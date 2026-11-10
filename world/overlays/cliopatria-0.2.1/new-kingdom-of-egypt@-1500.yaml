@@ -1,0 +1,4 @@
+row: "src:cliopatria-0.2.1#New%20Kingdom%20of%20Egypt@-1500"
+author: machine:claude-code
+same_as: people/polities/egypt-new-kingdom
+note: "Tied by the dataset's name and its Wikipedia link (\"New Kingdom of Egypt\"), not by a source the record cites; the record's own dates come from its rulers. The dataset's span for the name need not be the record's."

@@ -1,5 +1,6 @@
 // Search entities and named periods; choosing a result flies there.
 import type { PeriodRecord, SearchFile } from '../../../core/records.ts';
+import { nameFound } from '../../../core/timemachine.ts';
 
 export type SearchHit =
   | { type: 'entity'; id: string; label: string; detail: string; located: boolean }
@@ -36,11 +37,19 @@ export class Search {
     if (!q) return this.close();
     const words = q.split(/\s+/);
     const match = (s: string) => words.every((w) => s.toLowerCase().includes(w));
-    // Records whose name matches come before those that match only in their summary or id.
-    const ents: SearchHit[] = this.index.entities
-      .filter((e) => match(`${e.label} ${e.summary ?? ''} ${e.id}`))
-      .sort((a, b) => Number(match(b.label)) - Number(match(a.label)))
-      .map((e) => ({ type: 'entity', id: e.id, label: e.label, detail: kindLabel(e.kind), located: e.located }));
+    // Records found by a name they went by come before those that match only in their summary or id, and rows of
+    // datasets, found by their name alone, after records. A name not the label says what it is a name of.
+    const named = [...this.index.entities, ...(this.index.rows ?? [])]
+      .map((e) => ({ e, name: nameFound(e, q) }))
+      .filter(({ e, name }) => name || (!e.dataset && match(`${e.summary ?? ''} ${e.id}`)))
+      .sort((a, b) => Number(!!b.name) - Number(!!a.name) || Number(!!a.e.dataset) - Number(!!b.e.dataset));
+    const ents: SearchHit[] = named.map(({ e, name }) => ({
+      type: 'entity',
+      id: e.id,
+      label: name ?? e.label,
+      detail: `${name && name !== e.label ? `${e.label} · ` : ''}${kindLabel(e.kind)}${e.dataset ? ', a dataset’s rows' : ''}`,
+      located: e.located,
+    }));
     const pers: SearchHit[] = this.periods
       .filter((p) => match(p.name))
       .map((p) => ({ type: 'period', id: p.id, label: p.name, detail: p.rank, start: p.start, end: p.end }));
@@ -51,7 +60,7 @@ export class Search {
 
   private render(): void {
     this.list.innerHTML = this.hits
-      .map((h, i) => `<li role="option" data-i="${i}" class="${i === this.active ? 'active' : ''}"><span>${h.label.replace(/</g, '&lt;')}</span><small>${h.detail}</small></li>`)
+      .map((h, i) => `<li role="option" data-i="${i}" class="${i === this.active ? 'active' : ''}"><span>${h.label.replace(/</g, '&lt;')}</span><small>${h.detail.replace(/</g, '&lt;')}</small></li>`)
       .join('');
     this.list.hidden = this.hits.length === 0;
     for (const li of this.list.querySelectorAll('li')) li.onmousedown = () => this.choose(this.hits[Number(li.dataset.i)]);

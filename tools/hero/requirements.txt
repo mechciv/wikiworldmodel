@@ -1,0 +1,7 @@
+# For bake.py, in an environment of its own (not the project's .venv).
+numpy
+pillow
+scipy
+tifffile
+imagecodecs
+pyarrow

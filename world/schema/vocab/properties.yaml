@@ -70,6 +70,10 @@ properties:
     type: string
     applies_to: [occurrence, sample, ecosystem]
     description: The geological formation the fossils or the sample come from.
+  footprint_form:
+    type: footprint-form
+    applies_to: [occurrence]
+    description: Measured dimensions in millimetres and sidedness of an individual fossil footprint.
   evidence:
     type: string
     applies_to: [occurrence, sample]

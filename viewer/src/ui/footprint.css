@@ -1,0 +1,18 @@
+.footprint-detail {
+  box-sizing: border-box; width: min(800px, 94vw); max-height: 92dvh; overflow-y: auto;
+  color: #eeeae1; background: #182125; border: 1px solid #67736c; border-radius: 9px;
+  padding: 18px 20px; font: inherit;
+}
+.footprint-detail::backdrop { background: rgb(3 7 12 / 70%); }
+.footprint-detail header, .foot-controls { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.footprint-detail h2 { margin: 0; font-size: 1.25rem; }
+.footprint-detail canvas { width: 100%; aspect-ratio: 1 / .53; height: auto; display: block; margin: 16px 0; touch-action: none; cursor: grab; border-radius: 3px; }
+.footprint-detail canvas:active { cursor: grabbing; }
+.foot-view { position: relative; }
+.foot-scale { position: absolute; bottom: 12px; left: 14px; color: #302c24; border-bottom: 2px solid currentColor; font-size: 12px; text-align: center; white-space: nowrap; pointer-events: none; }
+.footprint-detail button { cursor: pointer; color: inherit; background: #293638; border: 1px solid #758078; border-radius: 4px; padding: .4em .75em; }
+.foot-controls { flex-wrap: wrap; justify-content: flex-start; }
+.foot-controls label { display: flex; align-items: center; gap: .4em; }
+.foot-controls input { width: clamp(44px, 10vw, 112px); accent-color: #cba675; }
+.footprint-detail p { margin: .7em 0; line-height: 1.4; }
+.foot-dimensions { font-weight: 600; }

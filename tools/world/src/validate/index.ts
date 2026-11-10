@@ -2,6 +2,7 @@
 // error fails the run. The chronology and frame checks run on the default picture and again
 // on every alternative combined with it.
 import { canonicalForm, resolveForm } from '../../../../core/form.ts';
+import { isFootprint } from '../../../../core/footprint.ts';
 import { checkForm } from '../../../../world/generators/life/forms.ts';
 import { changeProblems, FormTree } from '../forms.ts';
 import { cityKind } from '../../../../core/tileset.ts';
@@ -227,6 +228,9 @@ function checkValue(world: World, refs: RefChecker, c: Claim, issues: Issue[]): 
       if (problem) bad(problem);
       break;
     }
+    case 'footprint-form':
+      if (!isFootprint(v)) bad('a footprint needs a specimen, its side and positive dimensions in millimetres, with heel width within the maximum width');
+      break;
     case 'body-form': {
       for (const problem of changeProblems(v)) bad(problem);
       break;

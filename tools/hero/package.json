@@ -1,0 +1,9 @@
+{
+  "name": "wikiworldmodel-hero",
+  "private": true,
+  "description": "Renders the landing page's hero: the Earth cut open to the model's layers. See README.md.",
+  "type": "module",
+  "dependencies": {
+    "three": "0.186.1"
+  }
+}

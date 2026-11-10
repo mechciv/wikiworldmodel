@@ -1,3 +1,5 @@
+import { isFootprint } from '../../../core/footprint.ts';
+import { inspectFootprint } from './footprint.ts';
 // The inspect panel: what something is, when and where, every claim with its sources and
 // locators, the competing claims (which can be picked), its relations and the ones other
 // records make to it, and what the derived dates rest on.
@@ -370,7 +372,7 @@ export class InspectPanel {
   }
 
   /** How to go and see a taxon where it lived, if there is somewhere to go: what the panel offers. */
-  seeIt: ((id: string) => { label: string; go: () => void } | undefined) | null = null;
+  seeIt: ((id: string, local: boolean) => { label: string; go: () => void } | undefined) | null = null;
 
   showEntity(r: EntityRecord, scenario: Scenario, time: FeatureTime, here?: TerritoryHere, organism?: OrganismHere): void {
     const status = r.claims.every((c) => c.status === 'accepted') ? 'accepted' : r.claims.some((c) => c.status === 'disputed') ? 'disputed' : 'proposed';
@@ -391,6 +393,7 @@ export class InspectPanel {
     const derivedRefs = [...new Set([...(time.start.derived ? r.derivedBy.start : []), ...(!time.instant && time.end.derived ? r.derivedBy.end : [])])];
 
     let claims = '';
+    let footprintClaim: ClaimRecord | undefined;
     for (const [group, all] of groups) {
       // A claim of an alternative shows when that alternative is chosen; it replaces the
       // default picture's claims of its group.
@@ -401,6 +404,7 @@ export class InspectPanel {
       const competing = cs.length > 1;
       const def = cs.find((c) => c.rank === 'preferred') ?? (cs.filter((c) => c.rank !== 'deprecated').length === 1 ? cs.find((c) => c.rank !== 'deprecated') : undefined);
       const chosen = cs.find((c) => picks.has(c.ref)) ?? def;
+      if (chosen?.prop === 'footprint_form' && isFootprint(chosen.value)) footprintClaim = chosen;
       const phaseId = cs[0] ? splitRef(cs[0].subject).phase : undefined;
       const phase = phaseId ? r.phases.find((p) => p.id === phaseId) : undefined;
       claims += `<div class="claim-group${competing ? ' competing' : ''}"><h4>${esc(PROP_LABEL[prop] ?? words(prop))}${phase ? ` <span class="phase">· ${esc(phase.label)}</span>` : ''}${competing ? ' <span class="badge">competing claims</span>' : ''}</h4>`;
@@ -458,8 +462,19 @@ export class InspectPanel {
       ${r.wanted.length ? `<section><h3>Wanted</h3><p class="method">Referred to here but not written yet: ${r.wanted.map((w) => `<code>${esc(w)}</code>`).join(', ')}.</p></section>` : ''}
       <section><h3>Sources</h3><ol class="sources">${sources}</ol></section>`,
     );
+    if (footprintClaim && isFootprint(footprintClaim.value)) {
+      const form = footprintClaim.value;
+      const ref = footprintClaim.ref;
+      const button = document.createElement('button');
+      button.className = 'see-it';
+      button.textContent = 'Inspect footprint';
+      button.onclick = () => inspectFootprint(form, r.label, () => {
+        this.el.querySelector(`[data-claim="${CSS.escape(ref)}"]`)?.scrollIntoView({ block: 'center' });
+      });
+      this.el.querySelector('.summary, .meta')?.after(button);
+    }
     // A taxon can be gone and seen, where the most of its fossils are.
-    const see = organism ? undefined : this.seeIt?.(r.id);
+    const see = this.seeIt?.(r.id, !!organism);
     if (see) {
       const button = document.createElement('button');
       button.className = 'see-it';
@@ -524,9 +539,10 @@ export class InspectPanel {
     const summary = where.sea
       ? 'A sea, drawn at the depth the elevation field gives it. Every animal you see is placed by a generator: only who could be here comes from fossils.'
       : `Where the climate field reads the land at ${esc(String(b.ageMa))} Ma it is ${esc(b.label.toLowerCase())}, and the transitions allow forest over ${Math.round(b.cover.forests * 100)}% of it and grass over ${Math.round(b.cover.grasses * 100)}%. Every plant and animal you see is placed by a generator: only who could be here comes from fossils.`;
-    this.frame(spec.site.stage ?? 'This place', `<div class="meta"><span class="kind">What lived here</span> <span class="badge basis-procedural">procedural</span></div>
+    const formation = group('formation', 'Recorded in the formation', 'Fossils from this formation identify these organisms. Their positions in the scene are generated.');
+    this.frame(spec.site.place ? spec.site.label : spec.site.stage ?? 'This place', `<div class="meta"><span class="kind">What lived here</span> <span class="badge basis-procedural">procedural</span></div>
       <p class="summary">${summary}</p>
-      ${none}${tiers}
+      ${none}${formation}${tiers}
       ${note ? `<section><p class="note">${esc(note)}</p></section>` : ''}`);
   }
 

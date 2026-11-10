@@ -26,3 +26,6 @@ params:
   # How far an outline may stray from the dataset's, in degrees: about seventeen kilometres, a pixel or
   # two on the globe as close as it goes, and it keeps the file under 18 MB.
   tolerance_deg: 0.15
+  # Search finds a name's rows as one state while it runs on, and as another where the dataset leaves it out of use for
+  # longer than this: a name taken up again after a lifetime is another state.
+  search_gap_yr: 50
