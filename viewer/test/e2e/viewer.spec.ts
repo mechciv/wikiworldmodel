@@ -338,13 +338,13 @@ test('Rome: its territory at the time shown, drawn from its dataset, and a click
   await expect(page.locator('.territory-labels')).toBeHidden();
   const [r0, g0] = await canvasPatch(page, 0.5, 0.5, 15);
   expect(r1 - g1).toBeGreaterThan(r0 - g0 + 10);
-  // Two courts in 420, and nothing left of either after Constantinople fell.
+  // Two courts in 420, and nothing left of either after Constantinople fell: the states drawn then are other records'.
   await page.evaluate(() => window.__wikiworldmodel!.set({ t: 420 }));
   await idle(page);
   await expect(page.locator('.territory-label', { hasText: 'Western Roman Empire' })).toBeVisible();
   await page.evaluate(() => window.__wikiworldmodel!.set({ t: 1460 }));
   await idle(page);
-  await expect(page.locator('.territory-labels')).toBeHidden();
+  for (const id of ['people/polities/rome', 'people/polities/western-roman-empire']) await expect(page.locator(`.territory-label[data-entity="${id}"]`)).toBeHidden();
 });
 
 test('the time control zooms to a few years, reads the day, and keeps it in the link', async ({ page }) => {
