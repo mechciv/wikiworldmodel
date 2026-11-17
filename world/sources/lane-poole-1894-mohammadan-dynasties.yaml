@@ -1,0 +1,31 @@
+id: src:lane-poole-1894-mohammadan-dynasties
+type: publication
+kind: compilation
+citation: >-
+  Lane-Poole, S. (1894). The Mohammadan Dynasties: Chronological and Genealogical Tables with
+  Historical Introductions. Archibald Constable and Company.
+authors:
+  - "Lane-Poole, S."
+published: 1894
+title: "The Mohammadan Dynasties: Chronological and Genealogical Tables with Historical Introductions"
+container: Archibald Constable and Company
+url: https://archive.org/download/dli.csl.5719/5719_djvu.txt
+via: >-
+  The Internet Archive's scan of a copy digitized in India (dli.csl.5719), read in its OCR text. A
+  second scan (mohammadandynast00lane), whose OCR is cleaner, was read beside it for the pages on
+  the Great Khans and the Mongols of Persia; it lacks pages 222 to 245.
+reliability: >-
+  An old standard book of dynastic tables, each with a short introduction; its Mongol sections rest
+  on Howorth's History, as it says. It is cited for how that scholarship cut the Mongol realms: one
+  line of supreme khans from Chingiz down to 1634, of which the Yuan dynasty is a stage, with the
+  houses of Persia, Kipchak and Transoxiana as lines of their own, and for the years it sets at the
+  head of each table. The OCR is rough, and only what reads cleanly is quoted.
+verified:
+  by: machine:claude-code
+  how: >-
+    The OCR text fetched on 2026-11-17. Read: section XI, The Mongols, from its introduction through
+    the Great Khans (pp. 201–215) and the Mongols of Persia (pp. 217–219), in the cleaner scan, with
+    the passages quoted read again in this one; and the head of the Chagatay Khans (p. 241, by the
+    table of contents) in this one, which alone has that page. The quotations were found in the kept
+    text by quote-check; where the OCR garbles a word inside a heading, the quotation leaves it out
+    with an ellipsis.

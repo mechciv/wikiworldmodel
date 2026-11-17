@@ -1,0 +1,24 @@
+id: src:un-a-55-528-yugoslavia-application-2000
+type: document
+kind: act
+citation: >-
+  United Nations. Application of the Federal Republic of Yugoslavia for admission to membership
+  in the United Nations: note by the Secretary-General, 30 October 2000, with the letter dated
+  27 October 2000 from the President of the Federal Republic of Yugoslavia to the
+  Secretary-General and his declaration accepting the obligations of the Charter.
+  A/55/528-S/2000/1043.
+published: 2000
+title: Application of the Federal Republic of Yugoslavia for admission to membership in the United Nations
+url: https://documents.un.org/api/symbol/access?s=A/55/528&l=en&t=pdf
+via: The United Nations' Official Document System.
+reliability: >-
+  The state's own application, signed by its president, as the Secretary-General circulated it:
+  evidence that on 27 October 2000 it asked to be admitted as a member, citing the resolution
+  that had told it to apply. The letter does not say in so many words that the earlier claim is
+  withdrawn.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from documents.un.org on 2026-11-17 (the link resolves to
+    doc/undoc/gen/n00/716/85/pdf/n0071685.pdf) and read whole, three pages; the quote was found
+    in the kept text by quote-check.

@@ -1,0 +1,23 @@
+id: src:soviet-declaration-of-war-on-japan-1945
+type: document
+kind: act
+citation: >-
+  Declaration of war by the Soviet Government on Japan, handed by the People's Commissar for
+  Foreign Affairs, Molotov, to the Japanese ambassador, Sato, on 8 August 1945, as announced by
+  Molotov and broadcast by Moscow; English text as reported from London, 8 August 1945.
+published: 1945
+title: Soviet Declaration of War on Japan
+url: https://avalon.law.yale.edu/wwii/s4.asp
+via: >-
+  The Avalon Project of the Lillian Goldman Law Library, Yale Law School, which gives the English
+  text under a London dateline and names no publication it was taken from.
+reliability: >-
+  The declaration as the Soviet Government announced it, in an English version of a broadcast:
+  evidence of the day from which the Soviet Union held itself at war with Japan, and of its
+  joining the Allied powers' declaration of 26 July. The wording is a translation of unknown
+  hand.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from avalon.law.yale.edu on 2026-11-17 and read in full; the quotes were found in the
+    kept text by quote-check. The Russian text was not seen.

@@ -1,0 +1,24 @@
+id: src:lang-1911-britannica-scotland
+type: publication
+kind: review
+citation: >-
+  Lang, A. (1911). Scotland: III. Political History. Encyclopædia Britannica, 11th edition, vol.
+  24, pp. 429–457 of the article Scotland (pp. 412–460).
+authors:
+  - "Lang, A."
+published: 1911
+title: "Scotland: III. Political History"
+container: Encyclopædia Britannica, 11th edition, vol. 24
+url: https://en.wikisource.org/wiki/1911_Encyclop%C3%A6dia_Britannica/Scotland
+via: >-
+  English Wikisource's transcription of the volume, page by page against its scan; pp. 412 and
+  431 are marked validated there.
+reliability: >-
+  A general encyclopaedia's history of Scotland, signed A. L. It is brief on the kingdom's
+  beginnings, and its year for Kenneth MacAlpine's kingship of the Picts, 860, is the year the
+  Dictionary of National Biography gives for his death.
+verified:
+  by: machine:claude-code
+  how: >-
+    The page fetched on 2026-11-17; the paragraph on the name (p. 412) and the paragraphs on the
+    Picts and Scots (p. 431) read. Quotations found in the kept text by quote-check.

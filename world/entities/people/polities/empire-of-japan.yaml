@@ -1,0 +1,14 @@
+id: people/polities/empire-of-japan
+kind: polity
+summary: >-
+  The Japanese state under the constitution of the Meiji era, to its defeat and occupation. Written for the wars it
+  took part in (people/wars/second-sino-japanese-war, people/wars/second-world-war): it has no dates and no land
+  of its own here yet, and its place in time is bounded only by the spans it fought for. Whether the Japan that
+  followed is the same state under a new constitution is a question for its own record.
+author: machine:claude-code
+same_as: { wikidata: Q188712 }
+claims:
+  name:
+    prop: name
+    value: { en: Empire of Japan }
+    unsourced: An editorial label, in English.

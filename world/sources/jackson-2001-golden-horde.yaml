@@ -1,0 +1,27 @@
+id: src:jackson-2001-golden-horde
+type: publication
+kind: review
+citation: >-
+  Jackson, P. (2001). Golden Horde. Encyclopaedia Iranica, vol. XI, fasc. 1, pp. 75–76. Online
+  edition, last updated 3 June 2013.
+authors:
+  - "Jackson, P."
+published: 2001
+title: Golden Horde
+container: Encyclopaedia Iranica, vol. XI, fasc. 1
+doi: 10.1163/2330-4804_EIRO_COM_2259
+url: https://web.archive.org/web/20261009032234if_/https://www.iranicaonline.org/articles/golden-horde/
+via: >-
+  The Internet Archive's capture, of 9 October 2026, of the encyclopaedia's own page
+  (iranicaonline.org/articles/golden-horde), which sent a browser check to this reader instead
+  of the article.
+reliability: >-
+  A short signed entry in the standard scholarly reference work on Iran, written for the
+  Horde's wars with the Ilkhans. It says who counts as its first khan and when its lands were
+  conquered, and gives its end only as a dissolving into smaller states in the fifteenth
+  century; it names no year of foundation and none of its end.
+verified:
+  by: machine:claude-code
+  how: >-
+    The archived page fetched on 2026-11-17 and read in full: three paragraphs and a
+    bibliography. The quotations were found in the kept text by quote-check.

@@ -1,0 +1,54 @@
+id: people/polities/kingdom-of-england
+kind: polity
+summary: >-
+  The Kingdom of England, to its union with Scotland on 1 May 1707 by the calendar it kept.
+  Written for the unions that came of it and for the kings who held its crown with others: its
+  start is one reference work's hedged reading of when a king first ruled all the English, and
+  its land is drawn from the borders dataset's rows as they are, not as a territory of this
+  record. The years without a king are not marked: Wikidata's item sets aside 1649 to 1660, and
+  the dataset has rows named Commonwealth of England for 1645 to 1661.
+author: machine:claude-code
+same_as: { wikidata: Q179876 }
+claims:
+  name:
+    prop: name
+    value: { en: Kingdom of England }
+    source:
+      ref: src:union-with-scotland-act-1706
+      loc: recital
+      quote: by the Commissioners nominated on behalf of the Kingdom of England
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in union-with-scotland-act-1706.txt (sha256 37fa8bbbcbf7888f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  start:
+    prop: start
+    value: 926 CE
+    source:
+      - ref: src:allen-1885-dnb-athelstan
+        loc: "s.v. Athelstan, vol. 2, p. 216"
+        quote: compelled all the underkings to acknowledge his supremacy ‘with pledge and with oaths,’ at a congress held at Emmet in 926
+      - ref: src:allen-1885-dnb-athelstan
+        loc: "s.v. Athelstan, vol. 2, p. 216"
+        quote: He thus perhaps deserves the title of first king of all the English far more fully than Ecgberht or any other prince before Eadgar.
+    method: historical-account
+    basis: reconstruction
+    note: >-
+      Æthelstan, king of the West Saxons and Mercians, annexed Northumbria and then made the
+      lesser kings who had leagued against him own his supremacy: the Dictionary of National
+      Biography dates that to 926 and hedges the title. It is one convention for when the
+      kingdom began, taken because a standard work that could be read states it. Wikidata's
+      item gives 927, and the borders dataset's rows named Kingdom of England begin in 936.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in dnb-athelstan.txt (sha256 ed6d68e0a17eb47e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  end:
+    prop: end
+    value: { ref: people/polities/great-britain, edge: start }
+    source:
+      ref: src:union-with-scotland-act-1706
+      loc: "Article I"
+      quote: That the two Kingdoms of England and Scotland shall upon the First day of May which shall be in the year One thousand seven hundred and seven and for ever after be united into one Kingdom by the name of Great Britain
+    method: documentary
+    note: >-
+      The kingdom ended as Great Britain began: the end names that start, so the day is written
+      once, there, with its calendar.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in union-with-scotland-act-1706.txt (sha256 37fa8bbbcbf7888f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }

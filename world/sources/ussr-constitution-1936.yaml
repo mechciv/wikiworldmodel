@@ -1,0 +1,22 @@
+id: src:ussr-constitution-1936
+type: document
+kind: act
+citation: >-
+  Constitution (Fundamental Law) of the Union of Soviet Socialist Republics (Конституция
+  (Основной Закон) Союза Советских Социалистических Республик), approved by resolution of the
+  Extraordinary Eighth Congress of Soviets of the USSR, 5 December 1936; the original wording.
+published: 1936
+title: Конституция (Основной Закон) Союза Советских Социалистических Республик
+url: https://ru.wikisource.org/wiki/%D0%9A%D0%BE%D0%BD%D1%81%D1%82%D0%B8%D1%82%D1%83%D1%86%D0%B8%D1%8F_%D0%A1%D0%A1%D0%A1%D0%A0_(1936)/%D0%98%D1%81%D1%85%D0%BE%D0%B4%D0%BD%D0%B0%D1%8F_%D1%80%D0%B5%D0%B4%D0%B0%D0%BA%D1%86%D0%B8%D1%8F
+via: >-
+  Russian Wikisource's transcription of the original wording, which gives as its sources
+  constitution.garant.ru and the newspaper Советская Сибирь, no. 283 (5143), 7 December 1936.
+reliability: >-
+  The Union's constitution of 1936: evidence, in article 13, of the names of the republics united
+  in it on 5 December 1936, the Russian republic's in the new order of words.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from ru.wikisource.org on 2026-11-17; the heading and article 13 read in Russian, and
+    the text searched for the Russian republic's name. The quotes were found in the kept text by
+    quote-check.

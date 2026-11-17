@@ -1,0 +1,19 @@
+id: src:museum-karlshorst-historischer-ort
+type: database-record
+kind: review
+citation: >-
+  Museum Berlin-Karlshorst. Historischer Ort: Ort des Endes des Zweiten Weltkrieges in Europa.
+  museum-karlshorst.de, Über uns.
+snapshot: 2026-11-17
+title: "Historischer Ort: Ort des Endes des Zweiten Weltkrieges in Europa"
+container: Museum Berlin-Karlshorst
+url: https://www.museum-karlshorst.de/museum/historischer-ort
+reliability: >-
+  The account given by the museum that stands in the building where the surrender was signed in
+  Berlin: a short statement by the institution, without references, of when the signing took
+  place and what it ended. The page can change.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from museum-karlshorst.de on 2026-11-17 and read in full in German; the quotes were
+    found in the kept text by quote-check.

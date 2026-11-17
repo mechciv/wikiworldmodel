@@ -1,0 +1,21 @@
+id: src:unga-resolution-55-12
+type: document
+kind: act
+citation: >-
+  United Nations General Assembly. Resolution 55/12, Admission of the Federal Republic of
+  Yugoslavia to membership in the United Nations, adopted at the 48th plenary meeting, 1
+  November 2000. A/RES/55/12.
+published: 2000
+title: Admission of the Federal Republic of Yugoslavia to membership in the United Nations
+url: https://documents.un.org/api/symbol/access?s=A/RES/55/12&l=en&t=pdf
+via: The United Nations' Official Document System.
+reliability: >-
+  The act that admitted the Federal Republic of Yugoslavia to the United Nations, on its
+  application and the Security Council's recommendation: evidence that it came in as a new
+  member on that day. It says nothing itself of the claim the state had made before.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from documents.un.org on 2026-11-17 (the link resolves to
+    doc/undoc/gen/n00/560/11/pdf/n0056011.pdf) and read whole, one page; the quote was found in
+    the kept text by quote-check.

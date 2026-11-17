@@ -1,0 +1,268 @@
+id: people/polities/german-reich
+kind: polity
+summary: >-
+  The German state founded in 1871 under the name Deutsches Reich, as an organized state with a
+  government of its own: an empire, from 1918 a republic and from 1933 the National Socialist
+  state, until 1945, when its armed forces surrendered, its last government was arrested and the
+  four Allied powers declared that Germany had no central government and took supreme authority
+  themselves. That is what this record is a record of, and what its end dates. Whether the state
+  itself ended then is contested, and the two answers are the alternatives of
+  alt:germany-after-1945: the Federal Republic's constitutional court held that the Reich never
+  ceased to exist and that the Federal Republic is identical with it, and the Democratic
+  Republic's supreme court that it ceased to exist with the capitulation. Wikidata's German Reich
+  (Q1206012) is this state, and its German Empire, Weimar Republic and Nazi Germany are the three
+  phases here; it puts the state's dissolution in 1949, where the two later states begin.
+author: machine:claude-code
+same_as: { wikidata: Q1206012 }
+phases:
+  - id: empire
+    label: Empire
+    same_as: { wikidata: Q43287 }
+  - id: republic
+    label: Republic
+    same_as: { wikidata: Q41304 }
+  - id: national-socialist
+    label: National Socialist state
+    same_as: { wikidata: Q7318 }
+claims:
+  name:
+    prop: name
+    value: { en: German Reich, de: Deutsches Reich }
+    source:
+      - ref: src:verfassung-deutsches-reich-1871
+        loc: "Verfassung, preamble (RGBl. 1871, p. 64)"
+        quote: Dieser Bund wird den Namen Deutsches Reich führen
+      - ref: src:weimarer-verfassung-1919
+        loc: "Article 1 (RGBl. 1919, p. 1383)"
+        quote: Das Deutsche Reich ist eine Republik.
+    note: >-
+      In English: this federation shall bear the name German Reich; the German Reich is a
+      republic. The constitution that took effect on 1 January 1871 has the first sentence too,
+      and the republic kept the name.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in reichsverfassung-1871-wikisource.txt (sha256 4a64b1f49d8a84f3) and weimarer-verfassung-1919-wikisource.txt (sha256 81569bbd15300b19), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  start-constitution-january:
+    prop: start
+    value: 1 January 1871 CE
+    source:
+      - ref: src:protokoll-versailles-1870
+        loc: "p. 651"
+        quote: >-
+          daß diese Verfassung, vorbehaltlich der weiter unten zu erwähnenden Maaßgaben, mit dem
+          1. Januar 1871. in Wirksamkeit treten soll
+      - ref: src:verfassung-deutscher-bund-1870
+        loc: "preamble, p. 627"
+        quote: Dieser Bund wird den Namen Deutsches Reich führen
+      - ref: src:bpb-2021-proklamation-kaiserreich
+        loc: "section Wie kam es zur Reichsgründung?"
+        quote: >-
+          trat am 1. Januar 1871 als Verfassung des Deutschen Bundes in Kraft. Faktisch ist dies
+          das Gründungsdatum des deutschen Nationalstaats.
+    method: documentary
+    rank: preferred
+    note: >-
+      In English: that this constitution shall take effect on 1 January 1871; this federation
+      shall bear the name German Reich; it took effect on 1 January 1871 as the constitution of the
+      German Confederation, and in fact this is the founding date of the German nation-state. The
+      constitution agreed at Versailles in November 1870 between the North German Confederation,
+      Baden and Hesse, which Bavaria and Württemberg joined by treaties of their own, already
+      names the federation Deutsches Reich and its president Deutscher Kaiser. Preferred as the
+      day the state existed in law, under that name. The protocol says only that it shall take
+      effect then; that it did is the agency's statement. The agency also says that the southern
+      states acceded to the North German Confederation and that its constitution was lightly
+      revised: whether the Reich is that confederation of 1867, enlarged and renamed, is the same
+      question of identity at this end, and no record here answers it.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in protokoll-1870-11-15-wikisource.txt (sha256 0cd5a14065fba846), verfassung-deutscher-bund-1870-wikisource.txt (sha256 b866a7015382cb92) and bpb-proklamation-1871.txt (sha256 effce084620ef478), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  start-proclamation:
+    prop: start
+    value: 18 January 1871 CE
+    source:
+      - ref: src:bpb-2021-proklamation-kaiserreich
+        loc: "section Wie kam es zur Reichsgründung?"
+        quote: Die symbolische Reichsgründung erfolgte schließlich am 18. Januar 1871 im Schloss Versailles bei Paris.
+      - ref: src:lemo-reichsgruendung-1871
+        loc: "third paragraph"
+        quote: Die Kaiserproklamation blieb im deutschen Bewusstsein der eigentliche Reichgründungsakt.
+    method: historical-account
+    note: >-
+      In English: the symbolic founding of the Reich took place at last on 18 January 1871 in the
+      palace of Versailles near Paris; the proclamation of the emperor remained in German minds
+      the real act of founding the Reich. The day the German princes and high officers proclaimed
+      King Wilhelm I of Prussia German Emperor in the Hall of Mirrors, when the constitution had
+      been in effect since the start of the month. The proclamation's own text was not found in a
+      faithful copy.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in bpb-proklamation-1871.txt (sha256 effce084620ef478) and lemo-reichsgruendung.txt (sha256 50edf0c3799cd9d3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  start-constitution-april:
+    prop: start
+    value: 16 April 1871 CE
+    source:
+      - ref: src:verfassung-deutsches-reich-1871
+        loc: "§ 1 (RGBl. 1871, p. 63)"
+        quote: tritt die beigefügte Verfassungs-Urkunde für das Deutsche Reich.
+      - ref: src:verfassung-deutsches-reich-1871
+        loc: "closing formula of the law (RGBl. 1871, p. 64)"
+        quote: Gegeben Berlin, den 16. April 1871.
+      - ref: src:bpb-2021-proklamation-kaiserreich
+        loc: "section Wie war das Kaiserreich politisch aufgebaut?"
+        quote: >-
+          Der letzte Gründungsakt war schließlich die Verabschiedung der … durch den Reichstag am
+          14. April und die Unterschrift von Kaiser Wilhelm I. am 16. April 1871.
+    method: documentary
+    note: >-
+      In English: in place of the constitution of the German Confederation and of the treaties
+      with Bavaria and Württemberg comes the annexed constitution for the German Reich; given at
+      Berlin, 16 April 1871; the last act of the founding was the passing of the constitution of
+      the German Reich by the Reichstag on 14 April and the Emperor's signature on 16 April 1871.
+      The day the law was given. By its Article 2 a law of the Reich binds from the fourteenth day
+      after the day its number of the gazette was issued in Berlin, and Wikisource's heading gives
+      the publication as 20 April 1871; the day it took force is left to follow from that.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in reichsverfassung-1871-wikisource.txt (sha256 4a64b1f49d8a84f3) and bpb-proklamation-1871.txt (sha256 effce084620ef478), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  empire-end:
+    prop: end
+    subject: "@empire"
+    value: 9 November 1918 CE
+    source:
+      ref: src:lemo-revolution-1918-19
+      loc: "introduction"
+      quote: >-
+        Der monarchische Obrigkeitsstaat zerfiel ohne große Gegenwehr Anfang November 1918. Der
+        Thronverzicht von Kaiser Wilhelm II. und die Ausrufung der Republik am 9. November
+        entsprachen den politischen Wünschen vieler Deutscher.
+    method: historical-account
+    note: >-
+      In English: the monarchic authoritarian state fell apart without much resistance at the
+      start of November 1918; Emperor Wilhelm II's renunciation of the throne and the
+      proclamation of the republic on 9 November answered the political wishes of many Germans.
+      The day the chancellor announced the emperor's abdication and the republic was proclaimed
+      from a window of the Reichstag. The state went on under a new form: in the same account
+      the Social Democrats' leaders meant to leave the future form of state of the German Reich
+      to a national assembly, and the constitution that assembly made, of 11 August 1919, says
+      that the German Reich is a republic, repeals the constitution of 1871 and keeps the Reich's
+      other laws in force (src:weimarer-verfassung-1919, Articles 1 and 178). So this is a phase
+      of one record, and no relation of lineage.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in lemo-revolution-1918-19.txt (sha256 14c5cde4a3d2fee9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  republic-end:
+    prop: end
+    subject: "@republic"
+    value: 30 January 1933 CE
+    source:
+      - ref: src:lemo-weimarer-republik
+        loc: "section Krise und Ende der Weimarer Republik"
+        quote: Mit der Ernennung Adolf Hitlers zum Reichskanzler war das Ende der Weimarer Republik am 30. Januar 1933 besiegelt.
+      - ref: src:lemo-ns-regime
+        loc: "introduction"
+        quote: >-
+          Nach der Ernennung von Adolf Hitler zum Reichskanzler am 30. Januar 1933 zweifelte kaum
+          jemand daran, dass die Weimarer Republik der Vergangenheit angehörte.
+    method: historical-account
+    note: >-
+      In English: with the appointment of Adolf Hitler as Reich Chancellor the end of the Weimar
+      Republic was sealed on 30 January 1933; after it hardly anyone doubted that the Weimar
+      Republic belonged to the past. The conventional day. The same account has the National
+      Socialists set up their dictatorship in the weeks after it; no act of those weeks is dated
+      here.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in lemo-weimarer-republik.txt (sha256 5a2bd9edc780a20b) and lemo-ns-regime.txt (sha256 fd1e344fe3ffa7c8), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  end-berlin-declaration:
+    prop: end
+    value: 5 June 1945 CE
+    source:
+      - ref: src:berlin-declaration-1945
+        loc: "preamble, third paragraph"
+        quote: >-
+          There is no central Government or authority in Germany capable of accepting
+          responsibility for the maintenance of order, the administration of the country and
+          compliance with the requirements of the victorious Powers.
+      - ref: src:berlin-declaration-1945
+        loc: "the declaration, first paragraph"
+        quote: >-
+          hereby assume supreme authority with respect to Germany, including all the powers
+          possessed by the German Government, the High Command and any state, municipal, or local
+          government or authority.
+    method: documentary
+    rank: preferred
+    note: >-
+      The end of the Reich as an organized state: at Berlin on 5 June 1945 the four Allied powers
+      declared that Germany had no central government and took all the powers of the German
+      government and of every authority under it. Preferred over the arrest of the last
+      government because it is the act that took the state's powers, and it carries its own date.
+      The declaration says in the next sentence that this does not effect the annexation of
+      Germany (the copy read prints "affect"), and it speaks of Germany throughout as a country
+      that is there. Whether the state ended is the other question, which this claim does not
+      answer. The Federal Republic's court, which holds that it did not, grants what is dated
+      here: that the Reich, having no organs, cannot itself act. In that view the state is
+      carried on under the Federal Republic's record (its relation continues-the-reich), and the
+      years from 1945 to 1949, when by that view the state was there with no organization, belong
+      to no record. In the Democratic Republic's view the state ended with the capitulation, and
+      the claim end-capitulation takes this one's place.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in berlin-declaration-1945-avalon.txt (sha256 8aff29b055f5e83e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  end-last-government:
+    prop: end
+    value: 23 May 1945 CE
+    source:
+      - ref: src:bundesarchiv-regierung-doenitz
+        loc: "section Schriftgutbestand R 62"
+        quote: Reichspräsident Karl Dönitz und die Mitglieder seiner Regierung wurden am 23. Mai 1945 in Flensburg-Mürwik verhaftet.
+      - ref: src:bverfg-1987-teso
+        loc: "Rn. 46 (BVerfGE 77, 137 [154])"
+        quote: der Auflösung der letzten Reichsregierung im Mai 1945
+    method: historical-account
+    note: >-
+      In English: Reich President Karl Dönitz and the members of his government were arrested at
+      Flensburg-Mürwik on 23 May 1945; the dissolution of the last government of the Reich in May
+      1945. The day the Reich last had a government of its own. The Federal Constitutional Court
+      names it as one of three events with which the German state did not end, the capitulation
+      and the Allies' declaration being the others.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in bundesarchiv-regierung-doenitz.txt (sha256 bb9df47ccc4df113) and bverfge-77-137-teso.txt (sha256 d7d78c84ac201fd9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  end-capitulation:
+    prop: end
+    value: { ref: people/events/german-surrender-1945 }
+    alt: alt:germany-after-1945/reich-ended
+    source:
+      - ref: src:og-ddr-1951-identitaet
+        loc: "Neue Justiz 1952, p. 223"
+        quote: der Staat selbst also vernichtet worden. Er hat mit der Kapitulation aufgehört zu bestehen.
+      - ref: src:beyer-1952-status-deutschlands
+        loc: "Neue Justiz 1952, p. 535"
+        quote: Das Deutsche Reich ist mit der bedingungslosen Kapitulation vom 8. Mai 1945
+    against:
+      - ref: src:bverfg-1973-grundlagenvertrag
+        loc: "Rn. 78 (BVerfGE 36, 1 [15–16])"
+        quote: >-
+          daß das Deutsche Reich den Zusammenbruch 1945 überdauert hat und weder mit der
+          Kapitulation noch durch Ausübung fremder Staatsgewalt in Deutschland durch die
+          alliierten Okkupationsmächte noch später untergegangen ist
+    method: ruling
+    note: >-
+      The holding of the Supreme Court of the German Democratic Republic in its judgment of 31
+      October 1951. In English: the state itself was thus destroyed; it ceased to exist with the
+      capitulation. The second quote is the opening of a sentence of the higher regional court at
+      Schwerin, of 18 June 1951, as Beyer reports it: the German Reich perished as a legal person
+      with the unconditional capitulation of 8 May 1945; its last words stand out of order in the
+      kept text and are not quoted. The end is written as the surrender, not as a day, since that
+      is what the court says: it takes the surrender's date, whichever is chosen for it. Cited
+      against it is the Federal Constitutional Court's holding of 1973 that the Reich outlasted
+      the collapse of 1945 and perished neither with the capitulation nor later.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in neue-justiz-1952-s223.txt (sha256 8f8daec7a47feceb), neue-justiz-1952-s535.txt (sha256 72430db67f18531d) and bverfge-36-1-grundlagenvertrag.txt (sha256 c2ea395ae474a187), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  territory:
+    prop: territory
+    value:
+      from: src:cliopatria-0.2.1
+      names: [German Empire, Weimar Republic, Nazi Germany]
+    source: { ref: src:cliopatria-0.2.1, loc: "rows named German Empire, Weimar Republic and Nazi Germany" }
+    method: compilation
+    basis: reconstruction
+    note: >-
+      Cliopatria gives the Reich under three names, by regime; here they are one state, whose
+      forms of government are its phases. Its rows change name where its borders change, not
+      where a phase does: German Empire runs from 1871 to 1919, Weimar Republic from 1920 to 1935
+      and Nazi Germany from 1936 to 1944, so 1945 has no row. Its German Africa, the colonies
+      from 1871 to 1918, is left out: the constitution's Article 1 lists the federal territory as
+      the member states.

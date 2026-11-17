@@ -1,0 +1,23 @@
+id: src:george-vi-1945-broadcast-15-august
+type: document
+kind: eyewitness
+citation: >-
+  George VI. The War Is Over. Radio broadcast, London, 15 August 1945. Vital Speeches of the
+  Day, vol. XI, p. 674.
+published: 1945
+title: The War Is Over
+container: Vital Speeches of the Day, vol. XI
+url: http://www.ibiblio.org/pha/policy/1945/1945-08-15d.html
+via: >-
+  The Pearl Harbor History Associates' collection of policy documents on ibiblio, which
+  transcribes the text from Vital Speeches of the Day.
+reliability: >-
+  The King's broadcast to Britain and the Empire on 15 August 1945, once Japan's surrender had
+  been announced: evidence that the United Kingdom then took the war to have ended, in those
+  words, before any instrument was signed.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from ibiblio.org on 2026-11-17 over plain HTTP, since the site's certificate chain
+    did not verify from here, and read in full; the quotes were found in the kept text by
+    quote-check.

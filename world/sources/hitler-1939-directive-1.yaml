@@ -1,0 +1,24 @@
+id: src:hitler-1939-directive-1
+type: document
+kind: act
+citation: >-
+  Hitler, A. Directive No. 1 for the Conduct of the War. Supreme Commander of the Armed Forces,
+  most secret, Berlin, 31 August 1939. English translation among the documents of the
+  International Military Tribunal for Germany.
+authors:
+  - "Hitler, A."
+published: 1939
+title: Directive No. 1 for the Conduct of the War
+url: https://avalon.law.yale.edu/imt/wardir1.asp
+via: >-
+  The Avalon Project of the Lillian Goldman Law Library, Yale Law School, in English, among its
+  documents of the International Military Tribunal; the page names no translator and no
+  document number.
+reliability: >-
+  The order itself, in translation: evidence of the day and hour set for the attack on Poland
+  and of what was ordered in the west. It is an order, not a report of what happened.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from avalon.law.yale.edu on 2026-11-17 and read in full, sections 1 to 4; the quotes
+    were found in the kept text by quote-check. The German text was not seen.

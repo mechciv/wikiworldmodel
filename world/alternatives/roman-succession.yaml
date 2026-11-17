@@ -1,0 +1,21 @@
+# A group of alternatives: its members exclude each other, and groups combine freely. A
+# claim belongs to the default picture unless it names an alternative (section 4.4).
+id: alt:roman-succession
+type: group
+title: Who carried on the Roman Empire
+description: >-
+  Which state was the Roman Empire after Christmas 800, when Pope Leo III crowned the Frankish king
+  Charles emperor at Rome while the line of emperors went on at Constantinople. The popes and the
+  western emperors held that the empire itself had passed from the Greeks to the Franks, and after
+  them to the Germans, so that their empire was Rome carried on; they came to call the ruler at
+  Constantinople emperor of the Greeks. The emperors at Constantinople held that the empire had never
+  left them, and called the western emperors kings and usurpers of the Roman name. The default picture
+  takes the transfer for a claim and not a fact: it keeps the Roman state as one record, ruled from
+  Constantinople until 1453, as Constantinople held and as Barker (1911) writes it, and the Holy
+  Roman Empire as a state of its own that continues nothing. So the view from Constantinople has no
+  member here: what it asserts is the default picture already, and what it denies is cited against
+  the claim it denies (the continues relation of people/polities/holy-roman-empire). Later claims to the same inheritance, such as the Ottoman sultans' and Russia's after 1453,
+  which Bryce lists (1871, ch. XXI), are not yet written.
+# A steward decision: what a build shows. Shown on a machine's proposal, until a person decides.
+show: [alt:roman-succession/translatio-imperii]
+default: null

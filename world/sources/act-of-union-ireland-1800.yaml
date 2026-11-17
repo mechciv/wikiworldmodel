@@ -1,0 +1,20 @@
+id: src:act-of-union-ireland-1800
+type: document
+kind: act
+citation: >-
+  Parliament of Ireland. An Act for the Union of Great Britain and Ireland, 40 Geo. 3 c. 38.
+  Short title, given in 1951: Act of Union (Ireland) 1800.
+published: 1800
+title: An Act for the Union of Great Britain and Ireland
+url: https://www.legislation.gov.uk/aip/Geo3/40/38
+via: >-
+  legislation.gov.uk (The National Archives), in its revised text: the Act as it stands today in
+  Northern Ireland, with later repeals marked.
+reliability: >-
+  The Act of the Irish Parliament that ratified the same eight Articles of Union as the British
+  Act. It is evidence of what was enacted and for which day, in its makers' words.
+verified:
+  by: machine:claude-code
+  how: >-
+    The page fetched on 2026-11-17 and read: the preamble, Articles First to Third, and the
+    enacting section. Quotations found in the kept text by quote-check.

@@ -1,0 +1,26 @@
+id: src:calendar-new-style-act-1750
+type: document
+kind: act
+citation: >-
+  Parliament of Great Britain. An Act for regulating the Commencement of the Year, and for
+  correcting the Calendar now in use, 24 Geo. 2 c. 23. Short title, given in 1896: Calendar (New
+  Style) Act 1750.
+title: An Act for regulating the Commencement of the Year, and for correcting the Calendar now in use
+url: https://www.legislation.gov.uk/apgb/Geo2/24/23
+via: >-
+  legislation.gov.uk (The National Archives), in its revised text: the Act as it stands today,
+  with later repeals marked.
+reliability: >-
+  The Act by which Great Britain and its dominions gave up the Julian calendar in September 1752
+  and began the year on 1 January from 1752. Its preamble is evidence, from the time, of how
+  dates were reckoned before: by the Julian calendar throughout, with the legal year in England
+  beginning on 25 March, and otherwise in Scotland and in common use.
+verified:
+  by: machine:claude-code
+  how: >-
+    The page fetched on 2026-11-17 and read: the preamble and sections 1 to 6. Quotations found
+    in the kept text by quote-check.
+note: >-
+  No year of publication is given: the page shows the short title's 1750 and no day of passing,
+  and a year in an English statute's title before 1752 need not be the year by our reckoning
+  (see src:union-with-scotland-act-1706).

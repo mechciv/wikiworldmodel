@@ -1,0 +1,97 @@
+id: people/polities/great-britain
+kind: polity
+summary: >-
+  The kingdom made by the union of England and Scotland on 1 May 1707 in the Julian calendar
+  both then kept, 12 May in the Gregorian: "one Kingdom by the name of Great Britain". It lasted
+  until its own union with Ireland on 1 January 1801. By the words of both Parliaments' Acts the
+  two became one kingdom under a new name, with one Parliament and a Great Seal different from
+  either's; the Acts do not speak of either as carried on. The name was older than the state:
+  James VI and I had styled himself King of Great Britain a century before, while the two
+  kingdoms stayed apart.
+author: machine:claude-code
+same_as: { wikidata: Q161885 }
+claims:
+  name:
+    prop: name
+    value: { en: Great Britain }
+    source:
+      - ref: src:union-with-scotland-act-1706
+        loc: "Article I"
+        quote: be united into one Kingdom by the name of Great Britain
+      - ref: src:union-with-scotland-act-1706
+        loc: "Article III"
+        quote: That the United Kingdom of Great Britain be represented by one and the same Parliament to be stiled The Parliament of Great Britain.
+    note: >-
+      The name the Articles give. They also call it the United Kingdom of Great Britain, the
+      words that became a name in 1801, and in places the Kingdom of Great Britain.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in union-with-scotland-act-1706.txt (sha256 37fa8bbbcbf7888f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  start:
+    prop: start
+    value: 1 May 1707 CE Julian
+    source:
+      - ref: src:union-with-scotland-act-1706
+        loc: "Article I"
+        quote: That the two Kingdoms of England and Scotland shall upon the First day of May which shall be in the year One thousand seven hundred and seven and for ever after be united into one Kingdom by the name of Great Britain
+      - ref: src:union-with-england-act-1707
+        loc: "Article I"
+        quote: That the Two Kingdoms of Scotland and England shall upon the first day of May next ensuing the date hereof and forever after be United into One Kingdom by the Name of Great Britain
+      - ref: src:calendar-new-style-act-1750
+        loc: preamble
+        quote: the calendar now in use throughout all his Majesty’s British dominions, commonly called The Julian Calendar
+    method: documentary
+    note: >-
+      The day is written as the Acts give it, in the calendar they were made in: the Julian,
+      which Britain kept until September 1752 (the Calendar Act, preamble and section 1). So
+      the date names its calendar; left unnamed it would be read as Gregorian, eleven days
+      early. The English Act writes the year out. The Scottish Act says only the first of May
+      next after the date of the Articles, which its preamble gives as 22 July 1706. The two
+      countries then began the year on different days, which does not touch a date in May.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in union-with-scotland-act-1706.txt (sha256 37fa8bbbcbf7888f), union-with-england-act-1707.txt (sha256 cdb4f31a1c82a2f4) and calendar-new-style-act-1750.txt (sha256 6d528606040e466a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  end:
+    prop: end
+    value: { ref: people/polities/united-kingdom, edge: start }
+    source:
+      ref: src:union-with-ireland-act-1800
+      loc: "Article First"
+      quote: the said kingdoms of Great Britain and Ireland shall, upon the first day of January which shall be in the year of our Lord one thousand eight hundred and one, and for ever after, be united into one kingdom, by the name of the United Kingdom of Great Britain and Ireland
+    method: documentary
+    note: >-
+      It ended as the United Kingdom began, by a union made in the same words as its own: the
+      end names that start.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in union-with-ireland-act-1800.txt (sha256 0a00039a3c051c76), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+relations:
+  from-england:
+    rel: arose-from
+    to: people/polities/kingdom-of-england
+    source:
+      - ref: src:union-with-scotland-act-1706
+        loc: "Article I"
+        quote: That the two Kingdoms of England and Scotland shall upon the First day of May which shall be in the year One thousand seven hundred and seven and for ever after be united into one Kingdom by the name of Great Britain
+      - ref: src:union-with-scotland-act-1706
+        loc: "Article XXIV"
+        quote: there be one Great Seal for the United Kingdom of Great Britain which shall be different from the Great Seal now used in either Kingdom
+      - ref: src:union-with-scotland-act-1706
+        loc: "Article XXIV"
+        quote: that in the mean time the Great Seal of England be used as the Great Seal of the United Kingdom
+    note: >-
+      One of the two kingdoms united into it, by the Act of England's own Parliament, which
+      ratified the Articles after Scotland's had. The Articles make a new kingdom and not a
+      larger England: its seal was to differ from both kingdoms'. In its working the union
+      leaned England's way all the same: until that seal was made, England's was to serve.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in union-with-scotland-act-1706.txt (sha256 37fa8bbbcbf7888f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  from-scotland:
+    rel: arose-from
+    to: people/polities/kingdom-of-scotland
+    source:
+      ref: src:union-with-england-act-1707
+      loc: "Article I"
+      quote: That the Two Kingdoms of Scotland and England shall upon the first day of May next ensuing the date hereof and forever after be United into One Kingdom by the Name of Great Britain
+    note: >-
+      The other of the two kingdoms united into it, by the Act of Scotland's own Parliament,
+      which was to bind only once England's had ratified the same Articles.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in union-with-england-act-1707.txt (sha256 cdb4f31a1c82a2f4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }

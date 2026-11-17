@@ -1,0 +1,32 @@
+id: src:un-a-46-915-yugoslavia-declaration-1992
+type: document
+kind: act
+citation: >-
+  United Nations General Assembly, forty-sixth session. Letter dated 6 May 1992 from the Chargé
+  d'affaires a.i. of the Permanent Mission of Yugoslavia to the United Nations addressed to the
+  Secretary-General, with the Mission's note of 27 April 1992 (annex I) and the Declaration
+  adopted on 27 April 1992 at the joint session of the Assembly of the SFR of Yugoslavia, the
+  National Assembly of the Republic of Serbia and the Assembly of the Republic of Montenegro
+  (annex II). A/46/915.
+published: 1992
+title: Letter dated 6 May 1992 from the Chargé d'affaires a.i. of the Permanent Mission of Yugoslavia to the United Nations addressed to the Secretary-General
+url: https://documents.un.org/api/symbol/access?s=A/46/915&l=en&t=pdf
+via: >-
+  The United Nations' Official Document System, in the Mission's own English, as a machine-read
+  text of the printed document.
+reliability: >-
+  The new federation's own statement, on the day its constitution was proclaimed, that it was
+  the old one carried on: the note to the Secretary-General and the declaration of the
+  assemblies. It is evidence that the claim was made, by whom and in what words, and of the day;
+  it is the claim of one party, which the Security Council and the General Assembly refused.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from documents.un.org on 2026-11-17 (the link resolves to
+    doc/undoc/gen/n92/196/18/pdf/n9219618.pdf) and read whole, six pages, in the kept text and
+    on images of pages 1, 2 and 4. The machine reading is poor in places: the declaration's
+    first point, that the Federal Republic continues "the state, international legal and
+    political personality" of the old federation, is broken in the kept text and so is not
+    quoted, and the head of the document reads "7 May 1993", against the letter's 6 May 1992
+    and the processing stamps of 8 and 10 May 1992, so the citation leaves the document's day
+    out. The quotes are runs of the note in annex I that are whole, found by quote-check.

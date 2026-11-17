@@ -21,6 +21,28 @@ claims:
     note: >-
       Mathews and Schele call him Lord Shield Pacal, after the sign for his name; the label
       K'inich Janaab' Pakal is Wikidata's, the later reading.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in mathews-schele-1974-lords-of-palenque.txt (sha256 bb8f9f4893ca49da), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  start-long-count:
+    prop: start
+    value: 9.8.9.13.0 Long Count
+    source:
+      - ref: src:mathews-schele-1974-lords-of-palenque
+        loc: "online text, page 2 (RT01_lords002.html)"
+        quote: his birthdate was 9.8.9.13.0 8 Ahau 13 Pop in the Maya Long Count
+      - ref: src:mathews-schele-1974-lords-of-palenque
+        loc: "online text, page 15 (RT01_lords015.html)"
+        quote: the birth of Lord Shield Pacal on 9.8.9.13.0 8 Ahau 13 Pop
+    method: documentary
+    rank: preferred
+    note: >-
+      His birth as Mathews and Schele give it, with its place in the Calendar Round, 8 Ahau 13
+      Pop. Which day of our calendar that was is not written here: it follows the correlation
+      chosen on people/calendars/long-count-zero-day, as every date in the Long Count does. On
+      page 21 of the online text the date stands once as 9.9.8.13.0, with the same 8 Ahau 13
+      Pop: two places exchanged, in the paper or in its transcription.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in mathews-schele-1974-lords-of-palenque.txt (sha256 bb8f9f4893ca49da), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
   start:
     prop: start
     value: { lo: 21 March 603 CE, hi: 23 March 603 CE }
@@ -32,10 +54,37 @@ claims:
         loc: "section on correlation, and its table"
         quote: GMT 584,283 Modified Thompson 1 584,284 Thompson (Lounsbury) 584,285
     method: documentary
+    rank: deprecated
     note: >-
       The Julian dates are worked out here from the Long Count day number and the correlation
       constant, 584,283 (the GMT correlation) or 584,285 (Thompson-Lounsbury); the range is the
-      difference between them. Mathews and Schele give no Western date.
+      difference between them. Mathews and Schele give no Western date. Superseded by
+      start-long-count, which gives the date as they do and leaves its day to the correlation
+      chosen on people/calendars/long-count-zero-day: this range was a result worked out by
+      hand and stored, and it holds two of the three correlations argued there.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in mathews-schele-1974-lords-of-palenque.txt (sha256 bb8f9f4893ca49da) and wikipedia-long-count.txt (sha256 b0c3dddb06c58115), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  reign-start-long-count:
+    prop: start
+    subject: "@reign"
+    value: 9.9.2.4.8 Long Count
+    source:
+      - ref: src:mathews-schele-1974-lords-of-palenque
+        loc: "online text, page 20 (RT01_lords020.html)"
+        quote: We have established 9.9.2.4.8 5 Lamat 1 Mol as the 'accession' date of Lord Shield Pacal
+      - ref: src:mathews-schele-1974-lords-of-palenque
+        loc: "online text, page 34 (RT01_lords034.html)"
+        quote: E6-F6 (9.9.2.4.8) 5 Lamat 1 Mol (accession date)
+    method: documentary
+    rank: preferred
+    note: >-
+      His accession as Mathews and Schele give it, 5 Lamat 1 Mol in the Calendar Round. Its day
+      in our calendar follows the correlation chosen on people/calendars/long-count-zero-day.
+      The text they read on Tablet 3 of the Temple of the Inscriptions (page 34) reaches it by
+      adding the distance number 12.9.8 to his birth: 4,508 days, which is the difference
+      between the two Long Count dates.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in mathews-schele-1974-lords-of-palenque.txt (sha256 bb8f9f4893ca49da), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
   reign-start:
     prop: start
     subject: "@reign"
@@ -48,10 +97,34 @@ claims:
         loc: "section on correlation, and its table"
         quote: GMT 584,283 Modified Thompson 1 584,284 Thompson (Lounsbury) 584,285
     method: documentary
+    rank: deprecated
     note: >-
       The Julian dates are worked out here from the Long Count day number and the correlation
       constant, 584,283 (the GMT correlation) or 584,285 (Thompson-Lounsbury); the range is the
-      difference between them. Mathews and Schele give no Western date.
+      difference between them. Mathews and Schele give no Western date. Superseded by
+      reign-start-long-count, which gives the date as they do and leaves its day to the
+      correlation chosen on people/calendars/long-count-zero-day: this range was a result
+      worked out by hand and stored, and it holds two of the three correlations argued there.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in mathews-schele-1974-lords-of-palenque.txt (sha256 bb8f9f4893ca49da) and wikipedia-long-count.txt (sha256 b0c3dddb06c58115), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  end-long-count:
+    prop: end
+    value: 9.12.11.5.18 Long Count
+    source:
+      - ref: src:mathews-schele-1974-lords-of-palenque
+        loc: "online text, page 21 (RT01_lords021.html)"
+        quote: "9.12.11.5.18 6 Etz'nab 11 Yax is followed by 'Lord Shield'"
+      - ref: src:mathews-schele-1974-lords-of-palenque
+        loc: "online text, page 37 (RT01_lords037.html)"
+        quote: "9.12.11.5.18 6 Etz'nab 11 Yax, the date of Lord Shield Pacal's death"
+    method: documentary
+    rank: preferred
+    note: >-
+      His death as Mathews and Schele give it, 6 Etz'nab 11 Yax in the Calendar Round, from
+      Tablet 3 of the Temple of the Inscriptions and the Palace Tablet. Its day in our calendar
+      follows the correlation chosen on people/calendars/long-count-zero-day.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in mathews-schele-1974-lords-of-palenque.txt (sha256 bb8f9f4893ca49da), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
   end:
     prop: end
     value: { lo: 26 August 683 CE, hi: 28 August 683 CE }
@@ -63,10 +136,16 @@ claims:
         loc: "section on correlation, and its table"
         quote: GMT 584,283 Modified Thompson 1 584,284 Thompson (Lounsbury) 584,285
     method: documentary
+    rank: deprecated
     note: >-
       The Julian dates are worked out here from the Long Count day number and the correlation
       constant, 584,283 (the GMT correlation) or 584,285 (Thompson-Lounsbury); the range is the
-      difference between them. Mathews and Schele give no Western date.
+      difference between them. Mathews and Schele give no Western date. Superseded by
+      end-long-count, which gives the date as they do and leaves its day to the correlation
+      chosen on people/calendars/long-count-zero-day: this range was a result worked out by
+      hand and stored, and it holds two of the three correlations argued there.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in mathews-schele-1974-lords-of-palenque.txt (sha256 bb8f9f4893ca49da) and wikipedia-long-count.txt (sha256 b0c3dddb06c58115), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
   location:
     prop: location
     value: { lat: 17.48417, lon: -92.04639, frame: frame:earth/present-day }
@@ -78,6 +157,8 @@ claims:
         quote: This date occurs a total of six times at Palenque
     method: gazetteer
     note: Marked at Palenque, the city of his reign, at the site.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in mathews-schele-1974-lords-of-palenque.txt (sha256 bb8f9f4893ca49da), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
   frame:
     prop: frame
     value: frame:paleomap/plate-205
@@ -94,3 +175,5 @@ relations:
       loc: "text, on accession glyphs"
       quote: the 'accession' date of Lord Shield Pacal
     note: Lord (ajaw) of Palenque.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in mathews-schele-1974-lords-of-palenque.txt (sha256 bb8f9f4893ca49da), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }

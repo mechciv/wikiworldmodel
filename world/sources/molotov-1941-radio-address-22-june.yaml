@@ -1,0 +1,27 @@
+id: src:molotov-1941-radio-address-22-june
+type: document
+kind: eyewitness
+citation: >-
+  Молотов, В.М. Выступление по радио Заместителя Председателя Совета Народных Комиссаров СССР
+  и Народного Комиссара Иностранных Дел, 22 июня 1941 года (Radio address of the Deputy Chairman
+  of the Council of People's Commissars and People's Commissar for Foreign Affairs of the USSR,
+  22 June 1941). Правда, 23 June 1941, no. 172 (8580).
+authors:
+  - "Molotov, V.M."
+published: 1941
+title: Выступление по радио 22 июня 1941 года
+container: Правда, 23 June 1941, no. 172 (8580)
+url: https://ru.wikisource.org/wiki/%D0%92%D1%8B%D1%81%D1%82%D1%83%D0%BF%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5_%D0%92._%D0%9C._%D0%9C%D0%BE%D0%BB%D0%BE%D1%82%D0%BE%D0%B2%D0%B0_%D0%BF%D0%BE_%D1%80%D0%B0%D0%B4%D0%B8%D0%BE_22_%D0%B8%D1%8E%D0%BD%D1%8F_1941_%D0%B3.
+via: >-
+  Russian Wikisource's transcription, which says it quotes the text from Kulkov, Myagkov and
+  Rzheshevsky, Война 1941—1945 (Moscow: Olma-Press, 2005), and that it first appeared in Pravda
+  of 23 June 1941.
+reliability: >-
+  The Soviet Government's announcement of the German attack, on the day: evidence of the day and
+  the hour, by its own clock, from which the Soviet Union held itself attacked and at war with
+  Germany. It is one side's account of how the war between them began.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from ru.wikisource.org on 2026-11-17 and read in full in Russian; the quotes were
+    found in the kept text by quote-check.

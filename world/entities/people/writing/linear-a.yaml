@@ -49,6 +49,8 @@ claims:
       loc: page text
       quote: its use continued until the final destruction of the Minoan palaces, about 1425 BC
     method: expert-estimate
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-fhw-crete-writing.txt (sha256 8faf14a171f87fc6), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
   decipherment:
     prop: decipherment
     value: undeciphered

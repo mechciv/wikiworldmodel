@@ -1,0 +1,24 @@
+id: src:rsfsr-resolution-2014-1991
+type: document
+kind: act
+citation: >-
+  Supreme Soviet of the RSFSR. Resolution of 12 December 1991, no. 2014-I, "On the ratification
+  of the Agreement on the Creation of the Commonwealth of Independent States" (О ратификации
+  Соглашения о создании Содружества Независимых Государств), signed by its chairman,
+  R.I. Khasbulatov.
+published: 1991
+title: О ратификации Соглашения о создании Содружества Независимых Государств
+url: https://ru.wikisource.org/wiki/%D0%9F%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5_%D0%92%D0%A1_%D0%A0%D0%A1%D0%A4%D0%A1%D0%A0_%D0%BE%D1%82_12.12.1991_%E2%84%96_2014-I
+via: >-
+  Russian Wikisource's transcription, which gives as its source the official portal of legal
+  information (pravo.gov.ru) and prints an editor's note before the text.
+reliability: >-
+  The act by which Russia's parliament ratified the agreement of 8 December 1991: evidence of the
+  day Russia ratified it, and of the day and place of its signing as the parliament states them.
+  Wikisource's note says that ratification belonged to the Congress of People's Deputies, which
+  never gave it; that note was not checked.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from ru.wikisource.org on 2026-11-17 and read in full in Russian, points 1 to 3 and
+    the closing appeal; the quotes were found in the kept text by quote-check.

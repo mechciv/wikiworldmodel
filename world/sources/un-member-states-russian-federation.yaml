@@ -1,0 +1,21 @@
+id: src:un-member-states-russian-federation
+type: database-record
+kind: compilation
+citation: >-
+  United Nations. Member States: Russian Federation. un.org, About Us, Member States.
+snapshot: 2026-11-17
+title: Russian Federation
+container: United Nations, Member States
+url: https://www.un.org/en/about-us/member-states/russian-federation
+reliability: >-
+  The United Nations' own page on the membership of the Russian Federation, in the Organization's
+  words: evidence of how the United Nations records that membership, not of the letter it
+  summarizes. The list of member states that links to it gives the Russian Federation the date of
+  admission 24-10-1945, the Soviet Union's. The page can change.
+verified:
+  by: machine:claude-code
+  how: >-
+    The page fetched from un.org on 2026-11-17 and its two sentences on the Russian Federation
+    read; the list at https://www.un.org/en/about-us/member-states fetched the same day and its
+    line for the Russian Federation read. The quotes were found in the kept text of the page by
+    quote-check.

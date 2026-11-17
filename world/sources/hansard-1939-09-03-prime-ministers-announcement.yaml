@@ -1,0 +1,25 @@
+id: src:hansard-1939-09-03-prime-ministers-announcement
+type: document
+kind: eyewitness
+citation: >-
+  War with Germany: Prime Minister's Announcement. House of Commons Debates, 3 September 1939,
+  vol. 351, cols. 291-302.
+published: 1939
+title: "War with Germany: Prime Minister's Announcement"
+container: Hansard, House of Commons, vol. 351
+url: https://api.parliament.uk/historic-hansard/commons/1939/sep/03/prime-ministers-announcement
+via: >-
+  The UK Parliament's digitized Hansard (Historic Hansard, 1803-2005), a text read by machine
+  from the printed columns.
+reliability: >-
+  The official report of what the Prime Minister, Chamberlain, told the House shortly after
+  noon on 3 September 1939, with the text of the final Note to the German Government that he
+  read out: evidence of the day and hour from which the United Kingdom was at war with Germany.
+  The digitized text has slips: the hour named in the Note is printed "n a.m.".
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from api.parliament.uk on 2026-11-17; the Prime Minister's statement read (cols.
+    291-292), not the debate that follows, and compared with the Avalon Project's copy of the
+    same statement, which has the hour as 11 A.M. The quotes were found in the kept text by
+    quote-check.

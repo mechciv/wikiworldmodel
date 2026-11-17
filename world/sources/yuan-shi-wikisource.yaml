@@ -2,7 +2,7 @@ id: src:yuan-shi-wikisource
 type: text
 kind: historian
 citation: >-
-  Yuan shi (元史, History of the Yuan), chapter 1, Chinese text on Chinese Wikisource.
+  Yuan shi (元史, History of the Yuan), chapters 1, 4, 17 and 47, Chinese text on Chinese Wikisource.
 title: "元史"
 url: https://zh.wikisource.org/wiki/%E5%85%83%E5%8F%B2/%E5%8D%B7001
 via: Chinese Wikisource, with critical notes printed under the text.
@@ -13,3 +13,7 @@ verified:
   by: machine:claude-code
   how: >-
     Chapter 1 read on Chinese Wikisource; quotations checked by script against that text.
+    Chapters 4, 17 and 47 fetched there on 2026-11-17 (the same address, ending 卷004, 卷017 and
+    卷047) and read, as an agent reads classical Chinese, for the accession of Qubilai, his death
+    and the fall of the capital. The quotations from chapters 4 and 47 were found by quote-check
+    in their two kept texts joined end to end (yuan-shi-004-047.txt); chapter 17 is not quoted.

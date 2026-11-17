@@ -17,6 +17,8 @@ claims:
       loc: p. 138
       quote: "Possible writing is found both in large painted forms on vessels"
     note: Stauder goes on to the small incised bone tags, and he calls the material an incipient form of writing.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
   location:
     prop: location
     value: { lat: 26.174912, lon: 31.907992, frame: frame:earth/present-day }
@@ -50,3 +52,5 @@ claims:
       quote: For a lower date (ca. 3200 bc), see, for example, Joffe 2000, pp. 113–14, n. 4.
     method: expert-estimate
     note: "A lower date, at second hand: Joffe (2000) was not read."
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }

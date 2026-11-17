@@ -1,0 +1,25 @@
+id: src:agreement-on-succession-issues-2001
+type: document
+kind: act
+citation: >-
+  Agreement on Succession Issues (with annexes). Vienna, 29 June 2001; in force 2 June 2004.
+  United Nations Treaty Series, vol. 2262, No. 40296, p. 251.
+published: 2001
+title: Agreement on Succession Issues
+container: United Nations Treaty Series, vol. 2262
+url: https://treaties.un.org/doc/Publication/UNTS/Volume%202262/v2262.pdf
+via: >-
+  The volume of the Treaty Series on the United Nations Treaty Collection, a scan with a
+  machine-read text; the authentic text is English.
+reliability: >-
+  The treaty by which Bosnia and Herzegovina, Croatia, Macedonia, Slovenia and the Federal
+  Republic of Yugoslavia divided the old federation's property, archives and debts. It is
+  evidence of how the five states, the Federal Republic among them, described themselves to one
+  another in 2001: as equal successors of a state that had broken up. It names no day for the
+  break-up.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from treaties.un.org on 2026-11-17. The registration heading, the list of
+    ratifications and the English text from the preamble to Article 5 were read in the kept
+    text; the quote was found there by quote-check. The annexes were not read.

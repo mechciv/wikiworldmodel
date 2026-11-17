@@ -1,0 +1,31 @@
+id: src:un-a-47-60-alma-ata-1991
+type: document
+kind: act
+citation: >-
+  United Nations, General Assembly and Security Council. Letter dated 27 December 1991 from the
+  Permanent Representative of Belarus to the United Nations addressed to the Secretary-General,
+  with seven annexes: the Protocol to the Agreement establishing the Commonwealth of Independent
+  States, the Alma Ata Declaration, and the other documents signed at Alma Ata on 21 December
+  1991. A/47/60–S/23329. English; original Russian.
+published: 1991
+title: Letter dated 27 December 1991 from the Permanent Representative of Belarus to the United Nations addressed to the Secretary-General
+container: United Nations document A/47/60–S/23329
+url: https://documents.un.org/api/symbol/access?s=A/47/60&l=en&t=pdf
+via: >-
+  The United Nations' official document system, which serves a scan with a text layer read by
+  machine; the text has misread letters in places, and the day of issue in its heading is
+  garbled.
+reliability: >-
+  The Alma-Ata documents as the United Nations circulated them at Belarus's request, in the
+  Organization's English translation from the Russian: evidence of what the member states were
+  shown, and in what words. The translation differs from the Russian in tense: where the
+  declaration says that the Union ceases to exist (прекращает свое существование), the English
+  says that it ceased to exist.
+verified:
+  by: machine:claude-code
+  how: >-
+    The PDF fetched from documents.un.org on 2026-11-17 and its text read: the covering letter,
+    annex I (the protocol), annex II (the declaration), annex III (the minutes), annex IV (the
+    coordinating bodies), annex V (the decision on membership of the United Nations), and the
+    first pages of annex VI. The two passages quoted were compared with the Russian texts. The
+    quotes were found in the kept text by quote-check.

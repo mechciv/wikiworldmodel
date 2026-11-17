@@ -1,0 +1,53 @@
+id: people/polities/kingdom-of-ireland
+kind: polity
+summary: >-
+  The Kingdom of Ireland, from the Act of the Irish Parliament that made Henry VIII and the
+  Kings of England after him Kings of Ireland, to its union with Great Britain on 1 January
+  1801. Written for that union and for the kings who held its crown with England's. The borders
+  dataset has no rows of its name: it draws Ireland within its Kingdom of England, and from 1709
+  within its Kingdom of Great Britain.
+author: machine:claude-code
+same_as: { wikidata: Q215530 }
+claims:
+  name:
+    prop: name
+    value: { en: Kingdom of Ireland }
+    source:
+      ref: src:union-with-ireland-act-1800
+      loc: preamble
+      quote: to unite the two kingdoms of Great Britain and Ireland into one kingdom
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in union-with-ireland-act-1800.txt (sha256 0a00039a3c051c76), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  start:
+    prop: start
+    value: 1541 CE
+    source:
+      - ref: src:dunlop-1897-dnb-st-leger
+        loc: "s.v. St. Leger, Sir Anthony, vol. 50, p. 165"
+        quote: Parliament, for which great preparations had been made, assembled at Dublin on 13 June, and among the acts passed was one giving to Henry and his heirs the title of King of Ireland.
+      - ref: src:crown-of-ireland-act-1542
+        loc: "section I"
+        quote: The King’s highnesse, his heyres and successours, Kings of England, be alwayes Kings of Ireland
+    method: historical-account
+    note: >-
+      The Act bears no date. The Dictionary of National Biography gives the day the parliament
+      met and leaves its year to the narrative: after St. Leger reached Dublin in August 1540
+      and kept Christmas at Carlow, before the adjourned session of 15 February 1542; so June
+      1541. Only the year is claimed, because the day the Act passed is not given. Its short
+      title, given in 1951, is Crown of Ireland Act 1542, and Wikidata's item for the kingdom
+      begins it in 1542.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in dnb-st-leger-anthony.txt (sha256 4e6cbdb527e56e59) and crown-of-ireland-act-1542.txt (sha256 9d6c22a2407679d6), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  end:
+    prop: end
+    value: { ref: people/polities/united-kingdom, edge: start }
+    source:
+      ref: src:act-of-union-ireland-1800
+      loc: "Article First"
+      quote: the said kingdoms of Great Britain and Ireland shall, upon the first day of January, which shall be in the year of our lord one thousand eight hundred and one, and for ever, be united into one kingdom
+    method: documentary
+    note: >-
+      The kingdom ended as the United Kingdom began, by the Act of its own Parliament: the end
+      names that start.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in act-of-union-ireland-1800.txt (sha256 a52af5e3ba1838ae), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
