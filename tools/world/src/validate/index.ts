@@ -15,9 +15,10 @@ import { dwellingProblems, fieldProblems, settlementProblems } from '../../../..
 import { ladderCounts, LEVELS, STEPS } from '../../../../core/ladder.ts';
 import { parseRef, RefError, splitRef } from '../../../../core/refs.ts';
 import { conflictChanged, conflictIn, type Constraint, type Conflict, type Solution } from '../../../../core/stn.ts';
-import { parseLag, parseTime, TimeError, toMa } from '../../../../core/time.ts';
-import { available, buildNetwork, chosen, pictureNetwork, claimGroup, claimGroups, conflictInScenario, pictures, pointOf, scenariosOf, solveScenario, type Scenario } from '../chronology.ts';
+import { DAY_COUNTS, dayNumberAt, formatTime, historical, parseLag, parseTime, TimeError, toMa } from '../../../../core/time.ts';
+import { available, buildNetwork, chosen, countDays, epochsOf, pictureNetwork, claimGroup, claimGroups, conflictInScenario, inTurn, pictures, pointOf, scenariosOf, solveScenario, spanOf, spanRefs, zeroDayClaim, type Scenario } from '../chronology.ts';
 import { resolvePoints } from '../importer.ts';
+import { lineageLoop } from '../lineage.ts';
 import { REPO, WORLD } from '../paths.ts';
 import { readTable, rowClaims, type Table } from '../tables.ts';
 import { kindIs, loadWorld, schemaDir, type Claim, type Entity, type Field, type Input, type Model, type Relation, type World } from '../world.ts';
@@ -39,6 +40,8 @@ export interface Wanted {
 export interface Report {
   issues: Issue[];
   wanted: Wanted[];
+  /** the checks that were not run because an earlier one found errors: a clean report of them means nothing */
+  skipped: string[];
 }
 
 const SCHEMA = 'https://wikiworldmodel.invalid/schema/';
@@ -172,6 +175,20 @@ function checkValue(world: World, refs: RefChecker, c: Claim, issues: Issue[]): 
         if (t.kind === 'ref') refs.check(t.ref, c.file, `${c.where}.value.ref`, { self: c.entity, types: ['entity'] });
         if (t.kind === 'ref' && !t.edge && (v as { lag?: unknown }).lag !== undefined) bad('a lag counts from an edge of the record: add edge: start or end');
         if (t.kind === 'unknown' && c.prop !== 'end') bad(`only an end may be unknown`);
+        if (t.kind === 'count') {
+          // A day in a count of days is so many days after the count's zero day: the world must say which day that was.
+          const name = DAY_COUNTS[t.calendar].name;
+          const zero = epochsOf(world, t.calendar);
+          if (!zero.length) bad(`no record is the zero day of the ${name}: write an event/epoch with a claim calendar: ${t.calendar}, dated by the correlation`);
+          else if (zero.length === 1 && !countDays(world, t)) {
+            const dated = countDays(world, { calendar: t.calendar, days: 0 });
+            issues.push({ level: 'warning', check: 'values', file: c.file, where: `${c.where}.value`, message: dated ? `this day falls before 4713 BCE, where day numbers begin, so it cannot be placed` : `the ${name}'s zero day (${zero[0]}) is not dated to days of the calendar in the default picture, so this date cannot be placed` });
+          }
+          // It is copied from the source as it stands: a quote that does not have it is a sign of a slip, as two places exchanged.
+          const digits = t.text.split(' ')[0];
+          const quotes = c.sources.map((x) => x.quote).filter((q): q is string => !!q);
+          if (quotes.length && !quotes.some((q) => q.includes(digits))) issues.push({ level: 'warning', check: 'values', file: c.file, where: `${c.where}.value`, message: `none of its quotes has ${digits}: a date in a count of days is copied from the source as it stands` });
+        }
       } catch (e) {
         bad((e as TimeError).message);
       }
@@ -263,21 +280,33 @@ export function areaProblems(v: unknown): string[] {
   return out;
 }
 
+const SPAN_FORM = 'when it holds is { lo, hi }, either left open, each a year, a month, a day or a point, or the start or end of another record ({ ref, edge }), lo no later than hi; or one time at which it held';
+
 /** Claims and relations: what they share (section 4.3). */
 function checkClaimCommon(world: World, refs: RefChecker, c: Claim | Relation, issues: Issue[]): void {
   const at = (where: string) => ({ file: c.file, where: `${c.where}${where}` });
   for (const [i, s] of c.sources.entries()) refs.check(s.ref, c.file, `${c.where}.source${c.sources.length > 1 ? `[${i}]` : ''}`, { types: ['src'] });
+  for (const [i, s] of c.against.entries()) refs.check(s.ref, c.file, `${c.where}.against${c.against.length > 1 ? `[${i}]` : ''}`, { types: ['src'] });
   if (c.alt) {
     refs.check(c.alt, c.file, `${c.where}.alt`, { types: ['alt'] });
     const a = world.alternative.get(c.alt);
     if (a && a.type !== 'alternative') issues.push({ level: 'error', check: 'refs', ...at('.alt'), message: `${c.alt} is a group; a claim names one of its alternatives` });
   }
+  // When it holds: one time, or a span whose bounds are times or the edges of other records. (Whether a relation
+  // may have one at all is checked with its type.)
   if (c.valid !== undefined) {
-    try {
-      parseTime(c.valid as never);
-    } catch (e) {
-      issues.push({ level: 'error', check: 'values', ...at('.valid'), message: (e as TimeError).message });
+    const span = spanOf(c.valid);
+    if (!span) {
+      let why = SPAN_FORM;
+      try {
+        // A bound that is not a time says so itself.
+        for (const x of typeof c.valid === 'object' && c.valid !== null ? Object.values(c.valid) : [c.valid]) if (typeof x === 'string' || typeof x === 'number') parseTime(x as never);
+      } catch (e) {
+        why = (e as TimeError).message;
+      }
+      issues.push({ level: 'error', check: 'values', ...at('.valid'), message: why });
     }
+    for (const ref of spanRefs(span)) refs.check(ref, c.file, `${c.where}.valid`, { self: c.entity, types: ['entity'] });
   }
   if (typeof c.confidence === 'string' && !world.vocab.confidence[c.confidence]) {
     issues.push({ level: 'error', check: 'vocab', ...at('.confidence'), message: `unknown confidence word "${c.confidence}"; use a probability or one of ${Object.keys(world.vocab.confidence).join(', ')}` });
@@ -298,7 +327,7 @@ function checkLadder(c: Claim | Relation, issues: Issue[]): void {
     const at = { file: c.file, where: `${c.where}.checked[${i}]` };
     if (seen.has(s.step)) issues.push({ level: 'error', check: 'review', ...at, message: `"${s.step}" is recorded twice` });
     seen.add(s.step);
-    if (s.step === 'quoted' && !c.sources.some((x) => x.quote)) issues.push({ level: 'error', check: 'review', ...at, message: 'marked quoted, but none of its sources has a quote to find' });
+    if (s.step === 'quoted' && ![...c.sources, ...c.against].some((x) => x.quote)) issues.push({ level: 'error', check: 'review', ...at, message: 'marked quoted, but none of its sources has a quote to find' });
     if (s.step === 're-read' && s.by === c.author) issues.push({ level: 'error', check: 'review', ...at, message: `re-read by ${s.by}, who wrote it: a second reader re-reads` });
     if (s.step === 'audited' && s.by.startsWith('machine:')) issues.push({ level: 'error', check: 'review', ...at, message: `audited by ${s.by}: an audit is a person's` });
   });
@@ -357,6 +386,35 @@ function checkRecords(world: World, issues: Issue[], tables: Map<string, Table> 
         parseLag(r.lag);
       } catch (err) {
         issues.push({ level: 'error', check: 'values', file: r.file, where: `${r.where}.lag`, message: (err as TimeError).message });
+      }
+      // Lineage runs between things of a kind: a script does not arise from a state.
+      if (type.alike && target && e.kind.split('/')[0] !== target.kind.split('/')[0]) issues.push({ level: 'error', check: 'fit', file: r.file, where: `${r.where}.to`, message: `"${r.rel}" joins two records of one kind: ${article(e.kind)} and ${article(target.kind)} are not` });
+      // Preferred means over a rival: another relation of the same subject and type, which then holds only when picked.
+      if (r.rank === 'preferred' && !e.relations.some((x) => x !== r && x.subject === r.subject && x.rel === r.rel && x.rank !== 'deprecated' && x.status !== 'deprecated')) {
+        issues.push({ level: 'warning', check: 'ranks', file: r.file, where: r.where, message: `preferred over nothing: no other "${r.rel}" relation of ${r.subject} is its rival` });
+      }
+      // When a relation held: only one that holds over a span says so, as a span the solver can read.
+      if (r.valid !== undefined) {
+        if (!type.span) issues.push({ level: 'error', check: 'fit', file: r.file, where: `${r.where}.valid`, message: `"${r.rel}" does not hold over a span, so it has no valid time: those that do are ${Object.entries(world.vocab.relations).filter(([, t]) => t.span).map(([k]) => k).join(', ')}` });
+
+      }
+    }
+  }
+  // Each count of days has one zero day, and the vocabulary and the code know the same counts.
+  const counts = world.vocab.properties.calendar?.values ?? {};
+  for (const k of Object.keys(DAY_COUNTS)) if (!counts[k]) issues.push({ level: 'error', check: 'vocab', file: 'schema/vocab/properties.yaml', where: 'calendar', message: `core/time.ts reads the count "${k}", which the vocabulary's calendar does not list` });
+  for (const k of Object.keys(counts)) {
+    if (!DAY_COUNTS[k]) issues.push({ level: 'error', check: 'vocab', file: 'schema/vocab/properties.yaml', where: 'calendar', message: `no count of days "${k}" in core/time.ts` });
+    const zero = epochsOf(world, k);
+    if (zero.length > 1) issues.push({ level: 'error', check: 'ids', file: world.entity.get(zero[1])!.file, where: 'claims', message: `${zero.join(' and ')} both say they are the zero day of "${k}": a count has one, whose competing dates are the correlations` });
+    // A zero day given as a range of days gives every date in the count a range of its own, and the days between two
+    // of them, which the count fixes, are then no longer fixed: correlations compete, each a day.
+    for (const p of pictures(world)) {
+      const c = zeroDayClaim(world, k, p);
+      const days = c && countDays(world, { calendar: k, days: 0 }, p);
+      if (c && days && dayNumberAt(days[1] - 1e-7)! - dayNumberAt(days[0])! > 0) {
+        issues.push({ level: 'warning', check: 'values', file: c.file, where: c.where, message: `a zero day given as a range of days makes every date in the count a range of its own, and unfixes the days between them: write each correlation as a competing claim, a day each` });
+        break;
       }
     }
   }
@@ -624,6 +682,8 @@ function checkRanks(world: World, issues: Issue[]): void {
     for (const g of claimGroups(world)) {
       const avail = available(g, p).filter((c) => c.rank !== 'deprecated');
       if (avail.length < 2 || chosen(g, p)) continue;
+      // Claims that each hold for a span of their own, no two at once, do not compete: a state's names in turn.
+      if (inTurn(avail)) continue;
       const n = avail.filter((c) => c.rank === 'preferred').length;
       issues.push({
         level: 'error',
@@ -633,6 +693,40 @@ function checkRanks(world: World, issues: Issue[]): void {
         message: `competing "${g.prop}" claims need exactly one rank: preferred${p.alts ? ` (in ${p.alts.join(', ')})` : ''}; found ${n}`,
       });
     }
+  }
+}
+
+/** Nothing is its own ancestor: the lineage relations of a picture do not run in a loop. */
+function checkLineage(world: World, issues: Issue[]): void {
+  for (const p of pictures(world)) {
+    const loop = lineageLoop(world, p);
+    if (!loop) continue;
+    const first = sourceOf(world, loop[0].via);
+    issues.push({
+      level: 'error',
+      check: 'lineage',
+      file: first.file,
+      where: first.where,
+      message: `${pictureName(p)}, these relations make a record its own ancestor: ${loop.map((e) => `${e.from} ${e.rel} ${e.to}`).join('; ')}`,
+    });
+  }
+}
+
+/**
+ * A note where a record arose from, or succeeds, one that had ended long before it began, in the default picture:
+ * something lay between them that is not written, a link of the lineage for someone to find. A script made
+ * from a dead one is such a case too, and is no fault.
+ */
+function checkLineageGaps(world: World, issues: Issue[]): void {
+  const sol = solveScenario(world, {});
+  if (!sol.ok) return;
+  for (const r of world.entities.flatMap((e) => e.relations)) {
+    if (!['arose-from', 'succeeds'].includes(r.rel) || r.alt || r.rank === 'deprecated' || r.status === 'deprecated') continue;
+    const end = sol.bounds.get(pointOf(world, r.to, 'end'));
+    const start = sol.bounds.get(pointOf(world, r.subject, 'start'));
+    if (!end || !start || !Number.isFinite(end.hi) || !Number.isFinite(start.lo)) continue;
+    const gap = start.lo - end.hi;
+    if (gap > 1) issues.push({ level: 'info', check: 'lineage', file: r.file, where: r.where, message: `${r.subject} began at least ${fmtYears(gap)} after ${r.to} ended: what lay between them is not written` });
   }
 }
 
@@ -649,10 +743,13 @@ function checkDuplicates(world: World, issues: Issue[]): void {
   }
 }
 
-const fmtMa = (year: number) => `${toMa(year).toFixed(3)} Ma`;
+/** A time in a conflict: an age in Ma in deep time; within history, the day, since a thousandth of a million years says nothing there. */
+const fmtMa = (year: number) => (historical(year) ? formatTime(year, 1 / 365) : `${toMa(year).toFixed(3)} Ma`);
 
 function fmtYears(y: number): string {
   const a = Math.abs(y);
+  // Under a year, in days: within history a contradiction is often a matter of days.
+  if (a < 1 && a > 0) return a * 365.25 < 1 ? 'under a day' : `${Math.round(a * 365.25)} day${Math.round(a * 365.25) === 1 ? '' : 's'}`;
   return a >= 1e6 ? `${+(a / 1e6).toFixed(3)} Myr` : a >= 1e3 ? `${+(a / 1e3).toFixed(1)} kyr` : `${+a.toFixed(1)} yr`;
 }
 
@@ -710,19 +807,28 @@ function checkChronology(world: World, issues: Issue[]): void {
   if (centred) issues.push({ level: 'error', check: 'chronology', message: `with each dated claim at the middle of its range, ${describeConflict(world, centred)}` });
   // One at a time, with nothing kept but what is wrong: there are thousands of them. A pick is
   // checked only in the pieces of its picture's network that it changes (conflictChanged).
-  let picture: { points: string[]; constraints: Constraint[]; holds: boolean } | undefined;
+  let picture: { points: string[]; constraints: Constraint[]; holds: boolean; broken?: string } | undefined;
+  const sourcesOf = (c: Conflict) => c.constraints.map((x) => x.source).sort().join(' ');
+  // The same fault shows in every picture that leaves it alone, and under every pick that does: said once, where it
+  // is first met, which is the default picture if it is there.
+  const told = new Set<string>();
   for (const scenario of scenariosOf(world)) {
     let conflict: Conflict | undefined;
     if (!scenario.picks?.length) {
       const net = pictureNetwork(world, scenario);
       conflict = conflictIn(net.points, net.constraints);
-      picture = { ...net, holds: !conflict };
+      picture = { ...net, holds: !conflict, broken: conflict && sourcesOf(conflict) };
     } else {
       const net = buildNetwork(world, scenario);
       const quick = picture?.holds ? conflictChanged(picture, net.points, net.constraints) : 'whole';
       conflict = quick === 'whole' ? conflictIn(net.points, net.constraints) : quick;
+      // A picture that does not hold fails under every pick that leaves its fault alone: said once, of the picture.
+      if (conflict && picture?.broken === sourcesOf(conflict)) continue;
     }
     if (!conflict) continue;
+    const fault = `${scenario.picks?.[0] ?? ''}|${sourcesOf(conflict)}`;
+    if (told.has(fault)) continue;
+    told.add(fault);
     const v = { scenario, solution: { conflict } };
     const pick = v.scenario.picks?.[0];
     if (!pick) {
@@ -730,13 +836,16 @@ function checkChronology(world: World, issues: Issue[]): void {
       continue;
     }
     const { record, part } = splitRef(pick);
-    const c = world.entity.get(record)!.claims.find((x) => x.key === part)!;
+    const e = world.entity.get(record)!;
+    const c = e.claims.find((x) => x.key === part);
+    const r = c ? undefined : e.relations.find((x) => x.key === part)!;
+    const x = c ?? r!;
     issues.push({
-      level: c.rank === 'deprecated' ? 'info' : 'warning',
+      level: x.rank === 'deprecated' ? 'info' : 'warning',
       check: 'chronology',
-      file: c.file,
-      where: c.where,
-      message: `this competing "${c.prop}" claim (rank ${c.rank}) contradicts the rest of the world ${pictureName(v.scenario)}: ${describeConflict(world, v.solution.conflict)}`,
+      file: x.file,
+      where: x.where,
+      message: `this ${c ? `competing "${c.prop}" claim` : `rival "${r!.rel}" relation`} (rank ${x.rank}) contradicts the rest of the world ${pictureName(v.scenario)}: ${describeConflict(world, v.solution.conflict)}`,
     });
   }
 }
@@ -863,6 +972,7 @@ export async function validateWorld(world: World, opts: { frames?: boolean; tabl
   checkSchemas(world, issues);
   const wanted = checkRecords(world, issues, opts.tables ?? (await overlayTables(world)));
   checkRanks(world, issues);
+  checkLineage(world, issues);
   checkProminence(world, issues);
   checkForms(world, issues);
   checkModels(world, issues);
@@ -873,9 +983,16 @@ export async function validateWorld(world: World, opts: { frames?: boolean; tabl
     issues.push({ level: 'info', check: 'wanted', message: `${w.ref} is wanted: referenced ${w.from.length} time${w.from.length > 1 ? 's' : ''} (${w.from.map((f) => `${f.file} ${f.where}`).join('; ')}) but not written yet` });
   }
   const ok = () => !issues.some((i) => i.level === 'error');
-  if (ok()) checkChronology(world, issues);
-  if (opts.frames !== false && ok()) await checkFrames(world, issues);
-  return { issues, wanted };
+  const skipped: string[] = [];
+  if (ok()) {
+    checkChronology(world, issues);
+    if (ok()) checkLineageGaps(world, issues);
+  } else skipped.push('the chronology');
+  if (opts.frames !== false) {
+    if (ok()) await checkFrames(world, issues);
+    else skipped.push('the plate frames');
+  }
+  return { issues, wanted, skipped };
 }
 
 export function formatIssue(i: Issue): string {
@@ -887,8 +1004,10 @@ export async function runValidate(args: string[]): Promise<number> {
   const wi = args.indexOf('--world');
   const root = wi >= 0 ? resolve(args[wi + 1]) : WORLD;
   const world = await loadWorld(root);
-  const { issues, wanted } = await validateWorld(world, { frames: !args.includes('--no-frames') });
+  const { issues, wanted, skipped } = await validateWorld(world, { frames: !args.includes('--no-frames') });
   for (const i of issues) if (i.level !== 'info' || args.includes('--verbose')) console.log(formatIssue(i));
+  // A check that did not run has found nothing, which is not the same as nothing to find.
+  if (skipped.length) console.log(`not checked, because of the errors above: ${skipped.join(' and ')}. Fix those first.`);
   const n = (l: Issue['level']) => issues.filter((i) => i.level === l).length;
   const claims = world.entities.flatMap((e) => e.claims);
   const all = [...claims, ...world.entities.flatMap((e) => e.relations)];

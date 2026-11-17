@@ -52,6 +52,15 @@ export interface HazardRow {
   row?: string;
   /** what overlays changed, by property, if any did */
   corrected?: string[];
+  /**
+   * the records that draw this row as their territory (a subject each: an entity, or entity@phase). While one of
+   * them holds, at the time and in the scenario shown, the row is that record's, and is not drawn among the states;
+   * when none does, it is the dataset's row again.
+   */
+  claimedBy?: string[];
+  /** for a row a record draws as its territory, where it is drawn among the states: the record, and its name */
+  record?: string;
+  label?: string;
 }
 
 export interface HazardFile {
@@ -96,6 +105,15 @@ export interface PolityRow {
   row?: string;
   /** what overlays changed, by property, if any did */
   corrected?: string[];
+  /**
+   * the records that draw this row as their territory (a subject each: an entity, or entity@phase). While one of
+   * them holds, at the time and in the scenario shown, the row is that record's, and is not drawn among the states;
+   * when none does, it is the dataset's row again.
+   */
+  claimedBy?: string[];
+  /** for a row a record draws as its territory, where it is drawn among the states: the record, and its name */
+  record?: string;
+  label?: string;
 }
 
 export interface PolitiesFile {
@@ -110,6 +128,14 @@ export interface PolitiesFile {
 
 /** The rows that hold at a time. */
 export const politiesAt = (file: PolitiesFile, t: number): PolityRow[] => file.rows.filter((r) => r.from <= t && t < r.to);
+
+/**
+ * The rows that are drawn among the states at a time: those that hold, less those that a record draws as its
+ * own territory then. `holding` is the records whose territory holds, at that time and in the scenario shown: a
+ * row claimed only by records that do not hold there, because they ended earlier or begin later in that scenario,
+ * is still what the dataset says, and is drawn.
+ */
+export const statesAt = (file: PolitiesFile, t: number, holding: ReadonlySet<string>): PolityRow[] => politiesAt(file, t).filter((r) => !r.claimedBy?.some((id) => holding.has(id)));
 
 /** Is a point inside a row's rings, by the even-odd rule? Degrees. */
 export function insideRow(r: PolityRow, lon: number, lat: number): boolean {

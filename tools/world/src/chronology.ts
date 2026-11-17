@@ -4,8 +4,8 @@
 import { parseRef, splitRef } from '../../../core/refs.ts';
 import { scenarioKey, type Scenario } from '../../../core/scenario.ts';
 import { conflictIn, ORIGIN, solve, solveChanged, type Bounds, type Conflict, type Constraint, type Solution } from '../../../core/stn.ts';
-import { bounds, centre, parseLag, parseTime, type TimeValue } from '../../../core/time.ts';
-import { isMoment, type Claim, type Relation, type World } from './world.ts';
+import { bounds, centre, dayNumberAt, dayOnAxis, isCount, parseLag, parsePoint, parseTime, type TimeValue } from '../../../core/time.ts';
+import { isMoment, kindIs, type Claim, type Relation, type World } from './world.ts';
 
 export { scenarioKey, type Scenario } from '../../../core/scenario.ts';
 
@@ -93,8 +93,8 @@ export function chosen(g: ClaimGroup, s: Scenario = {}): Claim | undefined {
   return usable.length === 1 ? usable[0] : undefined;
 }
 
-/** Relations that hold in a scenario's picture. */
-export function relationsIn(world: World, s: Scenario): Relation[] {
+/** The relations of a scenario's picture that are not set aside: those that hold in it, and their rivals. */
+function relationsOf(world: World, s: Scenario): Relation[] {
   const alts = new Set(s.alts ?? []);
   let all = allRelations.get(world);
   if (!all) {
@@ -105,6 +105,29 @@ export function relationsIn(world: World, s: Scenario): Relation[] {
 }
 
 const allRelations = new WeakMap<World, Relation[]>();
+
+/** Relations of one subject and one type: where one of them is ranked preferred, the others are its rivals. */
+const rivalKey = (r: Relation) => `${r.subject}|${r.rel}`;
+
+/**
+ * Relations that hold in a scenario's picture. Several relations of one subject and one type all hold, as the two
+ * parents of a union do, unless one of them is ranked preferred: then the preferred hold, and the others are
+ * rival readings, which hold only when picked, in the preferred ones' place.
+ */
+export function relationsIn(world: World, s: Scenario): Relation[] {
+  const all = relationsOf(world, s);
+  const contested = new Set(all.filter((r) => r.rank === 'preferred').map(rivalKey));
+  if (!contested.size) return all;
+  const picked = new Set(all.filter((r) => contested.has(rivalKey(r)) && s.picks?.includes(r.ref)).map(rivalKey));
+  return all.filter((r) => !contested.has(rivalKey(r)) || (picked.has(rivalKey(r)) ? s.picks!.includes(r.ref) : r.rank === 'preferred'));
+}
+
+/** The rival relations of a scenario's picture: those that give way to a preferred relation of their subject and type. */
+export function rivalsIn(world: World, s: Scenario = {}): Relation[] {
+  const all = relationsOf(world, s);
+  const contested = new Set(all.filter((r) => r.rank === 'preferred').map(rivalKey));
+  return all.filter((r) => r.rank !== 'preferred' && contested.has(rivalKey(r)));
+}
 
 /** Times already read: the network is made once for every competing claim, from the same few thousand values. */
 const readStrings = new Map<string, TimeValue | undefined>();
@@ -129,6 +152,66 @@ function timeOrUndefined(v: unknown): TimeValue | undefined {
     readObjects.set(v, known);
   }
   return known.v;
+}
+
+const epochs = new WeakMap<World, Map<string, string[]>>();
+
+/**
+ * The records of a count's zero day (core/time.ts, DAY_COUNTS): each event/epoch whose `calendar` claim
+ * names the count. There should be one, and the validator says so where there is not.
+ */
+export function epochsOf(world: World, calendar: string): string[] {
+  let known = epochs.get(world);
+  if (!known) {
+    known = new Map();
+    for (const e of world.entities) {
+      if (!kindIs(e.kind, 'event/epoch')) continue;
+      for (const c of e.claims) if (c.prop === 'calendar' && c.status !== 'deprecated' && typeof c.value === 'string') known.set(c.value, [...new Set([...(known.get(c.value) ?? []), e.id])]);
+    }
+    epochs.set(world, known);
+  }
+  return known.get(calendar) ?? [];
+}
+
+/** Is a record the zero day of a count of days? Its date moves every date written in that count. */
+export function isEpoch(world: World, id: string): boolean {
+  const e = world.entity.get(id);
+  return !!e && kindIs(e.kind, 'event/epoch') && e.claims.some((c) => c.prop === 'calendar');
+}
+
+/**
+ * The days a date in a count of days names, on the axis, in a scenario: the count's zero day as the
+ * scenario's chosen claim dates it, and so many days on, counted on the calendar, day for day. A zero day
+ * given as a range of days gives a range. Undefined where no record is the zero day, or its date is not
+ * days of the calendar (a reference, a distribution, a time before day numbers begin).
+ */
+export function countDays(world: World, v: { calendar: string; days: number }, s: Scenario = {}): [number, number] | undefined {
+  const c = zeroDayClaim(world, v.calendar, s);
+  const zero = c ? timeOrUndefined(c.value) : undefined;
+  if (!zero || (zero.kind !== 'instant' && zero.kind !== 'interval')) return undefined;
+  const [lo, hi] = bounds(zero);
+  const first = dayNumberAt(lo);
+  // An interval's end is the start of the day after its last.
+  const last = zero.kind === 'instant' ? first : dayNumberAt(hi - 1e-7);
+  if (first === undefined || last === undefined || !Number.isFinite(lo) || !Number.isFinite(hi)) return undefined;
+  // A day of the era before the zero day is counted back from it; day numbers begin in 4713 BCE.
+  if (first + v.days < 0) return undefined;
+  const end = dayOnAxis(last + v.days);
+  return [dayOnAxis(first + v.days).t, end.t + end.whole];
+}
+
+/** The claim that dates a count's zero day in a scenario: the correlation every date in the count rests on there. */
+export function zeroDayClaim(world: World, calendar: string, s: Scenario = {}): Claim | undefined {
+  const [epoch] = epochsOf(world, calendar);
+  const g = epoch ? claimGroup(world, epoch, 'date') : undefined;
+  return g && chosen(g, s);
+}
+
+/** A day in a count of days, as a claim's value or a bound of a span gives it: the count and the days, or undefined. */
+export function countOf(v: unknown): { calendar: string; days: number; text: string } | undefined {
+  if (!isCount(v)) return undefined;
+  const t = timeOrUndefined(v);
+  return t?.kind === 'count' ? t : undefined;
 }
 
 /**
@@ -172,6 +255,8 @@ function pickedNetwork(world: World, s: Scenario, centres: boolean): { points: s
   const claim = world.entity.get(record)?.claims.find((c) => c.key === part);
   const g = claim && claimGroup(world, claim.subject, claim.prop);
   if (!claim || !g || !world.vocab.properties[g.prop]?.moment) return undefined;
+  // A zero day's date moves every date written in its count: nothing to change in place.
+  if (isEpoch(world, splitRef(claim.subject).record)) return undefined;
   const picture: Scenario = s.alts?.length ? { alts: s.alts } : {};
   const before = chosen(g, picture);
   if (!before) return undefined;
@@ -180,30 +265,38 @@ function pickedNetwork(world: World, s: Scenario, centres: boolean): { points: s
   if (at < 0) return undefined;
   // In place, so that the order of the constraints, on which ties in the solver turn, is the same as if made whole.
   const count = base.constraints.filter((c) => c.source === before.ref).length;
-  const mine = claimConstraints(world, g.prop, claim, centres);
+  const mine = claimConstraints(world, g.prop, claim, centres, s);
   return { points: base.points, constraints: [...base.constraints.slice(0, at), ...mine, ...base.constraints.slice(at + count)] };
 }
 
-/** What one dated claim says, as constraints. */
-function claimConstraints(world: World, prop: string, c: Claim, centres: boolean): Constraint[] {
+/** What one dated claim says, as constraints, in a scenario: a date in a count of days follows the scenario's zero day. */
+function claimConstraints(world: World, prop: string, c: Claim, centres: boolean, s: Scenario): Constraint[] {
   const out: Constraint[] = [];
   const add = (x: Constraint) => out.push(x);
   if (!subjectExists(world, c.subject)) return out;
-  const v = timeOrUndefined(c.value);
+  let v = timeOrUndefined(c.value);
   if (!v) return out;
-  const point = prop === 'end' ? pointOf(world, c.subject, 'end') : pointOf(world, c.subject, 'start');
+  // A bound says only that the point lies before a time, or after one: of a moment, or of a lasting thing's end.
+  const before = prop === 'earlier_than' || prop === 'end_before';
+  const after = prop === 'later_than';
+  const point = prop === 'end' || prop === 'end_before' ? pointOf(world, c.subject, 'end') : pointOf(world, c.subject, 'start');
   const source = c.ref;
+  if (v.kind === 'count') {
+    const days = countDays(world, v, s);
+    if (!days) return out; // no zero day to count from: the validator reports it
+    v = { kind: 'interval', lo: days[0], hi: days[1] };
+  }
   if (v.kind === 'ref') {
     if (!subjectExists(world, v.ref)) return out; // a wanted record: nothing to constrain by yet
     const [lo, hi] = v.lag;
     if (v.edge) {
       const tp = pointOf(world, v.ref, v.edge);
-      if (prop === 'earlier_than') add({ source, from: point, to: tp, lo, hi: Infinity, note: 'earlier than' });
-      else if (prop === 'later_than') add({ source, from: tp, to: point, lo, hi: Infinity, note: 'later than' });
+      if (before) add({ source, from: point, to: tp, lo, hi: Infinity, note: 'earlier than' });
+      else if (after) add({ source, from: tp, to: point, lo, hi: Infinity, note: 'later than' });
       else add({ source, from: tp, to: point, lo, hi });
-    } else if (prop === 'earlier_than') {
+    } else if (before) {
       add({ source, from: point, to: pointOf(world, v.ref, 'start'), lo: 0, hi: Infinity, note: 'earlier than' });
-    } else if (prop === 'later_than') {
+    } else if (after) {
       add({ source, from: pointOf(world, v.ref, 'end'), to: point, lo: 0, hi: Infinity, note: 'later than' });
     } else {
       add({ source, from: pointOf(world, v.ref, 'start'), to: point, lo: 0, hi: Infinity, note: 'within' });
@@ -212,11 +305,108 @@ function claimConstraints(world: World, prop: string, c: Claim, centres: boolean
     return out;
   }
   if (v.kind === 'unknown') return out;
-  const [lo, hi] = centres && prop !== 'earlier_than' && prop !== 'later_than' ? centre(v) : bounds(v);
-  if (prop === 'earlier_than') add({ source, from: ORIGIN, to: point, lo: -Infinity, hi, note: 'earlier than' });
-  else if (prop === 'later_than') add({ source, from: ORIGIN, to: point, lo, hi: Infinity, note: 'later than' });
+  const [lo, hi] = centres && !before && !after ? centre(v) : bounds(v);
+  if (before) add({ source, from: ORIGIN, to: point, lo: -Infinity, hi, note: 'earlier than' });
+  else if (after) add({ source, from: ORIGIN, to: point, lo, hi: Infinity, note: 'later than' });
   else if (Number.isFinite(lo) || Number.isFinite(hi)) add({ source, from: ORIGIN, to: point, lo, hi });
   return out;
+}
+
+/** A place on the axis, with the length of the calendar unit it names. */
+export interface SpanPoint {
+  t: number;
+  whole: number;
+}
+
+/** A bound of a span: a place on the axis, or the start or end of another record, wherever the evidence puts that. */
+export type SpanBound = SpanPoint | { ref: string; edge: 'start' | 'end' };
+
+export interface Span {
+  lo?: SpanBound;
+  hi?: SpanBound;
+  /** one time at which it held */
+  at?: SpanPoint;
+}
+
+/**
+ * The span a `valid` gives, of a relation or of a claim: from a time to a time, either left open, or one time at
+ * which it held. A bound is a year, a month, a day or a point, and one that names a calendar unit lies somewhere
+ * in it: "from 1871" is from some day of 1871. Or a bound names the start or the end of another record, `{ ref,
+ * edge }`, as "until his death" or "until the war ended" do: then it is not a date written twice, and it moves
+ * with that record's evidence. Undefined for a `valid` that is neither (the validator reports it).
+ */
+export function spanOf(
+  valid: unknown,
+  /** where a bound is on the axis; a bound it cannot place yet (a day in a count with no zero day) is left open */
+  at: (x: number | string) => SpanPoint | undefined = (x) => (isCount(x) ? (parseTime(x), undefined) : parsePoint(x)),
+): Span | undefined {
+  try {
+    if (typeof valid === 'number' || typeof valid === 'string') return valid === 'unknown' ? undefined : { at: at(valid) };
+    if (!valid || typeof valid !== 'object') return undefined;
+    const { lo, hi, ...rest } = valid as { lo?: unknown; hi?: unknown };
+    if (Object.keys(rest).length || (lo === undefined && hi === undefined)) return undefined;
+    let bad = false;
+    const bound = (x: unknown): SpanBound | undefined => {
+      if (x === undefined || x === 'unknown') return undefined;
+      if (typeof x === 'object' && x !== null) {
+        const { ref, edge, ...more } = x as { ref?: unknown; edge?: unknown };
+        if (typeof ref !== 'string' || (edge !== 'start' && edge !== 'end') || Object.keys(more).length) bad = true;
+        return bad ? undefined : { ref: ref as string, edge: edge as 'start' | 'end' };
+      }
+      return at(x as never);
+    };
+    const span: Span = { lo: bound(lo), hi: bound(hi) };
+    if (bad) return undefined;
+    if (span.lo && span.hi && !('ref' in span.lo) && !('ref' in span.hi) && span.lo.t > span.hi.t + span.hi.whole) return undefined;
+    return span;
+  } catch {
+    return undefined;
+  }
+}
+
+/** The records a span's bounds name, as written (local shorthand and all). */
+/**
+ * A span as its turn among others: from where its first unit starts to where its last unit starts, an open end
+ * infinite, so that a name dropped on the day the next was taken, or in the same year, has had its turn by then.
+ * Undefined if a bound names a record.
+ */
+export function turnOf(span: Span | undefined): [number, number] | undefined {
+  if (!span) return undefined;
+  if (span.at) return [span.at.t, span.at.t + span.at.whole];
+  if ((span.lo && 'ref' in span.lo) || (span.hi && 'ref' in span.hi)) return undefined;
+  return [span.lo ? span.lo.t : -Infinity, span.hi ? span.hi.t : Infinity];
+}
+
+/**
+ * Whether claims each hold for a span of their own, no two at once, as a state's official names do in turn. Such
+ * claims do not compete, and none of them need be preferred.
+ */
+export function inTurn(claims: readonly { valid?: unknown }[]): boolean {
+  if (claims.length < 2) return false;
+  const spans = claims.map((c) => (c.valid === undefined ? undefined : turnOf(spanOf(c.valid))));
+  return spans.every((x) => x) && spans.every((a, i) => spans.every((b, j) => i >= j || a![1] <= b![0] || b![1] <= a![0]));
+}
+
+export function spanRefs(span: Span | undefined): string[] {
+  return [span?.lo, span?.hi].flatMap((b) => (b && 'ref' in b ? [b.ref] : []));
+}
+
+/** The subject a bound of a span names, with local shorthand read as its own record's; undefined if it is no subject. */
+export function edgeSubject(ref: string, self: string): string | undefined {
+  try {
+    const r = parseRef(ref, self);
+    return r.type === 'entity' && !r.part ? (r.phase ? `${r.id}@${r.phase}` : r.id) : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/** A bound of a span on the axis, in a scenario: a point as written, or the days a date in a count of days comes to there. */
+function boundIn(world: World, x: number | string, s: Scenario): SpanPoint | undefined {
+  const count = countOf(x);
+  if (!count) return isCount(x) ? undefined : parsePoint(x);
+  const days = countDays(world, count, s);
+  return days && { t: days[0], whole: days[1] - days[0] };
 }
 
 function wholeNetwork(world: World, s: Scenario, centres: boolean): { points: string[]; constraints: Constraint[] } {
@@ -245,11 +435,40 @@ function wholeNetwork(world: World, s: Scenario, centres: boolean): { points: st
     const prop = world.vocab.properties[g.prop];
     if (!prop?.moment) continue;
     const c = chosen(g, s);
-    if (c) constraints.push(...claimConstraints(world, g.prop, c, centres));
+    if (c) constraints.push(...claimConstraints(world, g.prop, c, centres, s));
   }
   for (const r of relationsIn(world, s)) {
     const type = world.vocab.relations[r.rel];
-    if (!type?.time || !subjectExists(world, r.subject) || !subjectExists(world, r.to)) continue;
+    if (!type || !subjectExists(world, r.subject) || !subjectExists(world, r.to)) continue;
+    // A relation that holds over a span, and says which: the span lies within both lifetimes. A bound written in a
+    // count of days is the days it comes to in this scenario.
+    const span = type.span && r.valid !== undefined ? spanOf(r.valid, (x) => boundIn(world, x, s)) : undefined;
+    if (span) {
+      const start = `${r.ref}|start`;
+      const end = `${r.ref}|end`;
+      points.add(start).add(end);
+      const pin = (p: SpanPoint): [number, number] => (centres ? [p.t + p.whole / 2, p.t + p.whole / 2] : [p.t, p.t + p.whole]);
+      // A bound is a date, or the edge of another record, which it then shares: "until his death".
+      const bind = (b: SpanBound | undefined, point: string, note: string) => {
+        if (!b) return;
+        if (!('ref' in b)) return add({ source: r.ref, from: ORIGIN, to: point, lo: pin(b)[0], hi: pin(b)[1], note });
+        const target = edgeSubject(b.ref, r.entity);
+        if (target && subjectExists(world, target)) add({ source: r.ref, from: pointOf(world, target, b.edge), to: point, lo: 0, hi: 0, note });
+      };
+      bind(span.lo, start, 'it held from then');
+      bind(span.hi, end, 'it held until then');
+      if (span.at) {
+        add({ source: r.ref, from: ORIGIN, to: start, lo: -Infinity, hi: span.at.t + span.at.whole, note: 'it held by then' });
+        add({ source: r.ref, from: ORIGIN, to: end, lo: span.at.t, hi: Infinity, note: 'it still held then' });
+      }
+      add({ source: r.ref, from: start, to: end, lo: 0, hi: Infinity, note: 'it holds from its start to its end' });
+      for (const who of [r.subject, r.to]) {
+        add({ source: r.ref, from: pointOf(world, who, 'start'), to: start, lo: 0, hi: Infinity, note: 'both were there while it held' });
+        add({ source: r.ref, from: end, to: pointOf(world, who, 'end'), lo: 0, hi: Infinity, note: 'both were there while it held' });
+      }
+      continue;
+    }
+    if (!type.time) continue;
     let lag: [number, number] = [0, Infinity];
     try {
       lag = parseLag(r.lag);
@@ -293,8 +512,8 @@ export function pictures(world: World, alternatives: string[] = world.alternativ
 }
 
 /**
- * Each picture, and each picture with one competing dated claim picked over the default.
- * Combinations of picks are not worked out. The first of a picture's is the picture itself.
+ * Each picture, and each picture with one competing dated claim, or one rival relation, picked over the
+ * default. Combinations of picks are not worked out. The first of a picture's is the picture itself.
  */
 export function* scenariosOf(world: World, alternatives?: string[]): Generator<Scenario> {
   for (const p of pictures(world, alternatives)) {
@@ -306,6 +525,7 @@ export function* scenariosOf(world: World, alternatives?: string[]): Generator<S
       const def = chosen(g, p);
       for (const c of avail) if (c !== def) yield { ...p, picks: [c.ref] };
     }
+    for (const r of rivalsIn(world, p)) yield { ...p, picks: [r.ref] };
   }
 }
 

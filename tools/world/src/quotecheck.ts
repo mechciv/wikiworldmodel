@@ -1,13 +1,18 @@
-// The first step of the ladder (docs/STRUCTURE.md section 3.7, core/ladder.ts): a claim's quote found in
-// the text its source was read in, by script, not by eye.
+// The first step of the ladder (docs/STRUCTURE.md section 3.7, core/ladder.ts): a claim's quotes found in
+// the texts its sources were read in, by script, not by eye.
 //
-//   npm run world -- quote-check src:renne-2013-kpg-timescales renne-2013.txt [--by machine:<tool>] [--dry-run]
+//   npm run world -- quote-check src:renne-2013-kpg-timescales renne-2013.txt [src:… <text file> …]
+//                                [--by machine:<tool>] [--dry-run] [--redo]
 //
-// The text is what was retrieved and read: a page saved as text, a PDF's text. It is not kept; the step
+// A text is what was retrieved and read: a page saved as text, a PDF's text. It is not kept; the step
 // records its name and sha256. Both sides are compared after normalizing: Unicode compatibility forms,
 // curly quotes and dashes as plain ones, soft hyphens and words broken across a line joined, and every run
 // of whitespace as one space. A quote with an ellipsis (… or ...) is found when its pieces are, in order.
-// Each claim whose quote is found gets a `quoted` step written into its file, after what is there.
+//
+// A claim is quoted when every quote it has was found, each in its own source's text. So a claim that quotes
+// two sources gets its step only when both texts are given in one run, and the step names both; given one,
+// the other is asked for. The step is written into the claim's file, after what is there. `--redo` writes
+// it again over one this tool wrote before, as when a claim was checked against one of its texts only.
 import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
@@ -28,12 +33,8 @@ export function normalizeText(s: string): string {
     .trim();
 }
 
-/** Is a quote in a text? Both normalized; an ellipsis is a gap, whose pieces must come in order. */
-export function quoteIn(quote: string, text: string): boolean {
-  const pieces = normalizeText(quote)
-    .split(/\s*(?:…|\.\.\.)\s*/)
-    .map((p) => p.trim())
-    .filter(Boolean);
+/** The pieces of a quote, in order: an ellipsis is a gap between them. */
+function piecesIn(pieces: string[], text: string): boolean {
   if (!pieces.length) return false;
   let from = 0;
   for (const p of pieces) {
@@ -44,22 +45,29 @@ export function quoteIn(quote: string, text: string): boolean {
   return true;
 }
 
-export interface QuoteResult {
-  claim: Claim | Relation;
-  quote: string;
-  found: boolean;
-}
+/** A text with the hyphens inside its words taken out, so that "well-known" and "wellknown" are the same. */
+const unhyphenated = (s: string) => s.replace(/(?<=\p{L})-(?=\p{L})/gu, '');
 
-/** Every quote from a source in the world's claims, and whether the text has it. */
-export function checkQuotes(world: World, source: string, text: string): QuoteResult[] {
-  const norm = normalizeText(text);
-  const out: QuoteResult[] = [];
-  for (const e of world.entities) {
-    for (const c of [...e.claims, ...e.relations]) {
-      for (const s of c.sources) if (s.ref === source && s.quote) out.push({ claim: c, quote: s.quote, found: quoteIn(s.quote, norm) });
-    }
+let lastText = '';
+let lastUnhyphenated = '';
+
+/**
+ * Is a quote in a text? Both normalized; an ellipsis is a gap, whose pieces must come in order. A word broken
+ * across a line has been joined without its hyphen, which is wrong for a compound that was broken at its own
+ * hyphen ("Proto-" / "Sinaitic"): so a quote that is not found as it stands is looked for again with the hyphens
+ * inside words left out of both.
+ */
+export function quoteIn(quote: string, text: string): boolean {
+  const pieces = normalizeText(quote)
+    .split(/\s*(?:…|\.\.\.)\s*/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+  if (piecesIn(pieces, text)) return true;
+  if (text !== lastText) {
+    lastText = text;
+    lastUnhyphenated = unhyphenated(text);
   }
-  return out;
+  return piecesIn(pieces.map(unhyphenated), lastUnhyphenated);
 }
 
 /** The column a node starts at, in a text. */
@@ -99,38 +107,109 @@ function insertLines(text: string, at: number, lines: string[]): string {
   return text[at - 1] === '\n' ? `${text.slice(0, at)}${block}\n${text.slice(at)}` : `${text.slice(0, at)}\n${block}${text.slice(at)}`;
 }
 
+/** Write a step over the step of its kind that a claim or relation has, leaving the rest of the file as it was. */
+export function replaceStep(text: string, section: 'claims' | 'relations', key: string, step: CheckStep): string {
+  const doc = parseDocument(text, { keepSourceTokens: true });
+  const checked = doc.getIn([section, key, 'checked'], true) as Node | undefined;
+  const item = checked && isSeq(checked) ? (checked.items.find((i) => isMap(i) && i.get('step') === step.step) as Node | undefined) : undefined;
+  if (!item?.range || !isMap(item) || !item.flow) throw new Error(`${section}.${key} has no ${step.step} step written on one line to write over`);
+  return `${text.slice(0, item.range[0])}${stepLine(step)}${text.slice(item.range[1])}`;
+}
+
+export interface QuoteText {
+  /** the file's name, as the step records it */
+  name: string;
+  /** the first sixteen digits of its sha256 */
+  sha: string;
+  text: string;
+}
+
+export interface ClaimQuotes {
+  claim: Claim | Relation;
+  /** each of its quotes from a source whose text was given, and whether that text has it */
+  quotes: { source: string; quote: string; found: boolean }[];
+  /** the sources it quotes whose texts were not given */
+  others: string[];
+}
+
+/** Every claim that quotes one of the sources given, with all of its quotes: found, not found, or from a source not given. */
+export function checkClaims(world: World, texts: Map<string, QuoteText>): ClaimQuotes[] {
+  const norm = new Map([...texts].map(([source, t]) => [source, normalizeText(t.text)]));
+  const out: ClaimQuotes[] = [];
+  for (const e of world.entities) {
+    for (const c of [...e.claims, ...e.relations]) {
+      // What speaks for a claim and what denies it are quoted alike: both are words that must be in their texts.
+      const quoted = [...c.sources, ...c.against].filter((s) => s.quote);
+      if (!quoted.some((s) => norm.has(s.ref))) continue;
+      out.push({
+        claim: c,
+        quotes: quoted.filter((s) => norm.has(s.ref)).map((s) => ({ source: s.ref, quote: s.quote!, found: quoteIn(s.quote!, norm.get(s.ref)!) })),
+        others: [...new Set(quoted.filter((s) => !norm.has(s.ref)).map((s) => s.ref))],
+      });
+    }
+  }
+  return out;
+}
+
+/** What the step says was done: the texts a claim's quotes were found in, in the order it cites them. */
+export function quotedHow(c: ClaimQuotes, texts: Map<string, QuoteText>): string {
+  const files = [...new Set(c.quotes.map((q) => q.source))].map((s) => `${texts.get(s)!.name} (sha256 ${texts.get(s)!.sha})`);
+  const list = files.length > 1 ? `${files.slice(0, -1).join(', ')} and ${files.at(-1)}` : files[0];
+  return `Found in ${list}, after normalizing whitespace and typography, by npm run world -- quote-check.`;
+}
+
 export async function runQuoteCheck(world: World, args: string[]): Promise<number> {
-  const [source, file] = args.filter((a, i) => !a.startsWith('--') && !args[i - 1]?.startsWith('--by'));
-  if (!source || !file) {
-    console.error('usage: world quote-check src:<source> <text file> [--by machine:<tool>] [--dry-run]');
+  const positional = args.filter((a, i) => !a.startsWith('--') && !args[i - 1]?.startsWith('--by'));
+  if (!positional.length || positional.length % 2) {
+    console.error('usage: world quote-check src:<source> <text file> [src:<source> <text file> …] [--by machine:<tool>] [--dry-run] [--redo]');
     return 2;
   }
-  if (!world.source.has(source)) throw new Error(`no source ${source} in the world`);
   const by = args.includes('--by') ? args[args.indexOf('--by') + 1] : 'machine:quote-check';
   const dry = args.includes('--dry-run');
-  const raw = readFileSync(file);
-  const results = checkQuotes(world, source, raw.toString('utf8'));
-  const step: CheckStep = {
-    step: 'quoted',
-    by,
-    how: `Found in ${basename(file)} (sha256 ${createHash('sha256').update(raw).digest('hex').slice(0, 16)}), after normalizing whitespace and typography, by npm run world -- quote-check.`,
-    on: new Date().toISOString().slice(0, 10),
-  };
+  const redo = args.includes('--redo');
+  const texts = new Map<string, QuoteText>();
+  for (let i = 0; i < positional.length; i += 2) {
+    const [source, file] = [positional[i], positional[i + 1]];
+    if (!world.source.has(source)) throw new Error(`no source ${source} in the world`);
+    const raw = readFileSync(file);
+    texts.set(source, { name: basename(file), sha: createHash('sha256').update(raw).digest('hex').slice(0, 16), text: raw.toString('utf8') });
+  }
+  const results = checkClaims(world, texts);
+  const on = new Date().toISOString().slice(0, 10);
   const files = new Map<string, string>();
   let added = 0;
-  for (const r of results.filter((x) => x.found)) {
+  const waiting = new Map<string, number>();
+  for (const r of results) {
     const c = r.claim;
-    if (c.checked.some((s) => s.step === 'quoted') || c.where.split('.').length !== 2) continue;
+    if (r.quotes.some((q) => !q.found) || c.where.split('.').length !== 2) continue;
+    // Quoted means every quote: one from a source whose text was not given is still to find.
+    if (r.others.length) {
+      for (const o of r.others) waiting.set(o, (waiting.get(o) ?? 0) + 1);
+      continue;
+    }
+    const has = c.checked.find((s) => s.step === 'quoted');
+    if (has && !(redo && has.by === by)) continue;
+    const step: CheckStep = { step: 'quoted', by, how: quotedHow(r, texts), on };
     const [section, key] = c.where.split('.') as ['claims' | 'relations', string];
     const path = join(world.root, c.file);
     const before = files.get(path) ?? readFileSync(path, 'utf8');
-    const after = addStep(before, section, key, step);
+    const after = has ? replaceStep(before, section, key, step) : addStep(before, section, key, step);
     if (after !== before) added++;
     files.set(path, after);
   }
   if (!dry) for (const [path, text] of files) writeFileSync(path, text);
-  const missing = results.filter((r) => !r.found);
-  console.log(`${source}: ${results.length - missing.length} of ${results.length} quotes found in ${basename(file)}; ${dry ? 'would record' : 'recorded'} the quoted step on ${added} claim${added === 1 ? '' : 's'}.`);
-  for (const r of missing) console.log(`  not found  ${r.claim.file} ${r.claim.where}: ${r.quote}`);
-  return missing.length ? 1 : 0;
+  let missing = 0;
+  for (const [source, t] of texts) {
+    const mine = results.flatMap((r) => r.quotes.filter((q) => q.source === source).map((q) => ({ ...q, claim: r.claim })));
+    const lost = mine.filter((q) => !q.found);
+    missing += lost.length;
+    console.log(`${source}: ${mine.length - lost.length} of ${mine.length} quotes found in ${t.name}.`);
+    for (const q of lost) console.log(`  not found  ${q.claim.file} ${q.claim.where}: ${q.quote}`);
+  }
+  console.log(`${dry ? 'Would record' : 'Recorded'} the quoted step on ${added} claim${added === 1 ? '' : 's'}.`);
+  if (waiting.size) {
+    console.log('Some claims quote other sources too, and are quoted only when every quote is found: give these texts in the same run.');
+    for (const [source, n] of [...waiting].sort()) console.log(`  ${source}  (${n} claim${n === 1 ? '' : 's'})`);
+  }
+  return missing ? 1 : 0;
 }

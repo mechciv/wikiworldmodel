@@ -10,6 +10,9 @@ types:
     A text from before printing, ancient or medieval, cited by its traditional divisions (book,
     chapter, section) rather than by page. Quotes come from a named edition or translation.
   inscription: A text inscribed on stone or bronze, cited by its number in a corpus.
+  document: >-
+    An official document, such as a law, a treaty, a resolution, a judgment or a proclamation, cited by its
+    article, section or paragraph.
 kinds:
   measurement: Reports its own measurements or observations.
   review: Synthesizes published work.
@@ -19,3 +22,7 @@ kinds:
   eyewitness: Written by someone who saw the events or took part in them, at the time or soon after.
   historian: A history or a chronicle written after the events, from earlier sources, many of them now lost.
   tradition: Hands down a legend or a tradition; the dates it gives were reckoned long after the events.
+  act: >-
+    The document is itself the act: the law that made a union, the treaty that ended a war, the resolution that
+    admitted a state, the judgment that held two states to be one. It is evidence of what was enacted or held, and
+    when, in its makers' own words, and not of what came of it.

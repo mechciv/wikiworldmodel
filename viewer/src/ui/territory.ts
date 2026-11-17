@@ -5,8 +5,9 @@
 // about 3 kyr ago, the plates have moved less than a few hundred metres.
 import { unitVector } from '../../../core/quat.ts';
 import type { Scenario } from '../../../core/scenario.ts';
+import { PRESENT_YEAR } from '../../../core/time.ts';
 import { chosenClaim, spanOf } from '../../../core/planet.ts';
-import { contains, territoriesAt, TERRITORY_SCALE, type TerritoryAt, type TerritoryClaim, type TerritoryFile } from '../../../core/territory.ts';
+import { contains, drawnFirst, territoriesAt, TERRITORY_SCALE, type TerritoryAt, type TerritoryClaim, type TerritoryFile } from '../../../core/territory.ts';
 import type { Camera } from '../camera.ts';
 import type { V3 } from '../mat.ts';
 
@@ -31,6 +32,10 @@ export class TerritoryLayer {
   private file: TerritoryFile | null = null;
   private key = '';
   private active: TerritoryAt[] = [];
+  /** the territories that hold but have no colour of their own: the states layer draws them among the states */
+  rest: TerritoryAt[] = [];
+  /** the records whose territory holds, in colour or not: their rows of the dataset are theirs for now */
+  holding: ReadonlySet<string> = new Set();
   private channel = new Map<string, number>();
   private labels = new Map<string, HTMLElement>();
 
@@ -53,13 +58,20 @@ export class TerritoryLayer {
     return rows.length ? [Math.min(...rows.map((r) => r.from)), Math.max(...rows.map((r) => r.to))] : null;
   }
 
-  /** What holds at time t; redraws the texture when that changes, and says whether it did. */
-  update(t: number, s: Scenario): boolean {
-    const now = this.file ? territoriesAt(this.file, t, s).slice(0, CHANNELS) : [];
-    const key = now.map((a) => `${a.territory.subject}:${a.claim.claim}:${a.rows.map((r) => `${r.name}@${r.from}`).join('+')}`).join('|');
+  /**
+   * What holds at time t; redraws the texture when that changes, and says whether it did. There are three
+   * colours, so the record that is open and then the largest take them, and the others are left in `rest`.
+   */
+  update(t: number, s: Scenario, selected: string | null = null): boolean {
+    // At the present and after, today's map takes over, as it does from the states.
+    const { drawn: now, rest } = drawnFirst(this.file && t < PRESENT_YEAR ? territoriesAt(this.file, t, s) : [], selected, CHANNELS);
+    const keyOf = (list: TerritoryAt[]) => list.map((a) => `${a.territory.subject}:${a.claim.claim}:${a.rows.map((r) => `${r.name}@${r.from}`).join('+')}`).join('|');
+    const key = `${keyOf(now)}||${keyOf(rest)}`;
     if (key === this.key) return false;
     this.key = key;
     this.active = now;
+    this.rest = rest;
+    this.holding = new Set([...now, ...rest].map((a) => a.territory.subject));
     // A polity keeps its colour while it is on screen; a new one takes a free channel.
     for (const id of [...this.channel.keys()]) if (!now.some((a) => a.territory.subject === id)) this.channel.delete(id);
     for (const a of now) {

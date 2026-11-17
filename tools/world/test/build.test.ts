@@ -11,7 +11,7 @@ import { cityKind, type Feature, type FramesFile, type TileHeader, type Tileset 
 import { PLATE_OFFSET, PlateModels, RotationModel } from '../../../core/rotation-model.ts';
 import type { IceHeader } from '../../../core/ice.ts';
 import { chosenClaim, type PlanetFile } from '../../../core/planet.ts';
-import { peopleAt, type PeopleFile, type PeopleHeader } from '../../../core/layers.ts';
+import { peopleAt, statesAt, type PeopleFile, type PeopleHeader, type PolitiesFile } from '../../../core/layers.ts';
 import { territoriesAt, type TerritoryFile } from '../../../core/territory.ts';
 import type { CoverageFile, EntityRecord, PeriodsFile, SearchFile, SeriesFile } from '../../../core/records.ts';
 import { decodeRuns } from '../../../core/coverage.ts';
@@ -559,9 +559,21 @@ describe('build', () => {
     expect([peak.name, peak.from, peak.to, Math.round(peak.area / 1e5)]).toEqual(['Roman Empire', 117, 127, 53]);
     // In 420 CE there were two courts: the West drawn as its own polity, part of Rome.
     expect(territoriesAt(file, 420, {}).map((a) => a.territory.subject).sort()).toEqual(['people/polities/rome', 'people/polities/western-roman-empire']);
-    expect(territoriesAt(file, 1460, {})).toEqual([]);
+    // After the fall of Constantinople Rome draws nothing: the states of 1460 that are drawn so have records of their own.
+    expect(territoriesAt(file, 1460, {}).map((a) => a.territory.subject)).not.toContain('people/polities/rome');
     const ts = JSON.parse(readFileSync(join(dir, 'tileset.json'), 'utf8')) as Tileset;
     expect(ts.credits.map((c) => c.label)).toContain('Borders from Cliopatria (Bennett et al. 2025, Seshat)');
+    // The rows Rome draws are marked as its own, and left to it while it holds; the dataset's last Byzantine row,
+    // wholly after the state ended, is not Rome's. Once Rome has ended, what is left of its last row is the
+    // dataset's again, as that row is: nothing the dataset says is dropped.
+    const states = JSON.parse(readFileSync(join(dir, 'polities.json'), 'utf8')) as PolitiesFile;
+    const mine = new Set(rows.map((r) => `${r.name}@${r.from}`));
+    for (const r of states.rows) expect(r.claimedBy?.includes('people/polities/rome') ?? false).toBe(mine.has(`${r.name}@${r.from}`));
+    expect(states.rows.filter((r) => r.name === 'Byzantine Empire').map((r) => [r.from, r.to, r.claimedBy?.length ?? 0]).slice(-2)).toEqual([[1440, 1468, 1], [1468, 1475, 0]]);
+    const names = (t: number, holding: string[]) => statesAt(states, t, new Set(holding)).filter((r) => r.name === 'Byzantine Empire').length;
+    expect(names(1450, ['people/polities/rome'])).toBe(0);
+    expect(names(1460, [])).toBe(1);
+    expect(names(1470, [])).toBe(1);
   });
 
   it('draws where people lived from its grid, whose cells come to the world\'s series at its steps and between them', () => {
