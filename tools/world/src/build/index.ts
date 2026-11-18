@@ -11,7 +11,7 @@ import { bytesPrint } from '../../../../core/fingerprint.ts';
 import { ladderCounts } from '../../../../core/ladder.ts';
 import type { CoverageFile, OverlaysFile, PeriodRecord, PeriodsFile, SearchFile, SeriesFile } from '../../../../core/records.ts';
 import { bakeRotationModel, parseRot, PLATE_OFFSET, RotationModel } from '../../../../core/rotation-model.ts';
-import { fromMa, parseDuration, parsePoint, PRESENT_YEAR, toMa, type TimePointInput } from '../../../../core/time.ts';
+import { fromMa, parseDuration, parsePoint, PRESENT_YEAR, formatTime, toMa, type TimePointInput } from '../../../../core/time.ts';
 import type { Basis, Feature, FieldInfo, FieldKeyframe, FramesFile, GeneratorConstraint, SiteInfo, TileHeader, TileRef, Tileset } from '../../../../core/tileset.ts';
 import { GENERATOR as BIOME_TEXTURE, VERSION as BIOME_TEXTURE_VERSION, generateBiomeTexture, type BiomeTextureParams } from '../../../../world/generators/earth/biome/v1.ts';
 import { GENERATOR as CLOUDS, VERSION as CLOUDS_VERSION, generateClouds, type CloudParams } from '../../../../world/generators/earth/clouds/v1.ts';
@@ -37,6 +37,7 @@ import { ClaimIndex } from '../claimindex.ts';
 import { correctLand } from '../tables.ts';
 import { gridPlaces, lifeTierOf, seaTierOf, tierCounts, TIER_SPANS, type ResolveWorld } from '../../../../core/resolve.ts';
 import { coverageMatrix, type CoverageSource } from '../../../../core/coverage.ts';
+import { glance, landShares } from '../../../../core/glance.ts';
 import { spanOf, type PlanetFile } from '../../../../core/planet.ts';
 import { insideRow, politiesAt, type PolitiesFile } from '../../../../core/layers.ts';
 import type { AtlasBin } from '../../../../core/atlas.ts';
@@ -959,6 +960,17 @@ export async function runBuild(args: string[]): Promise<number> {
   }
   coverageFile.matrix = coverageMatrix(resolveWorld, span, COVERAGE.columns, COVERAGE.step, COVERAGE.samples, sources);
   log(`coverage  ${COVERAGE.columns} columns × ${coverageFile.matrix.layers.length} layers over a ${COVERAGE.step}° grid in ${((Date.now() - started) / 1000).toFixed(1)} s`);
+  // How much is known, at a glance, from the same counts: the landing page's bars.
+  const now = fromMa(0);
+  coverageFile.glance = glance({
+    matrix: coverageFile.matrix,
+    until: now,
+    land: landShares(resolveWorld, coverageFile.matrix.columns, COVERAGE.step, now),
+    forms: coverageFile.forms,
+    ladder: coverageFile.claims.ladder,
+    formatTime,
+  });
+  log(`coverage  at a glance: ${coverageFile.glance.groups.flatMap((g) => g.rows).map((r) => `${r.label} ${r.share === null ? '–' : `${(r.share * 100).toFixed(1)}%`}`).join(', ')}`);
   put('coverage.json', stableStringify(coverageFile));
 
   // 9. Index and identity.

@@ -12,8 +12,12 @@ two are served together.
   `npm run validate`, the time scale from the eon and era records in
   `world/entities/periods/ics/`, and the views' times and places from the golden tests. Update
   them when the world moves.
-- `main.js`: copies the starter prompt, and works out how wide Rome would be on the time scale
-  at the width it is drawn.
+- `main.js`: copies the starter prompt, works out how wide Rome would be on the time scale
+  at the width it is drawn, and draws the bars of how much is known from `glance.json`.
+- `glance.json` is not here: `npm run build:site` writes it beside the page from the latest build's
+  `coverage.json` (its `glance`, made by [core/glance.ts](../core/glance.ts)), so the bars follow
+  the world with no copying by hand. Without it, as when the page is served from `site/` alone,
+  the section stays hidden.
 - `img/`: stills from the viewer's golden images (`viewer/test/golden/`), as JPEG. They are
   1280 pixels wide; for the launch the hero should be rendered again at twice that.
 - `fonts/`: Newsreader and IBM Plex, Latin subsets from Fontsource 5.3.0, under the SIL Open
