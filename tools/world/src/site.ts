@@ -2,7 +2,7 @@
 // (dist/site) at /world/, the index of builds at /world/builds/index.json, where the viewer looks for
 // it, and the latest build's ATTRIBUTION.md at /ATTRIBUTION.md. The builds themselves are in object
 // storage (a store), each put there once and kept, so a link that names a build keeps working after
-// the next is published; the index says where. Without a store, the latest build goes beside the
+// the next is published; the index says where. The landing page's bars come from the build's coverage, as glance.json. Without a store, the latest build goes beside the
 // index, as it does locally. Pages refuses a deployment with a file over 25 MiB or more than 20,000
 // files, so both are checked here, where the error can say which file.
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
@@ -47,6 +47,11 @@ export function assembleSite({ landing, viewer, builds, out, store }: SiteOption
   const attribution = join(builds, build, 'ATTRIBUTION.md');
   if (!existsSync(attribution)) throw new Error(`build ${build} has no ATTRIBUTION.md: build the world again`);
   cpSync(attribution, join(out, 'ATTRIBUTION.md'));
+  // The landing page's bars of how much is known (core/glance.ts), from the build's coverage: small, beside the page,
+  // so the page reads them without reaching into the build. A build too old to have them leaves the bars out.
+  const coverage = join(builds, build, 'coverage.json');
+  const glance = existsSync(coverage) ? (JSON.parse(readFileSync(coverage, 'utf8')) as { glance?: unknown }).glance : undefined;
+  if (glance) writeFileSync(join(out, 'glance.json'), JSON.stringify({ build, glance }) + '\n');
   // The index lists the latest build only: it is the one this site puts out, and the one in the store
   // that this deployment's viewer is known to read.
   const published: BuildIndex = { builds: [entry], latest: build, ...(store ? { store } : {}) };

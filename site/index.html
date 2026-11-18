@@ -576,6 +576,72 @@
         color: var(--ink-soft);
       }
 
+      /* How much is known: one bar for each share (core/glance.ts), filled by main.js from glance.json */
+      #glance[hidden] {
+        display: none;
+      }
+      .ledger {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 2rem var(--gap);
+        margin-top: 1.5rem;
+      }
+      .ledger h3 {
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--rule-strong);
+      }
+      .ledger ol {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      .ledger li {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 0.35rem 1rem;
+        padding-block: 0.8rem;
+        border-bottom: 1px solid var(--rule);
+      }
+      .ledger .label {
+        font: 400 1.15rem/1.3 var(--serif);
+      }
+      .ledger .value {
+        font: 500 0.95rem/1.3 var(--mono);
+        font-variant-numeric: tabular-nums;
+        text-align: right;
+      }
+      .ledger .bar {
+        grid-column: 1 / -1;
+        height: 0.5rem;
+        border-radius: 0.25rem;
+        background: var(--well);
+        overflow: hidden;
+      }
+      .ledger .bar span {
+        display: block;
+        height: 100%;
+        min-width: 2px;
+        border-radius: inherit;
+        background: var(--ink);
+      }
+      .ledger .of {
+        grid-column: 1 / -1;
+        font-size: 0.85rem;
+        color: var(--ink-soft);
+      }
+      .ledger .unmeasured .label,
+      .ledger .unmeasured .value {
+        color: var(--ink-soft);
+      }
+      .ledger .unmeasured .bar {
+        background: repeating-linear-gradient(-45deg, var(--well) 0 4px, transparent 4px 8px);
+      }
+      @media (max-width: 720px) {
+        .ledger {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
+
       /* How it is made */
       .method {
         display: grid;
@@ -1174,6 +1240,23 @@
             wide on it.
           </figcaption>
         </figure>
+      </section>
+
+      <section
+        class="wrap section"
+        id="glance"
+        aria-labelledby="glance-title"
+        hidden
+      >
+        <p class="eyebrow">How much is known · <span data-glance-build></span></p>
+        <h2 id="glance-title">What the world knows so far</h2>
+        <p class="prose">
+          Each bar is the part of what the viewer draws that rests on evidence
+          or a model rather than a stand-in. The rest is drawn too, and marked
+          as generic. The <a href="world/coverage.html">coverage chart</a> shows
+          where and when, layer by layer.
+        </p>
+        <div class="ledger" data-glance></div>
       </section>
 
       <section class="wrap section" id="method" aria-labelledby="method-title">
