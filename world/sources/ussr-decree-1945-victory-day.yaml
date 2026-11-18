@@ -1,0 +1,24 @@
+id: src:ussr-decree-1945-victory-day
+type: document
+kind: act
+citation: >-
+  Указ Президиума Верховного Совета СССР от 8 мая 1945 г. № 121/57 «Об объявлении 9 мая
+  праздником победы» (Decree of the Presidium of the Supreme Soviet of the USSR of 8 May 1945
+  declaring 9 May the Holiday of Victory). Ведомости Верховного Совета СССР, 1945, no. 26;
+  Сборник законов СССР и указов Президиума Верховного Совета СССР, 1938 г. — июль 1956 г.,
+  Москва: Государственное издательство юридической литературы, 1956, p. 216.
+published: 1945
+title: Об объявлении 9 мая праздником победы
+url: https://ru.wikisource.org/wiki/%D0%A3%D0%BA%D0%B0%D0%B7_%D0%9F%D1%80%D0%B5%D0%B7%D0%B8%D0%B4%D0%B8%D1%83%D0%BC%D0%B0_%D0%92%D0%A1_%D0%A1%D0%A1%D0%A1%D0%A0_%D0%BE%D1%82_08.05.1945_%E2%84%96_121/57
+via: >-
+  Russian Wikisource's transcription from the 1956 collection of laws and decrees, which it
+  marks as proofread against a scan.
+reliability: >-
+  The decree itself: evidence that the Soviet Union, by an act dated in Moscow on 8 May 1945,
+  kept 9 May as the day of its victory over Germany. It is not evidence of the hour of the
+  surrender on any clock.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from ru.wikisource.org on 2026-11-17 and read in full in Russian; the quotes were
+    found in the kept text by quote-check.

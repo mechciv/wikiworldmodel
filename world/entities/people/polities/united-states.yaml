@@ -1,0 +1,12 @@
+id: people/polities/united-states
+kind: polity
+summary: >-
+  The United States of America. Written for the war it took part in (people/wars/second-world-war): it has no
+  dates and no land of its own here yet, and its place in time is bounded only by the span of that war it fought in.
+author: machine:claude-code
+same_as: { wikidata: Q30 }
+claims:
+  name:
+    prop: name
+    value: { en: United States }
+    unsourced: An editorial label, in English.

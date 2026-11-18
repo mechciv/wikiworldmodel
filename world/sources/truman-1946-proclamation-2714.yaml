@@ -1,0 +1,25 @@
+id: src:truman-1946-proclamation-2714
+type: document
+kind: act
+citation: >-
+  Truman, H.S. Proclamation 2714, Cessation of Hostilities of World War II. Washington, 31
+  December 1946.
+authors:
+  - "Truman, H.S."
+published: 1946
+title: Cessation of Hostilities of World War II
+container: Harry S. Truman Library, Proclamations
+url: https://www.trumanlibrary.gov/library/proclamations/2714/cessation-hostilities-world-war-ii
+via: >-
+  The Harry S. Truman Library's transcription, which files it among the proclamations under the
+  number 2714.
+reliability: >-
+  The proclamation itself: evidence of the day and hour from which the United States held the
+  hostilities of the war to have ceased, for its own law. It says in the same breath that a
+  state of war still exists, and it speaks for the United States alone.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from trumanlibrary.gov on 2026-11-17 and read in full; the quotes were found in the
+    kept text by quote-check. The number is from the library's address for the page, which the
+    text does not print.

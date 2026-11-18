@@ -1,0 +1,36 @@
+id: people/events/japanese-surrender-1945
+kind: event/treaty
+summary: >-
+  The instrument of surrender signed for Japan in Tokyo Bay on the morning of 2 September 1945
+  and accepted for the Allied Powers: the formal surrender of Japan, after its acceptance of
+  the Allies' terms had been announced in the middle of August. In Washington it was still the
+  evening of 1 September. Wikidata has an item for the instrument, given here, and another for
+  the surrender of Japan as an event.
+author: machine:claude-code
+same_as: { wikidata: Q665554 }
+claims:
+  name:
+    prop: name
+    value: { en: Japanese Instrument of Surrender }
+    unsourced: >-
+      An editorial label, the usual name in English; the document is headed Instrument of
+      Surrender.
+  date:
+    prop: date
+    value: 2 September 1945 CE
+    source:
+      - ref: src:japanese-instrument-of-surrender-1945
+        loc: signature line
+        quote: Signed at TOKYO BAY, JAPAN at 0904 I on the SECOND day of SEPTEMBER, 1945
+      - ref: src:truman-1945-radio-address-1-september
+        loc: next to last paragraph
+        quote: I proclaim Sunday, September the second, 1945, to be V-J Day--the day of formal surrender by Japan.
+    method: documentary
+    note: >-
+      The day the instrument gives for itself, by the clock of the place of signing: four
+      minutes past nine in the morning, in the zone it marks with the letter I. The President
+      of the United States spoke of the signing as just done in a broadcast headed 1 September,
+      10 p.m., at the White House, and in it proclaimed 2 September the day of the surrender:
+      the day is Tokyo's, and the model's day cannot say so.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ww2-nara-surrender-of-japan.txt (sha256 af060fc11fecf35d) and ww2-truman-1945-radio-address-tl.txt (sha256 b9b0cb5ed5216e92), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }

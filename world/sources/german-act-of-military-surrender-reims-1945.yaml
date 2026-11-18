@@ -1,0 +1,27 @@
+id: src:german-act-of-military-surrender-reims-1945
+type: document
+kind: act
+citation: >-
+  Act of Military Surrender, signed at Rheims at 0241 on 7 May 1945 by Jodl on behalf of the
+  German High Command, in the presence of W. B. Smith on behalf of the Supreme Commander, Allied
+  Expeditionary Force, and Sousloparov on behalf of the Soviet High Command, with F. Sevez of the
+  French Army as witness. In C. I. Bevans (comp.), Treaties and Other International Agreements of
+  the United States of America 1776-1949, vol. 3, Multilateral 1931-1945 (Department of State
+  Publication 8484). Washington: Government Printing Office, 1969.
+published: 1945
+title: Act of Military Surrender, signed at Rheims on 7 May 1945
+url: https://avalon.law.yale.edu/wwii/gs3.asp
+via: >-
+  The Avalon Project of the Lillian Goldman Law Library, Yale Law School, which transcribes the
+  English text from Bevans and heads it "59 Stat. 1957; Executive Agreement Series 502".
+reliability: >-
+  The act itself: evidence of what the German High Command undertook, of the hour and day it was
+  signed, and of the hour it set for operations to cease, which it names by Central European
+  time. It is not evidence of when the fighting in fact stopped. The transcription has slips of
+  spelling ("authorties"), and its paragraphs are not numbered.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from avalon.law.yale.edu on 2026-11-17 and read in full, its five paragraphs and the
+    signatures; the quotes were found in the kept text by quote-check. The statute citation in
+    the page's heading was not checked against the Statutes at Large.

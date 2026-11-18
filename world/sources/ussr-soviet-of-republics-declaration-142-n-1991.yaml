@@ -1,0 +1,28 @@
+id: src:ussr-soviet-of-republics-declaration-142-n-1991
+type: document
+kind: act
+citation: >-
+  Soviet of the Republics of the Supreme Soviet of the USSR. Declaration of 26 December 1991,
+  no. 142-Н, in connection with the creation of the Commonwealth of Independent States
+  (Декларация Совета Республик Верховного Совета СССР в связи с созданием Содружества Независимых
+  Государств), signed by its chairman, A. Alimzhanov. Ведомости Верховного Совета СССР, 1991,
+  no. 52.
+published: 1991
+title: Декларация Совета Республик Верховного Совета СССР в связи с созданием Содружества Независимых Государств
+url: https://ru.wikisource.org/wiki/%D0%94%D0%B5%D0%BA%D0%BB%D0%B0%D1%80%D0%B0%D1%86%D0%B8%D1%8F_%D0%A1%D0%BE%D0%B2%D0%B5%D1%82%D0%B0_%D0%A0%D0%B5%D1%81%D0%BF%D1%83%D0%B1%D0%BB%D0%B8%D0%BA_%D0%92%D0%A1_%D0%A1%D0%A1%D0%A1%D0%A0_%D0%BE%D1%82_26.12.1991_%E2%84%96_142-%D0%9D
+via: >-
+  Russian Wikisource's transcription, which gives as its source the gazette of the Supreme Soviet
+  of the USSR (Ведомости Верховного Совета СССР, 1991, no. 52). The transcription sets its own
+  note marks, [1] to [6], inside the first sentences.
+reliability: >-
+  The declaration of the upper chamber of the Union's own parliament: evidence that an organ of
+  the Union itself declared, on 26 December 1991, that the Union ceases to exist as a state and
+  a subject of international law with the creation of the Commonwealth. The transcription's
+  notes say that the chamber was set up by a law of 5 September 1991 and is not in the Union's
+  constitution, and that several republics' parliaments had not ratified the agreement by then:
+  those are Wikisource's notes, not the gazette's, and were not checked.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from ru.wikisource.org on 2026-11-17 and read in full in Russian, with the
+    transcription's notes; the quotes were found in the kept text by quote-check.

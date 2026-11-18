@@ -1,0 +1,27 @@
+id: src:german-act-of-military-surrender-berlin-1945
+type: document
+kind: act
+citation: >-
+  Act of Military Surrender, signed at Berlin on 8 May 1945 by von Friedeburg, Keitel and Stumpf
+  on behalf of the German High Command, in the presence of A. W. Tedder on behalf of the Supreme
+  Commander, Allied Expeditionary Force, and G. Zhukov on behalf of the Supreme High Command of
+  the Red Army, with de Lattre de Tassigny and Spaatz as witnesses. In C. I. Bevans (comp.),
+  Treaties and Other International Agreements of the United States of America 1776-1949, vol. 3,
+  Multilateral 1931-1945 (Department of State Publication 8484). Washington: Government Printing
+  Office, 1969.
+published: 1945
+title: Act of Military Surrender, signed at Berlin on 8 May 1945
+url: https://avalon.law.yale.edu/wwii/gs11.asp
+via: >-
+  The Avalon Project of the Lillian Goldman Law Library, Yale Law School, which transcribes the
+  English text from Bevans and heads it "59 Stat. 1957; Executive Agreement Series 502".
+reliability: >-
+  The act itself, in one of its two authentic languages: evidence of what was undertaken, of the
+  day it says it was signed, and of the hour it set for operations to cease. It gives no hour
+  for the signing, and it is not evidence of when the fighting in fact stopped.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from avalon.law.yale.edu on 2026-11-17 and read in full, paragraphs 1 to 6 and the
+    signatures; the quotes were found in the kept text by quote-check. The statute citation in
+    the page's heading was not checked against the Statutes at Large.

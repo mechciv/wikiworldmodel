@@ -8,7 +8,7 @@ import { decodeMargin, decodeThickness, iceFrame, iceKeysAt, iceScenario, sample
 import { levelOf, type HazardFile, type HazardRow, type PeopleFile, type PeopleHeader, type PolitiesFile, type PresentFile } from '../../core/layers.ts';
 import { coverAt, lookAt, spanOf, valueOf, type Cover, type Look } from '../../core/planet.ts';
 import { conj, mul, rotate, toLatLon, unitVector, type Quat } from '../../core/quat.ts';
-import type { EntityRecord, OverlaysFile } from '../../core/records.ts';
+import type { EntityRecord, OverlaysFile, SearchEntry } from '../../core/records.ts';
 import { encodeRowKey, splitRef } from '../../core/refs.ts';
 import { seaLevelAt } from '../../core/sealevel.ts';
 import { lookup, scenarioKey, type Scenario } from '../../core/scenario.ts';
@@ -16,6 +16,7 @@ import type { TerritoryFile } from '../../core/territory.ts';
 import { indexTree, subtree, type TreeFile } from '../../core/tree.ts';
 import { cityKind, placeAt, type FeatureTime, type FieldInfo, type GeneratorConstraint, type SiteInfo } from '../../core/tileset.ts';
 import { formatTime, fromMa, historical, MONTH_NAMES, PRESENT_YEAR, toMa } from '../../core/time.ts';
+import { positionOf, timeAt } from '../../core/timescale.ts';
 import { warmestMonth } from '../../core/months.ts';
 import { snowOf } from '../../world/generators/life/climate.ts';
 import { GENERATOR as BIOME_TEXTURE, type BiomeTextureParams } from '../../world/generators/earth/biome/v1.ts';
@@ -52,6 +53,8 @@ import { InspectPanel, stepName, type BiomeHere, type IceHere, type LandscapeHer
 import { Markers, timeFor, visibility } from './ui/markers.ts';
 import { PlanetPanel, valueAt } from './ui/planet.ts';
 import { Search } from './ui/search.ts';
+import { TimeMachine, type Mark } from './ui/timemachine.ts';
+import { nameAt, placeIn } from '../../core/timemachine.ts';
 import { TERRITORY_COLORS, TerritoryLayer } from './ui/territory.ts';
 import { FossilLayer } from './ui/fossils.ts';
 import { HazardLayer, PeopleLayer, PolityLayer, PresentLayer } from './ui/layers.ts';
@@ -183,6 +186,8 @@ function fail(root: HTMLElement, message: string): void {
 }
 
 async function start(root: HTMLElement): Promise<void> {
+  // A reader who comes with no link is asked where and when to; a link goes where it says.
+  const fresh = !location.search;
   const linked = buildOf(location.search);
   // Without the index, a linked build is looked for where builds are when nothing says otherwise.
   const { latest: newest, store } = await builds(ROOT).catch(() => ({ latest: linked ?? '', store: `${ROOT}builds/` }));
@@ -457,7 +462,7 @@ async function start(root: HTMLElement): Promise<void> {
   // otherwise whichever it is nearest.
   const sites: SiteInfo[] = ts.sites ?? [];
   const scenes = new Map<string, CityScene | LifeScene>();
-  const loadingScenes = new Set<string>();
+  const loadingScenes = new Map<string, Promise<void>>();
   /** Scenes that could not be made, and why, said while the camera is at them. */
   const failedScenes = new Map<string, string>();
   let site: SiteInfo | undefined;
@@ -577,7 +582,12 @@ async function start(root: HTMLElement): Promise<void> {
     menu.setAttribute('aria-expanded', String(open));
   };
   menu.onclick = () => openMenu(!top.classList.contains('menu-open'));
-  top.append(brand, search.el, menu, toolbar.el);
+  // The time machine's door, beside the search: it opens by itself for a reader who comes with no link.
+  const whenTo = document.createElement('button');
+  whenTo.className = 'when-to';
+  whenTo.textContent = 'When to?';
+  whenTo.title = 'Go to a place and a time';
+  top.append(brand, whenTo, search.el, menu, toolbar.el);
   root.appendChild(top);
 
   const timebar = new Timebar(build.periods.periods, limits, dataRange, {
@@ -630,6 +640,8 @@ async function start(root: HTMLElement): Promise<void> {
   new ResizeObserver(() => (dirty = true)).observe(stage);
   let urlTimer = 0;
   let playing = false;
+  let navigation = 0;
+  let travel: { from: number; to: number; start: number; last: number; arrive: () => void } | null = null;
   let lastFrame = performance.now();
   let shownRecord: string | null = null;
 
@@ -725,7 +737,21 @@ async function start(root: HTMLElement): Promise<void> {
   }
   /** A taxon to show when the scene of where it lived has come. */
   let arriving: string | null = null;
-  inspect.seeIt = (id) => {
+  inspect.seeIt = (id, local) => {
+    if (local) {
+      const current = city;
+      if (!(current instanceof LifeScene) || !current.named.some((item) => item.id === id)) return undefined;
+      return { label: 'Look closer', go: () => {
+        if (city !== current) return;
+        const [fx, fy] = current.focus;
+        let best = -1, nearest = Infinity;
+        for (const [i, item] of current.named.entries()) {
+          const distance = Math.hypot(item.at[0] - fx, item.at[1] - fy);
+          if (item.id === id && distance < nearest) { best = i; nearest = distance; }
+        }
+        if (best >= 0) lookAtOrganism(current, best);
+      } };
+    }
     const w = lifeWhere?.[id];
     if (!w) return undefined;
     return {
@@ -1037,7 +1063,7 @@ async function start(root: HTMLElement): Promise<void> {
     const right = norm(cross(fwd, [0, 0, 1]));
     const up = cross(right, fwd);
     const sun = norm(add(add(scale(norm(eye), 0.75), scale(right, -0.45)), scale(up, 0.5))) as V3;
-    if (territory.update(state.t, scenario())) globe.setTerritory(territory.canvas);
+    if (territory.update(state.t, scenario(), state.sel)) globe.setTerritory(territory.canvas);
     const showTerritory = territory.shown && !!fi && look.formed;
     if (state.people) {
       wantPeople();
@@ -1107,15 +1133,16 @@ async function start(root: HTMLElement): Promise<void> {
       if (sel.value !== want) sel.value = want;
       sel.options[0].textContent = `warmest (${MONTH_NAMES[warmestMonth((city as LifeScene).spec.climate!.months) - 1]})`;
     }
-    // What lives here, and how sure that is, where a scene is of a place with no formation of its own.
-    const showHere = inCity && city instanceof LifeScene && !city.spec.site.place;
+    // Both named formations and atlas scenes have a list of the organisms drawn there.
+    const showHere = inCity && city instanceof LifeScene;
     lifeHere.hidden = !showHere;
     lifeGo.hidden = !showHere || !(city as LifeScene).spec.taxa.length;
     if (showHere) {
       const taxa = (city as LifeScene).spec.taxa;
       const n = (tier: string) => taxa.filter((x) => x.tier === tier).length;
       // In the sea as on land; where none of what lived in a sea can be drawn yet, it says so.
-      const life = taxa.length ? `${n('here')} recorded here, ${n('region')} nearby, ${n('standin')} stand-ins` : (city as LifeScene).sea ? 'Nothing of the sea’s life can be drawn here yet' : 'Nothing recorded here';
+      const formation = n('formation');
+      const life = formation ? `${formation} recorded in this formation` : taxa.length ? `${n('here')} recorded here, ${n('region')} nearby, ${n('standin')} stand-ins` : (city as LifeScene).sea ? 'Nothing of the sea’s life can be drawn here yet' : 'Nothing recorded here';
       // And who lived here, where the scene has people.
       const folk = (city as LifeScene).people;
       const words = folk ? `${life} · ${peopleWords(folk)}` : life;
@@ -1152,7 +1179,8 @@ async function start(root: HTMLElement): Promise<void> {
     else {
       if (state.t < PRESENT_YEAR) wantPolities();
       // Over the people drawn, states are their outlines only.
-      polities.update(camera, state.t, state.cam.dist, stage.clientWidth, stage.clientHeight, !peopleDrawn);
+      // Territories of records beyond the three colours are drawn among the states, under their records' names.
+      polities.update(camera, state.t, state.cam.dist, stage.clientWidth, stage.clientHeight, !peopleDrawn, territory.rest.flatMap((a) => a.rows.map((r) => ({ ...r, record: a.territory.subject, label: a.territory.label }))), territory.holding);
       for (const fl of fieldLayers) fl.update(camera, fieldOn(fl), state.t, state.cam.dist, stage.clientWidth, stage.clientHeight);
       present.update(camera, state.t, state.cam.dist, stage.clientWidth, stage.clientHeight);
       hazards.update(camera, state.t, Math.max(timebar.yearsPerPixels(state.t, 8), 0.5), stage.clientWidth, stage.clientHeight);
@@ -1186,6 +1214,7 @@ async function start(root: HTMLElement): Promise<void> {
 
   function frame(now: number): void {
     requestAnimationFrame(frame);
+    if (travel) stepTravel(now);
     if (playing) {
       // Play at an even pace along the time control, whatever its warp: a 24th of it a second.
       const dt = Math.min(0.1, (now - lastFrame) / 1000);
@@ -1440,7 +1469,9 @@ async function start(root: HTMLElement): Promise<void> {
 
   /** The reader has taken the controls: nothing carries on without them. */
   function stopFlight(): void {
+    navigation++;
     flight = null;
+    travel = null;
     arriving = null;
     seaLook = 0;
   }
@@ -1497,9 +1528,16 @@ async function start(root: HTMLElement): Promise<void> {
     if (u >= 1) flight = null;
   }
 
-  async function loadScene(s: SiteInfo): Promise<void> {
-    if (failedScenes.has(s.id)) return;
-    loadingScenes.add(s.id);
+  function loadScene(s: SiteInfo): Promise<void> {
+    if (scenes.has(s.id) || failedScenes.has(s.id)) return Promise.resolve();
+    const pending = loadingScenes.get(s.id);
+    if (pending) return pending;
+    const load = makeScene(s).finally(() => loadingScenes.delete(s.id));
+    loadingScenes.set(s.id, load);
+    return load;
+  }
+
+  async function makeScene(s: SiteInfo): Promise<void> {
     try {
       const fast = state.quality === 'fast';
       const scene = s.kind === 'life' ? await (async () => {
@@ -1517,7 +1555,6 @@ async function start(root: HTMLElement): Promise<void> {
       console.error(`${s.id}: ${err instanceof Error ? err.message : String(err)}`.slice(0, 900));
       failedScenes.set(s.id, `${s.label} could not be drawn: ${err instanceof Error ? err.message.split('\n')[0] : err}`);
     }
-    loadingScenes.delete(s.id);
     dirty = true;
   }
 
@@ -1651,18 +1688,27 @@ async function start(root: HTMLElement): Promise<void> {
       if (from(i) > reach) continue;
       if (best < 0 || length(i) > length(best) || (length(i) === length(best) && from(i) < from(best))) best = i;
     }
-    if (best < 0 || !site) return false;
+    return best >= 0 && lookAtOrganism(c, best);
+  }
+
+  /** Aim from beside the selected generated individual, above the local ground. */
+  function lookAtOrganism(c: LifeScene, best: number): boolean {
+    if (!site) return false;
+    const [fx, fy] = c.focus;
     const s = c.named[best];
     const mid = (s.base + c.tops[best]) / 2;
     const dx = s.at[0] - fx;
     const dy = s.at[1] - fy;
     const l = Math.hypot(dx, dy);
     const [ux, uy] = l > 1 ? [dx / l, dy / l] : c.toRiver;
-    // Some five lengths off: near enough to see it through the water, and a small one from as near as the eye may come.
-    const back = Math.max(1, Math.min(14, 5 * (length(best) || 2)));
+    // Frame the body in its habitat, keeping the underwater view within the visible range.
+    const body = c.taxonOf(s.id);
+    const span = body?.length ?? body?.height ?? 2;
+    const back = c.sea ? Math.max(1, Math.min(14, 5 * span)) : Math.max(4, 2.6 * span);
     const ex = s.at[0] - ux * back;
     const ey = s.at[1] - uy * back;
-    const aim = lookThrough([ex, ey, Math.min(-1, Math.max(mid + 1.2, c.ground.at(ex, ey) + EYE_HEIGHT))], [s.at[0], s.at[1], mid], c.ground);
+    const eye = Math.max(mid + 1.2, c.ground.at(ex, ey) + EYE_HEIGHT);
+    const aim = lookThrough([ex, ey, c.sea ? Math.min(-1, eye) : eye], [s.at[0], s.at[1], mid], c.ground);
     if (!aim) return false;
     const [lat, lon] = fromLocal(site.origin, aim.target[0], aim.target[1]);
     flyTo({ lat, lon, dist: 1 + aim.range / EARTH_RADIUS, heading: aim.heading, tilt: aim.tilt }, 1800);
@@ -1716,14 +1762,15 @@ async function start(root: HTMLElement): Promise<void> {
     setState({ sel: null });
     shownRecord = null;
     const sea = listOf(city) === 'sea';
-    inspect.showLifeHere(city.spec, sea ? build.sea?.description : build.atlas?.description, { list: sea ? 'sea' : 'land', sea: city.sea });
+    const note = city.spec.site.place ? undefined : sea ? build.sea?.description : build.atlas?.description;
+    inspect.showLifeHere(city.spec, note, { list: sea ? 'sea' : 'land', sea: city.sea });
   };
 
   /** Fly to a structure of the city, looking at its front, at a time it stands. */
-  function flyToStructure(home: SiteInfo, s: CityStructure): void {
+  function flyToStructure(home: SiteInfo, s: CityStructure, at?: number): void {
     const a = s.time.start.best ?? -Infinity;
     const b = s.time.end.best ?? Infinity;
-    const t = state.t >= a && state.t <= b ? state.t : home.slice >= a && home.slice <= b ? home.slice : Math.max(a, Math.min(b, state.t));
+    const t = at ?? (state.t >= a && state.t <= b ? state.t : home.slice >= a && home.slice <= b ? home.slice : Math.max(a, Math.min(b, state.t)));
     const [lat, lon] = fromLocal(home.origin, s.at[0], s.at[1]);
     let extent = 60;
     for (const r of s.rings) for (let i = 0; i < r.length; i += 2) extent = Math.max(extent, Math.hypot(r[i] - s.at[0], r[i + 1] - s.at[1]));
@@ -1845,6 +1892,15 @@ async function start(root: HTMLElement): Promise<void> {
       const entity = splitRef(inside.at.territory.subject).record;
       const { name, from, to, area } = inside.row;
       here = { entity, source: inside.at.claim.source, info: { t: state.t, name, from, to, area } };
+      return setState({ sel: entity });
+    }
+    // Inside a record's territory that is drawn among the states: its record too.
+    const state_ = fi ? polities.at(hit.lon, hit.lat) : undefined;
+    if (state_?.record) {
+      const entity = splitRef(state_.record).record;
+      const { name, from, to, area } = state_;
+      const source = territory.rest.find((a) => a.territory.subject === state_.record)?.claim.source ?? '';
+      here = { entity, source, info: { t: state.t, name, from, to, area } };
       return setState({ sel: entity });
     }
     if (!fi) return inspect.showUnknown(state.t, unknownWhy(state.t), stateOf(frameLook), resolveLayer(resolveWorld(), 'geography', hit.lat, hit.lon, state.t, scenario()));
@@ -2045,42 +2101,48 @@ async function start(root: HTMLElement): Promise<void> {
     return clampWindow([a - pad, b + pad], limits);
   }
 
-  /** Open an entity, and move to its time and place if it is not in view. */
-  function goTo(id: string): void {
+  /** Open an entity, and move to its time and place if it is not in view: to the time given, if one is. */
+  function goTo(id: string, at?: number, request = ++navigation): void {
+    if (request !== navigation) return;
     here = null;
     // Its marker may be somewhere the view has not asked for: fetch it, then go.
     if (features.has(id) && (!features.get(id) || (scenarioKey(scenario()) && !features.hasVariants))) {
-      void Promise.all([features.load([id]), scenarioKey(scenario()) ? features.wantVariants() : undefined]).then(() => goTo(id));
+      void Promise.all([features.load([id]), scenarioKey(scenario()) ? features.wantVariants() : undefined]).then(() => goTo(id, at, request));
       return;
     }
     const f = features.get(id) ?? null;
-    const entry = build.search.entities.find((e) => e.id === id)!;
+    const entry = entryOf(id)!;
+    // Rows of a dataset found by their name: no record to open, but where and when they were drawn.
+    if (entry?.dataset) return goToRows(entry, at);
     const home = sites.find((s) => s.kind === 'city');
-    if (entry && cityKind(entry.kind) && home) {
+    if (entry && cityKind(entry.kind) && home && (at === undefined || (at >= home.span[0] && at <= home.span[1]))) {
       const open = () => {
+        if (request !== navigation) return;
         const c = scenes.get(home.id) as CityScene | undefined;
         const s = c?.file.structures.find((x) => x.id === id);
-        if (s) flyToStructure(home, s);
-        else setState({ sel: id });
+        if (s) flyToStructure(home, s, at);
+        else setState({ sel: id, ...(at === undefined ? {} : { t: at }) });
       };
       if (scenes.has(home.id)) open();
-      else if (!loadingScenes.has(home.id)) void loadScene(home).then(open);
+      else void loadScene(home).then(open);
       return;
     }
     const placed = sites.find((s) => s.place === id);
-    if (placed) {
-      setState({ sel: id });
+    // A site is entered at a time its scene is drawn for; at another, it is seen from above.
+    if (placed && (at === undefined || (at >= placed.near[0] && at <= placed.near[1]))) {
+      setState({ sel: id, ...(at === undefined ? {} : { t: at, window: windowAround(at) }) });
       return enterSite(placed);
     }
     const time = f ? timeFor(f, scenario()) : entry.time;
-    let t = state.t;
-    if (visibility(time, t, halo(t), false) < 0.5) t = time.start.best ?? t;
+    let t = at ?? state.t;
+    if (at === undefined && visibility(time, t, halo(t), false) < 0.5) t = time.start.best ?? t;
     t = Math.max(dataRange[0], Math.min(dataRange[1], t));
-    const window = windowFor(time) ?? state.window;
+    const window = (at === undefined ? windowFor(time) : windowAround(t)) ?? state.window;
     if (!entry.located) {
-      // A polity is where its land was drawn then.
-      const c = territory.centre(id, t, scenario());
-      const cam = c ? { lat: c[1], lon: c[0], dist: Math.min(state.cam.dist, 2.6) } : state.cam;
+      // A polity is where its land was drawn then: its own territory, or the rows of a dataset that are rows of it.
+      const p = placeIn(entry.places, t);
+      const c = territory.centre(id, t, scenario()) ?? (p ? [p[2], p[3]] : undefined);
+      const cam = c ? { lat: c[1], lon: c[0], dist: Math.min(state.cam.dist, p ? distFor(p[4]) : 2.6) } : state.cam;
       return setState({ t, sel: id, window, cam });
     }
     const ageAt = toMa(t);
@@ -2095,11 +2157,141 @@ async function start(root: HTMLElement): Promise<void> {
       const p = add(v, scale(add(scale(c, q[0]), cross(u, c)), 2));
       cam = { lat: (Math.asin(Math.max(-1, Math.min(1, p[2]))) * 180) / Math.PI, lon: (Math.atan2(p[1], p[0]) * 180) / Math.PI, dist: Math.min(state.cam.dist, 2.4) };
     }
-    setState({ t, cam, sel: id, window });
+    if (at !== undefined && loc && spot?.plate) {
+      setState({ t, sel: id, window });
+      flyTo({ ...cam, dist: Math.min(cam.dist, 1.24) });
+    } else setState({ t, cam, sel: id, window });
+  }
+
+  /** How far out to see a land of so many km² whole: a small state from nearer, a large one from as far as a polity is seen. */
+  const distFor = (km2: number) => Math.max(1.15, Math.min(2.6, 1.15 + (Math.sqrt(km2) / EARTH_RADIUS) * 4000));
+
+  /** What search has of an id: a record's entry, or rows of a dataset gathered under a name. */
+  function entryOf(id: string): SearchEntry | undefined {
+    return build.search.entities.find((e) => e.id === id) ?? build.search.rows?.find((e) => e.id === id);
+  }
+
+  /**
+   * Go to a state of a dataset that no record adopts: to the time asked, or its start if it is not
+   * drawn then, over where its row of that time was drawn; and open that row, as a click on it would.
+   */
+  function goToRows(entry: SearchEntry, at?: number): void {
+    const [a, b] = [entry.time.start.best ?? state.t, entry.time.end.best ?? state.t];
+    let t = at ?? (state.t >= a && state.t < b ? state.t : a);
+    t = Math.max(dataRange[0], Math.min(dataRange[1], t));
+    const p = placeIn(entry.places, t);
+    const cam = p ? { lat: p[3], lon: p[2], dist: Math.min(state.cam.dist, distFor(p[4])) } : state.cam;
+    setState({ t, cam, sel: null, window: windowAround(t) });
+    shownRecord = null;
+    wantPolities();
+    const asked = t;
+    void politiesLoading?.then(() => {
+      const file = polities.file;
+      if (!file || state.t !== quantize({ ...state, t: asked }).t || state.sel) return;
+      const named = file.rows.filter((r) => r.name === entry.label && (!p || (r.from === p[0] && r.at[0] === p[2] && r.at[1] === p[3])));
+      const row = named.find((r) => r.from <= t && t < r.to) ?? named[0];
+      if (!row) return;
+      const runs = entry.places?.length ?? 1;
+      inspect.showRow(
+        nameAt(entry, t),
+        `${kindLabel(entry.kind)}, as the dataset draws it`,
+        [`${formatTime(row.from)} – ${formatTime(row.to - 1)}`, `${row.area.toLocaleString('en-US')} km², as the dataset gives it`, ...(runs > 1 ? [`One of ${runs} rows the dataset gives under this name, ${formatTime(a)} – ${formatTime(b - 1)}`] : [])],
+        file.sourceRecord,
+        file.description,
+        rowInfo(row),
+      );
+    });
+  }
+
+  /** A window around a moment: a few centuries in the calendar's span, and a share of the age beyond it. */
+  function windowAround(t: number): [number, number] {
+    const d = Math.max(60, Math.abs(PRESENT_YEAR - t) * 0.08);
+    return fitWindow(t - d, Math.min(t + d, Math.max(t, PRESENT_YEAR)), limits);
+  }
+
+  /** Move along the same time scale that the strip uses. Each intermediate date goes through
+   * the normal renderer. On a long trip from the ground, climb out before moving the clock. */
+  function travelTo(t: number | undefined, arrive: () => void): void {
+    stopFlight();
+    playing = false;
+    if (t === undefined || matchMedia('(prefers-reduced-motion: reduce)').matches) return arrive();
+    const from = positionOf(state.t), to = positionOf(t);
+    if (Math.abs(to - from) < 1) return arrive();
+    const climb = state.cam.dist < 2 ? 1400 : 0;
+    if (climb) flyTo({ lat: state.cam.lat, lon: state.cam.lon, dist: 2.6 }, climb);
+    setState({ sel: null, window: fitWindow(Math.min(state.t, t), Math.max(state.t, t), limits) });
+    travel = { from, to, start: performance.now() + climb, last: -Infinity, arrive };
+  }
+
+  function stepTravel(now: number): void {
+    const trip = travel!;
+    if (now < trip.start) return;
+    const u = Math.min(1, (now - trip.start) / 2700);
+    if (u === 1) {
+      travel = null;
+      setState({ t: timeAt(trip.to) });
+      trip.arrive();
+    } else if (now - trip.last >= 80) {
+      // Bound expensive field requests during a sweep, just as for a hand scrubbing the strip.
+      trip.last = now;
+      setState({ t: timeAt(trip.from + (trip.to - trip.from) * u * u * (3 - 2 * u)) });
+    }
+  }
+
+  // Any new gesture takes the controls back immediately, including opening a second trip.
+  for (const event of ['pointerdown', 'wheel', 'keydown', 'popstate']) {
+    window.addEventListener(event, () => { if (travel) stopFlight(); }, { capture: true, passive: true });
+  }
+
+  // The time machine: where and when to, asked of a reader who comes with no link.
+  const timeMachine = new TimeMachine({
+    entries: [...build.search.entities, ...(build.search.rows ?? [])],
+    periods: build.periods.periods,
+    range: dataRange,
+    kindLabel,
+    offered: (e) => e.kind !== 'plate' && !cityKind(e.kind),
+    sceneTime: (id) => sites.find((s) => s.place === id)?.slice,
+    marks: (id, span) => marksNear(id, span),
+    go: (id, t) => {
+      const entry = build.search.entities.find((e) => e.id === id);
+      const at = t ?? (entry?.time.instant ? entry.time.start.best ?? undefined : undefined);
+      travelTo(at, () => goTo(id, at));
+    },
+    goTime: (t) => travelTo(t, () => {
+      here = null;
+      const cam = state.cam.dist < 2 ? { lat: state.cam.lat, lon: state.cam.lon, dist: 2.6 } : state.cam;
+      setState({ t, window: windowAround(t), sel: null, cam });
+    }),
+    goPeriod: (p) => setState({ window: fitWindow(p.start, p.end, limits), t: Math.max(dataRange[0], Math.min(dataRange[1], (p.start + p.end) / 2)) }),
+  });
+  root.appendChild(timeMachine.el);
+  whenTo.onclick = () => timeMachine.open();
+  if (fresh) timeMachine.open();
+
+  /**
+   * What is dated near a record within a stretch of its time, to mark along it: moments of the
+   * world's records on its plate, within a few hundred kilometres of where it stands.
+   */
+  async function marksNear(id: string, [a, b]: [number, number]): Promise<Mark[]> {
+    const moments = build.search.entities.filter((e) => e.id !== id && e.located && !e.bulk && e.time.instant && e.time.start.best !== null && e.time.start.best >= a && e.time.start.best <= b && features.has(e.id));
+    await features.load([id, ...moments.map((e) => e.id)]);
+    const home = features.get(id);
+    if (!home) return [];
+    const near = (x: { lat: number; lon: number }) => {
+      const p = unitVector(home.location.lat, home.location.lon);
+      const q = unitVector(x.lat, x.lon);
+      return Math.acos(Math.max(-1, Math.min(1, p[0] * q[0] + p[1] * q[1] + p[2] * q[2]))) * 6371;
+    };
+    return moments
+      .map((e) => ({ e, f: features.get(e.id) }))
+      .filter(({ f }) => f && f.frame === home.frame && near(f.location) < 300)
+      .map(({ e }) => ({ id: e.id, label: e.label, t: e.time.start.best! }))
+      .sort((x, y) => x.t - y.t);
   }
 
   window.addEventListener('keydown', (e) => {
     if ((e.target as HTMLElement).tagName === 'INPUT') return;
+    if (timeMachine.isOpen) return;
     if (frameView && 'wasd'.includes(e.key.toLowerCase()) && e.key.length === 1) {
       walking.add(e.key.toLowerCase());
       stopFlight();
@@ -2149,7 +2341,7 @@ async function start(root: HTMLElement): Promise<void> {
       ['people', !!state.people && !people.file && !!ts.files.people], ['clouds', !cloudsReady], ['surface', !surfaceReady],
       ['biome texture', !biomeTexReady], ['generic land', !genericReady], ['climate', !climateReady || climates.busy], ['ice', !iceReady],
       ['territory', !territoryReady], ['tree', !!treeLoading], ['cube', !cubeKey.startsWith(`${state.t}|`)],
-      ['selection', !!state.sel && shownRecord !== state.sel], ['flight', !!flight || !!seaLook], ['city', cityWanted()],
+      ['selection', !!state.sel && shownRecord !== state.sel], ['flight', !!travel || !!flight || !!seaLook], ['city', cityWanted()],
       ['landscape', landscapeOn() && (!landscape!.index || (landscapeLoading && !landscape!.globe))],
     ];
     return w.filter(([, x]) => x).map(([n]) => n);

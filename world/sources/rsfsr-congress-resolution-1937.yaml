@@ -1,0 +1,23 @@
+id: src:rsfsr-congress-resolution-1937
+type: document
+kind: act
+citation: >-
+  Extraordinary Seventeenth All-Russian Congress of Soviets. Resolution of 21 January 1937, "On
+  the approval of the Constitution of the RSFSR" (Об утверждении Конституции РСФСР), Moscow, the
+  Kremlin.
+published: 1937
+title: Об утверждении Конституции РСФСР
+url: https://ru.wikisource.org/wiki/%D0%9F%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5_%D0%92%D1%81%D0%B5%D1%80%D0%BE%D1%81%D1%81%D0%B8%D0%B9%D1%81%D0%BA%D0%BE%D0%B3%D0%BE_%D0%A1%D1%8A%D0%B5%D0%B7%D0%B4%D0%B0_%D0%A1%D0%BE%D0%B2%D0%B5%D1%82%D0%BE%D0%B2_%D0%BE%D1%82_21.01.1937_%D0%9E%D0%B1_%D1%83%D1%82%D0%B2%D0%B5%D1%80%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B8_%D0%9A%D0%BE%D0%BD%D1%81%D1%82%D0%B8%D1%82%D1%83%D1%86%D0%B8%D0%B8_%D0%A0%D0%A1%D0%A4%D0%A1%D0%A0
+via: >-
+  Russian Wikisource's transcription, which gives as its source
+  constitution.garant.ru/history/ussr-rsfsr/1937/1591772.
+reliability: >-
+  The act that approved the republic's constitution of 1937: evidence of the day, and of the
+  republic's name in the new order of words, Soviet Federative Socialist, where the constitution
+  of 1918 and the treaty of 1922 have Socialist Federative Soviet.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from ru.wikisource.org on 2026-11-17 and read in full in Russian; the constitution it
+    approves fetched too and its title and articles 1 to 13 read, which use the same name. The
+    quotes were found in the kept text by quote-check.

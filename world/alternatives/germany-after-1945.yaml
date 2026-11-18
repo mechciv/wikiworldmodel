@@ -1,0 +1,20 @@
+# A group of alternatives: its members exclude each other, and groups combine freely. A
+# claim belongs to the default picture unless it names an alternative (section 4.4).
+id: alt:germany-after-1945
+type: group
+title: Germany after 1945
+description: >-
+  Whether the German state founded in 1871 survived 1945. The Federal Republic held that it did,
+  and that the Federal Republic is that state: its Federal Constitutional Court said so in 1973 as
+  its settled holding, and again in 1987. The German Democratic Republic held from 1951 that the
+  state had ceased to exist with the capitulation and that it was itself a new state, neither
+  identical with the old one nor its successor: its Supreme Court said so on 31 October 1951,
+  against a lower court that had held the identity kept. The treaty of 1972 between the two left
+  the question open, each keeping its view of the national question, and the dispute lost a party
+  when the Democratic Republic acceded to the Federal Republic in 1990. The default picture says
+  only what both accept: that the Reich as an organized state with a government of its own ended
+  in 1945, that two states arose from it in 1949, and that one acceded to the other in 1990.
+# A steward decision: what a build shows, and which member it shows by default (none: the
+# default picture). Shown on a machine's proposal, until a person decides.
+show: [alt:germany-after-1945/reich-continues, alt:germany-after-1945/reich-ended]
+default: null

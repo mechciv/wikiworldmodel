@@ -1,0 +1,26 @@
+id: src:us-state-1943-peace-and-war
+type: publication
+kind: review
+citation: >-
+  United States Department of State (1943). Peace and War: United States Foreign Policy
+  1931-1941. Department of State Publication 1983. Washington: United States Government Printing
+  Office.
+published: 1943
+title: "Peace and War: United States Foreign Policy 1931-1941"
+container: Department of State Publication 1983
+url: http://www.ibiblio.org/pha/paw/Peace%20and%20War.html
+via: >-
+  The Pearl Harbor History Associates' transcription on ibiblio, which marks the book's pages;
+  a work of the United States Government, in the public domain.
+reliability: >-
+  The State Department's own account of American policy in the ten years before Pearl Harbor,
+  published in wartime with the documents it rests on: good for dates and for how Washington
+  then named what was happening, a war in Europe and Japan's undeclared war on China. It is a
+  government's case for its own conduct.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from ibiblio.org on 2026-11-17 over plain HTTP, since the site's certificate chain
+    did not verify from here: the title page and foreword on the collection's index page, and
+    of the narrative the opening chapter and the passages on July 1937 (pp. 44-45) and September
+    1939 (p. 68). The quotes were found in the kept text of the narrative by quote-check.

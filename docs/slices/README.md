@@ -24,3 +24,4 @@ and [STRUCTURE.md](../STRUCTURE.md).
 | 9 | [The faint Sun and the ice](NINTH-SLICE.md) | an energy-balance model under the Sun of each time: the CO₂ at which the Earth froze over and thawed, held to the Archean's soils and the Snowballs |
 | 10 | [The seas](TENTH-SLICE.md) | the sea's lists drawn, bodies for its great groups, a scene of any place in the sea, and a way down through its surface to its floor |
 | 11 | [The human landscape](ELEVENTH-SLICE.md) | anthromes and the archaeologists' assessments since 10,000 BCE, cities through time, building traditions as records, and settlements, houses and fields in any scene of the land |
+| 12 | [Identity](TWELFTH-SLICE.md) | what makes a thing one thing: lineage between records, identity as a claim, relations that hold for a span, wars with parts and participants, dates in a calendar whose meeting with ours is contested, tried on the hardest cases that could be found |

@@ -1,0 +1,23 @@
+id: people/writing/proto-canaanite
+kind: development/script
+summary: >-
+  The alphabetic inscriptions of the second millennium BCE from sites in Palestine, which stand between the
+  Proto-Sinaitic texts (people/writing/proto-sinaitic) and the Phoenician alphabet
+  (people/writing/phoenician-alphabet): a name for a scattered group of short texts on pottery and other objects,
+  not for a script anyone then named. Written for the relation that names it as a parent of the Greek alphabet: its
+  finds and their dates are not yet records.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Proto-Canaanite }
+    source:
+      ref: src:lam-2010-alphabet
+      loc: p. 190
+      quote: the Proto-Canaanite inscriptions, an umbrella term for a diverse and fragmentary group of texts (inscribed on pottery and other objects) hailing from various sites in Palestine
+    note: >-
+      Lam places these texts later than those of Serabit el-Khadem and Wadi el-Hol, tentatively, and has the
+      earliest datable one in the seventeenth century BCE and most from the thirteenth century and later (pp.
+      190–191); none of that is written here as a claim.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }

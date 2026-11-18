@@ -1,0 +1,28 @@
+id: src:prc-2005-victory-anniversary-speech
+type: document
+kind: historian
+citation: >-
+  Speech at a Meeting Marking the 60th Anniversary of the Victory of the Chinese People's War of
+  Resistance Against Japanese Aggression and the World Anti-Fascist War, 3 September 2005.
+  Ministry of Foreign Affairs of the People's Republic of China, Speeches.
+published: 2005
+title: >-
+  Speech at a Meeting Marking the 60th Anniversary of the Victory of the Chinese People's War of
+  Resistance Against Japanese Aggression and the World Anti-Fascist War
+container: Ministry of Foreign Affairs of the People's Republic of China, Speeches
+url: https://www.mfa.gov.cn/eng/xw/zyjh/202405/t20240530_11339773.html
+via: >-
+  The Ministry's English text. The page does not name the speaker in its text: its keywords
+  are "Hu;Jintao", and he speaks on behalf of the Central Committee of the Communist Party, the
+  State Council and the Central Military Commission.
+reliability: >-
+  The position of the People's Republic of China sixty years on, stated by its leadership:
+  evidence of how China's government reckons the war, which it calls the World Anti-Fascist War,
+  and its own War of Resistance within it. It is a statement of a position, not a history from
+  sources, and no kind of source in the vocabulary quite fits it.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from mfa.gov.cn on 2026-11-17; the opening and the account of the war read (the
+    first ten paragraphs of the speech), not the whole. The quotes were found in the kept text by
+    quote-check.

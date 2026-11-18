@@ -68,6 +68,30 @@ kinds:
         label: Conquest
         description: The capture of a city or the fall of a state to another, on the day it fell.
         moment: true
+      war:
+        label: War
+        description: >-
+          A war or another armed conflict, from its outbreak to its end. When it began and when it ended are often
+          disputed, by a day or by years, and are competing claims. Its campaigns and battles are part of it, and
+          so may another war be, for the years it was; the states that fought in it take part in it.
+      campaign:
+        label: Campaign
+        description: >-
+          A campaign, an operation or a battle that lasted weeks or months: a part of a war with a beginning and
+          an end of its own. A battle fought in a day or two is a moment.
+      treaty:
+        label: Treaty
+        description: >-
+          An agreement between states, such as a treaty, an armistice, a surrender or an act of union, on the day
+          it was signed. Where the day it took effect is the one that matters, the claim's note says so.
+        moment: true
+      epoch:
+        label: Zero day of a calendar
+        description: >-
+          The day a calendar counts from. Which day of ours it was is a correlation, argued from evidence and
+          often contested: the competing claims of its date are the correlations, and every date written in that
+          calendar follows the one chosen.
+        moment: true
       dispersal:
         label: Dispersal
         description: >-

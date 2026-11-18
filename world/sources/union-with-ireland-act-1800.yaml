@@ -1,0 +1,22 @@
+id: src:union-with-ireland-act-1800
+type: document
+kind: act
+citation: >-
+  Parliament of Great Britain. An Act for the Union of Great Britain and Ireland, 39 & 40 Geo. 3
+  c. 67, 2 July 1800. Short title, given in 1896: Union with Ireland Act 1800.
+published: 1800
+title: An Act for the Union of Great Britain and Ireland
+url: https://www.legislation.gov.uk/apgb/Geo3/39-40/67
+via: >-
+  legislation.gov.uk (The National Archives), in its revised text: the Act as it stands today,
+  with later repeals marked. The text as enacted is there only as a scan.
+reliability: >-
+  The Act of the British Parliament that ratified the eight Articles of Union agreed with the
+  Parliament of Ireland. It is evidence of what was enacted and for which day, in its makers'
+  words. Articles First to Third stand unamended; parts of the Fourth, on the first united
+  Parliament, and of the Sixth and Seventh are repealed and are not in this text.
+verified:
+  by: machine:claude-code
+  how: >-
+    The page fetched on 2026-11-17 and read: the preamble, Articles First to Fourth, Sixth and
+    Eighth, and the enacting section. Quotations found in the kept text by quote-check.

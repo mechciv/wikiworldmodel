@@ -1,0 +1,27 @@
+id: src:sherry-china-defensive
+type: publication
+kind: review
+citation: >-
+  Sherry, M.D. China Defensive, 4 July 1942 - 4 May 1945. The U.S. Army Campaigns of World War
+  II, CMH Pub 72-38. Washington: U.S. Army Center of Military History.
+authors:
+  - "Sherry, M.D."
+title: China Defensive, 4 July 1942 - 4 May 1945
+container: The U.S. Army Campaigns of World War II, CMH Pub 72-38
+url: http://www.ibiblio.org/hyperwar/USA/USA-C-ChinaD/index.html
+via: >-
+  The HyperWar Foundation's transcription on ibiblio (by Patrick Clancey); a work of the United
+  States Army, in the public domain. The Center of Military History's own site refused the
+  request from here.
+reliability: >-
+  A short official account of the American part in the war in China, one of the Army's
+  fiftieth-anniversary campaign brochures: good for when the Army's historians count China's war
+  with Japan from and to, in a sentence each; not a history of that war.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from ibiblio.org on 2026-11-17 over plain HTTP, since the site's certificate chain
+    did not verify from here, and read: the introduction, the opening and the strategic setting
+    (to p. 6) and the closing pages. The transcription gives no year of publication, and none is
+    given here; its page marks close each page, and it has none for p. 3. The quotes were found
+    in the kept text by quote-check.

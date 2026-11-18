@@ -1,0 +1,26 @@
+id: src:russia-law-2708-1992
+type: document
+kind: act
+citation: >-
+  Law of the Russian Federation of 21 April 1992, no. 2708-I, "On changes and additions to the
+  Constitution (Fundamental Law) of the Russian Soviet Federative Socialist Republic" (Об
+  изменениях и дополнениях Конституции (Основного Закона) Российской Советской Федеративной
+  Социалистической Республики), adopted by the Congress of People's Deputies of the Russian
+  Federation. Российская газета, 16 May 1992, no. 111 (447), pp. 3–5.
+published: 1992
+title: Об изменениях и дополнениях Конституции (Основного Закона) Российской Советской Федеративной Социалистической Республики
+container: Российская газета, 16 May 1992, no. 111 (447)
+url: https://ru.wikisource.org/wiki/%D0%97%D0%B0%D0%BA%D0%BE%D0%BD_%D0%A0%D0%A4_%D0%BE%D1%82_21.04.1992_%E2%84%96_2708-I
+via: >-
+  Russian Wikisource's transcription, which gives as its sources the official portal of legal
+  information and Rossiyskaya Gazeta of 16 May 1992.
+reliability: >-
+  The amendment that carried the new name into the constitution: evidence that the legislator
+  treated the change of December 1991 as a change of the state's name, and that it made the
+  names Russian Federation and Russia equal. The same law strikes the words Constitution of the
+  USSR, USSR and Union of SSR from several articles.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from ru.wikisource.org on 2026-11-17; section I, points 1 to 5, read in Russian. The
+    quotes were found in the kept text by quote-check.

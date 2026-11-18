@@ -1,0 +1,24 @@
+id: src:rsfsr-declaration-of-rights-1918
+type: document
+kind: act
+citation: >-
+  Third All-Russian Congress of Soviets of Workers', Soldiers' and Peasants' Deputies.
+  Declaration of the Rights of the Working and Exploited People (Декларация прав трудящегося и
+  эксплуатируемого народа), 12 (25) January 1918. In: Декреты Советской власти, vol. I. Moscow,
+  1957, pp. 341–343.
+published: 1957
+title: Декларация прав трудящегося и эксплуатируемого народа
+container: Декреты Советской власти, vol. I (Moscow, 1957)
+url: https://ru.wikisource.org/wiki/%D0%94%D0%B5%D0%BA%D0%BB%D0%B0%D1%80%D0%B0%D1%86%D0%B8%D1%8F_%D0%BF%D1%80%D0%B0%D0%B2_%D1%82%D1%80%D1%83%D0%B4%D1%8F%D1%89%D0%B5%D0%B3%D0%BE%D1%81%D1%8F_%D0%B8_%D1%8D%D0%BA%D1%81%D0%BF%D0%BB%D1%83%D0%B0%D1%82%D0%B8%D1%80%D1%83%D0%B5%D0%BC%D0%BE%D0%B3%D0%BE_%D0%BD%D0%B0%D1%80%D0%BE%D0%B4%D0%B0,_%D0%BF%D1%80%D0%B8%D0%BD%D1%8F%D1%82%D0%B0%D1%8F_%D0%A2%D1%80%D0%B5%D1%82%D1%8C%D0%B8%D0%BC_%D0%92%D1%81%D0%B5%D1%80%D0%BE%D1%81%D1%81%D0%B8%D0%B9%D1%81%D0%BA%D0%B8%D0%BC_%D1%81%D1%8A%D0%B5%D0%B7%D0%B4%D0%BE%D0%BC_%D0%A1%D0%BE%D0%B2%D0%B5%D1%82%D0%BE%D0%B2
+via: >-
+  Russian Wikisource's transcription of the declaration as the third congress adopted it, which
+  gives as its source the 1957 edition and dates it 12 (25) January 1918.
+reliability: >-
+  The act that declared Russia a republic of Soviets and a federation of Soviet national
+  republics: evidence of what the country was called and declared to be in January 1918, in the
+  congress's own words. The day is the transcription's, in both styles; the text carries none.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from ru.wikisource.org on 2026-11-17 and read in full in Russian, parts I to IV; the
+    quotes were found in the kept text by quote-check.

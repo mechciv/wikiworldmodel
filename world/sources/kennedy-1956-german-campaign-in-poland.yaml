@@ -1,0 +1,30 @@
+id: src:kennedy-1956-german-campaign-in-poland
+type: publication
+kind: review
+citation: >-
+  Kennedy, R.M. (1956). The German Campaign in Poland (1939). Department of the Army Pamphlet
+  No. 20-255. Washington: Department of the Army.
+authors:
+  - "Kennedy, R.M."
+published: 1956
+title: The German Campaign in Poland (1939)
+container: Department of the Army Pamphlet No. 20-255
+url: http://www.ibiblio.org/hyperwar/USA/DAP-Poland/index.html
+via: >-
+  The HyperWar Foundation's transcription on ibiblio (by Patrick Clancey), which marks the
+  pamphlet's pages; a work of the United States Army, in the public domain.
+reliability: >-
+  The U.S. Army's study of the campaign, written in the Office of the Chief of Military History
+  from captured German records and the accounts of German officers, with such Polish accounts as
+  were to hand: good for the course and dates of German operations, thinner on the Polish and
+  Soviet sides.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from ibiblio.org on 2026-11-17 over plain HTTP, since the site's certificate chain
+    did not verify from here: the contents, the foreword and preface (pp. v-viii), part two's
+    passage on the order to attack (p. 74), of part three the opening of the attack (pp. 78-79),
+    the last fighting at Kock (pp. 119-120) and the Soviet intervention (pp. 122-123), and the
+    chronology (pp. 138-140). The quotes are from the preface and part three, and were found by
+    quote-check in a kept text that is those two files as fetched, joined in that order; the
+    page numbers are the transcription's marks, which close each page.

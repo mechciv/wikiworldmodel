@@ -1,0 +1,27 @@
+id: src:bverfg-1987-teso
+type: document
+kind: act
+citation: >-
+  Bundesverfassungsgericht, Zweiter Senat, Beschluß vom 21. Oktober 1987 – 2 BvR 373/83 – (Teso).
+  Entscheidungen des Bundesverfassungsgerichts (BVerfGE) 77, 137.
+published: 1987
+title: Beschluß des Zweiten Senats vom 21. Oktober 1987 – 2 BvR 373/83 – (Teso), BVerfGE 77, 137
+url: https://www.servat.unibe.ch/dfr/bv077137.html
+via: >-
+  Das Fallrecht (DFR), University of Bern, edited by A. Tschentscher: a transcription of the
+  official reports that marks their page breaks and numbers the paragraphs itself (Rn.). The
+  locators here give both.
+reliability: >-
+  The decision itself, on whether a man naturalized in the German Democratic Republic was a German
+  national under the Basic Law: evidence of how the Federal Republic's constitutional court read
+  Germany's legal status three years before unification. What it says of other states' views, the
+  Democratic Republic's and the Allied powers' among them, is that court's account of acts that
+  were not read here.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from servat.unibe.ch on 2026-11-17. Read in German: the parties' submissions in part
+    (Rn. 9–20) and the reasons C.I and C.II.1 in full (Rn. 21–76), which hold the passages on the
+    continued existence of the German state; the rest was searched, not read. Paragraph and page
+    numbers were read from the page's markup. The quotes were found in the kept text by
+    quote-check.

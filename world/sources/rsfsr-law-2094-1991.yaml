@@ -1,0 +1,24 @@
+id: src:rsfsr-law-2094-1991
+type: document
+kind: act
+citation: >-
+  Law of the RSFSR of 25 December 1991, no. 2094-I, "On changing the name of the state Russian
+  Soviet Federative Socialist Republic" (Об изменении наименования государства Российская
+  Советская Федеративная Социалистическая Республика), signed by the President of the RSFSR,
+  B. Yeltsin, Moscow, House of Soviets of the RSFSR. State Archive of the Russian Federation,
+  f. 10026, op. 1, d. 577, l. 103.
+published: 1991
+title: Об изменении наименования государства Российская Советская Федеративная Социалистическая Республика
+url: https://ru.wikisource.org/wiki/%D0%97%D0%B0%D0%BA%D0%BE%D0%BD_%D0%A0%D0%A1%D0%A4%D0%A1%D0%A0_%D0%BE%D1%82_25.12.1991_%E2%84%96_2094-I
+via: >-
+  Russian Wikisource's transcription, which gives as its source the law in the State Archive of
+  the Russian Federation (ф. 10026, оп. 1, д. 577, л. 103).
+reliability: >-
+  The law that renamed the state: evidence of the old name, the new one and the day the change
+  took force, in the legislator's words. It changes a name and makes no new state. The
+  constitution was brought into line with it only on 21 April 1992 (src:russia-law-2708-1992).
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from ru.wikisource.org on 2026-11-17 and read in full in Russian, points 1 to 5, the
+    signature and the date line; the quotes were found in the kept text by quote-check.

@@ -1,0 +1,26 @@
+id: src:hansard-1945-05-08-victory-in-europe
+type: document
+kind: eyewitness
+citation: >-
+  Victory in Europe. House of Lords Debates, 8 May 1945, vol. 136, cols. 159-160: the Prime
+  Minister's statement on the surrender of Germany, read to the Lords by Lord Woolton as it
+  was being made in the Commons.
+published: 1945
+title: Victory in Europe
+container: Hansard, House of Lords, vol. 136
+url: https://api.parliament.uk/historic-hansard/lords/1945/may/08/victory-in-europe
+via: >-
+  The UK Parliament's digitized Hansard (Historic Hansard, 1803-2005), a text read by machine
+  from the printed columns. The index of that day's sitting lists no Commons columns, so the
+  statement was read in the Lords' report.
+reliability: >-
+  The official report of the British Government's announcement, by Churchill, of the German
+  surrender, made on the afternoon of 8 May 1945: evidence of how the government then gave the
+  hours of the signing and of the end of hostilities, by its own clock, and of what it held to
+  have ended. It was said before the signing in Berlin.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from api.parliament.uk on 2026-11-17 and read in full, and compared with the
+    statement as the Pearl Harbor History Associates' collection gives it from the Commons, which
+    agrees in substance. The quotes were found in the kept text by quote-check.

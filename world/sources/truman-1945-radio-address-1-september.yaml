@@ -1,0 +1,28 @@
+id: src:truman-1945-radio-address-1-september
+type: document
+kind: eyewitness
+citation: >-
+  Truman, H.S. Radio Address to the American People After the Signing of the Terms of
+  Unconditional Surrender by Japan, broadcast from the White House at 10 p.m. on 1 September
+  1945. Public Papers of the Presidents: Harry S. Truman, 1945.
+authors:
+  - "Truman, H.S."
+published: 1945
+title: Radio Address to the American People After the Signing of the Terms of Unconditional Surrender by Japan
+container: Harry S. Truman Library, Public Papers
+url: https://www.trumanlibrary.gov/library/public-papers/122/radio-address-american-people-after-signing-terms-unconditional-surrender
+via: >-
+  The Harry S. Truman Library's transcription of the Public Papers, which files the address
+  under the number 122 and notes that it was part of the broadcast of the surrender ceremonies
+  on board the U.S.S. Missouri.
+reliability: >-
+  The President's address on the evening the terms were signed in Tokyo Bay, dated by
+  Washington's calendar: evidence of the day on which Washington heard of the signing, of the
+  day he proclaimed as V-J Day, and of his saying that it was not yet the formal end of the war.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from trumanlibrary.gov on 2026-11-17 and read in full, and compared with the White
+    House news release as the Pearl Harbor History Associates' collection gives it, which
+    differs in a few words. The quotes were found in the kept text by quote-check. The number is
+    from the library's address for the page.

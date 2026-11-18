@@ -1,0 +1,24 @@
+id: src:japan-act-of-surrender-china-theatre-1945
+type: document
+kind: act
+citation: >-
+  Act of Surrender of the Japanese forces in the China Theatre to Generalissimo Chiang Kai-shek,
+  Nanking, 9 September 1945. In Tsao Wen-yen (ed.), Chinese Yearbook 1944-1945. Chungking:
+  Council of International Affairs.
+published: 1945
+title: Act of Surrender - China Theatre
+url: http://www.taiwandocuments.org/surrender02.htm
+via: >-
+  The Taiwan Documents Project's transcription from the Chinese Yearbook 1944-1945, in English,
+  with the project's own headnote on the ceremony. The signatures are not reproduced.
+reliability: >-
+  The act by which the Japanese commanders in China, Formosa and northern Indo-China surrendered
+  their forces: evidence of what was surrendered and to whom. The text as transcribed carries no
+  date: the day, the hour and the place of the ceremony are in the project's headnote, which
+  gives no source for them.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from taiwandocuments.org on 2026-11-17 over plain HTTP and read in full, the headnote
+    and the act; the quotes were found in the kept text by quote-check. The yearbook itself was
+    not seen.

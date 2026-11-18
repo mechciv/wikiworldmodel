@@ -2,7 +2,12 @@
 // written into the record's file without disturbing the rest of it.
 import { describe, expect, it } from 'vitest';
 import { parse } from 'yaml';
-import { addStep, normalizeText, quoteIn } from '../src/quotecheck.ts';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { dirname, join } from 'node:path';
+import { afterAll } from 'vitest';
+import { addStep, checkClaims, normalizeText, quotedHow, quoteIn, replaceStep, type QuoteText } from '../src/quotecheck.ts';
+import { loadWorld } from '../src/world.ts';
 
 const STEP = { step: 'quoted' as const, by: 'machine:quote-check', how: 'Found in a.txt.', on: '2026-11-06' };
 
@@ -40,6 +45,13 @@ describe('quotes against a text', () => {
     expect(quoteIn('at 66.039 ± 0.049 Ma', text)).toBe(false);
   });
 
+  it('find a compound that was broken at its own hyphen, which joining the lines took for a broken word', () => {
+    const text = normalizeText('in a script that strongly resembles the Proto-\nSinaitic texts, a well-\nknown case');
+    expect(quoteIn('strongly resembles the Proto-Sinaitic texts', text)).toBe(true);
+    expect(quoteIn('a well-known case', text)).toBe(true);
+    expect(quoteIn('strongly resembles the Proto-Canaanite texts', text)).toBe(false);
+  });
+
   it('join a word an OCR broke at a soft hyphen and the end of a line', () => {
     expect(quoteIn('increase downstream with discharge', normalizeText('increase downstream with dis\u00ad \ncharge in the form'))).toBe(true);
   });
@@ -74,5 +86,53 @@ describe('a step written into a record', () => {
   it('refuses a claim written in one line, rather than rewrite it', () => {
     const flow = RECORD.replace(/  name:\n    prop: name\n    value: \{ en: X \}\n    unsourced: An editorial label.\n/, '  name: { prop: name, value: { en: X }, unsourced: An editorial label. }\n');
     expect(() => addStep(flow, 'claims', 'name', STEP)).toThrow(/by hand/);
+  });
+});
+
+describe('a claim that quotes two sources', () => {
+  const dirs: string[] = [];
+  afterAll(() => {
+    for (const d of dirs) rmSync(d, { recursive: true, force: true });
+  });
+  const source = (id: string) => `id: ${id}\ntype: publication\nkind: measurement\ncitation: A fixture source, not a real publication.\n`;
+  const text = (name: string, t: string): QuoteText => ({ name, sha: '0123456789abcdef', text: t });
+
+  it('is quoted only when every quote is found, each in its own source\'s text; given one text, the other is asked for', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'wikiworldmodel-quotes-'));
+    dirs.push(root);
+    const files: Record<string, string> = {
+      'sources/a.yaml': source('src:test/a'),
+      'sources/b.yaml': source('src:test/b'),
+      'entities/x.yaml': `id: test/x\nkind: event/impact\nauthor: machine:claude-code\nclaims:\n  date:\n    prop: date\n    value: 66 Ma\n    source:\n      - { ref: src:test/a, loc: p. 1, quote: "at 66 Ma" }\n      - { ref: src:test/b, loc: p. 9, quote: "sixty-six million years" }\n  name:\n    prop: name\n    value: { en: X }\n    source: { ref: src:test/a, loc: p. 1, quote: "The X impact" }\n`,
+    };
+    for (const [path, t] of Object.entries(files)) {
+      mkdirSync(dirname(join(root, path)), { recursive: true });
+      writeFileSync(join(root, path), t);
+    }
+    const w = await loadWorld(root);
+    const a = text('a.txt', 'The X impact, at 66 Ma.');
+    const b = text('b.txt', 'About sixty-six million years ago.');
+    // One text: the claim that quotes only it is whole; the other still has a quote to find elsewhere.
+    const one = checkClaims(w, new Map([['src:test/a', a]]));
+    expect(one.map((r) => [r.claim.key, r.quotes.map((q) => q.found), r.others])).toEqual([
+      ['date', [true], ['src:test/b']],
+      ['name', [true], []],
+    ]);
+    // Both texts: each quote is looked for in its own source's text, and the step names both.
+    const texts = new Map([['src:test/a', a], ['src:test/b', b]]);
+    const both = checkClaims(w, texts);
+    expect(both[0]).toMatchObject({ quotes: [{ source: 'src:test/a', found: true }, { source: 'src:test/b', found: true }], others: [] });
+    expect(quotedHow(both[0], texts)).toBe('Found in a.txt (sha256 0123456789abcdef) and b.txt (sha256 0123456789abcdef), after normalizing whitespace and typography, by npm run world -- quote-check.');
+    // A quote is not found in the other source's text.
+    const swapped = checkClaims(w, new Map([['src:test/a', b], ['src:test/b', a]]));
+    expect(swapped[0].quotes.map((q) => q.found)).toEqual([false, false]);
+  });
+
+  it('a step this tool wrote can be written again, in place', () => {
+    const once = addStep(RECORD, 'claims', 'date', STEP);
+    const again = replaceStep(once, 'claims', 'date', { ...STEP, how: 'Found in a.txt and b.txt.' });
+    expect(parse(again).claims.date.checked).toEqual([{ ...STEP, how: 'Found in a.txt and b.txt.' }]);
+    expect(again.replace('Found in a.txt and b.txt.', 'Found in a.txt.')).toBe(once);
+    expect(() => replaceStep(RECORD, 'claims', 'date', STEP)).toThrow(/no quoted step/);
   });
 });

@@ -1,0 +1,27 @@
+id: src:un-a-47-485-legal-counsel-1992
+type: document
+kind: act
+citation: >-
+  United Nations General Assembly, forty-seventh session. Note by the Secretary-General, 30
+  September 1992, with the letter dated 29 September 1992 from the Under-Secretary-General, the
+  Legal Counsel, addressed to the Permanent Representatives of Bosnia and Herzegovina and
+  Croatia to the United Nations. A/47/485.
+published: 1992
+title: Letter dated 29 September 1992 from the Under-Secretary-General, the Legal Counsel, addressed to the Permanent Representatives of Bosnia and Herzegovina and Croatia to the United Nations
+url: https://documents.un.org/api/symbol/access?s=A/47/485&l=en&t=pdf
+via: >-
+  The United Nations' Official Document System, as a scan with a machine-read text.
+reliability: >-
+  The Secretariat's considered view, a week after the General Assembly's resolution 47/1 of 22
+  September 1992, of what that resolution decided and what followed from it in practice. It is
+  evidence of the resolution's terms as the Legal Counsel restates them, and of what the
+  Secretariat then did with the seat, the nameplate and the flag of Yugoslavia; it is an
+  opinion of the Secretariat, not a decision of the Assembly. The resolution's own page on the
+  document system is an image with no text, and was not read.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from documents.un.org on 2026-11-17 (the link resolves to
+    doc/undoc/gen/n92/471/13/pdf/n9247113.pdf) and read whole, three pages, in the kept text and
+    on an image of page 2. The machine reading puts some lines out of order, so each quote is a
+    run of the kept text that is whole, found by quote-check.

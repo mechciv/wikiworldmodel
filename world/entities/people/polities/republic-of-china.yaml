@@ -1,0 +1,14 @@
+id: people/polities/republic-of-china
+kind: polity
+summary: >-
+  The Chinese republic that declared war on Japan, Germany and Italy in December 1941. Written for the wars it took
+  part in (people/wars/second-sino-japanese-war, people/wars/second-world-war): it has no dates and no land of its
+  own here yet. Wikidata cuts it in two, an item for the republic of 1912 to 1949 (Q13426199) and one for the state
+  that began in 1912 and goes on in Taiwan (Q865): which of them this record is depends on where it is taken to end,
+  which is not yet written, so no Wikidata id is given.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Republic of China }
+    unsourced: An editorial label, in English.

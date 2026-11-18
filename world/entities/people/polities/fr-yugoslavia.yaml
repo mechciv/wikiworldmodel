@@ -1,0 +1,251 @@
+id: people/polities/fr-yugoslavia
+kind: polity
+summary: >-
+  The federation of Serbia and Montenegro, constituted on 27 April 1992 as the Federal Republic
+  of Yugoslavia, remade as the state union of Serbia and Montenegro in 2003, and ended by
+  Montenegro's independence in June 2006. It claimed to be the old socialist federation carried
+  on, and to keep its seat in the United Nations; the Security Council and the General Assembly
+  refused that in 1992, and in 2000 it gave the claim up and was admitted as a new member, one
+  of five successors. Wikidata has an item for each of its two forms and none for the state
+  through both, so the ids are on the phases. After 2006 Serbia carried on its membership and
+  its treaties; Serbia has no record here.
+author: machine:claude-code
+phases:
+  - id: federal-republic
+    label: Federal republic
+    same_as: { wikidata: Q838261 }
+  - id: state-union
+    label: State union
+    same_as: { wikidata: Q37024 }
+claims:
+  name-federal-republic:
+    prop: name
+    value: { en: Federal Republic of Yugoslavia, sr: Савезна Република Југославија }
+    valid: { hi: { ref: "@federal-republic", edge: end } }
+    source:
+      - ref: src:yugoslavia-constitution-1992
+        loc: "Article 1"
+        quote: Савезна Република Југославија је суверена савезна држава заснована на равноправности грађана и равноправности република чланица.
+      - ref: src:unsc-resolution-777-1992
+        loc: "paragraph 1"
+        quote: the Federal Republic of Yugoslavia (Serbia and Montenegro) should apply for membership in the United Nations
+      - ref: src:un-treaty-collection-historical-information
+        loc: 'note 2 under "Yugoslavia (Federal Republic of)"'
+        quote: the name of the State of the Federal Republic of Yugoslavia was changed to “Serbia and Montenegro [as of 4 February 2003]”
+    rank: preferred
+    note: >-
+      The name it began under and bore longest, preferred as the label. In English: the Federal
+      Republic of Yugoslavia is a sovereign federal state founded on the equality of its
+      citizens and the equality of its member republics. While it refused the state's claim to
+      be Yugoslavia carried on, the Security Council wrote the name with "(Serbia and
+      Montenegro)" after it.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in fry-constitution-1992-sr.txt (sha256 f101bb4edecc8939), unsc-res-777-1992.txt (sha256 436c3a271d902e08) and un-treaty-collection-historical-information.txt (sha256 e6849d59cbbaaaca), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  name-serbia-and-montenegro:
+    prop: name
+    value: { en: Serbia and Montenegro }
+    valid: { lo: { ref: "@state-union", edge: start } }
+    source:
+      - ref: src:serbia-and-montenegro-constitutional-charter-2003
+        loc: "Article 1"
+        quote: The name of the state union shall be Serbia and Montenegro.
+      - ref: src:un-treaty-collection-historical-information
+        loc: 'note 2 under "Yugoslavia (Federal Republic of)"'
+        quote: the name of the State of the Federal Republic of Yugoslavia was changed to “Serbia and Montenegro [as of 4 February 2003]”
+      - ref: src:un-treaty-collection-historical-information
+        loc: 'note 1 under "Serbia and Montenegro"'
+        quote: 'As from 4 February 2003 until 2 June 2006. Formerly: “Yugoslavia” until 3 February 2003.'
+    note: >-
+      The name from the day the Constitutional Charter was proclaimed, as the state told the
+      Secretary-General. The depositary lists it as Yugoslavia until 3 February 2003 and as
+      Serbia and Montenegro from 4 February 2003.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in serbia-montenegro-constitutional-charter-2003-en.txt (sha256 291b6ef3c196660f) and un-treaty-collection-historical-information.txt (sha256 e6849d59cbbaaaca), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  start:
+    prop: start
+    value: 27 April 1992 CE
+    source:
+      - ref: src:un-a-46-915-yugoslavia-declaration-1992
+        loc: "annex I, the note of 27 April 1992, second paragraph"
+        quote: at its session held on 27 April 1992, promulgated the Constitution of the Federal Republic of Yugoslavia.
+      - ref: src:un-treaty-collection-historical-information
+        loc: 'note 1 under "Yugoslavia (former)"'
+        quote: Yugoslavia came into being on 27 April 1992 following the promulgation of the constitution of the Federal Republic of Yugoslavia on that day.
+      - ref: src:arbitration-commission-yugoslavia-opinions-4-10
+        loc: "Opinion No. 8, para. 3, p. 88"
+        quote: Serbia and Montenegro, as Republics with equal standing in law, have constituted a new state, the 'Federal Republic of Yugoslavia', and on 27 April adopted a new constitution
+    method: documentary
+    note: >-
+      The day its constitution was proclaimed, by the assembly of the old federation. That it
+      began on this day is common ground, to itself, to the depositary and to the arbitration
+      commission; what began, a new state or the old one in a new form, was the dispute (the
+      relations below).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in un-a-46-915-fry-declaration.txt (sha256 48127ccd7608dda1), un-treaty-collection-historical-information.txt (sha256 e6849d59cbbaaaca) and arbitration-commission-yugoslavia-opinions-4-10.txt (sha256 4d6f68b3c4fda241), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  federal-republic-end:
+    prop: end
+    subject: "@federal-republic"
+    value: 4 February 2003 CE
+    source:
+      - ref: src:un-treaty-collection-historical-information
+        loc: 'note 2 under "Yugoslavia (Federal Republic of)"'
+        quote: the name of the State of the Federal Republic of Yugoslavia was changed to “Serbia and Montenegro [as of 4 February 2003]”
+      - ref: src:arhiv-jugoslavije-constituent-acts
+        loc: "The Constitutional Charter of the State Union of Serbia and Montenegro, February 4, 2003"
+        quote: the Federal Assembly on February 4, 2003 promulgated the Constitutional Charter of the State Union of Serbia and Montenegro
+      - ref: src:serbia-and-montenegro-constitutional-charter-2003
+        loc: "Article 63"
+        quote: all the rights and duties of the Federal Republic of Yugoslavia shall be transferred to Serbia and Montenegro
+      - ref: src:serbia-and-montenegro-constitutional-charter-2003
+        loc: "Article 14"
+        quote: Serbia and Montenegro shall be a single personality in international law
+    method: documentary
+    note: >-
+      The federal republic became a union of two member states when the Constitutional Charter
+      was proclaimed. To the United Nations this was a change of name. The Charter makes the
+      union a single person in international law, and its own words are that the Federal
+      Republic's rights and duties were transferred to Serbia and Montenegro. It is written as
+      a change of form within one record.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in un-treaty-collection-historical-information.txt (sha256 e6849d59cbbaaaca), arhiv-jugoslavije-constitutive-acts-en.txt (sha256 40a72eafc8ca5ad8) and serbia-montenegro-constitutional-charter-2003-en.txt (sha256 291b6ef3c196660f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  end:
+    prop: end
+    value: 3 June 2006 CE
+    source:
+      - ref: src:un-treaty-collection-historical-information
+        loc: 'note 1 under "Montenegro"'
+        quote: The National Assembly of the Republic of Montenegro adopted its Declaration of Independence on 3 June 2006
+      - ref: src:un-treaty-collection-historical-information
+        loc: 'note 1 under "Serbia"'
+        quote: The Republic of Serbia continued the membership of Serbia and Montenegro in the United Nations
+      - ref: src:un-treaty-collection-historical-information
+        loc: 'note 1 under "Serbia"'
+        quote: all treaty actions undertaken by Serbia and Montenegro will continue in force with respect to the Republic of Serbia with effect from 3 June 2006
+      - ref: src:un-treaty-collection-historical-information
+        loc: 'note 1 under "Serbia"'
+        quote: 'As from 3 June 2006: “Serbia”. Formerly: “Serbia and Montenegro” until 2 June 2006.'
+      - ref: src:serbia-and-montenegro-constitutional-charter-2003
+        loc: "Article 60"
+        quote: A member state that implements this right shall not inherit the right to international personality
+    method: documentary
+    note: >-
+      The union ended when Montenegro's assembly declared independence, after the referendum of
+      21 May 2006. What ended was the union and not the state. Under the Charter the member
+      that left did not inherit the union's international personality: Serbia carried on its
+      membership of the United Nations and its treaties from 3 June 2006, and the depositary
+      lists Serbia as the same party under a new name, while Montenegro was admitted as a new
+      member on 28 June. So a record of Serbia would continue this one, by an identity the
+      United Nations accepted, where in 1992 they had refused this state's own. No record of
+      Serbia is written here; this end is where the record stops, and only this note says that
+      the state went on.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in un-treaty-collection-historical-information.txt (sha256 e6849d59cbbaaaca) and serbia-montenegro-constitutional-charter-2003-en.txt (sha256 291b6ef3c196660f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  territory:
+    prop: territory
+    value: { from: src:cliopatria-0.2.1, names: [Serbia-Montenegro] }
+    source: { ref: src:cliopatria-0.2.1, loc: rows named Serbia-Montenegro }
+    method: compilation
+    basis: reconstruction
+    note: >-
+      The dataset's three rows by this name run from 1992 to 2005, one name through both of the
+      record's forms, and all three carry Wikidata's item for the state union of 2003. Its row
+      for 1992 to 1995 is nearly half as large again as its row for 1996 to 1999 (147,904
+      against 101,815 square kilometres in its own area column), so in the war years it draws
+      more than the two republics; from 2000 it has a Kosovo of its own, and the row is smaller
+      by about as much. The dataset has whole years, and begins its Republic of Serbia and its
+      Montenegro in 2006; the days the state began and ended are the record's own claims.
+relations:
+  from-socialist-federation:
+    rel: arose-from
+    to: people/polities/sfr-yugoslavia
+    source:
+      - ref: src:agreement-on-succession-issues-2001
+        loc: "preamble, first paragraph"
+        quote: being in sovereign equality the five successor States to the former Socialist Federal Republic of Yugoslavia
+      - ref: src:arbitration-commission-yugoslavia-opinions-4-10
+        loc: "Opinion No. 10, para. 5, p. 91"
+        quote: the FRY (Serbia and Montenegro) is a new state which cannot be considered the sole successor to the SFRY
+      - ref: src:arbitration-commission-yugoslavia-opinions-4-10
+        loc: "Opinion No. 9, para. 1, p. 89"
+        quote: All are successor states to the former SFRY.
+      - ref: src:un-treaty-collection-historical-information
+        loc: 'note 1 under "Yugoslavia (Federal Republic of)"'
+        quote: succeeds to the same and undertakes faithfully to perform and carry out the stipulations therein contained as from April 27, 1992, the date upon which the Federal Republic of Yugoslavia assumed responsibility for its international relations
+    note: >-
+      One of the five states that came out of the socialist federation as it broke up, and the
+      last of them to be constituted: a new state and one successor among equals, as the
+      arbitration commission held in 1992 and as it agreed itself by treaty in 2001, the year
+      it gave notice that it succeeded to the old federation's treaties. The other four have no
+      records here.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in unts-2262-succession-agreement-2001.txt (sha256 d53ad63b4bfa8c5a), arbitration-commission-yugoslavia-opinions-4-10.txt (sha256 4d6f68b3c4fda241) and un-treaty-collection-historical-information.txt (sha256 e6849d59cbbaaaca), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  continues-socialist-federation:
+    rel: continues
+    to: people/polities/sfr-yugoslavia
+    rank: deprecated
+    source:
+      - ref: src:un-a-46-915-yugoslavia-declaration-1992
+        loc: "annex I, the note of 27 April 1992, third paragraph"
+        quote: Strictly respecting the continuity of the international personality of Yugoslavia, the Federal Republic of Yugoslavia shall continue to fulfil all the rights conferred to
+      - ref: src:un-a-46-915-yugoslavia-declaration-1992
+        loc: "annex I, the note of 27 April 1992, third paragraph"
+        quote: The Federal Republic of Yugoslavia, as a founding member of the United Nations, acknowledges its full commitment to the world Organization
+      - ref: src:yugoslavia-constitution-1992
+        loc: "preamble"
+        quote: на темељу непрекинутог субјективитета Југославије и добровољности удруживања Републике Србије и Републике Црне Горе
+      - ref: src:arbitration-commission-yugoslavia-opinions-1-3
+        loc: "Opinion No. 1, the question put by Lord Carrington, p. 182"
+        quote: Serbia considers that those Republics which have declared or would declare themselves independent or sovereign have seceded or would secede from the SFRY which would otherwise continue to exist.
+      - ref: src:un-a-47-485-legal-counsel-1992
+        loc: "annex, the letter of 29 September 1992, fourth paragraph"
+        quote: nameplate remain as before, but in Assembly bodies representatives of the Federal Republic of Yugoslavia (Serbia and Montenegro) cannot sit behind the sign "Yugoslavia".
+      - ref: src:un-treaty-collection-historical-information
+        loc: 'note 1 under "Yugoslavia (former)"'
+        quote: Consistent with the claim of Yugoslavia to continue the international legal personality of the former Yugoslavia, the Secretary-General, as depositary, continued to list treaty actions that had been performed by the former Yugoslavia in status lists
+      - ref: src:un-a-55-528-yugoslavia-application-2000
+        loc: "annex, the letter of 27 October 2000, first paragraph"
+        quote: I have the honour to request the admission of the Federal Republic of Yugoslavia to membership in the United Nations in light of the implementation of Security Council resolution 777 (1992).
+      - ref: src:unga-resolution-55-12
+        loc: "the operative paragraph"
+        quote: Decides to admit the Federal Republic of Yugoslavia to membership in the United Nations.
+      - ref: src:un-treaty-collection-historical-information
+        loc: 'note 1 under "Yugoslavia (former)"'
+        quote: At the same time, Yugoslavia renounced its claim to have continued the international legal personality of the former Yugoslavia.
+    against:
+      - ref: src:unsc-resolution-757-1992
+        loc: "preamble, the paragraph that begins Noting that the claim"
+        quote: to continue automatically the membership of the former Socialist Federal Republic of Yugoslavia in the United Nations has not been generally accepted
+      - ref: src:unsc-resolution-777-1992
+        loc: "paragraph 1"
+        quote: Considers that the Federal Republic of Yugoslavia (Serbia and Montenegro) cannot continue automatically the membership of the former Socialist Federal Republic of Yugoslavia in the United Nations
+      - ref: src:un-a-47-485-legal-counsel-1992
+        loc: "annex, the letter of 29 September 1992, second paragraph"
+        quote: considered that the Federal Republic of Yugoslavia (Serbia and Montenegro) cannot continue automatically the membership of the former Socialist Federal Republic of Yugoslavia in the United Nations and decided that the Federal Republic of Yugoslavia (Serbia and Montenegro) should apply for membership in the United Nations
+      - ref: src:arbitration-commission-yugoslavia-opinions-4-10
+        loc: "Opinion No. 10, para. 5, p. 91"
+        quote: the FRY (Serbia and Montenegro) is a new state which cannot be considered the sole successor to the SFRY
+      - ref: src:un-treaty-collection-historical-information
+        loc: 'note 1 under "Yugoslavia (former)"'
+        quote: Bosnia and Herzegovina, Croatia, Slovenia and The former Yugoslav Republic of Macedonia ... objected to this claim.
+    note: >-
+      The claim that the Federal Republic was the old federation carried on: asserted,
+      refused, and given up. It was asserted by the Federal Republic itself from its first day.
+      Its constitution rests (in English) on the unbroken personality of Yugoslavia, and its
+      note to the Secretary-General of 27 April 1992 undertakes to continue the old
+      federation's rights and duties and calls itself a founding member of the United Nations;
+      behind it stood Serbia's view, put to the arbitration commission in 1991, that the other
+      republics had seceded from a state that otherwise went on. It was refused by the Security
+      Council, which noted on 30 May 1992 that the claim had not been generally accepted and
+      considered on 19 September 1992 that the Federal Republic could not continue the old
+      membership automatically and should apply; by the General Assembly, which decided the
+      same on 22 September 1992 (resolution 47/1, read here as the Legal Counsel restated it a
+      week later); by the arbitration commission, for which it was a new state (4 July 1992);
+      and by the other four republics. It was not without effect while it lasted: the
+      Assembly's resolution left the seat and the nameplate of Yugoslavia where they were, and
+      the depositary went on listing the old state's treaty acts and the new one's under one
+      name. It was given up in 2000: on 27 October the Federal Republic's president applied
+      for admission in the light of the Council's resolution of 1992, and on 1 November the
+      General Assembly admitted it, at which, in the depositary's words, it renounced the
+      claim. Ranked deprecated because it was withdrawn; it binds no dates.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in un-a-46-915-fry-declaration.txt (sha256 48127ccd7608dda1), fry-constitution-1992-sr.txt (sha256 f101bb4edecc8939), arbitration-commission-yugoslavia-opinions-1-3.txt (sha256 de3b2d2301127dcc), un-a-47-485-legal-counsel.txt (sha256 88a64643e22aaa05), un-treaty-collection-historical-information.txt (sha256 e6849d59cbbaaaca), un-a-55-528-fry-application.txt (sha256 176a282860201d3c), unga-res-55-12.txt (sha256 95d4ff3779c3be5a), unsc-res-757-1992.txt (sha256 4d500586f36e17de), unsc-res-777-1992.txt (sha256 436c3a271d902e08) and arbitration-commission-yugoslavia-opinions-4-10.txt (sha256 4d6f68b3c4fda241), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }

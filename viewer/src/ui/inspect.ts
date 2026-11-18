@@ -1,3 +1,5 @@
+import { isFootprint } from '../../../core/footprint.ts';
+import { inspectFootprint } from './footprint.ts';
 // The inspect panel: what something is, when and where, every claim with its sources and
 // locators, the competing claims (which can be picked), its relations and the ones other
 // records make to it, and what the derived dates rest on.
@@ -370,7 +372,7 @@ export class InspectPanel {
   }
 
   /** How to go and see a taxon where it lived, if there is somewhere to go: what the panel offers. */
-  seeIt: ((id: string) => { label: string; go: () => void } | undefined) | null = null;
+  seeIt: ((id: string, local: boolean) => { label: string; go: () => void } | undefined) | null = null;
 
   showEntity(r: EntityRecord, scenario: Scenario, time: FeatureTime, here?: TerritoryHere, organism?: OrganismHere): void {
     const status = r.claims.every((c) => c.status === 'accepted') ? 'accepted' : r.claims.some((c) => c.status === 'disputed') ? 'disputed' : 'proposed';
@@ -390,7 +392,12 @@ export class InspectPanel {
         .join('');
     const derivedRefs = [...new Set([...(time.start.derived ? r.derivedBy.start : []), ...(!time.instant && time.end.derived ? r.derivedBy.end : [])])];
 
+    // What denies a claim or a relation: said apart from what speaks for it, with the words of each.
+    const denied = (x: { against?: EntityRecord['claims'][number]['against'] }) =>
+      x.against?.length ? `<p class="method">Denied by ${this.cites(r, x.against)}</p>${x.against.filter((s) => s.quote).map((s) => `<blockquote class="against">${esc(s.quote)}</blockquote>`).join('')}` : '';
+
     let claims = '';
+    let footprintClaim: ClaimRecord | undefined;
     for (const [group, all] of groups) {
       // A claim of an alternative shows when that alternative is chosen; it replaces the
       // default picture's claims of its group.
@@ -398,12 +405,15 @@ export class InspectPanel {
       const cs = own.length ? own : all.filter((c) => !c.alt);
       const others = all.filter((c) => !cs.includes(c));
       const prop = cs[0]?.prop ?? all[0].prop;
-      const competing = cs.length > 1;
+      // Claims that each hold for a span of their own, as a state's names do in turn, are not a choice to make.
+      const turns = cs.length > 1 && cs.every((c) => c.turn);
+      const competing = cs.length > 1 && !turns;
       const def = cs.find((c) => c.rank === 'preferred') ?? (cs.filter((c) => c.rank !== 'deprecated').length === 1 ? cs.find((c) => c.rank !== 'deprecated') : undefined);
       const chosen = cs.find((c) => picks.has(c.ref)) ?? def;
+      if (chosen?.prop === 'footprint_form' && isFootprint(chosen.value)) footprintClaim = chosen;
       const phaseId = cs[0] ? splitRef(cs[0].subject).phase : undefined;
       const phase = phaseId ? r.phases.find((p) => p.id === phaseId) : undefined;
-      claims += `<div class="claim-group${competing ? ' competing' : ''}"><h4>${esc(PROP_LABEL[prop] ?? words(prop))}${phase ? ` <span class="phase">· ${esc(phase.label)}</span>` : ''}${competing ? ' <span class="badge">competing claims</span>' : ''}</h4>`;
+      claims += `<div class="claim-group${competing ? ' competing' : ''}"><h4>${esc(PROP_LABEL[prop] ?? words(prop))}${phase ? ` <span class="phase">· ${esc(phase.label)}</span>` : ''}${competing ? ' <span class="badge">competing claims</span>' : turns ? ' <span class="badge">in turn</span>' : ''}</h4>`;
       for (const c of cs) {
         const v = competing && c !== def ? variant(c.ref) : undefined;
         const inconsistent = v && !v.consistent;
@@ -412,10 +422,11 @@ export class InspectPanel {
           : '';
         const conf = c.confidence !== undefined ? `confidence: ${typeof c.confidence === 'number' ? c.confidence : `${c.confidence}${c.confidenceRange ? ` (${c.confidenceRange[0]}–${c.confidenceRange[1]})` : ''}`}` : '';
         claims += `<div class="claim rank-${esc(c.rank)}${inconsistent ? ' inconsistent' : ''}" data-claim="${esc(c.ref)}">
-          <label>${radio}<span class="value">${esc(c.valueText)}</span>${this.cites(r, c.sources, c.unsourced)}</label>
+          <label>${radio}<span class="value">${esc([...picks].map((p) => c.valueTexts?.[p]).find((x) => x !== undefined) ?? c.valueText)}</span>${this.cites(r, c.sources, c.unsourced)}</label>
           <div class="claim-meta"><span class="badge rank">${esc(c.rank)}</span><span class="badge status-${esc(c.status)}">${esc(c.status)}</span>${c.level && c.level !== 'unchecked' && c.level !== 'accepted' ? `<span class="badge ladder" title="${esc(checkedTitle(c))}">checked: ${esc(c.level)}</span>` : ''}${c.basis !== 'evidence' ? `<span class="badge basis-${esc(c.basis)}">${esc(c.basis)}</span>` : ''}${c.alt ? `<span class="badge alt">${esc(this.cb.altTitle(c.alt))}</span>` : ''}${conf ? `<span class="badge">${esc(conf)}</span>` : ''}${c.methodLabel ? `<span class="badge">${esc(c.methodLabel)}</span>` : ''}<span class="author">${esc(c.author)}</span></div>
           ${c.validText ? `<p class="method">Holds: ${esc(c.validText)}</p>` : ''}
           ${c.sources.filter((s) => s.quote).map((s) => `<blockquote>${esc(s.quote)}</blockquote>`).join('')}
+          ${denied(c)}
           ${c.note ? `<p class="note">${esc(c.note)}</p>` : ''}
           ${inconsistent ? `<p class="conflict">Contradicts the rest of the world, so it cannot be shown. Conflicting with:</p><ul class="conflict">${derivation(v!.conflict!.filter((x) => x !== c.ref))}</ul>` : ''}
         </div>`;
@@ -423,11 +434,18 @@ export class InspectPanel {
       if (others.length) claims += `<p class="method">${others.length} more in ${esc([...new Set(others.map((c) => (c.alt ? this.cb.altTitle(c.alt) : 'the default picture')))].join(', '))}.</p>`;
       claims += `</div>`;
     }
+    // A relation says when it held, if it held for a span; one set aside (given up, or superseded) says so, and one that
+    // belongs to an alternative shows only in that picture, from either end.
+    const held = (x: { validText?: string; rank: string; alt?: string; rival?: true }) =>
+      `${x.validText ? ` <span class="muted">(${esc(x.validText)})</span>` : ''}${x.rank === 'deprecated' ? ' <span class="badge">set aside</span>' : ''}${x.rival ? ' <span class="badge">another reading</span>' : ''}${x.alt ? ` <span class="badge">${esc(this.cb.altTitle(x.alt))}</span>` : ''}`;
     const relations = r.relations
       .filter((x) => !x.alt || alts.has(x.alt))
-      .map((x) => `<li><strong>${esc(REL_LABEL[x.rel] ?? x.rel.replace(/-/g, ' '))}</strong> ${this.link(x.to, x.toLabel, x.wanted)}${x.lagText ? ` <span class="muted">(${esc(x.lagText)})</span>` : ''} <span class="cite">— ${this.cites(r, x.sources, x.unsourced)}</span>${x.sources.filter((s) => s.quote).map((s) => `<blockquote>${esc(s.quote)}</blockquote>`).join('')}${x.note ? `<p class="note">${esc(x.note)}</p>` : ''}</li>`)
+      .map((x) => `<li><strong>${esc(REL_LABEL[x.rel] ?? x.rel.replace(/-/g, ' '))}</strong> ${this.link(x.to, x.toLabel, x.wanted)}${held(x)}${x.lagText ? ` <span class="muted">(${esc(x.lagText)})</span>` : ''} <span class="cite">— ${this.cites(r, x.sources, x.unsourced)}</span>${x.sources.filter((s) => s.quote).map((s) => `<blockquote>${esc(s.quote)}</blockquote>`).join('')}${denied(x)}${x.note ? `<p class="note">${esc(x.note)}</p>` : ''}</li>`)
       .join('');
-    const inverse = r.inverse.map((x) => `<li><strong>${esc(REL_LABEL[x.rel] ?? x.rel.replace(/-/g, ' '))}</strong> ${this.link(x.from, x.fromLabel)} <span class="muted">(stated by that record)</span></li>`).join('');
+    const inverse = r.inverse
+      .filter((x) => !x.alt || alts.has(x.alt))
+      .map((x) => `<li><strong>${esc(REL_LABEL[x.rel] ?? x.rel.replace(/-/g, ' '))}</strong> ${this.link(x.from, x.fromLabel)}${held(x)} <span class="muted">(stated by that record)</span></li>`)
+      .join('');
     const sources = Object.values(r.sources)
       .map((s) => `<li id="src-${esc(s.id)}"><p>${esc(s.citation)}</p>${s.doi ? `<a href="https://doi.org/${encodeURI(s.doi)}" target="_blank" rel="noopener">doi:${esc(s.doi)}</a>` : s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.url)}</a>` : ''} <span class="badge">${esc(s.kind)}</span>${s.license ? ` <span class="badge">${esc(s.license)}</span>` : ''}${s.written ? `<p class="written">Written ${esc(s.written)}.</p>` : ''}${s.type === 'text' && s.reliability ? `<p class="note">${esc(s.reliability)}</p>` : ''}${s.verified ? `<p class="verified">Checked: ${esc(s.verified.how)}</p>` : ''}</li>`)
       .join('');
@@ -458,8 +476,19 @@ export class InspectPanel {
       ${r.wanted.length ? `<section><h3>Wanted</h3><p class="method">Referred to here but not written yet: ${r.wanted.map((w) => `<code>${esc(w)}</code>`).join(', ')}.</p></section>` : ''}
       <section><h3>Sources</h3><ol class="sources">${sources}</ol></section>`,
     );
+    if (footprintClaim && isFootprint(footprintClaim.value)) {
+      const form = footprintClaim.value;
+      const ref = footprintClaim.ref;
+      const button = document.createElement('button');
+      button.className = 'see-it';
+      button.textContent = 'Inspect footprint';
+      button.onclick = () => inspectFootprint(form, r.label, () => {
+        this.el.querySelector(`[data-claim="${CSS.escape(ref)}"]`)?.scrollIntoView({ block: 'center' });
+      });
+      this.el.querySelector('.summary, .meta')?.after(button);
+    }
     // A taxon can be gone and seen, where the most of its fossils are.
-    const see = organism ? undefined : this.seeIt?.(r.id);
+    const see = this.seeIt?.(r.id, !!organism);
     if (see) {
       const button = document.createElement('button');
       button.className = 'see-it';
@@ -524,9 +553,10 @@ export class InspectPanel {
     const summary = where.sea
       ? 'A sea, drawn at the depth the elevation field gives it. Every animal you see is placed by a generator: only who could be here comes from fossils.'
       : `Where the climate field reads the land at ${esc(String(b.ageMa))} Ma it is ${esc(b.label.toLowerCase())}, and the transitions allow forest over ${Math.round(b.cover.forests * 100)}% of it and grass over ${Math.round(b.cover.grasses * 100)}%. Every plant and animal you see is placed by a generator: only who could be here comes from fossils.`;
-    this.frame(spec.site.stage ?? 'This place', `<div class="meta"><span class="kind">What lived here</span> <span class="badge basis-procedural">procedural</span></div>
+    const formation = group('formation', 'Recorded in the formation', 'Fossils from this formation identify these organisms. Their positions in the scene are generated.');
+    this.frame(spec.site.place ? spec.site.label : spec.site.stage ?? 'This place', `<div class="meta"><span class="kind">What lived here</span> <span class="badge basis-procedural">procedural</span></div>
       <p class="summary">${summary}</p>
-      ${none}${tiers}
+      ${none}${formation}${tiers}
       ${note ? `<section><p class="note">${esc(note)}</p></section>` : ''}`);
   }
 

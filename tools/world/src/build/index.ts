@@ -9,6 +9,7 @@ import type { ClimateRule } from '../../../../core/climate.ts';
 import { decodeTile, encodeTile } from '../../../../core/container.ts';
 import { bytesPrint } from '../../../../core/fingerprint.ts';
 import { ladderCounts } from '../../../../core/ladder.ts';
+import { searchRows } from './searchrows.ts';
 import type { CoverageFile, OverlaysFile, PeriodRecord, PeriodsFile, SearchFile, SeriesFile } from '../../../../core/records.ts';
 import { bakeRotationModel, parseRot, PLATE_OFFSET, RotationModel } from '../../../../core/rotation-model.ts';
 import { fromMa, parseDuration, parsePoint, PRESENT_YEAR, formatTime, toMa, type TimePointInput } from '../../../../core/time.ts';
@@ -50,7 +51,7 @@ import type { PlaceWorld } from '../../../../world/generators/life/spec.ts';
 import { FEATURE_INDEX } from '../../../../core/featuretiles.ts';
 import { prominenceOf, tileFeatures } from './featuretiles.ts';
 import { buildIce, type IceBuilt } from './ice.ts';
-import { hazardLayer, peopleLayer, polityLayer, presentLayer } from './layers.ts';
+import { hazardLayer, peopleLayer, polityLayer, presentLayer, stateRowKey } from './layers.ts';
 import { buildLandscape, disagreement, farmingAgreement, landscapeResolve } from './landscape.ts';
 import { fieldLayers } from './fieldlayers.ts';
 import { buildAtlas } from './atlas.ts';
@@ -587,7 +588,6 @@ export async function runBuild(args: string[]): Promise<number> {
     ),
   };
   put('periods.json', stableStringify(periods));
-  put('search.json', stableStringify(found));
   put('series.json', stableStringify({ series: seriesList } satisfies SeriesFile));
   put('planet.json', stableStringify(buildPlanet(solved)));
   const territoryFile = await buildTerritory(solved, log);
@@ -835,8 +835,19 @@ export async function runBuild(args: string[]): Promise<number> {
   if (present) put('present.json', stableStringify(present));
   const hazards = await hazardLayer(world, fixesOf('hazards'));
   if (hazards) put('hazards.json', stableStringify(hazards));
-  const polities = await polityLayer(world, new Set(territoryFile.territories.flatMap((t) => t.claims.flatMap((c) => c.rows.map((r) => r.name)))), fixesOf('polities'));
+  // The rows each record draws as its territory, by row: the viewer leaves a row to its records while one holds.
+  const claimedRows = new Map<string, string[]>();
+  for (const t of territoryFile.territories) {
+    for (const key of new Set(t.claims.flatMap((c) => c.rows.map((r) => stateRowKey(r.name, r.from))))) claimedRows.set(key, [...(claimedRows.get(key) ?? []), t.subject]);
+  }
+  const polities = await polityLayer(world, claimedRows, fixesOf('polities'));
   if (polities) put('polities.json', stableStringify(polities));
+  // Search: the records, with every name they go by and where the rows that are rows of them were drawn, and the
+  // states of the dataset that no record adopts, each name while it runs on in time (docs/STRUCTURE.md section 3.1).
+  const statesField = world.fields.find((x) => x.data?.as === 'polities');
+  const adopted = new Map(world.overlays.filter((o) => o.same_as).map((o) => [o.row, o.same_as!]));
+  const gap = (statesField?.params as { search_gap_yr?: number } | undefined)?.search_gap_yr ?? Infinity;
+  put('search.json', stableStringify(searchRows(found, polities, statesField?.rows?.kind ?? 'polity', gap, adopted, territoryFile)));
   // Fields of points, lines and areas, the one way (docs/STRUCTURE.md section 3.6): the languages and the roads.
   const layers = await fieldLayers(world, claims);
   for (const [path, content] of layers.files) put(path, content);

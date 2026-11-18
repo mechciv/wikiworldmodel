@@ -1,0 +1,93 @@
+id: people/wars/invasion-of-poland
+kind: event/campaign
+summary: >-
+  The German campaign against Poland in September and October 1939, the opening campaign of the
+  Second World War: the attack ordered for 1 September, the Red Army's move into eastern Poland
+  on 17 September, and the surrender of the last organized Polish force at Kock on 6 October.
+author: machine:claude-code
+same_as: { wikidata: Q150812 }
+claims:
+  name:
+    prop: name
+    value: { en: Invasion of Poland }
+    unsourced: An editorial label, the campaign's usual name in English.
+  start:
+    prop: start
+    value: 1 September 1939 CE
+    source:
+      - ref: src:hitler-1939-directive-1
+        loc: section 2
+        quote: "Date of attack: September 1, 1939."
+      - ref: src:kennedy-1956-german-campaign-in-poland
+        loc: p. 79
+        quote: At 1000 on 1 September Hitler reported the opening of hostilities to the assembled Reichstag
+    method: documentary
+    note: >-
+      The day the order set, and the day the attack was made. The order set the hour at 4:45
+      A.M.; Kennedy has the German Air Force open hostilities at 0440 (p. 78). Neither says by
+      which clock.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ww2-hitler-directive-1-1939.txt (sha256 f4e46927976baff3) and ww2-kennedy-1956-german-campaign-in-poland.txt (sha256 338160e6e7fcd1e2), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  end:
+    prop: end
+    value: 6 October 1939 CE
+    source:
+      ref: src:kennedy-1956-german-campaign-in-poland
+      loc: p. 119
+      quote: the Kock force surrendered on 6 October, adding 17,000 more to the total of prisoners taken by the Germans. The Polish Campaign was over
+    method: historical-account
+    note: >-
+      The surrender of the last organized Polish force, after the fighting at Kock from 4 to 6
+      October. Kennedy adds that sporadic fighting went on in remote areas for a considerable
+      period, and counts 36 days of operations (p. 120).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ww2-kennedy-1956-german-campaign-in-poland.txt (sha256 338160e6e7fcd1e2), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+relations:
+  part-of:
+    rel: part-of
+    to: people/wars/second-world-war
+    source:
+      ref: src:kennedy-1956-german-campaign-in-poland
+      loc: p. vii
+      quote: An enormous source of German material exists on this opening campaign of World War II.
+    note: >-
+      The campaign lies within the war from its first day to its last, so the relation has no
+      span of its own. On the usual reckoning the war begins as the campaign does
+      (people/wars/second-world-war, start-poland).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ww2-kennedy-1956-german-campaign-in-poland.txt (sha256 338160e6e7fcd1e2), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  german-reich:
+    rel: participant
+    to: people/polities/german-reich
+    source:
+      ref: src:hitler-1939-directive-1
+      loc: section 2
+      quote: The attack on Poland is to be carried out in accordance with the preparations made for Case White
+    note: The attacker, throughout.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ww2-hitler-directive-1-1939.txt (sha256 f4e46927976baff3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  second-polish-republic:
+    rel: participant
+    to: people/polities/second-polish-republic
+    source:
+      ref: src:kennedy-1956-german-campaign-in-poland
+      loc: p. 119
+      quote: The last organized stand by the Polish Army was made at Kock, where heavy fighting raged from 4 to 6 October.
+    note: The state attacked, throughout.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ww2-kennedy-1956-german-campaign-in-poland.txt (sha256 338160e6e7fcd1e2), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  soviet-union:
+    rel: participant
+    to: people/polities/soviet-union
+    valid: { lo: 17 September 1939 CE }
+    source:
+      ref: src:kennedy-1956-german-campaign-in-poland
+      loc: p. 123
+      quote: At 0200 on 17 September, in the presence of Molotov, the German Ambassador was informed by Stalin that Soviet troops would move into Poland at 0600 that same day.
+    note: >-
+      The Red Army moved into eastern Poland on 17 September, at Germany's urging (Kennedy, pp.
+      122-123), while the two were bound by their pact of non-aggression. The relation says that
+      the Soviet Union took part in the campaign from that day. It cannot say on which side, or
+      that in the wider war it was then on neither: a side is only a word in a note.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ww2-kennedy-1956-german-campaign-in-poland.txt (sha256 338160e6e7fcd1e2), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }

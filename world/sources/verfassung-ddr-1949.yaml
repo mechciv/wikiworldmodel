@@ -1,0 +1,23 @@
+id: src:verfassung-ddr-1949
+type: document
+kind: act
+citation: >-
+  Die Verfassung der Deutschen Demokratischen Republik vom 7. Oktober 1949. Gesetzblatt der
+  Deutschen Demokratischen Republik 1949, pp. 5–16.
+published: 1949
+title: Die Verfassung der Deutschen Demokratischen Republik
+url: http://www.documentarchiv.de/ddr/verfddr1949.html
+via: >-
+  documentArchiv.de, whose transcription gives the Gesetzblatt of 1949 as its source and marks
+  later amendments in notes of its own.
+reliability: >-
+  The constitution of 1949 with its promulgation formula: evidence of the day it was put into
+  force, by a law of the Provisional People's Chamber, and of how it speaks of Germany. The law
+  that put it into force was not read.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from documentarchiv.de on 2026-11-17. Read in German: the preamble, Articles 1 to 3
+    and 144 and the promulgation formula; Article 1 and the promulgation formula were compared
+    with the copy at verfassungen.de, which agrees. The quotes were found in the kept text by
+    quote-check.

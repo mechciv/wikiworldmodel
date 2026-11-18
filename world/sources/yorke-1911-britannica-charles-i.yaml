@@ -1,0 +1,23 @@
+id: src:yorke-1911-britannica-charles-i
+type: publication
+kind: review
+citation: >-
+  Yorke, P.C. (1911). Charles I. (1600–1649), king of Great Britain and Ireland. Encyclopædia
+  Britannica, 11th edition, vol. 5, pp. 906–912.
+authors:
+  - "Yorke, P.C."
+published: 1911
+title: Charles I. (1600–1649), king of Great Britain and Ireland
+container: Encyclopædia Britannica, 11th edition, vol. 5
+url: https://en.wikisource.org/wiki/1911_Encyclop%C3%A6dia_Britannica/Charles_I._(King_of_England)
+via: >-
+  English Wikisource's transcription of the volume, page by page against its scan; p. 906 is
+  marked proofread there.
+reliability: >-
+  A general encyclopaedia's life of James's son and heir, cited only for the day he succeeded
+  by his father's death.
+verified:
+  by: machine:claude-code
+  how: >-
+    The page fetched on 2026-11-17; the paragraph on the accession (p. 906) read. Quotation found
+    in the kept text by quote-check.

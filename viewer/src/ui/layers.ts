@@ -1,7 +1,7 @@
 // Today's borders and cities, and the hazards of the time shown, over the globe. They are rows of a
 // dataset, thousands of them, so they are drawn on a canvas and need no element each; a click finds
 // the nearest one drawn. At these times the plates have not moved enough to matter.
-import { cellAt, gridSize, hazardsNear, insideRow, levelOf, peopleAt, politiesAt, rangeAt, stepsAround, type HazardFile, type HazardRow, type PeopleFile, type PolitiesFile, type PolityRow, type PresentFile, type PresentPlace } from '../../../core/layers.ts';
+import { cellAt, gridSize, hazardsNear, insideRow, levelOf, peopleAt, rangeAt, statesAt, stepsAround, type HazardFile, type HazardRow, type PeopleFile, type PolitiesFile, type PolityRow, type PresentFile, type PresentPlace } from '../../../core/layers.ts';
 import { hueOf } from '../../../core/fieldlayers.ts';
 import { unitVector } from '../../../core/quat.ts';
 import { PRESENT_YEAR } from '../../../core/time.ts';
@@ -198,13 +198,19 @@ export class PolityLayer {
     this.el.hidden = true;
   }
 
-  /** `tint`: fill each state as well as outlining it, which hides what else is drawn on the land. */
-  update(camera: Camera, t: number, dist: number, width: number, height: number, tint = true): void {
+  /**
+   * `tint`: fill each state as well as outlining it, which hides what else is drawn on the land. `records`: rows
+   * that records draw as their territory and that have no colour of their own at this time (TerritoryLayer.rest):
+   * they are drawn here among the states, under their records' names, so that a state is never dropped.
+   * `holding`: the records whose territory holds now, which keep their own rows of the dataset to themselves.
+   */
+  update(camera: Camera, t: number, dist: number, width: number, height: number, tint = true, records: PolityRow[] = [], holding: ReadonlySet<string> = new Set()): void {
     this.stats = { rows: 0, names: 0 };
-    if (this.file && this.key !== String(t)) {
-      // At the present and after, today's map takes over.
-      this.now = t < PRESENT_YEAR ? politiesAt(this.file, t).sort((a, b) => b.area - a.area) : [];
-      this.key = String(t);
+    const key = `${t}|${records.map((r) => `${r.record}:${r.name}@${r.from}`).join('+')}|${[...holding].sort().join('+')}`;
+    if (this.file && this.key !== key) {
+      // At the present and after, today's map takes over. A row that a record holding now draws is that record's.
+      this.now = t < PRESENT_YEAR ? [...statesAt(this.file, t, holding), ...records].sort((a, b) => b.area - a.area) : [];
+      this.key = key;
     }
     const on = !!this.file && this.now.length > 0;
     this.el.hidden = !on;
@@ -253,16 +259,17 @@ export class PolityLayer {
     g.textBaseline = 'middle';
     for (const l of labels) {
       if (this.stats.names >= room) break;
-      const w = g.measureText(l.r.name).width;
+      const name = l.r.label ?? l.r.name;
+      const w = g.measureText(name).width;
       const box: [number, number, number, number] = [l.x - w / 2 - 2, l.y - 8, l.x + w / 2 + 2, l.y + 8];
       if (boxes.some((b) => b[0] < box[2] && box[0] < b[2] && b[1] < box[3] && box[1] < b[3])) continue;
       boxes.push(box);
       this.stats.names++;
       g.lineWidth = 3;
       g.strokeStyle = 'rgba(8, 12, 20, 0.7)';
-      g.strokeText(l.r.name, l.x, l.y);
+      g.strokeText(name, l.x, l.y);
       g.fillStyle = 'rgba(255, 246, 228, 0.92)';
-      g.fillText(l.r.name, l.x, l.y);
+      g.fillText(name, l.x, l.y);
     }
     g.textAlign = 'start';
   }

@@ -16,6 +16,8 @@ claims:
       ref: src:lam-2010-alphabet
       loc: p. 189
       quote: two single-line rock inscriptions were discovered at the desert site of Wadi el-Hol, near Thebes in Upper Egypt
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
   location:
     prop: location
     value: { lat: 25.93, lon: 32.444, frame: frame:earth/present-day }
@@ -38,6 +40,8 @@ claims:
     method: expert-estimate
     rank: preferred
     note: Preferred as the finders' date with its reason; at second hand through Lam, since Darnell et al. were not read.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
   date-waal:
     prop: date
     value: { lo: 1900 BCE, hi: 1800 BCE }
@@ -46,3 +50,5 @@ claims:
       loc: p. 85
       quote: the oldest now known alphabetic inscriptions stem from Wadi el-Hol in Egypt, dating to between 1900 and 1800 bc
     method: expert-estimate
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-waal-2018-phoenician-letters.txt (sha256 15d6828f21b7acfa), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }

@@ -1,0 +1,23 @@
+id: src:eire-confirmation-of-agreements-act-1938
+type: document
+kind: act
+citation: >-
+  Parliament of the United Kingdom. An Act to confirm and give effect to certain agreements as
+  to the relations between the United Kingdom and Eire (Eire (Confirmation of Agreements) Act,
+  1938), 1 & 2 Geo. 6 c. 25, 17 May 1938.
+published: 1938
+title: Eire (Confirmation of Agreements) Act, 1938
+url: https://www.legislation.gov.uk/ukpga/Geo6/1-2/25/pdfs/ukpga_19380025_en.pdf
+via: >-
+  legislation.gov.uk (The National Archives): a scan of the King's Printer's copy, as enacted,
+  read through the text layer of the PDF, which misreads the name in the headings ("Hire" for
+  Eire); section 1 is given cleanly.
+reliability: >-
+  The British Act whose first section says what the Irish Free State is to be called in British
+  law after the Constitution of 1937: Eire, the Irish name taken into English. It is evidence
+  that Britain treated the change as a new name for the same territory, and of the name it used.
+verified:
+  by: machine:claude-code
+  how: >-
+    The PDF fetched on 2026-11-17; the preamble and sections 1 and 2 read. Quotation found in
+    the kept text by quote-check.

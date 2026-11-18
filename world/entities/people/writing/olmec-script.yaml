@@ -1,0 +1,21 @@
+id: people/writing/olmec-script
+kind: development/script
+summary: >-
+  The writing of the Olmec of the Gulf Coast of Mexico, among the earliest in Mesoamerica and still unread.
+  Written for the relation that names it as a forerunner of Maya writing (people/writing/maya-script): its
+  inscriptions and their dates are not yet records.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Olmec script }
+    source:
+      ref: src:palka-2010-maya-writing
+      loc: p. 226
+      quote: The Maya were not the first literate people in ancient Mexico and Central America, since both Olmec and Zapotec scripts were invented earlier.
+    note: >-
+      Palka puts the invention of writing in Mesoamerica in the Early or Middle Formative period, about 1200 to 600
+      BCE, with the Olmec of the Gulf Coast among others, and says that all early writing there remains undeciphered
+      (p. 226); none of that is written here as a claim.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }

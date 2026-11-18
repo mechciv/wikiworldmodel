@@ -1,0 +1,26 @@
+id: src:morgan-2009-decline-and-fall-of-the-mongol-empire
+type: publication
+kind: review
+citation: >-
+  Morgan, D. (2009). The Decline and Fall of the Mongol Empire. Journal of the Royal Asiatic
+  Society 19(4), 427–437.
+authors:
+  - "Morgan, D."
+published: 2009
+title: The Decline and Fall of the Mongol Empire
+container: Journal of the Royal Asiatic Society 19(4)
+doi: 10.1017/S1356186309990046
+url: https://www.cambridge.org/core/journals/journal-of-the-royal-asiatic-society/article/abs/decline-and-fall-of-the-mongolempire/A8549B4ACF1A3A1B590BD8D80F59B7B4
+via: The publisher's page for the article, which shows its abstract and notes to a reader without a subscription.
+reliability: >-
+  A journal article by a historian of the Mongols on why the empire ended, which takes its
+  division into four khanates as given and studies the collapse of each. Only its abstract was
+  read, so it is cited only for what the abstract says: that the empire divided into four
+  khanates, and what it calls them.
+verified:
+  by: machine:claude-code
+  how: >-
+    The publisher's page fetched on 2026-11-17: the article's PDF address led to the abstract
+    page, and the full text is behind a paywall. Only the abstract was read. The page runs some
+    of its words together ("the empireinto four khanates"); the quotation is a stretch it
+    prints whole. It was found in the kept text by quote-check.

@@ -1,0 +1,114 @@
+id: people/calendars/long-count-zero-day
+kind: event/epoch
+summary: >-
+  The day the Maya Long Count counts from, 4 Ajaw 8 Kumk'u, which the inscriptions write as
+  the end of thirteen b'ak'tuns, 13.0.0.0.0. Which day of the European calendar it was is the
+  correlation question: the constants argued for it, 584283, 584285 and 584286, are that day's
+  Julian Day Number, reckoned from colonial documents, the day count still kept in the
+  Guatemalan highlands and astronomy, and every date written in the Long Count moves with the
+  one chosen.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Zero day of the Maya Long Count }
+    unsourced: An editorial label.
+  calendar:
+    prop: calendar
+    value: long-count
+    source:
+      - ref: src:lounsbury-1978-maya-numeration
+        loc: "section III, Calendar, Chronology, and Computation"
+        quote: "In Mayanist literature the count of days from 4 Ahau 8 Cumhu, 13.0.0.0.0, is commonly called the “long count”"
+      - ref: src:martin-skidmore-2012-584286-correlation
+        loc: "p. 4"
+        quote: "A Long Count date is similar to a Julian Day Number in that both record the number of days elapsed from a base date."
+    note: >-
+      The inscriptions write this day as 13.0.0.0.0, the last day of the thirteen b'ak'tuns of
+      the era before (Lounsbury). In a record it is day 0 of the count: 13.0.0.0.0 Long Count is
+      read as the day thirteen b'ak'tuns after it.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in lounsbury-1978-maya-numeration.txt (sha256 645f420af7fe6f2a) and martin-skidmore-2012-584286-correlation.txt (sha256 41efa8a7ce3dce30), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  date-584283:
+    prop: date
+    value: JDN 584283
+    source:
+      - ref: src:thompson-1950-maya-hieroglyphic-writing
+        loc: "Appendix II, p. 305"
+        quote: "in view of the probability that Landa was one day off in placing 12 Kan on July 16 (O.S.), and the virtual certainty that there never was a break of one day in the LC, my original Ahau equation of 584,285 must be reduced to 584,283"
+      - ref: src:martin-skidmore-2012-584286-correlation
+        loc: "p. 4"
+        quote: "This led Thompson to 584283, a correlation constant popular with many scholars today, particularly those who hold that the count kept by “day keepers” in the Guatemalan highlands is part of an unbroken tradition"
+      - ref: src:kennett-2013-maya-calendar-radiocarbon
+        loc: "Introduction, third paragraph"
+        quote: "In this case a coefficient of 584283 days is added to the Long Count to obtain the equivalent day in the European calendar."
+    method: calendar-correlation
+    basis: reconstruction
+    rank: preferred
+    note: >-
+      Thompson's last constant. In 1950 he took two days off his own 584,285: the 260-day count
+      still kept in the Guatemalan highlands and the Aztec day names recorded at the conquest
+      both put the Maya new year a day earlier than Landa's 16 July (Julian), and inscriptions
+      showed that the count had never slipped a day. Preferred for that agreement with a count
+      still kept, and because it is the one most used: Martin and Skidmore say the majority of
+      scholars have accepted Thompson's argument for it (p. 12), and Kennett et al. take it as
+      their variant. Their radiocarbon dates on a lintel at Tikal bear out the whole family,
+      584280 to 584285, against correlations decades and centuries away; dates that span
+      decades cannot tell days apart. Martin and Skidmore argue (p. 14) that 584283 cannot be
+      reached from Landa's date at all. Kennett et al. give this day as August 11, 3114 BC, in
+      the Gregorian calendar carried back; it is the same day.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in thompson-1950-maya-hieroglyphic-writing.txt (sha256 2303785eaa0b9ab0), martin-skidmore-2012-584286-correlation.txt (sha256 41efa8a7ce3dce30) and kennett-2013-maya-calendar-radiocarbon.txt (sha256 49bfd0f0345ed630), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  date-584285:
+    prop: date
+    value: JDN 584285
+    source:
+      - ref: src:thompson-1935-maya-chronology-correlation-question
+        loc: "p. 75"
+        quote: "This gives an Ahau equation of 584284, but it was presumed that a break of a day occurred when the days lost one day in month position (i.e. 13 Ahau 2 Pop was used instead of 13 Ahau 3 Pop). In this way an equation of 584285 was obtained for the early dates."
+      - ref: src:lounsbury-1978-maya-numeration
+        loc: "section VII, A Time Perspective"
+        quote: "the favored alternatives within this set are 584,283 (Thompson’s third and last revision) and 584,285 (his first). The greater of these, preferably increased by yet another day, is the only one of this set that would be consistent with the interpretation of moon ages and of dates in the eclipse table that has been presented here."
+      - ref: src:martin-skidmore-2012-584286-correlation
+        loc: "p. 3"
+        quote: "The two most widely accepted correlations are 584285 and 584283."
+    method: calendar-correlation
+    basis: reconstruction
+    note: >-
+      Thompson's first constant, of 1927: Landa's new year on 16 July 1553 (Julian) gives
+      584284, and he added a day for a break he supposed in the count. He withdrew it in 1950
+      for 584283, when inscriptions showed there had been no such break. Lounsbury took it up
+      again in 1978 on other grounds, that the ages of the moon on the monuments and the
+      eclipse table of the Dresden Codex fit it, or a day more, and not 584283. Martin and
+      Skidmore count it with 584283 as the two most widely accepted, and report (p. 12, note
+      13) that Bricker and Bricker reject Lounsbury's test of it. Not preferred: its author
+      gave up the argument it was first made on, and the argument from astronomy turns on what
+      the Maya were recording, which the sources read here dispute.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in thompson-1935-maya-chronology-correlation-question.txt (sha256 f3a81b07245e53d4), lounsbury-1978-maya-numeration.txt (sha256 645f420af7fe6f2a) and martin-skidmore-2012-584286-correlation.txt (sha256 41efa8a7ce3dce30), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  date-584286:
+    prop: date
+    value: JDN 584286
+    source:
+      - ref: src:martin-skidmore-2012-584286-correlation
+        loc: "p. 7"
+        quote: "Subtracting the Maya Day Number from the Julian Day Number in effect at the time of the eclipse yields a correlation constant of 584286"
+      - ref: src:martin-skidmore-2012-584286-correlation
+        loc: "p. 15"
+        quote: "The only value that would connect the Classic Maya and European calendars would be 584286."
+      - ref: src:lounsbury-1978-maya-numeration
+        loc: "note 22"
+        quote: "The suggested one–day increment to Thompson’s first constant, giving 584, 286 rather than 584, 285, has the advantage that it permits acceptance of the best apparent candidate for the recording of a solar-eclipse observation on a stone monument."
+    method: calendar-correlation
+    basis: reconstruction
+    note: >-
+      From one inscription. Stela 3 of Santa Elena Poco Uinic dates an event whose glyph is
+      read as a solar eclipse to 9.17.19.13.16, and a total eclipse crossed the site on 16 July
+      790 (Julian), Julian Day Number 2009802: the difference is 584286. It stands or falls
+      with that reading of the glyph, which Lounsbury says is still to be proven, and by Martin
+      and Skidmore's own account it had found no support since the 1930s, because it is out of
+      step with the highland count and with Landa. They add that if the Long Count day began at
+      sunrise, as they think likelier, an event after dark fell on the next European day, which
+      is 584287 for those hours: a single day number cannot say that.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in martin-skidmore-2012-584286-correlation.txt (sha256 41efa8a7ce3dce30) and lounsbury-1978-maya-numeration.txt (sha256 645f420af7fe6f2a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }

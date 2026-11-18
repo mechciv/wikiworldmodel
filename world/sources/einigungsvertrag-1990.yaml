@@ -1,0 +1,27 @@
+id: src:einigungsvertrag-1990
+type: document
+kind: act
+citation: >-
+  Vertrag zwischen der Bundesrepublik Deutschland und der Deutschen Demokratischen Republik über
+  die Herstellung der Einheit Deutschlands (Einigungsvertrag), Berlin, 31 August 1990.
+  Bundesgesetzblatt 1990 II, p. 889.
+published: 1990
+title: >-
+  Vertrag zwischen der Bundesrepublik Deutschland und der Deutschen Demokratischen Republik über die
+  Herstellung der Einheit Deutschlands (Einigungsvertrag)
+url: https://www.gesetze-im-internet.de/einigvtr/BJNR208890990.html
+via: >-
+  Gesetze im Internet, the federal portal of German federal law, which gives the treaty as it
+  stands today: its heading says it was last adjusted in 2022. The articles quoted here carry no
+  note of a change.
+reliability: >-
+  The treaty by which the two German states agreed the accession: evidence of what they agreed,
+  in their own words, among it the day the accession takes effect and that the Democratic
+  Republic's lands become lands of the Federal Republic. It is the terms of the accession, not the
+  act of acceding, which was the Democratic Republic's own declaration and was not read here.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from gesetze-im-internet.de on 2026-11-17. Read in German: the heading, the preamble,
+    Articles 1 to 12, 44 and 45 and the closing formula; the other articles, the protocol and the
+    annexes were not read. The quotes were found in the kept text by quote-check.

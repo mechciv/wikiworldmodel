@@ -11,8 +11,8 @@ import { cityKind, type Feature, type FramesFile, type TileHeader, type Tileset 
 import { PLATE_OFFSET, PlateModels, RotationModel } from '../../../core/rotation-model.ts';
 import type { IceHeader } from '../../../core/ice.ts';
 import { chosenClaim, type PlanetFile } from '../../../core/planet.ts';
-import { peopleAt, type PeopleFile, type PeopleHeader } from '../../../core/layers.ts';
-import { territoriesAt, type TerritoryFile } from '../../../core/territory.ts';
+import { peopleAt, statesAt, type PeopleFile, type PeopleHeader, type PolitiesFile } from '../../../core/layers.ts';
+import { drawnFirst, territoriesAt, type TerritoryFile } from '../../../core/territory.ts';
 import type { CoverageFile, EntityRecord, PeriodsFile, SearchFile, SeriesFile } from '../../../core/records.ts';
 import { decodeRuns } from '../../../core/coverage.ts';
 import { seaLevelAt } from '../../../core/sealevel.ts';
@@ -559,9 +559,66 @@ describe('build', () => {
     expect([peak.name, peak.from, peak.to, Math.round(peak.area / 1e5)]).toEqual(['Roman Empire', 117, 127, 53]);
     // In 420 CE there were two courts: the West drawn as its own polity, part of Rome.
     expect(territoriesAt(file, 420, {}).map((a) => a.territory.subject).sort()).toEqual(['people/polities/rome', 'people/polities/western-roman-empire']);
-    expect(territoriesAt(file, 1460, {})).toEqual([]);
+    // After the fall of Constantinople Rome draws nothing: the states of 1460 that are drawn so have records of their own.
+    expect(territoriesAt(file, 1460, {}).map((a) => a.territory.subject)).not.toContain('people/polities/rome');
     const ts = JSON.parse(readFileSync(join(dir, 'tileset.json'), 'utf8')) as Tileset;
     expect(ts.credits.map((c) => c.label)).toContain('Borders from Cliopatria (Bennett et al. 2025, Seshat)');
+    // The rows Rome draws are marked as its own, and left to it while it holds; the dataset's last Byzantine row,
+    // wholly after the state ended, is not Rome's. Once Rome has ended, what is left of its last row is the
+    // dataset's again, as that row is: nothing the dataset says is dropped.
+    const states = JSON.parse(readFileSync(join(dir, 'polities.json'), 'utf8')) as PolitiesFile;
+    const mine = new Set(rows.map((r) => `${r.name}@${r.from}`));
+    for (const r of states.rows) expect(r.claimedBy?.includes('people/polities/rome') ?? false).toBe(mine.has(`${r.name}@${r.from}`));
+    expect(states.rows.filter((r) => r.name === 'Byzantine Empire').map((r) => [r.from, r.to, r.claimedBy?.length ?? 0]).slice(-2)).toEqual([[1440, 1468, 1], [1468, 1475, 0]]);
+    const names = (t: number, holding: string[]) => statesAt(states, t, new Set(holding)).filter((r) => r.name === 'Byzantine Empire').length;
+    expect(names(1450, ['people/polities/rome'])).toBe(0);
+    expect(names(1460, [])).toBe(1);
+    expect(names(1470, [])).toBe(1);
+  });
+
+  it('tells names that follow one another from claims that compete', () => {
+    const rec = (id: string) => JSON.parse(readFileSync(join(latestBuild(), 'records', `${id}.json`), 'utf8')) as EntityRecord;
+    // Russia's three official names each hold for a span of their own: they take turns, and none is a choice.
+    const official = rec('people/polities/russia').claims.filter((c) => c.prop === 'official_name');
+    expect(official.length).toBe(3);
+    expect(official.map((c) => [c.turn, c.competing])).toEqual([[true, false], [true, false], [true, false]]);
+    // The four ends of the Soviet Union are readings of one date, and compete.
+    const ends = rec('people/polities/soviet-union').claims.filter((c) => c.prop === 'end');
+    expect(ends.length).toBe(4);
+    expect(ends.every((c) => c.competing && !c.turn)).toBe(true);
+  });
+
+  it('draws every state that has a record, however many hold at once: three in colours of their own, the others among the states', () => {
+    const dir = latestBuild();
+    const file = JSON.parse(readFileSync(join(dir, 'territory.json'), 'utf8')) as TerritoryFile;
+    const states = JSON.parse(readFileSync(join(dir, 'polities.json'), 'utf8')) as PolitiesFile;
+    // In 1300 CE the four states the Mongol Empire divided into, the Holy Roman Empire and Rome at Constantinople
+    // all hold, and each draws rows of the borders dataset.
+    const at = territoriesAt(file, 1300, {});
+    const subjects = at.map((a) => a.territory.subject);
+    for (const id of ['yuan-dynasty', 'golden-horde', 'chagatai-khanate', 'ilkhanate', 'holy-roman-empire', 'rome']) expect(subjects).toContain(`people/polities/${id}`);
+    const { drawn, rest } = drawnFirst(at, null, 3);
+    expect(drawn.length).toBe(3);
+    expect([...drawn, ...rest].map((a) => a.territory.subject).sort()).toEqual([...subjects].sort());
+    // The largest take the colours, and the record that is open takes one whatever its size.
+    const area = (a: (typeof at)[number]) => a.rows.reduce((n, r) => n + r.area, 0);
+    expect(Math.min(...drawn.map(area))).toBeGreaterThanOrEqual(Math.max(...rest.map(area)));
+    expect(rest.map((a) => a.territory.subject)).toContain('people/polities/rome');
+    expect(drawnFirst(at, 'people/polities/rome', 3).drawn.map((a) => a.territory.subject)).toContain('people/polities/rome');
+    // A row is left out of the states exactly while a record that draws it holds: none is drawn twice, none dropped.
+    const holding = new Set(subjects);
+    const shown = new Set(statesAt(states, 1300, holding));
+    const all = statesAt(states, 1300, new Set());
+    expect(all.length).toBeGreaterThan(shown.size);
+    for (const r of all) expect(shown.has(r)).toBe(!(r.claimedBy ?? []).some((id) => holding.has(id)));
+    // In the picture where the empire was transferred to the West in 800 CE, the Holy Roman Empire is there in
+    // 950 CE and draws its rows; in the default picture, where it begins in 962 CE, those rows are the dataset's.
+    const hre = 'people/polities/holy-roman-empire';
+    expect(territoriesAt(file, 950, {}).map((a) => a.territory.subject)).not.toContain(hre);
+    const early = states.rows.filter((r) => r.claimedBy?.includes(hre) && r.from <= 950 && r.to > 950);
+    expect(early.length).toBeGreaterThan(0);
+    expect(statesAt(states, 950, new Set()).filter((r) => early.includes(r)).length).toBe(early.length);
+    expect(statesAt(states, 950, new Set([hre])).filter((r) => early.includes(r)).length).toBe(0);
   });
 
   it('draws where people lived from its grid, whose cells come to the world\'s series at its steps and between them', () => {

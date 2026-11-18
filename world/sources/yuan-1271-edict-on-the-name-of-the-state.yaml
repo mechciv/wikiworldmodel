@@ -1,0 +1,28 @@
+id: src:yuan-1271-edict-on-the-name-of-the-state
+type: document
+kind: act
+citation: >-
+  Edict of the Great Khan Qubilai establishing Great Yuan (大元) as the name of the state, issued
+  on the day yihai of the eleventh month of the eighth year of Zhiyuan (1271), as given in the
+  Yuan shi (元史), chapter 7 (本紀第七, 世祖四).
+published: 1271
+title: Edict establishing Great Yuan as the name of the state
+url: https://zh.wikisource.org/wiki/%E5%85%83%E5%8F%B2/%E5%8D%B7007
+via: >-
+  The text of the edict as the Yuan shi gives it in chapter 7, read on Chinese Wikisource, which
+  prints critical notes under the text.
+reliability: >-
+  The proclamation itself, in the words of the court that issued it, as the dynasty's official
+  history, compiled under the Ming, preserves it. It is evidence of what was proclaimed and
+  when, and of how the court described its own state: as the one that Taizu, the founder whom
+  the same history's first chapter names as Temüjin, had raised, and which had gone without a
+  name. It is not evidence that anyone else saw that state so.
+verified:
+  by: machine:claude-code
+  how: >-
+    Chapter 7 fetched from Chinese Wikisource on 2026-11-17; the entries for the eighth year of
+    Zhiyuan read, and the edict in full, as an agent reads classical Chinese. The edict has no
+    articles, so locators name its paragraph, or the annals' entry that introduces it. Its date is
+    in the Chinese calendar and is left so: the year is given as 1271 by counting the years of the
+    reign-period, and the day is not converted. The quotations were found in the kept text by
+    quote-check.

@@ -1,0 +1,25 @@
+id: src:constitution-of-ireland-1937
+type: document
+kind: act
+citation: >-
+  Bunreacht na hÉireann (Constitution of Ireland), enacted by the People on 1 July 1937, in
+  operation as from 29 December 1937. Edition of January 2020, a copy of the text enrolled on 13
+  November 2019.
+published: 1937
+title: Constitution of Ireland
+url: https://www.irishstatutebook.ie/eli/cons/en/html
+via: >-
+  The electronic Irish Statute Book (Office of the Attorney General): the text in force, with
+  the amendments made since 1937 and without the transitory provisions (Articles 51 to 63), which
+  their own terms leave out of official texts.
+reliability: >-
+  The Constitution that replaced that of the Irish Free State and named the State Éire, or
+  Ireland. It is evidence of the name, of the day it came into operation, and of what it carried
+  over from Saorstát Éireann: its citizens, its laws, its Government's property and debts.
+verified:
+  by: machine:claude-code
+  how: >-
+    The page fetched on 2026-11-17; the title page, the list of amendments, Articles 1 to 9 and 48
+    to 50 read. Quotations found in the kept text by quote-check. This is not the text as
+    enacted: English Wikisource's transcription of the 1937 text, which is not set against a
+    scan, has Article 4 in the same words.

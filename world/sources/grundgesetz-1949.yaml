@@ -1,0 +1,25 @@
+id: src:grundgesetz-1949
+type: document
+kind: act
+citation: >-
+  Grundgesetz für die Bundesrepublik Deutschland vom 23. Mai 1949, as first promulgated.
+  Bundesgesetzblatt 1949, pp. 1–19.
+published: 1949
+title: Grundgesetz für die Bundesrepublik Deutschland
+url: http://www.documentarchiv.de/brd/1949/grundgesetz.html
+via: >-
+  documentArchiv.de, whose transcription gives the Bundesgesetzblatt of 1949 as its source. The
+  transcription at 1000dokumente.de (100(0) Schlüsseldokumente zur deutschen Geschichte im 20.
+  Jahrhundert), also from the gazette, was read beside it: the two agree in the passages quoted,
+  but for two slips in the preamble there ("um, dem" and "zugeben").
+reliability: >-
+  The constitution in its first wording: evidence of when it was promulgated and took force, of
+  where it applied at first and of what it says of the German Reich and of the other parts of
+  Germany. The text is the original of 1949, not the Basic Law as later amended.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from documentarchiv.de on 2026-11-17, over plain HTTP. Read in German: the
+    promulgation formula, the preamble, Articles 23, 116, 123, 134, 135 and 144 to 146 and the
+    closing lines; the same passages were read in the copy at 1000dokumente.de, and Article 145
+    in the copy at verfassungen.de. The quotes were found in the kept text by quote-check.

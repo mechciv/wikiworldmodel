@@ -12,6 +12,8 @@ claims:
       ref: src:lam-2010-alphabet
       loc: p. 189
       quote: Mesopotamian cuneiform and Egyptian hieroglyphs
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
   start:
     prop: start
     value: { ref: people/writing/abydos-tomb-u-j }
@@ -21,6 +23,8 @@ claims:
       quote: “proto-royal” Tomb U-j which produced the as yet earliest evidence of writing in Egypt
     method: radiometric/radiocarbon
     note: The date is the tomb's. Earlier pot marks and images are not counted as writing, in Stauder's account, for they do not record language.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
   end:
     prop: end
     value: 394 CE
@@ -38,6 +42,8 @@ claims:
       loc: p. 189
       quote: (thus requiring them to be deciphered by modern scholars)
     note: For the developed script. Stauder warns that readings of the Tomb U-j signs may project later values back on them.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
   location:
     prop: location
     value: { lat: 26.174912, lon: 31.907992, frame: frame:earth/present-day }
@@ -58,3 +64,29 @@ relations:
       ref: src:stauder-2010-earliest-egyptian-writing
       loc: p. 138
       quote: The first forms of emerging writing were found in the “proto-royal” Tomb U-j in the Umm el-Qaʾab cemetery, in the vicinity of This/Abydos in Upper Egypt
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  from-mesopotamian-writing:
+    rel: arose-from
+    to: people/writing/proto-cuneiform
+    source:
+      - ref: src:stauder-2010-earliest-egyptian-writing
+        loc: p. 142
+        quote: This led to the — always controversial — hypothesis that Egyptian writing may have originated as a result of cultural influence from Mesopotamia
+      - ref: src:stauder-2010-earliest-egyptian-writing
+        loc: p. 142
+        quote: an emerging writing, which can now be modeled as a local sequence
+      - ref: src:woods-2010-visible-language
+        loc: p. 16 (introduction)
+        quote: the idea of writing, rather than the technology itself, spread during periods of strong cultural influence, to Egypt at the beginning of the third millennium
+      - ref: src:woods-2010-visible-language
+        loc: p. 16 (introduction)
+        quote: further undermine the old assumption that writing arose in Egypt under Sumerian influences
+    rank: deprecated
+    note: >-
+      An old hypothesis, kept as given up: ranked deprecated, so no date follows from it. It had the idea of writing, and not the signs, come to Egypt from Mesopotamia (stimulus diffusion,
+      most closely associated with Gelb's A Study of Writing, 1952); the Egyptian look of the signs was read as a foreign technology adapted to local purposes. Stauder calls it always
+      controversial, and both he and Woods set it aside after the finds of Tomb U-j, published in 1998: they bring Egyptian writing close to the Mesopotamian in date, and show an early
+      stage that Stauder models as a local sequence. Woods counts Egypt among the four best candidates for an independent invention of writing (p. 15).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33) and scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }

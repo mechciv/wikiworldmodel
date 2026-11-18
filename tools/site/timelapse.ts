@@ -135,6 +135,10 @@ interface CameraBeat {
   v?: number;
   /** a site: the view its "Fly down into" button arrives at, in place of the rest */
   arrive?: string;
+  /** leave out the way from here to the next beat: the one view dissolves into the other, each going on as it was going */
+  skip?: boolean;
+  /** from here on, the hour a scene is lit by */
+  hour?: number;
 }
 
 interface Caption {
@@ -150,7 +154,7 @@ interface Shot {
   camera: CameraBeat[];
   /** degrees a second, or false for no clouds */
   clouds?: CloudDrift | false;
-  /** the hour a city is lit by, if not the viewer's */
+  /** the hour a scene is lit by until a camera beat says otherwise, if not the viewer's */
   hour?: number;
   captions?: Caption[];
 }
@@ -163,7 +167,14 @@ function yearOf(world: World, b: Beat): number {
   return y;
 }
 
-type Camera = Required<Omit<CameraBeat, 'arrive'>>;
+interface Camera {
+  at: number;
+  lat: number;
+  lon: number;
+  d: number;
+  h: number;
+  v: number;
+}
 
 function cameraOf(world: World, c: CameraBeat): Camera {
   if (c.arrive) {
@@ -177,10 +188,12 @@ function cameraOf(world: World, c: CameraBeat): Camera {
 
 /**
  * A monotone cubic through points (Fritsch–Carlson): smooth, and never past a point it passes
- * through, so time never runs backwards and a hold (two equal values) holds still.
+ * through, so time never runs backwards and a hold (two equal values) holds still. Past its ends it
+ * holds there, or with `extend` goes on as it was going.
  */
-function monotone(xs: number[], ys: number[]): (x: number) => number {
+function monotone(xs: number[], ys: number[], extend = false): (x: number) => number {
   const n = xs.length;
+  if (n === 1) return () => ys[0];
   const d = xs.slice(0, -1).map((x, i) => (ys[i + 1] - ys[i]) / (xs[i + 1] - x));
   const m = ys.map((_, i) => (i === 0 ? d[0] : i === n - 1 ? d[n - 2] : d[i - 1] * d[i] <= 0 ? 0 : (d[i - 1] + d[i]) / 2));
   for (let i = 0; i < n - 1; i++) {
@@ -197,8 +210,8 @@ function monotone(xs: number[], ys: number[]): (x: number) => number {
     }
   }
   return (x) => {
-    if (x <= xs[0]) return ys[0];
-    if (x >= xs[n - 1]) return ys[n - 1];
+    if (x <= xs[0]) return ys[0] + (extend ? m[0] * (x - xs[0]) : 0);
+    if (x >= xs[n - 1]) return ys[n - 1] + (extend ? m[n - 1] * (x - xs[n - 1]) : 0);
     let i = 0;
     while (x > xs[i + 1]) i++;
     const h = xs[i + 1] - xs[i];
@@ -212,14 +225,29 @@ function monotone(xs: number[], ys: number[]): (x: number) => number {
 /** How far into the past to measure the logarithm of the age from, in Ma, so that the present has one. */
 const LOG_FLOOR = 0.005;
 
+/** What a frame draws: the world at a time, from a camera, and the hour a scene is lit by. */
+interface Look {
+  year: number;
+  cam: CameraState;
+  hour?: number;
+}
+
 interface Frame {
   s: number;
   /** the time shown, in astronomical years */
   year: number;
-  cam: CameraState;
+  look: Look;
   drift?: CloudDrift;
-  /** within a dissolve: the world just before and just after the change, and how far from the one to the other */
-  across?: { before: number; after: number; w: number };
+  /** within a dissolve: what is drawn just before the change and just after it, and how far from the one to the other */
+  across?: { before: Look; after: Look; w: number };
+}
+
+/** A smooth way through camera beats, the distance from the ground on a logarithm; past its ends it goes on as it was going. */
+function path(beats: Camera[]): (s: number) => CameraState {
+  const xs = beats.map((c) => c.at);
+  const along = (f: (c: Camera) => number) => monotone(xs, beats.map(f), true);
+  const [lat, lon, heading, tilt, height] = [along((c) => c.lat), along((c) => c.lon), along((c) => c.h), along((c) => c.v), along((c) => Math.log(c.d - 1))];
+  return (s) => ({ lat: lat(s), lon: lon(s), dist: 1 + Math.exp(height(s)), heading: heading(s), tilt: Math.max(0, tilt(s)) });
 }
 
 /** Every frame of a shot: its time, its camera, its clouds, and whether it dissolves. */
@@ -255,18 +283,25 @@ function plan(shot: Shot, world: World): Frame[] {
   const curve = monotone(knots.map((k) => k.s), knots.map((k) => k.v));
 
   // The camera: the distance from the ground on a logarithm, so a fall from orbit to the street is as even
-  // in its scale as a turn; a heading turns the short way round, and so does the way to a site.
+  // in its scale as a turn; a heading turns the short way round, and so does the way to a site. It goes
+  // in runs between skips: across a skip the one run's view dissolves into the next's, each going on as
+  // it was going, so what lies between them is never drawn.
   const cams = shot.camera.map((c) => cameraOf(world, c));
   for (let i = 1; i < cams.length; i++) {
+    if (cams[i].at <= cams[i - 1].at) throw new Error(`the camera beats at ${cams[i - 1].at} s and ${cams[i].at} s are out of order`);
     cams[i].h += 360 * Math.round((cams[i - 1].h - cams[i].h) / 360);
     if (shot.camera[i].arrive) cams[i].lon += 360 * Math.round((cams[i - 1].lon - cams[i].lon) / 360);
   }
-  const cs = cams.map((c) => c.at);
-  const along = (k: keyof Camera) => monotone(cs, cams.map((c) => c[k]));
-  const [lat, lon, heading, tilt] = [along('lat'), along('lon'), along('h'), along('v')];
-  const height = monotone(cs, cams.map((c) => Math.log(c.d - 1)));
+  if (shot.camera.at(-1)?.skip) throw new Error('the last camera beat skips to nothing');
+  const runs: { from: number; to: number; at: (s: number) => CameraState }[] = [];
+  for (let i = 0, first = 0; i < cams.length; i++) {
+    if (!shot.camera[i].skip && i < cams.length - 1) continue;
+    runs.push({ from: cams[first].at, to: cams[i].at, at: path(cams.slice(first, i + 1)) });
+    first = i + 1;
+  }
+  const hourAt = (s: number) => shot.camera.reduce<number | undefined>((h, c) => (c.at <= s && c.hour !== undefined ? c.hour : h), shot.hour);
 
-  const end = Math.max(knots.at(-1)!.s, cs.at(-1)!);
+  const end = Math.max(knots.at(-1)!.s, cams.at(-1)!.at);
   const n = Math.round(end * shot.fps) + 1;
   const ease = (x: number) => 0.5 - 0.5 * Math.cos(Math.PI * Math.min(1, Math.max(0, x)));
   const frames: Frame[] = [];
@@ -276,23 +311,33 @@ function plan(shot: Shot, world: World): Frame[] {
     const still = knots.findIndex((k, j) => j + 1 < knots.length && k.s <= s && s <= knots[j + 1].s && Math.abs(k.v - knots[j + 1].v) < 1e-12);
     const by = shifts.filter((x) => x.from <= s).at(-1)?.by ?? 0;
     let year = still >= 0 ? knots[still].year : yearOfMa(Math.max(0, Math.exp(curve(s) - by) - LOG_FLOOR));
-    let across: Frame['across'];
+    let ages: { before: number; after: number; w: number } | undefined;
     for (const h of holds) {
       // Near a change, time is all but still: keep each side's frames on their own side of it.
       if (s < h.from) year = Math.min(year, h.before);
       else if (s > h.to) year = Math.max(year, h.after);
       else {
         const w = ease((s - h.from) / (h.to - h.from));
-        across = { before: h.before, after: h.after, w };
+        ages = { before: h.before, after: h.after, w };
         year = w < 0.5 ? h.before : h.after;
       }
     }
+    // Before the first camera beat and after the last, the camera holds still.
+    const t = Math.min(Math.max(s, cams[0].at), cams.at(-1)!.at);
+    const k = runs.findIndex((r) => t <= r.to);
+    const look: Look = { year, cam: runs[k].at(t), hour: hourAt(t) };
+    let across: Frame['across'];
+    if (t < runs[k].from) {
+      const before = runs[k - 1];
+      const after = runs[k];
+      if (ages) throw new Error(`at ${s.toFixed(2)} s a camera skip runs into a dissolve of time`);
+      across = { before: { year, cam: before.at(t), hour: hourAt(t) }, after: { year, cam: after.at(t), hour: hourAt(after.from) }, w: ease((t - before.to) / (after.from - before.to)) };
+    } else if (ages) across = { before: { ...look, year: ages.before }, after: { ...look, year: ages.after }, w: ages.w };
     // The clouds come to where the viewer has them at the last frame, so that the viewer takes over from it.
     const c = shot.clouds;
     const ago = (n - 1) / shot.fps - s;
     const drift = c ? { tropics: -c.tropics * ago, beyond: -c.beyond * ago, between: c.between } : undefined;
-    const cam: CameraState = { lat: lat(s), lon: lon(s), dist: 1 + Math.exp(height(s)), heading: heading(s), tilt: tilt(s) };
-    frames.push({ s, year, cam, drift, across });
+    frames.push({ s, year, look, drift, across });
   }
   return frames;
 }
@@ -437,14 +482,14 @@ async function open(url: string, scale: number, first: { ma: number; lat: number
   return { page, close: () => browser.close() };
 }
 
-async function show(page: Page, year: number, f: Frame, clouds: boolean, hour?: number): Promise<void> {
+async function show(page: Page, look: Look, f: Frame, clouds: boolean): Promise<void> {
   await page.evaluate(
     ({ t, cam, clouds, drift, hour }) => {
       const h = window.__wikiworldmodel!;
       h.set(hour === undefined ? { t, cam, clouds } : { t, cam, clouds, hour });
       h.driftClouds(drift ?? null);
     },
-    { t: year, cam: f.cam, clouds, drift: f.drift, hour },
+    { t: look.year, cam: look.cam, clouds, drift: f.drift, hour: look.hour },
   );
   await idle(page);
 }
@@ -458,7 +503,7 @@ async function frames(shotFile: string, out: string): Promise<void> {
   const to = Number(option('to') ?? Infinity);
   mkdirSync(join(out, 'frames'), { recursive: true });
   const f0 = all[0];
-  const { page, close } = await open(option('url') ?? 'http://localhost:5173/', Number(option('scale') ?? 1), { ma: maOfYear(f0.year), lat: f0.cam.lat, lon: f0.cam.lon, d: f0.cam.dist });
+  const { page, close } = await open(option('url') ?? 'http://localhost:5173/', Number(option('scale') ?? 1), { ma: maOfYear(f0.year), lat: f0.look.cam.lat, lon: f0.look.cam.lon, d: f0.look.cam.dist });
   const size = await page.evaluate(() => {
     const g = document.querySelector('canvas.globe') as HTMLCanvasElement;
     return { width: g.width, height: g.height };
@@ -471,12 +516,12 @@ async function frames(shotFile: string, out: string): Promise<void> {
       if (f.s < from || f.s > to) continue;
       let image: Buffer;
       if (f.across && f.across.w > 0 && f.across.w < 1) {
-        await show(page, f.across.before, f, clouds, shot.hour);
+        await show(page, f.across.before, f, clouds);
         await layer(page, 1, false);
-        await show(page, f.across.after, f, clouds, shot.hour);
+        await show(page, f.across.after, f, clouds);
         image = (await layer(page, f.across.w, true))!;
       } else {
-        await show(page, f.across ? (f.across.w < 1 ? f.across.before : f.across.after) : f.year, f, clouds, shot.hour);
+        await show(page, f.across ? (f.across.w < 1 ? f.across.before : f.across.after) : f.look, f, clouds);
         image = await canvasPng(page);
       }
       writeFileSync(join(out, 'frames', `${String(i).padStart(5, '0')}.png`), image);

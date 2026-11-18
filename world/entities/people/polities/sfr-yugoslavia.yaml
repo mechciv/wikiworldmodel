@@ -1,0 +1,235 @@
+id: people/polities/sfr-yugoslavia
+kind: polity
+summary: >-
+  The socialist Yugoslav federation of six republics. It was proclaimed a federal people's
+  republic on 29 November 1945, though it counted itself from the wartime council's decision of
+  29 November 1943; it took the name Socialist Federal Republic in 1963, and broke up in 1991
+  and 1992. No act ended it, so when it ended is a matter of legal opinion: the peace
+  conference's arbitration commission found it in the process of dissolution on 29 November
+  1991 and gone by 4 July 1992, the Security Council said on 19 September 1992 that it had
+  ceased to exist, and Serbia and Montenegro held until 2000 that it lived on as their Federal
+  Republic of Yugoslavia. The record is cut by the form of the state: in international law the
+  federation was the Yugoslav kingdom carried on, and the kingdom has no record here. Wikidata
+  has a separate item for the federation before the republic, as Democratic Federal Yugoslavia.
+author: machine:claude-code
+same_as: { wikidata: Q83286 }
+claims:
+  name:
+    prop: name
+    value: { en: Yugoslavia }
+    unsourced: >-
+      An editorial label, the state's short name in English. The kingdom before it and the
+      federal republic after it went by the same short name; the styles this state gave itself
+      in turn are its official names.
+  name-socialist-federal-republic:
+    prop: official_name
+    value: { en: Socialist Federal Republic of Yugoslavia, sr: Социјалистичка Федеративна Република Југославија }
+    valid: { lo: 7 April 1963 CE }
+    source:
+      - ref: src:yugoslavia-constitution-1963
+        loc: "Article 1"
+        quote: Социјалистичка Федеративна Република Југославија је савезна држава добровољно уједињених и равноправних народа
+      - ref: src:arhiv-jugoslavije-constituent-acts
+        loc: "Constitution of the SFRY, April 7, 1963"
+        quote: The state was renamed the Socialist Federative Republic of Yugoslavia
+    note: >-
+      The last of its official names and the longest in use. In English: the
+      Socialist Federal Republic of Yugoslavia is a federal state of voluntarily united and
+      equal peoples. The Archives of Yugoslavia date the constitution that brought the name to
+      7 April 1963; the kept text of the constitution, from the official gazette of 10 April,
+      does not give the day. The English form is the one the United Nations' documents use.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in yugoslavia-constitution-1963-sr.txt (sha256 e631759289c91b7b) and arhiv-jugoslavije-constitutive-acts-en.txt (sha256 40a72eafc8ca5ad8), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  name-federal-peoples-republic:
+    prop: official_name
+    value: { en: Federal People's Republic of Yugoslavia, sr: Федеративна Народна Република Југославија }
+    valid: { lo: 29 November 1945 CE, hi: 6 April 1963 CE }
+    source:
+      - ref: src:yugoslavia-declaration-republic-1945
+        loc: "section I"
+        quote: Demokratska Federativna Jugoslavija proglašava se narodnom republikom pod imenom FEDERATIVNA NARODNA REPUBLIKA JUGOSLAVIJA
+      - ref: src:yugoslavia-constitution-1946
+        loc: "Article 1"
+        quote: Федеративна Народна Република Југославија је савезна народна држава републиканског облика
+    note: >-
+      The name the declaration of 29 November 1945 gave the state. In English: Democratic
+      Federal Yugoslavia is proclaimed a people's republic under the name Federal People's
+      Republic of Yugoslavia (the declaration, read in a Croatian rendering of the Serbian
+      original); and, from the constitution of 31 January 1946, the Federal People's Republic
+      of Yugoslavia is a federal people's state, republican in form. The English form is a
+      translation.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in fnrj-declaration-1945-hr.txt (sha256 89d35ec2a133ba6a) and yugoslavia-constitution-1946-sr.txt (sha256 b89494717e9e28b5), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  name-democratic-federal:
+    prop: official_name
+    value: { en: Democratic Federal Yugoslavia }
+    valid: { hi: 28 November 1945 CE }
+    source:
+      - ref: src:yugoslavia-declaration-republic-1945
+        loc: "section I"
+        quote: Demokratska Federativna Jugoslavija proglašava se narodnom republikom
+      - ref: src:arhiv-jugoslavije-constituent-acts
+        loc: "Belgrade Agreement between Tito and Šubašić, November 1, 1944"
+        quote: on March 7, 1945 the provisional people's government of the Democratic Federative Yugoslavia was formed
+    note: >-
+      The name the state bore until the republic was proclaimed. It matters only where the
+      record is taken to begin in 1943: in the default picture the record begins on the day
+      this name ended. When the name came into use is not recorded here; the decision of 29
+      November 1943 does not use it, and it was the name of the joint government formed in
+      March 1945.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in fnrj-declaration-1945-hr.txt (sha256 89d35ec2a133ba6a) and arhiv-jugoslavije-constitutive-acts-en.txt (sha256 40a72eafc8ca5ad8), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  start-republic-1945:
+    prop: start
+    value: 29 November 1945 CE
+    source:
+      - ref: src:arhiv-jugoslavije-constituent-acts
+        loc: "Declaration of the Promulgation of the FPRY, November 29, 1945"
+        quote: the Constitutional Assembly adopted a declaration abolishing monarchy and promulgating a republic
+      - ref: src:yugoslavia-declaration-republic-1945
+        loc: "section I, and the date line"
+        quote: Demokratska Federativna Jugoslavija proglašava se narodnom republikom pod imenom FEDERATIVNA NARODNA REPUBLIKA JUGOSLAVIJA
+    method: documentary
+    rank: preferred
+    note: >-
+      The day the constituent assembly abolished the monarchy and proclaimed the federal
+      people's republic. Preferred because this record is of that republic: until this day the
+      monarchy stood, suspended but not abolished, and from March 1945 a regency and a joint
+      provisional government acted for the state (Archives of Yugoslavia). The declaration does
+      not found a state; it proclaims one that was there, Democratic Federal Yugoslavia, a
+      republic under a new name. So the start is a change in the form of a state, and what it
+      begins is this record, not Yugoslavia.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in arhiv-jugoslavije-constitutive-acts-en.txt (sha256 40a72eafc8ca5ad8) and fnrj-declaration-1945-hr.txt (sha256 89d35ec2a133ba6a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  start-avnoj-1943:
+    prop: start
+    value: 29 November 1943 CE
+    source:
+      - ref: src:avnoj-1943-decision-federal-yugoslavia
+        loc: "decision No. 3, second paragraph of the decision"
+        quote: Југославија се изграђује и изградиће се на федеративном принципу
+      - ref: src:yugoslavia-constitution-1946
+        loc: "Article 3"
+        quote: Класје је доле повезано траком на којој је исписан датум 29-XI-1943.
+      - ref: src:yugoslavia-constitution-1963
+        loc: "Article 3"
+        quote: Класје је доле повезано траком на којој је исписан датум 29 XI 1943.
+      - ref: src:arhiv-jugoslavije-constituent-acts
+        loc: "Declaration from the Second Session of AVNOJ, November 29, 1943"
+        quote: they did not interrupt the international legal continuity of Yugoslavia as a subject of international law
+      - ref: src:un-treaty-collection-historical-information
+        loc: 'note 1 under "Yugoslavia (former)"'
+        quote: The former Yugoslavia was an original Member of the United Nations, the Charter having been signed and ratified on its behalf on 26 June 1945, and 19 October 1945, respectively.
+    method: documentary
+    note: >-
+      The federation's own reckoning. At Jajce on 29 November 1943 the partisans' wartime
+      council (AVNOJ) decided, with immediate effect, that (in English) Yugoslavia is being
+      built and will be built on the federal principle; the same session denied the government
+      abroad the right to govern and forbade the king's return. The constitutions of 1946 and
+      1963 put the date on the state's arms (in English: the ears are tied below with a ribbon
+      on which the date 29-XI-1943 is written). It was a decision taken in the middle of the
+      war, two years before the monarchy was abolished. Whichever start is taken, the sources
+      treat the federation as one subject of international law with the kingdom before it: the
+      council's decisions broke with the kingdom's constitution but, as the Archives of
+      Yugoslavia have it, not with Yugoslavia's standing in international law, and the United
+      Nations count the federation as the member for whom the Charter was signed in June 1945,
+      five months before the republic. A record of the kingdom would be continued by this one.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in avnoj-1943-federal-decision-sr.txt (sha256 755df79a300ad8bd), yugoslavia-constitution-1946-sr.txt (sha256 b89494717e9e28b5), yugoslavia-constitution-1963-sr.txt (sha256 e631759289c91b7b), arhiv-jugoslavije-constitutive-acts-en.txt (sha256 40a72eafc8ca5ad8) and un-treaty-collection-historical-information.txt (sha256 e6849d59cbbaaaca), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  end-arbitration-commission:
+    prop: end
+    value: { lo: 29 November 1991 CE, hi: 4 July 1992 CE }
+    source:
+      - ref: src:arbitration-commission-yugoslavia-opinions-1-3
+        loc: "Opinion No. 1, para. 3, p. 183"
+        quote: that the Socialist Federal Republic of Yugoslavia is in the process of dissolution
+      - ref: src:arbitration-commission-yugoslavia-opinions-4-10
+        loc: "Opinion No. 8, para. 1, p. 87"
+        quote: the SFRY was at that time still a legal international entity
+      - ref: src:arbitration-commission-yugoslavia-opinions-4-10
+        loc: "Opinion No. 8, para. 4, p. 88"
+        quote: is now complete and that the SFRY no longer exists.
+      - ref: src:arbitration-commission-yugoslavia-opinions-4-10
+        loc: "Interlocutory Decision of 4 July 1992, p. 85"
+        quote: they challenged the Commission's competence to give an Opinion on the three questions
+    method: ruling
+    rank: preferred
+    note: >-
+      No act ended the federation, so its end is a finding, and this is the finding of the body
+      the peace conference had set up to make it. On 29 November 1991 the commission held that
+      the state was in the process of dissolution, though still a legal entity; on 4 July 1992,
+      asked whether the dissolution could now be regarded as complete, it held that it was and
+      that the state no longer existed. It named no day, holding that the existence or
+      disappearance of a state is a question of fact, so the end is written as the span between
+      the two opinions. Preferred because the commission alone took the question as such and
+      gave its reasons, and because what the Security Council said in September 1992 is
+      consistent with it. Serbia and Montenegro, for their new federal republic, had challenged
+      the commission's competence to answer.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in arbitration-commission-yugoslavia-opinions-1-3.txt (sha256 de3b2d2301127dcc) and arbitration-commission-yugoslavia-opinions-4-10.txt (sha256 4d6f68b3c4fda241), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  end-security-council:
+    prop: end_before
+    value: 19 September 1992 CE
+    source:
+      - ref: src:unsc-resolution-777-1992
+        loc: "preamble, second paragraph"
+        quote: Considering that the State formerly known as the Socialist Federal Republic of Yugoslavia has ceased to exist
+      - ref: src:unsc-resolution-757-1992
+        loc: "preamble, the paragraph that begins Noting that the claim"
+        quote: to continue automatically the membership of the former Socialist Federal Republic of Yugoslavia in the United Nations has not been generally accepted
+    method: ruling
+    note: >-
+      The Security Council's statement, in the resolution that denied the new federal republic
+      the old one's seat: by 19 September 1992 the state had ceased to exist. The Council names
+      no day either, so this is a latest day and no more: a bound on the end, which holds
+      beside whichever end is chosen and competes with none. It had written of the former
+      Socialist Federal Republic already on 30 May 1992 (resolution 757). It does not
+      contradict the commission's finding, which it follows by eleven weeks.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in unsc-res-777-1992.txt (sha256 436c3a271d902e08) and unsc-res-757-1992.txt (sha256 4d500586f36e17de), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  end-with-federal-republic:
+    prop: end
+    value: { ref: people/polities/fr-yugoslavia, edge: start }
+    source:
+      - ref: src:un-a-46-915-yugoslavia-declaration-1992
+        loc: "annex I, the note of 27 April 1992, second paragraph"
+        quote: on the basis of the continuing personality of Yugoslavia and the legitimate decisions by Serbia and Montenegro to continue to live together in Yugoslavia, the Socialist Federal Republic of Yugoslavia is transformed into the Federal Republic
+      - ref: src:un-treaty-collection-historical-information
+        loc: 'note 1 under "Yugoslavia (Federal Republic of)"'
+        quote: Entries in status tables relating to treaty actions undertaken by Yugoslavia between the date of the dissolution of the former Yugoslavia and the date of admission of Yugoslavia to membership in the United Nations
+      - ref: src:un-treaty-collection-historical-information
+        loc: 'note 1 under "Yugoslavia (Federal Republic of)"'
+        quote: succeeds to the same and undertakes faithfully to perform and carry out the stipulations therein contained as from April 27, 1992, the date upon which the Federal Republic of Yugoslavia assumed responsibility for its international relations
+    method: documentary
+    basis: reconstruction
+    note: >-
+      It ended as the Federal Republic began, on 27 April 1992: the one day the sources offer,
+      and a reading of them, since none says in so many words that the old state ended then.
+      For Serbia and Montenegro the old federation did not end that day but was transformed
+      into theirs, by a constitution that the old federation's own assembly proclaimed: a
+      claim that the two were one state, refused in 1992 and given up in 2000 (the continues
+      relation of people/polities/fr-yugoslavia). The day outlived the claim. The depositary's
+      notes count the new state's treaty actions from the date of the dissolution of the former
+      Yugoslavia and list them from 27 April 1992, and the Federal Republic's own notice of
+      succession in 2001 took effect from that day, as the day it took over responsibility for
+      its international relations. The day lies inside the commission's span and before the
+      Council's latest day, so the three statements do not contradict one another. The
+      Council's is a bound and holds beside either; this one and the commission's span compete
+      only because an end takes one value, and the span is the evidence as it was given.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in un-a-46-915-fry-declaration.txt (sha256 48127ccd7608dda1) and un-treaty-collection-historical-information.txt (sha256 e6849d59cbbaaaca), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  territory:
+    prop: territory
+    value: { from: src:cliopatria-0.2.1, names: [Socialist Federal Republic of Yugoslavia] }
+    source: { ref: src:cliopatria-0.2.1, loc: rows named Socialist Federal Republic of Yugoslavia }
+    method: compilation
+    basis: reconstruction
+    note: >-
+      The dataset's four rows by this name run from 1946 to 1991, under a name the state took
+      only in 1963. Its row for 1945 is named Yugoslavia, like the kingdom's rows of 1919 to
+      1940, and it puts on both names the Wikidata item this record has, the socialist
+      federation's: by name the row for 1945 is the kingdom's, and by that id the kingdom's
+      rows would be this record's. The partisans have a row of their own for 1944. The row for
+      1945 is not claimed here, since its name is the kingdom's. The dataset ends the
+      federation with 1991 and begins its successors with 1992, while the claims of its end
+      here reach into 1992.

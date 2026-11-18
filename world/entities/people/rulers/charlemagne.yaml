@@ -20,6 +20,8 @@ claims:
       ref: src:annales-regni-francorum
       loc: "a. 814, p. 140"
       quote: Domnus Karolus
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in annales-regni-francorum-kurze.txt (sha256 eeb40407ad2cc80d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
   start-748:
     prop: start
     value: 2 April 748 CE
@@ -51,6 +53,8 @@ claims:
     note: >-
       The older year, from Einhard's age at death; the revised annals have in English: in about
       the seventy-first year of his age.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in einhard-vita-karoli-turner.txt (sha256 8d100d971592c2b3) and annales-regni-francorum-kurze.txt (sha256 eeb40407ad2cc80d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
   king-start:
     prop: start
     subject: "@king"
@@ -80,6 +84,8 @@ claims:
       In English: on the most holy day of the Lord's birth, at St Peter's, Pope Leo set a crown
       on his head, and he was called emperor and Augustus. The annalist begins the year at
       Christmas, so Christmas 800 stands under 801.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in annales-regni-francorum-kurze.txt (sha256 eeb40407ad2cc80d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
   end:
     prop: end
     value: 28 January 814 CE
@@ -94,6 +100,8 @@ claims:
     note: >-
       The fifth day before the Kalends of February is 28 January. In the revised annals: he
       departed from human affairs.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in einhard-vita-karoli-turner.txt (sha256 8d100d971592c2b3) and annales-regni-francorum-kurze.txt (sha256 eeb40407ad2cc80d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
 relations:
   held-office-king:
     rel: held-office
@@ -113,3 +121,5 @@ relations:
       loc: "a. 801, p. 113"
       quote: imperator et augustus appellatus est
     note: King of the Franks and emperor.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in annales-regni-francorum-kurze.txt (sha256 eeb40407ad2cc80d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }

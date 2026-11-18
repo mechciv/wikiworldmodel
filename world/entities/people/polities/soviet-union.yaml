@@ -1,0 +1,199 @@
+id: people/polities/soviet-union
+kind: polity
+summary: >-
+  The union of Soviet republics formed by the treaty that the Russian, Ukrainian, Byelorussian
+  and Transcaucasian republics concluded and its first congress of Soviets approved in Moscow on
+  30 December 1922. It ended in December 1991, and on which day is contested: on the 8th three of
+  its founders declared that it was ceasing to exist, on the 21st eleven republics said the same,
+  on the 25th its president resigned, and on the 26th the upper chamber of its own parliament
+  declared that with the Commonwealth of Independent States created it ceases to exist as a
+  state. Russia, which is older than the Union and was a part of it, carries on its seat at the
+  United Nations and its treaties (people/polities/russia).
+author: machine:claude-code
+same_as: { wikidata: Q15180 }
+claims:
+  name:
+    prop: name
+    value: { en: Soviet Union, ru: Союз Советских Социалистических Республик }
+    source:
+      ref: src:ussr-treaty-1922
+      loc: preamble
+      quote: об объединении в одно союзное государство — „Союз Советских Социалистических Республик“
+    note: >-
+      The treaty unites the four republics "in one union state, the Union of Soviet Socialist
+      Republics". Soviet Union, the short name in English, is an editorial label.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ussr-treaty-1922.txt (sha256 b6f8d7c705b83acc), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  start:
+    prop: start
+    value: 30 December 1922 CE
+    source:
+      - ref: src:ussr-first-congress-resolution-1922
+        loc: point 1
+        quote: Декларацию и союзный договор в основном утвердить.
+      - ref: src:ussr-first-congress-resolution-1922
+        loc: date line
+        quote: Москва, 30 декабря 1922 года.
+      - ref: src:ussr-treaty-1922
+        loc: preamble
+        quote: заключают настоящий Союзный договор об объединении в одно союзное государство
+      - ref: src:rsfsr-resolution-2015-1991
+        loc: operative sentence
+        quote: утвержденный I Съездом Советов СССР 30 декабря 1922 года в городе Москве
+    method: documentary
+    note: >-
+      The day the Union's first congress of Soviets approved the declaration and the treaty of
+      union, as its resolution is dated. In English: "to approve the declaration and the treaty
+      of union in the main"; the four republics "conclude this treaty of union on uniting in one
+      union state"; and, in the Russian parliament's resolution of 1991, the treaty "approved by
+      the First Congress of Soviets of the USSR on 30 December 1922 in the city of Moscow". The
+      congress approved the two texts in the main and sent them back to the republics, leaving
+      the final text to the Union's Central Executive Committee and to the second congress
+      (points 2 to 4); the Union is counted from this day all the same, as the resolution of
+      1991 counts it. Of the four republics it arose from, only Russia has a record here, and
+      no relation to it is written in this record: Russia's own record says that it was part of
+      the Union and that it carries the Union on, and a relation from the Union back to Russia
+      would make each the other's ancestor.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ussr-first-congress-resolution-1922.txt (sha256 ca91876d97d767d9), ussr-treaty-1922.txt (sha256 b6f8d7c705b83acc) and rsfsr-resolution-2015-1991.txt (sha256 9de85da532fa415f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  end-soviet-of-republics:
+    prop: end
+    value: 26 December 1991 CE
+    source:
+      - ref: src:ussr-soviet-of-republics-declaration-142-n-1991
+        loc: first paragraph
+        quote: >-
+          Совет Республик Верховного Совета СССР констатирует, что с созданием Содружества
+          Независимых Государств Союз ССР как государство и субъект международного права
+          прекращает свое существование
+      - ref: src:ussr-soviet-of-republics-declaration-142-n-1991
+        loc: heading
+        quote: от 26 декабря 1991 года № 142-Н
+    method: documentary
+    rank: preferred
+    note: >-
+      In English: the Soviet of the Republics of the Supreme Soviet of the USSR states that with
+      the creation of the Commonwealth of Independent States the USSR as a state and a subject of
+      international law ceases to exist. Preferred because, of the four acts, it alone is an act
+      of an organ of the Union on the Union's own end, and it is the last of them: the republics'
+      declarations of 8 and 21 December say that the Union is ceasing to exist, yet its
+      president still signed a decree as president on the 25th (end-resignation). It is also
+      the day Wikidata's item gives. Wikisource's note to the text says that the chamber was set
+      up by a law of 5 September 1991 and is not provided for in the Union's constitution; that
+      note was not checked.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ussr-soviet-of-republics-declaration-142-n-1991.txt (sha256 587c5fd289c514c0), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  end-resignation:
+    prop: end
+    value: 25 December 1991 CE
+    source:
+      - ref: src:ussr-president-decree-3162-1991
+        loc: point 1
+        quote: В связи с уходом в отставку с поста Президента СССР слагаю с себя полномочия Верховного Главнокомандующего Вооруженными Силами СССР
+      - ref: src:ussr-president-decree-3162-1991
+        loc: date line
+        quote: Москва, Кремль. 25 декабря 1991 г.
+      - ref: src:gorbachev-resignation-statement-1991
+        loc: first paragraph
+        quote: я прекращаю свою деятельность на посту Президента СССР
+      - ref: src:blum-1992-russia-un-seat
+        loc: p. 356
+        quote: The fate of the Soviet Union was finally sealed on 25 December 1991 with the resignation of its President
+    method: documentary
+    note: >-
+      The day the Union's last head of state left office. In English: "in connection with my
+      resignation from the post of President of the USSR I lay down the powers of Supreme
+      Commander-in-Chief of the Armed Forces of the USSR", in a decree dated Moscow, the Kremlin,
+      25 December 1991; and, in his address, "I cease my activity in the post of President of
+      the USSR". Neither says that the Union has ended: in the address he says that the line of
+      dismembering the country has prevailed, with which he cannot agree. Blum takes the
+      resignation as what sealed the Union's fate.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ussr-president-decree-3162-1991.txt (sha256 e74339055b39f2b1), gorbachev-resignation-statement-1991.txt (sha256 802d047937d61451) and blum-1992-russia-un-seat.txt (sha256 54be67e9bad14d7c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  end-alma-ata:
+    prop: end
+    value: 21 December 1991 CE
+    source:
+      - ref: src:alma-ata-declaration-1991
+        loc: fifth operative paragraph
+        quote: С образованием Содружества Независимых Государств Союз Советских Социалистических Республик прекращает свое существование.
+      - ref: src:alma-ata-declaration-1991
+        loc: date line
+        quote: Алма-Ата 21 декабря 1991 г.
+      - ref: src:un-a-47-60-alma-ata-1991
+        loc: "annex II, p. 5"
+        quote: With the establishment of the Commonwealth of Independent States, the Union of Soviet Socialist Republics ceased to exist.
+      - ref: src:blum-1992-russia-un-seat
+        loc: p. 360
+        quote: made some three days (and possibly sixteen days) after the dissolution of the Soviet Union
+    method: documentary
+    note: >-
+      In English: with the forming of the Commonwealth of Independent States the Union of Soviet
+      Socialist Republics ceases to exist. The Russian verb is in the present; the English text
+      that the United Nations circulated puts it in the past, "ceased to exist". Eleven
+      republics signed it, Russia among them, with Georgia attending as an observer (Blum,
+      p. 359); it is the republics' act, not the Union's. Blum counts the dissolution from this
+      declaration: Russia's letter of 24 December came "some three days" after it, or possibly
+      sixteen, counting from the agreement of 8 December (end-belovezha).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in alma-ata-declaration-1991.txt (sha256 35f3b26c79d0bd3c), un-a-47-60-alma-ata-1991.txt (sha256 e895bbc0ec095e52) and blum-1992-russia-un-seat.txt (sha256 54be67e9bad14d7c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  end-belovezha:
+    prop: end
+    value: 8 December 1991 CE
+    source:
+      - ref: src:cis-agreement-1991
+        loc: preamble
+        quote: констатируем, что Союз ССР, как субъект международного права и геополитическая реальность, прекращает свое существование
+      - ref: src:cis-agreement-1991
+        loc: closing formula
+        quote: 8 декабря 1991 года в трех экземплярах, каждый на белорусском, русском и украинском языках
+      - ref: src:rsfsr-resolution-2014-1991
+        loc: point 1
+        quote: подписанное в г. Минске 8 декабря 1991 года
+      - ref: src:blum-1992-russia-un-seat
+        loc: p. 360
+        quote: made some three days (and possibly sixteen days) after the dissolution of the Soviet Union
+    method: documentary
+    note: >-
+      In English: we state that the USSR, as a subject of international law and a geopolitical
+      reality, is ceasing its existence. Three republics said so, Belarus, Russia and Ukraine,
+      as founders of the Union that had signed the treaty of 1922. Blum allows this day as
+      possibly that of the dissolution (the sixteen days before Russia's letter of 24 December),
+      and reports the view that the three had no right to dissolve the Union, but at most to
+      secede themselves, so that the nine republics not at Minsk still made it up (p. 359).
+      Russia's own parliament ratified the agreement only on 12 December, by the resolution
+      cited, and denounced the treaty of 1922 the same day.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in cis-agreement-1991.txt (sha256 4a1881eb7792595c), rsfsr-resolution-2014-1991.txt (sha256 9dc3b9ec724b252e) and blum-1992-russia-un-seat.txt (sha256 54be67e9bad14d7c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  territory:
+    prop: territory
+    value: { from: src:cliopatria-0.2.1, names: [Union of Soviet Socialist Republics] }
+    source: { ref: src:cliopatria-0.2.1, loc: rows named Union of Soviet Socialist Republics }
+    method: compilation
+    basis: reconstruction
+    note: >-
+      The dataset's rows run from 1922 to 1991 by whole years, the first of them for 1922 and
+      1923; the Union's first and last days are the record's own claims. For 1920 and 1921 the
+      dataset has one row named Republics of the Soviet Union, the Soviet republics before they
+      united, which is not claimed here.
+relations:
+  from-russia:
+    rel: arose-from
+    to: people/polities/russia
+    source:
+      - ref: src:ussr-treaty-1922
+        loc: preamble
+        quote: >-
+          Российская Социалистическая Федеративная Советская Республика (РСФСР), Украинская
+          Социалистическая Советская Республика (УССР), Белорусская Социалистическая Советская
+          Республика (БССР) и Закавказская Социалистическая Федеративная Советская Республика (ЗСФСР —
+          Грузия, Азербайджан и Армения) заключают настоящий Союзный договор
+    note: >-
+      The Union was formed by four republics, which concluded the treaty of union (in English:
+      the Russian, Ukrainian, Belorussian and Transcaucasian republics conclude this treaty of
+      union). Russia is the first named and the only one with a record here. It did not end in
+      the Union: it was a part of it from the first day to the last, and carried it on
+      afterwards (the part-of and continues relations of people/polities/russia). So the Union
+      arose from a state that outlived it.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ussr-treaty-1922.txt (sha256 b6f8d7c705b83acc), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }

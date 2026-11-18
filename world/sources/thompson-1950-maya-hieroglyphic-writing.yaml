@@ -1,0 +1,31 @@
+id: src:thompson-1950-maya-hieroglyphic-writing
+type: publication
+kind: review
+citation: >-
+  Thompson, J.E.S. (1950). Maya Hieroglyphic Writing: Introduction. Carnegie Institution of
+  Washington Publication 589. Washington, D.C.: Carnegie Institution of Washington.
+authors:
+  - "Thompson, J.E.S."
+published: 1950
+title: "Maya Hieroglyphic Writing: Introduction"
+container: Carnegie Institution of Washington Publication 589
+url: https://www.mesoweb.com/publications/Thompson/Thompson1950-OCR.pdf
+via: >-
+  Mesoweb's facsimile of the 1950 edition, in its version with searchable text, which leaves
+  out the figures and plates; it is offered at
+  https://www.mesoweb.com/publications/Thompson/Thompson1950.html.
+reliability: >-
+  The standard handbook of the Maya calendar in its day, by the scholar whose name the
+  correlation bears. Appendix II is where he reduced his own constant from 584,285 to 584,283
+  and gave his reasons: for that it is the argument itself. Its view of the glyphs as a script
+  has long been superseded.
+verified:
+  by: machine:claude-code
+  how: >-
+    The searchable PDF (169 MB, 366 pages) fetched from Mesoweb on 17 November 2026 and read
+    in its text layer: the passage on Goodman in the Introduction (pp. 30–31) and Appendix II,
+    The Correlation Question (pp. 303–310), with the printed page numbers. The text layer is
+    OCR and has slips on these pages (it reads "fell" as "tell", and "11.16.0.0.0" as
+    "I r.r6.0.0.0"); the quote was taken where it is clean, and found in the kept text by
+    quote-check. This version has no title page: the imprint is as Martin and Skidmore (2012)
+    cite it.

@@ -1,0 +1,44 @@
+id: src:kennett-2013-maya-calendar-radiocarbon
+type: publication
+kind: measurement
+citation: >-
+  Kennett, D.J., Hajdas, I., Culleton, B.J., … & Haug, G.H. (2013). Correlating the Ancient
+  Maya and Modern European Calendars with High-Precision AMS 14C Dating. Scientific Reports 3,
+  1597.
+authors:
+  - "Kennett, D.J."
+  - "Hajdas, I."
+  - "Culleton, B.J."
+  - "Belmecheri, S."
+  - "Martin, S."
+  - "Neff, H."
+  - "Awe, J."
+  - "Graham, H.V."
+  - "Freeman, K.H."
+  - "Newsom, L."
+  - "Lentz, D.L."
+  - "Anselmetti, F.S."
+  - "Robinson, M."
+  - "Marwan, N."
+  - "Southon, J."
+  - "Hodell, D.A."
+  - "Haug, G.H."
+published: 2013
+title: Correlating the Ancient Maya and Modern European Calendars with High-Precision AMS 14C Dating
+container: "Scientific Reports 3, 1597"
+doi: 10.1038/srep01597
+url: https://www.nature.com/articles/srep01597
+license: CC-BY-NC-ND-3.0
+reliability: >-
+  Radiocarbon dates through a carved lintel from Tikal that bears Long Count dates, matched to
+  the calibration curve. It tests correlations that lie decades and centuries apart and
+  supports the Goodman-Martínez-Thompson family against the rest. Its dates span decades, so
+  it says nothing on which constant of that family is right; it names 584283 as the variant it
+  uses.
+verified:
+  by: machine:claude-code
+  how: >-
+    The article's page fetched from nature.com on 17 November 2026 and read in full, without
+    the supplement. Authors, volume, article number and DOI are from the page's own citation
+    data. It gives its dates in the Gregorian calendar carried back before 1582 (the zero day
+    as August 11, 3114 BC). The quote found in the kept text by quote-check.
