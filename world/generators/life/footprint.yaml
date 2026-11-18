@@ -1,0 +1,16 @@
+id: gen:life/footprint
+type: generator
+title: A local relief model of a measured footprint
+version: 1
+code: generators/life/footprint/v1.ts
+runs_in: [client]
+outputs: { basis: procedural }
+inputs:
+  - { prop: footprint_form, note: "The specimen, side and measured spans, with heel drag and toe morphology where recorded." }
+slots:
+  specimen: { place: local to the individual print, seed: specimen }
+params: {}
+checks:
+  - { test: world/generators/life/footprint/v1.test.ts, holds: "fits the heel and forefoot to their measured widths and stops at the measured length" }
+limits:
+  - { note: The outline between measured sections and the relative depth are illustrative. No scan or geographic orientation is implied. }

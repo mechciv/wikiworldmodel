@@ -11,6 +11,24 @@ claims:
     prop: name
     value: { en: "Laetoli footprints" }
     unsourced: An editorial label, the name the trackways go by.
+  l8-s1-3-form:
+    prop: footprint_form
+    author: machine:codex
+    value: { specimen: L8/S1-3, side: right, length_mm: 260, width_mm: 103, heel_width_mm: 77, heel_drag_approx_mm: 100, toes: indistinct-with-projecting-hallux }
+    source:
+      - ref: src:masao-2016-laetoli
+        loc: "Table 2, row L8/S1-3: side, length, maximum width and heel width"
+        quote: "L8/S1-3 right 260 103 39.6 77 3"
+      - ref: src:masao-2016-laetoli
+        loc: "Morphology of hominin tracks, first paragraph"
+        quote: "No clear distinction among the toes is visible. The adducted hallux extends more anteriorly than the other toes in all visible footprints."
+      - ref: src:masao-2016-laetoli
+        loc: "Morphology of hominin tracks, paragraph crossing pages 15–16, including L8/S1-3"
+        quote: "a posterior drag mark about 100 mm long"
+    method: survey
+    note: The identification is local to test-pit L8 at Site S. The foot index and angle in the quoted row are not dimensions.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in masao-2016-laetoli.txt (sha256 556248bad2f4c062), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-18" }
   identified:
     prop: identified_as
     value: Australopithecus afarensis
