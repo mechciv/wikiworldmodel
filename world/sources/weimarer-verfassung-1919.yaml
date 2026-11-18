@@ -1,0 +1,23 @@
+id: src:weimarer-verfassung-1919
+type: document
+kind: act
+citation: >-
+  Die Verfassung des Deutschen Reichs. Vom 11. August 1919. Reichsgesetzblatt 1919, Nr. 152, pp.
+  1383–1418.
+published: 1919
+title: Die Verfassung des Deutschen Reichs. Vom 11. August 1919
+url: https://de.wikisource.org/wiki/Verfassung_des_Deutschen_Reichs_(1919)
+via: >-
+  German Wikisource's transcription from a scan of the gazette, marked there as proofread twice
+  (fertig), with the gazette's page numbers; its heading gives the gazette and 14 August 1919 as
+  the day of publication and of taking force.
+reliability: >-
+  The republic's constitution: evidence that the state it constitutes is the German Reich, now a
+  republic, that it repeals the constitution of 1871 and leaves the Reich's other laws in force.
+  It does not date the end of the monarchy, which fell nine months before it.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from de.wikisource.org on 2026-11-17. Read in German: the heading, the preamble,
+    Articles 1 and 2 and Articles 177 to 181 with the closing lines. The quote was found in the
+    kept text by quote-check.

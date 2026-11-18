@@ -1,0 +1,31 @@
+id: src:yule-1903-book-of-ser-marco-polo
+type: publication
+kind: review
+citation: >-
+  Yule, H. (1903). Marco Polo and his Book: Introductory Notices, and the notes to the text, in The
+  Book of Ser Marco Polo, the Venetian, concerning the Kingdoms and Marvels of the East, translated
+  and edited by H. Yule, 3rd edition, revised by H. Cordier, vol. 1. London: John Murray.
+authors:
+  - "Yule, H."
+published: 1903
+title: The Book of Ser Marco Polo, vol. 1 (introductory notices and notes)
+container: London, John Murray
+url: https://gutenberg.pglaf.org/1/0/6/3/10636/10636-0.txt
+via: >-
+  Project Gutenberg's transcription of the Yule-Cordier edition (ebook 10636, volume I), read from
+  Project Gutenberg's mirror at gutenberg.pglaf.org. It prints the sections and sidenotes of the
+  introduction and the numbered notes to each chapter, but not the page numbers of the text.
+reliability: >-
+  The editor's own essay and notes, first printed in 1871: a nineteenth-century scholar's account of
+  Asia in 1260, when the Polos set out, written from the Persian and Chinese histories as then
+  translated. It is old, and it is cited for how the division of the empire looked to that
+  scholarship, and for the dates it corrects in Polo. The words of Marco Polo himself are another
+  source (src:marco-polo-book-yule-1903).
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched on 2026-11-17 from gutenberg.pglaf.org, because gutenberg.org answered 503 (down for
+    maintenance). Read: the Introductory Notices, part II, sections 9 to 12 with their notes, and
+    the notes to the Prologue, chapter 2 (notes 1 and 3), Book I, chapter 51, and Book II, chapter
+    2. Locators are the section of the introduction, or the book, chapter and note. The quotations
+    were found in the kept text by quote-check.

@@ -1,0 +1,23 @@
+# A group of alternatives: its members exclude each other, and groups combine freely. A
+# claim belongs to the default picture unless it names an alternative (section 4.4).
+id: alt:mongol-unity
+type: group
+title: The Mongol Empire after 1260
+description: >-
+  Whether the Mongol Empire ended when it divided, in the civil war that followed the death of
+  the Great Khan Möngke in 1259, or went on as one empire until Mongol power fell in China in
+  1368. Most historians write that it dissolved around 1260 into four khanates, the realm of
+  the Great Khan in the east, later named the Yuan, and the Chagatai Khanate, the Ilkhanate and
+  the Golden Horde, each in practice independent (so Amitai and Jackson in the Encyclopaedia
+  Iranica, and the common view as Kim 2009 reports it). The default picture follows them: an
+  empire that ended in those years, and four states that arose from it. The Great Khans in
+  China held that nothing had ended, and some historians now argue the same (Kim 2009, with
+  Sugiyama, whom he quotes). The rulers of the west did not always grant it: Qaidu in Central
+  Asia defied Qubilai as long as he lived, and by Jackson's account was himself elected Great
+  Khan about 1271, which Kim denies he ever claimed; and from Ghazan (1295) the Ilkhans' coins
+  all but ceased to name the Great Khan. But in 1304 all of them made peace under Qubilai's
+  grandson Temür. The two sides agree on the events and differ on what the whole was, which is
+  why this is a perspective and not a rival date.
+# A steward decision: what a build shows. Shown on a machine's proposal, until a person decides.
+show: [alt:mongol-unity/one-empire]
+default: null

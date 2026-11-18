@@ -1,0 +1,29 @@
+id: src:thompson-1935-maya-chronology-correlation-question
+type: publication
+kind: review
+citation: >-
+  Thompson, J.E.S. (1935). Maya Chronology: The Correlation Question. Contributions to American
+  Archaeology 3(14), 51–104. Carnegie Institution of Washington Publication 456. Washington,
+  D.C.
+authors:
+  - "Thompson, J.E.S."
+published: 1935
+title: "Maya Chronology: The Correlation Question"
+container: "Contributions to American Archaeology 3(14), 51–104"
+url: https://www.mesoweb.com/publications/CAA_14/Thompson1935-OCR.pdf
+via: >-
+  Mesoweb's facsimile of the original publication, in its version with searchable text; it is
+  offered at https://www.mesoweb.com/publications/CAA_14/index.html.
+reliability: >-
+  Thompson's review of every correlation then proposed, in which he restates his constant of
+  1927, 584285, and finds that it fares best but is not decisive. He withdrew it for 584283 in
+  1950; it is evidence of the argument for 584285 as its author made it.
+verified:
+  by: machine:claude-code
+  how: >-
+    The searchable PDF fetched from Mesoweb on 17 November 2026 and read in its text layer: the
+    preface, the sections on the two 11.16.0.0.0 correlations (pp. 73–76) and the conclusions
+    (pp. 80–82), with the printed page numbers. The title page gives the author as J. Eric
+    Thompson, the series number 14 and the issue date October 1935; the volume, the pages and
+    the publication number are as Martin and Skidmore (2012) cite it. The text layer is OCR;
+    the quote was found in the kept text by quote-check.

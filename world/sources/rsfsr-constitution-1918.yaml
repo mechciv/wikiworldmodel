@@ -1,0 +1,23 @@
+id: src:rsfsr-constitution-1918
+type: document
+kind: act
+citation: >-
+  Constitution (Fundamental Law) of the Russian Socialist Federative Soviet Republic (Конституция
+  (Основной Закон) Российской Социалистической Федеративной Советской Республики), adopted by
+  resolution of the Fifth All-Russian Congress of Soviets in its sitting of 10 July 1918. In:
+  Декреты Советской власти, vol. II. Moscow, 1959, pp. 550–564.
+published: 1959
+title: Конституция (Основной Закон) Российской Социалистической Федеративной Советской Республики
+container: Декреты Советской власти, vol. II (Moscow, 1959)
+url: https://ru.wikisource.org/wiki/%D0%9A%D0%BE%D0%BD%D1%81%D1%82%D0%B8%D1%82%D1%83%D1%86%D0%B8%D1%8F_%D0%A0%D0%A1%D0%A4%D0%A1%D0%A0_(1918)
+via: Russian Wikisource's transcription, which gives as its source the 1959 edition.
+reliability: >-
+  The republic's first constitution: evidence of its name in July 1918, in the congress's
+  resolution adopting it. The resolution says the law takes force when published in final form
+  in Izvestiya; the day of that publication was not read.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from ru.wikisource.org on 2026-11-17; the congress's resolution and the first two
+    chapters read in Russian, and the text searched for the state's name. The quotes were found
+    in the kept text by quote-check.

@@ -1,0 +1,186 @@
+id: people/polities/chagatai-khanate
+kind: polity
+summary: >-
+  The Mongol khanate of Central Asia under the line of Chaghatai, second son of Chinggis Khan: one
+  of the four states the Mongol Empire is held to have divided into. Chinggis allotted Chaghatai an
+  ulus from the Uighur country to Samarkand and Bukhara; a khanate, in Jackson's reckoning, begins
+  only when the head of that ulus took over the Great Khan's administration there in the civil war
+  of 1259 to 1264. It divided in two in the 1340s. The western half, in Transoxania, was Timur's by
+  1370; the eastern, Moghulistan, kept the khanate's name and Chaghatai's line, which ended in 1678.
+  Where the one khanate ends is a choice, and three ends are given. The borders dataset draws it
+  from 1294 and keeps its name for the eastern half until 1462.
+author: machine:claude-code
+same_as: { wikidata: Q487829 }
+claims:
+  name:
+    prop: name
+    value: { en: Chagatai Khanate }
+    source:
+      ref: src:jackson-1991-chaghatayid-dynasty
+      loc: para. 2
+      quote: it is from this point that we may legitimately speak of a Čaḡatai khanate
+    note: >-
+      The usual name in English, in the borders dataset's spelling; Jackson writes Čaḡatai khanate
+      and Kim Chaghatai Khanate. It is a historian's name for the ulus of Chaghatai once it ruled
+      itself.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in iranica-chaghatayid-dynasty.txt (sha256 1842665c6eeb2376), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  start-khanate:
+    prop: start
+    value: { lo: 1260 CE, hi: 1266 CE }
+    source:
+      ref: src:jackson-1991-chaghatayid-dynasty
+      loc: para. 2
+      quote: "One consequence of the crisis was that the civil administration in Central Asia was subordinated to the head of Čaḡatai’s ulus, Alḡu (Alḡū; 658-64/1260-66), rather than to the great khan in the east, and it is from this point that we may legitimately speak of a Čaḡatai khanate."
+    method: expert-estimate
+    basis: reconstruction
+    rank: preferred
+    note: >-
+      The crisis is the war for the succession after Möngke's death in 1259. Jackson dates the
+      change only by Alghu, head of the ulus from 1260 to 1266, and the range is those years.
+      Preferred because the record is the state, and this is from when the specialist counts one:
+      before it the ulus had its own khans, but its fiscal administration was in the hands of civil
+      officials who answered to the Great Khan.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in iranica-chaghatayid-dynasty.txt (sha256 1842665c6eeb2376), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  start-ulus:
+    prop: start
+    value: 1227 CE
+    source:
+      - ref: src:lane-poole-1894-mohammadan-dynasties
+        loc: p. 241
+        quote: 85. CHAGATAY KHANS … 1227—1358
+      - ref: src:jackson-1991-chaghatayid-dynasty
+        loc: para. 1
+        quote: "when Čengīz Khan allotted an ulus, that is, pasturage and subject peoples, to each of his sons Čaḡatai’s share extended from the borders of the Uighur territory as far as Samarkand and Bukhara"
+    method: compilation
+    basis: reconstruction
+    note: >-
+      The older reckoning, by the line of khans and not the state: Lane-Poole's table of the
+      Chagatay khans begins in 1227, the year Chinggis Khan died, with Chaghatai himself. (The scan
+      garbles the word in brackets between the heading and its years, which the quotation leaves
+      out.) Jackson gives the allotment no year. On this reckoning the realm was for its first
+      thirty years and more a share of the empire, and no state.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in lane-poole-1894-mohammadan-dynasties-csl.txt (sha256 f408b1ab2bcdb103) and iranica-chaghatayid-dynasty.txt (sha256 1842665c6eeb2376), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  end-division:
+    prop: end
+    value: { lo: 1340 CE, hi: 1349 CE }
+    source:
+      ref: src:jackson-1991-chaghatayid-dynasty
+      loc: para. 8
+      quote: In any case, from the 740s/1340s the Čaḡatai khanate appears to have divided into two.
+    method: expert-estimate
+    basis: reconstruction
+    rank: preferred
+    note: >-
+      The range is the decade Jackson names. Preferred because from then on there are two realms
+      where there had been one khanate: the western, where tribal amirs set up khans as a show of
+      right, and the eastern, which Jackson goes on calling the Chaghatai khanate and others call
+      Moghulistan. Taking the eastern half for the khanate carried on, as the Roman record here
+      takes the empire in the east, would put the end at one of the two later dates below; no rule
+      says which half of a divided state, if either, is the state.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in iranica-chaghatayid-dynasty.txt (sha256 1842665c6eeb2376), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  end-timur:
+    prop: end
+    value: 1370 CE
+    source:
+      - ref: src:jackson-1991-chaghatayid-dynasty
+        loc: para. 8
+        quote: By 771/1370 he was the virtual ruler of the western khanate
+      - ref: src:jackson-1991-chaghatayid-dynasty
+        loc: para. 1
+        quote: "who reigned in Transoxania until ca. 771/1370 and in parts of Turkestan down to the 11th/17th century"
+    method: expert-estimate
+    basis: reconstruction
+    note: >-
+      The end of the line's rule in Transoxania, the khanate's western half, when Timur was master
+      of it; he and his house still named khans, from the line of Ögedei, into the fifteenth
+      century. About 1370, in Jackson's words. Lane-Poole's table (start-ulus) ends twelve years
+      sooner, in 1358, which is the year Jackson gives for the death of Qazaghan, the chief of the
+      amirs who had ruled there in the khans' name.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in iranica-chaghatayid-dynasty.txt (sha256 1842665c6eeb2376), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  end-dynasty:
+    prop: end
+    value: 1678 CE
+    source:
+      ref: src:jackson-1991-chaghatayid-dynasty
+      loc: para. 9
+      quote: "In 1089/1678, with Qalmaq support, power in Kashgharia passed to local religious leaders, the Khojas (See chinese turkestan vi), and the Chaghatayid dynasty was extinguished."
+    method: expert-estimate
+    basis: reconstruction
+    note: >-
+      The end of Chaghatai's line, in the east. It is the end of this record only if the eastern
+      khanate, and after 1514 the new state that one of the line founded at Kashgar, are the same
+      khanate carried on, which Jackson's wording allows for the first and not for the second. The
+      borders dataset draws the eastern realm under the khanate's name until 1462 and then as
+      Moghulistan.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in iranica-chaghatayid-dynasty.txt (sha256 1842665c6eeb2376), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  territory:
+    prop: territory
+    value: { from: src:cliopatria-0.2.1, names: [Chagatai Khanate] }
+    source: { ref: src:cliopatria-0.2.1, loc: rows named Chagatai Khanate }
+    method: compilation
+    basis: reconstruction
+    note: >-
+      The dataset's fifteen rows of this name run from 1294 to 1462. It has no Chagatai Khanate
+      before 1294: until 1293 it draws the empire whole, in its rows named Mongol Empire, so this
+      state's land in its first thirty years or so lies inside rows of another name. To 1351 the
+      rows reach from Transoxania far to the east; from 1352 they draw back eastward, and from 1375
+      the dataset's Timurid Empire lies in Transoxania beside them. What is left in the east it goes
+      on calling the Chagatai Khanate until 1462, and then Moghulistan. So the rows are this
+      record's only as far as its end is taken: to the 1340s by the preferred reckoning, and all of
+      them only if the eastern khanate is the khanate carried on (end-dynasty). Its rows named
+      (Allegiance of Chagatai Khanate to Yuan Dynasty), from 1294 to 1374, are the outline of this
+      state and the Yuan together, and are not claimed.
+relations:
+  from-the-empire:
+    rel: arose-from
+    to: people/polities/mongol-empire
+    source:
+      - ref: src:kim-2009-unity-of-the-mongol-empire
+        loc: p. 30
+        quote: "it was divided into (1) the domain of Qa’an in the east, usually known as the ‘Yuan Dynasty,’ (2) the ‘Chaghatai Khanate’ in Central Asia, (3) the ‘Ilkhanate’ in Iran and Iraq, and (4) the ‘Golden Horde’ or the ‘Qipchaq Khanate.’"
+      - ref: src:jackson-1991-chaghatayid-dynasty
+        loc: para. 2
+        quote: "On Möngke’s death in 657/1259 the succession was disputed once more, between his brothers Qubilai (Qūbīlāy) and Arïg Böke (Arīq Būkā): the former was victorious only after a five-year civil war in which numerous members of the imperial family were involved on both sides."
+      - ref: src:yule-1903-book-of-ser-marco-polo
+        loc: "Introductory Notices, II, § 10"
+        quote: The House of Chaghatai had settled upon the pastures of the Ili and the valley of the Jaxartes, and ruled the wealthy cities of Sogdiana.
+    note: >-
+      A share of the empire that became a state in the empire's civil war, when its head took over
+      the Great Khan's administration in Central Asia (start-khanate). Yule lists it among the great
+      monarchies the empire was splitting into in 1260.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in kim-2009-unity-mongol-empire.txt (sha256 87475f58552ad797), iranica-chaghatayid-dynasty.txt (sha256 1842665c6eeb2376) and yule-cordier-marco-polo-vol1.txt (sha256 5dfc170138c62134), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  part-of-the-empire:
+    rel: part-of
+    to: people/polities/mongol-empire
+    alt: alt:mongol-unity/one-empire
+    valid: 1304 CE
+    source:
+      - ref: src:kim-2009-unity-of-the-mongol-empire
+        loc: p. 34
+        quote: "they thought that their uluses were parts of a larger political unit called ‘Yeke Mongghol Ulus,’ which embraced all the great and small uluses"
+      - ref: src:jackson-1991-chaghatayid-dynasty
+        loc: para. 6
+        quote: "Čapar then submitted to the great khan, Qubilai’s grandson and successor Temür, so that for the first time since 658/1260 the Mongol world was united."
+      - ref: src:kim-2009-unity-of-the-mongol-empire
+        loc: p. 17
+        quote: "prince Chapar and Du’a [who had rebelled against the qa’an] dispatched envoys and submitted"
+    note: >-
+      In the perspective that the empire went on until 1368 this realm was a part of it. The span
+      says only that it was so in 1304, when its khan Du'a and Qaidu's son Chapar submitted to the
+      Great Khan Temür and their envoys went with his to Persia: a time at which the sources show it
+      holding, not when it began or ended. For the thirty years before, it had not held in fact:
+      Qaidu, whom Jackson has elected Great Khan against Qubilai about 1271, kept the ulus of
+      Chaghatai in his grip and at war with Qubilai. Kim reads those wars as a family's quarrel
+      inside one empire. The perspective's own claim is that the realm was a part from its beginning
+      until its own end or the empire's, whichever came first. A span can end with one record's end,
+      not with the earlier of two, and which came first here rests on which of this record's ends is
+      chosen; so only the year is claimed.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in kim-2009-unity-mongol-empire.txt (sha256 87475f58552ad797) and iranica-chaghatayid-dynasty.txt (sha256 1842665c6eeb2376), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }

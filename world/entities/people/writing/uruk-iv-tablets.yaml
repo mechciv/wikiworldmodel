@@ -16,6 +16,8 @@ claims:
       ref: src:woods-2010-visible-language
       loc: p. 34 (ch. 2)
       quote: virtually all the tablets were discovered in secondary archaeological contexts, specifically, in rubbish heaps
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
   location:
     prop: location
     value: { lat: 31.323375, lon: 45.639052, frame: frame:earth/present-day }
@@ -52,6 +54,8 @@ claims:
     note: >-
       Not used. Woods says it must be taken with caution, as a lone sample, in a stretch of the fourth millennium where radiocarbon dates are hard to read, and the beams need not date the
       tablets. It would also put these tablets before the start given for writing in Mesopotamia.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
 relations:
   at-uruk:
     rel: during
@@ -60,3 +64,5 @@ relations:
       ref: src:woods-2010-visible-language
       loc: p. 34 (ch. 2)
       quote: Writing was invented in this context.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }

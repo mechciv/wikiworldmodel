@@ -1,0 +1,26 @@
+id: src:bverfg-1973-grundlagenvertrag
+type: document
+kind: act
+citation: >-
+  Bundesverfassungsgericht, Zweiter Senat, Urteil vom 31. Juli 1973 – 2 BvF 1/73 –
+  (Grundlagenvertrag). Entscheidungen des Bundesverfassungsgerichts (BVerfGE) 36, 1–37.
+published: 1973
+title: Urteil des Zweiten Senats vom 31. Juli 1973 – 2 BvF 1/73 – (Grundlagenvertrag), BVerfGE 36, 1
+url: https://www.servat.unibe.ch/dfr/bv036001.html
+via: >-
+  Das Fallrecht (DFR), University of Bern, edited by A. Tschentscher: a transcription of the
+  official reports that marks their page breaks and numbers the paragraphs itself (Rn.). The
+  locators here give both.
+reliability: >-
+  The judgment itself: evidence of what the Federal Republic's constitutional court held the Basic
+  Law to say about Germany's legal status, in its own words, binding on every organ of the Federal
+  Republic. It is not evidence of how others saw the matter: the judgment itself sets out the
+  opposite legal view, as one the Basic Law rejects, and says that the two German states disagreed
+  on the national question.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from servat.unibe.ch on 2026-11-17 and read in full in German: the headnotes, the
+    treaty as the judgment prints it, the submissions of the Bavarian and the Federal Government
+    (Rn. 53–69) and the reasons (Rn. 70–120). Paragraph and page numbers were read from the page's
+    markup. The quotes were found in the kept text by quote-check.

@@ -1,0 +1,21 @@
+id: src:royal-and-parliamentary-titles-act-1927
+type: document
+kind: act
+citation: >-
+  Parliament of the United Kingdom. An Act to provide for the alteration of the Royal Style and
+  Titles and of the Style of Parliament and for purposes incidental thereto (Royal and
+  Parliamentary Titles Act, 1927), 1927 c. 4, 12 April 1927.
+published: 1927
+title: Royal and Parliamentary Titles Act, 1927
+url: https://www.legislation.gov.uk/ukpga/Geo5/17-18/4/enacted
+via: legislation.gov.uk (The National Archives), in the text as enacted.
+reliability: >-
+  The Act that restyled Parliament "of the United Kingdom of Great Britain and Northern Ireland"
+  and let the King alter his style. It is evidence of the style from its passing on, and of how
+  Parliament saw itself: the same Parliament under a corrected name. It does not, in so many
+  words, rename the state.
+verified:
+  by: machine:claude-code
+  how: >-
+    The page fetched on 2026-11-17 and read whole (three sections). Quotations found in the kept
+    text by quote-check.

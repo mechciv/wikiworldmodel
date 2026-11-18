@@ -1,0 +1,29 @@
+id: src:jackson-1991-chaghatayid-dynasty
+type: publication
+kind: review
+citation: >-
+  Jackson, P. (1991). Chaghatayid Dynasty. Encyclopaedia Iranica, vol. V, fasc. 4, pp. 343–346.
+  Online edition, last updated 10 June 2013.
+authors:
+  - "Jackson, P."
+published: 1991
+title: Chaghatayid Dynasty
+container: Encyclopaedia Iranica, vol. V, fasc. 4
+doi: 10.1163/2330-4804_EIRO_COM_7652
+url: https://web.archive.org/web/20260831121911if_/https://www.iranicaonline.org/articles/chaghatayid-dynasty/
+via: >-
+  The Internet Archive's capture, of 31 August 2026, of the encyclopaedia's own page
+  (iranicaonline.org/articles/chaghatayid-dynasty), which sent a browser check to this reader
+  instead of the article.
+reliability: >-
+  A signed entry in the standard scholarly reference work on Iran, by the historian who wrote
+  The Dissolution of the Mongol Empire (1978). It follows the line of Chaghatai from the ulus
+  Chinggis Khan allotted him to the end of the dynasty in Kashgharia in 1678, with most detail
+  on its dealings with Iran, and says from when one may speak of a khanate. Dates are given in
+  both the Islamic and the Christian era.
+verified:
+  by: machine:claude-code
+  how: >-
+    The archived page fetched on 2026-11-17 and read in full. It has no page breaks, so
+    locators count its paragraphs from the first. The quotations were found in the kept text by
+    quote-check, which sets aside the soft hyphens the page breaks some words with.

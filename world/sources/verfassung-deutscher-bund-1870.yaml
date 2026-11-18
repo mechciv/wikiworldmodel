@@ -1,0 +1,25 @@
+id: src:verfassung-deutscher-bund-1870
+type: document
+kind: act
+citation: >-
+  Verfassung des Deutschen Bundes, as agreed between the North German Confederation, Baden and
+  Hesse in November 1870 and published on 31 December 1870. Bundesgesetzblatt des Norddeutschen
+  Bundes 1870, Nr. 51, pp. 627–649.
+published: 1870
+title: Verfassung des Deutschen Bundes
+url: https://de.wikisource.org/wiki/Verfassung_des_Deutschen_Bundes_(1870)
+via: >-
+  German Wikisource's transcription from a scan of the gazette, marked there as proofread twice
+  (fertig), with the gazette's page numbers; its heading gives the gazette and the day of
+  publication.
+reliability: >-
+  The constitution as published at the end of 1870: evidence that the text then published already
+  named the federation Deutsches Reich and its president Deutscher Kaiser. The text itself carries
+  no date and does not say when it takes effect: the protocol printed after it does
+  (src:protokoll-versailles-1870).
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from de.wikisource.org on 2026-11-17. Read in German: the heading, the preamble,
+    Articles 1, 11, 17 and 78 to 80 as far as its first list. The quotes were found in the kept
+    text by quote-check.

@@ -1,0 +1,24 @@
+id: src:arhiv-jugoslavije-constituent-acts
+type: database-record
+kind: review
+citation: >-
+  Todorović, M. Constituent Acts of Yugoslavia. YU Lexicon, the Archives of Yugoslavia
+  (Arhiv Jugoslavije), Belgrade. English version.
+authors:
+  - "Todorović, M."
+snapshot: 2026-11-17
+title: Constituent Acts of Yugoslavia
+container: The Archives of Yugoslavia, YU Lexicon
+url: https://www.arhivyu.rs/en/leksikon-jugoslavije/konstitutivni_akti_jugoslavije
+reliability: >-
+  The account of the Yugoslav state's founding acts, from 1918 to 2003, on the website of the
+  archive that keeps them, each section signed as prepared by Mitar Todorović. A reference
+  page by the documents' custodian, written from Belgrade: good for the dates and the content
+  of the acts, and for how their keeper reads their bearing on the state's continuity; its
+  account of the break-up of 1991 and 1992 is one side's.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from arhivyu.rs on 2026-11-17; the page says it was last changed on 28 September
+    2026. The sections from the second session of AVNOJ (1943) to the Constitutional Charter
+    (2003) were read; the quotes were found in the kept text by quote-check.

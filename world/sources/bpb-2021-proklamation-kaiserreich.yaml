@@ -1,0 +1,20 @@
+id: src:bpb-2021-proklamation-kaiserreich
+type: publication
+kind: review
+citation: >-
+  Bundeszentrale für politische Bildung, Redaktion (15 January 2021). Vor 150 Jahren: Proklamation
+  des Deutschen Kaiserreichs. Hintergrund aktuell, bpb.de.
+published: 2021
+title: "Vor 150 Jahren: Proklamation des Deutschen Kaiserreichs"
+container: Hintergrund aktuell, Bundeszentrale für politische Bildung
+url: https://www.bpb.de/kurz-knapp/hintergrund-aktuell/325614/vor-150-jahren-proklamation-des-deutschen-kaiserreichs/
+reliability: >-
+  A short account by the editors of the Federal Agency for Civic Education, without references:
+  a reference work's summary of the acts by which the Reich was founded, and of which of them it
+  counts as the founding. Cited because it sets the three acts side by side.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from bpb.de on 2026-11-17 and read in full in German. The quotes were found in the
+    kept text by quote-check; the page's link labels ("Interner Link:") stand in that text and are
+    kept out of the quotes.

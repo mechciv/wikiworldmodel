@@ -1,0 +1,24 @@
+id: src:dunlop-1897-dnb-st-leger
+type: publication
+kind: review
+citation: >-
+  Dunlop, R. (1897). St. Leger, Sir Anthony (1496?–1559), lord-deputy of Ireland. Dictionary of
+  National Biography, vol. 50, pp. 163–167.
+authors:
+  - "Dunlop, R."
+published: 1897
+title: St. Leger, Sir Anthony (1496?–1559), lord-deputy of Ireland
+container: Dictionary of National Biography, vol. 50
+url: https://en.wikisource.org/wiki/Dictionary_of_National_Biography,_1885-1900/St._Leger,_Anthony
+via: >-
+  English Wikisource's transcription of the volume, page by page against its scan; pp. 163–166
+  are marked proofread there.
+reliability: >-
+  The standard British biographical dictionary, on the lord deputy who held the parliament that
+  made Henry VIII King of Ireland, from the State Papers. It gives the day the parliament met
+  and leaves the year to the run of the narrative.
+verified:
+  by: machine:claude-code
+  how: >-
+    The page fetched on 2026-11-17; the life read from his appointment in 1540 to the session of
+    February 1542 (pp. 164–165). Quotation found in the kept text by quote-check.

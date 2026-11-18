@@ -1,0 +1,25 @@
+id: src:verfassung-deutsches-reich-1871
+type: document
+kind: act
+citation: >-
+  Gesetz, betreffend die Verfassung des Deutschen Reichs. Vom 16. April 1871, with the Verfassung
+  des Deutschen Reichs annexed to it. Reichsgesetzblatt 1871, Nr. 16, pp. 63–85.
+published: 1871
+title: Gesetz, betreffend die Verfassung des Deutschen Reichs. Vom 16. April 1871
+url: https://de.wikisource.org/wiki/Verfassung_des_Deutschen_Reichs_(1871)
+via: >-
+  German Wikisource's transcription from a scan of the gazette, marked there as proofread twice
+  (fertig), with the gazette's page numbers; its heading gives the gazette and the day of
+  publication, 20 April 1871.
+reliability: >-
+  The law and the constitution it enacts: evidence of the day the law was given, of what it
+  replaced and of the name the federation bears. It does not say when the Reich began: it puts a
+  new text in place of a constitution already in force.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from de.wikisource.org on 2026-11-17. Read in German: the law (§§ 1 to 3 and its
+    closing formula), the constitution's preamble and Articles 1 to 3 and 11. The preamble has the
+    same words in the transcription at documentarchiv.de, which leaves out the law's closing
+    formula and has Verfassung-Urkunde in § 1. The quotes were found in the kept text by
+    quote-check.

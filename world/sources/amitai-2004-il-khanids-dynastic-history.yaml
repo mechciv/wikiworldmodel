@@ -1,0 +1,27 @@
+id: src:amitai-2004-il-khanids-dynastic-history
+type: publication
+kind: review
+citation: >-
+  Amitai, R. (2004). Il-Khanids i. Dynastic History. Encyclopaedia Iranica, vol. XII, fasc. 6,
+  pp. 645–654. Online edition, last updated 27 March 2012.
+authors:
+  - "Amitai, R."
+published: 2004
+title: Il-Khanids i. Dynastic History
+container: Encyclopaedia Iranica, vol. XII, fasc. 6
+url: https://web.archive.org/web/20261006235130if_/https://www.iranicaonline.org/articles/il-khanids-i-dynastic-history/
+via: >-
+  The Internet Archive's capture, of 6 October 2026, of the encyclopaedia's own page
+  (iranicaonline.org/articles/il-khanids-i-dynastic-history), which sent a browser check to
+  this reader instead of the article.
+reliability: >-
+  A signed entry by a historian of the Ilkhans and the Mamluks in the standard scholarly
+  reference work on Iran. A short survey of the reigns and of the state's institutions, with a
+  bibliography; it dates an independent Ilkhanid state from about 1260, within the breakup of
+  the united empire, and its end from the death of Abu Saʿid in 1335.
+verified:
+  by: machine:claude-code
+  how: >-
+    The archived page fetched on 2026-11-17 and read in full. It has no page breaks, so
+    locators name the section and the paragraph by its opening words. The quotations were
+    found in the kept text by quote-check.

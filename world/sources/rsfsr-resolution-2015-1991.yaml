@@ -1,0 +1,25 @@
+id: src:rsfsr-resolution-2015-1991
+type: document
+kind: act
+citation: >-
+  Supreme Soviet of the RSFSR. Resolution of 12 December 1991, no. 2015-I, "On the denunciation
+  of the Treaty on the Formation of the USSR" (О денонсации Договора об образовании СССР), signed
+  by its chairman, R.I. Khasbulatov, Moscow.
+published: 1991
+title: О денонсации Договора об образовании СССР
+url: https://ru.wikisource.org/wiki/%D0%9F%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5_%D0%92%D0%A1_%D0%A0%D0%A1%D0%A4%D0%A1%D0%A0_%D0%BE%D1%82_12.12.1991_%E2%84%96_2015-I
+via: >-
+  Russian Wikisource's transcription, which gives as its sources Consultant Plus and
+  rusarchives.ru/statehood/10-02-denonsaciya-dogovor-sssr.shtml. The transcription sets its own
+  note mark, [1], at the end of the operative sentence.
+reliability: >-
+  The act by which Russia's parliament denounced the treaty of union: evidence of the day Russia
+  itself held that it left the Union, and, in an official text, of the day the treaty had been
+  approved in 1922. The transcription's heading says the resolution lost force by a resolution of
+  the State Duma of 15 March 1996, which was not read.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from ru.wikisource.org on 2026-11-17 and read in full in Russian, the preamble, the
+    operative sentence, the signature and the date line; the quotes were found in the kept text
+    by quote-check.

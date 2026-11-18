@@ -1,0 +1,28 @@
+id: src:union-with-scotland-act-1706
+type: document
+kind: act
+citation: >-
+  Parliament of England. An Act for an Union of the Two Kingdoms of England and Scotland, 6 Ann.
+  c. 11 (chapter 8 of 5 & 6 Ann. in the common printed editions). Short title, given in 1896:
+  Union with Scotland Act 1706.
+published: 1707
+title: An Act for an Union of the Two Kingdoms of England and Scotland
+url: https://www.legislation.gov.uk/aep/Ann/6/11
+via: >-
+  legislation.gov.uk (The National Archives), in its revised text: the Act as it stands today,
+  with later repeals marked. The text as enacted is there only as a scan of the King's Printer's
+  copy, in black letter, whose text layer cannot be read.
+reliability: >-
+  The Act of the English Parliament that ratified the Articles of Union and the Scottish Act
+  approving them. It is evidence of what was enacted and for which day, in its makers' words,
+  and not of how the union was brought about. Article I, which makes the union, stands
+  unamended; Articles V, VIII to XV, XVII and XXII are repealed and are not in this text.
+verified:
+  by: machine:claude-code
+  how: >-
+    The page fetched on 2026-11-17 and read whole, as far as it stands. Quotations found in the
+    kept text by quote-check.
+note: >-
+  The year of the short title is not the year by our reckoning. The Act recites a Scottish Act
+  passed at Edinburgh on 5 February 1707 (section VI), so it was itself passed after that day and
+  before the union of 1 May: in 1707, as given here. The page gives no day of passing.

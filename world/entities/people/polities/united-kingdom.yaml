@@ -1,0 +1,111 @@
+id: people/polities/united-kingdom
+kind: polity
+summary: >-
+  The kingdom made by the union of Great Britain and Ireland on 1 January 1801, and the same
+  state today. By the words of its Acts of Union two kingdoms became one under a new name, as
+  England and Scotland had in 1707. All of Ireland but Northern Ireland left it in December 1922
+  as the Irish Free State, and the United Kingdom went on: in 1927 its Parliament, keeping its
+  number, took the style "of Great Britain and Northern Ireland". Wikidata cuts the state at
+  that renaming, into the United Kingdom of Great Britain and Ireland (Q174193, 1801 to 1927)
+  and the United Kingdom (Q145, begun in 1921 or 1927). Neither is the same thing as this
+  record, and the record has no phase for either to sit on, since its form of government did
+  not change: none is given.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: United Kingdom }
+    source:
+      - ref: src:union-with-ireland-act-1800
+        loc: "Article Third"
+        quote: the said United Kingdom be represented in one and the same Parliament
+      - ref: src:royal-and-parliamentary-titles-act-1927
+        loc: "section 2(2)"
+        quote: the expression " United Kingdom " shall, unless the context otherwise requires, mean Great Britain and Northern Ireland
+    note: >-
+      The short name, which its laws have used throughout, and the label: it did not change
+      when the long one did. The long styles are its official names, in turn.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in union-with-ireland-act-1800.txt (sha256 0a00039a3c051c76) and royal-and-parliamentary-titles-act-1927-enacted.txt (sha256 75057f0d6d9f48fb), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  name-1801:
+    prop: official_name
+    value: { en: United Kingdom of Great Britain and Ireland }
+    valid: { lo: 1 January 1801 CE, hi: 12 April 1927 CE }
+    source:
+      - ref: src:union-with-ireland-act-1800
+        loc: "Article First"
+        quote: by the name of the United Kingdom of Great Britain and Ireland
+      - ref: src:royal-and-parliamentary-titles-act-1927
+        loc: "section 2(1)"
+        quote: instead of the Thirty-fourth Parliament of the United Kingdom of Great Britain and Ireland
+    note: >-
+      The name the Articles of Union gave it. It outlasted by more than four years the leaving
+      of the Irish Free State, until the Act of 12 April 1927.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in union-with-ireland-act-1800.txt (sha256 0a00039a3c051c76) and royal-and-parliamentary-titles-act-1927-enacted.txt (sha256 75057f0d6d9f48fb), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  name-1927:
+    prop: official_name
+    value: { en: United Kingdom of Great Britain and Northern Ireland }
+    valid: { lo: 12 April 1927 CE }
+    source:
+      - ref: src:royal-and-parliamentary-titles-act-1927
+        loc: "section 2(1)"
+        quote: Parliament shall hereafter be known as and styled the Parliament of the United Kingdom of Great Britain and Northern Ireland
+      - ref: src:royal-and-parliamentary-titles-act-1927
+        loc: "section 2(1)"
+        quote: the present Parliament shall be known as the Thirty-fourth Parliament of the United Kingdom of Great Britain and Northern Ireland
+    note: >-
+      A new name and not a new state: the Act, passed on 12 April 1927, restyles the Parliament
+      then sitting without changing its number, and says what "United Kingdom" is to mean in
+      later Acts. It does not rename the state in so many words; the state's name is taken
+      from its Parliament's. The day is written here and in the old name's span, since a name's
+      span cannot point to another claim.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in royal-and-parliamentary-titles-act-1927-enacted.txt (sha256 75057f0d6d9f48fb), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  start:
+    prop: start
+    value: 1 January 1801 CE
+    source:
+      - ref: src:union-with-ireland-act-1800
+        loc: "Article First"
+        quote: the said kingdoms of Great Britain and Ireland shall, upon the first day of January which shall be in the year of our Lord one thousand eight hundred and one, and for ever after, be united into one kingdom, by the name of the United Kingdom of Great Britain and Ireland
+      - ref: src:act-of-union-ireland-1800
+        loc: "Article First"
+        quote: the said kingdoms of Great Britain and Ireland shall, upon the first day of January, which shall be in the year of our lord one thousand eight hundred and one, and for ever, be united into one kingdom
+    method: documentary
+    note: >-
+      The day both Parliaments' Acts name. It falls after September 1752, when the British
+      dominions took the Gregorian calendar (src:calendar-new-style-act-1750, section 1), so no
+      calendar need be named.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in union-with-ireland-act-1800.txt (sha256 0a00039a3c051c76) and act-of-union-ireland-1800.txt (sha256 a52af5e3ba1838ae), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+relations:
+  from-great-britain:
+    rel: arose-from
+    to: people/polities/great-britain
+    source:
+      - ref: src:union-with-ireland-act-1800
+        loc: "Article First"
+        quote: the said kingdoms of Great Britain and Ireland shall, upon the first day of January which shall be in the year of our Lord one thousand eight hundred and one, and for ever after, be united into one kingdom, by the name of the United Kingdom of Great Britain and Ireland
+      - ref: src:union-with-ireland-act-1800
+        loc: "Article Fourth"
+        quote: the lords spiritual and temporal and commons of Great Britain shall, together with the … commons so returned as aforesaid on the part of Ireland, constitute the two Houses of the Parliament of the United Kingdom
+    note: >-
+      One of the two kingdoms united into it, by the Act of Great Britain's own Parliament. The
+      Act speaks of two kingdoms becoming one under a new name, and not of Great Britain taking
+      Ireland in: so the United Kingdom arose from each, and is not Great Britain carried on.
+      In its working the union leaned one way all the same: the united Parliament was to be
+      the Lords and Commons of Great Britain with members for Ireland added. The gap in the
+      second quotation is where the revised text marks words since repealed.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in union-with-ireland-act-1800.txt (sha256 0a00039a3c051c76), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  from-ireland:
+    rel: arose-from
+    to: people/polities/kingdom-of-ireland
+    source:
+      ref: src:act-of-union-ireland-1800
+      loc: "Article First"
+      quote: the said kingdoms of Great Britain and Ireland shall, upon the first day of January, which shall be in the year of our lord one thousand eight hundred and one, and for ever, be united into one kingdom
+    note: The other of the two kingdoms united into it, by the Act of Ireland's own Parliament.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in act-of-union-ireland-1800.txt (sha256 a52af5e3ba1838ae), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }

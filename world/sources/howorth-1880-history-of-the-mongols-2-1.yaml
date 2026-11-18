@@ -1,0 +1,26 @@
+id: src:howorth-1880-history-of-the-mongols-2-1
+type: publication
+kind: review
+citation: >-
+  Howorth, H.H. (1880). History of the Mongols from the 9th to the 19th Century. Part II: The
+  So-called Tartars of Russia and Central Asia. Division I. London: Longmans, Green.
+authors:
+  - "Howorth, H.H."
+published: 1880
+title: "History of the Mongols from the 9th to the 19th Century. Part II, Division I"
+container: London, Longmans, Green
+url: https://archive.org/download/historyofmongols21howo/historyofmongols21howo_djvu.txt
+via: The Internet Archive's scan (historyofmongols21howo), read in its OCR text.
+reliability: >-
+  The fullest nineteenth-century history of the Golden Horde in English, compiled from
+  translations of the Russian, Persian and Arabic sources and from Karamzin and von Hammer,
+  whom it cites at the foot of each page. It is old and second-hand, and it is cited for the
+  year in which the Horde was finally broken, which it tells in detail. The OCR is rough, and
+  only what reads cleanly is quoted.
+verified:
+  by: machine:claude-code
+  how: >-
+    The OCR text fetched on 2026-11-17. Read: the opening of chapter I (pp. 1–2), the opening of
+    the life of Batu (pp. 36–37) and, in chapter V, the end of Sheikh Ahmed's reign and what
+    follows (pp. 346–347, 351), with the page numbers of the running heads. The quotations were
+    found in the kept text by quote-check.

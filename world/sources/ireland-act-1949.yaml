@@ -1,0 +1,21 @@
+id: src:ireland-act-1949
+type: document
+kind: act
+citation: >-
+  Parliament of the United Kingdom. An Act to recognise and declare the constitutional position
+  as to the part of Ireland heretofore known as Eire, and to make provision as to the name by
+  which it may be known … (Ireland Act, 1949), 1949 c. 41, 2 June 1949.
+published: 1949
+title: Ireland Act, 1949
+url: https://www.legislation.gov.uk/ukpga/Geo6/12-13-14/41/enacted
+via: legislation.gov.uk (The National Archives), in the text as enacted.
+reliability: >-
+  The British Act that answered the Republic of Ireland Act. It is evidence of the name British
+  law then gave the Irish state, and of Britain's view that Northern Ireland remained part of
+  the United Kingdom. It calls "Republic of Ireland" the name Irish law gives the state, where
+  the Irish Act calls it a description.
+verified:
+  by: machine:claude-code
+  how: >-
+    The page fetched on 2026-11-17; sections 1 to 4 read. Quotations found in the kept text by
+    quote-check.

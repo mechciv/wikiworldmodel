@@ -1,0 +1,25 @@
+id: src:irish-free-state-constitution-act-1922
+type: document
+kind: act
+citation: >-
+  Parliament of the United Kingdom. An Act to provide for the Constitution of the Irish Free
+  State (Irish Free State Constitution Act, 1922 (Session 2)), 13 Geo. 5 sess. 2 c. 1, 5 December
+  1922.
+published: 1922
+title: Irish Free State Constitution Act, 1922 (Session 2)
+url: https://www.legislation.gov.uk/ukpga/Geo5Sess2/13/1/pdfs/ukpga_19220001_en.pdf
+via: >-
+  legislation.gov.uk (The National Archives): a scan of the King's Printer's copy, as enacted,
+  read through the text layer of the PDF. That layer misreads letters here and there ("Eree" for
+  Free, "A ct" for Act), so only passages it gives cleanly are quoted.
+reliability: >-
+  The British Act that made the Constitution passed by the Irish constituent assembly the
+  Constitution of the Irish Free State, to come into operation on the King's proclamation. It is
+  evidence of what Parliament enacted, and of how it spoke of the Free State: as leaving "the
+  rest of the United Kingdom". The Irish assembly's own Act rests the same Constitution on
+  another authority (src:constitution-of-the-irish-free-state-act-1922).
+verified:
+  by: machine:claude-code
+  how: >-
+    The PDF fetched on 2026-11-17; the preamble and sections 1 to 5 read, and Article 83 in the
+    Schedule. Quotations found in the kept text by quote-check.

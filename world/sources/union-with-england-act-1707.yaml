@@ -1,0 +1,26 @@
+id: src:union-with-england-act-1707
+type: document
+kind: act
+citation: >-
+  Parliament of Scotland. Act Ratifying and Approving the Treaty of Union of the Two Kingdoms of
+  Scotland and England, 1707 c. 7. Short title, given in 1964: Union with England Act 1707.
+published: 1707
+title: Act Ratifying and Approving the Treaty of Union of the Two Kingdoms of Scotland and England
+url: https://www.legislation.gov.uk/aosp/1707/7
+via: >-
+  legislation.gov.uk (The National Archives), in its revised text: the Act as it stands today,
+  with later repeals marked.
+reliability: >-
+  The Act of the Scottish Parliament that approved the Articles of Union, on condition that the
+  English Parliament did the same. It is evidence of what was enacted, in its makers' words.
+  Article I, which makes the union, stands unamended; several other articles are repealed and
+  are not in this text.
+verified:
+  by: machine:claude-code
+  how: >-
+    The page fetched on 2026-11-17 and read whole. Quotations found in the kept text by
+    quote-check.
+note: >-
+  The Act does not date itself. The English Act that answers it recites it as passed at Edinburgh
+  on 16 January in the fifth year of Queen Anne (src:union-with-scotland-act-1706, recital), and
+  a Scottish Act of 5 February 1707 calls that "the Sixteenth of January last".

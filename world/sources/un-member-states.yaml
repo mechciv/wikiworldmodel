@@ -1,0 +1,22 @@
+id: src:un-member-states
+type: database-record
+kind: compilation
+citation: >-
+  United Nations. Member States: the list of the Member States of the United Nations, each with
+  its date of admission. un.org, About Us, Member States.
+snapshot: 2026-11-17
+title: Member States
+container: United Nations, About Us
+url: https://www.un.org/en/about-us/member-states
+reliability: >-
+  The United Nations' own list of its members and the day each was admitted: evidence of how the
+  Organization counts a membership. It lists the Russian Federation with the date 24-10-1945,
+  the day from which the Soviet Union was an original member, and says no more than the date;
+  the page on the Russian Federation that it links to says why
+  (src:un-member-states-russian-federation). The page can change.
+verified:
+  by: machine:claude-code
+  how: >-
+    The page fetched from un.org on 2026-11-17 and its entry for the Russian Federation read; the
+    quotes were found in the kept text by quote-check. The other entries were not read for this
+    record.

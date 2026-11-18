@@ -1,0 +1,141 @@
+id: people/wars/second-sino-japanese-war
+kind: event/war
+summary: >-
+  The war between Japan and China that began with a clash near Peiping on 7 July 1937 and was
+  fought undeclared until China declared war on 9 December 1941, after Japan had attacked the
+  United States and Britain; from then it was part of the Second World War, and it ended with
+  Japan's surrender in 1945. The People's Republic of China counts its War of Resistance from
+  September 1931, and the world war itself from July 1937.
+author: machine:claude-code
+same_as: { wikidata: Q170314 }
+claims:
+  name:
+    prop: name
+    value: { en: Second Sino-Japanese War }
+    unsourced: >-
+      An editorial label, the war's usual name in English. China calls it the War of Resistance
+      Against Japanese Aggression.
+  start-1937:
+    prop: start
+    value: 7 July 1937 CE
+    source:
+      - ref: src:us-state-1943-peace-and-war
+        loc: p. 44
+        quote: ON JULY 7, 1937 a clash occurred between Chinese and Japanese troops near Peiping in North China.
+      - ref: src:us-state-1943-peace-and-war
+        loc: p. 44
+        quote: On July 16, 1937, a few days after the beginning of Japan's undeclared war on China
+      - ref: src:china-declaration-of-war-1941
+        loc: headnote
+        quote: Japan waged an undeclared war on China from July 7, 1937
+      - ref: src:sherry-china-defensive
+        loc: p. 6
+        quote: Full-scale war with Japan began in July 1937.
+    method: historical-account
+    rank: preferred
+    note: >-
+      The usual start, and the one the record is cut by: the clash at the Marco Polo Bridge,
+      from which the State Department's account, the journal that printed China's declaration
+      and the U.S. Army's brochure all count the war, though it was not declared. The People's
+      Republic dates Japan's all-out war from the same day, and its own resistance from six
+      years earlier (start-1931).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ww2-peace-and-war-1943.txt (sha256 4527729176341e3a), ww2-china-declaration-of-war-1941.txt (sha256 70eb78c730bd20ef) and ww2-sherry-china-defensive.txt (sha256 79163035c2c5e7b0), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  start-1931:
+    prop: start
+    value: 18 September 1931 CE
+    source:
+      ref: src:prc-2005-victory-anniversary-speech
+      loc: paragraph beginning "The brazen aggression"
+      quote: The September 18th Incident in 1931 marked the start of their War of Resistance Against Japanese Aggression
+    method: historical-account
+    note: >-
+      The reckoning of the People's Republic of China, which counts the War of Resistance from
+      Japan's seizure of the north-east. The same speech calls the fighting before July 1937 a
+      struggle on a local basis and the prelude to the world war, so on this reckoning the war
+      is one thing from 1931 and a part of the world war only from 1937. Whether the war of
+      1931 and the war of 1937 are one war is the question, and a competing start is the only
+      way the record can ask it.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ww2-hu-2005-victory-anniversary-speech.txt (sha256 b2ae81f253d8632b), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  end-surrender:
+    prop: end
+    value: { ref: people/events/japanese-surrender-1945 }
+    source:
+      - ref: src:sherry-china-defensive
+        loc: opening paragraph (pp. 3-4)
+        quote: China had been at war with Japan since 1937 and continued the fight until the Japanese surrender in 1945.
+      - ref: src:prc-2005-victory-anniversary-speech
+        loc: paragraph beginning "During the heart-stirring national war of resistance"
+        quote: On September 2, 1945, the Japanese Government officially signed the instrument of surrender, which meant the complete defeat of Japanese aggressors
+    method: historical-account
+    rank: preferred
+    note: >-
+      The war ended with Japan's surrender, and takes the instrument's day. Preferred because
+      both accounts end the war there and not at the ceremony in China a week later. On the
+      reckoning that ends the world war when the surrender was announced
+      (people/wars/second-world-war, end-surrender-announced) this war still ends at the
+      signing, more than two weeks later: it names the instrument, and the announcement has no
+      record that it could name.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ww2-sherry-china-defensive.txt (sha256 79163035c2c5e7b0) and ww2-hu-2005-victory-anniversary-speech.txt (sha256 b2ae81f253d8632b), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  end-china-theatre:
+    prop: end
+    value: 9 September 1945 CE
+    source:
+      - ref: src:japan-act-of-surrender-china-theatre-1945
+        loc: headnote
+        quote: The formal Japanese surrender in the China Theatre took place in a simple 20 minute ceremony in the auditorium of the Central Military Academy in Nanking at 09:00 on 9 September 1945.
+      - ref: src:japan-act-of-surrender-china-theatre-1945
+        loc: second paragraph of the act
+        quote: hereby surrender unconditionally all of the forces under our command to Generalissimo Chiang Kai-shek
+    method: documentary
+    note: >-
+      The day the Japanese forces in China themselves surrendered, at Nanking, a week after the
+      instrument was signed in Tokyo Bay. On this reckoning the part outlasts its whole: the
+      war in China ends after the world war it was part of. The day is from the transcriber's
+      headnote, not from the act, whose text as transcribed carries no date.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ww2-japan-act-of-surrender-china-theatre-1945.txt (sha256 0e4db66ec63625f4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+relations:
+  part-of:
+    rel: part-of
+    to: people/wars/second-world-war
+    valid: { lo: 9 December 1941 CE }
+    source:
+      - ref: src:china-declaration-of-war-1941
+        loc: declaration of war on Japan, last paragraph
+        quote: The Chinese Government hereby formally declares war on Japan.
+      - ref: src:china-declaration-of-war-1941
+        loc: declaration of war on Germany and Italy, last paragraph
+        quote: as from midnight, December 9, 1941, a state of war exists between China and Germany and between China and Italy
+    note: >-
+      One marker of when the war in China became part of the wider war: the day China, which
+      had fought Japan for more than four years without a declaration, declared war on Japan
+      and on Germany and Italy. The declaration itself says that Japan, by attacking the United
+      States and Britain, had extended the theatre of its aggression. The span is open at its
+      end: the war in China was part of the world war until one of them ended. On the reckoning
+      that begins the world war in July 1937 (people/wars/second-world-war, start-china) it was
+      part of it from that day, which a span that is one fixed date cannot follow.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ww2-china-declaration-of-war-1941.txt (sha256 70eb78c730bd20ef), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  empire-of-japan:
+    rel: participant
+    to: people/polities/empire-of-japan
+    source:
+      ref: src:china-declaration-of-war-1941
+      loc: headnote
+      quote: Japan waged an undeclared war on China from July 7, 1937
+    note: The attacker, throughout.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ww2-china-declaration-of-war-1941.txt (sha256 70eb78c730bd20ef), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  republic-of-china:
+    rel: participant
+    to: people/polities/republic-of-china
+    source:
+      ref: src:china-declaration-of-war-1941
+      loc: declaration of war on Japan, first paragraph
+      quote: For more than four years China has resolutely resisted Japan's aggression
+    note: The state attacked, throughout.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ww2-china-declaration-of-war-1941.txt (sha256 70eb78c730bd20ef), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }

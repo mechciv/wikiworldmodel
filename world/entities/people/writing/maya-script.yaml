@@ -38,6 +38,8 @@ claims:
         loc: p. 227
         quote: Scholars assume these texts are in a Maya language since some signs resemble later ones
     note: Largely read in its Late Classic form, by Palka's account; its earliest texts are harder, and their language is assumed.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
   location:
     prop: location
     value: { lat: 17.55167, lon: -89.40889, frame: frame:earth/present-day }
@@ -58,3 +60,33 @@ relations:
       ref: src:stuart-2022-san-bartolo
       loc: abstract
       quote: found among fragments of painted murals excavated at San Bartolo, Guatemala
+  from-olmec-script:
+    rel: arose-from
+    to: people/writing/olmec-script
+    source:
+      - ref: src:palka-2010-maya-writing
+        loc: p. 226
+        quote: Maya writing developed in the tradition of Mesoamerican writing initiated by the Olmec and Zapotec
+      - ref: src:palka-2010-maya-writing
+        loc: p. 226
+        quote: while the Maya adopted writing from other Mesoamerican cultures and borrowed a few signs, such as the signs for “cloud” and “hill,” they invented their own hieroglyphs
+    note: >-
+      What was taken over is the practice of writing and a few signs; the hieroglyphs are the Maya's own. Palka does not say from which older script: more than likely, he writes, literate
+      peoples in the Gulf Coast or highland Oaxaca influenced Maya writing. So this relation and from-zapotec-script are one statement with an "or" in it, not a union of two parents. This
+      is the Olmec writing of the Gulf Coast, which has no record yet.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  from-zapotec-script:
+    rel: arose-from
+    to: people/writing/zapotec-script
+    source:
+      - ref: src:palka-2010-maya-writing
+        loc: p. 226
+        quote: Maya writing developed in the tradition of Mesoamerican writing initiated by the Olmec and Zapotec
+      - ref: src:palka-2010-maya-writing
+        loc: p. 226
+        quote: while the Maya adopted writing from other Mesoamerican cultures and borrowed a few signs, such as the signs for “cloud” and “hill,” they invented their own hieroglyphs
+    note: >-
+      The same statement as from-olmec-script, for the other script it names: the writing of highland Oaxaca, which Palka says may record the Zapotec language. It has no record yet.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }

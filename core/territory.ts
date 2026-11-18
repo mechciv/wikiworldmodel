@@ -67,6 +67,19 @@ export function territoriesAt(file: TerritoryFile, t: number, s: Scenario): Terr
   return out;
 }
 
+/**
+ * Of the territories that hold at a time, which are drawn in a colour of their own, and which are left to be
+ * drawn as states among the states: at most `max` in colour, the record that is open first, then the largest.
+ * None is dropped: the more records have land of their own, the more are drawn among the states.
+ */
+export function drawnFirst(all: TerritoryAt[], selected: string | null, max: number): { drawn: TerritoryAt[]; rest: TerritoryAt[] } {
+  const area = (a: TerritoryAt) => a.rows.reduce((n, r) => n + r.area, 0);
+  const order = [...all].sort((a, b) => Number(b.territory.subject === selected) - Number(a.territory.subject === selected) || area(b) - area(a) || (a.territory.subject < b.territory.subject ? -1 : 1));
+  // Kept in the order they came in, so a polity's colour does not depend on the others'.
+  const first = new Set(order.slice(0, max));
+  return { drawn: all.filter((a) => first.has(a)), rest: all.filter((a) => !first.has(a)) };
+}
+
 /** Whether a point lies inside a row's polygons (even-odd, as they are filled). */
 export function contains(row: TerritoryRow, lon: number, lat: number): boolean {
   const x = lon * TERRITORY_SCALE;

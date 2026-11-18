@@ -1,0 +1,227 @@
+id: people/polities/holy-roman-empire
+kind: polity
+summary: >-
+  The empire of the German kings over Germany and Italy, which called itself the Roman Empire and,
+  from the twelfth century, holy. It ended on 6 August 1806, when Francis II laid down the crown.
+  When it began is contested: with the coronation of Otto I at Rome in 962, or, as its own tradition
+  and older historians counted, with Charlemagne's in 800. It held that it was the Roman Empire
+  itself, transferred from the Greeks; Constantinople rejected that, and here it holds only in the
+  perspective of the translatio imperii.
+author: machine:claude-code
+same_as: { wikidata: Q12548 }
+claims:
+  name:
+    prop: name
+    value: { en: Holy Roman Empire }
+    source:
+      ref: src:bryce-1871-holy-roman-empire
+      loc: "ch. XII, at the sidenote: The title 'Holy Empire.'"
+      quote: "To the accustomed 'Roman Empire' Frederick Barbarossa adds the epithet of 'Holy.'"
+    note: >-
+      The name in use today. The empire's own name for itself was the Roman Empire; holy (sacrum
+      imperium) is first found in a privilege of Frederick I, and of the German nation was added
+      about the time of Maximilian I (Bryce, ch. XII and XVII). The declaration that ended it
+      speaks throughout of the German Empire (das deutsche Reich).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in bryce-holy-roman-empire.txt (sha256 b45cf0705a7c5c07), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  start-962:
+    prop: start
+    value: 2 February 962 CE
+    source:
+      - ref: src:bryce-1871-holy-roman-empire
+        loc: "ch. VI, at the sidenote: Otto the Great."
+        quote: The Holy Roman Empire, taking the name in the sense which it commonly bore in later centuries, as denoting the sovereignty of Germany and Italy vested in a Germanic prince, is the creation of Otto the Great.
+      - ref: src:bryce-1871-holy-roman-empire
+        loc: "ch. VI, at the sidenote: His coronation at Rome, A.D. 962."
+        quote: he was crowned by John XII, on the day of the Purification, the second of February, A.D. 962
+      - ref: src:barker-1911-empire
+        loc: "at the side-heading: The Holy Roman Empire."
+        quote: He was crowned by John XII. on Candlemas Day 962, and thus was begun the Holy Roman Empire, which lasted henceforth with a continuous life until 1806.
+    method: expert-estimate
+    basis: reconstruction
+    rank: preferred
+    note: >-
+      The coronation of Otto I, king of the East Franks, as emperor at Rome. Preferred because from
+      this day the empire had what Barker calls a continuous life until 1806, whereas the
+      Carolingian empire is usually taken to have ended in 888 and the last of the emperors made
+      in Italy after it, Berengar, died in 924 (Bryce, ch. VI); and because the later of the two
+      works read and both databases cut it here: the borders dataset begins its rows named Holy
+      Roman Empire in 962, and Wikidata's item gives 2 February 962 as its inception. Bryce, who
+      dates the beginning strictly from 800, still calls the empire in its later sense Otto's
+      creation and Otto a second founder. The day is the feast of the Purification, Candlemas.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in bryce-holy-roman-empire.txt (sha256 b45cf0705a7c5c07) and eb1911-empire.txt (sha256 64fce89ee2367b75), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  start-800:
+    prop: start
+    value: { ref: people/rulers/charlemagne@emperor, edge: start }
+    source:
+      - ref: src:bryce-1871-holy-roman-empire
+        loc: ch. I
+        quote: Strictly speaking, it is from the year 800 A.D., when a King of the Franks was crowned Emperor of the Romans by Pope Leo III, that the beginning of the Holy Roman Empire must be dated.
+      - ref: src:bryce-1871-holy-roman-empire
+        loc: "ch. XX, at the sidenote: End of the Empire."
+        quote: One thousand and six years after Leo the Pope had crowned the Frankish king, eighteen hundred and fifty-eight years after Cæsar had conquered at Pharsalia, the Holy Roman Empire came to its end.
+    method: expert-estimate
+    basis: reconstruction
+    note: >-
+      The older count: the empire begins as Charlemagne's reign as emperor begins, at Christmas 800
+      (people/rulers/charlemagne), and lasts 1006 years. Bryce's table of emperors runs from
+      Augustus to Francis II with Charles I at 800. On this count the empire of Charlemagne and
+      his heirs and the empire of Otto are one thing, which lapsed and was renewed. The record
+      cannot follow the count all the way: Charlemagne's reign as emperor and the lands of his
+      empire stay with the record of the Frankish kingdom.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in bryce-holy-roman-empire.txt (sha256 b45cf0705a7c5c07), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  start-translatio:
+    prop: start
+    value: { ref: people/rulers/charlemagne@emperor, edge: start }
+    alt: alt:roman-succession/translatio-imperii
+    source:
+      - ref: src:innocent-iii-venerabilem
+        loc: "Decretals of Gregory IX, book 1, title 6, chapter 34"
+        quote: quae Romanum imperium in personam magnifici Caroli a Graecis transtulit in Germanos
+      - ref: src:barker-1911-empire
+        loc: "at the side-heading: Theory of the Carolingian empire."
+        quote: a translatio Imperii took place in 800, whereby the pope transferred the Roman empire from the Greeks to the Germans in the person of the magnificent Charles
+    method: historical-account
+    basis: reconstruction
+    note: >-
+      Holds only in the alternative "The empire transferred to the West (translatio imperii)". In
+      English: (the apostolic see,) which transferred the Roman Empire from the Greeks to the
+      Germans in the person of the magnificent Charles. In this picture the empire in western hands
+      dates from the transfer, the coronation of 800, whichever start the default picture prefers.
+      It is the pope's statement of 1202, four centuries after the event. The claim repeats the
+      value of start-800, because an alternative ranks only claims of its own.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in decretales-gregorii-ix-1-6-augustana.txt (sha256 7894441a4ff1f386) and eb1911-empire.txt (sha256 64fce89ee2367b75), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  end:
+    prop: end
+    value: 6 August 1806 CE
+    source:
+      - ref: src:francis-ii-1806-declaration
+        loc: "third paragraph (Wir erklären demnach durch Gegenwärtiges)"
+        quote: daß Wir das reichsoberhauptliche Amt und Würde durch die Vereinigung der conföderirten rheinischen Stände als erloschen … betrachten und die von wegen desselben bis jetzt getragene Kaiserkrone und geführte kaiserliche Regierung, wie hiermit geschieht, niederlegen
+      - ref: src:francis-ii-1806-declaration
+        loc: the dating clause
+        quote: Gegeben in Unserer Haupt- und Residenzstadt Wien, den 6. August, im eintausend achthundert und sechsten
+      - ref: src:barker-1911-empire
+        loc: "at the side-heading: End of the Holy Roman Empire."
+        quote: on the 6th of August 1806, Francis resigned the imperial dignity. So perished the Empire.
+    method: documentary
+    note: >-
+      In English: that We regard the office and dignity of head of the empire as extinguished by
+      the union of the confederated states of the Rhine, and lay down, as is hereby done, the
+      imperial crown worn until now on the German Empire's account and the imperial government
+      conducted; given in Our capital and residence Vienna, 6 August 1806. In the same sentence
+      Francis holds the bond that tied him to the body of the German Empire to be dissolved, and in
+      the next he releases the electors, princes and estates from their duties to him. The act lays
+      down a crown and calls an office extinguished; that the empire ended with it is how
+      historians read it. The date is Gregorian.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in francis-ii-1806-declaration-wikisource.txt (sha256 39dfcfe788f415f7) and eb1911-empire.txt (sha256 64fce89ee2367b75), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  territory:
+    prop: territory
+    value:
+      from: src:cliopatria-0.2.1
+      names: ["(Holy Roman Empire)"]
+    source:
+      ref: src:cliopatria-0.2.1
+      loc: rows named (Holy Roman Empire), in brackets
+    method: compilation
+    basis: reconstruction
+    note: >-
+      The dataset has the empire at two levels. Its rows named (Holy Roman Empire), in brackets,
+      are the whole, each listing the rows that are its components, from 922 to 1806; these are
+      claimed here. Among the components are rows named Holy Roman Empire, from 962 to 1259 and for
+      1619 to 1621, and Holy Roman Empire Minor States, from 1260 to 1806, beside kingdoms and
+      lordships under their own names; all of these stay among the dataset's states. Its cut
+      differs from both starts. The bracketed rows begin in 922, with its Kingdom of Germany as
+      their only component until 961, so that the rows of 922 to 961 fall before the preferred
+      start and are drawn only if the start of 800 is chosen; and for 800 to 921 it has no row of
+      this name. The empire of Charlemagne and his heirs is its (Carolingian Empire), from 718 to
+      989, which this record does not claim.
+relations:
+  from-frankish-kingdom:
+    rel: arose-from
+    to: people/polities/frankish-kingdom
+    source:
+      - ref: src:bryce-1871-holy-roman-empire
+        loc: "ch. VI, at the sidenote: Partition of Verdun, A.D. 843."
+        quote: Lewis (surnamed, from his kingdom, the German) received all east of the Rhine
+      - ref: src:bryce-1871-holy-roman-empire
+        loc: "ch. VIII, at the sidenote: Germany and its monarchy."
+        quote: though it called itself not German but East Frankish, and claimed to be the lawful representative of the Carolingian monarchy
+      - ref: src:barker-1911-empire
+        loc: "at the side-heading: The German kingdom and the empire."
+        quote: so did the national strength of the East Frankish kingdom, now resting indeed on a Saxon rather than a Frankish basis, bring the Empire to its ruler in 962
+    note: >-
+      On either start the empire came out of the kingdom of the Franks. In 800 its king was crowned
+      emperor, and the kingdom went on under him. In 962 the crown came to the king of the East
+      Franks, whose realm was the part east of the Rhine that Lewis the German received when the
+      kingdom was divided at Verdun in 843; that realm, Bryce says (Appendix, note C), was
+      swallowed up in the empire. The East Frankish kingdom of 843 to 962 has no record here, so
+      the relation passes over it; the borders dataset has it as East Franks and, from 911, as
+      Kingdom of Germany.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in bryce-holy-roman-empire.txt (sha256 b45cf0705a7c5c07) and eb1911-empire.txt (sha256 64fce89ee2367b75), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  continues-rome:
+    rel: continues
+    to: people/polities/rome
+    alt: alt:roman-succession/translatio-imperii
+    source:
+      - ref: src:annales-regni-francorum
+        loc: "a. 801, pp. 112–113"
+        quote: a Deo coronato magno et pacifico imperatori Romanorum, vita et victoria!
+      - ref: src:bryce-1871-holy-roman-empire
+        loc: "ch. V, at the sidenote: Defect in the title of the Teutonic Emperors."
+        quote: Charles was held to be the legitimate successor, not of Romulus Augustulus, but of Basil, Heraclius, Justinian, Arcadius, and all the Eastern line
+      - ref: src:bryce-1871-holy-roman-empire
+        loc: "ch. XII, note 220, quoting Ansbert"
+        quote: a Constantinopolitana urbe ad pristinam sedem imperii, caput orbis Romam, acclamatione Romanorum et principum imperii, auctoritate quoque summi pontificis et S. catholicæ ecclesiæ translatam
+      - ref: src:innocent-iii-venerabilem
+        loc: "Decretals of Gregory IX, book 1, title 6, chapter 34"
+        quote: quae Romanum imperium in personam magnifici Caroli a Graecis transtulit in Germanos
+      - ref: src:francis-ii-1806-declaration
+        loc: the emperor's style, at the head
+        quote: von Gottes Gnaden erwählter römischer Kaiser
+      - ref: src:annales-regni-francorum
+        loc: "a. 812, p. 136"
+        quote: laudes ei dixerunt, imperatorem eum et basileum
+    against:
+      - ref: src:einhard-vita-karoli
+        loc: "ch. 28"
+        quote: He bore very patiently with the jealousy which the Roman emperors showed upon his assuming these titles, for they took this step very ill
+      - ref: src:liudprand-legatio
+        loc: "p. 443 of Henderson's translation"
+        quote: For he called you not emperor, which is Basileus in his tongue, but, to insult you, Rex, which is king in ours.
+      - ref: src:liudprand-legatio
+        loc: "p. 467 of Henderson's translation"
+        quote: 'calling him the emperor "of the Greeks," and not "of the Romans."'
+      - ref: src:bryce-1871-holy-roman-empire
+        loc: "ch. XII, at the sidenote: Rivalry of the two Empires."
+        quote: never ceased to deny their right to the imperial name
+    note: >-
+      Holds only in the alternative "The empire transferred to the West (translatio imperii)". The
+      first five sources show the claim being made, from the day of the coronation to the last
+      emperor's style. The Romans hailed Charles in 800 as emperor of the Romans, crowned by God;
+      the annals of the time, Bryce says, set him after Constantine VI as successor of the whole
+      eastern line; Frederick I told the envoys of the emperor Isaac Angelus that the monarchy had
+      been transferred from the city of Constantinople to the first seat of empire, Rome, the head
+      of the world, by the acclamation of the Romans and the princes of the empire and the authority
+      of the pope and the church; Innocent III wrote in 1202 that the apostolic see had transferred
+      the Roman Empire from the Greeks to the Germans in the person of Charles; and Francis II still
+      styled himself, in 1806, by God's grace elected Roman emperor. The sixth shows how far
+      Constantinople went to meet it: in 812 the envoys of the emperor Michael hailed him at Aachen,
+      in Greek, as emperor and basileus; the annals do not have them call him emperor of the Romans.
+      What is cited against the claim shows how Constantinople took it, which is why this is a
+      perspective and no more. Einhard has the Roman emperors, as Turner's translation has him call
+      them, take Charles's new titles very ill. In 968 the brother of the emperor Nicephorus would
+      call the Ottos not emperor but king, and the court took it as an outrage that the pope had
+      written to Nicephorus as emperor of the Greeks and not of the Romans. The eastern emperors,
+      Bryce sums up, never gave up denying the western their right to the imperial name.
+      The relation itself binds only that the empire outlasted the Roman state, as it did. It cannot
+      say the rest of the claim, that from 800 the state ruled from Constantinople was no longer the
+      Roman Empire: the record of Rome runs to 1453 in this picture as in every other, so that here
+      the Roman Empire is two states at once from 800 to 1453.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in annales-regni-francorum-kurze.txt (sha256 eeb40407ad2cc80d), bryce-holy-roman-empire.txt (sha256 b45cf0705a7c5c07), decretales-gregorii-ix-1-6-augustana.txt (sha256 7894441a4ff1f386), francis-ii-1806-declaration-wikisource.txt (sha256 39dfcfe788f415f7), einhard-vita-karoli-turner.txt (sha256 8d100d971592c2b3) and liudprand-legatio-henderson.txt (sha256 748eb0a683055fe9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }

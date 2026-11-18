@@ -8,10 +8,14 @@
 //   4550 BP          years before 1950
 //   66.043 Ma        also ka, Ga
 //   5 Gyr from now   also kyr and Myr; counted from the present of the axis (1950)
+//   JDN 584283       a day by its Julian Day Number, as astronomers and correlations count days
+//   9.12.11.5.18 Long Count
+//                    a day in a calendar that counts days from a zero day (DAY_COUNTS): so many days
+//                    after that day, wherever the world puts it
 // A time value is a point, an interval {lo, hi} (lo is always the earlier time; either end
-// may be left open), a normal distribution {mean, sd}, `unknown`, or a reference to another
-// record's interval or one of its edges, {ref, edge, lag}. Durations (sd, lag) are a number
-// of years or "<n> days|yr|kyr|Myr|Gyr".
+// may be left open), a normal distribution {mean, sd}, `unknown`, a reference to another
+// record's interval or one of its edges, {ref, edge, lag}, or a day in a count of days. Durations
+// (sd, lag) are a number of years or "<n> days|yr|kyr|Myr|Gyr".
 //
 // Dates are in the calendar then in use: the Julian before 15 October 1582, the Gregorian
 // from then on (a date may name its calendar instead, "25 October 1917 CE Julian"). Earlier
@@ -61,15 +65,73 @@ function axisOf(j: number): number {
   return y + (j - y0) / (yearStart(y + 1) - y0);
 }
 
-/** The calendar date at a point on the axis, in the calendar then in use; none before 4713 BCE. */
-export function dateAt(t: number): { year: number; month: number; day: number } | undefined {
+/** The day number (Julian Day Number) of the day a point on the axis falls in; none before 4713 BCE. */
+export function dayNumberAt(t: number): number | undefined {
   const y = Math.floor(t + 1e-9);
   if (!Number.isFinite(t) || y < FIRST_DATED_YEAR || y > 1e6) return undefined;
   const y0 = yearStart(y);
-  const j = y0 + Math.floor(Math.max(0, t - y) * (yearStart(y + 1) - y0) + 1e-6);
+  return y0 + Math.floor(Math.max(0, t - y) * (yearStart(y + 1) - y0) + 1e-6);
+}
+
+/** A day by its number: where it starts on the axis, and how long it is there. */
+export function dayOnAxis(j: number): { t: number; whole: number } {
+  const t = axisOf(j);
+  return { t, whole: axisOf(j + 1) - t };
+}
+
+/** The calendar date at a point on the axis, in the calendar then in use; none before 4713 BCE. */
+export function dateAt(t: number): { year: number; month: number; day: number } | undefined {
+  const j = dayNumberAt(t);
+  if (j === undefined) return undefined;
   const { y: year, m, d } = dateOf(j, j >= REFORM);
   return { year, month: m, day: d };
 }
+
+/**
+ * Counts of days: calendars that name a day by how many days it is after a zero day, written in places,
+ * as the Maya Long Count is. How the places count is the calendar's own rule, and is here as the Julian
+ * leap year is. Which day of ours the zero day was is not: it is a claim of the world, on the record of
+ * that day (kind event/epoch, with a `calendar` claim naming the count), often contested, and every date
+ * written in the count follows the one chosen (tools/world/src/chronology.ts).
+ *
+ *   places   how many of each place make one of the place before it, from the second place on
+ *   era      the count on which the era before the zero day ended, where the count had one: the Maya wrote their
+ *            zero day as 13.0.0.0.0, the end of thirteen b'ak'tuns, and dated the time before it in that older
+ *            era. A date marked "of the era before" is counted back from the zero day by what it lacks of this,
+ *            so `13.0.0.0.0 Long Count of the era before` is the zero day itself, and `13.0.0.0.0 Long Count`,
+ *            unmarked, the day thirteen b'ak'tuns after it.
+ */
+export const DAY_COUNTS: Record<string, { name: string; places: number[]; era?: number[] }> = {
+  // b'ak'tun.k'atun.tun.winal.k'in: 20 k'in to a winal, 18 winal to a tun, 20 tun to a k'atun, 20 k'atun to a b'ak'tun.
+  'long-count': { name: 'Long Count', places: [20, 20, 18, 20], era: [13, 0, 0, 0, 0] },
+};
+
+const ERA_BEFORE = 'of the era before';
+const COUNT = new RegExp(`^\\s*(\\d+(?:\\.\\d+)+)\\s+(${Object.values(DAY_COUNTS).map((c) => c.name).join('|')})(\\s+${ERA_BEFORE})?\\s*$`);
+
+/** The places of a count as a number of days. */
+const countOf = (digits: number[], places: number[]) => places.reduce((days, radix, i) => days * radix + digits[i + 1], digits[0]);
+
+/** A day written in a count of days: the count, and how many days after its zero day (before it, if negative). */
+function parseCount(input: string): { calendar: string; days: number; text: string } | undefined {
+  const m = COUNT.exec(input);
+  if (!m) return undefined;
+  const [calendar, def] = Object.entries(DAY_COUNTS).find(([, c]) => c.name === m[2])!;
+  const digits = m[1].split('.').map(Number);
+  if (digits.length !== def.places.length + 1) throw new TimeError(`"${input}": a ${def.name} date has ${def.places.length + 1} places`);
+  for (const [i, radix] of def.places.entries()) {
+    if (digits[i + 1] >= radix) throw new TimeError(`"${input}": place ${i + 2} of a ${def.name} date counts to ${radix - 1}`);
+  }
+  const days = countOf(digits, def.places);
+  if (!m[3]) return { calendar, days, text: `${digits.join('.')} ${def.name}` };
+  if (!def.era) throw new TimeError(`"${input}": the ${def.name} has no era before its zero day`);
+  const era = countOf(def.era, def.places);
+  if (days > era) throw new TimeError(`"${input}": the era before the zero day ended on ${def.era.join('.')}`);
+  return { calendar, days: days - era, text: `${digits.join('.')} ${def.name} ${ERA_BEFORE}` };
+}
+
+/** Is a time point, as written, a day in a count of days? Such a day has no place on the axis until the world gives its zero day. */
+export const isCount = (input: unknown): input is string => typeof input === 'string' && COUNT.test(input);
 
 const DATE = new RegExp(`^\\s*(?:(\\d{1,2})\\s+)?(${MONTHS.join('|')})\\s+(\\d+)\\s+(CE|BCE)(?:\\s+(Julian|Gregorian))?\\s*$`);
 
@@ -111,6 +173,8 @@ export type TimeValue =
   | { kind: 'interval'; lo: number; hi: number; loUnknown?: boolean; hiUnknown?: boolean }
   | { kind: 'normal'; mean: number; sd: number }
   | { kind: 'ref'; ref: string; edge?: 'start' | 'end'; lag: [number, number] }
+  /** a day in a count of days (DAY_COUNTS): so many days after the count's zero day, wherever the world puts that */
+  | { kind: 'count'; calendar: string; days: number; text: string }
   | { kind: 'unknown' };
 
 export class TimeError extends Error {}
@@ -130,8 +194,15 @@ export function parsePoint(input: TimePointInput): { t: number; whole: number } 
   }
   const date = parseDate(input);
   if (date) return date;
+  const jdn = /^\s*JDN\s+(\d+)\s*$/.exec(input);
+  if (jdn) {
+    const day = dayOnAxis(Number(jdn[1]));
+    if (day.t > 1e6) throw new TimeError(`"${input}": day numbers are read to the year 1,000,000`);
+    return day;
+  }
+  if (COUNT.test(input)) throw new TimeError(`"${input}" is a day in a count of days: it stands alone as a time, not as a bound of a range`);
   const m = /^\s*(-?\d+(?:\.\d+)?(?:e[+-]?\d+)?)\s+(CE|BCE|BP|ka|Ma|Ga|kyr from now|Myr from now|Gyr from now)\s*$/.exec(input);
-  if (!m) throw new TimeError(`not a time: "${input}" (write a year, a date such as 15 March 44 BCE, or a number with CE, BCE, BP, ka, Ma, Ga, or kyr/Myr/Gyr from now)`);
+  if (!m) throw new TimeError(`not a time: "${input}" (write a year, a date such as 15 March 44 BCE, a day number such as JDN 584283, or a number with CE, BCE, BP, ka, Ma, Ga, or kyr/Myr/Gyr from now)`);
   const x = Number(m[1]);
   const unit = m[2];
   if (unit === 'CE') return { t: x, whole: Number.isInteger(x) ? 1 : 0 };
@@ -166,6 +237,8 @@ export function parseLag(input: LagInput | undefined): [number, number] {
 export function parseTime(input: TimeInput): TimeValue {
   if (input === 'unknown') return { kind: 'unknown' };
   if (typeof input === 'number' || typeof input === 'string') {
+    const count = typeof input === 'string' ? parseCount(input) : undefined;
+    if (count) return { kind: 'count', ...count };
     const p = parsePoint(input);
     return p.whole ? { kind: 'interval', lo: p.t, hi: p.t + p.whole } : { kind: 'instant', t: p.t };
   }
@@ -296,6 +369,7 @@ export function formatTimeValue(v: TimeValue, refLabel: (ref: string) => string 
   const at = (y: number) => (deep(y) ? ma(y) : formatTime(y));
   if (v.kind === 'instant') return at(v.t);
   if (v.kind === 'unknown') return 'unknown';
+  if (v.kind === 'count') return v.text;
   if (v.kind === 'normal') {
     if (!deep(v.mean)) return `${formatTime(v.mean)} ± ${formatDuration(v.sd)} (1σ)`;
     return `${+((PRESENT_YEAR - v.mean) / 1e6).toFixed(4)} ± ${+(v.sd / 1e6).toFixed(4)} Ma (1σ)`;

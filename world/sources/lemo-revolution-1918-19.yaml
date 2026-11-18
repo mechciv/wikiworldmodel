@@ -1,0 +1,20 @@
+id: src:lemo-revolution-1918-19
+type: publication
+kind: review
+citation: >-
+  Scriba, A. (2015). Die Revolution von 1918/19. LeMO, Lebendiges Museum Online. Berlin: Deutsches
+  Historisches Museum. As of 15 August 2015.
+authors:
+  - "Scriba, A."
+published: 2015
+title: Die Revolution von 1918/19
+container: LeMO, Lebendiges Museum Online, Deutsches Historisches Museum
+url: https://www.dhm.de/lemo/kapitel/weimarer-republik/revolution
+reliability: >-
+  A museum's short account, without references: a reference work's summary of how the monarchy
+  fell and the republic was proclaimed in November 1918.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from dhm.de on 2026-11-17 and read in full in German, with its author and date. The
+    quote was found in the kept text by quote-check.

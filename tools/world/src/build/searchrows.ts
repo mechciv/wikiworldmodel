@@ -58,6 +58,8 @@ export function searchRows(found: SearchFile, polities: PolitiesFile | undefined
   for (const r of polities?.rows ?? []) {
     const owner = r.row ? adopted.get(r.row) : undefined;
     if (owner && byId.has(owner)) adopt.set(owner, [...(adopt.get(owner) ?? []), r]);
+    // A row a record draws as its territory is that record's: found by the record, named by its territory.
+    else if (r.claimedBy?.some((c) => byId.has(splitRef(c).record))) continue;
     else if (!r.name.startsWith('(')) loose.set(r.name, [...(loose.get(r.name) ?? []), r]);
   }
   const entities = found.entities.map((e) => {

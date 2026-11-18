@@ -5,13 +5,18 @@ summary: >-
   1453: a kingdom, a republic, an empire, and, after the end of the western line of emperors,
   an empire ruled from Constantinople alone. Wikidata has items for each of these forms and for
   ancient Rome as a civilization, but none for the state as a whole, so no Wikidata id is
-  given.
+  given for it. Its items for the kingdom and the republic are the same things as those two
+  phases, and are given on them. Its Roman Empire (Q2277) and Byzantine Empire (Q12544) are cut
+  elsewhere: the first has three dates of dissolution, 395, 476 and 1453, and the second four
+  of inception, from 285 to 395, so neither is the same thing as a phase here.
 author: machine:claude-code
 phases:
   - id: kingdom
     label: Kingdom
+    same_as: { wikidata: Q201038 }
   - id: republic
     label: Republic
+    same_as: { wikidata: Q17167 }
   - id: empire
     label: Empire
   - id: east

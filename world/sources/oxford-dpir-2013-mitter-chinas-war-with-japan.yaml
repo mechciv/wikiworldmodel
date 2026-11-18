@@ -1,0 +1,21 @@
+id: src:oxford-dpir-2013-mitter-chinas-war-with-japan
+type: database-record
+kind: review
+citation: >-
+  Department of Politics and International Relations, University of Oxford. Publication entry,
+  27 June 2013: Rana Mitter, China's War with Japan, 1937-1945: The Struggle for Survival
+  (Allen Lane).
+snapshot: 2026-11-17
+title: "China's War with Japan, 1937-1945 - The Struggle for Survival"
+container: University of Oxford, Department of Politics and International Relations, Publications
+url: https://www.politics.ox.ac.uk/publication/chinas-war-japan-1937-1945-struggle-survival
+reliability: >-
+  A description of the book on the page of an Oxford department that lists it among its
+  publications, two paragraphs in the manner of a publisher's: evidence that the book is
+  presented as dating the Second World War's opening to 1937, not of the book's argument, which
+  was not read. The page spells the publisher "Allan Lane" and can change.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from politics.ox.ac.uk on 2026-11-17 and read in full. The quote was found in the
+    kept text by quote-check. The book itself could not be read here.

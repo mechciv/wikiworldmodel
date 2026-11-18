@@ -42,6 +42,11 @@ describe('searchRows', () => {
   it('finds the rows no record adopts by their name, and leaves out relations between states', () => {
     expect(out.rows?.map((r) => [r.label, r.id, r.dataset, r.time.start.best, r.time.end.best])).toEqual([['Kush', 'src:states#Kush@-1000', 'src:states', -1000, -500]]);
   });
+  it('finds a row a record draws as its territory as that record, not as a state of its own', () => {
+    const claimed = { ...row('Roman Republic', -508, -26), claimedBy: ['people/polities/rome@republic'] };
+    const rome = record('people/polities/rome', 'Rome', -752, 1453);
+    expect(searchRows({ entities: [rome] }, file([claimed, row('Kush', -1000, -500)]), 'polity', 50, new Map(), none).rows?.map((r) => r.label)).toEqual(['Kush']);
+  });
   it('names a record by the rows of its own territory', () => {
     const rome = record('people/polities/rome', 'Rome', -752, 1453);
     const territory = { territories: [{ subject: 'people/polities/rome', label: 'Rome', time: rome.time, claims: [{ source: 'src:states', rows: [{ name: 'Roman Republic', from: -508, to: -26, area: 1, at: [12, 42], rings: [] }, { name: 'Roman Empire', from: -26, to: 395, area: 1, at: [12, 42], rings: [] }] }] }] } as unknown as TerritoryFile;

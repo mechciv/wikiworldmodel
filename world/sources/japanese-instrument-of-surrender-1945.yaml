@@ -1,0 +1,27 @@
+id: src:japanese-instrument-of-surrender-1945
+type: document
+kind: act
+citation: >-
+  Instrument of Surrender, signed at Tokyo Bay on 2 September 1945 by Mamoru Shigemitsu, by
+  command and in behalf of the Emperor of Japan and the Japanese Government, and Yoshijiro Umezu,
+  by command and in behalf of the Japanese Imperial General Headquarters, and accepted by
+  Douglas MacArthur, Supreme Commander for the Allied Powers. Records of the U.S. Joint Chiefs
+  of Staff, Record Group 218, National Archives.
+published: 1945
+title: Instrument of Surrender
+container: National Archives, Milestone Documents
+url: https://www.archives.gov/milestone-documents/surrender-of-japan
+via: >-
+  The U.S. National Archives' page for the document, which holds it, with the Archives'
+  transcript and a short account of the signing.
+reliability: >-
+  The instrument itself, in the transcript of the archive that holds it: evidence of what Japan
+  undertook and of the hour and day of signing, which it gives in the zone it marks with the
+  letter I. The account above the transcript is the Archives' own. The transcript spells the
+  first signatory "Shigmitsu".
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from archives.gov on 2026-11-17; the Archives' account and the whole transcript
+    read, and compared with the Avalon Project's transcription, which agrees but for slips of
+    spelling. The quotes were found in the kept text by quote-check.

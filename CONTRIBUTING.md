@@ -100,7 +100,8 @@ Figshare, PANGAEA, CEDA, publishers' sites, NOAA, OpenTopography, INGV. If some 
 4. **Check quotes against the texts** you retrieved, by script, not by eye: save the text you read
    and run `npm run world -- quote-check src:… <text file>`. Every `quote` must be found in it
    (after normalizing whitespace and typography); the command lists any that are not, and records
-   the `quoted` step on each claim whose quote it finds (see [Checking](docs/RECORDS.md#how-far-a-claim-has-been-checked)).
+   the `quoted` step on each claim whose quotes it all finds (see [Checking](docs/RECORDS.md#how-far-a-claim-has-been-checked)).
+   A claim that quotes several sources needs all their texts in one run: `quote-check src:a a.txt src:b b.txt`.
    Say what you checked in the source's `verified:` note too.
 5. **Validate.** `npm run validate -- --verbose`. Fix every error and warning; read the notes
    (wanted records, and competing claims that contradict the rest of the world).

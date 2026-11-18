@@ -12,6 +12,8 @@ claims:
       ref: src:woods-2010-visible-language
       loc: p. 35 (ch. 2)
       quote: Approximately five thousand proto-cuneiform tablets were unearthed at Uruk by the German Archaeological Institute between 1928 and 1976
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
   start:
     prop: start
     value: { ref: people/writing/uruk-iv-tablets }
@@ -22,6 +24,8 @@ claims:
     method: expert-estimate
     note: >-
       As old as the earliest tablets, whose date is conventional. The invention of writing may lie somewhat before them: Woods places it in the Late Uruk period, ca. 3350–3100 BC.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
   end:
     prop: end
     value: 2900 BCE
@@ -36,6 +40,8 @@ claims:
     note: >-
       The end of the Jemdet Nasr period, with which Woods equates Uruk III, the last phase of the archaic script. This is a change of name, not an end to writing: the script develops
       into cuneiform, and no source read sets a date for the change, so this is an editor's reading of the two periods.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
   location:
     prop: location
     value: { lat: 31.323375, lon: 45.639052, frame: frame:earth/present-day }
@@ -56,6 +62,8 @@ relations:
       ref: src:woods-2010-visible-language
       loc: p. 71 (catalog, Uruk IV texts)
       quote: conventionally dated to about 3200 bc, belong to the Uruk IV phase
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
   in-mesopotamia:
     rel: part-of
     to: people/developments/writing-mesopotamia
@@ -63,3 +71,5 @@ relations:
       ref: src:woods-2010-visible-language
       loc: p. 35 (ch. 2)
       quote: testifying to the fact that the new technology spread quickly throughout Babylonia soon after its invention
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }

@@ -1,0 +1,23 @@
+id: src:sovnarkom-calendar-decree-1918
+type: document
+kind: act
+citation: >-
+  Council of People's Commissars. Decree on the introduction of the Western European calendar
+  (Декрет о введении западноевропейского календаря), 24 January (6 February) 1918, signed by its
+  chairman, V. Ulyanov (Lenin). In: Декреты Советской власти, vol. I, 25 October 1917 – 16 March
+  1918. Moscow: Государственное издательство политической литературы, 1957, pp. 404–405.
+published: 1957
+title: Декрет о введении западноевропейского календаря
+container: Декреты Советской власти, vol. I (Moscow, 1957)
+url: http://www.hist.msu.ru/ER/Etext/DEKRET/18-01-24.htm
+via: >-
+  The electronic library of the Faculty of History of Moscow State University, which says its
+  text was checked against the 1957 edition and marks that edition's pages.
+reliability: >-
+  The decree that moved Russia from the Julian to the Gregorian calendar: evidence of the day the
+  count changed, and so of which calendar a Russian date before it is written in.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from hist.msu.ru on 2026-11-17 and read in full in Russian, the preamble and points
+    1 to 10; the quotes were found in the kept text by quote-check.

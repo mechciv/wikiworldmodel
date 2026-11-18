@@ -1,0 +1,29 @@
+id: src:kim-2009-unity-of-the-mongol-empire
+type: publication
+kind: review
+citation: >-
+  Kim, Hodong (2009). The Unity of the Mongol Empire and Continental Exchanges over Eurasia. Journal
+  of Central Eurasian Studies 1 (December 2009), 15–42. Center for Central Eurasian Studies.
+authors:
+  - "Kim, H."
+published: 2009
+title: The Unity of the Mongol Empire and Continental Exchanges over Eurasia
+container: Journal of Central Eurasian Studies 1
+url: https://web.archive.org/web/20240229165032id_/http://cces.snu.ac.kr/data/publications/jces1_2kim.pdf
+via: >-
+  The Internet Archive's capture, of 29 February 2024, of the journal's own PDF. The journal's site
+  (cces.snu.ac.kr) answered 404 for that address when this was read.
+reliability: >-
+  A journal article by a historian of the Mongol Empire, with notes to the Persian, Chinese and
+  Mongolian sources. It sets out the common view, that the empire dissolved into four khanates
+  around 1260, in order to argue against it: that the Mongols went on holding their realms to be
+  parts of one empire, of which Great Yuan was the name in Chinese. So it is evidence both of what
+  most historians hold and of the case against them. It prints the year the empire ended with Mongol
+  power in China as 1364 (p. 33), where the Yuan capital fell in 1368.
+verified:
+  by: machine:claude-code
+  how: >-
+    The PDF fetched on 2026-11-17 and read in full, text and notes (pp. 15–42), with the page
+    numbers of its running heads. Its text layer gives some capital letters as small ones ("the
+    Mongol empire", "eurasia", "first of all"): quotations are as the text layer has them. They were
+    found in the kept text by quote-check.

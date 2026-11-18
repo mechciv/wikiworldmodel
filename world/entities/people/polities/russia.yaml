@@ -1,0 +1,274 @@
+id: people/polities/russia
+kind: polity
+summary: >-
+  The Russian state founded in the revolution of 1917, when the Second All-Russian Congress of
+  Soviets took power on 25 October by the Julian calendar then in use, 7 November by the
+  Gregorian. Named the Russian Socialist Federative Soviet Republic in its constitution of 1918,
+  it was one of the four republics that formed the Soviet Union in December 1922 and a part of
+  it until the Union ended in December 1991. A law of 25 December 1991 renamed it the Russian
+  Federation, and it is the same state today; it carries on the Soviet Union's membership of the
+  United Nations and its treaties. Wikidata has no item for this state as a whole, so no id is
+  given: it has one for the republic until 1922 (Q2305208), one for the republic it dates from
+  25 October 1917 to 25 December 1991 (Q2184), and one for Russia (Q159), which it says replaced
+  that republic and whose inception it gives as four dates from 880 to 1991.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Russia, ru: Россия }
+    source:
+      - ref: src:rsfsr-declaration-of-rights-1918
+        loc: "part I, point 1"
+        quote: Россия объявляется Республикой Советов рабочих, солдатских и крестьянских депутатов
+      - ref: src:rsfsr-law-2094-1991
+        loc: point 1
+        quote: впредь именовать Российская Федерация (Россия)
+      - ref: src:russia-law-2708-1992
+        loc: "section I, point 1"
+        quote: Наименования государства Российская Федерация и Россия равнозначны.
+    note: >-
+      The country's name throughout, and the label. The congress of January 1918 declares
+      Russia a republic of Soviets; the law of 1991 names the state the Russian Federation
+      (Russia); and the constitution as amended in April 1992 holds that the names Russian
+      Federation and Russia are equal. The styles the state gave itself in turn are its official
+      names.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in rsfsr-declaration-of-rights-1918.txt (sha256 21143bbb1441bbbc), rsfsr-law-2094-1991.txt (sha256 843af083a287d93b) and russia-law-2708-1992.txt (sha256 e81ab389de088453), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  name-rsfsr-1918:
+    prop: official_name
+    value: { en: Russian Socialist Federative Soviet Republic, ru: Российская Социалистическая Федеративная Советская Республика }
+    valid: { lo: 10 July 1918 CE, hi: 21 January 1937 CE }
+    source:
+      - ref: src:rsfsr-constitution-1918
+        loc: "resolution of the Fifth Congress of Soviets, first paragraph"
+        quote: составляют единый основной закон Российской Социалистической Федеративной Советской Республики
+      - ref: src:rsfsr-constitution-1918
+        loc: "resolution of the Fifth Congress of Soviets, heading"
+        quote: принятое в заседании 10 июля 1918 г.
+      - ref: src:ussr-treaty-1922
+        loc: preamble
+        quote: Российская Социалистическая Федеративная Советская Республика (РСФСР)
+    note: >-
+      The republic's name in its first constitution, adopted on 10 July 1918, and in the treaty
+      of union of 1922, with the words in the order Socialist Federative Soviet. The span runs
+      from the constitution that fixes the name; how much earlier it was in use was not traced.
+      It ends with the republic's constitution of 1937 (name-rsfsr-1937).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in rsfsr-constitution-1918.txt (sha256 f03ec9b51a96a2c8) and ussr-treaty-1922.txt (sha256 b6f8d7c705b83acc), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  name-rsfsr-1937:
+    prop: official_name
+    value: { en: Russian Soviet Federative Socialist Republic, ru: Российская Советская Федеративная Социалистическая Республика }
+    valid: { lo: 21 January 1937 CE, hi: 25 December 1991 CE }
+    source:
+      - ref: src:rsfsr-congress-resolution-1937
+        loc: operative sentence
+        quote: Проект Конституции (Основного Закона) Российской Советской Федеративной Социалистической Республики
+      - ref: src:rsfsr-congress-resolution-1937
+        loc: date line
+        quote: 21 января 1937 г.
+      - ref: src:ussr-constitution-1936
+        loc: article 13
+        quote: Российской Советской Федеративной Социалистической Республики,
+      - ref: src:rsfsr-law-2094-1991
+        loc: point 1
+        quote: Государство Российская Советская Федеративная Социалистическая Республика (РСФСР) впредь именовать
+    note: >-
+      The same name with its words in a new order, Soviet Federative Socialist, from the
+      republic's constitution approved on 21 January 1937 until the law of 25 December 1991
+      replaced it. The Union's constitution of 5 December 1936 already names the republic so in
+      article 13, nearly seven weeks before the republic's own; the span is counted from the
+      republic's act.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in rsfsr-congress-resolution-1937.txt (sha256 c7c97088d8366707), ussr-constitution-1936.txt (sha256 d43408ed3701cf8c) and rsfsr-law-2094-1991.txt (sha256 843af083a287d93b), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  name-russian-federation:
+    prop: official_name
+    value: { en: Russian Federation, ru: Российская Федерация }
+    valid: { lo: 25 December 1991 CE }
+    source:
+      - ref: src:rsfsr-law-2094-1991
+        loc: point 1
+        quote: Государство Российская Советская Федеративная Социалистическая Республика (РСФСР) впредь именовать Российская Федерация (Россия).
+      - ref: src:rsfsr-law-2094-1991
+        loc: point 5
+        quote: Настоящий Закон вступает в силу со дня его принятия.
+      - ref: src:rsfsr-law-2094-1991
+        loc: date line
+        quote: 25 декабря 1991 года
+      - ref: src:russia-law-2708-1992
+        loc: "section I, opening"
+        quote: В связи с изменением наименования государства Российская Советская Федеративная Социалистическая Республика на наименование Российская Федерация - Россия
+      - ref: src:cis-agreement-1991
+        loc: preamble
+        quote: Мы, Республика Беларусь, Российская Федерация (РСФСР), Украина
+      - ref: src:yeltsin-letter-un-1991
+        loc: first paragraph
+        quote: использовать наименование «Российская Федерация»
+    note: >-
+      A renaming, not a new state. In English: "the state Russian Soviet Federative Socialist
+      Republic (RSFSR) is henceforth to be called the Russian Federation (Russia)", by a law that
+      "takes force from the day of its adoption", 25 December 1991; the congress that amended
+      the constitution on 21 April 1992 speaks of "the change of the name of the state". The
+      span is counted from the law, though the name was in use before it: the agreement of 8
+      December 1991 is made by the "Russian Federation (RSFSR)", and the president's letter of
+      24 December asks the United Nations to use it. The law let the old name stand on forms,
+      seals and stamps through 1992 (point 3).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in rsfsr-law-2094-1991.txt (sha256 843af083a287d93b), russia-law-2708-1992.txt (sha256 e81ab389de088453), cis-agreement-1991.txt (sha256 4a1881eb7792595c) and yeltsin-letter-un-1991.txt (sha256 1b8cac8c916b72a7), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  start:
+    prop: start
+    value: 25 October 1917 CE Julian
+    source:
+      - ref: src:second-congress-of-soviets-appeal-1917
+        loc: "heading, p. 8"
+        quote: 25 октября (7 ноября) 1917 г.
+      - ref: src:second-congress-of-soviets-appeal-1917
+        loc: "first paragraph, p. 8"
+        quote: опираясь на совершившееся в Петрограде победоносное восстание рабочих и гарнизона, съезд берет власть в свои руки
+      - ref: src:sovnarkom-calendar-decree-1918
+        loc: "point 1, p. 404"
+        quote: Первый день после 31 января сего года считать не 1 февраля, а 14 февраля
+    method: documentary
+    note: >-
+      The state is counted from the day the Second All-Russian Congress of Soviets declared that
+      it was taking power: "relying on the victorious rising of the workers and the garrison
+      accomplished in Petrograd, the congress takes power into its own hands". The edition dates
+      the appeal 25 October (7 November) 1917. The first is the Old Style date, by the Julian
+      calendar, which Russia kept until the decree of 24 January (6 February) 1918 made the day
+      after 31 January the 14th of February: "the first day after 31 January of this year is to
+      be counted not as 1 February but as 14 February". The date is written here as the source
+      gives it first, naming its calendar, and the axis reads it as the source's second date, 7
+      November 1917 by the Gregorian calendar. The appeal names no state: the congress of
+      January 1918 declared Russia a republic of Soviets, and the constitution of 10 July 1918
+      gave the republic its name (name-rsfsr-1918).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in second-congress-of-soviets-appeal-1917.txt (sha256 8c241b61c161e37f) and sovnarkom-calendar-decree-1918.txt (sha256 fb54f744e70e0cd6), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  territory:
+    prop: territory
+    value: { from: src:cliopatria-0.2.1, names: [Russian Federation] }
+    source: { ref: src:cliopatria-0.2.1, loc: rows named Russian Federation }
+    method: compilation
+    basis: reconstruction
+    note: >-
+      The dataset cuts this state differently, and gives it land of its own only from 1992, in
+      its rows named Russian Federation, which run to 2024. For 1917 it has one row, Russian
+      Republic, with the Wikidata item of the republic of September 1917; its rows of that name
+      for 1918 and 1919 hold Omsk, Arkhangelsk and Vladivostok and leave out Moscow and
+      Petrograd, which lie in no row at all in those two years, so they are not this state's
+      land. For 1920 and 1921 one row, Republics of the Soviet Union, draws the Soviet republics
+      together, and from 1922 to 1991 the republic is drawn only as part of the Union's rows.
+      None of those is claimed here, so the state has no land of its own on the map before 1992.
+      The dataset's rows named (Russian Federation), in brackets, add its row of Russian-occupied
+      territories to these; they are not claimed either.
+relations:
+  part-of-soviet-union:
+    rel: part-of
+    to: people/polities/soviet-union
+    valid: { lo: { ref: people/polities/soviet-union, edge: start }, hi: { ref: people/polities/soviet-union, edge: end } }
+    source:
+      - ref: src:ussr-treaty-1922
+        loc: preamble
+        quote: >-
+          Российская Социалистическая Федеративная Советская Республика (РСФСР), Украинская
+          Социалистическая Советская Республика (УССР), Белорусская Социалистическая Советская
+          Республика (БССР) и Закавказская Социалистическая Федеративная Советская Республика (ЗСФСР —
+          Грузия, Азербайджан и Армения) заключают настоящий Союзный договор
+      - ref: src:ussr-first-congress-resolution-1922
+        loc: date line
+        quote: Москва, 30 декабря 1922 года.
+      - ref: src:cis-agreement-1991
+        loc: article 11
+        quote: С момента подписания настоящего Соглашения на территориях подписавших его государств не допускается применение норм третьих государств, в том числе бывшего Союза ССР.
+      - ref: src:rsfsr-resolution-2015-1991
+        loc: operative sentence
+        quote: Денонсировать Договор об образовании Союза Советских Социалистических Республик
+      - ref: src:rsfsr-resolution-2015-1991
+        loc: date line
+        quote: 12 декабря 1991 года
+      - ref: src:alma-ata-declaration-1991
+        loc: fifth operative paragraph
+        quote: С образованием Содружества Независимых Государств Союз Советских Социалистических Республик прекращает свое существование.
+    note: >-
+      The part is five years older than the whole and outlasts it. Russia was the first named of
+      the four republics that concluded the treaty of union, approved on 30 December 1922, and
+      a part of the Union from that day. When it ceased to be one is tied to the Union's
+      contested end. The agreement its president signed on 8 December bars the law of "the
+      former USSR" on the signatories' territories "from the moment of signing" (article 11);
+      its own parliament denounced the treaty of union four days later, on 12 December 1991
+      ("to denounce the Treaty on the Formation of the Union of Soviet Socialist Republics"),
+      before the three later dates given for the Union's end; and on 21 December Russia declared
+      with ten other republics that the Union ceases to exist. The span is written as the
+      Union's own, from its start to its end, whichever of its ends is taken: a republic that
+      stopped applying the Union's law and denounced its treaty was still, by the Union's own
+      acts, a part of it until it ended. A reader who takes the denunciation for the day Russia
+      left has the span end a fortnight early at most.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ussr-treaty-1922.txt (sha256 b6f8d7c705b83acc), ussr-first-congress-resolution-1922.txt (sha256 ca91876d97d767d9), cis-agreement-1991.txt (sha256 4a1881eb7792595c), rsfsr-resolution-2015-1991.txt (sha256 9de85da532fa415f) and alma-ata-declaration-1991.txt (sha256 35f3b26c79d0bd3c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  continues-soviet-union:
+    rel: continues
+    to: people/polities/soviet-union
+    source:
+      - ref: src:un-member-states
+        loc: entry for the Russian Federation
+        quote: "Russian Federation Date of Admission: 24-10-1945"
+      - ref: src:un-member-states-russian-federation
+        loc: first sentence
+        quote: The Union of Soviet Socialist Republics was an original Member of the United Nations from 24 October 1945.
+      - ref: src:un-member-states-russian-federation
+        loc: second sentence
+        quote: the membership of the Soviet Union in the Security Council and all other United Nations organs was being continued by the Russian Federation with the support of the 11 member countries of the Commonwealth of Independent States
+      - ref: src:un-treaty-collection-historical-information
+        loc: "Russian Federation, note 1"
+        quote: as at 24 December 1991, the Russian Federation maintains full responsibility for all the rights and obligations of the USSR under the Charter of the United Nations and multilateral treaties deposited with the Secretary-General
+      - ref: src:yeltsin-letter-un-1991
+        loc: first paragraph
+        quote: >-
+          членство Союза Советских Социалистических Республик в Организации Объединенных Наций, в
+          том числе в Совете Безопасности, во всех других органах и организациях системы ООН
+          продолжается при поддержке стран Содружества Независимых Государств Российской Федерацией
+          (РСФСР)
+      - ref: src:cis-decision-un-membership-1991
+        loc: point 1
+        quote: Государства Содружества поддерживают Россию в том, чтобы она продолжила членство СССР в ООН, включая постоянное членство в Совете Безопасности, и других международных организациях.
+      - ref: src:un-a-47-60-alma-ata-1991
+        loc: "annex V, point 1, p. 8"
+        quote: Russia's continuance of the membership of the Union of Soviet Socialist Republics in the United Nations, including permanent membership of the Security Council
+      - ref: src:cis-agreement-1991
+        loc: article 12
+        quote: Высокие Договаривающиеся Стороны гарантируют выполнение международных обязательств, вытекающих для них из договоров и соглашений бывшего Союза ССР.
+      - ref: src:russia-law-101-fz-1995
+        loc: "article 1, part 3"
+        quote: международные договоры, в которых Российская Федерация является стороной в качестве государства — продолжателя СССР
+      - ref: src:russia-constitution-1993
+        loc: "article 67.1, part 1"
+        quote: правопреемником (правопродолжателем) Союза ССР в отношении членства в международных организациях, их органах, участия в международных договорах
+      - ref: src:blum-1992-russia-un-seat
+        loc: p. 356
+        quote: In the absence of any objection, the delegation of the Russian Federation took over the Soviet seat in the UN General Assembly, in the Security Council and in other organs of the United Nations
+      - ref: src:blum-1992-russia-un-seat
+        loc: p. 360
+        quote: to accede to Russia’s claim – however flawed legally – to be the ‘continuation’ of the Soviet Union
+    note: >-
+      A claim of identity that was made, supported and accepted, so it stands in the default
+      picture. Russia made it in its president's letter of 24 December 1991: "the membership of
+      the Union of Soviet Socialist Republics in the United Nations, including the Security
+      Council and all other organs and organizations of the United Nations system, is being
+      continued, with the support of the countries of the Commonwealth of Independent States, by
+      the Russian Federation (RSFSR)". The other republics of the Commonwealth had agreed to it
+      three days before: "the states of the Commonwealth support Russia in continuing the USSR's
+      membership of the UN, including permanent membership of the Security Council, and of
+      other international organizations", a decision the United Nations circulated to its
+      members in English. No member objected, and the United Nations lists the
+      Russian Federation as a member admitted on 24 October 1945, the day from which the Soviet
+      Union was an original member. As depositary of treaties it records Russia's notice that,
+      as at 24 December 1991, it maintains full responsibility for the Union's rights and
+      obligations under the Charter and the treaties deposited with the Secretary-General.
+      Russian law says the same of treaties, to which Russia is party "as the state that
+      continues the USSR". The identity claimed is of the Union's standing among states, not of
+      everything the Union was: Russia's constitution calls it the Union's legal successor on
+      its own territory, and its successor and continuator (правопродолжатель) in international
+      organizations and treaties; and the other republics too undertook to fulfil the
+      obligations that fall to them from the Union's treaties (the agreement of 8 December
+      1991, article 12). Blum held the claim legally flawed, since the republics, Russia among
+      them, had declared the Union extinct, and thought it accepted for reasons of politics.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in un-member-states.txt (sha256 0ac3c45daa60e926), un-member-states-russian-federation.txt (sha256 51ade60b9b19377f), un-treaty-collection-historical-information.txt (sha256 e6849d59cbbaaaca), yeltsin-letter-un-1991.txt (sha256 1b8cac8c916b72a7), cis-decision-un-membership-1991.txt (sha256 eb80ca130dd74123), un-a-47-60-alma-ata-1991.txt (sha256 e895bbc0ec095e52), cis-agreement-1991.txt (sha256 4a1881eb7792595c), russia-law-101-fz-1995.txt (sha256 be3b02e23788331e), russia-constitution-1993.txt (sha256 6af86fcdc342d128) and blum-1992-russia-un-seat.txt (sha256 54be67e9bad14d7c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }

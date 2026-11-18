@@ -18,7 +18,7 @@ export function credits(world: World): Tileset['credits'] {
 
 /** The databases whose entries the records cite, each with every licence it was read under. */
 function citedDatabases(world: World): { label: string; licenses: string[] }[] {
-  const cited = new Set(world.entities.flatMap((e) => [...e.claims, ...e.relations].flatMap((c) => c.sources.map((s) => s.ref))));
+  const cited = new Set(world.entities.flatMap((e) => [...e.claims, ...e.relations].flatMap((c) => [...c.sources, ...c.against].map((s) => s.ref))));
   // A database may have changed its licence between the snapshots read: credit each one.
   const databases = new Map<string, Set<string>>();
   for (const id of cited) {
