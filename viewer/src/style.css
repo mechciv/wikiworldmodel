@@ -203,6 +203,71 @@ body.evidence .planet-row.projection .planet-value { color: var(--procedural); }
 @media (min-width: 900px) { .stage:has(.inspect:not([hidden])) .landscape-legend { right: calc(min(400px, 100vw - 32px) + 28px); } }
 @media (max-width: 899px) { .stage:has(.inspect:not([hidden])) .landscape-legend { display: none; } }
 
+/* The time machine: "When to?", over the dimmed world, for a reader who comes with no link (ui/timemachine.ts). */
+.when-to { flex: none; padding: 9px 14px; border-radius: 8px; border: 1px solid rgba(255, 211, 107, 0.45); background: var(--panel); color: var(--accent); font-weight: 600; cursor: pointer; }
+.when-to:hover { border-color: var(--accent); }
+.timemachine { position: fixed; inset: 0; z-index: 20; display: grid; place-items: start center; padding: max(16px, 9vh) 16px 16px; background: radial-gradient(ellipse at center, rgba(5, 7, 13, 0.35), rgba(5, 7, 13, 0.82)); backdrop-filter: blur(2px); }
+.tm-dialog { width: min(600px, 100%); max-height: calc(100dvh - max(32px, 9vh + 16px)); display: flex; flex-direction: column; gap: 10px; padding: 22px 24px 16px; border: 1px solid var(--panel-border); border-radius: 16px; background: var(--panel); box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55); }
+.tm-dialog header { display: flex; align-items: center; justify-content: space-between; }
+.tm-dialog h1 { margin: 0; font-size: 30px; font-weight: 650; letter-spacing: -0.01em; color: var(--accent); }
+.tm-close { width: 34px; height: 34px; border: 0; border-radius: 8px; background: none; color: var(--muted); font-size: 22px; cursor: pointer; }
+.tm-close:hover { color: var(--text); background: rgba(255, 255, 255, 0.06); }
+.tm-input { width: 100%; padding: 13px 16px; border-radius: 10px; border: 1px solid var(--panel-border); background: rgba(0, 0, 0, 0.3); color: var(--text); font: inherit; font-size: 17px; }
+.tm-input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.tm-on-trip .tm-input, .tm-on-trip .tm-hint { display: none; }
+.tm-hint { margin: -2px 2px 0; min-height: 1.45em; color: var(--muted); }
+.tm-hint strong { color: var(--text); }
+.tm-body { min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.tm-body h2 { margin: 4px 2px 8px; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.tm-trips { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.tm-trip { display: grid; gap: 1px; padding: 10px 12px; border: 1px solid var(--panel-border); border-radius: 10px; background: rgba(255, 255, 255, 0.03); text-align: left; cursor: pointer; }
+.tm-trip:hover, .tm-trip:focus-visible { border-color: rgba(255, 211, 107, 0.6); background: rgba(255, 211, 107, 0.06); outline: none; }
+.tm-trip .tm-when { color: var(--accent); font-size: 12px; font-variant-numeric: tabular-nums; }
+.tm-trip .tm-label { font-size: 14px; font-weight: 600; }
+.tm-trip small { color: var(--muted); }
+.tm-rows { margin: 0; padding: 0; list-style: none; }
+.tm-rows li { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 8px 10px; border-radius: 8px; cursor: pointer; }
+.tm-rows li.active, .tm-rows li:hover { background: rgba(255, 255, 255, 0.07); }
+.tm-rows .tm-label { min-width: 0; }
+.tm-rows .tm-label small { margin-left: 8px; color: var(--muted); }
+.tm-rows .tm-when { flex: none; color: var(--muted); font-variant-numeric: tabular-nums; text-align: right; }
+.tm-note { margin-left: 8px; padding: 1px 6px; border-radius: 4px; font-size: 11px; }
+.tm-then { color: #9fe3b0; background: rgba(110, 200, 140, 0.12); }
+.tm-not-yet, .tm-no-longer { color: var(--muted); background: rgba(255, 255, 255, 0.06); }
+.tm-empty { margin: 8px 2px; color: var(--muted); }
+.tm-place { display: flex; align-items: center; gap: 10px; }
+.tm-place h2 { margin: 0; font-size: 20px; font-weight: 650; color: var(--text); text-transform: none; letter-spacing: 0; }
+.tm-place small { color: var(--muted); }
+.tm-back { flex: none; width: 34px; height: 34px; border: 1px solid var(--panel-border); border-radius: 8px; background: none; font-size: 16px; cursor: pointer; }
+.tm-at { display: block; margin: 18px 0 6px; text-align: center; font-size: 34px; font-weight: 650; color: var(--accent); font-variant-numeric: tabular-nums; }
+.tm-track { position: relative; padding-top: 16px; }
+.tm-track input { width: 100%; accent-color: var(--accent); }
+.tm-marks { position: absolute; top: 0; left: 8px; right: 8px; height: 16px; }
+.tm-tick { position: absolute; top: 2px; width: 9px; height: 12px; margin-left: -4px; padding: 0; border: 0; background: none; cursor: pointer; }
+.tm-tick::after { content: ''; position: absolute; left: 3.5px; top: 0; width: 2px; height: 12px; border-radius: 1px; background: var(--evidence); }
+.tm-tick:hover::after { background: var(--text); }
+.tm-ends { display: flex; justify-content: space-between; color: var(--muted); font-size: 12px; }
+.tm-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 4px; }
+.tm-chip { padding: 4px 9px; border: 1px solid var(--panel-border); border-radius: 999px; background: rgba(255, 255, 255, 0.03); font-size: 12px; cursor: pointer; }
+.tm-chip small { color: var(--muted); }
+.tm-chip:hover { border-color: var(--evidence); }
+.tm-chip-scene { border-color: rgba(255, 211, 107, 0.5); }
+.tm-go { width: 100%; margin-top: 12px; padding: 12px 16px; border: 0; border-radius: 10px; background: var(--accent); color: #1a1405; font-size: 15px; font-weight: 650; cursor: pointer; }
+.tm-go:hover { filter: brightness(1.06); }
+.tm-dialog footer { display: flex; align-items: center; gap: 12px; padding-top: 6px; border-top: 1px solid var(--panel-border); color: var(--muted); font-size: 12px; }
+.tm-look { flex: none; padding: 6px 10px; border: 1px solid var(--panel-border); border-radius: 8px; background: none; cursor: pointer; }
+.tm-look:hover { border-color: var(--text); }
+@media (max-width: 640px) {
+  .timemachine { place-items: start stretch; padding: max(16px, env(safe-area-inset-top)) 16px 16px; }
+  .tm-dialog { padding: 16px 16px 12px; }
+  .tm-dialog h1 { font-size: 24px; }
+  .tm-input { font-size: 16px; }
+  .tm-trip { padding: 8px 10px; }
+  .tm-trip .tm-label { font-size: 13px; }
+  .tm-dialog footer span { display: none; }
+  .when-to { padding: 9px 10px; }
+}
+
 /* Phones. What is above lays the viewer out for a wide screen; what follows, for a narrow one or a short one. The toggles
    fold behind a button beside the search; a record opens in a sheet over the foot of the view, or at the side when the
    phone is on its side; and nothing goes where a notch or a home bar takes the screen. ui/inspect.ts and ui/timebar.ts
