@@ -8,7 +8,7 @@ import { decodeMargin, decodeThickness, iceFrame, iceKeysAt, iceScenario, sample
 import { levelOf, type HazardFile, type HazardRow, type PeopleFile, type PeopleHeader, type PolitiesFile, type PresentFile } from '../../core/layers.ts';
 import { coverAt, lookAt, spanOf, valueOf, type Cover, type Look } from '../../core/planet.ts';
 import { conj, mul, rotate, toLatLon, unitVector, type Quat } from '../../core/quat.ts';
-import type { EntityRecord, OverlaysFile } from '../../core/records.ts';
+import type { EntityRecord, OverlaysFile, SearchEntry } from '../../core/records.ts';
 import { encodeRowKey, splitRef } from '../../core/refs.ts';
 import { seaLevelAt } from '../../core/sealevel.ts';
 import { lookup, scenarioKey, type Scenario } from '../../core/scenario.ts';
@@ -52,6 +52,8 @@ import { InspectPanel, stepName, type BiomeHere, type IceHere, type LandscapeHer
 import { Markers, timeFor, visibility } from './ui/markers.ts';
 import { PlanetPanel, valueAt } from './ui/planet.ts';
 import { Search } from './ui/search.ts';
+import { TimeMachine, type Mark } from './ui/timemachine.ts';
+import { nameAt, placeIn } from '../../core/timemachine.ts';
 import { TERRITORY_COLORS, TerritoryLayer } from './ui/territory.ts';
 import { FossilLayer } from './ui/fossils.ts';
 import { HazardLayer, PeopleLayer, PolityLayer, PresentLayer } from './ui/layers.ts';
@@ -183,6 +185,8 @@ function fail(root: HTMLElement, message: string): void {
 }
 
 async function start(root: HTMLElement): Promise<void> {
+  // A reader who comes with no link is asked where and when to; a link goes where it says.
+  const fresh = !location.search;
   const linked = buildOf(location.search);
   // Without the index, a linked build is looked for where builds are when nothing says otherwise.
   const { latest: newest, store } = await builds(ROOT).catch(() => ({ latest: linked ?? '', store: `${ROOT}builds/` }));
@@ -577,7 +581,12 @@ async function start(root: HTMLElement): Promise<void> {
     menu.setAttribute('aria-expanded', String(open));
   };
   menu.onclick = () => openMenu(!top.classList.contains('menu-open'));
-  top.append(brand, search.el, menu, toolbar.el);
+  // The time machine's door, beside the search: it opens by itself for a reader who comes with no link.
+  const whenTo = document.createElement('button');
+  whenTo.className = 'when-to';
+  whenTo.textContent = 'When to?';
+  whenTo.title = 'Go to a place and a time';
+  top.append(brand, whenTo, search.el, menu, toolbar.el);
   root.appendChild(top);
 
   const timebar = new Timebar(build.periods.periods, limits, dataRange, {
@@ -2045,16 +2054,18 @@ async function start(root: HTMLElement): Promise<void> {
     return clampWindow([a - pad, b + pad], limits);
   }
 
-  /** Open an entity, and move to its time and place if it is not in view. */
-  function goTo(id: string): void {
+  /** Open an entity, and move to its time and place if it is not in view: to the time given, if one is. */
+  function goTo(id: string, at?: number): void {
     here = null;
     // Its marker may be somewhere the view has not asked for: fetch it, then go.
     if (features.has(id) && (!features.get(id) || (scenarioKey(scenario()) && !features.hasVariants))) {
-      void Promise.all([features.load([id]), scenarioKey(scenario()) ? features.wantVariants() : undefined]).then(() => goTo(id));
+      void Promise.all([features.load([id]), scenarioKey(scenario()) ? features.wantVariants() : undefined]).then(() => goTo(id, at));
       return;
     }
     const f = features.get(id) ?? null;
-    const entry = build.search.entities.find((e) => e.id === id)!;
+    const entry = entryOf(id)!;
+    // Rows of a dataset found by their name: no record to open, but where and when they were drawn.
+    if (entry?.dataset) return goToRows(entry, at);
     const home = sites.find((s) => s.kind === 'city');
     if (entry && cityKind(entry.kind) && home) {
       const open = () => {
@@ -2068,19 +2079,21 @@ async function start(root: HTMLElement): Promise<void> {
       return;
     }
     const placed = sites.find((s) => s.place === id);
-    if (placed) {
-      setState({ sel: id });
+    // A site is entered at a time its scene is drawn for; at another, it is seen from above.
+    if (placed && (at === undefined || (at >= placed.near[0] && at <= placed.near[1]))) {
+      setState({ sel: id, ...(at === undefined ? {} : { t: at, window: windowAround(at) }) });
       return enterSite(placed);
     }
     const time = f ? timeFor(f, scenario()) : entry.time;
-    let t = state.t;
-    if (visibility(time, t, halo(t), false) < 0.5) t = time.start.best ?? t;
+    let t = at ?? state.t;
+    if (at === undefined && visibility(time, t, halo(t), false) < 0.5) t = time.start.best ?? t;
     t = Math.max(dataRange[0], Math.min(dataRange[1], t));
-    const window = windowFor(time) ?? state.window;
+    const window = (at === undefined ? windowFor(time) : windowAround(t)) ?? state.window;
     if (!entry.located) {
-      // A polity is where its land was drawn then.
-      const c = territory.centre(id, t, scenario());
-      const cam = c ? { lat: c[1], lon: c[0], dist: Math.min(state.cam.dist, 2.6) } : state.cam;
+      // A polity is where its land was drawn then: its own territory, or the rows of a dataset that are rows of it.
+      const p = placeIn(entry.places, t);
+      const c = territory.centre(id, t, scenario()) ?? (p ? [p[2], p[3]] : undefined);
+      const cam = c ? { lat: c[1], lon: c[0], dist: Math.min(state.cam.dist, p ? distFor(p[4]) : 2.6) } : state.cam;
       return setState({ t, sel: id, window, cam });
     }
     const ageAt = toMa(t);
@@ -2098,8 +2111,97 @@ async function start(root: HTMLElement): Promise<void> {
     setState({ t, cam, sel: id, window });
   }
 
+  /** How far out to see a land of so many km² whole: a small state from nearer, a large one from as far as a polity is seen. */
+  const distFor = (km2: number) => Math.max(1.15, Math.min(2.6, 1.15 + (Math.sqrt(km2) / EARTH_RADIUS) * 4000));
+
+  /** What search has of an id: a record's entry, or rows of a dataset gathered under a name. */
+  function entryOf(id: string): SearchEntry | undefined {
+    return build.search.entities.find((e) => e.id === id) ?? build.search.rows?.find((e) => e.id === id);
+  }
+
+  /**
+   * Go to a state of a dataset that no record adopts: to the time asked, or its start if it is not
+   * drawn then, over where its row of that time was drawn; and open that row, as a click on it would.
+   */
+  function goToRows(entry: SearchEntry, at?: number): void {
+    const [a, b] = [entry.time.start.best ?? state.t, entry.time.end.best ?? state.t];
+    let t = at ?? (state.t >= a && state.t < b ? state.t : a);
+    t = Math.max(dataRange[0], Math.min(dataRange[1], t));
+    const p = placeIn(entry.places, t);
+    const cam = p ? { lat: p[3], lon: p[2], dist: Math.min(state.cam.dist, distFor(p[4])) } : state.cam;
+    setState({ t, cam, sel: null, window: windowAround(t) });
+    shownRecord = null;
+    wantPolities();
+    const asked = t;
+    void politiesLoading?.then(() => {
+      const file = polities.file;
+      if (!file || state.t !== quantize({ ...state, t: asked }).t || state.sel) return;
+      const named = file.rows.filter((r) => r.name === entry.label && (!p || (r.from === p[0] && r.at[0] === p[2] && r.at[1] === p[3])));
+      const row = named.find((r) => r.from <= t && t < r.to) ?? named[0];
+      if (!row) return;
+      const runs = entry.places?.length ?? 1;
+      inspect.showRow(
+        nameAt(entry, t),
+        `${kindLabel(entry.kind)}, as the dataset draws it`,
+        [`${formatTime(row.from)} – ${formatTime(row.to - 1)}`, `${row.area.toLocaleString('en-US')} km², as the dataset gives it`, ...(runs > 1 ? [`One of ${runs} rows the dataset gives under this name, ${formatTime(a)} – ${formatTime(b - 1)}`] : [])],
+        file.sourceRecord,
+        file.description,
+        rowInfo(row),
+      );
+    });
+  }
+
+  /** A window around a moment: a few centuries in the calendar's span, and a share of the age beyond it. */
+  function windowAround(t: number): [number, number] {
+    const d = Math.max(60, Math.abs(PRESENT_YEAR - t) * 0.08);
+    return fitWindow(t - d, Math.min(t + d, Math.max(t, PRESENT_YEAR)), limits);
+  }
+
+  // The time machine: where and when to, asked of a reader who comes with no link.
+  const timeMachine = new TimeMachine({
+    entries: [...build.search.entities, ...(build.search.rows ?? [])],
+    periods: build.periods.periods,
+    range: dataRange,
+    kindLabel,
+    offered: (e) => e.kind !== 'plate' && !cityKind(e.kind),
+    sceneTime: (id) => sites.find((s) => s.place === id)?.slice,
+    marks: (id, span) => marksNear(id, span),
+    go: (id, t) => goTo(id, t),
+    goTime: (t) => {
+      here = null;
+      const cam = state.cam.dist < 2 ? { lat: state.cam.lat, lon: state.cam.lon, dist: 2.6 } : state.cam;
+      setState({ t, window: windowAround(t), sel: null, cam });
+    },
+    goPeriod: (p) => setState({ window: fitWindow(p.start, p.end, limits), t: Math.max(dataRange[0], Math.min(dataRange[1], (p.start + p.end) / 2)) }),
+  });
+  root.appendChild(timeMachine.el);
+  whenTo.onclick = () => timeMachine.open();
+  if (fresh) timeMachine.open();
+
+  /**
+   * What is dated near a record within a stretch of its time, to mark along it: moments of the
+   * world's records on its plate, within a few hundred kilometres of where it stands.
+   */
+  async function marksNear(id: string, [a, b]: [number, number]): Promise<Mark[]> {
+    const moments = build.search.entities.filter((e) => e.id !== id && e.located && !e.bulk && e.time.instant && e.time.start.best !== null && e.time.start.best >= a && e.time.start.best <= b && features.has(e.id));
+    await features.load([id, ...moments.map((e) => e.id)]);
+    const home = features.get(id);
+    if (!home) return [];
+    const near = (x: { lat: number; lon: number }) => {
+      const p = unitVector(home.location.lat, home.location.lon);
+      const q = unitVector(x.lat, x.lon);
+      return Math.acos(Math.max(-1, Math.min(1, p[0] * q[0] + p[1] * q[1] + p[2] * q[2]))) * 6371;
+    };
+    return moments
+      .map((e) => ({ e, f: features.get(e.id) }))
+      .filter(({ f }) => f && f.frame === home.frame && near(f.location) < 300)
+      .map(({ e }) => ({ id: e.id, label: e.label, t: e.time.start.best! }))
+      .sort((x, y) => x.t - y.t);
+  }
+
   window.addEventListener('keydown', (e) => {
     if ((e.target as HTMLElement).tagName === 'INPUT') return;
+    if (timeMachine.isOpen) return;
     if (frameView && 'wasd'.includes(e.key.toLowerCase()) && e.key.length === 1) {
       walking.add(e.key.toLowerCase());
       stopFlight();
