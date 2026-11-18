@@ -1,4 +1,5 @@
 // Entity records for the inspect panel, features for tiles, periods, and the search index.
+import { footprintText, type Footprint } from '../../../../core/footprint.ts';
 import { specText, type DwellingSpec } from '../../../../core/dwelling.ts';
 import { levelOf } from '../../../../core/ladder.ts';
 import type { FormSpec } from '../../../../core/city.ts';
@@ -380,6 +381,8 @@ function valueText(s: Solved, c: Claim, labelOf: (ref: string) => string): strin
       return prop.values?.[String(v)] ?? String(v);
     case 'form':
       return formText(v as FormSpec);
+    case 'footprint-form':
+      return footprintText(v as Footprint);
     case 'body-form': {
       const parts = Object.keys((v as { parts?: object }).parts ?? {});
       return parts.length ? `What it changes of the body it inherits: ${parts.join(', ')}` : 'What it changes of the body it inherits';
