@@ -1,0 +1,25 @@
+id: src:truman-1945-news-conference-14-august
+type: document
+kind: eyewitness
+citation: >-
+  Truman, H.S. The President's News Conference, held in his office at the White House at 7 p.m.
+  on Tuesday, 14 August 1945, announcing Japan's acceptance of the Potsdam Declaration. Public
+  Papers of the Presidents: Harry S. Truman, 1945.
+authors:
+  - "Truman, H.S."
+published: 1945
+title: The President's News Conference, 14 August 1945
+container: Harry S. Truman Library, Public Papers
+url: https://www.trumanlibrary.gov/library/public-papers/100/presidents-news-conference
+via: >-
+  The Harry S. Truman Library's transcription of the Public Papers, which files the conference
+  under the number 100.
+reliability: >-
+  The President's announcement of Japan's surrender, with the Japanese note he read out and the
+  editors' note of the hour and day of the conference: evidence of when the surrender was
+  announced in Washington, and of his holding V-J Day over until the terms were signed.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from trumanlibrary.gov on 2026-11-17 and read in full; the quotes were found in the
+    kept text by quote-check. The number is from the library's address for the page.

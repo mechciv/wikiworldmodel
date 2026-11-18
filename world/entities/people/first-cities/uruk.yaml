@@ -39,6 +39,8 @@ claims:
     note: >-
       The first urban phase taken as the start of the Late Uruk period, whose date the source gives as approximate. Preferred because it ties
       the city to the phase of rapid urbanization; the place was already large earlier in the Uruk period.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
   city-start-cdli:
     prop: start
     subject: "@city"
@@ -128,6 +130,8 @@ claims:
     method: expert-estimate
     rank: preferred
     note: Preferred because it states the range rather than one figure. The source does not say how the estimate was made.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
   population-giosan:
     prop: population
     value: 25000

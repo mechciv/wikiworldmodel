@@ -1,0 +1,25 @@
+id: src:unsc-resolution-757-1992
+type: document
+kind: act
+citation: >-
+  United Nations Security Council. Resolution 757 (1992) of 30 May 1992. S/RES/757 (1992).
+published: 1992
+title: Resolution 757 (1992)
+url: https://documents.un.org/api/symbol/access?s=S/RES/757(1992)&l=en&t=pdf
+via: >-
+  The United Nations' Official Document System, which serves the pages of the Council's printed
+  resolutions and decisions of 1992 as a scan with a machine-read text.
+reliability: >-
+  The resolution that put sanctions on the Federal Republic of Yugoslavia (Serbia and
+  Montenegro). It is evidence of what the Council noted that day about that state's claim to
+  the old federation's seat, in the Council's words, and not of whether the claim was good in
+  law.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from documents.un.org on 2026-11-17 (the link resolves to
+    doc/resolution/gen/nr0/011/16/pdf/nr001116.pdf). The preamble and paragraphs 1 to 4 were
+    read in the kept text, whose machine reading sets the page's two columns into one another
+    and breaks some words;
+    the quote is a run of it that is whole, found by quote-check. The day is as the text gives
+    it: "At its 3082nd meeting, on 30 May 1992".

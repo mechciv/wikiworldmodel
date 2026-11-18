@@ -1,0 +1,21 @@
+id: people/writing/zapotec-script
+kind: development/script
+summary: >-
+  The early writing of the highlands of Oaxaca, on carved stone monuments at San José Mogote and Monte Albán, which
+  may record the Zapotec language and is still unread. Written for the relation that names it as a forerunner of
+  Maya writing (people/writing/maya-script): its inscriptions and their dates are not yet records.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Zapotec script }
+    source:
+      ref: src:palka-2010-maya-writing
+      loc: p. 226
+      quote: Other examples of the earliest Mesoamerican writing are found in the highlands of Oaxaca, mostly on the monumental Danzante sculptures
+    note: >-
+      Palka dates a monument at San José Mogote with two glyphs to about 600 BCE by radiocarbon, and the beginnings
+      of writing at Monte Albán and nearby to about 500 to 200 BCE; "This script may record the Zapotec language"
+      (p. 226). None of that is written here as a claim.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }

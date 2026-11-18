@@ -11,6 +11,8 @@ claims:
       ref: src:lam-2010-alphabet
       loc: p. 192, fig. 12.3, caption
       quote: Ahiram Sarcophagus (Early Phoenician, ca. 1000 bc)
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
   evidence:
     prop: evidence
     value: inscription
@@ -18,6 +20,8 @@ claims:
       ref: src:lam-2010-alphabet
       loc: p. 192, fig. 12.3, caption
       quote: Ahiram Sarcophagus (Early Phoenician, ca. 1000 bc)
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
   location:
     prop: location
     value: { lat: 34.119249, lon: 35.646125, frame: frame:earth/present-day }
@@ -40,3 +44,5 @@ claims:
     note: >-
       Stated in a figure caption, without argument, and supported by the book's time line for the Phoenician alphabet. The date of this inscription is disputed, but the works arguing other dates could not be read, so they are not recorded
       here. A reviewer should add them.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }

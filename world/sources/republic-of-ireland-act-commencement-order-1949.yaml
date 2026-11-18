@@ -1,0 +1,16 @@
+id: src:republic-of-ireland-act-commencement-order-1949
+type: document
+kind: act
+citation: >-
+  Government of Ireland. The Republic of Ireland Act, 1948 (Commencement) Order, 1949 (S.I. No.
+  27 of 1949), 4 February 1949.
+published: 1949
+title: The Republic of Ireland Act, 1948 (Commencement) Order, 1949
+url: https://www.irishstatutebook.ie/eli/1949/si/27/made/en/print
+via: The electronic Irish Statute Book (Office of the Attorney General), in the text as made.
+reliability: The order that appointed the day the Republic of Ireland Act came into operation.
+verified:
+  by: machine:claude-code
+  how: >-
+    The page fetched on 2026-11-17 and read whole. Quotation found in the kept text by
+    quote-check.

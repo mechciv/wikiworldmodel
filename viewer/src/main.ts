@@ -1037,7 +1037,7 @@ async function start(root: HTMLElement): Promise<void> {
     const right = norm(cross(fwd, [0, 0, 1]));
     const up = cross(right, fwd);
     const sun = norm(add(add(scale(norm(eye), 0.75), scale(right, -0.45)), scale(up, 0.5))) as V3;
-    if (territory.update(state.t, scenario())) globe.setTerritory(territory.canvas);
+    if (territory.update(state.t, scenario(), state.sel)) globe.setTerritory(territory.canvas);
     const showTerritory = territory.shown && !!fi && look.formed;
     if (state.people) {
       wantPeople();
@@ -1152,7 +1152,8 @@ async function start(root: HTMLElement): Promise<void> {
     else {
       if (state.t < PRESENT_YEAR) wantPolities();
       // Over the people drawn, states are their outlines only.
-      polities.update(camera, state.t, state.cam.dist, stage.clientWidth, stage.clientHeight, !peopleDrawn);
+      // Territories of records beyond the three colours are drawn among the states, under their records' names.
+      polities.update(camera, state.t, state.cam.dist, stage.clientWidth, stage.clientHeight, !peopleDrawn, territory.rest.flatMap((a) => a.rows.map((r) => ({ ...r, record: a.territory.subject, label: a.territory.label }))), territory.holding);
       for (const fl of fieldLayers) fl.update(camera, fieldOn(fl), state.t, state.cam.dist, stage.clientWidth, stage.clientHeight);
       present.update(camera, state.t, state.cam.dist, stage.clientWidth, stage.clientHeight);
       hazards.update(camera, state.t, Math.max(timebar.yearsPerPixels(state.t, 8), 0.5), stage.clientWidth, stage.clientHeight);
@@ -1845,6 +1846,15 @@ async function start(root: HTMLElement): Promise<void> {
       const entity = splitRef(inside.at.territory.subject).record;
       const { name, from, to, area } = inside.row;
       here = { entity, source: inside.at.claim.source, info: { t: state.t, name, from, to, area } };
+      return setState({ sel: entity });
+    }
+    // Inside a record's territory that is drawn among the states: its record too.
+    const state_ = fi ? polities.at(hit.lon, hit.lat) : undefined;
+    if (state_?.record) {
+      const entity = splitRef(state_.record).record;
+      const { name, from, to, area } = state_;
+      const source = territory.rest.find((a) => a.territory.subject === state_.record)?.claim.source ?? '';
+      here = { entity, source, info: { t: state.t, name, from, to, area } };
       return setState({ sel: entity });
     }
     if (!fi) return inspect.showUnknown(state.t, unknownWhy(state.t), stateOf(frameLook), resolveLayer(resolveWorld(), 'geography', hit.lat, hit.lon, state.t, scenario()));

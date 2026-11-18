@@ -1,0 +1,29 @@
+id: src:og-ddr-1951-identitaet
+type: document
+kind: act
+citation: >-
+  Oberstes Gericht der Deutschen Demokratischen Republik, Urteil vom 31. Oktober 1951 – 1 Zz
+  78/51. Neue Justiz 1952, pp. 222–225.
+published: 1952
+title: OG, Urt. vom 31. Oktober 1951 – 1 Zz 78/51
+container: Neue Justiz
+url: https://www.gvoon.de/art/dokumente/1952/zeitschrift-neue-justiz-nj-ddr-1952/pdf/zeitschrift-neue-justiz-nj-ddr-1952-seite_223.pdf
+via: >-
+  gvoon.de, which gives the journal's volume of 1952 page by page as PDFs set from an optical
+  reading of the print, with misreadings here and there. The text taken from each PDF comes out
+  of reading order within many lines, so only passages that stand whole in the kept text are
+  quoted. The URL is that of page 223, from which every quote is taken; pages 222, 224 and 225 are
+  at the same address with their numbers.
+reliability: >-
+  The judgment of the Democratic Republic's highest court, as its law journal printed it, headnote
+  and reasons: evidence of what that court held on 31 October 1951 about the old German state and
+  the Democratic Republic, in its own words. It decides a district's liability for a debt of 1942
+  to 1945, and reasons from the class character of the two states; it is not evidence of how the
+  Federal Republic or other states saw the matter.
+verified:
+  by: machine:claude-code
+  how: >-
+    The four pages were fetched from gvoon.de on 2026-11-17 and read in full in German, as page
+    images and as text, from the headnote on page 222 to the end of the reasons on page 225. The
+    quotes, all from page 223, were found in that page's kept text by quote-check; the words were
+    also read on the page image, where they stand as quoted.

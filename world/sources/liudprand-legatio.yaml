@@ -1,0 +1,25 @@
+id: src:liudprand-legatio
+type: text
+kind: eyewitness
+citation: >-
+  Liudprand of Cremona, report of his mission to Constantinople (Legatio Constantinopolitana),
+  translated by E. F. Henderson, Select Historical Documents of the Middle Ages (London: George
+  Bell, 1910), pp. 440–477, in the Internet Medieval Sourcebook.
+published: 1910
+title: Report of his Mission to Constantinople
+url: https://sourcebooks.fordham.edu/source/liudprand1.asp
+via: >-
+  Internet Medieval Sourcebook, Fordham University, which keeps Henderson's page numbers and
+  says it has modernized his archaic verb forms and Americanized the spelling. Its text has
+  slips of scanning.
+reliability: >-
+  The envoy of Otto I to the emperor Nicephorus in 968 (Henderson's introduction), reporting to
+  his masters what was said to him at the eastern court. He is hostile and mocking, and the
+  Greeks' words reach us only as he tells them, in Latin and then in translation; but the
+  quarrel over the imperial title is the first thing he reports.
+verified:
+  by: machine:claude-code
+  how: >-
+    The Sourcebook page fetched on 2026-11-17; Henderson's introduction and pp. 442–448 and
+    464–468 read. The Latin was not read. The quotations were found in the kept text by
+    quote-check.

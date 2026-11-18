@@ -1,0 +1,158 @@
+id: people/polities/ilkhanate
+kind: polity
+summary: >-
+  The Mongol state in Iran, Iraq and the lands about them ruled by Hülegü and his descendants, the
+  Ilkhans: one of the four states the Mongol Empire is held to have divided into. Hülegü came to
+  Persia with the Great Khan's army and settled it in Azarbaijan by 1256; historians speak of an
+  independent Ilkhanid state from about 1260, within the breakup of the empire. The ruling house all
+  but ended with the death of Abu Saʿid in 1335, though khans were set up in its name until 1353.
+  Its rulers never gave up acknowledging the Great Khan in China as their superior in right, so that
+  one perspective makes it a part of the empire to its end (alt:mongol-unity/one-empire).
+author: machine:claude-code
+same_as: { wikidata: Q178084 }
+claims:
+  name:
+    prop: name
+    value: { en: Ilkhanate }
+    source:
+      ref: src:kim-2009-unity-of-the-mongol-empire
+      loc: p. 31
+      quote: the title of il khan was used only in the first half of the dynasty, from 1259-60 to 1295
+    note: >-
+      The usual name in English, from the title il-khan. Kim finds Hülegü's house using the title
+      only until 1295, and on its coins only in the Arabic legends, and so doubts the usual reading
+      of it as a khan subject to the Great Khan; he calls the state the ulus of Hülegü.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in kim-2009-unity-mongol-empire.txt (sha256 87475f58552ad797), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  start-independent:
+    prop: start
+    value: 1260 CE
+    source:
+      ref: src:amitai-2004-il-khanids-dynastic-history
+      loc: 'Dynastic history, the paragraph beginning "From about this time"'
+      quote: From about this time we can talk about an independent Il-khanid state, within the context of the breakup of the united Mongol empire.
+    method: expert-estimate
+    basis: reconstruction
+    rank: preferred
+    note: >-
+      Amitai's "about this time" is 1260: the sentence follows Hülegü's withdrawal from Syria in the
+      late winter of that year and the Mamluk victory at ʿAyn Jālut on 3 September. It is about, not
+      on: he ties it to the civil war between Hülegü's brothers, and has Qubilai recognize Hülegü's
+      independence in fact when he won it in 1264. Preferred because the record is the state, and
+      this is from when the specialist counts one.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in iranica-il-khanids-dynastic-history.txt (sha256 1b2505e8c878eccd), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  start-1256:
+    prop: start
+    value: 1256 CE
+    source:
+      - ref: src:lane-poole-1894-mohammadan-dynasties
+        loc: p. 217
+        quote: 82. MONGOLS OF PERSIA* 1256—1349
+      - ref: src:amitai-2004-il-khanids-dynastic-history
+        loc: 'Dynastic history, the paragraph beginning "By 1256"'
+        quote: By 1256, Hülegü had all but eliminated the Ismāʿilis as an independent force in Persia (although individual forts remained independent for some time, even years), and had moved with the bulk of his army to Azarbaijan, which was to become the center of the Il-khanid state.
+    method: compilation
+    basis: reconstruction
+    note: >-
+      The older reckoning, by the dynasty and not the state: Lane-Poole's table of the Mongols of
+      Persia begins in 1256, the year by which Hülegü, sent by his brother the Great Khan Möngke,
+      had settled his army in Azarbaijan. On this reckoning the realm was for its first years a
+      command within the empire, and no state.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in lane-poole-1894-mohammadan-dynasties-csl.txt (sha256 f408b1ab2bcdb103) and iranica-il-khanids-dynastic-history.txt (sha256 1b2505e8c878eccd), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  end-1335:
+    prop: end
+    value: 1335 CE
+    source:
+      - ref: src:amitai-2004-il-khanids-dynastic-history
+        loc: 'Dynastic history, the paragraph beginning "An important development"'
+        quote: With the unexpected death in 1335 of Abu Saʿid, who had set out to meet the reported advances of an invasion from the Golden Horde, the ruling house basically came to an end.
+      - ref: src:jackson-1991-chaghatayid-dynasty
+        loc: para. 8
+        quote: When the Il-khanid dynasty collapsed upon Abū Saʿīd’s death (736/1335)
+    method: expert-estimate
+    basis: reconstruction
+    rank: preferred
+    note: >-
+      Abu Saʿid, whom Amitai calls the last of the Ilkhans, left no son, and the great officers each
+      backed a pretender of their own, so that the kingdom fell apart. Preferred because both
+      specialists end the dynasty here.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in iranica-il-khanids-dynastic-history.txt (sha256 1b2505e8c878eccd) and iranica-chaghatayid-dynasty.txt (sha256 1842665c6eeb2376), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  end-1353:
+    prop: end
+    value: 1353 CE
+    source:
+      ref: src:britannica-1911-mongols
+      loc: "side-heading The Ilkhans of Persia"
+      quote: The empire of the Ilkhans established by Hulagu lasted nominally until 1353, but after the death of the Ilkhan Abu Said in 1335 the real power was divided between five petty dynasties
+    method: expert-estimate
+    basis: reconstruction
+    note: >-
+      The end in name. After 1335, as Lane-Poole has it, rival amirs set puppet sovereigns on the
+      throne; the encyclopaedia carries the line in name to 1353. It is cited as a last resort: the
+      better sources read here end with 1335 and do not follow the puppets. Lane-Poole's table of
+      the line (start-1256) stops at 1349, and the borders dataset's rows at 1343.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in eb1911-mongols.txt (sha256 e9e31b022fd120e5), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  territory:
+    prop: territory
+    value: { from: src:cliopatria-0.2.1, names: [Ilkhanate] }
+    source: { ref: src:cliopatria-0.2.1, loc: rows named Ilkhanate }
+    method: compilation
+    basis: reconstruction
+    note: >-
+      The dataset's four rows of this name run from 1294 to 1343. It has no Ilkhanate before 1294:
+      until 1293 it draws the empire whole, in its rows named Mongol Empire, so this state's land in
+      its first thirty years and more lies inside rows of another name. Its last row runs eight
+      years past the death of Abu Saʿid and is this record's only until the state ends. Its rows
+      named (Allegiance of Ilkhanate to Yuan Dynasty), for the same years, are the outline of this
+      state and the Yuan together, and are not claimed.
+relations:
+  from-the-empire:
+    rel: arose-from
+    to: people/polities/mongol-empire
+    source:
+      - ref: src:kim-2009-unity-of-the-mongol-empire
+        loc: p. 30
+        quote: "it was divided into (1) the domain of Qa’an in the east, usually known as the ‘Yuan Dynasty,’ (2) the ‘Chaghatai Khanate’ in Central Asia, (3) the ‘Ilkhanate’ in Iran and Iraq, and (4) the ‘Golden Horde’ or the ‘Qipchaq Khanate.’"
+      - ref: src:amitai-2004-il-khanids-dynastic-history
+        loc: 'Dynastic history, the paragraph beginning "From about this time"'
+        quote: From about this time we can talk about an independent Il-khanid state, within the context of the breakup of the united Mongol empire.
+      - ref: src:jackson-1991-chaghatayid-dynasty
+        loc: para. 3
+        quote: Hülegü, however, subsequently took advantage of the civil war of 657-62/1259-64 to establish himself as a virtually autonomous ruler
+    note: >-
+      The youngest of the four: not a share that Chinggis Khan allotted but, in Jackson's words, a
+      new ulus south of the Oxus, made from a command of the Great Khan's army that its commander,
+      the Great Khan's brother, kept when the empire broke up. Amitai notes the suggestion that
+      Hülegü went beyond his orders in founding a dynasty, and that his state's right to exist was
+      in question among its Mongol neighbours, so that it stressed its tie to the Great Khan.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in kim-2009-unity-mongol-empire.txt (sha256 87475f58552ad797), iranica-il-khanids-dynastic-history.txt (sha256 1b2505e8c878eccd) and iranica-chaghatayid-dynasty.txt (sha256 1842665c6eeb2376), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  part-of-the-empire:
+    rel: part-of
+    to: people/polities/mongol-empire
+    alt: alt:mongol-unity/one-empire
+    source:
+      - ref: src:amitai-2004-il-khanids-dynastic-history
+        loc: 'Institutional, social, and cultural aspects, the paragraph beginning "The checkered and often difficult relations"'
+        quote: It is clear, then, that the Il-khans never gave up their de jure recognition of the Great Khan’s preeminence.
+      - ref: src:kim-2009-unity-of-the-mongol-empire
+        loc: p. 34
+        quote: "they thought that their uluses were parts of a larger political unit called ‘Yeke Mongghol Ulus,’ which embraced all the great and small uluses"
+      - ref: src:marco-polo-book-yule-1903
+        loc: "Book I, ch. 51"
+        quote: "this Cublay, who is the Lord of all the Tartars in the world, those of the Levant and of the Ponent included; for these are all his liegemen and subjects"
+    note: >-
+      In the perspective that the empire went on until 1368 this realm is a part of it for its whole
+      life, so no span is given. It is the realm for which that reading has most support from those
+      who do not share it: Amitai, for whom the state was independent in fact from about 1260, has
+      its first rulers invested by Qubilai, a high commissioner of the Great Khan at its court until
+      1313, and embassies to the last. Polo's lords of the Levant are the Ilkhans, as Yule notes.
+      What these sources describe is a superior acknowledged in right and not obeyed in fact. The
+      vocabulary has `part-of` and nothing weaker, so that is written only here, where it is read as
+      membership, and not at all in the default picture.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in iranica-il-khanids-dynastic-history.txt (sha256 1b2505e8c878eccd), kim-2009-unity-mongol-empire.txt (sha256 87475f58552ad797) and yule-cordier-marco-polo-vol1.txt (sha256 5dfc170138c62134), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }

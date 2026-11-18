@@ -1,0 +1,25 @@
+id: src:francis-ii-1806-declaration
+type: document
+kind: act
+citation: >-
+  Francis II, declaration laying down the imperial crown and the government of the empire
+  (Erklärung des Kaisers Franz II. über die Niederlegung der deutschen Kaiserkrone), Vienna,
+  6 August 1806.
+published: 1806
+title: Erklärung des Kaisers Franz II. über die Niederlegung der deutschen Kaiserkrone
+url: https://de.wikisource.org/wiki/Erkl%C3%A4rung_Franz_II._zur_Niederlegung_der_Krone_des_Heiligen_R%C3%B6mischen_Reiches
+via: >-
+  German Wikisource's transcription of a contemporary print, marked there as proofread twice
+  against the scan. The German title is the one Wikisource gives in brackets, an editor's; the
+  print begins with the emperor's own style.
+reliability: >-
+  The emperor's own act, in his words: evidence of what he declared and on which day. It is not
+  evidence of whether the head of the empire could end it alone, nor of how others took it.
+verified:
+  by: machine:claude-code
+  how: >-
+    The Wikisource page fetched on 2026-11-17 and read whole. Compared with the transcription at
+    documentarchiv.de (http://www.documentarchiv.de/nzjh/1806/franz-II-niederlegung-kaiserkrone.html,
+    fetched the same day), which differs in spelling, in punctuation and in a few words
+    (verzichten where the print has verzeihen, the day written out), not in sense. The quotations
+    were found in the kept Wikisource text by quote-check.

@@ -1,0 +1,24 @@
+id: src:constitution-of-the-irish-free-state-act-1922
+type: document
+kind: act
+citation: >-
+  Dáil Eireann sitting as a Constituent Assembly. Constitution of the Irish Free State (Saorstát
+  Eireann) Act, 1922, with the Constitution as its First Schedule and the Articles of Agreement
+  for a Treaty between Great Britain and Ireland, signed at London on 6 December 1921, as its
+  Second.
+published: 1922
+title: Constitution of the Irish Free State (Saorstát Eireann) Act, 1922
+url: https://www.irishstatutebook.ie/eli/1922/act/1/enacted/en/print.html
+via: The electronic Irish Statute Book (Office of the Attorney General), in the text as enacted.
+reliability: >-
+  The Act by which the Irish constituent assembly proclaimed the Irish Free State and enacted its
+  Constitution, "in the exercise of undoubted right". It is evidence of what the assembly
+  enacted and on what authority it claimed to act, and it carries the text of the Treaty. The
+  British Parliament enacted the same Constitution by an Act of its own
+  (src:irish-free-state-constitution-act-1922).
+verified:
+  by: machine:claude-code
+  how: >-
+    The page fetched on 2026-11-17; the Act, Articles 1 to 4 and 83 of the Constitution and
+    Articles 1 to 6, 11 and 12 of the Treaty read. Quotations found in the kept text by
+    quote-check.

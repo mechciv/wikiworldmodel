@@ -43,6 +43,8 @@ interface ClaimCommon {
   valid?: unknown;
   validText?: string;
   sources: CitationRecord[];
+  /** works that deny it */
+  against?: CitationRecord[];
   unsourced?: string;
   confidence?: number | string;
   /** a calibrated confidence word's probability range */
@@ -64,11 +66,18 @@ export interface ClaimRecord extends ClaimCommon {
   value: unknown;
   /** human-readable value */
   valueText: string;
+  /**
+   * the value as text where another claim, picked over its group's default, changes what it comes to: by that
+   * claim's reference. A date in a count of days comes to another day under each date of the count's zero day.
+   */
+  valueTexts?: Record<string, string>;
   method?: string;
   methodLabel?: string;
   /** "subject|prop": claims in the same group compete */
   group: string;
   competing: boolean;
+  /** it holds in its turn: the claims of its group each hold for a span of their own, no two at once, and do not compete */
+  turn?: true;
   /** the claim the default picture uses for its group */
   chosen: boolean;
 }
@@ -78,6 +87,8 @@ export interface RelationRecord extends ClaimCommon {
   family: string;
   to: string;
   toLabel: string;
+  /** another reading: it gives way to a preferred relation of its subject and type, and holds only when picked */
+  rival?: true;
   /** the target is not written yet */
   wanted: boolean;
   lagText?: string;
@@ -91,6 +102,11 @@ export interface InverseRecord {
   from: string;
   fromLabel: string;
   status: string;
+  /** as the stored relation has them: the alternative it belongs to, its rank, the span it held over, and whether it is a rival reading */
+  alt?: string;
+  rank: string;
+  validText?: string;
+  rival?: true;
 }
 
 export interface VariantRecord {
@@ -115,7 +131,7 @@ export interface EntityRecord {
   frame?: { id: string; title: string; plate?: number; entity?: string; entityLabel?: string };
   same_as?: Record<string, string | number>;
   /** each phase's interval in the default picture, and under the scenarios that move it */
-  phases: { id: string; label: string; gap?: boolean; time: FeatureTime; variants?: Record<string, FeatureTime> }[];
+  phases: { id: string; label: string; gap?: boolean; same_as?: Record<string, string | number>; time: FeatureTime; variants?: Record<string, FeatureTime> }[];
   time: FeatureTime;
   claims: ClaimRecord[];
   relations: RelationRecord[];

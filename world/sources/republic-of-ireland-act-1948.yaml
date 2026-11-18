@@ -1,0 +1,17 @@
+id: src:republic-of-ireland-act-1948
+type: document
+kind: act
+citation: >-
+  Oireachtas. The Republic of Ireland Act, 1948 (No. 22 of 1948), 21 December 1948.
+published: 1948
+title: The Republic of Ireland Act, 1948
+url: https://www.irishstatutebook.ie/eli/1948/act/22/enacted/en/print.html
+via: The electronic Irish Statute Book (Office of the Attorney General), in the text as enacted.
+reliability: >-
+  The Act that declared the description of the State to be the Republic of Ireland. It is
+  evidence of that description; the State's name stayed what the Constitution says.
+verified:
+  by: machine:claude-code
+  how: >-
+    The page fetched on 2026-11-17 and read whole (five sections). Quotation found in the kept
+    text by quote-check.

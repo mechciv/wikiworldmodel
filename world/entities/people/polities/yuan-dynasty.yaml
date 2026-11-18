@@ -1,0 +1,217 @@
+id: people/polities/yuan-dynasty
+kind: polity
+summary: >-
+  The realm of the Mongol Great Khans in China and Mongolia from the accession of Qubilai in 1260,
+  named Great Yuan by his edict of 1271, until Ming troops took its capital in 1368. It is one of
+  the four states the Mongol Empire is held to have divided into around 1260, the one whose ruler
+  was the Great Khan; by its own account, and in the view of some historians, it was no new state
+  but the empire itself under a Chinese name (alt:mongol-unity/one-empire). The borders dataset
+  draws it only from 1294, the year Qubilai died, and keeps it until 1374.
+author: machine:claude-code
+same_as: { wikidata: Q7313 }
+claims:
+  name:
+    prop: name
+    value: { en: Yuan dynasty, zh: 大元 }
+    valid: { lo: 1271 CE }
+    source:
+      - ref: src:yuan-1271-edict-on-the-name-of-the-state
+        loc: "second paragraph of the edict"
+        quote: "可建國號曰大元，蓋取易經「乾元」之義。"
+      - ref: src:yuan-1271-edict-on-the-name-of-the-state
+        loc: "Yuan shi ch. 7, eighth year of Zhiyuan, eleventh month, day yihai"
+        quote: "建國號曰大元，詔曰"
+    method: documentary
+    note: >-
+      In English: let the name of the state be established as Great Yuan, taking the sense of qian
+      yuan, the originating power of Heaven, in the Book of Changes; and, from the annals, the name
+      of the state was established as Great Yuan, and the edict said. The name is in use from the
+      edict, whose year is given here and whose day is not (start-name). Yuan dynasty is the name in
+      common use in English; the edict names a state (國號), not a ruling house.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in yuan-shi-007.txt (sha256 7213ccd68a8efa5a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  start-accession:
+    prop: start
+    value: 1260 CE
+    source:
+      - ref: src:yule-1903-book-of-ser-marco-polo
+        loc: "Book II, ch. 2, note 1"
+        quote: There is no doubt that Kúblái was proclaimed Kaan in 1260 (4th month)
+      - ref: src:kim-2009-unity-of-the-mongol-empire
+        loc: p. 19
+        quote: "after the sudden death of Möngke Qa’an in 1259 and the rise of Qubilai in 1260"
+      - ref: src:yuan-shi-wikisource
+        loc: "ch. 4, first year of Zhongtong, third month, day xinmao"
+        quote: "辛卯，帝即皇帝位"
+    method: historical-account
+    rank: preferred
+    note: >-
+      The year is Yule's and Kim's. The Yuan shi has, in English: on the day xinmao the emperor took
+      the imperial throne; the same entry has him arrive at Kaiping, where the princes urged him to
+      it. It dates this to the day xinmao of the third month of the first year of Zhongtong, in the
+      Chinese calendar, which the axis does not read, so the day is not written; Yule has the fourth
+      month. Preferred because the edict of 1271 gave a name to a state that was there already, and
+      in the common view that state is the Great Khan's own realm from Qubilai's accession, one of
+      the four the empire divided into about 1260 and called the Yuan from the first, eleven years
+      before it had the name. Counted from the name instead (start-name), the record would begin
+      years after the empire it arose from had ended, with Qubilai's realm of those years in no
+      record.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in yule-cordier-marco-polo-vol1.txt (sha256 5dfc170138c62134), kim-2009-unity-mongol-empire.txt (sha256 87475f58552ad797) and yuan-shi-004-047.txt (sha256 921489005d23e139), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  start-name:
+    prop: start
+    value: { lo: 1271 CE, hi: 1272 CE }
+    source:
+      - ref: src:yuan-1271-edict-on-the-name-of-the-state
+        loc: "Yuan shi ch. 7, eighth year of Zhiyuan, eleventh month, day yihai"
+        quote: "建國號曰大元，詔曰"
+      - ref: src:kim-2009-unity-of-the-mongol-empire
+        loc: p. 32
+        quote: "‘Da Yuan,’ introduced in 1272 during the reign of Qubilai"
+    method: documentary
+    note: >-
+      The dynasty counted from its name, as Wikidata's item counts it (inception 1271). The annals
+      put the edict on the day yihai of the eleventh month of the eighth year of Zhiyuan, in the
+      Chinese calendar, which the axis does not read: the day is not converted here, and no source
+      read gives it in a Western calendar. The eighth year of Zhiyuan answers to 1271, counting back
+      from its thirty-first, in whose first month Qubilai died, in February 1294 (Yuan shi ch. 17;
+      Yule, Book II, ch. 2, note 2); its eleventh month lies at the turn of the Western year, and
+      Kim gives 1272. The range takes in both years. The edict itself does not begin a state: it
+      speaks of the one Taizu raised.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in yuan-shi-007.txt (sha256 7213ccd68a8efa5a) and kim-2009-unity-mongol-empire.txt (sha256 87475f58552ad797), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  end:
+    prop: end
+    value: 1368 CE
+    source:
+      - ref: src:yuan-shi-wikisource
+        loc: "ch. 47, twenty-eighth year of Zhizheng, eighth month, day gengwu"
+        quote: "八月庚（申）〔午〕，大明兵入京城，[6]國亡。"
+      - ref: src:britannica-1911-mongols
+        loc: 'history, the paragraph beginning "In 1355 a Buddhist priest"'
+        quote: in 1368 the ex-Buddhist priest ascended the throne as the first sovereign of the Ming
+    method: historical-account
+    rank: preferred
+    note: >-
+      In English: in the eighth month, on the day gengwu, the troops of the Great Ming entered the
+      capital, and the state perished. The brackets are the edition's: the transmitted text has the
+      day gengshen, which that month did not have, and is corrected to gengwu from the Veritable
+      Records of the Ming founder (its note 6, which gives the month's first day as jisi, so that
+      gengwu is its second). The date is in the Chinese calendar, which the axis does not read, so
+      the day is not written; the year is the encyclopaedia's. The emperor had left by night for the
+      north four days before, on the day bingyin of the intercalary seventh month. Preferred because
+      the dynasty's own history, written by its successors, sets the end of the state on this day.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in yuan-shi-004-047.txt (sha256 921489005d23e139) and eb1911-mongols.txt (sha256 e9e31b022fd120e5), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  end-1370:
+    prop: end
+    value: 1370 CE
+    source:
+      - ref: src:lane-poole-1894-mohammadan-dynasties
+        loc: p. 211
+        quote: (1) Yuen dynasty in China (1248-1370)
+      - ref: src:lane-poole-1894-mohammadan-dynasties
+        loc: p. 213
+        quote: In two years China was rid of the Mongols
+      - ref: src:yuan-shi-wikisource
+        loc: "ch. 47, closing entry"
+        quote: "又一年，四月丙戌，帝因痢疾殂於應昌"
+    method: compilation
+    basis: reconstruction
+    note: >-
+      Lane-Poole's tables carry the dynasty two years past the fall of Peking in 1368, to the
+      expulsion of the last emperor who had reigned there. The Yuan shi, after the fall of the
+      capital, has that emperor at Yingchang a year later and, in English, another year on, in the
+      fourth month, on the day bingxu, dead there of dysentery: the second year after the fall,
+      1370. The same tables begin the dynasty in 1248, with the first Great Khan of Tolui's line,
+      and run the line of Great Khans on in Mongolia to 1634; the borders dataset keeps a Yuan
+      Dynasty until 1374 and then a Northern Yuan. Whether those later khans carried the Yuan on is
+      a question of the same kind as this record's, and is not written here.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in lane-poole-1894-mohammadan-dynasties-csl.txt (sha256 f408b1ab2bcdb103) and yuan-shi-004-047.txt (sha256 921489005d23e139), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  territory:
+    prop: territory
+    value: { from: src:cliopatria-0.2.1, names: [Yuan Dynasty] }
+    source: { ref: src:cliopatria-0.2.1, loc: rows named Yuan Dynasty }
+    method: compilation
+    basis: reconstruction
+    note: >-
+      The dataset's three rows of this name run from 1294 to 1374. It has no Yuan before 1294: until
+      1293 it draws the empire whole, in its rows named Mongol Empire, so this state's land from
+      1260 to 1293 lies inside rows of another name. Its last row runs six years past the fall of
+      the capital, to the year before its Ming Dynasty rows begin, and is this record's only until
+      the state ends. From 1294 the dataset also has rows named (Allegiance of Golden Horde to Yuan
+      Dynasty), and the like for the Ilkhanate and the Chagatai Khanate: each is the outline of the
+      Yuan and that khanate together, and none is claimed here. Its rows named Great Yuan, in
+      Ferghana from 110 BCE to 50 CE, carry this dynasty's Wikidata id and are another state.
+relations:
+  from-the-empire:
+    rel: arose-from
+    to: people/polities/mongol-empire
+    source:
+      - ref: src:kim-2009-unity-of-the-mongol-empire
+        loc: p. 30
+        quote: "it was divided into (1) the domain of Qa’an in the east, usually known as the ‘Yuan Dynasty,’ (2) the ‘Chaghatai Khanate’ in Central Asia, (3) the ‘Ilkhanate’ in Iran and Iraq, and (4) the ‘Golden Horde’ or the ‘Qipchaq Khanate.’"
+      - ref: src:yule-1903-book-of-ser-marco-polo
+        loc: "Introductory Notices, II, § 10"
+        quote: "practically it was splitting up into several great monarchies under the descendants of the four sons of Chinghiz, Juji, Chaghatai, Okkodai, and Tuli"
+      - ref: src:morgan-2009-decline-and-fall-of-the-mongol-empire
+        loc: abstract
+        quote: the Great Khanate in China and Mongolia
+    note: >-
+      The common view, as Kim sets it out before arguing against it: in the struggle for the
+      succession after Möngke's death the empire was divided into four, of which this is the Great
+      Khan's own domain. Yule has the empire splitting into great monarchies as Qubilai took its
+      chief throne in 1260. Morgan's abstract speaks of the division of the empire into four
+      khanates and calls this one the Great Khanate in China and Mongolia. Of the four it is the one
+      that kept the empire's ruler and its homeland, which is why its own account is that nothing
+      arose (the-empire-carried-on).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in kim-2009-unity-mongol-empire.txt (sha256 87475f58552ad797), yule-cordier-marco-polo-vol1.txt (sha256 5dfc170138c62134) and morgan-2009-decline-and-fall-mongol-empire.txt (sha256 475fa985e2fef3bd), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  the-empire-carried-on:
+    rel: continues
+    to: people/polities/mongol-empire
+    alt: alt:mongol-unity/one-empire
+    source:
+      - ref: src:yuan-1271-edict-on-the-name-of-the-state
+        loc: "second paragraph of the edict"
+        quote: "我太祖聖武皇帝，握乾符而起朔土，以神武而膺帝圖，四震天聲，大恢土宇，輿圖之廣，歷古所無。"
+      - ref: src:yuan-1271-edict-on-the-name-of-the-state
+        loc: "second paragraph of the edict"
+        quote: "頃者，耆宿詣庭，奏章申請，謂既成於大業，宜早定於鴻名。"
+      - ref: src:kim-2009-unity-of-the-mongol-empire
+        loc: p. 32
+        quote: "According to the Mongol usage at that time, ‘Da Yuan’ was invented exclusively for the subjects using Chinese language and script, as an equivalent to the term ‘Yeke Mongghol Ulus.’"
+      - ref: src:kim-2009-unity-of-the-mongol-empire
+        loc: p. 32
+        quote: "However, the Mongols, and probably many semuren too, took it as a ‘Chinese-style’ name for the entire Mongol empire."
+      - ref: src:marco-polo-book-yule-1903
+        loc: "Book II, ch. 2"
+        quote: "Now this Cublay Kaan is of the right Imperial lineage, being descended from Chinghis Kaan, the first sovereign of all the Tartars. And he is the sixth Lord in that succession"
+      - ref: src:lane-poole-1894-mohammadan-dynasties
+        loc: p. 212
+        quote: The Khakaans of the blood of Chingiz now became a Chinese dynasty.
+    against:
+      - ref: src:amitai-2004-il-khanids-dynastic-history
+        loc: 'Dynastic history, the paragraph beginning "From about this time"'
+        quote: "The dissolution of the united empire is also symbolized by the outbreak of war between the two cousins, Hülegü and the Jochid Khan Berke, in the winter of 1261-62"
+      - ref: src:jackson-1991-chaghatayid-dynasty
+        loc: para. 6
+        quote: so that for the first time since 658/1260 the Mongol world was united
+    note: >-
+      A claim of identity made by the state itself and contested by historians, so it stands in a
+      perspective; the default picture has the Yuan arise from an empire that had ended. The edict
+      of 1271 founds nothing. In English: our Taizu, the sagely and martial emperor, grasped the
+      mandate and rose in the north, took up the imperial design with godlike prowess, made Heaven's
+      voice heard on every side, and widened the realm beyond any since antiquity; of late the
+      elders have come to court and petitioned that, the great work being done, the great name
+      should be settled early. The name is given to a state that was already there, Taizu's. Kim
+      argues that Da Yuan was the Chinese equivalent of Yeke Mongghol Ulus, the Great Mongol Empire,
+      and that the Mongols took it as a name for the whole empire. Marco Polo, at Qubilai's court,
+      counts him the sixth lord in succession from Chinggis (the fifth, Yule notes). Lane-Poole has
+      the same line of Great Khans become a Chinese dynasty. In this perspective the empire ends
+      when this record does (end-with-the-yuan, in the empire's record). Those cited against it
+      write of an empire that had dissolved: for Amitai the war of 1261 to 1262 is a sign of it, and
+      for Jackson the peace of 1304 united the Mongol world for the first time since 1260.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in yuan-shi-007.txt (sha256 7213ccd68a8efa5a), kim-2009-unity-mongol-empire.txt (sha256 87475f58552ad797), yule-cordier-marco-polo-vol1.txt (sha256 5dfc170138c62134), lane-poole-1894-mohammadan-dynasties-csl.txt (sha256 f408b1ab2bcdb103), iranica-il-khanids-dynastic-history.txt (sha256 1b2505e8c878eccd) and iranica-chaghatayid-dynasty.txt (sha256 1842665c6eeb2376), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }

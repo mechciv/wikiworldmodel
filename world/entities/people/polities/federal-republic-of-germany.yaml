@@ -1,0 +1,150 @@
+id: people/polities/federal-republic-of-germany
+kind: polity
+summary: >-
+  The German state under the Basic Law, from its promulgation on 23 May 1949 to today: at first in
+  the lands its Article 23 names, in the west of Germany, and since the German Democratic Republic
+  acceded to it on 3 October 1990 in the whole. Its Federal Constitutional Court holds that it is
+  not a new state but the German Reich of 1871 carried on, identical with it; the Democratic
+  Republic denied that, and the two views are the alternatives of alt:germany-after-1945.
+  Wikidata's Germany (Q183) is this state; it has a second item, West Germany (Q713750), for the
+  same state before 3 October 1990, a cut the Unification Treaty does not make.
+author: machine:claude-code
+same_as: { wikidata: Q183 }
+claims:
+  name:
+    prop: name
+    value: { en: Federal Republic of Germany, de: Bundesrepublik Deutschland }
+    source:
+      ref: src:grundgesetz-1949
+      loc: "promulgation formula"
+      quote: Grundgesetz für die Bundesrepublik Deutschland
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in grundgesetz-1949-documentarchiv.txt (sha256 34bd2e1143bc31db), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  start:
+    prop: start
+    value: 23 May 1949 CE
+    source:
+      - ref: src:grundgesetz-1949
+        loc: "promulgation formula"
+        quote: Der Parlamentarische Rat hat am 23. Mai 1949 in Bonn am Rhein in öffentlicher Sitzung festgestellt
+      - ref: src:grundgesetz-1949
+        loc: "Article 145 (2)"
+        quote: Dieses Grundgesetz tritt mit Ablauf des Tages der Verkündung in Kraft.
+    method: documentary
+    note: >-
+      In English: the Parliamentary Council established in public session at Bonn on the Rhine on
+      23 May 1949 that the Basic Law had been adopted, and on that it signed and promulgated it;
+      this Basic Law enters into force at the end of the day of its promulgation. So its first
+      moment in force is the midnight that ends 23 May 1949; the day is written as the act gives
+      it. The Basic Law speaks of the time before the Bundestag first meets (Article 123): the
+      Federal Republic's organs came after it and are not dated here.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in grundgesetz-1949-documentarchiv.txt (sha256 34bd2e1143bc31db), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  territory:
+    prop: territory
+    value:
+      from: src:cliopatria-0.2.1
+      names: [Federal Republic of Germany, Federated Republic of Germany]
+    source: { ref: src:cliopatria-0.2.1, loc: "rows named Federal Republic of Germany and Federated Republic of Germany" }
+    method: compilation
+    basis: reconstruction
+    note: >-
+      Cliopatria ends its Federal Republic of Germany in 1990 and begins a Federated Republic of
+      Germany in 1991, as two polities, with Wikidata's West Germany and Germany as their ids. The
+      Unification Treaty has the Democratic Republic accede to the Federal Republic, which went
+      on: here the two names are one state. The dataset's first row begins in 1950, so 1949 has
+      no outline.
+relations:
+  from-the-reich:
+    rel: arose-from
+    to: people/polities/german-reich
+    source:
+      - ref: src:grundgesetz-1949
+        loc: "preamble"
+        quote: um dem staatlichen Leben für eine Übergangszeit eine neue Ordnung zu geben
+      - ref: src:grundgesetz-1949
+        loc: "Article 134 (1)"
+        quote: Das Vermögen des Reiches wird grundsätzlich Bundesvermögen.
+      - ref: src:bverfg-1973-grundlagenvertrag
+        loc: "Rn. 57 (BVerfGE 36, 1 [8])"
+        quote: dem Neuentstehen zweier unabhängiger Staaten auf dem Gebiet des alten Reiches
+    note: >-
+      What both views accept: the Federal Republic was set up in 1949 in part of the German
+      Reich, and took over what was the Reich's. In English: to give the life of the state a new
+      order for a time of transition; the property of the Reich becomes federal property as a
+      rule; the new rise of two independent states on the territory of the old Reich. The last is
+      the Bavarian government's wording, in the judgment of 1973, of the view the Federal
+      Constitutional Court rejects. Whether what was set up is the Reich itself or a new state is
+      the question of alt:germany-after-1945, and the relation says neither.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in grundgesetz-1949-documentarchiv.txt (sha256 34bd2e1143bc31db) and bverfge-36-1-grundlagenvertrag.txt (sha256 c2ea395ae474a187), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  continues-the-reich:
+    rel: continues
+    to: people/polities/german-reich
+    alt: alt:germany-after-1945/reich-continues
+    source:
+      - ref: src:bverfg-1973-grundlagenvertrag
+        loc: "Rn. 79 (BVerfGE 36, 1 [16])"
+        quote: >-
+          Die Bundesrepublik Deutschland ist also nicht "Rechtsnachfolger" des Deutschen Reiches,
+          sondern als Staat identisch mit dem Staat "Deutsches Reich", - in bezug auf seine
+          räumliche Ausdehnung allerdings "teilidentisch", so daß insoweit die Identität keine
+          Ausschließlichkeit beansprucht.
+      - ref: src:bverfg-1973-grundlagenvertrag
+        loc: "Rn. 79 (BVerfGE 36, 1 [16])"
+        quote: >-
+          Mit der Errichtung der Bundesrepublik Deutschland wurde nicht ein neuer westdeutscher
+          Staat gegründet, sondern ein Teil Deutschlands neu organisiert
+      - ref: src:bverfg-1973-grundlagenvertrag
+        loc: "Rn. 78 (BVerfGE 36, 1 [15–16])"
+        quote: >-
+          daß das Deutsche Reich den Zusammenbruch 1945 überdauert hat und weder mit der
+          Kapitulation noch durch Ausübung fremder Staatsgewalt in Deutschland durch die
+          alliierten Okkupationsmächte noch später untergegangen ist
+      - ref: src:bverfg-1973-grundlagenvertrag
+        loc: "Rn. 78 (BVerfGE 36, 1 [16])"
+        quote: >-
+          Das Deutsche Reich existiert fort … besitzt nach wie vor Rechtsfähigkeit, ist allerdings
+          als Gesamtstaat mangels Organisation, insbesondere mangels institutionalisierter Organe
+          selbst nicht handlungsfähig.
+      - ref: src:bverfg-1987-teso
+        loc: "Rn. 52 (BVerfGE 77, 137 [155])"
+        quote: >-
+          Die Bundesrepublik Deutschland betrachtete sich vielmehr von Beginn an als identisch mit
+          dem Völkerrechtssubjekt Deutsches Reich.
+      - ref: src:bundestag-wd-2007-fortbestand
+        loc: "p. 3"
+        quote: Am Fortbestand des Deutschen Reichs in der Gestalt der Bundesrepublik Deutschland änderte sich durch den Beitritt nichts.
+      - ref: src:bundestag-wd-2007-fortbestand
+        loc: "p. 3"
+        quote: Das BVerfG hat diese Rechtsprechung seit der Wiedervereinigung nicht geändert.
+    against:
+      - ref: src:og-ddr-1951-identitaet
+        loc: "Neue Justiz 1952, p. 223"
+        quote: der Staat selbst also vernichtet worden. Er hat mit der Kapitulation aufgehört zu bestehen.
+    note: >-
+      The holding of the Federal Republic's Federal Constitutional Court, Second Senate, in its
+      judgment of 31 July 1973 on the treaty with the German Democratic Republic (BVerfGE 36, 1),
+      given as what the Basic Law itself says and as the court's settled case law. In English:
+      the Federal Republic of Germany is thus not the "legal successor" of the German Reich but,
+      as a state, identical with the state "German Reich", though in its territorial extent only
+      "partly identical", so that in that respect the identity claims no exclusiveness; with the
+      setting up of the Federal Republic no new West German state was founded, but a part of
+      Germany was organized anew; the German Reich outlasted the collapse of 1945 and perished
+      neither with the capitulation nor through the exercise of foreign state authority in
+      Germany by the Allied occupying powers nor later; the German Reich continues to exist and
+      still has legal capacity, but as a whole state, lacking organization and above all
+      institutional organs, cannot itself act. The court said in 1987 that the Federal Republic
+      had regarded itself from the start as identical with the German Reich as a subject of
+      international law, and the Bundestag's research service in 2007 that the accession of 1990
+      changed nothing in the continued existence of the German Reich in the shape of the Federal
+      Republic and that the court had not changed its holding since. So the court denies that the
+      Reich ever ended, and this relation is where that is written: the Reich's record keeps its
+      end, which dates the loss of its organization and not of the state. It is one side's
+      holding, binding on the Federal Republic's own organs: the same judgment says the two
+      German states disagreed on the national question (Rn. 117), and the Democratic Republic's
+      Supreme Court had held in 1951 that the old state had ceased to exist with the capitulation,
+      which is cited against it here. So it stands in the Federal Republic's perspective and not
+      in the default picture.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in bverfge-36-1-grundlagenvertrag.txt (sha256 c2ea395ae474a187), bverfge-77-137-teso.txt (sha256 d7d78c84ac201fd9), bundestag-wd-3-292-07.txt (sha256 89a36f8cbae9bb49) and neue-justiz-1952-s223.txt (sha256 8f8daec7a47feceb), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }

@@ -1,0 +1,165 @@
+id: people/polities/golden-horde
+kind: polity
+summary: >-
+  The Mongol khanate of the steppes north of the Black Sea and the Caspian, ruled by the line of
+  Jochi, eldest son of Chinggis Khan: one of the four states the Mongol Empire is held to have
+  divided into. Its lands were conquered in 1236 to 1240 by Batu, who counts as its first khan, so
+  it is some twenty years older than the division it came out of. It dissolved into smaller states
+  in the fifteenth century, and what was left of it was dispersed in 1502. The name is a later one.
+  The borders dataset draws it only from 1294, replaces it with a Blue Horde and a White Horde from
+  1363 to 1384, and gives its name again to rows in Mongolia from 1547 to 1695, which are not this
+  state.
+author: machine:claude-code
+same_as: { wikidata: Q79965 }
+claims:
+  name:
+    prop: name
+    value: { en: Golden Horde }
+    source:
+      - ref: src:jackson-2001-golden-horde
+        loc: para. 1
+        quote: GOLDEN HORDE, name given to the Mongol Khanate ruled by the descendants of Joči
+      - ref: src:kim-2009-unity-of-the-mongol-empire
+        loc: p. 31
+        quote: The first russian source using this word as a political term was the History of the Tsardom of Kazan written around 1564.
+    note: >-
+      A name given afterwards. Kim calls it anachronistic: at first it meant the golden pavilion of
+      a Mongol ruler, and the first Russian source to use it of a state dates from about 1564. He
+      writes of the ulus of Jochi, or of Batu.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in iranica-golden-horde.txt (sha256 9e03685dfc725989) and kim-2009-unity-mongol-empire.txt (sha256 87475f58552ad797), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  start:
+    prop: start
+    value: { lo: 1236 CE, hi: 1240 CE }
+    source:
+      ref: src:jackson-2001-golden-horde
+      loc: para. 1
+      quote: Its core was the steppelands north of the Black Sea and the Caspian conquered in 1236-40 by an army under Joči’s son Batu (Bātu), who ranks as its first khan
+    method: expert-estimate
+    basis: reconstruction
+    note: >-
+      No source read names a year of foundation. The khanate is counted from Batu, and its start is
+      put in the years in which he conquered its core. Counted from the share of the empire that
+      went to the house of his father Jochi, who died in 1226 or 1227, it would begin earlier;
+      Wikidata's item gives 1243. The borders dataset has no row of this name before 1294: it draws
+      the empire whole until 1293.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in iranica-golden-horde.txt (sha256 9e03685dfc725989), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  end-1502:
+    prop: end
+    value: 1502 CE
+    source:
+      - ref: src:howorth-1880-history-of-the-mongols-2-1
+        loc: p. 351
+        quote: In 1502, when the Golden Horde was finally dispersed
+      - ref: src:howorth-1880-history-of-the-mongols-2-1
+        loc: p. 346
+        quote: In 1502 Sheikh Ahmed's Tartars, when suffering from famine, were attacked by Mengli Girai and scattered or taken prisoners.
+    method: historical-account
+    rank: preferred
+    note: >-
+      The year the last khan's people were scattered by the khan of the Crimea, after which Howorth
+      writes that so ended the Golden Horde. Preferred as the one year a source gives, and the
+      borders dataset agrees with it: its rows of this name on the steppe end in 1501. By then the
+      Horde was one of several states on its former land (end-dissolved).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in howorth-1880-history-of-the-mongols-2-1.txt (sha256 5e6c44a8ea12443c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  end-dissolved:
+    prop: end
+    value: { lo: 1401 CE, hi: 1500 CE }
+    source:
+      ref: src:jackson-2001-golden-horde
+      loc: para. 3
+      quote: in the 15th century the Golden Horde dissolved into a number of smaller states.
+    method: expert-estimate
+    basis: reconstruction
+    note: >-
+      The modern specialist gives no year, only the century in which the khanate came apart; the
+      range is that century. It is the better source and the vaguer date: a state that dissolves
+      into several has no last day unless one of the several is taken for it, as Howorth takes the
+      horde of Sheikh Ahmed.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in iranica-golden-horde.txt (sha256 9e03685dfc725989), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  territory:
+    prop: territory
+    value: { from: src:cliopatria-0.2.1, names: [Golden Horde] }
+    source: { ref: src:cliopatria-0.2.1, loc: rows named Golden Horde }
+    method: compilation
+    basis: reconstruction
+    note: >-
+      The dataset's rows of this name on the western steppe run from 1294 to 1362 and from 1385 to
+      1501. It has none before 1294, when it draws the empire whole, so this state's land in its
+      first fifty years and more lies inside rows of another name. From 1363 to 1384 it draws a Blue
+      Horde in the west and a White Horde in the east where the Golden Horde had been; those rows
+      are not claimed, so in those years the state has no land of its own on the map. Fifteen more
+      rows of this name, from 1547 to 1695, lie in and about Mongolia, between about 80 and 126
+      degrees east: they cannot be this state, which lay on the Volga, and look like rows of another
+      Mongol realm misnamed. They fall after this record's end, so the claim does not take them; the
+      name the dataset gives them wants correcting. Its rows named (Allegiance of Golden Horde to
+      Yuan Dynasty), from 1294 to 1362, are the outline of this state and the Yuan together, and are
+      not claimed.
+relations:
+  from-the-empire:
+    rel: arose-from
+    to: people/polities/mongol-empire
+    source:
+      - ref: src:kim-2009-unity-of-the-mongol-empire
+        loc: p. 30
+        quote: "it was divided into (1) the domain of Qa’an in the east, usually known as the ‘Yuan Dynasty,’ (2) the ‘Chaghatai Khanate’ in Central Asia, (3) the ‘Ilkhanate’ in Iran and Iraq, and (4) the ‘Golden Horde’ or the ‘Qipchaq Khanate.’"
+      - ref: src:yule-1903-book-of-ser-marco-polo
+        loc: "Introductory Notices, II, § 10"
+        quote: "Barka, son of Juji, the first ruling prince of the House of Chinghiz to turn Mahomedan, reigned on the steppes of the Volga, where a standing camp, which eventually became a great city under the name of Sarai, had been established by his brother and predecessor Batu."
+    note: >-
+      It came out of the empire as a realm that was there already: a part of the empire under Batu
+      and then Berke (in-the-empire), and in practice a state of its own from about 1260, when the
+      common view has the empire divide. Yule lists it among the great monarchies the empire was
+      splitting into that year. The relation itself says only that it began no earlier than the
+      empire did.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in kim-2009-unity-mongol-empire.txt (sha256 87475f58552ad797) and yule-cordier-marco-polo-vol1.txt (sha256 5dfc170138c62134), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  in-the-empire:
+    rel: part-of
+    to: people/polities/mongol-empire
+    valid: { lo: { ref: people/polities/golden-horde, edge: start }, hi: { ref: people/polities/mongol-empire, edge: end } }
+    source:
+      - ref: src:jackson-1991-chaghatayid-dynasty
+        loc: para. 3
+        quote: "In 654/1256 the Great Khan Möngke sent to Persia under the overall command of his brother Hülegü (Hūlāgū) a fresh army including contingents supplied by both the Jochids and the Chaghatayids"
+      - ref: src:yule-1903-book-of-ser-marco-polo
+        loc: "Introductory Notices, II, § 10"
+        quote: "practically it was splitting up into several great monarchies under the descendants of the four sons of Chinghiz, Juji, Chaghatai, Okkodai, and Tuli"
+    note: >-
+      A part of the empire from its own beginning until the empire ended, whenever that was. The
+      span names the two records' start and end and no date, so it follows whichever end of the
+      empire is taken: the division of 1259 to 1264 in the default picture, the dataset's 1293, or
+      the fall of the Yuan in the perspective that the empire went on. Under the Great Khan Möngke
+      the house of Jochi still sent its contingents with the Great Khan's army (1256); by 1260, in
+      Yule's account, the empire was splitting into monarchies of which this was one.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in iranica-chaghatayid-dynasty.txt (sha256 1842665c6eeb2376) and yule-cordier-marco-polo-vol1.txt (sha256 5dfc170138c62134), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  in-the-empire-in-1305:
+    rel: part-of
+    to: people/polities/mongol-empire
+    alt: alt:mongol-unity/one-empire
+    valid: 1305 CE
+    source:
+      - ref: src:kim-2009-unity-of-the-mongol-empire
+        loc: p. 34
+        quote: "they thought that their uluses were parts of a larger political unit called ‘Yeke Mongghol Ulus,’ which embraced all the great and small uluses"
+      - ref: src:kim-2009-unity-of-the-mongol-empire
+        loc: "p. 35, the letter of the Ilkhan Öljeitü to Philip the Fair, 1305"
+        quote: "beginning with Temür Qaghan, Toghtogha, Chabar and Dugha, we, descendants of Chinggis Qaghan, from forty or fifty years ago up to this time recriminate against each other, but now by the protection of heaven all the elder and younger brothers made a mutual peace"
+      - ref: src:marco-polo-book-yule-1903
+        loc: "Book I, ch. 51"
+        quote: "this Cublay, who is the Lord of all the Tartars in the world, those of the Levant and of the Ponent included; for these are all his liegemen and subjects"
+    note: >-
+      The evidence, in the perspective that the empire went on until 1368, that the Horde was still
+      a part of it long after 1260: this relation says only that it was so in 1305, the year of the
+      letter in which the Ilkhan names Toghtogha, who is the Horde's khan Toqta, among the
+      descendants of Chinggis at peace with Temür Qaghan at their head. In that perspective the
+      relation above already runs to the empire's end, since its span follows it. Polo's lords of
+      the Ponent are the khans of Kipchak, the Horde, as Yule notes. Kim also records the Horde's
+      khans telling Qubilai in the 1280s that they were all in submission, and its wars with the
+      Ilkhans throughout.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in kim-2009-unity-mongol-empire.txt (sha256 87475f58552ad797) and yule-cordier-marco-polo-vol1.txt (sha256 5dfc170138c62134), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }

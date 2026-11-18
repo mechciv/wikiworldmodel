@@ -1,8 +1,13 @@
 id: people/polities/mongol-empire
 kind: polity
 summary: >-
-  The Mongol Empire. Written for the rulers that hold office in it: its dates are the span of the borders dataset's rows, and its
-  land is drawn from those rows as they are, not as a territory of this record.
+  The empire that Chinggis Khan founded in 1206, written first for the rulers that hold office in
+  it. It divided without a day on which it ended. The common view has it dissolve into four khanates
+  in the civil war of 1259 to 1264; the Great Khans in China, and some historians, hold that it went
+  on as one empire until the Yuan fell in 1368 (alt:mongol-unity/one-empire); the borders dataset,
+  whose rows gave this record its first dates, draws one empire until 1293, the year before Qubilai
+  died. Those rows are claimed as its territory for as long as the record lasts; the dataset has no
+  rows for the four successors before 1294.
 author: machine:claude-code
 same_as: { wikidata: Q12557 }
 claims:
@@ -20,3 +25,71 @@ claims:
     value: 1293 CE
     source: { ref: src:cliopatria-0.2.1, loc: 'rows named "Mongol Empire": the latest ToYear' }
     method: compilation
+  end-division:
+    prop: end
+    value: { lo: August 1259 CE, hi: 1264 CE }
+    source:
+      - ref: src:kim-2009-unity-of-the-mongol-empire
+        loc: p. 30
+        quote: "Traditionally, the Mongol empire as a unified entity has been regarded as dissolved into four regional dynasties, or ‘khanates,’ around 1260, right after Möngke died."
+      - ref: src:amitai-2004-il-khanids-dynastic-history
+        loc: 'Dynastic history, the paragraph beginning "This period of relatively loose control"'
+        quote: in the confusion and civil war that followed Möngke’s death in August 1259
+      - ref: src:amitai-2004-il-khanids-dynastic-history
+        loc: 'Dynastic history, the paragraph beginning "From about this time"'
+        quote: "One symbol of this discord was the civil war in Mongolia and northern China between Hülegü’s two brothers, Qubilai and Ariq Böke. The former achieved victory and the title of Qa’an in 1264 and recognized the de facto independence of Hülegü in the west."
+      - ref: src:jackson-1991-chaghatayid-dynasty
+        loc: para. 6
+        quote: so that for the first time since 658/1260 the Mongol world was united
+    method: expert-estimate
+    basis: reconstruction
+    rank: preferred
+    note: >-
+      The common view, which Kim sets out before arguing against it: the united empire dissolved
+      into four khanates around 1260. No source gives a day, and none could. The last Great Khan
+      whom all obeyed, Möngke, died in August 1259; two of his brothers disputed the succession, and
+      Qubilai was proclaimed in 1260; Hülegü and the khan of the Golden Horde went to war in the
+      winter of 1261 to 1262, which Amitai calls a symbol of the dissolution; and Qubilai won the
+      civil war in 1264, by when the realms of the west ruled themselves. The range runs from the
+      first of these to the last: the empire ended at some time within it, and a record of the civil
+      war, if one is written, would be the better value. Preferred because the specialists read here
+      write of the breakup or dissolution of the united empire in these years, Jackson has the peace
+      of 1304 unite the Mongol world for the first time since 1260, and Kim, who disagrees, calls
+      this the widely accepted view. The claim that was here before, 1293, is the last year of the
+      dataset's rows, which draw the empire whole until the year before Qubilai's death; no text
+      read here ends the empire then.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in kim-2009-unity-mongol-empire.txt (sha256 87475f58552ad797), iranica-il-khanids-dynastic-history.txt (sha256 1b2505e8c878eccd) and iranica-chaghatayid-dynasty.txt (sha256 1842665c6eeb2376), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  end-with-the-yuan:
+    prop: end
+    value: { ref: people/polities/yuan-dynasty, edge: end }
+    alt: alt:mongol-unity/one-empire
+    source:
+      ref: src:kim-2009-unity-of-the-mongol-empire
+      loc: p. 33
+      quote: This practice was basically unchallenged till 1364, when the empire ended with the collapse of Mongol power in China.
+    method: expert-estimate
+    basis: reconstruction
+    note: >-
+      In the perspective that the empire went on under the Great Khans in China, it ends when the
+      Yuan does: the claim names that record's end and copies no date. The practice Kim means is
+      that the whole Mongol world had one qa'an, its other rulers being khans. He prints the year as
+      1364. The collapse he describes is the fall of the Yuan capital, which the Yuan's own history
+      puts in 1368, so the figure is taken for a slip and is not used.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in kim-2009-unity-mongol-empire.txt (sha256 87475f58552ad797), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  territory:
+    prop: territory
+    value: { from: src:cliopatria-0.2.1, names: [Mongol Empire] }
+    source: { ref: src:cliopatria-0.2.1, loc: rows named Mongol Empire }
+    method: compilation
+    basis: reconstruction
+    note: >-
+      The dataset's twelve rows of this name run from 1206 to 1293: it draws the empire whole until
+      the year before Qubilai's death, some thirty years after the division of the default picture,
+      and has no rows for the four successor states before 1294. The rows are this record's while it
+      lasts; after its end, by whichever reckoning, they are the dataset's own reading of those
+      years, in which it differs from this record. From 1294 the dataset joins each western khanate
+      to the Yuan in rows named (Allegiance of Golden Horde to Yuan Dynasty) and the like, each the
+      outline of the two together, until 1362, 1343 and 1374: its nearest thing to the one empire of
+      the perspective that it went on. They are not claimed here.

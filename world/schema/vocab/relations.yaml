@@ -10,6 +10,18 @@
 #             lies in the relation's lag if `lag: true` (default lag: zero to unbounded),
 #             else b is not earlier than a. `self` is the subject, `other` the target,
 #             each at its start or end; a moment's start and end are its date.
+#   span      the relation holds over a span of time, which `valid` may give: from a time to a
+#             time, either left open, or one time at which it held. Then that span lies within
+#             the lifetimes of both the subject and the target, and `time` is not applied: a
+#             kingdom that was part of an empire for fifty of its hundred years says which fifty.
+#             Without `valid` the relation holds for the subject's whole lifetime, as `time` has it.
+#             Only a relation that holds over a span may carry `valid`.
+#   alike     the subject and the target are of one kind, at the top of the tree of kinds: a state
+#             arises from a state, a script from a script.
+#
+# Several relations of one subject and one type all hold, as the two parents of a union do. Where
+# they are rival readings, one is ranked preferred, with a note saying why: then it holds, and the
+# others hold only when a reader picks one in its place, as with competing claims.
 relations:
   before:
     family: temporal
@@ -29,14 +41,20 @@ relations:
   part-of:
     family: structural
     inverse: has-part
-    description: A part lies within its whole, in time as well as space.
+    span: true
+    description: >-
+      A part lies within its whole, in time as well as space. A part that was there before its
+      whole, or outlasted it, such as a kingdom that joined an empire, says when it was part of it
+      (`valid`).
     time: [{ from: other.start, to: self.start }, { from: self.end, to: other.end }]
   member-of:
     family: structural
     inverse: has-member
+    span: true
     description: >-
       A member of a group, such as an occurrence of its taxon. A member lies within its
-      group's lifetime, so a taxon's oldest fossil bounds its origin.
+      group's lifetime, so a taxon's oldest fossil bounds its origin; one that joined and left
+      says when it was a member (`valid`).
     time: [{ from: other.start, to: self.start }, { from: self.end, to: other.end }]
   descends-from:
     family: lineage
@@ -45,6 +63,48 @@ relations:
     to: [taxon]
     description: A group nested in the target in the tree of life. It arose no earlier than the target.
     time: [{ from: other.start, to: self.start }]
+  # Lineage among the things people made: states, scripts, institutions. It is a graph, not a tree. Each
+  # relation is stored in the later record and names the earlier, but merged-into, which the record that
+  # ended holds. A split is several records that arose from one; a union, one that arose from several.
+  arose-from:
+    family: lineage
+    alike: true
+    inverse: gave-rise-to
+    description: >-
+      The subject came out of the target: a state that seceded from another, or formed when it broke up or when
+      it united with others; a script adapted from another. The target may have ended in it or gone on beside
+      it, and its own end says which. The subject began no earlier than the target began.
+    time: [{ from: other.start, to: self.start }]
+  succeeds:
+    family: lineage
+    alike: true
+    inverse: succeeded-by
+    description: >-
+      The subject took the target's place when it ended: a new state where an old one stood, a dynasty after the
+      one it overthrew. It began no earlier than the target began and ended no earlier than it ended. Where the
+      one began on the day the other ended, the subject's start says so, by naming the target's end. A state that
+      was there already and took the other in is the target of merged-into, not the subject of this.
+    time: [{ from: other.start, to: self.start }, { from: other.end, to: self.end }]
+  merged-into:
+    family: lineage
+    alike: true
+    inverse: absorbed
+    description: >-
+      The subject ended by becoming part of the target, which was there already: a state that acceded to another
+      or was annexed by it, a village taken into a city. The target was there by the time the subject ended, and
+      outlasted it. Where a union made something new, the new thing arose from each instead.
+    time: [{ from: other.start, to: self.end }, { from: self.end, to: other.end }]
+  continues:
+    family: lineage
+    alike: true
+    inverse: continued-by
+    description: >-
+      The subject is the target carried on: the same state, people or institution, under another record, as a law,
+      a court, a treaty or the subject itself has it. It is a claim of identity, and often a contested one: one that
+      others reject belongs to an alternative, the perspective of those who make it; one that was given up is ranked
+      deprecated, with a note saying when. The subject outlasted the target, since it carried it on; it need not be
+      the younger of the two, as a republic older than the union it was part of may carry that union on.
+    time: [{ from: other.end, to: self.end }]
   caused-by:
     family: causal
     inverse: caused
@@ -76,10 +136,24 @@ relations:
     inverse: office-held-by
     from: [person]
     to: [polity]
+    span: true
     description: >-
       A person's rule or office in a polity, such as a pharaoh's or an emperor's. The subject is the
       phase of the life in which it was held, usually `subject: "@reign"`, and the target the polity
       or the phase of it whose office it was; the note names the office. That term lies within the
       polity's lifetime, so a reign can bound the dates of a state. It is the term and not the life
       that does: a person is not a polity, and may be born before the state began or outlive it.
+      One who held two offices at once, such as the crowns of two kingdoms, cannot give each a phase,
+      since phases follow one another: each office is then a relation of the person, with the term as
+      its `valid`.
     time: [{ from: other.start, to: self.start }, { from: self.end, to: other.end }]
+  participant:
+    family: participation
+    inverse: took-part-in
+    from: [event]
+    span: true
+    description: >-
+      Who took part in an event: a state that fought in a war, a person at a battle. It is stored in the event's
+      record, which names its participants; the note says on which side or in what role. One that joined late
+      or left early has the span it took part for (`valid`); otherwise its lifetime and the event's overlap.
+    time: [{ from: self.start, to: other.end }, { from: other.start, to: self.end }]

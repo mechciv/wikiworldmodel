@@ -1,0 +1,25 @@
+id: src:japan-rescript-declaring-war-1941
+type: document
+kind: act
+citation: >-
+  米國及英國ニ對スル宣戰ノ詔書 (Imperial rescript declaring war on the United States and
+  Britain), 8 December 1941. 官報 (Official Gazette), extra, 8 December 1941.
+published: 1941
+title: 米國及英國ニ對スル宣戰ノ詔書
+container: 官報 号外, 8 December 1941
+url: https://ja.wikisource.org/wiki/%E7%B1%B3%E5%9C%8B%E5%8F%8A%E8%8B%B1%E5%9C%8B%E3%83%8B%E5%B0%8D%E3%82%B9%E3%83%AB%E5%AE%A3%E6%88%B0%E3%83%8E%E8%A9%94%E6%9B%B8
+via: >-
+  Japanese Wikisource's transcription, which gives as its copy-text the extra of the Official
+  Gazette of 8 December 1941 in the National Diet Library's digital collection, and prints the
+  text three times, in the original characters, in plain old-form characters and in new-form
+  ones.
+reliability: >-
+  The rescript itself, in Japanese: evidence that Japan declared war on the United States and
+  Britain and of the day it did, which the text gives by the era (the eighth day of the twelfth
+  month of Showa 16) and the transcription's heading by the common era.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from ja.wikisource.org on 2026-11-17; the heading and the rescript's operative
+    sentence and date read in Japanese, not the whole text. The quotes were found in the kept
+    text by quote-check.

@@ -42,6 +42,8 @@ interface ClaimBase {
   subject: string;
   valid?: TimeInput;
   sources: Citation[];
+  /** works that deny it: a denial gives no other value, so it cannot be a competing claim */
+  against: Citation[];
   unsourced?: string;
   confidence?: number | string;
   basis: Basis;
@@ -75,6 +77,8 @@ export interface Phase {
   label?: string;
   /** an explicit gap: a stretch of the lifetime whose state is unknown */
   gap?: boolean;
+  /** external ids of the phase, where another database has an item for the state and none for the whole */
+  same_as?: Record<string, string | number>;
 }
 
 export interface Entity {
@@ -323,6 +327,10 @@ export interface RelationType {
   from?: string[];
   to?: string[];
   time?: TimeConstraintSpec[];
+  /** it holds over a span of time: with `valid`, that span lies within both lifetimes, in place of `time` */
+  span?: boolean;
+  /** its subject and its target are of one kind, at the top of the tree of kinds */
+  alike?: boolean;
 }
 
 export interface Vocab {
@@ -483,6 +491,7 @@ function normalizeEntity(file: string, d: Record<string, unknown>, issues: LoadI
       subject,
       valid: c.valid as TimeInput | undefined,
       sources: citations(c.source).map((s, i) => ({ ...s, ref: resolve(s?.ref, id, issues, file, `${where}.source${Array.isArray(c.source) ? `[${i}]` : ''}.ref`) })),
+      against: citations(c.against).map((s, i) => ({ ...s, ref: resolve(s?.ref, id, issues, file, `${where}.against${Array.isArray(c.against) ? `[${i}]` : ''}.ref`) })),
       unsourced: c.unsourced as string | undefined,
       confidence: c.confidence as number | string | undefined,
       basis: (c.basis as Basis) ?? 'evidence',
@@ -513,7 +522,7 @@ function normalizeEntity(file: string, d: Record<string, unknown>, issues: LoadI
     kind: String(d.kind),
     summary: d.summary as string | undefined,
     same_as: d.same_as as Record<string, string | number> | undefined,
-    phases: ((d.phases ?? []) as Phase[]).map((p) => ({ id: String(p?.id), label: p?.label, gap: p?.gap })),
+    phases: ((d.phases ?? []) as Phase[]).map((p) => ({ id: String(p?.id), label: p?.label, gap: p?.gap, ...(p?.same_as ? { same_as: p.same_as } : {}) })),
     claims,
     relations,
     file,

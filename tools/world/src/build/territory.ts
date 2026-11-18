@@ -6,12 +6,12 @@ import { existsSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { EARTH_RADIUS } from '../../../../core/city.ts';
-import { formatTime, parseTime } from '../../../../core/time.ts';
+import { formatTime } from '../../../../core/time.ts';
 import { TERRITORY_SCALE, type Territory, type TerritoryClaim, type TerritoryFile, type TerritoryRow } from '../../../../core/territory.ts';
 import { datasetFile, type Dataset } from '../manifest.ts';
 import { CACHE } from '../paths.ts';
 import { sha256, stableStringify } from '../util.ts';
-import { labeller, subjectTime, type Solved } from './records.ts';
+import { labeller, subjectTime, validSpan, type Solved } from './records.ts';
 
 /** What a territory claim's value names: a dataset, optionally its file, and its rows by name. */
 export interface GeometryValue {
@@ -135,9 +135,11 @@ export async function territory(s: Solved, log: (line: string) => void = console
           bySubject.set(c.subject, t);
         }
         const [born, gone] = lifetime(t);
-        const valid = c.valid !== undefined ? (parseTime(c.valid as never) as { lo?: number; hi?: number; t?: number }) : undefined;
-        const from = valid?.lo ?? valid?.t ?? born;
-        const to = valid?.hi ?? (valid?.t !== undefined ? valid.t + 1 : gone);
+        // When the outline holds: its valid time, an open end the polity's own.
+        const valid = validSpan(s, c.valid, e.id);
+        const from = valid?.[0] ?? born;
+        // An instant holds for the year from it.
+        const to = valid && valid[0] !== null && valid[1] === valid[0] ? valid[0] + 1 : (valid?.[1] ?? gone);
         const rs = rings(c.value as Polygon);
         const rows: TerritoryRow[] = rs.length ? [{ name: labelOf(c.subject), from, to, area: Math.round(areaKm2(rs)), at: labelPoint(rs), rings: rs }] : [];
         t.claims.push({ claim: c.ref, value: 'an outline written in the claim', rank: c.rank, alt: c.alt, basis: c.basis, source: c.sources[0]?.ref ?? '', rows });

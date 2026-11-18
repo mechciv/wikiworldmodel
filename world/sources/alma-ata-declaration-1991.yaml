@@ -1,0 +1,24 @@
+id: src:alma-ata-declaration-1991
+type: document
+kind: act
+citation: >-
+  Alma-Ata Declaration (Алма-Атинская декларация), signed by the heads of Azerbaijan, Armenia,
+  Belarus, Kazakhstan, Kyrgyzstan, the Russian Federation (RSFSR), Moldova, Tajikistan,
+  Turkmenistan, Uzbekistan and Ukraine, Alma-Ata, 21 December 1991.
+published: 1991
+title: Алма-Атинская декларация
+url: https://ru.wikisource.org/wiki/%D0%90%D0%BB%D0%BC%D0%B0-%D0%90%D1%82%D0%B8%D0%BD%D1%81%D0%BA%D0%B0%D1%8F_%D0%B4%D0%B5%D0%BA%D0%BB%D0%B0%D1%80%D0%B0%D1%86%D0%B8%D1%8F
+via: >-
+  Russian Wikisource's transcription of the Russian text, which gives as its source
+  cis.minsk.by (page 178); Wikisource marks the page as not yet reviewed.
+reliability: >-
+  The declaration of eleven of the republics: evidence of what they declared on 21 December 1991,
+  in their own words, among it that the Union ceases to exist with the forming of the
+  Commonwealth. It is not an act of the Union's own organs. Blum (src:blum-1992-russia-un-seat,
+  p. 355) quotes the same sentence in English, from the New York Times of 22 December 1991, and
+  the United Nations circulated an English text of the whole (src:un-a-47-60-alma-ata-1991).
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from ru.wikisource.org on 2026-11-17 and read in full in Russian, with its signatures
+    and date line; the quotes were found in the kept text by quote-check.

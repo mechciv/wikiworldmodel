@@ -1,0 +1,24 @@
+id: src:protokoll-versailles-1870
+type: document
+kind: act
+citation: >-
+  Protokoll, betreffend die Vereinbarung zwischen dem Norddeutschen Bunde, Baden und Hessen über
+  Gründung des Deutschen Bundes und Annahme der Bundesverfassung. Vom 15. November 1870.
+  Bundesgesetzblatt des Norddeutschen Bundes 1870, Nr. 51, pp. 650–653.
+published: 1870
+title: >-
+  Protokoll, betreffend die Vereinbarung zwischen dem Norddeutschen Bunde, Baden und Hessen über
+  Gründung des Deutschen Bundes und Annahme der Bundesverfassung
+url: https://de.wikisource.org/wiki/Protokoll,_betreffend_die_Vereinbarung_zwischen_dem_Norddeutschen_Bunde,_Baden_und_Hessen_%C3%BCber_Gr%C3%BCndung_des_Deutschen_Bundes_und_Annahme_der_Bundesverfassung
+via: >-
+  German Wikisource's transcription from a scan of the gazette, marked there as proofread once
+  (korrigiert), with the gazette's page numbers.
+reliability: >-
+  The record of the agreement made at Versailles on 15 November 1870: evidence of the day the
+  parties agreed the constitution should take effect. It is an undertaking, to be ratified in
+  December, and not evidence that it was kept; Bavaria and Württemberg were not parties to it.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from de.wikisource.org on 2026-11-17 and read in full in German, with its heading and
+    signature. The quotes were found in the kept text by quote-check.

@@ -1,0 +1,25 @@
+id: src:unsc-resolution-777-1992
+type: document
+kind: act
+citation: >-
+  United Nations Security Council. Resolution 777 (1992) of 19 September 1992, adopted at the
+  3116th meeting by 12 votes to none, with 3 abstentions. S/RES/777 (1992).
+published: 1992
+title: Resolution 777 (1992)
+url: https://documents.un.org/api/symbol/access?s=S/RES/777(1992)&l=en&t=pdf
+via: >-
+  The United Nations' Official Document System, which serves the page of the Council's printed
+  resolutions and decisions of 1992 on which the resolution stands (p. 34) as a scan with a
+  machine-read text.
+reliability: >-
+  The Council's recommendation to the General Assembly on the seat of Yugoslavia. It is evidence
+  of what the Council considered on that day, in its own words: that the old federation had
+  ceased to exist, and that the new one could not continue its membership automatically. It
+  names no day on which the old state ended, and it is not a finding of a court.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from documents.un.org on 2026-11-17 (the link resolves to
+    doc/resolution/gen/nr0/011/36/pdf/nr001136.pdf). The whole resolution was read, in the kept
+    text and on an image of the page; the machine reading sets the page's two columns into one
+    another, so each quote is a run of the kept text that is whole, found by quote-check.

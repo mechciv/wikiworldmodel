@@ -50,7 +50,7 @@ What every other domain leans on.
 | Boundary uncertainties and GSSPs as records | ○ | ICS chart; GSSP table at stratigraphy.org | ? | R |
 | Regional stages (North American land-mammal ages, Chinese stages) | ○ | literature; PBDB interval tables | ✓ PBDB | R |
 | Archaeological and historical periods | ○ | PeriodO | ✓ CC0 | D |
-| Calendars and eras: Olympiads, regnal years, AUC, Hijri, Chinese reign eras, Maya Long Count | ◐ Julian and Gregorian | standard conversion algorithms; regnal lists as records | — | code + R |
+| Calendars and eras: Olympiads, regnal years, AUC, Hijri, Chinese reign eras, Maya Long Count | ◐ Julian and Gregorian; day numbers; the Maya Long Count, its correlation a record with competing dates; reign years as a reign's start and a lag | standard conversion algorithms; regnal lists and zero days as records | — | code + R |
 | Radiocarbon calibration curves | ○ | IntCal20, SHCal20, Marine20 | ? | D |
 | Orbital solutions (insolation, eccentricity, obliquity) | ○ | Laskar et al. 2004, 2011 | ? | D/F |
 
@@ -71,8 +71,10 @@ What every other domain leans on.
 
 | Need | Here | Sources | License | As |
 |---|---|---|---|---|
-| Wikidata ids on every record that has one | ◐ | Wikidata | ✓ CC0 | R |
-| People of the past as entities, with life dates | ◐ 42 rulers | Wikidata; standard biographies | ✓ CC0 | R |
+| Wikidata ids on every record that has one | ◐ on records, and on a phase where Wikidata has an item for the state and none for the whole | Wikidata | ✓ CC0 | R |
+| People of the past as entities, with life dates | ◐ 43 rulers | Wikidata; standard biographies | ✓ CC0 | R |
+| Lineage: what arose from, succeeded, merged into and continues what | ◐ the hard cases of the [twelfth slice](slices/TWELFTH-SLICE.md): unions, break-ups, an accession, continuities claimed and refused | the acts themselves; standard histories; Wikidata's replaces and follows, as leads | — | R |
+| Which rows of a dataset are which record | ◐ a polity's territory names its rows; the borders dataset's rows carry Wikidata ids that nothing reads yet | Cliopatria's `Wikidata`, `Components` and `MemberOf` columns | ✓ | D + overlays |
 | A contributor registry (accounts, machine tools) | ○ | — | — | R |
 
 ---
@@ -197,11 +199,11 @@ region's sources.
 
 | Layer | Here | Sources (worldwide) | License | As |
 |---|---|---|---|---|
-| Polities and their borders, year by year | ◐ all of Cliopatria's as a layer of rows, and Rome as records | Cliopatria; OpenHistoricalMap | ✓ | D |
+| Polities and their borders, year by year | ◐ all of Cliopatria's as a layer of rows; 35 states as records, 22 of them from the cases of the [twelfth slice](slices/TWELFTH-SLICE.md) and four of those a name only; 16 draw rows of the dataset as their territory | Cliopatria; OpenHistoricalMap | ✓ | D |
 | Polities, other compilations | ○ | Seshat (CC BY-NC-SA); CShapes 2.0 (1886–2019); GeaCron and Euratlas (closed) | ✗ / ? | cite only |
-| Rulers, offices and reigns | ◐ 42 rulers, 27 of them Roman | Wikidata; regnal lists in standard references | ✓ | R |
+| Rulers, offices and reigns | ◐ 43 rulers, 27 of them Roman; one of them with three offices at once | Wikidata; regnal lists in standard references | ✓ | R |
 | Cities: founding, size, population through time | ◐ Rome, Constantinople, 18 first cities with area and population as records; Chandler's and Modelski's lists, as Reba, Reitsma & Seto placed them, as datasets | Reba, Reitsma & Seto 2016 (6,000 years of urbanization); Chandler, Modelski | ✓ CC BY | D + R |
-| Events: battles, treaties, foundations, disasters | ◐ Rome | Wikidata; primary and secondary literature | ✓ | R |
+| Events: wars, battles, treaties, foundations, disasters | ◐ Rome; the Second World War in outline: its start, its ends, two surrenders, a campaign, a war within it, and who fought from when | Wikidata; primary and secondary literature | ✓ | R |
 | People | ◐ rulers | Wikidata | ✓ | R |
 | Roads and routes | ◐ Roman roads, as a layer | Itiner-e (Roman roads); ORBIS; OpenHistoricalMap | ✓ Itiner-e; ? others | D |
 | Objects that moved, and where they were | ◐ 13, from obelisks to the Bust of Nefertiti | museums; literature | — | R |

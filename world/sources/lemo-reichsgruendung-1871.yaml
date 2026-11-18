@@ -1,0 +1,21 @@
+id: src:lemo-reichsgruendung-1871
+type: publication
+kind: review
+citation: >-
+  Rogasch, W. & Scriba, A. (2014). Die Reichsgründung 1871. LeMO, Lebendiges Museum Online.
+  Berlin: Deutsches Historisches Museum. As of 25 August 2014.
+authors:
+  - "Rogasch, W."
+  - "Scriba, A."
+published: 2014
+title: Die Reichsgründung 1871
+container: LeMO, Lebendiges Museum Online, Deutsches Historisches Museum
+url: https://www.dhm.de/lemo/kapitel/kaiserreich/reich/reichsgruendung
+reliability: >-
+  A museum's short account, without references: a reference work's summary of how the Reich was
+  founded and of how Germans saw the proclamation of the emperor.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from dhm.de on 2026-11-17 and read in full in German, with its authors and date. The
+    quotes were found in the kept text by quote-check.

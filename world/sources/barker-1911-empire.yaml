@@ -1,0 +1,23 @@
+id: src:barker-1911-empire
+type: publication
+kind: review
+citation: >-
+  Barker, E. (1911). Empire. In The Encyclopædia Britannica (1911), vol. 9.
+authors:
+  - "Barker, E."
+published: 1911
+title: Empire
+container: The Encyclopædia Britannica (1911), vol. 9
+url: https://en.wikisource.org/wiki/1911_Encyclop%C3%A6dia_Britannica/Empire
+via: English Wikisource's transcription of the article, signed E. Br. and headed "Empire by Ernest Barker".
+reliability: >-
+  A reference article of 1911 on the idea of empire from Rome to the empires of its own day, which
+  names Bryce first among its authorities. It begins the Holy Roman Empire with Otto I's
+  coronation in 962. It is a summary, a century old, and cites little for what it states.
+verified:
+  by: machine:claude-code
+  how: >-
+    The Wikisource page fetched on 2026-11-17 and read from the coronation of 800 to the end of
+    the Holy Roman Empire, with the notes and the list of authorities. The transcription shows
+    the article's side-headings but not its page numbers, so locators name the side-headings.
+    The quotations were found in the kept text by quote-check.

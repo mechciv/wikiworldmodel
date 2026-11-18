@@ -12,6 +12,8 @@ claims:
       ref: src:woods-2010-visible-language
       loc: p. 13 (Time Line of Writing)
       quote: 1000 Phoenician alphabet
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
   start-ahiram:
     prop: start
     value: { ref: people/writing/ahiram-sarcophagus }
@@ -25,6 +27,8 @@ claims:
     method: expert-estimate
     rank: preferred
     note: Preferred as a named, dated monument, against a phrase for a process.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33) and scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
   start-waal:
     prop: start
     value: { lo: 1100 BCE, hi: 1001 BCE }
@@ -34,6 +38,8 @@ claims:
       quote: In the course of the 11th century bc the stances of the letters become stabilized and the writing direction is fixed from right to left
     method: expert-estimate
     note: The same stabilization, set a little earlier, with no one find named for it.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-waal-2018-phoenician-letters.txt (sha256 15d6828f21b7acfa), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
   end:
     prop: end
     value: unknown
@@ -58,3 +64,25 @@ relations:
       ref: src:lam-2010-alphabet
       loc: p. 192, fig. 12.3, caption
       quote: Ahiram Sarcophagus (Early Phoenician, ca. 1000 bc)
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  from-proto-sinaitic:
+    rel: arose-from
+    to: people/writing/proto-sinaitic
+    source:
+      - ref: src:waal-2018-phoenician-letters
+        loc: p. 85
+        quote: it is clear that they can be considered the forerunners of the later Phoenician consonantal script
+      - ref: src:lam-2010-alphabet
+        loc: p. 191
+        quote: within the Proto-Canaanite texts, one can observe a gradual evolution away from purely pictographic shapes to more abstract, stylized forms
+      - ref: src:lam-2010-alphabet
+        loc: p. 197 (catalog no. 91)
+        quote: a script that represents a transitional stage between Proto-Canaanite and early Phoenician
+    note: >-
+      Waal's "they" are the early Proto-Sinaitic or Proto-Canaanite inscriptions, which she adds are not yet completely understood. This is descent by slow change within one tradition, not
+      an adaptation made at one time: the signs lose their pictures through the Proto-Canaanite inscriptions of Palestine, in the second millennium BCE, and around the turn of the first
+      their stances and the direction of writing are fixed. That middle stage has no record (people/writing/proto-canaanite, wanted by the Greek alphabet's record): this relation passes
+      over it, and should name it once it is written. Lam calls the evidence spotty and inconclusive overall (p. 191).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-waal-2018-phoenician-letters.txt (sha256 15d6828f21b7acfa) and scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }

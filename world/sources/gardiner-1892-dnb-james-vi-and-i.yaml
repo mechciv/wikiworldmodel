@@ -1,0 +1,27 @@
+id: src:gardiner-1892-dnb-james-vi-and-i
+type: publication
+kind: review
+citation: >-
+  Gardiner, S.R. (1892). James VI (1566–1625), king of Scotland, afterwards James I, king of
+  England. Dictionary of National Biography, vol. 29, pp. 161–181.
+authors:
+  - "Gardiner, S.R."
+published: 1892
+title: James VI (1566–1625), king of Scotland, afterwards James I, king of England
+container: Dictionary of National Biography, vol. 29
+url: https://en.wikisource.org/wiki/Dictionary_of_National_Biography,_1885-1900/James_VI_and_I
+via: >-
+  English Wikisource's transcription of the volume, page by page against its scan. It marks pp.
+  161–176 of this article as proofread and pp. 177–181 as not yet proofread.
+reliability: >-
+  The standard British biographical dictionary, the article by the historian of the reign. It
+  does not say which calendar its dates are in. They are read here as the countries' own, the
+  Julian, with the year begun on 1 January: Elizabeth's death is 24 March 1603, which was 1602
+  by England's reckoning then. Twice it gives both years, 1606–7 and 2 March 1618–19.
+verified:
+  by: machine:claude-code
+  how: >-
+    The page fetched on 2026-11-17; the opening (p. 161), the accession in England (p. 168), the
+    attempts at union (pp. 169–170) and the death (p. 180) read. Quotations found in the kept
+    text by quote-check. The death is on a page Wikisource has not proofread; the passage reads
+    cleanly, and the day agrees with the Britannica's article on Charles I.

@@ -1,0 +1,26 @@
+id: src:yugoslavia-declaration-republic-1945
+type: document
+kind: act
+citation: >-
+  Constituent Assembly of Yugoslavia, joint session of the Federal Assembly and the Assembly of
+  Peoples. Deklaracija o proglašenju Federativne Narodne Republike Jugoslavije (Declaration
+  proclaiming the Federal People's Republic of Yugoslavia). Belgrade, 29 November 1945.
+published: 1945
+title: Deklaracija o proglašenju Federativne narodne republike Jugoslavije
+url: https://hr.wikisource.org/wiki/Deklaracija_o_progla%C5%A1enju_Federativne_narodne_republike_Jugoslavije
+via: >-
+  Croatian Wikisource. The page says its text is a contributor's Croatian rendering of the
+  original, which is in Serbian in Cyrillic and kept in the Archives of Yugoslavia; it is not a
+  transcription of the original's words.
+reliability: >-
+  The act that abolished the monarchy and proclaimed the republic, read here only in a
+  rendering into Croatian by a Wikisource contributor. It is cited beside the Archives of
+  Yugoslavia's own account of the declaration, for the wording of its first section, and should
+  be replaced by the original text when that can be read.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from hr.wikisource.org on 2026-11-17 and read whole, with the page's notes on its
+    source; the quotes were found in the kept text by quote-check. The original was looked for
+    on Serbian Wikisource, which lists it and has no text, and at the Archives of Yugoslavia,
+    whose page describes it and does not give it.

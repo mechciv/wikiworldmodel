@@ -13,6 +13,8 @@ claims:
       ref: src:lam-2010-alphabet
       loc: p. 189
       quote: The earliest evidence for alphabetic writing comes from the second millennium bc in the Sinai and Egypt.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
   start-serabit:
     prop: start
     value: { ref: people/writing/serabit-el-khadem-inscriptions }
@@ -23,6 +25,8 @@ claims:
     method: expert-estimate
     rank: preferred
     note: Preferred because these inscriptions are what the name means; the ones from Wadi el-Hol are in a script that resembles them.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
   start-wadi-el-hol:
     prop: start
     value: { ref: people/writing/wadi-el-hol-inscriptions }
@@ -32,6 +36,8 @@ claims:
       quote: the oldest now known alphabetic inscriptions stem from Wadi el-Hol in Egypt
     method: expert-estimate
     note: If the two rock inscriptions from Wadi el-Hol are taken as the same early script.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-waal-2018-phoenician-letters.txt (sha256 15d6828f21b7acfa), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
   end:
     prop: end
     value: unknown
@@ -40,6 +46,8 @@ claims:
       loc: p. 191
       quote: one can observe a gradual evolution away from purely pictographic shapes to more abstract, stylized forms
     note: "It has no clear end: it passes into the Proto-Canaanite inscriptions, whose later forms are more stylized."
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
   decipherment:
     prop: decipherment
     value: partly-deciphered
@@ -48,6 +56,8 @@ claims:
       loc: p. 190
       quote: it is based on this assumption that the Sinai inscriptions have been partially deciphered
     note: The assumption is that the signs write West Semitic words by their first sounds. The phrases read include "for the Lady" and "chief of the miners".
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
   location:
     prop: location
     value: { lat: 29.036709, lon: 33.459411, frame: frame:earth/present-day }
@@ -68,6 +78,8 @@ relations:
       ref: src:lam-2010-alphabet
       loc: p. 189
       quote: consist of linear pictographic symbols inscribed on statuettes, stone panels, and rock faces at Serabit el-Khadem
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
   wadi-el-hol:
     rel: evidenced-by
     to: people/writing/wadi-el-hol-inscriptions
@@ -75,3 +87,22 @@ relations:
       ref: src:lam-2010-alphabet
       loc: p. 189
       quote: in a script that strongly resembles the Proto-Sinaitic texts
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  from-egyptian-hieroglyphs:
+    rel: arose-from
+    to: people/writing/egyptian-hieroglyphs
+    source:
+      - ref: src:lam-2010-alphabet
+        loc: p. 196 (catalog no. 89)
+        quote: consist of signs patterned on Egyptian hieroglyphic symbols but having phonetic values derived from the West Semitic words behind the pictographs
+      - ref: src:lam-2010-alphabet
+        loc: p. 190
+        quote: the alphabet was invented among Semitic speakers in the Egyptian realm, inspired iconographically by hieroglyphic writing but not bound by its modes of expression
+    note: >-
+      Only the shapes of the signs were taken over. Their sounds were not: each sign stands for the first sound of the West Semitic word for the thing it pictures, and the script writes
+      consonants alone. Lam finds plausible Egyptian models for most if not all of the signs, hieroglyphic and perhaps hieratic (p. 189; hieratic has no record here). How much Egyptian the
+      inventors knew is argued: he reports Goldwasser, for whom they were untrained in hieroglyphic writing and used it only as an iconic model, and Darnell and colleagues, for whom the
+      inscriptions attest a fairly high degree of literacy in Egyptian (p. 193, n. 8). Those works were not read.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }

@@ -16,6 +16,8 @@ claims:
       ref: src:lam-2010-alphabet
       loc: p. 189
       quote: consist of linear pictographic symbols inscribed on statuettes, stone panels, and rock faces at Serabit el-Khadem
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
   location:
     prop: location
     value: { lat: 29.036709, lon: 33.459411, frame: frame:earth/present-day }
@@ -51,3 +53,5 @@ claims:
       quote: The strongest challenge to this consensus in recent years has been Benjamin Sass (2004–05, 2008), who has put forward the possibility of a fourteenth-century date for the beginnings of the alphabet.
     method: expert-estimate
     note: At second hand, through Lam; Sass was not read.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }

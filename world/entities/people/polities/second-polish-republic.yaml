@@ -1,0 +1,14 @@
+id: people/polities/second-polish-republic
+kind: polity
+summary: >-
+  The Polish state between the two world wars, attacked by Germany on 1 September 1939 and by the Soviet Union on
+  17 September. Written for the war and the campaign it took part in (people/wars/second-world-war,
+  people/wars/invasion-of-poland): it has no dates and no land of its own here yet. When it ended, and whether its
+  government in exile carried it on, are questions for a fuller record.
+author: machine:claude-code
+same_as: { wikidata: Q207272 }
+claims:
+  name:
+    prop: name
+    value: { en: Second Polish Republic }
+    unsourced: An editorial label, in English.

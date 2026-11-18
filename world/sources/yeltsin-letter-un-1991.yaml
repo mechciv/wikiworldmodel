@@ -1,0 +1,28 @@
+id: src:yeltsin-letter-un-1991
+type: document
+kind: act
+citation: >-
+  Yeltsin, B.N., President of the RSFSR. Letter to the Secretary-General of the United Nations,
+  Javier Pérez de Cuéllar, Moscow, 24 December 1991, no. Пр-2338 (Письмо Президента РСФСР
+  Генеральному секретарю ООН). Circulated by the Secretary-General to the members of the United
+  Nations; Blum (1992) cites it as the appendix to UN Doc. 1991/RUSSIA of 24 December 1991.
+authors:
+  - "Yeltsin, B.N."
+published: 1991
+title: Письмо Президента РСФСР Генеральному секретарю ООН от 24.12.1991
+url: https://ru.wikisource.org/wiki/%D0%9F%D0%B8%D1%81%D1%8C%D0%BC%D0%BE_%D0%9F%D1%80%D0%B5%D0%B7%D0%B8%D0%B4%D0%B5%D0%BD%D1%82%D0%B0_%D0%A0%D0%A1%D0%A4%D0%A1%D0%A0_%D0%93%D0%B5%D0%BD%D0%B5%D1%80%D0%B0%D0%BB%D1%8C%D0%BD%D0%BE%D0%BC%D1%83_%D1%81%D0%B5%D0%BA%D1%80%D0%B5%D1%82%D0%B0%D1%80%D1%8E_%D0%9E%D0%9E%D0%9D_%D0%BE%D1%82_24.12.1991
+via: >-
+  Russian Wikisource's transcription of a scan of the Russian letter on the president's
+  letterhead (the Wikisource index Лист президента РФ генсеку ООН від 24.12.1991.pdf). The United
+  Nations document itself was not read.
+reliability: >-
+  The letter by which Russia told the United Nations that it was carrying on the Union's
+  membership: evidence of the claim Russia made, on what day and in what words, not of its
+  acceptance. The transcription agrees, sentence for sentence, with the English text that Blum
+  (src:blum-1992-russia-un-seat, p. 356) quotes from the appendix to UN document 1991/RUSSIA, and
+  with the United Nations' own summary of the letter (src:un-member-states-russian-federation).
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from ru.wikisource.org on 2026-11-17 and read in full in Russian; compared with the
+    English text in Blum (1992), p. 356. The quotes were found in the kept text by quote-check.

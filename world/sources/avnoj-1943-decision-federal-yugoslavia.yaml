@@ -1,0 +1,25 @@
+id: src:avnoj-1943-decision-federal-yugoslavia
+type: document
+kind: act
+citation: >-
+  Antifašističko veće narodnog oslobođenja Jugoslavije (AVNOJ), second session. Odluka o
+  izgradnji Jugoslavije na federativnom principu (Decision on building Yugoslavia on the
+  federal principle), decision No. 3. Jajce, 29 November 1943.
+published: 1943
+title: Одлука Другог заседања Антифашистичког већа народног ослобођења Југославије о изградњи Југославије на федеративном принципу
+url: https://sr.wikisource.org/wiki/%D0%9E%D0%B4%D0%BB%D1%83%D0%BA%D0%B0_II_%D0%B7%D0%B0%D1%81%D0%B5%D0%B4%D0%B0%D1%9A%D0%B0_%D0%90%D0%92%D0%9D%D0%9E%D0%88-%D0%B0_%D0%BE_%D0%B8%D0%B7%D0%B3%D1%80%D0%B0%D0%B4%D1%9A%D0%B8_%D0%88%D1%83%D0%B3%D0%BE%D1%81%D0%BB%D0%B0%D0%B2%D0%B8%D1%98%D0%B5_%D0%BD%D0%B0_%D1%84%D0%B5%D0%B4%D0%B5%D1%80%D0%B0%D1%82%D0%B8%D0%B2%D0%BD%D0%BE%D0%BC_%D0%BF%D1%80%D0%B8%D0%BD%D1%86%D0%B8%D0%BF%D1%83
+via: >-
+  Serbian Wikisource's transcription, in Serbian in Cyrillic. It gives as its source a page at
+  arhiv.sv.gov.yu, as the Internet Archive kept it in 2009, which was not fetched; the
+  transcription has slips of typing in it.
+reliability: >-
+  The wartime council's own decision, in its own words: evidence of what the partisans' assembly
+  resolved on that day and of the date the later state counted from. It is not evidence that
+  the council governed the country then, or that others recognised what it decided.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from sr.wikisource.org on 2026-11-17 and read whole; the quote was found in the kept
+    text by quote-check. The Archives of Yugoslavia hold a scan of the decisions
+    (arhivyu.rs/public/source/aj_10_02_06_odluke_avnoj.pdf), which has no text and so could not
+    be read against the transcription.

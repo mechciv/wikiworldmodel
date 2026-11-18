@@ -12,6 +12,8 @@ claims:
       ref: src:lam-2010-alphabet
       loc: p. 193
       quote: According to classical tradition, the Greek alphabet was borrowed from the Phoenicians
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
   start-dipylon:
     prop: start
     value: { ref: people/writing/dipylon-oinochoe }
@@ -43,6 +45,8 @@ claims:
     method: expert-estimate
     note: >-
       The minority view: early writing on perishable materials, now lost. It rests on letter forms and writing direction, not on any find. Lam says it cannot be embraced unreservedly until further inscriptions emerge.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-waal-2018-phoenician-letters.txt (sha256 15d6828f21b7acfa) and scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
   location:
     prop: location
     value: { lat: 37.978416, lon: 23.718301, frame: frame:earth/present-day }
@@ -63,3 +67,45 @@ relations:
       ref: src:waal-2018-phoenician-letters
       loc: p. 102
       quote: some of the oldest known inscriptions, such as the Nestor cup of Pithekoussai, the Dipylon inscription from Athens
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-waal-2018-phoenician-letters.txt (sha256 15d6828f21b7acfa), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  from-phoenician:
+    rel: arose-from
+    to: people/writing/phoenician-alphabet
+    source:
+      - ref: src:waal-2018-phoenician-letters
+        loc: abstract
+        quote: it is generally agreed upon that the Greeks borrowed (and modified) the alphabet from the Phoenicians
+      - ref: src:lam-2010-alphabet
+        loc: p. 193
+        quote: According to classical tradition, the Greek alphabet was borrowed from the Phoenicians
+      - ref: src:herodotus-histories
+        loc: "5.58.1"
+        quote: brought with them to Hellas, among many other kinds of learning, the alphabet, which had been unknown before this, I think, to the Greeks
+    rank: preferred
+    note: >-
+      Preferred as the general view, and the Greeks' own: Herodotus has the Phoenicians who came with Cadmus teach the letters to the Ionians, who used them with a few changes of form and
+      called them Phoenician (5.58.2). What shows the borrowing is the shapes, the names and the order of the letters; the Greeks are thought to have added the signs for vowels (Waal, p.
+      84). When it happened is argued (the competing start claims), and with that, from which stage of the West Semitic alphabet: see from-proto-canaanite.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-waal-2018-phoenician-letters.txt (sha256 15d6828f21b7acfa), scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33) and scripts-herodotus-5-58-godley.txt (sha256 125fe876c5d763ac), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  from-proto-canaanite:
+    rel: arose-from
+    to: people/writing/proto-canaanite
+    source:
+      - ref: src:lam-2010-alphabet
+        loc: p. 193
+        quote: some scholars have argued for an earlier divergence from Proto-Canaanite (in the eleventh century)
+      - ref: src:lam-2010-alphabet
+        loc: p. 193, n. 16
+        quote: The strongest case for the borrowing of the Greek alphabet from Proto-Canaanite is that of Naveh
+      - ref: src:waal-2018-phoenician-letters
+        loc: p. 89
+        quote: Naveh, for one, sees more resemblance between the Greek letter forms and the Proto-canaanite inscriptions than the later cursive Phoenician writing
+    note: >-
+      The minority view, which goes with the early start (start-early-transmission). Naveh's argument, as Lam and Waal report it, is that the Greeks took the script over while its letter
+      forms and its direction of writing were still unfixed, around 1100 BCE (Waal, p. 93), before it became the Phoenician alphabet as this world's record has it; the two would then be
+      branches of one stock, not parent and child. Lam says the hypothesis cannot be embraced unreservedly until more inscriptions emerge; Waal argues for the early date. Naveh (1973,
+      1987) was not read. The target is the second-millennium stage between people/writing/proto-sinaitic and the Phoenician alphabet, which has no record yet.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33) and scripts-waal-2018-phoenician-letters.txt (sha256 15d6828f21b7acfa), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }

@@ -184,6 +184,17 @@ const commands: Record<string, (args: string[]) => Promise<number | void>> = {
       console.log(`${shown} ${c.prop.padEnd(14)} ${JSON.stringify(c.value)}\n    ${c.origin}, ${c.rank}, ${c.status}, ${c.level}; ${c.author}; ${c.where}${c.note ? `\n    ${c.note}` : ''}`);
     }
   },
+  // What a record came from, what came of it, and which records are one thing with it, in the default picture or
+  // with the alternatives named: `npm run world -- lineage people/polities/rome [--alt alt:…]…`.
+  async lineage(args) {
+    const id = args.find((a, i) => !a.startsWith('--') && args[i - 1] !== '--alt');
+    if (!id) throw new Error('usage: world lineage <entity id> [--alt alt:<group>/<member>]…');
+    const alts = args.flatMap((a, i) => (a === '--alt' && args[i + 1] ? [args[i + 1]] : []));
+    const world = await loadWorld();
+    for (const a of alts) if (world.alternative.get(a)?.type !== 'alternative') throw new Error(`${a} is not an alternative of the world`);
+    const { lineageText } = await import('./lineage.ts');
+    console.log(lineageText(world, id, alts.length ? { alts } : {}));
+  },
   async validate(args) {
     const { runValidate } = await import('./validate/index.ts');
     return runValidate(args);

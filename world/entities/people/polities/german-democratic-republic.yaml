@@ -1,0 +1,168 @@
+id: people/polities/german-democratic-republic
+kind: polity
+summary: >-
+  The German state set up in the Soviet zone of occupation, from 7 October 1949, when its
+  constitution was put into force, to 3 October 1990, when its accession to the Federal Republic
+  of Germany took effect and its lands became lands of the Federal Republic. Its first
+  constitution spoke for Germany as a whole; from 1951 its Supreme Court held it a new state,
+  neither identical with the German Reich nor its successor, against the Federal Republic's view
+  that the Reich went on (alt:germany-after-1945).
+author: machine:claude-code
+same_as: { wikidata: Q16957 }
+claims:
+  name:
+    prop: name
+    value: { en: German Democratic Republic, de: Deutsche Demokratische Republik }
+    source:
+      ref: src:verfassung-ddr-1949
+      loc: "title"
+      quote: Die Verfassung der Deutschen Demokratischen Republik
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ddr-verfassung-1949-documentarchiv.txt (sha256 e2c2ac28dc356a16), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  start:
+    prop: start
+    value: 7 October 1949 CE
+    source:
+      ref: src:verfassung-ddr-1949
+      loc: "promulgation formula"
+      quote: >-
+        durch Gesetz der Provisorischen Volkskammer vom 7. Oktober 1949 in Kraft gesetzte
+        Verfassung der Deutschen Demokratischen Republik wird hiermit verkündet
+    method: documentary
+    note: >-
+      In English: the constitution of the German Democratic Republic, put into force by a law of
+      the Provisional People's Chamber of 7 October 1949, is hereby promulgated. The formula is
+      dated at Berlin the same day.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ddr-verfassung-1949-documentarchiv.txt (sha256 e2c2ac28dc356a16), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  end:
+    prop: end
+    value: 3 October 1990 CE
+    source:
+      - ref: src:einigungsvertrag-1990
+        loc: "Article 1 (1)"
+        quote: >-
+          Mit dem Wirksamwerden des Beitritts der Deutschen Demokratischen Republik zur
+          Bundesrepublik Deutschland gemäß Artikel 23 des Grundgesetzes am 3. Oktober 1990 werden
+          die Länder Brandenburg, Mecklenburg-Vorpommern, Sachsen, Sachsen-Anhalt und Thüringen
+          Länder der Bundesrepublik Deutschland.
+      - ref: src:bundestag-wd-2007-fortbestand
+        loc: "p. 3"
+        quote: >-
+          Mit dem Beitritt zur Bundesrepublik Deutschland zum 3. Oktober 1990 ging die Deutsche
+          Demokratische Republik im Rahmen einer sogenannten Staateninkorporation unter.
+    method: documentary
+    note: >-
+      In English: when the accession of the German Democratic Republic to the Federal Republic of
+      Germany under Article 23 of the Basic Law takes effect on 3 October 1990, the lands of
+      Brandenburg, Mecklenburg-Vorpommern, Saxony, Saxony-Anhalt and Thuringia become lands of the
+      Federal Republic of Germany; with the accession as of 3 October 1990 the German Democratic
+      Republic ceased to exist, by what is called the incorporation of a state. The day the
+      accession took effect, as the treaty of 31 August 1990 fixes it; the treaty names the day
+      and no hour, and does not say in so many words that the Democratic Republic ends, only what
+      becomes of its lands.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in einigungsvertrag-1990.txt (sha256 272bce3278d6d978) and bundestag-wd-3-292-07.txt (sha256 89a36f8cbae9bb49), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  territory:
+    prop: territory
+    value: { from: src:cliopatria-0.2.1, names: [German Democratic Republic] }
+    source: { ref: src:cliopatria-0.2.1, loc: "rows named German Democratic Republic" }
+    method: compilation
+    basis: reconstruction
+    note: >-
+      The dataset's rows run from 1949 to 1990, as the record does.
+relations:
+  acceded-to-the-federal-republic:
+    rel: merged-into
+    to: people/polities/federal-republic-of-germany
+    source:
+      - ref: src:einigungsvertrag-1990
+        loc: "Article 1 (1)"
+        quote: >-
+          Mit dem Wirksamwerden des Beitritts der Deutschen Demokratischen Republik zur
+          Bundesrepublik Deutschland gemäß Artikel 23 des Grundgesetzes am 3. Oktober 1990 werden
+          die Länder Brandenburg, Mecklenburg-Vorpommern, Sachsen, Sachsen-Anhalt und Thüringen
+          Länder der Bundesrepublik Deutschland.
+      - ref: src:einigungsvertrag-1990
+        loc: "Article 8"
+        quote: Mit dem Wirksamwerden des Beitritts tritt in dem in Artikel 3 genannten Gebiet Bundesrecht in Kraft
+      - ref: src:einigungsvertrag-1990
+        loc: "Article 11"
+        quote: >-
+          daß völkerrechtliche Verträge und Vereinbarungen, denen die Bundesrepublik Deutschland
+          als Vertragspartei angehört, einschließlich solcher Verträge, die Mitgliedschaften in
+          internationalen Organisationen oder Institutionen begründen, ihre Gültigkeit behalten
+      - ref: src:grundgesetz-1949
+        loc: "Article 23"
+        quote: In anderen Teilen Deutschlands ist es nach deren Beitritt in Kraft zu setzen.
+      - ref: src:bundestag-wd-2007-fortbestand
+        loc: "p. 3"
+        quote: Das Territorium der Bundesrepublik erweiterte sich um das Gebiet der neuen Bundesländer.
+    note: >-
+      An accession, in the treaty's own word (Beitritt), under the article of the Basic Law that
+      had kept it open since 1949: in other parts of Germany the Basic Law is to be put into force
+      on their accession. The Democratic Republic's lands became lands of the Federal Republic,
+      federal law came into force there, and the Federal Republic's treaties and memberships stayed
+      valid, while those of the Democratic Republic were to be talked over with its partners
+      (Article 12): the Federal Republic went on and the Democratic Republic did not. The
+      Bundestag's research service puts it so: the territory of the Federal Republic grew by that
+      of the new lands. The treaty sets the terms; the declaration of accession itself was not
+      read.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in einigungsvertrag-1990.txt (sha256 272bce3278d6d978), grundgesetz-1949-documentarchiv.txt (sha256 34bd2e1143bc31db) and bundestag-wd-3-292-07.txt (sha256 89a36f8cbae9bb49), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  from-the-reich:
+    rel: arose-from
+    to: people/polities/german-reich
+    source:
+      - ref: src:bverfg-1973-grundlagenvertrag
+        loc: "Rn. 100 (BVerfGE 36, 1 [29])"
+        quote: '"Andere Teile Deutschlands" haben allerdings mittlerweile in der Deutschen Demokratischen Republik ihre Staatlichkeit gefunden.'
+      - ref: src:og-ddr-1951-identitaet
+        loc: "Neue Justiz 1952, p. 223"
+        quote: der Staat selbst also vernichtet worden. Er hat mit der Kapitulation aufgehört zu bestehen.
+    note: >-
+      What both views accept: the Democratic Republic was set up in part of the German Reich. In
+      English, from the Federal Republic's court: "other parts of Germany" have meanwhile found
+      their statehood in the German Democratic Republic; and from the Democratic Republic's own:
+      the state itself was thus destroyed, it ceased to exist with the capitulation. That
+      judgment goes on, in words that stand out of order in the kept text and so are not quoted,
+      that on its ruins the working people of the former Soviet zone of occupation built the new
+      state. For the one court a part of a Germany that is still there, for the other a new state
+      where the old one stood: the relation says neither.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in bverfge-36-1-grundlagenvertrag.txt (sha256 c2ea395ae474a187) and neue-justiz-1952-s223.txt (sha256 8f8daec7a47feceb), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  once-continued-the-reich:
+    rel: continues
+    to: people/polities/german-reich
+    rank: deprecated
+    source:
+      - ref: src:verfassung-ddr-1949
+        loc: "Article 1 (1)"
+        quote: Deutschland ist eine unteilbare demokratische Republik; sie baut sich auf den deutschen Ländern auf.
+      - ref: src:bverfg-1987-teso
+        loc: "Rn. 55 (BVerfGE 77, 137 [156–157])"
+        quote: >-
+          Auch die Sowjetunion und die Deutsche Demokratische Republik sind im Jahre 1949 vom
+          Fortbestand des deutschen Staates ausgegangen.
+      - ref: src:og-ddr-1951-identitaet
+        loc: "Neue Justiz 1952, p. 223"
+        quote: Nicht ein Verhältnis der Rechtsnachfolge ist geschaffen, sondern die Identität ist verblieben.
+    against:
+      - ref: src:og-ddr-1951-identitaet
+        loc: "Neue Justiz 1952, p. 223"
+        quote: der Staat selbst also vernichtet worden. Er hat mit der Kapitulation aufgehört zu bestehen.
+    note: >-
+      Asserted at first and given up in 1951. In English: Germany is an indivisible democratic
+      republic, built on the German lands; the Soviet Union and the German Democratic Republic,
+      too, proceeded in 1949 from the continued existence of the German state; no relation of
+      legal succession has been created, the identity has remained. The constitution of 1949
+      speaks for Germany as a whole, with one German nationality, and the Federal Constitutional
+      Court read it so in 1987; the third quote is a regional court of the Democratic Republic in
+      1950, which held that no new state had arisen in 1945. The Democratic Republic's Supreme
+      Court overturned that judgment on 31 October 1951 and held the Democratic Republic neither
+      identical with the old state nor its successor, which is the view of
+      alt:germany-after-1945/reich-ended; its words on the old state's end are cited against the
+      claim here. That the constitution's words amount to a claim to be
+      the Reich carried on is a reading: neither it nor the court of 1987 says so in those terms.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ddr-verfassung-1949-documentarchiv.txt (sha256 e2c2ac28dc356a16), bverfge-77-137-teso.txt (sha256 d7d78c84ac201fd9) and neue-justiz-1952-s223.txt (sha256 8f8daec7a47feceb), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }

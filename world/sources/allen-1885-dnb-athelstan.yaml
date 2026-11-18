@@ -1,0 +1,24 @@
+id: src:allen-1885-dnb-athelstan
+type: publication
+kind: review
+citation: >-
+  Allen, C.G.B. (1885). Athelstan or Æthelstan (895–940), king of the West-Saxons and Mercians,
+  and afterwards of all the English. Dictionary of National Biography, vol. 2, pp. 215–217.
+authors:
+  - "Allen, C.G.B."
+published: 1885
+title: Athelstan or Æthelstan (895–940)
+container: Dictionary of National Biography, vol. 2
+url: https://en.wikisource.org/wiki/Dictionary_of_National_Biography,_1885-1900/Athelstan
+via: >-
+  English Wikisource's transcription of the volume, page by page against its scan; these pages
+  are marked proofread there.
+reliability: >-
+  The standard British biographical dictionary. It says itself that the sources for the reign
+  are meagre, and hedges the claim made from it here: Æthelstan "perhaps deserves" to be called
+  the first king of all the English.
+verified:
+  by: machine:claude-code
+  how: >-
+    The page fetched on 2026-11-17; the article read as far as the campaign of 937. Quotations
+    found in the kept text by quote-check.

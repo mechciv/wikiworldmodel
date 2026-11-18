@@ -1,0 +1,23 @@
+id: src:britannica-1911-james-i
+type: publication
+kind: review
+citation: >-
+  James I. (1566–1625), king of Great Britain and Ireland. Encyclopædia Britannica, 11th edition
+  (1911), vol. 15, pp. 136–138. Unsigned.
+published: 1911
+title: James I. (1566–1625), king of Great Britain and Ireland
+container: Encyclopædia Britannica, 11th edition, vol. 15
+url: https://en.wikisource.org/wiki/1911_Encyclop%C3%A6dia_Britannica/James_I._of_Great_Britain_and_Ireland
+via: >-
+  English Wikisource's transcription of the volume, page by page against its scan; these pages
+  are marked validated there.
+reliability: >-
+  A general encyclopaedia's short life. It gives his death as 5 March 1625, the day the
+  Dictionary of National Biography has him fall ill, against the same encyclopaedia's article on
+  his son, which has him die on 27 March: a slip. It is cited for that date, as a claim set
+  aside, and for the style it gives him.
+verified:
+  by: machine:claude-code
+  how: >-
+    The page fetched on 2026-11-17 and read: the opening (p. 136) and the close of the life (p.
+    137). Quotations found in the kept text by quote-check.

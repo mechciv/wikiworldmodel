@@ -49,7 +49,7 @@ import type { PlaceWorld } from '../../../../world/generators/life/spec.ts';
 import { FEATURE_INDEX } from '../../../../core/featuretiles.ts';
 import { prominenceOf, tileFeatures } from './featuretiles.ts';
 import { buildIce, type IceBuilt } from './ice.ts';
-import { hazardLayer, peopleLayer, polityLayer, presentLayer } from './layers.ts';
+import { hazardLayer, peopleLayer, polityLayer, presentLayer, stateRowKey } from './layers.ts';
 import { buildLandscape, disagreement, farmingAgreement, landscapeResolve } from './landscape.ts';
 import { fieldLayers } from './fieldlayers.ts';
 import { buildAtlas } from './atlas.ts';
@@ -834,7 +834,12 @@ export async function runBuild(args: string[]): Promise<number> {
   if (present) put('present.json', stableStringify(present));
   const hazards = await hazardLayer(world, fixesOf('hazards'));
   if (hazards) put('hazards.json', stableStringify(hazards));
-  const polities = await polityLayer(world, new Set(territoryFile.territories.flatMap((t) => t.claims.flatMap((c) => c.rows.map((r) => r.name)))), fixesOf('polities'));
+  // The rows each record draws as its territory, by row: the viewer leaves a row to its records while one holds.
+  const claimedRows = new Map<string, string[]>();
+  for (const t of territoryFile.territories) {
+    for (const key of new Set(t.claims.flatMap((c) => c.rows.map((r) => stateRowKey(r.name, r.from))))) claimedRows.set(key, [...(claimedRows.get(key) ?? []), t.subject]);
+  }
+  const polities = await polityLayer(world, claimedRows, fixesOf('polities'));
   if (polities) put('polities.json', stableStringify(polities));
   // Fields of points, lines and areas, the one way (docs/STRUCTURE.md section 3.6): the languages and the roads.
   const layers = await fieldLayers(world, claims);
