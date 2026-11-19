@@ -163,10 +163,15 @@ export function nameAt(e: SearchEntry, t: number): string {
   return e.names?.find((n) => n.valid && inUse(n.valid, t))?.text ?? e.label;
 }
 
-/** Whether every word typed starts a word of a name: "rome" finds Rome, not Andromeda. */
+const wordsOf = (s: string) => s.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+
+/**
+ * Whether every word typed starts a word of a name: "rome" finds Rome, not Andromeda. What is typed is split into
+ * words as the name is, at whatever is not a letter or a digit, so that "south-central" finds south-central Africa.
+ */
 export function nameMatches(name: string, text: string): boolean {
-  const words = text.toLowerCase().split(/\s+/).filter(Boolean);
-  const starts = name.toLowerCase().split(/[^\p{L}\p{N}]+/u);
+  const words = wordsOf(text);
+  const starts = wordsOf(name);
   return words.length > 0 && words.every((w) => starts.some((x) => x.startsWith(w)));
 }
 

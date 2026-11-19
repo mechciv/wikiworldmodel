@@ -136,8 +136,19 @@ test.describe('the Hell Creek', () => {
     const s = site();
     await page.goto(`/?b=${latestBuild()}&${arrival(s, 25)}&${FAST}`);
     await idle(page);
-    // The clear ground before the eye, above the time control and to the left of the city's bar.
-    await page.mouse.click(250, 190);
+    // Clear ground before the eye: of the points with nothing of the page over them, the one nearest the middle of the
+    // view where the scene says a click finds the ground. Not a fixed pixel: the scene's bar wraps over more of a short
+    // view as it says more, and a plant may stand anywhere.
+    const spot = await page.evaluate(() => {
+      const canvas = document.querySelector('canvas.globe')!;
+      const { width, height } = canvas.getBoundingClientRect();
+      const open: { x: number; y: number }[] = [];
+      for (let y = 5; y < height; y += 10) for (let x = 5; x < width; x += 10) if (document.elementFromPoint(x, y) === canvas) open.push({ x, y });
+      const away = (p: { x: number; y: number }) => Math.hypot(p.x - width / 2, p.y - height / 2);
+      return open.sort((a, b) => away(a) - away(b)).find((p) => window.__wikiworldmodel!.foundAt(p.x, p.y)?.ground) ?? null;
+    });
+    expect(spot).not.toBeNull();
+    await page.mouse.click(spot!.x, spot!.y);
     await idle(page);
     const panel = page.locator('.inspect');
     await expect(panel.locator('.badge.basis-procedural')).toBeVisible();
