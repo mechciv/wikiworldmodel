@@ -4,7 +4,8 @@
 // inferred and generated; generated life shows in evidence mode; the time each is drawn for; and the way down into
 // a scene of the sea, below its surface.
 import { expect, test } from '@playwright/test';
-import { atlasHasLand, seaList, type AtlasBin, type AtlasIndex, type SeaBin, type SeaIndex } from '../../../core/atlas.ts';
+import { atlasHasLand, atlasList, seaList, type AtlasBin, type AtlasIndex, type SeaBin, type SeaIndex } from '../../../core/atlas.ts';
+import { toMa } from '../../../core/time.ts';
 import { fingerprintProblems, type Fingerprint } from '../../../core/fingerprint.ts';
 import type { SceneFileV2 } from '../../../core/scene.ts';
 import type { SiteInfo, Tileset } from '../../../core/tileset.ts';
@@ -282,6 +283,43 @@ test.describe('anywhere else', () => {
       expect(text).toMatch(/Recorded here|Inferred|A stand-in|Recorded:/);
       expect(text).toMatch(/Its body:/);
     }
+  });
+
+  test('at a historical time, draws from its stage\'s list alone, and says on the screen that the list is the stage\'s', async ({ page }) => {
+    // The Basin of Mexico in 1500 CE, where scenes once drew glyptodonts and a ground sloth among the houses: its stage then
+    // ran from the Chibanian to today.
+    const [lat, lon, t] = [19.36, -99.08, 1500];
+    const ref = atlas().bins.find((b) => t >= b.from && t <= b.to)!;
+    expect(ref.name).toBe('Holocene');
+    await page.goto(`/?b=${latestBuild()}&${lowOver(lat, lon, t)}&${FAST}`);
+    await idle(page);
+    const scene = (await page.evaluate(() => window.__wikiworldmodel!.scene()))!;
+    expect(scene.stage).toBe('Holocene');
+    expect(scene.list).toBe('land');
+    // Everything in it is on the stage's list for its place: what the build holds to rows that reach the time (life.test.ts).
+    const list = atlasList(buildFile<AtlasBin>(ref.file), atlas().grid, scene.origin.lat, scene.origin.lon);
+    const onList = new Set(list.map((e) => e.taxon.id ?? `txn:${e.taxon.no}`));
+    expect(scene.taxa.length).toBeGreaterThan(0);
+    for (const x of scene.taxa) expect(onList.has(x.id), x.label).toBe(true);
+    expect(toMa(ref.from)).toBeCloseTo(0.0117, 6);
+    // The screen says what the list is of, that it is not the year's, and how little of it is recorded close by.
+    const notice = page.locator('.notice');
+    await expect(notice).toBeVisible();
+    await expect(notice).toContainText('fossils of the Holocene, 11.7 ka to the present');
+    await expect(notice).toContainText('not 1500 CE’s');
+    const here = scene.taxa.filter((x) => x.tier === 'here').length;
+    if (here * 2 < scene.taxa.length) await expect(notice).toContainText('recorded within a few hundred km of here');
+    // So does the panel, which lists what stands at the time.
+    await page.locator('.life-here').click();
+    const panel = page.locator('.inspect');
+    await expect(panel).toContainText('What lived here');
+    await expect(panel).toContainText('The list is the stage’s, not 1500 CE’s');
+    // In the deep past, where a stage is how time is read, the screen says nothing of it.
+    const w = witnesses()[0];
+    await page.goto(`/?b=${latestBuild()}&${lowOver(w.lat, w.lon, w.t)}&${FAST}`);
+    await idle(page);
+    expect((await page.evaluate(() => window.__wikiworldmodel!.scene()))!.stage).not.toBe('Holocene');
+    await expect(notice).toBeHidden();
   });
 
   test('says what lived here, in tiers, from the bar', async ({ page }) => {

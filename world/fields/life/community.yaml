@@ -10,6 +10,7 @@ description: >-
   nothing of a kind is known within reach, the nearest clade that has it stands in, and that is a guess at what sort of
   thing lived here. The fossil record leans heavily to Europe and North America, so a rich list partly shows who has been
   digging. The sea costs far more to cross than land, on the land of that time, so a seaway divides what it should.
+  Where a taxon's record, or a clade's above it, says when it died out, nothing of it is drawn after, whatever a row says.
 frame: frame:earth/present-day
 grid: { kind: rows }
 time: { lo: 541 Ma, hi: 0 Ma }
@@ -41,12 +42,17 @@ params:
   shallow_cost: 4
   deep_cost: 14
   shallow_m: 220
-  # A row dated only to a span longer than this says too little of any one stage; and a row dated to a span longer
-  # than the next is left out for a taxon that has rows dated better.
+  # A row dated only to a span longer than this says too little of any one stage, and one longer than this many times a
+  # stage too little of that stage: a row of the Pleistocene and Holocene together, of the Holocene alone. A row dated to
+  # a span longer than the next is left out for a taxon that has rows dated better.
   longest_span: 30
+  longest_span_in_stages: 10
   tight_span: 10
+  # A stage longer than this is cut, in Myr; and one shorter than the next is joined to the one before it, up the chart.
+  # The Holocene's three stages are each shorter than the Holocene the database dates its rows to, and are joined into
+  # it; the Upper Pleistocene and the Chibanian keep their own lists, as their rows are dated to them.
   longest_bin: 8
-  shortest_bin: 0.5
+  shortest_bin: 0.01
   quotas: { canopy: 8, under: 4, float: 2, big: 10, middle: 10, small: 6, air: 4, tiny: 4, water: 4 }
   standins: { canopy: 2, under: 1, big: 2, middle: 2, small: 1, air: 1, tiny: 1 }
   big_m: 3

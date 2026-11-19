@@ -286,6 +286,8 @@ body.evidence .inspect { top: calc(84px + var(--legend-h, 0px)); }
 .older-build { position: absolute; left: 50%; top: 72px; transform: translateX(-50%); max-width: min(560px, calc(100% - 32px)); padding: 6px 12px; border-radius: 10px; background: var(--panel); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border: 1px solid var(--panel-border); color: var(--muted); font-size: 12px; text-align: center; z-index: 5; }
 .older-build a { color: var(--accent); }
 .notice { position: absolute; left: 50%; bottom: 30px; transform: translateX(-50%); max-width: min(560px, calc(100% - 32px)); padding: 6px 12px; border-radius: 10px; background: var(--panel); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border: 1px solid var(--panel-border); color: var(--muted); font-size: 12px; text-align: center; pointer-events: none; }
+/* In a scene, above its bar, which it would cover. */
+.stage:has(.citybar:not([hidden])) .notice { bottom: 62px; }
 
 .life-here { white-space: nowrap; }
 .inspect .see-it { margin: 12px 0 2px; padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(244, 184, 96, 0.6); background: rgba(244, 184, 96, 0.06); color: var(--accent-text); font: inherit; cursor: pointer; }
@@ -419,6 +421,8 @@ html { touch-action: manipulation; overscroll-behavior-y: none; }
   .menu-about span { color: var(--muted); font-size: 12px; }
   .menu-about a { color: var(--accent); font-size: 13px; text-decoration: none; }
   .older-build { top: calc(60px + env(safe-area-inset-top)); }
+  /* A scene's bar wraps onto more lines here: its notice goes to the top, as the older build's does. */
+  .stage:has(.citybar:not([hidden])) .notice { top: calc(60px + env(safe-area-inset-top)); bottom: auto; }
   .scrim { background: linear-gradient(180deg, rgba(3, 4, 11, 0.7), rgba(3, 4, 11, 0) 200px); }
   .credits { left: max(12px, env(safe-area-inset-left)); max-width: calc(100% - 24px); }
   .credits.in-city { display: none; }

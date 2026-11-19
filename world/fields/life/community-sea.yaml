@@ -43,10 +43,12 @@ params:
   land_cost: 14
   deep_cost: 3
   shallow_m: 220
+  # The land's, so that a row says as much of a stage in the sea as on land, and the two have the same stages.
   longest_span: 30
+  longest_span_in_stages: 10
   tight_span: 10
   longest_bin: 8
-  shortest_bin: 0.5
+  shortest_bin: 0.01
   list_size: 12
   standins: 4
   # Besides those, how many genera a scene can draw a list keeps, and at most how many of one class among them.

@@ -137,4 +137,9 @@ Each step is usable by itself, and each is tested. The first four are the sevent
 6. **Agents at scale.** Batches of forms, by clade, as long as anyone runs them; and more body plans. *A first
    batch is written.*
 7. **The seas,** with their own forms and depth layers. *Built* ([TENTH-SLICE.md](slices/TENTH-SLICE.md)): the sea's lists draw, its great groups have bodies, and a scene of the sea has what lives on its floor and what swims above it; its depth layers are only those two.
-8. **Today and the recent past,** which have far more data and a different licence check.
+8. **Today and the recent past,** which have far more data and a different licence check. Until they come in, a scene
+   of the recent past lists the Holocene's fossils, as a stage of its own: a fossil dated more than ten times as
+   loosely as a stage says too little of it, so the Pleistocene's animals stay in the Pleistocene. A taxon whose record,
+   or a clade's above it, says when it died out is not drawn after, whatever a row says: the moa stand in 1300 CE and
+   are gone by 1500. At a time read as a year a scene says on the screen that its list is the stage's, and where little
+   of it is recorded near, it says so.
