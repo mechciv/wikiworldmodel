@@ -122,6 +122,8 @@ export interface WikiWorldModelHandle {
   /** where each group of a taxon stands: on the screen, and on the globe, for tests */
   organismsAt(id: string): { x: number; y: number; depth: number }[];
   organismPlaces(id: string): { lat: number; lon: number; x: number; y: number }[];
+  /** what a click at a point of the view finds in the living scene drawn: a taxon, a house the generator drew, or the ground (not the sky); null with no scene */
+  foundAt(x: number, y: number): { taxon?: string; house?: number; ground: boolean } | null;
   set(s: Partial<ViewState>): void;
   /**
    * How long each pass of the local scene's frame takes, the median over this many frames drawn again of the view as it
@@ -2502,6 +2504,14 @@ async function start(root: HTMLElement): Promise<void> {
       if (!(city instanceof LifeScene) || !frameView) return [];
       const v = frameView;
       return city.named.filter((x) => x.id === id).map((x) => projectLocal(v, x.at[0], x.at[1], x.base + 1)).filter((p): p is { x: number; y: number; depth: number } => !!p && p.x >= 0 && p.y >= 0 && p.x < stage.clientWidth && p.y < stage.clientHeight);
+    },
+    foundAt: (x, y) => {
+      if (!(city instanceof LifeScene) || !frameView) return null;
+      // As a click picks (pickAt), in the canvas's pixels.
+      const dpr = canvas.width / stage.clientWidth;
+      const found = city.pick(Math.round(x * dpr), canvas.height - 1 - Math.round(y * dpr));
+      if (found.taxon || found.house !== undefined) return { taxon: found.taxon?.id, house: found.house, ground: false };
+      return { ground: !!groundHit(frameView, rayOf(frameView, x, y), city.ground) };
     },
     set: (s) => setState(s),
     profile: async (frames = 20) => {

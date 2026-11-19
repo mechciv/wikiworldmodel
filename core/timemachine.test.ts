@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { SearchEntry } from './records.ts';
-import { heldAt, holdsAt, nameAt, nameFound, placeIn, readQuery, readTime } from './timemachine.ts';
+import { heldAt, holdsAt, nameAt, nameFound, nameMatches, placeIn, readQuery, readTime } from './timemachine.ts';
 import { PRESENT_YEAR } from './time.ts';
 
 const at = (best: number | null) => ({ best, lo: best ?? -Infinity, hi: best ?? Infinity, derived: false });
@@ -79,6 +79,25 @@ describe('heldAt', () => {
     const kingdom = { ...entry('new-kingdom', 'polity', -1477, null), places: [[-1499, -799, 31, 26, 1000]] as [number, number, number, number, number][] };
     expect(holdsAt(kingdom, -1000)).toBe(true);
     expect(holdsAt(kingdom, 1200)).toBe(false);
+  });
+});
+
+describe('nameMatches', () => {
+  it('finds a name by the starts of its words, in any order', () => {
+    expect(nameMatches('Rome', 'rome')).toBe(true);
+    expect(nameMatches('Andromeda', 'rome')).toBe(false);
+    expect(nameMatches('Battle of Actium', 'actium bat')).toBe(true);
+    expect(nameMatches('Battle of Actium', 'actium sea')).toBe(false);
+  });
+  it('splits what is typed into words as it splits the name, so that a hyphen typed finds one written', () => {
+    expect(nameMatches('south-central Africa', 'south-central')).toBe(true);
+    expect(nameMatches('south-central Africa', 'South-Central Af')).toBe(true);
+    expect(nameMatches('South Africa', 'south-central')).toBe(false);
+    expect(nameMatches("Xi'an", "xi'an")).toBe(true);
+  });
+  it('finds nothing where nothing is typed', () => {
+    expect(nameMatches('Rome', '')).toBe(false);
+    expect(nameMatches('Rome', ' - ')).toBe(false);
   });
 });
 
