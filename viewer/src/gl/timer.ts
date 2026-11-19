@@ -1,7 +1,8 @@
 // How long each pass of a frame takes, for the reference views (docs/plans/RENDERING.md, step 0). Where the browser
 // has timer queries the GPU says how long each pass took, a few frames later; where it has none, each pass is waited
-// for, which is slower and says only what the whole of a pass costs as the machine draws it. Off unless asked for: a
-// frame drawn while nobody measures pays nothing but a test of a flag at each pass.
+// for, which is slower and says only what the whole of a pass costs as the machine draws it. A browser's finish() need
+// not wait for the GPU, so the wait is a read of one pixel, which must. Off unless asked for: a frame drawn while nobody
+// measures pays nothing but a test of a flag at each pass.
 import type { GL } from './context.ts';
 
 /** What the passes of the frames measured took, each the median over the frames, in milliseconds. */
@@ -31,6 +32,8 @@ export class FrameTimer {
   private ext: TimerExt | null;
   private on = false;
   private frame = 0;
+  /** a pixel to read back, which waits for the GPU to finish what it was given */
+  private sync: { fb: WebGLFramebuffer; px: Uint8Array } | null = null;
   /** the pass being measured, and when it started where the GPU is waited for */
   private open: { name: string; query: WebGLQuery | null; t0: number } | null = null;
   /** queries asked of the GPU and not yet answered */
@@ -69,7 +72,7 @@ export class FrameTimer {
       gl.beginQuery(this.ext.TIME_ELAPSED_EXT, query);
       this.open = { name, query, t0: 0 };
     } else {
-      gl.finish();
+      this.wait();
       this.open = { name, query: null, t0: performance.now() };
     }
     if (!this.order.includes(name)) this.order.push(name);
@@ -114,8 +117,30 @@ export class FrameTimer {
       this.asked.push({ frame: this.frame, name: o.name, query: o.query });
       return;
     }
-    gl.finish();
+    this.wait();
     this.add(this.frame, o.name, performance.now() - o.t0);
+  }
+
+  /** Wait until the GPU has done all it was given: read one pixel of a target of its own, as reading back must wait. */
+  private wait(): void {
+    const gl = this.gl;
+    if (!this.sync) {
+      const t = gl.createTexture()!;
+      const keep = gl.getParameter(gl.TEXTURE_BINDING_2D) as WebGLTexture | null;
+      gl.bindTexture(gl.TEXTURE_2D, t);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+      gl.bindTexture(gl.TEXTURE_2D, keep);
+      const fb = gl.createFramebuffer()!;
+      const read = gl.getParameter(gl.READ_FRAMEBUFFER_BINDING) as WebGLFramebuffer | null;
+      gl.bindFramebuffer(gl.READ_FRAMEBUFFER, fb);
+      gl.framebufferTexture2D(gl.READ_FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, t, 0);
+      gl.bindFramebuffer(gl.READ_FRAMEBUFFER, read);
+      this.sync = { fb, px: new Uint8Array(4) };
+    }
+    const read = gl.getParameter(gl.READ_FRAMEBUFFER_BINDING) as WebGLFramebuffer | null;
+    gl.bindFramebuffer(gl.READ_FRAMEBUFFER, this.sync.fb);
+    gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, this.sync.px);
+    gl.bindFramebuffer(gl.READ_FRAMEBUFFER, read);
   }
 
   private add(frame: number, name: string, ms: number): void {
