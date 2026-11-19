@@ -1,0 +1,29 @@
+id: src:ixtlilxochitl-1892-historia-chichimeca
+type: text
+kind: historian
+citation: >-
+  Alva Ixtlilxóchitl, F. de. Historia chichimeca, in Obras históricas de don Fernando de Alva
+  Ixtlilxóchitl, ed. A. Chavero, tomo II. México: Oficina Tipográfica de la Secretaría de Fomento,
+  1892.
+authors: ["Alva Ixtlilxóchitl, F. de"]
+published: 1892
+written: { lo: 1610 CE, hi: 1640 CE }
+title: Historia chichimeca
+url: https://archive.org/details/obrashistricasd01ixtlgoog
+via: >-
+  Chavero's edition, tomo II (a Harvard copy scanned by Google, on the Internet Archive), read in
+  its OCR text. The footnotes are Chavero's. `written`: Chavero's introduction to this volume
+  dates the work "acaso desde antes de 1610 hasta 1640 poco más ó menos".
+license: public-domain
+reliability: >-
+  A history of Texcoco and its kings, written about a century after the conquest. It speaks for
+  Texcoco: it makes Texcoco the equal of Mexico and
+  the alliance Nezahualcoyotl's design, and Chavero's notes correct its dates and doubt a war it
+  tells.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched on 2026-11-19 (UTC); Chavero's introduction on the date, chapters XXXII (the swearing
+    of the three kings, pp. 153–155), LI (the war with Tlatelolco, pp. 251–252), LXXVI (the
+    succession of Texcoco, pp. 329–333) and XCI (Texcoco in 1520, pp. 412–413) read. Quotes found in
+    the kept text city-ixtlilxochitl-1892-tomo2.txt by script.

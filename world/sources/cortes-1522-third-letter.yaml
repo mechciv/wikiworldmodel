@@ -1,0 +1,38 @@
+id: src:cortes-1522-third-letter
+type: text
+kind: eyewitness
+citation: >-
+  Cortés, H. Third letter of relation to the Emperor Charles V, Coyoacán, 15 May 1522. As "Carta tercera" in Cartas
+  del famoso conquistador Hernan Cortes al emperador Carlos Quinto (Biblioteca histórica de la Iberia, tomo I).
+  México: Imprenta de I. Escalante y C.ia, 1870, pp. 239–437.
+authors:
+  - "Cortés, H."
+published: 1870
+written: 15 May 1522 CE
+title: Carta tercera, enviada por Fernando Cortés, capitán y justicia mayor del Yucatan, llamado la Nueva-España del mar Océano
+container: Cartas del famoso conquistador Hernan Cortes al emperador Carlos Quinto (México, 1870)
+url: https://es.wikisource.org/wiki/%C3%8Dndice:13_Cartas_del_Famoso_Conquistador_Hern%C3%A1n_Cort%C3%A9s.pdf
+via: >-
+  Spanish Wikisource's transcription of the 1870 edition (scan pages 250–448 of "13 Cartas del Famoso Conquistador
+  Hernán Cortés.pdf"), kept as the wiki's API renders that range of pages; it ends with the royal officials' letter
+  of the same date. The 1870 edition reprints an eighteenth-century editor's footnotes (evidently Lorenzana's,
+  1770), which are not Cortés's words. The transcription is marked proofread but is not faithful to the print in
+  places (accents added, misreadings such as "do" for "de"), so the quotations were compared with the page images
+  and cut to words the print and the transcription share.
+license: public domain
+reliability: >-
+  Cortés's report of the return to the valley, the siege and the fall, written at Coyoacán nine months after the
+  capture of Cuauhtemoc. It dates the muster of 28 April, the captains' march of 10 May, the investment of 30 May and
+  the capture on Tuesday 13 August 1521, and gives large figures for allies and for the dead; it makes the Texcocan
+  Ixtlilxochitl a younger brother sent as captain by the lord of Texcoco installed in the emperor's name. It is the
+  first account of the decision to resettle the city, as Cortés wished it seen.
+verified:
+  by: machine:claude-code
+  how: >-
+    Scans 250–448 rendered through es.wikisource.org's API (action=parse of the pages tag) on 2026-11-18 (2026-11-19
+    UTC) and kept as es-cortes-1522-third-letter.txt, with the printed page and scan number at each page start. Read:
+    the opening, the march to Texcoco, the brigantines and the garrisons (pp. 318–335), the help from Texcoco (pp.
+    341–343), the market of Tlatelolco (pp. 362–363), the last days and the capture (pp. 405–410), the resettlement
+    (pp. 417–419) and the date (p. 436). Every quotation was compared with its page image in the Commons PDF (scan 429,
+    p. 418, is marked problematic on Wikisource; the words quoted agree with the image), and all were found in the
+    kept text by script with quote-check's own matching. MacNutt's English translation was read alongside, not quoted.

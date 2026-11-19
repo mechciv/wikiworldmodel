@@ -1,0 +1,27 @@
+id: src:munoz-camargo-1892-historia-de-tlaxcala
+type: text
+kind: historian
+citation: >-
+  Muñoz Camargo, D. Historia de Tlaxcala, publicada y anotada por A. Chavero. México: Oficina
+  Tipográfica de la Secretaría de Fomento, 1892.
+authors: ["Muñoz Camargo, D."]
+published: 1892
+written: { lo: 1576 CE, hi: 1599 CE }
+title: Historia de Tlaxcala
+url: https://archive.org/details/gri_historiadetl00muno
+via: >-
+  Chavero's edition (the Getty Research Institute copy on the Internet Archive), read in its OCR
+  text. Notes ending "R." are José Fernando Ramírez's, as Chavero's preface says; the others are
+  Chavero's. `written`: the text speaks of "este año 1576", and its author died about 1599
+  (archive.org record: "approximately 1529-1599").
+license: public-domain
+reliability: >-
+  A history of Tlaxcala written in Tlaxcala about two generations after the conquest: the Tlaxcalan account, which makes the alliance with Cortés a reasoned choice of the
+  four lords and, as Chavero's note says, passes over the battles the Tlaxcalans first fought
+  against him.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched on 2026-11-19 (UTC); Chavero's preface, the chapters on the founding and division of
+    Tlaxcala, the wars with the Mexica (pp. 109–113) and Cortés's arrival (pp. 183–187) read.
+    Quotes found in the kept text city-munoz-camargo-1892.txt by script.

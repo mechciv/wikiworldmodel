@@ -1,0 +1,31 @@
+id: people/persons/hernan-cortes
+kind: person
+summary: >-
+  Hernán Cortés, captain of the expedition that conquered Tenochtitlan (people/organizations/cortes-expedition), whose
+  letters to Charles V, written while the war went on and after it, are the conquerors' first account of it. Written
+  here for the perspective he held; his life is not.
+author: machine:claude-code
+same_as: { wikidata: Q7326 }
+claims:
+  name:
+    prop: name
+    value: { en: Hernán Cortés }
+    unsourced: An editorial label; he signed Fernan Cortés.
+relations:
+  holds-the-conquerors-account:
+    rel: holds
+    to: alt:conquest-accounts/conquerors
+    valid: { lo: 30 October 1520 CE, hi: 15 October 1524 CE }
+    source:
+      - ref: src:cortes-1520-second-letter
+        loc: "p. 237 (the dating clause)"
+        quote: De la villa Segura de la Frontera desta Nueva España, á 30 de Octubre de 1520 años
+      - ref: src:cortes-1524-fourth-letter
+        loc: "p. 536 (scan 546)"
+        quote: ciudad de Temixtitan desta Nueva-España … del mes de Octubre de 1524 años
+    note: >-
+      From his second letter, written at Segura de la Frontera on 30 October 1520, four months after the flight from
+      the city, to his fourth, written in the rebuilt city on 15 October 1524: the dates of the letters read here, not
+      of his life.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in es-cortes-1520-second-letter.txt (sha256 6bb3044f6f34fb78) and es-cortes-1524-fourth-letter.txt (sha256 d9604f830bed44e9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }

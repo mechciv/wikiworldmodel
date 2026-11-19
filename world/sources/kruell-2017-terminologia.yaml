@@ -1,0 +1,27 @@
+id: src:kruell-2017-terminologia
+type: publication
+kind: review
+citation: >-
+  Kruell, G.K. (2017). Algunas precisiones terminológicas sobre el calendario náhuatl. Estudios de
+  Cultura Náhuatl 54, 135–164.
+authors:
+  - "Kruell, G.K."
+published: 2017
+title: Algunas precisiones terminológicas sobre el calendario náhuatl
+container: "Estudios de Cultura Náhuatl 54, 135–164"
+url: https://nahuatl.historicas.unam.mx/index.php/ecn/article/view/77841
+license: CC-BY-NC-ND-4.0
+reliability: >-
+  A philological study of the Nahuatl names for the counts of time in sixteenth-century sources.
+  It argues that the year of eighteen twenties was called cempohuallapohualli, that
+  xiuhtlapohualli (or xiuhpohualli) meant the count of years, the 52-year cycle, and that the
+  modern use of xiuhpohualli for the 365-day year is a misreading going back to León y Gama. It
+  lists the questions about the calendar that are still open. Evidence of terms and of the state
+  of the questions, not of a correlation.
+verified:
+  by: machine:claude-code
+  how: >-
+    The journal's PDF (article/download/77841/68891) fetched on 19 November 2026 (UTC) and read in
+    its text layer: the abstract, the introduction with note 3 (pp. 135–137) and sections 1–3
+    (pp. 137–148), with the printed page numbers. Quotes were found in the kept text
+    na-kruell-2017-terminologia.txt by script.

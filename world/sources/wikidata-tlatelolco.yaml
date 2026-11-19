@@ -1,0 +1,20 @@
+id: src:wikidata-tlatelolco
+type: database-record
+kind: compilation
+snapshot: "2026-11-19"
+citation: >-
+  Wikidata, item Q796925 (Tlatelolco): property P625 (coordinate location), P571 (inception) and P576 (dissolved,
+  abolished or demolished date).
+container: Wikidata
+url: https://www.wikidata.org/wiki/Q796925
+license: CC0-1.0
+reliability: >-
+  A crowd-edited item, "pre-Columban city (altepetl) in Mexico": one item for the town and the state, with an
+  inception of 1337 and a dissolution in 1473, the year Tenochtitlan took it, although the town went on: its
+  archaeological site (Q14623034) and the present district of Mexico City (Q14623011) are other items. Its point is
+  given to the tenth of a second of arc, at the archaeological zone.
+verified:
+  by: machine:claude-code
+  how: >-
+    The item's JSON (Special:EntityData/Q796925.json) fetched on 19 November 2026 (UTC) and kept as wd-Q796925.raw:
+    coordinates 19.45108333, -99.1375; P571 +1337; P576 +1473.

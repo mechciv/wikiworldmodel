@@ -1,0 +1,47 @@
+id: people/polities/texcoco
+kind: polity
+summary: >-
+  The altepetl of Texcoco, the Acolhua city on the eastern shore of the lake, one of the three heads of the Triple
+  Alliance. Divided before the Spaniards came, between Cacama, made king by Moctezuma's power, and his brother
+  Ixtlilxochitl in the north, it was on the Mexica side under Coanacochtzin in 1520 and on the Spaniards' in 1521,
+  under don Hernando, whom Cortés made lord, with Ixtlilxochitl leading its warriors at the siege.
+author: machine:claude-code
+same_as: { wikidata: Q2047652 }
+claims:
+  name:
+    prop: name
+    value: { en: Texcoco }
+    unsourced: An editorial label; Tetzcoco in Nahuatl, Tezcuco and Tesáico in the Spanish sources.
+  territory:
+    prop: territory
+    value:
+      from: src:cliopatria-0.2.1
+      names: ["Texcoco"]
+    source:
+      ref: src:cliopatria-0.2.1
+      loc: rows named Texcoco, 1202 to 1428
+    method: compilation
+    basis: reconstruction
+    note: >-
+      The dataset's three rows of this name, from 1202 to 1428; after it, the alliance's. No source read here dates
+      the altepetl's beginning, so the record has no start, and the build draws only the last row, of 1422 to 1428.
+      Their outline lies south of the lake and takes in Chalco and Xochimilco, but not Texcoco itself, on the eastern
+      shore: the error is the dataset's, and is listed in RECORD-SETS.md.
+relations:
+  in-the-alliance:
+    rel: member-of
+    to: people/polities/triple-alliance
+    valid: { lo: { ref: people/polities/triple-alliance, edge: start } }
+    source:
+      - ref: src:ixtlilxochitl-1892-historia-chichimeca
+        loc: "ch. XXXII, p. 154"
+        quote: siempre el de México y Tetzcuco fueron iguales en dignidad, señorío y rentas, y el de Tlacopan solo tenía cierta parte como la quinta en lo que eran rentas
+      - ref: src:smith-2008-aztec-empire
+        loc: "pp. 122–123"
+        quote: split the tribute, with two-fifths going to Texcoco, two-fifths to Tenochtitlan, and one-fifth to Tlacopan
+    note: >-
+      One of the three heads, with two fifths of the tribute. When it ceased to be one is open: its lord was of the
+      Mexica party late in 1520, and its next lord and his brother fought with Cortés in 1521
+      (people/conquest/conquest-of-mexico), and no source read dates the change.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in city-ixtlilxochitl-1892-tomo2.txt (sha256 5886f18c08b1f94b) and city-smith-2008-aztec-empire.txt (sha256 055d3630cd61ceaa), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }

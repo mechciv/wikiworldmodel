@@ -1,0 +1,45 @@
+id: people/rulers/moctezuma-ii
+kind: person
+summary: >-
+  Moctezuma, Motecuhzoma Xocoyotzin, ruler of Tenochtitlan when the Spaniards came: he received Cortés at the causeway
+  on 8 November 1519, was held by the Spaniards from that month, and died in their hands in the last days of June
+  1520. How he died is told two ways (people/conquest/death-of-moctezuma). Bernal Díaz heard that he had reigned
+  seventeen years; his brother Cuitlahuac succeeded him, after his death in Cortés's telling, before it in Bernal's.
+author: machine:claude-code
+same_as: { wikidata: Q141791 }
+claims:
+  name:
+    prop: name
+    value: { en: Moctezuma II }
+    unsourced: >-
+      An editorial label. Cortés writes Muteczuma, Bernal Díaz Montezuma, Book 12 Motecuçoma.
+  end:
+    prop: end
+    value: { ref: people/conquest/death-of-moctezuma }
+    source:
+      ref: src:cortes-1520-second-letter
+      loc: "p. 190 (scan 201)"
+      quote: le dieron una pedrada los suyos en la cabeza … tan grande, que de allí á tres dias murió
+    method: documentary
+    note: His death, whichever telling of it is taken, and on whichever day the evidence puts it.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in es-cortes-1520-second-letter.txt (sha256 6bb3044f6f34fb78), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+relations:
+  ruler-of-tenochtitlan:
+    rel: held-office
+    to: people/polities/tenochtitlan
+    valid: { hi: { ref: people/conquest/death-of-moctezuma, edge: start } }
+    source:
+      - ref: src:bernal-diaz-verdadera-historia
+        loc: "cap. CXXVI"
+        quote: decian que habia diez y siete años que reinaba
+      - ref: src:cortes-1520-second-letter
+        loc: "p. 231 (scan 242)"
+        quote: sucedido en el señorío un hermano suyo, señor de la ciudad de Iztapalapa, que se llamaba Cuetravacin
+    note: >-
+      Tlatoani of Tenochtitlan, to his death: they said he had reigned seventeen years (Bernal Díaz; in cap. CI he
+      has Moctezuma himself say eighteen); after his death his brother Cuetravacin, Cuitlahuac, lord of Iztapalapa,
+      succeeded to the lordship (Cortés). When the reign began is not dated by any source read here, and a span cannot
+      be counted back from its end, so it is left open.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in es-bernal-diaz-verdadera-historia.txt (sha256 fabaae2d6b1a8c58) and es-cortes-1520-second-letter.txt (sha256 6bb3044f6f34fb78), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }

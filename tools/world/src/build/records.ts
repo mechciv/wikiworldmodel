@@ -8,9 +8,9 @@ import { conj, rotate, toLatLon, unitVector } from '../../../../core/quat.ts';
 import { parseRef, splitRef } from '../../../../core/refs.ts';
 import type { RotationModel } from '../../../../core/rotation-model.ts';
 import type { Bounds, Solution } from '../../../../core/stn.ts';
-import { centre, formatDuration, formatTimeValue, parseLag, parseTime, PRESENT_YEAR } from '../../../../core/time.ts';
+import { bounds, centre, dayOnAxis, formatDuration, formatTimeValue, historical, parseLag, parseTime, PRESENT_YEAR } from '../../../../core/time.ts';
 import type { Basis, Estimate, Feature, FeatureMove, FeatureBasis, FeatureName, FeatureTime } from '../../../../core/tileset.ts';
-import { chosen, claimGroup, countDays, countOf, edgeSubject, epochsOf, inTurn, pointOf, rivalsIn, scenarioKey, spanOf, subjectExists, zeroDayClaim, type ClaimGroup, type Scenario, type SpanBound, type Variant } from '../chronology.ts';
+import { anchorsOf, chosen, claimGroup, countDays, countOf, cycleOf, edgeSubject, epochsOf, inTurn, isBeside, pointOf, resolveCycle, rivalsIn, scenarioKey, spanOf, subjectExists, zeroDayClaim, type ClaimGroup, type Scenario, type SpanBound, type Variant } from '../chronology.ts';
 import { BASES, isMoment, type Claim, type Entity, type Source, type World } from '../world.ts';
 
 /** A form in words, for its claim: its type and what is known of it. */
@@ -256,12 +256,15 @@ function timeBasis(s: Solved, refs: string[]): Basis {
 }
 
 function derivedBy(b: Bounds, w: World, subject: string): { start: string[]; end: string[] } {
-  // A date written in a count of days rests on the claim that dates the count's zero day too: the correlation.
+  // A date written in a count of days rests on the claim that dates the count's zero day too: the correlation. A date
+  // named in cycles rests on the claims that date each cycle's anchor.
   const withZeroDay = (ref: string): string[] => {
     const { record, part: key } = splitRef(ref);
-    const count = key ? countOf(w.entity.get(record)?.claims.find((c) => c.key === key)?.value) : undefined;
-    const zero = count && zeroDayClaim(w, count.calendar);
-    return zero ? [ref, zero.ref] : [ref];
+    const value = key ? w.entity.get(record)?.claims.find((c) => c.key === key)?.value : undefined;
+    const count = countOf(value);
+    const cycle = cycleOf(value);
+    const calendars = count ? [count.calendar] : cycle ? [cycle.day?.cycle, cycle.year?.cycle].filter((x): x is string => !!x) : [];
+    return [ref, ...calendars.flatMap((k) => zeroDayClaim(w, k)?.ref ?? [])];
   };
   const by = (p: string) => [...new Set([...b.get(p)!.loBy, ...b.get(p)!.hiBy].flatMap(withZeroDay))];
   return { start: by(pointOf(w, subject, 'start')), end: by(pointOf(w, subject, 'end')) };
@@ -359,8 +362,9 @@ function valueText(s: Solved, c: Claim, labelOf: (ref: string) => string): strin
   switch (prop?.type) {
     case 'time': {
       const t = parseTime(v as never);
-      // A day in a count of days is said as it is written, with the day it comes to in the default picture.
-      return t.kind === 'count' ? countText(s.world, t) : dateText(v, labelOf);
+      // A day in a count of days is said as it is written, with the day it comes to in the default picture; a day
+      // named in cycles, with the day it comes to there against the rest of the evidence.
+      return t.kind === 'count' ? countText(s.world, t) : t.kind === 'cycle' ? cycleText(s.world, c) : dateText(v, labelOf);
     }
     case 'point': {
       const p = v as { lat: number; lon: number; frame: string };
@@ -421,17 +425,37 @@ function countText(w: World, t: { calendar: string; days: number; text: string }
 }
 
 /**
- * The value of a claim written in a count of days, under each competing date of the count's zero day: by that
- * claim's reference, for the viewer to show when it is picked. Undefined for any other claim.
+ * A day named in cycles as text: as it is written, and the day the rest of the evidence lets it be in a scenario,
+ * or the days, or that it names none of the days the evidence allows.
+ */
+function cycleText(w: World, c: Claim, sc: Scenario = {}): string {
+  const r = resolveCycle(w, c, sc);
+  const day = ([a, b]: [number, number]) => formatTimeValue({ kind: 'interval', lo: dayOnAxis(a).t, hi: dayOnAxis(b).t + dayOnAxis(b).whole });
+  const text = String(c.value);
+  if (!r) return text;
+  if (r.days.length === 1) return `${text} (${day(r.days[0])})`;
+  if (r.days.length) return `${text} (one of ${r.days.map(day).join(', ')})`;
+  return r.nearest ? `${text} (none of the days the rest of the evidence allows; the nearest is ${day(r.nearest)})` : text;
+}
+
+/**
+ * The value of a claim written in a count of days, under each competing date of the count's zero day, or of a claim
+ * named in cycles, under each competing date of its cycles' anchors: by that claim's reference, for the viewer to
+ * show when it is picked. Undefined for any other claim.
  */
 function countTexts(w: World, c: Claim): Record<string, string> | undefined {
-  const count = w.vocab.properties[c.prop]?.type === 'time' ? countOf(c.value) : undefined;
-  const [epoch] = count ? epochsOf(w, count.calendar) : [];
-  const g = epoch ? claimGroup(w, epoch, 'date') : undefined;
-  if (!count || !g) return undefined;
-  const def = chosen(g);
+  if (w.vocab.properties[c.prop]?.type !== 'time') return undefined;
+  const count = countOf(c.value);
+  const cycle = cycleOf(c.value);
+  const calendars = count ? [count.calendar] : cycle ? [cycle.day?.cycle, cycle.year?.cycle].filter((x): x is string => !!x) : [];
   const out: Record<string, string> = {};
-  for (const z of g.claims) if (z !== def) out[z.ref] = countText(w, count, { picks: [z.ref] });
+  for (const k of calendars) {
+    const [epoch] = epochsOf(w, k);
+    const g = epoch ? claimGroup(w, epoch, 'date') : undefined;
+    if (!g) continue;
+    const def = chosen(g);
+    for (const z of g.claims) if (z !== def) out[z.ref] = count ? countText(w, count, { picks: [z.ref] }) : cycleText(w, c, { picks: [z.ref] });
+  }
   return Object.keys(out).length ? out : undefined;
 }
 
@@ -459,6 +483,41 @@ function validText(v: unknown, w: World, labelOf: (ref: string) => string, self:
   return a && b ? `${a} – ${b}` : a ? `from ${a}` : `until ${b}`;
 }
 
+/**
+ * How long after a moment a source was written, from its `written`: "written the same year", "written 4 months
+ * after", "written 34 years after", or, for a range, from its first year to its last. Undefined where the source
+ * does not say when it was written, or the moment is not within history.
+ */
+export function writtenAfter(written: unknown, at: number): string | undefined {
+  if (written === undefined || !historical(at)) return undefined;
+  let lo: number;
+  let hi: number;
+  try {
+    [lo, hi] = bounds(parseTime(written as never));
+  } catch {
+    return undefined;
+  }
+  if (!Number.isFinite(lo) || !Number.isFinite(hi)) return undefined;
+  const say = (years: number): string => {
+    const a = Math.abs(years);
+    if (a < 1 / 12) return 'weeks';
+    // Eleven and a half months and more is a year, not "12 months".
+    const months = Math.max(1, Math.round(a * 12));
+    if (months < 12) return `${months} month${months === 1 ? '' : 's'}`;
+    return `${Math.round(a)} year${Math.round(a) === 1 ? '' : 's'}`;
+  };
+  // A day, a month or a year it was written in is taken at its middle; a longer span from its first year to its last.
+  const [first, last] = hi - lo <= 1 ? [(lo + hi) / 2 - at, (lo + hi) / 2 - at] : [lo - at, hi - at];
+  if (last < 0) return `written ${say(last)} before`;
+  if (first < 0) return 'written at the time';
+  const a = say(first);
+  const b = say(last);
+  if (a === b) return `written ${a} after`;
+  // "33 to 56 years", not "33 years to 56 years".
+  const [n, unit] = a.split(' ');
+  return b.endsWith(` ${unit}`) || (unit === 'year' && b.endsWith(' years')) || (unit === 'month' && b.endsWith(' months')) ? `written ${n} to ${b} after` : `written ${a} to ${b} after`;
+}
+
 function lagText(lag: unknown): string | undefined {
   if (lag === undefined) return undefined;
   const [lo, hi] = parseLag(lag as never);
@@ -474,6 +533,13 @@ export function sourceRecord(src: Source): SourceRecord {
 }
 
 /** A label for any reference: an entity's or phase's name, a record's title, or the reference itself. */
+/** Who held a perspective, and when: the `holds` relations that name it, from the records that make them. */
+export function holdersOf(s: Solved, alt: string, labelOf: (ref: string) => string = labeller(s)): { id: string; label: string; held?: string }[] {
+  return s.world.entities
+    .flatMap((e) => e.relations.filter((r) => r.rel === 'holds' && r.to === alt && r.status !== 'deprecated' && r.rank !== 'deprecated').map((r) => ({ e, r })))
+    .map(({ e, r }) => ({ id: r.subject, label: labelOf(r.subject), ...(r.valid !== undefined ? { held: validText(r.valid, s.world, labelOf, e.id) } : {}) }));
+}
+
 export function labeller(s: Solved): (ref: string) => string {
   const cache = new Map<string, string>();
   for (const e of s.world.entities) cache.set(e.id, namesOf(s, e).label);
@@ -530,10 +596,19 @@ export function records(s: Solved): EntityRecord[] {
   for (const e of w.entities) {
     const used = new Set<string>();
     const wanted = new Set<string>();
-    const cites = (cs: { ref: string; loc?: string; quote?: string }[]): CitationRecord[] =>
+    // When a source was written, against when what it tells of happened: an account written down decades later
+    // is not one written that year (the moment is the claim's subject's date, or the edge a start or end claims).
+    const momentOf = (c: Claim | (typeof e.relations)[number]): number | undefined => {
+      const prop = 'prop' in c ? c.prop : undefined;
+      const point = isMoment(w, c.subject) ? pointOf(w, c.subject, 'start') : prop === 'start' || prop === 'end' ? pointOf(w, c.subject, prop) : undefined;
+      const b = point ? (s.centres.ok ? s.centres.bounds : s.sol.bounds).get(point) : undefined;
+      return b && Number.isFinite(b.lo) && Number.isFinite(b.hi) ? (b.lo + b.hi) / 2 : undefined;
+    };
+    const cites = (cs: { ref: string; loc?: string; quote?: string }[], at?: number): CitationRecord[] =>
       cs.map((c) => {
         used.add(c.ref);
-        return { ref: c.ref, loc: c.loc, quote: c.quote };
+        const after = at === undefined ? undefined : writtenAfter(w.source.get(c.ref)?.written, at);
+        return { ref: c.ref, loc: c.loc, quote: c.quote, ...(after ? { after } : {}) };
       });
     const common = (c: Claim | (typeof e.relations)[number]) => ({
       ref: c.ref,
@@ -541,8 +616,8 @@ export function records(s: Solved): EntityRecord[] {
       subject: c.subject,
       valid: c.valid,
       validText: validText(c.valid, w, labelOf, e.id),
-      sources: cites(c.sources),
-      against: c.against.length ? cites(c.against) : undefined,
+      sources: cites(c.sources, momentOf(c)),
+      against: c.against.length ? cites(c.against, momentOf(c)) : undefined,
       unsourced: c.unsourced,
       confidence: c.confidence,
       confidenceRange: typeof c.confidence === 'string' ? w.vocab.confidence[c.confidence] : undefined,
@@ -569,8 +644,10 @@ export function records(s: Solved): EntityRecord[] {
         method: c.method,
         methodLabel: c.method ? w.vocab.methods[c.method]?.label : undefined,
         group: `${c.subject}|${c.prop}`,
-        competing: !!g && g.claims.length > 1 && !turn,
+        competing: !!g && !isBeside(w, c) && g.claims.length > 1 && !turn,
         turn: turn || undefined,
+        // A date named in cycles holds beside the others of its group, and is never the one picked.
+        beside: isBeside(w, c) || undefined,
         chosen: !!g && chosen(g) === c,
       };
     });
@@ -631,8 +708,9 @@ function claimRefs(w: World, c: Claim): string[] {
     try {
       const t = parseTime(c.value as never);
       if (t.kind === 'ref') out.push(t.ref);
-      // A day in a count of days rests on the record of the count's zero day.
+      // A day in a count of days rests on the record of the count's zero day, and a day named in cycles on their anchors.
       if (t.kind === 'count') out.push(...epochsOf(w, t.calendar));
+      if (t.kind === 'cycle') for (const n of [t.day, t.year]) if (n) out.push(...anchorsOf(w, n.cycle));
     } catch {
       // the validator reports it
     }

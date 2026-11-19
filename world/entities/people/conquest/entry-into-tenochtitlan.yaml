@@ -1,0 +1,97 @@
+id: people/conquest/entry-into-tenochtitlan
+kind: event/political
+summary: >-
+  The entry of Hernán Cortés and his company into Tenochtitlan, where Moctezuma met them at the causeway from
+  Iztapalapa and lodged them in his father Axayacatl's palace. Both Spanish sources date it 8 November 1519. The
+  native sources date it in the Mexica calendar, and disagree with each other and with the Spanish date: Book 12 of
+  the Florentine Codex gives the day 1 Ehecatl, which under the correlation the fall fixes is 20 October, nineteen
+  days before; the Anales de Tlatelolco and Chimalpahin give 8 Ehecatl, a day after. Both are kept, set aside, with
+  how far each is off.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Entry of Cortés into Tenochtitlan }
+    unsourced: An editorial label.
+  date:
+    prop: date
+    value: 8 November 1519 CE
+    source:
+      - ref: src:cortes-1520-second-letter
+        loc: "p. 162 (scan 173)"
+        quote: de 8 de Noviembre de 1519 hasta entrante el mes de Mayo
+      - ref: src:bernal-diaz-verdadera-historia
+        loc: "cap. LXXXVIII"
+        quote: Y fué esta nuestra venturosa é atrevida entrada en la gran ciudad de Tenustitlan, Méjico, á ocho dias del mes de Noviembre, año de nuestro Salvador Jesucristo de 1519 años.
+    method: documentary
+    note: >-
+      Cortés: in these things he spent from 8 November 1519 until the beginning of May; the only place his letter
+      dates the entry, and the meeting itself (pp. 110–112) is undated. Bernal Díaz: this our fortunate and daring
+      entry into the great city of Tenustitlan, Mexico, was on 8 November 1519. Julian.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in es-cortes-1520-second-letter.txt (sha256 6bb3044f6f34fb78) and es-bernal-diaz-verdadera-historia.txt (sha256 fabaae2d6b1a8c58), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  date-book-12:
+    prop: date
+    value: 1 Ehecatl in the year 1 Acatl
+    source:
+      ref: src:florentine-codex-book-12
+      loc: "Book 12, chap. 27, fol. 50v, Nahuatl (Anderson and Dibble's transcription)"
+      quote: "ipā ce hecatl in cemjlhujtlapoalli: auh in xiuhtonalli ce acatl, oc muztla tlamatlactiz Quecholli"
+    against:
+      - ref: src:caso-1959-correlacion
+        loc: "p. 15"
+        quote: si contamos hacia atrás 645 días, no llegamos a 1 Ehecatl; sino a 7 Cipactli.
+      - ref: src:caso-1959-correlacion
+        loc: "p. 15"
+        quote: Luego los datos de Sahagún y de Cristóbal del Castillo son necesariamente erróneos
+    method: historical-account
+    rank: deprecated
+    note: >-
+      Book 12, as the Tlatelolca told it about 1555: on One Wind in the count of days, and the year sign was One
+      Reed; the next day would be the tenth of Quecholli. Lockhart reads the year sign as "ca acatl", Reed. Under
+      the correlation of the 260-day count (people/calendars/tonalpohualli-anchor) the day 1 Ehecatl of that year
+      nearest the Spanish date was 20 October 1519, nineteen days before it, and the world does not hold with both.
+      Caso, counting back from 1 Coatl on 13 August 1521, reaches 7 Cipactli for 8 November, not 1 Ehecatl, and
+      calls the day Book 12 and Cristóbal del Castillo give necessarily wrong. Set aside for that. The month and its
+      day, the eve of the 10th of Quecholli, agree with five other native sources (Caso, p. 15); a day of a month
+      is not read here.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in na-fc12-getty.txt (sha256 9a864988595f9f1f) and na-caso-1959-correlacion.txt (sha256 11d7f45ab98e2b75), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  date-anales-de-tlatelolco:
+    prop: date
+    value: 8 Ehecatl
+    source:
+      ref: src:caso-1959-correlacion
+      loc: "p. 15"
+      quote: dos de estas fuentes, Sahagún y Cristóbal del Castillo, dicen que el día 1 Ehecatl, mientras que Unos Anales y Chimalpahin, dicen que fué el día 8 Ehecatl.
+    method: historical-account
+    rank: deprecated
+    note: >-
+      The Anales de Tlatelolco (the "Unos anales históricos" of 1528, the earliest Nahuatl account) and Chimalpahin
+      give 8 Ehecatl, as Caso reports them; neither could be read here, and Caso names no year sign with the day.
+      Under the correlation of the 260-day count, 8 November 1519 was 7 Cipactli and 8
+      Ehecatl the next day: a day after the Spanish date. Caso saves it: if the Mexica day ran from noon to noon,
+      8 November could be called both 7 Cipactli and 8 Ehecatl (p. 16). A day here has no clock, and two days that
+      touch are held apart, so the world does not hold with both; set aside for that, and not because a source
+      rejects it.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in na-caso-1959-correlacion.txt (sha256 11d7f45ab98e2b75), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  location:
+    prop: location
+    value: { lat: 19.435, lon: -99.13138889, frame: frame:earth/present-day }
+    source: { ref: src:wikidata-tenochtitlan, loc: "Q13695, P625 coordinate location" }
+    method: gazetteer
+    note: >-
+      The city they entered: the point is the gazetteer's for Tenochtitlan, not the causeway from Iztapalapa where
+      Moctezuma met them, nor his father's palace, where he lodged them.
+  frame:
+    prop: frame
+    value: frame:paleomap/plate-104
+    source: { ref: src:paleomap-plate-model, loc: PALEOMAP_PlatePolygons.gpml }
+    method: plate-polygon
+    basis: reconstruction
+relations:
+  war:
+    rel: part-of
+    to: people/conquest/conquest-of-mexico
+    unsourced: An editorial grouping of the events of the conquest.

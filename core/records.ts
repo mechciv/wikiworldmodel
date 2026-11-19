@@ -32,6 +32,11 @@ export interface CitationRecord {
   ref: string;
   loc?: string;
   quote?: string;
+  /**
+   * how long after the moment the claim is about its source was written, where the source says when it was written
+   * and the claim is about a moment: "written 4 months after", "written 34 years after"
+   */
+  after?: string;
 }
 
 /** What claims and relations share. */
@@ -79,6 +84,8 @@ export interface ClaimRecord extends ClaimCommon {
   competing: boolean;
   /** it holds in its turn: the claims of its group each hold for a span of their own, no two at once, and do not compete */
   turn?: true;
+  /** it holds beside its group's other claims: a date written as a day named in cycles, which narrows them and is never picked */
+  beside?: true;
   /** the claim the default picture uses for its group */
   chosen: boolean;
 }

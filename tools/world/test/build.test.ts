@@ -790,3 +790,36 @@ describe('the climate at a height', () => {
     expect(jul - jan).toBeGreaterThan(1500);
   });
 });
+
+describe('the conquest of Tenochtitlan, as the build carries it (docs/slices/FIFTEENTH-SLICE.md)', () => {
+  const rec = (id: string) => JSON.parse(readFileSync(join(latestBuild(), 'records', `${id}.json`), 'utf8')) as EntityRecord;
+
+  it('says a day named in cycles as written, with the day it comes to, beside the other side’s date and not competing with it', () => {
+    const date = rec('people/conquest/fall-of-tenochtitlan').claims.filter((c) => c.prop === 'date');
+    expect(date.map((c) => [c.valueText, !!c.beside, c.competing])).toEqual([
+      ['13 August 1521 CE', false, false],
+      ['1 Coatl in the year 3 Calli (13 August 1521 CE)', true, false],
+    ]);
+    const entry = rec('people/conquest/entry-into-tenochtitlan').claims.find((c) => c.key === 'date-book-12')!;
+    expect(entry.valueText).toBe('1 Ehecatl in the year 1 Acatl (none of the days the rest of the evidence allows; the nearest is 20 October 1519 CE)');
+  });
+
+  it('says how long after the fall each source was written', () => {
+    const date = rec('people/conquest/fall-of-tenochtitlan').claims.find((c) => c.key === 'date')!;
+    expect(date.sources.map((s) => s.after)).toEqual(['written 9 months after', 'written 47 years after']);
+  });
+
+  it('says who held each perspective, and when', () => {
+    const ts = JSON.parse(readFileSync(join(latestBuild(), 'tileset.json'), 'utf8')) as Tileset;
+    const g = ts.alternatives.find((x) => x.id === 'alt:conquest-accounts')!;
+    expect(g.members.find((m) => m.id === 'alt:conquest-accounts/mexica')!.heldBy).toEqual([{ id: 'people/polities/tlatelolco', label: 'Tlatelolco', held: '1555 CE – 1565 CE' }]);
+    expect(g.members.find((m) => m.id === 'alt:conquest-accounts/conquerors')!.heldBy!.map((h) => h.label).sort()).toEqual(['Bernal Díaz del Castillo', 'Hernán Cortés']);
+  });
+
+  it('draws the Triple Alliance from the dataset’s rows of it, which take in Tlaxcala', () => {
+    const states = JSON.parse(readFileSync(join(latestBuild(), 'polities.json'), 'utf8')) as PolitiesFile;
+    const rows = states.rows.filter((r) => r.name === 'Aztec Triple Alliance');
+    expect(rows.length).toBe(12);
+    for (const r of rows) expect(r.claimedBy).toContain('people/polities/triple-alliance');
+  });
+});

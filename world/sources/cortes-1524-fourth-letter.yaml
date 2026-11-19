@@ -1,0 +1,33 @@
+id: src:cortes-1524-fourth-letter
+type: text
+kind: eyewitness
+citation: >-
+  Cortés, H. Fourth letter of relation to the Emperor Charles V, Temixtitan, 15 October 1524. As "Carta cuarta" in
+  Cartas del famoso conquistador Hernan Cortes al emperador Carlos Quinto (Biblioteca histórica de la Iberia, tomo I).
+  México: Imprenta de I. Escalante y C.ia, 1870, pp. 439–538.
+authors:
+  - "Cortés, H."
+published: 1870
+written: 15 October 1524 CE
+title: Carta cuarta, que don Fernando Cortés, gobernador y capitan general por su majestad en la Nueva-España del mar Océano, envió
+container: Cartas del famoso conquistador Hernan Cortes al emperador Carlos Quinto (México, 1870)
+url: https://es.wikisource.org/wiki/%C3%8Dndice:13_Cartas_del_Famoso_Conquistador_Hern%C3%A1n_Cort%C3%A9s.pdf
+via: >-
+  Spanish Wikisource's transcription of the 1870 edition (scan pages 449–548 of "13 Cartas del Famoso Conquistador
+  Hernán Cortés.pdf"), kept as the wiki's API renders that range of pages. The pages quoted (scans 513–517) are not
+  proofread on Wikisource and have misreadings ("dolía" for "della", "do" for "de"), so each quotation was compared
+  with its page image and cut to words the print and the transcription share. The 1870 edition reprints an
+  eighteenth-century editor's footnotes (evidently Lorenzana's, 1770), which are not Cortés's words.
+license: public domain
+reliability: >-
+  Cortés writing from the rebuilt city as its governor, three years after the fall: evidence of how he presented the
+  resettlement (a Spanish town and a native one divided by water, the native city under a cihuacoatl he restored,
+  30,000 native householders, the shipyard-fortress that made him master of the city), not a count anyone checked.
+verified:
+  by: machine:claude-code
+  how: >-
+    Scans 449–548 rendered through es.wikisource.org's API (action=parse of the pages tag) on 2026-11-18 (2026-11-19
+    UTC) and kept as es-cortes-1524-fourth-letter.txt, with the printed page and scan number at each page start. Read:
+    the passage on the city (pp. 503–508) and the date (p. 536). Every quotation was compared with its page image in
+    the Commons PDF, and all were found in the kept text by script with quote-check's own matching. MacNutt's English
+    translation was read alongside, not quoted.

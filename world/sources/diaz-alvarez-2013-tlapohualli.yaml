@@ -1,0 +1,25 @@
+id: src:diaz-alvarez-2013-tlapohualli
+type: publication
+kind: review
+citation: >-
+  Díaz Álvarez, A. (2013). Tlapohualli, la cuenta de las cosas. Reflexiones en torno a la
+  reconstrucción de los calendarios nahuas. Estudios de Cultura Náhuatl 46, 159–197.
+authors:
+  - "Díaz Álvarez, A."
+published: 2013
+title: "Tlapohualli, la cuenta de las cosas. Reflexiones en torno a la reconstrucción de los calendarios nahuas"
+container: "Estudios de Cultura Náhuatl 46, 159–197"
+url: https://nahuatl.historicas.unam.mx/index.php/ecn/article/view/77726
+license: CC-BY-NC-ND-4.0
+reliability: >-
+  A critique of how the Nahua calendars have been reconstructed from colonial wheels and tables
+  made to correlate them with the Christian year. Its note 13 reviews the proposals for a Nahua
+  leap day (Motolinía, Gemelli Careri, Castillo, Tena, Mora Echeverría) and finds no evidence for
+  any adjustment. Evidence of the state of that question in 2013.
+verified:
+  by: machine:claude-code
+  how: >-
+    The journal's PDF (article/download/77726/68772) fetched on 19 November 2026 (UTC) and read in
+    its text layer: the introduction and the section on the colonial correlations (pp. 159–170),
+    with notes 12–15 on p. 166, by the printed page numbers. Quotes were found in the kept text
+    na-diaz-alvarez-2013-tlapohualli.txt by script.

@@ -3,7 +3,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
-import { featureTileUrl, type FeatureIndex } from '../../../core/featuretiles.ts';
+import { capOf, featureTileUrl, type FeatureIndex } from '../../../core/featuretiles.ts';
 import type { Feature } from '../../../core/tileset.ts';
 import { idle, latestBuild } from './helpers.ts';
 
@@ -34,8 +34,12 @@ test('a tile below the root comes only when its cell is in view, and then its ma
   const f = rows.find((x) => x.time.start.best !== null && !x.moves && x.time.start.best > -1e5)!;
   const t = `t=${f.time.start.best}`;
   const marker = page.locator(`.marker[data-entity="${f.id}"]`);
-  // From the far side of the globe.
-  await page.goto(`/?b=${latestBuild()}&${t}&lat=${-f.location.lat}&lon=${f.location.lon + 180}&d=3.3`);
+  // From the far side of the globe from its cell. A cell is in view where its cap, widened by what the camera sees,
+  // reaches the view: for a quarter of the globe that is most of it, and the far side of a record off the cell's
+  // middle may still be within reach.
+  const [x, y, z] = capOf(r!.q).centre;
+  const [lat, lon] = [(Math.asin(z) * 180) / Math.PI, (Math.atan2(y, x) * 180) / Math.PI];
+  await page.goto(`/?b=${latestBuild()}&${t}&lat=${-lat}&lon=${lon + 180}&d=3.3`);
   await idle(page);
   await expect(marker).toHaveCount(0);
   expect((await fetched(page)).filter((u) => u.endsWith(featureTileUrl(r!)))).toEqual([]);

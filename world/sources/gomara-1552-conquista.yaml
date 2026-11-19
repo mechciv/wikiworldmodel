@@ -1,0 +1,37 @@
+id: src:gomara-1552-conquista
+type: publication
+kind: historian
+citation: >-
+  López de Gómara, F. La conquista de México (first printed Zaragoza, 1552), as copied by
+  Chimalpáhin and transcribed in S. Schroeder, D. Tavárez Bermúdez and C. Roa-de-la-Carrera (eds.),
+  Chimalpáhin y La conquista de México: la crónica de Francisco López de Gómara comentada por el
+  historiador nahua. México: Universidad Nacional Autónoma de México, Instituto de Investigaciones
+  Históricas, 2012 (Historiadores y Cronistas de Indias 10); PDF published online 2019.
+authors: ["López de Gómara, F."]
+published: 2012
+written: 1552 CE
+title: La conquista de México
+url: https://historicas.unam.mx/publicaciones/publicadigital/libros/568/568_04_11_71.pdf
+via: >-
+  The UNAM edition's transcription of Chimalpáhin's manuscript copy of Gómara's chronicle, chapters
+  71–80 (PDF "568_04_11_71"). Where the copy departs from Gómara's printed text, the editors give
+  the printed reading in brackets, "[LdeG: …]"; chapter numbers in brackets are the editors'. The
+  year of the first printing is from the Internet Archive's record of a copy of it
+  (laistoriadelasin00lpez, "La istoria de las Indias. y Conquista de Mexico", 1552).
+license: public-domain
+license_note: >-
+  Gómara's text is in the public domain; the UNAM edition allows non-profit reproduction with
+  citation of its source and address.
+reliability: >-
+  Gómara was Cortés's chaplain (Jiménez Martínez 2022 suggests the house count came to him from
+  Cortés); his 60,000 houses is the figure most later writers repeat. It is evidence of what was
+  said in Cortés's circle a generation after the conquest, not a count. Chimalpáhin's copy may
+  differ from the print, and the editors' brackets show where.
+verified:
+  by: machine:claude-code
+  how: >-
+    The PDF fetched on 2026-11-19 (UTC); chapters [78] to [80] read (pp. 218–223 of the edition,
+    pages assigned from the running heads, which the text layer prints at the foot of each page).
+    Quotes are passages where the copy and the bracketed printed readings agree. Found in the kept
+    text city-gomara-chimalpahin-71-80.txt by script. An 1870 Mexican reprint (Internet Archive
+    conquistademxic00gmgoog) was also read; its OCR garbles the key sentence, so it is not quoted.

@@ -1,0 +1,93 @@
+id: people/conquest/war-with-tlaxcala
+kind: event/campaign
+summary: >-
+  The battles of September 1519 between Cortés's company and the Tlaxcalans, whose lands they crossed on the way to
+  Tenochtitlan, and the peace that made Tlaxcala their ally against the Mexica for the rest of the war. Bernal Díaz
+  dates the first battle to 2 September and the entry into the city of Tlaxcala to 23 September; Cortés dates
+  neither, and counts the enemy in the hundred thousands. Tlaxcala's own history, written in the 1580s, passes over
+  the battles and tells the alliance as the choice of its four lords.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: War of the Spaniards with Tlaxcala }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 2 September 1519 CE
+    source:
+      ref: src:bernal-diaz-verdadera-historia
+      loc: "cap. LXIII"
+      quote: y llamábase donde pasó esta batalla Tehuacingo ó Tehuacacingo, y fué dada en 2 dias del mes de Setiembre de 1519 años
+    method: historical-account
+    note: >-
+      Bernal Díaz: the place of this battle was called Tehuacingo or Tehuacacingo, and it was fought on 2 September
+      1519. Lockhart's English has "on the first two days of September". Cortés counts more than a hundred thousand
+      fighting men, and the next day more than 149,000 (pp. 70–71), and dates no battle.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in es-bernal-diaz-verdadera-historia.txt (sha256 fabaae2d6b1a8c58), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  ended-by:
+    prop: end_before
+    value: 23 September 1519 CE
+    source:
+      ref: src:bernal-diaz-verdadera-historia
+      loc: "cap. LXXIV"
+      quote: como entramos en tierra de Tlascala, hasta que fuimos á su ciudad se pasaron veinte y cuatro dias, y entramos en ella á 23 de Setiembre de 1519 años
+    method: historical-account
+    note: >-
+      The peace was made before the Spaniards entered the city of Tlaxcala, on 23 September 1519; Cortés stayed six
+      or seven days in his camp after it (p. 80). No source read dates the peace itself, so the day is a bound on the
+      end and not its date. From the first battle to the entry is 21 days, not the 24 Bernal counts from entering
+      Tlaxcalan land.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in es-bernal-diaz-verdadera-historia.txt (sha256 fabaae2d6b1a8c58), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  account-tlaxcala:
+    prop: account
+    value:
+      en: >-
+        The four lords of the four cabeceras of the Señoría and Republic of Tlaxcala came out to receive Cortés in
+        state; the history of Tlaxcala tells the alliance as their choice, and passes over the battles, as its editor
+        says it tries to hide them.
+    source:
+      - ref: src:munoz-camargo-1892-historia-de-tlaxcala
+        loc: "p. 186"
+        quote: salieron los cuatro Señores de las cuatro cabeceras de la Señoría y República de Tlaxcalla con la mayor pompa y majestad que pudieron
+      - ref: src:munoz-camargo-1892-historia-de-tlaxcala
+        loc: "Chavero's note 1, p. 186"
+        quote: Aun cuando el autor trata de ocultar los combates que los tlaxcaltecas tuvieron con Cortés, no pudo menos aquí, que referirse al de Tecoac que fué el primero.
+    method: historical-account
+    note: >-
+      Diego Muñoz Camargo's history of Tlaxcala, written in the 1570s to 1590s, a third telling, Tlaxcala's own:
+      not a member of the perspectives of the conquerors and the Mexica, which differ on other things. Its editor
+      Chavero (1892) notes that it hides the fights the Tlaxcalans had with Cortés, and that the lords were divided:
+      Maxixcatzin for the alliance at once, the young Xicotencatl for war (pp. 186–187).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in city-munoz-camargo-1892.txt (sha256 ea7c4151e28c5a07), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+relations:
+  war:
+    rel: part-of
+    to: people/conquest/conquest-of-mexico
+    unsourced: An editorial grouping of the events of the conquest.
+  tlaxcala:
+    rel: participant
+    to: people/polities/tlaxcala
+    source:
+      ref: src:cortes-1520-second-letter
+      loc: "p. 78 (scan 89)"
+      quote: ni tenian ni habían tenido cierto señor; antes habían vivido exentos y por sí de inmemorial tiempo acá, y que siempre se habían defendido contra el gran poder de Muteczuma y de su padre y abuelos
+    note: >-
+      Against the Spaniards, who it took for Moctezuma's friends (Bernal, cap. LXXI). Cortés reports the plea of
+      Xicotencatl, captain general of the province, at the peace: they had never had a single lord, had lived free
+      from time immemorial, and had always defended themselves against Moctezuma and his fathers.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in es-cortes-1520-second-letter.txt (sha256 6bb3044f6f34fb78), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  expedition:
+    rel: participant
+    to: people/organizations/cortes-expedition
+    source:
+      ref: src:bernal-diaz-verdadera-historia
+      loc: "cap. LXV"
+      quote: Otro dia de mañana, que fueron 5 de Setiembre de 1519 años
+    note: Against Tlaxcala; the great battle of 5 September 1519 in Bernal's telling.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in es-bernal-diaz-verdadera-historia.txt (sha256 fabaae2d6b1a8c58), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }

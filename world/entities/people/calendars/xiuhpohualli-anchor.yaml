@@ -1,0 +1,98 @@
+id: people/calendars/xiuhpohualli-anchor
+kind: event/epoch
+summary: >-
+  The first day of the Mexica year 3 Calli, the year in which Tenochtitlan fell. The names of the years of the
+  conquest are not in dispute: 1 Acatl was 1519, 2 Tecpatl 1520, 3 Calli 1521. Where a year began is: which month
+  began it (Izcalli, Atlcahualo or Tlacaxipehualiztli), which of its days gave it its name, whether leap days were
+  counted, and whether every town began it on the same day are all argued, and Sahagún reports that the towns of
+  his own day disagreed. Only Sahagún gives the new year a day of the European calendar, 2 February; Caso's
+  correlation, the one most used, begins it with Izcalli and gives a rule, not a day. Every year named in the count
+  follows the day chosen here.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: "First day of the year 3 Calli" }
+    unsourced: An editorial label.
+  calendar:
+    prop: calendar
+    value: xiuhpohualli
+    source:
+      - ref: src:sahagun-historia-kingsborough-1831
+        loc: "Book 4, appendix, p. 154"
+        quote: "Contaban por estos caracteres cinquenta y dos anos, dando a cada uno de los caracteres trece anos, y contaban de esta manera: Ceacatl, Ometecpatl, Hicalli, Navitochili"
+      - ref: src:pina-garza-1999-aritmetica
+        loc: "p. 264"
+        quote: Los años solares tenían el nombre de un día del tonalpohualli, que se formaba con los 13 enteros ya mencionados, pero con sólo 4 símbolos, que entre los mexicas fueron calli, tochtli, ácatl, técpatl.
+      - ref: src:kruell-2017-terminologia
+        loc: "p. 140"
+        quote: los pueblos mesoamericanos medían con precisión el ciclo de 365 días que corresponde a un año solar y lo dividían en 18 periodos de 20 días a los cuales añadían 5 días aciagos llamados nemontemi.
+      - ref: src:diaz-alvarez-2013-tlapohualli
+        loc: "p. 166, note 13"
+        quote: Motolinía, quien menciona que “los naturales nunca alcanzaron el bisiesto”
+    note: >-
+      Sahagún: they counted fifty-two years by these signs, thirteen to each, thus: One Reed, Two Flint, Three
+      House, Four Rabbit (the scan's "Navitochili" is Nauhtochtli). Piña Garza: the years of 365 days were named
+      for a day of the 260-day count, with its thirteen numbers but only four signs. Kruell: the year of 365 days
+      was eighteen periods of twenty days and five unlucky days, the nemontemi. How the count turns, a year of
+      365 days with no leap day and the bearers in turn, is in core/time.ts (CYCLES): Caso's rule, and Motolinía's,
+      who says the natives never reached the leap year (Díaz Álvarez 2013, p. 166, note 13). Kruell (2017, p. 145)
+      shows that xiuhpohualli, the name the record uses as most modern work does, meant the count of years, the
+      cycle of fifty-two, and not the year of 365 days.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in na-kingsborough-1831-v7.txt (sha256 817869f9d37eb6be), na-pina-garza-1999-aritmetica.txt (sha256 6370428536a157b6), na-kruell-2017-terminologia.txt (sha256 dcd897d454976caf) and na-diaz-alvarez-2013-tlapohualli.txt (sha256 9f1c60114b281eae), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  day-name:
+    prop: day_name
+    value: the year 3 Calli
+    source:
+      - ref: src:florentine-codex-book-12
+        loc: "Book 12, chap. 40, fol. 83r, Spanish (Lockhart's transcription)"
+        quote: "Rendieronse los mexicanos, y despartiose la guerra en la cuenta de los años, que se dize tres casas, y ē la cuenta de los dias: en el signo que se llama Ce coatl."
+      - ref: src:caso-1959-correlacion
+        loc: "p. 16"
+        quote: Pero como 1521, año de la toma de Tenochtitlán se llamó 3 Calli, concluimos entonces que ese año no se llamó por el día que principiaba, pues este era necesariamente un día Cuetzpallin.
+    note: >-
+      Sahagún's Spanish of Book 12: the Mexica surrendered, and the war ended, in the count of the years that is
+      called Three Houses, and in the count of the days in the sign One Serpent. Caso: 1521, the year of the
+      taking of Tenochtitlan, was called 3 Calli; it was not named for the day it began on, which was a day
+      Cuetzpallin.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in na-fc12-getty.txt (sha256 9a864988595f9f1f) and na-caso-1959-correlacion.txt (sha256 11d7f45ab98e2b75), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  date:
+    prop: date
+    value: 2 February 1521 CE
+    source:
+      - ref: src:florentine-codex-book-12
+        loc: "Book 12, chap. 28, fol. 52v, Spanish (Lockhart's transcription)"
+        quote: otro año en el mes que llamauan Quauitl Eua que començaua segundo dia de hebrero
+      - ref: src:sahagun-historia-kingsborough-1831
+        loc: "Book 7, p. 194"
+        quote: En el Tlatilulco junté muchos viejos, los mas diestros que yo pude haber, y juntamente con los mas habiles de los colegiales se altered esta materia por muchos dias, y todos ellos concluyeron, que comenzaba el aho segundo dia de Febrero.
+    against:
+      - ref: src:bartl-gobel-prem-1989-calendarios
+        loc: "p. 13"
+        quote: "Los dos problemas básicos a solucionar son hasta hoy día: con qué mes principió el año azteca, y a qué fecha del calendario romano correspondió un determinado día azteca en un año dado."
+      - ref: src:johansson-2016-desliz
+        loc: "p. 75"
+        quote: cada cuatro años, un desliz “crono-lógico” de dichos meses dentro del año.
+    method: calendar-correlation
+    basis: reconstruction
+    note: >-
+      Sahagún's. In Book 12 he counts the months from the Spaniards' flight in Tecuilhuitontli, which he begins on
+      2 June, to the return of the Spaniards, and on the way another year began in the month Quahuitl ehua, which
+      began on the second of February: the year after the flight, 3 Calli, in which the city fell. In Book 7 he
+      tells how the elders he gathered in Tlatelolco, with the best of his students, argued it for many days and
+      all concluded that the year began on 2 February (the scan's "altered" is altercó). His table of the months
+      is the same for every year, which a year of 365 days with no leap day cannot be: Caso (p. 23) reads it as
+      true of 1570, with the twelve leap days of 1521 to 1570 uncounted, so that in 1521 the same month began some
+      days later than 2 February.
+      The only Julian day any source read gives a Mexica new year, and so the only one written; the others are
+      rules and are told here, not written. Caso begins the year with Izcalli, on the day after the sign that
+      names the year, so that a year 3 Calli began on a day 8 Cuetzpallin (pp. 9, 16), and he names no Julian day
+      for it; Motolinía's sources begin it with Tlacaxipehualiztli, Sahagún's with Atlcahualo (Bartl, Göbel and
+      Prem 1989, p. 14); Tena names the year for its 80th and 340th days (Piña Garza 1999, p. 264); Johansson
+      (2016) has the first month slide every four years. Sahagún himself heard that it began in January in some
+      places, on 1 February in others and in March in others (Book 7, p. 194). For the conquest it matters little:
+      each name of a year comes once in fifty-two, and no day dated here lies within two months of a new year.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in na-fc12-getty.txt (sha256 9a864988595f9f1f), na-kingsborough-1831-v7.txt (sha256 817869f9d37eb6be), na-bartl-gobel-prem-1989-calendarios.txt (sha256 d1a7636703580de6) and na-johansson-2016-desliz.txt (sha256 ade712474de830c0), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }

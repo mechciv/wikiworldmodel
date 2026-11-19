@@ -1,0 +1,32 @@
+id: people/persons/bernal-diaz-del-castillo
+kind: person
+summary: >-
+  Bernal Díaz del Castillo, a soldier of Cortés's company who wrote the True History of the conquest in his old age, in
+  Guatemala, finishing it in 1568: the conquerors' account from the ranks, against the historians who gave Cortés all
+  the glory. Written here for the perspective he held; his life is not.
+author: machine:claude-code
+same_as: { wikidata: Q315795 }
+claims:
+  name:
+    prop: name
+    value: { en: Bernal Díaz del Castillo }
+    unsourced: >-
+      An editorial label. Wikidata's English label for the item was vandalized when it was looked up (19 November 2026).
+relations:
+  holds-the-conquerors-account:
+    rel: holds
+    to: alt:conquest-accounts/conquerors
+    valid: 1568 CE
+    source:
+      - ref: src:bernal-diaz-verdadera-historia
+        loc: "cap. CCX"
+        quote: hasta este año 1568, que estoy trasladando esta relacion
+      - ref: src:bernal-diaz-lockhart-1844
+        loc: "vol. I, author's preface, pp. vii–viii"
+        quote: I have now completed it this 26th day of February, 1568, from my day-book and memory, in this very loyal city of Guatimala
+    note: >-
+      In 1568, when he was copying out this relation, and finished it, from his notes and memory, in Guatemala, on 26
+      February 1568 (his preface, in Lockhart's English; its Spanish is not in the edition kept): forty-seven years
+      after the fall.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in es-bernal-diaz-verdadera-historia.txt (sha256 fabaae2d6b1a8c58) and es-bernal-diaz-lockhart-1844.txt (sha256 8b87be22a2a9cc0b), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }

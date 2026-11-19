@@ -1,0 +1,27 @@
+id: src:smith-2008-aztec-city-planning
+type: publication
+kind: review
+citation: >-
+  Smith, M.E. (2008). City Planning: Aztec City Planning. In H. Selin (ed.), Encyclopaedia of the
+  History of Non-Western Science, Technology and Medicine, 2nd edition. Springer.
+authors: ["Smith, M.E."]
+published: 2008
+title: "City Planning: Aztec City Planning"
+container: Encyclopaedia of the History of Non-Western Science, Technology and Medicine, 2nd edition (Springer)
+url: http://web.archive.org/web/2024id_/https://www.public.asu.edu/~mesmith9/1-CompleteSet/MES-08-AzCityPlan-Encyclopedia.pdf
+via: >-
+  The author's PDF of the entry, read from the Internet Archive's copy of his ASU pages (capture
+  of 8 May 2024). Title, editor and container as the author's publication list gives them
+  (Internet Archive copy of his Publications page, which spells it "Non-Westsern"); the list's
+  "vol. 1, pp. 577-578" does not match the PDF's printed page numbers (133–143), so locators here
+  are the PDF's printed pages.
+license: all-rights-reserved
+license_note: Quoted briefly as evidence.
+reliability: >-
+  A short synthesis by an archaeologist of Aztec cities. It gives Tenochtitlan's area as a round
+  figure, and the chinampa house plots after Calnek (1972), without new data.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched on 2026-11-19 (UTC); the section on Tenochtitlan (p. 142) and the tables read. Quotes
+    found in the kept text city-smith-2008-aztec-city-planning.txt by script.

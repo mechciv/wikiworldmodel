@@ -37,7 +37,7 @@ export class Toolbar {
     const selects = groups
       .map(
         (g) => `<label class="alt-group" title="${esc(g.description ?? '')}"><span>${esc(g.title)}</span>
-          <select data-group="${esc(g.id)}"><option value="">Default picture</option>${g.members.map((m) => `<option value="${esc(m.id)}" title="${esc(m.description ?? '')}">${esc(m.title)}</option>`).join('')}</select></label>`,
+          <select data-group="${esc(g.id)}"><option value="">Default picture</option>${g.members.map((m) => `<option value="${esc(m.id)}" title="${esc([m.heldBy?.length ? `Held by ${m.heldBy.map((h) => `${h.label}${h.held ? ` (${h.held})` : ''}`).join('; ')}.` : '', m.description ?? ''].filter(Boolean).join(' '))}">${esc(m.title)}</option>`).join('')}</select></label>`,
       )
       .join('');
     this.el.innerHTML = `

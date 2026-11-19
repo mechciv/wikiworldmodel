@@ -1,0 +1,29 @@
+id: src:prescott-1843-conquest
+type: publication
+kind: historian
+citation: >-
+  Prescott, W.H. (1843). History of the Conquest of Mexico. Montezuma Edition, edited by W.H.
+  Munro and comprising the notes of the edition by J.F. Kirk, 4 vols. Philadelphia and London: J.B.
+  Lippincott Company, 1904 (The Works of William H. Prescott, vols. I–IV).
+authors: ["Prescott, W.H."]
+published: 1904
+written: 1843 CE
+title: History of the Conquest of Mexico
+url: https://gutenberg.pglaf.org/5/9/8/2/59820/59820-0.txt
+via: >-
+  Project Gutenberg's transcription of the Montezuma Edition (ebook 59755 for vol. 1, 59820 for
+  vol. 2), read from the mirror gutenberg.pglaf.org because www.gutenberg.org is down. The
+  transcription has no page numbers; locators are book, chapter and footnote. Notes marked {*} are
+  Munro's additions of 1904, as his introductory note in vol. 1 explains.
+license: public-domain
+reliability: >-
+  The standard nineteenth-century history in English, from the chronicles and manuscripts then
+  known. Its population figure is the chroniclers' house count times a household size; Munro's
+  1904 note disputes it after Morgan. Evidence of what the historians made of the sixteenth-century
+  figures, not of the population.
+verified:
+  by: machine:claude-code
+  how: >-
+    Both volumes fetched on 2026-11-19 (UTC); Munro's introductory note and the author's note on
+    bracketed notes (vol. 1), and Book IV chapter I with footnotes 313–323 (vol. 2) read. Quotes
+    found in the kept text city-prescott-1843-conquest-vol2.txt by script.

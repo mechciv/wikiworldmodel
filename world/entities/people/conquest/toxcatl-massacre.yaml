@@ -1,0 +1,145 @@
+id: people/conquest/toxcatl-massacre
+kind: event/massacre
+summary: >-
+  The killing of the Mexica nobles and warriors who were dancing at the feast of Toxcatl in the courtyard of the
+  great temple of Tenochtitlan, by the Spaniards whom Cortés had left in the city under Pedro de Alvarado while he
+  went to the coast against Narváez, in May 1520. The rising that followed ended with the Spaniards' flight from the
+  city. The sides tell it differently, and neither gives its day: the Mexica account of Book 12 names the month and
+  counts the days of friendship from the entry to it; Cortés does not mention it, and tells of a Mexica attack on the
+  Spaniards' fortress.
+author: machine:claude-code
+same_as: { wikidata: Q1131442 }
+claims:
+  name:
+    prop: name
+    value: { en: Massacre at the feast of Toxcatl }
+    unsourced: >-
+      An editorial label. Historians call it the massacre in the Great Temple, or of Toxcatl; whether it was a
+      massacre is what the sides dispute, and the record's kind takes the word most historians now use.
+  date:
+    prop: date
+    value: { ref: people/conquest/entry-into-tenochtitlan, edge: start, lag: 195 days }
+    source:
+      ref: src:florentine-codex-book-12
+      loc: "Book 12, chap. 27, fol. 51r, Nahuatl (Anderson and Dibble's transcription)"
+      quote: "Auh injc mocempoa in jzqujlhujtique matlacpoalli oçe, on caxtolli: auh in tocnjoan catca chicunapoalilhujtl on caxtolli. Auh in toiaovan catca vmpoalilhujtl"
+    method: historical-account
+    note: >-
+      Book 12, in the Mexica telling: all the days they spent [in the city] come to eleven twenties and fifteen
+      (235); they were our friends for nine twenties and fifteen days (195), and our enemies for forty. The same
+      chapter puts the death of the warriors in the month Toxcatl (fol. 51r). The claim reads the friendship as
+      ending with the killing, and counts its 195 days from the entry, a reading the record makes and says. Sahagún's
+      Spanish column divides the 235 days otherwise, 85 of peace and friendship. Wikidata's item gives 22 May 1520, from no source
+      read here; Hassig (2016) puts it in late April, by Sahagún's fixed table of the months, which would be before
+      Cortés left the city.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in na-fc12-getty.txt (sha256 9a864988595f9f1f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  after-cortes-left:
+    prop: later_than
+    value: May 1520 CE
+    source:
+      ref: src:cortes-1520-second-letter
+      loc: "p. 162 (scan 173)"
+      quote: de 8 de Noviembre de 1519 hasta entrante el mes de Mayo
+    method: documentary
+    note: >-
+      Cortés spent his time in the city from 8 November 1519 until the beginning of May 1520; the killing was done
+      while he was away, by those he left there (Book 12, chap. 19; Bernal Díaz, cap. CXXV).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in es-cortes-1520-second-letter.txt (sha256 6bb3044f6f34fb78), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  before-cortes-returned:
+    prop: earlier_than
+    value: 24 June 1520 CE
+    source:
+      - ref: src:cortes-1520-second-letter
+        loc: "p. 186 (scan 197)"
+        quote: E otro dia siguiente, que fué víspera de San Juan Bautista, me partí, y dormí en el camino, á tres leguas de la dicha gran ciudad; y dia de San Juan, despues de haber oido misa, me partí y entré en ella casi á medio dia
+      - ref: src:bernal-diaz-verdadera-historia
+        loc: "cap. CXXV"
+        quote: y llegamos á Méjico dia de señor San Juan de Junio de 1520 años
+    method: documentary
+    note: >-
+      Cortés came back into the city on St John the Baptist's day, 24 June 1520, after the killing and the rising,
+      of which the alcalde he had left wrote to him on the coast.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in es-cortes-1520-second-letter.txt (sha256 6bb3044f6f34fb78) and es-bernal-diaz-verdadera-historia.txt (sha256 fabaae2d6b1a8c58), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  account-conquerors:
+    prop: account
+    alt: alt:conquest-accounts/conquerors
+    value:
+      en: >-
+        The Mexica, in concert with Narváez, meant to kill the Spaniards Cortés had left in the city, and attacked
+        their fortress on every side. Alvarado, as he told it, fell on the lords at their dance because he had learned
+        that they were about to rise, to free Moctezuma at their god's bidding; he struck to put fear into them.
+    source:
+      - ref: src:cortes-1520-second-letter
+        loc: "p. 182 (scan 193)"
+        quote: E que entretanto ellos matarian á los que yo en la ciudad dejaba, como lo acometieron.
+      - ref: src:cortes-1520-second-letter
+        loc: "p. 183 (scan 194)"
+        quote: me hacia saber cómo los indios les habian combatido la fortaleza por todas las partes della
+      - ref: src:bernal-diaz-verdadera-historia
+        loc: "cap. CXXV"
+        quote: y el Pedro de Albarado dijo que luego le habian de venir á dar guerra, segun el concierto tenian entre ellos hecho
+      - ref: src:bernal-diaz-verdadera-historia
+        loc: "cap. CXXV"
+        quote: sino que verdaderamente dió en ellos por metelles temor
+    method: historical-account
+    note: >-
+      Cortés, four months after: meanwhile they would kill those he left in the city, as they attempted; the alcalde
+      wrote that the Indians had attacked the fortress on every side. He never mentions the feast or a killing by
+      Alvarado's men. Bernal Díaz, fifty years after and by hearsay (he was with Cortés against Narváez, and says he
+      had it from trustworthy men who were with Alvarado): Alvarado said they were about to make war on him, by the
+      plan they had made; but truly he fell on them to put fear into them. Bernal also reports the Mexica envoys'
+      telling, that Alvarado fell without cause on lords dancing at a feast he had licensed, and rejects the charge,
+      which he ascribes to Las Casas, that it was done for their gold.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in es-cortes-1520-second-letter.txt (sha256 6bb3044f6f34fb78) and es-bernal-diaz-verdadera-historia.txt (sha256 fabaae2d6b1a8c58), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  account-mexica:
+    prop: account
+    alt: alt:conquest-accounts/mexica
+    value:
+      en: >-
+        The Spaniards asked for the feast of Huitzilopochtli, and Moctezuma had it held. When the dancing had begun,
+        they came out armed, closed every way out of the temple courtyard, struck the drummer, and killed those who
+        were dancing.
+    source:
+      - ref: src:florentine-codex-book-12
+        loc: "Book 12, chap. 19, fol. 29v, Spanish (Lockhart's transcription)"
+        quote: persuadio a Motecuçoma para que mādasse hazer la fiesta de Vitzilobuchtli, porque querian ver como hazian aquella solēnidad.
+      - ref: src:florentine-codex-book-12
+        loc: "Book 12, chap. 20, heading, fol. 32v, Nahuatl (Lockhart's transcription)"
+        quote: vncā mitoa in quenin Espanoles quinmictique, quimixtlatique in Mexica, in quilhuiquixtiliaia Vitzilobuchtli in vncā mitoaia Teuitoalco.
+      - ref: src:florentine-codex-book-12
+        loc: "Book 12, chap. 20, fol. 32v, Nahuatl (Lockhart's transcription)"
+        quote: niman ie ic oalquiça omoiauchichiuhque, ocontzatzaquaco, in izquicampa quixoaia, calacoaia, in quauhquiiaoac tecpantzinco, acatl yiacapan, Tezcacoac.
+      - ref: src:florentine-codex-book-12
+        loc: "Book 12, chap. 20, fol. 32v, Spanish (Lockhart's transcription)"
+        quote: "salieron de donde estauan y tomaron todas las puertas del patio por que no saliese nadie y otros entraron con sus armas: y començaron a matar a los que estauā en el areyto"
+    method: historical-account
+    note: >-
+      Sahagún's Spanish: Alvarado persuaded Moctezuma to order the feast held, because they wanted to see how it was
+      done. The Nahuatl heading: where it is told how the Spaniards killed and wiped out the Mexica who were
+      celebrating Huitzilopochtli's feast at the place called the god's courtyard; then they came out armed and closed
+      every way people went out and came in. The Spanish column: they came out, took all the gates of the courtyard so
+      that no one could leave, and others went in with their weapons and began to kill those in the dance. Taken down
+      in Tlatelolco about 1555.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in na-fc12-getty.txt (sha256 9a864988595f9f1f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  location:
+    prop: location
+    value: { lat: 19.435, lon: -99.131389, frame: frame:earth/present-day }
+    source: { ref: src:wikidata-templo-mayor, loc: "Q774021, P625 coordinate location" }
+    method: gazetteer
+    note: The great temple of Tenochtitlan, in whose courtyard the feast was held; the point is the gazetteer's for the temple.
+  frame:
+    prop: frame
+    value: frame:paleomap/plate-104
+    source: { ref: src:paleomap-plate-model, loc: PALEOMAP_PlatePolygons.gpml }
+    method: plate-polygon
+    basis: reconstruction
+relations:
+  war:
+    rel: part-of
+    to: people/conquest/conquest-of-mexico
+    unsourced: An editorial grouping of the events of the conquest.

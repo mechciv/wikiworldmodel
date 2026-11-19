@@ -1,0 +1,22 @@
+id: src:herrera-2013-excan-tlahtoloyan
+type: publication
+kind: review
+citation: >-
+  Herrera Meza, M.C., López Austin, A. and Martínez Baracs, R. (2013). El nombre náhuatl de la
+  Triple Alianza. Estudios de Cultura Náhuatl 46, 7–35.
+authors: ["Herrera Meza, M.C.", "López Austin, A.", "Martínez Baracs, R."]
+published: 2013
+title: El nombre náhuatl de la Triple Alianza
+container: Estudios de Cultura Náhuatl 46 (UNAM, Instituto de Investigaciones Históricas)
+url: https://nahuatl.historicas.unam.mx/index.php/ecn/article/download/77723/68769/228655
+via: The journal's PDF from its open-access site.
+license_note: Open access; no licence is stated in the PDF. Quoted briefly as evidence.
+reliability: >-
+  A study of the Nahuatl terms for the alliance in the Nahuatl sources (Chimalpahin, the Anales de
+  Cuauhtitlan, the Codex Osuna and others), by two linguists and historians and one of the
+  scholars who first applied the term to the alliance of Tenochtitlan, Tetzcoco and Tlacopan.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched on 2026-11-19 (UTC) and read whole. Quotes found in the kept text
+    city-herrera-lopez-austin-2013-excan.txt by script.
