@@ -31,27 +31,29 @@ In the viewer:
 - Drag the time strip to move through time, and scroll on it to zoom in time. It runs from
   the Hadean to the far future on one fixed scale, with more room the nearer the present: a
   year or two a pixel in the last few centuries, a million years a pixel at the dinosaurs'
-  end. It zooms down to a few years, and the readout then gives the month or the day. Its
-  ruler reads in years BCE and CE within 10 kyr of the present, and ka, Ma and Ga beyond.
+  end. It zooms down to a few years, and the date at the top left then gives the month or the day. Its
+  ruler reads in years BCE and CE within 10 kyr of the present, and ka, Ma and Ga beyond. Under the ruler, two
+  rows of the geologic chart: eras and periods when zoomed out, epochs and stages when zoomed in. Click a
+  period's name under the date to fit the strip to it.
 - The track at the bottom of the strip marks every dated record: point at one to see it,
   click to open it. The thin band under it shows the planet's states, such as a magma ocean
   or a Snowball Earth's ice.
-- The panel at the top left shows the planet at the time shown: its state, and values such
-  as the Sun's brightness; click a row to see how it is known.
+- *The planet then*, under the date, opens a table of the planet at the time shown: its state, and values such as
+  the Sun's brightness, beside today's; click a row to see how it is known.
 - Click anything to see its claims and sources, and pick between competing claims. A click
   inside a polity's territory opens its record and says which row of the borders dataset is
   drawn there.
-- Switch the geologic time scale in the toolbar: records dated by a stage follow it.
-- Press *Settlement* in the toolbar to paint the land by how people lived there, from wildlands to villages and
+- Switch the geologic time scale under *Layers*, in *Alternatives*: records dated by a stage follow it.
+- Press *Settlement* under *Layers* to paint the land by how people lived there, from wildlands to villages and
   cities, at any time since 10,000 BCE; click any land to see how people lived there and how sure that is. A scene of
   the land in that span draws their settlements, houses and fields (docs/HUMAN-LANDSCAPE.md).
-- Press `E` for evidence mode, which marks what is reconstructed or generated.
+- Press *How we know*, or `E`, for evidence mode, which marks what is reconstructed or generated.
 - Scroll down over Rome, or press the button at the bottom of the globe, to come down into the
   city. There, drag to pan, right-drag or Shift-drag to turn and tilt, `W` `A` `S` `D` to walk,
   and move the Light slider or press `L` to change the hour. Click a monument to open its record.
 - On a phone or a tablet, drag with one finger and pinch with two, on the globe and on the time
   strip; near the ground, twist two fingers to turn, and move them up or down together to tilt.
-  Tap anything to open it. On a narrow screen the toggles fold behind the button beside the
+  Tap anything to open it. On a narrow screen the layers fold behind the button beside the
   search, and a record opens in a sheet at the foot of the screen: tap or drag its head to make
   it taller, and drag it down to close it.
 

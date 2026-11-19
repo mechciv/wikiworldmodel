@@ -11,7 +11,7 @@ import { conj, rotate, toLatLon, unitVector } from '../../../core/quat.ts';
 import { RotationModel } from '../../../core/rotation-model.ts';
 import type { SearchFile } from '../../../core/records.ts';
 import type { FramesFile, Tileset } from '../../../core/tileset.ts';
-import { buildFile, canvasPatch, idle, latestBuild } from './helpers.ts';
+import { buildFile, canvasPatch, idle, latestBuild, openLayers, openPlanet } from './helpers.ts';
 
 const year = (ka: number) => Math.round(1950 - ka * 1e3);
 const MA = (ka: number) => ka / 1e3;
@@ -151,6 +151,7 @@ test('outside the dataset\'s span ice falls back to what it was', async ({ page 
   await page.goto(`/?b=${latestBuild()}&t=${before}&lat=60&lon=-90&d=2.6`);
   await idle(page);
   expect(await page.evaluate(() => window.__wikiworldmodel!.iceAt(60, -85))).toBeNull();
+  await openPlanet(page);
   await expect(page.locator('.planet-ice')).toBeHidden();
   // The Sturtian's claim still draws its ice to the equator.
   await page.evaluate((t) => window.__wikiworldmodel!.set({ t }), 1950 - 690e6);
@@ -257,6 +258,7 @@ test('the planet panel sets the ice, as sea level, beside the sea-level stack', 
   await page.goto(`/?b=${latestBuild()}&t=${year(20)}&lat=60&lon=-85&d=2.6`);
   await idle(page);
   const row = page.locator('.planet-row[data-series="field:earth/ice-sheet-sea-level"]');
+  await openPlanet(page);
   await expect(row).toContainText('Ice sheets, as sea level');
   await expect(row).toContainText(/−?-?11\d m/);
   await expect(page.locator('.planet-row[data-series="field:earth/sea-level-stack"]')).toBeVisible();
@@ -284,6 +286,7 @@ test('its two scenarios: the alternative frees Hudson Bay of ice for a short tim
   await expect(ice).toContainText('In its other scenario here, Hudson Bay ice-free');
   await expect(ice).toContainText(/ice-free[^:]*: none/);
   // Choosing the alternative draws the other, and the panel follows on the next click.
+  await openLayers(page);
   await page.locator('.tg-alts').click();
   await page.selectOption('select[data-group="alt:laurentide-mis3"]', alt);
   await idle(page);

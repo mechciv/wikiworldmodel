@@ -28,7 +28,10 @@ function citedDatabases(world: World): { label: string; licenses: string[] }[] {
   return [...databases].sort(([a], [b]) => (a < b ? -1 : 1)).map(([label, licenses]) => ({ label, licenses: [...licenses].sort() }));
 }
 
-/** The fonts the site serves, named by the licence files beside them (site/fonts/OFL-<Name>.txt). */
+/**
+ * The fonts the site serves, named by the licence files beside them (site/fonts/OFL-<Name>.txt); or, given the viewer's
+ * folder, the fonts the viewer bundles, named by the licence files that go with it (viewer/public/fonts).
+ */
 export function siteFonts(dir = join(REPO, 'site/fonts')): string[] {
   if (!existsSync(dir)) return [];
   return readdirSync(dir)
@@ -40,7 +43,7 @@ export function siteFonts(dir = join(REPO, 'site/fonts')): string[] {
 const oneLine = (s: string) => s.replace(/\s+/g, ' ').trim();
 
 /** ATTRIBUTION.md: every dataset with its citation, licence and credit; the cited databases; the fonts. */
-export function attributionMarkdown(world: World, fonts: string[] = siteFonts()): string {
+export function attributionMarkdown(world: World, fonts: string[] = siteFonts(), viewerFonts: string[] = siteFonts(join(REPO, 'viewer/public/fonts'))): string {
   const lines = [
     '# Attribution',
     '',
@@ -79,14 +82,21 @@ export function attributionMarkdown(world: World, fonts: string[] = siteFonts())
       '',
     );
   }
-  if (fonts.length) {
-    lines.push(
-      '## Fonts',
-      '',
-      `The site's fonts are served from [site/fonts/](site/fonts/), each under the SIL Open Font License 1.1 in the`,
-      `OFL file beside it: ${fonts.join(', ')}.`,
-      '',
-    );
+  if (fonts.length || viewerFonts.length) {
+    lines.push('## Fonts', '');
+    if (fonts.length) {
+      lines.push(
+        `The site's fonts are served from [site/fonts/](site/fonts/), each under the SIL Open Font License 1.1 in the`,
+        `OFL file beside it: ${fonts.join(', ')}.`,
+      );
+    }
+    if (viewerFonts.length) {
+      lines.push(
+        `The viewer's come from Fontsource's packages, under the same licence, whose text goes out with the viewer from`,
+        `[viewer/public/fonts/](viewer/public/fonts/): ${viewerFonts.join(', ')}.`,
+      );
+    }
+    lines.push('');
   }
   lines.push(
     '## Code',

@@ -6,7 +6,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import type { SearchFile } from '../../../core/records.ts';
 import type { Tileset } from '../../../core/tileset.ts';
-import { buildFile, idle, latestBuild } from './helpers.ts';
+import { buildFile, idle, latestBuild, openLayers } from './helpers.ts';
 
 const year = (ka: number) => Math.round(1950 - ka * 1e3);
 
@@ -76,6 +76,7 @@ test.describe('rivers', () => {
     await page.goto(`/?b=${latestBuild()}&t=1950&lat=-8&lon=-56&d=1.6`);
     await idle(page);
     expect((await rivers(page)).drawn).toBe(0);
+    await openLayers(page);
     await page.locator('.tg-rv').click();
     await idle(page);
     await page.waitForFunction(() => window.__wikiworldmodel!.url().includes('ly=rv'));

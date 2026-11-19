@@ -1,158 +1,162 @@
 {
  "earth/lips/central-atlantic-magmatic-province": [
-  307,
-  551
+  284,
+  590
  ],
  "earth/lips/deccan-traps": [
-  1104,
-  355
+  1137,
+  380
  ],
  "earth/lips/siberian-traps": [
-  843,
-  -102
+  857,
+  -110
  ],
  "earth/orogens/himalaya": [
-  1108,
-  204
+  1140,
+  218
  ],
  "people/developments/writing-mesopotamia": [
-  922,
-  343
+  942,
+  367
  ],
  "people/domestication/barley": [
-  835,
-  359
- ],
- "people/domestication/cattle": [
-  844,
-  335
- ],
- "people/domestication/dog": [
-  926,
-  -78
- ],
- "people/domestication/einkorn": [
-  855,
-  315
- ],
- "people/domestication/emmer": [
-  835,
-  384
- ],
- "people/domestication/goat": [
-  929,
-  302
- ],
- "people/domestication/horse": [
-  852,
-  139
- ],
- "people/domestication/pig-near-east": [
-  853,
-  275
- ],
- "people/domestication/sheep": [
-  853,
-  292
- ],
- "people/domestication/sorghum": [
-  852,
-  549
- ],
- "people/events/augustus-named": [
-  586,
-  250
- ],
- "people/first-cities/memphis": [
-  787,
-  414
- ],
- "people/first-cities/meroe": [
-  823,
-  542
- ],
- "people/first-cities/uruk": [
-  922,
-  360
- ],
- "people/objects/bust-of-nefertiti": [
-  786,
-  442
- ],
- "people/objects/cleopatras-needle-new-york": [
-  771,
+  849,
   383
  ],
- "people/objects/code-of-hammurabi": [
-  941,
-  324
+ "people/domestication/cattle": [
+  858,
+  356
  ],
- "people/objects/flaminian-obelisk": [
-  586,
-  301
+ "people/domestication/dog": [
+  946,
+  -84
  ],
- "people/objects/lateran-obelisk": [
-  807,
-  445
- ],
- "people/objects/luxor-obelisk-paris": [
-  806,
-  480
- ],
- "people/objects/parthenon-sculptures": [
-  699,
-  319
- ],
- "people/objects/pergamon-altar": [
-  733,
-  284
- ],
- "people/objects/rosetta-stone": [
-  781,
-  401
- ],
- "people/objects/stele-of-naram-sin": [
-  941,
-  341
- ],
- "people/rulers/antoninus-pius": [
-  588,
-  304
- ],
- "people/rulers/hadrian": [
-  586,
-  267
- ],
- "people/trade/palmyra-tariff": [
-  849,
-  358
- ],
- "people/trade/palmyrene-caravan-trade": [
-  849,
-  375
- ],
- "people/writing/egyptian-hieroglyphs": [
-  798,
-  458
- ],
- "people/writing/greek-alphabet": [
-  699,
-  302
- ],
- "people/writing/phoenician-alphabet": [
-  825,
+ "people/domestication/einkorn": [
+  870,
   335
  ],
+ "people/domestication/emmer": [
+  849,
+  408
+ ],
+ "people/domestication/goat": [
+  949,
+  323
+ ],
+ "people/domestication/horse": [
+  866,
+  149
+ ],
+ "people/domestication/pig-near-east": [
+  868,
+  294
+ ],
+ "people/domestication/sheep": [
+  868,
+  311
+ ],
+ "people/domestication/sorghum": [
+  867,
+  587
+ ],
+ "people/events/augustus-named": [
+  583,
+  268
+ ],
+ "people/events/battle-of-actium": [
+  670,
+  311
+ ],
+ "people/first-cities/memphis": [
+  797,
+  442
+ ],
+ "people/first-cities/meroe": [
+  836,
+  579
+ ],
+ "people/first-cities/uruk": [
+  942,
+  384
+ ],
+ "people/objects/bust-of-nefertiti": [
+  796,
+  472
+ ],
+ "people/objects/cleopatras-needle-new-york": [
+  780,
+  409
+ ],
+ "people/objects/code-of-hammurabi": [
+  962,
+  347
+ ],
+ "people/objects/flaminian-obelisk": [
+  583,
+  319
+ ],
+ "people/objects/lateran-obelisk": [
+  818,
+  493
+ ],
+ "people/objects/luxor-obelisk-paris": [
+  818,
+  510
+ ],
+ "people/objects/parthenon-sculptures": [
+  703,
+  340
+ ],
+ "people/objects/pergamon-altar": [
+  739,
+  303
+ ],
+ "people/objects/rosetta-stone": [
+  790,
+  428
+ ],
+ "people/objects/stele-of-naram-sin": [
+  962,
+  364
+ ],
+ "people/rulers/antoninus-pius": [
+  585,
+  322
+ ],
+ "people/rulers/hadrian": [
+  583,
+  285
+ ],
+ "people/trade/palmyra-tariff": [
+  864,
+  381
+ ],
+ "people/trade/palmyrene-caravan-trade": [
+  864,
+  398
+ ],
+ "people/writing/egyptian-hieroglyphs": [
+  809,
+  472
+ ],
+ "people/writing/greek-alphabet": [
+  703,
+  322
+ ],
+ "people/writing/phoenician-alphabet": [
+  838,
+  359
+ ],
  "people/writing/proto-sinaitic": [
-  811,
-  403
+  823,
+  431
  ],
  "places/constantinople": [
-  748,
-  257
+  755,
+  275
  ],
  "places/rome": [
-  586,
-  284
+  583,
+  302
  ]
 }

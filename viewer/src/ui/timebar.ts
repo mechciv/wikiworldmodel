@@ -1,7 +1,9 @@
 // The time control: a strip that zooms like a map, along a scale that gives the recent past far
 // more room than the deep past (see core/timescale.ts). A window is a stretch of that scale, so
-// zooming and panning are even along it, and a narrow window is close to linear. Bands show the
-// named periods, and a track below them shows the world's dated records.
+// zooming and panning are even along it, and a narrow window is close to linear. Under its ruler,
+// two muted rows of the chart show the named periods, the finest two that can be told apart at
+// the zoom; a track under them shows the world's dated records, and a band along its foot the
+// planet's states. The moment shown is read large in the corner of the view (`readout`).
 import type { PeriodRecord, SearchEntry } from '../../../core/records.ts';
 import { lookup, type Scenario } from '../../../core/scenario.ts';
 import { formatTime, historical, PRESENT_YEAR } from '../../../core/time.ts';
@@ -65,42 +67,24 @@ export function fitWindow(a: number, b: number, limits: Win, margin = 0.06): Win
 }
 
 /**
- * The strip's rows, top to bottom: a ruler, a band for each rank of the named periods, the track of records, and the
- * planet's states along its foot. A short screen, a phone on its side, has fewer and thinner bands, so that the view
- * keeps room above them.
+ * The strip's rows, top to bottom: a ruler, two rows of the named periods, the track of records, and the planet's
+ * states along its foot. A short screen, a phone on its side, has thinner ones, so that the view keeps room above them.
  */
 interface Rows {
   ruler: number;
-  bands: { rank: string; h: number }[];
+  /** each row of periods, the room above the first, between the two, and below the second */
+  band: number;
+  above: number;
+  between: number;
+  below: number;
   track: number;
   pad: number;
-  font: string;
+  /** the size of the ruler's numbers and of the time on its flag */
+  tick: number;
+  flag: number;
 }
-const TALL: Rows = {
-  ruler: 22,
-  bands: [
-    { rank: 'eon', h: 13 },
-    { rank: 'era', h: 15 },
-    { rank: 'period', h: 18 },
-    { rank: 'epoch', h: 15 },
-    { rank: 'stage', h: 13 },
-  ],
-  track: 16,
-  pad: 4,
-  font: '11px system-ui, -apple-system, Segoe UI, sans-serif',
-};
-const SHORT: Rows = {
-  ruler: 18,
-  bands: [
-    { rank: 'eon', h: 11 },
-    { rank: 'era', h: 12 },
-    { rank: 'period', h: 14 },
-    { rank: 'epoch', h: 12 },
-  ],
-  track: 15,
-  pad: 3,
-  font: '10px system-ui, -apple-system, Segoe UI, sans-serif',
-};
+const TALL: Rows = { ruler: 22, band: 8, above: 6, between: 3, below: 8, track: 16, pad: 5, tick: 10.5, flag: 11 };
+const SHORT: Rows = { ruler: 18, band: 6, above: 4, between: 2, below: 5, track: 14, pad: 4, tick: 9.5, flag: 10 };
 /** A short screen, as style.css has it. */
 const SHORT_SCREEN = '(max-height: 500px)';
 
@@ -168,18 +152,47 @@ export function rulerTicks(win: Win, x: (t: number) => number, at: (x: number) =
   }
 }
 
-const TRACK_COLORS: Record<string, string> = {
-  event: '#ff7a59',
-  polity: '#e05d8a',
-  settlement: '#f2e6c9',
-  occurrence: '#9be38a',
-  sample: '#c8a2ff',
-  taxon: '#5fd4c4',
-  development: '#ffd36b',
-  'large-igneous-province': '#ff9f43',
-  landform: '#c8a2ff',
-  body: '#8fb8ff',
-};
+/** The chart's ranks, coarsest first, and what a row of each is called. */
+const RANKS = ['eon', 'era', 'period', 'epoch', 'stage'];
+const PLURAL: Record<string, string> = { eon: 'eons', era: 'eras', period: 'periods', epoch: 'epochs', stage: 'stages' };
+/** How wide, in pixels, the middle one of a rank's periods in view must be for a row of that rank to be drawn. */
+const LEGIBLE = 10;
+
+/** The strip's colours and type, as tokens.css has them. */
+const INK = { text: '#e9ecf2', faint: '#7a8496', accent: '#f4b860', onAccent: '#1a1205', sky: [3, 4, 11] };
+const MONO = "'Geist Mono Variable', ui-monospace, SFMono-Regular, Menlo, monospace";
+const SANS = "'Geist Variable', system-ui, -apple-system, 'Segoe UI', sans-serif";
+
+/** A period's chart colour, muted toward the sky: the rows are a quiet chart under the ruler, not its loudest part. */
+const mutedColors = new Map<string, string>();
+function muted(hex = '#888888'): string {
+  let m = mutedColors.get(hex);
+  if (!m) {
+    const [r, g, b] = [1, 3, 5].map((i, k) => Math.round(parseInt(hex.slice(i, i + 2), 16) * 0.55 + INK.sky[k] * 0.45));
+    m = `rgb(${r}, ${g}, ${b})`;
+    mutedColors.set(hex, m);
+  }
+  return m;
+}
+
+/** A time's label with its number apart from its unit, as the headline sets them: "66.038" and "Ma". */
+export function splitLabel(label: string): [string, string] {
+  const m = /^(.*\d)\s+(Ma|Ga|ka|BP|BCE|CE|[GMk]yr from now)$/.exec(label);
+  return m ? [m[1], m[2]] : [label, ''];
+}
+
+/** Beyond the calendar's reach, the moment in words: "66 million years before present". */
+export function gloss(t: number): string {
+  if (historical(t)) return '';
+  const age = PRESENT_YEAR - t;
+  const a = Math.abs(age);
+  const three = (x: number) => Number(x.toPrecision(3)).toLocaleString('en-US');
+  const words = a >= 1e9 ? `${three(a / 1e9)} billion` : a >= 1e6 ? `${three(a / 1e6)} million` : three(a);
+  return `${words} years ${age < 0 ? 'from now' : 'before present'}`;
+}
+
+const PLAY = '<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.6l7.4 4.4L3 10.4z" fill="currentColor"/></svg>';
+const PAUSE = '<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 1.5H5v9H2.5zM7 1.5h2.5v9H7z" fill="currentColor"/></svg>';
 
 /** A dated record on the track: where it starts, and where it ends if it ended. */
 interface TrackItem {
@@ -215,10 +228,12 @@ export interface TimebarCallbacks {
 
 export class Timebar {
   readonly el: HTMLElement;
+  /** the moment shown, read large: its number and unit, in words, and the periods it falls in (main.ts places it) */
+  readonly readout: HTMLElement;
   private canvas: HTMLCanvasElement;
-  private readout: HTMLElement;
   private playBtn: HTMLButtonElement;
   private tip: HTMLElement;
+  private rowsCaption: HTMLElement;
   private t = 0;
   private win: Win;
   private drag: { mode: 'scrub' | 'pan'; x: number; win: Win } | null = null;
@@ -230,9 +245,17 @@ export class Timebar {
   private keyframes: number[] = [];
   private track: TrackItem[] = [];
   private states: StateBand[] = [];
-  private hovered: TrackItem | StateBand | null = null;
+  private hovered: TrackItem | StateBand | PeriodRecord | null = null;
   /** times lit up on the track: the fossils of the group chosen in the tree of life */
   private lit: number[] = [];
+  /** the ranks of the two rows, as last drawn for the window */
+  private strata: [string, string] = ['era', 'period'];
+  /** what the cursor's flag says */
+  private flag = '';
+  private playing: boolean | null = null;
+  /** the periods the readout names, by their ids */
+  private named = '';
+  private hatch: CanvasPattern | null = null;
 
   /** the periods as the current scenario dates them */
   private periods: PeriodRecord[];
@@ -253,22 +276,27 @@ export class Timebar {
     this.el = document.createElement('div');
     this.el.className = 'timebar';
     this.el.innerHTML = `
-      <div class="timebar-controls">
-        <button class="tb-play" aria-label="Play">▶</button>
-        <div class="tb-readout" aria-live="polite"></div>
-        <div class="tb-spacer"></div>
-        <button class="tb-zoom-in" aria-label="Zoom in on time" title="Zoom in (or scroll on the strip)">+</button>
-        <button class="tb-zoom-out" aria-label="Zoom out on time" title="Zoom out">−</button>
-        <button class="tb-reset" aria-label="Show the whole time range" title="Whole range">⤢</button>
-      </div>
-      <div class="tb-strip">
-        <canvas class="tb-canvas" aria-label="Time control: drag to move through time, scroll to zoom, drag the ruler to pan; the bottom track lists dated records"></canvas>
-        <div class="tb-tip" hidden></div>
+      <div class="tb-main">
+        <button class="tb-play" aria-label="Play"></button>
+        <div class="tb-strip">
+          <canvas class="tb-canvas" aria-label="Time control: drag to move through time, scroll to zoom, drag the ruler to pan; the rows under the ruler are the named periods, and the track under them the dated records"></canvas>
+          <div class="tb-tip" hidden></div>
+        </div>
+        <div class="tb-foot"><span class="tb-rows"></span><span><span class="fine">Scroll to zoom</span><span class="coarse">Pinch to zoom</span> · drag to move through time</span></div>
+        <div class="tb-zoom">
+          <button class="tb-zoom-in" aria-label="Zoom in on time" title="Zoom in (or scroll on the strip)"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M6 2v8M2 6h8"/></svg></button>
+          <button class="tb-zoom-out" aria-label="Zoom out on time" title="Zoom out"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6h8"/></svg></button>
+          <button class="tb-reset" aria-label="Show the whole time range" title="Whole range"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 4.2V1.5h2.7M7.8 1.5h2.7v2.7M10.5 7.8v2.7H7.8M4.2 10.5H1.5V7.8"/></svg></button>
+        </div>
       </div>`;
     this.canvas = this.el.querySelector('canvas')!;
-    this.readout = this.el.querySelector('.tb-readout')!;
     this.playBtn = this.el.querySelector('.tb-play')!;
     this.tip = this.el.querySelector('.tb-tip')!;
+    this.rowsCaption = this.el.querySelector('.tb-rows')!;
+    this.readout = document.createElement('div');
+    this.readout.className = 'tb-readout';
+    this.readout.setAttribute('aria-live', 'polite');
+    this.readout.innerHTML = '<strong><span class="value"></span> <span class="unit"></span></strong><p class="tb-gloss"></p><div class="tb-periods"></div>';
     this.playBtn.onclick = () => this.cb.onPlay();
     this.el.querySelector<HTMLButtonElement>('.tb-zoom-in')!.onclick = () => this.zoom(2, this.t);
     this.el.querySelector<HTMLButtonElement>('.tb-zoom-out')!.onclick = () => this.zoom(0.5, this.t);
@@ -284,6 +312,8 @@ export class Timebar {
       this.zoom(Math.exp(-e.deltaY * 0.0015), tOf(x, this.win, this.width()), x / this.width());
     }, { passive: false });
     this.canvas.addEventListener('dblclick', (e) => this.dbl(e));
+    // The strip's numbers are drawn in the viewer's type, which may arrive after the first drawing.
+    document.fonts?.load(`${TALL.tick}px ${MONO}`).then(() => this.draw(), () => {});
   }
 
   setKeyframes(years: number[]): void {
@@ -337,8 +367,14 @@ export class Timebar {
   }
 
   private height(): number {
-    const { ruler, bands, track, pad } = this.rows;
-    return ruler + bands.reduce((s, r) => s + r.h, 0) + track + pad;
+    const r = this.rows;
+    return r.ruler + r.above + 2 * r.band + r.between + r.below + r.track + r.pad;
+  }
+
+  /** Where each row of periods starts, down the strip. */
+  private bandTops(): [number, number] {
+    const r = this.rows;
+    return [r.ruler + r.above, r.ruler + r.above + r.band + r.between];
   }
 
   private zoom(factor: number, tp: number, s?: number): void {
@@ -370,10 +406,24 @@ export class Timebar {
     return here.find((b) => b.over) ?? here[0] ?? null;
   }
 
-  private hover(it: TrackItem | StateBand | null, px = 0): void {
+  /** The named period under a point of the rows of periods: of the row's rank, or the coarser one drawn where it has none. */
+  private bandAt(x: number, y: number): PeriodRecord | undefined {
+    const tops = this.bandTops();
+    const row = tops.findIndex((top) => y >= top - 2 && y < top + this.rows.band + 2);
+    if (row < 0) return undefined;
+    const t = tOf(x, this.win, this.width());
+    if (t > PRESENT_YEAR) return undefined;
+    for (let k = RANKS.indexOf(this.strata[row]); k >= 0; k--) {
+      const p = this.periodAt(t, RANKS[k]);
+      if (p) return p;
+    }
+    return undefined;
+  }
+
+  private hover(it: TrackItem | StateBand | PeriodRecord | null, px = 0): void {
     if (it === this.hovered) return;
     this.hovered = it;
-    this.canvas.style.cursor = it ? 'pointer' : '';
+    this.canvas.style.cursor = it && !('rank' in it) ? 'pointer' : '';
     if (!it) {
       this.tip.hidden = true;
     } else {
@@ -382,6 +432,9 @@ export class Timebar {
         const when = it.end !== null && it.end !== it.start ? `${formatTime(it.start)} – ${formatTime(it.end)}` : formatTime(it.start);
         this.tip.textContent = `${it.entry.label} · ${when}`;
         x = xOf(it.start, this.win, this.width());
+      } else if ('rank' in it) {
+        const end = Number.isFinite(it.end) && it.end < PRESENT_YEAR ? formatTime(it.end) : 'today';
+        this.tip.textContent = `${it.name}, ${it.rank} · ${formatTime(it.start)} – ${end}`;
       } else {
         const when = Number.isFinite(it.end) ? `${formatTime(it.start)} – ${formatTime(it.end)}` : `from ${formatTime(it.start)}`;
         this.tip.textContent = `${it.label} · ${when}`;
@@ -441,7 +494,7 @@ export class Timebar {
       return;
     }
     if (!this.drag) {
-      if (!pressed) this.hover(this.itemAt(e.offsetX, e.offsetY) ?? this.stateAt(e.offsetX, e.offsetY), e.offsetX);
+      if (!pressed) this.hover(this.itemAt(e.offsetX, e.offsetY) ?? this.stateAt(e.offsetX, e.offsetY) ?? this.bandAt(e.offsetX, e.offsetY) ?? null, e.offsetX);
       return;
     }
     if (this.drag.mode === 'scrub') this.scrubTo(e.offsetX);
@@ -463,23 +516,15 @@ export class Timebar {
     this.cb.onTime(Math.max(this.dataRange[0], Math.min(this.dataRange[1], t)));
   }
 
-  private bandAt(x: number, y: number): PeriodRecord | undefined {
-    let top = this.rows.ruler;
-    for (const row of this.rows.bands) {
-      if (y >= top && y < top + row.h) {
-        const t = tOf(x, this.win, this.width());
-        return this.periods.find((p) => p.rank === row.rank && p.start <= t && t <= p.end);
-      }
-      top += row.h;
-    }
-    return undefined;
+  /** Fit the window to a named period, and move into it if the time shown is outside it. */
+  private fit(p: PeriodRecord): void {
+    this.cb.onWindow(fitWindow(p.start, Math.min(p.end, PRESENT_YEAR), this.limits));
+    if (this.t < p.start || this.t > p.end) this.cb.onTime(Math.max(this.dataRange[0], Math.min(this.dataRange[1], (p.start + Math.min(p.end, PRESENT_YEAR)) / 2)));
   }
 
   private dbl(e: MouseEvent): void {
     const p = this.bandAt(e.offsetX, e.offsetY);
-    if (!p) return;
-    this.cb.onWindow(fitWindow(p.start, p.end, this.limits));
-    if (this.t < p.start || this.t > p.end) this.cb.onTime(Math.max(this.dataRange[0], Math.min(this.dataRange[1], (p.start + p.end) / 2)));
+    if (p) this.fit(p);
   }
 
   /** The named period of a rank at time t. */
@@ -490,16 +535,85 @@ export class Timebar {
   set(t: number, win: Win, playing: boolean): void {
     this.t = t;
     this.win = win;
-    this.playBtn.textContent = playing ? '❚❚' : '▶';
-    this.playBtn.setAttribute('aria-label', playing ? 'Pause' : 'Play');
-    const res = this.yearsPerPixels(t, 1);
-    const stage = this.periodAt(t, 'stage');
-    const named = stage ?? this.periodAt(t, 'period') ?? this.periodAt(t, 'era') ?? this.periodAt(t, 'eon');
-    const period = this.periodAt(t, 'period');
-    const where = [named?.name, period && period.name !== named?.name ? period.name : undefined].filter(Boolean).join(', ');
-    const label = t === PRESENT_YEAR ? 'Today' : formatTime(t, res);
-    this.readout.innerHTML = `<strong>${label}</strong>${where ? ` <span>${where}</span>` : ''}`;
+    if (this.playing !== playing) {
+      this.playing = playing;
+      this.playBtn.innerHTML = playing ? PAUSE : PLAY;
+      this.playBtn.setAttribute('aria-label', playing ? 'Pause' : 'Play');
+    }
+    const label = t === PRESENT_YEAR ? 'Today' : formatTime(t, this.yearsPerPixels(t, 1));
+    // The periods it falls in: the finest named, its period, and its era (or eon), at most three.
+    const at = (rank: string) => this.periodAt(t, rank);
+    const finest = ['stage', 'epoch', 'period', 'era', 'eon'].map(at).find(Boolean);
+    const named = [finest, at('period'), at('era') ?? at('eon'), at('eon')].filter((p, i, all): p is PeriodRecord => !!p && all.indexOf(p) === i).slice(0, 3);
+    this.showReadout(label, gloss(t), named);
+    this.flag = finest ? `${label} · ${finest.name}` : label;
     this.draw();
+  }
+
+  /** The headline: written only where it changed, so that its buttons keep the pointer and the focus. */
+  private showReadout(label: string, words: string, named: PeriodRecord[]): void {
+    const [value, unit] = splitLabel(label);
+    const set = (sel: string, text: string) => {
+      const el = this.readout.querySelector<HTMLElement>(sel)!;
+      if (el.textContent !== text) el.textContent = text;
+    };
+    set('.value', value);
+    set('.unit', unit);
+    set('.tb-gloss', words);
+    // A long date is set smaller, so that the headline keeps to its corner.
+    this.readout.classList.toggle('mid', value.length > 7 && value.length <= 11);
+    this.readout.classList.toggle('long', value.length > 11);
+    const key = named.map((p) => p.id).join(' ');
+    if (key === this.named) return;
+    this.named = key;
+    this.readout.querySelector('.tb-periods')!.replaceChildren(
+      ...named.map((p) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'tb-period';
+        b.style.setProperty('--c', p.color ?? '');
+        const end = Number.isFinite(p.end) && p.end < PRESENT_YEAR ? formatTime(p.end) : 'today';
+        b.title = `${p.name}, ${p.rank}: ${formatTime(p.start)} – ${end}. Fit the time control to it`;
+        b.append(document.createElement('i'), p.name);
+        b.onclick = () => this.fit(p);
+        return b;
+      }),
+    );
+  }
+
+  /**
+   * The ranks of the two rows for the window: the finest whose periods in view are mostly wide enough to tell apart, and
+   * the rank above it. Zoomed out, eras and periods; zoomed in, epochs and stages.
+   */
+  private chooseStrata(w: number): [string, string] {
+    const end = Math.min(this.win[1], PRESENT_YEAR);
+    for (let i = RANKS.length - 1; i > 0; i--) {
+      const widths = this.periods
+        .filter((p) => p.rank === RANKS[i] && p.end > this.win[0] && p.start < end)
+        .map((p) => Math.min(w, xOf(Math.min(p.end, PRESENT_YEAR), this.win, w)) - Math.max(0, xOf(p.start, this.win, w)))
+        .sort((a, b) => a - b);
+      if (widths.length && widths[widths.length >> 1] >= LEGIBLE) return [RANKS[i - 1], RANKS[i]];
+    }
+    return [RANKS[0], RANKS[1]];
+  }
+
+  /** After the present nothing is charted: a hatch in the colour of what is projected. */
+  private hatchOf(g: CanvasRenderingContext2D): CanvasPattern | string {
+    if (!this.hatch) {
+      const c = document.createElement('canvas');
+      c.width = c.height = 6;
+      const p = c.getContext('2d')!;
+      p.strokeStyle = 'rgba(234, 68, 191, 0.55)';
+      p.lineWidth = 1.4;
+      p.beginPath();
+      for (const d of [-6, 0, 6]) {
+        p.moveTo(d, 6);
+        p.lineTo(d + 6, 0);
+      }
+      p.stroke();
+      this.hatch = g.createPattern(c, 'repeat');
+    }
+    return this.hatch ?? 'rgba(234, 68, 191, 0.25)';
   }
 
   draw(): void {
@@ -514,49 +628,49 @@ export class Timebar {
     const g = this.canvas.getContext('2d')!;
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
     g.clearRect(0, 0, w, h);
-    g.fillStyle = 'rgba(12, 16, 26, 0.92)';
-    g.fillRect(0, 0, w, h);
     const x = (t: number) => xOf(t, this.win, w);
+    const R = this.rows;
 
-    // Bands.
-    const { ruler: RULER, bands, track: TRACK, font } = this.rows;
-    let top = RULER;
-    g.font = font;
-    g.textBaseline = 'middle';
-    for (const row of bands) {
-      for (const p of this.periods) {
-        if (p.rank !== row.rank || p.end < this.win[0] || p.start > this.win[1]) continue;
-        const x0 = Math.max(0, x(p.start));
-        const x1 = Math.min(w, x(Math.min(p.end, PRESENT_YEAR)));
-        if (x1 - x0 < 0.5) continue;
-        g.fillStyle = p.color ?? '#888';
-        g.fillRect(x0, top, x1 - x0, row.h - 1);
-        const label = p.name;
-        const tw = g.measureText(label).width;
-        if (x1 - x0 > tw + 8) {
-          const [r, gg, b] = [1, 3, 5].map((i) => parseInt((p.color ?? '#888888').slice(i, i + 2), 16));
-          g.fillStyle = 0.299 * r + 0.587 * gg + 0.114 * b > 140 ? '#111' : '#fff';
-          g.fillText(label, (x0 + x1) / 2 - tw / 2, top + row.h / 2);
+    // Two rows of the chart, muted: each of its rank, over the coarser ranks where it has no period (the Hadean has no eras).
+    this.strata = this.chooseStrata(w);
+    const tops = this.bandTops();
+    this.strata.forEach((rank, row) => {
+      for (let k = 0; k <= RANKS.indexOf(rank); k++) {
+        for (const p of this.periods) {
+          if (p.rank !== RANKS[k] || p.end < this.win[0] || p.start > this.win[1]) continue;
+          const x0 = Math.max(0, x(p.start));
+          const x1 = Math.min(w, x(Math.min(p.end, PRESENT_YEAR)));
+          if (x1 - x0 < 0.5) continue;
+          g.fillStyle = p === this.hovered ? (p.color ?? '#888') : muted(p.color);
+          g.fillRect(x0, tops[row], x1 - x0, R.band);
         }
       }
-      top += row.h;
-    }
+      if (this.win[1] > PRESENT_YEAR) {
+        const px = Math.max(0, x(PRESENT_YEAR));
+        g.fillStyle = this.hatchOf(g);
+        g.fillRect(px, tops[row], w - px, R.band);
+      }
+    });
+    const caption = `${PLURAL[this.strata[0]].replace(/^./, (c) => c.toUpperCase())} and ${PLURAL[this.strata[1]]}`;
+    if (this.rowsCaption.textContent !== caption) this.rowsCaption.textContent = caption;
 
     // The track: dated records, a dot at each start and a line to the end of what has ended.
-    const ty = top + TRACK / 2;
+    const top = h - R.pad - R.track;
+    const ty = top + R.track / 2;
     for (const it of this.track) {
       const x0 = x(it.start);
       const x1 = it.end !== null && it.end > it.start ? Math.min(w, x(it.end)) : x0;
       if (x1 < -4 || x0 > w + 4) continue;
-      const color = TRACK_COLORS[it.entry.kind.split('/')[0]] ?? '#9aa6bd';
-      g.fillStyle = color;
-      g.globalAlpha = it === this.hovered ? 1 : 0.85;
-      if (x1 > x0) g.fillRect(Math.max(0, x0), ty - 1, Math.max(1, x1 - Math.max(0, x0)), 2);
+      const on = it === this.hovered;
+      if (x1 > x0) {
+        g.fillStyle = on ? INK.text : 'rgba(233, 236, 242, 0.18)';
+        g.fillRect(Math.max(0, x0), ty - 1, Math.max(1, x1 - Math.max(0, x0)), 2);
+      }
+      g.fillStyle = on ? INK.text : 'rgba(233, 236, 242, 0.32)';
       g.beginPath();
-      g.arc(x0, ty, it === this.hovered ? 4.5 : 3, 0, 2 * Math.PI);
+      g.arc(x0, ty, on ? 4 : 2, 0, 2 * Math.PI);
       g.fill();
     }
-    g.globalAlpha = 1;
     g.fillStyle = '#ffc45c';
     for (const lit of this.lit) {
       const px = x(lit);
@@ -564,47 +678,75 @@ export class Timebar {
     }
 
     // The planet's states, a thin band under the track: its phases, then episodes over them.
-    for (const b of [...this.states.filter((x) => !x.over), ...this.states.filter((x) => x.over)]) {
+    for (const b of [...this.states.filter((s) => !s.over), ...this.states.filter((s) => s.over)]) {
       if (b.end < this.win[0] || b.start > this.win[1]) continue;
       const x0 = Math.max(0, x(b.start));
       const x1 = Math.min(w, Number.isFinite(b.end) ? x(b.end) : w);
       if (x1 - x0 < 0.5) continue;
       g.fillStyle = b.color;
-      g.globalAlpha = b === this.hovered ? 1 : 0.8;
-      g.fillRect(x0, top + TRACK - 4, Math.max(1, x1 - x0), 3);
+      g.globalAlpha = b === this.hovered ? 1 : 0.75;
+      g.fillRect(x0, top + R.track - 4, Math.max(1, x1 - x0), 3);
     }
     g.globalAlpha = 1;
 
     // Outside the data range: dim it.
-    g.fillStyle = 'rgba(8, 10, 16, 0.65)';
-    if (this.win[0] < this.dataRange[0]) g.fillRect(0, RULER, Math.max(0, x(this.dataRange[0])), h - RULER);
+    g.fillStyle = 'rgba(3, 4, 11, 0.7)';
+    if (this.win[0] < this.dataRange[0]) g.fillRect(0, R.ruler, Math.max(0, x(this.dataRange[0])), h - R.ruler);
     if (this.win[1] > this.dataRange[1]) {
       const x1 = Math.min(w, x(this.dataRange[1]));
-      g.fillRect(x1, RULER, w - x1, h - RULER);
+      g.fillRect(x1, R.ruler, w - x1, h - R.ruler);
     }
 
-    // Ruler: keyframes, then ticks.
-    g.fillStyle = 'rgba(255,255,255,0.35)';
+    // The cursor's flag, first, so that the ruler's numbers keep clear of it.
+    const cx = x(this.t);
+    const showCursor = cx >= -1 && cx <= w + 1;
+    const flagH = R.ruler - 5;
+    g.font = `600 ${R.flag}px ${SANS}`;
+    const fw = g.measureText(this.flag).width + 14;
+    const fx = Math.max(0, Math.min(w - fw, cx - fw / 2));
+    const clear: [number, number][] = showCursor ? [[fx - 8, fx + fw + 8]] : [];
+
+    // The ruler: its line, the fields' keyframes, then ticks and their numbers; and now, where the window is wide.
+    g.fillStyle = 'rgba(233, 236, 242, 0.2)';
+    g.fillRect(0, R.ruler - 1, w, 1);
+    g.fillStyle = 'rgba(233, 236, 242, 0.3)';
     const kx = this.keyframes.map(x).filter((v) => v >= 0 && v <= w);
-    if (kx.length < 2 || kx.every((v, i) => i === 0 || Math.abs(v - kx[i - 1]) > 4)) for (const v of kx) g.fillRect(v - 0.5, RULER - 5, 1, 4);
-    g.fillStyle = '#cfd6e6';
+    if (kx.length < 2 || kx.every((v, i) => i === 0 || Math.abs(v - kx[i - 1]) > 4)) for (const v of kx) g.fillRect(v - 0.5, R.ruler - 4, 1, 3);
+    g.font = `500 ${R.tick}px ${MONO}`;
+    g.textBaseline = 'middle';
+    const labelY = (R.ruler - 4) / 2;
+    const free = (a: number, b: number) => !clear.some(([c, d]) => a < d && c < b);
+    const nx = x(PRESENT_YEAR);
+    if (this.win[1] - this.win[0] > 2e4 && nx >= 0 && nx <= w) {
+      const tw = g.measureText('now').width;
+      const lx = Math.min(w - tw - 2, Math.max(2, nx - tw / 2));
+      g.fillStyle = INK.text;
+      g.fillRect(nx, R.ruler - 6, 1, 5);
+      if (free(lx, lx + tw)) {
+        g.fillText('now', lx, labelY);
+        clear.push([lx - 6, lx + tw + 6]);
+      }
+    }
+    g.fillStyle = INK.faint;
     for (const { t, label } of rulerTicks(this.win, x, (v) => tOf(v, this.win, w), 72)) {
       const rx = x(t);
-      g.fillRect(rx, RULER - 7, 1, 7);
       const tw = g.measureText(label).width;
-      g.fillText(label, Math.min(w - tw - 2, Math.max(2, rx - tw / 2)), 8);
+      const lx = Math.min(w - tw - 2, Math.max(2, rx - tw / 2));
+      g.fillRect(rx, R.ruler - 5, 1, 4);
+      if (free(lx, lx + tw)) g.fillText(label, lx, labelY);
     }
 
-    // Cursor.
-    const cx = x(this.t);
-    if (cx >= -1 && cx <= w + 1) {
-      g.fillStyle = '#ffd36b';
-      g.fillRect(cx - 1, 0, 2, h);
+    // The cursor: an amber line down the strip from its flag, which reads the time and the period.
+    if (showCursor) {
+      g.fillStyle = INK.accent;
+      g.fillRect(cx - 0.75, flagH, 1.5, h - flagH);
       g.beginPath();
-      g.moveTo(cx - 6, 0);
-      g.lineTo(cx + 6, 0);
-      g.lineTo(cx, 7);
+      if (g.roundRect) g.roundRect(fx, 0, fw, flagH, 5);
+      else g.rect(fx, 0, fw, flagH);
       g.fill();
+      g.font = `600 ${R.flag}px ${SANS}`;
+      g.fillStyle = INK.onAccent;
+      g.fillText(this.flag, fx + 7, flagH / 2 + 0.5);
     }
   }
 }

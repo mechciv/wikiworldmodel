@@ -13,7 +13,7 @@ import type { Answer } from '../../../core/resolve.ts';
 import { splitRef } from '../../../core/refs.ts';
 import { lookup, scenarioKey, type Scenario } from '../../../core/scenario.ts';
 import type { Estimate, FeatureTime } from '../../../core/tileset.ts';
-import { formatTime, fromMa, historical, PRESENT_YEAR } from '../../../core/time.ts';
+import { formatTime, fromMa, historical, parseTime, PRESENT_YEAR, type TimeInput } from '../../../core/time.ts';
 import { PATTERN_LABEL } from '../../../core/landscape.ts';
 import type { PlaceLandscape } from '../city/landscape.ts';
 
@@ -303,6 +303,59 @@ function checkedTitle(c: ClaimRecord): string {
   return [LEVEL_LABEL[c.level], ...(c.checked ?? []).map((s) => `${s.step} by ${s.by}${s.on ? ` on ${s.on}` : ''}: ${s.how}`)].join('\n');
 }
 
+const CLOSE = '<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8"/></svg>';
+
+/** The properties whose values are times, which competing claims of can be set on a line. */
+const TIME_PROPS = new Set(['date', 'start', 'end', 'earlier_than', 'later_than', 'end_before']);
+
+/**
+ * Competing claims of a time, as points on a line: each where it puts the time, with a bar for its spread (its 1σ, or the
+ * span it gives), the one shown filled, the rest hollow. Nothing where fewer than two of them can be placed.
+ */
+export function dateLine(claims: { ref: string; value: unknown }[], shown: string | undefined, deprecated: (ref: string) => boolean): string {
+  const placed = claims.flatMap((c) => {
+    try {
+      const v = parseTime(c.value as TimeInput);
+      if (v.kind === 'normal') return [{ ref: c.ref, at: v.mean, lo: v.mean - v.sd, hi: v.mean + v.sd }];
+      if (v.kind === 'instant') return [{ ref: c.ref, at: v.t, lo: v.t, hi: v.t }];
+      if (v.kind === 'interval' && Number.isFinite(v.lo) && Number.isFinite(v.hi)) return [{ ref: c.ref, at: (v.lo + v.hi) / 2, lo: v.lo, hi: v.hi }];
+    } catch {
+      // A value the line cannot place (a period's name, a count of days) is left off it.
+    }
+    return [];
+  });
+  if (placed.length < 2) return '';
+  let a = Math.min(...placed.map((p) => p.lo));
+  let b = Math.max(...placed.map((p) => p.hi));
+  const pad = (b - a) * 0.12 || 1;
+  [a, b] = [a - pad, b + pad];
+  const W = 336;
+  const x = (t: number) => 8 + ((t - a) / (b - a)) * (W - 16);
+  // Ticks at round steps, in the unit the times are read in: three to five of them.
+  const deep = !historical(a) || !historical(b);
+  const span = deep ? (b - a) / 1e6 : b - a;
+  const step = [1, 2, 5].flatMap((m) => [-4, -3, -2, -1, 0, 1, 2, 3].map((e) => m * 10 ** e)).sort((p, q) => p - q).find((st) => span / st <= 5)!;
+  const ticks: number[] = [];
+  if (deep) for (let ma = Math.ceil((PRESENT_YEAR - b) / 1e6 / step) * step; ma <= (PRESENT_YEAR - a) / 1e6 + 1e-9; ma += step) ticks.push(PRESENT_YEAR - ma * 1e6);
+  else for (let y = Math.ceil(a / step) * step; y <= b; y += step) ticks.push(y);
+  const label = (t: number) => (deep ? `${+((PRESENT_YEAR - t) / 1e6).toFixed(Math.max(0, -Math.floor(Math.log10(step))))}` : formatTime(t));
+  const tickMarks = ticks
+    .map((t) => `<line x1="${x(t).toFixed(1)}" y1="31" x2="${x(t).toFixed(1)}" y2="37" stroke="rgba(233,236,242,0.35)"/><text x="${x(t).toFixed(1)}" y="52" text-anchor="middle">${esc(label(t))}${deep && t === Math.max(...ticks) ? ' Ma' : ''}</text>`)
+    .join('');
+  const points = placed
+    .sort((p, q) => Number(p.ref === shown) - Number(q.ref === shown))
+    .map((p) => {
+      const on = p.ref === shown;
+      const ink = on ? 'var(--accent)' : 'var(--faint)';
+      const bar = p.hi > p.lo ? `<line x1="${x(p.lo).toFixed(1)}" y1="34" x2="${x(p.hi).toFixed(1)}" y2="34" stroke="${ink}" stroke-width="${on ? 2 : 1.5}"/><line x1="${x(p.lo).toFixed(1)}" y1="29" x2="${x(p.lo).toFixed(1)}" y2="39" stroke="${ink}" stroke-width="1.5"/><line x1="${x(p.hi).toFixed(1)}" y1="29" x2="${x(p.hi).toFixed(1)}" y2="39" stroke="${ink}" stroke-width="1.5"/>` : '';
+      const dot = on ? `<circle cx="${x(p.at).toFixed(1)}" cy="34" r="4.5" fill="var(--accent)"/>` : `<circle cx="${x(p.at).toFixed(1)}" cy="34" r="4" fill="var(--panel-solid)" stroke="var(--faint)" stroke-width="1.5"${deprecated(p.ref) ? ' stroke-dasharray="2 1.5"' : ''}/>`;
+      return bar + dot;
+    })
+    .join('');
+  const said = placed.map((p) => `${p.ref === shown ? 'shown: ' : ''}${formatTime(p.at)}`).join('; ');
+  return `<svg class="dateline" viewBox="0 0 ${W} 58" role="img" aria-label="${esc(`The claims on a line of time: ${said}`)}"><line x1="8" y1="34" x2="${W - 8}" y2="34" stroke="rgba(233,236,242,0.22)"/>${tickMarks}${points}</svg>`;
+}
+
 /** A phone held upright, where the panel is a sheet over the foot of the view (style.css lays it out so). */
 const UPRIGHT = '(max-width: 640px) and (min-height: 501px)';
 
@@ -351,8 +404,8 @@ export class InspectPanel {
     this.el.classList.remove('full');
   }
 
-  private frame(title: string, body: string): void {
-    this.el.innerHTML = `<header><h2>${esc(title)}</h2><button class="close" aria-label="Close">×</button></header>${body}`;
+  private frame(title: string, body: string, kind?: string): void {
+    this.el.innerHTML = `<header><div>${kind ? `<p class="eyebrow kind">${esc(kind)}</p>` : ''}<h2>${esc(title)}</h2></div><button class="close" aria-label="Close">${CLOSE}</button></header>${body}`;
     this.el.querySelector<HTMLButtonElement>('.close')!.onclick = () => this.cb.onClose();
     for (const a of this.el.querySelectorAll<HTMLAnchorElement>('a.open')) {
       a.onclick = (e) => {
@@ -370,11 +423,11 @@ export class InspectPanel {
   }
 
   private cites(r: EntityRecord, cs: CitationRecord[], unsourced?: string): string {
-    if (unsourced) return `<span class="cite unsourced">No source: ${esc(unsourced)}</span>`;
+    if (unsourced) return `<span class="cites"><span class="cite unsourced">No source: ${esc(unsourced)}</span></span>`;
     // When a source was written, against what it tells of: an account written down decades after is said to be. Two
     // quotes from one place of one work are one citation; their quotes are shown apart below it.
     const shown = cs.map((c) => `<span class="cite">${esc(short(r.sources[c.ref], c.ref))}${c.loc ? `, ${esc(c.loc)}` : ''}${c.after ? ` <span class="after">(${esc(c.after)})</span>` : ''}</span>`);
-    return [...new Set(shown)].join('<span class="cite">; </span>');
+    return `<span class="cites">${[...new Set(shown)].join('<span class="cite">; </span>')}</span>`;
   }
 
   private link(ref: string, label: string, wanted = false): string {
@@ -428,6 +481,7 @@ export class InspectPanel {
       const phaseId = cs[0] ? splitRef(cs[0].subject).phase : undefined;
       const phase = phaseId ? r.phases.find((p) => p.id === phaseId) : undefined;
       claims += `<div class="claim-group${competing ? ' competing' : ''}"><h4>${esc(PROP_LABEL[prop] ?? words(prop))}${phase ? ` <span class="phase">· ${esc(phase.label)}</span>` : ''}${competing ? ' <span class="badge">competing claims</span>' : turns ? ' <span class="badge">in turn</span>' : ''}</h4>`;
+      if (competing && TIME_PROPS.has(prop)) claims += dateLine(cs, chosen?.ref, (ref) => cs.find((c) => c.ref === ref)?.rank === 'deprecated');
       for (const c of cs) {
         const v = competing && !c.beside && c !== def ? variant(c.ref) : undefined;
         const inconsistent = v && !v.consistent;
@@ -436,7 +490,7 @@ export class InspectPanel {
           : '';
         const conf = c.confidence !== undefined ? `confidence: ${typeof c.confidence === 'number' ? c.confidence : `${c.confidence}${c.confidenceRange ? ` (${c.confidenceRange[0]}–${c.confidenceRange[1]})` : ''}`}` : '';
         claims += `<div class="claim rank-${esc(c.rank)}${inconsistent ? ' inconsistent' : ''}" data-claim="${esc(c.ref)}">
-          <label>${radio}<span class="value">${esc([...picks].map((p) => c.valueTexts?.[p]).find((x) => x !== undefined) ?? c.valueText)}</span>${this.cites(r, c.sources, c.unsourced)}</label>
+          <label>${radio}<span class="value${/^[-−±<>~≈]?\d/.test(c.valueText) ? ' num' : ''}">${esc([...picks].map((p) => c.valueTexts?.[p]).find((x) => x !== undefined) ?? c.valueText)}</span>${this.cites(r, c.sources, c.unsourced)}</label>
           <div class="claim-meta">${c.beside ? '<span class="badge beside" title="A day named in a calendar of cycles: one of the days that bear these names, read against the rest of the evidence. It narrows the other claims and is not a choice between them.">named in cycles</span>' : ''}<span class="badge rank">${esc(c.rank)}</span><span class="badge status-${esc(c.status)}">${esc(c.status)}</span>${c.level && c.level !== 'unchecked' && c.level !== 'accepted' ? `<span class="badge ladder" title="${esc(checkedTitle(c))}">checked: ${esc(c.level)}</span>` : ''}${c.basis !== 'evidence' ? `<span class="badge basis-${esc(c.basis)}">${esc(c.basis)}</span>` : ''}${c.alt ? `<span class="badge alt">${esc(this.cb.altTitle(c.alt))}</span>` : ''}${conf ? `<span class="badge">${esc(conf)}</span>` : ''}${c.methodLabel ? `<span class="badge">${esc(c.methodLabel)}</span>` : ''}<span class="author">${esc(c.author)}</span></div>
           ${c.validText ? `<p class="method">Holds: ${esc(c.validText)}</p>` : ''}
           ${c.sources.filter((s) => s.quote).map((s) => `<blockquote>${esc(s.quote)}</blockquote>`).join('')}
@@ -456,7 +510,7 @@ export class InspectPanel {
     const target = (x: { to: string; toLabel: string; wanted: boolean }) => (x.to.startsWith('alt:') ? `the perspective “${esc(this.cb.altTitle(x.to))}”` : this.link(x.to, x.toLabel, x.wanted));
     const relations = r.relations
       .filter((x) => !x.alt || alts.has(x.alt))
-      .map((x) => `<li><strong>${esc(REL_LABEL[x.rel] ?? x.rel.replace(/-/g, ' '))}</strong> ${target(x)}${held(x)}${x.lagText ? ` <span class="muted">(${esc(x.lagText)})</span>` : ''} <span class="cite">— ${this.cites(r, x.sources, x.unsourced)}</span>${x.sources.filter((s) => s.quote).map((s) => `<blockquote>${esc(s.quote)}</blockquote>`).join('')}${denied(x)}${x.note ? `<p class="note">${esc(x.note)}</p>` : ''}</li>`)
+      .map((x) => `<li><strong>${esc(REL_LABEL[x.rel] ?? x.rel.replace(/-/g, ' '))}</strong> ${target(x)}${held(x)}${x.lagText ? ` <span class="muted">(${esc(x.lagText)})</span>` : ''} <span class="cite">${this.cites(r, x.sources, x.unsourced)}</span>${x.sources.filter((s) => s.quote).map((s) => `<blockquote>${esc(s.quote)}</blockquote>`).join('')}${denied(x)}${x.note ? `<p class="note">${esc(x.note)}</p>` : ''}</li>`)
       .join('');
     const inverse = r.inverse
       .filter((x) => !x.alt || alts.has(x.alt))
@@ -475,22 +529,24 @@ export class InspectPanel {
         : esc(f.title);
     const phases = r.phases.map((p) => `<li>${esc(p.label)}${p.gap ? ' <span class="badge">gap</span>' : ''}: ${esc(fmtTime(lookup(p.variants, scenario, p.time)))}</li>`).join('');
     const chosenAlts = [...alts].filter((a) => r.claims.some((c) => c.alt === a) || r.variants.some((v) => v.key.split(' ').includes(a)));
+    const nSources = Object.keys(r.sources).length;
     this.frame(
       r.label,
-      `<div class="meta"><span class="kind">${esc(r.kindLabel)}</span><span class="badge basis-${esc(r.basis.time)}" title="How directly its dates rest on evidence">${esc(r.basis.time)}</span><span class="badge status-${status}">${status}${machine && status === 'proposed' ? ' · machine-made, needs review' : ''}</span></div>
-      ${r.summary ? `<p class="summary">${esc(r.summary)}</p>` : ''}
+      `${r.summary ? `<p class="summary">${esc(r.summary)}</p>` : ''}
+      <div class="meta"><span class="badge basis-${esc(r.basis.time)}" title="How directly its dates rest on evidence">${esc(r.basis.time)}</span><span class="badge status-${status}">${status}${machine && status === 'proposed' ? ' · machine-made, needs review' : ''}</span>${nSources ? `<span class="badge">${nSources} ${nSources === 1 ? 'source' : 'sources'}</span>` : ''}</div>
       ${here ? this.hereSection(here) : ''}
       ${organism ? this.organismSection(organism) : ''}
-      <section><h3>When</h3><p class="when">${esc(fmtTime(time))}${picks.size || chosenAlts.length ? ' <span class="badge">with your choices</span>' : ''}</p>
+      <dl class="facts"><dt>When</dt><dd><p class="when">${esc(fmtTime(time))}${picks.size || chosenAlts.length ? ' <span class="badge">with your choices</span>' : ''}</p>
       ${chosenAlts.map((a) => `<p class="method alt-held">In the alternative “${esc(this.cb.altTitle(a))}”${heldText(this.cb.altHeld?.(a)) ? `, ${esc(heldText(this.cb.altHeld?.(a)))}` : ''}.</p>`).join('')}
       ${phases ? `<ul class="phases">${phases}</ul>` : ''}
-      ${derivedRefs.length ? `<p class="derived">Derived by the chronology solver from:</p><ul class="derived">${derivation(derivedRefs)}</ul>` : ''}</section>
-      <section><h3>Where</h3><p>${where}</p></section>
+      ${derivedRefs.length ? `<p class="derived">Derived by the chronology solver from:</p><ul class="derived">${derivation(derivedRefs)}</ul>` : ''}</dd>
+      <dt>Where</dt><dd>${where}</dd></dl>
       <section><h3>Claims</h3>${claims}</section>
       ${relations ? `<section><h3>Relations</h3><ul class="relations">${relations}</ul></section>` : ''}
       ${inverse ? `<section><h3>Related records</h3><ul class="relations inverse">${inverse}</ul></section>` : ''}
       ${r.wanted.length ? `<section><h3>Wanted</h3><p class="method">Referred to here but not written yet: ${r.wanted.map((w) => `<code>${esc(w)}</code>`).join(', ')}.</p></section>` : ''}
       <section><h3>Sources</h3><ol class="sources">${sources}</ol></section>`,
+      r.kindLabel,
     );
     if (footprintClaim && isFootprint(footprintClaim.value)) {
       const form = footprintClaim.value;
@@ -501,7 +557,7 @@ export class InspectPanel {
       button.onclick = () => inspectFootprint(form, r.label, () => {
         this.el.querySelector(`[data-claim="${CSS.escape(ref)}"]`)?.scrollIntoView({ block: 'center' });
       });
-      this.el.querySelector('.summary, .meta')?.after(button);
+      this.el.querySelector('.meta')?.after(button);
     }
     // A taxon can be gone and seen, where the most of its fossils are.
     const see = this.seeIt?.(r.id, !!organism);
@@ -570,16 +626,16 @@ export class InspectPanel {
       ? 'A sea, drawn at the depth the elevation field gives it. Every animal you see is placed by a generator: only who could be here comes from fossils.'
       : `Where the climate field reads the land at ${esc(String(b.ageMa))} Ma it is ${esc(b.label.toLowerCase())}, and the transitions allow forest over ${Math.round(b.cover.forests * 100)}% of it and grass over ${Math.round(b.cover.grasses * 100)}%. Every plant and animal you see is placed by a generator: only who could be here comes from fossils.`;
     const formation = group('formation', 'Recorded in the formation', 'Fossils from this formation identify these organisms. Their positions in the scene are generated.');
-    this.frame(spec.site.place ? spec.site.label : spec.site.stage ?? 'This place', `<div class="meta"><span class="kind">What lived here</span> <span class="badge basis-procedural">procedural</span></div>
-      <p class="summary">${summary}</p>
+    this.frame(spec.site.place ? spec.site.label : spec.site.stage ?? 'This place', `<p class="summary">${summary}</p>
+      <div class="meta"><span class="badge basis-procedural">procedural</span></div>
       ${none}${formation}${tiers}
-      ${note ? `<section><p class="note">${esc(note)}</p></section>` : ''}`);
+      ${note ? `<section><p class="note">${esc(note)}</p></section>` : ''}`, 'What lived here');
   }
 
   /** A living thing that is only a row of a database: what the row says, and what was made of it. */
   showOrganism(t: LivingTaxon, o: OrganismHere, src: SourceRecord | undefined): void {
     const source = `<section><h3>Source</h3><ol class="sources"><li><p>${esc(src?.citation ?? '')}</p></li></ol></section>`;
-    this.frame(t.label, `<div class="meta"><span class="kind">Taxon, in the Paleobiology Database</span> <span class="badge basis-procedural">procedural</span></div>${this.organismSection(o)}${source}`);
+    this.frame(t.label, `<div class="meta"><span class="badge basis-procedural">procedural</span></div>${this.organismSection(o)}${source}`, 'Taxon, in the Paleobiology Database');
   }
 
   /** Inside a polity's territory: which of the dataset's rows is drawn there, and for what years. */
@@ -601,12 +657,13 @@ export class InspectPanel {
       const inside = info.elevation > 0;
       this.frame(
         inside ? 'Continental block' : 'Between the blocks',
-        `<div class="meta"><span class="kind">${esc(info.fieldTitle)}</span><span class="badge basis-reconstruction">reconstruction</span></div>
+        `<div class="meta"><span class="badge basis-reconstruction">reconstruction</span></div>
         <section><h3>Here, at ${esc(formatTime(info.t, 1e4))}</h3>
         <p class="big">${inside ? 'Inside a continental block' : 'Outside the continental blocks'}</p>
         <p>${lat}, ${lon} in the geographic frame of this time${info.plate ? `, on plate ${info.plate}${info.plateLabel ? ` (${esc(info.plateLabel)})` : ''}` : ''}.</p>
         ${info.fieldDescription ? `<p class="note">${esc(info.fieldDescription)}</p>` : ''}
         <p class="method">Interpolated between ${esc(blend)}, each moved with its plates to this time.</p></section>${this.stateSection(info.state)}${source}`,
+        info.fieldTitle,
       );
       return;
     }
@@ -615,7 +672,7 @@ export class InspectPanel {
     const underIce = !!info.ice?.drawn;
     this.frame(
       underIce ? 'Ice sheet' : info.elevation >= 0 ? 'Land surface' : 'Sea floor',
-      `<div class="meta"><span class="kind">${esc(underIce ? info.ice!.title : info.fieldTitle)}</span><span class="badge basis-reconstruction">reconstruction</span></div>
+      `<div class="meta"><span class="badge basis-reconstruction">reconstruction</span></div>
       ${people}
       <section><h3>Here, at ${esc(formatTime(info.t, 1e4))}</h3>
       ${underIce ? this.iceSection(info.ice!) : ''}
@@ -627,6 +684,7 @@ export class InspectPanel {
       ${info.polity && info.elevation >= 0 ? this.politySection(info.polity) : ''}
       ${info.biome && info.elevation >= 0 && !underIce ? this.biomeSection(info.biome) : ''}
       <p class="method">${info.seaLevel ? this.seaLevelMethod(info.seaLevel, info.coastline) : `Interpolated between ${esc(blend)}, each moved with its plates to this time. The ${esc((info.coastline ?? 'coastline').toLowerCase())} is derived, not stored: the ${esc(info.datum === 'contemporaneous-sea-level' ? '0 m' : 'sea-level')} isoline of this field.`}${info.fieldSpread ? ` ${esc(SPREAD_TEXT[info.fieldSpread])}` : ''}</p></section>${this.stateSection(info.state)}${source}`,
+      underIce ? info.ice!.title : info.fieldTitle,
     );
   }
 
@@ -723,8 +781,9 @@ export class InspectPanel {
         : 'The globe is drawn plain on purpose: nothing here rests on evidence, a reconstruction or a projection.';
     this.frame(
       'Geography unknown',
-      `${generic ? '<div class="meta"><span class="kind">Generic land</span><span class="badge basis-procedural">generic</span></div>' : ''}<section><h3>At ${esc(formatTime(t, 1e4))}</h3><p>${esc(why)}</p>
+      `${generic ? '<div class="meta"><span class="badge basis-procedural">generic</span></div>' : ''}<section><h3>At ${esc(formatTime(t, 1e4))}</h3><p>${esc(why)}</p>
       <p class="note">${esc(note)}</p></section>${this.stateSection(state)}`,
+      generic ? 'Generic land' : undefined,
     );
   }
 
@@ -733,17 +792,14 @@ export class InspectPanel {
   /** A row of a dataset drawn on the globe: what it says, and the dataset it comes from. */
   showRow(title: string, kind: string, lines: string[], src: SourceRecord | undefined, note?: string, row?: RowInfo): void {
     const source = `<section><h3>Source</h3><ol class="sources"><li><p>${esc(src?.citation ?? '')}</p>${src?.doi ? `<a href="https://doi.org/${encodeURI(src.doi)}" target="_blank" rel="noopener">doi:${esc(src.doi)}</a>` : ''}</li></ol></section>`;
-    this.frame(title, `<div class="meta"><span class="kind">${esc(kind)}</span><span class="badge basis-evidence">evidence</span>${row?.corrected ? '<span class="badge corrected">corrected</span>' : ''}</div>
-      <section>${lines.map((l) => `<p>${esc(l)}</p>`).join('')}${note ? `<p class="note">${esc(note)}</p>` : ''}</section>${rowSection(row)}${source}`);
+    this.frame(title, `<div class="meta"><span class="badge basis-evidence">evidence</span>${row?.corrected ? '<span class="badge corrected">corrected</span>' : ''}</div>
+      <section>${lines.map((l) => `<p>${esc(l)}</p>`).join('')}${note ? `<p class="note">${esc(note)}</p>` : ''}</section>${rowSection(row)}${source}`, kind);
   }
 
   showGenerated(title: string, kind: string, text: string, why: string): void {
-    this.el.hidden = false;
-    this.el.innerHTML = `<header><h2>${esc(title)}</h2><button class="close" aria-label="Close">×</button></header>
-      <div class="meta"><span class="kind">${esc(kind)}</span> <span class="badge basis-procedural">procedural</span></div>
-      <p class="summary">${esc(text)}</p>
-      <h3>How we know</h3><p class="muted">${esc(why)}</p>`;
-    this.el.querySelector<HTMLButtonElement>('.close')!.onclick = () => this.cb.onClose();
+    this.frame(title, `<p class="summary">${esc(text)}</p>
+      <div class="meta"><span class="badge basis-procedural">procedural</span></div>
+      <h3>How we know</h3><p class="muted">${esc(why)}</p>`, kind);
   }
 
   showSeries(s: SeriesRecord, t: number, v: SeriesValue | null): void {
@@ -755,12 +811,13 @@ export class InspectPanel {
     const span = `${when(s.points[0][0])} to ${when(s.points.at(-1)![0])}`;
     this.frame(
       s.title,
-      `<div class="meta"><span class="kind">${esc(s.quantity ?? 'Global series')}</span><span class="badge basis-${esc(basis)}">${esc(basis)}</span></div>
-      ${s.description ? `<p class="summary">${esc(s.description)}</p>` : ''}
+      `${s.description ? `<p class="summary">${esc(s.description)}</p>` : ''}
+      <div class="meta"><span class="badge basis-${esc(basis)}">${esc(basis)}</span></div>
       <section><h3>At ${esc(formatTime(t, 1e4))}</h3>
       <p class="big">${v ? `${fmtValue(v.value)} ${esc(s.unit ?? '')}` : '<span class="muted">No value at this time</span>'}</p>${band}${s.spread && s.spread !== 'band' ? `<p class="method">${esc(SPREAD_TEXT[s.spread])}</p>` : ''}
       <p class="method">${s.rule ? `Computed with ${esc(s.rule.name)}${Object.keys(s.rule.params).length ? ` (${Object.entries(s.rule.params).map(([k, x]) => `${esc(k)} ${esc(String(x))}`).join(', ')})` : ''}, every step from ${esc(span)}` : `Read from the dataset's table, from ${esc(span)}`}; between its ${s.points.length.toLocaleString('en-US')} points the value is interpolated (${esc(s.interpolation)}).${projected ? ' After the present it is a projection.' : ''}</p></section>
       <section><h3>Source</h3><ol class="sources"><li><p>${esc(src?.citation ?? s.source.ref)}${s.source.loc ? `, ${esc(s.source.loc)}` : ''}</p>${src?.doi ? `<a href="https://doi.org/${encodeURI(src.doi)}" target="_blank" rel="noopener">doi:${esc(src.doi)}</a>` : ''}${src?.reliability ? `<p class="note">${esc(src.reliability)}</p>` : ''}${src?.verified ? `<p class="verified">Checked: ${esc(src.verified.how)}</p>` : ''}</li></ol></section>`,
+      s.quantity ?? 'Global series',
     );
   }
 }
