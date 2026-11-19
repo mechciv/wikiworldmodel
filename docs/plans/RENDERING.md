@@ -241,7 +241,8 @@ above, it says so here.
   Rome's forum and one of its streets. Each fixes the visit's clock (`clock=0`). `npx tsx tools/look/look.ts shoot <dir>`
   shoots them and writes each frame's time by pass; `look.ts sheet <before> <after> --out <dir>` lays two shoots side by
   side. The renderer times its passes ([timer.ts](../../viewer/src/gl/timer.ts)) by GPU timer queries where the browser
-  has them, or by waiting for each pass where it has none, and the viewer's `profile()` hook measures a view;
+  has them, or where it has none by waiting for each pass, reading a pixel back, and the viewer's `profile()` hook measures
+  a view;
   [frametime.spec.ts](../../viewer/test/e2e/frametime.spec.ts), the browser tests' `frame-time` group, holds each view to
   16 ms at 1600 × 900 on the reference GPU, and skips anywhere else. The reference GPU is a choice still to be made.
 - **1. Plants.** Every plant part type grows branches and holds its leaves on cards, cut by the shader to needles, a
@@ -273,8 +274,9 @@ above, it says so here.
 - **6. Bodies.** A body's trunk, head and tubes have half as many sides again close by, and a head's or a tube's rings one
   more between each two. Hide, fur, feathers, chitin and wings have a grain in the body's own frame, and a body a pattern
   by its taxon's tint: stripes, spots, mottling or none. *Not built:* normals smoothed across the joints of parts.
-- **7. Clouds.** The sky marches a layer of cloud from 1400 m to 2600 m, its cover the globe's clouds over the scene, lit
-  by the sun through itself; the ground's cloud shadows are taken through the same layer.
+- **7. Clouds.** The sky marches a layer of cloud from 1400 m to 2400 m, lit by the sun through itself; the ground's cloud
+  shadows are taken through the same layer. Its cover follows the globe's clouds over the scene, as fair weather: most of
+  their cover, and never more than half the sky. The lighter way keeps its flat clouds.
 - **8. The still.** A view held still is refined further: 48 frames, drawn at twice the size each way, the shadows cast
   from all over the sun's disc, and the scene asked for twice the budget with finer detail at each distance. It starts
   where a link says `still=1`, or once a visitor has used the page and held the view still for 1.5 s; any change ends it.
