@@ -15,7 +15,8 @@ import { buildFile, canvasPng, idle, latestBuild, settledUrl } from './helpers.t
 // for. A taller view of the Hell Creek passes the fast budget's cap on what it draws, and what it draws under the cap
 // depends on how it was streamed in, so that two loads of one link may not give the same pixels.
 const small = { viewport: { width: 640, height: 345 } };
-const FAST = 'quality=fast';
+// The lighter way to draw, and the visit's clock fixed, so that two loads of a link draw the same picture.
+const FAST = 'quality=fast&clock=0';
 const site = () => buildFile<Tileset>('tileset.json').sites!.find((s) => s.kind === 'life') as SiteInfo;
 const RAD = Math.PI / 180;
 const place = (s: SiteInfo, x: number, y: number) => ({ lat: s.origin.lat + y / 6371000 / RAD, lon: s.origin.lon + x / (6371000 * Math.cos(s.origin.lat * RAD)) / RAD });
@@ -53,6 +54,24 @@ test.describe('the Hell Creek', () => {
     await other.goto(url);
     await idle(other);
     expect((await canvasPng(other)).equals(pixels)).toBe(true);
+  });
+
+  test('what moves moves by the visit\'s clock: fixed by a link, the picture holds; running, the plants and animals move', async ({ page }) => {
+    const s = site();
+    // Fixed: two moments of the same link are the same picture.
+    await page.goto(`/?b=${latestBuild()}&${arrival(s)}&${FAST}`);
+    await idle(page);
+    const fixed = await canvasPng(page);
+    await page.waitForTimeout(1500);
+    await idle(page);
+    expect((await canvasPng(page)).equals(fixed)).toBe(true);
+    // Running: the link without a clock draws again as it goes, and the scene is not frozen.
+    await page.goto(`/?b=${latestBuild()}&${arrival(s)}&quality=fast`);
+    await idle(page);
+    expect(await page.evaluate(() => window.__wikiworldmodel!.state().clock)).toBeUndefined();
+    const before = await canvasPng(page);
+    await page.waitForTimeout(4000);
+    expect((await canvasPng(page)).equals(before)).toBe(false);
   });
 
   test('the way down: offered when near at the time it is drawn for, flying there, and ready when it arrives', async ({ page }) => {

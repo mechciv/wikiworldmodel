@@ -6,9 +6,9 @@ import type { LivingTaxon, SceneSpec } from '../../../core/scene.ts';
 import { GroundSampler, type GroundGridData } from '../city/ground.ts';
 import { fingerprint, type Fingerprint, type Part } from '../../../core/fingerprint.ts';
 import { Mesh, meshParts } from '../city/kit.ts';
-import { hashString } from '../city/math.ts';
-import { drawAnimal, drawPlant, POSE, type Detail, type Stance } from './forms.ts';
-import { CELL, CELLS, cellParts, cellKey, coverMask, EXTENT, groundGrids, LandCover, makePlan, placeLook, waterLevels, waterRibbons, waterSheet, watersFor, type CellRows, type LivingParams, type LivingPlan, type PlaceLook } from './scene/v5.ts';
+import { hash2, hashString, TAU } from '../city/math.ts';
+import { drawAnimal, drawClump, drawPlant, POSE, type Detail, type Stance } from './forms.ts';
+import { CELL, CELLS, cellParts, cellKey, coverMask, EXTENT, groundGrids, LandCover, makePlan, placeLook, waterLevels, waterRibbons, waterSheet, watersFor, type CellRows, type LivingParams, type LivingPlan, type PlaceLook } from './scene/v6.ts';
 import type { Waters } from './land.ts';
 import { drawDwelling, houseSize, type HouseDetail } from '../people/dwellings.ts';
 import { LandUseMap, landUseMask, makeSettlement, type SettlementPlan } from '../people/settlement/v1.ts';
@@ -29,6 +29,11 @@ export interface LifeView {
   /** the frame's height in pixels */
   height: number;
   clearance: number;
+  /**
+   * A still is being made (docs/plans/RENDERING.md, step 8): twice the budget, and the far drawn as the near is, a step
+   * finer at each distance.
+   */
+  rich?: boolean;
 }
 
 export interface Budget {
@@ -55,6 +60,25 @@ export interface ProtoMesh {
   proto: number;
   vertices: ArrayBuffer;
   indices: Uint32Array;
+  /**
+   * How an animal's mesh idles (docs/plans/RENDERING.md, step 5): where its neck leaves its shoulders, its hips and its
+   * middle, in its own frame, each followed by 0; then how far its head swings up or down from its pose and its tail from
+   * side to side, in radians, and how fast it idles, in radians a second. Its vertices say what moves with what.
+   */
+  idle?: number[];
+}
+
+/**
+ * How an animal idles, from how it stands: a head lowered to graze is raised now and then and lowered again, a head held
+ * up dips; a tail swings, more as it walks; and the pace is slower the bigger the body. These are the generator's look,
+ * no claim about any animal.
+ */
+function idling(pose: number, L: number): [number, number, number] {
+  const low = pose === POSE.graze || pose === POSE.drink;
+  // Up is positive: a grazing head comes up, a head held up dips.
+  const head = low ? 0.45 : pose === POSE.alert ? -0.06 : pose === POSE.rest ? -0.04 : pose === POSE.fly ? 0 : -0.14;
+  const tail = pose === POSE.walk ? 0.22 : pose === POSE.fly ? 0.05 : 0.12;
+  return [head, tail, (2 * Math.PI) / (2.2 * Math.sqrt(Math.max(L, 0.05)) + 0.8)];
 }
 
 export interface Selection {
@@ -65,11 +89,15 @@ export interface Selection {
   triangles: number;
   /** whether more cells are still to be made for this view */
   pending: number;
+  /** how many clumps of low plants cover the ground close by, apart from the instances */
+  clumps: number;
   /** the nearest groups, to name */
   groups: { taxon: number; at: [number, number]; base: number; top: number }[];
 }
 
-export const protoOf = (taxon: number, variant: number, detail: Detail) => (taxon << 8) | (variant << 2) | detail;
+export const protoOf = (taxon: number, variant: number, detail: Detail | typeof CLUMP) => (taxon << 8) | (variant << 2) | detail;
+/** A mesh's detail that is a clump of a low plant, as the ground's cover close by is drawn. */
+export const CLUMP = 3;
 export const protoParts = (p: number): { taxon: number; variant: number; detail: Detail } => ({ taxon: p >> 8, variant: (p >> 2) & 63, detail: (p & 3) as Detail });
 
 const WALKING = new Set<number>([POSE.walk, POSE.fly]);
@@ -107,7 +135,7 @@ export class SceneStream {
     const levelAt = waters.paths ? waterLevels(waters) : undefined;
     // The people, where the scene has any: their houses and fields, on this ground and away from this water. Where they
     // cleared the land no tree stands. A scene of the sea has them too, on whatever ground stands above its water: a place
-    // a few metres above the sea, a delta or a lower plain, is a scene of the sea (scene/v5.ts, sea_below), and among the
+    // a few metres above the sea, a delta or a lower plain, is a scene of the sea (scene/v6.ts, sea_below), and among the
     // most crowded land there was.
     let clearing: ((x: number, y: number) => number) | undefined;
     if (spec.people) {
@@ -178,8 +206,21 @@ export class SceneStream {
     const form = this.spec.forms[t.form];
     const m = new Mesh(detail >= 2 ? 4096 : 512);
     m.entity = taxon + 1;
-    if (form.kind === 'plant') drawPlant(m, form, t.height ?? 1, (variant + 1) * 0x9e37, detail, this.tones[taxon]);
-    else drawAnimal(m, form, this.stance(t, form, variant, detail, this.tones[taxon]));
+    if ((detail as number) === CLUMP) {
+      drawClump(m, form, t.height ?? 1, (variant + 1) * 0x9e37, this.tones[taxon]);
+      const { vertices, indices } = m.arrays();
+      this.meshes.set(proto, { tris: indices.length / 3 });
+      return { proto, vertices, indices };
+    }
+    // On the lighter way, a plant from a way off is the plain shapes it always was; otherwise its leaves are on cards.
+    if (form.kind === 'plant') drawPlant(m, form, t.height ?? 1, (variant + 1) * 0x9e37, detail, this.tones[taxon], !this.budget.fast);
+    else {
+      const stance = this.stance(t, form, variant, detail, this.tones[taxon]);
+      const j = drawAnimal(m, form, stance);
+      const { vertices, indices } = m.arrays();
+      this.meshes.set(proto, { tris: indices.length / 3 });
+      return { proto, vertices, indices, idle: [...j.neck, 0, ...j.hip, 0, ...j.middle, 0, ...idling(stance.pose, stance.L), 0] };
+    }
     const { vertices, indices } = m.arrays();
     this.meshes.set(proto, { tris: indices.length / 3 });
     return { proto, vertices, indices };
@@ -214,8 +255,9 @@ export class SceneStream {
     const buckets = new Map<number, { f: Float32Array; s: Uint16Array; n: number }>();
     let pending = 0;
     let instances = 0;
-    const cap = this.budget.instances;
-    const keepR = 1400 * this.keep;
+    const rich = !!v.rich && !this.budget.fast;
+    const cap = this.budget.instances * (rich ? 2 : 1);
+    const keepR = 1400 * (rich ? 1 : this.keep);
     const R0 = keepR * keepR;
     const reachOut = Math.min(EXTENT * 1.4, Math.max(5000, v.clearance * 8 + 6000));
     const span = Math.ceil(reachOut / CELL);
@@ -278,7 +320,7 @@ export class SceneStream {
         // The same individuals at every distance: further off, only the lowest ranks.
         if (dd > R0 && rank[q] * dd > 256 * R0) continue;
         const pxs = Math.sqrt(pxs2);
-        const detail: Detail = this.budget.fast ? (pxs >= 26 ? 1 : 0) : pxs >= 70 ? 2 : pxs >= 9 ? 1 : 0;
+        const detail: Detail = this.budget.fast ? (pxs >= 26 ? 1 : 0) : pxs >= (rich ? 36 : 70) ? 2 : pxs >= (rich ? 4 : 9) ? 1 : 0;
         const t0 = taxa[k];
         const form = this.spec.forms[t0.form];
         // A low plant is a mesh only close by.
@@ -359,6 +401,7 @@ export class SceneStream {
         }
       }
     }
+    const clumps = this.cover && !this.budget.fast ? this.groundCover(v, buckets) : 0;
     // Pay for meshes, and keep within the budget of triangles: the far share thins next time if it did not.
     const batches: Batch[] = [];
     const protos: ProtoMesh[] = [];
@@ -372,10 +415,88 @@ export class SceneStream {
       triangles += b.n * this.meshes.get(proto)!.tris;
       batches.push({ proto, count: b.n, data: b.f.buffer.slice(0, b.n * INSTANCE_STRIDE) as ArrayBuffer });
     }
-    if (instances >= cap || triangles > this.budget.triangles) this.keep = Math.max(0.2, this.keep * 0.8);
-    else if (instances < cap * 0.6 && triangles < this.budget.triangles * 0.6) this.keep = Math.min(1, this.keep * 1.1);
+    // A still's richer frame says nothing of what the live one can afford.
+    if (!rich) {
+      if (instances >= cap || triangles > this.budget.triangles) this.keep = Math.max(0.2, this.keep * 0.8);
+      else if (instances < cap * 0.6 && triangles < this.budget.triangles * 0.6) this.keep = Math.min(1, this.keep * 1.1);
+    }
     groups.sort((a, b) => Math.hypot(a.at[0] - ex, a.at[1] - ey) - Math.hypot(b.at[0] - ex, b.at[1] - ey));
-    return { batches, protos, instances, triangles, pending, groups: groups.slice(0, 64) };
+    return { batches, protos, instances, triangles, pending, clumps, groups: groups.slice(0, 64) };
+  }
+
+  /**
+   * The ground's cover close by (docs/plans/RENDERING.md, step 2): where the cover's share of low plants says, a clump of
+   * one of the understory the atlas has here, on a grid that stays put as the eye moves, its place shaken by a hash; fewer
+   * over the last third of the way out, until the ground's own colour for low plants is all there is; and no more than
+   * the clumps' own budget. A scene whose atlas has no understory has none.
+   */
+  private groundCover(v: LifeView, buckets: Map<number, { f: Float32Array; s: Uint16Array; n: number }>): number {
+    const c = this.params.plants.clumps;
+    if (!c) return 0;
+    const [ex, ey, ez] = v.eye;
+    const gz = this.ground.at(ex, ey);
+    // From high enough up the clumps would be too small to see.
+    if (ez - gz > c.reach * 0.6) return 0;
+    const R = c.reach;
+    const step = c.step;
+    const t = Math.tan(v.fov / 2);
+    const side = t * v.aspect;
+    const seed = this.look.seed;
+    const i0 = Math.floor((ex - R) / step);
+    const i1 = Math.ceil((ex + R) / step);
+    const j0 = Math.floor((ey - R) / step);
+    const j1 = Math.ceil((ey + R) / step);
+    let n = 0;
+    for (let j = j0; j <= j1 && n < c.most; j++) {
+      for (let i = i0; i <= i1 && n < c.most; i++) {
+        const x = (i + hash2(i, j, seed + 71)) * step;
+        const y = (j + hash2(i, j, seed + 72)) * step;
+        const dx = x - ex;
+        const dy = y - ey;
+        const d = Math.sqrt(dx * dx + dy * dy);
+        if (d > R) continue;
+        // In view, with a clump's width to spare.
+        const dz = gz - ez;
+        const fw = dx * v.forward[0] + dy * v.forward[1] + dz * v.forward[2];
+        if (fw < -2) continue;
+        const rt = dx * v.right[0] + dy * v.right[1] + dz * v.right[2];
+        const up = dx * v.up[0] + dy * v.up[1] + dz * v.up[2];
+        if (Math.abs(rt) > fw * side + 2 || Math.abs(up) > fw * t + 2) continue;
+        const keep = d < R * 0.66 ? 1 : 1 - (d - R * 0.66) / (R * 0.34);
+        const u = hash2(i, j, seed + 73);
+        const cover = this.cover.at(x, y);
+        if (cover.water || u >= cover.low * keep) continue;
+        const k = this.plan.underAt(cover.above, hash2(i, j, seed + 74));
+        if (k < 0) return 0;
+        const shade = (hash2(i, j, seed + 75) * 256) | 0;
+        const proto = protoOf(k, shade & 3, CLUMP);
+        let b = buckets.get(proto);
+        if (!b) {
+          const buf = new ArrayBuffer(INSTANCE_STRIDE * 256);
+          b = { f: new Float32Array(buf), s: new Uint16Array(buf), n: 0 };
+          buckets.set(proto, b);
+        }
+        if ((b.n + 1) * INSTANCE_STRIDE > b.f.byteLength) {
+          const buf = new ArrayBuffer(b.f.byteLength * 2);
+          new Uint8Array(buf).set(new Uint8Array(b.f.buffer));
+          b.f = new Float32Array(buf);
+          b.s = new Uint16Array(buf);
+        }
+        const a = hash2(i, j, seed + 76) * TAU;
+        const o = b.n * 7;
+        b.f[o] = x;
+        b.f[o + 1] = y;
+        b.f[o + 2] = this.ground.at(x, y);
+        b.f[o + 3] = 0.45 + 0.55 * hash2(i, j, seed + 77);
+        b.f[o + 4] = Math.sin(a);
+        b.f[o + 5] = Math.cos(a);
+        b.s[b.n * 14 + 12] = k + 1;
+        b.s[b.n * 14 + 13] = shade >> 2;
+        b.n++;
+        n++;
+      }
+    }
+    return n;
   }
 
   /**

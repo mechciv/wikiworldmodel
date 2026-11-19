@@ -1,4 +1,4 @@
-// A living scene, version 5: any place at any moment, on land or in the sea, from a spec. Nothing is laid out until it is looked at:
+// A living scene, version 6: any place at any moment, on land or in the sea, from a spec. Nothing is laid out until it is looked at:
 // each 400 m cell makes what stands in it from hashes of where it is, so the scene has no edge to speak of, and what a
 // far view shows is the top of the same list a near view shows in full. The records say which taxa could be here and how
 // big they grew; this says where each stands, how many there are, what it is doing and what colour it is, all invented
@@ -8,7 +8,10 @@
 // own climate bears and snow lies where the scene's month holds it (docs/SCENES.md), from the twelve months at the
 // scene's place. Since version 5 a place in the sea is a scene of the sea (docs/slices/TENTH-SLICE.md): its floor the
 // field's, no invented river, what lives on the floor on it and what swims in the water over it. A place on land makes
-// what version 4 made. The build and every browser are held to agree within the tolerance of core/fingerprint.ts.
+// what version 4 made. Since version 6 a plant close by grows a skeleton of branches and holds its leaves on cards, and
+// from a way off is its trunk, the mass of its leaves and fewer, larger cards (docs/plans/RENDERING.md, step 1): every
+// plant's mesh is new, and where and what everything is, is what version 5 made. The build and every browser are held
+// to agree within the tolerance of core/fingerprint.ts.
 import type { Part } from '../../../../core/fingerprint.ts';
 import type { Form, Pose } from '../../../../core/form.ts';
 import type { LivingTaxon, ReliefPatch, SceneCover, SceneSpec } from '../../../../core/scene.ts';
@@ -21,7 +24,7 @@ import { arrival, distanceField, fbm, noise, plainGrid, watersOf, type GridSpec,
 import { drawRiver, meet, type Oxbow, type RiverChoices, type RiverPath } from '../rivers.ts';
 
 export const GENERATOR = 'gen:life/scene';
-export const VERSION = 5;
+export const VERSION = 6;
 
 /** The side of a cell of the ground, in metres. */
 export const CELL = 400;
@@ -89,6 +92,12 @@ export interface LivingParams {
     under: number;
     mat_step: number;
     mats: number;
+    /**
+     * The ground's cover close by (docs/plans/RENDERING.md, step 2): clumps of the understory on a grid this many metres
+     * apart, where the cover's share of low plants says, out to `reach` metres from the eye, thinning over its last
+     * third, and at most `most` of them in a view.
+     */
+    clumps?: { step: number; reach: number; most: number };
   };
   animals: {
     /** Damuth's rule: a species of 1 kg at this many to the km², falling as mass to the −¾ */
@@ -793,6 +802,11 @@ export interface LivingPlan {
   focus: [number, number];
   toRiver: [number, number];
   cell(i: number, j: number, tier: number): CellRows;
+  /**
+   * Which of the understory grows at a place this far above the water, chosen by `u` (0–1) as the understory is sown:
+   * its index among the taxa, or −1 where the scene has none.
+   */
+  underAt(above: number, u: number): number;
 }
 
 /** How many to the km² a taxon is drawn at, by Damuth's rule and how common it is on its list. */
@@ -1093,7 +1107,8 @@ export function makePlan(spec: SceneSpec, ground: GroundSampler, look: PlaceLook
       groups,
     };
   };
-  return { look, focus, toRiver, cell };
+  const underAt = (above: number, u: number): number => (under.length ? choose(under, smooth(2.4, 0.5, above), u).index : -1);
+  return { look, focus, toRiver, cell, underAt };
 }
 
 /** A cell's rows as bytes: what the build and the browser hash. */

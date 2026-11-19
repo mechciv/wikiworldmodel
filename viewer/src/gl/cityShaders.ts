@@ -73,6 +73,144 @@ float standing(vec4 e) {
 }
 `;
 
+/**
+ * Leaves held on cards (docs/plans/RENDERING.md, step 1): a card's outline is cut here from its uv, as its material says:
+ * needles, the leaflets of a frond, broad leaves, or a frond held as a fan. The same cut is made in every pass, so that
+ * what casts a shadow and what a click finds are the leaves that are seen. How a leaf looks is the renderer's; whether a
+ * plant has needles, fronds or broad leaves is its form's.
+ */
+const LEAVES = /* glsl */ `
+const int NEEDLE_CARD = 44, FROND_CARD = 45, BROAD_CARD = 46, FAN_CARD = 47, LEAF_MASS = 48, BLADE_CARD = 49;
+bool onCard(int m) { return (m >= NEEDLE_CARD && m <= FAN_CARD) || m == BLADE_CARD; }
+float leafHash(vec2 p) {
+  vec3 q = fract(vec3(p.xyx) * 0.1031);
+  q += dot(q, q.yzx + 33.33);
+  return fract((q.x + q.y) * q.z);
+}
+// A leaf's signed distance, <0 inside, and its shade, from distances along and across it in its own halves.
+vec2 leafShape(float x, float y, float len, float wid, float shade) {
+  float w = sqrt(max(0.0, 1.0 - x * x)) * (1.0 - 0.28 * x);
+  float d = max((abs(y) - w) * wid * 0.5, (abs(x) - 1.0) * len * 0.5);
+  // The midrib, a little paler.
+  return vec2(d, shade + 0.12 * (1.0 - smoothstep(0.0, 0.14, abs(y))));
+}
+// Broad leaves along a twig, alternating, with one at its tip. p: across from the twig and along from the base, in
+// shares of the card's length; wide: how far the card reaches either side of its twig, in the same.
+vec2 broadLeaves(vec2 p, float wide, float seed) {
+  float best = p.y > 0.0 && p.y < 0.86 ? abs(p.x) - 0.009 : 1.0;
+  float shade = 0.6;
+  float scale = min(1.0, wide * 2.6 + 0.2);
+  for (int i = 0; i < 7; i++) {
+    float fi = float(i);
+    bool tip = i == 6;
+    float side = mod(fi, 2.0) < 0.5 ? -1.0 : 1.0;
+    float r = leafHash(vec2(fi + 1.0, seed + 3.0));
+    float t0 = tip ? 0.82 : 0.1 + fi * 0.125;
+    float ang = tip ? (r - 0.5) * 0.3 : side * (0.62 + 0.4 * r);
+    vec2 dir = vec2(sin(ang), cos(ang));
+    float len = (tip ? 0.3 : 0.25 + 0.09 * r) * scale;
+    float wid = len * 0.44;
+    vec2 q = p - vec2(0.0, t0) - dir * len * 0.56;
+    vec2 l = leafShape(dot(q, dir) / (len * 0.5), dot(q, vec2(dir.y, -dir.x)) / (wid * 0.5), len, wid, 0.72 + 0.5 * r);
+    if (l.x < best) { best = l.x; shade = l.y; }
+  }
+  return vec2(best, shade);
+}
+// Needles in two ranks along a twig, flat, as on a spray of a swamp cypress or a fir; shorter towards its tip.
+vec2 needles(vec2 p, float wide, float seed) {
+  float best = p.y > 0.0 && p.y < 0.96 ? abs(p.x) - 0.007 : 1.0;
+  float shade = 0.6;
+  float side = p.x < 0.0 ? -1.0 : 1.0;
+  const float SN = 0.8134, CS = 0.5817;
+  float r = abs(p.x) / SN;
+  float t0 = p.y - r * CS;
+  float s = 0.026;
+  float idx = floor(t0 / s + 0.5);
+  float tt = idx * s;
+  float h = leafHash(vec2(idx + side * 37.0, seed + 11.0));
+  float len = min(wide * 0.95 / SN, 0.3) * (1.0 - 0.5 * tt * tt) * (0.8 + 0.35 * h);
+  float d = max(abs(t0 - tt) * SN - 0.0088 * (1.0 - 0.45 * r / max(len, 1e-3)), r - len);
+  if (tt > 0.015 && tt < 0.95 && d < best) { best = d; shade = 0.7 + 0.55 * h; }
+  return vec2(best, shade);
+}
+// A frond: leaflets either side of its stalk, alternating, widest a third of the way out and gone at either end.
+vec2 frondLeaves(vec2 p, float wide, float seed) {
+  float best = p.y > 0.0 && p.y < 0.99 ? abs(p.x) - 0.006 : 1.0;
+  float shade = 0.62;
+  float side = p.x < 0.0 ? -1.0 : 1.0;
+  const float SN = 0.9128, CS = 0.4085;
+  float r = abs(p.x) / SN;
+  float t0 = p.y - r * CS;
+  float s = 0.05;
+  float off = side > 0.0 ? 0.0 : 0.5;
+  float idx = floor(t0 / s - off + 0.5);
+  float tt = (idx + off) * s;
+  float env = sqrt(max(0.0, 4.0 * tt * (1.0 - tt))) * (1.0 - 0.2 * tt) * (0.75 + 0.25 * smoothstep(0.0, 0.3, tt));
+  float len = wide * 0.97 / SN * env;
+  float x = r / max(len, 1e-4);
+  float w = s * 0.4 * sqrt(max(0.0, 1.0 - x * x)) * (1.0 - 0.35 * x);
+  float h = leafHash(vec2(idx + side * 53.0, seed + 5.0));
+  float d = max(abs(t0 - tt) * SN - w * SN, (r - len) * 0.5);
+  if (tt > 0.0 && tt < 0.99 && len > 0.003 && d < best) { best = d; shade = 0.72 + 0.4 * h + 0.1 * (1.0 - x); }
+  return vec2(best, shade);
+}
+// A tuft's blades from its foot, fanning out and curving a little, each narrowing to its tip. p: across from −1 to 1, and
+// up from 0 to 1.
+vec2 blades(vec2 p, float seed) {
+  float best = 1.0;
+  float shade = 0.7;
+  for (int i = 0; i < 9; i++) {
+    float fi = float(i);
+    float h = leafHash(vec2(fi + 2.0, seed + 19.0));
+    float top = 0.55 + 0.45 * h;
+    float f = p.y / top;
+    if (f > 1.0 || f < 0.0) continue;
+    float x0 = (fi / 8.0 - 0.5) * 0.5;
+    float x1 = (fi / 8.0 - 0.5) * 1.6 + (h - 0.5) * 0.3;
+    float x = mix(x0, x1, f * f * 0.8 + f * 0.2);
+    float d = abs(p.x - x) - (0.075 * (1.0 - f) + 0.004);
+    if (d < best) { best = d; shade = 0.72 + 0.4 * h + 0.2 * f; }
+  }
+  return vec2(best, shade);
+}
+// How much of a point of a card is leaf, 0 to 1, smoothed over a pixel; the leaf's shade there; and, on a card of blades,
+// whose colour it takes: 1 a frond's, 2 a needle's, 3 a broad leaf's. From far enough off that its leaves are finer than
+// a pixel or two, it is as much leaf as the pattern is on average, so nothing shimmers.
+vec3 leafCover(int m, vec2 uv) {
+  if (m == BLADE_CARD) {
+    float k = floor(uv.y);
+    vec2 p = vec2(uv.x, uv.y - k);
+    vec2 l = blades(p, mod(k, 8.0));
+    float aa = max(fwidth(p.x), 1e-4);
+    float a = clamp(0.5 - l.x / aa, 0.0, 1.0);
+    return vec3(mix(a, 0.4, smoothstep(0.08, 0.3, aa)), l.y, floor(k / 8.0 + 0.001));
+  }
+  if (m == FAN_CARD) {
+    // A fan: u across it, v out from its hub. Its leaflets part towards their tips, each pointed.
+    float x = uv.x * 22.0;
+    float seg = fract(x) - 0.5;
+    float r = uv.y;
+    float halfw = 0.5 - 0.44 * smoothstep(0.42, 1.0, r);
+    float fx = max(fwidth(x), 1e-4);
+    float fr = max(fwidth(r), 1e-4);
+    float d = max((abs(seg) - halfw) / fx, (r - (1.0 - 0.2 * abs(seg) * 2.0)) / fr);
+    float a = clamp(0.5 - d, 0.0, 1.0);
+    a = mix(a, 0.78, smoothstep(0.35, 1.2, fx));
+    return vec3(a, 0.7 + 0.45 * (1.0 - abs(seg) * 2.0), 0.0);
+  }
+  float k = floor(uv.y);
+  float seed = mod(k, 8.0);
+  float wide = floor(k / 8.0 + 0.001) / 40.0;
+  vec2 p = vec2(uv.x * wide, uv.y - k);
+  vec2 l = m == NEEDLE_CARD ? needles(p, wide, seed) : m == FROND_CARD ? frondLeaves(p, wide, seed) : broadLeaves(p, wide, seed);
+  float aa = max(length(fwidth(p)), 1e-5);
+  // Once its leaves are finer than a pixel or so, each grows by part of one: a spray closes, within its own outline, into
+  // the mass that a real one, leaves over leaves, shows from as far, rather than letting the sky through it.
+  float grow = aa * 0.6 * smoothstep(0.01, 0.04, aa);
+  return vec3(clamp(0.5 - (l.x - grow) / aa, 0.0, 1.0), l.y, 0.0);
+}
+`;
+
 export const MESH_VS = /* glsl */ `#version 300 es
 precision highp float;
 precision highp int;
@@ -88,18 +226,42 @@ layout(location = 7) in uvec2 iMeta;
 uniform mat4 uViewProj;
 uniform vec3 uEye;
 uniform float uInstanced;
+// Seconds of the visit; the wind across the ground, its direction times how hard it blows, as the renderer has it
+// (docs/plans/RENDERING.md, step 5).
+uniform float uClock;
+uniform vec2 uWind;
+// How an animal drawn by instancing idles: the root of its neck, its hips and its middle, in its own frame; then how far
+// its head swings up and its tail across, and its pace. uIdling is 1 for a mesh that has them.
+uniform vec4 uIdle[4];
+uniform float uIdling;
 ${DROP}
 ${ENTITY}
+// Turn a point about a pivot, in the plane of two of its axes.
+vec3 turnYZ(vec3 p, vec3 o, float a) {
+  vec3 r = p - o;
+  return o + vec3(r.x, r.y * cos(a) - r.z * sin(a), r.y * sin(a) + r.z * cos(a));
+}
+vec3 turnXY(vec3 p, vec3 o, float a) {
+  vec3 r = p - o;
+  return o + vec3(r.x * cos(a) - r.y * sin(a), r.x * sin(a) + r.y * cos(a), r.z);
+}
 out vec3 vPos;
 out vec3 vN;
 out vec2 vUv;
 out float vLight;
+// how high above its own foot a point of something drawn many times is: what stands low is under the canopy
+out float vLow;
+// where the point is in its body's own frame, in metres: its skin's grain and pattern are laid there, and go with it
+out vec3 vLocal;
 flat out int vMaterial;
 flat out float vTint;
+// the taxon's own tint, before each individual's shift: its pattern is the taxon's
+flat out float vKind;
 flat out float vFlags;
 flat out int vEntity;
 void main() {
   bool many = uInstanced > 0.5;
+  vLow = many ? aPos.z * iPlace.w : 1e4;
   int entity = many ? int(iMeta.x) : int(aEntity);
   vec4 e = entityOf(entity);
   float up = standing(e);
@@ -110,11 +272,50 @@ void main() {
   vec3 p = aPos;
   vec3 n = aNormal.xyz * 2.0 - 1.0;
   float tint = float(aMat.y) / 255.0;
+  // Each one its own time in its loops, from where it stands.
+  float own = many ? fract(sin(dot(iPlace.xy, vec2(12.9898, 78.233))) * 43758.5453) : 0.0;
+  if (many && uIdling > 0.5) {
+    // An animal idles: its vertex says what it moves with (world/generators/life/forms.ts, BONE), and how far.
+    int code = int(aEntity);
+    int bone = code & 15;
+    float w = float(code >> 4) / 255.0;
+    float t = uClock * uIdle[3].z + own * 6.2831853;
+    if (bone == 1 || bone == 2) {
+      // The head, and the neck as far as it goes with it, up or down about the neck's root, now and then.
+      float c = 0.5 - 0.5 * cos(t * 0.31);
+      float a = (bone == 1 ? 1.0 : w) * uIdle[3].x * c * c * c;
+      p = turnYZ(p, uIdle[0].xyz, a);
+      n = turnYZ(n, vec3(0.0), a);
+    } else if (bone == 3) {
+      float a = w * uIdle[3].y * sin(t);
+      p = turnXY(p, uIdle[1].xyz, a);
+      n = turnXY(n, vec3(0.0), a);
+    } else if (bone == 4) {
+      float b = 1.0 + 0.012 * w * sin(t * 1.7);
+      p = uIdle[2].xyz + (p - uIdle[2].xyz) * vec3(b, 1.0, b);
+    }
+  }
+  vLocal = many ? p * iPlace.w : aPos;
+  vKind = float(aMat.y) / 255.0;
   if (many) {
     // +y of the mesh goes to (fx, fy), and +x to (fy, −fx). A horn, an eye or a trunk's bark stays its colour.
-    p = iPlace.xyz + vec3(aPos.x * iFace.y + aPos.y * iFace.x, -aPos.x * iFace.x + aPos.y * iFace.y, aPos.z) * iPlace.w;
+    vec3 q = p;
+    p = iPlace.xyz + vec3(q.x * iFace.y + q.y * iFace.x, -q.x * iFace.x + q.y * iFace.y, q.z) * iPlace.w;
     n = vec3(n.x * iFace.y + n.y * iFace.x, -n.x * iFace.x + n.y * iFace.y, n.z);
     if (aMat.x != 32u && aMat.x != 10u && aMat.x != 37u) tint = fract(tint + float(iMeta.y) / 255.0);
+  }
+  // A plant drawn by instancing leans with the wind, the more the higher, in gusts that cross the ground; its leaves flutter.
+  int mat = int(aMat.x);
+  bool plant = mat == 35 || mat == 36 || mat == 37 || mat == 38 || (mat >= 44 && mat <= 49);
+  if (many && plant && dot(uWind, uWind) > 0.0) {
+    float h = max(aPos.z * iPlace.w, 0.0);
+    float speed = length(uWind);
+    vec2 dir = uWind / speed;
+    float gust = 0.55 + 0.45 * sin(uClock * 0.6 - dot(iPlace.xy, dir) * 0.035) * sin(uClock * 0.21 + own * 6.2831853);
+    float lean = gust * speed * 0.05 * h / (1.0 + h * 0.15) * (0.8 + 0.2 * sin(uClock * 1.7 + own * 19.0));
+    vec3 off = vec3(dir * lean, -0.5 * lean * lean / max(h, 0.5));
+    if (mat >= 44) off += 0.015 * speed * min(h, 4.0) * 0.25 * vec3(sin(uClock * 7.0 + aPos.x * 3.1 + own * 31.0), sin(uClock * 6.3 + aPos.y * 2.7), sin(uClock * 8.1 + aPos.z * 2.3));
+    p += off;
   }
   // A structure rises from the ground it stands on.
   if (up < 1.0) p.z = e.w + (p.z - e.w) * up;
@@ -132,19 +333,84 @@ void main() {
   if (aMat.x == 11u || aMat.x == 12u || aMat.x == 13u || aMat.x == 18u) gl_Position.z -= 1.4e-4 * gl_Position.w;
 }`;
 
+/**
+ * Depth only: for the shadows, and for the depth the lit pass and the occlusion are drawn over. Leaves on cards are cut
+ * to their outline for the shadows; the depth before the lit pass leaves them out, as the lit pass blends their edges
+ * by coverage and writes their depth itself.
+ */
 export const DEPTH_FS = /* glsl */ `#version 300 es
 precision highp float;
+precision highp int;
+in vec2 vUv;
+flat in int vMaterial;
+// 1: leaves on cards are cut to their outline; 0: they are left out
+uniform float uCards;
+${LEAVES}
 out vec4 o;
-void main() { o = vec4(0.0); }`;
+void main() {
+  if (onCard(vMaterial) && (uCards < 0.5 || leafCover(vMaterial, vUv).x < 0.5)) discard;
+  o = vec4(0.0);
+}`;
 
 export const ID_FS = /* glsl */ `#version 300 es
 precision highp float;
 precision highp int;
+in vec2 vUv;
+flat in int vMaterial;
 flat in int vEntity;
+${LEAVES}
 out vec4 o;
 void main() {
+  // A click between the leaves goes on to what is behind them.
+  if (onCard(vMaterial) && leafCover(vMaterial, vUv).x < 0.5) discard;
   o = vec4(float(vEntity & 255), float((vEntity >> 8) & 255), 0.0, 255.0) / 255.0;
 }`;
+
+/**
+ * Clouds with depth (docs/plans/RENDERING.md, step 7): fair-weather clouds in a layer from 1400 m to 2400 m above the
+ * sea, their density from noise shaped by how much of the sky the globe's clouds cover over the scene, rounded at their
+ * bases and tops, and drifting with the wind. The globe's clouds are its weather over a whole cell of it; the scene's sky
+ * is fair weather in it, heaps of cloud with sky between, so it takes most of their cover and never all. The sky marches through it; the ground's shadows are taken through the same
+ * layer towards the sun, so that the clouds seen are the ones whose shadows pass. A look, as the haze's constant is.
+ */
+const CLOUDS = /* glsl */ `
+// How much of the sky the clouds cover, from the globe's (gen:earth/clouds) over the scene; and the visit's clock. The
+// lighter way to draw keeps its flat clouds: uCloudVolume is 0 there.
+uniform float uCloudCover;
+uniform float uClockSky;
+uniform float uCloudVolume;
+// A different start for each frame's march, for the frames' average to smooth.
+uniform float uFrameNoise;
+const float CLOUD_BASE = 1400.0;
+const float CLOUD_TOP = 2400.0;
+float cloudDensity(vec3 p) {
+  float h = (p.z - CLOUD_BASE) / (CLOUD_TOP - CLOUD_BASE);
+  if (h <= 0.0 || h >= 1.0) return 0.0;
+  vec3 q = p + vec3(uClockSky * 6.0, uClockSky * 3.4, 0.0);
+  float shape = texture(uNoise, q / (64.0 * 900.0)).r * 0.62 + texture(uNoise, q / (64.0 * 320.0) + 0.37).g * 0.38;
+  // Flat at the base and round at the top, as a heap of cloud is. The noise lies mostly within a tenth of a half, so the
+  // share of the sky above a threshold is about its normal distribution's: the threshold that leaves the cover.
+  float profile = smoothstep(0.0, 0.08, h) * (1.0 - smoothstep(0.35, 1.0, h));
+  float cover = clamp(uCloudCover * 0.6, 0.0, 0.5);
+  float threshold = 0.5 + 0.26 * (0.5 - cover);
+  float d = (shape - threshold - 0.06 * (1.0 - profile)) * 7.0 * profile;
+  if (d <= 0.0) return 0.0;
+  // Its edges eaten away, finely.
+  d -= (texture(uNoise, q / (64.0 * 90.0) + 0.71).b - 0.5) * 0.35;
+  return clamp(d, 0.0, 1.0);
+}
+// How much sunlight comes through the clouds to a point below them, along the sun.
+float cloudShadow(vec3 p, vec3 sun) {
+  if (sun.z < 0.05 || uCloudCover <= 0.0) return 1.0;
+  float sum = 0.0;
+  for (int i = 0; i < 4; i++) {
+    float z = CLOUD_BASE + (CLOUD_TOP - CLOUD_BASE) * (float(i) + 0.5) / 4.0;
+    vec3 q = p + sun * ((z - p.z) / sun.z);
+    sum += cloudDensity(q);
+  }
+  return mix(1.0, exp(-sum * 1.6), smoothstep(0.05, 0.2, sun.z));
+}
+`;
 
 /** Sky, haze, lighting and shadows: what every lit surface shares. */
 const LIGHTING = /* glsl */ `
@@ -154,6 +420,10 @@ uniform vec3 uSunColor;
 uniform vec3 uSkyTop;
 uniform vec3 uSkyLow;
 uniform vec3 uBounce;
+// The sky's light on a surface by the way it faces, as spherical harmonics of the sky table (docs/plans/RENDERING.md,
+// step 4), so that the colour of dawn and dusk reaches the shade; and how much of it to take, 0 for the old two colours.
+uniform vec3 uSH[9];
+uniform float uSkyLight;
 uniform highp sampler2D uSkyLut;
 uniform highp sampler2DArrayShadow uShadow;
 uniform mat4 uShadowM[3];
@@ -162,6 +432,7 @@ uniform vec3 uShadowRadii;
 uniform float uHazeK;
 uniform highp sampler3D uNoise;
 ${SEA_LIGHT}
+${CLOUDS}
 
 // Noise whose features are about \`size\` metres across (the texture holds 64 cells to its repeat).
 float noiseM(vec3 p, float size) { return texture(uNoise, p / (64.0 * size)).r; }
@@ -212,10 +483,11 @@ vec3 seen(vec3 c, vec3 p, vec3 eye) {
   return he >= 0.0 ? aerial(c, eye + v * (1.0 - under), eye) : c;
 }
 
-// The shadows of fair-weather clouds, broad and soft, passing over the land.
+// The shadows of the clouds overhead, passing over the land: the clouds the sky draws (step 7), taken towards the sun; on
+// the lighter way, broad soft shadows of fair weather.
 float cloudShade(vec3 p) {
-  float c = fbmM(p + uSun * 2000.0, 260.0);
-  return 1.0 - 0.42 * smoothstep(0.5, 0.68, c) * smoothstep(0.08, 0.3, uSun.z);
+  if (uCloudVolume < 0.5) return 1.0 - 0.42 * smoothstep(0.5, 0.68, fbmM(p + uSun * 2000.0, 260.0)) * smoothstep(0.08, 0.3, uSun.z);
+  return 1.0 - 0.75 * (1.0 - cloudShadow(p, uSun));
 }
 
 float shadowAt(vec3 p, vec3 n, float pixel) {
@@ -238,6 +510,17 @@ float shadowAt(vec3 p, vec3 n, float pixel) {
   return s / 5.0;
 }
 
+// Bump by a height, from its derivatives across the screen (Mikkelsen 2010): a detail normal with no texture of its own.
+vec3 bumpBy(vec3 n, vec3 p, float h, float strength) {
+  vec3 dpdx = dFdx(p);
+  vec3 dpdy = dFdy(p);
+  vec3 r1 = cross(dpdy, n);
+  vec3 r2 = cross(n, dpdx);
+  float det = dot(dpdx, r1);
+  vec3 grad = sign(det) * (dFdx(h) * r1 + dFdy(h) * r2);
+  return normalize(abs(det) * n - strength * grad);
+}
+
 // GGX highlight of the sun.
 float sunSpecular(vec3 n, vec3 v, float rough) {
   vec3 h = normalize(uSun + v);
@@ -250,12 +533,21 @@ float sunSpecular(vec3 n, vec3 v, float rough) {
   return a2 / (3.14159 * d * d + 1e-4) * fres * 0.25 / max(0.1, vh);
 }
 
+// The light of the sky on a surface facing n: from its harmonics, or else between the low sky and the zenith's.
+vec3 skyLight(vec3 n) {
+  vec3 two = mix(uSkyLow, uSkyTop, n.z * 0.5 + 0.5);
+  if (uSkyLight <= 0.0) return two;
+  vec3 h = uSH[0] + uSH[1] * n.y + uSH[2] * n.z + uSH[3] * n.x + uSH[4] * (n.x * n.y) + uSH[5] * (n.y * n.z) + uSH[6] * (3.0 * n.z * n.z - 1.0) + uSH[7] * (n.x * n.z) + uSH[8] * (n.x * n.x - n.y * n.y);
+  // Facing down, the low sky still reaches it over the horizon, as the two colours had it.
+  return mix(two, max(h, vec3(0.0)) + uSkyLow * (0.5 - 0.5 * n.z) * 0.6, uSkyLight);
+}
+
 // Sun, sky and the light bounced off the ground.
 vec3 shade(vec3 albedo, float rough, float metal, vec3 n, vec3 p, vec3 eye, float occl, float shadow) {
   vec3 v = normalize(eye - p);
   float ndl = max(dot(n, uSun), 0.0);
   float up = n.z * 0.5 + 0.5;
-  vec3 sky = mix(uSkyLow, uSkyTop, up);
+  vec3 sky = skyLight(n);
   // A camera's white balance takes most of the blue out of the shade.
   float grey = dot(sky, vec3(0.3, 0.5, 0.2));
   sky = mix(vec3(grey), sky, 0.5) + uBounce * 0.45;
@@ -283,15 +575,25 @@ in vec3 vPos;
 in vec3 vN;
 in vec2 vUv;
 in float vLight;
+in float vLow;
+in vec3 vLocal;
 flat in int vMaterial;
 flat in float vTint;
+flat in float vKind;
 flat in float vFlags;
 uniform vec3 uEye;
+// On wild land, what covers the ground (R canopy): what stands low under the canopy is in its shade.
+uniform float uWild;
+uniform highp sampler2D uMask;
+uniform vec4 uMaskBox;
 uniform highp sampler2D uAO;
 uniform vec2 uAOSize;
 uniform float uEvidence;
+// 1: the edges of leaves on cards are blended by how much of a pixel they cover; 0: they are cut at half
+uniform float uCoverage;
 out vec4 o;
 ${LIGHTING}
+${LEAVES}
 
 const int MARBLE=1, TRAVERTINE=2, BRICK=3, PLASTER=4, TILE=5, GILT=6, BRONZE=7, GRANITE=8, WOOD=9, DARK=10, PAVING=11, BASALT=12, SAND=13, CONCRETE=14, LEAD=15, LEAF=16, TRUNK=17, GRASS=18, SHAFT=19, FACADE=20, STATUE=21, EARTH=22, SEATS=23, AWNING=24, SPIRAL=25, CLOTH=26, SKIN=27, DENTIL=28, FRIEZE=29, POOL=30, HIDE=31, HORN=32, SHELL=33, FUR=34, NEEDLE=35, FROND=36, BARK=37, BROAD=38, FEATHER=39, MEMBRANE=40, CHITIN=41, THATCH=42, MUD=43;
 
@@ -728,14 +1030,114 @@ Surface surface(int m, vec3 p, vec2 uv, float tint, vec3 n, float fw, out vec3 b
   return s;
 }
 
+// Leaves, on cards and in the mass inside a crown: patches across the crown as sun and age colour it, and each leaf its
+// own shade. Their colours are the renderer's, and nobody's record.
+Surface leaves(int m, vec3 p, float tint, float shade, float family) {
+  Surface s;
+  s.metal = 0.0;
+  s.bump = 0.0;
+  s.rough = 0.6;
+  if (m == LEAF_MASS) {
+    s.albedo = mix(vec3(0.036, 0.07, 0.03), vec3(0.056, 0.088, 0.032), tint) * (0.8 + 0.4 * fbmM(p, 1.5));
+    s.rough = 0.9;
+    return s;
+  }
+  vec3 dark = mix(vec3(0.028, 0.06, 0.024), vec3(0.052, 0.078, 0.022), tint);
+  vec3 lite = mix(vec3(0.085, 0.14, 0.04), vec3(0.16, 0.185, 0.05), tint);
+  if (m == NEEDLE_CARD || (m == BLADE_CARD && family > 1.5 && family < 2.5)) {
+    dark = mix(vec3(0.03, 0.064, 0.032), vec3(0.05, 0.085, 0.036), tint);
+    lite = mix(vec3(0.075, 0.135, 0.05), vec3(0.135, 0.185, 0.06), tint);
+    s.rough = 0.7;
+  } else if (m == FROND_CARD || m == FAN_CARD || (m == BLADE_CARD && family < 1.5)) {
+    dark = mix(vec3(0.05, 0.11, 0.035), vec3(0.075, 0.13, 0.04), tint);
+    lite = mix(vec3(0.16, 0.25, 0.07), vec3(0.25, 0.30, 0.085), tint);
+    s.rough = 0.5;
+  }
+  s.albedo = mix(dark, lite, clamp(0.2 + 0.55 * fbmM(p, 2.5) + (shade - 0.9) * 0.8, 0.0, 1.0));
+  return s;
+}
+
+// Leaves are lit as the mass they make, by a normal bent out from their crown's middle, softly round the side away from
+// the sun; on a card, with the light that comes through a leaf where the sun is behind it, and a little sheen; and with
+// as much of the sky as the crown lets in. g is the card's own face.
+vec3 foliage(vec3 albedo, float rough, vec3 n, vec3 g, vec3 p, float sky, float shadow, bool thin) {
+  vec3 v = normalize(uEye - p);
+  float wrap = clamp((dot(n, uSun) + 0.3) / 1.3, 0.0, 1.0);
+  float up = n.z * 0.5 + 0.5;
+  vec3 skyC = skyLight(n);
+  float grey = dot(skyC, vec3(0.3, 0.5, 0.2));
+  skyC = mix(vec3(grey), skyC, 0.5) + uBounce * 0.45;
+  vec3 bounce = uBounce * (1.0 - up) * (0.4 + 0.6 * shadow);
+  vec3 c = albedo * (uSunColor * wrap * shadow + (skyC + bounce) * sky);
+  if (thin) {
+    float gs = dot(g, uSun);
+    float gv = dot(g, v);
+    float through = gs * gv < 0.0 ? abs(gs) : 0.0;
+    float behind = pow(max(dot(-v, uSun), 0.0), 4.0);
+    c += albedo * vec3(1.1, 1.3, 0.5) * uSunColor * shadow * (0.45 * through + 0.3 * behind);
+    vec3 face = gv < 0.0 ? -g : g;
+    c += uSunColor * shadow * sunSpecular(face, v, rough) * max(dot(face, uSun), 0.0) * 0.06;
+  }
+  return uSea > 0.5 && p.z < 0.0 ? c * seaLight(p.z) : c;
+}
+
+// A body's skin close by (docs/plans/RENDERING.md, step 6): a height for its grain, in the body's own frame, as its
+// material is: pebbled scales on a hide, hair lying along a body, feathers lapping back from the head, seams between a
+// shell's scutes, the plates of chitin, the veins of a wing. Which a body has is its form's; how it looks is this.
+float skinGrain(int m, vec3 q) {
+  if (m == HIDE) {
+    float a = texture(uNoise, q / (64.0 * 0.012)).r;
+    float b = texture(uNoise, q / (64.0 * 0.035) + 0.3).g;
+    return smoothstep(0.35, 0.75, a) * 0.7 + b * 0.3;
+  }
+  if (m == FUR) return texture(uNoise, q * vec3(1.0, 0.12, 1.0) / (64.0 * 0.004)).r;
+  if (m == FEATHER) {
+    // Rows of vanes, each lapping the one behind it, along the body from the head back.
+    float row = fract(q.y / 0.035 + texture(uNoise, q / (64.0 * 0.05)).r * 0.6);
+    return row * row * 0.8 + texture(uNoise, q * vec3(1.0, 0.2, 1.0) / (64.0 * 0.006)).g * 0.2;
+  }
+  if (m == CHITIN) return smoothstep(0.0, 0.15, fract(q.y / 0.012));
+  if (m == MEMBRANE) return 1.0 - smoothstep(0.0, 0.06, abs(fract(q.x / 0.05 + q.y / 0.11) - 0.5));
+  return 0.0;
+}
+// Its pattern, by the generator's choice for the taxon, from its tint: plain, stripes across the body, spots, or
+// mottled; darker where the pattern is. The generator's look, and nobody's record.
+float skinPattern(vec3 q, float tint) {
+  int kind = int(tint * 255.0) >> 6;
+  if (kind == 1) return smoothstep(0.35, 0.65, sin(q.y * 26.0 + texture(uNoise, q / (64.0 * 0.08)).r * 4.0) * 0.5 + 0.5);
+  if (kind == 2) return smoothstep(0.62, 0.7, texture(uNoise, q / (64.0 * 0.05)).g);
+  if (kind == 3) return smoothstep(0.45, 0.7, texture(uNoise, q / (64.0 * 0.11)).b) * 0.7;
+  return 0.0;
+}
+
 void main() {
   vec3 n = normalize(vN);
   float fw = max(length(dFdx(vUv)), length(dFdy(vUv)));
   float glass = 0.0;
   vec3 bumped = n;
+  bool card = onCard(vMaterial);
+  bool leafy = card || vMaterial == LEAF_MASS;
+  float alpha = 1.0;
+  vec3 cover = vec3(1.0, 0.9, 0.0);
+  if (card) {
+    cover = leafCover(vMaterial, vUv);
+    alpha = cover.x;
+    if (uCoverage < 0.5) {
+      if (alpha < 0.5) discard;
+      alpha = 1.0;
+    } else if (alpha < 0.01) discard;
+  }
   Surface s;
-  if (vMaterial == FACADE) s = facade(vPos, vUv, vTint, fw, n, glass);
+  if (leafy) s = leaves(vMaterial, vPos, vTint, cover.y, cover.z);
+  else if (vMaterial == FACADE) s = facade(vPos, vUv, vTint, fw, n, glass);
   else s = surface(vMaterial, vPos, vUv, vTint, n, fw, bumped);
+  bool skin = vMaterial == HIDE || vMaterial == FUR || vMaterial == FEATHER || vMaterial == CHITIN || vMaterial == MEMBRANE;
+  if (skin) {
+    // Close by, the grain of its skin, while a pixel is small enough to show it; and its pattern, at any distance.
+    float near = 1.0 - smoothstep(4.0, 30.0, length(uEye - vPos));
+    if (near > 0.0) bumped = bumpBy(bumped, vPos, skinGrain(vMaterial, vLocal), (vMaterial == FUR ? 0.0025 : 0.004) * near);
+    if (vMaterial != MEMBRANE && vMaterial != CHITIN) s.albedo *= 1.0 - 0.38 * skinPattern(vLocal, vKind);
+  }
   // The eye's side of a face.
   vec3 toEye = uEye - vPos;
   // Foliage has holes in it, up close, where the leaves stop: fewer with distance, none once they would shimmer.
@@ -745,12 +1147,26 @@ void main() {
     float reach = 1.0 - smoothstep(14.0, 70.0, length(toEye));
     if (gap < 0.46 * reach) discard;
   }
-  vec3 w = gl_FrontFacing ? bumped : -bumped;
   float pixel = length(toEye) * 0.002;
-  float sh = shadowAt(vPos, gl_FrontFacing ? n : -n, pixel) * cloudShade(vPos);
-  float ao = texture(uAO, gl_FragCoord.xy / uAOSize).r;
-  float occl = ao * (vLight * 0.5 + 0.5);
-  vec3 c = shade(s.albedo, s.rough, s.metal, w, vPos, uEye, occl, sh * mix(1.0, ao, 0.35));
+  // Under the canopy, close to the ground, the sky's light is the forest floor's (docs/plans/RENDERING.md, step 4).
+  float under = 1.0;
+  if (uWild > 0.5 && vLow < 14.0) {
+    vec2 muv = (vPos.xy - uMaskBox.xy) / uMaskBox.zw;
+    if (muv.x > 0.0 && muv.y > 0.0 && muv.x < 1.0 && muv.y < 1.0) under = 1.0 - 0.72 * texture(uMask, muv).r * (1.0 - smoothstep(4.0, 14.0, vLow));
+  }
+  vec3 c;
+  if (leafy) {
+    // A leaf's normal is its crown's, whichever side of it is seen; and what it sees of the sky is the crown's to say.
+    float sh = shadowAt(vPos, n, pixel) * cloudShade(vPos);
+    vec3 g = normalize(cross(dFdx(vPos), dFdy(vPos)));
+    c = foliage(s.albedo, s.rough, n, g, vPos, vLight * under, sh, card);
+  } else {
+    vec3 w = gl_FrontFacing ? bumped : -bumped;
+    float sh = shadowAt(vPos, gl_FrontFacing ? n : -n, pixel) * cloudShade(vPos);
+    float ao = texture(uAO, gl_FragCoord.xy / uAOSize).r;
+    float occl = ao * (vLight * 0.5 + 0.5) * under;
+    c = shade(s.albedo, s.rough, s.metal, w, vPos, uEye, occl, sh * mix(1.0, ao, 0.35));
+  }
   c = seen(c, vPos, uEye);
   // Evidence mode: what rests on a reconstruction is amber, what was generated magenta.
   int flags = int(vFlags);
@@ -766,7 +1182,7 @@ void main() {
   } else if ((flags & 16) != 0) {
     c += vec3(0.9, 0.8, 0.6) * 0.06;
   }
-  o = vec4(c, 1.0);
+  o = vec4(c, alpha);
 }`;
 
 // ——— Terrain ———
@@ -838,6 +1254,8 @@ precision highp sampler3D;
 precision highp sampler2DArrayShadow;
 in vec3 vPos;
 uniform vec3 uEye;
+// The wind across the ground, as the renderer has it: sand's ripples lie across it.
+uniform vec2 uWind;
 uniform vec4 uInner;
 uniform highp sampler2D uNormal0;
 uniform highp sampler2D uNormal1;
@@ -859,6 +1277,15 @@ uniform vec3 uTone[10];
 uniform vec3 uShare;
 // Where snow lies: the height it starts at, the height over which it thickens, and the slope it slips off.
 uniform vec3 uSnow;
+// The water near the eye, seen from above (docs/plans/RENDERING.md, step 2): its level times how much of a place it
+// covers, and how much, blurred so that both reach its banks; the box it covers; and whether it is drawn at all.
+uniform highp sampler2D uWaterMap;
+uniform vec4 uWaterBox;
+uniform float uBanks;
+// What lies under the trees: 0 broad leaves, 1 needles, as the scene's canopy has them; and whether the ground close by
+// is covered by clumps of low plants, which then take the place of the ground's own colour for them.
+uniform float uLitter;
+uniform float uClumps;
 uniform vec4 uGrid[3];
 uniform vec2 uGridSize[3];
 out vec4 o;
@@ -969,9 +1396,97 @@ vec3 peopled(vec3 c, vec3 p, float dist) {
   vec3 trodden = mix(vec3(0.40, 0.34, 0.25), vec3(0.47, 0.41, 0.31), noiseM(p, 6.0));
   return mix(c, trodden, f.b * 0.85);
 }
+// Bump by a height, from its derivatives across the screen (Mikkelsen 2010): a detail normal with no texture of its own.
+vec3 bumped(vec3 n, vec3 p, float h, float strength) {
+  vec3 dpdx = dFdx(p);
+  vec3 dpdy = dFdy(p);
+  vec3 r1 = cross(dpdy, n);
+  vec3 r2 = cross(n, dpdx);
+  float det = dot(dpdx, r1);
+  vec3 grad = sign(det) * (dFdx(h) * r1 + dFdy(h) * r2);
+  return normalize(abs(det) * n - strength * grad);
+}
+// How near the water a point is, and how far above its level: from the water seen from above, blurred to its banks.
+float nearWater(vec3 p, out float above) {
+  above = 1e4;
+  if (uBanks < 0.5) return 0.0;
+  vec2 wuv = (p.xy - uWaterBox.xy) / uWaterBox.zw;
+  if (wuv.x <= 0.0 || wuv.y <= 0.0 || wuv.x >= 1.0 || wuv.y >= 1.0) return 0.0;
+  vec2 w = texture(uWaterMap, wuv).rg;
+  if (w.g < 0.002) return 0.0;
+  above = p.z - w.r / w.g;
+  vec2 e = min(wuv, 1.0 - wuv);
+  return smoothstep(0.002, 0.05, w.g) * smoothstep(0.0, 0.05, min(e.x, e.y));
+}
+// The ground close by (docs/plans/RENDERING.md, step 2): soil, litter, mud, sand, gravel and rock, each its own colour,
+// roughness and grain, blended by the cover, the slope and the wet, and by height, so that sand fills the hollows and rock
+// stands out of them; banks wet and darker as far up as the water rises, with mud and sand on their gentler slopes. Their
+// colours are the renderer's, and nobody's record. Gives the ground's colour, how rough it is, and its detail normal.
+vec3 groundClose(vec3 c, vec3 p, vec3 n, float dist, vec4 mask, float slope, out float rough, out vec3 nd) {
+  rough = 0.92;
+  nd = n;
+  float close = 1.0 - smoothstep(70.0, 260.0, dist);
+  float aboveWater;
+  float water = nearWater(p, aboveWater);
+  // Wet within the water's rise of its level; the bars of its channel where the bank is gentle.
+  float wet = water * smoothstep(1.3, 0.1, aboveWater);
+  float bar = water * smoothstep(0.16, 0.04, slope) * smoothstep(2.2, 0.2, aboveWater);
+  if (close <= 0.0) return mix(c, c * 0.62, wet * 0.8);
+  vec3 soil = mix(uTone[0], uTone[1], fbmM(p, 2.4)) * (0.75 + 0.5 * noiseM(p, 0.2));
+  vec3 needles = mix(vec3(0.20, 0.11, 0.05), vec3(0.29, 0.17, 0.08), noiseM(p, 0.05));
+  vec3 fallen = mix(vec3(0.17, 0.12, 0.06), vec3(0.30, 0.22, 0.10), noiseM(p, 0.09));
+  vec3 litter = mix(fallen, needles, uLitter) * (0.7 + 0.5 * noiseM(p + 7.0, 0.03));
+  vec3 mud = mix(uTone[0], uTone[1], 0.3) * vec3(0.62, 0.6, 0.58);
+  // Sand: mottled, with a fine grain; and close by its ripples, crests across the wind a hand's breadth apart, wavering,
+  // gone before a pixel is too coarse to hold them.
+  vec2 wind = normalize(uWind + vec2(1e-4, 0.0));
+  float ripple = (abs(fract(dot(p.xy, wind) / 0.25 + fbmM(p, 0.6) * 3.0) - 0.5) * 4.0 - 1.0) * (1.0 - smoothstep(3.0, 9.0, dist));
+  vec3 sand = mix(uTone[4], uTone[5], noiseM(p, 0.5)) * (0.88 + 0.2 * noiseM(p, 0.04) + 0.05 * ripple);
+  vec3 gravel = mix(vec3(0.30, 0.28, 0.25), mix(uTone[4], uTone[5], 0.5), noiseM(p, 0.04)) * (0.6 + 0.7 * noiseM(p + 2.0, 0.025));
+  vec3 rock = vec3(0.36, 0.33, 0.28) * (0.72 + 0.5 * fbmM(p, 0.6));
+  // Each one's height, and how much of it there is here.
+  float hSoil = fbmM(p, 0.3);
+  float hLitter = noiseM(p, 0.07) * 0.6 + noiseM(p + 3.0, 0.22) * 0.4;
+  float hMud = noiseM(p, 0.5) * 0.7;
+  float hSand = fbmM(p, 0.45) * 0.8 + ripple * 0.12;
+  float hGravel = noiseM(p, 0.035);
+  float hRock = fbmM(p, 0.8) + 0.2;
+  float wRock = smoothstep(0.2, 0.42, slope);
+  float wMud = max(wet * (1.0 - wRock), bar * smoothstep(0.5, 0.1, aboveWater));
+  float wSand = max(mask.b * (1.0 - wet) * (1.0 - wRock), bar * smoothstep(0.1, 0.6, aboveWater));
+  float wGravel = mask.b * smoothstep(0.06, 0.2, slope) * 0.8;
+  float wLitter = mask.r * (1.0 - wet);
+  float wSoil = 0.45;
+  float s0 = hSoil + wSoil;
+  float s1 = hLitter + wLitter * 1.2;
+  float s2 = hMud + wMud * 1.4;
+  float s3 = hSand + wSand * 1.3;
+  float s4 = hGravel + wGravel * 1.2;
+  float s5 = hRock + wRock * 1.5;
+  float top = max(max(max(s0, s1), max(s2, s3)), max(s4, s5)) - 0.18;
+  float b0 = max(s0 - top, 0.0);
+  float b1 = max(s1 - top, 0.0);
+  float b2 = max(s2 - top, 0.0);
+  float b3 = max(s3 - top, 0.0);
+  float b4 = max(s4 - top, 0.0);
+  float b5 = max(s5 - top, 0.0);
+  float sum = b0 + b1 + b2 + b3 + b4 + b5 + 1e-4;
+  vec3 g = (soil * b0 + litter * b1 + mud * b2 + sand * b3 + gravel * b4 + rock * b5) / sum;
+  float h = (hSoil * b0 + hLitter * b1 + hMud * b2 * 0.3 + hSand * b3 * 0.5 + hGravel * b4 + hRock * b5) / sum;
+  float r = (0.95 * b0 + 0.9 * b1 + 0.45 * b2 + 0.9 * b3 + 0.85 * b4 + 0.8 * b5) / sum;
+  // Low plants: where clumps of them stand close by, the ground between them shows; further off, their colour.
+  float herb = mask.g * (1.0 - uClumps * 0.3 * (1.0 - smoothstep(40.0, 72.0, dist)));
+  vec3 near = mix(g, c, herb * 0.92);
+  // Wet ground is darker and smoother.
+  near *= 1.0 - 0.38 * wet;
+  rough = mix(r, 0.35, wet * 0.8);
+  // Grain: the height bumps the light, while it can be seen.
+  nd = bumped(n, p, h, 0.05 * (1.0 - smoothstep(8.0, 60.0, dist)));
+  return mix(mix(c, c * 0.62, wet * 0.8), near, close);
+}
 // Land nobody has farmed. The mask says what covers it: R canopy, G low plants, B bare sediment, A water.
 // Its colours and shares are the place's climate's: soil, low plants, bare ground, canopy and low plants from afar, each from one tone to another.
-vec3 wilderness(vec3 p, vec3 n, float dist, out float water) {
+vec3 wilderness(vec3 p, vec3 n, float dist, out float water, out float rough, out vec3 nd, out float shaded) {
   vec2 muv = (p.xy - uMaskBox.xy) / uMaskBox.zw;
   float inside = step(0.0, muv.x) * step(0.0, muv.y) * step(muv.x, 1.0) * step(muv.y, 1.0);
   // Beyond the plan's map, forest and glade by noise of about the same size, growing with distance so
@@ -987,6 +1502,7 @@ vec3 wilderness(vec3 p, vec3 n, float dist, out float water) {
     mask = mix(beyond, texture(uMask, muv), smoothstep(0.0, 0.1, min(e.x, e.y)));
   }
   water = mask.a * smoothstep(450.0, 1000.0, dist);
+  shaded = mask.r;
   float slope = 1.0 - n.z;
   float nearby = 1.0 - smoothstep(40.0, 600.0, dist);
   // Leaf litter under the trees, and earth.
@@ -1010,6 +1526,8 @@ vec3 wilderness(vec3 p, vec3 n, float dist, out float water) {
   c = mix(c, canopy, mask.r * far);
   vec3 distantHerb = mix(uTone[8], uTone[9], mix(0.5, fbmM(p, 90.0), grain));
   c = mix(c, distantHerb, mask.g * smoothstep(900.0, 5000.0, dist));
+  // Close by, what the ground is made of, and its banks.
+  c = groundClose(c, p, n, dist, mask, slope, rough, nd);
   // What people made of it, where the scene has people.
   c = peopled(c, p, dist);
   // Rock on the steep slopes, and snow where the month's climate lays it, off the steepest.
@@ -1055,7 +1573,10 @@ void main() {
     return;
   }
   float river = 0.0;
-  vec3 c = uWild > 0.5 ? wilderness(p, n, dist, river) : countryside(p, n, dist);
+  float rough = 0.92;
+  vec3 nd = n;
+  float canopy = 0.0;
+  vec3 c = uWild > 0.5 ? wilderness(p, n, dist, river, rough, nd, canopy) : countryside(p, n, dist);
   // Inside the city's map: what the plan says this ground is.
   vec2 muv = (p.xy - uMaskBox.xy) / uMaskBox.zw;
   if (uWild < 0.5 && muv.x > 0.0 && muv.y > 0.0 && muv.x < 1.0 && muv.y < 1.0) {
@@ -1101,16 +1622,19 @@ void main() {
     vec3 garden = mix(vec3(0.12, 0.19, 0.06), vec3(0.24, 0.28, 0.10), fbmM(p, 4.0)) * (0.82 + 0.36 * noiseM(p, 0.4));
     c = mix(c, garden, mask.g);
   }
-  // Wet, darker ground at the river's edge.
-  if (uWild > 0.5) c = mix(c, vec3(0.15, 0.125, 0.085), smoothstep(uWater + 0.7, uWater + 0.05, p.z) * smoothstep(uWater - 9.0, uWater - 5.0, p.z) * (1.0 - smoothstep(16000.0, 18000.0, length(p.xy))) * 0.9);
-  else c = mix(c, vec3(0.28, 0.25, 0.18), smoothstep(uWater + 4.0, uWater + 1.0, p.z) * 0.8);
+  // Wet, darker ground at the river's edge; where the water is mapped from above, its banks are the close ground's.
+  if (uWild > 0.5 && uBanks < 0.5) c = mix(c, vec3(0.15, 0.125, 0.085), smoothstep(uWater + 0.7, uWater + 0.05, p.z) * smoothstep(uWater - 9.0, uWater - 5.0, p.z) * (1.0 - smoothstep(16000.0, 18000.0, length(p.xy))) * 0.9);
+  else if (uWild < 0.5) c = mix(c, vec3(0.28, 0.25, 0.18), smoothstep(uWater + 4.0, uWater + 1.0, p.z) * 0.8);
   // In a scene of the sea, its floor under the water, and a beach at the water's edge; no river is painted on it.
   if (uSea > 0.5) {
     float sunk = smoothstep(1.4, -0.4, p.z);
     c = mix(c, seabed(p, n, dist), sunk);
     river *= 1.0 - sunk;
   }
-  vec3 lit = shade(c, 0.92, 0.0, n, p, uEye, ao, sh);
+  // Under the canopy, the crowns take most of the sky's light, as their shadows take the sun's: a forest floor is dim, and a
+  // glade bright (docs/plans/RENDERING.md, step 4). From far off the canopy is all that is seen of it.
+  float floorShade = 1.0 - 0.72 * canopy * (1.0 - smoothstep(500.0, 2400.0, dist));
+  vec3 lit = shade(c, rough, 0.0, nd, p, uEye, ao * floorShade, sh);
   if (river > 0.0) lit = mix(lit, shade(vec3(0.145, 0.15, 0.085), 0.14, 0.0, vec3(0.0, 0.0, 1.0), p, uEye, 1.0, sh), river);
   lit = seen(lit, p, uEye);
   if (uEvidence > 0.5) {
@@ -1155,21 +1679,83 @@ uniform vec2 uAOSize;
 // The shallows' colour, then the depths', where a scene gives them.
 uniform float uWaterTone[6];
 uniform float uToned;
+// What is drawn so far, resolved, and its depth, for the water to be seen through and to reflect (docs/plans/RENDERING.md,
+// step 3); 1 where they are given, as on the fuller way to draw. And how the frame was projected.
+uniform highp sampler2D uScene;
+uniform highp sampler2D uSceneDepth;
+uniform float uScreen;
+uniform mat4 uViewProj;
+uniform vec2 uNearFar;
+uniform vec2 uViewport;
+// Seconds of the visit: what moves, moves by it.
+uniform float uClock;
 out vec4 o;
 ${LIGHTING}
+float linearDepth(float d) {
+  float z = d * 2.0 - 1.0;
+  return 2.0 * uNearFar.x * uNearFar.y / (uNearFar.y + uNearFar.x - z * (uNearFar.y - uNearFar.x));
+}
+// Where a point is on the screen, and how far in front of the eye.
+vec3 onScreen(vec3 q) {
+  vec4 c = uViewProj * vec4(vec3(q.xy, q.z - drop(q.xy)) - uEye, 1.0);
+  return vec3(c.xy / c.w * 0.5 + 0.5, c.w);
+}
+// What the water reflects along r from p, as far as what is drawn shows it: marched across the screen against its
+// depth, and found to within a step. Its weight is 0 where nothing is found, and fades towards the screen's edges.
+vec4 reflected(vec3 p, vec3 r) {
+  float t = 0.4;
+  float last = 0.0;
+  for (int i = 0; i < 32; i++) {
+    vec3 s = onScreen(p + r * t);
+    if (s.z <= 0.0 || s.x < 0.0 || s.y < 0.0 || s.x > 1.0 || s.y > 1.0) break;
+    float raw = texture(uSceneDepth, s.xy).r;
+    float scene = linearDepth(raw);
+    if (raw < 1.0 && s.z > scene && s.z - scene < max(0.8, t * 0.12)) {
+      // Halve the step back to where the ray first passes behind what is drawn.
+      float a = last;
+      float b = t;
+      for (int k = 0; k < 5; k++) {
+        float m = (a + b) * 0.5;
+        vec3 q = onScreen(p + r * m);
+        if (q.z > linearDepth(texture(uSceneDepth, q.xy).r)) b = m;
+        else a = m;
+      }
+      vec3 h = onScreen(p + r * b);
+      vec2 e = min(h.xy, 1.0 - h.xy);
+      float w = smoothstep(0.0, 0.08, min(e.x, e.y)) * (1.0 - smoothstep(0.6, 1.0, float(i) / 32.0));
+      return vec4(texture(uScene, h.xy).rgb, w);
+    }
+    last = t;
+    t = t * 1.16 + 0.35;
+  }
+  return vec4(0.0);
+}
 void main() {
   vec3 p = vPos;
   float dist = distance(p, uEye);
-  // Ripples, stilled with distance, before they could break up into glitter; drawn out along the current where it flows.
+  // Ripples, stilled with distance, before they could break up into glitter; drawn out along the current where it flows,
+  // and carried along by it, faster in the channel than at its edges; still water stays still.
   float speed = length(vFlow.xy);
   vec2 along = speed > 0.01 ? vFlow.xy / speed : vec2(1.0, 0.0);
   vec2 q = vec2(dot(p.xy, along), dot(p.xy, vec2(-along.y, along.x)));
   float stretch = 1.0 + 2.5 * smoothstep(0.05, 1.5, speed);
   q.x /= stretch;
   float amp = mix(0.05, 0.004, smoothstep(15.0, 320.0, dist)) * (1.0 + 0.8 * smoothstep(0.05, 2.0, speed));
-  vec3 d1 = vec3(texture(uNoise, vec3(q / 96.0, 0.2)).r, texture(uNoise, vec3(q / 96.0, 0.7)).g, 0.5) - 0.5;
-  vec3 d2 = vec3(texture(uNoise, vec3(q / 19.0, 0.4)).b, texture(uNoise, vec3(q / 19.0, 0.9)).r, 0.5) - 0.5;
-  vec2 dq = (d1.xy + d2.xy * 0.6) * amp * 3.0;
+  // Two layers of ripples carried by the current, each over a cycle of its own, blended so that neither is seen to stretch.
+  float cycle = 6.0;
+  float ph0 = fract(uClock / cycle);
+  float ph1 = fract(uClock / cycle + 0.5);
+  float carry = speed / stretch;
+  vec2 dq = vec2(0.0);
+  for (int k = 0; k < 2; k++) {
+    float ph = k == 0 ? ph0 : ph1;
+    float w = 1.0 - abs(ph * 2.0 - 1.0);
+    vec2 qk = q - vec2(carry * ph * cycle, 0.0) + float(k) * vec2(17.3, 5.1);
+    vec3 d1 = vec3(texture(uNoise, vec3(qk / 96.0, 0.2)).r, texture(uNoise, vec3(qk / 96.0, 0.7)).g, 0.5) - 0.5;
+    vec3 d2 = vec3(texture(uNoise, vec3(qk / 19.0, 0.4)).b, texture(uNoise, vec3(qk / 19.0, 0.9)).r, 0.5) - 0.5;
+    dq += (d1.xy + d2.xy * 0.6) * w;
+  }
+  dq *= amp * 3.0 * (speed > 0.01 ? 1.0 : 0.85);
   vec3 n = normalize(vec3(along * dq.x + vec2(-along.y, along.x) * dq.y, 1.0));
   vec3 v = normalize(uEye - p);
   float sh = shadowAt(p, vec3(0.0, 0.0, 1.0), dist * 0.002);
@@ -1182,10 +1768,73 @@ void main() {
     vec3 deep = vec3(uWaterTone[3], uWaterTone[4], uWaterTone[5]);
     body = mix(shallow, deep, smoothstep(0.3, 3.0, vFlow.z));
   }
-  vec3 c = body * (uSunColor * max(uSun.z, 0.0) * sh * 0.8 + uSkyTop * 0.6);
-  c = mix(c, skyColor(normalize(vec3(r.xy, abs(r.z)))), fres * 0.8);
-  c += uSunColor * pow(max(dot(r, uSun), 0.0), 360.0) * 1.4 * sh;
-  o = vec4(aerial(c, p, uEye), 1.0);
+  vec3 lit = body * (uSunColor * max(uSun.z, 0.0) * sh * 0.8 + uSkyTop * 0.6);
+  vec3 glint = uSunColor * pow(max(dot(r, uSun), 0.0), 360.0) * 1.4 * sh;
+  vec3 sky = skyColor(normalize(vec3(r.xy, abs(r.z))));
+  if (uScreen < 0.5) {
+    o = vec4(aerial(mix(lit, sky, fres * 0.8) + glint, p, uEye), 1.0);
+    return;
+  }
+  // Through the water: its bed, bent a little by the ripples, as far as the water lets it be seen. How much water the
+  // eye looks through is the depth drawn behind it, less the water's own, along the view.
+  vec2 uv = gl_FragCoord.xy / uViewport;
+  float here = onScreen(p).z;
+  float behind = linearDepth(texture(uSceneDepth, uv).r);
+  vec2 bent = clamp(uv + n.xy * 0.03 * smoothstep(0.0, 2.0, behind - here) / max(1.0, here * 0.02), vec2(0.001), vec2(0.999));
+  float behindBent = linearDepth(texture(uSceneDepth, bent).r);
+  if (behindBent < here) bent = uv;
+  else behind = behindBent;
+  float through = max(behind - here, 0.0) * dist / max(here, 1e-3);
+  vec3 bed = texture(uScene, bent).rgb;
+  // Silt takes the light along the way, the more the darker the water's own colour: what is lost is made up by the
+  // water's own light, scattered.
+  vec3 k = (vec3(1.0) - clamp(body * 4.5, 0.0, 0.92)) * 0.55 + 0.04;
+  vec3 tr = exp(-k * through);
+  vec3 under = bed * tr + aerial(lit, p, uEye) * (1.0 - tr);
+  // The bank in the water, where what is drawn shows it; the sky beyond.
+  vec3 rr = normalize(reflect(-v, normalize(vec3(n.xy * 0.4, 1.0))));
+  vec4 bank = rr.z > 0.0 ? reflected(p, rr) : vec4(0.0);
+  vec3 mirror = mix(aerial(sky, p, uEye), bank.rgb, bank.a);
+  vec3 c = mix(under, mirror, fres * 0.9) + aerial(glint, p, uEye);
+  // At its edge the water thins to nothing, and the ground under it is all that shows.
+  o = vec4(mix(bed, c, smoothstep(0.0, 0.3, through)), 1.0);
+}`;
+
+// ——— The water seen from above, for its banks (docs/plans/RENDERING.md, step 2) ———
+
+/** The water's mesh from straight above, over a box around the eye: its level, and that it is there. */
+export const WATERMAP_VS = /* glsl */ `#version 300 es
+precision highp float;
+layout(location = 0) in vec3 aPos;
+uniform vec4 uBox;
+out float vZ;
+void main() {
+  vZ = aPos.z;
+  gl_Position = vec4((aPos.xy - uBox.xy) / uBox.zw * 2.0 - 1.0, 0.0, 1.0);
+}`;
+
+export const WATERMAP_FS = /* glsl */ `#version 300 es
+precision highp float;
+in float vZ;
+out vec4 o;
+void main() { o = vec4(vZ, 1.0, 0.0, 1.0); }`;
+
+/** A blur of the water's map along one direction, its level weighted by how much water there is, so that both reach the banks. */
+export const WATERBLUR_FS = /* glsl */ `#version 300 es
+precision highp float;
+in vec2 vUv;
+uniform highp sampler2D uTex;
+uniform vec2 uDir;
+out vec4 o;
+void main() {
+  vec2 sum = vec2(0.0);
+  for (int i = -4; i <= 4; i++) {
+    float w = exp(-float(i * i) * 0.12);
+    vec2 t = texture(uTex, vUv + uDir * float(i)).rg;
+    // Premultiplied: a level counts as much as the water it stands for.
+    sum += vec2(t.r, t.g) * w;
+  }
+  o = vec4(sum / 6.43, 0.0, 1.0);
 }`;
 
 // ——— The sea's surface, in a scene of the sea ———
@@ -1378,6 +2027,7 @@ uniform float uAlpha;
 uniform float uEyeSea;
 uniform vec3 uSkyTop;
 ${SEA_LIGHT}
+${CLOUDS}
 out vec4 o;
 vec3 skyColor(vec3 d) {
   float az = acos(clamp(dot(normalize(d.xy + 1e-5), normalize(uSun.xy + 1e-5)), -1.0, 1.0)) / 3.14159265;
@@ -1385,8 +2035,8 @@ vec3 skyColor(vec3 d) {
   float v = 0.5 + 0.5 * sign(el) * sqrt(abs(el) / 1.5708);
   return texture(uSkyLut, vec2(az, v)).rgb;
 }
-float clouds(vec2 p) {
-  // Soft-edged, on a broad pattern that thins out in places: fair weather.
+// The lighter way's clouds: flat, on a layer high above, soft-edged, on a broad pattern that thins out in places.
+float flatClouds(vec2 p) {
   float broad = texture(uNoise, vec3(p * 0.11, 0.3)).g;
   float n = texture(uNoise, vec3(p * 0.42, 0.15)).r * 0.5 + texture(uNoise, vec3(p * 1.1, 0.45)).g * 0.3 + texture(uNoise, vec3(p * 2.7, 0.75)).b * 0.2;
   return smoothstep(0.5, 0.74, n + (broad - 0.5) * 0.3);
@@ -1405,22 +2055,68 @@ void main() {
   float sd = dot(d, uSun);
   c += uSunColor * smoothstep(0.99985, 0.99995, sd) * 18.0;
   c += uSunColor * pow(max(sd, 0.0), 300.0) * 0.28;
-  // Fair-weather clouds, flat on a layer high above, lit by the sun.
-  if (d.z > 0.012) {
-    vec2 p = d.xy / (d.z + 0.1) * 0.11;
-    float m = clouds(p);
-    if (m > 0.0) {
-      float m2 = clouds(p + uSun.xy * 0.012);
-      vec3 lit = mix(uSunColor * 0.9 + vec3(0.35, 0.38, 0.44), vec3(0.42, 0.42, 0.48), m2 * 0.7);
-      float far = smoothstep(0.012, 0.16, d.z);
-      c = mix(c, lit, m * 0.78 * far);
+  // Clouds with depth (step 7): marched through their layer, each step lit by the sun as far as the cloud towards it lets
+  // it through, and by the sky above; far off they thin into the haze.
+  if (uCloudVolume < 0.5) {
+    if (d.z > 0.012) {
+      vec2 p = d.xy / (d.z + 0.1) * 0.11;
+      float m = flatClouds(p);
+      if (m > 0.0) {
+        float m2 = flatClouds(p + uSun.xy * 0.012);
+        vec3 lit = mix(uSunColor * 0.9 + vec3(0.35, 0.38, 0.44), vec3(0.42, 0.42, 0.48), m2 * 0.7);
+        c = mix(c, lit, m * 0.78 * smoothstep(0.012, 0.16, d.z));
+      }
     }
+  } else if (d.z > 0.012 && uCloudCover > 0.0 && uHeight < CLOUD_BASE) {
+    float t0 = (CLOUD_BASE - uHeight) / d.z;
+    // Steps of 250 m at most, low towards the horizon, where the layer is crossed a long way: fewer, longer ones hit or
+    // missed its heaps too much at random for a few frames' average to smooth.
+    float t1 = min((CLOUD_TOP - uHeight) / d.z, t0 + 6000.0);
+    const int STEPS = 24;
+    float dt = (t1 - t0) / float(STEPS);
+    // The pattern moves across the screen from frame to frame, so that the frames' average takes it out.
+    float start = fract(52.9829189 * fract(dot(gl_FragCoord.xy + 5.588238 * uFrameNoise, vec2(0.06711056, 0.00583715))));
+    float mu = dot(d, uSun);
+    float g1 = 0.6;
+    float forward = (1.0 - g1 * g1) / (12.566 * pow(1.0 + g1 * g1 - 2.0 * g1 * mu, 1.5));
+    float phase = mix(0.08, forward, 0.5) * 12.566;
+    vec3 eye = vec3(0.0, 0.0, uHeight);
+    vec3 glow = vec3(0.0);
+    float through = 1.0;
+    for (int i = 0; i < STEPS; i++) {
+      vec3 p = eye + d * (t0 + (float(i) + start) * dt);
+      float rho = cloudDensity(p);
+      if (rho <= 0.0) continue;
+      // Towards the sun, how much cloud the light comes through: near by, and far along the layer, where a low sun's light
+      // crosses other heaps before it reaches this one (with the sun high, those points are above the layer).
+      float toward = cloudDensity(p + uSun * 110.0) + cloudDensity(p + uSun * 300.0) * 1.5 + cloudDensity(p + uSun * 900.0) * 3.0 + cloudDensity(p + uSun * 2200.0) * 5.0;
+      // Light comes through the cloud towards the sun, and a heap's edges, thin, catch less of it (the powder of
+      // Schneider and Vos 2015).
+      float sunlit = exp(-toward * 0.8) * (1.0 - exp(-rho * 4.0));
+      float height = (p.z - CLOUD_BASE) / (CLOUD_TOP - CLOUD_BASE);
+      vec3 light = uSunColor * sunlit * phase * 2.4 + uSkyTop * (0.7 + 0.7 * height);
+      float k = rho * dt * 0.0035;
+      float lost = exp(-k);
+      glow += through * light * (1.0 - lost);
+      through *= lost;
+      if (through < 0.02) break;
+    }
+    float far = 1.0 - smoothstep(0.012, 0.09, d.z);
+    through = mix(through, 1.0, far * 0.85);
+    glow *= 1.0 - far * 0.85;
+    c = c * through + glow;
   }
   o = vec4(c, uAlpha);
 }`;
 
 // ——— Ambient occlusion ———
 
+/**
+ * Ambient occlusion from the depth (docs/plans/RENDERING.md, step 4): ground-truth ambient occlusion (Jimenez, Wu, Pesce
+ * and Jarabo 2016). In a few slices about the view through each pixel, turned by noise from pixel to pixel, the highest
+ * horizon either side is found within a radius, and the light of the sky the surface still sees between the two horizons
+ * is integrated over its cosine. Drawn at half size, then blurred along the depth.
+ */
 export const AO_FS = /* glsl */ `#version 300 es
 precision highp float;
 in vec2 vUv;
@@ -1429,6 +2125,7 @@ uniform vec2 uProjK;   // tan(fov/2)·aspect, tan(fov/2)
 uniform vec2 uNearFar;
 uniform vec2 uTexel;
 out vec4 o;
+const float PI = 3.14159265;
 float linear(float z) {
   float n = uNearFar.x;
   float f = uNearFar.y;
@@ -1447,25 +2144,60 @@ void main() {
   }
   vec3 p = viewPos(vUv);
   vec3 n = normalize(cross(dFdx(p), dFdy(p)));
+  vec3 v = normalize(-p);
+  if (dot(n, v) < 0.0) n = -n;
   float dist = -p.z;
-  // The radius grows with distance: nearby the corners of a wall, far away the streets of a city.
-  float radius = clamp(dist * 0.035, 0.7, 30.0);
+  // The radius grows with distance, and reaches further close by: the foot of a wall, a crown over the ground; far
+  // away, the streets of a city.
+  float radius = clamp(dist * 0.05, 1.2, 30.0);
   vec2 sr = radius / (uProjK * dist) * 0.5;
-  float a = ign(gl_FragCoord.xy) * 6.2831853;
+  float turn = ign(gl_FragCoord.xy) * PI;
+  float jitter = fract(ign(gl_FragCoord.yx + 7.0) + 0.5);
+  const int SLICES = 2;
+  const int STEPS = 6;
   float sum = 0.0;
-  const int N = 10;
-  for (int i = 0; i < N; i++) {
-    float t = (float(i) + 0.5) / float(N);
-    float ang = a + t * 6.2831853 * 2.4;
-    vec2 uv = vUv + vec2(cos(ang), sin(ang)) * sr * sqrt(t);
-    vec3 q = viewPos(uv);
-    vec3 v = q - p;
-    float vv = dot(v, v);
-    float vn = dot(v, n);
-    float f = max(radius * radius - vv, 0.0) / (radius * radius);
-    sum += f * f * max(vn / (vv + 1e-3 * radius) - 0.02, 0.0) * radius;
+  for (int k = 0; k < SLICES; k++) {
+    float phi = turn + float(k) * PI / float(SLICES);
+    vec2 dir = vec2(cos(phi), sin(phi));
+    // The slice's plane: the view, and the direction across the screen; the normal as it falls in it.
+    vec3 across = vec3(dir, 0.0);
+    vec3 side = across - dot(across, v) * v;
+    vec3 axis = normalize(cross(side, v));
+    vec3 inPlane = n - axis * dot(n, axis);
+    float len = max(length(inPlane), 1e-4);
+    float cn = clamp(dot(inPlane, v) / len, 0.0, 1.0);
+    float gamma = sign(dot(side, inPlane)) * acos(cn);
+    // The highest horizon on either side, as the cosine of its angle from the view.
+    float c0 = -1.0;
+    float c1 = -1.0;
+    for (int i = 0; i < STEPS; i++) {
+      float t = (float(i) + jitter) / float(STEPS);
+      t *= t;
+      vec2 off = dir * sr * t;
+      vec3 a = viewPos(vUv + off) - p;
+      vec3 b = viewPos(vUv - off) - p;
+      float la = length(a);
+      float lb = length(b);
+      // Past the radius, a sample counts for less, and then not at all.
+      float fa = clamp(1.0 - la / radius, 0.0, 1.0);
+      float fb = clamp(1.0 - lb / radius, 0.0, 1.0);
+      c0 = max(c0, mix(-1.0, dot(a, v) / max(la, 1e-4), fa));
+      c1 = max(c1, mix(-1.0, dot(b, v) / max(lb, 1e-4), fb));
+    }
+    // The horizons' angles from the view: the one behind the slice's direction negative, the one along it positive,
+    // neither further than the surface's own half of the sky.
+    float h0 = -acos(clamp(c1, -1.0, 1.0));
+    float h1 = acos(clamp(c0, -1.0, 1.0));
+    h0 = gamma + clamp(h0 - gamma, -PI * 0.5, PI * 0.5);
+    h1 = gamma + clamp(h1 - gamma, -PI * 0.5, PI * 0.5);
+    // The cosine-weighted light between the horizons, over the slice.
+    float a0 = cos(gamma) + 2.0 * h0 * sin(gamma) - cos(2.0 * h0 - gamma);
+    float a1 = cos(gamma) + 2.0 * h1 * sin(gamma) - cos(2.0 * h1 - gamma);
+    sum += len * 0.25 * (a0 + a1);
   }
-  float ao = clamp(1.0 - 1.6 * sum / float(N), 0.0, 1.0);
+  float ao = clamp(sum / float(SLICES), 0.0, 1.0);
+  // Softened a little, as the old pass was, for the light the sky's colour already darkens.
+  ao = mix(1.0, ao, 0.85);
   o = vec4(ao, ao, ao, 1.0);
 }`;
 
@@ -1521,6 +2253,159 @@ void main() {
   o = vec4(min(c, vec3(16.0)), 1.0);
 }`;
 
+/**
+ * Temporal antialiasing (docs/plans/RENDERING.md, step 4): each frame is drawn a fraction of a pixel off the last, and
+ * folded into what came before. While the view holds still the frames are averaged, each counting as much as the others,
+ * so that after a few the picture is the same however it was come to; while it moves, what came before is carried to
+ * where it now is on the screen and held to what the frame shows around it, so that nothing trails.
+ */
+export const TAA_FS = /* glsl */ `#version 300 es
+precision highp float;
+in vec2 vUv;
+uniform highp sampler2D uCurrent;
+uniform highp sampler2D uHistory;
+uniform highp sampler2D uDepth;
+// From this frame's screen to the last's, through the world, the eye's move included.
+uniform mat4 uReproject;
+// The share of this frame in what is kept; 1 starts again.
+uniform float uBlend;
+// 1 while the view moves: what came before is carried and held to this frame's neighbourhood.
+uniform float uMoving;
+uniform vec2 uTexel;
+out vec4 o;
+vec3 toYCoCg(vec3 c) { return vec3(dot(c, vec3(0.25, 0.5, 0.25)), dot(c, vec3(0.5, 0.0, -0.5)), dot(c, vec3(-0.25, 0.5, -0.25))); }
+vec3 fromYCoCg(vec3 c) { return vec3(c.x + c.y - c.z, c.x + c.z, c.x - c.y - c.z); }
+void main() {
+  vec4 cur = texture(uCurrent, vUv);
+  if (uBlend >= 1.0) {
+    o = cur;
+    return;
+  }
+  vec2 uv = vUv;
+  if (uMoving > 0.5) {
+    float d = texture(uDepth, vUv).r;
+    vec4 p = uReproject * vec4(vUv * 2.0 - 1.0, d * 2.0 - 1.0, 1.0);
+    uv = p.xy / p.w * 0.5 + 0.5;
+  }
+  if (uv.x < 0.0 || uv.y < 0.0 || uv.x > 1.0 || uv.y > 1.0) {
+    o = cur;
+    return;
+  }
+  vec3 h = texture(uHistory, uv).rgb;
+  if (uMoving > 0.5) {
+    vec3 lo = vec3(1e9);
+    vec3 hi = vec3(-1e9);
+    for (int j = -1; j <= 1; j++) {
+      for (int i = -1; i <= 1; i++) {
+        vec3 c = toYCoCg(texture(uCurrent, vUv + vec2(float(i), float(j)) * uTexel).rgb);
+        lo = min(lo, c);
+        hi = max(hi, c);
+      }
+    }
+    h = fromYCoCg(clamp(toYCoCg(h), lo, hi));
+  }
+  o = vec4(mix(h, cur.rgb, uBlend), cur.a);
+}`;
+
+/**
+ * Light in the air (docs/plans/RENDERING.md, step 4): along each view, out to a few hundred metres, the sunlight the air
+ * scatters towards the eye where the sun reaches it, so that shafts show through a canopy and haze hangs low; marched
+ * through the shadow map at a quarter of the frame's size, a different start each frame, for the antialiasing to smooth.
+ */
+export const SHAFTS_FS = /* glsl */ `#version 300 es
+precision highp float;
+precision highp sampler3D;
+precision highp sampler2DArrayShadow;
+in vec2 vUv;
+uniform mat4 uInvViewProj;
+uniform vec3 uEye;
+// How much the air scatters, per metre, low down; the height over which that thins by e; the ground under the eye.
+uniform float uDensity;
+uniform float uThins;
+uniform float uFloor;
+uniform float uStart;
+out vec4 o;
+${LIGHTING}
+float lit(vec3 p) {
+  float d = distance(p, uShadowFocus);
+  int k = d < uShadowRadii.x * 0.92 ? 0 : d < uShadowRadii.y * 0.92 ? 1 : 2;
+  vec3 q = p;
+  q.z -= drop(q.xy);
+  vec4 c = uShadowM[k] * vec4(q, 1.0);
+  vec3 u = c.xyz * 0.5 + 0.5;
+  if (u.x < 0.0 || u.x > 1.0 || u.y < 0.0 || u.y > 1.0 || u.z > 1.0) return 1.0;
+  return texture(uShadow, vec4(u.xy, float(k), u.z - 0.0002));
+}
+// Along a pixel's way into the scene, whatever it meets there: how much sunlit air it passes out to 40, 80, 160 and
+// 320 m. A pixel of the frame reads it at its own depth (SHAFTS_ADD_FS), so that a twig against the sky takes the air
+// before the twig, and not the sky's.
+void main() {
+  vec4 w = uInvViewProj * vec4(vUv * 2.0 - 1.0, 0.0, 1.0);
+  vec3 dir = normalize(w.xyz / w.w);
+  const int STEPS = 16;
+  const float dl = 20.0;
+  float start = fract(52.9829189 * fract(dot(gl_FragCoord.xy + uStart, vec2(0.06711056, 0.00583715))));
+  float sum = 0.0;
+  vec4 at = vec4(0.0);
+  for (int i = 0; i < STEPS; i++) {
+    vec3 q = uEye + dir * (float(i) + start) * dl;
+    // The eye is drawn with the Earth's curve taken off; the shadow map and the air take it back.
+    q.z += drop(q.xy);
+    sum += lit(q) * exp(-max(q.z - uFloor, 0.0) / uThins) * dl;
+    if (i == 1) at.x = sum;
+    if (i == 3) at.y = sum;
+    if (i == 7) at.z = sum;
+  }
+  at.w = sum;
+  o = at;
+}`;
+
+/** The light in the air, a quarter of the frame's size, added to it: each pixel takes it as far as its own depth. */
+export const SHAFTS_ADD_FS = /* glsl */ `#version 300 es
+precision highp float;
+in vec2 vUv;
+uniform highp sampler2D uTex;
+uniform highp sampler2D uSceneDepth;
+uniform mat4 uInvViewProj;
+uniform vec3 uSun;
+uniform vec3 uSunColor;
+uniform float uDensity;
+out vec4 o;
+void main() {
+  vec4 at = texture(uTex, vUv);
+  vec4 w = uInvViewProj * vec4(vUv * 2.0 - 1.0, texture(uSceneDepth, vUv).r * 2.0 - 1.0, 1.0);
+  vec3 rel = w.xyz / w.w;
+  float len = length(rel);
+  vec3 dir = rel / max(len, 1e-4);
+  // The sunlit air out to this pixel's own depth, between the distances it was summed to.
+  float d = min(len, 320.0);
+  float sum = d < 40.0 ? at.x * d / 40.0 : d < 80.0 ? mix(at.x, at.y, (d - 40.0) / 40.0) : d < 160.0 ? mix(at.y, at.z, (d - 80.0) / 80.0) : mix(at.z, at.w, (d - 160.0) / 160.0);
+  // Scattered mostly forwards, as haze scatters: brightest looking towards the sun.
+  float mu = dot(dir, uSun);
+  float g = 0.62;
+  float phase = (1.0 - g * g) / (12.566 * pow(1.0 + g * g - 2.0 * g * mu, 1.5));
+  o = vec4(uSunColor * phase * uDensity * sum * smoothstep(-0.02, 0.06, uSun.z), 0.0);
+}`;
+
+/** The log of the light of the frame, a block of it to a texel: its mean, from the smallest of its mipmaps, meters the exposure. */
+export const LUM_FS = /* glsl */ `#version 300 es
+precision highp float;
+in vec2 vUv;
+uniform highp sampler2D uTex;
+// A texel of the meter, in the frame's own measure.
+uniform vec2 uCell;
+out vec4 o;
+void main() {
+  float s = 0.0;
+  for (int j = 0; j < 4; j++) {
+    for (int i = 0; i < 4; i++) {
+      vec3 c = texture(uTex, vUv + (vec2(float(i), float(j)) - 1.5) * uCell * 0.25).rgb;
+      s += log2(max(dot(c, vec3(0.2126, 0.7152, 0.0722)), 1e-4));
+    }
+  }
+  o = vec4(s / 16.0, 0.0, 0.0, 1.0);
+}`;
+
 export const POST_FS = /* glsl */ `#version 300 es
 precision highp float;
 in vec2 vUv;
@@ -1530,24 +2415,53 @@ uniform highp sampler2D uBloom1;
 uniform highp sampler2D uBloom2;
 uniform float uExposure;
 uniform float uAlpha;
+// The frame's light, metered (step 4): the mean of its log, in the meter's last mipmap; 1 where it is metered. The key a
+// darker frame is lifted towards, how far, and at most how much.
+uniform highp sampler2D uLum;
+uniform float uMeter;
+uniform vec3 uMeterWay;
+// 1: the sky is drawn solid, so the scene covers the whole frame; its alpha, which leaves' coverage leaves short of 1 at
+// their edges, is not read
+uniform float uSolid;
 out vec4 o;
-vec3 aces(vec3 x) {
-  // Narkowicz's fit, with a little more shoulder for skies.
-  return clamp((x * (2.51 * x + 0.03)) / (x * (2.43 * x + 0.59) + 0.14), 0.0, 1.0);
+// AgX (Sobotka), as Wrensch fitted it: a tone curve that keeps the colour of a bright sky, where a filmic curve washes
+// it out, and lets the brightest things go towards white as film does (docs/plans/RENDERING.md, step 4). Its result is
+// for the display as it is.
+vec3 agxContrast(vec3 x) {
+  vec3 x2 = x * x;
+  vec3 x4 = x2 * x2;
+  return 15.5 * x4 * x2 - 40.14 * x4 * x + 31.96 * x4 - 6.868 * x2 * x + 0.4298 * x2 + 0.1191 * x - 0.00232;
+}
+vec3 agx(vec3 c) {
+  const mat3 inset = mat3(0.842479062253094, 0.0423282422610123, 0.0423756549057051, 0.0784335999999992, 0.878468636469772, 0.0784336, 0.0792237451477643, 0.0791661274605434, 0.879142973793104);
+  const float lo = -12.47393;
+  const float hi = 4.026069;
+  c = inset * max(c, vec3(1e-10));
+  c = clamp(log2(c), lo, hi);
+  c = (c - lo) / (hi - lo);
+  c = agxContrast(c);
+  // A little more punch than the default look: as a slide film gives.
+  float l = dot(c, vec3(0.2126, 0.7152, 0.0722));
+  c = pow(max(c, vec3(0.0)), vec3(1.2));
+  return clamp(mix(vec3(l), c, 1.25), 0.0, 1.0);
 }
 void main() {
   vec4 s = texture(uScene, vUv);
   vec3 c = s.rgb;
   vec3 bloom = texture(uBloom0, vUv).rgb * 0.5 + texture(uBloom1, vUv).rgb * 0.3 + texture(uBloom2, vUv).rgb * 0.2;
   c += bloom * 0.1;
-  c *= uExposure;
-  c = aces(c);
-  // A touch more saturation and warmth, as a film stock gives.
-  float l = dot(c, vec3(0.2126, 0.7152, 0.0722));
-  c = mix(vec3(l), c, 0.98);
-  c = pow(max(c, vec3(0.0)), vec3(1.0 / 2.2));
+  float exposure = uExposure;
+  if (uMeter > 0.5) {
+    // As an eye adapts to shade: a frame darker than the key, a forest floor, is lifted part of the way towards it, and
+    // still reads darker than a meadow; a brighter one, snow or sand, is left as bright as its light makes it.
+    float k = uMeterWay.x / max(exp2(textureLod(uLum, vec2(0.5), 6.0).r) * uExposure, 1e-4);
+    exposure *= clamp(pow(k, uMeterWay.y), 1.0, uMeterWay.z);
+  }
+  c *= exposure;
+  c = agx(c);
   // Vignette.
   vec2 q = vUv - 0.5;
   c *= 1.0 - dot(q, q) * 0.28;
-  o = vec4(c * uAlpha * s.a, uAlpha * s.a);
+  float a = uAlpha * (uSolid > 0.5 ? 1.0 : s.a);
+  o = vec4(c * a, a);
 }`;

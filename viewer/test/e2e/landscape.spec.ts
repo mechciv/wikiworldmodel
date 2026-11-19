@@ -7,7 +7,8 @@ import { traditionAt } from '../../../core/dwelling.ts';
 import type { LandscapeIndex, TraditionsFile } from '../../../core/landscape.ts';
 import { buildFile, idle, latestBuild, settledUrl } from './helpers.ts';
 
-const FAST = 'quality=fast';
+// The lighter way to draw, and the visit's clock fixed, so that two loads of a link draw the same picture.
+const FAST = 'quality=fast&clock=0';
 const low = (lat: number, lon: number, t: number, metres: number) => `t=${t}&lat=${lat}&lon=${lon}&d=${1 + metres / 6371000}&h=40&v=70&${FAST}`;
 const scene = (page: Page) => page.evaluate(() => window.__wikiworldmodel!.scene());
 /** The building tradition the world records for Uruk's region, ArchaeoGLOBE's 59, in 3000 BCE, by its name. */
