@@ -1,6 +1,7 @@
 # Rendering: a better picture of every scene
 
-Status: proposal, November 2026. Nothing in it is built. It plans how the local scene renderer
+Status: steps 0 to 8 built, November 2026; step 9 waits until it is needed. What each step built, and where it differs
+from what was planned, is under [What was built](#what-was-built). It plans how the local scene renderer
 ([city.ts](../../viewer/src/gl/city.ts) and [cityShaders.ts](../../viewer/src/gl/cityShaders.ts)) and the meshes
 the generators make of forms ([forms.ts](../../world/generators/life/forms.ts)) get from a clean diorama to the
 picture of a good game, everywhere at once. [LIVING-WORLD.md](../LIVING-WORLD.md) and [SCENES.md](../SCENES.md) say
@@ -228,6 +229,56 @@ the same layered materials and detail normals. Its trees are drawn by their own 
 [city/forms.ts](../../world/generators/city/forms.ts), called from [cells.ts](../../world/generators/city/cells.ts)),
 not from forms; drawing them as step 1's plants would change the city's meshes, and whichever generator's version
 covers them. Both are later steps, judged on the sheet's city views.
+
+## What was built
+
+Steps 0 to 8 were built together, on one branch, and judged on the look book's sheet. Where a step differs from its plan
+above, it says so here.
+
+- **0. The look book and the budget.** The views are [tools/look/views.yaml](../../tools/look/views.yaml), twelve
+  links: the Hell Creek at its arrival, at a tree's foot, on the bank, from 300 m and at dusk; a desert; Mount
+  Rainier above the treeline in January; a Thanetian shelf sea's floor; a Moscovian coal swamp; the Great Plains; and
+  Rome's forum and one of its streets. Each fixes the visit's clock (`clock=0`). `npx tsx tools/look/look.ts shoot <dir>`
+  shoots them and writes each frame's time by pass; `look.ts sheet <before> <after> --out <dir>` lays two shoots side by
+  side. The renderer times its passes ([timer.ts](../../viewer/src/gl/timer.ts)) by GPU timer queries where the browser
+  has them, or by waiting for each pass where it has none, and the viewer's `profile()` hook measures a view;
+  [frametime.spec.ts](../../viewer/test/e2e/frametime.spec.ts), the browser tests' `frame-time` group, holds each view to
+  16 ms at 1600 × 900 on the reference GPU, and skips anywhere else. The reference GPU is a choice still to be made.
+- **1. Plants.** Every plant part type grows branches and holds its leaves on cards, cut by the shader to needles, a
+  frond's leaflets or broad leaves as its material says, blended at their edges by coverage; a dark mass of leaves
+  inside a crown stands for the leaves behind. From a way off (detail 1) a plant is its trunk, that mass and fewer,
+  larger cards, so that it keeps its ragged edge and its colour; the lighter way keeps its plain shapes. Leaves are lit
+  as their crown's mass, with light through them. The shadow, depth and pick passes cut them as the lit pass does; the
+  depth before the lit pass leaves them out, and they write their own. `gen:life/scene` is version 6. *Not built:*
+  impostors. A crown far off is still detail 1's cards or detail 0's shape; baking a tree into an atlas of views, as
+  planned, is left until a view on the sheet needs it.
+- **2. The ground.** The understory the atlas has there covers the ground close by, as clumps on a grid of a metre, out
+  to 70 m, thinning into the ground's own colour, with a budget of 40,000 of its own (`plants.clumps`); a tuft is a pair
+  of cards of blades, a fern a few fronds, anything else a few sprays of its leaves. Soil, litter, mud, sand, gravel and
+  rock blend by height close by, with a grain from their heights. Banks: the water near the eye is drawn from above into a
+  map of its level, blurred to its banks, so that ground within the water's rise of it is wet, with mud and sand on the
+  gentler slopes. Litter under trees is needles or leaves as the scene's canopy has them.
+- **3. Water.** What is drawn so far is resolved before the water, which sees its bed through itself, coloured by how
+  much water lies along the view, and reflects its banks by marching across the screen against the depth, the sky where
+  that finds nothing. Its ripples are carried by the current. *Not built:* a planar reflection for a lake or the sea.
+- **4. Light.** The sky's light on a surface follows its direction, from nine spherical harmonics of the sky table. Under
+  the canopy the sky's light is dimmed on the ground and on what stands low. Ground-truth ambient occlusion replaces the
+  old pass. Light in the air is marched through the shadow map. AgX is the tone curve, and the exposure is metered from
+  the frame, part of the way. Frames are jittered and averaged while the view holds still, eight of them, and a test
+  takes its frame once they are; while the view moves, what was kept is reprojected and clamped.
+- **5. Movement.** The visit's clock (`clock=` in a link; the tests fix it) moves the wind in the plants, the ripples, the
+  clouds and the animals: each vertex of an animal says whether it moves with the head, the neck, the tail or the
+  breathing trunk, and the shader turns it about its joint, at a pace set by the body's length. The wind's direction is
+  the renderer's, as no field gives it.
+- **6. Bodies.** A body's trunk, head and tubes have half as many sides again close by, and a head's or a tube's rings one
+  more between each two. Hide, fur, feathers, chitin and wings have a grain in the body's own frame, and a body a pattern
+  by its taxon's tint: stripes, spots, mottling or none. *Not built:* normals smoothed across the joints of parts.
+- **7. Clouds.** The sky marches a layer of cloud from 1400 m to 2600 m, its cover the globe's clouds over the scene, lit
+  by the sun through itself; the ground's cloud shadows are taken through the same layer.
+- **8. The still.** A view held still is refined further: 48 frames, drawn at twice the size each way, the shadows cast
+  from all over the sun's disc, and the scene asked for twice the budget with finer detail at each distance. It starts
+  where a link says `still=1`, or once a visitor has used the page and held the view still for 1.5 s; any change ends it.
+  `Save picture` keeps the canvas as a PNG with its link written into it.
 
 ## Open questions
 

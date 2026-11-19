@@ -185,7 +185,7 @@ export abstract class CellScene {
   }
 
   /** Draw a frame. */
-  render(v: LocalView, sun: V3, time: number, evidence: boolean, alpha: number, solid: boolean, outW: number, outH: number): void {
+  render(v: LocalView, sun: V3, time: number, evidence: boolean, alpha: number, solid: boolean, outW: number, outH: number, clock = 0): void {
     if (!this.ready) return;
     this.update(v);
     const f: CityFrame = {
@@ -204,6 +204,7 @@ export abstract class CellScene {
       alpha,
       solid,
       clearance: v.clearance,
+      clock,
       width: outW,
       height: outH,
     };

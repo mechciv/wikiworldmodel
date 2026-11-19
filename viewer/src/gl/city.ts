@@ -7,12 +7,52 @@ import type { GroundLevel } from '../../../core/city.ts';
 import { hash3 } from '../../../world/generators/city/math.ts';
 import { invert, multiply, type Mat4, type V3 } from '../mat.ts';
 import { program, setUniforms, texture2D, type GL, type Program } from './context.ts';
-import { AO_FS, BLUR_FS, BRIGHT_FS, DEPTH_FS, FULLSCREEN_VS, ID_FS, MESH_FS, MESH_VS, POST_FS, SEA, SEA_FS, SEA_VS, SKY_FS, SKY_LUT_FS, TERRAIN_FS, TERRAIN_VS, WATER_FS, WATER_VS } from './cityShaders.ts';
+import { FrameTimer } from './timer.ts';
+import { AO_FS, BLUR_FS, BRIGHT_FS, DEPTH_FS, FULLSCREEN_VS, ID_FS, LUM_FS, MESH_FS, MESH_VS, POST_FS, SHAFTS_ADD_FS, SHAFTS_FS, TAA_FS, SEA, SEA_FS, SEA_VS, SKY_FS, SKY_LUT_FS, TERRAIN_FS, TERRAIN_VS, WATER_FS, WATER_VS, WATERBLUR_FS, WATERMAP_FS, WATERMAP_VS } from './cityShaders.ts';
 
 /** Texture units, the same for every program; 12 to 16 are the passes' own, for their targets. */
-const UNIT = { noise: 0, sky: 1, shadow: 2, ao: 3, entities: 4, ground: 5, normal: 8, mask: 11, fields: 17 } as const;
+const UNIT = { noise: 0, sky: 1, shadow: 2, ao: 3, entities: 4, ground: 5, normal: 8, mask: 11, fields: 17, waterMap: 18, scene: 19, sceneDepth: 20 } as const;
+
+/** The water's map from above: texels a side, and metres it covers; it is drawn again when the eye leaves its middle. */
+const WATER_MAP = { size: 512, span: 2048, snap: 512 } as const;
 
 const SHADOW_SIZE = 2048;
+
+/**
+ * The wind the plants lean in (docs/plans/RENDERING.md, step 5): a gentle breeze from one quarter, the renderer's own,
+ * as no field of the climate's winds says yet where it blew from.
+ */
+const WIND: [number, number] = [0.82, 0.46];
+
+/** How many frames, each a fraction of a pixel off the last, are averaged while the view holds still (step 4). */
+const STEADY_FRAMES = 8;
+
+/**
+ * The still (docs/plans/RENDERING.md, step 8): how many frames it averages, drawn at twice the size each way, and how far
+ * from the sun's middle, in radians, the shadows are cast from as it goes, so that they soften as a disc's would.
+ */
+const STILL_FRAMES = 48;
+const STILL_SCALE = 2;
+const STILL_SUN = 0.012;
+
+/** The Halton sequence in a base: the offsets frames are jittered by, spread evenly over a pixel. */
+function halton(i: number, base: number): number {
+  let f = 1;
+  let r = 0;
+  for (let k = i; k > 0; k = Math.floor(k / base)) {
+    f /= base;
+    r += f * (k % base);
+  }
+  return r;
+}
+
+/** A projection moved by a fraction of a pixel across the screen. */
+function jittered(p: Mat4, dx: number, dy: number): Mat4 {
+  const m = new Float32Array(p);
+  m[8] += dx;
+  m[9] += dy;
+  return m;
+}
 
 /** A mesh of the city on the GPU. */
 export interface CellGPU {
@@ -35,6 +75,8 @@ export interface InstancedGPU {
   count: number;
   /** drawn into the shadow map: what is only a shape is left out */
   casts: boolean;
+  /** how an animal's mesh idles: its joints, then its swings and pace (world/generators/life/stream.ts, ProtoMesh) */
+  idle: Float32Array | null;
 }
 
 export interface CityFrame {
@@ -60,6 +102,8 @@ export interface CityFrame {
   solid: boolean;
   /** height of the eye above the ground, in metres */
   clearance: number;
+  /** seconds of the visit, by which what moves moves: apart from the world's time, and fixed by a link where it says */
+  clock?: number;
   width: number;
   height: number;
 }
@@ -100,6 +144,62 @@ function underExposure(z: number, lit: V3): number {
   return Math.max(1, Math.min(SEA.open, SEA.day / Math.max(1e-6, luminance(lit) * luminance(light))));
 }
 
+/**
+ * The sky's light on a surface by the way it faces, from the table of the sky's radiance (docs/plans/RENDERING.md, step 4):
+ * the upper half of the sky projected on nine spherical harmonics, turned into irradiance over π (Ramamoorthi & Hanrahan
+ * 2001), with each term's constant folded in so that the shader multiplies plain products of the normal's components; and
+ * scaled so that a surface facing straight up takes as much light as `top` says, as the two colours before it did.
+ */
+function skyHarmonics(table: Float32Array, sun: V3, top: V3): Float32Array {
+  const W = 192;
+  const H = 128;
+  const sample = (u: number, v: number, out: number[]) => {
+    const x = Math.max(0, Math.min(W - 1.001, u * (W - 1)));
+    const y = Math.max(0, Math.min(H - 1.001, v * (H - 1)));
+    const i = Math.floor(x);
+    const j = Math.floor(y);
+    const fx = x - i;
+    const fy = y - j;
+    for (let c = 0; c < 3; c++) {
+      const a = table[(j * W + i) * 4 + c] * (1 - fx) + table[(j * W + i + 1) * 4 + c] * fx;
+      const b = table[((j + 1) * W + i) * 4 + c] * (1 - fx) + table[((j + 1) * W + i + 1) * 4 + c] * fx;
+      out[c] = a * (1 - fy) + b * fy;
+    }
+  };
+  const L = new Float64Array(27);
+  const phiS = Math.atan2(sun[1], sun[0]);
+  const NA = 64;
+  const NE = 24;
+  const rgb = [0, 0, 0];
+  for (let j = 0; j < NE; j++) {
+    const el = ((j + 0.5) / NE) * (Math.PI / 2);
+    const ce = Math.cos(el);
+    const z = Math.sin(el);
+    // The table's elevation: more of it near the horizon (SKY_LUT_FS).
+    const v = 0.5 + 0.5 * Math.sqrt(el / (Math.PI / 2));
+    const dw = ce * (Math.PI / 2 / NE) * ((2 * Math.PI) / NA);
+    for (let i = 0; i < NA; i++) {
+      const phi = ((i + 0.5) / NA) * 2 * Math.PI;
+      const rel = Math.abs(((((phi - phiS) % (2 * Math.PI)) + 3 * Math.PI) % (2 * Math.PI)) - Math.PI);
+      sample(rel / Math.PI, v, rgb);
+      const x = ce * Math.cos(phi);
+      const y = ce * Math.sin(phi);
+      const Y = [1, y, z, x, x * y, y * z, 3 * z * z - 1, x * z, x * x - y * y];
+      for (let k = 0; k < 9; k++) for (let c = 0; c < 3; c++) L[k * 3 + c] += rgb[c] * Y[k] * dw;
+    }
+  }
+  // Each term: its basis constant squared (once to project, once to evaluate) and its band's share of the cosine, Â/π.
+  const C = [0.282095, 0.488603, 0.488603, 0.488603, 1.092548, 1.092548, 0.315392, 1.092548, 0.546274];
+  const A = [1, 2 / 3, 2 / 3, 2 / 3, 1 / 4, 1 / 4, 1 / 4, 1 / 4, 1 / 4];
+  const out = new Float32Array(27);
+  for (let k = 0; k < 9; k++) for (let c = 0; c < 3; c++) out[k * 3 + c] = L[k * 3 + c] * C[k] * C[k] * A[k];
+  // Straight up: the constant, the vertical, and twice the third band's middle term.
+  const up = [0, 1, 2].map((c) => out[c] + out[6 + c] + 2 * out[18 + c]);
+  const scale = luminance(top) / Math.max(1e-6, luminance(up));
+  for (let k = 0; k < 27; k++) out[k] *= scale;
+  return out;
+}
+
 /** A square grid of the terrain's vertices, with the middle of it left out or not. */
 function ringMesh(n: number, hole: number): { positions: Float32Array; indices: Uint32Array; ringCount: number } {
   const side = n * 2 + 1;
@@ -137,6 +237,12 @@ export class CityRenderer {
   private blurP: Program;
   private brightP: Program;
   private postP: Program;
+  private taaP: Program;
+  private lumP: Program;
+  private shaftsP: Program;
+  private shaftsAddP: Program;
+  private waterMapP: Program;
+  private waterBlurP: Program;
 
   private noise: WebGLTexture;
   private lut: WebGLTexture;
@@ -174,6 +280,19 @@ export class CityRenderer {
   private waterTone: number[] | null = null;
   /** how far toward the eye water that follows its channels is drawn, as a share of its distance */
   private waterBias = 0;
+  /** The water seen from above, around the eye, for its banks: two targets to blur between, and the box drawn */
+  private waterMapTex: WebGLTexture[] = [];
+  private waterMapFb: WebGLFramebuffer[] = [];
+  private waterMapKey = '';
+  private waterSerial = 0;
+  private waterBox: [number, number, number, number] = [0, 0, 1, 1];
+  /** whether floats can be blended, so that where two waters lie one over the other the map keeps the higher */
+  private floatBlend = false;
+  /** how much of the sky the clouds cover over the scene, as the globe's clouds have it (step 7) */
+  private cloudCover = 0.35;
+  /** what lies under the trees, 0 broad leaves to 1 needles; and whether clumps of low plants cover the ground close by */
+  private litter = 0;
+  private clumps = 0;
   /** the ground is land nobody has farmed: what the mask says of it is a wild place's */
   wild = false;
   /**
@@ -194,6 +313,9 @@ export class CityRenderer {
   // Render targets, remade when the size changes.
   private w = 0;
   private h = 0;
+  /** the frame's own size, which the scene is drawn at, or twice it for a still */
+  private outW = 0;
+  private outH = 0;
   private samples = 4;
   private msFb!: WebGLFramebuffer;
   private msColor!: WebGLRenderbuffer;
@@ -210,11 +332,39 @@ export class CityRenderer {
   private pickDepth: WebGLRenderbuffer | null = null;
   /** what the last frame used, for picking */
   private lastFrame: CityFrame | null = null;
+  /**
+   * Temporal antialiasing (step 4): two frames' worth of what has been kept, one read and the other written; the view
+   * the last was drawn for, how many frames have been drawn of it, and its view and projection, unmoved, to carry what
+   * was kept to where it is now.
+   */
+  private historyTex: WebGLTexture[] = [];
+  private historyFb: WebGLFramebuffer[] = [];
+  private historyAt = 0;
+  private viewKey = '';
+  private steady = 0;
+  private frames = 0;
+  /** which of the averaged frames this is: its jitter, and where marches through the air and the clouds start */
+  private sample = 0;
+  private lastVp: Mat4 | null = null;
+  private lastEye: V3 = [0, 0, 0];
+  /** the meter of the frame's light: a small target of its log, with mipmaps down to one texel */
+  private lumTex: WebGLTexture | null = null;
+  private lumFb: WebGLFramebuffer | null = null;
+  /** the light in the air, at a quarter of the frame's size */
+  private shaftsTex: WebGLTexture | null = null;
+  private shaftsFb: WebGLFramebuffer | null = null;
+  /** counts changes to who is lit and hovered, which the frame shows but no mesh changes for */
+  private flagSerial = 0;
   private lastDraw: CellGPU[] = [];
   private sunColor: V3 = [3, 2.8, 2.5];
   private skyTop: V3 = [0.3, 0.45, 0.8];
   private skyLow: V3 = [0.5, 0.55, 0.65];
   private bounce: V3 = [0.2, 0.17, 0.12];
+  /** the sky's light by direction, as nine spherical harmonics (docs/plans/RENDERING.md, step 4) */
+  private skyHarmonics: Float32Array = new Float32Array(27);
+
+  /** How long each pass takes, when someone measures (docs/plans/RENDERING.md, step 0). */
+  readonly timer: FrameTimer;
 
   /** The cells to draw this frame; the scene sets it. */
   shadowCells: (focus: V3, radius: number) => CellGPU[] = () => [];
@@ -227,6 +377,7 @@ export class CityRenderer {
 
   constructor(private gl: GL, opts: { fast?: boolean } = {}) {
     this.fast = !!opts.fast;
+    this.timer = new FrameTimer(gl);
     const ext = gl.getExtension('EXT_color_buffer_float');
     if (!ext) throw new Error('This view of the city needs floating-point render targets (EXT_color_buffer_float).');
     gl.getExtension('OES_texture_float_linear');
@@ -251,6 +402,12 @@ void main() {
     this.blurP = program(gl, 'city blur', FULLSCREEN_VS, BLUR_FS);
     this.brightP = program(gl, 'city bright', FULLSCREEN_VS, BRIGHT_FS);
     this.postP = program(gl, 'city post', FULLSCREEN_VS, POST_FS);
+    this.taaP = program(gl, 'city antialiasing', FULLSCREEN_VS, TAA_FS);
+    this.lumP = program(gl, 'city meter', FULLSCREEN_VS, LUM_FS);
+    this.shaftsP = program(gl, 'city light in the air', FULLSCREEN_VS, SHAFTS_FS);
+    this.shaftsAddP = program(gl, 'city light in the air, added', FULLSCREEN_VS, SHAFTS_ADD_FS);
+    this.waterMapP = program(gl, 'city water map', WATERMAP_VS, WATERMAP_FS);
+    this.waterBlurP = program(gl, 'city water blur', FULLSCREEN_VS, WATERBLUR_FS);
 
     // Noise, tiling, in four independent channels: everything's roughness and grain comes from it.
     const size = 64;
@@ -303,6 +460,22 @@ void main() {
     this.mask = texture2D(gl, { width: 1, height: 1, internal: gl.RGBA8, format: gl.RGBA, type: gl.UNSIGNED_BYTE, data: new Uint8Array([0, 0, 0, 0]), filter: gl.LINEAR });
     gl.activeTexture(gl.TEXTURE0 + UNIT.fields);
     this.fields = texture2D(gl, { width: 1, height: 1, internal: gl.RGBA8, format: gl.RGBA, type: gl.UNSIGNED_BYTE, data: new Uint8Array([0, 0, 0, 0]), filter: gl.LINEAR });
+    // The water's map: in floats, as a level needs; filtered where the browser can filter floats. The fast way has none.
+    if (!this.fast) {
+      gl.activeTexture(gl.TEXTURE0 + UNIT.waterMap);
+      const linear = !!gl.getExtension('OES_texture_float_linear');
+      this.floatBlend = !!gl.getExtension('EXT_float_blend');
+      for (let k = 0; k < 2; k++) {
+        const t = texture2D(gl, { width: WATER_MAP.size, height: WATER_MAP.size, internal: gl.RG32F, format: gl.RG, type: gl.FLOAT, data: null, filter: linear ? gl.LINEAR : gl.NEAREST });
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        const fb = gl.createFramebuffer()!;
+        gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, t, 0);
+        this.waterMapTex.push(t);
+        this.waterMapFb.push(fb);
+      }
+    }
 
     // What a mesh with no instances reads for its instance's entity: an integer attribute that is not enabled must
     // have an integer value, or every plain draw is refused.
@@ -339,18 +512,23 @@ void main() {
     };
     const lit = { uNoise: UNIT.noise, uSkyLut: UNIT.sky, uShadow: UNIT.shadow, uAO: UNIT.ao, uEntities: UNIT.entities };
     const ground = { uGround0: UNIT.ground, uGround1: UNIT.ground + 1, uGround2: UNIT.ground + 2, uNormal0: UNIT.normal, uNormal1: UNIT.normal + 1, uNormal2: UNIT.normal + 2, uMask: UNIT.mask, uFields: UNIT.fields };
-    ints(this.meshP, lit);
+    ints(this.meshP, { ...lit, uMask: UNIT.mask });
     ints(this.depthP, { uEntities: UNIT.entities });
     ints(this.idP, { uEntities: UNIT.entities });
-    ints(this.terrainP, { ...lit, ...ground });
+    ints(this.terrainP, { ...lit, ...ground, uWaterMap: UNIT.waterMap });
+    ints(this.waterBlurP, { uTex: UNIT.waterMap });
     ints(this.terrainDepthP, ground);
-    ints(this.waterP, lit);
+    ints(this.waterP, { ...lit, uScene: UNIT.scene, uSceneDepth: UNIT.sceneDepth });
     ints(this.seaP, { ...lit, ...ground });
     ints(this.skyP, { uNoise: UNIT.noise, uSkyLut: UNIT.sky });
     ints(this.aoP, { uDepth: 12 });
     ints(this.blurP, { uTex: 13, uDepth: 12 });
     ints(this.brightP, { uTex: 13 });
-    ints(this.postP, { uScene: 13, uBloom0: 14, uBloom1: 15, uBloom2: 16 });
+    ints(this.postP, { uScene: 13, uBloom0: 14, uBloom1: 15, uBloom2: 16, uLum: 12 });
+    ints(this.taaP, { uCurrent: 13, uHistory: 14, uDepth: 12 });
+    ints(this.lumP, { uTex: 13 });
+    ints(this.shaftsP, { ...lit, uSceneDepth: UNIT.sceneDepth });
+    ints(this.shaftsAddP, { uTex: 13 });
   }
 
   /** The ground's grids: heights to sample in the vertex shader, and normals to filter. */
@@ -413,6 +591,20 @@ void main() {
     this.meshSerial++;
   }
 
+  /**
+   * What covers the ground close by, as a scene's taxa say: the share of its canopy whose leaves are needles, for what
+   * lies under the trees; and whether it has low plants to cover the ground with clumps.
+   */
+  setGroundCover(litter: number, clumps: boolean): void {
+    this.litter = Math.max(0, Math.min(1, litter));
+    this.clumps = clumps ? 1 : 0;
+  }
+
+  /** How much of the sky the clouds cover over the scene, 0–1: from the globe's clouds, so the way down keeps its weather. */
+  setCloudCover(cover: number): void {
+    this.cloudCover = Math.max(0, Math.min(1, cover));
+  }
+
   /** The colours and shares of the land, as a place's climate gives them. */
   setLand(tones: Float32Array, shares: V3, snow?: { line: number; band: number; slope: number }): void {
     this.tones = tones;
@@ -421,7 +613,7 @@ void main() {
   }
 
   /** A mesh that will be drawn by instancing. */
-  addInstanced(id: number, vertices: ArrayBuffer, indices: Uint32Array, casts: boolean): void {
+  addInstanced(id: number, vertices: ArrayBuffer, indices: Uint32Array, casts: boolean, idle?: number[]): void {
     const gl = this.gl;
     const vao = gl.createVertexArray()!;
     gl.bindVertexArray(vao);
@@ -456,7 +648,7 @@ void main() {
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
     gl.bindVertexArray(null);
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
-    this.instanced.set(id, { vao, vbo, ibo, instances, capacity: 28 * 16, indexCount: indices.length, count: 0, casts });
+    this.instanced.set(id, { vao, vbo, ibo, instances, capacity: 28 * 16, indexCount: indices.length, count: 0, casts, idle: idle && idle.length >= 16 ? Float32Array.from(idle.slice(0, 16)) : null });
   }
 
   /** Who is drawn with each mesh this frame. Meshes not named draw nobody. */
@@ -509,13 +701,18 @@ void main() {
     if (!this.instanced.size) return;
     const gl = this.gl;
     const loc = p.uniforms.get('uInstanced');
+    const idle = p.uniforms.get('uIdle');
+    const idling = p.uniforms.get('uIdling');
     if (loc) gl.uniform1f(loc, 1);
     for (const g of this.instanced.values()) {
       if (!g.count || (shadow && !g.casts)) continue;
+      if (idling) gl.uniform1f(idling, g.idle ? 1 : 0);
+      if (idle && g.idle) gl.uniform4fv(idle, g.idle);
       gl.bindVertexArray(g.vao);
       gl.drawElementsInstanced(gl.TRIANGLES, g.indexCount, gl.UNSIGNED_INT, 0, g.count);
     }
     if (loc) gl.uniform1f(loc, 0);
+    if (idling) gl.uniform1f(idling, 0);
     gl.bindVertexArray(null);
   }
 
@@ -589,6 +786,58 @@ void main() {
     this.waterBuffers.push(ib);
     gl.bindVertexArray(null);
     this.waterCount = indices.length;
+    this.waterSerial++;
+  }
+
+  /**
+   * The water near the eye seen from above, for its banks (docs/plans/RENDERING.md, step 2): its mesh drawn straight down
+   * into a map of its level and its presence, then blurred, both weighted by the water, so that a bank close to it knows
+   * the level it stands above. Drawn again only when the eye leaves the middle of the map or the water changes.
+   */
+  private updateWaterMap(f: CityFrame): void {
+    if (this.fast || !this.wild || this.sea || !this.waterVao || !this.waterCount || !this.waterMapFb.length) return;
+    const gl = this.gl;
+    const cx = Math.round(f.eye[0] / WATER_MAP.snap) * WATER_MAP.snap;
+    const cy = Math.round(f.eye[1] / WATER_MAP.snap) * WATER_MAP.snap;
+    const key = `${cx},${cy},${this.waterSerial}`;
+    if (key === this.waterMapKey) return;
+    this.waterMapKey = key;
+    const half = WATER_MAP.span / 2;
+    this.waterBox = [cx - half, cy - half, WATER_MAP.span, WATER_MAP.span];
+    gl.viewport(0, 0, WATER_MAP.size, WATER_MAP.size);
+    gl.disable(gl.DEPTH_TEST);
+    gl.disable(gl.CULL_FACE);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.waterMapFb[0]);
+    gl.clearColor(0, 0, 0, 0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    // Where two waters lie one over the other, the higher, where floats can be blended; otherwise the last drawn.
+    if (this.floatBlend) {
+      gl.enable(gl.BLEND);
+      gl.blendEquation(gl.MAX);
+    }
+    gl.useProgram(this.waterMapP.program);
+    setUniforms(gl, this.waterMapP, { uBox: this.waterBox });
+    gl.bindVertexArray(this.waterVao);
+    gl.drawElements(gl.TRIANGLES, this.waterCount, gl.UNSIGNED_INT, 0);
+    gl.bindVertexArray(null);
+    gl.blendEquation(gl.FUNC_ADD);
+    gl.disable(gl.BLEND);
+    // Blurred across and along, twice, the second time wider: some 40 m out from the water.
+    gl.useProgram(this.waterBlurP.program);
+    gl.bindVertexArray(this.emptyVao);
+    gl.activeTexture(gl.TEXTURE0 + UNIT.waterMap);
+    const texel = 1 / WATER_MAP.size;
+    for (const step of [1, 2.5]) {
+      for (const [dx, dy] of [[1, 0], [0, 1]]) {
+        const from = dx ? 0 : 1;
+        gl.bindTexture(gl.TEXTURE_2D, this.waterMapTex[from]);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this.waterMapFb[1 - from]);
+        setUniforms(gl, this.waterBlurP, { uDir: [dx * texel * step, dy * texel * step] });
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+      }
+    }
+    gl.bindVertexArray(null);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   }
 
   /** When each entity stood, and what it rests on: [start, end, flags, ground] per entity. */
@@ -626,6 +875,7 @@ void main() {
     const gl = this.gl;
     if (this.entityData[index * 4 + 2] === flags) return;
     this.entityData[index * 4 + 2] = flags;
+    this.flagSerial++;
     gl.activeTexture(gl.TEXTURE0 + UNIT.entities);
     gl.bindTexture(gl.TEXTURE_2D, this.entityTex);
     gl.texSubImage2D(gl.TEXTURE_2D, 0, index & 255, index >> 8, 1, 1, gl.RGBA, gl.FLOAT, this.entityData, index * 4);
@@ -722,6 +972,35 @@ void main() {
     target(aw, ah, gl.R8, gl.RED, gl.UNSIGNED_BYTE, this.aoTex, this.aoFb);
     target(aw, ah, gl.R8, gl.RED, gl.UNSIGNED_BYTE, this.aoTex, this.aoFb);
     for (let k = 0; k < 3; k++) target(Math.max(1, w >> (k + 1)), Math.max(1, h >> (k + 1)), gl.RGBA16F, gl.RGBA, gl.HALF_FLOAT, this.bloomTex, this.bloomFb);
+    // What is kept from frame to frame, and the meter; the fast way has neither.
+    for (const t of this.historyTex) gl.deleteTexture(t);
+    for (const f of this.historyFb) gl.deleteFramebuffer(f);
+    this.historyTex = [];
+    this.historyFb = [];
+    this.viewKey = '';
+    this.lastVp = null;
+    if (this.shaftsTex) gl.deleteTexture(this.shaftsTex);
+    if (this.shaftsFb) gl.deleteFramebuffer(this.shaftsFb);
+    this.shaftsTex = null;
+    this.shaftsFb = null;
+    if (!this.fast) {
+      const air: WebGLTexture[] = [];
+      const airFb: WebGLFramebuffer[] = [];
+      target(Math.max(1, w >> 2), Math.max(1, h >> 2), gl.RGBA16F, gl.RGBA, gl.HALF_FLOAT, air, airFb);
+      this.shaftsTex = air[0];
+      this.shaftsFb = airFb[0];
+      for (let k = 0; k < 2; k++) target(w, h, gl.RGBA16F, gl.RGBA, gl.HALF_FLOAT, this.historyTex, this.historyFb);
+      if (!this.lumTex) {
+        this.lumTex = gl.createTexture()!;
+        gl.bindTexture(gl.TEXTURE_2D, this.lumTex);
+        gl.texStorage2D(gl.TEXTURE_2D, 7, gl.R16F, 64, 64);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        this.lumFb = gl.createFramebuffer()!;
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this.lumFb);
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.lumTex, 0);
+      }
+    }
     if (this.fast) {
       // Nothing occluded, nothing glowing: the passes that would fill these are skipped.
       const fill = (fbs: WebGLFramebuffer[], v: number) => {
@@ -767,6 +1046,9 @@ void main() {
       gl.readPixels(Math.floor(u * 191), Math.floor(v * 127), 1, 1, gl.RGBA, gl.FLOAT, px);
       return [px[0], px[1], px[2]];
     };
+    // The whole table, for the sky's light on a surface by the way it faces.
+    const table = new Float32Array(192 * 128 * 4);
+    gl.readPixels(0, 0, 192, 128, gl.RGBA, gl.FLOAT, table);
     const zen = read(0.5, 0.97);
     const hA = read(0.1, 0.56);
     const hB = read(0.9, 0.56);
@@ -782,6 +1064,7 @@ void main() {
     this.sunColor = [soft(tr(5.8e-6, 14e-6)) * 3.8 * up, soft(tr(13.5e-6, 14e-6)) * 3.75 * up, soft(tr(33.1e-6, 14e-6)) * 3.7 * up];
     this.skyTop = [zen[0] * 0.62, zen[1] * 0.62, zen[2] * 0.62];
     this.skyLow = [low[0] * 0.26, low[1] * 0.26, low[2] * 0.26];
+    this.skyHarmonics = skyHarmonics(table, sun, this.skyTop);
     const s = Math.max(sun[2], 0);
     this.bounce = [(this.sunColor[0] * s + this.skyTop[0]) * 0.13, (this.sunColor[1] * s + this.skyTop[1]) * 0.105, (this.sunColor[2] * s + this.skyTop[2]) * 0.075];
     for (let k = 0; k < 3; k++) this.shadowKeys[k] = '';
@@ -803,11 +1086,20 @@ void main() {
       uShadowRadii: this.shadowRadii,
       uHazeK: 2.0e-5,
       uTime: f.time,
+      uClock: f.clock ?? 0,
+      uClockSky: f.clock ?? 0,
+      uCloudCover: this.cloudCover,
+      uCloudVolume: this.fast ? 0 : 1,
+      uWind: WIND,
       uAOSize: [this.w, this.h],
       uEvidence: f.evidence ? 1 : 0,
       uWild: this.wild ? 1 : 0,
       uSeaSurface: this.seaSurface,
       uSea: this.sea ? 1 : 0,
+      uBanks: this.waterMapKey && !this.fast && this.wild && !this.sea ? 1 : 0,
+      uWaterBox: this.waterBox,
+      uLitter: this.litter,
+      uClumps: this.clumps,
     });
     const tone = p.uniforms.get('uTone');
     if (tone) gl.uniform3fv(tone, this.tones);
@@ -819,6 +1111,12 @@ void main() {
     if (fb) gl.uniform4f(fb, this.fieldsBox[0], this.fieldsBox[1], this.fieldsBox[2] - this.fieldsBox[0], this.fieldsBox[3] - this.fieldsBox[1]);
     const fs = p.uniforms.get('uFieldStyle');
     if (fs) gl.uniform4fv(fs, this.fieldStyle);
+    const mb = p.uniforms.get('uMaskBox');
+    if (mb) gl.uniform4f(mb, this.maskBox[0], this.maskBox[1], this.maskBox[2] - this.maskBox[0], this.maskBox[3] - this.maskBox[1]);
+    const sh = p.uniforms.get('uSH');
+    if (sh) gl.uniform3fv(sh, this.skyHarmonics);
+    const sl = p.uniforms.get('uSkyLight');
+    if (sl) gl.uniform1f(sl, 1);
     const m = p.uniforms.get('uShadowM');
     if (m) gl.uniformMatrix4fv(m, false, this.shadowM);
   }
@@ -910,7 +1208,10 @@ void main() {
       const cU = dt(f.focus, up);
       const sR = Math.round(cR / texel) * texel;
       const sU = Math.round(cU / texel) * texel;
-      const key = `${sR.toFixed(1)},${sU.toFixed(1)},${r.toFixed(1)},${sun.join()},${k === 2 ? Math.round(f.time / 4) : f.time},${this.entitySerial},${this.meshSerial}`;
+      // What moves in the wind or idles moves its shadow: the nearest cascade is drawn again ten times a second of the
+      // visit's clock, the middle once a second.
+      const moved = k === 0 ? Math.round((f.clock ?? 0) * 10) : k === 1 ? Math.round(f.clock ?? 0) : 0;
+      const key = `${sR.toFixed(1)},${sU.toFixed(1)},${r.toFixed(1)},${sun.join()},${k === 2 ? Math.round(f.time / 4) : f.time},${this.entitySerial},${this.meshSerial},${moved}`;
       const depthRange = Math.max(r * 4, 2500);
       const zc = dt(f.focus, sun);
       const view = new Float32Array([right[0], up[0], sun[0], 0, right[1], up[1], sun[1], 0, right[2], up[2], sun[2], 0, 0, 0, 0, 1]);
@@ -925,7 +1226,7 @@ void main() {
       if (this.fast) continue;
       // Everything's position already has the eye taken off for the camera; here it is absolute.
       gl.useProgram(this.depthP.program);
-      setUniforms(gl, this.depthP, { uViewProj: m, uEye: [0, 0, 0], uTime: f.time });
+      setUniforms(gl, this.depthP, { uViewProj: m, uEye: [0, 0, 0], uTime: f.time, uCards: 1, uClock: f.clock ?? 0, uWind: WIND });
       // Both sides of a face: many of a building's are shells, seen from either side.
       gl.disable(gl.CULL_FACE);
       for (const c of this.shadowCells(f.focus, r * 1.45)) {
@@ -947,11 +1248,77 @@ void main() {
   }
 
   /** A frame of the scene. The globe, if it shows through, has already been drawn. */
-  render(f: CityFrame, cells: CellGPU[], outW: number, outH: number): void {
+  /** Draw the next frame in full, as if the view had changed: for measuring what a frame costs. */
+  restart(): void {
+    this.viewKey = '';
+  }
+
+  /**
+   * The still (step 8): asked for, the renderer keeps working on a view as long as it holds still, averaging more frames
+   * at twice the size and casting the shadows from all over the sun's disc, until the view is the best it can draw.
+   */
+  still = false;
+  /** how many times larger than the frame the scene is drawn: 2 while a still is made */
+  private scale = 1;
+  /** when the view last changed, in ms of the page's clock */
+  private changedAt = performance.now();
+
+  /** Whether the view holds still and its frames are still being averaged: the viewer draws again until they are done. */
+  get refining(): boolean {
+    return !this.fast && (this.steady < STEADY_FRAMES || (this.still && (this.scale < STILL_SCALE || this.steady < STILL_FRAMES)));
+  }
+
+  /** How long, in ms, the view has held still. */
+  get steadyMs(): number {
+    return performance.now() - this.changedAt;
+  }
+
+  /** Whether the frame shown is a finished still. */
+  get stillDone(): boolean {
+    return this.still && this.scale === STILL_SCALE && this.steady >= STILL_FRAMES;
+  }
+
+  render(frame: CityFrame, cells: CellGPU[], outW: number, outH: number): void {
     const gl = this.gl;
-    this.resize(outW, outH);
-    this.lastFrame = f;
+    this.scale = this.still && !this.fast ? STILL_SCALE : 1;
+    this.resize(outW * this.scale, outH * this.scale);
+    this.outW = outW;
+    this.outH = outH;
+    this.lastFrame = frame;
     this.lastDraw = cells;
+    // Whether the view is the last one again: then its frames are averaged, each jittered by its own fraction of a pixel,
+    // and once enough are, the picture is done and only shown again.
+    const key = [frame.eye, frame.view, frame.proj, frame.sun, frame.time, frame.evidence, frame.alpha, frame.solid, frame.clock ?? 0, this.meshSerial, this.entitySerial, this.flagSerial, this.waterSerial, outW, outH].map(String).join('|');
+    const still = key === this.viewKey;
+    this.steady = still ? this.steady + 1 : 0;
+    if (!still) this.changedAt = performance.now();
+    this.viewKey = key;
+    this.frames++;
+    const enough = this.still ? STILL_FRAMES : STEADY_FRAMES;
+    if (!this.fast && still && this.steady > enough) {
+      this.finish(frame, this.historyTex[this.historyAt]);
+      return;
+    }
+    let f = frame;
+    let shadowSun = frame.sun;
+    if (!this.fast) {
+      const k = still ? this.steady : (this.frames % STEADY_FRAMES) + 1;
+      this.sample = k;
+      const jx = ((halton(k, 2) - 0.5) * 2) / this.w;
+      const jy = ((halton(k, 3) - 0.5) * 2) / this.h;
+      f = { ...frame, proj: jittered(frame.proj, jx, jy), farProj: jittered(frame.farProj, jx, jy) };
+      // A still's shadows are cast from all over the sun's disc, a point of it each frame.
+      if (this.still && still) {
+        const s = frame.sun;
+        const a = nrm(crs(LOOKAT_UP, s));
+        const b = crs(s, a);
+        const u = (halton(k, 5) - 0.5) * 2 * STILL_SUN;
+        const v = (halton(k, 7) - 0.5) * 2 * STILL_SUN;
+        shadowSun = nrm([s[0] + a[0] * u + b[0] * v, s[1] + a[1] * u + b[1] * v, s[2] + a[2] * u + b[2] * v]);
+      }
+    }
+    const time = this.timer;
+    time.pass('sky table');
     this.updateSky(f.sun, f.eye[2]);
 
     const vp = multiply(f.proj, f.view);
@@ -980,12 +1347,18 @@ void main() {
       gl.activeTexture(gl.TEXTURE0 + UNIT.ground + k);
       gl.bindTexture(gl.TEXTURE_2D, t);
     });
+    time.pass('water map');
+    this.updateWaterMap(f);
+    gl.activeTexture(gl.TEXTURE0 + UNIT.waterMap);
+    gl.bindTexture(gl.TEXTURE_2D, this.waterMapTex[0] ?? null);
     this.normalTex.forEach((t, k) => {
       gl.activeTexture(gl.TEXTURE0 + UNIT.normal + k);
       gl.bindTexture(gl.TEXTURE_2D, t);
     });
-    this.updateShadows(f);
+    time.pass('shadows');
+    this.updateShadows(shadowSun === f.sun ? f : { ...f, sun: shadowSun });
 
+    time.pass('sky');
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.msFb);
     gl.viewport(0, 0, this.w, this.h);
     gl.clearColor(0, 0, 0, 0);
@@ -996,7 +1369,7 @@ void main() {
 
     // The sky; under the sea, the water.
     gl.useProgram(this.skyP.program);
-    setUniforms(gl, this.skyP, { uInvViewProj: invert(farVp), uSun: f.sun, uSunColor: this.sunColor, uHeight: f.eye[2], uAlpha: f.solid || under ? 1 : 0, uSea: this.sea ? 1 : 0, uEyeSea: eyeSea, uSkyTop: this.skyTop });
+    setUniforms(gl, this.skyP, { uInvViewProj: invert(farVp), uSun: f.sun, uSunColor: this.sunColor, uHeight: f.eye[2], uAlpha: f.solid || under ? 1 : 0, uSea: this.sea ? 1 : 0, uEyeSea: eyeSea, uSkyTop: this.skyTop, uCloudCover: this.cloudCover, uClockSky: f.clock ?? 0, uCloudVolume: this.fast ? 0 : 1, uFrameNoise: this.sample });
     gl.activeTexture(gl.TEXTURE0 + UNIT.ao);
     gl.bindTexture(gl.TEXTURE_2D, null);
     gl.bindVertexArray(this.emptyVao);
@@ -1004,6 +1377,7 @@ void main() {
     gl.bindVertexArray(null);
 
     // The distant land, in its own depth range.
+    time.pass('far land');
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LESS);
     gl.depthMask(true);
@@ -1025,13 +1399,14 @@ void main() {
     // The near scene's depth, for its occlusion. The fast way has none, and its lit pass writes
     // the depth itself.
     if (!this.fast) {
+      time.pass('depth');
       gl.colorMask(false, false, false, false);
       gl.useProgram(this.terrainDepthP.program);
       setUniforms(gl, this.terrainDepthP, { uViewProj: vp, uEye: f.eye, uSeaSurface: this.seaSurface });
       this.setGrids(this.terrainDepthP);
       this.drawRings(this.terrainDepthP, f.eye, finest, Math.min(split, last), finest);
       gl.useProgram(this.depthP.program);
-      setUniforms(gl, this.depthP, { uViewProj: vp, uEye: f.eye, uTime: f.time });
+      setUniforms(gl, this.depthP, { uViewProj: vp, uEye: f.eye, uTime: f.time, uCards: 0, uClock: f.clock ?? 0, uWind: WIND });
       // Both sides, as the lit pass draws them.
       gl.disable(gl.CULL_FACE);
       for (const c of cells) {
@@ -1044,10 +1419,12 @@ void main() {
       gl.bindFramebuffer(gl.READ_FRAMEBUFFER, this.msFb);
       gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, this.resolveFb);
       gl.blitFramebuffer(0, 0, this.w, this.h, 0, 0, this.w, this.h, gl.DEPTH_BUFFER_BIT, gl.NEAREST);
+      time.pass('occlusion');
       this.occlusion(f);
     }
 
     // The near scene, lit.
+    time.pass('terrain');
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.msFb);
     gl.viewport(0, 0, this.w, this.h);
     gl.enable(gl.DEPTH_TEST);
@@ -1060,30 +1437,148 @@ void main() {
     setUniforms(gl, this.terrainP, { uUseAO: 1, uMaskBox: [this.maskBox[0], this.maskBox[1], this.maskBox[2] - this.maskBox[0], this.maskBox[3] - this.maskBox[1]], uWater: this.waterLevel });
     this.setGrids(this.terrainP);
     this.drawRings(this.terrainP, f.eye, finest, Math.min(split, last), finest);
+    time.pass('meshes');
     gl.disable(gl.CULL_FACE);
     this.useLit(this.meshP, f, vp);
+    // Leaves on cards are blended at their edges by coverage where there are samples to blend, and write their own
+    // depth: the depth drawn before left them out.
+    const coverage = this.samples > 1;
+    setUniforms(gl, this.meshP, { uCoverage: coverage ? 1 : 0 });
+    gl.depthMask(true);
+    if (coverage) gl.enable(gl.SAMPLE_ALPHA_TO_COVERAGE);
     for (const c of cells) {
       gl.bindVertexArray(c.vao);
       gl.drawElements(gl.TRIANGLES, c.count, gl.UNSIGNED_INT, 0);
     }
     this.drawInstanced(this.meshP, false);
-    gl.depthMask(true);
+    gl.disable(gl.SAMPLE_ALPHA_TO_COVERAGE);
     gl.depthFunc(gl.LESS);
     if (this.waterVao && this.waterCount) {
+      time.pass('water');
+      // On the fuller way, what is drawn so far, resolved as the frame will be, for the water to be seen through and to
+      // reflect (docs/plans/RENDERING.md, step 3).
+      const screen = !this.fast;
+      if (screen) {
+        gl.bindFramebuffer(gl.READ_FRAMEBUFFER, this.msFb);
+        gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, this.resolveFb);
+        gl.blitFramebuffer(0, 0, this.w, this.h, 0, 0, this.w, this.h, gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT, gl.NEAREST);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this.msFb);
+        gl.activeTexture(gl.TEXTURE0 + UNIT.scene);
+        gl.bindTexture(gl.TEXTURE_2D, this.colorTex);
+        gl.activeTexture(gl.TEXTURE0 + UNIT.sceneDepth);
+        gl.bindTexture(gl.TEXTURE_2D, this.depthTex);
+      }
       this.useLit(this.waterP, f, vp);
-      setUniforms(gl, this.waterP, { uWaterTone: this.waterTone ?? [0, 0, 0, 0, 0, 0], uToned: this.waterTone ? 1 : 0, uWaterBias: this.waterBias });
+      setUniforms(gl, this.waterP, { uWaterTone: this.waterTone ?? [0, 0, 0, 0, 0, 0], uToned: this.waterTone ? 1 : 0, uWaterBias: this.waterBias, uScreen: screen ? 1 : 0, uNearFar: [f.near, f.far], uViewport: [this.w, this.h] });
       gl.bindVertexArray(this.waterVao);
       gl.drawElements(gl.TRIANGLES, this.waterCount, gl.UNSIGNED_INT, 0);
+      if (screen) {
+        gl.activeTexture(gl.TEXTURE0 + UNIT.scene);
+        gl.bindTexture(gl.TEXTURE_2D, null);
+        gl.activeTexture(gl.TEXTURE0 + UNIT.sceneDepth);
+        gl.bindTexture(gl.TEXTURE_2D, null);
+      }
     }
     gl.bindVertexArray(null);
     // The sea's surface, over all of it.
-    if (this.sea) this.drawSea(f, vp, finest, Math.min(split, last), finest, () => -1e9);
+    if (this.sea) {
+      time.pass('sea');
+      this.drawSea(f, vp, finest, Math.min(split, last), finest, () => -1e9);
+    }
 
-    // Resolve, then finish.
+    // Resolve, fold into what was kept, then finish.
+    time.pass('resolve');
     gl.bindFramebuffer(gl.READ_FRAMEBUFFER, this.msFb);
     gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, this.resolveFb);
-    gl.blitFramebuffer(0, 0, this.w, this.h, 0, 0, this.w, this.h, gl.COLOR_BUFFER_BIT, gl.NEAREST);
-    this.finish(f);
+    gl.blitFramebuffer(0, 0, this.w, this.h, 0, 0, this.w, this.h, gl.COLOR_BUFFER_BIT | (this.fast ? 0 : gl.DEPTH_BUFFER_BIT), gl.NEAREST);
+    let shown = this.colorTex;
+    if (!this.fast) {
+      time.pass('light in the air');
+      this.shafts(f, vp);
+      time.pass('antialiasing');
+      shown = this.antialias(frame, still);
+    }
+    this.finish(frame, shown);
+    time.endFrame();
+  }
+
+  /** The light in the air (step 4): marched at a quarter of the frame's size, then added to the frame, resolved. */
+  private shafts(f: CityFrame, vp: Mat4): void {
+    if (!this.shaftsFb || f.sun[2] <= -0.02 || this.sea) return;
+    const gl = this.gl;
+    gl.disable(gl.DEPTH_TEST);
+    gl.disable(gl.CULL_FACE);
+    gl.disable(gl.BLEND);
+    gl.bindVertexArray(this.emptyVao);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.shaftsFb);
+    gl.viewport(0, 0, Math.max(1, this.w >> 2), Math.max(1, this.h >> 2));
+    gl.activeTexture(gl.TEXTURE0 + UNIT.sceneDepth);
+    gl.bindTexture(gl.TEXTURE_2D, this.depthTex);
+    this.useLit(this.shaftsP, f, vp);
+    setUniforms(gl, this.shaftsP, { uInvViewProj: invert(vp), uDensity: 0.00035, uThins: 80, uFloor: f.focus[2], uStart: this.sample * 7.13 });
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    gl.activeTexture(gl.TEXTURE0 + UNIT.sceneDepth);
+    gl.bindTexture(gl.TEXTURE_2D, null);
+    // Added to the frame, resolved: its own depth stays as it was.
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.resolveFb);
+    gl.viewport(0, 0, this.w, this.h);
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.ONE, gl.ONE);
+    gl.depthMask(false);
+    gl.useProgram(this.shaftsAddP.program);
+    gl.activeTexture(gl.TEXTURE13);
+    gl.bindTexture(gl.TEXTURE_2D, this.shaftsTex);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    gl.disable(gl.BLEND);
+    gl.depthMask(true);
+    gl.bindVertexArray(null);
+  }
+
+  /**
+   * Fold the frame just drawn into what was kept (step 4): while the view holds still, as an even average of its frames;
+   * while it moves, carried to where it now is and held to the frame's neighbourhood; afresh after anything else changes.
+   */
+  private antialias(f: CityFrame, still: boolean): WebGLTexture {
+    const gl = this.gl;
+    const vp = multiply(f.proj, f.view);
+    const from = this.historyAt;
+    const to = 1 - from;
+    let blend = 1;
+    let moving = 0;
+    let reproject: Mat4 = new Float32Array(16);
+    if (still) blend = 1 / this.steady;
+    else if (this.lastVp) {
+      // From this frame's clip space to the world about this eye, on to the last eye, and into the last frame's clip space.
+      const d: V3 = [f.eye[0] - this.lastEye[0], f.eye[1] - this.lastEye[1], f.eye[2] - this.lastEye[2]];
+      const move = new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, d[0], d[1], d[2], 1]);
+      reproject = multiply(this.lastVp, multiply(move, invert(vp)));
+      blend = 0.15;
+      moving = 1;
+    }
+    this.lastVp = vp;
+    this.lastEye = [f.eye[0], f.eye[1], f.eye[2]];
+    gl.disable(gl.DEPTH_TEST);
+    gl.disable(gl.CULL_FACE);
+    gl.disable(gl.BLEND);
+    gl.bindVertexArray(this.emptyVao);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.historyFb[to]);
+    gl.viewport(0, 0, this.w, this.h);
+    gl.useProgram(this.taaP.program);
+    gl.activeTexture(gl.TEXTURE13);
+    gl.bindTexture(gl.TEXTURE_2D, this.colorTex);
+    gl.activeTexture(gl.TEXTURE14);
+    gl.bindTexture(gl.TEXTURE_2D, this.historyTex[from]);
+    gl.activeTexture(gl.TEXTURE12);
+    gl.bindTexture(gl.TEXTURE_2D, this.depthTex);
+    setUniforms(gl, this.taaP, { uReproject: reproject, uBlend: blend, uMoving: moving, uTexel: [1 / this.w, 1 / this.h] });
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    gl.activeTexture(gl.TEXTURE14);
+    gl.bindTexture(gl.TEXTURE_2D, null);
+    gl.activeTexture(gl.TEXTURE12);
+    gl.bindTexture(gl.TEXTURE_2D, null);
+    gl.bindVertexArray(null);
+    this.historyAt = to;
+    return this.historyTex[to];
   }
 
   /**
@@ -1149,17 +1644,33 @@ void main() {
     gl.bindTexture(gl.TEXTURE_2D, null);
   }
 
-  private finish(f: CityFrame): void {
+  private finish(f: CityFrame, scene: WebGLTexture): void {
     const gl = this.gl;
     gl.disable(gl.DEPTH_TEST);
     gl.disable(gl.CULL_FACE);
     gl.depthMask(true);
     gl.bindVertexArray(this.emptyVao);
     gl.activeTexture(gl.TEXTURE13);
+    // The frame's light, metered (step 4); the fast way keeps the light's own exposure.
+    const metered = !this.fast && !!this.lumFb;
+    if (metered) {
+      this.timer.pass('meter');
+      gl.bindFramebuffer(gl.FRAMEBUFFER, this.lumFb);
+      gl.viewport(0, 0, 64, 64);
+      gl.useProgram(this.lumP.program);
+      gl.bindTexture(gl.TEXTURE_2D, scene);
+      setUniforms(gl, this.lumP, { uCell: [1 / 64, 1 / 64] });
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      gl.activeTexture(gl.TEXTURE12);
+      gl.bindTexture(gl.TEXTURE_2D, this.lumTex);
+      gl.generateMipmap(gl.TEXTURE_2D);
+      gl.activeTexture(gl.TEXTURE13);
+    }
     gl.useProgram(this.brightP.program);
-    let src = this.colorTex;
+    let src = scene;
     let sw = this.w;
     let sh = this.h;
+    this.timer.pass('bloom');
     // The fast way's bloom textures stay cleared.
     if (!this.fast) this.bloomTex.forEach((t, k) => {
       const tw = Math.max(1, this.w >> (k + 1));
@@ -1173,11 +1684,15 @@ void main() {
       sw = tw;
       sh = th;
     });
+    this.timer.pass('post');
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-    gl.viewport(0, 0, this.w, this.h);
+    // At the frame's own size: a still drawn at twice it is averaged down, four texels to a pixel, by the filtering.
+    gl.viewport(0, 0, this.outW || this.w, this.outH || this.h);
     gl.useProgram(this.postP.program);
     gl.activeTexture(gl.TEXTURE13);
-    gl.bindTexture(gl.TEXTURE_2D, this.colorTex);
+    gl.bindTexture(gl.TEXTURE_2D, scene);
+    gl.activeTexture(gl.TEXTURE12);
+    gl.bindTexture(gl.TEXTURE_2D, metered ? this.lumTex : null);
     gl.activeTexture(gl.TEXTURE14);
     gl.bindTexture(gl.TEXTURE_2D, this.bloomTex[0]);
     gl.activeTexture(gl.TEXTURE15);
@@ -1185,13 +1700,15 @@ void main() {
     gl.activeTexture(gl.TEXTURE16);
     gl.bindTexture(gl.TEXTURE_2D, this.bloomTex[2]);
     // A camera stops down for a high sun, and under the sea opens up as the daylight falls.
-    setUniforms(gl, this.postP, { uExposure: 0.62 * (1 - 0.42 * Math.max(f.sun[2], 0)) * this.exposure, uAlpha: f.alpha });
+    setUniforms(gl, this.postP, { uExposure: 0.62 * (1 - 0.42 * Math.max(f.sun[2], 0)) * this.exposure, uAlpha: f.alpha, uSolid: f.solid ? 1 : 0, uMeter: metered ? 1 : 0, uKey: 0.16 });
     if (f.alpha < 1 || !f.solid) {
       gl.enable(gl.BLEND);
       gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
     } else gl.disable(gl.BLEND);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     gl.disable(gl.BLEND);
+    gl.activeTexture(gl.TEXTURE12);
+    gl.bindTexture(gl.TEXTURE_2D, null);
     gl.activeTexture(gl.TEXTURE0);
     gl.bindVertexArray(null);
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
@@ -1199,10 +1716,13 @@ void main() {
   }
 
   /** What entity is at a pixel of the last frame, if any. CSS pixels are for the caller to scale. */
-  pick(x: number, y: number): number {
+  pick(atX: number, atY: number): number {
     const gl = this.gl;
     const f = this.lastFrame;
     if (!f) return 0;
+    // A still is drawn larger than the frame.
+    const x = Math.floor(atX * this.scale);
+    const y = Math.floor(atY * this.scale);
     if (!this.pickFb) {
       this.pickFb = gl.createFramebuffer()!;
       this.pickTex = gl.createTexture()!;
@@ -1238,7 +1758,7 @@ void main() {
     this.drawRings(this.terrainDepthP, f.eye, finest, Math.min(split, last), finest);
     gl.colorMask(true, true, true, true);
     gl.useProgram(this.idP.program);
-    setUniforms(gl, this.idP, { uViewProj: vp, uEye: f.eye, uTime: f.time });
+    setUniforms(gl, this.idP, { uViewProj: vp, uEye: f.eye, uTime: f.time, uClock: f.clock ?? 0, uWind: WIND });
     for (const c of this.lastDraw) {
       gl.bindVertexArray(c.vao);
       gl.drawElements(gl.TRIANGLES, c.count, gl.UNSIGNED_INT, 0);

@@ -7,7 +7,7 @@ import { printCheck, settlePrint, type Fingerprint, type PrintCheck } from '../.
 import { lookup, type Scenario } from '../../../core/scenario.ts';
 import type { LivingTaxon, SceneSpec } from '../../../core/scene.ts';
 import { GroundSampler } from '../../../world/generators/city/ground.ts';
-import { placeLook, type LivingParams } from '../../../world/generators/life/scene/v5.ts';
+import { placeLook, type LivingParams } from '../../../world/generators/life/scene/v6.ts';
 import { snowOf } from '../../../world/generators/life/climate.ts';
 import { declination, MID_DAY } from '../../../core/water.ts';
 import { protoParts } from '../../../world/generators/life/stream.ts';
@@ -32,6 +32,31 @@ function rendererFor(gl: GL, fast: boolean): CityRenderer {
     renderers.set(gl, r);
   }
   return r;
+}
+
+/** The leaves a plant's part holds when its form does not say: as the part types draw them (world/generators/life/forms.ts). */
+const LEAVES_OF: Record<string, string> = { conifer: 'needle', whorled: 'needle', 'scale-tree': 'needle', broadleaf: 'broad', shrub: 'broad', palm: 'frond', fern: 'frond', tuft: 'frond', mat: 'frond' };
+
+/**
+ * What covers the ground close by, from the scene's taxa: the share of its canopy, by weight, whose leaves are needles,
+ * for what lies under its trees; and whether it has any low plants, whose clumps then cover the ground near the eye.
+ */
+function groundCover(spec: SceneSpec): [number, boolean] {
+  let needles = 0;
+  let all = 0;
+  let under = false;
+  for (const t of spec.taxa) {
+    const form = spec.forms[t.form];
+    if (form?.kind !== 'plant' || t.height === undefined) continue;
+    const layer = form.behave?.layer ?? 'canopy';
+    if (layer === 'under') under = true;
+    if (layer !== 'canopy') continue;
+    const w = 0.1 + t.weight;
+    all += w;
+    const part = Object.values(form.parts).find((p) => p && LEAVES_OF[p.type]);
+    if (part && ((part.mat as string | undefined) ?? LEAVES_OF[part.type]) === 'needle') needles += w;
+  }
+  return [all > 0 ? needles / all : 0, under];
 }
 
 /** What a camera or a name stands on on land: the ground, or the top of the sea over it. In a scene of the sea, the ground. */
@@ -75,6 +100,8 @@ export class LifeScene {
   private lastSent: LocalView | null = null;
   private serial = 0;
   private want: LocalView | null = null;
+  /** whether the last view sent asked for a still's richer frame */
+  private sentRich = false;
   private active = false;
   private wasActive = false;
 
@@ -170,6 +197,7 @@ export class LifeScene {
     // Where the world gives the rivers their water falls downstream, and no one level bands the banks.
     r.setWater(g.water.vertices, g.water.indices, this.spec.water ? -1e4 : g.waterLevel, g.water.flow, tones.water);
     r.setLand(Float32Array.from(['soil', 'herb', 'bare', 'canopy', 'distant'].flatMap((k) => tones[k])), [Math.min(clim?.forest ?? 0, cover.forests), Math.min(clim?.herb ?? 0, cover.plants), 1 - cover.plants * (1 - (clim?.bare ?? 1))], snowOf(this.spec));
+    r.setGroundCover(...groundCover(this.spec));
     // Each taxon is an entity, and after them each kind of house, which stands for as long as the scene does: generated.
     const houseKinds = this.people?.forms.length ?? 0;
     const out = new Float32Array((this.spec.taxa.length + 1 + houseKinds) * 4);
@@ -211,7 +239,7 @@ export class LifeScene {
   }
 
   private apply(m: Extract<FromLifeWorker, { type: 'selection' }>): void {
-    for (const p of m.protos) this.renderer.addInstanced(p.proto, p.vertices, p.indices, protoParts(p.proto).detail >= 1);
+    for (const p of m.protos) this.renderer.addInstanced(p.proto, p.vertices, p.indices, protoParts(p.proto).detail >= 1, p.idle);
     this.renderer.setInstances(m.batches);
   }
 
@@ -227,7 +255,7 @@ export class LifeScene {
     const far = Math.max(3, a.clearance * 0.03);
     if (dx * dx + dy * dy + dz * dz > far * far) return true;
     const turn = a.forward[0] * b.forward[0] + a.forward[1] * b.forward[1] + a.forward[2] * b.forward[2];
-    return turn < 0.9995 || a.height !== b.height || a.fov !== b.fov;
+    return turn < 0.9995 || a.height !== b.height || a.fov !== b.fov || this.renderer.still !== this.sentRich;
   }
 
   private send(): void {
@@ -236,12 +264,14 @@ export class LifeScene {
     const v = this.want;
     this.lastSent = v;
     this.waiting = true;
-    const msg: ToLifeWorker = { type: 'view', serial: ++this.serial, view: { eye: [v.eye[0], v.eye[1], v.eye[2]], forward: [v.forward[0], v.forward[1], v.forward[2]], right: [v.right[0], v.right[1], v.right[2]], up: [v.up[0], v.up[1], v.up[2]], fov: v.fov, aspect: v.aspect, height: v.height, clearance: v.clearance } };
+    // A still asks for more of the scene than a live frame can afford (step 8).
+    this.sentRich = this.renderer.still;
+    const msg: ToLifeWorker = { type: 'view', serial: ++this.serial, view: { eye: [v.eye[0], v.eye[1], v.eye[2]], forward: [v.forward[0], v.forward[1], v.forward[2]], right: [v.right[0], v.right[1], v.right[2]], up: [v.up[0], v.up[1], v.up[2]], fov: v.fov, aspect: v.aspect, height: v.height, clearance: v.clearance, rich: this.sentRich } };
     this.worker.postMessage(msg);
   }
 
   /** Draw a frame. */
-  render(v: LocalView, sun: V3, time: number, evidence: boolean, alpha: number, solid: boolean, outW: number, outH: number): void {
+  render(v: LocalView, sun: V3, time: number, evidence: boolean, alpha: number, solid: boolean, outW: number, outH: number, clock = 0): void {
     if (!this.ready) return;
     this.activate();
     this.want = v;
@@ -262,6 +292,7 @@ export class LifeScene {
       alpha,
       solid,
       clearance: v.clearance,
+      clock,
       width: outW,
       height: outH,
     };

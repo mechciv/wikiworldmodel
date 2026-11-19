@@ -49,6 +49,15 @@ export const MAT = {
   chitin: 41,
   thatch: 42,
   mud: 43,
+  // Leaves held on cards, each cut by the shader to its outline (docs/plans/RENDERING.md, step 1): needles, the
+  // leaflets of a frond, broad leaves, a frond held as a fan; and the dark mass inside a crown of them.
+  needleCard: 44,
+  frondCard: 45,
+  broadCard: 46,
+  fanCard: 47,
+  leafMass: 48,
+  // A card of a tuft's blades, as the ground's cover is drawn close by (step 2).
+  bladeCard: 49,
 } as const;
 
 export type Material = (typeof MAT)[keyof typeof MAT];
