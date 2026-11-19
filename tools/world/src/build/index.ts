@@ -58,7 +58,7 @@ import { buildAtlas } from './atlas.ts';
 import { buildSeaAtlas, type SeaOut, type SeaParams } from './sea.ts';
 import type { LandSnapshot } from '../pbdb.ts';
 import { buildScene, witnesses } from './scene.ts';
-import { features as buildFeatures, periods as buildPeriods, records as buildRecords, search as buildSearch, sourceRecord, type Solved } from './records.ts';
+import { features as buildFeatures, holdersOf, periods as buildPeriods, records as buildRecords, search as buildSearch, sourceRecord, type Solved } from './records.ts';
 import { planet as buildPlanet } from './planet.ts';
 import { series as buildSeries } from './series.ts';
 import { energyBalanceReport, RULES as ENERGY_BALANCE, seriesAt } from './energybalance.ts';
@@ -407,6 +407,11 @@ export async function runBuild(args: string[]): Promise<number> {
     groups: claimGroups(world),
     model,
   };
+  // Who held each perspective, and when, as the records that held it say.
+  for (const g of alternatives) for (const m of g.members) {
+    const held = holdersOf(solved, m.id);
+    if (held.length) m.heldBy = held;
+  }
 
   // 4. Gridded fields: elevation grids, and before them the plate model's blocks.
   const grids: GridField[] = [];

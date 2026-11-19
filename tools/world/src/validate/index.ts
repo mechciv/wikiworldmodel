@@ -16,8 +16,8 @@ import { dwellingProblems, fieldProblems, settlementProblems } from '../../../..
 import { ladderCounts, LEVELS, STEPS } from '../../../../core/ladder.ts';
 import { parseRef, RefError, splitRef } from '../../../../core/refs.ts';
 import { conflictChanged, conflictIn, type Constraint, type Conflict, type Solution } from '../../../../core/stn.ts';
-import { DAY_COUNTS, dayNumberAt, formatTime, historical, parseLag, parseTime, TimeError, toMa } from '../../../../core/time.ts';
-import { available, buildNetwork, chosen, countDays, epochsOf, pictureNetwork, claimGroup, claimGroups, conflictInScenario, inTurn, pictures, pointOf, scenariosOf, solveScenario, spanOf, spanRefs, zeroDayClaim, type Scenario } from '../chronology.ts';
+import { CYCLES, DAY_COUNTS, dayNumberAt, dayOnAxis, formatTime, formatTimeValue, historical, namesSign, parseCycle, parseLag, parseTime, TimeError, toMa } from '../../../../core/time.ts';
+import { anchorPlace, anchorsOf, available, buildNetwork, chosen, countDays, cycleAnchor, epochsOf, pictureNetwork, claimGroup, claimGroups, conflictInScenario, inTurn, pictures, pointOf, resolveCycle, scenariosOf, solveScenario, spanOf, spanRefs, zeroDayClaim, type Scenario } from '../chronology.ts';
 import { resolvePoints } from '../importer.ts';
 import { lineageLoop } from '../lineage.ts';
 import { REPO, WORLD } from '../paths.ts';
@@ -190,6 +190,22 @@ function checkValue(world: World, refs: RefChecker, c: Claim, issues: Issue[]): 
           const quotes = c.sources.map((x) => x.quote).filter((q): q is string => !!q);
           if (quotes.length && !quotes.some((q) => q.includes(digits))) issues.push({ level: 'warning', check: 'values', file: c.file, where: `${c.where}.value`, message: `none of its quotes has ${digits}: a date in a count of days is copied from the source as it stands` });
         }
+        if (t.kind === 'cycle') {
+          // A day named in cycles is one of many days: it dates a moment, a start or an end beside the other evidence,
+          // and the world must say where each of its cycles meets our days.
+          if (!['date', 'start', 'end'].includes(c.prop)) bad(`a day named in cycles dates a moment, a start or an end, beside the other evidence: "${c.prop}" cannot take one`);
+          for (const name of [t.day, t.year]) {
+            if (!name) continue;
+            const def = CYCLES[name.cycle];
+            if (!anchorsOf(world, name.cycle).length) bad(`no record anchors the ${def.name}: write an event/epoch with claims calendar: ${name.cycle} and day_name, the name of its day in the cycle, dated by the correlation`);
+            else if (!cycleAnchor(world, name.cycle)) issues.push({ level: 'warning', check: 'values', file: c.file, where: `${c.where}.value`, message: `the anchor of the ${def.name} (${anchorsOf(world, name.cycle)[0]}) is not one day of the calendar with a day_name of the ${def.name} in the default picture, so this date cannot be placed` });
+          }
+          // The names are copied from the source: a quote that names none of its signs is a sign of a slip.
+          const signs = [t.day, t.year].flatMap((n) => (n ? [CYCLES[n.cycle].signs[n.place % CYCLES[n.cycle].signs.length]] : []));
+          const quotes = c.sources.map((x) => x.quote).filter((q): q is string => !!q);
+          const missing = signs.filter((sign) => !quotes.some((q) => namesSign(q, sign)));
+          if (quotes.length && missing.length) issues.push({ level: 'warning', check: 'values', file: c.file, where: `${c.where}.value`, message: `none of its quotes names ${missing.join(' or ')}: a day named in cycles is copied from the source as it stands` });
+        }
       } catch (e) {
         bad((e as TimeError).message);
       }
@@ -209,6 +225,14 @@ function checkValue(world: World, refs: RefChecker, c: Claim, issues: Issue[]): 
     case 'string':
       if (typeof v !== 'string' || !v) bad(`not a string`);
       else if (prop.values && !Object.hasOwn(prop.values, v)) bad(`not one of the values of ${c.prop}: ${Object.keys(prop.values).join(', ')}`);
+      // A name in a calendar of cycles is read by core/time.ts as a date in cycles is.
+      else if (c.prop === 'day_name') {
+        try {
+          if (!parseCycle(v)) bad(`not a name in a calendar of cycles: write a day as "1 Coatl", or the first day of a year as "the year 3 Calli"`);
+        } catch (e) {
+          bad((e as TimeError).message);
+        }
+      }
       break;
     case 'quantity': {
       // A number, or a number with its uncertainty as the source gives it.
@@ -391,6 +415,12 @@ function checkRecords(world: World, issues: Issue[], tables: Map<string, Table> 
       } catch (err) {
         issues.push({ level: 'error', check: 'values', file: r.file, where: `${r.where}.lag`, message: (err as TimeError).message });
       }
+      // A perspective is held by someone: the relation points to an alternative of kind perspective, not a record.
+      if (r.rel === 'holds') {
+        const a = world.alternative.get(splitRef(r.to).record);
+        if (!r.to.startsWith('alt:') || (a && (a.type !== 'alternative' || a.kind !== 'perspective'))) issues.push({ level: 'error', check: 'fit', file: r.file, where: `${r.where}.to`, message: `"holds" points to an alternative of kind perspective (alt:…), the reading held; ${r.to} is not one` });
+        if (r.alt) issues.push({ level: 'error', check: 'fit', file: r.file, where: `${r.where}.alt`, message: `who held a perspective is so in every picture: "holds" belongs to none` });
+      }
       // Lineage runs between things of a kind: a script does not arise from a state.
       if (type.alike && target && e.kind.split('/')[0] !== target.kind.split('/')[0]) issues.push({ level: 'error', check: 'fit', file: r.file, where: `${r.where}.to`, message: `"${r.rel}" joins two records of one kind: ${article(e.kind)} and ${article(target.kind)} are not` });
       // Preferred means over a rival: another relation of the same subject and type, which then holds only when picked.
@@ -404,11 +434,18 @@ function checkRecords(world: World, issues: Issue[], tables: Map<string, Table> 
       }
     }
   }
-  // Each count of days has one zero day, and the vocabulary and the code know the same counts.
+  // Each count of days has one zero day, and each cycle one anchor, and the vocabulary and the code know the same calendars.
   const counts = world.vocab.properties.calendar?.values ?? {};
-  for (const k of Object.keys(DAY_COUNTS)) if (!counts[k]) issues.push({ level: 'error', check: 'vocab', file: 'schema/vocab/properties.yaml', where: 'calendar', message: `core/time.ts reads the count "${k}", which the vocabulary's calendar does not list` });
+  for (const k of [...Object.keys(DAY_COUNTS), ...Object.keys(CYCLES)]) if (!counts[k]) issues.push({ level: 'error', check: 'vocab', file: 'schema/vocab/properties.yaml', where: 'calendar', message: `core/time.ts reads the calendar "${k}", which the vocabulary's calendar does not list` });
   for (const k of Object.keys(counts)) {
-    if (!DAY_COUNTS[k]) issues.push({ level: 'error', check: 'vocab', file: 'schema/vocab/properties.yaml', where: 'calendar', message: `no count of days "${k}" in core/time.ts` });
+    if (!DAY_COUNTS[k] && !CYCLES[k]) issues.push({ level: 'error', check: 'vocab', file: 'schema/vocab/properties.yaml', where: 'calendar', message: `no count of days or cycle "${k}" in core/time.ts` });
+    // An anchor of a cycle names its day in that cycle: the day count's by a day, the year count's by the year it begins.
+    if (CYCLES[k]) {
+      for (const id of epochsOf(world, k)) {
+        const e = world.entity.get(id)!;
+        if (anchorPlace(world, id, k) === undefined) issues.push({ level: 'error', check: 'values', file: e.file, where: 'claims', message: `${id} anchors the ${CYCLES[k].name}, and needs a day_name claim that names its ${CYCLES[k].unit === 'year' ? 'year, as "the year 3 Calli"' : 'day, as "1 Coatl"'} in it` });
+      }
+    }
     const zero = epochsOf(world, k);
     if (zero.length > 1) issues.push({ level: 'error', check: 'ids', file: world.entity.get(zero[1])!.file, where: 'claims', message: `${zero.join(' and ')} both say they are the zero day of "${k}": a count has one, whose competing dates are the correlations` });
     // A zero day given as a range of days gives every date in the count a range of its own, and the days between two
@@ -854,6 +891,39 @@ function checkChronology(world: World, issues: Issue[]): void {
   }
 }
 
+/**
+ * Dates named in cycles, read against the rest of the evidence in each picture: one that nothing else dates closely
+ * enough cannot be placed, and one that names several days the evidence allows does not say which. One that names
+ * none of them makes the picture fail, and the chronology check says so.
+ */
+function checkCycles(world: World, issues: Issue[]): void {
+  const told = new Set<string>();
+  for (const p of pictures(world)) {
+    const alts = new Set(p.alts ?? []);
+    for (const g of claimGroups(world)) {
+      for (const c of g.beside) {
+        if ((c.alt && !alts.has(c.alt)) || told.has(c.ref)) continue;
+        const r = resolveCycle(world, c, p);
+        const say = (level: Issue['level'], message: string) => {
+          told.add(c.ref);
+          issues.push({ level, check: 'chronology', file: c.file, where: c.where, message });
+        };
+        const day = ([a, b]: [number, number]) => formatTimeValue({ kind: 'interval', lo: dayOnAxis(a).t, hi: dayOnAxis(b).t + dayOnAxis(b).whole });
+        // One set aside binds nothing; how far it is from the rest of the evidence is still worth saying.
+        if (c.rank === 'deprecated') {
+          if (r?.nearest) {
+            const off = r.nearest[0] < (dayNumberAt(r.window[0]) ?? 0) ? (dayNumberAt(r.window[0]) ?? 0) - r.nearest[1] : r.nearest[0] - (dayNumberAt(r.window[1] - 1e-7) ?? 0);
+            say('info', `"${c.value}", set aside, names none of the days the rest of the evidence allows ${g.subject}: the nearest is ${day(r.nearest)}, ${off} day${off === 1 ? '' : 's'} ${r.nearest[0] < (dayNumberAt(r.window[0]) ?? 0) ? 'before' : 'after'} them`);
+          }
+          continue;
+        }
+        if (!r) say('warning', `${g.subject} is not dated closely enough by anything else for "${c.value}" to name one day: a day named in cycles is one of the days that bear its names, one or more in each turn of the cycles, and the rest of the evidence must say which`);
+        else if (r.days.length > 1) say('info', `"${c.value}" names ${r.days.length} days that the rest of the evidence allows ${g.subject}: ${r.days.map(day).join(', ')}`);
+      }
+    }
+  }
+}
+
 /** The chosen claim of an entity's property in a picture. */
 export function claimOf(world: World, subject: string, prop: string, s: Scenario = {}): Claim | undefined {
   const g = claimGroup(world, subject, prop);
@@ -991,6 +1061,7 @@ export async function validateWorld(world: World, opts: { frames?: boolean; tabl
   if (ok()) {
     checkChronology(world, issues);
     if (ok()) checkLineageGaps(world, issues);
+    if (ok()) checkCycles(world, issues);
   } else skipped.push('the chronology');
   if (opts.frames !== false) {
     if (ok()) await checkFrames(world, issues);
