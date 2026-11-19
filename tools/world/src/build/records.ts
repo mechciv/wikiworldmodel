@@ -1,4 +1,5 @@
 // Entity records for the inspect panel, features for tiles, periods, and the search index.
+import { footprintText, type Footprint } from '../../../../core/footprint.ts';
 import { specText, type DwellingSpec } from '../../../../core/dwelling.ts';
 import { levelOf } from '../../../../core/ladder.ts';
 import type { FormSpec } from '../../../../core/city.ts';
@@ -380,6 +381,8 @@ function valueText(s: Solved, c: Claim, labelOf: (ref: string) => string): strin
       return prop.values?.[String(v)] ?? String(v);
     case 'form':
       return formText(v as FormSpec);
+    case 'footprint-form':
+      return footprintText(v as Footprint);
     case 'body-form': {
       const parts = Object.keys((v as { parts?: object }).parts ?? {});
       return parts.length ? `What it changes of the body it inherits: ${parts.join(', ')}` : 'What it changes of the body it inherits';
@@ -677,7 +680,12 @@ export function search(s: Solved, feats: Feature[]): SearchFile {
   return {
     entities: s.world.entities
       .filter((e) => !e.kind.startsWith('period/'))
-      .map((e) => ({ id: e.id, label: namesOf(s, e).label, kind: e.kind, summary: e.summary, time: timeOf(s, e.id, s.sol.bounds, boundsOf(s.centres)), located: located.has(e.id), ...(e.id.startsWith('life/pbdb/') ? { bulk: true } : {}) })),
+      .map((e) => {
+        // Every name it goes by, so that it is found by any: absent where its label is its only one.
+        const { label, names } = namesOf(s, e);
+        const more = names.some((n) => n.text !== label || n.valid);
+        return { id: e.id, label, kind: e.kind, summary: e.summary, time: timeOf(s, e.id, s.sol.bounds, boundsOf(s.centres)), located: located.has(e.id), ...(e.id.startsWith('life/pbdb/') ? { bulk: true } : {}), ...(more ? { names } : {}) };
+      }),
   };
 }
 

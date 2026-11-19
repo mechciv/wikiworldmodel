@@ -2,6 +2,7 @@
 // periods (periods.json) and for coverage (coverage.json): everything the viewer's inspect
 // panel needs, already resolved.
 import type { CoverageMatrix } from './coverage.ts';
+import type { Glance } from './glance.ts';
 import type { CheckStep, Level } from './ladder.ts';
 import type { FieldSpread } from './samples.ts';
 import type { Basis, FeatureBasis, FeatureName, FeatureTime } from './tileset.ts';
@@ -153,10 +154,29 @@ export interface SearchEntry {
   located: boolean;
   /** imported in bulk: found by search, but too many to mark along the time control */
   bulk?: boolean;
+  /**
+   * Every name it goes by, with when each was in use where that is known: its own name claims, and
+   * the names of the dataset rows that are rows of it. Absent when its label is its only name.
+   */
+  names?: FeatureName[];
+  /**
+   * Where it was drawn, for one with no point of its own: the rows of a dataset that are rows of it,
+   * each [from, to, lon, lat, km²], [from, to) on the axis, at the row's label point.
+   */
+  places?: [number, number, number, number, number][];
+  /** for rows of a dataset gathered under one name, rather than a record: the dataset */
+  dataset?: string;
 }
 
 export interface SearchFile {
   entities: SearchEntry[];
+  /**
+   * Rows of datasets that name things, such as the states of Cliopatria, gathered under one name
+   * while they run on in time. They are no records: each is found by its name, its id is the
+   * address of its first row, src:<dataset>#<key>, and a row tied to a record by an overlay is
+   * found as that record instead (docs/STRUCTURE.md section 3.1).
+   */
+  rows?: SearchEntry[];
 }
 
 export interface PeriodRecord {
@@ -241,6 +261,8 @@ export interface CoverageFile {
   tiers?: { span: string; layers: Record<string, Record<string, number>> }[];
   /** the same, finely, with what answers each layer when: what the coverage page draws (core/coverage.ts) */
   matrix?: CoverageMatrix;
+  /** how much of the world is known, at a glance: the landing page's bars (core/glance.ts) */
+  glance?: Glance;
   /** how much of each area and era rests on each basis: features per tile, by basis */
   tiles: { tile: string; bbox: [number, number, number, number]; time: [number, number]; features: Partial<Record<Basis, number>> }[];
 }
