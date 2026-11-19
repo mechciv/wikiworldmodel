@@ -366,9 +366,10 @@ void main() {
 }`;
 
 /**
- * Clouds with depth (docs/plans/RENDERING.md, step 7): fair-weather clouds in a layer from 1400 m to 2600 m above the
+ * Clouds with depth (docs/plans/RENDERING.md, step 7): fair-weather clouds in a layer from 1400 m to 2400 m above the
  * sea, their density from noise shaped by how much of the sky the globe's clouds cover over the scene, rounded at their
- * bases and tops, and drifting with the wind. The sky marches through it; the ground's shadows are taken through the same
+ * bases and tops, and drifting with the wind. The globe's clouds are its weather over a whole cell of it; the scene's sky
+ * is fair weather in it, heaps of cloud with sky between, so it takes most of their cover and never all. The sky marches through it; the ground's shadows are taken through the same
  * layer towards the sun, so that the clouds seen are the ones whose shadows pass. A look, as the haze's constant is.
  */
 const CLOUDS = /* glsl */ `
@@ -380,7 +381,7 @@ uniform float uCloudVolume;
 // A different start for each frame's march, for the frames' average to smooth.
 uniform float uFrameNoise;
 const float CLOUD_BASE = 1400.0;
-const float CLOUD_TOP = 2600.0;
+const float CLOUD_TOP = 2400.0;
 float cloudDensity(vec3 p) {
   float h = (p.z - CLOUD_BASE) / (CLOUD_TOP - CLOUD_BASE);
   if (h <= 0.0 || h >= 1.0) return 0.0;
@@ -389,7 +390,8 @@ float cloudDensity(vec3 p) {
   // Flat at the base and round at the top, as a heap of cloud is. The noise lies mostly within a tenth of a half, so the
   // share of the sky above a threshold is about its normal distribution's: the threshold that leaves the cover.
   float profile = smoothstep(0.0, 0.08, h) * (1.0 - smoothstep(0.35, 1.0, h));
-  float threshold = 0.5 + 0.26 * (0.5 - uCloudCover);
+  float cover = clamp(uCloudCover * 0.6, 0.0, 0.5);
+  float threshold = 0.5 + 0.26 * (0.5 - cover);
   float d = (shape - threshold - 0.06 * (1.0 - profile)) * 7.0 * profile;
   if (d <= 0.0) return 0.0;
   // Its edges eaten away, finely.
@@ -2077,10 +2079,12 @@ void main() {
       if (rho <= 0.0) continue;
       // Towards the sun, how much cloud the light comes through.
       float toward = cloudDensity(p + uSun * 110.0) + cloudDensity(p + uSun * 300.0) * 1.5;
-      float sunlit = exp(-toward * 0.6) * (1.0 - exp(-rho * 2.0));
+      // Light comes through the cloud towards the sun, and a heap's edges, thin, catch less of it (the powder of
+      // Schneider and Vos 2015).
+      float sunlit = exp(-toward * 0.45) * (1.0 - exp(-rho * 4.0));
       float height = (p.z - CLOUD_BASE) / (CLOUD_TOP - CLOUD_BASE);
-      vec3 light = uSunColor * sunlit * phase * 1.6 + uSkyTop * (0.55 + 0.6 * height);
-      float k = rho * dt * 0.004;
+      vec3 light = uSunColor * sunlit * phase * 2.4 + uSkyTop * (0.7 + 0.7 * height);
+      float k = rho * dt * 0.0035;
       float lost = exp(-k);
       glow += through * light * (1.0 - lost);
       through *= lost;
