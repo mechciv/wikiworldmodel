@@ -1,142 +1,142 @@
 {
  "earth/lips/central-atlantic-magmatic-province": [
-  752,
-  318
+  760,
+  340
  ],
  "earth/structures/chicxulub-crater": [
-  330,
-  220
+  308,
+  234
  ],
  "people/developments/writing-mesopotamia": [
-  933,
-  190
+  953,
+  200
  ],
  "people/domestication/barley": [
-  921,
-  181
+  941,
+  156
  ],
  "people/domestication/cattle": [
-  912,
-  165
+  931,
+  172
  ],
  "people/domestication/common-bean": [
-  321,
-  199
+  299,
+  212
  ],
  "people/domestication/einkorn": [
-  909,
-  140
+  927,
+  148
  ],
  "people/domestication/emmer": [
-  923,
-  150
+  942,
+  194
  ],
  "people/domestication/goat": [
-  924,
-  123
+  943,
+  132
  ],
  "people/domestication/horse": [
-  866,
-  55
+  881,
+  58
  ],
  "people/domestication/maize": [
-  317,
-  215
+  294,
+  230
  ],
  "people/domestication/pig-near-east": [
-  907,
-  104
+  925,
+  111
  ],
  "people/domestication/potato": [
-  386,
-  470
+  368,
+  503
  ],
  "people/domestication/sheep": [
-  907,
-  121
+  925,
+  128
  ],
  "people/domestication/sorghum": [
-  964,
-  238
+  986,
+  255
  ],
  "people/domestication/squash": [
-  316,
-  243
+  293,
+  258
  ],
  "people/objects/bust-of-nefertiti": [
-  792,
-  45
+  803,
+  48
  ],
  "people/objects/cleopatras-needle-new-york": [
-  423,
-  92
+  408,
+  98
  ],
  "people/objects/code-of-hammurabi": [
-  776,
-  67
+  785,
+  71
  ],
  "people/objects/flaminian-obelisk": [
-  836,
-  86
+  849,
+  92
  ],
  "people/objects/lateran-obelisk": [
-  836,
-  120
+  850,
+  126
  ],
  "people/objects/luxor-obelisk-paris": [
-  776,
-  50
+  785,
+  54
  ],
  "people/objects/obelisk-of-axum": [
-  836,
-  137
+  850,
+  143
  ],
  "people/objects/okukor": [
-  757,
-  35
+  765,
+  38
  ],
  "people/objects/parthenon-sculptures": [
-  758,
-  55
+  767,
+  58
  ],
  "people/objects/pergamon-altar": [
-  797,
+  808,
   11
  ],
  "people/objects/rosetta-stone": [
-  758,
-  72
+  767,
+  75
  ],
  "people/objects/stele-of-naram-sin": [
-  776,
-  84
+  785,
+  88
  ],
  "people/objects/stone-of-scone": [
-  758,
-  89
+  767,
+  92
  ],
  "people/writing/greek-alphabet": [
-  883,
-  107
+  900,
+  114
  ],
  "people/writing/maya-script": [
-  323,
-  261
+  301,
+  277
  ],
  "people/writing/phoenician-alphabet": [
-  918,
-  177
+  937,
+  186
  ],
  "people/writing/proto-sinaitic": [
-  931,
-  207
+  951,
+  218
  ],
  "places/constantinople": [
-  882,
-  90
+  899,
+  96
  ],
  "places/rome": [
-  836,
-  103
+  850,
+  109
  ]
 }

@@ -5,7 +5,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { traditionAt } from '../../../core/dwelling.ts';
 import type { LandscapeIndex, TraditionsFile } from '../../../core/landscape.ts';
-import { buildFile, idle, latestBuild, settledUrl } from './helpers.ts';
+import { buildFile, idle, latestBuild, openLayers, settledUrl } from './helpers.ts';
 
 const FAST = 'quality=fast';
 const low = (lat: number, lon: number, t: number, metres: number) => `t=${t}&lat=${lat}&lon=${lon}&d=${1 + metres / 6371000}&h=40&v=70&${FAST}`;
@@ -28,6 +28,7 @@ test.describe('the human landscape', () => {
     await expect(legend).toContainText('2,000 BC');
     await expect(legend).toContainText('Irrigated villages');
     expect(await settledUrl(page)).toContain('ly=landscape');
+    await openLayers(page);
     await page.locator('.tg-landscape').click();
     await idle(page);
     await expect(legend).toBeHidden();
@@ -36,8 +37,9 @@ test.describe('the human landscape', () => {
 
   test('a click on a house of a city says what it rests on, and what of it is invented', async ({ page }) => {
     test.setTimeout(300_000);
-    // From above the city, at the full size of the page, so that the panel leaves the scene to click in.
-    await page.goto(`/?b=${latestBuild()}&t=-2999&lat=31.32&lon=45.64&d=${1 + 400 / 6371000}&h=40&v=20&${FAST}`);
+    // From above the city, centred on it as the lists place it, at the full size of the page, so that the panel leaves the
+    // scene to click in.
+    await page.goto(`/?b=${latestBuild()}&t=-2999&lat=31.3222&lon=45.6361&d=${1 + 400 / 6371000}&h=40&v=20&${FAST}`);
     await idle(page);
     const uruk = (await page.evaluate(() => window.__wikiworldmodel!.settlementsAt())).find((x) => x.city === 'Uruk');
     expect(uruk).toBeTruthy();

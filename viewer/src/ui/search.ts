@@ -17,7 +17,7 @@ export class Search {
   constructor(private index: SearchFile, private periods: PeriodRecord[], kindLabel: (k: string) => string) {
     this.el = document.createElement('div');
     this.el.className = 'search';
-    this.el.innerHTML = `<input type="search" placeholder="Search places, events, periods…" aria-label="Search" autocomplete="off"><ul role="listbox" hidden></ul>`;
+    this.el.innerHTML = `<label class="search-box"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg><input type="search" placeholder="Go to a place, an event or a period" aria-label="Search" autocomplete="off"><kbd title="Press / to search">/</kbd></label><ul role="listbox" hidden></ul>`;
     this.input = this.el.querySelector('input')!;
     this.list = this.el.querySelector('ul')!;
     this.input.addEventListener('input', () => this.run(kindLabel));

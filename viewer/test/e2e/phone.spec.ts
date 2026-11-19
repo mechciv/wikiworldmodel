@@ -75,14 +75,17 @@ test.describe('held upright', () => {
     await expect(page.locator('.credits')).toBeVisible();
   });
 
-  test('the planet\'s panel folds to its state, and lets out the rest', async ({ page }) => {
+  test('the planet\'s readings fold behind a button that counts them, and come out at a tap', async ({ page }) => {
     await page.goto(`/?b=${latestBuild()}&t=280Ma&lat=-38&lon=-22&d=3`);
     await idle(page);
+    const toggle = page.locator('.planet-toggle');
     const series = page.locator('.planet-row[data-series]');
-    await expect(page.locator('.planet-phase')).toBeVisible();
+    await expect(toggle).toContainText(/\d+ readings/);
+    await expect(page.locator('.planet-phase')).toBeHidden();
     for (const row of await series.all()) await expect(row).toBeHidden();
-    await page.locator('.planet-fold').tap();
-    await expect(series.first()).toBeVisible();
+    await toggle.tap();
+    await expect(page.locator('.planet-phase')).toBeVisible();
+    await expect(page.locator('.planet-row[data-series]:not([hidden])').first()).toBeVisible();
   });
 
   test('two fingers pinch the globe nearer, and back', async ({ page }) => {

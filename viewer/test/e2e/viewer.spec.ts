@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import type { PlanetFile } from '../../../core/planet.ts';
 import { xOf } from '../../src/ui/timebar.ts';
-import { buildFile, canvasPatch, canvasPng, idle, latestBuild, markerPositions, settledUrl } from './helpers.ts';
+import { buildFile, canvasPatch, canvasPng, idle, latestBuild, markerPositions, openLayers, openPlanet, settledUrl } from './helpers.ts';
 
 const year = (ma: number) => Math.round(1950 - ma * 1e6);
 
@@ -148,6 +148,7 @@ test('switching the time-scale alternative re-dates the stages and the records t
   await expect(panel.locator('.when')).toContainText('290.1 Ma – 283.5 Ma');
   await expect(panel).toContainText('during Artinskian');
   // The PBDB's own time scale ends the Artinskian at 279.3 Ma.
+  await openLayers(page);
   await page.locator('.tg-alts').click();
   await page.selectOption('select[data-group="alt:time-scale"]', 'alt:time-scale/pbdb-2022');
   await idle(page);
@@ -212,10 +213,34 @@ test('the future: today\'s map is held for 10 kyr, and the Sun\'s brightness is 
   await expect(page.locator('.notice')).toContainText('held only to 10 kyr from now');
   const sun = page.locator('.planet-row[data-series="field:sun/luminosity"]');
   await expect(sun).toContainText('1.1 L☉');
+  await openPlanet(page);
   await sun.click();
   await expect(page.locator('.inspect h2')).toHaveText('Brightness of the Sun');
   await expect(page.locator('.inspect .badge.basis-projection')).toBeVisible();
   await expect(page.locator('.inspect')).toContainText('Gough');
+});
+
+test('the moment is the headline, and the planet\'s readings fold behind a button that sets then beside today', async ({ page }) => {
+  await page.goto(`/?b=${latestBuild()}&t=66.038Ma&lat=14&lon=-40&d=4.1`);
+  await idle(page);
+  await expect(page.locator('.tb-gloss')).toHaveText('66 million years before present');
+  await expect(page.locator('.tb-period')).toHaveText(['Maastrichtian', 'Cretaceous', 'Mesozoic']);
+  const toggle = page.locator('.planet-toggle');
+  const day = page.locator('.planet-row[data-series="field:earth/day-length"]');
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  await expect(day).toBeHidden();
+  await toggle.click();
+  await expect(day.locator('.planet-value')).toHaveText('23.6 h');
+  await expect(day.locator('.planet-today')).toHaveText('24');
+  // Today's CO₂ is the ice cores', which refine the curve of millions of years and reach the present.
+  await expect(page.locator('.planet-row[data-series="field:earth/co2"] .planet-today')).toHaveText('313');
+  // A period's name fits the time control to it.
+  await page.locator('.tb-period', { hasText: 'Cretaceous' }).click();
+  await idle(page);
+  const { window: win } = await page.evaluate(() => window.__wikiworldmodel!.state());
+  expect(win[0]).toBeLessThan(1950 - 140e6);
+  expect(win[1]).toBeGreaterThan(1950 - 66.1e6);
+  expect(win[1] - win[0]).toBeLessThan(200e6);
 });
 
 test('Earth\'s states: nothing before it formed, a magma ocean after the Moon-forming impact, then oceans', async ({ page }) => {
@@ -268,6 +293,7 @@ test('Snowball Earth: the Sturtian ice reaches the equator, unless a claim that 
   await expect(ice).toContainText('Sturtian glaciation');
   await expect(ice).toContainText('to the equator');
   expect(Math.min(...(await canvasPatch(page, 0.5, 0.5)))).toBeGreaterThan(150);
+  await openPlanet(page);
   await ice.click();
   await idle(page);
   const panel = page.locator('.inspect');
@@ -324,9 +350,11 @@ test('Rome: its territory at the time shown, drawn from its dataset, and a click
   await idle(page);
   await expect(page.locator('.territory-label', { hasText: 'Rome' })).toHaveText('Rome · Empire');
   const [r1, g1] = await canvasPatch(page, 0.5, 0.5, 15);
-  // A click on the land opens the state's record, and says which of the dataset's rows is drawn there.
+  // A click on the land opens the state's record, and says which of the dataset's rows is drawn there: in the middle of
+  // the view, or as near it as no marker's name lies over the globe (a moment some lifetimes off can show there, faint).
   const box = (await page.locator('canvas.globe').boundingBox())!;
-  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  const [x, y] = await page.evaluate(([x, y]) => [0, 24, -24, 48, -48].map((d) => [x, y + d]).find(([u, v]) => document.elementFromPoint(u, v)?.matches('canvas.globe')) ?? [x, y], [box.x + box.width / 2, box.y + box.height / 2]);
+  await page.mouse.click(x, y);
   await idle(page);
   const panel = page.locator('.inspect');
   await expect(panel.locator('h2')).toHaveText('Rome');
@@ -372,8 +400,8 @@ test('the whole strip gives recent history room: years to the pixel, and its mom
   await idle(page);
   const box = (await page.locator('.tb-canvas').boundingBox())!;
   const { window: win } = await page.evaluate(() => window.__wikiworldmodel!.state());
-  // Scrubbing to Rome reads a year, and lands within a few years of it.
-  await page.mouse.click(box.x + xOf(120, win, box.width), box.y + 60);
+  // Scrubbing to Rome, in the rows of the chart, reads a year, and lands within a few years of it.
+  await page.mouse.click(box.x + xOf(120, win, box.width), box.y + 32);
   await idle(page);
   await expect(page.locator('.tb-readout strong')).toHaveText(/^\d+ CE$/);
   const { t } = await page.evaluate(() => window.__wikiworldmodel!.state());

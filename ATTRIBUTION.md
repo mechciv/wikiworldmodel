@@ -407,6 +407,8 @@ from them as data; the quotes stay under the terms given.
 
 The site's fonts are served from [site/fonts/](site/fonts/), each under the SIL Open Font License 1.1 in the
 OFL file beside it: IBM Plex Mono, IBM Plex Sans, Newsreader.
+The viewer's come from Fontsource's packages, under the same licence, whose text goes out with the viewer from
+[viewer/public/fonts/](viewer/public/fonts/): Geist, Geist Mono.
 
 ## Code
 

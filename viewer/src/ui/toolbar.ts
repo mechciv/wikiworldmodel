@@ -1,4 +1,6 @@
-// Display toggles, the alternatives the build shows, and the evidence legend.
+// Display toggles, the alternatives the build shows, and how what is shown is known: the toggles
+// and the alternatives in a menu under the layers' button (main.ts makes it), and evidence mode
+// on a button of its own, with its legend under the menu while it is on.
 import type { LayerInfo } from '../../../core/fieldlayers.ts';
 import type { AlternativeGroupInfo } from '../../../core/tileset.ts';
 
@@ -18,7 +20,12 @@ export interface ToolbarState {
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 
 export class Toolbar {
+  /** under the topbar's buttons: the menu of layers, and the legend */
   readonly el: HTMLElement;
+  readonly menu: HTMLElement;
+  /** evidence mode's button: how what is shown is known */
+  readonly know: HTMLButtonElement;
+  readonly legend: HTMLElement;
   onChange: (s: Partial<ToolbarState>) => void = () => {};
   private alt: string[] = [];
   private layers: string[] = [];
@@ -34,16 +41,17 @@ export class Toolbar {
       )
       .join('');
     this.el.innerHTML = `
-      <button class="tg-evidence" aria-pressed="false" title="Evidence mode (E): tint what is reconstructed or generated">Evidence</button>
-      <button class="tg-clouds" aria-pressed="true" title="Clouds (C)">Clouds</button>
-      <button class="tg-tree" aria-pressed="false" title="Tree of life (T): the lineages alive at the time shown">Tree</button>
-      ${toggles.map((t) => `<button class="tg-${esc(t.key)} tg-layer" data-layer="${esc(t.key)}" aria-pressed="false" title="${esc(t.title)}">${esc(t.label)}</button>`).join('')}
-      <button class="tg-people" aria-pressed="false" title="People (P): where people lived, for the times HYDE reconstructs it; a reconstruction on today's land, not a count">People</button>
-      ${groups.length ? '<button class="tg-alts" aria-pressed="false" aria-expanded="false" title="Other whole pictures of the world: hypotheses, readings and scenarios, each its own consistent world">Alternatives</button>' : ''}
-      <div class="build" title="Data version: the build this view shows">build ${buildId}</div>
-      <div class="alts" hidden>
-        <p>Each is a whole picture of the world, checked to be consistent in itself.</p>
-        ${selects}
+      <div class="layers-menu" id="layers-menu">
+        <button class="tg-clouds" aria-pressed="true" title="Clouds (C)">Clouds</button>
+        <button class="tg-tree" aria-pressed="false" title="Tree of life (T): the lineages alive at the time shown">Tree</button>
+        ${toggles.map((t) => `<button class="tg-${esc(t.key)} tg-layer" data-layer="${esc(t.key)}" aria-pressed="false" title="${esc(t.title)}">${esc(t.label)}</button>`).join('')}
+        <button class="tg-people" aria-pressed="false" title="People (P): where people lived, for the times HYDE reconstructs it; a reconstruction on today's land, not a count">People</button>
+        ${groups.length ? '<button class="tg-alts" aria-pressed="false" aria-expanded="false" title="Other whole pictures of the world: hypotheses, readings and scenarios, each its own consistent world">Alternatives</button>' : ''}
+        <div class="build" title="Data version: the build this view shows">build ${buildId}</div>
+        <div class="alts" hidden>
+          <p>Each is a whole picture of the world, checked to be consistent in itself.</p>
+          ${selects}
+        </div>
       </div>
       <div class="legend" hidden>
         <div><span class="sw evidence"></span>Evidence: sourced records</div>
@@ -57,7 +65,15 @@ export class Toolbar {
         <div><span class="sw derived"></span>Dashed: dates derived by the solver</div>
         <div><span class="sw unknown"></span>Plain globe: no geography and no state of the planet known at this time</div>
       </div>`;
-    this.el.querySelector<HTMLButtonElement>('.tg-evidence')!.onclick = () => this.onChange({ evidence: !this.is('.tg-evidence') });
+    this.menu = this.el.querySelector('.layers-menu')!;
+    this.legend = this.el.querySelector('.legend')!;
+    this.know = document.createElement('button');
+    this.know.className = 'tg-evidence';
+    this.know.setAttribute('aria-pressed', 'false');
+    this.know.title = 'How we know (E): tint what is sourced, reconstructed or generated, and say which is which';
+    this.know.innerHTML = '<span class="dots" aria-hidden="true"><i class="e"></i><i class="r"></i><i class="p"></i></span><span class="know">How we know</span>';
+    this.know.setAttribute('aria-label', 'How we know');
+    this.know.onclick = () => this.onChange({ evidence: this.know.getAttribute('aria-pressed') !== 'true' });
     this.el.querySelector<HTMLButtonElement>('.tg-clouds')!.onclick = () => this.onChange({ clouds: !this.is('.tg-clouds') });
     this.el.querySelector<HTMLButtonElement>('.tg-tree')!.onclick = () => this.onChange({ tree: !this.is('.tg-tree') });
     for (const b of this.el.querySelectorAll<HTMLButtonElement>('.tg-layer')) {
@@ -93,16 +109,23 @@ export class Toolbar {
     button.setAttribute('aria-pressed', String(this.alt.length > 0 || button.getAttribute('aria-expanded') === 'true'));
   }
 
+  /** What is drawn of what the menu toggles, as the layers' button names it: "Clouds", "Clouds, Rivers", "Clouds +2". */
+  summary(): string {
+    const on = [...this.menu.querySelectorAll<HTMLButtonElement>('button[aria-pressed="true"]:not(.tg-alts)')].map((b) => b.textContent ?? '');
+    if (this.alt.length) on.push(this.alt.length === 1 ? 'an alternative' : `${this.alt.length} alternatives`);
+    return on.length <= 2 ? on.join(', ') : `${on[0]} +${on.length - 1}`;
+  }
+
   set(s: ToolbarState): void {
     this.alt = s.alt;
     this.showAlts();
-    this.el.querySelector('.tg-evidence')!.setAttribute('aria-pressed', String(s.evidence));
+    this.know.setAttribute('aria-pressed', String(s.evidence));
     this.el.querySelector('.tg-clouds')!.setAttribute('aria-pressed', String(s.clouds));
     this.el.querySelector('.tg-tree')!.setAttribute('aria-pressed', String(s.tree));
     this.layers = s.layers;
     for (const b of this.el.querySelectorAll<HTMLButtonElement>('.tg-layer')) b.setAttribute('aria-pressed', String(s.layers.includes(b.dataset.layer!)));
     this.el.querySelector('.tg-people')!.setAttribute('aria-pressed', String(s.people));
-    this.el.querySelector<HTMLElement>('.legend')!.hidden = !s.evidence;
+    this.legend.hidden = !s.evidence;
     for (const sel of this.el.querySelectorAll<HTMLSelectElement>('select[data-group]')) {
       const g = this.groups.find((x) => x.id === sel.dataset.group)!;
       const v = s.alt.find((a) => g.members.some((m) => m.id === a)) ?? '';

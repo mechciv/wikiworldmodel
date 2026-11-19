@@ -44,12 +44,12 @@ Their tests are `tools/world/test/layers.test.ts` and `viewer/test/e2e/layers.sp
 - **Today's map.** From the time axis's present, 1950 (the datum geology dates from), although the lines are
   of about 2020. Its disputed lines are dashed.
 - **Hazards.** 9,123 of NOAA's eruptions, earthquakes and tsunamis as rings around their years.
-- **Languages.** Glottolog's points, by family, for the present only, behind a toolbar button.
+- **Languages.** Glottolog's points, by family, for the present only, behind a button in the *Layers* menu.
 
 ## A grid over the globe
 
 Set 9's people are the one layer that is not rows: a field with `grid: { kind: lonlat }` and `data.as: people`, which the build reads itself
-into one binary file, `people.lwt` (`peopleLayer` in `tools/world/src/build/layers.ts`), and the toolbar's **People** button draws
+into one binary file, `people.lwt` (`peopleLayer` in `tools/world/src/build/layers.ts`), and the **People** button of the *Layers* menu draws
 (`PeopleLayer` in `viewer/src/ui/layers.ts`). Its tests are `tools/world/test/people.test.ts`, the people test in
 `tools/world/test/build.test.ts` and three in `viewer/test/e2e/layers.spec.ts`.
 
@@ -101,7 +101,7 @@ so that they are not lost with the sessions that raised them.
 ### The alternatives a build shows
 
 What a build shows is a steward's decision (section 4.4 of the design), and no steward has made one. The five groups of sets 6, 7 and
-19 and the one of set 4 are shown on a machine's proposal, behind the toolbar's **Alternatives** button: their `show:` lists are what to change. None is
+19 and the one of set 4 are shown on a machine's proposal, behind the **Alternatives** button of the *Layers* menu: their `show:` lists are what to change. None is
 anyone's default. They cost a build about two minutes and 18 MB. The twelfth slice adds three groups of perspectives, shown on the
 same footing: who carried on the Roman Empire, Germany after 1945, and the Mongol Empire after 1260. No build works out combinations: where two groups are chosen, a
 record takes its time from the first of them that moves it.
