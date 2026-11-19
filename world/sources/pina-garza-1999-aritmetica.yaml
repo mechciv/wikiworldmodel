@@ -1,0 +1,26 @@
+id: src:pina-garza-1999-aritmetica
+type: publication
+kind: review
+citation: >-
+  Piña Garza, E. (1999). Aritmética del tonalpohualli y del xiuhpohualli. Estudios de Cultura
+  Náhuatl 30, 257–266.
+authors:
+  - "Piña Garza, E."
+published: 1999
+title: Aritmética del tonalpohualli y del xiuhpohualli
+container: "Estudios de Cultura Náhuatl 30, 257–266"
+url: https://nahuatl.historicas.unam.mx/index.php/ecn/article/view/9216
+license: CC-BY-NC-ND-4.0
+reliability: >-
+  A physicist's short paper on the arithmetic of the 260-day count and of the count of years as
+  the Mexica kept them shortly before the conquest. It lists the twenty day signs in order and
+  the four year bearers, taking spelling and order from Rafael Tena, and reports Tena's view of
+  which days of the year named it. A clear statement of the structure, at second hand from Tena
+  and Caso; it does not argue a correlation.
+verified:
+  by: machine:claude-code
+  how: >-
+    The journal's PDF (article/download/9216/8594) fetched on 19 November 2026 (UTC) and read in
+    full in its text layer. The first page carries no number; the following pages are numbered
+    258 to 266, so the paper runs from p. 257, and the journal's page lists no pages. Quotes were
+    found in the kept text na-pina-garza-1999-aritmetica.txt by script.

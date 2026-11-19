@@ -1,0 +1,104 @@
+id: people/conquest/noche-triste
+kind: event/battle
+summary: >-
+  The Spaniards' flight from Tenochtitlan by night along the causeway to Tlacopan, with their Tlaxcalan allies, under
+  attack from the Mexica, at the end of June 1520: the Noche Triste, the sad night. Cortés lost 150 Spaniards, 45
+  horses and more than 2,000 Indians in his count, more than 870 soldiers and 1,200 Tlaxcalans in Bernal Díaz's over
+  five days. Neither Spanish source dates the night itself. A modern synthesis gives the night of 30 June to 1 July;
+  Book 12 counts 235 days from the entry to it, which lands on the same night; Bernal's printed text has 10 July,
+  which Cortés's own dates rule out.
+author: machine:claude-code
+same_as: { wikidata: Q1308854 }
+claims:
+  name:
+    prop: name
+    value: { en: La Noche Triste }
+    unsourced: An editorial label, the name in Spanish, the sad night, used in English too.
+  date-hassig:
+    prop: date
+    value: { lo: 30 June 1520 CE, hi: 1 July 1520 CE }
+    source:
+      ref: src:hassig-2016-sincronizacion
+      loc: "p. 178"
+      quote: Cortés and his men fled the city at midnight on 30 June/1 July under cover of a thunderstorm
+    method: historical-account
+    rank: preferred
+    note: >-
+      Preferred as the date historians give, and because the count of days in Book 12 lands on it. It is a night
+      across two days, and written as both. Wikidata gives the same two days, and puts the place 1,600 km away.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in na-hassig-2016-sincronizacion.txt (sha256 6970cffa48e6c4c0), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  date-book-12:
+    prop: date
+    value: { ref: people/conquest/entry-into-tenochtitlan, edge: start, lag: 235 days }
+    source:
+      - ref: src:florentine-codex-book-12
+        loc: "Book 12, chap. 27, fol. 49v, Spanish (Lockhart's transcription)"
+        quote: Estuuieron los españoles desde que entraron en mexico hasta que salieron dozientos y treynta y cinco dias
+      - ref: src:florentine-codex-book-12
+        loc: "Book 12, chap. 27, fol. 51r, Nahuatl (Anderson and Dibble's transcription)"
+        quote: "Auh injc mocempoa in jzqujlhujtique matlacpoalli oçe, on caxtolli: auh in tocnjoan catca chicunapoalilhujtl on caxtolli. Auh in toiaovan catca vmpoalilhujtl"
+    method: historical-account
+    note: >-
+      Sahagún's Spanish: the Spaniards were in Mexico from their entry until they left 235 days; the Nahuatl: all
+      the days they spent come to eleven twenties and fifteen. Counted from the entry on 8 November 1519, the 235th
+      day after is 30 June 1520. The same column names the month, the feast of Tecuilhuitontli (fol. 51r); a day of
+      a month is not read here.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in na-fc12-getty.txt (sha256 9a864988595f9f1f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  date-bernal:
+    prop: date
+    value: 10 July 1520 CE
+    source:
+      - ref: src:bernal-diaz-verdadera-historia
+        loc: "cap. CXXVIII"
+        quote: y fué nuestra entrada en Méjico dia del señor San Juan de Junio de 1520 años, y fué nuestra salida huyendo á 10 del mes de Julio del año siguiente, y fué esta nombrada batalla de Obtumba á 14 del mes de Julio.
+      - ref: src:bernal-diaz-lockhart-1844
+        loc: "vol. I, cap. CXXVIII"
+        quote: of July following we commenced our retreat, and on the 14th we fought the battle of Otumpan
+    against:
+      ref: src:bernal-diaz-lockhart-1844
+      loc: "vol. I, translator's note 95"
+      quote: Bernal Diaz errs here with respect to dates, for the disastrous retreat from Mexico, according to Cortes' despatches and other accounts, took place on the 1st of July
+    method: historical-account
+    rank: deprecated
+    note: >-
+      The printed text of 1632: our flight on the 10th of July "of the following year", and Otumba on the 14th.
+      Lockhart reads the year as the same, the July following the June entry, and so does this claim; taken as
+      written, "the following year" would be 1521, which cannot stand. Set aside: Cortés left the land of Culúa on
+      Sunday 8 July, after the battle in the plain, so the flight came before the 8th; Lockhart wrote in 1844 that
+      Bernal errs. Whether the manuscript has the same dates was not checked.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in es-bernal-diaz-verdadera-historia.txt (sha256 fabaae2d6b1a8c58) and es-bernal-diaz-lockhart-1844.txt (sha256 8b87be22a2a9cc0b), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  before-leaving-culua:
+    prop: earlier_than
+    value: 8 July 1520 CE
+    source:
+      ref: src:cortes-1520-second-letter
+      loc: "p. 208 (scan 219)"
+      quote: E así salimos este dia, que fué domingo á 8 de Julio, de toda la tierra de Culúa
+    method: documentary
+    note: >-
+      Cortés: so on this day, which was Sunday 8 July, we left the whole land of Culúa, after the battle in the plain
+      the day before (Otumba, which he does not name). 8 July 1520 was a Sunday in the Julian calendar.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in es-cortes-1520-second-letter.txt (sha256 6bb3044f6f34fb78), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  location:
+    prop: location
+    value: { lat: 19.435, lon: -99.13138889, frame: frame:earth/present-day }
+    source: { ref: src:wikidata-tenochtitlan, loc: "Q13695, P625 coordinate location" }
+    method: gazetteer
+    note: >-
+      The city the Spaniards fled from: the point is the gazetteer's for Tenochtitlan, not the causeway to Tlacopan,
+      where they were attacked.
+  frame:
+    prop: frame
+    value: frame:paleomap/plate-104
+    source: { ref: src:paleomap-plate-model, loc: PALEOMAP_PlatePolygons.gpml }
+    method: plate-polygon
+    basis: reconstruction
+relations:
+  war:
+    rel: part-of
+    to: people/conquest/conquest-of-mexico
+    unsourced: An editorial grouping of the events of the conquest.

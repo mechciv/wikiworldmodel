@@ -1,0 +1,28 @@
+id: src:duran-1867-historia
+type: text
+kind: historian
+citation: >-
+  Durán, D. Historia de las Indias de Nueva-España y islas de Tierra Firme, ed. J.F. Ramírez, tomo
+  I. México: Imprenta de J.M. Andrade y F. Escalante, 1867.
+authors: ["Durán, D."]
+published: 1867
+written: 1581 CE
+title: Historia de las Indias de Nueva-España y islas de Tierra Firme
+url: https://archive.org/details/historiadelasind01dur
+via: >-
+  Ramírez's edition, tomo I (the Getty Research Institute copy scanned by the Internet Archive),
+  read in its OCR text through the archive's "stream" page, because the plain djvu text, run
+  through the fetch script, was taken for HTML and lost words. The footnotes are Ramírez's.
+  `written`: Ramírez's introduction gives 1581 for the first part (the history) and 1579 for the
+  treatises.
+license: public-domain
+reliability: >-
+  A Dominican's history of the Mexica kings, written about sixty years after the conquest from a
+  Nahua chronicle, which Ramírez calls the "Anónimo mexicano" and says forms the fabric
+  of the history; it tells the war with Tlatelolco from the Tenochca side.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched on 2026-11-19 (UTC); Ramírez's introduction on the dates, chapters V and VI (founding
+    of Tlatelolco, pp. 42–44) and chapters XXXIII and XXXIV (the war of Axayacatl with Tlatelolco,
+    to p. 271) read. Quotes found in the kept text city-duran-1867-vol1.txt by script.

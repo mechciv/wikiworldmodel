@@ -1,0 +1,109 @@
+id: people/traditions/tenochtitlan-house-plot
+kind: tradition/building
+summary: >-
+  The house plot of Tenochtitlan as it stood at the conquest: on a plot of 100 to 500 m², one or several small houses
+  of a single room, facing a patio rather than the street, of adobe with flat roofs in the centre of the city and
+  thatched farther out, the chinampa fields behind them on the canals. From Calnek's reconstruction, which could not be
+  read and is known here as Valero (1990) reports it, and from the chroniclers who saw or heard of the city. It is the
+  only house of the Basin of Mexico the sources read describe. The region it is found in, Central Mexico, is
+  ArchaeoGLOBE's region 23, whose 19.3 million people in 1500 were all drawn with generic houses before; it is drawn
+  over all of it, though the sources describe one city.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: House plot of Tenochtitlan }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: { ref: people/cities/tenochtitlan, edge: start }
+    unsourced: >-
+      No source read dates when the city's houses came to be built as Calnek and the chroniclers describe them, at the
+      conquest. The record takes the founding of the city, which grew by the chinampas its house plots stood on
+      (Valero 1990, p. 29), as the earliest they could have been built so: a bound the record chooses, and says so.
+  end:
+    prop: end
+    value: { ref: people/conquest/fall-of-tenochtitlan }
+    source:
+      ref: src:cortes-1522-third-letter
+      loc: "p. 418 (scan 429)"
+      quote: pareciénos que en ella era bien poblar, porque estaba toda destruida; y yo repartí los solares á los que se asentaron por vecinos
+    method: documentary
+    note: >-
+      The city was all destroyed in the siege, and Cortés gave out house lots to the Spaniards who settled it. The
+      natives rebuilt their own part (Cortés's fourth letter, p. 504; Bernal Díaz, cap. CLVII), in houses the sources
+      read do not describe: the tradition ends where the evidence for it does.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in es-cortes-1522-third-letter.txt (sha256 b72ff8bf42100af3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["23"] }
+    source:
+      ref: src:valero-1990-indios-tenochtitlan
+      loc: "p. 48"
+      quote: Se supone que las áreas residenciales eran pequeñas, con superficies que iban desde los 100 a los 500 metros cuadrados; cada área estaba ocupada por una o varias casitas en su interior que raras veces daban a la calle ya que por lo general, tenían la fachada hacia el patio.
+    method: editorial
+    note: >-
+      Region 23, Central Mexico, which holds Tenochtitlan (19.435 N, 99.131 W, by a test of the point against the
+      region's outline), and with it the rest of the Basin, Morelos and Tlaxcala. The house is claimed only for the
+      city the sources describe, not for the region.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in city-estudios-americanos-778.txt (sha256 e2b341ec7d870461), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  dwelling:
+    prop: dwelling
+    value: { rooms: 1, walls: mudbrick, roof: flat }
+    source:
+      - ref: src:valero-1990-indios-tenochtitlan
+        loc: "p. 48"
+        quote: las construcciones estaban por lo general formadas de una sola pieza que servía para todo
+      - ref: src:torquemada-1615-monarquia-indiana
+        loc: "book 3, ch. XXIII, p. 399"
+        quote: Las casas (como hemos dicho) eran de adobe comúnmente y con sus terrados y azoteas muy bien hechas
+      - ref: src:valero-1990-indios-tenochtitlan
+        loc: "p. 49"
+        quote: Las más humildes estaban construidas con techos de paja ( xacalli), mientras que los de una posición más acomodada vivían en casas de argamasa barata con empalizada ( cacan ie calli), habiendo también viviendas de adobe con techos de vigas ( tlapan calli, tlacocolli, tlatocacalli).
+    method: expert-estimate
+    note: >-
+      One room that served for everything (Valero, after Calnek); houses commonly of adobe, with flat roofs, terraces
+      and roof tops well made (Torquemada, 1615); the humblest thatched, the better-off of cheap mortar with stakes, and
+      adobe with beamed roofs (Valero). The words are the centre's, mudbrick walls and a flat roof; Valero says flat roofs
+      were typical of the centre and thatched jacales usual farther out (pp. 49–50), which a dwelling claim for one
+      tradition cannot say. Each house was of 10 to 40 m² (p. 49), which gives no width or length, so the size is left
+      to the generator.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in city-estudios-americanos-778.txt (sha256 e2b341ec7d870461) and city-torquemada-1615-joined.txt (sha256 688c18b2f2d9d7a3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  settlement:
+    prop: settlement_form
+    value: { pattern: compound, household: { lo: 2, hi: 10 } }
+    source:
+      - ref: src:valero-1990-indios-tenochtitlan
+        loc: "p. 48"
+        quote: Se supone que las áreas residenciales eran pequeñas, con superficies que iban desde los 100 a los 500 metros cuadrados; cada área estaba ocupada por una o varias casitas en su interior que raras veces daban a la calle ya que por lo general, tenían la fachada hacia el patio.
+      - ref: src:gomara-1552-conquista
+        loc: "ch. [79], p. 220 (Chimalpáhin's copy)"
+        quote: "mas por pequeñas que son pocas vezes [LdeG: dexan] de tener dos y tres, y aun diez moradores"
+    method: expert-estimate
+    note: >-
+      Plots of 100 to 500 m², each with one or several small houses facing a patio (Valero, after Calnek): a compound
+      of a household. Gómara: however small, the houses seldom had fewer than two or three dwellers, and some ten.
+      Calnek's own figure, as Valero reports it, is five to seven to a house, and three to a nuclear household as
+      Jiménez Martínez reports him: the household is the least sure of these numbers.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in city-estudios-americanos-778.txt (sha256 e2b341ec7d870461) and city-gomara-chimalpahin-71-80.txt (sha256 5adc6abb4fc88f1d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  fields:
+    prop: field_system
+    value: { kind: raised }
+    source:
+      - ref: src:torquemada-1615-monarquia-indiana
+        loc: "book 3, ch. XXIII, p. 399"
+        quote: a esta calle o acequia de agua correspondían las espaldas de las casas y unos camellones de tierra en los cuales sembraban su pan y legumbres
+      - ref: src:smith-2008-aztec-city-planning
+        loc: "p. 142"
+        quote: Families living on their individual small plots worked these fields (Fig. 15).
+    method: expert-estimate
+    note: >-
+      Torquemada: the backs of the houses gave onto the canal, and ridges of earth on which they sowed their grain and
+      vegetables, the chinampas; Smith: families on their own small plots worked them, in the outer neighbourhoods,
+      while near the centre the houses were packed tightly together.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in city-torquemada-1615-joined.txt (sha256 688c18b2f2d9d7a3) and city-smith-2008-aztec-city-planning.txt (sha256 2af75a49398182ad), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }

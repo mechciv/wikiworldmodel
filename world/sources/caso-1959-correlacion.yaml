@@ -1,0 +1,32 @@
+id: src:caso-1959-correlacion
+type: publication
+kind: review
+citation: >-
+  Caso, A. (1959). Nuevos datos para la correlación de los años aztecas y cristiano. Estudios de
+  Cultura Náhuatl 1, 9–25.
+authors:
+  - "Caso, A."
+published: 1959
+title: Nuevos datos para la correlación de los años aztecas y cristiano
+container: "Estudios de Cultura Náhuatl 1, 9–25"
+url: https://nahuatl.historicas.unam.mx/index.php/ecn/article/view/78644
+license: CC-BY-NC-ND-4.0
+reliability: >-
+  The paper in which Caso restated, twenty years on, the correlation he had published in 1939:
+  the taking of Tenochtitlan on the day 1 Coatl was 13 August 1521 (Julian), the Mexica year
+  began with Izcalli and was named for the last day of Tititl, and no leap days were counted. It
+  tabulates the native and Spanish sources for the dates of the entry of Cortés and the fall,
+  reports Thompson's and Miles's finding that the Maya day counts still kept agree with 1 Coatl =
+  13 August 1521 day for day, and answers Kirchhoff, who held that Tenochtitlan and Tlatelolco
+  named the days differently. It is the argument for the correlation by its author, and is
+  evidence of the sources as he read them, many at second hand.
+verified:
+  by: machine:claude-code
+  how: >-
+    The journal's PDF (article/download/78644/69585) fetched on 19 November 2026 (UTC) and read
+    in full in its text layer, pp. 9–25, with the printed page numbers. The text layer is OCR and
+    gives most pages twice, once garbled where the scan cut a column and once clean; it also
+    misreads ordinals (9º as 9'1 or 99) and a few names (Tochtli as T ochtli). Quotes are taken
+    from the clean passages only and were found in the kept text na-caso-1959-correlacion.txt by
+    script. Its first paragraph, on the 1939 correlation, gives the month of the Noche Triste as
+    Xocotlhuetzi, which does not fit the correlation the paper argues; no claim rests on it.

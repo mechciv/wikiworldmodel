@@ -16,8 +16,8 @@ been checked by a person, which is set 20. The three steps that come out of sets
 | 7 | Megafauna extinctions | done | `world/entities/life/megafauna/`, `world/alternatives/megafauna-causes*` |
 | 8 | Domestication worldwide | done | `world/entities/people/domestication/` |
 | 9 | Population and land use (HYDE) | where people lived as a 1° grid over the globe, 10,000 BCE to 2015; the world's population, cropland and grazing land as series; since the eleventh slice, every 5′ cell's anthrome from Anthromes 12K, ArchaeoGLOBE's assessments by region, and the lists of cities ([HUMAN-LANDSCAPE.md](HUMAN-LANDSCAPE.md)); no grid of land-use shares | `world/fields/earth/{population,world-population,cropland,grazing-land}.yaml`, `world/fields/people/`, `world/snapshots/hyde-3.2.1-*.csv`, `world/snapshots/archaeoglobe-2019-assessments.csv`, `world/snapshots/reba-2016-*.csv` |
-| 10 | States worldwide from Cliopatria | done as rows, not records; since the twelfth slice 16 states with records draw their own rows ([TWELFTH-SLICE.md](slices/TWELFTH-SLICE.md)) | `world/fields/earth/polities.yaml`, `world/entities/people/polities/` |
-| 11 | People and offices | done, for 43 rulers | `world/entities/people/rulers/`, `world/entities/people/polities/` |
+| 10 | States worldwide from Cliopatria | done as rows, not records; since the twelfth slice, states with records draw their own rows, 19 of them now ([TWELFTH-SLICE.md](slices/TWELFTH-SLICE.md), [FIFTEENTH-SLICE.md](slices/FIFTEENTH-SLICE.md)) | `world/fields/earth/polities.yaml`, `world/entities/people/polities/` |
+| 11 | People and offices | done, for 44 rulers | `world/entities/people/rulers/`, `world/entities/people/polities/` |
 | 12 | First cities, writing, languages | done; languages as rows | `world/fields/earth/languages.yaml`, `world/entities/people/first-cities/`, `world/entities/people/writing/` |
 | 13 | Routes and trade | done, but for the Silk Road's lines | `world/fields/earth/roman-roads.yaml`, `world/entities/people/trade/` |
 | 14 | Objects that move | done | `world/entities/people/objects/` |
@@ -103,7 +103,8 @@ so that they are not lost with the sessions that raised them.
 What a build shows is a steward's decision (section 4.4 of the design), and no steward has made one. The five groups of sets 6, 7 and
 19 and the one of set 4 are shown on a machine's proposal, behind the toolbar's **Alternatives** button: their `show:` lists are what to change. None is
 anyone's default. They cost a build about two minutes and 18 MB. The twelfth slice adds three groups of perspectives, shown on the
-same footing: who carried on the Roman Empire, Germany after 1945, and the Mongol Empire after 1260. No build works out combinations: where two groups are chosen, a
+same footing: who carried on the Roman Empire, Germany after 1945, and the Mongol Empire after 1260. The fifteenth adds a fourth,
+whose account of the conquest of Mexico, with no default: the default picture keeps what both sides say. No build works out combinations: where two groups are chosen, a
 record takes its time from the first of them that moves it.
 
 ### Set 1: biomes and fossil forests
@@ -389,6 +390,74 @@ What the cases found in the borders dataset, none of it corrected here or report
   and 1920–1921 is one row, "Republics of the Soviet Union".
 - The bracketed "(Holy Roman Empire)" begins in 922, where the sources read give 800 or 962.
 - 385 rows are relations between states (allegiance, alliance, vassalage, personal union), drawn as if they were states.
+
+### The conquest of Tenochtitlan (fifteenth slice)
+
+Written from the evidence of three agents, one for each side's sources and one for the city and its neighbours, each keeping its
+texts ([FIFTEENTH-SLICE.md](slices/FIFTEENTH-SLICE.md)): 25 new records, a group of two perspectives, 37 new sources. Every quote, 166
+of them, was found by script in the text it was read in, and Cortés's were held against the page images of the 1870 edition as well.
+Nothing was read twice by another reader, and nothing by a person. The translations in the notes are the agents' own.
+
+- **The tie between the calendars** (`people/calendars/tonalpohualli-anchor`, `xiuhpohualli-anchor`). 1 Coatl = 13 August 1521 is
+  Caso's, after Thompson; it rests on the fall's own double date, which therefore cannot test it, and Kirchhoff's denial is cited
+  against it as Caso reports it. The year 3 Calli from 2 February 1521 is Sahagún's, the only Julian new year a source read gives; the
+  arithmetic, 365 days with no leap day, is Caso's rule, and is code. Caso's book of 1967 and Tena's of 1987, where the arguments are
+  made at length, were not read: Tena is quoted through Piña Garza, Díaz Álvarez and Kruell.
+- **The entry's native dates** (`people/conquest/entry-into-tenochtitlan`). Book 12's 1 Ehecatl in the year 1 Acatl comes nearest the
+  Spanish 8 November 1519 nineteen days before it; the Anales de Tlatelolco's 8 Ehecatl, read only as Caso reports it, a day after.
+  Both are kept and set aside. Caso keeps the second, if the Mexica day ran from noon to noon.
+- **Toxcatl and the flight** (`people/conquest/toxcatl-massacre`, `noche-triste`). The 195 days from the entry to the killing are the
+  record's reading of Book 12's Nahuatl, the days of friendship ending with it; Sahagún's Spanish divides the 235 days otherwise.
+  Wikidata's 22 May 1520 rests on no source read. For the flight, Hassig's 30 June to 1 July 1520 is preferred, Book 12's 235 days
+  from the entry agree with it, and Bernal's printed 10 July is set aside, as Lockhart's note of 1844 has it.
+- **The war and the siege** (`people/conquest/conquest-of-mexico`, `siege-of-tenochtitlan`). The war from the sailing, 10 February
+  1519, is the record's choice, and the Triple Alliance's part in it is unsourced; Book 12's reckoning from Toxcatl is set aside
+  because the world cannot hold it with the war's parts. The siege from 30 May 1521, Cortés's seventy-five days, is preferred to
+  Bernal's 13 May.
+- **Tlatelolco** (`people/cities/tlatelolco`, `people/polities/tlatelolco`, `people/conquest/conquest-of-tlatelolco`). 1473 is
+  preferred to Ixtlilxóchitl's 1463, which his editor Chavero corrected, and the year 7 Calli he names sides with 1473. The town's
+  arising from Tenochtitlan is the tradition of a split, with Gómara and Jiménez cited against it. Of the tellings of Moquihuix's death,
+  the one Sahagún and the Codex Mendoza share is preferred, by rule more than by judgement.
+- **The city's people** (`people/cities/tenochtitlan`). Eight estimates, seven for 1519 and Chandler's for 1520, from 60,000 to 700,000, with Calnek's 150,000 to
+  200,000 preferred. Calnek, Sanders, Soustelle and Rojas were read only as Jiménez Martínez, Valero and Smith report them. The
+  Anonymous Conqueror's 60,000 is quoted in the Spanish: Saville's English of 1917 has 70,000, copied from Icazbalceta's misreport of
+  Prescott.
+- **The house** (`people/traditions/tenochtitlan-house-plot`). Calnek's model as Valero reports it, with Torquemada and Gómara; its
+  start is unsourced, and it is drawn over all of Central Mexico. Smith's measured houses of Morelos were scans with no text.
+- **Who held what.** Cortés's span is the dates of the letters read, 1520 to 1524; Bernal's the year he names, 1568; Tlatelolco's the
+  Digital Florentine Codex editors' 1555 to 1565. Tlaxcala is `subject-to` the Crown from the end of its war with Cortés, as Cortés has
+  it; through whom the expedition acted for the Crown is a note.
+- **Not reached:** the Anales de Tlatelolco, which have no public-domain transcription; Chimalpáhin; Caso's book of 1967 and his
+  article of 1939; Tena (1987); Thouvenot, Kruell and Acevedo's *Tiempos superpuestos* (2024), whose PDF answered 404; Sahagún's
+  revision of Book 12 of 1585; Calnek, Sanders, Soustelle, Gibson, Borah and Cook, Lombardo and Rojas themselves; Rojas's
+  *Cuantificaciones* (historiamexicana.colmex.mx answered 403); Battcock (2011) on whether the alliance was formal (revistas.inah.gob.mx
+  could not be reached); Smith's papers on his own site, which now asks for a sign-in (read in the Internet Archive's captures);
+  famsi.org (403), redalyc.org (502), the search of www.cervantesvirtual.com (403); Bernal's Guatemala manuscript, so the printed text's
+  dates were not held against it; Gayangos's edition of Cortés (1866), found and not fetched.
+
+What the case found in the borders dataset, none of it corrected here or reported to its makers yet:
+
+- "Aztec Triple Alliance" takes in Tlaxcala from 1450 to 1520, which it never ruled, and its first row, 1429–1439, leaves out
+  Tenochtitlan itself and Tlacopan. Its rows carry the Wikidata id of the Aztec Empire (Q2608489).
+- "Tenochtitlan" (1326–1428) lies east of the lake, between Texcoco and Tlaxcala, and takes in none of the Basin's towns, nor the city;
+  "Texcoco" (1202–1428) lies south of the lake, taking in Chalco and Xochimilco and not Texcoco. There is no Tlatelolco.
+- The Crown of Castile has no rows after 1515.
+
+The list of cities has one row for Mexico City, "Tenochtitlan" among its other names, from 1500 to 1975: 80,000 people in 1500 and
+1520, which is what the human landscape draws.
+
+And in Wikidata, looked up on 18 and 19 November 2026:
+
+- Tenochtitlan (Q13695) ends on 13 August 1521 and is replaced by Mexico City (Q1489), whose inception is both 1521 (preferred) and
+  1325. The Aztec Empire (Q2608489) and the Aztec Triple Alliance (Q794210) are two items for what the sources treat as one thing.
+- Tlatelolco (Q796925) is dissolved in 1473, though it went on as a tributary and as Santiago Tlatelolco; its inception of 1337 is
+  from English Wikipedia. Moquihuix (Q1647668) "replaces" Tlacateotl, where Sahagún and the Codex Mendoza put Quauhtlatoa between
+  them. Tlaxcala (Q614072) is dissolved in 1520, an end no source read gives.
+- La Noche Triste (Q1308854) has its coordinates in north-western Mexico, about 1,600 km from the city. The siege (Q593267) starts on
+  10 May 1521, Cortés's leaving Texcoco. The Cholula massacre (Q3297424) ends the day before it starts.
+- Bernal Díaz's English label (Q315795) has been vandalized; Cuauhtémoc (Q297050) has no label in English or Spanish; Cuitláhuac's
+  description (Q315628) gives his years as 1476–1638; Moctezuma II's death (Q141791) is on the Gregorian calendar model.
+- Villa Rica de la Vera Cruz, the town of 1519, has no item.
 
 ### Set 13: routes and trade
 

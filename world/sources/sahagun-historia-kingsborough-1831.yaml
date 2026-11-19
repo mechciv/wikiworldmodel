@@ -1,0 +1,44 @@
+id: src:sahagun-historia-kingsborough-1831
+type: text
+kind: historian
+citation: >-
+  Sahagún, B. de. Historia universal de las cosas de Nueva España (the Spanish text, in twelve
+  books). In Kingsborough, E. K., Antiquities of Mexico, vol. 7. London: printed by Richard and
+  John E. Taylor, published by Robert Havell and Colnaghi, Son and Co., 1831.
+authors:
+  - "Sahagún, B. de"
+published: 1831
+written: { lo: 1569 CE, hi: 1577 CE }
+title: Historia universal de las cosas de Nueva España
+container: Kingsborough, Antiquities of Mexico, vol. 7 (London, 1831)
+url: https://archive.org/download/AntiquitiesMexi7King/AntiquitiesMexi7King_djvu.txt
+via: >-
+  The Internet Archive's scan of the Smithsonian Libraries' copy of Kingsborough's volume 7
+  (identifier AntiquitiesMexi7King), read in its OCR text. The volume prints Sahagún's Spanish
+  only, without the Nahuatl, under the running head "Historia universal de las cosas de Nueva
+  España", and does not say which manuscript it was printed from.
+license: public domain
+reliability: >-
+  Sahagún's own Spanish, the friar's account of the Nahua world written from the testimony he
+  and his Nahua collaborators gathered. For the calendar (Books 2, 4 and 7) it is the earliest
+  full description of the three Mexica counts, by someone who questioned people who had kept
+  them, and it reports that the new year was disputed between towns and that the Tlatelolco
+  elders he assembled settled on 2 February. It gives each month a fixed Julian starting day and
+  reports a conjecture of a sixth nemontemi every fourth year; Caso's correlation counts no leap day, so
+  that the months drift against the Julian calendar. For the conquest (Book 12) it is the
+  Spanish column of the Florentine Codex in another copy.
+note: >-
+  Written: Caso (1959, p. 23) has Sahagún writing the calendar of Book 2 in 1569–70, and the
+  Spanish of the Florentine Codex was finished in 1577 (Richter and Houtrouw, Digital Florentine
+  Codex). The range is that of the Spanish text; this printing may follow a later copy of it.
+verified:
+  by: machine:claude-code
+  how: >-
+    The full text (AntiquitiesMexi7King_djvu.txt) fetched from archive.org on 19 November 2026
+    (UTC) and read where cited: the address to the reader before the calendar of Book 2 (p. 22),
+    the entry for Izcalli and the five days after it (p. 33), Book 4, chapter 1 (pp. 124–125), the
+    appendix to Book 4 (pp. 154–155), the end of Book 7 with the commentary on the count of years
+    (p. 194), and Book 12, chapters 3, 28 and 40 (pp. 416, 435, 446), by the printed page numbers (the
+    OCR reads 125 as 195 once). The text is OCR with many slips (año read as ao, aho, ano or afio;
+    á as 4; ó as 6); quotes are copied as the kept text has them and were found in
+    na-kingsborough-1831-v7.txt by script.

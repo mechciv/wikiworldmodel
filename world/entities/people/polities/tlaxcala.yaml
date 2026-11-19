@@ -1,0 +1,37 @@
+id: people/polities/tlaxcala
+kind: polity
+summary: >-
+  Tlaxcala, east of the Basin of Mexico: four cabeceras, Ocotelolco, Tizatlan, Quiahuiztlan and Tepeticpac, each with
+  its lord, who governed together, with no single lord over all, like the lordships of Venice, Genoa or Pisa, Cortés
+  wrote; the Señoría and Republic of Tlaxcala in its own history. Encircled by the Triple Alliance, it never paid it
+  tribute: Moctezuma wished to subject it and never could. It fought Cortés's company in September 1519, then made
+  peace, and was the Spaniards' first and largest ally to the end. Cortés wrote that its lords offered themselves as
+  the emperor's vassals; its own history tells an alliance. No dataset draws it: the borders dataset's outline of the
+  Triple Alliance takes its land in from 1450.
+author: machine:claude-code
+same_as: { wikidata: Q614072 }
+claims:
+  name:
+    prop: name
+    value: { en: Tlaxcala }
+    unsourced: An editorial label; Tlaxcallan in Nahuatl, Tlascala and Tascaltecal in the Spanish sources.
+relations:
+  vassal-of-the-crown:
+    rel: subject-to
+    to: people/polities/crown-of-castile
+    valid: { lo: { ref: people/conquest/war-with-tlaxcala, edge: end } }
+    source:
+      - ref: src:cortes-1520-second-letter
+        loc: "p. 79 (scan 90)"
+        quote: Finalmente, que ellos quedaron y se ofrecieron, por súbditos y vasallos de vuestra majestad y para su real servicio
+      - ref: src:bernal-diaz-verdadera-historia
+        loc: "cap. LXXIII"
+        quote: y de todos los caciques y República de Tlascala, á rogarle que los admitiese á nuestra amistad; y que venia á dar la obediencia á nuestro Rey y señor
+    note: >-
+      Cortés, to the emperor: finally they remained, and offered themselves as subjects and vassals of Your Majesty,
+      for your royal service. Bernal Díaz: Xicotencatl came for all the lords and the Republic of Tlaxcala to beg him to
+      admit them to our friendship, and to give obedience to our King. Friendship and obedience in the one, vassalage
+      in the other; Tlaxcala's own history, by Diego Muñoz Camargo (1570s–1590s), tells the alliance as the choice of
+      its four lords, who came out to receive Cortés in state (p. 186). From the peace, whose day no source read gives.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in es-cortes-1520-second-letter.txt (sha256 6bb3044f6f34fb78) and es-bernal-diaz-verdadera-historia.txt (sha256 fabaae2d6b1a8c58), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }

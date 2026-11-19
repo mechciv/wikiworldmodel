@@ -1,0 +1,25 @@
+id: src:valero-1990-indios-tenochtitlan
+type: publication
+kind: review
+citation: >-
+  Valero de García Lascuráin, A.R. (1990). Los indios en Tenochtitlan, la ciudad imperial mexica.
+  Anuario de Estudios Americanos 47, 29–63 (pages as printed in the scan).
+authors: ["Valero de García Lascuráin, A.R."]
+published: 1990
+title: Los indios en Tenochtitlan, la ciudad imperial mexica
+container: Anuario de Estudios Americanos 47 (Consejo Superior de Investigaciones Científicas)
+url: https://estudiosamericanos.revistas.csic.es/index.php/estudiosamericanos/article/download/778/773/774
+via: The journal's scanned PDF with an OCR text layer, from its open-access site.
+license: CC-BY-4.0
+license_note: Each page is stamped "Licencia Creative Commons Reconocimiento 4.0 Internacional (CC BY 4.0)".
+reliability: >-
+  A synthesis of the city's size, people and houses from the chronicles and from Calnek's work
+  (1972, 1974, 1976), which it summarizes; the house sizes it gives are Calnek's model, not new
+  measurements.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched on 2026-11-19 (UTC); the sections on the city's dimensions and population density
+    (pp. 29–30), its houses (pp. 46–49) and the conclusions (p. 63) read, by the journal's page
+    numbers as printed in the scan. The OCR has errors (for example "con1ún"). Quotes found in
+    the kept text city-estudios-americanos-778.txt by script.

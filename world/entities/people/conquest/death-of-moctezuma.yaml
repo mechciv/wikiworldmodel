@@ -1,0 +1,122 @@
+id: people/conquest/death-of-moctezuma
+kind: event/political
+summary: >-
+  The death of Moctezuma, ruler of Tenochtitlan, while he was held by the Spaniards in his father's palace, in the
+  last days of June 1520, between Cortés's return to the city and the flight from it. Both sides put it there, and
+  neither gives its day. They differ on how he died: the conquerors say from a stone thrown by his own people as he
+  spoke to them from the roof; the Mexica account of Book 12 says that he and the governor of Tlatelolco were found
+  dead, their bodies cast out from the Spaniards' building, and does not say who killed them.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Death of Moctezuma }
+    unsourced: An editorial label.
+  after-cortes-returned:
+    prop: later_than
+    value: 24 June 1520 CE
+    source:
+      ref: src:cortes-1520-second-letter
+      loc: "p. 186 (scan 197)"
+      quote: E otro dia siguiente, que fué víspera de San Juan Bautista, me partí, y dormí en el camino, á tres leguas de la dicha gran ciudad; y dia de San Juan, despues de haber oido misa, me partí y entré en ella casi á medio dia
+    method: documentary
+    note: >-
+      Cortés came back into the city on St John's day, 24 June 1520; the stone that killed Moctezuma, in his telling,
+      was thrown in the fighting after that (p. 190). Wikidata gives 29 June 1520, on the Gregorian calendar model,
+      from no source read here.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in es-cortes-1520-second-letter.txt (sha256 6bb3044f6f34fb78), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  account-conquerors:
+    prop: account
+    alt: alt:conquest-accounts/conquerors
+    value:
+      en: >-
+        As he spoke to his people from a parapet of the Spaniards' fortress, they struck him with stones and an arrow,
+        one stone on the head; he would not be treated, and died of it, three days later in Cortés's telling. Cortés
+        had the body carried out to them.
+    source:
+      - ref: src:cortes-1520-second-letter
+        loc: "p. 190 (scan 201)"
+        quote: le dieron una pedrada los suyos en la cabeza … tan grande, que de allí á tres dias murió
+      - ref: src:bernal-diaz-verdadera-historia
+        loc: "cap. CXXVI"
+        quote: le dieron tres pedradas é un flechazo, una en la cabeza y otra en un brazo y otra en una pierna
+      - ref: src:bernal-diaz-verdadera-historia
+        loc: "cap. CXXVI"
+        quote: ántes cuando no nos catamos, vinieron á decir que era muerto
+    method: historical-account
+    note: >-
+      Cortés, writing on 30 October 1520: his own people struck him on the head with a stone, so hard that he died
+      three days later (the gap is the 1770 editor's note mark). Bernal Díaz, about 1568: they gave him three stones
+      and an arrow, one on the head, one on an arm and one on a leg; he would not be treated, and when we least
+      expected it they came to say he was dead.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in es-cortes-1520-second-letter.txt (sha256 6bb3044f6f34fb78) and es-bernal-diaz-verdadera-historia.txt (sha256 fabaae2d6b1a8c58), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  account-mexica:
+    prop: account
+    alt: alt:conquest-accounts/mexica
+    value:
+      en: >-
+        Four days after the fighting at the temple, Moctezuma and Itzquauhtzin, the governor of Tlatelolco, were found
+        dead, thrown out at the water's edge by the entrance of the building where the Spaniards were. Who killed them
+        it does not say. The Mexica burned Moctezuma at Copolco amid curses; the Tlatelolca carried their governor home
+        and burned him with honour.
+    source:
+      - ref: src:florentine-codex-book-12
+        loc: "Book 12, chap. 23, heading, fol. 39v, Nahuatl (Lockhart's transcription)"
+        quote: "in quenin Motecuçoma, yoan ce vei pilli tlatilulco micque: auh in innacaio quivallazque iquiiaoaioc … in calli in vncan catca Españoles."
+      - ref: src:florentine-codex-book-12
+        loc: "Book 12, chap. 23, fol. 39v, Nahuatl (Lockhart's transcription)"
+        quote: Auh ie iuh navilhuitl neteucalhuiloc in quimontlaçaco in Motecuçoma, yoan Itzquauhtzin, omicque, atēco itocaiocan, Teoaioc
+      - ref: src:florentine-codex-book-12
+        loc: "Book 12, chap. 23, fol. 39v, Spanish (Lockhart's transcription)"
+        quote: quatro dias andados despues de la matança que se hizo con el cu, hallaron los mexicanos muertos a Motecuçoma, y al Gouernador del Tlatilulco echados fuera de … las casas reales cerca del muro dōde estaua vna piedra labrada como galapago que llamauā Teoayoc
+      - ref: src:florentine-codex-book-12
+        loc: "Book 12, chap. 23, fol. 40r, Nahuatl (Lockhart's transcription)"
+        quote: "Auh inic tlatlac, çan tlavelpan, aocmo cenca teiollocopa: cequi caoa: quitoa."
+    method: historical-account
+    note: >-
+      The Nahuatl heading: how Moctezuma and a great noble of Tlatelolco died, and their bodies were thrown out at
+      the entrance of the building where the Spaniards were; four days after people were thrown down from the temple,
+      they came to throw out Moctezuma and Itzquauhtzin, who were dead, at the water's edge at Teoayoc; and while he
+      burned, people were angry, and some cursed him. Sahagún's Spanish has the Mexica find them dead, thrown out of
+      the royal houses near the turtle stone. The verb that casts the bodies out has no named subject; the heading
+      puts them at the Spaniards' door. The Spanish column gives both bodies honours and burial, the Nahuatl only the
+      governor of Tlatelolco: the two columns tell the funeral differently, as they tell much from Tlatelolco's side.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in na-fc12-getty.txt (sha256 9a864988595f9f1f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  location:
+    prop: location
+    value: { lat: 19.435, lon: -99.13138889, frame: frame:earth/present-day }
+    source: { ref: src:wikidata-tenochtitlan, loc: "Q13695, P625 coordinate location" }
+    method: gazetteer
+    note: >-
+      The city where he died, in his father's palace, where the Spaniards held him: the point is the gazetteer's for
+      Tenochtitlan, not the palace.
+  frame:
+    prop: frame
+    value: frame:paleomap/plate-104
+    source: { ref: src:paleomap-plate-model, loc: PALEOMAP_PlatePolygons.gpml }
+    method: plate-polygon
+    basis: reconstruction
+relations:
+  before-the-flight:
+    rel: before
+    to: people/conquest/noche-triste
+    source:
+      - ref: src:cortes-1520-second-letter
+        loc: "p. 199 (scan 210)"
+        quote: acordé de lo hacer aquella noche
+      - ref: src:florentine-codex-book-12
+        loc: "Book 12, chap. 24, fol. 41r, Nahuatl (Lockhart's transcription)"
+        quote: Auh in ovaliovac in oacic ioalnepantla. nimā ie ic quiça in Españoles
+    note: >-
+      Both sides tell the death before the flight: Cortés the stone (p. 190) and then his decision to leave that night
+      (p. 199); Book 12 the bodies cast out (chap. 23) and then, when night had fallen and midnight came, the
+      Spaniards coming out (chap. 24).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in es-cortes-1520-second-letter.txt (sha256 6bb3044f6f34fb78) and na-fc12-getty.txt (sha256 9a864988595f9f1f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  war:
+    rel: part-of
+    to: people/conquest/conquest-of-mexico
+    unsourced: An editorial grouping of the events of the conquest.

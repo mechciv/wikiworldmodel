@@ -1,0 +1,31 @@
+id: src:bartl-gobel-prem-1989-calendarios
+type: publication
+kind: review
+citation: >-
+  Bartl, R., Göbel, B. & Prem, H.J. (1989). Los calendarios aztecas de Sahagún. Estudios de
+  Cultura Náhuatl 19, 13–82.
+authors:
+  - "Bartl, R."
+  - "Göbel, B."
+  - "Prem, H.J."
+published: 1989
+title: Los calendarios aztecas de Sahagún
+container: "Estudios de Cultura Náhuatl 19, 13–82"
+url: https://nahuatl.historicas.unam.mx/index.php/ecn/article/view/78319
+license: CC-BY-NC-ND-4.0
+reliability: >-
+  A study of every calendar table in Sahagún's manuscripts (the Primeros Memoriales, the Madrid
+  and Florentine codices and others), which finds that he worked with two traditions that agree
+  on the first month but place the five nemontemi differently, and with two Julian dates for the
+  new year. It is evidence of what Sahagún's tables say and of how unsettled the correlation of
+  the Mexica year with the Christian one was among the friars; it does not propose a correlation
+  of its own, and it dismisses an indigenous leap day as groundless.
+verified:
+  by: machine:claude-code
+  how: >-
+    The journal's PDF (article/download/78319/69271) fetched on 19 November 2026 (UTC) and read
+    in its text layer: the introduction and the general characteristics (pp. 13–15) and the
+    conclusions on the two traditions (pp. 59–60), with the printed page numbers; the tables in
+    between were skimmed. The text layer is OCR and repeats many lines; it reads ó as 6 in places
+    ("discusi6n") and an initial Tl as TI ("TIacaxipehualiztli"). Quotes are copied as the kept
+    text has them and were found in na-bartl-gobel-prem-1989-calendarios.txt by script.
