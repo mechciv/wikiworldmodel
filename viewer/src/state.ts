@@ -34,6 +34,17 @@ export interface ViewState {
    * view and the view reloaded from its link are drawn alike.
    */
   quality?: 'fast';
+  /**
+   * Seconds of the visit, by which what moves in a scene moves: the wind in its plants, its animals' idling, its water
+   * (docs/plans/RENDERING.md, step 5). Unsaid, it runs from when the page opened; a link that says it fixes it there, so
+   * that two loads of the link draw the same picture, as the tests need.
+   */
+  clock?: number;
+  /**
+   * Make a still of the view at once (docs/plans/RENDERING.md, step 8): the renderer keeps working on it while it holds
+   * still, until it is the best this machine can draw. Unsaid, a still is made once a visitor has rested the view a while.
+   */
+  still?: boolean;
 }
 
 /** The hours a city can be lit by: the sun is low but up at each end. Its sky has no twilight or night yet. */
@@ -59,6 +70,7 @@ export function quantize(s: ViewState): ViewState {
     window: [quantizeTime(s.window[0]), quantizeTime(s.window[1])],
     hour: Math.max(HOURS[0], Math.min(HOURS[1], s.hour)),
     month: s.month && s.month >= 1 && s.month <= 12 ? Math.round(s.month) : undefined,
+    clock: s.clock === undefined || !Number.isFinite(s.clock) ? undefined : q(Math.max(0, s.clock), 2),
   };
 }
 
@@ -83,6 +95,8 @@ export function toSearch(build: string, s: ViewState): string {
   if (s.layers?.length) p.set('ly', [...s.layers].sort().join(','));
   if (s.people) p.set('people', '1');
   if (s.quality) p.set('quality', s.quality);
+  if (s.clock !== undefined) p.set('clock', String(s.clock));
+  if (s.still) p.set('still', '1');
   return `?${p.toString()}`;
 }
 
@@ -124,6 +138,8 @@ export function fromSearch(search: string, defaults: ViewState): { build?: strin
     layers: toggled.length ? toggled : undefined,
     people: p.get('people') === '1' || undefined,
     quality: p.get('quality') === 'fast' ? 'fast' : undefined,
+    clock: p.has('clock') ? num('clock', 0) : undefined,
+    still: p.get('still') === '1' || undefined,
   });
   return { build: buildOf(search), state };
 }

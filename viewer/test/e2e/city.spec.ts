@@ -10,7 +10,8 @@ import { canvasPng, idle, latestBuild, line, settledUrl, touch } from './helpers
 // occlusion, bloom or multisampling, coarse meshes only), keeps the behaviour tests short. The
 // behaviour is the same either way.
 const small = { viewport: { width: 640, height: 380 } };
-const FAST = 'quality=fast';
+// The lighter way to draw, and the visit's clock fixed, so that two loads of a link draw the same picture.
+const FAST = 'quality=fast&clock=0';
 
 const OVERVIEW = 't=315.5&lat=41.8915&lon=12.49&d=1.000235&h=302&v=66';
 

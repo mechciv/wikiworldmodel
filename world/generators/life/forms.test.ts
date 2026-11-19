@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { parse } from 'yaml';
 import { describe, expect, it } from 'vitest';
 import { applyChange, canonicalForm, formSource, resolveForm, type Form, type TreeStep } from '../../../core/form.ts';
-import { Mesh } from '../city/kit.ts';
+import { MAT, Mesh, STRIDE } from '../city/kit.ts';
 import { checkForm, drawAnimal, drawPlant, meshBounds, POSE, unitStance } from './forms.ts';
 
 const PLANS = join(import.meta.dirname, '../../plans');
@@ -114,6 +114,35 @@ describe('the plans', () => {
       };
       expect(size(1), n).toBeLessThanOrEqual(size(2));
       expect(size(0), n).toBeLessThanOrEqual(size(1));
+    }
+  });
+
+  it('hold a plant\'s leaves on cards close by, and on fewer, larger cards from a way off, and never on the lighter way', () => {
+    // The materials of leaves on cards, and of the mass inside a crown (world/generators/city/kit.ts).
+    const onCards = new Set<number>([MAT.needleCard, MAT.frondCard, MAT.broadCard, MAT.fanCard]);
+    const cards = (m: Mesh) => {
+      const { vertices } = m.arrays();
+      const b = new Uint8Array(vertices);
+      let n = 0;
+      for (let i = 0; i < m.verts; i++) if (onCards.has(b[i * STRIDE + 24])) n++;
+      return n / 4;
+    };
+    for (const n of names) {
+      const f = canonicalForm(plans[n]);
+      if (f.kind !== 'plant') continue;
+      const draw = (d: 0 | 1 | 2, withCards: boolean) => {
+        const m = new Mesh(4096);
+        drawPlant(m, f, 12, 7, d, 90, withCards);
+        return m;
+      };
+      // Tufts are blades, and a mat floats: neither has leaves on cards.
+      const leafy = Object.values(f.parts).some((p) => p && p.type !== 'tuft' && p.type !== 'mat');
+      if (leafy) expect(cards(draw(2, true)), n).toBeGreaterThan(0);
+      expect(cards(draw(1, true)), n).toBeLessThanOrEqual(cards(draw(2, true)));
+      expect(cards(draw(1, false)), n).toBe(0);
+      expect(cards(draw(0, true)), n).toBe(0);
+      // The lighter way draws what it always did: a plant from a way off is no more than it was.
+      expect(draw(1, false).verts, n).toBeLessThanOrEqual(draw(1, true).verts);
     }
   });
 

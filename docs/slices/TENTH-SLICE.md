@@ -16,7 +16,7 @@ and depths.
   ichthyosaur, plesiosaur, mosasaur), and twenty-five records that adopt the database's great groups of the sea with their
   sizes, written by an agent on the forms' line ([FORMS.md](../FORMS.md)). Of the sea snapshot's 1,471,786 rows, 62% can
   now be drawn, up from 35%.
-- **A scene of the sea** (`gen:life/scene` version 5, [scene/v5.ts](../../world/generators/life/scene/v5.ts)): a place in
+- **A scene of the sea** (`gen:life/scene` version 5, `scene/v5.ts`, since replaced by later versions in [world/generators/life/scene/](../../world/generators/life/scene/)): a place in
   the sea has its floor from the field, no invented river, what lives on the floor resting on it and what swims in the
   water above it. A place on land makes what version 4 made.
 - **Under the water** ([gl/cityShaders.ts](../../viewer/src/gl/cityShaders.ts), [gl/city.ts](../../viewer/src/gl/city.ts),
@@ -63,7 +63,7 @@ cephalopods, snails, corals, trilobites, strophomenate brachiopods, sharks and l
 
 ### The scene
 
-[scene/v5.ts](../../world/generators/life/scene/v5.ts) is version 4 with a sea. A place whose ground at the origin lies under
+`scene/v5.ts` (since replaced by later versions in [world/generators/life/scene/](../../world/generators/life/scene/)) is version 4 with a sea. A place whose ground at the origin lies under
 the generator's `sea_below` is a scene of the sea: its water is the sea, at z = 0; its ground is the field's floor; it
 invents no river. In it, what swims is laid out where the water is more than 2 m deep, at least half its length above the
 floor and below the surface, and within `sea.swim_m` (40 m) of the floor; what lives on the floor, and what lives anywhere

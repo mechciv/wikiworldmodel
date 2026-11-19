@@ -15,7 +15,7 @@ import { lookup, scenarioKey, type Scenario } from '../../core/scenario.ts';
 import type { TerritoryFile } from '../../core/territory.ts';
 import { indexTree, subtree, type TreeFile } from '../../core/tree.ts';
 import { cityKind, placeAt, type FeatureTime, type FieldInfo, type GeneratorConstraint, type SiteInfo } from '../../core/tileset.ts';
-import { formatTime, fromMa, historical, MONTH_NAMES, PRESENT_YEAR, toMa } from '../../core/time.ts';
+import { formatTime, fromMa, historical, MONTH_NAMES, PRESENT_YEAR, timeToParam, toMa } from '../../core/time.ts';
 import { positionOf, timeAt } from '../../core/timescale.ts';
 import { warmestMonth } from '../../core/months.ts';
 import { snowOf } from '../../world/generators/life/climate.ts';
@@ -29,7 +29,7 @@ import { EARTH_RADIUS, fromLocal, toLocal, type CityStructure } from '../../core
 import type { AtlasWhere } from '../../core/atlas.ts';
 import type { SceneFileV2 } from '../../core/scene.ts';
 import { latticeOf } from '../../world/generators/life/spec.ts';
-import type { LivingParams } from '../../world/generators/life/scene/v5.ts';
+import type { LivingParams } from '../../world/generators/life/scene/v6.ts';
 import { Camera, MAX_DIST, MIN_DIST } from './camera.ts';
 import { LifeAtlas, type ClimateData } from './city/lifeatlas.ts';
 import { Climates, type ClimateAt } from './climates.ts';
@@ -46,6 +46,8 @@ import { FeatureTiles } from './features.ts';
 import { builds, fetchLog, getBytes, getJSON, loadBuild, loadRecord, type Build } from './data.ts';
 import { FieldRenderer, type FieldTileGPU } from './gl/field.ts';
 import { globeLook, GlobeRenderer, type CloudDrift } from './gl/globe.ts';
+import type { FrameProfile } from './gl/timer.ts';
+import { savePicture } from './picture.ts';
 import { add, cross, norm, scale, type V3 } from './mat.ts';
 import { buildOf, DEFAULT_HOUR, fromSearch, HOURS, quantize, toSearch, type ViewState } from './state.ts';
 import { TileManager, type LoadedTile } from './tiles.ts';
@@ -121,6 +123,11 @@ export interface WikiWorldModelHandle {
   organismsAt(id: string): { x: number; y: number; depth: number }[];
   organismPlaces(id: string): { lat: number; lon: number; x: number; y: number }[];
   set(s: Partial<ViewState>): void;
+  /**
+   * How long each pass of the local scene's frame takes, the median over this many frames drawn again of the view as it
+   * is (docs/plans/RENDERING.md, step 0); null where no scene is drawn.
+   */
+  profile(frames?: number): Promise<FrameProfile | null>;
   /** for a capture: how far the clouds have drifted along their bands, or null to put them back */
   driftClouds(d: CloudDrift | null): void;
 }
@@ -251,6 +258,25 @@ async function start(root: HTMLElement): Promise<void> {
   let cloudSpec: GeneratorConstraint | null = null;
   const clouds = printCheck();
   let cloudsReady = false;
+  /** the globe's clouds, as made: how much of the sky a scene's own clouds cover is theirs over its place (step 7) */
+  let cloudGrid: { width: number; height: number; density: Uint8Array } | null = null;
+  /** How much of the sky the globe's clouds cover around a place, 0–1: their mean over a few of their texels. */
+  const cloudCoverAt = (lat: number, lon: number): number => {
+    const g = cloudGrid;
+    if (!g) return 0.35;
+    const cj = Math.floor(((90 - lat) / 180) * g.height);
+    const ci = Math.floor(((lon + 180) / 360) * g.width);
+    let sum = 0;
+    let n = 0;
+    for (let j = cj - 2; j <= cj + 2; j++) {
+      if (j < 0 || j >= g.height) continue;
+      for (let i = ci - 2; i <= ci + 2; i++) {
+        sum += g.density[j * g.width + (((i % g.width) + g.width) % g.width)];
+        n++;
+      }
+    }
+    return n ? sum / n / 255 : 0.35;
+  };
   /** how far a capture has drifted the clouds, if one has */
   let cloudDrift: CloudDrift | undefined;
   let surfaceSpec: GeneratorConstraint | null = null;
@@ -498,7 +524,7 @@ async function start(root: HTMLElement): Promise<void> {
   const cityBar = document.createElement('div');
   cityBar.className = 'citybar';
   cityBar.hidden = true;
-  cityBar.innerHTML = `<label title="The hour of the day">Light <input type="range" min="${HOURS[0]}" max="${HOURS[1]}" step="0.05" aria-label="Hour of the day" /></label><label class="life-month" hidden title="The month the land is drawn in: its snow and the sun's height. Unless one is chosen, the place's warmest month">Month <select aria-label="Month of the year"><option value="">warmest</option>${MONTH_NAMES.map((m, i) => `<option value="${i + 1}">${m}</option>`).join('')}</select></label><button class="life-here" hidden title="What the records say lived here, and how sure that is"></button><button class="life-go" hidden title="Go down to where something of each is standing">Go and see</button><button class="to-globe" title="Back out to the whole Earth">Globe</button><button class="city-help" aria-expanded="false" aria-label="How to move about" title="${MOUSE_HELP}">?</button><p class="city-tips" hidden></p>`;
+  cityBar.innerHTML = `<label title="The hour of the day">Light <input type="range" min="${HOURS[0]}" max="${HOURS[1]}" step="0.05" aria-label="Hour of the day" /></label><label class="life-month" hidden title="The month the land is drawn in: its snow and the sun's height. Unless one is chosen, the place's warmest month">Month <select aria-label="Month of the year"><option value="">warmest</option>${MONTH_NAMES.map((m, i) => `<option value="${i + 1}">${m}</option>`).join('')}</select></label><button class="life-here" hidden title="What the records say lived here, and how sure that is"></button><button class="life-go" hidden title="Go down to where something of each is standing">Go and see</button><button class="save-picture" aria-label="Save picture" title="Save the picture as it is drawn, its link written into it. Rest the view a moment first: it is drawn better the longer it holds still">⤓</button><button class="to-globe" title="Back out to the whole Earth">Globe</button><button class="city-help" aria-expanded="false" aria-label="How to move about" title="${MOUSE_HELP}">?</button><p class="city-tips" hidden></p>`;
   stage.appendChild(cityBar);
   const cityEnter = document.createElement('button');
   cityEnter.className = 'city-enter';
@@ -663,6 +689,15 @@ async function start(root: HTMLElement): Promise<void> {
   let navigation = 0;
   let travel: { from: number; to: number; start: number; last: number; arrive: () => void } | null = null;
   let lastFrame = performance.now();
+  /** when the visit's clock started, and whether the last frame drew a scene whose clock runs */
+  const clockStart = performance.now();
+  let moving = false;
+  /** whether the last frame drew a scene whose frames, the view held still, are still being averaged */
+  let refining = false;
+  /** whether the last frame drew a scene; and whether a visitor has used the page, so a still may start of itself */
+  let cityDrawn = false;
+  let touched = false;
+  for (const e of ['pointerdown', 'keydown', 'wheel'] as const) window.addEventListener(e, () => (touched = true), { passive: true });
   let shownRecord: string | null = null;
 
   /** Is a time one the site is drawn for? */
@@ -710,6 +745,8 @@ async function start(root: HTMLElement): Promise<void> {
 
   function setState(p: Partial<ViewState>): void {
     const next = quantize({ ...state, ...p });
+    // Anything the visitor changes ends a still being made, unless the link asks for one.
+    if (city && !next.still) city.renderer.still = false;
     next.t = Math.max(dataRange[0], Math.min(dataRange[1], next.t));
     atSite(next.t, next.cam);
     // A time the site is not drawn for takes the camera back up to the globe.
@@ -884,6 +921,7 @@ async function start(root: HTMLElement): Promise<void> {
     const p = spec.params as unknown as CloudParams;
     const density = await generate(spec);
     globe.setClouds(p.width, p.height, density);
+    cloudGrid = { width: p.width, height: p.height, density };
     clouds.expected = spec.output;
     const problems = settlePrint(clouds, bytesPrint('pixels', density));
     if (problems.length) console.error(`the clouds generator's output differs from the build's: ${problems.join('; ')}`);
@@ -1003,6 +1041,9 @@ async function start(root: HTMLElement): Promise<void> {
 
 
   function render(): void {
+    moving = false;
+    refining = false;
+    cityDrawn = false;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     const w = Math.max(1, Math.round(stage.clientWidth * dpr));
     const h = Math.max(1, Math.round(stage.clientHeight * dpr));
@@ -1126,7 +1167,16 @@ async function start(root: HTMLElement): Promise<void> {
       const t0 = 1 - Math.max(0, Math.min(1, (range - solidAt) / (top - solidAt)));
       const alpha = t0 * t0 * (3 - 2 * t0);
       city!.select(state.sel);
-      city!.render(v, sunAt(state.hour, site!.origin.lat, city instanceof LifeScene ? city.declination : undefined), state.t, state.evidence, alpha, globeHidden, w, h);
+      // What moves in the scene moves by the visit's clock: fixed where the link says, running otherwise, and then drawn
+      // again every frame.
+      moving = state.clock === undefined;
+      // Frames are averaged once the scene has what it was waiting for: until then each mesh that comes starts them again,
+      // and a frame drawn to no purpose takes from the workers making the rest, as it does in software.
+      refining = city!.renderer.refining && city!.settled;
+      cityDrawn = true;
+      // The scene's clouds are the globe's over its place, or none where the clouds are turned off.
+      city!.renderer.setCloudCover(state.clouds ? cloudCoverAt(site!.origin.lat, site!.origin.lon) : 0);
+      city!.render(v, sunAt(state.hour, site!.origin.lat, city instanceof LifeScene ? city.declination : undefined), state.t, state.evidence, alpha, globeHidden, w, h, state.clock ?? (performance.now() - clockStart) / 1000);
       const labelKey = `${site!.id}|${city instanceof LifeScene ? city.labelSerial : 0}`;
       if (labelledSite !== labelKey) {
         labels.setStructures(city!.named, city!.tops, site!.label, (s) => s.label);
@@ -1249,7 +1299,13 @@ async function start(root: HTMLElement): Promise<void> {
     if (flight) stepFlight(now);
     if (walking.size && frameView) walk((now - lastFrame) / 1000);
     lastFrame = now;
-    if (!dirty) return;
+    // A still (step 8): at once where the link asks for one, or once a visitor has rested the view a while.
+    if (cityDrawn && city && !city.renderer.still && !city.renderer.refining && (state.still || (touched && city.renderer.steadyMs > 1500))) {
+      city.renderer.still = true;
+      dirty = true;
+    }
+    // A scene whose clock runs, or whose frames are still being averaged, is drawn again; that is not waiting on anything.
+    if (!dirty && !moving && !refining) return;
     dirty = false;
     render();
     // Tiles may still be arriving; keep rendering until they have.
@@ -1677,6 +1733,7 @@ async function start(root: HTMLElement): Promise<void> {
   cityBar.querySelector<HTMLInputElement>('input')!.oninput = (e) => setState({ hour: Number((e.target as HTMLInputElement).value) });
   cityBar.querySelector<HTMLSelectElement>('.life-month select')!.onchange = (e) => setState({ month: Number((e.target as HTMLSelectElement).value) || undefined });
   cityBar.querySelector<HTMLButtonElement>('.to-globe')!.onclick = () => flyTo({ lat: state.cam.lat, lon: state.cam.lon, dist: 2.6 }, 4200);
+  cityBar.querySelector<HTMLButtonElement>('.save-picture')!.onclick = () => void savePicture(canvas, location.href, `wikiworldmodel-${site?.id ?? 'view'}-${timeToParam(state.t)}`);
   // A title is never seen on a touch screen: the help opens on a tap, in the words for the screen it is on.
   const cityHelp = cityBar.querySelector<HTMLButtonElement>('.city-help')!;
   const cityTips = cityBar.querySelector<HTMLElement>('.city-tips')!;
@@ -2364,6 +2421,9 @@ async function start(root: HTMLElement): Promise<void> {
       ['biome texture', !biomeTexReady], ['generic land', !genericReady], ['climate', !climateReady || climates.busy], ['ice', !iceReady],
       ['territory', !territoryReady], ['tree', !!treeLoading], ['cube', !cubeKey.startsWith(`${state.t}|`)],
       ['selection', !!state.sel && shownRecord !== state.sel], ['flight', !!travel || !!flight || !!seaLook], ['city', cityWanted()],
+      // A view held still is averaged over a few frames, each a fraction of a pixel off the last: a test takes its frame
+      // once they are done (docs/plans/RENDERING.md, step 4).
+      ['refining', refining],
       ['landscape', landscapeOn() && (!landscape!.index || (landscapeLoading && !landscape!.globe))],
     ];
     return w.filter(([, x]) => x).map(([n]) => n);
@@ -2466,6 +2526,18 @@ async function start(root: HTMLElement): Promise<void> {
       return city.named.filter((x) => x.id === id).map((x) => projectLocal(v, x.at[0], x.at[1], x.base + 1)).filter((p): p is { x: number; y: number; depth: number } => !!p && p.x >= 0 && p.y >= 0 && p.x < stage.clientWidth && p.y < stage.clientHeight);
     },
     set: (s) => setState(s),
+    profile: async (frames = 20) => {
+      const timer = city?.renderer.timer;
+      if (!timer) return null;
+      timer.start();
+      // Each frame drawn again, as if the view had changed; timer queries answer a few frames late.
+      for (let i = 0; i < frames + 60 && timer.answered < frames; i++) {
+        city?.renderer.restart();
+        dirty = true;
+        await new Promise((done) => requestAnimationFrame(() => done(undefined)));
+      }
+      return timer.stop();
+    },
     driftClouds: (d) => {
       cloudDrift = d ?? undefined;
       dirty = true;

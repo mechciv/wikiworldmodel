@@ -136,6 +136,7 @@ body.evidence .planet-row.projection .planet-value { color: var(--procedural); }
 .citybar input[type='range'] { width: 110px; accent-color: var(--accent); }
 .citybar button { padding: 3px 9px; border-radius: 7px; border: 1px solid var(--line); background: rgba(233, 236, 242, 0.04); cursor: pointer; }
 .citybar .city-help { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; padding: 0; border-radius: 50%; cursor: help; }
+.citybar .save-picture { padding: 1px 6px; font-size: 13px; line-height: 1; }
 .city-tips { position: absolute; right: 0; bottom: calc(100% + 6px); width: min(330px, calc(100vw - 24px)); margin: 0; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--panel-border); background: var(--panel-solid); color: var(--text); font-size: 12px; }
 .city-enter { position: absolute; left: 50%; bottom: 74px; transform: translateX(-50%); padding: 7px 14px; border-radius: 18px; border: 1px solid var(--accent); background: rgba(10, 12, 18, 0.8); color: var(--accent); font: inherit; font-size: 13px; cursor: pointer; }
 canvas.globe.in-city { cursor: grab; }

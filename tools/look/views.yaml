@@ -1,0 +1,46 @@
+# The look book (docs/plans/RENDERING.md, step 0): the views a change to the renderer or to the generators' meshes is
+# judged on, each a place, a time and a camera, as a link without its build. The clock is fixed in each, so that two
+# shoots of one build draw the same picture. `npx tsx tools/look/look.ts shoot <dir>` shoots them, and
+# viewer/test/e2e/frametime.spec.ts holds each to the frame-time budget on the reference GPU.
+
+# The GPU the budget is for, as its driver names it (a pattern). A choice, to be made by whoever keeps the budget: the
+# GPU of a laptop of a few years ago, which a visitor can be expected to have.
+reference: Apple M1
+
+views:
+  - name: hell-creek-arrival
+    what: The Hell Creek where the way down arrives, by the river, from about 12 m up.
+    link: t=-66498050&lat=54.2141999&lon=-81.2315790&d=1.0000116151&h=19&v=81&clock=0
+  - name: hell-creek-tree
+    what: At the foot of a stand of trees in the Hell Creek, looking up into their crowns.
+    link: t=-66498050&lat=54.2132376&lon=-81.2297641&d=1.0000021975&h=150&v=93&clock=0
+  - name: hell-creek-bank
+    what: On the Hell Creek's bank, along the river, the far bank's trees across it.
+    link: t=-66498050&lat=54.2147101&lon=-81.2312785&d=1.0000047088&h=70&v=86&clock=0
+  - name: hell-creek-air
+    what: The Hell Creek from 300 m up, the forest along the river.
+    link: t=-66498050&lat=54.2141999&lon=-81.2315790&d=1.0000659237&h=19&v=45&clock=0
+  - name: hell-creek-dusk
+    what: The arrival with the sun low, for the colour of the light in the shade.
+    link: t=-66498050&lat=54.2141999&lon=-81.2315790&d=1.0000116151&h=19&v=81&hour=18.3&clock=0
+  - name: desert
+    what: A desert, the eastern Sahara in 1950, close over its sand.
+    link: t=1950&lat=25&lon=25&d=1.0000062785&h=30&v=82&hour=10&clock=0
+  - name: mountain-winter
+    what: Above the treeline on Mount Rainier in January 1950, snow over the slopes.
+    link: t=1950&lat=46.845&lon=-121.735&d=1.0001&h=270&v=78&mo=1&hour=12&clock=0
+  - name: sea-floor
+    what: The floor of a shelf sea of the Thanetian, near Paris, a few metres over it.
+    link: t=-57598050&lat=48&lon=2&d=1.0000004&h=30&v=80&hour=12&clock=0
+  - name: carboniferous-swamp
+    what: A coal swamp of the Moscovian, among its scale trees, at eye height.
+    link: t=-309048050&lat=-4&lon=-2&d=1.0000039&h=30&v=86&hour=12&clock=0
+  - name: open-plain
+    what: The Great Plains in 1950, a river winding through the open land.
+    link: t=1950&lat=38.5&lon=-99.5&d=1.00003&h=30&v=80&clock=0
+  - name: rome-forum
+    what: Rome's forum in 315, as the city's golden image has it.
+    link: t=315.5&lat=41.89185&lon=12.48665&d=1.00004&h=300&v=72&clock=0
+  - name: rome-street
+    what: A street of Rome in 315, from a few metres up.
+    link: t=315.5&lat=41.8945&lon=12.4925&d=1.0000006&h=200&v=86&clock=0
