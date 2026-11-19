@@ -2079,7 +2079,7 @@ void main() {
     float mu = dot(d, uSun);
     float g1 = 0.6;
     float forward = (1.0 - g1 * g1) / (12.566 * pow(1.0 + g1 * g1 - 2.0 * g1 * mu, 1.5));
-    float phase = mix(0.08, forward, 0.7) * 12.566;
+    float phase = mix(0.08, forward, 0.5) * 12.566;
     vec3 eye = vec3(0.0, 0.0, uHeight);
     vec3 glow = vec3(0.0);
     float through = 1.0;
@@ -2087,11 +2087,12 @@ void main() {
       vec3 p = eye + d * (t0 + (float(i) + start) * dt);
       float rho = cloudDensity(p);
       if (rho <= 0.0) continue;
-      // Towards the sun, how much cloud the light comes through.
-      float toward = cloudDensity(p + uSun * 110.0) + cloudDensity(p + uSun * 300.0) * 1.5;
+      // Towards the sun, how much cloud the light comes through: near by, and far along the layer, where a low sun's light
+      // crosses other heaps before it reaches this one (with the sun high, those points are above the layer).
+      float toward = cloudDensity(p + uSun * 110.0) + cloudDensity(p + uSun * 300.0) * 1.5 + cloudDensity(p + uSun * 900.0) * 3.0 + cloudDensity(p + uSun * 2200.0) * 5.0;
       // Light comes through the cloud towards the sun, and a heap's edges, thin, catch less of it (the powder of
       // Schneider and Vos 2015).
-      float sunlit = exp(-toward * 0.45) * (1.0 - exp(-rho * 4.0));
+      float sunlit = exp(-toward * 0.8) * (1.0 - exp(-rho * 4.0));
       float height = (p.z - CLOUD_BASE) / (CLOUD_TOP - CLOUD_BASE);
       vec3 light = uSunColor * sunlit * phase * 2.4 + uSkyTop * (0.7 + 0.7 * height);
       float k = rho * dt * 0.0035;

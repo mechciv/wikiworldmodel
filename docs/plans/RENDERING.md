@@ -270,9 +270,10 @@ above, it says so here.
   old pass. Light in the air is marched through the shadow map at a quarter of the frame's size, out to four distances
   along each pixel's way, and each pixel of the frame takes it as far as its own depth, so that a twig against the sky
   takes the air before it and not the sky's. AgX is the tone curve. A frame is exposed for the light on open level
-  ground, the sun's and the sky's, part of the way, as an eye adapts, so that dusk still reads darker than noon; then, at
-  full quality, metered from the frame, further for a dark frame than for a bright one, so that a forest floor is lifted
-  and snow and sand stay bright (`EXPOSURE` in [city.ts](../../viewer/src/gl/city.ts)). Frames are jittered and
+  ground, the sun's and the sky's, as an eye adapts by day, and below the light of a sun 18° up no further, so that dusk
+  reads darker than noon and a low sun's sky keeps its colours; then, at full quality, a frame darker than a key, a forest
+  floor, is lifted part of the way towards it, and a bright one is left as it is, so that snow and sand stay bright
+  (`EXPOSURE` in [city.ts](../../viewer/src/gl/city.ts)). Frames are jittered and
   averaged while the view holds still, eight of them, once the scene has settled, and a test takes its frame once they
   are; while the view moves, what was kept is reprojected and clamped. So that a frame which takes long, as in software,
   does not hold up a city's meshes, the scene asks its worker for every cell it wants at once, and the worker makes the
@@ -286,7 +287,8 @@ above, it says so here.
   more between each two. Hide, fur, feathers, chitin and wings have a grain in the body's own frame, and a body a pattern
   by its taxon's tint: stripes, spots, mottling or none. *Not built:* normals smoothed across the joints of parts.
 - **7. Clouds.** The sky marches a layer of cloud from 1400 m to 2400 m in steps of 250 m at most, each frame from a
-  start that moves across the screen, lit by the sun through itself; the ground's cloud
+  start that moves across the screen, lit by the sun through itself and, with the sun low, through the heaps its light
+  crosses along the layer, so that clouds against a low sun have dark cores and lit edges; the ground's cloud
   shadows are taken through the same layer. Its cover follows the globe's clouds over the scene, as fair weather: most of
   their cover, and never more than half the sky. The lighter way keeps its flat clouds.
 - **8. The still.** A view held still is refined further: 48 frames, drawn at twice the size each way, the shadows cast

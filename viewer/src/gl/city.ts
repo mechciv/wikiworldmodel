@@ -39,16 +39,16 @@ const STILL_SUN = 0.012;
  * How a frame is exposed (docs/plans/RENDERING.md, step 4): for the light on open level ground, the sun's on it and the
  * sky's, as an incident-light meter sets a camera, so that snow and sand stay bright and a meadow is a meadow's shade,
  * whatever the frame holds. Above a knee, about the light of a sun 18° up, it follows the light nearly all the way, as an
- * eye adapts by day; below it, less and less, so that twilight and night darken. Then, at full quality, a frame darker
- * than the key, a forest floor, is lifted part of the way towards it, as an eye adapts to shade; a brighter one is left
- * as its light makes it. The renderer's look, set on the look book's views; nobody's record.
+ * eye adapts by day; below it, not at all, so that dusk, twilight and night darken with the light and a sky with the sun
+ * low in it keeps its colours. Then, at full quality, a frame darker than the key, a forest floor, is lifted part of the
+ * way towards it, as an eye adapts to shade; a brighter one is left as its light makes it. The renderer's look, set on
+ * the look book's views; nobody's record.
  */
 const EXPOSURE = {
-  /** the knee, as `daylight` measures light; the exposure there; and how far it follows the light above and below */
+  /** the knee, as `daylight` measures light; the exposure there and below; and how far it follows the light above */
   knee: 1,
   at: 1.4,
   above: 0.85,
-  below: 0.4,
   /** the mean of an exposed frame's log luminance below which the meter lifts it; how far towards it; and at most */
   key: 0.18,
   lift: 0.5,
@@ -1731,8 +1731,7 @@ void main() {
     gl.activeTexture(gl.TEXTURE16);
     gl.bindTexture(gl.TEXTURE_2D, this.bloomTex[2]);
     // Exposed for the light on open ground (EXPOSURE); under the sea, opened up as the daylight falls.
-    const light = Math.max(this.daylight, 1e-4) / EXPOSURE.knee;
-    const exposure = EXPOSURE.at * Math.pow(light, light >= 1 ? -EXPOSURE.above : -EXPOSURE.below) * this.exposure;
+    const exposure = EXPOSURE.at * Math.pow(Math.max(this.daylight / EXPOSURE.knee, 1), -EXPOSURE.above) * this.exposure;
     setUniforms(gl, this.postP, {
       uExposure: exposure,
       uAlpha: f.alpha,
