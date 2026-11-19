@@ -35,6 +35,26 @@ const STILL_FRAMES = 48;
 const STILL_SCALE = 2;
 const STILL_SUN = 0.012;
 
+/**
+ * How a frame is exposed (docs/plans/RENDERING.md, step 4): for the light on open level ground, the sun's on it and the
+ * sky's, as an incident-light meter sets a camera, so that snow and sand stay bright and a meadow is a meadow's shade,
+ * whatever the frame holds. Above a knee, about the light of a sun 18° up, it follows the light nearly all the way, as an
+ * eye adapts by day; below it, less and less, so that twilight and night darken. Then, at full quality, a frame darker
+ * than the key, a forest floor, is lifted part of the way towards it, as an eye adapts to shade; a brighter one is left
+ * as its light makes it. The renderer's look, set on the look book's views; nobody's record.
+ */
+const EXPOSURE = {
+  /** the knee, as `daylight` measures light; the exposure there; and how far it follows the light above and below */
+  knee: 1,
+  at: 1.4,
+  above: 0.85,
+  below: 0.4,
+  /** the mean of an exposed frame's log luminance below which the meter lifts it; how far towards it; and at most */
+  key: 0.18,
+  lift: 0.5,
+  most: 1.8,
+};
+
 /** The Halton sequence in a base: the offsets frames are jittered by, spread evenly over a pixel. */
 function halton(i: number, base: number): number {
   let f = 1;
@@ -322,6 +342,8 @@ export class CityRenderer {
   private msDepth!: WebGLRenderbuffer;
   private resolveFb!: WebGLFramebuffer;
   private colorTex!: WebGLTexture;
+  /** the resolved colour alone, to add to while its depth is read */
+  private colorFb: WebGLFramebuffer | null = null;
   private depthTex!: WebGLTexture;
   private aoFb: WebGLFramebuffer[] = [];
   private aoTex: WebGLTexture[] = [];
@@ -358,6 +380,8 @@ export class CityRenderer {
   private lastDraw: CellGPU[] = [];
   private sunColor: V3 = [3, 2.8, 2.5];
   private skyTop: V3 = [0.3, 0.45, 0.8];
+  /** the light on open level ground, the sun's on it and the sky's from above, by which a frame is exposed */
+  private daylight = 3;
   private skyLow: V3 = [0.5, 0.55, 0.65];
   private bounce: V3 = [0.2, 0.17, 0.12];
   /** the sky's light by direction, as nine spherical harmonics (docs/plans/RENDERING.md, step 4) */
@@ -527,8 +551,8 @@ void main() {
     ints(this.postP, { uScene: 13, uBloom0: 14, uBloom1: 15, uBloom2: 16, uLum: 12 });
     ints(this.taaP, { uCurrent: 13, uHistory: 14, uDepth: 12 });
     ints(this.lumP, { uTex: 13 });
-    ints(this.shaftsP, { ...lit, uSceneDepth: UNIT.sceneDepth });
-    ints(this.shaftsAddP, { uTex: 13 });
+    ints(this.shaftsP, lit);
+    ints(this.shaftsAddP, { uTex: 13, uSceneDepth: UNIT.sceneDepth });
   }
 
   /** The ground's grids: heights to sample in the vertex shader, and normals to filter. */
@@ -952,6 +976,9 @@ void main() {
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.resolveFb);
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.colorTex, 0);
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, this.depthTex, 0);
+    if (!this.colorFb) this.colorFb = gl.createFramebuffer()!;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.colorFb);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.colorTex, 0);
     // Half-size occlusion, and the bloom's chain.
     for (const t of [...this.aoTex, ...this.bloomTex]) gl.deleteTexture(t);
     for (const f of [...this.aoFb, ...this.bloomFb]) gl.deleteFramebuffer(f);
@@ -1066,6 +1093,7 @@ void main() {
     this.skyLow = [low[0] * 0.26, low[1] * 0.26, low[2] * 0.26];
     this.skyHarmonics = skyHarmonics(table, sun, this.skyTop);
     const s = Math.max(sun[2], 0);
+    this.daylight = luminance(this.sunColor) * s + luminance(this.skyTop);
     this.bounce = [(this.sunColor[0] * s + this.skyTop[0]) * 0.13, (this.sunColor[1] * s + this.skyTop[1]) * 0.105, (this.sunColor[2] * s + this.skyTop[2]) * 0.075];
     for (let k = 0; k < 3; k++) this.shadowKeys[k] = '';
     draw(height);
@@ -1502,7 +1530,10 @@ void main() {
     time.endFrame();
   }
 
-  /** The light in the air (step 4): marched at a quarter of the frame's size, then added to the frame, resolved. */
+  /**
+   * The light in the air (step 4): marched at a quarter of the frame's size, out to four distances along each pixel's way,
+   * then added to the frame, resolved, each of its pixels taking it as far as its own depth.
+   */
   private shafts(f: CityFrame, vp: Mat4): void {
     if (!this.shaftsFb || f.sun[2] <= -0.02 || this.sea) return;
     const gl = this.gl;
@@ -1512,25 +1543,25 @@ void main() {
     gl.bindVertexArray(this.emptyVao);
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.shaftsFb);
     gl.viewport(0, 0, Math.max(1, this.w >> 2), Math.max(1, this.h >> 2));
-    gl.activeTexture(gl.TEXTURE0 + UNIT.sceneDepth);
-    gl.bindTexture(gl.TEXTURE_2D, this.depthTex);
+    const inv = invert(vp);
     this.useLit(this.shaftsP, f, vp);
-    setUniforms(gl, this.shaftsP, { uInvViewProj: invert(vp), uDensity: 0.00035, uThins: 80, uFloor: f.focus[2], uStart: this.sample * 7.13 });
+    setUniforms(gl, this.shaftsP, { uInvViewProj: inv, uThins: 80, uFloor: f.focus[2], uStart: this.sample * 7.13 });
     gl.drawArrays(gl.TRIANGLES, 0, 3);
-    gl.activeTexture(gl.TEXTURE0 + UNIT.sceneDepth);
-    gl.bindTexture(gl.TEXTURE_2D, null);
-    // Added to the frame, resolved: its own depth stays as it was.
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.resolveFb);
+    // Added to the frame, resolved, each pixel taking the air out to its own depth.
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.colorFb);
     gl.viewport(0, 0, this.w, this.h);
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.ONE, gl.ONE);
-    gl.depthMask(false);
     gl.useProgram(this.shaftsAddP.program);
+    setUniforms(gl, this.shaftsAddP, { uInvViewProj: inv, uSun: f.sun, uSunColor: this.sunColor, uDensity: 0.00035 });
+    gl.activeTexture(gl.TEXTURE0 + UNIT.sceneDepth);
+    gl.bindTexture(gl.TEXTURE_2D, this.depthTex);
     gl.activeTexture(gl.TEXTURE13);
     gl.bindTexture(gl.TEXTURE_2D, this.shaftsTex);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     gl.disable(gl.BLEND);
-    gl.depthMask(true);
+    gl.activeTexture(gl.TEXTURE0 + UNIT.sceneDepth);
+    gl.bindTexture(gl.TEXTURE_2D, null);
     gl.bindVertexArray(null);
   }
 
@@ -1699,8 +1730,16 @@ void main() {
     gl.bindTexture(gl.TEXTURE_2D, this.bloomTex[1]);
     gl.activeTexture(gl.TEXTURE16);
     gl.bindTexture(gl.TEXTURE_2D, this.bloomTex[2]);
-    // A camera stops down for a high sun, and under the sea opens up as the daylight falls.
-    setUniforms(gl, this.postP, { uExposure: 0.62 * (1 - 0.42 * Math.max(f.sun[2], 0)) * this.exposure, uAlpha: f.alpha, uSolid: f.solid ? 1 : 0, uMeter: metered ? 1 : 0, uKey: 0.16 });
+    // Exposed for the light on open ground (EXPOSURE); under the sea, opened up as the daylight falls.
+    const light = Math.max(this.daylight, 1e-4) / EXPOSURE.knee;
+    const exposure = EXPOSURE.at * Math.pow(light, light >= 1 ? -EXPOSURE.above : -EXPOSURE.below) * this.exposure;
+    setUniforms(gl, this.postP, {
+      uExposure: exposure,
+      uAlpha: f.alpha,
+      uSolid: f.solid ? 1 : 0,
+      uMeter: metered ? 1 : 0,
+      uMeterWay: [EXPOSURE.key, EXPOSURE.lift, EXPOSURE.most],
+    });
     if (f.alpha < 1 || !f.solid) {
       gl.enable(gl.BLEND);
       gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);

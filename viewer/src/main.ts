@@ -1124,7 +1124,9 @@ async function start(root: HTMLElement): Promise<void> {
       // What moves in the scene moves by the visit's clock: fixed where the link says, running otherwise, and then drawn
       // again every frame.
       moving = state.clock === undefined;
-      refining = city!.renderer.refining;
+      // Frames are averaged once the scene has what it was waiting for: until then each mesh that comes starts them again,
+      // and a frame drawn to no purpose takes from the workers making the rest, as it does in software.
+      refining = city!.renderer.refining && city!.settled;
       cityDrawn = true;
       // The scene's clouds are the globe's over its place, or none where the clouds are turned off.
       city!.renderer.setCloudCover(state.clouds ? cloudCoverAt(site!.origin.lat, site!.origin.lon) : 0);

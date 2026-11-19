@@ -204,9 +204,10 @@ vec3 leafCover(int m, vec2 uv) {
   vec2 p = vec2(uv.x * wide, uv.y - k);
   vec2 l = m == NEEDLE_CARD ? needles(p, wide, seed) : m == FROND_CARD ? frondLeaves(p, wide, seed) : broadLeaves(p, wide, seed);
   float aa = max(length(fwidth(p)), 1e-5);
-  float a = clamp(0.5 - l.x / aa, 0.0, 1.0);
-  float avg = m == NEEDLE_CARD ? 0.5 : m == FROND_CARD ? 0.46 : 0.55;
-  return vec3(mix(a, avg, smoothstep(0.012, 0.05, aa)), l.y, 0.0);
+  // Once its leaves are finer than a pixel or so, each grows by part of one: a spray closes, within its own outline, into
+  // the mass that a real one, leaves over leaves, shows from as far, rather than letting the sky through it.
+  float grow = aa * 0.6 * smoothstep(0.01, 0.04, aa);
+  return vec3(clamp(0.5 - (l.x - grow) / aa, 0.0, 1.0), l.y, 0.0);
 }
 `;
 
@@ -1253,6 +1254,8 @@ precision highp sampler3D;
 precision highp sampler2DArrayShadow;
 in vec3 vPos;
 uniform vec3 uEye;
+// The wind across the ground, as the renderer has it: sand's ripples lie across it.
+uniform vec2 uWind;
 uniform vec4 uInner;
 uniform highp sampler2D uNormal0;
 uniform highp sampler2D uNormal1;
@@ -1434,14 +1437,18 @@ vec3 groundClose(vec3 c, vec3 p, vec3 n, float dist, vec4 mask, float slope, out
   vec3 fallen = mix(vec3(0.17, 0.12, 0.06), vec3(0.30, 0.22, 0.10), noiseM(p, 0.09));
   vec3 litter = mix(fallen, needles, uLitter) * (0.7 + 0.5 * noiseM(p + 7.0, 0.03));
   vec3 mud = mix(uTone[0], uTone[1], 0.3) * vec3(0.62, 0.6, 0.58);
-  vec3 sand = mix(uTone[4], uTone[5], noiseM(p, 0.5)) * (0.86 + 0.24 * noiseS(p, vec3(0.06, 0.6, 1.0)));
+  // Sand: mottled, with a fine grain; and close by its ripples, crests across the wind a hand's breadth apart, wavering,
+  // gone before a pixel is too coarse to hold them.
+  vec2 wind = normalize(uWind + vec2(1e-4, 0.0));
+  float ripple = (abs(fract(dot(p.xy, wind) / 0.25 + fbmM(p, 0.6) * 3.0) - 0.5) * 4.0 - 1.0) * (1.0 - smoothstep(3.0, 9.0, dist));
+  vec3 sand = mix(uTone[4], uTone[5], noiseM(p, 0.5)) * (0.88 + 0.2 * noiseM(p, 0.04) + 0.05 * ripple);
   vec3 gravel = mix(vec3(0.30, 0.28, 0.25), mix(uTone[4], uTone[5], 0.5), noiseM(p, 0.04)) * (0.6 + 0.7 * noiseM(p + 2.0, 0.025));
   vec3 rock = vec3(0.36, 0.33, 0.28) * (0.72 + 0.5 * fbmM(p, 0.6));
   // Each one's height, and how much of it there is here.
   float hSoil = fbmM(p, 0.3);
   float hLitter = noiseM(p, 0.07) * 0.6 + noiseM(p + 3.0, 0.22) * 0.4;
   float hMud = noiseM(p, 0.5) * 0.7;
-  float hSand = noiseS(p, vec3(0.25, 0.9, 1.0)) * 0.8;
+  float hSand = fbmM(p, 0.45) * 0.8 + ripple * 0.12;
   float hGravel = noiseM(p, 0.035);
   float hRock = fbmM(p, 0.8) + 0.2;
   float wRock = smoothstep(0.2, 0.42, slope);
@@ -2062,10 +2069,13 @@ void main() {
     }
   } else if (d.z > 0.012 && uCloudCover > 0.0 && uHeight < CLOUD_BASE) {
     float t0 = (CLOUD_BASE - uHeight) / d.z;
-    float t1 = min((CLOUD_TOP - uHeight) / d.z, t0 + 9000.0);
-    const int STEPS = 12;
+    // Steps of 250 m at most, low towards the horizon, where the layer is crossed a long way: fewer, longer ones hit or
+    // missed its heaps too much at random for a few frames' average to smooth.
+    float t1 = min((CLOUD_TOP - uHeight) / d.z, t0 + 6000.0);
+    const int STEPS = 24;
     float dt = (t1 - t0) / float(STEPS);
-    float start = fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715))) + uFrameNoise * 0.618034);
+    // The pattern moves across the screen from frame to frame, so that the frames' average takes it out.
+    float start = fract(52.9829189 * fract(dot(gl_FragCoord.xy + 5.588238 * uFrameNoise, vec2(0.06711056, 0.00583715))));
     float mu = dot(d, uSun);
     float g1 = 0.6;
     float forward = (1.0 - g1 * g1) / (12.566 * pow(1.0 + g1 * g1 - 2.0 * g1 * mu, 1.5));
@@ -2306,7 +2316,6 @@ precision highp float;
 precision highp sampler3D;
 precision highp sampler2DArrayShadow;
 in vec2 vUv;
-uniform highp sampler2D uSceneDepth;
 uniform mat4 uInvViewProj;
 uniform vec3 uEye;
 // How much the air scatters, per metre, low down; the height over which that thins by e; the ground under the eye.
@@ -2326,37 +2335,56 @@ float lit(vec3 p) {
   if (u.x < 0.0 || u.x > 1.0 || u.y < 0.0 || u.y > 1.0 || u.z > 1.0) return 1.0;
   return texture(uShadow, vec4(u.xy, float(k), u.z - 0.0002));
 }
+// Along a pixel's way into the scene, whatever it meets there: how much sunlit air it passes out to 40, 80, 160 and
+// 320 m. A pixel of the frame reads it at its own depth (SHAFTS_ADD_FS), so that a twig against the sky takes the air
+// before the twig, and not the sky's.
 void main() {
-  float raw = texture(uSceneDepth, vUv).r;
-  vec4 w = uInvViewProj * vec4(vUv * 2.0 - 1.0, raw * 2.0 - 1.0, 1.0);
-  vec3 rel = w.xyz / w.w;
-  float len = length(rel);
-  vec3 dir = rel / max(len, 1e-4);
-  float reach = min(len, 320.0);
+  vec4 w = uInvViewProj * vec4(vUv * 2.0 - 1.0, 0.0, 1.0);
+  vec3 dir = normalize(w.xyz / w.w);
   const int STEPS = 16;
-  float dl = reach / float(STEPS);
+  const float dl = 20.0;
   float start = fract(52.9829189 * fract(dot(gl_FragCoord.xy + uStart, vec2(0.06711056, 0.00583715))));
   float sum = 0.0;
+  vec4 at = vec4(0.0);
   for (int i = 0; i < STEPS; i++) {
     vec3 q = uEye + dir * (float(i) + start) * dl;
     // The eye is drawn with the Earth's curve taken off; the shadow map and the air take it back.
     q.z += drop(q.xy);
     sum += lit(q) * exp(-max(q.z - uFloor, 0.0) / uThins) * dl;
+    if (i == 1) at.x = sum;
+    if (i == 3) at.y = sum;
+    if (i == 7) at.z = sum;
   }
-  // Scattered mostly forwards, as haze scatters: brightest looking towards the sun.
-  float mu = dot(dir, uSun);
-  float g = 0.62;
-  float phase = (1.0 - g * g) / (12.566 * pow(1.0 + g * g - 2.0 * g * mu, 1.5));
-  o = vec4(uSunColor * phase * uDensity * sum * smoothstep(-0.02, 0.06, uSun.z), 1.0);
+  at.w = sum;
+  o = at;
 }`;
 
-/** The light in the air, a quarter of the frame's size, added to it. */
+/** The light in the air, a quarter of the frame's size, added to it: each pixel takes it as far as its own depth. */
 export const SHAFTS_ADD_FS = /* glsl */ `#version 300 es
 precision highp float;
 in vec2 vUv;
 uniform highp sampler2D uTex;
+uniform highp sampler2D uSceneDepth;
+uniform mat4 uInvViewProj;
+uniform vec3 uSun;
+uniform vec3 uSunColor;
+uniform float uDensity;
 out vec4 o;
-void main() { o = vec4(texture(uTex, vUv).rgb, 0.0); }`;
+void main() {
+  vec4 at = texture(uTex, vUv);
+  vec4 w = uInvViewProj * vec4(vUv * 2.0 - 1.0, texture(uSceneDepth, vUv).r * 2.0 - 1.0, 1.0);
+  vec3 rel = w.xyz / w.w;
+  float len = length(rel);
+  vec3 dir = rel / max(len, 1e-4);
+  // The sunlit air out to this pixel's own depth, between the distances it was summed to.
+  float d = min(len, 320.0);
+  float sum = d < 40.0 ? at.x * d / 40.0 : d < 80.0 ? mix(at.x, at.y, (d - 40.0) / 40.0) : d < 160.0 ? mix(at.y, at.z, (d - 80.0) / 80.0) : mix(at.z, at.w, (d - 160.0) / 160.0);
+  // Scattered mostly forwards, as haze scatters: brightest looking towards the sun.
+  float mu = dot(dir, uSun);
+  float g = 0.62;
+  float phase = (1.0 - g * g) / (12.566 * pow(1.0 + g * g - 2.0 * g * mu, 1.5));
+  o = vec4(uSunColor * phase * uDensity * sum * smoothstep(-0.02, 0.06, uSun.z), 0.0);
+}`;
 
 /** The log of the light of the frame, a block of it to a texel: its mean, from the smallest of its mipmaps, meters the exposure. */
 export const LUM_FS = /* glsl */ `#version 300 es
@@ -2386,11 +2414,11 @@ uniform highp sampler2D uBloom1;
 uniform highp sampler2D uBloom2;
 uniform float uExposure;
 uniform float uAlpha;
-// The frame's light, metered (step 4): the mean of its log, in the meter's last mipmap; 1 where it is metered. And the
-// light a metered frame is brought towards.
+// The frame's light, metered (step 4): the mean of its log, in the meter's last mipmap; 1 where it is metered. The key a
+// darker frame is lifted towards, how far, and at most how much.
 uniform highp sampler2D uLum;
 uniform float uMeter;
-uniform float uKey;
+uniform vec3 uMeterWay;
 // 1: the sky is drawn solid, so the scene covers the whole frame; its alpha, which leaves' coverage leaves short of 1 at
 // their edges, is not read
 uniform float uSolid;
@@ -2423,10 +2451,10 @@ void main() {
   c += bloom * 0.1;
   float exposure = uExposure;
   if (uMeter > 0.5) {
-    // As a camera meters: part of the way towards the key, so that a forest floor still reads darker than a meadow and
-    // snow brighter, and within a stop or so of the light's own exposure.
-    float mean = exp2(textureLod(uLum, vec2(0.5), 6.0).r) * uExposure;
-    exposure *= clamp(pow(uKey / max(mean, 1e-4), 0.5), 0.6, 1.7);
+    // As an eye adapts to shade: a frame darker than the key, a forest floor, is lifted part of the way towards it, and
+    // still reads darker than a meadow; a brighter one, snow or sand, is left as bright as its light makes it.
+    float k = uMeterWay.x / max(exp2(textureLod(uLum, vec2(0.5), 6.0).r) * uExposure, 1e-4);
+    exposure *= clamp(pow(k, uMeterWay.y), 1.0, uMeterWay.z);
   }
   c *= exposure;
   c = agx(c);

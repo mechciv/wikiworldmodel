@@ -246,8 +246,10 @@ above, it says so here.
   [frametime.spec.ts](../../viewer/test/e2e/frametime.spec.ts), the browser tests' `frame-time` group, holds each view to
   16 ms at 1600 × 900 on the reference GPU, and skips anywhere else. The reference GPU is a choice still to be made.
 - **1. Plants.** Every plant part type grows branches and holds its leaves on cards, cut by the shader to needles, a
-  frond's leaflets or broad leaves as its material says, blended at their edges by coverage; a dark mass of leaves
-  inside a crown stands for the leaves behind. From a way off (detail 1) a plant is its trunk, that mass and fewer,
+  frond's leaflets or broad leaves as its material says, blended at their edges by coverage; once they are finer than a
+  pixel, each grows by part of one, so that a spray far off closes into a mass within its own outline, as a real one,
+  leaves over leaves, does, rather than letting the sky through. A dark mass of leaves inside a crown stands for the
+  leaves behind. From a way off (detail 1) a plant is its trunk, that mass and fewer,
   larger cards, so that it keeps its ragged edge and its colour; the lighter way keeps its plain shapes. Leaves are lit
   as their crown's mass, with light through them. The shadow, depth and pick passes cut them as the lit pass does; the
   depth before the lit pass leaves them out, and they write their own. `gen:life/scene` is version 6. *Not built:*
@@ -258,15 +260,24 @@ above, it says so here.
   of cards of blades, a fern a few fronds, anything else a few sprays of its leaves. Soil, litter, mud, sand, gravel and
   rock blend by height close by, with a grain from their heights. Banks: the water near the eye is drawn from above into a
   map of its level, blurred to its banks, so that ground within the water's rise of it is wet, with mud and sand on the
-  gentler slopes. Litter under trees is needles or leaves as the scene's canopy has them.
+  gentler slopes. Litter under trees is needles or leaves as the scene's canopy has them. Sand is mottled, and close by
+  rippled across the renderer's wind.
 - **3. Water.** What is drawn so far is resolved before the water, which sees its bed through itself, coloured by how
   much water lies along the view, and reflects its banks by marching across the screen against the depth, the sky where
   that finds nothing. Its ripples are carried by the current. *Not built:* a planar reflection for a lake or the sea.
 - **4. Light.** The sky's light on a surface follows its direction, from nine spherical harmonics of the sky table. Under
   the canopy the sky's light is dimmed on the ground and on what stands low. Ground-truth ambient occlusion replaces the
-  old pass. Light in the air is marched through the shadow map. AgX is the tone curve, and the exposure is metered from
-  the frame, part of the way. Frames are jittered and averaged while the view holds still, eight of them, and a test
-  takes its frame once they are; while the view moves, what was kept is reprojected and clamped.
+  old pass. Light in the air is marched through the shadow map at a quarter of the frame's size, out to four distances
+  along each pixel's way, and each pixel of the frame takes it as far as its own depth, so that a twig against the sky
+  takes the air before it and not the sky's. AgX is the tone curve. A frame is exposed for the light on open level
+  ground, the sun's and the sky's, part of the way, as an eye adapts, so that dusk still reads darker than noon; then, at
+  full quality, metered from the frame, further for a dark frame than for a bright one, so that a forest floor is lifted
+  and snow and sand stay bright (`EXPOSURE` in [city.ts](../../viewer/src/gl/city.ts)). Frames are jittered and
+  averaged while the view holds still, eight of them, once the scene has settled, and a test takes its frame once they
+  are; while the view moves, what was kept is reprojected and clamped. So that a frame which takes long, as in software,
+  does not hold up a city's meshes, the scene asks its worker for every cell it wants at once, and the worker makes the
+  nearest first ([worker.ts](../../viewer/src/city/worker.ts)): Rome's 972 cells, which came three a frame, now come
+  as fast as the worker makes them.
 - **5. Movement.** The visit's clock (`clock=` in a link; the tests fix it) moves the wind in the plants, the ripples, the
   clouds and the animals: each vertex of an animal says whether it moves with the head, the neck, the tail or the
   breathing trunk, and the shader turns it about its joint, at a pace set by the body's length. The wind's direction is
@@ -274,7 +285,8 @@ above, it says so here.
 - **6. Bodies.** A body's trunk, head and tubes have half as many sides again close by, and a head's or a tube's rings one
   more between each two. Hide, fur, feathers, chitin and wings have a grain in the body's own frame, and a body a pattern
   by its taxon's tint: stripes, spots, mottling or none. *Not built:* normals smoothed across the joints of parts.
-- **7. Clouds.** The sky marches a layer of cloud from 1400 m to 2400 m, lit by the sun through itself; the ground's cloud
+- **7. Clouds.** The sky marches a layer of cloud from 1400 m to 2400 m in steps of 250 m at most, each frame from a
+  start that moves across the screen, lit by the sun through itself; the ground's cloud
   shadows are taken through the same layer. Its cover follows the globe's clouds over the scene, as fair weather: most of
   their cover, and never more than half the sky. The lighter way keeps its flat clouds.
 - **8. The still.** A view held still is refined further: 48 frames, drawn at twice the size each way, the shadows cast
