@@ -63,6 +63,12 @@ export interface LivingTaxon {
   variants?: Record<string, FeatureTime>;
 }
 
+/**
+ * Whether a taxon of a scene stands at a time: within the span its record gives it, or its rows in the stage. A scene's
+ * renderer draws it only then, so a scene at a time its rows do not reach does not draw it.
+ */
+export const standsAt = (time: FeatureTime, t: number): boolean => (time.start.best ?? -Infinity) <= t && t <= (time.end.best ?? Infinity);
+
 /** The elevation field around a place, at the keyframe nearest its time: rows from the north, in metres above the coast. */
 export interface ReliefPatch {
   lat0: number;

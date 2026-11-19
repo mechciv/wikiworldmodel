@@ -15,7 +15,7 @@ import { sha256, stableStringify } from '../util.ts';
 import type { World } from '../world.ts';
 import type { ClimateKeyframe } from './climate.ts';
 import { SRC_W, type Snapshot } from './fields.ts';
-import { sourceRecord, type Solved } from './records.ts';
+import { claimOf, sourceRecord, subjectTime, type Solved } from './records.ts';
 
 export interface AtlasParams {
   /** the grid of the lists, and of the distances, in degrees */
@@ -33,6 +33,8 @@ export interface AtlasParams {
   shallow_m: number;
   /** a row dated to a span longer than this says too little of any stage, in Myr */
   longest_span: number;
+  /** and one longer than this many times a stage too little of that stage: a row of the whole Pleistocene, of the Holocene */
+  longest_span_in_stages: number;
   /** and one longer than this is left out for a taxon that has rows dated better than it, which say more */
   tight_span: number;
   /** a stage is cut if it is longer than this, and joined to the next if shorter, in Myr */
@@ -188,23 +190,79 @@ export class LandGraph {
   }
 }
 
-/** Stages from the world's chart, cut or joined to a usable length. Youngest last. */
+/**
+ * How much of a row a stage holds: the share of the row's span that lies in it, or 0 where the row says too little of the
+ * stage to count at all. A row dated to a span longer than `longest_span` says too little of any stage, and one longer than
+ * `longest_span_in_stages` times the stage too little of that stage: a row of the whole Pleistocene says next to nothing of
+ * the Holocene, though its span takes the Holocene in.
+ */
+export function rowShare(max: number, min: number, olderMa: number, youngerMa: number, p: Pick<AtlasParams, 'longest_span' | 'longest_span_in_stages'>): number {
+  if (max <= youngerMa || min >= olderMa) return 0;
+  const span = max - min;
+  if (span > p.longest_span || span > p.longest_span_in_stages * (olderMa - youngerMa)) return 0;
+  return (Math.min(max, olderMa) - Math.max(min, youngerMa)) / Math.max(span, 1e-3);
+}
+
+/** When a record says its taxon died out, as an age in Ma, at the latest its end may be: undefined where it gives no end. */
+export function recordEndMa(s: Solved, id: string): number | undefined {
+  const c = claimOf(s, id, 'end');
+  if (!c || c.value === 'unknown') return undefined;
+  const best = subjectTime(s, id).time.end.best;
+  return best === null || !Number.isFinite(best) ? undefined : toMa(best);
+}
+
+/**
+ * When each taxon of a snapshot died out, as the world's records say, as an age in Ma: the earliest end of the records that
+ * adopt it and the clades above it, as nothing outlives its clade. Undefined where none of them gives an end.
+ */
+export function endsOf(snap: Pick<LandSnapshot, 'taxa'>, adoptedAt: Map<number, string>, recordEnd: (id: string) => number | undefined): (no: number) => number | undefined {
+  const byNo = new Map(snap.taxa.map((t) => [t[0], t]));
+  const ends = new Map<string, number | undefined>();
+  const memo = new Map<number, number | undefined>();
+  return (no) => {
+    if (memo.has(no)) return memo.get(no);
+    let out: number | undefined;
+    for (let x = no, g = 0; x && byNo.has(x) && g < 200; x = byNo.get(x)![3], g++) {
+      const id = adoptedAt.get(x);
+      if (!id) continue;
+      if (!ends.has(id)) ends.set(id, recordEnd(id));
+      const e = ends.get(id);
+      if (e !== undefined && (out === undefined || e > out)) out = e;
+    }
+    memo.set(no, out);
+    return out;
+  };
+}
+
+/**
+ * Stages from the world's chart, cut or joined to a usable length. Youngest last. A run of stages joined into one is named
+ * for the unit of the chart it makes up, where it makes one up: the Holocene's three stages are the Holocene.
+ */
 export function atlasBins(periods: Pick<PeriodRecord, 'rank' | 'start' | 'end' | 'name'>[], longest: number, shortest: number, oldest = 541): { from: number; to: number; name: string }[] {
+  const span = (p: Pick<PeriodRecord, 'start' | 'end'>) => ({ older: toMa(p.start), younger: Math.max(0, toMa(p.end)) });
   const stages = periods
     .filter((p) => p.rank === 'stage')
-    .map((p) => ({ older: toMa(p.start), younger: Math.max(0, toMa(p.end)), name: p.name }))
+    .map((p) => ({ ...span(p), name: p.name }))
     .filter((p) => p.older <= oldest + 0.5)
     .sort((a, b) => a.younger - b.younger);
-  const out: { older: number; younger: number; name: string }[] = [];
+  const out: { older: number; younger: number; name: string; joined?: boolean }[] = [];
   for (const s of stages) {
     // The shortest are the youngest: joined to the next, up the chart, until they are long enough.
     const prev = out[out.length - 1];
     if (prev && prev.older - prev.younger < shortest) {
       prev.older = s.older;
       prev.name = `${s.name} to ${prev.name}`;
+      prev.joined = true;
       continue;
     }
     out.push({ ...s });
+  }
+  const units = periods.filter((p) => p.rank !== 'stage').map((p) => ({ ...span(p), name: p.name }));
+  const same = (a: number, b: number) => Math.abs(a - b) < 1e-6;
+  for (const s of out) {
+    if (!s.joined) continue;
+    const unit = units.filter((u) => same(u.older, s.older) && same(u.younger, s.younger)).sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0))[0];
+    if (unit) s.name = unit.name;
   }
   const cut: { from: number; to: number; name: string }[] = [];
   for (const s of out) {
@@ -219,6 +277,8 @@ export function atlasBins(periods: Pick<PeriodRecord, 'rank' | 'start' | 'end' |
 }
 
 const round = (x: number, k = 1000) => Math.round(x * k) / k;
+/** A span in Ma to the year: a scene draws a taxon only while its rows reach the time shown, which near the present is a year. */
+export const YEAR = 1e6;
 
 export interface AtlasOut {
   index: AtlasIndex;
@@ -227,7 +287,8 @@ export interface AtlasOut {
   wanted: { no: number; name: string; rows: number; node: string | null }[];
 }
 
-export function buildAtlas(s: Solved, periods: PeriodRecord[], elevation: Snapshot[], climate: ClimateKeyframe[], climateGridInfo: { step: number; nx: number; lon0: number; lat0: number }, rule: ClimateRule, log: (m: string) => void): AtlasOut | undefined {
+/** `recordEnd` says when a record's taxon died out; the world's solved records unless a test says otherwise. */
+export function buildAtlas(s: Solved, periods: PeriodRecord[], elevation: Snapshot[], climate: ClimateKeyframe[], climateGridInfo: { step: number; nx: number; lon0: number; lat0: number }, rule: ClimateRule, log: (m: string) => void, recordEnd: (id: string) => number | undefined = (id) => recordEndMa(s, id)): AtlasOut | undefined {
   const w = s.world;
   const field = w.fields.find((f) => f.data?.as === 'community');
   if (!field) return undefined;
@@ -291,6 +352,9 @@ export function buildAtlas(s: Solved, periods: PeriodRecord[], elevation: Snapsh
     rowsBySite[site].push(t);
     if (snap.sites[site][3] - snap.sites[site][4] <= p.tight_span) tight.add(t);
   }
+  // Where a record says when a taxon, or a clade above it, died out, nothing of it is drawn after: a row dated wholly after
+  // that end says what the record denies, and is left out, and the taxon's span in a stage ends there.
+  const endOf = endsOf(snap, adoptedAt, recordEnd);
 
   const bins = atlasBins(periods, p.longest_bin, p.shortest_bin);
   const grid: AtlasGrid = { step: p.grid_deg, nx: Math.round(360 / p.grid_deg), ny: Math.round(180 / p.grid_deg) };
@@ -325,15 +389,14 @@ export function buildAtlas(s: Solved, periods: PeriodRecord[], elevation: Snapsh
     let rowsHere = 0;
     snap.sites.forEach((site, i) => {
       const [, lat, lng, max, min] = site;
-      if (max <= youngerMa || min >= olderMa) return;
-      if (max - min > p.longest_span) return;
+      const share = rowShare(max, min, olderMa, youngerMa, p);
+      if (!share) return;
       const plate = sitePlate[i];
       if (!plate || !s.model.reaches(plate, midMa) || !s.model.reaches(plate, 0)) return;
       const list = rowsBySite[i];
       if (!list.length) return;
       const [la, lo] = toLatLon(rotate(s.model.total(plate, midMa), rotate(conj(s.model.total(plate, 0)), unitVector(lat, lng))));
       const node = graph.nodeAt(la, lo);
-      const share = (Math.min(max, olderMa) - Math.max(min, youngerMa)) / Math.max(max - min, 1e-3);
       let here = atNode.get(node);
       if (!here) {
         here = new Map();
@@ -341,6 +404,8 @@ export function buildAtlas(s: Solved, periods: PeriodRecord[], elevation: Snapsh
       }
       for (const t of list) {
         if (max - min > p.tight_span && tight.has(t)) continue;
+        const end = endOf(t);
+        if (end !== undefined && max <= end) continue;
         rowsHere++;
         const e = here.get(t);
         if (e) {
@@ -512,7 +577,7 @@ export function buildAtlas(s: Solved, periods: PeriodRecord[], elevation: Snapsh
             const i = entry(`t${t}`, () => {
               const q = spanOf.get(t)!;
               const kn = known.get(t)!;
-              return { ...kn.taxon, rows: q[2], span: [round(q[0]), round(q[1])] };
+              return { ...kn.taxon, rows: q[2], span: [round(q[0], YEAR), round(Math.max(q[1], endOf(t) ?? -Infinity), YEAR)] };
             });
             flat.push(i, Math.max(1, Math.round((sc / top) * 255)), km <= p.here_km ? TIER.here : TIER.region, Math.round(Math.min(65535, km / 10)));
           }
@@ -529,9 +594,10 @@ export function buildAtlas(s: Solved, periods: PeriodRecord[], elevation: Snapsh
         for (const b of best) {
           const example = exampleOf.get(b.node)!;
           const i = entry(`n${b.node}`, () => {
-            // Drawn as the clade: its span is the stage's, as all that is known is that its kind was somewhere.
+            // Drawn as the clade: its span is the stage's, as all that is known is that its kind was somewhere, up to the
+            // clade's end where a record gives one.
             const label = example.taxon.form_label;
-            return { ...example.taxon, label, no: b.nodeNo, id: b.node, rank: '', own: true, rows: 0, span: [round(olderMa), round(youngerMa)], standin: true };
+            return { ...example.taxon, label, no: b.nodeNo, id: b.node, rank: '', own: true, rows: 0, span: [round(olderMa, YEAR), round(Math.max(youngerMa, endOf(b.nodeNo) ?? -Infinity), YEAR)], standin: true };
           });
           flat.push(i, Math.max(1, Math.round((b.w / top) * 255)), TIER.standin, far);
         }

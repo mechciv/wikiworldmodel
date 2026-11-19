@@ -184,6 +184,9 @@ The atlas takes about 30 s of a build of about 3.5 minutes. On a laptop's GPU a 
 - **Density is a rule, not a census,** and the factor of 12 is for a visitor's sake. Trophic levels are only that predators are fewer.
 - **No seas.** Marine taxa are left out, and over the sea nothing is drawn. Fish are on the lists and are not drawn, because the water is opaque.
 - **Today is thin.** The snapshot has only fossils. The last stage is the Pleistocene and Holocene's subfossils, not the living world.
+  (Since then the Holocene is a stage of its own, a row dated more than ten times as loosely as a stage is left out of it, and a
+  taxon is not drawn after its record says it died out, so a scene of historical times no longer draws the Pleistocene's
+  animals: see [LIVING-WORLD.md](../LIVING-WORLD.md), step 8.)
 - **A scene is written for the middle of its stage.** The land is the keyframe nearest it, and climate the nearest of its 10 Myr runs.
 - **Competing claims do not move a scene's list.** A taxon's size follows the default picture.
 - **Forms are one file.** It should be split by hash long before a million forms, and a stage's lists could be half the size if they were not JSON.

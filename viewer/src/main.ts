@@ -52,6 +52,7 @@ import { add, cross, norm, scale, type V3 } from './mat.ts';
 import { buildOf, DEFAULT_HOUR, fromSearch, HOURS, quantize, toSearch, type ViewState } from './state.ts';
 import { TileManager, type LoadedTile } from './tiles.ts';
 import { InspectPanel, stepName, type BiomeHere, type IceHere, type LandscapeHere, type OrganismHere, type PlanetStateInfo, type RowInfo, type TerrainInfo, type TerritoryHere } from './ui/inspect.ts';
+import { barWords, noticeWords, standingAt } from './ui/lifewords.ts';
 import { Markers, timeFor, visibility } from './ui/markers.ts';
 import { PlanetPanel, valueAt } from './ui/planet.ts';
 import { Search } from './ui/search.ts';
@@ -1094,7 +1095,9 @@ async function start(root: HTMLElement): Promise<void> {
       }
     }
     frameLook = look;
-    const why = (site && failedScenes.get(site.id)) || (!look.formed ? beforeWhy() : fi ? '' : unknownWhy(state.t));
+    // A scene of the atlas at a time read as a year says that its list is its stage's, and how thin the record near it is.
+    const lifeWhy = inCity && city instanceof LifeScene ? noticeWords(city.spec, standingAt(city.spec, state.t, scenario()), state.t) : '';
+    const why = (site && failedScenes.get(site.id)) || (!look.formed ? beforeWhy() : fi ? lifeWhy : unknownWhy(state.t));
     if (notice.textContent !== why) notice.textContent = why;
     notice.hidden = !why;
 
@@ -1183,16 +1186,13 @@ async function start(root: HTMLElement): Promise<void> {
       if (sel.value !== want) sel.value = want;
       sel.options[0].textContent = `warmest (${MONTH_NAMES[warmestMonth((city as LifeScene).spec.climate!.months) - 1]})`;
     }
-    // Both named formations and atlas scenes have a list of the organisms drawn there.
+    // Both named formations and atlas scenes have a list of the organisms drawn there: what of it stands at the time shown.
     const showHere = inCity && city instanceof LifeScene;
+    const standing = showHere ? standingAt((city as LifeScene).spec, state.t, scenario()) : [];
     lifeHere.hidden = !showHere;
-    lifeGo.hidden = !showHere || !(city as LifeScene).spec.taxa.length;
+    lifeGo.hidden = !showHere || !standing.length;
     if (showHere) {
-      const taxa = (city as LifeScene).spec.taxa;
-      const n = (tier: string) => taxa.filter((x) => x.tier === tier).length;
-      // In the sea as on land; where none of what lived in a sea can be drawn yet, it says so.
-      const formation = n('formation');
-      const life = formation ? `${formation} recorded in this formation` : taxa.length ? `${n('here')} recorded here, ${n('region')} nearby, ${n('standin')} stand-ins` : (city as LifeScene).sea ? 'Nothing of the sea’s life can be drawn here yet' : 'Nothing recorded here';
+      const life = barWords(standing, (city as LifeScene).sea);
       // And who lived here, where the scene has people.
       const folk = (city as LifeScene).people;
       const words = folk ? `${life} · ${peopleWords(folk)}` : life;
@@ -1820,7 +1820,7 @@ async function start(root: HTMLElement): Promise<void> {
     shownRecord = null;
     const sea = listOf(city) === 'sea';
     const note = city.spec.site.place ? undefined : sea ? build.sea?.description : build.atlas?.description;
-    inspect.showLifeHere(city.spec, note, { list: sea ? 'sea' : 'land', sea: city.sea });
+    inspect.showLifeHere(city.spec, note, { list: sea ? 'sea' : 'land', sea: city.sea }, { t: state.t, taxa: standingAt(city.spec, state.t, scenario()) });
   };
 
   /** Fly to a structure of the city, looking at its front, at a time it stands. */

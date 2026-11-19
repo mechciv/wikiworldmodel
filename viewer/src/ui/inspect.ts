@@ -15,6 +15,7 @@ import { lookup, scenarioKey, type Scenario } from '../../../core/scenario.ts';
 import type { Estimate, FeatureTime } from '../../../core/tileset.ts';
 import { formatTime, fromMa, historical, PRESENT_YEAR } from '../../../core/time.ts';
 import { PATTERN_LABEL } from '../../../core/landscape.ts';
+import { stageWords, thinWords } from './lifewords.ts';
 import type { PlaceLandscape } from '../city/landscape.ts';
 
 const PATTERN_WORDS: Record<string, string> = PATTERN_LABEL;
@@ -526,11 +527,13 @@ export class InspectPanel {
 
   /**
    * What the records say lived at this place and time, in tiers, and what was made of it. `list` is the atlas the taxa
-   * are from, the land's or the sea's; `sea` that the scene is of the sea.
+   * are from, the land's or the sea's; `sea` that the scene is of the sea. `at` is the time shown and what of the list
+   * stands then, which is what the scene draws; without it, the whole list.
    */
-  showLifeHere(spec: SceneSpec, note?: string, where: { list: 'land' | 'sea'; sea: boolean } = { list: 'land', sea: false }): void {
+  showLifeHere(spec: SceneSpec, note?: string, where: { list: 'land' | 'sea'; sea: boolean } = { list: 'land', sea: false }, at?: { t: number; taxa: LivingTaxon[] }): void {
+    const taxa = at?.taxa ?? spec.taxa;
     const group = (tier: string, title: string, say: string) => {
-      const list = spec.taxa.filter((t) => t.tier === tier);
+      const list = taxa.filter((t) => t.tier === tier);
       if (!list.length) return '';
       const items = list.map((t) => {
         const name = t.id.startsWith('txn:') ? esc(t.label) : this.link(t.id, t.label);
@@ -541,11 +544,24 @@ export class InspectPanel {
       return `<section class="here organism"><h3>${esc(title)}</h3><p class="note">${esc(say)}</p><ul>${items.join('')}</ul></section>`;
     };
     const b = spec.biome;
-    const none = spec.taxa.length
+    // What of the stage's list is not drawn at the time shown: its fossils in the stage, or a record of when it died out, end
+    // before it, or begin after.
+    const hidden = at ? spec.taxa.length - taxa.length : 0;
+    const shown = at ? formatTime(at.t) : '';
+    const none = taxa.length
       ? ''
-      : where.sea
-        ? '<section class="here organism"><h3>Nothing of the sea drawn</h3><p>None of what the atlas of the sea lists here, if it lists anything, has a body to draw it with yet. The sea is drawn empty: its floor, and the water over it.</p></section>'
-        : '<section class="here organism"><h3>Nothing on land</h3><p>No fossil of anything living on land is known from this stage, anywhere within reach. The land is drawn bare.</p></section>';
+      : hidden
+        ? `<section class="here organism"><h3>Nothing at ${esc(shown)}</h3><p>Nothing on this stage’s list here stands at ${esc(shown)}: the fossils of each in the stage, and the records of when taxa died out, do not carry it to then.</p></section>`
+        : where.sea
+          ? '<section class="here organism"><h3>Nothing of the sea drawn</h3><p>None of what the atlas of the sea lists here, if it lists anything, has a body to draw it with yet. The sea is drawn empty: its floor, and the water over it.</p></section>'
+          : '<section class="here organism"><h3>Nothing on land</h3><p>No fossil of anything living on land is known from this stage, anywhere within reach. The land is drawn bare.</p></section>';
+    // An atlas's scene says what its list is of, and where the record near the place is thin, says so first.
+    const atlas = !spec.site.place;
+    const historic = !!at && historical(at.t);
+    const later = hidden && taxa.length ? ` ${hidden} more on the stage’s list ${hidden === 1 ? 'is' : 'are'} not drawn at ${shown}: ${hidden === 1 ? 'its' : 'their'} fossils in the stage, and the records of when taxa died out, do not carry ${hidden === 1 ? 'it' : 'them'} to then.` : '';
+    const when = atlas ? `<section class="here when"><h3>When</h3><p>${esc(`${stageWords(spec)}.${historic ? ` The list is the stage’s, not ${shown}’s.` : ''}${later}`)}</p></section>` : '';
+    const thinSaid = atlas && taxa.length ? thinWords(taxa, spec.site.stage ?? 'stage') : '';
+    const thin = thinSaid ? `<section class="here thin"><h3>Little is recorded near here</h3><p>${esc(thinSaid)}</p></section>` : '';
     const tiers =
       where.list === 'sea'
         ? `${group('here', 'Recorded here', 'A fossil of it within a few hundred km by sea, from this stage.')}${group('region', 'Recorded in the region', 'A fossil of it can be reached by sea, in a like belt of latitude. That it lived at this spot is an inference.')}${group('standin', 'Stand-ins', 'Nothing is recorded in the sea within reach. These are among the commonest of the stage in a like belt of latitude, and stand for what sort of thing may have lived here; they are no claim that it did.')}`
@@ -556,7 +572,7 @@ export class InspectPanel {
     const formation = group('formation', 'Recorded in the formation', 'Fossils from this formation identify these organisms. Their positions in the scene are generated.');
     this.frame(spec.site.place ? spec.site.label : spec.site.stage ?? 'This place', `<div class="meta"><span class="kind">What lived here</span> <span class="badge basis-procedural">procedural</span></div>
       <p class="summary">${summary}</p>
-      ${none}${formation}${tiers}
+      ${when}${thin}${none}${formation}${tiers}
       ${note ? `<section><p class="note">${esc(note)}</p></section>` : ''}`);
   }
 

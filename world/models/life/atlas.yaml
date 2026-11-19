@@ -25,6 +25,7 @@ inputs:
   - { prop: hip_height, note: "to sort taxa by size" }
   - { prop: plant_height, note: "to sort taxa by size" }
   - { prop: body_mass, note: "to sort taxa by size" }
+  - { prop: end, note: "when a taxon, or a clade above it, died out, where its record says: nothing of it is drawn after" }
 outputs: [field:life/community]
 params:
   grid_deg: { choice: "The size of a patch of land the lists are kept for." }
@@ -36,9 +37,17 @@ params:
   deep_cost: { choice: "How many km of land one km of deep sea counts as." }
   shallow_m: { choice: "How deep the sea may be and still count as shallow." }
   longest_span: { choice: "A row dated only to a span longer than this says too little of any one stage, and is left out." }
+  longest_span_in_stages:
+    choice: >-
+      A row dated to a span longer than this many times a stage says too little of that stage, and is left out of it. Ten
+      leaves a row of the Late Pleistocene and Holocene together, eleven times the Holocene, out of the Holocene: most
+      of such a row's span is the Pleistocene's, so its taxon would bring the Pleistocene's animals into the present.
   tight_span: { choice: "A row dated to a span this short or shorter is well dated, and keeps out the loose rows of its taxon." }
   longest_bin: { choice: "The longest a bin may be before it is split." }
-  shortest_bin: { choice: "The shortest a bin may be before it is merged." }
+  shortest_bin:
+    choice: >-
+      The shortest a bin may be before it is merged. Short enough that the Holocene, which the database dates its rows
+      to, is a bin of its own, and long enough that its three stages, which the rows do not tell apart, are one.
   quotas: { choice: "How many taxa of each size and habit a list holds." }
   standins: { choice: "How many stand-ins of each size and habit a list holds where nothing of a kind is near." }
   big_m: { choice: "The body length above which an animal is big." }

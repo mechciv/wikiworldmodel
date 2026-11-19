@@ -8,9 +8,9 @@ import { TIER, type AtlasBinRef, type AtlasGrid, type SeaBin, type SeaIndex, typ
 import { conj, rotate, toLatLon, unitVector } from '../../../../core/quat.ts';
 import type { PeriodRecord } from '../../../../core/records.ts';
 import { fromMa, toMa } from '../../../../core/time.ts';
-import type { LandSnapshot } from '../pbdb.ts';
+import { pbdbNumber, type LandSnapshot } from '../pbdb.ts';
 import { stableStringify } from '../util.ts';
-import { atlasBins, classify, LandGraph, type AtlasParams } from './atlas.ts';
+import { atlasBins, classify, endsOf, LandGraph, recordEndMa, rowShare, YEAR, type AtlasParams } from './atlas.ts';
 import { SRC_W, type Snapshot } from './fields.ts';
 import { sourceRecord, type Solved } from './records.ts';
 
@@ -28,8 +28,12 @@ export interface SeaParams {
   deep_cost: number;
   /** how deep the shelf goes, in m below the coast */
   shallow_m: number;
-  /** a row dated to a span longer than this says too little of any stage, in Myr; and one longer than the next is left out for a genus with better-dated rows */
+  /**
+   * a row dated to a span longer than this says too little of any stage, in Myr, and one longer than this many times a stage
+   * too little of that stage, as for the land's; and one longer than the last is left out for a genus with better-dated rows
+   */
   longest_span: number;
+  longest_span_in_stages: number;
   tight_span: number;
   /** a stage is cut if it is longer than this, and joined to the next if shorter, in Myr: the land's, so their lists cover the same spans */
   longest_bin: number;
@@ -92,7 +96,8 @@ function groupOf(snap: LandSnapshot, byNo: Map<number, LandSnapshot['taxa'][numb
   return phylum;
 }
 
-export function buildSeaAtlas(s: Solved, periods: PeriodRecord[], elevation: Snapshot[], snap: LandSnapshot, dataset: string, p: SeaParams, isoline: number, log: (m: string) => void): SeaOut {
+/** `recordEnd` says when a record's taxon died out; the world's solved records unless a test says otherwise. */
+export function buildSeaAtlas(s: Solved, periods: PeriodRecord[], elevation: Snapshot[], snap: LandSnapshot, dataset: string, p: SeaParams, isoline: number, log: (m: string) => void, recordEnd: (id: string) => number | undefined = (id) => recordEndMa(s, id)): SeaOut {
   const w = s.world;
   const field = w.fields.find((f) => f.data?.from === dataset)!;
   const byNo = new Map(snap.taxa.map((t) => [t[0], t]));
@@ -130,6 +135,13 @@ export function buildSeaAtlas(s: Solved, periods: PeriodRecord[], elevation: Sna
     rowsBySite[site].push(g);
     if (snap.sites[site][3] - snap.sites[site][4] <= p.tight_span) tight.add(g);
   }
+  // Where a record says when a genus, or a clade above it, died out, nothing of it is drawn after, as on land.
+  const adoptedAt = new Map<number, string>();
+  for (const e of w.entities) {
+    const no = e.kind === 'taxon' ? pbdbNumber(e) : undefined;
+    if (no !== undefined) adoptedAt.set(no, e.id);
+  }
+  const endOf = endsOf(snap, adoptedAt, recordEnd);
 
   const grid: AtlasGrid = { step: p.grid_deg, nx: Math.round(360 / p.grid_deg), ny: Math.round(180 / p.grid_deg) };
   const files = new Map<string, string>();
@@ -151,15 +163,14 @@ export function buildSeaAtlas(s: Solved, periods: PeriodRecord[], elevation: Sna
     let rowsHere = 0;
     snap.sites.forEach((site, i) => {
       const [, lat, lng, max, min] = site;
-      if (max <= youngerMa || min >= olderMa) return;
-      if (max - min > p.longest_span) return;
+      const share = rowShare(max, min, olderMa, youngerMa, p);
+      if (!share) return;
       const plate = sitePlate[i];
       if (!plate || !s.model.reaches(plate, midMa) || !s.model.reaches(plate, 0)) return;
       const list = rowsBySite[i];
       if (!list.length) return;
       const [la, lo] = toLatLon(rotate(s.model.total(plate, midMa), rotate(conj(s.model.total(plate, 0)), unitVector(lat, lng))));
       const node = graph.nodeAt(la, lo);
-      const share = (Math.min(max, olderMa) - Math.max(min, youngerMa)) / Math.max(max - min, 1e-3);
       let here = atNode.get(node);
       if (!here) {
         here = new Map();
@@ -167,6 +178,8 @@ export function buildSeaAtlas(s: Solved, periods: PeriodRecord[], elevation: Sna
       }
       for (const t of list) {
         if (max - min > p.tight_span && tight.has(t)) continue;
+        const end = endOf(t);
+        if (end !== undefined && max <= end) continue;
         rowsHere++;
         const e = here.get(t);
         if (e) {
@@ -267,7 +280,7 @@ export function buildSeaAtlas(s: Solved, periods: PeriodRecord[], elevation: Sna
       if (k) usedForms.add(k.taxon.form);
       // Its label, number and rank are the database's, as on any list; the rest is how it is drawn.
       const draw = k ? (({ no: _no, label: _label, rank: _rank, ...rest }) => rest)(k.taxon) : undefined;
-      return { no: t, label: x[1], rank: snap.words[x[2]] ?? '', group: groupOf(snap, byNo, t), rows: q[2], span: [round(q[0]), round(q[1])], ...(draw ? { draw } : {}) };
+      return { no: t, label: x[1], rank: snap.words[x[2]] ?? '', group: groupOf(snap, byNo, t), rows: q[2], span: [round(q[0], YEAR), round(Math.max(q[1], endOf(t) ?? -Infinity), YEAR)], ...(draw ? { draw } : {}) };
     };
     /**
      * After the most recorded, the genera a scene can draw: the most recorded of those first, and no more than `per_class`
