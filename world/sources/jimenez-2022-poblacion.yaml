@@ -1,0 +1,28 @@
+id: src:jimenez-2022-poblacion
+type: publication
+kind: review
+citation: >-
+  Jiménez Martínez, E. (2022). En torno a la población de México-Tenochtitlan en 1519. Anuario de
+  Historia Regional y de las Fronteras 27(1), 125–152.
+authors: ["Jiménez Martínez, E."]
+published: 2022
+title: En torno a la población de México-Tenochtitlan en 1519
+container: Anuario de Historia Regional y de las Fronteras 27(1)
+doi: 10.18273/revanu.v27n1-2022004
+url: https://dialnet.unirioja.es/descarga/articulo/8205553.pdf
+via: The article's PDF as Dialnet serves it.
+license_note: >-
+  Open access; no licence is stated in the PDF. Quoted briefly as evidence. The sentences it quotes
+  from Calnek, Sanders, Gibson, Borah and Cook and others in English are the author's own Spanish
+  translations ("Traducción personal").
+reliability: >-
+  A review of the estimates of the city's population from the sixteenth century to Smith (2005),
+  each with the area and method it rests on, followed by the author's own estimate from an assumed
+  density times his own area (Jiménez Martínez 2020). It reports Calnek's and Sanders's figures
+  from works that could not be read here; its translations of them are its own. Its own figure
+  (75,000–95,000) is the lowest of the modern ones.
+verified:
+  by: machine:claude-code
+  how: >-
+    The PDF fetched on 2026-11-19 (UTC) and read whole (pp. 125–152). Quotes found in the kept
+    text city-dialnet-8205553.txt by script.

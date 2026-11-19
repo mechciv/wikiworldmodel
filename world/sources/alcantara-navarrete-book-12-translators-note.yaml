@@ -1,0 +1,33 @@
+id: src:alcantara-navarrete-book-12-translators-note
+type: publication
+kind: review
+citation: >-
+  Alcántara Rojas, B. & Navarrete Linares, F. The Mexican Conquest, Book 12: Translators' Note
+  (Nahuatl to Spanish). In Digital Florentine Codex/Códice Florentino Digital, ed. K. N. Richter,
+  A. M. Houtrouw, K. Terraciano, J. F. Peterson, D. Magaloni and L. Sousa. Los Angeles: Getty
+  Research Institute, 2025.
+authors:
+  - "Alcántara Rojas, B."
+  - "Navarrete Linares, F."
+published: 2025
+title: "The Mexican Conquest, Book 12: Translators' Note (Nahuatl to Spanish)"
+container: Digital Florentine Codex (Getty Research Institute)
+url: https://florentinecodex.getty.edu/resources/5_Alcantara_and_Navarrete
+license: CC-BY-4.0
+reliability: >-
+  The note of the two scholars who translated the Nahuatl of Book 12 into Spanish for the Getty's
+  edition: when and by whom the Nahuatl text was made, and how it tells the war from Tlatelolco.
+  A modern scholarly reading, evidence of the dating and of the text's point of view, not of the
+  events.
+note: >-
+  The year is the one the site's Citations and Permissions page gives for its resource essays;
+  the essay itself carries none.
+verified:
+  by: machine:claude-code
+  how: >-
+    The page fetched on 19 November 2026 (UTC) with fetch-text.py; its visible text is only the
+    site's frame, and the essay is in the page's script data, so its text was taken out by script
+    from the kept page na-getty-alcantara-navarrete-book12-note.raw into
+    na-getty-alcantara-navarrete-book12-note.content.txt and read whole. Quotes were found in
+    that text by script. The licence is from the site's Citations and Permissions page (resource
+    essays: CC BY 4.0, rights holder Getty).

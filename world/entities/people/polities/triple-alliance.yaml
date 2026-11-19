@@ -1,0 +1,108 @@
+id: people/polities/triple-alliance
+kind: polity/alliance
+summary: >-
+  The alliance of three altepetl of the Basin of Mexico, Tenochtitlan, Texcoco and Tlacopan, formed after their war
+  against Azcapotzalco in 1428, which shared the tribute of the towns they conquered, two fifths each to Tenochtitlan
+  and Texcoco and one to Tlacopan, and by 1519 ruled much of central Mexico, Tenochtitlan by then the dominant
+  partner. Historians call it the Triple Alliance or the Aztec empire, the same thing; Wikidata has an item for each.
+  Its Nahuatl name excan tlahtoloyan was given it in 1961, from a term Chimalpáhin used for an older alliance; triple
+  alianza is Orozco y Berra's nineteenth-century name. When it was formed is dated three ways: the war of 1428, the
+  swearing of the three kings in 1431, or the accession of Moctezuma I.
+author: machine:claude-code
+same_as: { wikidata: Q794210 }
+claims:
+  name:
+    prop: name
+    value: { en: Triple Alliance }
+    source:
+      - ref: src:smith-2006-aztec-culture
+        loc: "p. 2"
+        quote: In a major war in 1428, Tenochtitlan overthrew Azcapotzalco and joined with Texcoco and Tlacopan to form the Triple Alliance or Aztec empire.
+      - ref: src:herrera-2013-excan-tlahtoloyan
+        loc: "p. 32"
+        quote: Es, sin duda, preferible al término español Triple Alianza, que hace alusión inmediata a su carácter militar y no acentúa su institucionalidad tradicional.
+    note: >-
+      Smith uses both names for one thing. Ixtlilxóchitl's phrase is the three heads of the empire; Chavero, his
+      editor, writes "triple alianza, llamémosla así", let us call it so; Herrera Meza, López Austin and Martínez
+      Baracs (2013) argue that excan tlahtoloyan is better than Triple Alliance, which stresses its military
+      character over its traditional institutions.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in city-smith-aztec-culture.txt (sha256 8e03007b95bb3225) and city-herrera-lopez-austin-2013-excan.txt (sha256 56b7276a967bf9ae), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  start-1428:
+    prop: start
+    value: 1428 CE
+    source:
+      - ref: src:smith-2008-aztec-empire
+        loc: "pp. 122–123"
+        quote: The Empire of the Triple Alliance was formed in the aftermath of the war that defeated Azcapotzalco in 1428.
+      - ref: src:smith-2006-aztec-culture
+        loc: "p. 2"
+        quote: In a major war in 1428, Tenochtitlan overthrew Azcapotzalco and joined with Texcoco and Tlacopan to form the Triple Alliance or Aztec empire.
+    method: expert-estimate
+    rank: preferred
+    note: >-
+      Formed in the aftermath of the war that defeated Azcapotzalco in 1428. Preferred as the date of the recent
+      syntheses and of the borders dataset, whose rows of the alliance begin in 1429.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in city-smith-2008-aztec-empire.txt (sha256 055d3630cd61ceaa) and city-smith-aztec-culture.txt (sha256 8e03007b95bb3225), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  start-1431:
+    prop: start
+    value: 1431 CE
+    source:
+      ref: src:ixtlilxochitl-1892-historia-chichimeca
+      loc: "ch. XXXII, p. 153"
+      quote: en el año de mil cuatrocientos treinta y uno de la Encarnación de Cristo Nuestro Señor que llaman nahui Acatl
+    method: historical-account
+    note: >-
+      Ixtlilxóchitl, writing in the early seventeenth century from Texcoco's point of view: in 1431, which they call
+      nahui acatl, 4 Reed, Nezahualcoyotl was sworn king, about four years after Azcapotzalco was subdued, and it
+      seemed to him better and more lasting that the empire be governed by three. The swearing, or the founding by
+      another reckoning.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in city-ixtlilxochitl-1892-tomo2.txt (sha256 5886f18c08b1f94b), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  start-1431-mexica:
+    prop: start
+    value: the year 4 Acatl
+    source:
+      ref: src:ixtlilxochitl-1892-historia-chichimeca
+      loc: "ch. XXXII, p. 153"
+      quote: en el año de mil cuatrocientos treinta y uno de la Encarnación de Cristo Nuestro Señor que llaman nahui Acatl
+    method: historical-account
+    rank: deprecated
+    note: >-
+      The same writer's year name for the same start, nahui acatl, 4 Reed. Set aside with the start it names, 1431:
+      it holds beside whichever start is chosen, and it falls in 1431, so with the start of 1428 preferred it would
+      contradict the rest. A date in cycles cannot be one competing claim among others; it can only be set aside.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in city-ixtlilxochitl-1892-tomo2.txt (sha256 5886f18c08b1f94b), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  end:
+    prop: end
+    value: { ref: people/conquest/fall-of-tenochtitlan }
+    source:
+      ref: src:ixtlilxochitl-1892-historia-chichimeca
+      loc: "ch. XXXII, p. 154"
+      quote: Y así los tres señores imperaron todos tres el imperio de esta Nueva España hasta la venida de la Santa fe católica
+    method: historical-account
+    note: >-
+      Ixtlilxóchitl: and so the three lords ruled, all three, the empire of this New Spain until the coming of the
+      holy Catholic faith. It ended with the
+      fall of its head, as Wikidata dates it, 13 August 1521. The kings of Texcoco and Tlacopan were held, and put to
+      death with Cuauhtemoc in 1525, which no source read here dates.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in city-ixtlilxochitl-1892-tomo2.txt (sha256 5886f18c08b1f94b), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  territory:
+    prop: territory
+    value:
+      from: src:cliopatria-0.2.1
+      names: ["Aztec Triple Alliance"]
+    source:
+      ref: src:cliopatria-0.2.1
+      loc: rows named Aztec Triple Alliance, 1429 to 1520
+    method: compilation
+    basis: reconstruction
+    note: >-
+      The dataset's twelve rows of this name, from 1429 to 1520. From 1450 their outline takes in Tlaxcala, which the
+      alliance never ruled (people/polities/tlaxcala): Cortés and Bernal Díaz found it at war with Moctezuma, and
+      Torquemada says he wished to subject it and never could. The first row, of 1429 to 1439, leaves out Tenochtitlan
+      itself and Tlacopan. No record can cut a hole in a row, or move one: the errors are the dataset's, and are listed
+      in RECORD-SETS.md.

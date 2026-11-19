@@ -1,0 +1,30 @@
+id: src:smith-2005-city-size
+type: publication
+kind: compilation
+citation: >-
+  Smith, M.E. (2005). City Size in Late Postclassic Mesoamerica. Journal of Urban History 31(4),
+  403–434.
+authors: ["Smith, M.E."]
+published: 2005
+title: City Size in Late Postclassic Mesoamerica
+container: Journal of Urban History 31(4)
+doi: 10.1177/0096144204274396
+url: http://web.archive.org/web/20241230024743/https://www.public.asu.edu/%7Emesmith9/1-CompleteSet/MES-05-CitySize.pdf
+via: >-
+  The author's own PDF of the published article, posted on his Arizona State University pages and
+  read from the Internet Archive's copy of 30 December 2024, because www.public.asu.edu now asks
+  for an ASU sign-in.
+license: all-rights-reserved
+license_note: Quoted briefly as evidence.
+reliability: >-
+  A compilation of the areas and published population figures of 87 Late Postclassic cities. For
+  Tenochtitlan it takes area and population from Calnek (1976) and Rojas (1986) (appendix, note 17),
+  and the author warns that population estimates were made by different methods and are
+  comparable only roughly. It is not a new estimate of Tenochtitlan's people.
+verified:
+  by: machine:claude-code
+  how: >-
+    The PDF fetched on 2026-11-19 (UTC) and read in full; Tables 4 and 5, the text on population
+    density (p. 412), the appendix table (read again with vertical text detected, to tie
+    Tenochtitlan's row to note 17) and its notes. Quotes found in the kept text
+    city-smith-2005-city-size.txt by script.

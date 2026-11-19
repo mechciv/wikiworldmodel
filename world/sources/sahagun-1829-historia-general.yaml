@@ -1,0 +1,28 @@
+id: src:sahagun-1829-historia-general
+type: text
+kind: historian
+citation: >-
+  Sahagún, B. de. Historia general de las cosas de Nueva España, ed. C.M. de Bustamante, vol. 2.
+  México: Imprenta del ciudadano Alejandro Valdés, 1829.
+authors: ["Sahagún, B. de"]
+published: 1829
+written: { lo: 1560 CE, hi: 1590 CE }
+title: Historia general de las cosas de Nueva España
+url: https://archive.org/details/historiagenerald02saha
+via: >-
+  Bustamante's edition of Sahagún's Spanish text, vol. 2 (books 5 to 9), the John Carter Brown
+  Library copy scanned by the Internet Archive, read in its OCR text, which has errors
+  ("Tlaltdolco" for "Tlaltelolco"). The notes marked (a) are Bustamante's. `written`: the lists of
+  rulers run "hasta el año de 1560" (book 8, chapter titles), and Sahagún died in 1590 (archive.org
+  record).
+license: public-domain
+reliability: >-
+  The Spanish text of the Franciscan Sahagún's general history of Nahua life and history, a
+  generation and more after the conquest. Its two accounts of Moquihuix's end (book 8: he
+  threw himself from the temple; book 9: his own people killed him) show it gathered more than one
+  tradition. A different text from the Nahuatl of the Florentine Codex.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched on 2026-11-19 (UTC); book 8 chapters I and II (pp. 269–275) and book 9 chapter I
+    (pp. 335–336) read. Quotes found in the kept text city-sahagun-1829-vol2.txt by script.

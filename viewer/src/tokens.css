@@ -1,14 +1,30 @@
-/* The viewer's colours and type, shared by its pages. */
+/* The viewer's colours and type, shared by its pages. Geist and Geist Mono come from Fontsource's packages, under the
+   SIL Open Font License, whose text is in viewer/public/fonts beside the build. */
+@import '@fontsource-variable/geist/wght.css';
+@import '@fontsource-variable/geist/wght-italic.css';
+@import '@fontsource-variable/geist-mono/wght.css';
 :root {
-  --bg: #05070d;
-  --panel: rgba(14, 19, 30, 0.94);
-  --panel-border: rgba(140, 160, 200, 0.18);
-  --text: #e6ebf5;
-  --muted: #9aa6bd;
-  --accent: #ffd36b;
+  /* the sky the globe is drawn against (gl/globe.ts), so that what lies over it and beside it is one field */
+  --bg: #03040b;
+  --panel: rgba(9, 12, 18, 0.82);
+  --panel-solid: #0a0d14;
+  --panel-border: rgba(233, 236, 242, 0.12);
+  /* hairlines: a control's edge, and the faint rule between parts of a panel */
+  --line: rgba(233, 236, 242, 0.16);
+  --hair: rgba(233, 236, 242, 0.1);
+  --text: #e9ecf2;
+  --text-2: #c8ced8;
+  --muted: #9aa3b2;
+  --faint: #7a8496;
+  /* the one warm colour: the time shown, and what is chosen */
+  --accent: #f4b860;
+  --accent-text: #f4c27c;
+  --on-accent: #1a1205;
+  --link: #9fd6f5;
   --evidence: #7fd1ff;
   --reconstruction: #f2a63a;
   --procedural: #ea44bf;
-  --font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font: 'Geist Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --mono: 'Geist Mono Variable', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   color-scheme: dark;
 }

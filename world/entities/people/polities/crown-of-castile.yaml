@@ -1,0 +1,14 @@
+id: people/polities/crown-of-castile
+kind: polity
+summary: >-
+  The crown of the kingdoms of Castile, to which the lands across the Ocean Sea belonged, worn in 1519–1521 by Juana
+  and her son Charles, king and, from 1519, emperor, in whose names Cortés's company acted. Written with a name only,
+  for the conquest's sake. The borders dataset draws a Crown of Castile to 1515 and a Spanish Empire from 1516; Wikidata
+  has the Crown from 1230 to 1715.
+author: machine:claude-code
+same_as: { wikidata: Q217196 }
+claims:
+  name:
+    prop: name
+    value: { en: Crown of Castile }
+    unsourced: An editorial label.

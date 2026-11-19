@@ -1,0 +1,67 @@
+id: people/conquest/siege-of-tenochtitlan
+kind: event/campaign
+summary: >-
+  The siege of Tenochtitlan and Tlatelolco by the Spaniards, their thirteen brigantines on the lake, and some tens of
+  thousands of their native allies, from Tlaxcala, Texcoco, Huexotzinco, Cholula and Chalco, until the capture of
+  Cuauhtemoc on 13 August 1521. When it began is counted two ways: from 30 May, when the city was invested, as Cortés
+  counts seventy-five days, or from the march from Texcoco, 10 May in Cortés's letter and 13 May in Bernal Díaz's,
+  who counts ninety-three days.
+author: machine:claude-code
+same_as: { wikidata: Q593267 }
+claims:
+  name:
+    prop: name
+    value: { en: Siege of Tenochtitlan }
+    unsourced: An editorial label.
+  start-investment:
+    prop: start
+    value: 30 May 1521 CE
+    source:
+      ref: src:cortes-1522-third-letter
+      loc: "p. 409 (scan 420)"
+      quote: á 30 de Mayo del dicho año, hasta que se ganó, pasaron setenta y cinco
+    method: documentary
+    rank: preferred
+    note: >-
+      Cortés: from the day the siege was laid on the city, 30 May of that year, until it was won, seventy-five days
+      passed. Preferred because it is the siege itself, the city invested on its causeways, and because the writer
+      led it and dates it within the year. Wikidata's item gives 10 May, the march from Texcoco, as its start, and 26
+      May, set aside.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in es-cortes-1522-third-letter.txt (sha256 b72ff8bf42100af3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  start-march:
+    prop: start
+    value: 13 May 1521 CE
+    source:
+      - ref: src:bernal-diaz-verdadera-historia
+        loc: "cap. CL"
+        quote: y otro dia, que fueron 13 de Mayo de 1521 años, salimos entrambas capitanías juntas
+      - ref: src:bernal-diaz-verdadera-historia
+        loc: "cap. CLVI"
+        quote: porque todos los noventa y tres dias que sobre esta ciudad estuvimos
+    method: historical-account
+    note: >-
+      Bernal Díaz, who marched with Alvarado: the next day, 13 May 1521, both companies left together; and all the
+      ninety-three days we lay before this city. Counted from 13 May, ninety-three days end on 13 August. Cortés
+      dates the same departure from Texcoco to 10 May (p. 322): the march, three days apart in the two accounts.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in es-bernal-diaz-verdadera-historia.txt (sha256 fabaae2d6b1a8c58), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  end:
+    prop: end
+    value: { ref: people/conquest/fall-of-tenochtitlan }
+    source:
+      - ref: src:cortes-1522-third-letter
+        loc: "p. 409 (scan 420)"
+        quote: nuestro Señor dar conclusion mártes, dia de San Hipólito, que fueron 13 de Agosto
+      - ref: src:florentine-codex-book-12
+        loc: "Book 12, chap. 40, fol. 83r, Spanish (Lockhart's transcription)"
+        quote: "Rendieronse los mexicanos, y despartiose la guerra en la cuenta de los años, que se dize tres casas, y ē la cuenta de los dias: en el signo que se llama Ce coatl."
+    method: documentary
+    note: The siege ended with the fall of the city, on whichever day the evidence gives it.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in es-cortes-1522-third-letter.txt (sha256 b72ff8bf42100af3) and na-fc12-getty.txt (sha256 9a864988595f9f1f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+relations:
+  war:
+    rel: part-of
+    to: people/conquest/conquest-of-mexico
+    unsourced: An editorial grouping of the events of the conquest.

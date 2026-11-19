@@ -113,16 +113,21 @@ describe('a date in a count of days', () => {
     expect(days(w, 'test/zero|date', picked.solution)).toBe('8 September 3114 BCE');
   });
 
-  it('counts across the change of calendar in 1582, where a lag in days would drift', async () => {
+  it('counts across the change of calendar in 1582, and a lag in days from a dated day counts the same', async () => {
     // 13.0.0.0.0, the end of the thirteenth b'ak'tun: 584283 + 1,872,000 = JDN 2456283, 21 December 2012.
     const w = await world({
       'entities/zero.yaml': zero(`  date: { prop: date, value: JDN 584283, ${cite} }\n`),
       'entities/turn.yaml': entity('test/turn', 'event/political', `claims:\n  date: { prop: date, value: 13.0.0.0.0 Long Count, ${cite} }\n`),
       'entities/lag.yaml': entity('test/lag', 'event/political', `claims:\n  date: { prop: date, value: { ref: test/zero, edge: start, lag: 1872000 days }, ${cite} }\n`),
+      'entities/loose.yaml': entity('test/loose', 'event/political', `claims:\n  date: { prop: date, value: { ref: test/vague, edge: start, lag: 1872000 days }, ${cite} }\n`),
+      'entities/vague.yaml': entity('test/vague', 'event/political', `claims:\n  date: { prop: date, value: 3114 BCE, ${cite} }\n`),
     });
     expect(days(w, 'test/turn|date')).toBe('21 December 2012 CE');
-    // The same count written as a lag in days is turned into years of 365.25 days, and lands days away.
-    expect(days(w, 'test/lag|date')).not.toBe('21 December 2012 CE');
+    // The same count written as a lag in days from the day is counted on the calendar too (docs/slices/FIFTEENTH-SLICE.md):
+    // carried as years of 365.25 days, as it was, it landed days away.
+    expect(days(w, 'test/lag|date')).toBe('21 December 2012 CE');
+    // From a thing dated only to its year there is no day to count from, and the lag is carried in years.
+    expect(days(w, 'test/loose|date')).toMatch(/2012 CE to .* 2013 CE/);
   });
 
   it('dates the era before the zero day from its end, where an unmarked date would land thirteen b’ak’tuns late', async () => {

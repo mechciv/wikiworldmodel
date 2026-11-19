@@ -1,4 +1,4 @@
-// The time machine: "When to?" A reader types a place, a time or both, or picks a trip, and goes
+// The time machine: "Go to…" A reader types a place, a time or both, or picks a trip, and goes
 // there. A place chosen alone opens its stretch of time, to pick a moment along it, with what
 // happened near it marked. Every time it shows is a record's; it holds no facts of its own.
 import type { PeriodRecord, SearchEntry } from '../../../core/records.ts';
@@ -97,7 +97,7 @@ export class TimeMachine {
     this.el.innerHTML = `
       <div class="tm-dialog" role="dialog" aria-modal="true" aria-labelledby="tm-title">
         <header>
-          <h1 id="tm-title">When to?</h1>
+          <h1 id="tm-title">Go to…</h1>
           <button class="tm-close" aria-label="Close">×</button>
         </header>
         <input type="search" class="tm-input" placeholder="Rome 100 CE, 66 Ma, Angkor…" aria-label="A place, a time, or both" autocomplete="off" spellcheck="false">

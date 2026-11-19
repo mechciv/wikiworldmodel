@@ -1,0 +1,20 @@
+id: src:wikidata-tenochtitlan
+type: database-record
+kind: compilation
+snapshot: "2026-11-19"
+citation: >-
+  Wikidata, item Q13695 (Tenochtitlan): property P625 (coordinate location), P571 (inception) and P576 (dissolved,
+  abolished or demolished date).
+container: Wikidata
+url: https://www.wikidata.org/wiki/Q13695
+license: CC0-1.0
+reliability: >-
+  A crowd-edited item, "former city-state in the Valley of Mexico": one item for the city and the state, with an
+  inception of 1 March 1325 and a dissolution on 13 August 1521, and a point to the second of arc at the site of
+  the Templo Mayor. Mexico City is another item (Q1489), whose own inception is 1521, preferred, or 13 March 1325.
+verified:
+  by: machine:claude-code
+  how: >-
+    The item's JSON (Special:EntityData/Q13695.json) fetched on 19 November 2026 (UTC) and kept as wd-Q13695.raw:
+    coordinates 19.435, -99.13138889; P571 +1325-03-01; P576 +1521-08-13. Mexico City's item (Q1489) fetched the same
+    day and kept as wd-Q1489.raw: P571 +1521 (preferred) and +1325-03-13 (normal).

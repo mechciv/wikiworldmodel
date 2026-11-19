@@ -123,6 +123,8 @@ export interface WikiWorldModelHandle {
   /** where each group of a taxon stands: on the screen, and on the globe, for tests */
   organismsAt(id: string): { x: number; y: number; depth: number }[];
   organismPlaces(id: string): { lat: number; lon: number; x: number; y: number }[];
+  /** what a click at a point of the view finds in the living scene drawn: a taxon, a house the generator drew, or the ground (not the sky); null with no scene */
+  foundAt(x: number, y: number): { taxon?: string; house?: number; ground: boolean } | null;
   set(s: Partial<ViewState>): void;
   /**
    * How long each pass of the local scene's frame takes, the median over this many frames drawn again of the view as it
@@ -237,6 +239,10 @@ async function start(root: HTMLElement): Promise<void> {
   canvas.className = 'globe';
   canvas.setAttribute('aria-label', 'Globe: drag to rotate, scroll to zoom, click to inspect');
   stage.appendChild(canvas);
+  // Under everything drawn over the globe: the sky darkened toward the corner the moment is read in.
+  const scrim = document.createElement('div');
+  scrim.className = 'scrim';
+  stage.appendChild(scrim);
   root.appendChild(stage);
   const gl = canvas.getContext('webgl2', { antialias: true, preserveDrawingBuffer: true, powerPreference: 'high-performance' });
   if (!gl) return fail(root, 'This viewer needs WebGL2.');
@@ -540,6 +546,7 @@ async function start(root: HTMLElement): Promise<void> {
     return build.search.entities.find((e) => e.id === id)?.label ?? build.periods.periods.find((p) => p.id === id)?.name ?? ref;
   };
   const altTitle = (id: string) => ts.alternatives.flatMap((g) => g.members).find((m) => m.id === id)?.title ?? id;
+  const altHeld = (id: string) => ts.alternatives.flatMap((g) => g.members).find((m) => m.id === id)?.heldBy;
   const scenario = (): Scenario => ({ alts: state.alt, picks: state.picks });
   const inspect = new InspectPanel({
     onPick: (group, claim) => setState({ picks: [...state.picks.filter((p) => !group.includes(p)), ...(claim ? [claim] : [])].sort() }),
@@ -547,6 +554,7 @@ async function start(root: HTMLElement): Promise<void> {
     onOpen: (id) => setState({ sel: id }),
     labelOf,
     altTitle,
+    altHeld,
   });
   stage.appendChild(inspect.el);
   /** Close the panel. One that is not a record's (the ground, a row of a dataset, a series) has no selection to clear. */
@@ -562,7 +570,7 @@ async function start(root: HTMLElement): Promise<void> {
   // Named for the span the build covers: the finest named period at its start, to its end.
   const named = (t: number) => ['period', 'era', 'eon'].map((rank) => build.periods.periods.find((p) => p.rank === rank && p.start <= t && t <= p.end)).find(Boolean);
   const until = dataRange[1] > PRESENT_YEAR ? formatTime(dataRange[1]) : 'today';
-  brand.innerHTML = `<strong>WikiWorldModel</strong><span>${named(dataRange[0])?.name ?? formatTime(dataRange[0])} to ${until}</span><a class="coverage-link" title="How much of the world each layer knows, across time and the globe">How much is known →</a>`;
+  brand.innerHTML = `<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="7.25" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M1.75 9h14.5M9 1.75c2.3 2.2 2.3 12.3 0 14.5M9 1.75c-2.3 2.2-2.3 12.3 0 14.5" fill="none" stroke="currentColor" stroke-width="1"/></svg><strong>WikiWorldModel</strong><span>${named(dataRange[0])?.name ?? formatTime(dataRange[0])} to ${until}</span><a class="coverage-link" title="How much of the world each layer knows, across time and the globe">How much is known →</a>`;
   brand.querySelector<HTMLAnchorElement>('.coverage-link')!.href = `./coverage.html?b=${encodeURIComponent(build.id)}`;
   const search = new Search(build.search, build.periods.periods, kindLabel);
   const toolbar = new Toolbar(build.id, ts.alternatives, ts.layers ?? []);
@@ -594,16 +602,19 @@ async function start(root: HTMLElement): Promise<void> {
     };
     toolbar.el.querySelector('.tg-people')!.before(b);
   }
-  // On a phone the toggles fold away behind a button, with the world's name and the way to how much of it is known.
+  // The toggles fold away behind the layers' button, which names what of them is drawn; on a phone it is three bars, and
+  // its menu has the world's name and the way to how much of it is known.
   const menu = document.createElement('button');
   menu.className = 'menu-toggle';
   menu.setAttribute('aria-expanded', 'false');
+  menu.setAttribute('aria-controls', 'layers-menu');
   menu.setAttribute('aria-label', 'Layers and options');
   menu.title = 'Layers and options';
-  menu.innerHTML = '<svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path class="bars" d="M3 5.5h14M3 10h14M3 14.5h14"/><path class="cross" d="M5 5l10 10M15 5 5 15"/></svg>';
+  menu.innerHTML = '<svg class="layers-icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M8 2l6 3-6 3-6-3 6-3zM2 8l6 3 6-3M2 11l6 3 6-3"/></svg><span class="menu-label">Layers</span><span class="menu-on"></span><svg class="menu-icon" viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path class="bars" d="M3 5.5h14M3 10h14M3 14.5h14"/><path class="cross" d="M5 5l10 10M15 5 5 15"/></svg>';
+  const menuOn = menu.querySelector<HTMLElement>('.menu-on')!;
   const about = brand.cloneNode(true) as HTMLElement;
   about.className = 'menu-about';
-  toolbar.el.prepend(about);
+  toolbar.menu.prepend(about);
   const openMenu = (open: boolean) => {
     top.classList.toggle('menu-open', open);
     menu.setAttribute('aria-expanded', String(open));
@@ -612,10 +623,19 @@ async function start(root: HTMLElement): Promise<void> {
   // The time machine's door, beside the search: it opens by itself for a reader who comes with no link.
   const whenTo = document.createElement('button');
   whenTo.className = 'when-to';
-  whenTo.textContent = 'When to?';
+  whenTo.textContent = 'Go to…';
   whenTo.title = 'Go to a place and a time';
-  top.append(brand, whenTo, search.el, menu, toolbar.el);
+  const tools = document.createElement('div');
+  tools.className = 'tools';
+  tools.append(whenTo, search.el, toolbar.know, menu, toolbar.el);
+  top.append(brand, tools);
   root.appendChild(top);
+  // A press anywhere else folds the menu away.
+  document.addEventListener('pointerdown', (e) => {
+    if (top.classList.contains('menu-open') && !tools.contains(e.target as Node)) openMenu(false);
+  });
+  // The record keeps clear of the legend of how things are known, while it is shown.
+  new ResizeObserver(() => document.body.style.setProperty('--legend-h', `${toolbar.legend.hidden ? 0 : toolbar.legend.offsetHeight + 8}px`)).observe(toolbar.legend);
 
   const timebar = new Timebar(build.periods.periods, limits, dataRange, {
     onTime: (t) => setState({ t }),
@@ -638,7 +658,11 @@ async function start(root: HTMLElement): Promise<void> {
   const planet = new PlanetPanel(build.series.series, earth?.label);
   planet.onOpen = (id) => showSeries(id);
   planet.onRecord = (id) => setState({ sel: id });
-  stage.appendChild(planet.el);
+  // The moment shown, read large, and the planet then under it, folded until asked for.
+  const masthead = document.createElement('div');
+  masthead.className = 'masthead';
+  masthead.append(timebar.readout, planet.el);
+  stage.appendChild(masthead);
   // The legend is over the markers, as the planet's panel is.
   stage.appendChild(people.el);
   stage.appendChild(landscapeLegend);
@@ -1257,8 +1281,10 @@ async function start(root: HTMLElement): Promise<void> {
     timebar.set(state.t, state.window, playing);
     planet.update(state.t, look, state.alt);
     toolbar.set({ evidence: state.evidence, clouds: state.clouds, alt: state.alt, tree: !!state.tree, layers: state.layers ?? [], people: !!state.people });
-    // The folded toggles' button lights while any of them is on, so that what is drawn can be undone from it.
-    menu.classList.toggle('lit', state.evidence || !state.clouds || !!state.tree || !!state.layers?.length || !!state.people || state.alt.length > 0);
+    const on = toolbar.summary();
+    if (menuOn.textContent !== on) menuOn.textContent = on;
+    // On a phone the folded toggles' button lights while any of them is on, so that what is drawn can be undone from it.
+    menu.classList.toggle('lit', !state.clouds || !!state.tree || !!state.layers?.length || !!state.people || state.alt.length > 0);
     document.body.classList.toggle('evidence', state.evidence);
   }
 
@@ -2502,6 +2528,14 @@ async function start(root: HTMLElement): Promise<void> {
       if (!(city instanceof LifeScene) || !frameView) return [];
       const v = frameView;
       return city.named.filter((x) => x.id === id).map((x) => projectLocal(v, x.at[0], x.at[1], x.base + 1)).filter((p): p is { x: number; y: number; depth: number } => !!p && p.x >= 0 && p.y >= 0 && p.x < stage.clientWidth && p.y < stage.clientHeight);
+    },
+    foundAt: (x, y) => {
+      if (!(city instanceof LifeScene) || !frameView) return null;
+      // As a click picks (pickAt), in the canvas's pixels.
+      const dpr = canvas.width / stage.clientWidth;
+      const found = city.pick(Math.round(x * dpr), canvas.height - 1 - Math.round(y * dpr));
+      if (found.taxon || found.house !== undefined) return { taxon: found.taxon?.id, house: found.house, ground: false };
+      return { ground: !!groundHit(frameView, rayOf(frameView, x, y), city.ground) };
     },
     set: (s) => setState(s),
     profile: async (frames = 20) => {

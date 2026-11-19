@@ -56,6 +56,17 @@ relations:
       group's lifetime, so a taxon's oldest fossil bounds its origin; one that joined and left
       says when it was a member (`valid`).
     time: [{ from: other.start, to: self.start }, { from: self.end, to: other.end }]
+  subject-to:
+    family: structural
+    inverse: holds-as-subject
+    span: true
+    description: >-
+      The subject owed allegiance to the target and kept rulers of its own: a town that paid another tribute and
+      took its governors from it, a lord who offered himself as a king's vassal, a company that acted in a king's
+      name. Less than part-of, which takes the subject in; more than nothing. What was owed, tribute, service or
+      obedience, is in the note, and the span it was owed for in `valid`; whose authority a company held, and through
+      whom, is often disputed, and rival relations, or what denies one, say so.
+    time: [{ from: self.start, to: other.end }, { from: other.start, to: self.end }]
   descends-from:
     family: lineage
     inverse: gave-rise-to
@@ -91,8 +102,10 @@ relations:
     inverse: absorbed
     description: >-
       The subject ended by becoming part of the target, which was there already: a state that acceded to another
-      or was annexed by it, a village taken into a city. The target was there by the time the subject ended, and
-      outlasted it. Where a union made something new, the new thing arose from each instead.
+      or was annexed by it and kept nothing of its own. The target was there by the time the subject ended, and
+      outlasted it. Where a union made something new, the new thing arose from each instead. A town taken into a
+      city does not end, nor does a state made to pay tribute that keeps its own rulers: the town goes on as a part
+      of the city (part-of, from then), the state as a subject (subject-to, for the span it was one).
     time: [{ from: other.start, to: self.end }, { from: self.end, to: other.end }]
   continues:
     family: lineage
@@ -147,6 +160,16 @@ relations:
       since phases follow one another: each office is then a relation of the person, with the term as
       its `valid`.
     time: [{ from: other.start, to: self.start }, { from: self.end, to: other.end }]
+  holds:
+    family: participation
+    inverse: held-by
+    span: true
+    description: >-
+      The subject held a perspective: a reading of the world that a state, a people, a court or a writer asserted, written
+      as an alternative of kind perspective (alt:…). It says who held the reading and, with `valid`, from when to when,
+      so that a view written down long after the events says so, and a contest that ended can say that it ended. Its
+      sources are where the subject asserted the reading. The target is an alternative and not a record of the world,
+      so it binds no dates, and the picture holds whoever held it.
   participant:
     family: participation
     inverse: took-part-in

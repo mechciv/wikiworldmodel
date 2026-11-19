@@ -1,0 +1,32 @@
+id: src:conquistador-anonimo-1858
+type: text
+kind: eyewitness
+citation: >-
+  El Conquistador Anónimo, Relación de algunas cosas de la Nueva España y de la gran ciudad de
+  Temestitan México, escrita por un compañero de Hernán Cortés; Spanish translation by J. García
+  Icazbalceta from the Italian printed by Ramusio, with the Italian below, in J. García Icazbalceta
+  (ed.), Colección de documentos para la historia de México, tomo I. México: Librería de J.M.
+  Andrade, 1858.
+published: 1858
+written: { lo: 1519 CE, hi: 1556 CE }
+title: Relación de algunas cosas de la Nueva España y de la gran ciudad de Temestitan México
+url: https://archive.org/details/bub_gb_WJk6nlChEKYC
+via: >-
+  The Internet Archive's scan of a copy in the National Central Library of Florence (digitized by
+  Google), read in its OCR text through the archive's "stream" page; the OCR has many errors. The
+  upper bound of `written` is the first printing, in the third volume of Ramusio's collection in
+  1556, as the introduction to Saville's English translation (1917) gives it.
+license: public-domain
+reliability: >-
+  The only text to survive is Ramusio's Italian; the Spanish here is Icazbalceta's translation of
+  it. The author calls himself a companion of Cortés; Gómez de Orozco (1953, as Jiménez Martínez
+  2022 reports) doubted that he took part in the conquest. Icazbalceta's note, after Prescott,
+  holds that the Italian "habitatori" rendered a Spanish "vecinos" (householders), but misstates
+  the other writers' figure as 70,000 where Prescott has 60,000.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched on 2026-11-19 (UTC) from archive.org's stream page, because the plain djvu text, run
+    through the fetch script, was taken for HTML and lost words. Chapter XVIII (pp. 390–391) and
+    Icazbalceta's note on it read, with the Italian below. Quotes found in the kept text
+    city-icazbalceta-1858-coleccion-t1.txt by script.

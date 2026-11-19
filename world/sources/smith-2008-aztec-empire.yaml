@@ -1,0 +1,25 @@
+id: src:smith-2008-aztec-empire
+type: publication
+kind: review
+citation: >-
+  Smith, M.E. (2008). The Aztec Empire. In E.M. Brumfiel and G.M. Feinman (eds.), The Aztec World,
+  pp. 121–136. New York: Abrams.
+authors: ["Smith, M.E."]
+published: 2008
+title: The Aztec Empire
+container: The Aztec World (Abrams, with the Field Museum)
+url: http://web.archive.org/web/2024id_/https://www.public.asu.edu/~mesmith9/1-CompleteSet/MES-08-AzEmpireFMNH.pdf
+via: >-
+  The author's scan of the chapter with an OCR text layer, read from the Internet Archive's copy of
+  his ASU pages (capture of 4 February 2023); editors, pages and publisher from his publication
+  list. The OCR has errors (for example "Hernin CortCs").
+license: all-rights-reserved
+license_note: Quoted briefly as evidence.
+reliability: >-
+  A museum-catalogue essay for a general reader by an archaeologist of the empire's provinces; a
+  synthesis, not a source for its dates.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched on 2026-11-19 (UTC); pp. 121–124 read. Quotes found in the kept text
+    city-smith-2008-aztec-empire.txt by script.

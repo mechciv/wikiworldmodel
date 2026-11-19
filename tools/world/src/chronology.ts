@@ -4,7 +4,7 @@
 import { parseRef, splitRef } from '../../../core/refs.ts';
 import { scenarioKey, type Scenario } from '../../../core/scenario.ts';
 import { conflictIn, ORIGIN, solve, solveChanged, type Bounds, type Conflict, type Constraint, type Solution } from '../../../core/stn.ts';
-import { bounds, centre, dayNumberAt, dayOnAxis, isCount, parseLag, parsePoint, parseTime, type TimeValue } from '../../../core/time.ts';
+import { bounds, centre, CYCLES, cycleDays, dayNumberAt, dayOnAxis, isCount, isCycle, parseCycle, parseLag, parsePoint, parseTime, type CycleAnchor, type CycleDate, type TimeValue } from '../../../core/time.ts';
 import { isMoment, kindIs, type Claim, type Relation, type World } from './world.ts';
 
 export { scenarioKey, type Scenario } from '../../../core/scenario.ts';
@@ -32,6 +32,12 @@ export interface ClaimGroup {
   subject: string;
   prop: string;
   claims: Claim[];
+  /**
+   * Claims of a moment's property whose value is a day named in calendars of cycles (core/time.ts, CYCLES). Such a
+   * date names a set of days, and narrows the others rather than competing with them: it holds beside them, in
+   * every picture, as a bound on an end does, and is never picked.
+   */
+  beside: Claim[];
 }
 
 const groupsOf = new WeakMap<World, { list: ClaimGroup[]; byKey: Map<string, ClaimGroup> }>();
@@ -58,14 +64,19 @@ function indexGroups(world: World): { list: ClaimGroup[]; byKey: Map<string, Cla
     for (const c of e.claims) {
       if (c.status === 'deprecated') continue;
       const key = `${c.subject}|${c.prop}`;
-      const g = groups.get(key) ?? { key, subject: c.subject, prop: c.prop, claims: [] };
-      g.claims.push(c);
+      const g = groups.get(key) ?? { key, subject: c.subject, prop: c.prop, claims: [], beside: [] };
+      (isBeside(world, c) ? g.beside : g.claims).push(c);
       groups.set(key, g);
     }
   }
   const index = { list: [...groups.values()].sort((a, b) => (a.key < b.key ? -1 : 1)), byKey: groups };
   groupsOf.set(world, index);
   return index;
+}
+
+/** Does a claim hold beside its group's others: a moment's date written as a day named in cycles? */
+export function isBeside(world: World, c: Claim): boolean {
+  return isCycle(c.value) && !!world.vocab?.properties[c.prop]?.moment;
 }
 
 /**
@@ -214,6 +225,126 @@ export function countOf(v: unknown): { calendar: string; days: number; text: str
   return t?.kind === 'count' ? t : undefined;
 }
 
+/** A day named in cycles, as a claim's value gives it, or undefined. */
+export function cycleOf(v: unknown): CycleDate | undefined {
+  if (!isCycle(v)) return undefined;
+  const t = timeOrUndefined(v);
+  return t?.kind === 'cycle' ? t : undefined;
+}
+
+/** The record whose day anchors a cycle (core/time.ts, CYCLES): an event/epoch with `calendar` naming the cycle. */
+export const anchorsOf = (world: World, cycle: string) => epochsOf(world, cycle);
+
+/** The name an anchor gives its day in its cycle, from its `day_name` claim: the place, or undefined. */
+export function anchorPlace(world: World, id: string, cycle: string): number | undefined {
+  const c = world.entity.get(id)?.claims.find((x) => x.prop === 'day_name' && x.status !== 'deprecated' && x.rank !== 'deprecated');
+  const v = typeof c?.value === 'string' ? parseCycle(c.value) : undefined;
+  const name = CYCLES[cycle]?.unit === 'year' ? v?.year : v?.day;
+  return name && name.cycle === cycle ? name.place : undefined;
+}
+
+/**
+ * Where a cycle meets our days in a scenario: the day the anchor's chosen date gives, and the place its `day_name`
+ * gives it. For a cycle of years the anchor is the first day of the year it names. Undefined where no record
+ * anchors the cycle, or its date is not one day of the calendar.
+ */
+export function cycleAnchor(world: World, cycle: string, s: Scenario = {}): CycleAnchor | undefined {
+  const [id] = anchorsOf(world, cycle);
+  const place = id === undefined ? undefined : anchorPlace(world, id, cycle);
+  const days = place === undefined ? undefined : countDays(world, { calendar: cycle, days: 0 }, s);
+  if (!days) return undefined;
+  const first = dayNumberAt(days[0]);
+  const last = dayNumberAt(days[1] - 1e-7);
+  return first !== undefined && first === last ? { jdn: first, place: place! } : undefined;
+}
+
+/** The anchors a date in cycles needs, in a scenario: one for each cycle it names. */
+export function anchorsFor(world: World, v: CycleDate, s: Scenario = {}): { day?: CycleAnchor; year?: CycleAnchor } {
+  return { day: v.day && cycleAnchor(world, v.day.cycle, s), year: v.year && cycleAnchor(world, v.year.cycle, s) };
+}
+
+/**
+ * The days a date in cycles comes to, between two places on the axis: as runs of day numbers (a day each, or the
+ * part of a year named alone). Undefined where a cycle it names has no anchor, or the window is open or too wide
+ * to say.
+ */
+export function cycleCandidates(world: World, v: CycleDate, lo: number, hi: number, s: Scenario = {}): [number, number][] | undefined {
+  if (!Number.isFinite(lo) || !Number.isFinite(hi)) return undefined;
+  const first = dayNumberAt(lo);
+  const last = dayNumberAt(Math.max(lo, hi - 1e-7));
+  if (first === undefined || last === undefined) return undefined;
+  return cycleDays(v, anchorsFor(world, v, s), first, last);
+}
+
+/** The point a claim of a moment's property dates. */
+function claimPoint(world: World, c: Claim): string {
+  return c.prop === 'end' || c.prop === 'end_before' ? pointOf(world, c.subject, 'end') : pointOf(world, c.subject, 'start');
+}
+
+/**
+ * How a date in cycles comes out in a scenario, against the rest of the evidence: the window that evidence leaves
+ * the claim's point, and the days in it that bear the names. One run: the day it is. Several: one of them, which
+ * the evidence does not decide. None: the names disagree with the rest of the evidence, and the nearest day that
+ * bears them is given, to say how far. Undefined where it cannot be said: no anchor, an open or a contradictory
+ * window.
+ */
+export interface CycleResolution {
+  window: [number, number];
+  days: [number, number][];
+  nearest?: [number, number];
+}
+
+/** The solutions of each scenario's network without its dates in cycles: the window each such date is read in. */
+const restSolutions = new WeakMap<World, Map<string, Solution>>();
+
+export function resolveCycle(world: World, c: Claim, s: Scenario = {}): CycleResolution | undefined {
+  const v = cycleOf(c.value);
+  if (!v) return undefined;
+  let known = restSolutions.get(world);
+  if (!known) restSolutions.set(world, (known = new Map()));
+  const key = scenarioKey(s);
+  let rest = known.get(key);
+  if (!rest) {
+    const net = restNetwork(world, s, false);
+    rest = solve(net.points, net.constraints);
+    known.set(key, rest);
+  }
+  return rest.ok ? resolveIn(world, v, rest.bounds.get(claimPoint(world, c)), s) : undefined;
+}
+
+function resolveIn(world: World, v: CycleDate, b: { lo: number; hi: number } | undefined, s: Scenario): CycleResolution | undefined {
+  if (!b) return undefined;
+  const days = cycleCandidates(world, v, b.lo, b.hi, s);
+  if (!days) return undefined;
+  const out: CycleResolution = { window: [b.lo, b.hi], days };
+  if (!days.length) {
+    // The nearest days of that name on either side of the window: a turn of the cycles back and forth is enough.
+    const turn = 366 * 52;
+    const first = dayNumberAt(b.lo)!;
+    const last = dayNumberAt(Math.max(b.lo, b.hi - 1e-7))!;
+    const before = cycleDays(v, anchorsFor(world, v, s), first - turn, first - 1)?.at(-1);
+    const after = cycleDays(v, anchorsFor(world, v, s), last + 1, last + turn)?.[0];
+    out.nearest = !before ? after : !after ? before : first - before[1] <= after[0] - last ? before : after;
+  }
+  return out;
+}
+
+/** What a date in cycles says, as constraints, given the window the rest of the evidence leaves its point. */
+function cycleConstraints(world: World, c: Claim, b: { lo: number; hi: number } | undefined, s: Scenario): Constraint[] {
+  const v = cycleOf(c.value);
+  const r = v && resolveIn(world, v, b, s);
+  const runs = r ? (r.days.length ? r.days : r.nearest ? [r.nearest] : []) : [];
+  if (!runs.length) return [];
+  const lo = dayOnAxis(runs[0][0]).t;
+  const end = dayOnAxis(runs.at(-1)![1]);
+  const hi = end.t + end.whole;
+  // One day is held at its middle. Two days that touch at midnight share an instant, and the solver forgives a
+  // thousandth of a year (core/stn.ts): held whole, a native date a day off the other side's would agree with it.
+  const one = runs.length === 1 && runs[0][0] === runs[0][1];
+  const [a, z] = one ? [(lo + hi) / 2, (lo + hi) / 2] : [lo, hi];
+  return [{ source: c.ref, from: ORIGIN, to: claimPoint(world, c), lo: a, hi: z, note: r!.days.length ? 'a day of that name' : 'the nearest day of that name' }];
+}
+
 /**
  * The network for a scenario. With `centres`, each dated claim is pinned to its central value
  * instead of its bounds: solving that gives best estimates for derived dates.
@@ -255,8 +386,9 @@ function pickedNetwork(world: World, s: Scenario, centres: boolean): { points: s
   const claim = world.entity.get(record)?.claims.find((c) => c.key === part);
   const g = claim && claimGroup(world, claim.subject, claim.prop);
   if (!claim || !g || !world.vocab.properties[g.prop]?.moment) return undefined;
-  // A zero day's date moves every date written in its count: nothing to change in place.
-  if (isEpoch(world, splitRef(claim.subject).record)) return undefined;
+  // A zero day's date moves every date written in its count, and a day others count days from moves them: nothing to
+  // change in place.
+  if (isEpoch(world, splitRef(claim.subject).record) || countedFrom(world).has(claim.subject)) return undefined;
   const picture: Scenario = s.alts?.length ? { alts: s.alts } : {};
   const before = chosen(g, picture);
   if (!before) return undefined;
@@ -288,6 +420,15 @@ function claimConstraints(world: World, prop: string, c: Claim, centres: boolean
   }
   if (v.kind === 'ref') {
     if (!subjectExists(world, v.ref)) return out; // a wanted record: nothing to constrain by yet
+    // A lag in days from a day its record dates is counted on the calendar, to the days it lands on: carried as years
+    // of 365.25 days, or even as the years between the two days, it straddles two days where the years differ in length.
+    const from = v.lagDays && v.edge && !before && !after ? datedDay(world, v.ref, v.edge, s) : undefined;
+    if (from !== undefined) {
+      const last = dayOnAxis(from + v.lagDays![1]);
+      const [a, z] = [dayOnAxis(from + v.lagDays![0]).t, last.t + last.whole];
+      add({ source, from: ORIGIN, to: point, ...(centres ? { lo: (a + z) / 2, hi: (a + z) / 2 } : { lo: a, hi: z }), note: `${v.lagDays![0] === v.lagDays![1] ? v.lagDays![0] : `${v.lagDays![0]}–${v.lagDays![1]}`} days on the calendar after a dated day` });
+      return out;
+    }
     const [lo, hi] = v.lag;
     if (v.edge) {
       const tp = pointOf(world, v.ref, v.edge);
@@ -310,6 +451,43 @@ function claimConstraints(world: World, prop: string, c: Claim, centres: boolean
   else if (after) add({ source, from: ORIGIN, to: point, lo, hi: Infinity, note: 'later than' });
   else if (Number.isFinite(lo) || Number.isFinite(hi)) add({ source, from: ORIGIN, to: point, lo, hi });
   return out;
+}
+
+const countedFroms = new WeakMap<World, Set<string>>();
+
+/** The subjects some claim counts a lag in days from: a pick of their dates moves those claims' days too. */
+function countedFrom(world: World): Set<string> {
+  let known = countedFroms.get(world);
+  if (!known) {
+    known = new Set();
+    for (const e of world.entities) {
+      for (const c of e.claims) {
+        const v = world.vocab?.properties[c.prop]?.moment ? timeOrUndefined(c.value) : undefined;
+        if (v?.kind === 'ref' && v.lagDays) known.add(splitRef(v.ref).phase ? v.ref : splitRef(v.ref).record);
+      }
+    }
+    countedFroms.set(world, known);
+  }
+  return known;
+}
+
+/**
+ * The day number of the day a subject's edge is dated to by its own chosen claim in a scenario, where that claim
+ * names one day of the calendar (a date, a day number, a day in a count). Undefined otherwise: a range, a year, a
+ * reference to another record.
+ */
+function datedDay(world: World, subject: string, edge: 'start' | 'end', s: Scenario): number | undefined {
+  const g = claimGroup(world, subject, isMoment(world, subject) ? 'date' : edge);
+  const c = g && chosen(g, s);
+  let v = c ? timeOrUndefined(c.value) : undefined;
+  if (v?.kind === 'count') {
+    const days = countDays(world, v, s);
+    v = days && { kind: 'interval', lo: days[0], hi: days[1] };
+  }
+  if (!v || (v.kind !== 'instant' && v.kind !== 'interval')) return undefined;
+  const [lo, hi] = bounds(v);
+  const first = dayNumberAt(lo);
+  return first !== undefined && (v.kind === 'instant' || first === dayNumberAt(hi - 1e-7)) ? first : undefined;
 }
 
 /** A place on the axis, with the length of the calendar unit it names. */
@@ -410,6 +588,34 @@ function boundIn(world: World, x: number | string, s: Scenario): SpanPoint | und
 }
 
 function wholeNetwork(world: World, s: Scenario, centres: boolean): { points: string[]; constraints: Constraint[] } {
+  return networkOf(world, s, centres, true);
+}
+
+/**
+ * A scenario's network. Dates written in cycles come last, with `cycles`: each names a set of days, and is read in
+ * the window the rest of the evidence leaves its point, in the same scenario.
+ */
+function networkOf(world: World, s: Scenario, centres: boolean, cycles: boolean): { points: string[]; constraints: Constraint[] } {
+  const net = restNetwork(world, s, centres);
+  if (!cycles) return net;
+  const alts = new Set(s.alts ?? []);
+  const beside = claimGroups(world).flatMap((g) => g.beside.filter((c) => c.rank !== 'deprecated' && (!c.alt || alts.has(c.alt)) && subjectExists(world, c.subject)));
+  if (!beside.length) return net;
+  let known = restSolutions.get(world);
+  if (!known) restSolutions.set(world, (known = new Map()));
+  const key = scenarioKey(s);
+  let rest = known.get(key);
+  if (!rest) {
+    const plain = centres ? restNetwork(world, s, false) : net;
+    rest = solve(plain.points, plain.constraints);
+    known.set(key, rest);
+  }
+  if (!rest.ok) return net; // the rest does not hold: the validator says why, and a date in cycles has no window to be read in
+  const bounds = rest.bounds;
+  return { points: net.points, constraints: [...net.constraints, ...beside.flatMap((c) => cycleConstraints(world, c, bounds.get(claimPoint(world, c)), s))] };
+}
+
+function restNetwork(world: World, s: Scenario, centres: boolean): { points: string[]; constraints: Constraint[] } {
   const points = new Set<string>();
   const constraints: Constraint[] = [];
   const add = (c: Constraint) => constraints.push(c);

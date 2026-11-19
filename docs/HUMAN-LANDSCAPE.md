@@ -93,7 +93,7 @@ the climate stands in, and says so. Agents write them, region by region; [DWELLI
   a far view draws the top of the list a near view draws in full, and within the frame's budget.
 - **Fields painted on the ground**: the generator gives where they are; the shader draws their plots by the tradition's
   field system (strips, blocks, paddies flooded within their banks, swidden plots).
-- **On the globe**, the anthromes' classes in the legend's colours, under *Settlement* in the toolbar; and a click on
+- **On the globe**, the anthromes' classes in the legend's colours, under *Settlement* in the *Layers* menu; and a click on
   land says how people lived there, from all of the above.
 
 ## What it will not do

@@ -4,7 +4,7 @@
 import { expect, test } from '@playwright/test';
 import type { HazardFile, PresentFile } from '../../../core/layers.ts';
 import type { SeriesFile } from '../../../core/records.ts';
-import { buildFile, canvasPatch, idle, latestBuild, markerPositions, settledUrl } from './helpers.ts';
+import { buildFile, canvasPatch, idle, latestBuild, markerPositions, openLayers, openPlanet, settledUrl } from './helpers.ts';
 
 const layers = (page: import('@playwright/test').Page) =>
   page.evaluate(() => {
@@ -92,6 +92,7 @@ test('the planet panel has one row for a quantity, the finest with a value, and 
   const row = (id: string) => page.locator(`.planet-row[data-series="${id}"]`);
   await page.goto(`/?b=${latestBuild()}&t=${1950 - 100e6}`);
   await idle(page);
+  await openPlanet(page);
   await expect(row('field:earth/co2')).toBeVisible();
   await expect(row('field:earth/sea-level')).toBeVisible();
   await expect(row('field:earth/co2-ice-core')).toBeHidden();
@@ -125,6 +126,7 @@ test('a whole other picture can be chosen, and alternatives of different groups 
   const button = page.locator('.tg-alts');
   await expect(button).toHaveText('Alternatives');
   await expect(page.locator('select[data-group="alt:peopling-of-the-americas"]')).toBeHidden();
+  await openLayers(page);
   await button.click();
   await page.selectOption('select[data-group="alt:peopling-of-the-americas"]', 'alt:peopling-of-the-americas/pre-lgm');
   await idle(page);
@@ -212,6 +214,7 @@ test('the world’s languages are drawn when asked for, at the present, and a cl
   await page.goto(`/?b=${latestBuild()}&lat=47&lon=2&d=1.5`);
   await idle(page);
   expect(await page.evaluate(() => window.__wikiworldmodel!.layers().languages)).toBe(0);
+  await openLayers(page);
   await page.locator('.tg-langs').click();
   await idle(page);
   expect(await page.evaluate(() => window.__wikiworldmodel!.layers().languages)).toBeGreaterThan(50);
@@ -246,6 +249,7 @@ test('where people lived is drawn when asked for: the Nile reads as populated at
   expect((await page.evaluate(() => window.__wikiworldmodel!.layers().people)).drawn).toBe(false);
   expect(await page.evaluate(() => window.__wikiworldmodel!.requests.some((r) => r.endsWith('people.lwt')))).toBe(false);
   await expect(page.locator('.people-legend')).toBeHidden();
+  await openLayers(page);
   await page.locator('.tg-people').click();
   await idle(page);
   await page.waitForFunction(() => window.__wikiworldmodel!.url().includes('people=1'));
@@ -268,6 +272,7 @@ test('where people lived is drawn when asked for: the Nile reads as populated at
   expect(onSahara[0]).toBeLessThan(110);
   expect(onNile[0]).toBeGreaterThan(onSahara[0] + 80);
   // With it off again the Sahara is brighter than it was under the layer, and the sea has not changed.
+  await openLayers(page);
   await page.locator('.tg-people').click();
   await idle(page);
   expect((await page.evaluate(() => window.__wikiworldmodel!.layers().people)).drawn).toBe(false);
@@ -362,6 +367,7 @@ test('a click says what the dataset gives for that cell, and how far to trust it
   await expect(panel).toContainText('at its step 1900 AD');
   await expect(panel).not.toContainText('Between its steps');
   // With the layer off a click on the land says nothing of people.
+  await openLayers(page);
   await page.locator('.tg-people').click();
   await idle(page);
   await page.mouse.click(middle.x, middle.y);

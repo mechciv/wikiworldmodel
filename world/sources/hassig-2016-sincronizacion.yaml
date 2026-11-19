@@ -1,0 +1,27 @@
+id: src:hassig-2016-sincronizacion
+type: publication
+kind: review
+citation: >-
+  Hassig, R. (2016). Timing and the Conquest of Mexico [Sincronización y Conquista de México].
+  Estudios de Cultura Náhuatl 51, 173–196.
+authors:
+  - "Hassig, R."
+published: 2016
+title: Timing and the Conquest of Mexico
+container: "Estudios de Cultura Náhuatl 51, 173–196"
+url: https://nahuatl.historicas.unam.mx/index.php/ecn/article/view/77798
+license: CC-BY-NC-ND-4.0
+reliability: >-
+  A historian's summary of the conquest by its dates in the Julian calendar, with references to
+  the Spanish and native accounts (Book 12 among them), used to argue that the seasons and the
+  war season shaped its timing. Evidence of the dates as a modern synthesis gives them; it does
+  not deal with the Mexica calendar or its correlation. Its table of dates heads the events of
+  1519 with the year 1518.
+verified:
+  by: machine:claude-code
+  how: >-
+    The journal's PDF (article/download/77798/68847) fetched on 19 November 2026 (UTC) and read in
+    its text layer: the overview of the conquest and its table of dates (pp. 175–183) and the
+    sections on the war season and on the Julian dates (pp. 183–190), by the printed page numbers;
+    the rest skimmed. Written in English, with a Spanish title. Quotes were found in the kept text na-hassig-2016-sincronizacion.txt by
+    script; the text layer splits one name ("Cui tlahua"), and the quote keeps it so.

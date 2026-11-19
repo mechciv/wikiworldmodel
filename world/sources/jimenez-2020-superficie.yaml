@@ -1,0 +1,27 @@
+id: src:jimenez-2020-superficie
+type: publication
+kind: review
+citation: >-
+  Jiménez Martínez, E. (2020). En torno a la superficie de México-Tenochtitlan en 1.519. Anuario de
+  Historia Regional y de las Fronteras 25(1), 15–45.
+authors: ["Jiménez Martínez, E."]
+published: 2020
+title: En torno a la superficie de México-Tenochtitlan en 1.519
+container: Anuario de Historia Regional y de las Fronteras 25(1)
+doi: 10.18273/revanu.v25n1-2020001
+url: http://web.archive.org/web/20250523014009/https://revistas.uis.edu.co/index.php/anuariohistoria/article/download/10378/10265/72323
+via: >-
+  The journal's PDF, read from the Internet Archive's copy of 23 May 2025, because the journal's
+  own download failed here with a TLS certificate error. The PDF's own citation line gives the
+  year as 2019 (received April and accepted September 2019); the DOI and the 2022 article give 2020.
+license_note: Open access; no licence is stated in the PDF. Quoted briefly as evidence.
+reliability: >-
+  A review of the area estimates of Tenochtitlan-Tlatelolco, from the Anonymous Conqueror to
+  Sanders, followed by the author's own measurement (9.44 km2) of a boundary he drew from barrio
+  limits, archaeological finds and early maps on INEGI's digital map. It summarizes the founding of
+  Tlatelolco and the war of 1473 from secondary sources.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched on 2026-11-19 (UTC); the introduction, the review of earlier estimates (pp. 25–32) and
+    the conclusion read. Quotes found in the kept text city-jimenez-2020-superficie.txt by script.

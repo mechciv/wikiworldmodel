@@ -1,0 +1,89 @@
+id: people/calendars/tonalpohualli-anchor
+kind: event/epoch
+summary: >-
+  A day of the Mexica 260-day count whose day in the European calendar is known: the day 1 Coatl on which
+  Tenochtitlan fell, 13 August 1521 in the Julian calendar. The native sources that give the day of the fall all
+  give 1 Coatl, and every author but two who gives its day in the European calendar gives 13 August (Caso 1959,
+  p. 13; Torquemada and the Títulos de Santa Isabel Tola give the 12th); Alfonso Caso, after J. Eric S. Thompson, took the
+  coincidence as the tie between the two calendars, and the 260-day counts still kept by Maya peoples agree with it
+  day for day. Paul Kirchhoff held that the towns of central Mexico named the same day differently, so that the
+  tie need not hold everywhere, even in Tlatelolco; Caso rejected that. Every date written in the 260-day count
+  follows the day chosen here.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: "1 Coatl, 13 August 1521" }
+    unsourced: An editorial label, the day's name in both calendars.
+  calendar:
+    prop: calendar
+    value: tonalpohualli
+    source:
+      - ref: src:sahagun-historia-kingsborough-1831
+        loc: "Book 4, appendix, p. 154"
+        quote: Decian que cada uno de los caracteres reinaba trece dias, que todos juntos son doscientos sesenta dias.
+      - ref: src:pina-garza-1999-aritmetica
+        loc: "p. 257"
+        quote: Las parejas así formadas son 260 diferentes, que después se repiten cíclicamente, en conjuntos periódicos de 260 días.
+      - ref: src:acuna-1976-calendarios-altiplano
+        loc: "p. 279"
+        quote: Afortunadamente, la correlación de los signos diarios mayas y mexicanos no ofrece mayor problema.
+    note: >-
+      Sahagún: they said each of the twenty signs reigned thirteen days, which together make 260 days. Piña Garza:
+      a number from 1 to 13 and a sign, both advancing a day at a time, make 260 different pairs, which then
+      repeat. Acuña: which Maya day sign answers which Mexica one is no great problem. How the count turns is in
+      core/time.ts (CYCLES); the order of the signs is Tena's, as Piña Garza gives it (p. 258).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in na-kingsborough-1831-v7.txt (sha256 817869f9d37eb6be), na-pina-garza-1999-aritmetica.txt (sha256 6370428536a157b6) and na-acuna-1976-calendarios-altiplano.txt (sha256 d781b500d45eff48), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  day-name:
+    prop: day_name
+    value: 1 Coatl
+    source:
+      - ref: src:florentine-codex-book-12
+        loc: "Book 12, chap. 40, fol. 83r, Nahuatl (Lockhart's transcription)"
+        quote: "Auh in omomā chimalli; inic tixitinque, in xiuhtonalli ei calli. Auh in cemilhuitlapoalli ce coatl:"
+      - ref: src:caso-1959-correlacion
+        loc: "p. 13"
+        quote: Todos los autores indios, no importa su procedencia, que citan el día de la toma de Tenochtitlán, están de acuerdo que fué el llamado 1 Coatl.
+    note: >-
+      Book 12, as the Tlatelolca told it: when the shield was laid down and we were scattered, the year sign was
+      Three House and the day count One Serpent. Caso: every native author who gives the day of the taking of
+      Tenochtitlan, wherever he came from, gives 1 Coatl (his table on p. 12 names the Anales de Tlatelolco, the
+      Anales de Tula, Sahagún's informants, Cristóbal del Castillo and Chimalpahin).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in na-fc12-getty.txt (sha256 9a864988595f9f1f) and na-caso-1959-correlacion.txt (sha256 11d7f45ab98e2b75), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  date:
+    prop: date
+    value: 13 August 1521 CE
+    source:
+      - ref: src:caso-1959-correlacion
+        loc: "p. 9"
+        quote: El día de la toma de la Ciudad de México, 13 de agosto de 1521, que correlaciono con el día 1 Coatl
+      - ref: src:caso-1959-correlacion
+        loc: "p. 11"
+        quote: Creo como Thompson que toda correlación que no admite la fórmula 1 Coatl = 13 agosto de 1521, no puede resistir la crítica.
+      - ref: src:caso-1959-correlacion
+        loc: "p. 10, reporting Miles (1952)"
+        quote: se ve que no se ha perdido un solo día con relación al tzolkin antiguo y que se ajusta a la correlación azteca 1 Coatl 13 de agosto 1521, naturalmente en el Calendario juliano.
+    against:
+      ref: src:caso-1959-correlacion
+      loc: "p. 11, reporting Kirchhoff"
+      quote: que la variación entre los calendarios del México Central, no sólo consistía en el mes por el que principiaban el año … de tal modo que el día 13 de agosto de 1521 no se llamaría 1 Coatl en todos los calendarios, y esto en ciudades tan cercanas como Tenochtitlán y Tlatelolco
+    method: calendar-correlation
+    basis: reconstruction
+    note: >-
+      Caso's correlation of 1939, restated in 1959: the day of the taking of the city, 13 August 1521, was 1
+      Coatl; with Thompson, no correlation that does not admit it can stand; and, after Miles, the day counts still
+      kept in Guatemala have not lost a day against it, in the Julian calendar. The tie comes from the conquest
+      itself, the day that both sides date: so the fall's own two dates, held against each other here, cannot test
+      it, but every other day dated by both sides does (people/conquest/entry-into-tenochtitlan). Denied by
+      Kirchhoff (1950, and at the round table of 1955), as Caso reports him: the calendars of central Mexico
+      differed not only in the month that began the year but in the names of the days, so that 13 August 1521
+      would not be 1 Coatl in every calendar, even in towns as close as Tenochtitlan and Tlatelolco. He gave no
+      other day, so his view is cited against this one and is not a competing claim. Caso found it untenable,
+      since no source says so (p. 11). Under the Maya correlation the world prefers, 584283
+      (people/calendars/long-count-zero-day), 13 August 1521 is 1 Chikchan, the Maya name of 1 Coatl; under
+      584285 or 584286 it is not: one tie serves both counts only with 584283, as Thompson argued. The world cannot
+      yet say that the two counts are one count, so this agreement is a note.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in na-caso-1959-correlacion.txt (sha256 11d7f45ab98e2b75), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }

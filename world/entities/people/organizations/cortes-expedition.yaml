@@ -1,0 +1,59 @@
+id: people/organizations/cortes-expedition
+kind: organization
+summary: >-
+  The company of soldiers and sailors that sailed from Cuba under Hernán Cortés in February 1519, some five hundred
+  men and sixteen horses, and with its native allies conquered Tenochtitlan. Whose company it was is the question its
+  own first letter answers: it sailed under a commission from Diego Velázquez, governor of Cuba, to trade; on the coast
+  its men founded the town of Villa Rica de la Vera Cruz, whose council found Velázquez's powers spent and received
+  Cortés as chief justice and captain of the royal arms, in the names of Juana and Charles, until they should provide.
+  Bernal Díaz adds the condition Cortés set: captain general, and a fifth of the gold after the king's. All agree that
+  it acted in the crown's name; through whom is what they dispute.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Expedition of Hernán Cortés }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 10 February 1519 CE
+    source:
+      ref: src:bernal-diaz-verdadera-historia
+      loc: "cap. XXV"
+      quote: y en 10 dias del mes de Febrero, año de 1519, despues de haber oido Misa, nos hicimos á la vela con nueve navíos por la banda del Sur
+    method: historical-account
+    note: >-
+      The fleet's sailing from Cuba, as Bernal Díaz dates it: the company was raised there in the months before, which
+      no source read dates. At Cozumel Cortés counted 508 soldiers, 109 masters, pilots and sailors, and sixteen horses
+      (cap. XXVI); the council's letter says ten caravels and four hundred men of war.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in es-bernal-diaz-verdadera-historia.txt (sha256 fabaae2d6b1a8c58), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  end:
+    prop: end
+    value: unknown
+    unsourced: >-
+      The company went on as the conquerors of New Spain and the councils of its towns; no source read says when it
+      ceased to act as one.
+relations:
+  in-the-crowns-name:
+    rel: subject-to
+    to: people/polities/crown-of-castile
+    source:
+      - ref: src:veracruz-council-1519-letter
+        loc: "p. 13 (scan 25)"
+        quote: nombró en nombre de vuestras majestades el dicho Diego Velazquez al dicho Fernando Cortes por capitan della para que viniese á esta tierra á rescatar y hacer lo que Grijalba no habia hecho
+      - ref: src:veracruz-council-1519-letter
+        loc: "p. 36 (scan 48)"
+        quote: lo recibimos en su real nombre en nuestro ajuntamiento y cabildo por justicia mayor y capitan de vuestras reales armas
+      - ref: src:bernal-diaz-verdadera-historia
+        loc: "cap. XLII"
+        quote: fué con condicion que le hiciésemos justicia mayor y capitan general; y lo peor de todo que le otorgamos, que le dariamos el quinto del oro de lo que se hubiese, despues de sacado el real quinto
+    note: >-
+      The council of Vera Cruz, 10 July 1519: Velázquez, in Your Majesties' name, named Cortés captain of the fleet, to
+      come and trade and do what Grijalba had not; and we received him in your royal name, in our council, as chief
+      justice and captain of your royal arms. Bernal Díaz: on condition that we made him chief justice and captain
+      general, and a fifth of the gold after the royal fifth. In the crown's name in every telling; by Velázquez's
+      commission or by the council's election is the dispute, which a relation cannot hold: it names whose subject a
+      thing was, not through whom.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in es-veracruz-council-1519-letter.txt (sha256 46551fc8429c4463) and es-bernal-diaz-verdadera-historia.txt (sha256 fabaae2d6b1a8c58), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
