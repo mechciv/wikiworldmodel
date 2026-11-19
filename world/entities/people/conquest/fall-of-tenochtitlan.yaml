@@ -1,0 +1,79 @@
+id: people/conquest/fall-of-tenochtitlan
+kind: event/conquest
+summary: >-
+  The end of the siege of Tenochtitlan: the capture of Cuauhtemoc, the last ruler of the city, as he left by canoe
+  from Tlatelolco, where the last of the Mexica held out, and the surrender of the city. The Spanish sources date it
+  to St Hippolytus's day, 13 August 1521; Book 12 of the Florentine Codex, told by the Tlatelolca, to the day 1
+  Coatl in the year 3 Calli. The two dates are held against each other here, and agree: the coincidence is the tie
+  between the two calendars (people/calendars/tonalpohualli-anchor).
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Fall of Tenochtitlan }
+    unsourced: >-
+      An editorial label. Wikidata's item of this name (Q593267) is the siege, from May to August; this record is
+      its last day.
+  date:
+    prop: date
+    value: 13 August 1521 CE
+    source:
+      - ref: src:cortes-1522-third-letter
+        loc: "p. 409 (scan 420)"
+        quote: nuestro Señor dar conclusion mártes, dia de San Hipólito, que fueron 13 de Agosto
+      - ref: src:bernal-diaz-verdadera-historia
+        loc: "cap. CLVI"
+        quote: Prendióse Guatemuz y sus capitanes en 13 de Agosto, á hora de vísperas, dia de señor San Hipólito, año de 1521
+    method: documentary
+    note: >-
+      Cortés, writing at Coyoacán on 15 May 1522: the war, which it pleased God to end on Tuesday, St Hippolytus's
+      day, which was 13 August 1521. Bernal Díaz, writing about 1568: Guatemuz and his captains were taken on 13
+      August at the hour of vespers, St Hippolytus's day. The date is Julian; weekday, feast and date agree.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in es-cortes-1522-third-letter.txt (sha256 b72ff8bf42100af3) and es-bernal-diaz-verdadera-historia.txt (sha256 fabaae2d6b1a8c58), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  date-mexica:
+    prop: date
+    value: 1 Coatl in the year 3 Calli
+    source:
+      - ref: src:florentine-codex-book-12
+        loc: "Book 12, chap. 40, fol. 83r, Nahuatl (Lockhart's transcription)"
+        quote: "Auh in omomā chimalli; inic tixitinque, in xiuhtonalli ei calli. Auh in cemilhuitlapoalli ce coatl:"
+      - ref: src:florentine-codex-book-12
+        loc: "Book 12, chap. 40, fol. 83r, Spanish (Lockhart's transcription)"
+        quote: "Rendieronse los mexicanos, y despartiose la guerra en la cuenta de los años, que se dize tres casas, y ē la cuenta de los dias: en el signo que se llama Ce coatl."
+    method: historical-account
+    note: >-
+      The Nahuatl, in the voice of the defeated: and when the shield was laid down, when we were scattered, the
+      year sign was Three House, and the day count One Serpent. Sahagún's Spanish: the Mexica surrendered and the
+      war ended in the count of the years called Three Houses, and in the count of the days in the sign called One
+      Serpent. No month is given. Taken down about 1555, some thirty-four years later. It holds beside the Spanish
+      date and agrees with it under the correlation the world uses; it cannot test that correlation, which rests
+      on this very coincidence.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in na-fc12-getty.txt (sha256 9a864988595f9f1f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  location:
+    prop: location
+    value: { lat: 19.45108333, lon: -99.1375, frame: frame:earth/present-day }
+    source: { ref: src:wikidata-tlatelolco, loc: "Q796925, P625 coordinate location" }
+    method: gazetteer
+    note: >-
+      Tlatelolco, where the sources put the end: Cortés on a roof in the ward of Amaxac, the house of the Tlatelolca
+      noble Aztaoatzin (Book 12, chap. 39, fol. 80r), and watching, in Bernal's telling, from the great temple of
+      Tlatelolco (cap. CLVI). The point is the gazetteer's for Tlatelolco, not the spot.
+  frame:
+    prop: frame
+    value: frame:paleomap/plate-104
+    source: { ref: src:paleomap-plate-model, loc: PALEOMAP_PlatePolygons.gpml }
+    method: plate-polygon
+    basis: reconstruction
+relations:
+  siege:
+    rel: part-of
+    to: people/conquest/siege-of-tenochtitlan
+    source:
+      ref: src:cortes-1522-third-letter
+      loc: "p. 409 (scan 420)"
+      quote: á 30 de Mayo del dicho año, hasta que se ganó, pasaron setenta y cinco
+    note: The day the siege, laid on 30 May, ended with the city won, seventy-five days on, as Cortés counts them.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in es-cortes-1522-third-letter.txt (sha256 b72ff8bf42100af3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }

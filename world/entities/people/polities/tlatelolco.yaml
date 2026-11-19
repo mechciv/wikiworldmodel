@@ -1,0 +1,114 @@
+id: people/polities/tlatelolco
+kind: polity
+summary: >-
+  The altepetl of Mexico Tlatelolco, on the north of the island: a republic of its own, as Torquemada put it, with its
+  own line of kings until Moquihuix was killed in the war of 1473 with Tenochtitlan; then a tributary, governed by
+  governors named by the Mexica kings, though always of its own people, until the Spaniards came; under them it had
+  its own governors again, as Santiago Tlatelolco. It did not end in 1473, as Wikidata has it: it became a subject.
+  Its elders told Sahagún's students the Mexica account of the conquest that is Book 12 of the Florentine Codex.
+author: machine:claude-code
+phases:
+  - id: kingdom
+    label: Kingdom of Tlatelolco
+    same_as: { wikidata: Q796925 }
+  - id: tributary
+    label: Tlatelolco under Tenochtitlan's governors
+  - id: santiago
+    label: Santiago Tlatelolco, under the Spaniards
+claims:
+  name:
+    prop: name
+    value: { en: Tlatelolco }
+    unsourced: An editorial label, the name of its town.
+  start:
+    prop: start
+    value: { ref: people/cities/tlatelolco, edge: start }
+    source:
+      ref: src:torquemada-1615-monarquia-indiana
+      loc: "book 2, ch. XII, p. 135"
+      quote: fueron los tlatilulcas, cuyo primer rey fue Quaquauhpitzahuac hijo, según dicen. de Tezozomoctli. rey de Azcaputzalco
+    method: tradition
+    note: >-
+      The altepetl begins with its town; its first king, Torquemada says, was Quaquauhpitzahuac, said to be a son of
+      Tezozomoc of Azcapotzalco, and some held that the Tlatelolca had a king before the Tenochca. Sahagún gives four
+      kings to Moquihuix (book 8, ch. II).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in city-torquemada-1615-joined.txt (sha256 688c18b2f2d9d7a3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  kingdom-ends:
+    prop: end
+    subject: "@kingdom"
+    value: { ref: people/conquest/conquest-of-tlatelolco }
+    source:
+      ref: src:torquemada-1615-monarquia-indiana
+      loc: "book 2, ch. LVIII, p. 248"
+      quote: nunca más tuvo rey y fue después gobernado por gobernadores nombrados por los reyes mexicanos, aunque siempre eran de los del mismo pueblo
+    method: historical-account
+    note: >-
+      Here ended the kingdom of Tlatelolco: it never again had a king, and was governed afterwards by governors named
+      by the Mexica kings, though they were always of the same town. Sahagún's book 9 calls them consuls, four nobles
+      with titles of office (p. 336).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in city-torquemada-1615-joined.txt (sha256 688c18b2f2d9d7a3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  tributary-ends:
+    prop: end
+    subject: "@tributary"
+    value: { ref: people/conquest/fall-of-tenochtitlan }
+    source:
+      - ref: src:sahagun-1829-historia-general
+        loc: "book 8, ch. II, p. 274"
+        quote: El quinto señor D. Pedro Temile, después en tiempo de los españoles … fué gobernador de Tlaltdolco, y así estos tornaron á cobrar su señorio
+      - ref: src:codex-mendoza-1831-english
+        loc: "commentary on Axayacatl's reign (Plates IX–X)"
+        quote: died, precipitating himself from the top of a high temple … the city of Tlatilula from that time until the conquest of Mexico by the Spaniards, was subject to the king of Mexico, paying him tribute, and acknowledging vassalage
+    method: historical-account
+    note: >-
+      Sahagún: the fifth lord, Don Pedro Temilo, after the Spaniards came, was governor of Tlatelolco, and so they
+      recovered their lordship ("Tlaltdolco" is the scan's Tlaltelolco). The Codex Mendoza: subject to the king of
+      Mexico from 1473 until the conquest. A governor of "this part of Santiago", don Melchor de Soto, served about
+      1600 (Torquemada, book 2, ch. XII).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in city-sahagun-1829-vol2.txt (sha256 170577622749b8c0) and city-kingsborough-1831-vol6.txt (sha256 3c597150a1bea5da), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  end:
+    prop: end
+    value: unknown
+    unsourced: No source read says when Santiago Tlatelolco's own government ended.
+relations:
+  subject-to-tenochtitlan:
+    rel: subject-to
+    to: people/polities/tenochtitlan
+    valid: { lo: { ref: people/conquest/conquest-of-tlatelolco, edge: start }, hi: { ref: people/conquest/fall-of-tenochtitlan, edge: start } }
+    source:
+      - ref: src:duran-1867-historia
+        loc: "ch. XXXIV, p. 269"
+        quote: que aquella parcialidad mexicana del tlatelulco le fuesen tributarios y pecheros como las demás ciudades y prouincias
+      - ref: src:codex-mendoza-1831-english
+        loc: "commentary on Axayacatl's reign (Plates IX–X)"
+        quote: died, precipitating himself from the top of a high temple … the city of Tlatilula from that time until the conquest of Mexico by the Spaniards, was subject to the king of Mexico, paying him tribute, and acknowledging vassalage
+    note: >-
+      Durán: Axayacatl ordered that that Mexica division of Tlatelolco be his tributaries and taxpayers like the other
+      cities and provinces; it paid every eighty days, and had no freedom and no temple of its own until the Spaniards
+      came. Tribute and governors from Tenochtitlan, but governors of its own people: subject, not taken in. That is
+      neither part-of nor merged-into, and before this slice there was no relation for it.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in city-duran-1867-vol1.txt (sha256 0c47389562a44709) and city-kingsborough-1831-vol6.txt (sha256 3c597150a1bea5da), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  holds-the-mexica-account:
+    rel: holds
+    to: alt:conquest-accounts/mexica
+    valid: { lo: 1555 CE, hi: 1565 CE }
+    source:
+      - ref: src:alcantara-navarrete-book-12-translators-note
+        loc: "the essay, paragraph 1"
+        quote: here in this work remains part of the “account” that, around 1555 in Tlatelolco,
+      - ref: src:alcantara-navarrete-book-12-translators-note
+        loc: "the essay, paragraph 2"
+        quote: worked on this text during different periods between 1555 and 1565.
+      - ref: src:florentine-codex-book-12
+        loc: "address to the reader, fol. iv, Spanish (Lockhart's transcription)"
+        quote: "la qual se escuiuio en tiempo que eran viuos, los que se hallaron en la misma conquista: y ellos dieron esta relacion personas principales, y de buen juizio"
+    note: >-
+      The account was given around 1555 in Tlatelolco, by people of rank and good judgement who had taken part in the
+      conquest, as Sahagún says in his address to the reader; his Nahua collaborators worked on the text between 1555
+      and 1565 (the Digital Florentine Codex's editors). Told in a Tlatelolca "we": the elders of Tlatelolco held this
+      view, about a generation after the events.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in na-getty-alcantara-navarrete-book12-note.content.txt (sha256 6562733f4335a034) and na-fc12-getty.txt (sha256 9a864988595f9f1f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }

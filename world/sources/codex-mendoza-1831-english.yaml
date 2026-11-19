@@ -1,0 +1,24 @@
+id: src:codex-mendoza-1831-english
+type: text
+kind: compilation
+citation: >-
+  Codex Mendoza (Collection of Mendoza), English translation of its Spanish commentary,
+  "Interpretation of the Collection of Mendoza", in E. King, Viscount Kingsborough, Antiquities of
+  Mexico, vol. 6. London: Robert Havell and Colnaghi, Son, and Co., 1831.
+published: 1831
+title: Interpretation of the Collection of Mendoza
+url: https://archive.org/details/AntiquitiesMexi6King
+via: >-
+  Kingsborough's English translation of the Spanish commentary, vol. 6 (the Smithsonian Libraries
+  copy on the Internet Archive), read in its OCR text; proper names are often garbled
+  ("Moaqutuurx" for Moquihuix).
+license: public-domain
+reliability: >-
+  An English translation, printed in 1831, of the Spanish commentary of the Codex Mendoza, printed in
+  vol. 5 of the same work; a public-domain translation, quoted where the OCR of the Spanish is too corrupt.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched on 2026-11-19 (UTC); the interpretation of plates VI, IX–X and XIX (Itzcoatl's
+    conquests, Axayacatl's, and the tribute of Tlatelolco) read and compared with the Spanish in vol. 5.
+    Quotes found in the kept text city-kingsborough-1831-vol6.txt by script.

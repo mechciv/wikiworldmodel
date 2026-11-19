@@ -1,0 +1,37 @@
+id: src:bernal-diaz-verdadera-historia
+type: text
+kind: eyewitness
+citation: >-
+  Díaz del Castillo, B. Verdadera historia de los sucesos de la conquista de la Nueva-España, por el capitan Bernal
+  Diaz del Castillo, uno de sus conquistadores. 3 vols. Madrid: Imprenta de Tejado, 1862.
+authors:
+  - "Díaz del Castillo, B."
+published: 1862
+written: 1568 CE
+title: Verdadera historia de los sucesos de la conquista de la Nueva-España
+container: Madrid, Imprenta de Tejado, 1862 (tomo I, caps. I–CXI; II, CXII–CLXVII; III, CLXVIII–CCXII)
+url: https://gutenberg.pglaf.org/6/4/9/4/64945/64945-0.txt
+via: >-
+  Project Gutenberg's transcription of the 1862 edition (ebooks 64945, 64946, 64947), read from its mirror at
+  gutenberg.pglaf.org and kept as one text, es-bernal-diaz-verdadera-historia.txt. The transcriber's note says it
+  follows the same text as Vedia's edition in the Biblioteca de Autores Españoles, XXVI (1853), corrects printing
+  errors, normalizes spelling variants (not proper names or native words), accents capitals, distinguishes mas/más,
+  aun/aún and que/qué, and breaks long paragraphs; so the quotations are of a modernized text. Its dates agree, at
+  every one checked, with Lockhart's English translation of the Madrid edition of 1632 (src:bernal-diaz-lockhart-1844).
+license: public domain
+reliability: >-
+  A soldier's history of the conquest by a man who sailed with Cortés in 1519 and served through the siege (in
+  Alvarado's division), written decades later from memory and notes, in Guatemala, to correct Gómara's account and
+  to claim the soldiers' share of the glory; the text says he was copying it out in 1568, and it was first printed
+  in 1632. It gives many exact days, often from church feasts, and numbers that differ widely from Cortés's; some
+  dates are corrupt in this text (the flight on 10 July "of the following year"), and what happened where he was not
+  (the killing at the festival in May 1520) is hearsay, as he says. Kind eyewitness, though written long after.
+verified:
+  by: machine:claude-code
+  how: >-
+    The three volumes fetched on 2026-11-18 (2026-11-19 UTC) from gutenberg.pglaf.org (gutenberg.org was down for
+    maintenance), kept as es-bernal-diaz-verdadera-historia-1/2/3.txt and joined, unaltered, into
+    es-bernal-diaz-verdadera-historia.txt. Read: the front matter and caps. XIX–XXVI, XXXVIII, XLII, XLVIII, LIV, LVI,
+    LXI–LXXVIII, LXXXIII, LXXXVII–XCII, CI, CXXIV–CXXVIII, CXLVIII–CLVIII, CCX and CCXII, in part. No page images were
+    checked. The quotations were found in the kept text by script with quote-check's own matching, each in the chapter
+    it is cited to.

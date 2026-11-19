@@ -1,0 +1,93 @@
+id: people/cities/tlatelolco
+kind: settlement
+summary: >-
+  Mexico Tlatelolco, the twin of Tenochtitlan on the north of the same island, with the great market the Spaniards
+  marvelled at. Separated from Tenochtitlan by a canal, it was a city with kings of its own until Tenochtitlan took it
+  in 1473 (people/conquest/conquest-of-tlatelolco); from then the chroniclers call it a ward, the second of the
+  city's two, and the last stand of 1521 was fought in it. It did not end: under the Spaniards it was Santiago
+  Tlatelolco, a town of natives with its own governors, and it is a district of Mexico City today. Wikidata ends it in
+  1473; merged-into, which says that a thing ended by becoming part of another, would say the same, and both would be
+  wrong.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Tlatelolco }
+    unsourced: >-
+      An editorial label. Gómara writes Tlatelulco, which he says means islet, Cortés and Bernal Díaz Tatelulco and
+      Tlatelulco, Book 12 Tlatilulco; under the Spaniards it was called Santiago (Codex Mendoza, commentary on plate
+      XIX: "Tlatilulco, which is now called Santiago").
+  start:
+    prop: start
+    value: { ref: people/cities/tenochtitlan, edge: start, lag: 13 yr }
+    source:
+      ref: src:jimenez-2020-superficie
+      loc: "p. 18"
+      quote: trece años después de su establecimiento, una serie de descontentos se separó del grupo principal estableciéndose en otro islote más al norte, llamado Xaltelolco
+    method: tradition
+    note: >-
+      Jiménez Martínez, from documentary sources he does not name: thirteen years after their settlement, a group of
+      the discontented separated from the main group and settled on another islet to the north, called Xaltelolco.
+      The tradition of a split; the same author reports that archaeology finds Tlatelolco settled before Tenochtitlan,
+      as Gómara wrote, which the relation below cites against it. Wikidata gives 1337, from English Wikipedia; Sahagún's
+      reigns of its four kings, 62, 38, 38 and 9 years to 1473, would begin about 1326.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in city-jimenez-2020-superficie.txt (sha256 de0eb47de70c2086), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  location:
+    prop: location
+    value: { lat: 19.45108333, lon: -99.1375, frame: frame:earth/present-day }
+    source: { ref: src:wikidata-tlatelolco, loc: "Q796925, P625 coordinate location" }
+    method: gazetteer
+  frame:
+    prop: frame
+    value: frame:paleomap/plate-104
+    source: { ref: src:paleomap-plate-model, loc: PALEOMAP_PlatePolygons.gpml }
+    method: plate-polygon
+    basis: reconstruction
+relations:
+  split-from:
+    rel: arose-from
+    to: people/cities/tenochtitlan
+    source:
+      - ref: src:duran-1867-historia
+        loc: "ch. V, pp. 43–44"
+        quote: Estos quatro señores se dividieron y apartaron de los demás y se fueron á vivir á este lugar del Tlatilulco
+      - ref: src:torquemada-1615-monarquia-indiana
+        loc: "book 3, ch. XXIII, p. 399"
+        quote: al cual llamaron Xaltelolco y alli se puso la mitad de la gente y es el segundo barrio de esta grandiosa ciudad, que se llama Tlatelulco
+    against:
+      - ref: src:gomara-1552-conquista
+        loc: "ch. [79], p. 222 (Chimalpáhin's copy)"
+        quote: Primero que se poblase este Varrio Mexico estaua ya poblado el de T latilulco
+      - ref: src:jimenez-2020-superficie
+        loc: "note 9, p. 18"
+        quote: indican que estuvo poblado antes que Tenochtitlan
+    note: >-
+      Durán (1581): these four lords divided and separated from the rest and went to live in Tlatelolco; Torquemada
+      (1615): half the people settled there, and it is the second ward of the city. Denied by Gómara (1552): before
+      this ward of Mexico was settled, that of Tlatelolco was already settled; and by the archaeology Jiménez Martínez
+      cites, the pottery and the building phases of Tlatelolco's great temple, which indicate that it was settled
+      before Tenochtitlan. A denial gives no date of its own, so it is cited against the relation and is not a rival.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in city-duran-1867-vol1.txt (sha256 0c47389562a44709), city-torquemada-1615-joined.txt (sha256 688c18b2f2d9d7a3), city-gomara-chimalpahin-71-80.txt (sha256 5adc6abb4fc88f1d) and city-jimenez-2020-superficie.txt (sha256 de0eb47de70c2086), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  in-the-city:
+    rel: part-of
+    to: people/cities/tenochtitlan
+    valid: { lo: { ref: people/conquest/conquest-of-tlatelolco, edge: start } }
+    source:
+      - ref: src:jimenez-2022-poblacion
+        loc: "p. 128"
+        quote: ya que Tlatelolco fue anexionada a Tenochtitlan en 1473, de la que solo estaba separada por un canal
+      - ref: src:smith-2008-aztec-city-planning
+        loc: "p. 142"
+        quote: The city of Tlatelolco, with its own impressive epicenter (Fig. 8), was originally a separate town but was later incorporated into Tenochtitlan (González Rul 1998).
+      - ref: src:gomara-1552-conquista
+        loc: "ch. [79], p. 221 (Chimalpáhin's copy)"
+        quote: esta la Ciudad repartida en dos Barrios. al vno llaman Tlatelulco que quiere dezir Yzleta, y al otro Mexico donde mora Moteczuma
+    note: >-
+      A town taken into a city does not end: Tlatelolco was annexed to Tenochtitlan in 1473, separated from it only by
+      a canal (Jiménez Martínez 2022), a separate town later incorporated (Smith 2008), one of the two wards the city
+      was divided into, when the Spaniards came (Gómara). The span runs from the conquest of 1473 and is open: it is
+      part of Mexico City still. Its rulers are another thing (people/polities/tlatelolco).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in city-dialnet-8205553.txt (sha256 658c0c042ea488d2), city-smith-2008-aztec-city-planning.txt (sha256 2af75a49398182ad) and city-gomara-chimalpahin-71-80.txt (sha256 5adc6abb4fc88f1d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }

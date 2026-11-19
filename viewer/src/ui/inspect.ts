@@ -102,6 +102,15 @@ export interface InspectCallbacks {
   onOpen(entityId: string): void;
   labelOf(ref: string): string;
   altTitle(id: string): string;
+  /** who held a perspective, and when, if the records say */
+  altHeld?(id: string): { id: string; label: string; held?: string }[] | undefined;
+}
+
+/** Who held a perspective, in words: "held by Tlatelolco (1550 CE – 1555 CE) and …". */
+export function heldText(held: { label: string; held?: string }[] | undefined): string {
+  if (!held?.length) return '';
+  const each = held.map((h) => `${h.label}${h.held ? ` (${h.held})` : ''}`);
+  return `held by ${each.length > 1 ? `${each.slice(0, -1).join(', ')} and ${each.at(-1)}` : each[0]}`;
 }
 
 export interface TerrainInfo {
@@ -362,7 +371,10 @@ export class InspectPanel {
 
   private cites(r: EntityRecord, cs: CitationRecord[], unsourced?: string): string {
     if (unsourced) return `<span class="cite unsourced">No source: ${esc(unsourced)}</span>`;
-    return cs.map((c) => `<span class="cite">${esc(short(r.sources[c.ref], c.ref))}${c.loc ? `, ${esc(c.loc)}` : ''}</span>`).join('<span class="cite">; </span>');
+    // When a source was written, against what it tells of: an account written down decades after is said to be. Two
+    // quotes from one place of one work are one citation; their quotes are shown apart below it.
+    const shown = cs.map((c) => `<span class="cite">${esc(short(r.sources[c.ref], c.ref))}${c.loc ? `, ${esc(c.loc)}` : ''}${c.after ? ` <span class="after">(${esc(c.after)})</span>` : ''}</span>`);
+    return [...new Set(shown)].join('<span class="cite">; </span>');
   }
 
   private link(ref: string, label: string, wanted = false): string {
@@ -405,25 +417,27 @@ export class InspectPanel {
       const cs = own.length ? own : all.filter((c) => !c.alt);
       const others = all.filter((c) => !cs.includes(c));
       const prop = cs[0]?.prop ?? all[0].prop;
+      // A date named in cycles holds beside the others and narrows them: it is not one of the choices.
+      const choice = cs.filter((c) => !c.beside);
       // Claims that each hold for a span of their own, as a state's names do in turn, are not a choice to make.
-      const turns = cs.length > 1 && cs.every((c) => c.turn);
-      const competing = cs.length > 1 && !turns;
-      const def = cs.find((c) => c.rank === 'preferred') ?? (cs.filter((c) => c.rank !== 'deprecated').length === 1 ? cs.find((c) => c.rank !== 'deprecated') : undefined);
-      const chosen = cs.find((c) => picks.has(c.ref)) ?? def;
+      const turns = choice.length > 1 && choice.every((c) => c.turn);
+      const competing = choice.length > 1 && !turns;
+      const def = choice.find((c) => c.rank === 'preferred') ?? (choice.filter((c) => c.rank !== 'deprecated').length === 1 ? choice.find((c) => c.rank !== 'deprecated') : undefined);
+      const chosen = choice.find((c) => picks.has(c.ref)) ?? def;
       if (chosen?.prop === 'footprint_form' && isFootprint(chosen.value)) footprintClaim = chosen;
       const phaseId = cs[0] ? splitRef(cs[0].subject).phase : undefined;
       const phase = phaseId ? r.phases.find((p) => p.id === phaseId) : undefined;
       claims += `<div class="claim-group${competing ? ' competing' : ''}"><h4>${esc(PROP_LABEL[prop] ?? words(prop))}${phase ? ` <span class="phase">· ${esc(phase.label)}</span>` : ''}${competing ? ' <span class="badge">competing claims</span>' : turns ? ' <span class="badge">in turn</span>' : ''}</h4>`;
       for (const c of cs) {
-        const v = competing && c !== def ? variant(c.ref) : undefined;
+        const v = competing && !c.beside && c !== def ? variant(c.ref) : undefined;
         const inconsistent = v && !v.consistent;
-        const radio = competing
-          ? `<input type="radio" name="${esc(group)}" value="${esc(c.ref)}" data-default="${esc(def?.ref ?? '')}" data-members="${esc(all.map((x) => x.ref).join(' '))}" ${c === chosen ? 'checked' : ''} ${inconsistent ? 'disabled' : ''} aria-label="Use this claim">`
+        const radio = competing && !c.beside
+          ? `<input type="radio" name="${esc(group)}" value="${esc(c.ref)}" data-default="${esc(def?.ref ?? '')}" data-members="${esc(all.filter((x) => !x.beside).map((x) => x.ref).join(' '))}" ${c === chosen ? 'checked' : ''} ${inconsistent ? 'disabled' : ''} aria-label="Use this claim">`
           : '';
         const conf = c.confidence !== undefined ? `confidence: ${typeof c.confidence === 'number' ? c.confidence : `${c.confidence}${c.confidenceRange ? ` (${c.confidenceRange[0]}–${c.confidenceRange[1]})` : ''}`}` : '';
         claims += `<div class="claim rank-${esc(c.rank)}${inconsistent ? ' inconsistent' : ''}" data-claim="${esc(c.ref)}">
           <label>${radio}<span class="value">${esc([...picks].map((p) => c.valueTexts?.[p]).find((x) => x !== undefined) ?? c.valueText)}</span>${this.cites(r, c.sources, c.unsourced)}</label>
-          <div class="claim-meta"><span class="badge rank">${esc(c.rank)}</span><span class="badge status-${esc(c.status)}">${esc(c.status)}</span>${c.level && c.level !== 'unchecked' && c.level !== 'accepted' ? `<span class="badge ladder" title="${esc(checkedTitle(c))}">checked: ${esc(c.level)}</span>` : ''}${c.basis !== 'evidence' ? `<span class="badge basis-${esc(c.basis)}">${esc(c.basis)}</span>` : ''}${c.alt ? `<span class="badge alt">${esc(this.cb.altTitle(c.alt))}</span>` : ''}${conf ? `<span class="badge">${esc(conf)}</span>` : ''}${c.methodLabel ? `<span class="badge">${esc(c.methodLabel)}</span>` : ''}<span class="author">${esc(c.author)}</span></div>
+          <div class="claim-meta">${c.beside ? '<span class="badge beside" title="A day named in a calendar of cycles: one of the days that bear these names, read against the rest of the evidence. It narrows the other claims and is not a choice between them.">named in cycles</span>' : ''}<span class="badge rank">${esc(c.rank)}</span><span class="badge status-${esc(c.status)}">${esc(c.status)}</span>${c.level && c.level !== 'unchecked' && c.level !== 'accepted' ? `<span class="badge ladder" title="${esc(checkedTitle(c))}">checked: ${esc(c.level)}</span>` : ''}${c.basis !== 'evidence' ? `<span class="badge basis-${esc(c.basis)}">${esc(c.basis)}</span>` : ''}${c.alt ? `<span class="badge alt">${esc(this.cb.altTitle(c.alt))}</span>` : ''}${conf ? `<span class="badge">${esc(conf)}</span>` : ''}${c.methodLabel ? `<span class="badge">${esc(c.methodLabel)}</span>` : ''}<span class="author">${esc(c.author)}</span></div>
           ${c.validText ? `<p class="method">Holds: ${esc(c.validText)}</p>` : ''}
           ${c.sources.filter((s) => s.quote).map((s) => `<blockquote>${esc(s.quote)}</blockquote>`).join('')}
           ${denied(c)}
@@ -438,9 +452,11 @@ export class InspectPanel {
     // belongs to an alternative shows only in that picture, from either end.
     const held = (x: { validText?: string; rank: string; alt?: string; rival?: true }) =>
       `${x.validText ? ` <span class="muted">(${esc(x.validText)})</span>` : ''}${x.rank === 'deprecated' ? ' <span class="badge">set aside</span>' : ''}${x.rival ? ' <span class="badge">another reading</span>' : ''}${x.alt ? ` <span class="badge">${esc(this.cb.altTitle(x.alt))}</span>` : ''}`;
+    // A perspective held is named, not opened: it is a picture of the world to choose, not a record.
+    const target = (x: { to: string; toLabel: string; wanted: boolean }) => (x.to.startsWith('alt:') ? `the perspective “${esc(this.cb.altTitle(x.to))}”` : this.link(x.to, x.toLabel, x.wanted));
     const relations = r.relations
       .filter((x) => !x.alt || alts.has(x.alt))
-      .map((x) => `<li><strong>${esc(REL_LABEL[x.rel] ?? x.rel.replace(/-/g, ' '))}</strong> ${this.link(x.to, x.toLabel, x.wanted)}${held(x)}${x.lagText ? ` <span class="muted">(${esc(x.lagText)})</span>` : ''} <span class="cite">— ${this.cites(r, x.sources, x.unsourced)}</span>${x.sources.filter((s) => s.quote).map((s) => `<blockquote>${esc(s.quote)}</blockquote>`).join('')}${denied(x)}${x.note ? `<p class="note">${esc(x.note)}</p>` : ''}</li>`)
+      .map((x) => `<li><strong>${esc(REL_LABEL[x.rel] ?? x.rel.replace(/-/g, ' '))}</strong> ${target(x)}${held(x)}${x.lagText ? ` <span class="muted">(${esc(x.lagText)})</span>` : ''} <span class="cite">— ${this.cites(r, x.sources, x.unsourced)}</span>${x.sources.filter((s) => s.quote).map((s) => `<blockquote>${esc(s.quote)}</blockquote>`).join('')}${denied(x)}${x.note ? `<p class="note">${esc(x.note)}</p>` : ''}</li>`)
       .join('');
     const inverse = r.inverse
       .filter((x) => !x.alt || alts.has(x.alt))
@@ -466,7 +482,7 @@ export class InspectPanel {
       ${here ? this.hereSection(here) : ''}
       ${organism ? this.organismSection(organism) : ''}
       <section><h3>When</h3><p class="when">${esc(fmtTime(time))}${picks.size || chosenAlts.length ? ' <span class="badge">with your choices</span>' : ''}</p>
-      ${chosenAlts.map((a) => `<p class="method">In the alternative “${esc(this.cb.altTitle(a))}”.</p>`).join('')}
+      ${chosenAlts.map((a) => `<p class="method alt-held">In the alternative “${esc(this.cb.altTitle(a))}”${heldText(this.cb.altHeld?.(a)) ? `, ${esc(heldText(this.cb.altHeld?.(a)))}` : ''}.</p>`).join('')}
       ${phases ? `<ul class="phases">${phases}</ul>` : ''}
       ${derivedRefs.length ? `<p class="derived">Derived by the chronology solver from:</p><ul class="derived">${derivation(derivedRefs)}</ul>` : ''}</section>
       <section><h3>Where</h3><p>${where}</p></section>

@@ -1,0 +1,26 @@
+id: src:johansson-2016-desliz
+type: publication
+kind: review
+citation: >-
+  Johansson K., P. (2016). El desliz cronológico de los meses en el calendario náhuatl
+  cempoallapohualli. Estudios de Cultura Náhuatl 52, 75–117.
+authors:
+  - "Johansson K., P."
+published: 2016
+title: El desliz cronológico de los meses en el calendario náhuatl cempoallapohualli
+container: "Estudios de Cultura Náhuatl 52, 75–117"
+url: https://nahuatl.historicas.unam.mx/index.php/ecn/article/view/77807
+license: CC-BY-NC-ND-4.0
+reliability: >-
+  A proposal, from colonial pictorial calendars and a count of the days, that the twenty-day
+  months slid within the year every four years, so that a different month began the year in each
+  group of four years and the series came round after 72 years. It names the years 1519–1522 as
+  1 Acatl to 4 Tochtli. A hypothesis argued by its author, which the sources read here do not
+  share; evidence of the proposal, not of the Mexica practice.
+verified:
+  by: machine:claude-code
+  how: >-
+    The journal's PDF (article/download/77807/68856) fetched on 19 November 2026 (UTC) and read in
+    its text layer: the abstract (p. 75), the argument for the slide (pp. 92–94) and the tables
+    of the years 1519–1522 and the conclusion (pp. 107–110), with the printed page numbers. Quotes
+    were found in the kept text na-johansson-2016-desliz.txt by script.

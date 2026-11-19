@@ -3,8 +3,8 @@ import { cpSync, mkdtempSync, renameSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
-import { toMa } from '../../../core/time.ts';
-import { pointOf, solveScenario } from '../src/chronology.ts';
+import { dayOnAxis, formatTime, formatTimeValue, toMa } from '../../../core/time.ts';
+import { available, claimGroup, pointOf, resolveCycle, solveScenario } from '../src/chronology.ts';
 import { WORLD } from '../src/paths.ts';
 import { validateWorld } from '../src/validate/index.ts';
 import { loadWorld } from '../src/world.ts';
@@ -79,6 +79,60 @@ describe('the world', async () => {
     ]).toContainEqual(clash);
     const yin = picked('earth/events/india-asia-collision#date-yin-harrison-2000');
     expect(yin.centres.ok && at(yin.centres.bounds, 'earth/orogens/himalaya', 'start')[0]).toBeCloseTo(70, 6);
+  });
+
+  describe('the conquest of Tenochtitlan, as both sides date it (docs/slices/FIFTEENTH-SLICE.md)', () => {
+    const claim = (subject: string, key: string) => world.entity.get(subject)!.claims.find((c) => c.key === key)!;
+    const named = (subject: string, key: string) => resolveCycle(world, claim(subject, key))!;
+    const day = ([a, b]: [number, number]) => formatTimeValue({ kind: 'interval', lo: dayOnAxis(a).t, hi: dayOnAxis(b).t + dayOnAxis(b).whole });
+    /** The day a point of a solution falls on, or the days its bounds run from and to. */
+    const dayOf = (b: { lo: number; hi: number }) => {
+      const [lo, hi] = [formatTime(b.lo, 1 / 365), formatTime(Math.max(b.lo, b.hi - 1e-6), 1 / 365)];
+      return lo === hi ? lo : `${lo} to ${hi}`;
+    };
+    const on = (subject: string) => dayOf(sol.bounds.get(pointOf(world, subject, 'start'))!);
+
+    it('holds the fall to the day both sides give it: 13 August 1521 and 1 Coatl in the year 3 Calli', () => {
+      expect(named('people/conquest/fall-of-tenochtitlan', 'date-mexica').days.map(day)).toEqual(['13 August 1521 CE']);
+      expect(on('people/conquest/fall-of-tenochtitlan')).toBe('13 August 1521 CE');
+    });
+
+    it('finds the native days for the entry off the Spanish one: Book 12 by nineteen days, the Anales de Tlatelolco by one', () => {
+      expect(day(named('people/conquest/entry-into-tenochtitlan', 'date-book-12').nearest!)).toBe('20 October 1519 CE');
+      expect(day(named('people/conquest/entry-into-tenochtitlan', 'date-anales-de-tlatelolco').nearest!)).toBe('9 November 1519 CE');
+    });
+
+    it('sides with the corrected year of the conquest of Tlatelolco: 7 Calli is 1473, not 1463', () => {
+      const year = named('people/conquest/conquest-of-tlatelolco', 'date-mexica');
+      expect(year.days.length).toBe(1);
+      expect(Math.floor(dayOnAxis(year.days[0][0]).t)).toBe(1473);
+      expect(solveScenario(world, { picks: ['people/conquest/conquest-of-tlatelolco#date-1463'] }).ok).toBe(false);
+    });
+
+    it('counts the killing at Toxcatl and the flight from the entry, in days, as Book 12 does', () => {
+      expect(on('people/conquest/toxcatl-massacre')).toBe('21 May 1520 CE');
+      const flight = solveScenario(world, { picks: ['people/conquest/noche-triste#date-book-12'] });
+      expect(flight.ok && dayOf(flight.bounds.get('people/conquest/noche-triste|date')!)).toBe('30 June 1520 CE');
+    });
+
+    it('keeps a town taken into a city: Tlatelolco has no end, and is part of the city from 1473', () => {
+      expect(sol.bounds.get(pointOf(world, 'people/cities/tlatelolco', 'end'))!.hi).toBe(Infinity);
+      expect(world.entity.get('people/cities/tlatelolco')!.relations.find((r) => r.rel === 'part-of')!.to).toBe('people/cities/tenochtitlan');
+      expect(world.entities.flatMap((e) => e.relations).filter((r) => r.rel === 'merged-into' && r.subject.startsWith('people/cities/'))).toEqual([]);
+    });
+
+    it('tells how Moctezuma died only in the picture of each side, and says who held each picture and when', () => {
+      const g = claimGroup(world, 'people/conquest/death-of-moctezuma', 'account')!;
+      expect(available(g, {})).toEqual([]);
+      expect(available(g, { alts: ['alt:conquest-accounts/mexica'] }).map((c) => c.key)).toEqual(['account-mexica']);
+      expect(available(g, { alts: ['alt:conquest-accounts/conquerors'] }).map((c) => c.key)).toEqual(['account-conquerors']);
+      const holders = world.entities.flatMap((e) => e.relations).filter((r) => r.rel === 'holds').map((r) => `${r.subject} ${r.to}`).sort();
+      expect(holders).toEqual([
+        'people/persons/bernal-diaz-del-castillo alt:conquest-accounts/conquerors',
+        'people/persons/hernan-cortes alt:conquest-accounts/conquerors',
+        'people/polities/tlatelolco alt:conquest-accounts/mexica',
+      ]);
+    });
   });
 
   describe('ids carry no meaning', () => {

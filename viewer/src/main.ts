@@ -539,6 +539,7 @@ async function start(root: HTMLElement): Promise<void> {
     return build.search.entities.find((e) => e.id === id)?.label ?? build.periods.periods.find((p) => p.id === id)?.name ?? ref;
   };
   const altTitle = (id: string) => ts.alternatives.flatMap((g) => g.members).find((m) => m.id === id)?.title ?? id;
+  const altHeld = (id: string) => ts.alternatives.flatMap((g) => g.members).find((m) => m.id === id)?.heldBy;
   const scenario = (): Scenario => ({ alts: state.alt, picks: state.picks });
   const inspect = new InspectPanel({
     onPick: (group, claim) => setState({ picks: [...state.picks.filter((p) => !group.includes(p)), ...(claim ? [claim] : [])].sort() }),
@@ -546,6 +547,7 @@ async function start(root: HTMLElement): Promise<void> {
     onOpen: (id) => setState({ sel: id }),
     labelOf,
     altTitle,
+    altHeld,
   });
   stage.appendChild(inspect.el);
   /** Close the panel. One that is not a record's (the ground, a row of a dataset, a series) has no selection to clear. */

@@ -1,0 +1,25 @@
+id: src:acuna-1976-calendarios-altiplano
+type: publication
+kind: review
+citation: >-
+  Acuña, R. (1976). Calendarios antiguos del altiplano de México y su correlación con los
+  calendarios mayas. Estudios de Cultura Náhuatl 12, 279–314.
+authors:
+  - "Acuña, R."
+published: 1976
+title: Calendarios antiguos del altiplano de México y su correlación con los calendarios mayas
+container: "Estudios de Cultura Náhuatl 12, 279–314"
+url: https://nahuatl.historicas.unam.mx/index.php/ecn/article/view/78480
+license: CC-BY-NC-ND-4.0
+reliability: >-
+  A comparison of the month names of the central Mexican and Maya calendars. It takes the
+  correspondence of the twenty day signs between the two as settled and argues about the months.
+  Evidence that the day signs are matched name for name, not of whether the two counts ran in
+  step on the same days.
+verified:
+  by: machine:claude-code
+  how: >-
+    The journal's PDF (article/download/78480/69429) fetched on 19 November 2026 (UTC); the
+    opening pages (pp. 279–281) were read in its text layer. The journal's page dates the volume
+    1976, the search listing 1977; the year here is the article page's. Quotes were found in the
+    kept text na-acuna-1976-calendarios-altiplano.txt by script.

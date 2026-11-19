@@ -171,7 +171,14 @@ export interface AlternativeGroupInfo {
   description?: string;
   /** the member shown by default; null: the default picture */
   default: string | null;
-  members: { id: string; title: string; description?: string; kind?: string }[];
+  members: {
+    id: string;
+    title: string;
+    description?: string;
+    kind?: string;
+    /** who held a perspective, and when, from the `holds` relations that name it */
+    heldBy?: { id: string; label: string; held?: string }[];
+  }[];
 }
 
 /**
