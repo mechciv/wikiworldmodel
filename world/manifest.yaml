@@ -317,13 +317,19 @@ datasets:
       Temperatures are of the surface, not of the air. Chosen over the runs of Pohl et al. (2022,
       Zenodo 6620748, CC BY) for its finer grid and its present: at 0 Ma, those have Antarctica above
       10 °C in summer and Germany under 7 °C, by a slab-ocean model that says its last 80 Myr are likely
-      too cold, and this has Antarctica frozen, the Amazon wet and Germany temperate.
+      too cold, and this has Antarctica frozen, the Amazon wet and Germany temperate. Its winds (U, V) are
+      on the level of 1000 hPa, which lies under the model's higher ground: there the file's numbers are a
+      reckoning below the surface, to 180 m/s, and not winds at the ground (field:earth/wind). Its surface
+      albedo (SALB) is 0 wherever a month has no sunlight (field:earth/surface-albedo).
     verified:
       by: machine:claude-code
       how: >-
         Licence and file read through the Figshare API; variables and their dimensions from the file's
         own header and the article's Data Records; the run's conditions from the article's Methods
         (Europe PMC full text). The classes of 17 places on the pre-industrial run were read and compared.
+        On 20 November 2026 the winds and the albedo: their names, units and dimensions from the header,
+        every value of all 55 runs scanned for its range, its gaps and its zeros, and the article's Data
+        Records read again (Europe PMC, PMC9240078).
     fetch:
       url: https://ndownloader.figshare.com/files/35396138
       sha256: 611d9c9a2d486bb1e9f3e950b9d63d12a318b2fb634e422f7daa4158111bc274
@@ -363,13 +369,23 @@ datasets:
       Its extension to 800,000 years (Krapp et al. 2021, Scientific Data 8, 228; OSF 8n43x, CC BY 4.0) would cover the whole
       span of the sea-level stack, but its monthly temperature and precipitation are about 4 GB, against this file's 1.3 GB
       for every variable. The addendum of 2021 (doi:10.1038/s41597-021-01051-1) only adds monthly net primary production, in
-      another file.
+      another file. Of the variables kept beside its months: the relative humidity and the wind speed are corrected to the
+      observed means of 1961–1990, where the temperature, rain and cloudiness are corrected to those of 1901–1930. The leaf
+      area index is in whole numbers to 626, a hundred times what its label in the file says (field:earth/leaf-area). The
+      biome's class 0, "Water bodies", is written wherever the vegetation model gave none, which is most of the shelves the
+      low sea bared that no ice covered (field:earth/biome-late-quaternary). And the file gives its latitudes the unit
+      "degrees_east" and its longitudes "degrees_north": the two labels are exchanged, and the values are as the article
+      says.
     verified:
       by: machine:claude-code
       how: >-
         Licence, files and their md5 from the Figshare API; the md5 of the file downloaded matches it. Citation and licence
         of the article from Crossref; its Methods and Data Records read in full through Europe PMC (PMC7360617), and its
-        addendum (PMC8481252). Variables, units, dimensions and times read from the file itself.
+        addendum (PMC8481252). Variables, units, dimensions and times read from the file itself. On 20 November 2026 the
+        cloudiness, relative humidity, wind speed, biome, leaf area and production: their names, units and dimensions from
+        the file, every slice scanned for its range and for cells that have months and lack one of them (none do), the
+        article read again in full, and the code that made the dataset where it takes and writes them
+        (src:beyer-2020-environment-code).
     fetch:
       url: https://ndownloader.figshare.com/files/22659026
       sha256: 7312280854bab9e95f8721c80050c0889b29ad3087a00bd264e7500d33d19857

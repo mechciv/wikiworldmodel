@@ -1,5 +1,10 @@
 # The months of each climate at every node with land, and the height they stand for, which a scene brings to the heights
 # of its own ground (model:earth/lapse-rate). It is not drawn on the globe: a scene reads it at the place it shows.
+#
+# Beside its tiles, at the same nodes and keyframes, the build keeps what else each climate's dataset says of them: the
+# fields read `as: months` (cloudiness, humidity and wind speed, a biome, leaf area and production for the last 120,000
+# years; wind and surface albedo for the deep past's runs), in tiles of their own (core/months.ts PARTS). No rule brings
+# those to another height: they are the node's, as their sources give them.
 id: field:earth/climate-at-height
 type: field
 title: Climate of the land, at a height

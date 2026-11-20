@@ -6,7 +6,7 @@ import { climateClass, CLIMATE_LABEL, reduceMonths, type ClimateNode, type Clima
 import { warmestMonth, type Months } from '../../../core/months.ts';
 import type { WaterParams } from '../../../core/water.ts';
 import type { Form } from '../../../core/form.ts';
-import type { LivingTaxon, ReliefPatch, SceneCover, SceneSpec, SceneTier } from '../../../core/scene.ts';
+import type { LivingTaxon, ReliefPatch, SceneCover, SceneParts, SceneSpec, SceneTier } from '../../../core/scene.ts';
 import { fromMa } from '../../../core/time.ts';
 import type { FeatureTime } from '../../../core/tileset.ts';
 import { dcos, hash2, hashString, PI } from '../city/math.ts';
@@ -203,7 +203,7 @@ export interface PlaceWorld {
     ageMa: number;
     /** the age whose coordinates its nodes are on */
     frameMa: number;
-    at: (lat: number, lon: number) => { months: Months; height: number; lat: number; lon: number } | undefined;
+    at: (lat: number, lon: number) => { months: Months; height: number; lat: number; lon: number; parts?: SceneParts } | undefined;
     lapse: number;
     water: WaterParams;
     /** the month to draw, 1–12; the place's warmest if not said */
@@ -243,7 +243,7 @@ export function placeSpec(w: PlaceWorld, lat: number, lon: number, ageMa: number
   spec.site.relief_at = relief_at;
   if (here) {
     const months: Months = { t: here.months.t.map(round2), p: here.months.p.map(round2) };
-    spec.climate = { field, ageMa: age, months, height: Math.round(here.height - w.isoline), coast: Math.round(w.isoline), lapse: m!.lapse, rule: w.rule, water: m!.water, month: m!.month ?? warmestMonth(months), lat: round5(here.lat) };
+    spec.climate = { field, ageMa: age, months, height: Math.round(here.height - w.isoline), coast: Math.round(w.isoline), lapse: m!.lapse, rule: w.rule, water: m!.water, month: m!.month ?? warmestMonth(months), lat: round5(here.lat), ...(here.parts ? { parts: here.parts } : {}) };
   }
   return spec;
 }

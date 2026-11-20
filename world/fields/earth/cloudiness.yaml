@@ -1,0 +1,31 @@
+# One of the parts kept beside the months of the last 120,000 years' climate (core/months.ts PARTS), at the same nodes
+# and keyframes. Nothing draws it yet: the clouds are still seeded noise (gen:earth/clouds).
+id: field:earth/cloudiness
+type: field
+title: Cloudiness of the land, last 120,000 years
+quantity: mean cloudiness of each month
+unit: "% of the sky"
+description: >-
+  How much of the sky cloud covered over the land in each month of the year, at each of the 72 times of the climate of
+  the last 120,000 years. It is a climate model's months (HadCM3), brought to half a degree and corrected by the
+  difference between the model's present and the cloudiness observed in 1901–1930, so that its present is that observed
+  cloudiness, and capped at 0 and 100. A node here is the mean of the land cells of the half-degree grid around it. It
+  is a mean of a month over thirty years of a run, not the sky of a day: a month of afternoon storms and a month of thin
+  overcast can have the same number. It is of the land only, and has nothing south of 60°S.
+kind: raster
+frame: frame:earth/present-day
+grid: { kind: lonlat, res_deg: 1 }
+time: { lo: 120 ka, hi: 0 ka }
+data:
+  from: src:beyer-2020-late-quaternary
+  as: months
+  # The file's own name and unit for it, which the build checks before it reads.
+  reads:
+    cloud: { variable: cloudiness, unit: percent }
+basis: reconstruction
+# A single value at each place, time and month: nobody gave its uncertainty (docs/STRUCTURE.md section 3.2).
+spread: unknown
+uncertainty: >-
+  A model's month, corrected to the cloudiness observed in 1901–1930. The dataset's article tests its temperature,
+  rain and biomes against reconstructions, and not its cloudiness. The tiles keep it to a quarter of a per cent.
+moves_with: src:paleomap-plate-model

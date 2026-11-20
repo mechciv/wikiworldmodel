@@ -117,6 +117,33 @@ export interface SceneWater {
   from: string[];
 }
 
+/** The year's vegetation in one cell of a climate's source: its class and the class's name, its leaf area index and its production, in their fields' units. */
+export interface SceneVegetation {
+  biome: number;
+  name?: string;
+  leaf?: number;
+  npp?: number;
+}
+
+/**
+ * What else the climate's source says of a scene's node, beside its temperature and rain (core/months.ts PARTS): each
+ * where the source has it, and null in a month it gives nothing for. No generator reads these yet.
+ */
+export interface SceneParts {
+  /** by month, January first: cloudiness, % of the sky; relative humidity, %; and the mean speed of the wind, m/s */
+  cloud?: (number | null)[];
+  humidity?: (number | null)[];
+  wind_speed?: (number | null)[];
+  /** the mean wind as a vector, m/s toward the east and the north of the climate's keyframe, where its source gives that and not the mean speed */
+  wind?: { u: (number | null)[]; v: (number | null)[] };
+  /** the share of sunlight the surface sends back, 0–1 */
+  albedo?: (number | null)[];
+  /** the year's vegetation in the source's cell the place is in, or the nearest of its node's that has one; and in each of the node's four cells, north-west, north-east, south-west, south-east */
+  vegetation?: SceneVegetation & { cells: (SceneVegetation | null)[] };
+  /** the field each is, by its part: cloud, humidity, wind_speed, u, v, albedo, biome, leaf, npp */
+  fields: Record<string, string>;
+}
+
 /**
  * The climate a scene stands in, at its own heights (field:earth/climate-at-height): the months of the node it stands
  * on, of the finest climate that covers its time, the height they stand for, and what brings them to any other height
@@ -140,6 +167,8 @@ export interface SceneClimate {
   /** the month drawn, 1–12, and the latitude of the node then, which sets its daylight */
   month: number;
   lat: number;
+  /** what else the climate's source says of the node, where the build keeps it */
+  parts?: SceneParts;
 }
 
 /**

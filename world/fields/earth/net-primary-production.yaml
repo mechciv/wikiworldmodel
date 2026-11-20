@@ -1,0 +1,29 @@
+# One of the parts kept beside the months of the last 120,000 years' climate (core/months.ts PARTS): by year and cell by
+# cell, with the biome it is of (field:earth/biome-late-quaternary). Nothing reads it yet.
+id: field:earth/net-primary-production
+type: field
+title: Growth of the vegetation the climate would grow, last 120,000 years
+quantity: net primary production of the year
+unit: g of carbon to the m² of ground, in a year
+description: >-
+  How much carbon a vegetation model (BIOME4) has plants fix in a year, beyond what they breathe out again, on each
+  square metre of ground, on the climate of each of the 72 times of the last 120,000 years, for the biome it grows
+  there, on the half-degree grid. Its numbers are whole, from 0 to 2,380. Under the ice sheets and in the cells of the
+  file's class "Water bodies" it is 0, as the dataset's code writes it, and there a 0 is not a measure of anything. It
+  is the growth of the vegetation the climate allows, with no people in it.
+kind: raster
+frame: frame:earth/present-day
+grid: { kind: lonlat, res_deg: 1 }
+time: { lo: 120 ka, hi: 0 ka }
+data:
+  from: src:beyer-2020-late-quaternary
+  as: months
+  reads:
+    npp: { variable: npp, unit: grams carbon per metre^2 }
+basis: reconstruction
+# A single value at each cell and time: nobody gave its uncertainty (docs/STRUCTURE.md section 3.2).
+spread: unknown
+uncertainty: >-
+  A vegetation model's answer on a climate model's months, and nothing in the dataset's article tests it. The tiles
+  keep each cell's number as the file has it.
+moves_with: src:paleomap-plate-model

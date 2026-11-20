@@ -14,6 +14,7 @@ import addFormats from 'ajv-formats';
 import { formProblem } from '../../../../core/city.ts';
 import { dwellingProblems, fieldProblems, settlementProblems } from '../../../../core/dwelling.ts';
 import { ladderCounts, LEVELS, STEPS } from '../../../../core/ladder.ts';
+import { MONTHS_PARTS } from '../../../../core/months.ts';
 import { parseRef, RefError, splitRef } from '../../../../core/refs.ts';
 import { conflictChanged, conflictIn, type Constraint, type Conflict, type Solution } from '../../../../core/stn.ts';
 import { CYCLES, DAY_COUNTS, dayNumberAt, dayOnAxis, formatTime, formatTimeValue, historical, namesSign, parseCycle, parseLag, parseTime, TimeError, toMa } from '../../../../core/time.ts';
@@ -523,8 +524,41 @@ function checkRecords(world: World, issues: Issue[], tables: Map<string, Table> 
     }
   }
   checkRowSpecs(world, issues);
+  checkMonthsParts(world, issues);
   checkOverlays(world, refs, tables, issues);
   return [...refs.wanted.values()].sort((a, b) => (a.ref < b.ref ? -1 : 1));
+}
+
+/**
+ * A field read `as: months` is one or more parts of what the tiles keep beside a climate's months (core/months.ts
+ * PARTS): it reads the dataset some climate is read from, on that climate's grid; no part is read twice from a
+ * dataset; a wind has both its components; and leaf area and production go with the class of vegetation they are of.
+ */
+function checkMonthsParts(world: World, issues: Issue[]): void {
+  const read = new Map<string, { field: Field; part: string }[]>();
+  for (const f of world.fields) {
+    if (f.data?.reads && f.data.as !== 'months') issues.push({ level: 'error', check: 'refs', file: f.file, where: 'data.reads', message: 'only a field read `as: months` says which parts it reads' });
+    if (f.data?.as !== 'months') continue;
+    const parts = Object.keys(f.data.reads ?? {});
+    if (!parts.length) issues.push({ level: 'error', check: 'refs', file: f.file, where: 'data.reads', message: 'a field read as months says which parts it is, and the variable of its dataset each is read from' });
+    for (const p of parts) if (!(MONTHS_PARTS as readonly string[]).includes(p)) issues.push({ level: 'error', check: 'vocab', file: f.file, where: `data.reads.${p}`, message: `"${p}" is not a part the tiles keep: ${MONTHS_PARTS.join(', ')}` });
+    const climate = world.fields.find((c) => c.data?.as === 'climate' && c.data.from === f.data!.from);
+    if (!climate) issues.push({ level: 'error', check: 'refs', file: f.file, where: 'data.from', message: `no climate is read from ${f.data.from}: a field read as months is kept at the nodes of the climate read from the same dataset` });
+    else if ((climate.grid as { res_deg?: number } | undefined)?.res_deg !== (f.grid as { res_deg?: number } | undefined)?.res_deg || climate.frame !== f.frame) {
+      issues.push({ level: 'error', check: 'refs', file: f.file, where: 'grid', message: `it is kept at the nodes of ${climate.id}: give it that field's grid and frame` });
+    }
+    for (const part of parts) read.set(f.data.from, [...(read.get(f.data.from) ?? []), { field: f, part }]);
+  }
+  for (const [from, list] of read) {
+    const has = (p: string) => list.some((x) => x.part === p);
+    for (const x of list) {
+      const first = list.find((y) => y.part === x.part)!;
+      if (first !== x) issues.push({ level: 'error', check: 'refs', file: x.field.file, where: `data.reads.${x.part}`, message: `${first.field.id} reads "${x.part}" from ${from} already` });
+    }
+    const say = (part: string, message: string) => issues.push({ level: 'error', check: 'refs', file: list.find((x) => x.part === part)!.field.file, where: `data.reads.${part}`, message });
+    if (has('u') !== has('v')) say(has('u') ? 'u' : 'v', `a wind has both its components: ${from} is read for one only`);
+    for (const p of ['leaf', 'npp']) if (has(p) && !has('biome')) say(p, `"${p}" is kept with the class of vegetation it is of: no field reads "biome" from ${from}`);
+  }
 }
 
 /** A field that reads its dataset as rows says what a row is, and every property it maps applies to that. */

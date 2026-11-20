@@ -145,10 +145,11 @@ What every other domain leans on.
 | Ice sheets, last glacial cycle | ◐ the last 80 kyr, on the globe: PaleoMIST 1.0, with its two scenarios; not the 36 kyr before | PaleoMIST 1.0; NADI-1; DATED-1; ICE-6G_C, ICE-7G_NA; GLAC-1D; Batchelor et al. 2019 | ✓ PaleoMIST, NADI-1, DATED-1; ✗ ICE-6G_C, ICE-7G_NA, GLAC-1D, Batchelor et al. 2019: no license stated, as read (see [RECORD-SETS](RECORD-SETS.md)) | F + C |
 | Ice sheets, deep time (Snowball, Karoo, Antarctic onset) | ◐ Snowball glaciations | literature | — | R + F |
 | Sea ice | ○ | modern: NSIDC; past: model output | ? | F |
-| Biomes and vegetation, past | ◐ derived from the climate field and the transitions, Phanerozoic; no pollen-based maps | BIOME 6000; LandCover6k pollen-based reconstructions | ? | F + C |
+| Biomes and vegetation, past | ◐ derived from the climate field and the transitions, Phanerozoic; no pollen-based maps. Kept and not yet drawn: a vegetation model's biome, leaf area and production for the last 120 kyr, cell by cell at half a degree (Beyer et al. 2020, BIOME4), with nothing on most of the shelves the low sea bared | BIOME 6000; LandCover6k pollen-based reconstructions | ✓ Beyer; ? the others | F + C |
 | Oxygen in the atmosphere and oceans | ◐ GOE, deoxygenation events | literature (O₂ curves) | — | R + F |
 | Climate indicators: coals, evaporites, tillites, reefs, bauxites | ○ | Boucot et al. 2013 compilation; Macrostrat lithologies | ? | C |
 | Monsoons and ocean circulation as entities (AMOC, Tethys seaway) | ○ | literature | — | R |
+| Cloudiness, humidity and wind, by month | ◐ kept and not yet read by any generator: cloudiness, relative humidity and wind speed for the last 120 kyr, of the land north of 60°S (Beyer et al. 2020); the wind at 1000 hPa, which is not the ground's wind under high ground, and the surface albedo of the deep past's runs (Li et al. 2022); nothing over the sea, and no cloudiness or humidity before 120 ka | the same two datasets; observed climatologies for today | ✓ | F |
 | Weather and clouds over time | ◐ generic clouds | climate fields above, as the cloud generator's constraints | — | G |
 
 ---
