@@ -1,8 +1,8 @@
 id: gen:life/scene
 type: generator
 title: A living scene of any place, on land or in the sea
-version: 6
-code: generators/life/scene/v6.ts
+version: 7
+code: generators/life/scene/v7.ts
 runs_in: [build, client]
 outputs: { basis: procedural }
 # What it reads from the world: who may stand where and how big each grew, the ground and the climate
@@ -31,17 +31,22 @@ inputs:
   - { ref: life/hell-creek/ecosystem, note: "the Hell Creek slot: where it was, and on which plate" }
 # What it makes, held in aggregate to what it samples (docs/STRUCTURE.md section 3.4).
 checks:
-  - { test: world/generators/life/scene/v6.test.ts, holds: "is only the taxa it is given, each near the arrival at least once" }
-  - { test: world/generators/life/scene/v6.test.ts, holds: "draws each taxon as often as the atlas's weight and the density rule say, in aggregate, below a cell's cap" }
-  - { test: world/generators/life/scene/v6.test.ts, holds: "has no forest before forests, only the few set by the arrival" }
-  - { test: world/generators/life/scene/v6.test.ts, holds: "has bare ground and no low plants at all before land plants" }
-  - { test: world/generators/life/scene/v6.test.ts, holds: "has a desert mostly bare, with no forest" }
-  - { test: world/generators/life/scene/v6.test.ts, holds: "grows what the climate of each height bears: forest below the treeline, none above it" }
-  - { test: world/generators/life/scene/v6.test.ts, holds: "lays snow down to where the month holds it: low in winter, high or not at all in summer" }
+  - { test: world/generators/life/scene/v7.test.ts, holds: "is only the taxa it is given, each near the arrival at least once" }
+  - { test: world/generators/life/scene/v7.test.ts, holds: "draws each taxon as often as the atlas's weight and the density rule say, in aggregate, below a cell's cap" }
+  - { test: world/generators/life/scene/v7.test.ts, holds: "has no forest before forests, only the few set by the arrival" }
+  - { test: world/generators/life/scene/v7.test.ts, holds: "has bare ground and no low plants at all before land plants" }
+  - { test: world/generators/life/scene/v7.test.ts, holds: "has a desert mostly bare, with no forest" }
+  - { test: world/generators/life/scene/v7.test.ts, holds: "grows what the climate of each height bears: forest below the treeline, none above it" }
+  - { test: world/generators/life/scene/v7.test.ts, holds: "lays snow down to where the month holds it: low in winter, high or not at all in summer" }
+  - { test: world/generators/life/meander.test.ts, holds: "winds as a meandering river does, its bends of many sizes, and never comes within a neck of itself" }
+  - { test: world/generators/life/meander.test.ts, holds: "cuts off loops where a neck closes, and keeps where it lay" }
+  - { test: world/generators/life/meander.test.ts, holds: "is the same river from the same seed, to the last bit, and another river from another" }
+  - { test: world/generators/life/meander.test.ts, holds: "has swept the inside of its bends, which shelves to the water, and cuts into the old plain outside them" }
+  - { test: world/generators/life/meander.test.ts, holds: "brings a visitor to dry ground inside a bend, off its other limb and off the old bends" }
   - { test: world/generators/life/rivers.test.ts, holds: "winds by the sine-generated curve, as long as its sinuosity says" }
   - { test: world/generators/life/rivers.test.ts, holds: "draws its channel by the laws, and braids, winds or runs straight as its slope and flow say" }
-  - { test: world/generators/life/scene/v6.test.ts, holds: "runs its rivers where the world says, with the water falling downstream" }
-  - { test: world/generators/life/scene/v6.test.ts, holds: "puts what lives on the sea floor on it, and what swims in the water over it, never on land" }
+  - { test: world/generators/life/scene/v7.test.ts, holds: "runs its rivers where the world says, with the water falling downstream" }
+  - { test: world/generators/life/scene/v7.test.ts, holds: "puts what lives on the sea floor on it, and what swims in the water over it, never on land" }
   - { test: world/generators/life/rivers.test.ts, holds: "brings a river that runs into another to the other's water, and draws it only to the other's bank" }
 limits:
   - with: field:life/community
@@ -74,16 +79,31 @@ params:
   ground:
     width: 86
     depth: 5.5
-    wavelength: 1500
-    swing: 1.25
+    # How the river a scene invents came to its bends (meander.ts): its channel migrates for 320 steps from a line all
+    # but straight, a bend as tight as its own width moving 0.15 of a width a step by its own curvature alone; a friction
+    # factor of 0.02, which with the depth sets how far upstream a bend is felt, and so the length of a bend at about
+    # 13 widths along the channel; the weights of the curvature at a point and of its mean upstream; and a loop cut off
+    # where the channel comes within 4 widths of itself, sooner than its neck closes, as a river in flood cuts across
+    # one. Where the channel lay in the last 240 steps is kept, one step in 4: the ground it swept. A bar rises most of
+    # the way to the plain in 25 steps, and trees stand on it again after four times as many; its scrolls stand 0.35 m high, one for every 12 steps of the channel's going;
+    # and a cut-off loop holds water for 60 steps before it has silted to a hollow.
+    migration:
+      steps: 320
+      kept: 240
+      every: 4
+      rate: 0.15
+      friction: 0.02
+      local: -1
+      upstream: 2.5
+      neck: 4
+      heal: 25
+      scroll: [0.35, 12]
+      lake: 60
     bank: [10, 70]
     rise: 2.6
     roughness: 0.8
     size: 420
     levee: [0.9, 70]
-    oxbows: 18
-    oxbow_radius: [170, 420]
-    oxbow_width: 54
     ponds: 26
     pond_radius: [30, 120]
     blend: [20000, 34000]

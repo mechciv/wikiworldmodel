@@ -1,4 +1,4 @@
-// A living scene, version 6: any place at any moment, on land or in the sea, from a spec. Nothing is laid out until it is looked at:
+// A living scene, version 7: any place at any moment, on land or in the sea, from a spec. Nothing is laid out until it is looked at:
 // each 400 m cell makes what stands in it from hashes of where it is, so the scene has no edge to speak of, and what a
 // far view shows is the top of the same list a near view shows in full. The records say which taxa could be here and how
 // big they grew; this says where each stands, how many there are, what it is doing and what colour it is, all invented
@@ -10,8 +10,11 @@
 // field's, no invented river, what lives on the floor on it and what swims in the water over it. A place on land makes
 // what version 4 made. Since version 6 a plant close by grows a skeleton of branches and holds its leaves on cards, and
 // from a way off is its trunk, the mass of its leaves and fewer, larger cards (docs/plans/RENDERING.md, step 1): every
-// plant's mesh is new, and where and what everything is, is what version 5 made. The build and every browser are held
-// to agree within the tolerance of core/fingerprint.ts.
+// plant's mesh is new, and where and what everything is, is what version 5 made. Since version 7 the river a scene
+// invents, where the world gives it none, is a channel that has migrated (../meander.ts): its bends are what migration
+// left, its oxbows the loops it cut off, and the inside of each bend a bar that rises and grows over with the time
+// since the channel left it. A scene whose rivers the world gives is what version 6 made. The build and every browser
+// are held to agree within the tolerance of core/fingerprint.ts.
 import type { Part } from '../../../../core/fingerprint.ts';
 import type { Form, Pose } from '../../../../core/form.ts';
 import type { LivingTaxon, ReliefPatch, SceneCover, SceneSpec } from '../../../../core/scene.ts';
@@ -24,7 +27,7 @@ import { arrival, distanceField, fbm, noise, plainGrid, watersOf, type GridSpec,
 import { drawRiver, meet, type Oxbow, type RiverChoices, type RiverPath } from '../rivers.ts';
 
 export const GENERATOR = 'gen:life/scene';
-export const VERSION = 6;
+export const VERSION = 7;
 
 /** The side of a cell of the ground, in metres. */
 export const CELL = 400;
@@ -46,16 +49,13 @@ export interface LivingParams {
     flow?: number;
     width: number;
     depth: number;
-    wavelength: number;
-    swing: number;
+    /** how the river a scene invents migrated to its bends, and what that leaves on the plain (../land.ts, ../meander.ts) */
+    migration: PlainParams['migration'];
     bank: [number, number];
     rise: number;
     roughness: number;
     size: number;
     levee: [number, number];
-    oxbows: number;
-    oxbow_radius: [number, number];
-    oxbow_width: number;
     ponds: number;
     pond_radius: [number, number];
     blend: [number, number];
@@ -663,8 +663,8 @@ export class LandCover {
   /** what grows at each height, where the world gives the climate at a height; the one class everywhere if not */
   private heights?: Heights;
   /**
-   * `clearing`, where people's fields, pastures and yards are (gen:people/settlement): how much of the ground they cleared
-   * of trees, 0–1. Without it, nothing is cleared, as before people.
+   * `clearing`: how much of the ground is clear of trees, 0–1, where people's fields, pastures and yards are
+   * (gen:people/settlement) and where an invented river has lately left a bar (../land.ts). Without it, nothing is.
    */
   constructor(spec: SceneSpec, private ground: GroundSampler, private level: number, focus: [number, number], private levelAt?: (x: number, y: number) => number, private clearing?: (x: number, y: number) => number) {
     const p = spec.generator.params as unknown as LivingParams;
@@ -827,8 +827,10 @@ export function makePlan(spec: SceneSpec, ground: GroundSampler, look: PlaceLook
   const level = look.water;
   const A = params.animals;
   const P = params.plants;
-  // Where a visitor arrives: inside the first good bend of the river, or simply by the origin.
-  const arrive = waters.river.length ? arrival(waters, 2600, params.cover.clearing * 0.72) : { at: [Math.round(hash2(4, 1, seed) * 800 - 400), Math.round(hash2(4, 2, seed) * 800 - 400)] as [number, number], toRiver: [0, 1] as [number, number] };
+  // Where a visitor arrives: inside the sharpest bend of the river near the middle, on ground that stands clear of
+  // the bare shore; or simply by the origin.
+  const firm = (x: number, y: number) => ground.at(x, y) - (levelAt ? levelAt(x, y) : level) > params.cover.bare * 1.6;
+  const arrive = waters.river.length ? arrival(waters, 2600, params.cover.clearing * 0.72, firm) : { at: [Math.round(hash2(4, 1, seed) * 800 - 400), Math.round(hash2(4, 2, seed) * 800 - 400)] as [number, number], toRiver: [0, 1] as [number, number] };
   const focus: [number, number] = [Math.round(arrive.at[0]), Math.round(arrive.at[1])];
   const toRiver: [number, number] = [Math.round(arrive.toRiver[0] * 1000) / 1000, Math.round(arrive.toRiver[1] * 1000) / 1000];
   const land = new LandCover(spec, ground, level, focus, levelAt, clearing);

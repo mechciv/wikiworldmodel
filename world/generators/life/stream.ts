@@ -8,8 +8,8 @@ import { fingerprint, type Fingerprint, type Part } from '../../../core/fingerpr
 import { Mesh, meshParts } from '../city/kit.ts';
 import { hash2, hashString, TAU } from '../city/math.ts';
 import { drawAnimal, drawClump, drawPlant, POSE, type Detail, type Stance } from './forms.ts';
-import { CELL, CELLS, cellParts, cellKey, coverMask, EXTENT, groundGrids, LandCover, makePlan, placeLook, waterLevels, waterRibbons, waterSheet, watersFor, type CellRows, type LivingParams, type LivingPlan, type PlaceLook } from './scene/v6.ts';
-import type { Waters } from './land.ts';
+import { CELL, CELLS, cellParts, cellKey, coverMask, EXTENT, groundGrids, LandCover, makePlan, placeLook, waterLevels, waterRibbons, waterSheet, watersFor, type CellRows, type LivingParams, type LivingPlan, type PlaceLook } from './scene/v7.ts';
+import { freshOf, type Waters } from './land.ts';
 import { drawDwelling, houseSize, type HouseDetail } from '../people/dwellings.ts';
 import { LandUseMap, landUseMask, makeSettlement, type SettlementPlan } from '../people/settlement/v1.ts';
 
@@ -87,7 +87,7 @@ export interface Selection {
   protos: ProtoMesh[];
   instances: number;
   triangles: number;
-  /** whether more cells are still to be made for this view */
+  /** how much is still to come for this view: cells to be made, and one more where its far share has yet to hold */
   pending: number;
   /** how many clumps of low plants cover the ground close by, apart from the instances */
   clumps: number;
@@ -115,6 +115,8 @@ export class SceneStream {
   private meshes = new Map<number, { tris: number }>();
   private tones: number[];
   private keep = 1;
+  /** how many selections running the far share has been changed after */
+  private unsettled = 0;
   private fullReach: number;
   private nearReach: number;
   /** the people's houses, settlements and fields, where the scene has people */
@@ -135,7 +137,7 @@ export class SceneStream {
     const levelAt = waters.paths ? waterLevels(waters) : undefined;
     // The people, where the scene has any: their houses and fields, on this ground and away from this water. Where they
     // cleared the land no tree stands. A scene of the sea has them too, on whatever ground stands above its water: a place
-    // a few metres above the sea, a delta or a lower plain, is a scene of the sea (scene/v6.ts, sea_below), and among the
+    // a few metres above the sea, a delta or a lower plain, is a scene of the sea (scene/v7.ts, sea_below), and among the
     // most crowded land there was.
     let clearing: ((x: number, y: number) => number) | undefined;
     if (spec.people) {
@@ -155,8 +157,11 @@ export class SceneStream {
         list.push(i);
       });
     }
-    this.plan = makePlan(spec, this.ground, this.look, waters, levelAt, clearing);
-    this.cover = new LandCover(spec, this.ground, this.look.water, this.plan.focus, levelAt, clearing);
+    // Nor does a tree stand yet on the bars an invented river has lately left.
+    const fresh = freshOf(waters, this.params.ground.migration);
+    const treeless = clearing && fresh ? (x: number, y: number) => Math.max(clearing(x, y), fresh(x, y)) : (clearing ?? fresh);
+    this.plan = makePlan(spec, this.ground, this.look, waters, levelAt, treeless);
+    this.cover = new LandCover(spec, this.ground, this.look.water, this.plan.focus, levelAt, treeless);
     this.tones = spec.taxa.map((t) => hashString(t.id) & 255);
     this.fullReach = this.params.reach.full;
     this.nearReach = this.params.reach.near;
@@ -417,8 +422,16 @@ export class SceneStream {
     }
     // A still's richer frame says nothing of what the live one can afford.
     if (!rich) {
+      const kept = this.keep;
       if (instances >= cap || triangles > this.budget.triangles) this.keep = Math.max(0.2, this.keep * 0.8);
       else if (instances < cap * 0.6 && triangles < this.budget.triangles * 0.6) this.keep = Math.min(1, this.keep * 1.1);
+      // A view the far share was changed for is not yet what it comes to rest at: the next selection of the same view
+      // would draw another. It is left pending, so that a view at rest is asked for again until the share holds, and
+      // what is drawn at rest does not depend on how often it was asked for. Not for ever, should the share never hold.
+      if (this.keep !== kept && this.unsettled < 16) {
+        this.unsettled++;
+        pending++;
+      } else if (this.keep === kept) this.unsettled = 0;
     }
     groups.sort((a, b) => Math.hypot(a.at[0] - ex, a.at[1] - ey) - Math.hypot(b.at[0] - ex, b.at[1] - ey));
     return { batches, protos, instances, triangles, pending, clumps, groups: groups.slice(0, 64) };
