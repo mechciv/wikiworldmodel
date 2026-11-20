@@ -29,7 +29,7 @@ import { EARTH_RADIUS, fromLocal, toLocal, type CityStructure } from '../../core
 import type { AtlasWhere } from '../../core/atlas.ts';
 import type { SceneFileV2 } from '../../core/scene.ts';
 import { latticeOf } from '../../world/generators/life/spec.ts';
-import type { LivingParams } from '../../world/generators/life/scene/v6.ts';
+import type { LivingParams } from '../../world/generators/life/scene/v7.ts';
 import { Camera, MAX_DIST, MIN_DIST } from './camera.ts';
 import { LifeAtlas, type ClimateData } from './city/lifeatlas.ts';
 import { Climates, type ClimateAt } from './climates.ts';
