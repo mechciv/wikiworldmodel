@@ -1,0 +1,30 @@
+id: people/polities/tlacopan
+kind: polity
+summary: >-
+  The altepetl of Tlacopan, Tacuba to the Spaniards, of the Tepanecs on the western shore of the lake, the third and
+  least of the heads of the Triple Alliance, with a fifth of its tribute. The Spaniards fled along its causeway on the
+  Noche Triste, and its lord was taken with Cuauhtemoc at the fall.
+author: machine:claude-code
+same_as: { wikidata: Q1140671 }
+claims:
+  name:
+    prop: name
+    value: { en: Tlacopan }
+    unsourced: An editorial label; Tacuba in the Spanish sources.
+relations:
+  in-the-alliance:
+    rel: member-of
+    to: people/polities/triple-alliance
+    valid: { lo: { ref: people/polities/triple-alliance, edge: start } }
+    source:
+      - ref: src:torquemada-1615-monarquia-indiana
+        loc: "book 2, ch. XXXIX, p. 201"
+        quote: en la distribución que después hicieron de las tierras le dieron la quinta parte de todo
+      - ref: src:ixtlilxochitl-1892-historia-chichimeca
+        loc: "ch. XXXII, p. 153"
+        quote: parecióle ser mejor y más permanente que fuese gobernado por tres (los cuales fueron los reyes y señores de los tres reinos, México, Tetzcuco y Tlacopan)
+    note: >-
+      Itzcoatl and Nezahualcoyotl gave its king, Totoquihuatzin, the fifth part of everything (Torquemada); Ixtlilxóchitl
+      says Itzcoatl objected to taking it in.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in city-torquemada-1615-joined.txt (sha256 688c18b2f2d9d7a3) and city-ixtlilxochitl-1892-tomo2.txt (sha256 5886f18c08b1f94b), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }

@@ -33,6 +33,18 @@ async function settle(page: Page): Promise<void> {
   }
 }
 
+/** Open the layers' menu, where the toggles are folded until asked for, if it is not open. */
+export async function openLayers(page: Page): Promise<void> {
+  const menu = page.locator('.menu-toggle');
+  if ((await menu.getAttribute('aria-expanded')) !== 'true') await menu.click();
+}
+
+/** Let out the planet's readings, folded behind their button until asked for, if they are not out. */
+export async function openPlanet(page: Page): Promise<void> {
+  const toggle = page.locator('.planet-toggle');
+  if ((await toggle.getAttribute('aria-expanded')) !== 'true') await toggle.click();
+}
+
 /** The WebGL canvas's own pixels as PNG bytes (no HTML overlays, no fonts). */
 export async function canvasPng(page: Page): Promise<Buffer> {
   const url = await page.evaluate(() => (document.querySelector('canvas.globe') as HTMLCanvasElement).toDataURL('image/png'));

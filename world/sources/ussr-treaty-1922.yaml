@@ -1,0 +1,27 @@
+id: src:ussr-treaty-1922
+type: document
+kind: act
+citation: >-
+  Treaty on the Formation of the Union of Soviet Socialist Republics (Договор об образовании Союза
+  Советских Социалистических Республик), adopted by the conference of plenipotentiary delegations
+  of the RSFSR, the Ukrainian SSR, the Transcaucasian SFSR and the Byelorussian SSR on 29 December
+  1922 and approved by the First Congress of Soviets of the USSR on 30 December 1922. State
+  Archive of the Russian Federation, f. R-3316, op. 1, d. 5, ll. 1–3.
+published: 1922
+title: Договор об образовании Союза Советских Социалистических Республик
+url: https://ru.wikisource.org/wiki/%D0%94%D0%BE%D0%B3%D0%BE%D0%B2%D0%BE%D1%80_%D0%BE%D0%B1_%D0%BE%D0%B1%D1%80%D0%B0%D0%B7%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B8_%D0%A1%D0%A1%D0%A1%D0%A0
+via: >-
+  Russian Wikisource's transcription, which gives as its source the declaration and treaty in the
+  State Archive of the Russian Federation (ф. Р-3316, оп. 1, д. 5, лл. 1–3), with the signatures
+  from Izvestiya of 1 January 1923.
+reliability: >-
+  The act by which the four republics united: evidence of who united, under what name and on what
+  terms, in the words agreed in December 1922. The text carries no date of its own: the days of
+  its adoption and approval are in the transcription's heading, and the day of approval in the
+  congress's resolution (src:ussr-first-congress-resolution-1922).
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from ru.wikisource.org on 2026-11-17 (the page Договор об образовании СССР, which
+    redirects to the full title) and read in full, the preamble and articles 1 to 26, in Russian;
+    the quotes were found in the kept text by quote-check.

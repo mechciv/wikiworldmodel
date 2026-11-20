@@ -45,3 +45,5 @@ claims:
       loc: p. 227
       quote: The earliest-known Maya writing, which dates to 400–200 bc, appears in murals on palace walls at the site of San Bartolo, Guatemala.
     method: expert-estimate
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }

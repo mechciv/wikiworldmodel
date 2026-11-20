@@ -1,0 +1,28 @@
+id: src:ussr-first-congress-resolution-1922
+type: document
+kind: act
+citation: >-
+  First Congress of Soviets of the USSR. Resolution of 30 December 1922, "On the approval of the
+  declaration and the treaty on the formation of the USSR" (Об утверждении декларации и договора об
+  образовании СССР), Moscow. In: Постановления первого съезда Советов Союза Советских
+  Социалистических Республик. Moscow: Central Executive Committee of the USSR, 1923.
+published: 1923
+title: Об утверждении декларации и договора об образовании СССР
+container: Постановления первого съезда Советов Союза Советских Социалистических Республик (Moscow, ЦИК СССР, 1923)
+url: https://ru.wikisource.org/wiki/%D0%9F%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5_I_%D1%81%D1%8A%D0%B5%D0%B7%D0%B4%D0%B0_%D0%A1%D0%BE%D0%B2%D0%B5%D1%82%D0%BE%D0%B2_%D0%A1%D0%A1%D0%A1%D0%A0_%D0%BE%D1%82_30.12.1922_%E2%84%96_1
+via: >-
+  Russian Wikisource's transcription, which gives as its source the congress's resolutions as
+  published by the Central Executive Committee of the USSR in 1923; the page prints the
+  declaration and the treaty after the resolution.
+reliability: >-
+  The congress's own act, signed by its chairman, Kalinin, and its secretary, Yenukidze, and dated
+  Moscow, 30 December 1922: evidence of the day the Union's first congress approved the
+  declaration and the treaty, and that it approved them in the main, leaving the final text to
+  the Union's Central Executive Committee and to the second congress.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from ru.wikisource.org on 2026-11-17; the resolution's four points and its date line
+    read in Russian, and the declaration and treaty printed under it compared by script with the
+    separate transcriptions of each, which they match word for word. The quotes were found in
+    the kept text by quote-check.

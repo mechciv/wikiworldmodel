@@ -1,0 +1,254 @@
+id: people/wars/second-world-war
+kind: event/war
+summary: >-
+  The war fought across Europe, Asia, Africa and the oceans that ended in 1945 with the
+  surrenders of Germany and Japan. When it began and when it ended are both contested. It is
+  usually counted from the German attack on Poland on 1 September 1939; the People's Republic
+  of China, and a recent history of China's war as it is presented, count it from the outbreak
+  of war between Japan and China in July 1937. It ended with Japan's surrender, announced in
+  the middle of August 1945 and signed on 2 September; the United States proclaimed hostilities
+  ended only at the end of 1946.
+author: machine:claude-code
+same_as: { wikidata: Q362 }
+claims:
+  name:
+    prop: name
+    value: { en: Second World War }
+    unsourced: >-
+      An editorial label, the war's usual name in English, with World War II. The People's
+      Republic of China calls it the World Anti-Fascist War.
+  start-poland:
+    prop: start
+    value: { ref: people/wars/invasion-of-poland, edge: start }
+    source:
+      - ref: src:kennedy-1956-german-campaign-in-poland
+        loc: p. vii
+        quote: The German attack on Poland precipitated World War II
+      - ref: src:kennedy-1956-german-campaign-in-poland
+        loc: p. vii
+        quote: An enormous source of German material exists on this opening campaign of World War II.
+    method: historical-account
+    rank: preferred
+    note: >-
+      The usual reckoning: the war began as the German attack on Poland did, and takes that
+      campaign's first day. Preferred because it is the convention of most of the sources read
+      here: the U.S. Army's historians call the Polish campaign the war's opening campaign, the
+      State Department in 1943 set a European war from September 1939 beside Japan's
+      undeclared war on China, and China itself declared war only in December 1941.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ww2-kennedy-1956-german-campaign-in-poland.txt (sha256 338160e6e7fcd1e2), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  start-china:
+    prop: start
+    value: 7 July 1937 CE
+    source:
+      - ref: src:prc-2005-victory-anniversary-speech
+        loc: paragraph beginning "The brazen aggression"
+        quote: The July 7th Incident in 1937 marked the outbreak of the World Anti-Fascist War in the East, in that China's national war of resistance opened the first battleground, massive in scale, in the world war against Fascism.
+      - ref: src:oxford-dpir-2013-mitter-chinas-war-with-japan
+        loc: description of the book
+        quote: Different countries give different opening dates for the period of the Second World War, but perhaps the most compelling is 1937
+    method: historical-account
+    note: >-
+      The reckoning of the People's Republic of China, and of a historian of China's war as
+      his book is described: the world war broke out in the East with the clash of 7 July 1937,
+      the day the war between Japan and China is usually counted from
+      (people/wars/second-sino-japanese-war, start-1937). The day is written out and not taken
+      from that record, because the same speech starts China's own war in 1931 and the world
+      war in 1937: a reference to that war's start could not say which of its starts it means.
+      On this reckoning the war in China was part of the world war from July 1937, and Japan
+      and China took part in it from then; the relations of this record and of that war give
+      the spans of the usual reckoning, and a competing claim cannot carry others with it.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ww2-hu-2005-victory-anniversary-speech.txt (sha256 b2ae81f253d8632b) and ww2-mitter-2013-oxford-page.txt (sha256 74b322d5243cbdd6), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  end-surrender-signed:
+    prop: end
+    value: { ref: people/events/japanese-surrender-1945 }
+    source:
+      - ref: src:stalin-1945-address-2-september
+        loc: third paragraph
+        quote: Это означает, что наступил конец второй мировой войны.
+      - ref: src:prc-2005-victory-anniversary-speech
+        loc: paragraph beginning "During the heart-stirring national war of resistance"
+        quote: On September 2, 1945, the Japanese Government officially signed the instrument of surrender, which meant the complete defeat of Japanese aggressors and the final victory of the World Anti-Fascist War.
+    method: documentary
+    rank: preferred
+    note: >-
+      The war ended when Japan's surrender was signed, and takes that instrument's day. Stalin
+      said so on the day (in English: this means that the end of the second world war has
+      come), and China's government dates the final victory to it. Preferred because it is the
+      surrender of Japan itself, accepted for all the powers at war with it, and the day on
+      which the Soviet Government then, and China's government since, have ended the war. The
+      President of the United States, naming the same day V-J Day, said it was not yet the
+      formal end of the war (end-hostilities-proclaimed).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ww2-stalin-address-2-sep-1945-ru.txt (sha256 383293a64235a0a3) and ww2-hu-2005-victory-anniversary-speech.txt (sha256 b2ae81f253d8632b), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  end-surrender-announced:
+    prop: end
+    value: 15 August 1945 CE
+    source:
+      - ref: src:george-vi-1945-broadcast-15-august
+        loc: second paragraph
+        quote: But Japan has surrendered. So let us join in thanking Almighty God that war has ended throughout the world
+      - ref: src:truman-1945-news-conference-14-august
+        loc: the President's statement
+        quote: Meantime, the Allied armed forces have been ordered to suspend offensive action.
+    method: documentary
+    note: >-
+      The war ended when Japan's acceptance of the Allies' terms was announced and the fighting
+      was called off, before anything was signed: the King told Britain and the Empire on 15
+      August that the war was over. The day depends on where it is counted. The President of
+      the United States announced Japan's acceptance in Washington at 7 p.m. on Tuesday 14
+      August, as the editors of his papers note, and held V-J Day over until the signing; the
+      claim's day is that of the King's broadcast.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ww2-george-vi-war-is-over-1945.txt (sha256 6254154c29fe0d3b) and ww2-truman-1945-news-conference-14-aug.txt (sha256 83f5fa9f03ab9bc0), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  end-hostilities-proclaimed:
+    prop: end
+    value: 31 December 1946 CE
+    source:
+      - ref: src:truman-1946-proclamation-2714
+        loc: operative paragraph
+        quote: do hereby proclaim the cessation of hostilities of World War II, effective twelve o'clock noon, December 31, 1946
+      - ref: src:truman-1945-radio-address-1-september
+        loc: next to last paragraph
+        quote: It is not yet the day for the formal proclamation of the end of the war nor of the cessation of hostilities.
+    method: documentary
+    note: >-
+      The end of hostilities as the United States proclaimed it for its own law, more than a
+      year after the surrender; the proclamation says in its preamble that a state of war still
+      exists. It is one state's formal date, and no fighting ended on it.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ww2-truman-proclamation-2714.txt (sha256 837413f679ccc164) and ww2-truman-1945-radio-address-tl.txt (sha256 b9b0cb5ed5216e92), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+relations:
+  german-reich:
+    rel: participant
+    to: people/polities/german-reich
+    valid: { lo: { ref: people/wars/invasion-of-poland, edge: start }, hi: { ref: people/events/german-surrender-1945, edge: start } }
+    source:
+      - ref: src:hitler-1939-directive-1
+        loc: section 2
+        quote: "Date of attack: September 1, 1939."
+      - ref: src:german-act-of-military-surrender-berlin-1945
+        loc: paragraph 1
+        quote: hereby surrender unconditionally to the Supreme Commander, Allied Expeditionary Force and simultaneously to the Supreme High Command of the Red Army all forces on land, at sea, and in the air who are at this date under German control
+    note: >-
+      One of the Axis powers, as China's declaration of war names Germany, Italy and Japan.
+      From its attack on Poland to the surrender of all its forces: the span runs from the
+      start of that campaign (people/wars/invasion-of-poland) to the surrender
+      (people/events/german-surrender-1945), whichever day is taken for it.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ww2-hitler-directive-1-1939.txt (sha256 f4e46927976baff3) and ww2-german-surrender-berlin-1945.txt (sha256 e0bb0919ced58a90), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  second-polish-republic:
+    rel: participant
+    to: people/polities/second-polish-republic
+    valid: { lo: { ref: people/wars/invasion-of-poland, edge: start } }
+    source:
+      - ref: src:hitler-1939-directive-1
+        loc: section 2
+        quote: The attack on Poland is to be carried out in accordance with the preparations made for Case White
+      - ref: src:hansard-1939-09-03-prime-ministers-announcement
+        loc: col. 292
+        quote: German attacks upon Poland have been continued and intensified
+    note: >-
+      On the Allied side: the state attacked on the first day, to which the United Kingdom
+      held itself bound when it went to war. The span begins with the campaign
+      (people/wars/invasion-of-poland) and is open at its end, and so runs to the end of the
+      war or of the Second Polish Republic, whichever came first: that record has no dates
+      yet, and when the republic ended is its question.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ww2-hitler-directive-1-1939.txt (sha256 f4e46927976baff3) and ww2-hansard-1939-09-03-prime-ministers-announcement.txt (sha256 d2a916a05e3c2574), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  united-kingdom:
+    rel: participant
+    to: people/polities/united-kingdom
+    valid: { lo: 3 September 1939 CE, hi: { ref: people/wars/second-world-war, edge: end } }
+    source:
+      - ref: src:hansard-1939-09-03-prime-ministers-announcement
+        loc: col. 292
+        quote: No such undertaking was received by the time stipulated, and, consequently, this country is at war with Germany.
+      - ref: src:hansard-1939-09-03-prime-ministers-announcement
+        loc: col. 292
+        quote: a state of war will exist between the two countries as from that hour
+    note: >-
+      One of the Allied Powers, as Japan's instrument of surrender calls them. At war with
+      Germany from the hour its Note set, eleven in the morning by British Summer Time on 3
+      September 1939, to the end of the war, whichever end is taken for it.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ww2-hansard-1939-09-03-prime-ministers-announcement.txt (sha256 d2a916a05e3c2574), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  soviet-union:
+    rel: participant
+    to: people/polities/soviet-union
+    valid: { lo: 22 June 1941 CE, hi: { ref: people/wars/second-world-war, edge: end } }
+    source:
+      - ref: src:molotov-1941-radio-address-22-june
+        loc: second paragraph
+        quote: Сегодня, в 4 часа утра, без предъявления каких-либо претензий к Советскому Союзу, без объявления войны германские войска напали на нашу страну
+      - ref: src:soviet-declaration-of-war-on-japan-1945
+        loc: last paragraph
+        quote: the Soviet Government declares that from tomorrow, that is from Aug. 9, the Soviet Government will consider itself to be at war with Japan
+    note: >-
+      One of the Allied Powers, from the German attack (in English: today, at four in the
+      morning, with no claims presented to the Soviet Union and no declaration of war, German
+      troops attacked our country). Until that day a pact of non-aggression held between the
+      Soviet Union and Germany, as the same address says, and it was on neither side; its move
+      into eastern Poland in September 1939 is a relation of that campaign
+      (people/wars/invasion-of-poland). It was at war with Japan only from 9 August 1945, after
+      Germany's surrender. The relation says that it took part from 22 June 1941 to the end of
+      the war; against whom, and on whose side, only this note can say.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ww2-molotov-broadcast-22-june-1941-ru.txt (sha256 f89a3d3939f4c4b3) and ww2-soviet-declaration-of-war-on-japan-1945.txt (sha256 23b6f60a1cd7db39), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  united-states:
+    rel: participant
+    to: people/polities/united-states
+    valid: { lo: 7 December 1941 CE, hi: { ref: people/wars/second-world-war, edge: end } }
+    source:
+      ref: src:roosevelt-1941-address-to-congress-8-december
+      loc: last paragraph of the address
+      quote: I ask that the Congress declare that since the unprovoked and dastardly attack by Japan on Sunday, December 7, a state of war has existed between the United States and the Japanese Empire.
+    note: >-
+      One of the Allied Powers. At war with Japan from the day of the attack, as the President
+      asked the Congress to declare on 8 December; the Congress declared the state of war with
+      Japan that day, and with Germany and Italy on 11 December (the same Senate document,
+      part 4). The day is Washington's: Japan's rescript dates the same opening of the war 8
+      December. The span ends with the war.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ww2-us-congress-1941-joint-session.txt (sha256 817aee49746247ce), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  empire-of-japan:
+    rel: participant
+    to: people/polities/empire-of-japan
+    valid: { lo: 8 December 1941 CE, hi: { ref: people/wars/second-world-war, edge: end } }
+    source:
+      - ref: src:japan-rescript-declaring-war-1941
+        loc: operative sentence
+        quote: 朕茲ニ米國及英國ニ對シテ戰ヲ宣ス
+      - ref: src:japan-rescript-declaring-war-1941
+        loc: the transcription's note of its copy-text
+        quote: 『官報』号外、1941年12月08日
+    note: >-
+      One of the Axis powers. In English: we hereby declare war on the United States and
+      Britain. The rescript is dated by the era, the eighth day of the twelfth month of Showa
+      16, which the transcription's copy-text, the Official Gazette, has as 8 December 1941:
+      Tokyo's day for what Washington dated 7 December. Japan had been at war with China since
+      July 1937 (people/wars/second-sino-japanese-war); on the reckoning that begins the world
+      war then, it took part from then. The span ends with the war, whichever end is taken
+      for it.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ww2-japan-rescript-declaring-war-1941-ja.txt (sha256 c0478cb31e284c00), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  republic-of-china:
+    rel: participant
+    to: people/polities/republic-of-china
+    valid: { lo: 9 December 1941 CE, hi: { ref: people/wars/second-world-war, edge: end } }
+    source:
+      - ref: src:china-declaration-of-war-1941
+        loc: declaration of war on Japan, last paragraph
+        quote: The Chinese Government hereby formally declares war on Japan.
+      - ref: src:china-declaration-of-war-1941
+        loc: declaration of war on Germany and Italy, last paragraph
+        quote: as from midnight, December 9, 1941, a state of war exists between China and Germany and between China and Italy
+    note: >-
+      One of the Allied Powers, from the day it declared war on Japan, Germany and Italy. It
+      had fought Japan since July 1937 without a declaration
+      (people/wars/second-sino-japanese-war); on the reckoning that begins the world war then,
+      it took part from then. Which midnight of 9 December the declaration means, and by what
+      clock, it does not say. The span ends with the war.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ww2-china-declaration-of-war-1941.txt (sha256 70eb78c730bd20ef), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }

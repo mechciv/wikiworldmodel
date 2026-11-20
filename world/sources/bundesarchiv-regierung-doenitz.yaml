@@ -1,0 +1,20 @@
+id: src:bundesarchiv-regierung-doenitz
+type: publication
+kind: review
+citation: >-
+  Dumschat, S. Archivgut zur Geschäftsführenden Reichsregierung Dönitz: ein Überblick zur
+  Überlieferung im Bundesarchiv. Bundesarchiv, bundesarchiv.de. Undated.
+authors:
+  - "Dumschat, S."
+title: Archivgut zur Geschäftsführenden Reichsregierung Dönitz
+container: Bundesarchiv, Archivgut recherchieren nach Themen
+url: https://www.bundesarchiv.de/im-archiv-recherchieren/archivgut-recherchieren/nach-themen/archivgut-zur-geschaeftsfuehrenden-reichsregierung-doenitz/
+reliability: >-
+  The Federal Archives' guide to its records of the last government of the Reich, undated and
+  without references: it gives the day that government was arrested in passing, as the archive
+  that holds its papers has it.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from bundesarchiv.de on 2026-11-17 and read in full in German, the guide and the
+    summaries of the pages it links. The quote was found in the kept text by quote-check.

@@ -1,0 +1,71 @@
+id: src:florentine-codex-book-12
+type: text
+kind: historian
+citation: >-
+  Sahagún, B. de, with Martín Jacobita, Andrés Leonardo, Antonio Valeriano, Alonso Vegerano,
+  Pedro de San Buenaventura and other Nahua collaborators. Historia general de las cosas de Nueva
+  España (the Florentine Codex), Book 12, "De la conquista de la Nueva España, que es la Ciudad de
+  México": the Nahuatl text and Sahagún's Spanish. Ms. Mediceo Palatino 220, Biblioteca Medicea
+  Laurenziana, Florence. Read in the transcriptions given by the Digital Florentine Codex, ed.
+  K. N. Richter, A. M. Houtrouw, K. Terraciano, J. F. Peterson, D. Magaloni and L. Sousa (Los
+  Angeles: Getty Research Institute, 2023).
+authors:
+  - "Sahagún, B. de"
+  - "Jacobita, M."
+  - "Leonardo, A."
+  - "Valeriano, A."
+  - "Vegerano, A."
+  - "San Buenaventura, P. de"
+published: 2023
+written: { lo: 1555 CE, hi: 1577 CE }
+title: Historia general de las cosas de Nueva España, Book 12 (Florentine Codex)
+container: Digital Florentine Codex (Getty Research Institute)
+url: https://florentinecodex.getty.edu/book/12/folio/1r
+via: >-
+  The Getty Research Institute's Digital Florentine Codex. Each folio's page loads its texts by
+  script from https://dfc-be.ch.digtest.co.uk/codex/codex_folio/book/12/folio/<folio>/, and the
+  texts were read there. Nahuatl quotes are copied from the transcriptions by James Lockhart (We
+  People Here, 1993) or by Arthur J. O. Anderson and Charles E. Dibble (Florentine Codex,
+  1950–82); Spanish quotes from the transcriptions by Lockhart (1993) or by Alfredo López Austin
+  and Josefina García Quintana (2000). Each locator names the folio and whose transcription.
+  Lockhart's English was read alongside to follow the Nahuatl and is not quoted.
+license: public domain
+license_note: >-
+  The sixteenth-century Nahuatl and Spanish are in the public domain. The Getty states that the
+  transcriptions are used with permission and all rights reserved (Lockhart's by the UCLA Center
+  for Medieval and Renaissance Studies, Anderson and Dibble's by the University of Utah Press,
+  López Austin and García Quintana's by their estates); they are quoted here only briefly, as the
+  words of the original. The folio images are CC BY-NC-ND 4.0 (Biblioteca Medicea Laurenziana).
+  The site's own essays and the Nahuatl-to-Spanish translation by Alcántara Rojas and Navarrete
+  Linares are CC BY 4.0.
+reliability: >-
+  The Nahua account of the conquest gathered under Sahagún in Tlatelolco from people who had
+  lived through it, with Sahagún's Spanish version beside it. The Nahuatl is told from Tlatelolco,
+  often in the first person plural of the Tlatelolca: it praises their warriors and lords and
+  shows Moctezuma and the Tenochca in a poor light. It was taken down some thirty-five years
+  after the events and reworked until the manuscript was made in 1575–77, and its dates in the
+  Mexica calendar do not all agree with one another or with the Spanish accounts. The Spanish
+  column, Sahagún's own, condenses the Nahuatl, differs from it in places and adds his remarks.
+  Evidence of how the Tlatelolca remembered the war a generation later; not a record made at the
+  time.
+note: >-
+  When it was written: the Nahuatl account was taken down in Tlatelolco around 1555 from noble
+  survivors (it "se escribió en tiempo que eran vivos los que se hallaron en la misma conquista, y
+  ellos dieron esta relación, personas principales y de buen juicio", Sahagún's address to the
+  reader, fol. iv), and his collaborators worked on it at intervals
+  between 1555 and 1565 (Alcántara Rojas and Navarrete Linares, Digital Florentine Codex); no
+  earlier copy of the Nahuatl of Book 12 survives. The Florentine manuscript, with the Spanish
+  column, was made in 1575–77 (Richter and Houtrouw, Digital Florentine Codex). Sahagún revised
+  Book 12 again in 1585; that version is a different text and is not read here.
+verified:
+  by: machine:claude-code
+  how: >-
+    The API responses for the 180 written pages of Book 12 (all but the blank leaves, the
+    paste-down, the cover and the edge) fetched on 19 November 2026 (UTC) and read in
+    their four transcriptions where cited: the address to the reader (fol. iv) and chapters 1–4,
+    19–24, 27–29, 32 and 39–41, with the rest searched for dates, month names and names. The
+    responses for the 27 folios quoted were kept with fetch-text.py as na-fc12-<folio>.raw (with .meta.json),
+    and their transcriptions, taken out by script with the markdown as the API gives it, make the
+    reading text na-fc12-getty.txt, in which every quote was found by script. The site's
+    Citations and Permissions page was read (its text is in the page's script data, kept as
+    na-getty-dfc-permissions.raw).

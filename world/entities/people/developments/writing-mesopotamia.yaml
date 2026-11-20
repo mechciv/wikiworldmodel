@@ -21,6 +21,8 @@ claims:
       The tablets of the earlier of the two archaic script phases, Uruk IV, conventionally
       dated to about 3200 BC; the source gives no uncertainty. Woods (ch. 2, p. 34) places
       the invention of writing in the Late Uruk period, ca. 3350–3100 BC.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-oimp32-visible-language.txt (sha256 b84714a8f838fe33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
   location:
     prop: location
     value: { lat: 31.3234, lon: 45.6391, frame: frame:earth/present-day }

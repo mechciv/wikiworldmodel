@@ -1,0 +1,28 @@
+id: src:berlin-declaration-1945
+type: document
+kind: act
+citation: >-
+  Declaration regarding the defeat of Germany and the assumption of supreme authority with
+  respect to Germany by the Governments of the United States of America, the Union of Soviet
+  Socialist Republics, the United Kingdom and the Provisional Government of the French Republic,
+  Berlin, 5 June 1945. In Bevans, C.I. (comp.), Treaties and Other International Agreements of the
+  United States of America 1776–1949, vol. 3 (1969).
+published: 1945
+title: Declaration Regarding the Defeat of Germany and the Assumption of Supreme Authority by Allied Powers
+url: https://avalon.law.yale.edu/wwii/ger01.asp
+via: >-
+  The Avalon Project, Yale Law School, which transcribes the English text from Bevans. Its
+  transcription has "does not affect the annexation of Germany" where the copy on English
+  Wikisource has "does not effect"; that sentence is not quoted here.
+reliability: >-
+  The act of the four powers: evidence of what they declared on 5 June 1945, in their own words,
+  among it that Germany had no central government and that they took supreme authority. It is not
+  evidence of what that did to the German state in law, on which courts later differed. The
+  English, Russian and French texts are authentic, by its Article 15; the English was read.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from avalon.law.yale.edu on 2026-11-17 and read in full, the preamble, Articles 1 to
+    15 and the signatures. The two sentences quoted were compared with the copy on English
+    Wikisource, fetched the same day, and are the same there. The quotes were found in the kept
+    text by quote-check.

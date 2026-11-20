@@ -16,8 +16,8 @@ been checked by a person, which is set 20. The three steps that come out of sets
 | 7 | Megafauna extinctions | done | `world/entities/life/megafauna/`, `world/alternatives/megafauna-causes*` |
 | 8 | Domestication worldwide | done | `world/entities/people/domestication/` |
 | 9 | Population and land use (HYDE) | where people lived as a 1° grid over the globe, 10,000 BCE to 2015; the world's population, cropland and grazing land as series; since the eleventh slice, every 5′ cell's anthrome from Anthromes 12K, ArchaeoGLOBE's assessments by region, and the lists of cities ([HUMAN-LANDSCAPE.md](HUMAN-LANDSCAPE.md)); no grid of land-use shares | `world/fields/earth/{population,world-population,cropland,grazing-land}.yaml`, `world/fields/people/`, `world/snapshots/hyde-3.2.1-*.csv`, `world/snapshots/archaeoglobe-2019-assessments.csv`, `world/snapshots/reba-2016-*.csv` |
-| 10 | States worldwide from Cliopatria | done as rows, not records | `world/fields/earth/polities.yaml` |
-| 11 | People and offices | done, for 42 rulers | `world/entities/people/rulers/`, `world/entities/people/polities/` |
+| 10 | States worldwide from Cliopatria | done as rows, not records; since the twelfth slice, states with records draw their own rows, 19 of them now ([TWELFTH-SLICE.md](slices/TWELFTH-SLICE.md), [FIFTEENTH-SLICE.md](slices/FIFTEENTH-SLICE.md)) | `world/fields/earth/polities.yaml`, `world/entities/people/polities/` |
+| 11 | People and offices | done, for 44 rulers | `world/entities/people/rulers/`, `world/entities/people/polities/` |
 | 12 | First cities, writing, languages | done; languages as rows | `world/fields/earth/languages.yaml`, `world/entities/people/first-cities/`, `world/entities/people/writing/` |
 | 13 | Routes and trade | done, but for the Silk Road's lines | `world/fields/earth/roman-roads.yaml`, `world/entities/people/trade/` |
 | 14 | Objects that move | done | `world/entities/people/objects/` |
@@ -33,7 +33,8 @@ been checked by a person, which is set 20. The three steps that come out of sets
 Sets 10, 12, 13, 15 and 18 add a new way of holding what has thousands of members: a field with
 `grid: { kind: rows }`, whose rows stay rows of a pinned dataset, thinned for the globe, and are drawn on a
 canvas over it (`core/layers.ts`, `tools/world/src/build/layers.ts`, `viewer/src/ui/layers.ts`). They are not
-records: they are not searched, not dated by the solver, and a click says what the dataset says of a row.
+records: they are not dated by the solver, and a click says what the dataset says of a row. Search finds only the states,
+by name, and a row an overlay ties to a record as that record.
 Their tests are `tools/world/test/layers.test.ts` and `viewer/test/e2e/layers.spec.ts`.
 
 - **States.** All of Cliopatria's rows at the time shown, tinted and outlined, the largest named; Rome's are
@@ -43,12 +44,12 @@ Their tests are `tools/world/test/layers.test.ts` and `viewer/test/e2e/layers.sp
 - **Today's map.** From the time axis's present, 1950 (the datum geology dates from), although the lines are
   of about 2020. Its disputed lines are dashed.
 - **Hazards.** 9,123 of NOAA's eruptions, earthquakes and tsunamis as rings around their years.
-- **Languages.** Glottolog's points, by family, for the present only, behind a toolbar button.
+- **Languages.** Glottolog's points, by family, for the present only, behind a button in the *Layers* menu.
 
 ## A grid over the globe
 
 Set 9's people are the one layer that is not rows: a field with `grid: { kind: lonlat }` and `data.as: people`, which the build reads itself
-into one binary file, `people.lwt` (`peopleLayer` in `tools/world/src/build/layers.ts`), and the toolbar's **People** button draws
+into one binary file, `people.lwt` (`peopleLayer` in `tools/world/src/build/layers.ts`), and the **People** button of the *Layers* menu draws
 (`PeopleLayer` in `viewer/src/ui/layers.ts`). Its tests are `tools/world/test/people.test.ts`, the people test in
 `tools/world/test/build.test.ts` and three in `viewer/test/e2e/layers.spec.ts`.
 
@@ -100,8 +101,10 @@ so that they are not lost with the sessions that raised them.
 ### The alternatives a build shows
 
 What a build shows is a steward's decision (section 4.4 of the design), and no steward has made one. The five groups of sets 6, 7 and
-19 and the one of set 4 are shown on a machine's proposal, behind the toolbar's **Alternatives** button: their `show:` lists are what to change. None is
-anyone's default. They cost a build about two minutes and 18 MB. No build works out combinations: where two groups are chosen, a
+19 and the one of set 4 are shown on a machine's proposal, behind the **Alternatives** button of the *Layers* menu: their `show:` lists are what to change. None is
+anyone's default. They cost a build about two minutes and 18 MB. The twelfth slice adds three groups of perspectives, shown on the
+same footing: who carried on the Roman Empire, Germany after 1945, and the Mongol Empire after 1260. The fifteenth adds a fourth,
+whose account of the conquest of Mexico, with no default: the default picture keeps what both sides say. No build works out combinations: where two groups are chosen, a
 record takes its time from the first of them that moves it.
 
 ### Set 1: biomes and fossil forests
@@ -297,10 +300,13 @@ A reviewer should look at these first:
 - Eleven polities were written for them, from Cliopatria's rows where those fit (`world/entities/people/polities/`): names, with the
   rows' first and last years. Four have no dates of their own (the First Dynasty of Babylon, the Old and New Kingdoms of Egypt,
   Palenque), because the chronologies compete or no row exists; Maurya and Han start with their first ruler's reign.
-- Wikipedia is a last resort in four places, each said so: Diocletian's death, Charlemagne's birth, Hammurabi's 43 regnal years, the Long
-  Count correlation.
+- Wikipedia is a last resort in three places, each said so: Diocletian's death, Charlemagne's birth, Hammurabi's 43 regnal years. The Long
+  Count correlation was a fourth, until the twelfth slice gave it a record with three sourced values, `people/calendars/long-count-zero-day`.
 - Worked out rather than stated, with the arithmetic in the notes: Nerva's birth and death, the birth years of Trajan and Titus,
-  Macrinus's accession, Elagabalus's death, Pakal's Julian dates, Hammurabi's High, Low and ultra-low starts.
+  Macrinus's accession, Elagabalus's death, Hammurabi's High, Low and ultra-low starts. Pakal's Julian dates were too: his birth, accession
+  and death are now written in the Long Count, as carved, and the ranges worked out by hand are kept, deprecated.
+- James VI and I, the 43rd, holds his three crowns by `held-office` relations with spans, since reigns that overlap cannot be phases. The
+  other 42 still hold office through reign phases: two ways of writing one thing.
 - The upper bound on Macrinus's death is the agent's own allowance. The Historia Augusta's later Lives are weak, and say so.
 - A birthplace stands for the whole of a life on the globe, so Claudius sits at Lyon during his reign.
 - New Dio and Suetonius source records were added beside the narrower ones, and may want merging.
@@ -315,7 +321,143 @@ A reviewer should look at these first:
 - The Ahiram inscription's date is from a figure caption and a time line, and its dispute is not recorded as a claim.
 - Editorial readings: proto-cuneiform's end at 2900 BCE; Mohenjo-daro's dates are the civilization's; the Dipylon jug stands for the
   8th-century Greek group.
-- Lineage between scripts (Linear A to B, Phoenician to Greek) is only in notes: no relation type fits yet.
+- Lineage between scripts is written since the twelfth slice: eight `arose-from` relations in six records, one of them a rival reading
+  (the Greek alphabet from Proto-Canaanite) and one set aside (Egyptian hieroglyphs from Mesopotamian writing). Three of the parents,
+  Proto-Canaanite, Olmec writing and Zapotec writing, are records with a name and no more.
+- A script's start is its first find, so its lineage can only be slack or contradict it: a first attestation should bound a start, not be it.
+
+### The identity cases (twelfth slice)
+
+Nine cases, each written by an agent of its own from sources it fetched and kept, then gone over when the engine could say more
+([TWELFTH-SLICE.md](slices/TWELFTH-SLICE.md)): 32 new records, 9 changed, 129 new sources. Every quote was found by script in the text it
+was read in, and one source from each of the 48 hosts was fetched a second time and its quotes found again. Nothing was read twice by
+another reader, and nothing by a person. The translations in the notes are the agents' own.
+
+- **The Long Count** (`people/calendars/long-count-zero-day`, `people/rulers/pakal`). Preferring 584283 is a judgement: it is the constant
+  most used, and agrees with the count still kept in the highlands; Martin and Skidmore explore 584286, from one eclipse. Thompson's two texts were read
+  as OCR, and Lounsbury's in a reproduction. Mathews and Schele's online text has Pakal's birth once with two places exchanged; the
+  claim's note says so. Their source record gives no year, though its id says 1974.
+- **Scripts** (`people/writing/`). The Phoenician alphabet "arose from" Proto-Sinaitic, where the sources see one script at two stages:
+  it could as well be `continues`, or one record. The Greek alphabet's rival parent rests on Lam's and Waal's reports of Naveh, who was
+  not read. Maya writing from Olmec or Zapotec writing is one statement with an "or" in it, written as two relations that both hold.
+- **The Holy Roman Empire.** Preferring 962 to 800 rests on Barker (1911) and on the two databases. The decretal Venerabilem is dated
+  1202 from la.wikisource; the Royal Frankish Annals were read in an OCR, in which two older quotes of Charlemagne's record are not found.
+  The view from Constantinople has no member of its own: what it asserts is the default picture, and what it denies is cited `against`.
+- **Yugoslavia** (`sfr-yugoslavia`, `fr-yugoslavia`). Which end is preferred, and 1945 against the state's own 1943, are judgements. The
+  declaration of 1945 was read only in a Wikisource contributor's Croatian rendering, and the constitutions on Wikisource were not held
+  against the gazettes (the gazette date given for 1992's, 3 January 1992, cannot be right). The head of A/46/915 reads 7 May 1993 over a
+  letter of 6 May 1992. The United Nations' machine-read PDFs set columns into one another: the quotes are in the text kept, which is
+  not proof of how the page reads. Not reached: the judgments of the International Court of Justice, General Assembly resolution 47/1
+  itself (cited as the Legal Counsel restated it), the Arbitration Commission's Opinion 11, Security Council resolution 752. The end is 3
+  June 2006; the United Nations' depositary gives 2 June.
+- **Britain** (six polities and `people/rulers/james-vi-and-i`). The Dictionary of National Biography's dates are read as Julian with the
+  year beginning in January, which it does not say. Ireland's 1541 is inferred; the Act's short title and Wikidata say 1542. England from
+  926 and Scotland from 846 are Victorian reference dates (Wikidata: 927, 843). The Constitution of Ireland is quoted from the
+  consolidated text of 2020, and the Acts of Union from revised texts that lack what was repealed. The 1927 Act restyles Parliament, not
+  the state in so many words. The United Kingdom has no Wikidata id, because Wikidata cuts it at the renaming.
+- **The Second World War** (`people/wars/`, `people/events/`). The reckoning from 1937 is a competing start, and should be a
+  perspective: under it nobody is in the war before 1939. Whether the war "from 1931" is the same war as that of 1937 is open. The end
+  of 31 December 1946 is one state's legal date. Avalon heads the German acts of surrender "59 Stat. 1957", which may be a slip for 1857; 9 September
+  1945 for the surrender at Nanking is from a headnote; the speech of 2005 is given to Hu Jintao only by the page's keywords.
+- **Germany** (`german-reich`, `federal-republic-of-germany`, `german-democratic-republic`). The Federal Republic's `continues` sits in a
+  perspective with no default, where an ordinary relation was the other choice. The Democratic Republic's is deprecated on a regional
+  court's holding of 1950 that the identity remained, before its Supreme Court held otherwise. The end is 5 June 1945, against 23 May.
+  `same_as` Q183 for the Federal Republic, though Wikidata also has an item for 1949–1990. The paragraph numbers of the 1973 judgment are
+  a transcription's, and the 1951 judgment's central sentence could not be quoted: its PDF's text is out of reading order.
+- **The Soviet Union and Russia.** Preferring 26 December 1991; Blum's "finally sealed on 25 December" is the rival. Russia is counted
+  from 25 October 1917 (Old Style), though the appeal may have been adopted early on the 26th. The acts were read on Wikisource and not
+  held against a printed edition, and no reference work could be reached. Nothing is cited against the continuity: a statement by
+  Ukraine in 2022 contesting Russia's seat is said to exist, and could not be fetched.
+- **The Mongol Empire.** The earlier record `mongol-empire` was changed: its end by the division of 1259–1264 is preferred to the borders
+  dataset's 1293, which is kept. The Encyclopaedia Iranica was read in Internet Archive captures, Morgan (2009) in its abstract alone, and
+  the Encyclopaedia Britannica of 1911 is the only source for the Ilkhanate's nominal end in 1353. The Yuan shi dates to the day in a
+  calendar the axis cannot read, so its dates are given to the year. The three western khanates are not cut alike: the Chagatai record has
+  two starts, the ulus of 1227 and the khanate of the 1260s.
+- **Records with a name only:** the United States, the Empire of Japan, the Republic of China, the Second Polish Republic, and the three
+  scripts above. The Republic of China has no Wikidata id here, because Wikidata cuts it in two.
+
+What the cases found in the borders dataset, none of it corrected here or reported to its makers yet:
+
+- Scotland is "Kingdom of Alba" to 1293 and "Kingdom of Scotland" to 1608, and then has no row: Edinburgh lies in none in 1650 and in
+  "Kingdom of England" in 1700. There is no Kingdom of Ireland. "Kingdom of Great Britain" runs from 1709 to 2024 and never becomes the
+  United Kingdom; its Wikidata id is the island's.
+- Germany's names change with its border rows and not its regimes (German Empire to 1919, Weimar Republic to 1935, Nazi Germany to 1944);
+  there is nothing for 1945–1948; "Federal Republic of Germany" ends in 1990 and "Federated Republic of Germany" begins in 1991 as another
+  polity.
+- Fifteen rows named "Golden Horde", for 1547–1695, lie in Mongolia and carry the Horde's Wikidata id; four named "Great Yuan", for 110
+  BCE–50 CE, lie in Ferghana and carry the Yuan dynasty's; "Mongol Khanate" carries the id of a disambiguation page.
+- "Yugoslavia" of 1919–1945 and the socialist federation of 1946–1991 carry one Wikidata id. Russia has no rows between 1922 and 1991,
+  and 1920–1921 is one row, "Republics of the Soviet Union".
+- The bracketed "(Holy Roman Empire)" begins in 922, where the sources read give 800 or 962.
+- 385 rows are relations between states (allegiance, alliance, vassalage, personal union), drawn as if they were states.
+
+### The conquest of Tenochtitlan (fifteenth slice)
+
+Written from the evidence of three agents, one for each side's sources and one for the city and its neighbours, each keeping its
+texts ([FIFTEENTH-SLICE.md](slices/FIFTEENTH-SLICE.md)): 25 new records, a group of two perspectives, 37 new sources. Every quote, 166
+of them, was found by script in the text it was read in, and Cortés's were held against the page images of the 1870 edition as well.
+Nothing was read twice by another reader, and nothing by a person. The translations in the notes are the agents' own.
+
+- **The tie between the calendars** (`people/calendars/tonalpohualli-anchor`, `xiuhpohualli-anchor`). 1 Coatl = 13 August 1521 is
+  Caso's, after Thompson; it rests on the fall's own double date, which therefore cannot test it, and Kirchhoff's denial is cited
+  against it as Caso reports it. The year 3 Calli from 2 February 1521 is Sahagún's, the only Julian new year a source read gives; the
+  arithmetic, 365 days with no leap day, is Caso's rule, and is code. Caso's book of 1967 and Tena's of 1987, where the arguments are
+  made at length, were not read: Tena is quoted through Piña Garza, Díaz Álvarez and Kruell.
+- **The entry's native dates** (`people/conquest/entry-into-tenochtitlan`). Book 12's 1 Ehecatl in the year 1 Acatl comes nearest the
+  Spanish 8 November 1519 nineteen days before it; the Anales de Tlatelolco's 8 Ehecatl, read only as Caso reports it, a day after.
+  Both are kept and set aside. Caso keeps the second, if the Mexica day ran from noon to noon.
+- **Toxcatl and the flight** (`people/conquest/toxcatl-massacre`, `noche-triste`). The 195 days from the entry to the killing are the
+  record's reading of Book 12's Nahuatl, the days of friendship ending with it; Sahagún's Spanish divides the 235 days otherwise.
+  Wikidata's 22 May 1520 rests on no source read. For the flight, Hassig's 30 June to 1 July 1520 is preferred, Book 12's 235 days
+  from the entry agree with it, and Bernal's printed 10 July is set aside, as Lockhart's note of 1844 has it.
+- **The war and the siege** (`people/conquest/conquest-of-mexico`, `siege-of-tenochtitlan`). The war from the sailing, 10 February
+  1519, is the record's choice, and the Triple Alliance's part in it is unsourced; Book 12's reckoning from Toxcatl is set aside
+  because the world cannot hold it with the war's parts. The siege from 30 May 1521, Cortés's seventy-five days, is preferred to
+  Bernal's 13 May.
+- **Tlatelolco** (`people/cities/tlatelolco`, `people/polities/tlatelolco`, `people/conquest/conquest-of-tlatelolco`). 1473 is
+  preferred to Ixtlilxóchitl's 1463, which his editor Chavero corrected, and the year 7 Calli he names sides with 1473. The town's
+  arising from Tenochtitlan is the tradition of a split, with Gómara and Jiménez cited against it. Of the tellings of Moquihuix's death,
+  the one Sahagún and the Codex Mendoza share is preferred, by rule more than by judgement.
+- **The city's people** (`people/cities/tenochtitlan`). Eight estimates, seven for 1519 and Chandler's for 1520, from 60,000 to 700,000, with Calnek's 150,000 to
+  200,000 preferred. Calnek, Sanders, Soustelle and Rojas were read only as Jiménez Martínez, Valero and Smith report them. The
+  Anonymous Conqueror's 60,000 is quoted in the Spanish: Saville's English of 1917 has 70,000, copied from Icazbalceta's misreport of
+  Prescott.
+- **The house** (`people/traditions/tenochtitlan-house-plot`). Calnek's model as Valero reports it, with Torquemada and Gómara; its
+  start is unsourced, and it is drawn over all of Central Mexico. Smith's measured houses of Morelos were scans with no text.
+- **Who held what.** Cortés's span is the dates of the letters read, 1520 to 1524; Bernal's the year he names, 1568; Tlatelolco's the
+  Digital Florentine Codex editors' 1555 to 1565. Tlaxcala is `subject-to` the Crown from the end of its war with Cortés, as Cortés has
+  it; through whom the expedition acted for the Crown is a note.
+- **Not reached:** the Anales de Tlatelolco, which have no public-domain transcription; Chimalpáhin; Caso's book of 1967 and his
+  article of 1939; Tena (1987); Thouvenot, Kruell and Acevedo's *Tiempos superpuestos* (2024), whose PDF answered 404; Sahagún's
+  revision of Book 12 of 1585; Calnek, Sanders, Soustelle, Gibson, Borah and Cook, Lombardo and Rojas themselves; Rojas's
+  *Cuantificaciones* (historiamexicana.colmex.mx answered 403); Battcock (2011) on whether the alliance was formal (revistas.inah.gob.mx
+  could not be reached); Smith's papers on his own site, which now asks for a sign-in (read in the Internet Archive's captures);
+  famsi.org (403), redalyc.org (502), the search of www.cervantesvirtual.com (403); Bernal's Guatemala manuscript, so the printed text's
+  dates were not held against it; Gayangos's edition of Cortés (1866), found and not fetched.
+
+What the case found in the borders dataset, none of it corrected here or reported to its makers yet:
+
+- "Aztec Triple Alliance" takes in Tlaxcala from 1450 to 1520, which it never ruled, and its first row, 1429–1439, leaves out
+  Tenochtitlan itself and Tlacopan. Its rows carry the Wikidata id of the Aztec Empire (Q2608489).
+- "Tenochtitlan" (1326–1428) lies east of the lake, between Texcoco and Tlaxcala, and takes in none of the Basin's towns, nor the city;
+  "Texcoco" (1202–1428) lies south of the lake, taking in Chalco and Xochimilco and not Texcoco. There is no Tlatelolco.
+- The Crown of Castile has no rows after 1515.
+
+The list of cities has one row for Mexico City, "Tenochtitlan" among its other names, from 1500 to 1975: 80,000 people in 1500 and
+1520, which is what the human landscape draws.
+
+And in Wikidata, looked up on 18 and 19 November 2026:
+
+- Tenochtitlan (Q13695) ends on 13 August 1521 and is replaced by Mexico City (Q1489), whose inception is both 1521 (preferred) and
+  1325. The Aztec Empire (Q2608489) and the Aztec Triple Alliance (Q794210) are two items for what the sources treat as one thing.
+- Tlatelolco (Q796925) is dissolved in 1473, though it went on as a tributary and as Santiago Tlatelolco; its inception of 1337 is
+  from English Wikipedia. Moquihuix (Q1647668) "replaces" Tlacateotl, where Sahagún and the Codex Mendoza put Quauhtlatoa between
+  them. Tlaxcala (Q614072) is dissolved in 1520, an end no source read gives.
+- La Noche Triste (Q1308854) has its coordinates in north-western Mexico, about 1,600 km from the city. The siege (Q593267) starts on
+  10 May 1521, Cortés's leaving Texcoco. The Cholula massacre (Q3297424) ends the day before it starts.
+- Bernal Díaz's English label (Q315795) has been vandalized; Cuauhtémoc (Q297050) has no label in English or Spanish; Cuitláhuac's
+  description (Q315628) gives his years as 1476–1638; Moctezuma II's death (Q141791) is on the Gregorian calendar model.
+- Villa Rica de la Vera Cruz, the town of 1519, has no item.
 
 ### Set 13: routes and trade
 

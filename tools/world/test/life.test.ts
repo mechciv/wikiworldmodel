@@ -17,7 +17,7 @@ import type { SceneFileV2 } from '../../../core/scene.ts';
 import { parsePoint, toMa, type TimePointInput } from '../../../core/time.ts';
 import type { FramesFile, Tileset } from '../../../core/tileset.ts';
 import { indexTree, layoutTree, type TreeFile } from '../../../core/tree.ts';
-import { CELL } from '../../../world/generators/life/scene/v5.ts';
+import { CELL } from '../../../world/generators/life/scene/v6.ts';
 import { FULL_BUDGET, SceneStream } from '../../../world/generators/life/stream.ts';
 import type { LandSnapshot, PbdbSnapshot } from '../src/pbdb.ts';
 import { pbdbNumber } from '../src/pbdb.ts';
@@ -286,6 +286,135 @@ describe('the atlas', () => {
     expect(list.length).toBeGreaterThan(5);
     const here = list.filter((e) => e.tier === TIER.here).map((e) => e.taxon.label);
     expect(here.some((l) => /Triceratops|Edmontosaurus|Tyrannosaurus|Thescelosaurus/.test(l)), here.join(', ')).toBe(true);
+  });
+
+  it('lists at a historical time only taxa whose rows reach it, dated to the stage and not far more loosely, recounted from the snapshot', () => {
+    // The Basin of Mexico in 1500 CE, where scenes once drew glyptodonts and a ground sloth among the houses: a stage that ran
+    // from the Chibanian to today took in the Pleistocene's rows.
+    const t = 1500;
+    const ageMa = toMa(t);
+    const basin: [number, number] = [19.36, -99.08];
+    const ref = index.bins.find((b) => t >= b.from && t <= b.to)!;
+    expect(ref.name).toBe('Holocene');
+    const bin = json<AtlasBin>(ref.file);
+    const older = toMa(bin.from);
+    const younger = toMa(bin.to);
+    expect(older).toBeCloseTo(0.0117, 6);
+    expect(younger).toBe(0);
+    const p = world.fields.find((f) => f.data?.as === 'community')!.params as { longest_span_in_stages: number; here_km: number; region_km: number };
+    const loosest = p.longest_span_in_stages * (older - younger);
+    const byNo = new Map(land.taxa.map((x) => [x[0], x]));
+    const rankOf = (no: number) => land.words[byNo.get(no)?.[2] ?? 0];
+    // The rows that reach the time, as a species is on a list as its genus: dated to a span that takes it in, and no longer
+    // than the stage allows.
+    const reaching = new Map<number, number[]>();
+    for (const [, site, taxon] of land.rows) {
+      const [, , , max, min] = land.sites[site];
+      if (max < ageMa || min > ageMa || max - min > loosest) continue;
+      for (let x = taxon, g = 0; x && g < 4; x = byNo.get(x)?.[3] ?? 0, g++) {
+        const l = reaching.get(x);
+        if (l) l.push(site);
+        else reaching.set(x, [site]);
+        if (!['species', 'subspecies', 'subgenus'].includes(rankOf(x))) break;
+      }
+    }
+    const plate = plateOfToday();
+    const km = (a: [number, number], b: [number, number]) => {
+      const ua = unitVector(a[0], a[1]);
+      const ub = unitVector(b[0], b[1]);
+      return Math.acos(Math.max(-1, Math.min(1, ua[0] * ub[0] + ua[1] * ub[1] + ua[2] * ub[2]))) * 6371;
+    };
+    const mid = toMa(bin.slice);
+    const where = new Map<number, [number, number] | null>();
+    const at = (site: number) => {
+      if (where.has(site)) return where.get(site)!;
+      const [, lat, lng] = land.sites[site];
+      const q = plate(lat, lng);
+      const out = q && model.reaches(q, mid) ? (toLatLon(rotate(model.total(q, mid), rotate(conj(model.total(q, 0)), unitVector(lat, lng)))) as [number, number]) : null;
+      where.set(site, out);
+      return out;
+    };
+    const keys = Object.keys(bin.nodes).map(Number);
+    const basinKey = atlasKeyOf(index.grid, ...basin);
+    const problems: string[] = [];
+    let checked = 0;
+    for (const key of [basinKey, ...keys.filter((_, i) => i % 9 === 0)]) {
+      const lat = 90 - (Math.floor(key / index.grid.nx) + 0.5) * index.grid.step;
+      const lon = -180 + ((key % index.grid.nx) + 0.5) * index.grid.step;
+      for (const e of atlasList(bin, index.grid, lat, lon)) {
+        if (e.tier === TIER.standin) {
+          // A stand-in is the clade of what the stage's rows hold elsewhere: it has none of its own.
+          if (!e.taxon.standin || e.taxon.rows !== 0) problems.push(`${e.taxon.label} at ${lat}, ${lon}: a stand-in with rows`);
+          continue;
+        }
+        // A scene hides a taxon while its rows in the stage do not reach the time shown (viewer/src/city/life.ts): one whose
+        // rows all end before 1500 CE is not drawn then.
+        if (e.taxon.span[1] > ageMa || e.taxon.span[0] < ageMa) continue;
+        // A patch is up to 4° across, and the graph 2° a step: that is the slack.
+        const reach = (e.tier === TIER.here ? p.here_km : p.region_km) + 900;
+        const near = (reaching.get(e.taxon.no) ?? []).some((s) => {
+          const q = at(s);
+          return !!q && km(q, [lat, lon]) <= reach;
+        });
+        if (!near) problems.push(`${e.taxon.label} at ${lat}, ${lon}, tier ${e.tier}: no row within reach reaches ${t} CE`);
+        checked++;
+      }
+    }
+    expect(problems.slice(0, 20)).toEqual([]);
+    expect(checked).toBeGreaterThan(100);
+    // The Basin has a list, and something on it is recorded: deer, rabbits and the like of the Holocene, not glyptodonts.
+    const list = atlasList(bin, index.grid, ...basin);
+    expect(list.filter((e) => e.tier !== TIER.standin).length).toBeGreaterThan(3);
+  });
+
+  it('draws nothing after its record says it died out: moa stand in New Zealand in 1300 CE, and are gone by 1500', () => {
+    const ref = index.bins.find((b) => 1500 >= b.from && 1500 <= b.to)!;
+    const bin = json<AtlasBin>(ref.file);
+    const stands = (span: [number, number], t: number) => span[0] >= toMa(t) && toMa(t) >= span[1];
+    const byNo = new Map(land.taxa.map((x) => [x[0], x]));
+    const adopted = new Map(world.entities.filter((e) => e.kind === 'taxon' && pbdbNumber(e) !== undefined).map((e) => [pbdbNumber(e)!, e.id]));
+    // When each record above a taxon says it died out, the earliest of them, as the build reads the records.
+    const endOf = (no: number): number | undefined => {
+      let out: number | undefined;
+      for (let x = no, g = 0; x && byNo.has(x) && g < 200; x = byNo.get(x)![3], g++) {
+        const id = adopted.get(x);
+        if (!id || !world.entity.get(id)!.claims.some((c) => c.prop === 'end' && c.value !== 'unknown')) continue;
+        const end = json<EntityRecord>(`records/${id}.json`).time.end.best;
+        if (end !== null && (out === undefined || end < out)) out = end;
+      }
+      return out;
+    };
+    const moaEnd = json<EntityRecord>('records/life/taxa/dinornithiformes.json').time.end.best!;
+    expect(moaEnd).toBeGreaterThan(1300);
+    expect(moaEnd).toBeLessThan(1500);
+    const moa = pbdbNumber(world.entity.get('life/taxa/dinornithiformes')!)!;
+    const isMoa = (no: number) => {
+      for (let x = no, g = 0; x && g < 200; x = byNo.get(x)?.[3] ?? 0, g++) if (x === moa) return true;
+      return false;
+    };
+    let moas = 0;
+    let ended = 0;
+    const ends = new Map<number, number | undefined>();
+    for (const key of Object.keys(bin.nodes).map(Number)) {
+      const lat = 90 - (Math.floor(key / index.grid.nx) + 0.5) * index.grid.step;
+      const lon = -180 + ((key % index.grid.nx) + 0.5) * index.grid.step;
+      for (const e of atlasList(bin, index.grid, lat, lon)) {
+        if (isMoa(e.taxon.no)) {
+          moas++;
+          expect(stands(e.taxon.span, 1300), `${e.taxon.label} at ${lat}, ${lon}`).toBe(true);
+          expect(stands(e.taxon.span, 1500), `${e.taxon.label} at ${lat}, ${lon}`).toBe(false);
+        }
+        // Anything whose record, or a clade's above it, gives an end, stops there: the American mastodon and the woolly
+        // mammoth among them, whatever a row of the Holocene says.
+        if (!ends.has(e.taxon.no)) ends.set(e.taxon.no, endOf(e.taxon.no));
+        const end = ends.get(e.taxon.no);
+        if (end === undefined) continue;
+        ended++;
+        expect(e.taxon.span[1], `${e.taxon.label} at ${lat}, ${lon}`).toBeGreaterThanOrEqual(toMa(end) - 1e-6);
+      }
+    }
+    expect(moas).toBeGreaterThan(0);
+    expect(ended).toBeGreaterThan(moas);
   });
 
   it('knows where to go to see a taxon, at a stage it lived in', () => {

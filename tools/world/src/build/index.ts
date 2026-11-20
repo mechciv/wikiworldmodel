@@ -9,9 +9,10 @@ import type { ClimateRule } from '../../../../core/climate.ts';
 import { decodeTile, encodeTile } from '../../../../core/container.ts';
 import { bytesPrint } from '../../../../core/fingerprint.ts';
 import { ladderCounts } from '../../../../core/ladder.ts';
+import { searchRows } from './searchrows.ts';
 import type { CoverageFile, OverlaysFile, PeriodRecord, PeriodsFile, SearchFile, SeriesFile } from '../../../../core/records.ts';
 import { bakeRotationModel, parseRot, PLATE_OFFSET, RotationModel } from '../../../../core/rotation-model.ts';
-import { fromMa, parseDuration, parsePoint, PRESENT_YEAR, toMa, type TimePointInput } from '../../../../core/time.ts';
+import { fromMa, parseDuration, parsePoint, PRESENT_YEAR, formatTime, toMa, type TimePointInput } from '../../../../core/time.ts';
 import type { Basis, Feature, FieldInfo, FieldKeyframe, FramesFile, GeneratorConstraint, SiteInfo, TileHeader, TileRef, Tileset } from '../../../../core/tileset.ts';
 import { GENERATOR as BIOME_TEXTURE, VERSION as BIOME_TEXTURE_VERSION, generateBiomeTexture, type BiomeTextureParams } from '../../../../world/generators/earth/biome/v1.ts';
 import { GENERATOR as CLOUDS, VERSION as CLOUDS_VERSION, generateClouds, type CloudParams } from '../../../../world/generators/earth/clouds/v1.ts';
@@ -37,6 +38,7 @@ import { ClaimIndex } from '../claimindex.ts';
 import { correctLand } from '../tables.ts';
 import { gridPlaces, lifeTierOf, seaTierOf, tierCounts, TIER_SPANS, type ResolveWorld } from '../../../../core/resolve.ts';
 import { coverageMatrix, type CoverageSource } from '../../../../core/coverage.ts';
+import { glance, landShares } from '../../../../core/glance.ts';
 import { spanOf, type PlanetFile } from '../../../../core/planet.ts';
 import { insideRow, politiesAt, type PolitiesFile } from '../../../../core/layers.ts';
 import type { AtlasBin } from '../../../../core/atlas.ts';
@@ -49,14 +51,14 @@ import type { PlaceWorld } from '../../../../world/generators/life/spec.ts';
 import { FEATURE_INDEX } from '../../../../core/featuretiles.ts';
 import { prominenceOf, tileFeatures } from './featuretiles.ts';
 import { buildIce, type IceBuilt } from './ice.ts';
-import { hazardLayer, peopleLayer, polityLayer, presentLayer } from './layers.ts';
+import { hazardLayer, peopleLayer, polityLayer, presentLayer, stateRowKey } from './layers.ts';
 import { buildLandscape, disagreement, farmingAgreement, landscapeResolve } from './landscape.ts';
 import { fieldLayers } from './fieldlayers.ts';
 import { buildAtlas } from './atlas.ts';
 import { buildSeaAtlas, type SeaOut, type SeaParams } from './sea.ts';
 import type { LandSnapshot } from '../pbdb.ts';
 import { buildScene, witnesses } from './scene.ts';
-import { features as buildFeatures, periods as buildPeriods, records as buildRecords, search as buildSearch, sourceRecord, type Solved } from './records.ts';
+import { features as buildFeatures, holdersOf, periods as buildPeriods, records as buildRecords, search as buildSearch, sourceRecord, type Solved } from './records.ts';
 import { planet as buildPlanet } from './planet.ts';
 import { series as buildSeries } from './series.ts';
 import { energyBalanceReport, RULES as ENERGY_BALANCE, seriesAt } from './energybalance.ts';
@@ -405,6 +407,11 @@ export async function runBuild(args: string[]): Promise<number> {
     groups: claimGroups(world),
     model,
   };
+  // Who held each perspective, and when, as the records that held it say.
+  for (const g of alternatives) for (const m of g.members) {
+    const held = holdersOf(solved, m.id);
+    if (held.length) m.heldBy = held;
+  }
 
   // 4. Gridded fields: elevation grids, and before them the plate model's blocks.
   const grids: GridField[] = [];
@@ -586,7 +593,6 @@ export async function runBuild(args: string[]): Promise<number> {
     ),
   };
   put('periods.json', stableStringify(periods));
-  put('search.json', stableStringify(found));
   put('series.json', stableStringify({ series: seriesList } satisfies SeriesFile));
   put('planet.json', stableStringify(buildPlanet(solved)));
   const territoryFile = await buildTerritory(solved, log);
@@ -834,8 +840,19 @@ export async function runBuild(args: string[]): Promise<number> {
   if (present) put('present.json', stableStringify(present));
   const hazards = await hazardLayer(world, fixesOf('hazards'));
   if (hazards) put('hazards.json', stableStringify(hazards));
-  const polities = await polityLayer(world, new Set(territoryFile.territories.flatMap((t) => t.claims.flatMap((c) => c.rows.map((r) => r.name)))), fixesOf('polities'));
+  // The rows each record draws as its territory, by row: the viewer leaves a row to its records while one holds.
+  const claimedRows = new Map<string, string[]>();
+  for (const t of territoryFile.territories) {
+    for (const key of new Set(t.claims.flatMap((c) => c.rows.map((r) => stateRowKey(r.name, r.from))))) claimedRows.set(key, [...(claimedRows.get(key) ?? []), t.subject]);
+  }
+  const polities = await polityLayer(world, claimedRows, fixesOf('polities'));
   if (polities) put('polities.json', stableStringify(polities));
+  // Search: the records, with every name they go by and where the rows that are rows of them were drawn, and the
+  // states of the dataset that no record adopts, each name while it runs on in time (docs/STRUCTURE.md section 3.1).
+  const statesField = world.fields.find((x) => x.data?.as === 'polities');
+  const adopted = new Map(world.overlays.filter((o) => o.same_as).map((o) => [o.row, o.same_as!]));
+  const gap = (statesField?.params as { search_gap_yr?: number } | undefined)?.search_gap_yr ?? Infinity;
+  put('search.json', stableStringify(searchRows(found, polities, statesField?.rows?.kind ?? 'polity', gap, adopted, territoryFile)));
   // Fields of points, lines and areas, the one way (docs/STRUCTURE.md section 3.6): the languages and the roads.
   const layers = await fieldLayers(world, claims);
   for (const [path, content] of layers.files) put(path, content);
@@ -959,6 +976,17 @@ export async function runBuild(args: string[]): Promise<number> {
   }
   coverageFile.matrix = coverageMatrix(resolveWorld, span, COVERAGE.columns, COVERAGE.step, COVERAGE.samples, sources);
   log(`coverage  ${COVERAGE.columns} columns × ${coverageFile.matrix.layers.length} layers over a ${COVERAGE.step}° grid in ${((Date.now() - started) / 1000).toFixed(1)} s`);
+  // How much is known, at a glance, from the same counts: the landing page's bars.
+  const now = fromMa(0);
+  coverageFile.glance = glance({
+    matrix: coverageFile.matrix,
+    until: now,
+    land: landShares(resolveWorld, coverageFile.matrix.columns, COVERAGE.step, now),
+    forms: coverageFile.forms,
+    ladder: coverageFile.claims.ladder,
+    formatTime,
+  });
+  log(`coverage  at a glance: ${coverageFile.glance.groups.flatMap((g) => g.rows).map((r) => `${r.label} ${r.share === null ? '–' : `${(r.share * 100).toFixed(1)}%`}`).join(', ')}`);
   put('coverage.json', stableStringify(coverageFile));
 
   // 9. Index and identity.

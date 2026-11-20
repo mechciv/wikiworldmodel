@@ -1,0 +1,21 @@
+id: src:bundestag-wd-2007-fortbestand
+type: publication
+kind: review
+citation: >-
+  Wissenschaftliche Dienste des Deutschen Bundestages (2007). Zum rechtlichen Fortbestand des
+  „Deutschen Reichs“. Dokumentation WD 3 – 292/07, completed 25 July 2007. Fachbereich WD 3,
+  Verfassung und Verwaltung.
+published: 2007
+title: Zum rechtlichen Fortbestand des „Deutschen Reichs“
+container: Wissenschaftliche Dienste des Deutschen Bundestages, Dokumentation WD 3 – 292/07
+url: https://www.bundestag.de/resource/blob/659208/bb1b8014f97412b4439d024bcdb79896/WD-3-292-07-pdf.pdf
+reliability: >-
+  A four-page note by the Bundestag's research service, which says of itself that it is not the
+  view of the Bundestag: it restates the Federal Constitutional Court's holding of 1973 and says
+  what unification changed, citing a handbook of constitutional law that was not read here. It is
+  the Federal Republic's side of the question, stated after the other side was gone.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from bundestag.de on 2026-11-17 as a PDF and read in full in German. The quotes were
+    found in the kept text by quote-check.

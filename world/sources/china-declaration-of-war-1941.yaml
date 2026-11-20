@@ -1,0 +1,25 @@
+id: src:china-declaration-of-war-1941
+type: document
+kind: act
+citation: >-
+  The Chinese Government's Declaration of War on Japan, and its Declaration of War on Germany
+  and Italy, issued by Lin Sen, President of the Chinese Republic, 9 December 1941. English text
+  in Contemporary China, vol. 1, no. 15, 15 December 1941.
+published: 1941
+title: China's Declaration of War against Japan, also against Germany and Italy
+container: Contemporary China, vol. 1, no. 15
+url: http://www.ibiblio.org/pha/policy/1941/1941-12-09b.html
+via: >-
+  The Pearl Harbor History Associates' collection of policy documents on ibiblio, which
+  transcribes the English text from Contemporary China with that journal's headnote.
+reliability: >-
+  The two declarations in the English in which China published them: evidence of the day China
+  declared war and on whom, and of how its government then described the four years before. The
+  sentence in brackets at the head, which dates the undeclared war from 7 July 1937, is the
+  journal's and not part of the declaration.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from ibiblio.org on 2026-11-17 over plain HTTP, since the site's certificate chain
+    did not verify from here, and read in full; the quotes were found in the kept text by
+    quote-check.

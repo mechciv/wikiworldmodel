@@ -1,0 +1,20 @@
+id: src:lemo-weimarer-republik
+type: publication
+kind: review
+citation: >-
+  Scriba, A. (2014). Die Weimarer Republik. LeMO, Lebendiges Museum Online. Berlin: Deutsches
+  Historisches Museum. As of 6 September 2014.
+authors:
+  - "Scriba, A."
+published: 2014
+title: Die Weimarer Republik
+container: LeMO, Lebendiges Museum Online, Deutsches Historisches Museum
+url: https://www.dhm.de/lemo/kapitel/weimarer-republik
+reliability: >-
+  A museum's overview of the republic of 1918 to 1933, without references: a reference work's
+  statement of when it ended.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from dhm.de on 2026-11-17 and read in full in German, with its author and date. The
+    quote was found in the kept text by quote-check.

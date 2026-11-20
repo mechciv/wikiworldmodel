@@ -1,0 +1,28 @@
+id: src:arbitration-commission-yugoslavia-opinions-1-3
+type: document
+kind: act
+citation: >-
+  Arbitration Commission of the Conference on Yugoslavia. Opinions Nos. 1 to 3 (Opinion No. 1
+  of 29 November 1991, published on 7 December 1991). Printed as the appendix to Pellet, A.
+  (1992). The Opinions of the Badinter Arbitration Committee: A Second Breath for the
+  Self-Determination of Peoples. European Journal of International Law 3(1), 178–185, at
+  182–185.
+published: 1992
+title: Opinions of the Arbitration Committee, Nos. 1 to 3
+container: European Journal of International Law 3(1)
+url: https://www.ejil.org/pdfs/3/1/1175.pdf
+via: >-
+  The journal's own PDF, an English version of the opinions with a machine-read text; the
+  journal calls the body the Arbitration Committee.
+reliability: >-
+  The opinions of the commission of five presidents of constitutional courts that the European
+  Community set up beside its peace conference on Yugoslavia, chaired by Robert Badinter. An
+  opinion is evidence of what the commission held and on what grounds; it was advice to the
+  conference, not a judgment that bound the republics.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from ejil.org on 2026-11-17. Opinion No. 1 was read whole (pp. 182–183), and the
+    openings of Opinions Nos. 2 and 3, which give its date. The machine-read text has slips
+    ("SDRY" for SFRY), so each quote is a run of the kept text that is whole, found by
+    quote-check.

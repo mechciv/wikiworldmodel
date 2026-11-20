@@ -1,0 +1,26 @@
+id: src:steele-meissner-2017-linear-b-to-linear-a
+type: publication
+kind: review
+citation: >-
+  Steele, P.M. & Meißner, T. (2017). From Linear B to Linear A: The problem of the backward projection of sound values. In Steele, P.M. (ed.),
+  Understanding Relations Between Scripts: The Aegean Writing Systems, pp. 93–110. Oxford and Philadelphia: Oxbow Books.
+authors:
+  - "Steele, P.M."
+  - "Meißner, T."
+published: 2017
+title: "From Linear B to Linear A: The problem of the backward projection of sound values"
+container: "Understanding Relations Between Scripts: The Aegean Writing Systems"
+doi: 10.17863/CAM.11325
+url: https://www.repository.cam.ac.uk/handle/1810/265228
+via: >-
+  The authors' accepted version, peer-reviewed, in Apollo, the University of Cambridge's repository; the DOI is the repository's, for that version. Its pages are
+  numbered "Chapter 6: 1" to "Chapter 6: 19" and not as the book's, so it is cited by section and by those pages.
+reliability: >-
+  A chapter by two specialists in the Aegean scripts, which argues that Linear A may be read with the sound values of Linear B. It states the present view of how the
+  two scripts are related, reports the older view and the doubts still in print, and says where uncertainty remains; the works it reports were not read.
+verified:
+  by: machine:claude-code
+  how: >-
+    The accepted version's PDF fetched from the repository on 17 November 2026 and read: sections 1 to 3 and the conclusion. Quotes found in its text layer by
+    quote-check. Title, authors, year, publisher and DOI are from the repository's record; the editor and the book's pages (93–110) from the catalogue of the German
+    Archaeological Institute (zenon.dainst.org, records 001517338 and 001497684). The published book was not seen.

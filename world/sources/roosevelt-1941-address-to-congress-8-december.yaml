@@ -1,0 +1,31 @@
+id: src:roosevelt-1941-address-to-congress-8-december
+type: document
+kind: eyewitness
+citation: >-
+  Roosevelt, F.D. Address by the President of the United States delivered before a joint
+  session of the two Houses of the Congress on 8 December 1941, requesting that the Congress
+  declare that a state of war has existed since 7 December 1941 between the United States and
+  the Japanese Empire. In Declarations of a State of War with Japan, Germany, and Italy, 77th
+  Congress, 1st Session, Senate Document No. 148. Washington: United States Government Printing
+  Office, 1941.
+authors:
+  - "Roosevelt, F.D."
+published: 1941
+title: Address by the President of the United States, 8 December 1941
+container: 77th Congress, 1st Session, Senate Document No. 148
+url: https://avalon.law.yale.edu/wwii/dec03.asp
+via: >-
+  The Avalon Project of the Lillian Goldman Law Library, Yale Law School, which transcribes
+  Senate Document No. 148 in parts; this is its part 3, the joint session.
+reliability: >-
+  The President's request to the Congress the day after the attack, as the Congress printed it:
+  evidence of the day from which the United States held itself to have been at war with Japan,
+  by Washington's calendar. It is the request, not the joint resolution that answered it the
+  same day.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from avalon.law.yale.edu on 2026-11-17: the document's title page and its parts 3
+    (the joint session and the address) and 4 (the Senate's proceedings of 8 and 11 December,
+    with the joint resolutions) read. The quotes were found in the kept text of part 3 by
+    quote-check.

@@ -1,0 +1,18 @@
+# A group of alternatives: its members exclude each other, and groups combine freely. A
+# claim belongs to the default picture unless it names an alternative (section 4.4).
+id: alt:conquest-accounts
+type: group
+title: Whose account of the conquest of Mexico
+description: >-
+  The conquest of Tenochtitlan, 1519–1521, is told by two sides in sources written down at different times and for
+  different ends. The conquerors told it in Cortés's letters to the emperor, written while the war went on (1520–1524)
+  and justifying him against the governor of Cuba, and in Bernal Díaz del Castillo's history, finished in 1568 and
+  written for the soldiers against the historians who gave Cortés all the glory. The Mexica told it to Bernardino de
+  Sahagún's Nahua students in Tlatelolco about 1555, in the Nahuatl account that became Book 12 of the Florentine
+  Codex (1575–77): a telling from Tlatelolco, which honours its warriors and blames Moctezuma and the Tenochca. The
+  two agree on much: the days of the entry, the return, the flight and the fall; who fought on which side; that
+  Moctezuma died in the Spaniards' hands. They differ on what happened at the feast of Toxcatl and on how Moctezuma
+  died. The default picture keeps what both say; each member holds one side's tellings of what they do not agree on.
+# A steward decision: what a build shows. Shown on a machine's proposal, until a person decides.
+show: [alt:conquest-accounts/conquerors, alt:conquest-accounts/mexica]
+default: null

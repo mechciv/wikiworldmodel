@@ -1,0 +1,124 @@
+id: people/rulers/james-vi-and-i
+kind: person
+summary: >-
+  King of Scots as James VI from 1567, and from 1603 also King of England and of Ireland as James
+  I: one man holding the crowns of kingdoms that stayed separate states, each with its own
+  parliament and law, until long after him. He styled himself King of Great Britain, a kingdom
+  that did not exist until 1707, and failed to get the union he wanted. His offices overlap, so
+  they are relations with their own spans and not phases of his life.
+author: machine:claude-code
+same_as: { wikidata: Q79972 }
+claims:
+  name:
+    prop: name
+    value: { en: James VI and I }
+    source:
+      ref: src:gardiner-1892-dnb-james-vi-and-i
+      loc: "s.v. James VI, vol. 29, p. 161"
+      quote: JAMES VI (1566–1625), king of Scotland, afterwards James I, king of England
+    note: Sixth of the name in Scotland and first in England; the two numbers joined are an editorial label.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in dnb-james-vi-and-i.txt (sha256 e4127dfc1918b22d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  start:
+    prop: start
+    value: 19 June 1566 CE
+    source:
+      ref: src:gardiner-1892-dnb-james-vi-and-i
+      loc: "s.v. James VI, vol. 29, p. 161"
+      quote: was born on 19 June 1566, in Edinburgh Castle
+    method: historical-account
+    note: A date before 1582, read as Julian without saying so; Scotland kept that calendar until 1752.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in dnb-james-vi-and-i.txt (sha256 e4127dfc1918b22d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  end-dnb:
+    prop: end
+    value: 27 March 1625 CE Julian
+    source:
+      - ref: src:gardiner-1892-dnb-james-vi-and-i
+        loc: "s.v. James VI, vol. 29, p. 180"
+        quote: On 5 March 1625 James was attacked by a tertian ague.
+      - ref: src:gardiner-1892-dnb-james-vi-and-i
+        loc: "s.v. James VI, vol. 29, p. 180"
+        quote: on 27 March he died at Theobalds
+      - ref: src:yorke-1911-britannica-charles-i
+        loc: "s.v. Charles I., vol. 5, p. 906"
+        quote: On the 27th of March 1625 Charles I. succeeded to the throne by the death of his father
+    method: historical-account
+    rank: preferred
+    note: >-
+      He died in England, which kept the Julian calendar, so the date names it: it is 6 April
+      1625 in the Gregorian. It falls two days after the English new year of 25 March, so the
+      year is 1625 in either reckoning. Preferred because the Dictionary of National Biography
+      tells the illness from its onset on 5 March to the death and the burial, and the
+      Britannica's article on his son agrees.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in dnb-james-vi-and-i.txt (sha256 e4127dfc1918b22d) and eb1911-charles-i.txt (sha256 b99b907c81f23240), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  end-britannica:
+    prop: end
+    value: 5 March 1625 CE Julian
+    source:
+      ref: src:britannica-1911-james-i
+      loc: "s.v. James I., vol. 15, p. 137"
+      quote: just before his death on the 5th of March 1625 at his favourite residence, Theobalds
+    method: historical-account
+    rank: deprecated
+    note: >-
+      A slip in the Britannica's life of James: 5 March is the day the Dictionary of National
+      Biography has him fall ill, and the same encyclopaedia's article on Charles I has Charles
+      succeed by his father's death on 27 March. Kept because a reader checking this record
+      against the Britannica will find it.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in eb1911-james-i.txt (sha256 27eb448f5081edab), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+relations:
+  king-of-scots:
+    rel: held-office
+    to: people/polities/kingdom-of-scotland
+    valid: { lo: 24 July 1567 CE, hi: { ref: people/rulers/james-vi-and-i, edge: end } }
+    source:
+      ref: src:gardiner-1892-dnb-james-vi-and-i
+      loc: "s.v. James VI, vol. 29, p. 161"
+      quote: On 24 July 1567 he became king by his mother's enforced abdication, and was crowned at Stirling on 29 July.
+    note: >-
+      King of Scots, as James VI, from the abdication of his mother, Mary, when he was a year
+      old, until his death: the span ends where his life does, whichever date of his death is
+      taken.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in dnb-james-vi-and-i.txt (sha256 e4127dfc1918b22d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  king-of-england:
+    rel: held-office
+    to: people/polities/kingdom-of-england
+    valid: { lo: 24 March 1603 CE Julian, hi: { ref: people/rulers/james-vi-and-i, edge: end } }
+    source:
+      - ref: src:gardiner-1892-dnb-james-vi-and-i
+        loc: "s.v. James VI, vol. 29, p. 168"
+        quote: At last, on 24 March 1603, Elizabeth died, and James was at once proclaimed in England by the title of James I, king of England, though he subsequently styled himself, without parliamentary authority, king of Great Britain.
+      - ref: src:calendar-new-style-act-1750
+        loc: preamble
+        quote: the legal supputation of the year of our Lord in England, according to which the year beginneth on the twenty-fifth day of March
+    note: >-
+      King of England, as James I, from the death of Elizabeth until his own. The day is Old
+      Style twice over. It is in the Julian calendar, so the date names it: 3 April 1603 in the
+      Gregorian. And England then began the year on 25 March, so to those who proclaimed him it
+      was the last day of 1602; the Dictionary of National Biography writes the year as begun
+      in January, which is how the time axis reads it, and that year is kept. A date can name
+      its calendar but not the day its year began.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in dnb-james-vi-and-i.txt (sha256 e4127dfc1918b22d) and calendar-new-style-act-1750.txt (sha256 6d528606040e466a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  king-of-ireland:
+    rel: held-office
+    to: people/polities/kingdom-of-ireland
+    valid: { lo: 24 March 1603 CE Julian, hi: { ref: people/rulers/james-vi-and-i, edge: end } }
+    source:
+      - ref: src:crown-of-ireland-act-1542
+        loc: "section I"
+        quote: The King’s highnesse, his heyres and successours, Kings of England, be alwayes Kings of Ireland
+      - ref: src:britannica-1911-james-i
+        loc: "s.v. James I., vol. 15, p. 136"
+        quote: JAMES I. (1566–1625), king of Great Britain and Ireland
+    note: >-
+      King of Ireland, a crown the Irish Act of Henry VIII's time joined to England's: whoever
+      was King of England was King of Ireland. So the span is that of his English kingship: its
+      first day is written out again, because a span's bound can name the start or end of a
+      record but not of another relation.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in crown-of-ireland-act-1542.txt (sha256 9d6c22a2407679d6) and eb1911-james-i.txt (sha256 27eb448f5081edab), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }

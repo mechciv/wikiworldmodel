@@ -1,0 +1,20 @@
+id: src:lemo-ns-regime
+type: publication
+kind: review
+citation: >-
+  Scriba, A. (2014). Das NS-Regime. LeMO, Lebendiges Museum Online. Berlin: Deutsches Historisches
+  Museum. As of 7 August 2014.
+authors:
+  - "Scriba, A."
+published: 2014
+title: Das NS-Regime
+container: LeMO, Lebendiges Museum Online, Deutsches Historisches Museum
+url: https://www.dhm.de/lemo/kapitel/ns-regime
+reliability: >-
+  A museum's overview of the National Socialist regime of 1933 to 1945, without references: a
+  reference work's statement of when it began.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from dhm.de on 2026-11-17 and read in full in German, with its author and date. The
+    quote was found in the kept text by quote-check.

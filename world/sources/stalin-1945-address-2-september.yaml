@@ -1,0 +1,25 @@
+id: src:stalin-1945-address-2-september
+type: document
+kind: eyewitness
+citation: >-
+  Сталин, И.В. Обращение к народу, 2 сентября 1945 года (Address to the people, 2 September
+  1945). Правда, 3 September 1945; in И. Сталин, О Великой Отечественной войне Советского Союза,
+  Москва, 1946.
+authors:
+  - "Stalin, I.V."
+published: 1945
+title: Обращение к народу, 2 сентября 1945 года
+url: https://ru.wikisource.org/wiki/%D0%9E%D0%B1%D1%80%D0%B0%D1%89%D0%B5%D0%BD%D0%B8%D0%B5_%D0%BA_%D0%BD%D0%B0%D1%80%D0%BE%D0%B4%D1%83_%28%D0%A1%D1%82%D0%B0%D0%BB%D0%B8%D0%BD%29
+via: >-
+  Russian Wikisource's transcription from the 1946 collection of Stalin's wartime speeches,
+  which notes that the address first appeared in Pravda of 3 September 1945.
+reliability: >-
+  The head of the Soviet Government speaking on the day Japan's surrender was signed: evidence
+  that the Soviet Union then took the signing as the end of the Second World War, in those
+  words. It is a victor's address, and its account of Japan's earlier wars is his own.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from ru.wikisource.org on 2026-11-17 and read in full in Russian, beside the English
+    of the Soviet Embassy's Information Bulletin as the Pearl Harbor History Associates'
+    collection gives it. The quotes were found in the kept Russian text by quote-check.

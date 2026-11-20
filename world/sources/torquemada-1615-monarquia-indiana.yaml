@@ -1,0 +1,33 @@
+id: src:torquemada-1615-monarquia-indiana
+type: publication
+kind: historian
+citation: >-
+  Torquemada, J. de. Monarquía indiana (first printed Seville, 1615; second edition Madrid, 1723).
+  Third edition (first UNAM edition), vol. I, México: Universidad Nacional Autónoma de México,
+  Instituto de Investigaciones Históricas, 1975 (Historiadores y Cronistas de Indias 5).
+authors: ["Torquemada, J. de"]
+published: 1975
+written: 1615 CE
+title: Monarquía indiana
+url: https://historicas.unam.mx/publicaciones/publicadigital/monarquia/mi_vol01.html
+via: >-
+  The UNAM edition's PDFs of single chapters, with a text layer (OCR-like, with errors such as
+  "feneci6" for "feneció"): book 2, chapters XII (miv1077), XXXIX (miv1104), LVIII (miv1123) and
+  LXXXII (miv1147); book 3, chapters XIV (miv1172) and XXIII (miv1183). The dates of the first two
+  printings are from the edition's "Advertencia" (miv1001).
+license: public-domain
+license_note: >-
+  Torquemada's text is in the public domain; UNAM allows non-profit reproduction of its digital
+  edition with citation of its source and address.
+reliability: >-
+  A Franciscan's history, written in Mexico from earlier chronicles (Gómara, Acosta, Herrera),
+  from painted and written native histories he had, and from his own inquiries, among them at
+  Tlatelolco; nearly a century after the conquest. He takes sides between sources and says so.
+verified:
+  by: machine:claude-code
+  how: >-
+    Each chapter PDF fetched on 2026-11-19 (UTC) and read; locators are book, chapter and the
+    edition's page. Quotes found by script in the kept texts city-torquemada-miv1077.txt,
+    city-torquemada-miv1104.txt, city-torquemada-miv1123.txt, city-torquemada-miv1147.txt,
+    city-torquemada-miv1172.txt and city-torquemada-miv1183.txt, each quote against the text of its
+    own chapter.

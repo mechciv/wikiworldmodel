@@ -1,0 +1,23 @@
+id: src:serbia-and-montenegro-constitutional-charter-2003
+type: document
+kind: act
+citation: >-
+  Constitutional Charter of the State Union of Serbia and Montenegro, adopted by the National
+  Assembly of the Republic of Serbia, the Assembly of the Republic of Montenegro and the
+  Federal Assembly; proclaimed 4 February 2003. English translation.
+published: 2003
+title: Constitutional Charter of the State Union of Serbia and Montenegro
+url: https://en.wikisource.org/wiki/Constitutional_Charter_of_Serbia_and_Montenegro
+via: >-
+  English Wikisource, an English translation whose maker the page does not name; the original
+  was not read.
+reliability: >-
+  The act that turned the Federal Republic of Yugoslavia into the state union of Serbia and
+  Montenegro: evidence of the union's name and of what it provided should a member leave. It is
+  read in a translation of unknown origin, and the text does not give the day it was
+  proclaimed; the depositary's notes and the Archives of Yugoslavia give 4 February 2003.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from en.wikisource.org on 2026-11-17. The preamble, Articles 1 and 2, Article 60
+    and Articles 63 and 64 were read; the quotes were found in the kept text by quote-check.

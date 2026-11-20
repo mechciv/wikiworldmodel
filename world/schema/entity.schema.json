@@ -25,7 +25,13 @@
         "properties": {
           "id": { "$ref": "defs.json#/$defs/key" },
           "label": { "type": "string" },
-          "gap": { "type": "boolean", "description": "A stretch of the lifetime whose state is unknown" }
+          "gap": { "type": "boolean", "description": "A stretch of the lifetime whose state is unknown" },
+          "same_as": {
+            "description": "External ids of this phase, by scheme, where another database has an item for the state and none for the whole: the Roman Republic, where the record is the Roman state",
+            "type": "object",
+            "propertyNames": { "pattern": "^[a-z][a-z0-9-]*$" },
+            "additionalProperties": { "type": ["string", "integer"] }
+          }
         },
         "additionalProperties": false
       }
@@ -51,7 +57,7 @@
         "prop": { "type": "string" },
         "value": {},
         "method": { "type": "string" },
-        "subject": true, "valid": true, "source": true, "unsourced": true, "confidence": true, "basis": true,
+        "subject": true, "valid": true, "source": true, "against": true, "unsourced": true, "confidence": true, "basis": true,
         "alt": true, "author": true, "status": true, "rank": true, "checked": true, "note": true
       },
       "additionalProperties": false
@@ -64,7 +70,7 @@
         "rel": { "type": "string" },
         "to": { "$ref": "defs.json#/$defs/ref" },
         "lag": { "$ref": "defs.json#/$defs/lag" },
-        "subject": true, "valid": true, "source": true, "unsourced": true, "confidence": true, "basis": true,
+        "subject": true, "valid": true, "source": true, "against": true, "unsourced": true, "confidence": true, "basis": true,
         "alt": true, "author": true, "status": true, "rank": true, "checked": true, "note": true
       },
       "additionalProperties": false

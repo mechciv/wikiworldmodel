@@ -38,6 +38,8 @@ claims:
       ref: src:fhw-crete-writing
       loc: page text
       quote: The interpretation of Linear B by M. Ventris and J. Chadwick in 1952 proved that the language of Mycenaean Greece was the Greek language
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-fhw-crete-writing.txt (sha256 8faf14a171f87fc6), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
   location:
     prop: location
     value: { lat: 35.297847, lon: 25.163106, frame: frame:earth/present-day }
@@ -58,3 +60,24 @@ relations:
       ref: src:tomas-2013-saving-on-clay
       loc: section 9.3
       quote: "The earliest are c.650 tablets from the Room of the Chariot Tablets at Knossos (hereafter RCT), dated to LM II or early LM IIIA1 (Driessen 1990: 117)."
+  from-linear-a:
+    rel: arose-from
+    to: people/writing/linear-a
+    source:
+      - ref: src:steele-meissner-2017-linear-b-to-linear-a
+        loc: section 2 (accepted version, p. 3)
+        quote: it is abundantly clear that essentially Linear B was adapted out of Linear A and nothing else
+      - ref: src:steele-meissner-2017-linear-b-to-linear-a
+        loc: section 2 (accepted version, p. 4)
+        quote: this figure has risen to about 64 out of 89, giving a figure of 72%
+      - ref: src:fhw-crete-writing
+        loc: page text
+        quote: Linear B resulted from Linear A
+    note: >-
+      An adaptation, made to write Greek. About 64 of 89 signs are now counted as shared by the two scripts, and some of Linear B's were invented for Greek. How far the sounds came over
+      with the shapes is argued: Steele and Meißner hold that Linear A may in principle, and as an approximation, be read with Linear B's values, though the sounds must have been
+      realigned to a degree that cannot now be reckoned, and they report doubts still in print (Zadka 2010) and Bennet's call for great caution (2008). They put to rest an older view,
+      that the two came independently out of a lost Proto-Linear script: Linear A is attested hundreds of years earlier, and falls out of use soon after Linear B appears. The works
+      they report were not read.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scripts-steele-meissner-2017-linear-b-to-linear-a.txt (sha256 c3a39d58c5dd6644) and scripts-fhw-crete-writing.txt (sha256 8faf14a171f87fc6), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }

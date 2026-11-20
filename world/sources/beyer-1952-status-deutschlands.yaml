@@ -1,0 +1,27 @@
+id: src:beyer-1952-status-deutschlands
+type: publication
+kind: review
+citation: >-
+  Beyer, W.R. (1952). Zum gegenwärtigen völkerrechtlichen Status Deutschlands. Neue Justiz 1952,
+  pp. 535 ff., with a note by the journal's editors (Die Redaktion) at its head.
+authors:
+  - "Beyer, W.R."
+published: 1952
+title: Zum gegenwärtigen völkerrechtlichen Status Deutschlands
+container: Neue Justiz
+url: https://www.gvoon.de/art/dokumente/1952/zeitschrift-neue-justiz-nj-ddr-1952/pdf/zeitschrift-neue-justiz-nj-ddr-1952-seite_535.pdf
+via: >-
+  gvoon.de, which gives the journal's volume of 1952 page by page as PDFs set from an optical
+  reading of the print. The text taken from the PDF comes out of reading order within many lines,
+  so only passages that stand whole in the kept text are quoted.
+reliability: >-
+  An article by a lawyer from Munich in the Democratic Republic's law journal, with the editors'
+  reservations before it: a report, made at the time, of what the courts of the Democratic
+  Republic and of the Federal Republic then held about the German Reich, with the cases it cites.
+  Only its first page was read, so its own argument is not cited.
+verified:
+  by: machine:claude-code
+  how: >-
+    Page 535 was fetched from gvoon.de on 2026-11-17 and read in German, as a page image and as
+    text; the article goes on after it. The quotes were found in the kept text by quote-check; the
+    words were also read on the page image.

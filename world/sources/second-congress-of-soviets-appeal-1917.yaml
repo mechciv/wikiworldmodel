@@ -1,0 +1,27 @@
+id: src:second-congress-of-soviets-appeal-1917
+type: document
+kind: act
+citation: >-
+  Second All-Russian Congress of Soviets of Workers' and Soldiers' Deputies. Appeal to the
+  workers, soldiers and peasants on the victory of the revolution and its immediate tasks
+  (Рабочим, солдатам и крестьянам!), 25 October (7 November) 1917. In: Декреты Советской
+  власти, vol. I. Moscow: Государственное издательство политической литературы, 1957, pp. 8–9.
+published: 1957
+title: Рабочим, солдатам и крестьянам!
+container: Декреты Советской власти, vol. I (Moscow, 1957)
+url: http://www.hist.msu.ru/ER/Etext/DEKRET/IIsiezd.htm
+via: >-
+  The electronic library of the Faculty of History of Moscow State University, which says its
+  text was checked against the 1957 edition and marks that edition's pages.
+reliability: >-
+  The act by which the congress of Soviets took power: evidence of what it declared, in its own
+  words. The day is the edition's heading, which gives it in both styles, the Old first; the
+  text carries no date. It names no state: Russia was declared a republic of Soviets in January
+  1918, and the constitution of July 1918 gives the republic its name.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from hist.msu.ru on 2026-11-17 and read in full in Russian; compared with Russian
+    Wikisource's transcription of the same edition, which has the same wording and gives the day
+    as 25 October (7 November) 1917 as well. The quotes were found in the kept text by
+    quote-check.

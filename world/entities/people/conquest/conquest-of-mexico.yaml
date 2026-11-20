@@ -1,0 +1,177 @@
+id: people/conquest/conquest-of-mexico
+kind: event/war
+summary: >-
+  The war in which Hernán Cortés's company and its native allies, Tlaxcala first and then others the Triple Alliance
+  had ruled or fought, overthrew the Triple Alliance and took Tenochtitlan, from 1519 to the fall of the city on 13
+  August 1521. When it began depends on what it is taken to be: the Spanish sources and Wikidata count the conquest
+  from the expedition's sailing from Cuba in February 1519, while the Mexica account of Book 12 counts the Spaniards
+  friends for 195 days in the city and enemies only from the killing at the feast of Toxcatl in May 1520. Its usual
+  name is itself a reading: historians since have written of a war of the Spaniards and their native allies, who did
+  most of the fighting, against an alliance of city-states.
+author: machine:claude-code
+same_as: { wikidata: Q828435 }
+claims:
+  name:
+    prop: name
+    value: { en: Spanish conquest of the Aztec Empire }
+    unsourced: >-
+      An editorial label, Wikidata's English one; in Spanish, la conquista de México. Both its halves are readings:
+      the Spaniards fought beside tens of thousands of native allies, and what they overthrew the sources call the
+      three heads of the empire, or the Triple Alliance (people/polities/triple-alliance).
+  start-sailing:
+    prop: start
+    value: 10 February 1519 CE
+    source:
+      ref: src:bernal-diaz-verdadera-historia
+      loc: "cap. XXV"
+      quote: y en 10 dias del mes de Febrero, año de 1519, despues de haber oido Misa, nos hicimos á la vela con nueve navíos por la banda del Sur
+    method: historical-account
+    rank: preferred
+    note: >-
+      Bernal Díaz: on 10 February 1519, after Mass, we set sail with nine ships along the south side of Cuba. The
+      conquest counted from the expedition that made it, as the Spanish sources tell it and as Wikidata dates it
+      (February 1519). Preferred because the entry into the city, Moctezuma held captive from November 1519, and the
+      war with Tlaxcala are acts of the same enterprise, and nothing the Mexica sources say denies that they were.
+      The fleet landed at San Juan de Ulúa on Good Friday 1519 (Bernal, cap. XXXVIII), a day the sources give by its
+      feast and which is not converted here.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in es-bernal-diaz-verdadera-historia.txt (sha256 fabaae2d6b1a8c58), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  start-toxcatl:
+    prop: start
+    value: { ref: people/conquest/toxcatl-massacre }
+    source:
+      - ref: src:florentine-codex-book-12
+        loc: "Book 12, chap. 27, fol. 51r, Nahuatl (Anderson and Dibble's transcription)"
+        quote: "Auh injc mocempoa in jzqujlhujtique matlacpoalli oçe, on caxtolli: auh in tocnjoan catca chicunapoalilhujtl on caxtolli. Auh in toiaovan catca vmpoalilhujtl"
+      - ref: src:florentine-codex-book-12
+        loc: "Book 12, chap. 20, heading, fol. 32v, Nahuatl (Lockhart's transcription)"
+        quote: vncā mitoa in quenin Espanoles quinmictique, quimixtlatique in Mexica, in quilhuiquixtiliaia Vitzilobuchtli in vncā mitoaia Teuitoalco.
+    method: historical-account
+    rank: deprecated
+    note: >-
+      The war counted from when the Spaniards became enemies, as the Mexica account counts it: they were our friends
+      for 195 days and our enemies for forty, and the friendship ended where the Spaniards killed the Mexica at the
+      feast of Huitzilopochtli. On this reckoning the war with Tlaxcala and the entry belong to an expedition that
+      was not yet a war with Tenochtitlan. Set aside because the world cannot hold it, and not because a source
+      rejects it: a competing claim moves the start and carries nothing with it, so under it the entry and the war
+      with Tlaxcala are still parts of the war, before its start, and the world does not hold. Nor can a perspective
+      hold it, since an alternative can add relations and never take one away. It is the twelfth slice's limitation
+      of the 1937 start of the Second World War, met again.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in na-fc12-getty.txt (sha256 9a864988595f9f1f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  end:
+    prop: end
+    value: { ref: people/conquest/fall-of-tenochtitlan }
+    source:
+      - ref: src:cortes-1522-third-letter
+        loc: "p. 409 (scan 420)"
+        quote: nuestro Señor dar conclusion mártes, dia de San Hipólito, que fueron 13 de Agosto
+      - ref: src:florentine-codex-book-12
+        loc: "Book 12, chap. 40, fol. 83r, Spanish (Lockhart's transcription)"
+        quote: "Rendieronse los mexicanos, y despartiose la guerra en la cuenta de los años, que se dize tres casas, y ē la cuenta de los dias: en el signo que se llama Ce coatl."
+    method: documentary
+    note: >-
+      Both sides end the war with the fall of the city: Cortés, the war God was pleased to end on St Hippolytus's day;
+      Sahagún's Spanish of Book 12, the Mexica surrendered and the war ended on One Serpent in the year Three Houses.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in es-cortes-1522-third-letter.txt (sha256 b72ff8bf42100af3) and na-fc12-getty.txt (sha256 9a864988595f9f1f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+relations:
+  expedition:
+    rel: participant
+    to: people/organizations/cortes-expedition
+    source:
+      ref: src:cortes-1522-third-letter
+      loc: "p. 318 (scan 329)"
+      quote: á 28 de Abril del dicho año, fice alarde de toda la gente, y hallé ochenta y seis de caballo, y ciento y diez y ocho ballesteros y escopeteros, y setecientos y tantos peones
+    note: >-
+      On the Spanish side, from its sailing to the fall. At the muster before the siege Cortés counted 86 horse, 118
+      crossbowmen and musketeers and seven hundred and some foot; it had sailed with 508 soldiers by Bernal's count.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in es-cortes-1522-third-letter.txt (sha256 b72ff8bf42100af3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  tenochtitlan:
+    rel: participant
+    to: people/polities/tenochtitlan
+    source:
+      ref: src:cortes-1522-third-letter
+      loc: "p. 408 (scan 419)"
+      quote: y saltaron de presto y prendiéronle á él y á aquel Guautimoucin
+    note: >-
+      Against the Spaniards: the head of the Triple Alliance, whose ruler Cuauhtemoc was taken at the end, and whose
+      people held out with the Tlatelolca in Tlatelolco.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in es-cortes-1522-third-letter.txt (sha256 b72ff8bf42100af3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  tlatelolco:
+    rel: participant
+    to: people/polities/tlatelolco
+    valid: { lo: { ref: people/conquest/toxcatl-massacre, edge: start } }
+    source:
+      - ref: src:florentine-codex-book-12
+        loc: "Book 12, chap. 32, fol. 59r, Nahuatl (Lockhart's transcription)"
+        quote: nimā iquac in quicauhque in imaltepeuh ça cemilhuitl. Auh in tlatilulca ie ne vmpa itztivi in tenuchtitlan in micalizque.
+      - ref: src:florentine-codex-book-12
+        loc: "Book 12, chap. 32, fol. 59r, Nahuatl (Lockhart's transcription)"
+        quote: iehica ca in tlatilulca cenca mochicauhque
+    note: >-
+      Against the Spaniards, from the rising in the city: when the Tenochca left their city in a single day, the
+      Tlatelolca went over to Tenochtitlan to fight, and Alvarado could do nothing because the Tlatelolca fought very
+      hard. Their governor Itzquauhtzin died with Moctezuma (people/conquest/death-of-moctezuma).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in na-fc12-getty.txt (sha256 9a864988595f9f1f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  triple-alliance:
+    rel: participant
+    to: people/polities/triple-alliance
+    unsourced: >-
+      The alliance as the side the war was fought against, as Wikidata and historians frame it; no source read here
+      names the alliance as the enemy. Its members took part each in its own way: Tenochtitlan to the end; Texcoco
+      divided, its lord of the Mexica party in 1520 and its next lord and his brother Ixtlilxochitl with Cortés in 1521;
+      Tlacopan, whose lord was taken with Cuauhtemoc.
+  tlaxcala-against:
+    rel: participant
+    to: people/polities/tlaxcala
+    valid: { lo: { ref: people/conquest/war-with-tlaxcala, edge: start }, hi: { ref: people/conquest/war-with-tlaxcala, edge: end } }
+    source:
+      ref: src:bernal-diaz-verdadera-historia
+      loc: "cap. LXXI"
+      quote: los cuales son sus enemigos mortales de tiempos muy antiguos
+    note: >-
+      Against the Spaniards, in the battles of September 1519, before the peace: the Tlaxcalan envoys told Cortés they
+      had fought because they took the Spaniards for friends of the Mexica, who were their mortal enemies from very
+      ancient times. The same state, on the other side for the rest of the war: the relation below. Which side a
+      participant was on is a note; a state that changed sides takes part twice.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in es-bernal-diaz-verdadera-historia.txt (sha256 fabaae2d6b1a8c58), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  tlaxcala-with:
+    rel: participant
+    to: people/polities/tlaxcala
+    valid: { lo: { ref: people/conquest/war-with-tlaxcala, edge: end }, hi: { ref: people/conquest/conquest-of-mexico, edge: end } }
+    source:
+      - ref: src:cortes-1522-third-letter
+        loc: "p. 320 (scan 331)"
+        quote: Y segun la cuenta que los capitanes nos dieron, pasaban de cincuenta mil hombres de guerra
+      - ref: src:florentine-codex-book-12
+        loc: "Book 12, chap. 24, fol. 41r, Nahuatl (Lockhart's transcription)"
+        quote: Auh in ovaliovac in oacic ioalnepantla. nimā ie ic quiça in Españoles
+    note: >-
+      With the Spaniards, from the peace of September 1519 to the fall: the Tlaxcalans went out with them on the night
+      of the flight (Book 12, chap. 24), and came to the siege more than fifty thousand men of war by their captains'
+      count (Cortés), eight thousand to each of two garrisons by Bernal's (cap. CL).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in es-cortes-1522-third-letter.txt (sha256 b72ff8bf42100af3) and na-fc12-getty.txt (sha256 9a864988595f9f1f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  texcoco-with:
+    rel: participant
+    to: people/polities/texcoco
+    valid: { lo: { ref: people/conquest/siege-of-tenochtitlan, edge: start }, hi: { ref: people/conquest/siege-of-tenochtitlan, edge: end } }
+    source:
+      - ref: src:cortes-1522-third-letter
+        loc: "p. 342 (scan 353)"
+        quote: E á uno dellos, que se llama Istrisuchil, que es de edad de veinte y tres ó veinte y cuatro años, muy esforzado, amado y temido de todos, envióle por capitan, y llegó al real de la calzada con más de treinta mil hombres de guerra
+      - ref: src:ixtlilxochitl-1892-historia-chichimeca
+        loc: "ch. XCI, p. 413"
+        quote: se vino á la ciudad de Tetzcuco, sólo á fin de oponerse y favorecer á Cortés
+    note: >-
+      With the Spaniards in the siege: don Hernando, lord of Texcoco by Cortés's grant, sent his brother Ixtlilxochitl
+      (Cortés's Istrisuchil) with more than thirty thousand men. Texcoco was a member of the Triple Alliance, and in
+      1520 its lord Coanacochtzin was of the Mexica party (Ixtlilxóchitl, ch. XCI, p. 412): a member of one side that
+      fought on the other, which a member-of with a span and a participant with a span can say only in two places.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in es-cortes-1522-third-letter.txt (sha256 b72ff8bf42100af3) and city-ixtlilxochitl-1892-tomo2.txt (sha256 5886f18c08b1f94b), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }

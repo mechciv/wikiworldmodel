@@ -68,6 +68,38 @@ kinds:
         label: Conquest
         description: The capture of a city or the fall of a state to another, on the day it fell.
         moment: true
+      massacre:
+        label: Massacre
+        description: >-
+          The killing of many people who were not fighting, or could not, by armed men, on a day. Whether a killing
+          was a massacre, or a battle against a rising, is often what the sides dispute: a record has one kind in
+          every picture, which takes the word most historians now use, and the sides' accounts are its claims.
+        moment: true
+      war:
+        label: War
+        description: >-
+          A war or another armed conflict, from its outbreak to its end. When it began and when it ended are often
+          disputed, by a day or by years, and are competing claims. Its campaigns and battles are part of it, and
+          so may another war be, for the years it was; the states that fought in it take part in it.
+      campaign:
+        label: Campaign
+        description: >-
+          A campaign, an operation or a battle that lasted weeks or months: a part of a war with a beginning and
+          an end of its own. A battle fought in a day or two is a moment.
+      treaty:
+        label: Treaty
+        description: >-
+          An agreement between states, such as a treaty, an armistice, a surrender or an act of union, on the day
+          it was signed. Where the day it took effect is the one that matters, the claim's note says so.
+        moment: true
+      epoch:
+        label: Day that anchors a calendar
+        description: >-
+          A day that fixes where a calendar meets ours: the day a count of days counts from, or, for a calendar of
+          cycles, a day whose name in the cycle the sources give. Which day of ours it was is a correlation, argued
+          from evidence and often contested: the competing claims of its date are the correlations, and every date
+          written in that calendar follows the one chosen.
+        moment: true
       dispersal:
         label: Dispersal
         description: >-
@@ -249,6 +281,21 @@ kinds:
     description: >-
       A state or other political unit, from its founding to its end. Its phases are its forms
       of government, such as a kingdom that became a republic; its territory is a claim.
+    children:
+      alliance:
+        label: Alliance
+        description: >-
+          States that bound themselves to act together, in war or in rule, and are named as one: a league, a
+          confederation, an alliance. Its members are member-of it, each for the span it was one, and it fights in a
+          war as one participant. Where it also ruled land, as an alliance whose members took tribute together did,
+          its territory is a claim, as any polity's is. Whether such a thing was an alliance or an empire is often
+          disputed; the record's kind takes the sources' word for it, and its summary says what else it is called.
+  organization:
+    label: Organization
+    description: >-
+      A body of people that acted as one, under a head or rules of its own, and was not a state: an expedition or an
+      army, a company, a council, an order. It may act in a state's name, and whose name, by whose authority and from
+      when is often what is disputed: `subject-to` says it, as for a vassal.
   person:
     label: Person
     description: >-

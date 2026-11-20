@@ -16,7 +16,8 @@ import type { LocalView } from './view.ts';
 const FINE_DISTANCE = 620;
 /** Finely drawn cells kept, once out of range, before the oldest is let go. */
 const FINE_BUDGET_BYTES = 900e6;
-const CONCURRENT = 3;
+/** How far the eye goes before the worker is told, for which cells to make first. */
+const EYE_STEP = 50;
 
 export interface Cell {
   key: number;
@@ -56,6 +57,8 @@ export abstract class CellScene {
   protected serial = 0;
   protected fineBytes = 0;
   protected queue: { key: number; detail: number }[] = [];
+  /** where the worker was last told the eye is */
+  protected eyeTold: [number, number] | null = null;
   onChange: () => void = () => {};
   /** every cell has its coarse mesh, and every near one its fine mesh (in the fast way, none) */
   get settled(): boolean {
@@ -98,8 +101,9 @@ export abstract class CellScene {
     this.onChange();
   }
 
+  /** Ask the worker for every cell wanted: it makes them in its own order, the nearest first (worker.ts). */
   protected pump(): void {
-    while (this.inflight < CONCURRENT && this.queue.length) {
+    while (this.queue.length) {
       const q = this.queue.shift()!;
       this.inflight++;
       this.worker!.postMessage({ type: 'cell', key: q.key, detail: q.detail, serial: ++this.serial });
@@ -110,6 +114,11 @@ export abstract class CellScene {
   update(v: LocalView): void {
     if (!this.ready) return;
     this.frame++;
+    const told = this.eyeTold;
+    if (!told || Math.hypot(v.eye[0] - told[0], v.eye[1] - told[1]) > EYE_STEP) {
+      this.eyeTold = [v.eye[0], v.eye[1]];
+      this.worker!.postMessage({ type: 'eye', at: this.eyeTold });
+    }
     const want: { key: number; detail: number; d: number }[] = [];
     for (const c of this.cells.values()) {
       const cx = (c.box[0] + c.box[2]) / 2;
@@ -185,7 +194,7 @@ export abstract class CellScene {
   }
 
   /** Draw a frame. */
-  render(v: LocalView, sun: V3, time: number, evidence: boolean, alpha: number, solid: boolean, outW: number, outH: number): void {
+  render(v: LocalView, sun: V3, time: number, evidence: boolean, alpha: number, solid: boolean, outW: number, outH: number, clock = 0): void {
     if (!this.ready) return;
     this.update(v);
     const f: CityFrame = {
@@ -204,6 +213,7 @@ export abstract class CellScene {
       alpha,
       solid,
       clearance: v.clearance,
+      clock,
       width: outW,
       height: outH,
     };

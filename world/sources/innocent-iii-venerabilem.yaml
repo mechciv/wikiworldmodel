@@ -1,0 +1,28 @@
+id: src:innocent-iii-venerabilem
+type: document
+kind: act
+citation: >-
+  Innocent III, decretal Venerabilem, addressed to the duke of Zähringen (Duci Caringiae), as
+  chapter 34 of title 6, De electione et electi potestate, of book 1 of the Decretals of Gregory
+  IX, in Corpus Iuris Canonici, pars secunda: Decretalium collectiones, ed. E. L. Richter and
+  E. Friedberg (Leipzig, 1881).
+published: 1881
+written: 1202 CE
+title: Venerabilem
+url: https://www.tha.de/~harsch/Chronologia/Lspost13/GregoriusIX/gre_1t06.html
+via: >-
+  Bibliotheca Augustana (Hochschule Augsburg), which gives the text of Richter and Friedberg's
+  edition in a digital version by Angus Graham.
+reliability: >-
+  The pope's ruling on the disputed election of a German king, which became a chapter of the
+  canon law. It is evidence of what the papacy held in 1202 about how the empire came to the
+  Germans, in its own words, and not of what was done or meant in 800.
+verified:
+  by: machine:claude-code
+  how: >-
+    Title 6 of book 1 fetched on 2026-11-17 (the address redirects from hs-augsburg.de) and
+    chapter 34 read whole; the edition is named on the work's index page there
+    (gre_0000.html), fetched the same day. The year 1202 is the one Latin Wikisource's copy of
+    the letter (https://la.wikisource.org/wiki/Venerabilem, of an edition it does not name)
+    gives; that copy has "in persona" where Friedberg's text has "in personam". The quotation
+    was found in the kept Augustana text by quote-check.

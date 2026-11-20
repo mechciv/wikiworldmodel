@@ -25,6 +25,13 @@ properties:
     description: >-
       A name, with its language. `valid` says when the name was in use; the viewer labels a
       thing by the name in use at the time shown, or by today's name where it had none.
+  official_name:
+    type: text
+    interp: step
+    description: >-
+      The name a state or a body gave itself in its laws, in full, with the time it held it (`valid`). The label on
+      the map is the `name`, the short name people use: a state that restyled itself keeps its `name`, and its
+      official names follow one another.
   date:
     type: time
     moment: true
@@ -40,6 +47,14 @@ properties:
     moment: true
     applies_to: [lasting]
     description: When an entity or phase ended. With no end claim and nothing implying one, it still holds.
+  end_before:
+    type: time
+    moment: true
+    applies_to: [lasting]
+    description: >-
+      An entity or phase had ended by this time (a terminus ante quem for its end): a resolution that says a state
+      has ceased to exist, a traveller who found a city in ruins. It is a bound and not a date: it holds beside
+      whatever the end claims say, in every picture, and does not compete with them.
   earlier_than:
     type: time
     moment: true
@@ -50,6 +65,36 @@ properties:
     moment: true
     applies_to: [moments]
     description: A moment happened after this time (a terminus post quem).
+  calendar:
+    type: string
+    applies_to: [event/epoch]
+    values:
+      long-count: >-
+        The Long Count of Mesoamerica, best known from Maya inscriptions, which names a day by how many days it is
+        after its zero day, in five places: b'ak'tun, k'atun, tun, winal and k'in. Written 9.12.11.5.18 Long Count.
+        The inscriptions write the zero day itself as 13.0.0.0.0, the end of an era before, and date the time
+        before it in that era: such a date is written 12.19.13.4.0 Long Count of the era before.
+      tonalpohualli: >-
+        The Mexica count of 260 days, which named each day by a number from 1 to 13 and one of twenty signs, both
+        advancing a day at a time, so that a name came round every 260 days. Written 1 Coatl. A record that anchors
+        it is a day whose name in the count the sources give.
+      xiuhpohualli: >-
+        The Mexica count of years of 365 days, which named each year by a number from 1 to 13 and one of four
+        bearers, Tochtli, Acatl, Tecpatl and Calli, both advancing a year at a time, so that a name came round every
+        52 years. Written the year 3 Calli, or with a day, 1 Coatl in the year 3 Calli. A record that anchors it is
+        the first day of a year whose name the sources give.
+    description: >-
+      The calendar a record anchors (core/time.ts). For a count of days, the record is its zero day: a date written
+      in that count is so many days after this record's date, counted on the calendar day for day, so it moves with
+      the correlation chosen. For a calendar of cycles, the record is a day whose name in the cycle is known (its
+      `day_name`): every date named in the cycle is one of the days that bear its names, counted from this one in
+      turns of the cycle, and moves with the correlation chosen.
+  day_name:
+    type: string
+    applies_to: [event/epoch]
+    description: >-
+      The name a calendar of cycles gave the day a record anchors, as the sources give it: a day of the 260-day count
+      as 1 Coatl, or, for the count of years, the year the day began, as the year 3 Calli (core/time.ts).
   location:
     type: point
     interp: step
@@ -70,6 +115,10 @@ properties:
     type: string
     applies_to: [occurrence, sample, ecosystem]
     description: The geological formation the fossils or the sample come from.
+  footprint_form:
+    type: footprint-form
+    applies_to: [occurrence]
+    description: Measured dimensions in millimetres and sidedness of an individual fossil footprint.
   evidence:
     type: string
     applies_to: [occurrence, sample]
@@ -87,6 +136,14 @@ properties:
       zooarchaeological: Animal remains from where people lived or worked, read for how people dealt with the animals, such as who was killed at what age, body size, burial, or dung and pens.
       inscription: Signs of a writing system or its forerunners, cut, painted or pressed into something that has lasted, such as a clay tablet, a bone, a pot or a rock face.
     description: What kind of evidence an occurrence or a sample is.
+  account:
+    type: text
+    applies_to: [event]
+    description: >-
+      What happened, in a sentence or two, as one source tells it: the writer's paraphrase, in English, of what the
+      quote shows. Where the sides tell an event differently, each telling is a claim; where a whole reading of
+      several events is at stake, each side's tellings belong to its perspective (section 4.4), and the default
+      picture keeps what they agree on. Who told it, and how long after, is the source's (its `kind` and `written`).
   ancestry:
     type: text
     applies_to: [occurrence, event/dispersal, event/admixture]
@@ -270,6 +327,15 @@ properties:
     description: >-
       The area a settlement covered, in hectares, at the moment `valid` gives. Sources measure
       different things, the settled area, the walled area or a protected zone, and the note says which.
+  houses:
+    type: quantity
+    unit: houses
+    interp: step
+    applies_to: [settlement]
+    description: >-
+      How many houses or households a settlement had at the moment `valid` gives, as a source counts them: houses,
+      householders (vecinos) or hearths, and the note says which. How many lived in each is another question, and an
+      estimate of its people that rests on such a count is a claim of population, with its own source.
   population:
     type: quantity
     unit: people
@@ -401,6 +467,16 @@ methods:
   model:
     label: Model projection
     description: Computed with a physical model, such as a model of the Sun's evolution or of galaxies' orbits.
+  calendar-correlation:
+    label: Calendar correlation
+    description: >-
+      A calendar's zero day placed in ours by reckoning back from a day that is dated in both: a double date in a
+      document of the time, an inscription matched to an eclipse that can be computed, a count of days still kept.
+  ruling:
+    label: Ruling
+    description: >-
+      Held by a court or another body competent to decide, in a judgment, an opinion or a resolution, often long
+      after the events: evidence of what was held, and that it was held.
   documentary:
     label: Documentary record
     description: >-

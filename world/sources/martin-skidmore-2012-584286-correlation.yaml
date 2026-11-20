@@ -1,0 +1,26 @@
+id: src:martin-skidmore-2012-584286-correlation
+type: publication
+kind: review
+citation: >-
+  Martin, S. & Skidmore, J. (2012). Exploring the 584286 Correlation between the Maya and
+  European Calendars. The PARI Journal 13(2), 3–16.
+authors:
+  - "Martin, S."
+  - "Skidmore, J."
+published: 2012
+title: Exploring the 584286 Correlation between the Maya and European Calendars
+container: "The PARI Journal 13(2), 3–16"
+url: https://www.mesoweb.com/pari/publications/journal/1302/Correlation.pdf
+via: The journal's own PDF, on Mesoweb.
+reliability: >-
+  A review of how the correlation constants 584283 and 584285 were reached, by two Mayanists
+  who argue against both and for 584286, from one inscription read as a record of the solar
+  eclipse of 16 July 790. It is evidence of the arguments and of where the question stood in
+  2012; by its own account the constant it argues for had found no support before it.
+verified:
+  by: machine:claude-code
+  how: >-
+    The PDF fetched from Mesoweb on 17 November 2026 and read in full, as the text pdfminer
+    takes from it; page numbers are the journal's (3–16). Quotes found in the kept text by
+    quote-check. The paper's sum on p. 4 prints 16 k'atuns as 115,000 days where its total
+    needs 115,200: a misprint, and no claim here rests on it.

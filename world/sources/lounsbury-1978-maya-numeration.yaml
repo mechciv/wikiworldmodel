@@ -1,0 +1,32 @@
+id: src:lounsbury-1978-maya-numeration
+type: publication
+kind: review
+citation: >-
+  Lounsbury, F.G. (1978). Maya Numeration, Computation, and Calendrical Astronomy. In
+  Gillispie, C.C. (ed.), Dictionary of Scientific Biography, vol. 15, pp. 759–818. New York:
+  Charles Scribner's Sons.
+authors:
+  - "Lounsbury, F.G."
+published: 1978
+title: "Maya Numeration, Computation, and Calendrical Astronomy"
+container: "Dictionary of Scientific Biography, vol. 15"
+url: https://www.encyclopedia.com/science/dictionaries-thesauruses-pictures-and-press-releases/maya-numeration-computation-and-calendrical-astronomy
+via: >-
+  Encyclopedia.com, which reproduces the article from the Complete Dictionary of Scientific
+  Biography, without its page numbers, figures or tables as printed.
+reliability: >-
+  A standard account of Maya arithmetic and the calendar by the scholar who argued the
+  astronomical case for the greater constants. On the correlation it states which constants
+  were favoured in 1978 and why its own reading of the moon ages and the eclipse table of the
+  Dresden Codex fits 584,285, or a day more, better than 584,283, and it says the question is
+  open.
+verified:
+  by: machine:claude-code
+  how: >-
+    The page fetched from Encyclopedia.com on 17 November 2026; read: the introduction, the
+    account of the day count in section III, section VII and notes 21–23. The page names the
+    author and the Complete Dictionary of Scientific Biography; the volume, editor, pages and
+    year are as Martin and Skidmore (2012) cite the article, and the phrases they quote from
+    its pp. 808–809 stand in this text word for word. The reproduction has scanning slips (it
+    prints "584, 286" with a space, and "Goodman-Mnrlinez-Thompson" once); the quotes are
+    copied as it has them and were found in the kept text by quote-check.

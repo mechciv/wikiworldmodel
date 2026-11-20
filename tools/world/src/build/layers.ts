@@ -206,8 +206,17 @@ export function polityRow(f: PolityFeature, tolerance: number): PolityRow | unde
   };
 }
 
-/** The states of the world as rows, thinned for the globe; those a record draws as its own territory are left to it. */
-export async function polityLayer(w: World, claimed: ReadonlySet<string>, fixes: Map<string, Fix[]> = new Map()): Promise<PolitiesFile | undefined> {
+/** A row of the states as a record's territory names it: its name and the year it starts, on the axis. */
+export const stateRowKey = (name: string, from: number) => `${name}@${from}`;
+
+/**
+ * The states of the world as rows, thinned for the globe. A row that a record draws as its own territory says
+ * which records do (`claimed`, by stateRowKey), and the viewer leaves it to them while one of them holds. It
+ * stays in the file, because whether a record holds depends on the time and the scenario shown: a state that
+ * begins in 800 by one reckoning and in 962 by another draws the rows between them only under the first, and
+ * under the second they are still what the dataset says. A row of a claimed name that no record draws stays too.
+ */
+export async function polityLayer(w: World, claimed: ReadonlyMap<string, string[]>, fixes: Map<string, Fix[]> = new Map()): Promise<PolitiesFile | undefined> {
   const f = w.fields.find((x) => x.data?.as === 'polities');
   if (!f) return undefined;
   const id = f.data!.from;
@@ -240,7 +249,12 @@ export async function polityLayer(w: World, claimed: ReadonlySet<string>, fixes:
     description: f.description,
     source: id,
     sourceRecord: s ? sourceRecord(s) : undefined,
-    rows: rows.filter((r) => !claimed.has(r.name)).sort((a, b) => a.from - b.from || (a.name < b.name ? -1 : 1)),
+    rows: rows
+      .map((r) => {
+        const by = claimed.get(stateRowKey(r.name, r.from));
+        return by ? { ...r, claimedBy: by } : r;
+      })
+      .sort((a, b) => a.from - b.from || (a.name < b.name ? -1 : 1)),
   };
 }
 

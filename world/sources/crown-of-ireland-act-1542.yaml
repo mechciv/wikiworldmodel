@@ -1,0 +1,23 @@
+id: src:crown-of-ireland-act-1542
+type: document
+kind: act
+citation: >-
+  Parliament of Ireland. An Act that the King of England, his Heirs and Successors, be Kings of
+  Ireland, 33 Hen. 8 c. 1. Short title, given in 1951: Crown of Ireland Act 1542.
+title: An Act that the King of England, his Heirs and Successors, be Kings of Ireland
+url: https://www.legislation.gov.uk/aip/Hen8/33/1
+via: >-
+  legislation.gov.uk (The National Archives), in its revised text: the Act as it stands today in
+  Northern Ireland.
+reliability: >-
+  The Act that gave the Kings of England the title of King of Ireland, and joined that crown to
+  England's. It is evidence of what was enacted, and bears no date.
+verified:
+  by: machine:claude-code
+  how: >-
+    The page fetched on 2026-11-17 and read whole (two sections). Quotations found in the kept
+    text by quote-check.
+note: >-
+  No year of publication is given. The short title's 1542 dates from 1951; the Dictionary of
+  National Biography's account of the lord deputy who held the parliament puts the session that
+  passed the Act in June of the year before (src:dunlop-1897-dnb-st-leger).

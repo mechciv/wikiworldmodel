@@ -1,0 +1,40 @@
+id: src:cortes-1520-second-letter
+type: text
+kind: eyewitness
+citation: >-
+  Cortés, H. Second letter of relation to the Emperor Charles V, Segura de la Frontera, 30 October 1520, with the
+  postscript and colophon of its first printing (Seville: Jacobo Cromberger, 8 November 1522). As "Carta segunda" in
+  Cartas del famoso conquistador Hernan Cortes al emperador Carlos Quinto (Biblioteca histórica de la Iberia, tomo I).
+  México: Imprenta de I. Escalante y C.ia, 1870, pp. 51–238.
+authors:
+  - "Cortés, H."
+published: 1870
+written: 30 October 1520 CE
+title: Carta segunda, enviada á su sacra majestad del emperador nuestro señor, por el capitan general de la Nueva-España, llamado don Fernando Cortés
+container: Cartas del famoso conquistador Hernan Cortes al emperador Carlos Quinto (México, 1870)
+url: https://es.wikisource.org/wiki/%C3%8Dndice:13_Cartas_del_Famoso_Conquistador_Hern%C3%A1n_Cort%C3%A9s.pdf
+via: >-
+  Spanish Wikisource's transcription of the 1870 edition (scan pages 62–249 of "13 Cartas del Famoso Conquistador
+  Hernán Cortés.pdf"), which has no work page there, so it was kept as the wiki's API renders that range of pages.
+  The 1870 edition reprints the text with an eighteenth-century editor's footnotes (evidently Lorenzana's, 1770),
+  which are not Cortés's words. The transcription is marked proofread but is not faithful to the print in places
+  (accents added, some misreadings), so the quotations were compared with the page images and cut to words the
+  print and the transcription share; the notes in the evidence file say where a difference remains.
+license: public domain
+reliability: >-
+  Cortés's own report to the emperor, written at Segura de la Frontera (Tepeaca) four months after the flight from
+  the city, to justify himself against Velázquez and Narváez and to present the Mexica as vassals who rebelled. It
+  is the earliest account of the city and of Moctezuma, at first hand; it dates few events (16 August 1519,
+  8 November 1519, St John's day 1520, Sunday 8 July 1520), gives very large numbers for enemies, and is silent on
+  the killing at the festival while he was away, presenting the rising as a Mexica attack planned with Narváez. The printer's
+  postscript of 1522 (news of the city's fall reaching Spain in March 1522) is not Cortés's.
+verified:
+  by: machine:claude-code
+  how: >-
+    Scans 62–249 rendered through es.wikisource.org's API (action=parse of the pages tag) on 2026-11-18 (2026-11-19
+    UTC) and kept as es-cortes-1520-second-letter.txt, with the printed page and scan number at each page start. Read:
+    the departure from Cempoala to the peace with Tlaxcala (pp. 54–83), Cholula (p. 91), the entry and Moctezuma's
+    speech (pp. 109–114), the description of the city (pp. 142–144), the news of Narváez to the flight and the arrival
+    in Tlaxcalan land (pp. 161–208), the successor (p. 231) and the end (pp. 237–238). Every quotation was compared
+    with its page image in the Commons PDF, and all were found in the kept text by script with quote-check's own
+    matching. MacNutt's English translation (1908, English Wikisource) was read alongside to find passages, not quoted.

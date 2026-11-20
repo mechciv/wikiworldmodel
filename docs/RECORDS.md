@@ -31,11 +31,23 @@ may use in [world/schema/vocab/](../world/schema/vocab/).
 - years: `44 BCE`, `80 CE`, `1990.61`;
 - days and months: `15 March 44 BCE`, `March 44 BCE`, in the Julian calendar before 15 October
   1582 and the Gregorian after;
+- a date from a country that kept the Julian calendar after 1582 names it:
+  `1 May 1707 CE Julian`, `25 October 1917 CE Julian`. Nothing can check this for you: left
+  unnamed, such a date is read as Gregorian and lands ten to thirteen days early. England also
+  began its year on 25 March until 1752, so an English "24 March 1602" is 1603: write the year as
+  begun in January and say so in the note;
+- a day by its Julian Day Number, as astronomers count days: `JDN 584283`;
+- a day in the Maya Long Count, as the inscription gives it: `9.12.11.5.18 Long Count`
+  ([a date in a count of days](#a-date-in-a-count-of-days));
+- a day or a year in the Mexica calendar, as the source names it: `1 Coatl in the year 3 Calli`,
+  `the year 7 Calli` ([a day named in cycles](#a-day-named-in-cycles));
 - ages: `4550 BP`, `12.9 ka`, `66.043 Ma`, `4.567 Ga`;
 - the future: `5 Gyr from now`.
 
-A Roman date before 45 BCE is in a calendar out of step with the seasons. Keep the date the source
-gives and say so in a note.
+Write a date as the source gives it, in the source's calendar where the axis reads it, and never
+convert it by hand: a conversion is a derived value, and the note is the place to say what the
+source's calendar was. A Roman date before 45 BCE is in a calendar out of step with the seasons.
+Keep the date the source gives and say so in a note.
 
 **Places** are recorded as measured: `{ lat, lon, frame: frame:earth/present-day }`, usually
 from a gazetteer (Pleiades, Wikidata, GeoNames) with `method: gazetteer` and the gazetteer's id
@@ -110,6 +122,12 @@ claims:
 The viewer lets a reader switch between them; the solver says if one contradicts the rest of
 the world.
 
+Estimates that differ several-fold, as the people of a city before any census do, are competing
+claims like any other, each with its method and the year it is for (`valid`), one preferred with
+a note saying why. A count of something else that an estimate rests on, the houses or householders
+a chronicler gives, is a claim of what it counts (`houses`), never turned into people here: an
+estimate of the people from it is a claim of `population`, with its own source.
+
 ### Evidence about time
 
 ```yaml
@@ -133,7 +151,296 @@ Relations carry a `source` like any claim. Their meaning in time is declared in
 [relations.yaml](../world/schema/vocab/relations.yaml), so the solver checks them: a cause dated
 after its effect fails validation.
 
+A count of days from another record's day, as a chronicle gives it, is a reference with a lag in
+days: `{ ref: people/conquest/entry-into-tenochtitlan, edge: start, lag: 195 days }`. Where that
+record's chosen claim dates its start or end to a day, the lag is counted on the calendar from it,
+day for day, and lands on a day. A lag in years, or from a date less exact than a day, is carried
+in years.
+
+### One thing or two: lineage
+
+Where one thing ends and another begins is the record's choice, and the sources' before it. Write
+one record for what your sources treat as one thing, with phases for its states: Rome is one
+record through a kingdom, a republic and an empire. Write a new record for what an act founded as
+new. **Where it is disputed whether two are one, write two records and join them with
+`continues`:** a relation can be contested, cited against and set in a perspective, and the shape
+of a record cannot. Then say what happened between the two, in the *later* record:
+
+```yaml
+# world/entities/people/polities/great-britain.yaml
+relations:
+  from-england:
+    rel: arose-from
+    to: people/polities/kingdom-of-england
+    source: { ref: src:…, loc: "Article I", quote: "…" }
+```
+
+| Relation | When to write it |
+|---|---|
+| `arose-from` | The subject came out of the target: it seceded from it, formed when it broke up, or formed when it united with others; a script adapted from another. The target may have ended or gone on. A break-up is several records that arose from one, and a union one that arose from several. |
+| `succeeds` | The subject is a new thing that took the target's place when it ended. |
+| `merged-into` | The subject ended by becoming part of the target, which was there already, and kept nothing of its own: an accession, an annexation. This one is written in the record that ended. Not for a town taken into a city, nor for a state made to pay tribute: see below. |
+| `continues` | The subject *is* the target, carried on under another record: a claim of identity, sourced to whoever holds it (a court, a treaty, the United Nations, the state itself). |
+
+- **Don't copy a date across records.** A kingdom that ended as the union began says so:
+  `value: { ref: people/polities/great-britain, edge: start }`.
+- **A contested `continues`** is the usual kind. Held by the body competent to decide, it is an
+  ordinary relation. Asserted by one side and rejected by others, it belongs to an alternative of
+  kind `perspective` (`alt: alt:<group>/<member>`), whose group says who holds which view. Asserted
+  once and since given up, it is `rank: deprecated`, with a note saying when: it is kept, and
+  binds nothing.
+- **A denial is cited `against` the claim it denies.** Whoever refused a claim of identity, a
+  court, a council, the other side, gives no other value to set beside it, so there is nothing
+  to write as a competing claim. Its words go in `against:`, a list of citations like `source:`,
+  and are quote-checked the same way. Any claim or relation may have one.
+- **A renaming is not a new record.** The `name` is the short name people use, and the label on
+  the map; a state's styles in its own laws are `official_name` claims, each with the `valid`
+  it held for. Names that follow one another, no two at once, need no rank, and the panel shows
+  them in turn. That is told from dates alone: where a name's span ends at a phase or at another
+  record, rank one of them `preferred`.
+- **Rival parents.** Two `arose-from` relations of one record both hold: that is a union. Where
+  they are rival readings, as when scholars disagree about a script's parent, rank one
+  `preferred`, with a note saying why, as for competing claims. Then it holds, and the other is
+  shown as another reading, which holds only when a reader picks it. This goes for any relation
+  type.
+- **Lineage runs between things of a kind:** a state arises from a state, a script from a script.
+- **A city is a settlement, and the bodies that governed it are polities.** Taken apart so, the
+  rules above decide what a conquest and a renaming do to it. The settlement is one record while
+  its sources treat it as one place, through a destruction and a rebuilding, with phases and its
+  names in turn: `people/cities/tenochtitlan` is Tenochtitlan and then Mexico City. The states
+  that ruled from it are records of their own, which may end, go on or be founded anew.
+- **A town taken into a city does not end, nor does a state made to pay tribute.** The town goes
+  on as part of the city, `part-of` it from the day it was taken (`valid: { lo: … }`). A state
+  that paid another tribute, or took its governors from it, and kept rulers of its own people is
+  `subject-to` it, for the span it was one. `merged-into` is for what ended by being taken in.
+
+```yaml
+# world/entities/people/polities/tlatelolco.yaml
+relations:
+  subject-to-tenochtitlan:
+    rel: subject-to
+    to: people/polities/tenochtitlan
+    valid: { lo: { ref: people/conquest/conquest-of-tlatelolco, edge: start }, hi: { ref: people/conquest/fall-of-tenochtitlan, edge: start } }
+    source: { ref: src:duran-1867-historia, loc: "ch. XXXIV, p. 269", quote: "…le fuesen tributarios y pecheros…" }
+    note: What was owed, and what was kept, in a sentence.
+```
+
+- **The note says what came over,** where that is the question: a script may take another's sign
+  shapes, their sounds, or only the idea of writing.
+- `npm run world -- lineage <id> [--alt alt:…]` prints what a record came from, what came of it,
+  and which records are one thing with it in that picture.
+
+### A relation that held for a span
+
+`part-of`, `member-of`, `held-office`, `participant`, `subject-to` and `holds` may say when they
+held:
+
+```yaml
+relations:
+  in-the-union:
+    rel: part-of
+    to: people/polities/soviet-union
+    valid: { lo: 30 December 1922 CE, hi: 26 December 1991 CE }
+    source: { ref: src:…, loc: …, quote: "…" }
+```
+
+Without `valid`, the subject's whole lifetime lies inside the target's: right for a fossil in its
+taxon, wrong for a republic older than its union. With it, only the span must lie inside both
+lifetimes. Either end may be left out, and one time (`valid: 1707 CE`) says it held then. A bound
+that names a year or a month lies somewhere in it.
+
+**A bound may be another record's start or end**, and where that is what the source means it
+should be, so that no date is written twice and the span follows the evidence: "until his death",
+"for as long as the Union lasted", "to the end of the war".
+
+```yaml
+    valid: { lo: 24 March 1603 CE Julian, hi: { ref: people/rulers/james-vi-and-i, edge: end } }
+    valid: { lo: { ref: people/polities/soviet-union, edge: start }, hi: { ref: people/polities/soviet-union, edge: end } }
+```
+
+An open end is not "to the end": it says the end is not known. A claim's `valid` takes the same
+bounds, and `"@phase"` names a phase of the record itself. Use a span for:
+
+- a state that was part of another, or a member of a league, for some of its years;
+- a person who held two offices at once: two `held-office` relations of the person, each with
+  its span. (One office at a time may still be a phase of the life, `subject: "@reign"`.)
+- a state that joined a war late or left it early;
+- a town that paid another tribute, a lord who made himself a king's vassal, a company that acted
+  in a king's name, for as long as it did (`subject-to`);
+- who held a perspective, and from when to when ([two sides' accounts](#two-sides-accounts)).
+
+No other relation takes `valid`.
+
+### A war
+
+A war is an event that lasts (`kind: event/war`), with a `start` and an `end`, which are often
+competing claims. Its battles, campaigns and smaller wars are `part-of` it, in their own records;
+a war that became part of a larger one partway through says from when (`valid`). Who fought is
+written in the war's record, one `participant` relation each, with the span they fought for and
+their side in the note:
+
+```yaml
+# world/entities/people/wars/second-world-war.yaml
+relations:
+  united-kingdom:
+    rel: participant
+    to: people/polities/united-kingdom
+    valid: { lo: 3 September 1939 CE, hi: … }
+    source: { ref: src:…, loc: …, quote: "…" }
+    note: One of the Allies.
+```
+
+A campaign, an operation or a battle that lasted is `kind: event/campaign`; a battle of a day or
+two is a moment. A treaty, an armistice or a surrender is a moment too (`kind: event/treaty`), on
+the day it was signed.
+
+- **Where a contested start or end changes what belongs to the war**, its parts and who fought
+  in it from when, a competing claim is not enough: it moves one date and carries nothing with
+  it. That is a perspective, an alternative that holds the date and the relations together.
+- **The event that ends a thing is its end, and not a part of it:** name it as the `end`.
+- **A state that changed sides takes part twice,** one `participant` relation for each span,
+  each note saying which side. An alliance (`polity/alliance`) takes part as one; a member that
+  fought on the other side takes part on its own, for its span. A company that fought in a
+  king's name (`organization`) takes part as itself, and is `subject-to` the king.
+
+### Two sides' accounts
+
+Where the sides tell an event differently, each telling is a claim of its `account`: a sentence or
+two in English, the writer's paraphrase of what the quotes show. Where a whole reading of several
+events is at stake, each side's tellings belong to its perspective, an alternative of kind
+`perspective` whose group says who told what, when and to what end. Neither is preferred: the
+default picture keeps what both say, the dates both give and who fought.
+
+```yaml
+# world/entities/people/conquest/toxcatl-massacre.yaml
+  account-mexica:
+    prop: account
+    alt: alt:conquest-accounts/mexica
+    value:
+      en: >-
+        The Spaniards asked for the feast of Huitzilopochtli, and Moctezuma had it held. When the
+        dancing had begun, they came out armed, closed every way out of the temple courtyard, and
+        killed those who were dancing.
+    source: { ref: src:florentine-codex-book-12, loc: "Book 12, chap. 20, fol. 32v", quote: "…" }
+    method: historical-account
+```
+
+Who held a perspective is a relation of the holder, `holds`, with the span it held it for, sourced
+to where it said so:
+
+```yaml
+# world/entities/people/persons/hernan-cortes.yaml
+relations:
+  holds-the-conquerors-account:
+    rel: holds
+    to: alt:conquest-accounts/conquerors
+    valid: { lo: 30 October 1520 CE, hi: 15 October 1524 CE }
+    source: { ref: src:cortes-1520-second-letter, loc: "p. 237 (the dating clause)", quote: "…" }
+```
+
+- **The span is when the holder said it**, from what its sources show: the dates of the letters
+  read, not of a life. A holder written only for the view it held needs no more than a name.
+- **A `holds` binds no dates** and holds in every picture: its target is an alternative, not a
+  record. The panel and the menu of alternatives name each perspective's holders.
+- **How long after.** When a source was written is the source's `written` (a day, a year, or a
+  range for a text compiled over years), and each citation of a claim about a moment shows how
+  long after the moment its source was written: *written 9 months after*, *written 33 to 56 years
+  after*. Don't put it in the note.
+- **One kind in every picture.** Whether a killing was a massacre or the putting down of a rising
+  is often what the sides dispute. A record has one kind, the word most historians now use, and
+  the accounts say the rest.
+
+### Bounds beside a date
+
+Some evidence does not date a start or an end, and only bounds it: a resolution that says a state
+has ceased to exist, a visitor who found a city in ruins. `end_before` holds such a bound on an
+end. It is not a competing end: it holds in every picture, beside whichever end is chosen.
+
+```yaml
+  end-security-council:
+    prop: end_before
+    value: 19 September 1992 CE
+    source: { ref: src:…, loc: "preamble", quote: "…has ceased to exist" }
+```
+
+A first mention bounds a start in the same way, and a last mention an end from the other side;
+those properties are not yet in the vocabulary, and are added with the first records that need
+them ([a new term](#a-new-term)).
+
+### A date in a count of days
+
+Some calendars name a day by how many days it is after a zero day. A record writes such a date
+as the source gives it:
+
+```yaml
+  end:
+    prop: end
+    value: 9.12.11.5.18 Long Count
+    source: { ref: src:…, loc: …, quote: "9.12.11.5.18 6 Etz'nab 11 Yax …" }
+```
+
+Which day of our calendar that is depends on which day the zero day was: a correlation, argued
+from evidence and contested. It is not in the code. It is the `date` of one record,
+`people/calendars/long-count-zero-day` (`kind: event/epoch`), whose competing claims are the
+correlations, each written as its constant: `value: JDN 584283`. Every Long Count date in the
+world follows the one chosen, day for day, and the viewer can switch them. So never convert a
+Long Count date yourself, and never cite a source for the correlation on a date: cite it on the
+zero day.
+
+- The validator warns where none of a claim's quotes has the date as written: two places are
+  easily exchanged.
+- The inscriptions write the zero day itself as 13.0.0.0.0, the end of an era before, and date
+  the time before it in that era. Such a date says so: `12.19.13.4.0 Long Count of the era
+  before`. Unmarked, the same places are a day of 2006.
+- A span of a relation may be bounded by such dates.
+
+### A day named in cycles
+
+The Mexica named a day by two cycles: the 260-day count, `tonalpohualli`, a number from 1 to 13
+with one of twenty signs (`1 Coatl`); and the year of 365 days, `xiuhpohualli`, a number with one
+of four bearers, Tochtli, Acatl, Tecpatl and Calli (`the year 3 Calli`). A record writes such a
+date as the source names it, a day, a year or both, with the signs spelled as in
+[core/time.ts](../core/time.ts):
+
+```yaml
+  date-mexica:
+    prop: date
+    value: 1 Coatl in the year 3 Calli
+    source: { ref: src:florentine-codex-book-12, loc: "Book 12, chap. 40, fol. 83r", quote: "…in xiuhtonalli ei calli. Auh in cemilhuitlapoalli ce coatl:" }
+    method: historical-account
+```
+
+Such a date names not one day but every day that bears its names: a day's name comes round every
+260 days, a year's every 52 years. So it is not a competing claim. It holds **beside** the
+record's other dates, needs no rank and is never picked. The rest of the evidence leaves its
+moment a window, and the date names the days of its name in that window: one, which must then
+agree with the other dates to the day; several, between which it cannot choose (a note); or none,
+and then the world fails, and says how far the nearest day of that name is. Two sides' dates for
+one day are held against each other so.
+
+- **Which day of ours a name falls on is a correlation:** the `date` of an anchor, a record of
+  kind `event/epoch` with a `calendar` claim, the cycle, and a `day_name` claim, its day's name in
+  it. `people/calendars/tonalpohualli-anchor` is the day 1 Coatl on which Tenochtitlan fell;
+  `people/calendars/xiuhpohualli-anchor` the first day of the year 3 Calli. Their competing dates
+  are the correlations, and every date named in cycles follows the one chosen. So never convert
+  such a date yourself, and cite a correlation on its anchor.
+- **A date given in both calendars tests the correlation,** unless the correlation rests on it.
+  Where it names none of the days the rest of the evidence allows, it is kept and set aside
+  (`rank: deprecated`), with a note saying why; the validator notes the nearest day of its name,
+  and how far.
+- **The quote names the signs,** in any of the spellings the sources use, Nahuatl or Spanish
+  (`coatl`, `cohuatl`, `culebra`): the validator warns where it does not.
+- **It dates a moment, a start or an end,** and nothing else: not `earlier_than`, nor a bound of
+  a span.
+- **A day of the year by its month,** "the eve of the 10th of Quecholli", is not read yet: it needs
+  the month that began the year, which is disputed. Keep it in the note.
+
 ### A source
+
+A law, a treaty, a resolution, a judgment or a proclamation is `type: document`, `kind: act`: the
+document is itself the act, cited by article, section or paragraph. A claim read from an act made
+at the time has `method: documentary`; one that rests on what a court or another competent body
+held, often long after, has `method: ruling`.
 
 ```yaml
 # world/sources/renne-2013-kpg-timescales.yaml
@@ -265,8 +572,10 @@ done short of that, each with who did it and how ([core/ladder.ts](../core/ladde
       - { step: re-read, by: machine:claude-code@reread, how: "Read Table 2 again on its own; same value." }
 ```
 
-- **quoted**: the quote was found in the text the source was read in, by script. `quote-check`
-  writes it; don't write it by hand.
+- **quoted**: every quote the claim has was found, each in the text its source was read in, by
+  script. `quote-check` writes it; don't write it by hand. A claim that quotes two sources is
+  checked against both texts in one run, `quote-check src:a a.txt src:b b.txt`, and its step names
+  both; given one text, the command asks for the other.
 - **re-read**: a second reader read the source on its own and reached the same value. The reader is
   not the claim's author: a second agent names itself apart, as `machine:claude-code@reread`.
 - **audited**: a person checked it, as part of a sample. Never a machine.

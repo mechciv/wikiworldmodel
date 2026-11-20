@@ -1,0 +1,39 @@
+id: src:veracruz-council-1519-letter
+type: text
+kind: eyewitness
+citation: >-
+  The justicia y regimiento (council) of the Rica Villa de la Vera Cruz, letter to Queen Juana and the Emperor
+  Charles V, 10 July 1519 (the "first letter" of Cortés's letters of relation). As "Carta primera" in Cartas del
+  famoso conquistador Hernan Cortes al emperador Carlos Quinto (Biblioteca histórica de la Iberia, tomo I). México:
+  Imprenta de I. Escalante y C.ia, 1870, pp. 1–49.
+published: 1870
+written: 10 July 1519 CE
+title: Carta primera, enviada á la reina doña Juana y al emperador Carlos V, su hijo, por la justicia y regimiento de la rica villa de la Veracruz
+container: Cartas del famoso conquistador Hernan Cortes al emperador Carlos Quinto (México, 1870)
+url: https://es.wikisource.org/wiki/Cartas_del_famoso_conquistador_Hern%C3%A1n_Cort%C3%A9s/Carta_primera
+via: >-
+  Spanish Wikisource's transcription of the 1870 edition (scan pages 13–61 of "13 Cartas del Famoso Conquistador
+  Hernán Cortés.pdf", from the Tecnológico de Monterrey's digital library), kept as rendered by the wiki's API. The
+  transcription is marked proofread but is not faithful to the print in places (accents added, some misreadings), so
+  the quotations were compared with the page images and cut to words the print and the transcription share. The
+  edition's introduction says the letter survives in an authenticated copy found at Vienna and was first printed whole
+  in the Colección de documentos inéditos para la historia de España, tomo I, pp. 421–461 (MacNutt's bibliographical
+  note, 1908, gives the year as 1844).
+license: public domain
+reliability: >-
+  The council the expedition created, writing to the crown on the day the letter is dated, three months after the
+  landing, to justify settling against Diego Velázquez's commission to trade: it is evidence of the authority the
+  expedition claimed (an election by its own council, in the crown's name, until the crown provided) and of how it
+  wished the crown to see Velázquez. It names Cortés's office as justicia mayor and captain, says nothing of the share
+  of gold Bernal Díaz says he was promised, and gives no date for any event before its own. The edition's introduction
+  and MacNutt's notes call it the stand-in for Cortés's own first letter, which is lost.
+verified:
+  by: machine:claude-code
+  how: >-
+    Scans 13–61 rendered through es.wikisource.org's API (action=parse of the pages tag) on 2026-11-18 (2026-11-19
+    UTC) and kept as es-veracruz-council-1519-letter.txt, with the printed page and scan number at each page start;
+    the letter read whole. Every quotation was compared with the page images of the Commons PDF (pp. 13, 14, 30,
+    34–36, 48, 49), where the transcription differs from the print the note says so, and all were found in the kept
+    text by script with quote-check's own matching. Scan 26 (p. 14) is not proofread on Wikisource; the words quoted
+    from it agree with the image. MacNutt's English translation (1908, English Wikisource) was read alongside to find
+    passages, not quoted.

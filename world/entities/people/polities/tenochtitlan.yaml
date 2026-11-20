@@ -1,0 +1,89 @@
+id: people/polities/tenochtitlan
+kind: polity
+summary: >-
+  The altepetl of Mexico Tenochtitlan: the city-state of the Mexica of Tenochtitlan, ruled by its tlatoani, head of
+  the Triple Alliance from 1428, and the side the Spaniards fought until 1521. Under the Spaniards the natives' city
+  went on beside theirs under officers of its own, a cihuacoatl among them. The borders dataset draws it from 1326 to
+  1428 and the Triple Alliance after, as if the one had become the other; Wikidata has one item for the city and the
+  state, and puts it on the city's record (people/cities/tenochtitlan).
+author: machine:claude-code
+phases:
+  - id: independent
+    label: Altepetl of Mexico Tenochtitlan
+  - id: under-spain
+    label: The natives' city under the Spaniards
+claims:
+  name:
+    prop: name
+    value: { en: Tenochtitlan }
+    unsourced: An editorial label, the name of its city.
+  start:
+    prop: start
+    value: { ref: people/cities/tenochtitlan, edge: start }
+    source:
+      ref: src:valero-1990-indios-tenochtitlan
+      loc: "\"Dimensiones de la ciudad\", p. 29"
+      quote: La isla original sobre la que se funda Tenochtitlan pudo haber tenido una extensión aproximada de 180 hectáreas hacia 1325
+    method: tradition
+    note: The altepetl begins as its city was founded.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in city-estudios-americanos-778.txt (sha256 e2b341ec7d870461), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  under-spain:
+    prop: start
+    subject: "@under-spain"
+    value: { ref: people/conquest/fall-of-tenochtitlan }
+    source:
+      - ref: src:cortes-1524-fourth-letter
+        loc: "p. 504 (scan 514)"
+        quote: que es ciguagoat, que quiere tanto decir como lugarteniente del señor
+      - ref: src:cortes-1524-fourth-letter
+        loc: "p. 504 (scan 514)"
+        quote: que hay hoy en la ciudad poblados hasta treinta mil vecinos
+    method: documentary
+    note: >-
+      From the fall the city was the Spaniards'. Cortés, in 1524, gave a captain general of the war, whom he had known
+      in Moctezuma's time, back the office he held in the lord's time, cihuacoatl, the lord's lieutenant, and charged
+      him with peopling the city again; there were by then as many as thirty thousand householders settled in the
+      natives' city, with its markets, apart from the Spaniards' town across a channel (p. 507). The lord himself,
+      Cuauhtemoc, he kept prisoner.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in es-cortes-1524-fourth-letter.txt (sha256 d9604f830bed44e9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  end:
+    prop: end
+    value: unknown
+    unsourced: >-
+      No source read says when the natives' government of the city, the later parcialidad of San Juan Tenochtitlan,
+      ended: the record ends at an unknown time.
+  territory:
+    prop: territory
+    value:
+      from: src:cliopatria-0.2.1
+      names: ["Tenochtitlan"]
+    source:
+      ref: src:cliopatria-0.2.1
+      loc: rows named Tenochtitlan, 1326 to 1428
+    method: compilation
+    basis: reconstruction
+    note: >-
+      The dataset's two rows of this name, from 1326 to 1428; from 1429 its rows are the Aztec Triple Alliance's
+      (people/polities/triple-alliance), which this altepetl headed. It draws no altepetl of the alliance's members
+      after 1428, and no Tlatelolco at all. The two rows' outline lies east of the lake, between Texcoco and Tlaxcala,
+      and takes in none of the towns of the Basin, nor the city on its island: the error is the dataset's, and is
+      listed in RECORD-SETS.md.
+relations:
+  in-the-alliance:
+    rel: member-of
+    to: people/polities/triple-alliance
+    valid: { lo: { ref: people/polities/triple-alliance, edge: start } }
+    source:
+      - ref: src:ixtlilxochitl-1892-historia-chichimeca
+        loc: "ch. XXXII, p. 153"
+        quote: parecióle ser mejor y más permanente que fuese gobernado por tres (los cuales fueron los reyes y señores de los tres reinos, México, Tetzcuco y Tlacopan)
+      - ref: src:smith-2008-aztec-empire
+        loc: "p. 123"
+        quote: Tenochtitlan had emerged as the dominant power in the empire, with the other capitals clearly subservient to the Mexica kings
+    note: >-
+      One of the three heads, with Texcoco and Tlacopan, and by 1519 the dominant one, the other capitals subservient
+      to the Mexica kings (Smith, after Carrasco). Ixtlilxóchitl, from Texcoco, has Mexico and Texcoco equal.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in city-ixtlilxochitl-1892-tomo2.txt (sha256 5886f18c08b1f94b) and city-smith-2008-aztec-empire.txt (sha256 055d3630cd61ceaa), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }

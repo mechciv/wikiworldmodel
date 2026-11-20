@@ -173,6 +173,38 @@ Identity follows the thing, not its state:
 - An animal, its fossil and the museum specimen are one entity, so clicking
   the specimen leads to where it lived.
 
+Where one thing ends and another begins is not given by the world. Whoever
+writes a record decides it, and sources, datasets and other databases decide
+it differently: the Roman state is one record here, six names in the borders
+dataset and several items in Wikidata. Three rules keep that honest:
+
+- **A record is what its sources treat as one thing,** and its phases are
+  that thing's states. A state that kept its institutions through a change of
+  government is one record with phases; one founded by an act that says it is
+  new is a new record.
+- **What happened between records is lineage** (section 4.5): one arose from
+  another, succeeded it or merged into it.
+- **That two records are one thing is a claim,** `continues`, with a source
+  like any other: a court's holding, a treaty, the thing's own assertion.
+  Where others reject it, it belongs to a perspective (section 4.4), and what
+  they said is cited against it. So what counts as one thing depends on the
+  picture shown, and `npm run world -- lineage <id>` says what it comes to
+  in each.
+
+The shape of a record is itself a claim of identity, and the one kind that
+nothing can contest: a record cannot sit in an alternative, and its phases
+are the same in every picture. So where it is disputed whether two things are
+one, they are two records joined by `continues`, and not one record with
+phases.
+
+A city is two kinds of thing: a **settlement**, a place and its people, and
+the **polities** that governed it. Taken apart so, the rules decide what a
+conquest does to it. The settlement is one record while its sources treat it
+as one place, through a destruction, a rebuilding and a renaming: Tenochtitlan
+became Mexico City. Each state that ruled from it is a record of its own,
+which may go on, end, or be founded anew by an act. A town taken into a city
+does not end there: it goes on as a part of the city, from then (section 4.5).
+
 A **phase** is a time-bounded state of an entity. Its interval, frame,
 geometry and attributes are claims about it. An entity's lifetime is itself
 a claim. Its phases tile that lifetime, and a period with no known state is
@@ -220,6 +252,9 @@ A claim has:
   `proposed`, human ones as `accepted`
 - rank (`preferred`, `normal` or `deprecated`, default `normal`), which picks
   the value the viewer shows by default
+- what denies it (`against`): works that say it is not so, cited as its
+  sources are. A denial gives no other value, so it cannot be a competing
+  claim
 - how far it has been checked against its source, short of acceptance: its
   `checked` steps, each with who and how. `quoted`: its quote was found in
   the text the source was read in, by script (`npm run world -- quote-check`).
@@ -270,6 +305,15 @@ perspective. The viewer switches whole alternatives, validators check each
 alternative as its own consistent world, and a build includes the default
 picture plus the alternatives its stewards choose to show.
 
+A perspective is held by someone, for a time. Who held it is a relation of
+the holder (`holds`, section 4.5), with sources and a span, so that a reading
+set down a generation after the events says so, and a contest that ended can
+say when. When each source was written is the source's, and every citation of
+a claim about a moment shows how long after the moment its source was
+written. Where two sides tell the same events differently, each side's
+tellings are claims of its perspective and neither is preferred: the default
+picture keeps what both say.
+
 ### 4.5 Relations
 
 A relation is a claim whose value is another record. It has sources, valid
@@ -284,15 +328,49 @@ replacement follows what it replaces.
 |---|---|
 | temporal | before, after, during, overlaps; optional lag bounds ("10–30 years after") |
 | spatial | within, adjacent, connects (road → gate, aqueduct → reservoir) |
-| structural | part-of, member-of (a specimen in its species, a city in its province, one centre of early farming in farming as a whole) |
-| lineage | replaces, splits-into, merges-into, descends-from, sister-of, reused-in (spolia) |
+| structural | part-of, member-of (a specimen in its species, a city in its province, one centre of early farming in farming as a whole), for the subject's whole lifetime or for a span of it; subject-to, allegiance kept with rulers of one's own (a tributary town, a vassal, a company acting in a king's name) |
+| lineage | descends-from (the tree of life); arose-from, succeeds, merged-into; continues (a claim of identity); to come: sister-of, reused-in (spolia) |
 | causal | caused-by, destroyed-by, damaged-by, commissioned-by, built-for |
-| participation | participant, with a role (attacker, impactor, founder); made-by; held-office |
+| participation | participant, stored in the event's record, with its role in the note (a side in a war, an attacker, a founder); made-by; held-office; holds, who held a perspective (section 4.4), which binds no dates |
 | evidential | evidenced-by: what a development rests on, with no meaning in time, so contested evidence does not bind the dates |
 
 Lineage is a graph, not a tree. Lineages merge as well as split, as when a
 eukaryote absorbed the bacterium that became its mitochondria, or villages
-merged into a city.
+joined to make a city. Among the things people made, three relations draw it,
+each stored in the later record and naming the earlier:
+
+- **arose-from**: the subject came out of the target, which may have ended
+  in it or gone on beside it. A secession is one record that arose from
+  another; a break-up, several that arose from one; a union, one that arose
+  from several; a script adapted from another arose from it.
+- **succeeds**: a new thing took the place of one that ended.
+- **merged-into**, the one the earlier record holds: it ended by becoming
+  part of something that was there already, as a state that accedes to
+  another does. A town taken into a city does not end, nor does a state made
+  to pay tribute that keeps its own rulers: the town goes on as part of the
+  city (part-of, from then), the state as a subject (subject-to, for the span
+  it was one).
+
+**continues** is of another kind: it says the subject *is* the target,
+carried on under another record (section 4.2). It binds little in time, only
+that what carries a thing on outlasts it, and it is the relation most often
+contested.
+
+**Rivals.** Several relations of one subject and one type all hold, as the
+two parents of a union do. Where they are rival readings, one is ranked
+preferred, as with competing claims: it holds, and the others hold only when
+a reader picks one in its place. The validators check each rival as they
+check each competing date.
+
+**Spans.** A relation that holds over a span of time (part-of, member-of,
+held-office, participant, subject-to, holds) may say when, as its valid time: a kingdom that
+was part of an empire for fifty of its hundred years, one king of two
+kingdoms at once, a state that joined a war late. The solver then keeps that
+span within the lifetimes of both ends, and no longer the subject's whole
+lifetime within the target's. Phases cannot say this, since they follow one
+another and an entity has one sequence of them. A bound of a span is a date,
+or the start or end of another record: "until his death" is his death,
+whichever date the evidence gives it.
 
 ### 4.6 Frames
 
@@ -476,6 +554,28 @@ atlas's weights), and `limits`, where it is known not to follow them.
   an interval may use different units ("1 Ga to 2100"). The loader converts
   everything to the stored axis. `lo` is always the earlier time, whatever
   the unit, and a bare year means that whole year.
+- **Calendars.** A date is written in the calendar then in use: the Julian
+  before 15 October 1582 and the Gregorian from then on, or it names its
+  calendar, where a country kept the old one longer. A day may also be given
+  by its Julian Day Number, as astronomers count days.
+- **Counts of days.** A calendar that names a day by how many days it is
+  after a zero day, as the Maya Long Count does, is written as the source
+  gives it: `9.12.11.5.18 Long Count`. How its places count is the calendar's
+  own rule, and is in code as the leap year is. Which day of ours its zero
+  day was is not: that is a correlation, argued from evidence and contested,
+  so it is a claim, on the record of that day, and every date written in the
+  count follows the correlation chosen, day for day.
+- **Days named in cycles.** A calendar that names a day by its place in
+  cycles that come round again, as the Mexica named a day of their 260-day
+  count and a year by its bearer (`1 Coatl in the year 3 Calli`), does not
+  name one day: it names every day that bears those names, one or two in each
+  52 years. Such a date is evidence of another kind, a set of candidate days.
+  How the cycles turn is code; where each meets our days is a claim, on the
+  record of a day whose name in the cycle the sources give. A date in cycles
+  holds beside the other evidence and narrows it, rather than competing with
+  it: it is read in the window the rest of the evidence leaves, and names the
+  day of that name there. So two sides' dates for one event are held against
+  each other, and a correlation under which they disagree is said not to hold.
 
 **Uncertainty.** Every time value is an interval or a distribution: `{ lo, hi }`,
 a normal distribution, or a reference to a probability density (for example a
@@ -493,7 +593,8 @@ evidence:
 - "begun under Vespasian", where the reign is itself an entity
 - an inscription
 - another record's start or end plus a lag ("rebuilt within 15 years of the
-  fire")
+  fire"); a lag in days from a day is counted on the calendar, day for day
+  ("on the 195th day after they entered")
 
 The build derives the dates, as archaeologists do with Harris matrices and
 Bayesian tools such as OxCal. When a calibration curve is revised, the dates

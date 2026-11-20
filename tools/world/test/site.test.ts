@@ -55,6 +55,17 @@ describe('the public site', () => {
     });
   });
 
+  it("puts the build's glance beside the landing page, and leaves it out for a build without one", () => {
+    const { root, opts, put } = fixture();
+    const glance = { format: 'lightworld-glance@1', groups: [] };
+    put('builds/b-new/coverage.json', JSON.stringify({ claims: {}, glance }));
+    assembleSite(opts);
+    expect(JSON.parse(readFileSync(join(root, 'out/glance.json'), 'utf8'))).toEqual({ build: 'b-new', glance });
+    rmSync(join(root, 'builds/b-new/coverage.json'));
+    assembleSite(opts);
+    expect(existsSync(join(root, 'out/glance.json'))).toBe(false);
+  });
+
   it('refuses a store that is not an https URL of a directory', () => {
     const { opts } = fixture();
     expect(() => assembleSite({ ...opts, store: 'https://builds.example.org' })).toThrow(/ending in a slash/);

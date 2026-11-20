@@ -1,4 +1,5 @@
 // Entity records for the inspect panel, features for tiles, periods, and the search index.
+import { footprintText, type Footprint } from '../../../../core/footprint.ts';
 import { specText, type DwellingSpec } from '../../../../core/dwelling.ts';
 import { levelOf } from '../../../../core/ladder.ts';
 import type { FormSpec } from '../../../../core/city.ts';
@@ -7,9 +8,9 @@ import { conj, rotate, toLatLon, unitVector } from '../../../../core/quat.ts';
 import { parseRef, splitRef } from '../../../../core/refs.ts';
 import type { RotationModel } from '../../../../core/rotation-model.ts';
 import type { Bounds, Solution } from '../../../../core/stn.ts';
-import { centre, formatDuration, formatTimeValue, parseLag, parseTime, PRESENT_YEAR, type TimeValue } from '../../../../core/time.ts';
+import { bounds, centre, dayOnAxis, formatDuration, formatTimeValue, historical, parseLag, parseTime, PRESENT_YEAR } from '../../../../core/time.ts';
 import type { Basis, Estimate, Feature, FeatureMove, FeatureBasis, FeatureName, FeatureTime } from '../../../../core/tileset.ts';
-import { chosen, claimGroup, pointOf, scenarioKey, subjectExists, type ClaimGroup, type Variant } from '../chronology.ts';
+import { anchorsOf, chosen, claimGroup, countDays, countOf, cycleOf, edgeSubject, epochsOf, inTurn, isBeside, pointOf, resolveCycle, rivalsIn, scenarioKey, spanOf, subjectExists, zeroDayClaim, type ClaimGroup, type Scenario, type SpanBound, type Variant } from '../chronology.ts';
 import { BASES, isMoment, type Claim, type Entity, type Source, type World } from '../world.ts';
 
 /** A form in words, for its claim: its type and what is known of it. */
@@ -158,20 +159,48 @@ function namesOf(s: Solved, e: Entity): { label: string; names: FeatureName[] } 
   for (const c of e.claims) {
     if (c.prop !== 'name' || c.subject !== e.id || c.alt || c.status === 'deprecated' || c.rank === 'deprecated') continue;
     const n: FeatureName = { text: text(c.value) };
-    if (c.valid !== undefined) {
-      const v = parseTime(c.valid as never);
-      const open = (x: number) => (Number.isFinite(x) ? x : null);
-      // An unknown end: the name was dropped at some time no claim gives, so it is shown up
-      // to the present, where today's name takes over.
-      if (v.kind === 'interval') n.valid = [open(v.lo), v.hiUnknown ? PRESENT_YEAR : open(v.hi)];
-      else if (v.kind === 'instant') n.valid = [v.t, v.t];
-    }
+    // An unknown end: the name was dropped at some time no claim gives, so it is shown up
+    // to the present, where today's name takes over.
+    const span = validSpan(s, c.valid, e.id, PRESENT_YEAR);
+    if (span) n.valid = span;
     names.push(n);
   }
   const chosenName = claimOf(s, e.id, 'name');
-  const today = names.filter((n) => !n.valid || ((n.valid[0] ?? -Infinity) <= PRESENT_YEAR && PRESENT_YEAR < (n.valid[1] ?? Infinity)));
+  // Today's names: those with no span, and those whose span is still open. Where every name has ended, the one
+  // that ended last. (Not the names of 1950, the present of the time axis: a name taken since is today's.)
+  const open = names.filter((n) => !n.valid || n.valid[1] === null);
+  const last = Math.max(...names.map((n) => n.valid?.[1] ?? Infinity));
+  const today = open.length ? open : names.filter((n) => n.valid?.[1] === last);
   const label = chosenName && (!chosenName.valid || today.some((n) => n.text === text(chosenName.value))) ? text(chosenName.value) : (today[0]?.text ?? names.at(-1)?.text ?? e.id);
   return { label, names };
+}
+
+/** Where the start or end of a subject is, at its best estimate in the default picture; null if open or unknown. */
+function edgeBest(s: Solved, subject: string, edge: 'start' | 'end'): number | null {
+  if (!subjectExists(s.world, subject)) return null;
+  return timeOf(s, subject, s.sol.bounds, boundsOf(s.centres))[edge].best;
+}
+
+/**
+ * When a claim holds, as years on the axis in the default picture: [from, to), an open end null. A bound that
+ * names another record's start or end is where the evidence puts that. `unknownEnd`: what an end said to be
+ * unknown is taken as. Undefined where the claim has no valid time, or one that cannot be read.
+ */
+export function validSpan(s: Solved, valid: unknown, self: string, unknownEnd: number | null = null): [number | null, number | null] | undefined {
+  if (valid === undefined) return undefined;
+  const span = spanOf(valid);
+  if (!span) return undefined;
+  if (span.at) return [span.at.t, span.at.t + (span.at.whole ? span.at.whole : 0)];
+  const at = (b: SpanBound | undefined, end: boolean): number | null => {
+    if (!b) return null;
+    if ('ref' in b) {
+      const subject = edgeSubject(b.ref, self);
+      return subject ? edgeBest(s, subject, b.edge) : null;
+    }
+    return end ? b.t + b.whole : b.t;
+  };
+  const unknown = (valid as { hi?: unknown }).hi === 'unknown';
+  return [at(span.lo, false), unknown ? unknownEnd : at(span.hi, true)];
 }
 
 /** Where a located entity is in its own frame, and on which plate. */
@@ -227,7 +256,17 @@ function timeBasis(s: Solved, refs: string[]): Basis {
 }
 
 function derivedBy(b: Bounds, w: World, subject: string): { start: string[]; end: string[] } {
-  const by = (p: string) => [...new Set([...b.get(p)!.loBy, ...b.get(p)!.hiBy])];
+  // A date written in a count of days rests on the claim that dates the count's zero day too: the correlation. A date
+  // named in cycles rests on the claims that date each cycle's anchor.
+  const withZeroDay = (ref: string): string[] => {
+    const { record, part: key } = splitRef(ref);
+    const value = key ? w.entity.get(record)?.claims.find((c) => c.key === key)?.value : undefined;
+    const count = countOf(value);
+    const cycle = cycleOf(value);
+    const calendars = count ? [count.calendar] : cycle ? [cycle.day?.cycle, cycle.year?.cycle].filter((x): x is string => !!x) : [];
+    return [ref, ...calendars.flatMap((k) => zeroDayClaim(w, k)?.ref ?? [])];
+  };
+  const by = (p: string) => [...new Set([...b.get(p)!.loBy, ...b.get(p)!.hiBy].flatMap(withZeroDay))];
   return { start: by(pointOf(w, subject, 'start')), end: by(pointOf(w, subject, 'end')) };
 }
 
@@ -321,8 +360,12 @@ function valueText(s: Solved, c: Claim, labelOf: (ref: string) => string): strin
   const prop = s.world.vocab.properties[c.prop];
   const v = c.value;
   switch (prop?.type) {
-    case 'time':
-      return formatTimeValue(parseTime(v as never), labelOf);
+    case 'time': {
+      const t = parseTime(v as never);
+      // A day in a count of days is said as it is written, with the day it comes to in the default picture; a day
+      // named in cycles, with the day it comes to there against the rest of the evidence.
+      return t.kind === 'count' ? countText(s.world, t) : t.kind === 'cycle' ? cycleText(s.world, c) : dateText(v, labelOf);
+    }
     case 'point': {
       const p = v as { lat: number; lon: number; frame: string };
       const f = s.world.frame.get(p.frame);
@@ -342,6 +385,8 @@ function valueText(s: Solved, c: Claim, labelOf: (ref: string) => string): strin
       return prop.values?.[String(v)] ?? String(v);
     case 'form':
       return formText(v as FormSpec);
+    case 'footprint-form':
+      return footprintText(v as Footprint);
     case 'body-form': {
       const parts = Object.keys((v as { parts?: object }).parts ?? {});
       return parts.length ? `What it changes of the body it inherits: ${parts.join(', ')}` : 'What it changes of the body it inherits';
@@ -362,10 +407,115 @@ function valueText(s: Solved, c: Claim, labelOf: (ref: string) => string): strin
   }
 }
 
-function validText(v: unknown): string | undefined {
+/**
+ * A time as text. A date that names its calendar is said as it is written, with the day it is on the axis where
+ * that differs: a source's 1 May 1707 in the Julian calendar is 12 May in the Gregorian, which the axis reads
+ * dates after 1582 in, and a reader with the source in hand looks for the first.
+ */
+function dateText(v: unknown, labelOf: (ref: string) => string = (r) => r): string {
+  const shown = formatTimeValue(parseTime(v as never), labelOf);
+  const named = typeof v === 'string' ? /^(.*) (Julian|Gregorian)$/.exec(v.trim()) : null;
+  return named && named[1] !== shown ? `${named[1]} in the ${named[2]} calendar (${shown})` : shown;
+}
+
+/** A day in a count of days as text: as it is written, and the day it comes to in a scenario, where it can be placed. */
+function countText(w: World, t: { calendar: string; days: number; text: string }, sc: Scenario = {}): string {
+  const days = countDays(w, t, sc);
+  return days ? `${t.text} (${formatTimeValue({ kind: 'interval', lo: days[0], hi: days[1] })})` : t.text;
+}
+
+/**
+ * A day named in cycles as text: as it is written, and the day the rest of the evidence lets it be in a scenario,
+ * or the days, or that it names none of the days the evidence allows.
+ */
+function cycleText(w: World, c: Claim, sc: Scenario = {}): string {
+  const r = resolveCycle(w, c, sc);
+  const day = ([a, b]: [number, number]) => formatTimeValue({ kind: 'interval', lo: dayOnAxis(a).t, hi: dayOnAxis(b).t + dayOnAxis(b).whole });
+  const text = String(c.value);
+  if (!r) return text;
+  if (r.days.length === 1) return `${text} (${day(r.days[0])})`;
+  if (r.days.length) return `${text} (one of ${r.days.map(day).join(', ')})`;
+  return r.nearest ? `${text} (none of the days the rest of the evidence allows; the nearest is ${day(r.nearest)})` : text;
+}
+
+/**
+ * The value of a claim written in a count of days, under each competing date of the count's zero day, or of a claim
+ * named in cycles, under each competing date of its cycles' anchors: by that claim's reference, for the viewer to
+ * show when it is picked. Undefined for any other claim.
+ */
+function countTexts(w: World, c: Claim): Record<string, string> | undefined {
+  if (w.vocab.properties[c.prop]?.type !== 'time') return undefined;
+  const count = countOf(c.value);
+  const cycle = cycleOf(c.value);
+  const calendars = count ? [count.calendar] : cycle ? [cycle.day?.cycle, cycle.year?.cycle].filter((x): x is string => !!x) : [];
+  const out: Record<string, string> = {};
+  for (const k of calendars) {
+    const [epoch] = epochsOf(w, k);
+    const g = epoch ? claimGroup(w, epoch, 'date') : undefined;
+    if (!g) continue;
+    const def = chosen(g);
+    for (const z of g.claims) if (z !== def) out[z.ref] = count ? countText(w, count, { picks: [z.ref] }) : cycleText(w, c, { picks: [z.ref] });
+  }
+  return Object.keys(out).length ? out : undefined;
+}
+
+/**
+ * When a claim holds, or the span a relation held over, in words: one time; "from … " and "until …" where an end
+ * is left open; a bound that names another record's start or end as that; a day in a count of days as written.
+ */
+function validText(v: unknown, w: World, labelOf: (ref: string) => string, self: string): string | undefined {
   if (v === undefined) return undefined;
-  const t: TimeValue = parseTime(v as never);
-  return formatTimeValue(t);
+  const say = (x: unknown): string | null => {
+    if (x === undefined) return null;
+    if (x === 'unknown') return 'unknown';
+    if (typeof x === 'object' && x !== null) {
+      const { ref, edge } = x as { ref: string; edge: string };
+      const subject = edgeSubject(ref, self) ?? ref;
+      // A moment has no start and end to tell apart: it is named itself, as a surrender is.
+      return isMoment(w, subject) ? labelOf(subject) : `the ${edge} of ${labelOf(subject)}`;
+    }
+    const count = countOf(x);
+    return count ? countText(w, count) : dateText(x);
+  };
+  if (typeof v !== 'object' || v === null) return say(v)!;
+  const { lo, hi } = v as { lo?: unknown; hi?: unknown };
+  const [a, b] = [say(lo), say(hi)];
+  return a && b ? `${a} – ${b}` : a ? `from ${a}` : `until ${b}`;
+}
+
+/**
+ * How long after a moment a source was written, from its `written`: "written the same year", "written 4 months
+ * after", "written 34 years after", or, for a range, from its first year to its last. Undefined where the source
+ * does not say when it was written, or the moment is not within history.
+ */
+export function writtenAfter(written: unknown, at: number): string | undefined {
+  if (written === undefined || !historical(at)) return undefined;
+  let lo: number;
+  let hi: number;
+  try {
+    [lo, hi] = bounds(parseTime(written as never));
+  } catch {
+    return undefined;
+  }
+  if (!Number.isFinite(lo) || !Number.isFinite(hi)) return undefined;
+  const say = (years: number): string => {
+    const a = Math.abs(years);
+    if (a < 1 / 12) return 'weeks';
+    // Eleven and a half months and more is a year, not "12 months".
+    const months = Math.max(1, Math.round(a * 12));
+    if (months < 12) return `${months} month${months === 1 ? '' : 's'}`;
+    return `${Math.round(a)} year${Math.round(a) === 1 ? '' : 's'}`;
+  };
+  // A day, a month or a year it was written in is taken at its middle; a longer span from its first year to its last.
+  const [first, last] = hi - lo <= 1 ? [(lo + hi) / 2 - at, (lo + hi) / 2 - at] : [lo - at, hi - at];
+  if (last < 0) return `written ${say(last)} before`;
+  if (first < 0) return 'written at the time';
+  const a = say(first);
+  const b = say(last);
+  if (a === b) return `written ${a} after`;
+  // "33 to 56 years", not "33 years to 56 years".
+  const [n, unit] = a.split(' ');
+  return b.endsWith(` ${unit}`) || (unit === 'year' && b.endsWith(' years')) || (unit === 'month' && b.endsWith(' months')) ? `written ${n} to ${b} after` : `written ${a} to ${b} after`;
 }
 
 function lagText(lag: unknown): string | undefined {
@@ -383,6 +533,13 @@ export function sourceRecord(src: Source): SourceRecord {
 }
 
 /** A label for any reference: an entity's or phase's name, a record's title, or the reference itself. */
+/** Who held a perspective, and when: the `holds` relations that name it, from the records that make them. */
+export function holdersOf(s: Solved, alt: string, labelOf: (ref: string) => string = labeller(s)): { id: string; label: string; held?: string }[] {
+  return s.world.entities
+    .flatMap((e) => e.relations.filter((r) => r.rel === 'holds' && r.to === alt && r.status !== 'deprecated' && r.rank !== 'deprecated').map((r) => ({ e, r })))
+    .map(({ e, r }) => ({ id: r.subject, label: labelOf(r.subject), ...(r.valid !== undefined ? { held: validText(r.valid, s.world, labelOf, e.id) } : {}) }));
+}
+
 export function labeller(s: Solved): (ref: string) => string {
   const cache = new Map<string, string>();
   for (const e of s.world.entities) cache.set(e.id, namesOf(s, e).label);
@@ -421,34 +578,46 @@ export function records(s: Solved): EntityRecord[] {
     const id = splitRef(target).record;
     inverse.set(id, [...(inverse.get(id) ?? []), x]);
   };
+  // Rival readings, in the default picture or in any alternative's: marked, so that neither end takes one for held.
+  const rivals = new Set([{}, ...w.alternatives.filter((a) => a.type === 'alternative').map((a) => ({ alts: [a.id] }))].flatMap((p) => rivalsIn(w, p).map((r) => r.ref)));
   for (const e of w.entities) {
     for (const r of e.relations) {
       const type = w.vocab.relations[r.rel];
-      if (type && subjectExists(w, r.to)) addInverse(r.to, { rel: type.inverse, via: r.ref, from: r.subject, fromLabel: labelOf(r.subject), status: r.status });
+      if (type && subjectExists(w, r.to)) addInverse(r.to, { rel: type.inverse, via: r.ref, from: r.subject, fromLabel: labelOf(r.subject), status: r.status, alt: r.alt, rank: r.rank, validText: validText(r.valid, w, labelOf, e.id), ...(rivals.has(r.ref) ? { rival: true as const } : {}) });
     }
     for (const c of e.claims) {
       const prop = w.vocab.properties[c.prop];
       if (prop?.type !== 'ref' || !prop.inverse) continue;
       const frame = w.frame.get(String(c.value));
-      if (frame?.entity && w.entity.has(frame.entity)) addInverse(frame.entity, { rel: prop.inverse, via: c.ref, from: c.subject, fromLabel: labelOf(c.subject), status: c.status });
+      if (frame?.entity && w.entity.has(frame.entity)) addInverse(frame.entity, { rel: prop.inverse, via: c.ref, from: c.subject, fromLabel: labelOf(c.subject), status: c.status, alt: c.alt, rank: c.rank });
     }
   }
   const out: EntityRecord[] = [];
   for (const e of w.entities) {
     const used = new Set<string>();
     const wanted = new Set<string>();
-    const cites = (cs: { ref: string; loc?: string; quote?: string }[]): CitationRecord[] =>
+    // When a source was written, against when what it tells of happened: an account written down decades later
+    // is not one written that year (the moment is the claim's subject's date, or the edge a start or end claims).
+    const momentOf = (c: Claim | (typeof e.relations)[number]): number | undefined => {
+      const prop = 'prop' in c ? c.prop : undefined;
+      const point = isMoment(w, c.subject) ? pointOf(w, c.subject, 'start') : prop === 'start' || prop === 'end' ? pointOf(w, c.subject, prop) : undefined;
+      const b = point ? (s.centres.ok ? s.centres.bounds : s.sol.bounds).get(point) : undefined;
+      return b && Number.isFinite(b.lo) && Number.isFinite(b.hi) ? (b.lo + b.hi) / 2 : undefined;
+    };
+    const cites = (cs: { ref: string; loc?: string; quote?: string }[], at?: number): CitationRecord[] =>
       cs.map((c) => {
         used.add(c.ref);
-        return { ref: c.ref, loc: c.loc, quote: c.quote };
+        const after = at === undefined ? undefined : writtenAfter(w.source.get(c.ref)?.written, at);
+        return { ref: c.ref, loc: c.loc, quote: c.quote, ...(after ? { after } : {}) };
       });
     const common = (c: Claim | (typeof e.relations)[number]) => ({
       ref: c.ref,
       key: c.key,
       subject: c.subject,
       valid: c.valid,
-      validText: validText(c.valid),
-      sources: cites(c.sources),
+      validText: validText(c.valid, w, labelOf, e.id),
+      sources: cites(c.sources, momentOf(c)),
+      against: c.against.length ? cites(c.against, momentOf(c)) : undefined,
       unsourced: c.unsourced,
       confidence: c.confidence,
       confidenceRange: typeof c.confidence === 'string' ? w.vocab.confidence[c.confidence] : undefined,
@@ -464,22 +633,28 @@ export function records(s: Solved): EntityRecord[] {
     const claims: ClaimRecord[] = e.claims.map((c) => {
       const g = claimGroup(w, c.subject, c.prop);
       for (const ref of claimRefs(w, c)) if (!exists(ref)) wanted.add(splitRef(ref).record);
+      // Claims of one picture that each hold for a span of their own, as a state's names do in turn, do not compete.
+      const turn = !!g && c.rank !== 'deprecated' && inTurn(g.claims.filter((x) => x.alt === c.alt && x.rank !== 'deprecated'));
       return {
         ...common(c),
         prop: c.prop,
         value: c.value,
         valueText: valueText(s, c, labelOf),
+        valueTexts: countTexts(w, c),
         method: c.method,
         methodLabel: c.method ? w.vocab.methods[c.method]?.label : undefined,
         group: `${c.subject}|${c.prop}`,
-        competing: !!g && g.claims.length > 1,
+        competing: !!g && !isBeside(w, c) && g.claims.length > 1 && !turn,
+        turn: turn || undefined,
+        // A date named in cycles holds beside the others of its group, and is never the one picked.
+        beside: isBeside(w, c) || undefined,
         chosen: !!g && chosen(g) === c,
       };
     });
     const relations: RelationRecord[] = e.relations.map((r) => {
       const ok = exists(r.to);
       if (!ok) wanted.add(splitRef(r.to).record);
-      return { ...common(r), rel: r.rel, family: w.vocab.relations[r.rel]?.family ?? 'other', to: r.to, toLabel: labelOf(r.to), wanted: !ok, lagText: lagText(r.lag) };
+      return { ...common(r), rel: r.rel, family: w.vocab.relations[r.rel]?.family ?? 'other', to: r.to, toLabel: labelOf(r.to), ...(rivals.has(r.ref) ? { rival: true as const } : {}), wanted: !ok, lagText: lagText(r.lag) };
     });
     const time = timeOf(s, e.id, s.sol.bounds, boundsOf(s.centres));
     const variants: VariantRecord[] = [];
@@ -508,7 +683,7 @@ export function records(s: Solved): EntityRecord[] {
       basis: pl ? { ...pl.basis, time: timeBasis(s, [...by.start, ...by.end]) } : { time: timeBasis(s, [...by.start, ...by.end]), place: 'evidence', placeNow: 'evidence' },
       frame: frame ? { id: frame.id, title: frame.title, plate: pl!.plate, entity: frame.entity, entityLabel: frame.entity ? labelOf(frame.entity) : undefined } : undefined,
       same_as: e.same_as,
-      phases: e.phases.map((p) => ({ id: p.id, label: p.label ?? p.id, gap: p.gap, ...subjectTime(s, `${e.id}@${p.id}`) })),
+      phases: e.phases.map((p) => ({ id: p.id, label: p.label ?? p.id, gap: p.gap, ...(p.same_as ? { same_as: p.same_as } : {}), ...subjectTime(s, `${e.id}@${p.id}`) })),
       time,
       claims,
       relations,
@@ -525,7 +700,7 @@ export function records(s: Solved): EntityRecord[] {
 /** The records a claim refers to, besides its sources. */
 function claimRefs(w: World, c: Claim): string[] {
   const prop = w.vocab.properties[c.prop];
-  const out = c.sources.map((x) => x.ref);
+  const out = [...c.sources, ...c.against].map((x) => x.ref);
   if (c.alt) out.push(c.alt);
   if (prop?.type === 'ref') out.push(String(c.value));
   if (prop?.type === 'point') out.push((c.value as { frame: string }).frame);
@@ -533,6 +708,9 @@ function claimRefs(w: World, c: Claim): string[] {
     try {
       const t = parseTime(c.value as never);
       if (t.kind === 'ref') out.push(t.ref);
+      // A day in a count of days rests on the record of the count's zero day, and a day named in cycles on their anchors.
+      if (t.kind === 'count') out.push(...epochsOf(w, t.calendar));
+      if (t.kind === 'cycle') for (const n of [t.day, t.year]) if (n) out.push(...anchorsOf(w, n.cycle));
     } catch {
       // the validator reports it
     }
@@ -580,7 +758,12 @@ export function search(s: Solved, feats: Feature[]): SearchFile {
   return {
     entities: s.world.entities
       .filter((e) => !e.kind.startsWith('period/'))
-      .map((e) => ({ id: e.id, label: namesOf(s, e).label, kind: e.kind, summary: e.summary, time: timeOf(s, e.id, s.sol.bounds, boundsOf(s.centres)), located: located.has(e.id), ...(e.id.startsWith('life/pbdb/') ? { bulk: true } : {}) })),
+      .map((e) => {
+        // Every name it goes by, so that it is found by any: absent where its label is its only one.
+        const { label, names } = namesOf(s, e);
+        const more = names.some((n) => n.text !== label || n.valid);
+        return { id: e.id, label, kind: e.kind, summary: e.summary, time: timeOf(s, e.id, s.sol.bounds, boundsOf(s.centres)), located: located.has(e.id), ...(e.id.startsWith('life/pbdb/') ? { bulk: true } : {}), ...(more ? { names } : {}) };
+      }),
   };
 }
 

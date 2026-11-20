@@ -1,0 +1,25 @@
+id: src:un-treaty-collection-historical-information
+type: database-record
+kind: compilation
+citation: >-
+  United Nations Treaty Collection. Multilateral Treaties Deposited with the Secretary-General:
+  Historical Information.
+snapshot: 2026-11-17
+title: Historical Information
+container: United Nations Treaty Collection, Multilateral Treaties Deposited with the Secretary-General
+url: https://treaties.un.org/Pages/HistoricalInfo.aspx?clang=_en
+reliability: >-
+  The depositary's own notes on changes of name, union, separation and continuity among the states
+  party to the treaties deposited with the Secretary-General, state by state. It is evidence of how
+  the United Nations Secretariat, as depositary, treats a state, and of the communications it
+  received, as it summarizes them; it is not the text of those communications. The page is
+  revised without notice.
+verified:
+  by: machine:claude-code
+  how: >-
+    The page fetched from treaties.un.org on 2026-11-17 and its entry "Russian Federation", note 1,
+    read in full; the quotes were found in the kept text by quote-check. For the Yugoslav records
+    the entries "Yugoslavia (former)", "Yugoslavia (Federal Republic of)", "Serbia and
+    Montenegro", "Serbia" and "Montenegro" were read in full on the same day, and their quotes
+    found in the kept text by quote-check. The other states' entries were not read for this
+    record.

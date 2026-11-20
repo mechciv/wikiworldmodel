@@ -1,0 +1,22 @@
+id: src:irish-free-state-proclamation-1922
+type: document
+kind: act
+citation: >-
+  George V. A Proclamation [announcing that the Constitution of the Irish Free State has been
+  passed and adopted by Parliament], given at Buckingham Palace on 6 December 1922. The London
+  Gazette, no. 32775, 8 December 1922, pp. 8689–8690.
+published: 1922
+title: A Proclamation
+container: The London Gazette, no. 32775
+url: https://www.thegazette.co.uk/London/issue/32775/data.pdf
+via: >-
+  The Gazette (The National Archives): a scan of the issue, read through the text layer of the
+  PDF, which misreads a letter here and there ("Beign" for Reign).
+reliability: >-
+  The proclamation on whose issue the Constitution of the Irish Free State came into operation,
+  as printed in the official gazette two days later. It is evidence of the day it was given.
+verified:
+  by: machine:claude-code
+  how: >-
+    The whole issue fetched on 2026-11-17 and the proclamation read (pp. 8689–8690). Quotations
+    found in the kept text by quote-check.

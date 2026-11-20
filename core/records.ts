@@ -2,6 +2,7 @@
 // periods (periods.json) and for coverage (coverage.json): everything the viewer's inspect
 // panel needs, already resolved.
 import type { CoverageMatrix } from './coverage.ts';
+import type { Glance } from './glance.ts';
 import type { CheckStep, Level } from './ladder.ts';
 import type { FieldSpread } from './samples.ts';
 import type { Basis, FeatureBasis, FeatureName, FeatureTime } from './tileset.ts';
@@ -31,6 +32,11 @@ export interface CitationRecord {
   ref: string;
   loc?: string;
   quote?: string;
+  /**
+   * how long after the moment the claim is about its source was written, where the source says when it was written
+   * and the claim is about a moment: "written 4 months after", "written 34 years after"
+   */
+  after?: string;
 }
 
 /** What claims and relations share. */
@@ -43,6 +49,8 @@ interface ClaimCommon {
   valid?: unknown;
   validText?: string;
   sources: CitationRecord[];
+  /** works that deny it */
+  against?: CitationRecord[];
   unsourced?: string;
   confidence?: number | string;
   /** a calibrated confidence word's probability range */
@@ -64,11 +72,20 @@ export interface ClaimRecord extends ClaimCommon {
   value: unknown;
   /** human-readable value */
   valueText: string;
+  /**
+   * the value as text where another claim, picked over its group's default, changes what it comes to: by that
+   * claim's reference. A date in a count of days comes to another day under each date of the count's zero day.
+   */
+  valueTexts?: Record<string, string>;
   method?: string;
   methodLabel?: string;
   /** "subject|prop": claims in the same group compete */
   group: string;
   competing: boolean;
+  /** it holds in its turn: the claims of its group each hold for a span of their own, no two at once, and do not compete */
+  turn?: true;
+  /** it holds beside its group's other claims: a date written as a day named in cycles, which narrows them and is never picked */
+  beside?: true;
   /** the claim the default picture uses for its group */
   chosen: boolean;
 }
@@ -78,6 +95,8 @@ export interface RelationRecord extends ClaimCommon {
   family: string;
   to: string;
   toLabel: string;
+  /** another reading: it gives way to a preferred relation of its subject and type, and holds only when picked */
+  rival?: true;
   /** the target is not written yet */
   wanted: boolean;
   lagText?: string;
@@ -91,6 +110,11 @@ export interface InverseRecord {
   from: string;
   fromLabel: string;
   status: string;
+  /** as the stored relation has them: the alternative it belongs to, its rank, the span it held over, and whether it is a rival reading */
+  alt?: string;
+  rank: string;
+  validText?: string;
+  rival?: true;
 }
 
 export interface VariantRecord {
@@ -115,7 +139,7 @@ export interface EntityRecord {
   frame?: { id: string; title: string; plate?: number; entity?: string; entityLabel?: string };
   same_as?: Record<string, string | number>;
   /** each phase's interval in the default picture, and under the scenarios that move it */
-  phases: { id: string; label: string; gap?: boolean; time: FeatureTime; variants?: Record<string, FeatureTime> }[];
+  phases: { id: string; label: string; gap?: boolean; same_as?: Record<string, string | number>; time: FeatureTime; variants?: Record<string, FeatureTime> }[];
   time: FeatureTime;
   claims: ClaimRecord[];
   relations: RelationRecord[];
@@ -137,10 +161,29 @@ export interface SearchEntry {
   located: boolean;
   /** imported in bulk: found by search, but too many to mark along the time control */
   bulk?: boolean;
+  /**
+   * Every name it goes by, with when each was in use where that is known: its own name claims, and
+   * the names of the dataset rows that are rows of it. Absent when its label is its only name.
+   */
+  names?: FeatureName[];
+  /**
+   * Where it was drawn, for one with no point of its own: the rows of a dataset that are rows of it,
+   * each [from, to, lon, lat, km²], [from, to) on the axis, at the row's label point.
+   */
+  places?: [number, number, number, number, number][];
+  /** for rows of a dataset gathered under one name, rather than a record: the dataset */
+  dataset?: string;
 }
 
 export interface SearchFile {
   entities: SearchEntry[];
+  /**
+   * Rows of datasets that name things, such as the states of Cliopatria, gathered under one name
+   * while they run on in time. They are no records: each is found by its name, its id is the
+   * address of its first row, src:<dataset>#<key>, and a row tied to a record by an overlay is
+   * found as that record instead (docs/STRUCTURE.md section 3.1).
+   */
+  rows?: SearchEntry[];
 }
 
 export interface PeriodRecord {
@@ -225,6 +268,8 @@ export interface CoverageFile {
   tiers?: { span: string; layers: Record<string, Record<string, number>> }[];
   /** the same, finely, with what answers each layer when: what the coverage page draws (core/coverage.ts) */
   matrix?: CoverageMatrix;
+  /** how much of the world is known, at a glance: the landing page's bars (core/glance.ts) */
+  glance?: Glance;
   /** how much of each area and era rests on each basis: features per tile, by basis */
   tiles: { tile: string; bbox: [number, number, number, number]; time: [number, number]; features: Partial<Record<Basis, number>> }[];
 }

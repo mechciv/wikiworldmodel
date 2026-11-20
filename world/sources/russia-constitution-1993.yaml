@@ -1,0 +1,27 @@
+id: src:russia-constitution-1993
+type: document
+kind: act
+citation: >-
+  Constitution of the Russian Federation (Конституция Российской Федерации), adopted by
+  nationwide vote on 12 December 1993, with the amendments approved in the nationwide vote of
+  1 July 2020.
+published: 1993
+title: Конституция Российской Федерации
+url: https://ru.wikisource.org/wiki/%D0%9A%D0%BE%D0%BD%D1%81%D1%82%D0%B8%D1%82%D1%83%D1%86%D0%B8%D1%8F_%D0%A0%D0%BE%D1%81%D1%81%D0%B8%D0%B9%D1%81%D0%BA%D0%BE%D0%B9_%D0%A4%D0%B5%D0%B4%D0%B5%D1%80%D0%B0%D1%86%D0%B8%D0%B8
+via: >-
+  Russian Wikisource's transcription of the text in force, which gives as its sources the
+  collected legislation of the Russian Federation, constitution.kremlin.ru, consultant.ru and the
+  official portal of legal information. In the kept text the number of article 67.1 runs
+  together as 671.
+reliability: >-
+  Russia's constitution as amended in 2020: evidence of what Russia itself now holds about its
+  relation to the Soviet Union, that it is the Union's legal successor on its own territory and
+  its successor and continuator in international organizations and treaties. Article 67.1 is
+  marked as being in the wording of the amendment law of 14 March 2020 (no. 1-ФКЗ), so it is not
+  evidence of what was held in 1991.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from ru.wikisource.org on 2026-11-17; article 1 and article 67.1 read in Russian, and
+    the page's note on the articles marked with an asterisk, of which 67.1 is one. The quotes
+    were found in the kept text by quote-check.

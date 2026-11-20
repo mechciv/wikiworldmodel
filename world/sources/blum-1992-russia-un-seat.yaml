@@ -1,0 +1,27 @@
+id: src:blum-1992-russia-un-seat
+type: publication
+kind: review
+citation: >-
+  Blum, Y.Z. (1992). Russia Takes Over the Soviet Union's Seat at the United Nations. European
+  Journal of International Law 3, 354–361.
+authors:
+  - "Blum, Y.Z."
+published: 1992
+title: Russia Takes Over the Soviet Union's Seat at the United Nations
+container: European Journal of International Law 3
+url: https://www.ejil.org/pdfs/3/2/2045.pdf
+reliability: >-
+  A note by an international lawyer, written by May 1992, on how Russia came to sit in the Soviet
+  Union's seat: it reports what the republics declared, quotes Yeltsin's letter from the United
+  Nations document, and says that no member objected. Its own judgment is that Russia's claim to
+  continue the Union was legally flawed, because the republics, Russia among them, had declared
+  the Union extinct, and that the claim was accepted for reasons of politics. It dates the
+  Union's dissolution to the Alma-Ata declaration, or possibly the Minsk agreement, and calls
+  the president's resignation the sealing of its fate.
+verified:
+  by: machine:claude-code
+  how: >-
+    The journal's PDF fetched from ejil.org on 2026-11-17 and its text read in full, pp. 354 to
+    the last page, which the PDF numbers 362 though the first page gives the article as 354–361;
+    page numbers are those printed in the PDF. The quotes were found in the kept text by
+    quote-check.

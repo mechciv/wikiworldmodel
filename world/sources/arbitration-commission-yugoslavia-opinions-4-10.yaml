@@ -1,0 +1,29 @@
+id: src:arbitration-commission-yugoslavia-opinions-4-10
+type: document
+kind: act
+citation: >-
+  Arbitration Commission of the Conference on Yugoslavia. Opinions Nos. 4 to 10 (Nos. 4 to 7 of
+  11 January 1992; the interlocutory decision and Opinions Nos. 8 to 10 of 4 July 1992).
+  Printed as annex 3, pp. 74–91, to Türk, D. (1993). Recognition of States: A Comment.
+  European Journal of International Law 4(1), 66–71.
+published: 1993
+title: Opinions No. 4-10 of the Arbitration Commission of the International Conference on Yugoslavia
+container: European Journal of International Law 4(1)
+url: https://www.ejil.org/pdfs/4/1/1227.pdf
+via: >-
+  The journal's own PDF, with a machine-read text; the journal marks the English of the
+  interlocutory decision and of Opinion No. 9 as an unofficial translation (footnotes 2 and 3).
+reliability: >-
+  The opinions of the commission that the European Community set up beside its peace conference
+  on Yugoslavia. They are evidence of what the commission held on 4 July 1992: that the old
+  federation's dissolution was complete, and that the Federal Republic of Yugoslavia was a new
+  state and not its sole successor. They were advice to the conference; Serbia and Montenegro
+  had challenged the commission's competence to give it.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from ejil.org on 2026-11-17. The interlocutory decision and Opinions Nos. 8, 9 and
+    10 were read whole (pp. 84–91). The machine-read text is poor in places ("die" for "the"
+    through most of Opinion No. 10, and the first words of the conclusion of Opinion No. 8 run
+    together), so each quote is a run of the kept text that is whole, found by quote-check.
+    Page numbers are the journal's, printed at the foot of each page.

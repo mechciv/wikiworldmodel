@@ -1,0 +1,80 @@
+id: people/polities/kingdom-of-scotland
+kind: polity
+summary: >-
+  The Kingdom of Scotland, to its union with England on 1 May 1707 by the calendar both kept.
+  Written for that union and for the king who held its crown with England's: its start is a
+  nineteenth-century reconstruction of when the Scots and the Picts came under one king, and
+  its land is drawn from the borders dataset's rows as they are, not as a territory of this
+  record. The Acts of Union keep Scotland's law, courts and church, and speak of it afterwards
+  as a part of the United Kingdom; this record is the kingdom as a state, and stops.
+author: machine:claude-code
+same_as: { wikidata: Q230791 }
+claims:
+  name:
+    prop: name
+    value: { en: Kingdom of Scotland }
+    source:
+      ref: src:union-with-scotland-act-1706
+      loc: recital
+      quote: the Commissioners nominated on the behalf of the Kingdom of Scotland
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in union-with-scotland-act-1706.txt (sha256 37fa8bbbcbf7888f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  start-dnb:
+    prop: start
+    value: 846 CE
+    source:
+      - ref: src:mackay-1892-dnb-kenneth-i
+        loc: "s.v. Kenneth I, vol. 30, p. 438"
+        quote: in the twelfth year of his reign (846), two years after succeeding to the Dalriad monarchy, he finally defeated the Picts and confirmed his rule over ‘Alban,’ the name given to the united kingdom of the Scots and Picts
+      - ref: src:mackay-1892-dnb-kenneth-i
+        loc: "s.v. Kenneth I, vol. 30, p. 438"
+        quote: it is not wonderful that Kenneth should have been looked back upon as the founder of the Scottish dynasty
+    method: historical-account
+    basis: reconstruction
+    rank: preferred
+    note: >-
+      The kingdom is traced to Kenneth MacAlpine, king of the Scots of Dalriada, who brought the
+      Picts under his rule: the Dictionary of National Biography reckons that to 846, from
+      chronicles written centuries later, and calls the period obscure. It is preferred to the
+      Britannica's year because the Dictionary works the years out and gives 860 as the year of
+      Kenneth's death. Wikidata's item for the kingdom gives 843. The united kingdom was called
+      Alban; the borders dataset names its rows Kingdom of Alba from 900 to 1293 and Kingdom of
+      Scotland from 1294.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in dnb-kenneth-i.txt (sha256 182e9b83b1ce058c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  start-britannica:
+    prop: start
+    value: 860 CE
+    source:
+      - ref: src:lang-1911-britannica-scotland
+        loc: "s.v. Scotland, vol. 24, p. 431"
+        quote: In 860 this Scot became king of the Picts.
+      - ref: src:lang-1911-britannica-scotland
+        loc: "s.v. Scotland, vol. 24, p. 431"
+        quote: The consequence was that what had been Pictland came to be styled Scotland.
+    method: historical-account
+    basis: reconstruction
+    note: >-
+      The same event, Kenneth MacAlpine's kingship over the Picts, fourteen years later than
+      the Dictionary of National Biography has it. The Britannica says elsewhere (p. 412) that
+      the name Scotland became established only in the twelfth and thirteenth centuries.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in eb1911-scotland.txt (sha256 9796793362e89db8), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  end:
+    prop: end
+    value: { ref: people/polities/great-britain, edge: start }
+    source:
+      - ref: src:union-with-england-act-1707
+        loc: "Article I"
+        quote: That the Two Kingdoms of Scotland and England shall upon the first day of May next ensuing the date hereof and forever after be United into One Kingdom by the Name of Great Britain
+      - ref: src:union-with-scotland-act-1706
+        loc: "Article XXIV"
+        quote: within that part of the United Kingdom now called Scotland
+    method: documentary
+    note: >-
+      The kingdom ended as Great Britain began: the end names that start, so the day is written
+      once, there, with its calendar. What ended was the separate state. The Articles keep "all
+      other Laws in use within the Kingdom of Scotland" in force after the union (XVIII) and its
+      courts as they were (XIX), and call it from then on a part of the United Kingdom.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in union-with-england-act-1707.txt (sha256 cdb4f31a1c82a2f4) and union-with-scotland-act-1706.txt (sha256 37fa8bbbcbf7888f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }

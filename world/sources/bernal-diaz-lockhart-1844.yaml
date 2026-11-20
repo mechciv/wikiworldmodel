@@ -1,0 +1,34 @@
+id: src:bernal-diaz-lockhart-1844
+type: text
+kind: eyewitness
+citation: >-
+  Díaz del Castillo, B. The Memoirs of the Conquistador Bernal Diaz del Castillo, written by himself, containing a
+  true and full account of the discovery and conquest of Mexico and New Spain. Translated from the original Spanish
+  by J. I. Lockhart. 2 vols. London: J. Hatchard and Son, 1844.
+authors:
+  - "Díaz del Castillo, B."
+published: 1844
+written: 26 February 1568 CE
+title: The Memoirs of the Conquistador Bernal Diaz del Castillo
+container: London, J. Hatchard and Son, 1844
+url: https://gutenberg.pglaf.org/3/2/4/7/32474/32474-h/32474-h.htm
+via: >-
+  Lockhart's English translation, which his preface says is "from the old edition printed at Madrid in 1632", in
+  Project Gutenberg's transcription (ebooks 32474, 32475, produced from Internet Archive images), read from its
+  mirror at gutenberg.pglaf.org and kept as one text, es-bernal-diaz-lockhart-1844.txt. It includes the author's
+  preface of the 1632 edition, which the Spanish edition of 1862 kept here does not, and the translator's notes.
+license: public domain
+reliability: >-
+  The same work as src:bernal-diaz-verdadera-historia, in a translation of 1844 from the 1632 print; cited for
+  the author's preface (dated 26 February 1568 at Guatemala, the `written` here) and for the translator's notes,
+  which are a nineteenth-century reader's judgements (as that Bernal's date for the flight is wrong). For the
+  narrative, cite the Spanish. Lockhart sometimes renders loosely (cap. LXIII's "en 2 dias del mes de Setiembre" as
+  "the first two days of September").
+verified:
+  by: machine:claude-code
+  how: >-
+    The HTML of both volumes fetched on 2026-11-18 (2026-11-19 UTC) from gutenberg.pglaf.org (gutenberg.org was down
+    for maintenance), kept as es-bernal-diaz-lockhart-1844-1/2.txt and joined, unaltered, into
+    es-bernal-diaz-lockhart-1844.txt. Read: the translator's and author's prefaces, and the chapters matching the
+    Spanish ones cited (to compare dates), with note 95. The quotations were found in the kept text by script with
+    quote-check's own matching.

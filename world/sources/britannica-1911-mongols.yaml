@@ -1,0 +1,29 @@
+id: src:britannica-1911-mongols
+type: publication
+kind: review
+citation: >-
+  Douglas, R.K. & Jülg, B. (1911). Mongols. Encyclopædia Britannica, 11th edition, vol. 18.
+authors:
+  - "Douglas, R.K."
+  - "Jülg, B."
+published: 1911
+title: Mongols
+container: Encyclopædia Britannica, 11th edition, vol. 18
+url: https://en.wikisource.org/wiki/1911_Encyclop%C3%A6dia_Britannica/Mongols
+via: >-
+  English Wikisource's transcription of the volume. The page as served joins the article's
+  pages and does not print their numbers.
+reliability: >-
+  A general encyclopaedia's article, a century old, which follows the supreme khans from
+  Jenghiz to the last of them in China and then each western house in turn. It is cited as a
+  last resort, for the year to which the Ilkhans' line lasted in name, which the better
+  sources read here do not give.
+verified:
+  by: machine:claude-code
+  how: >-
+    The page fetched on 2026-11-17. Read: the history from the opening to the death of Mangu
+    and the reigns from Kublai to the fall of the dynasty in China and after, and the sections
+    with the side-headings The House of Jagatai, The Ilkhans of Persia, The Golden Horde, The
+    White Horde and The Reign of Toktamish. Not read: the campaigns under Ogdai in the west,
+    the later Mongols and Kalmucks, the Krim Tatars and Uzbegs, and the part on the language.
+    Locators are the side-headings. The quotations were found in the kept text by quote-check.

@@ -1,0 +1,17 @@
+id: src:wikidata-templo-mayor
+type: database-record
+kind: compilation
+snapshot: "2026-11-19"
+citation: >-
+  Wikidata, item Q774021 (Templo Mayor), property P625 (coordinate location).
+container: Wikidata
+url: https://www.wikidata.org/wiki/Q774021
+license: CC0-1.0
+reliability: >-
+  A crowd-edited item, "main Temple of Tenochtitlan": the excavated temple in the centre of Mexico City, with a point
+  to the hundredth of a second of arc.
+verified:
+  by: machine:claude-code
+  how: >-
+    The item's JSON (Special:EntityData/Q774021.json) fetched on 19 November 2026 (UTC) and kept as wd-Q774021.raw:
+    coordinates 19.435, -99.131389.

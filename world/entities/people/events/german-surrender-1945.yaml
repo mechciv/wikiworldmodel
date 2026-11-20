@@ -1,0 +1,98 @@
+id: people/events/german-surrender-1945
+kind: event/treaty
+summary: >-
+  The act of military surrender by which the German High Command surrendered all its forces to
+  the Allied Expeditionary Force and the Soviet High Command: signed at Reims in the small hours
+  of 7 May 1945, to take effect at 2301 hours Central European time on 8 May, and signed again
+  in Berlin in the night of 8 to 9 May. Which day it has depends on which act is meant and on
+  whose clock. Wikidata has this item for the surrender and one more for each of the two
+  documents.
+author: machine:claude-code
+same_as: { wikidata: Q700983 }
+claims:
+  name:
+    prop: name
+    value: { en: German Instrument of Surrender }
+    unsourced: >-
+      An editorial label, the usual name in English; both documents are headed Act of Military
+      Surrender.
+  date-in-effect:
+    prop: date
+    value: 8 May 1945 CE
+    source:
+      - ref: src:german-act-of-military-surrender-reims-1945
+        loc: second paragraph
+        quote: to cease active operations at 2301 hours Central European time on 8 May
+      - ref: src:german-act-of-military-surrender-berlin-1945
+        loc: paragraph 2
+        quote: to cease active operations at 2301 hours Central European time on 8th May 1945
+      - ref: src:german-act-of-military-surrender-berlin-1945
+        loc: closing line
+        quote: Signed at BERLIN on the 8th day of May, 1945.
+    method: documentary
+    rank: preferred
+    note: >-
+      The taking effect, and the second signing. Both acts set the same hour for operations to
+      cease, one minute past eleven at night on 8 May by Central European time, and the act
+      signed in Berlin, which confirmed the first, gives 8 May as its own day. Preferred
+      because it is the one day both documents name, and the day the surrender bound the
+      forces it covered. The hour and its clock are part of what the acts say and cannot be
+      written here: the date is a whole day, and the day has no place.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ww2-german-surrender-reims-1945.txt (sha256 c4d71c46a802e885) and ww2-german-surrender-berlin-1945.txt (sha256 e0bb0919ced58a90), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  date-signed-reims:
+    prop: date
+    value: 7 May 1945 CE
+    source:
+      ref: src:german-act-of-military-surrender-reims-1945
+      loc: closing line
+      quote: Signed at RHEIMS at 0241 on the 7th day of May, 1945.
+    method: documentary
+    note: >-
+      The first signing, at Reims at 2.41 in the morning, by Jodl. By the rule that a treaty is
+      dated to the day it was signed this is the surrender's date; it took effect the next day
+      and was signed again in Berlin, so the day it took effect is preferred.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ww2-german-surrender-reims-1945.txt (sha256 c4d71c46a802e885), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+  date-after-midnight:
+    prop: date
+    value: 9 May 1945 CE
+    source:
+      - ref: src:hansard-1945-05-08-victory-in-europe
+        loc: cols. 159-160
+        quote: Hostilities will end officially ... at one minute after midnight to-night, Tuesday, the 8th of May
+      - ref: src:museum-karlshorst-historischer-ort
+        loc: first paragraph
+        quote: Hier unterzeichneten die Oberbefehlshaber der Wehrmacht in der Nacht vom 8. zum 9. Mai 1945
+      - ref: src:ussr-decree-1945-victory-day
+        loc: text of the decree
+        quote: установить, что 9 мая является днем всенародного торжества — Праздником Победы
+    method: documentary
+    note: >-
+      The same taking effect and the same second signing, on clocks and in accounts that put
+      them past midnight. The British Government gave the end of hostilities as one minute
+      after midnight, where the acts say 2301 hours Central European time. The museum in the
+      building where the act was signed in Berlin has it signed in the night from 8 to 9 May
+      (in English: here the commanders-in-chief of the Wehrmacht signed in the night from 8 to
+      9 May 1945). The Soviet Union, by a decree dated in Moscow on 8 May, kept 9 May as the
+      day of victory (in English: to establish that 9 May is a day of celebration for the whole
+      people, the Holiday of Victory). No document read gives the hour of either by Moscow's
+      clock. This is not a disagreement about when the surrender happened: it is one moment
+      read on several clocks, which the model can only write as competing days.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ww2-hansard-1945-05-08-lords-victory-in-europe.txt (sha256 1a9dc64744bec34f), ww2-museum-karlshorst-historischer-ort.txt (sha256 7fc1a462a98b82ee) and ww2-ussr-decree-victory-day-1945-ru.txt (sha256 082f004b4fe9b12c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }
+relations:
+  part-of:
+    rel: part-of
+    to: people/wars/second-world-war
+    source:
+      ref: src:museum-karlshorst-historischer-ort
+      loc: first paragraph
+      quote: Damit endete der Zweite Weltkrieg in Europa.
+    note: >-
+      In English: with this the Second World War ended in Europe. It ended the war with
+      Germany and not the war: the British Government's statement of the same day says that
+      the German war is at an end and that Japan remains unsubdued
+      (src:hansard-1945-05-08-victory-in-europe).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ww2-museum-karlshorst-historischer-ort.txt (sha256 7fc1a462a98b82ee), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-17" }

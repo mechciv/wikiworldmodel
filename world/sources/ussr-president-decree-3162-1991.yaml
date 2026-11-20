@@ -1,0 +1,26 @@
+id: src:ussr-president-decree-3162-1991
+type: document
+kind: act
+citation: >-
+  President of the USSR. Decree of 25 December 1991, no. УП-3162, "On the President of the USSR's
+  laying down the powers of Supreme Commander-in-Chief of the Armed Forces of the USSR and the
+  abolition of the Defence Council under the President of the USSR" (О сложении Президентом СССР
+  полномочий Верховного Главнокомандующего Вооруженными Силами СССР и упразднении Совета обороны
+  при Президенте СССР), Moscow, the Kremlin. Ведомости Верховного Совета СССР, 1991, no. 52.
+published: 1991
+title: О сложении Президентом СССР полномочий Верховного Главнокомандующего Вооруженными Силами СССР и упразднении Совета обороны при Президенте СССР
+url: https://ru.wikisource.org/wiki/%D0%A3%D0%BA%D0%B0%D0%B7_%D0%9F%D1%80%D0%B5%D0%B7%D0%B8%D0%B4%D0%B5%D0%BD%D1%82%D0%B0_%D0%A1%D0%A1%D0%A1%D0%A0_%D0%BE%D1%82_25.12.1991_%E2%84%96_3162
+via: >-
+  Russian Wikisource's transcription, which gives as its source the gazette of the Supreme Soviet
+  of the USSR (Ведомости Верховного Совета СССР, 1991, no. 52); Wikisource marks the page as not
+  yet reviewed.
+reliability: >-
+  Gorbachev's decree, signed as President of the USSR and dated Moscow, the Kremlin, 25 December
+  1991: evidence that he left the presidency that day and handed the right to use nuclear weapons
+  to the President of the Russian Federation, in his own words. It does not say that the Union
+  had ended.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched from ru.wikisource.org on 2026-11-17 and read in full in Russian, both points, the
+    signature and the date line; the quotes were found in the kept text by quote-check.

@@ -1,0 +1,143 @@
+id: people/conquest/conquest-of-tlatelolco
+kind: event/conquest
+summary: >-
+  The war in which Axayacatl of Tenochtitlan defeated Moquihuix of Tlatelolco, the last of Tlatelolco's own kings,
+  and made the twin city on the north of the island a tributary, governed from then on by governors named by the
+  Mexica kings, though always of its own people, until the Spaniards came. The year is 1473; Ixtlilxóchitl wrote 1463
+  and named the year 7 Calli, which is 1473 and not 1463, as his editor corrected him. How Moquihuix died is told five
+  ways.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Conquest of Tlatelolco }
+    unsourced: An editorial label.
+  date-1473:
+    prop: date
+    value: 1473 CE
+    source:
+      - ref: src:ixtlilxochitl-1892-historia-chichimeca
+        loc: "ch. LI, Chavero's note 2, p. 252"
+        quote: La verdadera fecha es 1473
+      - ref: src:jimenez-2020-superficie
+        loc: "p. 18"
+        quote: Ambos núcleos de población llevaron una vida políticamente independiente hasta 1.473 d.C., en que los tenochcas se enfrentaron y derrotaron a los tlatelolcas, los sometieron a tributo y les impusieron un gobierno militar.
+    method: historical-account
+    rank: preferred
+    note: >-
+      Chavero, editing Ixtlilxóchitl in 1892: the true date is 1473 (Nezahualpilli of Texcoco, whom the text has
+      take part, was then eight). Jiménez Martínez (2020): both settlements were politically independent until 1473,
+      when the Tenochca defeated the Tlatelolca, made them pay tribute and imposed a military government on them.
+      Preferred: it is the year the native year name gives.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in city-ixtlilxochitl-1892-tomo2.txt (sha256 5886f18c08b1f94b) and city-jimenez-2020-superficie.txt (sha256 de0eb47de70c2086), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  date-1463:
+    prop: date
+    value: 1463 CE
+    source:
+      ref: src:ixtlilxochitl-1892-historia-chichimeca
+      loc: "ch. LI, p. 252"
+      quote: que fué en el de mil cuatrocientos sesenta y tres … que llaman chicóme Calli
+    method: historical-account
+    rank: deprecated
+    note: >-
+      Ixtlilxóchitl, writing in the early seventeenth century: in the year 1463, which they call chicome calli, 7
+      House. Set aside: his editor corrects it to 1473, and the year he names, 7 Calli, falls in 1473, not 1463.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in city-ixtlilxochitl-1892-tomo2.txt (sha256 5886f18c08b1f94b), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  date-mexica:
+    prop: date
+    value: the year 7 Calli
+    source:
+      ref: src:ixtlilxochitl-1892-historia-chichimeca
+      loc: "ch. LI, p. 252"
+      quote: que fué en el de mil cuatrocientos sesenta y tres … que llaman chicóme Calli
+    method: historical-account
+    note: >-
+      The year Ixtlilxóchitl names in the Mexica count, chicome calli. Read against the year the other evidence
+      gives, it holds with 1473 and not with his own 1463: one witness's two dates for one event, held against each
+      other. The year's first day follows the anchor of the count of years (people/calendars/xiuhpohualli-anchor),
+      counted back fifty-two years from 1521 with no leap day.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in city-ixtlilxochitl-1892-tomo2.txt (sha256 5886f18c08b1f94b), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  account-codex-mendoza:
+    prop: account
+    value:
+      en: >-
+        Moquihuix, beaten in the battle, threw himself down from the top of a high temple; Tlatelolco was subject to
+        the king of Mexico from then until the Spanish conquest, paying him tribute and acknowledging vassalage.
+    source:
+      - ref: src:codex-mendoza-1831-english
+        loc: "commentary on Axayacatl's reign (Plates IX–X)"
+        quote: died, precipitating himself from the top of a high temple … the city of Tlatilula from that time until the conquest of Mexico by the Spaniards, was subject to the king of Mexico, paying him tribute, and acknowledging vassalage
+      - ref: src:sahagun-1829-historia-general
+        loc: "book 8, ch. II, p. 274"
+        quote: desde la cumbre de dicho Cú, se despeñó acia abajo, y así acabó su vida
+    method: historical-account
+    rank: preferred
+    note: >-
+      The Codex Mendoza's commentary (its English, in Kingsborough's edition) and Sahagún's book 8 agree that he
+      threw himself down. Preferred as the telling two sources share, the commentary of a Tenochca book of tribute
+      among them; the others are each one writer's.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in city-kingsborough-1831-vol6.txt (sha256 3c597150a1bea5da) and city-sahagun-1829-vol2.txt (sha256 170577622749b8c0), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  account-duran:
+    prop: account
+    value:
+      en: Axayacatl, entering the temple, killed Moquihuix and his captain Teconal by the altar and threw them down the steps.
+    source:
+      ref: src:duran-1867-historia
+      loc: "ch. XXXIV, p. 269"
+      quote: los mató y sacó arrastrando y echó por las escaleras abaxo del templo
+    method: historical-account
+    note: Durán, 1581. His editor Ramírez notes that the sources differ on who threw Moquihuix down.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in city-duran-1867-vol1.txt (sha256 0c47389562a44709), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  account-torquemada:
+    prop: account
+    value:
+      en: A Mexica called Quetzalhua threw Moquihuix down the steps, and Axayacatl took out his heart, though he was dead.
+    source:
+      ref: src:torquemada-1615-monarquia-indiana
+      loc: "book 2, ch. LVIII, p. 248"
+      quote: uno de ellos llamado Quetzalhua … de las gradas abajo, por donde vino rodando
+    method: historical-account
+    note: >-
+      Torquemada, 1615, who counts 460 Tlatelolca dead. Sahagún's book 9 has him killed by his own people instead
+      (p. 336), and Ixtlilxóchitl thrown from the highest tower by the armies of the three kings (ch. LI, p. 252).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in city-torquemada-1615-joined.txt (sha256 688c18b2f2d9d7a3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  location:
+    prop: location
+    value: { lat: 19.45108333, lon: -99.1375, frame: frame:earth/present-day }
+    source: { ref: src:wikidata-tlatelolco, loc: "Q796925, P625 coordinate location" }
+    method: gazetteer
+  frame:
+    prop: frame
+    value: frame:paleomap/plate-104
+    source: { ref: src:paleomap-plate-model, loc: PALEOMAP_PlatePolygons.gpml }
+    method: plate-polygon
+    basis: reconstruction
+relations:
+  tenochtitlan:
+    rel: participant
+    to: people/polities/tenochtitlan
+    source:
+      ref: src:sahagun-1829-historia-general
+      loc: "book 8, ch. I, p. 269"
+      quote: perdieron el señorío, por la victoria que tuvieron de ellos los de México … no tuvieron señor por espacio de cuarenta y seis años
+    note: The victors, under Axayacatl. Sahagún adds that the Tlatelolca had no lord for forty-six years after.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in city-sahagun-1829-vol2.txt (sha256 170577622749b8c0), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  tlatelolco:
+    rel: participant
+    to: people/polities/tlatelolco
+    source:
+      ref: src:torquemada-1615-monarquia-indiana
+      loc: "book 2, ch. LVIII, p. 248"
+      quote: ser repúblicas de por sí cada una
+    note: >-
+      The defeated, under Moquihuix. Torquemada holds it a war between two republics, each with its own king, against
+      Acosta, who called it a Tlatelolca rebellion.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in city-torquemada-1615-joined.txt (sha256 688c18b2f2d9d7a3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }

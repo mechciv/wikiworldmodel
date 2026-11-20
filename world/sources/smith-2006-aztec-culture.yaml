@@ -1,0 +1,20 @@
+id: src:smith-2006-aztec-culture
+type: publication
+kind: review
+citation: >-
+  Smith, M.E. (2006). Aztec Culture: An Overview. Web essay, Arizona State University (PDF).
+authors: ["Smith, M.E."]
+published: 2006
+title: "Aztec Culture: An Overview"
+url: http://web.archive.org/web/2024id_/https://www.public.asu.edu/~mesmith9/1-CompleteSet/Smith-AztecCulture-WWW.pdf
+via: The author's PDF, read from the Internet Archive's copy of his ASU pages (capture of 14 September 2024).
+license: all-rights-reserved
+license_note: Quoted briefly as evidence. The essay is marked "© 2006, Michael E. Smith".
+reliability: >-
+  A short overview the author wrote from his own encyclopedia entries; a summary of the consensus,
+  with no references for its dates.
+verified:
+  by: machine:claude-code
+  how: >-
+    Fetched on 2026-11-19 (UTC) and read whole. Quotes found in the kept text
+    city-smith-aztec-culture.txt by script.

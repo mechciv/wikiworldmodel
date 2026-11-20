@@ -1,0 +1,24 @@
+id: src:mackay-1892-dnb-kenneth-i
+type: publication
+kind: review
+citation: >-
+  Mackay, A.J.G. (1892). Kenneth I, MacAlpine (d. 860), king of the Scots. Dictionary of
+  National Biography, vol. 30, pp. 437–439.
+authors:
+  - "Mackay, A.J.G."
+published: 1892
+title: Kenneth I, MacAlpine (d. 860), king of the Scots
+container: Dictionary of National Biography, vol. 30
+url: https://en.wikisource.org/wiki/Dictionary_of_National_Biography,_1885-1900/Kenneth_I
+via: >-
+  English Wikisource's transcription of the volume, page by page against its scan; these pages
+  are marked proofread there.
+reliability: >-
+  The standard British biographical dictionary. For Kenneth's reign it follows the Chronicle of
+  Huntingdon and Fordun, written centuries later, and calls the period obscure; its dates are a
+  reconstruction, and later scholarship may put them otherwise.
+verified:
+  by: machine:claude-code
+  how: >-
+    The page fetched on 2026-11-17 and the article read. Quotations found in the kept text by
+    quote-check.
