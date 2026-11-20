@@ -1,27 +1,30 @@
-// What stands in a town besides its houses (core/dwelling.ts, TownSpec): the pieces of its wall, its towers and its
-// gates, and the water of its canals and its moat. Each is a short piece drawn many times along a line the settlement
-// generator lays out, as a house is drawn many times over a village. Nothing here is a fact about any town: what a wall
-// was made of, how high it stood and how many gates it had come from the claims, and what they leave open is drawn
-// plainly, as a type. A piece runs along x, its outside facing +y; the frame places it.
+// What stands in a settlement besides its houses: the pieces of a town's wall, its towers and its gates, the water of
+// its canals and its moat (core/dwelling.ts, TownSpec); and, of any settlement, the people by its houses and the boats
+// on its water. Each is one small thing drawn many times where the settlement generator puts it, as a house is drawn
+// many times over a village. Nothing here is a fact about any town: what a wall was made of, how high it stood and how
+// many gates it had come from the claims, and what they leave open is drawn plainly, as a type; the people and the
+// boats rest on no claim at all, and are the plainest there are. A piece runs along x, its outside facing +y; the frame
+// places it.
 import type { TownSpec } from '../../../core/dwelling.ts';
-import { box, MAT, type Mesh } from '../city/kit.ts';
+import { box, cap, figure, MAT, person, prism, type Mesh } from '../city/kit.ts';
+import type { Poly } from '../city/math.ts';
 import type { HouseDetail } from './dwellings.ts';
 
 /** What a wall is made of, where a town has one. */
 export type WallWord = Exclude<NonNullable<TownSpec['wall']>, 'none'>;
 
-export type WorkKind = 'wall' | 'tower' | 'gate' | 'canal' | 'moat';
+export type WorkKind = 'wall' | 'tower' | 'gate' | 'canal' | 'moat' | 'person' | 'boat';
 
-/** One kind of piece: a length of wall, a tower, a gate, or a length of water. Metres. */
+/** One kind of piece: a length of wall, a tower, a gate, a length of water, a person or a boat. Metres. */
 export interface WorkSpec {
   kind: WorkKind;
   /** what a wall, a tower or a gate is made of */
   material?: WallWord;
-  /** how high a wall stands; nothing for water */
+  /** how high a wall stands, a person is, or a boat's side rises; nothing for water */
   height: number;
-  /** how thick a wall is at its foot, or how wide the water is */
+  /** how thick a wall is at its foot, how wide the water is, or how long a boat is */
   thickness: number;
-  /** how wide a gate's way through is */
+  /** how wide a gate's way through is, or a boat's beam */
   opening?: number;
 }
 
@@ -39,6 +42,8 @@ export const towerSide = (s: WorkSpec): number => Math.max(4.5, s.thickness * 1.
 /** The top of a piece, for how big it comes out on the screen: water is taken by its width. */
 export function workTop(s: WorkSpec): number {
   if (s.kind === 'canal' || s.kind === 'moat') return Math.max(1.5, s.thickness * 0.5);
+  if (s.kind === 'person') return s.height;
+  if (s.kind === 'boat') return Math.max(1, s.thickness * 0.3);
   if (s.kind === 'wall') return s.height + 1;
   return s.height * 1.35 + 1;
 }
@@ -99,6 +104,24 @@ function tower(m: Mesh, s: WorkSpec, x: number, detail: HouseDetail): void {
 export function drawWork(m: Mesh, s: WorkSpec, detail: HouseDetail, tint = 128): void {
   m.tint = tint;
   const half = PIECE / 2;
+  if (s.kind === 'person') {
+    // Someone standing by the houses: the same plain figure for everyone, everywhere, but for the cloth, which `tint` varies.
+    if (detail === 2) {
+      m.mat = MAT.cloth;
+      figure(m, 0, 0, 0, s.height, 0);
+    } else person(m, 0, 0, 0, s.height, (tint * 53 + 40) & 255, 128 + (tint & 3));
+    return;
+  }
+  if (s.kind === 'boat') {
+    // A plain open hull of wood, pointed at both ends, afloat with its floor under the water's line.
+    const l = s.thickness / 2;
+    const b = (s.opening ?? s.thickness * 0.18) / 2;
+    const hull: Poly = [-l, 0, -l * 0.55, -b, l * 0.55, -b, l, 0, l * 0.55, b, -l * 0.55, b];
+    m.mat = MAT.wood;
+    prism(m, hull, -0.3, s.height, false);
+    if (detail < 2) cap(m, hull, s.height * 0.25);
+    return;
+  }
   if (s.kind === 'canal' || s.kind === 'moat') {
     // Water lying a little above the ground it is drawn on, between low banks of earth.
     const w = s.thickness / 2;

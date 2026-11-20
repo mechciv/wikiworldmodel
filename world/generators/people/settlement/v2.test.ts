@@ -237,9 +237,12 @@ describe('the settlement generator', () => {
       const s = plan.settlements.find((x) => x.city === 'Testopolis')!;
       const si = plan.settlements.indexOf(s);
       const mine = plan.houses.filter((h) => h.settlement === si);
-      const works = plan.works.filter((w) => w.settlement === si);
-      const kind = (k: string) => works.filter((w) => plan.workForms[w.form].spec.kind === k);
-      return { plan, s, mine, works, kind };
+      const all = plan.works.filter((w) => w.settlement === si);
+      const kind = (k: string) => all.filter((w) => plan.workForms[w.form].spec.kind === k);
+      // Its works: its wall and its water. The people by its houses and the boats on its water are counted apart.
+      const works = all.filter((w) => !['person', 'boat'].includes(plan.workForms[w.form].spec.kind));
+      const built = plan.workForms.filter((f) => !['person', 'boat'].includes(f.spec.kind));
+      return { plan, s, mine, works, kind, built };
     };
     // How far the houses reach from the town's middle in each of `n` directions.
     const reach = (hs: { x: number; y: number }[], n: number) => Array.from({ length: n }, (_, k) => Math.max(0, ...hs.filter((h) => Math.floor(((Math.atan2(h.y, h.x) + Math.PI) / (2 * Math.PI)) * n) % n === k).map((h) => Math.hypot(h.x, h.y))));
@@ -283,13 +286,13 @@ describe('the settlement generator', () => {
     });
 
     it('has the wall its tradition says, round its houses, with gates where its main streets leave it, and towers', () => {
-      const { plan, s, mine, kind } = town({ streets: 'grid', wall: 'stone', wall_height: 9, gates: 4 });
+      const { s, mine, kind, built } = town({ streets: 'grid', wall: 'stone', wall_height: 9, gates: 4 });
       const wall = kind('wall');
       const gates = kind('gate');
       expect(gates.length).toBe(4);
       expect(kind('tower').length).toBeGreaterThan(8);
       expect(wall.length).toBeGreaterThan(200);
-      expect(plan.workForms.map((f) => `${f.spec.kind} ${f.spec.material} ${f.spec.height} ${f.from}`)).toEqual(['wall stone 9 test/town-house', 'gate stone 9 test/town-house', 'tower stone 9 test/town-house']);
+      expect(built.map((f) => `${f.spec.kind} ${f.spec.material} ${f.spec.height} ${f.from}`)).toEqual(['wall stone 9 test/town-house', 'gate stone 9 test/town-house', 'tower stone 9 test/town-house']);
       expect(s.town!.text).toBe('streets on a grid, a wall of stone 9 m high, 4 gates');
       // Every house is inside the wall: in each direction the wall stands further out than the furthest house.
       const out = reach(wall, 180);
@@ -355,7 +358,7 @@ describe('the settlement generator', () => {
       const both = town({ streets: 'lanes', wall: 'stone', gates: 6 }, { record: 'people/cities/recordia', from: 'record', town: { wall: 'brick' } });
       expect(both.s.town!.from).toEqual({ streets: 'test/town-house', wall: 'people/cities/recordia', gates: 'test/town-house' });
       expect(both.kind('gate').length).toBe(6);
-      expect(both.plan.workForms.every((f) => f.spec.material === 'brick')).toBe(true);
+      expect(both.built.every((f) => f.spec.material === 'brick')).toBe(true);
     });
 
     it('too thin on the ground for streets has none: its houses stand apart, as many as its people make', () => {
@@ -365,6 +368,63 @@ describe('the settlement generator', () => {
       expect(works).toEqual([]);
       expect(s.town).toBeUndefined();
       expect(Math.max(...mine.map((h) => Math.hypot(h.x, h.y)))).toBeGreaterThan(2000);
+    });
+  });
+
+  describe('people, boats and paths', () => {
+    const villages = () => world(() => ({ code: 23, density: 260, region: 1 }), [{ id: 1, a: assess(1, 1, 3, 2) }]);
+    const of = (plan: ReturnType<typeof makeSettlement>, kind: string) => plan.works.filter((w) => plan.workForms[w.form].spec.kind === kind);
+
+    it('stands a few plain people by the houses of each settlement, and says they are generic', () => {
+      const plan = makeSettlement(spec(villages()), flat, dry, EXTENT);
+      const people = of(plan, 'person');
+      expect(people.length / plan.houses.length).toBeGreaterThan(0.3);
+      expect(people.length / plan.houses.length).toBeLessThan(0.6);
+      expect(plan.workForms.find((f) => f.spec.kind === 'person')).toMatchObject({ label: 'A person', from: 'generic' });
+      // Each within a few steps of a house of its own settlement.
+      const byPlace = new Map<number, { x: number; y: number }[]>();
+      for (const h of plan.houses) (byPlace.get(h.settlement) ?? byPlace.set(h.settlement, []).get(h.settlement)!).push(h);
+      for (const p of people.slice(0, 400)) expect(Math.min(...byPlace.get(p.settlement)!.map((h) => Math.hypot(p.x - h.x, p.y - h.y)))).toBeLessThan(6.6);
+    });
+
+    it('floats boats only on water deep enough, beside a settlement, and none on dry land', () => {
+      expect(of(makeSettlement(spec(villages()), flat, dry, EXTENT), 'boat')).toEqual([]);
+      // A river 400 m wide and 3 m deep along y, its water at 37 m: boats ride on it, at its level.
+      const ground: Ground = { at: (x) => (Math.abs(x) < 200 ? 34 : 40) };
+      const river = () => 37;
+      const plan = makeSettlement(spec(villages()), ground, river, EXTENT);
+      const boats = of(plan, 'boat');
+      expect(boats.length).toBeGreaterThan(5);
+      for (const b of boats) {
+        expect(Math.abs(b.x)).toBeLessThan(200);
+        expect(b.z).toBeCloseTo(36.95, 5);
+        const s = plan.settlements[b.settlement];
+        expect(Math.hypot(b.x - s.x, b.y - s.y)).toBeLessThan(s.r + 261);
+      }
+    });
+
+    it('joins each settlement to its nearest neighbours by a path that ends at the edge of their houses', () => {
+      const plan = makeSettlement(spec(villages()), flat, dry, EXTENT);
+      expect(plan.pathWidth).toBeGreaterThan(1);
+      expect(plan.paths.length).toBeGreaterThan(50);
+      const near = (x: number, y: number) => plan.settlements.reduce((best, s) => Math.min(best, Math.hypot(x - s.x, y - s.y) - s.r), Infinity);
+      let length = 0;
+      for (const line of plan.paths) {
+        expect(line.length).toBeGreaterThanOrEqual(6);
+        // Each end at the edge of a settlement's houses; no step of it long enough to cut a corner of the ground.
+        expect(near(line[0], line[1])).toBeLessThan(1);
+        expect(near(line.at(-2)!, line.at(-1)!)).toBeLessThan(1);
+        for (let q = 2; q < line.length; q += 2) {
+          const d = Math.hypot(line[q] - line[q - 2], line[q + 1] - line[q - 1]);
+          expect(d).toBeLessThan(40);
+          length += d;
+        }
+      }
+      // No more than the most the scene lays, give or take the last path.
+      expect(length).toBeLessThan(302_500);
+      // Herders' and foragers' camps are joined by none.
+      const camps = makeSettlement(spec(world(() => ({ code: 42, density: 3, region: 1 }), [{ id: 1, a: assess(1, 0, 0, 3) }])), flat, dry, EXTENT);
+      expect(camps.paths).toEqual([]);
     });
   });
 

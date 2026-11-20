@@ -127,6 +127,13 @@ export interface SettlementParams {
   towns: TownParams;
   /** how the animals people kept are drawn among them; without it none are */
   livestock?: LivestockParams;
+  /**
+   * People by the houses, boats on the water beside a settlement, and paths between settlements: drawn so that a scene
+   * has its scale and its ways. No record says anything of any of them; without these parameters none are drawn.
+   */
+  figures?: { per_house: number; most_in_settlement: number; most: number; height: number };
+  boats?: { length: number; beam: number; side: number; reach: number; depth: number; most_in_settlement: number };
+  paths?: { width: number; reach: number; each: number; most_km: number; wander: number; patterns: Pattern[] };
   /** the most houses a scene draws: past it, each house stands for more people, and the plan says how many */
   most_houses: number;
 }
@@ -237,6 +244,9 @@ export interface SettlementPlan {
   workForms: WorkForm[];
   /** the animals its people kept, where a husbandry tradition names them */
   animals: Kept[];
+  /** the paths between its settlements: each a line of points, flat [x, y, …] in the scene's metres; and how wide they are */
+  paths: number[][];
+  pathWidth: number;
   /** people the plan's houses hold, and the people the world puts in the land it covers */
   drawn: number;
   expected: number;
@@ -527,6 +537,105 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
       });
     });
   }
+  // People by the houses, and boats on the water beside a settlement: no record says anything of them. They are the
+  // plainest figures there are, the same everywhere, there so that a scene has its scale.
+  const F = p.figures;
+  if (F) {
+    const who = workOf({ kind: 'person', height: F.height, thickness: 0.5 }, 'A person', 'generic');
+    let stood = 0;
+    settlements.forEach((s, si) => {
+      const [h0, h1] = housesOf[si] ?? [0, 0];
+      if (h1 <= h0 || stood >= F.most) return;
+      const rng = new Rng((s.seed ^ 0x2c9277b5) >>> 0);
+      const n = Math.min(F.most_in_settlement, F.most - stood, Math.floor((h1 - h0) * F.per_house + rng.next()));
+      for (let q = 0; q < n; q++) {
+        const house = houses[h0 + rng.int(0, h1 - h0 - 1)];
+        const b = rng.next() * TAU;
+        const d = 2.5 + 4 * rng.next();
+        const x = house.x + Math.sin(b) * d;
+        const y = house.y + Math.cos(b) * d;
+        if (!fit(x, y)) continue;
+        works.push({ x, y, z: ground.at(x, y), face: rng.next() * TAU, form: who, settlement: si });
+        stood++;
+      }
+    });
+  }
+  const B = p.boats;
+  if (B) {
+    const boat = workOf({ kind: 'boat', height: B.side, thickness: B.length, opening: B.beam }, 'A boat', 'generic');
+    settlements.forEach((s, si) => {
+      if (!s.houses) return;
+      const rng = new Rng((s.seed ^ 0x51a3c6d1) >>> 0);
+      let afloat = 0;
+      for (let q = 0; q < 16 && afloat < B.most_in_settlement; q++) {
+        const b = rng.next() * TAU;
+        const d = s.r + 10 + B.reach * rng.next();
+        const x = s.x + Math.sin(b) * d;
+        const y = s.y + Math.cos(b) * d;
+        const level = water(x, y);
+        // Afloat only where the water is deep enough to float it, in the scene.
+        if (!inScene(x, y) || level - ground.at(x, y) < B.depth) continue;
+        works.push({ x, y, z: level - 0.05, face: rng.next() * TAU, form: boat, settlement: si });
+        afloat++;
+      }
+    });
+  }
+  // Paths between the settlements of people who stayed in one place: each to the nearest few within reach, by a line
+  // that wanders a little. No record gives any of them; they say only that neighbours went to and fro.
+  const paths: number[][] = [];
+  const W = p.paths;
+  if (W) {
+    const joined = settlements.map((s, i) => ({ s, i })).filter(({ s }) => W.patterns.includes(s.pattern) && s.houses > 0);
+    const size = W.reach;
+    const cells = new Map<string, number[]>();
+    joined.forEach(({ s }, j) => {
+      const k = `${Math.floor(s.x / size)},${Math.floor(s.y / size)}`;
+      (cells.get(k) ?? cells.set(k, []).get(k)!).push(j);
+    });
+    const done = new Set<string>();
+    let total = 0;
+    // From the middle of the scene outward, where a visitor arrives, until the most the scene draws is laid.
+    const order = joined.map((_, j) => j).sort((a, b) => Math.hypot(joined[a].s.x, joined[a].s.y) - Math.hypot(joined[b].s.x, joined[b].s.y));
+    for (const j of order) {
+      if (total > W.most_km * 1000) break;
+      const a = joined[j].s;
+      const near: { d: number; j: number }[] = [];
+      const cx = Math.floor(a.x / size);
+      const cy = Math.floor(a.y / size);
+      for (let u = -1; u <= 1; u++) for (let v = -1; v <= 1; v++) {
+        for (const o of cells.get(`${cx + u},${cy + v}`) ?? []) {
+          if (o === j) continue;
+          const d = Math.hypot(joined[o].s.x - a.x, joined[o].s.y - a.y);
+          if (d <= W.reach && d > a.r + joined[o].s.r) near.push({ d, j: o });
+        }
+      }
+      near.sort((x, y) => x.d - y.d || x.j - y.j);
+      for (const { d, j: o } of near.slice(0, W.each)) {
+        const key = j < o ? `${j}-${o}` : `${o}-${j}`;
+        if (done.has(key)) continue;
+        done.add(key);
+        const b = joined[o].s;
+        const ux = (b.x - a.x) / d;
+        const uy = (b.y - a.y) / d;
+        // From the edge of one's houses to the edge of the other's, bowed a little to one side and wandering.
+        const from = a.r * 0.9;
+        const length = d - a.r * 0.9 - b.r * 0.9;
+        if (length < 20) continue;
+        const seed = (a.seed ^ Math.imul(b.seed, 0x9e3779b1)) >>> 0;
+        const bow = (hash2(1, 41, seed) - 0.5) * 2 * W.wander * length;
+        const steps = Math.max(2, Math.ceil(length / 25));
+        const line: number[] = [];
+        for (let q = 0; q <= steps; q++) {
+          const f = q / steps;
+          const along = from + length * f;
+          const side = Math.sin(PI * f) * (bow + (fbm(along / 180, 3.7, seed | 0) - 0.5) * 2 * W.wander * Math.min(length, 600));
+          line.push(a.x + ux * along - uy * side, a.y + uy * along + ux * side);
+        }
+        paths.push(line);
+        total += length;
+      }
+    }
+  }
   // Houses past the most a scene draws stand for more people each: the plan keeps the people, and says so.
   let perHouse = 0;
   let drawn = 0;
@@ -545,7 +654,7 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
   const use = P.lifeway.fields === 'none' ? 'rainfed' : P.lifeway.fields;
   const generic = p.plots[use];
   const style = tc?.fields.kind ? { kind: tc.fields.kind, plot: mid(tc.fields.plot, generic.plot), from: 'tradition' as const, tradition: tc.id } : { kind: generic.kind, plot: generic.plot, from: 'generic' as const };
-  return { settlements, forms, houses: kept, works, workForms, animals, drawn: Math.round(drawn), expected: Math.round(expected), perHouse: Math.round(perHouse * 10) / 10, style, lifeway: P.lifeway };
+  return { settlements, forms, houses: kept, works, workForms, animals, paths, pathWidth: W?.width ?? 0, drawn: Math.round(drawn), expected: Math.round(expected), perHouse: Math.round(perHouse * 10) / 10, style, lifeway: P.lifeway };
 
   /**
    * Houses of a settlement, as its tradition's pattern sets them out: clustered, in a ring, along a line or apart. A town

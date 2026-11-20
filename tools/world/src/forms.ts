@@ -51,7 +51,9 @@ export class FormTree {
   parent(id: string): string | undefined {
     if (this.up.has(id)) return this.up.get(id);
     const e = this.world.entity.get(id);
-    const r = e?.relations.find((x) => x.rel === 'descends-from' && x.rank !== 'deprecated' && x.status !== 'deprecated');
+    // Of two parents, the one ranked preferred holds, as with any rival relations: a nearer parent written beside an older, coarser one.
+    const up = e?.relations.filter((x) => x.rel === 'descends-from' && x.rank !== 'deprecated' && x.status !== 'deprecated') ?? [];
+    const r = up.find((x) => x.rank === 'preferred') ?? up[0];
     const p = r ? splitRef(r.to).record : undefined;
     this.up.set(id, p);
     return p;

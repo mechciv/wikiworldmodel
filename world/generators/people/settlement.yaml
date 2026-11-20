@@ -136,4 +136,10 @@ params:
     graze_kg: 15
     most_in_settlement: 240
     most: 12000
+  # People by the houses, boats on the water beside a settlement and paths between settlements, so that a scene has its
+  # scale and its ways. No record says anything of any of them: they are the plainest there are, the same everywhere,
+  # and a click says that they are generic.
+  figures: { per_house: 0.5, most_in_settlement: 300, most: 20000, height: 1.62 }
+  boats: { length: 5, beam: 0.9, side: 0.45, reach: 250, depth: 0.6, most_in_settlement: 3 }
+  paths: { width: 1.8, reach: 2500, each: 2, most_km: 300, wander: 0.05, patterns: [shifting, farmsteads, hamlets, villages, towns, city] }
   most_houses: 60000

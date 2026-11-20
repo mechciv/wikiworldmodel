@@ -125,7 +125,7 @@ export interface WikiWorldModelHandle {
   organismsAt(id: string): { x: number; y: number; depth: number }[];
   organismPlaces(id: string): { lat: number; lon: number; x: number; y: number }[];
   /** what a click at a point of the view finds in the living scene drawn: a taxon, a house the generator drew, or the ground (not the sky); null with no scene */
-  foundAt(x: number, y: number): { taxon?: string; kept?: string; house?: number; work?: number; ground: boolean } | null;
+  foundAt(x: number, y: number): { taxon?: string; kept?: string; house?: number; work?: number; path?: boolean; ground: boolean } | null;
   set(s: Partial<ViewState>): void;
   /**
    * How long each pass of the local scene's frame takes, the median over this many frames drawn again of the view as it
@@ -1939,6 +1939,15 @@ async function start(root: HTMLElement): Promise<void> {
           const why = `${gen.generator}, version ${gen.version}: which animals people kept follows the husbandry tradition recorded for their way of life, region and time; the generator draws a few to each house, those that graze in herds on the pasture or at the edge of the fields, the rest about the houses.`;
           return inspect.showGenerated(a.label, 'Kept animal', text, why);
         }
+        // A path between two settlements: no record gives it.
+        if (found.path && city.people && city.spec.people) {
+          setState({ sel: null });
+          shownRecord = null;
+          const gen = city.spec.people.generator;
+          const text = `A path between two settlements of the scene, one of ${city.people.paths.toLocaleString('en-US')} it draws. No record says where any path ran: each settlement of people who stayed in one place is joined to the nearest few within reach by a line that wanders a little, to say that neighbours went to and fro, and it is broken where it would cross water.`;
+          const why = `${gen.generator}, version ${gen.version}: nobody surveyed this path. Which settlements it joins follows where the generator put them; its line is invented.`;
+          return inspect.showGenerated('A path', 'Generated path', text, why);
+        }
         // A piece of a town's works: its wall, a gate, a tower, the water of a canal or a moat.
         if (found.work !== undefined && city.people && city.spec.people) {
           setState({ sel: null });
@@ -1957,6 +1966,11 @@ async function start(root: HTMLElement): Promise<void> {
               : `The record of ${towns.find((x) => x.record === f.from)?.city ?? 'this city'} says how it was laid out: ${towns.find((x) => x.record === f.from)?.town?.text ?? 'see its record'}.`;
           const named = towns.filter((x) => x.city).map((x) => x.city);
           const where = named.length ? ` It stands round ${named.join(', ')}.` : towns.length ? ` ${towns.length.toLocaleString('en-US')} towns of the scene have it.` : '';
+          // A person or a boat rests on nothing at all: it is there for the scene's scale.
+          if (f.spec.kind === 'person' || f.spec.kind === 'boat') {
+            const what = f.spec.kind === 'person' ? `A person, one of the plain figures the scene stands by the houses of its settlements. No record says who lived in any of these houses, how they looked or what they wore: the figure is the same everywhere, drawn ${f.spec.height} m tall so that the houses have their scale.` : `A boat, one of the plain hulls the scene floats on water beside its settlements, ${f.spec.thickness} m long. No record says what boats these people had, or that they had any here: it is the same everywhere.`;
+            return inspect.showGenerated(f.label, f.spec.kind === 'person' ? 'Generated person' : 'Generated boat', what, `${gen.generator}, version ${gen.version}: nobody recorded this. It is generic, and where it stands is invented.`);
+          }
           const size = f.spec.kind === 'canal' || f.spec.kind === 'moat' ? `${f.spec.thickness} m wide` : `${f.spec.height} m high and ${f.spec.thickness} m thick`;
           const text = `${f.label}, drawn ${size}.${where} ${said} What they do not say (how high, how thick, how many towers) is the generator's, as is where its line runs: round the houses the scene draws, a street clear of them.`;
           const why = `${gen.generator}, version ${gen.version}: nobody surveyed this. A town's streets and what enclosed it follow the tradition of its townspeople or its own record where one says, and the generator's generic town where none does; every piece's place is invented.`;
@@ -2595,7 +2609,7 @@ async function start(root: HTMLElement): Promise<void> {
       // As a click picks (pickAt), in the canvas's pixels.
       const dpr = canvas.width / stage.clientWidth;
       const found = city.pick(Math.round(x * dpr), canvas.height - 1 - Math.round(y * dpr));
-      if (found.taxon || found.kept || found.house !== undefined || found.work !== undefined) return { taxon: found.taxon?.id, kept: found.kept?.id, house: found.house, work: found.work, ground: false };
+      if (found.taxon || found.kept || found.path || found.house !== undefined || found.work !== undefined) return { taxon: found.taxon?.id, kept: found.kept?.id, house: found.house, work: found.work, ...(found.path ? { path: true } : {}), ground: false };
       return { ground: !!groundHit(frameView, rayOf(frameView, x, y), city.ground) };
     },
     set: (s) => setState(s),

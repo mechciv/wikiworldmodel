@@ -15,6 +15,8 @@ export interface PeopleSummary {
   /** how many kinds of animal its people kept are drawn, and how many animals */
   kept: number;
   animals: number;
+  /** how many paths run between its settlements */
+  paths: number;
   settlements: { pattern: string; houses: number; people: number; city?: string; record?: string; from?: Settlement['from']; town?: Settlement['town']; husbandry?: string; tier: string; form: number; x: number; y: number }[];
   houses: number;
   drawn: number;
@@ -34,7 +36,7 @@ export function fieldStyle(s: SettlementPlan['style']): { plot: number; aspect: 
 export type ToLifeWorker = { type: 'init'; spec: SceneSpec; fast: boolean } | { type: 'view'; view: LifeView; serial: number } | { type: 'reset' };
 
 export type FromLifeWorker =
-  | { type: 'ground'; levels: { nx: number; ny: number; x0: number; y0: number; cell: number; z: Int16Array }[]; focus: [number, number]; toRiver: [number, number]; water: { vertices: Float32Array; indices: Uint32Array; flow: Float32Array }; waterLevel: number; mask: Uint8Array; maskSize: number; maskBox: [number, number, number, number]; print: Fingerprint; ms: number; people?: PeopleSummary; fields?: Uint8Array }
+  | { type: 'ground'; levels: { nx: number; ny: number; x0: number; y0: number; cell: number; z: Int16Array }[]; focus: [number, number]; toRiver: [number, number]; water: { vertices: Float32Array; indices: Uint32Array; flow: Float32Array }; waterLevel: number; mask: Uint8Array; maskSize: number; maskBox: [number, number, number, number]; print: Fingerprint; ms: number; people?: PeopleSummary; fields?: Uint8Array; paths?: { vertices: ArrayBuffer; indices: Uint32Array } }
   | { type: 'mask'; mask: Uint8Array; maskSize: number; maskBox: [number, number, number, number]; fields?: Uint8Array }
   | { type: 'selection'; serial: number; batches: Batch[]; protos: ProtoMesh[]; instances: number; triangles: number; pending: number; groups: { taxon: number; at: [number, number]; base: number; top: number }[]; ms: number };
 
@@ -53,6 +55,7 @@ self.onmessage = (e: MessageEvent<ToLifeWorker>) => {
     const water = stream.water();
     const levels = stream.levels.map((l) => ({ nx: l.nx, ny: l.ny, x0: l.x0, y0: l.y0, cell: l.cell, z: (l.z as Int16Array).slice() }));
     const fields = stream.fields(512)?.data;
+    const paths = stream.paths();
     const pl = stream.people;
     const people: PeopleSummary | undefined = pl && {
       forms: pl.forms,
@@ -60,6 +63,7 @@ self.onmessage = (e: MessageEvent<ToLifeWorker>) => {
       pieces: pl.works.length,
       kept: m.spec.people?.kept?.length ?? 0,
       animals: pl.animals.length,
+      paths: pl.paths.length,
       settlements: pl.settlements.map((x) => ({ pattern: x.pattern, houses: x.houses, people: Math.round(x.people), ...(x.city ? { city: x.city } : {}), ...(x.record ? { record: x.record } : {}), ...(x.from ? { from: x.from } : {}), ...(x.town ? { town: x.town } : {}), ...(x.husbandry ? { husbandry: x.husbandry } : {}), tier: x.tier, form: x.form, x: Math.round(x.x), y: Math.round(x.y) })),
       houses: pl.houses.length,
       drawn: pl.drawn,
@@ -68,7 +72,7 @@ self.onmessage = (e: MessageEvent<ToLifeWorker>) => {
       style: pl.style,
       lifeway: pl.lifeway,
     };
-    post({ type: 'ground', levels, focus: stream.plan.focus, toRiver: stream.plan.toRiver, water, waterLevel: stream.look.water, mask: data, maskSize: 512, maskBox: box, print, ms: performance.now() - t0, ...(people ? { people } : {}), ...(fields ? { fields } : {}) }, [data.buffer as ArrayBuffer, water.vertices.buffer as ArrayBuffer, water.indices.buffer as ArrayBuffer, water.flow.buffer as ArrayBuffer, ...levels.map((l) => l.z.buffer as ArrayBuffer), ...(fields ? [fields.buffer as ArrayBuffer] : [])]);
+    post({ type: 'ground', levels, focus: stream.plan.focus, toRiver: stream.plan.toRiver, water, waterLevel: stream.look.water, mask: data, maskSize: 512, maskBox: box, print, ms: performance.now() - t0, ...(people ? { people } : {}), ...(fields ? { fields } : {}), ...(paths ? { paths } : {}) }, [data.buffer as ArrayBuffer, water.vertices.buffer as ArrayBuffer, water.indices.buffer as ArrayBuffer, water.flow.buffer as ArrayBuffer, ...levels.map((l) => l.z.buffer as ArrayBuffer), ...(fields ? [fields.buffer as ArrayBuffer] : []), ...(paths ? [paths.vertices, paths.indices.buffer as ArrayBuffer] : [])]);
     // A finer picture of the ground, once there is something to look at.
     setTimeout(() => {
       if (!stream) return;

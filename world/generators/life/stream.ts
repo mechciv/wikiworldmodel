@@ -5,7 +5,7 @@ import type { Form } from '../../../core/form.ts';
 import type { LivingTaxon, SceneSpec } from '../../../core/scene.ts';
 import { GroundSampler, type GroundGridData } from '../city/ground.ts';
 import { fingerprint, type Fingerprint, type Part } from '../../../core/fingerprint.ts';
-import { Mesh, meshParts } from '../city/kit.ts';
+import { MAT, Mesh, meshParts } from '../city/kit.ts';
 import { hash2, hashString, TAU } from '../city/math.ts';
 import { drawAnimal, drawClump, drawPlant, POSE, type Detail, type Stance } from './forms.ts';
 import { CELL, CELLS, cellParts, cellKey, coverMask, EXTENT, groundGrids, LandCover, makePlan, placeLook, waterLevels, waterRibbons, waterSheet, watersFor, type CellRows, type LivingParams, type LivingPlan, type PlaceLook } from './scene/v7.ts';
@@ -200,6 +200,69 @@ export class SceneStream {
   /** What people made of the ground, as an image: R crops, G pasture, B yards, A paddies. Undefined where there are no people. */
   fields(size: number): { data: Uint8Array; box: [number, number, number, number] } | undefined {
     return this.landUse ? { data: landUseMask(this.landUse, size, EXTENT), box: [-EXTENT, -EXTENT, EXTENT, EXTENT] } : undefined;
+  }
+
+  /**
+   * The paths between the people's settlements, as one mesh laid on the ground: a ribbon along each, a hand above the
+   * ground at every few metres of its way, broken where it would cross water. Undefined where the scene has none. Its
+   * entity comes after the kept animals' (pathEntity).
+   */
+  paths(): { vertices: ArrayBuffer; indices: Uint32Array } | undefined {
+    const plan = this.people;
+    if (!plan?.paths.length || !(plan.pathWidth > 0)) return undefined;
+    const levelAt = this.waters.paths ? waterLevels(this.waters) : undefined;
+    const water = levelAt ?? (() => this.look.water);
+    const half = plan.pathWidth / 2;
+    const step = 4;
+    const lift = 0.12;
+    const m = new Mesh(4096);
+    m.entity = this.pathEntity();
+    m.mat = MAT.earth;
+    m.tint = 118;
+    for (const line of plan.paths) {
+      // Its points every few metres, then a strip between each pair that stands on dry ground.
+      let last: [number, number] | undefined;
+      let along = 0;
+      for (let q = 0; q + 3 < line.length; q += 2) {
+        const ax = line[q];
+        const ay = line[q + 1];
+        const dx = line[q + 2] - ax;
+        const dy = line[q + 3] - ay;
+        const d = Math.hypot(dx, dy);
+        if (!(d > 0)) continue;
+        const nx = -dy / d;
+        const ny = dx / d;
+        const n = Math.max(1, Math.ceil(d / step));
+        for (let k = q ? 1 : 0; k <= n; k++) {
+          const x = ax + (dx * k) / n;
+          const y = ay + (dy * k) / n;
+          const lx = x + nx * half;
+          const ly = y + ny * half;
+          const rx = x - nx * half;
+          const ry = y - ny * half;
+          const lz = this.ground.at(lx, ly);
+          const rz = this.ground.at(rx, ry);
+          const dry = Math.abs(x) < EXTENT && Math.abs(y) < EXTENT && Math.min(lz, rz) - water(x, y) > 0.25;
+          const w = along + (d * k) / n;
+          if (!dry) {
+            last = undefined;
+            continue;
+          }
+          const a = m.v(lx, ly, lz + lift, 0, 0, 1, -half, w);
+          const b = m.v(rx, ry, rz + lift, 0, 0, 1, half, w);
+          if (last) m.quad(last[0], last[1], b, a);
+          last = [a, b];
+        }
+        along += d;
+      }
+    }
+    const { vertices, indices } = m.arrays();
+    return indices.length ? { vertices, indices } : undefined;
+  }
+
+  /** The entity of the paths: after the taxa, the houses' forms, the works' pieces and the kept animals. */
+  pathEntity(): number {
+    return this.keptBase() + (this.spec.people?.kept?.length ?? 0);
   }
 
   /** The water: ribbons along the world's rivers, or the place's one sheet; with each vertex's flow and depth. */
@@ -460,7 +523,9 @@ export class SceneStream {
           const dd = dx * dx + dy * dy + dz * dz;
           const tall = this.workTops[w.form];
           const pxs2 = (tall * tall * K * K) / dd;
-          if (pxs2 < 1) continue;
+          // A wall is drawn as far as it can be made out; a person or a boat only once it is a few pixels tall.
+          const small = this.people.workForms[w.form].spec.kind === 'person' || this.people.workForms[w.form].spec.kind === 'boat';
+          if (pxs2 < (small ? 16 : 1)) continue;
           const pxs = Math.sqrt(pxs2);
           const detail: Detail = this.budget.fast ? (pxs >= 30 ? 1 : 0) : pxs >= 80 ? 2 : pxs >= 10 ? 1 : 0;
           const proto = protoOf(WORK + w.form, wi & 3, detail);

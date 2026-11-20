@@ -11,7 +11,7 @@ import { placeLook, type LivingParams } from '../../../world/generators/life/sce
 import { snowOf } from '../../../world/generators/life/climate.ts';
 import { declination, MID_DAY } from '../../../core/water.ts';
 import { protoParts } from '../../../world/generators/life/stream.ts';
-import { CityRenderer, type CityFrame } from '../gl/city.ts';
+import { CityRenderer, type CellGPU, type CityFrame } from '../gl/city.ts';
 import type { GL } from '../gl/context.ts';
 import type { V3 } from '../mat.ts';
 import { fieldStyle, type FromLifeWorker, type PeopleSummary, type ToLifeWorker } from './lifeworker.ts';
@@ -162,6 +162,8 @@ export class LifeScene {
 
   private groundData: Extract<FromLifeWorker, { type: 'ground' }> | null = null;
   private maskData: Extract<FromLifeWorker, { type: 'mask' }> | null = null;
+  /** the paths between the scene's settlements, on the GPU once the scene has been shown */
+  private pathsGpu: CellGPU | null = null;
   private held: Extract<FromLifeWorker, { type: 'selection' }>[] = [];
 
   /** This scene takes over the renderer: its ground, its colours and whatever has been made for it. */
@@ -200,7 +202,10 @@ export class LifeScene {
     r.setGroundCover(...groundCover(this.spec));
     // Each taxon is an entity, and after them each kind of house and each kind of piece of a town's works, which stand
     // for as long as the scene does: generated.
-    const houseKinds = (this.people?.forms.length ?? 0) + (this.people?.works.length ?? 0) + (this.people?.kept ?? 0);
+    // And one more for the paths between its settlements, if it has any.
+    const houseKinds = (this.people?.forms.length ?? 0) + (this.people?.works.length ?? 0) + (this.people?.kept ?? 0) + 1;
+    // The paths are one mesh of the scene's own, put on the GPU the first time it is shown.
+    if (g.paths && !this.pathsGpu) this.pathsGpu = r.upload(g.paths.vertices, g.paths.indices);
     const out = new Float32Array((this.spec.taxa.length + 1 + houseKinds) * 4);
     for (let f = 0; f < houseKinds; f++) {
       const k = (this.spec.taxa.length + 1 + f) * 4;
@@ -297,19 +302,21 @@ export class LifeScene {
       width: outW,
       height: outH,
     };
-    this.renderer.render(f, [], outW, outH);
+    this.renderer.render(f, this.pathsGpu ? [this.pathsGpu] : [], outW, outH);
   }
 
   /**
    * What is at a screen position: a taxon, a kind of house or of a piece of a town's works the generator drew, an animal
    * the scene's people kept, or nothing.
    */
-  pick(x: number, y: number): { taxon?: LivingTaxon; house?: number; work?: number; kept?: LivingTaxon } {
+  pick(x: number, y: number): { taxon?: LivingTaxon; house?: number; work?: number; kept?: LivingTaxon; path?: boolean } {
     const e = this.renderer.pick(x, y);
     if (!e) return {};
     const made = e - this.spec.taxa.length - 1;
     const forms = this.people?.forms.length ?? 0;
     const works = this.people?.works.length ?? 0;
+    const kept = this.people?.kept ?? 0;
+    if (made >= forms + works + kept) return { path: true };
     if (made >= forms + works) return { kept: this.spec.people?.kept?.[made - forms - works] };
     if (made >= forms) return { work: made - forms };
     if (made >= 0) return { house: made };
@@ -355,5 +362,7 @@ export class LifeScene {
     this.worker?.terminate();
     this.worker = null;
     this.active = false;
+    if (this.pathsGpu) this.renderer.remove(this.pathsGpu);
+    this.pathsGpu = null;
   }
 }
