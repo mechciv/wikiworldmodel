@@ -21,12 +21,14 @@ inputs:
   - { prop: settlement_form, note: "how its houses stood together, and how many lived in each" }
   - { prop: field_system, note: "the plots of its fields" }
   - { prop: extent, note: "the regions each tradition was found in" }
+  - { prop: lifeway, note: "whom each tradition housed: its house is drawn for those ways of life only" }
   - { ref: gen:life/scene, note: "the ground and the water of the scene the houses stand in" }
 checks:
   - { test: world/generators/people/settlement/v2.test.ts, holds: "holds as many people as the world puts in the land it draws" }
   - { test: world/generators/people/settlement/v2.test.ts, holds: "stands no house in the water or on a cliff" }
   - { test: world/generators/people/settlement/v2.test.ts, holds: "draws fields where people farmed, pasture where they herded, and neither for foragers" }
   - { test: world/generators/people/settlement/v2.test.ts, holds: "draws a tradition's house where it holds, and the generic one where none does" }
+  - { test: world/generators/people/settlement/v2.test.ts, holds: "draws a camp's shelter from the tradition that housed its way of life, and no farmer's house from a herder's tent" }
   - { test: world/generators/people/settlement/v2.test.ts, holds: "draws a city of the lists where the anthromes have none" }
   - { test: world/generators/people/settlement/v2.test.ts, holds: "puts a settlement in the same place from two scenes that overlap" }
 limits:

@@ -157,6 +157,8 @@ export interface LandscapeHere {
   density?: number;
   regionUses?: string[];
   cities: { name: string; people: number; km: number; list: string; also: { people: number; list: string }[] }[];
+  /** whose houses a scene draws here, in words: "herders", "townspeople" */
+  whose?: string;
   tradition?: { id: string; label: string; dwelling: string };
 }
 
@@ -740,9 +742,12 @@ export class InspectPanel {
     const cities = h.cities.length
       ? `<p><strong>Cities near</strong>: ${h.cities.map((c) => `${esc(c.name)}, about ${fmtValue(c.people)} people, ${c.km} km away (${esc(c.list)}${c.also.length ? `; ${c.also.map((a) => `${esc(a.list)} gives ${fmtValue(a.people)}`).join('; ')}` : ''})`).join('; ')}.</p>`
       : '';
-    const houses = h.tradition
-      ? `<p><strong>Houses</strong> are drawn as those of ${esc(h.tradition.label)}: ${esc(h.tradition.dwelling)}.</p>`
-      : '<p><strong>Houses</strong> here are generic: no building tradition is recorded for this region and time, so a scene draws a plain house for the way of life and the climate, and says so.</p>';
+    const whose = h.whose ? `the ${h.whose}` : 'the people';
+    const houses = !h.whose
+      ? ''
+      : h.tradition
+        ? `<p><strong>Houses</strong> of ${esc(whose)} here are drawn as those of ${esc(h.tradition.label)}: ${esc(h.tradition.dwelling)}.</p>`
+        : `<p><strong>Houses</strong> of ${esc(whose)} here are generic: no building tradition is recorded for them in this region at this time, so a scene draws a plain house for the way of life and the climate, and says so.</p>`;
     return `<section class="landscape"><h3>How people lived here, at ${esc(formatTime(p.t, 1e4))} <span class="badge basis-${tier}">${esc(l.tier)}</span></h3>
       <p class="big">${esc(PATTERN_WORDS[l.pattern] ?? l.pattern)}</p>
       <p>${esc(h.className)}, in ${esc(h.title.toLowerCase())} at their step ${esc(stepName(p.step))}. ${esc(dense)}</p>

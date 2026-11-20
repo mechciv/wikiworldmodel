@@ -2,7 +2,7 @@
 // life at each of a run of times, as HYDE and the model of how people lived place them, and whether any tradition the
 // world records for that way of life draws their houses. The top of the list is where most houses are drawn as generic.
 import { claimGroups, solveScenario } from './chronology.ts';
-import { buildLandscape, housing, type HousingRow } from './build/landscape.ts';
+import { buildLandscape, housing, HOUSING_TIMES, type HousingRow } from './build/landscape.ts';
 import { peopleLayer } from './build/layers.ts';
 import { lifewayText, type LifewayWord, type Tradition } from '../../../core/dwelling.ts';
 import { LIFEWAY_OF } from '../../../core/landscape.ts';
@@ -21,8 +21,8 @@ export interface Wanted {
   tradition?: string;
 }
 
-/** The times the list is counted at: every 2,000 years from 10,000 BCE, every 500 from 3000 BCE to 1500 CE, and the survey's last times. */
-export const WANTED_TIMES = [-9999, -7999, -5999, -3999, ...Array.from({ length: 6 }, (_, i) => -2999 + i * 500), 1, 500, 1000, 1500, 1750, 1850];
+/** The times the list is counted at: the build's (coverage.json, landscape.housing). */
+export const WANTED_TIMES = HOUSING_TIMES;
 
 /** The patterns of settlement of a region and time, added up by the way of life whose house they are drawn in. */
 export function wantedRows(rows: HousingRow[], labels: Map<number, string>): Wanted[] {

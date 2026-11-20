@@ -6,9 +6,11 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { parse } from 'yaml';
-import { compileTraditions, dwellingProblems, fieldProblems, lifewayProblems, lifewayText, settlementProblems, specText, traditionAt } from '../../../core/dwelling.ts';
-import { assessmentAt, cityPeople, citiesNear, LIFEWAY_OF, lifewayOf, nearestStep, shareDensity, tileKey, cellOf, type AnthromeClass, type Assessment, type CitiesFile, type City } from '../../../core/landscape.ts';
-import { assessmentsFile, cityYear, citiesOf, eckert4Inverse, parseClassGrid, rasterizeRegions, stepOfName } from '../src/build/landscape.ts';
+import { compileTraditions, dwellingProblems, fieldProblems, lifewayProblems, lifewayText, settlementProblems, specText, traditionAt, type LifewayWord, type Tradition } from '../../../core/dwelling.ts';
+import { anthromeTile, assessmentAt, cityPeople, citiesNear, classAtStep, LIFEWAY_OF, lifewayOf, nearestStep, shareDensity, tileKey, cellOf, type AnthromeClass, type Assessment, type CitiesFile, type City } from '../../../core/landscape.ts';
+import type { PeopleFile } from '../../../core/layers.ts';
+import { assessmentsFile, cityYear, citiesOf, eckert4Inverse, housing, housingCounts, parseClassGrid, rasterizeRegions, stepOfName, type LandscapeBuilt } from '../src/build/landscape.ts';
+import { wantedRows, wantedText, wantedTotals } from '../src/dwellingsWanted.ts';
 import { readTable, snapshotText, SLICES } from '../src/archaeoglobe.ts';
 import { loadManifest } from '../src/manifest.ts';
 import { REPO } from '../src/paths.ts';
@@ -298,5 +300,88 @@ describe('building traditions', () => {
     expect(traditionAt(list, 1, 0, 'foragers')).toBeUndefined();
     expect(traditionAt(list, 1, 0, 'shifting-cultivators')).toBeUndefined();
     expect(list.find((x) => x.id === 'silent')!.lifeways).toEqual([]);
+  });
+});
+
+describe('whose houses rest on a tradition', () => {
+  // A made-up world of one 10° tile, north of the equator and east of the meridian, at two steps. Two 1° cells hold
+  // people: one of rainfed villages in region 1, one half populated rangeland and half wild, in region 2.
+  const steps = [0, 1000];
+  const side = 120;
+  const village = { north: 5, west: 3 };
+  const range = { north: 5, west: 6 };
+  const counts = new Uint8Array(side * side);
+  const runs: number[] = [];
+  const region = new Uint8Array(side * side);
+  for (let r = 0; r < side; r++) for (let c = 0; c < side; c++) {
+    const lat = 10 - (r + 0.5) / 12;
+    const lon = (c + 0.5) / 12;
+    const inCell = (x: { north: number; west: number }) => lat < x.north && lat > x.north - 1 && lon > x.west && lon < x.west + 1;
+    const k = inCell(village) ? number(23) : inCell(range) ? (lon < range.west + 0.5 ? number(42) : number(62)) : 0;
+    if (!k) continue;
+    counts[r * side + c] = 1;
+    runs.push(k, 0);
+    region[r * side + c] = inCell(village) ? 1 : 2;
+  }
+  const tile = anthromeTile({ format: 'lightworld-anthromes@1', north: 10, west: 0, nx: side, ny: side, res: 1 / 12, steps }, counts, new Uint8Array(runs), region);
+  const a = (forage: number, swidden: number, farm: number, herd: number, urban = 0): Assessment => ({ use: [forage, swidden, farm, herd].map((l) => [l, l, l, l] as [number, number, number, number]), urban, urbanMedian: urban, quality: 2, expertise: 2 });
+  const place = (x: { north: number; west: number }) => (90 - x.north) * 360 + (x.west + 180);
+  // 144,000 villagers and 7,200 herders at the first step; twice as many at the second.
+  const people = { res: 1, steps, cell: new Uint32Array([place(village), place(range)]), land: new Uint32Array([12000, 12000]), people: new Uint32Array([144000, 7200, 288000, 14400]) } as unknown as PeopleFile;
+  const built = (traditions: Tradition[]) =>
+    ({
+      index: { steps, tile_deg: 10 },
+      classes,
+      tile: (key: string) => (key === '10_0' ? tile : undefined),
+      at: (lat: number, lon: number) => {
+        const cell = cellOf(tile, lat, lon);
+        return cell < 0 ? { anthrome: 0, region: 0 } : { anthrome: classAtStep(tile, cell, 0), region: tile.region[cell] };
+      },
+      assessments: { format: 'lightworld-assessments@1', source: 'src:test', title: 'Test', slices: [{ year: 0, label: 'then' }], regions: [{ id: 1, label: 'One' }, { id: 2, label: 'Two' }], rows: { '1': [a(1, 1, 3, 1, 1)], '2': [a(1, 0, 0, 3)] } },
+      traditions,
+      cities: { format: 'lightworld-cities@1', lists: [{ source: 'src:list', field: 'field:test', title: 'A list', hold: 50, gap: 600 }], cities: [{ name: 'Testopolis', country: 'Nowhere', lat: 4.5, lon: 3.5, certainty: 1, source: 'src:list', field: 'field:test', pops: [[0, 30000]] }] },
+    }) as unknown as LandscapeBuilt;
+  const house = { id: 'house', label: 'A house', regions: [1], span: [-500, 500] as [number, number], lifeways: ['farmers', 'townspeople'] as LifewayWord[], dwelling: { walls: 'mudbrick' as const } };
+
+  it('counts the people of each region by how they lived, as a scene shares them, with the tradition that houses them', () => {
+    const rows = housing(built(compileTraditions([house])), people, [0, 1000, 5000]);
+    // The villagers are all villagers, and the tradition written for the farmers of their region houses them while it holds.
+    expect(rows.filter((r) => r.t === 0)).toEqual([
+      { t: 0, region: 1, pattern: 'villages', people: 144000, tradition: 'house' },
+      { t: 0, region: 2, pattern: 'herders', people: 7200 },
+    ]);
+    // At the second step the tradition has ended; beyond the people's steps nothing is counted.
+    expect(rows.filter((r) => r.t === 1000)).toEqual([
+      { t: 1000, region: 1, pattern: 'villages', people: 288000 },
+      { t: 1000, region: 2, pattern: 'herders', people: 14400 },
+    ]);
+    expect(rows.filter((r) => r.t === 5000)).toEqual([]);
+  });
+
+  it('houses the herders only once a tradition says it housed herders', () => {
+    const tent = { id: 'tent', label: 'A tent', regions: [2], span: [-500, 500] as [number, number], lifeways: ['herders'] as LifewayWord[], dwelling: { walls: 'felt' as const } };
+    const farmhouse = { id: 'farmhouse', label: 'A farmhouse', regions: [2], span: [-500, 500] as [number, number], lifeways: ['farmers'] as LifewayWord[], dwelling: { walls: 'timber' as const } };
+    expect(housing(built(compileTraditions([house, farmhouse])), people, [0]).find((r) => r.region === 2)!.tradition).toBeUndefined();
+    expect(housing(built(compileTraditions([house, tent])), people, [0]).find((r) => r.region === 2)!.tradition).toBe('tent');
+  });
+
+  it('adds them up for the coverage: people and those housed, by pattern, the regions, and the cities of the lists', () => {
+    const b = built(compileTraditions([house]));
+    const [then, later] = housingCounts(b, housing(b, people, [0, 1000]));
+    expect(then).toEqual({ t: 0, people: 151200, housed: 144000, by: { villages: [144000, 144000], herders: [7200, 0] }, regions: [2, 1], cities: [1, 30000, 30000] });
+    // Later no tradition holds, and the list is silent about its city.
+    expect(later).toEqual({ t: 1000, people: 302400, housed: 0, by: { villages: [288000, 0], herders: [14400, 0] }, regions: [2, 0], cities: [0, 0, 0] });
+  });
+
+  it('lists what most wants a tradition by region, time and way of life', () => {
+    const b = built(compileTraditions([house]));
+    const rows = wantedRows(housing(b, people, [0, 1000]), new Map([[1, 'One'], [2, 'Two']]));
+    expect(rows.find((r) => r.t === 0 && r.region === 1)).toEqual({ region: 1, label: 'One', t: 0, lifeway: 'farmers', people: 144000, tradition: 'house' });
+    const text = wantedText(rows, 10);
+    // The most people in generic houses first; the villagers a tradition houses are not listed.
+    expect(text.split('\n').slice(1).map((l) => l.trim().split(/\s{2,}/).slice(0, 3).join(' | '))).toEqual(['1 One | 1000 CE | farmers', '2 Two | 1000 CE | herders', '2 Two | 1 BCE | herders']);
+    expect(wantedText(rows, 10, { lifeway: 'herders' })).not.toContain('farmers');
+    expect(wantedText(rows, 10, { region: 1 })).toContain('house');
+    expect(wantedTotals(rows)).toContain('95%');
   });
 });

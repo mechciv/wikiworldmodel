@@ -12,7 +12,7 @@ import type { CoverageFile } from '../../../core/records.ts';
 import type { SceneSpec } from '../../../core/scene.ts';
 import type { Tileset } from '../../../core/tileset.ts';
 import { makeSettlement } from '../../../world/generators/people/settlement/v2.ts';
-import { parseClassGrid } from '../src/build/landscape.ts';
+import { HOUSING_TIMES, parseClassGrid } from '../src/build/landscape.ts';
 import { dataset, latestBuild } from './helpers.ts';
 
 const file = (name: string) => readFileSync(join(latestBuild(), name));
@@ -90,6 +90,35 @@ describe('the human landscape, built', () => {
     const farming = c.landscape!.farming;
     expect(farming).toHaveLength(10);
     for (const f of farming) if (f.none[1]) expect(f.none[0] / f.none[1], f.slice).toBeGreaterThanOrEqual(0.95);
+  });
+
+  it('counts whose houses rest on a tradition, at each time, by pattern of settlement, and they add up', () => {
+    const c = json<CoverageFile>('coverage.json');
+    const counts = c.landscape!.housing!;
+    expect(counts.map((x) => x.t)).toEqual(HOUSING_TIMES);
+    const traditions = json<TraditionsFile>(index.traditions).traditions;
+    for (const x of counts) {
+      const sum = Object.values(x.by).reduce((s, v) => [s[0] + v![0], s[1] + v![1]], [0, 0]);
+      expect(sum, String(x.t)).toEqual([x.people, x.housed]);
+      for (const v of Object.values(x.by)) expect(v![1]).toBeLessThanOrEqual(v![0]);
+      expect(x.regions[1]).toBeLessThanOrEqual(x.regions[0]);
+      expect(x.cities[2]).toBeLessThanOrEqual(x.cities[1]);
+      // No one is housed by a tradition at a time none holds.
+      if (!traditions.some((t) => t.lifeways.length && x.t >= t.span[0] && x.t <= t.span[1])) expect(x.housed, String(x.t)).toBe(0);
+    }
+    // The people are HYDE's: nearly all foragers at the anthromes' first step, over a billion in 1850, most of them farmers.
+    expect(counts[0].by.foragers![0] / counts[0].people).toBeGreaterThan(0.9);
+    const last = counts.at(-1)!;
+    expect(last.people).toBeGreaterThan(1.1e9);
+    expect((last.by.villages![0] + last.by.hamlets![0] + last.by.farmsteads![0]) / last.people).toBeGreaterThan(0.6);
+    expect(last.cities[0]).toBeGreaterThan(1000);
+    // Every tradition written says whom it housed, and some house people at some time.
+    expect(traditions.filter((t) => !t.lifeways.length).map((t) => t.id)).toEqual([]);
+    expect(counts.some((x) => x.housed > 0)).toBe(true);
+    // The glance's bar is the same count: each time's share, each time alike.
+    const peopled = counts.filter((x) => x.people > 0);
+    const share = peopled.reduce((s, x) => s + x.housed / x.people, 0) / peopled.length;
+    expect(c.glance!.groups.flatMap((g) => g.rows).find((r) => r.id === 'houses')!.share).toBeCloseTo(share, 3);
   });
 
   it('puts the city of the lists in a scene of it: Uruk in 3000 BCE, which HYDE does not have', () => {

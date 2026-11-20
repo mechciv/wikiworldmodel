@@ -638,6 +638,13 @@ export function landscapeResolve(b: LandscapeBuilt): NonNullable<import('../../.
 
 // ——— Whose houses rest on a tradition ———
 
+/**
+ * The times the houses are counted at: every 2,000 years from the anthromes' first step, every 500 from 3000 BCE to
+ * 1500 CE, and the survey's last times. The world after 1850 is not counted: its houses want records of another kind
+ * (docs/plans/LIFEWAY-RENDERINGS.md).
+ */
+export const HOUSING_TIMES = [-9999, -7999, -5999, -3999, ...Array.from({ length: 6 }, (_, i) => -2999 + i * 500), 1, 500, 1000, 1500, 1750, 1850];
+
 /** The people of one region who lived one way at a time, and the tradition that draws their houses, if one is written. */
 export interface HousingRow {
   t: number;

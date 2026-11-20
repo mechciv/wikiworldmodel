@@ -40,7 +40,8 @@ import { gridPlaces, lifeTierOf, seaTierOf, tierCounts, TIER_SPANS, type Resolve
 import { coverageMatrix, type CoverageSource } from '../../../../core/coverage.ts';
 import { glance, landShares } from '../../../../core/glance.ts';
 import { spanOf, type PlanetFile } from '../../../../core/planet.ts';
-import { insideRow, politiesAt, type PolitiesFile } from '../../../../core/layers.ts';
+import { insideRow, politiesAt, type PeopleFile, type PolitiesFile } from '../../../../core/layers.ts';
+import type { HousingCount } from '../../../../core/landscape.ts';
 import type { AtlasBin } from '../../../../core/atlas.ts';
 import { fieldFor, fieldLods, loadBlocks, loadRelief, loadSnapshots, paleoElevation, sliceField, tileGrid, timeBins, type GridField } from './fields.ts';
 import { buildCity } from './city.ts';
@@ -52,7 +53,7 @@ import { FEATURE_INDEX } from '../../../../core/featuretiles.ts';
 import { prominenceOf, tileFeatures } from './featuretiles.ts';
 import { buildIce, type IceBuilt } from './ice.ts';
 import { hazardLayer, peopleLayer, polityLayer, presentLayer, stateRowKey } from './layers.ts';
-import { buildLandscape, disagreement, farmingAgreement, landscapeResolve } from './landscape.ts';
+import { buildLandscape, disagreement, farmingAgreement, housing, housingCounts, HOUSING_TIMES, landscapeResolve } from './landscape.ts';
 import { fieldLayers } from './fieldlayers.ts';
 import { buildAtlas } from './atlas.ts';
 import { buildSeaAtlas, type SeaOut, type SeaParams } from './sea.ts';
@@ -362,6 +363,7 @@ export async function runBuild(args: string[]): Promise<number> {
   const out = new Map<string, Uint8Array | string>(); // path → content
   const put = (path: string, content: Uint8Array | string) => out.set(path, content);
   let coverageLandscape: ReturnType<typeof disagreement> | undefined;
+  let coverageHousing: HousingCount[] | undefined;
 
   // 1. Validate.
   const world = await loadWorld();
@@ -869,6 +871,12 @@ export async function runBuild(args: string[]): Promise<number> {
     const share = disagreement(landscape, [-2999, -999, 1, 1000, 1500], 2);
     coverageLandscape = share;
     for (const x of share) log(`landscape  at ${x.t}: HYDE and the archaeologists disagree on ${(x.disagree * 100).toFixed(0)}% of the land; ${(x.evidence * 100).toFixed(0)}% rests on the archaeologists`);
+    // Whose houses rest on a tradition: the people of each time by how they lived, and how many a tradition houses.
+    if (people) {
+      const pf = { ...people.header, cell: people.arrays[0], land: people.arrays[1], people: people.arrays[2] } as unknown as PeopleFile;
+      coverageHousing = housingCounts(landscape, housing(landscape, pf, HOUSING_TIMES));
+      for (const h of coverageHousing) log(`landscape  at ${formatTime(h.t)}: ${((100 * h.housed) / Math.max(1, h.people)).toFixed(1)}% of ${(h.people / 1e6).toFixed(1)} million people in a tradition's house, in ${h.regions[1]} of ${h.regions[0]} regions; ${h.cities[0]} cities of the lists`);
+    }
   }
   // The living scene, on the land and climate above.
   const sites: SiteInfo[] = [];
@@ -940,7 +948,7 @@ export async function runBuild(args: string[]): Promise<number> {
   if (landscape) resolveWorld.landscape = landscapeResolve(landscape);
   if (coverageLandscape && landscape) {
     const farming = farmingAgreement(landscape);
-    coverageFile.landscape = { disagree: coverageLandscape, farming };
+    coverageFile.landscape = { disagree: coverageLandscape, farming, ...(coverageHousing ? { housing: coverageHousing } : {}) };
     for (const f of farming) if (f.none[1] || f.widespread[2]) log(`landscape  ${f.slice}: no farming in ${f.none[1]} regions, HYDE farms under 1% of ${f.none[0]}; farming widespread in ${f.widespread[2]}, HYDE farms ${f.widespread[0]} at all and ${f.widespread[1]} over a twentieth`);
   }
   coverageFile.tiers = TIER_SPANS.map((sp) => {
@@ -982,6 +990,7 @@ export async function runBuild(args: string[]): Promise<number> {
     matrix: coverageFile.matrix,
     until: now,
     land: landShares(resolveWorld, coverageFile.matrix.columns, COVERAGE.step, now),
+    housing: coverageHousing,
     forms: coverageFile.forms,
     ladder: coverageFile.claims.ladder,
     formatTime,

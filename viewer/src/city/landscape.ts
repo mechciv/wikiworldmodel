@@ -2,7 +2,7 @@
 // and put together into what a scene's people are and what the globe paints. The same core code as the build's, so what
 // a scene draws rests on the same anthromes, assessments, cities and traditions.
 import { decodeTile } from '../../../core/container.ts';
-import { traditionAt, type Tradition } from '../../../core/dwelling.ts';
+import { traditionAt, type LifewayWord, type Tradition } from '../../../core/dwelling.ts';
 import { anthromeTile, classAtStep, nearestStep, sceneTiles, scenePeople, assessmentAt, lifewayOf, LIFEWAY_OF, citiesNear, cellOf, tileKey, type AnthromeTile, type AnthromeTileHeader, type AssessmentsFile, type CitiesFile, type LandscapeData, type LandscapeIndex, type Lifeway, type TraditionsFile } from '../../../core/landscape.ts';
 import { cellAt, stepsAround, type PeopleFile } from '../../../core/layers.ts';
 import type { ResolveWorld } from '../../../core/resolve.ts';
@@ -29,6 +29,9 @@ export interface PlaceLandscape {
   region?: { id: number; label: string; slice: string; assessment: ReturnType<typeof assessmentAt> };
   lifeway: Lifeway;
   cities: ReturnType<typeof citiesNear>;
+  /** whose houses a scene would draw here: the way of life of the place, or townspeople where a list puts a city near */
+  whose?: LifewayWord;
+  /** the tradition written for that way of life, in the region and at the time */
   tradition?: Tradition;
 }
 
@@ -191,7 +194,8 @@ export class LandscapeAtlas {
     const cities = citiesNear(this.cities, lat, lon, t, this.index.reach_km);
     // The houses of the way of life here: a city's where a list puts one near, as a scene would draw it.
     const pattern = cities.length ? 'city' : lifeway.pattern;
-    const tradition = region && pattern !== 'none' ? traditionAt(this.traditions, region, t, LIFEWAY_OF[pattern]) : undefined;
-    return { t, step: this.index.steps[i], anthrome, ...(density !== undefined ? { density } : {}), ...(region && label && at ? { region: { id: region, label, slice: this.assessments.slices[at.slice].label, assessment: at } } : {}), lifeway, cities, ...(tradition ? { tradition } : {}) };
+    const whose = pattern !== 'none' ? LIFEWAY_OF[pattern] : undefined;
+    const tradition = region && whose ? traditionAt(this.traditions, region, t, whose) : undefined;
+    return { t, step: this.index.steps[i], anthrome, ...(density !== undefined ? { density } : {}), ...(region && label && at ? { region: { id: region, label, slice: this.assessments.slices[at.slice].label, assessment: at } } : {}), lifeway, cities, ...(whose ? { whose } : {}), ...(tradition ? { tradition } : {}) };
   }
 }

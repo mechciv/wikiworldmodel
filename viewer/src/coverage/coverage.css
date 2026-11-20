@@ -141,3 +141,16 @@ button { font: inherit; color: inherit; }
 .cov-table th, .cov-table td { padding: 3px 10px; border-bottom: 1px solid var(--line); text-align: right; }
 .cov-table th:first-child, .cov-table td:first-child { text-align: left; }
 .cov-table th { color: var(--muted); font-weight: 500; }
+
+.cov-houses { margin-top: 20px; }
+.cov-houses:empty { display: none; }
+.cov-houses h2 { margin: 0 0 4px; font-size: 14px; font-weight: 600; }
+.cov-houses .scroll { overflow-x: auto; }
+.cov-houses table { border-collapse: collapse; margin-top: 8px; font-size: 12px; font-variant-numeric: tabular-nums; }
+.cov-houses th, .cov-houses td { padding: 4px 10px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+.cov-houses th:first-child, .cov-houses td:first-child { text-align: left; }
+.cov-houses th { color: var(--muted); font-weight: 500; }
+.cov-houses td.house span { color: var(--muted); }
+.cov-houses td.house .housed { height: 4px; margin-top: 3px; border-radius: 2px; background: var(--tier-generic); overflow: hidden; }
+.cov-houses td.house .housed i { display: block; height: 100%; background: var(--tier-evidence); }
+.cov-houses .cov-note { color: var(--muted); font-size: 12px; margin: 8px 0 0; max-width: 90ch; }

@@ -12,7 +12,7 @@
 //
 // Everything is seeded by the world's 5′ cells and the anthromes' step, not by the scene, so two scenes that overlap put
 // their settlements in the same places: only the ground they stand on, which is the scene's, can move one a little.
-import { mid, traditionAt, within, type DwellingSpec, type FieldSpec, type SettlementSpec, type Tradition } from '../../../../core/dwelling.ts';
+import { mid, traditionAt, within, type DwellingSpec, type FieldSpec, type LifewayWord, type SettlementSpec, type Tradition } from '../../../../core/dwelling.ts';
 import { anthromeOf, lifewayOf, LIFEWAY_OF, type FieldUse, type Lifeway, type Pattern } from '../../../../core/landscape.ts';
 import type { ClimateClass } from '../../../../core/climate.ts';
 import type { SceneSpec } from '../../../../core/scene.ts';
@@ -94,6 +94,8 @@ export interface PlanForm {
   from: 'tradition' | 'generic';
   tradition?: string;
   label: string;
+  /** whose house it is drawn as: the way of life of the settlements it stands in */
+  whose: LifewayWord;
   /** which tradition gave each part, where it is a tradition's */
   parts?: Record<string, string>;
 }
@@ -175,15 +177,18 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
     const g = genericFor(p, pattern, climate);
     // A tradition's house for the way of life it says it housed (traditionAt has asked); the generic one where none holds.
     const use = t && Object.keys(t.dwelling).length;
-    const key = use ? `tradition:${t!.id}` : g.key;
+    // What a tradition leaves unsaid is the generic house's of the same way of life, so a tradition's house in a town is
+    // not its house in a village: each is a form of its own.
+    const key = use ? `tradition:${t!.id}|${g.key}` : g.key;
+    const whose = LIFEWAY_OF[pattern as Exclude<Pattern, 'none'>];
     let k = formIndex.get(key);
     if (k === undefined) {
       k = forms.length;
       formIndex.set(key, k);
       forms.push(
         use
-          ? { key, spec: { ...g.spec, ...t!.dwelling }, from: 'tradition', tradition: t!.id, label: t!.label, parts: Object.fromEntries(Object.entries(t!.from).filter(([k2]) => k2.startsWith('dwelling.')).map(([k2, v]) => [k2.slice(9), v])) }
-          : { key, spec: g.spec, from: 'generic', label: g.label },
+          ? { key, spec: { ...g.spec, ...t!.dwelling }, from: 'tradition', tradition: t!.id, label: t!.label, whose, parts: Object.fromEntries(Object.entries(t!.from).filter(([k2]) => k2.startsWith('dwelling.')).map(([k2, v]) => [k2.slice(9), v])) }
+          : { key, spec: g.spec, from: 'generic', label: g.label, whose },
       );
     }
     return k;

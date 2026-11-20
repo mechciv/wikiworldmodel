@@ -37,7 +37,7 @@ import { LifeScene } from './city/life.ts';
 import type { PeopleSummary } from './city/lifeworker.ts';
 import { LandscapeAtlas } from './city/landscape.ts';
 import { anthromeOf, classAtStep, nearestStep, PATTERN_LABEL, USE_LABEL, USES, LEVEL_WORDS, type Pattern } from '../../core/landscape.ts';
-import { specText } from '../../core/dwelling.ts';
+import { lifewayText, specText } from '../../core/dwelling.ts';
 import { CityScene } from './city/scene.ts';
 import { autoTilt, EYE_HEIGHT, groundHit, localView, lookThrough, projectLocal, rayOf, sunAt, underSea, type LocalView } from './city/view.ts';
 import { SEA } from './gl/cityShaders.ts';
@@ -1906,8 +1906,8 @@ async function start(root: HTMLElement): Promise<void> {
           ];
           const form =
             f.from === 'tradition'
-              ? `Its form follows the world's records of the building tradition ${f.label}: ${specText(f.spec)}. What they do not say, the generator's proportions fill in.`
-              : `No building tradition is recorded for this region and time, so this is a generic house for the way of life and the climate: ${specText(f.spec)}. It is a placeholder, and says so.`;
+              ? `Its form follows the world's records of the building tradition ${f.label}, which housed ${lifewayText([f.whose])} here: ${specText(f.spec)}. What they do not say, the generator's proportions fill in.`
+              : `No building tradition is recorded for the ${lifewayText([f.whose])} of this region at this time, so this is a generic house for the way of life and the climate: ${specText(f.spec)}. It is a placeholder, and says so.`;
           const text = `${where.length ? `Houses of this form stand in ${where.join('; ')}. ` : ''}${form} At the scene's middle, at ${formatTime(sp.t)}: ${PATTERN_LABEL[life.pattern].toLowerCase()}, ${k ? `${k.label.toLowerCase()} as the anthromes of HYDE have it at their step ${stepName(sp.step)}` : 'as the anthromes have it'}. ${life.why}${life.disagrees ? ` ${life.disagrees}` : ''} The scene draws ${pp.houses.toLocaleString('en-US')} houses for about ${pp.drawn.toLocaleString('en-US')} people; HYDE puts about ${pp.expected.toLocaleString('en-US')} in the land it covers${cities.length ? `, and the lists of cities add ${cities.join(', ')}` : ''}.`;
           const why = `${gen.generator}, version ${gen.version}: nobody recorded this house. How many houses there are follows HYDE's people through the anthromes, and the lists of cities where they name one; what way of life, the anthromes and the region's archaeologists; where each house stands and which way it faces is invented, keyed by the world's 5′ cells.`;
           return inspect.showGenerated(f.label, 'Generated house', text, why);
@@ -2045,6 +2045,7 @@ async function start(root: HTMLElement): Promise<void> {
       ...(place.density !== undefined ? { density: place.density } : {}),
       ...(regionUses ? { regionUses } : {}),
       cities: place.cities.map((c) => ({ name: c.city.name, people: c.people, km: c.km, list: listTitle(c.city.field), also: c.also.map((x) => ({ people: x.people, list: listTitle(x.city.field) })) })),
+      ...(place.whose ? { whose: lifewayText([place.whose]) } : {}),
       ...(place.tradition ? { tradition: { id: place.tradition.id, label: place.tradition.label, dwelling: specText(place.tradition.dwelling) } } : {}),
     };
   }
