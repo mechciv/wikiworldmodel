@@ -1,0 +1,21 @@
+id: src:sleep-2014-aftermath-moon-forming-impact
+type: publication
+kind: model
+citation: >-
+  Sleep, N.H., Zahnle, K.J. & Lupu, R.E. (2014). Terrestrial aftermath of the Moon-forming impact.
+  Philosophical Transactions of the Royal Society A 372(2024), 20130172.
+authors:
+  - "Sleep, N.H."
+  - "Zahnle, K.J."
+  - "Lupu, R.E."
+published: 2014
+title: Terrestrial aftermath of the Moon-forming impact
+container: Philosophical Transactions of the Royal Society A 372(2024), 20130172
+doi: 10.1098/rsta.2013.0172
+verified:
+  by: machine:claude-code
+  how: >-
+    Abstract only, read on 20 November 2026 from the Europe PMC record (PMID 25114303); citation from
+    Crossref. The article itself was not read: the Royal Society's site refused the request. So how
+    the abstract's ten million years were reckoned, and why they differ from the two million of
+    Zahnle et al. (2007), two of whose authors wrote this, is not known here.

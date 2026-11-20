@@ -96,6 +96,39 @@ export async function canvasPatch(page: Page, fx: number, fy: number, size = 9):
   }, [fx, fy, size]);
 }
 
+/**
+ * The globe's canvas as a small picture, `nx` by `ny` cells, each the mean colour of its part of the canvas: enough to
+ * say how much of the view changed between two moments, and no more.
+ */
+export async function canvasGrid(page: Page, nx = 64, ny = 38): Promise<number[]> {
+  return page.evaluate(([nx, ny]) => {
+    const src = document.querySelector('canvas.globe') as HTMLCanvasElement;
+    const c = document.createElement('canvas');
+    c.width = src.width;
+    c.height = src.height;
+    const g = c.getContext('2d')!;
+    g.drawImage(src, 0, 0);
+    const d = g.getImageData(0, 0, src.width, src.height).data;
+    const sum = new Float64Array(nx * ny * 3);
+    const count = new Float64Array(nx * ny);
+    for (let y = 0; y < src.height; y++) {
+      const j = Math.min(ny - 1, Math.floor((y * ny) / src.height));
+      for (let x = 0; x < src.width; x++) {
+        const k = j * nx + Math.min(nx - 1, Math.floor((x * nx) / src.width));
+        const i = (y * src.width + x) * 4;
+        sum[k * 3] += d[i];
+        sum[k * 3 + 1] += d[i + 1];
+        sum[k * 3 + 2] += d[i + 2];
+        count[k]++;
+      }
+    }
+    return Array.from(sum, (v, i) => v / count[Math.floor(i / 3)]);
+  }, [nx, ny]);
+}
+
+/** How far apart two such pictures are: the mean difference of their cells' colours, as a share of the whole range. */
+export const gridsApart = (a: number[], b: number[]): number => a.reduce((s, v, i) => s + Math.abs(v - b[i]), 0) / a.length / 255;
+
 /** Points from one place to another, in steps. */
 export const line = (from: [number, number], to: [number, number], steps = 8): [number, number][] =>
   Array.from({ length: steps + 1 }, (_, i) => [from[0] + ((to[0] - from[0]) * i) / steps, from[1] + ((to[1] - from[1]) * i) / steps]);

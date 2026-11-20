@@ -1,0 +1,25 @@
+id: src:nikolaou-2019-magma-ocean-duration
+type: publication
+kind: model
+citation: >-
+  Nikolaou, A., Katyal, N., Tosi, N., Godolt, M., Grenfell, J.L. & Rauer, H. (2019). What factors
+  affect the duration and outgassing of the terrestrial magma ocean? The Astrophysical Journal
+  875(1), 11.
+authors:
+  - "Nikolaou, A."
+  - "Katyal, N."
+  - "Tosi, N."
+  - "Godolt, M."
+  - "Grenfell, J.L."
+  - "Rauer, H."
+published: 2019
+title: What factors affect the duration and outgassing of the terrestrial magma ocean?
+container: The Astrophysical Journal 875(1), 11
+doi: 10.3847/1538-4357/ab08ed
+verified:
+  by: machine:claude-code
+  how: >-
+    Full text read on 20 November 2026 in the authors' accepted manuscript on arXiv (1903.07436, dated
+    19 March 2019), a PDF turned to text; citation from Crossref. The journal's typeset article was
+    not read, so locators name the manuscript's sections, and its wording may differ from the
+    journal's in small ways.

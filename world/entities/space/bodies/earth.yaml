@@ -3,7 +3,8 @@ kind: body/planet
 summary: >-
   The Earth, from the start of its accretion. Its phases are the states of its surface and
   atmosphere: a proto-Earth that grew by collisions and was remelted by giant impacts; the
-  rock-vapour atmosphere and the magma ocean under steam left by the Moon-forming impact;
+  rock-vapour atmosphere and the magma ocean under steam left by the Moon-forming impact; the
+  steam raining out, and the hot ocean it left under a thick atmosphere of carbon dioxide;
   oceans of water; and, as the Sun brightens, a planet without them.
 author: machine:claude-code
 same_as: { wikidata: Q2 }
@@ -14,6 +15,10 @@ phases:
     label: Rock-vapour atmosphere
   - id: magma-ocean
     label: Magma ocean under steam
+  - id: rain-out
+    label: Steam raining out
+  - id: hot-ocean
+    label: Hot ocean under carbon dioxide
   - id: oceans
     label: Oceans
   - id: without-oceans
@@ -37,6 +42,8 @@ claims:
       first solids, which the paper takes as the start of the Solar System (section 3). Earth
       then grew by collisions between embryos over some 50 Myr (section 2.2); with growth
       falling off exponentially, it reached 63% of its mass in about 11 Myr (section 3.2).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zahnle-2007.txt (sha256 09b580faa94c748c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   proto-earth-surface:
     prop: surface
     subject: "@proto-earth"
@@ -73,6 +80,8 @@ claims:
       quote: Once the atmosphere settled down it was mostly rock vapor topped by silicate clouds at ∼2,500 K.
     method: model
     basis: reconstruction
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zahnle-2007.txt (sha256 09b580faa94c748c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   rock-vapour-surface:
     prop: surface
     subject: "@rock-vapour"
@@ -84,6 +93,8 @@ claims:
     method: model
     basis: reconstruction
     note: The impact melted the mantle (the end of the proto-Earth), so magma lay under the rock vapour.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zahnle-2007.txt (sha256 09b580faa94c748c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   rock-vapour-end:
     prop: end
     subject: "@rock-vapour"
@@ -93,7 +104,59 @@ claims:
       loc: abstract
       quote: The Moon-forming impact left Earth enveloped in a hot silicate atmosphere that cooled and condensed over ∼1,000 yrs.
     method: model
-    note: An order of magnitude from one model, without an uncertainty.
+    rank: preferred
+    note: >-
+      An order of magnitude from one model, without an uncertainty. Preferred as the figure of
+      the account this record's phases follow; the two others bound it more than they differ
+      from it.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zahnle-2007.txt (sha256 09b580faa94c748c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  rock-vapour-end-sleep-2001:
+    prop: end
+    subject: "@rock-vapour"
+    value: { ref: earth/events/moon-forming-impact, edge: start, lag: { hi: 2 kyr } }
+    source:
+      ref: src:sleep-2001-clement-surface-conditions
+      loc: section "Moon-Forming Impact and an Atmosphere Heated from Below"
+      quote: At this rate of cooling, the rock-vapor epoch lasted less than 2,000 years.
+    method: model
+    note: >-
+      An upper bound, from the heat that cloud tops at about 2,300 K give off. Picked, the
+      phase is shown ending at the middle of what the bound allows.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in sleep-2001.txt (sha256 7b23936cb5716491), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  rock-vapour-end-zahnle-2010:
+    prop: end
+    subject: "@rock-vapour"
+    value: { ref: earth/events/moon-forming-impact, edge: start, lag: { lo: 100 yr, hi: 1 kyr } }
+    source:
+      ref: src:zahnle-2010-earliest-atmospheres
+      loc: Figure 3, caption
+      quote: (i) For 100–1000 yr after the Moon-forming impact Earth was enveloped in rock vapor.
+    method: model
+    note: >-
+      The same model retold three years later by its lead author, as a range. The article's
+      text gives about 1,000 years.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zahnle-2010.txt (sha256 9f8f215099aa0e0f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  rock-vapour-change:
+    prop: change
+    subject: "@rock-vapour"
+    value: gradual
+    source:
+      ref: src:zahnle-2007-habitable-planet
+      loc: section 5.1, p. 50
+      quote: Mixed into the atmosphere, at first as relatively minor constituents but becoming increasingly prominent as the silicates dropped out, were any volatiles initially in the mantle plus the air that survived the impact.
+    method: model
+    basis: reconstruction
+    note: >-
+      The rock vapour condensed and rained out through the whole phase, leaving the gases that
+      were the next phase's atmosphere. The paper has the silicate clouds as the planet's face
+      for all of the thousand years, and its radiating temperature falling toward that of a
+      steam atmosphere only after them: a face that changes evenly through the phase, as the
+      globe is drawn, is simpler than the model.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zahnle-2007.txt (sha256 09b580faa94c748c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   magma-ocean-atmosphere:
     prop: atmosphere
     subject: "@magma-ocean"
@@ -107,6 +170,8 @@ claims:
     note: >-
       A runaway greenhouse of water vapour: the steam atmosphere that condensed into the
       oceans once the mantle had solidified (Fig. 5 caption).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zahnle-2007.txt (sha256 09b580faa94c748c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   magma-ocean-surface:
     prop: surface
     subject: "@magma-ocean"
@@ -117,6 +182,8 @@ claims:
       quote: A substantial greenhouse effect and tidal heating maintain the magma ocean for some 2 million years.
     method: model
     basis: reconstruction
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zahnle-2007.txt (sha256 09b580faa94c748c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   magma-ocean-end:
     prop: end
     subject: "@magma-ocean"
@@ -126,10 +193,264 @@ claims:
       loc: abstract
       quote: It took another ∼2 Myrs for the magma ocean to freeze at the surface.
     method: model
+    rank: preferred
     note: >-
       "Another" follows the thousand years of rock vapour, so the surface froze about 2 Myr
       after the impact. The steam's greenhouse effect and tidal heating by the young Moon set
-      how long it took; one model, without an uncertainty.
+      how long it took; one model, without an uncertainty. Preferred because it is the model
+      whose account the phases before and after this one follow, and its paper was read in
+      full. Other models, which differ in what they count as the end and in the heat they
+      allow for, give from a fifth of a million years to ten million; the paper's own Fig. 5,
+      which it calls a cartoon, draws the freezing nearer 4 Myr.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zahnle-2007.txt (sha256 09b580faa94c748c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  magma-ocean-end-lebrun-2013:
+    prop: end
+    subject: "@magma-ocean"
+    value: { ref: earth/events/moon-forming-impact, edge: start, lag: 1.5 Myr }
+    source:
+      ref: src:lebrun-2013-magma-ocean-atmosphere
+      loc: abstract
+      quote: Water vapor condenses to an ocean after 0.1 Myr, 1.5 Myr and 10 Myr for, respectively, Mars, Earth and Venus.
+    method: model
+    note: >-
+      Another group's model, of a convecting magma ocean coupled to one of its atmosphere. Its
+      1.5 Myr is when the steam condenses to an ocean, which is where this phase ends; the
+      abstract has the steam delaying the end of the magma ocean itself by typically 1 Myr.
+      Read only in its abstract.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in lebrun-2013-abstract.txt (sha256 a96c60501ae99d74), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  magma-ocean-end-sleep-2014:
+    prop: end
+    subject: "@magma-ocean"
+    value: { ref: earth/events/moon-forming-impact, edge: start, lag: 10 Myr }
+    source:
+      - ref: src:sleep-2014-aftermath-moon-forming-impact
+        loc: abstract
+        quote: The duration of this runaway greenhouse stage was limited to approximately 10 Myr by the internal energy and tidal heating, ending with a partially crystalline uppermost mantle and a solid deep mantle.
+      - ref: src:sleep-2010-hadean-archaean-environment
+        loc: abstract
+        quote: The Earth began hot after the moon-forming impact and cooled to the point where liquid water was present in ∼10 million years
+    method: model
+    note: >-
+      A later model by two of the authors of the preferred one, five times as long. It was
+      read only in its abstract, which does not say why the two differ. The review of 2010 by
+      its first author gives the same ten million years for liquid water, and about twenty
+      for a surface and mantle of solid rock.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in sleep-2014-abstract.txt (sha256 8d56676beecef4fe) and sleep-2010.txt (sha256 0301c624bfa938fd), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  magma-ocean-end-nikolaou-2019:
+    prop: end
+    subject: "@magma-ocean"
+    value: { ref: earth/events/moon-forming-impact, edge: start, lag: 0.21 Myr }
+    source:
+      ref: src:nikolaou-2019-magma-ocean-duration
+      loc: section 4.3
+      quote: The MO duration amounts to ≈0.21 Myr for conservative Earth volatile abundances
+    method: model
+    note: >-
+      A third group's model, with a grey atmosphere of water vapour and CO2; the manuscript
+      does not mention heating by tides. It counts the magma ocean as ended when the mantle
+      at the surface holds too little melt to flow as a liquid (section 2.10), which comes
+      before the surface is frozen. Its conclusions put the Earth's magma ocean at no more
+      than 5 Myr, even with five oceans of water.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in nikolaou-2019.txt (sha256 0a1471a0db7f0565), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  magma-ocean-change:
+    prop: change
+    subject: "@magma-ocean"
+    value: gradual
+    source:
+      - ref: src:zahnle-2007-habitable-planet
+        loc: section 9, p. 72
+        quote: We estimate that, because of thermal blanketing, it took would have taken ∼2 Myrs for the surface of a magma ocean to freeze.
+      - ref: src:sleep-2010-hadean-archaean-environment
+        loc: section "Approach to Clement Conditions on the Earliest Earth"
+        quote: The surface remained hot 1800–2000 K, partially molten with some solid scum.
+    method: model
+    basis: reconstruction
+    note: >-
+      The freezing took the whole phase ("it took would have taken" is the paper's own slip).
+      The mantle froze from the bottom up, and the steam held the surface at the melting point,
+      part melt and part solid, until the freezing reached it. No source gives how much of the
+      surface was solid at each time: that the crust is drawn spreading evenly through the
+      phase is the choice of the model that draws it (model:earth/passage).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zahnle-2007.txt (sha256 09b580faa94c748c) and sleep-2010.txt (sha256 0301c624bfa938fd), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  rain-out-surface:
+    prop: surface
+    subject: "@rain-out"
+    value: crust-and-magma
+    source:
+      ref: src:zahnle-2007-habitable-planet
+      loc: section 5.2.1, p. 55
+      quote: Thereafter secular cooling takes over, and a freezing front rises through the mantle until it reaches the surface. This transition marks the end of the liquid magma ocean
+    method: model
+    basis: reconstruction
+    note: >-
+      What the rain began to fall on: a surface newly frozen, over a mantle not yet solid
+      throughout. In the paper's illustrative history the mantle reaches its solidus only 20
+      Myr after the impact (section 5.2.1, p. 56).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zahnle-2007.txt (sha256 09b580faa94c748c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  rain-out-atmosphere:
+    prop: atmosphere
+    subject: "@rain-out"
+    value: steam
+    source:
+      ref: src:zahnle-2007-habitable-planet
+      loc: section 9, p. 72
+      quote: Without the support of geothermal heat the steam condensed and rained out over a relatively short time, forming oceans of hot water.
+    method: model
+    basis: reconstruction
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zahnle-2007.txt (sha256 09b580faa94c748c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  rain-out-change:
+    prop: change
+    subject: "@rain-out"
+    value: gradual
+    source:
+      ref: src:zahnle-2007-habitable-planet
+      loc: section 5.2.1, p. 55
+      quote: Thereafter water condensed and rained out at ∼1 meter per year until the oceans returned
+    method: model
+    basis: reconstruction
+    note: >-
+      The phase is the rain: the steam thinning and the water gathering through all of it. The
+      metre a year is the global mean of rain less evaporation (the paper's footnote 6).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zahnle-2007.txt (sha256 09b580faa94c748c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  rain-out-end:
+    prop: end
+    subject: "@rain-out"
+    value: { ref: space/bodies/earth@rain-out, edge: start, lag: { lo: 1 kyr, hi: 10 kyr } }
+    source:
+      - ref: src:sleep-2010-hadean-archaean-environment
+        loc: section "Ground Zero on the Early Earth"
+        quote: Thereafter water rains out (initially at ∼350°C) of the atmosphere at ∼1 m/yr. The surface returns to clement conditions in a few thousand years.
+      - ref: src:zahnle-2007-habitable-planet
+        loc: section 5.2.1, p. 55, footnote 6
+        quote: The net rainfall rate of ∼1 m/yr refers to the global mean difference between rainfall and evaporation.
+    method: expert-estimate
+    note: >-
+      No source read gives the length of this rain in years. Sleep's "a few thousand years" is
+      said of the like rain after an impact that boils the ocean away, at the same metre a year
+      that Zahnle et al. give for this one, and an ocean is a few kilometres of water. It is
+      written here as more than one thousand years and fewer than ten, which is all that the
+      words say; the phase is shown ending at the middle of that.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in sleep-2010.txt (sha256 0301c624bfa938fd) and zahnle-2007.txt (sha256 09b580faa94c748c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  hot-ocean-surface:
+    prop: surface
+    subject: "@hot-ocean"
+    value: ocean
+    source:
+      ref: src:sleep-2010-hadean-archaean-environment
+      loc: section "Approach to Clement Conditions on the Earliest Earth"
+      quote: This amount of CO2 was insufficient to trigger a runaway greenhouse on the early Earth, but enough to maintain a surface temperature of ∼500 K above a liquid water ocean
+    method: model
+    basis: reconstruction
+    note: >-
+      Liquid at about 500 K because of the weight of the atmosphere over it, as in a pressure
+      cooker (the same passage).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in sleep-2010.txt (sha256 0301c624bfa938fd), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  hot-ocean-atmosphere:
+    prop: atmosphere
+    subject: "@hot-ocean"
+    value: dense-co2
+    source:
+      ref: src:zahnle-2007-habitable-planet
+      loc: section 9, p. 72
+      quote: At this point the atmosphere was dominated by ∼100 bars of CO2, and the surface temperature was ∼500 K.
+    method: model
+    basis: reconstruction
+    note: >-
+      The amount follows from how little CO2 dissolves in magma. The review of 2010 by the
+      paper's lead author gives 100 to 200 bars, and says what the model assumes: that CO2
+      was the main gas apart from water. Over a more reducing mantle it would have been
+      mostly methane, which the review thinks unlikely.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zahnle-2007.txt (sha256 09b580faa94c748c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  hot-ocean-change:
+    prop: change
+    subject: "@hot-ocean"
+    value: gradual
+    source:
+      ref: src:zahnle-2007-habitable-planet
+      loc: abstract
+      quote: Thereafter cooling was governed by how quickly CO2 was removed from the atmosphere.
+    method: model
+    basis: reconstruction
+    note: >-
+      The phase is the removal of the CO2: the sea floor took it up as carbonate, no more
+      than about ten bars at a time, and carried it into the mantle as the floor was renewed
+      (section 5.3).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zahnle-2007.txt (sha256 09b580faa94c748c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  hot-ocean-end:
+    prop: end
+    subject: "@hot-ocean"
+    value: { ref: space/bodies/earth@hot-ocean, edge: start, lag: { lo: 10 Myr, hi: 100 Myr } }
+    source:
+      - ref: src:sleep-2010-hadean-archaean-environment
+        loc: section "Approach to Clement Conditions on the Earliest Earth"
+        quote: It is unclear how long a warm 500 K CO2 greenhouse persisted. Zahnle et al. (2007) prefer a range between the minimum time of ∼10 million years to subduct the available CO2 to 100 million years
+      - ref: src:zahnle-2007-habitable-planet
+        loc: section 5.3, p. 57
+        quote: For specificity in preparing Fig. 5 we assume this takes either 10 Myr or 100 Myr
+    method: model
+    rank: preferred
+    note: >-
+      Preferred as what the paper's authors say they know: a range, whose ends are its two
+      cases, each a claim below. The phase is shown ending at the middle of the range, which
+      is neither case. The paper cannot say that the CO2 was removed at all, and its Fig. 5,
+      which it calls a cartoon, draws the surface near 500 K until about 100 Myr. What came
+      after is not claimed here: with the CO2 gone and the Sun faint, the paper takes a
+      lifeless Earth to have been cold, its oceans under ice, with thaws after large impacts.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in sleep-2010.txt (sha256 0301c624bfa938fd) and zahnle-2007.txt (sha256 09b580faa94c748c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  hot-ocean-end-efficient:
+    prop: end
+    subject: "@hot-ocean"
+    value: { ref: space/bodies/earth@hot-ocean, edge: start, lag: 10 Myr }
+    source:
+      ref: src:zahnle-2007-habitable-planet
+      loc: section 9, p. 72
+      quote: Vigorous hydrothermal circulation through the oceanic crust and rapid mantle turnover could have removed 100 bars of CO2 from the atmosphere in as little as 10 million years.
+    method: model
+    note: >-
+      The least time, if the carbonate went into the mantle as fast as it formed. It is the
+      case the paper's authors take as their view of the Hadean, and its review of 2010
+      repeats it.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zahnle-2007.txt (sha256 09b580faa94c748c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  hot-ocean-end-inefficient:
+    prop: end
+    subject: "@hot-ocean"
+    value: { ref: space/bodies/earth@hot-ocean, edge: start, lag: 100 Myr }
+    source:
+      ref: src:zahnle-2007-habitable-planet
+      loc: section 5.3, p. 57
+      quote: For specificity in preparing Fig. 5 we assume this takes either 10 Myr or 100 Myr
+    method: model
+    note: >-
+      The paper's other case, if carbonate entered the mantle poorly: the surface near 500 K
+      for many tens of millions of years (abstract).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zahnle-2007.txt (sha256 09b580faa94c748c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  hot-ocean-end-before-sleep-2014:
+    prop: end_before
+    subject: "@hot-ocean"
+    value: 3.8 Ga
+    source:
+      ref: src:sleep-2014-aftermath-moon-forming-impact
+      loc: abstract
+      quote: Almost all this CO2 had to be sequestered by subduction into the mantle by 3.8 Ga, when the geological record indicates the presence of life and hence a habitable environment.
+    method: expert-estimate
+    note: A bound from the rock record, which holds whichever length is chosen. Read only in the abstract.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in sleep-2014-abstract.txt (sha256 8d56676beecef4fe), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   oceans-surface:
     prop: surface
     subject: "@oceans"
@@ -141,10 +462,14 @@ claims:
     method: model
     basis: reconstruction
     note: >-
-      The steam rained out at about a metre a year (section 5.2.1), quickly on this scale, so
-      the oceans begin as the magma ocean froze. They began hot, under dense CO2; Earth could
-      have been habitable 10–20 Myr after the impact if CO2 entered the mantle efficiently
-      (section 9).
+      The ocean this sentence has forming is the hot one, under dense CO2, which is the phase
+      before this one; this phase is the same ocean once the CO2 was gone. Earth could have
+      been habitable 10–20 Myr after the impact if CO2 entered the mantle efficiently (section
+      9). No atmosphere is claimed for this phase: the paper takes the Hadean that followed to
+      have been cold, its oceans under ice, and says itself that this is reasoned and not
+      observed (section 7.2).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zahnle-2007.txt (sha256 09b580faa94c748c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   oceans-end-goldblatt-watson-2012:
     prop: end
     subject: "@oceans"

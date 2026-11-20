@@ -198,6 +198,14 @@ describe('models', () => {
     expect(errors(extra).map((i) => i.message)).toEqual(['no output of this model has a parameter "depth"']);
   });
 
+  it('name the parameters of what they derive themselves, where they make no field, and still hold them to the world', async () => {
+    const good = await check({ 'models/dates.yaml': model('inputs: [{ prop: date }]\nderives: Dates.\nparams:\n  pace: { choice: Evenly. }\n') });
+    expect(errors(good)).toEqual([]);
+    // A record such a parameter follows is looked for like any other: one nobody has written is wanted.
+    const wanted = await check({ 'models/dates.yaml': model('inputs: [{ prop: date }]\nderives: Dates.\nparams:\n  span: { follows: test/nothing#end }\n') });
+    expect(wanted.filter((i) => i.check === 'wanted').map((i) => i.message)).toEqual([expect.stringContaining('test/nothing is wanted')]);
+  });
+
   it('make each field once', async () => {
     const issues = await check({
       'fields/coast.yaml': coast,
