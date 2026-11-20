@@ -76,8 +76,12 @@ What answers a layer changes with the era, and the scene must say which:
 Noise makes texture, not landforms. Where a form's shape carries meaning, it is made by the process
 that makes it, at a scale a worker can afford:
 
-- **Rivers:** the sine-generated curve of real meanders, scaled by the channel, and cutoffs that leave
-  oxbows. Later, migration, which leaves scroll bars on the inside of each bend.
+- **Rivers:** a river the world gives is wound into the sine-generated curve of real meanders, scaled by
+  the channel, with cutoffs that leave oxbows. A river a scene invents, where the world gives it none, is
+  made by migration ([meander.ts](../world/generators/life/meander.ts)): a channel whose every point moves
+  sideways by the curvature at it and upstream of it, so that bends grow, lean down the valley and cut
+  off. Its oxbows are the loops it cut, and the inside of each bend is the ground it swept, a bar crossed
+  by scrolls. Later, the same for the rivers the world gives.
 - **Hills and valleys below the relief's cell:** stream-power erosion on the generated relief, so that
   valleys lead to the rivers that drain them.
 - **Dunes** from the wind of the climate runs, **glacial forms** from the ice's history, and **coasts**
