@@ -263,7 +263,24 @@ properties:
     values:
       rock-vapour: Vaporized rock, thousands of degrees hot.
       steam: A thick atmosphere of water vapour, its clouds hiding the surface.
+      dense-co2: >-
+        A thick atmosphere of carbon dioxide, about a hundred times the weight of today's air, over a hot ocean;
+        it veils the surface.
     description: The kind of atmosphere, where it changes how the planet looks from space.
+  change:
+    type: string
+    interp: step
+    applies_to: [body/planet]
+    values:
+      gradual: >-
+        Little by little, through the whole phase: the planet passed from the state the phase began in to the
+        state of the phase that follows.
+    description: >-
+      How a phase of a planet gave way to the next, where its sources say that the change took the length of the
+      phase: a cloud of rock vapour condensing, a magma ocean freezing, an ocean raining out of its steam. The
+      phase's `surface` and `atmosphere` are then what it began with. Without this claim a phase's state is taken
+      to have held until the phase ended. How the change ran inside the phase, fast at first or evenly, is not
+      said by it: the planet is drawn as passing evenly (model:earth/passage).
   ice_reach:
     type: quantity
     unit: °

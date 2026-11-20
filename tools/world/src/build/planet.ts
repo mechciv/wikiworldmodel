@@ -7,8 +7,8 @@ import { labeller, subjectTime, type Solved } from './records.ts';
 
 /** The planet the globe shows. */
 export const PLANET = 'space/bodies/earth';
-/** Properties that decide how a phase of the planet looks. */
-const PHASE_PROPS = ['surface', 'atmosphere'];
+/** Properties that decide how a phase of the planet looks, and whether it passes little by little into the next. */
+const PHASE_PROPS = ['surface', 'atmosphere', 'change'];
 /** Properties that make an event an episode of the planet's look. */
 const EPISODE_PROPS = ['ice_reach'];
 

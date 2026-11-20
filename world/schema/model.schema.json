@@ -22,7 +22,7 @@
     "derives": { "type": "string", "description": "What it derives that is not a field, such as the dates of every record" },
     "params": {
       "type": "object",
-      "description": "Where each parameter of its outputs comes from, by the parameter's name in the field: every one, and no other",
+      "description": "Where each parameter of its outputs comes from, by the parameter's name in the field: every one, and no other. A model that makes no field names the parameters of what it derives itself",
       "propertyNames": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
       "additionalProperties": {
         "oneOf": [

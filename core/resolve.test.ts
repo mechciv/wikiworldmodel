@@ -46,6 +46,33 @@ describe('resolve', () => {
     expect(resolve(WORLD, 'geography', 10, 0, GA(4.6))).toMatchObject({ tier: 'unknown', value: null });
   });
 
+  it('answers for the ground that shows as molten rock thins out, where a passage leads from it to oceans', () => {
+    // The same planet, its magma ocean freezing little by little into a crust that rain then covers.
+    const phases = PLANET.planet!.phases;
+    const gradual = { change: [{ claim: 'test/earth#c', value: 'gradual', rank: 'normal', basis: 'reconstruction' as const }] };
+    const passing: PlanetFile = {
+      ...PLANET,
+      planet: {
+        ...PLANET.planet!,
+        phases: [
+          { ...phases[0], time: span(GA(4.5), GA(4.45)), values: { ...phases[0].values, ...gradual } },
+          { ...state('test/earth@rain', 'Rain', GA(4.45), GA(4.4), 'crust-and-magma'), values: { ...state('test/earth@rain', 'Rain', GA(4.45), GA(4.4), 'crust-and-magma').values, ...gradual } },
+          ...phases.slice(1),
+        ],
+      },
+    };
+    const world = { ...WORLD, planet: passing };
+    // Magma freezing into crust over magma: molten rock covers everything still.
+    expect(resolve(world, 'geography', 60, 0, GA(4.47))).toMatchObject({ tier: 'evidence', value: 'magma' });
+    // The rain: generic land and sea show through the thinning melt, and the answer says so.
+    expect(resolve(world, 'geography', 60, 0, GA(4.42))).toMatchObject({ tier: 'generic', value: 'land' });
+    expect(resolve(world, 'geography', 10, 0, GA(4.42))).toMatchObject({ tier: 'generic', value: 'sea' });
+    // The planet's own answer names the phase, and says it is passing into the next.
+    const planet = resolve(world, 'planet', 10, 0, GA(4.42));
+    expect(planet).toMatchObject({ tier: 'evidence', value: 'Rain' });
+    expect(planet.why).toContain('part of the way to the next, Oceans');
+  });
+
   it("reads the atlas's tiers as tiers of evidence", () => {
     const t = GA(0.05);
     expect([40, 10, -10, -40].map((lat) => resolve(WORLD, 'life', lat, 0, t).tier)).toEqual(['evidence', 'model', 'generic', 'unknown']);

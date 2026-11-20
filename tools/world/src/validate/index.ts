@@ -661,7 +661,8 @@ function checkModels(world: World, issues: Issue[]): void {
     for (const n of names) {
       if (!m.params?.[n]) issues.push({ level: 'error', check: 'models', file: m.file, where: 'params', message: `say where "${n}" comes from: a source, a claim it follows, or a choice` });
     }
-    for (const n of Object.keys(m.params ?? {})) {
+    // A model that makes no field names the parameters of what it derives itself: there is no field to hold them to.
+    for (const n of m.outputs?.length ? Object.keys(m.params ?? {}) : []) {
       if (!names.has(n)) issues.push({ level: 'error', check: 'models', file: m.file, where: `params.${n}`, message: `no output of this model has a parameter "${n}"` });
     }
     checkTests(m.checks, m.file, 'models', issues);

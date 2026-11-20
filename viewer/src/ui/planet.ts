@@ -98,6 +98,9 @@ export class PlanetPanel {
     if (this.phase && this.ice) {
       const phase = look && !look.formed ? 'not formed yet' : (look?.phase?.label ?? '—');
       if (this.phase.value.textContent !== phase) this.phase.value.textContent = phase;
+      // A phase that is a passage says what it is passing into, and how far it has gone.
+      const passing = look?.into ? `Passing little by little into ${look.into.label}: ${Math.round(look.passed * 100)}% of the way` : '';
+      if (this.phase.row.title !== passing) this.phase.row.title = passing;
       this.phase.row.classList.toggle('empty', !look?.phase);
       this.open.phase = look?.phase ? look.phase.subject.split('@')[0] : '';
       const ice = look?.ice;

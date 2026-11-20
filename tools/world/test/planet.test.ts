@@ -1,8 +1,11 @@
-// The planet's state at a time: the phase that holds, how far through it the time is, and
-// the ice of any glaciation, each following the scenario's picks and alternatives.
+// The planet's state at a time: the phase that holds, how far through it the time is, how far
+// a phase that is a passage has gone into the next, and the ice of any glaciation, each
+// following the scenario's picks and alternatives. Then how the globe draws it.
 import { describe, expect, it } from 'vitest';
 import { chosenClaim, coverAt, lookAt, type PlanetFile, type StateClaim } from '../../../core/planet.ts';
 import type { FeatureTime } from '../../../core/tileset.ts';
+import { globeLook } from '../../../viewer/src/gl/globe.ts';
+import { apart, drawn } from './drawn.ts';
 
 const span = (start: number, end: number | null): FeatureTime => ({
   start: { best: start, lo: start, hi: start, derived: false },
@@ -24,6 +27,23 @@ const FILE: PlanetFile = {
   episodes: [{ subject: 'ice', label: 'Ice age', time: span(500, 600), values: { ice_reach: [claim('hard', 0, 'preferred'), claim('belt', 12)] } }],
 };
 
+/** A planet whose record says how each of its first states gave way: a cloud of rock vapour, a magma ocean, a rain, a hot ocean. */
+const PASSING: PlanetFile = {
+  planet: {
+    id: 'q',
+    label: 'Planet',
+    time: span(0, null),
+    phases: [
+      { subject: 'q@vapour', label: 'Vapour', time: span(0, 10), values: { surface: [claim('s0', 'magma')], atmosphere: [claim('a0', 'rock-vapour')], change: [claim('c0', 'gradual')] } },
+      { subject: 'q@molten', label: 'Molten', time: span(10, 110), variants: { 'x#late': span(10, 210) }, values: { surface: [claim('s1', 'magma')], atmosphere: [claim('a1', 'steam')], change: [claim('c1', 'gradual')] } },
+      { subject: 'q@rain', label: 'Rain', time: span(110, 120), variants: { 'x#late': span(210, 220) }, values: { surface: [claim('s2', 'crust-and-magma')], atmosphere: [claim('a2', 'steam')], change: [claim('c2', 'gradual')] } },
+      { subject: 'q@hot', label: 'Hot', time: span(120, 220), variants: { 'x#late': span(220, 320) }, values: { surface: [claim('s3', 'ocean')], atmosphere: [claim('a3', 'dense-co2')], change: [claim('c3', 'gradual')] } },
+      { subject: 'q@wet', label: 'Wet', time: span(220, null), variants: { 'x#late': span(320, null) }, values: { surface: [claim('s4', 'ocean')], change: [claim('c4', 'gradual')] } },
+    ],
+  },
+  episodes: [],
+};
+
 describe('the planet at a time', () => {
   it('has not formed before its record starts', () => {
     expect(lookAt(FILE, -1, {}).formed).toBe(false);
@@ -38,6 +58,26 @@ describe('the planet at a time', () => {
     // At a boundary the next phase has begun.
     expect(lookAt(FILE, 100, {}).phase?.label).toBe('Wet');
     expect(lookAt(FILE, 300, {}).atmosphere).toBeNull();
+  });
+
+  it('passes little by little into the next phase, where the phase\'s change is claimed to be gradual', () => {
+    const a = lookAt(PASSING, 35, {});
+    expect([a.phase?.label, a.surface, a.atmosphere]).toEqual(['Molten', 'magma', 'steam']);
+    expect([a.into?.label, a.intoSurface, a.intoAtmosphere]).toEqual(['Rain', 'crust-and-magma', 'steam']);
+    expect(a.passed).toBeCloseTo(0.25);
+    // As a phase starts nothing has passed; just before it ends, nearly all of it has.
+    expect(lookAt(PASSING, 110, {}).passed).toBe(0);
+    expect(lookAt(PASSING, 109.999, {}).passed).toBeCloseTo(1, 4);
+    // A pick that lengthens the phase stretches the passage with it.
+    expect(lookAt(PASSING, 110, { picks: ['x#late'] }).passed).toBeCloseTo(0.5);
+  });
+
+  it('holds its state where no such claim is made, and where the phase has no end to pass by', () => {
+    const held = lookAt(FILE, 25, {});
+    expect([held.into, held.passed, held.progress]).toEqual([null, 0, 0.25]);
+    // The last phase's change is claimed gradual too, but it has no end and nothing follows it.
+    const last = lookAt(PASSING, 1000, {});
+    expect([last.phase?.label, last.into, last.passed]).toEqual(['Wet', null, 0]);
   });
 
   it('moves its phases with a pick that moves their dates', () => {
@@ -118,5 +158,87 @@ describe('what can cover the land at a time', () => {
 
   it('is empty for a world with no transitions', () => {
     expect(coverAt({ planet: null, episodes: [] }, 1000, {})).toEqual({ crust: 0, plants: 0, forests: 0, grasses: 0, reefs: 0 });
+  });
+});
+
+describe('how the globe draws the planet between its states', () => {
+  const draw = { crust: { magma: 0, over_magma: 0.82 }, ice_edge: 5 };
+  const at = (file: PlanetFile, t: number) => globeLook(lookAt(file, t, {}), draw);
+
+  it('draws a state that holds as that state: molten rock under steam, or oceans under today\'s sky', () => {
+    const molten = at(FILE, 25);
+    expect([molten.molten, molten.crust, molten.ember, molten.surfaceMix]).toEqual([1, 0, 0, 0]);
+    expect(molten.clouds!.base).toBeGreaterThan(0.5);
+    const wet = at(FILE, 300);
+    expect([wet.surface, wet.molten, wet.ember]).toEqual([1, 0, 0]);
+    expect(wet.clouds).toEqual({ opacity: 0.78, base: 0, tint: [1, 1, 1], glow: [0, 0, 0] });
+  });
+
+  it('spreads a magma ocean\'s crust as far as its passage has gone, and dims the glow under its steam with it', () => {
+    expect(at(PASSING, 10).crust).toBe(0);
+    const half = at(PASSING, 60);
+    expect(half.molten).toBe(1);
+    expect(half.crust).toBeCloseTo(0.41);
+    expect(half.clouds!.glow[0]).toBeCloseTo(0.55 * (1 - 0.41));
+    expect(at(PASSING, 109.999).crust).toBeCloseTo(0.82, 3);
+  });
+
+  it('thins rock vapour over the magma under it, and molten rock over the ocean that the rain leaves', () => {
+    const vapour = at(PASSING, 5);
+    expect([vapour.ember, vapour.molten]).toEqual([0.5, 1]);
+    // The steam's clouds gather as the rock vapour thins.
+    expect(vapour.clouds!.base).toBeCloseTo(0.275);
+    const rain = at(PASSING, 115);
+    expect([rain.molten, rain.surface, rain.crust]).toEqual([0.5, 1, 0.82]);
+  });
+
+  it('thins a veil of carbon dioxide over the ocean until the sky is today\'s', () => {
+    const veiled = at(PASSING, 120);
+    const thinning = at(PASSING, 170);
+    const clear = at(PASSING, 220);
+    expect(veiled.clouds!.base).toBeGreaterThan(thinning.clouds!.base);
+    expect(thinning.clouds!.base).toBeGreaterThan(0);
+    expect([clear.clouds, clear.rim, clear.halo]).toEqual([{ opacity: 0.78, base: 0, tint: [1, 1, 1], glow: [0, 0, 0] }, [0.25, 0.45, 0.85], [0.22, 0.42, 0.95]]);
+    expect([veiled.surface, thinning.surface, clear.surface]).toEqual([1, 1, 1]);
+  });
+
+  it('passes from one plain surface to another, as oceans to bare rock would', () => {
+    const drying: PlanetFile = {
+      planet: {
+        id: 'd',
+        label: 'Planet',
+        time: span(0, null),
+        phases: [
+          { subject: 'd@wet', label: 'Wet', time: span(0, 100), values: { surface: [claim('s', 'ocean')], change: [claim('c', 'gradual')] } },
+          { subject: 'd@dry', label: 'Dry', time: span(100, null), values: { surface: [claim('r', 'bare-rock')] } },
+        ],
+      },
+      episodes: [],
+    };
+    const g = at(drying, 25);
+    expect([g.surface, g.surfaceTo, g.surfaceMix, g.molten]).toEqual([1, 4, 0.25, 0]);
+    // The clouds thin out with the water.
+    expect(g.clouds!.opacity).toBeCloseTo(0.78 * 0.75);
+  });
+
+  it('changes at no moment all at once, from the first rock vapour to the oceans', () => {
+    // Step through every passage: no step moves any part of the drawing by more than a little.
+    const step = 0.01;
+    let before = drawn(at(PASSING, 0));
+    let most = 0;
+    for (let t = step; t <= 230; t += step) {
+      const now = drawn(at(PASSING, t));
+      most = Math.max(most, apart(before, now));
+      before = now;
+    }
+    expect(most).toBeLessThan(0.003);
+    // At each boundary the phase before has come to the state the next begins in.
+    for (const b of [10, 110, 120, 220]) expect(apart(drawn(at(PASSING, b - 1e-9)), drawn(at(PASSING, b)))).toBeLessThan(1e-6);
+    // And each passage is a change: its two ends are drawn differently.
+    for (const [a, b] of [[0, 10], [10, 110], [110, 120], [120, 220]]) expect(apart(drawn(at(PASSING, a)), drawn(at(PASSING, b)))).toBeGreaterThan(0.2);
+  });
+
+  it('changes all at once where the record gives a state no passage', () => {
+    expect(apart(drawn(at(FILE, 99.999)), drawn(at(FILE, 100)))).toBeGreaterThan(0.5);
   });
 });

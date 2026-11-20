@@ -32,8 +32,8 @@ export interface SurfaceParams {
   detail_scale: number;
   /** how the renderer draws with the pattern; not used to make it */
   draw: {
-    /** the share of a magma surface crusted over at the start and the end of its phase, and of a crust over magma */
-    crust: { start: number; end: number; over_magma: number };
+    /** the share of the surface crusted over where it is magma, and where it is crust over magma */
+    crust: { magma: number; over_magma: number };
     /** how far the ice's edge strays either side of its claimed reach, in degrees */
     ice_edge: number;
   };
