@@ -16,8 +16,9 @@ reliability: >-
   The code that made the dataset the build reads (src:beyer-2020-late-quaternary), cited for how its vegetation was
   taken from the vegetation model and written to the file: what it says is what was done. It takes the model's biome,
   production and leaf area as the model's output gives them, sets them to 0 where the model gave none, to land ice and
-  0 under the ice sheets, and writes the leaf area with the label "metre^2 per metre^2". The project states no licence.
-  Nothing of it is imported or run.
+  0 under the ice sheets, and writes the leaf area with the label "metre^2 per metre^2". It also writes the file's
+  latitudes with the unit "degrees_east" and its longitudes with "degrees_north": the two labels are exchanged, and
+  the values are as the article says. The project states no licence. Nothing of it is imported or run.
 verified:
   by: machine:claude-code
   how: >-
