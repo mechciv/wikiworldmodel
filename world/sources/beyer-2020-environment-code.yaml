@@ -1,0 +1,30 @@
+id: src:beyer-2020-environment-code
+type: dataset
+kind: software
+citation: >-
+  Beyer, R. (2020). Late Quaternary Environment. Open Science Framework, doi:10.17605/OSF.IO/P86RT. The MATLAB code that
+  made the dataset of Beyer, Krapp & Manica (2020), Scientific Data 7, 236: its scripts create_vegdata.m,
+  create_final_file.m and create_observed_data.m.
+authors:
+  - "Beyer, R."
+published: 2020
+title: Late Quaternary Environment
+container: Open Science Framework
+doi: 10.17605/OSF.IO/P86RT
+url: https://doi.org/10.17605/OSF.IO/P86RT
+reliability: >-
+  The code that made the dataset the build reads (src:beyer-2020-late-quaternary), cited for how its vegetation was
+  taken from the vegetation model and written to the file: what it says is what was done. It takes the model's biome,
+  production and leaf area as the model's output gives them, sets them to 0 where the model gave none, to land ice and
+  0 under the ice sheets, and writes the leaf area with the label "metre^2 per metre^2". It also writes the file's
+  latitudes with the unit "degrees_east" and its longitudes with "degrees_north": the two labels are exchanged, and
+  the values are as the article says. The project states no licence. Nothing of it is imported or run.
+verified:
+  by: machine:claude-code
+  how: >-
+    The project's files listed through the Open Science Framework's API on 20 November 2026, and five of them
+    downloaded: README.txt and main.m read in full; create_vegdata.m (14,137 bytes, sha256 3bbc33ed…17e1de5) read from
+    its start to the end of its first function; create_final_file.m (10,569 bytes, sha256 18b431e1…0e93b64) read to
+    where it has written every variable and its attributes; create_observed_data.m (8,209 bytes, sha256
+    977c3492…05e7d) read to where it has loaded the observed climate. The project's address is as the dataset's
+    article gives it, in its Code availability.

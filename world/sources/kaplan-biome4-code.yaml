@@ -1,0 +1,27 @@
+id: src:kaplan-biome4-code
+type: dataset
+kind: software
+citation: >-
+  Kaplan, J.O. BIOME4, an equilibrium global vegetation model: the FORTRAN77 computational core biome4.f, version
+  4.2b2 of 2 November 1999, with a driver in modern Fortran. GitHub, github.com/jedokaplan/BIOME4, commit 4ad9dff of
+  13 January 2026.
+authors:
+  - "Kaplan, J.O."
+published: 2026
+title: BIOME4
+container: GitHub
+url: https://github.com/jedokaplan/BIOME4
+reliability: >-
+  The vegetation model's own code, as its author keeps it: its README says the computational core was last updated in
+  1999, and is the model first used in Kaplan et al. (2003), which the dataset of Beyer, Krapp & Manica (2020) names as
+  its vegetation model. Cited for how the core writes its outputs: what it says is what it does. Whether the copy that
+  made that dataset was this one to the letter is not known, and the driver that wrote its files was an older one,
+  which is not here. The file's header gives the GNU General Public License, version 2, and the repository's LICENSE
+  version 3. Nothing of it is imported or run: one line is quoted.
+verified:
+  by: machine:claude-code
+  how: >-
+    README.md, biome4.f (105,109 bytes, sha256 23b5194b…689968), biome4driver.f90 and netcdfmod.f90 downloaded from the
+    repository's head on 20 November 2026. The README read in full; biome4.f searched for every use of its leaf area
+    index, and its header and the lines of subroutine competition2 that assign the output variables read; the driver
+    and netcdfmod.f90 read where they name the outputs they write.

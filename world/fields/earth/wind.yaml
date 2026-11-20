@@ -1,0 +1,38 @@
+# One of the parts kept beside the months of the deep past's runs (core/months.ts PARTS), at the same nodes and
+# keyframes. Nothing reads it yet: the wind of a scene is a constant of the renderer, and no dune follows it.
+id: field:earth/wind
+type: field
+title: Wind near the ground
+quantity: mean wind of each month at 1000 hPa, toward the east and toward the north
+unit: m/s
+description: >-
+  Which way the air moved, and how fast, in each month of the year in each of the deep past's climate runs: the wind at
+  the level where the air's pressure is 1000 hPa, as two numbers, how fast it blew toward the east and toward the
+  north. It is the mean of the wind over sixty years of a run, so it is not the mean speed: where the wind turns, east
+  one week and west the next, the two cancel, and the mean wind is slower than the wind ever was. That level lies low,
+  near the sea, and the file gives a wind on it everywhere, under high ground too, where the level is below the
+  surface: there the number is a reckoning carried down under the ground, and not a wind anyone would feel. The file
+  shows it. On ground below 500 m, seven tenths of its land, the speed of its wind does not change with the ground's
+  height, and its middle value is about 2.5 m/s; between 1,000 and 1,500 m the middle value is 7.8 m/s, between 2,000
+  and 3,000 m 21.9 m/s, and above 3,000 m 57.5 m/s, with 180 m/s the most. The tiles keep the file's winds as they are,
+  at every node with land, beside the height of the model's ground there, and a reader must look at that height before
+  it believes one. A node is the mean of the model's land cells around it.
+kind: raster
+frame: frame:earth/geographic
+grid: { kind: lonlat, res_deg: 2 }
+time: { lo: 540 Ma, hi: 0 Ma, step: 10 Myr }
+data:
+  from: src:li-2022-phanerozoic-climate
+  as: months
+  # The file's own names and unit for them, which the build checks before it reads.
+  reads:
+    u: { variable: U, unit: m/s }
+    v: { variable: V, unit: m/s }
+basis: reconstruction
+# A single value at each place, time and month: nobody gave its uncertainty (docs/STRUCTURE.md section 3.2).
+spread: unknown
+uncertainty: >-
+  A climate model's wind on a pressure level, not at the ground: fit to read where the model's ground is low, and not
+  where it is high (see the description). The dataset's article shows and tests only its temperature and rain. The tiles
+  keep each number by its square root, to about a tenth of a metre a second at 1 m/s and a third at 10.
+moves_with: src:paleomap-plate-model

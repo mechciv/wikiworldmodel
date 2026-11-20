@@ -195,6 +195,20 @@ const commands: Record<string, (args: string[]) => Promise<number | void>> = {
     const { lineageText } = await import('./lineage.ts');
     console.log(lineageText(world, id, alts.length ? { alts } : {}));
   },
+  // What the latest build's tiles say of the climate at a place and a time, as a scene is given it: its months, and what
+  // else the climate's source says of its node. The place is where it stood then, as a link to the viewer gives it; the
+  // month is 1–12, or all twelve: `npm run world -- months 14.105 43.335 "1887 CE" 7`.
+  async months([lat, lon, time, month]) {
+    if (lat === undefined || lon === undefined || !time || [lat, lon].some((x) => !Number.isFinite(Number(x))) || (month !== undefined && !(Number(month) >= 1 && Number(month) <= 12))) {
+      throw new Error('usage: world months <lat> <lon> <time> [month, 1–12]');
+    }
+    const index = join(REPO, 'dist/builds/index.json');
+    if (!existsSync(index)) throw new Error('no world build: run `npm run build:world` first');
+    const { monthsAt, monthsText } = await import('./monthsat.ts');
+    const { parsePoint } = await import('../../../core/time.ts');
+    const t = parsePoint(time).t;
+    console.log(monthsText(Number(lat), Number(lon), t, monthsAt(join(REPO, 'dist/builds', JSON.parse(readFileSync(index, 'utf8')).latest), Number(lat), Number(lon), t), month === undefined ? undefined : Number(month)));
+  },
   async validate(args) {
     const { runValidate } = await import('./validate/index.ts');
     return runValidate(args);

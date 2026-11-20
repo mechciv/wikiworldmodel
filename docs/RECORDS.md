@@ -513,6 +513,13 @@ high around each value), `alternatives` (readings, each its own picture), `ensem
 runs of a model), `claims`, `tiers`, or `unknown` when the source gives one value and no spread. Say
 `unknown` rather than leave it out: no spread is not the same as exact.
 
+Another variable of the dataset a climate is read from, such as its cloudiness, its wind or a vegetation model's biome,
+is a field of its own, read `as: months`. Its `reads:` names the part it is of what the tiles keep beside that
+climate's months ([core/months.ts](../core/months.ts)), the variable of the file, and the unit the file itself gives
+that variable, which the build checks before it reads. It takes the climate's grid and frame, since it is kept at
+that climate's nodes. Copy [cloudiness.yaml](../world/fields/earth/cloudiness.yaml), and say in its description what
+the dataset's own documentation says the variable is, and where it does not answer.
+
 ### A row of a dataset
 
 A dataset read as rows (the PBDB's fossils, Cliopatria's states, NOAA's hazards, Glottolog's

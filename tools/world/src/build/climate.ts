@@ -8,7 +8,7 @@ import { climateClass, CLIMATE_LABEL, type ClimateClass } from '../../../../core
 import { conj, rotate, toLatLon, unitVector } from '../../../../core/quat.ts';
 import { toMa } from '../../../../core/time.ts';
 import { waterYear, type WaterParams } from '../../../../core/water.ts';
-import { encodeRain, T_OFFSET, T_SCALE, tileKey, type MonthsTileHeader } from '../../../../core/months.ts';
+import { cellOf, encodeRain, MONTHS_PARTS, PARTS, T_OFFSET, T_SCALE, tileKey, type MonthsPart, type MonthsTileHeader, type PartsTileHeader } from '../../../../core/months.ts';
 import type { FieldGrid } from '../../../../core/tileset.ts';
 import { claimOf, subjectTime, type Solved } from './records.ts';
 import { datasetFile } from '../manifest.ts';
@@ -40,6 +40,8 @@ export interface ClimateKeyframe {
   water?: { runoff: Float32Array; loss: Float32Array };
   /** its months at each node with land, and the height they stand for (field:earth/climate-at-height), where asked for */
   months?: NodeMonths;
+  /** what else its source says of each of those nodes (core/months.ts PARTS), where fields read it `as: months` */
+  parts?: NodeParts;
 }
 
 /** A keyframe's months at each node where the model has land: the land cells averaged into it, as the tiles keep them. */
@@ -92,6 +94,163 @@ export function monthsOfRun(grid: FieldGrid, lat: ArrayLike<number>, lon: ArrayL
     out.z[q] = Math.max(-32768, Math.min(32767, Math.round(sum[k * 25 + 24] / c)));
   });
   return out;
+}
+
+/** A keyframe's parts at each node where the model has land: the nodes of its months, in their order, and each part as the tiles keep it. */
+export interface NodeParts {
+  node: Uint32Array;
+  values: Partial<Record<MonthsPart, Uint8Array | Uint16Array>>;
+}
+
+/**
+ * One part of a run on the run's own grid: by month, twelve values a cell, month by month and row by row as the
+ * temperature is; by year, one a cell. NaN where the source gives none.
+ */
+export interface PartOfRun {
+  part: MonthsPart;
+  values: ArrayLike<number>;
+}
+
+/**
+ * The parts of one run at each node (core/months.ts PARTS), over the same land cells and nodes as monthsOfRun. A part
+ * by month is the mean of the node's land cells that have a value in that month, and none where none has. A part by
+ * year is kept cell by cell, each cell in the quarter of the node it lies in: a run with more than four cells to a
+ * node cannot be kept so, and stops the build.
+ */
+export function partsOfRun(grid: FieldGrid, lat: ArrayLike<number>, lon: ArrayLike<number>, land: ArrayLike<number>, parts: PartOfRun[]): NodeParts {
+  const nlat = lat.length;
+  const nlon = lon.length;
+  const n = grid.nx * grid.ny;
+  // Each land cell's node, and the nodes with land in the order monthsOfRun lists them.
+  const nodeOf = new Int32Array(nlat * nlon).fill(-1);
+  const has = new Uint8Array(n);
+  for (let j = 0; j < nlat; j++) {
+    const row = Math.round((grid.lat0 - lat[j]) / grid.step);
+    if (row < 0 || row >= grid.ny) continue;
+    for (let i = 0; i < nlon; i++) {
+      if (land[j * nlon + i] < 0.5) continue;
+      const lo = ((lon[i] + 180) % 360) - 180;
+      const col = ((Math.round((lo - grid.lon0) / grid.step) % grid.nx) + grid.nx) % grid.nx;
+      nodeOf[j * nlon + i] = row * grid.nx + col;
+      has[row * grid.nx + col] = 1;
+    }
+  }
+  const nodes: number[] = [];
+  const index = new Int32Array(n).fill(-1);
+  for (let k = 0; k < n; k++) {
+    if (!has[k]) continue;
+    index[k] = nodes.length;
+    nodes.push(k);
+  }
+  const out: NodeParts = { node: Uint32Array.from(nodes), values: {} };
+  for (const { part, values } of parts) {
+    const pack = PARTS[part];
+    const codes = pack.type === 'uint8' ? new Uint8Array(nodes.length * pack.per).fill(pack.none) : new Uint16Array(nodes.length * pack.per).fill(pack.none);
+    if (pack.per === 12) {
+      const sum = new Float64Array(nodes.length * 12);
+      const count = new Uint16Array(nodes.length * 12);
+      for (let j = 0; j < nlat; j++) {
+        for (let i = 0; i < nlon; i++) {
+          const k = nodeOf[j * nlon + i];
+          if (k < 0) continue;
+          const q = index[k];
+          for (let m = 0; m < 12; m++) {
+            const x = values[(m * nlat + j) * nlon + i];
+            if (Number.isNaN(x)) continue;
+            sum[q * 12 + m] += x;
+            count[q * 12 + m]++;
+          }
+        }
+      }
+      for (let e = 0; e < codes.length; e++) if (count[e]) codes[e] = pack.encode(sum[e] / count[e]);
+    } else {
+      const taken = new Uint8Array(nodes.length * 4);
+      for (let j = 0; j < nlat; j++) {
+        for (let i = 0; i < nlon; i++) {
+          const k = nodeOf[j * nlon + i];
+          if (k < 0) continue;
+          const q = index[k];
+          const c = cellOf(grid.lat0 - Math.floor(k / grid.nx) * grid.step, grid.lon0 + (k % grid.nx) * grid.step, lat[j], lon[i]);
+          if (taken[q * 4 + c]) throw new Error(`${part}: more than four cells of the run fall to a node of a ${grid.step}° grid, so they cannot be kept cell by cell`);
+          taken[q * 4 + c] = 1;
+          const x = values[j * nlon + i];
+          if (!Number.isNaN(x)) codes[q * 4 + c] = pack.encode(x);
+        }
+      }
+    }
+    out.values[part] = codes;
+  }
+  return out;
+}
+
+/** How many bytes of arrays a tile of parts may hold, which sets how many keyframes it spans: with its header, a file stays under 128 kB. */
+export const PARTS_TILE_BYTES = 120_000;
+
+/**
+ * A climate field's parts in tiles of `deg` degrees (core/months.ts PartsTile), beside its months' and with the same
+ * keys: each a span of the keyframes, youngest first, as many as keep a full tile within PARTS_TILE_BYTES. Every tile
+ * of the months has a file in every span, even one with no land in it then, so a file's name follows from its span
+ * and its key. `chunks` lists each span's keyframes.
+ */
+export function partsFiles(field: string, base: string, grid: FieldGrid, keys: ClimateKeyframe[], deg: number, tileKeys: string[]): { files: Map<string, Uint8Array>; chunks: number[][]; parts: MonthsPart[] } {
+  const across = Math.round(deg / grid.step);
+  const box = (i: number, j: number) => ({ lat0: 90 - j * deg, lon0: -180 + i * deg, nx: across, ny: across + 1 });
+  const present = MONTHS_PARTS.filter((p) => keys.some((k) => k.parts?.values[p]));
+  // What a node weighs at a keyframe: its index, and each part.
+  const weight = 2 + present.reduce((n, p) => n + PARTS[p].per * (PARTS[p].type === 'uint8' ? 1 : 2), 0);
+  const span = Math.max(1, Math.floor(PARTS_TILE_BYTES / (across * (across + 1) * weight)));
+  const files = new Map<string, Uint8Array>();
+  const chunks: number[][] = [];
+  for (let from = 0; from < keys.length; from += span) {
+    const part = keys.slice(from, from + span);
+    // Each tile's nodes at each keyframe of the span, as monthsFiles finds them: where in the keyframe, and where in the tile.
+    const tiles = new Map<string, Map<number, number[]>>();
+    part.forEach((k, kf) => {
+      k.parts?.node.forEach((node, q) => {
+        const la = grid.lat0 - Math.floor(node / grid.nx) * grid.step;
+        const lo = grid.lon0 + (node % grid.nx) * grid.step;
+        const key = tileKey(lo, la, deg);
+        const [i, j] = key.split('_').map(Number);
+        const b = box(i, j);
+        let tile = tiles.get(key);
+        if (!tile) tiles.set(key, (tile = new Map()));
+        let list = tile.get(kf);
+        if (!list) tile.set(kf, (list = []));
+        list.push(q, Math.round((b.lat0 - la) / grid.step) * b.nx + Math.round(((((lo - b.lon0) % 360) + 360) % 360) / grid.step));
+      });
+    });
+    for (const key of [...tiles.keys()]) if (!tileKeys.includes(key)) throw new Error(`${field}: its parts have land in tile ${key}, where its months have none`);
+    for (const key of [...tileKeys].sort()) {
+      const tile = tiles.get(key);
+      const arrays: (Uint8Array | Uint16Array)[] = [];
+      const keyframes: PartsTileHeader['keyframes'] = [];
+      part.forEach((k, kf) => {
+        const list = tile?.get(kf);
+        if (!list || !k.parts) return;
+        const count = list.length / 2;
+        const node = new Uint16Array(count);
+        for (let e = 0; e < count; e++) node[e] = list[e * 2 + 1];
+        arrays.push(node);
+        const at: PartsTileHeader['keyframes'][number] = { ageMa: k.ageMa, frameMa: k.frameMa ?? k.ageMa, node: arrays.length - 1, parts: {} };
+        for (const p of present) {
+          const from = k.parts.values[p];
+          if (!from) continue;
+          const per = PARTS[p].per;
+          const to = PARTS[p].type === 'uint8' ? new Uint8Array(count * per) : new Uint16Array(count * per);
+          for (let e = 0; e < count; e++) to.set(from.subarray(list[e * 2] * per, list[e * 2] * per + per), e * per);
+          arrays.push(to);
+          at.parts[p] = arrays.length - 1;
+        }
+        keyframes.push(at);
+      });
+      const [i, j] = key.split('_').map(Number);
+      const b = box(i, j);
+      const header: PartsTileHeader = { format: 'lightworld-months-parts@1', field, grid: { lat0: b.lat0, lon0: b.lon0, step: grid.step, nx: b.nx, ny: b.ny }, keyframes };
+      files.set(`${base}/${chunks.length}/${key}.lwt`, encodeTile(header as unknown as Record<string, unknown>, arrays, stableStringify));
+    }
+    chunks.push(part.map((k) => k.ageMa));
+  }
+  return { files, chunks, parts: present };
 }
 
 /** A climate field's months in tiles of `deg` degrees, each with every keyframe's land nodes in it (core/months.ts tileKey). */
@@ -301,10 +460,36 @@ export function spreadOverSea(grid: FieldGrid, nodes: Float32Array, rings: numbe
   return out;
 }
 
+/**
+ * A part of what the tiles keep beside a climate's months, as a field reads it `as: months` from the climate's
+ * dataset: the variable of the file, the unit the file must give it, and the value the file gives where it has none.
+ */
+export interface PartRead {
+  part: MonthsPart;
+  field: string;
+  variable: string;
+  unit?: string;
+  none?: number;
+}
+
+/** A part's values with the file's value for none made NaN, in place. */
+function withoutNone<T extends Float32Array | Float64Array>(values: T, none: number | undefined): T {
+  if (none !== undefined) for (let i = 0; i < values.length; i++) if (values[i] === none) values[i] = NaN;
+  return values;
+}
+
 /** Every keyframe of a climate field, oldest run first in the dataset, youngest first here. */
-export async function climateKeyframes(world: World, f: Field, snapshots: Snapshot[], plateIndex: Map<number, number>, log: (s: string) => void, water?: WaterOptions, months?: { g0: number }): Promise<ClimateKeyframe[]> {
+export async function climateKeyframes(world: World, f: Field, snapshots: Snapshot[], plateIndex: Map<number, number>, log: (s: string) => void, water?: WaterOptions, months?: { g0: number }, parts: PartRead[] = []): Promise<ClimateKeyframe[]> {
   const d = world.manifest.datasets[f.data!.from];
   const nc = await openNetcdf(datasetFile(d.id, d));
+  // Each part is a variable of the file by run, month, latitude and longitude, in the unit its field says the file gives.
+  for (const r of parts) {
+    const v = nc.variables.get(r.variable);
+    if (!v) throw new Error(`${r.field}: ${d.id} has no variable "${r.variable}"`);
+    const dims = v.dims.map((x) => x.name).join(', ');
+    if (PARTS[r.part].per !== 12 || dims !== nc.variables.get('T')!.dims.map((x) => x.name).join(', ')) throw new Error(`${r.field}: "${r.variable}" is by ${dims}, which is not read as ${r.part}`);
+    if (r.unit !== undefined && v.attrs.units !== r.unit) throw new Error(`${r.field}: the file gives "${r.variable}" in "${String(v.attrs.units)}", not "${r.unit}"`);
+  }
   const grid = climateGrid((f.grid as { res_deg: number }).res_deg);
   const lat = await nc.read('lat');
   const lon = await nc.read('lon');
@@ -342,7 +527,13 @@ export async function climateKeyframes(world: World, f: Field, snapshots: Snapsh
       const nlon = lon.length;
       nodeMonths = monthsOfRun(grid, lat, lon, land, t, p, (j, i) => phis[j * nlon + i] / months.g0);
     }
-    out.push({ ageMa, values, plate, nodes, ...(water ? { water: waterOfRun(grid, lat, lon, land, t, p, water.params, water.height(ageMa)) } : {}), ...(nodeMonths ? { months: nodeMonths } : {}) });
+    let nodeParts: NodeParts | undefined;
+    if (months && parts.length) {
+      const read: PartOfRun[] = [];
+      for (const r of parts) read.push({ part: r.part, values: withoutNone(await nc.read(r.variable, run, 1), r.none) });
+      nodeParts = partsOfRun(grid, lat, lon, land, read);
+    }
+    out.push({ ageMa, values, plate, nodes, ...(water ? { water: waterOfRun(grid, lat, lon, land, t, p, water.params, water.height(ageMa)) } : {}), ...(nodeMonths ? { months: nodeMonths } : {}), ...(nodeParts ? { parts: nodeParts } : {}) });
   }
   await nc.close();
   log(`climate: ${out.length} keyframes on a ${grid.step}° grid, from ${d.id}`);
@@ -364,6 +555,24 @@ interface MonthsMeta {
   grid: { latitudes: number[]; longitudes: number[] };
   units: { temperature: string; precipitation: string; time: string };
   slices: { index: number; time: number; cells: number }[];
+  /** the other variables kept for the same cells, by the name each is kept under: what the file says of it, and how it was kept */
+  more?: Record<string, { variable: string; per: 'month' | 'year'; scale: number; min: number | null; max: number | null; whole: boolean; attributes: Record<string, string> }>;
+}
+
+/**
+ * The names of a part's classes, by their numbers, as the file of an import gives them: the attributes of its variable
+ * that are named after it and a number (`biome_3`). Undefined where it has none.
+ */
+export async function partClasses(dir: string, part: MonthsPart): Promise<Record<string, string> | undefined> {
+  const meta = JSON.parse(await readFile(join(dir, 'meta.json'), 'utf8')) as MonthsMeta;
+  const m = meta.more?.[part];
+  if (!m) return undefined;
+  const out: Record<string, string> = {};
+  for (const [k, v] of Object.entries(m.attributes)) {
+    const n = new RegExp(`^${m.variable.replace(/[^A-Za-z0-9_]/g, '')}_(\\d+)$`).exec(k);
+    if (n) out[String(Number(n[1]))] = v;
+  }
+  return Object.keys(out).length ? out : undefined;
 }
 
 /**
@@ -371,9 +580,18 @@ interface MonthsMeta {
  * coordinates, carried by the plates under them today. Its nodes beyond the latitudes the runs reach are left without a
  * climate, as nodes far from any land are, rather than given the nearest land's.
  */
-export async function monthsKeyframes(f: Field, dir: string, present: Snapshot, plateIndex: Map<number, number>, log: (s: string) => void, water?: WaterOptions, months?: { height: (ageMa: number) => (lat: number, lon: number, half: number) => number }): Promise<ClimateKeyframe[]> {
+export async function monthsKeyframes(f: Field, dir: string, present: Snapshot, plateIndex: Map<number, number>, log: (s: string) => void, water?: WaterOptions, months?: { height: (ageMa: number) => (lat: number, lon: number, half: number) => number }, parts: PartRead[] = []): Promise<ClimateKeyframe[]> {
   const meta = JSON.parse(await readFile(join(dir, 'meta.json'), 'utf8')) as MonthsMeta;
   if (meta.units.temperature !== 'degrees celsius' || meta.units.precipitation !== 'millimetres per month' || meta.units.time !== 'years since present') throw new Error(`${f.id}: units ${JSON.stringify(meta.units)} are not read`);
+  // Each part was imported under its own name, by month or by year as it is kept, in the unit its field says the file gives.
+  for (const r of parts) {
+    const m = meta.more?.[r.part];
+    if (!m || m.variable !== r.variable) throw new Error(`${r.field}: the import has no "${r.variable}" kept as ${r.part}`);
+    if ((m.per === 'month') !== (PARTS[r.part].per === 12)) throw new Error(`${r.field}: "${r.variable}" is by ${m.per}, which is not read as ${r.part}`);
+    if (r.unit !== undefined && m.attributes.units !== r.unit) throw new Error(`${r.field}: the file gives "${r.variable}" in "${m.attributes.units}", not "${r.unit}"`);
+    // A class is a whole number: a file whose classes were not would have been rounded on the way in.
+    if (PARTS[r.part].tolerance(0) === 0 && !m.whole) throw new Error(`${r.field}: "${r.variable}" has values that are not whole numbers, which are not classes`);
+  }
   const grid = climateGrid((f.grid as { res_deg: number }).res_deg);
   const lat = meta.grid.latitudes;
   const lon = meta.grid.longitudes;
@@ -425,7 +643,23 @@ export async function monthsKeyframes(f: Field, dir: string, present: Snapshot, 
       const half = Math.abs(lat[1] - lat[0]) / 2;
       nodeMonths = monthsOfRun(grid, lat, lon, mask, t, p, (j, i) => h(lat[j], ((lon[i] + 180) % 360) - 180, half));
     }
-    out.push({ ageMa, frameMa: 0, values, plate, nodes, ...(water ? { water: waterOfRun(grid, lat, lon, mask, t, p, water.params, water.height(ageMa)) } : {}), ...(nodeMonths ? { months: nodeMonths } : {}) });
+    let nodeParts: NodeParts | undefined;
+    if (months && parts.length) {
+      const readParts: PartOfRun[] = [];
+      for (const r of parts) {
+        const m = meta.more![r.part];
+        const raw = await read(`${r.part}/${sl.index}.u16`, Uint16Array);
+        // On the file's whole grid, as its months are: NaN where the file has no land.
+        const per = m.per === 'month' ? 12 : 1;
+        const v = new Float32Array(per * cells).fill(NaN);
+        land.forEach((c, i) => {
+          for (let q = 0; q < per; q++) v[q * cells + c] = raw[i * per + q] / m.scale;
+        });
+        readParts.push({ part: r.part, values: withoutNone(v, r.none) });
+      }
+      nodeParts = partsOfRun(grid, lat, lon, mask, readParts);
+    }
+    out.push({ ageMa, frameMa: 0, values, plate, nodes, ...(water ? { water: waterOfRun(grid, lat, lon, mask, t, p, water.params, water.height(ageMa)) } : {}), ...(nodeMonths ? { months: nodeMonths } : {}), ...(nodeParts ? { parts: nodeParts } : {}) });
   }
   out.sort((a, b) => a.ageMa - b.ageMa);
   log(`climate: ${out.length} keyframes on a ${grid.step}° grid, from ${f.data!.from}, ${(out.at(-1)!.ageMa * 1e3).toFixed(0)} ka to the present`);
