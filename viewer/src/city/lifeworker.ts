@@ -4,12 +4,15 @@
 import type { Fingerprint } from '../../../core/fingerprint.ts';
 import type { SceneSpec } from '../../../core/scene.ts';
 import { FAST_BUDGET, FULL_BUDGET, SceneStream, type Batch, type LifeView, type ProtoMesh } from '../../../world/generators/life/stream.ts';
-import type { PlanForm, SettlementPlan } from '../../../world/generators/people/settlement/v2.ts';
+import type { PlanForm, Settlement, SettlementPlan, WorkForm } from '../../../world/generators/people/settlement/v2.ts';
 
 /** What a scene's people are, for its panel: the plan without its houses. */
 export interface PeopleSummary {
   forms: PlanForm[];
-  settlements: { pattern: string; houses: number; people: number; city?: string; tier: string; form: number; x: number; y: number }[];
+  /** the kinds of piece its towns' works are drawn from, and how many pieces stand */
+  works: WorkForm[];
+  pieces: number;
+  settlements: { pattern: string; houses: number; people: number; city?: string; record?: string; from?: Settlement['from']; town?: Settlement['town']; tier: string; form: number; x: number; y: number }[];
   houses: number;
   drawn: number;
   expected: number;
@@ -50,7 +53,9 @@ self.onmessage = (e: MessageEvent<ToLifeWorker>) => {
     const pl = stream.people;
     const people: PeopleSummary | undefined = pl && {
       forms: pl.forms,
-      settlements: pl.settlements.map((x) => ({ pattern: x.pattern, houses: x.houses, people: Math.round(x.people), ...(x.city ? { city: x.city } : {}), tier: x.tier, form: x.form, x: Math.round(x.x), y: Math.round(x.y) })),
+      works: pl.workForms,
+      pieces: pl.works.length,
+      settlements: pl.settlements.map((x) => ({ pattern: x.pattern, houses: x.houses, people: Math.round(x.people), ...(x.city ? { city: x.city } : {}), ...(x.record ? { record: x.record } : {}), ...(x.from ? { from: x.from } : {}), ...(x.town ? { town: x.town } : {}), tier: x.tier, form: x.form, x: Math.round(x.x), y: Math.round(x.y) })),
       houses: pl.houses.length,
       drawn: pl.drawn,
       expected: pl.expected,

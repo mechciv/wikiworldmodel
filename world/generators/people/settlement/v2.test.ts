@@ -4,10 +4,10 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { parse } from 'yaml';
-import { compileTraditions, type Tradition } from '../../../../core/dwelling.ts';
+import { compileTraditions, type TownSpec, type Tradition } from '../../../../core/dwelling.ts';
 import { lifewayOf, type AnthromeClass, type Assessment } from '../../../../core/landscape.ts';
 import type { SceneSpec, ScenePeople } from '../../../../core/scene.ts';
-import { LandUseMap, makeSettlement, roundLots, toLocal, type Ground } from './v2.ts';
+import { LandUseMap, makeSettlement, toLocal, type Ground } from './v2.ts';
 
 const ROOT = join(import.meta.dirname, '../../../..');
 const classes = (parse(readFileSync(join(ROOT, 'world/fields/people/anthromes.yaml'), 'utf8')) as { params: { classes: AnthromeClass[] } }).params.classes;
@@ -146,7 +146,7 @@ describe('the settlement generator', () => {
   });
 
   it('draws a city of the lists where the anthromes have none', () => {
-    const cities = [{ name: 'Testopolis', country: 'Nowhere', lat: 0.02, lon: 0.03, people: 40000, field: 'field:people/cities-ancient', source: 'src:test' }];
+    const cities = [{ name: 'Testopolis', country: 'Nowhere', lat: 0.02, lon: 0.03, people: 40000, field: 'field:people/cities-ancient', source: 'src:test', from: 'list' as const }];
     const p = world(() => ({ code: 54, density: 2, region: 1 }), [{ id: 1, a: assess(1, 0, 1, 3, 1) }], { cities });
     const plan = makeSettlement(spec(p), flat, dry, EXTENT);
     const city = plan.settlements.find((s) => s.city === 'Testopolis');
@@ -167,19 +167,171 @@ describe('the settlement generator', () => {
     for (const share of quarter) expect(share).toBeGreaterThan(0.15);
   });
 
-  it('lays a town out round, with a wandering edge, and every lot once', () => {
-    for (const n of [7, 400, 12000]) {
-      const lots = roundLots(n, 0x51c1 + n);
-      expect(lots.length).toBe(n);
-      expect(new Set(lots.map(([x, y]) => `${x},${y}`)).size).toBe(n);
-      // Within the radius of a disc of n lots, give or take its wandering edge.
-      const r = Math.sqrt(n / Math.PI);
-      for (const [x, y] of lots) expect(Math.hypot(x, y)).toBeLessThan(r * 1.5 + 2);
+  describe('a town', () => {
+    // A city of 30,000 at the middle of a land of few herders, with the tradition of its region's townspeople, if any.
+    const town = (form?: TownSpec, city: Partial<ScenePeople['cities'][number]> = {}) => {
+      const traditions: Tradition[] = form ? compileTraditions([{ id: 'test/town-house', label: 'A town house', regions: [1], span: [-500, 500], lifeways: ['townspeople'], dwelling: { plan: 'courtyard', walls: 'mudbrick', roof: 'flat' }, town: form }]) : [];
+      const cities = [{ name: 'Testopolis', country: 'Nowhere', lat: 0, lon: 0, people: 30000, field: 'field:people/cities-ancient', source: 'src:test', from: 'list' as const, ...city }];
+      const plan = makeSettlement(spec(world(() => ({ code: 54, density: 2, region: 1 }), [{ id: 1, a: assess(1, 0, 1, 3, 1) }], { cities, traditions })), flat, dry, EXTENT);
+      const s = plan.settlements.find((x) => x.city === 'Testopolis')!;
+      const si = plan.settlements.indexOf(s);
+      const mine = plan.houses.filter((h) => h.settlement === si);
+      const works = plan.works.filter((w) => w.settlement === si);
+      const kind = (k: string) => works.filter((w) => plan.workForms[w.form].spec.kind === k);
+      return { plan, s, mine, works, kind };
+    };
+    // How far the houses reach from the town's middle in each of `n` directions.
+    const reach = (hs: { x: number; y: number }[], n: number) => Array.from({ length: n }, (_, k) => Math.max(0, ...hs.filter((h) => Math.floor(((Math.atan2(h.y, h.x) + Math.PI) / (2 * Math.PI)) * n) % n === k).map((h) => Math.hypot(h.x, h.y))));
+
+    it('of no stated form is the generic town: lanes that wander, round with a wandering edge, and no wall', () => {
+      const { plan, s, mine, works } = town();
+      expect(mine.length).toBe(5000);
+      expect(works).toEqual([]);
+      expect(s.town).toEqual({ text: 'winding lanes, no wall', from: { streets: 'generic', wall: 'generic' } });
+      // Every house on its own ground, none on another.
+      const spots = new Set(mine.map((h) => `${Math.round(h.x / 4)},${Math.round(h.y / 4)}`));
+      expect(spots.size).toBeGreaterThan(mine.length * 0.97);
+      // Round: within the disc its people's ground makes, give or take its edge; and the edge wanders.
+      const far = reach(mine, 8);
+      expect(Math.max(...far)).toBeLessThan(s.r * 1.6);
+      expect(Math.min(...far)).toBeGreaterThan(s.r * 0.6);
+      expect(Math.max(...far) / Math.min(...far)).toBeGreaterThan(1.08);
+      // Along lanes the houses do not all face one of two ways, as the rows of a planned town do.
+      expect(new Set(mine.map((h) => Math.round(h.face * 100))).size).toBeGreaterThan(40);
+      expect(plan.forms[s.form].whose).toBe('townspeople');
+    });
+
+    it('on a grid is square, its houses in rows that face their streets, and a main street each way through its middle', () => {
+      const { s, mine } = town({ streets: 'grid', block: 80, street: 4, main_street: 12 });
+      expect(s.town!.from).toMatchObject({ streets: 'test/town-house', block: 'test/town-house', wall: 'generic' });
+      // The rows face one of two ways, back to back: the town's axis is the way they face.
+      const faces = [...new Set(mine.map((h) => Math.round((((h.face % Math.PI) + Math.PI) % Math.PI) * 1000)))];
+      expect(faces.length).toBeLessThanOrEqual(2);
+      const axis = mine[0].face;
+      const inFrame = mine.map((h) => ({ x: Math.cos(axis) * h.x - Math.sin(axis) * h.y, y: Math.sin(axis) * h.x + Math.cos(axis) * h.y }));
+      // Square: houses stand in its corners, where a round town of the same ground has none.
+      const half = Math.max(...inFrame.map((h) => Math.max(Math.abs(h.x), Math.abs(h.y))));
+      expect(half).toBeLessThan(s.r * 1.05);
+      for (const [sx, sy] of [[1, 1], [1, -1], [-1, 1], [-1, -1]]) expect(inFrame.filter((h) => h.x * sx > half * 0.82 && h.y * sy > half * 0.82).length).toBeGreaterThan(20);
+      // The main streets: no house within 6 m of either axis through the middle.
+      expect(inFrame.filter((h) => Math.abs(h.x) < 6 || Math.abs(h.y) < 6)).toEqual([]);
+      // As many houses as its people make, on about the ground they are given.
+      expect(mine.length).toBe(5000);
+      expect((2 * half) ** 2 / (5000 * 160)).toBeGreaterThan(0.85);
+      expect((2 * half) ** 2 / (5000 * 160)).toBeLessThan(1.3);
+    });
+
+    it('has the wall its tradition says, round its houses, with gates where its main streets leave it, and towers', () => {
+      const { plan, s, mine, kind } = town({ streets: 'grid', wall: 'stone', wall_height: 9, gates: 4 });
+      const wall = kind('wall');
+      const gates = kind('gate');
+      expect(gates.length).toBe(4);
+      expect(kind('tower').length).toBeGreaterThan(8);
+      expect(wall.length).toBeGreaterThan(200);
+      expect(plan.workForms.map((f) => `${f.spec.kind} ${f.spec.material} ${f.spec.height} ${f.from}`)).toEqual(['wall stone 9 test/town-house', 'gate stone 9 test/town-house', 'tower stone 9 test/town-house']);
+      expect(s.town!.text).toBe('streets on a grid, a wall of stone 9 m high, 4 gates');
+      // Every house is inside the wall: in each direction the wall stands further out than the furthest house.
+      const out = reach(wall, 180);
+      const houses = reach(mine, 180);
+      out.forEach((r, k) => r > 0 && expect(r, `direction ${k}`).toBeGreaterThan(houses[k] + 2));
+      // The wall is whole: a piece every few metres all the way round, but for its gates.
+      expect(out.filter((r) => r === 0).length).toBeLessThanOrEqual(4);
+      // Its pieces face out, and each gate stands at the end of a main street, clear of the wall's pieces.
+      for (const w of wall) expect(Math.sin(w.face) * w.x + Math.cos(w.face) * w.y).toBeGreaterThan(0);
+      const axis = mine[0].face;
+      for (const g of gates) {
+        const along = Math.cos(axis) * g.x - Math.sin(axis) * g.y;
+        const across = Math.sin(axis) * g.x + Math.cos(axis) * g.y;
+        expect(Math.min(Math.abs(along), Math.abs(across))).toBeLessThan(1);
+        expect(wall.filter((w) => Math.hypot(w.x - g.x, w.y - g.y) < 4)).toEqual([]);
+      }
+    });
+
+    it('has a rampart or a palisade with no towers, and a moat with a way across before each gate', () => {
+      const earth = town({ wall: 'earth', moat: true, gates: 3 });
+      expect(earth.kind('tower')).toEqual([]);
+      expect(earth.kind('gate').length).toBe(3);
+      expect(earth.kind('moat').length).toBeGreaterThan(100);
+      // The moat lies outside the wall, and is broken before the gates.
+      const wall = reach(earth.kind('wall'), 90);
+      reach(earth.kind('moat'), 90).forEach((r, k) => r > 0 && wall[k] > 0 && expect(r).toBeGreaterThan(wall[k] + 8));
+      for (const g of earth.kind('gate')) expect(earth.kind('moat').filter((m) => Math.hypot(m.x - g.x, m.y - g.y) < 12)).toEqual([]);
+      expect(earth.s.town!.text).toBe('winding lanes, a rampart of earth, 3 gates, a moat outside it');
+      expect(town({ wall: 'timber' }).kind('tower')).toEqual([]);
+    });
+
+    it('of canals has water in some of its streets, and no house in it', () => {
+      const { mine, kind, plan } = town({ streets: 'canals' });
+      const water = kind('canal');
+      expect(water.length).toBeGreaterThan(100);
+      expect(plan.workForms[water[0].form].from).toBe('test/town-house');
+      // No house stands within a canal's width of its water.
+      const cells = new Map<string, { x: number; y: number }[]>();
+      for (const w of water) {
+        const k = `${Math.floor(w.x / 40)},${Math.floor(w.y / 40)}`;
+        (cells.get(k) ?? cells.set(k, []).get(k)!).push(w);
+      }
+      for (const h of mine) {
+        for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) {
+          for (const w of cells.get(`${Math.floor(h.x / 40) + i},${Math.floor(h.y / 40) + j}`) ?? []) expect(Math.hypot(h.x - w.x, h.y - w.y)).toBeGreaterThan(3);
+        }
+      }
+    });
+
+    it("of a record is drawn from the record's own people, houses, ground and layout", () => {
+      // 2,400 houses a source counted, on 100 hectares, behind a wall of mudbrick: none of it the list's or the generator's.
+      const { plan, s, mine, kind } = town(undefined, { people: 12000, from: 'record', record: 'people/cities/recordia', houses: 2400, area: 100, town: { streets: 'grid', wall: 'mudbrick' } });
+      expect(s).toMatchObject({ people: 12000, record: 'people/cities/recordia', from: 'record', pattern: 'city' });
+      expect(mine.length).toBe(2400);
+      const axis = mine[0].face;
+      const half = Math.max(...mine.map((h) => Math.max(Math.abs(Math.cos(axis) * h.x - Math.sin(axis) * h.y), Math.abs(Math.sin(axis) * h.x + Math.cos(axis) * h.y))));
+      expect((2 * half) ** 2 / 1e6).toBeGreaterThan(0.85);
+      expect((2 * half) ** 2 / 1e6).toBeLessThan(1.25);
+      expect(s.town!.from).toEqual({ streets: 'people/cities/recordia', wall: 'people/cities/recordia' });
+      expect(kind('wall').length).toBeGreaterThan(100);
+      expect(plan.workForms[kind('wall')[0].form]).toMatchObject({ from: 'people/cities/recordia', label: 'A wall of mudbrick' });
+      // A record's layout stands over its tradition's, part by part.
+      const both = town({ streets: 'lanes', wall: 'stone', gates: 6 }, { record: 'people/cities/recordia', from: 'record', town: { wall: 'brick' } });
+      expect(both.s.town!.from).toEqual({ streets: 'test/town-house', wall: 'people/cities/recordia', gates: 'test/town-house' });
+      expect(both.kind('gate').length).toBe(6);
+      expect(both.plan.workForms.every((f) => f.spec.material === 'brick')).toBe(true);
+    });
+
+    it('too thin on the ground for streets has none: its houses stand apart, as many as its people make', () => {
+      // 12,000 people on 2,000 hectares: a hectare to a house.
+      const { s, mine, works } = town({ streets: 'grid', wall: 'stone' }, { people: 12000, from: 'record', record: 'people/cities/gardens', area: 2000 });
+      expect(mine.length).toBe(2000);
+      expect(works).toEqual([]);
+      expect(s.town).toBeUndefined();
+      expect(Math.max(...mine.map((h) => Math.hypot(h.x, h.y)))).toBeGreaterThan(2000);
+    });
+  });
+
+  it('seeds each cell and each settlement apart, and each alike from two scenes', () => {
+    const p = world(() => ({ code: 23, density: 260, region: 1 }), [{ id: 1, a: assess(1, 1, 3, 2) }]);
+    const plan = makeSettlement(spec(p), flat, dry, EXTENT);
+    // The houses of a settlement, from its middle, as a set.
+    const shape = (pl: typeof plan, si: number) => pl.houses.filter((h) => h.settlement === si).map((h) => `${Math.round(h.x - pl.settlements[si].x)},${Math.round(h.y - pl.settlements[si].y)}`).sort().join(' ');
+    const whole = plan.settlements.map((s, i) => ({ s, i })).filter(({ s }) => Math.abs(s.x) < EXTENT - 3000 && Math.abs(s.y) < EXTENT - 3000);
+    // No two villages are laid out alike.
+    const shapes = new Set(whole.slice(0, 40).map(({ i }) => shape(plan, i)));
+    expect(shapes.size).toBe(40);
+    // Nor do two cells put their villages on the same spots within the cell: the offsets from each cell's corner differ.
+    const cell = 111194.93 / 12;
+    const within = new Set(whole.map(({ s }) => `${Math.round((((s.x % cell) + cell) % cell) / 50)},${Math.round((((s.y % cell) + cell) % cell) / 50)}`));
+    expect(within.size).toBeGreaterThan(whole.length * 0.5);
+    // The same village is the same village from a scene beside this one.
+    const other = makeSettlement(spec(p, { lat: 0.05, lon: 0.04 }), flat, dry, EXTENT);
+    const [bx, by] = toLocal({ lat: 0, lon: 0 }, 0.05, 0.04);
+    let matched = 0;
+    // Those whole in both scenes: a village at a scene's edge is drawn as far as the scene reaches.
+    for (const { s, i } of whole.filter(({ s }) => Math.abs(s.x - bx) < EXTENT - 3000 && Math.abs(s.y - by) < EXTENT - 3000).slice(0, 40)) {
+      const j = other.settlements.findIndex((o) => Math.hypot(o.x + bx - s.x, o.y + by - s.y) < 3);
+      if (j < 0) continue;
+      matched++;
+      expect(shape(other, j)).toBe(shape(plan, i));
     }
-    // The edge wanders: the furthest lot in each of eight directions is not the same distance out.
-    const lots = roundLots(12000, 99);
-    const reach = Array.from({ length: 8 }, (_, k) => Math.max(...lots.filter(([x, y]) => Math.floor(((Math.atan2(y, x) + Math.PI) / (Math.PI / 4)) % 8) === k).map(([x, y]) => Math.hypot(x, y))));
-    expect(Math.max(...reach) / Math.min(...reach)).toBeGreaterThan(1.1);
+    expect(matched).toBeGreaterThan(20);
   });
 
   it('puts a settlement in the same place from two scenes that overlap', () => {

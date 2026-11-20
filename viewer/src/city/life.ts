@@ -198,8 +198,9 @@ export class LifeScene {
     r.setWater(g.water.vertices, g.water.indices, this.spec.water ? -1e4 : g.waterLevel, g.water.flow, tones.water);
     r.setLand(Float32Array.from(['soil', 'herb', 'bare', 'canopy', 'distant'].flatMap((k) => tones[k])), [Math.min(clim?.forest ?? 0, cover.forests), Math.min(clim?.herb ?? 0, cover.plants), 1 - cover.plants * (1 - (clim?.bare ?? 1))], snowOf(this.spec));
     r.setGroundCover(...groundCover(this.spec));
-    // Each taxon is an entity, and after them each kind of house, which stands for as long as the scene does: generated.
-    const houseKinds = this.people?.forms.length ?? 0;
+    // Each taxon is an entity, and after them each kind of house and each kind of piece of a town's works, which stand
+    // for as long as the scene does: generated.
+    const houseKinds = (this.people?.forms.length ?? 0) + (this.people?.works.length ?? 0);
     const out = new Float32Array((this.spec.taxa.length + 1 + houseKinds) * 4);
     for (let f = 0; f < houseKinds; f++) {
       const k = (this.spec.taxa.length + 1 + f) * 4;
@@ -299,11 +300,14 @@ export class LifeScene {
     this.renderer.render(f, [], outW, outH);
   }
 
-  /** What is at a screen position: a taxon, a kind of house the generator drew, or nothing. */
-  pick(x: number, y: number): { taxon?: LivingTaxon; house?: number } {
+  /** What is at a screen position: a taxon, a kind of house or of a piece of a town's works the generator drew, or nothing. */
+  pick(x: number, y: number): { taxon?: LivingTaxon; house?: number; work?: number } {
     const e = this.renderer.pick(x, y);
     if (!e) return {};
-    if (e > this.spec.taxa.length) return { house: e - this.spec.taxa.length - 1 };
+    const made = e - this.spec.taxa.length - 1;
+    const forms = this.people?.forms.length ?? 0;
+    if (made >= forms) return { work: made - forms };
+    if (made >= 0) return { house: made };
     return { taxon: this.spec.taxa[e - 1] };
   }
 

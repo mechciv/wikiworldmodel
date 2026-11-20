@@ -11,7 +11,7 @@
 // model:people/lifeways joins them into what a scene draws: a pattern of settlement (camps, hamlets, villages,
 // towns), how many people, what they did on the land, and how sure each part is. Nothing here is a fact about any
 // place: the classes' thresholds are the classification's own, quoted in the field's record.
-import type { LifewayWord, Tradition } from './dwelling.ts';
+import type { LifewayWord, TownSpec, Tradition } from './dwelling.ts';
 import type { ScenePeople } from './scene.ts';
 
 /** A class of Anthromes 12K: its code in the grids, its name and broader level, the legend's colour, and what it means. */
@@ -322,6 +322,30 @@ export interface City {
   pops: [number, number][];
 }
 
+/**
+ * A settlement the world has a record of, as the landscape reads it (docs/plans/LIFEWAY-RENDERINGS.md, step 4): where and
+ * when it stood, and what its own claims say of its people, its houses, the ground it covered and how it was laid out. A
+ * scene draws it from these, and from a list's figure only where its record gives none.
+ */
+export interface CityRecord {
+  id: string;
+  name: string;
+  /** its names in turn, where they have their times: each with when it was in use */
+  names?: { text: string; span: [number, number] }[];
+  lat: number;
+  lon: number;
+  /** when it stood, on the axis: [start, end]; a billion years either way stands for no bound */
+  span: [number, number];
+  /** [year, people], in order: its `population` claims, one for each time they are for */
+  pops: [number, number][];
+  /** [year, hectares]: its `settlement_area` claims */
+  areas: [number, number][];
+  /** [year, houses]: its `houses` claims */
+  houses: [number, number][];
+  /** how it was laid out: its `town_form` claim */
+  town?: TownSpec;
+}
+
 export interface CitiesFile {
   format: 'lightworld-cities@1';
   /**
@@ -330,13 +354,56 @@ export interface CitiesFile {
    */
   lists: { source: string; field: string; title: string; hold: number; gap: number }[];
   cities: City[];
+  /** the settlements the world has records of, with a place */
+  records?: CityRecord[];
 }
+
+/** A record's name at a time: the one in use then, where its names have their times; else its name. */
+export const nameAt = (r: Pick<CityRecord, 'name' | 'names'>, t: number): string => r.names?.find((n) => t >= n.span[0] && t <= n.span[1])?.text ?? r.name;
+
+/**
+ * A figure of a record at a time: straight between two times its claims are for, and the nearest one's before the first
+ * and after the last, while the record stands. Undefined where it has no such claims.
+ */
+export function figureAt(points: [number, number][], t: number): number | undefined {
+  if (!points.length) return undefined;
+  if (t <= points[0][0]) return points[0][1];
+  for (let i = 0; i + 1 < points.length; i++) {
+    const [a, va] = points[i];
+    const [b, vb] = points[i + 1];
+    if (t <= b) return b > a ? va + ((vb - va) * (t - a)) / (b - a) : vb;
+  }
+  return points.at(-1)![1];
+}
+
+/** A city a scene draws: a list's, a record's, or both as one. */
+export interface CityNear {
+  name: string;
+  country: string;
+  lat: number;
+  lon: number;
+  people: number;
+  km: number;
+  /** the list its people are from, where they are a list's: its field and dataset */
+  field?: string;
+  source?: string;
+  /** what the other list says of it */
+  also: { people: number; field: string; source: string }[];
+  /** the record it has, and what the record's own claims give at the time: its people, its houses, its ground in hectares, its layout */
+  record?: string;
+  /** whose the people are: the record's own claim, a list's figure, or the generator's guess from the record's ground or houses */
+  from: 'record' | 'list' | 'guess';
+  houses?: number;
+  area?: number;
+  town?: TownSpec;
+}
+
 
 /**
  * A city's people at a time: straight between two years its list gives that are no more than `gap` apart, and held `hold`
  * years either side of any figure; undefined at other times. A longer gap is a silence, not a city standing through it.
  */
-export function cityPeople(c: City, t: number, hold: number, gap = Infinity): number | undefined {
+export function cityPeople(c: Pick<City, 'pops'>, t: number, hold: number, gap = Infinity): number | undefined {
   const p = c.pops;
   for (let i = 0; i < p.length; i++) {
     const [a, pa] = p[i];
@@ -362,7 +429,7 @@ export function kmBetween(lat1: number, lon1: number, lat2: number, lon2: number
  * Two lists' figures for one city, within `merge_km` of each other, are one city, drawn with the larger, the other kept
  * beside it as what the other list says.
  */
-export function citiesNear(f: CitiesFile, lat: number, lon: number, t: number, km: number, mergeKm = 5): { city: City; people: number; km: number; also: { city: City; people: number }[] }[] {
+export function citiesNear(f: Pick<CitiesFile, 'lists' | 'cities'>, lat: number, lon: number, t: number, km: number, mergeKm = 5): { city: City; people: number; km: number; also: { city: City; people: number }[] }[] {
   const list = new Map(f.lists.map((l) => [l.source, l]));
   const found: { city: City; people: number; km: number; also: { city: City; people: number }[] }[] = [];
   const dLat = km / 111;
@@ -382,6 +449,60 @@ export function citiesNear(f: CitiesFile, lat: number, lon: number, t: number, k
     else out.push(x);
   }
   return out.sort((a, b) => a.km - b.km || b.people - a.people);
+}
+
+/**
+ * The cities a scene draws near a place at a time: the lists' (citiesNear), and the settlements the world has records
+ * of that stood then. A record within `recordKm` of a list's city is that city: it is drawn where the record puts it, with
+ * the record's houses, ground and layout, and with the record's own people where a claim gives them for about that time
+ * (within `hold` years of a figure, or between two no more than `gap` apart, as a list's are read) and the list's where
+ * none does. A record no list has then is drawn with its own nearest figure, or with its houses or its ground to guess
+ * its people from (`perHouse` people to a house, `lot` square metres to a house); one that says none of these is left out.
+ */
+export function citiesAround(f: CitiesFile, lat: number, lon: number, t: number, km: number, guess: { perHouse: number; lot: number; hold: number; gap: number }, recordKm = 12): CityNear[] {
+  const out: CityNear[] = citiesNear(f, lat, lon, t, km).map(({ city, people, km: d, also }) => ({ name: city.name, country: city.country, lat: city.lat, lon: city.lon, people, km: d, field: city.field, source: city.source, also: also.map((a) => ({ people: a.people, field: a.city.field, source: a.city.source })), from: 'list' as const }));
+  const dLat = km / 111;
+  for (const r of f.records ?? []) {
+    if (t < r.span[0] || t > r.span[1] || Math.abs(r.lat - lat) > dLat) continue;
+    const d = kmBetween(lat, lon, r.lat, r.lon);
+    if (d > km) continue;
+    const people = cityPeople({ pops: r.pops }, t, guess.hold, guess.gap);
+    const houses = figureAt(r.houses, t);
+    const area = figureAt(r.areas, t);
+    const own = { record: r.id, ...(houses !== undefined ? { houses: Math.round(houses) } : {}), ...(area !== undefined ? { area } : {}), ...(r.town ? { town: r.town } : {}) };
+    // The list's city nearest the record, if one stands within reach of it.
+    let best = -1;
+    let bestKm = recordKm;
+    out.forEach((c, i) => {
+      const k = c.record ? Infinity : kmBetween(r.lat, r.lon, c.lat, c.lon);
+      if (k <= bestKm) {
+        best = i;
+        bestKm = k;
+      }
+    });
+    if (best >= 0) {
+      const c = out[best];
+      // The list's figure stays beside the record's own, as what the list says.
+      out[best] = { ...c, ...own, name: nameAt(r, t), lat: r.lat, lon: r.lon, km: Math.round(d * 10) / 10, ...(people !== undefined ? { people: Math.round(people), from: 'record' as const, also: [{ people: c.people, field: c.field!, source: c.source! }, ...c.also] } : {}) };
+      if (people !== undefined) {
+        delete out[best].field;
+        delete out[best].source;
+      }
+      continue;
+    }
+    // No list has it then: its own nearest figure, whenever that is for, or a guess from its houses or its ground.
+    const own2 = people ?? figureAt(r.pops, t);
+    const guessed = own2 ?? (houses !== undefined ? houses * guess.perHouse : area !== undefined ? ((area * 1e4) / guess.lot) * guess.perHouse : undefined);
+    if (guessed === undefined || !(guessed > 0)) continue;
+    out.push({ name: nameAt(r, t), country: '', lat: r.lat, lon: r.lon, people: Math.round(guessed), km: Math.round(d * 10) / 10, also: [], from: own2 !== undefined ? 'record' : 'guess', ...own });
+  }
+  return out.sort((a, b) => a.km - b.km || b.people - a.people);
+}
+
+/** What citiesAround reads of the settlement generator's parameters (world/generators/people/settlement.yaml, cities). */
+export function cityGuess(params: Record<string, unknown> | undefined): { perHouse: number; lot: number; hold: number; gap: number } {
+  const p = (params ?? {}) as { household?: number; cities?: { household?: number; lot?: number; record_hold?: number; record_gap?: number } };
+  return { perHouse: p.cities?.household ?? p.household ?? 5, lot: p.cities?.lot ?? 200, hold: p.cities?.record_hold ?? 50, gap: p.cities?.record_gap ?? 600 };
 }
 
 // ——— A scene's people ———
@@ -483,7 +604,7 @@ export function scenePeople(d: LandscapeData, lat: number, lon: number, t: numbe
   });
   const centre = (gr - r0) * nx + (gc - c0);
   const lifeway = lifewayOf(d.classes, anthrome[centre], density[centre], regions.find((x) => x.id === region[centre])?.assessment);
-  const cities = citiesNear(d.cities, lat, lon, t, d.reach_km).map(({ city, people, also }) => ({ name: city.name, country: city.country, lat: city.lat, lon: city.lon, people, field: city.field, source: city.source, ...(also.length ? { also: also.map((a) => ({ people: a.people, field: a.city.field, source: a.city.source })) } : {}) }));
+  const cities = citiesAround(d.cities, lat, lon, t, d.reach_km, cityGuess(d.generator.params)).map(({ km: _km, also, ...c }) => ({ ...c, ...(also.length ? { also } : {}) }));
   const traditions = d.traditions.filter((x) => t >= x.span[0] && t <= x.span[1] && x.regions.some((g) => ids.includes(g)));
   return {
     t,

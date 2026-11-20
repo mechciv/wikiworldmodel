@@ -101,6 +101,7 @@ parameter you cannot source out of the claim: what no claim says is the generato
 | `dwelling` | the house: `plan`, `diameter` or `width` and `length`, `wall_height`, `height`, `storeys`, `rooms`, `walls`, `roof`, `roof_material`, `floor`, `court` |
 | `settlement_form` | how the houses stood together: `pattern`, `houses` (in one settlement), `spacing` (metres between them), `household` (people in one house) |
 | `field_system` | the fields: `kind`, `plot` (hectares), `bounds` |
+| `town_form` | for a tradition that housed townspeople, how its towns were laid out: `streets` (`grid`, `lanes`, `canals`), `block` and `street` and `main_street` (metres), `wall` (`none`, `earth`, `rammed-earth`, `timber`, `mudbrick`, `stone`, `brick`), `wall_height`, `wall_thickness`, `gates`, `moat`, `square` |
 | `member-of` | the broader tradition it belongs to: it inherits every parameter it does not state |
 
 The words each may take are in [core/dwelling.ts](../core/dwelling.ts), each with what it means. Lengths are in metres
@@ -128,6 +129,30 @@ the farmers of the same region, who stay generic until someone writes their hous
 show the house was lived in by, and no more. A house of villages and of the towns that grew from them is
 `[farmers, townspeople]`; a house known only from a city's excavated quarters is `[townspeople]`. The claim is sourced
 like any other: a sentence that says who lived in these houses.
+
+## Towns
+
+A town or a city is drawn as houses on the lots of its streets, and round them a wall with its gates and towers where
+it had one. How it was laid out is a `town_form` claim, of two kinds of record:
+
+- **A tradition that housed townspeople** states it for the towns of its region and time: "the towns of the Indus
+  cities stood on a grid of streets, behind walls of mudbrick". It is drawn for every town and city of the region then,
+  the lists' cities among them.
+- **A settlement's own record** (`kind: settlement`) states it for that city, and stands over the tradition's, part by
+  part: Tenochtitlan's canals, the four gates a source counts in a city's wall. With its `population`, `houses` and
+  `settlement_area` claims, it is what a scene draws the city from.
+
+```yaml
+  town:
+    prop: town_form
+    value: { streets: grid, block: { lo: 80, hi: 100 }, wall: mudbrick, wall_height: 6, gates: 4 }
+    source: { ref: src:…, loc: "p. …", quote: "…" }
+    method: excavation
+```
+
+Say only what a source states: a wall with no height is `wall: stone` and no `wall_height`, and the generator's
+height stands in and says so. Where neither a tradition nor a record says anything, the generic town is drawn, lanes
+that wander and no wall, and the panel says that it is generic.
 
 ## Which tradition draws a place
 

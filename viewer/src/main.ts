@@ -37,7 +37,7 @@ import { LifeScene } from './city/life.ts';
 import type { PeopleSummary } from './city/lifeworker.ts';
 import { LandscapeAtlas } from './city/landscape.ts';
 import { anthromeOf, classAtStep, nearestStep, PATTERN_LABEL, USE_LABEL, USES, LEVEL_WORDS, type Pattern } from '../../core/landscape.ts';
-import { lifewayText, specText } from '../../core/dwelling.ts';
+import { lifewayText, specText, townText } from '../../core/dwelling.ts';
 import { CityScene } from './city/scene.ts';
 import { autoTilt, EYE_HEIGHT, groundHit, localView, lookThrough, projectLocal, rayOf, sunAt, underSea, type LocalView } from './city/view.ts';
 import { SEA } from './gl/cityShaders.ts';
@@ -125,7 +125,7 @@ export interface WikiWorldModelHandle {
   organismsAt(id: string): { x: number; y: number; depth: number }[];
   organismPlaces(id: string): { lat: number; lon: number; x: number; y: number }[];
   /** what a click at a point of the view finds in the living scene drawn: a taxon, a house the generator drew, or the ground (not the sky); null with no scene */
-  foundAt(x: number, y: number): { taxon?: string; house?: number; ground: boolean } | null;
+  foundAt(x: number, y: number): { taxon?: string; house?: number; work?: number; ground: boolean } | null;
   set(s: Partial<ViewState>): void;
   /**
    * How long each pass of the local scene's frame takes, the median over this many frames drawn again of the view as it
@@ -151,6 +151,16 @@ const RAD = Math.PI / 180;
 const ROOT = new URL('./', location.href).href;
 
 /** A settlement of each way of life, one and many, for the panel of a house. */
+/** A city of a scene in words: whose its people are, and how it is laid out. */
+function cityWords(x: { people: number; record?: string; from?: 'record' | 'list' | 'guess'; town?: { text: string; from: Record<string, string> } }): string {
+  const people = `about ${x.people.toLocaleString('en-US')} people then`;
+  const whose = x.from === 'record' ? `a city the world has a record of, of ${people} by its record` : x.from === 'guess' ? `a city the world has a record of, of ${people}, a guess from the ground or the houses its record gives` : x.record ? `a city the world has a record of, of ${people} by the lists of cities` : `a city of the lists, of ${people}`;
+  if (!x.town) return whose;
+  const said = [...new Set(Object.values(x.town.from))];
+  const by = said.every((s) => s === 'generic') ? 'the generic town, as nothing says how it was laid out' : said.includes('generic') ? 'partly as its tradition or its record says, partly the generic town' : 'as its tradition or its record says';
+  return `${whose}, laid out with ${x.town.text} (${by})`;
+}
+
 const SETTLEMENT_WORDS: Record<Pattern, [string, string]> = {
   none: ['place', 'places'],
   foragers: ["foragers' camp", "foragers' camps"],
@@ -1896,12 +1906,12 @@ async function start(root: HTMLElement): Promise<void> {
           const life = sp.lifeway;
           const k = anthromeOf(sp.classes, life.anthrome);
           const cities = pp.settlements.filter((x) => x.city).map((x) => `${x.city} (about ${x.people.toLocaleString('en-US')} people)`);
-          // Where houses of this form stand in the scene: the lists' cities first, then the settlements of each way of life.
+          // Where houses of this form stand in the scene: the cities first, then the settlements of each way of life.
           const mine = pp.settlements.filter((x) => x.form === found.house);
           const counts = new Map<Pattern, number>();
           for (const x of mine) if (!x.city) counts.set(x.pattern as Pattern, (counts.get(x.pattern as Pattern) ?? 0) + 1);
           const where = [
-            ...mine.filter((x) => x.city).sort((a, b) => b.people - a.people).map((x) => `${x.city}, a city of the lists, of about ${x.people.toLocaleString('en-US')} people then`),
+            ...mine.filter((x) => x.city).sort((a, b) => b.people - a.people).map((x) => `${x.city}, ${cityWords(x)}`),
             ...[...counts].sort((a, b) => b[1] - a[1]).map(([p, c]) => `${c.toLocaleString('en-US')} ${SETTLEMENT_WORDS[p][c === 1 ? 0 : 1]}`),
           ];
           const form =
@@ -1909,8 +1919,31 @@ async function start(root: HTMLElement): Promise<void> {
               ? `Its form follows the world's records of the building tradition ${f.label}, which housed ${lifewayText([f.whose])} here: ${specText(f.spec)}. What they do not say, the generator's proportions fill in.`
               : `No building tradition is recorded for the ${lifewayText([f.whose])} of this region at this time, so this is a generic house for the way of life and the climate: ${specText(f.spec)}. It is a placeholder, and says so.`;
           const text = `${where.length ? `Houses of this form stand in ${where.join('; ')}. ` : ''}${form} At the scene's middle, at ${formatTime(sp.t)}: ${PATTERN_LABEL[life.pattern].toLowerCase()}, ${k ? `${k.label.toLowerCase()} as the anthromes of HYDE have it at their step ${stepName(sp.step)}` : 'as the anthromes have it'}. ${life.why}${life.disagrees ? ` ${life.disagrees}` : ''} The scene draws ${pp.houses.toLocaleString('en-US')} houses for about ${pp.drawn.toLocaleString('en-US')} people; HYDE puts about ${pp.expected.toLocaleString('en-US')} in the land it covers${cities.length ? `, and the lists of cities add ${cities.join(', ')}` : ''}.`;
-          const why = `${gen.generator}, version ${gen.version}: nobody recorded this house. How many houses there are follows HYDE's people through the anthromes, and the lists of cities where they name one; what way of life, the anthromes and the region's archaeologists; where each house stands and which way it faces is invented, keyed by the world's 5′ cells.`;
+          const why = `${gen.generator}, version ${gen.version}: nobody recorded this house. How many houses there are follows HYDE's people through the anthromes, and the lists of cities and the world's records of settlements where they name one; what way of life, the anthromes and the region's archaeologists; where each house stands and which way it faces is invented, keyed by the world's 5′ cells.`;
           return inspect.showGenerated(f.label, 'Generated house', text, why);
+        }
+        // A piece of a town's works: its wall, a gate, a tower, the water of a canal or a moat.
+        if (found.work !== undefined && city.people && city.spec.people) {
+          setState({ sel: null });
+          shownRecord = null;
+          const pp = city.people;
+          const f = pp.works[found.work];
+          const gen = city.spec.people.generator;
+          // The towns of the scene that have it, and what says so: a tradition, a town's own record, or nothing.
+          const part = f.spec.kind === 'canal' ? 'streets' : f.spec.kind === 'moat' ? 'moat' : 'wall';
+          const towns = pp.settlements.filter((x) => x.town && (x.town.from[part] ?? 'generic') === f.from);
+          const tradition = city.spec.people.traditions.find((x) => x.id === f.from);
+          const said = tradition
+            ? `The world's records of the building tradition ${tradition.label} say how its towns were laid out: ${townText(tradition.town)}.`
+            : f.from === 'generic'
+              ? 'No tradition or record says this town had it: it is the generic town the generator draws, and says so.'
+              : `The record of ${towns.find((x) => x.record === f.from)?.city ?? 'this city'} says how it was laid out: ${towns.find((x) => x.record === f.from)?.town?.text ?? 'see its record'}.`;
+          const named = towns.filter((x) => x.city).map((x) => x.city);
+          const where = named.length ? ` It stands round ${named.join(', ')}.` : towns.length ? ` ${towns.length.toLocaleString('en-US')} towns of the scene have it.` : '';
+          const size = f.spec.kind === 'canal' || f.spec.kind === 'moat' ? `${f.spec.thickness} m wide` : `${f.spec.height} m high and ${f.spec.thickness} m thick`;
+          const text = `${f.label}, drawn ${size}.${where} ${said} What they do not say (how high, how thick, how many towers) is the generator's, as is where its line runs: round the houses the scene draws, a street clear of them.`;
+          const why = `${gen.generator}, version ${gen.version}: nobody surveyed this. A town's streets and what enclosed it follow the tradition of its townspeople or its own record where one says, and the generator's generic town where none does; every piece's place is invented.`;
+          return inspect.showGenerated(f.label, 'Generated town works', text, why);
         }
         setState({ sel: null });
         shownRecord = null;
@@ -2044,7 +2077,14 @@ async function start(root: HTMLElement): Promise<void> {
       title: ix.title,
       ...(place.density !== undefined ? { density: place.density } : {}),
       ...(regionUses ? { regionUses } : {}),
-      cities: place.cities.map((c) => ({ name: c.city.name, people: c.people, km: c.km, list: listTitle(c.city.field), also: c.also.map((x) => ({ people: x.people, list: listTitle(x.city.field) })) })),
+      cities: place.cities.map((c) => ({
+        name: c.name,
+        people: c.people,
+        km: c.km,
+        list: c.from === 'list' ? listTitle(c.field!) : c.from === 'record' ? 'its record' : "a guess from its record's ground or houses, as no claim gives its people then",
+        also: c.also.map((x) => ({ people: x.people, list: listTitle(x.field) })),
+        ...(c.record ? { record: c.record } : {}),
+      })),
       ...(place.whose ? { whose: lifewayText([place.whose]) } : {}),
       ...(place.tradition ? { tradition: { id: place.tradition.id, label: place.tradition.label, dwelling: specText(place.tradition.dwelling) } } : {}),
     };
@@ -2537,7 +2577,7 @@ async function start(root: HTMLElement): Promise<void> {
       // As a click picks (pickAt), in the canvas's pixels.
       const dpr = canvas.width / stage.clientWidth;
       const found = city.pick(Math.round(x * dpr), canvas.height - 1 - Math.round(y * dpr));
-      if (found.taxon || found.house !== undefined) return { taxon: found.taxon?.id, house: found.house, ground: false };
+      if (found.taxon || found.house !== undefined || found.work !== undefined) return { taxon: found.taxon?.id, house: found.house, work: found.work, ground: false };
       return { ground: !!groundHit(frameView, rayOf(frameView, x, y), city.ground) };
     },
     set: (s) => setState(s),

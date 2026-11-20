@@ -13,16 +13,16 @@ import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { unzipSync } from 'fflate';
 import { decodeTile, encodeTile } from '../../../../core/container.ts';
-import { compileTraditions, traditionAt, type DwellingSpec, type FieldSpec, type LifewayWord, type SettlementSpec, type Tradition, type TraditionInput } from '../../../../core/dwelling.ts';
+import { compileTraditions, traditionAt, type DwellingSpec, type FieldSpec, type LifewayWord, type SettlementSpec, type TownSpec, type Tradition, type TraditionInput } from '../../../../core/dwelling.ts';
 import type { LandscapeIndex, TraditionsFile } from '../../../../core/landscape.ts';
 export type { LandscapeIndex, TraditionsFile };
-import { anthromeTile, assessmentAt, cityPeople, classAtStep, cellOf, kmBetween, LEVEL_WORDS, LIFEWAY_OF, lifewayOf, nearestStep, shareDensity, tileKey, type AnthromeClass, type City, type CitiesFile, type AnthromeTile, type AnthromeTileHeader, type Assessment, type AssessmentsFile, type HousingCount, type Pattern } from '../../../../core/landscape.ts';
+import { anthromeTile, assessmentAt, cityPeople, classAtStep, cellOf, kmBetween, LEVEL_WORDS, LIFEWAY_OF, lifewayOf, nameAt, nearestStep, shareDensity, tileKey, type AnthromeClass, type City, type CityRecord, type CitiesFile, type AnthromeTile, type AnthromeTileHeader, type Assessment, type AssessmentsFile, type HousingCount, type Pattern } from '../../../../core/landscape.ts';
 import { gridSize, peopleAt, type PeopleFile } from '../../../../core/layers.ts';
 import { datasetFile } from '../manifest.ts';
 import { CACHE } from '../paths.ts';
 import { sha256, stableStringify } from '../util.ts';
-import type { Field, World } from '../world.ts';
-import { claimOf, subjectTime, type Solved } from './records.ts';
+import { kindIs, type Field, type World } from '../world.ts';
+import { claimOf, subjectTime, validSpan, type Solved } from './records.ts';
 
 const NX = 4320;
 const NY = 2160;
@@ -435,9 +435,81 @@ export function traditionInputs(s: Solved, regionsSource: string): TraditionInpu
       ...(value<DwellingSpec>('dwelling') ? { dwelling: value<DwellingSpec>('dwelling') } : {}),
       ...(value<SettlementSpec>('settlement_form') ? { settlement: value<SettlementSpec>('settlement_form') } : {}),
       ...(value<FieldSpec>('field_system') ? { fields: value<FieldSpec>('field_system') } : {}),
+      ...(value<TownSpec>('town_form') ? { town: value<TownSpec>('town_form') } : {}),
     });
   }
   return out;
+}
+
+// ——— The settlements with records ———
+
+/** How near in years a second figure of a record is taken for a rival of one already kept, and not for another time's. */
+const RIVAL_YEARS = 50;
+
+/**
+ * The settlements the world has records of, as the landscape reads them (core/landscape.ts, CityRecord): each with a
+ * place, with what its claims say of its people, its houses and its ground at the times they are for, and how it was
+ * laid out. Of several claims for one time, or for times within fifty years of each other, the one the default picture
+ * prefers is kept, or the only one; where they cannot be told apart none is, and the lists' figure stands.
+ */
+export function cityRecords(s: Solved): CityRecord[] {
+  const out: CityRecord[] = [];
+  for (const e of s.world.entities) {
+    if (!kindIs(e.kind, 'settlement')) continue;
+    const at = claimOf(s, e.id, 'location')?.value as { lat?: number; lon?: number } | undefined;
+    if (!at || typeof at.lat !== 'number' || typeof at.lon !== 'number') continue;
+    const { time } = subjectTime(s, e.id);
+    const best = (x: { best: number | null; lo: number; hi: number }, or: number) => (x.best !== null && Number.isFinite(x.best) ? x.best : Number.isFinite(or) ? or : NaN);
+    const start = best(time.start, time.start.lo);
+    const end = time.endUnknown ? best(time.end, time.end.hi) : best(time.end, Infinity);
+    const span: [number, number] = [Number.isFinite(start) ? start : -1e9, Number.isFinite(end) ? end : 1e9];
+    // A property's figures through time: the preferred claim first, then the others where they stand alone at their time.
+    const figures = (prop: string): [number, number][] => {
+      const claims = e.claims.filter((c) => c.subject === e.id && c.prop === prop && !c.alt && c.status !== 'deprecated' && c.rank !== 'deprecated');
+      const points: { t: number; v: number; preferred: boolean }[] = [];
+      for (const c of claims) {
+        const q = c.value as number | { mean?: number; lo?: number; hi?: number };
+        const v = typeof q === 'number' ? q : typeof q?.mean === 'number' ? q.mean : typeof q?.lo === 'number' && typeof q?.hi === 'number' ? (q.lo + q.hi) / 2 : NaN;
+        if (!(v > 0)) continue;
+        const valid = validSpan(s, c.valid, e.id);
+        // A claim that says no time holds while the record stands: at its start.
+        const ts = !valid ? [span[0] > -1e8 ? span[0] : span[1]] : valid[0] !== null && valid[1] !== null && valid[1] - valid[0] > 1 ? [valid[0], valid[1]] : [valid[0] ?? valid[1]];
+        for (const t of ts) if (t !== null && Number.isFinite(t)) points.push({ t, v, preferred: c.rank === 'preferred' });
+      }
+      const kept: { t: number; v: number }[] = [];
+      for (const x of points.filter((x) => x.preferred)) kept.push(x);
+      for (const x of points.filter((x) => !x.preferred)) {
+        if (kept.some((k) => Math.abs(k.t - x.t) <= RIVAL_YEARS)) continue;
+        // Unranked rivals for one time cannot be told apart: none is kept.
+        const rivals = points.filter((y) => !y.preferred && y !== x && Math.abs(y.t - x.t) <= RIVAL_YEARS && y.v !== x.v);
+        if (!rivals.length) kept.push(x);
+      }
+      return kept.sort((a, b) => a.t - b.t).map((x) => [x.t, Math.round(x.v * 100) / 100] as [number, number]);
+    };
+    const name = claimOf(s, e.id, 'name')?.value as Record<string, string> | undefined;
+    // Its names in turn, where they have their times: a scene of 1500 names Tenochtitlan, not Mexico City.
+    const names = e.claims
+      .filter((c) => c.subject === e.id && c.prop === 'name' && !c.alt && c.status !== 'deprecated' && c.rank !== 'deprecated' && c.valid !== undefined)
+      .flatMap((c) => {
+        const v = validSpan(s, c.valid, e.id);
+        const text = (c.value as Record<string, string>)?.en ?? Object.values((c.value ?? {}) as Record<string, string>)[0];
+        return v && text ? [{ text, span: [v[0] ?? -1e9, v[1] ?? 1e9] as [number, number] }] : [];
+      });
+    const town = claimOf(s, e.id, 'town_form')?.value as TownSpec | undefined;
+    out.push({
+      id: e.id,
+      name: name?.en ?? Object.values(name ?? {})[0] ?? e.id,
+      ...(names.length ? { names } : {}),
+      lat: at.lat,
+      lon: at.lon,
+      span,
+      pops: figures('population'),
+      areas: figures('settlement_area'),
+      houses: figures('houses'),
+      ...(town ? { town } : {}),
+    });
+  }
+  return out.sort((a, b) => (a.id < b.id ? -1 : 1));
 }
 
 // ——— The build ———
@@ -554,6 +626,8 @@ export async function buildLandscape(s: Solved, log: (s: string) => void): Promi
     cities.lists.push({ source: f.data!.from, field: f.id, title: f.title, hold: p.hold_yr ?? 0, gap: p.gap_yr ?? 1e9 });
     cities.cities.push(...citiesOf(text, f.data!.from, f.id, p.left_out ?? []));
   }
+  // The settlements the world has records of: a scene draws one from its own claims, beside or in place of a list's figure.
+  cities.records = cityRecords(s);
   files.set('people/cities.json', stableStringify(cities));
   const traditions = compileTraditions(traditionInputs(s, regionsId));
   files.set('people/traditions.json', stableStringify({ format: 'lightworld-traditions@1', regions: regionsId, traditions } satisfies TraditionsFile));
@@ -580,7 +654,7 @@ export async function buildLandscape(s: Solved, log: (s: string) => void): Promi
     reach_km: (gen?.params as { cities?: { reach_km?: number } } | undefined)?.cities?.reach_km ?? 30,
   };
   files.set('people/landscape.json', stableStringify(index));
-  log(`landscape  ${tiles.length} tiles of 5′ cells over ${steps.length} steps, ${assessments.regions.length} regions assessed at ${assessments.slices.length} times, ${cities.cities.length} cities, ${traditions.length} building traditions`);
+  log(`landscape  ${tiles.length} tiles of 5′ cells over ${steps.length} steps, ${assessments.regions.length} regions assessed at ${assessments.slices.length} times, ${cities.cities.length} cities of the lists and ${cities.records.length} with records, ${traditions.length} building traditions`);
   // Lookups at a place and time, from the tiles as the viewer reads them.
   const decoded = new Map<string, AnthromeTile>();
   const tileOf = (name: string): AnthromeTile | undefined => {
@@ -618,15 +692,25 @@ export function landscapeResolve(b: LandscapeBuilt): NonNullable<import('../../.
   }
   const reach = b.index.reach_km;
   const lists = new Map(b.cities.lists.map((l) => [l.source, l]));
+  // The settlements with records, the same way: one that stood then, and says how big it was, is a city a scene draws.
+  const records = new Map<string, CityRecord[]>();
+  for (const r of b.cities.records ?? []) {
+    const k = `${Math.floor(r.lat)}_${Math.floor(r.lon)}`;
+    (records.get(k) ?? records.set(k, []).get(k)!).push(r);
+  }
   return {
     span: b.span,
     at: (lat, lon, t) => {
       const here = b.at(lat, lon, t);
       if (!here || !here.anthrome) return undefined;
       for (let dl = -1; dl <= 1; dl++) for (let dn = -1; dn <= 1; dn++) {
-        for (const c of buckets.get(`${Math.floor(lat) + dl}_${Math.floor(lon) + dn}`) ?? []) {
+        const key = `${Math.floor(lat) + dl}_${Math.floor(lon) + dn}`;
+        for (const c of buckets.get(key) ?? []) {
           const l = lists.get(c.source);
           if (kmBetween(lat, lon, c.lat, c.lon) <= reach && (cityPeople(c, t, l?.hold ?? 0, l?.gap ?? Infinity) ?? 0) > 0) return { tier: 'evidence', pattern: 'city', city: c.name };
+        }
+        for (const r of records.get(key) ?? []) {
+          if (t >= r.span[0] && t <= r.span[1] && (r.pops.length || r.houses.length || r.areas.length) && kmBetween(lat, lon, r.lat, r.lon) <= reach) return { tier: 'evidence', pattern: 'city', city: nameAt(r, t) };
         }
       }
       const a = here.region ? assessmentAt(b.assessments, here.region, t)?.a : undefined;

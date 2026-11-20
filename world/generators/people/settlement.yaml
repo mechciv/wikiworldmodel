@@ -22,6 +22,11 @@ inputs:
   - { prop: field_system, note: "the plots of its fields" }
   - { prop: extent, note: "the regions each tradition was found in" }
   - { prop: lifeway, note: "whom each tradition housed: its house is drawn for those ways of life only" }
+  - { prop: town_form, note: "how a town's streets ran and what enclosed it, as the tradition of its townspeople or its own record says" }
+  - { kind: settlement, note: "the cities the world has records of: where and when each stood" }
+  - { prop: population, kind: settlement, note: "a recorded city's people at the times its claims are for" }
+  - { prop: houses, kind: settlement, note: "a recorded city's houses, where a source counts them" }
+  - { prop: settlement_area, kind: settlement, note: "the ground a recorded city covered" }
   - { ref: gen:life/scene, note: "the ground and the water of the scene the houses stand in" }
 checks:
   - { test: world/generators/people/settlement/v2.test.ts, holds: "holds as many people as the world puts in the land it draws" }
@@ -31,6 +36,10 @@ checks:
   - { test: world/generators/people/settlement/v2.test.ts, holds: "draws a camp's shelter from the tradition that housed its way of life, and no farmer's house from a herder's tent" }
   - { test: world/generators/people/settlement/v2.test.ts, holds: "draws a city of the lists where the anthromes have none" }
   - { test: world/generators/people/settlement/v2.test.ts, holds: "puts a settlement in the same place from two scenes that overlap" }
+  - { test: world/generators/people/settlement/v2.test.ts, holds: "seeds each cell and each settlement apart, and each alike from two scenes" }
+  - { test: world/generators/people/settlement/v2.test.ts, holds: "has the wall its tradition says, round its houses, with gates where its main streets leave it, and towers" }
+  - { test: world/generators/people/settlement/v2.test.ts, holds: "of a record is drawn from the record's own people, houses, ground and layout" }
+  - { test: tools/world/test/landscape.test.ts, holds: "draws a list's city that has a record where the record puts it, with the record's own people about the time they are for" }
 limits:
   - with: field:people/anthromes
     note: >-
@@ -39,9 +48,12 @@ limits:
       stand for more people each, and the panel says how many.
   - with: field:people/cities
     note: >-
-      A city of the lists is drawn as one dense cluster of houses of its people, around the list's point: no streets,
-      walls, temples or districts, which are a city slice's work, as Rome's are. Its outline, round with an edge that
-      wanders, is invented, as a town's is.
+      A city of the lists is drawn as houses on the lots of streets, around the list's point: on a grid or along lanes,
+      walled or open, as the tradition of its region's townspeople says, and as the generic town where none does. Every
+      street's line, every gate's place and the outline, round or square, are invented. It has no temples, palaces or
+      districts, which are a city slice's work, as Rome's are. A city with a record covers the ground its record gives,
+      as a disc or a square about its point: the outline of the real city, and where within it people lived, are not
+      read. A city whose ground is more than params.towns.open_lot to a house is drawn with no streets, its houses apart.
 slots:
   any:
     place: >-
@@ -83,5 +95,28 @@ params:
     swidden: { kind: swidden, plot: 0.8 }
     pasture: { kind: irregular, plot: 3 }
   site: { steep: 0.25, above_water: 1.5, tries: 6 }
-  cities: { reach_km: 30, lot: 160, town_lot: 300, household: 6, city_from: 10000, most_houses: 12000 }
+  cities: { reach_km: 30, lot: 160, town_lot: 300, household: 6, city_from: 10000, most_houses: 12000, record_hold: 50, record_gap: 600 }
+  # A town where nothing says how it was laid out: lanes that wander, and no wall. Where a tradition or a record says a
+  # town had a wall and not how high or how thick, or streets and not how wide, these stand in, and the panel says so.
+  # How square a town's outline is goes by its streets: a planned town is drawn square, one of lanes round.
+  towns:
+    generic: { streets: lanes, wall: none }
+    block: 60
+    street: 3
+    main_street: 8
+    outline: { grid: 1, lanes: 0, canals: 0.5 }
+    walls:
+      earth: { height: 3, thickness: 12 }
+      rammed-earth: { height: 8, thickness: 8 }
+      timber: { height: 3.5, thickness: 0.4 }
+      mudbrick: { height: 7, thickness: 4 }
+      stone: { height: 8, thickness: 2.5 }
+      brick: { height: 9, thickness: 3 }
+    gates: 4
+    tower_every: 60
+    square: 0.02
+    canal: 6
+    moat: 12
+    canal_every: 2
+    open_lot: 1200
   most_houses: 60000

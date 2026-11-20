@@ -10,7 +10,7 @@ import type { Fingerprint } from './fingerprint.ts';
 import type { Form } from './form.ts';
 import type { FeatureTime } from './tileset.ts';
 import type { Tradition } from './dwelling.ts';
-import type { AnthromeClass, Assessment, Lifeway } from './landscape.ts';
+import type { AnthromeClass, Assessment, CityNear, Lifeway } from './landscape.ts';
 
 /** A taxon of the formation that is not drawn, and why not. */
 export interface SceneOmission {
@@ -159,8 +159,11 @@ export interface ScenePeople {
   regions: { id: number; label: string; slice: string; assessment: Assessment }[];
   /** the lifeway at the place itself */
   lifeway: Lifeway;
-  /** the cities standing within reach of the scene then, from the lists of cities */
-  cities: { name: string; country: string; lat: number; lon: number; people: number; field: string; source: string; also?: { people: number; field: string; source: string }[] }[];
+  /**
+   * the cities standing within reach of the scene then: the lists', and the settlements the world has records of, a
+   * record's city with what its own claims say of its people, houses, ground and layout (core/landscape.ts, citiesAround)
+   */
+  cities: (Omit<CityNear, 'km' | 'also'> & { also?: CityNear['also'] })[];
   /** the building traditions that hold in the grid's regions at the time, merged down their tree */
   traditions: Tradition[];
   /** what it rests on: the fields read */

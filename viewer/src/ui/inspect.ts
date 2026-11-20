@@ -156,7 +156,7 @@ export interface LandscapeHere {
   /** the step read, and the people per km² a scene draws there */
   density?: number;
   regionUses?: string[];
-  cities: { name: string; people: number; km: number; list: string; also: { people: number; list: string }[] }[];
+  cities: { name: string; people: number; km: number; list: string; also: { people: number; list: string }[]; record?: string }[];
   /** whose houses a scene draws here, in words: "herders", "townspeople" */
   whose?: string;
   tradition?: { id: string; label: string; dwelling: string };

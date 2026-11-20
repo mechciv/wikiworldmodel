@@ -7,8 +7,8 @@
 #               names: […] } names the rows that belong to the subject, { from: src:…,
 #               elements: […] } the elements of a snapshot; a form says how a generator should
 #               raise a structure: { type: temple, order: corinthian, … }, core/city.ts)
-#               | dwelling | settlement-form | field-system | lifeway (a building tradition's house,
-#               how its houses stood together, its fields, and whom it housed: core/dwelling.ts)
+#               | dwelling | settlement-form | field-system | town-form | lifeway (a building tradition's
+#               house, how its houses stood together, its fields, its towns, and whom it housed: core/dwelling.ts)
 #   unit        for quantities: values are written in this unit
 #   values      for strings: the values allowed, each with what it means
 #   interp      how a state changes between known points: step | linear | log-time | slerp
@@ -418,6 +418,16 @@ properties:
     description: >-
       The fields around a building tradition's settlements: their kind (strips, terraces, paddies, swidden plots…),
       the size of a plot in hectares, and what divided them (core/dwelling.ts).
+  town_form:
+    type: town-form
+    interp: step
+    applies_to: [tradition/building, settlement]
+    description: >-
+      How a town or a city was laid out: its streets (on a grid, winding lanes, or canals among them), the size of
+      its blocks, what enclosed it (a rampart, a palisade, a wall of mudbrick, rammed earth, stone or brick), how
+      high, how many gates, a moat, an open square (core/dwelling.ts). A tradition that housed townspeople states
+      it for the towns of its region and time; a settlement's own record states it for that city, with the time it
+      held (`valid`). What neither says is the generator's guess, and the panel says so.
   lifeway:
     type: lifeway
     interp: step

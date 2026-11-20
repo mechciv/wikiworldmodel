@@ -3,7 +3,7 @@
 // a scene draws rests on the same anthromes, assessments, cities and traditions.
 import { decodeTile } from '../../../core/container.ts';
 import { traditionAt, type LifewayWord, type Tradition } from '../../../core/dwelling.ts';
-import { anthromeTile, classAtStep, nearestStep, sceneTiles, scenePeople, assessmentAt, lifewayOf, LIFEWAY_OF, citiesNear, cellOf, tileKey, type AnthromeTile, type AnthromeTileHeader, type AssessmentsFile, type CitiesFile, type LandscapeData, type LandscapeIndex, type Lifeway, type TraditionsFile } from '../../../core/landscape.ts';
+import { anthromeTile, classAtStep, nearestStep, sceneTiles, scenePeople, assessmentAt, lifewayOf, LIFEWAY_OF, citiesAround, cityGuess, cellOf, tileKey, type AnthromeTile, type AnthromeTileHeader, type AssessmentsFile, type CitiesFile, type CityNear, type LandscapeData, type LandscapeIndex, type Lifeway, type TraditionsFile } from '../../../core/landscape.ts';
 import { cellAt, stepsAround, type PeopleFile } from '../../../core/layers.ts';
 import type { ResolveWorld } from '../../../core/resolve.ts';
 import type { ScenePeople } from '../../../core/scene.ts';
@@ -28,7 +28,7 @@ export interface PlaceLandscape {
   density?: number;
   region?: { id: number; label: string; slice: string; assessment: ReturnType<typeof assessmentAt> };
   lifeway: Lifeway;
-  cities: ReturnType<typeof citiesNear>;
+  cities: CityNear[];
   /** whose houses a scene would draw here: the way of life of the place, or townspeople where a list puts a city near */
   whose?: LifewayWord;
   /** the tradition written for that way of life, in the region and at the time */
@@ -138,6 +138,11 @@ export class LandscapeAtlas {
     return scenePeople(this.data(people), lat, lon, t);
   }
 
+  /** The cities a scene would draw near a place at a time: the lists', and the settlements with records (core/landscape.ts). */
+  private citiesAt(lat: number, lon: number, t: number): CityNear[] {
+    return citiesAround(this.cities, lat, lon, t, this.index.reach_km, cityGuess(this.index.generator?.params));
+  }
+
   /**
    * What the people layer of `resolve` asks (core/resolve.ts), as the build answers it: the lifeway at a place from its 5′
    * cell, and whether a city of the lists stands near. Undefined until the index, the assessments and the cities have come,
@@ -163,8 +168,8 @@ export class LandscapeAtlas {
         const cell = cellOf(tile, lat, lon);
         const anthrome = cell < 0 ? 0 : classAtStep(tile, cell, i);
         if (!anthrome) return undefined;
-        const city = citiesNear(this.cities, lat, lon, t, ix.reach_km)[0];
-        if (city) return { tier: 'evidence', pattern: 'city', city: city.city.name };
+        const city = this.citiesAt(lat, lon, t)[0];
+        if (city) return { tier: 'evidence', pattern: 'city', city: city.name };
         const region = tile.region[cell];
         const l = lifewayOf(ix.classes, anthrome, 0, region ? assessmentAt(this.assessments, region, t)?.a : undefined);
         return { tier: l.tier, pattern: l.pattern };
@@ -191,7 +196,7 @@ export class LandscapeAtlas {
     const p = await this.peopleFor(lat, lon, t).catch(() => undefined);
     const density = p ? p.grid.density[(Math.floor((p.grid.north - lat) / p.grid.res)) * p.grid.nx + Math.floor((lon - p.grid.west) / p.grid.res)] : undefined;
     const lifeway = lifewayOf(this.index.classes, anthrome, density ?? 0, at?.a);
-    const cities = citiesNear(this.cities, lat, lon, t, this.index.reach_km);
+    const cities = this.citiesAt(lat, lon, t);
     // The houses of the way of life here: a city's where a list puts one near, as a scene would draw it.
     const pattern = cities.length ? 'city' : lifeway.pattern;
     const whose = pattern !== 'none' ? LIFEWAY_OF[pattern] : undefined;

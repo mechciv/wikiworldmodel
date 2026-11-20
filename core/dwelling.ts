@@ -107,6 +107,28 @@ export const FIELD_WORDS = {
 } as const;
 
 /**
+ * How a town or a city was laid out: its streets, and what enclosed it. A tradition that housed townspeople states it
+ * for the towns of its region and time, and a settlement's own record for that city (`town_form`). The settlement
+ * generator lays a town's houses out by it; where neither says, by its generic town, which says so.
+ */
+export const TOWN_WORDS = {
+  streets: {
+    grid: 'Straight streets crossing at right angles, the houses in blocks between them.',
+    lanes: 'Winding lanes and alleys that follow no plan, the houses packed between them.',
+    canals: 'Streets of water among the streets of earth, the houses on the ground between them.',
+  },
+  wall: {
+    none: 'Open: nothing enclosed it.',
+    earth: 'A bank or rampart of earth.',
+    'rammed-earth': 'A wall of earth rammed between boards.',
+    timber: 'A palisade of posts.',
+    mudbrick: 'A wall of sun-dried brick.',
+    stone: 'A wall of stone.',
+    brick: 'A wall of fired brick.',
+  },
+} as const;
+
+/**
  * Whom a tradition housed: the ways of life the model of how people lived tells apart (model:people/lifeways). A
  * tradition's `lifeway` claim names one or more of them, and its house is drawn only for those: a herder's tent for
  * the camps of herders, not for the farmers of the same region.
@@ -169,9 +191,27 @@ export interface FieldSpec extends Words<typeof FIELD_WORDS> {
   plot?: Span;
 }
 
+/** A town's layout. Lengths in metres. */
+export interface TownSpec extends Words<typeof TOWN_WORDS> {
+  /** the side of a block between streets */
+  block?: Span;
+  /** how wide a street was, and a main street */
+  street?: Span;
+  main_street?: Span;
+  /** the wall: how high and how thick it stood, and how many gates it had */
+  wall_height?: Span;
+  wall_thickness?: Span;
+  gates?: Span;
+  /** whether a ditch or a moat ran outside the wall */
+  moat?: boolean;
+  /** whether an open place, a square or a market, lay at its middle */
+  square?: boolean;
+}
+
 const DWELLING_NUMBERS = ['diameter', 'width', 'length', 'wall_height', 'height', 'storeys', 'rooms'] as const;
 const SETTLEMENT_NUMBERS = ['houses', 'spacing', 'household'] as const;
 const FIELD_NUMBERS = ['plot'] as const;
+const TOWN_NUMBERS = ['block', 'street', 'main_street', 'wall_height', 'wall_thickness', 'gates'] as const;
 
 /** What is wrong with a span: a positive number, or { lo, hi } of them with lo ≤ hi. */
 export function spanProblem(v: unknown): string | undefined {
@@ -182,14 +222,14 @@ export function spanProblem(v: unknown): string | undefined {
   return 'a positive number, or { lo, hi } of them';
 }
 
-function problemsOf(v: unknown, what: string, words: Record<string, Record<string, string>>, numbers: readonly string[]): string[] {
+function problemsOf(v: unknown, what: string, words: Record<string, Record<string, string>>, numbers: readonly string[], flags: readonly string[] = []): string[] {
   if (!v || typeof v !== 'object' || Array.isArray(v)) return [`a ${what} is a mapping of its parameters`];
   const out: string[] = [];
   const entries = Object.entries(v as Record<string, unknown>);
   if (!entries.length) out.push(`a ${what} says something`);
   for (const [k, x] of entries) {
-    if (k === 'court') {
-      if (typeof x !== 'boolean') out.push('court is true or false');
+    if (flags.includes(k)) {
+      if (typeof x !== 'boolean') out.push(`${k} is true or false`);
       continue;
     }
     if (words[k]) {
@@ -201,14 +241,15 @@ function problemsOf(v: unknown, what: string, words: Record<string, Record<strin
       if (p) out.push(`${k} is ${p}`);
       continue;
     }
-    out.push(`a ${what} has no "${k}": it may have ${[...Object.keys(words), ...numbers, ...(what === 'dwelling' ? ['court'] : [])].join(', ')}`);
+    out.push(`a ${what} has no "${k}": it may have ${[...Object.keys(words), ...numbers, ...flags].join(', ')}`);
   }
   return out;
 }
 
-export const dwellingProblems = (v: unknown) => problemsOf(v, 'dwelling', DWELLING_WORDS, DWELLING_NUMBERS);
+export const dwellingProblems = (v: unknown) => problemsOf(v, 'dwelling', DWELLING_WORDS, DWELLING_NUMBERS, ['court']);
 export const settlementProblems = (v: unknown) => problemsOf(v, 'settlement form', SETTLEMENT_WORDS, SETTLEMENT_NUMBERS);
 export const fieldProblems = (v: unknown) => problemsOf(v, 'field system', FIELD_WORDS, FIELD_NUMBERS);
+export const townProblems = (v: unknown) => problemsOf(v, 'town form', TOWN_WORDS, TOWN_NUMBERS, ['moat', 'square']);
 
 /** Where each inherited parameter came from: the tradition whose claim gave it. */
 export type From = Record<string, string>;
@@ -229,6 +270,8 @@ export interface Tradition {
   dwelling: DwellingSpec;
   settlement: SettlementSpec;
   fields: FieldSpec;
+  /** how its towns were laid out, where it housed townspeople and says */
+  town: TownSpec;
   /** which tradition gave each parameter: `dwelling.walls` → its id; and `lifeway`, whose claim says whom it housed */
   from: From;
   /** whether it says anything of the dwelling itself, rather than inheriting it all */
@@ -246,6 +289,7 @@ export interface TraditionInput {
   dwelling?: DwellingSpec;
   settlement?: SettlementSpec;
   fields?: FieldSpec;
+  town?: TownSpec;
 }
 
 /**
@@ -282,6 +326,7 @@ export function compileTraditions(inputs: TraditionInput[]): Tradition[] {
       dwelling: merge(t.dwelling, up?.dwelling, 'dwelling'),
       settlement: merge(t.settlement, up?.settlement, 'settlement'),
       fields: merge(t.fields, up?.fields, 'fields'),
+      town: merge(t.town, up?.town, 'town'),
       from,
       own: !!t.dwelling && Object.keys(t.dwelling).length > 0,
     };
@@ -313,6 +358,21 @@ export function traditionAt(list: Tradition[], region: number | undefined, t: nu
     if (better) best = x;
   }
   return best;
+}
+
+/** A town's layout in words, for a panel: "streets on a grid, in blocks of 60–100 m, a wall of stone 8 m high, 4 gates". */
+export function townText(v: TownSpec): string {
+  const parts: string[] = [];
+  if (v.streets) parts.push(v.streets === 'grid' ? 'streets on a grid' : v.streets === 'lanes' ? 'winding lanes' : 'streets of water and of earth');
+  if (v.block !== undefined) parts.push(`blocks of ${spanText(v.block, ' m')}`);
+  if (v.street !== undefined) parts.push(`streets ${spanText(v.street, ' m')} wide`);
+  if (v.main_street !== undefined) parts.push(`main streets ${spanText(v.main_street, ' m')} wide`);
+  if (v.wall === 'none') parts.push('no wall');
+  else if (v.wall) parts.push(`${v.wall === 'earth' ? 'a rampart of earth' : v.wall === 'timber' ? 'a palisade' : `a wall of ${v.wall === 'rammed-earth' ? 'rammed earth' : v.wall}`}${v.wall_height !== undefined ? ` ${spanText(v.wall_height, ' m')} high` : ''}${v.wall_thickness !== undefined ? `, ${spanText(v.wall_thickness, ' m')} thick` : ''}`);
+  if (v.gates !== undefined) parts.push(`${spanText(v.gates)} gates`);
+  if (v.moat !== undefined) parts.push(v.moat ? 'a moat outside it' : 'no moat');
+  if (v.square !== undefined) parts.push(v.square ? 'an open square at its middle' : 'no open square');
+  return parts.join(', ');
 }
 
 /** A span's middle, or the number itself. */

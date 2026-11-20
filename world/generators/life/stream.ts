@@ -12,9 +12,12 @@ import { CELL, CELLS, cellParts, cellKey, coverMask, EXTENT, groundGrids, LandCo
 import { freshOf, type Waters } from './land.ts';
 import { drawDwelling, houseSize, type HouseDetail } from '../people/dwellings.ts';
 import { LandUseMap, landUseMask, makeSettlement, type SettlementPlan } from '../people/settlement/v2.ts';
+import { drawWork, workTop } from '../people/works.ts';
 
 /** Where houses start among a scene's kinds of mesh: a taxon's number is below it, a house's dwelling above. */
 export const HOUSE = 0x4000;
+/** Where the pieces of a town's works start, above the houses: a length of wall, a tower, a gate, a length of water. */
+export const WORK = 0x6000;
 
 export const INSTANCE_STRIDE = 28;
 
@@ -125,6 +128,9 @@ export class SceneStream {
   /** each cell's houses, by their place in the plan */
   private houseCells = new Map<number, number[]>();
   private houseTops: number[] = [];
+  /** each cell's pieces of its towns' works, by their place in the plan */
+  private workCells = new Map<number, number[]>();
+  private workTops: number[] = [];
 
   constructor(readonly spec: SceneSpec, private budget: Budget = FULL_BUDGET) {
     this.params = spec.generator.params as unknown as LivingParams;
@@ -154,6 +160,13 @@ export class SceneStream {
         const k = cellKey(Math.floor(h.x / CELL), Math.floor(h.y / CELL));
         let list = this.houseCells.get(k);
         if (!list) this.houseCells.set(k, (list = []));
+        list.push(i);
+      });
+      this.workTops = this.people.workForms.map((f) => workTop(f.spec));
+      this.people.works.forEach((w, i) => {
+        const k = cellKey(Math.floor(w.x / CELL), Math.floor(w.y / CELL));
+        let list = this.workCells.get(k);
+        if (!list) this.workCells.set(k, (list = []));
         list.push(i);
       });
     }
@@ -197,6 +210,15 @@ export class SceneStream {
   /** A mesh of one kind of body or plant, or of a house: the same everywhere, within the tolerance. */
   mesh(proto: number): ProtoMesh {
     const { taxon, variant, detail } = protoParts(proto);
+    if (taxon >= WORK) {
+      const f = this.people!.workForms[taxon - WORK];
+      const m = new Mesh(detail >= 2 ? 1024 : 256);
+      m.entity = this.spec.taxa.length + 1 + this.people!.forms.length + (taxon - WORK);
+      drawWork(m, f.spec, (2 - detail) as HouseDetail, 118 + (variant & 3) * 6);
+      const { vertices, indices } = m.arrays();
+      this.meshes.set(proto, { tris: indices.length / 3 });
+      return { proto, vertices, indices };
+    }
     if (taxon >= HOUSE) {
       const f = this.people!.forms[taxon - HOUSE];
       const m = new Mesh(detail >= 2 ? 2048 : 256);
@@ -393,6 +415,47 @@ export class SceneStream {
           b.f[o + 5] = Math.cos(h.face);
           b.s[b.n * 14 + 12] = this.spec.taxa.length + 1 + h.form;
           b.s[b.n * 14 + 13] = h.rank >> 3;
+          b.n++;
+          instances++;
+        }
+      }
+      // The pieces of the towns' works in the cell: walls, gates and towers stay in view as far as they can be made out.
+      const ws = this.workCells.get(cellKey(i, j));
+      if (ws && this.people) {
+        for (const wi of ws) {
+          if (instances >= cap) break;
+          const w = this.people.works[wi];
+          const dx = w.x - ex;
+          const dy = w.y - ey;
+          const dz = w.z - ez;
+          const dd = dx * dx + dy * dy + dz * dz;
+          const tall = this.workTops[w.form];
+          const pxs2 = (tall * tall * K * K) / dd;
+          if (pxs2 < 1) continue;
+          const pxs = Math.sqrt(pxs2);
+          const detail: Detail = this.budget.fast ? (pxs >= 30 ? 1 : 0) : pxs >= 80 ? 2 : pxs >= 10 ? 1 : 0;
+          const proto = protoOf(WORK + w.form, wi & 3, detail);
+          let b = buckets.get(proto);
+          if (!b) {
+            const buf = new ArrayBuffer(INSTANCE_STRIDE * 64);
+            b = { f: new Float32Array(buf), s: new Uint16Array(buf), n: 0 };
+            buckets.set(proto, b);
+          }
+          if ((b.n + 1) * INSTANCE_STRIDE > b.f.byteLength) {
+            const buf = new ArrayBuffer(b.f.byteLength * 2);
+            new Uint8Array(buf).set(new Uint8Array(b.f.buffer));
+            b.f = new Float32Array(buf);
+            b.s = new Uint16Array(buf);
+          }
+          const o = b.n * 7;
+          b.f[o] = w.x;
+          b.f[o + 1] = w.y;
+          b.f[o + 2] = w.z;
+          b.f[o + 3] = 1;
+          b.f[o + 4] = Math.sin(w.face);
+          b.f[o + 5] = Math.cos(w.face);
+          b.s[b.n * 14 + 12] = this.spec.taxa.length + 1 + this.people.forms.length + w.form;
+          b.s[b.n * 14 + 13] = (wi * 37) & 31;
           b.n++;
           instances++;
         }
