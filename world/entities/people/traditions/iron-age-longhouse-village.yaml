@@ -59,6 +59,27 @@ claims:
       named is where the sources place the house, not a claim that it covered the region.
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in nicosia-2022-PMC9432763-with-S1.txt (sha256 d9d52156e5f25fc8), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      - ref: src:wichmann-2025-fingerprinting-conflict
+        loc: 'section "Schleswig-Holstein (Bronze Age): Cooking pits, weapons, and fortifications"'
+        quote: >-
+          It was not until the Iron Age (from 500 BC) that the settlement pattern changed in favor of smaller houses in
+          hamlets and villages. … Houses and farms were fenced in and settlements were also demarcated from the
+          surrounding countryside
+      - ref: src:mousavi-derazmahalleh-2024-bicolored-shrew
+        loc: section "Archeological context and sample description"
+        quote: >-
+          The farm thereby consists of a 16‐m‐long longhouse, a well‐preserved stone‐paved entrance area and a smaller
+          outbuilding placed to the south of the stable.
+    method: editorial
+    note: >-
+      Farmers: from 500 BC the houses of the Jutland peninsula stood as fenced farms in hamlets and villages, and at the
+      one village a source read describes, near Aalborg, a farm was a longhouse with its stable and an outbuilding.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wichmann-2025-fingerprinting-conflict.txt (sha256 f921c0f1dd34d067) and mousavi-derazmahalleh-2024-bicolored-shrew.txt (sha256 9720288314052ca5), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   dwelling:
     prop: dwelling
     value: { plan: long }

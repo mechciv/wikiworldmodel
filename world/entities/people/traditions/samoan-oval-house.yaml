@@ -41,6 +41,28 @@ claims:
       Islands and French Polynesia, whose houses these sources do not describe; it is not claimed for all of it.
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in green-davidson-1974-western-samoa-2.txt (sha256 9815838631fee5a7), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+  lifeway:
+    prop: lifeway
+    value: [shifting-cultivators, farmers]
+    source:
+      - ref: src:green-davidson-1974-western-samoa-2
+        loc: "Report 39 (Davidson), section \"Distribution of Settlement\", p. 243"
+        quote: >-
+          Gradually the pattern of dispersed settlement may have evolved, with not only cultivations but settlements as
+          well, moving over the land as part of the cycle of land use.
+      - ref: src:green-davidson-1974-western-samoa-2
+        loc: "Report 39 (Davidson), section \"Distribution of Settlement\", p. 243"
+        quote: >-
+          For nearly 150 years the great majority of Samoans have been living on the coast, and cultivating the nearest
+          available land. The result is that much of the land adjacent to villages is exhausted
+    method: editorial
+    note: >-
+      Gardeners throughout. Davidson reads the dispersed settlement of most of the sequence as households that moved
+      over the land with their cultivations, as land was cleared and exhausted: shifting cultivators. The villagers of
+      the coast in the last 150 years, cultivating the land nearest them, are named farmers, the vocabulary's word for
+      the people of villages, though their gardens too move inland as the land is exhausted.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in green-davidson-1974-western-samoa-2.txt (sha256 5bf8752c79321945), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   dwelling:
     prop: dwelling
     value: { plan: oval, length: 10.5, wall_height: 1.5, walls: none, roof: hip, roof_material: thatch, floor: raised }

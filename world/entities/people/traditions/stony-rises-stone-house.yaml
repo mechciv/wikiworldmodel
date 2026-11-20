@@ -58,6 +58,30 @@ claims:
       the region; it is not claimed for the rest of it, nor for Tasmania.
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in fink-1987-lake-condah.txt (sha256 cbb33ba436913642), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+  lifeway:
+    prop: lifeway
+    value: [foragers]
+    source:
+      - ref: src:mcniven-2017-kurtonitj-stone-house
+        loc: abstract
+        quote: >-
+          Key challenges for future excavations are documenting stone houses dating unambiguously to before European
+          contact and determining how their history of use integrates with the development of eel trapping facilities over
+          the past 6600 years.
+      - ref: src:fink-1987-lake-condah-stone-shelters
+        loc: p. 6
+        quote: >-
+          The majority of newly recorded sites were found in close proximity to previously known house sites and, with few
+          exceptions, were close to volcanic depressions. Many of these depressions contain water, aquatic plants and
+          probably eels
+    method: editorial
+    note: >-
+      The houses stand by the hollows that held water and eels, and the excavators tie their use to the eel traps of the
+      same country: Aboriginal people who lived by trapping eels are foragers, however settled. Neither source says so in
+      as many words. The one dated house was lived in during the resistance to the pastoral invasion of the 1840s, or in
+      the two decades after, when its people lived and worked on pastoral properties.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in mcniven-2017-kurtonitj-stone-house.txt (sha256 ede6b0ca60c529ca) and fink-1987-lake-condah-stone-shelters.txt (sha256 29ed20fcf0b4f5f1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   dwelling:
     prop: dwelling
     value: { plan: round, diameter: { lo: 2, hi: 3 }, walls: stone, roof_material: bark, floor: ground }

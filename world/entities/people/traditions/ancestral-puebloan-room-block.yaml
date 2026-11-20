@@ -56,6 +56,29 @@ claims:
       claimed for all of the region, only for the places the sources name.
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in spielmann-2016-early-warning-southwest-PMC5051805.txt (sha256 86a7b8335d09b74a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      - ref: src:spielmann-2016-southwest-transformation
+        loc: section "Zuni"
+        quote: >-
+          The Zuni region is one of only a few places in the Southwestern US that was densely occupied by sedentary
+          small-scale farmers continuously from at least the last millennium B.C.E., through Spanish conquest, and into the
+          present
+      - ref: src:spielmann-2016-southwest-transformation
+        loc: section "Mesa Verde"
+        quote: >-
+          The Mesa Verde region was occupied by Pueblo farmers from the last millennium B.C.E. to the end of the thirteenth
+          century.
+    method: editorial
+    note: >-
+      Settled small-scale farmers, in both regions the paper describes; the hamlets and clusters of their small
+      residential structures are the settlement claim's. The towns they gathered into in the thirteenth century are a
+      record of their own (people/traditions/pueblo-planned-town), which says whom it housed for itself, so townspeople
+      are not named here.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in spielmann-2016-southwest-transformation.txt (sha256 0a311fdc48f928f9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   dwelling:
     prop: dwelling
     value: { plan: room-block, rooms: { lo: 2, hi: 20 }, floor: ground, roof: flat, walls: stone }

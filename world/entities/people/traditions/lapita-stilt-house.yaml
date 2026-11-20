@@ -56,6 +56,22 @@ claims:
       long before by other peoples, is not claimed.
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in kirch-1988-talepakemalai.txt (sha256 80f463582869b22a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      ref: src:kirch-1988-talepakemalai
+      loc: abstract
+      quote: >-
+        Lapita subsistence was broadly based and incorporated sophisticated marine exploitation and animal husbandry, and
+        developed arboriculture
+    method: editorial
+    note: >-
+      The people of the stilt-house kept animals and tended tree crops, and lived as much from the sea. People who raised
+      animals and tree crops are farmers in this vocabulary, which has no word for farmers who fished as much; foragers,
+      people who lived by fishing, hunting and gathering, are not named, as these also raised their food.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in kirch-1988-talepakemalai.txt (sha256 804a3d5caad2b4c1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   dwelling:
     prop: dwelling
     value: { plan: rectangular, floor: stilts }

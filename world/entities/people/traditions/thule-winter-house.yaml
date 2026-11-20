@@ -75,6 +75,21 @@ claims:
       so regions 1 to 3 are left out. The house is not claimed for all of either region.
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in jeppesen-2018-north-water-PMC5963568.txt (sha256 f88de530e459ab91), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+  lifeway:
+    prop: lifeway
+    value: [foragers]
+    source:
+      - ref: src:gallant-2024-somerset-island-thule
+        loc: Introduction
+        quote: >-
+          The Thule people, who are the direct ancestors of the present-day Inuit, were a group of whalers who arrived by
+          the Bering Strait approximately 800 years ago [1]. The Thule specialized in hunting bowhead whales
+    method: editorial
+    note: >-
+      Whalers, who lived by hunting the bowhead whale and built their winter houses with its bones: foragers, settled for
+      the winter. The other source has the people of a winter site a whale-boat owner, his crew and their families.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in gallant-2024-somerset-island-thule.txt (sha256 2f4621b729a70024), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   dwelling:
     prop: dwelling
     value: { walls: sod, floor: sunken }

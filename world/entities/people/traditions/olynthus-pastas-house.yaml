@@ -53,6 +53,21 @@ claims:
       claimed for all of the region.
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-olynthus-1382382761.txt (sha256 563157b5903e7215), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+  lifeway:
+    prop: lifeway
+    value: [townspeople]
+    source:
+      ref: src:wikipedia-olynthus
+      loc: section "Site topography", "Classical"
+      quote: >-
+        Excavations on the North Hill uncovered 108 buildings, revealing a Hippodamian grid plan. Two large avenues were
+        excavated, along with horizontal streets that divided the urban area into city blocks. Each block had ten houses
+    method: editorial
+    note: >-
+      Townspeople: the houses are known only from the city blocks of Olynthus's North Hill. The houses of the countryside
+      around the city are not described.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-olynthus.txt (sha256 42810b1c3f306a41), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   dwelling:
     prop: dwelling
     value: { plan: courtyard, court: true, storeys: { lo: 1, hi: 2 }, walls: mudbrick }

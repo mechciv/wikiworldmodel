@@ -61,6 +61,26 @@ claims:
       lived in the countryside.
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-indus-valley-civilisation.txt (sha256 b60abe492ff0c871), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+  lifeway:
+    prop: lifeway
+    value: [townspeople]
+    source:
+      - ref: src:wikipedia-indus-valley-civilisation
+        loc: section "Mature Harappan", "Cities"
+        quote: >-
+          Within the city, individual homes or groups of homes obtained water from wells. … Houses opened only to inner
+          courtyards and smaller lanes.
+      - ref: src:wikipedia-indus-valley-civilisation
+        loc: section "Mature Harappan", "Cities"
+        quote: >-
+          Most city dwellers appear to have been traders or artisans, who lived with others pursuing the same occupation in
+          well-defined neighbourhoods.
+    method: editorial
+    note: >-
+      The courtyard houses the article describes stood inside the cities, whose people were mostly traders and artisans.
+      Farmers are not named: no source read says the houses of the villages were built round a courtyard.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-indus-valley-civilisation.txt (sha256 746600d1d517eb71), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   dwelling:
     prop: dwelling
     value: { plan: courtyard, court: true, storeys: { lo: 1, hi: 2 } }

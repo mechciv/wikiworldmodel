@@ -45,6 +45,21 @@ claims:
       repaired with stone late in their use, and that the dates from one of them, Dashanqian, run as late as 1352 BC.
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in xiajiadian-2022.txt (sha256 c67e38a3b4bc7edb), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      ref: src:tang-2022-lower-xiajiadian-settlements
+      loc: section 4, "Settlement construction and relative chronology"
+      quote: >-
+        These sites are all located less than 50 meters from waterways and agricultural lands, suggesting that dry-land
+        farming very likely formed the most important component of the subsistence economy of these LXJD communities.
+    method: editorial
+    note: >-
+      Said of three of the earthen settlements of western Liaoning, Dongshanzui, Fengxia and Shuiquan, which stood beside
+      arable land: the people of these houses were farmers, as the broader tradition says of both kinds of settlement.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in tang-2022-lower-xiajiadian-settlements.txt (sha256 ae1e304c43481b17), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   dwelling:
     prop: dwelling
     value: { walls: mudbrick }

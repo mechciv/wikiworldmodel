@@ -77,6 +77,33 @@ claims:
       Avaris in Egypt, with a question mark; it is left out. The house is not claimed for all of the region.
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-four-room-house-1370009931.txt (sha256 92d3b7a3ca8da2ed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+  lifeway:
+    prop: lifeway
+    value: [farmers, townspeople]
+    source:
+      - ref: src:wikipedia-architecture-of-ancient-israel
+        loc: opening paragraph
+        quote: >-
+          a standardized plan featuring three longitudinal rooms and one broad room, which served as a spatial response to
+          both agrarian requirements and the socio-religious necessity of ritual boundaries
+      - ref: src:wikipedia-four-room-house
+        loc: opening section
+        quote: >-
+          When an upper floor was included, the inhabitants used it as living quarters, while the ground floor was used as
+          a stable for livestock and for storage.
+      - ref: src:wikipedia-four-room-house
+        loc: section "Analysis"
+        quote: >-
+          It can be observed that smaller urban houses, that shared walls between them, were most likely inhabited by
+          nuclear families, while the larger stand-alone houses belonged to extended and wealthy families such as the
+          urban elite.
+    method: editorial
+    note: >-
+      Farmers, as the plan answered the needs of farming, with a stable and stores on the ground floor; townspeople, as
+      the houses of the towns, small and large, were of this plan. The sources describe the towns and name no village, so
+      farmers rests on the house's plan and not on where it was found.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-architecture-of-ancient-israel.txt (sha256 9bbcfc527082f288) and wikipedia-four-room-house.txt (sha256 1f6a37e345f0932e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   dwelling:
     prop: dwelling
     value:

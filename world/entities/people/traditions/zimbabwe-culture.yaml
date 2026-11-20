@@ -84,6 +84,31 @@ claims:
       either region, nor for all of its people.
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in chirikure-2014-mapela-pmc4215987.txt (sha256 2bff304471186b5e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+  lifeway:
+    prop: lifeway
+    value: [farmers, townspeople]
+    source:
+      - ref: src:chirikure-2014-mapela
+        loc: section "Background to Mapela, Shashe region, south-western Zimbabwe"
+        quote: >-
+          The resulting flat areas were terraced following the contours of the hill from the bottom to the top, to create
+          spaces for homesteads, some of which were associated with clearly-defined kraals.
+      - ref: src:chirikure-2014-mapela
+        loc: section "c. Stratigraphy"
+        quote: >-
+          The recovery of sorghum seeds suggests that the circular stone feature that continued from the layer above, on the
+          northern side of the trench, was a grain bin foundation.
+      - ref: src:chirikure-2014-mapela
+        loc: section "Discussion"
+        quote: In some cases, the bigger settlements were networked with smaller villages and towns within a short distance.
+    method: editorial
+    note: >-
+      Homesteads with cattle kraals, and a grain bin among the house floors of a terrace at Mapela: farmers. The culture's
+      settlements ran from villages to towns and capitals, so its houses were townspeople's too. Only the houses of the
+      walled centres are described; those of the villages around them are not. Chirikure et al. (2017) call the people of
+      Great Zimbabwe agricultural communities, and the place urban.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in chirikure-2014-mapela.txt (sha256 463e59f4ec6414d2), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   dwelling:
     prop: dwelling
     value: { walls: wattle-and-daub, storeys: 1 }

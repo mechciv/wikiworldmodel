@@ -57,6 +57,28 @@ claims:
       Middle Jōmon generally; the house is not claimed for all of the region.
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in crema-2016.txt (sha256 c1bacb0729f91d0a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+  lifeway:
+    prop: lifeway
+    value: [foragers]
+    source:
+      - ref: src:crema-2016-jomon-population
+        loc: Abstract
+        quote: >-
+          Here we contribute to this research agenda by reconstructing the prehistoric population change of Jomon
+          hunter-gatherers between 7,000 and 3,000 cal BP.
+      - ref: src:crema-2016-jomon-population
+        loc: Introduction
+        quote: >-
+          The Jomon culture of Japan (ca 16,000 ~ 2,500 cal BP) is often regarded as a prime example of a parallel
+          evolutionary pathway where traits commonly associated with farming societies have been independently developed
+          within a primarily hunter-gatherer economy
+    method: editorial
+    note: >-
+      The Jōmon people whose numbers the paper follows, and whose pit dwellings the studies it reports count, were
+      hunter-gatherers. They also managed plants, and the encyclopedia article cited for the dwelling says how far that went
+      is debated; the paper calls the economy primarily a hunter-gatherer's, so only foragers are named.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in crema-2016-jomon-population.txt (sha256 4430379be4bb421d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   dwelling:
     prop: dwelling
     value: { floor: sunken }

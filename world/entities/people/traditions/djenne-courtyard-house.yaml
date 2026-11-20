@@ -37,6 +37,22 @@ claims:
     note: Region 76 (Mali), which holds Djenné. The house is described for the town alone, and is not claimed for the region.
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-djenne-1377179164.txt (sha256 192be4828b6b492b), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+  lifeway:
+    prop: lifeway
+    value: [townspeople]
+    source:
+      ref: src:wikipedia-djenne
+      loc: section "After the Songhai", Caillié's description of 1828
+      quote: >-
+        The town of Jenné is about two miles and half in circumference; it is surrounded by a very ill constructed earth
+        wall, about ten feet high, and fourteen inches thick. There are several gates, but they are all small. The houses are
+        built of bricks dried in the sun.
+    method: editorial
+    note: >-
+      The houses Caillié describes are those of a walled town, and the two-storey courtyard houses the article describes
+      today are the town's as well. It describes no house of the villages around Djenné, so farmers are not named.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-djenne.txt (sha256 a6503137280dc897), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   dwelling:
     prop: dwelling
     value: { plan: courtyard, court: true, storeys: { lo: 1, hi: 2 }, walls: mudbrick, roof: flat }

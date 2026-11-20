@@ -51,6 +51,28 @@ claims:
       the places' coordinates on Wikipedia against the region outlines. The tradition is not claimed for all of either region.
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in xiajiadian-2022.txt (sha256 c67e38a3b4bc7edb), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      - ref: src:tang-2022-lower-xiajiadian-settlements
+        loc: section 4, "Settlement construction and relative chronology"
+        quote: >-
+          residents of Type A and Type B settlements used the same set of cooking and serving ceramics, and stone tools,
+          constructed and lived in similarly structured dwelling sites and both depended on dry-land millet farming as the
+          primary subsistence
+      - ref: src:tang-2022-lower-xiajiadian-settlements
+        loc: section 7.2, "Chronology and LXJD's millet farming"
+        quote: >-
+          Archaeobotanical records of the LXJD culture sites indicate that local subsistence was based on dry-land millet
+          farming, supplemented with animal husbandry
+    method: editorial
+    note: >-
+      The people of both kinds of settlement lived by farming millet on dry land, with animals kept beside it. The paper's
+      words for the largest walled sites are central settlements and hill forts, not towns, and it has their people live by
+      the same farming, so townspeople are not named.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in tang-2022-lower-xiajiadian-settlements.txt (sha256 ae1e304c43481b17), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   dwelling:
     prop: dwelling
     value: { plan: round }
