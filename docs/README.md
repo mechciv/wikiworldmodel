@@ -52,6 +52,7 @@ Proposals for running the project in public, and for the viewer. Not built, exce
 | [plans/PUBLIC-PROJECT.md](plans/PUBLIC-PROJECT.md) | the open project and the public site: licensing, governance, contribution paths, serving, infrastructure, security, community, and the phases to get there |
 | [plans/OPEN-CONTRIBUTION.md](plans/OPEN-CONTRIBUTION.md) | contribution mostly by agents: lanes by risk, a machine review before merge, people checking afterwards, versions |
 | [plans/CATALOG.md](plans/CATALOG.md) | one catalog, kept by the build, of what the world holds and still needs, for people and agents choosing work |
+| [plans/LIFEWAY-RENDERINGS.md](plans/LIFEWAY-RENDERINGS.md) | filling in how people are drawn: how much rests on a tradition by time, way of life and kind of thing, and the order to fill it |
 | [plans/RENDERING.md](plans/RENDERING.md) | a better picture of every scene from the renderer and the generators' meshes: plants, ground, water, light, movement, bodies, clouds and the still |
 
 ## Archive
