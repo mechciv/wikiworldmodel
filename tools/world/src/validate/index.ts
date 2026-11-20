@@ -12,7 +12,7 @@ import { join, resolve } from 'node:path';
 import { Ajv2020 } from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 import { formProblem } from '../../../../core/city.ts';
-import { dwellingProblems, fieldProblems, settlementProblems } from '../../../../core/dwelling.ts';
+import { dwellingProblems, fieldProblems, lifewayProblems, settlementProblems } from '../../../../core/dwelling.ts';
 import { ladderCounts, LEVELS, STEPS } from '../../../../core/ladder.ts';
 import { parseRef, RefError, splitRef } from '../../../../core/refs.ts';
 import { conflictChanged, conflictIn, type Constraint, type Conflict, type Solution } from '../../../../core/stn.ts';
@@ -284,6 +284,9 @@ function checkValue(world: World, refs: RefChecker, c: Claim, issues: Issue[]): 
       break;
     case 'field-system':
       for (const problem of fieldProblems(v)) bad(problem);
+      break;
+    case 'lifeway':
+      for (const problem of lifewayProblems(v)) bad(problem);
       break;
   }
 }
@@ -1041,6 +1044,26 @@ function checkForms(world: World, issues: Issue[]): void {
   }
 }
 
+/**
+ * Every building tradition says whom it housed: a `lifeway` claim of its own, or of a tradition it is a member of. Its
+ * house is drawn only for those ways of life (core/dwelling.ts), so one that does not say is drawn for no one.
+ */
+function checkTraditions(world: World, issues: Issue[]): void {
+  const byId = new Map(world.entities.filter((e) => e.kind === 'tradition/building').map((e) => [e.id, e]));
+  for (const e of byId.values()) {
+    const seen = new Set<string>();
+    let at: Entity | undefined = e;
+    let says = false;
+    while (at && !seen.has(at.id) && !says) {
+      seen.add(at.id);
+      says = at.claims.some((c) => c.prop === 'lifeway');
+      const up: string | undefined = at.relations.find((r) => r.rel === 'member-of')?.to;
+      at = up ? byId.get(up) : undefined;
+    }
+    if (!says) issues.push({ level: 'warning', check: 'traditions', file: e.file, where: 'claims', message: `${e.id} does not say whom it housed: give it a \`lifeway\` claim (docs/DWELLINGS.md), or its house is drawn for no one` });
+  }
+}
+
 export async function validateWorld(world: World, opts: { frames?: boolean; tables?: Map<string, Table> } = {}): Promise<Report> {
   const issues: Issue[] = world.loadIssues.map((e) => ({ level: 'error', check: 'load', file: e.file, where: e.where, message: e.message }));
   checkSchemas(world, issues);
@@ -1049,6 +1072,7 @@ export async function validateWorld(world: World, opts: { frames?: boolean; tabl
   checkLineage(world, issues);
   checkProminence(world, issues);
   checkForms(world, issues);
+  checkTraditions(world, issues);
   checkModels(world, issues);
   checkGeneratorSamples(world, issues);
   checkDuplicates(world, issues);

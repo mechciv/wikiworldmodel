@@ -22,9 +22,11 @@ const WALL: Record<NonNullable<DwellingSpec['walls']>, number> = {
   cob: MAT.mud,
   hide: MAT.hide,
   felt: MAT.cloth,
+  cloth: MAT.hide,
   bark: MAT.bark,
   sod: MAT.grass,
   snow: MAT.plaster,
+  'earth-cut': MAT.earth,
   none: MAT.thatch,
 };
 
@@ -36,6 +38,7 @@ const ROOF: Record<NonNullable<DwellingSpec['roof_material']>, number> = {
   bark: MAT.bark,
   hide: MAT.hide,
   felt: MAT.cloth,
+  cloth: MAT.hide,
   reed: MAT.thatch,
   stone: MAT.granite,
   turf: MAT.grass,
@@ -49,7 +52,7 @@ export function houseSize(d: DwellingSpec): { w: number; l: number; eaves: numbe
   const w = round ? diameter : mid(d.width, d.plan === 'long' ? 6 : d.plan === 'courtyard' ? 12 : 5);
   const l = round ? (d.plan === 'oval' ? diameter * 1.4 : diameter) : mid(d.length, d.plan === 'long' ? Math.max(w * 4, 20) : d.plan === 'square' ? w : d.plan === 'courtyard' ? w : w * 1.6);
   const storeys = Math.max(1, Math.round(mid(d.storeys, 1)));
-  const wallH = d.walls === 'none' ? 0.2 : mid(d.wall_height, d.walls === 'felt' || d.walls === 'hide' ? 1.4 : 2.4);
+  const wallH = d.walls === 'none' ? 0.2 : mid(d.wall_height, d.walls === 'felt' || d.walls === 'hide' || d.walls === 'cloth' ? 1.4 : 2.4);
   const eaves = wallH * storeys + (d.floor === 'stilts' ? 1.6 : d.floor === 'platform' ? 1 : d.floor === 'raised' ? 0.4 : d.floor === 'sunken' ? -0.8 : 0);
   const roof = d.roof ?? 'gable';
   const rise = roof === 'flat' ? 0.4 : roof === 'dome' ? Math.min(w, l) * 0.45 : roof === 'conical' || roof === 'tent' ? Math.min(w, l) * 0.5 : Math.min(w, l) * 0.45;

@@ -5,8 +5,8 @@
 id: gen:people/settlement
 type: generator
 title: Houses, villages and fields of any place since 10,000 BCE
-version: 1
-code: generators/people/settlement/v1.ts
+version: 2
+code: generators/people/settlement/v2.ts
 runs_in: [build, client]
 outputs: { basis: procedural }
 inputs:
@@ -23,12 +23,12 @@ inputs:
   - { prop: extent, note: "the regions each tradition was found in" }
   - { ref: gen:life/scene, note: "the ground and the water of the scene the houses stand in" }
 checks:
-  - { test: world/generators/people/settlement/v1.test.ts, holds: "holds as many people as the world puts in the land it draws" }
-  - { test: world/generators/people/settlement/v1.test.ts, holds: "stands no house in the water or on a cliff" }
-  - { test: world/generators/people/settlement/v1.test.ts, holds: "draws fields where people farmed, pasture where they herded, and neither for foragers" }
-  - { test: world/generators/people/settlement/v1.test.ts, holds: "draws a tradition's house where it holds, and the generic one where none does" }
-  - { test: world/generators/people/settlement/v1.test.ts, holds: "draws a city of the lists where the anthromes have none" }
-  - { test: world/generators/people/settlement/v1.test.ts, holds: "puts a settlement in the same place from two scenes that overlap" }
+  - { test: world/generators/people/settlement/v2.test.ts, holds: "holds as many people as the world puts in the land it draws" }
+  - { test: world/generators/people/settlement/v2.test.ts, holds: "stands no house in the water or on a cliff" }
+  - { test: world/generators/people/settlement/v2.test.ts, holds: "draws fields where people farmed, pasture where they herded, and neither for foragers" }
+  - { test: world/generators/people/settlement/v2.test.ts, holds: "draws a tradition's house where it holds, and the generic one where none does" }
+  - { test: world/generators/people/settlement/v2.test.ts, holds: "draws a city of the lists where the anthromes have none" }
+  - { test: world/generators/people/settlement/v2.test.ts, holds: "puts a settlement in the same place from two scenes that overlap" }
 limits:
   - with: field:people/anthromes
     note: >-

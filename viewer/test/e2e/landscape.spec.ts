@@ -11,10 +11,10 @@ import { buildFile, idle, latestBuild, openLayers, settledUrl } from './helpers.
 const FAST = 'quality=fast&clock=0';
 const low = (lat: number, lon: number, t: number, metres: number) => `t=${t}&lat=${lat}&lon=${lon}&d=${1 + metres / 6371000}&h=40&v=70&${FAST}`;
 const scene = (page: Page) => page.evaluate(() => window.__wikiworldmodel!.scene());
-/** The building tradition the world records for Uruk's region, ArchaeoGLOBE's 59, in 3000 BCE, by its name. */
+/** The building tradition the world records for the townspeople of Uruk's region, ArchaeoGLOBE's 59, in 3000 BCE, by its name. */
 const uruksTradition = () => {
   const index = buildFile<LandscapeIndex>('people/landscape.json');
-  const t = traditionAt(buildFile<TraditionsFile>(index.traditions).traditions, 59, -2999);
+  const t = traditionAt(buildFile<TraditionsFile>(index.traditions).traditions, 59, -2999, 'townspeople');
   expect(t).toBeTruthy();
   return t!.label;
 };

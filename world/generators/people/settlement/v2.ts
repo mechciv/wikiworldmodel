@@ -1,21 +1,26 @@
-// The settlement generator, version 1 (docs/HUMAN-LANDSCAPE.md): the anonymous human landscape of a scene. From the
+// The settlement generator, version 2 (docs/HUMAN-LANDSCAPE.md): the anonymous human landscape of a scene. From the
 // people part of a scene's spec it lays out where people lived, how many houses, of what kind, and the fields and
 // pastures around them, in the scene's local metres. Nobody recorded any of these houses: how many there are follows
 // HYDE's people through the anthromes, and the lists of cities where they name one; what way of life, the anthromes and
 // the archaeologists of the region; what the houses were like, the building tradition the world records for the region
-// and the time, or where there is none, a generic house for the way of life and the climate, which says so.
+// and the time for that way of life, or where there is none, a generic house for the way of life and the climate,
+// which says so.
+//
+// Version 2 (docs/plans/LIFEWAY-RENDERINGS.md): a tradition says whom it housed, and its house is drawn for those ways
+// of life only, the camps of foragers and herders among them; version 1 gave a camp no tradition's house, and gave every
+// farmer and townsman of a region the one tradition written there, whoever it had housed.
 //
 // Everything is seeded by the world's 5′ cells and the anthromes' step, not by the scene, so two scenes that overlap put
 // their settlements in the same places: only the ground they stand on, which is the scene's, can move one a little.
 import { mid, traditionAt, within, type DwellingSpec, type FieldSpec, type SettlementSpec, type Tradition } from '../../../../core/dwelling.ts';
-import { anthromeOf, lifewayOf, type FieldUse, type Lifeway, type Pattern } from '../../../../core/landscape.ts';
+import { anthromeOf, lifewayOf, LIFEWAY_OF, type FieldUse, type Lifeway, type Pattern } from '../../../../core/landscape.ts';
 import type { ClimateClass } from '../../../../core/climate.ts';
 import type { SceneSpec } from '../../../../core/scene.ts';
 import { dcos, hash2, hash3, PI, TAU } from '../../city/math.ts';
 import { fbm, noise } from '../../life/land.ts';
 
 export const GENERATOR = 'gen:people/settlement';
-export const VERSION = 1;
+export const VERSION = 2;
 
 const EARTH = 6371000;
 const DEG = PI / 180;
@@ -168,8 +173,8 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
   const formIndex = new Map<string, number>();
   const formOf = (pattern: Pattern, t: Tradition | undefined): number => {
     const g = genericFor(p, pattern, climate);
-    // A tradition's house for its farmers and villagers; a camp's shelter stays a camp's, as a tradition of houses says nothing of it.
-    const use = t && pattern !== 'foragers' && pattern !== 'herders' && Object.keys(t.dwelling).length;
+    // A tradition's house for the way of life it says it housed (traditionAt has asked); the generic one where none holds.
+    const use = t && Object.keys(t.dwelling).length;
     const key = use ? `tradition:${t!.id}` : g.key;
     let k = formIndex.get(key);
     if (k === undefined) {
@@ -215,7 +220,7 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
     const lon = c.lon;
     const cell = cellAt(P.grid, lat, lon);
     const region = cell >= 0 ? P.grid.region[cell] : 0;
-    const t = traditionAt(P.traditions, region, P.t);
+    const t = traditionAt(P.traditions, region, P.t, LIFEWAY_OF[pattern]);
     const form = formOf(pattern, t);
     const s = settlements.push({ x: cx, y: cy, r, fieldR: r * 1.6, pattern, fields: 'rainfed', houses: 0, people: c.people, city: c.name, anthrome: cell >= 0 ? P.grid.anthrome[cell] : 0, region, form, tier: 'evidence' }) - 1;
     cityHere.push({ x: cx, y: cy, r: r * 1.15 });
@@ -239,8 +244,8 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
       const a = regionOf(region)?.assessment;
       const life = lifewayOf(P.classes, k, d, a);
       if (life.pattern === 'none') continue;
-      const t = traditionAt(P.traditions, region, P.t);
-      const pp = p.patterns[life.pattern as Exclude<Pattern, 'none'>];
+      const t = traditionAt(P.traditions, region, P.t, LIFEWAY_OF[life.pattern]);
+      const pp = p.patterns[life.pattern];
       const household = mid(t?.settlement.household, p.household);
       const area = side * side * dcos(((north - g.res / 2) * PI) / 180) * 1e-6;
       // The part of the cell inside the scene, for what the world expects of it.
@@ -295,7 +300,7 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
   perHouse = kept.length ? drawn / kept.length : 0;
   // The place's own field system: its tradition's, or the generic one for its use of the land.
   const centre = cellAt(g, origin.lat, origin.lon);
-  const tc = centre >= 0 ? traditionAt(P.traditions, g.region[centre], P.t) : undefined;
+  const tc = centre >= 0 && P.lifeway.pattern !== 'none' ? traditionAt(P.traditions, g.region[centre], P.t, LIFEWAY_OF[P.lifeway.pattern]) : undefined;
   const use = P.lifeway.fields === 'none' ? 'rainfed' : P.lifeway.fields;
   const generic = p.plots[use];
   const style = tc?.fields.kind ? { kind: tc.fields.kind, plot: mid(tc.fields.plot, generic.plot), from: 'tradition' as const, tradition: tc.id } : { kind: generic.kind, plot: generic.plot, from: 'generic' as const };

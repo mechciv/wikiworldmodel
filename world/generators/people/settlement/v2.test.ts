@@ -7,7 +7,7 @@ import { parse } from 'yaml';
 import { compileTraditions, type Tradition } from '../../../../core/dwelling.ts';
 import { lifewayOf, type AnthromeClass, type Assessment } from '../../../../core/landscape.ts';
 import type { SceneSpec, ScenePeople } from '../../../../core/scene.ts';
-import { LandUseMap, makeSettlement, roundLots, toLocal, type Ground } from './v1.ts';
+import { LandUseMap, makeSettlement, roundLots, toLocal, type Ground } from './v2.ts';
 
 const ROOT = join(import.meta.dirname, '../../../..');
 const classes = (parse(readFileSync(join(ROOT, 'world/fields/people/anthromes.yaml'), 'utf8')) as { params: { classes: AnthromeClass[] } }).params.classes;
@@ -107,7 +107,7 @@ describe('the settlement generator', () => {
   });
 
   it("draws a tradition's house where it holds, and the generic one where none does", () => {
-    const traditions: Tradition[] = compileTraditions([{ id: 'test/round-house', label: 'A round house', regions: [1], span: [-500, 500], dwelling: { plan: 'round', diameter: 8, walls: 'stone', roof: 'conical', roof_material: 'thatch' } }]);
+    const traditions: Tradition[] = compileTraditions([{ id: 'test/round-house', label: 'A round house', regions: [1], span: [-500, 500], lifeways: ['farmers'], dwelling: { plan: 'round', diameter: 8, walls: 'stone', roof: 'conical', roof_material: 'thatch' } }]);
     // The west half of the world is region 1, where the tradition holds; the east half region 2, where none does.
     const p = world((_, c) => ({ code: 23, density: 260, region: c < 12 ? 1 : 2 }), [{ id: 1, a: assess(1, 1, 3, 2) }, { id: 2, a: assess(1, 1, 3, 2) }], { traditions });
     const plan = makeSettlement(spec(p), flat, dry, EXTENT);
@@ -117,6 +117,32 @@ describe('the settlement generator', () => {
     const t = plan.forms.find((f) => f.from === 'tradition')!;
     expect(t.spec).toMatchObject({ plan: 'round', walls: 'stone', roof_material: 'thatch' });
     expect(t.parts).toMatchObject({ walls: 'test/round-house' });
+  });
+
+  it("draws a camp's shelter from the tradition that housed its way of life, and no farmer's house from a herder's tent", () => {
+    const traditions: Tradition[] = compileTraditions([
+      { id: 'test/tent', label: 'A felt tent', regions: [1], span: [-500, 500], lifeways: ['herders'], dwelling: { plan: 'round', diameter: 6, walls: 'felt', roof: 'tent', roof_material: 'felt' }, settlement: { pattern: 'camp', household: 4 } },
+      { id: 'test/pit-house', label: 'A pit house', regions: [1], span: [-500, 500], lifeways: ['foragers'], dwelling: { plan: 'round', diameter: 5, floor: 'sunken' } },
+    ]);
+    const drawn = (code: number, density: number, a: Assessment) => {
+      const plan = makeSettlement(spec(world(() => ({ code, density, region: 1 }), [{ id: 1, a }], { traditions })), flat, dry, EXTENT);
+      expect(plan.houses.length).toBeGreaterThan(10);
+      return { patterns: new Set(plan.settlements.map((s) => s.pattern)), from: new Set(plan.houses.map((h) => plan.forms[h.form].tradition ?? plan.forms[h.form].key)), plan };
+    };
+    // Rangeland with few people, where the archaeologists say herding was the way of life: the herders' tent.
+    const herders = drawn(42, 3, assess(1, 0, 0, 3));
+    expect(herders.patterns).toEqual(new Set(['herders']));
+    expect(herders.from).toEqual(new Set(['test/tent']));
+    // A tent holds the household its tradition gives, so the camps still hold the people the world puts there.
+    expect(Math.abs(herders.plan.drawn - herders.plan.expected) / herders.plan.expected).toBeLessThan(0.1);
+    // Remote woodland of foragers: the foragers' pit house, with the generic shelter's roof where it says nothing of one.
+    const foragers = drawn(53, 0.5, assess(3, 0, 0, 0));
+    expect(foragers.patterns).toEqual(new Set(['foragers']));
+    expect(foragers.from).toEqual(new Set(['test/pit-house']));
+    expect(foragers.plan.forms[0].spec).toMatchObject({ floor: 'sunken', diameter: 5, roof: 'dome' });
+    // The farmers of the same region: neither tradition says it housed them, so theirs is the generic house.
+    const farmers = drawn(23, 260, assess(1, 1, 3, 2));
+    expect(farmers.from).toEqual(new Set(['generic:farm:temperate']));
   });
 
   it('draws a city of the lists where the anthromes have none', () => {

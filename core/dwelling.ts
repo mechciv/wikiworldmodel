@@ -31,9 +31,11 @@ export const DWELLING_WORDS = {
     cob: 'Solid earth built up by hand in courses, with no frame: cob, daga or puddled mud.',
     hide: 'Hides over a frame.',
     felt: 'Felt over a frame.',
+    cloth: 'Cloth woven of hair or wool over poles and ropes, as a black tent is.',
     bark: 'Bark sheets over a frame.',
     sod: 'Cut turf or sod.',
     snow: 'Blocks of snow.',
+    'earth-cut': 'Cut into loess, soft rock or a hillside, the ground itself its walls: a cave dwelling.',
     none: 'No walls: the roof comes down to the ground.',
   },
   roof: {
@@ -53,6 +55,7 @@ export const DWELLING_WORDS = {
     bark: 'Bark sheets.',
     hide: 'Hides.',
     felt: 'Felt.',
+    cloth: 'Cloth woven of hair or wool.',
     reed: 'Reed mats.',
     stone: 'Stone slabs or corbelled stone.',
     turf: 'Turf.',
@@ -102,6 +105,37 @@ export const FIELD_WORDS = {
     dikes: 'Dikes or levees, as around flooded fields.',
   },
 } as const;
+
+/**
+ * Whom a tradition housed: the ways of life the model of how people lived tells apart (model:people/lifeways). A
+ * tradition's `lifeway` claim names one or more of them, and its house is drawn only for those: a herder's tent for
+ * the camps of herders, not for the farmers of the same region.
+ */
+export const LIFEWAY_WORDS = {
+  foragers: 'People who lived by hunting, fishing and gathering, in camps or in settled villages.',
+  herders: 'People who lived by their herds, in camps moved with them.',
+  'shifting-cultivators': 'People who cleared plots in woodland, cropped them for a few years and moved on.',
+  farmers: 'People who farmed the same fields year after year, in farmsteads, hamlets and villages.',
+  townspeople: 'People of towns and cities.',
+} as const;
+
+export type LifewayWord = keyof typeof LIFEWAY_WORDS;
+
+/** What is wrong with a `lifeway` claim's value: a list of one or more of the ways of life, each once. */
+export function lifewayProblems(v: unknown): string[] {
+  const words = Object.keys(LIFEWAY_WORDS);
+  if (!Array.isArray(v) || !v.length) return [`a lifeway is a list of one or more of ${words.join(', ')}`];
+  const out: string[] = [];
+  for (const x of v) if (typeof x !== 'string' || !Object.hasOwn(LIFEWAY_WORDS, x)) out.push(`"${String(x)}" is not a way of life: one of ${words.join(', ')}`);
+  if (new Set(v).size !== v.length) out.push('a lifeway names each way of life once');
+  return out;
+}
+
+/** Whom a tradition housed, in words, for a panel: "foragers", "farmers and townspeople". */
+export function lifewayText(v: LifewayWord[]): string {
+  const words = v.map((w) => w.replace('-', ' '));
+  return words.length > 1 ? `${words.slice(0, -1).join(', ')} and ${words.at(-1)}` : (words[0] ?? '');
+}
 
 type Words<T extends Record<string, object>> = { [K in keyof T]?: keyof T[K] & string };
 
@@ -190,10 +224,12 @@ export interface Tradition {
   regions: number[];
   /** when it holds, on the axis: [start, end]; an end it does not give is the present */
   span: [number, number];
+  /** whom it housed: its own `lifeway` claim, or its nearest ancestor's; empty where neither says, and then it houses no one */
+  lifeways: LifewayWord[];
   dwelling: DwellingSpec;
   settlement: SettlementSpec;
   fields: FieldSpec;
-  /** which tradition gave each parameter: `dwelling.walls` → its id */
+  /** which tradition gave each parameter: `dwelling.walls` → its id; and `lifeway`, whose claim says whom it housed */
   from: From;
   /** whether it says anything of the dwelling itself, rather than inheriting it all */
   own: boolean;
@@ -206,6 +242,7 @@ export interface TraditionInput {
   parent?: string;
   regions: number[];
   span: [number, number];
+  lifeways?: LifewayWord[];
   dwelling?: DwellingSpec;
   settlement?: SettlementSpec;
   fields?: FieldSpec;
@@ -231,6 +268,9 @@ export function compileTraditions(inputs: TraditionInput[]): Tradition[] {
       }
       return out as T;
     };
+    // Whom it housed is its own to say, whole: a member that says so does not add to its parent's.
+    const own = t.lifeways?.length ? [...t.lifeways] : undefined;
+    if (own) from.lifeway = t.id;
     const out: Tradition = {
       id: t.id,
       label: t.label,
@@ -238,6 +278,7 @@ export function compileTraditions(inputs: TraditionInput[]): Tradition[] {
       depth: up ? up.depth + 1 : 0,
       regions: t.regions.length ? [...t.regions].sort((a, b) => a - b) : up?.regions ?? [],
       span: t.span,
+      lifeways: own ?? up?.lifeways ?? [],
       dwelling: merge(t.dwelling, up?.dwelling, 'dwelling'),
       settlement: merge(t.settlement, up?.settlement, 'settlement'),
       fields: merge(t.fields, up?.fields, 'fields'),
@@ -251,15 +292,17 @@ export function compileTraditions(inputs: TraditionInput[]): Tradition[] {
 }
 
 /**
- * The tradition that holds at a region and a time: of those whose extent names the region and whose span holds the
- * time, the most particular, which is the deepest in the tree, then the one that names the fewest regions, then the
- * latest to start, then by id. Undefined where none does: the generator's generic dwelling stands in.
+ * The tradition that houses a way of life at a region and a time: of those whose extent names the region, whose span
+ * holds the time and whose `lifeway` names the way of life, the most particular, which is the deepest in the tree, then
+ * the one that names the fewest regions, then the latest to start, then by id. Undefined where none does: the
+ * generator's generic dwelling stands in. A herder's tent is no farmer's house, so a tradition of another way of life
+ * in the same region does not stand in either.
  */
-export function traditionAt(list: Tradition[], region: number | undefined, t: number): Tradition | undefined {
+export function traditionAt(list: Tradition[], region: number | undefined, t: number, lifeway: LifewayWord): Tradition | undefined {
   if (region === undefined) return undefined;
   let best: Tradition | undefined;
   for (const x of list) {
-    if (t < x.span[0] || t > x.span[1] || !x.regions.includes(region)) continue;
+    if (t < x.span[0] || t > x.span[1] || !x.regions.includes(region) || !x.lifeways.includes(lifeway)) continue;
     if (!x.own && !Object.keys(x.dwelling).length) continue;
     if (!best) {
       best = x;

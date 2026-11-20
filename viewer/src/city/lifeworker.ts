@@ -4,7 +4,7 @@
 import type { Fingerprint } from '../../../core/fingerprint.ts';
 import type { SceneSpec } from '../../../core/scene.ts';
 import { FAST_BUDGET, FULL_BUDGET, SceneStream, type Batch, type LifeView, type ProtoMesh } from '../../../world/generators/life/stream.ts';
-import type { PlanForm, SettlementPlan } from '../../../world/generators/people/settlement/v1.ts';
+import type { PlanForm, SettlementPlan } from '../../../world/generators/people/settlement/v2.ts';
 
 /** What a scene's people are, for its panel: the plan without its houses. */
 export interface PeopleSummary {

@@ -11,7 +11,7 @@ import { cellAt, stepsAround, type PeopleFile, type PeopleHeader } from '../../.
 import type { CoverageFile } from '../../../core/records.ts';
 import type { SceneSpec } from '../../../core/scene.ts';
 import type { Tileset } from '../../../core/tileset.ts';
-import { makeSettlement } from '../../../world/generators/people/settlement/v1.ts';
+import { makeSettlement } from '../../../world/generators/people/settlement/v2.ts';
 import { parseClassGrid } from '../src/build/landscape.ts';
 import { dataset, latestBuild } from './helpers.ts';
 

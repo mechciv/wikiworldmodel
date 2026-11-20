@@ -109,17 +109,21 @@ const commands: Record<string, (args: string[]) => Promise<number | void>> = {
     console.log(`${text.split('\n').filter((l) => l && !l.startsWith('#')).length - 1} rows → ${SNAPSHOT}`);
     console.log(`In world/manifest.yaml the dataset is repo:${SNAPSHOT}, sha256 ${createHash('sha256').update(text).digest('hex')}, ${Buffer.byteLength(text)} bytes.`);
   },
-  // What most wants a building tradition: `npm run world -- dwellings-wanted [--n 40] [--region 59]`.
+  // What most wants a building tradition: `npm run world -- dwellings-wanted [--n 40] [--region 59] [--lifeway herders]`;
+  // `--totals` for each time's people by way of life and how many a tradition houses; `--regions` for the regions' numbers.
   async 'dwellings-wanted'(args) {
-    const { dwellingsWanted, wantedText } = await import('./dwellingsWanted.ts');
+    const { dwellingsWanted, wantedText, wantedTotals, WANTED_TIMES } = await import('./dwellingsWanted.ts');
+    const { LIFEWAY_WORDS } = await import('../../../core/dwelling.ts');
     const opt = (name: string) => {
       const i = args.indexOf(name);
-      return i >= 0 ? Number(args[i + 1]) : undefined;
+      return i >= 0 ? args[i + 1] : undefined;
     };
-    // Every 500 years from 3000 BCE to 500 BCE, then 1 CE and every 500 years to 1500, and the survey's last times.
-    const times = [...Array.from({ length: 6 }, (_, i) => -2999 + i * 500), 1, 500, 1000, 1500, 1750, 1850];
-    const { rows } = await dwellingsWanted(times);
-    console.log(wantedText(rows, opt('--n') ?? 40, opt('--region')));
+    const lifeway = opt('--lifeway');
+    if (lifeway !== undefined && !Object.hasOwn(LIFEWAY_WORDS, lifeway)) throw new Error(`--lifeway is one of ${Object.keys(LIFEWAY_WORDS).join(', ')}`);
+    const { rows, regions } = await dwellingsWanted(WANTED_TIMES);
+    if (args.includes('--regions')) console.log(regions.map((r) => `${String(r.id).padStart(3)} ${r.label}`).join('\n'));
+    else if (args.includes('--totals')) console.log(wantedTotals(rows));
+    else console.log(wantedText(rows, Number(opt('--n') ?? 40), { ...(opt('--region') !== undefined ? { region: Number(opt('--region')) } : {}), ...(lifeway ? { lifeway: lifeway as keyof typeof LIFEWAY_WORDS } : {}) }));
   },
   // A sheet of a form, to look at: `npm run world -- form-sheet life/taxa/triceratops`, or `plan:ceratopsian`.
   async 'form-sheet'([name, out]) {

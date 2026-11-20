@@ -16,14 +16,19 @@ worth a lot: it draws every house there until someone writes a narrower one.
 ## The line
 
 ```sh
-npm run world -- dwellings-wanted               # the regions and times where people lived and no tradition is written
-npm run world -- dwellings-wanted --region 59   # one region's times, and the traditions that cover it
+npm run world -- dwellings-wanted               # the regions, times and ways of life with no tradition written
+npm run world -- dwellings-wanted --lifeway herders   # the same for one way of life
+npm run world -- dwellings-wanted --region 59   # one region's times and ways of life, and the traditions that cover them
+npm run world -- dwellings-wanted --totals      # each time's people by way of life, and how many a tradition houses
+npm run world -- dwellings-wanted --regions     # the regions' numbers and names
 npm run world -- quote-check src:<source> <text file>   # find every quote of a source in the text you read
 npm run validate -- --no-frames                 # every tradition is checked
 ```
 
-`dwellings-wanted` ranks a region and a time by how many people HYDE puts there, so the top of the list is where most
-houses are drawn as generic. Work from the top down.
+`dwellings-wanted` ranks a region, a time and a way of life by how many people HYDE and the model of how people lived
+put there, so the top of the list is where most houses are drawn as generic. Work from the top down, and then by way
+of life: foragers, herders and shifting cultivators never reach the top of a list ranked by people, and they are most
+of the land and, before 3000 BCE, most of the people.
 
 ## Where a tradition goes
 
@@ -58,6 +63,12 @@ claims:
     source: { ref: src:…, loc: "p. …", quote: "…" }
     method: editorial
     note: The regions the source places it in; it does not say the house covered all of them.
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source: { ref: src:…, loc: "p. …", quote: "…" }
+    method: editorial
+    note: Whom the source says lived in these houses, in a sentence.
   dwelling:
     prop: dwelling
     value: { plan: round, diameter: { lo: 5, hi: 15 }, walls: wattle-and-daub, roof: conical, roof_material: thatch }
@@ -86,6 +97,7 @@ parameter you cannot source out of the claim: what no claim says is the generato
 |---|---|
 | `start`, `end` | when the tradition held, as the source dates it: a year, a range, or a period's record |
 | `extent` | the ArchaeoGLOBE regions it was found in, as `{ from: src:archaeoglobe-2019-regions, names: ["59", "61"] }`. A region named is a region where the tradition was, not a claim that it covered all of it. A tradition with no extent takes its parent's |
+| `lifeway` | whom it housed: a list of one or more of `foragers`, `herders`, `shifting-cultivators`, `farmers`, `townspeople`. Its house is drawn only for those. A tradition with no lifeway takes its parent's; one with none at all houses no one, and the validator warns |
 | `dwelling` | the house: `plan`, `diameter` or `width` and `length`, `wall_height`, `height`, `storeys`, `rooms`, `walls`, `roof`, `roof_material`, `floor`, `court` |
 | `settlement_form` | how the houses stood together: `pattern`, `houses` (in one settlement), `spacing` (metres between them), `household` (people in one house) |
 | `field_system` | the fields: `kind`, `plot` (hectares), `bounds` |
@@ -99,11 +111,29 @@ same pull request.
 `household` matters most to the generator after the house itself: it turns HYDE's people into houses. Cite it only where a
 source gives it for this tradition; otherwise leave it out and the generator's stated choice stands in.
 
+## Whom a tradition housed
+
+The model of how people lived gives every piece of land a pattern of settlement, and each pattern is one way of life:
+
+| `lifeway` | The patterns it houses | Who they were |
+|---|---|---|
+| `foragers` | foragers' camps | people who lived by hunting, fishing and gathering, in camps or settled |
+| `herders` | herders' camps | people who lived by their herds, in camps moved with them |
+| `shifting-cultivators` | shifting cultivators | people who cleared plots in woodland, cropped them a few years and moved on |
+| `farmers` | farmsteads, hamlets, villages | people who farmed the same fields year after year |
+| `townspeople` | towns, cities | people of towns and cities, the lists' cities among them |
+
+A tradition's house is drawn only for the ways of life its `lifeway` names: a herder's tent for herders' camps, not for
+the farmers of the same region, who stay generic until someone writes their house. Name every way of life the sources
+show the house was lived in by, and no more. A house of villages and of the towns that grew from them is
+`[farmers, townspeople]`; a house known only from a city's excavated quarters is `[townspeople]`. The claim is sourced
+like any other: a sentence that says who lived in these houses.
+
 ## Which tradition draws a place
 
-At a place and a time, of the traditions whose `extent` names the place's region and whose span holds the time, the
-generator takes the most particular: the deepest in the tree, then the one that names the fewest regions, then the latest
-to start. So:
+At a place and a time, of the traditions whose `extent` names the place's region, whose span holds the time and whose
+`lifeway` names the way of life there, the generator takes the most particular: the deepest in the tree, then the one
+that names the fewest regions, then the latest to start. So:
 
 - **Write broad traditions first.** "Mudbrick houses of Mesopotamia, 3000–500 BCE" before "the houses of Ur in the Isin–Larsa
   period". The narrower one, when it comes, takes over where and when it holds, and inherits what it does not say.

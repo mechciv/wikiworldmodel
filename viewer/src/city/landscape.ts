@@ -3,7 +3,7 @@
 // a scene draws rests on the same anthromes, assessments, cities and traditions.
 import { decodeTile } from '../../../core/container.ts';
 import { traditionAt, type Tradition } from '../../../core/dwelling.ts';
-import { anthromeTile, classAtStep, nearestStep, sceneTiles, scenePeople, assessmentAt, lifewayOf, citiesNear, cellOf, tileKey, type AnthromeTile, type AnthromeTileHeader, type AssessmentsFile, type CitiesFile, type LandscapeData, type LandscapeIndex, type Lifeway, type TraditionsFile } from '../../../core/landscape.ts';
+import { anthromeTile, classAtStep, nearestStep, sceneTiles, scenePeople, assessmentAt, lifewayOf, LIFEWAY_OF, citiesNear, cellOf, tileKey, type AnthromeTile, type AnthromeTileHeader, type AssessmentsFile, type CitiesFile, type LandscapeData, type LandscapeIndex, type Lifeway, type TraditionsFile } from '../../../core/landscape.ts';
 import { cellAt, stepsAround, type PeopleFile } from '../../../core/layers.ts';
 import type { ResolveWorld } from '../../../core/resolve.ts';
 import type { ScenePeople } from '../../../core/scene.ts';
@@ -189,7 +189,9 @@ export class LandscapeAtlas {
     const density = p ? p.grid.density[(Math.floor((p.grid.north - lat) / p.grid.res)) * p.grid.nx + Math.floor((lon - p.grid.west) / p.grid.res)] : undefined;
     const lifeway = lifewayOf(this.index.classes, anthrome, density ?? 0, at?.a);
     const cities = citiesNear(this.cities, lat, lon, t, this.index.reach_km);
-    const tradition = region ? traditionAt(this.traditions, region, t) : undefined;
+    // The houses of the way of life here: a city's where a list puts one near, as a scene would draw it.
+    const pattern = cities.length ? 'city' : lifeway.pattern;
+    const tradition = region && pattern !== 'none' ? traditionAt(this.traditions, region, t, LIFEWAY_OF[pattern]) : undefined;
     return { t, step: this.index.steps[i], anthrome, ...(density !== undefined ? { density } : {}), ...(region && label && at ? { region: { id: region, label, slice: this.assessments.slices[at.slice].label, assessment: at } } : {}), lifeway, cities, ...(tradition ? { tradition } : {}) };
   }
 }

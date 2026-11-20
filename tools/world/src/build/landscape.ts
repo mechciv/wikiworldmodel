@@ -13,10 +13,11 @@ import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { unzipSync } from 'fflate';
 import { decodeTile, encodeTile } from '../../../../core/container.ts';
-import { compileTraditions, type DwellingSpec, type FieldSpec, type SettlementSpec, type Tradition, type TraditionInput } from '../../../../core/dwelling.ts';
+import { compileTraditions, traditionAt, type DwellingSpec, type FieldSpec, type LifewayWord, type SettlementSpec, type Tradition, type TraditionInput } from '../../../../core/dwelling.ts';
 import type { LandscapeIndex, TraditionsFile } from '../../../../core/landscape.ts';
 export type { LandscapeIndex, TraditionsFile };
-import { anthromeTile, assessmentAt, cityPeople, classAtStep, cellOf, kmBetween, LEVEL_WORDS, lifewayOf, nearestStep, tileKey, type AnthromeClass, type City, type CitiesFile, type AnthromeTile, type AnthromeTileHeader, type Assessment, type AssessmentsFile } from '../../../../core/landscape.ts';
+import { anthromeTile, assessmentAt, cityPeople, classAtStep, cellOf, kmBetween, LEVEL_WORDS, LIFEWAY_OF, lifewayOf, nearestStep, shareDensity, tileKey, type AnthromeClass, type City, type CitiesFile, type AnthromeTile, type AnthromeTileHeader, type Assessment, type AssessmentsFile, type HousingCount, type Pattern } from '../../../../core/landscape.ts';
+import { gridSize, peopleAt, type PeopleFile } from '../../../../core/layers.ts';
 import { datasetFile } from '../manifest.ts';
 import { CACHE } from '../paths.ts';
 import { sha256, stableStringify } from '../util.ts';
@@ -430,6 +431,7 @@ export function traditionInputs(s: Solved, regionsSource: string): TraditionInpu
       regions,
       // A billion years either way stands for no bound, as JSON has no infinity.
       span: [Number.isFinite(start) ? start : -1e9, Number.isFinite(end) ? end : 1e9],
+      ...(value<LifewayWord[]>('lifeway') ? { lifeways: value<LifewayWord[]>('lifeway') } : {}),
       ...(value<DwellingSpec>('dwelling') ? { dwelling: value<DwellingSpec>('dwelling') } : {}),
       ...(value<SettlementSpec>('settlement_form') ? { settlement: value<SettlementSpec>('settlement_form') } : {}),
       ...(value<FieldSpec>('field_system') ? { fields: value<FieldSpec>('field_system') } : {}),
@@ -451,6 +453,8 @@ export interface LandscapeBuilt {
   assessed: [number, number];
   /** the class and the region at a place and time, from the built tiles */
   at: (lat: number, lon: number, t: number) => { anthrome: number; region: number } | undefined;
+  /** a built tile by its key `north_west`, or undefined where it holds no land */
+  tile: (key: string) => AnthromeTile | undefined;
   classes: AnthromeClass[];
 }
 
@@ -599,7 +603,7 @@ export async function buildLandscape(s: Solved, log: (s: string) => void): Promi
   };
   const span: [number, number] = [steps[0], steps.at(-1)!];
   const assessed: [number, number] = [assessments.slices[0].year, assessments.slices.at(-1)!.year];
-  return { files, index, assessments, traditions, cities, span, assessed, at, classes };
+  return { files, index, assessments, traditions, cities, span, assessed, at, tile: tileOf, classes };
 }
 
 const toBuffer = (u: Uint8Array): ArrayBuffer => u.buffer.slice(u.byteOffset, u.byteOffset + u.byteLength) as ArrayBuffer;
@@ -630,6 +634,121 @@ export function landscapeResolve(b: LandscapeBuilt): NonNullable<import('../../.
       return { tier: l.tier, pattern: l.pattern };
     },
   };
+}
+
+// ——— Whose houses rest on a tradition ———
+
+/** The people of one region who lived one way at a time, and the tradition that draws their houses, if one is written. */
+export interface HousingRow {
+  t: number;
+  region: number;
+  pattern: Exclude<Pattern, 'none'>;
+  people: number;
+  tradition?: string;
+}
+
+/**
+ * Where HYDE's people lived at each of some times, as a scene shares them (scenePeople, core/landscape.ts): each 1°
+ * cell's people over its 5′ cells by their classes, each 5′ cell with the pattern of settlement the model gives it
+ * (model:people/lifeways). Added up by region and pattern, each with the building tradition that houses that way of
+ * life in the region then, if any. People HYDE puts in a 1° cell none of whose 5′ cells is peopled are left out, as a
+ * scene draws none of them.
+ */
+export function housing(b: LandscapeBuilt, people: PeopleFile, times: number[]): HousingRow[] {
+  const per = Math.round(1 / RES);
+  const { nx } = gridSize(people.res);
+  if (Math.abs(people.res - 1) > 1e-9) throw new Error('the people are shared over 5′ cells from cells of 1°');
+  const now = new Float64Array(people.cell.length);
+  const n = per * per;
+  const ks = new Array<number>(n).fill(0);
+  const land = new Array<number>(n).fill(0);
+  const reg = new Array<number>(n).fill(0);
+  const patterns = Object.keys(LIFEWAY_OF) as Exclude<Pattern, 'none'>[];
+  const rows: HousingRow[] = [];
+  for (const t of times) {
+    const step = nearestStep(b.index.steps, t);
+    if (step < 0 || !peopleAt(people, t, now)) continue;
+    const sum = new Map<number, number>();
+    const assessed = new Map<number, Assessment | undefined>();
+    for (let i = 0; i < now.length; i++) {
+      const p = now[i];
+      if (!(p > 0)) continue;
+      const place = people.cell[i];
+      const north = 90 - Math.floor(place / nx);
+      const west = -180 + (place % nx);
+      const tile = b.tile(tileKey(north - 0.5, west + 0.5, b.index.tile_deg).key);
+      if (!tile) continue;
+      for (let r = 0; r < per; r++) {
+        const lat = north - (r + 0.5) * RES;
+        const area = Math.cos((lat * Math.PI) / 180) * (RES * 111.195) ** 2;
+        for (let c = 0; c < per; c++) {
+          const cell = cellOf(tile, lat, west + (c + 0.5) * RES);
+          const k = cell < 0 ? 0 : classAtStep(tile, cell, step);
+          ks[r * per + c] = k;
+          land[r * per + c] = k ? area : 0;
+          reg[r * per + c] = cell < 0 ? 0 : tile.region[cell];
+        }
+      }
+      const d = shareDensity(b.classes, ks, land, p);
+      for (let q = 0; q < n; q++) {
+        if (!(d[q] > 0)) continue;
+        const g = reg[q];
+        if (!assessed.has(g)) assessed.set(g, g ? assessmentAt(b.assessments, g, t)?.a : undefined);
+        const l = lifewayOf(b.classes, ks[q], d[q], assessed.get(g));
+        if (l.pattern === 'none') continue;
+        const key = g * 16 + patterns.indexOf(l.pattern);
+        sum.set(key, (sum.get(key) ?? 0) + d[q] * land[q]);
+      }
+    }
+    for (const [key, count] of [...sum].sort((x, y) => x[0] - y[0])) {
+      const region = Math.floor(key / 16);
+      const pattern = patterns[key % 16];
+      const tradition = traditionAt(b.traditions, region, t, LIFEWAY_OF[pattern]);
+      rows.push({ t, region, pattern, people: Math.round(count), ...(tradition ? { tradition: tradition.id } : {}) });
+    }
+  }
+  return rows;
+}
+
+/**
+ * The same, counted for the coverage (coverage.json, landscape.housing): at each time, the people by pattern and how many
+ * a tradition houses, the regions with people and those with any tradition that houses some, and the lists' cities.
+ */
+export function housingCounts(b: LandscapeBuilt, rows: HousingRow[]): HousingCount[] {
+  const lists = new Map(b.cities.lists.map((l) => [l.source, l]));
+  return [...new Set(rows.map((r) => r.t))].map((t) => {
+    const mine = rows.filter((r) => r.t === t);
+    const by: HousingCount['by'] = {};
+    const regions = new Map<number, boolean>();
+    let people = 0;
+    let housed = 0;
+    for (const r of mine) {
+      const x = (by[r.pattern] ??= [0, 0]);
+      x[0] += r.people;
+      people += r.people;
+      if (r.tradition) {
+        x[1] += r.people;
+        housed += r.people;
+      }
+      if (r.region) regions.set(r.region, (regions.get(r.region) ?? false) || !!r.tradition);
+    }
+    // The lists' cities standing then; two lists' figures for one place are one city, with the larger.
+    const standing = new Map<string, { people: number; housed: boolean }>();
+    for (const c of b.cities.cities) {
+      const l = lists.get(c.source);
+      const n = cityPeople(c, t, l?.hold ?? 0, l?.gap ?? Infinity);
+      if (!n || n <= 0) continue;
+      const key = `${Math.round(c.lat * 20)}_${Math.round(c.lon * 20)}`;
+      if ((standing.get(key)?.people ?? 0) >= n) continue;
+      standing.set(key, { people: n, housed: !!traditionAt(b.traditions, b.at(c.lat, c.lon, t)?.region || undefined, t, 'townspeople') });
+    }
+    const cities: [number, number, number] = [standing.size, 0, 0];
+    for (const c of standing.values()) {
+      cities[1] += c.people;
+      if (c.housed) cities[2] += c.people;
+    }
+    return { t, people, housed, by, regions: [regions.size, [...regions.values()].filter(Boolean).length], cities };
+  });
 }
 
 /** How much of the land, at each of some times, HYDE and the archaeologists disagree on: the share of cells of land whose lifeway says so. */

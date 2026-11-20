@@ -6,8 +6,8 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { parse } from 'yaml';
-import { compileTraditions, dwellingProblems, fieldProblems, settlementProblems, specText, traditionAt } from '../../../core/dwelling.ts';
-import { assessmentAt, cityPeople, citiesNear, lifewayOf, nearestStep, shareDensity, tileKey, cellOf, type AnthromeClass, type Assessment, type CitiesFile, type City } from '../../../core/landscape.ts';
+import { compileTraditions, dwellingProblems, fieldProblems, lifewayProblems, lifewayText, settlementProblems, specText, traditionAt } from '../../../core/dwelling.ts';
+import { assessmentAt, cityPeople, citiesNear, LIFEWAY_OF, lifewayOf, nearestStep, shareDensity, tileKey, cellOf, type AnthromeClass, type Assessment, type CitiesFile, type City } from '../../../core/landscape.ts';
 import { assessmentsFile, cityYear, citiesOf, eckert4Inverse, parseClassGrid, rasterizeRegions, stepOfName } from '../src/build/landscape.ts';
 import { readTable, snapshotText, SLICES } from '../src/archaeoglobe.ts';
 import { loadManifest } from '../src/manifest.ts';
@@ -241,26 +241,62 @@ describe('building traditions', () => {
   it('inherits what a member does not say from the tradition it is a member of, and says whose each part is', () => {
     const [child, parent] = compileTraditions([
       { id: 'b', label: 'Child', parent: 'a', regions: [], span: [-100, 100], dwelling: { roof: 'flat' } },
-      { id: 'a', label: 'Parent', regions: [59, 61], span: [-3000, 500], dwelling: { plan: 'courtyard', walls: 'mudbrick', roof: 'gable' }, settlement: { household: 6 } },
+      { id: 'a', label: 'Parent', regions: [59, 61], span: [-3000, 500], lifeways: ['farmers', 'townspeople'], dwelling: { plan: 'courtyard', walls: 'mudbrick', roof: 'gable' }, settlement: { household: 6 } },
     ]).sort((x, y) => (x.id < y.id ? 1 : -1));
     expect(child.dwelling).toEqual({ plan: 'courtyard', walls: 'mudbrick', roof: 'flat' });
     expect(child.from).toMatchObject({ 'dwelling.roof': 'b', 'dwelling.walls': 'a', 'settlement.household': 'a' });
     expect(child.regions).toEqual([59, 61]);
     expect(child.depth).toBe(1);
     expect(parent.depth).toBe(0);
+    // Whom it housed is its parent's to say where it does not, and its own, whole, where it does.
+    expect(child.lifeways).toEqual(['farmers', 'townspeople']);
+    expect(child.from.lifeway).toBe('a');
+    const [own] = compileTraditions([
+      { id: 'c', label: 'Its own', parent: 'a', regions: [], span: [-100, 100], lifeways: ['herders'], dwelling: { walls: 'felt' } },
+      { id: 'a', label: 'Parent', regions: [59], span: [-3000, 500], lifeways: ['farmers'], dwelling: { plan: 'courtyard' } },
+    ]).sort((x, y) => (x.id < y.id ? 1 : -1));
+    expect(own.lifeways).toEqual(['herders']);
+    expect(own.from.lifeway).toBe('c');
+  });
+
+  it('checks whom a tradition housed word by word', () => {
+    expect(lifewayProblems(['foragers'])).toEqual([]);
+    expect(lifewayProblems(['farmers', 'townspeople'])).toEqual([]);
+    expect(lifewayProblems('farmers')).toEqual([expect.stringMatching(/a list of one or more/)]);
+    expect(lifewayProblems([])).toEqual([expect.stringMatching(/a list of one or more/)]);
+    expect(lifewayProblems(['peasants'])).toEqual([expect.stringMatching(/"peasants" is not a way of life/)]);
+    expect(lifewayProblems(['farmers', 'farmers'])).toEqual([expect.stringMatching(/each way of life once/)]);
+    expect(lifewayText(['shifting-cultivators', 'farmers', 'townspeople'])).toBe('shifting cultivators, farmers and townspeople');
+    // Every pattern of settlement the model draws has a way of life a tradition can name.
+    for (const word of Object.values(LIFEWAY_OF)) expect(lifewayProblems([word])).toEqual([]);
   });
 
   it('draws a place\'s houses from the most particular tradition that holds there and then', () => {
     const list = compileTraditions([
-      { id: 'broad', label: 'Broad', regions: [1, 2, 3], span: [-3000, 1500], dwelling: { walls: 'mudbrick' } },
-      { id: 'narrow', label: 'Narrow', regions: [1], span: [-2000, -1000], dwelling: { walls: 'stone' } },
+      { id: 'broad', label: 'Broad', regions: [1, 2, 3], span: [-3000, 1500], lifeways: ['farmers'], dwelling: { walls: 'mudbrick' } },
+      { id: 'narrow', label: 'Narrow', regions: [1], span: [-2000, -1000], lifeways: ['farmers'], dwelling: { walls: 'stone' } },
       { id: 'member', label: 'Member', parent: 'broad', regions: [2], span: [0, 500], dwelling: { roof: 'flat' } },
     ]);
-    expect(traditionAt(list, 1, -1500)!.id).toBe('narrow');
-    expect(traditionAt(list, 1, -500)!.id).toBe('broad');
-    expect(traditionAt(list, 2, 100)!.id).toBe('member');
-    expect(traditionAt(list, 3, 100)!.id).toBe('broad');
-    expect(traditionAt(list, 4, 100)).toBeUndefined();
-    expect(traditionAt(list, 1, 1600)).toBeUndefined();
+    expect(traditionAt(list, 1, -1500, 'farmers')!.id).toBe('narrow');
+    expect(traditionAt(list, 1, -500, 'farmers')!.id).toBe('broad');
+    expect(traditionAt(list, 2, 100, 'farmers')!.id).toBe('member');
+    expect(traditionAt(list, 3, 100, 'farmers')!.id).toBe('broad');
+    expect(traditionAt(list, 4, 100, 'farmers')).toBeUndefined();
+    expect(traditionAt(list, 1, 1600, 'farmers')).toBeUndefined();
+  });
+
+  it('draws a tradition\'s house only for the ways of life it says it housed', () => {
+    const list = compileTraditions([
+      { id: 'tent', label: 'A tent', regions: [1], span: [-3000, 1500], lifeways: ['herders'], dwelling: { walls: 'felt' } },
+      { id: 'house', label: 'A house', regions: [1], span: [-3000, 1500], lifeways: ['farmers', 'townspeople'], dwelling: { walls: 'mudbrick' } },
+      { id: 'silent', label: 'It does not say', regions: [1], span: [-3000, 1500], dwelling: { walls: 'stone' } },
+    ]);
+    expect(traditionAt(list, 1, 0, 'herders')!.id).toBe('tent');
+    expect(traditionAt(list, 1, 0, 'farmers')!.id).toBe('house');
+    expect(traditionAt(list, 1, 0, 'townspeople')!.id).toBe('house');
+    // No tradition of the region houses its foragers or its shifting cultivators; and one that does not say houses no one.
+    expect(traditionAt(list, 1, 0, 'foragers')).toBeUndefined();
+    expect(traditionAt(list, 1, 0, 'shifting-cultivators')).toBeUndefined();
+    expect(list.find((x) => x.id === 'silent')!.lifeways).toEqual([]);
   });
 });

@@ -11,7 +11,7 @@ import { drawAnimal, drawClump, drawPlant, POSE, type Detail, type Stance } from
 import { CELL, CELLS, cellParts, cellKey, coverMask, EXTENT, groundGrids, LandCover, makePlan, placeLook, waterLevels, waterRibbons, waterSheet, watersFor, type CellRows, type LivingParams, type LivingPlan, type PlaceLook } from './scene/v7.ts';
 import { freshOf, type Waters } from './land.ts';
 import { drawDwelling, houseSize, type HouseDetail } from '../people/dwellings.ts';
-import { LandUseMap, landUseMask, makeSettlement, type SettlementPlan } from '../people/settlement/v1.ts';
+import { LandUseMap, landUseMask, makeSettlement, type SettlementPlan } from '../people/settlement/v2.ts';
 
 /** Where houses start among a scene's kinds of mesh: a taxon's number is below it, a house's dwelling above. */
 export const HOUSE = 0x4000;

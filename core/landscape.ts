@@ -11,7 +11,7 @@
 // model:people/lifeways joins them into what a scene draws: a pattern of settlement (camps, hamlets, villages,
 // towns), how many people, what they did on the land, and how sure each part is. Nothing here is a fact about any
 // place: the classes' thresholds are the classification's own, quoted in the field's record.
-import type { Tradition } from './dwelling.ts';
+import type { LifewayWord, Tradition } from './dwelling.ts';
 import type { ScenePeople } from './scene.ts';
 
 /** A class of Anthromes 12K: its code in the grids, its name and broader level, the legend's colour, and what it means. */
@@ -182,6 +182,21 @@ export const PATTERN_LABEL: Record<Pattern, string> = {
   city: 'A city',
 };
 
+/**
+ * The way of life of each pattern of settlement, as a building tradition's `lifeway` claim names it (core/dwelling.ts):
+ * whose house a tradition's is. Farmsteads, hamlets and villages are all farmers'; towns and cities, townspeople's.
+ */
+export const LIFEWAY_OF: Record<Exclude<Pattern, 'none'>, LifewayWord> = {
+  foragers: 'foragers',
+  herders: 'herders',
+  shifting: 'shifting-cultivators',
+  farmsteads: 'farmers',
+  hamlets: 'farmers',
+  villages: 'farmers',
+  towns: 'townspeople',
+  city: 'townspeople',
+};
+
 /** What the fields are, where there are any. */
 export type FieldUse = 'none' | 'swidden' | 'rainfed' | 'irrigated' | 'rice' | 'pasture';
 
@@ -268,6 +283,26 @@ export function shareDensity(table: AnthromeClass[], classes: number[], land: nu
   });
   const total = weight.reduce((s, w) => s + w, 0);
   return classes.map((_, i) => (total > 0 && land[i] > 0 ? (people * weight[i]) / total / land[i] : 0));
+}
+
+// ——— Whose houses rest on a tradition ———
+
+/**
+ * At a time: HYDE's people as the model places them, by the pattern of settlement it gives their 5′ cell, and how many of
+ * each are drawn in a house of a building tradition written for their way of life, region and time. The rest are drawn
+ * in the generator's generic house (docs/plans/LIFEWAY-RENDERINGS.md).
+ */
+export interface HousingCount {
+  t: number;
+  /** HYDE's people the model places, and how many of them a tradition houses */
+  people: number;
+  housed: number;
+  /** by pattern of settlement: [people, housed] */
+  by: Partial<Record<Exclude<Pattern, 'none'>, [number, number]>>;
+  /** the regions with people, and those where a tradition houses any of them */
+  regions: [number, number];
+  /** the lists' cities standing then, their people, and the people of those a townspeople's tradition houses */
+  cities: [number, number, number];
 }
 
 // ——— Cities ———

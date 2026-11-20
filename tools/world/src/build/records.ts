@@ -1,6 +1,6 @@
 // Entity records for the inspect panel, features for tiles, periods, and the search index.
 import { footprintText, type Footprint } from '../../../../core/footprint.ts';
-import { specText, type DwellingSpec } from '../../../../core/dwelling.ts';
+import { lifewayText, specText, type DwellingSpec, type LifewayWord } from '../../../../core/dwelling.ts';
 import { levelOf } from '../../../../core/ladder.ts';
 import type { FormSpec } from '../../../../core/city.ts';
 import type { CitationRecord, ClaimRecord, EntityRecord, InverseRecord, PeriodRecord, RelationRecord, SearchFile, SourceRecord, VariantRecord } from '../../../../core/records.ts';
@@ -395,6 +395,8 @@ function valueText(s: Solved, c: Claim, labelOf: (ref: string) => string): strin
     case 'settlement-form':
     case 'field-system':
       return specText(v as DwellingSpec);
+    case 'lifeway':
+      return lifewayText(v as LifewayWord[]);
     case 'geometry': {
       const g = v as { from: string; names?: string[]; elements?: string[] };
       if (g.elements) return `Traced on the map: ${g.elements.join(', ')}`;
