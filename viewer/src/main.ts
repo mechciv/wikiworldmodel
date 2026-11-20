@@ -29,7 +29,7 @@ import { EARTH_RADIUS, fromLocal, toLocal, type CityStructure } from '../../core
 import type { AtlasWhere } from '../../core/atlas.ts';
 import type { SceneFileV2 } from '../../core/scene.ts';
 import { latticeOf } from '../../world/generators/life/spec.ts';
-import type { LivingParams } from '../../world/generators/life/scene/v6.ts';
+import type { LivingParams } from '../../world/generators/life/scene/v7.ts';
 import { Camera, MAX_DIST, MIN_DIST } from './camera.ts';
 import { LifeAtlas, type ClimateData } from './city/lifeatlas.ts';
 import { Climates, type ClimateAt } from './climates.ts';
@@ -67,6 +67,7 @@ import { RIVERS_TOGGLE, RiversLayer, type RiverNear, type RiversDrawn } from './
 import { TreePanel } from './ui/tree.ts';
 import { clampWindow, fitWindow, Timebar, xOf, type StateBand } from './ui/timebar.ts';
 import { Toolbar } from './ui/toolbar.ts';
+import logoUrl from '../../site/img/logo.svg';
 
 declare global {
   interface Window {
@@ -571,7 +572,8 @@ async function start(root: HTMLElement): Promise<void> {
   // Named for the span the build covers: the finest named period at its start, to its end.
   const named = (t: number) => ['period', 'era', 'eon'].map((rank) => build.periods.periods.find((p) => p.rank === rank && p.start <= t && t <= p.end)).find(Boolean);
   const until = dataRange[1] > PRESENT_YEAR ? formatTime(dataRange[1]) : 'today';
-  brand.innerHTML = `<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="7.25" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M1.75 9h14.5M9 1.75c2.3 2.2 2.3 12.3 0 14.5M9 1.75c-2.3 2.2-2.3 12.3 0 14.5" fill="none" stroke="currentColor" stroke-width="1"/></svg><strong>WikiWorldModel</strong><span>${named(dataRange[0])?.name ?? formatTime(dataRange[0])} to ${until}</span><a class="coverage-link" title="How much of the world each layer knows, across time and the globe">How much is known →</a>`;
+  // The name, with the site's logo, leads back to the site's front page, beside the viewer's folder.
+  brand.innerHTML = `<a class="home" href="../" title="WikiWorldModel: about the project"><img src="${logoUrl}" width="18" height="18" alt="" /><strong>WikiWorldModel</strong></a><span>${named(dataRange[0])?.name ?? formatTime(dataRange[0])} to ${until}</span><a class="coverage-link" title="How much of the world each layer knows, across time and the globe">How much is known →</a>`;
   brand.querySelector<HTMLAnchorElement>('.coverage-link')!.href = `./coverage.html?b=${encodeURIComponent(build.id)}`;
   const search = new Search(build.search, build.periods.periods, kindLabel);
   const toolbar = new Toolbar(build.id, ts.alternatives, ts.layers ?? []);
