@@ -135,13 +135,20 @@ export const TOWN_WORDS = {
  */
 export const LIFEWAY_WORDS = {
   foragers: 'People who lived by hunting, fishing and gathering, in camps or in settled villages.',
-  herders: 'People who lived by their herds, in camps moved with them.',
+  herders: 'People who lived mainly by their herds, in camps moved with them or on farms among their pastures.',
   'shifting-cultivators': 'People who cleared plots in woodland, cropped them for a few years and moved on.',
   farmers: 'People who farmed the same fields year after year, in farmsteads, hamlets and villages.',
   townspeople: 'People of towns and cities.',
 } as const;
 
 export type LifewayWord = keyof typeof LIFEWAY_WORDS;
+
+/**
+ * Ways of life near enough that the house of one stands in for the other's where none is written for it. The model
+ * tells shifting cultivators from farmers by a survey's answer for a whole region, non-continuous against continuous
+ * farming (model:people/lifeways), and the same villages are often both to their excavators. A stand-in says it is one.
+ */
+export const LIFEWAY_KIN: Partial<Record<LifewayWord, LifewayWord[]>> = { 'shifting-cultivators': ['farmers'], farmers: ['shifting-cultivators'] };
 
 /** What is wrong with a `lifeway` claim's value: a list of one or more of the ways of life, each once. */
 export function lifewayProblems(v: unknown): string[] {
@@ -373,6 +380,100 @@ export function townText(v: TownSpec): string {
   if (v.moat !== undefined) parts.push(v.moat ? 'a moat outside it' : 'no moat');
   if (v.square !== undefined) parts.push(v.square ? 'an open square at its middle' : 'no open square');
   return parts.join(', ');
+}
+
+// ——— Husbandry ———
+
+/**
+ * A way of keeping animals (a `tradition/husbandry` record), as the build compiles it: whose way it was, where and when
+ * it held, and which animals its people kept, as taxon records. Like a building tradition, a narrower one is a member
+ * of a broader one and takes what it does not say from it.
+ */
+export interface Husbandry {
+  id: string;
+  label: string;
+  parent?: string;
+  depth: number;
+  regions: number[];
+  span: [number, number];
+  lifeways: LifewayWord[];
+  /** the animals kept: the ids of their taxon records */
+  animals: string[];
+  /** which tradition said whose it was, and which animals: `lifeway` and `livestock` → its id */
+  from: From;
+}
+
+export interface HusbandryInput {
+  id: string;
+  label: string;
+  parent?: string;
+  regions: number[];
+  span: [number, number];
+  lifeways?: LifewayWord[];
+  animals?: string[];
+}
+
+/** Each husbandry tradition with what it inherits: its regions, whose it was and its animals, each whole, from the nearest that says. */
+export function compileHusbandry(inputs: HusbandryInput[]): Husbandry[] {
+  const byId = new Map(inputs.map((t) => [t.id, t]));
+  const done = new Map<string, Husbandry>();
+  const visit = (t: HusbandryInput, seen: Set<string>): Husbandry => {
+    const have = done.get(t.id);
+    if (have) return have;
+    const up = t.parent && byId.has(t.parent) && !seen.has(t.parent) ? visit(byId.get(t.parent)!, new Set([...seen, t.id])) : undefined;
+    const from: From = { ...(up?.from ?? {}) };
+    if (t.lifeways?.length) from.lifeway = t.id;
+    if (t.animals?.length) from.livestock = t.id;
+    const out: Husbandry = {
+      id: t.id,
+      label: t.label,
+      ...(up ? { parent: up.id } : {}),
+      depth: up ? up.depth + 1 : 0,
+      regions: t.regions.length ? [...t.regions].sort((a, b) => a - b) : up?.regions ?? [],
+      span: t.span,
+      lifeways: t.lifeways?.length ? [...t.lifeways] : up?.lifeways ?? [],
+      animals: t.animals?.length ? [...t.animals] : up?.animals ?? [],
+      from,
+    };
+    done.set(t.id, out);
+    return out;
+  };
+  return inputs.map((t) => visit(t, new Set())).sort((a, b) => (a.id < b.id ? -1 : 1));
+}
+
+/**
+ * The husbandry of a way of life at a region and a time: the most particular tradition that names the region, holds
+ * then and was that way of life's, as a building tradition is chosen (traditionAt). Undefined where none does: no
+ * animals are drawn, as nothing says which were kept.
+ */
+export function husbandryAt(list: Husbandry[], region: number | undefined, t: number, lifeway: LifewayWord): Husbandry | undefined {
+  if (region === undefined) return undefined;
+  let best: Husbandry | undefined;
+  for (const x of list) {
+    if (t < x.span[0] || t > x.span[1] || !x.regions.includes(region) || !x.lifeways.includes(lifeway) || !x.animals.length) continue;
+    if (!best) {
+      best = x;
+      continue;
+    }
+    const better =
+      x.depth !== best.depth ? x.depth > best.depth : x.regions.length !== best.regions.length ? x.regions.length < best.regions.length : x.span[0] !== best.span[0] ? x.span[0] > best.span[0] : x.id < best.id;
+    if (better) best = x;
+  }
+  return best;
+}
+
+/**
+ * The tradition that draws the houses of a way of life at a region and a time: the one written for it (traditionAt), or
+ * where none is, one written for a way of life kin to it (LIFEWAY_KIN), with whose it is. Undefined where neither holds.
+ */
+export function traditionFor(list: Tradition[], region: number | undefined, t: number, lifeway: LifewayWord): { tradition: Tradition; kin?: LifewayWord } | undefined {
+  const own = traditionAt(list, region, t, lifeway);
+  if (own) return { tradition: own };
+  for (const kin of LIFEWAY_KIN[lifeway] ?? []) {
+    const other = traditionAt(list, region, t, kin);
+    if (other) return { tradition: other, kin };
+  }
+  return undefined;
 }
 
 /** A span's middle, or the number itself. */

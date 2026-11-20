@@ -20,11 +20,12 @@
 //
 // Everything is seeded by the world's 5′ cells and the anthromes' step, not by the scene, so two scenes that overlap put
 // their settlements in the same places: only the ground they stand on, which is the scene's, can move one a little.
-import { mid, townText, traditionAt, within, type DwellingSpec, type FieldSpec, type LifewayWord, type SettlementSpec, type TownSpec, type Tradition } from '../../../../core/dwelling.ts';
+import { husbandryAt, mid, townText, traditionFor, within, type DwellingSpec, type FieldSpec, type LifewayWord, type SettlementSpec, type TownSpec, type Tradition } from '../../../../core/dwelling.ts';
 import { anthromeOf, lifewayOf, LIFEWAY_OF, type CityNear, type FieldUse, type Lifeway, type Pattern } from '../../../../core/landscape.ts';
 import type { ClimateClass } from '../../../../core/climate.ts';
 import type { SceneSpec } from '../../../../core/scene.ts';
-import { dcos, hash2, hash3, PI, TAU } from '../../city/math.ts';
+import { dcos, hash2, hash3, PI, Rng, TAU } from '../../city/math.ts';
+import { POSE } from '../../life/forms.ts';
 import { fbm, noise } from '../../life/land.ts';
 import { PIECE, towered, towerSide, type WallWord, type WorkSpec } from '../works.ts';
 
@@ -71,6 +72,22 @@ export interface TownParams {
   open_lot: number;
 }
 
+/**
+ * How the animals a husbandry tradition names are drawn among its people. Which animals they kept is the tradition's;
+ * how many is nobody's: these only say how full a scene is drawn.
+ */
+export interface LivestockParams {
+  /** animals to a house, by the way of life of its people */
+  per_household: Record<LifewayWord, number>;
+  /** animals in one herd, least and most */
+  herd: [number, number];
+  /** lighter than this, kg, an animal is kept about the houses and not in a herd */
+  graze_kg: number;
+  /** the most animals one settlement is drawn with, and a scene */
+  most_in_settlement: number;
+  most: number;
+}
+
 export interface SettlementParams {
   /** people to a house where no tradition says */
   household: number;
@@ -108,8 +125,29 @@ export interface SettlementParams {
     record_gap: number;
   };
   towns: TownParams;
+  /** how the animals people kept are drawn among them; without it none are */
+  livestock?: LivestockParams;
   /** the most houses a scene draws: past it, each house stands for more people, and the plan says how many */
   most_houses: number;
+}
+
+/** An animal its people kept, where it stands: one of the scene's kept animals (ScenePeople.kept), in a herd or about a house. */
+export interface Kept {
+  x: number;
+  y: number;
+  z: number;
+  /** the way it faces, radians clockwise from north */
+  face: number;
+  /** which animal, in the scene's list of those kept; and its settlement */
+  kind: number;
+  settlement: number;
+  /** how it stands (world/generators/life/forms.ts, POSE), a share of its kind's size, and what varies it: 0–255 each */
+  pose: number;
+  size: number;
+  shade: number;
+  phase: number;
+  /** 0–255: lower ones stay in view from further off */
+  rank: number;
 }
 
 /** A house: where it stands, which way it faces, which dwelling it is, and its rank for the view. */
@@ -137,6 +175,8 @@ export interface PlanForm {
   label: string;
   /** whose house it is drawn as: the way of life of the settlements it stands in */
   whose: LifewayWord;
+  /** the way of life its tradition was written for, where that is another, kin to it: the house stands in */
+  kin?: LifewayWord;
   /** which tradition gave each part, where it is a tradition's */
   parts?: Record<string, string>;
 }
@@ -182,6 +222,10 @@ export interface Settlement {
   tier: Lifeway['tier'];
   /** a town's layout as it is drawn, in words, and what says each part of it: a tradition's id, a record's, or `generic` */
   town?: { text: string; from: Record<string, string> };
+  /** the husbandry tradition whose animals are drawn about it, if one holds for its people */
+  husbandry?: string;
+  /** what everything invented of it is seeded by: its cell and its place in it, or a city's place */
+  seed: number;
 }
 
 export interface SettlementPlan {
@@ -191,6 +235,8 @@ export interface SettlementPlan {
   /** the walls, gates, towers and water of its towns, and the kinds of piece they are drawn from */
   works: Work[];
   workForms: WorkForm[];
+  /** the animals its people kept, where a husbandry tradition names them */
+  animals: Kept[];
   /** people the plan's houses hold, and the people the world puts in the land it covers */
   drawn: number;
   expected: number;
@@ -251,9 +297,11 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
   const climate = spec.biome.climate;
   const forms: PlanForm[] = [];
   const formIndex = new Map<string, number>();
-  const formOf = (pattern: Pattern, t: Tradition | undefined): number => {
+  // The tradition of a way of life in a region at the scene's time: the one written for it, or for one kin to it.
+  const traditionOf = (region: number, pattern: Exclude<Pattern, 'none'>) => traditionFor(P.traditions, region, P.t, LIFEWAY_OF[pattern]);
+  const formOf = (pattern: Pattern, t: Tradition | undefined, kin?: LifewayWord): number => {
     const g = genericFor(p, pattern, climate);
-    // A tradition's house for the way of life it says it housed (traditionAt has asked); the generic one where none holds.
+    // A tradition's house for the way of life it says it housed, or for one kin to it; the generic one where none holds.
     const use = t && Object.keys(t.dwelling).length;
     // What a tradition leaves unsaid is the generic house's of the same way of life, so a tradition's house in a town is
     // not its house in a village: each is a form of its own.
@@ -265,7 +313,7 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
       formIndex.set(key, k);
       forms.push(
         use
-          ? { key, spec: { ...g.spec, ...t!.dwelling }, from: 'tradition', tradition: t!.id, label: t!.label, whose, parts: Object.fromEntries(Object.entries(t!.from).filter(([k2]) => k2.startsWith('dwelling.')).map(([k2, v]) => [k2.slice(9), v])) }
+          ? { key, spec: { ...g.spec, ...t!.dwelling }, from: 'tradition', tradition: t!.id, label: t!.label, whose, ...(kin ? { kin } : {}), parts: Object.fromEntries(Object.entries(t!.from).filter(([k2]) => k2.startsWith('dwelling.')).map(([k2, v]) => [k2.slice(9), v])) }
           : { key, spec: g.spec, from: 'generic', label: g.label, whose },
       );
     }
@@ -312,6 +360,8 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
   const fit = (x: number, y: number) => inScene(x, y) && ok(x, y);
   const settlements: Settlement[] = [];
   const houses: House[] = [];
+  // Where each settlement's houses lie in the list, as they are laid out one settlement after another.
+  const housesOf: [number, number][] = [];
   let expected = 0;
   // The cities first, the lists' and the records': each takes the land within its reach, and no settlement of the
   // anthromes stands in it.
@@ -333,11 +383,15 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
     const lon = c.lon;
     const cell = cellAt(P.grid, lat, lon);
     const region = cell >= 0 ? P.grid.region[cell] : 0;
-    const t = traditionAt(P.traditions, region, P.t, LIFEWAY_OF[pattern]);
-    const form = formOf(pattern, t);
-    const s = settlements.push({ x: cx, y: cy, r, fieldR: r * 1.6, pattern, fields: 'rainfed', houses: 0, people: c.people, city: c.name, ...(c.record ? { record: c.record } : {}), from: c.from, anthrome: cell >= 0 ? P.grid.anthrome[cell] : 0, region, form, tier: 'evidence' }) - 1;
+    const found = traditionOf(region, pattern);
+    const t = found?.tradition;
+    const form = formOf(pattern, t, found?.kin);
+    const citySeed = seedOf(hash2(Math.round(lat * 1000), Math.round(lon * 1000), 0x51c1));
+    const s = settlements.push({ x: cx, y: cy, r, fieldR: r * 1.6, pattern, fields: 'rainfed', houses: 0, people: c.people, city: c.name, ...(c.record ? { record: c.record } : {}), from: c.from, anthrome: cell >= 0 ? P.grid.anthrome[cell] : 0, region, form, tier: 'evidence', seed: citySeed }) - 1;
     cityHere.push({ x: cx, y: cy, r: r * 1.15 });
-    layOut(settlements[s], s, n, lot, seedOf(hash2(Math.round(lat * 1000), Math.round(lon * 1000), 0x51c1)), t?.settlement ?? {}, Math.min(2.5, Math.sqrt(households / n)), townOf(t, c.town, c.record));
+    const first = houses.length;
+    layOut(settlements[s], s, n, lot, citySeed, t?.settlement ?? {}, Math.min(2.5, Math.sqrt(households / n)), townOf(t, c.town, c.record));
+    housesOf[s] = [first, houses.length];
   }
   // Then each 5′ cell the scene reaches, as its anthrome and region say.
   const g = P.grid;
@@ -357,7 +411,8 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
       const a = regionOf(region)?.assessment;
       const life = lifewayOf(P.classes, k, d, a);
       if (life.pattern === 'none') continue;
-      const t = traditionAt(P.traditions, region, P.t, LIFEWAY_OF[life.pattern]);
+      const found = traditionOf(region, life.pattern);
+      const t = found?.tradition;
       const pp = p.patterns[life.pattern];
       const household = mid(t?.settlement.household, p.household);
       const area = side * side * dcos(((north - g.res / 2) * PI) / 180) * 1e-6;
@@ -376,7 +431,7 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
       const lot = mid(t?.settlement.spacing, 0) > 0 ? mid(t!.settlement.spacing, 0) ** 2 : pp.lot;
       const catchment = (area * 1e6) / count;
       const grid = Math.ceil(Math.sqrt(count));
-      const form = formOf(life.pattern, t);
+      const form = formOf(life.pattern, t, found?.kin);
       const town = life.pattern === 'city' || life.pattern === 'towns' ? townOf(t) : undefined;
       for (let n = 0; n < count; n++) {
         // A jittered grid over the whole cell, so that the same settlement is in the same place whichever scene draws it.
@@ -394,11 +449,83 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
           if (!inScene(x, y) || cityHere.some((c) => (x - c.x) ** 2 + (y - c.y) ** 2 < c.r * c.r)) continue;
           const r = Math.sqrt((perSettlement * lot) / PI);
           const fieldR = Math.sqrt(r * r + (pp.fields * catchment) / PI);
-          const s = settlements.push({ x, y, r, fieldR, pattern: life.pattern, fields: life.fields, houses: 0, people: perSettlement * household, anthrome: k, region, form, tier: life.tier }) - 1;
-          layOut(settlements[s], s, perSettlement, lot, seedOf(hash3(n, gr, gc, seed)), t?.settlement ?? {}, 1, town);
+          const own = seedOf(hash3(n, gr, gc, seed));
+          const s = settlements.push({ x, y, r, fieldR, pattern: life.pattern, fields: life.fields, houses: 0, people: perSettlement * household, anthrome: k, region, form, tier: life.tier, seed: own }) - 1;
+          const first = houses.length;
+          layOut(settlements[s], s, perSettlement, lot, own, t?.settlement ?? {}, 1, town);
+          housesOf[s] = [first, houses.length];
         }
       }
     }
+  }
+  // The animals its people kept, where a husbandry tradition of the region and time names them for their way of life:
+  // those that graze in herds, on the pasture of people who herd and at the edge of the houses of people who farm; the
+  // rest about the houses. Which animals is the tradition's; how many, and where each stands, is invented.
+  const animals: Kept[] = [];
+  const keptList = P.kept ?? [];
+  const L = p.livestock;
+  if (L && keptList.length && P.husbandry?.length) {
+    const index = new Map(keptList.map((k, i) => [k.id, i]));
+    const posesOf = keptList.map((k) => {
+      const poses = (P.keptForms?.[k.form]?.behave?.poses ?? ['stand', 'walk', 'graze']).map((x) => POSE[x]).filter((x) => x !== POSE.fly);
+      return poses.length ? poses : [POSE.stand];
+    });
+    const grazes = keptList.map((k) => {
+      const f = P.keptForms?.[k.form];
+      return (f?.behave?.habitat ?? 'open') === 'open' && (k.mass ?? (k.length ?? 1) ** 3 * (f?.mass_length ?? 20)) >= L.graze_kg;
+    });
+    settlements.forEach((s, si) => {
+      if (s.pattern === 'none' || animals.length >= L.most) return;
+      const whose = LIFEWAY_OF[s.pattern];
+      const h = husbandryAt(P.husbandry!, s.region, P.t, whose);
+      const mine = (h?.animals ?? []).map((id) => index.get(id)).filter((k): k is number => k !== undefined);
+      if (!h || !mine.length) return;
+      s.husbandry = h.id;
+      const [h0, h1] = housesOf[si] ?? [0, 0];
+      const total = Math.min(L.most_in_settlement, L.most - animals.length, Math.floor((h1 - h0) * L.per_household[whose] + hash2(si, 31, s.seed)));
+      if (total <= 0) return;
+      const rng = new Rng((s.seed ^ 0x6b43a9b5) >>> 0);
+      const stand = (x: number, y: number, kind: number, pose: number, size: number, face: number): boolean => {
+        if (!fit(x, y)) return false;
+        animals.push({ x, y, z: ground.at(x, y), face, kind, settlement: si, pose, size, shade: rng.int(0, 255), phase: rng.int(0, 255), rank: rng.int(0, 255) });
+        return true;
+      };
+      mine.forEach((k, j) => {
+        // Each kind alike, the odd ones going to the first.
+        let left = Math.floor(total / mine.length) + (j < total % mine.length ? 1 : 0);
+        const long = keptList[k].length ?? 1;
+        const poses = posesOf[k];
+        if (!grazes[k]) {
+          // About the houses: by one of them, a few steps off.
+          for (; left > 0 && h1 > h0; left--) {
+            const house = houses[h0 + rng.int(0, h1 - h0 - 1)];
+            const b = rng.next() * TAU;
+            const d = 4 + 6 * rng.next();
+            const still = poses.filter((x) => x !== POSE.graze);
+            stand(house.x + Math.sin(b) * d, house.y + Math.cos(b) * d, k, (still.length ? still : poses)[rng.int(0, (still.length || poses.length) - 1)], 0.75 + 0.25 * rng.next(), rng.next() * TAU);
+          }
+          return;
+        }
+        for (let herd = 0; left > 0 && herd < 64; herd++) {
+          const size = Math.min(left, L.herd[0] + rng.int(0, L.herd[1] - L.herd[0]));
+          left -= size;
+          const r0 = s.r * 1.15 + 15;
+          const r1 = s.fields === 'pasture' ? Math.max(r0 + 60, s.fieldR * 0.9) : r0 + 90;
+          const rr = Math.sqrt(r0 * r0 + (r1 * r1 - r0 * r0) * rng.next());
+          const at = rng.next() * TAU;
+          const cx = s.x + Math.sin(at) * rr;
+          const cy = s.y + Math.cos(at) * rr;
+          const turn = rng.next() * TAU;
+          const spread = long * (1.6 + 1.1 * Math.sqrt(size));
+          let drawn = 0;
+          for (let q = 0; q < size * 5 && drawn < size; q++) {
+            const b = rng.next() * TAU;
+            const d = drawn === 0 ? 0 : spread * Math.sqrt(rng.next());
+            if (stand(cx + Math.sin(b) * d, cy + Math.cos(b) * d, k, poses[rng.int(0, poses.length - 1)], drawn === 0 ? 1 : 0.7 + 0.3 * rng.next(), turn + (rng.next() - 0.5) * 1.2)) drawn++;
+          }
+        }
+      });
+    });
   }
   // Houses past the most a scene draws stand for more people each: the plan keeps the people, and says so.
   let perHouse = 0;
@@ -414,11 +541,11 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
   perHouse = kept.length ? drawn / kept.length : 0;
   // The place's own field system: its tradition's, or the generic one for its use of the land.
   const centre = cellAt(g, origin.lat, origin.lon);
-  const tc = centre >= 0 && P.lifeway.pattern !== 'none' ? traditionAt(P.traditions, g.region[centre], P.t, LIFEWAY_OF[P.lifeway.pattern]) : undefined;
+  const tc = centre >= 0 && P.lifeway.pattern !== 'none' ? traditionOf(g.region[centre], P.lifeway.pattern)?.tradition : undefined;
   const use = P.lifeway.fields === 'none' ? 'rainfed' : P.lifeway.fields;
   const generic = p.plots[use];
   const style = tc?.fields.kind ? { kind: tc.fields.kind, plot: mid(tc.fields.plot, generic.plot), from: 'tradition' as const, tradition: tc.id } : { kind: generic.kind, plot: generic.plot, from: 'generic' as const };
-  return { settlements, forms, houses: kept, works, workForms, drawn: Math.round(drawn), expected: Math.round(expected), perHouse: Math.round(perHouse * 10) / 10, style, lifeway: P.lifeway };
+  return { settlements, forms, houses: kept, works, workForms, animals, drawn: Math.round(drawn), expected: Math.round(expected), perHouse: Math.round(perHouse * 10) / 10, style, lifeway: P.lifeway };
 
   /**
    * Houses of a settlement, as its tradition's pattern sets them out: clustered, in a ring, along a line or apart. A town

@@ -291,6 +291,19 @@ function checkValue(world: World, refs: RefChecker, c: Claim, issues: Issue[]): 
     case 'lifeway':
       for (const problem of lifewayProblems(v)) bad(problem);
       break;
+    case 'taxa': {
+      // A list of taxon records, each once.
+      if (!Array.isArray(v) || !v.length) {
+        bad('a list of one or more taxon records, as [life/taxa/…, …]');
+        break;
+      }
+      if (new Set(v).size !== v.length) bad('each taxon is named once');
+      v.forEach((x, i) => {
+        const e = refs.check(x, c.file, `${c.where}.value[${i}]`, { self: c.entity, types: ['entity'] });
+        if (e && e.kind !== 'taxon') bad(`${String(x)} is not a taxon record`);
+      });
+      break;
+    }
   }
 }
 
@@ -1048,22 +1061,28 @@ function checkForms(world: World, issues: Issue[]): void {
 }
 
 /**
- * Every building tradition says whom it housed: a `lifeway` claim of its own, or of a tradition it is a member of. Its
- * house is drawn only for those ways of life (core/dwelling.ts), so one that does not say is drawn for no one.
+ * Every building tradition says whom it housed, and every husbandry tradition whose animals it kept and which: a
+ * `lifeway` claim, and for husbandry a `livestock` claim, of its own or of a tradition of its kind it is a member of.
+ * A house or a herd is drawn only for those ways of life (core/dwelling.ts), so one that does not say is drawn for no one.
  */
 function checkTraditions(world: World, issues: Issue[]): void {
-  const byId = new Map(world.entities.filter((e) => e.kind === 'tradition/building').map((e) => [e.id, e]));
-  for (const e of byId.values()) {
-    const seen = new Set<string>();
-    let at: Entity | undefined = e;
-    let says = false;
-    while (at && !seen.has(at.id) && !says) {
-      seen.add(at.id);
-      says = at.claims.some((c) => c.prop === 'lifeway');
-      const up: string | undefined = at.relations.find((r) => r.rel === 'member-of')?.to;
-      at = up ? byId.get(up) : undefined;
+  for (const kind of ['tradition/building', 'tradition/husbandry']) {
+    const byId = new Map(world.entities.filter((e) => e.kind === kind).map((e) => [e.id, e]));
+    const says = (e: Entity, prop: string): boolean => {
+      const seen = new Set<string>();
+      for (let at: Entity | undefined = e; at && !seen.has(at.id); ) {
+        seen.add(at.id);
+        if (at.claims.some((c) => c.prop === prop)) return true;
+        const up: string | undefined = at.relations.find((r) => r.rel === 'member-of')?.to;
+        at = up ? byId.get(up) : undefined;
+      }
+      return false;
+    };
+    for (const e of byId.values()) {
+      const what = kind === 'tradition/building' ? ['whom it housed', 'its house'] : ['whose animals it kept', 'its animals'];
+      if (!says(e, 'lifeway')) issues.push({ level: 'warning', check: 'traditions', file: e.file, where: 'claims', message: `${e.id} does not say ${what[0]}: give it a \`lifeway\` claim (docs/DWELLINGS.md), or ${what[1]} are drawn for no one`.replace('its house are', 'its house is') });
+      if (kind === 'tradition/husbandry' && !says(e, 'livestock')) issues.push({ level: 'warning', check: 'traditions', file: e.file, where: 'claims', message: `${e.id} does not say which animals its people kept: give it a \`livestock\` claim (docs/DWELLINGS.md)` });
     }
-    if (!says) issues.push({ level: 'warning', check: 'traditions', file: e.file, where: 'claims', message: `${e.id} does not say whom it housed: give it a \`lifeway\` claim (docs/DWELLINGS.md), or its house is drawn for no one` });
   }
 }
 

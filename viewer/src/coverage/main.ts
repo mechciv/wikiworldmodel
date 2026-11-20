@@ -842,7 +842,7 @@ class Page {
       el(
         'p',
         'cov-lede',
-        "At each time, the people HYDE puts on the land, by the way of life the model of how people lived gives the land they lived on, and the share of each drawn in a house of a building tradition written for that way of life, region and time. Everyone else is drawn in the generator's generic house, which says so. A bar is the share housed by a tradition.",
+        "At each time, the people HYDE puts on the land, by the way of life the model of how people lived gives the land they lived on, and the share of each drawn in a house of a building tradition written for that way of life, region and time. Where none is written for a region's shifting cultivators the house of its farmers stands in, and the other way round, and says so. Everyone else is drawn in the generator's generic house, which says so. A bar is the share housed by a tradition.",
       ),
     );
     const ways = [...new Set(Object.values(LIFEWAY_OF))] as LifewayWord[];
@@ -867,7 +867,9 @@ class Page {
     table.append(head);
     for (const h of rows) {
       const tr = el('tr');
-      tr.append(el('td', undefined, formatTime(h.t)), el('td', undefined, people(h.people)), cell(h.people, h.housed, 0));
+      const all = cell(h.people, h.housed, 0);
+      if (h.standIn) all.title += `; ${people(h.standIn)} of them in the house of a way of life kin to theirs, standing in`;
+      tr.append(el('td', undefined, formatTime(h.t)), el('td', undefined, people(h.people)), all);
       for (const w of ways) {
         let all = 0;
         let housed = 0;

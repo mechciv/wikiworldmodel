@@ -2,11 +2,12 @@
 // and put together into what a scene's people are and what the globe paints. The same core code as the build's, so what
 // a scene draws rests on the same anthromes, assessments, cities and traditions.
 import { decodeTile } from '../../../core/container.ts';
-import { traditionAt, type LifewayWord, type Tradition } from '../../../core/dwelling.ts';
+import { traditionFor, type Husbandry, type LifewayWord, type Tradition } from '../../../core/dwelling.ts';
+import type { Form } from '../../../core/form.ts';
 import { anthromeTile, classAtStep, nearestStep, sceneTiles, scenePeople, assessmentAt, lifewayOf, LIFEWAY_OF, citiesAround, cityGuess, cellOf, tileKey, type AnthromeTile, type AnthromeTileHeader, type AssessmentsFile, type CitiesFile, type CityNear, type LandscapeData, type LandscapeIndex, type Lifeway, type TraditionsFile } from '../../../core/landscape.ts';
 import { cellAt, stepsAround, type PeopleFile } from '../../../core/layers.ts';
 import type { ResolveWorld } from '../../../core/resolve.ts';
-import type { ScenePeople } from '../../../core/scene.ts';
+import type { LivingTaxon, ScenePeople } from '../../../core/scene.ts';
 
 async function getJSON<T>(url: string): Promise<T> {
   const r = await fetch(url);
@@ -31,14 +32,19 @@ export interface PlaceLandscape {
   cities: CityNear[];
   /** whose houses a scene would draw here: the way of life of the place, or townspeople where a list puts a city near */
   whose?: LifewayWord;
-  /** the tradition written for that way of life, in the region and at the time */
+  /** the tradition written for that way of life, in the region and at the time; or for one kin to it, standing in */
   tradition?: Tradition;
+  kin?: LifewayWord;
 }
 
 export class LandscapeAtlas {
   index!: LandscapeIndex;
   assessments!: AssessmentsFile;
   traditions: Tradition[] = [];
+  /** the husbandry traditions, the animals they name as a scene draws them, and those animals' forms */
+  husbandry: Husbandry[] = [];
+  kept: LivingTaxon[] = [];
+  keptForms: Record<string, Form> = {};
   cities!: CitiesFile;
   globe?: AnthromeTile;
   private indexed: Promise<void> | null = null;
@@ -64,6 +70,9 @@ export class LandscapeAtlas {
       const [a, tr, c] = await Promise.all([getJSON<AssessmentsFile>(this.base + this.index.assessments), getJSON<TraditionsFile>(this.base + this.index.traditions), getJSON<CitiesFile>(this.base + this.index.cities)]);
       this.assessments = a;
       this.traditions = tr.traditions;
+      this.husbandry = tr.husbandry ?? [];
+      this.kept = tr.kept ?? [];
+      this.keptForms = tr.forms ?? {};
       this.cities = c;
     })();
     return this.ready;
@@ -111,6 +120,9 @@ export class LandscapeAtlas {
       tile: (key) => this.loaded.get(key),
       assessments: this.assessments,
       traditions: this.traditions,
+      husbandry: this.husbandry,
+      kept: this.kept,
+      keptForms: this.keptForms,
       cities: this.cities,
       people: (lat, lon, t) => {
         if (!people) return undefined;
@@ -200,7 +212,8 @@ export class LandscapeAtlas {
     // The houses of the way of life here: a city's where a list puts one near, as a scene would draw it.
     const pattern = cities.length ? 'city' : lifeway.pattern;
     const whose = pattern !== 'none' ? LIFEWAY_OF[pattern] : undefined;
-    const tradition = region && whose ? traditionAt(this.traditions, region, t, whose) : undefined;
-    return { t, step: this.index.steps[i], anthrome, ...(density !== undefined ? { density } : {}), ...(region && label && at ? { region: { id: region, label, slice: this.assessments.slices[at.slice].label, assessment: at } } : {}), lifeway, cities, ...(whose ? { whose } : {}), ...(tradition ? { tradition } : {}) };
+    const found = region && whose ? traditionFor(this.traditions, region, t, whose) : undefined;
+    const tradition = found?.tradition;
+    return { t, step: this.index.steps[i], anthrome, ...(density !== undefined ? { density } : {}), ...(region && label && at ? { region: { id: region, label, slice: this.assessments.slices[at.slice].label, assessment: at } } : {}), lifeway, cities, ...(whose ? { whose } : {}), ...(tradition ? { tradition } : {}), ...(found?.kin ? { kin: found.kin } : {}) };
   }
 }

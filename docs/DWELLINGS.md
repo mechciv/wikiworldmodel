@@ -130,6 +130,17 @@ show the house was lived in by, and no more. A house of villages and of the town
 `[farmers, townspeople]`; a house known only from a city's excavated quarters is `[townspeople]`. The claim is sourced
 like any other: a sentence that says who lived in these houses.
 
+Two things about how the model draws the line:
+
+- **Herders are people who lived mainly by their herds,** in camps moved with them or on farms among their pastures.
+  The model calls the people of grazed land with few people herders, in Iceland as on the steppe. A house of stock
+  farmers whose sources say they lived by their herds names `herders`, beside `farmers` if they also tilled.
+- **Shifting cultivators and farmers stand in for each other.** The model tells them apart by a survey's answer for a
+  whole region, farming that was not continuous against farming that was, and the same villages are often both to
+  their excavators. So where no tradition is written for a region's shifting cultivators, the house of its farmers is
+  drawn for them, and the other way round, and the panel says that it stands in. Name the one the sources show; write
+  the other's house when a source describes one.
+
 ## Towns
 
 A town or a city is drawn as houses on the lots of its streets, and round them a wall with its gates and towers where
@@ -153,6 +164,50 @@ it had one. How it was laid out is a `town_form` claim, of two kinds of record:
 Say only what a source states: a wall with no height is `wall: stone` and no `wall_height`, and the generator's
 height stands in and says so. Where neither a tradition nor a record says anything, the generic town is drawn, lanes
 that wander and no wall, and the panel says that it is generic.
+
+## Animals
+
+Which animals people kept is a record of its own kind, a husbandry tradition (`kind: tradition/husbandry`), written as
+a building tradition is: `name`, `start`, `end`, `extent`, `lifeway`, and in place of a dwelling its `livestock`, the
+animals as a list of taxon records. A narrower one is a `member-of` a broader one and says only what differs. The file
+goes in `world/entities/people/husbandry/`.
+
+```yaml
+id: people/husbandry/neolithic-europe
+kind: tradition/husbandry
+summary: >-
+  The cattle, sheep, goats and pigs of Europe's first farmers …
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Farm animals of Neolithic Europe }
+    unsourced: An editorial label.
+  start: { prop: start, value: 6500 BCE, source: { ref: src:…, loc: "…", quote: "…" }, method: expert-estimate }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["43", "44"] }
+    source: { ref: src:…, loc: "…", quote: "…" }
+    method: editorial
+  lifeway: { prop: lifeway, value: [farmers], source: { ref: src:…, loc: "…", quote: "…" }, method: editorial }
+  livestock:
+    prop: livestock
+    value: [life/taxa/bos-taurus, life/taxa/ovis-aries, life/taxa/capra-hircus, life/taxa/sus-domesticus]
+    source: { ref: src:…, loc: "…", quote: "…" }
+    method: excavation
+```
+
+The settlement generator draws those animals among the tradition's people: the ones that graze, in herds on the pasture
+of people who herd and at the edge of the houses of people who farm; the rest, pigs, fowl and dogs, about the houses.
+Which animals is the tradition's claim. How many is no one's: the generator draws a few to a house and says so.
+
+Each animal is a taxon record (`kind: taxon`, in `world/entities/life/taxa/`), drawn with the body of the nearest
+record above it that has one ([FORMS.md](FORMS.md)) and its own size. So a domestic animal needs a record with a
+`descends-from` relation to a taxon that has a body (cattle, sheep and goats to `life/taxa/bovidae`, pigs to
+`life/taxa/suoidea`, horses and donkeys to `life/taxa/equus`, camels and llamas to `life/taxa/camelidae`, dogs to
+`life/taxa/canidae`, fowl to `life/taxa/galliformes`) and a sourced `body_length` or `body_mass`: without a size of
+its own it is drawn at the middle of its family's range, a sheep as big as an ox. One with no size anywhere above it
+is not drawn, and the build says so.
 
 ## Which tradition draws a place
 

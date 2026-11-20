@@ -125,7 +125,7 @@ export interface WikiWorldModelHandle {
   organismsAt(id: string): { x: number; y: number; depth: number }[];
   organismPlaces(id: string): { lat: number; lon: number; x: number; y: number }[];
   /** what a click at a point of the view finds in the living scene drawn: a taxon, a house the generator drew, or the ground (not the sky); null with no scene */
-  foundAt(x: number, y: number): { taxon?: string; house?: number; work?: number; ground: boolean } | null;
+  foundAt(x: number, y: number): { taxon?: string; kept?: string; house?: number; work?: number; ground: boolean } | null;
   set(s: Partial<ViewState>): void;
   /**
    * How long each pass of the local scene's frame takes, the median over this many frames drawn again of the view as it
@@ -1916,11 +1916,28 @@ async function start(root: HTMLElement): Promise<void> {
           ];
           const form =
             f.from === 'tradition'
-              ? `Its form follows the world's records of the building tradition ${f.label}, which housed ${lifewayText([f.whose])} here: ${specText(f.spec)}. What they do not say, the generator's proportions fill in.`
+              ? `Its form follows the world's records of the building tradition ${f.label}, ${f.kin ? `the house of the region's ${lifewayText([f.kin])}, standing in here for its ${lifewayText([f.whose])}, for whom none is recorded` : `which housed ${lifewayText([f.whose])} here`}: ${specText(f.spec)}. What they do not say, the generator's proportions fill in.`
               : `No building tradition is recorded for the ${lifewayText([f.whose])} of this region at this time, so this is a generic house for the way of life and the climate: ${specText(f.spec)}. It is a placeholder, and says so.`;
           const text = `${where.length ? `Houses of this form stand in ${where.join('; ')}. ` : ''}${form} At the scene's middle, at ${formatTime(sp.t)}: ${PATTERN_LABEL[life.pattern].toLowerCase()}, ${k ? `${k.label.toLowerCase()} as the anthromes of HYDE have it at their step ${stepName(sp.step)}` : 'as the anthromes have it'}. ${life.why}${life.disagrees ? ` ${life.disagrees}` : ''} The scene draws ${pp.houses.toLocaleString('en-US')} houses for about ${pp.drawn.toLocaleString('en-US')} people; HYDE puts about ${pp.expected.toLocaleString('en-US')} in the land it covers${cities.length ? `, and the lists of cities add ${cities.join(', ')}` : ''}.`;
           const why = `${gen.generator}, version ${gen.version}: nobody recorded this house. How many houses there are follows HYDE's people through the anthromes, and the lists of cities and the world's records of settlements where they name one; what way of life, the anthromes and the region's archaeologists; where each house stands and which way it faces is invented, keyed by the world's 5′ cells.`;
           return inspect.showGenerated(f.label, 'Generated house', text, why);
+        }
+        // An animal the people of the scene kept: which is their husbandry tradition's; how many and where is invented.
+        if (found.kept && city.people && city.spec.people) {
+          setState({ sel: null });
+          shownRecord = null;
+          const a = found.kept;
+          const sp = city.spec.people;
+          const gen = sp.generator;
+          const keepers = (sp.husbandry ?? []).filter((h) => h.animals.includes(a.id));
+          const near = new Set(city.people.settlements.map((x) => x.husbandry).filter((x): x is string => !!x));
+          const drawn = keepers.filter((h) => near.has(h.id));
+          const names = (drawn.length ? drawn : keepers).map((h) => `${h.label}, a way of keeping animals of ${lifewayText(h.lifeways)}`);
+          const body = a.own ? 'Its body is its own record\'s' : `Its body is that of ${a.form_label}, the nearest record above it that has one`;
+          const size = a.size_from ? `its size the middle of the range ${a.size_from} gives, as no record measures it itself` : `its size the middle of what its own record gives${a.fromMass ? ', from its mass' : ''}`;
+          const text = `${a.label} is drawn here because the world's records say the people of this place and time kept it: ${names.join('; ') || 'a husbandry tradition of the region'}. ${body}, ${size}: about ${a.length} m long${a.mass ? ` and ${a.mass.toLocaleString('en-US')} kg` : ''}. The scene draws ${city.people.animals.toLocaleString('en-US')} kept animals; how many there were, in what herds and where each stands is invented.`;
+          const why = `${gen.generator}, version ${gen.version}: which animals people kept follows the husbandry tradition recorded for their way of life, region and time; the generator draws a few to each house, those that graze in herds on the pasture or at the edge of the fields, the rest about the houses.`;
+          return inspect.showGenerated(a.label, 'Kept animal', text, why);
         }
         // A piece of a town's works: its wall, a gate, a tower, the water of a canal or a moat.
         if (found.work !== undefined && city.people && city.spec.people) {
@@ -2086,6 +2103,7 @@ async function start(root: HTMLElement): Promise<void> {
         ...(c.record ? { record: c.record } : {}),
       })),
       ...(place.whose ? { whose: lifewayText([place.whose]) } : {}),
+      ...(place.kin ? { kin: lifewayText([place.kin]) } : {}),
       ...(place.tradition ? { tradition: { id: place.tradition.id, label: place.tradition.label, dwelling: specText(place.tradition.dwelling) } } : {}),
     };
   }
@@ -2577,7 +2595,7 @@ async function start(root: HTMLElement): Promise<void> {
       // As a click picks (pickAt), in the canvas's pixels.
       const dpr = canvas.width / stage.clientWidth;
       const found = city.pick(Math.round(x * dpr), canvas.height - 1 - Math.round(y * dpr));
-      if (found.taxon || found.house !== undefined || found.work !== undefined) return { taxon: found.taxon?.id, house: found.house, work: found.work, ground: false };
+      if (found.taxon || found.kept || found.house !== undefined || found.work !== undefined) return { taxon: found.taxon?.id, kept: found.kept?.id, house: found.house, work: found.work, ground: false };
       return { ground: !!groundHit(frameView, rayOf(frameView, x, y), city.ground) };
     },
     set: (s) => setState(s),

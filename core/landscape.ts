@@ -11,8 +11,9 @@
 // model:people/lifeways joins them into what a scene draws: a pattern of settlement (camps, hamlets, villages,
 // towns), how many people, what they did on the land, and how sure each part is. Nothing here is a fact about any
 // place: the classes' thresholds are the classification's own, quoted in the field's record.
-import type { LifewayWord, TownSpec, Tradition } from './dwelling.ts';
-import type { ScenePeople } from './scene.ts';
+import type { Husbandry, LifewayWord, TownSpec, Tradition } from './dwelling.ts';
+import type { Form } from './form.ts';
+import type { LivingTaxon, ScenePeople } from './scene.ts';
 
 /** A class of Anthromes 12K: its code in the grids, its name and broader level, the legend's colour, and what it means. */
 export interface AnthromeClass {
@@ -297,6 +298,8 @@ export interface HousingCount {
   /** HYDE's people the model places, and how many of them a tradition houses */
   people: number;
   housed: number;
+  /** of those housed, how many in the house of a way of life kin to theirs, standing in (core/dwelling.ts, LIFEWAY_KIN) */
+  standIn?: number;
   /** by pattern of settlement: [people, housed] */
   by: Partial<Record<Exclude<Pattern, 'none'>, [number, number]>>;
   /** the regions with people, and those where a tradition houses any of them */
@@ -518,6 +521,10 @@ export interface LandscapeData {
   tile: (key: string) => AnthromeTile | undefined;
   assessments: AssessmentsFile;
   traditions: Tradition[];
+  /** the husbandry traditions, the animals they name and those animals' forms, where the world has any */
+  husbandry?: Husbandry[];
+  kept?: LivingTaxon[];
+  keptForms?: Record<string, Form>;
   cities: CitiesFile;
   /** HYDE's people in the 1° cell that holds a place, at a time; undefined where it has none */
   people: (lat: number, lon: number, t: number) => number | undefined;
@@ -606,6 +613,11 @@ export function scenePeople(d: LandscapeData, lat: number, lon: number, t: numbe
   const lifeway = lifewayOf(d.classes, anthrome[centre], density[centre], regions.find((x) => x.id === region[centre])?.assessment);
   const cities = citiesAround(d.cities, lat, lon, t, d.reach_km, cityGuess(d.generator.params)).map(({ km: _km, also, ...c }) => ({ ...c, ...(also.length ? { also } : {}) }));
   const traditions = d.traditions.filter((x) => t >= x.span[0] && t <= x.span[1] && x.regions.some((g) => ids.includes(g)));
+  // The husbandry that holds there then, and of the animals the world can draw, those it names.
+  const husbandry = (d.husbandry ?? []).filter((x) => t >= x.span[0] && t <= x.span[1] && x.regions.some((g) => ids.includes(g)));
+  const named = new Set(husbandry.flatMap((x) => x.animals));
+  const kept = (d.kept ?? []).filter((x) => named.has(x.id));
+  const keptForms = Object.fromEntries(kept.map((x) => [x.form, d.keptForms?.[x.form]]).filter((x): x is [string, Form] => !!x[1]));
   return {
     t,
     step: d.steps[step],
@@ -615,6 +627,7 @@ export function scenePeople(d: LandscapeData, lat: number, lon: number, t: numbe
     lifeway,
     cities,
     traditions,
+    ...(kept.length ? { husbandry, kept, keptForms } : {}),
     fields: d.fields,
     generator: d.generator,
   };
@@ -651,5 +664,9 @@ export interface TraditionsFile {
   /** the regions' dataset its extents name */
   regions: string;
   traditions: Tradition[];
+  /** the husbandry traditions, the animals they name as a scene draws them, and those animals' forms by their keys */
+  husbandry?: Husbandry[];
+  kept?: LivingTaxon[];
+  forms?: Record<string, Form>;
 }
 

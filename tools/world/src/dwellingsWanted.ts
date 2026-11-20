@@ -17,8 +17,9 @@ export interface Wanted {
   /** whose houses: the way of life, as a tradition's `lifeway` claim names it */
   lifeway: LifewayWord;
   people: number;
-  /** the tradition that draws their houses then, if any */
+  /** the tradition that draws their houses then, if any; and the way of life it was written for, where its house stands in */
   tradition?: string;
+  kin?: LifewayWord;
 }
 
 /** The times the list is counted at: the build's (coverage.json, landscape.housing). */
@@ -32,7 +33,7 @@ export function wantedRows(rows: HousingRow[], labels: Map<number, string>): Wan
     const key = `${r.t}|${r.region}|${lifeway}`;
     const have = out.get(key);
     if (have) have.people += r.people;
-    else out.set(key, { region: r.region, label: labels.get(r.region) ?? (r.region ? String(r.region) : 'no region'), t: r.t, lifeway, people: r.people, ...(r.tradition ? { tradition: r.tradition } : {}) });
+    else out.set(key, { region: r.region, label: labels.get(r.region) ?? (r.region ? String(r.region) : 'no region'), t: r.t, lifeway, people: r.people, ...(r.tradition ? { tradition: r.tradition } : {}), ...(r.kin ? { kin: r.kin } : {}) });
   }
   return [...out.values()];
 }
@@ -59,7 +60,7 @@ export function wantedText(rows: Wanted[], n: number, opts: { region?: number; l
   if (opts.region !== undefined) {
     const mine = rows.filter((r) => r.region === opts.region && (!opts.lifeway || r.lifeway === opts.lifeway)).sort((a, b) => a.t - b.t || b.people - a.people);
     if (!mine.length) return `No region ${opts.region}.`;
-    return [`${mine[0].label} (region ${opts.region}):`, ...mine.map((r) => `  ${formatTime(r.t).padEnd(12)} ${lifewayText([r.lifeway]).padEnd(22)} ${fmt(r.people).padStart(14)} people  ${r.tradition ?? '— generic houses'}`)].join('\n');
+    return [`${mine[0].label} (region ${opts.region}):`, ...mine.map((r) => `  ${formatTime(r.t).padEnd(12)} ${lifewayText([r.lifeway]).padEnd(22)} ${fmt(r.people).padStart(14)} people  ${r.tradition ? `${r.tradition}${r.kin ? ` (the house of its ${lifewayText([r.kin])}, standing in)` : ''}` : '— generic houses'}`)].join('\n');
   }
   const open = rows.filter((r) => !r.tradition && r.people > 0 && (!opts.lifeway || r.lifeway === opts.lifeway)).sort((a, b) => b.people - a.people).slice(0, n);
   const whose = opts.lifeway ? `${lifewayText([opts.lifeway])} ` : 'people ';

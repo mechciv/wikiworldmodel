@@ -9,7 +9,7 @@ import type { WaterParams } from './water.ts';
 import type { Fingerprint } from './fingerprint.ts';
 import type { Form } from './form.ts';
 import type { FeatureTime } from './tileset.ts';
-import type { Tradition } from './dwelling.ts';
+import type { Husbandry, Tradition } from './dwelling.ts';
 import type { AnthromeClass, Assessment, CityNear, Lifeway } from './landscape.ts';
 
 /** A taxon of the formation that is not drawn, and why not. */
@@ -26,8 +26,11 @@ export interface SceneCover {
   grasses: number;
 }
 
-/** How a taxon in a scene rests on evidence. A site's own taxa come from its formation's rows. */
-export type SceneTier = 'formation' | 'here' | 'region' | 'standin';
+/**
+ * How a taxon in a scene rests on evidence. A site's own taxa come from its formation's rows. An animal the people of
+ * the scene kept is `kept`: a husbandry tradition of its region and time names it (ScenePeople.kept).
+ */
+export type SceneTier = 'formation' | 'here' | 'region' | 'standin' | 'kept';
 
 export interface LivingTaxon {
   /** a record's id, or the database's number as `txn:123` where no record adopts it */
@@ -166,6 +169,13 @@ export interface ScenePeople {
   cities: (Omit<CityNear, 'km' | 'also'> & { also?: CityNear['also'] })[];
   /** the building traditions that hold in the grid's regions at the time, merged down their tree */
   traditions: Tradition[];
+  /**
+   * the husbandry traditions that hold there then, and the animals they name, each with its body and its size as its
+   * taxon's records give them, and their forms: gen:people/settlement draws them in the pastures and about the yards
+   */
+  husbandry?: Husbandry[];
+  kept?: LivingTaxon[];
+  keptForms?: Record<string, Form>;
   /** what it rests on: the fields read */
   fields: { anthromes: string; assessment: string; population: string; lifeways: string };
   /** the generator that draws it, and its parameters */

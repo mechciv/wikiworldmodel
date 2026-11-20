@@ -9,6 +9,7 @@
 #               raise a structure: { type: temple, order: corinthian, … }, core/city.ts)
 #               | dwelling | settlement-form | field-system | town-form | lifeway (a building tradition's
 #               house, how its houses stood together, its fields, its towns, and whom it housed: core/dwelling.ts)
+#               | taxa (a list of taxon records, as the animals a husbandry tradition kept)
 #   unit        for quantities: values are written in this unit
 #   values      for strings: the values allowed, each with what it means
 #   interp      how a state changes between known points: step | linear | log-time | slerp
@@ -431,12 +432,21 @@ properties:
   lifeway:
     type: lifeway
     interp: step
-    applies_to: [tradition/building]
+    applies_to: [tradition]
     description: >-
-      Whom a building tradition housed: one or more of the ways of life the model of how people lived tells apart
-      (core/dwelling.ts): foragers, herders, shifting-cultivators, farmers, townspeople. Its house is drawn only for
-      those: a herder's tent for the camps of herders, not for the farmers of the same region. A tradition that does
-      not say takes the answer of the one it is a member of; one that has none houses no one, and the validator says so.
+      Whose a tradition was: one or more of the ways of life the model of how people lived tells apart
+      (core/dwelling.ts): foragers, herders, shifting-cultivators, farmers, townspeople. A building tradition's
+      house is drawn only for those: a herder's tent for the camps of herders, not for the farmers of the same
+      region; and a husbandry tradition's animals only among them. A tradition that does not say takes the answer of
+      the one it is a member of; one that has none is drawn for no one, and the validator says so.
+  livestock:
+    type: taxa
+    interp: step
+    applies_to: [tradition/husbandry]
+    description: >-
+      The animals a husbandry tradition's people kept, as a list of taxon records: domestic cattle, sheep, horses.
+      The settlement generator draws them, each with its taxon's body and size, in the pastures and about the yards
+      of the tradition's people. How many there were is not read from it: that is the generator's, and says so.
   extent:
     type: geometry
     interp: step

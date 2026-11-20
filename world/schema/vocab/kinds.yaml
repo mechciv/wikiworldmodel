@@ -217,6 +217,12 @@ kinds:
           A way of building houses and setting them out, recognized across sites: the dwelling its sources describe,
           the settlement those houses stood in and the fields around it, where and when it held. The settlement
           generator draws its houses (docs/DWELLINGS.md).
+      husbandry:
+        label: Husbandry tradition
+        description: >-
+          A way of keeping animals, recognized across a region over a span of time: which animals its people kept
+          (`livestock`), whose way it was (`lifeway`), and where and when it held. The settlement generator draws
+          those animals in the pastures and about the yards of the people it names (docs/DWELLINGS.md).
   artefact:
     label: Artefact
     description: >-

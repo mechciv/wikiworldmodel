@@ -6,7 +6,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { parse } from 'yaml';
-import { compileTraditions, dwellingProblems, fieldProblems, lifewayProblems, lifewayText, settlementProblems, specText, traditionAt, type LifewayWord, type Tradition } from '../../../core/dwelling.ts';
+import { compileHusbandry, compileTraditions, husbandryAt, dwellingProblems, fieldProblems, lifewayProblems, lifewayText, settlementProblems, specText, traditionAt, traditionFor, type LifewayWord, type Tradition } from '../../../core/dwelling.ts';
 import { anthromeTile, assessmentAt, cityPeople, citiesAround, citiesNear, classAtStep, figureAt, nameAt, LIFEWAY_OF, lifewayOf, nearestStep, shareDensity, tileKey, cellOf, type AnthromeClass, type Assessment, type CitiesFile, type City } from '../../../core/landscape.ts';
 import type { PeopleFile } from '../../../core/layers.ts';
 import { assessmentsFile, cityYear, citiesOf, eckert4Inverse, housing, housingCounts, parseClassGrid, rasterizeRegions, stepOfName, type LandscapeBuilt } from '../src/build/landscape.ts';
@@ -261,6 +261,26 @@ describe('building traditions', () => {
     expect(own.from.lifeway).toBe('c');
   });
 
+  it("keeps a husbandry tradition's animals, with whose they were, and gives the most particular for a way of life", () => {
+    const list = compileHusbandry([
+      { id: 'broad', label: 'Farm animals', regions: [1, 2], span: [-3000, 1500], lifeways: ['farmers', 'townspeople'], animals: ['cattle', 'pigs'] },
+      { id: 'narrow', label: 'Later farm animals', parent: 'broad', regions: [1], span: [0, 1500], animals: ['cattle', 'pigs', 'hens'] },
+      { id: 'steppe', label: 'Herds', regions: [1], span: [-3000, 1500], lifeways: ['herders'], animals: ['horses', 'sheep'] },
+      { id: 'empty', label: 'Says nothing', regions: [1], span: [-3000, 1500], lifeways: ['foragers'] },
+    ]);
+    const narrow = list.find((x) => x.id === 'narrow')!;
+    // A member takes whose it was from its parent, and says its animals whole.
+    expect(narrow).toMatchObject({ lifeways: ['farmers', 'townspeople'], animals: ['cattle', 'pigs', 'hens'], depth: 1, from: { lifeway: 'broad', livestock: 'narrow' } });
+    expect(husbandryAt(list, 1, 500, 'farmers')!.id).toBe('narrow');
+    expect(husbandryAt(list, 1, -500, 'farmers')!.id).toBe('broad');
+    expect(husbandryAt(list, 2, 500, 'townspeople')!.id).toBe('broad');
+    expect(husbandryAt(list, 1, 500, 'herders')!.id).toBe('steppe');
+    // No animals for a way of life none names, nor from a tradition that names none.
+    expect(husbandryAt(list, 1, 500, 'shifting-cultivators')).toBeUndefined();
+    expect(husbandryAt(list, 1, 500, 'foragers')).toBeUndefined();
+    expect(husbandryAt(list, 3, 500, 'farmers')).toBeUndefined();
+  });
+
   it('checks whom a tradition housed word by word', () => {
     expect(lifewayProblems(['foragers'])).toEqual([]);
     expect(lifewayProblems(['farmers', 'townspeople'])).toEqual([]);
@@ -300,6 +320,21 @@ describe('building traditions', () => {
     expect(traditionAt(list, 1, 0, 'foragers')).toBeUndefined();
     expect(traditionAt(list, 1, 0, 'shifting-cultivators')).toBeUndefined();
     expect(list.find((x) => x.id === 'silent')!.lifeways).toEqual([]);
+  });
+
+  it('lets the house of farmers stand in for shifting cultivators who have none, and says so; a tent for no one else', () => {
+    const list = compileTraditions([
+      { id: 'tent', label: 'A tent', regions: [1], span: [-3000, 1500], lifeways: ['herders'], dwelling: { walls: 'felt' } },
+      { id: 'house', label: 'A house', regions: [1], span: [-3000, 1500], lifeways: ['farmers', 'townspeople'], dwelling: { walls: 'mudbrick' } },
+      { id: 'swidden', label: 'A swidden house', regions: [2], span: [-3000, 1500], lifeways: ['shifting-cultivators'], dwelling: { walls: 'pole-and-thatch' } },
+    ]);
+    expect(traditionFor(list, 1, 0, 'farmers')).toEqual({ tradition: expect.objectContaining({ id: 'house' }) });
+    expect(traditionFor(list, 1, 0, 'shifting-cultivators')).toEqual({ tradition: expect.objectContaining({ id: 'house' }), kin: 'farmers' });
+    expect(traditionFor(list, 2, 0, 'farmers')).toEqual({ tradition: expect.objectContaining({ id: 'swidden' }), kin: 'shifting-cultivators' });
+    // Townspeople, herders and foragers take only a house written for them.
+    expect(traditionFor(list, 2, 0, 'townspeople')).toBeUndefined();
+    expect(traditionFor(list, 1, 0, 'foragers')).toBeUndefined();
+    expect(traditionFor(list, 2, 0, 'herders')).toBeUndefined();
   });
 });
 
@@ -363,6 +398,18 @@ describe('whose houses rest on a tradition', () => {
     const farmhouse = { id: 'farmhouse', label: 'A farmhouse', regions: [2], span: [-500, 500] as [number, number], lifeways: ['farmers'] as LifewayWord[], dwelling: { walls: 'timber' as const } };
     expect(housing(built(compileTraditions([house, farmhouse])), people, [0]).find((r) => r.region === 2)!.tradition).toBeUndefined();
     expect(housing(built(compileTraditions([house, tent])), people, [0]).find((r) => r.region === 2)!.tradition).toBe('tent');
+  });
+
+  it("counts shifting cultivators in the house of their region's farmers as housed, by a stand-in", () => {
+    // The herders' region has only a farmhouse: no tent, so no house for them. A region of shifting cultivators would take it.
+    const swidden = { id: 'farm', label: 'A farm', regions: [2], span: [-500, 500] as [number, number], lifeways: ['shifting-cultivators'] as LifewayWord[], dwelling: { walls: 'timber' as const } };
+    const b = built(compileTraditions([swidden, { ...house, regions: [9] }]));
+    // The villagers of region 1 have no tradition of their own region; those of a region with a swidden house take it.
+    const moved = built(compileTraditions([{ ...swidden, regions: [1] }]));
+    expect(housing(b, people, [0]).find((r) => r.region === 1)!.tradition).toBeUndefined();
+    const row = housing(moved, people, [0]).find((r) => r.region === 1)!;
+    expect(row).toMatchObject({ pattern: 'villages', tradition: 'farm', kin: 'shifting-cultivators' });
+    expect(housingCounts(moved, housing(moved, people, [0]))[0]).toMatchObject({ housed: 144000, standIn: 144000 });
   });
 
   it('adds them up for the coverage: people and those housed, by pattern, the regions, and the cities of the lists', () => {

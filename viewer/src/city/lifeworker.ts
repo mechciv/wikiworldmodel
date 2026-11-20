@@ -12,7 +12,10 @@ export interface PeopleSummary {
   /** the kinds of piece its towns' works are drawn from, and how many pieces stand */
   works: WorkForm[];
   pieces: number;
-  settlements: { pattern: string; houses: number; people: number; city?: string; record?: string; from?: Settlement['from']; town?: Settlement['town']; tier: string; form: number; x: number; y: number }[];
+  /** how many kinds of animal its people kept are drawn, and how many animals */
+  kept: number;
+  animals: number;
+  settlements: { pattern: string; houses: number; people: number; city?: string; record?: string; from?: Settlement['from']; town?: Settlement['town']; husbandry?: string; tier: string; form: number; x: number; y: number }[];
   houses: number;
   drawn: number;
   expected: number;
@@ -55,7 +58,9 @@ self.onmessage = (e: MessageEvent<ToLifeWorker>) => {
       forms: pl.forms,
       works: pl.workForms,
       pieces: pl.works.length,
-      settlements: pl.settlements.map((x) => ({ pattern: x.pattern, houses: x.houses, people: Math.round(x.people), ...(x.city ? { city: x.city } : {}), ...(x.record ? { record: x.record } : {}), ...(x.from ? { from: x.from } : {}), ...(x.town ? { town: x.town } : {}), tier: x.tier, form: x.form, x: Math.round(x.x), y: Math.round(x.y) })),
+      kept: m.spec.people?.kept?.length ?? 0,
+      animals: pl.animals.length,
+      settlements: pl.settlements.map((x) => ({ pattern: x.pattern, houses: x.houses, people: Math.round(x.people), ...(x.city ? { city: x.city } : {}), ...(x.record ? { record: x.record } : {}), ...(x.from ? { from: x.from } : {}), ...(x.town ? { town: x.town } : {}), ...(x.husbandry ? { husbandry: x.husbandry } : {}), tier: x.tier, form: x.form, x: Math.round(x.x), y: Math.round(x.y) })),
       houses: pl.houses.length,
       drawn: pl.drawn,
       expected: pl.expected,

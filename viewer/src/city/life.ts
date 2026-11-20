@@ -200,7 +200,7 @@ export class LifeScene {
     r.setGroundCover(...groundCover(this.spec));
     // Each taxon is an entity, and after them each kind of house and each kind of piece of a town's works, which stand
     // for as long as the scene does: generated.
-    const houseKinds = (this.people?.forms.length ?? 0) + (this.people?.works.length ?? 0);
+    const houseKinds = (this.people?.forms.length ?? 0) + (this.people?.works.length ?? 0) + (this.people?.kept ?? 0);
     const out = new Float32Array((this.spec.taxa.length + 1 + houseKinds) * 4);
     for (let f = 0; f < houseKinds; f++) {
       const k = (this.spec.taxa.length + 1 + f) * 4;
@@ -300,12 +300,17 @@ export class LifeScene {
     this.renderer.render(f, [], outW, outH);
   }
 
-  /** What is at a screen position: a taxon, a kind of house or of a piece of a town's works the generator drew, or nothing. */
-  pick(x: number, y: number): { taxon?: LivingTaxon; house?: number; work?: number } {
+  /**
+   * What is at a screen position: a taxon, a kind of house or of a piece of a town's works the generator drew, an animal
+   * the scene's people kept, or nothing.
+   */
+  pick(x: number, y: number): { taxon?: LivingTaxon; house?: number; work?: number; kept?: LivingTaxon } {
     const e = this.renderer.pick(x, y);
     if (!e) return {};
     const made = e - this.spec.taxa.length - 1;
     const forms = this.people?.forms.length ?? 0;
+    const works = this.people?.works.length ?? 0;
+    if (made >= forms + works) return { kept: this.spec.people?.kept?.[made - forms - works] };
     if (made >= forms) return { work: made - forms };
     if (made >= 0) return { house: made };
     return { taxon: this.spec.taxa[e - 1] };

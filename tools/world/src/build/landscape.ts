@@ -13,7 +13,10 @@ import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { unzipSync } from 'fflate';
 import { decodeTile, encodeTile } from '../../../../core/container.ts';
-import { compileTraditions, traditionAt, type DwellingSpec, type FieldSpec, type LifewayWord, type SettlementSpec, type TownSpec, type Tradition, type TraditionInput } from '../../../../core/dwelling.ts';
+import { compileHusbandry, compileTraditions, traditionAt, traditionFor, type DwellingSpec, type FieldSpec, type Husbandry, type HusbandryInput, type LifewayWord, type SettlementSpec, type TownSpec, type Tradition, type TraditionInput } from '../../../../core/dwelling.ts';
+import { canonicalForm, type Form } from '../../../../core/form.ts';
+import type { LivingTaxon } from '../../../../core/scene.ts';
+import { FormTree } from '../forms.ts';
 import type { LandscapeIndex, TraditionsFile } from '../../../../core/landscape.ts';
 export type { LandscapeIndex, TraditionsFile };
 import { anthromeTile, assessmentAt, cityPeople, classAtStep, cellOf, kmBetween, LEVEL_WORDS, LIFEWAY_OF, lifewayOf, nameAt, nearestStep, shareDensity, tileKey, type AnthromeClass, type City, type CityRecord, type CitiesFile, type AnthromeTile, type AnthromeTileHeader, type Assessment, type AssessmentsFile, type HousingCount, type Pattern } from '../../../../core/landscape.ts';
@@ -441,6 +444,101 @@ export function traditionInputs(s: Solved, regionsSource: string): TraditionInpu
   return out;
 }
 
+// ——— Husbandry ———
+
+/** Each husbandry tradition the world records, with its own claims, before inheritance. */
+export function husbandryInputs(s: Solved, regionsSource: string): HusbandryInput[] {
+  const out: HusbandryInput[] = [];
+  for (const e of s.world.entities) {
+    if (e.kind !== 'tradition/husbandry') continue;
+    const value = <T>(prop: string): T | undefined => claimOf(s, e.id, prop)?.value as T | undefined;
+    const extent = value<{ from: string; names: string[] }>('extent');
+    const regions = extent && extent.from === regionsSource ? extent.names.map(Number).filter((n) => Number.isInteger(n) && n > 0) : [];
+    const { time } = subjectTime(s, e.id);
+    const best = (x: { best: number | null; lo: number; hi: number }, or: number) => (x.best !== null && Number.isFinite(x.best) ? x.best : Number.isFinite(or) ? or : NaN);
+    const start = best(time.start, time.start.lo);
+    const end = time.endUnknown ? best(time.end, time.end.hi) : best(time.end, Infinity);
+    const name = value<Record<string, string>>('name');
+    const parent = e.relations.find((r) => r.rel === 'member-of')?.to;
+    out.push({
+      id: e.id,
+      label: name?.en ?? Object.values(name ?? {})[0] ?? e.id,
+      ...(parent ? { parent } : {}),
+      regions,
+      span: [Number.isFinite(start) ? start : -1e9, Number.isFinite(end) ? end : 1e9],
+      ...(value<LifewayWord[]>('lifeway') ? { lifeways: value<LifewayWord[]>('lifeway') } : {}),
+      ...(value<string[]>('livestock') ? { animals: value<string[]>('livestock') } : {}),
+    });
+  }
+  return out;
+}
+
+/** To three figures, as the atlas rounds a size. */
+const figures3 = (x: number): number => {
+  let k = 1;
+  while (x * k < 100) k *= 10;
+  while (x * k >= 1000) k /= 10;
+  return Math.floor(x * k + 0.5) / k;
+};
+
+/**
+ * The animals the husbandry traditions name, each as a scene draws it: the body its taxon's records give it, up the
+ * tree to the nearest that has one, and its size, the middle of the range its nearest claim gives (the atlas's taxa
+ * take theirs the same way, core/form.ts and tools/world/src/forms.ts). One with no body or no size above it is left
+ * out, and said: a size is inherited, never guessed.
+ */
+export function keptAnimals(w: World, ids: string[], log: (s: string) => void = () => {}): { kept: LivingTaxon[]; forms: Record<string, Form> } {
+  const tree = new FormTree(w);
+  const kept: LivingTaxon[] = [];
+  const forms: Record<string, Form> = {};
+  const labelOf = (id: string) => {
+    const name = w.entity.get(id)?.claims.find((c) => c.prop === 'name')?.value as { en?: string; la?: string } | undefined;
+    return name?.en ?? name?.la ?? id;
+  };
+  const always = { best: null, lo: -Infinity, hi: Infinity, derived: true };
+  for (const id of [...new Set(ids)].sort()) {
+    const source = tree.source(id);
+    const form = tree.form(id);
+    const length = tree.size(id, 'body_length');
+    const mass = tree.size(id, 'body_mass');
+    const hip = tree.size(id, 'hip_height');
+    if (!source || !form || form.kind !== 'animal' || (!length && !mass)) {
+      log(`landscape  ${id} is kept by a husbandry tradition and cannot be drawn: ${!source || !form ? 'no record above it has a body plan' : form.kind !== 'animal' ? 'its body is no animal\'s' : 'no record at or above it gives a size'}`);
+      continue;
+    }
+    const canon = canonicalForm(form);
+    const key = sha256(stableStringify(canon)).slice(0, 16);
+    forms[key] = canon;
+    const middle = (q: { lo: number; hi: number }) => figures3(Math.sqrt(q.lo * q.hi));
+    const m = mass ? middle(mass) : undefined;
+    const fromMass = !length && m !== undefined;
+    const l = length ? middle(length) : figures3(Math.cbrt(m! / (form.mass_length ?? 20)));
+    const size = length ?? mass!;
+    const posture = tree.posture(id);
+    kept.push({
+      id,
+      label: labelOf(id),
+      form: key,
+      form_from: source.from,
+      form_label: labelOf(source.from),
+      own: source.from === id,
+      tier: 'kept',
+      weight: 1,
+      rows: 0,
+      ...(posture ? { posture } : {}),
+      biped: posture === 'biped',
+      length: l,
+      ...(hip && hip.own ? { hip: middle(hip) } : {}),
+      ...(m !== undefined ? { mass: m } : {}),
+      ...(!size.own ? { size_from: labelOf(size.from) } : {}),
+      ...(fromMass ? { fromMass: true } : {}),
+      // It stands for as long as its keepers' tradition does: the scene asks the tradition, not the taxon.
+      time: { start: always, end: always, instant: false },
+    });
+  }
+  return { kept, forms };
+}
+
 // ——— The settlements with records ———
 
 /** How near in years a second figure of a record is taken for a rival of one already kept, and not for another time's. */
@@ -519,6 +617,7 @@ export interface LandscapeBuilt {
   index: LandscapeIndex;
   assessments: AssessmentsFile;
   traditions: Tradition[];
+  husbandry: Husbandry[];
   cities: CitiesFile;
   /** the span the anthromes hold, and the assessments' */
   span: [number, number];
@@ -630,7 +729,10 @@ export async function buildLandscape(s: Solved, log: (s: string) => void): Promi
   cities.records = cityRecords(s);
   files.set('people/cities.json', stableStringify(cities));
   const traditions = compileTraditions(traditionInputs(s, regionsId));
-  files.set('people/traditions.json', stableStringify({ format: 'lightworld-traditions@1', regions: regionsId, traditions } satisfies TraditionsFile));
+  // The animals people kept: the husbandry traditions, and each animal they name with its body and size.
+  const husbandry = compileHusbandry(husbandryInputs(s, regionsId));
+  const animals = keptAnimals(w, husbandry.flatMap((h) => h.animals), log);
+  files.set('people/traditions.json', stableStringify({ format: 'lightworld-traditions@1', regions: regionsId, traditions, ...(husbandry.length ? { husbandry, kept: animals.kept, forms: animals.forms } : {}) } satisfies TraditionsFile));
   const globe = decodeTile<AnthromeTileHeader>(toBuffer(files.get('people/anthromes/globe.lwt') as Uint8Array));
   const steps = globe.header.steps;
   const tiles = [...files.keys()].filter((k) => /^people\/anthromes\/-?\d+_-?\d+\.lwt$/.test(k)).map((k) => k.slice('people/anthromes/'.length, -4)).sort();
@@ -654,7 +756,7 @@ export async function buildLandscape(s: Solved, log: (s: string) => void): Promi
     reach_km: (gen?.params as { cities?: { reach_km?: number } } | undefined)?.cities?.reach_km ?? 30,
   };
   files.set('people/landscape.json', stableStringify(index));
-  log(`landscape  ${tiles.length} tiles of 5′ cells over ${steps.length} steps, ${assessments.regions.length} regions assessed at ${assessments.slices.length} times, ${cities.cities.length} cities of the lists and ${cities.records.length} with records, ${traditions.length} building traditions`);
+  log(`landscape  ${tiles.length} tiles of 5′ cells over ${steps.length} steps, ${assessments.regions.length} regions assessed at ${assessments.slices.length} times, ${cities.cities.length} cities of the lists and ${cities.records.length} with records, ${traditions.length} building traditions, ${husbandry.length} husbandry traditions keeping ${animals.kept.length} kinds of animal`);
   // Lookups at a place and time, from the tiles as the viewer reads them.
   const decoded = new Map<string, AnthromeTile>();
   const tileOf = (name: string): AnthromeTile | undefined => {
@@ -677,7 +779,7 @@ export async function buildLandscape(s: Solved, log: (s: string) => void): Promi
   };
   const span: [number, number] = [steps[0], steps.at(-1)!];
   const assessed: [number, number] = [assessments.slices[0].year, assessments.slices.at(-1)!.year];
-  return { files, index, assessments, traditions, cities, span, assessed, at, tile: tileOf, classes };
+  return { files, index, assessments, traditions, husbandry, cities, span, assessed, at, tile: tileOf, classes };
 }
 
 const toBuffer = (u: Uint8Array): ArrayBuffer => u.buffer.slice(u.byteOffset, u.byteOffset + u.byteLength) as ArrayBuffer;
@@ -736,6 +838,8 @@ export interface HousingRow {
   pattern: Exclude<Pattern, 'none'>;
   people: number;
   tradition?: string;
+  /** the way of life the tradition was written for, where that is another, kin to theirs: its house stands in */
+  kin?: LifewayWord;
 }
 
 /**
@@ -794,8 +898,8 @@ export function housing(b: LandscapeBuilt, people: PeopleFile, times: number[]):
     for (const [key, count] of [...sum].sort((x, y) => x[0] - y[0])) {
       const region = Math.floor(key / 16);
       const pattern = patterns[key % 16];
-      const tradition = traditionAt(b.traditions, region, t, LIFEWAY_OF[pattern]);
-      rows.push({ t, region, pattern, people: Math.round(count), ...(tradition ? { tradition: tradition.id } : {}) });
+      const found = traditionFor(b.traditions, region, t, LIFEWAY_OF[pattern]);
+      rows.push({ t, region, pattern, people: Math.round(count), ...(found ? { tradition: found.tradition.id, ...(found.kin ? { kin: found.kin } : {}) } : {}) });
     }
   }
   return rows;
@@ -813,6 +917,7 @@ export function housingCounts(b: LandscapeBuilt, rows: HousingRow[]): HousingCou
     const regions = new Map<number, boolean>();
     let people = 0;
     let housed = 0;
+    let standIn = 0;
     for (const r of mine) {
       const x = (by[r.pattern] ??= [0, 0]);
       x[0] += r.people;
@@ -820,6 +925,7 @@ export function housingCounts(b: LandscapeBuilt, rows: HousingRow[]): HousingCou
       if (r.tradition) {
         x[1] += r.people;
         housed += r.people;
+        if (r.kin) standIn += r.people;
       }
       if (r.region) regions.set(r.region, (regions.get(r.region) ?? false) || !!r.tradition);
     }
@@ -838,7 +944,7 @@ export function housingCounts(b: LandscapeBuilt, rows: HousingRow[]): HousingCou
       cities[1] += c.people;
       if (c.housed) cities[2] += c.people;
     }
-    return { t, people, housed, by, regions: [regions.size, [...regions.values()].filter(Boolean).length], cities };
+    return { t, people, housed, ...(standIn ? { standIn } : {}), by, regions: [regions.size, [...regions.values()].filter(Boolean).length], cities };
   });
 }
 

@@ -157,8 +157,9 @@ export interface LandscapeHere {
   density?: number;
   regionUses?: string[];
   cities: { name: string; people: number; km: number; list: string; also: { people: number; list: string }[]; record?: string }[];
-  /** whose houses a scene draws here, in words: "herders", "townspeople" */
+  /** whose houses a scene draws here, in words: "herders", "townspeople"; and whose house stands in for theirs, if one does */
   whose?: string;
+  kin?: string;
   tradition?: { id: string; label: string; dwelling: string };
 }
 
@@ -746,7 +747,7 @@ export class InspectPanel {
     const houses = !h.whose
       ? ''
       : h.tradition
-        ? `<p><strong>Houses</strong> of ${esc(whose)} here are drawn as those of ${esc(h.tradition.label)}: ${esc(h.tradition.dwelling)}.</p>`
+        ? `<p><strong>Houses</strong> of ${esc(whose)} here are drawn as those of ${esc(h.tradition.label)}${h.kin ? `, the house of the region's ${esc(h.kin)}, standing in: no tradition is recorded for ${esc(whose)} themselves` : ''}: ${esc(h.tradition.dwelling)}.</p>`
         : `<p><strong>Houses</strong> of ${esc(whose)} here are generic: no building tradition is recorded for them in this region at this time, so a scene draws a plain house for the way of life and the climate, and says so.</p>`;
     return `<section class="landscape"><h3>How people lived here, at ${esc(formatTime(p.t, 1e4))} <span class="badge basis-${tier}">${esc(l.tier)}</span></h3>
       <p class="big">${esc(PATTERN_WORDS[l.pattern] ?? l.pattern)}</p>

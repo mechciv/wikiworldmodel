@@ -4,9 +4,10 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { parse } from 'yaml';
-import { compileTraditions, type TownSpec, type Tradition } from '../../../../core/dwelling.ts';
+import { compileHusbandry, compileTraditions, type TownSpec, type Tradition } from '../../../../core/dwelling.ts';
+import type { Form } from '../../../../core/form.ts';
 import { lifewayOf, type AnthromeClass, type Assessment } from '../../../../core/landscape.ts';
-import type { SceneSpec, ScenePeople } from '../../../../core/scene.ts';
+import type { LivingTaxon, SceneSpec, ScenePeople } from '../../../../core/scene.ts';
 import { LandUseMap, makeSettlement, toLocal, type Ground } from './v2.ts';
 
 const ROOT = join(import.meta.dirname, '../../../..');
@@ -143,6 +144,66 @@ describe('the settlement generator', () => {
     // The farmers of the same region: neither tradition says it housed them, so theirs is the generic house.
     const farmers = drawn(23, 260, assess(1, 1, 3, 2));
     expect(farmers.from).toEqual(new Set(['generic:farm:temperate']));
+  });
+
+  it("draws shifting cultivators in the house of their region's farmers where none is written for them, and says it stands in", () => {
+    const traditions: Tradition[] = compileTraditions([{ id: 'test/farmhouse', label: 'A farmhouse', regions: [1], span: [-500, 500], lifeways: ['farmers'], dwelling: { plan: 'rectangular', walls: 'timber' } }]);
+    // Populated woodland where the archaeologists say shifting cultivation was the way of life.
+    const plan = makeSettlement(spec(world(() => ({ code: 52, density: 4, region: 1 }), [{ id: 1, a: assess(1, 3, 1, 0) }], { traditions })), flat, dry, EXTENT);
+    expect(new Set(plan.settlements.map((s) => s.pattern))).toEqual(new Set(['shifting']));
+    expect(plan.forms).toHaveLength(1);
+    expect(plan.forms[0]).toMatchObject({ from: 'tradition', tradition: 'test/farmhouse', whose: 'shifting-cultivators', kin: 'farmers' });
+    expect(plan.forms[0].spec).toMatchObject({ walls: 'timber' });
+  });
+
+  describe('the animals people kept', () => {
+    const always = { best: null, lo: -Infinity, hi: Infinity, derived: true };
+    const animal = (id: string, label: string, length: number, mass: number): LivingTaxon => ({ id, label, form: id, form_from: id, form_label: label, own: true, tier: 'kept', weight: 1, rows: 0, biped: false, length, mass, time: { start: always, end: always, instant: false } });
+    const kept = [animal('test/cattle', 'Cattle', 2.4, 500), animal('test/hens', 'Chickens', 0.4, 2)];
+    const keptForms = Object.fromEntries(kept.map((k) => [k.form, { kind: 'animal', behave: { habitat: 'open', poses: k.mass! > 100 ? ['graze', 'stand', 'walk'] : ['stand', 'walk'] } }])) as unknown as Record<string, Form>;
+    const husbandry = compileHusbandry([{ id: 'test/herding', label: 'Herding', regions: [1], span: [-500, 500], lifeways: ['herders'], animals: ['test/cattle', 'test/hens', 'test/unknown'] }]);
+    const plan = (code: number, density: number, a: Assessment, extra: Partial<ScenePeople> = { husbandry, kept, keptForms }) => makeSettlement(spec(world(() => ({ code, density, region: 1 }), [{ id: 1, a }], extra)), flat, dry, EXTENT);
+
+    it('are drawn where a husbandry tradition names them for that way of life: herds on the pasture, the rest about the houses', () => {
+      const p = plan(42, 3, assess(1, 0, 0, 3));
+      expect(p.animals.length).toBeGreaterThan(200);
+      expect(new Set(p.settlements.map((s) => s.husbandry))).toEqual(new Set(['test/herding']));
+      // About six to a house, as the generator's parameters say for herders, and both kinds alike.
+      expect(p.animals.length / p.houses.length).toBeGreaterThan(4.5);
+      expect(p.animals.length / p.houses.length).toBeLessThan(6.6);
+      const of = (kind: number) => p.animals.filter((a) => a.kind === kind);
+      expect(of(0).length / of(1).length).toBeGreaterThan(0.8);
+      expect(of(0).length / of(1).length).toBeLessThan(1.25);
+      // The cattle graze in herds beyond the tents, within their camp's pasture; the hens stay by a tent.
+      for (const a of of(0)) {
+        const s = p.settlements[a.settlement];
+        const d = Math.hypot(a.x - s.x, a.y - s.y);
+        expect(d).toBeGreaterThan(s.r);
+        expect(d).toBeLessThan(Math.max(s.r * 1.15 + 75, s.fieldR * 0.9) + 40);
+      }
+      const tents = new Map<number, { x: number; y: number }[]>();
+      for (const h of p.houses) (tents.get(h.settlement) ?? tents.set(h.settlement, []).get(h.settlement)!).push(h);
+      for (const a of of(1)) expect(Math.min(...tents.get(a.settlement)!.map((h) => Math.hypot(a.x - h.x, a.y - h.y)))).toBeLessThan(10.01);
+      // Cattle graze, mostly; hens do not.
+      expect(of(0).some((a) => a.pose === 2)).toBe(true);
+      expect(of(1).every((a) => a.pose !== 2)).toBe(true);
+    });
+
+    it('are not drawn for people whose way of life no husbandry names, nor where the world gives none', () => {
+      // Farmers of the same region: the herding tradition is the herders'.
+      const farmers = plan(23, 260, assess(1, 1, 3, 2));
+      expect(farmers.animals).toEqual([]);
+      expect(farmers.settlements.every((s) => s.husbandry === undefined)).toBe(true);
+      expect(plan(42, 3, assess(1, 0, 0, 3), {}).animals).toEqual([]);
+      // The same herd from two scenes: an animal of a camp well inside both stands in the same place.
+      const a = plan(42, 3, assess(1, 0, 0, 3));
+      const b = makeSettlement(spec(world(() => ({ code: 42, density: 3, region: 1 }), [{ id: 1, a: assess(1, 0, 0, 3) }], { husbandry, kept, keptForms }), { lat: 0.03, lon: 0.02 }), flat, dry, EXTENT);
+      const [bx, by] = toLocal({ lat: 0, lon: 0 }, 0.03, 0.02);
+      const spots = new Set(b.animals.map((x) => `${Math.round(x.x + bx)},${Math.round(x.y + by)}`));
+      const inner = a.animals.filter((x) => Math.abs(x.x) < 6000 && Math.abs(x.y) < 6000);
+      expect(inner.length).toBeGreaterThan(50);
+      expect(inner.filter((x) => spots.has(`${Math.round(x.x)},${Math.round(x.y)}`)).length / inner.length).toBeGreaterThan(0.9);
+    });
   });
 
   it('draws a city of the lists where the anthromes have none', () => {

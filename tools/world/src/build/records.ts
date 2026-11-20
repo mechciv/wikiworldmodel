@@ -397,6 +397,8 @@ function valueText(s: Solved, c: Claim, labelOf: (ref: string) => string): strin
       return specText(v as DwellingSpec);
     case 'town-form':
       return townText(v as TownSpec);
+    case 'taxa':
+      return (v as string[]).map((id) => labelOf(id)).join(', ');
     case 'lifeway':
       return lifewayText(v as LifewayWord[]);
     case 'geometry': {

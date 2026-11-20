@@ -23,6 +23,12 @@ inputs:
   - { prop: extent, note: "the regions each tradition was found in" }
   - { prop: lifeway, note: "whom each tradition housed: its house is drawn for those ways of life only" }
   - { prop: town_form, note: "how a town's streets ran and what enclosed it, as the tradition of its townspeople or its own record says" }
+  - { kind: tradition/husbandry, note: "the ways of keeping animals that hold in the region at the time" }
+  - { prop: livestock, note: "which animals each husbandry tradition's people kept" }
+  - { prop: body_plan, note: "each kept animal's body, from its taxon's records" }
+  - { prop: body_form, note: "each kept animal's body, from its taxon's records" }
+  - { prop: body_length, note: "how big each kept animal is drawn" }
+  - { prop: body_mass, note: "how big each kept animal is drawn, and whether it grazes in a herd or is kept about the houses" }
   - { kind: settlement, note: "the cities the world has records of: where and when each stood" }
   - { prop: population, kind: settlement, note: "a recorded city's people at the times its claims are for" }
   - { prop: houses, kind: settlement, note: "a recorded city's houses, where a source counts them" }
@@ -34,6 +40,8 @@ checks:
   - { test: world/generators/people/settlement/v2.test.ts, holds: "draws fields where people farmed, pasture where they herded, and neither for foragers" }
   - { test: world/generators/people/settlement/v2.test.ts, holds: "draws a tradition's house where it holds, and the generic one where none does" }
   - { test: world/generators/people/settlement/v2.test.ts, holds: "draws a camp's shelter from the tradition that housed its way of life, and no farmer's house from a herder's tent" }
+  - { test: world/generators/people/settlement/v2.test.ts, holds: "draws shifting cultivators in the house of their region's farmers where none is written for them, and says it stands in" }
+  - { test: world/generators/people/settlement/v2.test.ts, holds: "are drawn where a husbandry tradition names them for that way of life: herds on the pasture, the rest about the houses" }
   - { test: world/generators/people/settlement/v2.test.ts, holds: "draws a city of the lists where the anthromes have none" }
   - { test: world/generators/people/settlement/v2.test.ts, holds: "puts a settlement in the same place from two scenes that overlap" }
   - { test: world/generators/people/settlement/v2.test.ts, holds: "seeds each cell and each settlement apart, and each alike from two scenes" }
@@ -119,4 +127,13 @@ params:
     moat: 12
     canal_every: 2
     open_lot: 1200
+  # The animals a husbandry tradition says its people kept are drawn among them: those that graze in herds, on the
+  # pasture of people who herd and at the edge of the houses of people who farm; the rest about the houses. Which animals
+  # is the tradition's. How many is nobody's: these numbers only say how full a scene is drawn.
+  livestock:
+    per_household: { foragers: 0.5, herders: 6, shifting-cultivators: 0.8, farmers: 1.5, townspeople: 0.1 }
+    herd: [3, 12]
+    graze_kg: 15
+    most_in_settlement: 240
+    most: 12000
   most_houses: 60000
