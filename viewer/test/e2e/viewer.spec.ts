@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import type { PlanetFile } from '../../../core/planet.ts';
 import { xOf } from '../../src/ui/timebar.ts';
-import { buildFile, canvasPatch, canvasPng, idle, latestBuild, markerPositions, openLayers, openPlanet, settledUrl } from './helpers.ts';
+import { buildFile, canvasGrid, canvasPatch, canvasPng, gridsApart, idle, latestBuild, markerPositions, openLayers, openPlanet, settledUrl } from './helpers.ts';
 
 const year = (ma: number) => Math.round(1950 - ma * 1e6);
 
@@ -284,6 +284,52 @@ test('Earth\'s states: nothing before it formed, a magma ocean after the Moon-fo
   await page.mouse.click(640, 300);
   await expect(panel.locator('h2')).toHaveText('Geography unknown');
   await expect(panel).toContainText('generic land is drawn');
+});
+
+test('Earth after the Moon-forming impact: each state passes little by little into the next, and none changes all at once', async ({ page }) => {
+  const { planet } = buildFile<PlanetFile>('planet.json');
+  const phases = planet!.phases;
+  const span = (i: number): [number, number] => [phases[i].time.start.best!, phases[i].time.end.best!];
+  const index = (id: string) => phases.findIndex((p) => p.subject.endsWith(`@${id}`));
+  const view = async (t: number) => {
+    await page.evaluate((t) => window.__wikiworldmodel!.set({ t }), t);
+    await idle(page);
+    return canvasGrid(page);
+  };
+  // With its atmosphere, as the planet would be seen; then without the clouds, for what is under them.
+  for (const clouds of [1, 0]) {
+    await page.goto(`/?b=${latestBuild()}&t=4536Ma&lat=10&lon=20&d=3.3&cl=${clouds}`);
+    await idle(page);
+    // Without clouds the last passage shows only at the planet's rim: the ocean under the veil is the same ocean.
+    const passages = clouds ? ['rock-vapour', 'magma-ocean', 'rain-out', 'hot-ocean'] : ['rock-vapour', 'magma-ocean', 'rain-out'];
+    for (const id of passages) {
+      const i = index(id);
+      const [a, b] = span(i);
+      const where = `${phases[i].label}, clouds ${clouds ? 'on' : 'off'}`;
+      // Eight moments through the phase, and its end.
+      const frames: number[][] = [];
+      for (let k = 0; k <= 8; k++) frames.push(await view(a + ((b - a) * k) / 8));
+      const steps = frames.slice(1).map((f, k) => gridsApart(frames[k], f));
+      const whole = gridsApart(frames[0], frames[8]);
+      // The phase is a change one can see; each moment is a little different from the one before; and no one step is most of it.
+      expect(whole, where).toBeGreaterThan(0.02);
+      for (const s of steps) expect(s, `${where}: steps ${steps.map((x) => x.toFixed(4)).join(' ')}`).toBeGreaterThan(whole / 200);
+      expect(Math.max(...steps), `${where}: steps ${steps.map((x) => x.toFixed(4)).join(' ')}`).toBeLessThan(whole / 2);
+      // Across the boundary with the next phase nothing jumps: a thousandth of each phase either side of it.
+      const [, next] = span(i + 1);
+      const before = await view(b - (b - a) / 1000);
+      const after = await view(b + (next - b) / 1000);
+      expect(gridsApart(before, after), `${where}: its end`).toBeLessThan(whole / 20);
+    }
+  }
+  // The panel says what the globe is doing: half way through the rain, it is passing into the hot ocean.
+  const [a, b] = span(index('rain-out'));
+  await page.evaluate((t) => window.__wikiworldmodel!.set({ t }), (a + b) / 2);
+  await idle(page);
+  await expect(page.locator('.planet-phase')).toContainText('Steam raining out');
+  await expect(page.locator('.planet-phase')).toHaveAttribute('title', 'Passing little by little into Hot ocean under carbon dioxide: 50% of the way');
+  await page.mouse.click(640, 300);
+  await expect(page.locator('.inspect .planet-state .passing')).toContainText('Hot ocean under carbon dioxide: 50% of the way');
 });
 
 test('Snowball Earth: the Sturtian ice reaches the equator, unless a claim that leaves open water is picked', async ({ page }) => {

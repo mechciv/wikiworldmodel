@@ -28,7 +28,8 @@ import type { FromGlobeWorker, ToGlobeWorker } from './gl/globeworker.ts';
 import { EARTH_RADIUS, fromLocal, toLocal, type CityStructure } from '../../core/city.ts';
 import type { AtlasWhere } from '../../core/atlas.ts';
 import type { SceneFileV2 } from '../../core/scene.ts';
-import { latticeOf } from '../../world/generators/life/spec.ts';
+import { bedrockShort, groundAnswer, substrateShort } from '../../core/substrate.ts';
+import { LATTICE_DEG, latticeOf } from '../../world/generators/life/spec.ts';
 import type { LivingParams } from '../../world/generators/life/scene/v7.ts';
 import { Camera, MAX_DIST, MIN_DIST } from './camera.ts';
 import { LifeAtlas, type ClimateData } from './city/lifeatlas.ts';
@@ -36,7 +37,7 @@ import { Climates, type ClimateAt } from './climates.ts';
 import { LifeScene } from './city/life.ts';
 import type { PeopleSummary } from './city/lifeworker.ts';
 import { LandscapeAtlas } from './city/landscape.ts';
-import { anthromeOf, classAtStep, nearestStep, PATTERN_LABEL, USE_LABEL, USES, LEVEL_WORDS, type Pattern } from '../../core/landscape.ts';
+import { anthromeOf, classAtStep, kmBetween, nearestStep, PATTERN_LABEL, USE_LABEL, USES, LEVEL_WORDS, type Pattern } from '../../core/landscape.ts';
 import { lifewayText, specText, townText, prevalenceOf, traditionsFor } from '../../core/dwelling.ts';
 import { CityScene } from './city/scene.ts';
 import { autoTilt, EYE_HEIGHT, groundHit, localView, lookThrough, projectLocal, rayOf, sunAt, underSea, type LocalView } from './city/view.ts';
@@ -114,7 +115,7 @@ export interface WikiWorldModelHandle {
   /** where the settlements of the scene drawn stand on the screen, those in view: the lists' cities by name */
   settlementsAt(): { pattern: string; city?: string; houses: number; x: number; y: number }[];
   /** the living scene as the viewer has it, if one is loaded */
-  scene(): { site: string; plan: PrintCheck; taxa: { id: string; label: string; form: string; own: boolean; tier: string; km?: number; rows: number; drawn: boolean }[]; instances: number; triangles: number; meshes: number; groundMs: number; stage?: string; climate: string; climateField: string; month: number | null; snow: number | null; focus: [number, number]; toRiver: [number, number]; origin: { lat: number; lon: number }; water: { tier: string; rivers: { key: string; from: string }[] } | null; sea: boolean; list: 'land' | 'sea'; eye: { z: number; floor: number } | null; people: { asked: boolean; houses: number; drawn: number; expected: number; settlements: number; pattern?: string; tier?: string; forms: string[]; works: string[]; pieces: number; kept: string[]; animals: number; paths: number; cities: { name: string; people: number; record?: string; from?: string; town?: string }[]; near: { lat: number; lon: number; r: number; pattern: string; houses: number; city?: string }[] } | null } | null;
+  scene(): { site: string; plan: PrintCheck; taxa: { id: string; label: string; form: string; own: boolean; tier: string; km?: number; rows: number; drawn: boolean }[]; instances: number; triangles: number; meshes: number; groundMs: number; stage?: string; climate: string; climateField: string; month: number | null; snow: number | null; focus: [number, number]; toRiver: [number, number]; origin: { lat: number; lon: number }; water: { tier: string; rivers: { key: string; from: string }[] } | null; sea: boolean; list: 'land' | 'sea'; eye: { z: number; floor: number } | null; people: { asked: boolean; houses: number; drawn: number; expected: number; settlements: number; pattern?: string; tier?: string; forms: string[]; works: string[]; pieces: number; kept: string[]; animals: number; paths: number; cities: { name: string; people: number; record?: string; from?: string; town?: string }[]; near: { lat: number; lon: number; r: number; pattern: string; houses: number; city?: string }[] } | null; ground: { tier: string; from: string; weight: number; materials: [string, number][]; source: string; rows: string[] } | null; bedrock: { code: string; label: string; rock?: string; source: string } | null } | null;
   /** a browser's fingerprint of the scene of a place and a time, as a witness in the build has it */
   lifePrint(lat: number, lon: number, t: number): Promise<Fingerprint | null>;
   /** how far the atlas reaches, as the build says */
@@ -212,6 +213,7 @@ const HAZARD_SIZE: Record<HazardRow['kind'], string> = { eruption: 'Volcanic exp
 const STATE_COLORS: Record<string, string> = {
   'rock-vapour': '#ffc061',
   steam: '#c9ced8',
+  'dense-co2': '#a9c4cf',
   magma: '#e2572b',
   'crust-and-magma': '#8a3a1a',
   ocean: '#2f6fa3',
@@ -1027,6 +1029,29 @@ async function start(root: HTMLElement): Promise<void> {
       polities: polities.file?.rows.length ? [Math.min(...polities.file.rows.map((r) => r.from)), Math.max(...polities.file.rows.map((r) => r.to))] : undefined,
       polity: polities.file ? (lat, lon) => polities.at(lon, lat)?.name : undefined,
       genericLand: genericMask ? (lat, lon) => genericLandAt(genericMask!.mask, genericMask!.params, lat, lon) : undefined,
+      // What the ground is made of, from the rock sites of the stage shown and from today's maps, once they have come:
+      // which of them covers a time is for them to say.
+      substrate:
+        lifeAtlas && build.substrate
+          ? {
+              span: [-Infinity, Infinity],
+              at: (lat, lon, t) => {
+                // In a living scene of the place, the ground it is drawn with. Elsewhere the place's own, carried on its
+                // plate to the stage's slice and to where it is today, as a scene's is.
+                if (city instanceof LifeScene && !city.sea && t >= city.spec.site.span[0] && t <= city.spec.site.span[1]) {
+                  const here = latticeOf(lat, lon);
+                  const o = city.spec.site.origin;
+                  // A scene of the lattice is its cell's. A scene of a recorded place hangs from no cell: it answers as
+                  // far from its origin as a cell reaches from its middle.
+                  const within = city.spec.site.place ? kmBetween(lat, lon, o.lat, o.lon) < LATTICE_DEG * 111.2 * Math.SQRT1_2 : Math.abs(here.lat - o.lat) < 1e-4 && Math.abs(here.lon - o.lon) < 1e-4;
+                  if (within) return groundAnswer(city.spec.substrate, city.spec.bedrock);
+                }
+                const plate = build.frames.plateIndex[Math.round(field.sample(unitVector(lat, lon))[2])] || 0;
+                const g = lifeAtlas.groundAt(lat, lon, t, plate);
+                return groundAnswer(g.substrate, g.bedrock);
+              },
+            }
+          : undefined,
       water: ts.rivers && rivers
         ? {
             observed: ts.rivers.observed ? { span: ts.rivers.observed.span, at: (lat, lon) => rivers.seenAt(lat, lon) } : undefined,
@@ -1258,7 +1283,12 @@ async function start(root: HTMLElement): Promise<void> {
       const life = barWords(standing, (city as LifeScene).sea);
       // And who lived here, where the scene has people.
       const folk = (city as LifeScene).people;
-      const words = folk ? `${life} · ${peopleWords(folk)}` : life;
+      // And what its ground is made of, and the rock under it, where the world says.
+      const ground = (city as LifeScene).spec.substrate;
+      const under = (city as LifeScene).spec.bedrock;
+      const rock = under ? `${under.rock ? 'over' : 'on'} ${bedrockShort(under)}` : '';
+      const made = ground ? `Ground of ${substrateShort(ground)}${rock ? ` ${rock}` : ''}` : rock ? `Ground ${rock}` : '';
+      const words = [life, folk ? peopleWords(folk) : '', made].filter(Boolean).join(' · ');
       if (lifeHere.textContent !== words) lifeHere.textContent = words;
     }
     const enter = !!site && !made && !inCity && state.cam.dist < 2.2 && siteDistance(state.cam.lat, state.cam.lon) < 1.5e6 && !awayFromSite();
@@ -2230,6 +2260,7 @@ async function start(root: HTMLElement): Promise<void> {
     return {
       planet: earth.id,
       phase: look.phase.label,
+      into: look.into ? { label: look.into.label, passed: look.passed } : undefined,
       ice: look.ice ? { id: look.ice.subject, label: look.ice.label, reach: reachText(look.iceReach) } : undefined,
     };
   }
@@ -2610,7 +2641,7 @@ async function start(root: HTMLElement): Promise<void> {
       const drawn = new Set(c.named.map((x) => x.id));
       // Where the eye is in the scene drawn, above its sea, and the ground under it.
       const eye = c === city && frameView && c.ground ? { z: frameView.eye[2], floor: c.ground.at(frameView.eye[0], frameView.eye[1]) } : null;
-      return { site: c.spec.site.id, plan: c.plan, taxa: c.spec.taxa.map((t) => ({ id: t.id, label: t.label, form: t.form_label, own: t.own, tier: t.tier, km: t.km, rows: t.rows, drawn: drawn.has(t.id) })), instances: c.last.instances, triangles: c.last.triangles, meshes: c.last.meshes, groundMs: c.groundMs, stage: c.spec.site.stage, climate: c.spec.biome.climate, climateField: c.spec.biome.field, month: c.spec.climate?.month ?? null, snow: Number.isFinite(snowOf(c.spec).line) ? snowOf(c.spec).line : null, focus: c.focus, toRiver: c.toRiver, origin: c.spec.site.origin, water: c.spec.water ? { tier: c.spec.water.tier, rivers: c.spec.water.rivers.map((r) => ({ key: r.key, from: r.from })) } : null, sea: c.sea, list: listOf(c), eye, people: c.spec.people ? { asked: true, houses: c.people?.houses ?? 0, drawn: c.people?.drawn ?? 0, expected: c.people?.expected ?? 0, settlements: c.people?.settlements.length ?? 0, pattern: c.people?.lifeway.pattern, tier: c.people?.lifeway.tier, forms: c.people?.forms.map((f) => f.label) ?? [], works: c.people?.works.map((f) => f.label) ?? [], pieces: c.people?.pieces ?? 0, kept: c.spec.people.kept?.map((k) => k.label) ?? [], animals: c.people?.animals ?? 0, paths: c.people?.paths ?? 0, cities: c.people?.settlements.filter((x) => x.city).map((x) => ({ name: x.city!, people: x.people, ...(x.record ? { record: x.record } : {}), ...(x.from ? { from: x.from } : {}), ...(x.town ? { town: x.town.text } : {}) })) ?? [], near: nearestSettlements(c) } : null };
+      return { site: c.spec.site.id, plan: c.plan, taxa: c.spec.taxa.map((t) => ({ id: t.id, label: t.label, form: t.form_label, own: t.own, tier: t.tier, km: t.km, rows: t.rows, drawn: drawn.has(t.id) })), instances: c.last.instances, triangles: c.last.triangles, meshes: c.last.meshes, groundMs: c.groundMs, stage: c.spec.site.stage, climate: c.spec.biome.climate, climateField: c.spec.biome.field, month: c.spec.climate?.month ?? null, snow: Number.isFinite(snowOf(c.spec).line) ? snowOf(c.spec).line : null, focus: c.focus, toRiver: c.toRiver, origin: c.spec.site.origin, water: c.spec.water ? { tier: c.spec.water.tier, rivers: c.spec.water.rivers.map((r) => ({ key: r.key, from: r.from })) } : null, sea: c.sea, list: listOf(c), eye, people: c.spec.people ? { asked: true, houses: c.people?.houses ?? 0, drawn: c.people?.drawn ?? 0, expected: c.people?.expected ?? 0, settlements: c.people?.settlements.length ?? 0, pattern: c.people?.lifeway.pattern, tier: c.people?.lifeway.tier, forms: c.people?.forms.map((f) => f.label) ?? [], works: c.people?.works.map((f) => f.label) ?? [], pieces: c.people?.pieces ?? 0, kept: c.spec.people.kept?.map((k) => k.label) ?? [], animals: c.people?.animals ?? 0, paths: c.people?.paths ?? 0, cities: c.people?.settlements.filter((x) => x.city).map((x) => ({ name: x.city!, people: x.people, ...(x.record ? { record: x.record } : {}), ...(x.from ? { from: x.from } : {}), ...(x.town ? { town: x.town.text } : {}) })) ?? [], near: nearestSettlements(c) } : null, ground: c.spec.substrate ? { tier: c.spec.substrate.tier, from: c.spec.substrate.from, weight: c.spec.substrate.weight, materials: c.spec.substrate.materials, source: c.spec.substrate.source, rows: c.spec.substrate.rows } : null, bedrock: c.spec.bedrock ? { code: c.spec.bedrock.code, label: c.spec.bedrock.label, rock: c.spec.bedrock.rock, source: c.spec.bedrock.source } : null };
     },
     lifePrint: async (lat, lon, t) => {
       const spec = await lifeAtlas?.spec(lat, lon, t, {});

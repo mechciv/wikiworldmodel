@@ -2,6 +2,8 @@
 // place's spec needs from the climate and the land the viewer already has. A descent fetches a stage's lists
 // and the tiles of the land under it, and no ground or plant or animal: those it makes.
 import { atlasHasLand, atlasList, seaDrawList, seaList, type AtlasBin, type AtlasIndex, type SeaBin } from '../../../core/atlas.ts';
+import { rockBoxes, type RockBoxes, type RocksBin } from '../../../core/rocks.ts';
+import { bedrockAt, firstGround, groundHeld, substrateOfRocks, substrateOfSoil, type GroundHeader, type GroundMaps, type SceneBedrock, type SceneSubstrate } from '../../../core/substrate.ts';
 import { decodeTile } from '../../../core/container.ts';
 import { decodeNode, type ClimateHeader, type ClimateRule } from '../../../core/climate.ts';
 import type { Form } from '../../../core/form.ts';
@@ -43,6 +45,12 @@ export class LifeAtlas {
   private seaForms: Promise<Record<string, Form>> | null = null;
   /** the specs whose taxa are the sea's list */
   private ofSea = new WeakSet<SceneSpec>();
+  /** the rock record's sites, by stage's file: as they are sent for, and once they have come, with their boxes */
+  private rockBins = new Map<string, Promise<RocksBin | undefined>>();
+  private loadedRocks = new Map<string, { bin: RocksBin; boxes: RockBoxes }>();
+  /** today's maps of the ground: as they are sent for, and once they have come */
+  private groundSent: Promise<GroundMaps | undefined> | null = null;
+  private ground: GroundMaps | undefined;
   private fields = new Map<string, Promise<LoadedField | undefined>>();
   /** the rivers a place's scene is given: its own loader, as the globe's layer has its own */
   private rivers: Rivers;
@@ -124,6 +132,76 @@ export class LifeAtlas {
     return p;
   }
 
+  /**
+   * The rock record's sites of a stage of the atlas, where the build has them and a rule to read a ground from them: a
+   * scene without them is drawn as it was before there were any, so a file that does not come is no error.
+   */
+  private rocksOf(stage: { from: number; to: number }): Promise<RocksBin | undefined> {
+    const ref = this.build.substrate ? this.build.rocks?.bins.find((b) => b.from === stage.from && b.to === stage.to) : undefined;
+    if (!ref) return Promise.resolve(undefined);
+    let p = this.rockBins.get(ref.file);
+    if (!p) {
+      p = getJSON<RocksBin>(this.build.base + ref.file)
+        .then((bin) => {
+          this.loadedRocks.set(ref.file, { bin, boxes: rockBoxes(bin) });
+          return bin;
+        })
+        .catch(() => undefined);
+      this.rockBins.set(ref.file, p);
+    }
+    return p;
+  }
+
+  /**
+   * Today's maps of the ground, the topsoil and the rock under it, where the build has them and holds one for the time:
+   * they are not sent for at a time neither covers. A scene without them is drawn as it was before there were any, so a
+   * file that does not come is no error.
+   */
+  private groundMaps(t: number): Promise<GroundMaps | undefined> {
+    const file = this.build.substrate?.ground;
+    const held = this.build.substrate?.held;
+    if (!file || (held && !held.some(([older, younger]) => t >= older && t <= younger))) return Promise.resolve(undefined);
+    return (this.groundSent ??= getBytes(this.build.base + file)
+      .then((buf) => {
+        const { header, arrays } = decodeTile<GroundHeader>(buf);
+        this.ground = { header, soil: header.soil ? (arrays[header.soil.array] as Uint8Array) : undefined, bedrock: header.bedrock ? (arrays[header.bedrock.array] as Uint8Array) : undefined };
+        return this.ground;
+      })
+      .catch(() => undefined));
+  }
+
+  /**
+   * What the ground is made of at a place and a time, and the rock under it: from the rock sites of the stage and from
+   * today's maps, if they have come. They are sent for if not, and until then, as where nothing says, there is no
+   * answer. The place is carried on its `plate` to the stage's slice, where the sites stand, and to where it is today,
+   * where the maps are, as a scene's place is; with no plate it is read where it stands.
+   */
+  groundAt(lat: number, lon: number, t: number, plate = 0): { substrate?: SceneSubstrate; bedrock?: SceneBedrock } {
+    const rule = this.build.substrate?.rule;
+    if (!rule) return {};
+    const a = toMa(t);
+    const carried = (b: number): [number, number] => (plate && this.model.reaches(plate, a) && this.model.reaches(plate, b) ? toLatLon(rotate(this.model.total(plate, b), rotate(conj(this.model.total(plate, a)), unitVector(lat, lon)))) : [lat, lon]);
+    const rocks = this.build.rocks;
+    const ref = rocks?.bins.find((b) => t >= b.from && t <= b.to);
+    let rock: SceneSubstrate | undefined;
+    if (rocks && ref) {
+      const got = this.loadedRocks.get(ref.file);
+      if (got) {
+        const [la, lo] = carried(toMa(ref.slice));
+        rock = substrateOfRocks(got.bin, rocks, rule, la, lo, got.boxes);
+      } else void this.rocksOf(ref);
+    }
+    const maps = this.ground;
+    if (!maps) void this.groundMaps(t);
+    const soil = !!maps && groundHeld(maps.header.soil, t);
+    const under = !!maps && groundHeld(maps.header.bedrock, t);
+    const today = soil || under ? carried(0) : undefined;
+    return {
+      substrate: firstGround(rock, () => (soil && today ? substrateOfSoil(maps!, rule, today[0], today[1]) : undefined)),
+      bedrock: under && today ? bedrockAt(maps!, rule, today[0], today[1]) : undefined,
+    };
+  }
+
   /** A scene's spec for a place and time: nothing if there is no land there, or no list. */
   async spec(lat: number, lon: number, t: number, s: Scenario, month?: number): Promise<SceneSpec | null> {
     const ref = this.binAt(t);
@@ -131,11 +209,13 @@ export class LifeAtlas {
     if (!ref || !clim) return null;
     const seaRef = this.seaRefAt(t);
     const sea = this.build.sea;
-    const [bin, landForms, seaBin, seaForms] = await Promise.all([
+    const [bin, landForms, seaBin, seaForms, rockBin, ground] = await Promise.all([
       this.load(ref.file),
       (this.forms ??= getJSON<Record<string, Form>>(this.build.base + this.index.forms)),
       seaRef && sea ? this.loadSea(seaRef.file) : Promise.resolve(undefined),
       sea?.forms ? (this.seaForms ??= getJSON<Record<string, Form>>(this.build.base + sea.forms)) : Promise.resolve({} as Record<string, Form>),
+      this.rocksOf(ref),
+      this.groundMaps(t),
     ]);
     // The forms are keyed by what they are, so the land's and the sea's never clash.
     const forms = { ...seaForms, ...landForms };
@@ -220,11 +300,21 @@ export class LifeAtlas {
       isoline: this.coastAt(field, when),
       generator: this.generator,
     };
+    // What the ground is made of, from the rock record of the stage, where the build has it.
+    const rocks = this.build.rocks;
+    const rule = this.build.substrate?.rule;
+    if (rockBin && rocks && rule) pw.substrate = (la, lo) => substrateOfRocks(rockBin, rocks, rule, la, lo);
+    // And from today's maps, where the time shown is one they are held for.
+    if (ground && rule) {
+      if (groundHeld(ground.header.soil, when)) pw.soil = (la, lo) => substrateOfSoil(ground, rule, la, lo);
+      if (groundHeld(ground.header.bedrock, when)) pw.bedrock = (la, lo) => bedrockAt(ground, rule, la, lo);
+    }
     // The months of the finest climate that covers the time, at the node the place stood on then.
     const mInfo = this.months.info;
     const where = mInfo && monthsPlace(mInfo, pw, lat, lon, ageMa);
-    const tiles = where ? await this.months.near(where.set, where.lat, where.lon) : [];
-    if (mInfo && where && tiles.length) pw.months = placeMonths(mInfo, where, tiles, month);
+    // And beside them, what else that climate's source says of the node, which nothing draws yet.
+    const [tiles, parts] = where ? await Promise.all([this.months.near(where.set, where.lat, where.lon), this.months.partsNear(where.set, where.ageMa, where.lat, where.lon)]) : [[], []];
+    if (mInfo && where && tiles.length) pw.months = placeMonths(mInfo, where, tiles, month, parts);
     const spec = placeSpec(pw, lat, lon, ageMa);
     if (!spec) return null;
     // Its list is the sea's where the land's atlas has none for its place, as placeSpec chooses.

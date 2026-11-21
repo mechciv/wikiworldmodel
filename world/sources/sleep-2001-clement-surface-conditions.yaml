@@ -1,0 +1,20 @@
+id: src:sleep-2001-clement-surface-conditions
+type: publication
+kind: model
+citation: >-
+  Sleep, N.H., Zahnle, K. & Neuhoff, P.S. (2001). Initiation of clement surface conditions on the
+  earliest Earth. Proceedings of the National Academy of Sciences 98(7), 3666–3672.
+authors:
+  - "Sleep, N.H."
+  - "Zahnle, K."
+  - "Neuhoff, P.S."
+published: 2001
+title: Initiation of clement surface conditions on the earliest Earth
+container: Proceedings of the National Academy of Sciences 98(7), 3666–3672
+doi: 10.1073/pnas.071045698
+verified:
+  by: machine:claude-code
+  how: >-
+    Full text read on 20 November 2026 from PubMed Central (PMC31109), its page saved and turned to
+    text; citation from Crossref. The page gives no page breaks, so locators name the article's
+    sections.

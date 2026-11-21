@@ -1,0 +1,37 @@
+# Today's topsoil, held as it is back through the Holocene: what a scene's ground is made of there, where no fossil
+# collection of the time lies at the place itself (field:earth/substrate).
+id: field:earth/soil
+type: field
+title: Today's topsoil
+quantity: the sand, silt and clay of the top 5 cm of the soil, and the coarse fragments in it
+unit: "%"
+description: >-
+  How much of the top 5 cm of the soil is sand, silt and clay, by the mass of its fine earth, and how much of its volume
+  is fragments coarser than sand, in each half degree of land: the means of SoilGrids 2.0's predictions. It is a model
+  of today's soil, fitted to soil profiles and to maps of climate, land cover and terrain, and where profiles are few,
+  in deserts above all, it is a guess from places like it: it does not know a sea of dunes from the plain beside it. It
+  says nothing of a soil's colour, its depth or what grows on it. Predicted for the present only: before it, the soil is
+  held as it is today back through the Holocene, moved with its plates. What changed it in that time is left out: the
+  ploughing and draining of the last few thousand years, the dust and the floods that built it, the forests that came
+  and went over it.
+frame: frame:earth/present-day
+grid: { kind: lonlat, res_deg: 0.5 }
+# As far back as the Holocene began, by the chart: the build checks it against the period named in params.held.
+time: { lo: 0.0117 Ma, hi: 0 ka }
+data:
+  from: src:soilgrids-2.0-topsoil
+  as: topsoil
+# Predicted for today; a reconstruction for every time before, by the assumption that the soil was as it is now.
+basis: reconstruction
+# One value at each place: the grids read here carry none of the finer maps' prediction intervals.
+spread: unknown
+# Every cell moves with the plate under it today, as the relief's nodes do.
+interp: plate-warp
+moves_with: src:paleomap-plate-model
+projection:
+  method: hold
+  until: 10 kyr from now
+  note: Today's soil, held for the near future as the relief is.
+params:
+  # The span it is held for, as a period of the chart: the field's time begins where it does.
+  held: ics/holocene

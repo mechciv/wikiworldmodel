@@ -367,6 +367,35 @@ A first mention bounds a start in the same way, and a last mention an end from t
 those properties are not yet in the vocabulary, and are added with the first records that need
 them ([a new term](#a-new-term)).
 
+### A state that gave way little by little
+
+A planet's phases say what covered its surface and what its atmosphere was (`surface`, `atmosphere`).
+Where the sources say that a state did not end at a stroke, but changed through its whole phase into
+the next, as a magma ocean froze over two million years, a claim of `change` says so:
+
+```yaml
+# world/entities/space/bodies/earth.yaml
+  magma-ocean-change:
+    prop: change
+    subject: "@magma-ocean"
+    value: gradual
+    source: { ref: src:zahnle-2007-habitable-planet, loc: "section 9, p. 72", quote: "…it took would have taken ∼2 Myrs for the surface of a magma ocean to freeze." }
+```
+
+- **The phase's `surface` and `atmosphere` are then what it began with,** and the phase after it is
+  what it came to. The viewer draws the planet part of the way from the one to the other, as far as
+  the phase has run.
+- **The quote shows that the change took the phase's length.** How long that was is the phase's
+  `end`, a claim like any other: competing lengths are competing claims of it, and the fade follows
+  the one chosen. Never write a length for a fade anywhere else.
+- **A change that took its own time between two states is a phase of its own,** as the rain is
+  between the magma ocean and the first ocean.
+- **Without the claim, the state held until the phase ended,** and the globe changes there at once.
+  That is right for a state that an impact ended.
+- **It says nothing of how the change ran inside the phase.** The planet is drawn passing evenly
+  (`model:earth/passage`), which no source says: the note is the place for what the sources have
+  instead.
+
 ### A date in a count of days
 
 Some calendars name a day by how many days it is after a zero day. A record writes such a date
@@ -483,6 +512,13 @@ The field that reads a dataset says how its uncertainty is carried, as `spread:`
 high around each value), `alternatives` (readings, each its own picture), `ensemble` (members, such as
 runs of a model), `claims`, `tiers`, or `unknown` when the source gives one value and no spread. Say
 `unknown` rather than leave it out: no spread is not the same as exact.
+
+Another variable of the dataset a climate is read from, such as its cloudiness, its wind or a vegetation model's biome,
+is a field of its own, read `as: months`. Its `reads:` names the part it is of what the tiles keep beside that
+climate's months ([core/months.ts](../core/months.ts)), the variable of the file, and the unit the file itself gives
+that variable, which the build checks before it reads. It takes the climate's grid and frame, since it is kept at
+that climate's nodes. Copy [cloudiness.yaml](../world/fields/earth/cloudiness.yaml), and say in its description what
+the dataset's own documentation says the variable is, and where it does not answer.
 
 ### A row of a dataset
 

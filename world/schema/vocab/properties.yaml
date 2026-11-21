@@ -118,6 +118,32 @@ properties:
     type: string
     applies_to: [occurrence, sample, ecosystem]
     description: The geological formation the fossils or the sample come from.
+  depositional_environment:
+    type: string
+    applies_to: [occurrence, sample]
+    description: >-
+      The environment a rock was laid down in, in its dataset's own words: a lake, a channel, a floodplain, a dune, a
+      reef. What the place was when the rock formed, as far as the rock says.
+  lithology:
+    type: string
+    applies_to: [occurrence, sample]
+    description: >-
+      What a rock is made of, in its dataset's own words: sandstone, claystone, gypsum, coal. The rock as it is now: the
+      sediment it was when it formed is what it was laid down as, sand for a sandstone and mud for a claystone.
+  lithology_adjectives:
+    type: string
+    applies_to: [occurrence, sample]
+    description: >-
+      What its dataset says of a lithology besides its name, as the dataset joins the words: its grain, its colour, its
+      bedding, and what dried, grew or burrowed in it (desiccation cracks, a paleosol, burrows).
+  second_lithology:
+    type: string
+    applies_to: [occurrence, sample]
+    description: A second lithology of the same beds, where its dataset describes two.
+  second_lithology_adjectives:
+    type: string
+    applies_to: [occurrence, sample]
+    description: What its dataset says of the second lithology besides its name.
   footprint_form:
     type: footprint-form
     applies_to: [occurrence]
@@ -266,7 +292,24 @@ properties:
     values:
       rock-vapour: Vaporized rock, thousands of degrees hot.
       steam: A thick atmosphere of water vapour, its clouds hiding the surface.
+      dense-co2: >-
+        A thick atmosphere of carbon dioxide, about a hundred times the weight of today's air, over a hot ocean;
+        it veils the surface.
     description: The kind of atmosphere, where it changes how the planet looks from space.
+  change:
+    type: string
+    interp: step
+    applies_to: [body/planet]
+    values:
+      gradual: >-
+        Little by little, through the whole phase: the planet passed from the state the phase began in to the
+        state of the phase that follows.
+    description: >-
+      How a phase of a planet gave way to the next, where its sources say that the change took the length of the
+      phase: a cloud of rock vapour condensing, a magma ocean freezing, an ocean raining out of its steam. The
+      phase's `surface` and `atmosphere` are then what it began with. Without this claim a phase's state is taken
+      to have held until the phase ended. How the change ran inside the phase, fast at first or evenly, is not
+      said by it: the planet is drawn as passing evenly (model:earth/passage).
   ice_reach:
     type: quantity
     unit: °

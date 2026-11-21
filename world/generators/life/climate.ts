@@ -1,7 +1,7 @@
 // What a scene's climate does at its heights and in its month, apart from the generator that draws it, so the page can
 // light and paint a scene without loading the generator: where snow lies (field:earth/climate-at-height).
-import { monthsKeyframe, nearestNode, snowLine, type MonthsInfo, type MonthsSet, type MonthsTile } from '../../../core/months.ts';
-import type { SceneSpec } from '../../../core/scene.ts';
+import { monthsKeyframe, nearestNode, nearestParts, snowLine, type CellVegetation, type MonthsInfo, type MonthsSet, type MonthsTile, type NodeParts, type PartsSet, type PartsTile } from '../../../core/months.ts';
+import type { SceneParts, SceneSpec, SceneVegetation } from '../../../core/scene.ts';
 import { latticeOf, type PlaceWorld } from './spec.ts';
 
 /** How the climate is brought to a scene's heights: the generator's choices. */
@@ -56,7 +56,45 @@ export function monthsPlace(info: MonthsInfo, w: Pick<PlaceWorld, 'plate' | 'car
   return { set: mk.set, ageMa: mk.ageMa, frameMa, lat: ml, lon: mo };
 }
 
-/** What a place's spec reads of its months, once the tiles near it (core/months.ts tilesNear) have come. */
-export function placeMonths(info: MonthsInfo, at: MonthsPlace, tiles: MonthsTile[], month?: number): NonNullable<PlaceWorld['months']> {
-  return { field: at.set.field, ageMa: at.ageMa, frameMa: at.frameMa, at: (la, lo) => nearestNode(tiles, at.ageMa, la, lo), lapse: info.lapse, water: info.water, ...(month ? { month } : {}) };
+/**
+ * What a place's spec reads of its months, once the tiles near it (core/months.ts tilesNear) have come; and of what else
+ * the climate's source says of its node, where the tiles of its parts (partsFile) have come too.
+ */
+export function placeMonths(info: MonthsInfo, at: MonthsPlace, tiles: MonthsTile[], month?: number, parts: PartsTile[] = []): NonNullable<PlaceWorld['months']> {
+  const set = at.set.parts;
+  return {
+    field: at.set.field,
+    ageMa: at.ageMa,
+    frameMa: at.frameMa,
+    at: (la, lo) => {
+      const node = nearestNode(tiles, at.ageMa, la, lo);
+      if (!node || !set || !parts.length) return node;
+      // The two kinds of tile keep the same nodes: parts of any other node are not this place's.
+      const p = nearestParts(parts, at.ageMa, la, lo);
+      return p && p.lat === node.lat && p.lon === node.lon ? { ...node, parts: sceneParts(p.parts, set) } : node;
+    },
+    lapse: info.lapse,
+    water: info.water,
+    ...(month ? { month } : {}),
+  };
+}
+
+const round4 = (x: number) => Math.round(x * 1e4) / 1e4;
+
+/** A node's parts as a scene's spec carries them: in their fields' units, each class with its name, and the field each is. */
+export function sceneParts(p: NodeParts, set: PartsSet): SceneParts {
+  const info = (part: string) => set.list.find((x) => x.part === part);
+  const months = (v: (number | null)[]) => v.map((x) => (x === null ? null : round4(x)));
+  const scaled = (part: string, x: number | undefined) => (x === undefined ? undefined : round4(x * (info(part)?.scale ?? 1)));
+  const cell = (c: CellVegetation): SceneVegetation => {
+    const name = info('biome')?.classes?.[String(c.biome)];
+    const leaf = scaled('leaf', c.leaf);
+    const npp = scaled('npp', c.npp);
+    return { biome: c.biome, ...(name !== undefined ? { name } : {}), ...(leaf !== undefined ? { leaf } : {}), ...(npp !== undefined ? { npp } : {}) };
+  };
+  const out: SceneParts = { fields: Object.fromEntries(set.list.map((x) => [x.part, x.field])) };
+  for (const part of ['cloud', 'humidity', 'wind_speed', 'albedo'] as const) if (p[part]) out[part] = months(p[part]!);
+  if (p.wind) out.wind = { u: months(p.wind.u), v: months(p.wind.v) };
+  if (p.vegetation) out.vegetation = { ...cell(p.vegetation), cells: p.vegetation.cells.map((c) => (c ? cell(c) : null)) };
+  return out;
 }

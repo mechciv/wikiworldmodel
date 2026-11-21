@@ -1,0 +1,36 @@
+# A model run here (section 4.10 of the design). The values of its parameters stay in the field.
+id: model:earth/rock-record
+type: model
+title: The rock near a place, from the collections of its stage
+description: >-
+  Reduces the Paleobiology Database's collections to the sites of each stage: each collection dated to the stage, moved
+  with its plate to where it stood at the stage's middle, with its rock and its environment in the database's own
+  words. Asked at a place, it answers in tiers: here, where a site lies within a few tens of km, about as far as a scene
+  reaches and as well as a collection's coordinates are known; near, out to a couple of hundred km, about the width of a
+  basin; and nothing beyond. It weighs a site by how much of its span the stage holds, and adds nothing of its own: no
+  rock is carried from one stage to the next, and none is inferred where no collection lies. It is a reading of where
+  people have collected fossils, so it is thickest in Europe and North America and in beds laid down under water.
+author: machine:claude-code
+code: tools/world/src/build/rocks.ts
+inputs:
+  - { ref: src:pbdb-rocks-2026-11-20, note: "the rows: each collection's rock, its environment, its place today and its interval" }
+  - { kind: period/stage, note: "the stages it lists by, cut and joined as the atlases' are" }
+  - { ref: field:earth/elevation, note: "the plates that carry the collections, and the land and sea it is held against" }
+  - { ref: field:earth/coastline, note: "what is land and what is sea in that field" }
+outputs: [field:earth/rock-record]
+params:
+  here_km: { choice: "How near a collection must be for its rock to be the place's own: about a scene's reach, and no finer than most collections' coordinates." }
+  near_km: { choice: "How far a collection may be and still say something of the place: about the width of a sedimentary basin." }
+  longest_span: { choice: "A collection dated only to a span longer than this says too little of any one stage, and is left out: the atlases' choice." }
+  longest_span_in_stages: { choice: "A collection dated to a span longer than this many times a stage says too little of that stage, and is left out of it: the atlases' choice." }
+  longest_bin: { choice: "The longest a stage may be before it is cut: the atlases', so that the rocks and the lists have the same stages." }
+  shortest_bin: { choice: "The shortest a stage may be before it is joined to the next: the atlases'." }
+uncertainty:
+  kind: tiers
+  note: >-
+    A place's rock is here, near or not known. Within a tier there is no measure: a collection's coordinates may be
+    out by tens of km, its age is an interval's, and the distances that set the tiers are choices.
+checks:
+  - { test: tools/world/test/rocks.test.ts, holds: "has a tier that is true: *here* has a collection of the stage within here_km, recounted from the snapshot" }
+  - { test: tools/world/test/rocks.test.ts, holds: "finds the Codó Formation's lake beds beside the first round's Aptian point" }
+  - { test: tools/world/test/rocks.test.ts, holds: "keeps no word the field says means nothing was given" }

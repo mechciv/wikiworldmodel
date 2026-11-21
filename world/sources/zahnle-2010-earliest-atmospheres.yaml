@@ -1,0 +1,24 @@
+id: src:zahnle-2010-earliest-atmospheres
+type: publication
+kind: review
+citation: >-
+  Zahnle, K., Schaefer, L. & Fegley, B. (2010). Earth's earliest atmospheres. Cold Spring Harbor
+  Perspectives in Biology 2(10), a004895.
+authors:
+  - "Zahnle, K."
+  - "Schaefer, L."
+  - "Fegley, B."
+published: 2010
+title: Earth's earliest atmospheres
+container: Cold Spring Harbor Perspectives in Biology 2(10), a004895
+doi: 10.1101/cshperspect.a004895
+reliability: >-
+  A review. Its account of the time after the Moon-forming impact retells Zahnle et al. (2007), which it
+  calls a speculative narrative history, with some figures changed: so it is the same model again, by its
+  lead author, and not a second estimate.
+verified:
+  by: machine:claude-code
+  how: >-
+    Full text read on 20 November 2026 from PubMed Central (PMC2944365), its page saved and turned to
+    text; citation from Crossref. The article has no page numbers, so locators name its sections and
+    figure captions.

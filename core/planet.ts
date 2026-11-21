@@ -3,6 +3,10 @@
 // the ice of a Snowball Earth. Each comes with its interval in every scenario that moves it
 // and the claims that decide how it looks. The viewer reads them at the time shown; how a
 // state is drawn is the surface generator's and the renderer's business, not a fact.
+//
+// A phase whose record says its change was gradual is a passage: through it the planet goes
+// from the state the phase began in to the state of the phase that follows, evenly in time
+// (model:earth/passage). How long that takes is the phase's own length, which is a claim.
 import { lookup, type Scenario } from './scenario.ts';
 import type { Basis, FeatureTime } from './tileset.ts';
 
@@ -84,6 +88,13 @@ export interface Look {
   atmosphere: string | null;
   /** how far through its phase the time is: 0 at its start, 1 at its end */
   progress: number;
+  /** the state the planet is passing into, where the phase's change is claimed to be gradual: the phase after it */
+  into: PlanetState | null;
+  /** what covers the surface, and what the atmosphere is, in the state it is passing into */
+  intoSurface: string | null;
+  intoAtmosphere: string | null;
+  /** how far it has passed into that state: 0 as the phase starts, 1 as it ends; 0 where there is no passage */
+  passed: number;
   /** the lowest latitude that ice reaches, in degrees; 90 is no ice */
   iceReach: number;
   /** the episode the ice belongs to */
@@ -117,8 +128,15 @@ export function valueOf(st: PlanetState, prop: string, s: Scenario): string | nu
   return chosenClaim(st.values[prop] ?? [], s)?.value ?? null;
 }
 
+/** What a phase's own claims say covers the surface, and what the atmosphere is. */
+function stateOf(ph: PlanetState, s: Scenario): { surface: string | null; atmosphere: string | null } {
+  const surface = valueOf(ph, 'surface', s);
+  const atmosphere = valueOf(ph, 'atmosphere', s);
+  return { surface: typeof surface === 'string' ? surface : null, atmosphere: typeof atmosphere === 'string' ? atmosphere : null };
+}
+
 export function lookAt(file: PlanetFile, t: number, s: Scenario): Look {
-  const look: Look = { formed: true, phase: null, surface: null, atmosphere: null, progress: 0, iceReach: 90, ice: null };
+  const look: Look = { formed: true, phase: null, surface: null, atmosphere: null, progress: 0, into: null, intoSurface: null, intoAtmosphere: null, passed: 0, iceReach: 90, ice: null };
   const p = file.planet;
   if (!p) return look;
   const [born, gone] = spanOf(p, s);
@@ -133,10 +151,15 @@ export function lookAt(file: PlanetFile, t: number, s: Scenario): Look {
     }
   }
   if (look.phase) {
-    const surface = valueOf(look.phase, 'surface', s);
-    const atmosphere = valueOf(look.phase, 'atmosphere', s);
-    look.surface = typeof surface === 'string' ? surface : null;
-    look.atmosphere = typeof atmosphere === 'string' ? atmosphere : null;
+    ({ surface: look.surface, atmosphere: look.atmosphere } = stateOf(look.phase, s));
+    // A passage: the phase's change is claimed to be gradual, it has a length, and a phase follows it.
+    const next = p.phases[p.phases.indexOf(look.phase) + 1];
+    const [a, b] = spanOf(look.phase, s);
+    if (next && valueOf(look.phase, 'change', s) === 'gradual' && Number.isFinite(a) && Number.isFinite(b) && b > a) {
+      look.into = next;
+      ({ surface: look.intoSurface, atmosphere: look.intoAtmosphere } = stateOf(next, s));
+      look.passed = look.progress;
+    }
   }
   for (const ep of file.episodes) {
     const [a, b] = spanOf(ep, s);

@@ -24,6 +24,8 @@ claims:
       219–223) later confirmed by atom-probe tomography that the U–Pb age of a 4.4-Gyr-old
       Jack Hills zircon is not biased by lead mobility; whether that is this grain was not
       checked.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wilde-2001-abstract.txt (sha256 bd1c74a32c41aa77), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   location:
     prop: location
     value: { lat: -26.1828, lon: 116.9325, frame: frame:earth/present-day }
@@ -55,6 +57,34 @@ relations:
         loc: abstract
         quote: This zircon thus represents the earliest evidence for continental crust and oceans on the Earth.
     basis: reconstruction
+    rank: deprecated
     note: >-
       The grain's oxygen isotopes record rock that had been altered by liquid water at the
       surface before it melted, so oceans existed when it grew. The evidence is indirect.
+      Set aside on 20 November 2026, when the Earth's first, hot ocean under carbon dioxide
+      became a phase of its own and this phase the ocean after it: the isotopes do not tell
+      the one from the other, so the grain bounds only the rain that made the ocean
+      (after-the-rain).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wilde-2001-abstract.txt (sha256 bd1c74a32c41aa77), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  after-the-rain:
+    rel: after
+    to: space/bodies/earth@rain-out
+    source:
+      - ref: src:wilde-2001-jack-hills-zircon
+        loc: abstract
+        quote: Magmatic oxygen isotope ratios in this range point toward the involvement of supracrustal material that has undergone low-temperature interaction with a liquid hydrosphere.
+      - ref: src:wilde-2001-jack-hills-zircon
+        loc: abstract
+        quote: This zircon thus represents the earliest evidence for continental crust and oceans on the Earth.
+      - ref: src:sleep-2010-hadean-archaean-environment
+        loc: section "Zircons and the Earliest Continents"
+        quote: These data do not bear on whether weathering occurred in a CO2-rich atmosphere at ∼500 K or at clement conditions.
+    basis: reconstruction
+    note: >-
+      The grain's oxygen isotopes record rock that had been altered by liquid water at the
+      surface before it melted, so the steam had rained out into an ocean by the time it grew.
+      Whether that ocean was still the hot one under carbon dioxide, the isotopes do not say.
+      The evidence is indirect.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wilde-2001-abstract.txt (sha256 bd1c74a32c41aa77) and sleep-2010.txt (sha256 0301c624bfa938fd), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

@@ -1,0 +1,52 @@
+# A model run here (section 4.10 of the design). It makes no field: what it derives is how far the planet
+# has gone from one state of its record into the next, at every time.
+id: model:earth/passage
+type: model
+title: The planet between its states
+description: >-
+  The Earth's record gives the planet's states as phases, each with what covered the surface and what the
+  atmosphere was as it began. Where a phase's sources say that the change took the phase's whole length, its
+  `change` is claimed to be gradual, and this model fills the time inside it: the planet is taken to pass from
+  the state the phase began in to the state of the phase that follows, evenly in time, having gone as far as
+  the share of the phase that has run. A phase without that claim is taken to hold its state until it ends. The
+  renderer draws the result (viewer/src/gl/globe.ts): rock vapour and molten rock thinning over what lies
+  under them, the crust of a magma ocean spreading, the sky and the clouds going from one state's to the
+  next's. The model knows nothing of how any of these changes ran: it has no temperatures, no pressures and
+  no physics, only when each began and ended.
+author: machine:claude-code
+code: core/planet.ts
+inputs:
+  - { prop: surface, note: "what covered the surface as each phase began" }
+  - { prop: atmosphere, note: "what the atmosphere was as each phase began" }
+  - { prop: change, note: "which phases gave way little by little" }
+  - { prop: start, kind: body/planet, note: "when the planet and each of its phases began" }
+  - { prop: end, kind: body/planet, note: "when each phase ended, which is the length of its passage" }
+derives: How far the planet has passed from the state of one phase into the state of the next, at every time.
+params:
+  rock_vapour:
+    follows: space/bodies/earth#rock-vapour-end
+    note: How long the rock vapour took to condense and rain out, after the Moon-forming impact.
+  magma_ocean:
+    follows: space/bodies/earth#magma-ocean-end
+    note: How long the magma ocean took to freeze at its surface.
+  rain_out:
+    follows: space/bodies/earth#rain-out-end
+    note: How long the steam took to rain out into an ocean.
+  hot_ocean:
+    follows: space/bodies/earth#hot-ocean-end
+    note: How long the carbon dioxide took to leave the atmosphere.
+  course:
+    choice: >-
+      Evenly in time, from the start of a phase to its end. No work read gives how any of these changes ran
+      inside its phase, and they did not run evenly: the sources have the rock vapour's clouds holding the
+      planet's face until the vapour was gone, the magma ocean's surface held at its melting point until the
+      freezing reached it, and the carbon dioxide leaving as fast as the sea floor could carry it down.
+uncertainty:
+  kind: alternatives
+  note: >-
+    It follows the claims a reader picks: a competing length for a phase, or another date for the impact, moves
+    the passage with it. Within one picture it gives one value, with nothing to say how unsure it is, and the
+    uncertainty of a phase's own dates is not drawn.
+checks:
+  - { test: tools/world/test/planet.test.ts, holds: "passes little by little into the next phase, where the phase's change is claimed to be gradual" }
+  - { test: tools/world/test/build.test.ts, holds: "leaves no moment between the Moon-forming impact and the oceans at which the planet's state changes all at once" }

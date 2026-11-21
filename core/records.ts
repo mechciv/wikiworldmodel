@@ -265,6 +265,12 @@ export interface CoverageFile {
     /** at some times, how many people are drawn in a house of a tradition written for their way of life, by pattern of settlement */
     housing?: HousingCount[];
   };
+  /**
+   * the rock record of fossil sites (model:earth/rock-record): how many collections it has and how many stand in a stage,
+   * how they agree with the land and sea of the elevation field, which does not read them, and how many have an age
+   * measured for them
+   */
+  rocks?: { collections: number; sites: number; stages: number; agreement: import('./rocks.ts').RocksAgreement; measured: { collections: number; of: number } };
   /** fossil forests against the climate reconstructed for their place and time; none should be in a desert */
   forests?: { id: string; ageMa: number; keyframeMa: number; lat: number; lon: number; climate: string | null; label: string }[];
   /** which tier answers each layer, over a grid of places at times through each span (core/resolve.ts) */

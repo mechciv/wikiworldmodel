@@ -1,0 +1,106 @@
+# A derived field: declared, never stored (section 9.1). A scene works it out for its place from the rock record of its
+# stage and from today's maps of soil and rock, where the time is one they are held for (core/substrate.ts), and the
+# renderer draws the ground from it. Where it answers nothing, the ground is the climate's, as it was before: generic,
+# and said to be.
+id: field:earth/substrate
+type: field
+title: What the ground was made of
+description: >-
+  The loose ground of a place: sand, gravel, silt, mud, lime mud, a crust of salt, peat or ash, in shares, with the
+  colours and the marks its sources name; and the rock under it. In deep time it is read from the rocks of the fossil
+  collections of the stage: a sandstone was laid down as sand and a claystone as mud, and what a collection says of its
+  rock's colour, its cracks and its ripples is said of the ground it was. Only collections the database calls
+  terrestrial count for the ground of the land. Where a collection of the stage lies within a few tens of km, this is
+  evidence of the place; where the nearest are further off, out to a couple of hundred km, it is what the country round
+  was like, and counts for part of the ground only. In the Holocene the ground is today's topsoil, held as it is: its
+  sand, silt and clay and its stones, a model of the place itself, which gives way only to a collection at the place.
+  Through the Quaternary the rock under the ground is today's, carried back on its plate: the class a map of the world's
+  lithology gives the place, which says what outcrops and stones are of, and nothing of the loose ground over them. Where
+  none of these answers, it says nothing, and the ground is drawn by the climate's class alone.
+derived: true
+from: [field:earth/rock-record, field:earth/soil, field:earth/bedrock]
+rule: substrate
+params:
+  # Whose rock is a land's ground: the class of environment the database must put a collection in.
+  land_class: terrestrial
+  # How much of a scene's ground the rock of the country round decides, where no collection lies within here_km: the
+  # rest stays the climate's own.
+  near_weight: 0.5
+  # What each rock was laid down as, by its name in the Paleobiology Database: the definitions of the names. A
+  # lithology with no entry here takes its type's, below; one with neither says nothing of the ground (amber, chert,
+  # a schist).
+  lithologies:
+    sandstone: { sand: 1 }
+    siltstone: { silt: 1 }
+    mudstone: { mud: 1 }
+    claystone: { mud: 1 }
+    '"shale"': { mud: 1 }
+    conglomerate: { gravel: 1 }
+    gravel: { gravel: 1 }
+    breccia: { gravel: 1 }
+    '"volcaniclastic"': { ash: 1 }
+    diatomite: { silt: 1 }
+    bituminous coal: { organic: 1 }
+    subbituminous coal: { organic: 1 }
+    coal ball: { organic: 1 }
+  # And by the type the database's own vocabulary gives a lithology. A siliciclastic rock of no stated grain is taken as
+  # half sand and half mud, and a rock of mixed carbonate and siliciclastic as half lime mud.
+  types:
+    siliciclastic: { sand: 0.5, mud: 0.5 }
+    mixed: { lime: 0.5, mud: 0.5 }
+    carbonate: { lime: 1 }
+    evaporite: { evaporite: 1 }
+    organic: { organic: 1 }
+    volcanic: { ash: 1 }
+  # What an adjective of a lithology says of the ground: a colour, by a plain name the renderer has a tint for; a mark
+  # on its surface; or that some of it was another material. An adjective with no entry says nothing here.
+  adjectives:
+    gray: { colour: gray }
+    red: { colour: red }
+    green: { colour: green }
+    brown: { colour: brown }
+    yellow: { colour: yellow }
+    white: { colour: white }
+    black: { colour: black }
+    blue: { colour: blue }
+    red or brown: { colour: red-brown }
+    ferruginous: { colour: red }
+    hematitic: { colour: red }
+    glauconitic: { colour: green }
+    desiccation cracks: { mark: cracks }
+    current ripples: { mark: ripples }
+    wave ripples: { mark: ripples }
+    dunes: { mark: ripples }
+    paleosol/pedogenic: { mark: soil }
+    nodular: { mark: nodules }
+    concretionary: { mark: nodules }
+    burrows: { mark: burrows }
+    bioturbation: { mark: burrows }
+    very fine: { mark: fine }
+    fine: { mark: fine }
+    coarse: { mark: coarse }
+    very coarse: { mark: coarse }
+    pebbly: { material: gravel, share: 0.25 }
+    gypsiferous: { material: evaporite, share: 0.25 }
+    tuffaceous: { material: ash, share: 0.25 }
+    volcaniclastic: { material: ash, share: 0.25 }
+  # Today's topsoil, where the time is one it is held for (field:earth/soil): what each of its parts is drawn as. Its
+  # clay is the mud of the vocabulary above, and its coarse fragments the gravel.
+  soil: { sand: sand, silt: silt, clay: mud, coarse: gravel }
+  # Today's bedrock, where the time is one it is held for (field:earth/bedrock): the kind of rock each class of its map
+  # is, by the class's code, for outcrops and stones to be drawn of. Unconsolidated sediments are no rock. Water
+  # bodies, ice and cells with no data have no entry, and say nothing of the ground.
+  bedrock:
+    su: {}
+    ss: { rock: siliciclastic }
+    sm: { rock: mixed-sedimentary }
+    sc: { rock: carbonate }
+    ev: { rock: evaporite }
+    py: { rock: pyroclastic }
+    va: { rock: acid-volcanic }
+    vi: { rock: intermediate-volcanic }
+    vb: { rock: basic-volcanic }
+    pa: { rock: acid-plutonic }
+    pi: { rock: intermediate-plutonic }
+    pb: { rock: basic-plutonic }
+    mt: { rock: metamorphic }

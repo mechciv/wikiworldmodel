@@ -1,0 +1,53 @@
+id: field:earth/rock-record
+type: field
+title: The rock record of fossil sites
+quantity: the rock of each fossil collection and the environment it was laid down in, by stage
+unit: collections
+description: >-
+  What the ground of a place was made of and where it was laid down, as far as the rocks that hold a stage's fossils
+  say: for each stage of the chart, every collection of the Paleobiology Database dated to it, where its plate stood then,
+  with its lithologies and their adjectives (grain, colour, bedding, cracks, soils) and its environment (a lake, a channel,
+  a dune, a reef). Within a few tens of km of a collection the rock is the place's own, as near as a collection's
+  coordinates tell; out to a couple of hundred it says something of the country round it; beyond that, nothing. It is
+  what a scene's ground and setting can be drawn from, and nothing draws from it yet. The record leans as the fossils
+  do, to Europe and North America and to beds laid down under water: a place with no collection near has no rock
+  record here, which does not mean it had no rock.
+frame: frame:earth/present-day
+grid: { kind: rows }
+time: { lo: 541 Ma, hi: 0 Ma }
+data:
+  from: src:pbdb-rocks-2026-11-20
+  file: snapshot
+  as: rock-record
+basis: evidence
+# How sure the rock at a place is: a collection here, one near, or none.
+spread: tiers
+interp: step
+# The snapshot's rows are claims (docs/STRUCTURE.md section 3.1), one a collection, keyed by the database's collection
+# number, which the rows of the fossils' snapshots also give. "not reported" is the database's word for no lithology.
+rows:
+  kind: sample
+  key: "coll:{collection}"
+  claims:
+    depositional_environment: { column: environment }
+    lithology: { column: lithology, none: ["not reported"] }
+    lithology_adjectives: { column: lithology_adjectives }
+    second_lithology: { column: lithology2, none: ["not reported"] }
+    second_lithology_adjectives: { column: lithology2_adjectives }
+    formation: { column: formation }
+    location: { column: [lat, lng], as: point, method: compilation }
+    date: { column: [max_ma, min_ma], as: ma-range, method: stratigraphic }
+params:
+  # How near a collection must be for its rock to be the place's own, and how far it may be and still say something of
+  # the place: choices, and what the tiers mean.
+  here_km: 30
+  near_km: 200
+  # The atlases', so that a collection says as much of a stage here as its fossils do there, and all three have the same
+  # stages.
+  longest_span: 30
+  longest_span_in_stages: 10
+  longest_bin: 8
+  shortest_bin: 0.01
+source:
+  ref: src:pbdb-rocks-2026-11-20
+  loc: rows of the snapshot

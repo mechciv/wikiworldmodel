@@ -1,0 +1,31 @@
+# One of the parts kept beside the months of the last 120,000 years' climate (core/months.ts PARTS). Nothing reads it
+# yet: the wind of a scene is a constant of the renderer.
+id: field:earth/wind-speed
+type: field
+title: Wind speed over the land, last 120,000 years
+quantity: mean wind speed of each month
+unit: m/s
+description: >-
+  How fast the wind blew over the land in each month of the year, whichever way it blew, at each of the 72 times of the
+  climate of the last 120,000 years: the file calls it the monthly mean (absolute) wind speed. It is a climate model's
+  months (HadCM3), brought to half a degree and corrected by the difference between the model's present and the wind
+  speed observed in 1961–1990, and never below zero. It says nothing of the wind's direction, and neither the file nor
+  the article says at what height above the ground it is. A node here is the mean of the land cells of the half-degree
+  grid around it. It is of the land only, and has nothing south of 60°S.
+kind: raster
+frame: frame:earth/present-day
+grid: { kind: lonlat, res_deg: 1 }
+time: { lo: 120 ka, hi: 0 ka }
+data:
+  from: src:beyer-2020-late-quaternary
+  as: months
+  reads:
+    wind_speed: { variable: wind_speed, unit: metres per second }
+basis: reconstruction
+# A single value at each place, time and month: nobody gave its uncertainty (docs/STRUCTURE.md section 3.2).
+spread: unknown
+uncertainty: >-
+  A model's month, corrected to the wind speed observed in 1961–1990. The dataset's article tests its temperature, rain
+  and biomes against reconstructions, and not its wind. Over all its times its values run from 0 to 18.0 m/s, with a
+  mean of 3.5. The tiles keep it to a twentieth of a metre a second.
+moves_with: src:paleomap-plate-model

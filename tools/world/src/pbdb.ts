@@ -285,6 +285,237 @@ export async function exportFossils(envtype: 'terrestrial' | 'marine', date: str
   };
 }
 
+// ——— The rocks the fossils lie in ———
+
+/**
+ * What the database says of the rock of every collection: its lithologies with their adjectives (grain, colour, bedding,
+ * what grew in it), the environment it was laid down in, its tectonic setting, and any age measured for it. It is the
+ * rock record near a place, which a scene's ground and setting can be drawn from (docs/SCENES.md): kept apart from the
+ * snapshots of occurrences, which name their collections by the same numbers, so that neither has to change for the
+ * other. Kept as tables with few repeated strings, as the land's is. The service's own classes of environment, and its
+ * own types of lithology, come with it: what a lake or a carbonate is, is the database's to say, not this code's.
+ */
+export interface RocksSnapshot {
+  format: 'lightworld-pbdb-rocks@1';
+  snapshot: string;
+  license: string;
+  /** what the service was asked, with the date it answered */
+  query: { collections: string; classes: string; vocabulary: string };
+  /** the words the tables below refer to by number */
+  words: string[];
+  /** the service's classes of environment (its `envtype`), by name: a collection's `classes` has a bit for each, the first the lowest */
+  classes: string[];
+  /** the type the service's vocabulary gives a lithology: lithology and type, as words */
+  lithologies: [lithology: number, type: number][];
+  /**
+   * collection number, lat, lng, the oldest and youngest ages of its interval (Ma); then words: environment, tectonic
+   * setting, formation, and for each of its two lithologies the name, the adjectives as the database joins them,
+   * the lithification and the minor lithology; then its classes of environment, as bits
+   */
+  collections: RockRow[];
+  /** a measured age of a collection: its number, which (0 direct, 1 oldest, 2 youngest), the value, its uncertainty or null, and the unit and the method as words */
+  ages: RockAge[];
+}
+
+export type RockRow = [collection: number, lat: number, lng: number, max: number, min: number, environment: number, tectonic: number, formation: number, lithology1: number, adjectives1: number, lithification1: number, minor1: number, lithology2: number, adjectives2: number, lithification2: number, minor2: number, classes: number];
+export type RockAge = [collection: number, which: 0 | 1 | 2, value: number, error: number | null, unit: number, method: number];
+
+/** The classes of environment the service's documentation gives for `envtype`, as it spells them. */
+export const ROCK_CLASSES = ['terrestrial', 'lacustrine', 'fluvial', 'karst', 'glacial', 'terrother', 'terrindet', 'marine', 'carbonate', 'silicic', 'marginal', 'reef', 'stshallow', 'stdeep', 'offshore', 'slope', 'basin', 'marindet', 'unknown'];
+
+/** The spans the collections are asked for one at a time, about a period long each, over the 541 Myr of the occurrences'. */
+export const ROCK_SPANS = [541, 485, 444, 419, 359, 299, 252, 201, 145, 66, 23, 0];
+
+/**
+ * The records of the service's CSV, each as its fields. A quoted field may hold commas, doubled quotes and line breaks,
+ * as a collection's description does, so this reads the text and not its lines.
+ */
+export function csvRecords(text: string, each: (fields: string[]) => void): void {
+  const n = text.length;
+  let i = 0;
+  let row: string[] = [];
+  while (i < n) {
+    if (text.charCodeAt(i) === 34) {
+      let j = i + 1;
+      let s = '';
+      for (;;) {
+        const q = text.indexOf('"', j);
+        if (q < 0) {
+          s += text.slice(j);
+          j = n;
+          break;
+        }
+        if (text.charCodeAt(q + 1) === 34) {
+          s += text.slice(j, q + 1);
+          j = q + 2;
+          continue;
+        }
+        s += text.slice(j, q);
+        j = q + 1;
+        break;
+      }
+      row.push(s);
+      i = j;
+    } else {
+      let j = i;
+      while (j < n) {
+        const c = text.charCodeAt(j);
+        if (c === 44 || c === 10 || c === 13) break;
+        j++;
+      }
+      row.push(text.slice(i, j));
+      i = j;
+    }
+    if (text.charCodeAt(i) === 44) {
+      i++;
+      // A comma at the very end leaves one more field, empty.
+      if (i >= n) row.push('');
+      continue;
+    }
+    if (text.charCodeAt(i) === 13) i++;
+    if (text.charCodeAt(i) === 10) i++;
+    each(row);
+    row = [];
+  }
+  if (row.length) each(row);
+}
+
+/**
+ * The service's answer as CSV: its licence line, where it was asked to say (`datainfo`), and each record after the header
+ * as a column's value by name. The header is the line after "Records:", or the first line where nothing comes before it.
+ */
+function csvAnswer(text: string, each: (value: (column: string) => string) => void): string | undefined {
+  let license: string | undefined;
+  let col: Record<string, number> | undefined;
+  let records = false;
+  csvRecords(text, (r) => {
+    if (col) {
+      if (r.length > 1) each((c) => r[col![c]] ?? '');
+    } else if (records || r[0] === 'collection_no') col = Object.fromEntries(r.map((h, i) => [h, i]));
+    else if (r[0] === 'Data License') license = r[1];
+    else if (r[0] === 'Records:') records = true;
+  });
+  return license;
+}
+
+/**
+ * A snapshot of the rocks from the service's answers: `collections` its answers for the spans, in any order (a
+ * collection it gives for two spans is kept once); `classes` its answer for each class of environment; `vocabulary`
+ * the records of its configuration. Collections with no place are left out.
+ */
+export function rocksFrom(date: string, query: RocksSnapshot['query'], collections: string[], classes: Map<string, string>, vocabulary: Row[]): RocksSnapshot {
+  const words = new Map<string, number>([['', 0]]);
+  const word = (w: string | undefined) => {
+    const key = (w ?? '').trim();
+    let k = words.get(key);
+    if (k === undefined) {
+      k = words.size;
+      words.set(key, k);
+    }
+    return k;
+  };
+  const rows = new Map<number, RockRow>();
+  const ages: RockAge[] = [];
+  let license = 'unknown';
+  for (const text of collections) {
+    const l = csvAnswer(text, (v) => {
+      const no = Number(v('collection_no'));
+      const lat = v('lat');
+      const lng = v('lng');
+      if (!no || rows.has(no) || lat === '' || lng === '' || !Number.isFinite(Number(lat)) || !Number.isFinite(Number(lng))) return;
+      rows.set(no, [no, Number(lat), Number(lng), Number(v('max_ma')), Number(v('min_ma')), word(v('environment')), word(v('tectonic_setting')), word(v('formation')), word(v('lithology1')), word(v('lithadj1')), word(v('lithification1')), word(v('minor_lithology1')), word(v('lithology2')), word(v('lithadj2')), word(v('lithification2')), word(v('minor_lithology2')), 0]);
+      (['direct', 'max', 'min'] as const).forEach((which, k) => {
+        const value = v(`${which}_ma_value`);
+        if (value === '' || !Number.isFinite(Number(value))) return;
+        const error = v(`${which}_ma_error`);
+        ages.push([no, k as 0 | 1 | 2, Number(value), error === '' || !Number.isFinite(Number(error)) ? null : Number(error), word(v(`${which}_ma_unit`)), word(v(`${which}_ma_method`))]);
+      });
+    });
+    if (l) license = l;
+  }
+  const names = [...classes.keys()];
+  names.forEach((name, bit) => {
+    csvAnswer(classes.get(name)!, (v) => {
+      const row = rows.get(Number(v('collection_no')));
+      if (row) row[16] |= 1 << bit;
+    });
+  });
+  const lithologies: [number, number][] = [];
+  for (const r of vocabulary) {
+    if (r.config_section !== 'lth' || !r.lith_type || !r.lithology) continue;
+    lithologies.push([word(String(r.lithology)), word(String(r.lith_type))]);
+  }
+  return {
+    format: 'lightworld-pbdb-rocks@1',
+    snapshot: date,
+    license,
+    query,
+    words: [...words.keys()],
+    classes: names,
+    lithologies,
+    collections: [...rows.values()].sort((a, b) => a[0] - b[0]),
+    ages: ages.sort((a, b) => a[0] - b[0] || a[1] - b[1]),
+  };
+}
+
+/** The rocks of every collection, from the service. `log` says how far it has got: it takes some minutes. */
+export async function exportRocks(date: string, log: (m: string) => void, spans: number[] = ROCK_SPANS, classes: string[] = ROCK_CLASSES): Promise<RocksSnapshot> {
+  const text = async (url: string): Promise<string> => {
+    const res = await fetch(url, { headers: { 'User-Agent': 'wikiworldmodel-world-tools' } });
+    if (!res.ok) throw new Error(`GET ${url}: HTTP ${res.status}`);
+    return res.text();
+  };
+  // Every collection whose span overlaps the one asked for, so that none falls between two spans.
+  const collUrl = (max: number, min: number) => `${SERVICE}/colls/list.csv?max_ma=${max}&min_ma=${min}&timerule=overlap&show=lithext,geo,ages,strat&vocab=pbdb&limit=all&datainfo`;
+  const classUrl = `${SERVICE}/colls/list.csv?max_ma=${spans[0]}&min_ma=${spans[spans.length - 1]}&timerule=overlap&envtype={class}&vocab=pbdb&limit=all`;
+  const vocabUrl = `${SERVICE}/config.json?show=all&vocab=pbdb`;
+  const collUrls = spans.slice(1).map((min, i) => collUrl(spans[i], min));
+  const answers: string[] = [];
+  for (const url of collUrls) {
+    log(`asking for the collections: ${url}`);
+    answers.push(await text(url));
+    log(`  ${(answers[answers.length - 1].length / 1e6).toFixed(1)} MB`);
+  }
+  const byClass = new Map<string, string>();
+  for (const name of classes) {
+    log(`asking which collections the service calls ${name}`);
+    byClass.set(name, await text(classUrl.replace('{class}', name)));
+  }
+  const vocabulary = (await service(vocabUrl)).records;
+  const snap = rocksFrom(date, { collections: collUrls.join(' '), classes: classUrl, vocabulary: vocabUrl }, answers, byClass, vocabulary);
+  log(`${snap.collections.length} collections, ${snap.ages.length} measured ages, ${snap.words.length} words; ${snap.license}`);
+  return snap;
+}
+
+/** A collection's words, read out of the snapshot's tables: what a row of it says, as columns. */
+export function rockRows(snap: RocksSnapshot): Record<string, unknown>[] {
+  const w = (k: number) => snap.words[k] ?? '';
+  const classOf = (bits: number) => snap.classes.filter((_, k) => bits & (1 << k)).join(', ');
+  const measured = new Map<number, RockAge[]>();
+  for (const a of snap.ages) measured.set(a[0], [...(measured.get(a[0]) ?? []), a]);
+  const WHICH = ['direct', 'oldest', 'youngest'];
+  return snap.collections.map((c) => ({
+    collection: c[0],
+    lat: c[1],
+    lng: c[2],
+    max_ma: c[3],
+    min_ma: c[4],
+    environment: w(c[5]),
+    tectonic_setting: w(c[6]),
+    formation: w(c[7]),
+    lithology: w(c[8]),
+    lithology_adjectives: w(c[9]),
+    lithification: w(c[10]),
+    minor_lithology: w(c[11]),
+    lithology2: w(c[12]),
+    lithology2_adjectives: w(c[13]),
+    lithification2: w(c[14]),
+    minor_lithology2: w(c[15]),
+    environment_classes: classOf(c[16]),
+    measured_ages: (measured.get(c[0]) ?? []).map((a) => `${WHICH[a[1]]} ${a[2]}${a[3] === null ? '' : ` ± ${a[3]}`} ${w(a[4])}${w(a[5]) ? ` (${w(a[5])})` : ''}`).join('; '),
+  }));
+}
+
 /**
  * A written record of a taxon of the land's snapshot joins the world's tree: it hangs from the nearest taxon
  * above it that a record adopts, by the database's classification, unless it says otherwise. Taxa no record

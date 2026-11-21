@@ -172,12 +172,17 @@ export interface Field {
     from: string;
     file?: string;
     /** what the data is read as, where it is not elevation */
-    as?: 'climate' | 'ice-sheets' | 'borders' | 'hazards' | 'polities' | 'routes' | 'languages' | 'people' | 'community' | 'community-sea' | 'relief' | 'river-widths' | 'anthromes' | 'land-use-assessment' | 'cities';
+    as?: 'climate' | 'months' | 'ice-sheets' | 'borders' | 'hazards' | 'polities' | 'routes' | 'languages' | 'people' | 'community' | 'community-sea' | 'rock-record' | 'relief' | 'river-widths' | 'anthromes' | 'land-use-assessment' | 'cities' | 'topsoil' | 'bedrock';
     places?: string;
     /** for a land-use assessment by region: the dataset of the regions' shapes */
     regions?: string;
     /** for a climate read as months from NetCDF-4: the file's variables */
     variables?: Record<'temperature' | 'precipitation' | 'time' | 'latitude' | 'longitude', string>;
+    /**
+     * read `as: months`: the parts it is of what the tiles keep beside a climate's months (core/months.ts PARTS), each
+     * with the file's variable, the unit the file gives it, and the value the file gives where it has none
+     */
+    reads?: Record<string, { variable: string; unit?: string; none?: number }>;
     /** for relief: today's ocean and lakes, as areas */
     water?: { ocean: string; lakes: string };
     /** a series of the world's own measurements: the property whose claims give its values */

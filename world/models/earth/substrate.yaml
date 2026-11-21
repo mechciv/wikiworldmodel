@@ -1,0 +1,72 @@
+# A model run here (section 4.10 of the design). The values of its parameters stay in the field.
+id: model:earth/substrate
+type: model
+title: The ground of a place, from the rocks near it and from today's maps
+description: >-
+  Reads what the loose ground of a place of land was made of, and the rock under it. In deep time it reads the rock
+  record of the stage. Each collection near the place that the database calls terrestrial counts by how much of its span
+  the stage holds; its lithologies share that, and each is read as what it was laid down as: a sandstone as sand, a
+  claystone as mud, a conglomerate as gravel, a gypsum as a crust of salt. What a collection says of its rock besides
+  its name is said of the ground: a colour, cracks where it dried, ripples, or that part of it was pebbles or ash. Where
+  a collection lies within here_km, those alone decide, and the ground is evidence of the place; where the nearest are
+  further off, out to near_km, they decide part of the ground only, as a model of the country round. Where the time is
+  one a map of today's topsoil is held for, and no collection lies at the place itself, the ground is that topsoil's:
+  its coarse fragments by their share of its volume, and its sand, silt and clay sharing the rest. That is a model of
+  the place itself, and decides all of its ground; it names no colour, which stays the climate's. Where the time is one
+  a map of today's bedrock is held for, the rock under the ground is the class that map gives the place where it stands
+  today, carried there on its plate: a model, which says what outcrops and stones are of and nothing of the loose ground
+  over them. It answers nothing where none of these does, and it infers nothing from the climate, the relief or the
+  stage before. A fossil collection is where fossils were kept, mostly in beds laid down under or beside water: the
+  ground between such beds, which kept nothing, is not in it. A map of today held back in time knows nothing of what
+  changed: a soil since ploughed, drained or blown away, a lava not yet erupted.
+author: machine:claude-code
+code: core/substrate.ts
+inputs:
+  - { ref: field:earth/rock-record, note: "the sites of the stage near the place: their lithologies, the adjectives of each, and their classes of environment" }
+  - { ref: field:earth/soil, note: "today's topsoil at the place where it stands today: its sand, silt, clay and coarse fragments; and the span it is held for" }
+  - { ref: field:earth/bedrock, note: "today's class of rock at the place where it stands today, and the span it is held for" }
+outputs: [field:earth/substrate]
+params:
+  land_class: { choice: "Whose rock is a land's ground: only collections the database puts in this class of environment." }
+  near_weight: { choice: "How much of the ground the rocks of the country round decide, where none lies within here_km; the rest stays the climate's." }
+  lithologies:
+    choice: >-
+      What each rock was laid down as, by the meaning of its name: sand for a sandstone, silt for a siltstone, mud for a
+      mudstone, a claystone or a shale, gravel for a conglomerate or a breccia, ash for a volcaniclastic rock. Coals said
+      to be of a rank are peat, as coal is. A diatomite is taken as silt.
+  types:
+    choice: >-
+      The same by the type the database's vocabulary gives a lithology, for one with no entry of its own: a carbonate as
+      lime mud, an evaporite as a crust of salt, an organic rock as peat, a volcanic one as ash. A siliciclastic rock of
+      no stated grain is taken as half sand and half mud, and a mixed one as half lime mud and half mud: neither is known.
+  adjectives:
+    choice: >-
+      What an adjective of a lithology says of the ground: the nine colours the database has, by a plain name; a rock
+      said to be ferruginous or hematitic as red and a glauconitic one as green; cracks, ripples, a soil, nodules and
+      burrows as marks; and a quarter of a rock said to be pebbly as gravel, of one gypsiferous as salt, of one
+      tuffaceous or volcaniclastic as ash. The quarter is a choice: the database gives no amount.
+  soil:
+    choice: >-
+      Which material each part of a topsoil is drawn as: its sand as sand, its silt as silt, its clay as mud and its
+      coarse fragments as gravel. The fractions of the fine earth are by mass and the coarse fragments by volume, and
+      they are added as if they were alike: near enough for how a ground looks, and no measure of it.
+  bedrock:
+    choice: >-
+      The kind of rock each class of the map of bedrock is drawn as, class for class by its name. Unconsolidated
+      sediments are no rock, and say only that the ground is loose; water bodies, ice and cells with no data have no
+      entry, and say nothing.
+uncertainty:
+  kind: tiers
+  note: >-
+    The ground is evidence, a model or not known. The shares of its materials are of what the collections in reach say,
+    not of the ground's area: one collection of sandstone makes it all sand. A topsoil's shares are one prediction's
+    mean over half a degree, and the rock under it one class for the cell.
+checks:
+  - { test: core/substrate.test.ts, holds: "is evidence where a collection lies here, and takes only those: the country round says nothing more" }
+  - { test: core/substrate.test.ts, holds: "counts only collections of the land, and only rocks that say what they were" }
+  - { test: core/substrate.test.ts, holds: "makes a topsoil's ground of its stones by volume, and of its fine earth in what they leave" }
+  - { test: core/substrate.test.ts, holds: "takes today's topsoil before the rocks of the country round, and after a collection at the place" }
+  - { test: core/substrate.test.ts, holds: "reads a class of bedrock as its kind of rock, and says nothing where the map has water or ice" }
+  - { test: tools/world/test/rocks.test.ts, holds: "makes the ground at the first round's Aptian point of the lake beds beside it, and the build's own scene's of its formation's" }
+  - { test: tools/world/test/ground.test.ts, holds: "lays today's topsoil on the land of today's bedrock, better than a cell off any way" }
+  - { test: tools/world/test/ground.test.ts, holds: "holds the topsoil through the Holocene and the bedrock through the Quaternary, as the chart dates them" }

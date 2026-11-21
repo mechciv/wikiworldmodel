@@ -34,10 +34,14 @@ export function fieldAgesMa(f: Field): { maxAgeMa: number; minAgeMa: number; ste
  * What a gridded field is made from: elevation grids (a dataset of snapshots, partitioned by
  * the plate model's polygons), the plate model's polygons alone (where its continental
  * blocks are), or today's relief on a fixed datum, which a coastline reads at the sea level of
- * each time. Those three are carried by the tiles; the climate, the ice sheets and the people have files of their own.
+ * each time. Those three are carried by the tiles; the climate and what else its dataset says, the ice sheets, the
+ * people and today's maps of the ground have files of their own.
  */
-export function fieldSource(f: Field): 'elevation' | 'blocks' | 'relief' | 'climate' | 'ice' | 'people' | 'landscape' {
+export function fieldSource(f: Field): 'elevation' | 'blocks' | 'relief' | 'climate' | 'months' | 'ice' | 'people' | 'landscape' | 'ground' {
+  // Another variable of a climate's dataset, kept beside its months at the same nodes (core/months.ts PARTS).
+  if (f.data?.as === 'months') return 'months';
   if (f.data?.as === 'anthromes' || f.data?.as === 'land-use-assessment' || f.data?.as === 'cities') return 'landscape';
+  if (f.data?.as === 'topsoil' || f.data?.as === 'bedrock') return 'ground';
   if (f.data?.as === 'relief') return 'relief';
   if (f.data?.as === 'climate') return 'climate';
   if (f.data?.as === 'ice-sheets') return 'ice';
@@ -115,14 +119,20 @@ export async function importReliefPlates(field: Field, log: (s: string) => void 
   return run('plates', 'paleomap-plates', key, request, log);
 }
 
-/** The months of a climate field's runs, from a NetCDF-4 file: the cells with a value in each slice, and their twelve months. */
-export async function importMonths(field: Field, variables: Record<'temperature' | 'precipitation' | 'time' | 'latitude' | 'longitude', string>, log: (s: string) => void = console.log): Promise<string> {
+/** Another variable of a climate's file, kept for the cells that have months: the file's name for it, whether it is by month or by year, and what its values are multiplied by before they are rounded. */
+export type MonthsMore = Record<string, { variable: string; per: 'month' | 'year'; scale: number }>;
+
+/**
+ * The months of a climate field's runs, from a NetCDF-4 file: the cells with a value in each slice, and their twelve
+ * months; and, where asked for, other variables of the file for the same cells (tools/world/importers/months.py).
+ */
+export async function importMonths(field: Field, variables: Record<'temperature' | 'precipitation' | 'time' | 'latitude' | 'longitude', string>, log: (s: string) => void = console.log, more?: MonthsMore): Promise<string> {
   const manifest = await loadManifest();
   const id = field.data!.from;
   const d = manifest.datasets[id];
   if (!d) throw new Error(`${field.id}: ${id} is not a dataset in the manifest`);
-  const request = { file: datasetFile(id, d), ...variables };
-  const key = await importKey({ checksums: { [id]: d.fetch.sha256 }, variables }, MONTHS);
+  const request = { file: datasetFile(id, d), ...variables, ...(more && Object.keys(more).length ? { more } : {}) };
+  const key = await importKey({ checksums: { [id]: d.fetch.sha256 }, variables, ...(more && Object.keys(more).length ? { more } : {}) }, MONTHS);
   return run('months', 'months', key, request, log, MONTHS);
 }
 

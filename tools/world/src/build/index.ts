@@ -19,7 +19,7 @@ import { GENERATOR as CLOUDS, VERSION as CLOUDS_VERSION, generateClouds, type Cl
 import { GENERATOR as SURFACE, VERSION as SURFACE_VERSION, generateSurface, type SurfaceParams } from '../../../../world/generators/earth/surface/v1.ts';
 import { GENERATOR as GENERIC_LAND, VERSION as GENERIC_LAND_VERSION, generateGenericLand, genericLandAt, type GenericLandParams } from '../../../../world/generators/earth/generic-land/v1.ts';
 import { claimGroups, solveScenario, solveVariants } from '../chronology.ts';
-import { fieldAgesMa, fieldSource, importBlocks, importElevation, importMonths, importReliefPlates, PLATE_MODEL, tiledField } from '../importer.ts';
+import { fieldAgesMa, fieldSource, importBlocks, importElevation, importMonths, importReliefPlates, PLATE_MODEL, tiledField, type MonthsMore } from '../importer.ts';
 import { meanGrid } from '../tiff.ts';
 import { fillFromOcean, WATER, waterMask, type Areas } from './relief.ts';
 import { deepRivers, recentRivers, riverFiles, type DrainageParams, type Water } from './rivers.ts';
@@ -35,7 +35,7 @@ import { formatIssue, validateWorld } from '../validate/index.ts';
 import { loadWorld, type Field, type World } from '../world.ts';
 import { attributionMarkdown, credits } from '../attribution.ts';
 import { ClaimIndex } from '../claimindex.ts';
-import { correctLand } from '../tables.ts';
+import { correctLand, correctRocks } from '../tables.ts';
 import { gridPlaces, lifeTierOf, seaTierOf, tierCounts, TIER_SPANS, type ResolveWorld } from '../../../../core/resolve.ts';
 import { coverageMatrix, type CoverageSource } from '../../../../core/coverage.ts';
 import { glance, landShares } from '../../../../core/glance.ts';
@@ -45,8 +45,8 @@ import type { HousingCount } from '../../../../core/landscape.ts';
 import type { AtlasBin } from '../../../../core/atlas.ts';
 import { fieldFor, fieldLods, loadBlocks, loadRelief, loadSnapshots, paleoElevation, sliceField, tileGrid, timeBins, type GridField } from './fields.ts';
 import { buildCity } from './city.ts';
-import { climateGrid, climateKeyframes, encodeClimate, forestChecks, heightOn, monthsFiles, monthsKeyframes, waterParamsOf, type ClimateKeyframe, type WaterOptions } from './climate.ts';
-import { MonthsTile, tilesNear, type MonthsInfo, type MonthsSet, type MonthsTileHeader } from '../../../../core/months.ts';
+import { climateGrid, climateKeyframes, encodeClimate, forestChecks, heightOn, monthsFiles, monthsKeyframes, partClasses, partsFiles, waterParamsOf, type ClimateKeyframe, type PartRead, type WaterOptions } from './climate.ts';
+import { MONTHS_PARTS, MonthsTile, PARTS, PartsTile, partsFile, tilesNear, type MonthsInfo, type MonthsPart, type MonthsSet, type MonthsTileHeader, type PartInfo, type PartsTileHeader } from '../../../../core/months.ts';
 import { monthsPlace, placeMonths } from '../../../../world/generators/life/climate.ts';
 import type { PlaceWorld } from '../../../../world/generators/life/spec.ts';
 import { FEATURE_INDEX } from '../../../../core/featuretiles.ts';
@@ -57,7 +57,10 @@ import { buildLandscape, disagreement, farmingAgreement, housing, housingCounts,
 import { fieldLayers } from './fieldlayers.ts';
 import { buildAtlas } from './atlas.ts';
 import { buildSeaAtlas, type SeaOut, type SeaParams } from './sea.ts';
-import type { LandSnapshot } from '../pbdb.ts';
+import { buildRocks, type NoneWords, type RocksOut, type RocksParams } from './rocks.ts';
+import { buildGround, groundResolve } from './groundmaps.ts';
+import { bedrockAt, firstGround, groundHeld, substrateOfRocks, substrateOfSoil, type SubstrateFile, type SubstrateRule } from '../../../../core/substrate.ts';
+import type { LandSnapshot, RocksSnapshot } from '../pbdb.ts';
 import { buildScene, witnesses } from './scene.ts';
 import { features as buildFeatures, holdersOf, periods as buildPeriods, records as buildRecords, search as buildSearch, sourceRecord, type Solved } from './records.ts';
 import { planet as buildPlanet } from './planet.ts';
@@ -116,6 +119,8 @@ function worldSpan(periods: PeriodRecord[], found: SearchFile, grids: GridField[
 const CLIMATE_CHUNK = 12;
 /** How many degrees a tile of the months (field:earth/climate-at-height) is square: one a scene fetches. */
 const MONTHS_TILE_DEG = 10;
+/** What a part by month is multiplied by on its way in from a NetCDF-4 file, which keeps whole numbers: to a hundredth of its unit. One by year is kept as it is. */
+const PART_IMPORT_SCALE = 100;
 
 /** How finely the coverage chart asks the layers: columns along the time control's scale, the grid in degrees, and times per column. */
 const COVERAGE = { columns: 160, step: 5, samples: 3 };
@@ -641,6 +646,10 @@ export async function runBuild(args: string[]): Promise<number> {
       };
     };
   })();
+  // What else each climate's dataset says of its nodes, as the fields read `as: months` declare it (core/months.ts PARTS).
+  const partFields = world.fields.filter((f) => fieldSource(f) === 'months');
+  const partReads = (climate: Field): PartRead[] =>
+    heightParams ? MONTHS_PARTS.flatMap((part) => partFields.filter((x) => x.data!.from === climate.data!.from && x.data!.reads?.[part]).map((x) => ({ part, field: x.id, ...x.data!.reads![part] }))) : [];
   const monthsSets: MonthsSet[] = [];
   // The months' files as written, which a witness scene reads as a browser would.
   const monthBytes = new Map<string, Uint8Array>();
@@ -648,19 +657,37 @@ export async function runBuild(args: string[]): Promise<number> {
     monthBytes.set(path, bytes);
     put(path, bytes);
   };
-  const putMonths = (f: Field, keys: ClimateKeyframe[]) => {
+  const putMonths = async (f: Field, keys: ClimateKeyframe[], classes: (part: MonthsPart) => Promise<Record<string, string> | undefined> = async () => undefined) => {
     const grid = climateGrid((f.grid as { res_deg: number }).res_deg);
     const slug = f.id.replace(/^field:/, '').replace(/\//g, '-');
     const out = monthsFiles(f.id, `months/${slug}`, grid, keys, MONTHS_TILE_DEG);
     for (const [path, bytes] of out.files) putMonth(path, bytes);
     const frames = new Set(keys.map((k) => k.frameMa ?? k.ageMa));
-    monthsSets.push({ field: f.id, title: f.title, keyframesMa: keys.map((k) => k.ageMa).sort((a, b) => a - b), ...(frames.size === 1 ? { frameMa: [...frames][0] } : {}), step: grid.step, tile_deg: MONTHS_TILE_DEG, tiles: out.tiles });
+    const set: MonthsSet = { field: f.id, title: f.title, keyframesMa: keys.map((k) => k.ageMa).sort((a, b) => a - b), ...(frames.size === 1 ? { frameMa: [...frames][0] } : {}), step: grid.step, tile_deg: MONTHS_TILE_DEG, tiles: out.tiles };
+    // Beside them, the parts its dataset has, in tiles of their own: a span of the keyframes each.
+    const reads = partReads(f);
+    if (reads.length && keys.some((k) => k.parts)) {
+      const dir = `months/${slug}/parts`;
+      const made = partsFiles(f.id, dir, grid, keys, MONTHS_TILE_DEG, Object.keys(out.tiles));
+      for (const [path, bytes] of made.files) putMonth(path, bytes);
+      const parts: PartInfo[] = [];
+      for (const r of reads) {
+        const pf = partFields.find((x) => x.id === r.field)!;
+        const names = await classes(r.part);
+        parts.push({ part: r.part, field: pf.id, title: pf.title, ...(pf.quantity ? { quantity: pf.quantity } : {}), ...(pf.unit ? { unit: pf.unit } : {}), source: pf.data!.from, ...(names ? { classes: names } : {}), ...(typeof pf.params?.scale === 'number' ? { scale: pf.params.scale } : {}) });
+      }
+      set.parts = { list: parts, dir, chunks: made.chunks };
+    }
+    monthsSets.push(set);
     // What is written is all a scene needs of them; the rest of the build reads only the nodes and the water.
-    for (const k of keys) delete k.months;
+    for (const k of keys) {
+      delete k.months;
+      delete k.parts;
+    }
   };
   if (climateField && biomeField) {
     const elevation = paleoElevation(grids)!;
-    climateKeys = await climateKeyframes(world, climateField, elevation.snapshots, plateIndex, log, waterOptions, heightParams ? { g0: heightParams.g0 } : undefined);
+    climateKeys = await climateKeyframes(world, climateField, elevation.snapshots, plateIndex, log, waterOptions, heightParams ? { g0: heightParams.g0 } : undefined, partReads(climateField));
     put('climate.lwt', encodeClimate(climateGrid((climateField.grid as { res_deg: number }).res_deg), climateKeys, biomeField.params as unknown as ClimateRule));
   }
   // Climates finer in time than the deep past's runs, read as months, on today's coordinates and the plates under them
@@ -668,9 +695,12 @@ export async function runBuild(args: string[]): Promise<number> {
   const recentClimates: { field: Field; keys: ClimateKeyframe[]; chunks: { file: string; keyframesMa: number[] }[] }[] = [];
   if (biomeField) {
     for (const f of world.fields.filter((x) => fieldSource(x) === 'climate' && x.data?.variables)) {
-      const dir = await importMonths(f, f.data!.variables!, log);
+      // With its months, the other variables of its file that fields read `as: months`: by month or by year, as each is kept.
+      const reads = cellHeight ? partReads(f) : [];
+      const more: MonthsMore = Object.fromEntries(reads.map((r) => [r.part, PARTS[r.part].per === 12 ? { variable: r.variable, per: 'month' as const, scale: PART_IMPORT_SCALE } : { variable: r.variable, per: 'year' as const, scale: 1 }]));
+      const dir = await importMonths(f, f.data!.variables!, log, more);
       imports[f.id] = dir.split('/').pop()!;
-      const keys = await monthsKeyframes(f, dir, paleoElevation(grids)!.snapshots.find((x) => x.ageMa === 0)!, plateIndex, log, waterOptions, heightParams && cellHeight ? { height: cellHeight } : undefined);
+      const keys = await monthsKeyframes(f, dir, paleoElevation(grids)!.snapshots.find((x) => x.ageMa === 0)!, plateIndex, log, waterOptions, heightParams && cellHeight ? { height: cellHeight } : undefined, reads);
       const grid = climateGrid((f.grid as { res_deg: number }).res_deg);
       const slug = f.id.replace(/^field:/, '').replace(/\//g, '-');
       const chunks: { file: string; keyframesMa: number[] }[] = [];
@@ -682,12 +712,12 @@ export async function runBuild(args: string[]): Promise<number> {
         if (i + CLIMATE_CHUNK >= keys.length) break;
       }
       recentClimates.push({ field: f, keys, chunks });
-      if (heightParams) putMonths(f, keys);
+      if (heightParams) await putMonths(f, keys, (part) => partClasses(dir, part));
     }
   }
-  if (heightParams && climateField && climateKeys.length) putMonths(climateField, climateKeys);
+  if (heightParams && climateField && climateKeys.length) await putMonths(climateField, climateKeys);
   const monthsInfo: MonthsInfo | undefined = heightField && heightParams && monthsSets.length && waterOptions ? { water: waterOptions.params, field: heightField.id, title: heightField.title, model: 'model:earth/lapse-rate', lapse: heightParams.lapse_c_per_km, sets: monthsSets } : undefined;
-  if (monthsInfo) log(`months  ${monthsSets.map((x) => `${x.field}: ${x.keyframesMa.length} keyframes in ${Object.keys(x.tiles).length} tiles`).join('; ')}`);
+  if (monthsInfo) log(`months  ${monthsSets.map((x) => `${x.field}: ${x.keyframesMa.length} keyframes in ${Object.keys(x.tiles).length} tiles${x.parts ? `, and ${x.parts.list.map((p) => p.part).join(', ')} in ${x.parts.chunks.length} span${x.parts.chunks.length === 1 ? '' : 's'} of them` : ''}`).join('; ')}`);
   // The rivers and lakes of every time (model:earth/drainage): today's ground at the sea of each time for the glacial
   // cycles, with the water of the climate of the last 120,000 years, and before that each PaleoDEM with its run's.
   const riversField = world.fields.find((f) => f.rule === 'drainage' && f.kind === 'lines');
@@ -878,6 +908,51 @@ export async function runBuild(args: string[]): Promise<number> {
       for (const h of coverageHousing) log(`landscape  at ${formatTime(h.t)}: ${((100 * h.housed) / Math.max(1, h.people)).toFixed(1)}% of ${(h.people / 1e6).toFixed(1)} million people in a tradition's house, in ${h.regions[1]} of ${h.regions[0]} regions; ${h.cities[0]} cities of the lists`);
     }
   }
+  // The rock record of fossil sites, on the atlases' stages: what a scene's ground and setting can be read from
+  // (core/rocks.ts). Its rows are corrected by the overlays before anything reads them, as the fossils' are.
+  let rocks: RocksOut | undefined;
+  const rockField = world.fields.find((f) => f.data?.as === 'rock-record');
+  const rockLand = paleoElevation(grids);
+  if (rockField && rockLand) {
+    const id = rockField.data!.from;
+    const path = datasetFile(id, world.manifest.datasets[id], rockField.data!.file);
+    if (existsSync(path)) {
+      const started = Date.now();
+      const spec = rockField.rows;
+      const snap = JSON.parse(await readFile(path, 'utf8')) as RocksSnapshot;
+      // The words a column's claims say mean nothing was given, such as the database's "not reported".
+      const none: NoneWords = (column) => new Set(Object.values(spec?.claims ?? {}).filter((m) => m.column === column).flatMap((m) => (m.none ?? []).map(String)));
+      const isoline = world.fields.find((f) => f.id === 'field:earth/coastline')?.isoline_m ?? 20;
+      rocks = buildRocks(solved, periodList, rockLand.snapshots, spec ? correctRocks(snap, spec, claims.corrections(id)) : snap, id, rockField, rockField.params as unknown as RocksParams, none, isoline, log);
+      for (const [p, c] of rocks.files) put(p, c);
+      coverageFile.rocks = { collections: snap.collections.length, sites: rocks.index.bins.reduce((n, b) => n + b.sites, 0), stages: rocks.index.bins.length, agreement: rocks.index.agreement, measured: rocks.index.measured };
+      log(`rocks   built in ${((Date.now() - started) / 1000).toFixed(1)} s`);
+    } else log(`rocks   not built: no snapshot ${id} yet`);
+  }
+  // Today's maps of the ground, held back in time: the topsoil, and the rock under it (core/substrate.ts).
+  const ground = await buildGround(world, periodList, log);
+  if (ground) put('ground.lwt', encodeTile(ground.header as unknown as Record<string, unknown>, ground.arrays, stableStringify));
+  // What a ground is made of, by that record and those maps (field:earth/substrate): the rule a scene reads its place's
+  // ground by, for a viewer; and the ground of the build's own scene, where its place stood at the slice of the stage
+  // that holds it, and where it stands today.
+  const substrateField = world.fields.find((f) => f.rule === 'substrate');
+  const substrateRule = rocks || ground ? (substrateField?.params as unknown as SubstrateRule | undefined) : undefined;
+  if (substrateField && substrateRule) {
+    const file: SubstrateFile = { format: 'lightworld-substrate@1', field: substrateField.id, title: substrateField.title, description: substrateField.description, rule: substrateRule, ...(rocks ? { rocks: 'rocks/index.json' } : {}), ...(ground ? { ground: 'ground.lwt', held: [ground.header.soil, ground.header.bedrock].flatMap((m) => (m ? [m.span] : [])) } : {}) };
+    put('substrate.json', stableStringify(file));
+  }
+  const groundOf = substrateRule
+    ? (slice: number, positionAt: (ageMa: number) => { lat: number; lon: number }) => {
+        const k = rocks ? rocks.index.bins.findIndex((b) => slice >= b.from && slice <= b.to) : -1;
+        const at = k >= 0 ? positionAt(toMa(rocks!.index.bins[k].slice)) : undefined;
+        const rock = at ? substrateOfRocks(rocks!.bins[k], rocks!.index, substrateRule, at.lat, at.lon) : undefined;
+        const today = ground && (groundHeld(ground.header.soil, slice) || groundHeld(ground.header.bedrock, slice)) ? positionAt(0) : undefined;
+        return {
+          substrate: firstGround(rock, () => (today && groundHeld(ground!.header.soil, slice) ? substrateOfSoil(ground!.maps, substrateRule, today.lat, today.lon) : undefined)),
+          bedrock: today && groundHeld(ground!.header.bedrock, slice) ? bedrockAt(ground!.maps, substrateRule, today.lat, today.lon) : undefined,
+        };
+      }
+    : undefined;
   // The living scene, on the land and climate above.
   const sites: SiteInfo[] = [];
   let atlasFile: string | undefined;
@@ -890,7 +965,7 @@ export async function runBuild(args: string[]): Promise<number> {
   if (climateKeys.length && biomeField) {
     const elevation = paleoElevation(grids)!;
     const cg = climateGrid((climateField!.grid as { res_deg: number }).res_deg);
-    const living = buildScene(solved, elevation.snapshots, climateKeys, cg, biomeField.params as unknown as ClimateRule, buildPlanet(solved), log);
+    const living = buildScene(solved, elevation.snapshots, climateKeys, cg, biomeField.params as unknown as ClimateRule, buildPlanet(solved), log, groundOf);
     if (living) {
       const f = living.file;
       const spec = f.spec;
@@ -918,11 +993,13 @@ export async function runBuild(args: string[]): Promise<number> {
       for (const [path, content] of atlas.files) put(path, content);
       // A scene's months, from their files as written, as a browser reads them (world/generators/life/climate.ts).
       const monthTiles = new Map<string, MonthsTile>();
+      const partTiles = new Map<string, PartsTile>();
       const monthsAt = monthsInfo
         ? (pw: PlaceWorld, lat: number, lon: number, ageMa: number) => {
             const where = monthsPlace(monthsInfo, pw, lat, lon, ageMa);
             if (!where) return undefined;
             const tiles: MonthsTile[] = [];
+            const parts: PartsTile[] = [];
             for (const key of tilesNear(where.lat, where.lon, where.set)) {
               const file = where.set.tiles[key];
               if (!file) continue;
@@ -931,8 +1008,16 @@ export async function runBuild(args: string[]): Promise<number> {
                 monthTiles.set(file, new MonthsTile(header, arrays as unknown as ArrayLike<number>[]));
               }
               tiles.push(monthTiles.get(file)!);
+              // And the tile of its parts that holds the keyframe.
+              const part = partsFile(where.set, where.ageMa, key);
+              if (!part) continue;
+              if (!partTiles.has(part)) {
+                const { header, arrays } = decodeTile<PartsTileHeader>(monthBytes.get(part)!.slice().buffer as ArrayBuffer);
+                partTiles.set(part, new PartsTile(header, arrays as unknown as ArrayLike<number>[]));
+              }
+              parts.push(partTiles.get(part)!);
             }
-            return tiles.length ? placeMonths(monthsInfo, where, tiles) : undefined;
+            return tiles.length ? placeMonths(monthsInfo, where, tiles, undefined, parts) : undefined;
           }
         : undefined;
       const seen = witnesses(solved, atlas.index, atlas.files, elevation.snapshots, climateKeys, cg, biomeField.params as unknown as ClimateRule, buildPlanet(solved), log, waterAt, monthsAt, seaAtlas);
@@ -946,6 +1031,7 @@ export async function runBuild(args: string[]): Promise<number> {
   // Every layer answers everywhere, in a tier (docs/STRUCTURE.md section 3.3): how much of the world each tier holds.
   const resolveWorld = resolveWorldOf(world, solved, grids, climateKeys, ice, people, polities, lifeAtlas, seaAtlas, riversInfo ? { info: riversInfo, seen: riversSeen } : undefined, seriesList);
   if (landscape) resolveWorld.landscape = landscapeResolve(landscape);
+  if (substrateRule) resolveWorld.substrate = groundResolve(rocks, ground, substrateRule);
   if (coverageLandscape && landscape) {
     const farming = farmingAgreement(landscape);
     coverageFile.landscape = { disagree: coverageLandscape, farming, ...(coverageHousing ? { housing: coverageHousing } : {}) };
@@ -972,6 +1058,16 @@ export async function runBuild(args: string[]): Promise<number> {
     seaAtlas,
     riversInfo,
   );
+  if (rocks && substrateField && substrateRule) {
+    const refs = rocks.index.bins;
+    const stages: [number, number] = [Math.min(...refs.map((b) => b.from)), Math.max(...refs.map((b) => b.to))];
+    sources.push({ layer: 'substrate', id: rocks.index.source, title: world.source.get(rocks.index.source)?.title ?? rocks.index.source, tier: 'evidence', span: stages, lane: 'rocks' });
+    sources.push({ layer: 'substrate', id: substrateField.id, title: substrateField.title, tier: 'model', span: stages, lane: 'substrate' });
+  }
+  // Today's maps of the ground, each for the span it is held for: models both, of the place itself.
+  if (ground && substrateRule) {
+    for (const m of [ground.header.soil, ground.header.bedrock]) if (m) sources.push({ layer: 'substrate', id: m.field, title: m.title, tier: 'model', span: m.span, res_deg: m.res, lane: m.field });
+  }
   if (landscape) {
     const af = world.fields.find((f) => f.data?.as === 'anthromes')!;
     const lf = world.fields.find((f) => f.data?.as === 'land-use-assessment')!;
@@ -1005,7 +1101,7 @@ export async function runBuild(args: string[]): Promise<number> {
     timeRange: span,
     lods: lods.map((l) => ({ lod: l.lod, step: l.step, cell: [l.cells[0][2] - l.cells[0][0], l.cells[0][3] - l.cells[0][1]], binsMa: l.binsMa })),
     tiles,
-    files: { frames: 'frames.json', periods: 'periods.json', search: 'search.json', records: 'records/', coverage: 'coverage.json', series: 'series.json', planet: 'planet.json', territory: 'territory.json', city: city ? `city/${city.file.site.id}.json` : undefined, climate: climateKeys.length ? 'climate.lwt' : undefined, ice: ice ? 'ice.lwt' : undefined, tree: 'tree.json', ...(present ? { present: 'present.json' } : {}), ...(hazards ? { hazards: 'hazards.json' } : {}), ...(polities ? { polities: 'polities.json' } : {}), ...(overlays ? { overlays: 'overlays.json' } : {}), ...(people ? { people: 'people.lwt' } : {}), ...(atlasFile ? { atlas: atlasFile } : {}), ...(seaAtlas ? { sea: 'life/sea.json' } : {}), ...(landscape ? { landscape: 'people/landscape.json' } : {}), features: FEATURE_INDEX },
+    files: { frames: 'frames.json', periods: 'periods.json', search: 'search.json', records: 'records/', coverage: 'coverage.json', series: 'series.json', planet: 'planet.json', territory: 'territory.json', city: city ? `city/${city.file.site.id}.json` : undefined, climate: climateKeys.length ? 'climate.lwt' : undefined, ice: ice ? 'ice.lwt' : undefined, tree: 'tree.json', ...(present ? { present: 'present.json' } : {}), ...(hazards ? { hazards: 'hazards.json' } : {}), ...(polities ? { polities: 'polities.json' } : {}), ...(overlays ? { overlays: 'overlays.json' } : {}), ...(people ? { people: 'people.lwt' } : {}), ...(atlasFile ? { atlas: atlasFile } : {}), ...(seaAtlas ? { sea: 'life/sea.json' } : {}), ...(rocks ? { rocks: 'rocks/index.json' } : {}), ...(substrateRule ? { substrate: 'substrate.json' } : {}), ...(ground ? { ground: 'ground.lwt' } : {}), ...(landscape ? { landscape: 'people/landscape.json' } : {}), features: FEATURE_INDEX },
     rivers: riversInfo,
     months: monthsInfo,
     climates: recentClimates.length

@@ -10,6 +10,9 @@
 // crust over magma, an atmosphere of rock vapour or steam, the ice of a glaciation, and,
 // where the map is unknown, the oceans or bare rock of the time. The states are claims; how
 // they look here, and the surface generator's pattern they are drawn with, is procedural.
+// A phase that is a passage (core/planet.ts) is drawn part of the way from its own state to the
+// next: molten rock and rock vapour lie over whatever is under them and thin out, the crust of a
+// magma ocean spreads, and the sky, the clouds and the surface go from the one's to the other's.
 // Where the map is unknown and the planet has oceans, generic land stands in for the land
 // nothing records (gen:earth/generic-land, docs/STRUCTURE.md section 3.3): flat, muted and
 // under a graticule, so that it reads as a placeholder and never as a map.
@@ -52,11 +55,16 @@ uniform float uTexel;
 // How far apart the field's nodes are, in radians: its isolines are smoothed over about a third of that.
 uniform float uSmooth;
 uniform int uMode;
-// The planet's state: surface 0 as the mode draws it, 1 oceans, 2 magma, 3 crust over
-// magma, 4 bare rock; air 0 today's sky, 1 rock vapour.
+// The planet's state. What the map, or the lack of one, is drawn as: 0 as the mode draws it, 1 oceans,
+// 4 bare rock; and, while it passes from one to another, the one it is passing into and how far it has.
 uniform int uSurface;
-uniform int uAir;
+uniform int uSurfaceTo;
+uniform float uSurfaceMix;
+// How much of that molten rock covers, the share of the molten rock crusted over, and how much of
+// everything an atmosphere of rock vapour hides: each 0–1.
+uniform float uMolten;
 uniform float uCrust;
+uniform float uEmber;
 uniform float uIceReach;
 uniform float uIceEdge;
 uniform vec3 uRim;
@@ -296,6 +304,24 @@ float iceCover(vec3 n, vec4 p) {
   return smoothstep(edge - w, edge + w, lat);
 }
 
+// No map: the plain globe, or the oceans or bare rock of the time with a faint graticule, since where
+// the land was is not known.
+vec3 plain(int surface, vec3 n, vec3 view, vec4 p, float diffuse) {
+  vec3 c = unknownSurface(n);
+  if (surface == 1) {
+    float land = uGenericOn > 0.5 ? smoothstep(0.49, 0.53, texture(uGenericLand, mapUv(n)).r) : 0.0;
+    vec3 sea = vec3(0.035, 0.15, 0.30) * (0.22 + 0.85 * diffuse);
+    sea += vec3(0.55, 0.65, 0.75) * pow(max(dot(reflect(-uSun, n), view), 0.0), 60.0) * 0.35;
+    vec3 ground = vec3(0.34, 0.33, 0.31) * (0.85 + 0.3 * p.a) * (0.22 + 0.85 * diffuse);
+    c = mix(sea, ground, land);
+    c += vec3(0.32, 0.38, 0.50) * graticule(n) * 0.12;
+  } else if (surface == 4) {
+    c = vec3(0.46, 0.38, 0.30) * (0.75 + 0.5 * p.a) * (0.22 + 0.85 * diffuse);
+    c += vec3(0.32, 0.38, 0.50) * graticule(n) * 0.12;
+  }
+  return c;
+}
+
 // The height of the ice sheets' surface, in metres: the thickness over the ground the globe has here.
 // It leaves out how far the ground sank under the ice, which is broad and smooth.
 float iceSurface(vec3 n) {
@@ -312,41 +338,36 @@ void main() {
   vec3 magenta = vec3(0.92, 0.25, 0.75);
   vec4 p = pattern(n);
   // An atmosphere of rock vapour hides the surface: the planet glows like an ember.
-  if (uAir == 1) {
+  vec3 ember = vec3(0.0);
+  if (uEmber > 0.0) {
     float mu = max(dot(n, view), 0.0);
-    vec3 c = heat(clamp(0.74 + 0.9 * (p.g - 0.5), 0.0, 1.0)) * (0.5 + 0.5 * pow(mu, 0.45));
-    c = mix(c, magenta, uEvidence * (0.14 + 0.26 * hatch));
-    o = vec4(c + uRim * rim * 0.45, 1.0);
-    return;
+    ember = heat(clamp(0.74 + 0.9 * (p.g - 0.5), 0.0, 1.0)) * (0.5 + 0.5 * pow(mu, 0.45));
+    ember = mix(ember, magenta, uEvidence * (0.14 + 0.26 * hatch));
+    if (uEmber >= 1.0) {
+      o = vec4(ember + uRim * rim * 0.45, 1.0);
+      return;
+    }
   }
   // Magma, or crust over magma, covers whatever the map has.
-  if (uSurface == 2 || uSurface == 3) {
-    vec3 c = magma(p, uCrust, max(dot(n, uSun), 0.0));
-    c = mix(c, vec3(0.88, 0.9, 0.93) * (0.35 + 0.75 * max(dot(n, uSun), 0.0)), iceCover(n, p));
-    c = mix(c, magenta, uEvidence * (0.14 + 0.26 * hatch));
-    o = vec4(c + uRim * rim * 0.45, 1.0);
-    return;
+  vec3 molten = vec3(0.0);
+  if (uMolten > 0.0) {
+    molten = magma(p, uCrust, max(dot(n, uSun), 0.0));
+    molten = mix(molten, vec3(0.88, 0.9, 0.93) * (0.35 + 0.75 * max(dot(n, uSun), 0.0)), iceCover(n, p));
+    molten = mix(molten, magenta, uEvidence * (0.14 + 0.26 * hatch));
+    if (uMolten >= 1.0) {
+      o = vec4(mix(molten, ember, uEmber) + uRim * rim * 0.45, 1.0);
+      return;
+    }
   }
   if (uMode == 2) {
-    // No map: the plain globe, or the oceans or bare rock of the time with a faint graticule,
-    // since where the land was is not known.
+    // No map: what the state says covers the planet, or, in a passage, part of the way from that to the next.
     float diffuse = max(dot(n, uSun), 0.0);
-    vec3 c = unknownSurface(n);
-    if (uSurface == 1) {
-      float land = uGenericOn > 0.5 ? smoothstep(0.49, 0.53, texture(uGenericLand, mapUv(n)).r) : 0.0;
-      vec3 sea = vec3(0.035, 0.15, 0.30) * (0.22 + 0.85 * diffuse);
-      sea += vec3(0.55, 0.65, 0.75) * pow(max(dot(reflect(-uSun, n), view), 0.0), 60.0) * 0.35;
-      vec3 ground = vec3(0.34, 0.33, 0.31) * (0.85 + 0.3 * p.a) * (0.22 + 0.85 * diffuse);
-      c = mix(sea, ground, land);
-      c += vec3(0.32, 0.38, 0.50) * graticule(n) * 0.12;
-    } else if (uSurface == 4) {
-      c = vec3(0.46, 0.38, 0.30) * (0.75 + 0.5 * p.a) * (0.22 + 0.85 * diffuse);
-      c += vec3(0.32, 0.38, 0.50) * graticule(n) * 0.12;
-    }
+    vec3 c = plain(uSurface, n, view, p, diffuse);
+    if (uSurfaceMix > 0.0) c = mix(c, plain(uSurfaceTo, n, view, p, diffuse), uSurfaceMix);
     float ice = iceCover(n, p);
     c = mix(c, vec3(0.80, 0.87, 0.93) * (0.86 + 0.24 * p.a) * (0.35 + 0.75 * diffuse), ice);
-    if (uSurface != 0) c = mix(c, magenta, uEvidence * (0.14 + 0.26 * hatch));
-    o = vec4(c + uRim * rim * 0.45, 1.0);
+    if (uSurface != 0 || (uSurfaceMix > 0.0 && uSurfaceTo != 0)) c = mix(c, magenta, uEvidence * (0.14 + 0.26 * hatch));
+    o = vec4(mix(mix(c, molten, uMolten), ember, uEmber) + uRim * rim * 0.45, 1.0);
     return;
   }
   vec3 ref = abs(n.z) < 0.99 ? vec3(0.0, 0.0, 1.0) : vec3(1.0, 0.0, 0.0);
@@ -425,6 +446,7 @@ void main() {
   // Evidence mode: the whole field is a reconstruction — amber hatching, the ice sheets of a field too;
   // ice from a claimed latitude is procedural.
   c = mix(c, mix(vec3(0.95, 0.65, 0.18), magenta, ice), uEvidence * (0.14 + 0.26 * hatch));
+  c = mix(mix(c, molten, uMolten), ember, uEmber);
   c += uRim * rim * 0.45;
   o = vec4(c, 1.0);
 }`;
@@ -542,12 +564,17 @@ type RGB = [number, number, number];
 export interface GlobeLook {
   /** false: the planet has not formed, and only the sky is drawn */
   formed: boolean;
-  /** 0 as the mode draws it, 1 oceans, 2 magma, 3 crust over magma, 4 bare rock */
+  /** what the map, or the lack of one, is drawn as: 0 as the mode draws it, 1 oceans, 4 bare rock */
   surface: number;
-  /** 0 today's sky, 1 rock vapour */
-  air: number;
-  /** the share of a molten surface crusted over, 0–1 */
+  /** in a passage from one such surface to another, the one it is passing into, and how far it has, 0–1 */
+  surfaceTo: number;
+  surfaceMix: number;
+  /** how much of that molten rock covers, 0–1: all of it over magma or crust over magma */
+  molten: number;
+  /** the share of the molten rock crusted over, 0–1 */
   crust: number;
+  /** how much of everything an atmosphere of rock vapour hides, 0–1 */
+  ember: number;
   /** the lowest latitude ice reaches, in degrees; 90 is none */
   iceReach: number;
   iceEdge: number;
@@ -559,36 +586,98 @@ export interface GlobeLook {
   clouds: { opacity: number; base: number; tint: RGB; glow: RGB } | null;
 }
 
+type Clouds = NonNullable<GlobeLook['clouds']>;
+
 const RIM: RGB = [0.25, 0.45, 0.85];
 const HALO: RGB = [0.22, 0.42, 0.95];
-const CLEAR_CLOUDS = { opacity: 0.78, base: 0, tint: [1, 1, 1] as RGB, glow: [0, 0, 0] as RGB };
+const CLEAR_CLOUDS: Clouds = { opacity: 0.78, base: 0, tint: [1, 1, 1], glow: [0, 0, 0] };
 const NONE: RGB = [0, 0, 0];
 
 /** As the world was drawn before it had states: today's sky, clouds, no ice. */
-export const PLAIN_LOOK: GlobeLook = { formed: true, surface: 0, air: 0, crust: 0, iceReach: 90, iceEdge: 0, cover: { crust: 0, plants: 0, forests: 0, grasses: 0, reefs: 0 }, rim: RIM, halo: HALO, clouds: CLEAR_CLOUDS };
+export const PLAIN_LOOK: GlobeLook = { formed: true, surface: 0, surfaceTo: 0, surfaceMix: 0, molten: 0, crust: 0, ember: 0, iceReach: 90, iceEdge: 0, cover: { crust: 0, plants: 0, forests: 0, grasses: 0, reefs: 0 }, rim: RIM, halo: HALO, clouds: CLEAR_CLOUDS };
 
-const SURFACES: Record<string, number> = { ocean: 1, magma: 2, 'crust-and-magma': 3, 'bare-rock': 4 };
+/** What the map, or the lack of one, is drawn as under each surface that is not molten. */
+const PLAIN_SURFACES: Record<string, number> = { ocean: 1, 'bare-rock': 4 };
+
+/** A state as it is drawn while it holds, before any passage into the next. */
+interface Steady {
+  /** molten rock covers everything: magma, or crust over magma */
+  molten: boolean;
+  /** the share of the molten rock crusted over */
+  crust: number;
+  /** what is drawn where no molten rock is: 0 as the mode draws it, 1 oceans, 4 bare rock */
+  plain: number;
+  /** an atmosphere of rock vapour hides the surface */
+  ember: boolean;
+  rim: RGB;
+  halo: RGB;
+  clouds: Clouds | null;
+}
 
 /**
  * The drawing of a state. Clouds need water: oceans or a steam atmosphere, which is all but
- * overcast and lit from below by the magma; over a Snowball Earth they are thin. Where no
+ * overcast and lit from below by the magma; over a Snowball Earth they are thin. An atmosphere
+ * of dense carbon dioxide is a pale veil that all but hides the ocean under it. Where no
  * atmosphere is claimed the sky is today's, except over a molten surface, drawn bare.
+ */
+function steady(surface: string | null, atmosphere: string | null, crustAt: SurfaceParams['draw']['crust'], iceReach: number): Steady {
+  const molten = surface === 'magma' || surface === 'crust-and-magma';
+  const crust = surface === 'crust-and-magma' ? crustAt.over_magma : crustAt.magma;
+  const base = { molten, crust: molten ? crust : 0, plain: PLAIN_SURFACES[surface ?? ''] ?? 0, ember: false };
+  if (atmosphere === 'rock-vapour') return { ...base, ember: true, rim: [1.0, 0.62, 0.28], halo: [1.0, 0.55, 0.2], clouds: null };
+  if (atmosphere === 'steam') {
+    const glow = molten ? 1 - crust : 0;
+    return { ...base, rim: [0.82, 0.82, 0.84], halo: [0.78, 0.8, 0.86], clouds: { opacity: 0.6, base: 0.55, tint: [0.88, 0.88, 0.9], glow: [0.55 * glow, 0.12 * glow, 0.02 * glow] } };
+  }
+  if (atmosphere === 'dense-co2') return { ...base, rim: [0.74, 0.8, 0.86], halo: [0.7, 0.78, 0.9], clouds: { opacity: 0.3, base: 0.8, tint: [0.93, 0.93, 0.9], glow: NONE } };
+  if (molten) return { ...base, rim: NONE, halo: NONE, clouds: null };
+  if (surface === 'bare-rock') return { ...base, rim: RIM, halo: HALO, clouds: null };
+  if (iceReach <= 0) return { ...base, rim: RIM, halo: HALO, clouds: { ...CLEAR_CLOUDS, opacity: 0.45 } };
+  return { ...base, rim: RIM, halo: HALO, clouds: CLEAR_CLOUDS };
+}
+
+const lerp = (a: number, b: number, w: number) => a + (b - a) * w;
+const lerp3 = (a: RGB, b: RGB, w: number): RGB => [lerp(a[0], b[0], w), lerp(a[1], b[1], w), lerp(a[2], b[2], w)];
+
+/** Clouds part of the way from one state's to another's; where one has none, the other's thin out into nothing. */
+function cloudsBetween(a: Clouds | null, b: Clouds | null, w: number): Clouds | null {
+  if (!a && !b) return null;
+  const from = a ?? { ...b!, opacity: 0, base: 0, glow: NONE };
+  const to = b ?? { ...a!, opacity: 0, base: 0, glow: NONE };
+  return { opacity: lerp(from.opacity, to.opacity, w), base: lerp(from.base, to.base, w), tint: lerp3(from.tint, to.tint, w), glow: lerp3(from.glow, to.glow, w) };
+}
+
+/**
+ * How the planet is drawn at a time: its state as it is while it holds, or, where the phase is a
+ * passage, part of the way from that to the state it is passing into. Rock vapour and molten rock
+ * thin out over what is under them; a magma ocean's crust spreads; the sky and the clouds go from
+ * the one's to the other's.
  */
 export function globeLook(look: Look, draw: SurfaceParams['draw'] | undefined, cover?: Cover): GlobeLook {
   if (!look.formed) return { ...PLAIN_LOOK, formed: false, rim: NONE, halo: NONE, clouds: null };
-  const surface = SURFACES[look.surface ?? ''] ?? 0;
-  const crustAt = draw?.crust ?? { start: 0, end: 0.96, over_magma: 0.82 };
-  const crust = surface === 3 ? crustAt.over_magma : crustAt.start + (crustAt.end - crustAt.start) * look.progress;
-  const base = { ...PLAIN_LOOK, surface, crust, iceReach: look.iceReach, iceEdge: draw?.ice_edge ?? 5, cover: cover ?? PLAIN_LOOK.cover };
-  if (look.atmosphere === 'rock-vapour') return { ...base, air: 1, rim: [1.0, 0.62, 0.28], halo: [1.0, 0.55, 0.2], clouds: null };
-  if (look.atmosphere === 'steam') {
-    const glow = 1 - crust;
-    return { ...base, rim: [0.82, 0.82, 0.84], halo: [0.78, 0.8, 0.86], clouds: { opacity: 0.6, base: 0.55, tint: [0.88, 0.88, 0.9], glow: [0.55 * glow, 0.12 * glow, 0.02 * glow] } };
-  }
-  if (surface === 2 || surface === 3) return { ...base, rim: NONE, halo: NONE, clouds: null };
-  if (surface === 4) return { ...base, clouds: null };
-  if (look.iceReach <= 0) return { ...base, clouds: { ...CLEAR_CLOUDS, opacity: 0.45 } };
-  return base;
+  const crustAt = draw?.crust ?? { magma: 0, over_magma: 0.82 };
+  const a = steady(look.surface, look.atmosphere, crustAt, look.iceReach);
+  const base = { ...PLAIN_LOOK, iceReach: look.iceReach, iceEdge: draw?.ice_edge ?? 5, cover: cover ?? PLAIN_LOOK.cover };
+  const one = (x: Steady): GlobeLook => ({ ...base, surface: x.plain, molten: x.molten ? 1 : 0, crust: x.crust, ember: x.ember ? 1 : 0, rim: x.rim, halo: x.halo, clouds: x.clouds });
+  if (!look.into || look.passed <= 0) return one(a);
+  const b = steady(look.intoSurface, look.intoAtmosphere, crustAt, look.iceReach);
+  const w = Math.min(1, look.passed);
+  // Molten rock on both sides is one surface whose crust spreads; on one side only, it keeps its crust as it thins.
+  const crust = a.molten && b.molten ? lerp(a.crust, b.crust, w) : a.molten ? a.crust : b.crust;
+  // Under molten rock there is nothing to pass from: what shows as it thins is the other side's.
+  const mixing = !a.molten && !b.molten && a.plain !== b.plain;
+  return {
+    ...base,
+    surface: a.molten ? b.plain : a.plain,
+    surfaceTo: mixing ? b.plain : 0,
+    surfaceMix: mixing ? w : 0,
+    molten: lerp(a.molten ? 1 : 0, b.molten ? 1 : 0, w),
+    crust,
+    ember: lerp(a.ember ? 1 : 0, b.ember ? 1 : 0, w),
+    rim: lerp3(a.rim, b.rim, w),
+    halo: lerp3(a.halo, b.halo, w),
+    clouds: cloudsBetween(a.clouds, b.clouds, w),
+  };
 }
 
 /** Polities' territory over the land: whether any is drawn, each channel's colour, and the one selected. */
@@ -845,7 +934,8 @@ export class GlobeRenderer {
       uRim: look.rim,
     });
     setUniforms(gl, this.surface, { uPeopleOn: f.people ? 1 : 0, uAnthromesOn: f.anthromes ? 1 : 0 });
-    setUniforms(gl, this.surface, { uMode: f.mode, uSurface: look.surface, uAir: look.air }, ['uMode', 'uSurface', 'uAir']);
+    setUniforms(gl, this.surface, { uSurfaceMix: look.surfaceMix, uMolten: look.molten, uEmber: look.ember });
+    setUniforms(gl, this.surface, { uMode: f.mode, uSurface: look.surface, uSurfaceTo: look.surfaceTo }, ['uMode', 'uSurface', 'uSurfaceTo']);
     gl.drawElements(gl.TRIANGLES, this.count, gl.UNSIGNED_INT, 0);
     gl.activeTexture(gl.TEXTURE0);
 
