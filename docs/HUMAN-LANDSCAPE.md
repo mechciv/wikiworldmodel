@@ -1,7 +1,9 @@
 # The human landscape: zoom in anywhere and see how people lived there
 
 Status: the plan and what is built of it, November 2026. The [eleventh slice](slices/ELEVENTH-SLICE.md) builds its first
-steps. It does for people what [LIVING-WORLD.md](LIVING-WORLD.md) does for life: at any place on land and any time since
+steps, and the [sixteenth](slices/SIXTEENTH-SLICE.md) fills it in: whom each tradition housed, towns with streets and
+walls, cities drawn from their own records, the animals people kept, people, boats and paths
+([plans/LIFEWAY-RENDERINGS.md](plans/LIFEWAY-RENDERINGS.md)). It does for people what [LIVING-WORLD.md](LIVING-WORLD.md) does for life: at any place on land and any time since
 10,000 BCE, the settlements, houses and fields of the people who lived there, drawn from what is known and honest about
 which is which. It is the anonymous landscape, the villages and farmsteads nobody wrote about one by one. Named places,
 Rome's monuments and the first cities, stay records of their own, and a city slice draws a city's fabric as Rome's is.
@@ -13,11 +15,13 @@ few small, sourced inputs, and nothing they make is stored:
 
 ```text
 HYDE 3.2 (people, land use)  →  Anthromes 12K: every 5′ cell's class, 73 times        the lists of cities (Chandler, Modelski)
-ArchaeoGLOBE: 146 regions × 10 times, how each way of life was spread                  building traditions: records, by region and time
+ArchaeoGLOBE: 146 regions × 10 times, how each way of life was spread                  the settlements the world has records of
+                                                                                       traditions: of building and of husbandry, by region, time and way of life
             ↓ the build: tiles of 5′ cells, the regions drawn into them, the assessments, the cities, the traditions
 model:people/lifeways: at a place and time, how people lived, how many, and how sure that is
             ↓ a few tiles and lists, in the browser
-gen:people/settlement: settlements, houses of a tradition's form, fields, pastures, yards
+gen:people/settlement: settlements, houses of a tradition's form, towns with streets and walls, fields, pastures,
+                       herds, people, boats, paths
             ↓
 drawn in the living scene, on its ground, around its rivers, its trees cleared where the fields are
 ```
@@ -42,6 +46,12 @@ people. A class is a reading of HYDE's model, not a map anyone drew, and HYDE's 
 Chandler's to 1975, as Reba, Reitsma and Seto placed them on the map (`field:people/cities-ancient`, `field:people/cities`).
 They are evidence of a kind HYDE's grid does not have: at 5′ HYDE has no Uruk in 3000 BCE, Tikal in 700 CE or Cahokia in
 1100, and the lists do.
+
+**A city the world has a record of** (`kind: settlement`) is drawn from the record: where its `location` puts it, under
+its name of the time, with the people a `population` claim gives it for about that time, the houses a source counted
+(`houses`), the ground it covered (`settlement_area`) and the layout its `town_form` states. A list's figure stands
+where the record gives none for the time, and is kept beside the record's where it gives one. Of several estimates for
+one time the record's preferred one is drawn; Tenochtitlan in 1519 is Calnek's city, not Chandler's.
 
 ## 2. How did they live?
 
@@ -78,10 +88,31 @@ more in only about a third to a half of those regions. Every build counts it aga
 
 **Every house has a form, and the regions' traditions fill every gap.** A building tradition is a record
 (`tradition/building`): where it was (`extent`, the ArchaeoGLOBE regions its sources place it in), when (`start`, `end`),
-and as sourced claims, its dwelling (plan, size, walls, roof, floor), how its houses stood together, how many lived in
-each, and its fields. A narrower tradition is a member of a broader one and says only what differs. At a place and time
-the most particular tradition that holds there draws the houses; where none does, a generic house for the way of life and
+whom it housed (`lifeway`: foragers, herders, shifting cultivators, farmers, townspeople), and as sourced claims, its
+dwelling (plan, size, walls, roof, floor), how its houses stood together, how many lived in each, its fields, and how
+its towns were laid out. A narrower tradition is a member of a broader one and says only what differs. At a place and
+time the most particular tradition that holds there *for the way of life of the people there* draws the houses: a
+herder's tent for the camps of herders, not for the farmers of the same region. Where none is written for a region's
+shifting cultivators the house of its farmers stands in, and the other way round, and says so: the model tells the two
+apart only by a survey's answer for a whole region. A tradition that was the house of a part of a region's people says
+so (`prevalence`: a few, some or most of them), and is drawn for that part of the region's 5′ cells, the rest in the
+next tradition's house or the generic one. Where no tradition holds, a generic house for the way of life and
 the climate stands in, and says so. Agents write them, region by region; [DWELLINGS.md](DWELLINGS.md) is the brief.
+
+**A town has streets.** Its houses stand on lots, back to back in blocks: on a grid with a main street each way
+through the middle, along lanes that wander, or with water in some of its streets; a square may lie at its middle; and
+round it a wall with gates and towers, a rampart, a palisade or a moat. Which is a `town_form` claim, of the tradition
+that housed its townspeople or of the city's own record. Where neither says, the generic town is drawn, lanes and no
+wall, and the panel says so. A city too thin on the ground for streets, a hectare to a house, has none.
+
+**The animals people kept** are a record too, a husbandry tradition (`tradition/husbandry`): which animals, as taxon
+records, whose way it was, where and when. Each is drawn with its taxon's body and size, as a wild animal is: those
+that graze in herds, on the pasture of people who herd and at the edge of the houses of people who farm; the rest about
+the houses. Which animals is the tradition's claim. How many is nobody's, and the generator says so.
+
+**People, boats and paths** rest on no record at all. A few plain people stand by the houses of every settlement, a
+boat floats on water deep enough beside one, and a path joins each settlement of people who stayed put to its nearest
+neighbours, so that a scene has its scale and its ways. They are the same everywhere, and a click says they are generic.
 
 ## 4. How is it drawn?
 
@@ -90,7 +121,9 @@ the climate stands in, and says so. Agents write them, region by region; [DWELLI
 - **Keyed by the world.** Settlements are seeded by the world's 5′ cells and the anthromes' step, so two scenes that
   overlap put them in the same places.
 - **Houses as instances**, one mesh for each dwelling and detail, as the bodies of the living scene are, ranked so that
-  a far view draws the top of the list a near view draws in full, and within the frame's budget.
+  a far view draws the top of the list a near view draws in full, and within the frame's budget. A town's wall, its
+  towers, gates and water are short pieces drawn the same way, along the line the generator lays; the animals people
+  kept are drawn as the wild ones are; the paths are one ribbon laid on the ground.
 - **Fields painted on the ground**: the generator gives where they are; the shader draws their plots by the tradition's
   field system (strips, blocks, paddies flooded within their banks, swidden plots).
 - **On the globe**, the anthromes' classes in the legend's colours, under *Settlement* in the *Layers* menu; and a click on
@@ -105,8 +138,16 @@ the climate stands in, and says so. Agents write them, region by region; [DWELLI
 - ArchaeoGLOBE's regions are made from today's provinces and are as large as a country; a tradition named in a region is
   drawn over all of it.
 - The lists of cities lean to the cities historians wrote about, and their figures differ from later archaeologists' by a
-  factor of two or more. A city is a dense cluster of houses, with no streets, walls or temples of its own.
-- Paths, roads, boundaries, livestock and people are not drawn yet.
+  factor of two or more. A city has streets and a wall as its tradition or its record says, and every street's line,
+  every gate's place and its outline are invented; it has no temples, palaces or districts of its own.
+- The model's ways of life are coarse. It calls the people of grazed land herders and of land the archaeologists farmed
+  without continuous fields shifting cultivators, region by region, so a tradition written for farmers reaches only
+  those the model calls farmers, or shifting cultivators through the stand-in. Where the model has foragers and the
+  excavators have farming villages, as in the American Southwest before 1750, the villages are not drawn.
+- How many animals, people and boats there were is nobody's claim. The roads people built, the Roman roads among them,
+  are not drawn in a scene yet, nor are boundaries, or the seasons of the fields.
+- The world after 1850 and before 10,000 BCE is left as it was: a tradition with no end runs to the present, and no
+  model says where people were before the anthromes begin.
 
 ## The order
 
@@ -115,10 +156,12 @@ the climate stands in, and says so. Agents write them, region by region; [DWELLI
 2. **Settlements in scenes:** houses, fields and pastures from the lifeway and HYDE's people, cities from the lists.
    *Built.*
 3. **Traditions as records**, with a brief, and a first batch by region. *A first batch is written.*
-4. **More traditions,** by agents, from `npm run world -- dwellings-wanted`, until every region and era that HYDE peoples
-   has one.
+4. **More traditions,** by agents, from `npm run world -- dwellings-wanted`, until every region, era and way of life
+   that HYDE peoples has one. *Under way: each says whom it housed, and every build counts how many people a tradition
+   houses, by time and way of life (the coverage page).*
 5. **HYDE's land use as grids:** cropland, rice and irrigation at 1°, to hold each scene's fields to HYDE's share of
    cropland, not only to the class's.
-6. **Paths and roads** between settlements, the Roman roads where Itiner-e has them; **livestock** in the pastures;
-   **people** in the villages.
-7. **Sites as evidence:** dated, excavated settlements as records, so that a scene near one draws it there.
+6. **Paths** between settlements; **livestock** in the pastures; **people** in the villages; **boats**. *Built.* The
+   Roman roads where Itiner-e has them are not in scenes yet.
+7. **Sites as evidence:** dated, excavated settlements as records, so that a scene near one draws it there. *Built for
+   the settlements that have records: a city is drawn from its record's people, houses, ground and layout.*

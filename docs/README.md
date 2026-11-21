@@ -33,7 +33,7 @@ yet, they say so.
 | [DATA-OUTLINE.md](DATA-OUTLINE.md) | everything a complete history needs, domain by domain, with candidate datasets and their licenses: the menu for contributors |
 | [RECORD-SETS.md](RECORD-SETS.md) | where each of the twenty record sets stands, and what a reviewer should check first |
 | [FORMS.md](FORMS.md) | the brief for writing a taxon's form, its body as data |
-| [DWELLINGS.md](DWELLINGS.md) | the brief for writing a building tradition: its houses, settlements and fields as data |
+| [DWELLINGS.md](DWELLINGS.md) | the brief for writing a building tradition: its houses, settlements, fields and towns as data, whom it housed, and the animals people kept |
 
 ## Slices
 
@@ -52,7 +52,7 @@ Proposals for running the project in public, and for the viewer. Not built, exce
 | [plans/PUBLIC-PROJECT.md](plans/PUBLIC-PROJECT.md) | the open project and the public site: licensing, governance, contribution paths, serving, infrastructure, security, community, and the phases to get there |
 | [plans/OPEN-CONTRIBUTION.md](plans/OPEN-CONTRIBUTION.md) | contribution mostly by agents: lanes by risk, a machine review before merge, people checking afterwards, versions |
 | [plans/CATALOG.md](plans/CATALOG.md) | one catalog, kept by the build, of what the world holds and still needs, for people and agents choosing work |
-| [plans/LIFEWAY-RENDERINGS.md](plans/LIFEWAY-RENDERINGS.md) | filling in how people are drawn: how much rests on a tradition by time, way of life and kind of thing, and the order to fill it |
+| [plans/LIFEWAY-RENDERINGS.md](plans/LIFEWAY-RENDERINGS.md) | filling in how people are drawn: how much rests on a tradition by time, way of life and kind of thing, and the order to fill it; built as the sixteenth slice, but for the world after 1850 |
 | [plans/RENDERING.md](plans/RENDERING.md) | a better picture of every scene from the renderer and the generators' meshes: plants, ground, water, light, movement, bodies, clouds and the still |
 
 ## Archive

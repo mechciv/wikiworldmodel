@@ -141,6 +141,41 @@ Two things about how the model draws the line:
   drawn for them, and the other way round, and the panel says that it stands in. Name the one the sources show; write
   the other's house when a source describes one.
 
+## How many lived so
+
+An `extent` names regions where a tradition was, not regions it covered, and a region is large: Central Europe, Myanmar,
+south-eastern China. A tradition that says nothing more is drawn as the house of everyone of its way of life there whom
+no more particular tradition houses. Where the sources show it was the house of a part of them, a `prevalence` claim
+says so:
+
+| `prevalence` | How many of them |
+|---|---|
+| `few` | a few: a house of some districts, of one people among others, or of those who could afford it |
+| `some` | a part of them, beside other houses |
+| `most` | most of them |
+
+```yaml
+  prevalence:
+    prop: prevalence
+    value: few
+    source:
+      ref: src:…
+      loc: "…"
+      quote: Only five villages included Square Tulou, and six featured Round Tulou.
+    method: editorial
+    note: What the region holds besides, and that the word is the record's reading of where the houses stood.
+```
+
+- **A word, not a number.** A source says that a house was rare or common far more often than it counts, and a count is
+  of one district, not of the region. The part of the region's settlements each word is drawn for is the generator's
+  parameter (`params.prevalence` in [settlement.yaml](../world/generators/people/settlement.yaml)), and no claim.
+- **Its source places the house:** a sentence that says where it stood, or how common it was, and a note that says what
+  else the region holds.
+- **What it does.** Each 5′ cell of the region falls to one tradition, so a rare house stands in clusters. The
+  traditions that say how many take their parts first, the most particular first; the most particular of those that do
+  not say takes everyone left; and where none does, the rest are in the generic house and counted so.
+- **A member does not take it from its parent,** and a tradition that was the house of its region needs none.
+
 ## Towns
 
 A town or a city is drawn as houses on the lots of its streets, and round them a wall with its gates and towers where
@@ -162,8 +197,14 @@ it had one. How it was laid out is a `town_form` claim, of two kinds of record:
 ```
 
 Say only what a source states: a wall with no height is `wall: stone` and no `wall_height`, and the generator's
-height stands in and says so. Where neither a tradition nor a record says anything, the generic town is drawn, lanes
-that wander and no wall, and the panel says that it is generic.
+height stands in and says so. A wall whose height, thickness or gates a source gives and whose material it does not
+has those and no `wall`: it is drawn as the generator's plain wall, and the panel says that what it was made of is
+not said. A layout that held for part of a record's span says when (`valid`), as a palisade put up late does, and is
+drawn only then. Where neither a tradition nor a record says anything, the generic town is drawn, lanes that wander
+and no wall, and the panel says that it is generic.
+
+The wall is drawn round the whole town, and the form for every town of a tradition's regions. A wall round a precinct,
+or one that some towns had and others did not, belongs in the note until a record can say so.
 
 ## Animals
 
@@ -213,7 +254,8 @@ is not drawn, and the build says so.
 
 At a place and a time, of the traditions whose `extent` names the place's region, whose span holds the time and whose
 `lifeway` names the way of life there, the generator takes the most particular: the deepest in the tree, then the one
-that names the fewest regions, then the latest to start. So:
+that names the fewest regions, then the latest to start. Those that say they housed a part of the people
+([how many lived so](#how-many-lived-so)) take their parts before it. So:
 
 - **Write broad traditions first.** "Mudbrick houses of Mesopotamia, 3000–500 BCE" before "the houses of Ur in the Isin–Larsa
   period". The narrower one, when it comes, takes over where and when it holds, and inherits what it does not say.
@@ -231,6 +273,7 @@ needs a sentence that states it. "Houses of 5–7 m across" is a source for `dia
 ## What it will not do
 
 - A tradition is a type, not a house: every house the generator draws is one sample of it, and none of them was there.
-- A region is coarse. Where a tradition held only part of one, the generator draws it over all of it: the panel says the
-  tradition was found in the region, not here.
+- A region is coarse. Where a tradition held only part of one, the generator draws it over all of it, or over a part
+  of its cells taken at random where the tradition says how many lived so: never over the part it really held. The
+  panel says the tradition was found in the region, not here.
 - Colour, decoration and the inside of a house are the generator's, and marked so.

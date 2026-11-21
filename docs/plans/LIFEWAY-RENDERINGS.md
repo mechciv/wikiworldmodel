@@ -1,6 +1,8 @@
 # Filling in how people are drawn: time, ways of life, and things
 
-Status: a plan, November 2026. Nothing here is built. It says how much of the human world a visitor sees drawn from
+Status: built in November 2026 as the [sixteenth slice](../slices/SIXTEENTH-SLICE.md), but for step 5, the ends of
+time, which was set aside: [what was built](#what-was-built) says how each step came out. The rest is the plan as it
+was written, before any of it was built. It says how much of the human world a visitor sees drawn from
 something written, where the rest is a stand-in, and the order to fill it in. It takes up
 [HUMAN-LANDSCAPE.md](../HUMAN-LANDSCAPE.md) at its step 4; [DWELLINGS.md](../DWELLINGS.md) is the brief for the records,
 and [RENDERING.md](RENDERING.md) is the plan for the picture's quality, which this does not touch.
@@ -103,11 +105,36 @@ stopped, and traditions for industrial and modern housing, or the present stays 
 where from when, and forms are a pipeline that exists ([FORMS.md](../FORMS.md)). Then paths between settlements and
 the Roman roads in scenes, then people, then boats.
 
+## What was built
+
+The [sixteenth slice](../slices/SIXTEENTH-SLICE.md) is the record of it; in short, by step:
+
+| Step | Built | Not built |
+|---|---|---|
+| 0. Keep the measure | every build counts it at sixteen times (`coverage.json`), the coverage page and the glance show it, `dwellings-wanted` lists by way of life | |
+| 1. A tradition's way of life | a `lifeway` claim on every tradition; version 2 of the generator; farmers and shifting cultivators stand in for each other | |
+| 2. Fill by people | 37 traditions for South Asia, China, Japan, Korea and Europe. Of each time's people, 28% at 1 CE and at 1500, 56% at 1750 and 55% at 1850 are in a tradition's house, where the table above has 4%, 7% and 4% | France, eastern and southern Europe, the Ganges plain and South India before 1500, south-eastern China's lowlands: the aim of half from 3000 BCE is met only from 1750 |
+| 3. Fill by way of life | 18 traditions: herders 7, foragers 6, shifting cultivators and the farmers who stand in 5 | most camps are still generic: travellers' accounts begin in the nineteenth century, and nothing was read for Australia, the Amazon, the Sahel or the Bronze Age steppe |
+| 4. Cities | a town form (streets, a wall, gates, a moat, a square) from a tradition or a record; the 22 settlements with records drawn from their own people, houses and ground | no generator of any city from Rome's fabric: a recorded city is drawn in the living scene; Tenochtitlan's lakes; cities with maps |
+| 5. The ends of time | | all of it, by decision: the world after 1850 wants a framework of its own, nearer to records than to traditions, and the time before 10,000 BCE is left as it is |
+| 6. What lives and moves | 20 husbandry traditions and the animals they name, as herds and yard animals; paths between settlements; people; boats | the Roman roads, or any recorded road, in a scene |
+
+Three things the plan did not foresee:
+
+- **A house of a part of a region.** A tradition is drawn over the whole of each region it names, and the regions are
+  large. A `prevalence` claim (a few, some, most) now draws a rare house for a part of a region's cells.
+- **The model's ways of life are the bound.** A tradition reaches only the people the model gives its way of life, and
+  the model has herders, shifting cultivators and foragers where the excavators have farms. Mending the model would
+  house more people than any record.
+- **The viewer could not show most of it.** No scene could be made within 1,400 km of Rome while Rome stood. A city
+  with a scene of its own now keeps 60 km.
+
 ## Order, and what is to be decided
 
 Steps 0 and 1 are small and come first. Steps 2 and 3 are records, written by agents in parallel once 1 is in. Step 4's
 first tier follows 1; its second is a slice. Steps 5 and 6 can wait for a demand.
 
-- Is the way of life a claim of the tradition, or read from its `settlement_form`? A claim is plainer.
-- Is the world after 1850 in scope now, or left generic and marked?
-- Before 10,000 BCE, sites only, or a model of foragers' numbers as well?
+- Is the way of life a claim of the tradition, or read from its `settlement_form`? A claim is plainer. *Decided: a
+  claim.*
+- Is the world after 1850 in scope now, or left generic and marked? *Decided: left, for a framework of its own.*
+- Before 10,000 BCE, sites only, or a model of foragers' numbers as well? *Decided: left as it is.*
