@@ -128,8 +128,8 @@ for (const [name, t, lat, lon, which] of [
     continue;
   }
   // From a little south of it, low, looking north across it; a town from outside its edge.
-  const back = s.pattern === 'city' || s.pattern === 'towns' ? 0.016 : 0.0009;
-  const up = s.pattern === 'city' || s.pattern === 'towns' ? 90 : 22;
+  const back = s.pattern === 'city' || s.pattern === 'towns' ? 0.016 : 0.00045;
+  const up = s.pattern === 'city' || s.pattern === 'towns' ? 90 : 9;
   await shot(name, `?b=${build}&t=${t}&lat=${s.lat - back}&lon=${s.lon}&d=${1 + up / R}&h=0&v=80&cl=0${quality}`, 300_000);
 }
 await browser.close();

@@ -20,6 +20,7 @@
 //
 // Everything is seeded by the world's 5′ cells and the anthromes' step, not by the scene, so two scenes that overlap put
 // their settlements in the same places: only the ground they stand on, which is the scene's, can move one a little.
+import { houseSize } from '../dwellings.ts';
 import { husbandryAt, mid, prevalenceOf, townText, traditionFor, within, type DwellingSpec, type FieldSpec, type LifewayWord, type SettlementSpec, type TownSpec, type Tradition } from '../../../../core/dwelling.ts';
 import { anthromeOf, lifewayOf, LIFEWAY_OF, type CityNear, type FieldUse, type Lifeway, type Pattern } from '../../../../core/landscape.ts';
 import type { ClimateClass } from '../../../../core/climate.ts';
@@ -486,6 +487,17 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
       }
     }
   }
+  // A spot before a house: `out` metres clear of its front wall, and `across` of its width (and `more` metres) to one
+  // side of its door. A house's front faces the way it is turned, and its length runs that way (dwellings.ts).
+  const sizes = forms.map((f) => houseSize(f.spec));
+  const before = (h: House, out: number, across: number, more: number): [number, number] => {
+    const sz = sizes[h.form];
+    const d = (sz.l / 2) * h.size + out;
+    const a = across * (sz.w * h.size + more);
+    const sf = Math.sin(h.face);
+    const cf = Math.cos(h.face);
+    return [h.x + sf * d + cf * a, h.y + cf * d - sf * a];
+  };
   // The animals its people kept, where a husbandry tradition of the region and time names them for their way of life:
   // those that graze in herds, on the pasture of people who herd and at the edge of the houses of people who farm; the
   // rest about the houses. Which animals is the tradition's; how many, and where each stands, is invented.
@@ -524,13 +536,11 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
         const long = keptList[k].length ?? 1;
         const poses = posesOf[k];
         if (!grazes[k]) {
-          // About the houses: by one of them, a few steps off.
+          // About the houses: before one of them, a few steps out from its walls.
           for (; left > 0 && h1 > h0; left--) {
-            const house = houses[h0 + rng.int(0, h1 - h0 - 1)];
-            const b = rng.next() * TAU;
-            const d = 4 + 6 * rng.next();
+            const [x, y] = before(houses[h0 + rng.int(0, h1 - h0 - 1)], 1.5 + 4 * rng.next(), rng.next() - 0.5, 4);
             const still = poses.filter((x) => x !== POSE.graze);
-            stand(house.x + Math.sin(b) * d, house.y + Math.cos(b) * d, k, (still.length ? still : poses)[rng.int(0, (still.length || poses.length) - 1)], 0.75 + 0.25 * rng.next(), rng.next() * TAU);
+            stand(x, y, k, (still.length ? still : poses)[rng.int(0, (still.length || poses.length) - 1)], 0.75 + 0.25 * rng.next(), rng.next() * TAU);
           }
           return;
         }
@@ -567,11 +577,8 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
       const rng = new Rng((s.seed ^ 0x2c9277b5) >>> 0);
       const n = Math.min(F.most_in_settlement, F.most - stood, Math.floor((h1 - h0) * F.per_house + rng.next()));
       for (let q = 0; q < n; q++) {
-        const house = houses[h0 + rng.int(0, h1 - h0 - 1)];
-        const b = rng.next() * TAU;
-        const d = 2.5 + 4 * rng.next();
-        const x = house.x + Math.sin(b) * d;
-        const y = house.y + Math.cos(b) * d;
+        // Before the door of one of its houses, a step or two out: never within its walls.
+        const [x, y] = before(houses[h0 + rng.int(0, h1 - h0 - 1)], 0.8 + 1.7 * rng.next(), rng.next() - 0.5, 0);
         if (!fit(x, y)) continue;
         works.push({ x, y, z: ground.at(x, y), face: rng.next() * TAU, form: who, settlement: si });
         stood++;

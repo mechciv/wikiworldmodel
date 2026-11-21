@@ -67,7 +67,8 @@ export function drawDwelling(m: Mesh, d: DwellingSpec, detail: HouseDetail, tint
   const roofMat = ROOF[d.roof_material ?? (d.roof === 'flat' ? 'earth' : 'thatch')];
   const base = d.floor === 'stilts' ? 1.6 : d.floor === 'platform' ? 1 : d.floor === 'raised' ? 0.4 : 0;
   const sides = detail === 0 ? 16 : detail === 1 ? 10 : 6;
-  m.tint = tint;
+  // Felt is drawn as cloth, whose tint picks a dye: a tent of felt keeps to the undyed ones, pale and grey.
+  m.tint = d.walls === 'felt' || d.roof_material === 'felt' ? (tint & 0xf8) | (tint % 3) : tint;
   // What it stands on.
   if (d.floor === 'platform' || d.floor === 'raised') {
     m.mat = d.floor === 'platform' ? MAT.granite : MAT.mud;

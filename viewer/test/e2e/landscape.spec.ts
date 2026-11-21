@@ -1,9 +1,11 @@
 // Pass criteria for the human landscape in the browser (docs/slices/ELEVENTH-SLICE.md): the globe's picture of the
 // anthromes under its toggle, with a legend; a scene of land in the anthromes' span has its people, a delta a few metres
 // above the sea among them; a city of the lists is named, and drawn in its region's houses; a click on a house says what it
-// rests on; and the people layer of `resolve` answers in a tier, as the build's does.
+// rests on; and the people layer of `resolve` answers in a tier, as the build's does. And for its filling in
+// (docs/slices/SIXTEENTH-SLICE.md): a city drawn from its record, people and paths, the herds a husbandry names, and a
+// scene of a village anywhere past the ground of a city that has a scene of its own.
 import { expect, test, type Page } from '@playwright/test';
-import { traditionAt } from '../../../core/dwelling.ts';
+import { traditionAt, type LifewayWord } from '../../../core/dwelling.ts';
 import type { LandscapeIndex, TraditionsFile } from '../../../core/landscape.ts';
 import { buildFile, idle, latestBuild, openLayers, settledUrl } from './helpers.ts';
 
@@ -11,13 +13,15 @@ import { buildFile, idle, latestBuild, openLayers, settledUrl } from './helpers.
 const FAST = 'quality=fast&clock=0';
 const low = (lat: number, lon: number, t: number, metres: number) => `t=${t}&lat=${lat}&lon=${lon}&d=${1 + metres / 6371000}&h=40&v=70&${FAST}`;
 const scene = (page: Page) => page.evaluate(() => window.__wikiworldmodel!.scene());
-/** The building tradition the world records for the townspeople of Uruk's region, ArchaeoGLOBE's 59, in 3000 BCE, by its name. */
-const uruksTradition = () => {
+/** The most particular building tradition the world records for a way of life of one of ArchaeoGLOBE's regions at a time, by its name. */
+const traditionOf = (region: number, t: number, lifeway: LifewayWord) => {
   const index = buildFile<LandscapeIndex>('people/landscape.json');
-  const t = traditionAt(buildFile<TraditionsFile>(index.traditions).traditions, 59, -2999, 'townspeople');
-  expect(t).toBeTruthy();
-  return t!.label;
+  const found = traditionAt(buildFile<TraditionsFile>(index.traditions).traditions, region, t, lifeway);
+  expect(found, `a tradition of the ${lifeway} of region ${region}`).toBeTruthy();
+  return found!.label;
 };
+/** The one for the townspeople of Uruk's region, 59, in 3000 BCE. */
+const uruksTradition = () => traditionOf(59, -2999, 'townspeople');
 
 test.describe('the human landscape', () => {
   test('Settlement paints the anthromes of the time, with a legend of the classes present, and stays in the link', async ({ page }) => {
@@ -57,7 +61,8 @@ test.describe('the human landscape', () => {
     }
     expect(hit).toBe(true);
     await expect(panel.locator('h2')).toHaveText(uruksTradition());
-    await expect(panel).toContainText('Uruk, a city of the lists');
+    // Uruk has a record of its own as well as a row in the lists: the panel says whose its people are.
+    await expect(panel).toContainText('Uruk, a city the world has a record of');
     await expect(panel).toContainText('nobody recorded this house');
   });
 
@@ -88,6 +93,54 @@ test.describe('the human landscape', () => {
       const r = await page.evaluate(() => window.__wikiworldmodel!.resolve(31.32, 45.64, 'people'));
       expect(r).toMatchObject({ tier: 'evidence', value: 'Uruk' });
       expect((await scene(page))!.people!.forms).toContain(uruksTradition());
+    });
+
+    test("a city with a record is drawn from the record: its name of the time, its people by its own claim, and streets", async ({ page }) => {
+      // Tenochtitlan in 1519: the lists call the place Mexico City and give it 80,000; its record prefers 150,000-200,000.
+      await page.goto(`/?b=${latestBuild()}&${low(19.4326, -99.1332, 1519.5, 2500)}`);
+      await idle(page);
+      const p = (await scene(page))!.people!;
+      const city = p.cities.find((c) => c.record === 'people/cities/tenochtitlan')!;
+      expect(city).toBeTruthy();
+      expect(city.name).toBe('Tenochtitlan');
+      expect(city.from).toBe('record');
+      expect(city.people).toBeGreaterThanOrEqual(150000);
+      // A town has streets, whatever says how they ran; the bar names it.
+      expect(city.town).toBeTruthy();
+      await expect(page.locator('.life-here')).toContainText('Tenochtitlan');
+    });
+
+    test('a farming country has people by its houses and paths between its villages, and says they are generic', async ({ page }) => {
+      await page.goto(`/?b=${latestBuild()}&${low(30.8, 31.0, -1499, 900)}`);
+      await idle(page);
+      const p = (await scene(page))!.people!;
+      expect(p.works).toContain('A person');
+      expect(p.pieces).toBeGreaterThan(500);
+      expect(p.paths).toBeGreaterThan(20);
+    });
+
+    test('a hamlet far from a city with a scene of its own is drawn while that city stands, in the house of its region', async ({ page }) => {
+      // East Anglia in 1300, some 1,470 km from Rome, whose scene is open from 1000 BCE to 1950: the ground is not Rome's.
+      await page.goto(`/?b=${latestBuild()}&${low(52.2, 0.4, 1300, 900)}`);
+      await idle(page);
+      const s = await scene(page);
+      expect(s!.list).toBe('land');
+      expect(s!.people!.houses).toBeGreaterThan(100);
+      // The scene is the one shown: its bar says who lived here.
+      await expect(page.locator('.life-here')).toContainText('houses');
+      await expect(page.locator('.city-enter')).toBeHidden();
+      expect(s!.people!.forms).toContain(traditionOf(38, 1300, 'farmers'));
+    });
+
+    test('herders of the steppe live in the tent of their region, among the herds its husbandry names', async ({ page }) => {
+      await page.goto(`/?b=${latestBuild()}&${low(47.2, 102.8, 1200, 300)}`);
+      await idle(page);
+      const p = (await scene(page))!.people!;
+      expect(p.pattern).toBe('herders');
+      expect(p.forms).toContain(traditionOf(115, 1200, 'herders'));
+      // Which animals is a husbandry tradition's claim; how many is the generator's.
+      expect(p.kept.length).toBeGreaterThan(1);
+      expect(p.animals).toBeGreaterThan(20);
     });
 
     test('before the anthromes begin, a scene has no people', async ({ page }) => {

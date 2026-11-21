@@ -8,6 +8,7 @@ import { compileHusbandry, compileTraditions, type TownSpec, type Tradition } fr
 import type { Form } from '../../../../core/form.ts';
 import { lifewayOf, type AnthromeClass, type Assessment } from '../../../../core/landscape.ts';
 import type { LivingTaxon, SceneSpec, ScenePeople } from '../../../../core/scene.ts';
+import { houseSize } from '../dwellings.ts';
 import { LandUseMap, makeSettlement, toLocal, type Ground } from './v2.ts';
 
 const ROOT = join(import.meta.dirname, '../../../..');
@@ -423,6 +424,27 @@ describe('the settlement generator', () => {
   describe('people, boats and paths', () => {
     const villages = () => world(() => ({ code: 23, density: 260, region: 1 }), [{ id: 1, a: assess(1, 1, 3, 2) }]);
     const of = (plan: ReturnType<typeof makeSettlement>, kind: string) => plan.works.filter((w) => plan.workForms[w.form].spec.kind === kind);
+    /** Of some people standing: how far each is from the nearest house of its settlement, and how many stand within a house's walls. */
+    const standing = (plan: ReturnType<typeof makeSettlement>, people: { x: number; y: number; settlement: number }[]) => {
+      const byPlace = new Map<number, (typeof plan.houses)[number][]>();
+      for (const h of plan.houses) (byPlace.get(h.settlement) ?? byPlace.set(h.settlement, []).get(h.settlement)!).push(h);
+      const sizes = plan.forms.map((f) => houseSize(f.spec));
+      let inside = 0;
+      const near: number[] = [];
+      for (const p of people) {
+        const mine = byPlace.get(p.settlement)!;
+        near.push(Math.min(...mine.map((h) => Math.hypot(p.x - h.x, p.y - h.y))));
+        // In a house's own frame: its front faces the way it is turned, its length along that.
+        if (mine.some((h) => {
+          const dx = p.x - h.x;
+          const dy = p.y - h.y;
+          const along = dx * Math.sin(h.face) + dy * Math.cos(h.face);
+          const across = dx * Math.cos(h.face) - dy * Math.sin(h.face);
+          return Math.abs(along) < (sizes[h.form].l / 2) * h.size - 0.05 && Math.abs(across) < (sizes[h.form].w / 2) * h.size - 0.05;
+        })) inside++;
+      }
+      return { near, inside };
+    };
 
     it('stands a few plain people by the houses of each settlement, and says they are generic', () => {
       const plan = makeSettlement(spec(villages()), flat, dry, EXTENT);
@@ -430,10 +452,26 @@ describe('the settlement generator', () => {
       expect(people.length / plan.houses.length).toBeGreaterThan(0.3);
       expect(people.length / plan.houses.length).toBeLessThan(0.6);
       expect(plan.workForms.find((f) => f.spec.kind === 'person')).toMatchObject({ label: 'A person', from: 'generic' });
-      // Each within a few steps of a house of its own settlement.
-      const byPlace = new Map<number, { x: number; y: number }[]>();
-      for (const h of plan.houses) (byPlace.get(h.settlement) ?? byPlace.set(h.settlement, []).get(h.settlement)!).push(h);
-      for (const p of people.slice(0, 400)) expect(Math.min(...byPlace.get(p.settlement)!.map((h) => Math.hypot(p.x - h.x, p.y - h.y)))).toBeLessThan(6.6);
+      // Each a few steps from a house of its own settlement, and outside the walls of every one of them.
+      const { near, inside } = standing(plan, people.slice(0, 400));
+      expect(Math.max(...near)).toBeLessThan(9);
+      expect(inside).toBe(0);
+    });
+
+    it('stands them outside the walls of a house however big it is, and in the street of a town', () => {
+      // A courtyard house twelve metres across: nobody stands in its court or under its roof.
+      const traditions = compileTraditions([{ id: 'test/courtyard', label: 'A courtyard house', regions: [1], span: [-500, 500], lifeways: ['farmers', 'townspeople'], dwelling: { plan: 'courtyard', width: 12, length: 12, walls: 'mudbrick', roof: 'flat' } }]);
+      const plan = makeSettlement(spec(world(() => ({ code: 23, density: 260, region: 1 }), [{ id: 1, a: assess(1, 1, 3, 2) }], { traditions })), flat, dry, EXTENT);
+      const village = standing(plan, of(plan, 'person').slice(0, 400));
+      expect(village.inside).toBe(0);
+      expect(Math.max(...village.near)).toBeLessThan(13);
+      // A town on a grid: its houses stand wall to wall, and its people in the streets before them.
+      const cities = [{ name: 'Testopolis', country: 'Nowhere', lat: 0, lon: 0, people: 30000, field: 'field:people/cities-ancient', source: 'src:test', from: 'list' as const }];
+      const town = makeSettlement(spec(world(() => ({ code: 54, density: 2, region: 1 }), [{ id: 1, a: assess(1, 0, 1, 3, 1) }], { cities, traditions: compileTraditions([{ id: 'test/town-house', label: 'A town house', regions: [1], span: [-500, 500], lifeways: ['townspeople'], dwelling: { plan: 'rectangular' }, town: { streets: 'grid' } }]) })), flat, dry, EXTENT);
+      const folk = of(town, 'person').filter((w) => town.settlements[w.settlement].city);
+      expect(folk.length).toBeGreaterThan(100);
+      // A few in a hundred may stand where a street narrows to a neighbour's wall.
+      expect(standing(town, folk).inside / folk.length).toBeLessThan(0.03);
     });
 
     it('floats boats only on water deep enough, beside a settlement, and none on dry land', () => {
