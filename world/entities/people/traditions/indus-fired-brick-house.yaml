@@ -19,7 +19,7 @@ claims:
     method: expert-estimate
     note: The start of the urban phase, as for the broader tradition.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-indus-valley-civilisation.txt (sha256 b60abe492ff0c871), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-indus-valley-civilisation.txt (sha256 746600d1d517eb71), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   end:
     prop: end
     value: 1900 BCE
@@ -30,7 +30,7 @@ claims:
     method: expert-estimate
     note: The end of the urban phase, as for the broader tradition.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-indus-valley-civilisation.txt (sha256 b60abe492ff0c871), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-indus-valley-civilisation.txt (sha256 746600d1d517eb71), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["105"] }
@@ -46,7 +46,7 @@ claims:
       the same region, but no source read here says so of its houses; and at Lothal, in India, the article read has houses
       of mud and brick, so the other regions are left to the broader tradition. Not claimed for all of the region.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-harappan-architecture.txt (sha256 27a90a20286a1fdd), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-harappan-architecture.txt (sha256 05a5b1f9eeb040d5), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [townspeople]
@@ -65,7 +65,7 @@ claims:
       Fired brick was the brick of the houses of the cities, and mud brick that of the countryside, so this house is the
       townspeople's alone.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-harappan-architecture.txt (sha256 05a5b1f9eeb040d5) and wikipedia-indus-valley-civilisation.txt (sha256 746600d1d517eb71), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-harappan-architecture.txt (sha256 05a5b1f9eeb040d5) and wikipedia-indus-valley-civilisation.txt (sha256 746600d1d517eb71), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
     value: { walls: fired-brick }
@@ -87,7 +87,33 @@ claims:
       Fired brick, which the sources call baked; the last quote is of the buildings of Mohenjo-daro. The rest of the house is
       the broader tradition's.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-indus-valley-civilisation.txt (sha256 b60abe492ff0c871), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-indus-valley-civilisation.txt (sha256 746600d1d517eb71) and wikipedia-harappan-architecture.txt (sha256 05a5b1f9eeb040d5), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  outbuildings:
+    prop: outbuildings
+    value:
+      - { use: well, per: house }
+      - { use: well, per: settlement }
+      - { use: oven, per: settlement }
+    source:
+      - ref: src:wikipedia-indus-valley-civilisation
+        loc: section "Mature Harappan", "Cities"
+        quote: Within the city, individual homes or groups of homes obtained water from wells.
+      - ref: src:wikipedia-harappan-architecture
+        loc: section "Overview", "Planning"
+        quote: with each block containing a network of houses and public wells
+      - ref: src:wikipedia-harappan-architecture
+        loc: section "Overview", "Planning"
+        quote: Harappan cities featured urban and social elements such as roads, fire pits, kilns, and industrial buildings
+    method: excavation
+    note: >-
+      Of the cities, as at Harappa, Mohenjo-daro and Rakhigarhi: a well by a house or a group of houses, in the article
+      on the civilisation, and public wells in each block and kilns in the cities, in the article on its architecture.
+      Both are encyclopedias, cited because nothing better was read. How many houses shared a well is not said, so no
+      count is given. This list replaces the broader tradition's, so its public wells are written again here. The room
+      set aside for bathing, whose water ran to covered drains along the streets, was inside the house and is not an
+      outbuilding.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-indus-valley-civilisation.txt (sha256 746600d1d517eb71) and wikipedia-harappan-architecture.txt (sha256 05a5b1f9eeb040d5), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
 relations:
   broader:
     rel: member-of

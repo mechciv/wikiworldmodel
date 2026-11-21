@@ -27,7 +27,7 @@ claims:
       The start of the Classic period, to which the settlements the source analyses date as they were last mapped. Some of
       its centres began in the Middle Preclassic, 800 to 400 BCE; the house before 250 CE is not described here.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in thompson-2022-maya-neighborhoods-PMC9629605.txt (sha256 dbea98df14ef7993), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in thompson-2022-maya-neighborhoods.txt (sha256 7555f59bd2aea3d4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   end:
     prop: end
     value: { lo: 900 CE, hi: 1000 CE }
@@ -52,7 +52,7 @@ claims:
       settlements, not of the house: the first source goes on to the Postclassic centres, 1000 to 1519 CE, which are not
       described here.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in ringle-2021-puuc-lidar-PMC8081171.txt (sha256 daf856aa10e0374f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in thompson-2022-maya-neighborhoods.txt (sha256 7555f59bd2aea3d4) and ringle-2021-puuc-lidar.txt (sha256 063a278c2dda804b), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["24", "25"] }
@@ -75,7 +75,7 @@ claims:
       Mexico, Guatemala and Belize, the Puuc among them; and region 25 (Honduras, Nicaragua, Costa Rica and Panama), for
       Copán, in Honduras. The house is not claimed for all of either region, only for the lowland centres the sources name.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in ringle-2021-puuc-lidar-PMC8081171.txt (sha256 daf856aa10e0374f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in thompson-2022-maya-neighborhoods.txt (sha256 7555f59bd2aea3d4) and ringle-2021-puuc-lidar.txt (sha256 063a278c2dda804b), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [farmers, townspeople]
@@ -105,7 +105,7 @@ claims:
       on the Puuc weighs fallow rotations there, but neither says the households moved with their fields, so shifting
       cultivators are not named.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in thompson-2022-maya-neighborhoods.txt (sha256 7555f59bd2aea3d4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in thompson-2022-maya-neighborhoods.txt (sha256 7555f59bd2aea3d4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
     value: { walls: pole-and-thatch, roof_material: thatch, floor: raised }
@@ -132,10 +132,30 @@ claims:
       household groups of southern Belize stood less than 50 cm high, and southern Belize lacked masonry superstructures; the
       Puuc platforms ran from a single course of stone to several metres. The size and plan of the house are not given.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in ringle-2021-puuc-lidar-PMC8081171.txt (sha256 daf856aa10e0374f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in ringle-2021-puuc-lidar.txt (sha256 063a278c2dda804b) and thompson-2021-maya-household-inequality.txt (sha256 954a1c2394b062d7), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  outbuildings:
+    prop: outbuildings
+    value:
+      - { use: kitchen, per: house }
+      - { use: shrine, per: house }
+    source:
+      - ref: src:thompson-2022-maya-neighborhoods
+        loc: section "Identification and definitions of neighborhoods in archaeological contexts"
+        quote: >-
+          Archaeologically, Maya households are represented by one or more houses, sometimes with auxiliary structures such
+          as kitchens or shrines, that represent a kin-focused group [62].
+    method: excavation
+    note: >-
+      The kitchen and the shrine, a household's, standing among its houses round the patio; "sometimes", so not every
+      group had them, and how often is the generator's; their size and build are not given. The chultuns, the household
+      cisterns cut into the platforms of house compounds in the Puuc, have no word (a cistern under the platform is
+      neither a well nor a pond) and are not written. The council houses (popol nah) and temples of the civic and elite
+      groups are not a household's and are not written.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in thompson-2022-maya-neighborhoods.txt (sha256 7555f59bd2aea3d4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
-    value: { pattern: compound, houses: { lo: 1, hi: 6 } }
+    value: { pattern: compound, houses: { lo: 1, hi: 6 }, plaza: true }
     source:
       - ref: src:thompson-2022-maya-neighborhoods
         loc: section "Identification and definitions of neighborhoods in archaeological contexts"
@@ -175,6 +195,7 @@ claims:
       kitchens and shrines among them, which the source calls the basal unit of settlement and which stands here for a
       settlement; groups of more, up to dozens, are left out. The groups were spread thinly: at the 23 centres of the same
       paper the mean distance from a group to its nearest neighbour was about 32 to 216 m, and the groups clustered into
-      neighbourhoods.
+      neighbourhoods. The open ground at the middle is the group's patio or plazuela, round which its structures stood
+      (both papers of Thompson and colleagues).
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in ringle-2021-puuc-lidar-PMC8081171.txt (sha256 daf856aa10e0374f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in thompson-2022-maya-neighborhoods.txt (sha256 7555f59bd2aea3d4), ringle-2021-puuc-lidar.txt (sha256 063a278c2dda804b) and thompson-2021-maya-household-inequality.txt (sha256 954a1c2394b062d7), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

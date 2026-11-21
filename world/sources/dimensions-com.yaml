@@ -1,0 +1,22 @@
+id: src:dimensions-com
+type: database-record
+kind: compilation
+citation: >-
+  Dimensions.com: a reference database of dimensioned drawings. Fantastic Offense. Each page says when it was last
+  updated.
+snapshot: 2026-11-20
+title: Dimensions.com
+url: https://www.dimensions.com/
+license_note: >-
+  All rights reserved, so it is only cited and quoted briefly.
+reliability: >-
+  A site of scaled drawings for designers, and a weak source. Its pages name no works for their figures and link only
+  to Wikipedia; the shoulder heights and weights it gives for the yak are those of Wikipedia's article, and it does not
+  say where its body lengths are from or how they were measured. Cited only for the body length of a domestic animal
+  where nothing better stating one could be read, so that the animal is not drawn at the middle of its whole family's
+  range: each such claim says so, and wants a measured length in its place.
+verified:
+  by: machine:claude-code
+  how: >-
+    The pages cited fetched on 20 November 2026 and read as text, in their sections "Dimensions & Sizes"; the quotes
+    checked by script against that text.

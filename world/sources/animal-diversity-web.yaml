@@ -18,4 +18,6 @@ verified:
   by: machine:claude-code
   how: >-
     The accounts cited fetched and read on 2026-11-05, in their Physical Description sections, and
-    the quotes checked by script against the text of the page after normalizing whitespace.
+    the quotes checked by script against the text of the page after normalizing whitespace. The account
+    of Lama pacos, which the alpaca's length cites, was fetched on 2026-11-20 and is kept as a text of
+    its own.

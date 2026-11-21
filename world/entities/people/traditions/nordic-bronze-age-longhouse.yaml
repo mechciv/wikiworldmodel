@@ -45,7 +45,7 @@ claims:
       to hamlets and villages of smaller houses. The three-aisled longhouse itself went on: the Iron Age record,
       people/traditions/iron-age-longhouse-village, takes over here.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wichmann-2025-PMC11844905.txt (sha256 9f20a4209e5e5fb8), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wichmann-2025-fingerprinting-conflict.txt (sha256 f921c0f1dd34d067), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["39", "43"] }
@@ -80,7 +80,7 @@ claims:
       two-aisled and four-aisled houses of the period. A region named is where the sources place the house, not a claim that
       it covered the region.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in nicosia-2022-PMC9432763-with-S1.txt (sha256 d9d52156e5f25fc8), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in nicosia-2022-oppeano-byre-houses.txt (sha256 7b64abc59f76e146), jackson-2018-norse-greenland.txt (sha256 dbb283ce484827de) and wichmann-2025-fingerprinting-conflict.txt (sha256 f921c0f1dd34d067), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [farmers]
@@ -95,10 +95,10 @@ claims:
       Farmers: in the Older and the Younger Bronze Age of the Jutland peninsula the longhouse was the house of a single
       farmstead.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wichmann-2025-fingerprinting-conflict.txt (sha256 f921c0f1dd34d067), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wichmann-2025-fingerprinting-conflict.txt (sha256 f921c0f1dd34d067), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { plan: long }
+    value: { plan: long, byre: true }
     source:
       - ref: src:jackson-2018-norse-greenland
         loc: Table 2, row "Farm (Farmstead and Outbuildings)", column "West Norway"
@@ -113,9 +113,12 @@ claims:
     method: excavation
     note: >-
       A longhouse with its roof on two rows of posts, which made three aisles, and a byre and a dwelling under one roof. No
-      source read gives the size of an ordinary house, or its walls or roof, so the generator guesses them.
+      source read gives the size of an ordinary house, or its walls or roof, so the generator guesses them. The byre is
+      the first source's division into living quarters and barns, from the early Bronze Age, and the second's
+      partitions for livestock and people in every longhouse read as a byre-house; the S1 Table of the second lists
+      Bronze Age houses so read in Denmark and the Netherlands. Where the doors were is not said.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in nicosia-2022-PMC9432763-with-S1.txt (sha256 d9d52156e5f25fc8), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in jackson-2018-norse-greenland.txt (sha256 dbb283ce484827de) and nicosia-2022-oppeano-byre-houses.txt (sha256 7b64abc59f76e146), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
     value: { pattern: dispersed, houses: { lo: 1, hi: 2 } }
@@ -130,4 +133,4 @@ claims:
       The Older and the Younger Bronze Age of the Jutland peninsula. The settlement is the farmstead, with one or two
       longhouses; the farmsteads stood a few kilometres apart, which says nothing of the spacing of houses within one.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wichmann-2025-PMC11844905.txt (sha256 9f20a4209e5e5fb8), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wichmann-2025-fingerprinting-conflict.txt (sha256 f921c0f1dd34d067), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

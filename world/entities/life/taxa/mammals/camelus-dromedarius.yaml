@@ -10,6 +10,38 @@ claims:
     value: { en: "dromedary camels", la: "Camelus dromedarius" }
     source: { ref: src:opentree-taxonomy-3.7, loc: "tnrs/match_names: Camelus dromedarius, ott510752" }
     note: Open Tree gives the scientific name; the English name is an editorial gloss.
+  body-plan:
+    prop: body_plan
+    value: camel
+    unsourced: >-
+      Which plan draws it: an editorial classification. The plan is a machine's drawing of a dromedary, from
+      Wikipedia's article, a long curved neck, a narrow chest and a single hump, and otherwise as camels are generally
+      known; it was only compared with its sheet.
+  length:
+    prop: body_length
+    value: { lo: 2.3, hi: 3.4 }
+    source:
+      ref: src:wikipedia-de-dromedar
+      loc: "section \"Anatomie\""
+      quote: "Sie erreichen eine Kopf-Rumpf-Länge von 2,3 bis 3,4 Metern, eine Schulterhöhe von 1,8 bis 2,3 Metern"
+    method: compilation
+    note: >-
+      The length of the head and body, from the German Wikipedia, as no better source stating a length could be read:
+      the English article and the Animal Diversity Web's account give heights and weights only.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-de-dromedar.txt (sha256 4a90c7e60ffa6193), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  hip:
+    prop: hip_height
+    value: { lo: 1.8, hi: 2.3 }
+    source:
+      ref: src:wikipedia-de-dromedar
+      loc: "section \"Anatomie\""
+      quote: "Sie erreichen eine Kopf-Rumpf-Länge von 2,3 bis 3,4 Metern, eine Schulterhöhe von 1,8 bis 2,3 Metern"
+    method: compilation
+    note: >-
+      A height at the shoulder, below the hump, taken for the height of the back; from the same sentence as the length.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-de-dromedar.txt (sha256 4a90c7e60ffa6193), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   mass:
     prop: body_mass
     value: { lo: 300, hi: 690 }

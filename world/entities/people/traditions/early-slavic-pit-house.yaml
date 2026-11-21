@@ -23,7 +23,7 @@ claims:
       560–645 CE (radiocarbon) at Prague-Roztoky in Bohemia, 628–635 CE (tree rings) at Kraków-Wyciąże in Lesser Poland, and
       not before the second half of the seventh century in northern Poland and northeastern Germany.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in gretzinger-2025-PMC12507669-with-SI.txt (sha256 d607fb2a8efa123f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in gretzinger-2025-slavs.txt (sha256 64fa809ae6974700), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   end:
     prop: end
     value: { lo: 701 CE, hi: 800 CE }
@@ -37,7 +37,7 @@ claims:
       (2012) has it as the commonest building of the open settlements of the ninth and tenth centuries in Austria, the Czech
       Republic, Slovakia and Hungary, which people/traditions/sunken-house-east-central-europe records.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in gretzinger-2025-PMC12507669-with-SI.txt (sha256 d607fb2a8efa123f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in gretzinger-2025-slavs.txt (sha256 64fa809ae6974700), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["43", "45", "48"] }
@@ -55,7 +55,7 @@ claims:
       the Baltic Sea, from the Elbe to the Dnieper", but the regions named are those it dates. A region named is where the
       source places the house, not a claim that it covered the region.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in gretzinger-2025-PMC12507669-with-SI.txt (sha256 d607fb2a8efa123f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in gretzinger-2025-slavs.txt (sha256 64fa809ae6974700), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [farmers]
@@ -74,10 +74,10 @@ claims:
       are the hamlets that the vocabulary gives to farmers. No source read says in so many words that their people farmed,
       or how.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in gretzinger-2025-slavs.txt (sha256 64fa809ae6974700), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in gretzinger-2025-slavs.txt (sha256 64fa809ae6974700), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { floor: sunken }
+    value: { plan: square, floor: sunken }
     source:
       - ref: src:gretzinger-2025-slavs
         loc: main text, section "Main", third paragraph
@@ -91,12 +91,22 @@ claims:
       - ref: src:gretzinger-2025-slavs
         loc: Supplementary Note 1.2 (F. Biermann), "The archaeological debate on Slavic expansion"
         quote: mostly rather small settlements characterized by pit houses or ground-level blockhouses
+      - ref: src:nowotny-2019-rural-settlement-eastern-central-europe
+        loc: 'section "Micro-scale", p. 282'
+        quote: >-
+          In the early Slavic period the typical dwellings in the research area are pit houses (Nowotny 2016), which are
+          square (Fig. 1/1) or slightly rectangular (Fig. 1/2) in shape. Often there is an oven situated in one of the
+          corners. The walls are constructed with the help of posts or in log construction, with their footings inside or
+          outside the pit.
     method: excavation
     note: >-
       A house dug into the ground. Some settlements had log houses at ground level instead ("blockhouses"), which this
-      claim leaves out. The plan, size, walls and roof are not given in a source read, so the generator guesses them.
+      claim leaves out. The plan is from Nowotny (2019), of the early Slavic pit houses of Lower Austria, Bohemia and
+      Moravia: square or slightly rectangular, written square. Often an oven stood in a corner of the pit, which a
+      dwelling has no word for; the walls were of posts or of logs, and as the source gives both they are left out. The
+      size and the roof are not given in a source read, and are left to the generator.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in gretzinger-2025-PMC12507669-with-SI.txt (sha256 d607fb2a8efa123f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in gretzinger-2025-slavs.txt (sha256 64fa809ae6974700) and nowotny-2019-rural-settlement-eastern-central-europe.txt (sha256 303d384b1db44b87), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
     value: { pattern: hamlet, houses: { lo: 8, hi: 20 } }

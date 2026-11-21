@@ -11,6 +11,7 @@ import { lifewayOf, type AnthromeClass, type Assessment } from '../../../core/la
 import type { LivingTaxon, ScenePeople, SceneSpec } from '../../../core/scene.ts';
 import type { FeatureTime } from '../../../core/tileset.ts';
 import { STRIDE } from '../city/kit.ts';
+import { houseSize } from './dwellings.ts';
 import { GENERATOR, VERSION, type LivingParams } from '../life/scene/v7.ts';
 import { HOUSE, INSTANCE_STRIDE, KEPT, protoParts, SceneStream, WORK, type LifeView } from '../life/stream.ts';
 
@@ -133,6 +134,29 @@ describe('the people of a scene, drawn', () => {
       }
     }
     expect(kinds).toEqual(new Set(['house', 'work', 'kept']));
+  });
+
+  it("keeps a town's low houses in sight from far off, where each is wider than a pixel though not as tall as one", () => {
+    // From two and a half kilometres, looking down on the town at a fifth of a right angle, as a visitor first sees it.
+    const low = compileTraditions([{ id: 'test/low-house', label: 'A low house', regions: [1], span: [-500, 500], lifeways: ['townspeople'], dwelling: { plan: 'courtyard', court: true, storeys: 1, walls: 'mudbrick', roof: 'flat' }, town: { streets: 'grid' } }]);
+    const stream = new SceneStream({ ...spec, people: { ...people(), traditions: low } });
+    const plan = stream.people!;
+    const town = plan.settlements.find((s) => s.city === 'Testopolis')!;
+    const up = 855;
+    const view: LifeView = { eye: [town.x, town.y - 2350, stream.ground.at(town.x, town.y) + up], forward: [0, 0.94, -0.34], right: [1, 0, 0], up: [0, 0.34, 0.94], fov: 1, aspect: 1.7, height: 760, clearance: up };
+    const sent = new Set<number>();
+    let sel = stream.select(view, sent);
+    for (let i = 0; i < 40 && sel.pending; i++) sel = stream.select(view, sent);
+    const si = plan.settlements.indexOf(town);
+    const form = plan.forms[town.form];
+    // Its houses are of one storey round a court: a pixel there is three and a half metres, more than they are tall.
+    expect(houseSize(form.spec, 0, form.grow ?? 1).top).toBeLessThan(3.5);
+    let seen = 0;
+    for (const b of sel.batches) {
+      const { taxon } = protoParts(b.proto);
+      if (taxon >= HOUSE && taxon < WORK && taxon - HOUSE === town.form) seen += b.count;
+    }
+    expect(seen).toBeGreaterThan(plan.houses.filter((h) => h.settlement === si).length * 0.5);
   });
 
   it('lays the paths on the ground as one mesh of their own entity, a hand above it and never under water', () => {

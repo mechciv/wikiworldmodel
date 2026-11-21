@@ -29,7 +29,7 @@ claims:
       source describes; a date from tradition, and not one for the house, which no source read here describes before 1896.
       There is no end claim: no source read says when such houses ceased to be built.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-hakha.txt (sha256 f2050f09231a1722) and wikipedia-chin-people.txt (sha256 113f5ee45c7f2f7a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-hakha.txt (sha256 f2050f09231a1722) and wikipedia-chin-people.txt (sha256 113f5ee45c7f2f7a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["125"] }
@@ -45,7 +45,7 @@ claims:
       Region 125 (Myanmar), which holds the Chin Hills. The Chin of Mizoram, Manipur and Arakan, whose houses the source
       does not describe, are left out.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in carey-tuck-1896-chin-hills-vol-1.txt (sha256 550f7d4928681337) and wikipedia-chin-people.txt (sha256 113f5ee45c7f2f7a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in carey-tuck-1896-chin-hills-vol-1.txt (sha256 550f7d4928681337) and wikipedia-chin-people.txt (sha256 113f5ee45c7f2f7a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   prevalence:
     prop: prevalence
     value: few
@@ -87,10 +87,10 @@ claims:
       fields were new clearings; how long a field was kept is not said. The model calls the region's cultivators shifting
       cultivators, for whom this house stands in.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in carey-tuck-1896-chin-hills-vol-1.txt (sha256 550f7d4928681337), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in carey-tuck-1896-chin-hills-vol-1.txt (sha256 550f7d4928681337), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { plan: rectangular, width: 9.1, length: { lo: 15, hi: 61 }, height: 6.1, storeys: 1, walls: timber, roof_material: thatch, floor: stilts }
+    value: { plan: rectangular, width: 9.1, length: { lo: 15, hi: 61 }, height: 6.1, storeys: 1, walls: plank, roof_material: thatch, floor: stilts, floor_height: { lo: 0.9, hi: 6.1 }, entrance: end, windows: none, smoke: none, veranda: true, byre: true }
     source:
       - ref: src:carey-tuck-1896-chin-hills-vol-1
         loc: "chap. on manners and customs, p. 177"
@@ -104,6 +104,26 @@ claims:
         loc: "chap. on manners and customs, p. 177"
         quote: It is built off the ground and underneath is the pig and cattle pen.
       - ref: src:carey-tuck-1896-chin-hills-vol-1
+        loc: "chap. on manners and customs, p. 177"
+        quote: It has no windows or chimneys and the smoke escapes as it can.
+      - ref: src:carey-tuck-1896-chin-hills-vol-1
+        loc: "chap. on manners and customs, p. 177"
+        quote: >-
+          In front is a long platform and the house is divided into a front verandah and front room, a back room, a
+          closet and a back verandah.
+      - ref: src:carey-tuck-1896-chin-hills-vol-1
+        loc: "chap. on manners and customs, p. 177"
+        quote: >-
+          when the house rests some 3 feet off the ground on the up-hill side it is perhaps 15 and 20 feet off the
+          ground and supported by long posts on the down-hill side.
+      - ref: src:carey-tuck-1896-chin-hills-vol-1
+        loc: "chap. on manners and customs, p. 177"
+        quote: >-
+          The roof of the house protrudes or overhangs the front verandah, which is enclosed on three sides
+      - ref: src:carey-tuck-1896-chin-hills-vol-1
+        loc: "chap. on manners and customs, p. 178"
+        quote: with only one entrance to their houses
+      - ref: src:carey-tuck-1896-chin-hills-vol-1
         loc: "chap. on manners and customs, p. 178"
         quote: it is laid on a foot thick
     method: documentary
@@ -111,13 +131,33 @@ claims:
       The house of the Haka, which the source describes for all as built on the same principles and varying in size and
       quality with the owner's wealth. Twenty feet high is 6.1 m, 30 feet broad 9.1 m, and 50 to 200 feet long 15 to 61 m.
       It stood on the hillside some three feet off the ground uphill and fifteen or twenty downhill, on posts, over the
-      pen. The shape of the roof is not given.
+      pen. The shape of the roof is not given. The walls, first written as timber, are now plank, the vocabulary's
+      narrower word for the source's "built of plank"; a refinement, not a disagreement. The floor's height is the one
+      house's from the uphill side to the downhill, some 3 feet to 15 or 20, 0.9 to 6.1 m. No windows and no chimney,
+      the smoke escaping as it could. The veranda is the front verandah, enclosed on three sides under the overhanging
+      roof, with a back verandah at the other end. The entrance is in an end: the house ran from the front verandah
+      through the front room, the back room and the closet to the back verandah, the length of a house 50 to 200 feet
+      long and some 30 broad, so the front was one of its short sides; that is read from the order of the rooms, as the
+      source does not name the side. The northern Chins said their houses had only one entrance. The pigs and the
+      cattle were penned under the floor, written as animals under the same roof.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in carey-tuck-1896-chin-hills-vol-1.txt (sha256 550f7d4928681337), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in carey-tuck-1896-chin-hills-vol-1.txt (sha256 550f7d4928681337), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
-    value: { pattern: compound, household: 5 }
+    value: { pattern: compound, enclosure: fence, yard: fence, household: 5 }
     source:
+      - ref: src:carey-tuck-1896-chin-hills-vol-1
+        loc: "chap. on manners and customs, p. 175"
+        quote: >-
+          Each platform is surrounded with a timber fence or a cactus hedge and often with both.
+      - ref: src:carey-tuck-1896-chin-hills-vol-1
+        loc: "chap. on manners and customs, p. 175"
+        quote: trenches outside the village fence.
+      - ref: src:carey-tuck-1896-chin-hills-vol-1
+        loc: "chap. on manners and customs, p. 176"
+        quote: >-
+          Besides the gates, cactus and stiff thorn hedges, palisades, stone breastworks and rifle-pits surround and
+          defend the village.
       - ref: src:carey-tuck-1896-chin-hills-vol-1
         loc: "chap. on manners and customs, p. 175"
         quote: >-
@@ -131,6 +171,11 @@ claims:
     note: >-
       Each household's house in its own compound, fenced or hedged, on a platform cut into the hillside. The household of
       five is the source's upper bound on the average, from enquiries and not a census; it multiplied the houses by five to
-      estimate the people.
+      estimate the people. Each compound's yard was fenced: its platform had a timber fence or a cactus hedge round it,
+      often both, which is written as a fence. The village too was fenced: rifle trenches were dug outside the village
+      fence, and the village was defended by hedges of cactus and thorn, palisades and stone breastworks besides its
+      narrow gates, which the one word cannot all hold; the source says some villages once fortified on peaks had since
+      moved down by the streams and were not fortified. The large wooden trough fed by wooden leads, which stood in
+      every compound, has no word among the outbuildings and is not written.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in carey-tuck-1896-chin-hills-vol-1.txt (sha256 550f7d4928681337), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in carey-tuck-1896-chin-hills-vol-1.txt (sha256 550f7d4928681337), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

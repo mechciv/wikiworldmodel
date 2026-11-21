@@ -10,6 +10,52 @@ claims:
     value: { en: "domestic pigs", la: "Sus scrofa domesticus" }
     source: { ref: src:opentree-taxonomy-3.7, loc: "tnrs/match_names: Sus scrofa domesticus, ott729998" }
     note: Open Tree gives the scientific name; the English name is an editorial gloss.
+  form:
+    prop: body_form
+    value:
+      hip: 0.5
+      behave: { group: [1, 8], habitat: any, poses: [stand, stand, walk, rest] }
+      parts:
+        body:
+          sides: [14, 8]
+          rings:
+            - [-0.49, 0.78, 0.75, 0.005]
+            - [-0.475, 0.88, 0.84, 0.009]
+            - [-0.445, 0.92, 0.87, 0.012]
+            - [-0.42, 0.72, 0.64, 0.03]
+            - [-0.375, 0.95, 0.4, 0.1]
+            - [-0.35, 1.0, 0.335, 0.139]
+            - [-0.24, 1.03, 0.33, 0.146]
+            - [-0.1, 1.045, 0.33, 0.148]
+            - [0.03, 1.04, 0.34, 0.144]
+            - [0.12, 1.01, 0.37, 0.13]
+            - [0.18, 0.97, 0.41, 0.112]
+            - [0.22, 0.94, 0.46, 0.094]
+          neck: { r: 0.076, steps: [2, 1] }
+        rump: { type: lump, mat: fur, sides: [12, 8], bands: [6, 4], at: [0, -0.35, 0.667], r: [0.136, 0.11, 0.165] }
+        hind: { y: -0.31, x: 0.078, top: 0.66, knee: 0.44, ankle: 0.23, r: 0.07, swing: 0.045 }
+        fore: { y: 0.14, x: 0.075, top: 0.48, r: 0.04, swing: 0.045 }
+        head:
+          sides: [12, 6]
+          flat: true
+          at:
+            stand: { y: 0.26, z: 0.74, pitch: 0.45 }
+            alert: { y: 0.26, z: 0.84, pitch: 0.22 }
+            low: { y: 0.3, reach: 0.205, pitch: 0.95 }
+          rings:
+            - [-0.03, 0.02, 0.075, 0.085]
+            - [0.04, 0.012, 0.072, 0.078]
+            - [0.1, 0.0, 0.056, 0.058]
+            - [0.16, -0.012, 0.042, 0.042]
+            - [0.2, -0.018, 0.038, 0.038]
+        tusks: null
+        ears: { from: [0.05, 0.015, 0.06], to: [0.085, 0.06, 0.13], r: 0.03 }
+        eyes: { at: [0.062, 0.08, 0.034], r: 0.0055 }
+    unsourced: >-
+      A machine's reconstruction of a domestic pig, from Wikipedia's article on the pig: a large head, and a long
+      snout with a disc at its tip. The rest is as pigs are generally known: a long low barrel of a body with round
+      hams on short legs, hardly any neck, pricked ears and a short thin tail. No tusks are drawn. Its proportions are
+      a drawing's, and no measurements of any animal. Only compared with its sheet.
   mass:
     prop: body_mass
     value: { lo: 140, hi: 300 }

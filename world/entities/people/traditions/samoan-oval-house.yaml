@@ -27,7 +27,7 @@ claims:
       postholes with no plan. Davidson's conclusion (p. 243) has Samoan houses oval "throughout the known Samoan sequence",
       and her summary of the valley's work (Report 30, p. 160) takes its occupation back at least 1800 years.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in green-davidson-1974-western-samoa-2.txt (sha256 9815838631fee5a7), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in green-davidson-1974-western-samoa-2.txt (sha256 5bf8752c79321945), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["145"] }
@@ -40,7 +40,7 @@ claims:
       Region 145 (Polynesia), which holds Upolu and Savai'i, where the work was done. The region also holds Tonga, the Cook
       Islands and French Polynesia, whose houses these sources do not describe; it is not claimed for all of it.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in green-davidson-1974-western-samoa-2.txt (sha256 9815838631fee5a7), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in green-davidson-1974-western-samoa-2.txt (sha256 5bf8752c79321945), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [shifting-cultivators, farmers]
@@ -62,10 +62,10 @@ claims:
       the coast in the last 150 years, cultivating the land nearest them, are named farmers, the vocabulary's word for
       the people of villages, though their gardens too move inland as the land is exhausted.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in green-davidson-1974-western-samoa-2.txt (sha256 5bf8752c79321945), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in green-davidson-1974-western-samoa-2.txt (sha256 5bf8752c79321945), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { plan: oval, length: 10.5, wall_height: 1.5, walls: none, roof: hip, roof_material: thatch, floor: raised }
+    value: { plan: oval, length: 10.5, wall_height: 1.5, walls: none, roof: hip, roof_material: thatch, floor: raised, floor_height: 0.3 }
     source:
       - ref: src:green-davidson-1974-western-samoa-2
         loc: "Report 39 (Davidson), section \"Houses\", p. 232"
@@ -109,10 +109,42 @@ claims:
       closed when needed with blinds of plaited coconut leaf: the vocabulary has no word for open sides, and "none" is the
       nearest, though the roof stops about 1.5 m above the floor rather than at the ground. An oval roof over a short ridge slopes on every side,
       which is "hip"; the encyclopedia calls it domed. The platform was low, about a foot high for ordinary houses in the
-      accounts McKinlay gathers, higher for people of rank. The width the sources give is that of the community house,
-      not of a dwelling, and is left out.
+      accounts McKinlay gathers, higher for people of rank, and the platforms with house outlines at Sasoa'a are near
+      that lesser height: so the floor's height is written 0.3 m, the foot of Peale and Wilkes. The width the sources
+      give is that of the community house, not of a dwelling, and is left out.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in green-davidson-1974-western-samoa-2.txt (sha256 9815838631fee5a7), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in green-davidson-1974-western-samoa-2.txt (sha256 5bf8752c79321945) and wikipedia-architecture-of-samoa.txt (sha256 7ce131867d761f1c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  outbuildings:
+    prop: outbuildings
+    value:
+      - { use: kitchen, per: house, count: 1, walls: none }
+    source:
+      - ref: src:green-davidson-1974-western-samoa-2
+        loc: "Report 39 (Davidson), section \"Ovens and Pits\", p. 237"
+        quote: >-
+          Every family in a modern Samoan village has at least one cooking house — a rough shelter over one or more
+          earth ovens — and the excavations at Folasa indicated that a similar pattern probably prevailed in the past.
+      - ref: src:green-davidson-1974-western-samoa-2
+        loc: "Report 21 (McKinlay), section \"Principal Structural Features\", p. 28"
+        quote: >-
+          as it was a roughly built structure consisting largely of a roof of one of two “original” types described by
+          Buck (1930: 13-14), it would leave little evidence other than a set of eight or so postholes.
+      - ref: src:wikipedia-architecture-of-samoa
+        loc: section "Types of fale"
+        quote: >-
+          The tunoa (cook house) is a flimsy structure, small in size, and not to be considered as a house.
+    method: excavation
+    note: >-
+      The cooking house, each family's: at least one to a family in a modern village, Davidson says, with the
+      excavations at Folasa showing that it was probably so in the past; McKinlay found postholes of such houses by
+      ovens in prehistoric levels at Sa-3 and Fo-1. It was a rough shelter over earth ovens, mostly a roof, which is
+      written as having no walls; its size and plan are not given beyond the encyclopedia's "small". The large
+      community or guest house (fale tele) is not written: Davidson found only one, at Sasoa'a in the early historic
+      period, and no prehistoric example (Report 39, p. 233). The malae, the open ground before the meeting houses,
+      is the encyclopedia's for villages of its own day and is not written in the dispersed settlement form preferred
+      here.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in green-davidson-1974-western-samoa-2.txt (sha256 5bf8752c79321945) and wikipedia-architecture-of-samoa.txt (sha256 7ce131867d761f1c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement-dispersed:
     prop: settlement_form
     value: { pattern: dispersed, houses: 14, household: { lo: 3.5, hi: 4.1 } }
@@ -149,7 +181,7 @@ claims:
       people to a house are Davidson's estimate for the 13 dwellings of Sasoa'a, from their floor area at 10 or 8.7 m² a
       person.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in green-davidson-1974-western-samoa-2.txt (sha256 9815838631fee5a7), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in green-davidson-1974-western-samoa-2.txt (sha256 5bf8752c79321945), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement-nucleated:
     prop: settlement_form
     value: { pattern: nucleated }

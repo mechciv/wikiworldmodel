@@ -33,7 +33,7 @@ claims:
       The beginning of the Yangshao culture as the paper dates it, in calibrated years before the present. The
       encyclopedia has "around 5000 BC", which is the same.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in liu-2022-proto-sino-tibetan-migration.txt (sha256 0112a15e47cb6b15), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in liu-2022-proto-sino-tibetan-migration.txt (sha256 0112a15e47cb6b15), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   end:
     prop: end
     value: { lo: 5000 BP, hi: 4700 BP }
@@ -55,7 +55,7 @@ claims:
       ground level become the commonest in the late Yangshao, from about 3500 BC, so that the house of this record was
       giving way before the end written here.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in liu-2022-proto-sino-tibetan-migration.txt (sha256 0112a15e47cb6b15), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in liu-2022-proto-sino-tibetan-migration.txt (sha256 0112a15e47cb6b15), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["119", "120"] }
@@ -86,7 +86,7 @@ claims:
       say nothing of their houses. The culture reached further, north and west, in its later phases; those regions are
       not named, and the house is not claimed for all of either region.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in liu-2022-proto-sino-tibetan-migration.txt (sha256 0112a15e47cb6b15) and wikipedia-yangshao-culture.txt (sha256 9690f5e15f3ce0f5), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in liu-2022-proto-sino-tibetan-migration.txt (sha256 0112a15e47cb6b15) and wikipedia-yangshao-culture.txt (sha256 9690f5e15f3ce0f5), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [farmers, shifting-cultivators]
@@ -116,10 +116,10 @@ claims:
       region fully settled only in the late Yangshao. Whichever the model of how people lived takes them for, these
       were their houses.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in liu-2022-proto-sino-tibetan-migration.txt (sha256 0112a15e47cb6b15) and wikipedia-yangshao-culture.txt (sha256 9690f5e15f3ce0f5), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in liu-2022-proto-sino-tibetan-migration.txt (sha256 0112a15e47cb6b15) and wikipedia-yangshao-culture.txt (sha256 9690f5e15f3ce0f5), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { plan: round, walls: wattle-and-daub, roof: conical, roof_material: thatch, floor: sunken }
+    value: { plan: round, walls: wattle-and-daub, roof: conical, roof_material: thatch, floor: sunken, finish: mud }
     source:
       - ref: src:wikipedia-banpo
         loc: opening section
@@ -158,12 +158,13 @@ claims:
       said to have been; the same articles have square and rectangular houses beside the round ones, pits of a rounded
       rectangle, and houses at ground level, which became the commoner kind in the late Yangshao. No size of a house
       is given by anything read, and it is left to the generator. The few large square buildings, of which the paper
-      measures one at Dadiwan at 290 square metres, were public and are not drawn.
+      measures one at Dadiwan at 290 square metres, were public and are not drawn. The wattle was plastered with mud
+      (the fourth quote), written as the mud finish too. The roof was steep, but no angle is given.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-banpo.txt (sha256 130534d6cf2e0b5f) and wikipedia-yangshao-culture.txt (sha256 9690f5e15f3ce0f5), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-banpo.txt (sha256 130534d6cf2e0b5f) and wikipedia-yangshao-culture.txt (sha256 9690f5e15f3ce0f5), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
-    value: { pattern: nucleated, houses: 100 }
+    value: { pattern: nucleated, houses: 100, layout: ring, plaza: true, enclosure: ditch }
     source:
       - ref: src:liu-2022-proto-sino-tibetan-migration
         loc: 'section "Archaeological and Ethnographical Analogies in Settlement Pattern and Dancing–Drinking Rituals"'
@@ -182,11 +183,57 @@ claims:
         quote: >-
           Population estimates for the site typically range between 100-500 people, though estimations are limited
           because of the large portion of the settlement still unexcavated.
+      - ref: src:wikipedia-yangshao-culture
+        loc: section "Archaeological sites"
+        quote: >-
+          Another major settlement called Jiangzhai was excavated out to its limits, and archaeologists found that it
+          was completely surrounded by a ring-ditch.
+      - ref: src:wikipedia-banpo
+        loc: section "Site"
+        quote: The settlement was surrounded by a moat, with graves and pottery kilns located outside the moat perimeter.
     method: excavation
     note: >-
-      A village of houses set round an open space, their doors towards it, within a ditch. A hundred houses is
+      A village of houses set round an open space, their doors towards it, within a ditch: the vocabulary's ring
+      round open ground at the middle, inside a ditch, from Jiangzhai, dug to its limits and ringed by its ditch, and
+      Banpo, whose ditch the encyclopedia calls a moat, 5 to 6 m wide. A hundred houses is
       Jiangzhai, the one village dug to its edges, by the encyclopedia's report of Peterson and Shelach's study, which
       could not be read; whether all hundred stood at once it does not say. The people of a house are not given: Banpo
       is put at 100 to 500 people, with much of it undug, and that is not divided among its houses here.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in liu-2022-proto-sino-tibetan-migration.txt (sha256 0112a15e47cb6b15), wikipedia-jiangzhai.txt (sha256 98fb300a7f3b12c5), wikipedia-yangshao-culture.txt (sha256 9690f5e15f3ce0f5) and wikipedia-banpo.txt (sha256 130534d6cf2e0b5f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in liu-2022-proto-sino-tibetan-migration.txt (sha256 0112a15e47cb6b15), wikipedia-jiangzhai.txt (sha256 98fb300a7f3b12c5), wikipedia-yangshao-culture.txt (sha256 9690f5e15f3ce0f5) and wikipedia-banpo.txt (sha256 130534d6cf2e0b5f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  outbuildings:
+    prop: outbuildings
+    value:
+      - { use: pen, per: house }
+      - { use: oven, per: settlement }
+      - { use: granary, per: settlement }
+      - { use: hall, per: settlement }
+    source:
+      - ref: src:wikipedia-yangshao-culture
+        loc: section "Structures"
+        quote: Food and items were placed or hung against the walls. A pen would be built outside for animals.
+      - ref: src:wikipedia-banpo
+        loc: section "Site"
+        quote: The settlement was surrounded by a moat, with graves and pottery kilns located outside the moat perimeter.
+      - ref: src:wikipedia-yangshao-culture
+        loc: section "Structures"
+        quote: >-
+          Middle Yangshao settlements such as Jiangzhi contain raised-floor buildings that may have been used for the
+          storage of surplus grains.
+      - ref: src:liu-2022-proto-sino-tibetan-migration
+        loc: 'section "Archaeological and Ethnographical Analogies in Settlement Pattern and Dancing–Drinking Rituals"'
+        quote: >-
+          typical Yangshao culture settlements are characterized by a centripetal layout, in which all the houses,
+          including large public buildings, were arranged with doors facing the central plaza
+    method: excavation
+    note: >-
+      A pen built outside the house for animals, in the encyclopedia's account of how a house was built, so a
+      household's; at Banpo some oblong structures with no hearth are thought to be pigsties or pens. The pottery
+      kilns of Banpo stood outside its ditch, with the graves: the vocabulary's oven, the settlement's, though the
+      generator draws it among the houses. The raised-floor buildings of middle Yangshao villages "may have been"
+      granaries, as the encyclopedia puts it, and are written so; how high their floors stood is not said. The large
+      public buildings faced the plaza with the houses: the vocabulary's hall, whose size, one measured at Dadiwan at
+      290 square metres, is that of a single building and not written. The encyclopedia's communal storage pits are
+      left out, as pits.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-yangshao-culture.txt (sha256 9690f5e15f3ce0f5), wikipedia-banpo.txt (sha256 130534d6cf2e0b5f) and liu-2022-proto-sino-tibetan-migration.txt (sha256 0112a15e47cb6b15), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

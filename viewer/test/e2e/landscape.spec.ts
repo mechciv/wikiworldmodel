@@ -3,7 +3,9 @@
 // above the sea among them; a city of the lists is named, and drawn in its region's houses; a click on a house says what it
 // rests on; and the people layer of `resolve` answers in a tier, as the build's does. And for its filling in
 // (docs/slices/SIXTEENTH-SLICE.md): a city drawn from its record, people and paths, the herds a husbandry names, and a
-// scene of a village anywhere past the ground of a city that has a scene of its own.
+// scene of a village anywhere past the ground of a city that has a scene of its own. And for the house in detail
+// (docs/slices/SEVENTEENTH-SLICE.md): a house in its yard, and a village with what its tradition says stood in it and
+// round it.
 import { expect, test, type Page } from '@playwright/test';
 import { traditionAt, type LifewayWord } from '../../../core/dwelling.ts';
 import type { LandscapeIndex, TraditionsFile } from '../../../core/landscape.ts';
@@ -141,6 +143,23 @@ test.describe('the human landscape', () => {
       // Which animals is a husbandry tradition's claim; how many is the generator's.
       expect(p.kept.length).toBeGreaterThan(1);
       expect(p.animals).toBeGreaterThan(20);
+    });
+
+    test('a house stands in its yard, and a village has what its tradition says stood in it and round it', async ({ page }) => {
+      // East Anglia in 1300: a peasant's house in its toft, with what its tradition says a holding had.
+      await page.goto(`/?b=${latestBuild()}&${low(52.2, 0.4, 1300, 900)}`);
+      await idle(page);
+      const english = (await scene(page))!.people!;
+      expect(english.yards).toContain(traditionOf(38, 1300, 'farmers'));
+      // The Wei valley in 4000 BCE: a village round its open middle, a house to meet in there, a ditch round it all.
+      await page.goto(`/?b=${latestBuild()}&${low(34.4, 109.0, -4000, 900)}`);
+      await idle(page);
+      const yangshao = (await scene(page))!.people!;
+      expect(yangshao.things).toContain('A meeting house');
+      expect(yangshao.works).toContain('A ditch round a settlement');
+      // Click the house at the middle of the view, if one is there: what it rests on says that no two are drawn alike.
+      const houses = await page.evaluate(() => window.__wikiworldmodel!.settlementsAt());
+      expect(houses.length).toBeGreaterThan(0);
     });
 
     test('before the anthromes begin, a scene has no people', async ({ page }) => {

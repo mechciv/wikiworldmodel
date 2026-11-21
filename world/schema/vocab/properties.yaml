@@ -7,8 +7,9 @@
 #               names: […] } names the rows that belong to the subject, { from: src:…,
 #               elements: […] } the elements of a snapshot; a form says how a generator should
 #               raise a structure: { type: temple, order: corinthian, … }, core/city.ts)
-#               | dwelling | settlement-form | field-system | town-form | lifeway (a building tradition's
-#               house, how its houses stood together, its fields, its towns, and whom it housed: core/dwelling.ts)
+#               | dwelling | settlement-form | field-system | town-form | lifeway | outbuildings (a building
+#               tradition's house, how its houses stood together, its fields, its towns, whom it housed, and what
+#               stood by its houses: core/dwelling.ts)
 #               | taxa (a list of taxon records, as the animals a husbandry tradition kept)
 #   unit        for quantities: values are written in this unit
 #   values      for strings: the values allowed, each with what it means
@@ -446,15 +447,30 @@ properties:
     applies_to: [tradition/building]
     description: >-
       The house a building tradition put up, as the parameters the settlement generator draws it from: its plan, its
-      size, what its walls, roof and floor were made of (core/dwelling.ts). A tradition says only what differs from
-      the one it is a member of; what neither says is the generator's guess, and the panel says whose each part is.
+      size, what its walls, roof and floor were made of and how they were finished, where its door was and which way
+      it faced, its windows, how its smoke left it, a porch, a veranda, a byre under its roof (core/dwelling.ts). A
+      tradition says only what differs from the one it is a member of; what neither says is the generator's guess,
+      and the panel says whose each part is.
   settlement_form:
     type: settlement-form
     interp: step
     applies_to: [tradition/building]
     description: >-
       How a building tradition's houses stood together: clustered in villages, standing apart, in compounds or in
-      camps; how many to a settlement, how far apart, and how many people lived in each (core/dwelling.ts).
+      camps; in a ring or in rows; what stood round the settlement and round each yard; open ground at its middle;
+      how many to a settlement, how far apart, and how many people lived in each (core/dwelling.ts).
+  outbuildings:
+    type: outbuildings
+    interp: step
+    applies_to: [tradition/building]
+    description: >-
+      What a building tradition's households and settlements had besides their houses, as a list: a granary, a byre,
+      a pen, a cookhouse, an oven, a well, a rack, a stack, a threshing floor, a shrine, a house to meet in
+      (core/dwelling.ts). Each says its use, whether it was a household's or the settlement's (`per`), how many where
+      a source counts them, and what it was like in the words and sizes of a dwelling, as far as its sources say. The
+      settlement generator draws them by the houses or among them; what a source leaves unsaid of one is the
+      generator's plain one of that use, and the panel says so. A tradition that gives no list takes the list of the
+      one it is a member of, whole.
   field_system:
     type: field-system
     interp: step

@@ -1,14 +1,16 @@
 // The pieces of a town's works (works.ts): each is drawn, at every detail, the size its spec says.
 import { describe, expect, it } from 'vitest';
 import { Mesh, STRIDE } from '../city/kit.ts';
-import { drawWork, PIECE, towered, towerSide, workTop, type WallWord, type WorkKind, type WorkSpec } from './works.ts';
+import { PERSON_VARIANTS } from './figures.ts';
+import { drawWork, PIECE, smallWork, towered, towerSide, WORK_VARIANTS, workTop, type WallWord, type WorkKind, type WorkSpec } from './works.ts';
+import { ENCLOSURE_SIZE } from './yard.ts';
 
 const WALLS: WallWord[] = ['earth', 'rammed-earth', 'timber', 'mudbrick', 'stone', 'brick'];
 
 /** A piece's vertices, as [x, y, z]. */
-function drawn(s: WorkSpec, detail: 0 | 1 | 2): [number, number, number][] {
+function drawn(s: WorkSpec, detail: 0 | 1 | 2, variant = 0): [number, number, number][] {
   const m = new Mesh(256);
-  drawWork(m, s, detail);
+  drawWork(m, s, detail, variant);
   const { vertices, indices } = m.arrays();
   expect(indices.length).toBeGreaterThan(0);
   expect(indices.length % 3).toBe(0);
@@ -58,6 +60,71 @@ describe("a town's works", () => {
       expect(Math.max(...v.map((p) => p[2]))).toBeLessThan(0.5);
       expect(Math.max(...v.map((p) => Math.abs(p[1])))).toBeCloseTo(5.5, 5);
       expect(workTop({ kind, height: 0, thickness: 10 })).toBe(5);
+    }
+  });
+
+  it('draws each length of enclosure as long as it is asked to be, and about as high as its kind stands', () => {
+    for (const word of ['fence', 'hedge', 'palisade', 'bank', 'ditch', 'wall'] as const) {
+      const s: WorkSpec = { kind: 'enclosure', height: 0, thickness: ENCLOSURE_SIZE[word].thickness, word, run: 6 };
+      for (const detail of [0, 1, 2] as const) {
+        for (const variant of [0, 5]) {
+          const v = drawn(s, detail, variant);
+          // Its lengths meet: each runs the whole of its run, within the lumps of a hedge.
+          expect(Math.min(...v.map((p) => p[0])), `${word} at ${detail}`).toBeLessThanOrEqual(-3 + 0.6);
+          expect(Math.max(...v.map((p) => p[0])), `${word} at ${detail}`).toBeGreaterThanOrEqual(3 - 0.6);
+          expect(Math.max(...v.map((p) => p[2])), `${word} at ${detail}`).toBeLessThanOrEqual(workTop(s) + 0.6);
+          expect(Math.max(...v.map((p) => p[2]))).toBeGreaterThanOrEqual(ENCLOSURE_SIZE[word].height * 0.7);
+        }
+      }
+    }
+  });
+
+  it('draws a pen round its ground with a way in, and each thing of a yard about the size it says', () => {
+    const pen: WorkSpec = { kind: 'pen', height: 0, thickness: 8, word: 'hedge' };
+    const v = drawn(pen, 0);
+    for (const p of v) expect(Math.hypot(p[0], p[1])).toBeLessThanOrEqual(4 + 1.6);
+    // The way in is at its front: nothing stands across it.
+    expect(v.filter((p) => Math.abs(p[0]) < 0.5 && p[1] > 3)).toEqual([]);
+    const things: WorkSpec[] = [
+      { kind: 'well', height: 0, thickness: 1.6 },
+      { kind: 'oven', height: 0, thickness: 1.4 },
+      { kind: 'rack', height: 1.8, thickness: 2.6 },
+      { kind: 'stack', height: 2.8, thickness: 2.6 },
+      { kind: 'floor', height: 0, thickness: 8 },
+      { kind: 'pond', height: 0, thickness: 8 },
+      { kind: 'pole', height: 5, thickness: 0.4 },
+    ];
+    for (const s of things) {
+      for (const detail of [0, 1, 2] as const) {
+        const w = drawn(s, detail);
+        expect(Math.max(...w.map((p) => p[2])), `${s.kind} at ${detail}`).toBeLessThanOrEqual(Math.max(workTop(s), s.height) + 0.6);
+        expect(Math.max(...w.map((p) => Math.hypot(p[0], p[1]))), `${s.kind} at ${detail}`).toBeLessThanOrEqual(Math.max(s.thickness / 2 + 1.5, 1.6));
+      }
+      // Water and a floor lie on the ground; the rest stand on it.
+      const top = Math.max(...drawn(s, 0).map((p) => p[2]));
+      if (s.kind === 'floor' || s.kind === 'pond') expect(top).toBeLessThan(0.5);
+      else expect(top).toBeGreaterThan(0.7);
+      expect(smallWork(s.kind)).toBe(s.kind !== 'floor' && s.kind !== 'pond');
+    }
+  });
+
+  it('draws a person in each of its ways, a grown one as tall as it says and a child shorter', () => {
+    expect(WORK_VARIANTS).toBe(PERSON_VARIANTS);
+    const s: WorkSpec = { kind: 'person', height: 1.62, thickness: 0.5 };
+    const tops = Array.from({ length: PERSON_VARIANTS }, (_, k) => Math.max(...drawn(s, 0, k).map((p) => p[2])));
+    // Standing, with a staff, walking: about its height. Carrying on its head: more. Sitting, kneeling, a child: less.
+    for (const k of [0, 2, 7]) expect(tops[k]).toBeCloseTo(1.62, 0);
+    expect(tops[3]).toBeGreaterThan(1.7);
+    for (const k of [4, 5]) expect(tops[k]).toBeLessThan(1.1);
+    expect(tops[6]).toBeGreaterThan(0.95);
+    expect(tops[6]).toBeLessThan(1.25);
+    for (let k = 0; k < PERSON_VARIANTS; k++) {
+      for (const detail of [0, 1, 2] as const) {
+        const v = drawn(s, detail, k);
+        // On the ground, and no wider than a person with what it carries.
+        expect(Math.min(...v.map((p) => p[2]))).toBeGreaterThanOrEqual(-0.05);
+        expect(Math.max(...v.map((p) => Math.hypot(p[0], p[1])))).toBeLessThan(1.1);
+      }
     }
   });
 });

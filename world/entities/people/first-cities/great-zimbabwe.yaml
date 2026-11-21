@@ -21,6 +21,8 @@ claims:
     method: expert-estimate
     rank: preferred
     note: Preferred as the framing of the study that deals with the site's occupation as a whole.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in chirikure-2017-great-zimbabwe.txt (sha256 8d343af98653f22f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   start-period-ii:
     prop: start
     value: 900 CE
@@ -30,6 +32,8 @@ claims:
       quote: "passed through four different phases: Periods II (CE900–1000), III (CE1000–1200), IV (CE1200–1700), and V (CE1700–1890)"
     method: expert-estimate
     note: The first of the four phases of those who built in stone.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in chirikure-2017-great-zimbabwe.txt (sha256 8d343af98653f22f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   end-chirikure:
     prop: end
     value: 1800 CE
@@ -40,6 +44,8 @@ claims:
     method: expert-estimate
     rank: preferred
     note: The end of its long occupation. Its last phase in the same paper runs on to CE1890.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in chirikure-2017-great-zimbabwe.txt (sha256 8d343af98653f22f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   end-unesco:
     prop: end
     value: 1450 CE
@@ -71,6 +77,8 @@ claims:
     rank: preferred
     note: >-
       The estate as a whole, with no date, of which only about 40 percent has evidence of settlement, and not all at one time. Table 1 of the same paper gives far smaller occupied areas by period, up to 125 ha.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in chirikure-2017-great-zimbabwe.txt (sha256 8d343af98653f22f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   area-80:
     prop: settlement_area
     value: 80
@@ -95,6 +103,8 @@ claims:
     note: >-
       An upper limit, not an estimate of a moment. Preferred because it is the only figure here tested against which parts were lived in at the same time. Their own house-count models
       give much less: 2,756 to 4,823 if all of the site was occupied at once.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in chirikure-2017-great-zimbabwe.txt (sha256 8d343af98653f22f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   population-huffman:
     prop: population
     value: 18000
@@ -108,6 +118,8 @@ claims:
         quote: previously believed to be between CE1300 and 1450
     method: expert-estimate
     note: At second hand, through Chirikure et al.; Huffman's work was not read. A lower limit, in his reckoning.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in chirikure-2017-great-zimbabwe.txt (sha256 8d343af98653f22f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   population-accepted:
     prop: population
     value: 20000
@@ -118,6 +130,8 @@ claims:
       quote: Archaeologists believe that at its peak, Great Zimbabwe had a fully urban population of 20,000 people
     method: expert-estimate
     note: The received figure, as Chirikure et al. report it before arguing against it.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in chirikure-2017-great-zimbabwe.txt (sha256 8d343af98653f22f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   population-garlake:
     prop: population
     value: { lo: 1000, hi: 2500 }
@@ -127,6 +141,8 @@ claims:
       quote: Garlake suggested that the total population of Great Zimbabwe was somewhere between 1,000 and 2,500 people
     method: expert-estimate
     note: The first estimate, at second hand through Chirikure et al.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in chirikure-2017-great-zimbabwe.txt (sha256 8d343af98653f22f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   population-chandler:
     prop: population
     value: 40000

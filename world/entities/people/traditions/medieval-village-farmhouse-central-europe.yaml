@@ -33,7 +33,7 @@ claims:
       different regions, and that it is hard to date. The villages these houses stood in were formed between the
       eleventh and the thirteenth centuries.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in nowotny-2019-rural-settlement-eastern-central-europe.txt (sha256 303d384b1db44b87) and schreg-2019-deserted-settlements-southern-germany.txt (sha256 1cfded0b56c486a9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in nowotny-2019-rural-settlement-eastern-central-europe.txt (sha256 303d384b1db44b87) and schreg-2019-deserted-settlements-southern-germany.txt (sha256 1cfded0b56c486a9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   end:
     prop: end
     value: { lo: 1401 CE, hi: 1500 CE }
@@ -50,7 +50,7 @@ claims:
       were for some 700 years. The farmhouses of the centuries after 1500 are not described in what was read, and are
       another record's to tell.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in nowotny-2019-rural-settlement-eastern-central-europe.txt (sha256 303d384b1db44b87), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in nowotny-2019-rural-settlement-eastern-central-europe.txt (sha256 303d384b1db44b87), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["43", "45"] }
@@ -76,7 +76,7 @@ claims:
       north of Germany and the Low Countries are in region 43 too, and are not described by what was read. A region named
       is where the sources place the house, not a claim that it covered the region.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in nowotny-2019-rural-settlement-eastern-central-europe.txt (sha256 303d384b1db44b87) and schreg-2019-deserted-settlements-southern-germany.txt (sha256 1cfded0b56c486a9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in nowotny-2019-rural-settlement-eastern-central-europe.txt (sha256 303d384b1db44b87) and schreg-2019-deserted-settlements-southern-germany.txt (sha256 1cfded0b56c486a9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [farmers]
@@ -97,7 +97,7 @@ claims:
       year, by peasants who came to hold their farms for rent. The houses of the towns founded in the same centuries are
       not described by what was read, and are not these.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in schreg-2019-deserted-settlements-southern-germany.txt (sha256 1cfded0b56c486a9) and nowotny-2019-rural-settlement-eastern-central-europe.txt (sha256 303d384b1db44b87), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in schreg-2019-deserted-settlements-southern-germany.txt (sha256 1cfded0b56c486a9) and nowotny-2019-rural-settlement-eastern-central-europe.txt (sha256 303d384b1db44b87), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
     value: { rooms: { lo: 1, hi: 4 }, walls: timber, floor: ground }
@@ -144,10 +144,10 @@ claims:
       entrance besides, then a stable; three rooms were common in Bohemia and Moravia. The shape of the plan, the size
       and the roof are not stated in what was read, and are left to the generator.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in nowotny-2019-rural-settlement-eastern-central-europe.txt (sha256 303d384b1db44b87), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in nowotny-2019-rural-settlement-eastern-central-europe.txt (sha256 303d384b1db44b87), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
-    value: { pattern: nucleated }
+    value: { pattern: nucleated, layout: rows, plaza: true, yard: fence }
     source:
       - ref: src:schreg-2019-deserted-settlements-southern-germany
         loc: 'section "The formation of the medieval village and the end of the shifting farmsteads system", p. 165'
@@ -167,6 +167,19 @@ claims:
           Villages located on relatively good soils usually became open-field villages with a rectangular or
           spindle-shaped square or a … village green (a type known as Angerdorf). Villages located on worse soils in
           forest areas and foothills usually became forest villages (Waldhufendorf type).
+      - ref: src:nowotny-2019-rural-settlement-eastern-central-europe
+        loc: 'section "Village shape and field forms", p. 287'
+        quote: >-
+          The farmsteads of late medieval Hard (Fig. 4a; 5b) were situated in two rows beside a road, with a village green
+          between them and the manor farm.
+      - ref: src:nowotny-2019-rural-settlement-eastern-central-europe
+        loc: 'section "Village shape and field forms", p. 287'
+        quote: especially Anger-villages (two rows of houses separated by a linear village green)
+      - ref: src:nowotny-2019-rural-settlement-eastern-central-europe
+        loc: 'section "Internal structure of the settlements and the emergence of farmsteads", p. 285'
+        quote: >-
+          The development towards clearly enclosed yards was anticipated at early medieval central places (among others
+          the Burgwälle), but on rural sites farmsteads enclosed by fences are only visible in the High Middle Ages
     method: expert-estimate
     note: >-
       Villages: farmsteads gathered round a church in southern Germany, set in rows along a green in Bohemia, Moravia and
@@ -174,9 +187,14 @@ claims:
       (Waldhufendorf) on the poorer soils of the hills. How many farmsteads made a village is not given as a rule: the first
       source of this record has 17 along the green of Mstěnice in Moravia, and 6 to 8 homesteads in the short forest
       villages of the Drahany highlands. The words left out of the last quote are the caption of a figure and the head
-      of a page.
+      of a page. The layout and the open ground at the middle are those of the green villages: at Hard in Lower Austria
+      the farmsteads stood in two rows beside a road with a green between them, and an Angerdorf is two rows of houses
+      on either side of a long green, the second source has it; villages round a church in southern Germany, and forest
+      villages along their strips, were not so, and the rows and the green stand for the tradition as a whole. Each
+      farmstead was fenced from the High Middle Ages, as the second source says of rural sites (p. 285); at Hard some
+      plots were shut off by stone walls instead (p. 286).
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in schreg-2019-deserted-settlements-southern-germany.txt (sha256 1cfded0b56c486a9), nowotny-2019-rural-settlement-eastern-central-europe.txt (sha256 303d384b1db44b87) and legut-pintal-2019-melioratio-terrae-silesia.txt (sha256 b7a43419f5424353), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in schreg-2019-deserted-settlements-southern-germany.txt (sha256 1cfded0b56c486a9), nowotny-2019-rural-settlement-eastern-central-europe.txt (sha256 303d384b1db44b87) and legut-pintal-2019-melioratio-terrae-silesia.txt (sha256 b7a43419f5424353), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   fields:
     prop: field_system
     value: { kind: strips, bounds: none }
@@ -209,4 +227,24 @@ claims:
       laid out at 50 Franconian greater Hufen each, as the third source of this record has it, without saying what that
       is in hectares.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in schreg-2019-deserted-settlements-southern-germany.txt (sha256 1cfded0b56c486a9) and nowotny-2019-rural-settlement-eastern-central-europe.txt (sha256 303d384b1db44b87), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in schreg-2019-deserted-settlements-southern-germany.txt (sha256 1cfded0b56c486a9) and nowotny-2019-rural-settlement-eastern-central-europe.txt (sha256 303d384b1db44b87), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  outbuildings:
+    prop: outbuildings
+    value:
+      - { use: shrine, per: settlement }
+    source:
+      - ref: src:schreg-2019-deserted-settlements-southern-germany
+        loc: 'section "The formation of the medieval village and the end of the shifting farmsteads system", p. 165'
+        quote: Only then were closed villages established around the most often already existing churches.
+      - ref: src:schreg-2019-deserted-settlements-southern-germany
+        loc: 'section "The formation of the medieval village and the end of the shifting farmsteads system", p. 165'
+        quote: this formation of the village was not only a clustering of farmsteads around a church
+    method: expert-estimate
+    note: >-
+      The village's church, round which the farmsteads of southern Germany were gathered when the villages formed (the
+      first source); the villages of Silesia had parish churches too (Legut-Pintal 2019), not drawn from here. Each
+      farmstead had a yard and "various outbuildings" in the Later Middle Ages (Nowotny 2019, p. 286), but what they
+      were is not said, and none is listed: storerooms or granaries that had stood apart from the house in Mstěnice and
+      Pfaffenschlag were later joined to it (p. 284), and the four-room house took the stable in.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in schreg-2019-deserted-settlements-southern-germany.txt (sha256 1cfded0b56c486a9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

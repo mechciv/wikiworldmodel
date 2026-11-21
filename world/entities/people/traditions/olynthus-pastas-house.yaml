@@ -26,7 +26,7 @@ claims:
       The houses of this type stand on the North Hill, which was settled after the towns around were moved into Olynthus in
       432 BCE.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-olynthus-1382382761.txt (sha256 563157b5903e7215), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-olynthus.txt (sha256 42810b1c3f306a41), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   end:
     prop: end
     value: 348 BCE
@@ -39,7 +39,7 @@ claims:
       Philip II razed the town in 348 BCE. The source says only a small part of the North Hill was lived in again afterwards,
       until 316 BCE.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-olynthus-1382382761.txt (sha256 563157b5903e7215), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-olynthus.txt (sha256 42810b1c3f306a41), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["44"] }
@@ -52,7 +52,7 @@ claims:
       Region 44 (Southern Europe), which holds Chalcidice. The source describes the houses of one town; the house is not
       claimed for all of the region.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-olynthus-1382382761.txt (sha256 563157b5903e7215), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-olynthus.txt (sha256 42810b1c3f306a41), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [townspeople]
@@ -67,10 +67,10 @@ claims:
       Townspeople: the houses are known only from the city blocks of Olynthus's North Hill. The houses of the countryside
       around the city are not described.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-olynthus.txt (sha256 42810b1c3f306a41), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-olynthus.txt (sha256 42810b1c3f306a41), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { plan: courtyard, court: true, storeys: { lo: 1, hi: 2 }, walls: mudbrick }
+    value: { plan: courtyard, court: true, storeys: { lo: 1, hi: 2 }, walls: mudbrick, veranda: true }
     source:
       - ref: src:wikipedia-olynthus
         loc: section "Site topography", "Classical"
@@ -87,14 +87,22 @@ claims:
       - ref: src:wikipedia-ancient-greek-architecture
         loc: section "Domestic buildings"
         quote: City houses were inward-facing, with major openings looking onto the central courtyard, rather than the street.
+      - ref: src:wikipedia-ancient-greek-architecture
+        loc: section "Domestic buildings"
+        quote: >-
+          Many houses centred on a wide passage or "pasta" which ran the length of the house and opened at one side onto
+          a small courtyard which admitted light and air.
     method: excavation
     note: >-
       The plan and the upper storey are Olynthus's, from the first source. The walls are from the second, which says of many
       Greek houses, not of Olynthus in particular, that their walls were of sun-dried brick, or of a timber frame filled with
       clay, on a stone base. The roof is left out: that source has thatch on simple houses and tile on substantial ones, and
-      does not say which the Olynthus houses were.
+      does not say which the Olynthus houses were. The veranda is the pastas that the first source names in every
+      house of the type: the second has it as a wide passage the length of the house, open along one side to the court,
+      which is the vocabulary's gallery under the eaves; the first does not say what a pastas was, and the second
+      speaks of Greek houses in general. Shops and kitchens were rooms of the house, not buildings apart from it.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-olynthus-1382382761.txt (sha256 563157b5903e7215), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-olynthus.txt (sha256 42810b1c3f306a41) and wikipedia-ancient-greek-architecture.txt (sha256 7a702058fd89590d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
     value: { pattern: walled }
@@ -110,7 +118,7 @@ claims:
       A town inside its wall, on a grid of streets, its houses ten to a block in two rows of five that shared their walls. The
       houses of the Villa Section, on the hill's eastern slope, kept less strictly to this plan, with empty plots between them.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-olynthus-1382382761.txt (sha256 563157b5903e7215), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-olynthus.txt (sha256 42810b1c3f306a41), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   town:
     prop: town_form
     value: { streets: grid }
@@ -126,4 +134,4 @@ claims:
       The North Hill town on a Hippodamian grid, avenues crossed by streets into blocks of ten houses. The land wall round it
       is named but not what it was built of, and the blocks' size in metres is not given there, so neither is claimed.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-olynthus.txt (sha256 42810b1c3f306a41), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-olynthus.txt (sha256 42810b1c3f306a41), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

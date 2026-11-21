@@ -1,0 +1,20 @@
+id: src:wikipedia-de-dromedar
+type: database-record
+kind: review
+citation: >-
+  "Dromedar." Wikipedia, Die freie Enzyklopädie (German edition), revision 267929523.
+snapshot: 2026-11-20
+title: Dromedar
+container: Wikipedia
+url: https://de.wikipedia.org/w/index.php?title=Dromedar&oldid=267929523
+license: CC-BY-SA-4.0
+license_note: Short quotes, with credit.
+reliability: >-
+  A general encyclopedia article, in German, cited for the length and the shoulder height of dromedaries because no
+  better source stating a length could be read here: the English article and the Animal Diversity Web's account give
+  heights and weights only. Its figures are those long given for the genus as a whole, and it names no work for them.
+verified:
+  by: machine:claude-code
+  how: >-
+    The article's HTML, rendered from revision 267929523 through the MediaWiki parse API, fetched on 20 November 2026 and
+    read as text, with the reference marks taken out; the quotes checked by script against that text.

@@ -10,6 +10,68 @@ claims:
     value: { en: "donkeys", la: "Equus asinus" }
     source: { ref: src:opentree-taxonomy-3.7, loc: "tnrs/match_names: Equus asinus, ott1068202" }
     note: Open Tree gives the scientific name; the English name is an editorial gloss.
+  form:
+    prop: body_form
+    value:
+      hip: 0.62
+      behave: { group: [1, 6], habitat: open, poses: [graze, stand, stand, walk] }
+      parts:
+        body:
+          sides: [14, 8]
+          rings:
+            - [-0.5, 0.3, 0.27, 0.008]
+            - [-0.5, 0.42, 0.36, 0.02]
+            - [-0.497, 0.58, 0.55, 0.01]
+            - [-0.485, 0.82, 0.78, 0.012]
+            - [-0.455, 0.95, 0.89, 0.018]
+            - [-0.43, 0.77, 0.71, 0.03]
+            - [-0.39, 0.945, 0.53, 0.076]
+            - [-0.365, 0.993, 0.487, 0.099]
+            - [-0.27, 0.99, 0.48, 0.105]
+            - [-0.14, 0.98, 0.46, 0.11]
+            - [-0.01, 0.98, 0.46, 0.108]
+            - [0.09, 0.99, 0.48, 0.098]
+            - [0.16, 1.0, 0.54, 0.08]
+            - [0.2, 1.0, 0.62, 0.06]
+          neck: { r: 0.046, steps: [4, 2] }
+        rump: { type: lump, mat: fur, sides: [12, 8], bands: [6, 4], at: [0, -0.365, 0.74], r: [0.096, 0.1, 0.155] }
+        hind: { y: -0.32, x: 0.05, top: 0.8, knee: 0.56, ankle: 0.33, r: 0.052, swing: 0.06 }
+        fore: { y: 0.13, x: 0.05, top: 0.62, r: 0.025, swing: 0.06 }
+        head:
+          sides: [12, 6]
+          flat: true
+          at:
+            stand: { y: 0.33, z: 1.2, pitch: 0.8 }
+            alert: { y: 0.32, z: 1.34, pitch: 0.55 }
+            low: { y: 0.38, reach: 0.25, pitch: 1.25 }
+          rings:
+            - [-0.015, 0.006, 0.034, 0.044]
+            - [0.045, 0.008, 0.038, 0.052]
+            - [0.11, -0.002, 0.03, 0.04]
+            - [0.185, -0.012, 0.025, 0.03]
+            - [0.245, -0.018, 0.026, 0.025]
+        ears: { from: [0.02, -0.004, 0.04], to: [0.04, -0.03, 0.15], r: 0.016 }
+        eyes: { at: [0.034, 0.065, 0.024], r: 0.0065 }
+        mane: { points: [[0, 0.17, 0.96], [0, 0.17, 1.04], [0, 0.22, 1.1], [0, 0.27, 1.2], [0, 0.31, 1.32], [0, 0.325, 1.36], [0, 0.32, 1.26], [0, 0.27, 1.1], [0, 0.22, 0.98]] }
+    unsourced: >-
+      A machine's reconstruction of a donkey, as donkeys are generally known: smaller and narrower than a horse, with
+      a large head on a neck carried level, long ears, a short upright mane, a straight back, and a thin tail with a
+      tuft at its end. Its proportions are a drawing's, and no measurements of any animal. Only compared with its
+      sheet.
+  length:
+    prop: body_length
+    value: { lo: 1.45, hi: 1.93 }
+    source:
+      ref: src:dimensions-com
+      loc: "page \"Donkey (Equus africanus asinus)\", Dimensions & Sizes"
+      quote: "withers height of 36”-48” (92-123 cm), and body length of 57”-76” (145-193 cm)"
+    method: expert-estimate
+    note: >-
+      From a site of drawings for designers, which names no work for the figure and does not say how the length was
+      measured. It is given because nothing better stating a length for the donkey could be read, and without it the
+      donkey is drawn as long as a horse. A measured length should take its place.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in dimensions-com.txt (sha256 481d614326cd01a6), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   mass:
     prop: body_mass
     value: { lo: 165, hi: 320 }

@@ -33,7 +33,7 @@ claims:
       the region; they reached other parts later. It is the start of the hillfort and its round houses, not of the round
       house, which the source has in the open villages of the Bronze Age before.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in ayan-vila-2008-round-iron-age.txt (sha256 1d859ee14d6f545c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in ayan-vila-2008-round-iron-age.txt (sha256 1d859ee14d6f545c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   end:
     prop: end
     value: 100 CE
@@ -49,7 +49,7 @@ claims:
       hillfort as the main kind of settlement, not of every hillfort: the source has some lived in until the fourth and
       fifth centuries, and round houses of slate in the mining settlements that Rome planted in the mountains.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in ayan-vila-2008-round-iron-age.txt (sha256 1d859ee14d6f545c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in ayan-vila-2008-round-iron-age.txt (sha256 1d859ee14d6f545c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["41"] }
@@ -70,7 +70,7 @@ claims:
       in Galicia, northern Portugal, western Asturias and León. The house is not claimed for the rest of the region, whose
       houses in these centuries were others.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in ayan-vila-2008-round-iron-age.txt (sha256 1d859ee14d6f545c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in ayan-vila-2008-round-iron-age.txt (sha256 1d859ee14d6f545c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [farmers]
@@ -95,7 +95,7 @@ claims:
       Settled communities that lived from the arable land and the pasture around their hillfort, and stored their grain
       in it: farmers, as the model of how people lived counts them. The source calls them peasant-warriors.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in ayan-vila-2008-round-iron-age.txt (sha256 1d859ee14d6f545c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in ayan-vila-2008-round-iron-age.txt (sha256 1d859ee14d6f545c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
     value: { plan: round, diameter: { lo: 4, hi: 5 }, walls: stone, roof: conical, roof_material: thatch }
@@ -126,12 +126,14 @@ claims:
       Rías Baixas from the seventh century BCE. The house had one room, about 20 square metres, some with a loft; a
       dwelling here has no word for a floor area. Larger houses are known (there are signs of one nine metres across at O
       Castro Pequeno de Neixón), and in the last phase, from the end of the second century BCE, the big settlements of the
-      south had houses of several buildings round a yard.
+      south had houses of several buildings round a yard. The doors of the houses described face south-south-east, south
+      and east at different sites, and the source states no rule, so none is claimed; the atria, vestibules and bread
+      ovens it describes belong to the courtyard houses of that last phase, not to the round house of this claim.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in ayan-vila-2008-round-iron-age.txt (sha256 1d859ee14d6f545c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in ayan-vila-2008-round-iron-age.txt (sha256 1d859ee14d6f545c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
-    value: { pattern: walled, household: { lo: 4, hi: 5 } }
+    value: { pattern: walled, enclosure: wall, household: { lo: 4, hi: 5 } }
     source:
       - ref: src:ayan-vila-2008-round-iron-age
         loc: section 3, p. 924
@@ -147,12 +149,25 @@ claims:
       - ref: src:ayan-vila-2008-round-iron-age
         loc: section 4, p. 937
         quote: This architectural model reflects family units with an average of four to five people per house
+      - ref: src:ayan-vila-2008-round-iron-age
+        loc: section 3, p. 935
+        quote: >-
+          a visible and monumental settlement with restricted access thanks to the wall built around the settlement that
+          simultaneously concealed and isolated the housing area
+      - ref: src:ayan-vila-2008-round-iron-age
+        loc: section 3, p. 924
+        quote: >-
+          the building of a defensive ditch and the material used to raise parapets and walls came from the material
+          extracted by the construction of the ditch
     method: expert-estimate
     note: >-
       A settlement inside its wall, on a hill, its houses standing apart with no order among them. The household is an
       estimate the source reports from Camino (2002), who read each small house as one family's; in its endnote 18 the
       author doubts that a house so small need mean a family like today's, as kin beyond it may have counted as one
       household. How many houses a hillfort held is not given in general: the first were of less than a hectare, and
-      about a thousand people are reckoned for one large settlement of the last phase, San Cibrán de Lás.
+      about a thousand people are reckoned for one large settlement of the last phase, San Cibrán de Lás. The enclosure
+      is the wall built round the settlement (p. 935), raised from what was dug out of a defensive ditch before it, as
+      at As Croas, where the wall was about 1.8 m thick and 1.5 m high (p. 924); the vocabulary takes one word, and the
+      wall is the one written.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in ayan-vila-2008-round-iron-age.txt (sha256 1d859ee14d6f545c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in ayan-vila-2008-round-iron-age.txt (sha256 1d859ee14d6f545c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

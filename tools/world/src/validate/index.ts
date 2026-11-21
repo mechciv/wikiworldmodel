@@ -12,7 +12,7 @@ import { join, resolve } from 'node:path';
 import { Ajv2020 } from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 import { formProblem } from '../../../../core/city.ts';
-import { dwellingProblems, fieldProblems, lifewayProblems, settlementProblems, townProblems } from '../../../../core/dwelling.ts';
+import { dwellingProblems, fieldProblems, lifewayProblems, outbuildingProblems, settlementProblems, townProblems } from '../../../../core/dwelling.ts';
 import { ladderCounts, LEVELS, STEPS } from '../../../../core/ladder.ts';
 import { MONTHS_PARTS } from '../../../../core/months.ts';
 import { parseRef, RefError, splitRef } from '../../../../core/refs.ts';
@@ -291,6 +291,9 @@ function checkValue(world: World, refs: RefChecker, c: Claim, issues: Issue[]): 
       break;
     case 'lifeway':
       for (const problem of lifewayProblems(v)) bad(problem);
+      break;
+    case 'outbuildings':
+      for (const problem of outbuildingProblems(v)) bad(problem);
       break;
     case 'taxa': {
       // A list of taxon records, each once.

@@ -30,7 +30,7 @@ claims:
       these houses in the past tense, of the customs of before about 1900, but no source read says when they ceased to be
       built.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-buganda.txt (sha256 0ffa08ef64be4f7c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-buganda.txt (sha256 0ffa08ef64be4f7c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["92"] }
@@ -49,7 +49,7 @@ claims:
       Bunyoro, Ankole, Rwanda and Burundi are not described in what was read and are not claimed; the region is named for
       Buganda alone.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-buganda.txt (sha256 0ffa08ef64be4f7c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-buganda.txt (sha256 0ffa08ef64be4f7c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [farmers]
@@ -68,10 +68,10 @@ claims:
       after year, not cleared and left. The chiefs' and the king's enclosures, which Roscoe describes at length, were of the
       same round houses, larger; the capital is not claimed as a town here.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in roscoe-1911-baganda.txt (sha256 13c07afbd038c9ba), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in roscoe-1911-baganda.txt (sha256 13c07afbd038c9ba), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { plan: round, walls: none, roof: conical, roof_material: thatch, height: { lo: 4, hi: 5.5 } }
+    value: { plan: round, walls: none, roof: conical, roof_material: thatch, height: { lo: 4, hi: 5.5 }, rooms: 2, floor: ground, porch: true, smoke: none, byre: true }
     source:
       - ref: src:roscoe-1911-baganda
         loc: "chap. XI, p. 369"
@@ -91,30 +91,69 @@ claims:
       - ref: src:roscoe-1911-baganda
         loc: "chap. XI, p. 373"
         quote: adding layer upon layer, to the top of the conical house.
+      - ref: src:roscoe-1911-baganda
+        loc: "chap. XI, p. 374"
+        quote: over the doorway a hood was built to form a porch
+      - ref: src:roscoe-1911-baganda
+        loc: "chap. XI, p. 374"
+        quote: Floor-making was also a special occupation ; the earthen … floor was first dug up and levelled
+      - ref: src:roscoe-1911-baganda
+        loc: "chap. XI, p. 375"
+        quote: >-
+          A wall across the middle divided the house into two equal … portions, one of which was the sitting room, and the
+          other the … sleeping room
+      - ref: src:roscoe-1911-baganda
+        loc: "chap. XI, p. 376"
+        quote: >-
+          No house was provided with a chimney ; the smoke from the fires had to find its way out through the doorway or the
+          roof.
+      - ref: src:roscoe-1911-baganda
+        loc: "chap. XII, p. 417"
+        quote: Poor people took their cows into their houses by night
+      - ref: src:roscoe-1911-baganda
+        loc: "chap. XII, p. 422"
+        quote: Goats were kept in the houses by night
     method: documentary
     note: >-
       A round house whose roof of stitched reeds came down to the ground, so it had no walls, thatched with grass to the top
       of the cone. The height is from the central pillars, on which the ring at the top of the roof rested: fifteen or
       twenty feet long, two of them in the ground, so the top stood some thirteen to eighteen feet, 4 to 5.5 m, above the
-      floor; that reckoning is the writer's, and it is of "a good house". No diameter is given in what was read.
+      floor; that reckoning is the writer's, and it is of "a good house". The only diameter given is a large house's,
+      thirty feet at the base (p. 376), and as peasants' houses differed from chiefs' in their dimensions it is not
+      entered. Roscoe's chapter on building gives the rest: a porch, a hood built over the doorway at a gentler slope than
+      the roof (p. 374); an earthen floor, beaten hard and smeared with clay and cowdung (pp. 374-375), at the level of
+      the ground; two rooms, a sitting room and a sleeping room either side of a wall across the middle (p. 375); no
+      chimney, the smoke leaving by the doorway or through the roof, entered as smoke none (p. 376). Goats were kept in
+      the houses by night, tethered where the roof sloped down low, and poor people took their cows in too (pp. 417,
+      422): entered as a byre under the same roof. Where the doorway faced is not said; large houses had a second door at
+      the back.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in roscoe-1911-baganda.txt (sha256 13c07afbd038c9ba), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in roscoe-1911-baganda.txt (sha256 13c07afbd038c9ba), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
-    value: { pattern: dispersed }
+    value: { pattern: dispersed, yard: fence }
     source:
       - ref: src:roscoe-1911-baganda
         loc: "chap. III, p. 95"
         quote: the houses were some little distance away from each other.
+      - ref: src:roscoe-1911-baganda
+        loc: "chap. II, p. 68"
+        quote: the fence which enclosed the back premises
       - ref: src:roscoe-1911-baganda
         loc: "chap. I, p. 15"
         quote: >-
           a number of people lived in a community, often forming four or five miles of continuous garden with families
           living each on their own plot
     method: documentary
-    note: Each family's house on its own plot in the gardens, the houses a little apart, with no village of the European kind.
+    note: >-
+      Each family's house on its own plot in the gardens, the houses a little apart, with no village of the European kind.
+      A fence enclosed the back premises of a house, as Roscoe mentions it in the ceremonies for twins (chap. II, p. 68),
+      which is the yard's fence; he describes how the reed fences of the royal and chiefs' enclosures were built (chap.
+      XI, pp. 368-369) but not a peasant's. The plots' own boundaries were vague, a gutter or a shrub here and there (chap.
+      I, p. 15). No building by the house is described for a peasant: the cattle kraals of thorn are the King's and the
+      chiefs' (chap. XII, p. 417).
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in roscoe-1911-baganda.txt (sha256 13c07afbd038c9ba), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in roscoe-1911-baganda.txt (sha256 13c07afbd038c9ba), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   fields:
     prop: field_system
     value: { kind: gardens }
@@ -125,4 +164,4 @@ claims:
     method: documentary
     note: Plantain gardens, kept by the women, around the houses.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in roscoe-1911-baganda.txt (sha256 13c07afbd038c9ba), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in roscoe-1911-baganda.txt (sha256 13c07afbd038c9ba), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

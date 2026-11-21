@@ -24,7 +24,7 @@ claims:
         1700.
     method: expert-estimate
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wp-Latte_stone.txt (sha256 01126542cf782d86), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-latte-stone.txt (sha256 7b2c28bb13238672), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   end:
     prop: end
     value: 1700 CE
@@ -38,7 +38,7 @@ claims:
     method: expert-estimate
     note: When the last were abandoned; they were falling out of use from Spanish colonization on.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wp-Latte_stone.txt (sha256 01126542cf782d86), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-latte-stone.txt (sha256 7b2c28bb13238672), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["144"] }
@@ -51,7 +51,7 @@ claims:
       Region 144 (Micronesia), which holds the Mariana Islands. The article calls the latte stone unique to the Marianas in
       Oceania, so the rest of the region, from Palau to the Marshall Islands, is not claimed.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wp-Latte_stone.txt (sha256 01126542cf782d86), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-latte-stone.txt (sha256 7b2c28bb13238672), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [farmers]
@@ -64,7 +64,7 @@ claims:
     method: editorial
   dwelling:
     prop: dwelling
-    value: { plan: rectangular, floor: stilts }
+    value: { plan: rectangular, floor: stilts, floor_height: { lo: 0.6, hi: 3 } }
     source:
       - ref: src:wikipedia-latte-stone
         loc: section "Use"
@@ -88,7 +88,10 @@ claims:
       The plan from the stones' arrangement in the field, the house on them from the Spanish accounts. The supports are
       capped stone pillars, 0.6 to 3 m high, not wooden posts; "stilts" is the nearest word. Whether ordinary people lived
       in these houses is disputed, and the article puts the cooking huts, canoe houses and young men's houses of a latte
-      village on the ground; the generator draws every house of the tradition on latte. The walls, roof and size of the
-      house are not given.
+      village on the ground; the generator draws every house of the tradition on latte. The floor's height is written as
+      the pillars' typical height, 0.6 to 3 m: the article gives no height for the floor itself, which stood on the
+      capstones above them, and says that the more pairs of stones, the taller they were. The walls, roof and size of
+      the house are not given. The cooking huts, canoe houses and young men's houses the article says a latte village
+      "may have included" are not written as outbuildings: it does not say whose they were, nor that they stood there.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wp-Latte_stone.txt (sha256 01126542cf782d86), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-latte-stone.txt (sha256 7b2c28bb13238672), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

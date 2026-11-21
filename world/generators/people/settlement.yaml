@@ -2,14 +2,17 @@
 # how many follows HYDE's people through the anthromes, and the lists of cities and the world's records of settlements;
 # what way of life, the anthromes and the archaeologists of the region; what the houses were like, the building tradition
 # the world records there and then for that way of life, or a generic house for the way of life and the climate, which
-# says so. A town has streets and a wall as the tradition of its townspeople or its own record says; the animals people
-# kept are those a husbandry tradition names; people, boats and paths rest on no record. Everything it makes is marked
-# as generated.
+# says so. A house is drawn from every part its tradition's claims state, its door, its windows, its smoke, its finish,
+# in one of several shapes within the ranges they give; it stands in its yard, with what its tradition says enclosed
+# the yard and stood in it; houses stand in a ring or in rows and face one way where their tradition says so, within
+# what it says enclosed them; and a settlement has the hall, the shrine, the well or the pen its tradition names. A town
+# has streets and a wall as the tradition of its townspeople or its own record says; the animals people kept are those
+# a husbandry tradition names; people, boats and paths rest on no record. Everything it makes is marked as generated.
 id: gen:people/settlement
 type: generator
 title: Houses, villages and fields of any place since 10,000 BCE
-version: 2
-code: generators/people/settlement/v2.ts
+version: 3
+code: generators/people/settlement/v3.ts
 runs_in: [build, client]
 outputs: { basis: procedural }
 inputs:
@@ -21,7 +24,8 @@ inputs:
   - { ref: field:people/cities-ancient, note: "the cities that stood near, and their people" }
   - { kind: tradition/building, note: "the building traditions that hold in the region at the time" }
   - { prop: dwelling, note: "what each tradition's houses were like" }
-  - { prop: settlement_form, note: "how its houses stood together, and how many lived in each" }
+  - { prop: settlement_form, note: "how its houses stood together, in a ring or in rows, round open ground; what enclosed the settlement and each yard; and how many lived in each house" }
+  - { prop: outbuildings, note: "what stood by each house and what each settlement had of its own: granaries, byres, pens, wells, shrines, halls" }
   - { prop: field_system, note: "the plots of its fields" }
   - { prop: extent, note: "the regions each tradition was found in" }
   - { prop: lifeway, note: "whom each tradition housed: its house is drawn for those ways of life only" }
@@ -39,21 +43,34 @@ inputs:
   - { prop: settlement_area, kind: settlement, note: "the ground a recorded city covered" }
   - { ref: gen:life/scene, note: "the ground and the water of the scene the houses stand in" }
 checks:
-  - { test: world/generators/people/settlement/v2.test.ts, holds: "holds as many people as the world puts in the land it draws" }
-  - { test: world/generators/people/settlement/v2.test.ts, holds: "stands no house in the water or on a cliff" }
-  - { test: world/generators/people/settlement/v2.test.ts, holds: "draws fields where people farmed, pasture where they herded, and neither for foragers" }
-  - { test: world/generators/people/settlement/v2.test.ts, holds: "draws a tradition's house where it holds, and the generic one where none does" }
-  - { test: world/generators/people/settlement/v2.test.ts, holds: "draws a camp's shelter from the tradition that housed its way of life, and no farmer's house from a herder's tent" }
-  - { test: world/generators/people/settlement/v2.test.ts, holds: "draws shifting cultivators in the house of their region's farmers where none is written for them, and says it stands in" }
-  - { test: world/generators/people/settlement/v2.test.ts, holds: "draws a house that some lived in for that part of the cells of its region, each cell all of one house, and alike from two scenes" }
-  - { test: world/generators/people/settlement/v2.test.ts, holds: "are drawn where a husbandry tradition names them for that way of life: herds on the pasture, the rest about the houses" }
-  - { test: world/generators/people/settlement/v2.test.ts, holds: "joins each settlement to its nearest neighbours by a path that ends at the edge of their houses" }
+  - { test: world/generators/people/settlement/v3.test.ts, holds: "holds as many people as the world puts in the land it draws" }
+  - { test: world/generators/people/settlement/v3.test.ts, holds: "stands no house in the water or on a cliff" }
+  - { test: world/generators/people/settlement/v3.test.ts, holds: "draws fields where people farmed, pasture where they herded, and neither for foragers" }
+  - { test: world/generators/people/settlement/v3.test.ts, holds: "draws a tradition's house where it holds, and the generic one where none does" }
+  - { test: world/generators/people/settlement/v3.test.ts, holds: "draws a camp's shelter from the tradition that housed its way of life, and no farmer's house from a herder's tent" }
+  - { test: world/generators/people/settlement/v3.test.ts, holds: "draws shifting cultivators in the house of their region's farmers where none is written for them, and says it stands in" }
+  - { test: world/generators/people/settlement/v3.test.ts, holds: "draws a house that some lived in for that part of the cells of its region, each cell all of one house, and alike from two scenes" }
+  - { test: world/generators/people/settlement/v3.test.ts, holds: "are drawn where a husbandry tradition names them for that way of life: herds on the pasture, the rest about the houses" }
+  - { test: world/generators/people/settlement/v3.test.ts, holds: "joins each settlement to its nearest neighbours by a path that ends at the edge of their houses" }
   - { test: world/generators/people/scene.test.ts, holds: "hands a view each kind as its own entity: taxa, then houses, then works, then kept animals" }
-  - { test: world/generators/people/settlement/v2.test.ts, holds: "draws a city of the lists where the anthromes have none" }
-  - { test: world/generators/people/settlement/v2.test.ts, holds: "puts a settlement in the same place from two scenes that overlap" }
-  - { test: world/generators/people/settlement/v2.test.ts, holds: "seeds each cell and each settlement apart, and each alike from two scenes" }
-  - { test: world/generators/people/settlement/v2.test.ts, holds: "has the wall its tradition says, round its houses, with gates where its main streets leave it, and towers" }
-  - { test: world/generators/people/settlement/v2.test.ts, holds: "of a record is drawn from the record's own people, houses, ground and layout" }
+  - { test: world/generators/people/settlement/v3.test.ts, holds: "draws a city of the lists where the anthromes have none" }
+  - { test: world/generators/people/settlement/v3.test.ts, holds: "puts a settlement in the same place from two scenes that overlap" }
+  - { test: world/generators/people/settlement/v3.test.ts, holds: "seeds each cell and each settlement apart, and each alike from two scenes" }
+  - { test: world/generators/people/settlement/v3.test.ts, holds: "has the wall its tradition says, round its houses, with gates where its main streets leave it, and towers" }
+  - { test: world/generators/people/settlement/v3.test.ts, holds: "of a record is drawn from the record's own people, houses, ground and layout" }
+  - { test: world/generators/people/settlement/v3.test.ts, holds: "draws each house in one of its shapes, and no bigger than its claims say" }
+  - { test: world/generators/people/settlement/v3.test.ts, holds: "sets houses in a ring round open ground, their doors to the middle, where its tradition says so" }
+  - { test: world/generators/people/settlement/v3.test.ts, holds: "sets houses in rows, and turns every house the way its tradition says they all faced" }
+  - { test: world/generators/people/settlement/v3.test.ts, holds: "draws round a settlement what its tradition says enclosed it, and the generator's plain wall where it says only that one did" }
+  - { test: world/generators/people/settlement/v3.test.ts, holds: "draws what a settlement had of its own among its houses, and a household's things with its house" }
+  - { test: world/generators/people/settlement/v3.test.ts, holds: "draws a house that stands for several households wider and longer, and not as a bigger copy of itself" }
+  - { test: world/generators/people/settlement/v3.test.ts, holds: "draws a town's house no wider than the ground its town gives it, so that none stands in its neighbour" }
+  - { test: world/generators/people/settlement/v3.test.ts, holds: "lets no house of a town of winding lanes stand in its neighbour, and still houses the town" }
+  - { test: world/generators/people/settlement/v3.test.ts, holds: "keeps a city's houses off the ground of a city that adjoins it" }
+  - { test: world/generators/people/dwellings.test.ts, holds: "draws every word a claim may use, at every detail, about as big as it says" }
+  - { test: world/generators/people/dwellings.test.ts, holds: "draws a dwelling in several shapes, each within the ranges its claims give, and each the same every time" }
+  - { test: world/generators/people/dwellings.test.ts, holds: "takes from the generator's house only what fits what a tradition says" }
+  - { test: world/generators/people/dwellings.test.ts, holds: "draws the yard with the house, within its own ground, and not from far off" }
   - { test: tools/world/test/landscape.test.ts, holds: "draws a list's city that has a record where the record puts it, with the record's own people about the time they are for" }
 limits:
   - with: field:people/anthromes
@@ -69,6 +86,21 @@ limits:
       districts, which are a city slice's work, as Rome's are. A city with a record covers the ground its record gives,
       as a disc or a square about its point: the outline of the real city, and where within it people lived, are not
       read. A city whose ground is more than params.towns.open_lot to a house is drawn with no streets, its houses apart.
+  - note: >-
+      A tradition's claims are drawn for every house of it: a porch that some houses had, a byre the poor shared with
+      their cattle, a village wall that was often there, are drawn for all or not at all. What a household kept in its
+      yard is drawn for a share of the households where no source counts it (params.outbuildings.share), and what a
+      settlement had, once to a settlement. Where each stands, where a fence runs and where its ways in are, and that
+      one house of a tradition differs from the next, are invented.
+  - note: >-
+      A town's house stands at the front of a lot as wide as itself and deeper, and is drawn as small as its lot where
+      the town gives it less ground than its tradition's house takes. The lot is the generator's, from the town's
+      people and its ground, and no record's. Along winding lanes a house fronts its lane as the lane runs there, and a
+      lot that the lane's wandering has squeezed against one already taken is passed over for the next: which lots,
+      and every lane's line, are invented. Where two cities would take the same ground, the one that comes first in
+      the lists keeps it, and the other has fewer houses than its people; nothing says where one ended and the other
+      began. A house that stands for several households has a door to each share of its front, as many as it is times
+      as wide: fewer than the households it stands for.
 slots:
   any:
     place: >-
@@ -80,6 +112,8 @@ slots:
 # a settlement's land is in fields, and the generic houses drawn where no tradition holds.
 params:
   household: 5
+  # Houses a tradition sets in a ring or in rows, and says no more of, stand this many lengths of a house apart.
+  compact: 2.4
   patterns:
     foragers: { houses: [2, 6], lot: 900, fields: 0 }
     herders: { houses: [2, 8], lot: 1600, fields: 0.6 }
@@ -93,7 +127,7 @@ params:
     foragers: { plan: round, diameter: 3.5, walls: none, roof: dome, roof_material: thatch, height: 2 }
     herders: { plan: round, diameter: 5, walls: felt, roof: tent, roof_material: felt, wall_height: 1.4, height: 2.6 }
     town: { storeys: 2 }
-    city: { storeys: 2, court: true }
+    city: { plan: courtyard, storeys: 2, court: true, width: 11, length: 11 }
     farm:
       rainforest: { plan: rectangular, width: 5, length: 8, walls: pole-and-thatch, roof: gable, roof_material: thatch, floor: stilts }
       savanna: { plan: round, diameter: 5, walls: wattle-and-daub, roof: conical, roof_material: thatch }
@@ -135,6 +169,7 @@ params:
     moat: 12
     canal_every: 2
     open_lot: 1200
+    deep: 3
   # The part of a region's settlements of a way of life drawn in a tradition's house, where the tradition says its people
   # were a few, some or most of them and not all. No source gives these numbers: each word stands for a part, so that a
   # rare house is drawn rarely. Each 5′ cell falls to one tradition, so a rare house stands in clusters, as most did.
@@ -148,6 +183,36 @@ params:
     graze_kg: 15
     most_in_settlement: 240
     most: 12000
+  # What stood by the houses, where a tradition's `outbuildings` name it: a household's things are drawn in its yard,
+  # with its house; a settlement's, among the houses or at their edge. That they stood there is the tradition's claim.
+  # How many, where no source counts them, is the generator's: a household's thing by this share of the houses, a
+  # settlement's once. And what each looked like, where its tradition says nothing of it, is the plain one of its use
+  # here for its shape and size, built of what the tradition's own houses are built of.
+  outbuildings:
+    share: 0.6
+    generic:
+      granary: { plan: round, diameter: 2.2, wall_height: 1.5, roof: conical, floor: raised }
+      store: { plan: rectangular, width: 2.4, length: 3.2, wall_height: 1.8 }
+      byre: { plan: rectangular, width: 3.5, length: 6, wall_height: 1.9 }
+      kitchen: { plan: rectangular, width: 2.6, length: 3.4, wall_height: 1.8 }
+      workshop: { plan: rectangular, width: 3, length: 4, wall_height: 1.9 }
+      bath: { plan: round, diameter: 2.4, wall_height: 1.3, roof: dome, roof_material: earth }
+      shrine: { plan: square, width: 3, wall_height: 2.2, floor: raised }
+      hall: { plan: rectangular, width: 7, length: 14, wall_height: 2.8, entrance: end }
+      pen: { diameter: 6 }
+      oven: { diameter: 1.4 }
+      well: { diameter: 1.6 }
+      pond: { diameter: 8 }
+      rack: { width: 2.6, height: 1.8 }
+      stack: { diameter: 2.6, height: 2.8 }
+      threshing-floor: { diameter: 8 }
+      pole: { height: 5 }
+    most: 6000
+  # What stood round a settlement, where its tradition's `settlement_form` names it: drawn in lengths of this many
+  # metres round its outermost houses, with this many ways in. A settlement its tradition calls walled and says no
+  # more of is drawn within the plain wall here, and the panel says that is the generator's. No source places any
+  # length of any of them.
+  enclosures: { run: 6, gates: 2, unstated: wall, most: 30000 }
   # People by the houses, boats on the water beside a settlement and paths between settlements, so that a scene has its
   # scale and its ways. No record says anything of any of them: they are the plainest there are, the same everywhere,
   # and a click says that they are generic.

@@ -27,7 +27,7 @@ claims:
       years; the claim takes the century from which it says the settlements were all of wattle and daub. The tradition has no
       end claim: the source has these houses the majority throughout the centuries since.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in fleisher-2015-swahili-maritime.txt (sha256 16f6c804c80804bf), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in fleisher-2015-swahili-maritime.txt (sha256 706ffe4994251995), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["93", "95"] }
@@ -51,7 +51,7 @@ claims:
       among the lands of the Swahili, but describes no house there, so region 96 is left out. The houses stood on the coast
       and its islands: the tradition is not claimed for the interior of either region.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in fleisher-2015-swahili-maritime.txt (sha256 16f6c804c80804bf), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in fleisher-2015-swahili-maritime.txt (sha256 706ffe4994251995), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [farmers, townspeople]
@@ -77,7 +77,7 @@ claims:
       fishing communities the source has on the coast before them are not said to have lived in such houses, so foragers
       are not named.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in fleisher-2015-swahili-maritime.txt (sha256 706ffe4994251995), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in fleisher-2015-swahili-maritime.txt (sha256 706ffe4994251995), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
     value: { walls: wattle-and-daub, roof_material: thatch }
@@ -98,9 +98,10 @@ claims:
     method: excavation
     note: >-
       Walls of wattle and daub, roofs of thatch: the "earth and thatch" of the source. Their plan, size and number of rooms are
-      not given, and are left to the generator.
+      not given, and are left to the generator, as are their doors, windows, finish and roof form: the source describes the
+      stonehouses' rooms, plaster and graffiti, not those of the earth-and-thatch houses.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in fleisher-2015-swahili-maritime.txt (sha256 16f6c804c80804bf), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in fleisher-2015-swahili-maritime.txt (sha256 706ffe4994251995), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
     value: { pattern: nucleated }
@@ -119,5 +120,8 @@ claims:
     note: >-
       Villages in the first millennium, some of which grew into towns of 17 to 30 hectares; in the second millennium towns, in
       the larger of which, the stonetowns, the houses of earth and thatch stood beside buildings of stone.
+      Smaller towns had, the source says, perhaps a single stone mosque, and the mosques of the first millennium stood in
+      the town centres; a mosque is not entered as an outbuilding, as the source does not say which settlements of earth
+      and thatch had one, and Islam is first attested on the coast in the eighth century.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in fleisher-2015-swahili-maritime.txt (sha256 16f6c804c80804bf), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in fleisher-2015-swahili-maritime.txt (sha256 706ffe4994251995), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

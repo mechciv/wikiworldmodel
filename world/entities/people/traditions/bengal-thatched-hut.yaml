@@ -40,7 +40,7 @@ claims:
       and the walls are first described, in what was read, in 1808. No end is given, and none is known from what was
       read: the latest account, the gazetteer of 1908, has it as the house of Lower Bengal in its own day.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in abul-fazl-ain-i-akbari-jarrett-vol-2.txt (sha256 ad8e62160e2b09ea), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in abul-fazl-ain-i-akbari-jarrett-vol-2.txt (sha256 ad8e62160e2b09ea), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["111"] }
@@ -67,7 +67,7 @@ claims:
       are separate though they adjoin, so the hut is not claimed for all of the region. The ellipsis in the
       gazetteer's sentence stands for the turn of the page, and leaves no words out.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in buchanan-1808-dinajpur.txt (sha256 39a013d2834e12bd), hunter-1877-statistical-account-bengal-vol-5.txt (sha256 ae6b5746534ab539) and imperial-gazetteer-of-india-1908.txt (sha256 6cdf9985eed79137), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in buchanan-1808-dinajpur.txt (sha256 39a013d2834e12bd), hunter-1877-statistical-account-bengal-vol-5.txt (sha256 ae6b5746534ab539) and imperial-gazetteer-of-india-1908.txt (sha256 6cdf9985eed79137), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [farmers, townspeople]
@@ -93,10 +93,10 @@ claims:
       town, was almost wholly of thatched huts in 1808, and the gazetteer of 1908 calls many of the towns of Bengal
       overgrown villages. The wealthy of the towns, who had houses of brick, are not drawn by this record.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in hunter-1877-statistical-account-bengal-vol-5.txt (sha256 ae6b5746534ab539), buchanan-1808-dinajpur.txt (sha256 39a013d2834e12bd) and imperial-gazetteer-of-india-1908.txt (sha256 6cdf9985eed79137), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in hunter-1877-statistical-account-bengal-vol-5.txt (sha256 ae6b5746534ab539), buchanan-1808-dinajpur.txt (sha256 39a013d2834e12bd) and imperial-gazetteer-of-india-1908.txt (sha256 6cdf9985eed79137), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { plan: rectangular, rooms: 1, walls: reed, roof: gable, roof_material: thatch, floor: raised }
+    value: { plan: rectangular, rooms: 1, walls: reed, finish: mud, roof: curved, roof_material: thatch, floor: raised, floor_height: { lo: 0.3, hi: 0.6 }, windows: none, veranda: true }
     source:
       - ref: src:buchanan-1808-dinajpur
         loc: 'Book III, chapter VIII, "Fine Arts", p. 922'
@@ -118,6 +118,20 @@ claims:
         loc: 'Book III, chapter VIII, "Fine Arts", p. 922'
         quote: frame of the house usually consists entirely of bamboos tied together
       - ref: src:buchanan-1808-dinajpur
+        loc: 'Book III, chapter VIII, "Fine Arts", p. 922'
+        quote: those of straw are plastered with cow dung and clay
+      - ref: src:buchanan-1808-dinajpur
+        loc: 'Book III, chapter VIII, "Domestic Buildings", p. 923'
+        quote: >-
+          The door is in general the only aperture in the hut, crevices excepted
+      - ref: src:buchanan-1808-dinajpur
+        loc: 'Book III, chapter VIII, "Domestic Buildings", p. 923'
+        quote: There are very few houses that have any openings like windows, to admit air or light.
+      - ref: src:hunter-1877-statistical-account-bengal-vol-5
+        loc: "Dacca District, Dwellings, p. 76"
+        quote: >-
+          is either a shady place in the open yard, or in the verandah of the principal apartment.
+      - ref: src:buchanan-1808-dinajpur
         loc: "Book III, chapter IV, p. 696"
         quote: thatched roofs are the only ones known in this district
       - ref: src:hunter-1877-statistical-account-bengal-vol-5
@@ -135,8 +149,16 @@ claims:
     method: documentary
     note: >-
       The roof, the raised floor and the bamboo frame are Buchanan's, of Dinajpur in 1808; the single room is Hunter's,
-      of Dacca in the 1870s; the gazetteer of 1908 has the same hut on a mud plinth for all of Lower Bengal. The roof is
-      what the vocabulary calls a gable, two slopes meeting at a ridge, though here the ridge is curved. No source read
+      of Dacca in the 1870s; the gazetteer of 1908 has the same hut on a mud plinth for all of Lower Bengal. The roof was
+      written as a gable, two slopes meeting at a ridge, until the vocabulary had a word for Buchanan's ridge "forming the
+      segment of a circle": it is now curved, a refinement of the same reading and no disagreement. The floor's height,
+      a foot or two, is Buchanan's, 0.3 to 0.6 m by the writer's conversion. No windows, also Buchanan's: the door was in
+      general the only opening, and very few houses had any like windows; a hurdle tied above the door fell over it like
+      a valve. The walls' plaster of cow-dung and clay is Buchanan's for the better houses of Dinajpur and Hunter's
+      for Dacca, where it lined the reed walls on the inside. The veranda is Hunter's: the men of a cultivator's family
+      sat and received visitors in the yard or in the verandah of the principal hut. Which side the door was in is not
+      said, nor how the smoke got out, nor how steep the roof was. Buchanan's poor man had one hut for himself and his
+      cattle, but a family of any means built a hut for each purpose, so no byre under the roof is written. No source read
       says in words that the plan is oblong: it is read from the roof, two slopes meeting in one ridge like a boat
       overturned. The walls differ from place to place and no one word holds them: hurdles of straw, grass or reeds
       between split bamboos in Dinajpur where the soil was loose, mats in its better houses, reeds lined with clay and
@@ -147,15 +169,19 @@ claims:
       the Calcutta printing of Buchanan's account has huts from 6 cubits by 5 to 15 by 8, in cubits whose length it
       does not state.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in buchanan-1808-dinajpur.txt (sha256 39a013d2834e12bd), hunter-1877-statistical-account-bengal-vol-5.txt (sha256 ae6b5746534ab539) and imperial-gazetteer-of-india-1908.txt (sha256 6cdf9985eed79137), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in buchanan-1808-dinajpur.txt (sha256 39a013d2834e12bd), hunter-1877-statistical-account-bengal-vol-5.txt (sha256 ae6b5746534ab539) and imperial-gazetteer-of-india-1908.txt (sha256 6cdf9985eed79137), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
-    value: { pattern: dispersed, household: 5 }
+    value: { pattern: dispersed, yard: fence, household: 5 }
     source:
       - ref: src:imperial-gazetteer-of-india-1908
         loc: "vol. VII, article Bengal, pp. 239–240"
         quote: >-
           The houses in Lower Bengal are not congregated into villages, but … each homestead stands in its own orchard
+      - ref: src:imperial-gazetteer-of-india-1908
+        loc: "vol. VII, article Bengal, p. 240"
+        quote: >-
+          The whole is encircled with a bamboo fence, and sometimes by a moat and a thorny cane or cactus hedge.
       - ref: src:hunter-1877-statistical-account-bengal-vol-5
         loc: "Bakarganj District, p. 202"
         quote: >-
@@ -188,9 +214,53 @@ claims:
       district; Buchanan in 1808 reckoned the working men of Dinajpur at a fifth of their families; and the census of
       1901 found a mean of 5·2 for India, about which the gazetteer says the provinces outside northern India vary
       little. The scan's text writes that decimal point as a hyphen, and the quote keeps its characters. How many
-      homesteads made a village is not stated.
+      homesteads made a village is not stated. Each homestead's yard was fenced: Buchanan's common fence round a
+      family's huts in Dinajpur, and the gazetteer's bamboo fence round the homestead of Lower Bengal, with sometimes a
+      moat and a hedge of thorny cane or cactus besides, which the one word cannot hold.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in imperial-gazetteer-of-india-1908.txt (sha256 6cdf9985eed79137), hunter-1877-statistical-account-bengal-vol-5.txt (sha256 ae6b5746534ab539) and buchanan-1808-dinajpur.txt (sha256 39a013d2834e12bd), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in imperial-gazetteer-of-india-1908.txt (sha256 6cdf9985eed79137), hunter-1877-statistical-account-bengal-vol-5.txt (sha256 ae6b5746534ab539) and buchanan-1808-dinajpur.txt (sha256 39a013d2834e12bd), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  outbuildings:
+    prop: outbuildings
+    value:
+      - { use: kitchen, per: house }
+      - { use: store, per: house }
+      - { use: workshop, per: house }
+      - { use: byre, per: house }
+      - { use: pond, per: house }
+    source:
+      - ref: src:hunter-1877-statistical-account-bengal-vol-5
+        loc: "Dacca District, Dwellings, p. 76"
+        quote: >-
+          The dwelling of an average cultivator generally consists of four huts, built one on each side of the yard
+      - ref: src:hunter-1877-statistical-account-bengal-vol-5
+        loc: "Dacca District, Dwellings, p. 76"
+        quote: the Rashuighar, or cook-house; (3) Goldghar, or storehouse
+      - ref: src:hunter-1877-statistical-account-bengal-vol-5
+        loc: "Dacca District, Dwellings, p. 76"
+        quote: or shed in which the rice is husked.
+      - ref: src:hunter-1877-statistical-account-bengal-vol-5
+        loc: "Dacca District, Dwellings, p. 76"
+        quote: >-
+          a prosperous agriculturist has generally two sheds, in one of which the cattle are kept at night, and in the
+          other during the day.
+      - ref: src:imperial-gazetteer-of-india-1908
+        loc: "vol. VII, article Bengal, p. 240"
+        quote: >-
+          sites have been laboriously raised by excavation, which has left tanks in every compound
+    method: documentary
+    note: >-
+      The cookhouse, the storehouse and the shed where rice was husked are three of the four huts Hunter gives for an
+      average cultivator's dwelling in Dacca in the 1870s, the fourth being the principal hut, which the dwelling claim
+      draws; each stood on a side of the yard, of the same make as the rest. The storehouse was also where the family
+      other than its head slept. The husking shed, the dhenki shed, has no word of its own and is written as a work hut,
+      the nearest. The cattle sheds are Hunter's for a prosperous cultivator, who had two, one for the night and one for
+      the day; how many households had them is not said, so no count is given. The tank is the gazetteer's, of 1908: the
+      earth dug to raise each homestead's site in Lower Bengal left a tank in every compound. Hunter says there was no
+      fixed rule for the number of huts and that a single hut might serve for sleeping, storing and cooking: the list is
+      the average cultivator's, not every household's. Buchanan's granaries of Dinajpur were the grain merchants', in
+      the marts, and are not written; nor is the small brick mosque he found in the premises of a rich Muslim farmer.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in hunter-1877-statistical-account-bengal-vol-5.txt (sha256 ae6b5746534ab539) and imperial-gazetteer-of-india-1908.txt (sha256 6cdf9985eed79137), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   fields:
     prop: field_system
     value: { kind: paddies, bounds: banks }
@@ -215,7 +285,7 @@ claims:
       the older alluvium, whose surface undulates; the new alluvium of the delta is level, and the gazetteer says
       nothing of banks there beyond the ridges. No size of a plot is given.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in abul-fazl-ain-i-akbari-jarrett-vol-2.txt (sha256 ad8e62160e2b09ea) and imperial-gazetteer-of-india-1908.txt (sha256 6cdf9985eed79137), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in abul-fazl-ain-i-akbari-jarrett-vol-2.txt (sha256 ad8e62160e2b09ea) and imperial-gazetteer-of-india-1908.txt (sha256 6cdf9985eed79137), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   town:
     prop: town_form
     value: { streets: lanes }
@@ -234,4 +304,4 @@ claims:
       the region on the strength of the gazetteer's remark that many of them were overgrown villages. No wall is
       stated, as Buchanan describes none round the town.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in buchanan-1808-dinajpur.txt (sha256 39a013d2834e12bd) and imperial-gazetteer-of-india-1908.txt (sha256 6cdf9985eed79137), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in buchanan-1808-dinajpur.txt (sha256 39a013d2834e12bd) and imperial-gazetteer-of-india-1908.txt (sha256 6cdf9985eed79137), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

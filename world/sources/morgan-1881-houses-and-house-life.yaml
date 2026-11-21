@@ -1,0 +1,29 @@
+id: src:morgan-1881-houses-and-house-life
+type: publication
+kind: review
+citation: >-
+  Morgan, L.H. (1881). Houses and House-Life of the American Aborigines. Contributions to North American Ethnology,
+  vol. IV. Washington: Government Printing Office.
+authors: ["Morgan, L.H."]
+published: 1881
+title: Houses and House-Life of the American Aborigines
+container: Contributions to North American Ethnology, vol. IV
+url: https://archive.org/details/housesandhouseli08112gut
+via: >-
+  Project Gutenberg's transcription (etext 8112), read in the copy the Internet Archive keeps of it
+  (housesandhouseli08112gut, file habor10.txt), Project Gutenberg's own site being down for maintenance that day.
+license: public domain
+reliability: >-
+  A survey of the houses of the peoples of the Americas by the ethnologist of the Iroquois, from his own visits (the
+  Seneca, the Mandan village, the ruins of the Animas valley in 1878) and from the accounts of others, which it quotes
+  at length with their pages: Bartram on Onondaga (1751), Lewis and Clark on the lower Columbia (1805–1806), and
+  correspondents on the living pueblos. Its reading of the houses serves an argument, that the households of the
+  American peoples lived in common, and it says so; its quotations of others are evidence of what they wrote, at one
+  remove.
+verified:
+  by: machine:claude-code
+  how: >-
+    The transcription read on 20 November 2026: chapter III on the Iroquois, chapter V on the houses north of New
+    Mexico (the Columbia valley, the Iroquois long-house, Bartram's Onondaga), and the passages of chapters VI and VIII
+    on the pueblos and their estufas; the quotes checked by script against that text. The transcription keeps no page
+    numbers, so the locators give the chapter and what the passage describes.

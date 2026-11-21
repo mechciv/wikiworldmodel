@@ -24,7 +24,7 @@ claims:
       frequencies of tree-ring cutting dates. Preferred as the earlier date for the region as a whole; the Zuni region
       gathered later, as the other claim has it.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in bocinsky-2016-pueblo-macrohistory-PMC4820384.txt (sha256 302f38d01d94ecdc), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in bocinsky-2016-pueblo-macrohistory.txt (sha256 b05757fd61d02d99), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   start-spielmann:
     prop: start
     value: { lo: 1260 CE, hi: 1300 CE }
@@ -35,7 +35,7 @@ claims:
     method: expert-estimate
     note: The Zuni region only.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in spielmann-2016-early-warning-southwest-PMC5051805.txt (sha256 86a7b8335d09b74a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in spielmann-2016-southwest-transformation.txt (sha256 0a311fdc48f928f9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [farmers, townspeople]
@@ -59,10 +59,46 @@ claims:
       farmers of the region were from then on the people of these towns; the paper has the farmers of the Mesa Verde
       region gather likewise, in the settlements of hundreds of rooms the settlement claim cites.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in spielmann-2016-southwest-transformation.txt (sha256 0a311fdc48f928f9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in spielmann-2016-southwest-transformation.txt (sha256 0a311fdc48f928f9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  dwelling:
+    prop: dwelling
+    value: { entrance: roof, windows: small, finish: mud }
+    source:
+      - ref: src:morgan-1881-houses-and-house-life
+        loc: ch. VI, quoting Mr. Miller of Santa Fe on the pueblos in general
+        quote: >-
+          and ingress and egress to and from the rooms below is on the inside in the room above through trap-doors and upon
+          ladders.
+      - ref: src:morgan-1881-houses-and-house-life
+        loc: ch. VI, quoting Mrs. Stevenson's description of Zuni (1879)
+        quote: >-
+          There is a second entrance through hatchways in the roof, and thence by ladders down into the rooms below. In many
+          of the pueblos there are no doors whatever on the ground floor
+      - ref: src:morgan-1881-houses-and-house-life
+        loc: ch. VI, quoting Mrs. Stevenson's description of Zuni (1879)
+        quote: The houses have small windows, in which mica was originally used
+      - ref: src:morgan-1881-houses-and-house-life
+        loc: ch. VI, quoting Mrs. Stevenson's description of Zuni (1879)
+        quote: but the floors are usually plastered with clay, like the walls.
+      - ref: src:morgan-1881-houses-and-house-life
+        loc: ch. VI, on Zuni
+        quote: They are constructed of adobe brick, and of stone embedded in adobe mortar, and plastered over.
+    method: historical-account
+    note: >-
+      The rooms entered through trap-doors in the roof by ladders, in the living pueblos of New Mexico in the nineteenth
+      century, as Morgan quotes his correspondents: in many pueblos the ground floor had no doors at all. Zuni, which the
+      record's other source has go on from the planned towns of the late thirteenth century, is the town described, and
+      its lowest rooms had doors on the ground as well, the same account says. Its houses had small windows, once of mica,
+      and walls of adobe brick and of stone set in adobe, plastered over with clay, kept up by the women (Morgan, and Mrs.
+      Stevenson's account of 1879 that he quotes). That the towns of 1260 to 1300 were entered, lit and plastered so is
+      not said by the sources read for them; it is drawn from the towns of the same people six centuries on. The
+      rest of the house is the room block's (people/traditions/ancestral-puebloan-room-block). Morgan is cited as the one
+      further source read for this record.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in morgan-1881-houses-and-house-life.txt (sha256 01fda4edacf944d1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
-    value: { pattern: room-block }
+    value: { pattern: room-block, plaza: true }
     source:
       - ref: src:spielmann-2016-southwest-transformation
         loc: section "Zuni"
@@ -75,14 +111,20 @@ claims:
       - ref: src:spielmann-2016-southwest-transformation
         loc: section "Mesa Verde"
         quote: lived in increasingly aggregated settlements (up to 400–600 rooms)
+      - ref: src:spielmann-2016-southwest-transformation
+        loc: section "Religio-Political Institutions"
+        quote: >-
+          Formal plazas developed later in time and are much more diverse in the Mesa Verde area than in Zuni (where villages
+          typically had only one or two central plazas).
     method: excavation
     note: >-
       Towns of about 200 to 1500 rooms in single structures in the Zuni region, and settlements of up to 400 to 600 rooms in
       the Mesa Verde region, where people gathered after the drought of the mid-1100s. Rooms are not houses, so no number of
       houses is given. The Mesa Verde region was left by the end of the thirteenth century, the same paper says; no end is
-      given here, as Zuni went on.
+      given here, as Zuni went on. The room blocks were often built round one or more open plazas, and the villages of
+      Zuni typically had one or two central ones: open ground at the middle.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in spielmann-2016-early-warning-southwest-PMC5051805.txt (sha256 86a7b8335d09b74a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in spielmann-2016-southwest-transformation.txt (sha256 0a311fdc48f928f9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
 relations:
   broader:
     rel: member-of

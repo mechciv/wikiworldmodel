@@ -28,7 +28,7 @@ claims:
       whose settled villages and counts of dwellings it discusses. Earlier, less settled Jōmon people also built pit-houses;
       this record does not reach back to them.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in crema-2016.txt (sha256 c1bacb0729f91d0a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in crema-2016-jomon-population.txt (sha256 4430379be4bb421d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   end:
     prop: end
     value: 2300 BP
@@ -41,7 +41,7 @@ claims:
       The end of the Final Jōmon in the same chronology. In the same section, counts of dwellings at Hachinohe go on falling
       through the Late and Final Jōmon. The pit-houses of the Yayoi period and after are not this tradition.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in crema-2016.txt (sha256 c1bacb0729f91d0a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in crema-2016-jomon-population.txt (sha256 4430379be4bb421d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["124"] }
@@ -56,7 +56,7 @@ claims:
       Region 124 (Japan), which holds Hokkaido, Aomori and Kanto. The sources read here speak of eastern Japan, and of the
       Middle Jōmon generally; the house is not claimed for all of the region.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in crema-2016.txt (sha256 c1bacb0729f91d0a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in crema-2016-jomon-population.txt (sha256 4430379be4bb421d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [foragers]
@@ -78,10 +78,10 @@ claims:
       hunter-gatherers. They also managed plants, and the encyclopedia article cited for the dwelling says how far that went
       is debated; the paper calls the economy primarily a hunter-gatherer's, so only foragers are named.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in crema-2016-jomon-population.txt (sha256 4430379be4bb421d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in crema-2016-jomon-population.txt (sha256 4430379be4bb421d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { floor: sunken }
+    value: { walls: none, roof_material: thatch, floor: sunken }
     source:
       - ref: src:crema-2016-jomon-population
         loc: Introduction
@@ -96,9 +96,28 @@ claims:
       - ref: src:wikipedia-jomon-period
         loc: section "Middle Jōmon (3520–2470 BC)"
         quote: This period saw a rise in complexity in the design of pit-houses, the most commonly used method of housing at the time
+      - ref: src:jaanus-dictionary
+        loc: s.v. tateana jūkyo
+        quote: Houses of this type existed in Japan from the Jōmon period until the end of the medieval period
+      - ref: src:jaanus-dictionary
+        loc: s.v. tateana jūkyo
+        quote: >-
+          The general construction pattern involved excavating a pit for the floor and then roofing it, usually with
+          thatch or some of the material excavated, supported on a timber roof frame.
+      - ref: src:jaanus-dictionary
+        loc: s.v. tateana jūkyo
+        quote: >-
+          Though occasionally dwarf walls were used, the ends of the rafters were generally bedded upon a low peripheral
+          baulk made from the excavated earth, and the roof extended virtually to ground level.
     method: excavation
     note: >-
       The pit dwelling as the unit the counts are made of, through the Early to Final Jōmon, and as the usual house of the
-      Middle Jōmon. No source read here gives its plan, size, walls or roof; the generator guesses them.
+      Middle Jōmon. The roof and the want of walls are the dictionary's, for the pit dwelling of Japan from the Jōmon
+      period on: a roof usually of thatch, or of the dug earth, on a timber frame, its rafters bedded on a low bank of
+      the dug earth so that it came nearly to the ground, with dwarf walls only now and then. The earth roof the
+      dictionary names beside thatch is left to a narrower record. Its range of plans (oval, square, rectangular with
+      rounded corners, polygonal), sizes (2.5 by 2.5 m to 31 by 9 m) and depths (50 cm to over 1 m) is for pit dwellings
+      of every period together, and is left out, as is its central open hearth, which has no word; the generator
+      guesses the plan and size.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in crema-2016.txt (sha256 c1bacb0729f91d0a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in crema-2016-jomon-population.txt (sha256 4430379be4bb421d), wikipedia-jomon-period.txt (sha256 1070c63a32793e0d) and jaanus-dictionary.txt (sha256 9d242cd750c47f8e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

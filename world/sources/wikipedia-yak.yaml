@@ -1,0 +1,20 @@
+id: src:wikipedia-yak
+type: database-record
+kind: review
+citation: >-
+  "Yak." Wikipedia, the free encyclopedia (English edition), revision 1382411587.
+snapshot: 2026-11-20
+title: Yak
+container: Wikipedia
+url: https://en.wikipedia.org/w/index.php?title=Yak&oldid=1382411587
+license: CC-BY-SA-4.0
+license_note: Short quotes, with credit.
+reliability: >-
+  A general encyclopedia article, about the domestic yak, cited for its height at the withers because no better source
+  stating it for the domestic animal could be read here: the Animal Diversity Web's account gives sizes for the wild yak
+  only. Its figures are footnoted to other works, none of which was read.
+verified:
+  by: machine:claude-code
+  how: >-
+    The article's HTML, rendered from revision 1382411587 through the MediaWiki parse API, fetched on 20 November 2026 and
+    read as text, with the reference marks taken out; the quotes checked by script against that text.

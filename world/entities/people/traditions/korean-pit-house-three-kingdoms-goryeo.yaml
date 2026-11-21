@@ -28,7 +28,7 @@ claims:
       The start of the Proto-Three Kingdoms period in the source, where the Mumun pit house
       (people/traditions/mumun-pit-house) ends.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in west-2025-pit-to-surface-structures.txt (sha256 62e9aa916ad8c279), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in west-2025-pit-to-surface-structures.txt (sha256 62e9aa916ad8c279), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   end:
     prop: end
     value: 1392 CE
@@ -48,7 +48,7 @@ claims:
       (people/traditions/korean-thatched-house-choga); when the thatched surface house took over is not dated by any
       source read here.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in west-2025-pit-to-surface-structures.txt (sha256 62e9aa916ad8c279), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in west-2025-pit-to-surface-structures.txt (sha256 62e9aa916ad8c279), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["117"] }
@@ -61,7 +61,7 @@ claims:
     method: editorial
     note: Region 117 (Korea), the peninsula.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in west-2025-pit-to-surface-structures.txt (sha256 62e9aa916ad8c279), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in west-2025-pit-to-surface-structures.txt (sha256 62e9aa916ad8c279), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [farmers]
@@ -82,10 +82,10 @@ claims:
       Farmers of rural settlements. Pit houses were also used at provincial towns of Unified Silla (West, p. 100), but
       not in its capital, and no townspeople's house is written for Korea before 1392, so townspeople are not named.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in west-2025-pit-to-surface-structures.txt (sha256 62e9aa916ad8c279) and yun-ko-lee-pyeonggeo-dong.txt (sha256 aa2af5d29a405c58), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in west-2025-pit-to-surface-structures.txt (sha256 62e9aa916ad8c279) and yun-ko-lee-pyeonggeo-dong.txt (sha256 aa2af5d29a405c58), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { floor: sunken }
+    value: { floor: sunken, smoke: chimney }
     source:
       - ref: src:kwon-2015-baekje-royal-city-periphery
         loc: section "Residential culture of the Baekje center", "Pillar-wall buildings"
@@ -103,13 +103,21 @@ claims:
         quote: >-
           From the Proto-Three Kingdoms Period, cooking and heating facilities were installed along the wall opposite
           the entrance in dwellings
+      - ref: src:kwon-2015-baekje-royal-city-periphery
+        loc: section "Decorated chimney caps"
+        quote: >-
+          An external chimney, usually made of clay or hollowed out logs, was a necessary requirement for ventilation
     method: excavation
     note: >-
       A sunken floor, in both of the Mahan-Baekje types. The plan is left out: one type was pentagonal or hexagonal (no
       word in the vocabulary), the other square, and they held different parts of the peninsula, which one region
-      cannot tell apart. No size is given by any source read here.
+      cannot tell apart. The entrance is left out for the same reason: a passage at the side in the one, a ladder from
+      the roof in the other. The smoke left by an external chimney of clay or hollowed logs, which Kwon calls a
+      necessary requirement of the cooking and heating places against the wall; he says ceramic chimneys were common in
+      the Mahan-Baekje zone and rare in Gaya-Silla, and does not say what the Silla houses had instead. No size is given
+      by any source read here, and none names a building that stood by the houses.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in kwon-2015-baekje-royal-city-periphery.txt (sha256 137a0222d74f45c8), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in kwon-2015-baekje-royal-city-periphery.txt (sha256 137a0222d74f45c8), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   fields:
     prop: field_system
     value: { kind: paddies }
@@ -125,4 +133,4 @@ claims:
       Irrigated rice paddies at one excavated site of south-central Korea, ploughed with cattle; dry fields lay beside
       them. No plot size is given.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in yun-ko-lee-pyeonggeo-dong.txt (sha256 aa2af5d29a405c58), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in yun-ko-lee-pyeonggeo-dong.txt (sha256 aa2af5d29a405c58), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

@@ -37,7 +37,7 @@ claims:
       not say. It dates the village, not the form of its houses, whose plans are not published in what was read; the house
       is described only from Smith's time. There is no end claim: no source read says when such houses ceased to be built.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in pokharia-2013-nagaland-agriculture.txt (sha256 409d573fff5ab1ee) and smith-1925-ao-naga-tribe.txt (sha256 15e18b7948a60774), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in pokharia-2013-nagaland-agriculture.txt (sha256 409d573fff5ab1ee) and smith-1925-ao-naga-tribe.txt (sha256 15e18b7948a60774), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["112"] }
@@ -54,7 +54,7 @@ claims:
       Chungliyimti lies, in Tuensang. The other Naga peoples' houses, and the terraced villages of the Angami, are not
       described in what was read and are not claimed; the region is named for the Ao.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in pokharia-2013-nagaland-agriculture.txt (sha256 409d573fff5ab1ee) and smith-1925-ao-naga-tribe.txt (sha256 15e18b7948a60774), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in pokharia-2013-nagaland-agriculture.txt (sha256 409d573fff5ab1ee) and smith-1925-ao-naga-tribe.txt (sha256 15e18b7948a60774), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [shifting-cultivators]
@@ -79,10 +79,10 @@ claims:
       Shifting cultivators in the model's sense: the jungle was cut, burnt, cropped for two years and left fallow seven to
       ten. The fields moved and the villages did not; the people kept to their ancestral sites.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in smith-1925-ao-naga-tribe.txt (sha256 15e18b7948a60774), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in smith-1925-ao-naga-tribe.txt (sha256 15e18b7948a60774), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { plan: rectangular, width: 6.1, length: 12.2, walls: reed, roof: gable, roof_material: thatch }
+    value: { plan: rectangular, width: 6.1, length: 12.2, walls: wattle, roof: gable, roof_material: thatch, entrance: end, windows: none, smoke: none, porch: true, byre: true }
     source:
       - ref: src:smith-1925-ao-naga-tribe
         loc: "chap. III, p. 28"
@@ -111,22 +111,55 @@ claims:
       - ref: src:smith-1925-ao-naga-tribe
         loc: "chap. III, p. 29"
         quote: a sort of semi-circular verandah roof over the front gable
+      - ref: src:smith-1925-ao-naga-tribe
+        loc: "chap. III, p. 28"
+        quote: >-
+          without floor, where they keep the wood, the implements for husking rice, the pigs, chickens, and even the
+          cattle.
+      - ref: src:smith-1925-ao-naga-tribe
+        loc: "chap. III, p. 29"
+        quote: >-
+          The Aos’ houses are invariably dark, inasmuch as there are no openings other than the doors at the front and
+          rear, which are not always kept open. Since there is no chimney, or opening for the smoke to escape
+      - ref: src:smith-1925-ao-naga-tribe
+        loc: "chap. III, p. 30"
+        quote: The cattle, fowls and also the pigs are kept in their dwelling-houses.
+      - ref: src:smith-1925-ao-naga-tribe
+        loc: "chap. III, p. 29"
+        quote: >-
+          In the front of some houses is a small raised platform where the women work at their cloth-making and the
+          men at their basket-weaving.
+      - ref: src:pokharia-2013-nagaland-agriculture
+        loc: "pp. 1342–1343, \"Chungliyimti\""
+        quote: >-
+          The pits in most cases were found in association with houses, either on the … frontal porch or inside.
     method: documentary
     note: >-
       Two rooms twenty feet wide, the main room thirty feet long and the front room ten, so the house is twenty feet by
-      forty, 6.1 by 12.2 m; the sum is the writer's. Walls of split bamboo plaited together, which the vocabulary has no
-      word for: written as reed, the nearest. A gabled roof on a ridge-pole, thatched with grass or palm leaves. The floor
+      forty, 6.1 by 12.2 m; the sum is the writer's. Walls of split bamboo plaited together: first written as reed, the
+      nearest word then, and now wattle, the vocabulary's word for woven branches or split bamboo with no daub, which is
+      what Smith says; a refinement, not a disagreement. A gabled roof on a ridge-pole, thatched with grass or palm leaves. The floor
       is left out: the main room has a floor of bamboo and the front room none, and many houses stood on steep slopes with
-      a platform behind, which the vocabulary's words do not describe.
+      a platform behind, which the vocabulary's words do not describe. The doors were at the front and the rear, and the
+      front was a gable end, the room there twenty feet across, the width of the house: so the entrance is in an end.
+      No windows and no opening for the smoke, Smith's: the doors were the only openings, and soot covered everything.
+      The pigs, the fowls and the cattle were kept in the front room, on the earth; the pigs had a pen of their own on
+      one side of it and a small doorway under the threshold. The porch is the excavators' at Chungliyimti, where pits
+      were found on the frontal porch of houses or inside them, and Smith's small raised platform before some houses,
+      where the women wove and the men made baskets. The semicircular veranda roof over the front gable was a privilege of the rich, bought with feasts, and is
+      not written as the rule.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in smith-1925-ao-naga-tribe.txt (sha256 15e18b7948a60774), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in smith-1925-ao-naga-tribe.txt (sha256 15e18b7948a60774) and pokharia-2013-nagaland-agriculture.txt (sha256 409d573fff5ab1ee), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
-    value: { pattern: nucleated }
+    value: { pattern: nucleated, layout: rows }
     source:
       - ref: src:smith-1925-ao-naga-tribe
         loc: "chap. III, p. 27"
         quote: The Ao Naga villages are large.
+      - ref: src:smith-1925-ao-naga-tribe
+        loc: "chap. III, p. 28"
+        quote: In several villages there are rows of houses one above the other
       - ref: src:smith-1925-ao-naga-tribe
         loc: "chap. III, p. 27"
         quote: The villages are built on the summits of big hills or on ridges.
@@ -141,9 +174,52 @@ claims:
     note: >-
       Large villages on hilltops and ridges, the houses packed along a street on the crest; in the old days they were
       defended by stockades, gates and ditches set with bamboo spikes. How many houses a village had is not given in what
-      was read.
+      was read. The houses stood in rows: one fronting each side of the principal street along the crest, and in several
+      villages rows one above the other down the slopes. The stockades, gates and spiked ditches were of the old days,
+      and by Smith's time the gates stood open with no stockade, so no enclosure is written.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in smith-1925-ao-naga-tribe.txt (sha256 15e18b7948a60774), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in smith-1925-ao-naga-tribe.txt (sha256 15e18b7948a60774), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  outbuildings:
+    prop: outbuildings
+    value:
+      - { use: granary, per: house }
+      - { use: hall, per: settlement, count: 3 }
+      - { use: pole, per: house }
+    source:
+      - ref: src:smith-1925-ao-naga-tribe
+        loc: "chap. III, p. 41"
+        quote: After the grain is threshed out it is carried to the village and deposited in the granary.
+      - ref: src:smith-1925-ao-naga-tribe
+        loc: "chap. III, p. 42"
+        quote: >-
+          A man’s economic position in the community depends to a considerable degree upon the number of granaries he
+          possesses
+      - ref: src:smith-1925-ao-naga-tribe
+        loc: "chap. III, p. 27"
+        quote: >-
+          Near the gate stood the ariju, or barracks, of the young braves. This is the most imposing structure in the
+          whole village.
+      - ref: src:smith-1925-ao-naga-tribe
+        loc: "chap. IV, p. 52"
+        quote: >-
+          For convenience of administration a village is usually separated into three divisions, called mopu. In each of
+          these sections there is an ariju
+      - ref: src:smith-1925-ao-naga-tribe
+        loc: "chap. III, p. 29"
+        quote: >-
+          he sets up forked posts before his house so all may know his social standing
+    method: documentary
+    note: >-
+      Smith's, of the 1920s. The granaries are a household's: the threshed rice was carried from the fields to the
+      village and stored in the granary, and a man's standing rested on how many granaries he had, so their number
+      varied and none is counted; what they were like is not said. The ariju, the young men's house, the most imposing
+      building of the village, stood near the gate, one in each of the usually three divisions of a village; its size
+      and form are not given in what was read. The forked posts were set up before the house of a man who gave feasts
+      of merit, one for each feast, and stand by only some houses. The small house each husbandman had in his field,
+      where the rice was threshed, stood in the fields and is not written; the large platform at the rear of the house
+      is part of the house.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in smith-1925-ao-naga-tribe.txt (sha256 15e18b7948a60774), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   fields:
     prop: field_system
     value: { kind: swidden }
@@ -155,4 +231,4 @@ claims:
         to ten years.
     method: documentary
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in smith-1925-ao-naga-tribe.txt (sha256 15e18b7948a60774), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in smith-1925-ao-naga-tribe.txt (sha256 15e18b7948a60774), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

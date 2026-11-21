@@ -24,7 +24,7 @@ claims:
       The start of the Joseon dynasty, the period whose classes the encyclopedia's sentence describes; tiled roofs are
       far older in Korea. No end is given within this record's span.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in kim-2025-eupchi-eupseong.txt (sha256 5a260fd60a988efb), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in kim-2025-eupchi-eupseong.txt (sha256 5a260fd60a988efb), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["117"] }
@@ -35,7 +35,7 @@ claims:
     method: editorial
     note: Region 117 (Korea), whose county seats lay across the whole peninsula.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in kim-2025-eupchi-eupseong.txt (sha256 5a260fd60a988efb), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in kim-2025-eupchi-eupseong.txt (sha256 5a260fd60a988efb), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [townspeople]
@@ -50,10 +50,10 @@ claims:
       The houses of the towns, of the upper and middle classes and of urban commoners. Yangban in the countryside lived
       under tile too, and the poor of the towns under thatch; the record names townspeople only.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-hanok.txt (sha256 55aa6d202f1902e3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-hanok.txt (sha256 55aa6d202f1902e3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { roof_material: tile }
+    value: { roof_material: tile, windows: large, smoke: chimney }
     source:
       - ref: src:wikipedia-hanok
         loc: section "Variations", "By social class"
@@ -68,13 +68,33 @@ claims:
       - ref: src:kim-2025-eupchi-eupseong
         loc: "p. 123"
         quote: The walls also contributed to differentiate the magistrate and local officials, who work from their splendid tile-roofed houses
+      - ref: src:wikipedia-hanok
+        loc: section "Materials"
+        quote: >-
+          A form of traditional Korean paper (hanji), lubricated with bean oil to make it waterproof and polished, is
+          used to make breathable windows and doors.
+      - ref: src:wikipedia-hanok
+        loc: section "Characteristics"
+        quote: >-
+          the Ondol (Gudeul), a floor-based heating system, and the Daecheong, a cool wooden-floor style hall, were
+          devised long ago
+      - ref: src:wikipedia-ondol
+        loc: opening section
+        quote: >-
+          a raised masonry floor underlain by horizontal smoke passages, and a vertical, freestanding chimney on the
+          opposite exterior wall providing a draft.
     method: expert-estimate
     note: >-
       A tiled roof on a timber frame set on cornerstones. The walls (the article speaks of wooden beams and stone-block
       construction, without saying which), the plan (in a line, L-shaped or square by region) and the size are left
-      out; no source read here gives a town house's size.
+      out; no source read here gives a town house's size. The windows are of oiled paper (hanji), which is "large", in
+      the article's section on the materials of the tile-roofed house; it does not say how many or how big. The smoke
+      left by the chimney of the heated floor (ondol): the hanok article names the ondol as the house's heating, and
+      the ondol article puts a freestanding chimney on the outer wall opposite the firebox. The ondol's raised masonry
+      floor is not written as the floor, since the hanok's wooden-floored hall (daecheong) stood beside it; how high
+      either stood is not given.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-hanok.txt (sha256 55aa6d202f1902e3) and kim-2025-eupchi-eupseong.txt (sha256 5a260fd60a988efb), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-hanok.txt (sha256 55aa6d202f1902e3), kim-2025-eupchi-eupseong.txt (sha256 5a260fd60a988efb) and wikipedia-ondol.txt (sha256 b3e9bd80168fb51f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   town:
     prop: town_form
     value: { wall: stone }
@@ -105,4 +125,4 @@ claims:
       stood inside the larger walls. So a wall is drawn round towns that in most counties had none. The wall was low,
       and its height is not given; the moat, built at some, is not claimed. The streets are not described.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in kim-2025-eupchi-eupseong.txt (sha256 5a260fd60a988efb), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in kim-2025-eupchi-eupseong.txt (sha256 5a260fd60a988efb), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

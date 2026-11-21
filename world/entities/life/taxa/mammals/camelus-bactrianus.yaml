@@ -10,6 +10,23 @@ claims:
     value: { en: "Bactrian camels", la: "Camelus bactrianus" }
     source: { ref: src:opentree-taxonomy-3.7, loc: "tnrs/match_names: Camelus bactrianus, ott510768" }
     note: Open Tree gives the scientific name; the English name is an editorial gloss.
+  body-plan:
+    prop: body_plan
+    value: camel
+    unsourced: >-
+      Which plan draws it: an editorial classification.
+  form:
+    prop: body_form
+    value:
+      parts:
+        hump: { at: [0, 0.03, 0.91], r: [0.062, 0.075, 0.19] }
+        hump-behind: { type: lump, mat: fur, sides: [12, 8], bands: [6, 4], at: [0, -0.2, 0.91], r: [0.062, 0.075, 0.185] }
+        mane: { type: sheet, mat: fur, not: [graze, drink], gap: 0.012, points: [[0, 0.25, 0.85], [0, 0.16, 0.57], [0, 0.215, 0.5], [0, 0.3, 0.63], [0, 0.352, 0.82], [0, 0.368, 0.98]] }
+    unsourced: >-
+      A machine's reconstruction of a Bactrian camel: the camel it starts from, with two humps in the place of one
+      and, from the account of Camelus bactrianus on the Animal Diversity Web, long hair that is thicker on the neck,
+      drawn as a mane under it. Its proportions are a drawing's, and no measurements of any animal. Only compared with
+      its sheet.
   length:
     prop: body_length
     value: { lo: 2.25, hi: 3.45 }
@@ -20,6 +37,18 @@ claims:
     method: compilation
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in animal-diversity-web.txt (sha256 5ae3d0bcfbf74dd9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  hip:
+    prop: hip_height
+    value: { lo: 1.8, hi: 2.3 }
+    source:
+      ref: src:animal-diversity-web
+      loc: "account of Camelus bactrianus, Physical Description"
+      quote: "the shoulder height is 1.80-2.30 m tall"
+    method: compilation
+    note: >-
+      A height at the shoulder, below the humps, taken for the height of the back.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in animal-diversity-web.txt (sha256 5ae3d0bcfbf74dd9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   mass:
     prop: body_mass
     value: { lo: 300, hi: 690 }

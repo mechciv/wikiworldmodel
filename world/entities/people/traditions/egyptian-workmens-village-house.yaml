@@ -29,7 +29,7 @@ claims:
       The reign of Thutmose I, to which the first source dates the first remains of the village at Deir el-Medina, the earlier
       of the two villages. The second source's circa 1500 BC lies within it.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-deir-el-medina-1383863269.txt (sha256 91dc1c8b3b421d6b), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-deir-el-medina.txt (sha256 08f68f0fa7fda8ee) and driaux-2016-water-supply-egypt.txt (sha256 564e625897a562e1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   end:
     prop: end
     value: 1069 BCE
@@ -42,7 +42,7 @@ claims:
     method: expert-estimate
     note: The end of the village at Deir el-Medina, circa 1069 BC as the source gives it.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in driaux-2016-water-supply-egypt.txt (sha256 ff7f3809d63434ad), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in driaux-2016-water-supply-egypt.txt (sha256 564e625897a562e1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["72"] }
@@ -61,7 +61,7 @@ claims:
       region's farmers and townspeople in the same centuries are not described by these sources: the tradition is not claimed
       for all of Egypt.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in driaux-2016-water-supply-egypt.txt (sha256 ff7f3809d63434ad), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in driaux-2016-water-supply-egypt.txt (sha256 564e625897a562e1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [townspeople]
@@ -82,10 +82,10 @@ claims:
       craftsmen who did not farm, and so, of the five ways of life, townspeople. The source calls both settlements
       villages, each at the desert's edge beside a city, Thebes and Amarna.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in driaux-2016-water-supply-egypt.txt (sha256 564e625897a562e1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in driaux-2016-water-supply-egypt.txt (sha256 564e625897a562e1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { plan: rectangular, width: 5, length: 10, rooms: { lo: 4, hi: 5 }, storeys: { lo: 1, hi: 2 }, walls: mudbrick }
+    value: { plan: rectangular, width: 5, length: 10, rooms: { lo: 4, hi: 5 }, storeys: { lo: 1, hi: 2 }, walls: mudbrick, finish: lime, windows: small }
     source:
       - ref: src:wikipedia-workmens-village-amarna
         loc: section "Walled village"
@@ -106,17 +106,30 @@ claims:
         quote: >-
           Houses consisted of four to five rooms: an entrance, main room, two smaller rooms, kitchen with cellar and staircase
           leading to the roof.
+      - ref: src:wikipedia-deir-el-medina
+        loc: section "Village"
+        quote: Mud was applied to the walls, which were then painted white on the external surfaces
+      - ref: src:wikipedia-deir-el-medina
+        loc: section "Village"
+        quote: The full glare of the sun was avoided by situating the windows high up in the walls.
+      - ref: src:wikipedia-workmens-village-amarna
+        loc: section "Walled village"
+        quote: Windows are not preserved but were likely small and high up to let in light but minimize dust.
     method: excavation
     note: >-
       The size is that of the houses of the Amarna village, which were all of one size, and the plan is read from it, twice as
       long as wide. At Deir el-Medina the houses varied in size, with an average floor space of 70 square metres, as the second
       article says. Four rooms at Amarna, four or five at Deir el-Medina. The stairs led up to a second floor at Amarna and to
-      the roof at Deir el-Medina, so the storeys are one or two.
+      the roof at Deir el-Medina, so the storeys are one or two. The finish is from Deir el-Medina: walls plastered with mud
+      and painted white outside, which is entered as lime, the word for a white wash, though the article says painted, not
+      limewashed; some inner walls were whitewashed to about a metre. The windows were high in the walls at Deir el-Medina,
+      and at Amarna, where none survives, likely small and high: entered as small, the Amarna article's word being a
+      likelihood. Whether the roof was flat is not said, though the stairs led to it.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-deir-el-medina-1383863269.txt (sha256 91dc1c8b3b421d6b), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-workmens-village-amarna.txt (sha256 573e5c7025e93c25) and wikipedia-deir-el-medina.txt (sha256 08f68f0fa7fda8ee), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
-    value: { pattern: walled, houses: { lo: 68, hi: 72 } }
+    value: { pattern: walled, layout: rows, houses: { lo: 68, hi: 72 } }
     source:
       - ref: src:driaux-2016-water-supply-egypt
         loc: section "Evidence from New Kingdom workmen's villages"
@@ -128,9 +141,47 @@ claims:
         quote: >-
           Occupying an area of ca. 5600 m2, the village, enclosed by a mud-brick wall (Fig. 6), contained almost 68 houses in
           its final phase
+      - ref: src:wikipedia-deir-el-medina
+        loc: section "Village"
+        quote: with a narrow road running the length of the village
     method: excavation
     note: >-
       The Amarna village (the first quote) had 72 houses besides a large one, presumably an official's; Deir el-Medina (the
-      second) almost 68 in its final phase. Both were walled, and at Amarna the houses stood along parallel narrow streets.
+      second) almost 68 in its final phase. Both were walled, and at Amarna the houses stood along parallel narrow streets,
+      which is the layout, rows; at Deir el-Medina a narrow road ran the length of the village (the article on it, section
+      "Village"). Neither village had a well inside it: Amarna had none, its water carried from the city to an area of jars
+      outside the gate, and Deir el-Medina's was in a communal cistern outside the gate, and from Ramesses III's time a well
+      a few hundred metres off (the first source).
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in driaux-2016-water-supply-egypt.txt (sha256 ff7f3809d63434ad), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in driaux-2016-water-supply-egypt.txt (sha256 564e625897a562e1) and wikipedia-deir-el-medina.txt (sha256 08f68f0fa7fda8ee), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  outbuildings:
+    prop: outbuildings
+    value:
+      - { use: pen, per: settlement }
+      - { use: byre, per: settlement }
+      - { use: shrine, per: settlement, count: { lo: 16, hi: 23 } }
+    source:
+      - ref: src:wikipedia-workmens-village-amarna
+        loc: section "Walled village"
+        quote: >-
+          This evidence comes in the form of animal pens in the south-western part of the village and mangers in the main
+          street, as well as buildings directly in front of the village and to the east.
+      - ref: src:wikipedia-workmens-village-amarna
+        loc: section "Walled village"
+        quote: Pigs, fed grain, were raised in covered pens
+      - ref: src:wikipedia-workmens-village-amarna
+        loc: section "Chapels and their wall paintings"
+        quote: Outside of the walled portion of the village approximately twenty-three chapels were built along the hillside.
+      - ref: src:wikipedia-deir-el-medina
+        loc: section "Popular piety"
+        quote: The community had between 16 and 18 chapels
+    method: excavation
+    note: >-
+      The pens for animals in the south-western part of the Amarna village, and the covered pens in which pigs were
+      raised, entered as a byre, a house for animals (the Amarna article); neither is counted or measured, and the
+      article does not say whether the pigs' pens stood inside the wall or round the village. The chapels are the
+      settlement's: about twenty-three outside the wall on the hillside at Amarna, 16 to 18 at Deir el-Medina, so 16 to 23;
+      the Amarna article has them of mudbrick and limestone and varying in plan, with outer and inner courts and a shrine
+      in the larger ones. They stood outside the village, not among its houses. No granary, oven or well is described.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-workmens-village-amarna.txt (sha256 573e5c7025e93c25) and wikipedia-deir-el-medina.txt (sha256 08f68f0fa7fda8ee), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

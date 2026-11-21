@@ -29,7 +29,7 @@ claims:
       seasonal campsites of Xiongnu herders fit the portable dwellings drawn on Xiongnu birch-bark containers. It bounds the
       start rather than dating it, as the tent may be older. The tent has no end claim: it is lived in today.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in makarewicz-2024-xiongnu-elites.txt (sha256 19988d8593535de4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in makarewicz-2024-xiongnu-elites.txt (sha256 bf88a829bea80f16), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["115"] }
@@ -53,7 +53,7 @@ claims:
       out, as no source read here dates the tent there. It is not claimed for every household of the region: the first source
       also has walled settlements of the Xiongnu élite and small settlements of semi-subterranean dwellings.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in makarewicz-2024-xiongnu-elites.txt (sha256 19988d8593535de4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in makarewicz-2024-xiongnu-elites.txt (sha256 bf88a829bea80f16) and lim-2018-ger-pm25.txt (sha256 025cffebf1aae81a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [herders]
@@ -80,10 +80,10 @@ claims:
       Ulaanbaatar has hundreds of thousands of families living in them in its suburbs: that is shown of the capital today
       only, and the first source gives the settled places of the Xiongnu other buildings.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in makarewicz-2024-xiongnu-elites.txt (sha256 bf88a829bea80f16) and sellers-2022-tuvan-pastoralists.txt (sha256 11ab1b990f872639), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in makarewicz-2024-xiongnu-elites.txt (sha256 bf88a829bea80f16) and sellers-2022-tuvan-pastoralists.txt (sha256 11ab1b990f872639), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { plan: round, diameter: 5.6, walls: felt, roof_material: felt }
+    value: { plan: round, diameter: 5.6, walls: felt, roof_material: felt, smoke: hole, faces: south }
     source:
       - ref: src:lim-2018-ger-pm25
         loc: section "1. Introduction"
@@ -91,14 +91,32 @@ claims:
       - ref: src:sellers-2022-tuvan-pastoralists
         loc: section "General lifestyle of the participants"
         quote: The Tuvan yurts are round (mean diameter 5.6 m).
+      - ref: src:rockhill-1900-journey-of-william-of-rubruck
+        loc: p. 54, note 1, quoting Pian de Carpine's description of the Mongols' dwellings
+        quote: >-
+          In the top they have a round opening which admits the light, and by which the smoke can escape, for they keep
+          a fire always in the centie.
+      - ref: src:rockhill-1900-journey-of-william-of-rubruck
+        loc: on the Tartars and their dwellings, p. 56
+        quote: When they set down their dwelling-houses, they always turn the door to the south
+      - ref: src:lim-2018-ger-pm25
+        loc: section "1. Introduction"
+        quote: The stoves used in gers have a closed combustion chamber and a chimney vented to the outdoors.
     method: survey
     note: >-
       The plan and the felt over a wooden lattice frame are from the first source, on the gers of Ulaanbaatar today; it calls
       the ger felt-covered, read here as felt on walls and roof alike. The diameter is the mean the second source gives for the
       eight yurts of the Tuvan herders it studied, across the border in Russia: no measure of a Mongolian ger was read. The
-      shape of the roof is not stated, and is left to the generator.
+      shape of the roof is not stated, and is left to the generator. The smoke hole and the door to the south are the
+      thirteenth century's, from Rockhill's translation of Rubruck, who crossed to the camps of the Mongols in
+      Mongolia in 1253, and the description of Pian de Carpine, ten years before, that Rockhill quotes in his note
+      (the OCR has "centie" for "centre"). Rubruck says the door was always turned south; Rockhill's note adds that he
+      had often seen Mongol tents facing east and south-east. The gers of Ulaanbaatar today have a stove whose chimney
+      is vented outdoors (the first source): the vocabulary's chimney, which would compete with the hole for the
+      present day, and is kept in this note rather than written as a claim, as no source read says when the stove
+      came in.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in lim-2018-ger-pm25.txt (sha256 2af02ac0e6cc367f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in lim-2018-ger-pm25.txt (sha256 025cffebf1aae81a), sellers-2022-tuvan-pastoralists.txt (sha256 11ab1b990f872639) and rockhill-1900-journey-of-william-of-rubruck.txt (sha256 5e85b5061bcdef34), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
     value: { pattern: camp, household: 4 }
@@ -121,4 +139,4 @@ claims:
       households of a city's ger districts in 2016, not of herders' camps, and the only count read. How many tents stood in a
       camp is not stated.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in makarewicz-2024-xiongnu-elites.txt (sha256 19988d8593535de4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in makarewicz-2024-xiongnu-elites.txt (sha256 bf88a829bea80f16), sellers-2022-tuvan-pastoralists.txt (sha256 11ab1b990f872639) and lim-2018-ger-pm25.txt (sha256 025cffebf1aae81a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

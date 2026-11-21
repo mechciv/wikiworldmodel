@@ -32,7 +32,7 @@ claims:
       of the Zimbabwe culture. Preferred as the dated evidence, over the received start at Mapungubwe that the same paper argues
       against.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in chirikure-2014-mapela-pmc4215987.txt (sha256 2bff304471186b5e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in chirikure-2014-mapela.txt (sha256 463e59f4ec6414d2), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   start-mapungubwe:
     prop: start
     value: 1220 CE
@@ -45,7 +45,7 @@ claims:
     method: expert-estimate
     note: The received view, as the source reports it before arguing against it, that the Zimbabwe culture began at Mapungubwe.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in chirikure-2014-mapela-pmc4215987.txt (sha256 2bff304471186b5e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in chirikure-2014-mapela.txt (sha256 463e59f4ec6414d2), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   end:
     prop: end
     value: 1820 CE
@@ -60,7 +60,7 @@ claims:
       The end of the span of Khami, the last of the capitals the source names. Great Zimbabwe itself was lived in later:
       Chirikure et al. (2017) give its occupation as CE1000–1800.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in chirikure-2014-mapela-pmc4215987.txt (sha256 2bff304471186b5e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in chirikure-2014-mapela.txt (sha256 463e59f4ec6414d2), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["88", "96"] }
@@ -83,7 +83,7 @@ claims:
       reports Huffman's view that the status of the walled sites there is unclear. The tradition is not claimed for all of
       either region, nor for all of its people.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in chirikure-2014-mapela-pmc4215987.txt (sha256 2bff304471186b5e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in chirikure-2014-mapela.txt (sha256 463e59f4ec6414d2) and wikipedia-great-zimbabwe.txt (sha256 5aa40758ea137906), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [farmers, townspeople]
@@ -108,7 +108,7 @@ claims:
       walled centres are described; those of the villages around them are not. Chirikure et al. (2017) call the people of
       Great Zimbabwe agricultural communities, and the place urban.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in chirikure-2014-mapela.txt (sha256 463e59f4ec6414d2), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in chirikure-2014-mapela.txt (sha256 463e59f4ec6414d2), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
     value: { walls: wattle-and-daub, storeys: 1 }
@@ -131,7 +131,7 @@ claims:
       the nearest, and neither is right); Chirikure et al. (2014) call such houses solid dhaka. The huts were single-storeyed.
       Their plan, size and roof are not described by the sources read, and are left to the generator.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-great-zimbabwe-1381423922.txt (sha256 efe33072082c85ef), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-great-zimbabwe.txt (sha256 5aa40758ea137906) and chirikure-2017-great-zimbabwe.txt (sha256 8d343af98653f22f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
     value: { pattern: compound }
@@ -156,6 +156,34 @@ claims:
       Houses grouped in homesteads inside walls: of dry stone for the élite, and at Great Zimbabwe of solid earth for the
       others, laid out alike. A homestead of several huts, each a room of the household, is how Shona households live today,
       and is how the second source reads the remains. How many houses stood together, and how far apart, is not given in a
-      form the generator can take.
+      form the generator can take: the second source's field walking in the unwalled areas found "hut clusters, varying in
+      number between three and five, located with various distances ranging from two to 50 metres apart", which may count
+      the huts of a cluster or the clusters, and may measure between huts or between clusters, so neither is entered. The
+      same source finds walls in arcs that possibly marked out courtyards, which is not entered as a yard.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in chirikure-2014-mapela-pmc4215987.txt (sha256 2bff304471186b5e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in chirikure-2014-mapela.txt (sha256 463e59f4ec6414d2) and chirikure-2017-great-zimbabwe.txt (sha256 8d343af98653f22f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  outbuildings:
+    prop: outbuildings
+    value:
+      - { use: kitchen, per: house }
+      - { use: granary, per: house, plan: round }
+    source:
+      - ref: src:chirikure-2017-great-zimbabwe
+        loc: section "a. Ethnography"
+        quote: In a polygamous family, each wife often had her own kitchen, bedroom and granaries
+      - ref: src:chirikure-2014-mapela
+        loc: 'section "Mapela fieldwork", Terrace Excavation Trench 1, level 13'
+        quote: >-
+          The recovery of sorghum seeds suggests that the circular stone feature that continued from the layer above, on the
+          northern side of the trench, was a grain bin foundation.
+    method: excavation
+    note: >-
+      A kitchen and granaries to each household, and to each wife of a polygamous one: the Shona homestead of the
+      ethnographies, with which the second source (2017) reads the remains of Great Zimbabwe, and not a finding at the
+      site itself; the kitchen was one of the huts of the homestead, the "per house" here being the household's. That a
+      grain bin was round rests on one circular stone foundation with sorghum seeds on an élite terrace at Mapela (the
+      first source, 2014); its size and how it was built above the foundation are not given. Vitrified dung on the
+      terraces and flats of Mapela points to cattle kraals there, but whose they were and how many is not said, so no pen
+      is entered.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in chirikure-2017-great-zimbabwe.txt (sha256 8d343af98653f22f) and chirikure-2014-mapela.txt (sha256 463e59f4ec6414d2), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

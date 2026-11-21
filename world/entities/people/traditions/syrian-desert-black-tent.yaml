@@ -25,7 +25,7 @@ claims:
       stays in their camps from then. It bounds the start and does not date it; the tent is surely older. No end is given:
       no source read says when it went out of use.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in burckhardt-1831-notes-on-the-bedouins.txt (sha256 d485a71826c744ed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in burckhardt-1831-notes-on-the-bedouins.txt (sha256 d485a71826c744ed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["58", "59", "63"] }
@@ -44,7 +44,7 @@ claims:
       Najd (63), where their brethren lived, whom he knew by report; and Iraq (59), where they sometimes camped. The tents
       he describes are of the 'Aneze and the tribes of the north; he says other tribes' differ in the number of poles.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in burckhardt-1831-notes-on-the-bedouins.txt (sha256 d485a71826c744ed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in burckhardt-1831-notes-on-the-bedouins.txt (sha256 d485a71826c744ed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [herders]
@@ -63,7 +63,7 @@ claims:
       Herders who moved their tents with their camels, sheep and goats. Burckhardt also has tribes who camped the year
       round among the villages of Syria, some of whom tilled; their tents are not described apart, and farmers are not named.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in burckhardt-1831-notes-on-the-bedouins.txt (sha256 d485a71826c744ed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in burckhardt-1831-notes-on-the-bedouins.txt (sha256 d485a71826c744ed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
     value:
@@ -76,6 +76,8 @@ claims:
       roof: tent
       roof_material: cloth
       floor: ground
+      rooms: 2
+      entrance: side
     source:
       - ref: src:burckhardt-1831-notes-on-the-bedouins
         loc: 'vol. 1, chapter "The tent, and its different parts", p. 37'
@@ -94,15 +96,34 @@ claims:
       - ref: src:burckhardt-1831-notes-on-the-bedouins
         loc: 'vol. 1, chapter "The tent, and its different parts", p. 42'
         quote: The Aeneze tents are always of black goat's-hair.
+      - ref: src:burckhardt-1831-notes-on-the-bedouins
+        loc: 'vol. 1, chapter "The tent, and its different parts", pp. 39-40'
+        quote: >-
+          The tent is divided into two parte ; the men's apartment (mekaad rabiaa), and the women's {meharrem) ; the men's on
+          the left … of one , entering the tent, the women's oh the right
+      - ref: src:burckhardt-1831-notes-on-the-bedouins
+        loc: 'vol. 1, chapter "The tent, and its different parts", pp. 38-39'
+        quote: The back part of the tent is closed by the rowdky
+      - ref: src:burckhardt-1831-notes-on-the-bedouins
+        loc: 'vol. 1, chapter "The tent, and its different parts", p. 42'
+        quote: >-
+          In summer, the three front posts are sometimes not employed, and the tent is supported only by the middle and hind
+          poles, being wide open in front.
     method: survey
     note: >-
       Burckhardt gives the sizes in feet: the middle posts about 7 ft (2.1 m), the side posts about 5 ft (1.5 m), here the
       height of the eaves; a tent with two middle posts 25 to 30 ft long (7.6 to 9.1 m), and its depth, with all the poles
       up, "at most ten feet" (3.0 m), so the width given is the most, not the usual. Smaller tents had one middle post and
       a sheikh's four or five. The cloth is woven goat's hair, the cover and the hanging back wall alike, so walls and roof
-      are cloth; the roof is a tent on poles. The ground is the floor, covered with carpets in the men's part.
+      are cloth; the roof is a tent on poles. The ground is the floor, covered with carpets in the men's part. Two rooms,
+      the men's and the women's, divided by a carpet drawn across the tent at the middle posts, the men's on the left of
+      one entering and the women's on the right, though Burckhardt saw it the other way among the Arabs of the Hauran
+      (pp. 39-40). The entrance is in a long side: the back was closed by a hanging wall, the front stood open in summer,
+      and the tent was 25 to 30 ft long and at most 10 ft deep from front to back, so the front is a long side; that
+      reading of the sizes is the writer's (OCR in the quote: "parte" for parts, "oh" for on). Which way the tents faced is
+      not said: the sheikh's stood on the camp's west side, as guests and enemies came from the west (p. 33).
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in burckhardt-1831-notes-on-the-bedouins.txt (sha256 d485a71826c744ed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in burckhardt-1831-notes-on-the-bedouins.txt (sha256 d485a71826c744ed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
     value: { pattern: camp, houses: { lo: 10, hi: 800 } }
@@ -119,7 +140,8 @@ claims:
     method: survey
     note: >-
       Camps of ten to eight hundred tents, in a circle when few and in rows along a stream when many; in winter a tribe
-      spread out in parties of three or four tents. One family to a tent: Burckhardt says the richest man has but one,
-      unless a second wife or a kinsman's family needs another. How many people lived in a tent is not stated.
+      spread out in parties of three or four tents. The layout is left out, as it was a ring or rows by the camp's size.
+      One family to a tent: Burckhardt says the richest man has but one, unless a second wife or a kinsman's family
+      needs another. How many people lived in a tent is not stated.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in burckhardt-1831-notes-on-the-bedouins.txt (sha256 d485a71826c744ed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in burckhardt-1831-notes-on-the-bedouins.txt (sha256 d485a71826c744ed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

@@ -33,7 +33,7 @@ claims:
       Agra in 1626. No end is given, and none is known from what was read: the latest account, the gazetteer of 1908, has
       it as the house of the cultivator and the labourer of its own day.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in babur-nama-beveridge-1922.txt (sha256 aa11be1d660b4526), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in babur-nama-beveridge-1922.txt (sha256 aa11be1d660b4526), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["107"] }
@@ -62,7 +62,7 @@ claims:
       Punjab and the houses of Rajputana, which the gazetteers of those provinces describe, are other traditions and are
       not written here.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in bernier-1916-travels-mogul-empire.txt (sha256 31b3e06e78fd57cf), buchanan-1811-bihar-and-patna.txt (sha256 a51ca698efc0c530) and imperial-gazetteer-1908-united-provinces.txt (sha256 0c93c94c8f7a58c2), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in bernier-1916-travels-mogul-empire.txt (sha256 31b3e06e78fd57cf), buchanan-1811-bihar-and-patna.txt (sha256 a51ca698efc0c530) and imperial-gazetteer-1908-united-provinces.txt (sha256 0c93c94c8f7a58c2), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [farmers, townspeople]
@@ -87,14 +87,22 @@ claims:
       Bernier's officers and merchants at Delhi in houses with courts and gardens, few of them wholly of brick or stone,
       and those 7,187 houses of Patna were of brick. This record does not draw them.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in babur-nama-beveridge-1922.txt (sha256 aa11be1d660b4526), buchanan-1811-bihar-and-patna.txt (sha256 a51ca698efc0c530) and bernier-1916-travels-mogul-empire.txt (sha256 31b3e06e78fd57cf), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in babur-nama-beveridge-1922.txt (sha256 aa11be1d660b4526), buchanan-1811-bihar-and-patna.txt (sha256 a51ca698efc0c530) and bernier-1916-travels-mogul-empire.txt (sha256 31b3e06e78fd57cf), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { plan: rectangular, length: 5, width: 3.2, rooms: 1, storeys: 1, walls: cob, roof: gable, roof_material: thatch }
+    value: { plan: rectangular, length: 5, width: 3.2, rooms: 1, storeys: 1, walls: cob, roof: gable, roof_material: thatch, windows: none, smoke: none }
     source:
       - ref: src:pelsaert-1925-jahangirs-india
         loc: 'section 12, "The manner of life", p. 61'
         quote: Their houses are built of mud with thatched roofs.
+      - ref: src:pelsaert-1925-jahangirs-india
+        loc: 'section 12, "The manner of life", p. 61'
+        quote: >-
+          they try to keep warm over little cowdung fires which are lit outside the doors, because the houses have no
+          fire-places or chimneys
+      - ref: src:buchanan-1811-bihar-and-patna
+        loc: "vol. 1, Book II, chapter II, p. 278"
+        quote: Although of the shape usual in Bengal they are too flat
       - ref: src:buchanan-1811-bihar-and-patna
         loc: "vol. 1, Book II, chapter II, p. 278"
         quote: >-
@@ -136,12 +144,17 @@ claims:
       tiled in 1595, as most of those of Patna were in 1811–12, and the gazetteer of 1908 has thatch or tiles in the
       centre and east of the United Provinces and flat roofs in the west. A cooking shed and a hut for the cattle made up
       a small farmer's dwelling, and a second hut and a granary a comfortable one. The two-storeyed mud houses and the
-      brick houses of the towns are not drawn.
+      brick houses of the towns are not drawn. No windows: Buchanan's huts of Bihar seldom had any opening but one small
+      door, and glass windows were far removed from hope; which side the door was in he does not say. No opening for the
+      smoke: Pelsaert's houses of the poor at Agra had no fire-places or chimneys, and their cowdung fires were lit
+      outside the doors, so the generator draws no smoke hole. Buchanan says the farmers' thatched roofs were of the
+      shape usual in Bengal but too flat; since he does not say what of that shape they kept, the roof is left a gable
+      and not made curved, and no pitch is given.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in pelsaert-1925-jahangirs-india.txt (sha256 643fc8ca54dd66d1), buchanan-1811-bihar-and-patna.txt (sha256 a51ca698efc0c530), burn-1902-census-nwp-oudh.txt (sha256 facc94ad9154b59c), abul-fazl-ain-i-akbari-jarrett-vol-2.txt (sha256 ad8e62160e2b09ea) and imperial-gazetteer-1908-united-provinces.txt (sha256 0c93c94c8f7a58c2), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in pelsaert-1925-jahangirs-india.txt (sha256 643fc8ca54dd66d1), buchanan-1811-bihar-and-patna.txt (sha256 a51ca698efc0c530), burn-1902-census-nwp-oudh.txt (sha256 facc94ad9154b59c), abul-fazl-ain-i-akbari-jarrett-vol-2.txt (sha256 ad8e62160e2b09ea) and imperial-gazetteer-1908-united-provinces.txt (sha256 0c93c94c8f7a58c2), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
-    value: { pattern: nucleated, household: { lo: 5.49, hi: 6 } }
+    value: { pattern: nucleated, yard: wall, household: { lo: 5.49, hi: 6 } }
     source:
       - ref: src:buchanan-1811-bihar-and-patna
         loc: "vol. 1, Book II, chapter II, p. 279"
@@ -167,9 +180,31 @@ claims:
       one family eating together lived in; the report thinks the true family smaller, and gives 5.7 for 1891 and 6.42 for
       1881 under other definitions. The scan's text writes these decimal points as an apostrophe and a hyphen, and the
       quote keeps its characters; the page image has 5·49, 5·7 and 6·42. How many houses stood in a village is not
-      stated.
+      stated. The yard is walled: the fence round it was usually a mud wall, in Buchanan's sentence.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in buchanan-1811-bihar-and-patna.txt (sha256 a51ca698efc0c530), imperial-gazetteer-1908-united-provinces.txt (sha256 0c93c94c8f7a58c2) and burn-1902-census-nwp-oudh.txt (sha256 facc94ad9154b59c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in buchanan-1811-bihar-and-patna.txt (sha256 a51ca698efc0c530), imperial-gazetteer-1908-united-provinces.txt (sha256 0c93c94c8f7a58c2) and burn-1902-census-nwp-oudh.txt (sha256 facc94ad9154b59c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  outbuildings:
+    prop: outbuildings
+    value:
+      - { use: kitchen, per: house }
+      - { use: byre, per: house }
+      - { use: granary, per: house, plan: round, roof: dome }
+    source:
+      - ref: src:buchanan-1811-bihar-and-patna
+        loc: "vol. 1, Book II, chapter II, p. 279"
+        quote: >-
+          a wretched shed for cooking, and a hut for the cattle, complete a small farmer’s dwelling; while the
+          addition of a second hut, and of a granary like a large bee-hive, forms what is considered a comfortable abode.
+    method: documentary
+    note: >-
+      Buchanan's, of the district of Behar in 1811–12: a shed for cooking and a hut for the cattle made up a small
+      farmer's dwelling with his hut, and a second hut and a granary like a large beehive made a comfortable one, all
+      built about the household's walled yard. The granary's shape is read from "like a large bee-hive": round, and
+      rounded over like a dome, which is the nearest of the vocabulary's roofs; what it was made of and how big it was
+      are not said, nor how many households had one, so no count is given. The scan breaks "cooking" and "bee-hive"
+      across lines, and the quote joins them.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in buchanan-1811-bihar-and-patna.txt (sha256 a51ca698efc0c530), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   town:
     prop: town_form
     value: { streets: lanes }
@@ -186,4 +221,4 @@ claims:
       from the eastern gate to the western. No wall is stated, as the two differ: Pelsaert's Agra was open and unwalled,
       and Buchanan's Patna a walled city with gates, whose wall he does not describe in what was read.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in pelsaert-1925-jahangirs-india.txt (sha256 643fc8ca54dd66d1) and buchanan-1811-bihar-and-patna.txt (sha256 a51ca698efc0c530), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in pelsaert-1925-jahangirs-india.txt (sha256 643fc8ca54dd66d1) and buchanan-1811-bihar-and-patna.txt (sha256 a51ca698efc0c530), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

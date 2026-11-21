@@ -34,7 +34,7 @@ claims:
       describes a house before Staden's. Morro Grande, on the coast of Rio de Janeiro, has hearths dated to 2920 ± 70 BP,
       which the same paper takes as the earliest; the consensus date it reports is used here.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in scheel-ybert-2008-morro-grande.txt (sha256 65f49b2e1d22fbc4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in scheel-ybert-2008-morro-grande.txt (sha256 65f49b2e1d22fbc4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   end:
     prop: end
     value: { lo: 1555 CE, hi: 1874 CE }
@@ -51,7 +51,7 @@ claims:
       travelled the coast between Santos and Ubatuba where Staden was held, wrote that no Indian was left there. When the
       last such village was given up is not in what was read.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in staden-1874-captivity-of-hans-stade.txt (sha256 148559cf50fd0766), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in staden-1874-captivity-of-hans-stade.txt (sha256 148559cf50fd0766), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["31"] }
@@ -74,7 +74,7 @@ claims:
       south-eastern and north-eastern coast. The Guarani of the south, the Tupi of the Amazon and the peoples of the
       interior are left out: no source read here describes their houses. It is not claimed for all the region's land.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in staden-1874-captivity-of-hans-stade.txt (sha256 148559cf50fd0766) and scheel-ybert-2008-morro-grande.txt (sha256 65f49b2e1d22fbc4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in staden-1874-captivity-of-hans-stade.txt (sha256 148559cf50fd0766) and scheel-ybert-2008-morro-grande.txt (sha256 65f49b2e1d22fbc4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [shifting-cultivators]
@@ -94,10 +94,10 @@ claims:
       who moved their villages when the land round them was used up. They also hunted and fished, as Staden tells at
       length; the village, not the camp, was their home.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in staden-1874-captivity-of-hans-stade.txt (sha256 148559cf50fd0766), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in staden-1874-captivity-of-hans-stade.txt (sha256 148559cf50fd0766), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { plan: long, width: 4.3, length: 46, height: 3.7, walls: pole-and-thatch, roof: vault, roof_material: thatch }
+    value: { plan: long, width: 4.3, length: 46, height: 3.7, walls: pole-and-thatch, roof: vault, roof_material: thatch, entrance: side }
     source:
       - ref: src:staden-1874-captivity-of-hans-stade
         loc: "Part II, chap. IV, p. 125"
@@ -112,18 +112,26 @@ claims:
       - ref: src:staden-1874-captivity-of-hans-stade
         loc: "Part II, chap. IV, p. 125"
         quote: each couple, man and woman, has a space of twelve feet on one side
+      - ref: src:staden-1874-captivity-of-hans-stade
+        loc: "Part II, chap. IV, p. 125"
+        quote: >-
+          They all have commonly three entrances, one on each side, and one in the middle ; these are low, so that they must
+          stoop when they go in and out.
     method: documentary
     note: >-
       Fourteen feet is 4.3 m and a hundred and fifty feet 46 m, a length Staden gives as "perhaps" and as varying with the
       number who lived in it; two fathoms, twelve feet, is 3.7 m, taken as the height to the top of the vault. The house
       was one open hall, twelve feet to a couple along each side. He says the houses were thatched thickly with palm leaves
       and rounded at the top like a vaulted cellar, which is read here as a vault of thatch on poles coming down to the
-      ground, so that wall and roof are one; that reading is the writer's.
+      ground, so that wall and roof are one; that reading is the writer's. The house had commonly three low doorways, so
+      low that one stooped to go through, "one on each side, and one in the middle": the one in the middle at least was
+      in a long side, so the entrance is written as in the side. Whether the other two were at the ends or in the long
+      sides the translation does not make plain, and the German was not read.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in staden-1874-captivity-of-hans-stade.txt (sha256 148559cf50fd0766), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in staden-1874-captivity-of-hans-stade.txt (sha256 148559cf50fd0766), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
-    value: { pattern: walled, houses: 7, household: 80 }
+    value: { pattern: walled, houses: 7, household: 80, enclosure: palisade, plaza: true }
     source:
       - ref: src:staden-1874-captivity-of-hans-stade
         loc: "Part II, chap. IV, p. 125"
@@ -145,11 +153,13 @@ claims:
     method: documentary
     note: >-
       Villages of up to seven houses round an open space, inside a palisade of split palm trunks, with an outer fence of
-      high rails; the village where Staden was first brought had seven. Seven is the most Staden says most villages had,
+      high rails: the enclosure is the palisade, about a fathom and a half high and pierced with loopholes, and the open
+      space between the houses, where prisoners were killed, is the plaza. Staden does not say the houses stood in a ring,
+      so no layout is written; the village where Staden was first brought had seven. Seven is the most Staden says most villages had,
       and is written as the number; fewer were common. The household is the people of one house: some forty couples, 80
       adults, with their children, whom he does not count.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in staden-1874-captivity-of-hans-stade.txt (sha256 148559cf50fd0766), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in staden-1874-captivity-of-hans-stade.txt (sha256 148559cf50fd0766), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   fields:
     prop: field_system
     value: { kind: swidden }
@@ -163,4 +173,4 @@ claims:
     method: documentary
     note: Plots cleared by felling and burning, the manioc planted among the burnt trunks.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in staden-1874-captivity-of-hans-stade.txt (sha256 148559cf50fd0766), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in staden-1874-captivity-of-hans-stade.txt (sha256 148559cf50fd0766), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

@@ -28,7 +28,7 @@ claims:
       late phase of that period, in which pit houses are also found. It dates the house at this one site, and the
       site's radiocarbon dates have been revised since in works not read.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in sankalia-1975-early-farmers-village.txt (sha256 2487ae20dbb74eed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in sankalia-1975-early-farmers-village.txt (sha256 2487ae20dbb74eed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   end:
     prop: end
     value: 1100 BCE
@@ -47,7 +47,7 @@ claims:
       rectangular, and the houses of the Late Jorwe period that followed were uniformly round
       (people/traditions/late-jorwe-round-hut).
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in sankalia-1975-early-farmers-village.txt (sha256 2487ae20dbb74eed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in sankalia-1975-early-farmers-village.txt (sha256 2487ae20dbb74eed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["108"] }
@@ -62,7 +62,7 @@ claims:
       settlements to be dug, and says the early settlements at Nevasa, Chandoli and Songaon were too disturbed to show
       their houses. It is not claimed for all of the region.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in sankalia-1975-early-farmers-village.txt (sha256 2487ae20dbb74eed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in sankalia-1975-early-farmers-village.txt (sha256 2487ae20dbb74eed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [farmers]
@@ -75,7 +75,7 @@ claims:
       Farmers who also kept animals, in a village lived in for about a thousand years: barley, wheat, lentil and other
       pulses were found, with the bones of goat or sheep, pig, deer and nilgai.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in sankalia-1975-early-farmers-village.txt (sha256 2487ae20dbb74eed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in sankalia-1975-early-farmers-village.txt (sha256 2487ae20dbb74eed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
     value: { plan: rectangular, length: { lo: 2.75, hi: 6.66 }, width: { lo: 2.57, hi: 4.4 }, walls: wattle-and-daub }
@@ -104,7 +104,7 @@ claims:
       very thin screens of mud and reed that had fallen onto the floors. The roof is not described, and is left to
       the generator. The pit houses of the Malwa period are not drawn: the article's sizes for them do not agree.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in sankalia-1975-early-farmers-village.txt (sha256 2487ae20dbb74eed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in sankalia-1975-early-farmers-village.txt (sha256 2487ae20dbb74eed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
     value: { pattern: nucleated, spacing: { lo: 1.5, hi: 2 } }
@@ -119,4 +119,4 @@ claims:
       slept in the large Malwa house, with its built-in furniture: a ceiling for the largest house, not a household,
       so none is written.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in sankalia-1975-early-farmers-village.txt (sha256 2487ae20dbb74eed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in sankalia-1975-early-farmers-village.txt (sha256 2487ae20dbb74eed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

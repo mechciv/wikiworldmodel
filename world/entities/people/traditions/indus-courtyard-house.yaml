@@ -24,7 +24,7 @@ claims:
     method: expert-estimate
     note: The start of the mature, urban phase of the civilization, taken as the start of its city house.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in lancelotti-2018.txt (sha256 ed18977fa1f8f878), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-indus-valley-civilisation.txt (sha256 746600d1d517eb71) and lancelotti-2018-indus-fuel.txt (sha256 1dc0c9208e2b87a1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   end:
     prop: end
     value: 1900 BCE
@@ -40,7 +40,7 @@ claims:
       The end of the urban phase. People went on living at Lothal and elsewhere after it, the Lothal article says in "poorly
       built houses and reed huts"; that later housing is not this tradition.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in lancelotti-2018.txt (sha256 ed18977fa1f8f878), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-indus-valley-civilisation.txt (sha256 746600d1d517eb71) and lancelotti-2018-indus-fuel.txt (sha256 1dc0c9208e2b87a1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["105", "107", "109"] }
@@ -60,7 +60,7 @@ claims:
       outlines. The house is not claimed for all of any of them: the sources describe the cities, and say that most people
       lived in the countryside.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-indus-valley-civilisation.txt (sha256 b60abe492ff0c871), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-indus-valley-civilisation.txt (sha256 746600d1d517eb71) and wikipedia-lothal.txt (sha256 b445624a22f203aa), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [townspeople]
@@ -80,7 +80,7 @@ claims:
       The courtyard houses the article describes stood inside the cities, whose people were mostly traders and artisans.
       Farmers are not named: no source read says the houses of the villages were built round a courtyard.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-indus-valley-civilisation.txt (sha256 746600d1d517eb71), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-indus-valley-civilisation.txt (sha256 746600d1d517eb71), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
     value: { plan: courtyard, court: true, storeys: { lo: 1, hi: 2 } }
@@ -101,7 +101,27 @@ claims:
       tradition and the generator: the same article says the houses of the cities were of baked brick and those of the
       countryside of mud brick, and the Lothal article has houses of mud and brick there. No source read gives a house's size.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-indus-valley-civilisation.txt (sha256 b60abe492ff0c871), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-harappan-architecture.txt (sha256 05a5b1f9eeb040d5), wikipedia-indus-valley-civilisation.txt (sha256 746600d1d517eb71) and wikipedia-lothal.txt (sha256 b445624a22f203aa), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  outbuildings:
+    prop: outbuildings
+    value:
+      - { use: well, per: settlement }
+    source:
+      - ref: src:wikipedia-harappan-architecture
+        loc: section "Overview", "Planning"
+        quote: with each block containing a network of houses and public wells
+      - ref: src:wikipedia-lothal
+        loc: section "Excavated Lothal", "Dockyard"
+        quote: The identification of just two wells in the town, one on the southern edge of the dock and the other on the acropolis
+    method: excavation
+    note: >-
+      Public wells among the houses of the blocks, in the article on Harappan architecture, which is an encyclopedia
+      cited because nothing better was read; at Lothal two wells were identified in the whole town, one by the dock and
+      one on the acropolis, a count put forward by those who read the dock as a tank. How many to a town is not stated for the tradition. The houses' own wells of the great
+      cities are the narrower tradition's. The granaries of the citadels are not written: they stood in the citadels,
+      not among the houses, and their use as granaries is disputed.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-harappan-architecture.txt (sha256 05a5b1f9eeb040d5) and wikipedia-lothal.txt (sha256 b445624a22f203aa), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   town:
     prop: town_form
     value: { streets: grid }
@@ -117,4 +137,4 @@ claims:
       the size of a block, are not given there, so only the streets are claimed; at Lothal a wall of mudbrick, at Kanmer one of
       stone, show that the walls' material varied.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-harappan-architecture.txt (sha256 05a5b1f9eeb040d5), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-harappan-architecture.txt (sha256 05a5b1f9eeb040d5), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

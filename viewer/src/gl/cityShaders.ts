@@ -1030,6 +1030,256 @@ Surface surface(int m, vec3 p, vec2 uv, float tint, vec3 n, float fw, out vec3 b
   return s;
 }
 
+// What houses are built of (world/generators/city/kit.ts, from 50), and their thatch and mud. A pattern is laid in the
+// house's own frame (q, in metres, z up from its foot) and along its walls and up its roofs (uv, in metres), so that
+// planks, courses and weaves stay with the house however it is turned; weather is laid in the world (p). The colours are
+// the renderer's, and nobody's record: what a house was built of is its tradition's claim, what colour that was is not.
+const int WATTLE=50, LIMEWASH=51, HALFTIMBER=52, LOGS=53, PLANKS=54, RUBBLE=55, MATTING=56, FELT=57, TANNED=58, HAIRCLOTH=59, SOD=60, SNOW=61, EARTHROOF=62, SHINGLE=63, LEAFTHATCH=64, BRUSHWOOD=65, REEDWORK=66, ROPE=67, PAINTED=68, ADOBE=69, CLAYTILE=70;
+
+bool isBuilt(int m) { return m >= 50 || m == THATCH || m == MUD; }
+
+// Old wood goes grey where the weather reaches it.
+vec3 weathered(vec3 wood, vec3 p, float age) {
+  return mix(wood, vec3(0.34, 0.32, 0.29) * (0.8 + 0.4 * noiseM(p, 0.3)), (0.2 + 0.5 * age) * smoothstep(0.35, 0.75, fbmM(p + 5.0, 1.8)));
+}
+
+// Splash and damp at the foot of a wall, streaks down it from its top.
+vec3 walled(vec3 c, vec3 p, vec3 q, float stain) {
+  float foot = 1.0 - smoothstep(0.0, 0.5 + 0.5 * noiseM(p, 0.8), q.z);
+  c = mix(c, c * vec3(0.64, 0.58, 0.50), foot * stain);
+  float streak = smoothstep(0.5, 0.85, noiseS(p, vec3(0.2, 0.2, 3.0)));
+  return c * (1.0 - 0.13 * streak * stain);
+}
+
+Surface built(int m, vec3 q, vec3 p, vec2 uv, float tint, vec3 n, float fw, out vec3 bumpN) {
+  Surface s;
+  s.rough = 0.93;
+  s.metal = 0.0;
+  s.bump = 0.0;
+  bumpN = n;
+  // Each house its own age and its own shade, from its tint.
+  float age = fract(tint * 11.3);
+  float shade = fract(tint * 29.7);
+  if (m == THATCH) {
+    // Thatch of straw, grass or reed: bundles in courses down the slope, their butts ragged; gold when new, grey-brown
+    // and mossy when old.
+    vec3 straw = mix(vec3(0.50, 0.40, 0.20), vec3(0.27, 0.24, 0.17), 0.2 + 0.65 * age);
+    float lap = fract((uv.y + 0.06 * noiseM(p, 0.3)) / 0.42);
+    float vis = visible(0.42, fw);
+    straw *= mix(0.92, 0.68 + 0.36 * smoothstep(0.0, 0.34, lap), vis);
+    float near = visible(0.03, fw);
+    straw *= mix(0.96, 0.7 + 0.52 * noiseS(p, vec3(0.025, 0.025, 0.6)), near);
+    straw = mix(straw, vec3(0.19, 0.23, 0.10), smoothstep(0.56, 0.8, fbmM(p + 11.0, 1.9)) * age * 0.6);
+    s.albedo = straw * (0.84 + 0.32 * fbmM(p, 1.3));
+    s.rough = 0.96;
+  } else if (m == MUD) {
+    // Mud plaster, cob or rammed earth: smoothed by hand, runnelled by rain, dark at its foot.
+    vec3 earth = mix(vec3(0.52, 0.42, 0.30), vec3(0.41, 0.32, 0.23), shade);
+    earth *= 0.84 + 0.28 * fbmM(p, 0.9);
+    earth *= 0.93 + 0.14 * noiseM(p, 0.07) * visible(0.07, fw);
+    // The lifts it was built up in, faintly.
+    earth *= 1.0 - 0.06 * smoothstep(0.86, 0.97, fract(q.z / 0.5)) * visible(0.3, fw);
+    s.albedo = walled(earth, p, q, 0.7);
+  } else if (m == ADOBE) {
+    // Sun-dried bricks in their courses, in mud mortar.
+    vec3 earth = mix(vec3(0.53, 0.43, 0.31), vec3(0.43, 0.34, 0.25), shade);
+    vec2 c = courses(vec2(uv.x, q.z), vec2(0.4, 0.12));
+    float vis = visible(0.12, fw);
+    earth *= mix(0.94, (0.84 + 0.26 * c.y) * (0.7 + 0.3 * smoothstep(0.0, 0.014, c.x)), vis);
+    earth *= 0.84 + 0.3 * fbmM(p, 1.0);
+    s.albedo = walled(earth, p, q, 0.8);
+  } else if (m == WATTLE) {
+    // Rods woven round stakes.
+    float row = floor(q.z / 0.05);
+    float weave = 0.5 + 0.5 * cos((uv.x / 0.42 + mod(row, 2.0) * 0.5) * 6.2831853);
+    float rod = abs(fract(q.z / 0.05) - 0.5) * 2.0;
+    vec3 base = mix(vec3(0.31, 0.24, 0.15), vec3(0.42, 0.33, 0.21), shade);
+    base *= mix(0.86, (0.6 + 0.4 * weave) * (1.0 - 0.5 * rod * rod), visible(0.05, fw));
+    s.albedo = weathered(base, p, age) * (0.8 + 0.4 * fbmM(p, 1.1));
+  } else if (m == LIMEWASH || m == PAINTED) {
+    // Lime on a wall: white, stained at its foot, flaked in patches to the daub beneath. Painted, it has bands of red
+    // earth: a dado, or stripes.
+    vec3 base = mix(vec3(0.80, 0.78, 0.71), vec3(0.87, 0.85, 0.79), shade);
+    if (m == PAINTED) {
+      vec3 red = vec3(0.47, 0.19, 0.11) * (0.85 + 0.3 * noiseM(p, 0.4));
+      float stripes = step(0.5, fract(uv.x / 0.9));
+      float dado = 1.0 - smoothstep(0.86, 0.9, q.z);
+      base = mix(base, red, mix(dado, stripes, step(0.5, age)));
+    }
+    base *= 0.86 + 0.2 * fbmM(p, 1.6);
+    float worn = smoothstep(0.64, 0.76, fbmM(p + 3.1, 0.9));
+    base = mix(base, vec3(0.50, 0.41, 0.29), worn * (0.25 + 0.4 * age));
+    s.albedo = walled(base, p, q, 0.9);
+    s.rough = 0.88;
+  } else if (m == HALFTIMBER) {
+    // A frame of timber, its panels filled and daubed: posts, rails, and a brace in a panel here and there.
+    float post = abs(fract(uv.x / 1.3 + 0.5) - 0.5) * 1.3;
+    float rail = abs(fract(q.z / 1.15 + 0.5) - 0.5) * 1.15;
+    vec2 cell = floor(vec2(uv.x / 1.3, q.z / 1.15));
+    vec2 f = fract(vec2(uv.x / 1.3, q.z / 1.15));
+    float brace = hash(cell) < 0.28 ? abs(f.x - (hash(cell + 7.0) < 0.5 ? f.y : 1.0 - f.y)) * 0.85 : 1.0;
+    float timber = 1.0 - smoothstep(0.065, 0.085, min(min(post, rail), brace));
+    vec3 wood = weathered(vec3(0.17, 0.12, 0.08) * (0.7 + 0.6 * noiseS(p, vec3(0.03, 0.03, 0.4))), p, age);
+    vec3 daub = mix(vec3(0.70, 0.64, 0.50), vec3(0.80, 0.76, 0.66), shade) * (0.86 + 0.2 * fbmM(p, 1.4));
+    daub = walled(daub, p, q, 0.8);
+    float vis = visible(0.5, fw);
+    s.albedo = mix(mix(daub, wood, 0.2), mix(daub, wood, timber), vis);
+  } else if (m == LOGS) {
+    // Logs laid one on another: each round, with the seam between them in shadow.
+    float t = fract(q.z / 0.22);
+    float vis = visible(0.22, fw);
+    vec3 base = mix(vec3(0.31, 0.21, 0.13), vec3(0.40, 0.29, 0.18), shade) * (0.7 + 0.5 * noiseS(p.zxy, vec3(0.04, 0.6, 0.6)));
+    base *= mix(0.86, 0.42 + 0.62 * sin(t * 3.14159), vis);
+    bumpN = normalize(n + vec3(0.0, 0.0, 1.0) * (t - 0.5) * 1.1 * vis);
+    s.albedo = weathered(base, p, age);
+    s.rough = 0.88;
+  } else if (m == PLANKS) {
+    // Boards, upright, with the gaps between them.
+    float a = fract(uv.x / 0.26);
+    float id = hash(vec2(floor(uv.x / 0.26), 3.0));
+    vec3 base = mix(vec3(0.34, 0.24, 0.15), vec3(0.43, 0.33, 0.23), shade) * (0.8 + 0.28 * id);
+    base *= 0.72 + 0.5 * noiseS(p, vec3(0.03, 0.03, 0.6));
+    base *= mix(0.92, 0.5 + 0.5 * smoothstep(0.0, 0.07, min(a, 1.0 - a)), visible(0.26, fw));
+    s.albedo = weathered(base, p, age);
+    s.rough = 0.88;
+  } else if (m == RUBBLE) {
+    // Rough stone, laid dry or in mud: stones of many sizes in wandering courses.
+    vec2 w = vec2(uv.x + 0.14 * noiseM(p, 0.5), q.z + 0.06 * noiseM(p + 2.0, 0.4));
+    vec2 c = courses(w, vec2(0.46, 0.2));
+    vec3 stone = mix(vec3(0.38, 0.36, 0.33), vec3(0.56, 0.52, 0.45), c.y);
+    stone = mix(stone, stone * vec3(1.08, 0.98, 0.84), shade);
+    float vis = visible(0.2, fw);
+    stone *= mix(0.84, 0.4 + 0.6 * smoothstep(0.0, 0.024, c.x), vis);
+    stone *= 0.8 + 0.4 * fbmM(p, 0.7);
+    // Lichen and moss where it is damp.
+    stone = mix(stone, vec3(0.30, 0.33, 0.20), smoothstep(0.62, 0.8, fbmM(p + 8.0, 1.4)) * 0.4);
+    s.albedo = stone;
+    s.rough = 0.95;
+  } else if (m == MATTING) {
+    // Mats woven of split bamboo, palm leaf or grass, lashed on in sheets.
+    vec2 g = uv / 0.11;
+    float ch = mod(floor(g.x) + floor(g.y), 2.0);
+    float strand = ch > 0.5 ? abs(fract(g.x * 3.0) - 0.5) : abs(fract(g.y * 3.0) - 0.5);
+    vec3 base = mix(vec3(0.52, 0.44, 0.25), vec3(0.42, 0.37, 0.24), 0.2 + 0.6 * age);
+    base *= mix(0.94, (0.76 + 0.24 * ch) * (0.78 + 0.44 * strand), visible(0.11, fw));
+    float seam = abs(fract(uv.x / 1.8 + 0.5) - 0.5) * 1.8;
+    base *= mix(1.0, 0.62 + 0.38 * smoothstep(0.0, 0.05, seam), visible(0.4, fw));
+    s.albedo = base * (0.82 + 0.36 * fbmM(p, 1.3));
+  } else if (m == FELT) {
+    // Felt: pale, soft, grimed at its foot and smoked at its top.
+    vec3 base = mix(vec3(0.63, 0.60, 0.53), vec3(0.74, 0.72, 0.66), shade);
+    base *= 0.86 + 0.22 * fbmM(p, 0.9);
+    base *= 0.95 + 0.1 * noiseM(p, 0.04) * visible(0.04, fw);
+    float dirt = 1.0 - smoothstep(0.0, 0.7, q.z);
+    base = mix(base, base * vec3(0.70, 0.64, 0.54), dirt * 0.6);
+    // The edges of its sheets, where one laps the next.
+    float lap = abs(fract(uv.x / 2.1 + 0.5) - 0.5) * 2.1;
+    base *= mix(1.0, 0.86 + 0.14 * smoothstep(0.0, 0.04, lap), visible(0.4, fw));
+    s.albedo = base;
+    s.rough = 0.97;
+  } else if (m == TANNED) {
+    // Hides sewn together: each its own shade, the seams between them, the top dark with smoke.
+    vec2 c = courses(vec2(uv.x + 0.2 * noiseM(p, 0.7), uv.y), vec2(1.5, 1.15));
+    vec3 base = mix(vec3(0.50, 0.40, 0.27), vec3(0.63, 0.54, 0.39), shade) * (0.84 + 0.22 * c.y);
+    base *= mix(1.0, 0.58 + 0.42 * smoothstep(0.0, 0.03, c.x), visible(0.5, fw));
+    base = mix(base, base * vec3(0.36, 0.31, 0.27), smoothstep(2.4, 4.4, q.z) * 0.8);
+    s.albedo = base * (0.85 + 0.3 * fbmM(p, 0.8));
+    s.rough = 0.8;
+  } else if (m == HAIRCLOTH) {
+    // Cloth woven of goat's or yak's hair, in long strips sewn edge to edge: near black, browner where it has worn.
+    vec3 base = mix(vec3(0.045, 0.04, 0.035), vec3(0.09, 0.075, 0.058), shade);
+    float strip = abs(fract(uv.x / 0.7 + 0.5) - 0.5) * 0.7;
+    base *= mix(1.0, 0.66 + 0.34 * smoothstep(0.0, 0.03, strip), visible(0.3, fw));
+    base *= mix(1.0, 0.78 + 0.44 * noiseM(p, 0.012), visible(0.012, fw));
+    s.albedo = base * (0.72 + 0.6 * fbmM(p, 0.6));
+    s.rough = 0.97;
+  } else if (m == SOD) {
+    // Turf: grass where it faces the sky, and cut sods in their courses where it is a wall.
+    float up = smoothstep(0.35, 0.7, n.z);
+    vec3 grass = mix(vec3(0.15, 0.21, 0.08), vec3(0.30, 0.31, 0.13), fbmM(p, 2.0)) * (0.84 + 0.32 * noiseM(p, 0.2));
+    vec3 earth = mix(vec3(0.20, 0.16, 0.10), vec3(0.29, 0.23, 0.15), shade) * (0.8 + 0.4 * noiseM(p, 0.25));
+    float vis = visible(0.14, fw);
+    vec3 side = mix(earth, grass * 0.8, smoothstep(0.7, 0.95, fract(q.z / 0.14)) * vis + 0.25 * (1.0 - vis));
+    s.albedo = mix(side, grass, up);
+    s.rough = 0.96;
+  } else if (m == SNOW) {
+    // Blocks of snow, their joints faint.
+    vec2 c = courses(uv, vec2(0.8, 0.42));
+    vec3 base = vec3(0.84, 0.89, 0.95) * (0.92 + 0.1 * c.y);
+    base *= mix(1.0, 0.8 + 0.2 * smoothstep(0.0, 0.03, c.x), visible(0.42, fw));
+    s.albedo = base * (0.94 + 0.1 * fbmM(p, 1.2));
+    s.rough = 0.55;
+  } else if (m == EARTHROOF) {
+    // Earth over beams and matting: dry, cracked, with weeds where it holds the rain.
+    vec3 earth = mix(vec3(0.47, 0.39, 0.28), vec3(0.40, 0.33, 0.24), shade) * (0.84 + 0.3 * fbmM(p, 1.1));
+    float weeds = smoothstep(0.58, 0.72, fbmM(p + 9.0, 1.7)) * smoothstep(0.3, 0.8, n.z);
+    earth = mix(earth, vec3(0.30, 0.30, 0.14) * (0.8 + 0.4 * noiseM(p, 0.2)), weeds * 0.7);
+    float crack = 1.0 - smoothstep(0.0, 0.035, abs(noiseM(p, 0.5) - 0.5));
+    s.albedo = earth * (1.0 - 0.3 * crack * visible(0.1, fw));
+  } else if (m == SHINGLE) {
+    // Shingles or boards on a roof: rows lapping down the slope, weathered grey.
+    vec2 g = uv / vec2(0.15, 0.32);
+    float row = floor(g.y);
+    float x = g.x + mod(row, 2.0) * 0.5;
+    float a = fract(x);
+    vec3 base = mix(vec3(0.31, 0.26, 0.21), vec3(0.42, 0.39, 0.35), 0.2 + 0.7 * age) * (0.8 + 0.4 * hash(vec2(floor(x), row)));
+    float vis = visible(0.15, fw);
+    base *= mix(0.9, (0.58 + 0.42 * smoothstep(0.0, 0.08, min(a, 1.0 - a))) * (0.7 + 0.3 * smoothstep(0.0, 0.14, fract(g.y))), vis);
+    s.albedo = base * (0.8 + 0.4 * fbmM(p, 1.8));
+    s.rough = 0.9;
+  } else if (m == CLAYTILE) {
+    // Fired tiles in rows down the slope, a ridge over each joint: dull red to grey, as the kiln left them.
+    vec2 g = uv / vec2(0.3, 0.42);
+    float a = fract(g.x);
+    float prof = abs(a - 0.5) * 2.0;
+    float vis = visible(0.3, fw);
+    vec3 base = mix(vec3(0.33, 0.31, 0.30), vec3(0.42, 0.30, 0.24), shade * 0.6);
+    base *= 0.78 + 0.44 * fbmM(p, 2.2);
+    base *= mix(1.0, 0.82 + 0.34 * hash(vec2(floor(g.x), floor(g.y))), vis);
+    base *= mix(0.88, 0.62 + 0.46 * pow(prof, 3.0), vis);
+    base *= mix(1.0, 0.8 + 0.2 * smoothstep(0.0, 0.1, fract(g.y)), visible(0.42, fw));
+    base = mix(base, base * vec3(0.7, 0.78, 0.66), smoothstep(0.5, 0.75, fbmM(p + 7.0, 4.5)) * 0.5);
+    vec3 t = normalize(cross(vec3(0.0, 0.0, 1.0), n) + vec3(1e-4));
+    bumpN = normalize(n + t * (a - 0.5) * 0.7 * vis);
+    s.albedo = base;
+    s.rough = 0.8;
+  } else if (m == LEAFTHATCH) {
+    // Leaves laid like tiles: each row's edge scalloped over the next, green when new and brown when dry.
+    vec2 g = uv / vec2(0.28, 0.24);
+    float row = floor(g.y);
+    float x = g.x + mod(row, 2.0) * 0.5;
+    float leaf = abs(fract(x) - 0.5) * 2.0;
+    float edge = smoothstep(0.0, 0.2, fract(g.y) - 0.35 * leaf * leaf);
+    vec3 dry = mix(vec3(0.34, 0.29, 0.14), vec3(0.25, 0.25, 0.13), shade);
+    vec3 base = mix(dry, vec3(0.19, 0.27, 0.10), smoothstep(0.5, 0.75, fbmM(p + 4.0, 2.2)) * (1.0 - age) * 0.7);
+    base *= 0.74 + 0.3 * hash(vec2(floor(x), row));
+    base *= mix(0.9, (0.55 + 0.45 * edge) * (0.82 + 0.18 * (1.0 - leaf)), visible(0.24, fw));
+    s.albedo = base * (0.82 + 0.36 * fbmM(p, 1.5));
+  } else if (m == BRUSHWOOD) {
+    // Boughs and brushwood: a tangle of sticks, grey where it is dead thorn, with a little green where it still grows.
+    vec3 base = mix(vec3(0.15, 0.125, 0.095), vec3(0.22, 0.18, 0.125), shade);
+    float tw = noiseS(p, vec3(0.03, 0.2, 0.03)) * 0.5 + noiseS(p.yzx, vec3(0.03, 0.2, 0.03)) * 0.5;
+    base = mix(base, vec3(0.10, 0.15, 0.06), smoothstep(0.55, 0.75, fbmM(p + 2.0, 0.7)) * 0.5);
+    s.albedo = base * (0.45 + 1.1 * tw) * (0.8 + 0.4 * fbmM(p, 0.9));
+    s.rough = 0.97;
+  } else if (m == REEDWORK) {
+    // Reeds in bundles, bound at every few spans.
+    vec3 base = mix(vec3(0.51, 0.43, 0.23), vec3(0.41, 0.36, 0.22), 0.2 + 0.6 * age);
+    base *= mix(0.94, 0.66 + 0.6 * noiseS(p, vec3(0.02, 0.02, 0.9)), visible(0.03, fw));
+    float bundle = abs(fract(uv.x / 0.24) - 0.5) * 2.0;
+    base *= mix(1.0, 0.7 + 0.3 * (1.0 - bundle * bundle), visible(0.24, fw));
+    float tie = abs(fract(uv.y / 0.7 + 0.5) - 0.5) * 0.7;
+    base *= mix(1.0, 0.68 + 0.32 * smoothstep(0.0, 0.03, tie), visible(0.2, fw));
+    s.albedo = base * (0.85 + 0.3 * fbmM(p, 1.6));
+  } else if (m == ROPE) {
+    s.albedo = vec3(0.21, 0.16, 0.10) * (0.7 + 0.6 * noiseM(p, 0.02));
+    s.rough = 0.95;
+  } else {
+    s.albedo = vec3(0.6);
+  }
+  return s;
+}
+
 // Leaves, on cards and in the mass inside a crown: patches across the crown as sun and age colour it, and each leaf its
 // own shade. Their colours are the renderer's, and nobody's record.
 Surface leaves(int m, vec3 p, float tint, float shade, float family) {
@@ -1130,6 +1380,7 @@ void main() {
   Surface s;
   if (leafy) s = leaves(vMaterial, vPos, vTint, cover.y, cover.z);
   else if (vMaterial == FACADE) s = facade(vPos, vUv, vTint, fw, n, glass);
+  else if (isBuilt(vMaterial)) s = built(vMaterial, vLocal, vPos, vUv, vTint, n, fw, bumped);
   else s = surface(vMaterial, vPos, vUv, vTint, n, fw, bumped);
   bool skin = vMaterial == HIDE || vMaterial == FUR || vMaterial == FEATHER || vMaterial == CHITIN || vMaterial == MEMBRANE;
   if (skin) {
@@ -1402,8 +1653,10 @@ vec3 peopled(vec3 c, vec3 p, float dist) {
   vec3 grazed = mix(vec3(0.30, 0.31, 0.15), vec3(0.37, 0.35, 0.19), noiseM(p, 30.0));
   c = mix(c, grazed, f.g * 0.75);
   c = mix(c, plots(p, dist, f.a), f.r);
-  vec3 trodden = mix(vec3(0.40, 0.34, 0.25), vec3(0.47, 0.41, 0.31), noiseM(p, 6.0));
-  return mix(c, trodden, f.b * 0.85);
+  // Among the houses the ground is trodden bare in patches, where feet and hooves go; between them it keeps what grew.
+  vec3 trodden = mix(vec3(0.36, 0.30, 0.22), vec3(0.46, 0.40, 0.30), noiseM(p, 6.0));
+  float worn = smoothstep(0.36, 0.6, noiseM(p, 11.0) * 0.55 + noiseM(p + 7.0, 3.0) * 0.45);
+  return mix(c, trodden, f.b * (0.4 + 0.5 * worn));
 }
 // Bump by a height, from its derivatives across the screen (Mikkelsen 2010): a detail normal with no texture of its own.
 vec3 bumped(vec3 n, vec3 p, float h, float strength) {

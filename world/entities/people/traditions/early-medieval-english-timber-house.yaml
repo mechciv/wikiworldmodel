@@ -29,7 +29,7 @@ claims:
       own example of a record, the site at Bishopstone in Sussex, is dated to the fifth. The dates are the excavators',
       and the source says that few buildings of the period can be dated closely.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in marshall-marshall-1991-anglo-saxon-buildings.txt (sha256 20346e55515c1e84), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in marshall-marshall-1991-anglo-saxon-buildings.txt (sha256 20346e55515c1e84), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   end:
     prop: end
     value: { ref: people/traditions/later-medieval-english-peasant-house, edge: start }
@@ -51,7 +51,7 @@ claims:
       source's buildings are no later than the ninth century, so the houses of the tenth to twelfth centuries are held
       here by that one statement.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in dyer-1986-english-peasant-buildings.txt (sha256 3ef1b244c818fded), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in dyer-1986-english-peasant-buildings.txt (sha256 3ef1b244c818fded), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["38"] }
@@ -64,7 +64,7 @@ claims:
       Region 38 (United Kingdom and Ireland), for England, over the whole of which the source finds the style. Wales,
       Scotland and Ireland are not claimed.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in marshall-marshall-1991-anglo-saxon-buildings.txt (sha256 20346e55515c1e84), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in marshall-marshall-1991-anglo-saxon-buildings.txt (sha256 20346e55515c1e84), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [farmers]
@@ -87,7 +87,7 @@ claims:
       ellipses in its quote stand for footnote numbers. The great halls of the sites it takes to be of high status,
       Yeavering a royal seat among them, are larger than the house drawn here.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in marshall-marshall-1991-anglo-saxon-buildings.txt (sha256 20346e55515c1e84) and dyer-1986-english-peasant-buildings.txt (sha256 3ef1b244c818fded), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in marshall-marshall-1991-anglo-saxon-buildings.txt (sha256 20346e55515c1e84) and dyer-1986-english-peasant-buildings.txt (sha256 3ef1b244c818fded), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
     value: { plan: rectangular, width: { lo: 4.5, hi: 6.5 }, length: { lo: 7, hi: 14 }, walls: timber }
@@ -125,4 +125,4 @@ claims:
       and what the roof was of, the source does not say, as only the plans survive. Its data base holds no
       sunken-featured buildings.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in marshall-marshall-1991-anglo-saxon-buildings.txt (sha256 20346e55515c1e84), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in marshall-marshall-1991-anglo-saxon-buildings.txt (sha256 20346e55515c1e84), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

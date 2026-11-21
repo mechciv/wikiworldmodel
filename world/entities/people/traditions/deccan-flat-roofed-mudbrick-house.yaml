@@ -30,7 +30,7 @@ claims:
       house is surely older, and no earlier account of the common house of the Deccan was read. No end is given, and
       none is known from what was read: the latest account, the gazetteer of 1908, has it as the house of its own day.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in coats-1823-township-of-lony.txt (sha256 7365f9e73aa7ab4f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in coats-1823-township-of-lony.txt (sha256 7365f9e73aa7ab4f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["108"] }
@@ -50,7 +50,7 @@ claims:
       two storeys with tiled roofs, and huts of wattle and daub thatched with grass or palm leaves. So the house is
       not claimed for all of the region.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in coats-1823-township-of-lony.txt (sha256 7365f9e73aa7ab4f) and imperial-gazetteer-of-india-1908.txt (sha256 6cdf9985eed79137), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in coats-1823-township-of-lony.txt (sha256 7365f9e73aa7ab4f) and imperial-gazetteer-of-india-1908.txt (sha256 6cdf9985eed79137), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [farmers]
@@ -66,10 +66,10 @@ claims:
       Farmers: the Maratha cultivators of Lony, a township of 568 people, and the agricultural classes of Berar. The
       houses of the towns of the Deccan were not read of, and are not claimed.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in coats-1823-township-of-lony.txt (sha256 7365f9e73aa7ab4f) and imperial-gazetteer-of-india-1908.txt (sha256 6cdf9985eed79137), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in coats-1823-township-of-lony.txt (sha256 7365f9e73aa7ab4f) and imperial-gazetteer-of-india-1908.txt (sha256 6cdf9985eed79137), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { plan: rectangular, storeys: 1, rooms: { lo: 2, hi: 4 }, walls: mudbrick, roof: flat, roof_material: earth }
+    value: { plan: rectangular, storeys: 1, rooms: { lo: 2, hi: 4 }, walls: mudbrick, roof: flat, roof_material: earth, windows: none, veranda: true, byre: true }
     source:
       - ref: src:coats-1823-township-of-lony
         loc: "p. 191 of the reprint of 1877"
@@ -80,6 +80,14 @@ claims:
       - ref: src:coats-1823-township-of-lony
         loc: "p. 191 of the reprint of 1877"
         quote: the body of the house (muzghur), which is divided into two, three, or four small rooms
+      - ref: src:coats-1823-township-of-lony
+        loc: "p. 192 of the reprint of 1877"
+        quote: openings to admit tlie air and light
+      - ref: src:coats-1823-township-of-lony
+        loc: "p. 191 of the reprint of 1877"
+        quote: >-
+          a sort of open portico (wosuree) runs along the front of the dwelling-house ; the poorer employ this to tie
+          their cattle in, and the richer as a store-room, or keep it clean to sit in.
       - ref: src:coats-1823-township-of-lony
         loc: "p. 192 of the reprint of 1877"
         quote: A good terraced house for a cultivator and six or eight bullocks will be 30 cubits long, and 20 wide
@@ -112,13 +120,31 @@ claims:
       inches, which it does not state, that house would be about 13.7 m by 9.1 m. The poorest lived in houses of 10 or
       12 feet by 4 or 5, covered with grass, which are not drawn. In Berar in 1908 the walls were of the same
       sun-dried brick, the roofs of thatch or tiles with flat roofs of earth also common, the labourer had one or two
-      rooms with a small walled yard in front, and the poorest huts of hurdles or grass mats daubed with mud.
+      rooms with a small walled yard in front, and the poorest huts of hurdles or grass mats daubed with mud. No
+      windows: Coats's small rooms had no openings to let in the air and light (the scan reads "the" as "tlie", and the
+      quote keeps it). The veranda is his open portico along the front of the house, with another behind opening into a
+      private court; the vocabulary's porch is a porch before a door, and this ran the length of the front, so it is
+      written as a veranda. The cattle under the roof are the poorer cultivators', tied in that portico, and the good
+      house of 30 cubits by 20 was one "for a cultivator and six or eight bullocks"; the better houses had sheds for
+      their cattle about a walled court besides, which the outbuildings claim lists. Coats says all the houses had
+      square gable-ends while their tops were terraced, which the roof's one word does not hold; the walls of five
+      cubits and the doors of three by one and a half are left out, as the length of his cubit is not stated. Which
+      way the door faced, how the smoke left and how the walls were finished are not said.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in coats-1823-township-of-lony.txt (sha256 7365f9e73aa7ab4f) and imperial-gazetteer-of-india-1908.txt (sha256 6cdf9985eed79137), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in coats-1823-township-of-lony.txt (sha256 7365f9e73aa7ab4f) and imperial-gazetteer-of-india-1908.txt (sha256 6cdf9985eed79137), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
-    value: { pattern: walled, houses: 107, household: 5 }
+    value: { pattern: walled, enclosure: wall, yard: wall, houses: 107, household: 5 }
     source:
+      - ref: src:coats-1823-township-of-lony
+        loc: "p. 191 of the reprint of 1877"
+        quote: >-
+          the best are surrounded by a square dead wall, which is entered by a low door; two or three sides are
+          occupied by sheds for cattle, husbandry implements, &c., and one only by the dwelling-house ; if a wall does
+          not inclose the whole, there is a walled court in front, or in the rear, or both.
+      - ref: src:imperial-gazetteer-of-india-1908
+        loc: "vol. VII, article Berar, p. 381"
+        quote: with a small dngan or yard enclosed by a mud wall in front of the house.
       - ref: src:coats-1823-township-of-lony
         loc: "pp. 190–191 of the reprint of 1877"
         quote: >-
@@ -147,6 +173,57 @@ claims:
       one township counted. Five to a house is Coats's "rather more than five", from his count of 568 inhabitants in
       those houses, a few of which held more than one family; the census of 1901 found a mean of 5·2 for India, from
       which the gazetteer says Bombay differs little. In the first quote the ellipsis stands for a footnote and the
-      turn of the page, between which the wall's girth of five furlongs is given.
+      turn of the page, between which the wall's girth of five furlongs is given. The enclosure is that mud wall round
+      the village. Each house's yard was walled: at Lony the best houses stood within a square dead wall, the others
+      with a walled court before or behind or both, and in Berar in 1908 the labourer's house had a small yard walled
+      with mud in front of it (the scan misreads its name, angan).
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in coats-1823-township-of-lony.txt (sha256 7365f9e73aa7ab4f) and imperial-gazetteer-of-india-1908.txt (sha256 6cdf9985eed79137), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in coats-1823-township-of-lony.txt (sha256 7365f9e73aa7ab4f) and imperial-gazetteer-of-india-1908.txt (sha256 6cdf9985eed79137), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  outbuildings:
+    prop: outbuildings
+    value:
+      - { use: byre, per: house }
+      - { use: hall, per: settlement, count: 1, plan: square, width: 9.1, length: 9.1, roof: gable, roof_material: tile }
+      - { use: shrine, per: settlement, plan: rectangular, length: 4.9, width: 3.0, walls: stone, roof: flat }
+      - { use: shrine, per: settlement, plan: square, width: 7.9, length: 7.9, roof: flat, roof_material: earth }
+      - { use: shrine, per: settlement, roof_material: tile }
+    source:
+      - ref: src:coats-1823-township-of-lony
+        loc: "p. 191 of the reprint of 1877"
+        quote: >-
+          two or three sides are occupied by sheds for cattle, husbandry implements, &c., and one only by the dwelling-house
+      - ref: src:coats-1823-township-of-lony
+        loc: "p. 191 of the reprint of 1877"
+        quote: >-
+          the public buildings are the Chowree, or town-hall ; three Hindoo temples, one dedicated to Mahadeo, one to
+          Hanuman, and the third to Byroo
+      - ref: src:coats-1823-township-of-lony
+        loc: "p. 192 of the reprint of 1877"
+        quote: >-
+          is a building 30 feet square, with square gable-ends, and a roof of tiles supported on a treble row of square
+          wooden posts
+      - ref: src:coats-1823-township-of-lony
+        loc: "p. 193 of the reprint of 1877"
+        quote: >-
+          The temple of Mahadeo is built of hewn stone, and lime, with a terraced roof of the same materials; it is
+          about 16 feet long and 10 wide
+      - ref: src:coats-1823-township-of-lony
+        loc: "p. 193 of the reprint of 1877"
+        quote: >-
+          The temple of Hanuman is a building 26 fset square, with a flat roof terraced with white earth, open in front
+      - ref: src:coats-1823-township-of-lony
+        loc: "p. 193 of the reprint of 1877"
+        quote: The temple of Byroo is a tiled building, open in front
+    method: documentary
+    note: >-
+      All from Coats's Lony of 1819, one township, set down for the tradition. The cattle sheds are the better houses':
+      two or three sides of the square walled court were taken up by sheds for cattle and husbandry implements, and
+      one by the house; the poorer tied their cattle in the portico, which the dwelling claim says. The town hall, the
+      Chowree, where the township's business was done and travellers lodged, was 30 feet square under a roof of tiles
+      with square gable-ends, 9.1 m by the writer's conversion. The three temples are the village's: Mahadeo's of hewn
+      stone and lime with a terraced roof of the same, 16 feet by 10 (4.9 by 3.0 m); Hanuman's 26 feet square (7.9 m)
+      with a flat roof terraced with white earth on rows of wooden posts, open in front (the scan misreads "feet" as
+      "fset", and the quote keeps it); Byroo's a mean tiled building open in front, whose size is not given. A ruined
+      mosque of 10 cubits by 5 is left out. Every village is drawn with these, though Coats counts them for Lony alone.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in coats-1823-township-of-lony.txt (sha256 7365f9e73aa7ab4f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

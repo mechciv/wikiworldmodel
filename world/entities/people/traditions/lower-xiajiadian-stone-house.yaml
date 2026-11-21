@@ -22,7 +22,7 @@ claims:
     method: radiometric/radiocarbon
     note: The modelled transition from the earthen to the stone settlements, at 68.3% confidence; 1622–1536 BC at 95.4%.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in xiajiadian-2022.txt (sha256 c67e38a3b4bc7edb), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in tang-2022-lower-xiajiadian-settlements.txt (sha256 ae1e304c43481b17), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   end:
     prop: end
     value: { lo: 1375 BCE, hi: 1295 BCE }
@@ -40,7 +40,7 @@ claims:
       The end of the whole culture, as the stone settlements were its last. The stone sites' own dates sum to only 1580–1448 BC
       at 68.3% confidence, but they come from three sites, and the authors think their span was likely longer.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in xiajiadian-2022.txt (sha256 c67e38a3b4bc7edb), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in tang-2022-lower-xiajiadian-settlements.txt (sha256 ae1e304c43481b17), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [farmers]
@@ -62,7 +62,7 @@ claims:
       the millet they grew. The paper's words for the largest hillforts are central settlements, not towns, so townspeople
       are not named.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in tang-2022-lower-xiajiadian-settlements.txt (sha256 ae1e304c43481b17), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in tang-2022-lower-xiajiadian-settlements.txt (sha256 ae1e304c43481b17), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
     value: { walls: stone, floor: ground }
@@ -78,20 +78,25 @@ claims:
       Stone walls, from the first quote. The floor at ground level is from the second, which the paper reports of one site,
       Gaojiataizi near Chifeng, where the stone houses were built over earlier pit houses of mudbrick.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in xiajiadian-2022.txt (sha256 c67e38a3b4bc7edb), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in tang-2022-lower-xiajiadian-settlements.txt (sha256 ae1e304c43481b17), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
-    value: { pattern: walled }
+    value: { pattern: walled, enclosure: wall }
     source:
-      ref: src:tang-2022-lower-xiajiadian-settlements
-      loc: section 4, "Settlement construction and relative chronology"
-      quote: External walls have been found in all reported Type B settlements.
+      - ref: src:tang-2022-lower-xiajiadian-settlements
+        loc: section 4, "Settlement construction and relative chronology"
+        quote: External walls have been found in all reported Type B settlements.
+      - ref: src:tang-2022-lower-xiajiadian-settlements
+        loc: section 4, "Settlement construction and relative chronology"
+        quote: Type B sites feature well-preserved stone houses, installations, enclosures, and paved roads surrounded by defensive stone walls.
     method: excavation
     note: >-
       Within the walls the households still kept their walled yards, as the broader tradition says. The paper adds that most
-      small sites of the culture were not fortified.
+      small sites of the culture were not fortified. The enclosure is the defensive wall of stone; the paper has it
+      built where natural cliffs did not protect the site, up to three metres wide at Sanzuodian, with round bastions
+      on its outer face, and a moat outside it at one site, Kangjiatun, in its second phase.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in xiajiadian-2022.txt (sha256 c67e38a3b4bc7edb), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in tang-2022-lower-xiajiadian-settlements.txt (sha256 ae1e304c43481b17), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
 relations:
   broader:
     rel: member-of
@@ -101,4 +106,4 @@ relations:
       loc: section 4, "Settlement construction and relative chronology"
       quote: they should be regarded as one cultural group
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in xiajiadian-2022.txt (sha256 c67e38a3b4bc7edb), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in tang-2022-lower-xiajiadian-settlements.txt (sha256 ae1e304c43481b17), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

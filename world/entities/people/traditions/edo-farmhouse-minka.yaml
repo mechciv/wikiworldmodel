@@ -30,7 +30,7 @@ claims:
       dictionary dates, are of the later seventeenth century and after. No end is given: farmhouses of this kind were
       built into the Meiji period, past the span of this record's sources.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in hayami-2010-population-family-central-japan.txt (sha256 801f4f30e86ac227) and jaanus-dictionary.txt (sha256 9d242cd750c47f8e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in hayami-2010-population-family-central-japan.txt (sha256 801f4f30e86ac227) and jaanus-dictionary.txt (sha256 9d242cd750c47f8e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["124"] }
@@ -45,7 +45,7 @@ claims:
       Region 124 (Japan), where the dictionary places the hall-plan farmhouse and its kin across Honshu, Kyushu and
       Shikoku. Hokkaido and the Ryukyus are not claimed.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in jaanus-dictionary.txt (sha256 9d242cd750c47f8e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in jaanus-dictionary.txt (sha256 9d242cd750c47f8e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [farmers]
@@ -64,10 +64,10 @@ claims:
       of prosperous farmers and headmen; the houses of poorer farmers were smaller (see the household claim's sources),
       and the record does not tell them apart.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in jaanus-dictionary.txt (sha256 9d242cd750c47f8e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in jaanus-dictionary.txt (sha256 9d242cd750c47f8e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { walls: timber, roof_material: thatch, floor: raised, rooms: { lo: 3, hi: 5 } }
+    value: { walls: timber, roof_material: thatch, floor: raised, rooms: { lo: 3, hi: 5 }, windows: small, smoke: hole, byre: true }
     source:
       - ref: src:jaanus-dictionary
         loc: s.v. minka
@@ -94,6 +94,19 @@ claims:
         quote: >-
           The number of rooms at the upper end beyond the hiroma varies: most commonly there are two, but sometimes
           there are three or four rooms.
+      - ref: src:jaanus-dictionary
+        loc: s.v. minka
+        quote: In general, early minka were relatively closed with small windows and single sliding doors
+      - ref: src:jaanus-dictionary
+        loc: s.v. doma
+        quote: >-
+          the doma was usually open to the underside of the rafters allowing smoke to rise and escape through a smoke
+          hole, *kemuridashi 煙出, in the roof.
+      - ref: src:jaanus-dictionary
+        loc: s.v. doma
+        quote: >-
+          It often included an area for pounding or milling rice, *usuniwa 臼庭 or usunaya 臼納屋, and a stable, *umaya
+          馬屋, the floor of which was often excavated to about 25 cm below ground level.
     method: expert-estimate
     note: >-
       A timber house under thatch. The floor is half earth and half raised timber; the vocabulary has no word for that,
@@ -102,9 +115,16 @@ claims:
       the hall plan, four in the four-room plan; the earth-floored space is not counted. The roof was gabled, hipped or
       hipped-and-gabled, and the dictionary names no one of them as usual, so its shape is left out; so is a size, which
       no source read gives in metres. The one village whose houses were measured (Shitsukawa, in 1884) gives building
-      areas of 6.75, 13.63 and 16.90 tsubo for houses of one, two and three rooms.
+      areas of 6.75, 13.63 and 16.90 tsubo for houses of one, two and three rooms. The windows, the smoke and the byre
+      are the dictionary's too: early minka had small windows, and larger openings and paired sliding doors came in
+      from the mid-Edo period, so "small" is the earlier house's; the smoke rose through the doma, open to the rafters,
+      and left by a smoke hole (kemuridashi) in the roof; the doma of a farmhouse often held a stable (umaya), so
+      animals were stalled under the house's roof, "often" and not always. Which side the great door (ōdoguchi) was in
+      is not a rule: the dictionary names houses entered from the gable and from the long side, and the entrance is
+      left out; so is the pitch, which it says varied by region, steepest in the gasshō houses. No source read here
+      names a building that stood by the farmhouse.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in jaanus-dictionary.txt (sha256 9d242cd750c47f8e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in jaanus-dictionary.txt (sha256 9d242cd750c47f8e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
     value: { household: { lo: 4.19, hi: 5.76 } }
@@ -127,7 +147,7 @@ claims:
       range runs from the lowest of the averages cited to the highest; a household is not a house, but the sources
       count one house to a household.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in hayami-2010-population-family-central-japan.txt (sha256 801f4f30e86ac227) and miura-tani-2010-shitsukawa-farmhouses.txt (sha256 f087a308f4ab6802), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in hayami-2010-population-family-central-japan.txt (sha256 801f4f30e86ac227) and miura-tani-2010-shitsukawa-farmhouses.txt (sha256 f087a308f4ab6802), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
 relations:
   broader:
     rel: member-of

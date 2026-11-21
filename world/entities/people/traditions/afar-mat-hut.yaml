@@ -24,7 +24,7 @@ claims:
       from Tajura to Shoa that year. It bounds the start and does not date it: the hut is surely older. No end is given: no
       source read says when it went out of use.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in harris-1844-highlands-of-aethiopia.txt (sha256 95709d11ef0466e9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in harris-1844-highlands-of-aethiopia.txt (sha256 95709d11ef0466e9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["90", "91"] }
@@ -40,7 +40,7 @@ claims:
       Djibouti (90), where Tajura is (the OCR reads "Dan&kil" and "Tajiira" for Danákil and Tajúra), and Ethiopia (91), through whose Afar lowlands the road to Shoa ran. The Afar also
       lived in what is now Eritrea, in the same region 90; no source read places the hut beyond the embassy's road.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in harris-1844-highlands-of-aethiopia.txt (sha256 95709d11ef0466e9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in harris-1844-highlands-of-aethiopia.txt (sha256 95709d11ef0466e9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [herders]
@@ -55,10 +55,10 @@ claims:
       Herders: the passage is of the wife's work, who tended the sheep and goats and moved the hut with the camp to new
       pools and pastures; Harris has milk as their chief food.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in harris-1844-highlands-of-aethiopia.txt (sha256 95709d11ef0466e9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in harris-1844-highlands-of-aethiopia.txt (sha256 95709d11ef0466e9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { plan: rectangular, length: 2.4, width: 1.8, height: 1.5, walls: none, roof: vault, roof_material: reed, floor: ground }
+    value: { plan: rectangular, length: 2.4, width: 1.8, height: 1.5, walls: none, roof: vault, roof_material: mat, floor: ground }
     source:
       ref: src:harris-1844-highlands-of-aethiopia
       loc: 'vol. 1, chapter "The gentle Adaiel, and farewell to them", p. 357'
@@ -70,9 +70,11 @@ claims:
     note: >-
       8 ft long, 6 ft broad and 5 ft high (2.4 by 1.8 m, 1.5 m high), as Harris gives it for the huts in general, not for one
       he measured. The branches bent into arches make the roof a vault coming down to the ground, so there are no walls.
-      The roof is a mat of date-palm leaf, entered as reed, the nearest word, which is mats of reed.
+      The roof is a mat of date-palm leaf: first entered as reed, the nearest word then, and now as mat, woven mats, the
+      word Harris's "a mat composed of date leaves" names; a refinement, not a disagreement. The doorway is only "the narrow
+      aperture of each matted wigwam" (p. 165), with no place in the hut, and is left to the generator.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in harris-1844-highlands-of-aethiopia.txt (sha256 95709d11ef0466e9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in harris-1844-highlands-of-aethiopia.txt (sha256 95709d11ef0466e9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
     value: { pattern: camp }
@@ -90,4 +92,4 @@ claims:
       Camps of huts moved from place to place. How many huts stood in a camp, and how many people lived in one, is not
       stated.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in harris-1844-highlands-of-aethiopia.txt (sha256 95709d11ef0466e9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in harris-1844-highlands-of-aethiopia.txt (sha256 95709d11ef0466e9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

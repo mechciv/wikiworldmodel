@@ -26,7 +26,7 @@ claims:
       not date it: the hut is surely older, and no source read here says how much. No end is given: the source read
       describes camps still moving, and none read says when the hut went out of use.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in tanaka-1974-central-kalahari-bushmen.txt (sha256 f65c726b5b2f5134), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in tanaka-1974-central-kalahari-bushmen.txt (sha256 f65c726b5b2f5134), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["87"] }
@@ -40,7 +40,7 @@ claims:
       and South Africa, may have built such huts too, but no source read here describes theirs, so their regions are left
       out; nor is the hut claimed for all of Botswana.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in tanaka-1974-central-kalahari-bushmen.txt (sha256 f65c726b5b2f5134), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in tanaka-1974-central-kalahari-bushmen.txt (sha256 f65c726b5b2f5134), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [foragers]
@@ -53,7 +53,7 @@ claims:
       Foragers: the G/wi and G//ana of the source lived by hunting and gathering, moving their camps with the seasons. The
       source also has many San already living among the Tswana and on white farms; their houses are not this tradition.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in tanaka-1974-central-kalahari-bushmen.txt (sha256 f65c726b5b2f5134), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in tanaka-1974-central-kalahari-bushmen.txt (sha256 f65c726b5b2f5134), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
     value: { plan: round, diameter: 2, height: 2, walls: pole-and-thatch, roof: dome, roof_material: thatch, floor: ground }
@@ -72,10 +72,10 @@ claims:
       huts in general. The grass covers the frame down to the ground, so wall and roof are one: walls of pole-and-thatch
       under a thatched dome. The source has the hut as a shade and windbreak, life being lived at the fire in front of it.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in tanaka-1974-central-kalahari-bushmen.txt (sha256 f65c726b5b2f5134), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in tanaka-1974-central-kalahari-bushmen.txt (sha256 f65c726b5b2f5134), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
-    value: { pattern: camp, houses: { lo: 1, hi: 20 } }
+    value: { pattern: camp, layout: ring, houses: { lo: 1, hi: 20 } }
     source:
       - ref: src:tanaka-1974-central-kalahari-bushmen
         loc: 'ch. 3, section "2. Dwellings", p. 24'
@@ -89,6 +89,9 @@ claims:
     note: >-
       Camps of one family to about twenty, the huts set in a circle; the same passage has a hut for each nuclear family,
       though the text layer garbles that sentence and it is not quoted, so camps of 1 to 20 families are taken as 1 to 20
-      huts. How many people lived in a hut is not stated.
+      huts. The huts usually stood in a circle, which is the layout, a ring; whether open ground was left at its middle is
+      not said. How many people lived in a hut is not stated. The same page has the hut thatched leaving a space for the
+      entrance, with a fire built near it outside, but not where in the hut the entrance was, and no building besides the
+      huts.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in tanaka-1974-central-kalahari-bushmen.txt (sha256 f65c726b5b2f5134), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in tanaka-1974-central-kalahari-bushmen.txt (sha256 f65c726b5b2f5134), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

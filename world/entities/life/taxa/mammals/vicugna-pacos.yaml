@@ -10,6 +10,78 @@ claims:
     value: { en: "alpacas", la: "Vicugna pacos" }
     source: { ref: src:opentree-taxonomy-3.7, loc: "tnrs/match_names: Vicugna pacos, ott906301" }
     note: Open Tree gives the scientific name; the English name is an editorial gloss.
+  form:
+    prop: body_form
+    value:
+      hip: 0.55
+      behave: { group: [2, 10], habitat: open, poses: [graze, stand, stand, walk] }
+      parts:
+        body:
+          sides: [14, 8]
+          rings:
+            - [-0.445, 0.74, 0.68, 0.012]
+            - [-0.43, 0.88, 0.8, 0.022]
+            - [-0.4, 0.96, 0.88, 0.028]
+            - [-0.385, 0.8, 0.7, 0.03]
+            - [-0.345, 0.975, 0.51, 0.1]
+            - [-0.32, 1.02, 0.46, 0.128]
+            - [-0.22, 1.03, 0.45, 0.134]
+            - [-0.1, 1.03, 0.44, 0.136]
+            - [0.02, 1.03, 0.45, 0.13]
+            - [0.1, 1.04, 0.5, 0.112]
+            - [0.15, 1.06, 0.6, 0.088]
+          neck: { r: 0.05, steps: [5, 2] }
+        rump: { type: lump, mat: fur, sides: [12, 8], bands: [6, 4], at: [0, -0.32, 0.74], r: [0.125, 0.11, 0.152] }
+        hind: { y: -0.27, x: 0.07, top: 0.76, knee: 0.52, ankle: 0.3, r: 0.06, swing: 0.06 }
+        fore: { y: 0.09, x: 0.066, top: 0.6, r: 0.036, swing: 0.06 }
+        head:
+          sides: [12, 6]
+          at:
+            stand: { y: 0.235, z: 1.45, pitch: 0.2 }
+            alert: { y: 0.225, z: 1.55, pitch: 0.08 }
+            low: { y: 0.32, reach: 0.145, pitch: 1.05 }
+          rings:
+            - [-0.012, 0.004, 0.03, 0.034]
+            - [0.028, 0.008, 0.036, 0.04]
+            - [0.065, 0.0, 0.028, 0.03]
+            - [0.1, -0.008, 0.021, 0.022]
+            - [0.128, -0.012, 0.019, 0.018]
+        topknot: { type: lump, on: head, mat: fur, sides: [8, 5], bands: [4, 3], at: [0, 0.012, 0.04], r: [0.03, 0.03, 0.022] }
+        ears: { from: [0.022, 0.0, 0.03], to: [0.03, -0.012, 0.07], r: 0.011 }
+        eyes: { at: [0.028, 0.05, 0.02] }
+    unsourced: >-
+      A machine's reconstruction of an alpaca in its fleece, from the account of Lama pacos on the Animal Diversity
+      Web: a small head with pointed ears on an upright neck, and long hair on the body, legs and neck but short on
+      the head and feet. The rest is as alpacas are generally known: lower and woollier than a llama, with a tuft of
+      wool on the crown and a short tail. Its proportions are a drawing's, and no measurements of any animal. Only
+      compared with its sheet.
+  length:
+    prop: body_length
+    value: { lo: 1.2, hi: 2.25 }
+    source:
+      ref: src:animal-diversity-web
+      loc: "account of Lama pacos, Physical Description"
+      quote: "Head and body length ranges from 1200 to 2250 mm"
+    method: compilation
+    note: >-
+      The same account gives alpacas a shoulder height of 900 to 1,300 mm, more than the 81 to 99 cm of Wikipedia's
+      article, so its lengths may be long for them too. The length of the head and body of an animal with so long a neck
+      is more than it stands from nose to tail.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in animal-diversity-web-lama-pacos.txt (sha256 ecbe773ee671f4f9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  hip:
+    prop: hip_height
+    value: { lo: 0.81, hi: 0.99 }
+    source:
+      ref: src:wikipedia-alpaca
+      loc: "section \"Background\""
+      quote: "An adult alpaca generally is between 81 and 99 centimetres (32 and 39 inches) in height at the shoulders (withers)."
+    method: compilation
+    note: >-
+      From Wikipedia, as its figure is for the alpaca alone. A height at the withers, taken for the height of the back at
+      the hips.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-alpaca.txt (sha256 9e811e1182b40829), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   mass:
     prop: body_mass
     value: { lo: 48, hi: 90 }

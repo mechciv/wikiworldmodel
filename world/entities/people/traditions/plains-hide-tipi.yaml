@@ -30,7 +30,7 @@ claims:
       end is given: the review read has the Plains peoples moved into Western-style housing by the late nineteenth century,
       but tipis are still put up, and no source read dates when they ceased to be lived in.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in winship-1904-journey-of-coronado.txt (sha256 b60324e626b614fe), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in winship-1904-journey-of-coronado.txt (sha256 b60324e626b614fe), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["6", "7", "8", "20"] }
@@ -48,7 +48,7 @@ claims:
       the second source, which names the Blackfoot and the Cree. The plains of the United States between them (16, 17) were
       surely tipi country too, but no source read here places the tipi there, so they are left out.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in winship-1904-journey-of-coronado.txt (sha256 b60324e626b614fe) and mashford-pringle-2023-indigenous-building-structures.txt (sha256 738a150881c2faa4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in winship-1904-journey-of-coronado.txt (sha256 b60324e626b614fe) and mashford-pringle-2023-indigenous-building-structures.txt (sha256 738a150881c2faa4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [foragers]
@@ -66,10 +66,10 @@ claims:
       Foragers: hunters of the bison who did not farm, following the herds. The farming peoples of the plains, such as
       those of Quivira, lived in other houses.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in winship-1904-journey-of-coronado.txt (sha256 b60324e626b614fe) and mashford-pringle-2023-indigenous-building-structures.txt (sha256 738a150881c2faa4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in winship-1904-journey-of-coronado.txt (sha256 b60324e626b614fe) and mashford-pringle-2023-indigenous-building-structures.txt (sha256 738a150881c2faa4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { plan: round, diameter: { lo: 4.3, hi: 4.9 }, height: 5.2, walls: hide, roof: tent, roof_material: hide, floor: ground }
+    value: { plan: round, diameter: { lo: 4.3, hi: 4.9 }, height: 5.2, walls: hide, roof: tent, roof_material: hide, floor: ground, faces: east, smoke: hole }
     source:
       - ref: src:mashford-pringle-2023-indigenous-building-structures
         loc: 'section 3.1, "Identified Themes", on the tipi'
@@ -80,13 +80,25 @@ claims:
       - ref: src:winship-1904-journey-of-coronado
         loc: 'Relación del Suceso, p. 210'
         quote: they set them up over some poles they have made for this purpose, which come together and are tied at the top
+      - ref: src:wissler-1910-blackfoot-material-culture
+        loc: 'section "The Tipi", p. 104'
+        quote: The door of a tipi always faces the east.
+      - ref: src:wissler-1910-blackfoot-material-culture
+        loc: 'section "The Tipi", p. 105'
+        quote: >-
+          Another interesting part of the tipi is the arrangement for guarding the smoke hole, a large opening in front of
+          the crossing of the poles. This is flanked by two pointed sail-like projections of the cover.
     method: survey
     note: >-
       A cone of about twenty poles under a cover of 12 to 14 bison hides, 14 to 16 feet across (4.3–4.9 m) and about 17 feet
       high (5.2 m), from the review, which has it of the Blackfoot from Oldershaw (1987); the poles tied at the top from
       the Relación of Coronado's expedition, of the Querechos' tents in 1541. The hide cover is wall and roof at once.
+      The door facing east and the smoke hole, a large opening at the top below the crossing of the poles, flanked by
+      two "ears" of the cover set on outside poles to keep the wind from driving the smoke back, are Wissler's, of the
+      Blackfoot tipi of 1910; his were then covered with canvas, but he has the cover of buffalo skins before. The door
+      itself, a narrow oval eighteen inches above the ground with a curtain over it, has no word beyond its direction.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in mashford-pringle-2023-indigenous-building-structures.txt (sha256 738a150881c2faa4) and winship-1904-journey-of-coronado.txt (sha256 b60324e626b614fe), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in mashford-pringle-2023-indigenous-building-structures.txt (sha256 738a150881c2faa4), winship-1904-journey-of-coronado.txt (sha256 b60324e626b614fe) and wissler-1910-blackfoot-material-culture.txt (sha256 9b4753d40de346d1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
     value: { pattern: camp, household: 8 }
@@ -103,4 +115,4 @@ claims:
       a camp is not given in general: the Traslado counts one settlement of about 200 tents on the plains in 1541, a single
       camp, which is not made a rule here.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in mashford-pringle-2023-indigenous-building-structures.txt (sha256 738a150881c2faa4) and winship-1904-journey-of-coronado.txt (sha256 b60324e626b614fe), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in mashford-pringle-2023-indigenous-building-structures.txt (sha256 738a150881c2faa4) and winship-1904-journey-of-coronado.txt (sha256 b60324e626b614fe), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

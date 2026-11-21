@@ -10,6 +10,41 @@ claims:
     value: { en: "domestic cattle", la: "Bos taurus" }
     source: { ref: src:opentree-taxonomy-3.7, loc: "tnrs/match_names: Bos taurus, ott490099" }
     note: Open Tree gives the scientific name; the English name is an editorial gloss.
+  body-plan:
+    prop: body_plan
+    value: ox
+    unsourced: >-
+      Which plan draws it: an editorial classification. The plan is a machine's drawing of an ox, from the account of
+      Bos taurus on the Animal Diversity Web, a short neck with a dewlap hanging below it, two horns and a long tufted
+      tail, and otherwise as cattle are generally known; it was only compared with its sheet.
+  length:
+    prop: body_length
+    value: { mean: 2.4765, sd: 0.094 }
+    source:
+      ref: src:anderson-2003-sizing-holstein-cows
+      loc: "section \"Cow measurements\""
+      quote: "Cows used for a behavior study in Quebec had a mean nose-to-tail length of 97.5 ± 3.7 inches (Haley 2001)."
+    method: compilation
+    note: >-
+      Holstein cows, a large dairy breed of today, from nose to tail as they stand: 97.5 ± 3.7 inches, in metres. The note
+      does not say what the ± is, and it is read as one standard deviation. It gives 95 inches for Friesian-Holsteins in
+      Britain and more than 102 for one herd in Ontario. Smaller breeds, and the cattle of the past, were shorter, and no
+      length for them was read.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in anderson-2003-sizing-holstein-cows.txt (sha256 66d6d7496a4c32ea), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  hip:
+    prop: hip_height
+    value: 1.473
+    source:
+      ref: src:anderson-2003-sizing-holstein-cows
+      loc: "section \"Holstein Canada and Holstein Association USA\""
+      quote: "According to information from Holstein Association USA, the average weight for the breed is 1500 lb. and rump height is 58 inches."
+    method: compilation
+    note: >-
+      The same breed's average height at the rump, 58 inches, in metres; a quarter of Canadian cows in their first
+      lactation stand 59 inches or more. Smaller breeds, and the cattle of the past, stood lower.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in anderson-2003-sizing-holstein-cows.txt (sha256 66d6d7496a4c32ea), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   mass:
     prop: body_mass
     value: { lo: 147, hi: 1363 }

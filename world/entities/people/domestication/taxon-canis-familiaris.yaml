@@ -12,6 +12,47 @@ claims:
     value: { en: dogs, la: "Canis lupus familiaris" }
     source: { ref: src:opentree-taxonomy-3.7, loc: "tnrs/match_names: Canis familiaris is a synonym of ott247333, accepted name Canis lupus familiaris" }
     note: Open Tree gives the scientific name; the English name is an editorial gloss.
+  form:
+    prop: body_form
+    value:
+      hip: 0.52
+      behave: { group: [1, 4], habitat: any, poses: [stand, stand, walk, rest] }
+      parts:
+        body:
+          sides: [12, 8]
+          rings:
+            - [-0.535, 1.5, 1.46, 0.008]
+            - [-0.55, 1.4, 1.32, 0.017]
+            - [-0.525, 1.26, 1.15, 0.022]
+            - [-0.47, 1.14, 1.02, 0.025]
+            - [-0.4, 1.05, 0.86, 0.04]
+            - [-0.345, 1.0, 0.6, 0.072]
+            - [-0.24, 0.99, 0.55, 0.079]
+            - [-0.08, 0.99, 0.46, 0.09]
+            - [0.09, 1.02, 0.4, 0.098]
+            - [0.17, 1.04, 0.47, 0.084]
+          neck: { r: 0.056, steps: [3, 1] }
+        hind: { y: -0.3, x: 0.046, top: 0.8, knee: 0.56, ankle: 0.3, r: 0.048, swing: 0.07 }
+        fore: { y: 0.11, x: 0.054, top: 0.6, r: 0.031, swing: 0.07 }
+        head:
+          sides: [12, 6]
+          at:
+            stand: { y: 0.27, z: 1.12, pitch: 0.3 }
+            alert: { y: 0.265, z: 1.24, pitch: 0.12 }
+            low: { y: 0.33, reach: 0.185, pitch: 0.95 }
+          rings:
+            - [-0.015, 0.006, 0.04, 0.042]
+            - [0.03, 0.012, 0.05, 0.05]
+            - [0.07, 0.004, 0.04, 0.038]
+            - [0.12, -0.012, 0.024, 0.024]
+            - [0.165, -0.018, 0.019, 0.017]
+        nose: { type: lump, on: head, near: true, mat: dark, sides: [5, 4], bands: [3, 2], at: [0, 0.18, -0.016], r: [0.009, 0.009, 0.008] }
+        ears: { from: [0.03, 0.01, 0.045], to: [0.045, -0.005, 0.1], r: 0.02 }
+        eyes: { at: [0.032, 0.062, 0.022], r: 0.006 }
+    unsourced: >-
+      A machine's reconstruction of a village dog of middling size, as such dogs are generally known: a deep chest and
+      a tucked belly, a wedge of a head with pricked ears, and the tail carried up in a sickle. Its proportions are a
+      drawing's, and no measurements of any animal. Only compared with its sheet.
   mass:
     prop: body_mass
     value: { lo: 0.5, hi: 79 }

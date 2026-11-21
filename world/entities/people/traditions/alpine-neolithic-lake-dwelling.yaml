@@ -25,7 +25,7 @@ claims:
       4300 BC, from the first of the Swiss lake dwellings, whose timbers are dated by their tree rings to the year. The
       source dates the Swiss ones only.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in schibler-2004-neolithic-lake-dwellings.txt (sha256 88c52cf2d9287923), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in schibler-2004-neolithic-lake-dwellings.txt (sha256 88c52cf2d9287923), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   end:
     prop: end
     value: 2450 BCE
@@ -46,7 +46,7 @@ claims:
       the source describes the houses of the Neolithic ones only, so the record ends with them. Within its span there
       are gaps of decades to a century and more with no known sites.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in schibler-2004-neolithic-lake-dwellings.txt (sha256 88c52cf2d9287923), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in schibler-2004-neolithic-lake-dwellings.txt (sha256 88c52cf2d9287923), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["43"] }
@@ -116,7 +116,7 @@ claims:
       Farmers, who grew cereals in fields cleared from the forest and kept cattle, sheep, goats and pigs; cereals gave
       most of their food in good years. They also hunted, fished and gathered, and more so when harvests failed.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in schibler-2004-neolithic-lake-dwellings.txt (sha256 88c52cf2d9287923), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in schibler-2004-neolithic-lake-dwellings.txt (sha256 88c52cf2d9287923), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
     value: { plan: rectangular, width: { lo: 3, hi: 6 }, length: { lo: 6, hi: 12 }, rooms: { lo: 1, hi: 2 }, walls: wattle-and-daub, roof_material: timber }
@@ -151,10 +151,10 @@ claims:
       and the vocabulary takes one word. The floors were built apart from the walls and roof and had to be renewed every
       four or five years, the whole house about every ten.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in schibler-2004-neolithic-lake-dwellings.txt (sha256 88c52cf2d9287923), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in schibler-2004-neolithic-lake-dwellings.txt (sha256 88c52cf2d9287923), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
-    value: { pattern: nucleated, houses: { lo: 6, hi: 100 }, household: { lo: 6, hi: 8 } }
+    value: { pattern: nucleated, layout: rows, houses: { lo: 6, hi: 100 }, household: { lo: 6, hi: 8 } }
     source:
       - ref: src:schibler-2004-neolithic-lake-dwellings
         loc: 'section "Life in the Neolithic Alpine region", "Villages and Houses"'
@@ -172,5 +172,8 @@ claims:
       Villages of houses set close in rows on the shore, of 500 to 10,000 square metres, each lived in for ten to thirty
       years. The household is the six to eight persons to a house with which the authors reckon the villages' people,
       an assumption of theirs and not a count; they call the house the centre of a large family of several generations.
+      The layout, rows, is the first quote's two or more rows, the houses' short sides to the water; that says which
+      way a house lay, not where its door was, and no entrance is claimed. Neither source read says what, if anything,
+      enclosed a village.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in schibler-2004-neolithic-lake-dwellings.txt (sha256 88c52cf2d9287923), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in schibler-2004-neolithic-lake-dwellings.txt (sha256 88c52cf2d9287923), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

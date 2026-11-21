@@ -1,0 +1,25 @@
+id: src:wissler-1910-blackfoot-material-culture
+type: publication
+kind: measurement
+citation: >-
+  Wissler, C. (1910). Material Culture of the Blackfoot Indians. Anthropological Papers of the American Museum of
+  Natural History, vol. V, part I. New York: American Museum of Natural History.
+authors: ["Wissler, C."]
+published: 1910
+title: Material Culture of the Blackfoot Indians
+container: Anthropological Papers of the American Museum of Natural History, vol. V, part I
+url: https://archive.org/details/materialcultureo00wiss
+via: >-
+  The Internet Archive's scan of the paper (materialcultureo00wiss), read in the text its OCR made
+  (materialcultureo00wiss_djvu.txt), which keeps the running heads with the page numbers.
+license: public domain
+reliability: >-
+  The museum's ethnography of the Blackfoot, from Wissler's own fieldwork among the Piegan and the other Blackfoot
+  tribes in the first decade of the twentieth century, compared with the accounts of Henry, Maximilian and Grinnell.
+  Its tipi is the tipi of its own day, covered with canvas; it says the cover was of twelve to fourteen buffalo skins
+  before.
+verified:
+  by: machine:claude-code
+  how: >-
+    The OCR text read on 20 November 2026: the section on the tipi (pp. 99–108) in full and the passage on drying meat
+    (p. 24); the quotes checked by script against that text.

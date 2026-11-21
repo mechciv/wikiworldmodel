@@ -38,7 +38,7 @@ claims:
       as nothing read gives their size, and a record of them is still to write. No end is given: the caves are lived in
       today, though the second source has people leaving them since the 1980s.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-yaodong.txt (sha256 a3cd3b88842d8e0a) and zhang-2021-silo-caves.txt (sha256 db56dca673041d41), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-yaodong.txt (sha256 a3cd3b88842d8e0a) and zhang-2021-silo-caves.txt (sha256 db56dca673041d41), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["119"] }
@@ -71,7 +71,7 @@ claims:
       extent than these regions give. The dwelling is not claimed for all of region 119 either: courtyard houses were
       built there too (people/traditions/north-china-courtyard-house).
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-yaodong.txt (sha256 a3cd3b88842d8e0a), zhou-2002-yaodong-thermal-environment.txt (sha256 614bc63a17fcd444) and zhang-2021-silo-caves.txt (sha256 db56dca673041d41), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-yaodong.txt (sha256 a3cd3b88842d8e0a), zhou-2002-yaodong-thermal-environment.txt (sha256 614bc63a17fcd444) and zhang-2021-silo-caves.txt (sha256 db56dca673041d41), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   prevalence:
     prop: prevalence
     value: some
@@ -116,10 +116,10 @@ claims:
       Yan'an as its example of the cliffside kind. They are not drawn: nothing read says how far the towns of the
       region were built so, and the courtyard house is written for their people.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-yaodong.txt (sha256 a3cd3b88842d8e0a), zhang-2021-silo-caves.txt (sha256 db56dca673041d41) and gao-2021-sunken-cave-dwellings.txt (sha256 fa12377c9efc94ec), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-yaodong.txt (sha256 a3cd3b88842d8e0a), zhang-2021-silo-caves.txt (sha256 db56dca673041d41) and gao-2021-sunken-cave-dwellings.txt (sha256 fa12377c9efc94ec), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { plan: rectangular, length: { lo: 5, hi: 12 }, rooms: { lo: 1, hi: 3 }, walls: earth-cut, roof: vault, roof_material: earth }
+    value: { plan: rectangular, length: { lo: 5, hi: 12 }, rooms: { lo: 1, hi: 3 }, walls: earth-cut, roof: vault, roof_material: earth, entrance: end, finish: mud, byre: true }
     source:
       - ref: src:wikipedia-yaodong
         loc: opening section
@@ -148,6 +148,24 @@ claims:
         quote: >-
           Di Keng Yuan, an underground rectangular courtyard is usually made up of more than 8 caves for a family,
           large or small, as well as livestock the family possesses to inhabit.
+      - ref: src:gao-2021-sunken-cave-dwellings
+        loc: 'section 4.2.1, "Orientation", p. 245'
+        quote: >-
+          Because only one side of the cave faces the courtyard and only one side functions as portal for light coming
+      - ref: src:gao-2021-sunken-cave-dwellings
+        loc: 'section 4.1, "The procedures of construction", on the faces of caves, p. 244'
+        quote: >-
+          Over the adobe bricks, they would apply mud with straws to even and to smooth the surface of the bricks.
+          Sometimes they would apply lime mortar over the mixture of mud and straws for protection and to beautify the
+          face of the cave.
+      - ref: src:gao-2021-sunken-cave-dwellings
+        loc: 'section 4.2.1, "Orientation", p. 246'
+        quote: >-
+          back in the days when cattle, sheep, chickens were kept by every household, they were kept at the end of the
+          cave. Men and animals shared spaces in one single cave.
+      - ref: src:wikipedia-yaodong
+        loc: section "Construction"
+        quote: The inside walls are usually plastered with lime to make them white.
     method: survey
     note: >-
       A cave with a rectangular floor and an arched top, cut into the loess, which is its walls and its roof: the
@@ -158,9 +176,16 @@ claims:
       openings side by side, the commonest kind by the encyclopedia. The other kind is the sunken courtyard, a pit 6 to
       7 m deep with caves in its four walls, more than eight to a family and its animals: it would be a courtyard plan
       with a sunken floor, and is left for a narrower record. A third kind, built above ground as a vault of brick or
-      stone, is not drawn.
+      stone, is not drawn. Each cave opens on one side only, its front, which is a short end of a cave that runs 5 to
+      12 m into the ground: the vocabulary's entrance in an end (the fourth source). Its face is of brick or of adobe
+      brick smoothed with mud and straw, sometimes with lime mortar over it, in Gao's villages of Sanmenxia, written as
+      the mud finish; the encyclopedia has the inside walls usually limewashed white. When every household kept
+      cattle, sheep and chickens, they were kept at the back of the cave, the people and the animals in one cave, as
+      the villagers told Gao: the vocabulary's animals under the same roof. The window beside the door, which Gao's
+      measured caves have and over which the bed lay, is not given a size, and is left out; so is the well dug in
+      every sunken court to drain it, which belongs to the narrower record of that kind.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-yaodong.txt (sha256 a3cd3b88842d8e0a), gao-2021-sunken-cave-dwellings.txt (sha256 fa12377c9efc94ec), zhou-2002-yaodong-thermal-environment.txt (sha256 614bc63a17fcd444) and zhang-2021-silo-caves.txt (sha256 db56dca673041d41), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-yaodong.txt (sha256 a3cd3b88842d8e0a), gao-2021-sunken-cave-dwellings.txt (sha256 fa12377c9efc94ec), zhou-2002-yaodong-thermal-environment.txt (sha256 614bc63a17fcd444) and zhang-2021-silo-caves.txt (sha256 db56dca673041d41), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
     value: { pattern: linear }
@@ -175,4 +200,4 @@ claims:
       in one village of western Henan in 1969. How many people lived in a dwelling is not given by anything read, and
       is left to the generator.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-yaodong.txt (sha256 a3cd3b88842d8e0a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-yaodong.txt (sha256 a3cd3b88842d8e0a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

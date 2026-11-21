@@ -36,7 +36,7 @@ claims:
       was still the usual house until the end of the Heian period, in 1185, so for eastern Japan this record starts
       too early; the region cannot be split here.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in west-2025-pit-to-surface-structures.txt (sha256 62e9aa916ad8c279) and jaanus-dictionary.txt (sha256 9d242cd750c47f8e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in west-2025-pit-to-surface-structures.txt (sha256 62e9aa916ad8c279) and jaanus-dictionary.txt (sha256 9d242cd750c47f8e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["124"] }
@@ -49,7 +49,7 @@ claims:
     method: editorial
     note: Region 124 (Japan), west, east and north of Honshu, Kyushu and Shikoku. Hokkaido and the Ryukyus are not claimed.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in jaanus-dictionary.txt (sha256 9d242cd750c47f8e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in jaanus-dictionary.txt (sha256 9d242cd750c47f8e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [farmers]
@@ -73,7 +73,7 @@ claims:
       The farmhouses whose posts were still set in the ground; the houses of the capitals were surface buildings too,
       but the townspeople's house is people/traditions/machiya-town-house, so only farmers are named here.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in jaanus-dictionary.txt (sha256 9d242cd750c47f8e) and west-2025-pit-to-surface-structures.txt (sha256 62e9aa916ad8c279), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in jaanus-dictionary.txt (sha256 9d242cd750c47f8e) and west-2025-pit-to-surface-structures.txt (sha256 62e9aa916ad8c279), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
     value: { floor: ground }
@@ -94,4 +94,4 @@ claims:
       Only the floor is stated. The walls stood on a frame of earthfast posts, but what they were made of, the roof, the
       plan and the size are not given by any source read here, and the generator guesses them.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in jaanus-dictionary.txt (sha256 9d242cd750c47f8e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in jaanus-dictionary.txt (sha256 9d242cd750c47f8e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

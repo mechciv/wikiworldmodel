@@ -33,7 +33,7 @@ claims:
       ground, and with them, the source argues, came carpentered frames. It says the change has not been closely dated
       anywhere, and that it came at different times in different regions.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in dyer-1986-english-peasant-buildings.txt (sha256 3ef1b244c818fded), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in dyer-1986-english-peasant-buildings.txt (sha256 3ef1b244c818fded), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   end:
     prop: end
     value: { lo: 1501 CE, hi: 1560 CE }
@@ -53,7 +53,7 @@ claims:
       second source dates the new features after 1540. Many of the houses stood long after, rebuilt with upper floors
       (people/traditions/english-house-of-the-great-rebuilding).
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in gardiner-2000-later-medieval-domestic-plan.txt (sha256 5a4b9112c3348a56) and dyer-1986-english-peasant-buildings.txt (sha256 3ef1b244c818fded), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in gardiner-2000-later-medieval-domestic-plan.txt (sha256 5a4b9112c3348a56) and dyer-1986-english-peasant-buildings.txt (sha256 3ef1b244c818fded), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["38"] }
@@ -74,7 +74,7 @@ claims:
       Midlands, East Anglia, Kent and Yorkshire. It says nothing of Wales, Scotland or Ireland, whose houses are not
       claimed here.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in dyer-1986-english-peasant-buildings.txt (sha256 3ef1b244c818fded), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in dyer-1986-english-peasant-buildings.txt (sha256 3ef1b244c818fded), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [farmers]
@@ -93,7 +93,7 @@ claims:
       more than four in five of the people of England about 1300. The houses of towns, which the source has as dearer,
       of two storeys and tiled, are not these.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in dyer-1986-english-peasant-buildings.txt (sha256 3ef1b244c818fded), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in dyer-1986-english-peasant-buildings.txt (sha256 3ef1b244c818fded), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
     value:
@@ -102,10 +102,14 @@ claims:
       length: { lo: 7.6, hi: 15.2 }
       storeys: { lo: 1, hi: 2 }
       rooms: { lo: 2, hi: 3 }
-      walls: wattle-and-daub
+      walls: timber-frame
+      finish: lime
       roof: gable
       roof_material: thatch
       floor: ground
+      entrance: side
+      windows: small
+      byre: false
     source:
       - ref: src:dyer-1986-english-peasant-buildings
         loc: 'section "Peasant buildings, 1200–1350", point 2, p. 35'
@@ -148,23 +152,45 @@ claims:
       - ref: src:dyer-1986-english-peasant-buildings
         loc: Conclusion, p. 42
         quote: because of their lack of built floors
+      - ref: src:dyer-1986-english-peasant-buildings
+        loc: Conclusion, p. 42
+        quote: also the small size of their unglazed windows, combined with open hearths
+      - ref: src:dyer-1986-english-peasant-buildings
+        loc: 'section "West Midland peasant buildings, 1350–1500", p. 24'
+        quote: >-
+          People and animals were usually accommodated in separate buildings. The long-house, in which dwelling and byre
+          came under the same roof, which is known from excavations in Gloucestershire in a 13th-century context … had
+          evidently become a rarity after 1350.
+      - ref: src:gardiner-2000-later-medieval-domestic-plan
+        loc: 'section "The later medieval domestic plan", p. 161'
+        quote: >-
+          The cross-entry was entered by a door at the side of the building and generally, as the name implies, allowed
+          access to a second door on the other side.
     method: excavation
     note: >-
       The width and length are those of the great majority of the thirteenth-century buildings excavated, which the source
       finds in line with the two or three bays, each about 4.6 m square, of the building agreements of 1350–1500. The
-      walls are the wattle and daub that filled a timber frame, which stood on a low stone footing in the west and north
-      and on the ground or on pad-stones in the east; the vocabulary has no word for a frame so filled, and wattle and
-      daub is the nearest. The frame was of crucks in the west midlands and the south-west and of posts in the east;
+      walls are a timber frame filled with wattle and daub, which stood on a low stone footing in the west and north
+      and on the ground or on pad-stones in the east: they were written wattle-and-daub before the vocabulary had
+      timber-frame, and are changed to it on the two quotes of p. 26 already cited (crucks, infilled with wattle and
+      daub), a narrowing and not a disagreement. Some sources show the walls plastered and limewashed, the same page
+      says, which is the finish; how many is not said. The frame was of crucks in the west midlands and the south-west and of posts in the east;
       Devon built in cob, the Cotswolds and the north sometimes in stone to the eaves. A gabled roof is read from one
       house only, which the lord built on a tenant's holding at Coleshill in Berkshire in the 1430s, and whose stone
       walls stood higher at the gables. Most houses were of one storey; upper floors spread from eastern England after 1350 and were common there
       by 1500. A hall and one or two chambers is the commonest division of a three-bay house in the west midlands;
-      Gardiner (2000) describes the plan as services, a cross-entry, a hall and sometimes a chamber.
+      Gardiner (2000) describes the plan as services, a cross-entry, a hall and sometimes a chamber. The way in, from
+      Gardiner (p. 161), was a door in the side of the house into the cross-entry, with generally a second door
+      opposite it, which the vocabulary cannot say; in some houses the second door was later blocked. The windows are
+      small and unglazed and the hearths open, from Dyer's conclusion, which says nothing of how the smoke left, and
+      that is left to the generator. No byre under the roof: after 1350 people and animals usually had separate
+      buildings, and the long-house was a rarity (Dyer, p. 24); in the thirteenth century long-houses were more widely
+      found, on Dartmoor and in the south-west above all (Dyer, p. 35), which this claim does not draw.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in dyer-1986-english-peasant-buildings.txt (sha256 3ef1b244c818fded), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in dyer-1986-english-peasant-buildings.txt (sha256 3ef1b244c818fded) and gardiner-2000-later-medieval-domestic-plan.txt (sha256 5a4b9112c3348a56), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
-    value: { pattern: nucleated, household: 5 }
+    value: { pattern: nucleated, household: 5, yard: ditch }
     source:
       - ref: src:dyer-1986-english-peasant-buildings
         loc: 'section "West Midland peasant buildings, 1350–1500", p. 24'
@@ -179,6 +205,10 @@ claims:
       - ref: src:dyer-1986-english-peasant-buildings
         loc: Conclusion, p. 42
         quote: the average English peasant family of five had … (8.3 sq. m) each in a two-bay house
+      - ref: src:dyer-1986-english-peasant-buildings
+        loc: 'section "West Midland peasant buildings, 1350–1500", p. 24'
+        quote: >-
+          It was usually of rectilinear shape and bounded by banks, hedges, fences or walls, with an external ditch.
     method: expert-estimate
     note: >-
       Villages, where each house stood on its plot beside its neighbours along a street; in districts of scattered
@@ -186,6 +216,55 @@ claims:
       often of a quarter of an acre, was bounded by banks, hedges, fences or walls and held a barn and often a
       bakehouse or a byre besides the house. The household is the "average English peasant family of five" by which the
       source reckons the floor to each person; it does not say where the figure comes from. The words left out of the
-      quote are "90 sq. ft.", which the recognition of the scan misreads.
+      quote are "90 sq. ft.", which the recognition of the scan misreads. Each yard (the toft) is ditched: the source
+      has it bounded by banks, hedges, fences or walls, with an external ditch, and the ditch is the one of these it
+      gives to all; the vocabulary takes one word.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in dyer-1986-english-peasant-buildings.txt (sha256 3ef1b244c818fded), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in dyer-1986-english-peasant-buildings.txt (sha256 3ef1b244c818fded), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  outbuildings:
+    prop: outbuildings
+    value:
+      - { use: granary, per: house, length: { lo: 9.2, hi: 13.7 } }
+      - { use: byre, per: house }
+      - { use: kitchen, per: house }
+    source:
+      - ref: src:dyer-1986-english-peasant-buildings
+        loc: 'section "West Midland peasant buildings, 1350–1500", p. 25'
+        quote: >-
+          Peasant holdings were normally provided with agricultural buildings as well as dwelling houses. Even a cottage
+          tenement might have a house, a granary, and a byre, though perhaps only two buildings, a house and barn, would
+          be found on some small-holdings.
+      - ref: src:dyer-1986-english-peasant-buildings
+        loc: 'section "West Midland peasant buildings, 1350–1500", p. 25'
+        quote: >-
+          The basic structures were those to provide living space for people, one building for animals (a byre or
+          sheepcote were the most common), and another for crop storage, either a barn (grangia) or granary (horreum)
+      - ref: src:dyer-1986-english-peasant-buildings
+        loc: 'section "West Midland peasant buildings, 1350–1500", p. 25'
+        quote: Frequently an additional building was a free-standing bakehouse
+      - ref: src:dyer-1986-english-peasant-buildings
+        loc: 'section "West Midland peasant buildings, 1350–1500", p. 25'
+        quote: Kitchens are mentioned as free-standing buildings
+      - ref: src:dyer-1986-english-peasant-buildings
+        loc: 'section "Documentary evidence for peasant buildings outside the West Midlands, 1350–1500", point 2, p. 34'
+        quote: >-
+          Individual houses and barns were mostly of two or three bays, so measured from about 30 to 45 ft (9.2 to 13.7 m)
+          in length.
+      - ref: src:gardiner-2000-later-medieval-domestic-plan
+        loc: 'section "The later medieval domestic plan", p. 162'
+        quote: >-
+          The number of buildings on a peasant farmstead may have increased in the period after 1350, though on many
+          farms before that date there would have already been a barn or kitchen.
+    method: historical-account
+    note: >-
+      Each holding's own buildings, from Dyer's reading of the manorial records of the West Midlands after 1350 (p. 25):
+      besides the house, one for animals (a byre or a sheepcote) and one for crops (a barn or a granary, which the
+      records name interchangeably, written granary here), and frequently a free-standing bakehouse, which may also
+      have been a brewhouse; kitchens stood free too. The bakehouse and the kitchen are one entry, kitchen, the
+      vocabulary's word for a cookhouse apart from the house. A barn's length is that of houses and barns of the
+      building agreements outside the West Midlands, two or three bays (p. 34). Gardiner (p. 162) has a barn or a
+      kitchen on many farms before 1350 too. The records name brewhouses, malt-kilns, stables, pigsties, dovecotes,
+      cart-houses and forges only now and then, and they are left out. How many holdings had each is not counted:
+      that is left to the generator.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in dyer-1986-english-peasant-buildings.txt (sha256 3ef1b244c818fded) and gardiner-2000-later-medieval-domestic-plan.txt (sha256 5a4b9112c3348a56), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

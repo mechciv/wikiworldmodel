@@ -10,6 +10,52 @@ claims:
     value: { en: "zebu (humped cattle)", la: "Bos indicus" }
     source: { ref: src:opentree-taxonomy-3.7, loc: "tnrs/match_names: Bos indicus, ott490109" }
     note: Open Tree gives the scientific name; the English name is an editorial gloss.
+  body-plan:
+    prop: body_plan
+    value: ox
+    unsourced: >-
+      Which plan draws it: an editorial classification, the zebu being cattle.
+  form:
+    prop: body_form
+    value:
+      hip: 0.66
+      parts:
+        hump: { type: lump, mat: fur, sides: [10, 6], bands: [5, 3], at: [0, 0.1, 0.9], r: [0.08, 0.11, 0.2] }
+        dewlap: { points: [[0, 0.2, 0.7], [0, 0.34, 0.76], [0, 0.34, 0.56], [0, 0.3, 0.42], [0, 0.23, 0.33], [0, 0.15, 0.36], [0, 0.11, 0.5]] }
+        horns: { points: [[0.04, -0.005, 0.045, 0.014], [0.07, -0.03, 0.085, 0.012], [0.085, -0.07, 0.135, 0.008], [0.07, -0.11, 0.185, 0.003]] }
+        ears: { at: [0.085, 0.03, -0.015], r: [0.022, 0.018, 0.05] }
+    unsourced: >-
+      A machine's reconstruction of a zebu: the ox it starts from, with the hump over the shoulders and the deep
+      hanging dewlap that zebu are generally known for, and, from Wikipedia's article on the Gir, long pendulous ears
+      and horns that turn out and back. Its proportions are a drawing's, and no measurements of any animal. Only
+      compared with its sheet.
+  length:
+    prop: body_length
+    value: { lo: 1.8, hi: 2.26 }
+    source:
+      ref: src:dimensions-com
+      loc: "page \"Zebu (Bos taurus indicus)\", Dimensions & Sizes"
+      quote: "Zebus have a shoulder height between 43.3”-55.1” (110-140 cm), body length from 71”-89” (180-226 cm)"
+    method: expert-estimate
+    note: >-
+      From a site of drawings for designers, which names no work for the figure and does not say how the length was
+      measured. It is given because nothing better stating a length for zebu could be read, and without it the animal is
+      drawn at the middle of all bovids' lengths. A measured length should take its place.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in dimensions-com.txt (sha256 481d614326cd01a6), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  hip:
+    prop: hip_height
+    value: { lo: 1.3, hi: 1.4 }
+    source:
+      ref: src:wikipedia-gyr-cattle
+      loc: "section \"Characteristics\""
+      quote: "Cows average 385 kg in weight and 130 cm in height; bulls weigh 545 kg on average, with a height of 140 cm."
+    method: compilation
+    note: >-
+      The average cow and bull of the Gir, the breed whose weights this record gives, from Wikipedia. The article does not
+      say where the height is taken; it is read as the height at the withers, and taken for the height of the back.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-gyr-cattle.txt (sha256 446a339617b1b431), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   mass:
     prop: body_mass
     value: { lo: 385, hi: 545 }

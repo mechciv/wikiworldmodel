@@ -26,7 +26,7 @@ claims:
       among them by its owner's seal. It bounds the start: the same note has the buildings' foundations go back to the
       Mauryan period, and Marshall thought one of the two houses measured here could have been built then.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in litvinsky-1994-cities-kushan-kingdom.txt (sha256 b072ec581df12ac1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in litvinsky-1994-cities-kushan-kingdom.txt (sha256 b072ec581df12ac1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   end:
     prop: end
     value: { lo: 201 CE, hi: 300 CE }
@@ -42,7 +42,7 @@ claims:
       buildings put up after the Kushan period no longer lined up with the streets; a house of the old layout was still
       lived in then, as a seal from its stratum of the fourth to fifth century shows.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in litvinsky-1994-cities-kushan-kingdom.txt (sha256 b072ec581df12ac1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in litvinsky-1994-cities-kushan-kingdom.txt (sha256 b072ec581df12ac1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["107"] }
@@ -57,7 +57,7 @@ claims:
       and at Kolhapur, but describes no house from them. Taxila's houses, in Pakistan, are another record's. The house is
       not claimed for all of the region, nor for its villages.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in litvinsky-1994-cities-kushan-kingdom.txt (sha256 b072ec581df12ac1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in litvinsky-1994-cities-kushan-kingdom.txt (sha256 b072ec581df12ac1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [townspeople]
@@ -77,10 +77,10 @@ claims:
       The houses of a walled city and of those who lived in it: the owners known by their seals were a man with a shop on
       the main street and one styled banker or guild elder. Nothing is said of the houses of the villages around.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in litvinsky-1994-cities-kushan-kingdom.txt (sha256 b072ec581df12ac1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in litvinsky-1994-cities-kushan-kingdom.txt (sha256 b072ec581df12ac1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { plan: courtyard, court: true, width: { lo: 10.4, hi: 13.4 }, length: { lo: 11.3, hi: 14 }, storeys: { lo: 2, hi: 3 }, rooms: 12, walls: fired-brick }
+    value: { plan: courtyard, court: true, width: { lo: 10.4, hi: 13.4 }, length: { lo: 11.3, hi: 14 }, storeys: { lo: 2, hi: 3 }, rooms: 12, walls: fired-brick, finish: painted, floor: raised }
     source:
       - ref: src:litvinsky-1994-cities-kushan-kingdom
         loc: "p. 287"
@@ -97,6 +97,13 @@ claims:
         quote: >-
           two rows of two- or three-storey houses each accommodating between ten and twenty occupants, family members and
           servants included
+      - ref: src:litvinsky-1994-cities-kushan-kingdom
+        loc: "p. 297"
+        quote: >-
+          In the construction of a house, a raised terrace (pras¯ada) preceded the setting up of the walls
+      - ref: src:litvinsky-1994-cities-kushan-kingdom
+        loc: "p. 297"
+        quote: houses were painted
     method: excavation
     note: >-
       Two houses of Bhita as Marshall dug them, at second hand. One was 14 by 13.4 m, a rectangular court with twelve
@@ -104,9 +111,14 @@ claims:
       quarters of 11.3 by 10.4 m about an inner court, behind a shop of three rooms on the street and a court between.
       The spans of width and length are those two houses, not a range the source states, and the twelve rooms are the
       first's. Two or three storeys is the source's reckoning for the houses between the streets; of the first house it
-      says only that, by the thickness of its walls, part may have had a second floor. The roof is not described.
+      says only that, by the thickness of its walls, part may have had a second floor. The roof is not described. The
+      raised terrace the walls stood on, and the painting of houses, are the review's from Puri's reading of the
+      sculptures of Gandhara and Mathura with the literature, not from Bhita's excavation; it gives the rooms several
+      windows, which are left out as their size and kind are not said, and a balcony in large houses, which has no
+      word. The first house at Bhita had two entrances on opposite sides, north-east and south-west, near its long axis,
+      and the second a façade on the High Street and a door to a lane: no rule for the entrance is written.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in litvinsky-1994-cities-kushan-kingdom.txt (sha256 b072ec581df12ac1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in litvinsky-1994-cities-kushan-kingdom.txt (sha256 b072ec581df12ac1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
     value: { pattern: walled, houses: 940, household: { lo: 10, hi: 20 } }
@@ -130,7 +142,22 @@ claims:
       an estimate the source reports from Marshall (1911) and Schlingloff (1970) for this one city, reckoned from the
       houses that would fit between its streets, not a count.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in litvinsky-1994-cities-kushan-kingdom.txt (sha256 b072ec581df12ac1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in litvinsky-1994-cities-kushan-kingdom.txt (sha256 b072ec581df12ac1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  outbuildings:
+    prop: outbuildings
+    value:
+      - { use: shrine, per: settlement, count: 1 }
+    source:
+      - ref: src:litvinsky-1994-cities-kushan-kingdom
+        loc: "p. 285"
+        quote: >-
+          the 'Main Street', began at the city gates and led to a sanctuary in the centre of the town.
+    method: excavation
+    note: >-
+      The sanctuary at the centre of Bhita, where its main street led from the gates; what it was like is not said.
+      It is the one city's, set down for the towns of the tradition.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in litvinsky-1994-cities-kushan-kingdom.txt (sha256 b072ec581df12ac1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   town:
     prop: town_form
     value: { streets: grid, block: 45, main_street: 9, street: 4.5, wall_height: 12, wall_thickness: 3.4 }
@@ -161,4 +188,4 @@ claims:
       angles: on that the streets are called a grid. The wall's height and thickness are given, but not what it was built
       of, so no material is stated; nor is the number of its gates.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in litvinsky-1994-cities-kushan-kingdom.txt (sha256 b072ec581df12ac1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in litvinsky-1994-cities-kushan-kingdom.txt (sha256 b072ec581df12ac1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

@@ -10,6 +10,48 @@ claims:
     value: { en: "domestic chickens", la: "Gallus gallus domesticus" }
     source: { ref: src:opentree-taxonomy-3.7, loc: "tnrs/match_names: Gallus gallus domesticus is a synonym of ott153563, accepted name Gallus gallus" }
     note: Open Tree gives the scientific name; the English name is an editorial gloss.
+  form:
+    prop: body_form
+    value:
+      hip: 0.4
+      behave: { group: [2, 8], habitat: open, poses: [stand, walk, walk, rest] }
+      parts:
+        body:
+          sides: [10, 6]
+          rings:
+            - [-0.41, 1.86, 1.78, 0.006]
+            - [-0.375, 1.9, 1.6, 0.012]
+            - [-0.315, 1.8, 1.36, 0.022]
+            - [-0.25, 1.6, 1.12, 0.05]
+            - [-0.18, 1.5, 0.84, 0.1]
+            - [-0.09, 1.5, 0.66, 0.132]
+            - [0.01, 1.5, 0.6, 0.14]
+            - [0.1, 1.5, 0.66, 0.128]
+            - [0.165, 1.5, 0.82, 0.1]
+            - [0.2, 1.52, 1.0, 0.072]
+          neck: { r: 0.04, steps: [3, 1] }
+        legs: { y: -0.01, x: 0.055, top: 0.85, knee: 0.56, ankle: 0.32, r: 0.042, swing: 0.07 }
+        wings: { shoulder: [0.13, 0.12, 1.35], span: 0.5, chord: 0.3, sweep: 0.08, folded: 0.3, drop: 0.4 }
+        head:
+          at:
+            stand: { y: 0.245, z: 1.88, pitch: 0.1 }
+            alert: { y: 0.235, z: 2.02, pitch: 0.0 }
+            low: { y: 0.33, reach: 0.12, clear: 0.05, pitch: 1.1 }
+            fly: { y: 0.27, z: 1.7, pitch: 0.05 }
+          rings:
+            - [-0.025, 0, 0.028, 0.03]
+            - [0.015, 0.004, 0.036, 0.038]
+            - [0.05, 0.0, 0.028, 0.03]
+            - [0.075, -0.006, 0.014, 0.016]
+        bill: { from: [0, 0.068, -0.004], to: [0, 0.118, -0.022], r: 0.014 }
+        comb: { type: sheet, on: head, mat: membrane, tint: 0, gap: 0.004, points: [[0, 0.01, 0.02], [0, -0.03, 0.05], [0, -0.01, 0.075], [0, 0.03, 0.08], [0, 0.065, 0.06], [0, 0.07, 0.03]] }
+        wattles: { type: lump, on: head, near: true, mat: membrane, tint: 0, sides: [5, 4], bands: [3, 2], at: [0, 0.06, -0.04], r: [0.01, 0.012, 0.02] }
+        eyes: { at: [0.03, 0.035, 0.012], r: 0.008 }
+    unsourced: >-
+      A machine's reconstruction of a domestic hen, as hens are generally known: a plump upright body on short legs,
+      the tail carried up as a blade of feathers, a small head with a comb and wattles, a short bill, and the wings
+      folded on the flanks. The comb and wattles are drawn in the shader's membrane, the warmest colour it has. Its
+      proportions are a drawing's, and no measurements of any animal. Only compared with its sheet.
   mass:
     prop: body_mass
     value: { lo: 1.26, hi: 3.55 }

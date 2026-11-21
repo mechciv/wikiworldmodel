@@ -13,10 +13,10 @@ import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { unzipSync } from 'fflate';
 import { decodeTile, encodeTile } from '../../../../core/container.ts';
-import { compileHusbandry, compileTraditions, prevalenceOf, traditionAt, traditionsFor, type PrevalenceWord, type DwellingSpec, type FieldSpec, type Husbandry, type HusbandryInput, type LifewayWord, type SettlementSpec, type TownSpec, type Tradition, type TraditionInput } from '../../../../core/dwelling.ts';
+import { compileHusbandry, compileTraditions, prevalenceOf, traditionAt, traditionsFor, type PrevalenceWord, type DwellingSpec, type FieldSpec, type Husbandry, type HusbandryInput, type LifewayWord, type OutbuildingSpec, type SettlementSpec, type TownSpec, type Tradition, type TraditionInput } from '../../../../core/dwelling.ts';
 import { canonicalForm, type Form } from '../../../../core/form.ts';
 import type { LivingTaxon } from '../../../../core/scene.ts';
-import { GENERATOR as SETTLEMENT, VERSION as SETTLEMENT_VERSION } from '../../../../world/generators/people/settlement/v2.ts';
+import { GENERATOR as SETTLEMENT, VERSION as SETTLEMENT_VERSION } from '../../../../world/generators/people/settlement/v3.ts';
 import { FormTree } from '../forms.ts';
 import type { LandscapeIndex, TraditionsFile } from '../../../../core/landscape.ts';
 export type { LandscapeIndex, TraditionsFile };
@@ -449,6 +449,7 @@ export function traditionInputs(s: Solved, regionsSource: string): TraditionInpu
       ...(value<FieldSpec>('field_system') ? { fields: value<FieldSpec>('field_system') } : {}),
       ...(value<TownSpec>('town_form') ? { town: value<TownSpec>('town_form') } : {}),
       ...(townSpan(s, e.id) ? { townSpan: townSpan(s, e.id) } : {}),
+      ...(value<OutbuildingSpec[]>('outbuildings') ? { outbuildings: value<OutbuildingSpec[]>('outbuildings') } : {}),
     });
   }
   return out;

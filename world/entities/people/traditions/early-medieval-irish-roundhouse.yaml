@@ -27,7 +27,7 @@ claims:
       excavation has dated, not of the round house, which the source says goes back into late prehistory
       (people/traditions/roundhouse-britain-ireland, which ends in 400 CE); the century between is held by neither record.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in osullivan-2010-early-medieval-ireland-excavations.txt (sha256 6032cfb2ec8e7cf4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in osullivan-2010-early-medieval-ireland-excavations.txt (sha256 6032cfb2ec8e7cf4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   end:
     prop: end
     value: 800 CE
@@ -46,7 +46,7 @@ claims:
       rectangular houses that followed, of low stone or turf walls under reed, turf or straw, are not written as a record
       here: the source read gives no size for them.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in osullivan-2010-early-medieval-ireland-excavations.txt (sha256 6032cfb2ec8e7cf4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in osullivan-2010-early-medieval-ireland-excavations.txt (sha256 6032cfb2ec8e7cf4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["38"] }
@@ -62,7 +62,7 @@ claims:
       Region 38 (United Kingdom and Ireland), for Ireland: the excavated houses the source names lie in all four
       provinces. The house is not claimed for Britain. The ellipsis in the quote stands for the turn of the page.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in osullivan-2010-early-medieval-ireland-excavations.txt (sha256 6032cfb2ec8e7cf4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in osullivan-2010-early-medieval-ireland-excavations.txt (sha256 6032cfb2ec8e7cf4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [farmers]
@@ -83,10 +83,10 @@ claims:
       documents of the time dwell on cattle, and the cow was the measure of wealth, but the source reads the fields, mills
       and kilns as a mixed economy of stock and crops, so herders are not named.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in osullivan-2010-early-medieval-ireland-excavations.txt (sha256 6032cfb2ec8e7cf4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in osullivan-2010-early-medieval-ireland-excavations.txt (sha256 6032cfb2ec8e7cf4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { plan: round, diameter: { lo: 4, hi: 5 }, walls: wattle-and-daub, roof_material: thatch }
+    value: { plan: round, diameter: { lo: 4, hi: 5 }, walls: wattle, roof_material: thatch }
     source:
       - ref: src:osullivan-2010-early-medieval-ireland-excavations
         loc: 'chapter 2, "Early Medieval Houses", "Roundhouses", p. 35'
@@ -104,16 +104,17 @@ claims:
     method: excavation
     note: >-
       The typical house, 4 to 5 m across; some were 6 to 10 m, and the law tract Críth Gablach, which the source cites,
-      ties the size of a house to its owner's rank. The walls are the source's post-and-wattle, woven rods between posts,
-      for which wattle and daub is the nearest word: it does not say the wattle was daubed, and at Deer Park Farms the
-      wall was two skins of wattle packed with straw, moss and heather. In cashels most houses were of stone. Thatch
+      ties the size of a house to its owner's rank. The walls are the source's post-and-wattle, woven rods between posts:
+      written wattle-and-daub before the vocabulary had wattle, they are changed to it on the first quote, as the source
+      does not say the wattle was daubed, and at Deer Park Farms the wall was two skins of wattle packed with straw, moss
+      and heather; a narrowing, not a disagreement. In cashels most houses were of stone. Thatch
       stands for a roof of reed, turf or straw; the roof's shape is not stated. A second, smaller round room was often
       joined to the house, making a figure of eight, which a dwelling here has no way to say.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in osullivan-2010-early-medieval-ireland-excavations.txt (sha256 6032cfb2ec8e7cf4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in osullivan-2010-early-medieval-ireland-excavations.txt (sha256 6032cfb2ec8e7cf4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
-    value: { pattern: compound }
+    value: { pattern: compound, enclosure: bank }
     source:
       - ref: src:osullivan-2010-early-medieval-ireland-excavations
         loc: 'chapter 2, "Interior Structures", "Early Medieval Houses", p. 35'
@@ -123,15 +124,20 @@ claims:
       - ref: src:osullivan-2010-early-medieval-ireland-excavations
         loc: 'chapter 2, "Early Medieval Raths/Cashels", p. 25'
         quote: While univallate raths are seen as defensive farmsteads
+      - ref: src:osullivan-2010-early-medieval-ireland-excavations
+        loc: 'chapter 2, "Early Medieval Raths/Cashels", p. 21'
+        quote: The majority of raths are univallate, i.e. with a single bank and external ditch.
     method: excavation
     note: >-
       A household's houses and yard inside one enclosure, a bank and ditch (rath) or a stone wall (cashel), which the
       vocabulary calls a compound; the enclosures stood apart over the land, as single farmsteads, and the source finds
       no villages. In one surveyed district the space enclosed was 15.5 to 75 m across, two in five being of 28 to 35 m.
       Round houses also stood on unenclosed sites. How many houses stood in a rath is not given in general: at Deer Park
-      Farms, about 700 CE, there were three.
+      Farms, about 700 CE, there were three. The enclosure is the bank, with its ditch outside, of the univallate rath,
+      over four in five of the raths in most districts surveyed; cashels were walled in stone instead, and some raths had
+      two or three banks.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in osullivan-2010-early-medieval-ireland-excavations.txt (sha256 6032cfb2ec8e7cf4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in osullivan-2010-early-medieval-ireland-excavations.txt (sha256 6032cfb2ec8e7cf4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   fields:
     prop: field_system
     value: { bounds: banks }
@@ -146,4 +152,32 @@ claims:
       Fields divided by banks and ditches, or by wooden fences or stone walls; banks are given here, as the vocabulary
       takes one word. The source says few field boundaries have been dug and dated, and gives no size or shape of field.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in osullivan-2010-early-medieval-ireland-excavations.txt (sha256 6032cfb2ec8e7cf4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in osullivan-2010-early-medieval-ireland-excavations.txt (sha256 6032cfb2ec8e7cf4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  outbuildings:
+    prop: outbuildings
+    value:
+      - { use: pen, per: house }
+      - { use: workshop, per: house }
+    source:
+      - ref: src:osullivan-2010-early-medieval-ireland-excavations
+        loc: 'chapter 2, "Interior Structures", "Early Medieval Houses", p. 35'
+        quote: >-
+          Early medieval raths/cashels were essentially domestic sites, which enclosed houses, workshops, animal pens,
+          cobbled areas and pathways, open-air metalworking surfaces, middens and rubbish dumps.
+      - ref: src:osullivan-2010-early-medieval-ireland-excavations
+        loc: 'chapter 2, "Interior Structures", "Early Medieval Houses", p. 35'
+        quote: >-
+          Although there has not been a great deal of definitive evidence for these ancillary structures associated with
+          a farmstead
+    method: excavation
+    note: >-
+      What a rath enclosed besides its houses, as the source sums up its excavations: workshops and animal pens. A rath
+      was one household's farmstead (the settlement claim), so each is the household's, per house. The law texts the
+      source cites name more inside the les, an outhouse, an ox-house, sheep-pens and calf-pens, a pig-sty and a
+      drying-kiln, but it says there is little definitive evidence of these ancillary structures, and they are left
+      out. Souterrains, underground passages and chambers of stone or wood, used for storage or refuge as the commonest
+      explanations have it (chapter 2, "Souterrains", pp. 36–38), are found within raths and on other sites, many added
+      later and unevenly spread over the island; the source does not say how many households had one, and they are left
+      out too. Sizes are not given.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in osullivan-2010-early-medieval-ireland-excavations.txt (sha256 6032cfb2ec8e7cf4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

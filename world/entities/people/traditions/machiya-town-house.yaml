@@ -33,7 +33,7 @@ claims:
       Heian picture scrolls show rows of them. The oldest machiya standing is of 1607. No end is given: the source
       carries the house into the Meiji period, past this record's span.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in jaanus-dictionary.txt (sha256 9d242cd750c47f8e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in jaanus-dictionary.txt (sha256 9d242cd750c47f8e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["124"] }
@@ -47,7 +47,7 @@ claims:
     method: editorial
     note: Region 124 (Japan), for the towns of Kansai, western Japan and the Kantō the dictionary names.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in jaanus-dictionary.txt (sha256 9d242cd750c47f8e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in jaanus-dictionary.txt (sha256 9d242cd750c47f8e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [townspeople]
@@ -60,10 +60,10 @@ claims:
     method: editorial
     note: The house of the townspeople; the warriors' and nobles' houses in the same towns are not this one.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in jaanus-dictionary.txt (sha256 9d242cd750c47f8e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in jaanus-dictionary.txt (sha256 9d242cd750c47f8e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { plan: rectangular, width: 6, storeys: { lo: 1, hi: 2 }, walls: timber }
+    value: { plan: rectangular, width: 6, storeys: { lo: 1, hi: 2 }, walls: timber, entrance: side, smoke: hole }
     source:
       - ref: src:jaanus-dictionary
         loc: s.v. machiya
@@ -86,15 +86,55 @@ claims:
         loc: s.v. machiya
         quote: >-
           and from walls with the structural timbers exposed, to thick overall plastering
+      - ref: src:jaanus-dictionary
+        loc: s.v. machiya
+        quote: Most machiya were *hirairi 平入 houses with their eaves overhanging the street
+      - ref: src:jaanus-dictionary
+        loc: s.v. minka
+        quote: those with the main entrance on the non-gabled side are called *hirairi 平入.
+      - ref: src:jaanus-dictionary
+        loc: s.v. tōriniwa
+        quote: >-
+          but the okuniwa was usually open to the rafters fukinuke 吹抜け, with a louvre *kemuridashi 煙出 either on
+          the roof or high in the walls for the smoke from the cooking range *kamado 竃 to escape.
     method: expert-estimate
     note: >-
       Rectangular and narrow across the street, deep behind; 6 m is the standard frontage (3 to 3.5 ken) of Edo-period
       Kyoto, a large house reaching 18 to 20 m; the house took the whole frontage of its plot. No depth is given. One
       or two storeys: "often" two, the upper floors at first low attics. Walls are of timber, plastered over in later
       and richer houses (the vocabulary has no word for plaster over a frame). The roof is left out: shingle and
-      thatch gave way to tile over time, which the record cannot date, and its shape is not stated.
+      thatch gave way to tile over time, which the record cannot date, and its shape is not stated. The entrance is in
+      the long side: most machiya were hirairi, which the dictionary defines as having the main entrance on the side
+      that is not gabled, their eaves over the street; some gable-entry houses occurred in some areas. The smoke of the
+      range in the back of the earth-floored passage left by a louvre (kemuridashi) on the roof or high in the walls:
+      "hole" is the roof's, and the louvre in the walls has no word. The dictionary says the louvres doubled as high
+      windows in the later Edo period and that windows and rooflights were added later still, without saying what they
+      were like, so the windows are left out.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in jaanus-dictionary.txt (sha256 9d242cd750c47f8e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in jaanus-dictionary.txt (sha256 9d242cd750c47f8e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  outbuildings:
+    prop: outbuildings
+    value:
+      - { use: store, per: house }
+    source:
+      - ref: src:jaanus-dictionary
+        loc: s.v. machiya
+        quote: >-
+          The typical machiya plot was narrow but deep, with storehouses, kura 蔵, and other ancillary structures at the
+          rear of the house.
+      - ref: src:jaanus-dictionary
+        loc: s.v. tōriniwa
+        quote: >-
+          providing the only means of access from the front street to the warehouses, workshops, rented row houses
+          *nagaya 長屋, etc, that occupied the rear of the plot.
+    method: expert-estimate
+    note: >-
+      The storehouses (kura) at the back of the typical plot, reached through the earth-floored passage, are each
+      house's: the dictionary puts them on the house's own plot. How many, their size and what they were built of are
+      not given. The workshops and rented row houses (nagaya) the dictionary also puts at the back of the plot are not
+      written: it does not say how many plots had them, and a row house is a dwelling, not an outbuilding.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in jaanus-dictionary.txt (sha256 9d242cd750c47f8e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   town:
     prop: town_form
     value: { streets: grid }
@@ -111,4 +151,4 @@ claims:
       "frequently quite narrow, turned and twisted around" for defence. Kyoto's grid was older. A wall or a moat is not
       claimed: only some castle towns were enclosed, or guarded by water on three sides.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in jaanus-dictionary.txt (sha256 9d242cd750c47f8e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in jaanus-dictionary.txt (sha256 9d242cd750c47f8e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

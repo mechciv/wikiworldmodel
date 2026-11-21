@@ -169,6 +169,109 @@ const commands: Record<string, (args: string[]) => Promise<number | void>> = {
     else if (args.includes('--totals')) console.log(wantedTotals(rows));
     else console.log(wantedText(rows, Number(opt('--n') ?? 40), { ...(opt('--region') !== undefined ? { region: Number(opt('--region')) } : {}), ...(lifeway ? { lifeway: lifeway as keyof typeof LIFEWAY_WORDS } : {}) }));
   },
+  // A sheet of a house, to look at: `npm run world -- dwelling-sheet people/traditions/iban-longhouse`; or of one thing
+  // that stood by its houses, `--outbuilding 1` for the first of its list; or of the generator's own house,
+  // `generic:foragers`, `generic:herders`, `generic:farm:temperate`; or of any dwelling, as JSON: '{"plan":"round"}'.
+  // `--grow 2` draws it twice as wide and long, as where one house stands for several households; `--climate desert`
+  // takes what a farmer's house leaves unsaid from the generator's house of that climate, and not of the temperate one.
+  async 'dwelling-sheet'(args) {
+    const flag = (name: string) => {
+      const i = args.indexOf(name);
+      return i >= 0 ? args[i + 1] : undefined;
+    };
+    const rest = args.filter((a, i) => !a.startsWith('--') && !args[i - 1]?.startsWith('--'));
+    const [name, out] = rest;
+    if (!name) throw new Error('give a building tradition, generic:<house>, or a dwelling as JSON');
+    const world = await loadWorld();
+    const { dwellingSheet } = await import('./dwellingsheet.ts');
+    const { fillDwelling, homesteadOf, outbuildingSpec } = await import('../../../world/generators/people/dwellings.ts');
+    const { compileTraditions, outbuildingText, specText } = await import('../../../core/dwelling.ts');
+    type Spec = import('../../../core/dwelling.ts').DwellingSpec;
+    const gen = world.generators.find((g) => g.id === 'gen:people/settlement');
+    const generic = (gen?.params as { generic?: { foragers: Spec; herders: Spec; town: Spec; city: Spec; farm: Record<string, Spec> } } | undefined)?.generic;
+    const outs = (gen?.params as { outbuildings?: import('../../../world/generators/people/dwellings.ts').OutbuildingParams } | undefined)?.outbuildings;
+    // `--yard` draws each house with its yard, on a lot of that side in metres (or of its tradition's spacing).
+    const yard = args.includes('--yard');
+    const lotOf = (t: { settlement: { spacing?: import('../../../core/dwelling.ts').Span } }) => {
+      const given = Number(flag('--yard'));
+      const spacing = t.settlement.spacing;
+      return given > 0 ? given : spacing !== undefined ? (typeof spacing === 'number' ? spacing : (spacing.lo + spacing.hi) / 2) : 18;
+    };
+    let spec: Spec;
+    let label = name;
+    let home: import('../../../world/generators/people/dwellings.ts').Homestead | undefined;
+    if (name === 'all') {
+      // Every tradition's house on pages of twelve, or those whose id has a word in it: `dwelling-sheet all longhouse`.
+      const { contactSheet } = await import('./dwellingsheet.ts');
+      const { claimGroups, solveScenario } = await import('./chronology.ts');
+      const { traditionInputs } = await import('./build/landscape.ts');
+      const solved = { world, sol: solveScenario(world), centres: solveScenario(world, {}, true), variants: [], groups: claimGroups(world), model: undefined as never };
+      const all = compileTraditions(traditionInputs(solved as never, 'src:archaeoglobe-2019-regions')).filter((t) => !out || t.id.includes(out));
+      const items = all.map((t) => {
+        const whose = t.lifeways[0];
+        const under: Spec = whose === 'foragers' ? generic?.foragers ?? {} : whose === 'herders' ? generic?.herders ?? {} : generic?.farm[flag('--climate') ?? 'temperate'] ?? {};
+        const spec = fillDwelling(t.dwelling, under);
+        return { spec, label: t.id.split('/').pop()!, variant: Number(flag('--variant') ?? 0), ...(yard ? { home: homesteadOf(t, spec, lotOf(t), outs) } : {}) };
+      });
+      mkdirSync(join(REPO, 'dist', 'sheets'), { recursive: true });
+      for (let p = 0; p * 12 < items.length; p++) {
+        const file = join(REPO, 'dist', 'sheets', `traditions-${String(p + 1).padStart(2, '0')}.png`);
+        writeFileSync(file, contactSheet(items.slice(p * 12, p * 12 + 12), `BUILDING TRADITIONS ${p * 12 + 1} TO ${Math.min(items.length, p * 12 + 12)} OF ${items.length}`));
+        console.log(file);
+      }
+      return;
+    }
+    if (name.startsWith('work:')) {
+      // One kind of piece of a settlement's works: `work:person`, `work:well`, `work:enclosure:hedge`, `work:pen:fence`.
+      const { workSheet } = await import('./dwellingsheet.ts');
+      const [, kind, word] = name.split(':');
+      const figures = (gen?.params as { figures?: { height: number } } | undefined)?.figures;
+      const size = outs?.generic[kind === 'floor' ? 'threshing-floor' : (kind as 'well')] ?? {};
+      const num = (x: unknown, or: number) => (typeof x === 'number' ? x : or);
+      const w = { kind, height: kind === 'person' ? (figures?.height ?? 1.62) : num(size.height, 0), thickness: num(size.diameter ?? size.width, kind === 'person' ? 0.5 : 3), ...(word ? { word } : {}), ...(kind === 'enclosure' ? { run: 6 } : {}) } as import('../../../world/generators/people/works.ts').WorkSpec;
+      const file = out ?? join(REPO, 'dist', 'sheets', `${name.replace(/[^a-z0-9]+/gi, '-')}.png`);
+      mkdirSync(dirname(file), { recursive: true });
+      writeFileSync(file, workSheet(w, name));
+      console.log(file);
+      return;
+    }
+    if (name.startsWith('{')) {
+      spec = JSON.parse(name) as Spec;
+      label = 'a dwelling';
+    } else if (name.startsWith('generic:')) {
+      const [, kind, climate] = name.split(':');
+      const found = kind === 'farm' ? generic?.farm[climate ?? 'temperate'] : (generic as Record<string, Spec> | undefined)?.[kind];
+      if (!found) throw new Error(`no generic house "${name}"`);
+      spec = found;
+    } else {
+      const { claimGroups, solveScenario } = await import('./chronology.ts');
+      const { traditionInputs } = await import('./build/landscape.ts');
+      const solved = { world, sol: solveScenario(world), centres: solveScenario(world, {}, true), variants: [], groups: claimGroups(world), model: undefined as never };
+      const t = compileTraditions(traditionInputs(solved as never, 'src:archaeoglobe-2019-regions')).find((x) => x.id === name);
+      if (!t) throw new Error(`no building tradition "${name}"`);
+      // What a tradition leaves unsaid is the generator's house of its people's way of life, as in a scene.
+      const whose = t.lifeways[0];
+      const under: Spec = whose === 'foragers' ? generic?.foragers ?? {} : whose === 'herders' ? generic?.herders ?? {} : generic?.farm[flag('--climate') ?? 'temperate'] ?? {};
+      const nth = flag('--outbuilding');
+      if (nth !== undefined) {
+        const o = t.outbuildings?.[Number(nth) - 1];
+        if (!o) throw new Error(`${name} has ${t.outbuildings?.length ?? 0} outbuildings`);
+        spec = outbuildingSpec(o, outs, fillDwelling(t.dwelling, under));
+        label = `${name.split('/').pop()}: ${outbuildingText(o)}`;
+      } else {
+        spec = fillDwelling(t.dwelling, under);
+        console.log(`Its own: ${specText(t.dwelling) || 'nothing'}.`);
+        const borrowed = Object.fromEntries(Object.entries(spec).filter(([k]) => !(k in t.dwelling)));
+        console.log(`The generator's, where it says nothing: ${specText(borrowed) || 'nothing'}.`);
+        if (t.outbuildings?.length) console.log(`By its houses: ${t.outbuildings.map(outbuildingText).join('; ')}.`);
+        if (yard) home = homesteadOf(t, spec, lotOf(t), outs);
+      }
+    }
+    const file = out ?? join(REPO, 'dist', 'sheets', `${label.replace(/[^a-z0-9]+/gi, '-').slice(0, 80)}.png`);
+    mkdirSync(dirname(file), { recursive: true });
+    writeFileSync(file, dwellingSheet(spec, label, Number(flag('--grow') ?? 1), home));
+    console.log(file);
+  },
   // A sheet of a form, to look at: `npm run world -- form-sheet life/taxa/triceratops`, or `plan:ceratopsian`.
   async 'form-sheet'([name, out]) {
     const world = await loadWorld();

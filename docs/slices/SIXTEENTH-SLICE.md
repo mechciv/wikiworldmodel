@@ -50,6 +50,9 @@ As for the other slices (see the [README](../../README.md)); it needs no dataset
 
 ## Pass criteria
 
+The generator's tests named here as `v2.test.ts` are in `v3.test.ts` since the [seventeenth slice](SEVENTEENTH-SLICE.md)
+made its version 3; their names are as they were.
+
 | Criterion | Where it is checked |
 |---|---|
 | A lifeway is a list of the five ways of life, each once; a member takes its parent's where it says none | `tools/world/test/landscape.test.ts`: checks whom a tradition housed word by word; inherits what a member does not say |
@@ -122,7 +125,8 @@ and nothing is written for them (see *Limitations*).
   Each 5′ cell and each city falls to one tradition by a number of its own, so that a rare house stands in clusters,
   and the same cell is the same house whichever scene draws it.
 - **The settlement generator is version 2**
-  ([world/generators/people/settlement/v2.ts](../../world/generators/people/settlement/v2.ts)). A town's houses stand on
+  (`world/generators/people/settlement/v2.ts`, since replaced by version 3 in
+  [world/generators/people/settlement/](../../world/generators/people/settlement/)). A town's houses stand on
   lots back to back in blocks; its outline is round with a wandering edge, or square where its streets are planned; its
   wall follows the outline a street clear of the outermost houses, in pieces that overlap so that they fill each run
   between two gates ([works.ts](../../world/generators/people/works.ts)). Herds, people, boats and paths are laid after

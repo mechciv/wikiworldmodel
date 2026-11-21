@@ -38,7 +38,7 @@ claims:
       and 1386. Before it, the article has the farmers of north-west Europe in three-aisled longhouses whose posts were
       set in the ground, as people/traditions/iron-age-longhouse-village records for earlier centuries.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-low-german-house.txt (sha256 c275f84dc2238367), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-low-german-house.txt (sha256 c275f84dc2238367), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   end:
     prop: end
     value: { lo: 1850 CE, hi: 1900 CE }
@@ -54,7 +54,7 @@ claims:
       The second half of the nineteenth century, when fewer and fewer were built and the type went out of use: an end of
       the building of such houses, not of the houses, many of which stand and are lived in.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-low-german-house.txt (sha256 c275f84dc2238367), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-low-german-house.txt (sha256 c275f84dc2238367), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["43"] }
@@ -82,7 +82,7 @@ claims:
       North Sea coast, where it has the Gulf house from the sixteenth century. A region named is where the source places
       the house, not a claim that it covered the region.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-low-german-house.txt (sha256 c275f84dc2238367), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-low-german-house.txt (sha256 c275f84dc2238367), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   prevalence:
     prop: prevalence
     value: some
@@ -122,10 +122,19 @@ claims:
       Farmers: the house is a farmhouse, lived in by the farmer's family, farmhands and maids together with the cattle
       and horses. The article says nothing of the houses of towns.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-low-german-house.txt (sha256 c275f84dc2238367), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-low-german-house.txt (sha256 c275f84dc2238367), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { plan: rectangular, length: { lo: 5, hi: 25 }, walls: wattle-and-daub, roof: gable, roof_material: thatch, floor: ground }
+    value:
+      plan: rectangular
+      length: { lo: 5, hi: 25 }
+      walls: timber-frame
+      roof: gable
+      roof_material: thatch
+      floor: ground
+      entrance: end
+      smoke: gable
+      byre: true
     source:
       - ref: src:wikipedia-low-german-house
         loc: opening section
@@ -157,16 +166,59 @@ claims:
       - ref: src:wikipedia-low-german-house
         loc: section "Diele"
         quote: With its tamped clay floor it was the working room of the farmhouse.
+      - ref: src:wikipedia-low-german-house
+        loc: section "Diele"
+        quote: >-
+          This was usually entered via the great, rounded door at the gable end, known in Low German as the Grote Dör,
+          Groot Dör or Grotendör ("great door").
+      - ref: src:wikipedia-low-german-house
+        loc: section "Diele"
+        quote: >-
+          To both sides of the Diele were the half-open stalls or stables (Kübbungen) for cattle or horses, as well as
+          chambers for the maids and farmhands.
+      - ref: src:wikipedia-low-german-house
+        loc: section "Flett"
+        quote: >-
+          Smoke escaped through an opening in the roof on the gable, the Uhlenloch (also Eulenloch, literally: "owl
+          hole").
     method: expert-estimate
     note: >-
       A rectangular hall. The length runs from the smallest houses, of two bays, to the largest, of ten, which the
       article puts at about 25 m: it gives the bay as about 2.5 m, so the 5 m of two bays is that figure doubled, not
       one the article states. In the eighteenth century houses were built up to 50 m long and 15 m wide; no usual width
       is given, and it is left to the generator. The walls are a timber frame whose panels were filled with wattle and
-      daub, later with brick; the vocabulary has no word for a frame so filled, and wattle and daub is the nearest. The
-      frame itself, which carried the loft and the roof on two rows of posts down the hall (on four rows, the outer walls
+      daub, later with brick: written wattle-and-daub before the vocabulary had timber-frame, they are changed to it on
+      the quote of the section "Construction" already cited, a narrowing and not a disagreement. The frame itself, which carried the loft and the roof on two rows of posts down the hall (on four rows, the outer walls
       among them, in the houses of richer farmers), stood on a low stone footing. The roof was gabled in Westphalia and
-      "hipped-gable" in Mecklenburg, for which there is no word, and thatched with reed. The floor is the tamped clay of
+      "hipped-gable" in Mecklenburg, now the vocabulary's hip-and-gable, and in parts of Lower Saxony and Holstein
+      either; gable is kept for the whole, and a Mecklenburg house would want a narrower tradition. It was thatched with
+      reed. The floor is the tamped clay of
       the threshing floor; the living rooms added at the back after the Thirty Years' War were raised a little above it.
+      The way in was the great door in the gable end into the threshing floor, which took the harvest wagons; some
+      houses had one at both ends. Cattle and horses stood in stalls along both sides of the hall, under the one roof.
+      The smoke of the open fire found its way out by the owl hole in the gable; later houses had a flue, and then a
+      stone chimney, which the article does not date.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-low-german-house.txt (sha256 c275f84dc2238367), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-low-german-house.txt (sha256 c275f84dc2238367), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  outbuildings:
+    prop: outbuildings
+    value:
+      - { use: oven, per: house }
+      - { use: byre, per: house }
+    source:
+      - ref: src:wikipedia-low-german-house
+        loc: section "Flett", footnote (*)
+        quote: >-
+          Bread was baked outside the farmhouse Hauses in an earth or stone oven. In northwest Germany this only had one
+          chamber.
+      - ref: src:wikipedia-low-german-house
+        loc: section "Diele"
+        quote: From the outset pigs were banished to separate sheds outside the building due to their smell.
+    method: expert-estimate
+    note: >-
+      Each farmhouse's: a bread oven of earth or stone outside the house, and a shed for the pigs, which were kept out
+      of the hall until the living rooms were walled off from it; the vocabulary's byre is a house for animals, a sty
+      among them. The article gives no sizes, and says nothing of barns, granaries or wells beside the house, which
+      held people, beasts and the harvest under its one roof.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-low-german-house.txt (sha256 c275f84dc2238367), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

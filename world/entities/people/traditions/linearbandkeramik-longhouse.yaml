@@ -36,7 +36,7 @@ claims:
       middle of the 54th century cal BC, and it reached the Paris basin, Ukraine, Moldova and Romania some centuries
       after.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in jakucs-2016-vinca-linearbandkeramik.txt (sha256 9edc67e4f2edca93), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in jakucs-2016-vinca-linearbandkeramik.txt (sha256 9edc67e4f2edca93), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   end:
     prop: end
     value: { lo: 5000 BCE, hi: 4900 BCE }
@@ -53,7 +53,7 @@ claims:
       its latest phase, was left shortly after 4950 BCE. The houses of the cultures that came of it, Rössen, Lengyel and
       others, are not this record's.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in gelabert-2025-lbk-first-farmers.txt (sha256 da2a6366be45f774) and furholt-2020-vrable.txt (sha256 349a4a283413862c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in gelabert-2025-lbk-first-farmers.txt (sha256 da2a6366be45f774) and furholt-2020-vrable.txt (sha256 349a4a283413862c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["42", "43", "45", "47", "48"] }
@@ -84,7 +84,7 @@ claims:
       loess and never held the whole of any of these regions, and it reached France, Ukraine, Moldova and Romania only
       in its later centuries.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in gelabert-2025-lbk-first-farmers.txt (sha256 da2a6366be45f774), keeley-golitko-2004-first-farmers-central-europe.txt (sha256 c2459ef75b569106) and mueller-scheessel-2020-house-orientations.txt (sha256 cfcc39b9ea6dd1fa), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in gelabert-2025-lbk-first-farmers.txt (sha256 da2a6366be45f774), keeley-golitko-2004-first-farmers-central-europe.txt (sha256 c2459ef75b569106) and mueller-scheessel-2020-house-orientations.txt (sha256 cfcc39b9ea6dd1fa), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [farmers]
@@ -110,7 +110,7 @@ claims:
       they were shifting cultivators who burnt new clearings and moved on was the older view, which the sources read
       give up.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in gelabert-2025-lbk-first-farmers.txt (sha256 da2a6366be45f774), furholt-2020-vrable.txt (sha256 349a4a283413862c) and keeley-golitko-2004-first-farmers-central-europe.txt (sha256 c2459ef75b569106), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in gelabert-2025-lbk-first-farmers.txt (sha256 da2a6366be45f774), furholt-2020-vrable.txt (sha256 349a4a283413862c) and keeley-golitko-2004-first-farmers-central-europe.txt (sha256 c2459ef75b569106), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
     value: { plan: long, width: 7, length: { lo: 10, hi: 40 }, walls: wattle-and-daub }
@@ -157,10 +157,10 @@ claims:
       and daub is the vocabulary's nearest word. Three rows of posts inside carried the roof, whose shape and covering
       are not stated, and are left to the generator; no original floor has been recovered, as the last source has it.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in mueller-scheessel-2020-house-orientations.txt (sha256 cfcc39b9ea6dd1fa), furholt-2020-vrable.txt (sha256 349a4a283413862c) and keeley-golitko-2004-first-farmers-central-europe.txt (sha256 c2459ef75b569106), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in mueller-scheessel-2020-house-orientations.txt (sha256 cfcc39b9ea6dd1fa), furholt-2020-vrable.txt (sha256 349a4a283413862c) and keeley-golitko-2004-first-farmers-central-europe.txt (sha256 c2459ef75b569106), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
-    value: { pattern: nucleated, houses: { lo: 9, hi: 18 }, household: 8.5 }
+    value: { pattern: nucleated, houses: { lo: 9, hi: 18 }, spacing: { lo: 16, hi: 40 }, household: 8.5 }
     source:
       - ref: src:furholt-2020-vrable
         loc: 'ch. 6.3 (Wunderlich et al.), p. 514'
@@ -189,6 +189,11 @@ claims:
           settlements with numerous contemporaneous long-houses and, sometimes, associated cemeteries. Excavations on the
           Aldenhovener Platte indicate, however, that in other instances, LBK "villages" actually were isolated farmsteads
           separated by several hundred meters.
+      - ref: src:mueller-scheessel-2020-house-orientations
+        loc: 'Results, section "Orientation of houses"'
+        quote: >-
+          The average distance between house centroids of the settlements ranges between 16.0 and 40.0 m, signaling
+          differences in building densities.
     method: expert-estimate
     note: >-
       Villages of farmsteads: each household had a yard of about half a hectare in which one house, or two, stood at a
@@ -197,9 +202,16 @@ claims:
       as one house each: one valley's figure, the only one read. Vráble itself, the largest there, had some 70 houses at
       its height, and on the Aldenhovener Platte near Cologne farmsteads stood alone, some hundreds of metres apart.
       Nobody knows how many lived in a longhouse: estimates run from 5 to 25, the excavators of Vráble reckon with the
-      8.5 of Zimmermann et al. (2009), and most studies assume no more than ten.
+      8.5 of Zimmermann et al. (2009), and most studies assume no more than ten. The spacing is the average distance
+      between house centres in the settlements of the last source's sample, measured on magnetic plans, from 16 to
+      40 m. The same source gives the houses' long axes a common
+      orientation within a settlement that turned slowly over time (about 18° east of north on average in the Žitava
+      valley), but says a house's single direction cannot normally be told, so no entrance or facing is claimed. Some
+      settlements were ringed by ditches and palisades, as the western one at Vráble was (Furholt et al., ch. 2.1),
+      but the same chapter says these were relatively rare beside settlements without them, and no enclosure is
+      claimed.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in furholt-2020-vrable.txt (sha256 349a4a283413862c) and keeley-golitko-2004-first-farmers-central-europe.txt (sha256 c2459ef75b569106), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in furholt-2020-vrable.txt (sha256 349a4a283413862c), keeley-golitko-2004-first-farmers-central-europe.txt (sha256 c2459ef75b569106) and mueller-scheessel-2020-house-orientations.txt (sha256 cfcc39b9ea6dd1fa), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   fields:
     prop: field_system
     value: { kind: gardens }
@@ -224,4 +236,4 @@ claims:
       a plot is not given: the 0.4 hectare is the land one person is reckoned to have needed, and the excavators of
       Vráble cite 0.5 to 1 hectare a person from other authors. What bounded the plots is not known.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in furholt-2020-vrable.txt (sha256 349a4a283413862c) and keeley-golitko-2004-first-farmers-central-europe.txt (sha256 c2459ef75b569106), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in furholt-2020-vrable.txt (sha256 349a4a283413862c) and keeley-golitko-2004-first-farmers-central-europe.txt (sha256 c2459ef75b569106), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

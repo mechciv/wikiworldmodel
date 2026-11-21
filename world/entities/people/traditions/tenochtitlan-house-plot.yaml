@@ -34,7 +34,7 @@ claims:
       natives rebuilt their own part (Cortés's fourth letter, p. 504; Bernal Díaz, cap. CLVII), in houses the sources
       read do not describe: the tradition ends where the evidence for it does.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in es-cortes-1522-third-letter.txt (sha256 b72ff8bf42100af3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+      - { step: quoted, by: machine:quote-check, how: "Found in cortes-1522-third-letter.txt (sha256 b72ff8bf42100af3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["23"] }
@@ -48,7 +48,7 @@ claims:
       region's outline), and with it the rest of the Basin, Morelos and Tlaxcala. The house is claimed only for the
       city the sources describe, not for the region.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in city-estudios-americanos-778.txt (sha256 e2b341ec7d870461), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+      - { step: quoted, by: machine:quote-check, how: "Found in valero-1990-indios-tenochtitlan.txt (sha256 1913bd4fdbbc9e7a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [townspeople]
@@ -66,10 +66,10 @@ claims:
       the chinampas behind their houses (the fields claim) and were the city's people still; the sources read describe
       this house in no village, so farmers are not named.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in valero-1990-indios-tenochtitlan.txt (sha256 1913bd4fdbbc9e7a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in valero-1990-indios-tenochtitlan.txt (sha256 1913bd4fdbbc9e7a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { rooms: 1, walls: mudbrick, roof: flat }
+    value: { rooms: 1, walls: mudbrick, roof: flat, windows: none }
     source:
       - ref: src:valero-1990-indios-tenochtitlan
         loc: "p. 48"
@@ -80,6 +80,9 @@ claims:
       - ref: src:valero-1990-indios-tenochtitlan
         loc: "p. 49"
         quote: Las más humildes estaban construidas con techos de paja ( xacalli), mientras que los de una posición más acomodada vivían en casas de argamasa barata con empalizada ( cacan ie calli), habiendo también viviendas de adobe con techos de vigas ( tlapan calli, tlacocolli, tlatocacalli).
+      - ref: src:gomara-1552-conquista
+        loc: "ch. [79], p. 220 (Chimalpáhin's copy)"
+        quote: las de los otros Chicas y ruines sin puertas sin Ventanas
     method: expert-estimate
     note: >-
       One room that served for everything (Valero, after Calnek); houses commonly of adobe, with flat roofs, terraces
@@ -87,9 +90,32 @@ claims:
       adobe with beamed roofs (Valero). The words are the centre's, mudbrick walls and a flat roof; Valero says flat roofs
       were typical of the centre and thatched jacales usual farther out (pp. 49–50), which a dwelling claim for one
       tradition cannot say. Each house was of 10 to 40 m² (p. 49), which gives no width or length, so the size is left
-      to the generator.
+      to the generator. No windows is Gómara's: the houses of the king, the lords and the courtiers were large and good,
+      those of the others small and mean, without doors or windows. Torquemada too has no doors used in the houses, only a
+      hanging screen of cane (as Valero, p. 47, reports him), and Gómara has almost all houses with two doorways, one on
+      the street and one on the canal; neither says which side of the house they were in, so no entrance is written.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in city-estudios-americanos-778.txt (sha256 e2b341ec7d870461) and city-torquemada-1615-joined.txt (sha256 688c18b2f2d9d7a3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+      - { step: quoted, by: machine:quote-check, how: "Found in valero-1990-indios-tenochtitlan.txt (sha256 1913bd4fdbbc9e7a), torquemada-1615-monarquia-indiana.txt (sha256 688c18b2f2d9d7a3) and gomara-1552-conquista.txt (sha256 5adc6abb4fc88f1d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  outbuildings:
+    prop: outbuildings
+    value:
+      - { use: shrine, per: house }
+      - { use: bath, per: house }
+    source:
+      - ref: src:valero-1990-indios-tenochtitlan
+        loc: "p. 49"
+        quote: Algunas casas tenían el llamado teotzintle, especie de adoratorio doméstico
+      - ref: src:valero-1990-indios-tenochtitlan
+        loc: "p. 49"
+        quote: un temazcalli o baño de vapor
+    method: expert-estimate
+    note: >-
+      Valero, after Calnek: some houses had a teotzintle, a kind of household shrine, and others a temazcalli, a steam
+      bath. Some, not all, and no share is given, so how often each is drawn is the generator's; neither's size is given,
+      and whether the shrine stood apart from the house or in it is not said. The kitchen was a hearth of three stones in
+      the open or on the floor of the house (p. 48), not a cookhouse, and is not written.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in valero-1990-indios-tenochtitlan.txt (sha256 1913bd4fdbbc9e7a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
     value: { pattern: compound, household: { lo: 2, hi: 10 } }
@@ -107,7 +133,7 @@ claims:
       Calnek's own figure, as Valero reports it, is five to seven to a house, and three to a nuclear household as
       Jiménez Martínez reports him: the household is the least sure of these numbers.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in city-estudios-americanos-778.txt (sha256 e2b341ec7d870461) and city-gomara-chimalpahin-71-80.txt (sha256 5adc6abb4fc88f1d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+      - { step: quoted, by: machine:quote-check, how: "Found in valero-1990-indios-tenochtitlan.txt (sha256 1913bd4fdbbc9e7a) and gomara-1552-conquista.txt (sha256 5adc6abb4fc88f1d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   fields:
     prop: field_system
     value: { kind: raised }
@@ -124,4 +150,4 @@ claims:
       vegetables, the chinampas; Smith: families on their own small plots worked them, in the outer neighbourhoods,
       while near the centre the houses were packed tightly together.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in city-torquemada-1615-joined.txt (sha256 688c18b2f2d9d7a3) and city-smith-2008-aztec-city-planning.txt (sha256 2af75a49398182ad), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+      - { step: quoted, by: machine:quote-check, how: "Found in torquemada-1615-monarquia-indiana.txt (sha256 688c18b2f2d9d7a3) and smith-2008-aztec-city-planning.txt (sha256 8ad06786d1178be1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

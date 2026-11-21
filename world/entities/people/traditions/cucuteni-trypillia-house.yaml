@@ -26,7 +26,7 @@ claims:
       About 4800 BCE, the beginning the source gives the Cucuteni–Trypillia societies, which it says followed those with
       Linear and Bug–Dniester pottery (people/traditions/linearbandkeramik-longhouse for the first).
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in fuchs-2024-kosenivka.txt (sha256 dd1e9941e9f589a8), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in fuchs-2024-kosenivka.txt (sha256 dd1e9941e9f589a8), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   end:
     prop: end
     value: 3000 BCE
@@ -44,7 +44,7 @@ claims:
       About 3000 BCE; the source ends the last phase at 3300 or 3000 BCE. The sizes and storeys of the dwelling claim are
       of a settlement of the middle phase, and the houses of the late phase, in smaller settlements, are less known.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in fuchs-2024-kosenivka.txt (sha256 dd1e9941e9f589a8), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in fuchs-2024-kosenivka.txt (sha256 dd1e9941e9f589a8), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["47", "48"] }
@@ -60,7 +60,7 @@ claims:
       Trypillia sphere, where the houses described here were excavated. Only parts of each country, as the source says:
       Bulgaria, in region 48, is not among them.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in fuchs-2024-kosenivka.txt (sha256 dd1e9941e9f589a8), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in fuchs-2024-kosenivka.txt (sha256 dd1e9941e9f589a8), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [farmers]
@@ -79,7 +79,7 @@ claims:
       were pre-urban centres of up to about 10,000 people, and readings of them run from early towns to places of
       seasonal gathering; townspeople are not named here.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in fuchs-2024-kosenivka.txt (sha256 dd1e9941e9f589a8), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in fuchs-2024-kosenivka.txt (sha256 dd1e9941e9f589a8), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
     value: { plan: rectangular, width: { lo: 3, hi: 6 }, length: { lo: 10, hi: 15 }, storeys: { lo: 1, hi: 2 }, walls: wattle-and-daub }
@@ -120,10 +120,10 @@ claims:
       the Ukrainian side: no measure of a Cucuteni house in Romania was read. The roof is not stated, and is left to
       the generator.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in ohlrau-2020-maidanetske.txt (sha256 9d7b262e19cb3624), hofmann-2019-governing-tripolye.txt (sha256 ace77f81b1f55775) and fuchs-2024-kosenivka.txt (sha256 dd1e9941e9f589a8), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in ohlrau-2020-maidanetske.txt (sha256 9d7b262e19cb3624), hofmann-2019-governing-tripolye.txt (sha256 ace77f81b1f55775) and fuchs-2024-kosenivka.txt (sha256 dd1e9941e9f589a8), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
-    value: { pattern: nucleated, household: { lo: 3.9, hi: 7 } }
+    value: { pattern: nucleated, layout: ring, household: { lo: 3.9, hi: 7 } }
     source:
       - ref: src:fuchs-2024-kosenivka
         loc: 'Introduction, section "Cucuteni–Trypillia phenomena"'
@@ -162,6 +162,43 @@ claims:
       nuclear family in one dwelling, which is reckoned from many peoples and which both sources use for these houses,
       and the 3.9 to 4.7 that Diachenko (2016) reconstructed from a cemetery of the latest Trypillia. Neither is a count
       of who lived in a house; the remains of seven people in the burnt house 6 of Kosenivka, six of whom may have died
-      there, are probably of one household.
+      there, are probably of one household. The layout is the rings of the second quote, from the middle phase on, as
+      the third has the mega-sites' centripetal layout; the settlements of the early phase are not said to have been
+      laid out so, and the ring stands for the tradition as a whole. The large ditched enclosure of Maidanets'ke (the
+      second source, section 4.3.20) is one site's, and no enclosure is claimed.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in fuchs-2024-kosenivka.txt (sha256 dd1e9941e9f589a8), hofmann-2019-governing-tripolye.txt (sha256 ace77f81b1f55775) and ohlrau-2020-maidanetske.txt (sha256 9d7b262e19cb3624), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in fuchs-2024-kosenivka.txt (sha256 dd1e9941e9f589a8), hofmann-2019-governing-tripolye.txt (sha256 ace77f81b1f55775) and ohlrau-2020-maidanetske.txt (sha256 9d7b262e19cb3624), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  outbuildings:
+    prop: outbuildings
+    value:
+      - { use: hall, per: settlement }
+    source:
+      - ref: src:fuchs-2024-kosenivka
+        loc: 'Introduction, section "Cucuteni–Trypillia phenomena"'
+        quote: >-
+          From its middle phase onwards, the unifying attributes are very specific, including settlement layouts of
+          several concentric circles, some with monumental assembly houses
+      - ref: src:hofmann-2019-governing-tripolye
+        loc: section "Comparison with mega-structures in magnetic plans"
+        quote: >-
+          In Maidanetske, 82% of the total settlement area has been surveyed by high resolution magnetometry, and thirteen
+          mega-structures have been identified
+      - ref: src:hofmann-2019-governing-tripolye
+        loc: section "Comparison with mega-structures in magnetic plans"
+        quote: >-
+          In addition to this positioning, the buildings show considerable size differences between 120 and 580 m2 and
+          also a certain degree of architectural variability.
+      - ref: src:hofmann-2019-governing-tripolye
+        loc: section "Identifying different positions of mega-structures in magnetic plans"
+        quote: >-
+          In the site plans of Tripolye settlements, mega-structures are located not within concentric house rings, but
+          within the ring corridor, radial trackways, or at the outskirt of the settlement.
+    method: excavation
+    note: >-
+      The settlement's houses of assembly, the mega-structures: "some" settlements of the middle phase on had them, as
+      the first source says, and Maidanetske had thirteen, of 120 to 580 square metres, the one excavated partly roofed
+      and others perhaps wholly roofed or unroofed, placed in the corridor between the rings of houses, in the radial
+      ways or outside the rings, not among the houses. How many an ordinary settlement had is not counted, and their
+      sizes are given as areas, which an outbuilding has no word for; both are left to the generator.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in fuchs-2024-kosenivka.txt (sha256 dd1e9941e9f589a8) and hofmann-2019-governing-tripolye.txt (sha256 ace77f81b1f55775), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

@@ -29,7 +29,7 @@ claims:
       centuries" are the thirteenth and fourteenth, when the Inuit came to the North Water, between Greenland and
       Ellesmere Island.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in jeppesen-2018-north-water-PMC5963568.txt (sha256 f88de530e459ab91), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in gallant-2024-somerset-island-thule.txt (sha256 2f4621b729a70024) and jeppesen-2018-north-water-oasis.txt (sha256 43cae342b149fb39), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   end:
     prop: end
     value: 1600 CE
@@ -53,7 +53,7 @@ claims:
       second source says, after they lost their kitchens to lamp niches in the fifteenth century. The winter houses of the
       Inuit after 1600 are not described here.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in jeppesen-2018-north-water-PMC5963568.txt (sha256 f88de530e459ab91), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in gallant-2024-somerset-island-thule.txt (sha256 2f4621b729a70024) and jeppesen-2018-north-water-oasis.txt (sha256 43cae342b149fb39), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["4", "13"] }
@@ -74,7 +74,7 @@ claims:
       Thule came from Alaska by way of the Mackenzie Delta, but their houses there and on the way are not described here,
       so regions 1 to 3 are left out. The house is not claimed for all of either region.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in jeppesen-2018-north-water-PMC5963568.txt (sha256 f88de530e459ab91), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in gallant-2024-somerset-island-thule.txt (sha256 2f4621b729a70024) and jeppesen-2018-north-water-oasis.txt (sha256 43cae342b149fb39), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [foragers]
@@ -89,7 +89,7 @@ claims:
       Whalers, who lived by hunting the bowhead whale and built their winter houses with its bones: foragers, settled for
       the winter. The other source has the people of a winter site a whale-boat owner, his crew and their families.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in gallant-2024-somerset-island-thule.txt (sha256 2f4621b729a70024), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in gallant-2024-somerset-island-thule.txt (sha256 2f4621b729a70024), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
     value: { walls: sod, floor: sunken }
@@ -118,7 +118,25 @@ claims:
       were semisubterranean. The roof, the plan and the size are not described in the sources read here. The men's houses
       (qassi), larger and of another kind, are not this house.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in jeppesen-2018-north-water-PMC5963568.txt (sha256 f88de530e459ab91), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in jeppesen-2018-north-water-oasis.txt (sha256 43cae342b149fb39) and gallant-2024-somerset-island-thule.txt (sha256 2f4621b729a70024), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  outbuildings:
+    prop: outbuildings
+    value:
+      - { use: hall, per: settlement }
+    source:
+      - ref: src:jeppesen-2018-north-water-oasis
+        loc: section "The Late Dorset and Inuit in the NOW Polynya (13th to 15th centuries AD)"
+        quote: >-
+          many of the sites had a separate, larger and different type of dwelling structure—the so-called Men’s houses, or
+          qassi
+    method: excavation
+    note: >-
+      The men's house (qassi), a larger building of another kind standing apart at many of the winter sites of the North
+      Water, the settlement's. Not every site had one, and the source gives no share, so how often one is drawn is the
+      generator's; its size and build are not given. The other source has whale bone used for caches and for kayak and
+      umiak rests as well as houses, without saying whose they were or where they stood, so they are not written.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in jeppesen-2018-north-water-oasis.txt (sha256 43cae342b149fb39), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
     value: { pattern: hamlet, houses: { lo: 3, hi: 8 } }
@@ -138,4 +156,4 @@ claims:
       Island with 22 and 23 dwellings in the other source. A dwelling held one or two nuclear families, with no number of
       people given.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in jeppesen-2018-north-water-PMC5963568.txt (sha256 f88de530e459ab91), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in jeppesen-2018-north-water-oasis.txt (sha256 43cae342b149fb39), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
