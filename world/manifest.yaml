@@ -740,7 +740,8 @@ datasets:
         Exported from the API with the queries in the snapshot, by `npm run world -- macrostrat-snapshot`, on 21 November
         2026 (UTC). The licence read the same day from the API's root, its /meta, the answers themselves and the pages
         https://macrostrat.org/about and https://macrostrat.org/docs/data-services, and the documentation of columns and
-        of the age model from https://macrostrat.org/docs/columns; the article from its preprint (EarthArXiv,
+        of the age model from https://macrostrat.org/docs/columns/stratigraphic-columns and
+        https://macrostrat.org/docs/columns/age-model; the article from its preprint (EarthArXiv,
         doi:10.31223/osf.io/ynaxw, src:peters-2018-macrostrat), not from the journal, whose site refuses a script. The
         quotes here checked by script against those texts as kept. The counts are of the snapshot. The map sources'
         licences tallied from nine pages of https://macrostrat.org/api/v3/sources; the tenth answered HTTP 500.
