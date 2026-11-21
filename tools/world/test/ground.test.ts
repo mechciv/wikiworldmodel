@@ -138,7 +138,8 @@ describe("today's maps of the ground", () => {
     expect(recent.model / recent.all).toBeGreaterThan(0.18);
     const glacial = of('1 Ma–100 ka');
     expect(glacial.model / glacial.all).toBeGreaterThan(0.18);
-    // Before the Quaternary only the rocks of fossil collections say anything, of far fewer places.
+    // Before the Quaternary these maps say nothing: only the rocks of fossil collections and the columns of rock
+    // units do (tools/world/test/strata.test.ts), of far fewer places.
     const deep = of('100–10 Ma');
     expect((deep.model + deep.evidence) / deep.all).toBeLessThan(0.1);
     // And what answers the layer when is on the coverage page: each map for the span it is held for.

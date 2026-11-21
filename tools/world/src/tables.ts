@@ -15,6 +15,7 @@ import { parseTable } from './build/series.ts';
 import { datasetFile } from './manifest.ts';
 import type { Citation, Field, World } from './world.ts';
 import { rockRows, type LandSnapshot, type RockRow, type RocksSnapshot } from './pbdb.ts';
+import { unitRows, type ColumnsSnapshot, type UnitRow } from './macrostrat.ts';
 
 /** How a column's raw value becomes a claim's value, and back. */
 export type Conversion = 'string' | 'number' | 'text' | 'year' | 'year-end' | 'ma' | 'ma-range' | 'point';
@@ -166,6 +167,10 @@ export async function rawRows(world: World, field: Field): Promise<Record<string
     const path = datasetFile(id, d, field.data!.file ?? (d.fetch.files ? Object.keys(d.fetch.files)[0] : undefined));
     return existsSync(path) ? rockRows(JSON.parse(await readFile(path, 'utf8')) as RocksSnapshot) : undefined;
   }
+  if (field.data!.as === 'strata') {
+    const path = datasetFile(id, d, field.data!.file ?? (d.fetch.files ? Object.keys(d.fetch.files)[0] : undefined));
+    return existsSync(path) ? unitRows(JSON.parse(await readFile(path, 'utf8')) as ColumnsSnapshot) : undefined;
+  }
   const member = field.data!.file ?? (d.fetch.files ? Object.keys(d.fetch.files)[0] : undefined);
   const path = datasetFile(id, d, member);
   if (!existsSync(path)) return undefined;
@@ -289,6 +294,48 @@ export function correctRocks(snap: RocksSnapshot, spec: RowsSpec, fixes: Map<str
     collections[i] = c;
   }
   return { ...snap, words, collections };
+}
+
+/**
+ * The units of the columns of rock with corrections applied: a corrected name, or a corrected age of its start or its
+ * end, written into the unit's own row. What a correction says of a unit's lithologies, its environments or its place
+ * cannot be written back, since a row gives those as its dataset's own lists and its column's point: such corrections
+ * are returned as unapplied, and so is one that would end a unit before it began. Returns the snapshot itself where no
+ * overlay names a row of it.
+ */
+export function correctUnits(snap: ColumnsSnapshot, spec: RowsSpec, fixes: Map<string, Fix[]>): { snap: ColumnsSnapshot; unapplied: string[] } {
+  if (!fixes.size) return { snap, unapplied: [] };
+  const { keys, rows, changed } = correctRows(spec, unitRows(snap), fixes);
+  if (!changed.size) return { snap, unapplied: [] };
+  const words = [...snap.words];
+  const at = new Map(words.map((w, i) => [w, i]));
+  const word = (w: unknown): number => {
+    const key = String(w ?? '');
+    let k = at.get(key);
+    if (k === undefined) {
+      k = words.length;
+      words.push(key);
+      at.set(key, k);
+    }
+    return k;
+  };
+  const units = [...snap.units];
+  const unapplied: string[] = [];
+  for (const [i, props] of changed) {
+    const r = rows[i];
+    const u = [...units[i]] as UnitRow;
+    for (const p of props) {
+      for (const column of [spec.claims[p].column].flat()) {
+        if (column === 'label') u[4] = word(r.label);
+        else if (column === 'older_ma') u[5] = Number(r.older_ma);
+        else if (column === 'younger_ma') u[6] = Number(r.younger_ma);
+        else unapplied.push(`${keys[i]}: a corrected ${p} cannot be written into a unit's row`);
+      }
+    }
+    if (!Number.isFinite(u[5]) || !Number.isFinite(u[6]) || u[5] < u[6]) unapplied.push(`${keys[i]}: corrected, it would run from ${u[5]} to ${u[6]} Ma`);
+    else units[i] = u;
+  }
+  return { snap: { ...snap, words, units }, unapplied };
 }
 
 /**

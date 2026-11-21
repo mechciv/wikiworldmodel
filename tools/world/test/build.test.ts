@@ -174,6 +174,7 @@ describe('build', () => {
       'src:itinere-2024',
       'src:jouzel-2007-epica-dome-c',
       'src:li-2022-phanerozoic-climate',
+      'src:macrostrat-columns-2026-11-21',
       'src:natural-earth-boundaries-5.1.2',
       'src:natural-earth-lakes-5.1.2',
       'src:natural-earth-ocean-5.1.2',

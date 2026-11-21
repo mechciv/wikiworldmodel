@@ -35,7 +35,7 @@ import { formatIssue, validateWorld } from '../validate/index.ts';
 import { loadWorld, type Field, type World } from '../world.ts';
 import { attributionMarkdown, credits } from '../attribution.ts';
 import { ClaimIndex } from '../claimindex.ts';
-import { correctLand, correctRocks } from '../tables.ts';
+import { correctLand, correctRocks, correctUnits } from '../tables.ts';
 import { gridPlaces, lifeTierOf, seaTierOf, tierCounts, TIER_SPANS, type ResolveWorld } from '../../../../core/resolve.ts';
 import { coverageMatrix, type CoverageSource } from '../../../../core/coverage.ts';
 import { glance, landShares } from '../../../../core/glance.ts';
@@ -58,8 +58,10 @@ import { buildAtlas } from './atlas.ts';
 import { buildSeaAtlas, type SeaOut, type SeaParams } from './sea.ts';
 import { buildRocks, type NoneWords, type RocksOut, type RocksParams } from './rocks.ts';
 import { buildGround, groundResolve } from './groundmaps.ts';
-import { bedrockAt, firstGround, groundHeld, substrateOfRocks, substrateOfSoil, type SubstrateFile, type SubstrateRule } from '../../../../core/substrate.ts';
+import { buildStrata, columnAt, todayOf, type StrataOut, type StrataParams } from './strata.ts';
+import { bedrockAt, firstGround, firstRock, groundHeld, groundOfStrata, substrateOfRocks, substrateOfSoil, type SceneBedrock, type SceneSubstrate, type SubstrateFile, type SubstrateRule } from '../../../../core/substrate.ts';
 import type { LandSnapshot, RocksSnapshot } from '../pbdb.ts';
+import type { ColumnsSnapshot } from '../macrostrat.ts';
 import { buildScene, witnesses } from './scene.ts';
 import { features as buildFeatures, holdersOf, periods as buildPeriods, records as buildRecords, search as buildSearch, sourceRecord, type Solved } from './records.ts';
 import { planet as buildPlanet } from './planet.ts';
@@ -924,13 +926,38 @@ export async function runBuild(args: string[]): Promise<number> {
   // Today's maps of the ground, held back in time: the topsoil, and the rock under it (core/substrate.ts).
   const ground = await buildGround(world, periodList, log);
   if (ground) put('ground.lwt', encodeTile(ground.header as unknown as Record<string, unknown>, ground.arrays, stableStringify));
-  // What a ground is made of, by that record and those maps (field:earth/substrate): the rule a scene reads its place's
-  // ground by, for a viewer; and the ground of the build's own scene, where its place stood at the slice of the stage
-  // that holds it, and where it stands today.
   const substrateField = world.fields.find((f) => f.rule === 'substrate');
-  const substrateRule = rocks || ground ? (substrateField?.params as unknown as SubstrateRule | undefined) : undefined;
+  // Rock with ages: the columns of rock units, which a place's ground can be read from at any time (core/strata.ts).
+  // Its rows are corrected by the overlays before anything reads them, as the rock record's are.
+  let strata: StrataOut | undefined;
+  const strataField = world.fields.find((f) => f.data?.as === 'strata');
+  if (strataField) {
+    const id = strataField.data!.from;
+    const path = datasetFile(id, world.manifest.datasets[id], strataField.data!.file);
+    if (existsSync(path)) {
+      const started = Date.now();
+      const given = JSON.parse(await readFile(path, 'utf8')) as ColumnsSnapshot;
+      const { snap, unapplied } = strataField.rows ? correctUnits(given, strataField.rows, claims.corrections(id)) : { snap: given, unapplied: [] };
+      for (const u of unapplied) log(`warning rows        ${id} ${u}`);
+      // The field's time is the units' own: from the start of its oldest to the end of its youngest.
+      const [lo, hi] = [toMa(parsePoint(strataField.time!.lo as TimePointInput).t), toMa(parsePoint(strataField.time!.hi as TimePointInput).t)];
+      const [older, younger] = [Math.max(...snap.units.map((u) => u[5])), Math.min(...snap.units.map((u) => u[6]))];
+      if (Math.abs(lo - older) > 1e-6 || Math.abs(hi - younger) > 1e-6) throw new Error(`${strataField.id}: its time runs from ${lo} to ${hi} Ma, and its units from ${older} to ${younger} Ma`);
+      const isoline = world.fields.find((f) => f.id === 'field:earth/coastline')?.isoline_m ?? 20;
+      const rule = substrateField?.params as unknown as SubstrateRule | undefined;
+      strata = buildStrata(solved, snap, id, strataField, strataField.params as unknown as StrataParams, world.manifest.datasets[id]?.credit, log, rockLand && rule ? { periods: periodList, elevation: rockLand.snapshots, isoline, rule } : undefined);
+      put('strata.lwt', encodeTile(strata.header as unknown as Record<string, unknown>, [strata.rows, strata.runs], stableStringify));
+      for (const [p, c] of strata.files) put(p, c);
+      coverageFile.strata = { columns: snap.columns.length, units: snap.units.length, cells: strata.cells, lost: strata.lost, ...(strata.agreement ? { agreement: strata.agreement } : {}) };
+      log(`strata  built in ${((Date.now() - started) / 1000).toFixed(1)} s`);
+    } else log(`strata  not built: no snapshot ${id} yet`);
+  }
+  // What a ground is made of, by that record, those maps and those columns (field:earth/substrate): the rule a scene
+  // reads its place's ground by, for a viewer; and the ground of the build's own scene, where its place stood at the
+  // slice of the stage that holds it, and where it stands today.
+  const substrateRule = rocks || ground || strata ? (substrateField?.params as unknown as SubstrateRule | undefined) : undefined;
   if (substrateField && substrateRule) {
-    const file: SubstrateFile = { format: 'lightworld-substrate@1', field: substrateField.id, title: substrateField.title, description: substrateField.description, rule: substrateRule, ...(rocks ? { rocks: 'rocks/index.json' } : {}), ...(ground ? { ground: 'ground.lwt', held: [ground.header.soil, ground.header.bedrock].flatMap((m) => (m ? [m.span] : [])) } : {}) };
+    const file: SubstrateFile = { format: 'lightworld-substrate@1', field: substrateField.id, title: substrateField.title, description: substrateField.description, rule: substrateRule, ...(rocks ? { rocks: 'rocks/index.json' } : {}), ...(ground ? { ground: 'ground.lwt', held: [ground.header.soil, ground.header.bedrock].flatMap((m) => (m ? [m.span] : [])) } : {}), ...(strata ? { strata: 'strata.lwt' } : {}) };
     put('substrate.json', stableStringify(file));
   }
   const groundOf = substrateRule
@@ -939,9 +966,19 @@ export async function runBuild(args: string[]): Promise<number> {
         const at = k >= 0 ? positionAt(toMa(rocks!.index.bins[k].slice)) : undefined;
         const rock = at ? substrateOfRocks(rocks!.bins[k], rocks!.index, substrateRule, at.lat, at.lon) : undefined;
         const today = ground && (groundHeld(ground.header.soil, slice) || groundHeld(ground.header.bedrock, slice)) ? positionAt(0) : undefined;
+        // The units of the column the place lies in today, at the time of the slice.
+        let units: { substrate?: SceneSubstrate; bedrock?: SceneBedrock } | undefined;
+        const unitsHere = () => {
+          if (!units) {
+            const now = strata ? positionAt(0) : undefined;
+            const column = now ? columnAt(strata!, now.lat, now.lon) : undefined;
+            units = column ? groundOfStrata(column, toMa(slice), strata!.of, substrateRule) : {};
+          }
+          return units;
+        };
         return {
-          substrate: firstGround(rock, () => (today && groundHeld(ground!.header.soil, slice) ? substrateOfSoil(ground!.maps, substrateRule, today.lat, today.lon) : undefined)),
-          bedrock: today && groundHeld(ground!.header.bedrock, slice) ? bedrockAt(ground!.maps, substrateRule, today.lat, today.lon) : undefined,
+          substrate: firstGround(rock, () => (today && groundHeld(ground!.header.soil, slice) ? substrateOfSoil(ground!.maps, substrateRule, today.lat, today.lon) : undefined), () => unitsHere().substrate),
+          bedrock: firstRock(today && groundHeld(ground!.header.bedrock, slice) ? bedrockAt(ground!.maps, substrateRule, today.lat, today.lon) : undefined, () => unitsHere().bedrock),
         };
       }
     : undefined;
@@ -1023,7 +1060,26 @@ export async function runBuild(args: string[]): Promise<number> {
   // Every layer answers everywhere, in a tier (docs/STRUCTURE.md section 3.3): how much of the world each tier holds.
   const resolveWorld = resolveWorldOf(world, solved, grids, climateKeys, ice, people, polities, lifeAtlas, seaAtlas, riversInfo ? { info: riversInfo, seen: riversSeen } : undefined, seriesList);
   if (landscape) resolveWorld.landscape = landscapeResolve(landscape);
-  if (substrateRule) resolveWorld.substrate = groundResolve(rocks, ground, substrateRule);
+  if (substrateRule) {
+    // A place asked at a time is carried on its plate to where it stands today, where the columns are.
+    const carry = strata && rockLand ? todayOf(solved, rockLand.snapshots) : undefined;
+    resolveWorld.substrate = groundResolve(
+      rocks,
+      ground,
+      substrateRule,
+      strata && carry
+        ? {
+            span: strata.header.span,
+            at: (lat, lon, t) => {
+              const ageMa = toMa(t);
+              const now = ageMa >= 0 ? carry(lat, lon, ageMa) : undefined;
+              const column = now ? columnAt(strata!, now[0], now[1]) : undefined;
+              return column ? groundOfStrata(column, ageMa, strata!.of, substrateRule) : {};
+            },
+          }
+        : undefined,
+    );
+  }
   if (coverageLandscape && landscape) {
     const farming = farmingAgreement(landscape);
     coverageFile.landscape = { disagree: coverageLandscape, farming };
@@ -1060,6 +1116,8 @@ export async function runBuild(args: string[]): Promise<number> {
   if (ground && substrateRule) {
     for (const m of [ground.header.soil, ground.header.bedrock]) if (m) sources.push({ layer: 'substrate', id: m.field, title: m.title, tier: 'model', span: m.span, res_deg: m.res, lane: m.field });
   }
+  // The columns of rock with ages, for as long as they have units: a model, of the areas their footprints cover.
+  if (strata && substrateRule) sources.push({ layer: 'substrate', id: strata.header.field, title: strata.header.title, tier: 'model', span: strata.header.span, res_deg: strata.header.grid.res, lane: strata.header.field });
   if (landscape) {
     const af = world.fields.find((f) => f.data?.as === 'anthromes')!;
     const lf = world.fields.find((f) => f.data?.as === 'land-use-assessment')!;
@@ -1092,7 +1150,7 @@ export async function runBuild(args: string[]): Promise<number> {
     timeRange: span,
     lods: lods.map((l) => ({ lod: l.lod, step: l.step, cell: [l.cells[0][2] - l.cells[0][0], l.cells[0][3] - l.cells[0][1]], binsMa: l.binsMa })),
     tiles,
-    files: { frames: 'frames.json', periods: 'periods.json', search: 'search.json', records: 'records/', coverage: 'coverage.json', series: 'series.json', planet: 'planet.json', territory: 'territory.json', city: city ? `city/${city.file.site.id}.json` : undefined, climate: climateKeys.length ? 'climate.lwt' : undefined, ice: ice ? 'ice.lwt' : undefined, tree: 'tree.json', ...(present ? { present: 'present.json' } : {}), ...(hazards ? { hazards: 'hazards.json' } : {}), ...(polities ? { polities: 'polities.json' } : {}), ...(overlays ? { overlays: 'overlays.json' } : {}), ...(people ? { people: 'people.lwt' } : {}), ...(atlasFile ? { atlas: atlasFile } : {}), ...(seaAtlas ? { sea: 'life/sea.json' } : {}), ...(rocks ? { rocks: 'rocks/index.json' } : {}), ...(substrateRule ? { substrate: 'substrate.json' } : {}), ...(ground ? { ground: 'ground.lwt' } : {}), ...(landscape ? { landscape: 'people/landscape.json' } : {}), features: FEATURE_INDEX },
+    files: { frames: 'frames.json', periods: 'periods.json', search: 'search.json', records: 'records/', coverage: 'coverage.json', series: 'series.json', planet: 'planet.json', territory: 'territory.json', city: city ? `city/${city.file.site.id}.json` : undefined, climate: climateKeys.length ? 'climate.lwt' : undefined, ice: ice ? 'ice.lwt' : undefined, tree: 'tree.json', ...(present ? { present: 'present.json' } : {}), ...(hazards ? { hazards: 'hazards.json' } : {}), ...(polities ? { polities: 'polities.json' } : {}), ...(overlays ? { overlays: 'overlays.json' } : {}), ...(people ? { people: 'people.lwt' } : {}), ...(atlasFile ? { atlas: atlasFile } : {}), ...(seaAtlas ? { sea: 'life/sea.json' } : {}), ...(rocks ? { rocks: 'rocks/index.json' } : {}), ...(substrateRule ? { substrate: 'substrate.json' } : {}), ...(ground ? { ground: 'ground.lwt' } : {}), ...(strata ? { strata: 'strata.lwt' } : {}), ...(landscape ? { landscape: 'people/landscape.json' } : {}), features: FEATURE_INDEX },
     rivers: riversInfo,
     months: monthsInfo,
     climates: recentClimates.length

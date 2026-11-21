@@ -97,6 +97,24 @@ const commands: Record<string, (args: string[]) => Promise<number | void>> = {
     console.log(`${snap.collections.length} collections, ${snap.ages.length} measured ages → ${file}`);
     console.log(`In world/manifest.yaml point the dataset at repo:${file}, sha256 ${createHash('sha256').update(zip).digest('hex')}, ${zip.length} bytes; its member ${member}, sha256 ${createHash('sha256').update(json).digest('hex')}.`);
   },
+  // Macrostrat's columns and their units, with their footprints and the references they name, zipped in world/snapshots:
+  // rock with ages, which a place's ground can be read from at any time (field:earth/strata).
+  async 'macrostrat-snapshot'() {
+    const { exportColumns } = await import('./macrostrat.ts');
+    const { zipSync, strToU8 } = await import('fflate');
+    const date = new Date().toISOString().slice(0, 10);
+    const name = `macrostrat-columns-${date}`;
+    const file = `world/snapshots/${name}.zip`;
+    if (existsSync(join(REPO, file))) throw new Error(`${file} exists: one snapshot a day`);
+    const snap = await exportColumns(date, console.log);
+    const json = strToU8(JSON.stringify(snap));
+    const member = `${name}.json`;
+    // A fixed time on the member, so that the same rows make the same bytes.
+    const zip = zipSync({ [member]: [json, { level: 9, mtime: new Date('2000-01-01T00:00:00Z') }] });
+    writeFileSync(join(REPO, file), zip);
+    console.log(`${snap.columns.length} columns, ${snap.units.length} units → ${file}`);
+    console.log(`In world/manifest.yaml point the dataset at repo:${file}, sha256 ${createHash('sha256').update(zip).digest('hex')}, ${zip.length} bytes; its member ${member}, sha256 ${createHash('sha256').update(json).digest('hex')}.`);
+  },
   // What the rocks of a stage say near a place, by the latest build: `npm run world -- rocks -4.04 -43.18 123.7 Ma`.
   // The place is as it is today; the time is written as a record writes one.
   async rocks([lat, lon, ...when]) {

@@ -7,7 +7,7 @@ import { warmestMonth, type Months } from '../../../core/months.ts';
 import type { WaterParams } from '../../../core/water.ts';
 import type { Form } from '../../../core/form.ts';
 import type { LivingTaxon, ReliefPatch, SceneCover, SceneParts, SceneSpec, SceneTier } from '../../../core/scene.ts';
-import { firstGround, type SceneBedrock, type SceneSubstrate } from '../../../core/substrate.ts';
+import { firstGround, firstRock, type SceneBedrock, type SceneSubstrate } from '../../../core/substrate.ts';
 import { fromMa, toMa } from '../../../core/time.ts';
 import type { FeatureTime } from '../../../core/tileset.ts';
 import { dcos, hash2, hashString, PI } from '../city/math.ts';
@@ -221,6 +221,11 @@ export interface PlaceWorld {
    */
   soil?: (lat: number, lon: number) => SceneSubstrate | undefined;
   bedrock?: (lat: number, lon: number) => SceneBedrock | undefined;
+  /**
+   * And from the units of the column of rock the place lies in (field:earth/strata), at the time shown: the ground a
+   * unit being laid down then makes, and the rock under it. Asked where the place stands today, where the columns are.
+   */
+  strata?: (lat: number, lon: number) => { substrate?: SceneSubstrate; bedrock?: SceneBedrock };
   generator: { id: string; version: number; params: Record<string, unknown> };
 }
 
@@ -258,13 +263,15 @@ export function placeSpec(w: PlaceWorld, lat: number, lon: number, ageMa: number
     spec.climate = { field, ageMa: age, months, height: Math.round(here.height - w.isoline), coast: Math.round(w.isoline), lapse: m!.lapse, rule: w.rule, water: m!.water, month: m!.month ?? warmestMonth(months), lat: round5(here.lat), ...(here.parts ? { parts: here.parts } : {}) };
   }
   // The ground of a place of land, where the world says what it was made of, and the rock under it.
-  if (land && (w.substrate || w.soil || w.bedrock)) {
+  if (land && (w.substrate || w.soil || w.bedrock || w.strata)) {
     const carried = (toAge: number): [number, number] => (plate ? w.carry(plate, origin.lat, origin.lon, ageMa, toAge) : [origin.lat, origin.lon]);
     const [sl, so] = w.substrate ? carried(toMa(w.bin.slice)) : [0, 0];
-    const [tl, to] = w.soil || w.bedrock ? carried(0) : [0, 0];
-    const ground = firstGround(w.substrate?.(sl, so), () => w.soil?.(tl, to));
+    const [tl, to] = w.soil || w.bedrock || w.strata ? carried(0) : [0, 0];
+    let units: { substrate?: SceneSubstrate; bedrock?: SceneBedrock } | undefined;
+    const unitsHere = () => (units ??= w.strata?.(tl, to) ?? {});
+    const ground = firstGround(w.substrate?.(sl, so), () => w.soil?.(tl, to), () => unitsHere().substrate);
     if (ground) spec.substrate = ground;
-    const rock = w.bedrock?.(tl, to);
+    const rock = firstRock(w.bedrock?.(tl, to), () => unitsHere().bedrock);
     if (rock) spec.bedrock = rock;
   }
   return spec;
