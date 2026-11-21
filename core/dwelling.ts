@@ -18,12 +18,21 @@ export const DWELLING_WORDS = {
     long: 'A longhouse: many times longer than it is wide, often for several households or for people and animals together.',
     courtyard: 'Rooms around an open court, which the house encloses.',
     'room-block': 'Many rooms joined wall to wall and often stacked, so that houses are cells of one block.',
+    'l-shaped': 'Two ranges of rooms meeting at a corner.',
+    'figure-of-eight': 'Two round rooms joined.',
+    polygonal: 'Five, six or more straight sides.',
+    semicircular: 'A half circle, open or straight along one side: a windbreak or a lean-to shelter.',
   },
   walls: {
     mudbrick: 'Sun-dried mud bricks.',
     'fired-brick': 'Bricks fired in a kiln.',
     stone: 'Stone, dry or set in mortar or mud.',
     timber: 'Logs, planks or a timber frame filled with timber.',
+    log: 'Logs laid one on another and notched together at the corners.',
+    plank: 'Planks, set upright or laid along, on a frame of posts.',
+    'timber-frame': 'A frame of timber whose panels are filled with wattle and daub, earth or brick.',
+    wattle: 'Woven branches or split bamboo, with no daub.',
+    mat: 'Mats woven of bamboo, palm leaf, grass or reed, tied to a frame.',
     'wattle-and-daub': 'Woven branches plastered with mud or clay.',
     'pole-and-thatch': 'Poles with thatch or leaves tied to them, so that wall and roof are one.',
     reed: 'Bundled or woven reeds.',
@@ -46,10 +55,17 @@ export const DWELLING_WORDS = {
     dome: 'A dome or a rounded vault of the whole house.',
     tent: 'A tent: a covering on poles.',
     vault: 'A barrel vault.',
+    'hip-and-gable': 'Slopes on all four sides, the two at the ends stopping short of the ridge under a small gable.',
+    'half-hip': 'A gable whose top is cut back in a short slope.',
+    curved: 'Slopes whose ridge and eaves curve down towards the ends, as the roofs of Bengal do.',
+    shed: 'One slope.',
   },
   roof_material: {
     earth: 'Earth or mud over beams and matting.',
     thatch: 'Thatch of straw, grass, reeds or leaves.',
+    leaves: 'Leaves, where a source says so and not straw or grass: laid like tiles or tied on in bunches.',
+    brush: 'Brushwood, boughs or bundled stalks.',
+    mat: 'Woven mats.',
     tile: 'Fired tiles.',
     timber: 'Planks or shingles.',
     bark: 'Bark sheets.',
@@ -68,7 +84,53 @@ export const DWELLING_WORDS = {
     platform: 'On a built platform, a metre or more high.',
     stilts: 'On posts, above the ground or water.',
   },
+  entrance: {
+    end: 'In a short side, or under a gable.',
+    side: 'In a long side.',
+    roof: 'Through the roof, by a ladder.',
+    tunnel: 'By a low covered passage, as a snow house or a winter house of sod has.',
+  },
+  faces: {
+    north: 'Its entrance faces north.',
+    'north-east': 'Its entrance faces north-east.',
+    east: 'Its entrance faces east.',
+    'south-east': 'Its entrance faces south-east.',
+    south: 'Its entrance faces south.',
+    'south-west': 'Its entrance faces south-west.',
+    west: 'Its entrance faces west.',
+    'north-west': 'Its entrance faces north-west.',
+  },
+  windows: {
+    none: 'No windows: light came by the door and the smoke hole.',
+    small: 'Small openings, unglazed, shuttered or barred.',
+    large: 'Large windows, of lattice, paper or glass.',
+  },
+  smoke: {
+    none: 'No opening for it: smoke found its way out through the roof or by the door.',
+    hole: 'A hole in the roof, at its top or along its ridge.',
+    gable: 'Openings under the ridge at the gable ends.',
+    chimney: 'A built chimney.',
+  },
+  finish: {
+    plain: 'Left as built.',
+    mud: 'Plastered with mud, clay or dung.',
+    lime: 'Plastered or washed with lime: white.',
+    painted: 'Painted or patterned in colours.',
+  },
 } as const;
+
+/** What stood round a settlement, a compound or a yard. */
+const ENCLOSURE_WORDS = {
+  none: 'Open: nothing stood round it.',
+  fence: 'A fence of posts and rails, of wattle or of reeds.',
+  hedge: 'A hedge, live or of cut thorn.',
+  palisade: 'A palisade of upright posts.',
+  bank: 'A bank of earth, with or without its ditch.',
+  ditch: 'A ditch.',
+  wall: 'A wall of stone, brick or earth.',
+} as const;
+
+export type EnclosureWord = keyof typeof ENCLOSURE_WORDS;
 
 export const SETTLEMENT_WORDS = {
   pattern: {
@@ -81,7 +143,67 @@ export const SETTLEMENT_WORDS = {
     'room-block': 'One block of rooms holds the whole settlement, or most of it.',
     walled: 'A settlement inside a wall.',
   },
+  layout: {
+    ring: 'Houses in a ring round an open middle.',
+    rows: 'Houses in straight rows.',
+  },
+  /** what stood round the whole settlement, or round a compound */
+  enclosure: ENCLOSURE_WORDS,
+  /** what stood round each house's own yard */
+  yard: ENCLOSURE_WORDS,
 } as const;
+
+/**
+ * What a household or a settlement had besides its houses: a granary, a pen, a well, a house to meet in. A tradition's
+ * `outbuildings` claim lists them, each with whose it was and, as far as its sources say, what it was like, in the
+ * words and sizes of a dwelling. The settlement generator draws them by the houses or among them.
+ */
+export const OUTBUILDING_WORDS = {
+  use: {
+    granary: 'A store for grain or other crops: a granary, a crib, a raised storehouse.',
+    store: 'A storehouse for other goods, or a cache.',
+    byre: 'A house for animals: a byre, a stable, a sty, a sheepcote.',
+    pen: 'An open enclosure for animals: a pen, a fold, a kraal, a corral.',
+    kitchen: 'A cookhouse apart from the house.',
+    oven: 'An oven or a kiln standing in the open.',
+    well: 'A well.',
+    pond: 'A pond or a tank dug for water.',
+    rack: 'A rack or a scaffold for drying fish, meat, hides or crops.',
+    stack: 'A stack or a rick of hay, straw or fodder.',
+    'threshing-floor': 'A floor for threshing, in the open.',
+    workshop: "A hut to work in: a weaving hut, a smithy, a potter's shed.",
+    bath: 'A bath house or a sweat house.',
+    shrine: 'A shrine, a temple or a church.',
+    hall: "A house to meet in: a men's house, a council house, a chief's hall, a kiva.",
+    pole: 'A carved or painted pole, or a standing stone.',
+  },
+  per: {
+    house: "A household's: it stood by a house.",
+    settlement: "The settlement's: it stood among the houses, or at their middle.",
+  },
+} as const;
+
+export type OutbuildingUse = keyof typeof OUTBUILDING_WORDS.use;
+
+/** The uses that are roofed buildings, drawn as a house is from the words of a dwelling; the rest are drawn as works. */
+export const OUTBUILDING_ROOFED: Record<OutbuildingUse, boolean> = {
+  granary: true,
+  store: true,
+  byre: true,
+  pen: false,
+  kitchen: true,
+  oven: false,
+  well: false,
+  pond: false,
+  rack: false,
+  stack: false,
+  'threshing-floor': false,
+  workshop: true,
+  bath: true,
+  shrine: true,
+  hall: true,
+  pole: false,
+};
 
 export const FIELD_WORDS = {
   kind: {
@@ -195,8 +317,18 @@ export interface DwellingSpec extends Words<typeof DWELLING_WORDS> {
   height?: Span;
   storeys?: Span;
   rooms?: Span;
+  /** how far its floor stood above the ground, raised, on a platform or on stilts; or below it, sunken */
+  floor_height?: Span;
+  /** how steeply its roof sloped, in degrees from the level */
+  pitch?: Span;
   /** whether its rooms stand around an open court */
   court?: boolean;
+  /** whether a porch stood out before its door */
+  porch?: boolean;
+  /** whether a veranda or an open gallery ran under its eaves */
+  veranda?: boolean;
+  /** whether animals were stalled under its roof, at one end */
+  byre?: boolean;
 }
 
 /** How the houses stood together. */
@@ -207,6 +339,19 @@ export interface SettlementSpec extends Words<typeof SETTLEMENT_WORDS> {
   spacing?: Span;
   /** people in one house */
   household?: Span;
+  /** whether open ground lay at its middle: a green, a dance ground, a plaza */
+  plaza?: boolean;
+}
+
+/** One thing a household or a settlement had besides its houses (OUTBUILDING_WORDS), in the words and sizes of a dwelling. */
+export interface OutbuildingSpec extends DwellingSpec {
+  use: OutbuildingUse;
+  /** whose it was: a household's, by its house; or the settlement's */
+  per: keyof typeof OUTBUILDING_WORDS.per;
+  /** how many to a household, or in a settlement; less than one where some households had one */
+  count?: Span;
+  /** what a pen was made of */
+  enclosure?: EnclosureWord;
 }
 
 /** The fields around them. Plots in hectares. */
@@ -231,7 +376,8 @@ export interface TownSpec extends Words<typeof TOWN_WORDS> {
   square?: boolean;
 }
 
-const DWELLING_NUMBERS = ['diameter', 'width', 'length', 'wall_height', 'height', 'storeys', 'rooms'] as const;
+const DWELLING_NUMBERS = ['diameter', 'width', 'length', 'wall_height', 'height', 'storeys', 'rooms', 'floor_height', 'pitch'] as const;
+const DWELLING_FLAGS = ['court', 'porch', 'veranda', 'byre'] as const;
 const SETTLEMENT_NUMBERS = ['houses', 'spacing', 'household'] as const;
 const FIELD_NUMBERS = ['plot'] as const;
 const TOWN_NUMBERS = ['block', 'street', 'main_street', 'wall_height', 'wall_thickness', 'gates'] as const;
@@ -269,8 +415,29 @@ function problemsOf(v: unknown, what: string, words: Record<string, Record<strin
   return out;
 }
 
-export const dwellingProblems = (v: unknown) => problemsOf(v, 'dwelling', DWELLING_WORDS, DWELLING_NUMBERS, ['court']);
-export const settlementProblems = (v: unknown) => problemsOf(v, 'settlement form', SETTLEMENT_WORDS, SETTLEMENT_NUMBERS);
+export const dwellingProblems = (v: unknown) => {
+  const out = problemsOf(v, 'dwelling', DWELLING_WORDS, DWELLING_NUMBERS, DWELLING_FLAGS);
+  const pitch = (v as { pitch?: Span } | null)?.pitch;
+  if (pitch !== undefined && !spanProblem(pitch) && (typeof pitch === 'number' ? pitch : pitch.hi) >= 90) out.push('pitch is in degrees from the level, less than 90');
+  return out;
+};
+export const settlementProblems = (v: unknown) => problemsOf(v, 'settlement form', SETTLEMENT_WORDS, SETTLEMENT_NUMBERS, ['plaza']);
+
+/** What is wrong with an `outbuildings` claim's value: a list of one or more, each with its use and whose it was. */
+export function outbuildingProblems(v: unknown): string[] {
+  if (!Array.isArray(v) || !v.length) return ['outbuildings are a list of one or more, each a mapping with its use and whose it was'];
+  const out: string[] = [];
+  const words = { ...DWELLING_WORDS, ...OUTBUILDING_WORDS, enclosure: ENCLOSURE_WORDS };
+  v.forEach((x, i) => {
+    const at = `outbuilding ${i + 1}`;
+    for (const p of problemsOf(x, 'outbuilding', words, [...DWELLING_NUMBERS, 'count'], DWELLING_FLAGS)) out.push(`${at}: ${p}`);
+    const r = x as { use?: unknown; per?: unknown } | null;
+    if (!r || typeof r !== 'object') return;
+    if (r.use === undefined) out.push(`${at}: it says its use, one of ${Object.keys(OUTBUILDING_WORDS.use).join(', ')}`);
+    if (r.per === undefined) out.push(`${at}: it says whose it was (per), one of ${Object.keys(OUTBUILDING_WORDS.per).join(', ')}`);
+  });
+  return out;
+}
 export const fieldProblems = (v: unknown) => problemsOf(v, 'field system', FIELD_WORDS, FIELD_NUMBERS);
 export const townProblems = (v: unknown) => problemsOf(v, 'town form', TOWN_WORDS, TOWN_NUMBERS, ['moat', 'square']);
 
@@ -298,7 +465,12 @@ export interface Tradition {
   /** how its towns were laid out, where it housed townspeople and says; and when, where its claim holds for part of its span */
   town: TownSpec;
   townSpan?: [number, number];
-  /** which tradition gave each parameter: `dwelling.walls` → its id; and `lifeway`, whose claim says whom it housed */
+  /** what its households and settlements had besides their houses: its own list, whole, or its nearest ancestor's that has one */
+  outbuildings?: OutbuildingSpec[];
+  /**
+   * which tradition gave each parameter: `dwelling.walls` → its id; `lifeway`, whose claim says whom it housed; and
+   * `outbuildings`, whose list they are
+   */
   from: From;
   /** whether it says anything of the dwelling itself, rather than inheriting it all */
   own: boolean;
@@ -319,6 +491,7 @@ export interface TraditionInput {
   town?: TownSpec;
   /** when its town form held, where the claim says: [from, to] on the axis */
   townSpan?: [number, number];
+  outbuildings?: OutbuildingSpec[];
 }
 
 /**
@@ -344,6 +517,9 @@ export function compileTraditions(inputs: TraditionInput[]): Tradition[] {
     // Whom it housed is its own to say, whole: a member that says so does not add to its parent's.
     const own = t.lifeways?.length ? [...t.lifeways] : undefined;
     if (own) from.lifeway = t.id;
+    // What stood by its houses is a list of its own, whole: a member that gives one does not add to its parent's.
+    const outbuildings = t.outbuildings?.length ? t.outbuildings : up?.outbuildings;
+    if (t.outbuildings?.length) from.outbuildings = t.id;
     const out: Tradition = {
       id: t.id,
       label: t.label,
@@ -360,6 +536,7 @@ export function compileTraditions(inputs: TraditionInput[]): Tradition[] {
       town: merge(t.town, up?.town, 'town'),
       // A town form that holds for part of a span is its own claim's; a member that says none keeps its parent's.
       ...((t.town ? t.townSpan : up?.townSpan) ? { townSpan: t.town ? t.townSpan : up!.townSpan } : {}),
+      ...(outbuildings?.length ? { outbuildings } : {}),
       from,
       own: !!t.dwelling && Object.keys(t.dwelling).length > 0,
     };
@@ -547,6 +724,25 @@ export function within(s: Span | undefined, or: number, u: number): number {
 
 const spanText = (s: Span, unit = '') => (typeof s === 'number' ? `${s}${unit}` : `${s.lo}–${s.hi}${unit}`);
 
+/** How each word of some parameters is said in a panel, where the word alone would not read. */
+const SAID: Record<string, Record<string, string>> = {
+  entrance: { end: 'its door in an end', side: 'its door in a long side', roof: 'entered through the roof', tunnel: 'entered by a low passage' },
+  windows: { none: 'no windows', small: 'small windows', large: 'large windows' },
+  smoke: { none: 'no opening for the smoke', hole: 'a smoke hole in the roof', gable: 'smoke openings under the ridge', chimney: 'a chimney' },
+  finish: { plain: 'walls left plain', mud: 'plastered with mud', lime: 'limewashed', painted: 'painted' },
+  layout: { ring: 'in a ring', rows: 'in rows' },
+  enclosure: { none: 'open', fence: 'within a fence', hedge: 'within a hedge', palisade: 'within a palisade', bank: 'within a bank', ditch: 'within a ditch', wall: 'within a wall' },
+  yard: { none: 'yards open', fence: 'yards fenced', hedge: 'yards hedged', palisade: 'yards within palisades', bank: 'yards within banks', ditch: 'yards ditched', wall: 'yards walled' },
+};
+/** What a flag says, set and unset. */
+const FLAG_SAID: Record<string, [string, string]> = {
+  court: ['around a court', 'without a court'],
+  porch: ['with a porch', 'without a porch'],
+  veranda: ['with a veranda', 'without a veranda'],
+  byre: ['animals under its roof', 'no animals under its roof'],
+  plaza: ['round open ground at its middle', 'with no open ground at its middle'],
+};
+
 /** A dwelling, settlement form or field system in words, for a panel: its parameters as a source would say them. */
 export function specText(v: DwellingSpec | SettlementSpec | FieldSpec): string {
   const parts: string[] = [];
@@ -554,9 +750,44 @@ export function specText(v: DwellingSpec | SettlementSpec | FieldSpec): string {
   const unit: Record<string, string> = { diameter: ' m across', width: ' m wide', length: ' m long', wall_height: ' m to the eaves', height: ' m high', storeys: ' storeys', rooms: ' rooms', houses: ' houses', spacing: ' m apart', household: ' people to a house', plot: ' ha a plot' };
   const word: Record<string, string> = { plan: 'plan', walls: 'walls of', roof: 'roof', roof_material: 'roofed with', floor: 'floor', pattern: '', kind: '', bounds: 'divided by' };
   for (const [k, x] of Object.entries(r)) {
-    if (k === 'court') parts.push(x ? 'around a court' : 'without a court');
+    if (FLAG_SAID[k]) parts.push(FLAG_SAID[k][x ? 0 : 1]);
+    else if (k === 'faces') parts.push(`its entrance to the ${String(x)}`);
+    else if (typeof x === 'string' && SAID[k]) parts.push(SAID[k][x] ?? x);
     else if (typeof x === 'string') parts.push(k === 'plan' || k === 'roof' || k === 'floor' ? `${x} ${word[k]}` : word[k] ? `${word[k]} ${x}` : x);
+    else if (k === 'floor_height' && x !== undefined) parts.push(`its floor ${spanText(x as Span, ' m')} ${r.floor === 'sunken' ? 'below' : 'above'} the ground`);
+    else if (k === 'pitch' && x !== undefined) parts.push(`its roof pitched at ${spanText(x as Span, '°')}`);
     else if (x !== undefined) parts.push(spanText(x as Span, unit[k] ?? ''));
   }
   return parts.join(', ');
 }
+
+/** What each outbuilding is called, for a panel and a label. */
+export const OUTBUILDING_LABEL: Record<OutbuildingUse, string> = {
+  granary: 'a granary',
+  store: 'a storehouse',
+  byre: 'a byre',
+  pen: 'a pen',
+  kitchen: 'a cookhouse',
+  oven: 'an oven',
+  well: 'a well',
+  pond: 'a pond',
+  rack: 'a drying rack',
+  stack: 'a stack',
+  'threshing-floor': 'a threshing floor',
+  workshop: 'a work hut',
+  bath: 'a bath house',
+  shrine: 'a shrine',
+  hall: 'a meeting house',
+  pole: 'a pole',
+};
+
+/** One outbuilding in words: "a granary by a house (round plan, floor on stilts)". */
+export function outbuildingText(o: OutbuildingSpec): string {
+  const { use, per, count, enclosure, ...rest } = o;
+  const what = [enclosure && enclosure !== 'none' ? `of ${enclosure === 'wall' ? 'walling' : enclosure === 'bank' ? 'a bank' : enclosure === 'ditch' ? 'a ditch' : enclosure === 'fence' ? 'fencing' : enclosure === 'hedge' ? 'hedging' : 'posts'}` : '', specText(rest as DwellingSpec)].filter(Boolean).join(', ');
+  const whose = per === 'house' ? (count !== undefined ? `, ${spanText(count)} to a household` : ' by a house') : count !== undefined ? `, ${spanText(count)} in a settlement` : ' of the settlement';
+  return `${OUTBUILDING_LABEL[use] ?? String(use)}${whose}${what ? ` (${what})` : ''}`;
+}
+
+/** A tradition's outbuildings in words, for a panel. */
+export const outbuildingsText = (v: OutbuildingSpec[]): string => v.map(outbuildingText).join('; ');

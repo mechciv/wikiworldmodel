@@ -23,7 +23,18 @@ npm run world -- dwellings-wanted --totals      # each time's people by way of l
 npm run world -- dwellings-wanted --regions     # the regions' numbers and names
 npm run world -- quote-check src:<source> <text file>   # find every quote of a source in the text you read
 npm run validate -- --no-frames                 # every tradition is checked
+npm run world -- dwelling-sheet people/traditions/iban-longhouse          # draw its house, and print whose each part is
+npm run world -- dwelling-sheet people/traditions/iban-longhouse --yard   # the same in its yard, with what stood by it
+npm run world -- dwelling-sheet people/traditions/iban-longhouse --outbuilding 1   # the first thing of its outbuildings
+npm run world -- dwelling-sheet all [word] [--yard]   # every tradition's house, twelve to a page
 ```
+
+`dwelling-sheet` writes a PNG under `dist/sheets/` with the house from before and behind, from the front, the side and
+above, in several of its shapes and at each detail, with a scale. **Look at it**, as a form's sheet is looked at
+([FORMS.md](FORMS.md)): it is the quickest way to see that a claim says what you meant, that a door is in the end
+you read it in, that a floor on posts stands as high as the source says. Its colours only tell the materials apart; the
+viewer's are its own. `--climate desert` takes what a farmer's house leaves unsaid from the generator's house of that
+climate, as a scene there would.
 
 `dwellings-wanted` ranks a region, a time and a way of life by how many people HYDE and the model of how people lived
 put there, so the top of the list is where most houses are drawn as generic. Work from the top down, and then by way
@@ -98,8 +109,9 @@ parameter you cannot source out of the claim: what no claim says is the generato
 | `start`, `end` | when the tradition held, as the source dates it: a year, a range, or a period's record |
 | `extent` | the ArchaeoGLOBE regions it was found in, as `{ from: src:archaeoglobe-2019-regions, names: ["59", "61"] }`. A region named is a region where the tradition was, not a claim that it covered all of it. A tradition with no extent takes its parent's |
 | `lifeway` | whom it housed: a list of one or more of `foragers`, `herders`, `shifting-cultivators`, `farmers`, `townspeople`. Its house is drawn only for those. A tradition with no lifeway takes its parent's; one with none at all houses no one, and the validator warns |
-| `dwelling` | the house: `plan`, `diameter` or `width` and `length`, `wall_height`, `height`, `storeys`, `rooms`, `walls`, `roof`, `roof_material`, `floor`, `court` |
-| `settlement_form` | how the houses stood together: `pattern`, `houses` (in one settlement), `spacing` (metres between them), `household` (people in one house) |
+| `dwelling` | the house: `plan`, `diameter` or `width` and `length`, `wall_height`, `height`, `storeys`, `rooms`, `walls`, `finish`, `roof`, `roof_material`, `pitch`, `floor`, `floor_height`, `court`, and [its openings and what stood against it](#the-house-in-detail): `entrance`, `faces`, `windows`, `smoke`, `porch`, `veranda`, `byre` |
+| `settlement_form` | how the houses stood together: `pattern`, `layout` (`ring`, `rows`), `enclosure` (what stood round the settlement or the compound), `yard` (what stood round each house's yard), `plaza`, `houses` (in one settlement), `spacing` (metres between them), `household` (people in one house) |
+| `outbuildings` | [what stood by the houses](#what-stood-by-the-houses): granaries, byres, pens, cookhouses, ovens, wells, racks, stacks, shrines, houses to meet in, as a list |
 | `field_system` | the fields: `kind`, `plot` (hectares), `bounds` |
 | `town_form` | for a tradition that housed townspeople, how its towns were laid out: `streets` (`grid`, `lanes`, `canals`), `block` and `street` and `main_street` (metres), `wall` (`none`, `earth`, `rammed-earth`, `timber`, `mudbrick`, `stone`, `brick`), `wall_height`, `wall_thickness`, `gates`, `moat`, `square` |
 | `member-of` | the broader tradition it belongs to: it inherits every parameter it does not state |
@@ -111,6 +123,73 @@ same pull request.
 
 `household` matters most to the generator after the house itself: it turns HYDE's people into houses. Cite it only where a
 source gives it for this tradition; otherwise leave it out and the generator's stated choice stands in.
+
+## The house in detail
+
+A house is drawn from every part its `dwelling` claim states, and what it does not state is the generator's plain
+guess, marked so. Beside its plan, size and materials, a source often says a few things that make a house its own, and
+each has a word:
+
+| Parameter | What it says | Words |
+|---|---|---|
+| `entrance` | where the way in was | `end` (in a short side, or under a gable), `side` (in a long side), `roof` (through the roof, by a ladder), `tunnel` (by a low covered passage) |
+| `faces` | which way the entrance faced, where the houses of a tradition all faced one way | `north`, `north-east`, `east`, `south-east`, `south`, `south-west`, `west`, `north-west` |
+| `windows` | its windows | `none`, `small` (unglazed, shuttered or barred), `large` (lattice, paper or glass) |
+| `smoke` | how smoke left it | `none` (through the thatch or by the door), `hole` (in the roof), `gable` (openings under the ridge), `chimney` |
+| `finish` | how its walls were finished | `plain`, `mud` (mud, clay or dung plaster), `lime` (limewash or lime plaster), `painted` |
+| `porch`, `veranda`, `byre` | `true` or `false`: a porch before the door; a veranda or gallery under the eaves; animals stalled under the same roof | |
+| `floor_height` | metres the floor stood above the ground (raised, on a platform, on stilts) or below it (sunken) | |
+| `pitch` | how steeply the roof sloped, in degrees from the level | |
+
+Words added with these, for what the first traditions could not say: plans `l-shaped`, `figure-of-eight`, `polygonal`,
+`semicircular`; walls `log`, `plank`, `timber-frame` (a frame filled with wattle and daub, earth or brick), `wattle`
+(with no daub), `mat`; roofs `hip-and-gable`, `half-hip`, `curved` (ridge and eaves curving down to the ends, as in
+Bengal), `shed`; roof materials `leaves`, `brush`, `mat`. Where a source says only "timber" or "thatch", keep those:
+the narrower word needs a sentence that says it.
+
+Each needs a sentence that states it, as a size does: "the door is always in the gable end facing the street" is a
+source for `entrance: end`; a plan in a figure is not. `faces` is for a rule the source states ("the doorways face
+south-east"), never for one house. Say `windows: none`, `smoke: none` or `porch: false` only where a source says there
+were none: a parameter left out is unknown, which is not the same.
+
+A round house enclosing a court (`plan: round` with `court: true`) is drawn as a ring of rooms round it, as a tulou is.
+
+## What stood by the houses
+
+A household had more than a house, and a settlement more than households: a granary on posts, a pen for the cattle at
+night, a cookhouse, a well, a rack for drying fish, a house the men met in. A tradition's `outbuildings` claim lists
+them:
+
+```yaml
+  outbuildings:
+    prop: outbuildings
+    value:
+      - { use: granary, per: house, plan: round, diameter: 2, walls: wattle-and-daub, roof: conical, roof_material: thatch, floor: stilts }
+      - { use: pen, per: settlement, enclosure: hedge, diameter: { lo: 20, hi: 30 } }
+      - { use: hall, per: settlement, plan: rectangular, length: 18, width: 8 }
+    source:
+      - { ref: src:…, loc: "p. …", quote: "…each wife has her own granary, a small round hut raised on stones…" }
+      - { ref: src:…, loc: "p. …", quote: "…the cattle are driven at night into a fold of thorn bushes in the middle…" }
+    method: historical-account
+    note: Which source gives which, and what is left to the generator.
+```
+
+| Field | What it holds |
+|---|---|
+| `use` | `granary`, `store`, `byre` (a house for animals), `pen` (an open fold, kraal or corral), `kitchen`, `oven` (an oven or kiln in the open), `well`, `pond`, `rack`, `stack`, `threshing-floor`, `workshop`, `bath`, `shrine` (a shrine, temple or church), `hall` (a house to meet in: a men's house, a council house, a kiva), `pole` (a carved pole or a standing stone) |
+| `per` | `house`: a household's, drawn by a house; `settlement`: the settlement's, drawn among the houses or at their middle |
+| `count` | how many to a household or in a settlement, where a source counts them; a number below one where only some households had one ("one granary to four or five houses" is `{ lo: 0.2, hi: 0.25 }`) |
+| the words and sizes of a dwelling | `plan`, `diameter`, `width`, `length`, `height`, `walls`, `roof`, `roof_material`, `floor`, `floor_height` and the rest, as far as a source says them; `enclosure` for what a pen was made of |
+
+- **One list, one claim.** Cite each source that gives a part of it, each with its quote, and say in the note which
+  gives which.
+- **Only what a source says stood there.** "Grain was stored in pits inside the house" is no outbuilding. A use with no
+  word is left to the note, or a word is added to [core/dwelling.ts](../core/dwelling.ts) with its meaning.
+- **`per` is the source's.** "Each household had its own granary" is `per: house`; "the village granary" is
+  `per: settlement`. Where it does not say, leave the outbuilding out and say so in the note.
+- **How many is drawn where none is counted is the generator's:** by a part of the houses, or once in a settlement
+  (`params.outbuildings` in [settlement.yaml](../world/generators/people/settlement.yaml)), and the panel says so.
+- A member tradition that gives a list of its own does not add to its parent's: it replaces it.
 
 ## Whom a tradition housed
 
@@ -276,4 +355,6 @@ needs a sentence that states it. "Houses of 5–7 m across" is a source for `dia
 - A region is coarse. Where a tradition held only part of one, the generator draws it over all of it, or over a part
   of its cells taken at random where the tradition says how many lived so: never over the part it really held. The
   panel says the tradition was found in the region, not here.
-- Colour, decoration and the inside of a house are the generator's, and marked so.
+- Colour, decoration and the inside of a house are the generator's, and marked so. So is every difference between one
+  house of a tradition and the next: which of its stated sizes each has, how weathered it is, where exactly its
+  windows are.

@@ -6,7 +6,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { parse } from 'yaml';
-import { compileHusbandry, compileTraditions, husbandryAt, dwellingProblems, fieldProblems, lifewayProblems, lifewayText, prevalenceOf, PREVALENCE_WORDS, settlementProblems, specText, traditionAt, traditionFor, traditionsFor, type LifewayWord, type Prevalence, type Tradition } from '../../../core/dwelling.ts';
+import { compileHusbandry, compileTraditions, husbandryAt, dwellingProblems, fieldProblems, lifewayProblems, lifewayText, OUTBUILDING_LABEL, OUTBUILDING_ROOFED, OUTBUILDING_WORDS, outbuildingProblems, outbuildingsText, prevalenceOf, PREVALENCE_WORDS, settlementProblems, specText, traditionAt, traditionFor, traditionsFor, type LifewayWord, type Prevalence, type Tradition } from '../../../core/dwelling.ts';
 import { anthromeTile, assessmentAt, cityPeople, citiesAround, citiesNear, classAtStep, figureAt, nameAt, LIFEWAY_OF, lifewayOf, nearestStep, shareDensity, tileKey, cellOf, type AnthromeClass, type Assessment, type CitiesFile, type City } from '../../../core/landscape.ts';
 import type { PeopleFile } from '../../../core/layers.ts';
 import { assessmentsFile, cityYear, citiesOf, eckert4Inverse, housing, housingCounts, parseClassGrid, rasterizeRegions, stepOfName, type LandscapeBuilt } from '../src/build/landscape.ts';
@@ -240,6 +240,57 @@ describe('building traditions', () => {
     expect(settlementProblems({ pattern: 'nucleated', houses: { lo: 20, hi: 10 } })).toEqual([expect.stringMatching(/houses is/)]);
     expect(fieldProblems({ kind: 'paddies', plot: 0.1, bounds: 'dikes' })).toEqual([]);
     expect(specText({ plan: 'round', diameter: { lo: 5, hi: 15 }, roof: 'conical', roof_material: 'thatch' })).toBe('round plan, 5–15 m across, conical roof, roofed with thatch');
+  });
+
+  it('checks the house in detail: its door, its windows, its smoke, its finish, and what stood against it', () => {
+    expect(dwellingProblems({ entrance: 'end', faces: 'south-east', windows: 'none', smoke: 'hole', finish: 'lime', porch: true, veranda: false, byre: true, floor: 'stilts', floor_height: { lo: 2.4, hi: 3.7 }, pitch: 50 })).toEqual([]);
+    expect(dwellingProblems({ walls: 'timber-frame', roof: 'hip-and-gable', roof_material: 'leaves', plan: 'l-shaped' })).toEqual([]);
+    expect(dwellingProblems({ faces: 'up' })).toEqual([expect.stringMatching(/^faces is one of north, north-east/)]);
+    expect(dwellingProblems({ porch: 'yes' })).toEqual(['porch is true or false']);
+    expect(dwellingProblems({ pitch: 95 })).toEqual([expect.stringMatching(/less than 90/)]);
+    expect(dwellingProblems({ smoke: 'louvre' })).toEqual([expect.stringMatching(/^smoke is one of none, hole, gable, chimney/)]);
+    expect(settlementProblems({ layout: 'ring', enclosure: 'hedge', yard: 'fence', plaza: true })).toEqual([]);
+    expect(settlementProblems({ enclosure: 'moat' })).toEqual([expect.stringMatching(/^enclosure is one of none, fence, hedge, palisade, bank, ditch, wall/)]);
+    expect(specText({ plan: 'long', entrance: 'end', faces: 'south', windows: 'none', smoke: 'hole', byre: true, floor: 'stilts', floor_height: { lo: 2.4, hi: 3.7 }, pitch: 50 })).toBe(
+      'long plan, its door in an end, its entrance to the south, no windows, a smoke hole in the roof, animals under its roof, stilts floor, its floor 2.4–3.7 m above the ground, its roof pitched at 50°',
+    );
+    expect(specText({ floor: 'sunken', floor_height: 1.2 })).toBe('sunken floor, its floor 1.2 m below the ground');
+    expect(specText({ layout: 'ring', enclosure: 'hedge', yard: 'fence', plaza: true })).toBe('in a ring, within a hedge, yards fenced, round open ground at its middle');
+  });
+
+  it('checks what stood by the houses: each with its use and whose it was, in the words of a dwelling', () => {
+    expect(outbuildingProblems([{ use: 'granary', per: 'house', plan: 'round', diameter: 2, floor: 'stilts' }, { use: 'pen', per: 'settlement', enclosure: 'hedge', diameter: { lo: 20, hi: 30 } }, { use: 'shrine', per: 'settlement', count: { lo: 16, hi: 23 } }])).toEqual([]);
+    expect(outbuildingProblems([])).toEqual([expect.stringMatching(/a list of one or more/)]);
+    expect(outbuildingProblems({ use: 'granary', per: 'house' })).toEqual([expect.stringMatching(/a list of one or more/)]);
+    expect(outbuildingProblems([{ per: 'house' }])).toEqual([expect.stringMatching(/outbuilding 1: it says its use/)]);
+    expect(outbuildingProblems([{ use: 'granary' }])).toEqual([expect.stringMatching(/outbuilding 1: it says whose it was/)]);
+    expect(outbuildingProblems([{ use: 'barn', per: 'house' }])).toEqual([expect.stringMatching(/outbuilding 1: use is one of granary, store, byre/)]);
+    expect(outbuildingProblems([{ use: 'well', per: 'village' }])).toEqual([expect.stringMatching(/outbuilding 1: per is one of house, settlement/)]);
+    expect(outbuildingProblems([{ use: 'well', per: 'house', count: 0 }])).toEqual([expect.stringMatching(/count is a positive number/)]);
+    expect(outbuildingsText([{ use: 'granary', per: 'house', count: { lo: 0.2, hi: 0.25 }, plan: 'round', floor: 'stilts' }, { use: 'pen', per: 'settlement', enclosure: 'hedge' }, { use: 'hall', per: 'settlement', count: 3 }])).toBe(
+      'a granary, 0.2–0.25 to a household (round plan, stilts floor); a pen of the settlement (of hedging); a meeting house, 3 in a settlement',
+    );
+    // Every use has its name, and is roofed or not.
+    for (const use of Object.keys(OUTBUILDING_WORDS.use)) {
+      expect(OUTBUILDING_LABEL[use as keyof typeof OUTBUILDING_LABEL]).toMatch(/^an? /);
+      expect(typeof OUTBUILDING_ROOFED[use as keyof typeof OUTBUILDING_ROOFED]).toBe('boolean');
+    }
+  });
+
+  it("takes a member's list of outbuildings whole where it gives one, and its parent's where it gives none", () => {
+    const list = compileTraditions([
+      { id: 'a', label: 'Parent', regions: [1], span: [-3000, 500], lifeways: ['farmers'], dwelling: { plan: 'round' }, settlement: { enclosure: 'hedge', yard: 'fence' }, outbuildings: [{ use: 'granary', per: 'house' }, { use: 'pen', per: 'settlement' }] },
+      { id: 'b', label: 'Takes its parent\'s', parent: 'a', regions: [], span: [-100, 100], dwelling: { walls: 'stone' } },
+      { id: 'c', label: 'Gives its own', parent: 'a', regions: [], span: [-100, 100], settlement: { enclosure: 'wall' }, outbuildings: [{ use: 'well', per: 'settlement' }] },
+      { id: 'd', label: 'Has none', regions: [2], span: [-100, 100], dwelling: { plan: 'round' } },
+    ]);
+    const of = (id: string) => list.find((x) => x.id === id)!;
+    expect(of('b').outbuildings).toEqual(of('a').outbuildings);
+    expect(of('b').from.outbuildings).toBe('a');
+    expect(of('b').settlement).toEqual({ enclosure: 'hedge', yard: 'fence' });
+    expect(of('c').outbuildings).toEqual([{ use: 'well', per: 'settlement' }]);
+    expect(of('c').from).toMatchObject({ outbuildings: 'c', 'settlement.enclosure': 'c', 'settlement.yard': 'a' });
+    expect(of('d').outbuildings).toBeUndefined();
   });
 
   it('inherits what a member does not say from the tradition it is a member of, and says whose each part is', () => {
