@@ -115,6 +115,32 @@ properties:
     type: string
     applies_to: [occurrence, sample, ecosystem]
     description: The geological formation the fossils or the sample come from.
+  depositional_environment:
+    type: string
+    applies_to: [occurrence, sample]
+    description: >-
+      The environment a rock was laid down in, in its dataset's own words: a lake, a channel, a floodplain, a dune, a
+      reef. What the place was when the rock formed, as far as the rock says.
+  lithology:
+    type: string
+    applies_to: [occurrence, sample]
+    description: >-
+      What a rock is made of, in its dataset's own words: sandstone, claystone, gypsum, coal. The rock as it is now: the
+      sediment it was when it formed is what it was laid down as, sand for a sandstone and mud for a claystone.
+  lithology_adjectives:
+    type: string
+    applies_to: [occurrence, sample]
+    description: >-
+      What its dataset says of a lithology besides its name, as the dataset joins the words: its grain, its colour, its
+      bedding, and what dried, grew or burrowed in it (desiccation cracks, a paleosol, burrows).
+  second_lithology:
+    type: string
+    applies_to: [occurrence, sample]
+    description: A second lithology of the same beds, where its dataset describes two.
+  second_lithology_adjectives:
+    type: string
+    applies_to: [occurrence, sample]
+    description: What its dataset says of the second lithology besides its name.
   footprint_form:
     type: footprint-form
     applies_to: [occurrence]

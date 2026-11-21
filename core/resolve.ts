@@ -16,7 +16,7 @@ import type { Scenario } from './scenario.ts';
 export type Tier = 'evidence' | 'model' | 'generic' | 'unknown';
 export const TIERS: readonly Tier[] = ['evidence', 'model', 'generic', 'unknown'];
 
-export const LAYERS = ['planet', 'geography', 'climate', 'ice', 'water', 'life', 'people', 'polity'] as const;
+export const LAYERS = ['planet', 'geography', 'climate', 'ice', 'water', 'substrate', 'life', 'people', 'polity'] as const;
 export type LayerId = (typeof LAYERS)[number];
 
 export interface Answer {
@@ -52,6 +52,13 @@ export interface ResolveWorld {
   polities?: [number, number];
   /** the rivers: where a dataset saw them and when it is evidence for, and the spans the drainage model routes */
   water?: { observed?: { span: [number, number]; at: (lat: number, lon: number) => boolean }; model: [number, number][] };
+  /**
+   * What the ground is made of (core/substrate.ts): the span its sources cover, and the ground at a place and time, in a
+   * few words with how it is known; undefined where nothing says, and the climate's class decides. It is read from the
+   * rocks of the stage's fossil collections, from a map of today's topsoil, or, where neither says what the loose ground
+   * is, from a map of today's bedrock: `held` names the span a map of today's is held for.
+   */
+  substrate?: { span: [number, number]; at: (lat: number, lon: number, t: number) => { tier: 'evidence' | 'model'; words: string; from: 'rocks' | 'soil' | 'bedrock'; held?: string } | undefined };
   life?: (lat: number, lon: number, t: number) => LifeTier | null;
   polity?: (lat: number, lon: number, t: number) => string | undefined;
   /** where the generic prior puts land */
@@ -98,6 +105,16 @@ export function resolve(w: ResolveWorld, layer: LayerId, lat: number, lon: numbe
       if (o && within(o.span, t) && o.at(lat, lon)) return a('evidence', 'observed rivers', 'Rivers wider than 30 m were seen here from space, and how wide.');
       if (w.water?.model.some((m) => within(m, t))) return a('model', 'drainage', 'The water of the climate, routed over the ground of the time, says where rivers ran and how much they carried.');
       return a('generic', 'invented', 'Nothing routes water here then: a scene invents its river.');
+    }
+    case 'substrate': {
+      if (look.surface === 'magma' || look.surface === 'crust-and-magma') return a('evidence', look.surface, 'The planet\'s state covers everything: there is no ground but rock, molten or newly set.');
+      const here = within(w.substrate?.span, t) ? w.substrate!.at(lat, lon, t) : undefined;
+      const held = here?.held ? ` through the ${here.held}` : '';
+      if (here?.from === 'soil') return a('model', here.words, `A map of today's topsoil, held as it is${held}, says what the ground here is made of.`);
+      if (here?.from === 'bedrock') return a('model', here.words, `A map of today's bedrock, carried back on its plate${held}, says what rock lies under the ground here: nothing says what loose ground lay over it.`);
+      if (here?.tier === 'evidence') return a('evidence', here.words, 'The rock of a fossil collection of the stage, within a scene\'s reach of here, says what the ground was made of.');
+      if (here?.tier === 'model') return a('model', here.words, 'The rocks of the stage\'s fossil collections in the country round say what its ground was like: none lies here, so they decide part of it only.');
+      return a('generic', 'by climate', 'Nothing says what the ground was made of here then: it is drawn by the climate\'s class alone.');
     }
     case 'life': {
       const tier = w.life?.(lat, lon, t) ?? null;

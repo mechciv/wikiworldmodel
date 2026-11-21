@@ -129,6 +129,8 @@ export interface CityFrame {
 }
 
 const LOOKAT_UP: V3 = [0, 0, 1];
+/** The rock the ground is drawn with, and its stones, where nothing says what rock it is: nobody's record. */
+const PLAIN_ROCK = [0.36, 0.33, 0.28, 0.3, 0.28, 0.25];
 
 function ortho(l: number, r: number, b: number, t: number, n: number, f: number): Mat4 {
   const m = new Float32Array(16);
@@ -325,6 +327,14 @@ export class CityRenderer {
   /** what the wild land's colours are, ten tones in threes; and its shares of forest, low plants and bare ground */
   private tones: Float32Array = new Float32Array(30);
   private shares: V3 = [1, 1, 0];
+  /** the ground's own materials, where the world says what they are: how much they decide and their marks, their shares, their tones */
+  private sub: [number, number, number, number] = [0, 0, 0, 0];
+  private subShare: Float32Array = new Float32Array(8);
+  private subBand: Float32Array = new Float32Array(16);
+  private subTone: Float32Array = new Float32Array(48);
+  /** how much of the earth under plants takes the substrate's colour; and the shade of a mapped soil's fine earth, or nothing */
+  private subSoil: [number, number] = [0, 0];
+  private rock: Float32Array = Float32Array.of(...PLAIN_ROCK);
   /** where snow lies on the wild land: from a height, thickening over a height, off slopes steeper than a share */
   private snow: V3 = [1e6, 1, 1];
   /** everything drawn by instancing, by what mesh it is */
@@ -613,6 +623,9 @@ void main() {
     this.normalTex = [];
     this.grids = [];
     this.meshSerial++;
+    // A new ground is the climate's until its scene says what it is made of, and its rock the renderer's own.
+    this.setSubstrate(null);
+    this.setRock(null);
   }
 
   /**
@@ -634,6 +647,23 @@ void main() {
     this.tones = tones;
     this.shares = shares;
     this.snow = snow && Number.isFinite(snow.line) ? [snow.line, snow.band, snow.slope] : [1e6, 1, 1];
+  }
+
+  /**
+   * What the ground is made of, where the world says (core/substrate.ts): how much of the ground it decides, each
+   * material's share and two tones, and the marks its sources name. Null where nothing says: the climate's ground alone.
+   */
+  setSubstrate(look: { weight: number; shares: Float32Array; bands: Float32Array; tones: Float32Array; cracks: number; ripples: number; grain: number; soil: number; shade: number } | null): void {
+    this.sub = look ? [look.weight, look.cracks, look.ripples, look.grain] : [0, 0, 0, 0];
+    this.subShare = look ? look.shares : new Float32Array(8);
+    this.subBand = look ? look.bands : new Float32Array(16);
+    this.subTone = look ? look.tones : new Float32Array(48);
+    this.subSoil = look ? [look.soil, look.shade] : [0, 0];
+  }
+
+  /** The colour of the rock under the ground and of its stones, where the world says what rock it is; null for the renderer's own. */
+  setRock(look: { rock: V3; stones: V3 } | null): void {
+    this.rock = look ? Float32Array.of(...look.rock, ...look.stones) : Float32Array.of(...PLAIN_ROCK);
   }
 
   /** A mesh that will be drawn by instancing. */
@@ -1133,6 +1163,18 @@ void main() {
     if (tone) gl.uniform3fv(tone, this.tones);
     const share = p.uniforms.get('uShare');
     if (share) gl.uniform3fv(share, this.shares);
+    const sub = p.uniforms.get('uSub');
+    if (sub) gl.uniform4fv(sub, this.sub);
+    const subShare = p.uniforms.get('uSubShare');
+    if (subShare) gl.uniform1fv(subShare, this.subShare);
+    const subBand = p.uniforms.get('uSubBand');
+    if (subBand) gl.uniform2fv(subBand, this.subBand);
+    const subTone = p.uniforms.get('uSubTone');
+    if (subTone) gl.uniform3fv(subTone, this.subTone);
+    const subSoil = p.uniforms.get('uSubSoil');
+    if (subSoil) gl.uniform2f(subSoil, this.subSoil[0], this.subSoil[1]);
+    const rock = p.uniforms.get('uRock');
+    if (rock) gl.uniform3fv(rock, this.rock);
     const snow = p.uniforms.get('uSnow');
     if (snow) gl.uniform3fv(snow, this.snow);
     const fb = p.uniforms.get('uFieldsBox');

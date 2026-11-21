@@ -13,6 +13,7 @@ import type { LivingTaxon, SceneFileV2, SceneOmission, SceneSpec } from '../../.
 import { parsePoint, toMa, type TimePointInput } from '../../../../core/time.ts';
 import { cubeRoot, placeSpec, reliefPatch, sizeWithin, type PlaceWorld } from '../../../../world/generators/life/spec.ts';
 import type { SceneWater } from '../../../../core/scene.ts';
+import { bedrockWords, substrateWords, type SceneBedrock, type SceneSubstrate } from '../../../../core/substrate.ts';
 import { FULL_BUDGET, SceneStream } from '../../../../world/generators/life/stream.ts';
 import { VERSION, type LivingParams } from '../../../../world/generators/life/scene/v7.ts';
 import { FormTree } from '../forms.ts';
@@ -52,7 +53,12 @@ export interface SceneBuild {
   file: SceneFileV2;
 }
 
-export function buildScene(s: Solved, elevation: Snapshot[], climate: ClimateKeyframe[], climateGridInfo: { step: number; nx: number; ny: number; lon0: number; lat0: number }, rule: ClimateRule, planet: PlanetFile, log: (m: string) => void): SceneBuild | undefined {
+/**
+ * `ground` says what the ground of the place was made of and what rock lay under it, where the world says
+ * (core/substrate.ts): given the scene's slice and where its place stood at any age, as the rock record's sites stand
+ * where their plates stood at a stage's slice, and today's maps where the place stands today.
+ */
+export function buildScene(s: Solved, elevation: Snapshot[], climate: ClimateKeyframe[], climateGridInfo: { step: number; nx: number; ny: number; lon0: number; lat0: number }, rule: ClimateRule, planet: PlanetFile, log: (m: string) => void, ground?: (slice: number, positionAt: (ageMa: number) => { lat: number; lon: number }) => { substrate?: SceneSubstrate; bedrock?: SceneBedrock }): SceneBuild | undefined {
   const w = s.world;
   const gen = w.generators.find((g) => g.id === SCENE);
   if (!gen) return undefined;
@@ -220,9 +226,13 @@ export function buildScene(s: Solved, elevation: Snapshot[], climate: ClimateKey
     fossils: { source: site.snapshot, rows: inSlice, collections: new Set(snap.occurrences.filter((o) => o.max >= sliceMa && o.min <= sliceMa).map((o) => o.collection)).size, title: w.manifest.datasets[site.snapshot].title ?? site.snapshot, drawn: drawnRows },
     generator: { generator: gen.id, version: gen.version, seed: seedText, basis: 'procedural', params: { ...rest, ground: { ...params.ground, flow: site.flow } } as unknown as Record<string, unknown> },
   };
+  // What its ground was made of, which the renderer draws and the generator does not read.
+  const made = ground?.(slice, positionAt);
+  if (made?.substrate) spec.substrate = made.substrate;
+  if (made?.bedrock) spec.bedrock = made.bedrock;
   const stream = new SceneStream(spec, FULL_BUDGET);
   const file: SceneFileV2 = { format: 'lightworld-scene-file@2', spec, print: stream.print(), focus: stream.plan.focus, to_river: stream.plan.toRiver, water_level: stream.look.water };
-  log(`scene   ${site.id}: ${taxa.length} taxa drawn and ${omitted.length} left out; water at ${stream.look.water} m; ${climateNow}; at ${place.lat}, ${place.lon}`);
+  log(`scene   ${site.id}: ${taxa.length} taxa drawn and ${omitted.length} left out; water at ${stream.look.water} m; ${climateNow}; at ${place.lat}, ${place.lon}${made?.substrate ? `; ${substrateWords(made.substrate)}` : ''}${made?.bedrock ? `; ${bedrockWords(made.bedrock)}` : ''}`);
   return { file };
 }
 

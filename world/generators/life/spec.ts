@@ -7,7 +7,8 @@ import { warmestMonth, type Months } from '../../../core/months.ts';
 import type { WaterParams } from '../../../core/water.ts';
 import type { Form } from '../../../core/form.ts';
 import type { LivingTaxon, ReliefPatch, SceneCover, SceneParts, SceneSpec, SceneTier } from '../../../core/scene.ts';
-import { fromMa } from '../../../core/time.ts';
+import { firstGround, type SceneBedrock, type SceneSubstrate } from '../../../core/substrate.ts';
+import { fromMa, toMa } from '../../../core/time.ts';
 import type { FeatureTime } from '../../../core/tileset.ts';
 import { dcos, hash2, hashString, PI } from '../city/math.ts';
 
@@ -209,6 +210,17 @@ export interface PlaceWorld {
     /** the month to draw, 1–12; the place's warmest if not said */
     month?: number;
   };
+  /**
+   * What the ground of a place of land is made of, where the world says (field:earth/substrate): asked where the place
+   * stood at the stage's slice, as the rock record's sites are placed. The generator does not read it: the renderer does.
+   */
+  substrate?: (lat: number, lon: number) => SceneSubstrate | undefined;
+  /**
+   * The same from today's maps, where the time is one they are held for: the ground a map of today's topsoil makes, and
+   * the rock a map of today's bedrock puts under it. Both are asked where the place stands today.
+   */
+  soil?: (lat: number, lon: number) => SceneSubstrate | undefined;
+  bedrock?: (lat: number, lon: number) => SceneBedrock | undefined;
   generator: { id: string; version: number; params: Record<string, unknown> };
 }
 
@@ -244,6 +256,16 @@ export function placeSpec(w: PlaceWorld, lat: number, lon: number, ageMa: number
   if (here) {
     const months: Months = { t: here.months.t.map(round2), p: here.months.p.map(round2) };
     spec.climate = { field, ageMa: age, months, height: Math.round(here.height - w.isoline), coast: Math.round(w.isoline), lapse: m!.lapse, rule: w.rule, water: m!.water, month: m!.month ?? warmestMonth(months), lat: round5(here.lat), ...(here.parts ? { parts: here.parts } : {}) };
+  }
+  // The ground of a place of land, where the world says what it was made of, and the rock under it.
+  if (land && (w.substrate || w.soil || w.bedrock)) {
+    const carried = (toAge: number): [number, number] => (plate ? w.carry(plate, origin.lat, origin.lon, ageMa, toAge) : [origin.lat, origin.lon]);
+    const [sl, so] = w.substrate ? carried(toMa(w.bin.slice)) : [0, 0];
+    const [tl, to] = w.soil || w.bedrock ? carried(0) : [0, 0];
+    const ground = firstGround(w.substrate?.(sl, so), () => w.soil?.(tl, to));
+    if (ground) spec.substrate = ground;
+    const rock = w.bedrock?.(tl, to);
+    if (rock) spec.bedrock = rock;
   }
   return spec;
 }

@@ -26,6 +26,15 @@ views:
   - name: desert
     what: A desert, the eastern Sahara in 1950, close over its sand.
     link: t=1950&lat=25&lon=25&d=1.0000062785&h=30&v=82&hour=10&clock=0
+  - name: ground-stones
+    what: The Sahara south of the Adrar des Ifoghas in 475, looking down at the stones scattered through its sand.
+    link: t=475.002&lat=18.79153&lon=2.90111&d=1.0000012&h=130&v=50&hour=11&mo=8&clock=0
+  - name: ground-cracked-mud
+    what: A red mud of the Rhaetian that its rock says dried into cracks, from a few metres up.
+    link: t=204.9Ma&lat=27.04&lon=100.20&d=1.0000004&h=30&v=70&hour=12&mo=7&clock=0
+  - name: ground-salt
+    what: A crust of salt of the Tortonian, in the south-east of Spain, heaved into plates.
+    link: t=9.44Ma&lat=38.45&lon=-1.61&d=1.0000012&h=30&v=50&hour=12&mo=7&clock=0
   - name: mountain-winter
     what: Above the treeline on Mount Rainier in January 1950, snow over the slopes.
     link: t=1950&lat=46.845&lon=-121.735&d=1.0001&h=270&v=78&mo=1&hour=12&clock=0

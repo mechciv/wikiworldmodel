@@ -47,7 +47,7 @@ its own generator below its finest field.
 | --- | --- | --- | --- | --- |
 | Relief | elevation, sea level, ice | ETOPO 2022 (0.1° in use; 15″ exists); SRTM 30 m | today's ground at the sea level of the time (800 kyr); PaleoDEMs at 1° | landforms by process: valleys cut by the rivers, hills by erosion, dunes, glacial forms |
 | Water | relief, climate, water balance | HydroRIVERS; Natural Earth lakes | the drainage routed over the relief of the time, with runoff from its climate | channels from discharge; meanders, bars and oxbows; banks and floodplains |
-| Substrate | geology, soils | Macrostrat; SoilGrids | lithology from the rock record; generic before | outcrop, scree and soil colour by lithology |
+| Substrate | the rock record, soils, geology | SoilGrids 2.0 and the Global Lithological Map, both at half a degree; Macrostrat's units, which have ages, are not read | the rocks of the stage's fossil collections; today's topsoil held through the Holocene, and today's bedrock carried back through the Quaternary; generic by climate elsewhere ([below](#what-the-ground-is-made-of)) | the ground's materials in patches, with pebbles, cracks and crusts; outcrops and stones in the colour of the rock |
 | Cover | biome, transitions, land cover | ESA WorldCover (10 m) | biome from climate; pollen biomes (BIOME 6000) for the late Quaternary | stands, glades and edges; trees along water |
 | Life | the atlases, forms | living species (later) | fossils, in tiers | individuals, as now |
 | Weather and season | monthly climate | observed climatologies | the runs' months | snow cover, leaf, a river's season, the light |
@@ -127,6 +127,48 @@ Limits:
 - The vegetation of the last 120,000 years has no people in it, and nothing on most of the shelves the low sea bared
   (field:earth/biome-late-quaternary).
 
+## What the ground is made of
+
+A scene's ground is made of what the world says it was (`field:earth/substrate`,
+[core/substrate.ts](../core/substrate.ts)): sand, gravel, silt, mud, lime mud, a crust of salt, peat or ash, in
+shares, with the colours and marks its sources name, and the rock under it. Three things answer, each for the times it
+covers, and the panel says which:
+
+- **The rocks of the stage's fossil collections** (`field:earth/rock-record`), through the Phanerozoic. A sandstone
+  was laid down as sand and a claystone as mud, and what a collection says of its rock's colour, cracks and ripples is
+  said of the ground. A collection within 30 km is evidence of the place and decides all of its bare ground. Those of
+  the country round, out to 200 km, are a model and decide half. Its materials are drawn sorted across the ground,
+  each over the share of it the collections give: gravel in sheets of pebbles on the rises, then sand, silt and mud,
+  and a crust of salt in the hollows, each in its own colour or the one the collections name.
+- **Today's topsoil** (`field:earth/soil`), held as it is through the Holocene: its sand, silt and clay, and its
+  coarse fragments as gravel, from SoilGrids' predictions averaged over half degrees. A model of the place itself. It
+  gives way only to a collection at the place, and it names no colour. So its fine earth is drawn as one mixture, a
+  shade of the ground its climate gives it, paler where it is sandy and darker where it is clay; and its coarse
+  fragments as stones scattered through it, thick in places and thin in others, as many as their share.
+- **Today's bedrock** (`field:earth/bedrock`), carried back on its plate through the Quaternary: the class the
+  Global Lithological Map gives the place where it stands today. It says nothing of the loose ground. Outcrops, steep
+  rock and stones are drawn in its colour: a basalt dark, a limestone pale.
+
+Where none answers, the ground is drawn by the climate's class alone, as it was before, and says so. The generator
+does not read the substrate: the renderer does, so a scene's plants, animals and river are the same with it and
+without. Leaf litter under a canopy, the wet of a bank and steep rock cover the ground as they did.
+
+Limits:
+- A fossil collection is where fossils were kept, mostly in beds laid down under or beside water. The ground between
+  such beds is not in it, and one collection of sandstone makes a scene's ground all sand.
+- A map of today held back knows nothing of what changed: soils since ploughed, drained or buried in dust, a lava
+  not yet erupted. The bedrock map gives no ages, so it stops at the Quaternary, and is wrong within it wherever the
+  rock is younger than the time shown.
+- Half a degree is some 50 km. A scene takes one cell's soil and one class of rock for all of its ground, where a real
+  one has wadi floors of silt beside plains of pebbles. SoilGrids is weakest in deserts, and does not know a sea of
+  dunes from the plain beside it.
+- Where each material lies is the renderer's, by a noise: the amounts are the world's, and the places are not. The
+  rises and hollows it sorts them by are not the scene's own relief, and no stones gather on its slopes.
+- A soil's coarse fragments are drawn as stones lying on it. In the soil they are mixed through its depth.
+- No stones, boulders or outcrops stand on the ground as things of their own. That would change what the generator
+  makes, and wants a version of it.
+- What it costs a frame is not measured: the frame-time budget wants its reference GPU.
+
 ## What it costs
 
 What is stored grows with the evidence, not with the Earth's area. Global fields are kept at the
@@ -142,9 +184,14 @@ Each step has a budget, and a test.
    shown, within its stage, on the 0.1° relief where it covers the time. A scene now reads its climate from the finest
    field that covers the time too, as months at its own heights (below).
 3. **The rock record's environments** for deep-time scenes: the PBDB's collection environments read
-   into the atlas, and a scene that draws the one its fossils name.
+   into the atlas, and a scene that draws the one its fossils name. The first half is done: every collection's
+   environment and rock is in the build by stage, as sites a place can ask for those near it
+   (`field:earth/rock-record`, [core/rocks.ts](../core/rocks.ts)). A scene's ground is drawn from their rocks
+   ([above](#what-the-ground-is-made-of)); no scene reads their environments yet.
 4. **Relief below the field,** by erosion, and today's ground from finer tiles of evidence.
-5. **Cover and substrate today:** land cover, soils and geology, licence by licence.
+5. **Cover and substrate today:** land cover, soils and geology, licence by licence. The substrate is begun: today's
+   topsoil and bedrock at half a degree ([above](#what-the-ground-is-made-of)). Finer maps, rock units with their
+   ages, a soil's colour and land cover remain.
 6. **Season and weather** from the monthly climate. The month's snow and sun are done (above); leaf, grass, a river's
    season, the weather and the sky remain. The months of cloudiness, humidity and wind they will read are kept (above).
 7. **Seamless ground,** keyed in the world's coordinates, which the rivers' keying begins.

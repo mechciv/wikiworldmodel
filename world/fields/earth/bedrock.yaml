@@ -1,0 +1,63 @@
+# Today's bedrock, carried back on its plates through the Quaternary: the rock under a scene's ground, which its
+# outcrops and its stones are drawn of (field:earth/substrate).
+id: field:earth/bedrock
+type: field
+kind: categorical
+title: Today's bedrock
+quantity: the class of rock at the surface of each half degree of land
+description: >-
+  What rock lies at or near the surface of each half degree of land, as one of the classes of the first level of the
+  Global Lithological Map: unconsolidated sediments, three kinds of sedimentary rock, evaporites, pyroclastics,
+  volcanic and plutonic rocks each of three kinds, and metamorphic rocks. The map was put together from regional
+  geological maps, and this grid gives a cell some 50 km across one class. Mapped for the present only. Before it, the
+  rock is held as it is today back through the Quaternary, moved with its plates. That is an assumption, and a blunt
+  one: the map gives no ages, so a lava or a sheet of gravel laid down within the Quaternary is drawn before it was
+  there. Nothing is said before the Quaternary, when what lay at the surface was often rock since worn away or buried.
+  Water bodies, ice and cells with no data say nothing of the ground.
+frame: frame:earth/present-day
+grid: { kind: lonlat, res_deg: 0.5 }
+# As far back as the Quaternary began, by the chart: the build checks it against the period named in params.held.
+time: { lo: 2.58 Ma, hi: 0 ka }
+data:
+  from: src:glim-1.0-0.5deg
+  file: grid
+  as: bedrock
+# Mapped for today; a reconstruction for every time before, by the assumption that the rock was as it is now.
+basis: reconstruction
+# One class at each place: the map gives no uncertainty.
+spread: unknown
+# Every cell moves with the plate under it today, as the relief's nodes do.
+interp: plate-warp
+moves_with: src:paleomap-plate-model
+projection:
+  method: hold
+  until: 10 kyr from now
+  note: Today's rock, held for the near future as the relief is.
+params:
+  # The span it is held for, as a period of the chart: the field's time begins where it does.
+  held: ics/quaternary
+  # The archive's own table of the classes, which the build checks the numbers and codes below against.
+  table: classes
+  # Each class: its number in the grid and its code, as the archive's table gives them, and its name, as the table cited
+  # below gives it "from Hartmann and Moosdorf".
+  classes:
+    - { value: 1, code: su, label: Unconsolidated Sediments }
+    - { value: 2, code: vb, label: Basic Volcanic Rocks }
+    - { value: 3, code: ss, label: Siliciclastic Sedimentary Rocks }
+    - { value: 4, code: pb, label: Basic Plutonic Rocks }
+    - { value: 5, code: sm, label: Mixed Sedimentary Rocks }
+    - { value: 6, code: sc, label: Carbonate Sedimentary Rocks }
+    - { value: 7, code: va, label: Acid Volcanic Rocks }
+    - { value: 8, code: mt, label: Metamorphics }
+    - { value: 9, code: pa, label: Acid Plutonic Rocks }
+    - { value: 10, code: vi, label: Intermediate Volcanic Rocks }
+    - { value: 11, code: wb, label: Water Bodies }
+    - { value: 12, code: py, label: Pyroclastics }
+    - { value: 13, code: pi, label: Intermediate Plutonic Rocks }
+    - { value: 14, code: ev, label: Evaporites }
+    - { value: 15, code: nd, label: No Data }
+    - { value: 16, code: ig, label: Ice and Glaciers }
+source:
+  ref: src:mechenich-2023-eco-isea3h
+  loc: Table 7
+  quote: "Codes and descriptions for the 16 first-level, 12 second-level, and 14 third-level GLiM lithological classes, from Hartmann and Moosdorf"

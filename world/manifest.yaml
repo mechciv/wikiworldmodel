@@ -481,6 +481,171 @@ datasets:
           path: pbdb-sea-2026-11-06.json
           sha256: 06910b4f50b2be3e666904cdc610db7628a096b20819e1fd1642abdff360addb
 
+  src:pbdb-rocks-2026-11-20:
+    type: dataset
+    kind: compilation
+    title: The Paleobiology Database, the rocks its fossils lie in
+    citation: >-
+      The Paleobiology Database. Every collection whose interval overlaps 541 Ma to the present: its place, its interval's
+      ages, its lithologies with their adjectives, its environment, its tectonic setting, its formation and any age measured
+      for it, with the service's own classes of environment and types of lithology, read through the data service (data1.2)
+      on 20 November 2026.
+    version: Data service export of 2026-11-20, kept zipped in world/snapshots with the queries in its own `query` field
+    container: The Paleobiology Database
+    url: https://paleobiodb.org/
+    credit: The rocks of fossil sites from the Paleobiology Database
+    license: CC0-1.0
+    license_note: >-
+      The data service's datainfo header, read on 20 November 2026 with every span of the export, states "Data License:
+      Creative Commons CC0" (https://creativecommons.org/publicdomain/zero/1.0/).
+    reliability: >-
+      What the enterers of a collection took from its literature, in the database's own short vocabulary: a lithology or two,
+      a few adjectives, one environment. A fifth of the collections report no lithology, more than a third give an
+      environment no nearer than "marine indet." or "terrestrial indet.", and one in seven says a colour. A collection's
+      place is often no better than a locality's name allows, and its age is its interval's unless one was measured, as it
+      was for one in seven, four in five of those by the method the database calls age-depth. It says what the rock at a
+      fossil site is, not what the ground round it was: sites are where fossils were found and kept, mostly in beds laid
+      down under water. The primary references were not read here.
+    note: >-
+      Asked for in eleven spans of time, each with every collection that overlaps it, and a collection given for two spans is
+      kept once; then once for each of the service's nineteen classes of environment (its `envtype`), to keep which
+      collections it puts in each; and its vocabulary of lithologies with their types. It names collections by the numbers
+      the snapshots of occurrences use, and is kept apart from them, so that neither changes for the other. No stable URL
+      serves an extract of a changing database, so the snapshot is kept in the repository, zipped.
+    verified:
+      by: machine:claude-code
+      how: Exported from the data service with the queries in the snapshot, by `npm run world -- pbdb-rocks`.
+    fetch:
+      url: repo:world/snapshots/pbdb-rocks-2026-11-20.zip
+      sha256: 36c4b28d8ff22e4bcdb59cf885ade3a415a8e062f4072b96a236c6dcf7dc66ed
+      bytes: 3662904
+      format: zip
+      files:
+        snapshot:
+          path: pbdb-rocks-2026-11-20.json
+          sha256: c598859743342386b98c59edffadc061c411e19dc7ae9b73728bcffdce73aace
+
+  src:soilgrids-2.0-topsoil:
+    type: dataset
+    kind: model
+    title: "SoilGrids 2.0, the top 5 cm of the soil: sand, silt, clay and coarse fragments in each half degree"
+    citation: >-
+      Poggio, L., de Sousa, L. M., Batjes, N. H., Heuvelink, G. B. M., Kempen, B., Ribeiro, E., and Rossiter, D. (2021).
+      SoilGrids 2.0: producing soil information for the globe with quantified spatial uncertainty. SOIL 7, 217–240,
+      doi:10.5194/soil-7-217-2021. The data: ISRIC – World Soil Information, SoilGrids 2.0, the mean predictions of sand,
+      silt, clay and coarse fragments for 0 to 5 cm, aggregated to 5000 m.
+    authors:
+      - "Poggio, L."
+      - "de Sousa, L. M."
+      - "Batjes, N. H."
+      - "Heuvelink, G. B. M."
+      - "Kempen, B."
+      - "Ribeiro, E."
+      - "Rossiter, D."
+    published: 2021
+    version: >-
+      SoilGrids 2.0, the four grids of mean predictions for 0 to 5 cm at 5000 m as served on 20 November 2026 (ISRIC's
+      catalogue dates them 4 May 2020), their pixels averaged over half degrees and kept in world/snapshots
+    container: ISRIC – World Soil Information
+    doi: 10.5194/soil-7-217-2021
+    url: https://files.isric.org/soilgrids/latest/data_aggregated/
+    credit: Today's topsoil from SoilGrids 2.0 (Poggio et al. 2021, ISRIC), its 5 km cells averaged over half degrees
+    license: CC-BY-4.0
+    license_note: >-
+      The readme beside the aggregated grids says: "The SoilGrids maps are publicly available under the [CC-BY 4.0
+      License](https://creativecommons.org/licenses/by/4.0/)." ISRIC's FAQ says the same and asks for the article to be
+      cited. The release of 2017 was under the ODbL and is not this one. This file adapts ISRIC's, and CC BY asks for that
+      to be said: the credit says what was changed.
+    reliability: >-
+      Predictions, not measurements: ISRIC's models are "fitted using over 230 000 soil profile observations from the WoSIS
+      database and a series of environmental covariates", and it says of them that "the variation explained by the models is
+      between 30% and 70%". It says too: "Certain regions have a very low density of soil profile observations", which "is
+      especially relevant for Central Asia, the Artic regions, coastal areas and deserts"; and parent material is a
+      factor its covariates lack. It calls SoilGrids "a global model intended for global applications", not for use "at
+      the local or farm level". It has no date: "There is no year for SoilGrids". It gives texture and stones, and nothing
+      of a soil's colour. The grids at 5000 m carry no uncertainty of their own. A sea of dunes is not in it as one: the
+      cell at 26° N, 26.5° E, in Egypt's Great Sand Sea, comes to 53% sand and 29% clay.
+    note: >-
+      It is not a file of ISRIC's. ISRIC serves the grids in the interrupted Goode homolosine projection; each half degree
+      here is the mean of the pixels under a lattice of 10 by 10 points across it, projected as the grids are, and is kept
+      if a tenth of its points have a soil: 62,916 cells. Sand, silt and clay are percent of the fine earth by mass and add
+      up to 100 in every cell; coarse fragments are percent of the soil by volume. ISRIC stores each in tenths of a percent,
+      and its page on the layers gives the factor of 10. Its catalogue gives the fractions' sizes: clay to 2 micrometres,
+      silt from there to 50 or 63, sand from there to 2000, so that coarse fragments are what is coarser than 2 mm. The
+      other depths, the other properties and the quantiles of the 250 m maps are not read.
+    verified:
+      by: machine:claude-code
+      how: >-
+        The four grids downloaded on 20 November 2026 and each one's sha256 checked against the one ISRIC publishes beside
+        it, by `npm run world -- soilgrids-snapshot`, which was run twice to the same bytes. The readme, the page on the
+        layers and their units, and the FAQ read as served, and the quotes here checked by script against those texts. The
+        projection checked by a test that sets the cells against the land of the lithological map, which they fit better
+        than when shifted a cell any way (tools/world/test/ground.test.ts). The article itself was not read.
+    fetch:
+      url: repo:world/snapshots/soilgrids-2.0-topsoil-0.5deg.csv
+      sha256: 220f9fcdbe7980211d43fd877b10a5906dec0b26ca3dfd58887b9f0768c97739
+      bytes: 1959722
+      format: csv
+      via: >-
+        `npm run world -- soilgrids-snapshot` (tools/world/src/soilgrids.ts) makes it from the four grids
+        https://files.isric.org/soilgrids/latest/data_aggregated/5000m/<property>/<property>_0-5cm_mean_5000.tif for sand,
+        silt, clay and cfvo, 36 MB in all. The snapshot's header lists each with its bytes and sha256.
+
+  src:glim-1.0-0.5deg:
+    type: dataset
+    kind: compilation
+    title: "The Global Lithological Map (GLiM) v1.0, gridded to half a degree"
+    citation: >-
+      Hartmann, J. & Moosdorf, N. (2012). Global Lithological Map Database v1.0 (gridded to 0.5° spatial resolution).
+      PANGAEA, doi:10.1594/PANGAEA.788537. Supplement to: Hartmann, J. & Moosdorf, N. (2012). The new global lithological
+      map database GLiM: A representation of rock properties at the Earth surface. Geochemistry, Geophysics, Geosystems
+      13, Q12004, doi:10.1029/2012GC004370.
+    authors:
+      - "Hartmann, J."
+      - "Moosdorf, N."
+    published: 2012
+    version: v1.0, the grid of half a degree that PANGAEA published on 12 September 2012
+    container: PANGAEA
+    doi: 10.1594/PANGAEA.788537
+    url: https://doi.org/10.1594/PANGAEA.788537
+    credit: Today's bedrock from the Global Lithological Map (Hartmann & Moosdorf 2012)
+    license: CC-BY-3.0
+    license_note: >-
+      PANGAEA's record of the dataset gives its licence as "Creative Commons Attribution 3.0 Unported", CC-BY-3.0.
+    reliability: >-
+      A map of maps: PANGAEA's record says it "was assembled from existing regional geological maps translated into
+      lithological information with the help of regional literature", and that it "represents the rock types of the Earth
+      surface using 1,235,400 polygons". This grid gives each half degree one of the sixteen classes of its first level,
+      and neither the record nor the archive says how a cell's class was chosen among the polygons in it. A class is very
+      broad, a cell is some 50 km across, and nothing says how old its rock is or how deep the loose ground over it lies:
+      nearly a quarter of the cells that are not sea or ice are unconsolidated sediments. The article that describes it
+      was not read here.
+    note: >-
+      The archive holds the grid, 720 by 360 cells from 180° W and 90° S with -9999 where there is no land, and a table of
+      the sixteen classes' numbers and two-letter codes. The classes' names are not in it. They are taken from a table of
+      a later article that gives them "from Hartmann and Moosdorf" (src:mechenich-2023-eco-isea3h): the article of 2012
+      itself answers a script with a bot check. The polygons, with two further levels of class, are a separate download
+      and are not read.
+    verified:
+      by: machine:claude-code
+      how: >-
+        The citation and licence from PANGAEA's own metadata record (format=metainfo_xml), read on 20 November 2026. The
+        archive downloaded from the address that record's handle resolves to, and its members listed: the table read in
+        full, and the grid's header and the count of each value. A map of the commonest class of each block set against
+        the continents: ice over Greenland and Antarctica, basic volcanics over the Deccan and Siberia's traps.
+    fetch:
+      url: https://epic.awi.de/id/eprint/31092/1/hartmann-moosdorf_2012.zip
+      sha256: 43b4ce3276b155d804db8ff9fb227d620b4c35015a4cf564eac4d06d2b69d88e
+      bytes: 38670
+      format: zip
+      files:
+        grid:
+          path: glim_wgs84_0point5deg.txt.asc
+          sha256: 2323b29b970f032f6630332ba2aa04d648ee1275f96935efb532bdbeadea3f3a
+        classes:
+          path: Classnames.txt
+          sha256: 046c46bda603676a3d41e9b8167c513625bf14f58bc867f6ad76568f3625c956
+
   src:ohm-rome-2026-11-01:
     type: dataset
     kind: compilation

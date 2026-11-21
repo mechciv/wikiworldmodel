@@ -79,6 +79,41 @@ const commands: Record<string, (args: string[]) => Promise<number | void>> = {
     console.log(`${snap.rows.length} occurrences at ${snap.sites.length} sites, ${snap.taxa.length} taxa → ${file}`);
     console.log(`In world/manifest.yaml point the dataset at repo:${file}, sha256 ${createHash('sha256').update(zip).digest('hex')}, ${zip.length} bytes; its member ${member}, sha256 ${createHash('sha256').update(json).digest('hex')}.`);
   },
+  // The rocks the Paleobiology Database's fossils lie in: every collection's lithologies, environment and measured ages,
+  // zipped in world/snapshots. Apart from the snapshots of occurrences, which name their collections by the same numbers.
+  async 'pbdb-rocks'() {
+    const { exportRocks } = await import('./pbdb.ts');
+    const { zipSync, strToU8 } = await import('fflate');
+    const date = new Date().toISOString().slice(0, 10);
+    const name = `pbdb-rocks-${date}`;
+    const file = `world/snapshots/${name}.zip`;
+    if (existsSync(join(REPO, file))) throw new Error(`${file} exists: one snapshot a day`);
+    const snap = await exportRocks(date, console.log);
+    const json = strToU8(JSON.stringify(snap));
+    const member = `${name}.json`;
+    // A fixed time on the member, so that the same rows make the same bytes.
+    const zip = zipSync({ [member]: [json, { level: 9, mtime: new Date('2000-01-01T00:00:00Z') }] });
+    writeFileSync(join(REPO, file), zip);
+    console.log(`${snap.collections.length} collections, ${snap.ages.length} measured ages → ${file}`);
+    console.log(`In world/manifest.yaml point the dataset at repo:${file}, sha256 ${createHash('sha256').update(zip).digest('hex')}, ${zip.length} bytes; its member ${member}, sha256 ${createHash('sha256').update(json).digest('hex')}.`);
+  },
+  // What the rocks of a stage say near a place, by the latest build: `npm run world -- rocks -4.04 -43.18 123.7 Ma`.
+  // The place is as it is today; the time is written as a record writes one.
+  async rocks([lat, lon, ...when]) {
+    if (lat === undefined || lon === undefined || !when.length) throw new Error('usage: world rocks <lat> <lon> <time>, the place as it is today: world rocks -4.04 -43.18 123.7 Ma');
+    const { rocksOfBuild, rocksText } = await import('./rocksnear.ts');
+    const { parsePoint } = await import('../../../core/time.ts');
+    const { BUILDS } = await import('./paths.ts');
+    const index = join(BUILDS, 'index.json');
+    if (!existsSync(index)) throw new Error('no world build: run `npm run build:world` first');
+    const t = parsePoint(when.join(' ') as import('../../../core/time.ts').TimePointInput).t;
+    const found = rocksOfBuild(join(BUILDS, JSON.parse(readFileSync(index, 'utf8')).latest), Number(lat), Number(lon), t);
+    if (!found) {
+      console.log('The build has no rock record for that place and time: no stage holds the time, or no plate carries the place there.');
+      return 1;
+    }
+    console.log(rocksText(found));
+  },
   // A fresh extract of NOAA's hazard databases, kept in world/snapshots.
   async 'noaa-snapshot'() {
     const { exportHazards } = await import('./noaa.ts');
@@ -96,6 +131,15 @@ const commands: Record<string, (args: string[]) => Promise<number | void>> = {
   async 'hyde-snapshot'() {
     const { exportPopulationGrid, SNAPSHOT } = await import('./hyde.ts');
     const text = await exportPopulationGrid();
+    writeFileSync(join(REPO, SNAPSHOT), text);
+    console.log(`${text.split('\n').filter((l) => l && !l.startsWith('#')).length - 1} cells → ${SNAPSHOT}`);
+    console.log(`In world/manifest.yaml the dataset is repo:${SNAPSHOT}, sha256 ${createHash('sha256').update(text).digest('hex')}, ${Buffer.byteLength(text)} bytes.`);
+  },
+  // SoilGrids 2.0's topsoil, averaged over half degrees and kept in world/snapshots. A fixed release, so this makes the
+  // same bytes every time, and has no date in its name.
+  async 'soilgrids-snapshot'() {
+    const { exportTopsoil, SNAPSHOT } = await import('./soilgrids.ts');
+    const text = await exportTopsoil();
     writeFileSync(join(REPO, SNAPSHOT), text);
     console.log(`${text.split('\n').filter((l) => l && !l.startsWith('#')).length - 1} cells → ${SNAPSHOT}`);
     console.log(`In world/manifest.yaml the dataset is repo:${SNAPSHOT}, sha256 ${createHash('sha256').update(text).digest('hex')}, ${Buffer.byteLength(text)} bytes.`);

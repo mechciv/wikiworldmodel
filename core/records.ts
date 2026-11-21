@@ -262,6 +262,12 @@ export interface CoverageFile {
     /** at each of the survey's times: regions with no farming, and how many HYDE farms under 1% of; with farming widespread, and how many HYDE farms at all and over a twentieth */
     farming: { slice: string; year: number; none: [number, number]; widespread: [number, number, number] }[];
   };
+  /**
+   * the rock record of fossil sites (model:earth/rock-record): how many collections it has and how many stand in a stage,
+   * how they agree with the land and sea of the elevation field, which does not read them, and how many have an age
+   * measured for them
+   */
+  rocks?: { collections: number; sites: number; stages: number; agreement: import('./rocks.ts').RocksAgreement; measured: { collections: number; of: number } };
   /** fossil forests against the climate reconstructed for their place and time; none should be in a desert */
   forests?: { id: string; ageMa: number; keyframeMa: number; lat: number; lon: number; climate: string | null; label: string }[];
   /** which tier answers each layer, over a grid of places at times through each span (core/resolve.ts) */

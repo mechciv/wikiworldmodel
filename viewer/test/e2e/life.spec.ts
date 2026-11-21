@@ -450,4 +450,36 @@ test.describe('anywhere else', () => {
     expect(jan.snow).not.toBeNull();
     expect(jul.snow === null || jul.snow > jan.snow! + 1000).toBe(true);
   });
+
+  test('a scene says what its ground is made of: today\'s topsoil and the rock under it, where the time is one they are held for', async ({ page }) => {
+    // The Deccan today, east of Pune: a clay soil over the traps' basalt.
+    await page.goto(`/?b=${latestBuild()}&${lowOver(19.25, 75.25, 1950, 300)}&${FAST}`);
+    await idle(page);
+    await expect.poll(async () => (await page.evaluate(() => window.__wikiworldmodel!.scene()))?.ground?.from, { timeout: 60_000 }).toBe('soil');
+    const scene = (await page.evaluate(() => window.__wikiworldmodel!.scene()))!;
+    // A model of the place itself, which decides all of its ground; its shares add up, and mud is the most of it.
+    expect(scene.ground).toMatchObject({ tier: 'model', weight: 1, source: 'src:soilgrids-2.0-topsoil', rows: [] });
+    expect(scene.ground!.materials.reduce((n, [, w]) => n + w, 0)).toBeCloseTo(1, 2);
+    expect(scene.ground!.materials[0][0]).toBe('mud');
+    expect(scene.bedrock).toMatchObject({ code: 'vb', rock: 'basic-volcanic', source: 'src:glim-1.0-0.5deg' });
+    // The bar under the scene says both, and the layer answers as the scene is drawn.
+    await expect(page.locator('.life-here')).toContainText('Ground of clay');
+    await expect(page.locator('.life-here')).toContainText('over basic volcanic rocks');
+    const answer = await page.evaluate((o) => window.__wikiworldmodel!.resolve(o.lat, o.lon, 'substrate'), scene.origin);
+    expect(answer.tier).toBe('model');
+    expect(answer.why).toContain('topsoil');
+    // The panel says what it rests on, and that its colour is not the map's.
+    await page.locator('.life-here').click();
+    const ground = page.locator('.inspect .ground');
+    await expect(ground).toContainText("today's topsoil here, held as it is through the Holocene");
+    await expect(ground).toContainText('carried back on its plate through the Quaternary');
+    await expect(ground).toContainText('SoilGrids');
+    // The same place half a million years ago has its rock and no soil: the map of topsoil is not held so far back.
+    await page.evaluate(() => window.__wikiworldmodel!.set({ t: -500_000 }));
+    await idle(page);
+    await expect.poll(async () => (await page.evaluate(() => window.__wikiworldmodel!.scene()))?.stage, { timeout: 60_000 }).not.toBe('Holocene');
+    const old = (await page.evaluate(() => window.__wikiworldmodel!.scene()))!;
+    expect(old.ground?.from).not.toBe('soil');
+    expect(old.bedrock).toMatchObject({ code: 'vb', rock: 'basic-volcanic' });
+  });
 });

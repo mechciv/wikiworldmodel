@@ -14,6 +14,7 @@ import { protoParts } from '../../../world/generators/life/stream.ts';
 import { CityRenderer, type CityFrame } from '../gl/city.ts';
 import type { GL } from '../gl/context.ts';
 import type { V3 } from '../mat.ts';
+import { groundLook, groundTones, rockLook } from './groundlook.ts';
 import { fieldStyle, type FromLifeWorker, type PeopleSummary, type ToLifeWorker } from './lifeworker.ts';
 import { Skyline } from './skyline.ts';
 import type { LocalView } from './view.ts';
@@ -196,7 +197,13 @@ export class LifeScene {
     const tones = params.cover.tones[cover.plants > 0 ? clim?.tones ?? 'plain' : 'barren'] ?? params.cover.tones.plain;
     // Where the world gives the rivers their water falls downstream, and no one level bands the banks.
     r.setWater(g.water.vertices, g.water.indices, this.spec.water ? -1e4 : g.waterLevel, g.water.flow, tones.water);
-    r.setLand(Float32Array.from(['soil', 'herb', 'bare', 'canopy', 'distant'].flatMap((k) => tones[k])), [Math.min(clim?.forest ?? 0, cover.forests), Math.min(clim?.herb ?? 0, cover.plants), 1 - cover.plants * (1 - (clim?.bare ?? 1))], snowOf(this.spec));
+    // What the ground is made of, where the world says: its own materials close by, and their colour in the land's from
+    // afar. And the rock under it: what its outcrops and its stones are drawn of.
+    const rock = rockLook(this.spec.bedrock);
+    const ground = groundLook(this.spec.substrate, rock);
+    r.setLand(Float32Array.from(groundTones(['soil', 'herb', 'bare', 'canopy', 'distant'].flatMap((k) => tones[k]), ground)), [Math.min(clim?.forest ?? 0, cover.forests), Math.min(clim?.herb ?? 0, cover.plants), 1 - cover.plants * (1 - (clim?.bare ?? 1))], snowOf(this.spec));
+    r.setSubstrate(ground);
+    r.setRock(rock);
     r.setGroundCover(...groundCover(this.spec));
     // Each taxon is an entity, and after them each kind of house, which stands for as long as the scene does: generated.
     const houseKinds = this.people?.forms.length ?? 0;

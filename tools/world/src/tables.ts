@@ -14,7 +14,7 @@ export { rowRef } from '../../../core/refs.ts';
 import { parseTable } from './build/series.ts';
 import { datasetFile } from './manifest.ts';
 import type { Citation, Field, World } from './world.ts';
-import type { LandSnapshot } from './pbdb.ts';
+import { rockRows, type LandSnapshot, type RockRow, type RocksSnapshot } from './pbdb.ts';
 
 /** How a column's raw value becomes a claim's value, and back. */
 export type Conversion = 'string' | 'number' | 'text' | 'year' | 'year-end' | 'ma' | 'ma-range' | 'point';
@@ -162,6 +162,10 @@ export async function rawRows(world: World, field: Field): Promise<Record<string
     const snap = world.landFossils.get(id);
     return snap ? landRows(snap) : undefined;
   }
+  if (field.data!.as === 'rock-record') {
+    const path = datasetFile(id, d, field.data!.file ?? (d.fetch.files ? Object.keys(d.fetch.files)[0] : undefined));
+    return existsSync(path) ? rockRows(JSON.parse(await readFile(path, 'utf8')) as RocksSnapshot) : undefined;
+  }
   const member = field.data!.file ?? (d.fetch.files ? Object.keys(d.fetch.files)[0] : undefined);
   const path = datasetFile(id, d, member);
   if (!existsSync(path)) return undefined;
@@ -246,6 +250,45 @@ export function correctRows<T extends Record<string, unknown>>(spec: RowsSpec, r
     return copy;
   });
   return { keys, rows: out, changed };
+}
+
+/**
+ * The rocks of the collections with corrections applied: a corrected place, age, environment, lithology or formation
+ * written into the collection's own row. Returns the snapshot itself where no overlay names a row of it.
+ */
+export function correctRocks(snap: RocksSnapshot, spec: RowsSpec, fixes: Map<string, Fix[]>): RocksSnapshot {
+  if (!fixes.size) return snap;
+  const { rows, changed } = correctRows(spec, rockRows(snap), fixes);
+  if (!changed.size) return snap;
+  const words = [...snap.words];
+  const at = new Map(words.map((w, i) => [w, i]));
+  const word = (w: unknown): number => {
+    const key = String(w ?? '');
+    let k = at.get(key);
+    if (k === undefined) {
+      k = words.length;
+      words.push(key);
+      at.set(key, k);
+    }
+    return k;
+  };
+  const collections = [...snap.collections];
+  for (const i of changed.keys()) {
+    const r = rows[i];
+    const c = [...collections[i]] as RockRow;
+    c[1] = Number(r.lat);
+    c[2] = Number(r.lng);
+    c[3] = Number(r.max_ma);
+    c[4] = Number(r.min_ma);
+    c[5] = word(r.environment);
+    c[7] = word(r.formation);
+    c[8] = word(r.lithology);
+    c[9] = word(r.lithology_adjectives);
+    c[12] = word(r.lithology2);
+    c[13] = word(r.lithology2_adjectives);
+    collections[i] = c;
+  }
+  return { ...snap, words, collections };
 }
 
 /**

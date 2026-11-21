@@ -34,13 +34,14 @@ export function fieldAgesMa(f: Field): { maxAgeMa: number; minAgeMa: number; ste
  * What a gridded field is made from: elevation grids (a dataset of snapshots, partitioned by
  * the plate model's polygons), the plate model's polygons alone (where its continental
  * blocks are), or today's relief on a fixed datum, which a coastline reads at the sea level of
- * each time. Those three are carried by the tiles; the climate and what else its dataset says, the ice sheets and the
- * people have files of their own.
+ * each time. Those three are carried by the tiles; the climate and what else its dataset says, the ice sheets, the
+ * people and today's maps of the ground have files of their own.
  */
-export function fieldSource(f: Field): 'elevation' | 'blocks' | 'relief' | 'climate' | 'months' | 'ice' | 'people' | 'landscape' {
+export function fieldSource(f: Field): 'elevation' | 'blocks' | 'relief' | 'climate' | 'months' | 'ice' | 'people' | 'landscape' | 'ground' {
   // Another variable of a climate's dataset, kept beside its months at the same nodes (core/months.ts PARTS).
   if (f.data?.as === 'months') return 'months';
   if (f.data?.as === 'anthromes' || f.data?.as === 'land-use-assessment' || f.data?.as === 'cities') return 'landscape';
+  if (f.data?.as === 'topsoil' || f.data?.as === 'bedrock') return 'ground';
   if (f.data?.as === 'relief') return 'relief';
   if (f.data?.as === 'climate') return 'climate';
   if (f.data?.as === 'ice-sheets') return 'ice';
