@@ -10,6 +10,7 @@ import type { CitationRecord, ClaimRecord, EntityRecord, OverlaysFile, SeriesRec
 import { LEVEL_LABEL } from '../../../core/ladder.ts';
 import { SPREAD_TEXT, type FieldSpread } from '../../../core/samples.ts';
 import type { Answer } from '../../../core/resolve.ts';
+import { bedrockWords, substrateWords } from '../../../core/substrate.ts';
 import { splitRef } from '../../../core/refs.ts';
 import { lookup, scenarioKey, type Scenario } from '../../../core/scenario.ts';
 import type { Estimate, FeatureTime } from '../../../core/tileset.ts';
@@ -642,9 +643,22 @@ export class InspectPanel {
       ? 'A sea, drawn at the depth the elevation field gives it. Every animal you see is placed by a generator: only who could be here comes from fossils.'
       : `Where the climate field reads the land at ${esc(String(b.ageMa))} Ma it is ${esc(b.label.toLowerCase())}, and the transitions allow forest over ${Math.round(b.cover.forests * 100)}% of it and grass over ${Math.round(b.cover.grasses * 100)}%. Every plant and animal you see is placed by a generator: only who could be here comes from fossils.`;
     const formation = group('formation', 'Recorded in the formation', 'Fossils from this formation identify these organisms. Their positions in the scene are generated.');
+    // What the ground is made of and the rock under it, and what says so; or that nothing does. A sea's floor is the
+    // renderer's alone.
+    const g = spec.substrate;
+    const under = spec.bedrock;
+    const drawn = !g ? '' : g.from === 'soil' ? 'Its fine earth is drawn as one mixture, a shade of the ground its climate gives it, since the map names no colour, and its stones scattered through it.' : g.weight >= 1 ? 'The bare ground is drawn as that.' : `${Math.round(g.weight * 100)}% of the bare ground is drawn as that, and the rest by the climate.`;
+    const rests = !g ? '' : g.rows.length ? `${esc(g.rows.join(', '))}${g.sites > g.rows.length ? ` and ${g.sites - g.rows.length} more` : ''}` : esc(g.credit ?? g.source);
+    const made = g
+      ? `<p>${esc(substrateWords(g))}. ${drawn} How each material looks is the renderer’s.</p><p class="note">${rests}</p>`
+      : `<p>Nothing says what the loose ground was made of here: it is drawn by the climate’s class alone.</p>`;
+    const rock = under
+      ? `<p>${esc(bedrockWords(under))}. ${under.rock ? 'Its outcrops and its stones are drawn as that rock; how the rock looks is the renderer’s.' : 'That it is loose says nothing of its grain, and nothing is drawn from it.'}</p><p class="note">${esc(under.credit ?? under.source)}</p>`
+      : '';
+    const ground = where.sea ? '' : `<section class="here ground"><h3>The ground</h3>${made}${rock}</section>`;
     this.frame(spec.site.place ? spec.site.label : spec.site.stage ?? 'This place', `<p class="summary">${summary}</p>
       <div class="meta"><span class="badge basis-procedural">procedural</span></div>
-      ${when}${thin}${none}${formation}${tiers}
+      ${when}${thin}${none}${formation}${tiers}${ground}
       ${note ? `<section><p class="note">${esc(note)}</p></section>` : ''}`, 'What lived here');
   }
 

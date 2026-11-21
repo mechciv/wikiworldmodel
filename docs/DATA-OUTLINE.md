@@ -109,8 +109,9 @@ What every other domain leans on.
 | Present-day relief, global | ✓ at 0.1°, from ETOPO 2022's 60″ grid; two 15″ tiles around Rome | ETOPO 2022; GEBCO | ✓ PD; ? GEBCO | F |
 | Present-day relief, fine (30 m) | ◐ Rome | SRTM GL1; Copernicus GLO-30; national DEMs (TINITALY…) | ✓ SRTM; ? Copernicus | F |
 | Ocean-floor age and spreading | ○ | Seton et al. 2020 age grids | ? | F |
-| Geologic map units with ages and lithology | ○ | Macrostrat | ✓ CC BY (check) | D |
-| A fossil site's setting: channel, floodplain, lake, delta, dune, reef | ○ the scene of a site should draw it ([SCENES.md](SCENES.md)) | the Paleobiology Database's collection environments | ✓ CC0 | D |
+| Geologic map units with ages and lithology | ◐ the class of rock at the surface today in each half degree, with no ages (`field:earth/bedrock`): held back through the Quaternary on its plates, for a scene's outcrops and stones. Units with their ages are not read | the Global Lithological Map at 0.5° (Hartmann & Moosdorf 2012); Macrostrat's columns and units, which have ages | ✓ CC BY 3.0 GLiM; Macrostrat states CC BY 4.0 for its own data, and many of the maps it gathers state no licence or a non-commercial one, so those are left out | D |
+| Soils: texture, stones, colour, depth | ◐ the sand, silt, clay and coarse fragments of today's topsoil in each half degree (`field:earth/soil`): held through the Holocene, for a scene's ground. No colour, depth or organic matter, and none of the finer maps' uncertainty | SoilGrids 2.0 (Poggio et al. 2021), its 5 km grids averaged | ✓ CC BY 4.0 (the 2017 release was ODbL, and is not read) | D |
+| A fossil site's setting: channel, floodplain, lake, delta, dune, reef | ◐ every collection's environment, its lithologies and their adjectives (grain, colour, cracks, soils), as rows and as the sites of each stage that a place can ask for those near it (`field:earth/rock-record`, `npm run world -- rocks`). A scene's ground is drawn from the rocks (`field:earth/substrate`); its setting is not read yet ([SCENES.md](SCENES.md)) | the Paleobiology Database's collections | ✓ CC0 | D |
 | Large igneous provinces with dated phases | ◐ Deccan, Siberia, CAMP | LIP Commission records; literature | — | R |
 | Volcanoes and eruptions, Holocene | ◐ NOAA's significant eruptions, as a layer | Smithsonian Global Volcanism Program; NOAA NCEI | ? GVP; ✓ PD NOAA | D |
 | Big eruptions in the ice cores (VEI 6+) | ○ | eVolv2k (Toohey & Sigl 2017) | ? | D |
@@ -147,7 +148,7 @@ What every other domain leans on.
 | Sea ice | ○ | modern: NSIDC; past: model output | ? | F |
 | Biomes and vegetation, past | ◐ derived from the climate field and the transitions, Phanerozoic; no pollen-based maps | BIOME 6000; LandCover6k pollen-based reconstructions | ? | F + C |
 | Oxygen in the atmosphere and oceans | ◐ GOE, deoxygenation events | literature (O₂ curves) | — | R + F |
-| Climate indicators: coals, evaporites, tillites, reefs, bauxites | ○ | Boucot et al. 2013 compilation; Macrostrat lithologies | ? | C |
+| Climate indicators: coals, evaporites, tillites, reefs, bauxites | ◐ the lithologies of the Paleobiology Database's collections, with the database's type for each (evaporite, organic, carbonate), where fossils were collected (`field:earth/rock-record`); not yet held against the climate | Boucot et al. 2013 compilation; Macrostrat lithologies | ? | C |
 | Monsoons and ocean circulation as entities (AMOC, Tethys seaway) | ○ | literature | — | R |
 | Weather and clouds over time | ◐ generic clouds | climate fields above, as the cloud generator's constraints | — | G |
 

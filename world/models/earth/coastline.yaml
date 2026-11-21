@@ -20,3 +20,16 @@ uncertainty:
   note: >-
     A line with no width: the elevation field's 1° nodes and 40 m steps are the real limit, and nothing
     is drawn of them.
+# Held to the rocks, which it does not read: a collection of the Paleobiology Database that the database
+# calls terrestrial should stand on this coast's land at its stage, and a marine one lie in its sea.
+checks:
+  - { test: tools/world/test/rocks.test.ts, holds: "stands most terrestrial collections on the elevation field's land at their stage, and lays most marine ones in its sea" }
+disagrees:
+  - with: field:earth/rock-record
+    note: >-
+      About a third of the collections the database calls marine lie on this coast's land at the middle of
+      their stage, and about one in eight of the terrestrial in its sea; each build counts them in
+      coverage.json. A collection near a coast can fall on the wrong side of a field 1° across that is read
+      at a stage's middle, and a collection's own place is often loose; how much of the third that explains
+      has not been counted. What is left would be seas over the continents that the rocks record and the
+      field does not have. Nothing corrects the coast from the rocks yet.

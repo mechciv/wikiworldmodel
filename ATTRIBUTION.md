@@ -118,6 +118,35 @@ The Paleobiology Database. Regular occurrences named to a genus or better, from 
 - From: <https://paleobiodb.org/>
 - Source id: `src:pbdb-sea-2026-11-06`
 
+### The Paleobiology Database, the rocks its fossils lie in
+
+The Paleobiology Database. Every collection whose interval overlaps 541 Ma to the present: its place, its interval's ages, its lithologies with their adjectives, its environment, its tectonic setting, its formation and any age measured for it, with the service's own classes of environment and types of lithology, read through the data service (data1.2) on 20 November 2026.
+
+- Licence: CC0-1.0. The data service's datainfo header, read on 20 November 2026 with every span of the export, states "Data License: Creative Commons CC0" (https://creativecommons.org/publicdomain/zero/1.0/).
+- Credit: The rocks of fossil sites from the Paleobiology Database
+- From: <https://paleobiodb.org/>
+- Source id: `src:pbdb-rocks-2026-11-20`
+
+### SoilGrids 2.0, the top 5 cm of the soil: sand, silt, clay and coarse fragments in each half degree
+
+Poggio, L., de Sousa, L. M., Batjes, N. H., Heuvelink, G. B. M., Kempen, B., Ribeiro, E., and Rossiter, D. (2021). SoilGrids 2.0: producing soil information for the globe with quantified spatial uncertainty. SOIL 7, 217–240, doi:10.5194/soil-7-217-2021. The data: ISRIC – World Soil Information, SoilGrids 2.0, the mean predictions of sand, silt, clay and coarse fragments for 0 to 5 cm, aggregated to 5000 m.
+
+- Licence: CC-BY-4.0. The readme beside the aggregated grids says: "The SoilGrids maps are publicly available under the [CC-BY 4.0 License](https://creativecommons.org/licenses/by/4.0/)." ISRIC's FAQ says the same and asks for the article to be cited. The release of 2017 was under the ODbL and is not this one. This file adapts ISRIC's, and CC BY asks for that to be said: the credit says what was changed.
+- Credit: Today's topsoil from SoilGrids 2.0 (Poggio et al. 2021, ISRIC), its 5 km cells averaged over half degrees
+- DOI: [10.5194/soil-7-217-2021](https://doi.org/10.5194/soil-7-217-2021)
+- From: <https://files.isric.org/soilgrids/latest/data_aggregated/>
+- Source id: `src:soilgrids-2.0-topsoil`
+
+### The Global Lithological Map (GLiM) v1.0, gridded to half a degree
+
+Hartmann, J. & Moosdorf, N. (2012). Global Lithological Map Database v1.0 (gridded to 0.5° spatial resolution). PANGAEA, doi:10.1594/PANGAEA.788537. Supplement to: Hartmann, J. & Moosdorf, N. (2012). The new global lithological map database GLiM: A representation of rock properties at the Earth surface. Geochemistry, Geophysics, Geosystems 13, Q12004, doi:10.1029/2012GC004370.
+
+- Licence: CC-BY-3.0. PANGAEA's record of the dataset gives its licence as "Creative Commons Attribution 3.0 Unported", CC-BY-3.0.
+- Credit: Today's bedrock from the Global Lithological Map (Hartmann & Moosdorf 2012)
+- DOI: [10.1594/PANGAEA.788537](https://doi.org/10.1594/PANGAEA.788537)
+- From: <https://doi.org/10.1594/PANGAEA.788537>
+- Source id: `src:glim-1.0-0.5deg`
+
 ### OpenHistoricalMap, the elements of antiquity around Rome
 
 OpenHistoricalMap contributors. Elements dated before 600 CE within 41.82–41.96°N, 12.38–12.60°E, and the river Tiber, as of 1 November 2026.

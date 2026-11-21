@@ -1,0 +1,25 @@
+id: src:mechenich-2023-eco-isea3h
+type: publication
+kind: compilation
+citation: >-
+  Mechenich, M. F. & Žliobaitė, I. (2023). Eco-ISEA3H, a machine learning ready spatial database for ecometric and
+  species distribution modeling. Scientific Data 10, 77.
+authors:
+  - "Mechenich, M. F."
+  - "Žliobaitė, I."
+published: 2023
+title: Eco-ISEA3H, a machine learning ready spatial database for ecometric and species distribution modeling
+container: Scientific Data
+doi: 10.1038/s41597-023-01966-x
+url: https://doi.org/10.1038/s41597-023-01966-x
+license: CC-BY-4.0
+reliability: >-
+  A secondary source for the names of the Global Lithological Map's classes: a database that uses the map, and tabulates
+  its classes "from Hartmann and Moosdorf". Cited for the names only, because the article of 2012 that defines them
+  could not be read: its publisher's site answers a script with a bot check.
+verified:
+  by: machine:claude-code
+  how: >-
+    The full text read as Europe PMC serves it (PMC9905527, fullTextXML) on 20 November 2026: the citation from its front
+    matter, and Table 7 printed from it, whose sixteen first-level codes are the sixteen of the table in the map's own
+    archive (src:glim-1.0-0.5deg). The table's caption, which field:earth/bedrock quotes, found in that text by script.

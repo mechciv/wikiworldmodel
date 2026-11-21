@@ -11,6 +11,7 @@ import type { Form } from './form.ts';
 import type { FeatureTime } from './tileset.ts';
 import type { Tradition } from './dwelling.ts';
 import type { AnthromeClass, Assessment, Lifeway } from './landscape.ts';
+import type { SceneBedrock, SceneSubstrate } from './substrate.ts';
 
 /** A taxon of the formation that is not drawn, and why not. */
 export interface SceneOmission {
@@ -195,6 +196,10 @@ export interface SceneSpec {
   climate?: SceneClimate;
   /** the people of the place and time, where the human landscape reaches it */
   people?: ScenePeople;
+  /** what its ground is made of, where the world says (core/substrate.ts); without it the climate's class decides, generically */
+  substrate?: SceneSubstrate;
+  /** the rock under its ground, where a map of today's bedrock is held for its time: what its outcrops and stones are drawn of */
+  bedrock?: SceneBedrock;
   taxa: LivingTaxon[];
   omitted: SceneOmission[];
   forms: Record<string, Form>;
