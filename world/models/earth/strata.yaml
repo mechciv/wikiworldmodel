@@ -1,0 +1,44 @@
+# A model run here (section 4.10 of the design). The values of its parameters stay in the field.
+id: model:earth/strata
+type: model
+title: The rock units under a place, from the column it lies in
+description: >-
+  Turns Macrostrat's columns into something a place can ask: which column it lies in, and what units that column has.
+  Each column's footprint is laid on a grid of today's Earth, a cell taking the column whose footprint holds its
+  middle; where two footprints overlap, as the rectangles round drill sites close together do, the smaller has the
+  cell, and a column too small to hold the middle of any cell takes the one its own point lies in. A place of the past
+  is carried on its plate to where it stands today, and is in the column of the cell it falls in there. The column's
+  units are given as the database has them, with its own words for their lithologies, the attributes of each and
+  their environments, and the class, type and group its vocabulary gives each word. It adds nothing of its own: no unit
+  is carried from one column to the next, none is inferred where no footprint reaches, and no age is changed. What the
+  units make of a ground is another model's (model:earth/substrate). It inherits what a column is: a summary of an
+  area, in a footprint drawn round the area's middle, with ages from an age model that states no uncertainty, and with
+  only the rock that is there today. So it cannot say that a place within a column had a given rock, only that the
+  column's area did; it cannot tell a time when nothing was laid down from one whose rock has since been worn away;
+  and it carries a place on one plate, where the rocks of a mountain belt have been moved against each other since
+  they were laid down.
+author: machine:claude-code
+code: tools/world/src/build/strata.ts
+inputs:
+  - { ref: src:macrostrat-columns-2026-11-21, note: "the rows: each column's footprint and point, each unit's ages, lithologies, attributes and environments, the vocabulary's class, type and group for each word, and the reference each column names" }
+  - { ref: field:earth/elevation, note: "the plates that carry a place to where it stands today, and the land and sea the columns are held against" }
+  - { ref: field:earth/coastline, note: "what is land and what is sea in that field" }
+  - { kind: period/stage, note: "the stages the columns are held against that field on, cut and joined as the atlases' are" }
+  - { ref: field:earth/substrate, note: "which of the vocabulary's words say a unit was laid down at the surface, and under the sea: read for that holding only, and nothing here depends on it" }
+outputs: [field:earth/strata]
+params:
+  cell_deg: { choice: "The cell of the grid the footprints are laid on: a tenth of a degree, which all but a handful of the smallest footprints are wide enough to hold the middle of a cell of, and the finest the relief has." }
+  longest_bin: { choice: "The longest a stage may be before it is cut, for the stages the columns are held against the elevation field on: the atlases'." }
+  shortest_bin: { choice: "The shortest a stage may be before it is joined to the next: the atlases'." }
+uncertainty:
+  kind: none
+  note: >-
+    A place is in a column or in none, and a unit is of a time or is not: the dataset gives its ages and its footprints
+    no uncertainty, and none is made up for them here. What is uncertain is said in words, in the field's record.
+checks:
+  - { test: core/strata.test.ts, holds: "is kept as runs along its rows, and read back cell for cell" }
+  - { test: core/strata.test.ts, holds: "are none in a gap, where the youngest from wholly before are named instead" }
+  - { test: tools/world/test/macrostrat.test.ts, holds: "keeps every column and unit the service gives, in the order of their numbers" }
+  - { test: tools/world/test/strata.test.ts, holds: "puts a place in the column whose footprint holds it, recounted from the snapshot's outlines" }
+  - { test: tools/world/test/strata.test.ts, holds: "gives a column the units its snapshot has, word for word" }
+  - { test: tools/world/test/strata.test.ts, holds: "is held against the elevation field's land and sea, stage by stage, and counts where they disagree" }

@@ -655,12 +655,18 @@ export class InspectPanel {
     const g = spec.substrate;
     const under = spec.bedrock;
     const drawn = !g ? '' : g.from === 'soil' ? 'Its fine earth is drawn as one mixture, a shade of the ground its climate gives it, since the map names no colour, and its stones scattered through it.' : g.weight >= 1 ? 'The bare ground is drawn as that.' : `${Math.round(g.weight * 100)}% of the bare ground is drawn as that, and the rest by the climate.`;
-    const rests = !g ? '' : g.rows.length ? `${esc(g.rows.join(', '))}${g.sites > g.rows.length ? ` and ${g.sites - g.rows.length} more` : ''}` : esc(g.credit ?? g.source);
+    // What it rests on: its rows, where it has them, and what its dataset is credited as, which for a column of rock
+    // names the work the column was compiled from.
+    const rows = (list: string[], all: number) => `${esc(list.join(', '))}${all > list.length ? ` and ${all - list.length} more` : ''}`;
+    const rests = !g ? '' : g.rows.length ? `${rows(g.rows, g.sites)}${g.credit ? ` · ${esc(g.credit)}` : ''}` : esc(g.credit ?? g.source);
     const made = g
       ? `<p>${esc(substrateWords(g))}. ${drawn} How each material looks is the renderer’s.</p><p class="note">${rests}</p>`
       : `<p>Nothing says what the loose ground was made of here: it is drawn by the climate’s class alone.</p>`;
+    // A column holds the rock that is there today: what lay over a unit and has since worn away is in none.
+    const stripped = under?.from === 'strata' && !under.laid ? ' Rock since worn away from over it is in no column.' : '';
+    const under_rests = !under ? '' : under.rows?.length ? `${rows(under.rows, under.units?.length ?? under.rows.length)}${under.credit ? ` · ${esc(under.credit)}` : ''}` : esc(under.credit ?? under.source);
     const rock = under
-      ? `<p>${esc(bedrockWords(under))}. ${under.rock ? 'Its outcrops and its stones are drawn as that rock; how the rock looks is the renderer’s.' : 'That it is loose says nothing of its grain, and nothing is drawn from it.'}</p><p class="note">${esc(under.credit ?? under.source)}</p>`
+      ? `<p>${esc(bedrockWords(under))}.${stripped} ${under.rock ? 'Its outcrops and its stones are drawn as that rock; how the rock looks is the renderer’s.' : 'That it is loose says nothing of its grain, and nothing is drawn from it.'}</p><p class="note">${under_rests}</p>`
       : '';
     const ground = where.sea ? '' : `<section class="here ground"><h3>The ground</h3>${made}${rock}</section>`;
     this.frame(spec.site.place ? spec.site.label : spec.site.stage ?? 'This place', `<p class="summary">${summary}</p>

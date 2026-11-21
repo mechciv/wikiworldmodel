@@ -271,6 +271,12 @@ export interface CoverageFile {
    * measured for them
    */
   rocks?: { collections: number; sites: number; stages: number; agreement: import('./rocks.ts').RocksAgreement; measured: { collections: number; of: number } };
+  /**
+   * the columns of rock with ages (model:earth/strata): how many columns and units it has, how many cells of its grid
+   * lie in a footprint, which columns are too small for a cell of their own, and how the columns agree with the land
+   * and sea of the elevation field, which does not read them
+   */
+  strata?: { columns: number; units: number; cells: number; lost: number[]; agreement?: import('./strata.ts').StrataAgreement };
   /** fossil forests against the climate reconstructed for their place and time; none should be in a desert */
   forests?: { id: string; ageMa: number; keyframeMa: number; lat: number; lon: number; climate: string | null; label: string }[];
   /** which tier answers each layer, over a grid of places at times through each span (core/resolve.ts) */

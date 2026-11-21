@@ -1,0 +1,31 @@
+id: src:peters-2018-macrostrat
+type: publication
+kind: compilation
+citation: >-
+  Peters, S. E., Husson, J. M. & Czaplewski, J. (2018). Macrostrat: a platform for geological data integration and
+  deep-time Earth crust research. EarthArXiv, preprint, version 1, doi:10.31223/osf.io/ynaxw. Published as: Macrostrat:
+  A Platform for Geological Data Integration and Deep-Time Earth Crust Research. Geochemistry, Geophysics, Geosystems
+  19(4), 1393–1409, doi:10.1029/2018GC007467.
+authors:
+  - "Peters, S. E."
+  - "Husson, J. M."
+  - "Czaplewski, J."
+published: 2018
+title: "Macrostrat: a platform for geological data integration and deep-time Earth crust research"
+container: EarthArXiv
+doi: 10.31223/osf.io/ynaxw
+url: https://eartharxiv.org/repository/view/1461/
+license: CC-BY-4.0
+reliability: >-
+  The database's own account of itself, by its makers: what a unit and a column are, how a column's footprint is drawn
+  and how its units are given ages. Read as the preprint of January 2018, which its page says "has not been peer
+  reviewed"; the article in the journal came out in April 2018 and was not read, so what changed between the two is not
+  known here. It describes the database of 2018, with 33,903 units in 1,474 regions, in four groups of columns: the core
+  set read today has 35,481 units in 1,534 columns, of six projects.
+verified:
+  by: machine:claude-code
+  how: >-
+    The preprint's PDF downloaded from EarthArXiv on 21 November 2026 (UTC) and its words read out page by page by
+    script; its page there read for its licence, "CC BY Attribution 4.0 International", and for the journal article's
+    DOI. The journal's citation from Crossref's record of that DOI. The journal's own site answers a script with a bot
+    check, so the published text was not read. The quotes that cite this record found in the preprint's text by script.

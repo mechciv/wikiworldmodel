@@ -5,7 +5,7 @@
 // a scene of the sea, below its surface.
 import { expect, test } from '@playwright/test';
 import { atlasHasLand, atlasList, seaList, type AtlasBin, type AtlasIndex, type SeaBin, type SeaIndex } from '../../../core/atlas.ts';
-import { toMa } from '../../../core/time.ts';
+import { fromMa, toMa } from '../../../core/time.ts';
 import { fingerprintProblems, type Fingerprint } from '../../../core/fingerprint.ts';
 import type { SceneFileV2 } from '../../../core/scene.ts';
 import type { SiteInfo, Tileset } from '../../../core/tileset.ts';
@@ -481,5 +481,37 @@ test.describe('anywhere else', () => {
     const old = (await page.evaluate(() => window.__wikiworldmodel!.scene()))!;
     expect(old.ground?.from).not.toBe('soil');
     expect(old.bedrock).toMatchObject({ code: 'vb', rock: 'basic-volcanic' });
+  });
+
+  test('a deep-time scene far from any fossil collection has its ground from the rock unit its column has being laid down then', async ({ page }) => {
+    // Wyoming where it stood in the Early Jurassic, 188 million years ago: no collection of the stage lies within reach,
+    // and Macrostrat's column for the Granite Mountains has the Nugget Sandstone being laid down, a sea of dunes.
+    await page.goto(`/?b=${latestBuild()}&${lowOver(27.42, -44.39, fromMa(188.05), 300)}&${FAST}`);
+    await idle(page);
+    await expect.poll(async () => (await page.evaluate(() => window.__wikiworldmodel!.scene()))?.ground?.from, { timeout: 60_000 }).toBe('strata');
+    const scene = (await page.evaluate(() => window.__wikiworldmodel!.scene()))!;
+    // A model, of the area the column stands for; its rows are units of the snapshot, and the unit is all sand.
+    expect(scene.ground).toMatchObject({ tier: 'model', source: 'src:macrostrat-columns-2026-11-21' });
+    expect(scene.ground!.rows.length).toBeGreaterThan(0);
+    expect(scene.ground!.rows.every((r) => /^src:macrostrat-columns-2026-11-21#unit:\d+$/.test(r))).toBe(true);
+    expect(scene.ground!.materials[0][0]).toBe('sand');
+    expect(scene.ground!.materials.reduce((n, [, w]) => n + w, 0)).toBeCloseTo(1, 2);
+    // The bar under the scene says it, and the layer answers as the scene is drawn.
+    await expect(page.locator('.life-here')).toContainText('Ground of sand');
+    const answer = await page.evaluate((o) => window.__wikiworldmodel!.resolve(o.lat, o.lon, 'substrate'), scene.origin);
+    expect(answer.tier).toBe('model');
+    expect(answer.why).toContain('column of rock');
+    // The panel names the unit and its ages, its row, Macrostrat, and the chart the column was compiled from.
+    await page.locator('.life-here').click();
+    const ground = page.locator('.inspect .ground');
+    await expect(ground).toContainText('Nugget Sandstone');
+    await expect(ground).toContainText('being laid down then in the column of rock for');
+    await expect(ground).toContainText('#unit:');
+    await expect(ground).toContainText('Macrostrat');
+    await expect(ground).toContainText('COSUNA');
+    // What it fetched for this: the grid of column numbers once, and the one file that holds its column.
+    const urls = await page.evaluate(() => window.__wikiworldmodel!.requests);
+    expect(urls.filter((u) => /strata\.lwt$/.test(u)).length).toBe(1);
+    expect(urls.filter((u) => /strata\/columns\/\d+\.json$/.test(u)).length).toBe(1);
   });
 });

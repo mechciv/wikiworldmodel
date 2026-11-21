@@ -55,10 +55,11 @@ export interface ResolveWorld {
   /**
    * What the ground is made of (core/substrate.ts): the span its sources cover, and the ground at a place and time, in a
    * few words with how it is known; undefined where nothing says, and the climate's class decides. It is read from the
-   * rocks of the stage's fossil collections, from a map of today's topsoil, or, where neither says what the loose ground
-   * is, from a map of today's bedrock: `held` names the span a map of today's is held for.
+   * rocks of the stage's fossil collections, from a map of today's topsoil, or from the unit a column of rock has being
+   * laid down at the time; or, where none says what the loose ground is, from the rock under it, by a map of today's
+   * bedrock or by the column's units (`strata-under`): `held` names the span a map of today's is held for.
    */
-  substrate?: { span: [number, number]; at: (lat: number, lon: number, t: number) => { tier: 'evidence' | 'model'; words: string; from: 'rocks' | 'soil' | 'bedrock'; held?: string } | undefined };
+  substrate?: { span: [number, number]; at: (lat: number, lon: number, t: number) => { tier: 'evidence' | 'model'; words: string; from: 'rocks' | 'soil' | 'strata' | 'bedrock' | 'strata-under'; held?: string } | undefined };
   life?: (lat: number, lon: number, t: number) => LifeTier | null;
   polity?: (lat: number, lon: number, t: number) => string | undefined;
   /** where the generic prior puts land */
@@ -112,6 +113,8 @@ export function resolve(w: ResolveWorld, layer: LayerId, lat: number, lon: numbe
       const held = here?.held ? ` through the ${here.held}` : '';
       if (here?.from === 'soil') return a('model', here.words, `A map of today's topsoil, held as it is${held}, says what the ground here is made of.`);
       if (here?.from === 'bedrock') return a('model', here.words, `A map of today's bedrock, carried back on its plate${held}, says what rock lies under the ground here: nothing says what loose ground lay over it.`);
+      if (here?.from === 'strata') return a('model', here.words, 'The unit that the column of rock for this place has being laid down at this time says what the ground was made of: a column stands for an area, and not for a spot in it.');
+      if (here?.from === 'strata-under') return a('model', here.words, 'The column of rock for this place says what rock lay at its surface then: a lava being laid down, or in a gap the youngest unit from before it. Nothing says what loose ground lay over it, and rock since worn away is not in a column.');
       if (here?.tier === 'evidence') return a('evidence', here.words, 'The rock of a fossil collection of the stage, within a scene\'s reach of here, says what the ground was made of.');
       if (here?.tier === 'model') return a('model', here.words, 'The rocks of the stage\'s fossil collections in the country round say what its ground was like: none lies here, so they decide part of it only.');
       return a('generic', 'by climate', 'Nothing says what the ground was made of here then: it is drawn by the climate\'s class alone.');

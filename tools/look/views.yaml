@@ -35,6 +35,12 @@ views:
   - name: ground-salt
     what: A crust of salt of the Tortonian, in the south-east of Spain, heaved into plates.
     link: t=9.44Ma&lat=38.45&lon=-1.61&d=1.0000012&h=30&v=50&hour=12&mo=7&clock=0
+  - name: ground-unit-sand
+    what: Wyoming in the Early Jurassic, far from any fossil collection, where its column of rock has the Nugget Sandstone being laid down, all sand.
+    link: t=188.05Ma&lat=27.42&lon=-44.39&d=1.0000012&h=30&v=50&hour=12&mo=7&clock=0
+  - name: ground-unit-red-mud
+    what: North Dakota in the Permian, where its column of rock has the Opeche Shale being laid down, a red-brown mud with salt.
+    link: t=275.35Ma&lat=17.03&lon=-23.47&d=1.0000012&h=30&v=50&hour=12&mo=7&clock=0
   - name: mountain-winter
     what: Above the treeline on Mount Rainier in January 1950, snow over the slopes.
     link: t=1950&lat=46.845&lon=-121.735&d=1.0001&h=270&v=78&mo=1&hour=12&clock=0

@@ -47,7 +47,7 @@ its own generator below its finest field.
 | --- | --- | --- | --- | --- |
 | Relief | elevation, sea level, ice | ETOPO 2022 (0.1° in use; 15″ exists); SRTM 30 m | today's ground at the sea level of the time (800 kyr); PaleoDEMs at 1° | landforms by process: valleys cut by the rivers, hills by erosion, dunes, glacial forms |
 | Water | relief, climate, water balance | HydroRIVERS; Natural Earth lakes | the drainage routed over the relief of the time, with runoff from its climate | channels from discharge; meanders, bars and oxbows; banks and floodplains |
-| Substrate | the rock record, soils, geology | SoilGrids 2.0 and the Global Lithological Map, both at half a degree; Macrostrat's units, which have ages, are not read | the rocks of the stage's fossil collections; today's topsoil held through the Holocene, and today's bedrock carried back through the Quaternary; generic by climate elsewhere ([below](#what-the-ground-is-made-of)) | the ground's materials in patches, with pebbles, cracks and crusts; outcrops and stones in the colour of the rock |
+| Substrate | the rock record, soils, geology | SoilGrids 2.0 and the Global Lithological Map, both at half a degree; Macrostrat's columns of rock units, which have ages | the rocks of the stage's fossil collections; today's topsoil held through the Holocene, and today's bedrock carried back through the Quaternary; at any time, the units of the column of rock a place lies in, where Macrostrat has one; generic by climate elsewhere ([below](#what-the-ground-is-made-of)) | the ground's materials in patches, with pebbles, cracks and crusts; outcrops and stones in the colour of the rock |
 | Cover | biome, transitions, land cover | ESA WorldCover (10 m) | biome from climate; pollen biomes (BIOME 6000) for the late Quaternary | stands, glades and edges; trees along water |
 | Life | the atlases, forms | living species (later) | fossils, in tiers | individuals, as now |
 | Weather and season | monthly climate | observed climatologies | the runs' months | snow cover, leaf, a river's season, the light |
@@ -131,8 +131,8 @@ Limits:
 
 A scene's ground is made of what the world says it was (`field:earth/substrate`,
 [core/substrate.ts](../core/substrate.ts)): sand, gravel, silt, mud, lime mud, a crust of salt, peat or ash, in
-shares, with the colours and marks its sources name, and the rock under it. Three things answer, each for the times it
-covers, and the panel says which:
+shares, with the colours and marks its sources name, and the rock under it. Four things answer, each for the times and
+places it covers, and the panel says which:
 
 - **The rocks of the stage's fossil collections** (`field:earth/rock-record`), through the Phanerozoic. A sandstone
   was laid down as sand and a claystone as mud, and what a collection says of its rock's colour, cracks and ripples is
@@ -148,6 +148,20 @@ covers, and the panel says which:
 - **Today's bedrock** (`field:earth/bedrock`), carried back on its plate through the Quaternary: the class the
   Global Lithological Map gives the place where it stands today. It says nothing of the loose ground. Outcrops, steep
   rock and stones are drawn in its colour: a basalt dark, a limestone pale.
+- **The rock units of the place's column** (`field:earth/strata`, [core/strata.ts](../core/strata.ts)), at any time,
+  where Macrostrat has a column: in North America above all. A column is the rock succession of an area, each unit
+  with the ages it was laid down between. The place is carried on its plate to where it stands today, and is in the
+  column whose footprint holds it there. A unit being laid down at the time shown, and not under the sea, is the
+  ground: its lithologies by their shares, read by the same words as the collections' rocks, so that the Nugget
+  Sandstone of Wyoming is sand and the Opeche Shale of North Dakota a red-brown mud with salt. A lava or an ash being
+  laid down is the rock at the surface. Where the column has a gap at the time, the youngest unit from before it is the
+  rock under the ground, and nothing is said of the loose ground. The panel names the unit, its ages, its row and the
+  work its column was compiled from. A scene sends for the grid of which column a place lies in once, 143 kB, and for
+  the one file that holds its column, 119 kB at the most.
+
+A place's loose ground is the first of these to answer: a collection at the place; then today's topsoil; then its
+column's unit; then the collections of the country round ([core/substrate.ts](../core/substrate.ts), `firstGround`,
+which says why). The rock under it is today's map's through the Quaternary, and its column's before.
 
 Where none answers, the ground is drawn by the climate's class alone, as it was before, and says so. The generator
 does not read the substrate: the renderer does, so a scene's plants, animals and river are the same with it and
@@ -164,6 +178,20 @@ Limits:
   dunes from the plain beside it.
 - Where each material lies is the renderer's, by a noise: the amounts are the world's, and the places are not. The
   rises and hollows it sorts them by are not the scene's own relief, and no stones gather on its slopes.
+- A column of rock stands for an area, some 150 km across in North America, and does not say where in it each rock
+  lies. Its unit is drawn over all of a scene's ground, and two units of one age share the ground alike, whatever
+  their thickness. Its footprint is drawn round the middle of its area, and is no geological boundary: a scene at its
+  edge may have the rock of the column next to it.
+- A column holds the rock that is there today. The youngest unit from before a gap is taken as the rock under the
+  ground, which is wrong wherever rock since worn away lay over it, and a granite counts as at the surface as soon as
+  its column has nothing younger. Most of what the columns say is of this kind: asked at the middle of a stage where
+  the elevation field has land, a column has a gap about two times in three, and a unit laid down on land one time in
+  twelve.
+- A unit laid down under the sea says nothing of a land. Where the elevation field has land and the column only such
+  units, about one time in twelve, the ground stays generic: nothing settles which of the two is right, and
+  `coverage.json` counts it.
+- A unit's ages are an age model's, with no uncertainty, and a scene takes them as given. Nothing is said where no
+  column reaches, which is most of the Earth outside North America.
 - A soil's coarse fragments are drawn as stones lying on it. In the soil they are mixed through its depth.
 - No stones, boulders or outcrops stand on the ground as things of their own. That would change what the generator
   makes, and wants a version of it.
@@ -190,8 +218,9 @@ Each step has a budget, and a test.
    ([above](#what-the-ground-is-made-of)); no scene reads their environments yet.
 4. **Relief below the field,** by erosion, and today's ground from finer tiles of evidence.
 5. **Cover and substrate today:** land cover, soils and geology, licence by licence. The substrate is begun: today's
-   topsoil and bedrock at half a degree ([above](#what-the-ground-is-made-of)). Finer maps, rock units with their
-   ages, a soil's colour and land cover remain.
+   topsoil and bedrock at half a degree, and rock units with their ages where Macrostrat has columns
+   ([above](#what-the-ground-is-made-of)). Finer maps, rock units for the rest of the Earth, a soil's colour and land
+   cover remain.
 6. **Season and weather** from the monthly climate. The month's snow and sun are done (above); leaf, grass, a river's
    season, the weather and the sky remain. The months of cloudiness, humidity and wind they will read are kept (above).
 7. **Seamless ground,** keyed in the world's coordinates, which the rivers' keying begins.

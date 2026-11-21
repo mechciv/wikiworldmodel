@@ -646,6 +646,115 @@ datasets:
           path: Classnames.txt
           sha256: 046c46bda603676a3d41e9b8167c513625bf14f58bc867f6ad76568f3625c956
 
+  src:macrostrat-columns-2026-11-21:
+    type: dataset
+    kind: compilation
+    title: "Macrostrat, its columns of rock units with their ages"
+    citation: >-
+      Peters, S.E. et al. Macrostrat: a platform for geological data integration and deep-time research.
+      https://macrostrat.org, accessed on 21 November 2026. The 1,534 columns of its core set, each with its footprint,
+      and their 35,481 units: each unit's name, the ages it was laid down between, its lithologies with their shares and
+      attributes, its environments and its thickness, with the service's own vocabularies of lithologies, their
+      attributes and environments, read through its API (version 2). Each column and unit names the reference it was
+      compiled from, 29 in all, here as the service gives their authors, years and titles.
+      Childs, O.E., 1985, Correlation of stratigraphic units of North America; COSUNA. AAPG Bulletin 69:173-180.
+      Douglas, R.J.W., 1970, Geology and economic minerals of Canada. Geological Survey of Canada Economic Geology Report No. 1.
+      Dockery, D.T., 2008, Stratigraphic Units of Mississippi. Mississippi Department of Environmental Quality.
+      Dorsey, R., 2005, Stratigraphy, Tectonics, and basin evolution in the Anza-Borrego Desert region.
+      King, P.R., T.R. Naish, G.H. Browne, B.D. Field, S.W. Edbrooke, 1999, Cretaceous to Recent sedimentary patterns in New Zealand. GNS Folio Series 1.
+      Maurrasse, F.J-M.R., 1986, Stratigraphic chart for the circum-Caribbean region. Volume H, The Geology of North America.
+      Maurrasse, F.J-M.R., 1990, Stratigraphic correlation for the circum-Caribbean region. In Dengo, G. and Case J.E. (eds.). The Geology of North America Volume H: The Caribbean Region.
+      Salvador, A. and Muneton, J.M.Q., 1989, Stratigraphic Correlation Chart: Gulf of Mexico Basin. In Salvador, A. (ed). The Geology of North America Vol. J: The Gulf of Mexico Basin. Geological Society of America, Boulder, Colo.
+      H. Gabrielse and A.J. Brookfield, 1988, Correlation chart for the Canadian Cordiellera.
+      Trettin, H.P., 1991, Geotectonic correlation chart. in Geological Survey of Canada, Geology of Canada No. 3.
+      Stott, D.F., 1991, Geotectonic correlation charts. in Sedimentary Cover of the North American craton: Canada. GSC Geology of Canada No. 5.
+      DSDP, 1966, Deep Sea Drilling Project.
+      ODP, 1985, Ocean Drilling Program.
+      IODP, 2003, Integrated Ocean Drilling Program.
+      Howell, J.A., E. Schwarz, L.A. Spalletti, G.D. Veiga, 2005, The Neuquén Basin: an overview.
+      Milani, E.J, A.B. França, R. L. Schneider, 2007, Bacia do Paraná. Boletim de Geociências da PETROBRÁS 15.2 p. 265-287.
+      Pilar, 2013, Petroleum geology of the Campos and Santos basins, Lower Cretaceous Brazilian sector of the South Atlantic margin.
+      Becerra, J.,E. Conteras-Reyes C. Arriagada, 2013, Seismic structure and tectonics of the southern Arauco Basin, south-central Chile.
+      Barredo, Silvia, 2012, Geodynamic and Tectonostratigraphic of a Continental Rift: Cuyana Basin.
+      Betard et al., 2015, Landforms and Landscape Evolution of the Equatorial Margin of Northeast Brazil.
+      Clemente, Pilar, 2013, Petroleum Geology of the Campos and Santos Basins.
+      Conti et al, 2015, Speculative Petroleum Systems of the Southern Pelotas Basin, Offshore Uruguay.
+      Basu, Urbi, 2013, 2D Lithofacies Modelling of the Parnaiba Basin, Brazil by Statistical Electrofacies Determination.
+      Mpodozis, C. et al., 2005, Late Mesozoic to Paleogene Stratigraphy of the Salar de Atacama Basin, Antofagastan Northern Chile: Implications for the Tectonic Evolution of the Central Andes.
+      Hampton, B et al., 2007, Sheetflow Fluvial Processes in a Rapidly Subsiding Basin, Altiplano Plateau, Bolivia.
+      Cogne, N, P.R. Cobol, C. Riccomini, K. Gallagher, 2013, Tectonic setting of the Taubaté Basin (Southeastern Brazil): Insights from regional seismic profiles and outcrop data.
+      Hoak, T.E. et al., 2014, Integrated Exploration of the Owambo Basin, Onshore Namibia: Hydrocarbon Exploration and Implications for a Modern Frontier Basin. Search and Discovery Article 10609.
+      Yinfu et al, 2010, Petroleum Geology and Exploration Potential of the Oriente-Maranon Basin.
+      Cunha et al, 2011, Amazon Basin Potash Report.
+    version: >-
+      API version 2, which its /meta gives as 2.6.0: an export of 21 November 2026 (UTC), kept zipped in world/snapshots
+      with the queries in its own `query` field
+    container: Macrostrat
+    url: https://macrostrat.org/
+    credit: Rock units and their ages from Macrostrat's columns (Peters et al.), each compiled from the source its column names
+    license: CC-BY-4.0
+    license_note: >-
+      Read at source on 21 November 2026 (UTC). The root of the API states its licence as "CC-BY 4.0. More info at
+      /meta", and /meta says: "All data are licensed under Creative Commons BY 4.0 International". The answers for the
+      columns and for the units each state "CC-BY 4.0" themselves. Macrostrat's page about itself says: "Data are
+      licensed CC BY 4.0: attribute Macrostrat and the original data sources", and: "If specific data sets were targeted,
+      you should also include citations to the original references. These references are accessible from the API and web
+      interface." So each column's reference goes with it into every build, and the 29 are cited above. Only the columns
+      and their units are read. The geologic map Macrostrat gathers from other publishers' maps is another matter, and
+      is not read: of the first 900 of its map sources as its API version 3 lists them, 494 state no licence and 112
+      state "CC BY-NC-SA 4.0".
+    reliability: >-
+      A compilation of compilations. Macrostrat's documentation says its columns "are composite records, typically
+      compiled at basin or regional scale from published stratigraphic summaries (for example, the COSUNA charts for
+      North America)": 17,013 of the units here name that one chart, of 1985, and the primary literature behind the
+      charts was not read here. A column is no outcrop. The article that describes the database says such columns
+      "lack information about the specific spatial distribution of geographically restricted units", that units of one
+      column may be of one age, being "“laterally adjacent” units that reflect spatial variation in lithology within the
+      geographic region covered by the column", and that a column on land gets "a geographic footprint that is defined
+      by a Voronoi tessellation" round the middle of its region: the footprints are no geological boundaries. The ages
+      are an age model's. The article says its first one was "constructed for each column using only the
+      chronostratigraphic bins to which its constituent units were originally correlated and the relative temporal
+      constraints provided by contact relationships of adjacent rock bodies within columns", and that it "lacks explicit
+      statements of uncertainty and does not take advantage of all other information that could be temporally
+      informative, such as thickness and lithology". How many boundaries a source has dated since was not counted here. A column holds the
+      rock that is there now: rock since worn away is not in it, and nothing in a unit says whether it lay at the surface
+      at a time after it was laid down. Deep-sea columns are drill sites, each given a small rectangle round its point.
+      A footprint is some 110 km across at the median: about 150 km in North America and 30 km in New Zealand. The
+      lithologies' shares are estimates of volume. The 3,111 units given no environment are all of igneous or metamorphic
+      rock, two of them with a volcaniclastic rock besides. The service sends some names with their accents encoded twice.
+    note: >-
+      The service's `all` is its core set, which it calls the "best available" default set of regional columns,
+      "composited from other datasets": North America (949 columns), New Zealand (329), the deep sea (132), the Caribbean
+      (64), South America (58) and Africa (2), all active. Its other projects, the offshore drilling holes of eODP among
+      them, are not read. Kept of each unit: its name, its ages with the intervals their boundaries are placed in, its
+      thickness, where it is exposed, its notes, its lithologies with their shares and attributes, its environments and
+      its references. Left out: the numbers and ranks of its stratigraphic names, its economic attributes and
+      measurements, its counts of fossil collections, the units above and below it, the colours the service suggests, and
+      the service's own paleolatitudes, since a place is carried on the plates here. The status of
+      each boundary's age in the age model (/age_model) was not fetched. Words sent with their accents encoded twice
+      ("SÃ£o Paulo") are read back, and every other word is kept as sent. No stable URL serves an extract of a changing
+      database, so the snapshot is kept in the repository, zipped.
+    verified:
+      by: machine:claude-code
+      how: >-
+        Exported from the API with the queries in the snapshot, by `npm run world -- macrostrat-snapshot`, on 21 November
+        2026 (UTC). The licence read the same day from the API's root, its /meta, the answers themselves and the pages
+        https://macrostrat.org/about and https://macrostrat.org/docs/data-services, and the documentation of columns and
+        of the age model from https://macrostrat.org/docs/columns/stratigraphic-columns and
+        https://macrostrat.org/docs/columns/age-model; the article from its preprint (EarthArXiv,
+        doi:10.31223/osf.io/ynaxw, src:peters-2018-macrostrat), not from the journal, whose site refuses a script. The
+        quotes here checked by script against those texts as kept. The counts are of the snapshot. The map sources'
+        licences tallied from nine pages of https://macrostrat.org/api/v3/sources; the tenth answered HTTP 500.
+    fetch:
+      url: repo:world/snapshots/macrostrat-columns-2026-11-21.zip
+      sha256: 347682a7fe191e17c952c8883f355b65d4678abfe2865c1fb9b81faa299daf6b
+      bytes: 1261513
+      format: zip
+      files:
+        snapshot:
+          path: macrostrat-columns-2026-11-21.json
+          sha256: 1657de0af36a40e0ed9e31a848aa715bd1baf82a8a2003455c1b1a3e3bc0134e
+
   src:ohm-rome-2026-11-01:
     type: dataset
     kind: compilation

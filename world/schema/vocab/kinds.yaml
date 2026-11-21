@@ -261,6 +261,12 @@ kinds:
     label: Dated sample
     description: A rock or mineral sample at its locality, at the time it formed.
     moment: true
+  rock-unit:
+    label: Rock unit
+    description: >-
+      A body of rock or sediment in the succession of an area, told from those above and below it: a formation, a
+      member, a lava. It lasts from when it began to be laid down to when it stopped; the rock is there after, where
+      nothing has worn it away.
   taxon:
     label: Taxon
     description: >-

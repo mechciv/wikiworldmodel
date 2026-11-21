@@ -3,7 +3,8 @@
 // and the tiles of the land under it, and no ground or plant or animal: those it makes.
 import { atlasHasLand, atlasList, seaDrawList, seaList, type AtlasBin, type AtlasIndex, type SeaBin } from '../../../core/atlas.ts';
 import { rockBoxes, type RockBoxes, type RocksBin } from '../../../core/rocks.ts';
-import { bedrockAt, firstGround, groundHeld, substrateOfRocks, substrateOfSoil, type GroundHeader, type GroundMaps, type SceneBedrock, type SceneSubstrate } from '../../../core/substrate.ts';
+import { strataCell, strataColumn, strataColumns, strataFileOf, type StrataColumns, type StrataFile, type StrataHeader } from '../../../core/strata.ts';
+import { bedrockAt, firstGround, firstRock, groundHeld, groundOfStrata, substrateOfRocks, substrateOfSoil, type GroundHeader, type GroundMaps, type SceneBedrock, type SceneSubstrate } from '../../../core/substrate.ts';
 import { decodeTile } from '../../../core/container.ts';
 import { decodeNode, type ClimateHeader, type ClimateRule } from '../../../core/climate.ts';
 import type { Form } from '../../../core/form.ts';
@@ -35,6 +36,13 @@ export interface ClimateData {
   arrays: ArrayLike<unknown>[];
 }
 
+/** The grid of which column of rock a place of today's Earth lies in, as read (strata.lwt). */
+interface StrataGrid {
+  header: StrataHeader;
+  rows: Uint32Array;
+  runs: Uint16Array;
+}
+
 export class LifeAtlas {
   private bins = new Map<string, Promise<AtlasBin>>();
   private loadedBins = new Map<string, AtlasBin>();
@@ -51,6 +59,11 @@ export class LifeAtlas {
   /** today's maps of the ground: as they are sent for, and once they have come */
   private groundSent: Promise<GroundMaps | undefined> | null = null;
   private ground: GroundMaps | undefined;
+  /** the columns of rock with ages: the grid of which column a place lies in, as it is sent for and once it has come; and the columns' files likewise */
+  private strataSent: Promise<StrataGrid | undefined> | null = null;
+  private strata: StrataGrid | undefined;
+  private strataFiles = new Map<string, Promise<StrataColumns | undefined>>();
+  private loadedStrata = new Map<string, StrataColumns>();
   private fields = new Map<string, Promise<LoadedField | undefined>>();
   /** the rivers a place's scene is given: its own loader, as the globe's layer has its own */
   private rivers: Rivers;
@@ -171,16 +184,92 @@ export class LifeAtlas {
   }
 
   /**
-   * What the ground is made of at a place and a time, and the rock under it: from the rock sites of the stage and from
-   * today's maps, if they have come. They are sent for if not, and until then, as where nothing says, there is no
-   * answer. The place is carried on its `plate` to the stage's slice, where the sites stand, and to where it is today,
-   * where the maps are, as a scene's place is; with no plate it is read where it stands.
+   * The grid of which column of rock a place of today's Earth lies in, where the build has columns and a rule to read
+   * their units by. One file, sent for once: a scene without it is drawn as it was before there were any, so a file
+   * that does not come is no error.
+   */
+  private strataGrid(): Promise<StrataGrid | undefined> {
+    const file = this.build.substrate?.strata;
+    if (!file || !this.build.substrate?.rule.strata) return Promise.resolve(undefined);
+    return (this.strataSent ??= getBytes(this.build.base + file)
+      .then((buf) => {
+        const { header, arrays } = decodeTile<StrataHeader>(buf);
+        this.strata = { header, rows: arrays[header.grid.rows] as Uint32Array, runs: arrays[header.grid.runs] as Uint16Array };
+        return this.strata;
+      })
+      .catch(() => undefined));
+  }
+
+  /** A file of columns, with what the dataset's vocabulary says of their words. */
+  private strataFile(file: string): Promise<StrataColumns | undefined> {
+    let p = this.strataFiles.get(file);
+    if (!p) {
+      p = getJSON<StrataFile>(this.build.base + file)
+        .then((f) => {
+          const columns = strataColumns(f);
+          this.loadedStrata.set(file, columns);
+          return columns;
+        })
+        .catch(() => undefined);
+      this.strataFiles.set(file, p);
+    }
+    return p;
+  }
+
+  /** Sends for the column a place of today's Earth lies in, and is done when it has come: its grid first, then its file. */
+  private async columnFor(lat: number, lon: number): Promise<void> {
+    const grid = await this.strataGrid();
+    if (!grid) return;
+    const k = strataCell(grid.header.grid, grid.rows, grid.runs, lat, lon);
+    const ref = k ? strataFileOf(grid.header.files, k) : undefined;
+    if (ref) await this.strataFile(ref.file);
+  }
+
+  /**
+   * What the units of the column a place of today's Earth lies in make of its ground at an age, in Ma, and the rock
+   * under it: if the grid and the column's file have come. They are sent for if not, and until then there is no answer,
+   * as where the place lies in no column.
+   */
+  private unitsAt(lat: number, lon: number, ageMa: number): { substrate?: SceneSubstrate; bedrock?: SceneBedrock } {
+    const rule = this.build.substrate?.rule;
+    if (!rule?.strata || !this.build.substrate?.strata || ageMa < 0) return {};
+    const grid = this.strata;
+    if (!grid) {
+      void this.strataGrid();
+      return {};
+    }
+    const k = strataCell(grid.header.grid, grid.rows, grid.runs, lat, lon);
+    const ref = k ? strataFileOf(grid.header.files, k) : undefined;
+    if (!ref) return {};
+    const columns = this.loadedStrata.get(ref.file);
+    if (!columns) {
+      void this.strataFile(ref.file);
+      return {};
+    }
+    const column = strataColumn(columns, k);
+    return column ? groundOfStrata(column, ageMa, { field: grid.header.field, source: grid.header.source, ...(grid.header.credit ? { credit: grid.header.credit } : {}) }, rule) : {};
+  }
+
+  /**
+   * What the ground is made of at a place and a time, and the rock under it: from the rock sites of the stage, from
+   * today's maps and from the units of the place's column of rock, if they have come. They are sent for if not, and
+   * until then, as where nothing says, there is no answer. The place is carried on its `plate` to the stage's slice,
+   * where the sites stand, and to where it is today, where the maps and the columns are, as a scene's place is; with
+   * no plate it is read where it stands.
    */
   groundAt(lat: number, lon: number, t: number, plate = 0): { substrate?: SceneSubstrate; bedrock?: SceneBedrock } {
     const rule = this.build.substrate?.rule;
     if (!rule) return {};
     const a = toMa(t);
     const carried = (b: number): [number, number] => (plate && this.model.reaches(plate, a) && this.model.reaches(plate, b) ? toLatLon(rotate(this.model.total(plate, b), rotate(conj(this.model.total(plate, a)), unitVector(lat, lon)))) : [lat, lon]);
+    let units: { substrate?: SceneSubstrate; bedrock?: SceneBedrock } | undefined;
+    const unitsHere = () => {
+      if (!units) {
+        const [la, lo] = carried(0);
+        units = this.unitsAt(la, lo, a);
+      }
+      return units;
+    };
     const rocks = this.build.rocks;
     const ref = rocks?.bins.find((b) => t >= b.from && t <= b.to);
     let rock: SceneSubstrate | undefined;
@@ -197,8 +286,8 @@ export class LifeAtlas {
     const under = !!maps && groundHeld(maps.header.bedrock, t);
     const today = soil || under ? carried(0) : undefined;
     return {
-      substrate: firstGround(rock, () => (soil && today ? substrateOfSoil(maps!, rule, today[0], today[1]) : undefined)),
-      bedrock: under && today ? bedrockAt(maps!, rule, today[0], today[1]) : undefined,
+      substrate: firstGround(rock, () => (soil && today ? substrateOfSoil(maps!, rule, today[0], today[1]) : undefined), () => unitsHere().substrate),
+      bedrock: firstRock(under && today ? bedrockAt(maps!, rule, today[0], today[1]) : undefined, () => unitsHere().bedrock),
     };
   }
 
@@ -216,6 +305,8 @@ export class LifeAtlas {
       sea?.forms ? (this.seaForms ??= getJSON<Record<string, Form>>(this.build.base + sea.forms)) : Promise.resolve({} as Record<string, Form>),
       this.rocksOf(ref),
       this.groundMaps(t),
+      // The grid of the columns of rock comes with the rest; the place's own column is sent for below, once its place is known.
+      this.strataGrid(),
     ]);
     // The forms are keyed by what they are, so the land's and the sea's never clash.
     const forms = { ...seaForms, ...landForms };
@@ -308,6 +399,14 @@ export class LifeAtlas {
     if (ground && rule) {
       if (groundHeld(ground.header.soil, when)) pw.soil = (la, lo) => substrateOfSoil(ground, rule, la, lo);
       if (groundHeld(ground.header.bedrock, when)) pw.bedrock = (la, lo) => bedrockAt(ground, rule, la, lo);
+    }
+    // And from the units of the column of rock the place lies in where it stands today, at the time shown: its
+    // column is sent for first, so that the spec has its ground from the start.
+    if (rule?.strata && this.build.substrate?.strata) {
+      const plate = pw.plate(origin.lat, origin.lon);
+      const [tl, to] = plate ? pw.carry(plate, origin.lat, origin.lon, ageMa, 0) : [origin.lat, origin.lon];
+      await this.columnFor(tl, to);
+      pw.strata = (la, lo) => this.unitsAt(la, lo, ageMa);
     }
     // The months of the finest climate that covers the time, at the node the place stood on then.
     const mInfo = this.months.info;

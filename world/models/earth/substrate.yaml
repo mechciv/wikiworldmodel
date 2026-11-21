@@ -1,7 +1,7 @@
 # A model run here (section 4.10 of the design). The values of its parameters stay in the field.
 id: model:earth/substrate
 type: model
-title: The ground of a place, from the rocks near it and from today's maps
+title: The ground of a place, from the rocks near it, from today's maps and from the rock units under it
 description: >-
   Reads what the loose ground of a place of land was made of, and the rock under it. In deep time it reads the rock
   record of the stage. Each collection near the place that the database calls terrestrial counts by how much of its span
@@ -15,16 +15,30 @@ description: >-
   the place itself, and decides all of its ground; it names no colour, which stays the climate's. Where the time is one
   a map of today's bedrock is held for, the rock under the ground is the class that map gives the place where it stands
   today, carried there on its plate: a model, which says what outcrops and stones are of and nothing of the loose ground
-  over them. It answers nothing where none of these does, and it infers nothing from the climate, the relief or the
-  stage before. A fossil collection is where fossils were kept, mostly in beds laid down under or beside water: the
-  ground between such beds, which kept nothing, is not in it. A map of today held back in time knows nothing of what
-  changed: a soil since ploughed, drained or blown away, a lava not yet erupted.
+  over them. At any time it reads the rock units of the column the place lies in where it stands today. The units being
+  laid down at the time are the ground: each counts alike, its lithologies by their shares of it, each read as what it
+  was laid down as by the same words, with what its attributes say besides. It decides as much of the ground as the
+  share of that rock that says what it was. A unit laid down under the sea alone says nothing of a land, and where every
+  unit of the time is such, the column says nothing. A lava or an ash being laid down is itself the rock at the surface.
+  Where the column has a gap at the time, or only rock that formed at depth, the youngest units it has from wholly
+  before are the rock under the ground, by the kind of rock that makes most of them. A place's ground is the first of
+  these that answers: a collection at the place, which is evidence of the spot; then today's topsoil, which is the
+  surface itself; then its column's unit, a model of the column's whole area, which holds the place and is dated to the
+  time; then the collections of the country round, which lie as far as near_km off. The rock under it is today's map's
+  through the Quaternary, which is of the surface and finer than most columns, and the column's before. It answers
+  nothing where none of these does, and it infers nothing from the climate, the relief or the stage before. A fossil
+  collection is where fossils were kept, mostly in beds laid down under or beside water: the ground between such beds,
+  which kept nothing, is not in it. A map of today held back in time knows nothing of what changed: a soil since
+  ploughed, drained or blown away, a lava not yet erupted. A column holds the rock that is there today: the youngest
+  unit from before a gap is the rock under the ground only if nothing since worn away lay over it, and a granite is
+  taken to be at the surface as soon as a column has nothing younger, though it was unroofed later.
 author: machine:claude-code
 code: core/substrate.ts
 inputs:
   - { ref: field:earth/rock-record, note: "the sites of the stage near the place: their lithologies, the adjectives of each, and their classes of environment" }
   - { ref: field:earth/soil, note: "today's topsoil at the place where it stands today: its sand, silt, clay and coarse fragments; and the span it is held for" }
   - { ref: field:earth/bedrock, note: "today's class of rock at the place where it stands today, and the span it is held for" }
+  - { ref: field:earth/strata, note: "the units of the column the place lies in where it stands today: their ages, their lithologies with their shares and attributes, and their environments, with the class, type and group the dataset's vocabulary gives each" }
 outputs: [field:earth/substrate]
 params:
   land_class: { choice: "Whose rock is a land's ground: only collections the database puts in this class of environment." }
@@ -33,18 +47,30 @@ params:
     choice: >-
       What each rock was laid down as, by the meaning of its name: sand for a sandstone, silt for a siltstone, mud for a
       mudstone, a claystone or a shale, gravel for a conglomerate or a breccia, ash for a volcaniclastic rock. Coals said
-      to be of a rank are peat, as coal is. A diatomite is taken as silt.
+      to be of a rank are peat, as coal is. A diatomite is taken as silt. A name is read alike whichever database uses
+      it. For the names of the rock units: sand, silt, clay and mud as themselves, ash for an ash, a tuff, a welded tuff
+      or an ignimbrite, half lime mud and half mud for a marl, and half gravel and half mud for a till or a diamictite,
+      whose shares are not known.
   types:
     choice: >-
       The same by the type the database's vocabulary gives a lithology, for one with no entry of its own: a carbonate as
       lime mud, an evaporite as a crust of salt, an organic rock as peat, a volcanic one as ash. A siliciclastic rock of
       no stated grain is taken as half sand and half mud, and a mixed one as half lime mud and half mud: neither is known.
+  groups:
+    choice: >-
+      The same by the group a database's vocabulary gives a lithology, where it gives one, before its type: the
+      sandstones as sand, the mudrocks as mud and the conglomerates as gravel. Only a rock of the class that is laid
+      down as loose ground is read by its group or its type.
   adjectives:
     choice: >-
       What an adjective of a lithology says of the ground: the nine colours the database has, by a plain name; a rock
       said to be ferruginous or hematitic as red and a glauconitic one as green; cracks, ripples, a soil, nodules and
       burrows as marks; and a quarter of a rock said to be pebbly as gravel, of one gypsiferous as salt, of one
-      tuffaceous or volcaniclastic as ash. The quarter is a choice: the database gives no amount.
+      tuffaceous or volcaniclastic as ash. The quarter is a choice: the database gives no amount. For the words of the
+      rock units, none of which the collections use: a colour said with a shade or a lean as the colour it names last;
+      mud cracks, ripples of three kinds, burrowing and concretions as the same marks; and a quarter of a rock said to
+      be sandy, silty, argillaceous, shaly, clayey, muddy, conglomeratic or gravelly as that material. Calcareous and
+      dolomitic are not read: of a sandstone they say what cements it.
   soil:
     choice: >-
       Which material each part of a topsoil is drawn as: its sand as sand, its silt as silt, its clay as mud and its
@@ -55,18 +81,37 @@ params:
       The kind of rock each class of the map of bedrock is drawn as, class for class by its name. Unconsolidated
       sediments are no rock, and say only that the ground is loose; water bodies, ice and cells with no data have no
       entry, and say nothing.
+  strata:
+    choice: >-
+      How a column's units are read, in the words of the dataset's vocabulary. A unit whose environments are all marine
+      was laid down under the sea. A sedimentary rock is laid down as loose ground; a rock of another class says what
+      loose ground it was only by its name. A volcanic rock is laid down at the surface, and a unit is of the surface
+      where sedimentary and volcanic rock make the greater part of it. The kind of rock a lithology is, for outcrops
+      and stones: where the vocabulary groups it, by its grouping, felsic as acid and mafic or ultramafic as basic,
+      though that counts diorite and monzonite among the felsic; an andesite or a latite as intermediate, an ash or a
+      tuff as pyroclastic and a marl as mixed, by the meaning of the name; a siliciclastic, a carbonate or an evaporite
+      rock as that; any metamorphic rock as metamorphic; and sediment not turned to stone, a till among it, as no rock.
 uncertainty:
   kind: tiers
   note: >-
     The ground is evidence, a model or not known. The shares of its materials are of what the collections in reach say,
     not of the ground's area: one collection of sandstone makes it all sand. A topsoil's shares are one prediction's
-    mean over half a degree, and the rock under it one class for the cell.
+    mean over half a degree, and the rock under it one class for the cell. A column's shares are of the volume of its
+    units, which each count alike whatever their thickness, over an area 150 km across at the median in North America;
+    the ages that say which unit is of the time have no uncertainty of their own.
 checks:
   - { test: core/substrate.test.ts, holds: "is evidence where a collection lies here, and takes only those: the country round says nothing more" }
   - { test: core/substrate.test.ts, holds: "counts only collections of the land, and only rocks that say what they were" }
   - { test: core/substrate.test.ts, holds: "makes a topsoil's ground of its stones by volume, and of its fine earth in what they leave" }
   - { test: core/substrate.test.ts, holds: "takes today's topsoil before the rocks of the country round, and after a collection at the place" }
   - { test: core/substrate.test.ts, holds: "reads a class of bedrock as its kind of rock, and says nothing where the map has water or ice" }
+  - { test: core/substrate.test.ts, holds: "is the unit being laid down then: its rocks by their shares, and as much of the ground as says what it was" }
+  - { test: core/substrate.test.ts, holds: "leaves out a unit laid down under the sea, and says nothing where every unit of the time is one" }
+  - { test: core/substrate.test.ts, holds: "takes the youngest units from before a gap as the rock under the ground" }
+  - { test: core/substrate.test.ts, holds: "takes a lava being laid down as the rock at the surface, and its ash as part of the ground" }
+  - { test: core/substrate.test.ts, holds: "comes after a collection at the place and after the topsoil, and before the rocks of the country round" }
+  - { test: tools/world/test/strata.test.ts, holds: "makes a place's ground of the units its column has at two times, counted again from the snapshot" }
+  - { test: tools/world/test/strata.test.ts, holds: "reads the rock record's collections as it did before the units' words were added" }
   - { test: tools/world/test/rocks.test.ts, holds: "makes the ground at the first round's Aptian point of the lake beds beside it, and the build's own scene's of its formation's" }
   - { test: tools/world/test/ground.test.ts, holds: "lays today's topsoil on the land of today's bedrock, better than a cell off any way" }
   - { test: tools/world/test/ground.test.ts, holds: "holds the topsoil through the Holocene and the bedrock through the Quaternary, as the chart dates them" }
