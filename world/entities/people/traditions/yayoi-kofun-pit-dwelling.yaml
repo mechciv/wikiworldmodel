@@ -33,7 +33,7 @@ claims:
       matter of ongoing debate; on p. 99 the same paper gives 965 cal BC. The Yayoi reached the Chubu region last, and
       the Jōmon pit dwelling (people/traditions/jomon-pit-dwelling) is drawn for Japan's foragers until about 350 BCE.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in west-2025-pit-to-surface-structures.txt (sha256 62e9aa916ad8c279), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in west-2025-pit-to-surface-structures.txt (sha256 62e9aa916ad8c279), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   end:
     prop: end
     value: 710 CE
@@ -54,7 +54,7 @@ claims:
       eastern Japan pit dwellings went on until the end of the twelfth century (same page); the ground-level house of
       people/traditions/japanese-ground-level-house is drawn for the whole region after 710.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in west-2025-pit-to-surface-structures.txt (sha256 62e9aa916ad8c279), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in west-2025-pit-to-surface-structures.txt (sha256 62e9aa916ad8c279), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["124"] }
@@ -69,7 +69,7 @@ claims:
       Region 124 (Japan), for Kyushu, Shikoku and Honshu. Hokkaido and the Ryukyus, where the source has other peoples'
       pit houses, are in the region too and are not claimed for this tradition.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in west-2025-pit-to-surface-structures.txt (sha256 62e9aa916ad8c279), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in west-2025-pit-to-surface-structures.txt (sha256 62e9aa916ad8c279), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [farmers]
@@ -89,7 +89,7 @@ claims:
       Settled rice farmers lived in these houses. Elites at the political centres lived in raised-floor buildings (pp.
       111–113), which are not this house; no source read puts townspeople in pit dwellings here.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in west-2025-pit-to-surface-structures.txt (sha256 62e9aa916ad8c279), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in west-2025-pit-to-surface-structures.txt (sha256 62e9aa916ad8c279), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
     value: { walls: none, roof_material: thatch, floor: sunken }
@@ -114,7 +114,36 @@ claims:
       region, so it is left out here, as is a size: the dictionary's range, 2.5 by 2.5 m to a long house of 31 by 9 m,
       is for pit dwellings of all periods together.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in west-2025-pit-to-surface-structures.txt (sha256 62e9aa916ad8c279) and jaanus-dictionary.txt (sha256 9d242cd750c47f8e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in west-2025-pit-to-surface-structures.txt (sha256 62e9aa916ad8c279) and jaanus-dictionary.txt (sha256 9d242cd750c47f8e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  outbuildings:
+    prop: outbuildings
+    value:
+      - { use: granary, per: settlement, floor: stilts }
+    source:
+      - ref: src:west-2025-pit-to-surface-structures
+        loc: "p. 112, section 3.1"
+        quote: >-
+          Raised-floor buildings are built at many settlement sites, and most are thought to have been used as
+          granaries.
+      - ref: src:west-2025-pit-to-surface-structures
+        loc: "p. 112, section 3.1"
+        quote: >-
+          The most common surface structures in Japanese archaeology are pillared-buildings (hottate-bashira tatemono
+          掘立柱建物), subdivided into raised-floor buildings
+      - ref: src:west-2025-pit-to-surface-structures
+        loc: "p. 114, section 3.2"
+        quote: >-
+          both pit structures and raised-floor structures were used for food storage from the Yayoi period onwards.
+    method: expert-estimate
+    note: >-
+      The raised-floor buildings of the Yayoi settlements, most of them thought to be granaries: a building on posts set
+      in the ground with its floor lifted above it, written "stilts". West speaks of them at settlement sites, not of
+      one to a household, so they are the settlement's, and how many stood in one is left to the generator; their plan
+      and size are not given. The large raised-floor halls of the Middle and Late Yayoi stood only at political centres,
+      such as Makimuku and Ikegami Sone, as elites' houses or for ritual, and are not written for every settlement. The
+      storage pits dug into the floors of the pit houses are not outbuildings.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in west-2025-pit-to-surface-structures.txt (sha256 62e9aa916ad8c279), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   fields:
     prop: field_system
     value: { kind: paddies }
@@ -127,4 +156,4 @@ claims:
     method: expert-estimate
     note: The kind of field only; no plot size was found in a source that could be read.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-yayoi-period.txt (sha256 947c964f3543253b), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-yayoi-period.txt (sha256 947c964f3543253b), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

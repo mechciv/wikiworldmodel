@@ -33,7 +33,7 @@ claims:
       seventeenth centuries (West 2025, p. 100); the pit house of people/traditions/korean-pit-house-three-kingdoms-goryeo
       is drawn before 1392. No end is given: the choga declined from the 1960s, past this record's span.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in kim-2025-eupchi-eupseong.txt (sha256 5a260fd60a988efb) and wikipedia-choga-architecture.txt (sha256 cbbec5f071f39d24), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in kim-2025-eupchi-eupseong.txt (sha256 5a260fd60a988efb) and wikipedia-choga-architecture.txt (sha256 cbbec5f071f39d24), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["117"] }
@@ -46,7 +46,7 @@ claims:
     method: editorial
     note: Region 117 (Korea), the peninsula, from Jeju to the north, whose regional forms the article names.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-hanok.txt (sha256 55aa6d202f1902e3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-hanok.txt (sha256 55aa6d202f1902e3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [farmers]
@@ -64,10 +64,10 @@ claims:
       Farmers and provincial commoners. Urban commoners lived under tile (people/traditions/joseon-tiled-town-house),
       though the poor of the towns surely lived under thatch too; no source read says so, and townspeople are not named.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-choga-architecture.txt (sha256 cbbec5f071f39d24) and wikipedia-hanok.txt (sha256 55aa6d202f1902e3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-choga-architecture.txt (sha256 cbbec5f071f39d24) and wikipedia-hanok.txt (sha256 55aa6d202f1902e3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { walls: wattle-and-daub, roof_material: thatch }
+    value: { walls: wattle-and-daub, roof_material: thatch, floor: raised, smoke: chimney }
     source:
       - ref: src:wikipedia-choga-architecture
         loc: opening section
@@ -86,12 +86,58 @@ claims:
       - ref: src:wikipedia-ondol
         loc: section "Goryeo to Joseon"
         quote: in the late Joseon dynasty, ondol was widely used in thatched houses of ordinary people.
+      - ref: src:wikipedia-choga-architecture
+        loc: section "Building techniques and materials"
+        quote: >-
+          The wooden formwork, which consists of columns, girders, beams, rafters, and many other smaller components,
+          stands on a platform to support its roof.
+      - ref: src:wikipedia-choga-architecture
+        loc: section "Characteristics", "Ondol heating system"
+        quote: >-
+          Residents of choga commonly used a heatable brick bed made of mud and stone as a heating method called Ondol
+      - ref: src:wikipedia-choga-architecture
+        loc: section "Characteristics", "Ondol heating system"
+        quote: >-
+          The heating system includes a 20–30 cm high firebox and stove and flues built in underfloor to convey the heat
+          to the chimney.
     method: expert-estimate
     note: >-
       Walls of wattle and daub, the earlier way, which rammed earth joined over a time the article does not date; a
       narrower record of the later house should give rammed earth. A roof of rice straw. The plan is left out: the
-      layouts were L-shaped, in a line or square by region, and the vocabulary has no L. The heated stone floor (ondol)
-      of the late Joseon has no word of its own; "raised" would misdraw the earlier houses, so the floor is left out.
-      No size is given by any source read here.
+      layouts were L-shaped around Seoul, in two rows of rooms in the centre and in a straight line in the west, and
+      one region cannot tell them apart. The floor is "raised" for the platform the timber frame stood on, which the
+      article states for the choga generally; how high it was is not given. The heated floor (ondol) has no word of
+      its own; its flues led the smoke of the firebox to a chimney, which is "chimney". The article says choga
+      residents commonly used it, and also that some sources say heat from the kitchen alone was more usual; the
+      ondol spread through the sixteenth and seventeenth centuries and was widely used in thatched houses only in the
+      late Joseon, so the chimney is the later house's more than the earlier's. No size is given by any source read
+      here, nor are the windows or the door.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-choga-architecture.txt (sha256 cbbec5f071f39d24) and wikipedia-ondol.txt (sha256 b3e9bd80168fb51f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-choga-architecture.txt (sha256 cbbec5f071f39d24) and wikipedia-ondol.txt (sha256 b3e9bd80168fb51f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  settlement:
+    prop: settlement_form
+    value: { yard: wall }
+    source:
+      - ref: src:wikipedia-choga-architecture
+        loc: section "Building techniques and materials"
+        quote: >-
+          The outer wall which surrounds the residence is called todam, "to" means earth and "dam" means a low
+          fence-like wall.
+      - ref: src:wikipedia-choga-architecture
+        loc: section "Building techniques and materials"
+        quote: >-
+          In windy Jeju, this wall is called chukdam and is made of rocks stacked together without mortar so strong
+          winds can pass through them as opposed to knocking them down.
+      - ref: src:wikipedia-choga-architecture
+        loc: section "Characteristics"
+        quote: >-
+          Each choga is formed with outer walls encapsulating various smaller buildings, with greater numbers of
+          buildings signifying higher levels of income.
+    method: expert-estimate
+    note: >-
+      Each house's yard was walled: a low earth wall (todam) round the residence, of dry stone (chukdam) on Jeju. Its
+      height is not given beyond "low". The article says the walls enclosed several smaller buildings, more for the
+      richer, but does not say what they were for, so no outbuildings are written; how the houses stood together in a
+      village is not given either.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-choga-architecture.txt (sha256 cbbec5f071f39d24), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

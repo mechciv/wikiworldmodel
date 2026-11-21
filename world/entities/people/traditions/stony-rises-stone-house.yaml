@@ -28,7 +28,7 @@ claims:
       start of building in stone: the paper sets dating stone houses unambiguously before European contact as a task for
       future excavation, so older ones may stand undated.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in mcniven-2017-kurtonitj.txt (sha256 2d408b9e54435ddd), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in mcniven-2017-kurtonitj-stone-house.txt (sha256 ede6b0ca60c529ca), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   end:
     prop: end
     value: 1870 CE
@@ -42,7 +42,7 @@ claims:
     method: excavation
     note: About 1870, the latest date for the excavated house. When the last of these houses was lived in, the sources do not say.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in mcniven-2017-kurtonitj.txt (sha256 2d408b9e54435ddd), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in mcniven-2017-kurtonitj-stone-house.txt (sha256 ede6b0ca60c529ca), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["141"] }
@@ -57,7 +57,7 @@ claims:
       Region 141 (Victoria and Tasmania). The houses are known only from the lava flows of western Victoria, a small part of
       the region; it is not claimed for the rest of it, nor for Tasmania.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in fink-1987-lake-condah.txt (sha256 cbb33ba436913642), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in fink-1987-lake-condah-stone-shelters.txt (sha256 29ed20fcf0b4f5f1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [foragers]
@@ -81,10 +81,10 @@ claims:
       as many words. The one dated house was lived in during the resistance to the pastoral invasion of the 1840s, or in
       the two decades after, when its people lived and worked on pastoral properties.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in mcniven-2017-kurtonitj-stone-house.txt (sha256 ede6b0ca60c529ca) and fink-1987-lake-condah-stone-shelters.txt (sha256 29ed20fcf0b4f5f1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in mcniven-2017-kurtonitj-stone-house.txt (sha256 ede6b0ca60c529ca) and fink-1987-lake-condah-stone-shelters.txt (sha256 29ed20fcf0b4f5f1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { plan: round, diameter: { lo: 2, hi: 3 }, walls: stone, roof_material: bark, floor: ground }
+    value: { plan: semicircular, diameter: { lo: 2, hi: 3 }, walls: stone, roof_material: bark, floor: ground }
     source:
       - ref: src:fink-1987-lake-condah-stone-shelters
         loc: p. 6
@@ -103,8 +103,10 @@ claims:
           directly on to lava bedrock.
     method: survey
     note: >-
-      The walls, their size and the roof from the survey report; the floor on the bare rock from the excavation. A
-      semi-circular wall has no word of its own in the vocabulary, and "round" is the nearest. The roof's shape is not
-      given.
+      The walls, their size and the roof from the survey report; the floor on the bare rock from the excavation. The
+      plan was first written "round", the nearest word then; it is now "semicircular", the word since added for a half
+      circle open along one side, which is what the report's "semi-circular dry-stone walled structures" says: a
+      refinement of the same reading, not a new one. The roof's shape is not given, nor is which way the open side
+      faced, nor any building beside the houses.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in mcniven-2017-kurtonitj.txt (sha256 2d408b9e54435ddd), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in fink-1987-lake-condah-stone-shelters.txt (sha256 29ed20fcf0b4f5f1) and mcniven-2017-kurtonitj-stone-house.txt (sha256 ede6b0ca60c529ca), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

@@ -31,7 +31,7 @@ claims:
       movements at different times, and Gardiner (2000) has the yeomen of Kent building houses of two full storeys
       already in the early sixteenth century.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in dyer-1986-english-peasant-buildings.txt (sha256 3ef1b244c818fded), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in dyer-1986-english-peasant-buildings.txt (sha256 3ef1b244c818fded), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   end:
     prop: end
     value: { lo: 1701 CE, hi: 1800 CE }
@@ -47,7 +47,7 @@ claims:
       for the rebuilding, not an end of the houses, which stood and were lived in long after. What was built for the
       people of the countryside and of the new towns after it, no source read says.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in dyer-1986-english-peasant-buildings.txt (sha256 3ef1b244c818fded), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in dyer-1986-english-peasant-buildings.txt (sha256 3ef1b244c818fded), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["38"] }
@@ -66,7 +66,7 @@ claims:
       Region 38 (United Kingdom and Ireland), for England: the sources name Kent, eastern England and Northumberland.
       Wales, Scotland and Ireland are not claimed.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in dyer-1986-english-peasant-buildings.txt (sha256 3ef1b244c818fded) and gardiner-2000-later-medieval-domestic-plan.txt (sha256 5a4b9112c3348a56), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in dyer-1986-english-peasant-buildings.txt (sha256 3ef1b244c818fded) and gardiner-2000-later-medieval-domestic-plan.txt (sha256 5a4b9112c3348a56), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [farmers]
@@ -86,7 +86,7 @@ claims:
       Farmers: the rebuilding is of rural houses, the yeomen's first and the labourers' later. The houses of towns are not
       described.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in dyer-1986-english-peasant-buildings.txt (sha256 3ef1b244c818fded), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in dyer-1986-english-peasant-buildings.txt (sha256 3ef1b244c818fded), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
     value: { storeys: 2 }
@@ -115,7 +115,7 @@ claims:
       and thatch, brick, stone, tile and slate are for a source on the houses of the seventeenth and eighteenth
       centuries to say.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in dyer-1986-english-peasant-buildings.txt (sha256 3ef1b244c818fded) and gardiner-2000-later-medieval-domestic-plan.txt (sha256 5a4b9112c3348a56), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in dyer-1986-english-peasant-buildings.txt (sha256 3ef1b244c818fded) and gardiner-2000-later-medieval-domestic-plan.txt (sha256 5a4b9112c3348a56), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
     value: { household: 4.75 }
@@ -132,4 +132,4 @@ claims:
       lived in are counted in the household, and the abstract says a majority of people lived in households of six or
       more. Only the abstract was read.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in laslett-1969-household-england.txt (sha256 aef17fe58c47379f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in laslett-1969-household-england.txt (sha256 aef17fe58c47379f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

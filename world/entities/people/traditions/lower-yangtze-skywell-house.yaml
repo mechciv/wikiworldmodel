@@ -32,7 +32,7 @@ claims:
       Anhui, are of the Ming, and none says in which of its years they were built. It bounds the start rather than
       dating it, for nothing read says how the house was built before.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in pan-2023-southern-anhui-folk-houses.txt (sha256 7c9abdde92013f4d), li-2022-hongcun-dwellings.txt (sha256 f71f8fa6ecff9248) and zhou-2002-one-bright-two-dark.txt (sha256 ab926c4c48d1e397), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in pan-2023-southern-anhui-folk-houses.txt (sha256 7c9abdde92013f4d), li-2022-hongcun-dwellings.txt (sha256 f71f8fa6ecff9248) and zhou-2002-one-bright-two-dark.txt (sha256 ab926c4c48d1e397), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   end:
     prop: end
     value: 1949 CE
@@ -45,7 +45,7 @@ claims:
       The bound the survey of 264 houses sets on its own cases, taken here as the end of building in this way; it is
       not a date any source gives for the last such house, and the houses are lived in still.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wang-2016-jiangnan-closed-halls.txt (sha256 0cb32369883a0166), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wang-2016-jiangnan-closed-halls.txt (sha256 0cb32369883a0166), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["123"] }
@@ -68,7 +68,7 @@ claims:
       region. The first source also has 18 cases in northern Fujian (region 122), which it sets in another cultural
       circle and says differ in style; that region is left out.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wang-2016-jiangnan-closed-halls.txt (sha256 0cb32369883a0166) and min-zhang-2026-yangtze-delta-dwellings.txt (sha256 7b37735a8ee5003f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wang-2016-jiangnan-closed-halls.txt (sha256 0cb32369883a0166) and min-zhang-2026-yangtze-delta-dwellings.txt (sha256 7b37735a8ee5003f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [farmers, townspeople]
@@ -94,10 +94,10 @@ claims:
       No work read says what the people of these houses lived by, save that at Hongcun most of the men traded away
       from home; that the villagers farmed is not stated in them.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in min-zhang-2026-yangtze-delta-dwellings.txt (sha256 7b37735a8ee5003f) and li-2022-hongcun-dwellings.txt (sha256 f71f8fa6ecff9248), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in min-zhang-2026-yangtze-delta-dwellings.txt (sha256 7b37735a8ee5003f) and li-2022-hongcun-dwellings.txt (sha256 f71f8fa6ecff9248), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { plan: courtyard, court: true, width: 9, length: 23.3, storeys: { lo: 1, hi: 3 }, walls: fired-brick, roof: gable, roof_material: tile }
+    value: { plan: courtyard, court: true, width: 9, length: 23.3, storeys: { lo: 1, hi: 3 }, walls: fired-brick, roof: gable, roof_material: tile, finish: lime, veranda: true }
     source:
       - ref: src:min-zhang-2026-yangtze-delta-dwellings
         loc: section "Study area", "Vernacular dwellings"
@@ -138,6 +138,14 @@ claims:
         quote: >-
           The dwellings face north and south, with an axisymmetric layout, 9 m in width and 23.3 m in depth. There are
           two patios of different scales in the dwelling
+      - ref: src:li-2022-hongcun-dwellings
+        loc: section 3, "Materials"
+        quote: The lime is often used in wall plastering, creating a white wall, which is an important element of traditional dwellings in Hongcun
+      - ref: src:min-zhang-2026-yangtze-delta-dwellings
+        loc: section "Methods", "Field survey"
+        quote: >-
+          with inclusion criteria requiring structural integrity, clearly defined spatial layouts, intact key spatial
+          elements such as sky-wells and eaves corridors
     method: survey
     note: >-
       The plan round a sky-well, the brick outer walls on a timber frame that bears the load and the tiled roof are
@@ -147,9 +155,13 @@ claims:
       width and length are those of one house, Yao's House at Xixinan in southern Anhui, of two courts and of a
       layout its source calls typical: the only measures of a whole house read, and no range. The houses run from one
       court to nine on an axis, and Hongcun's outer walls stand 7 to 8 m high; the delta's sky-wells are 6 to 13 m
-      wide and 3 to 7 m deep, for which a dwelling has no parameter.
+      wide and 3 to 7 m deep, for which a dwelling has no parameter. The walls were plastered with lime, white (Hongcun;
+      the delta's "white-lime walls"). The eaves corridor along the sky-well was one of the key spaces of the house in
+      the delta survey, which chose its houses for having one: the vocabulary's veranda. The walls towards the
+      sky-well had full-height windows in the delta survey's words, and the outer walls' windows are not described,
+      so windows are left out; so is the direction the houses faced, as Yao's House "faces north and south".
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in min-zhang-2026-yangtze-delta-dwellings.txt (sha256 7b37735a8ee5003f), wang-2016-jiangnan-closed-halls.txt (sha256 0cb32369883a0166), li-2022-hongcun-dwellings.txt (sha256 f71f8fa6ecff9248) and pan-2023-southern-anhui-folk-houses.txt (sha256 7c9abdde92013f4d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in min-zhang-2026-yangtze-delta-dwellings.txt (sha256 7b37735a8ee5003f), wang-2016-jiangnan-closed-halls.txt (sha256 0cb32369883a0166), li-2022-hongcun-dwellings.txt (sha256 f71f8fa6ecff9248) and pan-2023-southern-anhui-folk-houses.txt (sha256 7c9abdde92013f4d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
     value: { pattern: nucleated }
@@ -169,7 +181,7 @@ claims:
       stood in a village, and how many people lived in one, no work read states: Hongcun's 110 houses of the Ming and
       Qing are those that still stand on its 19 hectares, not a count of the village then.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in pan-2023-southern-anhui-folk-houses.txt (sha256 7c9abdde92013f4d), min-zhang-2026-yangtze-delta-dwellings.txt (sha256 7b37735a8ee5003f) and li-2022-hongcun-dwellings.txt (sha256 f71f8fa6ecff9248), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in pan-2023-southern-anhui-folk-houses.txt (sha256 7c9abdde92013f4d), min-zhang-2026-yangtze-delta-dwellings.txt (sha256 7b37735a8ee5003f) and li-2022-hongcun-dwellings.txt (sha256 f71f8fa6ecff9248), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   town:
     prop: town_form
     value: { streets: canals }
@@ -187,4 +199,4 @@ claims:
       study of climate, resting on a work not read here. It is not said of the hill towns of southern Anhui or of
       Jiangxi, and no wall, street width or block is stated.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in min-zhang-2026-yangtze-delta-dwellings.txt (sha256 7b37735a8ee5003f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in min-zhang-2026-yangtze-delta-dwellings.txt (sha256 7b37735a8ee5003f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

@@ -42,7 +42,7 @@ claims:
       nothing read describes a village house of the plain in the centuries between. The house is surely older; its
       earlier form is the broader record's. No end is given, and none is known from what was read.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-siheyuan.txt (sha256 6f6140321b8817ea) and smith-1899-village-life-in-china.txt (sha256 924989bcd4918bb0), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-siheyuan.txt (sha256 6f6140321b8817ea) and smith-1899-village-life-in-china.txt (sha256 924989bcd4918bb0), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["116", "120"] }
@@ -71,7 +71,7 @@ claims:
       here of walls, roof and size is Smith's of the plain, carried there on that footing. The house is not claimed for
       all of either region: Smith himself notes houses of stone in the mountains and caves in the loess.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in smith-1899-village-life-in-china.txt (sha256 924989bcd4918bb0), wikipedia-siheyuan.txt (sha256 6f6140321b8817ea) and wikipedia-kang-heated-platform.txt (sha256 9f25ab3fd6f923c9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in smith-1899-village-life-in-china.txt (sha256 924989bcd4918bb0), wikipedia-siheyuan.txt (sha256 6f6140321b8817ea) and wikipedia-kang-heated-platform.txt (sha256 9f25ab3fd6f923c9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [farmers, townspeople]
@@ -98,10 +98,10 @@ claims:
       is given for the towns: Smith says that every city had a wall, lying roughly four-square, but not what it was
       built of, and he describes the streets of villages, not of cities.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in smith-1899-village-life-in-china.txt (sha256 924989bcd4918bb0), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in smith-1899-village-life-in-china.txt (sha256 924989bcd4918bb0), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { length: { lo: 9.1, hi: 11 }, rooms: { lo: 2, hi: 3 }, walls: mudbrick, roof_material: earth, floor: ground }
+    value: { length: { lo: 9.1, hi: 11 }, rooms: { lo: 2, hi: 3 }, walls: mudbrick, roof_material: earth, floor: ground, faces: south, windows: large, entrance: side }
     source:
       - ref: src:smith-1899-village-life-in-china
         loc: 'chapter II, "Construction of Villages" (the index puts the arrangement of a courtyard at p. 25)'
@@ -135,6 +135,28 @@ claims:
       - ref: src:smith-1899-village-life-in-china
         loc: 'chapter II, "Construction of Villages", the paragraph on the floor and what stands on it'
         quote: The floor of all common dwellings is merely the earth
+      - ref: src:smith-1899-village-life-in-china
+        loc: 'chapter II, "Construction of Villages", the paragraph on doors and windows'
+        quote: >-
+          The wooden grating, which does duty as a window, is built into the wall, for security against thieves, and
+          is often covered, even in the heat of summer, with oiled paper.
+      - ref: src:smith-1899-village-life-in-china
+        loc: 'chapter II, "Construction of Villages", the paragraph on doors and windows'
+        quote: >-
+          Doors do not open directly from dwelling-houses to the street, and if there are any windows on the street
+          side of the house, they are very small and very high.
+      - ref: src:zhou-2002-one-bright-two-dark
+        loc: "section 1, Introduction, p. 171"
+        quote: >-
+          the standard plan in Ming(1368-1644) and Qing dynasty(1644-1912) was One Bright Both Sides Dark
+      - ref: src:zhou-2002-one-bright-two-dark
+        loc: "section 1, Introduction, p. 171"
+        quote: which composes the fundamental unit of SiHeYuan houses
+      - ref: src:zhou-2002-one-bright-two-dark
+        loc: 'section 3-2-2, "The Opinion that It is One Bright Both Sides Dark Type", p. 172'
+        quote: >-
+          had a frontage of three spans. An entrance with door was at the center. And windows were at the right and
+          left sides.
     method: documentary
     note: >-
       An eyewitness's account, in round figures and not measured. The court, the single storey and the ridged roof are
@@ -146,11 +168,22 @@ claims:
       vocabulary's mudbrick, laid on a footing of fired brick with a course of reeds against the damp; the roof is
       earth over reeds, mats or sorghum stalks on purlins, and in the better houses posts carried it. A bed of adobe
       brick, the k'ang, heated by flues from the cooking fire, stood in the room: the vocabulary has no word for it.
+      The house faced south, from the first quote. Its window was a wooden grating built into the wall and covered
+      with oiled paper, which is the vocabulary's large window, of lattice or paper, though Smith gives no size;
+      windows towards the street, where there were any, were very small and very high. Of the smoke he says that the
+      cooking fire's went through the flues under the k'ang, that a thatched house's opening for it had to be near the
+      ground, and that "there are no chimneys worthy of the name", so that the smoke filled the house: that is
+      neither a chimney nor none, and it is left out. Where the door stood in the front he does not say: the door in
+      the long side, in the middle of three divisions, is from the last source, which has the standard plan of the
+      Ming and Qing house, the unit of which courtyard houses were composed, as the "One Bright Both Sides Dark"
+      type, a frontage of three spans with the door in the middle one and a window to either side, in its report of
+      Itou's account, which it says is the type "commonly used today". It is not said of Smith's villages in
+      particular, and it agrees with his three divisions.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in smith-1899-village-life-in-china.txt (sha256 924989bcd4918bb0), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in smith-1899-village-life-in-china.txt (sha256 924989bcd4918bb0) and zhou-2002-one-bright-two-dark.txt (sha256 ab926c4c48d1e397), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
-    value: { pattern: nucleated, houses: { lo: 30, hi: 1000 }, household: 5 }
+    value: { pattern: nucleated, houses: { lo: 30, hi: 1000 }, household: 5, enclosure: wall, yard: wall }
     source:
       - ref: src:smith-1899-village-life-in-china
         loc: 'chapter II, "Construction of Villages" (the index puts streets, alleys and overcrowding at p. 21)'
@@ -172,6 +205,24 @@ claims:
         quote: >-
           The villages were 150 in number, and the average size was taken as eighty families, which, reckoning five
           persons to the family, gave a total of 60,000 persons.
+      - ref: src:smith-1899-village-life-in-china
+        loc: 'chapter II, "Construction of Villages", last paragraphs'
+        quote: >-
+          The Chinese village is always a miniature city, not only by reason of its internal arrangements--or lack of
+          it--but often also in the virtue of the fact that it is surrounded by a wall.
+      - ref: src:smith-1899-village-life-in-china
+        loc: 'chapter II, "Construction of Villages", last paragraphs'
+        quote: Although the walls are seldom more than fifteen or twenty feet in height
+      - ref: src:smith-1899-village-life-in-china
+        loc: 'chapter II, "Construction of Villages" (the index puts the arrangement of a courtyard at p. 25)'
+        quote: >-
+          If the premises are large, the front wall of the yard is formed by another house, similar to the one in the
+          rear, and like it having side buildings.
+      - ref: src:smith-1899-village-life-in-china
+        loc: 'chapter II, "Construction of Villages" (the index puts streets, alleys and overcrowding at p. 21)'
+        quote: >-
+          Even the buildings which happen to stand contiguous to the main street offer nothing to the gaze but an
+          expanse of dead wall.
     method: documentary
     note: >-
       Crowded villages, the yards opening on narrow alleys off a crooked street, many within an earthen rampart that he
@@ -181,9 +232,53 @@ claims:
       residence the average was taken as eighty. Five persons to a family is the reckoning he used in both, not a
       count: the villager who made the second list told him it was far too low, since families that lived with all
       things in common, some of twenty people, were each counted once. It is written as he used it, and the true
-      household was larger by an amount he does not give.
+      household was larger by an amount he does not give. The wall round the village is Smith's: "often", not always,
+      seldom more than fifteen or twenty feet high, and an earthen rampart where he says what it was made of; it is
+      written for every village, which is more than he says. Each yard had a wall in front, which in large premises a
+      second house formed, and the houses showed the street only dead wall.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in smith-1899-village-life-in-china.txt (sha256 924989bcd4918bb0), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in smith-1899-village-life-in-china.txt (sha256 924989bcd4918bb0), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  outbuildings:
+    prop: outbuildings
+    value:
+      - { use: well, per: settlement }
+      - { use: shrine, per: settlement }
+      - { use: pen, per: house, floor: sunken }
+    source:
+      - ref: src:smith-1899-village-life-in-china
+        loc: 'chapter VI, "Village Wells", first paragraph'
+        quote: The well is a very important feature of the outfit of a Chinese village
+      - ref: src:smith-1899-village-life-in-china
+        loc: 'chapter VI, "Village Wells"'
+        quote: Village wells are often sunk on ground which is conjointly owned by several families.
+      - ref: src:smith-1899-village-life-in-china
+        loc: 'chapter VI, "Village Wells", first paragraph'
+        quote: >-
+          Rarely have they a cover of any sort, and the opening being level with the surface of the ground
+      - ref: src:smith-1899-village-life-in-china
+        loc: 'chapter III, "Village Nomenclature"'
+        quote: The most conspicuous object in a Chinese village is generally a temple
+      - ref: src:smith-1899-village-life-in-china
+        loc: 'chapter XI, "Village Temples and Religious Societies"'
+        quote: >-
+          The two temples which are most likely to be found, though all others be wanting, are those of the local
+          god, and of the god of war.
+      - ref: src:smith-1899-village-life-in-china
+        loc: 'chapter II, "Construction of Villages", the paragraph on the yard'
+        quote: >-
+          Pigs are kept in a kind of well, with a brick wall to prevent its caving in, and by climbing a very steep
+          flight of brick stairs they can ascend to a little kennel provided for them at the edge of their pits
+    method: documentary
+    note: >-
+      The village's wells, shallow and seldom covered, often on ground several families owned together; Smith counts
+      four or five in one village, a single instance, and no count is written. The village temple, which he calls its
+      most conspicuous object and finds in nearly every village, those of the local god and the god of war the most
+      likely; he says some small villages had none. The pigs' pit, lined with brick, with a kennel at its edge, which
+      the vocabulary's nearest word is a pen, sunk below the ground: it is written as a household's, though Smith
+      says only that a family's animals had to be found a place in the yard. He has threshing floors in the autumn
+      harvest, and fuel stacked in the villages, but not whose they were or where they lay, and they are left out.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in smith-1899-village-life-in-china.txt (sha256 924989bcd4918bb0), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
 relations:
   broader:
     rel: member-of
@@ -195,4 +290,4 @@ relations:
         If the premises are large, the front wall of the yard is formed by another house, similar to the one in the
         rear, and like it having side buildings.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in smith-1899-village-life-in-china.txt (sha256 924989bcd4918bb0), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in smith-1899-village-life-in-china.txt (sha256 924989bcd4918bb0), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

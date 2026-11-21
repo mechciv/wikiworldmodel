@@ -28,7 +28,7 @@ claims:
       older, and no source read here says how much. The tradition has no end claim: the ethnographies of the 1970s and of
       2003 to 2018 find it built in the forest camps.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in stanley-1890-in-darkest-africa-vol-2.txt (sha256 c03541e8098bf551), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in stanley-1890-in-darkest-africa-vol-2.txt (sha256 c03541e8098bf551), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["83", "84"] }
@@ -51,7 +51,7 @@ claims:
       most of whose people were farmers, nor for the forest foragers of the Central African Republic (82), Gabon or Rwanda,
       whose huts no source read here describes.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in tanno-1981-mbuti-plant-utilization.txt (sha256 9d56ca7afbd9b32d), hattori-2006-baka-marantaceae.txt (sha256 27a6aae6c5413f1b) and kilius-2021-bayaka-sleep.txt (sha256 6559e066f824177d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in tanno-1981-mbuti-plant-utilization.txt (sha256 9d56ca7afbd9b32d), hattori-2006-baka-marantaceae.txt (sha256 27a6aae6c5413f1b) and kilius-2021-bayaka-sleep.txt (sha256 6559e066f824177d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [foragers]
@@ -69,10 +69,10 @@ claims:
       farmers, in houses of mudbrick, and the leaf hut is their dwelling in the forest only; the Baka of the second source
       also farm. Their village houses are not this tradition.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in tanno-1981-mbuti-plant-utilization.txt (sha256 9d56ca7afbd9b32d) and kilius-2021-bayaka-sleep.txt (sha256 6559e066f824177d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in tanno-1981-mbuti-plant-utilization.txt (sha256 9d56ca7afbd9b32d) and kilius-2021-bayaka-sleep.txt (sha256 6559e066f824177d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { plan: round, diameter: { lo: 2, hi: 3 }, height: 1.5, walls: pole-and-thatch, roof: dome, roof_material: thatch, floor: ground }
+    value: { plan: round, diameter: { lo: 2, hi: 3 }, height: 1.5, walls: pole-and-thatch, roof: dome, roof_material: leaves, floor: ground }
     source:
       - ref: src:tanno-1981-mbuti-plant-utilization
         loc: 'section "F. Dwelling equipment, 1. Huts", p. 29'
@@ -95,13 +95,17 @@ claims:
       The size from the Mbuti: 2–3 m across and 1.5 m high in the first source, 2–2.5 m across in the second, both of the
       Ituri; the frame of bent saplings from the second, and the same frame thatched with Marantaceae leaves from bottom to
       top from the third, of the Baka of Cameroon, who give no size. The leaves are tied over the frame down to the
-      ground, so wall and roof are one: walls of pole-and-thatch under a dome thatched with leaves. Stanley in 1888 saw
-      the Ituri huts as low and oval with a door at each end; the ethnographies of the 1970s describe them round.
+      ground, so wall and roof are one: walls of pole-and-thatch under a dome thatched with leaves. The roof material was
+      entered as thatch and is now leaves, the narrower word, as the third source says the frame is thatched with
+      Marantaceae leaves, and the first two say the same of the Mbuti, not straw or grass: a refinement, not a
+      disagreement. Stanley in 1888 saw the Ituri huts as low and oval with a door at each end; the ethnographies of the
+      1970s describe them round, and none says where the doorway of a round hut stood, so the entrance is left to the
+      generator. A fire was burnt in the middle of the hut at night (Tanno, p. 30), but how its smoke left is not said.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in tanno-1981-mbuti-plant-utilization.txt (sha256 9d56ca7afbd9b32d), ichikawa-1979-mbuti-residential-groups.txt (sha256 f6a56713c12c9d93) and hattori-2006-baka-marantaceae.txt (sha256 27a6aae6c5413f1b), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in tanno-1981-mbuti-plant-utilization.txt (sha256 9d56ca7afbd9b32d), ichikawa-1979-mbuti-residential-groups.txt (sha256 f6a56713c12c9d93) and hattori-2006-baka-marantaceae.txt (sha256 27a6aae6c5413f1b), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
-    value: { pattern: camp, houses: { lo: 10, hi: 14 } }
+    value: { pattern: camp, layout: ring, plaza: true, houses: { lo: 10, hi: 14 } }
     source:
       - ref: src:ichikawa-1979-mbuti-residential-groups
         loc: 'section "Size of the bands", p. 13'
@@ -117,11 +121,38 @@ claims:
       - ref: src:ichikawa-1979-mbuti-residential-groups
         loc: 'section "Plan of the hunting camps", p. 39'
         quote: An open space is left in the middle, and huts are built around it.
+      - ref: src:stanley-1890-in-darkest-africa-vol-2
+        loc: 'ch. XXIII, "The Great Central African Forest", p. 103'
+        quote: >-
+          in a rough circle, the centre of which is left cleared for the residence of the chief and his family, and as a
+          common.
     method: survey
     note: >-
-      Camps of 10 to 14 huts, the five base camps of Mbuti archers counted at Andiri in May 1975, where a hut was a
+      The huts stand in a ring round open ground (Ichikawa's plan of a model camp, and Stanley's rough circle with its
+      centre cleared as a common): the layout and the open middle. Ichikawa's middle is the tele, where the men meet, and
+      the ground round it where the children play and dancing takes place; Stanley's centre also held the chief's
+      family's dwelling, which Ichikawa's camps do not have. Ichikawa has a family hearth in front of each hut, where the
+      women cook, which is not a building. Camps of 10 to 14 huts, the five base camps of Mbuti archers counted at Andiri in May 1975, where a hut was a
       family's; the net-hunting bands of the Tetri area had 10 to 25 families, or 47 to 94 people, and set up camp
       together. The huts stand around an open space where the men meet. How many people lived in one hut is not given as
       such, and is left to the generator: the bands' counts are not turned into it here.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in ichikawa-1979-mbuti-residential-groups.txt (sha256 f6a56713c12c9d93), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in ichikawa-1979-mbuti-residential-groups.txt (sha256 f6a56713c12c9d93) and stanley-1890-in-darkest-africa-vol-2.txt (sha256 c03541e8098bf551), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  outbuildings:
+    prop: outbuildings
+    value:
+      - { use: shrine, per: settlement }
+    source:
+      - ref: src:ichikawa-1979-mbuti-residential-groups
+        loc: 'section "Plan of the hunting camps", pp. 39-40'
+        quote: >-
+          Sometimes, a ndekele is constructed, in which … apakumandura (kalisia) is enshrined, at the entrance to the camp
+          along one of these paths.
+    method: survey
+    note: >-
+      The ndekele, built sometimes at the camp's entrance on one of the paths into the forest, in which a spirit is
+      enshrined (Ichikawa): the camp's, and only sometimes built, though how often is not counted, and it stood at the
+      camp's edge, not among the huts. Its form and size are not described. Stanley's sentry-houses, about 100 yards out
+      along every track, just large enough for two, have no word in the vocabulary and are left out.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ichikawa-1979-mbuti-residential-groups.txt (sha256 f6a56713c12c9d93), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

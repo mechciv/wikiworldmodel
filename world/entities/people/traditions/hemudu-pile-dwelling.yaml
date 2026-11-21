@@ -32,7 +32,7 @@ claims:
       Tianluoshan from 7000 cal BP, which is the same time. The older Kuahuqiao culture of the same country is not
       part of this record.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in zhang-2014-tianluoshan-animal-procurement.txt (sha256 3f619ecd92250263) and eda-2022-goose-domestication-tianluoshan.txt (sha256 74610cfe15450020), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in zhang-2014-tianluoshan-animal-procurement.txt (sha256 3f619ecd92250263) and eda-2022-goose-domestication-tianluoshan.txt (sha256 74610cfe15450020), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   end:
     prop: end
     value: 3500 BCE
@@ -50,7 +50,7 @@ claims:
       The end of the phase the source sets the culture in. The village of Tianluoshan itself was left earlier: the
       same source has it lived in from about 5000 to 4000 cal BC, and the study of its geese to 5500 cal BP.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in zhang-2014-tianluoshan-animal-procurement.txt (sha256 3f619ecd92250263), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in zhang-2014-tianluoshan-animal-procurement.txt (sha256 3f619ecd92250263), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["123"] }
@@ -69,7 +69,7 @@ claims:
       and the islands off it: the house is not claimed for the rest of the region, where the Majiabang culture north
       of Hangzhou Bay and the cultures of the middle Yangtze built otherwise or are not described in what was read.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in zhang-2014-tianluoshan-animal-procurement.txt (sha256 3f619ecd92250263), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in zhang-2014-tianluoshan-animal-procurement.txt (sha256 3f619ecd92250263), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [foragers, farmers]
@@ -84,7 +84,7 @@ claims:
       Villagers who lived mainly by hunting, fishing and gathering and also grew rice in paddies beside the village,
       year after year in the same wet ground: both ways of life, as the source has them at Tianluoshan.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in eda-2022-goose-domestication-tianluoshan.txt (sha256 74610cfe15450020), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in eda-2022-goose-domestication-tianluoshan.txt (sha256 74610cfe15450020), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
     value: { plan: rectangular, width: 7, length: 23, floor: stilts }
@@ -124,7 +124,7 @@ claims:
       source's words, buildings with raised floors. What the walls and the roof were made of is not stated, and is
       left to the generator.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in zhang-2014-tianluoshan-animal-procurement.txt (sha256 3f619ecd92250263) and eda-2022-goose-domestication-tianluoshan.txt (sha256 74610cfe15450020), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in zhang-2014-tianluoshan-animal-procurement.txt (sha256 3f619ecd92250263) and eda-2022-goose-domestication-tianluoshan.txt (sha256 74610cfe15450020), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
     value: { pattern: nucleated }
@@ -142,7 +142,7 @@ claims:
       A village: buildings, fences and pits together on about three hectares at Tianluoshan, its paddies beside it.
       How many houses stood in it, and how many people lived in one, is not stated.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in eda-2022-goose-domestication-tianluoshan.txt (sha256 74610cfe15450020) and zhang-2014-tianluoshan-animal-procurement.txt (sha256 3f619ecd92250263), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in eda-2022-goose-domestication-tianluoshan.txt (sha256 74610cfe15450020) and zhang-2014-tianluoshan-animal-procurement.txt (sha256 3f619ecd92250263), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   fields:
     prop: field_system
     value: { kind: paddies, bounds: banks }
@@ -157,4 +157,21 @@ claims:
       Paddies made by clearing and levelling wetland and banking it round with earth, as the source has it from a
       study of the fields at Tianluoshan that was not read here. No size of a plot is stated.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in eda-2022-goose-domestication-tianluoshan.txt (sha256 74610cfe15450020), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in eda-2022-goose-domestication-tianluoshan.txt (sha256 74610cfe15450020), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  outbuildings:
+    prop: outbuildings
+    value:
+      - { use: well, per: settlement }
+    source:
+      - ref: src:zhang-2014-tianluoshan-animal-procurement
+        loc: "p. 39, section 2.3.2"
+        quote: >-
+          Other construction features include a water well and storage pits filled with acorns and water chestnuts
+    method: excavation
+    note: >-
+      A water well at Hemudu, as the first source reports from the excavation report: one, and so the settlement's.
+      The storage pits beside it, filled with acorns and water chestnuts, are not said to have stood by each house or
+      to have been roofed, and are left out. The wooden fences at Tianluoshan were built at the edge of the low-lying
+      ground where paddles were found, not round the village, and are not written as its enclosure.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zhang-2014-tianluoshan-animal-procurement.txt (sha256 3f619ecd92250263), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

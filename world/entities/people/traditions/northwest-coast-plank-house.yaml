@@ -30,7 +30,7 @@ claims:
       No end is given: the source has a plank house of San Juan Island lived in until 1859, and plank houses are still
       built.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in rorabaugh-2023-salish-sea-population.txt (sha256 896cc5caefa56cd3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in rorabaugh-2023-salish-sea-population.txt (sha256 896cc5caefa56cd3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   start-review:
     prop: start
     value: 5 ka
@@ -43,7 +43,7 @@ claims:
       At least 5000 years before the review (2023), read as 5 ka: a bound, of the longhouse and the plank house together,
       from the works it cites, which were not read here.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in mashford-pringle-2023-indigenous-building-structures.txt (sha256 738a150881c2faa4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in mashford-pringle-2023-indigenous-building-structures.txt (sha256 738a150881c2faa4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["5", "14"] }
@@ -69,7 +69,7 @@ claims:
       south-east Alaska (1), were plank house country too, but no source read here places the house there, so they are
       left out; nor is it claimed for the interior of either region.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in rorabaugh-2023-salish-sea-population.txt (sha256 896cc5caefa56cd3) and sanchez-2021-palmrose-plank-house.txt (sha256 9e25537e58d96499), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in rorabaugh-2023-salish-sea-population.txt (sha256 896cc5caefa56cd3) and sanchez-2021-palmrose-plank-house.txt (sha256 9e25537e58d96499), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [foragers]
@@ -89,10 +89,10 @@ claims:
       Settled foragers: fishers, hunters and gatherers who lived in their plank houses in winter villages and took the
       planks to their summer camps.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in rorabaugh-2023-salish-sea-population.txt (sha256 896cc5caefa56cd3) and mashford-pringle-2023-indigenous-building-structures.txt (sha256 738a150881c2faa4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in rorabaugh-2023-salish-sea-population.txt (sha256 896cc5caefa56cd3) and mashford-pringle-2023-indigenous-building-structures.txt (sha256 738a150881c2faa4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { plan: rectangular, width: 6, length: 12, walls: timber, floor: ground }
+    value: { plan: rectangular, width: 6, length: 12, walls: plank, roof: gable, roof_material: timber, floor: ground, smoke: hole, finish: painted }
     source:
       - ref: src:sanchez-2021-palmrose-plank-house
         loc: section "Background"
@@ -104,14 +104,87 @@ claims:
         quote: >-
           Both the longhouse and the plank house were pole-and-beam log structures designed to house several generations
           together under the same roof
+      - ref: src:mashford-pringle-2023-indigenous-building-structures
+        loc: 'section 3.1, "Identified Themes", on the building as knowledge and history'
+        quote: >-
+          carvings and paintings were put on the interior and exterior walls and columns of the longhouses, describing
+          important family events and knowledge
+      - ref: src:morgan-1881-houses-and-house-life
+        loc: "ch. V, quoting Lewis and Clark's Travels, p. 431, on the houses of the Clatsops and Chinooks"
+        quote: >-
+          They are hollowed at the top, so as to receive the end of a round beam or pole (ridge-pole) stretching from one to
+          the other, and forming the upper point of the roof for the whole extent of the building. On each side of this
+          range is placed another, which forms the eaves of the house
+      - ref: src:morgan-1881-houses-and-house-life
+        loc: "ch. V, quoting Lewis and Clark's Travels, p. 431, on the houses of the Clatsops and Chinooks"
+        quote: >-
+          The sides are now made, with a range of white boards, sunk a small distance into the ground, with upper ends
+          projecting above the poles at the eaves.... The gable end and partitions are formed in the same way
+      - ref: src:morgan-1881-houses-and-house-life
+        loc: "ch. V, quoting Lewis and Clark's Travels, p. 431, on the houses of the Clatsops and Chinooks"
+        quote: >-
+          covered with a double range of thin boards, except an aperture of two or three feet in the center, for the smoke
+          to pass through.
     method: excavation
+    rank: preferred
     note: >-
       Rectangular, walled with planks on a frame of posts and beams; the size is that of the one early house at Palmrose,
       as its excavators' notes give it. Later houses were often far larger, and the review says they varied in size with
-      the community's needs, but no size of them was read here. The roof is not described in the sources read, and is the
-      generator's.
+      the community's needs, but no size of them was read here. The walls are planks, the roof a gable on a ridge-pole
+      and eave beams, covered with thin boards, with an opening in its middle for the smoke, from Lewis and Clark's
+      account of the houses of the Clatsops and Chinooks at the mouth of the Columbia in 1805–1806, as Morgan quotes it;
+      Palmrose is on the Clatsop coast. The walls were given as timber before and are now plank, the narrower word, which
+      their "range of white boards" states. The walls painted is the review's, of the Nisga'a longhouse on the northern
+      coast, with carvings and paintings inside and out telling the family's history; how much of a wall was painted is
+      not said. The floor at ground level is from no sentence read here: Lewis and Clark have the houses often sunk four
+      or five feet, which the other claim says. Preferred as the claim the tradition has held, with the excavated size;
+      the other is one account of one stretch of coast. The entrance, "a small hole, cut out of the boards, and just
+      large enough to admit the body", is not said to be in a side or an end.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in sanchez-2021-palmrose-plank-house.txt (sha256 9e25537e58d96499) and mashford-pringle-2023-indigenous-building-structures.txt (sha256 738a150881c2faa4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in sanchez-2021-palmrose-plank-house.txt (sha256 9e25537e58d96499), mashford-pringle-2023-indigenous-building-structures.txt (sha256 738a150881c2faa4) and morgan-1881-houses-and-house-life.txt (sha256 01fda4edacf944d1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  dwelling-lewis-clark:
+    prop: dwelling
+    value:
+      plan: rectangular
+      width: { lo: 4.3, hi: 6.1 }
+      length: { lo: 6.1, hi: 18.3 }
+      walls: plank
+      roof: gable
+      roof_material: timber
+      floor: sunken
+      floor_height: { lo: 1.2, hi: 1.5 }
+      smoke: hole
+    source:
+      - ref: src:morgan-1881-houses-and-house-life
+        loc: "ch. V, quoting Lewis and Clark's Travels, p. 431, on the houses of the Clatsops and Chinooks"
+        quote: >-
+          The houses in this neighborhood are all large wooden buildings, ranging in length from twenty to sixty feet, and
+          from fourteen to twenty in width.
+      - ref: src:morgan-1881-houses-and-house-life
+        loc: "ch. V, quoting Lewis and Clark's Travels, p. 431, on the houses of the Clatsops and Chinooks"
+        quote: >-
+          and as the building is often sunk to the depth of four or five feet, the eaves come very near the surface of the
+          earth.
+      - ref: src:morgan-1881-houses-and-house-life
+        loc: "ch. V, quoting Lewis and Clark's Travels, p. 431, on the houses of the Clatsops and Chinooks"
+        quote: >-
+          The sides are now made, with a range of white boards, sunk a small distance into the ground, with upper ends
+          projecting above the poles at the eaves.... The gable end and partitions are formed in the same way
+      - ref: src:morgan-1881-houses-and-house-life
+        loc: "ch. V, quoting Lewis and Clark's Travels, p. 431, on the houses of the Clatsops and Chinooks"
+        quote: >-
+          covered with a double range of thin boards, except an aperture of two or three feet in the center, for the smoke
+          to pass through.
+    method: historical-account
+    note: >-
+      The houses of the Clatsops and Chinooks at the mouth of the Columbia, as Lewis and Clark described them in
+      1805–1806 and Morgan quotes them: 20 to 60 feet long (6.1–18.3 m) and 14 to 20 wide (4.3–6.1 m), walled with
+      boards, under a gable roof of thin boards with an opening for the smoke, and often sunk four or five feet into the
+      ground (1.2–1.5 m), so that the eaves, five feet up, came near the surface. "Often" is not always: the other claim,
+      with its floor at the ground, is preferred, and a reader may pick this one. Read at one remove, in Morgan's
+      quotation; the journals themselves were not read.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in morgan-1881-houses-and-house-life.txt (sha256 01fda4edacf944d1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
     value: { pattern: nucleated }
@@ -129,4 +202,4 @@ claims:
       Villages of plank houses, each house of several families. How many houses stood in a village and how many people
       lived in one are not given in the sources read.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in rorabaugh-2023-salish-sea-population.txt (sha256 896cc5caefa56cd3) and mashford-pringle-2023-indigenous-building-structures.txt (sha256 738a150881c2faa4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in rorabaugh-2023-salish-sea-population.txt (sha256 896cc5caefa56cd3) and mashford-pringle-2023-indigenous-building-structures.txt (sha256 738a150881c2faa4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

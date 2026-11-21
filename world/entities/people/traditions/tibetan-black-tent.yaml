@@ -35,7 +35,7 @@ claims:
       translation, which the OCR has as "nave" for "have". It bounds the start and does not date it; the tent may be
       older. No end claim: the tent is still lived in.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in rockhill-1891-land-of-the-lamas.txt (sha256 3dccfc48df989a6e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in rockhill-1891-land-of-the-lamas.txt (sha256 3dccfc48df989a6e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["118", "119"] }
@@ -56,7 +56,7 @@ claims:
       second journey, where he camped by black tents. The tent is surely found further west on the plateau and in the
       Himalayas (106), but no source read places it there, so they are left out.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in rockhill-1891-land-of-the-lamas.txt (sha256 3dccfc48df989a6e) and rockhill-1894-diary-mongolia-tibet.txt (sha256 2c0b46665c458baf), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in rockhill-1891-land-of-the-lamas.txt (sha256 3dccfc48df989a6e) and rockhill-1894-diary-mongolia-tibet.txt (sha256 2c0b46665c458baf), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [herders]
@@ -77,10 +77,10 @@ claims:
       Rockhill also lists a people near Kuei-te who "have black tents, but cultivate the soil"; their house is not described apart, and farmers are not
       named.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in rockhill-1891-land-of-the-lamas.txt (sha256 3dccfc48df989a6e) and rockhill-1894-diary-mongolia-tibet.txt (sha256 2c0b46665c458baf), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in rockhill-1891-land-of-the-lamas.txt (sha256 3dccfc48df989a6e) and rockhill-1894-diary-mongolia-tibet.txt (sha256 2c0b46665c458baf), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { plan: rectangular, length: { lo: 3, hi: 15.2 }, walls: cloth, roof: tent, roof_material: cloth, floor: ground }
+    value: { plan: rectangular, length: { lo: 3, hi: 15.2 }, walls: cloth, roof: tent, roof_material: cloth, floor: ground, smoke: hole }
     source:
       - ref: src:rockhill-1891-land-of-the-lamas
         loc: chapter on Lan-chou fu, Hsi-ning, Kumbum and Tankar, pp. 75-76
@@ -98,9 +98,13 @@ claims:
       From 10 to 50 ft long (3.0 to 15.2 m), the largest Rockhill saw 30 ft broad (9.1 m); the breadth of the smaller tents
       is not given, nor the height. The cloth is woven of yak hair, the cover and its sides alike, so walls and roof are
       cloth; the roof is flat in Rockhill's words, a cover stretched on a ridge-pole and cords, entered as a tent. A low wall
-      of mud and stones or dung was sometimes built round it against the wind, but seldom on the Koko-nor.
+      of mud and stones or dung was sometimes built round it against the wind, but seldom on the Koko-nor. The smoke
+      left by the open space about two feet wide along the centre of the top, which let in the light too (the first
+      quote): the vocabulary's hole along the ridge. Smoke from the long mud stove down the middle went out so. The
+      door is marked on Rockhill's plan of a tent in his diary (p. 123), but no sentence says where it was, and the
+      entrance is left out.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in rockhill-1891-land-of-the-lamas.txt (sha256 3dccfc48df989a6e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in rockhill-1891-land-of-the-lamas.txt (sha256 3dccfc48df989a6e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
     value: { pattern: camp, household: 5 }
@@ -117,4 +121,27 @@ claims:
       souls; it agrees with his small families of two or three children. Camps, which he counts at fifty tents in two camps
       near one lamasery; how many tents stood in one is not otherwise stated.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in rockhill-1891-land-of-the-lamas.txt (sha256 3dccfc48df989a6e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in rockhill-1891-land-of-the-lamas.txt (sha256 3dccfc48df989a6e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  outbuildings:
+    prop: outbuildings
+    value:
+      - { use: shrine, per: house, walls: stone, finish: mud }
+    source:
+      - ref: src:rockhill-1894-diary-mongolia-tibet
+        loc: p. 123, below the elevation and plan of a Tibetan tent
+        quote: >-
+          On the altar, which is built some little distance from the tent, juniper spines (shukd) are burnt morning
+          and evening.
+      - ref: src:rockhill-1894-diary-mongolia-tibet
+        loc: p. 123
+        quote: >-
+          near the ruins of an old Tibetan camp marked by numerous cooking stoves and altars of stone plastered with
+          dung.
+    method: historical-account
+    note: >-
+      An altar of stone plastered with dung, built a little way from the tent, on which juniper was burnt morning and
+      evening. Rockhill describes it with his plan of one tent, and finds such altars by the stoves of an old camp, so
+      it is written as a household's. The vocabulary has no word for an altar in the open; shrine is the nearest, and
+      it is drawn as a small roofed building, which the altar was not. No size is given.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in rockhill-1894-diary-mongolia-tibet.txt (sha256 2c0b46665c458baf), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

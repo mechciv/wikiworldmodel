@@ -34,7 +34,7 @@ claims:
       lived in longhouses; they lived on the Kapuas before, in the same region, and the house is older than this, but no
       source read here dates it there. No end is given: the Iban still live in longhouses.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-iban-people.txt (sha256 bfb698008c5770dd), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-iban-people.txt (sha256 bfb698008c5770dd), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["132"] }
@@ -50,7 +50,7 @@ claims:
       Region 132 (Borneo), which holds the Kapuas basin and Sarawak. The longhouses of the other peoples of Borneo, which
       the same compilation describes, are not claimed here; the region is named for the Iban.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-iban-people.txt (sha256 bfb698008c5770dd), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-iban-people.txt (sha256 bfb698008c5770dd), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [shifting-cultivators]
@@ -73,10 +73,10 @@ claims:
       Shifting cultivators of hill rice: they farmed old forest once and left it seven years, and when the old forest near
       the village ran short they moved the village nearer to it.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in roth-1896-natives-of-sarawak.txt (sha256 895b9fe0da50fe7f) and wikipedia-iban-people.txt (sha256 bfb698008c5770dd), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in roth-1896-natives-of-sarawak.txt (sha256 895b9fe0da50fe7f) and wikipedia-iban-people.txt (sha256 bfb698008c5770dd), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { plan: long, length: { lo: 163, hi: 181 }, walls: timber, roof_material: thatch, floor: stilts }
+    value: { plan: long, length: { lo: 163, hi: 181 }, walls: timber, roof_material: thatch, floor: stilts, floor_height: { lo: 2.4, hi: 3.7 }, entrance: end, veranda: true, windows: none, smoke: hole }
     source:
       - ref: src:roth-1896-natives-of-sarawak
         loc: "vol. II, p. 9 (Brooke Low)"
@@ -106,6 +106,25 @@ claims:
       - ref: src:roth-1896-natives-of-sarawak
         loc: "vol. II, p. 17 (Hornaday)"
         quote: Most of the Sibuyau village-houses are raised about eight feet above the ground
+      - ref: src:roth-1896-natives-of-sarawak
+        loc: "vol. II, p. 9 (Brooke Low)"
+        quote: >-
+          There is always a ladder at either end of the terrace by which to ascend, and sometimes one or more towards
+          the centre of the tanju or open-air platform.
+      - ref: src:roth-1896-natives-of-sarawak
+        loc: "vol. II, p. 9 (Brooke Low)"
+        quote: >-
+          The former partakes of the nature of a very wide verandah, and is open throughout its entire length.
+      - ref: src:roth-1896-natives-of-sarawak
+        loc: "vol. II, pp. 9–10 (Brooke Low)"
+        quote: >-
+          There is no window such as we understand, but … a portion of the roof is so constructed that it can be raised
+          a foot or two by means of a stick to let out the smoke or to admit the fresh air.
+      - ref: src:roth-1896-natives-of-sarawak
+        loc: "vol. II, p. 10 (Brooke Low)"
+        quote: >-
+          As the smoke from the wood fire is not conducted to the roof by means of a chimney, it spreads itself
+          throughout the loft
     method: documentary
     note: >-
       The village was one long house on posts, its length set by how many families it held, one room each behind an open
@@ -113,12 +132,20 @@ claims:
       shingles, written as thatch. The length is the two Sibuyau houses on the Lundu that James Brooke and Spencer St. John
       measured, 594 and 534 feet, 181 and 163 m; the compilation calls a third, of 771 feet, the longest on record. These
       are the houses travellers measured for their size, so most were shorter, by how much no source read says. Most
-      Sibuyau houses stood about eight feet off the ground, some twelve and some four or five.
+      Sibuyau houses stood about eight feet off the ground, some twelve and some four or five: the floor's height is
+      written from eight to twelve feet, 2.4 to 3.7 m. Brooke Low gives the rest, for the Sea Dyak house as the Rev. W.
+      Crossland described the Undup's: the way up was by a ladder at either end, so the entrance is "end", with
+      sometimes one or more ladders to the open platform (tanju) in front; the front half was a very wide veranda
+      (ruai), open its whole length; there were no windows, but a part of the roof could be propped up a foot or two to
+      let out the smoke, which is "hole", there being no chimney. The tanju, an unroofed platform before the veranda,
+      has no word, and is not drawn. The tempuan wall was sometimes painted in patterns, which is not the outer walls'
+      finish, and no finish is written. No source read here names a building that stood by the longhouse: the rice was
+      kept in its loft (sadau).
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in roth-1896-natives-of-sarawak.txt (sha256 895b9fe0da50fe7f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in roth-1896-natives-of-sarawak.txt (sha256 895b9fe0da50fe7f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
-    value: { houses: 1 }
+    value: { houses: 1, enclosure: palisade }
     source:
       - ref: src:roth-1896-natives-of-sarawak
         loc: "vol. II, p. 9 (Brooke Low)"
@@ -131,10 +158,10 @@ claims:
     method: documentary
     note: >-
       One building to a village: Low's "houses" are the families' apartments joined into one terrace on posts. It was
-      fenced at its foot by a palisade. How the villages lay to one another is not given, and the pattern is left to the
-      generator.
+      fenced at its foot by a palisade, which is the enclosure, guarded in turn by pointed bamboo. How the villages lay to
+      one another is not given, and the pattern is left to the generator.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in roth-1896-natives-of-sarawak.txt (sha256 895b9fe0da50fe7f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in roth-1896-natives-of-sarawak.txt (sha256 895b9fe0da50fe7f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   fields:
     prop: field_system
     value: { kind: swidden }
@@ -145,4 +172,4 @@ claims:
         After having felled the old jungle and farmed on it once, they leave it for seven years to grow up again
     method: documentary
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in roth-1896-natives-of-sarawak.txt (sha256 895b9fe0da50fe7f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in roth-1896-natives-of-sarawak.txt (sha256 895b9fe0da50fe7f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

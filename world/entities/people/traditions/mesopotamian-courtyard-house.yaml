@@ -23,7 +23,7 @@ claims:
       "The 3000's BCE" is read as the fourth millennium BCE, the widest reading; the century from 3099 to 3000 BCE, the
       narrowest, lies within it.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-architecture-of-mesopotamia-1384588782.txt (sha256 caa4c479981c7d86), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-architecture-of-mesopotamia.txt (sha256 242b96333f37ee34), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   end:
     prop: end
     value: { lo: 600 BCE, hi: 501 BCE }
@@ -37,7 +37,7 @@ claims:
       source says the courtyard house "has been used in Mesopotamia to the present day". The tradition here is the house of
       ancient Mesopotamia, and a later tradition, when one is written, takes up the story.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-architecture-of-mesopotamia-1384588782.txt (sha256 caa4c479981c7d86), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-architecture-of-mesopotamia.txt (sha256 242b96333f37ee34), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["59"] }
@@ -51,7 +51,7 @@ claims:
       Mesopotamia in Syria and Turkey are left out, as the sources describe no house there. The house is not claimed for all of
       the region.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-architecture-of-mesopotamia-1384588782.txt (sha256 caa4c479981c7d86), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-architecture-of-mesopotamia.txt (sha256 242b96333f37ee34), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [townspeople]
@@ -70,10 +70,10 @@ claims:
       where people lived in quarters by their trade. It names small hamlets on the irrigated land around a city, and does
       not describe their houses.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-architecture-of-mesopotamia.txt (sha256 242b96333f37ee34), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-architecture-of-mesopotamia.txt (sha256 242b96333f37ee34), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { plan: courtyard, court: true, storeys: { lo: 1, hi: 2 }, walls: mudbrick, roof_material: earth }
+    value: { plan: courtyard, court: true, storeys: { lo: 1, hi: 2 }, walls: mudbrick, roof_material: earth, finish: mud, windows: none }
     source:
       - ref: src:wikipedia-architecture-of-mesopotamia
         loc: section "Houses"
@@ -92,14 +92,21 @@ claims:
       - ref: src:wikipedia-architecture-of-mesopotamia
         loc: section "Houses", "Design"
         quote: It is likely that most houses had an upper storey.
+      - ref: src:wikipedia-architecture-of-mesopotamia
+        loc: section "Houses", "Construction"
+        quote: Houses would usually have no windows, if they did it would be made of clay or wooden grilles.
     method: excavation
     note: >-
       A roof of mud and poplar is what the vocabulary calls earth. The source thinks an upper storey likely on most houses, so
       the storeys are one or two. It also gives a typical floor area of 90 square metres for a Sumerian house, for which a
       dwelling here has no parameter, and says the poorest may have built of reeds outside the cities, with very little
-      evidence.
+      evidence. The walls were finished with mud plaster (the quote on construction), which is the finish, mud. Most houses
+      had no windows, as the same section says, so windows are none; some had grilles of clay or wood. The house had a
+      single opening to the street through a small antechamber, but the source does not say in which wall, and the roof
+      was reached by stairs and used for growing vegetables and for rites, but its form is not said, and both are left to
+      the generator.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-architecture-of-mesopotamia-1384588782.txt (sha256 caa4c479981c7d86), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-architecture-of-mesopotamia.txt (sha256 242b96333f37ee34), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
     value: { pattern: nucleated, household: { lo: 4.64, hi: 5.29 } }

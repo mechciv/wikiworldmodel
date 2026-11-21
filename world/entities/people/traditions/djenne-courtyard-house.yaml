@@ -25,7 +25,7 @@ claims:
       The year of Caillié's visit, the earliest description of the houses read here. It bounds the start rather than dating
       it: the house is older. The tradition has no end claim, as the same source describes such houses today.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-djenne-1377179164.txt (sha256 192be4828b6b492b), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-djenne.txt (sha256 a6503137280dc897), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["76"] }
@@ -36,7 +36,7 @@ claims:
     method: editorial
     note: Region 76 (Mali), which holds Djenné. The house is described for the town alone, and is not claimed for the region.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-djenne-1377179164.txt (sha256 192be4828b6b492b), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-djenne.txt (sha256 a6503137280dc897), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [townspeople]
@@ -52,10 +52,10 @@ claims:
       The houses Caillié describes are those of a walled town, and the two-storey courtyard houses the article describes
       today are the town's as well. It describes no house of the villages around Djenné, so farmers are not named.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-djenne.txt (sha256 a6503137280dc897), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-djenne.txt (sha256 a6503137280dc897), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { plan: courtyard, court: true, storeys: { lo: 1, hi: 2 }, walls: mudbrick, roof: flat }
+    value: { plan: courtyard, court: true, storeys: { lo: 1, hi: 2 }, walls: mudbrick, roof: flat, finish: mud }
     source:
       - ref: src:wikipedia-djenne
         loc: section "After the Songhai", Caillié's description of 1828
@@ -73,14 +73,22 @@ claims:
       - ref: src:wikipedia-djenne
         loc: section "Architecture"
         quote: The traditional flat-roofed two-storey houses are built around a small central courtyard
+      - ref: src:wikipedia-djenne
+        loc: section "Architecture"
+        quote: All the brickwork is covered with a protective layer of plaster consisting of a mixture of earth and rice husks.
     method: documentary
     note: >-
       Caillié's houses of 1828 were of sun-dried bricks of a round form, mostly of one storey, all with a terrace roof reached
       by a stair, their rooms long and narrow and lit only from an inner court; the traditional houses of the town today, as
       the article describes them, are flat-roofed, of two storeys, around a small central court. The storeys span the two. The
-      houses' size is given only as "as large as those of European villages", and is left to the generator.
+      houses' size is given only as "as large as those of European villages", and is left to the generator. The finish is
+      the article's plaster of earth and rice husks over all the brickwork, renewed every other year: mud. Windows are left
+      out, as the two sources differ by date: Caillié's houses of 1828 had none to the outside, while the article has a
+      single small window over the door of the Toucouleur-style houses built before 1900 and small ornate windows in the
+      more recent Moroccan-style ones. The covered entrance porch of the Toucouleur-style houses is left out too, as only
+      some houses had one. The stair to the terrace has no word in a dwelling.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-djenne-1377179164.txt (sha256 192be4828b6b492b), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-djenne.txt (sha256 a6503137280dc897), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
     value: { pattern: walled }
@@ -96,7 +104,7 @@ claims:
     method: documentary
     note: A walled town in 1828, and still in 1895, when Félix Dubois visited it.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-djenne-1377179164.txt (sha256 192be4828b6b492b), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-djenne.txt (sha256 a6503137280dc897), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   town:
     prop: town_form
     value: { wall: mudbrick, wall_height: 3.05, wall_thickness: 0.36 }
@@ -114,7 +122,7 @@ claims:
       Djenné in 1828 inside a wall of earth, which the article calls adobe, so sun-dried brick: about ten feet high and
       fourteen inches thick, here 3.05 m and 0.36 m. It had several small gates, not counted. How its streets ran is not said.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-djenne.txt (sha256 a6503137280dc897), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-djenne.txt (sha256 a6503137280dc897), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
 relations:
   broader:
     rel: member-of

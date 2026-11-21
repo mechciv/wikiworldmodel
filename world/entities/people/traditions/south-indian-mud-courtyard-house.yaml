@@ -35,7 +35,7 @@ claims:
       court are first described, in what was read, in 1800. No end is given, and none is known from what was read: the
       latest account, the gazetteer of 1908, has it as the ordinary house of its own day.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in paes-1520-narrative-vijayanagar.txt (sha256 0bcec8f487ccba8d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in paes-1520-narrative-vijayanagar.txt (sha256 0bcec8f487ccba8d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["110"] }
@@ -70,7 +70,7 @@ claims:
       and Buchanan found the people of Malabar in detached houses among gardens. No record is written for that house,
       and this one will be drawn there.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in buchanan-1807-journey-mysore-vol-1.txt (sha256 98b82efda7c1eefb) and imperial-gazetteer-of-india-1908.txt (sha256 6cdf9985eed79137), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in buchanan-1807-journey-mysore-vol-1.txt (sha256 98b82efda7c1eefb) and imperial-gazetteer-of-india-1908.txt (sha256 6cdf9985eed79137), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [farmers, townspeople]
@@ -96,10 +96,10 @@ claims:
       from the labourer's hut of one room up to the elaborate dwelling of the rich money-lender or landowner, which
       this record does not draw.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in imperial-gazetteer-of-india-1908.txt (sha256 6cdf9985eed79137) and buchanan-1807-journey-mysore-vol-1.txt (sha256 98b82efda7c1eefb), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in imperial-gazetteer-of-india-1908.txt (sha256 6cdf9985eed79137) and buchanan-1807-journey-mysore-vol-1.txt (sha256 98b82efda7c1eefb), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { plan: courtyard, court: true, storeys: 1, rooms: { lo: 3, hi: 4 }, walls: cob, roof_material: thatch }
+    value: { plan: courtyard, court: true, storeys: 1, rooms: { lo: 3, hi: 4 }, walls: cob, finish: painted, roof_material: thatch, windows: none, smoke: none, veranda: true }
     source:
       - ref: src:buchanan-1807-journey-mysore-vol-1
         loc: "chapter I, Conjeveram, p. 12"
@@ -119,6 +119,21 @@ claims:
       - ref: src:buchanan-1807-journey-mysore-vol-1
         loc: "chapter I, above the Ghats, p. 33"
         quote: The houses and huts have their walls universally built of this mud
+      - ref: src:buchanan-1807-journey-mysore-vol-1
+        loc: "chapter I, above the Ghats, p. 33"
+        quote: >-
+          the mud being smoothed, and painted on the outside, with alternate vertical broad stripes of white and red.
+          The white is lime
+      - ref: src:buchanan-1807-journey-mysore-vol-1
+        loc: "chapter I, above the Ghats, p. 33"
+        quote: >-
+          The huts are built in the form of a parallelogram, without veranda or windows, or any other vent for the
+          smoke than the doors.
+      - ref: src:imperial-gazetteer-of-india-1908
+        loc: "vol. XVI, article Madras Presidency, p. 266"
+        quote: >-
+          On the street side is usually a veranda, which is not considered to be part of the house and so can be used
+          by strangers
       - ref: src:buchanan-1807-journey-mysore-vol-1
         loc: "chapter I, the plain behind Madras, p. 2"
         quote: >-
@@ -166,13 +181,29 @@ claims:
       of tiled to thatched dwellings in Madras had risen. On the plateau many houses had flat roofs terraced with mud
       in 1800, and in the Deccan districts of Madras the roofs were flat in 1908, with no court and no veranda: the
       Telugu houses Buchanan saw at Vencataghery had neither. The shape of the roof is left to the generator, and no
-      size is given. In the Mysore sentence the ellipsis stands for "; but", which the scan's text spaces oddly.
+      size is given. In the Mysore sentence the ellipsis stands for "; but", which the scan's text spaces oddly. The
+      finish is Buchanan's above the Ghats in 1800: the mud of houses and huts alike was smoothed and painted outside in
+      broad upright stripes of white lime and red clay, as the little walls along the streets of Conjeveram were. No
+      windows and no vent for the smoke but the door are his of the huts above the Ghats, and the gazetteer has the mud
+      houses of Mysore in 1908 with few, if any, openings outwards except the door. The veranda is the gazetteer's for
+      Madras, usually on the street side, where strangers could sit without entering; Buchanan's Tamil villages had
+      one; in Mysore the verandas surrounded the court within. The huts above the Ghats had none, nor had the Telugu
+      houses of Vencataghery, nor the houses of the Deccan districts of Madras in 1908: the veranda is of the courtyard
+      house this record draws, not of the one-roomed hut. Which side the door was in is not said beyond its opening
+      on the street.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in buchanan-1807-journey-mysore-vol-1.txt (sha256 98b82efda7c1eefb) and imperial-gazetteer-of-india-1908.txt (sha256 6cdf9985eed79137), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in buchanan-1807-journey-mysore-vol-1.txt (sha256 98b82efda7c1eefb) and imperial-gazetteer-of-india-1908.txt (sha256 6cdf9985eed79137), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
-    value: { pattern: nucleated, household: 5.2 }
+    value: { pattern: nucleated, enclosure: wall, yard: wall, household: 5.2 }
     source:
+      - ref: src:buchanan-1807-journey-mysore-vol-1
+        loc: "chapter I, above the Ghats, p. 32"
+        quote: while the village, or Pettah, is surrounded by a weaker defence of mud.
+      - ref: src:paes-1520-narrative-vijayanagar
+        loc: "p. 290"
+        quote: >-
+          all one-storeyed and flat-roofed, to each of which there is a low surrounding wall
       - ref: src:buchanan-1807-journey-mysore-vol-1
         loc: "chapter I, above the Ghats, p. 32"
         quote: All the houses are collected in villages … the smallest village, of five or six houses, is fortified
@@ -202,9 +233,30 @@ claims:
       scarcely at all from Bengal. The scan's text writes the decimal point as a hyphen, and the quote keeps its
       characters; the second ellipsis stands for the word enclosure in quotation marks, which the scan's text spaces
       oddly. The gazetteer gives Hyderabad's villages about 500 people each, a census village and not a count of
-      houses, so the number of houses in a village is not stated.
+      houses, so the number of houses in a village is not stated. The enclosure is a wall: above the Ghats in 1800 a
+      larger village or a town had a fort for a citadel and the village round it a weaker defence of mud, and the
+      smallest had a round stone tower forty feet across and six feet high to flee into; walled villages are the
+      gazetteer's for all Hyderabad in 1908. Most of Madras, where the houses stood apart each in its own ground, had
+      no such wall that the sources read describe, so the word holds for the plateau more than for the plain. Each
+      house within a low wall of its own is Paes's, of the houses of the city of Vijayanagar about 1520.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in buchanan-1807-journey-mysore-vol-1.txt (sha256 98b82efda7c1eefb) and imperial-gazetteer-of-india-1908.txt (sha256 6cdf9985eed79137), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in buchanan-1807-journey-mysore-vol-1.txt (sha256 98b82efda7c1eefb), paes-1520-narrative-vijayanagar.txt (sha256 0bcec8f487ccba8d) and imperial-gazetteer-of-india-1908.txt (sha256 6cdf9985eed79137), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  outbuildings:
+    prop: outbuildings
+    value:
+      - { use: hall, per: settlement }
+    source:
+      - ref: src:imperial-gazetteer-of-india-1908
+        loc: "vol. XIII, article Hyderabad State, p. 250"
+        quote: In the evenings they gather at the village chaiiri and join in gossip
+    method: documentary
+    note: >-
+      The village chauri of Hyderabad State in 1908, where the cultivators gathered in the evenings (the scan misreads
+      the word as "chaiiri", and the quote keeps it); what it was like is not said. The fort or tower of the villages
+      above the Ghats, which Buchanan describes, has no word among the outbuildings and is left to the settlement's
+      note. Temples are described only for towns, such as the great temples of Conjeveram, and are not written.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in imperial-gazetteer-of-india-1908.txt (sha256 6cdf9985eed79137), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   town:
     prop: town_form
     value: { wall: earth }
@@ -222,4 +274,4 @@ claims:
       of the region or the time. The streets are not stated: Buchanan found those of Conjeveram tolerably wide and
       crossing at right angles, in a town he calls very regularly built, and that is one town.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in paes-1520-narrative-vijayanagar.txt (sha256 0bcec8f487ccba8d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in paes-1520-narrative-vijayanagar.txt (sha256 0bcec8f487ccba8d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

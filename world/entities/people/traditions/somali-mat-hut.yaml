@@ -25,7 +25,7 @@ claims:
       October 1854. It bounds the start and does not date it: the hut is surely older. No end is given: no source read says
       when it went out of use.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in burton-1856-first-footsteps-in-east-africa.txt (sha256 d84e27a324e82dd3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in burton-1856-first-footsteps-in-east-africa.txt (sha256 d84e27a324e82dd3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["94"] }
@@ -39,7 +39,7 @@ claims:
       camped inside it; he gives it as the Somali village in general. The Somali also lived in the Ogaden, now in Ethiopia,
       which he did not cross; it is left out.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in burton-1856-first-footsteps-in-east-africa.txt (sha256 d84e27a324e82dd3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in burton-1856-first-footsteps-in-east-africa.txt (sha256 d84e27a324e82dd3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [herders]
@@ -57,10 +57,10 @@ claims:
       Herders who moved between the hills and the plains with the seasons, and whose women pitched the mat hut at each halt.
       Burton has the Somali of the towns and the farmers near Harar living otherwise; they are not named.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in burton-1856-first-footsteps-in-east-africa.txt (sha256 d84e27a324e82dd3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in burton-1856-first-footsteps-in-east-africa.txt (sha256 d84e27a324e82dd3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { plan: round, diameter: 1.8, height: 1.5, walls: none, roof: dome, roof_material: reed, floor: ground }
+    value: { plan: round, diameter: 1.8, height: 1.5, walls: none, roof: dome, roof_material: mat, floor: ground, smoke: none }
     source:
       - ref: src:burton-1856-first-footsteps-in-east-africa
         loc: '"The kraal", pp. 213-214'
@@ -73,27 +73,61 @@ claims:
         quote: >-
           or sticks bent and hardened in the fire: to build the hut, these are planted in the ground, tied together with
           cords, and covered with mats of two different kinds
+      - ref: src:burton-1856-first-footsteps-in-east-africa
+        loc: '"The kraal", p. 214'
+        quote: 'there being no chimney, the interior is black with soot.'
     method: survey
     note: >-
       About 5 ft high and 6 ft across (1.5 and 1.8 m), smaller in the hot lowlands and larger in the cool hills, as Burton
       gives it. A hemisphere, so a dome to the ground and no walls. The mats are of grass, "small bundles of grass neatly
-      joined" and one of long pile, entered as reed, the nearest word, which is mats of reed; hides were laid on top in the
-      rains.
+      joined" and one of long pile: first entered as reed, the nearest word then, and now as mat, the word for woven mats
+      that Burton's "covered with mats" names, a refinement, not a disagreement; hides were laid on top in the rains. There
+      was no chimney, and the inside was black with soot: smoke none. The single entrance was "in front", with a mat for a
+      curtain, which places it in no part of a round hut, and is left to the generator.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in burton-1856-first-footsteps-in-east-africa.txt (sha256 d84e27a324e82dd3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in burton-1856-first-footsteps-in-east-africa.txt (sha256 d84e27a324e82dd3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
-    value: { pattern: compound }
+    value: { pattern: compound, layout: ring, enclosure: hedge }
     source:
-      ref: src:burton-1856-first-footsteps-in-east-africa
-      loc: '"The kraal", p. 213'
-      quote: >-
-        is a line of scattered huts on plains where thorns are rare, beast of prey scarce, and raids not expected. In the
-        hills it is surrounded by a strong fence to prevent cattle straying
+      - ref: src:burton-1856-first-footsteps-in-east-africa
+        loc: '"The kraal", p. 213'
+        quote: >-
+          is a line of scattered huts on plains where thorns are rare, beast of prey scarce, and raids not expected. In the
+          hills it is surrounded by a strong fence to prevent cattle straying
+      - ref: src:burton-1856-first-footsteps-in-east-africa
+        loc: '"The kraal", p. 213'
+        quote: At intervals around and inside the outer abattis are built the Gurgi or wigwams
+      - ref: src:burton-1856-first-footsteps-in-east-africa
+        loc: '"The kraal", p. 215'
+        quote: the hedges and earth are sometimes set on fire
     method: survey
     note: >-
       A kraal: in the hills a thorn fence with huts round its inside and the cattle in rings within, which is the form
-      entered; on the open plains a line of scattered huts. How many huts stood in a kraal, and how many people lived in
-      one, is not stated.
+      entered; on the open plains a line of scattered huts. The huts stood at intervals round the inside of the fence, the
+      layout a ring; the fence is Burton's abattis, of cut thorn, which he also calls the hedges, entered as a hedge, and in
+      danger it was doubled and trebled, with usually four entrances closed with bushes at night. How many huts stood in a
+      kraal, and how many people lived in one, is not stated.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in burton-1856-first-footsteps-in-east-africa.txt (sha256 d84e27a324e82dd3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in burton-1856-first-footsteps-in-east-africa.txt (sha256 d84e27a324e82dd3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  outbuildings:
+    prop: outbuildings
+    value:
+      - { use: pen, per: settlement, plan: round, enclosure: hedge }
+    source:
+      - ref: src:burton-1856-first-footsteps-in-east-africa
+        loc: '"The kraal", p. 213'
+        quote: >-
+          The interior space is partitioned off by dwarf hedges into rings, which contain and separate the different
+          species of cattle.
+      - ref: src:burton-1856-first-footsteps-in-east-africa
+        loc: '"The kraal", p. 213'
+        quote: usually they are placed in the centre of the kraal.
+    method: survey
+    note: >-
+      The pens inside the kraal, rings fenced with dwarf hedges, one for each kind of beast, the camels usually in the
+      middle and sometimes in an outer compartment by the fence (Burton): the kraal's, round and hedged, their number and
+      size not given. Rude bowers of brush and firewood sheltered the weak young of the flocks, and horses were tethered
+      by their owners' huts, which are not entered: whose the bowers were is not said.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in burton-1856-first-footsteps-in-east-africa.txt (sha256 d84e27a324e82dd3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

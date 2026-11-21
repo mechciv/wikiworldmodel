@@ -35,7 +35,7 @@ claims:
       is another record (people/traditions/hemudu-pile-dwelling). Only the frame is dated so; no house of Sichuan read
       here is dated at all. There is no end claim: the source has the frame built still.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in kim-park-2017-tectonic-traditions.txt (sha256 5bbdbcbe0b002f20), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in kim-park-2017-tectonic-traditions.txt (sha256 5bbdbcbe0b002f20), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["121", "123"] }
@@ -62,7 +62,7 @@ claims:
       described are all of north-eastern Sichuan; the house is not claimed for all of either region, and in region
       123 the lower Yangtze's own house (people/traditions/lower-yangtze-skywell-house) is another record.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in kim-park-2017-tectonic-traditions.txt (sha256 5bbdbcbe0b002f20), liu-2018-zhaohua-historic-buildings.txt (sha256 bc80e813b7a4a8e1) and hou-2021-northeastern-sichuan-dwellings.txt (sha256 f26e5a6b20134699), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in kim-park-2017-tectonic-traditions.txt (sha256 5bbdbcbe0b002f20), liu-2018-zhaohua-historic-buildings.txt (sha256 bc80e813b7a4a8e1) and hou-2021-northeastern-sichuan-dwellings.txt (sha256 f26e5a6b20134699), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [farmers, townspeople]
@@ -84,10 +84,10 @@ claims:
       Houses of a mountain village and of the farmsteads of the Chengdu Plain, among their fields, and the 232 old
       buildings of Zhaohua, a town of north-eastern Sichuan.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in hou-2021-northeastern-sichuan-dwellings.txt (sha256 f26e5a6b20134699), zhang-2022-linpan-thermal-comfort.txt (sha256 3d2dc4a24f2c9cc1) and liu-2018-zhaohua-historic-buildings.txt (sha256 bc80e813b7a4a8e1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in hou-2021-northeastern-sichuan-dwellings.txt (sha256 f26e5a6b20134699), zhang-2022-linpan-thermal-comfort.txt (sha256 3d2dc4a24f2c9cc1) and liu-2018-zhaohua-historic-buildings.txt (sha256 bc80e813b7a4a8e1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { plan: rectangular, walls: wattle-and-daub, roof: gable, roof_material: tile, floor: raised }
+    value: { plan: rectangular, walls: timber-frame, roof: gable, roof_material: tile, floor: raised, faces: south, veranda: true, byre: true }
     source:
       - ref: src:kim-park-2017-tectonic-traditions
         loc: "p. 32, section 2"
@@ -123,6 +123,25 @@ claims:
       - ref: src:liu-2018-zhaohua-historic-buildings
         loc: "p. 10, section 3"
         quote: among the 62 buildings built with mud walls … among the 162 buildings with brick walls
+      - ref: src:kim-park-2017-tectonic-traditions
+        loc: "p. 32, section 2"
+        quote: >-
+          The pillars in this form directly support the roof purlins, the number of pillars is increased, and
+          horizontal tie beam members are mortised directly into, or tenoned through, manifold columns
+      - ref: src:hou-2021-northeastern-sichuan-dwellings
+        loc: "p. 284, section 4.3"
+        quote: >-
+          the large eaves of the traditional dwellings brought eaves corridor space to the houses, which increased the
+          level of indoor and outdoor space
+      - ref: src:hou-2021-northeastern-sichuan-dwellings
+        loc: "p. 284, section 4.2"
+        quote: >-
+          They can adapt to the height difference between the hillside, making the dwellings half overhead and half
+          landing. The overhead location is wet, and the daylight conditions are poor. The residents of the village use
+          it to place firewood and raise livestock
+      - ref: src:zhang-2022-linpan-thermal-comfort
+        loc: 'section 3.1, the results of the classification of 1,194 Linpan'
+        quote: The buildings mainly face south.
     method: survey
     note: >-
       The frame is the first source's; the rest is of houses standing in north-eastern Sichuan today. The plan is the
@@ -131,12 +150,19 @@ claims:
       has for most houses of the countryside, are what the vocabulary calls wattle and daub; in the town of Zhaohua
       62 of the old buildings had walls of mud and 162 of brick. A roof sloping on both sides is a gable roof. The
       house stands on a stone base with steps up from the yard; on slopes the survey has houses half on stilts, the
-      space beneath for firewood and animals. No size is given in any work read, and none is claimed.
+      space beneath for firewood and animals. No size is given in any work read, and none is claimed. The walls were
+      written as wattle and daub, and are now the narrower timber-frame, a frame of timber whose panels are filled:
+      the frame of posts carrying the purlins themselves, tied through by beams (the first source), with walls of
+      bamboo strips and mud that carry nothing between them (the village survey). The large eaves make a corridor
+      under them along the house, the vocabulary's veranda (the village survey). The animals under the roof are those
+      of the stilted houses of the hill village, which the survey calls typical there, kept in the space beneath the
+      part that stands out over the slope; the houses of the plain, on level ground, are not said to have had it. The
+      houses face south, as the study of the Chengdu Plain's linpan finds of their buildings from imagery today.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in kim-park-2017-tectonic-traditions.txt (sha256 5bbdbcbe0b002f20), hou-2021-northeastern-sichuan-dwellings.txt (sha256 f26e5a6b20134699) and liu-2018-zhaohua-historic-buildings.txt (sha256 bc80e813b7a4a8e1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in kim-park-2017-tectonic-traditions.txt (sha256 5bbdbcbe0b002f20), hou-2021-northeastern-sichuan-dwellings.txt (sha256 f26e5a6b20134699), liu-2018-zhaohua-historic-buildings.txt (sha256 bc80e813b7a4a8e1) and zhang-2022-linpan-thermal-comfort.txt (sha256 3d2dc4a24f2c9cc1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
-    value: { pattern: hamlet, houses: { lo: 1, hi: 5 } }
+    value: { pattern: hamlet, houses: { lo: 1, hi: 5 }, spacing: 18, enclosure: ditch }
     source:
       - ref: src:zhang-2022-linpan-thermal-comfort
         loc: section 1, "Introduction"
@@ -152,12 +178,18 @@ claims:
       - ref: src:zhang-2022-linpan-thermal-comfort
         loc: section 3, "Spatial Composition Analysis and Design"
         quote: Linpan containing 1–5 buildings account for the largest proportion
+      - ref: src:zhang-2022-linpan-thermal-comfort
+        loc: 'section 3.1, the nearest-neighbour distances of 1,194 Linpan'
+        quote: The results showed that the average ANND of all Linpan was 18 m
     method: survey
     note: >-
       The wooded farmsteads (linpan) of the Chengdu Plain, each a few houses in its trees with its fields about it,
       some 200,000 of them on the plain by the source's count. The houses are the commonest class among 1,194 of them
       counted from imagery of two towns today, where a building need not be a dwelling; how old the pattern is the
       source does not say. It is the plain's pattern, not that of the hill villages, such as the one the house is
-      described from. How many people lived in a house is not stated.
+      described from. How many people lived in a house is not stated. The spacing is the mean distance from each
+      building's centre to its nearest neighbour's in a linpan, 18 m over all of them, most between 15 and 20 m. The
+      ditches round the linpan are among the "basic elements" the third quote names; how wide they were, and whether
+      every linpan had one, it does not say.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in zhang-2022-linpan-thermal-comfort.txt (sha256 3d2dc4a24f2c9cc1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in zhang-2022-linpan-thermal-comfort.txt (sha256 3d2dc4a24f2c9cc1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

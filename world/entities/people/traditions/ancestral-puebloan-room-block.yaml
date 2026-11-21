@@ -34,7 +34,7 @@ claims:
       pueblos (people/traditions/pueblo-i-jacal-room-block); it is not repeated here, as a member cannot start before the
       tradition it belongs to.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in bocinsky-2016-pueblo-macrohistory-PMC4820384.txt (sha256 302f38d01d94ecdc), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in bocinsky-2016-pueblo-macrohistory.txt (sha256 b05757fd61d02d99), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["15"] }
@@ -55,7 +55,7 @@ claims:
       Region 15 (Southwestern USA), which holds Chaco Canyon, Mesa Verde, Bandelier and the Zuni region. The pueblo is not
       claimed for all of the region, only for the places the sources name.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in spielmann-2016-early-warning-southwest-PMC5051805.txt (sha256 86a7b8335d09b74a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-ancestral-puebloans.txt (sha256 04255ff33c28e391) and spielmann-2016-southwest-transformation.txt (sha256 0a311fdc48f928f9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [farmers]
@@ -78,10 +78,10 @@ claims:
       record of their own (people/traditions/pueblo-planned-town), which says whom it housed for itself, so townspeople
       are not named here.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in spielmann-2016-southwest-transformation.txt (sha256 0a311fdc48f928f9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in spielmann-2016-southwest-transformation.txt (sha256 0a311fdc48f928f9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { plan: room-block, rooms: { lo: 2, hi: 20 }, floor: ground, roof: flat, walls: stone }
+    value: { plan: room-block, rooms: { lo: 2, hi: 20 }, floor: ground, roof: flat, walls: stone, finish: mud }
     source:
       - ref: src:wikipedia-pueblo-i-period
         loc: section "Architecture"
@@ -111,9 +111,51 @@ claims:
       residential structure in the Zuni region in the eleventh to thirteenth centuries, in the paper on Zuni and Mesa Verde.
       The walls are stone from Pueblo II on: the first paper has the habitations of Basketmaker III and Pueblo I lacking stone
       masonry, and the rooms of Pueblo I, of jacal, are a record of their own. The article on the Ancestral Puebloans also
-      names adobe mud among their materials.
+      names adobe mud among their materials. The walls plastered with mud are from its sentence on the cliff dwellings of
+      the thirteenth century, of sandstone blocks "held together and plastered with adobe mortar"; whether the plaster
+      covered the faces of the walls or only bound the blocks it does not make plain, and no other source read says.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in bocinsky-2016-pueblo-macrohistory-PMC4820384.txt (sha256 302f38d01d94ecdc), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-pueblo-i-period.txt (sha256 9880c22ebd091d55), spielmann-2016-southwest-transformation.txt (sha256 0a311fdc48f928f9), bocinsky-2016-pueblo-macrohistory.txt (sha256 b05757fd61d02d99) and wikipedia-ancestral-puebloans.txt (sha256 04255ff33c28e391), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  outbuildings:
+    prop: outbuildings
+    value:
+      - { use: hall, per: settlement, plan: round, floor: sunken, walls: stone, entrance: roof }
+    source:
+      - ref: src:wikipedia-ancestral-puebloans
+        loc: section "Cultural characteristics"
+        quote: >-
+          The kiva, a congregational space that was used mostly for ceremonies, was an integral part of the community
+          structure.
+      - ref: src:wikipedia-ancestral-puebloans
+        loc: section "Cliff communities", caption of the section of Kiva A in Mesa Verde's Fire Temple
+        quote: >-
+          it is neither round in form nor truly subterranean like other structures defined as kivas.
+      - ref: src:bocinsky-2016-pueblo-macrohistory
+        loc: Discussion
+        quote: in favor, eventually, of a P II system of masonry-lined small kivas
+      - ref: src:morgan-1881-houses-and-house-life
+        loc: ch. VIII, on the ruins in the Animas valley (Aztec) and the estufas of the living pueblos
+        quote: >-
+          These estufas, which are used as places of council, and for the performance of their religious rites, are still
+          found at all the present occupied pueblos in New Mexico. There are six at Taos, three at each house, and they are
+          partly sunk in the ground by an excavation. They are entered through a trap-doorway in the roof, the descent being
+          by a ladder.
+      - ref: src:morgan-1881-houses-and-house-life
+        loc: ch. VIII, on the ruins in the Animas valley (Aztec) and the estufas of the living pueblos
+        quote: There are two circular estufas in the main building
+    method: excavation
+    note: >-
+      The kiva, the settlement's: a room for ceremonies that was part of every community (the article on the Ancestral
+      Puebloans), round and sunk below the ground as kivas are, its caption on the Fire Temple implies, and lined with
+      masonry from Pueblo II on (the paper). The way in through the roof by a ladder is Morgan's, of the estufas of the
+      living pueblos of New Mexico in his day, which he has the same rooms as the circular ones he measured in the ruin
+      in the Animas valley; that the kivas of the eleventh to thirteenth centuries were entered so is his reading, and
+      the kiva's roof is not written. How many stood in a settlement is not written: the article has one small kiva to
+      about 29 rooms in the great houses of Chaco, and Mug House at Mesa Verde with eight to its 94 rooms, which are
+      those places'. The great kivas, up to 19 m across, belonged to some communities only and are not written. Morgan
+      is cited as the one further source read for this record.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-ancestral-puebloans.txt (sha256 04255ff33c28e391), bocinsky-2016-pueblo-macrohistory.txt (sha256 b05757fd61d02d99) and morgan-1881-houses-and-house-life.txt (sha256 01fda4edacf944d1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
     value: { pattern: hamlet }
@@ -134,4 +176,4 @@ claims:
       great houses, stood among the hamlets. The villages of Pueblo I and the planned towns of the late thirteenth century
       on are records of their own.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in spielmann-2016-early-warning-southwest-PMC5051805.txt (sha256 86a7b8335d09b74a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in spielmann-2016-southwest-transformation.txt (sha256 0a311fdc48f928f9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

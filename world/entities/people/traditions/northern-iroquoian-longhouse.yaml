@@ -25,7 +25,7 @@ claims:
       "By A.D. 1300" in the source, held here at that year. Before it the source has small base camps, occupied for part of
       the year, from about 1000.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in hart-2017-iroquoia-dispersal-PMC5550228.txt (sha256 58b876009d207332), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in hart-2017-iroquoia-dispersal.txt (sha256 426d8df80a9382f6), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   end:
     prop: end
     value: { lo: 1600 CE }
@@ -49,7 +49,7 @@ claims:
       formed, and longhouses stood at Garoga, in the Mohawk valley, in the village the second source dates to about 1550 to
       1582 (68.3% probability). No source read here says when the longhouse went out of use.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in hart-2017-iroquoia-dispersal-PMC5550228.txt (sha256 58b876009d207332), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in hart-2017-iroquoia-dispersal.txt (sha256 426d8df80a9382f6) and manning-2021-mohawk-valley-villages.txt (sha256 b4675313c6d0fba7), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["9", "10", "19"] }
@@ -68,7 +68,7 @@ claims:
       southern Quebec and upper New York. The longhouse is not claimed for all of the three regions, only for the parts the
       source names.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in hart-2017-iroquoia-dispersal-PMC5550228.txt (sha256 58b876009d207332), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in hart-2017-iroquoia-dispersal.txt (sha256 426d8df80a9382f6) and manning-2021-mohawk-valley-villages.txt (sha256 b4675313c6d0fba7), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [shifting-cultivators, townspeople]
@@ -98,10 +98,10 @@ claims:
       year, is the other reading, not taken here because no source read has the fields kept when the settlement moved.
       Townspeople are named for the towns the same sentence gives beside the villages.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in murchie-2026-crawford-lake-sedadna.txt (sha256 7f8a67f5c7adf92a) and hart-feranec-2020-iroquoian-fields.txt (sha256 c1ee8a80bac6a79f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in murchie-2026-crawford-lake-sedadna.txt (sha256 7f8a67f5c7adf92a) and hart-feranec-2020-iroquoian-fields.txt (sha256 c1ee8a80bac6a79f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { plan: long, width: { lo: 6, hi: 7 }, walls: bark, roof: vault, roof_material: bark }
+    value: { plan: long, width: { lo: 6, hi: 7 }, length: { lo: 15.2, hi: 30.5 }, walls: bark, roof: vault, roof_material: bark, entrance: end, smoke: hole }
     source:
       - ref: src:wikipedia-longhouse
         loc: section "Americas"
@@ -118,17 +118,59 @@ claims:
         quote: >-
           The settlement plans of formative coalescent communities exhibit evidence of longhouse and palisade expansion and
           the addition of new clusters of longhouses
+      - ref: src:wikipedia-longhouse
+        loc: section "Americas"
+        quote: Hearths were spaced about 6 to 7 metres (20 to 23 ft) apart down the aisle, with smoke holes in the roof.
+      - ref: src:morgan-1881-houses-and-house-life
+        loc: "ch. V, on the long-house of the Iroquois"
+        quote: was from fifty to eighty and sometimes one hundred feet long.
+      - ref: src:morgan-1881-houses-and-house-life
+        loc: "ch. V, on the long-house of the Iroquois"
+        quote: passage way which passed through the center of the house from end to end. At each end was a doorway
+      - ref: src:morgan-1881-houses-and-house-life
+        loc: "ch. V, quoting Bartram's Observations (1751), pp. 40–41, on the council-house at Onondaga"
+        quote: over each fire-place they leave a hole to let out the smoke
     method: excavation
+    rank: preferred
     note: >-
       The width, covering and shape are from the encyclopedia, whose paragraph on the Iroquois longhouse cites a survey of
       the archaeological sites of the Mohawk valley; the archaeological papers read here call the houses of all three regions
       longhouses without describing them.
       The arbor-shaped roof is given as a barrel vault, the nearest word; walls and roof as bark, which the source names with
       wood boards. No length is given: a house was built to the number of families it was to hold and lengthened as they
-      grew, and the paper on Ontario finds longhouses lengthened in its town plans. Nor is a household given: the source says
-      several related families, with no number of people.
+      grew, and the paper on Ontario finds longhouses lengthened in its town plans; Morgan gives the Iroquois long-house
+      as fifty to eighty and sometimes a hundred feet long (15.2–30.5 m), which is written as the length. Nor is a
+      household given: the source says several related families, with no number of people. The doorway at each end, hung
+      with skins, is Morgan's, from the Seneca; the smoke holes in the roof over the hearths are the encyclopedia's, and
+      Bartram's at Onondaga in 1743 as Morgan quotes him, who adds that they were covered with bark in the rain. Morgan
+      gives the roof as triangular, and round only in some cases, which the other claim says; this one is preferred, its
+      arbor shape being from the archaeological survey the encyclopedia cites, and Bartram's Onondaga houses being bent
+      round on the top. Morgan's palisaded Onondaga village of 1615, from Champlain, is one village and is not written
+      into the settlement form, which the town form's palisade answers after 1450.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in hart-2016-southern-ontario-PMC4880188.txt (sha256 a0c70436bbc0d31e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-longhouse.txt (sha256 c46f0454c4657760), hart-2016-southern-ontario-nations.txt (sha256 de4b7fd95e7aa410) and morgan-1881-houses-and-house-life.txt (sha256 01fda4edacf944d1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  dwelling-morgan:
+    prop: dwelling
+    value: { plan: long, length: { lo: 15.2, hi: 30.5 }, walls: bark, roof: gable, roof_material: bark, entrance: end }
+    source:
+      - ref: src:morgan-1881-houses-and-house-life
+        loc: "ch. V, on the long-house of the Iroquois"
+        quote: >-
+          was from fifty to eighty and sometimes one hundred feet long. It consisted of a strong frame of upright poles set
+          in the ground, which were strengthened with horizontal poles attached with withes, and surmounted with a
+          triangular, and in some cases with a round roof. It was covered over, both sides and roof, with large strips of
+          elm bark tied to the frame with strings or splints.
+      - ref: src:morgan-1881-houses-and-house-life
+        loc: "ch. V, on the long-house of the Iroquois"
+        quote: passage way which passed through the center of the house from end to end. At each end was a doorway
+    method: historical-account
+    note: >-
+      Morgan's long-house of the Iroquois, from what the Seneca told him and from the older accounts: fifty to eighty and
+      sometimes a hundred feet long (15.2–30.5 m), a frame of poles covered with elm bark, under a triangular roof, given
+      as a gable, and in some cases a round one, with a doorway at each end. It disagrees with the preferred claim only on
+      the roof, and a reader may pick it.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in morgan-1881-houses-and-house-life.txt (sha256 01fda4edacf944d1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
     value: { pattern: nucleated }
@@ -152,7 +194,7 @@ claims:
       palisades, for which walled would be the word; this record keeps the village, and a narrower record could take the
       towns.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in hart-2017-iroquoia-dispersal-PMC5550228.txt (sha256 58b876009d207332), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in hart-2017-iroquoia-dispersal.txt (sha256 426d8df80a9382f6) and hart-2016-southern-ontario-nations.txt (sha256 de4b7fd95e7aa410), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   town:
     prop: town_form
     value: { wall: timber }
@@ -171,7 +213,7 @@ claims:
       The large towns that formed after about 1450 stood inside palisades of several rows of posts. The palisades' height, how
       many rows and openings they had, and how the longhouses inside were ranged are not given here.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in hart-2016-southern-ontario-nations.txt (sha256 de4b7fd95e7aa410) and hart-2017-iroquoia-dispersal.txt (sha256 426d8df80a9382f6), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in hart-2016-southern-ontario-nations.txt (sha256 de4b7fd95e7aa410) and hart-2017-iroquoia-dispersal.txt (sha256 426d8df80a9382f6), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   fields:
     prop: field_system
     value: { kind: swidden }
@@ -208,4 +250,4 @@ claims:
       accounts, and the second paper doubts that fields were shifted often while a village stood. Maize was grown in hills,
       with beans in the same hills and squash between them.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in hart-feranec-2020-iroquoian-fields-PMC7141618.txt (sha256 57fcc1529dbb8da1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in murchie-2026-crawford-lake-sedadna.txt (sha256 7f8a67f5c7adf92a) and hart-feranec-2020-iroquoian-fields.txt (sha256 c1ee8a80bac6a79f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

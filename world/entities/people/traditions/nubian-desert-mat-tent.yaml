@@ -30,7 +30,7 @@ claims:
       1813, and those of the Bisharin at Atbara in May 1814. It bounds the start and does not date it: the tent is surely
       older. No end is given: no source read says when it went out of use.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in burckhardt-1822-travels-in-nubia.txt (sha256 19eff18d8cfdee95), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in burckhardt-1822-travels-in-nubia.txt (sha256 19eff18d8cfdee95), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["72", "73"] }
@@ -49,7 +49,7 @@ claims:
       desert between Egypt and Abyssinia; and Egypt (72), for the Kerrarish of the Nile valley above Derr, in Lower Nubia.
       The desert he names may reach into Eritrea, which is left out, as he was not there.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in burckhardt-1822-travels-in-nubia.txt (sha256 19eff18d8cfdee95), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in burckhardt-1822-travels-in-nubia.txt (sha256 19eff18d8cfdee95), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [herders]
@@ -65,10 +65,10 @@ claims:
       Herders, who struck their tents and moved them on camels. The Ja'alin near Shendi, who pastured herds and also grew
       onions, lived in huts of mats, which Burckhardt does not describe; farmers are not named.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in burckhardt-1822-travels-in-nubia.txt (sha256 19eff18d8cfdee95), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in burckhardt-1822-travels-in-nubia.txt (sha256 19eff18d8cfdee95), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { plan: rectangular, height: { lo: 3.7, hi: 4.6 }, walls: none, roof: gable, roof_material: reed, floor: ground }
+    value: { plan: rectangular, height: { lo: 3.7, hi: 4.6 }, walls: none, roof: gable, roof_material: mat, floor: ground }
     source:
       - ref: src:burckhardt-1822-travels-in-nubia
         loc: 'journey to Berber and Suakin, entry of May 22d, the village of Atbara, p. 331'
@@ -85,19 +85,24 @@ claims:
       Poles 12 to 15 ft high (3.7 to 4.6 m) leaning together at the top, read here as the height of the ridge; with the mats
       sloping from the top to the ground the roof is two inclined planes, a gable, and there are no walls. The plan is read
       from the two rows of poles set opposite each other, so is longer than wide; its length and width are not stated. The
-      mats are of doum-palm leaf, entered as reed, the nearest word, which is mats of reed.
+      mats are of doum-palm leaf: first entered as reed, the nearest word then, and now as mat, woven mats, the word for
+      Burckhardt's "mats are thrown" over the frame; a refinement, not a disagreement. The larger tents had a partition
+      across them, the back part the women's and the kitchen, which is not entered as rooms, as the smaller had none.
+      Persons of quality sometimes added an open shed to receive strangers, which is not entered, as how many did is not
+      said.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in burckhardt-1822-travels-in-nubia.txt (sha256 19eff18d8cfdee95), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in burckhardt-1822-travels-in-nubia.txt (sha256 19eff18d8cfdee95), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
-    value: { pattern: camp }
+    value: { pattern: camp, layout: rows }
     source:
       ref: src:burckhardt-1822-travels-in-nubia
       loc: 'journey to Berber and Suakin, entry of May 22d, the village of Atbara, pp. 330-331'
       quote: of several long irregular rows of tents, formed of mats made of … leaves of the Doum tree, and containing about two hundred families
     method: survey
     note: >-
-      A camp of long, irregular rows of tents: the one at Atbara held about two hundred families. How many tents that was,
+      A camp of long, irregular rows of tents: the one at Atbara held about two hundred families. The rows are the
+      layout, though Burckhardt calls them irregular, and the vocabulary's rows are straight. How many tents that was,
       and how many people to a tent, is not stated: persons of quality had a second tent for their women.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in burckhardt-1822-travels-in-nubia.txt (sha256 19eff18d8cfdee95), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in burckhardt-1822-travels-in-nubia.txt (sha256 19eff18d8cfdee95), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

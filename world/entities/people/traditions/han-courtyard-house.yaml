@@ -30,7 +30,7 @@ claims:
       to, the tombs' models and pictures and the buried settlement of Sanyangzhuang; the house did not begin with the
       dynasty, and nothing read describes the houses of the centuries before it.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in zhuang-2016-heaven-human-induction.txt (sha256 9afe2a803360abb2), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in zhuang-2016-heaven-human-induction.txt (sha256 9afe2a803360abb2), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   end:
     prop: end
     value: 220 CE
@@ -49,7 +49,7 @@ claims:
       The last year of the Han, an end of the evidence and not of the house: the courtyard house went on, and the
       broader record this one is a member of carries it from there.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in zhuang-2016-heaven-human-induction.txt (sha256 9afe2a803360abb2) and wikipedia-han-dynasty.txt (sha256 460285e70f0f0ca8), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in zhuang-2016-heaven-human-induction.txt (sha256 9afe2a803360abb2) and wikipedia-han-dynasty.txt (sha256 460285e70f0f0ca8), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["119", "120"] }
@@ -77,7 +77,7 @@ claims:
       and the encyclopedia's sentences on Han homes are of the empire as a whole. The house is not claimed for all of
       either region, nor denied elsewhere in the empire.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in zhuang-2016-heaven-human-induction.txt (sha256 9afe2a803360abb2) and wikipedia-society-and-culture-of-the-han-dynasty.txt (sha256 0d4e005cc2eee511), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in zhuang-2016-heaven-human-induction.txt (sha256 9afe2a803360abb2) and wikipedia-society-and-culture-of-the-han-dynasty.txt (sha256 0d4e005cc2eee511), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [farmers, townspeople]
@@ -102,10 +102,10 @@ claims:
       capital's people living in walled wards; that the houses in those wards were courtyard houses is a reading, not a
       statement of either source.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in zhuang-2016-heaven-human-induction.txt (sha256 9afe2a803360abb2), chen-2015-sanyangzhuang-pottery-tile.txt (sha256 4e383b4d42e9991c), wikipedia-han-dynasty.txt (sha256 460285e70f0f0ca8) and wikipedia-society-and-culture-of-the-han-dynasty.txt (sha256 0d4e005cc2eee511), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in zhuang-2016-heaven-human-induction.txt (sha256 9afe2a803360abb2), chen-2015-sanyangzhuang-pottery-tile.txt (sha256 4e383b4d42e9991c), wikipedia-han-dynasty.txt (sha256 460285e70f0f0ca8) and wikipedia-society-and-culture-of-the-han-dynasty.txt (sha256 0d4e005cc2eee511), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { walls: rammed-earth, roof_material: tile, floor: raised }
+    value: { walls: rammed-earth, roof_material: tile, floor: raised, finish: painted }
     source:
       - ref: src:wikipedia-science-and-technology-of-the-han-dynasty
         loc: section "Structural engineering and public works", "Materials and construction"
@@ -117,6 +117,10 @@ claims:
         quote: >-
           Han homes had a courtyard area (and some had multiple courtyards) with halls that were slightly elevated
           above it and connected by stairways.
+      - ref: src:wikipedia-science-and-technology-of-the-han-dynasty
+        loc: section "Structural engineering and public works", "Courtyard homes"
+        quote: >-
+          stairways and walls were usually plastered over to produce a smooth surface and then painted.
       - ref: src:wikipedia-han-dynasty
         loc: section "Science and technology", "Structural and geo-technical engineering"
         quote: >-
@@ -136,12 +140,15 @@ claims:
       farmers' houses excavated at Sanyangzhuang had tiled roofs. The
       halls stood a little above the court, which the vocabulary calls a raised floor. No source read gives the size of
       a house or of a court. The towers of several storeys that the tomb models show are the houses of the rich and are
-      not drawn.
+      not drawn. The walls were plastered smooth and painted, the encyclopedia says of the halls of Han homes as the
+      tombs' pictures and models show them: those are the homes of people who could pay for a tomb, and whether a
+      poor farmer's walls were painted nothing read says. It says too that the tiled eaves projected, carried on
+      brackets, but not how steep the roof was or of what shape.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-science-and-technology-of-the-han-dynasty.txt (sha256 add9920dbb9bc5f3), wikipedia-han-dynasty.txt (sha256 460285e70f0f0ca8) and chen-2015-sanyangzhuang-pottery-tile.txt (sha256 4e383b4d42e9991c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-science-and-technology-of-the-han-dynasty.txt (sha256 add9920dbb9bc5f3), wikipedia-han-dynasty.txt (sha256 460285e70f0f0ca8) and chen-2015-sanyangzhuang-pottery-tile.txt (sha256 4e383b4d42e9991c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
-    value: { pattern: walled, houses: 100, household: { lo: 4, hi: 5 } }
+    value: { pattern: walled, houses: 100, household: { lo: 4, hi: 5 }, enclosure: wall, yard: wall }
     source:
       - ref: src:wikipedia-society-and-culture-of-the-han-dynasty
         loc: section "Urban and rural life"
@@ -149,6 +156,11 @@ claims:
       - ref: src:wikipedia-han-dynasty
         loc: section "Culture and society", "Marriage, gender, and kinship"
         quote: The Han-era family was patrilineal and typically had four to five nuclear family members living in one household.
+      - ref: src:zhuang-2016-heaven-human-induction
+        loc: 'section "Socio-environmental consequences of agricultural development", p. 8 of the manuscript'
+        quote: >-
+          Inside or adjacent to courtyard buildings, wells and small ditches were dug and connected with water bodies
+          via small outlets or holes that pierced the courtyard walls
     method: expert-estimate
     rank: preferred
     note: >-
@@ -156,26 +168,83 @@ claims:
       household a family of four to five, so that a hundred families are taken as a hundred houses. Preferred over the
       scattered compounds of Sanyangzhuang because it is said of the average hamlet of the whole empire, and that is one
       settlement on newly taken floodplain. It is the weaker kind of evidence all the same, an encyclopedia's summary of
-      a history that was not read against an excavation, and a reader may well choose the other.
+      a history that was not read against an excavation, and a reader may well choose the other. The hamlet's
+      enclosure is its wall with two gates, of what the encyclopedia does not say. Each house's court had its own
+      wall, pierced by the outlets of its well and ditches, as the review has it from the tombs' models and from
+      Sanyangzhuang.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-society-and-culture-of-the-han-dynasty.txt (sha256 0d4e005cc2eee511) and wikipedia-han-dynasty.txt (sha256 460285e70f0f0ca8), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-society-and-culture-of-the-han-dynasty.txt (sha256 0d4e005cc2eee511), wikipedia-han-dynasty.txt (sha256 460285e70f0f0ca8) and zhuang-2016-heaven-human-induction.txt (sha256 9afe2a803360abb2), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement-sanyangzhuang:
     prop: settlement_form
-    value: { pattern: dispersed }
+    value: { pattern: dispersed, yard: wall }
     source:
-      ref: src:zhuang-2016-heaven-human-induction
-      loc: 'section "Socio-environmental consequences of agricultural development", p. 8 of the manuscript'
-      quote: >-
-        Here more than 15 building compounds have been found. Each compound consists of one to several courtyard
-        buildings and was surrounded by farming fields.
+      - ref: src:zhuang-2016-heaven-human-induction
+        loc: 'section "Socio-environmental consequences of agricultural development", p. 8 of the manuscript'
+        quote: >-
+          Here more than 15 building compounds have been found. Each compound consists of one to several courtyard
+          buildings and was surrounded by farming fields.
+      - ref: src:zhuang-2016-heaven-human-induction
+        loc: 'section "Socio-environmental consequences of agricultural development", p. 8 of the manuscript'
+        quote: >-
+          Inside or adjacent to courtyard buildings, wells and small ditches were dug and connected with water bodies
+          via small outlets or holes that pierced the courtyard walls
     method: excavation
     note: >-
       The one Han farming settlement excavated that was read of, on the Yellow River's floodplain in Henan: more than 15
       compounds, each standing apart among its own fields. The review that reports it sets it at the time when, by the
       end of the Western Han, the bans on settling the floodplains had broken down, so it may not show how the older
-      villages stood; it is kept as another reading and not preferred.
+      villages stood; it is kept as another reading and not preferred. Each court was walled, its wall pierced by
+      the outlets of the well and ditches dug inside or beside it, which the review says of the tombs' models and has
+      revealed at Sanyangzhuang.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in zhuang-2016-heaven-human-induction.txt (sha256 9afe2a803360abb2), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in zhuang-2016-heaven-human-induction.txt (sha256 9afe2a803360abb2), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  outbuildings:
+    prop: outbuildings
+    value:
+      - { use: well, per: house }
+      - { use: pond, per: settlement }
+      - { use: shrine, per: settlement }
+    source:
+      - ref: src:zhuang-2016-heaven-human-induction
+        loc: 'section "Socio-environmental consequences of agricultural development", p. 8 of the manuscript'
+        quote: >-
+          Inside or adjacent to courtyard buildings, wells and small ditches were dug and connected with water bodies
+          via small outlets or holes that pierced the courtyard walls
+      - ref: src:zhuang-2016-heaven-human-induction
+        loc: 'section "Socio-environmental consequences of agricultural development", p. 8 of the manuscript'
+        quote: >-
+          ceramic models illustrate ponds were dug next to fields, either close or far away from courtyards
+      - ref: src:zhuang-2016-heaven-human-induction
+        loc: 'section "Socio-environmental consequences of agricultural development", p. 8 of the manuscript'
+        quote: >-
+          Such wells and ponds located next to both farming fields and house compounds have been revealed during
+          excavations at Sanyangzhuang
+      - ref: src:zhuang-2016-heaven-human-induction
+        loc: 'section "Socio-environmental consequences of agricultural development", p. 8 of the manuscript'
+        quote: These small irrigated features were shared by these courtyards
+      - ref: src:chen-2015-sanyangzhuang-pottery-tile
+        loc: "section 1, Introduction, p. 1312"
+        quote: >-
+          we found a number of important relics, such as house tile roof, wall, water wells, toilets, pond, farmland,
+          and some trees.
+      - ref: src:wikipedia-society-and-culture-of-the-han-dynasty
+        loc: section "Urban and rural life"
+        quote: >-
+          At the center of social life in the hamlet was the religious altar (built in honor of a local deity) where
+          festivities could be staged.
+    method: excavation
+    note: >-
+      A well inside or beside each courtyard building, as the review has it from the tombs' models and from the
+      excavation at Sanyangzhuang, where the first excavated courtyards had wells, toilets and a pond; and ponds dug
+      by the fields, near the courtyards or far from them, which the review says were shared by the courtyards, so
+      written as the settlement's. The review's "shared" is said of the wells and ponds together, and the wells are
+      kept as a household's because it places them in or by each building. The hamlet's altar to its local deity, at
+      the centre of its social life, is the encyclopedia's: the vocabulary has no word for an altar, and shrine is the
+      nearest. The toilets have no word either and are left out. The encyclopedia's tomb models also show granaries
+      on stilts, animal pens and privies, but it does not say whose they were, and they are left out. No size is
+      given for any of them.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zhuang-2016-heaven-human-induction.txt (sha256 9afe2a803360abb2), chen-2015-sanyangzhuang-pottery-tile.txt (sha256 4e383b4d42e9991c) and wikipedia-society-and-culture-of-the-han-dynasty.txt (sha256 0d4e005cc2eee511), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   town:
     prop: town_form
     value: { wall: rammed-earth }
@@ -198,7 +267,7 @@ claims:
       gates each, a moat 8 m wide at Chang'an): those belong to the cities' own records and are not written for every
       town.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-han-dynasty.txt (sha256 460285e70f0f0ca8) and wikipedia-society-and-culture-of-the-han-dynasty.txt (sha256 0d4e005cc2eee511), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-han-dynasty.txt (sha256 460285e70f0f0ca8) and wikipedia-society-and-culture-of-the-han-dynasty.txt (sha256 0d4e005cc2eee511), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
 relations:
   broader:
     rel: member-of
@@ -210,4 +279,4 @@ relations:
         Siheyuan originated in the Han Dynasty (206 BCE – 220 CE) and became popular during the Ming (1368–1644) and
         Qing (1644–1912) dynasties.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-siheyuan.txt (sha256 6f6140321b8817ea), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-siheyuan.txt (sha256 6f6140321b8817ea), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

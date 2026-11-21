@@ -26,7 +26,7 @@ claims:
       encyclopedia's twelfth century because the paper is the better source and the encyclopedia's own oldest tulou
       is of 1371.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in colafranceschi-2020-tulou.txt (sha256 9fe40f5380e77788), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in colafranceschi-2020-tulou.txt (sha256 9fe40f5380e77788), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   start-encyclopedia:
     prop: start
     value: { lo: 1101 CE, hi: 1200 CE }
@@ -42,7 +42,7 @@ claims:
       The twelfth century, as the encyclopedia's opening has it, with no reference; the oldest tulou the same article
       names was built in 1371.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-fujian-tulou.txt (sha256 d7741233f1f05fed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-fujian-tulou.txt (sha256 d7741233f1f05fed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   end:
     prop: end
     value: { lo: 1950 CE, hi: 2000 CE }
@@ -57,7 +57,7 @@ claims:
       Building ceased a few decades after the middle of the twentieth century, read here as the century's second
       half. Many are lived in still.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in colafranceschi-2020-tulou.txt (sha256 9fe40f5380e77788), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in colafranceschi-2020-tulou.txt (sha256 9fe40f5380e77788), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["122"] }
@@ -75,7 +75,7 @@ claims:
       survey of 2,189 villages found square tulou in five and round ones in six. The tulou is not claimed for the
       region, only as found in it.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in colafranceschi-2020-tulou.txt (sha256 9fe40f5380e77788) and tao-2018-meizhou-vernacular-dwellings.txt (sha256 afd9776e2bb0a126), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in colafranceschi-2020-tulou.txt (sha256 9fe40f5380e77788) and tao-2018-meizhou-vernacular-dwellings.txt (sha256 afd9776e2bb0a126), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   prevalence:
     prop: prevalence
     value: few
@@ -119,10 +119,10 @@ claims:
       in common, and the survey of the Hakka settlements of Dabu, the county of Guangdong next to Fujian, where tulou
       also stand, finds a society living by its scarce farmland, in the valleys and on terraced slopes.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in colafranceschi-2020-tulou.txt (sha256 9fe40f5380e77788), wikipedia-fujian-tulou.txt (sha256 d7741233f1f05fed) and tao-2017-hakka-settlements-dabu.txt (sha256 9f602e1b9fbc5b53), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in colafranceschi-2020-tulou.txt (sha256 9fe40f5380e77788), wikipedia-fujian-tulou.txt (sha256 d7741233f1f05fed) and tao-2017-hakka-settlements-dabu.txt (sha256 9f602e1b9fbc5b53), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { plan: round, court: true, diameter: { lo: 14, hi: 77.42 }, storeys: { lo: 3, hi: 4 }, walls: rammed-earth, roof: gable, roof_material: tile }
+    value: { plan: round, court: true, diameter: { lo: 14, hi: 77.42 }, storeys: { lo: 3, hi: 4 }, walls: rammed-earth, roof: hip-and-gable, roof_material: tile, windows: small, veranda: true }
     source:
       - ref: src:colafranceschi-2020-tulou
         loc: "p. 937, section 1"
@@ -148,18 +148,38 @@ claims:
       - ref: src:wikipedia-fujian-tulou
         loc: section "Architecture"
         quote: The rooftops were covered with baked clay tiles, arranged radially
+      - ref: src:colafranceschi-2020-tulou
+        loc: "p. 937, section 1"
+        quote: >-
+          the external, protective wall is always built of rammed earth, with few openings on the top stories and a
+          single monumental entrance
+      - ref: src:wikipedia-fujian-tulou
+        loc: section "Architecture"
+        quote: >-
+          The bottom two stories of tulou are solid with no window nor gun hole, windows are open only from the third
+          to fifth stories
+      - ref: src:wikipedia-fujian-tulou
+        loc: section "Architecture"
+        quote: >-
+          Circular corridors from 2nd to uppermost level were made of wood boards laid on horizontal wooden beams with
+          one end inserted into the earth wall.
     method: survey
     note: >-
       The round tulou, the kind all eight of the paper's cases are; it has square, oval and other shapes too, and
       the encyclopedia calls the rectangular and the circular the commonest. Storeys, the rammed-earth outer wall and
-      the central court are the paper's. Its "hip and gable roof" has no word in the vocabulary and is written as
-      gable, the ring's two slopes. The diameters are the smallest and the largest round tulou the encyclopedia
+      the central court are the paper's. Its "hip and gable roof" was first written as gable, when the vocabulary had
+      no word for it, and is now the vocabulary's hip-and-gable, in the paper's own words. The diameters are the smallest and the largest round tulou the encyclopedia
       names, cited because the paper gives ceilings only, 60 m for the Hakka's and 80 m for the Minnan's, and an
       area from about 500 to 4,000 or 5,000 square metres, for which a dwelling has no parameter; the tiled roof is
       the encyclopedia's too. Inside, the Hakka's have a timber frame with partitions of mud brick, their ring of
-      rooms and gallery 4 to 6 m deep, and the Minnan's have cross-walls of rammed earth.
+      rooms and gallery 4 to 6 m deep, and the Minnan's have cross-walls of rammed earth. The outer wall had few
+      openings, and those high up: no window in the two lowest storeys, windows only from the third up, written as
+      the vocabulary's small windows, as the sources give their number and height and not their size. Round the court,
+      on every storey above the ground, ran a gallery of boards on beams set into the earth wall, which is the
+      vocabulary's veranda. There was a single gate (both sources), which for a round house has no word of the
+      vocabulary's, and is left out; Chengqi Lou has two main gates and two side gates.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in colafranceschi-2020-tulou.txt (sha256 9fe40f5380e77788) and wikipedia-fujian-tulou.txt (sha256 d7741233f1f05fed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in colafranceschi-2020-tulou.txt (sha256 9fe40f5380e77788) and wikipedia-fujian-tulou.txt (sha256 d7741233f1f05fed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
     value: { pattern: compound, household: 300 }
@@ -188,4 +208,35 @@ claims:
       and too many for the common run of them. The encyclopedia puts the most a tulou housed at 800. How many tulou
       stood in a settlement is not stated.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in colafranceschi-2020-tulou.txt (sha256 9fe40f5380e77788) and wikipedia-fujian-tulou.txt (sha256 d7741233f1f05fed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in colafranceschi-2020-tulou.txt (sha256 9fe40f5380e77788) and wikipedia-fujian-tulou.txt (sha256 d7741233f1f05fed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  outbuildings:
+    prop: outbuildings
+    value:
+      - { use: well, per: house, count: { lo: 2, hi: 3 } }
+      - { use: shrine, per: house, count: 1 }
+    source:
+      - ref: src:wikipedia-fujian-tulou
+        loc: section "Architecture"
+        quote: >-
+          Public water wells in groups of two or three are usually located at the center court; more luxurious tulous
+          have in-house water well for each household in ground floor kitchen.
+      - ref: src:wikipedia-fujian-tulou
+        loc: section "Architecture"
+        quote: >-
+          A small building at the center with an open front served as an ancestral hall for ancestry worshipping,
+          festivals, meetings, weddings, funerals and other ceremonial functions.
+      - ref: src:colafranceschi-2020-tulou
+        loc: "p. 937, section 1"
+        quote: >-
+          All Tulou have wooden floors and distribution elements, a hip and gable roof, a large central courtyard, an
+          ancestral common area
+    method: survey
+    note: >-
+      What stood in the court of the tulou, the house of a whole clan, so written as the house's: two or three wells,
+      and at the centre a small building open at the front, the ancestral hall, used for worship and for the clan's
+      festivals and meetings (the encyclopedia). The paper has an ancestral common area in every tulou. The ancestral
+      hall is written as a shrine, the use it is named for; it served as the clan's hall too. The wells of each
+      household's kitchen in the richer tulou were inside the ring, and are not written. The paper's granaries and
+      schools are "in some cases" and left out.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-fujian-tulou.txt (sha256 d7741233f1f05fed) and colafranceschi-2020-tulou.txt (sha256 9fe40f5380e77788), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

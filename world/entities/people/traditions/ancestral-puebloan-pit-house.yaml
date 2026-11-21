@@ -32,7 +32,7 @@ claims:
       a bound of the study as well. The pit house is older than the period, whose people, the article says, went on living
       in pit houses; this record is the house of this period only.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in bocinsky-2016-pueblo-macrohistory-PMC4820384.txt (sha256 302f38d01d94ecdc), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in bocinsky-2016-pueblo-macrohistory.txt (sha256 b05757fd61d02d99) and wikipedia-basketmaker-iii-period.txt (sha256 fc3c1846a47ed598), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   end-bocinsky:
     prop: end
     value: 700 CE
@@ -55,7 +55,7 @@ claims:
       Preferred over the encyclopedia's 750 CE as the period dated from evidence, in a peer-reviewed paper. It is the end of
       the period, when stores moved above ground, not the last pit house.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in bocinsky-2016-pueblo-macrohistory-PMC4820384.txt (sha256 302f38d01d94ecdc), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in bocinsky-2016-pueblo-macrohistory.txt (sha256 b05757fd61d02d99), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   end-wikipedia:
     prop: end
     value: 750 CE
@@ -66,7 +66,7 @@ claims:
     method: expert-estimate
     note: The conventional end of the period, as the encyclopedia gives it.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-basketmaker-iii-period-1366430453.txt (sha256 c4e1ef600cd68432), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-basketmaker-iii-period.txt (sha256 fc3c1846a47ed598), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["15"] }
@@ -89,7 +89,7 @@ claims:
       Colorado, Arizona and New Mexico, and the encyclopedia's Mesa Verde and Chaco Canyon. The house is not claimed for all
       of the region, only for the places the sources name.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in bocinsky-2016-pueblo-macrohistory-PMC4820384.txt (sha256 302f38d01d94ecdc), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in bocinsky-2016-pueblo-macrohistory.txt (sha256 b05757fd61d02d99) and wikipedia-basketmaker-iii-period.txt (sha256 fc3c1846a47ed598), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [farmers]
@@ -109,10 +109,10 @@ claims:
       period kept theirs in cists beside the pit house. The encyclopedia cited for the house has them hunt, trap and
       gather wild plants as well, beside what they grew, so foragers are not named.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in bocinsky-2016-pueblo-macrohistory.txt (sha256 b05757fd61d02d99), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in bocinsky-2016-pueblo-macrohistory.txt (sha256 b05757fd61d02d99), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { plan: round, diameter: { lo: 2.4, hi: 6.1 }, floor: sunken, walls: wattle-and-daub, roof_material: earth }
+    value: { plan: round, diameter: { lo: 2.4, hi: 6.1 }, floor: sunken, walls: wattle-and-daub, roof_material: earth, entrance: roof, smoke: hole }
     source:
       - ref: src:wikipedia-basketmaker-iii-period
         loc: section "Architecture"
@@ -133,9 +133,34 @@ claims:
       a log frame covered with woven reeds, grass and mud, given as wattle and daub, the nearest word; the roof was covered
       the same way, given as earth over beams and matting. The same article says the houses of this period were larger than
       before, divided into sections, with a central hearth, vestibules and walls lined with slabs of stone. The paper is cited
-      for the pit house as the dwelling of the period.
+      for the pit house as the dwelling of the period. The entrance through the roof and the smoke hole are the same
+      article's one opening in the centre of the roof, used both for ventilation and as the way in; the vestibules, the
+      antechambers before the house, have no word and are not drawn. The encyclopedia is cited as the only text read here
+      that describes the house; its sources were not read.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in bocinsky-2016-pueblo-macrohistory-PMC4820384.txt (sha256 302f38d01d94ecdc), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-basketmaker-iii-period.txt (sha256 fc3c1846a47ed598), wikipedia-pueblo-i-period.txt (sha256 9880c22ebd091d55) and bocinsky-2016-pueblo-macrohistory.txt (sha256 b05757fd61d02d99), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  outbuildings:
+    prop: outbuildings
+    value:
+      - { use: granary, per: house, floor: sunken, walls: stone, roof_material: stone }
+    source:
+      - ref: src:bocinsky-2016-pueblo-macrohistory
+        loc: Discussion
+        quote: storing maize in underground cists outside the pit house in the BM III period
+      - ref: src:wikipedia-basketmaker-iii-period
+        loc: section "Agriculture"
+        quote: Food was kept in storage cists, below ground pits that were lined and covered with stone.
+    method: excavation
+    note: >-
+      The storage cist: maize kept in underground cists outside the pit house (the paper), pits lined and covered with
+      stone (the encyclopedia), so the household's, by its house; given as a granary, sunken, walled and covered with
+      stone. How many to a house and how large are not given. The paper has this give way in Pueblo I to storage in rooms
+      above ground. The large pit house used for rituals at Shabik'eschee, likely a great kiva, and the great kivas and
+      dance floors the paper takes to characterize the period are not written: no source read says they stood in every
+      settlement, or which ones. Stockades round pit houses at eleven sites near Pleasant View, Colorado, are one
+      district's and are not written as the settlement's enclosure.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in bocinsky-2016-pueblo-macrohistory.txt (sha256 b05757fd61d02d99) and wikipedia-basketmaker-iii-period.txt (sha256 fc3c1846a47ed598), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
     value: { pattern: hamlet, houses: { lo: 1, hi: 20 } }
@@ -157,4 +182,4 @@ claims:
       the article on Pueblo I, is for the Four Corners region. One Chaco Canyon village the article names, Shabik'eschee, had
       18.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-basketmaker-iii-period-1366430453.txt (sha256 c4e1ef600cd68432), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-basketmaker-iii-period.txt (sha256 fc3c1846a47ed598) and wikipedia-pueblo-i-period.txt (sha256 9880c22ebd091d55), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

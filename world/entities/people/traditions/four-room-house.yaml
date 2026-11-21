@@ -30,7 +30,7 @@ claims:
       same source has belts of houses against town walls from the 12th century BCE, and four-room houses in such belts before
       the casemate wall, which grew out of them in the 12th and 11th centuries: earlier than the other claim allows.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-architecture-of-ancient-israel-1375836145.txt (sha256 89dd017f14fabed9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-architecture-of-ancient-israel.txt (sha256 9bbcfc527082f288), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   start-four-room:
     prop: start
     value: { lo: 1100 BCE, hi: 1001 BCE }
@@ -45,7 +45,7 @@ claims:
       The source names both the beginning of Iron Age I and the late 11th century BCE in one sentence. The claim takes the
       whole century, as "late" is not given in years.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-four-room-house-1370009931.txt (sha256 92d3b7a3ca8da2ed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-four-room-house.txt (sha256 1f6a37e345f0932e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   end:
     prop: end
     value: { lo: 587 BCE, hi: 586 BCE }
@@ -61,7 +61,7 @@ claims:
       587 or 586 BCE, the end of the span the first source gives. The second says the house was no longer built after the
       destruction of Judah, which it puts in the seventh and sixth centuries BCE.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-four-room-house-1370009931.txt (sha256 92d3b7a3ca8da2ed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-architecture-of-ancient-israel.txt (sha256 9bbcfc527082f288) and wikipedia-four-room-house.txt (sha256 1f6a37e345f0932e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["58"] }
@@ -76,7 +76,7 @@ claims:
       Region 58 (Syria, Cyprus and the Levant), which holds ancient Israel and Judah. The source's list of sites also names
       Avaris in Egypt, with a question mark; it is left out. The house is not claimed for all of the region.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-four-room-house-1370009931.txt (sha256 92d3b7a3ca8da2ed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-four-room-house.txt (sha256 1f6a37e345f0932e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [farmers, townspeople]
@@ -103,11 +103,11 @@ claims:
       the houses of the towns, small and large, were of this plan. The sources describe the towns and name no village, so
       farmers rests on the house's plan and not on where it was found.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-architecture-of-ancient-israel.txt (sha256 9bbcfc527082f288) and wikipedia-four-room-house.txt (sha256 1f6a37e345f0932e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-architecture-of-ancient-israel.txt (sha256 9bbcfc527082f288) and wikipedia-four-room-house.txt (sha256 1f6a37e345f0932e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
     value:
-      { plan: rectangular, court: true, length: { lo: 10, hi: 12 }, width: { lo: 8, hi: 10 }, rooms: 4, storeys: { lo: 1, hi: 2 }, walls: stone, roof: flat, roof_material: earth }
+      { plan: rectangular, court: true, length: { lo: 10, hi: 12 }, width: { lo: 8, hi: 10 }, rooms: 4, storeys: { lo: 1, hi: 2 }, walls: stone, roof: flat, roof_material: earth, finish: lime, byre: true }
     source:
       - ref: src:wikipedia-architecture-of-ancient-israel
         loc: section "Domestic architecture"
@@ -136,29 +136,52 @@ claims:
         quote: >-
           Roofs were typically flat, and served as functional workspaces … They were constructed by laying wooden beams across
           the tops of walls, followed by a layer of reeds and twigs to support several applications of mud or chalk plaster.
+      - ref: src:wikipedia-four-room-house
+        loc: section "Building patterns and materials"
+        quote: >-
+          The surfaces of exterior walls were likely plastered to prevent erosion from rainfall … The plastering would have
+          demanded a significant quantity of lime to be manufactured, which required a kiln.
+      - ref: src:wikipedia-four-room-house
+        loc: opening section
+        quote: >-
+          When an upper floor was included, the inhabitants used it as living quarters, while the ground floor was used as a
+          stable for livestock and for storage.
     method: excavation
     note: >-
       The plan, court, walls and roof are from the article on the architecture of ancient Israel; the size and the upper floor
       from the article on the four-room house, which gives the size for the houses of Iron Age I. The middle room was often,
       not always, an open court; the four rooms count it, and that article also has houses of two, three and five rooms. The
       walls are stone, or mudbrick on courses of stone; in the plains and valleys, where stone was scarce, they were of
-      mudbrick. Only some houses had a second storey.
+      mudbrick. Only some houses had a second storey. The finish and the byre are from the article on the four-room house:
+      the outer walls were likely plastered, with lime burnt in a kiln (a likelihood in the source, entered as lime); and
+      where there was an upper floor the people lived on it and the ground floor stabled the livestock, entered as a byre
+      under the same roof, which the article says of the houses with an upper floor and not of the rest.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-four-room-house-1370009931.txt (sha256 92d3b7a3ca8da2ed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-architecture-of-ancient-israel.txt (sha256 9bbcfc527082f288) and wikipedia-four-room-house.txt (sha256 1f6a37e345f0932e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
-    value: { pattern: walled }
+    value: { pattern: walled, layout: ring }
     source:
-      ref: src:wikipedia-architecture-of-ancient-israel
-      loc: section "Casemate walls"
-      quote: >-
-        The mature casemate fortification system comprised three standardized components: the casemate city wall itself, a
-        belt of residential houses abutting the wall from the interior, and a peripheral road running along the houses' outer
-        face.
+      - ref: src:wikipedia-architecture-of-ancient-israel
+        loc: section "Casemate walls"
+        quote: >-
+          The mature casemate fortification system comprised three standardized components: the casemate city wall itself, a
+          belt of residential houses abutting the wall from the interior, and a peripheral road running along the houses' outer
+          face.
+      - ref: src:wikipedia-architecture-of-ancient-israel
+        loc: section "Casemate walls"
+        quote: >-
+          The casemate wall developed gradually during the 12th and 11th centuries BCE out of earlier settlement patterns in
+          which residential four-room houses were arranged in an encircling belt around the site.
+      - ref: src:wikipedia-four-room-house
+        loc: section "Building patterns and materials"
+        quote: >-
+          The houses could be constructed in a circular pattern, where the outer city wall connected all back broadroom walls
     method: excavation
     note: >-
       The source calls this plan "the dominant urban design principle throughout the Iron Age". It speaks of towns: villages
       and farmsteads are not described, and the article on the four-room house finds the houses standing alone as well as in
-      clusters.
+      clusters. The layout is a ring: the houses in an encircling belt round the site, their back rooms against the town
+      wall, as both articles have it; what stood inside the belt is not described as open ground.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-architecture-of-ancient-israel-1375836145.txt (sha256 89dd017f14fabed9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-architecture-of-ancient-israel.txt (sha256 9bbcfc527082f288) and wikipedia-four-room-house.txt (sha256 1f6a37e345f0932e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

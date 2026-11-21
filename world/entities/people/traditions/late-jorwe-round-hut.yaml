@@ -23,7 +23,7 @@ claims:
       it were rectangular (people/traditions/deccan-chalcolithic-rectangular-house). The site's radiocarbon dates have
       been revised since in works not read.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in sankalia-1975-early-farmers-village.txt (sha256 2487ae20dbb74eed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in sankalia-1975-early-farmers-village.txt (sha256 2487ae20dbb74eed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   end:
     prop: end
     value: 700 BCE
@@ -39,7 +39,7 @@ claims:
       The end of the Late Jorwe period, when the village was abandoned: about 700 BCE in the excavators' list of
       periods, and about a thousand years after 1600 BCE in their conclusions.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in sankalia-1975-early-farmers-village.txt (sha256 2487ae20dbb74eed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in sankalia-1975-early-farmers-village.txt (sha256 2487ae20dbb74eed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["108"] }
@@ -52,7 +52,7 @@ claims:
       Region 108 (Southwestern India), which holds Inamgaon, by its coordinates against the region outlines. The hut is
       known here from this one village, and is not claimed for all of the region.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in sankalia-1975-early-farmers-village.txt (sha256 2487ae20dbb74eed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in sankalia-1975-early-farmers-village.txt (sha256 2487ae20dbb74eed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [farmers]
@@ -65,7 +65,7 @@ claims:
       The excavators' judgment of the village over its whole life, as farmers who also kept animals; they do not say
       in this article how the people of its last period lived apart from the earlier ones.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in sankalia-1975-early-farmers-village.txt (sha256 2487ae20dbb74eed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in sankalia-1975-early-farmers-village.txt (sha256 2487ae20dbb74eed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
     value: { plan: round, diameter: { lo: 2.5, hi: 4.25 } }
@@ -80,7 +80,7 @@ claims:
       The plan and the diameters of the thirty-nine huts exposed by 1975. Some seem to have had an open kind of
       veranda. The article does not describe their walls or roofs, which are left to the generator.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in sankalia-1975-early-farmers-village.txt (sha256 2487ae20dbb74eed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in sankalia-1975-early-farmers-village.txt (sha256 2487ae20dbb74eed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
     value: { pattern: nucleated }
@@ -94,4 +94,22 @@ claims:
       defence, or whether groups of huts were the units of families or crafts. The thirty-nine huts are those dug, not
       those standing at one time, so the number of houses and the people to a house are not written.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in sankalia-1975-early-farmers-village.txt (sha256 2487ae20dbb74eed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in sankalia-1975-early-farmers-village.txt (sha256 2487ae20dbb74eed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  outbuildings:
+    prop: outbuildings
+    value:
+      - { use: oven, per: settlement, count: 1 }
+    source:
+      - ref: src:sankalia-1975-early-farmers-village
+        loc: section "Arts and Crafts"
+        quote: >-
+          In the last phase of occupation on the westernmost area of the site we found an area within which lime was
+          processed from the raw material into these balls. This included both the kiln and the general work area.
+    method: excavation
+    note: >-
+      The lime kiln of Inamgaon's last phase, in a work area at the west of the site, where lime was made into sling
+      balls, more of them, the excavators think, than the village could use. It is the one site's, set down for the
+      tradition; its size is not given. The open veranda some of the huts seem to have had is in the dwelling's note,
+      as the article does not say it was the rule.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in sankalia-1975-early-farmers-village.txt (sha256 2487ae20dbb74eed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

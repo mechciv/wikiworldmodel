@@ -29,7 +29,7 @@ claims:
       second journey into Ukambani, of 1851, and rests on what he learnt there and at the coast. It bounds the start and does
       not date it: the house is surely older. No end is given: no source read says when it went out of use.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in krapf-1860-travels-in-eastern-africa.txt (sha256 71e860d94c28a68a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in krapf-1860-travels-in-eastern-africa.txt (sha256 71e860d94c28a68a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["93", "95"] }
@@ -47,7 +47,7 @@ claims:
       Kenya (93) and Tanzania (95): the plains from two degrees north of the Equator to four south, between Kilimanjaro and
       Mount Kenya ("Kegnia"), which Thomson crossed in 1883 and 1884.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in krapf-1860-travels-in-eastern-africa.txt (sha256 71e860d94c28a68a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in krapf-1860-travels-in-eastern-africa.txt (sha256 71e860d94c28a68a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [herders]
@@ -61,7 +61,7 @@ claims:
       Herders, who lived on milk, butter and the meat of their cattle, goats and sheep, and despised tillage, as Krapf has
       it; the Kwavi who settled to farm are not described apart, and farmers are not named.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in krapf-1860-travels-in-eastern-africa.txt (sha256 71e860d94c28a68a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in krapf-1860-travels-in-eastern-africa.txt (sha256 71e860d94c28a68a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
     value:
@@ -73,6 +73,8 @@ claims:
       roof: flat
       roof_material: earth
       floor: ground
+      finish: mud
+      porch: true
     source:
       - ref: src:thomson-1887-through-masai-land
         loc: 'chapter on the Maasai, p. 243'
@@ -86,18 +88,23 @@ claims:
       - ref: src:krapf-1860-travels-in-eastern-africa
         loc: '"Second journey to Ukambani", the section "The Wakuafi and Masai tribes", p. 362'
         quote: in which they construct huts, covered with cow-hides or
+      - ref: src:thomson-1887-through-masai-land
+        loc: 'chapter on the Maasai, p. 243'
+        quote: >-
+          The doorway was of the smallest, and stood at right angles to the line of the house in the manner of a porch.
     method: survey
     note: >-
       Thomson's hut is 3.5 ft high at most (1.1 m), and "might be" 9 ft long by 5 ft broad (2.7 by 1.5 m): his estimate.
       Boughs woven together and plastered with cow dung are entered as wattle-and-daub, the nearest word, the daub being
       dung, not mud; the flat roof is of the same, entered as earth, and in the rains was covered with hides, as Krapf's huts
       are. The plan is rectangular with rounded corners (the OCR reads "comers", cut from the quote). The doorway was a
-      small porch at right angles to the house.
+      small porch at right angles to the house: Thomson's words, entered as a porch. The dung plaster over the boughs is
+      also entered as the walls' finish, mud, which takes dung. Where in the house the doorway stood is not said.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in thomson-1887-through-masai-land.txt (sha256 ad4b3803605675d5) and krapf-1860-travels-in-eastern-africa.txt (sha256 71e860d94c28a68a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in thomson-1887-through-masai-land.txt (sha256 ad4b3803605675d5) and krapf-1860-travels-in-eastern-africa.txt (sha256 71e860d94c28a68a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
-    value: { pattern: compound }
+    value: { pattern: compound, layout: ring, enclosure: hedge, plaza: true }
     source:
       - ref: src:thomson-1887-through-masai-land
         loc: 'chapter on the Maasai, p. 243'
@@ -114,7 +121,28 @@ claims:
         quote: and surrounded by thorn hedges and ditches for protection against an enemy's attack.
     method: survey
     note: >-
-      A kraal: a ring of huts round the cattle's night pen, inside a thorn fence. Krapf has larger and smaller settlements,
-      with names for each; neither source counts the huts of one or the people of a hut.
+      A kraal: a ring of huts round the cattle's night pen, inside a thorn fence. The huts in a circle round a considerable
+      area are the ring, and that area, never swept, the open ground at its middle (Thomson); the strong fence of thorns
+      outside the circle is entered as a hedge, of cut thorn (Thomson; Krapf's thorn hedges, which also had ditches, for
+      which the claim has no second word). Krapf has larger and smaller settlements, with names for each; neither source
+      counts the huts of one or the people of a hut.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in thomson-1887-through-masai-land.txt (sha256 ad4b3803605675d5) and krapf-1860-travels-in-eastern-africa.txt (sha256 71e860d94c28a68a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in thomson-1887-through-masai-land.txt (sha256 ad4b3803605675d5) and krapf-1860-travels-in-eastern-africa.txt (sha256 71e860d94c28a68a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  outbuildings:
+    prop: outbuildings
+    value:
+      - { use: pen, per: settlement }
+    source:
+      - ref: src:thomson-1887-through-masai-land
+        loc: 'chapter on the Maasai, p. 243'
+        quote: >-
+          The hut of the expectant Masai lady was one of a circle enclosing a considerable area, in which the cattle were
+          kept during the night.
+    method: survey
+    note: >-
+      The kraal's one pen, the space inside the ring of huts where the cattle stood at night (Thomson): the settlement's,
+      at its middle. It had no fence of its own that Thomson names, the huts and the thorn fence outside them closing it,
+      and its size is given only as "considerable". Calves and goats were also kept inside the huts, as the next page has
+      it, which is not entered as a byre. No other building by the huts is described by either source.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in thomson-1887-through-masai-land.txt (sha256 ad4b3803605675d5), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

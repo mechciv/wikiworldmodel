@@ -26,7 +26,7 @@ claims:
       The earlier limit the source gives to the levels of the iron-using sites. It adds that a phase before iron, not
       yet firmly established, may be older than 1100 BCE.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in lal-1992-painted-grey-ware.txt (sha256 0ff9834c782ba152), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in lal-1992-painted-grey-ware.txt (sha256 0ff9834c782ba152), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   end:
     prop: end
     value: 500 BCE
@@ -43,7 +43,7 @@ claims:
       gives to it. It describes no house of those two centuries apart from the earlier ones, and has structures of burnt
       brick appear with the Northern Black Polished Ware at Hastinapura, which are not this tradition.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in lal-1992-painted-grey-ware.txt (sha256 0ff9834c782ba152), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in lal-1992-painted-grey-ware.txt (sha256 0ff9834c782ba152), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["107", "109"] }
@@ -61,7 +61,7 @@ claims:
       Sind, and fourteen sites in Bahawalpur) and from one site in the Himalaya; it describes no house from them, so
       regions 105 and 106 are left out. The house is not claimed for all of either region.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in lal-1992-painted-grey-ware.txt (sha256 0ff9834c782ba152), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in lal-1992-painted-grey-ware.txt (sha256 0ff9834c782ba152), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [farmers, herders]
@@ -83,10 +83,10 @@ claims:
       those who lived by herds here. It is a reading of one people into two of the ways of life the world tells apart,
       and a reviewer may prefer farmers alone. The source has no towns: at no stage, it says, did a city come into being.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in lal-1992-painted-grey-ware.txt (sha256 0ff9834c782ba152), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in lal-1992-painted-grey-ware.txt (sha256 0ff9834c782ba152), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { plan: round, diameter: { lo: 4.25, hi: 6.85 }, walls: wattle-and-daub }
+    value: { plan: round, diameter: { lo: 4.25, hi: 6.85 }, walls: wattle-and-daub, finish: mud }
     source:
       - ref: src:lal-1992-painted-grey-ware
         loc: "p. 425"
@@ -112,9 +112,12 @@ claims:
       of posts with wild cane and bamboo tied between them and mud plastered on both faces. The roof is not described.
       The well-to-do had houses of mud walls: one at Bhagwanpura had thirteen rooms, from 1.6 by 1.6 m to 3.35 by 4.2 m,
       a corridor and a courtyard, and this record does not draw it. Burnt bricks were found but not, the source thinks,
-      in houses.
+      in houses. The finish is that mud plaster, laid on both the inner and the outer faces and strengthened with rice
+      husks. The kiln found at Atranjikhera, oval and about a metre deep, is not written as an outbuilding: the source
+      does not say whose it was or whether every village had one; nor are the unlined wells near Atranjikhera, which
+      Gaur took for irrigation and which stood in the fields.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in lal-1992-painted-grey-ware.txt (sha256 0ff9834c782ba152), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in lal-1992-painted-grey-ware.txt (sha256 0ff9834c782ba152), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
     value: { pattern: nucleated }
@@ -134,4 +137,4 @@ claims:
       nor how many people lived in a house: from the size of the hearths at Atranjikhera the source infers large, joint
       families, and gives no number.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in lal-1992-painted-grey-ware.txt (sha256 0ff9834c782ba152), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in lal-1992-painted-grey-ware.txt (sha256 0ff9834c782ba152), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

@@ -22,7 +22,7 @@ claims:
     method: expert-estimate
     note: The start of the Iron Age on the Jutland peninsula, which follows people/traditions/nordic-bronze-age-longhouse.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wichmann-2025-PMC11844905.txt (sha256 9f20a4209e5e5fb8), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wichmann-2025-fingerprinting-conflict.txt (sha256 f921c0f1dd34d067), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   end:
     prop: end
     value: { ref: people/traditions/viking-age-longhouse, edge: start }
@@ -58,7 +58,7 @@ claims:
       in Denmark, Sweden and Norway; region 43 (Central Europe), for those in the Netherlands and northern Germany. A region
       named is where the sources place the house, not a claim that it covered the region.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in nicosia-2022-PMC9432763-with-S1.txt (sha256 d9d52156e5f25fc8), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in nicosia-2022-oppeano-byre-houses.txt (sha256 7b64abc59f76e146), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [farmers]
@@ -79,10 +79,10 @@ claims:
       Farmers: from 500 BC the houses of the Jutland peninsula stood as fenced farms in hamlets and villages, and at the
       one village a source read describes, near Aalborg, a farm was a longhouse with its stable and an outbuilding.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wichmann-2025-fingerprinting-conflict.txt (sha256 f921c0f1dd34d067) and mousavi-derazmahalleh-2024-bicolored-shrew.txt (sha256 9720288314052ca5), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wichmann-2025-fingerprinting-conflict.txt (sha256 f921c0f1dd34d067) and mousavi-derazmahalleh-2024-bicolored-shrew.txt (sha256 9720288314052ca5), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { plan: long }
+    value: { plan: long, byre: true }
     source:
       - ref: src:mousavi-derazmahalleh-2024-bicolored-shrew
         loc: section "Archeological context and sample description"
@@ -99,9 +99,13 @@ claims:
       A longhouse with a stable at one end and the living room at the other. Wichmann et al. (2025) have the Iron Age houses
       smaller than those of the Bronze Age, without figures. The one house a source read measures, at a village near
       Aalborg of about 250 BC to 175 AD, is 16 m long; one house is not the type, so no length is given here and the
-      generator guesses it.
+      generator guesses it. The byre under the same roof is the stable at one end, which the second source has as what
+      makes a byre-house of every longhouse read as one, partitions for livestock and for people; the S1 Table it
+      compiles lists Iron Age and Roman Age houses so read in Denmark, Sweden, Norway, the Netherlands and Germany. The
+      house near Aalborg had two opposing doors in the middle of its long sides, but as it is one house no entrance is
+      claimed; its farm had a smaller outbuilding south of the stable, of no stated use.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in nicosia-2022-PMC9432763-with-S1.txt (sha256 d9d52156e5f25fc8), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in mousavi-derazmahalleh-2024-bicolored-shrew.txt (sha256 9720288314052ca5) and nicosia-2022-oppeano-byre-houses.txt (sha256 7b64abc59f76e146), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
     value: { pattern: hamlet }
@@ -120,7 +124,7 @@ claims:
       they use twice. The village near Aalborg grew to 13 or 14 farms, but one village is not the type, so no number of
       houses is given.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wichmann-2025-PMC11844905.txt (sha256 9f20a4209e5e5fb8), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wichmann-2025-fingerprinting-conflict.txt (sha256 f921c0f1dd34d067) and mousavi-derazmahalleh-2024-bicolored-shrew.txt (sha256 9720288314052ca5), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   fields:
     prop: field_system
     value: { kind: blocks }

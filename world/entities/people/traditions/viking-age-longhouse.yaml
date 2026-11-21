@@ -23,7 +23,7 @@ claims:
       The start of the Viking Age, in round figures. The longhouse is older: before this,
       people/traditions/iron-age-longhouse-village.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-Viking_Age.txt (sha256 1a75b39c997442fe), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-viking-age.txt (sha256 c4ad28e4015bb747), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   end:
     prop: end
     value: 1050 CE
@@ -34,7 +34,7 @@ claims:
     method: expert-estimate
     note: The end of the Viking Age, in round figures. No source read says what the house became after it.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-Viking_Age.txt (sha256 1a75b39c997442fe), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-viking-age.txt (sha256 c4ad28e4015bb747), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["39"] }
@@ -55,7 +55,7 @@ claims:
       their own record, people/traditions/north-atlantic-turf-longhouse. A region named is where the sources place the
       house, not a claim that it covered the region.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in nicosia-2022-PMC9432763-with-S1.txt (sha256 d9d52156e5f25fc8), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in nicosia-2022-oppeano-byre-houses.txt (sha256 7b64abc59f76e146) and wikipedia-medieval-scandinavian-architecture.txt (sha256 70797e00aed3c6c0), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [farmers]
@@ -76,10 +76,10 @@ claims:
       stables, and most Scandinavians of the time were farmers and craftsmen who stayed at home. The second quote is the
       encyclopedia's, from a book that was not read. Neither source describes the houses of the towns.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-medieval-scandinavian-architecture.txt (sha256 70797e00aed3c6c0) and wikipedia-viking-age.txt (sha256 c4ad28e4015bb747), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-medieval-scandinavian-architecture.txt (sha256 70797e00aed3c6c0) and wikipedia-viking-age.txt (sha256 c4ad28e4015bb747), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { plan: long, width: { lo: 5, hi: 7 }, length: { lo: 15, hi: 75 }, walls: timber, roof_material: thatch }
+    value: { plan: long, width: { lo: 5, hi: 7 }, length: { lo: 15, hi: 75 }, walls: timber, finish: mud, roof_material: thatch, byre: true }
     source:
       - ref: src:wikipedia-medieval-scandinavian-architecture
         loc: section "Viking longhouse"
@@ -98,6 +98,11 @@ claims:
       - ref: src:wikipedia-medieval-scandinavian-architecture
         loc: section "Viking longhouse"
         quote: If the owner did not have stables, the animals were housed in stalls at the end of the longhouse.
+      - ref: src:wikipedia-medieval-scandinavian-architecture
+        loc: section "Viking longhouse"
+        quote: >-
+          The walls were curved inwards to create a boat-like shape similar to the boating houses. The walls were covered
+          with clay and vertical poles lined the inside to help create support.
       - ref: src:nicosia-2022-oppeano-byre-houses
         loc: S1 Table, row "Moi I/V"
         quote: Moi I/V Norway Three-aisled long house 1 Viking Age
@@ -106,6 +111,9 @@ claims:
       The size, walls and roof are the encyclopedia's, which cites no study of excavated houses for them; the long end of
       the range is the houses of the rich. The walls were of planks or logs, which the vocabulary calls timber, or of wattle
       and daub. The roof is given as "thatched or slanted", so thatch, and no shape. The S1 Table finds Viking-Age houses
-      in Norway three-aisled, the roof on two rows of posts.
+      in Norway three-aisled, the roof on two rows of posts. The walls were covered with clay, which is the finish. The
+      animals stood in stalls at one end of the house where the owner had no stables, the encyclopedia says, so byre:
+      the house of those who had stables apart is not drawn. Its walls curved inwards in a boat-like shape, which the
+      vocabulary's long plan does not say. Where the doors were and how the smoke of the fireplace left are not said.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in nicosia-2022-PMC9432763-with-S1.txt (sha256 d9d52156e5f25fc8), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-medieval-scandinavian-architecture.txt (sha256 70797e00aed3c6c0) and nicosia-2022-oppeano-byre-houses.txt (sha256 7b64abc59f76e146), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

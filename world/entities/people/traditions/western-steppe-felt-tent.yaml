@@ -28,7 +28,7 @@ claims:
       date of his journey, as his title gives it). It bounds the start and does not date it: Rockhill's notes cite Strabo and
       Herodotus on the felt tents of the Scythians, which were not read. No end claim: the tent is still lived in.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in rockhill-1900-journey-of-william-of-rubruck.txt (sha256 5e85b5061bcdef34), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in rockhill-1900-journey-of-william-of-rubruck.txt (sha256 5e85b5061bcdef34), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["51", "52", "101"] }
@@ -53,7 +53,7 @@ claims:
       chiefs' yurts. The steppe between, in western Kazakhstan, was surely theirs too, but no source read places the tent
       there, so it is left out.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in rockhill-1900-journey-of-william-of-rubruck.txt (sha256 5e85b5061bcdef34), bell-1788-travels-from-st-petersburgh.txt (sha256 3052bc36db59833b) and atkinson-1858-oriental-and-western-siberia.txt (sha256 b13c698cd76a38ea), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in rockhill-1900-journey-of-william-of-rubruck.txt (sha256 5e85b5061bcdef34), bell-1788-travels-from-st-petersburgh.txt (sha256 3052bc36db59833b) and atkinson-1858-oriental-and-western-siberia.txt (sha256 b13c698cd76a38ea), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [herders]
@@ -70,7 +70,7 @@ claims:
       Herders, who moved between winter and summer pastures, as Rubruck has the Tartars, and whose wealth was their flocks,
       as Bell has the Kalmyks.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in rockhill-1900-journey-of-william-of-rubruck.txt (sha256 5e85b5061bcdef34) and bell-1788-travels-from-st-petersburgh.txt (sha256 3052bc36db59833b), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in rockhill-1900-journey-of-william-of-rubruck.txt (sha256 5e85b5061bcdef34) and bell-1788-travels-from-st-petersburgh.txt (sha256 3052bc36db59833b), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
     value:
@@ -82,6 +82,8 @@ claims:
       roof: dome
       roof_material: felt
       floor: ground
+      smoke: hole
+      faces: south
     source:
       - ref: src:atkinson-1858-oriental-and-western-siberia
         loc: 'chap. 17, "Their dwelling", p. 285'
@@ -99,6 +101,16 @@ claims:
       - ref: src:bell-1788-travels-from-st-petersburgh
         loc: 'vol. 1, at Saratov, June 1716, p. 32'
         quote: Thefe tents are of a conical figure.
+      - ref: src:atkinson-1858-oriental-and-western-siberia
+        loc: 'chap. 17, "Their dwelling", p. 285'
+        quote: >-
+          a ring about four feet across, which secures the top of the dome, admits light, and lets out the smoke.
+      - ref: src:rockhill-1900-journey-of-william-of-rubruck
+        loc: chap. 2, on the Tartars and their dwellings, p. 56
+        quote: When they set down their dwelling-houses, they always turn the door to the south
+      - ref: src:rockhill-1900-journey-of-william-of-rubruck
+        loc: on the arrangement inside the dwelling, p. 57
+        quote: HEN they have fixed their dwelling, the door turned to the south
     method: survey
     note: >-
       The sizes are Atkinson's, of two Kazakh chiefs' yurts: 25 and 34 ft across (7.6 to 10.4 m), 10 and 12 ft high in the
@@ -106,12 +118,20 @@ claims:
       likely larger than most; the mean of eight herders' yurts in Tuva today is 5.6 m (people/traditions/mongolian-ger),
       and Rubruck has the largest Tartar houses, carried whole on carts, thirty feet wide. The cover is felt ("voilock")
       over walls and roof alike; the roof is a dome of bent willow rods in Atkinson's, and Bell's Kalmyk tents of poles
-      leaning to a hoop are conical, so the shape of the roof varied.
+      leaning to a hoop are conical, so the shape of the roof varied. The smoke left by the ring at the top of the dome,
+      about four feet across, which let in the light too (Atkinson; Bell's Kalmyk tents had the same aperture in their
+      hoop). The door faced south: Rubruck says the Tartars always turned it so when they set the dwelling down, and
+      the second quote, which the OCR begins "HEN" for "When" under a drop capital, repeats it. Rockhill's own note
+      there has Mongol tents of his day facing east and south-east too, and down the valley in narrow valleys, so the
+      rule is Rubruck's of 1253. Atkinson's door was a gap in the lattice under a hanging felt; for a round tent the
+      vocabulary's end and side do not apply, and the entrance is left out. Rubruck has the felt sometimes coated with
+      chalk, white clay or powdered bone to whiten it, which is not a finish of a wall the vocabulary has a word for,
+      and is left out.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in atkinson-1858-oriental-and-western-siberia.txt (sha256 b13c698cd76a38ea) and bell-1788-travels-from-st-petersburgh.txt (sha256 3052bc36db59833b), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in atkinson-1858-oriental-and-western-siberia.txt (sha256 b13c698cd76a38ea), bell-1788-travels-from-st-petersburgh.txt (sha256 3052bc36db59833b) and rockhill-1900-journey-of-william-of-rubruck.txt (sha256 5e85b5061bcdef34), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
-    value: { pattern: camp, houses: 18, household: 5 }
+    value: { pattern: camp, houses: 18, household: 5, layout: rows }
     source:
       - ref: src:atkinson-1858-oriental-and-western-siberia
         loc: 'chap. 15, p. 258'
@@ -119,9 +139,44 @@ claims:
       - ref: src:atkinson-1858-oriental-and-western-siberia
         loc: 'chap. 16, "Kirghis yourt", p. 278'
         quote: my host and his wife slept, and near them three children.
+      - ref: src:bell-1788-travels-from-st-petersburgh
+        loc: 'vol. 1, at Saratov, June 1716, p. 32'
+        quote: Where the Chan, or any perfon of character, refides, they are placed in ftraight lines.
+      - ref: src:rockhill-1900-journey-of-william-of-rubruck
+        loc: chap. 2, on the Tartars and their dwellings, p. 57
+        quote: >-
+          and after her the others according to their rank, so that the last wife will be in the extreme east ; and
+          there will be the distance of a stone's throw between the iurt of one wife and that of another.
     method: survey
     note: >-
       One aoul (camp) of eighteen yurts, the only count read; and one household of five, the chief, his wife and three
-      children, in the 25-ft yurt where Atkinson slept. Both are single instances, not means.
+      children, in the 25-ft yurt where Atkinson slept. Both are single instances, not means. The rows are Bell's, of
+      the Kalmyk tents where the khan or a man of rank lived, and Rubruck's, of the dwellings of a rich Tartar's wives
+      set from west to east a stone's throw apart: both say it of the camps of the great, and none read says how an
+      ordinary camp stood, so the rows are drawn for all on the camps of the rich alone. A stone's throw is not a
+      measure, and no spacing is written.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in atkinson-1858-oriental-and-western-siberia.txt (sha256 b13c698cd76a38ea), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in atkinson-1858-oriental-and-western-siberia.txt (sha256 b13c698cd76a38ea), bell-1788-travels-from-st-petersburgh.txt (sha256 3052bc36db59833b) and rockhill-1900-journey-of-william-of-rubruck.txt (sha256 5e85b5061bcdef34), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  outbuildings:
+    prop: outbuildings
+    value:
+      - { use: store, per: house }
+    source:
+      - ref: src:rockhill-1900-journey-of-william-of-rubruck
+        loc: chap. 2, on the Tartars and their dwellings, p. 56
+        quote: >-
+          they place the carts with coffers on either side near the house at a half stone's throw, so that the dwelling
+          stands between two rows of carts as between two walls.
+      - ref: src:rockhill-1900-journey-of-william-of-rubruck
+        loc: chap. 2, on the Tartars and their dwellings, p. 56
+        quote: And in such coffers they out all their oedding and valuables
+    method: historical-account
+    note: >-
+      Rubruck's coffers, little houses of wattle covered with black felt, which held a household's bedding and
+      valuables and were never taken off their carts; when the dwelling was set down, they stood on carts on either
+      side of it. They are the vocabulary's storehouse, though they were on wheels. The OCR of the second quote has
+      "out" for "put" and "oedding" for "bedding". How many there were is a rich man's count, a hundred or two hundred
+      carts, and is not written; no size is given beyond "the size of a large chest". Atkinson and Bell name nothing
+      that stood by the tents.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in rockhill-1900-journey-of-william-of-rubruck.txt (sha256 5e85b5061bcdef34), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

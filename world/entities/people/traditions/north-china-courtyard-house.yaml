@@ -31,7 +31,7 @@ claims:
       what was read, and the earlier date is not taken. No end is given, and none is known: the article has the houses
       that remain still lived in, and shows one built in rural Shanxi in 2017.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-siheyuan.txt (sha256 6f6140321b8817ea), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-siheyuan.txt (sha256 6f6140321b8817ea), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["119", "120"] }
@@ -54,7 +54,7 @@ claims:
       of either region, and in region 119 many farmers lived instead in caves cut in the loess
       (people/traditions/loess-plateau-yaodong).
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-siheyuan.txt (sha256 6f6140321b8817ea), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-siheyuan.txt (sha256 6f6140321b8817ea), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [farmers, townspeople]
@@ -76,10 +76,10 @@ claims:
       a gate: the first source's account of the homes of commoners, which is of China as a whole. The second has the
       house in a city, Beijing, and in the countryside of Shanxi.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-chinese-architecture.txt (sha256 3ca3c5783e84cf0d) and wikipedia-siheyuan.txt (sha256 6f6140321b8817ea), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-chinese-architecture.txt (sha256 3ca3c5783e84cf0d) and wikipedia-siheyuan.txt (sha256 6f6140321b8817ea), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { plan: courtyard, court: true, storeys: 1, roof: gable }
+    value: { plan: courtyard, court: true, storeys: 1, roof: gable, faces: south }
     source:
       - ref: src:wikipedia-siheyuan
         loc: opening section
@@ -106,6 +106,27 @@ claims:
       article describes the house of Beijing and gives no size, and nothing of walls or roofing; the members of this
       record say those for their times. That the house was much the same through the centuries between the Han and the
       Ming rests on the last quote alone, the encyclopedia's report of a book review: no house of those centuries was
-      read of, and one built otherwise then would be a record of its own.
+      read of, and one built otherwise then would be a record of its own. The main house faces south (the second
+      quote), and so its door does. The encyclopedia has the buildings of a Beijing siheyuan joined by decorated
+      pathways and a veranda dividing the court; that is not written, as this record's members would inherit it, and
+      nothing read gives a veranda to the Han house or to the farmhouse of the North China plain.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-siheyuan.txt (sha256 6f6140321b8817ea) and wikipedia-chinese-architecture.txt (sha256 3ca3c5783e84cf0d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-siheyuan.txt (sha256 6f6140321b8817ea) and wikipedia-chinese-architecture.txt (sha256 3ca3c5783e84cf0d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  settlement:
+    prop: settlement_form
+    value: { yard: wall }
+    source:
+      - ref: src:wikipedia-siheyuan
+        loc: section "Layout of Beijing siheyuan"
+        quote: Siheyuan walls provide security as well as protection against dust and storms.
+      - ref: src:wikipedia-siheyuan
+        loc: section "Layout of Beijing siheyuan"
+        quote: >-
+          Northwestern walls are usually higher than the other walls to protect the inside buildings from the harsh
+          winds blowing across northern China in the winter.
+    method: expert-estimate
+    note: >-
+      The court was walled. How the houses stood together, how many to a village and how many people to a house, the
+      encyclopedia does not say; the members of this record say it for their times.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-siheyuan.txt (sha256 6f6140321b8817ea), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

@@ -29,7 +29,7 @@ claims:
       architecture; the city wall was probably built in the latter half of the first millennium. The houses of the earlier
       phases are not described. The tradition has no end claim: nearly all of Djenné's buildings are of sun-baked brick today.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-djenne-djenno-1380966072.txt (sha256 b5351c101c20e01a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-djenne-djenno.txt (sha256 79da6a4418ebf9d3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["76"] }
@@ -49,7 +49,7 @@ claims:
       architecture in the fourteenth and fifteenth centuries. The sources read describe the inland delta only: the tradition
       is not claimed for the rest of the region, and the delta's mudbrick building beyond Mali is not written.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-djenne-djenno-1380966072.txt (sha256 b5351c101c20e01a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-djenne-djenno.txt (sha256 79da6a4418ebf9d3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [townspeople]
@@ -71,7 +71,7 @@ claims:
       are read as people grouped by their crafts, and of Djenné beside it. The villages of the delta are not described, so
       farmers are not named.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-djenne-djenno.txt (sha256 79da6a4418ebf9d3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-djenne-djenno.txt (sha256 79da6a4418ebf9d3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
     value: { walls: mudbrick }
@@ -92,7 +92,7 @@ claims:
       1930s, and moulded rectangular bricks since. The plan, size and roof of Jenne-jeno's houses are not described by the
       sources read, and are left to the generator.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-djenne-djenno-1380966072.txt (sha256 b5351c101c20e01a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-djenne-djenno.txt (sha256 79da6a4418ebf9d3) and wikipedia-djenne.txt (sha256 a6503137280dc897), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   settlement:
     prop: settlement_form
     value: { pattern: nucleated }
@@ -106,7 +106,7 @@ claims:
       specializing in their trades, and the main mound had a city wall. The same article elsewhere has the main mound
       surrounded by 69 other mounds. The villages of the delta are not described.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-djenne-djenno-1380966072.txt (sha256 b5351c101c20e01a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-djenne-djenno.txt (sha256 79da6a4418ebf9d3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   town:
     prop: town_form
     value: { wall: mudbrick, wall_thickness: 3.7 }
@@ -123,4 +123,4 @@ claims:
       round; the width is at the base, the only one given. It is the one town of the tradition whose wall is described, and
       Djenné's own, narrower record gives its wall of 1828. Its height, its gates and its streets are not given.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-djenne-djenno.txt (sha256 79da6a4418ebf9d3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-djenne-djenno.txt (sha256 79da6a4418ebf9d3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

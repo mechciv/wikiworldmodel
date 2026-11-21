@@ -23,7 +23,7 @@ claims:
     method: expert-estimate
     note: The start of the Kofun period in the source; the change from round to rectangular began in the Late Yayoi.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in west-2025-pit-to-surface-structures.txt (sha256 62e9aa916ad8c279), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in west-2025-pit-to-surface-structures.txt (sha256 62e9aa916ad8c279), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   end:
     prop: end
     value: 710 CE
@@ -36,10 +36,10 @@ claims:
     method: expert-estimate
     note: The end of the Kofun period, as the end of the broader tradition.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in west-2025-pit-to-surface-structures.txt (sha256 62e9aa916ad8c279), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in west-2025-pit-to-surface-structures.txt (sha256 62e9aa916ad8c279), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { plan: square }
+    value: { plan: square, smoke: chimney }
     source:
       - ref: src:jaanus-dictionary
         loc: s.v. tateana jūkyo
@@ -53,13 +53,26 @@ claims:
         quote: >-
           By the Kofun period (250-710 AD), rectangular pit structures became the dominant type and by the 5th century,
           round pit structures were completely phased out
+      - ref: src:jaanus-dictionary
+        loc: s.v. tateana jūkyo
+        quote: >-
+          this gave place to a *kamado 竈 set against a side wall and equipped with an external chimney stack in the
+          Kofun period.
+      - ref: src:west-2025-pit-to-surface-structures
+        loc: "p. 113, section 3.1"
+        quote: >-
+          In the latter half of the 5th century, migration from the Korean peninsula led to the adoption of stoves
+          (kamado) in pit dwellings, which were typically built along the walls of a house rather than in the center.
     method: expert-estimate
     note: >-
       The dictionary has the widespread Kofun pit square, with rounded corners; West calls the dominant pits
       rectangular, which in the sense of four straight sides rather than longer than wide is taken to agree. The stove
-      against the wall has no word in the vocabulary. No size is given.
+      (kamado) against the wall has no word in the vocabulary, but the dictionary gives it an external chimney stack,
+      which is "chimney". It came only in the latter half of the fifth century, so the pit houses of the third and
+      fourth centuries, which this record also draws, had instead the hearth dug into the earth that West says the stove
+      replaced. No size is given.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in jaanus-dictionary.txt (sha256 9d242cd750c47f8e) and west-2025-pit-to-surface-structures.txt (sha256 62e9aa916ad8c279), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in jaanus-dictionary.txt (sha256 9d242cd750c47f8e) and west-2025-pit-to-surface-structures.txt (sha256 62e9aa916ad8c279), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
 relations:
   broader:
     rel: member-of

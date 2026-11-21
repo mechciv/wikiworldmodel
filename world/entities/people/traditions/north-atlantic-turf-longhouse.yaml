@@ -20,7 +20,7 @@ claims:
     method: expert-estimate
     note: The ninth century, when Iceland was settled; the source gives no year.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-Icelandic_turf_house.txt (sha256 b900cc0e84632141), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-icelandic-turf-house.txt (sha256 613673125b6efd97), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   end:
     prop: end
     value: { lo: 1301 CE, hi: 1400 CE }
@@ -35,7 +35,7 @@ claims:
       The fourteenth century, when the longhouse was given up in Iceland, gradually. For Greenland, Jackson et al. (2018)
       have both longhouses and passage houses, and no source read says when the longhouse ended there.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-Icelandic_turf_house.txt (sha256 b900cc0e84632141), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-icelandic-turf-house.txt (sha256 613673125b6efd97), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["37", "13"] }
@@ -57,7 +57,7 @@ claims:
       southwest. A region named is where the sources place the house, not a claim that it covered the region; in Greenland
       the house stood only in the Norse settlements.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in nicosia-2022-PMC9432763-with-S1.txt (sha256 d9d52156e5f25fc8), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in jackson-2018-norse-greenland.txt (sha256 dbb283ce484827de) and nicosia-2022-oppeano-byre-houses.txt (sha256 7b64abc59f76e146), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   lifeway:
     prop: lifeway
     value: [farmers]
@@ -76,10 +76,10 @@ claims:
       home-fields; Table 2 describes the longhouse of both in its row on the farm. They lived largely by their livestock,
       with shielings for the summer, but on fixed farmsteads, so they are not named herders.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in jackson-2018-norse-greenland.txt (sha256 dbb283ce484827de), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in jackson-2018-norse-greenland.txt (sha256 dbb283ce484827de), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
-    value: { plan: long, walls: sod, roof_material: turf }
+    value: { plan: long, walls: sod, roof_material: turf, entrance: side }
     source:
       - ref: src:jackson-2018-norse-greenland
         loc: Table 2, row "Farm (Farmstead and Outbuildings)", column "Iceland"
@@ -100,10 +100,16 @@ claims:
       - ref: src:wikipedia-icelandic-turf-house
         loc: lead section
         quote: are timber structures with turf walls and turf as a cover for the roof.
+      - ref: src:wikipedia-medieval-scandinavian-architecture
+        loc: section "Icelandic turf houses"
+        quote: The doorway was place on the longitudinal side of the home and was the only entrance.
     method: excavation
     note: >-
       A long hall with a central hearth on a timber frame, its walls of turf (the vocabulary's sod) and its roof covered
       with turf. In Greenland, where wood was short, internal walls rather than posts carried the roof. The size is not
-      given in a source read, so the generator guesses it.
+      given in a source read, so the generator guesses it. The entrance is a single doorway in a long side, from the
+      encyclopedia's account of the Icelandic turf house, which speaks of the type through its centuries, not of the
+      Viking Age or Greenland in particular; the doorway, often decorated, was the only wood seen outside, the other
+      article says.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in jackson-2018-PMC6182579.txt (sha256 957fc9f64573e797), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in jackson-2018-norse-greenland.txt (sha256 dbb283ce484827de), wikipedia-icelandic-turf-house.txt (sha256 613673125b6efd97) and wikipedia-medieval-scandinavian-architecture.txt (sha256 70797e00aed3c6c0), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }

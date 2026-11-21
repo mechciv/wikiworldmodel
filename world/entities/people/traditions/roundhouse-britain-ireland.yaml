@@ -54,7 +54,7 @@ claims:
       gave way to round houses inside ringforts. That is Ireland's end; no source read dates the end of the round house in
       Britain.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in guiry-2025-PMC11793965.txt (sha256 dfdaf1fdf209da57), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in guiry-2025-irish-pigs.txt (sha256 48d8863665aaf795), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   extent:
     prop: extent
     value: { from: src:archaeoglobe-2019-regions, names: ["38"] }
@@ -96,7 +96,7 @@ claims:
       speaks of as small concentrations of farms or single farmsteads. That is Ireland; no source read says in so many
       words how the people of Britain's round houses lived.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in guiry-2025-irish-pigs.txt (sha256 48d8863665aaf795), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+      - { step: quoted, by: machine:quote-check, how: "Found in guiry-2025-irish-pigs.txt (sha256 48d8863665aaf795), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   dwelling:
     prop: dwelling
     value: { plan: round }
@@ -123,7 +123,7 @@ claims:
       - { step: quoted, by: machine:quote-check, how: "Found in parker-pearson-2025-cladh-hallan-part2.txt (sha256 d3eb66ef72db1f1b), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
   settlement:
     prop: settlement_form
-    value: { pattern: dispersed }
+    value: { pattern: dispersed, enclosure: none }
     source:
       ref: src:guiry-2025-irish-pigs
       loc: 'section "Pigs and proximity: nitrogen isotope compositions show change"'
@@ -133,6 +133,7 @@ claims:
     method: expert-estimate
     note: >-
       Scattered, unenclosed round houses in Ireland, through the Bronze and Iron Ages. The excavated sites in north Cork had
-      two and three round houses each (Johnston 2011).
+      two and three round houses each (Johnston 2011). Open, with nothing round them: the source's "unenclosed", which
+      it says of Ireland; nothing read says it of Britain, and the claim stands for both.
     checked:
-      - { step: quoted, by: machine:quote-check, how: "Found in guiry-2025-PMC11793965.txt (sha256 dfdaf1fdf209da57), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+      - { step: quoted, by: machine:quote-check, how: "Found in guiry-2025-irish-pigs.txt (sha256 48d8863665aaf795), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
