@@ -8,8 +8,8 @@ import { compileHusbandry, compileTraditions, type TownSpec, type Tradition } fr
 import type { Form } from '../../../../core/form.ts';
 import { lifewayOf, type AnthromeClass, type Assessment } from '../../../../core/landscape.ts';
 import type { LivingTaxon, SceneSpec, ScenePeople } from '../../../../core/scene.ts';
-import { houseSize } from '../dwellings.ts';
-import { LandUseMap, makeSettlement, toLocal, type Ground } from './v2.ts';
+import { houseSize, HOUSE_VARIANTS } from '../dwellings.ts';
+import { LandUseMap, makeSettlement, toLocal, type Ground } from './v3.ts';
 
 const ROOT = join(import.meta.dirname, '../../../..');
 const classes = (parse(readFileSync(join(ROOT, 'world/fields/people/anthromes.yaml'), 'utf8')) as { params: { classes: AnthromeClass[] } }).params.classes;
@@ -561,3 +561,200 @@ describe('the settlement generator', () => {
     }
   });
 });
+
+describe('how a tradition sets its houses out', () => {
+  const farmland = (traditions: Tradition[], density = 260) => makeSettlement(spec(world(() => ({ code: 23, density, region: 1 }), [{ id: 1, a: assess(1, 1, 3, 2) }], { traditions })), flat, dry, EXTENT);
+  const house = { plan: 'rectangular', width: 5, length: 8, walls: 'wattle-and-daub', roof: 'gable', roof_material: 'thatch' } as const;
+  const base = { regions: [1], span: [-500, 500] as [number, number], lifeways: ['farmers' as const] };
+  /** The houses of each settlement that are dwellings: what a settlement has of its own is told by its form. */
+  const dwellings = (plan: ReturnType<typeof farmland>, si: number) => plan.houses.filter((h) => h.settlement === si && !plan.forms[h.form].outbuilding);
+
+  it('draws each house in one of its shapes, and no bigger than its claims say', () => {
+    const plan = farmland(compileTraditions([{ id: 'test/house', label: 'A house', ...base, dwelling: { ...house, length: { lo: 7, hi: 12 } } }]));
+    expect(plan.houses.length).toBeGreaterThan(1000);
+    expect(new Set(plan.houses.map((h) => h.variant))).toEqual(new Set(Array.from({ length: HOUSE_VARIANTS }, (_, k) => k)));
+    expect(plan.houses.every((h) => h.size === 1)).toBe(true);
+  });
+
+  it('sets houses in a ring round open ground, their doors to the middle, where its tradition says so', () => {
+    const plan = farmland(compileTraditions([{ id: 'test/ring', label: 'A ring of houses', ...base, dwelling: house, settlement: { layout: 'ring', plaza: true, houses: 16, spacing: 14 } }]));
+    let seen = 0;
+    plan.settlements.forEach((s, si) => {
+      const mine = dwellings(plan, si);
+      if (mine.length < 16) return;
+      seen++;
+      const far = mine.map((h) => Math.hypot(h.x - s.x, h.y - s.y));
+      // All about as far from the middle, which is left open.
+      expect(Math.min(...far)).toBeGreaterThan(12);
+      expect(Math.max(...far) / Math.min(...far)).toBeLessThan(1.25);
+      for (const h of mine) {
+        // Its front points at the middle.
+        const d = Math.hypot(s.x - h.x, s.y - h.y);
+        expect((Math.sin(h.face) * (s.x - h.x) + Math.cos(h.face) * (s.y - h.y)) / d).toBeGreaterThan(0.95);
+      }
+    });
+    expect(seen).toBeGreaterThan(20);
+  });
+
+  it('sets houses in rows, and turns every house the way its tradition says they all faced', () => {
+    const rows = farmland(compileTraditions([{ id: 'test/rows', label: 'Rows of houses', ...base, dwelling: house, settlement: { layout: 'rows', houses: 24, spacing: 12 } }]));
+    let seen = 0;
+    rows.settlements.forEach((s, si) => {
+      const mine = dwellings(rows, si);
+      if (mine.length < 24) return;
+      seen++;
+      // Two ways only: a row faces the row across the way from it.
+      const ways = new Set(mine.map((h) => Math.round((((h.face % TAU) + TAU) % TAU) * 20)));
+      expect(ways.size).toBe(2);
+      void s;
+    });
+    expect(seen).toBeGreaterThan(20);
+    const south = farmland(compileTraditions([{ id: 'test/south', label: 'Houses that face south', ...base, dwelling: { ...house, faces: 'south' } }]));
+    expect(south.houses.length).toBeGreaterThan(1000);
+    for (const h of south.houses) expect(Math.abs(h.face - Math.PI)).toBeLessThan(0.16);
+  });
+
+  it("draws round a settlement what its tradition says enclosed it, and the generator's plain wall where it says only that one did", () => {
+    const palisaded = farmland(compileTraditions([{ id: 'test/palisade', label: 'A palisaded village', ...base, dwelling: house, settlement: { enclosure: 'palisade', houses: 20 } }]));
+    const lengths = palisaded.workForms.findIndex((f) => f.spec.kind === 'enclosure');
+    expect(palisaded.workForms[lengths]).toMatchObject({ spec: { word: 'palisade' }, from: 'test/palisade' });
+    let seen = 0;
+    palisaded.settlements.forEach((s, si) => {
+      const round = palisaded.works.filter((w) => w.settlement === si && w.form === lengths);
+      const mine = dwellings(palisaded, si);
+      if (mine.length < 20 || !round.length) return;
+      seen++;
+      // It stands outside every house, all the way round but for its ways in.
+      const reach = Math.max(...mine.map((h) => Math.hypot(h.x - s.x, h.y - s.y)));
+      const far = round.map((w) => Math.hypot(w.x - s.x, w.y - s.y));
+      expect(Math.min(...far)).toBeGreaterThan(reach + 2);
+      const run = palisaded.workForms[lengths].spec.run!;
+      expect(round.length).toBeGreaterThanOrEqual(Math.floor((TAU * Math.min(...far)) / run) - 3);
+      expect(round.length).toBeLessThan((TAU * Math.max(...far)) / run);
+    });
+    expect(seen).toBeGreaterThan(5);
+    const walled = farmland(compileTraditions([{ id: 'test/walled', label: 'A walled village', ...base, dwelling: house, settlement: { pattern: 'walled', houses: 20 } }]));
+    expect(walled.workForms.find((f) => f.spec.kind === 'enclosure')).toMatchObject({ spec: { word: 'wall' }, from: 'generic' });
+    // A tradition that says nothing of an enclosure has none.
+    expect(farmland(compileTraditions([{ id: 'test/open', label: 'An open village', ...base, dwelling: house }])).workForms.find((f) => f.spec.kind === 'enclosure')).toBeUndefined();
+  });
+
+  it("draws what a settlement had of its own among its houses, and a household's things with its house", () => {
+    const traditions = compileTraditions([
+      {
+        id: 'test/village',
+        label: 'A village with a hall',
+        ...base,
+        dwelling: house,
+        settlement: { houses: 30, yard: 'fence' },
+        outbuildings: [
+          { use: 'hall', per: 'settlement', plan: 'rectangular', length: 16, width: 7 },
+          { use: 'well', per: 'settlement' },
+          { use: 'granary', per: 'house', count: 1 },
+        ],
+      },
+    ]);
+    const plan = farmland(traditions);
+    const hall = plan.forms.findIndex((f) => f.outbuilding?.use === 'hall');
+    expect(plan.forms[hall]).toMatchObject({ from: 'tradition', tradition: 'test/village', label: 'A meeting house', spec: { length: 16, width: 7, walls: 'wattle-and-daub' } });
+    const well = plan.workForms.findIndex((f) => f.spec.kind === 'well');
+    expect(plan.workForms[well]).toMatchObject({ label: 'A well', from: 'test/village' });
+    let seen = 0;
+    plan.settlements.forEach((s, si) => {
+      const mine = dwellings(plan, si);
+      if (mine.length < 30) return;
+      seen++;
+      // One hall and one well, near its middle; and no house counted that is none.
+      const halls = plan.houses.filter((h) => h.settlement === si && h.form === hall);
+      expect(halls.length).toBe(1);
+      expect(Math.hypot(halls[0].x - s.x, halls[0].y - s.y)).toBeLessThan(s.r);
+      expect(plan.works.filter((w) => w.settlement === si && w.form === well).length).toBe(1);
+      expect(s.houses).toBe(mine.length);
+    });
+    expect(seen).toBeGreaterThan(20);
+    // Each house has its yard: fenced, with its granary in it; and the panel can say whose claim that is.
+    const home = plan.forms.find((f) => f.tradition === 'test/village' && !f.outbuilding)!;
+    expect(home.home).toMatchObject({ yard: 'fence', out: [{ use: 'granary', count: 1 }] });
+    expect(home.by!.map((x) => x.from)).toEqual(['test/village', 'test/village']);
+    expect(home.by![0].text).toMatch(/^a granary/);
+  });
+
+  it("draws a town's house no wider than the ground its town gives it, so that none stands in its neighbour", () => {
+    const traditions = compileTraditions([{ id: 'test/great-house', label: 'A great house', regions: [1], span: [-500, 500], lifeways: ['townspeople'], dwelling: { plan: 'courtyard', court: true, width: 30, length: 30, walls: 'mudbrick', roof: 'flat' }, town: { streets: 'grid' } }]);
+    const p = world(() => ({ code: 23, density: 100, region: 1 }), [{ id: 1, a: assess(1, 1, 3, 2) }], { traditions, cities: [{ name: 'Tight Town', country: 'Nowhere', lat: 0, lon: 0, people: 6000, field: 'field:test', source: 'src:test', from: 'list' }] });
+    const plan = makeSettlement(spec(p), flat, dry, EXTENT);
+    const town = plan.settlements.findIndex((s) => s.city === 'Tight Town');
+    const form = plan.forms[plan.settlements[town].form];
+    // Thirty metres of house on a few hundred square metres of ground: drawn smaller, and said to be.
+    expect(form.grow).toBeLessThan(1);
+    const size = houseSize(form.spec, 0, form.grow);
+    const mine = plan.houses.filter((h) => h.settlement === town);
+    expect(mine.length).toBeGreaterThan(500);
+    for (const h of mine.slice(0, 150)) {
+      const near = Math.min(...mine.filter((o) => o !== h).map((o) => Math.hypot(o.x - h.x, o.y - h.y)));
+      expect(near).toBeGreaterThanOrEqual(Math.min(size.w, size.l) - 0.05);
+    }
+  });
+
+  it('lets no house of a town of winding lanes stand in its neighbour, and still houses the town', () => {
+    const town = (streets: 'grid' | 'lanes') => {
+      const traditions = compileTraditions([{ id: 'test/great-house', label: 'A great house', regions: [1], span: [-500, 500], lifeways: ['townspeople'], dwelling: { plan: 'courtyard', court: true, width: 30, length: 30, walls: 'mudbrick', roof: 'flat' }, town: { streets } }]);
+      const p = world(() => ({ code: 23, density: 100, region: 1 }), [{ id: 1, a: assess(1, 1, 3, 2) }], { traditions, cities: [{ name: 'Tight Town', country: 'Nowhere', lat: 0, lon: 0, people: 6000, field: 'field:test', source: 'src:test', from: 'list' }] });
+      const plan = makeSettlement(spec(p), flat, dry, EXTENT);
+      const si = plan.settlements.findIndex((s) => s.city === 'Tight Town');
+      const form = plan.forms[plan.settlements[si].form];
+      return { size: houseSize(form.spec, 0, form.grow), houses: plan.houses.filter((h) => h.settlement === si) };
+    };
+    const { size, houses } = town('lanes');
+    // Two houses stand apart where a line parts them: along the front or the side of either.
+    const apart = (a: (typeof houses)[0], b: (typeof houses)[0]): boolean => {
+      for (const f of [a.face, a.face + Math.PI / 2, b.face, b.face + Math.PI / 2]) {
+        const nx = Math.sin(f);
+        const ny = Math.cos(f);
+        const reach = (h: (typeof houses)[0]) => (size.l / 2) * Math.abs(nx * Math.sin(h.face) + ny * Math.cos(h.face)) + (size.w / 2) * Math.abs(nx * Math.cos(h.face) - ny * Math.sin(h.face));
+        if (Math.abs(nx * (b.x - a.x) + ny * (b.y - a.y)) >= reach(a) + reach(b)) return true;
+      }
+      return false;
+    };
+    let turned = 0;
+    for (let i = 0; i < houses.length; i++) {
+      for (let j = i + 1; j < houses.length; j++) {
+        if (Math.hypot(houses[j].x - houses[i].x, houses[j].y - houses[i].y) > Math.hypot(size.w, size.l)) continue;
+        expect(apart(houses[i], houses[j])).toBe(true);
+      }
+      if (Math.abs(Math.sin(houses[i].face - houses[0].face)) > 0.1 && Math.abs(Math.cos(houses[i].face - houses[0].face)) > 0.1) turned++;
+    }
+    // Its lanes wander, and its houses front them as they run; and it has the houses a town of straight streets has.
+    expect(turned).toBeGreaterThan(houses.length * 0.2);
+    expect(houses.length).toBe(town('grid').houses.length);
+  });
+
+  it("keeps a city's houses off the ground of a city that adjoins it", () => {
+    const city = (name: string, lat: number) => ({ name, country: 'Nowhere', lat, lon: 0, people: 6000, field: 'field:test', source: 'src:test', from: 'list' as const });
+    const p = world(() => ({ code: 23, density: 100, region: 1 }), [{ id: 1, a: assess(1, 1, 3, 2) }], { cities: [city('Old Town', 0), city('New Town', 0.0015)] });
+    const plan = makeSettlement(spec(p), flat, dry, EXTENT);
+    const old = plan.settlements.findIndex((s) => s.city === 'Old Town');
+    const young = plan.settlements.findIndex((s) => s.city === 'New Town');
+    const A = plan.settlements[old];
+    const B = plan.settlements[young];
+    // The two would take some of the same ground: the one that comes first keeps it.
+    expect(Math.hypot(B.x - A.x, B.y - A.y)).toBeLessThan((A.r + B.r) * 0.8);
+    const theirs = plan.houses.filter((h) => h.settlement === young);
+    expect(theirs.length).toBeGreaterThan(200);
+    for (const h of theirs) expect(Math.hypot(h.x - A.x, h.y - A.y)).toBeGreaterThanOrEqual(A.r);
+    expect(plan.houses.filter((h) => h.settlement === old).length).toBeGreaterThan(theirs.length);
+  });
+
+  it('draws a house that stands for several households wider and longer, and not as a bigger copy of itself', () => {
+    const traditions = compileTraditions([{ id: 'test/town-house', label: 'A town house', regions: [1], span: [-500, 500], lifeways: ['townspeople'], dwelling: { plan: 'rectangular', width: 5, length: 9, walls: 'mudbrick', roof: 'flat' }, town: { streets: 'grid' } }]);
+    const p = world(() => ({ code: 23, density: 100, region: 1 }), [{ id: 1, a: assess(1, 1, 3, 2) }], { traditions, cities: [{ name: 'Great City', country: 'Nowhere', lat: 0, lon: 0, people: 600000, field: 'field:test', source: 'src:test', from: 'list' }] });
+    const plan = makeSettlement(spec(p), flat, dry, EXTENT);
+    const city = plan.settlements.findIndex((s) => s.city === 'Great City');
+    const form = plan.forms[plan.settlements[city].form];
+    expect(form.grow).toBeGreaterThan(1);
+    expect(houseSize(form.spec, 0, form.grow).w).toBeCloseTo(houseSize(form.spec, 0).w * form.grow!, 6);
+    expect(plan.houses.filter((h) => h.settlement === city).every((h) => h.size === 1)).toBe(true);
+  });
+});
+
+const TAU = 2 * Math.PI;

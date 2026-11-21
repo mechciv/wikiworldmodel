@@ -1,32 +1,43 @@
 // What stands in a settlement besides its houses: the pieces of a town's wall, its towers and its gates, the water of
-// its canals and its moat (core/dwelling.ts, TownSpec); and, of any settlement, the people by its houses and the boats
-// on its water. Each is one small thing drawn many times where the settlement generator puts it, as a house is drawn
-// many times over a village. Nothing here is a fact about any town: what a wall was made of, how high it stood and how
-// many gates it had come from the claims, and what they leave open is drawn plainly, as a type; the people and the
-// boats rest on no claim at all, and are the plainest there are. A piece runs along x, its outside facing +y; the frame
-// places it.
-import type { TownSpec } from '../../../core/dwelling.ts';
-import { box, cap, figure, MAT, person, prism, type Mesh } from '../city/kit.ts';
+// its canals and its moat (core/dwelling.ts, TownSpec); what stood round a village and in it, a fence, a hedge, a
+// palisade, a bank, a ditch, a pen, a well, an oven, a rack, a stack, a threshing floor, a pond, a pole (yard.ts); and,
+// of any settlement, the people by its houses and the boats on its water. Each is one small thing drawn many times
+// where the settlement generator puts it, as a house is drawn many times over a village. Nothing here is a fact about
+// any town: what a wall was made of, how high it stood and how many gates it had come from the claims, and what they
+// leave open is drawn plainly, as a type; the people and the boats rest on no claim at all. A piece runs along x, its
+// outside facing +y; the frame places it.
+import type { EnclosureWord, TownSpec } from '../../../core/dwelling.ts';
+import { box, cap, MAT, prism, type Mesh } from '../city/kit.ts';
 import type { Poly } from '../city/math.ts';
 import type { HouseDetail } from './dwellings.ts';
+import { drawPerson } from './figures.ts';
+import { reset } from './parts.ts';
+import { drawFloor, drawOven, drawPole, drawPond, drawRack, drawStack, drawWell, enclosurePiece, ENCLOSURE_SIZE, penRing } from './yard.ts';
 
 /** What a wall is made of, where a town has one. */
 export type WallWord = Exclude<NonNullable<TownSpec['wall']>, 'none'>;
 
-export type WorkKind = 'wall' | 'tower' | 'gate' | 'canal' | 'moat' | 'person' | 'boat';
+export type WorkKind = 'wall' | 'tower' | 'gate' | 'canal' | 'moat' | 'person' | 'boat' | 'enclosure' | 'pen' | 'well' | 'oven' | 'rack' | 'stack' | 'floor' | 'pond' | 'pole';
 
-/** One kind of piece: a length of wall, a tower, a gate, a length of water, a person or a boat. Metres. */
+/** One kind of piece: a length of wall, a tower, a gate, a length of water, a person, a boat, or something of a yard. Metres. */
 export interface WorkSpec {
   kind: WorkKind;
   /** what a wall, a tower or a gate is made of */
   material?: WallWord;
-  /** how high a wall stands, a person is, or a boat's side rises; nothing for water */
+  /** how high a wall stands, a person is, a boat's side rises, or a rack, a stack or a pole stands; nothing for water */
   height: number;
-  /** how thick a wall is at its foot, how wide the water is, or how long a boat is */
+  /** how thick a wall is at its foot, how wide the water is, how long a boat is, or how far across a pen, an oven, a floor or a pond is */
   thickness: number;
   /** how wide a gate's way through is, or a boat's beam */
   opening?: number;
+  /** what a length of enclosure or a pen is of, how long one length is, and what a wall of it is drawn as (a material of the kit) */
+  word?: Exclude<EnclosureWord, 'none'>;
+  run?: number;
+  stuff?: number;
 }
+
+/** The kinds too small to be made out from far off: drawn only once they are a few pixels tall. */
+export const smallWork = (k: WorkKind): boolean => k !== 'wall' && k !== 'tower' && k !== 'gate' && k !== 'canal' && k !== 'moat' && k !== 'floor' && k !== 'pond';
 
 /** How long one piece of wall or of water is: a run that does not divide by it has its pieces overlap a little. */
 export const PIECE = 8;
@@ -41,9 +52,13 @@ export const towerSide = (s: WorkSpec): number => Math.max(4.5, s.thickness * 1.
 
 /** The top of a piece, for how big it comes out on the screen: water is taken by its width. */
 export function workTop(s: WorkSpec): number {
-  if (s.kind === 'canal' || s.kind === 'moat') return Math.max(1.5, s.thickness * 0.5);
-  if (s.kind === 'person') return s.height;
+  if (s.kind === 'canal' || s.kind === 'moat' || s.kind === 'floor' || s.kind === 'pond') return Math.max(1.5, s.thickness * 0.5);
+  if (s.kind === 'person' || s.kind === 'rack' || s.kind === 'stack' || s.kind === 'pole') return s.height;
   if (s.kind === 'boat') return Math.max(1, s.thickness * 0.3);
+  if (s.kind === 'enclosure') return (s.height || ENCLOSURE_SIZE[s.word ?? 'fence'].height) + 0.3;
+  if (s.kind === 'pen') return Math.max(2, s.thickness * 0.35);
+  if (s.kind === 'well') return 2;
+  if (s.kind === 'oven') return Math.max(1, s.thickness * 0.6);
   if (s.kind === 'wall') return s.height + 1;
   return s.height * 1.35 + 1;
 }
@@ -100,18 +115,30 @@ function tower(m: Mesh, s: WorkSpec, x: number, detail: HouseDetail): void {
   parapet(m, x - side / 2, x + side / 2, y1, h, detail);
 }
 
-/** A piece of a town's works, drawn into a mesh at the frame's origin. `tint` varies its colour a little between pieces. */
-export function drawWork(m: Mesh, s: WorkSpec, detail: HouseDetail, tint = 128): void {
+/** How many ways one kind of piece is drawn. */
+export const WORK_VARIANTS = 8;
+
+/** A piece of a settlement's works, drawn into a mesh at the frame's origin. `variant` is which of its shapes it is. */
+export function drawWork(m: Mesh, s: WorkSpec, detail: HouseDetail, variant = 0): void {
+  reset(m);
+  const tint = 118 + (variant & 3) * 6;
   m.tint = tint;
+  m.light = 1;
   const half = PIECE / 2;
   if (s.kind === 'person') {
-    // Someone standing by the houses: the same plain figure for everyone, everywhere, but for the cloth, which `tint` varies.
-    if (detail === 2) {
-      m.mat = MAT.cloth;
-      figure(m, 0, 0, 0, s.height, 0);
-    } else person(m, 0, 0, 0, s.height, (tint * 53 + 40) & 255, 128 + (tint & 3));
+    // Someone by the houses: how they stand and what they wear is the generator's, and no record's.
+    drawPerson(m, s.height, variant, detail, (variant * 53 + 40) & 255, 128 + (variant & 3));
     return;
   }
+  if (s.kind === 'enclosure') return enclosurePiece(m, s.word ?? 'fence', s.run ?? PIECE, detail, variant, s.stuff ?? MAT.mud, s.height || undefined);
+  if (s.kind === 'pen') return penRing(m, s.word ?? 'fence', s.thickness / 2, detail, variant, s.stuff ?? MAT.mud);
+  if (s.kind === 'well') return drawWell(m, detail);
+  if (s.kind === 'oven') return drawOven(m, detail, s.thickness);
+  if (s.kind === 'rack') return drawRack(m, detail, s.thickness, s.height, variant);
+  if (s.kind === 'stack') return drawStack(m, detail, s.thickness, s.height);
+  if (s.kind === 'floor') return drawFloor(m, detail, s.thickness);
+  if (s.kind === 'pond') return drawPond(m, detail, s.thickness);
+  if (s.kind === 'pole') return drawPole(m, detail, s.height, s.stuff === MAT.rubble);
   if (s.kind === 'boat') {
     // A plain open hull of wood, pointed at both ends, afloat with its floor under the water's line.
     const l = s.thickness / 2;

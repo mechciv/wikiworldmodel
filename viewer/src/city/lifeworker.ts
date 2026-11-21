@@ -4,7 +4,7 @@
 import type { Fingerprint } from '../../../core/fingerprint.ts';
 import type { SceneSpec } from '../../../core/scene.ts';
 import { FAST_BUDGET, FULL_BUDGET, SceneStream, type Batch, type LifeView, type ProtoMesh } from '../../../world/generators/life/stream.ts';
-import type { PlanForm, Settlement, SettlementPlan, WorkForm } from '../../../world/generators/people/settlement/v2.ts';
+import type { PlanForm, Settlement, SettlementPlan, WorkForm } from '../../../world/generators/people/settlement/v3.ts';
 
 /** What a scene's people are, for its panel: the plan without its houses. */
 export interface PeopleSummary {
@@ -17,7 +17,7 @@ export interface PeopleSummary {
   animals: number;
   /** how many paths run between its settlements */
   paths: number;
-  settlements: { pattern: string; houses: number; people: number; city?: string; record?: string; from?: Settlement['from']; town?: Settlement['town']; husbandry?: string; tier: string; form: number; region: number; x: number; y: number; r: number }[];
+  settlements: { pattern: string; houses: number; people: number; city?: string; record?: string; from?: Settlement['from']; town?: Settlement['town']; husbandry?: string; tier: string; form: number; region: number; x: number; y: number; r: number; house?: [number, number, number] }[];
   houses: number;
   drawn: number;
   expected: number;
@@ -57,6 +57,18 @@ self.onmessage = (e: MessageEvent<ToLifeWorker>) => {
     const fields = stream.fields(512)?.data;
     const paths = stream.paths();
     const pl = stream.people;
+    // A house of each settlement, the nearest its middle: where it stands and which way it faces, for a look at it.
+    const houseOf = new Map<number, [number, number, number]>();
+    const nearest = new Map<number, number>();
+    for (const h of pl?.houses ?? []) {
+      if (pl!.forms[h.form].outbuilding) continue;
+      const s = pl!.settlements[h.settlement];
+      const d = Math.hypot(h.x - s.x, h.y - s.y);
+      if (d < (nearest.get(h.settlement) ?? Infinity)) {
+        nearest.set(h.settlement, d);
+        houseOf.set(h.settlement, [Math.round(h.x * 10) / 10, Math.round(h.y * 10) / 10, Math.round(h.face * 100) / 100]);
+      }
+    }
     const people: PeopleSummary | undefined = pl && {
       forms: pl.forms,
       works: pl.workForms,
@@ -64,7 +76,7 @@ self.onmessage = (e: MessageEvent<ToLifeWorker>) => {
       kept: m.spec.people?.kept?.length ?? 0,
       animals: pl.animals.length,
       paths: pl.paths.length,
-      settlements: pl.settlements.map((x) => ({ pattern: x.pattern, houses: x.houses, people: Math.round(x.people), ...(x.city ? { city: x.city } : {}), ...(x.record ? { record: x.record } : {}), ...(x.from ? { from: x.from } : {}), ...(x.town ? { town: x.town } : {}), ...(x.husbandry ? { husbandry: x.husbandry } : {}), tier: x.tier, form: x.form, region: x.region, x: Math.round(x.x), y: Math.round(x.y), r: Math.round(x.r) })),
+      settlements: pl.settlements.map((x, i) => ({ ...(houseOf.has(i) ? { house: houseOf.get(i)! } : {}), pattern: x.pattern, houses: x.houses, people: Math.round(x.people), ...(x.city ? { city: x.city } : {}), ...(x.record ? { record: x.record } : {}), ...(x.from ? { from: x.from } : {}), ...(x.town ? { town: x.town } : {}), ...(x.husbandry ? { husbandry: x.husbandry } : {}), tier: x.tier, form: x.form, region: x.region, x: Math.round(x.x), y: Math.round(x.y), r: Math.round(x.r) })),
       houses: pl.houses.length,
       drawn: pl.drawn,
       expected: pl.expected,

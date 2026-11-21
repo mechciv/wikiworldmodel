@@ -58,6 +58,32 @@ export const MAT = {
   leafMass: 48,
   // A card of a tuft's blades, as the ground's cover is drawn close by (step 2).
   bladeCard: 49,
+  // What houses are built of, beyond the city's own materials (world/generators/people/dwellings.ts): woven branches,
+  // limewash, a timber frame with its panels, logs, planks, rough stone, woven mats, felt, sewn hides, cloth of hair,
+  // turf, snow, an earthen roof, shingles, leaves, brushwood, reeds in bundles, rope, painted plaster, bricks of mud.
+  // Their colours are the renderer's, and nobody's record.
+  wattle: 50,
+  limewash: 51,
+  halftimber: 52,
+  logs: 53,
+  planks: 54,
+  rubble: 55,
+  matting: 56,
+  felt: 57,
+  tanned: 58,
+  haircloth: 59,
+  sod: 60,
+  snow: 61,
+  earthroof: 62,
+  shingle: 63,
+  leafthatch: 64,
+  brushwood: 65,
+  reedwork: 66,
+  rope: 67,
+  painted: 68,
+  adobe: 69,
+  // Fired tiles on a house's roof: the city's own tile is Rome's.
+  claytile: 70,
 } as const;
 
 export type Material = (typeof MAT)[keyof typeof MAT];

@@ -10,7 +10,18 @@ type Rgb = [number, number, number];
 
 /** A colour for each material: enough to tell the parts apart. */
 const TONE: Record<number, Rgb> = {
+  3: [150, 92, 66],
+  4: [196, 176, 142],
+  5: [176, 100, 62],
+  8: [140, 128, 124],
+  9: [112, 80, 52],
   10: [24, 22, 20],
+  13: [196, 172, 128],
+  18: [96, 124, 60],
+  22: [118, 104, 70],
+  26: [190, 182, 164],
+  27: [150, 108, 80],
+  30: [60, 96, 110],
   31: [132, 118, 88],
   32: [214, 200, 160],
   33: [110, 104, 62],
@@ -22,9 +33,33 @@ const TONE: Record<number, Rgb> = {
   39: [110, 130, 150],
   40: [176, 136, 92],
   41: [70, 54, 44],
+  42: [172, 142, 84],
+  43: [156, 126, 92],
+  // What houses are built of (world/generators/city/kit.ts): woven branches to bricks of mud.
+  50: [136, 108, 70],
+  51: [226, 220, 204],
+  52: [206, 190, 160],
+  53: [124, 90, 58],
+  54: [132, 100, 66],
+  55: [146, 138, 126],
+  56: [186, 160, 104],
+  57: [206, 200, 186],
+  58: [176, 146, 104],
+  59: [50, 44, 40],
+  60: [104, 110, 66],
+  61: [232, 238, 244],
+  62: [132, 116, 80],
+  63: [120, 104, 86],
+  64: [120, 126, 70],
+  65: [110, 92, 66],
+  66: [182, 162, 100],
+  67: [92, 76, 56],
+  68: [208, 170, 120],
+  69: [166, 132, 96],
+  70: [122, 108, 100],
 };
 
-class Canvas {
+export class Canvas {
   readonly rgb: Uint8Array;
   readonly z: Float32Array;
   constructor(readonly w: number, readonly h: number) {
@@ -44,7 +79,7 @@ class Canvas {
 }
 
 /** A view: which way each of the mesh's axes goes on the page. */
-interface View {
+export interface View {
   title: string;
   /** a vertex's page coordinates and its depth, before scaling */
   project: (x: number, y: number, z: number) => [number, number, number];
@@ -52,9 +87,9 @@ interface View {
   light: [number, number, number];
 }
 
-const SIDE: View = { title: 'SIDE', project: (x, y, z) => [y, z, x], light: [-0.55, 0.45, 0.7] };
-const FRONT: View = { title: 'FRONT', project: (x, y, z) => [x, z, -y], light: [0.4, 0.55, 0.73] };
-const TOP: View = { title: 'TOP', project: (x, y, z) => [y, x, -z], light: [0.3, 0.3, 0.9] };
+export const SIDE: View = { title: 'SIDE', project: (x, y, z) => [y, z, x], light: [-0.55, 0.45, 0.7] };
+export const FRONT: View = { title: 'FRONT', project: (x, y, z) => [x, z, -y], light: [0.4, 0.55, 0.73] };
+export const TOP: View = { title: 'TOP', project: (x, y, z) => [y, x, -z], light: [0.3, 0.3, 0.9] };
 
 function drawMesh(cv: Canvas, m: Mesh, view: View, ox: number, oy: number, scale: number): void {
   const { vertices, indices } = m.arrays();
@@ -111,7 +146,7 @@ const GLYPHS: Record<string, string> = {
   '.': '00000000000000000000000000110001100', '-': '00000000000000011111000000000000000', ':': '00000011000110000000011000110000000', '/': '00001000010001000100010001000010000', '(': '00010001000100001000010000010000010', ')': '01000001000001000010000100010001000', ',': '00000000000000000000001100010001000', ' ': '00000000000000000000000000000000000',
 };
 
-function text(cv: Canvas, s: string, x: number, y: number, scale = 2, c: Rgb = [40, 40, 44]): void {
+export function text(cv: Canvas, s: string, x: number, y: number, scale = 2, c: Rgb = [40, 40, 44]): void {
   let px = x;
   for (const ch of s.toUpperCase()) {
     const g = GLYPHS[ch] ?? GLYPHS[' '];
@@ -167,7 +202,7 @@ const niceStep = (span: number) => {
 };
 
 /** Draw one mesh in a panel of the sheet, scaled to fit, with its ground line and scale. */
-function panel(cv: Canvas, m: Mesh, view: View, x: number, y: number, w: number, h: number, title: string, fit: number): void {
+export function panel(cv: Canvas, m: Mesh, view: View, x: number, y: number, w: number, h: number, title: string, fit: number): void {
   cv.rect(x, y, x + w - 2, y + h - 2, [248, 248, 246]);
   text(cv, title, x + 6, y + 6, 1);
   const { vertices } = m.arrays();

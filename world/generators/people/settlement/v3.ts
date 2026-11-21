@@ -1,4 +1,4 @@
-// The settlement generator, version 2 (docs/HUMAN-LANDSCAPE.md): the anonymous human landscape of a scene. From the
+// The settlement generator, version 3 (docs/HUMAN-LANDSCAPE.md): the anonymous human landscape of a scene. From the
 // people part of a scene's spec it lays out where people lived, how many houses, of what kind, and the fields and
 // pastures around them, in the scene's local metres. Nobody recorded any of these houses: how many there are follows
 // HYDE's people through the anthromes, and the cities of the lists and of the world's records where they name one; what
@@ -18,10 +18,24 @@
 //   - Seeds are whole numbers. Version 1 seeded each cell and each settlement with a number between 0 and 1, which the
 //     hashes read as 0: every cell laid its settlements out alike, and every village its houses.
 //
+// Version 3 (docs/slices/SEVENTEENTH-SLICE.md):
+//   - A house is drawn in one of several shapes of its dwelling, each with sizes of its own within the ranges its
+//     tradition's claims give, and as big as they say: version 2 drew one shape, shrunk or swollen by a share. A house
+//     that stands for several households is drawn wider and longer, its storeys and doors as they were.
+//   - A house stands in its yard: what its tradition says enclosed each yard, and what it says stood by each house, are
+//     drawn with the house as one thing (dwellings.ts, Homestead).
+//   - Houses stand in a ring or in rows, round open ground, and face the way they all faced, where their tradition's
+//     claims say so; a fence, a hedge, a palisade, a bank, a ditch or a wall stands round a settlement where its
+//     tradition says one did; and what a settlement had of its own, a hall, a shrine, a well, a pen, stands among its
+//     houses or at their edge.
+//   - What a tradition leaves unsaid of its house is taken from the generator's own house only as far as that fits
+//     what it does say (dwellings.ts, fillDwelling): a round house takes no gable, a court no farmhouse's width.
+//   - The ground is trodden round each house, and no longer in a disc at the middle of houses that stand far apart.
+//
 // Everything is seeded by the world's 5′ cells and the anthromes' step, not by the scene, so two scenes that overlap put
 // their settlements in the same places: only the ground they stand on, which is the scene's, can move one a little.
-import { houseSize } from '../dwellings.ts';
-import { husbandryAt, mid, prevalenceOf, townText, traditionFor, within, type DwellingSpec, type FieldSpec, type LifewayWord, type SettlementSpec, type TownSpec, type Tradition } from '../../../../core/dwelling.ts';
+import { fillDwelling, homesteadOf, houseSize, HOUSE_VARIANTS, outbuildingSpec, type Homestead, type HouseDims, type OutbuildingParams } from '../dwellings.ts';
+import { husbandryAt, mid, OUTBUILDING_LABEL, OUTBUILDING_ROOFED, outbuildingText, prevalenceOf, townText, traditionFor, within, type DwellingSpec, type EnclosureWord, type FieldSpec, type LifewayWord, type OutbuildingUse, type TownSpec, type Tradition } from '../../../../core/dwelling.ts';
 import { anthromeOf, lifewayOf, LIFEWAY_OF, type CityNear, type FieldUse, type Lifeway, type Pattern } from '../../../../core/landscape.ts';
 import type { ClimateClass } from '../../../../core/climate.ts';
 import type { SceneSpec } from '../../../../core/scene.ts';
@@ -29,9 +43,11 @@ import { dcos, hash2, hash3, PI, Rng, TAU } from '../../city/math.ts';
 import { POSE } from '../../life/forms.ts';
 import { fbm, noise } from '../../life/land.ts';
 import { PIECE, towered, towerSide, type WallWord, type WorkSpec } from '../works.ts';
+import { ENCLOSURE_SIZE } from '../yard.ts';
+import { MAT } from '../../city/kit.ts';
 
 export const GENERATOR = 'gen:people/settlement';
-export const VERSION = 2;
+export const VERSION = 3;
 
 const EARTH = 6371000;
 const DEG = PI / 180;
@@ -73,6 +89,8 @@ export interface TownParams {
   canal_every: number;
   /** more ground than this to a house, m², and a city is too thin on the ground for streets: its houses stand apart */
   open_lot: number;
+  /** how many times deeper than wide a lot may be, where a house is narrower than its ground: its yard lies behind it */
+  deep: number;
 }
 
 /**
@@ -94,6 +112,11 @@ export interface LivestockParams {
 export interface SettlementParams {
   /** people to a house where no tradition says */
   household: number;
+  /**
+   * how far apart houses set in a ring or in rows stand, where their tradition says they stood so and not how far
+   * apart: in lengths of a house, from the middle of one to the middle of the next
+   */
+  compact: number;
   patterns: Record<Exclude<Pattern, 'none'>, PatternParams>;
   /** the houses drawn where no tradition holds: for foragers and herders, for towns and cities, and for farmers by climate */
   /** town and city change the farmer's house of the climate: more storeys, a rectangular plan */
@@ -142,6 +165,17 @@ export interface SettlementParams {
    * has its scale and its ways. No record says anything of any of them; without these parameters none are drawn.
    */
   figures?: { per_house: number; most_in_settlement: number; most: number; height: number };
+  /**
+   * What stood by the houses, where a tradition's `outbuildings` name it: how many where none is counted, and the plain
+   * one of each use (dwellings.ts, OutbuildingParams); and the most of a settlement's own things a scene draws
+   */
+  outbuildings?: OutbuildingParams & { most: number };
+  /**
+   * What stood round a settlement, where its tradition's `settlement_form` says: how long one length of it is drawn, m;
+   * how many ways in it has; what is drawn round a settlement its tradition calls walled and says no more of; and the
+   * most lengths a scene draws, laid from its middle outward
+   */
+  enclosures?: { run: number; gates: number; unstated: Exclude<EnclosureWord, 'none'>; most: number };
   boats?: { length: number; beam: number; side: number; reach: number; depth: number; most_in_settlement: number };
   paths?: { width: number; reach: number; each: number; most_km: number; wander: number; patterns: Pattern[] };
   /** the most houses a scene draws: past it, each house stands for more people, and the plan says how many */
@@ -177,8 +211,10 @@ export interface House {
   /** its dwelling, in the plan's list, and its settlement */
   form: number;
   settlement: number;
-  /** a share of its dwelling's size, about 1 */
+  /** a share of its dwelling's size: 1, as a house is drawn as big as its claims say */
   size: number;
+  /** which of its dwelling's shapes it is drawn in (dwellings.ts, HOUSE_VARIANTS) */
+  variant: number;
   /** 0–255: lower ones stay in view from further off */
   rank: number;
 }
@@ -196,6 +232,14 @@ export interface PlanForm {
   kin?: LifewayWord;
   /** which tradition gave each part, where it is a tradition's */
   parts?: Record<string, string>;
+  /** how much wider and longer it is drawn, where one house stands for several households */
+  grow?: number;
+  /** its yard, drawn with it: what encloses it, and what of its household's stands in it (dwellings.ts) */
+  home?: Homestead;
+  /** what its tradition says stood by each house and what enclosed each yard, in words, and whose claims those are */
+  by?: { text: string; from: string }[];
+  /** where it is no house but something its settlement had: what, in words, and that it was the settlement's */
+  outbuilding?: { use: OutbuildingUse; text: string };
 }
 
 /** A piece of a town's works: a length of wall, a tower, a gate, a length of a canal or a moat (works.ts). */
@@ -243,6 +287,8 @@ export interface Settlement {
   husbandry?: string;
   /** what everything invented of it is seeded by: its cell and its place in it, or a city's place */
   seed: number;
+  /** its houses stand far apart, each on its own ground: the ground between them is not trodden bare */
+  loose?: boolean;
 }
 
 export interface SettlementPlan {
@@ -322,23 +368,62 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
   // most of them lived in.
   const parts = prevalenceOf(P.generator.params);
   const traditionOf = (region: number, pattern: Exclude<Pattern, 'none'>, u?: number) => traditionFor(P.traditions, region, P.t, LIFEWAY_OF[pattern], parts, u);
-  const formOf = (pattern: Pattern, t: Tradition | undefined, kin?: LifewayWord): number => {
+  // The side of the ground one house has to itself: what a tradition says of how far apart its houses stood, as the
+  // distance from one to the next where that is more than a house, and as the gap between them where it is less.
+  const lotOf = (pattern: Exclude<Pattern, 'none'>, t: Tradition | undefined): number => {
+    const stated = mid(t?.settlement.spacing, 0);
+    if (!(stated > 0) && !t?.settlement.layout) return p.patterns[pattern].lot;
+    const size = houseSize(t && Object.keys(t.dwelling).length ? fillDwelling(t.dwelling, genericFor(p, pattern, climate).spec) : genericFor(p, pattern, climate).spec);
+    const long = Math.max(size.w, size.l);
+    if (stated > 0) return (stated >= long + 1 ? stated : stated + long) ** 2;
+    // Houses set in a ring or in rows stood close, a house and its yard apart: no nearer than the generator's own
+    // ground for a house of their pattern, where that is less.
+    return Math.min(p.patterns[pattern].lot, Math.max(long * p.compact, 11) ** 2);
+  };
+  const formOf = (pattern: Pattern, t: Tradition | undefined, kin?: LifewayWord, grow = 1, lot?: number): number => {
     const g = genericFor(p, pattern, climate);
     // A tradition's house for the way of life it says it housed, or for one kin to it; the generic one where none holds.
     const use = t && Object.keys(t.dwelling).length;
-    // What a tradition leaves unsaid is the generic house's of the same way of life, so a tradition's house in a town is
-    // not its house in a village: each is a form of its own.
-    const key = use ? `tradition:${t!.id}|${g.key}` : g.key;
+    // What a tradition leaves unsaid is the generic house's of the same way of life, as far as that fits what it says
+    // (fillDwelling), so a tradition's house in a town is not its house in a village: each is a form of its own.
+    // A house that stands for several households is a form of its own, as wide and long as they would take; and so is
+    // a house with its yard, by the ground it has.
+    const yard = lot !== undefined && t && (t.settlement.yard || t.outbuildings?.some((o) => o.per === 'house')) ? Math.round(Math.sqrt(lot)) : 0;
+    const key = (use ? `tradition:${t!.id}|${g.key}` : g.key) + (grow !== 1 ? `|x${grow}` : '') + (yard ? `|yard${yard}` : '');
     const whose = LIFEWAY_OF[pattern as Exclude<Pattern, 'none'>];
     let k = formIndex.get(key);
     if (k === undefined) {
       k = forms.length;
       formIndex.set(key, k);
+      const spec = use ? fillDwelling(t!.dwelling, g.spec) : g.spec;
+      const home = yard ? homesteadOf(t, spec, yard, p.outbuildings) : undefined;
+      // In words, for a panel: what stood by each house, and what enclosed its yard, each with whose claim it is.
+      const by = yard
+        ? [
+            ...(t!.outbuildings ?? []).filter((o) => o.per === 'house').map((o) => ({ text: outbuildingText(o), from: t!.from.outbuildings ?? t!.id })),
+            ...(home?.yard ? [{ text: `its yard within ${home.yard === 'wall' ? 'a wall' : home.yard === 'ditch' ? 'a ditch' : home.yard === 'bank' ? 'a bank' : home.yard === 'hedge' ? 'a hedge' : home.yard === 'palisade' ? 'a palisade' : 'a fence'}`, from: t!.from['settlement.yard'] ?? t!.id }] : []),
+          ]
+        : [];
+      const more = { ...(grow !== 1 ? { grow } : {}), ...(home && (home.yard || home.out.length) ? { home } : {}), ...(by.length ? { by } : {}) };
       forms.push(
         use
-          ? { key, spec: { ...g.spec, ...t!.dwelling }, from: 'tradition', tradition: t!.id, label: t!.label, whose, ...(kin ? { kin } : {}), parts: Object.fromEntries(Object.entries(t!.from).filter(([k2]) => k2.startsWith('dwelling.')).map(([k2, v]) => [k2.slice(9), v])) }
-          : { key, spec: g.spec, from: 'generic', label: g.label, whose },
+          ? { key, spec, from: 'tradition', tradition: t!.id, label: t!.label, whose, ...(kin ? { kin } : {}), parts: Object.fromEntries(Object.entries(t!.from).filter(([k2]) => k2.startsWith('dwelling.')).map(([k2, v]) => [k2.slice(9), v])), ...more }
+          : { key, spec, from: 'generic', label: g.label, whose, ...more },
       );
+    }
+    return k;
+  };
+  // Something a settlement had of its own that is a roofed building: a form like a house's, drawn as one.
+  const thingOf = (t: Tradition, i: number, pattern: Exclude<Pattern, 'none'>): number => {
+    const key = `thing:${t.id}:${i}`;
+    let k = formIndex.get(key);
+    if (k === undefined) {
+      const o = t.outbuildings![i];
+      const g = genericFor(p, pattern, climate);
+      k = forms.length;
+      formIndex.set(key, k);
+      const label = OUTBUILDING_LABEL[o.use];
+      forms.push({ key, spec: outbuildingSpec(o, p.outbuildings, fillDwelling(t.dwelling, g.spec)), from: 'tradition', tradition: t.from.outbuildings ?? t.id, label: label[0].toUpperCase() + label.slice(1).replace(/^(A|An) /, (x) => x), whose: LIFEWAY_OF[pattern], outbuilding: { use: o.use, text: outbuildingText(o) } });
     }
     return k;
   };
@@ -346,7 +431,7 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
   const workForms: WorkForm[] = [];
   const workIndex = new Map<string, number>();
   const workOf = (w: WorkSpec, label: string, from: string): number => {
-    const key = `${w.kind}:${w.material ?? ''}:${w.height}:${w.thickness}:${w.opening ?? ''}|${from}`;
+    const key = `${w.kind}:${w.material ?? ''}:${w.height}:${w.thickness}:${w.opening ?? ''}:${w.word ?? ''}:${w.run ?? ''}:${w.stuff ?? ''}|${label}|${from}`;
     let k = workIndex.get(key);
     if (k === undefined) {
       k = workForms.length;
@@ -394,6 +479,18 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
   // The cities first, the lists' and the records': each takes the land within its reach, and no settlement of the
   // anthromes stands in it.
   const cityHere: { x: number; y: number; r: number }[] = [];
+  // Whether a place is on the ground of a city that is not this settlement: an earlier city keeps its ground against a
+  // later one, and any city against a settlement that is none, so that no house of one stands among another's.
+  const cityOf = new Map<Settlement, number>();
+  const onAnothers = (x: number, y: number, s: Settlement): boolean => {
+    const own = cityOf.get(s);
+    for (let i = 0; i < (own ?? cityHere.length); i++) {
+      const c = cityHere[i];
+      const r = c.r / 1.15;
+      if ((x - c.x) ** 2 + (y - c.y) ** 2 < r * r) return true;
+    }
+    return false;
+  };
   for (const c of P.cities) {
     const [cx, cy] = toLocal(origin, c.lat, c.lon);
     if (Math.abs(cx) > extent + 4000 || Math.abs(cy) > extent + 4000) continue;
@@ -413,12 +510,15 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
     const region = cell >= 0 ? P.grid.region[cell] : 0;
     const found = traditionOf(region, pattern, hash2(Math.round(lat * 1000), Math.round(lon * 1000), 0x7ad1));
     const t = found?.tradition;
-    const form = formOf(pattern, t, found?.kin);
+    // A house that stands for several households is drawn as wide and long as they would take, to a quarter.
+    const grow = Math.round(Math.min(2.5, Math.sqrt(households / n)) * 4) / 4;
+    const form = formOf(pattern, t, found?.kin, grow);
     const citySeed = seedOf(hash2(Math.round(lat * 1000), Math.round(lon * 1000), 0x51c1));
     const s = settlements.push({ x: cx, y: cy, r, fieldR: r * 1.6, pattern, fields: 'rainfed', houses: 0, people: c.people, city: c.name, ...(c.record ? { record: c.record } : {}), from: c.from, anthrome: cell >= 0 ? P.grid.anthrome[cell] : 0, region, form, tier: 'evidence', seed: citySeed }) - 1;
     cityHere.push({ x: cx, y: cy, r: r * 1.15 });
+    cityOf.set(settlements[s], cityHere.length - 1);
     const first = houses.length;
-    layOut(settlements[s], s, n, lot, citySeed, t?.settlement ?? {}, Math.min(2.5, Math.sqrt(households / n)), townOf(t, c.town, c.record));
+    layOut(settlements[s], s, n, lot, citySeed, t, townOf(t, c.town, c.record), (g) => formOf(pattern, t, found?.kin, g));
     housesOf[s] = [first, houses.length];
   }
   // Then each 5′ cell the scene reaches, as its anthrome and region say.
@@ -457,11 +557,12 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
       const housesInCell = people / household;
       const count = Math.floor(housesInCell / perSettlement + hash2(gc, gr, seed ^ 0x3a));
       if (!count) continue;
-      const lot = mid(t?.settlement.spacing, 0) > 0 ? mid(t!.settlement.spacing, 0) ** 2 : pp.lot;
+      const lot = lotOf(life.pattern, t);
       const catchment = (area * 1e6) / count;
       const grid = Math.ceil(Math.sqrt(count));
-      const form = formOf(life.pattern, t, found?.kin);
       const town = life.pattern === 'city' || life.pattern === 'towns' ? townOf(t) : undefined;
+      // A house stands in its yard where it is not on the lots of a town's streets.
+      const form = formOf(life.pattern, t, found?.kin, 1, town && lot <= p.towns.open_lot ? undefined : lot);
       for (let n = 0; n < count; n++) {
         // A jittered grid over the whole cell, so that the same settlement is in the same place whichever scene draws it.
         const gx = n % grid;
@@ -481,7 +582,7 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
           const own = seedOf(hash3(n, gr, gc, seed));
           const s = settlements.push({ x, y, r, fieldR, pattern: life.pattern, fields: life.fields, houses: 0, people: perSettlement * household, anthrome: k, region, form, tier: life.tier, seed: own }) - 1;
           const first = houses.length;
-          layOut(settlements[s], s, perSettlement, lot, own, t?.settlement ?? {}, 1, town);
+          layOut(settlements[s], s, perSettlement, lot, own, t, town, (g) => formOf(life.pattern, t, found?.kin, g));
           housesOf[s] = [first, houses.length];
         }
       }
@@ -489,15 +590,146 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
   }
   // A spot before a house: `out` metres clear of its front wall, and `across` of its width (and `more` metres) to one
   // side of its door. A house's front faces the way it is turned, and its length runs that way (dwellings.ts).
-  const sizes = forms.map((f) => houseSize(f.spec));
+  const sizes = new Map<number, HouseDims>();
+  const sizeOf = (h: House): HouseDims => {
+    const k = h.form * HOUSE_VARIANTS + h.variant;
+    let sz = sizes.get(k);
+    if (!sz) sizes.set(k, (sz = houseSize(forms[h.form].spec, h.variant, forms[h.form].grow ?? 1)));
+    return sz;
+  };
   const before = (h: House, out: number, across: number, more: number): [number, number] => {
-    const sz = sizes[h.form];
-    const d = (sz.l / 2) * h.size + out;
-    const a = across * (sz.w * h.size + more);
+    const sz = sizeOf(h);
+    const d = sz.l / 2 + out;
+    const a = across * (sz.w + more);
     const sf = Math.sin(h.face);
     const cf = Math.cos(h.face);
     return [h.x + sf * d + cf * a, h.y + cf * d - sf * a];
   };
+  // What each settlement had of its own, where its tradition's `outbuildings` say: a hall, a shrine, a well, a pen. A
+  // roofed one is drawn as a house is, from its own form; the rest as works. That it had them is the tradition's claim;
+  // how many where none is counted (one), and where each stands, is the generator's: what people met at or drew water
+  // from at its middle, what smoked, smelt or needed room at its edge.
+  const traditionById = new Map(P.traditions.map((t) => [t.id, t]));
+  const reachOf = (si: number): number => {
+    const [h0, h1] = housesOf[si] ?? [0, 0];
+    const s = settlements[si];
+    let far = 0;
+    for (let i = h0; i < h1; i++) far = Math.max(far, Math.hypot(houses[i].x - s.x, houses[i].y - s.y));
+    return far;
+  };
+  const O = p.outbuildings;
+  const MIDDLE = new Set<OutbuildingUse>(['hall', 'shrine', 'well', 'pole', 'granary', 'store', 'bath']);
+  let things = 0;
+  if (O) {
+    settlements.forEach((s, si) => {
+      const f = forms[s.form];
+      const t = f.tradition ? traditionById.get(f.tradition) : undefined;
+      const [h0, h1] = housesOf[si] ?? [0, 0];
+      if (!t?.outbuildings?.length || h1 <= h0 || s.pattern === 'none' || things >= O.most) return;
+      const st = t.settlement;
+      const open = !!st.plaza || st.layout === 'ring';
+      const far = reachOf(si);
+      const rng = new Rng((s.seed ^ 0x3f1c9a5b) >>> 0);
+      let mid0 = 0;
+      let edge = 0;
+      t.outbuildings.forEach((o, i) => {
+        if (o.per !== 'settlement') return;
+        const count = Math.max(1, Math.min(8, Math.round(o.count !== undefined ? within(o.count, 1, rng.next()) : 1)));
+        const spec = outbuildingSpec(o, O, f.spec);
+        const across = OUTBUILDING_ROOFED[o.use] ? Math.max(houseSize(spec).w, houseSize(spec).l) : mid(spec.diameter ?? spec.width, 3);
+        // A pen stands at the middle of a ring of houses, as a fold does; else at the edge with what needs room.
+        const middle = MIDDLE.has(o.use) || (o.use === 'pen' && open);
+        for (let q = 0; q < count && things < O.most; q++) {
+          let x: number;
+          let y: number;
+          let face: number;
+          if (middle) {
+            // Round the middle: the first at it, where the ground is open; the rest about it.
+            const k = mid0++;
+            const rr = k === 0 && open ? 0 : across * 0.5 + 4 + 5 * Math.floor(k / 5);
+            const a = hash2(1, 7, s.seed) * TAU + k * 2.399963;
+            x = s.x + Math.sin(a) * rr;
+            y = s.y + Math.cos(a) * rr;
+            face = rr === 0 ? hash2(2, 7, s.seed) * TAU : a + PI;
+          } else {
+            const a = hash2(3, 7, s.seed) * TAU + edge++ * 2.399963;
+            const rr = far + across * 0.5 + 6 + 3 * rng.next();
+            x = s.x + Math.sin(a) * rr;
+            y = s.y + Math.cos(a) * rr;
+            face = a + PI;
+          }
+          if (!(s.city ? fitCity(x, y) : fit(x, y))) continue;
+          things++;
+          if (OUTBUILDING_ROOFED[o.use]) {
+            houses.push({ x, y, z: ground.at(x, y), face, form: thingOf(t, i, s.pattern as Exclude<Pattern, 'none'>), settlement: si, size: 1, variant: rng.int(0, HOUSE_VARIANTS - 1), rank: rng.int(0, 40) });
+            continue;
+          }
+          const label = OUTBUILDING_LABEL[o.use];
+          const named = label[0].toUpperCase() + label.slice(1);
+          const from = t.from.outbuildings ?? t.id;
+          const stuff = f.spec.walls === 'stone' ? MAT.rubble : MAT.mud;
+          const w: WorkSpec =
+            o.use === 'pen'
+              ? { kind: 'pen', height: 0, thickness: across, word: o.enclosure && o.enclosure !== 'none' ? o.enclosure : 'fence', stuff }
+              : o.use === 'well'
+                ? { kind: 'well', height: 0, thickness: across }
+                : o.use === 'oven'
+                  ? { kind: 'oven', height: 0, thickness: across }
+                  : o.use === 'rack'
+                    ? { kind: 'rack', height: mid(spec.height, 1.8), thickness: mid(spec.width ?? spec.length, 2.6) }
+                    : o.use === 'stack'
+                      ? { kind: 'stack', height: mid(spec.height, 2.8), thickness: across }
+                      : o.use === 'pond'
+                        ? { kind: 'pond', height: 0, thickness: across }
+                        : o.use === 'pole'
+                          ? { kind: 'pole', height: mid(spec.height, 5), thickness: 0.4, ...(spec.walls === 'stone' ? { stuff: MAT.rubble } : {}) }
+                          : { kind: 'floor', height: 0, thickness: across };
+          works.push({ x, y, z: ground.at(x, y), face, form: workOf(w, named, from), settlement: si });
+        }
+      });
+    });
+  }
+  // What stood round a settlement, where its tradition says: a fence, a hedge, a palisade, a bank, a ditch, a wall, in
+  // lengths round its outermost houses with a way in or two. From the middle of the scene outward, where a visitor
+  // arrives, until the most a scene draws are laid.
+  const E = p.enclosures;
+  if (E) {
+    let laid = 0;
+    const order = settlements.map((_, i) => i).sort((a, b) => Math.hypot(settlements[a].x, settlements[a].y) - Math.hypot(settlements[b].x, settlements[b].y));
+    for (const si of order) {
+      if (laid >= E.most) break;
+      const s = settlements[si];
+      const f = forms[s.form];
+      const t = f.tradition ? traditionById.get(f.tradition) : undefined;
+      const [h0, h1] = housesOf[si] ?? [0, 0];
+      // A town has its own wall, or none, by its town form.
+      if (!t || h1 <= h0 || s.town) continue;
+      const word = t.settlement.enclosure ?? (t.settlement.pattern === 'walled' ? E.unstated : undefined);
+      if (!word || word === 'none') continue;
+      const from = t.settlement.enclosure ? (t.from['settlement.enclosure'] ?? t.id) : 'generic';
+      const size = sizeOf(houses[h0]);
+      const want = reachOf(si) + Math.max(size.w, size.l) * 0.5 + (f.home ? f.home.lot * 0.35 : 3) + ENCLOSURE_SIZE[word].thickness * 0.5 + 1.5;
+      // Lengths of one size, as many as go round: the ring is as wide as that many make, so that one kind of piece
+      // serves every settlement of a tradition.
+      const count = Math.max(8, Math.round((TAU * want) / E.run));
+      const R = E.run / (2 * Math.sin(PI / count));
+      const run = E.run + 0.05;
+      const stuff = f.spec.walls === 'stone' ? MAT.rubble : f.spec.walls === 'fired-brick' ? MAT.brick : f.spec.walls === 'mudbrick' ? MAT.adobe : MAT.mud;
+      const piece = workOf({ kind: 'enclosure', height: 0, thickness: ENCLOSURE_SIZE[word].thickness, word, run, ...(word === 'wall' ? { stuff } : {}) }, ENCLOSURE_LABEL[word], from);
+      const gates = Math.max(1, Math.round(E.gates));
+      const turn = hash2(4, 7, s.seed) * TAU;
+      for (let i = 0; i < count; i++) {
+        // A way in is a length left out.
+        if (gates > 0 && (i * gates) % count < gates) continue;
+        const a = turn + (TAU * (i + 0.5)) / count;
+        const x = s.x + Math.sin(a) * R * Math.cos(PI / count);
+        const y = s.y + Math.cos(a) * R * Math.cos(PI / count);
+        if (!inScene(x, y) || ground.at(x, y) - water(x, y) < 0.2) continue;
+        works.push({ x, y, z: ground.at(x, y), face: a, form: piece, settlement: si });
+        laid++;
+      }
+    }
+  }
   // The animals its people kept, where a husbandry tradition of the region and time names them for their way of life:
   // those that graze in herds, on the pasture of people who herd and at the edge of the houses of people who farm; the
   // rest about the houses. Which animals is the tradition's; how many, and where each stands, is invented.
@@ -669,7 +901,7 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
   if (houses.length > p.most_houses) {
     kept = houses.filter((h) => h.rank < (256 * p.most_houses) / houses.length);
     const counts = new Map<number, number>();
-    for (const h of kept) counts.set(h.settlement, (counts.get(h.settlement) ?? 0) + 1);
+    for (const h of kept) if (!forms[h.form].outbuilding) counts.set(h.settlement, (counts.get(h.settlement) ?? 0) + 1);
     settlements.forEach((x, i) => (x.houses = counts.get(i) ?? 0));
   }
   perHouse = kept.length ? drawn / kept.length : 0;
@@ -682,33 +914,75 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
   return { settlements, forms, houses: kept, works, workForms, animals, paths, pathWidth: W?.width ?? 0, drawn: Math.round(drawn), expected: Math.round(expected), perHouse: Math.round(perHouse * 10) / 10, style, lifeway: P.lifeway };
 
   /**
-   * Houses of a settlement, as its tradition's pattern sets them out: clustered, in a ring, along a line or apart. A town
-   * or a city, given how it is laid out, takes the lots of its streets (layOutTown), unless it is one block of rooms or
-   * too thin on the ground for streets.
+   * Houses of a settlement, as its tradition's pattern sets them out: clustered, in a ring, in rows, along a line or
+   * apart; round open ground where its tradition says there was some; each facing the way its tradition says they all
+   * faced, where it says. A town or a city, given how it is laid out, takes the lots of its streets (layOutTown),
+   * unless it is one block of rooms or too thin on the ground for streets.
    */
-  function layOut(s: Settlement, si: number, n: number, lot: number, seed: number, st: SettlementSpec, scale: number, town?: TownOf): void {
+  function layOut(s: Settlement, si: number, n: number, lot: number, seed: number, t: Tradition | undefined, town?: TownOf, sized?: (grow: number) => number): void {
+    const st = t?.settlement ?? {};
     const pattern = st.pattern ?? (s.pattern === 'foragers' || s.pattern === 'herders' ? 'camp' : s.pattern === 'farmsteads' ? 'dispersed' : 'nucleated');
-    if (town && pattern !== 'room-block' && lot <= p.towns.open_lot) return layOutTown(s, si, n, lot, seed, scale, town);
+    if (town && pattern !== 'room-block' && lot <= p.towns.open_lot) return layOutTown(s, si, n, lot, seed, town, sized);
     const spacing = Math.sqrt(lot);
     const axis = hash2(1, 7, seed) * TAU;
     // A room block is the rectangle it was built as: rows of rooms either side of lanes, on the settlement's axis.
     const block = pattern === 'room-block';
+    const layout = block || pattern === 'linear' ? undefined : (st.layout ?? (pattern === 'camp' ? 'ring' : undefined));
+    // The way every house faced, where its tradition says they all faced one way: a little off it, each.
+    const stated = forms[s.form].spec.faces;
+    const facing = stated !== undefined ? COMPASS[stated] : undefined;
+    // What the settlement keeps at its middle clears the houses from it.
+    const middle = (t?.outbuildings ?? []).some((o) => o.per === 'settlement');
+    const clear = st.plaza ? Math.max(spacing * 1.6, 12) : middle && !layout ? Math.max(spacing * 0.9, 9) : 0;
+    // A ring: as many as one ring holds a house's ground apart, then another outside it.
+    const per = spacing * 0.95;
+    const firstRing = Math.min(n, 44);
+    // A camp nobody says stood in a ring is a loose one, as wide as its shelters need; a ring its tradition names is
+    // as wide as its houses take, side by side.
+    const R0 = st.layout === 'ring' ? Math.max(spacing * 1.3, clear, (firstRing * per) / TAU) : Math.max(clear, spacing * (0.4 + 0.25 * Math.sqrt(n)));
+    const loose = st.layout === 'ring' ? 0.06 : 0.3;
+    let ring = 0;
+    let onRing = 0;
+    let holds = firstRing;
+    // Rows: houses side by side, the rows in pairs that face each other across a way.
+    const perRow = Math.max(2, Math.round(Math.sqrt(n * 2.2)));
+    const rows = Math.ceil(n / perRow);
+    // A cluster: its houses thrown on the ground they would take, none nearer another than a house and its yard need,
+    // and none on the open ground at its middle.
+    const loosely = pattern === 'dispersed' ? 2.2 : pattern === 'compound' ? 0.8 : 0.62;
+    const spots = layout || block || pattern === 'linear' ? undefined : scatter(n, spacing * loosely, clear, seed);
     for (let h = 0; h < n; h++) {
       let dx: number;
       let dy: number;
       let face: number;
-      if (pattern === 'camp') {
-        const a = (TAU * h) / n + hash2(h, 1, seed) * 0.4;
-        const rr = spacing * (0.4 + 0.25 * n ** 0.5) * (0.85 + 0.3 * hash2(h, 2, seed));
+      if (layout === 'ring') {
+        if (onRing >= holds) {
+          ring++;
+          onRing = 0;
+          holds = Math.max(6, Math.floor((TAU * (R0 + ring * spacing * 1.3)) / per));
+        }
+        const left = Math.min(holds, n - (h - onRing));
+        const a = axis + (TAU * (onRing + (ring % 2) * 0.5)) / left + (hash2(h, 1, seed) - 0.5) * loose * 0.8;
+        const rr = (R0 + ring * spacing * 1.3) * (1 + (hash2(h, 2, seed) - 0.5) * loose);
+        onRing++;
         dx = Math.sin(a) * rr;
         dy = Math.cos(a) * rr;
         face = a + PI;
+      } else if (layout === 'rows') {
+        const r = Math.floor(h / perRow);
+        const i = h % perRow;
+        const lx = (i - (Math.min(perRow, n - r * perRow) - 1) / 2) * spacing * 0.95 + (hash2(h, 3, seed) - 0.5) * spacing * 0.08;
+        // Rows in pairs: a way between the two of a pair, their backs to the next pair.
+        const ly = (Math.floor(r / 2) - (Math.ceil(rows / 2) - 1) / 2) * spacing * 2.3 + (r % 2 ? 0.5 : -0.5) * spacing * 0.95;
+        dx = Math.cos(axis) * lx + Math.sin(axis) * ly;
+        dy = -Math.sin(axis) * lx + Math.cos(axis) * ly;
+        face = axis + (r % 2 ? PI : 0);
       } else if (pattern === 'linear') {
         const along = (h - n / 2) * spacing * 1.1;
         const side = h % 2 ? 1 : -1;
         dx = Math.sin(axis) * along + Math.cos(axis) * side * spacing * 0.6;
         dy = Math.cos(axis) * along - Math.sin(axis) * side * spacing * 0.6;
-        face = axis + (side > 0 ? PI / 2 : -PI / 2);
+        face = axis + (side > 0 ? -PI / 2 : PI / 2);
       } else if (block) {
         const w = Math.ceil(Math.sqrt(n));
         const gx = (h % w) - Math.floor(w / 2);
@@ -719,18 +993,26 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
         dy = -Math.sin(axis) * lx + Math.cos(axis) * ly;
         face = axis + (gy % 2 ? PI : 0);
       } else {
-        // A sunflower's spiral, shaken: as dense at the edge as in the middle, and no two on one spot.
-        const rr = spacing * Math.sqrt(h + 0.5) * (pattern === 'dispersed' ? 2.2 : pattern === 'compound' ? 0.8 : 0.62);
-        const a = h * 2.399963 + axis;
-        dx = Math.sin(a) * rr + (hash2(h, 3, seed) - 0.5) * spacing * 0.5;
-        dy = Math.cos(a) * rr + (hash2(h, 4, seed) - 0.5) * spacing * 0.5;
-        face = pattern === 'compound' ? a + PI : axis + (hash2(h, 5, seed) < 0.5 ? 0 : PI / 2) + (hash2(h, 6, seed) - 0.5) * 0.5;
+        [dx, dy] = spots![h];
+        const a = Math.atan2(dx, dy);
+        face = pattern === 'compound' || clear > 0 ? a + PI + (hash2(h, 6, seed) - 0.5) * 0.5 : axis + (hash2(h, 5, seed) < 0.5 ? 0 : PI / 2) + (hash2(h, 6, seed) - 0.5) * 0.5;
       }
+      if (facing !== undefined) face = facing + (hash2(h, 13, seed) - 0.5) * 0.3;
       const x = s.x + dx;
       const y = s.y + dy;
-      if (!(s.city ? fitCity(x, y) : fit(x, y))) continue;
-      houses.push({ x, y, z: ground.at(x, y), face, form: s.form, settlement: si, size: scale * (0.85 + 0.3 * hash2(h, 8, seed)), rank: Math.floor(hash2(h, 9, seed) * 256) });
+      if (!(s.city ? fitCity(x, y) : fit(x, y)) || onAnothers(x, y, s)) continue;
+      houses.push({ x, y, z: ground.at(x, y), face, form: s.form, settlement: si, size: 1, variant: Math.floor(hash2(h, 12, seed) * HOUSE_VARIANTS), rank: Math.floor(hash2(h, 9, seed) * 256) });
       s.houses++;
+    }
+    // Houses standing apart, each among its own fields, leave the ground between them as it was.
+    if (pattern === 'dispersed' && n > 1) s.loose = true;
+    // Its houses reach as far as they were set: a ring or rows take more ground than a cluster of as many.
+    if (layout) {
+      const far = layout === 'ring' ? R0 + ring * spacing * 1.3 : Math.hypot((perRow * spacing * 0.95) / 2, (Math.ceil(rows / 2) * spacing * 2.3) / 2);
+      if (far + spacing * 0.5 > s.r) {
+        s.fieldR = Math.sqrt(Math.max(0, s.fieldR * s.fieldR - s.r * s.r) + (far + spacing * 0.5) ** 2);
+        s.r = far + spacing * 0.5;
+      }
     }
   }
 
@@ -741,8 +1023,10 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
    * wandering by its seed, or square where its streets are planned. A square is left open at its middle, water runs in
    * some streets of a town of canals, and a wall with its gates and towers, and a moat, stand round it, where its form
    * says so. What a tradition or a record says is drawn; the rest is the generic town's, and the plan says which.
+   * `sized` gives the town's house as a form drawn so many times as wide and long: a house wider than the ground its
+   * town gives it is drawn as small as its lot, so that no house stands in its neighbour.
    */
-  function layOutTown(s: Settlement, si: number, n: number, lot: number, seed: number, scale: number, town: TownOf): void {
+  function layOutTown(s: Settlement, si: number, n: number, lot: number, seed: number, town: TownOf, sized?: (grow: number) => number): void {
     const T = p.towns;
     const form = town.spec;
     const streets = form.streets ?? 'lanes';
@@ -756,11 +1040,30 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
     const w = mid(form.street, T.street);
     const M = planned ? Math.max(w, mid(form.main_street, T.main_street)) : w;
     const side0 = Math.sqrt(lot);
-    // Lots to a block's long side; and a lot's side, so that a house with its share of the streets takes the ground the
-    // town's people give it: (k·side + w)(2·side + w) = 2k·lot.
-    const k = Math.max(2, Math.round(mid(form.block, T.block) / side0));
-    const bq = k * w + 2 * w;
-    const sideL = Math.max(side0 * 0.6, (-bq + Math.sqrt(bq * bq - 8 * k * (w * w - 2 * k * lot))) / (4 * k));
+    // A lot is as wide along its street as its house and a way past it, and as much deeper as its ground allows, to
+    // three times: a town's houses line its streets, their yards behind them.
+    let house = houseSize(forms[s.form].spec, 0, forms[s.form].grow ?? 1);
+    const deep = Math.min(T.deep, Math.max(1, lot / (house.w + 1.2) ** 2));
+    // Lots to a block's long side; and a lot's width, so that a house with its share of the streets takes the ground
+    // the town's people give it: (k·wide + w)(2·deep·wide + w) = 2k·lot.
+    const k = Math.max(2, Math.round((mid(form.block, T.block) * Math.sqrt(deep)) / side0));
+    const qa = 2 * deep * k;
+    const qb = k * w + 2 * deep * w;
+    const fX = Math.max(side0 * 0.4, (-qb + Math.sqrt(qb * qb - 4 * qa * (w * w - 2 * k * lot))) / (2 * qa));
+    const fY = fX * deep;
+    // How far a house may be turned from the way its lane runs, radians: along lanes houses do not stand squarely.
+    const turned = planned ? 0 : 0.08;
+    // A house wider or deeper than its lot, turned so, is drawn as small as the lot: to a twentieth, and no less than
+    // two fifths.
+    const fits = Math.min((fX - 0.1) / (house.w * Math.cos(turned) + house.l * Math.sin(turned)), (fY - 0.5) / (house.l * Math.cos(turned) + house.w * Math.sin(turned)));
+    if (fits < 1 && sized) {
+      s.form = sized(Math.max(0.4, Math.floor((forms[s.form].grow ?? 1) * fits * 20) / 20));
+      house = houseSize(forms[s.form].spec, 0, forms[s.form].grow ?? 1);
+    }
+    // A lot's size, where it is not its width or its depth that is meant.
+    const sideL = Math.sqrt(fX * fY);
+    // How far a house stands forward of its lot's middle: at its front, a step back from the street.
+    const forward = Math.max(0, fY / 2 - house.l / 2 - 0.7);
     const C = streets === 'canals' ? T.canal : 0;
     const every = Math.max(1, Math.round(T.canal_every));
     const canalAfter = (bj: number) => C > 0 && bj !== -1 && ((bj % every) + every) % every === 0;
@@ -768,15 +1071,15 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
     // How far out lots are looked for: the disc the town would be, and half as far again.
     const R = Math.sqrt((n * lot) / PI);
     const reach = R * 1.6 + 4 * sideL;
-    const pitchX = k * sideL + w;
+    const pitchX = k * fX + w;
     const NA = Math.ceil(reach / pitchX) + 1;
-    const NB = Math.ceil(reach / (2 * sideL + w)) + 1;
+    const NB = Math.ceil(reach / (2 * fY + w)) + 1;
     // Where each row of blocks begins, either side of the main street.
     const yLo = new Float64Array(2 * NB);
     yLo[NB] = M / 2;
-    for (let bj = 1; bj < NB; bj++) yLo[NB + bj] = yLo[NB + bj - 1] + 2 * sideL + gapAfter(bj - 1);
-    yLo[NB - 1] = -M / 2 - 2 * sideL;
-    for (let bj = -2; bj >= -NB; bj--) yLo[NB + bj] = yLo[NB + bj + 1] - gapAfter(bj) - 2 * sideL;
+    for (let bj = 1; bj < NB; bj++) yLo[NB + bj] = yLo[NB + bj - 1] + 2 * fY + gapAfter(bj - 1);
+    yLo[NB - 1] = -M / 2 - 2 * fY;
+    for (let bj = -2; bj >= -NB; bj--) yLo[NB + bj] = yLo[NB + bj + 1] - gapAfter(bj) - 2 * fY;
     const xLo = (bi: number) => (bi >= 0 ? M / 2 + bi * pitchX : -M / 2 + bi * pitchX + w);
     // Its outline: round with an edge that wanders, or squared, as its streets are.
     const q = clamp01(T.outline[streets] ?? 0);
@@ -789,10 +1092,10 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
       // Along lanes the blocks of one row are out of step with the next, so no street runs straight through.
       const shift = planned ? 0 : (hash2(bj, 17, seed) - 0.5) * pitchX;
       for (let r = 0; r < 2; r++) {
-        const y = yLo[NB + bj] + (r + 0.5) * sideL;
+        const y = yLo[NB + bj] + (r + 0.5) * fY;
         for (let bi = -NA; bi < NA; bi++) {
           for (let i = 0; i < k; i++) {
-            const x = xLo(bi) + (i + 0.5) * sideL + shift;
+            const x = xLo(bi) + (i + 0.5) * fX + shift;
             if (Math.abs(x) < sq && Math.abs(y) < sq) continue;
             const a = Math.atan2(y, x);
             const d = (Math.hypot(x, y) * across(a)) / edge(a) + hash3(bi * k + i, bj * 2 + r, 5, seed) * 0.8 * sideL * (1 - q);
@@ -802,13 +1105,63 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
       }
     }
     lots.sort((u, v) => u.d - v.d || u.y - v.y || u.x - v.x);
-    const taken = lots.slice(0, n);
-    if (!taken.length) return;
-    const D = taken[taken.length - 1].d;
     // Lanes wander: every lot is carried a little by a slow noise, its neighbours with it.
     const lam = 14 * sideL;
     const amp = planned ? 0 : 2.2 * sideL;
     const warp = (x: number, y: number): [number, number] => (amp ? [x + (fbm(x / lam + 31, y / lam + 17, seed | 0) - 0.5) * 2 * amp, y + (fbm(x / lam - 12, y / lam + 45, (seed + 7) | 0) - 0.5) * 2 * amp] : [x, y]);
+    // Where a house stands in the town's frame, and the way its front looks: at the front of its lot, on the street its
+    // row is on. Along lanes it fronts its lane as the lane runs there, and not squarely.
+    type Stand = { x: number; y: number; fx: number; fy: number };
+    const stand = (l: { x: number; y: number; r: number }, h: number): Stand => {
+      const ly = l.y + (l.r === 0 ? -forward : forward);
+      const [x, y] = warp(l.x, ly);
+      if (planned) return { x, y, fx: 0, fy: l.r === 0 ? -1 : 1 };
+      const [ax, ay] = warp(l.x - fX / 2, ly);
+      const [bx, by] = warp(l.x + fX / 2, ly);
+      const len = Math.hypot(bx - ax, by - ay) || 1;
+      const tx = (bx - ax) / len;
+      const ty = (by - ay) / len;
+      const fx = l.r === 0 ? ty : -ty;
+      const fy = l.r === 0 ? -tx : tx;
+      const j = (hash2(h, 6, seed) - 0.5) * 2 * turned;
+      return { x, y, fx: fx * Math.cos(j) + fy * Math.sin(j), fy: fy * Math.cos(j) - fx * Math.sin(j) };
+    };
+    // Whether two houses would stand in one another, or closer than a step apart: no line parts them.
+    const clash = (a: Stand, b: Stand): boolean => {
+      const dx = b.x - a.x;
+      const dy = b.y - a.y;
+      for (const [nx, ny] of [[a.fx, a.fy], [a.fy, -a.fx], [b.fx, b.fy], [b.fy, -b.fx]]) {
+        const ra = (house.l / 2) * Math.abs(nx * a.fx + ny * a.fy) + (house.w / 2) * Math.abs(nx * a.fy - ny * a.fx);
+        const rb = (house.l / 2) * Math.abs(nx * b.fx + ny * b.fy) + (house.w / 2) * Math.abs(nx * b.fy - ny * b.fx);
+        if (Math.abs(nx * dx + ny * dy) >= ra + rb + 0.3) return false;
+      }
+      return true;
+    };
+    // The town takes its lots from its middle outward. Along lanes the wandering squeezes some lots against their
+    // neighbours: a lot whose house would stand in one already taken is passed over, and the town takes the next.
+    const taken: typeof lots = [];
+    const stands: Stand[] = [];
+    const cell = Math.hypot(house.w, house.l) + 0.5;
+    const cells = new Map<number, number[]>();
+    const cellOf = (i: number, j: number) => (i + 32768) * 65536 + (j + 32768);
+    for (const l of lots) {
+      if (taken.length >= n) break;
+      const st = stand(l, taken.length);
+      if (!planned) {
+        const ci = Math.floor(st.x / cell);
+        const cj = Math.floor(st.y / cell);
+        let hit = false;
+        for (let j = cj - 1; j <= cj + 1 && !hit; j++) for (let i = ci - 1; i <= ci + 1 && !hit; i++) hit = (cells.get(cellOf(i, j)) ?? []).some((o) => clash(st, stands[o]));
+        if (hit) continue;
+        const own = cells.get(cellOf(ci, cj));
+        if (own) own.push(stands.length);
+        else cells.set(cellOf(ci, cj), [stands.length]);
+      }
+      taken.push(l);
+      stands.push(st);
+    }
+    if (!taken.length) return;
+    const D = taken[taken.length - 1].d;
     const rowExt = new Map<number, [number, number]>();
     taken.forEach((l, h) => {
       const e = rowExt.get(l.bj);
@@ -817,12 +1170,11 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
         e[0] = Math.min(e[0], l.x);
         e[1] = Math.max(e[1], l.x);
       }
-      const [lx, ly] = warp(l.x, l.y);
-      const [x, y] = toScene(lx, ly);
-      if (!(s.city ? fitCity(x, y) : fit(x, y))) return;
-      // A house fronts the street its row is on; along lanes, not squarely.
-      const face = axis + (l.r === 0 ? PI : 0) + (planned ? 0 : (hash2(h, 6, seed) - 0.5) * 0.4);
-      houses.push({ x, y, z: ground.at(x, y), face, form: s.form, settlement: si, size: scale * (0.85 + 0.3 * hash2(h, 8, seed)), rank: Math.floor(hash2(h, 9, seed) * 256) });
+      const st = stands[h];
+      const [x, y] = toScene(st.x, st.y);
+      if (!(s.city ? fitCity(x, y) : fit(x, y)) || onAnothers(x, y, s)) return;
+      const face = planned ? axis + (l.r === 0 ? PI : 0) : faceOf(st.fx, st.fy);
+      houses.push({ x, y, z: ground.at(x, y), face, form: s.form, settlement: si, size: 1, variant: Math.floor(hash2(h, 12, seed) * HOUSE_VARIANTS), rank: Math.floor(hash2(h, 9, seed) * 256) });
       s.houses++;
     });
     // In words: the generic town's "no wall" is left out where a record states a wall's height or gates.
@@ -845,9 +1197,9 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
         const a = rowExt.get(bj);
         const b = rowExt.get(bj + 1);
         if (!a && !b) continue;
-        const x0 = Math.min(a?.[0] ?? Infinity, b?.[0] ?? Infinity) - sideL;
-        const x1 = Math.max(a?.[1] ?? -Infinity, b?.[1] ?? -Infinity) + sideL;
-        const y = yLo[NB + bj] + 2 * sideL + C / 2;
+        const x0 = Math.min(a?.[0] ?? Infinity, b?.[0] ?? Infinity) - fX;
+        const x1 = Math.max(a?.[1] ?? -Infinity, b?.[1] ?? -Infinity) + fX;
+        const y = yLo[NB + bj] + 2 * fY + C / 2;
         const count = Math.max(1, Math.ceil((x1 - x0) / PIECE));
         for (let j = 0; j < count; j++) put(x0 + ((j + 0.5) * (x1 - x0)) / count, y, 0, 1, canal);
       }
@@ -943,6 +1295,73 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
   }
 }
 
+/** The way a house faces by each word of the compass, in radians clockwise from north. */
+const COMPASS: Record<NonNullable<DwellingSpec['faces']>, number> = {
+  north: 0,
+  'north-east': PI / 4,
+  east: PI / 2,
+  'south-east': (3 * PI) / 4,
+  south: PI,
+  'south-west': (5 * PI) / 4,
+  west: (3 * PI) / 2,
+  'north-west': (7 * PI) / 4,
+};
+
+const ENCLOSURE_LABEL: Record<Exclude<EnclosureWord, 'none'>, string> = {
+  fence: 'A fence round a settlement',
+  hedge: 'A hedge round a settlement',
+  palisade: 'A palisade round a settlement',
+  bank: 'A bank round a settlement',
+  ditch: 'A ditch round a settlement',
+  wall: 'A wall round a settlement',
+};
+
+/**
+ * Places for the houses of a cluster: thrown at random on the round of ground they would take at `step` to a house,
+ * none nearer another than most of a step, none within `clear` of the middle. As dense at the edge as at the middle,
+ * with no rows and no spiral; the same for the same seed.
+ */
+function scatter(n: number, step: number, clear: number, seed: number): [number, number][] {
+  const rng = new Rng((seed ^ 0x5ca77e2) >>> 0);
+  const apart = step * 1.25;
+  const out: [number, number][] = [];
+  const cells = new Map<number, number[]>();
+  const key = (x: number, y: number) => Math.floor(x / apart) * 65536 + Math.floor(y / apart);
+  // The ground: the round n houses take, and the open middle besides.
+  let reach = Math.sqrt(step * step * n + clear * clear);
+  for (let tries = 0; out.length < n && tries < n * 60 + 200; tries++) {
+    const a = rng.next() * TAU;
+    const rr = Math.sqrt(clear * clear + (reach * reach - clear * clear) * rng.next());
+    const x = Math.sin(a) * rr;
+    const y = Math.cos(a) * rr;
+    let free = true;
+    for (let i = -1; i <= 1 && free; i++) {
+      for (let j = -1; j <= 1 && free; j++) {
+        for (const o of cells.get(key(x + i * apart, y + j * apart)) ?? []) {
+          if ((out[o][0] - x) ** 2 + (out[o][1] - y) ** 2 < apart * apart) {
+            free = false;
+            break;
+          }
+        }
+      }
+    }
+    if (!free) {
+      // Too full to take another: a little more ground.
+      if (tries % 40 === 39) reach *= 1.06;
+      continue;
+    }
+    const k = key(x, y);
+    (cells.get(k) ?? cells.set(k, []).get(k)!).push(out.length);
+    out.push([x, y]);
+  }
+  // Whatever found no place stands at the edge, so that every house has one.
+  while (out.length < n) {
+    const a = rng.next() * TAU;
+    out.push([Math.sin(a) * reach, Math.cos(a) * reach]);
+  }
+  return out;
+}
+
 const WALL_LABEL: Record<WallWord, string> = {
   earth: 'A rampart of earth',
   'rammed-earth': 'A wall of rammed earth',
@@ -973,7 +1392,33 @@ export interface LandUse {
 export class LandUseMap {
   private buckets = new Map<number, number[]>();
   private size = 2000;
+  /** how trodden the ground is round each house, 0–255, on a grid of `step` metres about the scene's middle */
+  private yards: Uint8Array;
+  private step = 16;
+  private across: number;
   constructor(private plan: SettlementPlan, private ground: Ground, private water: (x: number, y: number) => number, private seed: number) {
+    // Every house's own ground: its yard, or a few steps round its walls.
+    let reach = 64;
+    for (const h of plan.houses) reach = Math.max(reach, Math.abs(h.x) + 48, Math.abs(h.y) + 48);
+    this.across = Math.ceil((2 * reach) / this.step);
+    this.yards = new Uint8Array(this.across * this.across);
+    const half = (this.across * this.step) / 2;
+    for (const h of plan.houses) {
+      const f = plan.forms[h.form];
+      const r = Math.max(7, Math.min(18, (f.home?.lot ?? 14) * 0.5));
+      const i0 = Math.floor((h.x - r * 1.2 + half) / this.step);
+      const i1 = Math.floor((h.x + r * 1.2 + half) / this.step);
+      const j0 = Math.floor((h.y - r * 1.2 + half) / this.step);
+      const j1 = Math.floor((h.y + r * 1.2 + half) / this.step);
+      for (let j = Math.max(0, j0); j <= Math.min(this.across - 1, j1); j++) {
+        for (let i = Math.max(0, i0); i <= Math.min(this.across - 1, i1); i++) {
+          const d = Math.hypot((i + 0.5) * this.step - half - h.x, (j + 0.5) * this.step - half - h.y);
+          const v = Math.round(255 * (1 - smooth(r * 0.5, r * 1.2, d)));
+          const at = j * this.across + i;
+          if (v > this.yards[at]) this.yards[at] = v;
+        }
+      }
+    }
     plan.settlements.forEach((s, i) => {
       const reach = Math.max(s.fieldR, s.r);
       const b0 = Math.floor((s.x - reach) / this.size);
@@ -988,6 +1433,19 @@ export class LandUseMap {
       }
     });
   }
+  /** How trodden the ground is by the houses near a place, 0 to 1: read between the grid's points. */
+  private yardAt(x: number, y: number): number {
+    const half = (this.across * this.step) / 2;
+    const u = (x + half) / this.step - 0.5;
+    const v = (y + half) / this.step - 0.5;
+    const i = Math.floor(u);
+    const j = Math.floor(v);
+    if (i < 0 || j < 0 || i >= this.across - 1 || j >= this.across - 1) return 0;
+    const a = u - i;
+    const b = v - j;
+    const k = j * this.across + i;
+    return ((this.yards[k] * (1 - a) + this.yards[k + 1] * a) * (1 - b) + (this.yards[k + this.across] * (1 - a) + this.yards[k + this.across + 1] * a) * b) / 255;
+  }
   /** What covers the ground at a place. */
   at(x: number, y: number, out: LandUse = { crop: 0, pasture: 0, yard: 0, paddy: 0 }): LandUse {
     out.crop = out.pasture = out.yard = out.paddy = 0;
@@ -1001,7 +1459,8 @@ export class LandUseMap {
     for (const i of list) {
       const s = this.plan.settlements[i];
       const d = Math.sqrt((x - s.x) ** 2 + (y - s.y) ** 2);
-      const yard = 1 - smooth(s.r * 0.75, s.r * 1.1, d + wob * s.r * 0.6);
+      // Among houses that stand together the ground is trodden; where they stand apart, only round each of them.
+      const yard = s.loose ? 0 : 1 - smooth(s.r * 0.75, s.r * 1.1, d + wob * s.r * 0.6);
       if (yard > out.yard) out.yard = yard;
       if (s.fields === 'none') continue;
       const edge = s.fieldR * (1 + wob * 0.45);
@@ -1017,6 +1476,8 @@ export class LandUseMap {
         if (s.fields === 'rice' || s.fields === 'irrigated') out.paddy = Math.max(out.paddy, inField * (s.fields === 'rice' ? 1 : 0.5) * (1 - smooth(4, 14, above)));
       }
     }
+    const own = this.yardAt(x, y);
+    if (own > out.yard) out.yard = own;
     out.crop *= 1 - out.yard * 0.8;
     return out;
   }

@@ -10,9 +10,9 @@ import { hash2, hashString, TAU } from '../city/math.ts';
 import { drawAnimal, drawClump, drawPlant, POSE, type Detail, type Stance } from './forms.ts';
 import { CELL, CELLS, cellParts, cellKey, coverMask, EXTENT, groundGrids, LandCover, makePlan, placeLook, waterLevels, waterRibbons, waterSheet, watersFor, type CellRows, type LivingParams, type LivingPlan, type PlaceLook } from './scene/v7.ts';
 import { freshOf, type Waters } from './land.ts';
-import { drawDwelling, houseSize, type HouseDetail } from '../people/dwellings.ts';
-import { LandUseMap, landUseMask, makeSettlement, type SettlementPlan } from '../people/settlement/v2.ts';
-import { drawWork, workTop } from '../people/works.ts';
+import { drawDwelling, HOUSE_VARIANTS, houseSize, type HouseDetail } from '../people/dwellings.ts';
+import { LandUseMap, landUseMask, makeSettlement, type SettlementPlan } from '../people/settlement/v3.ts';
+import { drawWork, smallWork, WORK_VARIANTS, workTop } from '../people/works.ts';
 
 /** Where houses start among a scene's kinds of mesh: a taxon's number is below it, a house's dwelling above. */
 export const HOUSE = 0x4000;
@@ -129,7 +129,9 @@ export class SceneStream {
   private landUse?: LandUseMap;
   /** each cell's houses, by their place in the plan */
   private houseCells = new Map<number, number[]>();
+  /** how tall a house of each form is in each of its shapes, and how wide or long, whichever is more: form × shape */
   private houseTops: number[] = [];
+  private houseWide: number[] = [];
   /** each cell's pieces of its towns' works, by their place in the plan */
   private workCells = new Map<number, number[]>();
   private workTops: number[] = [];
@@ -160,7 +162,15 @@ export class SceneStream {
         const u = use.at(x, y);
         return Math.max(u.crop, u.pasture * 0.85, u.yard);
       };
-      this.houseTops = this.people.forms.map((f) => houseSize(f.spec).top);
+      this.houseTops = [];
+      this.houseWide = [];
+      for (const f of this.people.forms) {
+        for (let v = 0; v < HOUSE_VARIANTS; v++) {
+          const size = houseSize(f.spec, v, f.grow ?? 1);
+          this.houseTops.push(size.top);
+          this.houseWide.push(Math.max(size.w, size.l));
+        }
+      }
       this.people.houses.forEach((h, i) => {
         const k = cellKey(Math.floor(h.x / CELL), Math.floor(h.y / CELL));
         let list = this.houseCells.get(k);
@@ -302,7 +312,7 @@ export class SceneStream {
       const f = this.people!.workForms[taxon - WORK];
       const m = new Mesh(detail >= 2 ? 1024 : 256);
       m.entity = this.spec.taxa.length + 1 + this.people!.forms.length + (taxon - WORK);
-      drawWork(m, f.spec, (2 - detail) as HouseDetail, 118 + (variant & 3) * 6);
+      drawWork(m, f.spec, (2 - detail) as HouseDetail, variant);
       const { vertices, indices } = m.arrays();
       this.meshes.set(proto, { tris: indices.length / 3 });
       return { proto, vertices, indices };
@@ -311,8 +321,9 @@ export class SceneStream {
       const f = this.people!.forms[taxon - HOUSE];
       const m = new Mesh(detail >= 2 ? 2048 : 256);
       m.entity = this.spec.taxa.length + 1 + (taxon - HOUSE);
-      // Detail 2 is the finest, as for bodies; a house's own scale runs the other way.
-      drawDwelling(m, f.spec, (2 - detail) as HouseDetail, 112 + (variant & 31));
+      // Detail 2 is the finest, as for bodies; a house's own scale runs the other way. A house is drawn in the shape
+      // its variant picks, as wide and long as it stands for, and with its yard where it has one.
+      drawDwelling(m, f.spec, (2 - detail) as HouseDetail, variant, f.grow ?? 1, f.home);
       const { vertices, indices } = m.arrays();
       this.meshes.set(proto, { tris: indices.length / 3 });
       return { proto, vertices, indices };
@@ -480,13 +491,17 @@ export class SceneStream {
           const dy = h.y - ey;
           const dz = h.z - ez;
           const dd = dx * dx + dy * dy + dz * dz;
-          const tall = this.houseTops[h.form] * h.size;
+          const shape = h.form * HOUSE_VARIANTS + h.variant;
+          const tall = this.houseTops[shape] * h.size;
           const pxs2 = (tall * tall * K * K) / dd;
-          if (pxs2 < 1) continue;
+          // A house is left out where it is too small to see: less than a pixel tall and, as its roof shows from above,
+          // less than a pixel across half its width. A low house round a court is wider than tall many times over.
+          const wide = 0.5 * this.houseWide[shape] * h.size;
+          if (pxs2 < 1 && (wide * wide * K * K) / dd < 1) continue;
           if (dd > R0 * 4 && h.rank * dd > 1024 * R0) continue;
           const pxs = Math.sqrt(pxs2);
           const detail: Detail = this.budget.fast ? (pxs >= 30 ? 1 : 0) : pxs >= 80 ? 2 : pxs >= 10 ? 1 : 0;
-          const proto = protoOf(HOUSE + h.form, h.rank & 3, detail);
+          const proto = protoOf(HOUSE + h.form, h.variant, detail);
           let b = buckets.get(proto);
           if (!b) {
             const buf = new ArrayBuffer(INSTANCE_STRIDE * 64);
@@ -525,11 +540,11 @@ export class SceneStream {
           const tall = this.workTops[w.form];
           const pxs2 = (tall * tall * K * K) / dd;
           // A wall is drawn as far as it can be made out; a person or a boat only once it is a few pixels tall.
-          const small = this.people.workForms[w.form].spec.kind === 'person' || this.people.workForms[w.form].spec.kind === 'boat';
+          const small = smallWork(this.people.workForms[w.form].spec.kind);
           if (pxs2 < (small ? 16 : 1)) continue;
           const pxs = Math.sqrt(pxs2);
           const detail: Detail = this.budget.fast ? (pxs >= 30 ? 1 : 0) : pxs >= 80 ? 2 : pxs >= 10 ? 1 : 0;
-          const proto = protoOf(WORK + w.form, wi & 3, detail);
+          const proto = protoOf(WORK + w.form, wi % WORK_VARIANTS, detail);
           let b = buckets.get(proto);
           if (!b) {
             const buf = new ArrayBuffer(INSTANCE_STRIDE * 64);
@@ -683,6 +698,8 @@ export class SceneStream {
         const u = hash2(i, j, seed + 73);
         const cover = this.cover.at(x, y);
         if (cover.water || u >= cover.low * keep) continue;
+        // Among the houses the ground is trodden: little grows where feet go.
+        if (this.landUse && hash2(i, j, seed + 78) < this.landUse.at(x, y).yard * 0.9) continue;
         const k = this.plan.underAt(cover.above, hash2(i, j, seed + 74));
         if (k < 0) return 0;
         const shade = (hash2(i, j, seed + 75) * 256) | 0;

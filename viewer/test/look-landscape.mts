@@ -4,7 +4,8 @@
 //   npx tsx viewer/test/look-landscape.mts <out dir> [name …]
 // It serves the built viewer itself, on a port of its own, so that it never looks at another checkout's. LOOK_GPU=1
 // draws on the machine's GPU (Metal), which is much faster and looks as a visitor sees it; without it, software WebGL,
-// as the browser tests draw.
+// as the browser tests draw. Each line it prints says what the frame drew, and on a GPU how long the viewer's profiler
+// timed a frame at: a rough figure, good for telling one scene from another in one run and no more.
 import { mkdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { chromium } from 'playwright';
@@ -68,7 +69,19 @@ const shot = async (name: string, url: string, wait: number) => {
   await page.screenshot({ path: join(out, `${name}.png`), timeout: 180_000 });
   const bar = await page.locator('.life-here').first().textContent({ timeout: 1000 }).catch(() => null);
   const people = await page.evaluate(() => window.__wikiworldmodel?.scene()?.people ?? null);
-  console.log(name, `(${(took / 1000).toFixed(1)} s)`, bar ? `| bar: ${bar}` : '', people ? `| people: ${JSON.stringify(people)}` : '');
+  // What the frame cost: how many things it drew, of how many triangles, from how many meshes.
+  const cost = await page.evaluate(() => {
+    const s = window.__wikiworldmodel?.scene();
+    return s ? `${s.instances.toLocaleString('en-US')} drawn, ${s.triangles.toLocaleString('en-US')} triangles, ${s.meshes} meshes` : '';
+  });
+  // And how long a frame took, where the browser draws on a GPU and can time one.
+  const frame = gpu
+    ? await page
+        .evaluate(() => window.__wikiworldmodel?.profile(30))
+        .then((p) => (p ? `${p.total.toFixed(2)} ms a frame (${p.method})` : ''))
+        .catch(() => '')
+    : '';
+  console.log(name, `(${(took / 1000).toFixed(1)} s)`, cost ? `| ${cost}` : '', frame ? `| ${frame}` : '', bar ? `| bar: ${bar}` : '', people ? `| people: ${JSON.stringify(people)}` : '');
 };
 
 // The globe, with Settlement on, at three times.
@@ -112,30 +125,55 @@ for (const [name, t, lat, lon, m, h, v] of [
 }
 // Close to a settlement of a scene, by where the scene says its nearest ones are: the houses, the people by them, what
 // animals a husbandry names, and the edge of a town with its wall. [name, time, latitude, longitude, which of the nearest].
-for (const [name, t, lat, lon, which] of [
-  ['close-nile-village', -1499, 30.8, 31.0, 0],
-  ['close-mongolia-camp', 1200, 47.2, 102.8, 0],
-  ['close-pataliputra-edge', 1, 25.61, 85.14, 0],
-  ['close-europe-village', 1300, 52.2, 0.4, 0],
+// Each is looked at twice: from the ground a little way off (`close-…`), and from over it (`over-…`), where how its
+// houses stand together shows, and what stands round them.
+const places: [string, number, number, number, number | 'city'][] = [
+  ['nile-village', -1499, 30.8, 31.0, 0],
+  ['mongolia-camp', 1200, 47.2, 102.8, 0],
+  ['pataliputra-edge', 1, 25.61, 85.14, 0],
+  ['europe-village', 1300, 52.2, 0.4, 0],
+  // Houses of traditions that say more of them: a yard and what stood in it, a ring, an enclosure, a way they all faced.
+  ['bengal-village', 1800, 24.5, 88.5, 0],
+  ['hindustan-village', 1600, 26.8, 80.9, 0],
+  ['north-china-village', 1850, 36.6, 115.5, 0],
+  ['yangshao-village', -4000, 34.4, 109.0, 0],
+  ['edo-village', 1750, 35.6, 138.6, 0],
+  ['maasai-kraal', 1885, -2.6, 36.6, 0],
+  ['bedouin-camp', 1830, 34.6, 38.3, 0],
+  ['plains-camp', 1800, 50.5, -105.5, 0],
+  ['iroquois-village', 1500, 43.0, -76.5, 0],
+  ['pueblo', 1280, 36.06, -107.96, 0],
+  ['inuit-camp', 1830, 69.4, -81.8, 0],
+  ['iban-longhouse', 1850, 1.6, 111.6, 0],
   // A city's wall, gates and towers, and the water in its streets, from just outside it: the nearest settlement that is one.
-  ['close-uruk-wall', -2999, 31.3222, 45.6361, 'city'],
-  ['close-tenochtitlan-canals', 1519.5, 19.4326, -99.1332, 'city'],
-  ['close-pataliputra-wall', 1, 25.61, 85.14, 'city'],
-] as [string, number, number, number, number | 'city'][]) {
-  if (only.size && !only.has(name)) continue;
+  ['uruk-wall', -2999, 31.3222, 45.6361, 'city'],
+  ['tenochtitlan-canals', 1519.5, 19.4326, -99.1332, 'city'],
+  ['pataliputra-wall', 1, 25.61, 85.14, 'city'],
+];
+for (const [place, t, lat, lon, which] of places) {
+  const name = `close-${place}`;
+  const over = `over-${place}`;
+  if (only.size && !only.has(name) && !only.has(over)) continue;
   await page.goto(`${base}?b=${build}&t=${t}&lat=${lat}&lon=${lon}&d=${1 + 900 / R}&h=40&v=70&cl=0${quality}`);
   await idle(300_000);
   const near = await page.evaluate(() => window.__wikiworldmodel?.scene()?.people?.near ?? []);
-  const s = which === 'city' ? near.find((x) => x.city) : near[which];
+  // A village is looked for among the settlements that are no town, where there is one.
+  const s = which === 'city' ? near.find((x) => x.city) : (near.filter((x) => x.pattern !== 'towns' && x.pattern !== 'city')[which] ?? near[which]);
   if (!s) {
     console.log(name, 'has no settlement near');
     continue;
   }
-  // From a little south of it, low, looking north across it; a town from just outside the reach of its houses.
+  // A town from just outside the reach of its houses, looking north across it; a village from before the door of one
+  // of its houses, a little to one side, as someone walking up to it sees it.
   const town = s.pattern === 'city' || s.pattern === 'towns';
-  const back = town ? (s.r + 140) / 111195 : 0.00045;
-  const up = town ? 45 : 9;
-  await shot(name, `?b=${build}&t=${t}&lat=${s.lat - back}&lon=${s.lon}&d=${1 + up / R}&h=0&v=${town ? 76 : 80}&cl=0${quality}`, 300_000);
+  if (town || !s.house) {
+    const back = town ? (s.r + 70) / 111195 : 0.00045;
+    const up = town ? 24 : 9;
+    await shot(name, `?b=${build}&t=${t}&lat=${s.lat - back}&lon=${s.lon}&d=${1 + up / R}&h=0&v=${town ? 76 : 80}&cl=0${quality}`, 300_000);
+  } else await shot(name, `?b=${build}&t=${t}&lat=${s.house.lat}&lon=${s.house.lon}&d=${1 + 17 / R}&h=${(s.house.faces + 180 + 28) % 360}&v=79&cl=0${quality}`, 300_000);
+  // From over it, looking down at its middle from the south: as far off as shows all of a village, or a quarter of a town.
+  const off = town ? 220 : Math.max(60, Math.min(190, s.r * 2.4));
+  await shot(over, `?b=${build}&t=${t}&lat=${s.lat}&lon=${s.lon}&d=${1 + off / R}&h=0&v=52&cl=0${quality}`, 300_000);
 }
 await browser.close();
 await new Promise<void>((done) => server.httpServer.close(() => done()));
