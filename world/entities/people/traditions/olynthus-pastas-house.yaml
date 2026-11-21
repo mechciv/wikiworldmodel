@@ -111,3 +111,19 @@ claims:
       houses of the Villa Section, on the hill's eastern slope, kept less strictly to this plan, with empty plots between them.
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-olynthus-1382382761.txt (sha256 563157b5903e7215), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+  town:
+    prop: town_form
+    value: { streets: grid }
+    source:
+      - ref: src:wikipedia-olynthus
+        loc: section "Site topography", "Classical"
+        quote: Excavations on the North Hill uncovered 108 buildings, revealing a Hippodamian grid plan.
+      - ref: src:wikipedia-olynthus
+        loc: section "Site topography", "Classical"
+        quote: Two large avenues were excavated, along with horizontal streets that divided the urban area into city blocks.
+    method: excavation
+    note: >-
+      The North Hill town on a Hippodamian grid, avenues crossed by streets into blocks of ten houses. The land wall round it
+      is named but not what it was built of, and the blocks' size in metres is not given there, so neither is claimed.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-olynthus.txt (sha256 42810b1c3f306a41), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

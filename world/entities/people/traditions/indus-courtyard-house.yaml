@@ -102,3 +102,19 @@ claims:
       countryside of mud brick, and the Lothal article has houses of mud and brick there. No source read gives a house's size.
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-indus-valley-civilisation.txt (sha256 b60abe492ff0c871), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+  town:
+    prop: town_form
+    value: { streets: grid }
+    source:
+      ref: src:wikipedia-harappan-architecture
+      loc: section "Overview", "Planning"
+      quote: >-
+        The cities were divided into rectilinear grids divided by roads which intersected at right angles, encircled by
+        fortifications, with each block containing a network of houses and public wells.
+    method: excavation
+    note: >-
+      The Indus cities on a grid of streets crossing at right angles, inside fortifications. What the walls were built of, and
+      the size of a block, are not given there, so only the streets are claimed; at Lothal a wall of mudbrick, at Kanmer one of
+      stone, show that the walls' material varied.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-harappan-architecture.txt (sha256 05a5b1f9eeb040d5), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

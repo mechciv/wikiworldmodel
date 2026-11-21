@@ -30,6 +30,8 @@ claims:
       quote: the best preserved urban settlement in South Asia dating back to the beginning of the 3rd millennium BC
     method: expert-estimate
     note: '"The beginning of the 3rd millennium" taken as about 3000 BCE. An official summary, giving no evidence.'
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in unesco-whc-138-moenjodaro.txt (sha256 f7c87e348397ec30), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   end-petrie:
     prop: end
     value: 1900 BCE
@@ -49,6 +51,8 @@ claims:
       quote: the metropolis of Indus civilization, which flourished between 2,500-1,500 BC
     method: expert-estimate
     note: An official summary, for the civilization. A Buddhist stupa was built on the ruins much later, in the 2nd century AD, the same text says.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in unesco-whc-138-moenjodaro.txt (sha256 f7c87e348397ec30), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   location:
     prop: location
     value: { lat: 27.325412, lon: 68.137741, frame: frame:earth/present-day }
@@ -71,6 +75,8 @@ claims:
     method: survey
     rank: preferred
     note: The extent of the remains as they lie, here held over the urban phase; not a size at one moment.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in unesco-whc-138-moenjodaro.txt (sha256 f7c87e348397ec30), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   area-jansen:
     prop: settlement_area
     value: 200
@@ -98,3 +104,23 @@ claims:
     source: { ref: src:reba-2016-urban-population, loc: "chandlerV2.csv, row Mohenjodaro, column BC_1800" }
     method: compilation
     note: Chandler's figure, as digitized by Reba et al. (2016), and later than the urban phase as now dated.
+  town-form:
+    prop: town_form
+    value: { streets: grid }
+    valid: { lo: 2600 BCE, hi: 1900 BCE }
+    source:
+      - ref: src:wikipedia-harappan-architecture
+        loc: section "Overview", "Planning"
+        quote: Mohenjo-daro had a planned layout with rectilinear buildings arranged on a grid plan.
+      - ref: src:unesco-whc-138-moenjodaro
+        loc: Brief description
+        quote: >-
+          The acropolis, set on high embankments, the ramparts, and the lower town, which is laid out according to strict
+          rules, provide evidence of an early system of town planning.
+    method: excavation
+    note: >-
+      A planned lower town on a grid. UNESCO names ramparts but not what they were built of, and says in one place the city
+      was all of unbaked brick and in another of burnt brick, so no wall is claimed here; an encyclopedia article is cited
+      for the grid because no excavation report could be read.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-harappan-architecture.txt (sha256 05a5b1f9eeb040d5) and unesco-whc-138-moenjodaro.txt (sha256 f7c87e348397ec30), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

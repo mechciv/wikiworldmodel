@@ -153,6 +153,25 @@ claims:
       towns.
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in hart-2017-iroquoia-dispersal-PMC5550228.txt (sha256 58b876009d207332), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+  town:
+    prop: town_form
+    value: { wall: timber }
+    valid: { lo: 1450 CE }
+    source:
+      - ref: src:hart-2016-southern-ontario-nations
+        loc: section "Geopolitical change in south-central Ontario, ca. A.D. 1350–1650"
+        quote: Coalescent communities were surrounded by multi-row defensive palisades (Fig 2).
+      - ref: src:hart-2017-iroquoia-dispersal
+        loc: section "Regional setting"
+        quote: >-
+          After A.D. 1450, sites become fewer, larger, increasingly situated in defensive locations, and surrounded by
+          multirow palisades (4).
+    method: excavation
+    note: >-
+      The large towns that formed after about 1450 stood inside palisades of several rows of posts. The palisades' height, how
+      many rows and openings they had, and how the longhouses inside were ranged are not given here.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in hart-2016-southern-ontario-nations.txt (sha256 de4b7fd95e7aa410) and hart-2017-iroquoia-dispersal.txt (sha256 426d8df80a9382f6), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   fields:
     prop: field_system
     value: { kind: swidden }

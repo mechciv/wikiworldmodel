@@ -32,6 +32,8 @@ claims:
       quote: It was occupied primarily during the Mississippian period (800–1400)
     method: expert-estimate
     note: The earlier part of this range is village occupation, before the city.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in unesco-whc-198-cahokia.txt (sha256 8c0f2ca010677778), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   end-munoz:
     prop: end
     value: 1350 CE
@@ -61,6 +63,8 @@ claims:
       loc: description
       quote: It was occupied primarily during the Mississippian period (800–1400)
     method: expert-estimate
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in unesco-whc-198-cahokia.txt (sha256 8c0f2ca010677778), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   location:
     prop: location
     value: { lat: 38.653889, lon: -90.064444, frame: frame:earth/present-day }
@@ -82,6 +86,8 @@ claims:
       quote: when it covered nearly 1,600 ha and included some 120 mounds
     method: expert-estimate
     note: A little under, and given for the Mississippian period as a whole. The moment is set to the peak the same text gives.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in unesco-whc-198-cahokia.txt (sha256 8c0f2ca010677778), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   population-pompeani:
     prop: population
     value: { lo: 15000, hi: 20000 }
@@ -93,6 +99,8 @@ claims:
     method: expert-estimate
     rank: preferred
     note: Preferred as the recent statement, with references to the archaeology, which were not read.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in pompeani-2021-cahokia-drought.txt (sha256 0061c89cb2a20981), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   population-unesco:
     prop: population
     value: { lo: 10000, hi: 20000 }
@@ -102,6 +110,8 @@ claims:
       loc: description
       quote: This agricultural society may have had a population of 10–20,000 at its peak between 1050 and 1150.
     method: expert-estimate
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in unesco-whc-198-cahokia.txt (sha256 8c0f2ca010677778), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   population-chandler:
     prop: population
     value: 40000
@@ -109,3 +119,23 @@ claims:
     source: { ref: src:reba-2016-urban-population, loc: "chandlerV2.csv, row Cahokia, column AD_1100" }
     method: compilation
     note: Chandler's figure, as digitized by Reba et al. (2016), twice the others.
+  town-form:
+    prop: town_form
+    value: { wall: timber }
+    valid: { lo: 1200 CE }
+    source:
+      - ref: src:pompeani-2021-cahokia-drought
+        loc: Introduction
+        quote: This includes archaeological evidence for the construction of palisade walls around Cahokia’s central precinct
+      - ref: src:pompeani-2021-cahokia-drought
+        loc: Discussion
+        quote: After 1200 CE, when the first fortifications were built around Cahokia’s central precinct
+      - ref: src:unesco-whc-198-cahokia
+        loc: Outstanding Universal Value, brief synthesis
+        quote: a section of reconstructed palisade, all of which together defined the limits and internal symmetry of the settlement
+    method: excavation
+    note: >-
+      A palisade from about 1200 CE round the central precinct, not round the whole settlement, which the generator cannot
+      tell apart. Its height, its gates and how the houses were laid out are not given here.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in pompeani-2021-cahokia-drought.txt (sha256 0061c89cb2a20981) and unesco-whc-198-cahokia.txt (sha256 8c0f2ca010677778), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

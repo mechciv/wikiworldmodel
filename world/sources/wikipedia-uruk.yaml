@@ -1,0 +1,21 @@
+id: src:wikipedia-uruk
+type: database-record
+kind: review
+citation: >-
+  "Uruk." Wikipedia, the free encyclopedia (English edition), revision 1386184711.
+snapshot: 2026-11-20
+title: Uruk
+container: Wikipedia
+url: https://en.wikipedia.org/w/index.php?title=Uruk&oldid=1386184711
+license: CC-BY-SA-4.0
+license_note: Short quotes, with credit.
+reliability: >-
+  A general encyclopedia article, cited for Uruk's canals and its city wall because no better work stating them could be read
+  here. It cites the canals to Harmansah (2007), "The Archaeology of Mesopotamia", and the wall to Nissen, H.J. (1972), "The
+  City Wall of Uruk", in Ucko, Tringham and Dimbleby (eds.), Man, Settlement and Urbanism, pp. 793–98, which was not reached
+  and should replace it.
+verified:
+  by: machine:claude-code
+  how: >-
+    The article's HTML, rendered from revision 1386184711, fetched from Wikipedia on 20 November 2026 and read as text; the
+    quotes checked by script against that text.

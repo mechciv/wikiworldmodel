@@ -107,3 +107,20 @@ claims:
       surrounded by 69 other mounds. The villages of the delta are not described.
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-djenne-djenno-1380966072.txt (sha256 b5351c101c20e01a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+  town:
+    prop: town_form
+    value: { wall: mudbrick, wall_thickness: 3.7 }
+    source:
+      ref: src:wikipedia-djenne-djenno
+      loc: section "History", "Later Phases"
+      quote: >-
+        including a city wall, probably built during the latter half of the first millennium CE using the cylindrical bricks
+        historically made by Djenné masons. The wall "was 3.7 meters wide at its base and ran almost two kilometers around the
+        town".
+    method: excavation
+    note: >-
+      The city wall of Jenne-jeno, of the cylindrical mud bricks of Djenné's masons, 3.7 m wide at its base and nearly 2 km
+      round; the width is at the base, the only one given. It is the one town of the tradition whose wall is described, and
+      Djenné's own, narrower record gives its wall of 1828. Its height, its gates and its streets are not given.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-djenne-djenno.txt (sha256 79da6a4418ebf9d3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
