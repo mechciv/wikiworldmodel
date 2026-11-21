@@ -30,7 +30,8 @@ export function wantedRows(rows: HousingRow[], labels: Map<number, string>): Wan
   const out = new Map<string, Wanted>();
   for (const r of rows) {
     const lifeway = LIFEWAY_OF[r.pattern];
-    const key = `${r.t}|${r.region}|${lifeway}`;
+    // People of one way of life whom several traditions share are a row for each, and one for those none houses.
+    const key = `${r.t}|${r.region}|${lifeway}|${r.tradition ?? ''}`;
     const have = out.get(key);
     if (have) have.people += r.people;
     else out.set(key, { region: r.region, label: labels.get(r.region) ?? (r.region ? String(r.region) : 'no region'), t: r.t, lifeway, people: r.people, ...(r.tradition ? { tradition: r.tradition } : {}), ...(r.kin ? { kin: r.kin } : {}) });

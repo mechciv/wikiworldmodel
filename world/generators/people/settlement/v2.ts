@@ -20,7 +20,7 @@
 //
 // Everything is seeded by the world's 5′ cells and the anthromes' step, not by the scene, so two scenes that overlap put
 // their settlements in the same places: only the ground they stand on, which is the scene's, can move one a little.
-import { husbandryAt, mid, townText, traditionFor, within, type DwellingSpec, type FieldSpec, type LifewayWord, type SettlementSpec, type TownSpec, type Tradition } from '../../../../core/dwelling.ts';
+import { husbandryAt, mid, prevalenceOf, townText, traditionFor, within, type DwellingSpec, type FieldSpec, type LifewayWord, type SettlementSpec, type TownSpec, type Tradition } from '../../../../core/dwelling.ts';
 import { anthromeOf, lifewayOf, LIFEWAY_OF, type CityNear, type FieldUse, type Lifeway, type Pattern } from '../../../../core/landscape.ts';
 import type { ClimateClass } from '../../../../core/climate.ts';
 import type { SceneSpec } from '../../../../core/scene.ts';
@@ -64,6 +64,8 @@ export interface TownParams {
   tower_every: number;
   /** the share of a town's ground an open square takes, where it has one */
   square: number;
+  /** what a wall is drawn as where a form gives its height, its thickness or its gates and not what it was made of */
+  unstated_wall: WallWord;
   /** how wide a canal and a moat are, m; and every which street between the rows of a town of canals is one */
   canal: number;
   moat: number;
@@ -104,6 +106,8 @@ export interface SettlementParams {
     above_water: number;
     /** how many places near its spot a settlement tries before it is left out */
     tries: number;
+    /** how far above the water a house of a city of a list or a record stands at least, in metres */
+    city_above_water: number;
   };
   cities: {
     /** how far from the scene's middle a city is looked for, km */
@@ -125,6 +129,11 @@ export interface SettlementParams {
     record_gap: number;
   };
   towns: TownParams;
+  /**
+   * the part of a region's settlements of a way of life drawn in a tradition's house, where the tradition says its
+   * people were a few, some or most of them and not all (its `prevalence`); without it such a tradition draws none
+   */
+  prevalence?: Record<'few' | 'some' | 'most', number>;
   /** how the animals people kept are drawn among them; without it none are */
   livestock?: LivestockParams;
   /**
@@ -307,8 +316,11 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
   const climate = spec.biome.climate;
   const forms: PlanForm[] = [];
   const formIndex = new Map<string, number>();
-  // The tradition of a way of life in a region at the scene's time: the one written for it, or for one kin to it.
-  const traditionOf = (region: number, pattern: Exclude<Pattern, 'none'>) => traditionFor(P.traditions, region, P.t, LIFEWAY_OF[pattern]);
+  // The tradition of a way of life in a region at the scene's time: the one written for it, or for one kin to it. Where
+  // several share the region's people, a number of a cell's or a city's own says which it falls to; with none, the one
+  // most of them lived in.
+  const parts = prevalenceOf(P.generator.params);
+  const traditionOf = (region: number, pattern: Exclude<Pattern, 'none'>, u?: number) => traditionFor(P.traditions, region, P.t, LIFEWAY_OF[pattern], parts, u);
   const formOf = (pattern: Pattern, t: Tradition | undefined, kin?: LifewayWord): number => {
     const g = genericFor(p, pattern, climate);
     // A tradition's house for the way of life it says it housed, or for one kin to it; the generic one where none holds.
@@ -346,7 +358,9 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
   const townOf = (t: Tradition | undefined, own?: TownSpec, record?: string): TownOf => {
     const out: Record<string, unknown> = { ...p.towns.generic };
     const from: Record<string, string> = Object.fromEntries(Object.keys(out).map((k) => [k, 'generic']));
-    for (const [k, v] of Object.entries(t?.town ?? {})) {
+    // A tradition's town form holds for the time its claim says, where it says one.
+    const held = t && (!t.townSpan || (P.t >= t.townSpan[0] && P.t <= t.townSpan[1])) ? t.town : {};
+    for (const [k, v] of Object.entries(held)) {
       out[k] = v;
       from[k] = t!.from[`town.${k}`] ?? t!.id;
     }
@@ -368,6 +382,9 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
   const ok = (x: number, y: number) => ground.at(x, y) - water(x, y) > p.site.above_water && slope(x, y) < p.site.steep;
   const inScene = (x: number, y: number) => Math.abs(x) < extent && Math.abs(y) < extent;
   const fit = (x: number, y: number) => inScene(x, y) && ok(x, y);
+  // A city a list or a record puts at a place stood there, on whatever of its ground is dry: a village keeps well above
+  // the water, but the level of a scene's river is the scene's, and a city on a river's plain is no less a city for it.
+  const fitCity = (x: number, y: number) => inScene(x, y) && ground.at(x, y) - water(x, y) > p.site.city_above_water && slope(x, y) < p.site.steep;
   const settlements: Settlement[] = [];
   const houses: House[] = [];
   // Where each settlement's houses lie in the list, as they are laid out one settlement after another.
@@ -393,7 +410,7 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
     const lon = c.lon;
     const cell = cellAt(P.grid, lat, lon);
     const region = cell >= 0 ? P.grid.region[cell] : 0;
-    const found = traditionOf(region, pattern);
+    const found = traditionOf(region, pattern, hash2(Math.round(lat * 1000), Math.round(lon * 1000), 0x7ad1));
     const t = found?.tradition;
     const form = formOf(pattern, t, found?.kin);
     const citySeed = seedOf(hash2(Math.round(lat * 1000), Math.round(lon * 1000), 0x51c1));
@@ -421,7 +438,12 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
       const a = regionOf(region)?.assessment;
       const life = lifewayOf(P.classes, k, d, a);
       if (life.pattern === 'none') continue;
-      const found = traditionOf(region, life.pattern);
+      // The cell's place on the world's grid seeds everything in it.
+      const gr = Math.round((90 - north) / g.res);
+      const gc = Math.round((west + 180) / g.res);
+      const seed = seedOf(hash3(gr, gc, Math.round(P.step), 0x5e7));
+      // A cell's settlements are all of one tradition: where several share the region's people, the cell falls to one.
+      const found = traditionOf(region, life.pattern, hash2(gc, gr, seed ^ 0x7ad1));
       const t = found?.tradition;
       const pp = p.patterns[life.pattern];
       const household = mid(t?.settlement.household, p.household);
@@ -430,10 +452,6 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
       const inside = (Math.max(0, Math.min(x1, extent) - Math.max(x0, -extent)) * Math.max(0, Math.min(y1, extent) - Math.max(y0, -extent))) / ((x1 - x0) * (y1 - y0));
       expected += d * area * inside;
       const people = d * area;
-      // The cell's place on the world's grid seeds everything in it.
-      const gr = Math.round((90 - north) / g.res);
-      const gc = Math.round((west + 180) / g.res);
-      const seed = seedOf(hash3(gr, gc, Math.round(P.step), 0x5e7));
       const perSettlement = Math.max(1, Math.round(within(t?.settlement.houses ?? { lo: pp.houses[0], hi: pp.houses[1] }, pp.houses[0], hash2(gr, gc, seed))));
       const housesInCell = people / household;
       const count = Math.floor(housesInCell / perSettlement + hash2(gc, gr, seed ^ 0x3a));
@@ -477,7 +495,7 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
   if (L && keptList.length && P.husbandry?.length) {
     const index = new Map(keptList.map((k, i) => [k.id, i]));
     const posesOf = keptList.map((k) => {
-      const poses = (P.keptForms?.[k.form]?.behave?.poses ?? ['stand', 'walk', 'graze']).map((x) => POSE[x]).filter((x) => x !== POSE.fly);
+      const poses = (P.keptForms?.[k.form]?.behave?.poses ?? ['stand', 'walk', 'graze']).map((x) => POSE[x] as number | undefined).filter((x): x is number => x !== undefined && x !== POSE.fly);
       return poses.length ? poses : [POSE.stand];
     });
     const grazes = keptList.map((k) => {
@@ -703,7 +721,7 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
       }
       const x = s.x + dx;
       const y = s.y + dy;
-      if (!fit(x, y)) continue;
+      if (!(s.city ? fitCity(x, y) : fit(x, y))) continue;
       houses.push({ x, y, z: ground.at(x, y), face, form: s.form, settlement: si, size: scale * (0.85 + 0.3 * hash2(h, 8, seed)), rank: Math.floor(hash2(h, 9, seed) * 256) });
       s.houses++;
     }
@@ -794,13 +812,16 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
       }
       const [lx, ly] = warp(l.x, l.y);
       const [x, y] = toScene(lx, ly);
-      if (!fit(x, y)) return;
+      if (!(s.city ? fitCity(x, y) : fit(x, y))) return;
       // A house fronts the street its row is on; along lanes, not squarely.
       const face = axis + (l.r === 0 ? PI : 0) + (planned ? 0 : (hash2(h, 6, seed) - 0.5) * 0.4);
       houses.push({ x, y, z: ground.at(x, y), face, form: s.form, settlement: si, size: scale * (0.85 + 0.3 * hash2(h, 8, seed)), rank: Math.floor(hash2(h, 9, seed) * 256) });
       s.houses++;
     });
-    s.town = { text: townText(form), from: town.from };
+    // In words: the generic town's "no wall" is left out where a record states a wall's height or gates.
+    const { wall: _generic, ...walled } = form;
+    const stated = (town.from.wall ?? 'generic') !== 'generic' || !(form.wall_height !== undefined || form.wall_thickness !== undefined || form.gates !== undefined || form.moat === true);
+    s.town = { text: townText(stated ? form : walled), from: stated ? town.from : Object.fromEntries(Object.entries(town.from).filter(([k]) => k !== 'wall')) };
     // A piece of its works, where the ground is in the scene and above the water.
     const put = (lx: number, ly: number, nx: number, ny: number, kind: number): void => {
       const [x, y] = toScene(lx, ly);
@@ -824,7 +845,13 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
         for (let j = 0; j < count; j++) put(x0 + ((j + 0.5) * (x1 - x0)) / count, y, 0, 1, canal);
       }
     }
-    const wall = form.wall && form.wall !== 'none' ? form.wall : undefined;
+    // Its wall, of what its form says; or, where the form gives a wall's height, thickness or gates and not what it was
+    // made of, of the generator's plain wall, which says so.
+    const said = form.wall_height !== undefined || form.wall_thickness !== undefined || form.gates !== undefined || form.moat === true;
+    // Whether a tradition or a record says what the wall was made of, or that there was none: the generic town's word
+    // gives way to a wall whose height or gates a record states.
+    const material = (town.from.wall ?? 'generic') !== 'generic' || !said;
+    const wall = material ? (form.wall && form.wall !== 'none' ? form.wall : undefined) : T.unstated_wall;
     if (!wall) return;
     const height = mid(form.wall_height, T.walls[wall].height);
     const thick = mid(form.wall_thickness, T.walls[wall].thickness);
@@ -860,13 +887,15 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
       return [l.xy[2 * lo] + (l.xy[2 * lo + 2] - l.xy[2 * lo]) * f, l.xy[2 * lo + 1] + (l.xy[2 * lo + 3] - l.xy[2 * lo + 1]) * f, ty, -tx];
     };
     const ring = line(margin);
-    const who = town.from.wall ?? 'generic';
-    const piece = workOf({ kind: 'wall', material: wall, height, thickness: thick }, WALL_LABEL[wall], who);
+    // What says it had a wall: its `wall`, or whatever of the wall it states where it does not say what it was made of.
+    const named = material ? WALL_LABEL[wall] : 'A town wall, of what is not said';
+    const who = (material ? town.from.wall : town.from.wall_height ?? town.from.wall_thickness ?? town.from.gates ?? town.from.moat) ?? 'generic';
+    const piece = workOf({ kind: 'wall', material: wall, height, thickness: thick }, named, who);
     const opening = Math.max(3, planned ? M : w * 1.5);
     const gateSpec: WorkSpec = { kind: 'gate', material: wall, height, thickness: thick, opening };
-    const gate = workOf(gateSpec, `A gate in ${WALL_LABEL[wall].replace(/^A /, 'a ')}`, town.from.gates ?? who);
+    const gate = workOf(gateSpec, `A gate in ${named.replace(/^A /, 'a ')}`, town.from.gates ?? who);
     const towers = towered(wall);
-    const tower = towers ? workOf({ kind: 'tower', material: wall, height, thickness: thick }, `A tower of ${WALL_LABEL[wall].replace(/^A /, 'a ')}`, who) : -1;
+    const tower = towers ? workOf({ kind: 'tower', material: wall, height, thickness: thick }, `A tower of ${named.replace(/^A /, 'a ')}`, who) : -1;
     // Its gates: where the main streets leave a planned town, and round a town of lanes about evenly.
     const G = Math.max(1, Math.round(mid(form.gates, T.gates)));
     const gates = Array.from({ length: G }, (_, j) => (ring.length * (planned ? j : j + 0.6 * hash2(j, 21, seed))) / G).sort((a, b) => a - b);

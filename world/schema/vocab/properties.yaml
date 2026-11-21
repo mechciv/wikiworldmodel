@@ -439,6 +439,22 @@ properties:
       house is drawn only for those: a herder's tent for the camps of herders, not for the farmers of the same
       region; and a husbandry tradition's animals only among them. A tradition that does not say takes the answer of
       the one it is a member of; one that has none is drawn for no one, and the validator says so.
+  prevalence:
+    type: string
+    interp: step
+    applies_to: [tradition/building]
+    values:
+      few: A few of them lived so. A house of some districts, of one people among others, or of those who could afford it.
+      some: A part of them, beside other houses.
+      most: Most of them.
+    description: >-
+      How many of the people a building tradition could house lived in its houses: of those of its way of life, in
+      the regions its extent names, while it held. An extent names regions where the tradition was, not ones it
+      covered, and a tradition that says nothing more is drawn as the house of everyone there whom no more particular
+      tradition houses. One that says is drawn for a part of their settlements, and the rest are another tradition's
+      or the generic house's. A word and not a number: a source says that a house was rare or common far more often
+      than it counts, and the part each word is drawn for is the settlement generator's (its params.prevalence). A
+      tradition does not take it from the one it is a member of.
   livestock:
     type: taxa
     interp: step

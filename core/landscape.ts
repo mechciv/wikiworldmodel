@@ -345,8 +345,9 @@ export interface CityRecord {
   areas: [number, number][];
   /** [year, houses]: its `houses` claims */
   houses: [number, number][];
-  /** how it was laid out: its `town_form` claim */
+  /** how it was laid out: its `town_form` claim, and when that held, where the claim says */
   town?: TownSpec;
+  townSpan?: [number, number];
 }
 
 export interface CitiesFile {
@@ -472,7 +473,8 @@ export function citiesAround(f: CitiesFile, lat: number, lon: number, t: number,
     const people = cityPeople({ pops: r.pops }, t, guess.hold, guess.gap);
     const houses = figureAt(r.houses, t);
     const area = figureAt(r.areas, t);
-    const own = { record: r.id, ...(houses !== undefined ? { houses: Math.round(houses) } : {}), ...(area !== undefined ? { area } : {}), ...(r.town ? { town: r.town } : {}) };
+    const laid = r.town && (!r.townSpan || (t >= r.townSpan[0] && t <= r.townSpan[1])) ? r.town : undefined;
+    const own = { record: r.id, ...(houses !== undefined ? { houses: Math.round(houses) } : {}), ...(area !== undefined ? { area } : {}), ...(laid ? { town: laid } : {}) };
     // The list's city nearest the record, if one stands within reach of it.
     let best = -1;
     let bestKm = recordKm;

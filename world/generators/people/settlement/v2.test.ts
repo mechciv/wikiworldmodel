@@ -156,6 +156,41 @@ describe('the settlement generator', () => {
     expect(plan.forms[0].spec).toMatchObject({ walls: 'timber' });
   });
 
+  it('draws a house that some lived in for that part of the cells of its region, each cell all of one house, and alike from two scenes', () => {
+    const traditions: Tradition[] = compileTraditions([
+      { id: 'test/farmhouse', label: 'A farmhouse', regions: [1], span: [-500, 500], lifeways: ['farmers'], dwelling: { plan: 'rectangular', walls: 'timber' } },
+      { id: 'test/tower', label: 'A tower', regions: [1], span: [-500, 500], lifeways: ['farmers'], prevalence: 'some', dwelling: { plan: 'round', walls: 'rammed-earth' } },
+    ]);
+    const p = world(() => ({ code: 32, density: 40, region: 1 }), [{ id: 1, a: assess(1, 1, 3, 2) }], { traditions });
+    // A scene wide enough for a hundred cells and more: the part is of many.
+    const wide = 60000;
+    const plan = makeSettlement(spec(p), flat, dry, wide);
+    const whose = (pl: typeof plan, s: (typeof plan.settlements)[number]) => pl.forms[s.form].tradition;
+    // The 5′ cell a settlement is in, on the world's grid.
+    const cellOf = (x: number, y: number) => `${Math.floor((1 - y / 111194.93) * 12)},${Math.floor((x / 111194.93 + 1) * 12)}`;
+    const cells = new Map<string, Set<string | undefined>>();
+    for (const s of plan.settlements) (cells.get(cellOf(s.x, s.y)) ?? cells.set(cellOf(s.x, s.y), new Set()).get(cellOf(s.x, s.y))!).add(whose(plan, s));
+    expect(cells.size).toBeGreaterThan(100);
+    // Every settlement is in one house or the other, and no cell has both.
+    for (const set of cells.values()) expect(set.size).toBe(1);
+    const towers = [...cells.values()].filter((set) => set.has('test/tower')).length;
+    const part = (gen.params.prevalence as { some: number }).some;
+    // The part its word stands for, within what a hundred and more cells allow.
+    expect(Math.abs(towers / cells.size - part)).toBeLessThan(0.12);
+    expect([...cells.values()].filter((set) => set.has('test/farmhouse')).length).toBe(cells.size - towers);
+    // The same cell is the same house from a scene beside this one.
+    const other = makeSettlement(spec(p, { lat: 0.2, lon: 0.15 }), flat, dry, wide);
+    const [bx, by] = toLocal({ lat: 0, lon: 0 }, 0.2, 0.15);
+    let matched = 0;
+    for (const s of other.settlements) {
+      const mine = cells.get(cellOf(s.x + bx, s.y + by));
+      if (!mine) continue;
+      matched++;
+      expect(mine.has(whose(other, s))).toBe(true);
+    }
+    expect(matched).toBeGreaterThan(200);
+  });
+
   describe('the animals people kept', () => {
     const always = { best: null, lo: -Infinity, hi: Infinity, derived: true };
     const animal = (id: string, label: string, length: number, mass: number): LivingTaxon => ({ id, label, form: id, form_from: id, form_label: label, own: true, tier: 'kept', weight: 1, rows: 0, biped: false, length, mass, time: { start: always, end: always, instant: false } });
@@ -309,6 +344,20 @@ describe('the settlement generator', () => {
         expect(Math.min(Math.abs(along), Math.abs(across))).toBeLessThan(1);
         expect(wall.filter((w) => Math.hypot(w.x - g.x, w.y - g.y) < 4)).toEqual([]);
       }
+    });
+
+    it('has a wall of the plain kind where its form gives the wall and not what it was made of, and none before its claim holds', () => {
+      // A wall twelve metres high, of what the source does not say: drawn, as the generator's plain wall, and said to be.
+      const { plan, s, kind } = town({ streets: 'grid', wall_height: 12, wall_thickness: 3.4 });
+      expect(kind('wall').length).toBeGreaterThan(100);
+      expect(plan.workForms[kind('wall')[0].form]).toMatchObject({ label: 'A town wall, of what is not said', from: 'test/town-house', spec: { material: 'mudbrick', height: 12, thickness: 3.4 } });
+      expect(s.town!.text).toBe('streets on a grid, a wall 12 m high, 3.4 m thick');
+      // A palisade that the tradition's towns had only from a later time: none at the scene's.
+      const traditions = compileTraditions([{ id: 'test/town-house', label: 'A town house', regions: [1], span: [-500, 500], lifeways: ['townspeople'], dwelling: { plan: 'long' }, town: { wall: 'timber' }, townSpan: [300, 500] }]);
+      const cities = [{ name: 'Testopolis', country: 'Nowhere', lat: 0, lon: 0, people: 30000, field: 'field:people/cities-ancient', source: 'src:test', from: 'list' as const }];
+      const early = makeSettlement(spec(world(() => ({ code: 54, density: 2, region: 1 }), [{ id: 1, a: assess(1, 0, 1, 3, 1) }], { cities, traditions })), flat, dry, EXTENT);
+      expect(early.workForms.filter((f) => f.spec.kind === 'wall')).toEqual([]);
+      expect(early.settlements[0].town!.from).toEqual({ streets: 'generic', wall: 'generic' });
     });
 
     it('has a rampart or a palisade with no towers, and a moat with a way across before each gate', () => {

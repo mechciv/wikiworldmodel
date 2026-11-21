@@ -166,6 +166,22 @@ export function lifewayText(v: LifewayWord[]): string {
   return words.length > 1 ? `${words.slice(0, -1).join(', ')} and ${words.at(-1)}` : (words[0] ?? '');
 }
 
+/**
+ * How many of the people a tradition could house lived in its houses, where its `prevalence` claim says they were not
+ * all of them: a word, as sources say that a house was rare or common far more often than they count. The part of the
+ * settlements each word is drawn for is the settlement generator's (its params.prevalence), not a fact.
+ */
+export const PREVALENCE_WORDS = ['few', 'some', 'most'] as const;
+export type PrevalenceWord = (typeof PREVALENCE_WORDS)[number];
+/** The part of a region's settlements of a way of life each word is drawn for, of one. */
+export type Prevalence = Record<PrevalenceWord, number>;
+
+/** The parts the settlement generator's parameters give each word; none, where they give none. */
+export function prevalenceOf(params: Record<string, unknown> | undefined): Prevalence {
+  const given = (params?.prevalence ?? {}) as Partial<Prevalence>;
+  return { few: given.few ?? 0, some: given.some ?? 0, most: given.most ?? 0 };
+}
+
 type Words<T extends Record<string, object>> = { [K in keyof T]?: keyof T[K] & string };
 
 /** A dwelling as a claim states it: whichever parameters are known. Lengths in metres. */
@@ -274,11 +290,14 @@ export interface Tradition {
   span: [number, number];
   /** whom it housed: its own `lifeway` claim, or its nearest ancestor's; empty where neither says, and then it houses no one */
   lifeways: LifewayWord[];
+  /** how many of them lived so, where its own `prevalence` claim says they were not all */
+  prevalence?: PrevalenceWord;
   dwelling: DwellingSpec;
   settlement: SettlementSpec;
   fields: FieldSpec;
-  /** how its towns were laid out, where it housed townspeople and says */
+  /** how its towns were laid out, where it housed townspeople and says; and when, where its claim holds for part of its span */
   town: TownSpec;
+  townSpan?: [number, number];
   /** which tradition gave each parameter: `dwelling.walls` → its id; and `lifeway`, whose claim says whom it housed */
   from: From;
   /** whether it says anything of the dwelling itself, rather than inheriting it all */
@@ -293,10 +312,13 @@ export interface TraditionInput {
   regions: number[];
   span: [number, number];
   lifeways?: LifewayWord[];
+  prevalence?: PrevalenceWord;
   dwelling?: DwellingSpec;
   settlement?: SettlementSpec;
   fields?: FieldSpec;
   town?: TownSpec;
+  /** when its town form held, where the claim says: [from, to] on the axis */
+  townSpan?: [number, number];
 }
 
 /**
@@ -330,10 +352,14 @@ export function compileTraditions(inputs: TraditionInput[]): Tradition[] {
       regions: t.regions.length ? [...t.regions].sort((a, b) => a - b) : up?.regions ?? [],
       span: t.span,
       lifeways: own ?? up?.lifeways ?? [],
+      // How many lived so is its own to say: a member is not as rare as the tradition it belongs to.
+      ...(t.prevalence ? { prevalence: t.prevalence } : {}),
       dwelling: merge(t.dwelling, up?.dwelling, 'dwelling'),
       settlement: merge(t.settlement, up?.settlement, 'settlement'),
       fields: merge(t.fields, up?.fields, 'fields'),
       town: merge(t.town, up?.town, 'town'),
+      // A town form that holds for part of a span is its own claim's; a member that says none keeps its parent's.
+      ...((t.town ? t.townSpan : up?.townSpan) ? { townSpan: t.town ? t.townSpan : up!.townSpan } : {}),
       from,
       own: !!t.dwelling && Object.keys(t.dwelling).length > 0,
     };
@@ -344,27 +370,21 @@ export function compileTraditions(inputs: TraditionInput[]): Tradition[] {
 }
 
 /**
- * The tradition that houses a way of life at a region and a time: of those whose extent names the region, whose span
- * holds the time and whose `lifeway` names the way of life, the most particular, which is the deepest in the tree, then
- * the one that names the fewest regions, then the latest to start, then by id. Undefined where none does: the
- * generator's generic dwelling stands in. A herder's tent is no farmer's house, so a tradition of another way of life
- * in the same region does not stand in either.
+ * The traditions that house a way of life at a region and a time, the most particular first: those whose extent names
+ * the region, whose span holds the time and whose `lifeway` names the way of life; the deepest in the tree first, then
+ * the one that names the fewest regions, then the latest to start, then by id. A herder's tent is no farmer's house, so
+ * a tradition of another way of life in the same region is not among them.
  */
+export function traditionsAt(list: Tradition[], region: number | undefined, t: number, lifeway: LifewayWord): Tradition[] {
+  if (region === undefined) return [];
+  return list
+    .filter((x) => t >= x.span[0] && t <= x.span[1] && x.regions.includes(region) && x.lifeways.includes(lifeway) && (x.own || Object.keys(x.dwelling).length > 0))
+    .sort((a, b) => b.depth - a.depth || a.regions.length - b.regions.length || b.span[0] - a.span[0] || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+}
+
+/** The most particular tradition that houses a way of life at a region and a time (traditionsAt). Undefined where none does. */
 export function traditionAt(list: Tradition[], region: number | undefined, t: number, lifeway: LifewayWord): Tradition | undefined {
-  if (region === undefined) return undefined;
-  let best: Tradition | undefined;
-  for (const x of list) {
-    if (t < x.span[0] || t > x.span[1] || !x.regions.includes(region) || !x.lifeways.includes(lifeway)) continue;
-    if (!x.own && !Object.keys(x.dwelling).length) continue;
-    if (!best) {
-      best = x;
-      continue;
-    }
-    const better =
-      x.depth !== best.depth ? x.depth > best.depth : x.regions.length !== best.regions.length ? x.regions.length < best.regions.length : x.span[0] !== best.span[0] ? x.span[0] > best.span[0] : x.id < best.id;
-    if (better) best = x;
-  }
-  return best;
+  return traditionsAt(list, region, t, lifeway)[0];
 }
 
 /** A town's layout in words, for a panel: "streets on a grid, in blocks of 60–100 m, a wall of stone 8 m high, 4 gates". */
@@ -375,6 +395,7 @@ export function townText(v: TownSpec): string {
   if (v.street !== undefined) parts.push(`streets ${spanText(v.street, ' m')} wide`);
   if (v.main_street !== undefined) parts.push(`main streets ${spanText(v.main_street, ' m')} wide`);
   if (v.wall === 'none') parts.push('no wall');
+  else if (!v.wall && (v.wall_height !== undefined || v.wall_thickness !== undefined)) parts.push(`a wall${v.wall_height !== undefined ? ` ${spanText(v.wall_height, ' m')} high` : ''}${v.wall_thickness !== undefined ? `${v.wall_height !== undefined ? ',' : ''} ${spanText(v.wall_thickness, ' m')} thick` : ''}`);
   else if (v.wall) parts.push(`${v.wall === 'earth' ? 'a rampart of earth' : v.wall === 'timber' ? 'a palisade' : `a wall of ${v.wall === 'rammed-earth' ? 'rammed earth' : v.wall}`}${v.wall_height !== undefined ? ` ${spanText(v.wall_height, ' m')} high` : ''}${v.wall_thickness !== undefined ? `, ${spanText(v.wall_thickness, ' m')} thick` : ''}`);
   if (v.gates !== undefined) parts.push(`${spanText(v.gates)} gates`);
   if (v.moat !== undefined) parts.push(v.moat ? 'a moat outside it' : 'no moat');
@@ -462,16 +483,54 @@ export function husbandryAt(list: Husbandry[], region: number | undefined, t: nu
   return best;
 }
 
+/** A tradition that draws houses of a way of life at a region and a time: whose it was written for, where that is a way of life kin to theirs, and the part of their settlements it draws. */
+export interface Housed {
+  tradition: Tradition;
+  /** the way of life it was written for, where that is another, kin to theirs: its house stands in */
+  kin?: LifewayWord;
+  /** the part of the region's settlements of that way of life drawn in its house, of one */
+  share: number;
+}
+
 /**
- * The tradition that draws the houses of a way of life at a region and a time: the one written for it (traditionAt), or
- * where none is, one written for a way of life kin to it (LIFEWAY_KIN), with whose it is. Undefined where neither holds.
+ * The traditions that draw the houses of a way of life at a region and a time, each with its part of them. The ones
+ * written for that way of life come first, then those written for a way of life kin to it (LIFEWAY_KIN), which stand
+ * in. Of each, the ones that say how many lived so (`prevalence`) take their parts first, as the generator's parameters
+ * size the word, the most particular first (traditionsAt); then the most particular of those that do not say takes
+ * everyone left. What is left when all have taken their parts is drawn in the generator's generic house.
  */
-export function traditionFor(list: Tradition[], region: number | undefined, t: number, lifeway: LifewayWord): { tradition: Tradition; kin?: LifewayWord } | undefined {
-  const own = traditionAt(list, region, t, lifeway);
-  if (own) return { tradition: own };
-  for (const kin of LIFEWAY_KIN[lifeway] ?? []) {
-    const other = traditionAt(list, region, t, kin);
-    if (other) return { tradition: other, kin };
+export function traditionsFor(list: Tradition[], region: number | undefined, t: number, lifeway: LifewayWord, parts: Prevalence): Housed[] {
+  const out: Housed[] = [];
+  let left = 1;
+  for (const way of [lifeway, ...(LIFEWAY_KIN[lifeway] ?? [])]) {
+    const at = traditionsAt(list, region, t, way);
+    for (const x of [...at.filter((y) => y.prevalence), ...at.filter((y) => !y.prevalence)]) {
+      if (left <= 1e-9) return out;
+      // One written for both ways of life is theirs, and does not stand in a second time.
+      if (out.some((o) => o.tradition === x)) continue;
+      const share = Math.min(left, x.prevalence ? parts[x.prevalence] : 1);
+      if (!(share > 0)) continue;
+      out.push({ tradition: x, ...(way !== lifeway ? { kin: way } : {}), share });
+      left -= share;
+    }
+  }
+  return out;
+}
+
+/**
+ * The tradition that draws the houses of a way of life at a region and a time: the one written for it, or where none
+ * is, one written for a way of life kin to it, with whose it is (traditionsFor). Where several share the region's
+ * people, the one most of them lived in; or, given a number in [0, 1) that is a settlement's own, the one that
+ * settlement falls to, each taking its part of that range in turn. Undefined where none holds, or the number falls
+ * past them all: the generator's generic dwelling stands in.
+ */
+export function traditionFor(list: Tradition[], region: number | undefined, t: number, lifeway: LifewayWord, parts: Prevalence, u?: number): Housed | undefined {
+  const found = traditionsFor(list, region, t, lifeway, parts);
+  if (u === undefined) return found.reduce<Housed | undefined>((best, x) => (!best || x.share > best.share ? x : best), undefined);
+  let upTo = 0;
+  for (const x of found) {
+    upTo += x.share;
+    if (u < upTo) return x;
   }
   return undefined;
 }

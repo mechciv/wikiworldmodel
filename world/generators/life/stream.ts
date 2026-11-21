@@ -217,7 +217,8 @@ export class SceneStream {
     const lift = 0.12;
     const m = new Mesh(4096);
     m.entity = this.pathEntity();
-    m.mat = MAT.earth;
+    // Beaten pale, and of a material the renderer lays on the ground at any distance.
+    m.mat = MAT.sand;
     m.tint = 118;
     for (const line of plan.paths) {
       // Its points every few metres, then a strip between each pair that stands on dry ground.

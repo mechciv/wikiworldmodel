@@ -2,7 +2,7 @@
 // and put together into what a scene's people are and what the globe paints. The same core code as the build's, so what
 // a scene draws rests on the same anthromes, assessments, cities and traditions.
 import { decodeTile } from '../../../core/container.ts';
-import { traditionFor, type Husbandry, type LifewayWord, type Tradition } from '../../../core/dwelling.ts';
+import { prevalenceOf, traditionFor, type Husbandry, type LifewayWord, type Tradition } from '../../../core/dwelling.ts';
 import type { Form } from '../../../core/form.ts';
 import { anthromeTile, classAtStep, nearestStep, sceneTiles, scenePeople, assessmentAt, lifewayOf, LIFEWAY_OF, citiesAround, cityGuess, cellOf, tileKey, type AnthromeTile, type AnthromeTileHeader, type AssessmentsFile, type CitiesFile, type CityNear, type LandscapeData, type LandscapeIndex, type Lifeway, type TraditionsFile } from '../../../core/landscape.ts';
 import { cellAt, stepsAround, type PeopleFile } from '../../../core/layers.ts';
@@ -212,7 +212,8 @@ export class LandscapeAtlas {
     // The houses of the way of life here: a city's where a list puts one near, as a scene would draw it.
     const pattern = cities.length ? 'city' : lifeway.pattern;
     const whose = pattern !== 'none' ? LIFEWAY_OF[pattern] : undefined;
-    const found = region && whose ? traditionFor(this.traditions, region, t, whose) : undefined;
+    // Where several traditions share the region's people, the one most of them lived in.
+    const found = region && whose ? traditionFor(this.traditions, region, t, whose, prevalenceOf(this.index.generator?.params)) : undefined;
     const tradition = found?.tradition;
     return { t, step: this.index.steps[i], anthrome, ...(density !== undefined ? { density } : {}), ...(region && label && at ? { region: { id: region, label, slice: this.assessments.slices[at.slice].label, assessment: at } } : {}), lifeway, cities, ...(whose ? { whose } : {}), ...(tradition ? { tradition } : {}), ...(found?.kin ? { kin: found.kin } : {}) };
   }

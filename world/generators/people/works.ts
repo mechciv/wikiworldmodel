@@ -31,7 +31,7 @@ export interface WorkSpec {
 /** How long one piece of wall or of water is: a run that does not divide by it has its pieces overlap a little. */
 export const PIECE = 8;
 
-const WALL_MAT: Record<WallWord, number> = { earth: MAT.earth, 'rammed-earth': MAT.mud, timber: MAT.wood, mudbrick: MAT.mud, stone: MAT.granite, brick: MAT.brick };
+const WALL_MAT: Record<WallWord, number> = { earth: MAT.mud, 'rammed-earth': MAT.mud, timber: MAT.wood, mudbrick: MAT.mud, stone: MAT.granite, brick: MAT.brick };
 
 /** Whether a wall of this kind has towers along it: a bank of earth and a palisade have none. */
 export const towered = (w: WallWord): boolean => w !== 'earth' && w !== 'timber';
@@ -125,7 +125,7 @@ export function drawWork(m: Mesh, s: WorkSpec, detail: HouseDetail, tint = 128):
   if (s.kind === 'canal' || s.kind === 'moat') {
     // Water lying a little above the ground it is drawn on, between low banks of earth.
     const w = s.thickness / 2;
-    m.mat = MAT.earth;
+    m.mat = MAT.mud;
     box(m, -half, -w - 0.5, -1, half, -w, 0.3, true);
     box(m, -half, w, -1, half, w + 0.5, 0.3, true);
     m.mat = MAT.pool;

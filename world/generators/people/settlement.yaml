@@ -1,7 +1,10 @@
 # The anonymous human landscape: the houses, settlements, fields and pastures of a scene. Nobody recorded any of them:
-# how many follows HYDE's people through the anthromes and the lists of cities; what way of life, the anthromes and the
-# archaeologists of the region; what the houses were like, the building tradition the world records there and then, or a
-# generic house for the way of life and the climate, which says so. Everything it makes is marked as generated.
+# how many follows HYDE's people through the anthromes, and the lists of cities and the world's records of settlements;
+# what way of life, the anthromes and the archaeologists of the region; what the houses were like, the building tradition
+# the world records there and then for that way of life, or a generic house for the way of life and the climate, which
+# says so. A town has streets and a wall as the tradition of its townspeople or its own record says; the animals people
+# kept are those a husbandry tradition names; people, boats and paths rest on no record. Everything it makes is marked
+# as generated.
 id: gen:people/settlement
 type: generator
 title: Houses, villages and fields of any place since 10,000 BCE
@@ -22,6 +25,7 @@ inputs:
   - { prop: field_system, note: "the plots of its fields" }
   - { prop: extent, note: "the regions each tradition was found in" }
   - { prop: lifeway, note: "whom each tradition housed: its house is drawn for those ways of life only" }
+  - { prop: prevalence, note: "how many of them lived so, where a tradition says they were not all: the part of their settlements drawn in its house" }
   - { prop: town_form, note: "how a town's streets ran and what enclosed it, as the tradition of its townspeople or its own record says" }
   - { kind: tradition/husbandry, note: "the ways of keeping animals that hold in the region at the time" }
   - { prop: livestock, note: "which animals each husbandry tradition's people kept" }
@@ -41,7 +45,10 @@ checks:
   - { test: world/generators/people/settlement/v2.test.ts, holds: "draws a tradition's house where it holds, and the generic one where none does" }
   - { test: world/generators/people/settlement/v2.test.ts, holds: "draws a camp's shelter from the tradition that housed its way of life, and no farmer's house from a herder's tent" }
   - { test: world/generators/people/settlement/v2.test.ts, holds: "draws shifting cultivators in the house of their region's farmers where none is written for them, and says it stands in" }
+  - { test: world/generators/people/settlement/v2.test.ts, holds: "draws a house that some lived in for that part of the cells of its region, each cell all of one house, and alike from two scenes" }
   - { test: world/generators/people/settlement/v2.test.ts, holds: "are drawn where a husbandry tradition names them for that way of life: herds on the pasture, the rest about the houses" }
+  - { test: world/generators/people/settlement/v2.test.ts, holds: "joins each settlement to its nearest neighbours by a path that ends at the edge of their houses" }
+  - { test: world/generators/people/scene.test.ts, holds: "hands a view each kind as its own entity: taxa, then houses, then works, then kept animals" }
   - { test: world/generators/people/settlement/v2.test.ts, holds: "draws a city of the lists where the anthromes have none" }
   - { test: world/generators/people/settlement/v2.test.ts, holds: "puts a settlement in the same place from two scenes that overlap" }
   - { test: world/generators/people/settlement/v2.test.ts, holds: "seeds each cell and each settlement apart, and each alike from two scenes" }
@@ -102,7 +109,7 @@ params:
     rice: { kind: paddies, plot: 0.15 }
     swidden: { kind: swidden, plot: 0.8 }
     pasture: { kind: irregular, plot: 3 }
-  site: { steep: 0.25, above_water: 1.5, tries: 6 }
+  site: { steep: 0.25, above_water: 1.5, tries: 6, city_above_water: 0.3 }
   cities: { reach_km: 30, lot: 160, town_lot: 300, household: 6, city_from: 10000, most_houses: 12000, record_hold: 50, record_gap: 600 }
   # A town where nothing says how it was laid out: lanes that wander, and no wall. Where a tradition or a record says a
   # town had a wall and not how high or how thick, or streets and not how wide, these stand in, and the panel says so.
@@ -120,6 +127,7 @@ params:
       mudbrick: { height: 7, thickness: 4 }
       stone: { height: 8, thickness: 2.5 }
       brick: { height: 9, thickness: 3 }
+    unstated_wall: mudbrick
     gates: 4
     tower_every: 60
     square: 0.02
@@ -127,6 +135,10 @@ params:
     moat: 12
     canal_every: 2
     open_lot: 1200
+  # The part of a region's settlements of a way of life drawn in a tradition's house, where the tradition says its people
+  # were a few, some or most of them and not all. No source gives these numbers: each word stands for a part, so that a
+  # rare house is drawn rarely. Each 5′ cell falls to one tradition, so a rare house stands in clusters, as most did.
+  prevalence: { few: 0.03, some: 0.3, most: 0.75 }
   # The animals a husbandry tradition says its people kept are drawn among them: those that graze in herds, on the
   # pasture of people who herd and at the edge of the houses of people who farm; the rest about the houses. Which animals
   # is the tradition's. How many is nobody's: these numbers only say how full a scene is drawn.

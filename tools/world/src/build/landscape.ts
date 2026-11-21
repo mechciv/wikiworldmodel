@@ -13,9 +13,10 @@ import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { unzipSync } from 'fflate';
 import { decodeTile, encodeTile } from '../../../../core/container.ts';
-import { compileHusbandry, compileTraditions, traditionAt, traditionFor, type DwellingSpec, type FieldSpec, type Husbandry, type HusbandryInput, type LifewayWord, type SettlementSpec, type TownSpec, type Tradition, type TraditionInput } from '../../../../core/dwelling.ts';
+import { compileHusbandry, compileTraditions, prevalenceOf, traditionAt, traditionsFor, type PrevalenceWord, type DwellingSpec, type FieldSpec, type Husbandry, type HusbandryInput, type LifewayWord, type SettlementSpec, type TownSpec, type Tradition, type TraditionInput } from '../../../../core/dwelling.ts';
 import { canonicalForm, type Form } from '../../../../core/form.ts';
 import type { LivingTaxon } from '../../../../core/scene.ts';
+import { GENERATOR as SETTLEMENT, VERSION as SETTLEMENT_VERSION } from '../../../../world/generators/people/settlement/v2.ts';
 import { FormTree } from '../forms.ts';
 import type { LandscapeIndex, TraditionsFile } from '../../../../core/landscape.ts';
 export type { LandscapeIndex, TraditionsFile };
@@ -410,6 +411,13 @@ export function citiesOf(csv: string, source: string, field: string, leftOut: { 
 
 // ——— The traditions ———
 
+/** When a record's town form held, where its claim says: [from, to] on the axis, a billion years either way for no bound. */
+function townSpan(s: Solved, id: string): [number, number] | undefined {
+  const c = claimOf(s, id, 'town_form');
+  const v = c ? validSpan(s, c.valid, id) : undefined;
+  return v ? [v[0] ?? -1e9, v[1] ?? 1e9] : undefined;
+}
+
 /** Each building tradition the world records, with its own claims, before inheritance. */
 export function traditionInputs(s: Solved, regionsSource: string): TraditionInput[] {
   const w = s.world;
@@ -435,10 +443,12 @@ export function traditionInputs(s: Solved, regionsSource: string): TraditionInpu
       // A billion years either way stands for no bound, as JSON has no infinity.
       span: [Number.isFinite(start) ? start : -1e9, Number.isFinite(end) ? end : 1e9],
       ...(value<LifewayWord[]>('lifeway') ? { lifeways: value<LifewayWord[]>('lifeway') } : {}),
+      ...(value<PrevalenceWord>('prevalence') ? { prevalence: value<PrevalenceWord>('prevalence') } : {}),
       ...(value<DwellingSpec>('dwelling') ? { dwelling: value<DwellingSpec>('dwelling') } : {}),
       ...(value<SettlementSpec>('settlement_form') ? { settlement: value<SettlementSpec>('settlement_form') } : {}),
       ...(value<FieldSpec>('field_system') ? { fields: value<FieldSpec>('field_system') } : {}),
       ...(value<TownSpec>('town_form') ? { town: value<TownSpec>('town_form') } : {}),
+      ...(townSpan(s, e.id) ? { townSpan: townSpan(s, e.id) } : {}),
     });
   }
   return out;
@@ -605,6 +615,7 @@ export function cityRecords(s: Solved): CityRecord[] {
       areas: figures('settlement_area'),
       houses: figures('houses'),
       ...(town ? { town } : {}),
+      ...(town && townSpan(s, e.id) ? { townSpan: townSpan(s, e.id) } : {}),
     });
   }
   return out.sort((a, b) => (a.id < b.id ? -1 : 1));
@@ -736,7 +747,9 @@ export async function buildLandscape(s: Solved, log: (s: string) => void): Promi
   const globe = decodeTile<AnthromeTileHeader>(toBuffer(files.get('people/anthromes/globe.lwt') as Uint8Array));
   const steps = globe.header.steps;
   const tiles = [...files.keys()].filter((k) => /^people\/anthromes\/-?\d+_-?\d+\.lwt$/.test(k)).map((k) => k.slice('people/anthromes/'.length, -4)).sort();
-  const gen = w.generators.find((g) => g.id === 'gen:people/settlement');
+  const gen = w.generators.find((g) => g.id === SETTLEMENT);
+  // The record and the code are one version: a browser draws with the code, and says the record's.
+  if (gen && gen.version !== SETTLEMENT_VERSION) throw new Error(`${SETTLEMENT} is version ${gen.version} in its record and ${SETTLEMENT_VERSION} in its code`);
   const index: LandscapeIndex = {
     format: 'lightworld-landscape@1',
     title: af.title,
@@ -831,7 +844,11 @@ export function landscapeResolve(b: LandscapeBuilt): NonNullable<import('../../.
  */
 export const HOUSING_TIMES = [-9999, -7999, -5999, -3999, ...Array.from({ length: 6 }, (_, i) => -2999 + i * 500), 1, 500, 1000, 1500, 1750, 1850];
 
-/** The people of one region who lived one way at a time, and the tradition that draws their houses, if one is written. */
+/**
+ * The people of one region who lived one way at a time, and the tradition that draws their houses, if one is written.
+ * Where several traditions share them (`prevalence`), there is a row for each one's part, and one for those left to the
+ * generic house.
+ */
 export interface HousingRow {
   t: number;
   region: number;
@@ -859,6 +876,8 @@ export function housing(b: LandscapeBuilt, people: PeopleFile, times: number[]):
   const land = new Array<number>(n).fill(0);
   const reg = new Array<number>(n).fill(0);
   const patterns = Object.keys(LIFEWAY_OF) as Exclude<Pattern, 'none'>[];
+  // The part of a region's settlements a tradition is drawn for, where it says it was not all: the generator's.
+  const parts = prevalenceOf(b.index.generator?.params);
   const rows: HousingRow[] = [];
   for (const t of times) {
     const step = nearestStep(b.index.steps, t);
@@ -898,8 +917,18 @@ export function housing(b: LandscapeBuilt, people: PeopleFile, times: number[]):
     for (const [key, count] of [...sum].sort((x, y) => x[0] - y[0])) {
       const region = Math.floor(key / 16);
       const pattern = patterns[key % 16];
-      const found = traditionFor(b.traditions, region, t, LIFEWAY_OF[pattern]);
-      rows.push({ t, region, pattern, people: Math.round(count), ...(found ? { tradition: found.tradition.id, ...(found.kin ? { kin: found.kin } : {}) } : {}) });
+      const found = traditionsFor(b.traditions, region, t, LIFEWAY_OF[pattern], parts);
+      const all = Math.round(count);
+      const whole = found.reduce((s, f) => s + f.share, 0) > 1 - 1e-9;
+      let left = all;
+      found.forEach((f, i) => {
+        // The last of those that between them house everyone takes whoever the rounding left.
+        const n = whole && i === found.length - 1 ? left : Math.min(left, Math.round(count * f.share));
+        if (n <= 0) return;
+        rows.push({ t, region, pattern, people: n, tradition: f.tradition.id, ...(f.kin ? { kin: f.kin } : {}) });
+        left -= n;
+      });
+      if (left > 0 || !found.length) rows.push({ t, region, pattern, people: left });
     }
   }
   return rows;
