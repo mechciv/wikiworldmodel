@@ -1,7 +1,8 @@
 // What a build can answer of the rock record of fossil sites (model:earth/rock-record): its stages are the atlases', a
-// place's tier is true to the snapshot, the Codó Formation's lake beds lie beside the point where the first round of
-// visual gaps found the viewer drawing a rainforest (docs/plans/VISUAL-GAPS.md), and the collections agree with the
-// land and sea of the elevation field, which reads none of them.
+// place's tier is true to the snapshot, and the collections agree with the land and sea of the elevation field, which
+// reads none of them. One place is asked by name: a point of the Aptian, at 4.04° S, 43.18° W on today's Earth, where
+// the first round of setting the viewer's pictures beside what the sources say found it drawing a rainforest. The Codó
+// Formation's lake beds lie beside it.
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
