@@ -10,6 +10,57 @@ claims:
     value: { en: "domestic sheep", la: "Ovis aries" }
     source: { ref: src:opentree-taxonomy-3.7, loc: "tnrs/match_names: Ovis aries, ott70819" }
     note: Open Tree gives the scientific name; the English name is an editorial gloss.
+  form:
+    prop: body_form
+    value:
+      hip: 0.62
+      behave: { group: [3, 12], habitat: open, poses: [graze, graze, stand, walk] }
+      parts:
+        body:
+          tint: 192
+          sides: [14, 8]
+          rings:
+            - [-0.5, 0.57, 0.545, 0.008]
+            - [-0.494, 0.74, 0.7, 0.016]
+            - [-0.478, 0.9, 0.83, 0.024]
+            - [-0.41, 0.76, 0.68, 0.04]
+            - [-0.36, 0.99, 0.46, 0.15]
+            - [-0.345, 1.024, 0.406, 0.179]
+            - [-0.27, 1.03, 0.4, 0.184]
+            - [-0.16, 1.03, 0.395, 0.187]
+            - [-0.05, 1.03, 0.39, 0.188]
+            - [0.06, 1.035, 0.4, 0.181]
+            - [0.12, 1.045, 0.43, 0.168]
+            - [0.17, 1.065, 0.5, 0.146]
+            - [0.21, 1.09, 0.6, 0.118]
+          neck: { r: 0.066, steps: [4, 2] }
+        rump: { type: lump, mat: fur, tint: 192, sides: [12, 8], bands: [6, 4], at: [0, -0.345, 0.715], r: [0.176, 0.14, 0.19] }
+        chest: { type: lump, mat: fur, tint: 192, sides: [12, 8], bands: [6, 4], at: [0, 0.18, 0.66], r: [0.145, 0.118, 0.16] }
+        hind: { tint: 12, y: -0.3, x: 0.08, top: 0.72, knee: 0.5, ankle: 0.26, r: 0.06, swing: 0.06 }
+        fore: { tint: 12, y: 0.135, x: 0.08, top: 0.6, r: 0.031, swing: 0.06 }
+        head:
+          tint: 12
+          sides: [12, 6]
+          at:
+            stand: { y: 0.345, z: 1.05, pitch: 0.8 }
+            alert: { y: 0.325, z: 1.22, pitch: 0.55 }
+            low: { y: 0.37, reach: 0.2, pitch: 1.25 }
+          rings:
+            - [-0.02, 0.004, 0.038, 0.042]
+            - [0.03, 0.006, 0.05, 0.054]
+            - [0.08, 0.0, 0.044, 0.046]
+            - [0.135, -0.01, 0.034, 0.035]
+            - [0.18, -0.016, 0.028, 0.027]
+        horns: null
+        ears: { type: lump, on: head, mirror: true, mat: fur, tint: 12, sides: [6, 4], bands: [3, 2], at: [0.082, 0.012, 0.022], r: [0.045, 0.02, 0.012], from: null, to: null }
+        eyes: { at: [0.046, 0.055, 0.02], r: 0.0075 }
+    unsourced: >-
+      A machine's reconstruction of a domestic sheep in its fleece, as woolly sheep are generally known: a deep, wide
+      barrel of wool with a rounded rump and chest, a short neck carried level in the wool, a short narrow face with
+      the ears held out to the sides, thin legs and a short hanging tail. No horns are drawn: the account of Ovis
+      aries on the Animal Diversity Web has sheep bred with and without them. The fleece is set to the palest fur the
+      shader has and the face and legs to a dark one, a choice of the drawing and no claim of any breed's colour. Its
+      proportions are a drawing's, and no measurements of any animal. Only compared with its sheet.
   length:
     prop: body_length
     value: { lo: 1.2, hi: 1.8 }
@@ -20,6 +71,19 @@ claims:
     method: compilation
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in animal-diversity-web.txt (sha256 5ae3d0bcfbf74dd9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  hip:
+    prop: hip_height
+    value: { lo: 0.65, hi: 1.27 }
+    source:
+      ref: src:animal-diversity-web
+      loc: "account of Ovis aries, Physical Description"
+      quote: "shoulder height is 650-1,270 mm"
+    method: compilation
+    note: >-
+      A height at the shoulder, taken for the height of the back at the hips, which in a sheep stand about as high. Across
+      today's breeds.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in animal-diversity-web.txt (sha256 5ae3d0bcfbf74dd9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   mass:
     prop: body_mass
     value: { lo: 20, hi: 200 }

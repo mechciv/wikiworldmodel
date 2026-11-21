@@ -10,6 +10,77 @@ claims:
     value: { en: "domestic yak", la: "Bos grunniens" }
     source: { ref: src:opentree-taxonomy-3.7, loc: "tnrs/match_names: Bos grunniens, ott381164" }
     note: Open Tree gives the scientific name; the English name is an editorial gloss.
+  body-plan:
+    prop: body_plan
+    value: ox
+    unsourced: >-
+      Which plan draws it: an editorial classification, the yak being of the cattle's genus.
+  form:
+    prop: body_form
+    value:
+      hip: 0.5
+      parts:
+        body:
+          rings:
+            - [-0.5, 0.26, 0.2, 0.02]
+            - [-0.5, 0.42, 0.32, 0.04]
+            - [-0.497, 0.62, 0.52, 0.042]
+            - [-0.488, 0.82, 0.74, 0.034]
+            - [-0.445, 0.985, 0.925, 0.03]
+            - [-0.425, 0.68, 0.6, 0.03]
+            - [-0.4, 0.95, 0.31, 0.112]
+            - [-0.372, 1.0, 0.25, 0.146]
+            - [-0.28, 1.0, 0.22, 0.156]
+            - [-0.15, 1.01, 0.2, 0.162]
+            - [-0.02, 1.05, 0.2, 0.16]
+            - [0.09, 1.12, 0.22, 0.146]
+            - [0.16, 1.13, 0.27, 0.126]
+            - [0.205, 1.08, 0.36, 0.102]
+          neck: { r: 0.075, steps: [4, 2] }
+        rump: { at: [0, -0.372, 0.625], r: [0.143, 0.105, 0.19] }
+        hind: { top: 0.7, knee: 0.46, ankle: 0.27, r: 0.062 }
+        fore: { top: 0.5, r: 0.038 }
+        head:
+          at:
+            stand: { y: 0.345, z: 0.8, pitch: 0.9 }
+            alert: { y: 0.34, z: 0.95, pitch: 0.55 }
+            low: { y: 0.39, reach: 0.225, pitch: 1.25 }
+        horns: { points: [[0.045, 0.0, 0.04, 0.016], [0.1, -0.005, 0.045, 0.014], [0.15, -0.03, 0.08, 0.01], [0.155, -0.07, 0.14, 0.003]] }
+        dewlap: null
+    unsourced: >-
+      A machine's reconstruction of a domestic yak: the ox it starts from, changed as Wikipedia's article and the
+      account of Bos grunniens on the Animal Diversity Web describe it: long hair hanging lower than the belly, so
+      that the legs look short, a hump over the shoulders, horns that sweep out from the sides of the head and up, a
+      head carried low, and a long tail haired like a horse's from its root. Its proportions are a drawing's, and no
+      measurements of any animal. Only compared with its sheet.
+  length:
+    prop: body_length
+    value: { lo: 2.14, hi: 2.76 }
+    source:
+      ref: src:dimensions-com
+      loc: "page \"Domestic Yak (Bos grunniens)\", Dimensions & Sizes"
+      quote: "Domestic Yaks have a shoulder height between 41.3”-54.3” (105-138 cm), body length from 84”-109” (214-276 cm)"
+    method: expert-estimate
+    note: >-
+      From a site of drawings for designers, which names no work for the figure and does not say how the length was
+      measured. It is given because nothing better stating a length for the domestic yak could be read, and without it the
+      animal is drawn at the middle of all bovids' lengths, half as long as it is. A measured length should take its
+      place.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in dimensions-com.txt (sha256 481d614326cd01a6), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  hip:
+    prop: hip_height
+    value: { lo: 1.05, hi: 1.38 }
+    source:
+      ref: src:wikipedia-yak
+      loc: "section \"Physical characteristics\""
+      quote: "domestic yak males are 111–138 cm (44–54 in) high at the withers, while females are 105–117 cm (41–46 in) high at the withers"
+    method: compilation
+    note: >-
+      From the lowest cows to the tallest bulls, from Wikipedia, as no better source stating it for the domestic animal
+      could be read. A height at the withers, taken for the height of the back at the hips.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-yak.txt (sha256 089d67cbab4e8d78), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   mass:
     prop: body_mass
     value: { lo: 225, hi: 580 }

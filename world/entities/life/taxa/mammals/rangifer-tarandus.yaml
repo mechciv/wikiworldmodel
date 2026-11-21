@@ -10,6 +10,57 @@ claims:
     value: { en: "reindeer", la: "Rangifer tarandus" }
     source: { ref: src:opentree-taxonomy-3.7, loc: "tnrs/match_names: Rangifer tarandus, ott410153" }
     note: Open Tree gives the scientific name; the English name is an editorial gloss.
+  form:
+    prop: body_form
+    value:
+      hip: 0.6
+      behave: { group: [3, 12], habitat: open, poses: [graze, graze, stand, walk] }
+      parts:
+        body:
+          sides: [14, 8]
+          rings:
+            - [-0.48, 0.86, 0.82, 0.01]
+            - [-0.47, 0.94, 0.88, 0.02]
+            - [-0.45, 0.97, 0.9, 0.024]
+            - [-0.43, 0.78, 0.72, 0.03]
+            - [-0.39, 0.95, 0.57, 0.078]
+            - [-0.365, 1.0, 0.525, 0.101]
+            - [-0.27, 1.0, 0.51, 0.106]
+            - [-0.14, 0.99, 0.49, 0.11]
+            - [-0.01, 1.0, 0.49, 0.108]
+            - [0.09, 1.03, 0.5, 0.1]
+            - [0.16, 1.05, 0.54, 0.084]
+            - [0.2, 1.04, 0.61, 0.066]
+          neck: { r: 0.05, steps: [4, 2] }
+        rump: { type: lump, mat: fur, sides: [12, 8], bands: [6, 4], at: [0, -0.365, 0.76], r: [0.098, 0.1, 0.143] }
+        mane: { type: sheet, mat: fur, not: [graze, drink, alert], gap: 0.012, points: [[0, 0.24, 0.9], [0, 0.2, 0.62], [0, 0.26, 0.6], [0, 0.31, 0.74], [0, 0.335, 0.92], [0, 0.33, 1.02]] }
+        hind: { y: -0.32, x: 0.052, top: 0.78, knee: 0.54, ankle: 0.31, r: 0.056, swing: 0.065 }
+        fore: { y: 0.13, x: 0.052, top: 0.6, r: 0.028, swing: 0.065 }
+        head:
+          sides: [12, 6]
+          flat: true
+          at:
+            stand: { y: 0.335, z: 1.1, pitch: 0.75 }
+            alert: { y: 0.325, z: 1.3, pitch: 0.45 }
+            low: { y: 0.38, reach: 0.2, pitch: 1.25 }
+          rings:
+            - [-0.015, 0.004, 0.034, 0.038]
+            - [0.035, 0.008, 0.042, 0.048]
+            - [0.09, 0.0, 0.034, 0.038]
+            - [0.15, -0.01, 0.026, 0.028]
+            - [0.195, -0.016, 0.025, 0.023]
+        antlers: { points: [[0.022, 0.0, 0.04, 0.014], [0.05, -0.126, 0.059, 0.013], [0.085, -0.245, 0.112, 0.011], [0.1, -0.297, 0.213, 0.008], [0.09, -0.287, 0.318, 0.003]] }
+        tine: { type: spike, on: head, mirror: true, mat: horn, tint: 130, sides: [4, 4], from: [0.1, -0.297, 0.213], to: [0.135, -0.41, 0.26], r: 0.007 }
+        tine-top: { type: spike, on: head, near: true, mirror: true, mat: horn, tint: 130, sides: [4, 4], from: [0.096, -0.292, 0.27], to: [0.125, -0.2, 0.36], r: 0.006 }
+        brow: { near: null, from: [0.022, 0.005, 0.045], to: [0.032, 0.11, 0.095], r: 0.008 }
+        bez: { from: [0.085, -0.245, 0.112], to: [0.12, -0.36, 0.13], r: 0.006 }
+        ears: { from: [0.03, 0.0, 0.025], to: [0.065, -0.02, 0.05], r: 0.012 }
+        eyes: { at: [0.036, 0.06, 0.022], r: 0.0065 }
+    unsourced: >-
+      A machine's reconstruction of a reindeer, from Wikipedia's article: antlers whose main beams run back over the
+      shoulders and bow so that the tips point forward, with brow tines forward over the face, and a short tail. The
+      rest is as reindeer are generally known: a stocky deer with a thick neck, maned beneath, and the head carried
+      low. Its proportions are a drawing's, and no measurements of any animal. Only compared with its sheet.
   length:
     prop: body_length
     value: { lo: 1.62, hi: 2.14 }
@@ -25,6 +76,19 @@ claims:
       From the shortest female to the longest male, from Wikipedia, as no better source stating it for the domestic animal could be read; the figures are for the species, wild and herded.
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-reindeer.txt (sha256 323b883b055ec58d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  hip:
+    prop: hip_height
+    value: { lo: 0.85, hi: 1.5 }
+    source:
+      ref: src:wikipedia-reindeer
+      loc: "section \"Size\""
+      quote: "The shoulder height is usually 85 to 150 cm (33 to 59 in)"
+    method: compilation
+    note: >-
+      A height at the shoulder, taken for the height of the back at the hips; for the species, wild and herded, as the
+      length is.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-reindeer.txt (sha256 323b883b055ec58d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   mass:
     prop: body_mass
     value: { lo: 80, hi: 182 }

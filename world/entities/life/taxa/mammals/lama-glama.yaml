@@ -10,6 +10,50 @@ claims:
     value: { en: "llamas", la: "Lama glama" }
     source: { ref: src:opentree-taxonomy-3.7, loc: "tnrs/match_names: Lama glama, ott986973" }
     note: Open Tree gives the scientific name; the English name is an editorial gloss.
+  form:
+    prop: body_form
+    value:
+      hip: 0.76
+      behave: { group: [2, 10], habitat: open, poses: [graze, stand, stand, walk] }
+      parts:
+        body:
+          sides: [14, 8]
+          rings:
+            - [-0.48, 0.72, 0.68, 0.01]
+            - [-0.465, 0.86, 0.8, 0.02]
+            - [-0.425, 0.94, 0.86, 0.026]
+            - [-0.42, 0.8, 0.72, 0.03]
+            - [-0.385, 0.915, 0.61, 0.085]
+            - [-0.36, 0.95, 0.57, 0.11]
+            - [-0.26, 0.98, 0.54, 0.118]
+            - [-0.14, 1.0, 0.52, 0.122]
+            - [-0.02, 1.0, 0.51, 0.12]
+            - [0.08, 1.0, 0.52, 0.11]
+            - [0.15, 1.0, 0.57, 0.092]
+            - [0.19, 1.02, 0.66, 0.07]
+          neck: { r: 0.046, steps: [5, 2] }
+        rump: { type: lump, mat: fur, sides: [12, 8], bands: [6, 4], at: [0, -0.36, 0.76], r: [0.108, 0.1, 0.143] }
+        hind: { y: -0.31, x: 0.06, top: 0.78, knee: 0.56, ankle: 0.32, r: 0.06, swing: 0.07 }
+        fore: { y: 0.1, x: 0.058, top: 0.62, r: 0.033, swing: 0.07 }
+        head:
+          sides: [12, 6]
+          at:
+            stand: { y: 0.27, z: 1.5, pitch: 0.15 }
+            alert: { y: 0.26, z: 1.58, pitch: 0.05 }
+            low: { y: 0.36, reach: 0.17, pitch: 1.05 }
+          rings:
+            - [-0.012, 0.004, 0.028, 0.032]
+            - [0.03, 0.008, 0.034, 0.038]
+            - [0.075, 0.0, 0.027, 0.03]
+            - [0.12, -0.008, 0.02, 0.022]
+            - [0.155, -0.012, 0.018, 0.017]
+        ears: { from: [0.02, 0.0, 0.03], to: [0.03, -0.01, 0.085], r: 0.011 }
+        eyes: { at: [0.026, 0.05, 0.02] }
+    unsourced: >-
+      A machine's reconstruction of a llama, from the account of Lama glama on the Animal Diversity Web: a long neck
+      and long limbs, a rounded muzzle, no hump, and a long shaggy coat. The rest is as llamas are generally known:
+      the neck held upright, long ears, and a short tail. Its proportions are a drawing's, and no measurements of any
+      animal. Only compared with its sheet.
   length:
     prop: body_length
     value: { lo: 0.92, hi: 1.6 }
@@ -20,6 +64,33 @@ claims:
     method: compilation
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in animal-diversity-web.txt (sha256 5ae3d0bcfbf74dd9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  length-pantheria:
+    prop: body_length
+    value: 1.5951
+    source:
+      ref: src:jones-2009-pantheria
+      loc: "PanTHERIA_1-0_WR05_Aug2008.txt, row Lama glama, columns 1-1_ActivityCycle, 5-1_AdultBodyMass_g, 8-1_AdultForearmLen_mm, 13-1_AdultHeadBodyLen_mm"
+      quote: "Lama glama -999.00 78322.67 -999.00 1595.10"
+    method: compilation
+    rank: preferred
+    note: >-
+      The mean length of the head and body of adults, 1,595.10 mm, as PanTHERIA compiles it from the literature. Preferred
+      to the Animal Diversity Web's range, which does not say what its length measures and whose average, 1.2 m, is no
+      longer than the same account has the animal standing at the shoulder; this figure lies at the top of that range.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in jones-2009-pantheria-lama-glama.txt (sha256 615c01d97affe22e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  hip:
+    prop: hip_height
+    value: 1.21
+    source:
+      ref: src:animal-diversity-web
+      loc: "account of Lama glama, Physical Description"
+      quote: "standing about 1.21 m at the shoulder"
+    method: compilation
+    note: >-
+      A height at the shoulder, taken for the height of the back at the hips.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in animal-diversity-web.txt (sha256 5ae3d0bcfbf74dd9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
   mass:
     prop: body_mass
     value: { lo: 130, hi: 155 }

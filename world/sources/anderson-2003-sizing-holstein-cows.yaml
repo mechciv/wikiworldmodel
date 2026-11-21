@@ -1,0 +1,22 @@
+id: src:anderson-2003-sizing-holstein-cows
+type: publication
+kind: review
+citation: >-
+  Anderson, N. (2003). Sizing Holstein Cows. Ontario Ministry of Agriculture and Food, March 2003.
+authors: ["Anderson, N."]
+published: 2003
+title: Sizing Holstein Cows
+url: https://web.archive.org/web/20040103034647/http://www.gov.on.ca:80/OMAFRA/english/livestock/ceptor/2003/mar03a4.htm
+via: >-
+  The Internet Archive's copy of 3 January 2004: the ministry's page is no longer at its address. Found through the
+  account of Bos taurus in the University of Wisconsin-Stevens Point's Vertebrate Collection, which cites it.
+reliability: >-
+  A note for dairy farmers by a veterinary scientist of the ministry, on how large Holstein cows are, for sizing their
+  stalls. It gathers what others measured, a breed association's average rump height and the nose-to-tail lengths of
+  cows in studies in Britain and Quebec, and adds one herd of its own, measured on video against a grid. It is about one
+  large dairy breed of today, and says nothing of other cattle.
+verified:
+  by: machine:claude-code
+  how: >-
+    The archived page fetched on 20 November 2026 and read whole as text; the quotes checked by script against that
+    text. The works it cites were not read.

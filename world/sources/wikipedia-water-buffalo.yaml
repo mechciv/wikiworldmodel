@@ -1,0 +1,20 @@
+id: src:wikipedia-water-buffalo
+type: database-record
+kind: review
+citation: >-
+  "Water buffalo." Wikipedia, the free encyclopedia (English edition), revision 1386213039.
+snapshot: 2026-11-20
+title: Water buffalo
+container: Wikipedia
+url: https://en.wikipedia.org/w/index.php?title=Water_buffalo&oldid=1386213039
+license: CC-BY-SA-4.0
+license_note: Short quotes, with credit.
+reliability: >-
+  A general encyclopedia article, about the domestic buffalo, cited for its height at the withers because no better
+  source stating it for the domestic animal could be read here: the Animal Diversity Web's account gives the height of
+  the species, whose wild form is much the larger. Its figures are footnoted to other works, none of which was read.
+verified:
+  by: machine:claude-code
+  how: >-
+    The article's HTML, rendered from revision 1386213039 through the MediaWiki parse API, fetched on 20 November 2026 and
+    read as text, with the reference marks taken out; the quotes checked by script against that text.
