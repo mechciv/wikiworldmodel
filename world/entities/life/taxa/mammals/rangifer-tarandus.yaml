@@ -1,0 +1,47 @@
+id: life/taxa/rangifer-tarandus
+kind: taxon
+summary: >-
+  Reindeer, herded across northern Eurasia; the same species as the wild caribou, which this record does not stand for.
+same_as: { ott: 410153 }
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: "reindeer", la: "Rangifer tarandus" }
+    source: { ref: src:opentree-taxonomy-3.7, loc: "tnrs/match_names: Rangifer tarandus, ott410153" }
+    note: Open Tree gives the scientific name; the English name is an editorial gloss.
+  length:
+    prop: body_length
+    value: { lo: 1.62, hi: 2.14 }
+    source:
+      - ref: src:wikipedia-reindeer
+        loc: "section \"Size\""
+        quote: "usually measure 162–205 cm (64–81 in) in length and weigh 80–120 kg"
+      - ref: src:wikipedia-reindeer
+        loc: "section \"Size\""
+        quote: "measuring 180–214 cm (71–84 in) in length and usually weighing 159–182 kg"
+    method: compilation
+    note: >-
+      From the shortest female to the longest male, from Wikipedia, as no better source stating it for the domestic animal could be read; the figures are for the species, wild and herded.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-reindeer.txt (sha256 323b883b055ec58d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  mass:
+    prop: body_mass
+    value: { lo: 80, hi: 182 }
+    source:
+      - ref: src:wikipedia-reindeer
+        loc: "section \"Size\""
+        quote: "usually measure 162–205 cm (64–81 in) in length and weigh 80–120 kg"
+      - ref: src:wikipedia-reindeer
+        loc: "section \"Size\""
+        quote: "measuring 180–214 cm (71–84 in) in length and usually weighing 159–182 kg"
+    method: compilation
+    note: >-
+      From the lightest female to the heaviest usual male.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-reindeer.txt (sha256 323b883b055ec58d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+relations:
+  parent:
+    rel: descends-from
+    to: life/taxa/cervidae
+    source: { ref: src:opentree-taxonomy-3.7, loc: "taxonomy/taxon_info ott410153 with include_lineage: Rangifer tarandus lies within Cervidae" }

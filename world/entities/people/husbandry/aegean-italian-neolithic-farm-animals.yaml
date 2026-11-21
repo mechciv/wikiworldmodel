@@ -1,0 +1,57 @@
+id: people/husbandry/aegean-italian-neolithic-farm-animals
+kind: tradition/husbandry
+summary: >-
+  The cattle, sheep, goats and pigs that seafaring colonists from south-west Asia brought to coastal Greece and the Aegean islands about 9,000 to 8,000 years ago, and to Italy about 8,000 years ago.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: "Farm animals of Neolithic Greece and Italy" }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: { lo: 9 ka, hi: 8 ka }
+    source:
+      ref: src:zeder-2008-mediterranean
+      loc: "The Diffusion of Animal Domesticates in the Mediterranean Basin"
+      quote: "at ca. 9,000 to 8,000 B.P., carried many components of the full Neolithic package (plant and animal domesticates"
+    method: expert-estimate
+    note: >-
+      Calibrated ages, for Greece; Italy followed about 8,000 years ago. The animals are still kept, so there is no end claim.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zeder-2008-mediterranean.txt (sha256 aafb5ac0c581a441), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["44"] }
+    source:
+      - ref: src:zeder-2008-mediterranean
+        loc: "The Diffusion of Animal Domesticates in the Mediterranean Basin"
+        quote: "these seafaring pioneers established farming communities that selectively focused on favorable environments in coastal Greece and on various Aegean Islands"
+      - ref: src:zeder-2008-mediterranean
+        loc: "The Diffusion of Animal Domesticates in the Mediterranean Basin"
+        quote: "Neolithic lifeways were introduced into the Italian peninsula ca. 8,000 B.P."
+    method: editorial
+    note: >-
+      Region 44 (Southern Europe), which holds Greece and Italy. The paper has the farmers in coastal enclaves at first; the region is drawn whole.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zeder-2008-mediterranean.txt (sha256 aafb5ac0c581a441), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      ref: src:zeder-2008-mediterranean
+      loc: "The Diffusion of Animal Domesticates in the Mediterranean Basin"
+      quote: "these seafaring pioneers established farming communities that selectively focused on favorable environments in coastal Greece and on various Aegean Islands"
+    method: editorial
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zeder-2008-mediterranean.txt (sha256 aafb5ac0c581a441), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  livestock:
+    prop: livestock
+    value: [life/taxa/bos-taurus, life/taxa/ovis-aries, life/taxa/capra-hircus, life/taxa/sus-domesticus]
+    source:
+      ref: src:zeder-2008-mediterranean
+      loc: "Abstract"
+      quote: "four major Near Eastern livestock species (sheep, goats, cattle, and pigs) and their subsequent dispersal throughout the Mediterranean Basin"
+    method: compilation
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zeder-2008-mediterranean.txt (sha256 aafb5ac0c581a441), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

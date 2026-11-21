@@ -1,0 +1,19 @@
+id: src:wikipedia-gyr-cattle
+type: database-record
+kind: review
+citation: >-
+  "Gyr cattle." Wikipedia, the free encyclopedia (English edition), revision 1352968712.
+snapshot: 2026-11-20
+title: Gyr cattle
+container: Wikipedia
+url: https://en.wikipedia.org/w/index.php?title=Gyr_cattle&oldid=1352968712
+license: CC-BY-SA-4.0
+license_note: Short quotes, with credit.
+reliability: >-
+  A general encyclopedia article, cited for the weight of one breed of Indian zebu cattle because no better source stating it could be read here. Its
+  figures are footnoted to other works, none of which was read.
+verified:
+  by: machine:claude-code
+  how: >-
+    The article's HTML, rendered from revision 1352968712 through the MediaWiki parse API, fetched on 20 November 2026 and
+    read as text, with the reference marks taken out; the quotes checked by script against that text.

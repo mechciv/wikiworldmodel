@@ -1,0 +1,69 @@
+id: people/husbandry/central-plain-cattle-and-sheep
+kind: tradition/husbandry
+summary: >-
+  The farm animals of the Central Plain of China from the late Longshan period, when cattle and sheep, herded and foddered, joined the pigs and dogs of the millet farmers.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: "Farm animals of the Longshan Central Plain" }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: { lo: 2500 BCE, hi: 1800 BCE }
+    source:
+      - ref: src:li-guo-chen-2026-central-plain
+        loc: "Introduction, \"The Central Plain in prehistory\""
+        quote: "During the Longshan (LS) period (2500 to 1800 BCE), social complexity intensified further."
+      - ref: src:li-guo-chen-2026-central-plain
+        loc: "Results, \"Inequality and subsistence regimes\""
+        quote: "From the late LS period onward, zooarchaeological data show increasing proportions of cattle and sheep"
+    method: expert-estimate
+    note: >-
+      Within the Longshan period, from its later part; the paper gives no closer date. The animals are still kept, so there is no end claim.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in li-guo-chen-2026-central-plain.txt (sha256 9854fb1fdd863f43), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["120"] }
+    source:
+      ref: src:li-guo-chen-2026-central-plain
+      loc: "Results, \"Inequality and subsistence regimes\""
+      quote: "at most sites in the Central Plain"
+    method: editorial
+    note: >-
+      Region 120 (Northern China), which holds the Central Plain in Henan.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in li-guo-chen-2026-central-plain.txt (sha256 9854fb1fdd863f43), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      ref: src:li-guo-chen-2026-central-plain
+      loc: "Introduction, \"The Central Plain in prehistory\""
+      quote: "During the Longshan (LS) period (2500 to 1800 BCE), social complexity intensified further."
+    method: editorial
+    note: >-
+      Farmers, whose agriculture the paper says remained millet based.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in li-guo-chen-2026-central-plain.txt (sha256 9854fb1fdd863f43), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  livestock:
+    prop: livestock
+    value: [life/taxa/sus-domesticus, life/taxa/canis-familiaris, life/taxa/bos-taurus, life/taxa/ovis-aries]
+    source:
+      - ref: src:li-guo-chen-2026-central-plain
+        loc: "Results, \"Inequality and subsistence regimes\""
+        quote: "From the late LS period onward, zooarchaeological data show increasing proportions of cattle and sheep"
+      - ref: src:liu-2022-proto-sino-tibetan-migration
+        loc: "section \"Dadiwan of the Yangshao Culture\""
+        quote: "The Yangshao culture that flourished in the middle Yellow River valley is characterized by sedentary villages, production of painted pottery, domestication of pigs and dogs"
+    method: excavation
+    note: >-
+      The pigs and dogs of the broader tradition, with cattle and sheep. Chickens reached Central China only in the late second millennium BCE (Peters et al. 2022) and are not added here.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in li-guo-chen-2026-central-plain.txt (sha256 9854fb1fdd863f43) and liu-2022-proto-sino-tibetan-migration.txt (sha256 0112a15e47cb6b15), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+relations:
+  member-of:
+    rel: member-of
+    to: people/husbandry/yangshao-pigs-and-dogs
+    unsourced: An editorial grouping.

@@ -1,0 +1,54 @@
+id: people/husbandry/mehrgarh-farm-animals
+kind: tradition/husbandry
+summary: >-
+  The sheep, goats and zebu cattle of the first farmers of Baluchistan, kept at Mehrgarh from the aceramic Neolithic, about 7000 BCE, with zebu growing in importance.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: "Farm animals of Neolithic Baluchistan" }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 7000 BCE
+    source:
+      ref: src:sharif-thapar-1992-food-producing-communities
+      loc: "p. 124"
+      quote: "In absolute chronology this period is dated to around 7000 b.c."
+    method: expert-estimate
+    note: >-
+      The date the review gives to Period I at Mehrgarh. The same review doubts it once in passing (sixth millennium); the animals are still kept, so there is no end claim.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in sharif-thapar-1992-food-producing-communities.txt (sha256 4d53840aa055b775), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["105"] }
+    source:
+      ref: src:sharif-thapar-1992-food-producing-communities
+      loc: "p. 123"
+      quote: "Mehrgarh, at the foot of the Bolan pass in the north of the Kachi plain"
+    method: editorial
+    note: >-
+      Region 105 (Pakistan).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in sharif-thapar-1992-food-producing-communities.txt (sha256 4d53840aa055b775), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      ref: src:sharif-thapar-1992-food-producing-communities
+      loc: "p. 126"
+      quote: "Evidence of cultivated plants has been obtained from impressions of straw and grain in mud-bricks."
+    method: editorial
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in sharif-thapar-1992-food-producing-communities.txt (sha256 4d53840aa055b775), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  livestock:
+    prop: livestock
+    value: [life/taxa/ovis-aries, life/taxa/capra-hircus, life/taxa/bos-indicus]
+    source:
+      ref: src:sharif-thapar-1992-food-producing-communities
+      loc: "p. 126"
+      quote: "First, a shift during the aceramic Neolithic from the hunting of wild animals to the keeping of domesticated sheep, goats and cattle; second, an increase in the importance of zebu cattle in relation to sheep and goats"
+    method: excavation
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in sharif-thapar-1992-food-producing-communities.txt (sha256 4d53840aa055b775), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

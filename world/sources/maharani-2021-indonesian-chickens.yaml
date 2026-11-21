@@ -1,0 +1,25 @@
+id: src:maharani-2021-indonesian-chickens
+type: publication
+kind: measurement
+citation: >-
+  Maharani, D., Mustofa, F., Sari, A.P.Z.N.L., Fathoni, A., Sasongko, H. & Hariyono, D.N.H. (2021). Phenotypic characterization and principal component analyses of indigenous chicken breeds in Indonesia. Veterinary World 14(6), 1665–1676.
+authors:
+  - "Maharani, D."
+  - "Mustofa, F."
+  - "Sari, A.P.Z.N.L."
+  - "Fathoni, A."
+  - "Sasongko, H."
+  - "Hariyono, D.N.H."
+published: 2021
+title: "Phenotypic characterization and principal component analyses of indigenous chicken breeds in Indonesia"
+container: "Veterinary World 14(6), 1665–1676"
+doi: 10.14202/vetworld.2021.1665-1676
+url: https://europepmc.org/article/PMC/PMC8304439
+license: CC-BY-4.0
+reliability: >-
+  Body weights of adult village chickens of five indigenous breeds, weighed on a digital scale; cited for the size of domestic chickens kept in villages rather than of modern broilers.
+verified:
+  by: machine:claude-code
+  how: >-
+    Full text read on the PMC page (PMC8304439) on 20 November 2026, and turned into text. Each quote checked by script against that text; citation from the Europe PMC
+    record.

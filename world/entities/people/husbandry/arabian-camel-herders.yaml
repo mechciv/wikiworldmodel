@@ -1,0 +1,56 @@
+id: people/husbandry/arabian-camel-herders
+kind: tradition/husbandry
+summary: >-
+  The dromedaries of the southern Arabian Peninsula, where they were first domesticated around 4000 to 3000 BCE.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: "Camels of southern Arabia" }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: { lo: 4000 BCE, hi: 3000 BCE }
+    source:
+      ref: src:wikipedia-dromedary
+      loc: "section \"History\""
+      quote: "The dromedary was first domesticated in the southern Arabian Peninsula around 4000–3000 BC."
+    method: expert-estimate
+    note: >-
+      From Wikipedia, as the open genetic study (Almathen et al. 2016) could not be reached. Still kept, so there is no end claim.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-dromedary.txt (sha256 5d016364bf29b37a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["64"] }
+    source:
+      ref: src:wikipedia-dromedary
+      loc: "section \"History\""
+      quote: "The dromedary was first domesticated in the southern Arabian Peninsula around 4000–3000 BC."
+    method: editorial
+    note: >-
+      Region 64 (Yemen, Oman and the UAE), the south of the peninsula. Region 63 is left out, as nothing read places early herds there.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-dromedary.txt (sha256 5d016364bf29b37a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [herders]
+    source:
+      ref: src:wikipedia-dromedary
+      loc: "section \"History\""
+      quote: "The dromedary was first domesticated in the southern Arabian Peninsula around 4000–3000 BC."
+    method: editorial
+    note: >-
+      Herders: an editorial reading, as the source says where the animal was domesticated, not by whom. Goats and sheep are not named, though they were surely kept.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-dromedary.txt (sha256 5d016364bf29b37a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  livestock:
+    prop: livestock
+    value: [life/taxa/camelus-dromedarius]
+    source:
+      ref: src:wikipedia-dromedary
+      loc: "section \"History\""
+      quote: "The dromedary was first domesticated in the southern Arabian Peninsula around 4000–3000 BC."
+    method: compilation
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-dromedary.txt (sha256 5d016364bf29b37a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

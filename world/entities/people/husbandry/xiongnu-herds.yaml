@@ -1,0 +1,56 @@
+id: people/husbandry/xiongnu-herds
+kind: tradition/husbandry
+summary: >-
+  The sheep, goats, cattle and horses, and a few dogs, of the herders of the Mongolian steppe from the Xiongnu period, moved between seasonal pastures and foddered in winter.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: "Herds of the Mongolian steppe" }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 250 BCE
+    source:
+      ref: src:makarewicz-2024-xiongnu-elites
+      loc: "caption of Fig 1"
+      quote: "The extent of the Xiongnu Empire (ca 250 BCE– 150 AD)"
+    method: expert-estimate
+    note: >-
+      The start of the Xiongnu period, the earliest the source read dates these herds to; herding there is older, and goes on today, so there is no end claim.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in makarewicz-2024-xiongnu-elites.txt (sha256 bf88a829bea80f16), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["115"] }
+    source:
+      ref: src:makarewicz-2024-xiongnu-elites
+      loc: "section \"The Xiongnu archaeological record\""
+      quote: "Seasonally occupied nomadic campsites used by Xiongnu herders"
+    method: editorial
+    note: >-
+      Region 115 (Mongolia), where the campsites the paper cites were surveyed.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in makarewicz-2024-xiongnu-elites.txt (sha256 bf88a829bea80f16), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [herders]
+    source:
+      ref: src:makarewicz-2024-xiongnu-elites
+      loc: "section \"The Xiongnu archaeological record\""
+      quote: "Seasonally occupied nomadic campsites used by Xiongnu herders"
+    method: editorial
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in makarewicz-2024-xiongnu-elites.txt (sha256 bf88a829bea80f16), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  livestock:
+    prop: livestock
+    value: [life/taxa/ovis-aries, life/taxa/capra-hircus, life/taxa/bos-taurus, life/taxa/equus-caballus, life/taxa/canis-familiaris]
+    source:
+      ref: src:makarewicz-2024-xiongnu-elites
+      loc: "section \"The Xiongnu archaeological record\""
+      quote: "Seasonal habitat sites also yield the scattered remains of domesticated sheep, goat, cows, horse, and, occasionally, dogs"
+    method: excavation
+    note: >-
+      Camels and yaks are not named in the source read, and are left out.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in makarewicz-2024-xiongnu-elites.txt (sha256 bf88a829bea80f16), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

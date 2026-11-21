@@ -1,0 +1,71 @@
+id: people/husbandry/fertile-crescent-farm-animals
+kind: tradition/husbandry
+summary: >-
+  The cattle, sheep, goats and pigs of south-west Asia's first farmers, brought under management across the Fertile Crescent between about 11,000 and 10,000 years ago, from the northern Zagros to south-eastern Anatolia and the Levant, and kept there ever since.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: "Farm animals of the Fertile Crescent" }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: { lo: 11 ka, hi: 10 ka }
+    source:
+      ref: src:zeder-2008-mediterranean
+      loc: "Initial Animal Domestication in the Fertile Crescent"
+      quote: "with all four major livestock species coming under management over a period from ca. 11,000 to 10,000 B.P."
+    method: expert-estimate
+    note: >-
+      Ages in this paper are calibrated. The animals are still kept there, so there is no end claim.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zeder-2008-mediterranean.txt (sha256 aafb5ac0c581a441), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["56", "58", "59", "60", "61"] }
+    source:
+      - ref: src:zeder-2008-mediterranean
+        loc: "Initial Animal Domestication in the Fertile Crescent"
+        quote: "in the region that stretches from the northern Zagros to southeastern Anatolia"
+      - ref: src:zeder-2008-mediterranean
+        loc: "Initial Animal Domestication in the Fertile Crescent"
+        quote: "reaching the southernmost tips of both the eastern and western arms of the Fertile Crescent"
+      - ref: src:zeder-2008-mediterranean
+        loc: "Initial Animal Domestication in the Fertile Crescent"
+        quote: "pigs were first domesticated somewhere in southeastern Anatolia"
+      - ref: src:zeder-2008-mediterranean
+        loc: "Initial Animal Domestication in the Fertile Crescent"
+        quote: "Ganj Dareh in highland Iran"
+    method: editorial
+    note: >-
+      Regions 56 (Turkey) for south-eastern Anatolia, 59 (Iraq), 60 (Northwestern Iran) and 61 (Western Iran) for the Zagros, and 58 (Syria, Cyprus and the Levant) for the western arm of the Fertile Crescent and for Cyprus, whose first colonists brought all four animals. Matching the paper's places to the regions is editorial. Eastern Iran and Arabia are left out, as the paper does not place the animals there.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zeder-2008-mediterranean.txt (sha256 aafb5ac0c581a441), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      - ref: src:zeder-2008-mediterranean
+        loc: "Initial Animal Domestication in the Fertile Crescent"
+        quote: "with all four major livestock species coming under management over a period from ca. 11,000 to 10,000 B.P."
+      - ref: src:zeder-2008-mediterranean
+        loc: "Fig. 2 caption"
+        quote: "areas that are proposed to have been settled by colonist farmers"
+    method: editorial
+    note: >-
+      Farmers: the paper treats the four animals as part of the Neolithic farming economy whose spread it follows. Herders of the same animals in the region are not named here.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zeder-2008-mediterranean.txt (sha256 aafb5ac0c581a441), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  livestock:
+    prop: livestock
+    value: [life/taxa/bos-taurus, life/taxa/ovis-aries, life/taxa/capra-hircus, life/taxa/sus-domesticus]
+    source:
+      - ref: src:zeder-2008-mediterranean
+        loc: "Abstract"
+        quote: "four major Near Eastern livestock species (sheep, goats, cattle, and pigs) and their subsequent dispersal throughout the Mediterranean Basin"
+      - ref: src:zeder-2008-mediterranean
+        loc: "The Diffusion of Animal Domesticates in the Mediterranean Basin"
+        quote: "including all four major livestock species (sheep, goat, cattle, and pig)"
+    method: excavation
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zeder-2008-mediterranean.txt (sha256 aafb5ac0c581a441), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

@@ -1,0 +1,69 @@
+id: people/husbandry/iron-age-levant-mesopotamia-fowl
+kind: tradition/husbandry
+summary: >-
+  The farm animals of the Levant and Mesopotamia after the Late Bronze Age collapse, when chickens were taken up in Iron Age I and came to be kept in the towns.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: "Farm animals and fowl of the Iron Age Levant and Mesopotamia" }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: { lo: 1150 BCE, hi: 965 BCE }
+    source:
+      ref: src:peters-2022-chickens
+      loc: "Results, \"Southwest Asia.\""
+      quote: "imply the adoption of chicken husbandry during Iron Age I (∼1150 to 965 BCE)"
+    method: expert-estimate
+    note: >-
+      Iron Age I, when scattered bones show chickens being kept; the animals are still kept, so there is no end claim.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in peters-2022-chickens.txt (sha256 b75c9dadef531c16), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["58", "59"] }
+    source:
+      ref: src:peters-2022-chickens
+      loc: "Results, \"Southwest Asia.\""
+      quote: "Scattered bone finds across Mesopotamia and the Levant postdating the Late Bronze Age collapse"
+    method: editorial
+    note: >-
+      Region 58 (Syria, Cyprus and the Levant) and region 59 (Iraq).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in peters-2022-chickens.txt (sha256 b75c9dadef531c16), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [farmers, townspeople]
+    source:
+      - ref: src:peters-2022-chickens
+        loc: "Results, \"Southwest Asia.\""
+        quote: "chickens being seen in the city"
+      - ref: src:zeder-2008-mediterranean
+        loc: "Abstract"
+        quote: "four major Near Eastern livestock species (sheep, goats, cattle, and pigs) and their subsequent dispersal throughout the Mediterranean Basin"
+    method: editorial
+    note: >-
+      Farmers, as the broader tradition; and townspeople, as a seventh-century omen text speaks of chickens seen in the city.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in peters-2022-chickens.txt (sha256 b75c9dadef531c16) and zeder-2008-mediterranean.txt (sha256 aafb5ac0c581a441), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  livestock:
+    prop: livestock
+    value: [life/taxa/ovis-aries, life/taxa/capra-hircus, life/taxa/bos-taurus, life/taxa/gallus-domesticus]
+    source:
+      - ref: src:peters-2022-chickens
+        loc: "Results, \"Southwest Asia.\""
+        quote: "imply the adoption of chicken husbandry during Iron Age I (∼1150 to 965 BCE)"
+      - ref: src:greenfield-2022-early-dynastic-ur
+        loc: "Introduction, \"Context\""
+        quote: "These herds were dominated by sheep and goats and, to a lesser degree, bovines (domestic cattle)"
+    method: excavation
+    note: >-
+      The herds of the broader tradition with chickens added. Pigs are left out: the sources read say nothing of them in the Iron Age, when they were avoided in parts of the Levant.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in peters-2022-chickens.txt (sha256 b75c9dadef531c16) and greenfield-2022-early-dynastic-ur.txt (sha256 6b46031795fbe1ac), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+relations:
+  member-of:
+    rel: member-of
+    to: people/husbandry/sumerian-herds
+    unsourced: An editorial grouping.

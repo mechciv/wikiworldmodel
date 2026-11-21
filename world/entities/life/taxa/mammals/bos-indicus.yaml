@@ -1,0 +1,29 @@
+id: life/taxa/bos-indicus
+kind: taxon
+summary: >-
+  Zebu, the humped cattle domesticated in South Asia. Open Tree keeps them as a species of their own; some classifications make them a subspecies of Bos taurus.
+same_as: { ott: 490109 }
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: "zebu (humped cattle)", la: "Bos indicus" }
+    source: { ref: src:opentree-taxonomy-3.7, loc: "tnrs/match_names: Bos indicus, ott490109" }
+    note: Open Tree gives the scientific name; the English name is an editorial gloss.
+  mass:
+    prop: body_mass
+    value: { lo: 385, hi: 545 }
+    source:
+      ref: src:wikipedia-gyr-cattle
+      loc: "section \"Characteristics\""
+      quote: "Cows average 385 kg in weight and 130 cm in height; bulls weigh 545 kg on average"
+    method: compilation
+    note: >-
+      The average cow and bull of one Indian zebu breed, the Gir, from Wikipedia, as no better source stating it for the domestic animal could be read. Other breeds are smaller or larger.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-gyr-cattle.txt (sha256 446a339617b1b431), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+relations:
+  parent:
+    rel: descends-from
+    to: life/taxa/bovidae
+    source: { ref: src:opentree-taxonomy-3.7, loc: "taxonomy/taxon_info ott490109 with include_lineage: Bos indicus lies within Bovidae" }

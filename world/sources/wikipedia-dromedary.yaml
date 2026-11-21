@@ -1,0 +1,19 @@
+id: src:wikipedia-dromedary
+type: database-record
+kind: review
+citation: >-
+  "Dromedary." Wikipedia, the free encyclopedia (English edition), revision 1383820303.
+snapshot: 2026-11-20
+title: Dromedary
+container: Wikipedia
+url: https://en.wikipedia.org/w/index.php?title=Dromedary&oldid=1383820303
+license: CC-BY-SA-4.0
+license_note: Short quotes, with credit.
+reliability: >-
+  A general encyclopedia article, cited for the weight of dromedaries and when they were domesticated and reached North Africa because no better source stating it could be read here. Its
+  figures are footnoted to other works, none of which was read.
+verified:
+  by: machine:claude-code
+  how: >-
+    The article's HTML, rendered from revision 1383820303 through the MediaWiki parse API, fetched on 20 November 2026 and
+    read as text, with the reference marks taken out; the quotes checked by script against that text.

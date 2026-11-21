@@ -1,0 +1,54 @@
+id: people/husbandry/north-african-camel-herders
+kind: tradition/husbandry
+summary: >-
+  The dromedaries of the peoples of North Africa and the Sahara, present by 1500 BCE and kept widely as the desert grew drier.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: "Camels of North Africa and the Sahara" }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 1500 BCE
+    source:
+      ref: src:wikipedia-dromedary
+      loc: "section \"History\""
+      quote: "Archaeological and rock art evidence puts the earliest dromedary in North Africa by 1500BC at the latest"
+    method: expert-estimate
+    note: >-
+      The latest date the source allows for the first dromedaries; it says they were not much kept as livestock until later, with no date. Still kept, so there is no end claim.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-dromedary.txt (sha256 5d016364bf29b37a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["65", "66", "67", "68", "69", "70", "71"] }
+    source:
+      ref: src:wikipedia-dromedary
+      loc: "section \"History\""
+      quote: "Archaeological and rock art evidence puts the earliest dromedary in North Africa by 1500BC at the latest"
+    method: editorial
+    note: >-
+      Regions 65 to 71, Morocco, Algeria, Tunisia and Libya, as North Africa. Egypt (72) has its own tradition; the Senegal valley, where the source has dromedaries by the third century CE, is left out.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-dromedary.txt (sha256 5d016364bf29b37a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [herders]
+    source:
+      ref: src:wikipedia-dromedary
+      loc: "opening section"
+      quote: "Products of the dromedary, including its meat and milk, support several North African tribes"
+    method: editorial
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-dromedary.txt (sha256 5d016364bf29b37a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  livestock:
+    prop: livestock
+    value: [life/taxa/camelus-dromedarius]
+    source:
+      ref: src:wikipedia-dromedary
+      loc: "section \"History\""
+      quote: "Archaeological and rock art evidence puts the earliest dromedary in North Africa by 1500BC at the latest"
+    method: compilation
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-dromedary.txt (sha256 5d016364bf29b37a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

@@ -1,0 +1,32 @@
+id: life/taxa/equus-asinus
+kind: taxon
+summary: >-
+  Donkeys, domesticated from the African wild ass.
+same_as: { ott: 1068202 }
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: "donkeys", la: "Equus asinus" }
+    source: { ref: src:opentree-taxonomy-3.7, loc: "tnrs/match_names: Equus asinus, ott1068202" }
+    note: Open Tree gives the scientific name; the English name is an editorial gloss.
+  mass:
+    prop: body_mass
+    value: { lo: 165, hi: 320 }
+    source:
+      - ref: src:jones-2009-pantheria
+        loc: "PanTHERIA_1-0_WR05_Aug2008.txt, row Equus asinus, columns 1-1_ActivityCycle, 5-1_AdultBodyMass_g, 8-1_AdultForearmLen_mm, 13-1_AdultHeadBodyLen_mm"
+        quote: "Equus asinus -999.00 164998.49 -999.00 -999.00"
+      - ref: src:animal-diversity-web
+        loc: "account of Equus asinus, Physical Description"
+        quote: "Piccione et al. (2008) reported the average mass of 5 adult females as 320 +/- 15 kg"
+    method: compilation
+    note: >-
+      From the mean mass PanTHERIA gives for the species (165 kg) to the mean of five adult female donkeys measured by Piccione et al. (2008), which the account cites.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in jones-2009-pantheria.txt (sha256 262cb3378ec67260) and animal-diversity-web.txt (sha256 5ae3d0bcfbf74dd9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+relations:
+  parent:
+    rel: descends-from
+    to: life/taxa/equus
+    source: { ref: src:opentree-taxonomy-3.7, loc: "taxonomy/taxon_info ott1068202 with include_lineage: Equus asinus lies within Equus" }

@@ -1,0 +1,29 @@
+id: life/taxa/camelus-dromedarius
+kind: taxon
+summary: >-
+  The one-humped camel, domesticated in Arabia.
+same_as: { ott: 510752 }
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: "dromedary camels", la: "Camelus dromedarius" }
+    source: { ref: src:opentree-taxonomy-3.7, loc: "tnrs/match_names: Camelus dromedarius, ott510752" }
+    note: Open Tree gives the scientific name; the English name is an editorial gloss.
+  mass:
+    prop: body_mass
+    value: { lo: 300, hi: 690 }
+    source:
+      ref: src:wikipedia-dromedary
+      loc: "opening section"
+      quote: "Males typically weigh between 400 and 690 kg (880 and 1,520 lb), and females weigh between 300 and 540 kg"
+    method: compilation
+    note: >-
+      From the lightest female to the heaviest male, from Wikipedia, as no better source stating it for the domestic animal could be read.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-dromedary.txt (sha256 5d016364bf29b37a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+relations:
+  parent:
+    rel: descends-from
+    to: life/taxa/camelidae
+    source: { ref: src:opentree-taxonomy-3.7, loc: "taxonomy/taxon_info ott510752 with include_lineage: Camelus dromedarius lies within Camelidae" }

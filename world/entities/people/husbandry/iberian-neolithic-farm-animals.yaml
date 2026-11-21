@@ -1,0 +1,56 @@
+id: people/husbandry/iberian-neolithic-farm-animals
+kind: tradition/husbandry
+summary: >-
+  The farm animals of the first farmers of Spain and Portugal, whose settlements appear on the eastern and southern coasts of Spain about 7,700 years ago and on the Atlantic coast of Portugal about 7,400 years ago.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: "Farm animals of Neolithic Iberia" }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: { lo: 7.7 ka, hi: 7.6 ka }
+    source:
+      ref: src:zeder-2008-mediterranean
+      loc: "The Diffusion of Animal Domesticates in the Mediterranean Basin"
+      quote: "appearing first on the eastern and southern coasts of Spain at ca. 7,700–7,600 B.P. and on the Atlantic coast of Portugal ca. 7,400–7,300 B.P."
+    method: expert-estimate
+    note: >-
+      Calibrated ages, of the first farming enclaves on the coasts of Spain. The animals are still kept, so there is no end claim.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zeder-2008-mediterranean.txt (sha256 aafb5ac0c581a441), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["41"] }
+    source:
+      ref: src:zeder-2008-mediterranean
+      loc: "The Diffusion of Animal Domesticates in the Mediterranean Basin"
+      quote: "Neolithic settlements with apparently fully formed agro-pastoral economic systems suddenly appear in the Iberian Peninsula"
+    method: editorial
+    note: >-
+      Region 41 (Spain and Portugal).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zeder-2008-mediterranean.txt (sha256 aafb5ac0c581a441), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      ref: src:zeder-2008-mediterranean
+      loc: "The Diffusion of Animal Domesticates in the Mediterranean Basin"
+      quote: "Neolithic settlements with apparently fully formed agro-pastoral economic systems suddenly appear in the Iberian Peninsula"
+    method: editorial
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zeder-2008-mediterranean.txt (sha256 aafb5ac0c581a441), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  livestock:
+    prop: livestock
+    value: [life/taxa/bos-taurus, life/taxa/ovis-aries, life/taxa/capra-hircus, life/taxa/sus-domesticus]
+    source:
+      ref: src:zeder-2008-mediterranean
+      loc: "Abstract"
+      quote: "four major Near Eastern livestock species (sheep, goats, cattle, and pigs) and their subsequent dispersal throughout the Mediterranean Basin"
+    method: compilation
+    note: >-
+      The four animals whose dispersal through the Mediterranean Basin the paper follows; it names sheep, goats and cattle in Iberia and Portugal, and pigs across Europe.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zeder-2008-mediterranean.txt (sha256 aafb5ac0c581a441), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
