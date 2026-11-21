@@ -114,7 +114,7 @@ export interface WikiWorldModelHandle {
   /** where the settlements of the scene drawn stand on the screen, those in view: the lists' cities by name */
   settlementsAt(): { pattern: string; city?: string; houses: number; x: number; y: number }[];
   /** the living scene as the viewer has it, if one is loaded */
-  scene(): { site: string; plan: PrintCheck; taxa: { id: string; label: string; form: string; own: boolean; tier: string; km?: number; rows: number; drawn: boolean }[]; instances: number; triangles: number; meshes: number; groundMs: number; stage?: string; climate: string; climateField: string; month: number | null; snow: number | null; focus: [number, number]; toRiver: [number, number]; origin: { lat: number; lon: number }; water: { tier: string; rivers: { key: string; from: string }[] } | null; sea: boolean; list: 'land' | 'sea'; eye: { z: number; floor: number } | null; people: { asked: boolean; houses: number; drawn: number; expected: number; settlements: number; pattern?: string; tier?: string; forms: string[] } | null } | null;
+  scene(): { site: string; plan: PrintCheck; taxa: { id: string; label: string; form: string; own: boolean; tier: string; km?: number; rows: number; drawn: boolean }[]; instances: number; triangles: number; meshes: number; groundMs: number; stage?: string; climate: string; climateField: string; month: number | null; snow: number | null; focus: [number, number]; toRiver: [number, number]; origin: { lat: number; lon: number }; water: { tier: string; rivers: { key: string; from: string }[] } | null; sea: boolean; list: 'land' | 'sea'; eye: { z: number; floor: number } | null; people: { asked: boolean; houses: number; drawn: number; expected: number; settlements: number; pattern?: string; tier?: string; forms: string[]; works: string[]; pieces: number; kept: string[]; animals: number; paths: number; cities: { name: string; people: number; record?: string; from?: string; town?: string }[]; near: { lat: number; lon: number; pattern: string; houses: number; city?: string }[] } | null } | null;
   /** a browser's fingerprint of the scene of a place and a time, as a witness in the build has it */
   lifePrint(lat: number, lon: number, t: number): Promise<Fingerprint | null>;
   /** how far the atlas reaches, as the build says */
@@ -143,6 +143,14 @@ const CITY_SOLID = 4.5e5;
 const LIFE_TOP = 3.2e5;
 const LIFE_SOLID = 1.2e5;
 const GLOBE_GONE = 4.5e4;
+/**
+ * How far round a city with a scene of its own the ground is that city's, and round a place with one: nearer than this
+ * the view comes down into its scene, and past it into the scene of wherever the camera is. A city's reach is past that
+ * of the lists' cities a scene of anywhere draws (the settlement generator's cities.reach_km), so that no scene draws a
+ * city in generic houses beside the one drawn building by building.
+ */
+const CITY_REACH = 6e4;
+const PLACE_REACH = 15e3;
 /** How far one sees through the sea's water, as it is drawn: until its green light falls to a twentieth. */
 const SEEN_THROUGH_WATER = Math.log(20) / SEA.extinction[1];
 const RAD = Math.PI / 180;
@@ -151,6 +159,17 @@ const RAD = Math.PI / 180;
 const ROOT = new URL('./', location.href).href;
 
 /** A settlement of each way of life, one and many, for the panel of a house. */
+/** The settlements of a scene nearest its middle that have houses, each with where it is on the globe: for a test, or a look. */
+function nearestSettlements(c: LifeScene): { lat: number; lon: number; pattern: string; houses: number; city?: string }[] {
+  const o = c.spec.site.origin;
+  const perDeg = 111194.93;
+  return (c.people?.settlements ?? [])
+    .filter((s) => s.houses > 0)
+    .sort((a, b) => Math.hypot(a.x, a.y) - Math.hypot(b.x, b.y))
+    .slice(0, 6)
+    .map((s) => ({ lat: o.lat + s.y / perDeg, lon: o.lon + s.x / (perDeg * Math.cos((o.lat * Math.PI) / 180)), pattern: s.pattern, houses: s.houses, ...(s.city ? { city: s.city } : {}) }));
+}
+
 /** A city of a scene in words: whose its people are, and how it is laid out. */
 function cityWords(x: { people: number; record?: string; from?: 'record' | 'list' | 'guess'; town?: { text: string; from: Record<string, string> } }): string {
   const people = `about ${x.people.toLocaleString('en-US')} people then`;
@@ -727,15 +746,17 @@ async function start(root: HTMLElement): Promise<void> {
     return 2 * EARTH_RADIUS * Math.asin(Math.min(1, Math.sqrt(a)));
   }
   const siteDistance = (lat: number, lon: number) => (site ? distanceFrom(site, lat, lon) : Infinity);
+  /** Is a view over a place that has its own scene: within the ground that is the place's? */
+  const isOver = (s: SiteInfo, at: { lat: number; lon: number }) => distanceFrom(s, at.lat, at.lon) < (s.kind === 'city' ? CITY_REACH : PLACE_REACH);
   /** The site a view is at. */
   function siteFor(t: number, cam: ViewState['cam']): SiteInfo | undefined {
     const within = (list: SiteInfo[], reach: number) => list.map((s) => ({ s, d: distanceFrom(s, cam.lat, cam.lon) })).filter((x) => x.d < reach).sort((a, b) => a.d - b.d)[0]?.s;
     const open = sites.filter((s) => t >= s.span[0] && t <= s.span[1]);
     const near = within(open, 2.2e6);
     const range = (cam.dist - 1) * EARTH_RADIUS;
-    // A city, or a place with its own scene that the camera is right over, is that place. Otherwise, near the
+    // A place with its own scene that the camera is over is that place, and so it is from high up. Otherwise, near the
     // ground, the scene of wherever the camera is, once there is one.
-    const atPlace = !!near && (near.kind === 'city' || distanceFrom(near, cam.lat, cam.lon) < 15e3 || range > LIFE_TOP * 1.4);
+    const atPlace = !!near && (isOver(near, cam) || range > LIFE_TOP * 1.4);
     if (atPlace) return near;
     if (lifeSite && t >= lifeSite.span[0] && t <= lifeSite.span[1] && range < LIFE_TOP * 1.4) return lifeSite;
     return near ?? within(sites, 1.5e6) ?? open[0] ?? sites[0];
@@ -744,12 +765,18 @@ async function start(root: HTMLElement): Promise<void> {
     site = siteFor(t, cam);
     city = site ? scenes.get(site.id) ?? null : null;
   }
-  /** Is this somewhere a scene can be made? Not by a city, which has its own way down. */
+  /** Is this somewhere a scene can be made? Not over a city that has a scene of its own, and its own way down. */
   function canDrawLife(t: number, cam: ViewState['cam']): boolean {
     if (!lifeAtlas) return false;
-    if (sites.some((s) => s.kind === 'city' && t >= s.span[0] && t <= s.span[1] && distanceFrom(s, cam.lat, cam.lon) < 1.4e6)) return false;
+    if (sites.some((s) => s.kind === 'city' && t >= s.span[0] && t <= s.span[1] && isOver(s, cam))) return false;
     return lifeAtlas.canDraw(t, cam.lat, cam.lon);
   }
+  /**
+   * Is the view near the ground at a place that gets a scene of its own, away from the site's ground? Then the site's
+   * scene is not wanted, however near the site is: the globe is drawn until the place's own scene has come.
+   */
+  const awayFromSite = (): boolean =>
+    !!site && site !== lifeSite && (state.cam.dist - 1) * EARTH_RADIUS < LIFE_TOP * 1.4 && !isOver(site, state.cam) && canDrawLife(state.t, state.cam);
   /** How close to the Earth a view may come here: to the street at the site, nowhere near it elsewhere. */
   function lowestDist(cam: ViewState['cam'], t: number): number {
     if (canDrawLife(t, cam)) return 1 + 2 / EARTH_RADIUS;
@@ -1076,7 +1103,7 @@ async function start(root: HTMLElement): Promise<void> {
     const made = site === lifeSite && !!lifeSite;
     const top = made ? LIFE_TOP : CITY_TOP;
     const solidAt = made ? LIFE_SOLID : CITY_SOLID;
-    const wantsCity = !!site && siteOpen(state.t) && range < top * 1.4 && siteDistance(state.cam.lat, state.cam.lon) < 1.6e6;
+    const wantsCity = !!site && siteOpen(state.t) && range < top * 1.4 && siteDistance(state.cam.lat, state.cam.lon) < 1.6e6 && !awayFromSite();
     // Loaded before it is needed: as soon as the way down is on offer.
     if (site && !made && siteOpen(state.t) && state.cam.dist < 2.2 && siteDistance(state.cam.lat, state.cam.lon) < 2e6 && !city && !loadingScenes.has(site.id)) void loadScene(site);
     const inCity = wantsCity && !!city?.ready && range < top;
@@ -1234,7 +1261,7 @@ async function start(root: HTMLElement): Promise<void> {
       const words = folk ? `${life} · ${peopleWords(folk)}` : life;
       if (lifeHere.textContent !== words) lifeHere.textContent = words;
     }
-    const enter = !!site && !made && !inCity && state.cam.dist < 2.2 && siteDistance(state.cam.lat, state.cam.lon) < 1.5e6;
+    const enter = !!site && !made && !inCity && state.cam.dist < 2.2 && siteDistance(state.cam.lat, state.cam.lon) < 1.5e6 && !awayFromSite();
     cityEnter.hidden = !enter;
     if (enter) cityEnter.textContent = `Fly down into ${site!.label}, ${formatTime(site!.slice)}`;
     if (inCity && site!.kind === 'city') {
@@ -1574,7 +1601,7 @@ async function start(root: HTMLElement): Promise<void> {
   function sceneComing(to: ViewState['cam']): boolean {
     const t = state.t;
     const s = siteFor(t, to);
-    if (s && s !== lifeSite && t >= s.span[0] && t <= s.span[1] && (s.kind === 'city' || distanceFrom(s, to.lat, to.lon) < 15e3)) {
+    if (s && s !== lifeSite && t >= s.span[0] && t <= s.span[1] && isOver(s, to)) {
       if (failedScenes.has(s.id)) return false;
       if (!scenes.get(s.id) && !loadingScenes.has(s.id)) void loadScene(s);
       return !scenes.get(s.id)?.ready;
@@ -1673,7 +1700,7 @@ async function start(root: HTMLElement): Promise<void> {
     if (range > LIFE_TOP * 1.4 || !canDrawLife(state.t, cam)) return;
     // A place that has its own scene, and the camera right over it, is that place.
     const there = cam === state.cam ? site : siteFor(state.t, cam);
-    if (there && there !== lifeSite && there.kind === 'life' && distanceFrom(there, cam.lat, cam.lon) < 15e3) return;
+    if (there && there !== lifeSite && there.kind === 'life' && isOver(there, cam)) return;
     const key = lifeKeyAt(state.t, cam);
     if (lifeEmpty.has(key) || !climateData || !climateRule) return;
     const now = performance.now();
@@ -2486,10 +2513,10 @@ async function start(root: HTMLElement): Promise<void> {
     if (site && failedScenes.has(site.id)) return false;
     const made = site === lifeSite && !!lifeSite;
     // A scene is wanted here and has not come, or has not settled.
-    if (!made && lifeAtlas && range < LIFE_TOP * 1.4 && canDrawLife(state.t, state.cam) && !(site && distanceFrom(site, state.cam.lat, state.cam.lon) < 15e3)) {
+    if (!made && lifeAtlas && range < LIFE_TOP * 1.4 && canDrawLife(state.t, state.cam) && !(site && isOver(site, state.cam))) {
       if (!lifeEmpty.has(lifeKeyAt(state.t, state.cam))) return true;
     }
-    return !!site && siteOpen(state.t) && range < (made ? LIFE_TOP : CITY_TOP) * 1.4 && siteDistance(state.cam.lat, state.cam.lon) < 1.6e6 && !(city?.settled && city.plan.actual);
+    return !!site && siteOpen(state.t) && range < (made ? LIFE_TOP : CITY_TOP) * 1.4 && siteDistance(state.cam.lat, state.cam.lon) < 1.6e6 && !awayFromSite() && !(city?.settled && city.plan.actual);
   };
   /** What the view is still waiting on before it is idle, by name: nothing, once it is. */
   const waiting = (): string[] => {
@@ -2578,7 +2605,7 @@ async function start(root: HTMLElement): Promise<void> {
       const drawn = new Set(c.named.map((x) => x.id));
       // Where the eye is in the scene drawn, above its sea, and the ground under it.
       const eye = c === city && frameView && c.ground ? { z: frameView.eye[2], floor: c.ground.at(frameView.eye[0], frameView.eye[1]) } : null;
-      return { site: c.spec.site.id, plan: c.plan, taxa: c.spec.taxa.map((t) => ({ id: t.id, label: t.label, form: t.form_label, own: t.own, tier: t.tier, km: t.km, rows: t.rows, drawn: drawn.has(t.id) })), instances: c.last.instances, triangles: c.last.triangles, meshes: c.last.meshes, groundMs: c.groundMs, stage: c.spec.site.stage, climate: c.spec.biome.climate, climateField: c.spec.biome.field, month: c.spec.climate?.month ?? null, snow: Number.isFinite(snowOf(c.spec).line) ? snowOf(c.spec).line : null, focus: c.focus, toRiver: c.toRiver, origin: c.spec.site.origin, water: c.spec.water ? { tier: c.spec.water.tier, rivers: c.spec.water.rivers.map((r) => ({ key: r.key, from: r.from })) } : null, sea: c.sea, list: listOf(c), eye, people: c.spec.people ? { asked: true, houses: c.people?.houses ?? 0, drawn: c.people?.drawn ?? 0, expected: c.people?.expected ?? 0, settlements: c.people?.settlements.length ?? 0, pattern: c.people?.lifeway.pattern, tier: c.people?.lifeway.tier, forms: c.people?.forms.map((f) => f.label) ?? [] } : null };
+      return { site: c.spec.site.id, plan: c.plan, taxa: c.spec.taxa.map((t) => ({ id: t.id, label: t.label, form: t.form_label, own: t.own, tier: t.tier, km: t.km, rows: t.rows, drawn: drawn.has(t.id) })), instances: c.last.instances, triangles: c.last.triangles, meshes: c.last.meshes, groundMs: c.groundMs, stage: c.spec.site.stage, climate: c.spec.biome.climate, climateField: c.spec.biome.field, month: c.spec.climate?.month ?? null, snow: Number.isFinite(snowOf(c.spec).line) ? snowOf(c.spec).line : null, focus: c.focus, toRiver: c.toRiver, origin: c.spec.site.origin, water: c.spec.water ? { tier: c.spec.water.tier, rivers: c.spec.water.rivers.map((r) => ({ key: r.key, from: r.from })) } : null, sea: c.sea, list: listOf(c), eye, people: c.spec.people ? { asked: true, houses: c.people?.houses ?? 0, drawn: c.people?.drawn ?? 0, expected: c.people?.expected ?? 0, settlements: c.people?.settlements.length ?? 0, pattern: c.people?.lifeway.pattern, tier: c.people?.lifeway.tier, forms: c.people?.forms.map((f) => f.label) ?? [], works: c.people?.works.map((f) => f.label) ?? [], pieces: c.people?.pieces ?? 0, kept: c.spec.people.kept?.map((k) => k.label) ?? [], animals: c.people?.animals ?? 0, paths: c.people?.paths ?? 0, cities: c.people?.settlements.filter((x) => x.city).map((x) => ({ name: x.city!, people: x.people, ...(x.record ? { record: x.record } : {}), ...(x.from ? { from: x.from } : {}), ...(x.town ? { town: x.town.text } : {}) })) ?? [], near: nearestSettlements(c) } : null };
     },
     lifePrint: async (lat, lon, t) => {
       const spec = await lifeAtlas?.spec(lat, lon, t, {});
