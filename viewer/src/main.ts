@@ -184,6 +184,7 @@ const HAZARD_SIZE: Record<HazardRow['kind'], string> = { eruption: 'Volcanic exp
 const STATE_COLORS: Record<string, string> = {
   'rock-vapour': '#ffc061',
   steam: '#c9ced8',
+  'dense-co2': '#a9c4cf',
   magma: '#e2572b',
   'crust-and-magma': '#8a3a1a',
   ocean: '#2f6fa3',
@@ -2154,6 +2155,7 @@ async function start(root: HTMLElement): Promise<void> {
     return {
       planet: earth.id,
       phase: look.phase.label,
+      into: look.into ? { label: look.into.label, passed: look.passed } : undefined,
       ice: look.ice ? { id: look.ice.subject, label: look.ice.label, reach: reachText(look.iceReach) } : undefined,
     };
   }

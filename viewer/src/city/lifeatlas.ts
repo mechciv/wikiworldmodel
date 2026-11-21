@@ -312,8 +312,9 @@ export class LifeAtlas {
     // The months of the finest climate that covers the time, at the node the place stood on then.
     const mInfo = this.months.info;
     const where = mInfo && monthsPlace(mInfo, pw, lat, lon, ageMa);
-    const tiles = where ? await this.months.near(where.set, where.lat, where.lon) : [];
-    if (mInfo && where && tiles.length) pw.months = placeMonths(mInfo, where, tiles, month);
+    // And beside them, what else that climate's source says of the node, which nothing draws yet.
+    const [tiles, parts] = where ? await Promise.all([this.months.near(where.set, where.lat, where.lon), this.months.partsNear(where.set, where.ageMa, where.lat, where.lon)]) : [[], []];
+    if (mInfo && where && tiles.length) pw.months = placeMonths(mInfo, where, tiles, month, parts);
     const spec = placeSpec(pw, lat, lon, ageMa);
     if (!spec) return null;
     // Its list is the sea's where the land's atlas has none for its place, as placeSpec chooses.

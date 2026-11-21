@@ -1,0 +1,22 @@
+id: src:sleep-2010-hadean-archaean-environment
+type: publication
+kind: review
+citation: >-
+  Sleep, N.H. (2010). The Hadean-Archaean environment. Cold Spring Harbor Perspectives in Biology
+  2(6), a002527.
+authors:
+  - "Sleep, N.H."
+published: 2010
+title: The Hadean-Archaean environment
+container: Cold Spring Harbor Perspectives in Biology 2(6), a002527
+doi: 10.1101/cshperspect.a002527
+reliability: >-
+  A review by one of the authors of Zahnle et al. (2007) and of Sleep et al. (2014). Its figures for the
+  time after the Moon-forming impact are its author's summary of that work, given without their
+  derivation, and differ from one place in the article to another (liquid water in about 10 million
+  years in the abstract, solid rock in about 20 in the text).
+verified:
+  by: machine:claude-code
+  how: >-
+    Full text read on 20 November 2026 from PubMed Central (PMC2869525), its page saved and turned to
+    text; citation from Crossref. The article has no page numbers, so locators name its sections.

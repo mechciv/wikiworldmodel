@@ -10,7 +10,7 @@ import { featureTileUrl, type FeatureIndex } from '../../../core/featuretiles.ts
 import { cityKind, type Feature, type FramesFile, type TileHeader, type Tileset } from '../../../core/tileset.ts';
 import { PLATE_OFFSET, PlateModels, RotationModel } from '../../../core/rotation-model.ts';
 import type { IceHeader } from '../../../core/ice.ts';
-import { chosenClaim, type PlanetFile } from '../../../core/planet.ts';
+import { chosenClaim, lookAt, spanOf, type PlanetFile } from '../../../core/planet.ts';
 import { peopleAt, statesAt, type PeopleFile, type PeopleHeader, type PolitiesFile } from '../../../core/layers.ts';
 import { drawnFirst, territoriesAt, type TerritoryFile } from '../../../core/territory.ts';
 import type { CoverageFile, EntityRecord, PeriodsFile, SearchFile, SeriesFile } from '../../../core/records.ts';
@@ -23,6 +23,8 @@ import type { ClimateRule } from '../../../core/climate.ts';
 import { GENERATOR, generateClouds, type CloudParams } from '../../../world/generators/earth/clouds/v1.ts';
 import { GENERATOR as SURFACE, generateSurface, type SurfaceParams } from '../../../world/generators/earth/surface/v1.ts';
 import { GENERATOR as GENERIC_LAND, generateGenericLand, type GenericLandParams } from '../../../world/generators/earth/generic-land/v1.ts';
+import { globeLook } from '../../../viewer/src/gl/globe.ts';
+import { apart, drawn } from './drawn.ts';
 import { latestBuild } from './helpers.ts';
 
 /** A file's bytes as an ArrayBuffer of their own (small files share Node's buffer pool). */
@@ -522,8 +524,11 @@ describe('build', () => {
   it('writes the planet\'s states: its phases in order, tied to the dates they follow, and the ice of its glaciations', () => {
     const { planet, episodes } = JSON.parse(readFileSync(join(latestBuild(), 'planet.json'), 'utf8')) as PlanetFile;
     const { entities } = JSON.parse(readFileSync(join(latestBuild(), 'search.json'), 'utf8')) as SearchFile;
-    expect(planet!.phases.map((p) => p.label)).toEqual(['Proto-Earth', 'Rock-vapour atmosphere', 'Magma ocean under steam', 'Oceans', 'Without oceans']);
-    expect(planet!.phases.map((p) => p.values.surface?.map((c) => c.value))).toEqual([['crust-and-magma'], ['magma'], ['magma'], ['ocean'], ['bare-rock']]);
+    expect(planet!.phases.map((p) => p.label)).toEqual(['Proto-Earth', 'Rock-vapour atmosphere', 'Magma ocean under steam', 'Steam raining out', 'Hot ocean under carbon dioxide', 'Oceans', 'Without oceans']);
+    expect(planet!.phases.map((p) => p.values.surface?.map((c) => c.value))).toEqual([['crust-and-magma'], ['magma'], ['magma'], ['crust-and-magma'], ['ocean'], ['ocean'], ['bare-rock']]);
+    expect(planet!.phases.map((p) => p.values.atmosphere?.map((c) => c.value))).toEqual([undefined, ['rock-vapour'], ['steam'], ['steam'], ['dense-co2'], undefined, undefined]);
+    // The four phases after the impact are passages: each gave way little by little, as its sources say.
+    expect(planet!.phases.map((p) => !!p.values.change)).toEqual([false, true, true, true, true, false, false]);
     // Earth begins within 1 Myr of the Solar System's first solids; the proto-Earth ends at the impact.
     const date = (id: string) => entities.find((e) => e.id === id)!.time.start.best!;
     const phase = (id: string) => planet!.phases.find((p) => p.subject === `space/bodies/earth@${id}`)!;
@@ -534,6 +539,17 @@ describe('build', () => {
     // The oceans are lost about 2 Gyr from now, a projection.
     expect(phase('oceans').time.end.best).toBe(PRESENT_YEAR + 2e9);
     expect(phase('magma-ocean').time.end.best! - date('earth/events/moon-forming-impact')).toBeCloseTo(2e6, 0);
+    // The steam rains out in thousands of years, and the carbon dioxide is gone ten to a hundred million years on.
+    const rain = phase('rain-out').time.end.best! - phase('rain-out').time.start.best!;
+    expect(rain).toBeGreaterThanOrEqual(1e3);
+    expect(rain).toBeLessThanOrEqual(1e4);
+    const hot = phase('hot-ocean');
+    expect(hot.time.end.best! - hot.time.start.best!).toBeCloseTo(5.5e7, 0);
+    const cases = Object.entries(hot.variants ?? {}).filter(([k]) => k.startsWith('space/bodies/earth#hot-ocean-end-')).map(([, v]) => Math.round((v.end.best! - v.start.best!) / 1e6));
+    expect(cases.sort((a, b) => a - b)).toEqual([10, 100]);
+    // Other models' lengths for the magma ocean compete, from a fifth of a million years to ten million.
+    const lengths = Object.entries(phase('magma-ocean').variants ?? {}).filter(([k]) => k.startsWith('space/bodies/earth#magma-ocean-end-')).map(([, v]) => Math.round((v.end.best! - date('earth/events/moon-forming-impact')) / 1e4) / 100);
+    expect(lengths.sort((a, b) => a - b)).toEqual([0.21, 1.5, 10]);
     // Picking another date for the impact moves the magma ocean with it.
     const maurice = phase('magma-ocean').variants!['earth/events/moon-forming-impact#date-maurice-2020'];
     expect(toMa(maurice.start.best!)).toBeCloseTo(4425, 0);
@@ -542,6 +558,44 @@ describe('build', () => {
       const reach = episodes.find((e) => e.subject === id)!.values.ice_reach;
       expect(chosenClaim(reach, {})!.value).toBe(0);
       expect(reach.filter((c) => c.value !== 0).length).toBe(1);
+    }
+  });
+
+  it('leaves no moment between the Moon-forming impact and the oceans at which the planet\'s state changes all at once', () => {
+    const dir = latestBuild();
+    const file = JSON.parse(readFileSync(join(dir, 'planet.json'), 'utf8')) as PlanetFile;
+    const ts = JSON.parse(readFileSync(join(dir, 'tileset.json'), 'utf8')) as Tileset;
+    const { header } = decodeTile<TileHeader>(bytes(join(dir, ts.tiles[0].url)));
+    const draw = (header.generators.find((x) => x.generator === SURFACE)!.params as unknown as SurfaceParams).draw;
+    const phases = file.planet!.phases;
+    const of = (id: string) => phases.findIndex((p) => p.subject === `space/bodies/earth@${id}`);
+    // In the default picture, and in every other the build solved these phases for: each alternative, and each
+    // competing claim that moves them picked in turn.
+    const keys = new Set(phases.slice(of('rock-vapour'), of('oceans') + 1).flatMap((p) => Object.keys(p.variants ?? {})));
+    const pictures = [...keys].map((k) => ({ alts: k.split(' ').filter((x) => x.startsWith('alt:')), picks: k.split(' ').filter((x) => !x.startsWith('alt:')) }));
+    expect(pictures.some((s) => s.picks.includes('space/bodies/earth#magma-ocean-end-sleep-2014'))).toBe(true);
+    for (const scenario of [{}, ...pictures]) {
+      const at = (t: number) => drawn(globeLook(lookAt(file, t, scenario), draw));
+      const where = JSON.stringify(scenario);
+      for (let i = of('rock-vapour'); i < of('oceans'); i++) {
+        const [a, b] = spanOf(phases[i], scenario);
+        expect(b, `${phases[i].label} ${where}`).toBeGreaterThan(a);
+        // Through the phase, in a thousand steps, no step moves any part of the drawing by more than a little.
+        let before = at(a);
+        let most = 0;
+        for (let k = 1; k < 1000; k++) {
+          const now = at(a + ((b - a) * k) / 1000);
+          most = Math.max(most, apart(before, now));
+          before = now;
+        }
+        expect(most, `${phases[i].label} ${where}`).toBeLessThan(0.003);
+        // The phase is a change, and by its end has come to the state the next begins in.
+        expect(apart(at(a), at(b)), `${phases[i].label} ${where}`).toBeGreaterThan(0.2);
+        expect(apart(at(b - (b - a) * 1e-7), at(b)), `${phases[i].label} → ${phases[i + 1].label} ${where}`).toBeLessThan(1e-5);
+      }
+      // The impact itself is a moment in the record, and the globe changes at it.
+      const [, impact] = spanOf(phases[of('proto-earth')], scenario);
+      expect(apart(at(impact - 1), at(impact)), `the impact ${where}`).toBeGreaterThan(0.5);
     }
   });
 

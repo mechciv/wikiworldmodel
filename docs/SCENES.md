@@ -95,6 +95,15 @@ corrected to the climate observed on a half-degree grid, it is the mean height o
 keyframe's twelve months at each node with land, with that height, in tiles of 10° (field:earth/climate-at-height). A
 scene fetches the tile its place stood in at the keyframe nearest its time, of the finest climate that covers it. Scenes draw so from `gen:life/scene` version 4.
 
+Beside its months each node keeps what else its climate's dataset says of it, each a field of its own, in tiles of
+parts (`core/months.ts`, PARTS). For the last 120,000 years: the cloudiness, the relative humidity and the wind speed
+of each month, and the year's biome, leaf area and production from a vegetation model, cell by cell of the dataset's
+half-degree grid. For the deep past's runs: each month's wind at 1000 hPa, toward the east and the north, and the
+surface's albedo. A tile of parts holds a span of the keyframes, so a scene fetches one file of them for each tile of
+months, and its spec carries what they say of its node (`climate.parts`). **Nothing draws from them yet:** the clouds,
+the haze and the wind are still the renderer's own, and a scene's cover is still the class of its months.
+`npm run world -- months <lat> <lon> <time> [month]` prints what a build's tiles say at a place, as a scene is given it.
+
 At any height of the scene, the air is colder by one lapse rate, 5.8 °C a kilometre (model:earth/lapse-rate, from
 Loomis et al. 2017), with the same rain. So:
 
@@ -112,6 +121,11 @@ Limits:
 - No leaf or grass seasons: a deciduous forest is drawn in leaf in January. Its phenology wants a source.
 - Snow lies on the ground's colour only. Trees stay green under it, and lakes and rivers do not freeze.
 - The node is the nearest of a 1° grid, so a scene near a coast can read a node of a model's coast that is not its own.
+- The parts are the node's at every height: nothing brings cloudiness, humidity or wind up a mountain.
+- No cloudiness or humidity before 120,000 years ago, and none over the sea at any time. The deep past's winds are on
+  a pressure level, which lies under high ground: there they are not winds at the surface (field:earth/wind).
+- The vegetation of the last 120,000 years has no people in it, and nothing on most of the shelves the low sea bared
+  (field:earth/biome-late-quaternary).
 
 ## What the ground is made of
 
@@ -179,5 +193,5 @@ Each step has a budget, and a test.
    topsoil and bedrock at half a degree ([above](#what-the-ground-is-made-of)). Finer maps, rock units with their
    ages, a soil's colour and land cover remain.
 6. **Season and weather** from the monthly climate. The month's snow and sun are done (above); leaf, grass, a river's
-   season, the weather and the sky remain.
+   season, the weather and the sky remain. The months of cloudiness, humidity and wind they will read are kept (above).
 7. **Seamless ground,** keyed in the world's coordinates, which the rivers' keying begins.

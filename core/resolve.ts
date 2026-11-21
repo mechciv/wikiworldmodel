@@ -73,12 +73,17 @@ export function resolve(w: ResolveWorld, layer: LayerId, lat: number, lon: numbe
   if (!look.formed) return a('unknown', null, 'The Earth had not formed, or is gone.');
   switch (layer) {
     case 'planet':
-      return look.phase ? a('evidence', look.phase.label, 'The planet\'s state at this time, from its records.') : a('unknown', null, 'No state of the planet is recorded for this time.');
+      if (!look.phase) return a('unknown', null, 'No state of the planet is recorded for this time.');
+      // In a passage the records give the state the phase began in and the one it came to; what lies between is a model's.
+      return a('evidence', look.phase.label, look.into ? `The planet's state at this time, from its records. They say it gave way little by little: it is drawn part of the way to the next, ${look.into.label}.` : 'The planet\'s state at this time, from its records.');
     case 'geography': {
-      if (look.surface === 'magma' || look.surface === 'crust-and-magma') return a('evidence', look.surface, 'The planet\'s state covers everything: there is no land and sea to map.');
+      // Under molten rock that a passage is thinning out, what shows is the ground of the state it is passing into.
+      const molten = (x: string | null) => x === 'magma' || x === 'crust-and-magma';
+      const surface = look.into && molten(look.surface) && !molten(look.intoSurface) ? look.intoSurface : look.surface;
+      if (surface === 'magma' || surface === 'crust-and-magma') return a('evidence', surface, 'The planet\'s state covers everything: there is no land and sea to map.');
       const f = w.geography.find((g) => within(g.coverage, t));
       if (f) return a('model', f.mode, `${f.title} covers this time.`);
-      if (look.surface === 'bare-rock') return a('generic', 'rock', 'Nothing records the ground of this time: bare rock is drawn, as the planet\'s state says there were no oceans.');
+      if (surface === 'bare-rock') return a('generic', 'rock', 'Nothing records the ground of this time: bare rock is drawn, as the planet\'s state says there were no oceans.');
       const land = w.genericLand?.(lat, lon);
       return a('generic', land ? 'land' : 'sea', 'Nothing records where the land was at this time: generic land is drawn, its places invented and its amount a placeholder.');
     }

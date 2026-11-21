@@ -51,7 +51,7 @@
       "properties": {
         "from": { "$ref": "defs.json#/$defs/ref" },
         "file": { "type": "string", "description": "The dataset's file, where it has several" },
-        "as": { "enum": ["climate", "ice-sheets", "borders", "hazards", "polities", "routes", "languages", "people", "community", "community-sea", "rock-record", "relief", "river-widths", "anthromes", "land-use-assessment", "cities", "topsoil", "bedrock"], "description": "What the data is read as, where it is not elevation of each time: relief is today's ground on a fixed datum, held through the times the field covers, which a coastline reads at the sea level of each time; topsoil and bedrock are today's maps of the ground, held likewise, which a scene's ground is read from" },
+        "as": { "enum": ["climate", "months", "ice-sheets", "borders", "hazards", "polities", "routes", "languages", "people", "community", "community-sea", "rock-record", "relief", "river-widths", "anthromes", "land-use-assessment", "cities", "topsoil", "bedrock"], "description": "What the data is read as, where it is not elevation of each time: relief is today's ground on a fixed datum, held through the times the field covers, which a coastline reads at the sea level of each time; months is another variable of the dataset a climate is read from, by month or by year, kept beside that climate's months at its nodes (core/months.ts); topsoil and bedrock are today's maps of the ground, held as relief is, which a scene's ground is read from" },
         "places": { "$ref": "defs.json#/$defs/ref", "description": "For borders: the dataset of places that goes with them" },
         "regions": { "$ref": "defs.json#/$defs/ref", "description": "For a land-use assessment by region: the dataset of the regions' shapes" },
         "variables": {
@@ -60,6 +60,18 @@
           "required": ["temperature", "precipitation", "time", "latitude", "longitude"],
           "properties": { "temperature": { "type": "string" }, "precipitation": { "type": "string" }, "time": { "type": "string" }, "latitude": { "type": "string" }, "longitude": { "type": "string" } },
           "additionalProperties": false
+        },
+        "reads": {
+          "type": "object",
+          "description": "For a field read as months: each part it is of what the tiles keep beside a climate's months (core/months.ts PARTS), with the variable of the dataset's file that holds it, the unit the file itself gives that variable, which the build checks before it reads, and the value the file gives where it has none",
+          "minProperties": 1,
+          "propertyNames": { "enum": ["cloud", "humidity", "wind_speed", "u", "v", "albedo", "biome", "leaf", "npp"] },
+          "additionalProperties": {
+            "type": "object",
+            "required": ["variable"],
+            "properties": { "variable": { "type": "string" }, "unit": { "type": "string" }, "none": { "type": "number" } },
+            "additionalProperties": false
+          }
         },
         "water": {
           "type": "object",

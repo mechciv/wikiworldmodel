@@ -1,0 +1,27 @@
+id: src:lebrun-2013-magma-ocean-atmosphere
+type: publication
+kind: model
+citation: >-
+  Lebrun, T., Massol, H., Chassefière, E., Davaille, A., Marcq, E., Sarda, P., Leblanc, F. &
+  Brandeis, G. (2013). Thermal evolution of an early magma ocean in interaction with the atmosphere.
+  Journal of Geophysical Research: Planets 118(6), 1155–1176.
+authors:
+  - "Lebrun, T."
+  - "Massol, H."
+  - "Chassefière, E."
+  - "Davaille, A."
+  - "Marcq, E."
+  - "Sarda, P."
+  - "Leblanc, F."
+  - "Brandeis, G."
+published: 2013
+title: Thermal evolution of an early magma ocean in interaction with the atmosphere
+container: "Journal of Geophysical Research: Planets 118(6), 1155–1176"
+doi: 10.1002/jgre.20068
+verified:
+  by: machine:claude-code
+  how: >-
+    Abstract only, read on 20 November 2026 from the record the HAL open archive's search interface
+    returns for hal-00799240; citation from Crossref. The article itself was not read: HAL's copy of it
+    sits behind a check for automated readers, which was not worked around. So what the abstract's
+    figures assume, and how the model defines the end of its magma ocean, are not known here.

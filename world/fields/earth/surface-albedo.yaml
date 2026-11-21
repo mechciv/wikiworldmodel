@@ -1,0 +1,33 @@
+# One of the parts kept beside the months of the deep past's runs (core/months.ts PARTS), at the same nodes and
+# keyframes. Nothing reads it yet.
+id: field:earth/surface-albedo
+type: field
+title: How much sunlight the ground sends back
+quantity: surface albedo of each month
+unit: a share of the sunlight that falls, 0 to 1
+description: >-
+  How much of the sunlight that reaches the ground the ground sends back, in each month of the year in each of the deep
+  past's climate runs: low over forest and wet ground, higher over desert, and highest over snow. It is the model's
+  own ground, and that ground is not the past's: every run before the pre-industrial one starts as warm grassland on a
+  uniform loam with no ice sheets, and grows what its vegetation model grows. So it says where and when the model lays
+  snow, and how bare its ground is, more than what colour the land was. In a month with no sunlight there is nothing to
+  send back, and the file gives 0: in 2.3 million of its cell-months, none of them nearer the equator than 65.5°, from
+  October to February in the north and from April to August in the south, where its least value above 0 is 0.03. The
+  tiles keep those months as no value. A node is the mean of the model's land cells around it that have one.
+kind: raster
+frame: frame:earth/geographic
+grid: { kind: lonlat, res_deg: 2 }
+time: { lo: 540 Ma, hi: 0 Ma, step: 10 Myr }
+data:
+  from: src:li-2022-phanerozoic-climate
+  as: months
+  # The file's own name and unit for it, which the build checks before it reads; and what the file gives where a month has no sunlight.
+  reads:
+    albedo: { variable: SALB, unit: fraction, none: 0 }
+basis: reconstruction
+# A single value at each place, time and month: nobody gave its uncertainty (docs/STRUCTURE.md section 3.2).
+spread: unknown
+uncertainty: >-
+  A climate model's ground under a climate model's snow. The dataset's article names the variable and says no more of
+  it. Over the land its values, where it has one, run from 0.05 to 0.90. The tiles keep it to a quarter of a per cent.
+moves_with: src:paleomap-plate-model

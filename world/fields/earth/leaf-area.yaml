@@ -1,0 +1,41 @@
+# One of the parts kept beside the months of the last 120,000 years' climate (core/months.ts PARTS): by year and cell by
+# cell, with the biome it is of (field:earth/biome-late-quaternary). Nothing draws it yet.
+id: field:earth/leaf-area
+type: field
+title: Leaf area of the vegetation the climate would grow, last 120,000 years
+quantity: leaf area index of the year
+unit: m² of leaf to the m² of ground
+description: >-
+  How much leaf a vegetation model (BIOME4) grows over each square metre of ground on the climate of each of the 72
+  times of the last 120,000 years, for the biome it grows there, on the half-degree grid. Under the ice sheets and in
+  the cells of the file's class "Water bodies" it is 0, as the dataset's code writes it, and there a 0 is not a
+  measure of anything. The file's numbers are whole, from 0 to 626, and what they count is our reading. The file's own
+  label is "metre^2 per metre^2", the article's table gives the unit as gC m⁻², and neither fits a number of 626. The
+  vegetation model's code writes its leaf area index as the nearest whole number to a hundred times it, and the
+  dataset's code takes the model's output as it is, so one of the file's numbers is read here as a hundredth: a
+  tropical evergreen forest's middle value of 414 is then a leaf area index of 4.14, and a desert's of 32 is 0.32.
+kind: raster
+frame: frame:earth/present-day
+grid: { kind: lonlat, res_deg: 1 }
+time: { lo: 120 ka, hi: 0 ka }
+data:
+  from: src:beyer-2020-late-quaternary
+  as: months
+  # The label the file gives the variable, which is what the build checks: not what its numbers are (see above).
+  reads:
+    leaf: { variable: lai, unit: metre^2 per metre^2 }
+params:
+  # What one of the file's numbers is, in the unit above.
+  scale: 0.01
+source:
+  ref: src:kaplan-biome4-code
+  loc: "biome4.f, subroutine competition2, where the values of the output variables are assigned"
+  quote: output(2)=nint(lai*100.)
+basis: reconstruction
+# A single value at each cell and time: nobody gave its uncertainty (docs/STRUCTURE.md section 3.2).
+spread: unknown
+uncertainty: >-
+  A vegetation model's answer on a climate model's months, and nothing in the dataset's article tests it. That its
+  numbers are hundredths is read from the vegetation model's code and not said by the dataset. The tiles keep each
+  cell's number as the file has it.
+moves_with: src:paleomap-plate-model

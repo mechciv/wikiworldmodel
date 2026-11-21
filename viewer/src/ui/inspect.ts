@@ -235,6 +235,8 @@ export function coverWords(b: Pick<BiomeHere, 'climate' | 'cover' | 'sheets'>): 
 export interface PlanetStateInfo {
   planet: string;
   phase: string;
+  /** the state the phase is passing into, where its record says the change was gradual, and how far it has gone, 0–1 */
+  into?: { label: string; passed: number };
   ice?: { id: string; label: string; reach: string };
 }
 
@@ -421,7 +423,9 @@ export class InspectPanel {
   /** The planet's state at the time, with links to the records it comes from. */
   private stateSection(s: PlanetStateInfo | undefined): string {
     if (!s) return '';
-    return `<section class="planet-state"><h3>The planet then</h3><p>${this.link(s.planet, s.phase)}${s.ice ? `, with ice to ${esc(s.ice.reach)} during the ${this.link(s.ice.id, s.ice.label)}` : ''}.</p></section>`;
+    // A passage is drawn part of the way to the next state: say so, and that its even pace is the drawing's and no record's.
+    const passing = s.into ? `<p class="note passing">Passing little by little into the next state, ${esc(s.into.label)}: ${Math.round(s.into.passed * 100)}% of the way, drawn as if the change ran evenly.</p>` : '';
+    return `<section class="planet-state"><h3>The planet then</h3><p>${this.link(s.planet, s.phase)}${s.ice ? `, with ice to ${esc(s.ice.reach)} during the ${this.link(s.ice.id, s.ice.label)}` : ''}.</p>${passing}</section>`;
   }
 
   private cites(r: EntityRecord, cs: CitationRecord[], unsourced?: string): string {

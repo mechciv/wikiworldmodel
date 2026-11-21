@@ -1,0 +1,37 @@
+# One of the parts kept beside the months of the last 120,000 years' climate (core/months.ts PARTS): by year, and cell by
+# cell of the dataset's own half-degree grid, since a class cannot be averaged into a node. Nothing draws it yet: a
+# scene's cover is still the Köppen–Geiger class of its months (field:earth/biome).
+id: field:earth/biome-late-quaternary
+type: field
+title: Vegetation the climate would grow, last 120,000 years
+quantity: the biome of the year
+unit: one of the file's 29 classes, by its number
+description: >-
+  What vegetation a vegetation model (BIOME4) grows on the climate of each of the 72 times of the last 120,000 years:
+  one of 28 classes, from tropical evergreen forest to desert, barren ground and land ice, on the half-degree grid. The
+  model reads each time's coldest temperature of the year and its months of temperature, rain and cloudiness. Where a
+  reconstruction of the ice sheets (ICE-6G) has ice, the dataset writes land ice whatever the model grew. It is the
+  vegetation the climate allows, with no people in it: no field, pasture or cleared forest. The file's class 0 is named
+  "Water bodies": the dataset's code writes it wherever the model gave no biome on land not under ice. Nearly all of
+  it is ground the low sea bared: of the 4,507 cells of that class at 22,000 years ago, 4,496 are sea in the dataset's
+  present. So more than half of the bared shelves that no ice covered have no vegetation here: of the 16,236 cells that
+  are land then and sea at present, 8,099 are under ice, 3,641 have a biome and 4,496 are of that class, on the shelves
+  of Siberia, Beringia, Sunda and Sahul among others. The class "Boreal parkland" is in the file's list and in none
+  of its cells.
+kind: categorical
+frame: frame:earth/present-day
+grid: { kind: lonlat, res_deg: 1 }
+time: { lo: 120 ka, hi: 0 ka }
+data:
+  from: src:beyer-2020-late-quaternary
+  as: months
+  reads:
+    biome: { variable: biome, unit: categorical }
+basis: reconstruction
+# A single class at each cell and time: nobody gave its uncertainty (docs/STRUCTURE.md section 3.2).
+spread: unknown
+uncertainty: >-
+  A vegetation model's answer on a climate model's months. The dataset's article finds it agrees with biomes
+  reconstructed from pollen for the mid-Holocene and the Last Glacial Maximum about as well as other models' do. The
+  tiles keep each cell's class as the file has it.
+moves_with: src:paleomap-plate-model
