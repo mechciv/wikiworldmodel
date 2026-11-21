@@ -37,7 +37,7 @@ import { LifeScene } from './city/life.ts';
 import type { PeopleSummary } from './city/lifeworker.ts';
 import { LandscapeAtlas } from './city/landscape.ts';
 import { anthromeOf, classAtStep, nearestStep, PATTERN_LABEL, USE_LABEL, USES, LEVEL_WORDS, type Pattern } from '../../core/landscape.ts';
-import { lifewayText, specText, townText } from '../../core/dwelling.ts';
+import { lifewayText, specText, townText, prevalenceOf, traditionsFor } from '../../core/dwelling.ts';
 import { CityScene } from './city/scene.ts';
 import { autoTilt, EYE_HEIGHT, groundHit, localView, lookThrough, projectLocal, rayOf, sunAt, underSea, type LocalView } from './city/view.ts';
 import { SEA } from './gl/cityShaders.ts';
@@ -114,7 +114,7 @@ export interface WikiWorldModelHandle {
   /** where the settlements of the scene drawn stand on the screen, those in view: the lists' cities by name */
   settlementsAt(): { pattern: string; city?: string; houses: number; x: number; y: number }[];
   /** the living scene as the viewer has it, if one is loaded */
-  scene(): { site: string; plan: PrintCheck; taxa: { id: string; label: string; form: string; own: boolean; tier: string; km?: number; rows: number; drawn: boolean }[]; instances: number; triangles: number; meshes: number; groundMs: number; stage?: string; climate: string; climateField: string; month: number | null; snow: number | null; focus: [number, number]; toRiver: [number, number]; origin: { lat: number; lon: number }; water: { tier: string; rivers: { key: string; from: string }[] } | null; sea: boolean; list: 'land' | 'sea'; eye: { z: number; floor: number } | null; people: { asked: boolean; houses: number; drawn: number; expected: number; settlements: number; pattern?: string; tier?: string; forms: string[]; works: string[]; pieces: number; kept: string[]; animals: number; paths: number; cities: { name: string; people: number; record?: string; from?: string; town?: string }[]; near: { lat: number; lon: number; pattern: string; houses: number; city?: string }[] } | null } | null;
+  scene(): { site: string; plan: PrintCheck; taxa: { id: string; label: string; form: string; own: boolean; tier: string; km?: number; rows: number; drawn: boolean }[]; instances: number; triangles: number; meshes: number; groundMs: number; stage?: string; climate: string; climateField: string; month: number | null; snow: number | null; focus: [number, number]; toRiver: [number, number]; origin: { lat: number; lon: number }; water: { tier: string; rivers: { key: string; from: string }[] } | null; sea: boolean; list: 'land' | 'sea'; eye: { z: number; floor: number } | null; people: { asked: boolean; houses: number; drawn: number; expected: number; settlements: number; pattern?: string; tier?: string; forms: string[]; works: string[]; pieces: number; kept: string[]; animals: number; paths: number; cities: { name: string; people: number; record?: string; from?: string; town?: string }[]; near: { lat: number; lon: number; r: number; pattern: string; houses: number; city?: string }[] } | null } | null;
   /** a browser's fingerprint of the scene of a place and a time, as a witness in the build has it */
   lifePrint(lat: number, lon: number, t: number): Promise<Fingerprint | null>;
   /** how far the atlas reaches, as the build says */
@@ -159,15 +159,15 @@ const RAD = Math.PI / 180;
 const ROOT = new URL('./', location.href).href;
 
 /** A settlement of each way of life, one and many, for the panel of a house. */
-/** The settlements of a scene nearest its middle that have houses, each with where it is on the globe: for a test, or a look. */
-function nearestSettlements(c: LifeScene): { lat: number; lon: number; pattern: string; houses: number; city?: string }[] {
+/** The settlements of a scene nearest its middle that have houses, each with where it is on the globe and how far its houses reach, in metres: for a test, or a look. */
+function nearestSettlements(c: LifeScene): { lat: number; lon: number; r: number; pattern: string; houses: number; city?: string }[] {
   const o = c.spec.site.origin;
   const perDeg = 111194.93;
   return (c.people?.settlements ?? [])
     .filter((s) => s.houses > 0)
     .sort((a, b) => Math.hypot(a.x, a.y) - Math.hypot(b.x, b.y))
     .slice(0, 6)
-    .map((s) => ({ lat: o.lat + s.y / perDeg, lon: o.lon + s.x / (perDeg * Math.cos((o.lat * Math.PI) / 180)), pattern: s.pattern, houses: s.houses, ...(s.city ? { city: s.city } : {}) }));
+    .map((s) => ({ lat: o.lat + s.y / perDeg, lon: o.lon + s.x / (perDeg * Math.cos((o.lat * Math.PI) / 180)), r: s.r, pattern: s.pattern, houses: s.houses, ...(s.city ? { city: s.city } : {}) }));
 }
 
 /** A city of a scene in words: whose its people are, and how it is laid out. */
@@ -1941,10 +1941,15 @@ async function start(root: HTMLElement): Promise<void> {
             ...mine.filter((x) => x.city).sort((a, b) => b.people - a.people).map((x) => `${x.city}, ${cityWords(x)}`),
             ...[...counts].sort((a, b) => b[1] - a[1]).map(([p, c]) => `${c.toLocaleString('en-US')} ${SETTLEMENT_WORDS[p][c === 1 ? 0 : 1]}`),
           ];
+          // A tradition that was the house of a part of the region's people is drawn for a part of its settlements, by
+          // lot; and the generic house beside it is not for want of any record.
+          const part = { few: 'a few', some: 'some', most: 'most' } as const;
+          const said = f.from === 'tradition' ? sp.traditions.find((t) => t.id === f.tradition)?.prevalence : undefined;
+          const beside = f.from === 'generic' && mine.length ? traditionsFor(sp.traditions, mine[0].region, sp.t, f.whose, prevalenceOf(gen.params)) : [];
           const form =
             f.from === 'tradition'
-              ? `Its form follows the world's records of the building tradition ${f.label}, ${f.kin ? `the house of the region's ${lifewayText([f.kin])}, standing in here for its ${lifewayText([f.whose])}, for whom none is recorded` : `which housed ${lifewayText([f.whose])} here`}: ${specText(f.spec)}. What they do not say, the generator's proportions fill in.`
-              : `No building tradition is recorded for the ${lifewayText([f.whose])} of this region at this time, so this is a generic house for the way of life and the climate: ${specText(f.spec)}. It is a placeholder, and says so.`;
+              ? `Its form follows the world's records of the building tradition ${f.label}, ${f.kin ? `the house of the region's ${lifewayText([f.kin])}, standing in here for its ${lifewayText([f.whose])}, for whom none is recorded` : `which housed ${lifewayText([f.whose])} here`}: ${specText(f.spec)}. What they do not say, the generator's proportions fill in.${said ? ` Its records say it was the house of ${part[said]} of them in the region, not of all: which settlements are drawn in it is the generator's lot, not a record.` : ''}`
+              : `${beside.length ? `The building traditions recorded for the ${lifewayText([f.whose])} of this region at this time (${beside.map((x) => x.tradition.label).join('; ')}) housed a part of them only` : `No building tradition is recorded for the ${lifewayText([f.whose])} of this region at this time`}, so this is a generic house for the way of life and the climate: ${specText(f.spec)}. It is a placeholder, and says so.`;
           const text = `${where.length ? `Houses of this form stand in ${where.join('; ')}. ` : ''}${form} At the scene's middle, at ${formatTime(sp.t)}: ${PATTERN_LABEL[life.pattern].toLowerCase()}, ${k ? `${k.label.toLowerCase()} as the anthromes of HYDE have it at their step ${stepName(sp.step)}` : 'as the anthromes have it'}. ${life.why}${life.disagrees ? ` ${life.disagrees}` : ''} The scene draws ${pp.houses.toLocaleString('en-US')} houses for about ${pp.drawn.toLocaleString('en-US')} people; HYDE puts about ${pp.expected.toLocaleString('en-US')} in the land it covers${cities.length ? `, and the lists of cities add ${cities.join(', ')}` : ''}.`;
           const why = `${gen.generator}, version ${gen.version}: nobody recorded this house. How many houses there are follows HYDE's people through the anthromes, and the lists of cities and the world's records of settlements where they name one; what way of life, the anthromes and the region's archaeologists; where each house stands and which way it faces is invented, keyed by the world's 5′ cells.`;
           return inspect.showGenerated(f.label, 'Generated house', text, why);

@@ -117,20 +117,25 @@ for (const [name, t, lat, lon, which] of [
   ['close-mongolia-camp', 1200, 47.2, 102.8, 0],
   ['close-pataliputra-edge', 1, 25.61, 85.14, 0],
   ['close-europe-village', 1300, 52.2, 0.4, 0],
-] as [string, number, number, number, number][]) {
+  // A city's wall, gates and towers, and the water in its streets, from just outside it: the nearest settlement that is one.
+  ['close-uruk-wall', -2999, 31.3222, 45.6361, 'city'],
+  ['close-tenochtitlan-canals', 1519.5, 19.4326, -99.1332, 'city'],
+  ['close-pataliputra-wall', 1, 25.61, 85.14, 'city'],
+] as [string, number, number, number, number | 'city'][]) {
   if (only.size && !only.has(name)) continue;
   await page.goto(`${base}?b=${build}&t=${t}&lat=${lat}&lon=${lon}&d=${1 + 900 / R}&h=40&v=70&cl=0${quality}`);
   await idle(300_000);
   const near = await page.evaluate(() => window.__wikiworldmodel?.scene()?.people?.near ?? []);
-  const s = near[which];
+  const s = which === 'city' ? near.find((x) => x.city) : near[which];
   if (!s) {
     console.log(name, 'has no settlement near');
     continue;
   }
-  // From a little south of it, low, looking north across it; a town from outside its edge.
-  const back = s.pattern === 'city' || s.pattern === 'towns' ? 0.016 : 0.00045;
-  const up = s.pattern === 'city' || s.pattern === 'towns' ? 90 : 9;
-  await shot(name, `?b=${build}&t=${t}&lat=${s.lat - back}&lon=${s.lon}&d=${1 + up / R}&h=0&v=80&cl=0${quality}`, 300_000);
+  // From a little south of it, low, looking north across it; a town from just outside the reach of its houses.
+  const town = s.pattern === 'city' || s.pattern === 'towns';
+  const back = town ? (s.r + 140) / 111195 : 0.00045;
+  const up = town ? 45 : 9;
+  await shot(name, `?b=${build}&t=${t}&lat=${s.lat - back}&lon=${s.lon}&d=${1 + up / R}&h=0&v=${town ? 76 : 80}&cl=0${quality}`, 300_000);
 }
 await browser.close();
 await new Promise<void>((done) => server.httpServer.close(() => done()));

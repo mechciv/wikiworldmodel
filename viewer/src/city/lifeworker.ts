@@ -17,7 +17,7 @@ export interface PeopleSummary {
   animals: number;
   /** how many paths run between its settlements */
   paths: number;
-  settlements: { pattern: string; houses: number; people: number; city?: string; record?: string; from?: Settlement['from']; town?: Settlement['town']; husbandry?: string; tier: string; form: number; x: number; y: number }[];
+  settlements: { pattern: string; houses: number; people: number; city?: string; record?: string; from?: Settlement['from']; town?: Settlement['town']; husbandry?: string; tier: string; form: number; region: number; x: number; y: number; r: number }[];
   houses: number;
   drawn: number;
   expected: number;
@@ -64,7 +64,7 @@ self.onmessage = (e: MessageEvent<ToLifeWorker>) => {
       kept: m.spec.people?.kept?.length ?? 0,
       animals: pl.animals.length,
       paths: pl.paths.length,
-      settlements: pl.settlements.map((x) => ({ pattern: x.pattern, houses: x.houses, people: Math.round(x.people), ...(x.city ? { city: x.city } : {}), ...(x.record ? { record: x.record } : {}), ...(x.from ? { from: x.from } : {}), ...(x.town ? { town: x.town } : {}), ...(x.husbandry ? { husbandry: x.husbandry } : {}), tier: x.tier, form: x.form, x: Math.round(x.x), y: Math.round(x.y) })),
+      settlements: pl.settlements.map((x) => ({ pattern: x.pattern, houses: x.houses, people: Math.round(x.people), ...(x.city ? { city: x.city } : {}), ...(x.record ? { record: x.record } : {}), ...(x.from ? { from: x.from } : {}), ...(x.town ? { town: x.town } : {}), ...(x.husbandry ? { husbandry: x.husbandry } : {}), tier: x.tier, form: x.form, region: x.region, x: Math.round(x.x), y: Math.round(x.y), r: Math.round(x.r) })),
       houses: pl.houses.length,
       drawn: pl.drawn,
       expected: pl.expected,
