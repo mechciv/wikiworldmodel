@@ -1,0 +1,29 @@
+id: src:grosman-2016-nahal-ein-gev-ii
+type: publication
+kind: measurement
+citation: >-
+  Grosman, L., Munro, N.D., Abadi, I., Boaretto, E., Shaham, D., Belfer-Cohen, A. & Bar-Yosef, O. (2016). Nahal Ein Gev
+  II, a Late Natufian Community at the Sea of Galilee. PLOS ONE 11(1), e0146647.
+authors:
+  - "Grosman, L."
+  - "Munro, N.D."
+  - "Abadi, I."
+  - "Boaretto, E."
+  - "Shaham, D."
+  - "Belfer-Cohen, A."
+  - "Bar-Yosef, O."
+published: 2016
+title: Nahal Ein Gev II, a Late Natufian Community at the Sea of Galilee
+container: PLOS ONE
+doi: 10.1371/journal.pone.0146647
+url: https://europepmc.org/article/PMC/PMC4729465
+license: CC-BY-4.0
+reliability: >-
+  The excavation report of a Late Natufian site east of the Sea of Galilee, dated by three AMS dates to 12,550–12,000 cal
+  BP, with the plans of its round stone buildings. Its sizes are read from the curvature of partly eroded walls.
+verified:
+  by: machine:claude-code
+  how: >-
+    Full text read from Europe PMC (PMC4729465), its JATS XML fetched on 20 November 2026 and read as text; the
+    introduction, the dating and the section on architecture read in full, and the quotes checked by script against that
+    text.

@@ -1,0 +1,120 @@
+id: people/traditions/maasai-kraal-house
+kind: tradition/building
+summary: >-
+  The house and kraal of the Maasai and the Kwavi (Wakuafi) cattle herders of the plains between Kilimanjaro and Mount
+  Kenya: a low, flat-roofed hut of boughs bent over and woven together, plastered with cow dung and in the rains covered
+  with hides, one of a ring of huts round an open space where the cattle stood at night, the whole ringed by a thorn
+  fence. The earliest account read here is Krapf's, of 1851, from what he was told; Thomson's, of 1883 and 1884, is the
+  first read from a traveller who stayed in the kraals.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Dung-plastered house and kraal of the Maasai }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 1851 CE
+    source:
+      - ref: src:krapf-1860-travels-in-eastern-africa
+        loc: 'chapter "Close of residence in Eastern Africa", p. 213'
+        quote: I undertook the journey to Ukambani by myself on the 11th of July, 1851.
+      - ref: src:krapf-1860-travels-in-eastern-africa
+        loc: '"Second journey to Ukambani", the section "The Wakuafi and Masai tribes", p. 362'
+        quote: >-
+          Where the Masai and Wakuafi abide for any length of time, they build a large town
+    method: documentary
+    note: >-
+      The year of the earliest account read: Krapf's description of the Wakuafi and Maasai stands in the narrative of his
+      second journey into Ukambani, of 1851, and rests on what he learnt there and at the coast. It bounds the start and does
+      not date it: the house is surely older. No end is given: no source read says when it went out of use.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in krapf-1860-travels-in-eastern-africa.txt (sha256 71e860d94c28a68a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["93", "95"] }
+    source:
+      - ref: src:krapf-1860-travels-in-eastern-africa
+        loc: '"Second journey to Ukambani", the section "The Wakuafi and Masai tribes", p. 358'
+        quote: >-
+          occupy large plains in the interior of Eastern Africa, which extend from about two degrees north of the Equator to
+          about four degrees south of it.
+      - ref: src:krapf-1860-travels-in-eastern-africa
+        loc: '"Second journey to Ukambani", the section "The Wakuafi and Masai tribes", p. 361'
+        quote: They thus possess the entire country which lies between Kilimanjaro and Kegnia
+    method: editorial
+    note: >-
+      Kenya (93) and Tanzania (95): the plains from two degrees north of the Equator to four south, between Kilimanjaro and
+      Mount Kenya ("Kegnia"), which Thomson crossed in 1883 and 1884.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in krapf-1860-travels-in-eastern-africa.txt (sha256 71e860d94c28a68a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [herders]
+    source:
+      ref: src:krapf-1860-travels-in-eastern-africa
+      loc: '"Second journey to Ukambani", the section "The Wakuafi and Masai tribes", p. 358'
+      quote: >-
+        Their manner of life is nomadic, and where they find water and grass, there they encamp often for months together.
+    method: editorial
+    note: >-
+      Herders, who lived on milk, butter and the meat of their cattle, goats and sheep, and despised tillage, as Krapf has
+      it; the Kwavi who settled to farm are not described apart, and farmers are not named.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in krapf-1860-travels-in-eastern-africa.txt (sha256 71e860d94c28a68a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value:
+      plan: rectangular
+      length: 2.7
+      width: 1.5
+      height: 1.1
+      walls: wattle-and-daub
+      roof: flat
+      roof_material: earth
+      floor: ground
+    source:
+      - ref: src:thomson-1887-through-masai-land
+        loc: 'chapter on the Maasai, p. 243'
+        quote: >-
+          It reached a maximum height of three feet and a half, and might be nine feet long by five feet broad. It was
+          constructed of boughs bent over and interwoven together, forming … a flat-roofed building with rounded
+      - ref: src:thomson-1887-through-masai-land
+        loc: 'chapter on the Maasai, p. 243'
+        quote: >-
+          To keep out the wind a composition of cow's dung was liberally plastered over the boughs.
+      - ref: src:krapf-1860-travels-in-eastern-africa
+        loc: '"Second journey to Ukambani", the section "The Wakuafi and Masai tribes", p. 362'
+        quote: in which they construct huts, covered with cow-hides or
+    method: survey
+    note: >-
+      Thomson's hut is 3.5 ft high at most (1.1 m), and "might be" 9 ft long by 5 ft broad (2.7 by 1.5 m): his estimate.
+      Boughs woven together and plastered with cow dung are entered as wattle-and-daub, the nearest word, the daub being
+      dung, not mud; the flat roof is of the same, entered as earth, and in the rains was covered with hides, as Krapf's huts
+      are. The plan is rectangular with rounded corners (the OCR reads "comers", cut from the quote). The doorway was a
+      small porch at right angles to the house.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in thomson-1887-through-masai-land.txt (sha256 ad4b3803605675d5) and krapf-1860-travels-in-eastern-africa.txt (sha256 71e860d94c28a68a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  settlement:
+    prop: settlement_form
+    value: { pattern: compound }
+    source:
+      - ref: src:thomson-1887-through-masai-land
+        loc: 'chapter on the Maasai, p. 243'
+        quote: >-
+          The hut of the expectant Masai lady was one of a circle enclosing a considerable area, in which the cattle were
+          kept during the night.
+      - ref: src:thomson-1887-through-masai-land
+        loc: 'chapter on the Maasai, p. 243'
+        quote: >-
+          Outside the circle of huts there extends a strong fence of thorns as a protection from wild beasts, and in case of
+          an attack.
+      - ref: src:krapf-1860-travels-in-eastern-africa
+        loc: '"Second journey to Ukambani", the section "The Wakuafi and Masai tribes", p. 362'
+        quote: and surrounded by thorn hedges and ditches for protection against an enemy's attack.
+    method: survey
+    note: >-
+      A kraal: a ring of huts round the cattle's night pen, inside a thorn fence. Krapf has larger and smaller settlements,
+      with names for each; neither source counts the huts of one or the people of a hut.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in thomson-1887-through-masai-land.txt (sha256 ad4b3803605675d5) and krapf-1860-travels-in-eastern-africa.txt (sha256 71e860d94c28a68a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

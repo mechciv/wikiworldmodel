@@ -1,0 +1,59 @@
+id: people/husbandry/linear-pottery-farm-animals
+kind: tradition/husbandry
+summary: >-
+  The cattle, sheep and goats of the Linear Pottery (LBK) farmers, who spread across Central Europe from the Carpathian Basin and eastern Austria from about 5500 BCE, pasturing their cattle in the forests.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: "Farm animals of the Linear Pottery farmers" }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: { lo: 5545 BCE, hi: 5360 BCE }
+    source:
+      - ref: src:gillis-2025-lbk-cattle
+        loc: "Main"
+        quote: "the forested steppe of eastern Austria (~5545–5360 cal bce"
+      - ref: src:brusgaard-2026-swifterbant-cattle
+        loc: "Abstract"
+        quote: "Linear Pottery culture (c. 5500 − 4900 BCE)"
+    method: expert-estimate
+    note: >-
+      The first LBK settlements, in the Carpathian Basin and eastern Austria. The culture ended about 4900 BCE, but its animals were kept on, so there is no end claim.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in gillis-2025-lbk-cattle.txt (sha256 0a8ea84c958e1bb3) and brusgaard-2026-swifterbant-cattle.txt (sha256 e261e117f81e9871), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["43"] }
+    source:
+      ref: src:gillis-2025-lbk-cattle
+      loc: "Abstract"
+      quote: "During the sixth millennium bce, the first farmers of Central Europe rapidly expanded across a varied mosaic of forested environments."
+    method: editorial
+    note: >-
+      Region 43 (Central Europe). The LBK reached into eastern France and Ukraine too, which are left out.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in gillis-2025-lbk-cattle.txt (sha256 0a8ea84c958e1bb3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      ref: src:gillis-2025-lbk-cattle
+      loc: "Abstract"
+      quote: "During the sixth millennium bce, the first farmers of Central Europe rapidly expanded across a varied mosaic of forested environments."
+    method: editorial
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in gillis-2025-lbk-cattle.txt (sha256 0a8ea84c958e1bb3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  livestock:
+    prop: livestock
+    value: [life/taxa/bos-taurus, life/taxa/ovis-aries, life/taxa/capra-hircus]
+    source:
+      ref: src:gillis-2025-lbk-cattle
+      loc: "Results and discussion, \"Stable carbon isotopes\""
+      quote: "a previous large-scale analysis has demonstrated that sheep/goat and cattle were subject to different dietary regimes"
+    method: excavation
+    note: >-
+      Cattle and sheep or goats, as the bones are reported; the paper does not tell sheep from goats, and says nothing of pigs, which are left out.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in gillis-2025-lbk-cattle.txt (sha256 0a8ea84c958e1bb3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

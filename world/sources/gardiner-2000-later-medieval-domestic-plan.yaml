@@ -1,0 +1,26 @@
+id: src:gardiner-2000-later-medieval-domestic-plan
+type: publication
+kind: review
+citation: >-
+  Gardiner, M. (2000). Vernacular buildings and the development of the later medieval domestic plan in England. Medieval
+  Archaeology 44, 159–179.
+authors:
+  - "Gardiner, M."
+published: 2000
+title: Vernacular buildings and the development of the later medieval domestic plan in England
+container: Medieval Archaeology
+doi: 10.1179/med.2000.44.1.159
+url: https://archaeologydataservice.ac.uk/archiveDS/archiveDownload?t=arch-769-1/dissemination/pdf/vol44/44_159_179.pdf
+via: >-
+  The Society for Medieval Archaeology's volumes 1–50, kept open by the Archaeology Data Service (collection arch-769-1).
+reliability: >-
+  An archaeologist's study of when the plan of the later medieval English house (services, cross-entry, hall and
+  chamber) came into use, from excavated and standing buildings of the 12th and 13th centuries. It is cited here for
+  what that plan was and for when it was given up, which it states in passing and leaves to other studies.
+verified:
+  by: machine:claude-code
+  how: >-
+    The scan of the article served by the Archaeology Data Service fetched on 20 November 2026; its introduction and the
+    section on the later medieval domestic plan (pp. 159–167) read. The pages were read in the PDF's own text layer and,
+    from their images, by macOS text recognition; both readings are kept in one text file and the quotes were checked by
+    script against it. Page numbers are the printed ones. DOI from Crossref.

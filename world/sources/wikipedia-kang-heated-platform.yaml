@@ -1,0 +1,23 @@
+id: src:wikipedia-kang-heated-platform
+type: database-record
+kind: review
+citation: >-
+  "Kang (heated platform)." Wikipedia, the free encyclopedia (English edition), revision 1376363030.
+snapshot: 2026-11-20
+title: Kang (heated platform)
+container: Wikipedia
+url: https://en.wikipedia.org/w/index.php?title=Kang_(heated_platform)&oldid=1376363030
+license: CC-BY-SA-4.0
+license_note: Short quotes, with credit.
+reliability: >-
+  A general encyclopedia article, cited for one sentence that puts the heated platform in the traditional houses of
+  Manchuria, because no study of those houses could be read here. The sentence cites nothing. The article's list of
+  references has Guo Qinghua's paper in Historical Perspectives on East Asian Science, Technology and Medicine (2001),
+  pp. 505–514, and Bean, Olesen and Kim (2010), "History of Radiant Heating and Cooling Systems", ASHRAE Journal;
+  neither was read. Guo, Q. (2002), "The Chinese Domestic Architectural Heating System [Kang]: Origins, Applications
+  and Techniques", Architectural History, should replace it.
+verified:
+  by: machine:claude-code
+  how: >-
+    The article's HTML, rendered from revision 1376363030, fetched from Wikipedia on 20 November 2026 and read as text,
+    with the reference marks taken out; the quote checked by script against that text.

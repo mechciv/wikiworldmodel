@@ -1,0 +1,31 @@
+id: src:coats-1823-township-of-lony
+type: publication
+kind: measurement
+citation: >-
+  Coats, T. (1823). Account of the present state of the township of Lony; in illustration of the institutions,
+  resources, &c. of the Marratta cultivators. Transactions of the Literary Society of Bombay, vol. III, article VIII.
+  London, 1823; reprinted at the Bombay Education Society's Press, 1877.
+authors:
+  - "Coats, T."
+published: 1823
+written: { lo: 1819 CE, hi: 1820 CE }
+title: Account of the present state of the township of Lony
+container: Transactions of the Literary Society of Bombay, vol. III
+url: https://archive.org/details/s6id13658340
+via: The Internet Archive's scan of the reprint of 1877 (s6id13658340), read in its OCR text.
+license: public domain
+reliability: >-
+  A description of one village of Maratha cultivators, its wall, houses, people and husbandry, with the author's own
+  count of its houses and inhabitants in July 1819. It is one township, which the Society's preface says lay within
+  thirteen miles of Poona, "which was then the capital of the Peishwa's Government"; some of its houses were in
+  ruins, and the outcastes' houses had been destroyed in what the author calls the late campaign. Its house sizes
+  are in cubits, whose length it does not state.
+verified:
+  by: machine:claude-code
+  how: >-
+    Read on 20 November 2026 in the OCR text of the scan: the title and the date it was read to the Society, the
+    description of the town and its houses (pp. 190 to 193 of the reprint, which stars the pages of 1823 in its
+    text), the enumeration of July 1819 and the sentence on persons to a house (p. 194), and the preface for
+    where Lony lies. The page numbers are those of the reprint's running heads nearest each passage. The quotes were
+    checked by script against the OCR, keeping to stretches it reads cleanly: it writes the date of reading "29 th
+    February" and the month of the count "July ," with stray spaces, which the quotes keep.

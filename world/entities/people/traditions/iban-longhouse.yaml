@@ -1,0 +1,148 @@
+id: people/traditions/iban-longhouse
+kind: tradition/building
+summary: >-
+  The longhouse of the Iban, the Sea Dyaks of Sarawak: the whole village one long building raised on hardwood posts, its
+  outer walls of planks and its roof thatched with palm leaves or shingles, divided along its length into an open gallery
+  in front and a row of rooms behind, one for each family, the longest measured some 534 to 771 feet; its people farmed
+  hill rice on land cleared from old forest, farmed once and left seven years, and moved the house nearer when old forest
+  ran short. It starts here with the Iban's move from the Kapuas into Sarawak in the 1550s, which bounds and does not date
+  it, and has no end: longhouses are still lived in.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Iban longhouse }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 1550 CE
+    source:
+      - ref: src:wikipedia-iban-people
+        loc: opening section
+        quote: >-
+          The Iban trace their origins to the Kapuas basin in Kalimantan Barat, specifically the Ketungau tributary which
+          is considered their ancestral land prior to their migration into the territory of modern-day Sarawak from the
+          middle of the 16th century.
+      - ref: src:wikipedia-iban-people
+        loc: section "History", "Pre-19th century"
+        quote: >-
+          The historical timeline of the Iban migration has been further supported by the work of Benedict Sandin (1968),
+          who suggested that the Iban began their migration from the Kapuas Hulu region in the 1550s.
+    method: tradition
+    note: >-
+      The start of the Iban's move into Sarawak, as Sandin reckoned it from their genealogies, taken as a time by which they
+      lived in longhouses; they lived on the Kapuas before, in the same region, and the house is older than this, but no
+      source read here dates it there. No end is given: the Iban still live in longhouses.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-iban-people.txt (sha256 bfb698008c5770dd), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["132"] }
+    source:
+      - ref: src:wikipedia-iban-people
+        loc: opening section
+        quote: >-
+          The Iban trace their origins to the Kapuas basin in Kalimantan Barat, specifically the Ketungau tributary which
+          is considered their ancestral land prior to their migration into the territory of modern-day Sarawak from the
+          middle of the 16th century.
+    method: editorial
+    note: >-
+      Region 132 (Borneo), which holds the Kapuas basin and Sarawak. The longhouses of the other peoples of Borneo, which
+      the same compilation describes, are not claimed here; the region is named for the Iban.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-iban-people.txt (sha256 bfb698008c5770dd), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [shifting-cultivators]
+    source:
+      - ref: src:roth-1896-natives-of-sarawak
+        loc: "vol. I, p. 400 (Brooke Low)"
+        quote: >-
+          After having felled the old jungle and farmed on it once, they leave it for seven years to grow up again
+      - ref: src:roth-1896-natives-of-sarawak
+        loc: "vol. I, p. 400 (Brooke Low)"
+        quote: they shift their residence nearer to it.
+      - ref: src:wikipedia-iban-people
+        loc: opening section
+        quote: The Iban's traditional social units are based around longhouses, which serve as communal living spaces for extended families.
+      - ref: src:wikipedia-iban-people
+        loc: opening section
+        quote: the Iban have long practiced shifting cultivation, particularly of rice
+    method: documentary
+    note: >-
+      Shifting cultivators of hill rice: they farmed old forest once and left it seven years, and when the old forest near
+      the village ran short they moved the village nearer to it.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in roth-1896-natives-of-sarawak.txt (sha256 895b9fe0da50fe7f) and wikipedia-iban-people.txt (sha256 bfb698008c5770dd), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { plan: long, length: { lo: 163, hi: 181 }, walls: timber, roof_material: thatch, floor: stilts }
+    source:
+      - ref: src:roth-1896-natives-of-sarawak
+        loc: "vol. II, p. 9 (Brooke Low)"
+        quote: >-
+          A Sea Dyak Village is a terrace upon posts varying in length according to the number of houses of which it is
+          composed
+      - ref: src:roth-1896-natives-of-sarawak
+        loc: "vol. II, p. 9 (Brooke Low)"
+        quote: The roof is thatched throughout with the same material — shingles or palm leaves
+      - ref: src:roth-1896-natives-of-sarawak
+        loc: "vol. II, p. 9 (Brooke Low)"
+        quote: The outer walls are of plank, the inner of bark.
+      - ref: src:roth-1896-natives-of-sarawak
+        loc: "vol. II, p. 9 (Brooke Low)"
+        quote: >-
+          The latter occupies the rear of the entire building and is sub-divided into apartments, one for each family.
+      - ref: src:roth-1896-natives-of-sarawak
+        loc: "vol. II, p. 16 (James Brooke)"
+        quote: >-
+          594 feet in length, and the front room, or street, is the entire length of the building, and 21 feet broad.
+      - ref: src:roth-1896-natives-of-sarawak
+        loc: "vol. II, p. 16 (James Brooke)"
+        quote: This edifice is raised twelve feet from the ground
+      - ref: src:roth-1896-natives-of-sarawak
+        loc: "vol. II, p. 17 (St. John)"
+        quote: Sir Spencer St. John measured a Sibuyau house on the Lundu as 534 feet long containing 500 people
+      - ref: src:roth-1896-natives-of-sarawak
+        loc: "vol. II, p. 17 (Hornaday)"
+        quote: Most of the Sibuyau village-houses are raised about eight feet above the ground
+    method: documentary
+    note: >-
+      The village was one long house on posts, its length set by how many families it held, one room each behind an open
+      gallery along the whole front; outer walls of planks, inner of bark, and a roof of nipa or pandanus leaves or of
+      shingles, written as thatch. The length is the two Sibuyau houses on the Lundu that James Brooke and Spencer St. John
+      measured, 594 and 534 feet, 181 and 163 m; the compilation calls a third, of 771 feet, the longest on record. These
+      are the houses travellers measured for their size, so most were shorter, by how much no source read says. Most
+      Sibuyau houses stood about eight feet off the ground, some twelve and some four or five.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in roth-1896-natives-of-sarawak.txt (sha256 895b9fe0da50fe7f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  settlement:
+    prop: settlement_form
+    value: { houses: 1 }
+    source:
+      - ref: src:roth-1896-natives-of-sarawak
+        loc: "vol. II, p. 9 (Brooke Low)"
+        quote: >-
+          A Sea Dyak Village is a terrace upon posts varying in length according to the number of houses of which it is
+          composed
+      - ref: src:roth-1896-natives-of-sarawak
+        loc: "vol. II, p. 9 (Brooke Low)"
+        quote: The village is surrounded at its base by a wooden palisade
+    method: documentary
+    note: >-
+      One building to a village: Low's "houses" are the families' apartments joined into one terrace on posts. It was
+      fenced at its foot by a palisade. How the villages lay to one another is not given, and the pattern is left to the
+      generator.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in roth-1896-natives-of-sarawak.txt (sha256 895b9fe0da50fe7f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  fields:
+    prop: field_system
+    value: { kind: swidden }
+    source:
+      ref: src:roth-1896-natives-of-sarawak
+      loc: "vol. I, p. 400 (Brooke Low)"
+      quote: >-
+        After having felled the old jungle and farmed on it once, they leave it for seven years to grow up again
+    method: documentary
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in roth-1896-natives-of-sarawak.txt (sha256 895b9fe0da50fe7f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

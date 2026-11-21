@@ -1,0 +1,32 @@
+id: src:buchanan-1808-dinajpur
+type: publication
+kind: eyewitness
+citation: >-
+  Buchanan, F. Account of the district of Dinajpur (1808), as printed in Martin, R.M. (ed.), The History, Antiquities,
+  Topography, and Statistics of Eastern India, vol. II: Bhagulpoor, Goruckpoor, and Dinajepoor, Book III. London:
+  W.H. Allen and Co., 1838.
+authors:
+  - "Buchanan, F."
+published: 1838
+written: 1808 CE
+title: "The History, Antiquities, Topography, and Statistics of Eastern India, vol. II, Book III: District of Dinajpoor"
+url: https://archive.org/details/b33488320_0002
+via: The Internet Archive's scan of the Wellcome Library's copy (b33488320_0002), read in its OCR text.
+license: public domain
+reliability: >-
+  The report of a survey of the district made under the orders of the government, which the author went over division
+  by division: his own observation of its huts and of the town of Dinajpur, in what he calls "the present year 1808".
+  His population is a reckoning from the number of ploughs and not a count, as he says. Martin's title page names only
+  himself, and his notes name Dr. Buchanan as the author; the same account was printed under Buchanan's name at
+  Calcutta (A Geographical, Statistical, and Historical Description of the District, or Zila, of Dinajpur, Baptist
+  Mission Press), with the estimates of household expenses, giving the sizes of huts in cubits, that Martin leaves
+  out. The account does not say how long its cubit is, so those sizes are not used.
+verified:
+  by: machine:claude-code
+  how: >-
+    Read on 20 November 2026 in the OCR text of the scan: the town of Dinajpur (p. 623), the chapter on population and
+    the manner of living (pp. 686 and 696 to 697) and the chapter on the arts (pp. 922 to 923). The page numbers are
+    those of the running heads nearest each passage. The Calcutta edition was read beside it in the Internet Archive's
+    scan india.history.resource.36451, whose OCR is poorer; the passage on the hut and its roof differs there only in
+    spelling and punctuation. The quotes were checked by script against the OCR of Martin's edition, keeping to
+    stretches it reads cleanly.

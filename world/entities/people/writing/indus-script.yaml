@@ -91,6 +91,8 @@ relations:
       ref: src:meadow-kenoyer-2001-harappa
       loc: section "Kot Diji Phase Developments"
       quote: the first appearance of the Early Indus script that has been found on pottery, a sealing of a square seal with possible Early Indus script
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in meadow-kenoyer-2001-harappa.txt (sha256 1f1cf53cc045e1a1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   earlier-signs:
     rel: evidenced-by
     to: people/writing/harappa-ravi-sherd
@@ -98,3 +100,5 @@ relations:
       ref: src:meadow-kenoyer-2001-harappa
       loc: section "Ravi Phase and Kot Diji Phase Occupations"
       quote: on into the Harappa Phase, where some of them can be identified as elements of the Indus writing system
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in meadow-kenoyer-2001-harappa.txt (sha256 1f1cf53cc045e1a1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

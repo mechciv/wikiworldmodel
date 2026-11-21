@@ -1,0 +1,119 @@
+id: people/traditions/inuit-snow-house
+kind: tradition/building
+summary: >-
+  The snow house (igdlu) of the Inuit of the central and eastern Arctic: a dome of blocks of snow cut with a snow knife and
+  laid in a rising spiral, its joints packed with snow, reached through a passage of smaller vaults and lined inside with
+  skins, put up for the winter on the sea ice or the shore, a hut of two families with a lamp each, a few to a score of
+  them to a village. Parry found a village of them at Winter Island in 1822; Boas in 1888 has it built every winter by
+  all the tribes from Smith Sound to Labrador and from Davis Strait to Victoria Land.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Inuit snow house }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 1822 CE
+    source:
+      - ref: src:parry-1824-second-voyage
+        loc: 'ch. VII, Winter Island, February 1822, p. 160'
+        quote: >-
+          at finding an establishment of five huts, with canoes, sledges, dogs, and above sixty men, women
+      - ref: src:parry-1824-second-voyage
+        loc: 'ch. VII, Winter Island, February 1822, p. 160'
+        quote: >-
+          to enter these extraordinary houses, in the construction of which we observed that not a single material was used
+          but snow and ice.
+    method: documentary
+    note: >-
+      1822, the earliest account read: Parry's ships, wintering at Winter Island in Foxe Basin, found a village of snow
+      houses within sight of them on 1 February 1822. It bounds the start and does not date it; the snow house is surely
+      older, and no source read here says how much. No end is given: Boas in 1888 has it built every winter, and no source
+      read says when it went out of use as a winter dwelling.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in parry-1824-second-voyage.txt (sha256 b70638d41d56c734), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["3", "4", "12", "13"] }
+    source:
+      ref: src:boas-1888-central-eskimo
+      loc: 'section "Habitations and dress: The house", p. 539'
+      quote: >-
+        All the tribes from Smith Sound to Labrador and from Davis Strait to Victoria Land are in the habit of building
+        snow houses in winter.
+    method: editorial
+    note: >-
+      Nunavut (4), which holds Baffin Island, Davis Strait's western shore, Hudson Bay's west coast and Iglulik; Greenland
+      (13), where the Smith Sound tribe lives, on its north-west coast; Newfoundland and Labrador (12), for Labrador; and
+      the Northwest Territories (3), where the western half of Victoria Island lies. Labrador in 1888 may also have meant
+      the north of Quebec (10), which is left out. The house is not claimed for the rest of Greenland, nor for Alaska or the
+      Mackenzie coast, which the source does not name.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in boas-1888-central-eskimo.txt (sha256 67966135935241e9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [foragers]
+    source:
+      ref: src:boas-1888-central-eskimo
+      loc: 'section on daily life in winter'
+      quote: >-
+        In winter the staple food of the Eskimo is boiled seal and walrus meat, though in some parts of the western
+        districts it is musk ox and venison
+    method: editorial
+    note: >-
+      Foragers: hunters of the seal and the walrus in winter, of the deer and the salmon in summer, who left the snow
+      houses for tents when the snow melted.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in boas-1888-central-eskimo.txt (sha256 67966135935241e9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { plan: round, diameter: { lo: 3.7, hi: 4.6 }, height: { lo: 3, hi: 3.7 }, walls: snow, roof: dome, roof_material: snow }
+    source:
+      ref: src:boas-1888-central-eskimo
+      loc: 'section "Habitations and dress: The house", pp. 539–540'
+      quote: >-
+        Thus the whole building becomes a tight vault, without any holes through which the warm air inside may escape. Such
+        a snow house, about five feet high and seven feet in diameter, is used as a camp in winter journeys. It takes about
+        two hours for two skilled men to build and finish it. For winter quarters the vaults are built from ten to twelve
+        feet high and twelve to fifteen feet in diameter.
+    method: survey
+    note: >-
+      The house of winter quarters: 12 to 15 feet across (3.7–4.6 m) and 10 to 12 feet high (3.0–3.7 m), a vault of snow
+      blocks that is wall and roof at once. The smaller snow house of a winter journey, 5 feet high and 7 across, is not this
+      one. The entrance vaults, the storerooms and the bench of snow at the back on which the family sleeps are the
+      source's and not drawn.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in boas-1888-central-eskimo.txt (sha256 67966135935241e9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  settlement:
+    prop: settlement_form
+    value: { pattern: camp, houses: { lo: 5, hi: 21 } }
+    source:
+      - ref: src:parry-1824-second-voyage
+        loc: 'ch. VII, Winter Island, February 1822, p. 160'
+        quote: >-
+          at finding an establishment of five huts, with canoes, sledges, dogs, and above sixty men, women
+      - ref: src:parry-1824-second-voyage
+        loc: 'ch. XIV, April 1823, p. 423'
+        quote: consisting of five snow-huts built upon the ice ; the people, who were twenty-eight in number
+      - ref: src:boas-1888-central-eskimo
+        loc: 'section "Habitations and dress: The house", pp. 543–546'
+        quote: >-
+          These huts are always occupied by two families, each woman having her own lamp and sitting on the ledge in front
+          of it
+      - ref: src:boas-1888-central-eskimo
+        loc: 'section on the Netchillirmiut, citing Ross p. 389'
+        quote: >-
+          as 21 snow houses were found which had been inhabited by them during the winter (p. 389). The number of
+          inhabitants of this village was about one hundred and seventy
+      - ref: src:boas-1888-central-eskimo
+        loc: 'section on the Netchillirmiut, citing M''Clintock p. 257'
+        quote: On the 4th of May, twenty deserted snow huts were found on the southwest point of Matty Island (p. 257).
+    method: survey
+    note: >-
+      Winter villages put up on the snow or the sea ice and left in spring: Parry's two of 1822 and 1823 had five snow
+      houses each, with above sixty and with twenty-eight people; the two Boas counts from Ross and M'Clintock had 21 and
+      20, the first with about 170 people. A house held two families, Boas says. The people in one house are not given as a
+      number, and the villages' counts are not divided here into one: the generator's choice stands in.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in parry-1824-second-voyage.txt (sha256 b70638d41d56c734) and boas-1888-central-eskimo.txt (sha256 67966135935241e9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

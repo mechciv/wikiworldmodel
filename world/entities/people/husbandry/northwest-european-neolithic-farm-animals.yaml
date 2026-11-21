@@ -1,0 +1,59 @@
+id: people/husbandry/northwest-european-neolithic-farm-animals
+kind: tradition/husbandry
+summary: >-
+  The cattle, sheep and pigs of the first farmers of Britain, Ireland and southern Scandinavia, from about 4000 BCE.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: "Farm animals of Neolithic Britain and Scandinavia" }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 4000 BCE
+    source:
+      ref: src:brusgaard-2026-swifterbant-cattle
+      loc: "Introduction"
+      quote: "around 4000 BCE in Britain and southern Scandinavia"
+    method: expert-estimate
+    note: >-
+      The transition to farming the paper gives for Britain and southern Scandinavia. The animals are still kept, so there is no end claim.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in brusgaard-2026-swifterbant-cattle.txt (sha256 e261e117f81e9871), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["38", "39"] }
+    source:
+      ref: src:brusgaard-2026-swifterbant-cattle
+      loc: "Introduction"
+      quote: "around 4000 BCE in Britain and southern Scandinavia"
+    method: editorial
+    note: >-
+      Region 38 (United Kingdom and Ireland) and region 39 (Scandinavia). Ireland is in the region but not named by the source.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in brusgaard-2026-swifterbant-cattle.txt (sha256 e261e117f81e9871), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      ref: src:brusgaard-2026-swifterbant-cattle
+      loc: "Introduction"
+      quote: "Farming emerged in this region towards the end of the 5th millennium BCE"
+    method: editorial
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in brusgaard-2026-swifterbant-cattle.txt (sha256 e261e117f81e9871), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  livestock:
+    prop: livestock
+    value: [life/taxa/bos-taurus, life/taxa/ovis-aries, life/taxa/sus-domesticus]
+    source:
+      - ref: src:brusgaard-2026-swifterbant-cattle
+        loc: "Introduction"
+        quote: "isotope analysis of cattle, suids, and sheep from the Swifterbant culture sites"
+      - ref: src:erven-2025-neolithic-pigs
+        loc: "Results and Discussion"
+        quote: "Finally, one sample was obtained from the Late Neolithic henge of Durrington Walls"
+    method: excavation
+    note: >-
+      The animals of the earliest farmers of the Netherlands, next door, and a Neolithic pig of Britain. No source read lists Britain's or Scandinavia's first farm animals directly: a reviewer should find one.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in brusgaard-2026-swifterbant-cattle.txt (sha256 e261e117f81e9871) and erven-2025-neolithic-pigs.txt (sha256 b27ee3d713d73b02), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

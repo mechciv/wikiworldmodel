@@ -1,0 +1,178 @@
+id: people/traditions/loess-plateau-yaodong
+kind: tradition/building
+summary: >-
+  The yaodong, the cave dwelling of the farmers of the Loess Plateau: rooms with a rectangular floor and an arched top
+  cut straight into the loess, the earth itself their walls and roof, dug into a cliff with a yard before them or, on
+  the flat tablelands, into the four sides of a square pit six or seven metres deep that serves as the court. Caves
+  were lived in on the loess from the late Neolithic; this record is the dwelling of historical times, from the Han,
+  when the sources have it holding its own while houses elsewhere came to be built of masonry and timber, to the
+  present. Some forty million people were said to live in such caves in the late twentieth century. No end is given.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Cave dwelling of the Loess Plateau (yaodong) }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: { lo: 206 BCE, hi: 220 CE }
+    source:
+      - ref: src:wikipedia-yaodong
+        loc: section "Origins"
+        quote: >-
+          Chinese scholars generally believe that this type of habitat was developed mainly from the Han dynasty (206
+          BC to 220 AD) on
+      - ref: src:zhang-2021-silo-caves
+        loc: 'Results, section "Historical evolution"'
+        quote: >-
+          During the Qin and Han dynasties (2000 years ago), the masonry-timber structure gradually replaced the
+          earth-timber structure and emerged as the main house form in China at that time. However, due to the
+          traditional culture and economic limitation of the economy, cave dwellings remained an important dwelling
+          form for residents in the loess area
+    method: expert-estimate
+    note: >-
+      The Han, as the encyclopedia dates it, from which the cave dwelling of historical times is said to have been
+      developed; the range is the whole dynasty. It is a late bound and not an origin. The second source has caves cut
+      in the loess from about 5000 years ago, in the late Yangshao, more of them under the Longshan and in the Bronze
+      Age, and the first has underground dwellings of the second millennium BCE: those older caves are not this record,
+      as nothing read gives their size, and a record of them is still to write. No end is given: the caves are lived in
+      today, though the second source has people leaving them since the 1980s.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-yaodong.txt (sha256 a3cd3b88842d8e0a) and zhang-2021-silo-caves.txt (sha256 db56dca673041d41), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["119"] }
+    source:
+      - ref: src:wikipedia-yaodong
+        loc: section "Geographic distribution"
+        quote: >-
+          The yaodong homes are common on the Loess Plateau of China in the North, and are found mainly in five
+          provinces: Gansu, Shaanxi, Shanxi, Henan, and the Hui Autonomous Region of Ningxia.
+      - ref: src:wikipedia-yaodong
+        loc: section "Geographic distribution"
+        quote: >-
+          In the Qingyang, Gansu region, the ratio of cave dwellers to non-cave dwellers is the highest found anywhere
+          in China.
+      - ref: src:zhou-2002-yaodong-thermal-environment
+        loc: "section 1, Introduction, p. 81"
+        quote: Taking Zaoyuan village (in Yan’an city, SHAANXI Province) as a model area
+      - ref: src:zhang-2021-silo-caves
+        loc: Abstract
+        quote: >-
+          The research shows that silo-cave villages are mainly distributed in economically underdeveloped areas, such
+          as West Henan (Yuxi), South Shanxi (Jinnan), Central Shaanxi (Guanzhong), and East Gansu (Longdong).
+    method: editorial
+    note: >-
+      Region 119 (North Central China), which holds Shaanxi, Gansu and Ningxia, by the coordinates of Yan'an, Qingyang
+      and their chief cities against the region outlines. Shanxi and western Henan, where the sources have the caves as
+      well and where the caves whose depth is given here were measured, lie in region 120 (Northern China). That region
+      is left out on purpose: most of it is the North China plain, and a region named is drawn over all its land, so
+      that naming it would put the farmers of the plain in caves. The caves of Shanxi and western Henan want a finer
+      extent than these regions give. The dwelling is not claimed for all of region 119 either: courtyard houses were
+      built there too (people/traditions/north-china-courtyard-house).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-yaodong.txt (sha256 a3cd3b88842d8e0a), zhou-2002-yaodong-thermal-environment.txt (sha256 614bc63a17fcd444) and zhang-2021-silo-caves.txt (sha256 db56dca673041d41), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  prevalence:
+    prop: prevalence
+    value: some
+    source:
+      - ref: src:wikipedia-yaodong
+        loc: section "Geographic distribution"
+        quote: The yaodong homes are common on the Loess Plateau of China in the North
+      - ref: src:wikipedia-yaodong
+        loc: section "Geographic distribution"
+        quote: >-
+          In the Qingyang, Gansu region, the ratio of cave dwellers to non-cave dwellers is the highest found anywhere
+          in China.
+    method: editorial
+    note: >-
+      A part of the farmers of region 119, beside the courtyard houses built there too
+      (people/traditions/north-china-courtyard-house): common on the loess, and commonest of all in one district of
+      it. Nothing read says what part of the region's people lived in caves at any time before the present.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-yaodong.txt (sha256 a3cd3b88842d8e0a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      - ref: src:wikipedia-yaodong
+        loc: section "Types", "Sunken Yaodong"
+        quote: >-
+          In the Loess Plateau, without hillsides and ravines available, peasants skillfully use loess's features (wall
+          stability) to dig a square pit on the spot, and then dig the cave horizontally on the four walls to form the
+          underground courtyard.
+      - ref: src:zhang-2021-silo-caves
+        loc: 'Results, section "Spatial distribution of the Silo-cave Villages"'
+        quote: Meanwhile, these areas are all economically underdeveloped and classified as the traditional agricultural regions.
+      - ref: src:gao-2021-sunken-cave-dwellings
+        loc: "Abstract, p. 241"
+        quote: >-
+          With more and more farmers flowing into cities from rural area of Sanmenxia, Henan Province because of
+          economic development and rapid pace of urbanisation in China, the sunken cave dwellings in that area are
+          being either abandoned
+    method: editorial
+    note: >-
+      Farmers, the peasants of the villages on the loess. Towns had caves too: the encyclopedia gives the city of
+      Yan'an as its example of the cliffside kind. They are not drawn: nothing read says how far the towns of the
+      region were built so, and the courtyard house is written for their people.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-yaodong.txt (sha256 a3cd3b88842d8e0a), zhang-2021-silo-caves.txt (sha256 db56dca673041d41) and gao-2021-sunken-cave-dwellings.txt (sha256 fa12377c9efc94ec), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { plan: rectangular, length: { lo: 5, hi: 12 }, rooms: { lo: 1, hi: 3 }, walls: earth-cut, roof: vault, roof_material: earth }
+    source:
+      - ref: src:wikipedia-yaodong
+        loc: opening section
+        quote: They are generally carved out of a hillside or excavated horizontally from a central "sunken courtyard".
+      - ref: src:wikipedia-yaodong
+        loc: section "Types", "Cliffside Yaodong"
+        quote: People dig caves in the cliff on the edge of the loess slopes with the floor rectangular and the top arched.
+      - ref: src:wikipedia-yaodong
+        loc: section "Types", "Cliffside Yaodong"
+        quote: >-
+          According to the number of cave openings, the yaodongs can be further classified into the three-hole type,
+          two-hole type, and single hole type.
+      - ref: src:gao-2021-sunken-cave-dwellings
+        loc: 'section 4.2.1, "Orientation", p. 245'
+        quote: For living, the depth of caves is from 5m to 12m.
+      - ref: src:zhou-2002-yaodong-thermal-environment
+        loc: 'section 3.2, "Outline of Investigated Dwelling", p. 82'
+        quote: The roof is covered with soil and there are weeds growing on it.
+      - ref: src:zhang-2021-silo-caves
+        loc: Abstract
+        quote: >-
+          Silo-cave is a unique human habitation form on the Loess Plateau in northern China, which consists of an
+          excavated 6–7 m deep pit as the courtyard and cave dwellings in the surrounding four walls.
+      - ref: src:gao-2021-sunken-cave-dwellings
+        loc: "section 1, Introduction, p. 241"
+        quote: >-
+          Di Keng Yuan, an underground rectangular courtyard is usually made up of more than 8 caves for a family,
+          large or small, as well as livestock the family possesses to inhabit.
+    method: survey
+    note: >-
+      A cave with a rectangular floor and an arched top, cut into the loess, which is its walls and its roof: the
+      vocabulary's earth-cut walls and a vault of earth. The length is how deep the caves lived in ran into the ground,
+      5 to 12 m, in the 104 caves the fourth source measured in two villages of Sanmenxia in western Henan; they are of
+      the sunken-courtyard kind and lie outside the region named, and no measured cave of Shaanxi or Gansu was read of.
+      No source read gives a cave's width or height. The rooms are the caves of a cliffside dwelling, one to three
+      openings side by side, the commonest kind by the encyclopedia. The other kind is the sunken courtyard, a pit 6 to
+      7 m deep with caves in its four walls, more than eight to a family and its animals: it would be a courtyard plan
+      with a sunken floor, and is left for a narrower record. A third kind, built above ground as a vault of brick or
+      stone, is not drawn.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-yaodong.txt (sha256 a3cd3b88842d8e0a), gao-2021-sunken-cave-dwellings.txt (sha256 fa12377c9efc94ec), zhou-2002-yaodong-thermal-environment.txt (sha256 614bc63a17fcd444) and zhang-2021-silo-caves.txt (sha256 db56dca673041d41), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  settlement:
+    prop: settlement_form
+    value: { pattern: linear }
+    source:
+      ref: src:wikipedia-yaodong
+      loc: section "Types"
+      quote: most yaodongs are distributed along the sides of the cliffs and valleys to conform to the terrain
+    method: expert-estimate
+    note: >-
+      Rows of caves along the cliffs and the sides of valleys, for which the nearest word is linear. The sunken
+      courtyards of the tablelands stood otherwise, in villages of many pits: Zhang and others (2021) count 172 of them
+      in one village of western Henan in 1969. How many people lived in a dwelling is not given by anything read, and
+      is left to the generator.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-yaodong.txt (sha256 a3cd3b88842d8e0a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

@@ -1,0 +1,158 @@
+id: people/traditions/castro-roundhouse
+kind: tradition/building
+summary: >-
+  The round house of the hillforts (castros) of the north-west of the Iberian Peninsula, in Galicia, northern Portugal,
+  western Asturias and León: a circular or oval house of one room, four to five metres across, under a conical roof of
+  straw or broom, standing apart from its neighbours inside the wall of a small fortified settlement. The first hillforts
+  were raised in the tenth and ninth centuries BCE, with houses of perishable materials; from the fifth and fourth
+  centuries BCE the houses were built of stone. Under Rome rectangular houses with tiled roofs came in beside the round
+  ones, and around 100 CE the hillfort was given up as the main kind of settlement.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Round house of the castros of north-western Iberia }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: { lo: 1000 BCE, hi: 801 BCE }
+    source:
+      - ref: src:ayan-vila-2008-round-iron-age
+        loc: 'section 3, "House, family and community in the Early Iron Age", p. 922'
+        quote: >-
+          This process of fortification began during the tenth and ninth centuries BC in the littoral and southern regions
+          of the northwest and spread progressively throughout the entire peninsula at different rates in different areas
+      - ref: src:ayan-vila-2008-round-iron-age
+        loc: section 3, p. 924
+        quote: >-
+          Within the domestic area small circular houses between three and five meters in diameter were built from
+          perishable materials that followed a curve established by an irregular stone base
+    method: expert-estimate
+    note: >-
+      The tenth and ninth centuries BCE, when the first fortified settlements were raised on the coast and in the south of
+      the region; they reached other parts later. It is the start of the hillfort and its round houses, not of the round
+      house, which the source has in the open villages of the Bronze Age before.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ayan-vila-2008-round-iron-age.txt (sha256 1d859ee14d6f545c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  end:
+    prop: end
+    value: 100 CE
+    source:
+      ref: src:ayan-vila-2008-round-iron-age
+      loc: section 6, on the hillforts under Rome, p. 968
+      quote: >-
+        led to the abandonment of the hillfort, and its system of spatial organization, as the main settlement model
+        around the end of the first and beginning of the second centuries AD
+    method: expert-estimate
+    note: >-
+      "Around the end of the first and beginning of the second centuries AD", written here as 100 CE. It is the end of the
+      hillfort as the main kind of settlement, not of every hillfort: the source has some lived in until the fourth and
+      fifth centuries, and round houses of slate in the mining settlements that Rome planted in the mountains.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ayan-vila-2008-round-iron-age.txt (sha256 1d859ee14d6f545c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["41"] }
+    source:
+      - ref: src:ayan-vila-2008-round-iron-age
+        loc: Abstract, p. 903
+        quote: >-
+          This article provides a diachronic synthesis of domestic space in the northwestern Iberian Peninsula from recent
+          prehistory through the High Middles Ages.
+      - ref: src:ayan-vila-2008-round-iron-age
+        loc: section 4, p. 938
+        quote: >-
+          There is some contextualized evidence in northern Portugal at the castros of Coto da Pena and Romariz (Silva
+          1986: 37-43), Cividade de Terroso (Póvoa de Varzim)
+    method: editorial
+    note: >-
+      Region 41 (Spain and Portugal), which holds the north-west of the peninsula: the hillforts the source describes are
+      in Galicia, northern Portugal, western Asturias and León. The house is not claimed for the rest of the region, whose
+      houses in these centuries were others.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ayan-vila-2008-round-iron-age.txt (sha256 1d859ee14d6f545c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      - ref: src:ayan-vila-2008-round-iron-age
+        loc: section 3, p. 936
+        quote: >-
+          the emergence of these fortifications marks the appearance of a stable settlement pattern, the beginning of a
+          sedentary way of life
+      - ref: src:ayan-vila-2008-round-iron-age
+        loc: section 3, p. 935
+        quote: >-
+          a core zone consisting of the settlement, arable land and pasturage, and land in the peripheral waste ground
+          that serves as a boundary with other communities
+      - ref: src:ayan-vila-2008-round-iron-age
+        loc: section 4, p. 949
+        quote: >-
+          the increase of agricultural exploitation during this period, cause and consequence of the consolidation process
+          of a rural society and economy. The structures for storing crops became more common
+    method: editorial
+    note: >-
+      Settled communities that lived from the arable land and the pasture around their hillfort, and stored their grain
+      in it: farmers, as the model of how people lived counts them. The source calls them peasant-warriors.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ayan-vila-2008-round-iron-age.txt (sha256 1d859ee14d6f545c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { plan: round, diameter: { lo: 4, hi: 5 }, walls: stone, roof: conical, roof_material: thatch }
+    source:
+      - ref: src:ayan-vila-2008-round-iron-age
+        loc: 'section 4, "Domestic space during the late Iron Age", p. 937'
+        quote: >-
+          Most of the houses excavated from this period, regardless of the building material used, follow the same basic
+          pattern: a circular or oval plan, about four to five meters in diameter with roofs made of rye straw or plant
+          branches from scrublands such as broom or gorse.
+      - ref: src:ayan-vila-2008-round-iron-age
+        loc: section 4, p. 936
+        quote: >-
+          the settlement organization model became consolidated due to the widespread shift to stone construction for
+          domestic buildings
+      - ref: src:ayan-vila-2008-round-iron-age
+        loc: section 3, p. 931
+        quote: >-
+          This isolationism, in the case of these circular structures, was partly an artifact of the use of the conical
+          roof, which made shared walls a problem for the normal evacuation of water around the whole perimeter of the
+          house.
+    method: excavation
+    note: >-
+      The plan, the size and the roofing are those of most houses excavated from the second phase of the hillforts, which
+      the source dates from the fifth and fourth centuries BCE; a roof of rye straw, broom or gorse is what the vocabulary
+      calls thatch, and the source has it conical. Stone walls are that phase's too: before it most houses were of
+      perishable materials on a rough stone base, and three to five metres across, though houses of stone stood in the
+      Rías Baixas from the seventh century BCE. The house had one room, about 20 square metres, some with a loft; a
+      dwelling here has no word for a floor area. Larger houses are known (there are signs of one nine metres across at O
+      Castro Pequeno de Neixón), and in the last phase, from the end of the second century BCE, the big settlements of the
+      south had houses of several buildings round a yard.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ayan-vila-2008-round-iron-age.txt (sha256 1d859ee14d6f545c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  settlement:
+    prop: settlement_form
+    value: { pattern: walled, household: { lo: 4, hi: 5 } }
+    source:
+      - ref: src:ayan-vila-2008-round-iron-age
+        loc: section 3, p. 924
+        quote: >-
+          During this initial stage of the hillfort period there was a clear predominance of small, fortified settlements
+          of less than one hectare, with a single enclosure that usually took advantage of the natural conditions of the
+          surrounding terrain.
+      - ref: src:ayan-vila-2008-round-iron-age
+        loc: section 3, p. 931
+        quote: >-
+          First, we see a characteristic in this early phase that is typical of hillfort settlements, with isolated houses
+          that do not even share walls.
+      - ref: src:ayan-vila-2008-round-iron-age
+        loc: section 4, p. 937
+        quote: This architectural model reflects family units with an average of four to five people per house
+    method: expert-estimate
+    note: >-
+      A settlement inside its wall, on a hill, its houses standing apart with no order among them. The household is an
+      estimate the source reports from Camino (2002), who read each small house as one family's; in its endnote 18 the
+      author doubts that a house so small need mean a family like today's, as kin beyond it may have counted as one
+      household. How many houses a hillfort held is not given in general: the first were of less than a hectare, and
+      about a thousand people are reckoned for one large settlement of the last phase, San Cibrán de Lás.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ayan-vila-2008-round-iron-age.txt (sha256 1d859ee14d6f545c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

@@ -1,0 +1,24 @@
+id: src:parry-1824-second-voyage
+type: text
+kind: eyewitness
+citation: >-
+  Parry, W.E. Journal of a Second Voyage for the Discovery of a North-West Passage from the Atlantic to the Pacific;
+  Performed in the Years 1821–22–23, in His Majesty's Ships Fury and Hecla. London: John Murray, 1824.
+authors: ["Parry, W.E."]
+published: 1824
+written: { lo: 1821 CE, hi: 1824 CE }
+title: Journal of a Second Voyage for the Discovery of a North-West Passage
+url: https://archive.org/details/journalofsecondv01parr
+via: The Internet Archive's scan (journalofsecondv01parr), read in its OCR text.
+license: public domain
+reliability: >-
+  The journal of the commander of the expedition that wintered at Winter Island in 1821–22 and at Igloolik in 1822–23
+  among the Inuit of Foxe Basin, written up from his journal day by day. He describes the snow houses he entered and
+  counts the huts and the people of the villages he and his officers visited.
+verified:
+  by: machine:claude-code
+  how: >-
+    Read on 20 November 2026 in the OCR text of the scan: the first visit to the snow village at Winter Island
+    (ch. VII, p. 160), the move of the Igloolik people onto the ice in December 1822 (p. 386) and Lyon's visit to the
+    snow huts on the ice in April 1823 (p. 423). The quotes were checked by script against the OCR, keeping to stretches
+    it reads cleanly.

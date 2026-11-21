@@ -1,0 +1,24 @@
+id: src:jaanus-dictionary
+type: database-record
+kind: review
+citation: >-
+  Parent, M.N. (compiler). JAANUS: Dictionary of Japanese Architectural and Art Historical Terminology. Originally
+  built by the Atsumi International Scholarship Foundation; hosted by the Media Center for Art History, Columbia
+  University. Entries s.v. tateana jūkyo, heichi jūkyo, hottatebashira, minka, doma, hiromagata, kayabuki,
+  yosemune-zukuri, machiya, tōriniwa, jōkamachi.
+authors:
+  - "Parent, M.N."
+title: "JAANUS: Dictionary of Japanese Architectural and Art Historical Terminology"
+container: Media Center for Art History, Columbia University
+url: https://projects.mcah.columbia.edu/jaanus/
+snapshot: 2026-11-20
+reliability: >-
+  A specialist dictionary of Japanese architectural terms, compiled by an architectural historian, whose entries
+  summarize the Japanese literature without citing it. Cited, as a reference work, for the forms of the pit dwelling,
+  the ground-level house, the farmhouse and the town house of Japan and for the layout of castle towns, where no
+  excavation report or regional study could be read here. Each entry is cited by its headword.
+verified:
+  by: machine:claude-code
+  how: >-
+    Each entry's page (https://projects.mcah.columbia.edu/jaanus/record/<headword>) fetched on 20 November 2026 and
+    read as text, the entries kept together in one text file; the quotes checked by script against it.

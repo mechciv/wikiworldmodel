@@ -1,0 +1,160 @@
+id: people/traditions/hemudu-pile-dwelling
+kind: tradition/building
+summary: >-
+  The pile dwelling of the Hemudu culture, on the wet plain south of Hangzhou Bay in the lower Yangtze: long
+  rectangular houses of timber raised on rows of piles driven into the ground, their timbers joined by mortise and
+  tenon, standing together in a village with wooden fences, storage pits and rice paddies about it. Its people grew
+  rice in fields banked with earth and lived for the most part by hunting, fishing and gathering. It is known from the
+  waterlogged sites of Hemudu and Tianluoshan, read here from summaries of their excavation reports.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Pile dwelling of the Hemudu culture }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 5000 BCE
+    source:
+      - ref: src:zhang-2014-tianluoshan-animal-procurement
+        loc: "p. 33, section 2.3.1"
+        quote: >-
+          Late Neolithic Phase (5,000 – 3,500 BC) The representative culture of Late Neolithic phase includes Hemudu
+          culture and Majiabang culture.
+      - ref: src:eda-2022-goose-domestication-tianluoshan
+        loc: introduction
+        quote: >-
+          The Tianluoshan site contains the remains of a Middle Neolithic early rice cultivation village (7000 to 5500
+          cal BP) of the Hemudu Culture
+    method: expert-estimate
+    note: >-
+      The beginning of the phase the first source sets the Hemudu culture in; the second has the village of
+      Tianluoshan from 7000 cal BP, which is the same time. The older Kuahuqiao culture of the same country is not
+      part of this record.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zhang-2014-tianluoshan-animal-procurement.txt (sha256 3f619ecd92250263) and eda-2022-goose-domestication-tianluoshan.txt (sha256 74610cfe15450020), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  end:
+    prop: end
+    value: 3500 BCE
+    source:
+      - ref: src:zhang-2014-tianluoshan-animal-procurement
+        loc: "p. 33, section 2.3.1"
+        quote: >-
+          Late Neolithic Phase (5,000 – 3,500 BC) The representative culture of Late Neolithic phase includes Hemudu
+          culture and Majiabang culture.
+      - ref: src:zhang-2014-tianluoshan-animal-procurement
+        loc: "p. 42, section 2.3.3"
+        quote: Tianluoshan was occupied approximately from 5,000 to 4,000 Cal BC
+    method: expert-estimate
+    note: >-
+      The end of the phase the source sets the culture in. The village of Tianluoshan itself was left earlier: the
+      same source has it lived in from about 5000 to 4000 cal BC, and the study of its geese to 5500 cal BP.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zhang-2014-tianluoshan-animal-procurement.txt (sha256 3f619ecd92250263), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["123"] }
+    source:
+      - ref: src:zhang-2014-tianluoshan-animal-procurement
+        loc: "p. 38, section 2.3.2"
+        quote: >-
+          Hemudu culture sites are mainly distributed in the east coastal area of the Lower Yangtze River region, and
+          are particularly grouped along the Yao River on the Ningbo-Shaoxing Plain.
+      - ref: src:zhang-2014-tianluoshan-animal-procurement
+        loc: "p. 38, section 2.3.2"
+        quote: Until now, over 50 sites of Hemudu culture have been discovered
+    method: editorial
+    note: >-
+      Region 123 (Eastern China), which holds Zhejiang and its Ningbo-Shaoxing Plain. The culture kept to that plain
+      and the islands off it: the house is not claimed for the rest of the region, where the Majiabang culture north
+      of Hangzhou Bay and the cultures of the middle Yangtze built otherwise or are not described in what was read.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zhang-2014-tianluoshan-animal-procurement.txt (sha256 3f619ecd92250263), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [foragers, farmers]
+    source:
+      ref: src:eda-2022-goose-domestication-tianluoshan
+      loc: introduction
+      quote: >-
+        Although people cultivated rice and possibly kept pigs, they mainly hunted, fished, and gathered food from
+        terrestrial and water environments
+    method: editorial
+    note: >-
+      Villagers who lived mainly by hunting, fishing and gathering and also grew rice in paddies beside the village,
+      year after year in the same wet ground: both ways of life, as the source has them at Tianluoshan.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in eda-2022-goose-domestication-tianluoshan.txt (sha256 74610cfe15450020), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { plan: rectangular, width: 7, length: 23, floor: stilts }
+    source:
+      - ref: src:zhang-2014-tianluoshan-animal-procurement
+        loc: "p. 39, section 2.3.2"
+        quote: >-
+          The most significant findings are the wooden pile-structured dwellings, in which piles and timbers are
+          arranged in rows
+      - ref: src:zhang-2014-tianluoshan-animal-procurement
+        loc: "p. 39, section 2.3.2"
+        quote: >-
+          Reconstruction suggests that these are originally belong to elongated rectangular houses (approx. 23 metres
+          long 7 metres deep) supported by wooden stakes, so that the gap underneath can raise the houses up away
+          from humidity and dangerous animals
+      - ref: src:zhang-2014-tianluoshan-animal-procurement
+        loc: "p. 39, section 2.3.2"
+        quote: the mortise and tenon technique is employed to connect timbers
+      - ref: src:zhang-2014-tianluoshan-animal-procurement
+        loc: "p. 38, section 2.3.2"
+        quote: Hemudu culture is named after the Hemudu site in Yuyao County, only 7 km away to the southwest of Tianluoshan
+      - ref: src:zhang-2014-tianluoshan-animal-procurement
+        loc: "p. 44, section 2.3.3"
+        quote: >-
+          On the higher-ground to the east part, posts were arranged in rows, showing the location of the pile
+          dwellings
+      - ref: src:eda-2022-goose-domestication-tianluoshan
+        loc: introduction
+        quote: >-
+          Archaeological surveys revealed that the village included raised-floor–style wooden buildings, wooden
+          fences, storage and refuse pits, and rice paddy fields.
+    method: excavation
+    note: >-
+      The house as the first source summarizes the excavators' reconstruction at Hemudu, from the rows of piles and
+      timbers found there: about 23 m long and 7 m deep, on stakes, of timber joined by mortise and tenon. It is one
+      reconstruction, and the only size read. Tianluoshan, 7 km away, has the same rows of posts and, in the second
+      source's words, buildings with raised floors. What the walls and the roof were made of is not stated, and is
+      left to the generator.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zhang-2014-tianluoshan-animal-procurement.txt (sha256 3f619ecd92250263) and eda-2022-goose-domestication-tianluoshan.txt (sha256 74610cfe15450020), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  settlement:
+    prop: settlement_form
+    value: { pattern: nucleated }
+    source:
+      - ref: src:eda-2022-goose-domestication-tianluoshan
+        loc: introduction
+        quote: >-
+          Archaeological surveys revealed that the village included raised-floor–style wooden buildings, wooden
+          fences, storage and refuse pits, and rice paddy fields.
+      - ref: src:zhang-2014-tianluoshan-animal-procurement
+        loc: "p. 42, section 2.3.3"
+        quote: It is estimated through drilling investigations that the whole Tianluoshan site covers about 30,000 m2.
+    method: excavation
+    note: >-
+      A village: buildings, fences and pits together on about three hectares at Tianluoshan, its paddies beside it.
+      How many houses stood in it, and how many people lived in one, is not stated.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in eda-2022-goose-domestication-tianluoshan.txt (sha256 74610cfe15450020) and zhang-2014-tianluoshan-animal-procurement.txt (sha256 3f619ecd92250263), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  fields:
+    prop: field_system
+    value: { kind: paddies, bounds: banks }
+    source:
+      - ref: src:eda-2022-goose-domestication-tianluoshan
+        loc: 'Discussion, section "Significance of the Tianluoshan Locally Bred Goose in the History of Poultry"'
+        quote: >-
+          Paddy fields at that time were created by clearing and leveling natural wetlands and surrounding them with
+          soil mounds
+    method: expert-estimate
+    note: >-
+      Paddies made by clearing and levelling wetland and banking it round with earth, as the source has it from a
+      study of the fields at Tianluoshan that was not read here. No size of a plot is stated.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in eda-2022-goose-domestication-tianluoshan.txt (sha256 74610cfe15450020), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

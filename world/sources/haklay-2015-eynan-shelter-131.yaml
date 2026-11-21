@@ -1,0 +1,21 @@
+id: src:haklay-2015-eynan-shelter-131
+type: publication
+kind: review
+citation: >-
+  Haklay, G. & Gopher, A. (2015). A New Look at Shelter 131/51 in the Natufian Site of Eynan (Ain-Mallaha), Israel.
+  PLOS ONE 10(7), e0130121.
+authors: ["Haklay, G.", "Gopher, A."]
+published: 2015
+title: A New Look at Shelter 131/51 in the Natufian Site of Eynan (Ain-Mallaha), Israel
+container: PLOS ONE
+doi: 10.1371/journal.pone.0130121
+url: https://europepmc.org/article/PMC/PMC4496039
+license: CC-BY-4.0
+reliability: >-
+  A re-analysis of the published plans of the Early Natufian shelters of Eynan (Ain Mallaha) in the Hula Valley,
+  excavated by Perrot and Valla; its summary of the site and of the shelters' sizes is the excavators'.
+verified:
+  by: machine:claude-code
+  how: >-
+    Full text read from Europe PMC (PMC4496039), its JATS XML fetched on 20 November 2026 and read as text; the
+    introduction and the description of the shelters read, and the quotes checked by script against that text.

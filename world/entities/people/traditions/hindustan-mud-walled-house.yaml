@@ -1,0 +1,189 @@
+id: people/traditions/hindustan-mud-walled-house
+kind: tradition/building
+summary: >-
+  The common house of the villages and towns of the plain of the Jumna and the Ganges under the Mughals and after: a low
+  hut of one room with walls of mud under a thatched roof with a ridge, the huts of a household standing about a yard
+  fenced with a mud wall, and the yards close together. Babur saw villages and towns of huts spring up in 1526; mud walls
+  and thatch are described at Agra in 1626 and at Delhi in 1663, and measured in Bihar in 1811–12, where many roofs were
+  tiled. No end is given: it was still the ordinary house when the gazetteer of 1908 was written.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Mud-walled thatched house of Hindustan }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 1526 CE
+    source:
+      - ref: src:babur-nama-beveridge-1922
+        loc: heading of the year 932 AH
+        quote: "932 AH.-OCT. 18TH 1525 TO OCT. 8TH 1526 AD."
+      - ref: src:babur-nama-beveridge-1922
+        loc: 'the year 932 AH, section "Other particulars about Hindūstān", fol. 274b to 275'
+        quote: >-
+          they need not build houses or set up walls … wood is unlimited, huts are made, and straightway there is a village
+          or a town!
+    method: documentary
+    note: >-
+      The year of the earliest account read. Babur's description of Hindustan stands under 932 AH, 18 October 1525 to
+      8 October 1526, the year of his conquest of Hindustan, and has villages and towns made in a moment of huts of grass and
+      wood. It bounds the start and does not date it: the house is surely older, and no earlier account of the common
+      house of the plain was read. Babur's huts are of grass and wood; walls of mud are first described a century later, at
+      Agra in 1626. No end is given, and none is known from what was read: the latest account, the gazetteer of 1908, has
+      it as the house of the cultivator and the labourer of its own day.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in babur-nama-beveridge-1922.txt (sha256 aa11be1d660b4526), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["107"] }
+    source:
+      - ref: src:bernier-1916-travels-mogul-empire
+        loc: "Letter to Monsieur de la Mothe le Vayer, p. 246"
+        quote: >-
+          It is because of these wretched mud and thatch houses that I always represent to myself Dehli as a collection of
+          many villages
+      - ref: src:buchanan-1811-bihar-and-patna
+        loc: "vol. 1, Book II, chapter II, p. 278"
+        quote: >-
+          In Gaya and Patna the chief ornament of the houses consists of carved wooden work in the front of the galleries,
+          and in some few houses, both of brick and mud, this has a tolerable effect
+      - ref: src:imperial-gazetteer-1908-united-provinces
+        loc: 'p. 72, "Material condition of the people"'
+        quote: >-
+          The houses of both classes are of mud, but the cultivator will have several rooms round a small courtyard, while
+          the labourer and his family live in a single room.
+    method: editorial
+    note: >-
+      Region 107 (Northern India), which holds Delhi and Agra, Patna and Gaya in Bihar, and the plains of the United
+      Provinces of 1908, by their cities' coordinates against the region outlines. The gazetteer excepts the hills,
+      Bundelkhand and parts of Muttra and Agra districts, where stone was the ordinary material, and says that in the west
+      of the provinces roofs were flat. The house is not claimed for all of the region. The flat-roofed mud house of the
+      Punjab and the houses of Rajputana, which the gazetteers of those provinces describe, are other traditions and are
+      not written here.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in bernier-1916-travels-mogul-empire.txt (sha256 31b3e06e78fd57cf), buchanan-1811-bihar-and-patna.txt (sha256 a51ca698efc0c530) and imperial-gazetteer-1908-united-provinces.txt (sha256 0c93c94c8f7a58c2), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [farmers, townspeople]
+    source:
+      - ref: src:babur-nama-beveridge-1922
+        loc: 'the year 932 AH, section "Other particulars about Hindūstān", fol. 274b'
+        quote: In Hindūstān hamlets and villages, towns indeed, are depopulated and set up in a moment!
+      - ref: src:buchanan-1811-bihar-and-patna
+        loc: "vol. 1, Book II, chapter II, p. 278"
+        quote: The farmers and decent artists have huts similar, but covered with thatch
+      - ref: src:bernier-1916-travels-mogul-empire
+        loc: "Letter to Monsieur de la Mothe le Vayer, p. 246"
+        quote: >-
+          Intermixed with these different houses is an immense number of small ones, built of mud and thatched with straw,
+          in which lodge the common troopers, and all that vast multitude of servants and camp-followers who follow the
+          court and the army.
+    method: editorial
+    note: >-
+      Farmers, as in Buchanan's Bihar and as the gazetteer's cultivators and labourers; and townspeople: the workmen,
+      servants and shopkeepers whose houses Pelsaert describes at Agra, the troopers and servants of Delhi, and most of
+      Patna, where all but 7,187 of an estimated 52,000 houses had mud walls. The better-off of the towns lived otherwise:
+      Bernier's officers and merchants at Delhi in houses with courts and gardens, few of them wholly of brick or stone,
+      and those 7,187 houses of Patna were of brick. This record does not draw them.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in babur-nama-beveridge-1922.txt (sha256 aa11be1d660b4526), buchanan-1811-bihar-and-patna.txt (sha256 a51ca698efc0c530) and bernier-1916-travels-mogul-empire.txt (sha256 31b3e06e78fd57cf), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { plan: rectangular, length: 5, width: 3.2, rooms: 1, storeys: 1, walls: cob, roof: gable, roof_material: thatch }
+    source:
+      - ref: src:pelsaert-1925-jahangirs-india
+        loc: 'section 12, "The manner of life", p. 61'
+        quote: Their houses are built of mud with thatched roofs.
+      - ref: src:buchanan-1811-bihar-and-patna
+        loc: "vol. 1, Book II, chapter II, p. 278"
+        quote: >-
+          The huts here, although far from neat, and although dark and close, having seldom any aperture but one small
+          door, are so far comfortable, that, having mud walls
+      - ref: src:buchanan-1811-bihar-and-patna
+        loc: "vol. 1, Book II, chapter II, p. 278"
+        quote: The farmers and decent artists have huts similar, but covered with thatch
+      - ref: src:buchanan-1811-bihar-and-patna
+        loc: "vol. 1, Book II, chapter II, p. 279"
+        quote: The roof is commonly supported by the walls, and a ridge-pole running from one gable-end to the other
+      - ref: src:buchanan-1811-bihar-and-patna
+        loc: "vol. 1, Book II, chapter II, p. 279"
+        quote: Each hut usually consists of one apartment 11 cubits long by seven wide
+      - ref: src:buchanan-1811-bihar-and-patna
+        loc: "vol. 2, the chapter on coins, weights and measures, p. 703"
+        quote: >-
+          The Company everywhere uses a Guz of the same length, 18 of which are supposed to be 40 cubits long, so that each
+          contains 40 inches
+      - ref: src:burn-1902-census-nwp-oudh
+        loc: "chapter I, paragraph 30, p. 15"
+        quote: >-
+          The two principal types of houses are the fairly well made brick houses in the centre of each town, and the mud
+          or wattle huts surrounding them. The latter are never more than one story high
+      - ref: src:abul-fazl-ain-i-akbari-jarrett-vol-2
+        loc: "The Subah of Bihar, p. 164"
+        quote: The houses for the most part are roofed with tiles.
+      - ref: src:imperial-gazetteer-1908-united-provinces
+        loc: 'p. 49, "Dwellings"'
+        quote: but elsewhere houses are thatched or tiled.
+    method: survey
+    note: >-
+      Mud walls and thatch at Agra in 1626 (Pelsaert) and in Bihar in 1811–12 (Buchanan), whose account gives the rest: one
+      room, a roof resting on the walls and on a ridge-pole from gable to gable, and the size, 11 cubits by 7. His cubit
+      is of 18 inches, since 18 yards of 40 inches make 40 cubits, so the hut is 5.03 m by 3.20 m, written here as 5 by
+      3.2. Mud is taken as earth built up without a frame, which the vocabulary calls cob; the census report of 1901 has
+      huts of mud or of wattle, and its one storey is of the huts of the towns. Thatch is the roof of the farmers' huts of
+      Bihar and of the common houses of Agra and Delhi. Tiles were as common in places: the houses of Bihar were mostly
+      tiled in 1595, as most of those of Patna were in 1811–12, and the gazetteer of 1908 has thatch or tiles in the
+      centre and east of the United Provinces and flat roofs in the west. A cooking shed and a hut for the cattle made up
+      a small farmer's dwelling, and a second hut and a granary a comfortable one. The two-storeyed mud houses and the
+      brick houses of the towns are not drawn.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in pelsaert-1925-jahangirs-india.txt (sha256 643fc8ca54dd66d1), buchanan-1811-bihar-and-patna.txt (sha256 a51ca698efc0c530), burn-1902-census-nwp-oudh.txt (sha256 facc94ad9154b59c), abul-fazl-ain-i-akbari-jarrett-vol-2.txt (sha256 ad8e62160e2b09ea) and imperial-gazetteer-1908-united-provinces.txt (sha256 0c93c94c8f7a58c2), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  settlement:
+    prop: settlement_form
+    value: { pattern: nucleated, household: { lo: 5.49, hi: 6 } }
+    source:
+      - ref: src:buchanan-1811-bihar-and-patna
+        loc: "vol. 1, Book II, chapter II, p. 279"
+        quote: >-
+          The fence round the yard, contiguous to which are built the various huts, of which a native habitation consists,
+          is usually a mud wall, and in most villages there is no space intervening between these enclosures
+      - ref: src:imperial-gazetteer-1908-united-provinces
+        loc: 'p. 34, "Towns and villages"'
+        quote: In the western part of the Provinces the village sites are usually compact groups of houses
+      - ref: src:buchanan-1811-bihar-and-patna
+        loc: "vol. 1, Book I, the city of Patna, p. 61"
+        quote: will give an average of six persons for each house
+      - ref: src:burn-1902-census-nwp-oudh
+        loc: "chapter I, paragraph 32, p. 19"
+        quote: The average number of persons per house is now 5'49 instead of 5-7 in 1891 and 6'42 in 1881
+    method: survey
+    note: >-
+      Villages of yards set close together, each fenced with a mud wall and holding the huts of one household, in Bihar
+      in 1811–12; compact village sites in the west of the United Provinces in 1908, where the gazetteer has scattered
+      hamlets more common in the centre and east. The household spans two counts. Six persons to a house is for the city
+      of Patna in 1811–12, the average of the police officers' conjectures, each from a partial count. The other is 5.49
+      for the whole of the N.-W. Provinces and Oudh at the census of 1901, when a house was the part of an enclosure that
+      one family eating together lived in; the report thinks the true family smaller, and gives 5.7 for 1891 and 6.42 for
+      1881 under other definitions. The scan's text writes these decimal points as an apostrophe and a hyphen, and the
+      quote keeps its characters; the page image has 5·49, 5·7 and 6·42. How many houses stood in a village is not
+      stated.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in buchanan-1811-bihar-and-patna.txt (sha256 a51ca698efc0c530), imperial-gazetteer-1908-united-provinces.txt (sha256 0c93c94c8f7a58c2) and burn-1902-census-nwp-oudh.txt (sha256 facc94ad9154b59c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  town:
+    prop: town_form
+    value: { streets: lanes }
+    source:
+      - ref: src:pelsaert-1925-jahangirs-india
+        loc: 'section 1, "The city of Agra", p. 1'
+        quote: The streets and houses are built without any regular plan.
+      - ref: src:buchanan-1811-bihar-and-patna
+        loc: "vol. 1, Book I, the city of Patna, p. 58"
+        quote: Every other passage is narrow, crooked, and irregular.
+    method: documentary
+    note: >-
+      Lanes with no plan, at Agra in 1626 and inside the walls of Patna in 1811–12, where one tolerably wide street ran
+      from the eastern gate to the western. No wall is stated, as the two differ: Pelsaert's Agra was open and unwalled,
+      and Buchanan's Patna a walled city with gates, whose wall he does not describe in what was read.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in pelsaert-1925-jahangirs-india.txt (sha256 643fc8ca54dd66d1) and buchanan-1811-bihar-and-patna.txt (sha256 a51ca698efc0c530), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

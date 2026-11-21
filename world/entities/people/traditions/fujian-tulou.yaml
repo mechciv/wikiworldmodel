@@ -1,0 +1,191 @@
+id: people/traditions/fujian-tulou
+kind: tradition/building
+summary: >-
+  The tulou of the hill country of southern Fujian: one great enclosed building of three or four storeys, most often
+  round or rectangular, its outer wall of rammed earth with a single gate and few openings, rooms of timber ranged
+  inside it round a central court, under a tiled roof, built by the Hakka and the Minnan as the house of a whole clan
+  of farmers. They were built from the fourteenth century to the twentieth, and some three thousand still stand. It is
+  one house of the region's hills, not the house of its lowland farmers, of which nothing was read.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Tulou of southern Fujian }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: { lo: 1301 CE, hi: 1400 CE }
+    source:
+      ref: src:colafranceschi-2020-tulou
+      loc: "p. 937, section 1"
+      quote: Tulou are traditional rural architectures built in southern Fujian between XIV and XX century
+    method: expert-estimate
+    rank: preferred
+    note: >-
+      The fourteenth century, as the paper dates the first of them, from the literature it follows. Preferred to the
+      encyclopedia's twelfth century because the paper is the better source and the encyclopedia's own oldest tulou
+      is of 1371.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in colafranceschi-2020-tulou.txt (sha256 9fe40f5380e77788), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  start-encyclopedia:
+    prop: start
+    value: { lo: 1101 CE, hi: 1200 CE }
+    source:
+      - ref: src:wikipedia-fujian-tulou
+        loc: opening section
+        quote: They were mostly built between the 12th and the 20th centuries.
+      - ref: src:wikipedia-fujian-tulou
+        loc: section "Architecture", "Oldest Tulou"
+        quote: is the oldest tulou, built in 1371
+    method: expert-estimate
+    note: >-
+      The twelfth century, as the encyclopedia's opening has it, with no reference; the oldest tulou the same article
+      names was built in 1371.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-fujian-tulou.txt (sha256 d7741233f1f05fed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  end:
+    prop: end
+    value: { lo: 1950 CE, hi: 2000 CE }
+    source:
+      ref: src:colafranceschi-2020-tulou
+      loc: "p. 944, Conclusion"
+      quote: >-
+        began to arise in the middle of the last century; just a few decades after that, the construction of new
+        Tulou ceased definitively
+    method: expert-estimate
+    note: >-
+      Building ceased a few decades after the middle of the twentieth century, read here as the century's second
+      half. Many are lived in still.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in colafranceschi-2020-tulou.txt (sha256 9fe40f5380e77788), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["122"] }
+    source:
+      - ref: src:colafranceschi-2020-tulou
+        loc: "p. 937, section 1"
+        quote: Tulou are traditional rural architectures built in southern Fujian between XIV and XX century
+      - ref: src:tao-2018-meizhou-vernacular-dwellings
+        loc: "p. 17, section 2.2"
+        quote: Only five villages included Square Tulou, and six featured Round Tulou.
+    method: editorial
+    note: >-
+      Region 122 (Southeastern China and Taiwan) holds Fujian. It holds Guangdong, Guangxi, Hainan and Taiwan too,
+      where the tulou is rare or absent: in Meizhou, the Hakka country of north-eastern Guangdong next to Fujian, a
+      survey of 2,189 villages found square tulou in five and round ones in six. The tulou is not claimed for the
+      region, only as found in it.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in colafranceschi-2020-tulou.txt (sha256 9fe40f5380e77788) and tao-2018-meizhou-vernacular-dwellings.txt (sha256 afd9776e2bb0a126), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  prevalence:
+    prop: prevalence
+    value: few
+    source:
+      - ref: src:colafranceschi-2020-tulou
+        loc: "p. 937, section 1"
+        quote: Tulou are traditional rural architectures built in southern Fujian between XIV and XX century
+      - ref: src:tao-2018-meizhou-vernacular-dwellings
+        loc: "p. 17, section 2.2"
+        quote: dwellings in 2,189 villages throughout Meizhou
+      - ref: src:tao-2018-meizhou-vernacular-dwellings
+        loc: "p. 17, section 2.2"
+        quote: Only five villages included Square Tulou, and six featured Round Tulou.
+    method: editorial
+    note: >-
+      A few of the farmers of region 122: the tulou is a house of the hills of southern Fujian, and the region holds
+      the rest of Fujian, Guangdong, Guangxi, Hainan and Taiwan as well. In Meizhou, the Hakka country of Guangdong
+      next to it, a survey of the dwellings of 2,189 villages found square tulou in five and round ones in six. Nothing
+      read counts the people of the tulou against the region's: the word is this record's reading of where they stand.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in colafranceschi-2020-tulou.txt (sha256 9fe40f5380e77788) and tao-2018-meizhou-vernacular-dwellings.txt (sha256 afd9776e2bb0a126), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      - ref: src:colafranceschi-2020-tulou
+        loc: "p. 937, section 1"
+        quote: Tulou are traditional rural architectures built in southern Fujian between XIV and XX century
+      - ref: src:wikipedia-fujian-tulou
+        loc: section "Architecture", "Housing for a community of equals"
+        quote: The residents of tulou farmed communally.
+      - ref: src:tao-2017-hakka-settlements-dabu
+        loc: "p. 9, section 1"
+        quote: maintain rich cultural relics such as Lung Wai housing and Tulou (earthen structures)
+      - ref: src:tao-2017-hakka-settlements-dabu
+        loc: "p. 9, abstract"
+        quote: this closed agrarian society is fundamentally dependent on the availability of farmland
+    method: editorial
+    note: >-
+      Country people who farmed: the paper on the tulou calls them rural, the encyclopedia has their people farming
+      in common, and the survey of the Hakka settlements of Dabu, the county of Guangdong next to Fujian, where tulou
+      also stand, finds a society living by its scarce farmland, in the valleys and on terraced slopes.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in colafranceschi-2020-tulou.txt (sha256 9fe40f5380e77788), wikipedia-fujian-tulou.txt (sha256 d7741233f1f05fed) and tao-2017-hakka-settlements-dabu.txt (sha256 9f602e1b9fbc5b53), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { plan: round, court: true, diameter: { lo: 14, hi: 77.42 }, storeys: { lo: 3, hi: 4 }, walls: rammed-earth, roof: gable, roof_material: tile }
+    source:
+      - ref: src:colafranceschi-2020-tulou
+        loc: "p. 937, section 1"
+        quote: they can take a round, oval, square or mixtilinear shape
+      - ref: src:colafranceschi-2020-tulou
+        loc: "p. 937, section 1"
+        quote: Tulou are enclosed buildings, usually three to four stories
+      - ref: src:colafranceschi-2020-tulou
+        loc: "p. 937, section 1"
+        quote: the external, protective wall is always built of rammed earth
+      - ref: src:colafranceschi-2020-tulou
+        loc: "p. 937, section 1"
+        quote: All Tulou have wooden floors and distribution elements, a hip and gable roof, a large central courtyard
+      - ref: src:colafranceschi-2020-tulou
+        loc: "p. 942, section 3"
+        quote: the diameter does not exceed 60 meters in the one case, while in the other it can reach up to 80 meters
+      - ref: src:wikipedia-fujian-tulou
+        loc: section "Architecture", "Smallest Tulou"
+        quote: is the smallest tulou, with a diameter of 14 meters
+      - ref: src:wikipedia-fujian-tulou
+        loc: section "Architecture", "Largest round Tulou"
+        quote: Its diameter was measured at 77.42 meters.
+      - ref: src:wikipedia-fujian-tulou
+        loc: section "Architecture"
+        quote: The rooftops were covered with baked clay tiles, arranged radially
+    method: survey
+    note: >-
+      The round tulou, the kind all eight of the paper's cases are; it has square, oval and other shapes too, and
+      the encyclopedia calls the rectangular and the circular the commonest. Storeys, the rammed-earth outer wall and
+      the central court are the paper's. Its "hip and gable roof" has no word in the vocabulary and is written as
+      gable, the ring's two slopes. The diameters are the smallest and the largest round tulou the encyclopedia
+      names, cited because the paper gives ceilings only, 60 m for the Hakka's and 80 m for the Minnan's, and an
+      area from about 500 to 4,000 or 5,000 square metres, for which a dwelling has no parameter; the tiled roof is
+      the encyclopedia's too. Inside, the Hakka's have a timber frame with partitions of mud brick, their ring of
+      rooms and gallery 4 to 6 m deep, and the Minnan's have cross-walls of rammed earth.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in colafranceschi-2020-tulou.txt (sha256 9fe40f5380e77788) and wikipedia-fujian-tulou.txt (sha256 d7741233f1f05fed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  settlement:
+    prop: settlement_form
+    value: { pattern: compound, household: 300 }
+    source:
+      - ref: src:colafranceschi-2020-tulou
+        loc: "p. 937, section 1"
+        quote: Often assembled in small settlements
+      - ref: src:colafranceschi-2020-tulou
+        loc: "p. 939, section 2"
+        quote: >-
+          Hakka Tulou are real collective dwellings, with shared spaces and distribution, while Minnan ones are
+          aggregate private houses, organised around a common courtyard
+      - ref: src:wikipedia-fujian-tulou
+        loc: section "Architecture", "Housing for a community of equals"
+        quote: Tulous were usually occupied by one large family clan of several generations
+      - ref: src:wikipedia-fujian-tulou
+        loc: section "Notable Fujian tulou", "Chengqi Lou"
+        quote: The 15th-generation Jiang clan with 57 families and 300 people live here.
+      - ref: src:wikipedia-fujian-tulou
+        loc: opening section
+        quote: housing up to 800 people
+    method: expert-estimate
+    note: >-
+      A clan within one enclosure, the tulou standing a few together. The people to a house are those the
+      encyclopedia counts in one tulou today, Chengqi Lou, 62.6 m across and among the largest: the only count read,
+      and too many for the common run of them. The encyclopedia puts the most a tulou housed at 800. How many tulou
+      stood in a settlement is not stated.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in colafranceschi-2020-tulou.txt (sha256 9fe40f5380e77788) and wikipedia-fujian-tulou.txt (sha256 d7741233f1f05fed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

@@ -1,0 +1,18 @@
+id: src:yacobaccio-2021-camelids
+type: publication
+kind: review
+citation: >-
+  Yacobaccio, H.D. (2021). The domestication of South American camelids: a review. Animal Frontiers 11(3), 43–51.
+authors:
+  - "Yacobaccio, H.D."
+published: 2021
+title: "The domestication of South American camelids: a review"
+container: "Animal Frontiers 11(3), 43–51"
+doi: 10.1093/af/vfaa065
+url: https://europepmc.org/article/PMC/PMC8214430
+license: CC-BY-4.0
+verified:
+  by: machine:claude-code
+  how: >-
+    Full text read as XML from Europe PMC (PMC8214430) on 20 November 2026, and turned into text. Each quote checked by script against that text; citation from the Europe PMC
+    record.

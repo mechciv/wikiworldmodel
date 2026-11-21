@@ -1,0 +1,27 @@
+id: src:wang-2016-jiangnan-closed-halls
+type: publication
+kind: measurement
+citation: >-
+  Wang, H., Pu, X., Wang, R., Zeng, Y. & Qi, X. (2016). A Study on Closed Halls in Traditional Dwellings in the Jiangnan
+  Area, China. Journal of Asian Architecture and Building Engineering 15(2), 139–146.
+authors:
+  - "Wang, H."
+  - "Pu, X."
+  - "Wang, R."
+  - "Zeng, Y."
+  - "Qi, X."
+published: 2016
+title: A Study on Closed Halls in Traditional Dwellings in the Jiangnan Area, China
+container: Journal of Asian Architecture and Building Engineering
+doi: 10.3130/jaabe.15.139
+url: https://www.jstage.jst.go.jp/article/jaabe/15/2/15_139/_article
+reliability: >-
+  A study of the plans of 264 standing houses of southern and central Jiangsu, Zhejiang, south-eastern Anhui, eastern
+  Jiangxi and northern Fujian, most of them taken from earlier publications as the representative plans of their
+  districts and some surveyed by the authors. Its question is whether the hall opens onto the court; what it says of
+  frames, walls and dates is its account of how the cases were chosen, in a sentence each.
+verified:
+  by: machine:claude-code
+  how: >-
+    The article's PDF fetched from J-STAGE on 20 November 2026 and turned into text with PyMuPDF; the whole read; the
+    quotes checked by script against that text. Volume, pages and DOI as the PDF's first page gives them.

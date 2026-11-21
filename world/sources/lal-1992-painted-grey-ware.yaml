@@ -1,0 +1,29 @@
+id: src:lal-1992-painted-grey-ware
+type: publication
+kind: review
+citation: >-
+  Lal, B.B. (1992). The Painted Grey Ware culture of the Iron Age. In A.H. Dani & V.M. Masson (eds), History of
+  Civilizations of Central Asia, vol. I, The dawn of civilization: earliest times to 700 B.C., chapter 18. Paris: UNESCO
+  Publishing.
+authors:
+  - "Lal, B.B."
+published: 1992
+title: The Painted Grey Ware culture of the Iron Age
+container: "History of Civilizations of Central Asia, vol. I (UNESCO Publishing)"
+url: https://en.unesco.org/silkroad/sites/default/files/knowledge-bank-article/vol_I%20silk%20road_the%20painted%20grey%20ware%20culture%20of%20the%20iron%20age.pdf
+via: >-
+  UNESCO's PDF of the chapter, from the knowledge bank of its Silk Roads programme, as archived at web.archive.org on
+  7 December 2025.
+reliability: >-
+  A synthesis, by the excavator of Hastinapura, of the digs at the culture's sites up to about 1980 (Bhagwanpura,
+  Atranjikhera, Jakhera, Hastinapura, Noh). Only Bhagwanpura had been dug over a large area, so what it says of houses
+  rests on few plans. Its dates are estimates from stratigraphy and the first radiocarbon dates. Its reading of the
+  culture as that of the later Vedic Aryans is its author's, and is not used here.
+verified:
+  by: machine:claude-code
+  how: >-
+    Read on 20 November 2026 as UNESCO's PDF of the chapter (its pages bear ISBN 978-92-3-102719-2), in the copy archived
+    at web.archive.org on 7 December 2025: UNESCO's own address now redirects to the Silk Roads home page, and
+    unesdoc.unesco.org answered with a bot check. The text was extracted with PyMuPDF and the quotes checked by script
+    against it. The pages cited are the PDF's own numbers (412 to 431), which differ from the printed volume's. The year is
+    that of the volume's first printing, as library catalogues give it; the PDF does not state it.

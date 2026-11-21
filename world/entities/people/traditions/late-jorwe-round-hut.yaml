@@ -1,0 +1,97 @@
+id: people/traditions/late-jorwe-round-hut
+kind: tradition/building
+summary: >-
+  The round hut of the last centuries of the farming village of Inamgaon in the Deccan, about 1100 to 700 BCE: small,
+  two and a half to a little over four metres across, the huts standing close together, some with an open veranda. It
+  took the place of the rectangular houses of the village's earlier periods, and the village was abandoned at its end.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Round hut of the Late Jorwe period }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 1100 BCE
+    source:
+      - ref: src:sankalia-1975-early-farmers-village
+        loc: the list of periods, before "The Site and Its Environs"
+        quote: Late Jorwe (ca. 1100-700 B.C.)
+    method: excavation
+    note: >-
+      The beginning of the Late Jorwe period at Inamgaon as its excavators dated it, "ca.", in 1975; the houses before
+      it were rectangular (people/traditions/deccan-chalcolithic-rectangular-house). The site's radiocarbon dates have
+      been revised since in works not read.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in sankalia-1975-early-farmers-village.txt (sha256 2487ae20dbb74eed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  end:
+    prop: end
+    value: 700 BCE
+    source:
+      - ref: src:sankalia-1975-early-farmers-village
+        loc: the list of periods, before "The Site and Its Environs"
+        quote: Late Jorwe (ca. 1100-700 B.C.)
+      - ref: src:sankalia-1975-early-farmers-village
+        loc: section "Conclusions"
+        quote: The site was first settled at about 1600 B.C. and was abandoned about a thousand years later.
+    method: excavation
+    note: >-
+      The end of the Late Jorwe period, when the village was abandoned: about 700 BCE in the excavators' list of
+      periods, and about a thousand years after 1600 BCE in their conclusions.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in sankalia-1975-early-farmers-village.txt (sha256 2487ae20dbb74eed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["108"] }
+    source:
+      - ref: src:sankalia-1975-early-farmers-village
+        loc: opening paragraph
+        quote: it lies within the revenue limits of Inamgaon Village (Sirur Taluka, Poona District)
+    method: editorial
+    note: >-
+      Region 108 (Southwestern India), which holds Inamgaon, by its coordinates against the region outlines. The hut is
+      known here from this one village, and is not claimed for all of the region.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in sankalia-1975-early-farmers-village.txt (sha256 2487ae20dbb74eed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      - ref: src:sankalia-1975-early-farmers-village
+        loc: section "Conclusions"
+        quote: it was a large, self-sufficient agricultural and pastoral settlement
+    method: editorial
+    note: >-
+      The excavators' judgment of the village over its whole life, as farmers who also kept animals; they do not say
+      in this article how the people of its last period lived apart from the earlier ones.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in sankalia-1975-early-farmers-village.txt (sha256 2487ae20dbb74eed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { plan: round, diameter: { lo: 2.5, hi: 4.25 } }
+    source:
+      - ref: src:sankalia-1975-early-farmers-village
+        loc: section "House and Settlement Pattern (Period III, Late Jorwe)"
+        quote: >-
+          Most of the houses, some thirty-nine in all, have been exposed in the uppermost levels of the site. They are
+          uniformly circular in plan and vary in diameter from 2.5 to 4.25 m.
+    method: excavation
+    note: >-
+      The plan and the diameters of the thirty-nine huts exposed by 1975. Some seem to have had an open kind of
+      veranda. The article does not describe their walls or roofs, which are left to the generator.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in sankalia-1975-early-farmers-village.txt (sha256 2487ae20dbb74eed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  settlement:
+    prop: settlement_form
+    value: { pattern: nucleated }
+    source:
+      - ref: src:sankalia-1975-early-farmers-village
+        loc: section "House and Settlement Pattern (Period III, Late Jorwe)"
+        quote: the Late Jorwe settlement was more nucleated than before, with houses close together
+    method: excavation
+    note: >-
+      Huts close together, closer than the houses of the period before; the excavators wonder whether that was for
+      defence, or whether groups of huts were the units of families or crafts. The thirty-nine huts are those dug, not
+      those standing at one time, so the number of houses and the people to a house are not written.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in sankalia-1975-early-farmers-village.txt (sha256 2487ae20dbb74eed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

@@ -1,0 +1,23 @@
+id: src:imperial-gazetteer-1908-united-provinces
+type: publication
+kind: compilation
+citation: >-
+  The Imperial Gazetteer of India, Provincial Series: United Provinces of Agra and Oudh, vol. I. Calcutta:
+  Superintendent of Government Printing, 1908.
+published: 1908
+title: "Imperial Gazetteer of India, Provincial Series: United Provinces of Agra and Oudh, vol. I"
+url: https://archive.org/details/in.ernet.dli.2015.207370
+via: The Internet Archive's scan (in.ernet.dli.2015.207370), read in its OCR text.
+license: public domain
+reliability: >-
+  The official gazetteer of the province, compiled by its civil servants from the census of 1901, the district
+  gazetteers and the settlement reports. Its paragraphs on dwellings and on the material condition of the people are
+  general statements for the whole province, of the years about 1901 to 1904, with no survey behind them that it
+  names.
+verified:
+  by: machine:claude-code
+  how: >-
+    The chapter on the population (towns and villages, p. 34; dwellings, p. 49) and the paragraph on the material condition
+    of the people (p. 72) read on 20 November 2026 in the OCR text of the scan. The OCR reads "flat roofs" on p. 49 as
+    "fiat roofs", so that sentence is quoted only from where it reads cleanly. The quotes were checked by script against
+    the OCR.

@@ -1,0 +1,28 @@
+id: src:pan-2023-southern-anhui-folk-houses
+type: publication
+kind: measurement
+citation: >-
+  Pan, C., Wu, Y., Chen, S. & Yang, Y. (2023). Indoor Environmental Comfort Assessment of Traditional Folk Houses: A
+  Case Study in Southern Anhui, China. International Journal of Environmental Research and Public Health 20(4), 3024.
+authors:
+  - "Pan, C."
+  - "Wu, Y."
+  - "Chen, S."
+  - "Yang, Y."
+published: 2023
+title: "Indoor Environmental Comfort Assessment of Traditional Folk Houses: A Case Study in Southern Anhui, China"
+container: International Journal of Environmental Research and Public Health
+doi: 10.3390/ijerph20043024
+url: https://www.ebi.ac.uk/europepmc/webservices/rest/PMC9966381/fullTextXML
+license: CC-BY-4.0
+via: Europe PMC (PMC9966381).
+reliability: >-
+  A study of heat, light, air and noise inside the old houses of one village, Xixinan in the Huizhou District of
+  Huangshan, with one house measured through a summer and a winter. It describes the village's houses in a paragraph
+  and gives the measures of that one house; the village's age and its counts of Ming and Qing buildings are taken
+  from a work not read here.
+verified:
+  by: machine:claude-code
+  how: >-
+    The full text read from Europe PMC's XML on 20 November 2026 and kept as text; section 2.2 read in full and the
+    rest searched; the quotes checked by script against that text.

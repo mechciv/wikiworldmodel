@@ -1,0 +1,24 @@
+id: src:kwon-2015-baekje-royal-city-periphery
+type: publication
+kind: review
+citation: >-
+  Kwon, O. (2015). The Material Culture of the Royal City Identified in the Peripheral Regions of Baekje. Journal of
+  Korean Art and Archaeology 9, 80–92.
+authors:
+  - "Kwon, O."
+published: 2015
+title: The Material Culture of the Royal City Identified in the Peripheral Regions of Baekje
+container: Journal of Korean Art and Archaeology 9, 80–92
+doi: 10.23158/jkaa.2015.v9_06
+url: https://ijkaa.org/v.9/0/80/137
+license: CC-BY-NC-ND-4.0
+license_note: Short quotes, with credit.
+reliability: >-
+  An archaeologist of Baekje, in the National Museum of Korea's journal, cited for the pit dwellings of the
+  Mahan-Baekje sphere of the Proto-Three Kingdoms period and the surface buildings that followed them in Baekje's
+  capitals, which it summarizes from excavation reports not read here.
+verified:
+  by: machine:claude-code
+  how: >-
+    The article's HTML fetched from the journal's site on 20 November 2026 and read as text; the quotes checked by
+    script against that text.

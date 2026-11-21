@@ -1,0 +1,25 @@
+id: src:roth-1896-natives-of-sarawak
+type: publication
+kind: review
+citation: >-
+  Roth, H.L. The Natives of Sarawak and British North Borneo, based chiefly on the MSS. of the late Hugh Brooke Low,
+  Sarawak Government Service. 2 vols. London: Truslove & Hanson, 1896.
+authors:
+  - "Roth, H.L."
+published: 1896
+title: The Natives of Sarawak and British North Borneo
+url: https://archive.org/details/nativesofsarawak01roth
+via: >-
+  The Internet Archive's scans of the two volumes (nativesofsarawak01roth and nativesofsarawak02roth), read in their OCR
+  text, the two kept as one text file.
+license: public domain
+reliability: >-
+  A compilation of what travellers, officers and missionaries had written of the peoples of Sarawak and North Borneo,
+  chiefly Brooke Low's notes, each passage quoted with its author. The passages cited are Low's, James Brooke's,
+  Spencer St. John's and W.T. Hornaday's, of the Sea Dyaks (Iban) and the Sibuyau, written between the 1840s and the 1880s; the houses
+  measured in it are those its authors thought worth measuring, the largest.
+verified:
+  by: machine:claude-code
+  how: >-
+    Vol. I, pp. 397 to 400 (agriculture), and vol. II, pp. 9 to 12 and 16 (houses), read on 20 November 2026 in the OCR
+    text of the scans; the quotes keep to stretches the OCR reads cleanly, and were checked by script against it.

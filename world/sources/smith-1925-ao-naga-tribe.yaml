@@ -1,0 +1,22 @@
+id: src:smith-1925-ao-naga-tribe
+type: publication
+kind: measurement
+citation: >-
+  Smith, W.C. The Ao Naga Tribe of Assam: A Study in Ethnology and Sociology, with an introduction by J.H. Hutton.
+  London: Macmillan, 1925.
+authors:
+  - "Smith, W.C."
+published: 1925
+title: "The Ao Naga Tribe of Assam: A Study in Ethnology and Sociology"
+url: https://archive.org/details/aonagatribeofass0000will_h3n3
+via: The Internet Archive's scan (aonagatribeofass0000will_h3n3), read in its OCR text.
+license: public domain
+reliability: >-
+  An ethnography by a sociologist who had been superintendent of the mission training school at Impur in the Naga Hills,
+  written from what he saw among the Ao in the first years of the twentieth century. It describes the house and the
+  fields as they were then; it dates nothing earlier, and its account of Ao origins is the people's own tradition.
+verified:
+  by: machine:claude-code
+  how: >-
+    Chapter III (pp. 27 to 30, houses and villages; pp. 40 and 41, agriculture) and p. 80 read on 20 November 2026 in the
+    OCR text of the scan; the quotes checked by script against it.

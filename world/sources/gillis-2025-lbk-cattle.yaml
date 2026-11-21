@@ -1,0 +1,22 @@
+id: src:gillis-2025-lbk-cattle
+type: publication
+kind: measurement
+citation: >-
+  Gillis, R.E., Kendall, I.P., Roffet-Salque, M., … & Evershed, R.P. (2025). Diverse prehistoric cattle husbandry strategies in the forests of Central Europe. Nature Ecology & Evolution 9(1), 87–98.
+authors:
+  - "Gillis, R.E."
+  - "Kendall, I.P."
+  - "Roffet-Salque, M."
+  - "Zanon, M."
+# the first four of many authors
+published: 2025
+title: "Diverse prehistoric cattle husbandry strategies in the forests of Central Europe"
+container: "Nature Ecology & Evolution 9(1), 87–98"
+doi: 10.1038/s41559-024-02553-y
+url: https://europepmc.org/article/PMC/PMC11726460
+license: CC-BY-4.0
+verified:
+  by: machine:claude-code
+  how: >-
+    Full text read as XML from Europe PMC (PMC11726460) on 20 November 2026, and turned into text. Each quote checked by script against that text; citation from the Europe PMC
+    record.

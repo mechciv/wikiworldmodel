@@ -52,6 +52,25 @@ claims:
       the region.
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-architecture-of-mesopotamia-1384588782.txt (sha256 caa4c479981c7d86), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+  lifeway:
+    prop: lifeway
+    value: [townspeople]
+    source:
+      - ref: src:wikipedia-architecture-of-mesopotamia
+        loc: last paragraph of section "Ziggurats", on the notable remains
+        quote: Houses are mostly known from Old Babylonian remains at Nippur and Ur.
+      - ref: src:wikipedia-architecture-of-mesopotamia
+        loc: section "Urban planning"
+        quote: >-
+          The typical city divided space into residential, mixed use, commercial, and civic spaces. The residential areas
+          were grouped by profession.
+    method: editorial
+    note: >-
+      Townspeople: the houses the source describes are those of cities, known mostly from two of them, Nippur and Ur,
+      where people lived in quarters by their trade. It names small hamlets on the irrigated land around a city, and does
+      not describe their houses.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-architecture-of-mesopotamia.txt (sha256 242b96333f37ee34), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   dwelling:
     prop: dwelling
     value: { plan: courtyard, court: true, storeys: { lo: 1, hi: 2 }, walls: mudbrick, roof_material: earth }

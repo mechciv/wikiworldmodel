@@ -1,0 +1,128 @@
+id: people/traditions/ganda-round-house
+kind: tradition/building
+summary: >-
+  The round house of the Baganda, north and west of Lake Victoria, as Roscoe described the customs before colonial rule:
+  a cone of stitched reeds on rings of posts, built from the top down and carried to the ground on every side but the
+  doorway, thatched a foot thick with broad-bladed grass, standing among the plantain gardens of its family, each a
+  little apart from the next. The span is a reading: it starts with the founding of the kingdom as the encyclopedia
+  dates it from tradition, which is not a date for the house, and has no end, as no source read says when such houses
+  ceased to be built.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Ganda round house }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: { lo: 1200 CE, hi: 1400 CE }
+    source:
+      ref: src:wikipedia-buganda
+      loc: section "Clans of Baganda", "Kintu migration"
+      quote: >-
+        The Abalasangeye dynasty came to power through the conquests of Kabaka of Buganda ssekabaka Kintu, which are
+        estimated to have occurred sometime between 1200 and 1400 AD.
+    method: tradition
+    note: >-
+      When the kingdom is reckoned to have been founded, from its king lists, taken as a bound by which the Ganda way of
+      life, and so its house, is taken to have stood. No source read here describes a Ganda house before Speke's of 1862
+      or dates one by excavation, so this is a reading, not a date for the house. There is no end claim: Roscoe writes of
+      these houses in the past tense, of the customs of before about 1900, but no source read says when they ceased to be
+      built.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-buganda.txt (sha256 0ffa08ef64be4f7c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["92"] }
+    source:
+      - ref: src:wikipedia-buganda
+        loc: opening section
+        quote: Buganda is a Bantu kingdom within Uganda.
+      - ref: src:wikipedia-buganda
+        loc: section "Geography and environment"
+        quote: >-
+          Buganda's boundaries are marked by the Tanzanian border in Lake Victoria (Lake Nalubaale) to the south, the
+          River Nile (River Kiira) to the east, Lake Kyoga to the north, Ankole to the west and River Kafu to the northwest.
+    method: editorial
+    note: >-
+      Region 92 (Uganda, Rwanda and Burundi), of which Buganda is the part north and west of Lake Victoria. The houses of
+      Bunyoro, Ankole, Rwanda and Burundi are not described in what was read and are not claimed; the region is named for
+      Buganda alone.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-buganda.txt (sha256 0ffa08ef64be4f7c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      - ref: src:roscoe-1911-baganda
+        loc: "chap. I, p. 15"
+        quote: The peasants in the country lived in their gardens or
+      - ref: src:roscoe-1911-baganda
+        loc: "chap. I, p. 15"
+        quote: >-
+          a number of people lived in a community, often forming four or five miles of continuous garden with families
+          living each on their own plot
+    method: documentary
+    note: >-
+      Peasant families who lived on their own plots in their plantain gardens, which ran on for miles: fields kept year
+      after year, not cleared and left. The chiefs' and the king's enclosures, which Roscoe describes at length, were of the
+      same round houses, larger; the capital is not claimed as a town here.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in roscoe-1911-baganda.txt (sha256 13c07afbd038c9ba), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { plan: round, walls: none, roof: conical, roof_material: thatch, height: { lo: 4, hi: 5.5 } }
+    source:
+      - ref: src:roscoe-1911-baganda
+        loc: "chap. XI, p. 369"
+        quote: In the building of a round house, the work was begun from
+      - ref: src:roscoe-1911-baganda
+        loc: "chap. XI, p. 371"
+        quote: The central pillars of a good house were about fifteen or twenty feet long
+      - ref: src:roscoe-1911-baganda
+        loc: "chap. XI, p. 372"
+        quote: They were planted two feet in the ground
+      - ref: src:roscoe-1911-baganda
+        loc: "chap. XI, p. 372"
+        quote: This reedwork-roof was carried down to the ground on all sides, except in the doorways.
+      - ref: src:roscoe-1911-baganda
+        loc: "chap. XI, p. 372"
+        quote: The grass for thatching was a special broad-bladed variety which grew in every part of the country.
+      - ref: src:roscoe-1911-baganda
+        loc: "chap. XI, p. 373"
+        quote: adding layer upon layer, to the top of the conical house.
+    method: documentary
+    note: >-
+      A round house whose roof of stitched reeds came down to the ground, so it had no walls, thatched with grass to the top
+      of the cone. The height is from the central pillars, on which the ring at the top of the roof rested: fifteen or
+      twenty feet long, two of them in the ground, so the top stood some thirteen to eighteen feet, 4 to 5.5 m, above the
+      floor; that reckoning is the writer's, and it is of "a good house". No diameter is given in what was read.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in roscoe-1911-baganda.txt (sha256 13c07afbd038c9ba), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  settlement:
+    prop: settlement_form
+    value: { pattern: dispersed }
+    source:
+      - ref: src:roscoe-1911-baganda
+        loc: "chap. III, p. 95"
+        quote: the houses were some little distance away from each other.
+      - ref: src:roscoe-1911-baganda
+        loc: "chap. I, p. 15"
+        quote: >-
+          a number of people lived in a community, often forming four or five miles of continuous garden with families
+          living each on their own plot
+    method: documentary
+    note: Each family's house on its own plot in the gardens, the houses a little apart, with no village of the European kind.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in roscoe-1911-baganda.txt (sha256 13c07afbd038c9ba), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  fields:
+    prop: field_system
+    value: { kind: gardens }
+    source:
+      ref: src:roscoe-1911-baganda
+      loc: "chap. III, p. 95"
+      quote: Peasant women had large plantain gardens to keep in order
+    method: documentary
+    note: Plantain gardens, kept by the women, around the houses.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in roscoe-1911-baganda.txt (sha256 13c07afbd038c9ba), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

@@ -1,0 +1,27 @@
+id: src:zhou-2002-yaodong-thermal-environment
+type: publication
+kind: measurement
+citation: >-
+  Zhou, N., Nishida, M. & Kitayama, H. (2002). Study on the Thermal Environment of the YaoDong Dwelling in the Loess
+  Plateau of China. Journal of Asian Architecture and Building Engineering 1(1), 81–86.
+authors:
+  - "Zhou, N."
+  - "Nishida, M."
+  - "Kitayama, H."
+published: 2002
+title: Study on the Thermal Environment of the YaoDong Dwelling in the Loess Plateau of China
+container: Journal of Asian Architecture and Building Engineering 1(1), 81–86
+doi: 10.3130/jaabe.1.81
+url: https://www.jstage.jst.go.jp/article/jaabe/1/1/1_1_81/_pdf
+via: J-STAGE, where the journal's early volumes are kept.
+license_note: No licence is stated on the paper. Short quotes only.
+reliability: >-
+  A study of the summer temperatures inside one cave dwelling at Zaoyuan village, Yan'an, in northern Shaanxi, measured
+  on two days of August 1999; not a study of the dwelling's form. It is cited for where yaodong are found and for the
+  one house it describes, whose roof was earth with weeds growing on it. Its forty million cave dwellers are "said" and
+  given no source. It gives no size for the dwelling in its text.
+verified:
+  by: machine:claude-code
+  how: >-
+    The paper's PDF fetched from J-STAGE on 20 November 2026 and read whole as text; the quotes checked by script
+    against it. Volume, issue and pages from the paper's own header and Crossref's record of the DOI.

@@ -1,0 +1,20 @@
+id: src:brusgaard-2026-swifterbant-cattle
+type: publication
+kind: measurement
+citation: >-
+  Brusgaard, N.Ø., Kootker, L.M. & Raemaekers, D.C.M. (2026). Isotope analysis reveals mobility of the earliest cattle herds in northern Europe. Scientific Reports 16, 35619.
+authors:
+  - "Brusgaard, N.Ø."
+  - "Kootker, L.M."
+  - "Raemaekers, D.C.M."
+published: 2026
+title: "Isotope analysis reveals mobility of the earliest cattle herds in northern Europe"
+container: "Scientific Reports 16, 35619"
+doi: 10.1038/s41598-026-66057-4
+url: https://europepmc.org/article/PMC/PMC13723414
+license: CC-BY-4.0
+verified:
+  by: machine:claude-code
+  how: >-
+    Full text read as XML from Europe PMC (PMC13723414) on 20 November 2026, and turned into text. Each quote checked by script against that text; citation from the Europe PMC
+    record.

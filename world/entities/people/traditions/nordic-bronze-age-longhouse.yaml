@@ -81,6 +81,21 @@ claims:
       it covered the region.
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in nicosia-2022-PMC9432763-with-S1.txt (sha256 d9d52156e5f25fc8), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      ref: src:wichmann-2025-fingerprinting-conflict
+      loc: 'section "Schleswig-Holstein (Bronze Age): Cooking pits, weapons, and fortifications"'
+      quote: >-
+        Settlements in both periods, on the other hand, consisted of individual farmsteads with or one or two longhouses,
+        which were scattered across the Jutland peninsula within a few kilometres of each other.
+    method: editorial
+    note: >-
+      Farmers: in the Older and the Younger Bronze Age of the Jutland peninsula the longhouse was the house of a single
+      farmstead.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wichmann-2025-fingerprinting-conflict.txt (sha256 f921c0f1dd34d067), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   dwelling:
     prop: dwelling
     value: { plan: long }

@@ -54,6 +54,33 @@ claims:
       also has walled settlements of the Xiongnu élite and small settlements of semi-subterranean dwellings.
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in makarewicz-2024-xiongnu-elites.txt (sha256 19988d8593535de4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+  lifeway:
+    prop: lifeway
+    value: [herders]
+    source:
+      - ref: src:makarewicz-2024-xiongnu-elites
+        loc: section "The Xiongnu archaeological record"
+        quote: >-
+          Seasonally occupied nomadic campsites used by Xiongnu herders are usually represented by a central hearth feature
+          surrounded by sparse artifact scatters with minimal debris accumulation and no detectable architectural investment.
+      - ref: src:makarewicz-2024-xiongnu-elites
+        loc: section "The Xiongnu archaeological record"
+        quote: >-
+          This material patterning is consistent with the use of portable dwellings (i.e., yurts or gers) depicted in images on
+          a number of Xiongnu birch bark containers
+      - ref: src:sellers-2022-tuvan-pastoralists
+        loc: section "Introduction"
+        quote: >-
+          The pastoralists lived in yurts and practised animal husbandry, which required the regular herding of livestock for
+          many hours per day in an extreme cold environment.
+    method: editorial
+    note: >-
+      Herders, then and now: the camps of Xiongnu herders fit portable tents, and the herders the second source studied, in
+      Tuva across the border, live in yurts today. Townspeople are not named, though the source that counts the gers of
+      Ulaanbaatar has hundreds of thousands of families living in them in its suburbs: that is shown of the capital today
+      only, and the first source gives the settled places of the Xiongnu other buildings.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in makarewicz-2024-xiongnu-elites.txt (sha256 bf88a829bea80f16) and sellers-2022-tuvan-pastoralists.txt (sha256 11ab1b990f872639), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   dwelling:
     prop: dwelling
     value: { plan: round, diameter: 5.6, walls: felt, roof_material: felt }

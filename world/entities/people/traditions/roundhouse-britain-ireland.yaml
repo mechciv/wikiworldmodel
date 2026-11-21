@@ -76,6 +76,27 @@ claims:
       among them, and Ireland. A region named is where the sources place the house, not a claim that it covered the region.
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in parker-pearson-2025-cladh-hallan-part2.txt (sha256 d3eb66ef72db1f1b), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      - ref: src:guiry-2025-irish-pigs
+        loc: 'section "Pigs and proximity: nitrogen isotope compositions show change"'
+        quote: >-
+          The settlement type in Iron Age Ireland was of dispersed rural unenclosed round houses, which was essentially
+          unchanged since the Bronze Age
+      - ref: src:guiry-2025-irish-pigs
+        loc: 'section "Pigs and proximity: nitrogen isotope compositions show change"'
+        quote: >-
+          For our purposes, areas of denser human population would be settlement locations … such as small
+          concentrations of farms or even individual farmsteads.
+    method: editorial
+    note: >-
+      Farmers: the scattered rural round houses were the settlements of Bronze Age and Iron Age Ireland, which the source
+      speaks of as small concentrations of farms or single farmsteads. That is Ireland; no source read says in so many
+      words how the people of Britain's round houses lived.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in guiry-2025-irish-pigs.txt (sha256 48d8863665aaf795), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   dwelling:
     prop: dwelling
     value: { plan: round }

@@ -37,6 +37,22 @@ claims:
     note: Region 76 (Mali), which holds Djenné. The house is described for the town alone, and is not claimed for the region.
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-djenne-1377179164.txt (sha256 192be4828b6b492b), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+  lifeway:
+    prop: lifeway
+    value: [townspeople]
+    source:
+      ref: src:wikipedia-djenne
+      loc: section "After the Songhai", Caillié's description of 1828
+      quote: >-
+        The town of Jenné is about two miles and half in circumference; it is surrounded by a very ill constructed earth
+        wall, about ten feet high, and fourteen inches thick. There are several gates, but they are all small. The houses are
+        built of bricks dried in the sun.
+    method: editorial
+    note: >-
+      The houses Caillié describes are those of a walled town, and the two-storey courtyard houses the article describes
+      today are the town's as well. It describes no house of the villages around Djenné, so farmers are not named.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-djenne.txt (sha256 a6503137280dc897), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   dwelling:
     prop: dwelling
     value: { plan: courtyard, court: true, storeys: { lo: 1, hi: 2 }, walls: mudbrick, roof: flat }
@@ -81,6 +97,24 @@ claims:
     note: A walled town in 1828, and still in 1895, when Félix Dubois visited it.
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-djenne-1377179164.txt (sha256 192be4828b6b492b), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+  town:
+    prop: town_form
+    value: { wall: mudbrick, wall_height: 3.05, wall_thickness: 0.36 }
+    source:
+      - ref: src:wikipedia-djenne
+        loc: section "After the Songhai", Caillié's description of 1828
+        quote: >-
+          it is surrounded by a very ill constructed earth wall, about ten feet high, and fourteen inches thick. There are
+          several gates, but they are all small.
+      - ref: src:wikipedia-djenne
+        loc: section "After the Songhai"
+        quote: At the time of his visit the town was still encircled by an adobe wall.
+    method: documentary
+    note: >-
+      Djenné in 1828 inside a wall of earth, which the article calls adobe, so sun-dried brick: about ten feet high and
+      fourteen inches thick, here 3.05 m and 0.36 m. It had several small gates, not counted. How its streets ran is not said.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-djenne.txt (sha256 a6503137280dc897), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
 relations:
   broader:
     rel: member-of

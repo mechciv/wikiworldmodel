@@ -1,0 +1,67 @@
+id: people/husbandry/indus-farm-animals
+kind: tradition/husbandry
+summary: >-
+  The zebu cattle and water buffalo, with fewer sheep, goats and pigs, of the Indus Civilisation's towns and villages from its urban phase, 2600 BCE.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: "Farm animals of the Indus Civilisation" }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 2600 BCE
+    source:
+      ref: src:petrie-2024-indus-animal-movement
+      loc: "Introduction"
+      quote: "the settlements of its urban phase (2600–1900 BC) were distributed over an extensive area of Pakistan and northwest India"
+    method: expert-estimate
+    note: >-
+      The start of the urban phase. The animals were kept on after it, so there is no end claim.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in petrie-2024-indus-animal-movement.txt (sha256 8792967b4bb3ff61), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["105", "107", "109"] }
+    source:
+      ref: src:petrie-2024-indus-animal-movement
+      loc: "Introduction"
+      quote: "the settlements of its urban phase (2600–1900 BC) were distributed over an extensive area of Pakistan and northwest India"
+    method: editorial
+    note: >-
+      Region 105 (Pakistan), and regions 107 (Northern India) and 109 (Northwestern India) for northwest India, as the building traditions of the Indus have them.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in petrie-2024-indus-animal-movement.txt (sha256 8792967b4bb3ff61), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [farmers, townspeople]
+    source:
+      - ref: src:petrie-2024-indus-animal-movement
+        loc: "Introduction, \"The Indus Civilisation and evidence for animal use\""
+        quote: "were the animals most suited to heavy traction in both agricultural production"
+      - ref: src:petrie-2024-indus-animal-movement
+        loc: "Introduction"
+        quote: "the settlements of its urban phase (2600–1900 BC) were distributed over an extensive area of Pakistan and northwest India"
+    method: editorial
+    note: >-
+      Farmers, whose ploughs and carts the cattle and buffalo drew, and the people of the towns, whose bones these assemblages are.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in petrie-2024-indus-animal-movement.txt (sha256 8792967b4bb3ff61), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  livestock:
+    prop: livestock
+    value: [life/taxa/bos-indicus, life/taxa/bubalus-bubalis, life/taxa/ovis-aries, life/taxa/capra-hircus, life/taxa/sus-domesticus]
+    source:
+      - ref: src:petrie-2024-indus-animal-movement
+        loc: "Introduction, \"The Indus Civilisation and evidence for animal use\""
+        quote: "Indus zooarchaeological assemblages typically have a high proportion of cattle (largely Bos indicus) and/or water buffalo (Bubalus bubalis)"
+      - ref: src:petrie-2024-indus-animal-movement
+        loc: "Introduction, \"The Indus Civilisation and evidence for animal use\""
+        quote: "and a smaller proportion of sheep/goat (Ovis aries and Capra hircus), with some pig (Sus domesticus)"
+    method: excavation
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in petrie-2024-indus-animal-movement.txt (sha256 8792967b4bb3ff61), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+relations:
+  member-of:
+    rel: member-of
+    to: people/husbandry/mehrgarh-farm-animals
+    unsourced: An editorial grouping.

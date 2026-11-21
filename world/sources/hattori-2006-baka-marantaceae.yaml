@@ -1,0 +1,23 @@
+id: src:hattori-2006-baka-marantaceae
+type: publication
+kind: measurement
+citation: >-
+  Hattori, S. (2006). Utilization of Marantaceae Plants by the Baka Hunter-Gatherers in Southeastern Cameroon. African
+  Study Monographs, Supplementary Issue 33, 29–48.
+authors: ["Hattori, S."]
+published: 2006
+title: Utilization of Marantaceae Plants by the Baka Hunter-Gatherers in Southeastern Cameroon
+container: African Study Monographs, Supplementary Issue
+doi: 10.14989/68476
+url: http://hdl.handle.net/2433/68476
+license: open access
+license_note: As the Kyoto University Research Information Repository (KURENAI) gives it; no licence is named.
+reliability: >-
+  An ethnobotanical study of the Baka of Malea Ancien, Boumba-Ngoko, East Province of Cameroon, from fieldwork of
+  November 2003 to July 2004. It describes how the traditional hut is built, and gives no sizes.
+verified:
+  by: machine:claude-code
+  how: >-
+    The PDF from the Kyoto University repository (handle 2433/68476), downloaded on 20 November 2026 through the
+    repository's API, and its text layer read with PyMuPDF; the research area and the entries on the plants used for the
+    hut read, and the quotes checked by script against that text.

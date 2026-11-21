@@ -1,0 +1,69 @@
+id: people/husbandry/post-harappan-fowl
+kind: tradition/husbandry
+summary: >-
+  The farm animals of the north-west of South Asia after the Harappans, with chickens, which reached South Asia only after the Harappan civilization, by the late second millennium BCE.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: "Farm animals and fowl of South Asia after the Harappans" }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: { lo: 1500 BCE, hi: 1200 BCE }
+    source:
+      - ref: src:peters-2022-chickens
+        loc: "Results, on the Indian subcontinent"
+        quote: "prominent in the subsequent early Jorwe levels dating from ∼1500 to 1200 BCE"
+      - ref: src:peters-2022-chickens
+        loc: "Results, on the Indian subcontinent"
+        quote: "poultry farming in South Asia was a post-Harappan development"
+    method: expert-estimate
+    note: >-
+      The early Jorwe levels at Daimabad, the first in which the paper finds chickens prominent. The animals are still kept, so there is no end claim.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in peters-2022-chickens.txt (sha256 b75c9dadef531c16), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["105", "107", "109"] }
+    source:
+      ref: src:peters-2022-chickens
+      loc: "Results, on the Indian subcontinent"
+      quote: "poultry farming in South Asia was a post-Harappan development"
+    method: editorial
+    note: >-
+      The regions of the Indus tradition, 105 (Pakistan), 107 (Northern India) and 109 (Northwestern India), as the paper writes of South Asia as a whole. Matching its words to these regions is editorial, and Daimabad itself, in the Deccan, lies outside them.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in peters-2022-chickens.txt (sha256 b75c9dadef531c16), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      ref: src:peters-2022-chickens
+      loc: "Results, on the Indian subcontinent"
+      quote: "poultry farming in South Asia was a post-Harappan development"
+    method: editorial
+    note: >-
+      Farmers, as the broader tradition.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in peters-2022-chickens.txt (sha256 b75c9dadef531c16), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  livestock:
+    prop: livestock
+    value: [life/taxa/bos-indicus, life/taxa/bubalus-bubalis, life/taxa/ovis-aries, life/taxa/capra-hircus, life/taxa/sus-domesticus, life/taxa/gallus-domesticus]
+    source:
+      - ref: src:petrie-2024-indus-animal-movement
+        loc: "Introduction, \"The Indus Civilisation and evidence for animal use\""
+        quote: "Indus zooarchaeological assemblages typically have a high proportion of cattle (largely Bos indicus) and/or water buffalo (Bubalus bubalis)"
+      - ref: src:peters-2022-chickens
+        loc: "Results, on the Indian subcontinent"
+        quote: "prominent in the subsequent early Jorwe levels dating from ∼1500 to 1200 BCE"
+    method: excavation
+    note: >-
+      The animals of the broader tradition, with chickens.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in petrie-2024-indus-animal-movement.txt (sha256 8792967b4bb3ff61) and peters-2022-chickens.txt (sha256 b75c9dadef531c16), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+relations:
+  member-of:
+    rel: member-of
+    to: people/husbandry/indus-farm-animals
+    unsourced: An editorial grouping.

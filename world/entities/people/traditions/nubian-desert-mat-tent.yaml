@@ -1,0 +1,103 @@
+id: people/traditions/nubian-desert-mat-tent
+kind: tradition/building
+summary: >-
+  The mat tent of the herders of the Nubian desert, the Bisharin and the Arab tribes along the Nile and the Atbara: two
+  rows of poles set opposite each other and leaning together at the top, with poles tied across them and mats of doum-palm
+  leaf thrown over, so that the sides slope like a roof to shed the rain. A partition parted the women's side; camps stood
+  in long rows, and when the people moved, the poles and mats went on camels. Its earliest description read here is
+  Burckhardt's, of 1813 and 1814.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Palm-mat tent of the Nubian desert }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 1813 CE
+    source:
+      - ref: src:burckhardt-1822-travels-in-nubia
+        loc: 'the opening of the journey to Berber and Suakin "performed in the year 1814"'
+        quote: After my return from a journey along the banks of the Nile … in the spring of the year 1813
+      - ref: src:burckhardt-1822-travels-in-nubia
+        loc: 'journey along the Nile, entry of March 2d, on the Kerrarish, p. 28'
+        quote: >-
+          They are poor ; their tents are formed of mats made of the leaves of palm-trees, with a partition in the middle to
+          separate the women's apartment
+    method: documentary
+    note: >-
+      The year of the earliest account read: Burckhardt saw the mat tents of the Kerrarish on the Nile above Derr in March
+      1813, and those of the Bisharin at Atbara in May 1814. It bounds the start and does not date it: the tent is surely
+      older. No end is given: no source read says when it went out of use.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in burckhardt-1822-travels-in-nubia.txt (sha256 19eff18d8cfdee95), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["72", "73"] }
+    source:
+      - ref: src:burckhardt-1822-travels-in-nubia
+        loc: 'journey to Berber and Suakin, entry of May 22d, the village of Atbara, p. 331'
+        quote: This is the general mode of dwelling throughout the tract of desert country lying between Egypt and Abyssinia.
+      - ref: src:burckhardt-1822-travels-in-nubia
+        loc: 'journey along the Nile, entry of March 2d, on the Kerrarish, p. 28'
+        quote: >-
+          pasture their cattle on the uninhabited banks of the river, and on its islands, from Derr southward, as far as
+          Mahass and Dongola
+    method: editorial
+    note: >-
+      Sudan (73), where Burckhardt stayed in the Bisharin camp at Atbara and calls the mat tent the dwelling of the whole
+      desert between Egypt and Abyssinia; and Egypt (72), for the Kerrarish of the Nile valley above Derr, in Lower Nubia.
+      The desert he names may reach into Eritrea, which is left out, as he was not there.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in burckhardt-1822-travels-in-nubia.txt (sha256 19eff18d8cfdee95), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [herders]
+    source:
+      - ref: src:burckhardt-1822-travels-in-nubia
+        loc: 'journey to Berber and Suakin, entry of May 22d, the village of Atbara, p. 331'
+        quote: Whenever the Bedouins remove, the tents are struck, and the poles, mats, &c. are loaded upon camels.
+      - ref: src:burckhardt-1822-travels-in-nubia
+        loc: 'journey along the Nile, entry of March 2d, on the Kerrarish, p. 28'
+        quote: pasture their cattle on the uninhabited banks of the river
+    method: editorial
+    note: >-
+      Herders, who struck their tents and moved them on camels. The Ja'alin near Shendi, who pastured herds and also grew
+      onions, lived in huts of mats, which Burckhardt does not describe; farmers are not named.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in burckhardt-1822-travels-in-nubia.txt (sha256 19eff18d8cfdee95), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { plan: rectangular, height: { lo: 3.7, hi: 4.6 }, walls: none, roof: gable, roof_material: reed, floor: ground }
+    source:
+      - ref: src:burckhardt-1822-travels-in-nubia
+        loc: 'journey to Berber and Suakin, entry of May 22d, the village of Atbara, p. 331'
+        quote: >-
+          their place is supphed with mats. They fix a row of poles, about twelve or fifteen feet high, into the ground,
+          opposite to each other, and converging at the top; over these they fasten others horizontally ; upon which mats
+          are thrown in such a way as to present every where an inclined plane for the rain to run off.
+      - ref: src:burckhardt-1822-travels-in-nubia
+        loc: 'journey to Berber and Suakin, entry of May 22d, the village of Atbara, p. 331'
+        quote: >-
+          In the smaller tents both sexes live together ; but in the larger there is a partition across the tent
+    method: survey
+    note: >-
+      Poles 12 to 15 ft high (3.7 to 4.6 m) leaning together at the top, read here as the height of the ridge; with the mats
+      sloping from the top to the ground the roof is two inclined planes, a gable, and there are no walls. The plan is read
+      from the two rows of poles set opposite each other, so is longer than wide; its length and width are not stated. The
+      mats are of doum-palm leaf, entered as reed, the nearest word, which is mats of reed.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in burckhardt-1822-travels-in-nubia.txt (sha256 19eff18d8cfdee95), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  settlement:
+    prop: settlement_form
+    value: { pattern: camp }
+    source:
+      ref: src:burckhardt-1822-travels-in-nubia
+      loc: 'journey to Berber and Suakin, entry of May 22d, the village of Atbara, pp. 330-331'
+      quote: of several long irregular rows of tents, formed of mats made of … leaves of the Doum tree, and containing about two hundred families
+    method: survey
+    note: >-
+      A camp of long, irregular rows of tents: the one at Atbara held about two hundred families. How many tents that was,
+      and how many people to a tent, is not stated: persons of quality had a second tent for their women.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in burckhardt-1822-travels-in-nubia.txt (sha256 19eff18d8cfdee95), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

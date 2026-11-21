@@ -1,0 +1,28 @@
+id: src:keeley-golitko-2004-first-farmers-central-europe
+type: publication
+kind: review
+citation: >-
+  Keeley, L.H. & Golitko, M. (2004). First Farmers of Central Europe. In Bogucki, P.I. & Crabtree, P.J. (eds), Ancient
+  Europe 8000 B.C.–A.D. 1000: Encyclopedia of the Barbarian World, vol. 1, part 3. Charles Scribner's Sons (Thomson Gale).
+authors:
+  - "Keeley, L.H."
+  - "Golitko, M."
+published: 2004
+title: First Farmers of Central Europe
+container: "Ancient Europe 8000 B.C.–A.D. 1000: Encyclopedia of the Barbarian World, vol. 1 (Charles Scribner's Sons)"
+url: https://www.encyclopedia.com/humanities/encyclopedias-almanacs-transcripts-and-maps/first-farmers-central-europe
+via: Encyclopedia.com, which republishes the encyclopedia's articles from Gale.
+reliability: >-
+  A signed article by two students of the Linearbandkeramik in an encyclopedia of prehistory for general readers,
+  without references in the text but with a bibliography. It is of 2004: its date for the culture's origin, about 5700
+  BC, is earlier than later work gives, and is not used here. It is cited for what the houses were, where the culture
+  spread, and for the change of view on how its people farmed.
+verified:
+  by: machine:claude-code
+  how: >-
+    The article's page at Encyclopedia.com fetched on 20 November 2026 and read in full as text; the names of its authors
+    stand at its foot. The copy has question marks in place of some letters with diacritics, and the quotes keep clear of
+    them. The page gives no page numbers; the volume and part are from the cross-references of the encyclopedia's
+    articles on Bylany and Brześć Kujawski, read at the same site. The editors, publishers and year are from Open
+    Library's records of the encyclopedia (works OL19365288W and OL8311329W), which give Thomson Gale and Charles
+    Scribner's Sons, and 2004 and 2003. Quotes checked by script against the text of the page.

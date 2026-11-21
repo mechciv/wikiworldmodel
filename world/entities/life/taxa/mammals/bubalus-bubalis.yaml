@@ -1,0 +1,29 @@
+id: life/taxa/bubalus-bubalis
+kind: taxon
+summary: >-
+  The domestic water buffalo of South and East Asia, river and swamp types.
+same_as: { ott: 641187 }
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: "water buffalo", la: "Bubalus bubalis" }
+    source: { ref: src:opentree-taxonomy-3.7, loc: "tnrs/match_names: Bubalus bubalis, ott641187" }
+    note: Open Tree gives the scientific name; the English name is an editorial gloss.
+  mass:
+    prop: body_mass
+    value: { lo: 250, hi: 550 }
+    source:
+      ref: src:animal-diversity-web
+      loc: "account of Bubalus bubalis, Physical Description"
+      quote: "Domesticated water buffalo range from 250 to 550 kg."
+    method: compilation
+    note: >-
+      Domestic buffalo only; the wild form is about twice as heavy, and the account's body length is for the species, so none is given here.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in animal-diversity-web.txt (sha256 5ae3d0bcfbf74dd9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+relations:
+  parent:
+    rel: descends-from
+    to: life/taxa/bovidae
+    source: { ref: src:opentree-taxonomy-3.7, loc: "taxonomy/taxon_info ott641187 with include_lineage: Bubalus bubalis lies within Bovidae" }

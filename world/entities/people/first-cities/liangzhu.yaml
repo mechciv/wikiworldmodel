@@ -20,6 +20,8 @@ claims:
     method: radiometric/radiocarbon
     rank: preferred
     note: The dates of the culture, taken for its capital. Preferred as calibrated radiocarbon in cal B.P.; only the abstract could be read. The dams date from 5.3 to 4.7 ka B.P., says Zhang et al. (2021).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in liu-2017-liangzhu-hydraulic.txt (sha256 ae4e05bd8b35cb3c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   start-unesco:
     prop: start
     value: 3300 BCE
@@ -70,3 +72,21 @@ claims:
       quote: the ancient city of Liangzhu, with an estimated size of about 300 ha
     method: expert-estimate
     note: With no moment given within the culture's dates.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in liu-2017-liangzhu-hydraulic.txt (sha256 ae4e05bd8b35cb3c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  town-form:
+    prop: town_form
+    value: { wall: earth }
+    source:
+      - ref: src:liu-2017-liangzhu-hydraulic
+        loc: section "Defining the Liangzhu Hydraulic Landscape"
+        quote: earthen walls enclosed the city of Liangzhu in an area of about 300 ha (approximately 1.9 × 1.7 km)
+      - ref: src:liu-2017-liangzhu-hydraulic
+        loc: section "Defining the Liangzhu Hydraulic Landscape"
+        quote: the stones used in the base of the Liangzhu city walls
+    method: excavation
+    note: >-
+      Earthen walls on a base of stone round the city, with "water gates" where the inner walls are broken (Fig. 1 legend),
+      not counted. Their height and thickness, and how the city's streets or waterways ran, are not given here.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in liu-2017-liangzhu-hydraulic.txt (sha256 ae4e05bd8b35cb3c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

@@ -71,6 +71,8 @@ describe('the glance', () => {
       until: 0,
       land: { lifeways: 0.9, from: -300 },
       forms: { taxa: 1000, own_form: 2 },
+      // A time with no one is not counted; each of the others counts the same, however many lived then.
+      housing: [{ t: -9000, people: 0, housed: 0 }, { t: -3000, people: 100, housed: 10 }, { t: -100, people: 1000, housed: 500 }],
       ladder: { unchecked: 98, quoted: 2, 're-read': 0, audited: 0, accepted: 0 },
       formatTime: (t) => `${-t} yr ago`,
     });
@@ -82,6 +84,7 @@ describe('the glance', () => {
     expect(row('bodies').share).toBe(0.002);
     expect(row('lifeways').of).toBe('of inhabited land since 300 yr ago');
     expect(row('states')).toMatchObject({ share: null, of: 'not drawn yet' });
+    expect(row('houses')).toEqual({ id: 'houses', label: 'Houses of a tradition', share: 0.3, of: 'of people, at 2 times since 3000 yr ago' });
     expect(row('checked')).toMatchObject({ share: 0.02, of: 'of 100 claims, against their sources' });
     expect(row('history')).toMatchObject({ share: null, of: 'not measured yet' });
   });

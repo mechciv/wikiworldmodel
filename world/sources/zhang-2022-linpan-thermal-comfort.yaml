@@ -1,0 +1,36 @@
+id: src:zhang-2022-linpan-thermal-comfort
+type: publication
+kind: measurement
+citation: >-
+  Zhang, L., Liu, H., Wei, D., Liu, F., Li, Y., Li, H., Dong, Z., Cheng, J., Tian, L., Zhang, G. & Shi, L. (2022).
+  Impacts of Spatial Components on Outdoor Thermal Comfort in Traditional Linpan Settlements. International Journal of
+  Environmental Research and Public Health 19(11), 6421.
+authors:
+  - "Zhang, L."
+  - "Liu, H."
+  - "Wei, D."
+  - "Liu, F."
+  - "Li, Y."
+  - "Li, H."
+  - "Dong, Z."
+  - "Cheng, J."
+  - "Tian, L."
+  - "Zhang, G."
+  - "Shi, L."
+published: 2022
+title: Impacts of Spatial Components on Outdoor Thermal Comfort in Traditional Linpan Settlements
+container: International Journal of Environmental Research and Public Health
+doi: 10.3390/ijerph19116421
+url: https://www.ebi.ac.uk/europepmc/webservices/rest/PMC9179965/fullTextXML
+license: CC-BY-4.0
+via: Europe PMC (PMC9179965).
+reliability: >-
+  A study of outdoor comfort in the wooded farm settlements of the Chengdu Plain as they stand today, with the
+  buildings and woods of 1,194 of them in two towns counted from imagery. What it says of how the settlements are
+  spread and what they hold describes the present; it does not say how old the pattern is, and a building it counts
+  need not be a dwelling.
+verified:
+  by: machine:claude-code
+  how: >-
+    The full text read from Europe PMC's XML on 20 November 2026 and kept as text; the introduction and the paragraph
+    on the counted settlements read in full and the rest searched; the quotes checked by script against that text.

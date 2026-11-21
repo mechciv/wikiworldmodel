@@ -1,0 +1,54 @@
+id: people/husbandry/yangshao-pigs-and-dogs
+kind: tradition/husbandry
+summary: >-
+  The pigs and dogs of the Yangshao millet farmers of the middle Yellow River, from 5000 BCE.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: "Pigs and dogs of the Yangshao farmers" }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 5000 BCE
+    source:
+      ref: src:li-guo-chen-2026-central-plain
+      loc: "Introduction, \"The Central Plain in prehistory\""
+      quote: "The subsequent Yangshao (YS) period (5000 to 2500 BCE) represents a fully developed millet-based agricultural society"
+    method: expert-estimate
+    note: >-
+      The start of the Yangshao period in the Central Plain. Pigs and dogs were kept on after it, so there is no end claim.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in li-guo-chen-2026-central-plain.txt (sha256 9854fb1fdd863f43), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["119", "120"] }
+    source:
+      ref: src:liu-2022-proto-sino-tibetan-migration
+      loc: "section \"Dadiwan of the Yangshao Culture\""
+      quote: "The Yangshao culture that flourished in the middle Yellow River valley is characterized by sedentary villages, production of painted pottery, domestication of pigs and dogs"
+    method: editorial
+    note: >-
+      Regions 119 (North Central China) and 120 (Northern China), which hold the Wei valley and western Henan, as the Yangshao building tradition has them.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in liu-2022-proto-sino-tibetan-migration.txt (sha256 0112a15e47cb6b15), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      ref: src:li-guo-chen-2026-central-plain
+      loc: "Introduction, \"The Central Plain in prehistory\""
+      quote: "The subsequent Yangshao (YS) period (5000 to 2500 BCE) represents a fully developed millet-based agricultural society"
+    method: editorial
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in li-guo-chen-2026-central-plain.txt (sha256 9854fb1fdd863f43), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  livestock:
+    prop: livestock
+    value: [life/taxa/sus-domesticus, life/taxa/canis-familiaris]
+    source:
+      ref: src:liu-2022-proto-sino-tibetan-migration
+      loc: "section \"Dadiwan of the Yangshao Culture\""
+      quote: "The Yangshao culture that flourished in the middle Yellow River valley is characterized by sedentary villages, production of painted pottery, domestication of pigs and dogs"
+    method: compilation
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in liu-2022-proto-sino-tibetan-migration.txt (sha256 0112a15e47cb6b15), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

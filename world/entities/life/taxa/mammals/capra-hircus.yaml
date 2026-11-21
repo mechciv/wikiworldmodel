@@ -1,0 +1,39 @@
+id: life/taxa/capra-hircus
+kind: taxon
+summary: >-
+  Domestic goats, descended from the bezoar of the Zagros and south-eastern Anatolia.
+same_as: { ott: 19017 }
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: "domestic goats", la: "Capra hircus" }
+    source: { ref: src:opentree-taxonomy-3.7, loc: "tnrs/match_names: Capra hircus, ott19017" }
+    note: Open Tree gives the scientific name; the English name is an editorial gloss.
+  length:
+    prop: body_length
+    value: { lo: 1.15, hi: 1.7 }
+    source:
+      ref: src:animal-diversity-web
+      loc: "account of Capra hircus, Physical Description"
+      quote: "C. hircus is 1150 to 1700 mm in length"
+    method: compilation
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in animal-diversity-web.txt (sha256 5ae3d0bcfbf74dd9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  mass:
+    prop: body_mass
+    value: { lo: 9, hi: 113 }
+    source:
+      ref: src:animal-diversity-web
+      loc: "account of Capra hircus, Physical Description"
+      quote: "weight can vary between 9 and 113 kg"
+    method: compilation
+    note: >-
+      Across breeds; the account gives 45 kg as typical.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in animal-diversity-web.txt (sha256 5ae3d0bcfbf74dd9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+relations:
+  parent:
+    rel: descends-from
+    to: life/taxa/bovidae
+    source: { ref: src:opentree-taxonomy-3.7, loc: "taxonomy/taxon_info ott19017 with include_lineage: Capra hircus lies within Bovidae" }

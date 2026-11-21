@@ -1,0 +1,128 @@
+id: people/traditions/early-medieval-english-timber-house
+kind: tradition/building
+summary: >-
+  The timber house of the farms, hamlets and villages of England from the Anglo-Saxon settlement to the thirteenth
+  century: a rectangular building about twice as long as wide, some five metres by ten, its walls of posts or planks set
+  in the ground. It is measured from the buildings of the fifth to ninth centuries; that posts dug into the ground went
+  on being the way of rural building until footings of stone replaced them in the thirteenth century is a historian's
+  statement, and no measure of the later houses was read.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Post-built timber house of early medieval England }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: { lo: 401 CE, hi: 600 CE }
+    source:
+      - ref: src:marshall-marshall-1991-anglo-saxon-buildings
+        loc: introduction, p. 30
+        quote: >-
+          all the available information on Anglo-Saxon structures from the 6th to the 9th century has been collected
+      - ref: src:marshall-marshall-1991-anglo-saxon-buildings
+        loc: 'Table 1, "The record for a site", p. 32'
+        quote: Name Bishopstone County Sussex Date (Century) 5 Number of buildings 13
+    method: expert-estimate
+    note: >-
+      The fifth or the sixth century. The source says its data base runs from the sixth century to the ninth, and its
+      own example of a record, the site at Bishopstone in Sussex, is dated to the fifth. The dates are the excavators',
+      and the source says that few buildings of the period can be dated closely.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in marshall-marshall-1991-anglo-saxon-buildings.txt (sha256 20346e55515c1e84), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  end:
+    prop: end
+    value: { ref: people/traditions/later-medieval-english-peasant-house, edge: start }
+    source:
+      - ref: src:dyer-1986-english-peasant-buildings
+        loc: 'section "Peasant buildings, 1200–1350", point 3, p. 35'
+        quote: >-
+          We can define a clear and important innovation in building construction in the 13th century when various forms
+          of foundation were adopted instead of earthfast posts
+      - ref: src:dyer-1986-english-peasant-buildings
+        loc: 'section "Peasant buildings, 1200–1350", point 3, pp. 35–36, where the sentence runs over the page'
+        quote: >-
+          posts (visible archaeologically as post-holes) which had been a feature of building in … rural settlements since
+          prehistoric times
+    method: expert-estimate
+    note: >-
+      It ends as the later medieval peasant house begins, in the thirteenth century, when footings took the place of
+      posts set in the ground: the second source's statement of when that way of building was given up. The first
+      source's buildings are no later than the ninth century, so the houses of the tenth to twelfth centuries are held
+      here by that one statement.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in dyer-1986-english-peasant-buildings.txt (sha256 3ef1b244c818fded), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["38"] }
+    source:
+      ref: src:marshall-marshall-1991-anglo-saxon-buildings
+      loc: introduction, p. 30
+      quote: there is the further problem of how the hybrid came to be so widespread over the whole of England
+    method: editorial
+    note: >-
+      Region 38 (United Kingdom and Ireland), for England, over the whole of which the source finds the style. Wales,
+      Scotland and Ireland are not claimed.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in marshall-marshall-1991-anglo-saxon-buildings.txt (sha256 20346e55515c1e84), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      - ref: src:marshall-marshall-1991-anglo-saxon-buildings
+        loc: 'section "The social and economic context", p. 30'
+        quote: >-
+          possess a large number of structures: others, such as Chalton, … are small hamlets or, as at New Wintles, …
+          isolated farm units
+      - ref: src:dyer-1986-english-peasant-buildings
+        loc: 'section "Peasant buildings, 1200–1350", point 3, pp. 35–36, where the sentence runs over the page'
+        quote: >-
+          posts (visible archaeologically as post-holes) which had been a feature of building in … rural settlements since
+          prehistoric times
+    method: editorial
+    note: >-
+      Farmers: the settlements are single farms, hamlets and larger groups of buildings, and the later source speaks of
+      rural settlements. The first source says the finds tell little of how their people lived: sheep and cattle bones
+      suggest a partly pastoral economy at Bishopstone, and no site had then given evidence of arable farming. The
+      ellipses in its quote stand for footnote numbers. The great halls of the sites it takes to be of high status,
+      Yeavering a royal seat among them, are larger than the house drawn here.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in marshall-marshall-1991-anglo-saxon-buildings.txt (sha256 20346e55515c1e84) and dyer-1986-english-peasant-buildings.txt (sha256 3ef1b244c818fded), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { plan: rectangular, width: { lo: 4.5, hi: 6.5 }, length: { lo: 7, hi: 14 }, walls: timber }
+    source:
+      - ref: src:marshall-marshall-1991-anglo-saxon-buildings
+        loc: 'section "The shapes of the structures", p. 39'
+        quote: The structures are all rectangular, so that each can be characterized by the ratio of its length and width.
+      - ref: src:marshall-marshall-1991-anglo-saxon-buildings
+        loc: 'section "The results of the analysis", p. 34'
+        quote: >-
+          The box of Fig. 2 shows that the average width of all the structures is close to 5 m while their average length
+          is close to 10 m
+      - ref: src:marshall-marshall-1991-anglo-saxon-buildings
+        loc: 'section "The widths of the structures", p. 35'
+        quote: the widths cluster at 4.5 to 5.5 and at 6 to 6.5 m
+      - ref: src:marshall-marshall-1991-anglo-saxon-buildings
+        loc: 'section "The lengths of the structures", p. 37'
+        quote: These occur at approximately 7, 10, 14 and, to a lesser extent, 20 m
+      - ref: src:marshall-marshall-1991-anglo-saxon-buildings
+        loc: 'section "The lengths of the structures", p. 37'
+        quote: but otherwise most of the structures are not more than 14 m long
+      - ref: src:marshall-marshall-1991-anglo-saxon-buildings
+        loc: 'section "The data, its representation and the methods of analysis", p. 33'
+        quote: >-
+          The type of construction was classified under one of three headings: individual post-holes; post-in-trench; and
+          plank-in-trench.
+    method: excavation
+    note: >-
+      Of the 247 buildings of the fifth to ninth centuries whose length and width the source has, measured from excavated
+      plans and, for a few, from aerial photographs: the average is close to 5 m by 10 m, the widths gather at 4.5 to 5.5
+      m and at 6 to 6.5 m, and the lengths at about 7, 10 and 14 m, with most not over 14 m; the width and length here
+      span those. The source's buildings include the great halls of a few sites, wider than 7 m and longer than 15 m,
+      which the span leaves out. The walls were of timber set in the ground: single posts, the earliest way and one that
+      went on throughout, or posts or planks set in a trench, which came later. What filled the wall between the posts,
+      and what the roof was of, the source does not say, as only the plans survive. Its data base holds no
+      sunken-featured buildings.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in marshall-marshall-1991-anglo-saxon-buildings.txt (sha256 20346e55515c1e84), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

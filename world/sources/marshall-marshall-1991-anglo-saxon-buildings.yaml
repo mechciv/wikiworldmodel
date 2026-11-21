@@ -1,0 +1,32 @@
+id: src:marshall-marshall-1991-anglo-saxon-buildings
+type: publication
+kind: compilation
+citation: >-
+  Marshall, A. & Marshall, G. (1991). A survey and analysis of the buildings of Early and Middle Anglo-Saxon England.
+  Medieval Archaeology 35, 29–43.
+authors:
+  - "Marshall, A."
+  - "Marshall, G."
+published: 1991
+title: A survey and analysis of the buildings of Early and Middle Anglo-Saxon England
+container: Medieval Archaeology
+doi: 10.1080/00766097.1991.11735537
+url: https://archaeologydataservice.ac.uk/archiveDS/archiveDownload?t=arch-769-1/dissemination/pdf/vol35/35_029_043.pdf
+via: >-
+  The Society for Medieval Archaeology's volumes 1–50, kept open by the Archaeology Data Service (collection arch-769-1).
+reliability: >-
+  A data base of 267 Anglo-Saxon timber buildings, with the length and width of 247, compiled from excavation reports
+  and, for some, from published aerial photographs (measured to within half a metre at worst), and analysed for size and
+  shape. It holds the buildings whose posts or planks were set in the ground; it does not treat the sunken-featured
+  buildings found beside them, and it includes the great halls of high-status sites such as Yeavering and Cowdery's
+  Down. The dates are the excavators', and the authors say few are firm. It is of 1991: many more buildings have been
+  dug since.
+verified:
+  by: machine:claude-code
+  how: >-
+    The scan of the article served by the Archaeology Data Service fetched on 20 November 2026 and read whole. Its own
+    text layer runs words together and breaks the tables, so the pages were also read from their images by macOS text
+    recognition; both readings are kept in one text file and the quotes were checked by script against it. Table 1 is
+    quoted as the recognition reads it, cell after cell; it and the sentence on widths (pp. 32 and 35), where the
+    recognition prints the decimal points as hyphens, were also read by eye on the page images. Page numbers are the
+    printed ones. DOI from Crossref.

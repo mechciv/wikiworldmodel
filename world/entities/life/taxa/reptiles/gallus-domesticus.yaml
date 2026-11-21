@@ -1,0 +1,32 @@
+id: life/taxa/gallus-domesticus
+kind: taxon
+summary: >-
+  Domestic chickens, domesticated from the red junglefowl in mainland South-east Asia. Open Tree has no record of the domestic form apart from the species, so the name is the species'.
+same_as: { ott: 153563 }
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: "domestic chickens", la: "Gallus gallus domesticus" }
+    source: { ref: src:opentree-taxonomy-3.7, loc: "tnrs/match_names: Gallus gallus domesticus is a synonym of ott153563, accepted name Gallus gallus" }
+    note: Open Tree gives the scientific name; the English name is an editorial gloss.
+  mass:
+    prop: body_mass
+    value: { lo: 1.26, hi: 3.55 }
+    source:
+      - ref: src:maharani-2021-indonesian-chickens
+        loc: "Table-2, row \"Body weight (kg)\""
+        quote: "Female 1.61±0.06c 0.02 1.31±0.04d 0.20 2.14±0.05b 0.29 1.26±0.05d"
+      - ref: src:maharani-2021-indonesian-chickens
+        loc: "Table-2, row \"Body weight (kg)\""
+        quote: "1.65±0.13d 0.42 3.55±0.16a"
+    method: compilation
+    note: >-
+      The lowest and highest mean adult weights of the five indigenous Indonesian breeds measured (Nunukan hens, Pelung cocks); the means over all breeds are 1.87 kg for hens and 2.35 kg for cocks. Village chickens, not modern broilers.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in maharani-2021-indonesian-chickens.txt (sha256 1d01c943a5cc2e09), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+relations:
+  parent:
+    rel: descends-from
+    to: life/taxa/galliformes
+    source: { ref: src:opentree-taxonomy-3.7, loc: "taxonomy/taxon_info ott153563 with include_lineage: Gallus gallus lies within Galliformes" }

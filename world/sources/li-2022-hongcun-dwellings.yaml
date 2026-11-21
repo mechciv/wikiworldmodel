@@ -1,0 +1,29 @@
+id: src:li-2022-hongcun-dwellings
+type: publication
+kind: measurement
+citation: >-
+  Li, T., Zhang, M. & Gu, X. (2022). Optimization strategies for conservation of traditional dwellings in Hongcun
+  Village, China, based on decay phenomena analysis. PLOS ONE 17(11), e0276306.
+authors:
+  - "Li, T."
+  - "Zhang, M."
+  - "Gu, X."
+published: 2022
+title: >-
+  Optimization strategies for conservation of traditional dwellings in Hongcun Village, China, based on decay
+  phenomena analysis
+container: PLOS ONE
+doi: 10.1371/journal.pone.0276306
+url: https://www.ebi.ac.uk/europepmc/webservices/rest/PMC9639817/fullTextXML
+license: CC-BY-4.0
+via: Europe PMC (PMC9639817).
+reliability: >-
+  A field study of the materials and the decay of the houses of one village, Hongcun in Yi County, southern Anhui,
+  which it calls representative of the Huizhou region. Its account of how the houses are built is the authors' own
+  survey with the Chinese literature on Huizhou, not read here; what it says of the village's founding and its ponds
+  is local history at second hand.
+verified:
+  by: machine:claude-code
+  how: >-
+    The full text read from Europe PMC's XML on 20 November 2026 and kept as text; sections 1 to 3 read in full; the
+    quotes checked by script against that text. Authors, volume and article number from the XML's front matter.

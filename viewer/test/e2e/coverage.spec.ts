@@ -51,6 +51,21 @@ test('a place on the map opens the globe there and then', async ({ page }) => {
   await idle(page);
 });
 
+test('shows whose houses rest on a tradition, at each time the build counts, by way of life', async ({ page }) => {
+  const counts = buildFile<CoverageFile>('coverage.json').landscape!.housing!;
+  await page.goto(`/coverage.html?b=${latestBuild()}`);
+  const table = page.locator('.cov-houses table');
+  await expect(page.locator('.cov-houses h2')).toHaveText("People's houses, by way of life");
+  // A row for each time counted, under the header; a column for each way of life.
+  await expect(table.locator('tr')).toHaveCount(counts.length + 1);
+  for (const way of ['foragers', 'herders', 'shifting cultivators', 'farmers', 'townspeople']) await expect(table.locator('th', { hasText: way })).toHaveCount(1);
+  // The last time's share in a tradition's house is the build's, to the page's rounding.
+  const last = counts.at(-1)!;
+  const share = last.housed / last.people;
+  const shown = await table.locator('tr').last().locator('td.house b').first().textContent();
+  expect(shown).toBe(share === 0 ? '0%' : share < 0.001 ? '<0.1%' : share < 0.1 ? `${(share * 100).toFixed(1)}%` : `${Math.round(share * 100)}%`);
+});
+
 test('the globe links to the coverage of the build it shows', async ({ page }) => {
   await page.goto(`/?b=${latestBuild()}`);
   await idle(page);

@@ -11,7 +11,8 @@ export function tree(s: Solved): TreeFile {
   const taxa = w.entities.filter((e) => e.kind === 'taxon').sort((a, b) => (a.id < b.id ? -1 : 1));
   const index = new Map(taxa.map((e, i) => [e.id, i]));
   const nodes: TreeNode[] = taxa.map((e) => {
-    const parent = e.relations.find((r) => r.rel === 'descends-from' && r.rank !== 'deprecated' && r.status !== 'deprecated');
+    const up = e.relations.filter((r) => r.rel === 'descends-from' && r.rank !== 'deprecated' && r.status !== 'deprecated');
+    const parent = up.find((r) => r.rank === 'preferred') ?? up[0];
     const rank = claimOf(s, e.id, 'taxon_rank')?.value as string | undefined;
     const node: TreeNode = { id: e.id, label: labelOf(e.id), parent: parent ? index.get(splitRef(parent.to).record) ?? -1 : -1, ...subjectTime(s, e.id) };
     if (rank) node.rank = rank;

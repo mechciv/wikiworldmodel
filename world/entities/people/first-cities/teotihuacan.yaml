@@ -14,6 +14,8 @@ claims:
       ref: src:sugiyama-2021-teotihuacan-lidar
       loc: title
       quote: "Humans as geomorphic agents: Lidar detection of the past, present and future of the Teotihuacan Valley, Mexico"
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in sugiyama-2021-teotihuacan-lidar.txt (sha256 d302c963c8281730), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   start-sugiyama:
     prop: start
     value: 1 CE
@@ -24,6 +26,8 @@ claims:
     method: expert-estimate
     rank: preferred
     note: Preferred as the more recent statement. Earlier occupation in the valley is not covered.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in sugiyama-2021-teotihuacan-lidar.txt (sha256 d302c963c8281730), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   start-froese:
     prop: start
     value: 100 CE
@@ -53,6 +57,8 @@ claims:
       loc: Outstanding Universal Value, criterion vi
       quote: Following the destruction and abandonment of the city towards 650 A.D.
     method: expert-estimate
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in unesco-whc-414-teotihuacan.txt (sha256 c2e0a866010c07a2), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   location:
     prop: location
     value: { lat: 19.6925, lon: -98.843889, frame: frame:earth/present-day }
@@ -87,6 +93,8 @@ claims:
       loc: Outstanding Universal Value, brief synthesis
       quote: At the peak of its development the city stretched out over 36 km2.
     method: expert-estimate
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in unesco-whc-414-teotihuacan.txt (sha256 c2e0a866010c07a2), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   population-millon:
     prop: population
     value: 125000
@@ -109,6 +117,8 @@ claims:
       loc: section "Teotihuacan"
       quote: supported an estimated 100,000 inhabitants
     method: expert-estimate
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in sugiyama-2021-teotihuacan-lidar.txt (sha256 d302c963c8281730), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   population-froese:
     prop: population
     value: { lo: 80000, hi: 100000 }
@@ -128,3 +138,22 @@ claims:
       quote: one of the largest ancient cities in the Americas, with at least 25,000 inhabitants
     method: expert-estimate
     note: A lower limit, far below the rest, and the summary gives no evidence.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in unesco-whc-414-teotihuacan.txt (sha256 c2e0a866010c07a2), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  town-form:
+    prop: town_form
+    value: { streets: grid }
+    source:
+      - ref: src:sugiyama-2021-teotihuacan-lidar
+        loc: Introduction
+        quote: The configuration of scale, density, and orthogonal cityscape at Teotihuacan—unparalleled in the New World
+      - ref: src:unesco-whc-414-teotihuacan
+        loc: Outstanding Universal Value, brief synthesis
+        quote: This north-south oriented main reference axis of the city is lined with monumental buildings and complexes
+    method: survey
+    note: >-
+      An orthogonal city on the axis of the Avenue of the Dead. Froese et al. (2014) report that most of its streets were short
+      and discontinuous rather than long and straight, so the grid is of orientation more than of through streets. No wall is
+      named, nor the width of the avenue.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in sugiyama-2021-teotihuacan-lidar.txt (sha256 d302c963c8281730) and unesco-whc-414-teotihuacan.txt (sha256 c2e0a866010c07a2), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

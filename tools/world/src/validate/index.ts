@@ -12,7 +12,7 @@ import { join, resolve } from 'node:path';
 import { Ajv2020 } from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 import { formProblem } from '../../../../core/city.ts';
-import { dwellingProblems, fieldProblems, settlementProblems } from '../../../../core/dwelling.ts';
+import { dwellingProblems, fieldProblems, lifewayProblems, settlementProblems, townProblems } from '../../../../core/dwelling.ts';
 import { ladderCounts, LEVELS, STEPS } from '../../../../core/ladder.ts';
 import { MONTHS_PARTS } from '../../../../core/months.ts';
 import { parseRef, RefError, splitRef } from '../../../../core/refs.ts';
@@ -286,6 +286,25 @@ function checkValue(world: World, refs: RefChecker, c: Claim, issues: Issue[]): 
     case 'field-system':
       for (const problem of fieldProblems(v)) bad(problem);
       break;
+    case 'town-form':
+      for (const problem of townProblems(v)) bad(problem);
+      break;
+    case 'lifeway':
+      for (const problem of lifewayProblems(v)) bad(problem);
+      break;
+    case 'taxa': {
+      // A list of taxon records, each once.
+      if (!Array.isArray(v) || !v.length) {
+        bad('a list of one or more taxon records, as [life/taxa/…, …]');
+        break;
+      }
+      if (new Set(v).size !== v.length) bad('each taxon is named once');
+      v.forEach((x, i) => {
+        const e = refs.check(x, c.file, `${c.where}.value[${i}]`, { self: c.entity, types: ['entity'] });
+        if (e && e.kind !== 'taxon') bad(`${String(x)} is not a taxon record`);
+      });
+      break;
+    }
   }
 }
 
@@ -1076,6 +1095,32 @@ function checkForms(world: World, issues: Issue[]): void {
   }
 }
 
+/**
+ * Every building tradition says whom it housed, and every husbandry tradition whose animals it kept and which: a
+ * `lifeway` claim, and for husbandry a `livestock` claim, of its own or of a tradition of its kind it is a member of.
+ * A house or a herd is drawn only for those ways of life (core/dwelling.ts), so one that does not say is drawn for no one.
+ */
+function checkTraditions(world: World, issues: Issue[]): void {
+  for (const kind of ['tradition/building', 'tradition/husbandry']) {
+    const byId = new Map(world.entities.filter((e) => e.kind === kind).map((e) => [e.id, e]));
+    const says = (e: Entity, prop: string): boolean => {
+      const seen = new Set<string>();
+      for (let at: Entity | undefined = e; at && !seen.has(at.id); ) {
+        seen.add(at.id);
+        if (at.claims.some((c) => c.prop === prop)) return true;
+        const up: string | undefined = at.relations.find((r) => r.rel === 'member-of')?.to;
+        at = up ? byId.get(up) : undefined;
+      }
+      return false;
+    };
+    for (const e of byId.values()) {
+      const what = kind === 'tradition/building' ? ['whom it housed', 'its house'] : ['whose animals it kept', 'its animals'];
+      if (!says(e, 'lifeway')) issues.push({ level: 'warning', check: 'traditions', file: e.file, where: 'claims', message: `${e.id} does not say ${what[0]}: give it a \`lifeway\` claim (docs/DWELLINGS.md), or ${what[1]} are drawn for no one`.replace('its house are', 'its house is') });
+      if (kind === 'tradition/husbandry' && !says(e, 'livestock')) issues.push({ level: 'warning', check: 'traditions', file: e.file, where: 'claims', message: `${e.id} does not say which animals its people kept: give it a \`livestock\` claim (docs/DWELLINGS.md)` });
+    }
+  }
+}
+
 export async function validateWorld(world: World, opts: { frames?: boolean; tables?: Map<string, Table> } = {}): Promise<Report> {
   const issues: Issue[] = world.loadIssues.map((e) => ({ level: 'error', check: 'load', file: e.file, where: e.where, message: e.message }));
   checkSchemas(world, issues);
@@ -1084,6 +1129,7 @@ export async function validateWorld(world: World, opts: { frames?: boolean; tabl
   checkLineage(world, issues);
   checkProminence(world, issues);
   checkForms(world, issues);
+  checkTraditions(world, issues);
   checkModels(world, issues);
   checkGeneratorSamples(world, issues);
   checkDuplicates(world, issues);

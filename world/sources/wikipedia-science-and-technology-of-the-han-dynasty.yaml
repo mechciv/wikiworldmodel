@@ -1,0 +1,24 @@
+id: src:wikipedia-science-and-technology-of-the-han-dynasty
+type: database-record
+kind: review
+citation: >-
+  "Science and technology of the Han dynasty." Wikipedia, the free encyclopedia (English edition), revision 1383663926.
+snapshot: 2026-11-20
+title: Science and technology of the Han dynasty
+container: Wikipedia
+url: https://en.wikipedia.org/w/index.php?title=Science_and_technology_of_the_Han_dynasty&oldid=1383663926
+license: CC-BY-SA-4.0
+license_note: Short quotes, with credit.
+reliability: >-
+  A general encyclopedia article, cited for how Han houses were built because no study of them could be read here. Its
+  sentences on roofs, pillars and walls and on courtyard homes are footnoted to Ebrey (1999), p. 76, Loewe (1968), pp.
+  138–139, and Steinhardt (2005); none was read. As the article says, Han remains are scarce and no wooden building of
+  the time survives, so that what is said of houses comes from ceramic models, paintings and bricks found in tombs; the
+  review of Zhuang and others cited beside it has such models in the tombs of "mid to lower class elites". It gives no
+  size for a house.
+verified:
+  by: machine:claude-code
+  how: >-
+    The article's HTML, rendered from revision 1383663926, fetched from Wikipedia on 20 November 2026 and read as text,
+    with the reference marks taken out; the quotes checked by script against that text, and their footnotes matched to
+    the works they cite, by author, year and page as the footnotes give them.

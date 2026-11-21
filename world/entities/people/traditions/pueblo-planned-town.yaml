@@ -36,6 +36,30 @@ claims:
     note: The Zuni region only.
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in spielmann-2016-early-warning-southwest-PMC5051805.txt (sha256 86a7b8335d09b74a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+  lifeway:
+    prop: lifeway
+    value: [farmers, townspeople]
+    source:
+      - ref: src:spielmann-2016-southwest-transformation
+        loc: section "Zuni"
+        quote: >-
+          The Zuni region is one of only a few places in the Southwestern US that was densely occupied by sedentary
+          small-scale farmers continuously from at least the last millennium B.C.E., through Spanish conquest, and into the
+          present
+      - ref: src:spielmann-2016-southwest-transformation
+        loc: section "Zuni"
+        quote: >-
+          Within a single generation, between about 1260 and 1300 C.E., the entire population of the Zuni region reorganized.
+          People went from living in widely distributed small residential structures clustered into communities to massive,
+          planned, nucleated towns
+    method: editorial
+    note: >-
+      Farmers, and the people of towns: the whole people of the Zuni region, small-scale farmers before and since, went
+      to live in what the paper calls towns, and in its next sentence large, planned villages. Both are named, as the
+      farmers of the region were from then on the people of these towns; the paper has the farmers of the Mesa Verde
+      region gather likewise, in the settlements of hundreds of rooms the settlement claim cites.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in spielmann-2016-southwest-transformation.txt (sha256 0a311fdc48f928f9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   settlement:
     prop: settlement_form
     value: { pattern: room-block }

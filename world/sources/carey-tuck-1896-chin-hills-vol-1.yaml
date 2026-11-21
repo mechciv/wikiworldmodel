@@ -1,0 +1,24 @@
+id: src:carey-tuck-1896-chin-hills-vol-1
+type: publication
+kind: measurement
+citation: >-
+  Carey, B.S. & Tuck, H.N. The Chin Hills: A History of the People, British Dealings with Them, their Customs and
+  Manners, and a Gazetteer of their Country, vol. I. Rangoon: Superintendent, Government Printing, Burma, 1896.
+authors:
+  - "Carey, B.S."
+  - "Tuck, H.N."
+published: 1896
+title: The Chin Hills, vol. I
+url: https://archive.org/details/in.ernet.dli.2015.6132
+via: The Internet Archive's copy of the Digital Library of India's scan (in.ernet.dli.2015.6132), read in its OCR text.
+license: public domain
+reliability: >-
+  A gazetteer by two of the British officers who annexed the Chin Hills, written in the first years of the occupation
+  from their own tours and enquiries. Its chapter on manners and customs describes villages and houses as they then
+  were; its population figures are, as it says, estimates and not a census.
+verified:
+  by: machine:claude-code
+  how: >-
+    The introduction (p. 4) and the chapters on manners and customs (pp. 174 to 179) and on crops (pp. 210 and 211) read
+    on 20 November 2026 in the OCR text of the scan. The OCR runs the marginal notes into the text, so the quotes keep to
+    stretches it reads cleanly, and were checked by script against it.

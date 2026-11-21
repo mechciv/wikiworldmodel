@@ -1,0 +1,29 @@
+id: life/taxa/vicugna-pacos
+kind: taxon
+summary: >-
+  Alpacas, the smaller domestic camelid of the Andes, kept for their fibre.
+same_as: { ott: 906301 }
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: "alpacas", la: "Vicugna pacos" }
+    source: { ref: src:opentree-taxonomy-3.7, loc: "tnrs/match_names: Vicugna pacos, ott906301" }
+    note: Open Tree gives the scientific name; the English name is an editorial gloss.
+  mass:
+    prop: body_mass
+    value: { lo: 48, hi: 90 }
+    source:
+      ref: src:wikipedia-alpaca
+      loc: "section \"Background\""
+      quote: "They usually weigh between 48 and 90 kilograms"
+    method: compilation
+    note: >-
+      Adult alpacas, from Wikipedia, as no better source stating it for the domestic animal could be read.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-alpaca.txt (sha256 9e811e1182b40829), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+relations:
+  parent:
+    rel: descends-from
+    to: life/taxa/camelidae
+    source: { ref: src:opentree-taxonomy-3.7, loc: "taxonomy/taxon_info ott906301 with include_lineage: Vicugna pacos lies within Camelidae" }

@@ -1,0 +1,22 @@
+id: src:da-silva-2025-african-sheep
+type: publication
+kind: review
+citation: >-
+  Da Silva, A., Ahbara, A., Baazaoui, I., … & Lenstra, J.A. (2025). History and genetic diversity of African sheep: Contrasting phenotypic and genomic diversity. Animal Genetics 56(1), e13488.
+authors:
+  - "Da Silva, A."
+  - "Ahbara, A."
+  - "Baazaoui, I."
+  - "Jemaa, S.B."
+# the first four of 21 authors
+published: 2025
+title: "History and genetic diversity of African sheep: Contrasting phenotypic and genomic diversity"
+container: "Animal Genetics 56(1), e13488"
+doi: 10.1111/age.13488
+url: https://europepmc.org/article/PMC/PMC11666867
+license: CC-BY-NC-ND-4.0
+verified:
+  by: machine:claude-code
+  how: >-
+    Full text read as XML from Europe PMC (PMC11666867) on 20 November 2026, and turned into text. Each quote checked by script against that text; citation from the Europe PMC
+    record.

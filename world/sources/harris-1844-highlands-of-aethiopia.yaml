@@ -1,0 +1,23 @@
+id: src:harris-1844-highlands-of-aethiopia
+type: text
+kind: eyewitness
+citation: >-
+  Harris, W.C. The Highlands of Æthiopia. In three volumes, vol. 1. London: Longman, Brown, Green, and Longmans, 1844.
+authors:
+  - "Harris, W.C."
+published: 1844
+written: { lo: 1841 CE, hi: 1843 CE }
+title: The Highlands of Æthiopia, vol. 1
+url: https://archive.org/details/highlandsthiopi01harrgoog
+via: The Internet Archive's copy of Google's scan of volume 1 (highlandsthiopi01harrgoog), read in its OCR text.
+license: public domain
+reliability: >-
+  The narrative of the British embassy to Shoa, which left Bombay in April 1841, crossed the Afar (Adaiel, Danakil) country
+  from Tajura and reached Shoa that year; the preface is dated at Ankober on 1 January 1843. The author describes the Afar
+  he travelled among, with a soldier's contempt for them; the passage on their huts is general, not of one camp.
+verified:
+  by: machine:claude-code
+  how: >-
+    The chapter "The gentle Adaiel, and farewell to them" (chap. 39, pp. 354-358) and the account of Tajura (p. 50) read on
+    20 November 2026 in the OCR text of the scan, fetched from the Internet Archive; the quotes were checked by script
+    against it.

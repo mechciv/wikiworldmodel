@@ -1,0 +1,56 @@
+id: people/husbandry/nile-valley-sheep-and-goats
+kind: tradition/husbandry
+summary: >-
+  The sheep and goats of the first farmers of Egypt, brought from south-west Asia between 6500 and 5000 BCE.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: "Sheep and goats of Neolithic Egypt" }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: { lo: 6500 BCE, hi: 5000 BCE }
+    source:
+      ref: src:da-silva-2025-african-sheep
+      loc: "section \"Egyptian and Maghreb sheep\""
+      quote: "Sheep husbandry commenced during the Neolithic period with agriculture spreading from western Asia to Egypt between 6500 and 5000 BCE"
+    method: expert-estimate
+    note: >-
+      Still kept, so there is no end claim.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in da-silva-2025-african-sheep.txt (sha256 d6c05191998a4cc7), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["72"] }
+    source:
+      ref: src:da-silva-2025-african-sheep
+      loc: "section \"Egyptian and Maghreb sheep\""
+      quote: "Ovicaprine bones, some of which are undoubtedly from sheep and dated at around 6500 BCE have been found in Egyptian archaeological sites"
+    method: editorial
+    note: >-
+      Region 72 (Egypt).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in da-silva-2025-african-sheep.txt (sha256 d6c05191998a4cc7), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      ref: src:da-silva-2025-african-sheep
+      loc: "section \"Egyptian and Maghreb sheep\""
+      quote: "Sheep husbandry commenced during the Neolithic period with agriculture spreading from western Asia to Egypt between 6500 and 5000 BCE"
+    method: editorial
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in da-silva-2025-african-sheep.txt (sha256 d6c05191998a4cc7), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  livestock:
+    prop: livestock
+    value: [life/taxa/ovis-aries, life/taxa/capra-hircus]
+    source:
+      ref: src:da-silva-2025-african-sheep
+      loc: "section \"Egyptian and Maghreb sheep\""
+      quote: "Ovicaprine bones, some of which are undoubtedly from sheep and dated at around 6500 BCE have been found in Egyptian archaeological sites"
+    method: excavation
+    note: >-
+      Sheep and goats (ovicaprines), as the review of Africa's sheep has them. Egypt's cattle, pigs and donkeys were surely kept too, but no source read here says so; a reviewer should add them with a source.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in da-silva-2025-african-sheep.txt (sha256 d6c05191998a4cc7), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

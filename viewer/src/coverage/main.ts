@@ -5,6 +5,8 @@
 //
 // It reads the build's coverage.json, which the build makes with the same resolve the viewer asks (core/coverage.ts).
 import { decodeRuns, type CoverageMatrix, type CoverageSource, type Span } from '../../../core/coverage.ts';
+import { lifewayText, type LifewayWord } from '../../../core/dwelling.ts';
+import { LIFEWAY_OF, type Pattern } from '../../../core/landscape.ts';
 import type { CoverageFile, PeriodsFile, SearchEntry, SearchFile, SeriesFile } from '../../../core/records.ts';
 import { LAYERS, TIERS, type LayerId, type Tier } from '../../../core/resolve.ts';
 import { formatDuration, formatTime, PRESENT_YEAR, timeToParam } from '../../../core/time.ts';
@@ -209,7 +211,7 @@ class Page {
     this.detail = el('aside', 'cov-detail');
     this.detail.setAttribute('aria-live', 'polite');
     main.append(this.chart, this.detail);
-    page.append(main, this.table());
+    page.append(main, this.houses(), this.table());
     app.append(page);
     this.tip = el('div', 'tip');
     this.tip.hidden = true;
@@ -826,6 +828,70 @@ class Page {
   }
 
   /** The numbers behind the strips, for reading without colour: each layer's share in each tier, and in each era. */
+  /**
+   * Whose houses rest on a building tradition (docs/plans/LIFEWAY-RENDERINGS.md): at each time the build counts, HYDE's
+   * people by the way of life the model gives the land they lived on, and the share of each drawn in a house of a
+   * tradition written for that way of life, region and time. The rest are drawn in the generator's generic house.
+   */
+  houses(): HTMLElement {
+    const box = el('section', 'cov-houses');
+    const rows = this.cov.landscape?.housing;
+    if (!rows?.length) return box;
+    box.append(el('h2', undefined, "People's houses, by way of life"));
+    box.append(
+      el(
+        'p',
+        'cov-lede',
+        "At each time, the people HYDE puts on the land, by the way of life the model of how people lived gives the land they lived on, and the share of each drawn in a house of a building tradition written for that way of life, region and time. Where none is written for a region's shifting cultivators the house of its farmers stands in, and the other way round, and says so. Everyone else is drawn in the generator's generic house, which says so. A bar is the share housed by a tradition.",
+      ),
+    );
+    const ways = [...new Set(Object.values(LIFEWAY_OF))] as LifewayWord[];
+    const people = (n: number) => (n >= 1e9 ? `${(n / 1e9).toFixed(2)} billion` : n >= 1e6 ? `${(n / 1e6).toFixed(n >= 1e7 ? 0 : 1)} million` : count(Math.round(n)));
+    const cell = (all: number, housed: number, of: number): HTMLTableCellElement => {
+      const td = el('td', 'house');
+      if (!(all > 0)) {
+        td.append('–');
+        return td;
+      }
+      const bar = el('div', 'housed');
+      const fill = el('i');
+      fill.style.width = `${(100 * housed) / all}%`;
+      bar.append(fill);
+      td.append(el('b', undefined, pct(housed / all)), el('span', undefined, ` of ${of > 0 ? pct(all / of) : people(all)}`), bar);
+      td.title = `${people(housed)} of ${people(all)} in a tradition's house`;
+      return td;
+    };
+    const table = el('table');
+    const head = el('tr');
+    head.append(el('th', undefined, 'Time'), el('th', undefined, 'People'), el('th', undefined, "In a tradition's house"), ...ways.map((w) => el('th', undefined, lifewayText([w]))), el('th', undefined, 'Cities of the lists'), el('th', undefined, 'Regions'));
+    table.append(head);
+    for (const h of rows) {
+      const tr = el('tr');
+      const all = cell(h.people, h.housed, 0);
+      if (h.standIn) all.title += `; ${people(h.standIn)} of them in the house of a way of life kin to theirs, standing in`;
+      tr.append(el('td', undefined, formatTime(h.t)), el('td', undefined, people(h.people)), all);
+      for (const w of ways) {
+        let all = 0;
+        let housed = 0;
+        for (const [pattern, v] of Object.entries(h.by) as [Exclude<Pattern, 'none'>, [number, number]][]) {
+          if (LIFEWAY_OF[pattern] !== w) continue;
+          all += v[0];
+          housed += v[1];
+        }
+        tr.append(cell(all, housed, h.people));
+      }
+      const [cities, inCities, housedCities] = h.cities;
+      const c = cell(inCities, housedCities, 0);
+      if (cities) c.title = `${count(cities)} cities with ${people(inCities)} people; ${people(housedCities)} in a townspeople's tradition`;
+      tr.append(c, el('td', undefined, `${h.regions[1]} of ${h.regions[0]}`));
+      table.append(tr);
+    }
+    const scroll = el('div', 'scroll');
+    scroll.append(table);
+    box.append(scroll, el('p', 'cov-note', "Under each way of life: the share of its people a tradition houses, and its share of all the people then. Cities of the lists are Chandler's and Modelski's, counted beside HYDE's people. Regions: those where a tradition houses anyone, of those with people. The world after 1850 is not counted."));
+    return box;
+  }
+
   table(): HTMLElement {
     const det = el('details', 'cov-table');
     det.append(el('summary', undefined, 'The numbers, as a table'));

@@ -1,0 +1,27 @@
+id: src:legut-pintal-2019-melioratio-terrae-silesia
+type: publication
+kind: review
+citation: >-
+  Legut-Pintal, M. (2019). Late medieval transformation of the rural landscape: a model of melioratio terrae on the
+  examples of the land of Nysa-Otmuchów and the Kaczawskie Foothills, Silesia, Poland. In Brady, N. & Theune, C. (eds),
+  Ruralia XII: Settlement change across Medieval Europe; old paradigms and new vistas, 293–304. Leiden: Sidestone Press.
+authors:
+  - "Legut-Pintal, M."
+published: 2019
+title: >-
+  Late medieval transformation of the rural landscape: a model of melioratio terrae on the examples of the land of
+  Nysa-Otmuchów and the Kaczawskie Foothills, Silesia, Poland
+container: "Ruralia XII: Settlement change across Medieval Europe; old paradigms and new vistas (Leiden, Sidestone Press), 293–304"
+url: https://www.sidestone.com/books/settlement-change-across-medieval-europe
+reliability: >-
+  A study of two districts of Silesia colonized in the thirteenth century, from charters, old maps, laser scans and what
+  little has been excavated. It is cited for the two forms the new villages took. The author says that research on the
+  medieval villages of Silesia is still thin, and that these districts were chosen because their villages kept their
+  medieval outlines into the nineteenth century.
+verified:
+  by: machine:claude-code
+  how: >-
+    The publisher's open-access PDF of the whole volume (sidestone.com/openaccess/9789088908064.pdf) fetched on 20 November
+    2026 and turned into text with PyMuPDF; the chapter's first six pages read in full (pages 295–300 of the file, which
+    are pages 293–298 as printed), and the rest searched for what it says of villages, fields and plots. Quotes checked
+    by script against the text of the chapter's pages (295–306 of the file).

@@ -1,0 +1,34 @@
+id: src:imperial-gazetteer-of-india-1908
+type: publication
+kind: compilation
+citation: >-
+  The Imperial Gazetteer of India. New edition, published under the authority of His Majesty's Secretary of State for
+  India in Council. Oxford: Clarendon Press, 1908. Volumes read: I, The Indian Empire: Descriptive (the copy read is
+  dated 1909); VII, Bareilly to Berasia; VIII, Berhampore to Bombay; XIII, Gyaraspur to Jais; XVI, Kotchandpur to
+  Mahavinyaka; XVIII, Moram to Nayagarh (each dated 1908).
+published: 1908
+title: The Imperial Gazetteer of India, new edition
+url: https://archive.org/details/imperialgazettee07grea
+via: >-
+  The Internet Archive's scans of the six volumes (imperialgazettee01grea, imperialgazettee07grea,
+  imperialgazettee08grea, imperialgazettee13grea, imperialgazettee16grea and imperialgazettee18grea), read in their OCR
+  text and, for the persons to a house, in the page image.
+license: public domain
+reliability: >-
+  The official gazetteer of British India, compiled by its civil servants after the census of 1901. Its paragraphs on
+  the houses of a province, in the articles Bengal, Berar, Bombay Presidency, Hyderabad State, Madras Presidency and
+  Mysore State, are general statements for a whole province or state, a few sentences each, with no survey behind them
+  that it names. Its persons to a house are those of the census of 1901, taken under definitions of a house that
+  differed from province to province, as it says itself.
+verified:
+  by: machine:claude-code
+  how: >-
+    Read on 20 November 2026 in the OCR text of the six scans, kept as one file with a line marking where each volume
+    begins: vol. I, chapter IX, Population (pp. 456 and 458); vol. VII, the articles Bengal (pp. 223 to 224, 239 to
+    242 and 250 to 251) and Berar (pp. 375 and 381); vol. VIII, Bombay Presidency (p. 309); vol. XIII, Hyderabad
+    State (pp. 244 and 250); vol. XVI, Madras Presidency (p. 266); vol. XVIII, Mysore State (p. 208). The page
+    numbers are those of the running heads nearest each passage in the OCR. The OCR reads the raised decimal point of
+    the persons to a house on
+    p. 458 of vol. I as a hyphen ("5-2"); the page image (leaf 493 of the scan) has 5·2, and the quote keeps the OCR's
+    characters. Where the OCR misreads a word the quotes keep to the stretches it reads cleanly, and a quote that runs
+    over a page turn has an ellipsis where the running head falls. The quotes were checked by script against the OCR.

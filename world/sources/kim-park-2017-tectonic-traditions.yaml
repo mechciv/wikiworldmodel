@@ -1,0 +1,25 @@
+id: src:kim-park-2017-tectonic-traditions
+type: publication
+kind: review
+citation: >-
+  Kim, Y.J. & Park, S. (2017). Tectonic Traditions in Ancient Chinese Architecture, and Their Development. Journal of
+  Asian Architecture and Building Engineering 16(1), 31–38.
+authors:
+  - "Kim, Y.J."
+  - "Park, S."
+published: 2017
+title: Tectonic Traditions in Ancient Chinese Architecture, and Their Development
+container: Journal of Asian Architecture and Building Engineering
+doi: 10.3130/jaabe.16.31
+url: https://www.jstage.jst.go.jp/article/jaabe/16/1/16_31/_article
+reliability: >-
+  An essay on where the timber frames of Chinese building came from, drawn from the published archaeology and the
+  histories of Chinese architecture. What it says of the frame of posts and tie-beams, where it is still built and how
+  far back it goes is a paragraph of synthesis, without a count of sites or a date for any house; the excavations and
+  the tomb models it rests on were not read here.
+verified:
+  by: machine:claude-code
+  how: >-
+    The article's PDF fetched from J-STAGE on 20 November 2026 and turned into text with PyMuPDF; its abstract and
+    sections 1 and 2 read in full; the quotes checked by script against that text. Volume, pages and DOI as the PDF's
+    first page gives them.

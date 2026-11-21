@@ -1,0 +1,30 @@
+id: src:ayan-vila-2008-round-iron-age
+type: publication
+kind: review
+citation: >-
+  Ayán Vila, X.M. (2008). A Round Iron Age: The Circular House in the Hillforts of the Northwestern Iberian Peninsula.
+  e-Keltoi: Journal of Interdisciplinary Celtic Studies 6 (The Celts in the Iberian Peninsula), 903–1003.
+authors:
+  - "Ayán Vila, X.M."
+published: 2008
+title: "A Round Iron Age: The Circular House in the Hillforts of the Northwestern Iberian Peninsula"
+container: "e-Keltoi: Journal of Interdisciplinary Celtic Studies"
+url: https://dc.uwm.edu/ekeltoi/vol6/iss1/19
+via: >-
+  The journal's page at the University of Wisconsin–Milwaukee, which now leads to the University of Wisconsin's MINDS
+  repository (bitstream 2cc95985-5af4-4e6b-81e1-ffe4bd573789).
+reliability: >-
+  A refereed synthesis, by an archaeologist of the Padre Sarmiento Institute of Galician Studies (Spanish National
+  Research Council), of the excavated houses of the hillforts (castros) of Galicia, northern Portugal, western Asturias
+  and León, from the Late Bronze Age to the early Middle Ages. It reads the houses for what they say of society; its
+  sizes are those the excavators published, site by site, and the number of people to a house is another author's
+  estimate (Camino 2002), which it reports and, in a note, doubts. Its English is a translation of the author's
+  manuscript.
+verified:
+  by: machine:claude-code
+  how: >-
+    The article's PDF (ayan_6_19.pdf) downloaded on 20 November 2026 and converted to text. Read: the first hillforts and
+    their houses (pp. 922–927, 934–936), the house of the late Iron Age (pp. 936–938, 949–952), the Roman period and the
+    end of the hillforts (pp. 962–968), and endnote 18. The journal's server sends an incomplete certificate chain: the
+    intermediate certificate that its own certificate names was fetched and added to a copy of the system's roots, so
+    that verification stayed on. Quotes checked by script against the text. Page numbers are the journal's.

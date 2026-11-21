@@ -1,0 +1,22 @@
+id: src:chritz-2026-turkana-pastoralists
+type: publication
+kind: measurement
+citation: >-
+  Chritz, K.L., Sawchuk, E.A., Prendergast, M.E., … & Hildebrand, E.A. (2026). Isotopic evidence for dietary variability among eastern Africa's first pastoralists. Proceedings of the National Academy of Sciences 123(22), e2532741123.
+authors:
+  - "Chritz, K.L."
+  - "Sawchuk, E.A."
+  - "Prendergast, M.E."
+  - "Blumenthal, S.A."
+# the first four of 18 authors
+published: 2026
+title: "Isotopic evidence for dietary variability among eastern Africa's first pastoralists"
+container: "Proceedings of the National Academy of Sciences 123(22), e2532741123"
+doi: 10.1073/pnas.2532741123
+url: https://europepmc.org/article/PMC/PMC13229173
+license: CC-BY-NC-ND-4.0
+verified:
+  by: machine:claude-code
+  how: >-
+    Full text read as XML from Europe PMC (PMC13229173) on 20 November 2026, and turned into text. Each quote checked by script against that text; citation from the Europe PMC
+    record.

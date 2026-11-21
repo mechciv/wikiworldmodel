@@ -1,0 +1,134 @@
+id: people/traditions/natufian-round-house
+kind: tradition/building
+summary: >-
+  The round house of the Natufian foragers of the Levant, among the first people anywhere to live year round in one
+  place: a semi-subterranean dwelling dug into the ground or cut into a slope, its round or semicircular wall of undressed
+  stones holding back the earth, about five to nine metres across, under a roof presumed of organic material, a few
+  together in settlements of perhaps fifty to a hundred people. It spans the Natufian period, about 14,600 to 11,500
+  years ago.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Natufian round house }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 14.6 ka
+    source:
+      - ref: src:abdo-2026-jeftelik-cereal-harvesting
+        loc: abstract
+        quote: The harvesting of wild cereals with sickle blades during the Late Epipalaeolithic Natufian period (ca. 14.6–11.5 ka cal BP)
+      - ref: src:grosman-2016-nahal-ein-gev-ii
+        loc: section "Introduction"
+        quote: >-
+          It’s typical characteristics emerged by 15,000 cal BP and provide an intensive archaeological signal primarily
+          characterized by large sites, permanent architecture
+    method: expert-estimate
+    note: >-
+      The start of the Natufian period as the first source gives it, about 14,600 years ago; the second has the culture's
+      characteristics, permanent architecture among them, by 15,000 cal BP, and the Early Natufian shelters of Eynan are
+      dated from about 15,000 cal BP. The houses are taken to start with the period.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in abdo-2026-jeftelik-cereal-harvesting.txt (sha256 1492aa66a58f7a34) and grosman-2016-nahal-ein-gev-ii.txt (sha256 e891ec7c03e2125d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  end:
+    prop: end
+    value: 11.5 ka
+    source:
+      ref: src:abdo-2026-jeftelik-cereal-harvesting
+      loc: abstract
+      quote: The harvesting of wild cereals with sickle blades during the Late Epipalaeolithic Natufian period (ca. 14.6–11.5 ka cal BP)
+    method: expert-estimate
+    note: >-
+      The end of the Natufian period, about 11,500 years ago. The report on Nahal Ein Gev II has the earliest sites of the Pre-Pottery
+      Neolithic A from about 11,700 cal BP, overlapping the last Natufian briefly; their houses are not this tradition.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in abdo-2026-jeftelik-cereal-harvesting.txt (sha256 1492aa66a58f7a34), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["58"] }
+    source:
+      - ref: src:haklay-2015-eynan-shelter-131
+        loc: section "Introduction"
+        quote: >-
+          Semi-subterranean curvilinear structures [built architectural features] made of undressed limestone characterized
+          the site throughout its history.
+      - ref: src:grosman-2016-nahal-ein-gev-ii
+        loc: section "Nahal Ein Gev II"
+        quote: >-
+          NEG II is located in Nahal (wadi) Ein Gev, at the middle of a perennial stream that flows west to the Sea of
+          Galilee
+      - ref: src:abdo-2026-jeftelik-cereal-harvesting
+        loc: section "Archaeological site and lithic material"
+        quote: >-
+          Excavations conducted between 2008 and 2010 uncovered several Natufian stone structures that had been partially
+          disturbed by Bronze Age, Byzantine, and Ottoman-period pits.
+    method: editorial
+    note: >-
+      Syria, Cyprus and the Levant (58), where Eynan in the Hula Valley, Nahal Ein Gev II by the Sea of Galilee and Jeftelik
+      in the Homs Gap of western Syria are. The house is not claimed for Cyprus, nor for all of the region.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in haklay-2015-eynan-shelter-131.txt (sha256 d3fae10756755c91), grosman-2016-nahal-ein-gev-ii.txt (sha256 e891ec7c03e2125d) and abdo-2026-jeftelik-cereal-harvesting.txt (sha256 1492aa66a58f7a34), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [foragers]
+    source:
+      - ref: src:grosman-2016-nahal-ein-gev-ii
+        loc: section "Introduction"
+        quote: >-
+          Characterizing this important period of potential overlap in the Jordan Valley is crucial for understanding the
+          socioeconomic processes that marked the shift from Palaeolithic foragers to Neolithic agricultural communities.
+      - ref: src:abdo-2026-jeftelik-cereal-harvesting
+        loc: abstract
+        quote: The harvesting of wild cereals with sickle blades during the Late Epipalaeolithic Natufian period (ca. 14.6–11.5 ka cal BP)
+    method: editorial
+    note: >-
+      Foragers, hunters and gatherers who harvested wild cereals and lived in one place for much or all of the year,
+      before farming: the Natufian is the last of the Palaeolithic foragers' cultures in the first source.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in grosman-2016-nahal-ein-gev-ii.txt (sha256 e891ec7c03e2125d) and abdo-2026-jeftelik-cereal-harvesting.txt (sha256 1492aa66a58f7a34), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { plan: round, diameter: { lo: 5, hi: 9 }, walls: stone, floor: sunken }
+    source:
+      - ref: src:grosman-2016-nahal-ein-gev-ii
+        loc: 'section "Architecture", buildings 3–5'
+        quote: >-
+          In summary, our excavations reveal that the structures at NEG II were primarily large and rounded reaching about 5
+          m in diameter and in many cases were built with two parallel walls.
+      - ref: src:grosman-2016-nahal-ein-gev-ii
+        loc: 'section "Architecture", buildings 3–5'
+        quote: >-
+          These carefully planned semi-subterranean houses were dug at least 30–40 cm into the ground and supported the
+          superstructure of the dwellings. The foundations were made from undressed stones collected in the immediate
+          vicinity of the site.
+      - ref: src:haklay-2015-eynan-shelter-131
+        loc: section "Introduction"
+        quote: >-
+          Their construction usually consisted of cutting into the slope and building retaining walls in order to support
+          the surrounding sloping ground. The superstructure (roof) of these shelters [a combination of associated
+          structures and floors] was presumed to have been made of organic material.
+      - ref: src:haklay-2015-eynan-shelter-131
+        loc: section "Introduction"
+        quote: Shelter 131/51 is presumed to have been a semi-circular structure (8–9 m in diameter) and features a series of postholes.
+    method: excavation
+    note: >-
+      Round, with walls of undressed stone round a floor dug into the ground or cut into the slope: about 5 m across at the
+      Late Natufian site of Nahal Ein Gev II, 8–9 m for the large Early Natufian shelter 131/51 at Eynan, whose purpose,
+      dwelling or not, is debated. The roof was presumably of organic material, branches or brush, but its form and
+      covering are not known, and are left to the generator.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in grosman-2016-nahal-ein-gev-ii.txt (sha256 e891ec7c03e2125d) and haklay-2015-eynan-shelter-131.txt (sha256 d3fae10756755c91), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  settlement:
+    prop: settlement_form
+    value: { pattern: nucleated }
+    source:
+      ref: src:haklay-2015-eynan-shelter-131
+      loc: section "Introduction"
+      quote: The settlement was estimated to cover about 2,000 sq m [3] and to inhabit a population of 50–100 people.
+    method: expert-estimate
+    note: >-
+      Small settlements of houses lived in year round: Eynan's of about 2,000 square metres, estimated at 50 to 100 people.
+      How many houses stood at once is not given, nor how many people lived in one.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in haklay-2015-eynan-shelter-131.txt (sha256 d3fae10756755c91), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

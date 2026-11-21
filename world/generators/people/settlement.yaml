@@ -1,12 +1,15 @@
 # The anonymous human landscape: the houses, settlements, fields and pastures of a scene. Nobody recorded any of them:
-# how many follows HYDE's people through the anthromes and the lists of cities; what way of life, the anthromes and the
-# archaeologists of the region; what the houses were like, the building tradition the world records there and then, or a
-# generic house for the way of life and the climate, which says so. Everything it makes is marked as generated.
+# how many follows HYDE's people through the anthromes, and the lists of cities and the world's records of settlements;
+# what way of life, the anthromes and the archaeologists of the region; what the houses were like, the building tradition
+# the world records there and then for that way of life, or a generic house for the way of life and the climate, which
+# says so. A town has streets and a wall as the tradition of its townspeople or its own record says; the animals people
+# kept are those a husbandry tradition names; people, boats and paths rest on no record. Everything it makes is marked
+# as generated.
 id: gen:people/settlement
 type: generator
 title: Houses, villages and fields of any place since 10,000 BCE
-version: 1
-code: generators/people/settlement/v1.ts
+version: 2
+code: generators/people/settlement/v2.ts
 runs_in: [build, client]
 outputs: { basis: procedural }
 inputs:
@@ -21,14 +24,37 @@ inputs:
   - { prop: settlement_form, note: "how its houses stood together, and how many lived in each" }
   - { prop: field_system, note: "the plots of its fields" }
   - { prop: extent, note: "the regions each tradition was found in" }
+  - { prop: lifeway, note: "whom each tradition housed: its house is drawn for those ways of life only" }
+  - { prop: prevalence, note: "how many of them lived so, where a tradition says they were not all: the part of their settlements drawn in its house" }
+  - { prop: town_form, note: "how a town's streets ran and what enclosed it, as the tradition of its townspeople or its own record says" }
+  - { kind: tradition/husbandry, note: "the ways of keeping animals that hold in the region at the time" }
+  - { prop: livestock, note: "which animals each husbandry tradition's people kept" }
+  - { prop: body_plan, note: "each kept animal's body, from its taxon's records" }
+  - { prop: body_form, note: "each kept animal's body, from its taxon's records" }
+  - { prop: body_length, note: "how big each kept animal is drawn" }
+  - { prop: body_mass, note: "how big each kept animal is drawn, and whether it grazes in a herd or is kept about the houses" }
+  - { kind: settlement, note: "the cities the world has records of: where and when each stood" }
+  - { prop: population, kind: settlement, note: "a recorded city's people at the times its claims are for" }
+  - { prop: houses, kind: settlement, note: "a recorded city's houses, where a source counts them" }
+  - { prop: settlement_area, kind: settlement, note: "the ground a recorded city covered" }
   - { ref: gen:life/scene, note: "the ground and the water of the scene the houses stand in" }
 checks:
-  - { test: world/generators/people/settlement/v1.test.ts, holds: "holds as many people as the world puts in the land it draws" }
-  - { test: world/generators/people/settlement/v1.test.ts, holds: "stands no house in the water or on a cliff" }
-  - { test: world/generators/people/settlement/v1.test.ts, holds: "draws fields where people farmed, pasture where they herded, and neither for foragers" }
-  - { test: world/generators/people/settlement/v1.test.ts, holds: "draws a tradition's house where it holds, and the generic one where none does" }
-  - { test: world/generators/people/settlement/v1.test.ts, holds: "draws a city of the lists where the anthromes have none" }
-  - { test: world/generators/people/settlement/v1.test.ts, holds: "puts a settlement in the same place from two scenes that overlap" }
+  - { test: world/generators/people/settlement/v2.test.ts, holds: "holds as many people as the world puts in the land it draws" }
+  - { test: world/generators/people/settlement/v2.test.ts, holds: "stands no house in the water or on a cliff" }
+  - { test: world/generators/people/settlement/v2.test.ts, holds: "draws fields where people farmed, pasture where they herded, and neither for foragers" }
+  - { test: world/generators/people/settlement/v2.test.ts, holds: "draws a tradition's house where it holds, and the generic one where none does" }
+  - { test: world/generators/people/settlement/v2.test.ts, holds: "draws a camp's shelter from the tradition that housed its way of life, and no farmer's house from a herder's tent" }
+  - { test: world/generators/people/settlement/v2.test.ts, holds: "draws shifting cultivators in the house of their region's farmers where none is written for them, and says it stands in" }
+  - { test: world/generators/people/settlement/v2.test.ts, holds: "draws a house that some lived in for that part of the cells of its region, each cell all of one house, and alike from two scenes" }
+  - { test: world/generators/people/settlement/v2.test.ts, holds: "are drawn where a husbandry tradition names them for that way of life: herds on the pasture, the rest about the houses" }
+  - { test: world/generators/people/settlement/v2.test.ts, holds: "joins each settlement to its nearest neighbours by a path that ends at the edge of their houses" }
+  - { test: world/generators/people/scene.test.ts, holds: "hands a view each kind as its own entity: taxa, then houses, then works, then kept animals" }
+  - { test: world/generators/people/settlement/v2.test.ts, holds: "draws a city of the lists where the anthromes have none" }
+  - { test: world/generators/people/settlement/v2.test.ts, holds: "puts a settlement in the same place from two scenes that overlap" }
+  - { test: world/generators/people/settlement/v2.test.ts, holds: "seeds each cell and each settlement apart, and each alike from two scenes" }
+  - { test: world/generators/people/settlement/v2.test.ts, holds: "has the wall its tradition says, round its houses, with gates where its main streets leave it, and towers" }
+  - { test: world/generators/people/settlement/v2.test.ts, holds: "of a record is drawn from the record's own people, houses, ground and layout" }
+  - { test: tools/world/test/landscape.test.ts, holds: "draws a list's city that has a record where the record puts it, with the record's own people about the time they are for" }
 limits:
   - with: field:people/anthromes
     note: >-
@@ -37,9 +63,12 @@ limits:
       stand for more people each, and the panel says how many.
   - with: field:people/cities
     note: >-
-      A city of the lists is drawn as one dense cluster of houses of its people, around the list's point: no streets,
-      walls, temples or districts, which are a city slice's work, as Rome's are. Its outline, round with an edge that
-      wanders, is invented, as a town's is.
+      A city of the lists is drawn as houses on the lots of streets, around the list's point: on a grid or along lanes,
+      walled or open, as the tradition of its region's townspeople says, and as the generic town where none does. Every
+      street's line, every gate's place and the outline, round or square, are invented. It has no temples, palaces or
+      districts, which are a city slice's work, as Rome's are. A city with a record covers the ground its record gives,
+      as a disc or a square about its point: the outline of the real city, and where within it people lived, are not
+      read. A city whose ground is more than params.towns.open_lot to a house is drawn with no streets, its houses apart.
 slots:
   any:
     place: >-
@@ -80,6 +109,49 @@ params:
     rice: { kind: paddies, plot: 0.15 }
     swidden: { kind: swidden, plot: 0.8 }
     pasture: { kind: irregular, plot: 3 }
-  site: { steep: 0.25, above_water: 1.5, tries: 6 }
-  cities: { reach_km: 30, lot: 160, town_lot: 300, household: 6, city_from: 10000, most_houses: 12000 }
+  site: { steep: 0.25, above_water: 1.5, tries: 6, city_above_water: 0.3 }
+  cities: { reach_km: 30, lot: 160, town_lot: 300, household: 6, city_from: 10000, most_houses: 12000, record_hold: 50, record_gap: 600 }
+  # A town where nothing says how it was laid out: lanes that wander, and no wall. Where a tradition or a record says a
+  # town had a wall and not how high or how thick, or streets and not how wide, these stand in, and the panel says so.
+  # How square a town's outline is goes by its streets: a planned town is drawn square, one of lanes round.
+  towns:
+    generic: { streets: lanes, wall: none }
+    block: 60
+    street: 3
+    main_street: 8
+    outline: { grid: 1, lanes: 0, canals: 0.5 }
+    walls:
+      earth: { height: 3, thickness: 12 }
+      rammed-earth: { height: 8, thickness: 8 }
+      timber: { height: 3.5, thickness: 0.4 }
+      mudbrick: { height: 7, thickness: 4 }
+      stone: { height: 8, thickness: 2.5 }
+      brick: { height: 9, thickness: 3 }
+    unstated_wall: mudbrick
+    gates: 4
+    tower_every: 60
+    square: 0.02
+    canal: 6
+    moat: 12
+    canal_every: 2
+    open_lot: 1200
+  # The part of a region's settlements of a way of life drawn in a tradition's house, where the tradition says its people
+  # were a few, some or most of them and not all. No source gives these numbers: each word stands for a part, so that a
+  # rare house is drawn rarely. Each 5′ cell falls to one tradition, so a rare house stands in clusters, as most did.
+  prevalence: { few: 0.03, some: 0.3, most: 0.75 }
+  # The animals a husbandry tradition says its people kept are drawn among them: those that graze in herds, on the
+  # pasture of people who herd and at the edge of the houses of people who farm; the rest about the houses. Which animals
+  # is the tradition's. How many is nobody's: these numbers only say how full a scene is drawn.
+  livestock:
+    per_household: { foragers: 0.5, herders: 6, shifting-cultivators: 0.8, farmers: 1.5, townspeople: 0.1 }
+    herd: [3, 12]
+    graze_kg: 15
+    most_in_settlement: 240
+    most: 12000
+  # People by the houses, boats on the water beside a settlement and paths between settlements, so that a scene has its
+  # scale and its ways. No record says anything of any of them: they are the plainest there are, the same everywhere,
+  # and a click says that they are generic.
+  figures: { per_house: 0.5, most_in_settlement: 300, most: 20000, height: 1.62 }
+  boats: { length: 5, beam: 0.9, side: 0.45, reach: 250, depth: 0.6, most_in_settlement: 3 }
+  paths: { width: 1.8, reach: 2500, each: 2, most_km: 300, wander: 0.05, patterns: [shifting, farmsteads, hamlets, villages, towns, city] }
   most_houses: 60000

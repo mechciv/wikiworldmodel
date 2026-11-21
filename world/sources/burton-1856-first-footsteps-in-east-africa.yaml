@@ -1,0 +1,24 @@
+id: src:burton-1856-first-footsteps-in-east-africa
+type: text
+kind: eyewitness
+citation: >-
+  Burton, R.F. First Footsteps in East Africa; or, An Exploration of Harar. London: Longman, Brown, Green, and Longmans,
+  1856.
+authors:
+  - "Burton, R.F."
+published: 1856
+written: { lo: 1854 CE, hi: 1856 CE }
+title: First Footsteps in East Africa; or, An Exploration of Harar
+url: https://archive.org/details/31383026806979
+via: The Internet Archive's scan of the 1856 edition (31383026806979), read in its OCR text.
+license: public domain
+reliability: >-
+  The narrative of a British officer's journey from Zeila across the country of the northern Somali to Harar, from October
+  1854 to January 1855, written up on his return. He camped in the Somali kraals and describes them from what he saw; his
+  remarks on the Somali are those of a hostile outsider.
+verified:
+  by: machine:claude-code
+  how: >-
+    The description of the kraal and its huts (pp. 213-214), the passages on the Somali women pitching the mat tent
+    (p. 133) and on the nomads' seasonal moves, read on 20 November 2026 in the OCR text of the scan, fetched from the
+    Internet Archive; the quotes were checked by script against it.

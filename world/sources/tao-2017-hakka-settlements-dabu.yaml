@@ -1,0 +1,28 @@
+id: src:tao-2017-hakka-settlements-dabu
+type: publication
+kind: measurement
+citation: >-
+  Tao, J., Chen, H. & Xiao, D. (2017). Influences of the Natural Environment on Traditional Settlement Patterns: A Case
+  Study of Hakka Traditional Settlements in Eastern Guangdong Province. Journal of Asian Architecture and Building
+  Engineering 16(1), 9–14.
+authors:
+  - "Tao, J."
+  - "Chen, H."
+  - "Xiao, D."
+published: 2017
+title: >-
+  Influences of the Natural Environment on Traditional Settlement Patterns: A Case Study of Hakka Traditional
+  Settlements in Eastern Guangdong Province
+container: Journal of Asian Architecture and Building Engineering
+doi: 10.3130/jaabe.16.9
+url: https://www.jstage.jst.go.jp/article/jaabe/16/1/16_9/_article
+reliability: >-
+  A survey of where 89 old Hakka settlements of one mountain county, Dabu in eastern Guangdong, stand with respect to
+  slope, rivers, sunlight and farmland. It says what the settlements lived by and where they were put; it does not
+  describe their houses, which it names only in passing.
+verified:
+  by: machine:claude-code
+  how: >-
+    The article's PDF fetched from J-STAGE on 20 November 2026 and turned into text with PyMuPDF; the abstract and
+    sections 1 to 4 read in full; the quotes checked by script against that text. Volume, pages and DOI as the PDF's
+    first page gives them.

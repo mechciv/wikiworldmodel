@@ -1,0 +1,93 @@
+id: people/traditions/afar-mat-hut
+kind: tradition/building
+summary: >-
+  The portable hut of the Afar (Adaiel, Danakil) herders of the lowlands between the Gulf of Tajura and Shoa: a low,
+  rectangular frame of branches bent in pairs over a fire and lashed into arches, roofed with a mat of date-palm leaf,
+  which the women took down and put up again when the camp moved to new pools and pastures. Its earliest description read
+  here is Harris's, from the British embassy to Shoa of 1841.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Mat hut of the Afar }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 1841 CE
+    source:
+      ref: src:harris-1844-highlands-of-aethiopia
+      loc: 'vol. 1, extract of the instructions to the embassy, dated at Bombay Castle'
+      quote: April, 1841.
+    method: documentary
+    note: >-
+      The year of the earliest account read: the embassy was sent from Bombay in April 1841 and crossed the Afar country
+      from Tajura to Shoa that year. It bounds the start and does not date it: the hut is surely older. No end is given: no
+      source read says when it went out of use.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in harris-1844-highlands-of-aethiopia.txt (sha256 95709d11ef0466e9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["90", "91"] }
+    source:
+      - ref: src:harris-1844-highlands-of-aethiopia
+        loc: 'vol. 1, on Tajura, p. 50'
+        quote: the united tribes composing the Adaiel of Dan&kil nation, whereof Tajiira is the seat
+      - ref: src:harris-1844-highlands-of-aethiopia
+        loc: 'vol. 1, on Tajura, p. 50'
+        quote: his powerful tribe occupying a central position on the road to Abyssinia
+    method: editorial
+    note: >-
+      Djibouti (90), where Tajura is (the OCR reads "Dan&kil" and "Tajiira" for Danákil and Tajúra), and Ethiopia (91), through whose Afar lowlands the road to Shoa ran. The Afar also
+      lived in what is now Eritrea, in the same region 90; no source read places the hut beyond the embassy's road.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in harris-1844-highlands-of-aethiopia.txt (sha256 95709d11ef0466e9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [herders]
+    source:
+      ref: src:harris-1844-highlands-of-aethiopia
+      loc: 'vol. 1, chapter "The gentle Adaiel, and farewell to them", p. 355'
+      quote: >-
+        tends his flocks of sheep and goats, dismantles and erects his wigwam when migrations are undertaken to distant
+        pools and pastures
+    method: editorial
+    note: >-
+      Herders: the passage is of the wife's work, who tended the sheep and goats and moved the hut with the camp to new
+      pools and pastures; Harris has milk as their chief food.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in harris-1844-highlands-of-aethiopia.txt (sha256 95709d11ef0466e9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { plan: rectangular, length: 2.4, width: 1.8, height: 1.5, walls: none, roof: vault, roof_material: reed, floor: ground }
+    source:
+      ref: src:harris-1844-highlands-of-aethiopia
+      loc: 'vol. 1, chapter "The gentle Adaiel, and farewell to them", p. 357'
+      quote: >-
+        The Bedouin wigwam — a rectangle of eight feet in length by six broad, and five high — is constructed of a
+        succession of branches in couples, curved before the fire, and lashed in the form of a lip-arch. A mat composed of
+        date leaves forms the roof
+    method: survey
+    note: >-
+      8 ft long, 6 ft broad and 5 ft high (2.4 by 1.8 m, 1.5 m high), as Harris gives it for the huts in general, not for one
+      he measured. The branches bent into arches make the roof a vault coming down to the ground, so there are no walls.
+      The roof is a mat of date-palm leaf, entered as reed, the nearest word, which is mats of reed.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in harris-1844-highlands-of-aethiopia.txt (sha256 95709d11ef0466e9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  settlement:
+    prop: settlement_form
+    value: { pattern: camp }
+    source:
+      - ref: src:harris-1844-highlands-of-aethiopia
+        loc: 'vol. 1, chapter "The gentle Adaiel, and farewell to them", p. 357'
+        quote: >-
+          the whole fabric, wherein the hand of no master builder is visible, is thus readily transferred from place to
+          place.
+      - ref: src:harris-1844-highlands-of-aethiopia
+        loc: 'vol. 1, p. 216'
+        quote: The temporary mat huts of all these nomade visitors
+    method: survey
+    note: >-
+      Camps of huts moved from place to place. How many huts stood in a camp, and how many people lived in one, is not
+      stated.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in harris-1844-highlands-of-aethiopia.txt (sha256 95709d11ef0466e9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

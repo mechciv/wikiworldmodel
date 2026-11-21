@@ -1,0 +1,191 @@
+id: people/traditions/later-medieval-english-peasant-house
+kind: tradition/building
+summary: >-
+  The house of the peasants of later medieval England, from the thirteenth century, when timber frames set on stone
+  footings took the place of posts dug into the ground, to the early sixteenth: a rectangular house of two or three bays,
+  some four to five metres wide and eight to fifteen long, its timber frame (on crucks in the west and the midlands)
+  filled with wattle and daub and thatched, with a hall and one or two chambers, mostly of one storey. It stood on a
+  small enclosed plot with a barn and other buildings, in a village street or apart. Building differed much from region
+  to region, in cob, in stone, with crucks or without, and the record gives what the regions had in common.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Peasant house of later medieval England }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: { lo: 1201 CE, hi: 1300 CE }
+    source:
+      - ref: src:dyer-1986-english-peasant-buildings
+        loc: 'section "Peasant buildings, 1200–1350", point 3, p. 35'
+        quote: >-
+          We can define a clear and important innovation in building construction in the 13th century when various forms
+          of foundation were adopted instead of earthfast posts
+      - ref: src:dyer-1986-english-peasant-buildings
+        loc: Conclusion, p. 40
+        quote: >-
+          In the 13th century in many regions stone foundations developed, and were probably accompanied by new types of
+          timber-work that resulted by 1300 in some well-carpentered and durable structures.
+    method: expert-estimate
+    note: >-
+      The thirteenth century, when footings of stone, or stones under the main posts, took the place of posts set in the
+      ground, and with them, the source argues, came carpentered frames. It says the change has not been closely dated
+      anywhere, and that it came at different times in different regions.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in dyer-1986-english-peasant-buildings.txt (sha256 3ef1b244c818fded), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  end:
+    prop: end
+    value: { lo: 1501 CE, hi: 1560 CE }
+    source:
+      - ref: src:gardiner-2000-later-medieval-domestic-plan
+        loc: introduction, p. 159
+        quote: >-
+          in the course of a few decades in the early and mid-16th century, the plan was first modified and then
+          superseded
+      - ref: src:dyer-1986-english-peasant-buildings
+        loc: Conclusion, p. 41
+        quote: >-
+          most of the new features adopted after 1540 can be shown to have at least an ancestry before 1500
+    method: expert-estimate
+    note: >-
+      "The early and mid-16th century", read here as 1501 to 1560, when the plan of the medieval house was given up; the
+      second source dates the new features after 1540. Many of the houses stood long after, rebuilt with upper floors
+      (people/traditions/english-house-of-the-great-rebuilding).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in gardiner-2000-later-medieval-domestic-plan.txt (sha256 5a4b9112c3348a56) and dyer-1986-english-peasant-buildings.txt (sha256 3ef1b244c818fded), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["38"] }
+    source:
+      - ref: src:dyer-1986-english-peasant-buildings
+        loc: Conclusion, p. 41
+        quote: >-
+          First, the rich variety of housing types and methods of construction across the country give only one indication
+          of the heterogeneous peasant culture of medieval England.
+      - ref: src:dyer-1986-english-peasant-buildings
+        loc: 'section "Documentary evidence for peasant buildings outside the West Midlands, 1350–1500", p. 34'
+        quote: >-
+          This survey of documented buildings, although inevitably incomplete, confirms the wide variety of local
+          constructional traditions already known from the material evidence.
+    method: editorial
+    note: >-
+      Region 38 (United Kingdom and Ireland), for England: the source surveys the West Midlands, Devon, Berkshire, the East
+      Midlands, East Anglia, Kent and Yorkshire. It says nothing of Wales, Scotland or Ireland, whose houses are not
+      claimed here.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in dyer-1986-english-peasant-buildings.txt (sha256 3ef1b244c818fded), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      - ref: src:dyer-1986-english-peasant-buildings
+        loc: Introduction, p. 21
+        quote: >-
+          Peasants can be defined simply as small-scale rural cultivators, occupying a relatively subordinate social
+          position, and having relatively low incomes.
+      - ref: src:dyer-1986-english-peasant-buildings
+        loc: Introduction, p. 21
+        quote: with their families and dependents they formed a majority of the English population, in excess of 80%
+    method: editorial
+    note: >-
+      Farmers: the houses are those of peasants, small cultivators who held from an acre or two up to forty or fifty,
+      more than four in five of the people of England about 1300. The houses of towns, which the source has as dearer,
+      of two storeys and tiled, are not these.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in dyer-1986-english-peasant-buildings.txt (sha256 3ef1b244c818fded), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value:
+      plan: rectangular
+      width: { lo: 3.7, hi: 4.9 }
+      length: { lo: 7.6, hi: 15.2 }
+      storeys: { lo: 1, hi: 2 }
+      rooms: { lo: 2, hi: 3 }
+      walls: wattle-and-daub
+      roof: gable
+      roof_material: thatch
+      floor: ground
+    source:
+      - ref: src:dyer-1986-english-peasant-buildings
+        loc: 'section "Peasant buildings, 1200–1350", point 2, p. 35'
+        quote: >-
+          The great majority measured from 25 ft (7.6 m) to 50 ft (15.2 m) in length, and from 12 to 16 ft (3.7-4.9 m) in
+          width
+      - ref: src:dyer-1986-english-peasant-buildings
+        loc: 'section "Documentary evidence for peasant buildings outside the West Midlands, 1350–1500", point 2, p. 34'
+        quote: >-
+          Individual houses and barns were mostly of two or three bays, so measured from about 30 to 45 ft (9.2 to 13.7 m)
+          in length.
+      - ref: src:dyer-1986-english-peasant-buildings
+        loc: 'section "West Midland peasant buildings, 1350–1500", p. 26'
+        quote: >-
+          They normally had stone foundations, usually no more than a low plinth wall, but higher walls, even up to the
+          eaves, are implied by some Cotswold records. The timber superstructures were invariably based on crucks, called
+          'forks' or 'couples', so peasants were using a building technique that could have been sturdy.
+      - ref: src:dyer-1986-english-peasant-buildings
+        loc: 'section "West Midland peasant buildings, 1350–1500", p. 26'
+        quote: >-
+          The walls were infilled with wattle and daub, and can be shown from some sources to have been plastered and
+          lime-washed.
+      - ref: src:dyer-1986-english-peasant-buildings
+        loc: Conclusion, p. 41
+        quote: >-
+          The main roofing material continued to be thatch, though a few peasant buildings erected by lords were being
+          given complete slate roofs in the 15th century.
+      - ref: src:dyer-1986-english-peasant-buildings
+        loc: 'section "Documentary evidence for peasant buildings outside the West Midlands, 1350–1500", p. 31'
+        quote: with stone walls 9 ft (2.7 m) high at the sides and 16 ft (4.9 m) high at the gables
+      - ref: src:dyer-1986-english-peasant-buildings
+        loc: 'section "West Midland peasant buildings, 1350–1500", p. 25'
+        quote: >-
+          The most common arrangement was for a three-bay house to be divided into a hall and one or two chambers
+      - ref: src:dyer-1986-english-peasant-buildings
+        loc: Conclusion, p. 41
+        quote: >-
+          Peasant houses of two storeys were being built in eastern England from the mid 14th century, and had become
+          common by 1500.
+      - ref: src:dyer-1986-english-peasant-buildings
+        loc: Conclusion, p. 42
+        quote: because of their lack of built floors
+    method: excavation
+    note: >-
+      The width and length are those of the great majority of the thirteenth-century buildings excavated, which the source
+      finds in line with the two or three bays, each about 4.6 m square, of the building agreements of 1350–1500. The
+      walls are the wattle and daub that filled a timber frame, which stood on a low stone footing in the west and north
+      and on the ground or on pad-stones in the east; the vocabulary has no word for a frame so filled, and wattle and
+      daub is the nearest. The frame was of crucks in the west midlands and the south-west and of posts in the east;
+      Devon built in cob, the Cotswolds and the north sometimes in stone to the eaves. A gabled roof is read from one
+      house only, which the lord built on a tenant's holding at Coleshill in Berkshire in the 1430s, and whose stone
+      walls stood higher at the gables. Most houses were of one storey; upper floors spread from eastern England after 1350 and were common there
+      by 1500. A hall and one or two chambers is the commonest division of a three-bay house in the west midlands;
+      Gardiner (2000) describes the plan as services, a cross-entry, a hall and sometimes a chamber.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in dyer-1986-english-peasant-buildings.txt (sha256 3ef1b244c818fded), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  settlement:
+    prop: settlement_form
+    value: { pattern: nucleated, household: 5 }
+    source:
+      - ref: src:dyer-1986-english-peasant-buildings
+        loc: 'section "West Midland peasant buildings, 1350–1500", p. 24'
+        quote: >-
+          that served as the centre of each holding, either arranged next to its neighbours along a village street, or, in
+          an area of dispersed settlement, beside an access road
+      - ref: src:dyer-1986-english-peasant-buildings
+        loc: Introduction, p. 22
+        quote: >-
+          Survey and excavation of village sites show the small defined territory (toft) of each household, often closely
+          associated with neighbours in collective groupings.
+      - ref: src:dyer-1986-english-peasant-buildings
+        loc: Conclusion, p. 42
+        quote: the average English peasant family of five had … (8.3 sq. m) each in a two-bay house
+    method: expert-estimate
+    note: >-
+      Villages, where each house stood on its plot beside its neighbours along a street; in districts of scattered
+      settlement the plot lay alone beside a road, and the record does not say how much of England was which. The plot,
+      often of a quarter of an acre, was bounded by banks, hedges, fences or walls and held a barn and often a
+      bakehouse or a byre besides the house. The household is the "average English peasant family of five" by which the
+      source reckons the floor to each person; it does not say where the figure comes from. The words left out of the
+      quote are "90 sq. ft.", which the recognition of the scan misreads.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in dyer-1986-english-peasant-buildings.txt (sha256 3ef1b244c818fded), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

@@ -1,0 +1,22 @@
+id: src:roscoe-1911-baganda
+type: publication
+kind: measurement
+citation: >-
+  Roscoe, J. The Baganda: An Account of their Native Customs and Beliefs. London: Macmillan, 1911.
+authors:
+  - "Roscoe, J."
+published: 1911
+title: "The Baganda: An Account of their Native Customs and Beliefs"
+url: https://archive.org/details/bagandaaccountof00roscuoft
+via: The Internet Archive's scan of the University of Toronto's copy (bagandaaccountof00roscuoft), read in its OCR text.
+license: public domain
+reliability: >-
+  An ethnography by a missionary who lived in Buganda from 1884, written in the past tense of the customs before the
+  colonial changes he saw. Its account of house-building is mostly of the royal and the chiefs' houses; what it says of
+  every house, and of the peasants', is cited as such.
+verified:
+  by: machine:claude-code
+  how: >-
+    Chapter I (p. 15), chapter III (p. 95) and chapter XI on house-building (pp. 369 to 375) read on 20 November 2026 in
+    the OCR text of the scan. The OCR runs the marginal notes into the text, so the quotes keep to stretches it reads
+    cleanly, and were checked by script against it.

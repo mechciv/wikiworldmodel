@@ -56,6 +56,27 @@ claims:
       house, not a claim that it covered the region.
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in nicosia-2022-PMC9432763-with-S1.txt (sha256 d9d52156e5f25fc8), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      - ref: src:wikipedia-medieval-scandinavian-architecture
+        loc: section "Viking longhouse"
+        quote: >-
+          Throughout the Norse lands, people lived in longhouses (langhús) … If the owner did not have stables, the
+          animals were housed in stalls at the end of the longhouse.
+      - ref: src:wikipedia-viking-age
+        loc: note 4 to the lead section, quoting Haywood (1995), The Penguin Historical Atlas of the Vikings, p. 8
+        quote: >-
+          most Viking-age Scandinavians were not Vikings at all, but peaceful farmers and craftsmen who stayed quietly at
+          home all their lives
+    method: editorial
+    note: >-
+      Farmers: people throughout the Norse lands lived in longhouses, with their animals in stalls at one end or in
+      stables, and most Scandinavians of the time were farmers and craftsmen who stayed at home. The second quote is the
+      encyclopedia's, from a book that was not read. Neither source describes the houses of the towns.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-medieval-scandinavian-architecture.txt (sha256 70797e00aed3c6c0) and wikipedia-viking-age.txt (sha256 c4ad28e4015bb747), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   dwelling:
     prop: dwelling
     value: { plan: long, width: { lo: 5, hi: 7 }, length: { lo: 15, hi: 75 }, walls: timber, roof_material: thatch }

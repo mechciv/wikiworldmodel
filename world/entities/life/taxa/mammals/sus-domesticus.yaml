@@ -1,0 +1,31 @@
+id: life/taxa/sus-domesticus
+kind: taxon
+summary: >-
+  Domestic pigs, domesticated from the wild boar in south-west Asia and again in China.
+same_as: { ott: 729998 }
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: "domestic pigs", la: "Sus scrofa domesticus" }
+    source: { ref: src:opentree-taxonomy-3.7, loc: "tnrs/match_names: Sus scrofa domesticus, ott729998" }
+    note: Open Tree gives the scientific name; the English name is an editorial gloss.
+  mass:
+    prop: body_mass
+    value: { lo: 140, hi: 300 }
+    source:
+      ref: src:wikipedia-pig
+      loc: "section \"Description\""
+      quote: "Adult pigs generally weigh between 140 and 300 kg"
+    method: compilation
+    note: >-
+      Adult pigs of today's breeds, from Wikipedia, as no better source stating it for the domestic animal could be read. The pigs of the past were smaller, and no figure for them was read.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-pig.txt (sha256 513ae0a5b43851dc), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+relations:
+  parent:
+    rel: descends-from
+    to: life/taxa/suoidea
+    source: { ref: src:opentree-taxonomy-3.7, loc: "taxonomy/taxon_info ott729998 with include_lineage: Sus scrofa domesticus lies within Suidae" }
+    note: >-
+      Open Tree places the domestic pig in Suidae, within Suina; the record of pigs and peccaries is the nearest with a body.

@@ -1,0 +1,25 @@
+id: src:zhou-2002-one-bright-two-dark
+type: publication
+kind: review
+citation: >-
+  Zhou, N., Aoki, M., Kamiwada, S., Nishida, M. & Fukuda, H. (2002). Study on the Development Process of One Bright
+  Both Sides Dark Type Houses in China. Journal of Asian Architecture and Building Engineering 1(2), 171–176.
+authors:
+  - "Zhou, N."
+  - "Aoki, M."
+  - "Kamiwada, S."
+  - "Nishida, M."
+  - "Fukuda, H."
+published: 2002
+title: Study on the Development Process of One Bright Both Sides Dark Type Houses in China
+container: Journal of Asian Architecture and Building Engineering
+url: https://www.jstage.jst.go.jp/article/jaabe/1/2/1_2_2_171/_article
+reliability: >-
+  A study from literature of the three-bay house plan of China, a hall between two rooms, from the Han to the Qing. It
+  is cited here only for the years it gives the Ming and Qing dynasties; its argument about the house of the Han rests
+  on texts about the well-to-do and, as it says itself, on little that is known of ordinary people's houses.
+verified:
+  by: machine:claude-code
+  how: >-
+    The article's PDF fetched from J-STAGE on 20 November 2026 and turned into text with PyMuPDF; the whole read; the
+    quote checked by script against that text. Volume and pages as the PDF's first page gives them.

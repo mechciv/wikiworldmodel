@@ -1,0 +1,97 @@
+id: people/traditions/japanese-ground-level-house
+kind: tradition/building
+summary: >-
+  The ground-level house of Japan's farmers from the Nara period on: a house whose floor is at the level of the ground,
+  with walls of its own rather than a roof coming down to the earth, on a timber frame whose posts were set in the
+  ground (hottatebashira). It replaced the pit dwelling in western Japan by the early eighth century and became the
+  usual house of the east and north in the Heian and early medieval periods; foundation stones spread to farmhouses
+  only slowly, and earthfast posts were still used in them in the mid-eighteenth century. A broad record, with little
+  said of the house beyond its floor, standing for Japan's farmers until the farmhouse of the Edo period
+  (people/traditions/edo-farmhouse-minka), which is a member of it.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Ground-level house of Japan }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 710 CE
+    source:
+      - ref: src:west-2025-pit-to-surface-structures
+        loc: "pp. 99–100, section 1.3.1"
+        quote: >-
+          During the Nara period (710–794 AD), pit structures were almost entirely replaced by surface structures in
+          western Japan but continued to be used in parts of eastern Japan until the end of the Heian period (794–1185
+          AD)
+      - ref: src:jaanus-dictionary
+        loc: s.v. heichi jūkyo
+        quote: >-
+          appear to have become common in western Japan during the course of the Kofun period, superseding
+          pit-dwellings. They gradually became dominant in the east and north too during the Heian and early medieval
+          periods.
+    method: expert-estimate
+    note: >-
+      The start of the Nara period, when the pit dwelling had given way in western Japan. In the east the pit dwelling
+      was still the usual house until the end of the Heian period, in 1185, so for eastern Japan this record starts
+      too early; the region cannot be split here.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in west-2025-pit-to-surface-structures.txt (sha256 62e9aa916ad8c279) and jaanus-dictionary.txt (sha256 9d242cd750c47f8e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["124"] }
+    source:
+      ref: src:jaanus-dictionary
+      loc: s.v. heichi jūkyo
+      quote: >-
+        appear to have become common in western Japan during the course of the Kofun period, superseding pit-dwellings.
+        They gradually became dominant in the east and north too during the Heian and early medieval periods.
+    method: editorial
+    note: Region 124 (Japan), west, east and north of Honshu, Kyushu and Shikoku. Hokkaido and the Ryukyus are not claimed.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in jaanus-dictionary.txt (sha256 9d242cd750c47f8e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      - ref: src:jaanus-dictionary
+        loc: s.v. hottatebashira
+        quote: >-
+          The use of foundation stones at ground level spread gradually during the succeeding centuries, first to the
+          residences of the upper classes and then into vernacular houses
+      - ref: src:jaanus-dictionary
+        loc: s.v. hottatebashira
+        quote: but hottatebashira were still used in farmhouses until as late as the mid-18th century.
+      - ref: src:west-2025-pit-to-surface-structures
+        loc: "p. 108, section 2.3"
+        quote: >-
+          In state societies where both pit dwellings and surface dwellings were used, such as Unified Silla–Goryeo
+          period Korea, and Nara–Heian period Japan, pit houses were often relegated to rural settlements and the urban
+          capital sites used surface structures.
+    method: editorial
+    note: >-
+      The farmhouses whose posts were still set in the ground; the houses of the capitals were surface buildings too,
+      but the townspeople's house is people/traditions/machiya-town-house, so only farmers are named here.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in jaanus-dictionary.txt (sha256 9d242cd750c47f8e) and west-2025-pit-to-surface-structures.txt (sha256 62e9aa916ad8c279), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { floor: ground }
+    source:
+      - ref: src:jaanus-dictionary
+        loc: s.v. heichi jūkyo
+        quote: >-
+          A type of house in which the floor is level with the surface of the ground, rather than excavated into it like
+          a pit-dwelling
+      - ref: src:jaanus-dictionary
+        loc: s.v. heichi jūkyo
+        quote: with peripheral walls, rather than a roof extending to the ground
+      - ref: src:jaanus-dictionary
+        loc: s.v. hottatebashira
+        quote: Earthfast posts.
+    method: expert-estimate
+    note: >-
+      Only the floor is stated. The walls stood on a frame of earthfast posts, but what they were made of, the roof, the
+      plan and the size are not given by any source read here, and the generator guesses them.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in jaanus-dictionary.txt (sha256 9d242cd750c47f8e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

@@ -5,16 +5,21 @@ import type { Form } from '../../../core/form.ts';
 import type { LivingTaxon, SceneSpec } from '../../../core/scene.ts';
 import { GroundSampler, type GroundGridData } from '../city/ground.ts';
 import { fingerprint, type Fingerprint, type Part } from '../../../core/fingerprint.ts';
-import { Mesh, meshParts } from '../city/kit.ts';
+import { MAT, Mesh, meshParts } from '../city/kit.ts';
 import { hash2, hashString, TAU } from '../city/math.ts';
 import { drawAnimal, drawClump, drawPlant, POSE, type Detail, type Stance } from './forms.ts';
 import { CELL, CELLS, cellParts, cellKey, coverMask, EXTENT, groundGrids, LandCover, makePlan, placeLook, waterLevels, waterRibbons, waterSheet, watersFor, type CellRows, type LivingParams, type LivingPlan, type PlaceLook } from './scene/v7.ts';
 import { freshOf, type Waters } from './land.ts';
 import { drawDwelling, houseSize, type HouseDetail } from '../people/dwellings.ts';
-import { LandUseMap, landUseMask, makeSettlement, type SettlementPlan } from '../people/settlement/v1.ts';
+import { LandUseMap, landUseMask, makeSettlement, type SettlementPlan } from '../people/settlement/v2.ts';
+import { drawWork, workTop } from '../people/works.ts';
 
 /** Where houses start among a scene's kinds of mesh: a taxon's number is below it, a house's dwelling above. */
 export const HOUSE = 0x4000;
+/** Where the pieces of a town's works start, above the houses: a length of wall, a tower, a gate, a length of water. */
+export const WORK = 0x6000;
+/** Where the animals people kept start, above the works: each kind the scene's husbandry names (ScenePeople.kept). */
+export const KEPT = 0x7000;
 
 export const INSTANCE_STRIDE = 28;
 
@@ -125,6 +130,12 @@ export class SceneStream {
   /** each cell's houses, by their place in the plan */
   private houseCells = new Map<number, number[]>();
   private houseTops: number[] = [];
+  /** each cell's pieces of its towns' works, by their place in the plan */
+  private workCells = new Map<number, number[]>();
+  private workTops: number[] = [];
+  /** each cell's kept animals, by their place in the plan; and each kind's tone */
+  private keptCells = new Map<number, number[]>();
+  private keptTones: number[] = [];
 
   constructor(readonly spec: SceneSpec, private budget: Budget = FULL_BUDGET) {
     this.params = spec.generator.params as unknown as LivingParams;
@@ -156,6 +167,20 @@ export class SceneStream {
         if (!list) this.houseCells.set(k, (list = []));
         list.push(i);
       });
+      this.keptTones = (spec.people.kept ?? []).map((t) => hashString(t.id) & 255);
+      this.people.animals.forEach((a, i) => {
+        const k = cellKey(Math.floor(a.x / CELL), Math.floor(a.y / CELL));
+        let list = this.keptCells.get(k);
+        if (!list) this.keptCells.set(k, (list = []));
+        list.push(i);
+      });
+      this.workTops = this.people.workForms.map((f) => workTop(f.spec));
+      this.people.works.forEach((w, i) => {
+        const k = cellKey(Math.floor(w.x / CELL), Math.floor(w.y / CELL));
+        let list = this.workCells.get(k);
+        if (!list) this.workCells.set(k, (list = []));
+        list.push(i);
+      });
     }
     // Nor does a tree stand yet on the bars an invented river has lately left.
     const fresh = freshOf(waters, this.params.ground.migration);
@@ -175,6 +200,70 @@ export class SceneStream {
   /** What people made of the ground, as an image: R crops, G pasture, B yards, A paddies. Undefined where there are no people. */
   fields(size: number): { data: Uint8Array; box: [number, number, number, number] } | undefined {
     return this.landUse ? { data: landUseMask(this.landUse, size, EXTENT), box: [-EXTENT, -EXTENT, EXTENT, EXTENT] } : undefined;
+  }
+
+  /**
+   * The paths between the people's settlements, as one mesh laid on the ground: a ribbon along each, a hand above the
+   * ground at every few metres of its way, broken where it would cross water. Undefined where the scene has none. Its
+   * entity comes after the kept animals' (pathEntity).
+   */
+  paths(): { vertices: ArrayBuffer; indices: Uint32Array } | undefined {
+    const plan = this.people;
+    if (!plan?.paths.length || !(plan.pathWidth > 0)) return undefined;
+    const levelAt = this.waters.paths ? waterLevels(this.waters) : undefined;
+    const water = levelAt ?? (() => this.look.water);
+    const half = plan.pathWidth / 2;
+    const step = 4;
+    const lift = 0.12;
+    const m = new Mesh(4096);
+    m.entity = this.pathEntity();
+    // Beaten pale, and of a material the renderer lays on the ground at any distance.
+    m.mat = MAT.sand;
+    m.tint = 118;
+    for (const line of plan.paths) {
+      // Its points every few metres, then a strip between each pair that stands on dry ground.
+      let last: [number, number] | undefined;
+      let along = 0;
+      for (let q = 0; q + 3 < line.length; q += 2) {
+        const ax = line[q];
+        const ay = line[q + 1];
+        const dx = line[q + 2] - ax;
+        const dy = line[q + 3] - ay;
+        const d = Math.hypot(dx, dy);
+        if (!(d > 0)) continue;
+        const nx = -dy / d;
+        const ny = dx / d;
+        const n = Math.max(1, Math.ceil(d / step));
+        for (let k = q ? 1 : 0; k <= n; k++) {
+          const x = ax + (dx * k) / n;
+          const y = ay + (dy * k) / n;
+          const lx = x + nx * half;
+          const ly = y + ny * half;
+          const rx = x - nx * half;
+          const ry = y - ny * half;
+          const lz = this.ground.at(lx, ly);
+          const rz = this.ground.at(rx, ry);
+          const dry = Math.abs(x) < EXTENT && Math.abs(y) < EXTENT && Math.min(lz, rz) - water(x, y) > 0.25;
+          const w = along + (d * k) / n;
+          if (!dry) {
+            last = undefined;
+            continue;
+          }
+          const a = m.v(lx, ly, lz + lift, 0, 0, 1, -half, w);
+          const b = m.v(rx, ry, rz + lift, 0, 0, 1, half, w);
+          if (last) m.quad(last[0], last[1], b, a);
+          last = [a, b];
+        }
+        along += d;
+      }
+    }
+    const { vertices, indices } = m.arrays();
+    return indices.length ? { vertices, indices } : undefined;
+  }
+
+  /** The entity of the paths: after the taxa, the houses' forms, the works' pieces and the kept animals. */
+  pathEntity(): number {
+    return this.keptBase() + (this.spec.people?.kept?.length ?? 0);
   }
 
   /** The water: ribbons along the world's rivers, or the place's one sheet; with each vertex's flow and depth. */
@@ -197,6 +286,27 @@ export class SceneStream {
   /** A mesh of one kind of body or plant, or of a house: the same everywhere, within the tolerance. */
   mesh(proto: number): ProtoMesh {
     const { taxon, variant, detail } = protoParts(proto);
+    if (taxon >= KEPT) {
+      // An animal its people kept: its taxon's body, drawn as the wild ones are.
+      const t = this.spec.people!.kept![taxon - KEPT];
+      const form = this.spec.people!.keptForms![t.form];
+      const m = new Mesh(detail >= 2 ? 4096 : 512);
+      m.entity = this.keptBase() + (taxon - KEPT);
+      const stance = this.stance(t, form, variant, detail, this.keptTones[taxon - KEPT]);
+      const j = drawAnimal(m, form, stance);
+      const { vertices, indices } = m.arrays();
+      this.meshes.set(proto, { tris: indices.length / 3 });
+      return { proto, vertices, indices, idle: [...j.neck, 0, ...j.hip, 0, ...j.middle, 0, ...idling(stance.pose, stance.L), 0] };
+    }
+    if (taxon >= WORK) {
+      const f = this.people!.workForms[taxon - WORK];
+      const m = new Mesh(detail >= 2 ? 1024 : 256);
+      m.entity = this.spec.taxa.length + 1 + this.people!.forms.length + (taxon - WORK);
+      drawWork(m, f.spec, (2 - detail) as HouseDetail, 118 + (variant & 3) * 6);
+      const { vertices, indices } = m.arrays();
+      this.meshes.set(proto, { tris: indices.length / 3 });
+      return { proto, vertices, indices };
+    }
     if (taxon >= HOUSE) {
       const f = this.people!.forms[taxon - HOUSE];
       const m = new Mesh(detail >= 2 ? 2048 : 256);
@@ -229,6 +339,11 @@ export class SceneStream {
     const { vertices, indices } = m.arrays();
     this.meshes.set(proto, { tris: indices.length / 3 });
     return { proto, vertices, indices };
+  }
+
+  /** The entity of the first kind of kept animal: after the taxa, the houses' forms and the works' pieces. */
+  private keptBase(): number {
+    return this.spec.taxa.length + 1 + (this.people?.forms.length ?? 0) + (this.people?.workForms.length ?? 0);
   }
 
   private stance(t: LivingTaxon, form: Form, variant: number, detail: Detail, tint: number): Stance {
@@ -393,6 +508,95 @@ export class SceneStream {
           b.f[o + 5] = Math.cos(h.face);
           b.s[b.n * 14 + 12] = this.spec.taxa.length + 1 + h.form;
           b.s[b.n * 14 + 13] = h.rank >> 3;
+          b.n++;
+          instances++;
+        }
+      }
+      // The pieces of the towns' works in the cell: walls, gates and towers stay in view as far as they can be made out.
+      const ws = this.workCells.get(cellKey(i, j));
+      if (ws && this.people) {
+        for (const wi of ws) {
+          if (instances >= cap) break;
+          const w = this.people.works[wi];
+          const dx = w.x - ex;
+          const dy = w.y - ey;
+          const dz = w.z - ez;
+          const dd = dx * dx + dy * dy + dz * dz;
+          const tall = this.workTops[w.form];
+          const pxs2 = (tall * tall * K * K) / dd;
+          // A wall is drawn as far as it can be made out; a person or a boat only once it is a few pixels tall.
+          const small = this.people.workForms[w.form].spec.kind === 'person' || this.people.workForms[w.form].spec.kind === 'boat';
+          if (pxs2 < (small ? 16 : 1)) continue;
+          const pxs = Math.sqrt(pxs2);
+          const detail: Detail = this.budget.fast ? (pxs >= 30 ? 1 : 0) : pxs >= 80 ? 2 : pxs >= 10 ? 1 : 0;
+          const proto = protoOf(WORK + w.form, wi & 3, detail);
+          let b = buckets.get(proto);
+          if (!b) {
+            const buf = new ArrayBuffer(INSTANCE_STRIDE * 64);
+            b = { f: new Float32Array(buf), s: new Uint16Array(buf), n: 0 };
+            buckets.set(proto, b);
+          }
+          if ((b.n + 1) * INSTANCE_STRIDE > b.f.byteLength) {
+            const buf = new ArrayBuffer(b.f.byteLength * 2);
+            new Uint8Array(buf).set(new Uint8Array(b.f.buffer));
+            b.f = new Float32Array(buf);
+            b.s = new Uint16Array(buf);
+          }
+          const o = b.n * 7;
+          b.f[o] = w.x;
+          b.f[o + 1] = w.y;
+          b.f[o + 2] = w.z;
+          b.f[o + 3] = 1;
+          b.f[o + 4] = Math.sin(w.face);
+          b.f[o + 5] = Math.cos(w.face);
+          b.s[b.n * 14 + 12] = this.spec.taxa.length + 1 + this.people.forms.length + w.form;
+          b.s[b.n * 14 + 13] = (wi * 37) & 31;
+          b.n++;
+          instances++;
+        }
+      }
+      // The animals people kept, in the cell: drawn as the wild ones are, the same at every distance, fewer further off.
+      const ks = this.keptCells.get(cellKey(i, j));
+      const kept = this.spec.people?.kept;
+      if (ks && this.people && kept) {
+        const base = this.keptBase();
+        for (const ai of ks) {
+          if (instances >= cap) break;
+          const a = this.people.animals[ai];
+          const t0 = kept[a.kind];
+          const form = this.spec.people!.keptForms![t0.form];
+          const dx = a.x - ex;
+          const dy = a.y - ey;
+          const dz = a.z - ez;
+          const dd = dx * dx + dy * dy + dz * dz;
+          const tall = (t0.length ?? 1) * a.size;
+          const pxs2 = (tall * tall * K * K) / dd;
+          if (pxs2 < 2.25) continue;
+          if (dd > R0 && a.rank * dd > 256 * R0) continue;
+          const pxs = Math.sqrt(pxs2);
+          const detail: Detail = this.budget.fast ? (pxs >= 26 ? 1 : 0) : pxs >= (rich ? 36 : 70) ? 2 : pxs >= (rich ? 4 : 9) ? 1 : 0;
+          const proto = protoOf(KEPT + a.kind, this.variantOf(t0, form, a.pose, a.phase, a.shade, detail), detail);
+          let b = buckets.get(proto);
+          if (!b) {
+            const buf = new ArrayBuffer(INSTANCE_STRIDE * 64);
+            b = { f: new Float32Array(buf), s: new Uint16Array(buf), n: 0 };
+            buckets.set(proto, b);
+          }
+          if ((b.n + 1) * INSTANCE_STRIDE > b.f.byteLength) {
+            const buf = new ArrayBuffer(b.f.byteLength * 2);
+            new Uint8Array(buf).set(new Uint8Array(b.f.buffer));
+            b.f = new Float32Array(buf);
+            b.s = new Uint16Array(buf);
+          }
+          const o = b.n * 7;
+          b.f[o] = a.x;
+          b.f[o + 1] = a.y;
+          b.f[o + 2] = a.z;
+          b.f[o + 3] = a.size;
+          b.f[o + 4] = Math.sin(a.face);
+          b.f[o + 5] = Math.cos(a.face);
+          b.s[b.n * 14 + 12] = base + a.kind;
+          b.s[b.n * 14 + 13] = a.shade >> 3;
           b.n++;
           instances++;
         }

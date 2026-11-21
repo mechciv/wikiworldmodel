@@ -47,6 +47,25 @@ claims:
       of mud and brick, so the other regions are left to the broader tradition. Not claimed for all of the region.
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-harappan-architecture.txt (sha256 27a90a20286a1fdd), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+  lifeway:
+    prop: lifeway
+    value: [townspeople]
+    source:
+      - ref: src:wikipedia-harappan-architecture
+        loc: section "Materials"
+        quote: If the house was more rural the bricks would be mud. If the house was in an urban area then the bricks would be baked.
+      - ref: src:wikipedia-indus-valley-civilisation
+        loc: opening section
+        quote: >-
+          The cities of the ancient Indus were noted for their urban planning, baked brick houses, elaborate drainage
+          systems, water supply systems, clusters of large non-residential buildings, and techniques of handicraft and
+          metallurgy.
+    method: editorial
+    note: >-
+      Fired brick was the brick of the houses of the cities, and mud brick that of the countryside, so this house is the
+      townspeople's alone.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-harappan-architecture.txt (sha256 05a5b1f9eeb040d5) and wikipedia-indus-valley-civilisation.txt (sha256 746600d1d517eb71), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   dwelling:
     prop: dwelling
     value: { walls: fired-brick }

@@ -6,13 +6,13 @@ import { join } from 'node:path';
 import { unzipSync } from 'fflate';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { decodeTile } from '../../../core/container.ts';
-import { anthromeTile, classAtStep, cellOf, nearestStep, scenePeople, tileKey, type AnthromeTile, type AnthromeTileHeader, type AssessmentsFile, type CitiesFile, type LandscapeIndex, type TraditionsFile } from '../../../core/landscape.ts';
+import { anthromeTile, citiesAround, cityGuess, classAtStep, cellOf, nameAt, nearestStep, scenePeople, tileKey, type AnthromeTile, type AnthromeTileHeader, type AssessmentsFile, type CitiesFile, type LandscapeIndex, type TraditionsFile } from '../../../core/landscape.ts';
 import { cellAt, stepsAround, type PeopleFile, type PeopleHeader } from '../../../core/layers.ts';
 import type { CoverageFile } from '../../../core/records.ts';
 import type { SceneSpec } from '../../../core/scene.ts';
 import type { Tileset } from '../../../core/tileset.ts';
-import { makeSettlement } from '../../../world/generators/people/settlement/v1.ts';
-import { parseClassGrid } from '../src/build/landscape.ts';
+import { makeSettlement } from '../../../world/generators/people/settlement/v2.ts';
+import { HOUSING_TIMES, parseClassGrid } from '../src/build/landscape.ts';
 import { dataset, latestBuild } from './helpers.ts';
 
 const file = (name: string) => readFileSync(join(latestBuild(), name));
@@ -90,6 +90,62 @@ describe('the human landscape, built', () => {
     const farming = c.landscape!.farming;
     expect(farming).toHaveLength(10);
     for (const f of farming) if (f.none[1]) expect(f.none[0] / f.none[1], f.slice).toBeGreaterThanOrEqual(0.95);
+  });
+
+  it('counts whose houses rest on a tradition, at each time, by pattern of settlement, and they add up', () => {
+    const c = json<CoverageFile>('coverage.json');
+    const counts = c.landscape!.housing!;
+    expect(counts.map((x) => x.t)).toEqual(HOUSING_TIMES);
+    const traditions = json<TraditionsFile>(index.traditions).traditions;
+    for (const x of counts) {
+      const sum = Object.values(x.by).reduce((s, v) => [s[0] + v![0], s[1] + v![1]], [0, 0]);
+      expect(sum, String(x.t)).toEqual([x.people, x.housed]);
+      for (const v of Object.values(x.by)) expect(v![1]).toBeLessThanOrEqual(v![0]);
+      expect(x.regions[1]).toBeLessThanOrEqual(x.regions[0]);
+      expect(x.cities[2]).toBeLessThanOrEqual(x.cities[1]);
+      // No one is housed by a tradition at a time none holds.
+      if (!traditions.some((t) => t.lifeways.length && x.t >= t.span[0] && x.t <= t.span[1])) expect(x.housed, String(x.t)).toBe(0);
+    }
+    // The people are HYDE's: nearly all foragers at the anthromes' first step, over a billion in 1850, most of them farmers.
+    expect(counts[0].by.foragers![0] / counts[0].people).toBeGreaterThan(0.9);
+    const last = counts.at(-1)!;
+    expect(last.people).toBeGreaterThan(1.1e9);
+    expect((last.by.villages![0] + last.by.hamlets![0] + last.by.farmsteads![0]) / last.people).toBeGreaterThan(0.6);
+    expect(last.cities[0]).toBeGreaterThan(1000);
+    // Every tradition written says whom it housed, and some house people at some time.
+    expect(traditions.filter((t) => !t.lifeways.length).map((t) => t.id)).toEqual([]);
+    expect(counts.some((x) => x.housed > 0)).toBe(true);
+    // The glance's bar is the same count: each time's share, each time alike.
+    const peopled = counts.filter((x) => x.people > 0);
+    const share = peopled.reduce((s, x) => s + x.housed / x.people, 0) / peopled.length;
+    expect(c.glance!.groups.flatMap((g) => g.rows).find((r) => r.id === 'houses')!.share).toBeCloseTo(share, 3);
+  });
+
+  it('reads the settlements the world has records of: where and when each stood, and what its claims say of its size', () => {
+    const cities = json<CitiesFile>(index.cities);
+    const records = cities.records!;
+    expect(records.length).toBeGreaterThanOrEqual(20);
+    const of = (id: string) => records.find((r) => r.id === id)!;
+    // Mohenjo-daro: the ground UNESCO gives it, held over its urban phase; Modelski's people at its height.
+    const m = of('people/first-cities/mohenjo-daro');
+    expect(m.lat).toBeCloseTo(27.3254, 3);
+    expect(m.span[0]).toBeLessThan(-2500);
+    expect(m.span[1]).toBeLessThan(-1400);
+    expect(m.areas.map((a) => a[1])).toEqual([240, 240]);
+    expect(m.pops[0][1]).toBe(40000);
+    // Tenochtitlan: the estimate the record prefers for 1519, not the eight beside it; and its name of the time.
+    const t = of('people/cities/tenochtitlan');
+    const p1519 = t.pops.filter(([y]) => y >= 1519 && y < 1521);
+    expect(p1519).toHaveLength(1);
+    expect(p1519[0][1]).toBeGreaterThanOrEqual(150000);
+    expect(p1519[0][1]).toBeLessThanOrEqual(200000);
+    expect(t.houses.some(([, n]) => n === 60000)).toBe(true);
+    expect(nameAt(t, 1500)).toBe('Tenochtitlan');
+    expect(nameAt(t, 1900)).toBe('Mexico City');
+    // A scene of it in 1519 draws the record's city, with the record's people, where a list's row stands beside it.
+    const near = citiesAround(cities, t.lat, t.lon, 1519.5, index.reach_km, cityGuess(index.generator!.params));
+    expect(near[0]).toMatchObject({ name: 'Tenochtitlan', record: 'people/cities/tenochtitlan', from: 'record' });
+    expect(near[0].also.length).toBeGreaterThan(0);
   });
 
   it('puts the city of the lists in a scene of it: Uruk in 3000 BCE, which HYDE does not have', () => {

@@ -1,0 +1,225 @@
+id: people/traditions/south-indian-mud-courtyard-house
+kind: tradition/building
+summary: >-
+  The common house of the villages and towns of southern India, from the Carnatic plain to Mysore and Hyderabad: low,
+  of one storey, with walls of mud, its few rooms set round a small court open to the sky, and one door to the street,
+  on which side there was usually a veranda. The labourer's hut of one room was thatched; better houses were tiled, or on
+  the dry plateau roofed flat with a terrace of mud. Houses of one storey, flat-roofed and each within a low wall,
+  were seen in the city of Vijayanagar about 1520; mud walls round a court are described at Conjeveram and above the
+  Ghats in 1800, and in the gazetteer of 1908. No end is given: it was still the ordinary house when the gazetteer was
+  written.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Mud-walled courtyard house of southern India }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: { lo: 1520 CE, hi: 1522 CE }
+    source:
+      - ref: src:paes-1520-narrative-vijayanagar
+        loc: "heading of the narrative, p. 235"
+        quote: WRITTEN PROBABLY … 1520-22
+      - ref: src:paes-1520-narrative-vijayanagar
+        loc: "p. 290"
+        quote: >-
+          Of the city of Bisnaga they say that there are more than a hundred thousand dwelling-houses in it, all
+          one-storeyed and flat-roofed, to each of which there is a low surrounding wall
+    method: documentary
+    note: >-
+      The years in which the translator thinks Paes wrote, the earliest account read: the houses of the city of
+      Vijayanagar, all of one storey and flat-roofed, each within a low wall. It bounds the start and does not date it:
+      the house is surely older, and no earlier account of the common house of the south was read. Paes does not say
+      what the walls were made of, and gives the houses as what was said of the city; walls of mud and rooms round a
+      court are first described, in what was read, in 1800. No end is given, and none is known from what was read: the
+      latest account, the gazetteer of 1908, has it as the ordinary house of its own day.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in paes-1520-narrative-vijayanagar.txt (sha256 0bcec8f487ccba8d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["110"] }
+    source:
+      - ref: src:buchanan-1807-journey-mysore-vol-1
+        loc: "chapter I, Conjeveram, p. 12"
+        quote: >-
+          The houses have mud walls, and are roofed with tiles. Each is built in the form of a square with a small court
+          in the centre.
+      - ref: src:imperial-gazetteer-of-india-1908
+        loc: "vol. XVI, article Madras Presidency, p. 266"
+        quote: >-
+          The ordinary house contains a central court, surrounded by various rooms and opening by one door into the
+          street.
+      - ref: src:imperial-gazetteer-of-india-1908
+        loc: "vol. XVIII, article Mysore State, p. 208"
+        quote: >-
+          The dwellings of the people are generally of mud, one-storeyed and low, with few, if any, openings outwards
+          except the door, but possessed of courtyards within, surrounded with verandas and open to the sky.
+      - ref: src:imperial-gazetteer-of-india-1908
+        loc: "vol. XIII, article Hyderabad State, p. 250"
+        quote: >-
+          of the common cultivator consists of three or four small rooms, the walls being of mud and the roof tiled or
+          thatched, the rooms being built round a bhavanti or courtyard
+    method: editorial
+    note: >-
+      Region 110 (Southern India), which holds Conjeveram (Kanchipuram) and the plain behind Madras, the Mysore
+      plateau, the city of Hyderabad and the ruins of Vijayanagar, by their coordinates against the region outlines.
+      The Madras Presidency and Hyderabad State of 1908 reached beyond it, into regions 111 and 108, which are left to
+      other records. The house is not claimed for all of the region. The west coast is in it and built otherwise:
+      there, the gazetteer says, there was no village site and each cultivator made his dwelling where it suited him,
+      and Buchanan found the people of Malabar in detached houses among gardens. No record is written for that house,
+      and this one will be drawn there.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in buchanan-1807-journey-mysore-vol-1.txt (sha256 98b82efda7c1eefb) and imperial-gazetteer-of-india-1908.txt (sha256 6cdf9985eed79137), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [farmers, townspeople]
+    source:
+      - ref: src:imperial-gazetteer-of-india-1908
+        loc: "vol. XIII, article Hyderabad State, p. 250"
+        quote: >-
+          of the common cultivator consists of three or four small rooms, the walls being of mud and the roof tiled or
+          thatched, the rooms being built round a bhavanti or courtyard
+      - ref: src:buchanan-1807-journey-mysore-vol-1
+        loc: "chapter I, above the Ghats, p. 33"
+        quote: in many towns and villages, the houses have flat roofs terraced with this mud
+      - ref: src:buchanan-1807-journey-mysore-vol-1
+        loc: "chapter I, Conjeveram, p. 12"
+        quote: >-
+          none of the houses are more than one story high. The streets are tolerably wide and clean, and cross one
+          another at right angles.
+    method: editorial
+    note: >-
+      Farmers: the common cultivator of Hyderabad State in 1908, and the villages above the Ghats in 1800.
+      Townspeople: the towns of the same country in 1800, the town of Conjeveram, most of whose houses were lived in
+      by Brahmans of its temples, and the city of Vijayanagar about 1520. The gazetteer of Madras has the same plan
+      from the labourer's hut of one room up to the elaborate dwelling of the rich money-lender or landowner, which
+      this record does not draw.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in imperial-gazetteer-of-india-1908.txt (sha256 6cdf9985eed79137) and buchanan-1807-journey-mysore-vol-1.txt (sha256 98b82efda7c1eefb), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { plan: courtyard, court: true, storeys: 1, rooms: { lo: 3, hi: 4 }, walls: cob, roof_material: thatch }
+    source:
+      - ref: src:buchanan-1807-journey-mysore-vol-1
+        loc: "chapter I, Conjeveram, p. 12"
+        quote: >-
+          none of the houses are more than one story high. The streets are tolerably wide and clean, and cross one
+          another at right angles.
+      - ref: src:buchanan-1807-journey-mysore-vol-1
+        loc: "chapter I, Conjeveram, p. 12"
+        quote: >-
+          The houses have mud walls, and are roofed with tiles. Each is built in the form of a square with a small court
+          in the centre.
+      - ref: src:buchanan-1807-journey-mysore-vol-1
+        loc: "chapter I, Vencataghery, p. 30"
+        quote: >-
+          The houses are much inferiour to those in the Tamul villages. They are built of mud, with thatched roofs; but
+          do not surround a square court; nor have they any Verandah
+      - ref: src:buchanan-1807-journey-mysore-vol-1
+        loc: "chapter I, above the Ghats, p. 33"
+        quote: The houses and huts have their walls universally built of this mud
+      - ref: src:buchanan-1807-journey-mysore-vol-1
+        loc: "chapter I, the plain behind Madras, p. 2"
+        quote: >-
+          many of the huts being built of mud, and neatly covered with tiles, have a better appearance than those in
+          Bengal: but the roofs of such as are thatched look ragged
+      - ref: src:imperial-gazetteer-of-india-1908
+        loc: "vol. XVI, article Madras Presidency, p. 266"
+        quote: >-
+          Houses vary in degree from the one-roomed, mud-walled, thatched-roof hut of the labouring classes to the
+          elaborate dwelling of the rich money-lender or landowner. The ordinary house contains a central court,
+          surrounded by various rooms and opening by one door into the street.
+      - ref: src:imperial-gazetteer-of-india-1908
+        loc: "vol. XVI, article Madras Presidency, p. 266"
+        quote: In the Deccan there is usually no court and no outer veranda, and the roofs are flat.
+      - ref: src:imperial-gazetteer-of-india-1908
+        loc: "vol. XVIII, article Mysore State, p. 208"
+        quote: >-
+          The dwellings of the people are generally of mud, one-storeyed and low, with few, if any, openings outwards
+          except the door, but possessed of courtyards within, surrounded with verandas and open to the sky.
+      - ref: src:imperial-gazetteer-of-india-1908
+        loc: "vol. XVIII, article Mysore State, p. 208"
+        quote: >-
+          The huts of the outcaste and poorer classes are thatched … the houses of the higher orders are covered with
+          either terraced or tiled roofs
+      - ref: src:imperial-gazetteer-of-india-1908
+        loc: "vol. XIII, article Hyderabad State, p. 250"
+        quote: >-
+          of the common cultivator consists of three or four small rooms, the walls being of mud and the roof tiled or
+          thatched, the rooms being built round a bhavanti or courtyard
+      - ref: src:imperial-gazetteer-of-india-1908
+        loc: "vol. XIII, article Hyderabad State, p. 244"
+        quote: The houses are usually built of mud with thatched roofs.
+    method: documentary
+    note: >-
+      The plan is Buchanan's of 1800, a square with a small court in the centre at Conjeveram and, by the contrast he
+      draws with the houses of Vencataghery, a square court and a veranda in the Tamil villages; it is the
+      gazetteer's of 1908 for Madras, Mysore and Hyderabad alike. Mud is taken
+      as earth built up without a frame, which the vocabulary calls cob: above the Ghats Buchanan has walls of a
+      reddish clay that stand the rains for many years. One storey is Buchanan's of Conjeveram and the gazetteer's of
+      Mysore, as it was Paes's of Vijayanagar; three or four rooms are those of the common cultivator of Hyderabad,
+      and the labourer's hut had one. The roof differed with the place and the means and no one word holds it. Thatch
+      is written, as the roof of the labourer's hut in Madras, of the poorer classes in Mysore and of the usual house
+      in Hyderabad; in the plain behind Madras it was of palmyra leaves. Tiles covered the houses of Conjeveram and
+      many huts of that plain in 1800 and the better houses of Mysore in 1908, and the gazetteer says the proportion
+      of tiled to thatched dwellings in Madras had risen. On the plateau many houses had flat roofs terraced with mud
+      in 1800, and in the Deccan districts of Madras the roofs were flat in 1908, with no court and no veranda: the
+      Telugu houses Buchanan saw at Vencataghery had neither. The shape of the roof is left to the generator, and no
+      size is given. In the Mysore sentence the ellipsis stands for "; but", which the scan's text spaces oddly.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in buchanan-1807-journey-mysore-vol-1.txt (sha256 98b82efda7c1eefb) and imperial-gazetteer-of-india-1908.txt (sha256 6cdf9985eed79137), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  settlement:
+    prop: settlement_form
+    value: { pattern: nucleated, household: 5.2 }
+    source:
+      - ref: src:buchanan-1807-journey-mysore-vol-1
+        loc: "chapter I, above the Ghats, p. 32"
+        quote: All the houses are collected in villages … the smallest village, of five or six houses, is fortified
+      - ref: src:imperial-gazetteer-of-india-1908
+        loc: "vol. I, chapter IX, p. 456"
+        quote: >-
+          Elsewhere again, as in the greater part of Madras and Bengal proper, the houses, while still collected on a
+          common site, are well separated and each stands in its own ground.
+      - ref: src:imperial-gazetteer-of-india-1908
+        loc: "vol. XIII, article Hyderabad State, p. 244"
+        quote: walled villages are found all over the State
+      - ref: src:imperial-gazetteer-of-india-1908
+        loc: "vol. I, chapter IX, p. 458"
+        quote: compared with a general mean of 5-2), but elsewhere it is generally very uniform
+      - ref: src:imperial-gazetteer-of-india-1908
+        loc: "vol. I, chapter IX, p. 458"
+        quote: >-
+          the figures for Bombay and Madras, where the … criterion was adopted, differ scarcely at all from those for
+          Bengal and Burma
+    method: survey
+    note: >-
+      Houses gathered in villages: above the Ghats in 1800 every village was fortified, down to one of five or six
+      houses, and in 1908 walled villages were found all over Hyderabad State, while in most of Madras the houses
+      stood on one site but apart, each in its own ground. The household is the mean of all India at the census of
+      1901, 5·2 persons to a house; the gazetteer gives no figure for Madras by itself, and says that outside the
+      Punjab and Kashmir the provinces vary little and that Madras, where the house counted was the enclosure, differs
+      scarcely at all from Bengal. The scan's text writes the decimal point as a hyphen, and the quote keeps its
+      characters; the second ellipsis stands for the word enclosure in quotation marks, which the scan's text spaces
+      oddly. The gazetteer gives Hyderabad's villages about 500 people each, a census village and not a count of
+      houses, so the number of houses in a village is not stated.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in buchanan-1807-journey-mysore-vol-1.txt (sha256 98b82efda7c1eefb) and imperial-gazetteer-of-india-1908.txt (sha256 6cdf9985eed79137), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  town:
+    prop: town_form
+    value: { wall: earth }
+    source:
+      - ref: src:paes-1520-narrative-vijayanagar
+        loc: "p. 237"
+        quote: >-
+          The whole country is thickly populated with cities and towns and villages; the king allows them to be
+          surrounded only with earthen walls for fear of their becoming too strong.
+    method: documentary
+    note: >-
+      Walls of earth, the only walls the king of Vijayanagar allowed his cities, towns and villages about 1520; a city
+      at the edge of his territory might have walls of stone, Paes adds, but never a town. In 1800 Buchanan still
+      found towns and villages above the Ghats fortified with mud walls and hedges. It is not the wall of every town
+      of the region or the time. The streets are not stated: Buchanan found those of Conjeveram tolerably wide and
+      crossing at right angles, in a town he calls very regularly built, and that is one town.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in paes-1520-narrative-vijayanagar.txt (sha256 0bcec8f487ccba8d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

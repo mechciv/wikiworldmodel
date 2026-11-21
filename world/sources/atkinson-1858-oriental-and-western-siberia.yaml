@@ -1,0 +1,24 @@
+id: src:atkinson-1858-oriental-and-western-siberia
+type: text
+kind: eyewitness
+citation: >-
+  Atkinson, T.W. Oriental and Western Siberia: a narrative of seven years' explorations and adventures in Siberia,
+  Mongolia, the Kirghis Steppes, Chinese Tartary, and part of Central Asia. London: Hurst and Blackett, 1858.
+authors:
+  - "Atkinson, T.W."
+published: 1858
+written: { lo: 1847 CE, hi: 1858 CE }
+title: Oriental and Western Siberia
+url: https://archive.org/details/orientalwesterns00atki
+via: The Internet Archive's scan of the 1858 edition (orientalwesterns00atki), read in its OCR text.
+license: public domain
+reliability: >-
+  An English architect and painter who travelled for the seven years of his title in Siberia and the Kazakh ("Kirghis") steppe,
+  in the years around 1847 to 1853 that he names in passing; the book does not date each passage. The
+  passages cited are his account of the Kazakh camps he stayed in west of the Irtysh, in autumn; the yurts he measured
+  are those of chiefs, a great and wealthy one among them, and so likely larger than most.
+verified:
+  by: machine:claude-code
+  how: >-
+    Chapters 15 to 17, from the Kazakh camps by Kara-tas to "Among the Kirghis" and "Adventures in the steppe" (pp. 255-287), read on 20 November 2026 in the
+    OCR text of the scan, fetched from the Internet Archive; the quotes were checked by script against it.

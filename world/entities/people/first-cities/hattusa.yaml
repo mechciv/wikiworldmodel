@@ -81,6 +81,8 @@ claims:
       quote: 268.46 ha
     method: survey
     note: The protected property, so with no date. It takes in the city area, the rock sanctuary of Yazılıkaya, the ruins of Kayalı Boğaz and the İbikçam Forest.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in unesco-whc-377-hattusha.txt (sha256 0806123520d2338f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   population-modern:
     prop: population
     value: 10000
@@ -108,3 +110,18 @@ claims:
     source: { ref: src:reba-2016-urban-population, loc: "chandlerV2.csv, row Hattusa, column BC_1200" }
     method: compilation
     note: Chandler's figure, as digitized by Reba et al. (2016).
+  town-form:
+    prop: town_form
+    value: { gates: 5 }
+    source:
+      ref: src:unesco-whc-377-hattusha
+      loc: Outstanding Universal Value, brief synthesis
+      quote: >-
+        form a double wall with more than a hundred towers and, as far as is known today, five gateways
+    method: excavation
+    note: >-
+      A double wall with more than a hundred towers and five gateways round the upper city, inside a monumental enclosure wall
+      of more than 8 km round the whole city. What the walls were built of is not said in what could be read, so no wall
+      material is claimed and the gates are drawn only where a tradition gives the wall.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in unesco-whc-377-hattusha.txt (sha256 0806123520d2338f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

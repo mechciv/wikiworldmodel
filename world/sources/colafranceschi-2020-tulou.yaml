@@ -1,0 +1,27 @@
+id: src:colafranceschi-2020-tulou
+type: publication
+kind: measurement
+citation: >-
+  Colafranceschi, E., Pallottino, E. & Porretta, P. (2020). Tulou: the rammed earth dwellings of Fujian (China).
+  Functional, typological and constructive features. The International Archives of the Photogrammetry, Remote Sensing
+  and Spatial Information Sciences XLIV-M-1-2020, 937–944.
+authors:
+  - "Colafranceschi, E."
+  - "Pallottino, E."
+  - "Porretta, P."
+published: 2020
+title: "Tulou: the rammed earth dwellings of Fujian (China). Functional, typological and constructive features"
+container: The International Archives of the Photogrammetry, Remote Sensing and Spatial Information Sciences
+doi: 10.5194/isprs-archives-XLIV-M-1-2020-937-2020
+url: https://isprs-archives.copernicus.org/articles/XLIV-M-1-2020/937/2020/isprs-archives-XLIV-M-1-2020-937-2020.pdf
+license: CC-BY-4.0
+reliability: >-
+  A peer-reviewed conference paper by architects of Roma Tre University working with Fuzhou University, on how the
+  tulou of the Minnan and of the Hakka differ in plan and structure, from eight round tulou studied on the ground and
+  the literature (Huang Hanmin's catalogues and the World Heritage nomination, neither read here). Its dates and its
+  count of standing tulou are from that literature; its sizes are ceilings and extremes, not a survey of all.
+verified:
+  by: machine:claude-code
+  how: >-
+    The paper's PDF fetched from the ISPRS Archives' site (Copernicus) on 20 November 2026 and turned into text with
+    PyMuPDF; the whole read; the quotes checked by script against that text. The licence is as its page footers state.

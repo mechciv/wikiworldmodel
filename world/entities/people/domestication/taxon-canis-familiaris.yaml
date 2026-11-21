@@ -12,8 +12,29 @@ claims:
     value: { en: dogs, la: "Canis lupus familiaris" }
     source: { ref: src:opentree-taxonomy-3.7, loc: "tnrs/match_names: Canis familiaris is a synonym of ott247333, accepted name Canis lupus familiaris" }
     note: Open Tree gives the scientific name; the English name is an editorial gloss.
+  mass:
+    prop: body_mass
+    value: { lo: 0.5, hi: 79 }
+    source:
+      ref: src:wikipedia-dog
+      loc: "section \"Size and skeleton\""
+      quote: "the Great Dane, at 50–79 kg (110–174 lb) and 71–81 cm (28–32 in), to one of the smallest, the Chihuahua, at 0.5–3 kg"
+    method: compilation
+    note: >-
+      From the smallest of today's breeds to one of the largest, from Wikipedia, as no better source stating it for the
+      domestic dog could be read. The dogs of the past were mostly of middling size, and no figure for them was read.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-dog.txt (sha256 4ad562d92a13ce0d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
 relations:
   parent:
     rel: descends-from
     to: life/taxa/mammalia
     source: { ref: src:opentree-synthesis-16.1, loc: "induced_subtree of ott247333 and ott244265: Canis lupus familiaris lies within Mammalia" }
+  parent-canidae:
+    rel: descends-from
+    to: life/taxa/canidae
+    source: { ref: src:opentree-taxonomy-3.7, loc: "taxonomy/taxon_info ott247333 with include_lineage: Canis lupus familiaris lies within Canidae" }
+    rank: preferred
+    note: >-
+      The nearer parent of the same lineage: Canidae lies within Mammalia, and is the nearest record above the dog that has a
+      body, so the tree takes this one.

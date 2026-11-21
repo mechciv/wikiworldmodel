@@ -1,0 +1,132 @@
+id: people/traditions/northwest-coast-plank-house
+kind: tradition/building
+summary: >-
+  The plank house of the fishing, hunting and gathering peoples of the Pacific Northwest Coast: a rectangular house of
+  posts and beams walled with planks, holding several families under one roof, the houses standing together in villages
+  by the shore. Large plank house villages emerged in the Salish Sea between about 3200 and 1000 years ago; an early
+  house at Palmrose on the Oregon coast, of about 6 by 12 metres, was lived in around the turn of the era.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Plank house of the Northwest Coast }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: { lo: 3200 BP, hi: 1000 BP }
+    source:
+      ref: src:rorabaugh-2023-salish-sea-population
+      loc: section "Introduction"
+      quote: >-
+        The social transformations in the Salish Sea from 3200–1000 cal BP which include a transition from smaller house
+        structures to the emergence of large plank house villages
+    method: expert-estimate
+    rank: preferred
+    note: >-
+      The span over which large plank house villages emerged in the Salish Sea, as the regional literature the source
+      cites has it, and the start of the tradition somewhere within it. Preferred to the review's "at least 5000 years",
+      which is a public-health review's summary of two works on the longhouse and the plank house together and names no
+      site. The plank house at Palmrose, Oregon, was lived in from about 160–1 cal BC to cal AD 170–320, within this span.
+      No end is given: the source has a plank house of San Juan Island lived in until 1859, and plank houses are still
+      built.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in rorabaugh-2023-salish-sea-population.txt (sha256 896cc5caefa56cd3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  start-review:
+    prop: start
+    value: 5 ka
+    source:
+      ref: src:mashford-pringle-2023-indigenous-building-structures
+      loc: 'section 3.1, "Identified Themes", on the longhouse and plank house'
+      quote: These houses were used for at least 5000 years, as evidenced archaeologically [25,26].
+    method: expert-estimate
+    note: >-
+      At least 5000 years before the review (2023), read as 5 ka: a bound, of the longhouse and the plank house together,
+      from the works it cites, which were not read here.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in mashford-pringle-2023-indigenous-building-structures.txt (sha256 738a150881c2faa4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["5", "14"] }
+    source:
+      - ref: src:rorabaugh-2023-salish-sea-population
+        loc: section "Introduction"
+        quote: >-
+          have argued that the Fraser Delta served as a regional core, with the emergence of large plank house villages
+      - ref: src:rorabaugh-2023-salish-sea-population
+        loc: section "Discussion"
+        quote: >-
+          was occupied until 1859 when British troops established a military camp and dismantled the plank house during
+          the Pig War
+      - ref: src:sanchez-2021-palmrose-plank-house
+        loc: abstract
+        quote: >-
+          One site, known as Palmrose (35CLT47), provides compelling evidence for the presence of one of the earliest
+          examples of a rectangular plank house along the Oregon Coast.
+    method: editorial
+    note: >-
+      British Columbia (5), for the Fraser Delta, and the Western USA (14), for San Juan Island, where the village whose
+      plank house stood until 1859 was, and for Palmrose on the northern Oregon coast. The coasts further north, to
+      south-east Alaska (1), were plank house country too, but no source read here places the house there, so they are
+      left out; nor is it claimed for the interior of either region.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in rorabaugh-2023-salish-sea-population.txt (sha256 896cc5caefa56cd3) and sanchez-2021-palmrose-plank-house.txt (sha256 9e25537e58d96499), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [foragers]
+    source:
+      - ref: src:rorabaugh-2023-salish-sea-population
+        loc: section "Discussion"
+        quote: >-
+          which has broader implications for interpreting the population dynamics of sedentary and semi-sedentary
+          hunter-gatherer-fishers
+      - ref: src:mashford-pringle-2023-indigenous-building-structures
+        loc: 'section 3.1, "Identified Themes", on the longhouse and plank house'
+        quote: >-
+          In the summer, plank houses can be removed, put on canoes, and transported to summer camp where they can be
+          transformed into lean-to structures, which was more convenient for summer fishing, berry gathering, and hunting
+    method: editorial
+    note: >-
+      Settled foragers: fishers, hunters and gatherers who lived in their plank houses in winter villages and took the
+      planks to their summer camps.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in rorabaugh-2023-salish-sea-population.txt (sha256 896cc5caefa56cd3) and mashford-pringle-2023-indigenous-building-structures.txt (sha256 738a150881c2faa4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { plan: rectangular, width: 6, length: 12, walls: timber, floor: ground }
+    source:
+      - ref: src:sanchez-2021-palmrose-plank-house
+        loc: section "Background"
+        quote: >-
+          they encountered a rectangular house feature, most likely a plank house, possibly measuring 6 m in width and 12 m
+          in length
+      - ref: src:mashford-pringle-2023-indigenous-building-structures
+        loc: 'section 3.1, "Identified Themes", on the longhouse and plank house'
+        quote: >-
+          Both the longhouse and the plank house were pole-and-beam log structures designed to house several generations
+          together under the same roof
+    method: excavation
+    note: >-
+      Rectangular, walled with planks on a frame of posts and beams; the size is that of the one early house at Palmrose,
+      as its excavators' notes give it. Later houses were often far larger, and the review says they varied in size with
+      the community's needs, but no size of them was read here. The roof is not described in the sources read, and is the
+      generator's.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in sanchez-2021-palmrose-plank-house.txt (sha256 9e25537e58d96499) and mashford-pringle-2023-indigenous-building-structures.txt (sha256 738a150881c2faa4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  settlement:
+    prop: settlement_form
+    value: { pattern: nucleated }
+    source:
+      - ref: src:rorabaugh-2023-salish-sea-population
+        loc: section "Introduction"
+        quote: >-
+          The social transformations in the Salish Sea from 3200–1000 cal BP which include a transition from smaller house
+          structures to the emergence of large plank house villages
+      - ref: src:mashford-pringle-2023-indigenous-building-structures
+        loc: 'section 3.1, "Identified Themes", on the longhouse and plank house'
+        quote: Slightly different from the longhouse, the plank house was a form of modular multi-family housing [25].
+    method: expert-estimate
+    note: >-
+      Villages of plank houses, each house of several families. How many houses stood in a village and how many people
+      lived in one are not given in the sources read.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in rorabaugh-2023-salish-sea-population.txt (sha256 896cc5caefa56cd3) and mashford-pringle-2023-indigenous-building-structures.txt (sha256 738a150881c2faa4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

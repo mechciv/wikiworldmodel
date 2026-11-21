@@ -1,0 +1,24 @@
+id: src:winship-1904-journey-of-coronado
+type: text
+kind: eyewitness
+citation: >-
+  Winship, G.P. (ed. and trans.). The Journey of Coronado, 1540–1542, from the City of Mexico to the Grand Cañon of the
+  Colorado and the Buffalo Plains of Texas, Kansas, and Nebraska, as Told by Himself and His Followers. New York: A. S.
+  Barnes & Company, 1904.
+authors: ["Winship, G.P."]
+published: 1904
+title: The Journey of Coronado, 1540–1542
+url: https://archive.org/details/journeycoronado00winsrich
+via: The Internet Archive's scan (journeycoronado00winsrich), read in its OCR text.
+license: public domain
+reliability: >-
+  English translations of the narratives of Coronado's expedition to the plains: Castañeda's account, written "twenty
+  years and more" after by one who went, the anonymous Traslado de las Nuevas and Relación del Suceso, and Coronado's own
+  letter to the King of 20 October 1541, with Winship's introduction tracing the route. The members of the expedition
+  describe the tents of the bison hunters they met on the plains as they saw them, in 1541.
+verified:
+  by: machine:claude-code
+  how: >-
+    Read on 20 November 2026 in the OCR text of the scan: Winship's introduction, Castañeda's chapter on the march to the
+    plains (pp. 64–65), the Traslado (pp. 190–194), the Relación del Suceso (pp. 209–210) and Coronado's letter (pp.
+    213–214). The quotes were checked by script against the OCR, keeping to stretches it reads cleanly.

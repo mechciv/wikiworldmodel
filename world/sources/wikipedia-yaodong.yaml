@@ -1,0 +1,24 @@
+id: src:wikipedia-yaodong
+type: database-record
+kind: review
+citation: >-
+  "Yaodong." Wikipedia, the free encyclopedia (English edition), revision 1386738772.
+snapshot: 2026-11-20
+title: Yaodong
+container: Wikipedia
+url: https://en.wikipedia.org/w/index.php?title=Yaodong&oldid=1386738772
+license: CC-BY-SA-4.0
+license_note: Short quotes, with credit.
+reliability: >-
+  A general encyclopedia article, cited for the shape of the cave dwelling, its kinds, the provinces it is found in and
+  when it spread, because the studies that give those could not be read here (G. Golany's book of 1992; papers on MDPI's
+  site, which refused the request). Its sentence on the Han and later dynasties is footnoted to Golany, G. (1992),
+  Chinese Earth-Sheltered Dwellings, University of Hawaii Press, with no page; its sentences on the cliffside type, on
+  the number of caves and on the five provinces cite nothing; its opening rests on a dialect survey, a Ministry of
+  Culture web page of 2003 and a Chinese paper of 1983. None was read here. Golany (1992) should replace it.
+verified:
+  by: machine:claude-code
+  how: >-
+    The article's HTML, rendered from revision 1386738772, fetched from Wikipedia on 20 November 2026 and read as text,
+    with the reference marks taken out; the quotes checked by script against that text, and their footnotes matched to
+    the works they cite.

@@ -60,6 +60,34 @@ claims:
       None is claimed for all its land.
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in wp-Đông_Sơn_drum.txt (sha256 da46a633fd9ea358), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      - ref: src:wikipedia-dong-son-drum
+        loc: section "Appearances"
+        quote: >-
+          The patterns on drums bear a realistic style and show stilted houses, dancing people, people pounding rice,
+          beating drums and sailing, together with animal and birds.
+      - ref: src:wikipedia-austronesian-peoples
+        loc: section "Architecture"
+        quote: >-
+          Building structures on pilings is believed to be derived from the design of raised granaries and storehouses,
+          which are highly important status symbols among the ancestrally rice-cultivating Austronesians.
+      - ref: src:wikipedia-austronesian-peoples
+        loc: opening section
+        quote: >-
+          Aside from language, Austronesian peoples widely share cultural characteristics, including such traditions and
+          traditional technologies as lashed-lug shipbuilding, tattooing, stilt houses, jade carving, wetland agriculture,
+          and various rock art motifs.
+    method: editorial
+    note: >-
+      Growers of rice: the drums of the Red River delta set stilted houses beside people pounding rice, and the builders
+      on piles of the islands kept granaries of rice and farmed wet land. No sentence read shows shifting cultivators,
+      townspeople or peoples who lived by fishing in these houses, so they are not named; the kelong in the stilt-house
+      article's list, built for fishing first and lived in second, is left out.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-dong-son-drum.txt (sha256 350a743295844ef6) and wikipedia-austronesian-peoples.txt (sha256 f13a15ba3abfbe2e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   dwelling:
     prop: dwelling
     value: { plan: rectangular, roof: gable, roof_material: thatch, floor: stilts }

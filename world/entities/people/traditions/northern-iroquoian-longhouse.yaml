@@ -69,6 +69,36 @@ claims:
       source names.
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in hart-2017-iroquoia-dispersal-PMC5550228.txt (sha256 58b876009d207332), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+  lifeway:
+    prop: lifeway
+    value: [shifting-cultivators, townspeople]
+    source:
+      - ref: src:murchie-2026-crawford-lake-sedadna
+        loc: section "Palaeoecology and Human Settlement"
+        quote: >-
+          Archaeological surveys have identified a sequence of village sites in the region, reflecting movement of
+          communities roughly every ~15–40 years
+      - ref: src:murchie-2026-crawford-lake-sedadna
+        loc: section "Palaeoecology and Human Settlement"
+        quote: >-
+          Overall these patterns align with Late Woodland agricultural practices where fields were typically left to fallow
+          and villages moved as local resources and soil fertility declined, allowing secondary forest succession in former
+          clearings
+      - ref: src:hart-feranec-2020-iroquoian-fields
+        loc: Introduction
+        quote: >-
+          From the fourteenth century AD onwards, Iroquoians lived in villages and towns that were occupied for 20 to 40
+          years or more [9] and housed hundreds to well over 1,000 individuals [10–12].
+    method: editorial
+    note: >-
+      Shifting cultivators, as the first paper has it: fields cleared in the forest were left to fallow and the village
+      moved as the soil wore out, every 15 to 40 years, the forest growing back in the clearings. The second paper, which
+      has the villages and towns stand for 20 to 40 years, also has their fields cropped without a break for 10 to 30
+      years, and doubts that they were shifted often while a settlement stood: farmers, of the same fields year after
+      year, is the other reading, not taken here because no source read has the fields kept when the settlement moved.
+      Townspeople are named for the towns the same sentence gives beside the villages.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in murchie-2026-crawford-lake-sedadna.txt (sha256 7f8a67f5c7adf92a) and hart-feranec-2020-iroquoian-fields.txt (sha256 c1ee8a80bac6a79f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   dwelling:
     prop: dwelling
     value: { plan: long, width: { lo: 6, hi: 7 }, walls: bark, roof: vault, roof_material: bark }
@@ -123,6 +153,25 @@ claims:
       towns.
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in hart-2017-iroquoia-dispersal-PMC5550228.txt (sha256 58b876009d207332), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+  town:
+    prop: town_form
+    value: { wall: timber }
+    valid: { lo: 1450 CE }
+    source:
+      - ref: src:hart-2016-southern-ontario-nations
+        loc: section "Geopolitical change in south-central Ontario, ca. A.D. 1350–1650"
+        quote: Coalescent communities were surrounded by multi-row defensive palisades (Fig 2).
+      - ref: src:hart-2017-iroquoia-dispersal
+        loc: section "Regional setting"
+        quote: >-
+          After A.D. 1450, sites become fewer, larger, increasingly situated in defensive locations, and surrounded by
+          multirow palisades (4).
+    method: excavation
+    note: >-
+      The large towns that formed after about 1450 stood inside palisades of several rows of posts. The palisades' height, how
+      many rows and openings they had, and how the longhouses inside were ranged are not given here.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in hart-2016-southern-ontario-nations.txt (sha256 de4b7fd95e7aa410) and hart-2017-iroquoia-dispersal.txt (sha256 426d8df80a9382f6), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   fields:
     prop: field_system
     value: { kind: swidden }

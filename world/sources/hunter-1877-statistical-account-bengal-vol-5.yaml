@@ -1,0 +1,29 @@
+id: src:hunter-1877-statistical-account-bengal-vol-5
+type: publication
+kind: compilation
+citation: >-
+  Hunter, W.W. (1877). A Statistical Account of Bengal, vol. V: Districts of Dacca, Bakarganj, Faridpur, and
+  Maimansinh. London: Trübner & Co.
+authors:
+  - "Hunter, W.W."
+published: 1877
+title: "A Statistical Account of Bengal, vol. V: Districts of Dacca, Bakarganj, Faridpur, and Maimansinh"
+url: https://archive.org/details/in.ernet.dli.2015.534065
+via: >-
+  The Internet Archive's scan (in.ernet.dli.2015.534065) of the reprint by D.K. Publishing House, Delhi, 1973, read in
+  its OCR text.
+license: public domain
+reliability: >-
+  One volume of the government's statistical survey of Bengal, compiled district by district from the returns of the
+  district officers and the census of 1872. Its paragraph on dwellings is a general description for a district, and
+  its account of the homesteads of Bakarganj is taken from a police officer's report, as it says. Its four to five
+  inmates to a house for Dacca are the reckoning of the Revenue Survey of 1857 to 1861, made before the first census,
+  and the volume itself thinks the survey's figure for the city too low.
+verified:
+  by: machine:claude-code
+  how: >-
+    Read on 20 November 2026 in the OCR text of the scan: Dacca District, the population (p. 31) and the dwellings
+    (pp. 75 to 76), and Bakarganj District (p. 202). The page numbers are those of the running heads nearest each
+    passage; the year and the title are the title page's as the reprint gives it. The OCR is poor in places (it
+    misreads the name of the reed of which walls are made, and the decimal points of the census), and the quotes keep
+    to the stretches it reads cleanly. The quotes were checked by script against the OCR.

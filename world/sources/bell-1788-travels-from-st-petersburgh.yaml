@@ -1,0 +1,26 @@
+id: src:bell-1788-travels-from-st-petersburgh
+type: text
+kind: eyewitness
+citation: >-
+  Bell, J. Travels from St. Petersburgh in Russia, to various parts of Asia. In two volumes, vol. 1. Edinburgh: printed
+  for William Creech, 1788.
+authors:
+  - "Bell, J."
+published: 1788
+written: June 1716 CE
+title: Travels from St. Petersburgh in Russia, to various parts of Asia, vol. 1
+url: https://archive.org/details/travelsfromstpe00langgoog
+via: The Internet Archive's copy of Google's scan of the 1788 edition (travelsfromstpe00langgoog), read in its OCR text.
+license: public domain
+reliability: >-
+  The journal of a Scottish physician in the Russian embassy to Persia of 1715-1718, first printed in 1763. The passage
+  cited is his entry for the embassy's stop at Saratov on the Volga in June 1716, when he crossed the river to a horse
+  market of the Kalmyks and saw their tents. The scan prints the long s, which its OCR reads as f ("Thefe tents"); the
+  quotes keep the OCR's spelling.
+verified:
+  by: machine:claude-code
+  how: >-
+    The journal of the descent of the Volga from Kazan, June 1716 (vol. 1, pp. 27-33), read on 20 November 2026 in the
+    OCR text of the scan, fetched from the Internet Archive; the quotes were checked by script against it, keeping to
+    stretches it reads cleanly. The date of the passage is from the journal's entry of 4 June 1716 at Kazan and its
+    running heads.

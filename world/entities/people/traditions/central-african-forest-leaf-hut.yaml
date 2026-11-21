@@ -1,0 +1,127 @@
+id: people/traditions/central-african-forest-leaf-hut
+kind: tradition/building
+summary: >-
+  The leaf hut of the forest foragers of Central Africa, the Mbuti of the Ituri and the Baka and BaYaka of the western
+  Congo basin: a low dome of saplings stuck in the ground in a circle, bent over and tied, and thatched from the bottom up
+  with the broad leaves of Marantaceae herbs, two to three metres across, built by the women in a few hours, one to a
+  family, the huts of a camp standing in a ring around an open space. Its earliest description read here is Stanley's,
+  from his crossing of the Ituri in 1887 and 1888; it is still built in the forest camps.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Leaf hut of the Central African forest foragers }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 1888 CE
+    source:
+      ref: src:stanley-1890-in-darkest-africa-vol-2
+      loc: 'ch. XXIII, "The Great Central African Forest", p. 103'
+      quote: >-
+        The pigmies arrange their dwellings — low structures of the shape of an oval figure cut lengthways ; the doors are
+        from two feet to three feet high, placed at the ends — in a rough circle
+    method: documentary
+    note: >-
+      The year of the earliest account read: the page is dated 1888 in its margin, in Stanley's chapter on the forest he
+      crossed with the Emin Pasha Relief Expedition from 1887. It bounds the start and does not date it: the hut is surely
+      older, and no source read here says how much. The tradition has no end claim: the ethnographies of the 1970s and of
+      2003 to 2018 find it built in the forest camps.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in stanley-1890-in-darkest-africa-vol-2.txt (sha256 c03541e8098bf551), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["83", "84"] }
+    source:
+      - ref: src:tanno-1981-mbuti-plant-utilization
+        loc: p. 1
+        quote: The Mbuti pygmies are hunter-gatherers who inhabit the Ituri Forest
+      - ref: src:hattori-2006-baka-marantaceae
+        loc: p. 30, "Research area"
+        quote: >-
+          I conducted research in the area around the village of Malea Ancien in the Boumba-Ngoko Division of East Province,
+          Cameroon
+      - ref: src:kilius-2021-bayaka-sleep
+        loc: abstract
+        quote: We examined sleep biology among BaYaka foragers from the Republic of Congo
+    method: editorial
+    note: >-
+      The Democratic Republic of the Congo (84), where the Ituri forest of the Mbuti is, and region 83, where the Baka of
+      south-eastern Cameroon and the BaYaka of the Republic of Congo live. The hut is not claimed for all of either region,
+      most of whose people were farmers, nor for the forest foragers of the Central African Republic (82), Gabon or Rwanda,
+      whose huts no source read here describes.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in tanno-1981-mbuti-plant-utilization.txt (sha256 9d56ca7afbd9b32d), hattori-2006-baka-marantaceae.txt (sha256 27a6aae6c5413f1b) and kilius-2021-bayaka-sleep.txt (sha256 6559e066f824177d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [foragers]
+    source:
+      - ref: src:tanno-1981-mbuti-plant-utilization
+        loc: p. 1
+        quote: The Mbuti pygmies are hunter-gatherers who inhabit the Ituri Forest
+      - ref: src:kilius-2021-bayaka-sleep
+        loc: section "Introduction"
+        quote: >-
+          Compared to the mudbrick homes used in the village, BaYaka sleep in leaf huts in the forest
+    method: editorial
+    note: >-
+      Foragers, in their forest camps. The BaYaka studied by the third source spend half the year in a village beside
+      farmers, in houses of mudbrick, and the leaf hut is their dwelling in the forest only; the Baka of the second source
+      also farm. Their village houses are not this tradition.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in tanno-1981-mbuti-plant-utilization.txt (sha256 9d56ca7afbd9b32d) and kilius-2021-bayaka-sleep.txt (sha256 6559e066f824177d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { plan: round, diameter: { lo: 2, hi: 3 }, height: 1.5, walls: pole-and-thatch, roof: dome, roof_material: thatch, floor: ground }
+    source:
+      - ref: src:tanno-1981-mbuti-plant-utilization
+        loc: 'section "F. Dwelling equipment, 1. Huts", p. 29'
+        quote: The Mbuti's hut is semispherical about 2-3 m in diameter and 1.5 m in height, and is built
+      - ref: src:ichikawa-1979-mbuti-residential-groups
+        loc: 'ch. 7, p. 35'
+        quote: which is dome-shaped with a diameter of 2-2.5 m.
+      - ref: src:ichikawa-1979-mbuti-residential-groups
+        loc: 'section "Plan of the hunting camps", p. 39'
+        quote: >-
+          First, thin, wooden poles about two or three meters long are stuck in the ground to form a circle. These are then
+          bent to form the framework of a dome.
+      - ref: src:hattori-2006-baka-marantaceae
+        loc: 'entry for boboko, p. 44'
+        quote: >-
+          Baka women make a framework of the traditional hut by bending slender trees and intertwining them to one another.
+          They thatch the framework with boboko and other leaves of Marantaceae from the bottom to the top.
+    method: survey
+    note: >-
+      The size from the Mbuti: 2–3 m across and 1.5 m high in the first source, 2–2.5 m across in the second, both of the
+      Ituri; the frame of bent saplings from the second, and the same frame thatched with Marantaceae leaves from bottom to
+      top from the third, of the Baka of Cameroon, who give no size. The leaves are tied over the frame down to the
+      ground, so wall and roof are one: walls of pole-and-thatch under a dome thatched with leaves. Stanley in 1888 saw
+      the Ituri huts as low and oval with a door at each end; the ethnographies of the 1970s describe them round.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in tanno-1981-mbuti-plant-utilization.txt (sha256 9d56ca7afbd9b32d), ichikawa-1979-mbuti-residential-groups.txt (sha256 f6a56713c12c9d93) and hattori-2006-baka-marantaceae.txt (sha256 27a6aae6c5413f1b), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  settlement:
+    prop: settlement_form
+    value: { pattern: camp, houses: { lo: 10, hi: 14 } }
+    source:
+      - ref: src:ichikawa-1979-mbuti-residential-groups
+        loc: 'section "Size of the bands", p. 13'
+        quote: >-
+          It was found that the Ativu's camp had 13 huts, the AsanTs 14, the Mustafa's 10, the Likenbe's 13, and the
+          Ndelendele's 10.
+      - ref: src:ichikawa-1979-mbuti-residential-groups
+        loc: 'section "Size of the bands", p. 13'
+        quote: falls within the range of from 10 to 25 families, or from 47 to 94 people.
+      - ref: src:ichikawa-1979-mbuti-residential-groups
+        loc: 'ch. 7, p. 35'
+        quote: When the Mbuti marry, they set up independent huts and form nuclear families.
+      - ref: src:ichikawa-1979-mbuti-residential-groups
+        loc: 'section "Plan of the hunting camps", p. 39'
+        quote: An open space is left in the middle, and huts are built around it.
+    method: survey
+    note: >-
+      Camps of 10 to 14 huts, the five base camps of Mbuti archers counted at Andiri in May 1975, where a hut was a
+      family's; the net-hunting bands of the Tetri area had 10 to 25 families, or 47 to 94 people, and set up camp
+      together. The huts stand around an open space where the men meet. How many people lived in one hut is not given as
+      such, and is left to the generator: the bands' counts are not turned into it here.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ichikawa-1979-mbuti-residential-groups.txt (sha256 f6a56713c12c9d93), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

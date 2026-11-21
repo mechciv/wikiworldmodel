@@ -3,6 +3,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import { checkForm } from '../../../world/generators/life/forms.ts';
 import { canonicalForm } from '../../../core/form.ts';
 import { classify, type AtlasParams } from '../src/build/atlas.ts';
+import { keptAnimals } from '../src/build/landscape.ts';
 import { changeProblems, FormTree, planForm } from '../src/forms.ts';
 import { formsWanted } from '../src/formsWanted.ts';
 import { loadWorld, type World } from '../src/world.ts';
@@ -45,6 +46,23 @@ describe('the tree of life, for forms', () => {
       expect(f, e.id).toBeDefined();
       expect(checkForm(canonicalForm(f!)), e.id).toEqual([]);
     }
+  });
+
+  it("gives an animal people kept its taxon's body and the middle of its size, and leaves out one with no size above it", () => {
+    const said: string[] = [];
+    const { kept, forms } = keptAnimals(world, ['life/taxa/equus', 'life/taxa/bison', 'life/taxa/mammalia', 'life/taxa/equus'], (s) => said.push(s));
+    expect(kept.map((k) => k.id)).toEqual(['life/taxa/bison', 'life/taxa/equus']);
+    const horse = kept[1];
+    const length = tree.size('life/taxa/equus', 'body_length')!;
+    expect(horse.tier).toBe('kept');
+    expect(horse.length).toBeGreaterThan(length.lo);
+    expect(horse.length).toBeLessThan(length.hi);
+    expect(horse.length! ** 2 / (length.lo * length.hi)).toBeCloseTo(1, 1);
+    expect(forms[horse.form]).toEqual(canonicalForm(tree.form('life/taxa/equus')!));
+    expect(checkForm(forms[horse.form])).toEqual([]);
+    // Mammals as such have a plan and no size: a size is inherited, never guessed.
+    expect(said).toHaveLength(1);
+    expect(said[0]).toMatch(/life\/taxa\/mammalia .* no record at or above it gives a size/);
   });
 
   it('keeps every claim a machine made of a body as proposed', () => {

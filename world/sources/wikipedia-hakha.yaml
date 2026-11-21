@@ -1,0 +1,18 @@
+id: src:wikipedia-hakha
+type: database-record
+kind: review
+citation: >-
+  "Hakha." Wikipedia, the free encyclopedia (English edition), revision 1383115418.
+snapshot: 2026-11-20
+title: Hakha
+container: Wikipedia
+url: https://en.wikipedia.org/w/index.php?title=Hakha&oldid=1383115418
+license: CC-BY-SA-4.0
+reliability: >-
+  A general encyclopedia article, cited only for when Hakha was founded, because no history of the town could be read
+  here. The sentence cites nothing, and the date is presumably reckoned from tradition.
+verified:
+  by: machine:claude-code
+  how: >-
+    The article's HTML fetched with the action=render view of index.php on 20 November 2026 and read as text, with the
+    reference marks taken out; the quotes checked by script against that text.
