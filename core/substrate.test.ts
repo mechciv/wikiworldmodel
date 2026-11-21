@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { RockSite } from './rocks.ts';
-import { bedrockAt, bedrockWords, firstGround, groundAnswer, groundHeld, laidDownAs, soilAt, substrateOfSites, substrateOfSoil, substrateWords, type GroundMaps, type SubstrateRule } from './substrate.ts';
+import type { StrataColumn, StrataUnit } from './strata.ts';
+import { bedrockAt, bedrockWords, firstGround, firstRock, groundAnswer, groundHeld, groundOfStrata, laidDownAs, soilAt, substrateOfSites, substrateOfSoil, substrateWords, unitLaidDownAs, unitRock, type GroundMaps, type SubstrateRule } from './substrate.ts';
 
 const rule: SubstrateRule = {
   land_class: 'terrestrial',
@@ -178,5 +179,202 @@ describe('the ground of a place, from maps of today', () => {
     expect(groundAnswer(undefined, basalt)).toEqual({ tier: 'model', words: 'over basic volcanic rocks', from: 'bedrock', held: 'Holocene' });
     expect(groundAnswer(undefined, loose)).toEqual({ tier: 'model', words: 'unconsolidated sediments', from: 'bedrock', held: 'Holocene' });
     expect(groundAnswer(undefined, undefined)).toBeUndefined();
+  });
+});
+
+// A column of rock with ages, in a vocabulary like Macrostrat's: each lithology has a type, a group and a class, and
+// each environment a class. From the top: sands still being laid down; old gravels; a granite; a flood of basalt with a
+// little tuff; river beds, with a marine limestone laid down beside them in their first half; a shore's sand, marine
+// only; and an old marine limestone.
+const said: { lithologies: Record<string, { type: string; group: string; cls: string }>; environments: Record<string, string> } = {
+  lithologies: {
+    sandstone: { type: 'siliciclastic', group: 'sandstones', cls: 'sedimentary' },
+    arkose: { type: 'siliciclastic', group: 'sandstones', cls: 'sedimentary' },
+    shale: { type: 'siliciclastic', group: 'mudrocks', cls: 'sedimentary' },
+    alluvium: { type: 'siliciclastic', group: 'unconsolidated', cls: 'sedimentary' },
+    sand: { type: 'siliciclastic', group: 'unconsolidated', cls: 'sedimentary' },
+    gravel: { type: 'siliciclastic', group: 'unconsolidated', cls: 'sedimentary' },
+    limestone: { type: 'carbonate', group: '', cls: 'sedimentary' },
+    chert: { type: 'chemical', group: '', cls: 'sedimentary' },
+    basalt: { type: 'volcanic', group: 'mafic', cls: 'igneous' },
+    tuff: { type: 'volcanic', group: '', cls: 'igneous' },
+    granite: { type: 'plutonic', group: 'felsic', cls: 'igneous' },
+    quartzite: { type: 'metasedimentary', group: 'sandstones', cls: 'metamorphic' },
+  },
+  environments: { 'fluvial indet.': 'non-marine', 'inferred marine': 'marine', shoreface: 'marine' },
+};
+const unitsRule: SubstrateRule = {
+  ...rule,
+  lithologies: { ...rule.lithologies, sand: { sand: 1 }, gravel: { gravel: 1 }, tuff: { ash: 1 } },
+  groups: { sandstones: { sand: 1 }, mudrocks: { mud: 1 } },
+  strata: {
+    sea_class: 'marine',
+    laid_class: 'sedimentary',
+    surface_types: ['volcanic'],
+    rocks: {
+      lithologies: { tuff: 'pyroclastic' },
+      groups: { 'volcanic mafic': 'basic-volcanic', 'plutonic felsic': 'acid-plutonic', 'siliciclastic unconsolidated': 'loose' },
+      types: { siliciclastic: 'siliciclastic', carbonate: 'carbonate' },
+      classes: { metamorphic: 'metamorphic' },
+    },
+  },
+};
+// A unit's lithologies and environments each carry what the vocabulary says of them.
+const unit = (n: number, name: string, older: number, younger: number, lithologies: [string, number, ...string[]][], environments: string[] = []): StrataUnit => ({
+  unit: n,
+  name,
+  older,
+  younger,
+  environments: environments.map((e) => ({ name: e, cls: said.environments[e] })),
+  lithologies: lithologies.map(([l, share, ...attributes]) => ({ name: l, ...said.lithologies[l], share, attributes })),
+});
+const column: StrataColumn = {
+  column: 7,
+  name: 'Red Basin',
+  refs: ['A. Author, 1985, A chart.'],
+  units: [
+    unit(6, 'Young Sands', 2, 0, [['sand', 0.5], ['gravel', 0.5]], ['fluvial indet.']),
+    unit(8, 'Old Gravels', 30, 20, [['gravel', 1]], ['fluvial indet.']),
+    unit(5, 'The Granite', 80, 70, [['granite', 1]]),
+    unit(4, 'Flood Basalt', 100, 99, [['basalt', 0.9], ['tuff', 0.1]]),
+    unit(1, 'River Beds', 160, 150, [['sandstone', 0.6, 'red'], ['shale', 0.3], ['chert', 0.1]], ['fluvial indet.']),
+    unit(2, 'Sea Lime', 160, 155, [['limestone', 1]], ['inferred marine']),
+    unit(7, 'Shore Sand', 200, 195, [['sandstone', 1]], ['shoreface']),
+    unit(3, 'Old Lime', 300, 290, [['limestone', 0.7], ['shale', 0.3]], ['inferred marine']),
+  ],
+};
+const of = { field: 'field:strata', source: 'src:columns', credit: 'Rock units of a dataset' };
+const at = (ageMa: number) => groundOfStrata(column, ageMa, of, unitsRule);
+
+describe('what a rock of a unit was laid down as, and what kind of rock it is', () => {
+  it('goes by its name, then its group, then its type, for a rock laid down as loose ground', () => {
+    expect(unitLaidDownAs('sandstone', said.lithologies.sandstone, unitsRule)).toEqual({ sand: 1 });
+    expect(unitLaidDownAs('arkose', said.lithologies.arkose, unitsRule)).toEqual({ sand: 1 });
+    expect(unitLaidDownAs('shale', said.lithologies.shale, unitsRule)).toEqual({ mud: 1 });
+    // A sediment of no stated grain goes by its type: half sand and half mud.
+    expect(unitLaidDownAs('alluvium', said.lithologies.alluvium, unitsRule)).toEqual({ sand: 0.5, mud: 0.5 });
+    expect(unitLaidDownAs('limestone', said.lithologies.limestone, unitsRule)).toEqual({ lime: 1 });
+    expect(unitLaidDownAs('chert', said.lithologies.chert, unitsRule)).toBeUndefined();
+  });
+
+  it('lets an igneous or a metamorphic rock say so only by its name', () => {
+    expect(unitLaidDownAs('tuff', said.lithologies.tuff, unitsRule)).toEqual({ ash: 1 });
+    // A lava is of a type some rule may read as ash, and a quartzite of a group that is sand: neither is asked.
+    const loose: SubstrateRule = { ...unitsRule, types: { ...unitsRule.types, volcanic: { ash: 1 } } };
+    expect(unitLaidDownAs('basalt', said.lithologies.basalt, loose)).toBeUndefined();
+    expect(unitLaidDownAs('quartzite', said.lithologies.quartzite, loose)).toBeUndefined();
+    expect(unitLaidDownAs('granite', said.lithologies.granite, loose)).toBeUndefined();
+    expect(unitLaidDownAs('a rock nobody listed', undefined, loose)).toBeUndefined();
+    // Without the rule for units, only names speak.
+    expect(unitLaidDownAs('arkose', said.lithologies.arkose, rule)).toBeUndefined();
+  });
+
+  it('names its kind of rock by its name, its type and group, its type, then its class', () => {
+    const r = unitsRule.strata!;
+    expect(unitRock('tuff', said.lithologies.tuff, r)).toBe('pyroclastic');
+    expect(unitRock('basalt', said.lithologies.basalt, r)).toBe('basic-volcanic');
+    expect(unitRock('granite', said.lithologies.granite, r)).toBe('acid-plutonic');
+    expect(unitRock('sandstone', said.lithologies.sandstone, r)).toBe('siliciclastic');
+    expect(unitRock('limestone', said.lithologies.limestone, r)).toBe('carbonate');
+    expect(unitRock('quartzite', said.lithologies.quartzite, r)).toBe('metamorphic');
+    expect(unitRock('sand', said.lithologies.sand, r)).toBe('loose');
+    expect(unitRock('chert', said.lithologies.chert, r)).toBeUndefined();
+    expect(unitRock('a rock nobody listed', undefined, r)).toBeUndefined();
+  });
+});
+
+describe('the ground of a place, from the units of its column of rock', () => {
+  it('is the unit being laid down then: its rocks by their shares, and as much of the ground as says what it was', () => {
+    const { substrate: s, bedrock } = at(152);
+    expect(bedrock).toBeUndefined();
+    expect(s).toMatchObject({ tier: 'model', from: 'strata', source: 'src:columns', rows: ['src:columns#unit:1'], sites: 1, km: 0, column: 'Red Basin' });
+    // Six tenths sandstone and three shale; the chert says nothing, so nine tenths of the ground is decided.
+    expect(s!.weight).toBe(0.9);
+    expect(s!.materials).toEqual([
+      ['sand', 0.667],
+      ['mud', 0.333],
+    ]);
+    // Red is said of the sandstone: two thirds of what was said.
+    expect(s!.colours).toEqual([['red', 0.667]]);
+    expect(s!.units).toEqual([{ name: 'River Beds', older: 160, younger: 150 }]);
+    // The column's own reference goes with it.
+    expect(s!.credit).toBe('Rock units of a dataset; this column from A. Author, 1985, A chart.');
+    expect(substrateWords(s!)).toBe('Ground of sand, mud, red: River Beds, 160 to 150 Ma, the unit being laid down then in the column of rock for Red Basin');
+    expect(groundAnswer(s, bedrock)).toEqual({ tier: 'model', words: 'sand and mud', from: 'strata' });
+  });
+
+  it('leaves out a unit laid down under the sea, and says nothing where every unit of the time is one', () => {
+    // A marine limestone laid down beside the river beds: the land's ground is the river beds' alone.
+    expect(at(157).substrate).toEqual(at(152).substrate);
+    // A shore's sand, marine only: nothing of a land's ground, nor of the rock under it.
+    expect(at(197)).toEqual({});
+    expect(at(295)).toEqual({});
+    // The class is each environment's own, not its name's: a vocabulary may call two environments a delta plain, one
+    // of the sea and one of the land.
+    const delta = (cls: string): StrataColumn => ({ ...column, units: [{ ...unit(9, 'Delta Sand', 60, 50, [['sandstone', 1]]), environments: [{ name: 'delta plain', cls }] }] });
+    expect(groundOfStrata(delta('marine'), 55, of, unitsRule)).toEqual({});
+    expect(groundOfStrata(delta('non-marine'), 55, of, unitsRule).substrate!.materials).toEqual([['sand', 1]]);
+  });
+
+  it('takes the youngest units from before a gap as the rock under the ground', () => {
+    const { substrate, bedrock: b } = at(250);
+    expect(substrate).toBeUndefined();
+    expect(b).toMatchObject({ tier: 'model', from: 'strata', code: 'unit:3', label: 'limestone', rock: 'carbonate', field: 'field:strata', source: 'src:columns', rows: ['src:columns#unit:3'], column: 'Red Basin', laid: false });
+    expect(b!.units).toEqual([{ name: 'Old Lime', older: 300, younger: 290 }]);
+    expect(bedrockWords(b!)).toBe('Over limestone: Old Lime, 300 to 290 Ma, the youngest unit from before this time in the column of rock for Red Basin');
+    expect(groundAnswer(undefined, b)).toEqual({ tier: 'model', words: 'over limestone', from: 'strata-under' });
+    // Loose sediment from before is no rock.
+    const gravels = at(10).bedrock!;
+    expect(gravels.rock).toBeUndefined();
+    expect(gravels.label).toBe('gravel');
+    expect(bedrockWords(gravels)).toBe('On gravel: Old Gravels, 30 to 20 Ma, the youngest unit from before this time in the column of rock for Red Basin');
+    // Before the column's oldest unit, and so with nothing from before, there is no answer.
+    expect(at(400)).toEqual({});
+  });
+
+  it('takes a lava being laid down as the rock at the surface, and its ash as part of the ground', () => {
+    const { substrate: s, bedrock: b } = at(99.5);
+    expect(b).toMatchObject({ from: 'strata', label: 'basalt', rock: 'basic-volcanic', laid: true });
+    expect(bedrockWords(b!)).toBe('Over basalt: Flood Basalt, 100 to 99 Ma, being laid down then in the column of rock for Red Basin');
+    // A tenth of the unit is tuff: a tenth of the ground is ash, and the rest stays the climate's.
+    expect(s).toMatchObject({ from: 'strata', weight: 0.1, materials: [['ash', 1]] });
+    expect(substrateWords(s!)).toMatch(/^Ground partly of ash: Flood Basalt/);
+  });
+
+  it('reads through rock that formed at depth: a granite of the time is no ground, and the rock under it is what was there before', () => {
+    // While the granite was emplaced, the youngest unit laid down before is the basalt.
+    expect(at(75).bedrock).toMatchObject({ label: 'basalt', rock: 'basic-volcanic', laid: false });
+    expect(at(75).substrate).toBeUndefined();
+    // After it, the granite is the youngest the column has: the rock that lay over it then is in no column.
+    expect(at(50).bedrock).toMatchObject({ label: 'granite', rock: 'acid-plutonic', laid: false, units: [{ name: 'The Granite', older: 80, younger: 70 }] });
+  });
+
+  it('reaches the present, and says nothing without the rule for units', () => {
+    const now = at(0).substrate!;
+    expect(now.materials).toEqual([
+      ['gravel', 0.5],
+      ['sand', 0.5],
+    ]);
+    expect(now.weight).toBe(1);
+    expect(substrateWords(now)).toBe('Ground of gravel, sand: Young Sands, 2 Ma to the present, the unit being laid down then in the column of rock for Red Basin');
+    expect(groundOfStrata(column, 152, of, rule)).toEqual({});
+  });
+
+  it('comes after a collection at the place and after the topsoil, and before the rocks of the country round', () => {
+    const units = () => at(152).substrate;
+    const soil = () => substrateOfSoil(maps, mapRule, 45, -135);
+    const here = substrateOfSites([site(1, 12, [{ name: 'sandstone', adjectives: [] }])], index, rule)!;
+    const near = substrateOfSites([site(1, 60, [{ name: 'mudstone', adjectives: [] }])], index, rule)!;
+    expect(firstGround(here, soil, units)).toBe(here);
+    expect(firstGround(near, soil, units)!.from).toBe('soil');
+    expect(firstGround(near, () => undefined, units)!.from).toBe('strata');
+    expect(firstGround(undefined, () => undefined, units)!.from).toBe('strata');
+    expect(firstGround(near, () => undefined, () => undefined)).toBe(near);
+    // The rock under the ground: today's map where it is held, and failing that the column's units.
+    const map = bedrockAt(maps, mapRule, 45, -45)!;
+    const under = () => at(250).bedrock;
+    expect(firstRock(map, under)).toBe(map);
+    expect(firstRock(undefined, under)!.from).toBe('strata');
+    expect(firstRock(undefined, () => undefined)).toBeUndefined();
   });
 });

@@ -172,7 +172,7 @@ export interface Field {
     from: string;
     file?: string;
     /** what the data is read as, where it is not elevation */
-    as?: 'climate' | 'months' | 'ice-sheets' | 'borders' | 'hazards' | 'polities' | 'routes' | 'languages' | 'people' | 'community' | 'community-sea' | 'rock-record' | 'relief' | 'river-widths' | 'anthromes' | 'land-use-assessment' | 'cities' | 'topsoil' | 'bedrock';
+    as?: 'climate' | 'months' | 'ice-sheets' | 'borders' | 'hazards' | 'polities' | 'routes' | 'languages' | 'people' | 'community' | 'community-sea' | 'rock-record' | 'relief' | 'river-widths' | 'anthromes' | 'land-use-assessment' | 'cities' | 'topsoil' | 'bedrock' | 'strata';
     places?: string;
     /** for a land-use assessment by region: the dataset of the regions' shapes */
     regions?: string;

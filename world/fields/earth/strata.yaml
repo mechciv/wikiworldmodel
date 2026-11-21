@@ -1,0 +1,64 @@
+# Rock with ages: the units of each column of Macrostrat's core set, and the footprint of each column on today's
+# Earth. What a scene's ground and the rock under it are read from at any time (field:earth/substrate), where a map of
+# today's bedrock has no ages to be carried back by.
+id: field:earth/strata
+type: field
+title: Rock units and their ages
+quantity: the rock units of each column of the crust, with the ages each was laid down between
+unit: units
+description: >-
+  What rock lies under a place and when each part of it was laid down, as far as Macrostrat's columns say. A column is
+  the rock succession of an area of today's Earth, put together from published correlation charts and drill cores: its
+  units, each with the ages it began and stopped being laid down at, its lithologies with their shares of it and what
+  the database says of each besides (its colour, its grain, its ripples and cracks), and the environments it was laid
+  down in, which the database classes as marine or not. There are 1,534 columns, 949 of them in North America, the
+  rest in New Zealand, the Caribbean, South America and Africa and at drill sites in the deep sea, with 35,481 units
+  in all. A place is in the column whose footprint holds it where it stands today, so a place of the past is carried
+  there on its plate. Nothing is said where no column's footprint reaches: most of the Earth. A column stands for its
+  whole area, some 150 km across in North America and 30 km in New Zealand, and does not say where in it each rock
+  lies: two units of one age are rocks laid down side by side somewhere in it. Its footprint is drawn round the middle
+  of its area and is no geological boundary. The ages are an age model's: unless a source dated it, a boundary between
+  units is placed some way through a named interval of the timescale, by the order of the units, and none has an
+  uncertainty. A column holds the rock that is there today. Rock since worn away is not in it, so a gap in a column
+  is a time of which no rock is left there, whether none was laid down or it was lost; and nothing says whether a
+  unit lay at the surface at any time after it was laid down.
+frame: frame:earth/present-day
+# Its rows are the units; the grid of which column a place lies in is the build's, at the cell given below.
+grid: { kind: rows }
+# From the start of the oldest unit to the end of the youngest: the build checks it against the units themselves.
+time: { lo: 4059.45 Ma, hi: 0 Ma }
+data:
+  from: src:macrostrat-columns-2026-11-21
+  file: snapshot
+  as: strata
+# Rock that is there, as its describers named it: the ages are a model's, and the rows say so of each.
+basis: evidence
+# One pair of ages for each unit, and one share for each lithology: the dataset gives no spread for either.
+spread: unknown
+interp: step
+# A column is fixed to today's Earth: a place of the past is carried to it on the plate under it.
+moves_with: src:paleomap-plate-model
+# The snapshot's units are claims (docs/STRUCTURE.md section 3.1), one row a unit, keyed by the database's unit
+# number. A unit's place is its column's own point, and its lithologies and environments are lists in the database's
+# words, which an overlay cannot write back: one that corrects them is reported and not applied.
+rows:
+  kind: rock-unit
+  key: "unit:{unit}"
+  claims:
+    name: { column: label, as: text }
+    start: { column: older_ma, as: ma, method: stratigraphic, basis: reconstruction }
+    end: { column: younger_ma, as: ma, method: stratigraphic, basis: reconstruction }
+    lithology: { column: lithologies, method: compilation }
+    depositional_environment: { column: environments, method: compilation }
+    location: { column: [lat, lng], as: point, method: compilation }
+params:
+  # The cell of the grid a build makes of the columns' footprints, in degrees: fine enough that all but a few of the
+  # smallest footprints hold the middle of a cell.
+  cell_deg: 0.1
+  # The atlases' stages, on which the columns are held against the land and sea of the elevation field.
+  longest_bin: 8
+  shortest_bin: 0.01
+source:
+  ref: src:peters-2018-macrostrat
+  loc: Fig. 2, caption
+  quote: "Columns located on continental crust acquire, by default, a geographic footprint that is defined by a Voronoi tessellation. The points used to create the tessellation correspond to the approximate center of the region covered by each composite column."

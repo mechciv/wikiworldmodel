@@ -6,7 +6,7 @@ import { readFile } from 'node:fs/promises';
 import type { PeriodRecord } from '../../../../core/records.ts';
 import type { ResolveWorld } from '../../../../core/resolve.ts';
 import { rockBoxes, type RockBoxes } from '../../../../core/rocks.ts';
-import { bedrockAt, firstGround, groundAnswer, groundHeld, substrateOfRocks, substrateOfSoil, type GroundHeader, type GroundMap, type GroundMaps, type SceneSubstrate, type SubstrateRule } from '../../../../core/substrate.ts';
+import { bedrockAt, firstGround, firstRock, groundAnswer, groundHeld, substrateOfRocks, substrateOfSoil, type GroundHeader, type GroundMap, type GroundMaps, type SceneBedrock, type SceneSubstrate, type SubstrateRule } from '../../../../core/substrate.ts';
 import { parsePoint, type TimePointInput } from '../../../../core/time.ts';
 import { datasetFile } from '../manifest.ts';
 import { parseTopsoil } from '../soilgrids.ts';
@@ -140,15 +140,17 @@ export async function buildGround(world: World, periods: PeriodRecord[], log: (m
 }
 
 /**
- * What resolve reads of the ground: the rocks of the stage at the place itself, then today's topsoil, then the rocks of
- * the country round, and where none says what the loose ground is, the rock under it. A place is asked where it stands
- * at the time: within the spans the maps are held for, its plate has carried it a few cells of them at most.
+ * What resolve reads of the ground: the rocks of the stage at the place itself, then today's topsoil, then the unit the
+ * place's column of rock has being laid down, then the rocks of the country round; and where none says what the loose
+ * ground is, the rock under it, by today's map of bedrock or by the column. A place is asked where it stands at the
+ * time. For today's maps that is where it is read: within the spans they are held for, its plate has carried it a few
+ * cells of them at most. For the columns, which answer through deep time, `strata` carries it to where it stands today.
  */
-export function groundResolve(rocks: RocksOut | undefined, ground: GroundBuilt | undefined, rule: SubstrateRule): NonNullable<ResolveWorld['substrate']> {
+export function groundResolve(rocks: RocksOut | undefined, ground: GroundBuilt | undefined, rule: SubstrateRule, strata?: { span: [number, number]; at: (lat: number, lon: number, t: number) => { substrate?: SceneSubstrate; bedrock?: SceneBedrock } }): NonNullable<ResolveWorld['substrate']> {
   const refs = rocks?.index.bins ?? [];
   const boxes = new Map<number, RockBoxes>();
   const h = ground?.header;
-  const spans: [number, number][] = [...refs.map((b): [number, number] => [b.from, b.to]), ...(h?.soil ? [h.soil.span] : []), ...(h?.bedrock ? [h.bedrock.span] : [])];
+  const spans: [number, number][] = [...refs.map((b): [number, number] => [b.from, b.to]), ...(h?.soil ? [h.soil.span] : []), ...(h?.bedrock ? [h.bedrock.span] : []), ...(strata ? [strata.span] : [])];
   return {
     span: [Math.min(...spans.map((s) => s[0])), Math.max(...spans.map((s) => s[1]))],
     at: (lat, lon, t) => {
@@ -162,9 +164,11 @@ export function groundResolve(rocks: RocksOut | undefined, ground: GroundBuilt |
         }
         rock = substrateOfRocks(rocks.bins[k], rocks.index, rule, lat, lon, bx);
       }
-      const s = firstGround(rock, () => (ground && groundHeld(h?.soil, t) ? substrateOfSoil(ground.maps, rule, lat, lon) : undefined));
+      let units: { substrate?: SceneSubstrate; bedrock?: SceneBedrock } | undefined;
+      const unitsHere = () => (units ??= strata && t >= strata.span[0] && t <= strata.span[1] ? strata.at(lat, lon, t) : {});
+      const s = firstGround(rock, () => (ground && groundHeld(h?.soil, t) ? substrateOfSoil(ground.maps, rule, lat, lon) : undefined), () => unitsHere().substrate);
       if (s) return groundAnswer(s, undefined);
-      return groundAnswer(undefined, ground && groundHeld(h?.bedrock, t) ? bedrockAt(ground.maps, rule, lat, lon) : undefined);
+      return groundAnswer(undefined, firstRock(ground && groundHeld(h?.bedrock, t) ? bedrockAt(ground.maps, rule, lat, lon) : undefined, () => unitsHere().bedrock));
     },
   };
 }

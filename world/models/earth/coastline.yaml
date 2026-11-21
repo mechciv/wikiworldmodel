@@ -21,9 +21,11 @@ uncertainty:
     A line with no width: the elevation field's 1° nodes and 40 m steps are the real limit, and nothing
     is drawn of them.
 # Held to the rocks, which it does not read: a collection of the Paleobiology Database that the database
-# calls terrestrial should stand on this coast's land at its stage, and a marine one lie in its sea.
+# calls terrestrial should stand on this coast's land at its stage, and a marine one lie in its sea. And to the
+# columns of rock units: a unit laid down under the sea should lie in this coast's sea while it is laid down.
 checks:
   - { test: tools/world/test/rocks.test.ts, holds: "stands most terrestrial collections on the elevation field's land at their stage, and lays most marine ones in its sea" }
+  - { test: tools/world/test/strata.test.ts, holds: "is held against the elevation field's land and sea, stage by stage, and counts where they disagree" }
 disagrees:
   - with: field:earth/rock-record
     note: >-
@@ -33,3 +35,13 @@ disagrees:
       at a stage's middle, and a collection's own place is often loose; how much of the third that explains
       has not been counted. What is left would be seas over the continents that the rocks record and the
       field does not have. Nothing corrects the coast from the rocks yet.
+  - with: field:earth/strata
+    note: >-
+      Each column of rock units asked at the middle of each stage, where its own point stood then: of the
+      times a column on this coast's land has a unit being laid down at the surface, the unit was laid down
+      under the sea alone about half the time; in this coast's sea, a column's unit of the time was laid
+      down on land about one time in twelve. Each build counts them in coverage.json. A column stands for an
+      area some 150 km across and a unit for a span of millions of years, in which a sea may have come and
+      gone, while the field is read at one moment on nodes 1° apart; how much of the half that explains has
+      not been counted. What is left would be seas over the continents that the columns record and the field
+      does not have. Nothing corrects the coast from the columns yet.

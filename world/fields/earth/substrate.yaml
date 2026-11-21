@@ -1,7 +1,7 @@
 # A derived field: declared, never stored (section 9.1). A scene works it out for its place from the rock record of its
-# stage and from today's maps of soil and rock, where the time is one they are held for (core/substrate.ts), and the
-# renderer draws the ground from it. Where it answers nothing, the ground is the climate's, as it was before: generic,
-# and said to be.
+# stage, from today's maps of soil and rock, where the time is one they are held for, and from the units of the column
+# of rock it lies in (core/substrate.ts), and the renderer draws the ground from it. Where it answers nothing, the
+# ground is the climate's, as it was before: generic, and said to be.
 id: field:earth/substrate
 type: field
 title: What the ground was made of
@@ -15,10 +15,13 @@ description: >-
   was like, and counts for part of the ground only. In the Holocene the ground is today's topsoil, held as it is: its
   sand, silt and clay and its stones, a model of the place itself, which gives way only to a collection at the place.
   Through the Quaternary the rock under the ground is today's, carried back on its plate: the class a map of the world's
-  lithology gives the place, which says what outcrops and stones are of, and nothing of the loose ground over them. Where
-  none of these answers, it says nothing, and the ground is drawn by the climate's class alone.
+  lithology gives the place, which says what outcrops and stones are of, and nothing of the loose ground over them. And
+  at any time, where the place lies in a column of rock units with ages, the units say: one being laid down then, and
+  not under the sea, is the ground, a model of the column's whole area; a lava or an ash being laid down is the rock at
+  the surface; and where the column has a gap at the time, the youngest unit from before it is the rock under the
+  ground. Where none of these answers, it says nothing, and the ground is drawn by the climate's class alone.
 derived: true
-from: [field:earth/rock-record, field:earth/soil, field:earth/bedrock]
+from: [field:earth/rock-record, field:earth/soil, field:earth/bedrock, field:earth/strata]
 rule: substrate
 params:
   # Whose rock is a land's ground: the class of environment the database must put a collection in.
@@ -43,6 +46,23 @@ params:
     bituminous coal: { organic: 1 }
     subbituminous coal: { organic: 1 }
     coal ball: { organic: 1 }
+    # Names that Macrostrat's units use (field:earth/strata) and the entries above lack. A name is read alike
+    # whichever database uses it: marl, ash and tuff are the Paleobiology Database's too, and are read here as its
+    # types already read them. Sediment not turned to stone goes by its own name. A till or a diamictite, stones in a
+    # matrix of mud, is taken as half gravel and half mud.
+    sand: { sand: 1 }
+    silt: { silt: 1 }
+    clay: { mud: 1 }
+    mud: { mud: 1 }
+    till: { gravel: 0.5, mud: 0.5 }
+    diamictite: { gravel: 0.5, mud: 0.5 }
+    volcaniclastic: { ash: 1 }
+    marl: { lime: 0.5, mud: 0.5 }
+    mixed carbonate-siliciclastic: { lime: 0.5, mud: 0.5 }
+    ash: { ash: 1 }
+    tuff: { ash: 1 }
+    welded tuff: { ash: 1 }
+    ignimbrite: { ash: 1 }
   # And by the type the database's own vocabulary gives a lithology. A siliciclastic rock of no stated grain is taken as
   # half sand and half mud, and a rock of mixed carbonate and siliciclastic as half lime mud.
   types:
@@ -52,6 +72,13 @@ params:
     evaporite: { evaporite: 1 }
     organic: { organic: 1 }
     volcanic: { ash: 1 }
+  # And, before its type, by the group a database's vocabulary gives a lithology, where it gives one: Macrostrat's
+  # does, and puts an arkose and a greywacke among the sandstones and a shale and an argillite among the mudrocks.
+  # A siltstone, which it puts among the mudrocks, goes by its own name above.
+  groups:
+    sandstones: { sand: 1 }
+    mudrocks: { mud: 1 }
+    conglomerates: { gravel: 1 }
   # What an adjective of a lithology says of the ground: a colour, by a plain name the renderer has a tint for; a mark
   # on its surface; or that some of it was another material. An adjective with no entry says nothing here.
   adjectives:
@@ -84,6 +111,43 @@ params:
     gypsiferous: { material: evaporite, share: 0.25 }
     tuffaceous: { material: ash, share: 0.25 }
     volcaniclastic: { material: ash, share: 0.25 }
+    # Words that Macrostrat's units use of a lithology (field:earth/strata) and no collection of the Paleobiology
+    # Database's snapshot does: adding them changes no ground read from the rock record. A colour said with a shade
+    # or a lean is read as the colour it names last, and reddish brown as the red-brown above. Calcareous and
+    # dolomitic are left unread: of a sandstone they say what cements it, not what was laid down.
+    light gray: { colour: gray }
+    dark gray: { colour: gray }
+    greenish gray: { colour: gray }
+    bluish gray: { colour: gray }
+    brownish gray: { colour: gray }
+    reddish gray: { colour: gray }
+    yellowish gray: { colour: gray }
+    light brown: { colour: brown }
+    dark brown: { colour: brown }
+    yellowish brown: { colour: brown }
+    reddish brown: { colour: red-brown }
+    brownish red: { colour: red-brown }
+    mud cracks: { mark: cracks }
+    symmetric ripples: { mark: ripples }
+    ripple laminations: { mark: ripples }
+    climbing ripples: { mark: ripples }
+    bioturbated: { mark: burrows }
+    bioturbated-weakly: { mark: burrows }
+    bioturbated-moderately: { mark: burrows }
+    bioturbated-thoroughly: { mark: burrows }
+    burrowed: { mark: burrows }
+    concretions-calcareous: { mark: nodules }
+    concretions-ironstone: { mark: nodules }
+    concretions-phosphatic: { mark: nodules }
+    concretions-sideritic: { mark: nodules }
+    sandy: { material: sand, share: 0.25 }
+    silty: { material: silt, share: 0.25 }
+    argillaceous: { material: mud, share: 0.25 }
+    shaly: { material: mud, share: 0.25 }
+    clayey: { material: mud, share: 0.25 }
+    muddy: { material: mud, share: 0.25 }
+    conglomeratic: { material: gravel, share: 0.25 }
+    gravelly: { material: gravel, share: 0.25 }
   # Today's topsoil, where the time is one it is held for (field:earth/soil): what each of its parts is drawn as. Its
   # clay is the mud of the vocabulary above, and its coarse fragments the gravel.
   soil: { sand: sand, silt: silt, clay: mud, coarse: gravel }
@@ -104,3 +168,41 @@ params:
     pi: { rock: intermediate-plutonic }
     pb: { rock: basic-plutonic }
     mt: { rock: metamorphic }
+  # The units of a column of rock with ages (field:earth/strata), in the words of Macrostrat's own vocabulary, which
+  # gives every lithology a class, a type and often a group, and every environment a class.
+  strata:
+    # A unit all of whose environments are of this class was laid down under the sea, and says nothing of a land.
+    sea_class: marine
+    # A rock of this class is laid down as loose ground, and its group and type above say what it was where its name
+    # does not. A rock of another class says so only by its name: an ash, and no lava, granite or schist.
+    laid_class: sedimentary
+    # Besides that class, rocks of these types are laid down at the surface: while a lava or an ash is laid down, it is
+    # the rock there. Rock of any other kind formed at depth, and says nothing of the surface of its time.
+    surface_types: [volcanic]
+    # The kind of rock a lithology is, for outcrops and stones: by its name; failing that by its type and group
+    # together, by its type, by its class. `loose` is sediment not turned to stone, which is no rock. A lithology
+    # with no entry at any level says nothing: a chert, a coal, a volcanic or plutonic rock of no stated kind.
+    rocks:
+      lithologies:
+        andesite: intermediate-volcanic
+        latite: intermediate-volcanic
+        ash: pyroclastic
+        tuff: pyroclastic
+        welded tuff: pyroclastic
+        ignimbrite: pyroclastic
+        marl: mixed-sedimentary
+        mixed carbonate-siliciclastic: mixed-sedimentary
+        till: loose
+      groups:
+        volcanic felsic: acid-volcanic
+        volcanic mafic: basic-volcanic
+        plutonic felsic: acid-plutonic
+        plutonic mafic: basic-plutonic
+        plutonic ultramafic: basic-plutonic
+        siliciclastic unconsolidated: loose
+      types:
+        siliciclastic: siliciclastic
+        carbonate: carbonate
+        evaporite: evaporite
+      classes:
+        metamorphic: metamorphic
