@@ -612,6 +612,96 @@ What to check first, beyond what the slice's document lists under *The records*:
   matting; a hip-and-gable and a half-hipped roof; a curved ridge; an L-shaped, a semicircular and an aisled plan; a
   heated floor; a floor area; a homestead of several huts; a village that is one house; a village round a green.
 
+### The house in detail, and what stood by the houses
+
+Read out of the traditions' own sources by six agents for the [seventeenth slice](slices/SEVENTEENTH-SLICE.md), one
+to a part of the world, after the vocabulary grew to hold it ([DWELLINGS.md](DWELLINGS.md), *The house in detail* and
+*What stood by the houses*). All of it is `proposed`, and nothing has been looked at by a person.
+
+- **What changed:** all 92 building traditions were read again, and 85 of their records changed, a few only in
+  the wording of a check. 58 now say something of the house that no record could say
+  before: where its door was (16), which way it faced (6), its windows (18), how its smoke left it (23), how its
+  walls were finished (19), a porch (3), a veranda (9), animals under its roof (13), how high its floor stood (6); or
+  one of the narrower words for its walls, roof or plan (15). 35 say how the houses stood: in a ring or in rows (13),
+  what enclosed the settlement (16) and each yard (14), open ground at its middle (7). 37 have an `outbuildings`
+  claim, 69 things in all: shrines and halls of settlements, and of households kitchens, granaries, stores, byres,
+  pens and wells.
+- **Their checks:** the traditions' 674 claims and relations cite a source in 572, with 1,537 quotes, and every one
+  of the 572 has its `quoted` step, written again by `quote-check --redo` with all of a claim's texts in one run
+  wherever a claim gained a source.
+- **Sources:** two new, both read in the Internet Archive's copies: Morgan's *Houses and House-Life of the American
+  Aborigines* (1881), which quotes Lewis and Clark and Bartram, so that what rests on them is at one remove and says
+  so; and Wissler's *Material Culture of the Blackfoot Indians* (1910). Five texts that were not kept before were
+  retrieved and kept: Nicosia 2022 from Europe PMC with its supplementary table, and four Wikipedia articles at the
+  revisions their records name. The Cortés, Torquemada and Gómara texts were copied from another checkout's cache,
+  where the fifteenth slice had kept them.
+- **Two disagreements, kept as competing claims:** Lewis and Clark's plank houses, sunk four or five feet, beside the
+  record's house on the ground, which no sentence read supports; and Morgan's Iroquois longhouse with a roof of two
+  slopes beside the record's arched one.
+
+What to check first:
+
+- **A detail of some houses, drawn for all.** The village wall of North China is "often" there in its source; the
+  byre under the roof is "usually" not so in later medieval England, and so of the Viking house only where the owner
+  had no stable; the chimney of the thatched Korean house belongs mainly to the late Joseon, and that of the Kofun pit
+  dwelling to after the mid-fifth century; the painted finish of the Han house is said of tomb models, so of the
+  well-off; the limewash of the English peasant's house is in "some sources".
+- **One site, drawn for every settlement:** Lony's hall and three temples for the Deccan's villages; Bhita's sanctuary
+  for the towns of the Ganges; Inamgaon's kiln; Deir el-Medina's and Amarna's chapels, which stood outside the wall;
+  Maidanetske's assembly houses, which only some Trypillia settlements had.
+- **Readings, not statements:** the door in the end of the Ao Naga and the Chin houses; the door in the long side of
+  the black tent of Syria, read from its sizes; the round granary of Hindustan, from "like a large bee-hive"; the
+  veranda of the Olynthus house, for its pastas; `windows: small` for windows of gut, ice and mica; the tulou's, from
+  "few openings". `per: house` for the pens and workshops of an Irish rath rests on a rath being one household's.
+- **Later accounts carried back:** the house of the planned Pueblo towns of 1260–1300 rests wholly on the pueblos of
+  the nineteenth century; the tipi's door to the east and its smoke flaps on canvas tipis of 1910; the kitchens and
+  granaries of the Zimbabwe culture on the Shona of today; the Samoan cookhouse on a pattern its excavator judged
+  probably held in the past.
+- **Which way houses faced.** Six traditions say: the felt tents of the steppe and of Mongolia to the south, on
+  Rubruck's "always", though Rockhill's note has Mongol tents facing east and south-east too; the tipi to the east;
+  the houses of North China and of Sichuan to the south.
+- **Sizes that are not what the word means:** the latte house's floor height is its pillars'; the Chin house's is
+  one house's span from its uphill to its downhill side; `floor_height` under a sunken floor is a depth.
+- **What had no word, and is in the notes only:** a storage pit; an altar in the open (written as a shrine, which is
+  drawn roofed); a stair to a roof terrace; the two opposed doors of a cross-passage; an oven or a stove inside a
+  house, the kang among them; a floor half of earth and half of boards; a smoke louvre high in a wall; an open
+  platform before a veranda; a vestibule; a cistern; a privy; a trough; walls bowed like a boat's; an area for an
+  outbuilding; a sentry's hut.
+- **Not read:** Cladh Hallan's second report, a file of 132 MB that the agent did not fetch unasked; four other
+  sources whose texts were not kept; and anything in German for Staden's three doors, which were read in English.
+
+### The bodies of the animals people kept
+
+Drawn by one agent for the [seventeenth slice](slices/SEVENTEENTH-SLICE.md): a `body_form` or a new plan for each of
+the sixteen animals the husbandry traditions name, and eighteen sourced sizes. All of it is `proposed`.
+
+- **What changed:** the taxon records of the sheep, the goat, cattle, the pig, the hen, the dog, the zebu, the
+  dromedary, the water buffalo, the alpaca, the llama, the horse, the yak, the Bactrian camel, the donkey and the
+  reindeer (the dog's and the horse's are under `people/domestication`); two plans, `ox` and `camel`; five sources.
+  The twenty claims of a form or a plan are `unsourced` and say what each was drawn from. The eighteen of a length
+  or a height each have a quote and its `quoted` step.
+
+What to check first:
+
+- **Three lengths from Dimensions.com:** the zebu's, the yak's and the donkey's (`method: expert-estimate`). The site
+  names no work for its figures. PanTHERIA has no row for the zebu and no length for the yak or the ass, and the
+  Animal Diversity Web sizes only the wild yak and gives the ass a length that repeats its shoulder height. Each note
+  asks for a measured length in its place.
+- **Cattle are one breed:** a large modern dairy cow, the Holstein, from a ministry's note that cites the measurements
+  and was read without them. Its ± is read as one standard deviation, and its inches are turned into metres.
+- **The water buffalo's length is the species',** wild and domestic together, and the wild is the heavier. The record
+  had left it out for that reason; it is given now, with that said, since without it the animal was drawn half as long
+  as it is.
+- **The llama's two lengths:** PanTHERIA's mean is preferred to the Animal Diversity Web's range, which does not say
+  what it measures. The alpaca's length, from the account of *Lama pacos*, may be long.
+- **Shoulder heights for the hip's** in nine records; only cattle's is a height at the rump. Ranges over all breeds
+  make tall middles: the sheep stands 0.91 m at the back. The goat has no height, and stands 0.81 m where its account's
+  typical goat is 0.64 m.
+- **The dromedary's sizes** are from the German Wikipedia, quoted in German: the English article and the Animal
+  Diversity Web give heights and weights only, and *Mammalian Species* 375 came as a scan with no text.
+- **Not seen in the viewer.** Each was looked at on its sheet. The pig and the dog are `habitat: any`, so that the
+  generator keeps them about the houses and does not herd them on the pasture: one word reverses it.
+
 ### Set 16: day length and the Moon
 
 - 21 measurements from the Moodies Group (3.22 Ga) to today, 13 with the Earth–Moon distance, as records; the series are read

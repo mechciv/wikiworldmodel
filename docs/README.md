@@ -33,7 +33,7 @@ yet, they say so.
 | [DATA-OUTLINE.md](DATA-OUTLINE.md) | everything a complete history needs, domain by domain, with candidate datasets and their licenses: the menu for contributors |
 | [RECORD-SETS.md](RECORD-SETS.md) | where each of the twenty record sets stands, and what a reviewer should check first |
 | [FORMS.md](FORMS.md) | the brief for writing a taxon's form, its body as data |
-| [DWELLINGS.md](DWELLINGS.md) | the brief for writing a building tradition: its houses, settlements, fields and towns as data, whom it housed, and the animals people kept |
+| [DWELLINGS.md](DWELLINGS.md) | the brief for writing a building tradition: its houses in detail, what stood by them, its settlements, fields and towns as data, whom it housed, and the animals people kept; and how to look at a house on its sheet |
 
 ## Slices
 

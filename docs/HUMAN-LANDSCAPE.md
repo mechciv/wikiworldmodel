@@ -99,9 +99,30 @@ so (`prevalence`: a few, some or most of them), and is drawn for that part of th
 next tradition's house or the generic one. Where no tradition holds, a generic house for the way of life and
 the climate stands in, and says so. Agents write them, region by region; [DWELLINGS.md](DWELLINGS.md) is the brief.
 
+**A house is drawn from every part its claims state.** Beside its plan, size and materials a dwelling says where its
+door was and which way it faced, its windows, how its smoke left it, how its walls were finished, a porch, a veranda,
+a byre under its roof, how high its floor stood on its posts or how deep it was dug, how steep its roof was. Each is
+drawn: a roof as thick as thatch is, a frame of timber with its panels, a ladder to a floor on posts, a hatch and a
+ladder where a house was entered by its roof, a low passage into a house of snow. What the claims leave unsaid is the
+generator's own house of the way of life and the climate, as far as that fits what they do say: a round house takes no
+gable, a court no farmhouse's width. And no two houses of a tradition are drawn alike: a dwelling is drawn in eight
+shapes, each with sizes of its own within the ranges its claims give, which is the generator's and no record's.
+
+**A house stands in its yard, and a settlement has what its tradition names.** A tradition's `outbuildings` say what
+stood by the houses: a granary, a byre, a pen, a cookhouse, an oven, a well, a rack, a stack, a shrine, a house to
+meet in, each a household's or the settlement's. A household's are drawn in its yard with its house, within what its
+tradition says enclosed the yard; a settlement's among the houses or at their edge. Its `settlement_form` says whether
+its houses stood in a ring or in rows, round open ground, and what stood round them all: a fence, a hedge, a
+palisade, a bank, a ditch, a wall. That they stood there is the tradition's claim; how many where no source counts
+them, and where each stands, is the generator's.
+
 **A town has streets.** Its houses stand on lots, back to back in blocks: on a grid with a main street each way
 through the middle, along lanes that wander, or with water in some of its streets; a square may lie at its middle; and
-round it a wall with gates and towers, a rampart, a palisade or a moat. Which is a `town_form` claim, of the tradition
+round it a wall with gates and towers, a rampart, a palisade or a moat. A lot is as wide as its house and a way past
+it, and deeper than wide where its ground allows, the house at its front: houses line a street, and a house wider
+than the ground its town gives it is drawn as small as its lot, and says so. Along lanes a house fronts its lane as
+the lane runs there, and no house stands in its neighbour; where two cities of the lists would take the same ground,
+the one that comes first keeps it. Which kind of streets is a `town_form` claim, of the tradition
 that housed its townspeople or of the city's own record. Where neither says, the generic town is drawn, lanes and no
 wall, and the panel says so. A city too thin on the ground for streets, a hectare to a house, has none.
 
@@ -110,9 +131,10 @@ records, whose way it was, where and when. Each is drawn with its taxon's body a
 that graze in herds, on the pasture of people who herd and at the edge of the houses of people who farm; the rest about
 the houses. Which animals is the tradition's claim. How many is nobody's, and the generator says so.
 
-**People, boats and paths** rest on no record at all. A few plain people stand by the houses of every settlement, a
-boat floats on water deep enough beside one, and a path joins each settlement of people who stayed put to its nearest
-neighbours, so that a scene has its scale and its ways. They are the same everywhere, and a click says they are generic.
+**People, boats and paths** rest on no record at all. A few people are by the houses of every settlement, standing,
+walking, carrying, sitting, at work, a child among them; a boat floats on water deep enough beside one; and a path
+joins each settlement of people who stayed put to its nearest neighbours, so that a scene has its scale and its ways.
+The same few figures are drawn everywhere, in plain cloth, and a click says they are the generator's.
 
 ## 4. How is it drawn?
 
@@ -120,10 +142,18 @@ neighbours, so that a scene has its scale and its ways. They are the same everyw
   where people cleared fields, pastures and yards, no tree stands.
 - **Keyed by the world.** Settlements are seeded by the world's 5′ cells and the anthromes' step, so two scenes that
   overlap put them in the same places.
-- **Houses as instances**, one mesh for each dwelling and detail, as the bodies of the living scene are, ranked so that
-  a far view draws the top of the list a near view draws in full, and within the frame's budget. A town's wall, its
-  towers, gates and water are short pieces drawn the same way, along the line the generator lays; the animals people
-  kept are drawn as the wild ones are; the paths are one ribbon laid on the ground.
+- **Houses as instances**, one mesh for each dwelling, shape and detail, as the bodies of the living scene are, ranked
+  so that a far view draws the top of the list a near view draws in full, and within the frame's budget. A house's
+  yard is part of its mesh, so that a village of homesteads costs no more instances than a village of houses; from
+  far off a house is a block under its roof. A town's wall, its towers, gates and water, and a village's fence or
+  hedge, are short pieces drawn the same way, along the line the generator lays; the animals people kept are drawn as
+  the wild ones are; the paths are one ribbon laid on the ground.
+- **What a house is built of is a surface the renderer draws:** thatch in its courses, mud plaster runnelled by rain,
+  limewash stained at its foot, a frame of timber and its panels, logs, boards, rough stone, woven mats, felt, sewn
+  hides, cloth of hair, turf, snow, shingles, tiles. Each is laid in the house's own frame, so that it stays with the
+  house however it is turned. That a wall was of mud is its tradition's claim; what colour the mud was is the
+  renderer's, and no record's.
+- **The ground is trodden round each house**, and among houses that stand together; little grows there.
 - **Fields painted on the ground**: the generator gives where they are; the shader draws their plots by the tradition's
   field system (strips, blocks, paddies flooded within their banks, swidden plots).
 - **On the globe**, the anthromes' classes in the legend's colours, under *Settlement* in the *Layers* menu; and a click on
@@ -132,7 +162,13 @@ neighbours, so that a scene has its scale and its ways. They are the same everyw
 ## What it will not do
 
 - A house, a village, a field: none of them was there. Only their numbers, their way of life and their type rest on
-  anything, and a click says which.
+  anything, and a click says which. That one house of a tradition differs from the next, where a thing stands in its
+  yard, where a fence runs and where its ways in are: all invented.
+- What a tradition says of its house is drawn for every house of it. A porch that some houses had, a byre that the
+  poor shared with their cattle and the rich did not, a village wall that was "often" there, are drawn for all or left
+  in a note, until a record can say how many.
+- A thing with no word is not drawn: a storage pit, a stair to a roof terrace, the two doors of a cross-passage, a
+  floor half of earth and half of boards. The records' notes keep them.
 - HYDE's people within a country rest on its allocation rules, and its anthromes on thresholds: a cell near one is a coin
   toss. Before 1500 CE its numbers are rough, and its farming falls well short of the archaeologists'.
 - ArchaeoGLOBE's regions are made from today's provinces and are as large as a country; a tradition named in a region is

@@ -129,6 +129,10 @@ Three things the plan did not foresee:
 - **The viewer could not show most of it.** No scene could be made within 1,400 km of Rome while Rome stood. A city
   with a scene of its own now keeps 60 km.
 
+What this plan left alone, how a house itself is drawn and what stands round it, is the
+[seventeenth slice](../slices/SEVENTEENTH-SLICE.md): a house from every part its tradition's claims state, in its
+yard, in shapes that differ.
+
 ## Order, and what is to be decided
 
 Steps 0 and 1 are small and come first. Steps 2 and 3 are records, written by agents in parallel once 1 is in. Step 4's
