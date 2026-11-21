@@ -47,6 +47,8 @@ claims:
       quote: initial urban development in the Indus region began between approximately 2,800 and 2,600 BCE during the Kot Diji Phase (Harappa Period 2)
     method: stratigraphic
     note: The first urban phase, with early planning and walled mounds. The full city follows in the Harappa Phase, 2600–1900 BCE.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in meadow-kenoyer-2001-harappa.txt (sha256 1f1cf53cc045e1a1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   end:
     prop: end
     value: 1300 BCE
@@ -80,6 +82,8 @@ claims:
     method: survey
     rank: preferred
     note: A lower limit, for the city of the Harappa Phase, whose separate walled areas ranged from 10 to 25 hectares each.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in meadow-kenoyer-2001-harappa.txt (sha256 1f1cf53cc045e1a1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   area-kot-diji:
     prop: settlement_area
     value: 25
@@ -90,6 +94,8 @@ claims:
       quote: The total area of the Kot Diji settlement at Harappa is more than 25 hectares
     method: survey
     note: A lower limit.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in meadow-kenoyer-2001-harappa.txt (sha256 1f1cf53cc045e1a1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   population:
     prop: population
     value: 20000
@@ -97,3 +103,25 @@ claims:
     source: { ref: src:reba-2016-urban-population, loc: "modelskiAncientV2.csv, row Harappa, column BC_2400" }
     method: compilation
     note: Modelski's figure, as digitized by Reba et al. (2016); he holds it to 2200 BCE. No excavator's estimate could be read.
+  town-form:
+    prop: town_form
+    value: { streets: grid, wall: mudbrick }
+    valid: { lo: 2800 BCE, hi: 1900 BCE }
+    source:
+      - ref: src:meadow-kenoyer-2001-harappa
+        loc: section "Kot Diji Phase Developments"
+        quote: >-
+          Early city planning is reflected in the layout of north-south and east-west oriented streets and houses
+      - ref: src:meadow-kenoyer-2001-harappa
+        loc: section "Kot Diji Phase Developments"
+        quote: the site was divided into two distinct mounds (AB and E) each with a massive mud-brick perimeter wall
+      - ref: src:meadow-kenoyer-2001-harappa
+        loc: section "Fortification Wall"
+        quote: The Harappan phase wall was actually built on top of the Early Harappan city wall.
+    method: excavation
+    note: >-
+      Streets running north-south and east-west from the Kot Diji phase, and each mound inside a massive perimeter wall of
+      mudbrick, rebuilt and refaced through the Harappa phase. The city was several walled mounds, not one walled town, which
+      the generator cannot draw; the walls' height, thickness and gates are not given here.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in meadow-kenoyer-2001-harappa.txt (sha256 1f1cf53cc045e1a1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

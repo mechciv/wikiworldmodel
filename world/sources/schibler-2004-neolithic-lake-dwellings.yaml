@@ -1,0 +1,30 @@
+id: src:schibler-2004-neolithic-lake-dwellings
+type: publication
+kind: review
+citation: >-
+  Schibler, J., Jacomet, S. & Choyke, A. (2004). Neolithic Lake Dwellings in the Alpine Region. In Bogucki, P.I. &
+  Crabtree, P.J. (eds), Ancient Europe 8000 B.C.–A.D. 1000: Encyclopedia of the Barbarian World, vol. 1, part 4. Charles
+  Scribner's Sons (Thomson Gale).
+authors:
+  - "Schibler, J."
+  - "Jacomet, S."
+  - "Choyke, A."
+published: 2004
+title: Neolithic Lake Dwellings in the Alpine Region
+container: "Ancient Europe 8000 B.C.–A.D. 1000: Encyclopedia of the Barbarian World, vol. 1 (Charles Scribner's Sons)"
+url: https://www.encyclopedia.com/humanities/encyclopedias-almanacs-transcripts-and-maps/neolithic-lake-dwellings-alpine-region
+via: Encyclopedia.com, which republishes the encyclopedia's articles from Gale.
+reliability: >-
+  A signed article in an encyclopedia of prehistory for general readers, without references in the text but with a
+  bibliography, in which two of its authors appear as authors of the studies of the economy of the lake-shore
+  settlements of Zurich; the other works it lists, among them Stöckli, Niffeler & Gross-Klee (1995) on the Swiss
+  Neolithic, were not read here. It describes the Swiss sites above all, and is of 2004. It says that each site is
+  different, with houses raised above the ground at some and at ground level at others.
+verified:
+  by: machine:claude-code
+  how: >-
+    The article's page at Encyclopedia.com fetched on 20 November 2026 and read in full as text; the names of its authors
+    stand at its foot. The page gives no page numbers; the volume and part are from the cross-reference of the
+    encyclopedia's article on La Tène, read at the same site. The editors, publishers and year are from Open Library's
+    records of the encyclopedia (works OL19365288W and OL8311329W), which give Thomson Gale and Charles Scribner's Sons,
+    and 2004 and 2003. Quotes checked by script against the text of the page.

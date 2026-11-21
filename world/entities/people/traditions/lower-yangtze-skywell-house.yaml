@@ -1,0 +1,190 @@
+id: people/traditions/lower-yangtze-skywell-house
+kind: tradition/building
+summary: >-
+  The house of the villages and towns of the lower Yangtze under the Ming and the Qing: halls and rooms set on a
+  central axis around small open courts called sky-wells, a timber frame carrying a grey-tiled roof, and high outer
+  walls of brick that carry no load, lime-washed white. It is read from houses still standing in southern Jiangsu,
+  Zhejiang, southern Anhui and eastern Jiangxi, the oldest of them of the Ming; how much older the form is, the works
+  read do not say. In the water towns of the delta the houses stand along canals and lanes.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Sky-well courtyard house of the lower Yangtze }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 1368 CE
+    source:
+      - ref: src:pan-2023-southern-anhui-folk-houses
+        loc: section 2.2, "Research Subjects"
+        quote: the village now has more than 10 well-preserved Ming Dynasty buildings and more than 100 Qing Dynasty dwellings
+      - ref: src:li-2022-hongcun-dwellings
+        loc: section 2, "Research significance and methods"
+        quote: there are still 110 traditional dwellings dating to the Ming and Qing Dynasties
+      - ref: src:zhou-2002-one-bright-two-dark
+        loc: "p. 171, section 1"
+        quote: the standard plan in Ming(1368-1644) and Qing dynasty(1644-1912)
+    method: expert-estimate
+    note: >-
+      The first year of the Ming dynasty, as the third source gives its years. The dynasty stands for the time the
+      evidence belongs to: the oldest houses the works read count as standing, at Xixinan and Hongcun in southern
+      Anhui, are of the Ming, and none says in which of its years they were built. It bounds the start rather than
+      dating it, for nothing read says how the house was built before.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in pan-2023-southern-anhui-folk-houses.txt (sha256 7c9abdde92013f4d), li-2022-hongcun-dwellings.txt (sha256 f71f8fa6ecff9248) and zhou-2002-one-bright-two-dark.txt (sha256 ab926c4c48d1e397), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  end:
+    prop: end
+    value: 1949 CE
+    source:
+      ref: src:wang-2016-jiangnan-closed-halls
+      loc: "p. 140, section 3.2"
+      quote: The chosen dwellings were mainly constructed during the Qing Dynasty and the Republican Period (before 1949).
+    method: expert-estimate
+    note: >-
+      The bound the survey of 264 houses sets on its own cases, taken here as the end of building in this way; it is
+      not a date any source gives for the last such house, and the houses are lived in still.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wang-2016-jiangnan-closed-halls.txt (sha256 0cb32369883a0166), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["123"] }
+    source:
+      - ref: src:wang-2016-jiangnan-closed-halls
+        loc: "p. 140, section 3.2"
+        quote: 89 are within the Jiangnan area, including 50 cases in southern Jiangsu and 39 cases in northern Zhejiang
+      - ref: src:wang-2016-jiangnan-closed-halls
+        loc: "p. 140, section 3.2"
+        quote: 71 in central and southern Zhejiang, 37 in southeastern Anhui, 19 in eastern Jiangxi
+      - ref: src:min-zhang-2026-yangtze-delta-dwellings
+        loc: section "Study area", "Data source"
+        quote: >-
+          the Yangtze River Delta encompasses parts of Jiangsu, Zhejiang, and Anhui Provinces, as well as the entire
+          Shanghai Municipality
+    method: editorial
+    note: >-
+      Region 123 (Eastern China) holds Jiangsu, Shanghai, Zhejiang, Anhui and Jiangxi, where the two surveys' houses
+      stand, and Hubei and Hunan besides, of whose houses nothing was read: the house is not claimed for all of the
+      region. The first source also has 18 cases in northern Fujian (region 122), which it sets in another cultural
+      circle and says differ in style; that region is left out.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wang-2016-jiangnan-closed-halls.txt (sha256 0cb32369883a0166) and min-zhang-2026-yangtze-delta-dwellings.txt (sha256 7b37735a8ee5003f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [farmers, townspeople]
+    source:
+      - ref: src:min-zhang-2026-yangtze-delta-dwellings
+        loc: section "Methods", "Field survey"
+        quote: the research team conducted field surveys on 705 vernacular dwellings across 35 historic towns
+      - ref: src:min-zhang-2026-yangtze-delta-dwellings
+        loc: section "Methods", the paragraph "Statistical assumptions and uncertainty"
+        quote: All 158 measured samples were taken from different villages and households
+      - ref: src:li-2022-hongcun-dwellings
+        loc: section 1, "Introduction"
+        quote: Hongcun is a traditional village in Yi County, southern Anhui Province
+      - ref: src:li-2022-hongcun-dwellings
+        loc: section 1, "Introduction"
+        quote: the people of Hongcun continue to live within their traditional dwellings
+      - ref: src:li-2022-hongcun-dwellings
+        loc: section 3, "Materials"
+        quote: most of the male population of Hongcun was traditionally engaged in business away from their hometown
+    method: editorial
+    note: >-
+      Houses of towns and of villages, as the surveys count them: farmers stands here for the people of the villages.
+      No work read says what the people of these houses lived by, save that at Hongcun most of the men traded away
+      from home; that the villagers farmed is not stated in them.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in min-zhang-2026-yangtze-delta-dwellings.txt (sha256 7b37735a8ee5003f) and li-2022-hongcun-dwellings.txt (sha256 f71f8fa6ecff9248), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { plan: courtyard, court: true, width: 9, length: 23.3, storeys: { lo: 1, hi: 3 }, walls: fired-brick, roof: gable, roof_material: tile }
+    source:
+      - ref: src:min-zhang-2026-yangtze-delta-dwellings
+        loc: section "Study area", "Vernacular dwellings"
+        quote: they adopt a highly compact spatial form centered around the sky-well
+      - ref: src:wang-2016-jiangnan-closed-halls
+        loc: "p. 140, section 3.2"
+        quote: are generally made of traditional wooden frames with external brick walls
+      - ref: src:wang-2016-jiangnan-closed-halls
+        loc: "p. 140, section 3.2"
+        quote: The dwellings of all scales were included in the study, from the smallest of one unit … to the largest of nine units.
+      - ref: src:li-2022-hongcun-dwellings
+        loc: section 3, "Materials"
+        quote: security for their families was provided by the 7–8 m enclosure walls
+      - ref: src:li-2022-hongcun-dwellings
+        loc: section 3, "Materials"
+        quote: the load-bearing structures are wooden frame systems, while the exterior wall is just an enclosure structure
+      - ref: src:li-2022-hongcun-dwellings
+        loc: section 3, "Materials"
+        quote: local black brick is the typical exterior facing material. It is fired with clay
+      - ref: src:li-2022-hongcun-dwellings
+        loc: section 3, "Materials"
+        quote: the gable walls are constructed with gray tiles in a stepped or ridge shape that looks like a horse head
+      - ref: src:min-zhang-2026-yangtze-delta-dwellings
+        loc: section "Results", "Thermal envelope interface"
+        quote: the representative white-lime walls and grey-tile roofs
+      - ref: src:min-zhang-2026-yangtze-delta-dwellings
+        loc: section "Results", "Morphological parameters"
+        quote: >-
+          the statistical distribution of sky-well morphological parameters in the region (width: 6–13 m; depth: 3–7
+          m; height: 1–2 storeys)
+      - ref: src:li-2022-hongcun-dwellings
+        loc: section 3, "Materials"
+        quote: >-
+          two-floor or three-floor brick and wood buildings are constructed rather than the single-level courtyard
+          houses more commonly seen elsewhere
+      - ref: src:pan-2023-southern-anhui-folk-houses
+        loc: section 2.2, "Research Subjects"
+        quote: >-
+          The dwellings face north and south, with an axisymmetric layout, 9 m in width and 23.3 m in depth. There are
+          two patios of different scales in the dwelling
+    method: survey
+    note: >-
+      The plan round a sky-well, the brick outer walls on a timber frame that bears the load and the tiled roof are
+      from the surveys of the delta, of 264 houses in and around Jiangnan and of Hongcun. A gable roof is read from
+      Hongcun's stepped gable walls; no source names the roof's shape. The storeys join the delta's sky-wells, one or
+      two storeys high, with Hongcun's houses of two or three floors, built so where level ground is scarce. The
+      width and length are those of one house, Yao's House at Xixinan in southern Anhui, of two courts and of a
+      layout its source calls typical: the only measures of a whole house read, and no range. The houses run from one
+      court to nine on an axis, and Hongcun's outer walls stand 7 to 8 m high; the delta's sky-wells are 6 to 13 m
+      wide and 3 to 7 m deep, for which a dwelling has no parameter.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in min-zhang-2026-yangtze-delta-dwellings.txt (sha256 7b37735a8ee5003f), wang-2016-jiangnan-closed-halls.txt (sha256 0cb32369883a0166), li-2022-hongcun-dwellings.txt (sha256 f71f8fa6ecff9248) and pan-2023-southern-anhui-folk-houses.txt (sha256 7c9abdde92013f4d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  settlement:
+    prop: settlement_form
+    value: { pattern: nucleated }
+    source:
+      - ref: src:pan-2023-southern-anhui-folk-houses
+        loc: section 2.2, "Research Subjects"
+        quote: The traditional houses in Xixinan Village are usually compact in group layout
+      - ref: src:min-zhang-2026-yangtze-delta-dwellings
+        loc: section "Study area", "Vernacular dwellings"
+        quote: a layout that enables the buildings to gracefully align with the rivers and lanes
+      - ref: src:li-2022-hongcun-dwellings
+        loc: section 1, "Introduction"
+        quote: The site covers 19.11 hectares
+    method: survey
+    note: >-
+      Houses packed together in a village, as at Xixinan, and along the rivers and lanes of the delta. How many houses
+      stood in a village, and how many people lived in one, no work read states: Hongcun's 110 houses of the Ming and
+      Qing are those that still stand on its 19 hectares, not a count of the village then.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in pan-2023-southern-anhui-folk-houses.txt (sha256 7c9abdde92013f4d), min-zhang-2026-yangtze-delta-dwellings.txt (sha256 7b37735a8ee5003f) and li-2022-hongcun-dwellings.txt (sha256 f71f8fa6ecff9248), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  town:
+    prop: town_form
+    value: { streets: canals }
+    source:
+      - ref: src:min-zhang-2026-yangtze-delta-dwellings
+        loc: section "Study area", "Data source"
+        quote: By the Ming and Qing Dynasties, a considerable cluster of small towns and prefectures had emerged
+      - ref: src:min-zhang-2026-yangtze-delta-dwellings
+        loc: section "Study area", "Data source"
+        quote: >-
+          a composite “dual-chessboard” traffic system interweaving waterways and streets
+    method: expert-estimate
+    note: >-
+      The towns of the delta, Jiangnan, where waterways and streets ran side by side: a sentence of background in a
+      study of climate, resting on a work not read here. It is not said of the hill towns of southern Anhui or of
+      Jiangxi, and no wall, street width or block is stated.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in min-zhang-2026-yangtze-delta-dwellings.txt (sha256 7b37735a8ee5003f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

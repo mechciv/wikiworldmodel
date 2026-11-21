@@ -1,0 +1,23 @@
+id: src:abul-fazl-ain-i-akbari-jarrett-vol-2
+type: text
+kind: eyewitness
+citation: >-
+  Abu'l-Fazl 'Allami. The A'in-i Akbari, vol. II, translated by H.S. Jarrett; second edition, corrected and further
+  annotated by Jadunath Sarkar (Bibliotheca Indica). Calcutta: Royal Asiatic Society of Bengal, 1949.
+authors:
+  - "Abu'l-Fazl, A."
+published: 1949
+written: 1595 CE
+title: "The A'in-i Akbari, vol. II"
+url: https://archive.org/details/in.ernet.dli.2015.460916
+via: The Internet Archive's scan (in.ernet.dli.2015.460916), read in its OCR text and, for the sentence quoted, in the page image.
+reliability: >-
+  An account of Akbar's empire, province by province, written at his court and speaking of the fortieth year of the
+  reign as the present, which the edition's note puts from 6 December 1594 to 25 November 1595. Its remarks on the houses
+  of a province are a single sentence each, with nothing to show what they rest on.
+verified:
+  by: machine:claude-code
+  how: >-
+    The account of the Subah of Bihar (pp. 162 to 166) read on 20 November 2026 in the OCR text of the scan, and p. 164
+    (leaf 171) in the page image; the accounts of the Subahs of Ajmer, Gujarat and Bengal were read for what they say
+    of houses. The quote was checked by script against the OCR.

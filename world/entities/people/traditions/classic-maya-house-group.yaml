@@ -76,6 +76,36 @@ claims:
       Copán, in Honduras. The house is not claimed for all of either region, only for the lowland centres the sources name.
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in ringle-2021-puuc-lidar-PMC8081171.txt (sha256 daf856aa10e0374f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+  lifeway:
+    prop: lifeway
+    value: [farmers, townspeople]
+    source:
+      - ref: src:thompson-2022-maya-neighborhoods
+        loc: section "Lowland Maya settlement patterns"
+        quote: >-
+          Some of the centers discussed in this study are large urban centers (e.g., Altar de Sacrificios, Caracol,
+          Chunchucmil, Copán, El Perú-Waka’, El Pilar, Mayapan) with temples, palaces, causeways, carved stelae,
+          ballcourts, markets, and networks of districts and neighborhoods.
+      - ref: src:thompson-2022-maya-neighborhoods
+        loc: section "Settlement scale and center size"
+        quote: >-
+          The differences in settlement scale in the archaeological sample presented here parallel the Pokom Maya concepts
+          of tenamit (“town”), kokamak (“small population” or a hamlet), and pajuyes (“in the mountains” or small,
+          scattered farms) [146]
+      - ref: src:thompson-2022-maya-neighborhoods
+        loc: section "Environmental considerations"
+        quote: >-
+          residences situated in the cores and fringes of larger centers were reliant on infield and outfield cultivation
+          to varying degrees
+    method: editorial
+    note: >-
+      The people of large urban centres, and of settlements the size of hamlets and scattered farms, lived in the same
+      residential groups, and those of the larger centres relied on what was grown among and beyond their houses:
+      townspeople and farmers. The paper has milpa-cycle agriculture among the houses of one large centre, and the paper
+      on the Puuc weighs fallow rotations there, but neither says the households moved with their fields, so shifting
+      cultivators are not named.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in thompson-2022-maya-neighborhoods.txt (sha256 7555f59bd2aea3d4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   dwelling:
     prop: dwelling
     value: { walls: pole-and-thatch, roof_material: thatch, floor: raised }

@@ -1,0 +1,22 @@
+id: src:marshall-1918-guide-to-taxila
+type: publication
+kind: measurement
+citation: >-
+  Marshall, J. (1918). A Guide to Taxila. Calcutta: Superintendent Government Printing, India.
+authors:
+  - "Marshall, J."
+published: 1918
+title: A Guide to Taxila
+url: https://archive.org/details/cu31924024121125
+via: The Internet Archive's scan of Cornell University's copy (cu31924024121125), read in its OCR text.
+license: public domain
+reliability: >-
+  The excavator's own guide to the sites he was digging at Taxila, written in the first years of the work: of the
+  buildings inside Sirkap it describes those of the uppermost stratum, the ones then dug. Its dates for the city are
+  given by the dynasties that held it, as they were then reckoned. His final report of 1951 was not read here.
+verified:
+  by: machine:claude-code
+  how: >-
+    Chapter VI, on Sirkap (pp. 65 to 72), read on 20 November 2026 in the OCR text of the scan. The OCR garbles the
+    Sanskrit words and some letters, so the quotes keep to stretches it reads cleanly, and were checked by script
+    against it.

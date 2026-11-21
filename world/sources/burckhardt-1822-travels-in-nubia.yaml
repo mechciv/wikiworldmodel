@@ -1,0 +1,23 @@
+id: src:burckhardt-1822-travels-in-nubia
+type: text
+kind: eyewitness
+citation: >-
+  Burckhardt, J.L. Travels in Nubia. Published by the Association for Promoting the Discovery of the Interior Parts of
+  Africa. Second edition. London: John Murray, 1822.
+authors:
+  - "Burckhardt, J.L."
+published: 1822
+written: 1814 CE
+title: Travels in Nubia
+url: https://archive.org/details/travelsinnubiaa00burcgoog
+via: The Internet Archive's copy of Google's scan of the second edition (travelsinnubiaa00burcgoog), read in its OCR text.
+license: public domain
+reliability: >-
+  The journal of a Swiss traveller's journey through the Nubian desert to Berber and Shendi and on to Suakin, which the
+  book heads as performed in the year 1814, published after his death. The passages cited are his own entries on the
+  camps he stayed in, in May 1814.
+verified:
+  by: machine:claude-code
+  how: >-
+    The entries for the village of Atbara (pp. 330-331) and the Djaalein near Shendi read on 20 November 2026 in the OCR
+    text of the scan, fetched from the Internet Archive; the quotes were checked by script against it.

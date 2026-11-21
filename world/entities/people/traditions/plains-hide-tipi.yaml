@@ -1,0 +1,106 @@
+id: people/traditions/plains-hide-tipi
+kind: tradition/building
+summary: >-
+  The tipi of the bison hunters of the Great Plains: a cone of poles tied together at the top and covered with tanned
+  bison hides sewn together, moved from camp to camp with the herds, on dogs before horses came. Coronado's army met the
+  Querechos living in such tents on the southern plains in 1541; the Blackfoot tipi of the northern plains, about four
+  and a half metres across and five high, housed a family of eight.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Hide tipi of the Plains }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 1541 CE
+    source:
+      - ref: src:winship-1904-journey-of-coronado
+        loc: introduction, p. viii
+        quote: Coronado started on April 23d, 1541, with his whole army to march to Quivira.
+      - ref: src:winship-1904-journey-of-coronado
+        loc: 'Castañeda, part 1, ch. XIX, p. 64'
+        quote: >-
+          These folks live in tents made of the tanned skins of the cows. They travel around near the cows, killing them
+          for food.
+    method: documentary
+    note: >-
+      1541, when Coronado's army, marching east from the Pecos, met the Querechos on the plains: the earliest account
+      read. It bounds the start and does not date it; the tipi is surely older, and no source read here says how much. No
+      end is given: the review read has the Plains peoples moved into Western-style housing by the late nineteenth century,
+      but tipis are still put up, and no source read dates when they ceased to be lived in.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in winship-1904-journey-of-coronado.txt (sha256 b60324e626b614fe), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["6", "7", "8", "20"] }
+    source:
+      - ref: src:winship-1904-journey-of-coronado
+        loc: introduction, p. viii
+        quote: For five weeks the Europeans plodded onward across what is now known as the "Staked Plains,"
+      - ref: src:mashford-pringle-2023-indigenous-building-structures
+        loc: 'section 3.1, "Identified Themes", on the tipi'
+        quote: A tipi is a traditional structure for the First Nations people of the Plains
+    method: editorial
+    note: >-
+      The Southern USA (20), where the Staked Plains (the Llano Estacado) of Coronado's march are, on which the army met the
+      Querechos and the Teyas; and Alberta, Saskatchewan and Manitoba (6, 7, 8), the Canadian plains of the First Nations of
+      the second source, which names the Blackfoot and the Cree. The plains of the United States between them (16, 17) were
+      surely tipi country too, but no source read here places the tipi there, so they are left out.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in winship-1904-journey-of-coronado.txt (sha256 b60324e626b614fe) and mashford-pringle-2023-indigenous-building-structures.txt (sha256 738a150881c2faa4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [foragers]
+    source:
+      - ref: src:winship-1904-journey-of-coronado
+        loc: 'Traslado de las Nuevas, p. 193'
+        quote: >-
+          The maintenance or sustenance of these Indians comes entirely from the cows, because they neither sow nor reap
+          corn.
+      - ref: src:mashford-pringle-2023-indigenous-building-structures
+        loc: 'section 3.1, "Identified Themes", on the tipi'
+        quote: The simple design of tipi made the structure very flexible and reflected an ever-changing nomadic life.
+    method: editorial
+    note: >-
+      Foragers: hunters of the bison who did not farm, following the herds. The farming peoples of the plains, such as
+      those of Quivira, lived in other houses.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in winship-1904-journey-of-coronado.txt (sha256 b60324e626b614fe) and mashford-pringle-2023-indigenous-building-structures.txt (sha256 738a150881c2faa4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { plan: round, diameter: { lo: 4.3, hi: 4.9 }, height: 5.2, walls: hide, roof: tent, roof_material: hide, floor: ground }
+    source:
+      - ref: src:mashford-pringle-2023-indigenous-building-structures
+        loc: 'section 3.1, "Identified Themes", on the tipi'
+        quote: >-
+          The traditional tipi was cone-shaped, an average of 14 to 16 feet in diameter, and was about 17 feet tall [32]. The
+          framework of the structure was usually built with 20 wooden poles and the tipi cover was usually made of 12 to 14
+          fabricated buffalo hides
+      - ref: src:winship-1904-journey-of-coronado
+        loc: 'Relación del Suceso, p. 210'
+        quote: they set them up over some poles they have made for this purpose, which come together and are tied at the top
+    method: survey
+    note: >-
+      A cone of about twenty poles under a cover of 12 to 14 bison hides, 14 to 16 feet across (4.3–4.9 m) and about 17 feet
+      high (5.2 m), from the review, which has it of the Blackfoot from Oldershaw (1987); the poles tied at the top from
+      the Relación of Coronado's expedition, of the Querechos' tents in 1541. The hide cover is wall and roof at once.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in mashford-pringle-2023-indigenous-building-structures.txt (sha256 738a150881c2faa4) and winship-1904-journey-of-coronado.txt (sha256 b60324e626b614fe), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  settlement:
+    prop: settlement_form
+    value: { pattern: camp, household: 8 }
+    source:
+      - ref: src:mashford-pringle-2023-indigenous-building-structures
+        loc: 'section 3.1, "Identified Themes", on the tipi'
+        quote: One tipi structure could create a 150–200 square feet space and house a family of eight [32].
+      - ref: src:winship-1904-journey-of-coronado
+        loc: 'Castañeda, part 2, ch. VII, p. 111'
+        quote: They travel like the Arabs, with their tents and troops of dogs loaded with poles
+    method: survey
+    note: >-
+      Camps moved with the herds; a tipi housed a family of eight in the review, of the Blackfoot. How many tipis stood in
+      a camp is not given in general: the Traslado counts one settlement of about 200 tents on the plains in 1541, a single
+      camp, which is not made a rule here.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in mashford-pringle-2023-indigenous-building-structures.txt (sha256 738a150881c2faa4) and winship-1904-journey-of-coronado.txt (sha256 b60324e626b614fe), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

@@ -1,0 +1,37 @@
+id: src:zhuang-2016-heaven-human-induction
+type: publication
+kind: review
+citation: >-
+  Zhuang, Y., Lee, H. & Kidder, T.R. (2016). The cradle of heaven-human induction idealism: agricultural
+  intensification, environmental consequences and social responses in Han China and Three-Kingdoms Korea. World
+  Archaeology 48(4), 563–585.
+authors:
+  - "Zhuang, Y."
+  - "Lee, H."
+  - "Kidder, T.R."
+published: 2016
+title: >-
+  The cradle of heaven-human induction idealism: agricultural intensification, environmental consequences and social
+  responses in Han China and Three-Kingdoms Korea
+container: World Archaeology 48(4), 563–585
+doi: 10.1080/00438243.2016.1251850
+url: https://discovery.ucl.ac.uk/id/eprint/1537421/1/Zhuang_Main%20document%20with%20full%20author%20details.pdf
+via: >-
+  The authors' accepted manuscript in UCL Discovery (eprint 1537421), not the journal's pages: the publisher's site is
+  closed to automated readers.
+license_note: >-
+  An accepted manuscript deposited in a university repository; no licence is stated on it. Short quotes only.
+reliability: >-
+  A review of farming, water and floods under the Han, by an archaeologist of UCL and two colleagues, one of them (Kidder)
+  the first author of the studies of Sanyangzhuang that it cites. It is cited for the dates of the Han and for its
+  summary of that site: a farming
+  settlement on the Yellow River's floodplain in Henan, buried by a flood, whose excavation reports (Kidder, Liu and Li
+  2012 in Antiquity; the Henan institute's report of 2010 in Huaxia Kaogu) could not be read here. It says how the
+  compounds stood and that their people farmed, and nothing of how the houses were built. The manuscript's wording and
+  pages may differ from the printed article's.
+verified:
+  by: machine:claude-code
+  how: >-
+    The accepted manuscript's PDF fetched from UCL Discovery on 20 November 2026 and read as text; the quotes checked by
+    script against it, and the locators are the manuscript's own pages. Volume, issue and pages of the printed article
+    from Crossref's record of the DOI.

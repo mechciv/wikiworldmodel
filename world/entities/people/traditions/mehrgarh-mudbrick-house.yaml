@@ -1,0 +1,124 @@
+id: people/traditions/mehrgarh-mudbrick-house
+kind: tradition/building
+summary: >-
+  The house of the first farming villages of Baluchistan, known from Mehrgarh on the Kachi plain: rectangular rooms
+  walled with mud bricks of regular size, marked with finger impressions, on floors of packed clay, from the period
+  before pottery. Its people grew barley and wheat and kept sheep, goats and cattle. Little of the house is stated in
+  the review read: its plan and its walls, no size and no roof.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Mudbrick house of Neolithic Mehrgarh }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 7000 BCE
+    source:
+      ref: src:sharif-thapar-1992-food-producing-communities
+      loc: "p. 124"
+      quote: In absolute chronology this period is dated to around 7000 b.c.
+    method: expert-estimate
+    rank: preferred
+    note: >-
+      About 7000 BCE, the date the review gives to Period I, in whose levels the first mud-brick room was found.
+      Preferred as the dating of its account of the site, which its conclusions repeat as a Neolithic before pottery of
+      perhaps 7000 to 5000 BCE; the later date of the other claim is a doubt raised in passing, with no evidence given.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in sharif-thapar-1992-food-producing-communities.txt (sha256 4d53840aa055b775), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  start-sixth-millennium:
+    prop: start
+    value: { lo: 6000 BCE, hi: 5001 BCE }
+    source:
+      ref: src:sharif-thapar-1992-food-producing-communities
+      loc: "p. 128"
+      quote: >-
+        The earliest complexes of Mehrgarh may perhaps be dated to the sixth millennium rather than to the seventh
+        millennium b.c. as is often hypothesized.
+    method: expert-estimate
+    note: >-
+      The same chapter's doubt, in a passage that compares the site with Jeitun in Turkmenistan: the whole of the sixth
+      millennium is written, as it names no year.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in sharif-thapar-1992-food-producing-communities.txt (sha256 4d53840aa055b775), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  end:
+    prop: end
+    value: 4000 BCE
+    source:
+      - ref: src:sharif-thapar-1992-food-producing-communities
+        loc: "p. 125"
+        quote: Period III, which is dated around 4000 b.c., shows the mass-production of pottery, a high density of population
+      - ref: src:sharif-thapar-1992-food-producing-communities
+        loc: "p. 126"
+        quote: In Period III five further compartmented buildings representing three building phases have been exposed.
+    method: expert-estimate
+    note: >-
+      About 4000 BCE, the date of Period III, the last whose buildings the review describes. It bounds the end and does
+      not date it: the site was lived in through four more periods, of which the review describes no building, and the
+      houses of the Indus cities are another tradition's.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in sharif-thapar-1992-food-producing-communities.txt (sha256 4d53840aa055b775), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["105"] }
+    source:
+      - ref: src:sharif-thapar-1992-food-producing-communities
+        loc: "p. 123"
+        quote: >-
+          more recently Mehrgarh, at the foot of the Bolan pass in the north of the Kachi plain, has proved to be a classic
+          site showing a full sequence of the development of Neolithic and Chalcolithic cultures in this region.
+      - ref: src:sharif-thapar-1992-food-producing-communities
+        loc: "p. 129"
+        quote: However, by the end of the period they had houses of mud-brick or hard-packed clay.
+    method: editorial
+    note: >-
+      Region 105 (Pakistan), which holds the Kachi plain below the Bolan pass and Quetta, near which the second quote's
+      site, Kili Gul Muhammad, had houses of mud brick by about 4900 to 4300 BCE. The house is known from these two
+      places in Baluchistan and is not claimed for the rest of the region: on the Potwar plateau, near Taxila, the same
+      review has pit dwellings about 3000 BCE.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in sharif-thapar-1992-food-producing-communities.txt (sha256 4d53840aa055b775), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [farmers, herders]
+    source:
+      - ref: src:sharif-thapar-1992-food-producing-communities
+        loc: "p. 128"
+        quote: >-
+          The cultivation of cereal crops and the husbandry of animals were practised in addition to hunting and gathering
+          in Period I, and to their exclusion in Period II.
+      - ref: src:sharif-thapar-1992-food-producing-communities
+        loc: "p. 147"
+        quote: >-
+          The Mehrgarh settlement in southern Pakistan features an early stage in the transition to an agricultural-pastoral
+          economy with a mode of life of its own
+    method: editorial
+    note: >-
+      One settled people who grew cereals and kept herds, and in the first period still hunted: farmers, and herders in
+      that the review calls their economy agricultural and pastoral and shows no herders apart from them. As for the
+      Painted Grey Ware villages, it is a reading of one people into two of the ways of life the world tells apart, and a
+      reviewer may prefer farmers alone.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in sharif-thapar-1992-food-producing-communities.txt (sha256 4d53840aa055b775), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { plan: rectangular, walls: mudbrick }
+    source:
+      - ref: src:sharif-thapar-1992-food-producing-communities
+        loc: "p. 125"
+        quote: >-
+          a rectangular room of a house has walls built of mud-bricks of regular size, the bricks showing finger
+          impressions on their surfaces
+      - ref: src:sharif-thapar-1992-food-producing-communities
+        loc: "p. 133"
+        quote: >-
+          At the close of this period there were already developed mud-brick structures; wheat and barley were cultivated;
+          cattle and sheep were domesticated.
+    method: excavation
+    note: >-
+      A rectangular room with walls of mud bricks of regular size, on a floor of packed clay, from Period I, which the
+      review calls aceramic. No size of a house is given, and no roof. The review also describes buildings divided into four, six or
+      ten small rectangular compartments, one of four measuring 1.5 by 1.0 m in all, and says that those of the next
+      period have been identified as granaries: they are not taken for dwellings here, so no number of rooms is written.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in sharif-thapar-1992-food-producing-communities.txt (sha256 4d53840aa055b775), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

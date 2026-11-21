@@ -1,0 +1,22 @@
+id: src:wikipedia-choga-architecture
+type: database-record
+kind: review
+citation: >-
+  "Choga (architecture)." Wikipedia, the free encyclopedia (English edition), revision 1367807759.
+snapshot: 2026-11-20
+title: Choga (architecture)
+container: Wikipedia
+url: https://en.wikipedia.org/w/index.php?title=Choga_(architecture)&oldid=1367807759
+license: CC-BY-SA-4.0
+license_note: Short quotes, with credit.
+reliability: >-
+  A general encyclopedia article on the thatched house of Korea, cited for its materials, its walls and who lived in it
+  because no study of it could be read here. Its paragraphs cite Jackson & Koehler (2015), Korean Architecture:
+  Breathing with Nature, Jung (2019) and Lee & Kim (2021), "The Samcheong Hanok and the Evolution of the Traditional
+  Korean House", Sustainability 13(16), 9034; the last is open access, but MDPI refused this machine (Access Denied),
+  and it should replace this. One of its sources is tagged as a predatory publication; nothing is cited from that one.
+verified:
+  by: machine:claude-code
+  how: >-
+    The article's HTML for revision 1367807759, fetched through the MediaWiki parse API on 20 November 2026 and read as
+    text with the reference marks taken out; the quotes checked by script against that text.

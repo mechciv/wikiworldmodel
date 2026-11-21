@@ -1,0 +1,24 @@
+id: src:west-2025-pit-to-surface-structures
+type: publication
+kind: review
+citation: >-
+  West, S. (2025). The Transition from Pit Structures to Surface Structures: Comparing Japan with other Pit Dwelling
+  Societies. Bunka Kyōsei Gaku Kenkyū (Studies in Cultural Symbiotics, Graduate School of Humanities and Social
+  Sciences, Okayama University) 24, 97–122.
+authors:
+  - "West, S."
+published: 2025
+title: "The Transition from Pit Structures to Surface Structures: Comparing Japan with other Pit Dwelling Societies"
+container: Bunka Kyōsei Gaku Kenkyū 24, 97–122
+url: https://ousar.lib.okayama-u.ac.jp/files/public/6/68297/20250129161353929451/scs_024_097.pdf
+via: Okayama University Scientific Achievement Repository.
+reliability: >-
+  A doctoral student's review, in a university journal, of when pit houses were used and given up, worldwide and in
+  Japan in detail. Its periods and its account of the pit houses of the Yayoi, Kofun, Nara and Heian periods, and of
+  Korea's from the Mumun to the Joseon, rest on the works it cites (Ishino 1975, the Agency for Cultural Affairs 2010,
+  the Korean Archaeological Society 2010, among others), none read here. It gives no sizes of houses.
+verified:
+  by: machine:claude-code
+  how: >-
+    The PDF fetched from the university's repository on 20 November 2026, its text extracted with PyMuPDF and read; the
+    quotes checked by script against that text. Volume and pages from the running heads of the PDF.

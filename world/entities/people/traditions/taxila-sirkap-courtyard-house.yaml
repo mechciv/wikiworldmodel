@@ -1,0 +1,164 @@
+id: people/traditions/taxila-sirkap-courtyard-house
+kind: tradition/building
+summary: >-
+  The house of Sirkap, the walled city of Taxila under the Indo-Greeks, the Scytho-Parthians and the first Kushans:
+  chambers about an open quadrangle, the unit repeated as the household needed, of rubble stone plastered with lime and
+  mud, of two floors under a flat roof of mud, with shops in the small rooms on the street. The city stood on a main
+  street with side streets at right angles, inside a wall of rubble masonry. It is one city's house, from its excavator's
+  guide of 1918 and a later review; no size of a house was read.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Stone courtyard house of Sirkap (Taxila) }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: { lo: 200 BCE, hi: 101 BCE }
+    source:
+      - ref: src:marshall-1918-guide-to-taxila
+        loc: "chapter VI, p. 65"
+        quote: >-
+          the city of Sirkap appears to have been founded during the supremacy of the Indo-Greeks in the second century B.C.
+      - ref: src:litvinsky-1994-cities-kushan-kingdom
+        loc: "p. 284"
+        quote: >-
+          The Mauryan city of Taxila on the Bhir Mound was replaced under the Graeco-Bactrians in the second century b.c. by
+          a new city at Sirkap, which remained in use up to the Early Kushan period.
+    method: expert-estimate
+    note: >-
+      The second century BCE, when both sources have the city founded. The houses described are those of its uppermost
+      stratum, the last of the city, so the house is known from the end of the span. It is carried back to the founding
+      on the excavator's word that the structures of the Greek and Scytho-Parthian periods were of rubble masonry, like
+      the city's wall; their plans he does not describe.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in marshall-1918-guide-to-taxila.txt (sha256 7786e207e139d4be) and litvinsky-1994-cities-kushan-kingdom.txt (sha256 b072ec581df12ac1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  end:
+    prop: end
+    value: { lo: 50 CE, hi: 60 CE }
+    source:
+      - ref: src:marshall-1918-guide-to-taxila
+        loc: "chapter II, p. 16"
+        quote: >-
+          The chronology of this period is very uncertain, but it seems probable that it was about 50 or 60 A.D. that
+          Kujula
+      - ref: src:litvinsky-1994-cities-kushan-kingdom
+        loc: "p. 284"
+        quote: >-
+          The Mauryan city of Taxila on the Bhir Mound was replaced under the Graeco-Bactrians in the second century b.c. by
+          a new city at Sirkap, which remained in use up to the Early Kushan period.
+    method: expert-estimate
+    note: >-
+      About 50 or 60 CE is when the Guide puts the Kushans' taking of Taxila under Kujula Kadphises, by a chronology it
+      calls very uncertain. It bounds the end from below: the city stayed in use into the early Kushan period, the Guide
+      says until the reign of the next king, who succeeded a few years later, and was then left for a new city at
+      Sirsukh. No source read gives the year it was left.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in marshall-1918-guide-to-taxila.txt (sha256 7786e207e139d4be) and litvinsky-1994-cities-kushan-kingdom.txt (sha256 b072ec581df12ac1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["105"] }
+    source:
+      ref: src:litvinsky-1994-cities-kushan-kingdom
+      loc: "p. 284"
+      quote: >-
+        One of the most thoroughly studied sites is Taxila in north Pakistan, where John Marshall carried out extensive
+        excavations between 1913 and 1934.
+    method: editorial
+    note: >-
+      Region 105 (Pakistan), which holds Taxila by its coordinates against the region outlines. The review says the
+      second city of Charsadda, in the same region, was laid out in a similar manner, but describes no house there. The
+      house is one city's and is not claimed for the rest of the region, nor for its villages.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in litvinsky-1994-cities-kushan-kingdom.txt (sha256 b072ec581df12ac1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [townspeople]
+    source:
+      - ref: src:litvinsky-1994-cities-kushan-kingdom
+        loc: "p. 284"
+        quote: >-
+          Both sides of the main street were lined with shops (Fig. 1), as well as some shrines, especially stupas. Behind
+          the shops and the shrines were the dwelling houses.
+      - ref: src:marshall-1918-guide-to-taxila
+        loc: "chapter VI, p. 71"
+        quote: >-
+          this unit is repeated two, three, four or more times according to the amount of accommodation required by the
+          occupants, the small rooms fronting on to the street being usually reserved for shops.
+    method: editorial
+    note: >-
+      The dwellings of a walled city, behind the shops of its main street. The excavator thought them larger than one
+      family would need, and that several families may have shared one, or that teachers and their pupils lived in them.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in litvinsky-1994-cities-kushan-kingdom.txt (sha256 b072ec581df12ac1) and marshall-1918-guide-to-taxila.txt (sha256 7786e207e139d4be), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { plan: courtyard, court: true, storeys: 2, walls: stone, roof: flat, roof_material: earth }
+    source:
+      - ref: src:marshall-1918-guide-to-taxila
+        loc: "chapter VI, p. 71"
+        quote: The unit of their design, that is to say, is the open quadrangle surrounded by chambers
+      - ref: src:marshall-1918-guide-to-taxila
+        loc: "chapter VI, p. 71"
+        quote: >-
+          The walls are constructed either of rough rubble or of the diaper masonry which came into fashion at the
+          beginning of the Kushan period
+      - ref: src:marshall-1918-guide-to-taxila
+        loc: "chapter VI, p. 71"
+        quote: >-
+          The fact that no tiles have been found in any of these houses indicates that the roofs were flat and covered
+          with mud.
+      - ref: src:marshall-1918-guide-to-taxila
+        loc: "chapter VI, p. 72"
+        quote: >-
+          is the amount of accommodation provided in them, which, even if they were not more than two storeys, was greater
+          than a single family in that age would be
+    method: excavation
+    note: >-
+      The houses of the uppermost stratum as their excavator describes them. The walls were of rubble or of the
+      stonework he calls diaper masonry, both stone, plastered inside and out with lime and mud; wood was used for doors,
+      windows and roof timbers. The flat roof of mud is his inference from the absence of tiles. Two storeys is the
+      least he allows: the lower rooms had no doors to the court or the street and were entered from the rooms above. No
+      size of a house is given in what was read, and none is written.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in marshall-1918-guide-to-taxila.txt (sha256 7786e207e139d4be), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  settlement:
+    prop: settlement_form
+    value: { pattern: walled }
+    source:
+      ref: src:marshall-1918-guide-to-taxila
+      loc: "chapter VI, p. 65"
+      quote: These fortifications are constructed of rubble masonry throughout
+    method: excavation
+    note: >-
+      A city inside a wall, 1,300 m from north to south and 900 m at its widest by the review. How many houses it held and
+      how many people lived in one are not stated.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in marshall-1918-guide-to-taxila.txt (sha256 7786e207e139d4be), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  town:
+    prop: town_form
+    value: { streets: grid, block: 36.5, wall: stone, wall_thickness: { lo: 4.6, hi: 6.4 }, wall_height: { lo: 6.1, hi: 9.1 } }
+    source:
+      - ref: src:litvinsky-1994-cities-kushan-kingdom
+        loc: "p. 284"
+        quote: >-
+          The city was intersected from north to south by the main street with side-streets running off at right angles.
+          Each of the spaces between the side-streets (which were 36.5 m or slightly more apart) contained blocks of
+          buildings, occasionally divided by small alleyways.
+      - ref: src:marshall-1918-guide-to-taxila
+        loc: "chapter VI, p. 65"
+        quote: These fortifications are constructed of rubble masonry throughout
+      - ref: src:marshall-1918-guide-to-taxila
+        loc: "chapter VI, p. 65"
+        quote: and vary in thickness from 15 ft. to 21 ft.
+      - ref: src:marshall-1918-guide-to-taxila
+        loc: "chapter VI, p. 65"
+        quote: The height of the walls and bastions was probably between 20 and 30 feet
+    method: excavation
+    note: >-
+      A main street with side streets at right angles, 36.5 m or slightly more apart, which is written as the side of a
+      block. The wall was of rubble masonry, which is stone; its thickness of 15 to 21 feet is 4.6 to 6.4 m, and its
+      height, which the excavator calls probable, of 20 to 30 feet is 6.1 to 9.1 m. The scan's text is unclear after
+      "21 ft." and seems to add six inches. The wall had rectangular bastions; its gates are not counted in what was read.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in litvinsky-1994-cities-kushan-kingdom.txt (sha256 b072ec581df12ac1) and marshall-1918-guide-to-taxila.txt (sha256 7786e207e139d4be), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

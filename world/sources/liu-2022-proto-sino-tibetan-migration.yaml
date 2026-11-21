@@ -1,0 +1,33 @@
+id: src:liu-2022-proto-sino-tibetan-migration
+type: publication
+kind: review
+citation: >-
+  Liu, L., Chen, J., Wang, J., Zhao, Y. & Chen, X. (2022). Archaeological evidence for initial migration of Neolithic
+  Proto Sino-Tibetan speakers from Yellow River valley to Tibetan Plateau. Proceedings of the National Academy of
+  Sciences 119(51), e2212006119.
+authors:
+  - "Liu, L."
+  - "Chen, J."
+  - "Wang, J."
+  - "Zhao, Y."
+  - "Chen, X."
+published: 2022
+title: >-
+  Archaeological evidence for initial migration of Neolithic Proto Sino-Tibetan speakers from Yellow River valley to
+  Tibetan Plateau
+container: Proceedings of the National Academy of Sciences 119(51), e2212006119
+doi: 10.1073/pnas.2212006119
+url: https://www.ebi.ac.uk/europepmc/webservices/rest/PMC9907151/fullTextXML
+license: CC-BY-NC-ND-4.0
+via: Europe PMC (PMC9907151).
+reliability: >-
+  A study of residues on Yangshao pottery from Gansu and Sichuan, by archaeologists of Stanford, Dartmouth, Chengdu and
+  Beijing. It is cited for its summary of the Yangshao culture, its dates and how its villages were laid out, which
+  rests on Liu and Chen (2012), The Archaeology of China (by the paper's first and last authors), the Institute of
+  Archaeology's volume on the Neolithic (2010) and the excavation report of Jiangzhai (1988), none of them read here.
+  It says nothing of how a house was built or how large it was.
+verified:
+  by: machine:claude-code
+  how: >-
+    The full text read from Europe PMC's XML on 20 November 2026 and kept as text; the quotes checked by script against
+    it. Volume, issue, article number and authors from Crossref's record of the DOI.

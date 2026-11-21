@@ -1,0 +1,20 @@
+id: src:wikipedia-hanok
+type: database-record
+kind: review
+citation: >-
+  "Hanok." Wikipedia, the free encyclopedia (English edition), revision 1380049234.
+snapshot: 2026-11-20
+title: Hanok
+container: Wikipedia
+url: https://en.wikipedia.org/w/index.php?title=Hanok&oldid=1380049234
+license: CC-BY-SA-4.0
+license_note: Short quotes, with credit.
+reliability: >-
+  A general encyclopedia article on the traditional Korean house, cited for which classes lived under tile and which
+  under thatch and for the house's construction, because no study could be read here. The sentences cited carry no
+  footnote.
+verified:
+  by: machine:claude-code
+  how: >-
+    The article's HTML for revision 1380049234, fetched through the MediaWiki parse API on 20 November 2026 and read as
+    text with the reference marks taken out; the quotes checked by script against that text.

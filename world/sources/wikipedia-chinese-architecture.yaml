@@ -1,0 +1,23 @@
+id: src:wikipedia-chinese-architecture
+type: database-record
+kind: review
+citation: >-
+  "Chinese architecture." Wikipedia, the free encyclopedia (English edition), revision 1386169858.
+snapshot: 2026-11-20
+title: Chinese architecture
+container: Wikipedia
+url: https://en.wikipedia.org/w/index.php?title=Chinese_architecture&oldid=1386169858
+license: CC-BY-SA-4.0
+license_note: Short quotes, with credit.
+reliability: >-
+  A general encyclopedia article, cited for two sentences on the homes of commoners because no study of them could be
+  read here. Both rest on one footnote, a book review: Kohrman, M. (1998), reviewing F. Bray, Technology and Gender:
+  Fabrics of Power in Late Imperial China, American Anthropologist 100(1), 236; the article spells the name "Korman".
+  Neither the review nor Bray's book was read, and Bray (1997) should replace this. The sentences are about China as a
+  whole and name no region.
+verified:
+  by: machine:claude-code
+  how: >-
+    The article's HTML, rendered from revision 1386169858, fetched from Wikipedia on 20 November 2026 and read as text,
+    with the reference marks taken out; the quotes checked by script against that text, and their footnote matched to
+    the work it cites.

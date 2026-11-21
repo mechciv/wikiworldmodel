@@ -12,8 +12,40 @@ claims:
     value: { en: domestic horses, la: "Equus caballus" }
     source: { ref: src:opentree-taxonomy-3.7, loc: "tnrs/match_names: Equus caballus, ott1068218" }
     note: Open Tree gives the scientific name; the English name is an editorial gloss.
+  length:
+    prop: body_length
+    value: { lo: 2.2, hi: 2.8 }
+    source:
+      ref: src:animal-diversity-web
+      loc: "account of Equus caballus, Other Physical Features"
+      quote: "Range length 220 to 280 cm"
+    method: compilation
+    note: >-
+      The account does not say what the length measures; it is taken as head and body.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in animal-diversity-web.txt (sha256 5ae3d0bcfbf74dd9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  mass:
+    prop: body_mass
+    value: { lo: 227, hi: 900 }
+    source:
+      ref: src:animal-diversity-web
+      loc: "account of Equus caballus, Physical Description"
+      quote: "can range from 227 to 900 kg in mass and 0.9 to 1.7 meters in height"
+    method: compilation
+    note: >-
+      Across today's breeds; the horses of the past were mostly smaller, and no figure for them was read.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in animal-diversity-web.txt (sha256 5ae3d0bcfbf74dd9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
 relations:
   parent:
     rel: descends-from
     to: life/taxa/mammalia
     source: { ref: src:opentree-synthesis-16.1, loc: "induced_subtree of ott1068218 and ott244265: Equus caballus lies within Mammalia" }
+  parent-equus:
+    rel: descends-from
+    to: life/taxa/equus
+    source: { ref: src:opentree-taxonomy-3.7, loc: "taxonomy/taxon_info ott1068218 with include_lineage: Equus caballus lies within Equus" }
+    rank: preferred
+    note: >-
+      The nearer parent of the same lineage: Equus lies within Mammalia, and is the nearest record above the horse that has a
+      body, so the tree takes this one.

@@ -35,6 +35,25 @@ claims:
       The end of the Early Mumun. The section on settlement puts the change to small pit-houses "some time after 900 BC".
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-mumun-pottery-period.txt (sha256 1049b51639fe2ad3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+  lifeway:
+    prop: lifeway
+    value: [shifting-cultivators]
+    source:
+      - ref: src:wikipedia-mumun-pottery-period
+        loc: section "Chronology", "Early Mumun"
+        quote: >-
+          The Early (or Formative) Mumun (c. 1500–850 BC) is characterized by shifting cultivation, fishing, hunting, and
+          discrete settlements with rectangular semi-subterranean pit-houses.
+      - ref: src:wikipedia-mumun-pottery-period
+        loc: opening section
+        quote: Slash-and-burn cultivators who used Mumun pottery displaced people using Jeulmun period subsistence patterns.
+    method: editorial
+    note: >-
+      The people of these pit-houses cleared and burnt plots to crop, and fished and hunted beside it. The same section has
+      rice farming appear in the Early Mumun, but the article keeps intensive agriculture for the Middle Mumun, so farmers
+      are named by the broader tradition only.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-mumun-pottery-period.txt (sha256 47f0c0ac918a3b81), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   dwelling:
     prop: dwelling
     value: { plan: rectangular }

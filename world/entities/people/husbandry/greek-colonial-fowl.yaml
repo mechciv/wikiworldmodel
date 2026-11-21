@@ -1,0 +1,66 @@
+id: people/husbandry/greek-colonial-fowl
+kind: tradition/husbandry
+summary: >-
+  The farm animals of Greece and Italy from the eighth century BCE, when Greek seafarers carried chickens across the northern Mediterranean.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: "Farm animals and fowl of Iron Age Greece and Italy" }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: { lo: 776 BCE, hi: 540 BCE }
+    source:
+      ref: src:peters-2022-chickens
+      loc: "Results, \"Europe.\""
+      quote: "the earliest directly dated chickens in southern Europe have been excavated in Italy from two Greek colonies dated to 776 to 540 BCE"
+    method: expert-estimate
+    note: >-
+      The dates of the earliest directly dated chickens in southern Europe. The animals are still kept, so there is no end claim.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in peters-2022-chickens.txt (sha256 b75c9dadef531c16), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["44"] }
+    source:
+      ref: src:peters-2022-chickens
+      loc: "Results, \"Europe.\""
+      quote: "Greek seafarers transported chickens across the northern Mediterranean"
+    method: editorial
+    note: >-
+      Region 44 (Southern Europe), as the broader tradition.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in peters-2022-chickens.txt (sha256 b75c9dadef531c16), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      ref: src:zeder-2008-mediterranean
+      loc: "The Diffusion of Animal Domesticates in the Mediterranean Basin"
+      quote: "these seafaring pioneers established farming communities that selectively focused on favorable environments in coastal Greece and on various Aegean Islands"
+    method: editorial
+    note: >-
+      Farmers, as the broader tradition. The townspeople of the Greek cities kept chickens too, but nothing read says so.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zeder-2008-mediterranean.txt (sha256 aafb5ac0c581a441), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  livestock:
+    prop: livestock
+    value: [life/taxa/bos-taurus, life/taxa/ovis-aries, life/taxa/capra-hircus, life/taxa/sus-domesticus, life/taxa/gallus-domesticus]
+    source:
+      - ref: src:zeder-2008-mediterranean
+        loc: "Abstract"
+        quote: "four major Near Eastern livestock species (sheep, goats, cattle, and pigs) and their subsequent dispersal throughout the Mediterranean Basin"
+      - ref: src:peters-2022-chickens
+        loc: "Results, \"Europe.\""
+        quote: "Greek seafarers transported chickens across the northern Mediterranean"
+    method: excavation
+    note: >-
+      The four animals of the broader tradition, with chickens.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zeder-2008-mediterranean.txt (sha256 aafb5ac0c581a441) and peters-2022-chickens.txt (sha256 b75c9dadef531c16), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+relations:
+  member-of:
+    rel: member-of
+    to: people/husbandry/aegean-italian-neolithic-farm-animals
+    unsourced: An editorial grouping.

@@ -3,6 +3,7 @@
 // panel needs, already resolved.
 import type { CoverageMatrix } from './coverage.ts';
 import type { Glance } from './glance.ts';
+import type { HousingCount } from './landscape.ts';
 import type { CheckStep, Level } from './ladder.ts';
 import type { FieldSpread } from './samples.ts';
 import type { Basis, FeatureBasis, FeatureName, FeatureTime } from './tileset.ts';
@@ -261,6 +262,8 @@ export interface CoverageFile {
     disagree: { t: number; land: number; disagree: number; evidence: number }[];
     /** at each of the survey's times: regions with no farming, and how many HYDE farms under 1% of; with farming widespread, and how many HYDE farms at all and over a twentieth */
     farming: { slice: string; year: number; none: [number, number]; widespread: [number, number, number] }[];
+    /** at some times, how many people are drawn in a house of a tradition written for their way of life, by pattern of settlement */
+    housing?: HousingCount[];
   };
   /**
    * the rock record of fossil sites (model:earth/rock-record): how many collections it has and how many stand in a stage,

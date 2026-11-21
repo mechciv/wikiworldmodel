@@ -1,0 +1,29 @@
+id: life/taxa/bos-taurus
+kind: taxon
+summary: >-
+  Taurine domestic cattle, descended from the aurochs of south-west Asia. Their size is that of today's breeds.
+same_as: { ott: 490099 }
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: "domestic cattle", la: "Bos taurus" }
+    source: { ref: src:opentree-taxonomy-3.7, loc: "tnrs/match_names: Bos taurus, ott490099" }
+    note: Open Tree gives the scientific name; the English name is an editorial gloss.
+  mass:
+    prop: body_mass
+    value: { lo: 147, hi: 1363 }
+    source:
+      ref: src:animal-diversity-web
+      loc: "account of Bos taurus, Physical Description"
+      quote: "Weight ranges from 147 kilograms to 1363 kilograms"
+    method: compilation
+    note: >-
+      The range of today's breeds; animals of the past were often smaller, and no figure for them was read.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in animal-diversity-web.txt (sha256 5ae3d0bcfbf74dd9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+relations:
+  parent:
+    rel: descends-from
+    to: life/taxa/bovidae
+    source: { ref: src:opentree-taxonomy-3.7, loc: "taxonomy/taxon_info ott490099 with include_lineage: Bos taurus lies within Bovidae" }

@@ -22,9 +22,11 @@ const WALL: Record<NonNullable<DwellingSpec['walls']>, number> = {
   cob: MAT.mud,
   hide: MAT.hide,
   felt: MAT.cloth,
+  cloth: MAT.hide,
   bark: MAT.bark,
   sod: MAT.grass,
   snow: MAT.plaster,
+  'earth-cut': MAT.earth,
   none: MAT.thatch,
 };
 
@@ -36,6 +38,7 @@ const ROOF: Record<NonNullable<DwellingSpec['roof_material']>, number> = {
   bark: MAT.bark,
   hide: MAT.hide,
   felt: MAT.cloth,
+  cloth: MAT.hide,
   reed: MAT.thatch,
   stone: MAT.granite,
   turf: MAT.grass,
@@ -49,7 +52,7 @@ export function houseSize(d: DwellingSpec): { w: number; l: number; eaves: numbe
   const w = round ? diameter : mid(d.width, d.plan === 'long' ? 6 : d.plan === 'courtyard' ? 12 : 5);
   const l = round ? (d.plan === 'oval' ? diameter * 1.4 : diameter) : mid(d.length, d.plan === 'long' ? Math.max(w * 4, 20) : d.plan === 'square' ? w : d.plan === 'courtyard' ? w : w * 1.6);
   const storeys = Math.max(1, Math.round(mid(d.storeys, 1)));
-  const wallH = d.walls === 'none' ? 0.2 : mid(d.wall_height, d.walls === 'felt' || d.walls === 'hide' ? 1.4 : 2.4);
+  const wallH = d.walls === 'none' ? 0.2 : mid(d.wall_height, d.walls === 'felt' || d.walls === 'hide' || d.walls === 'cloth' ? 1.4 : 2.4);
   const eaves = wallH * storeys + (d.floor === 'stilts' ? 1.6 : d.floor === 'platform' ? 1 : d.floor === 'raised' ? 0.4 : d.floor === 'sunken' ? -0.8 : 0);
   const roof = d.roof ?? 'gable';
   const rise = roof === 'flat' ? 0.4 : roof === 'dome' ? Math.min(w, l) * 0.45 : roof === 'conical' || roof === 'tent' ? Math.min(w, l) * 0.5 : Math.min(w, l) * 0.45;
@@ -64,7 +67,8 @@ export function drawDwelling(m: Mesh, d: DwellingSpec, detail: HouseDetail, tint
   const roofMat = ROOF[d.roof_material ?? (d.roof === 'flat' ? 'earth' : 'thatch')];
   const base = d.floor === 'stilts' ? 1.6 : d.floor === 'platform' ? 1 : d.floor === 'raised' ? 0.4 : 0;
   const sides = detail === 0 ? 16 : detail === 1 ? 10 : 6;
-  m.tint = tint;
+  // Felt is drawn as cloth, whose tint picks a dye: a tent of felt keeps to the undyed ones, pale and grey.
+  m.tint = d.walls === 'felt' || d.roof_material === 'felt' ? (tint & 0xf8) | (tint % 3) : tint;
   // What it stands on.
   if (d.floor === 'platform' || d.floor === 'raised') {
     m.mat = d.floor === 'platform' ? MAT.granite : MAT.mud;

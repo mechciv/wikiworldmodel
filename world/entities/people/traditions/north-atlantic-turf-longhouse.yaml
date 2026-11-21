@@ -58,6 +58,25 @@ claims:
       the house stood only in the Norse settlements.
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in nicosia-2022-PMC9432763-with-S1.txt (sha256 d9d52156e5f25fc8), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      - ref: src:jackson-2018-norse-greenland
+        loc: Abstract
+        quote: Norse Scandinavian farmers introduced agriculture to sub-arctic Greenland in the late tenth century
+      - ref: src:jackson-2018-norse-greenland
+        loc: section "Accumulating Information – Landscape Learning in Greenland"
+        quote: >-
+          has recorded a general absence of infield dykes, which are common to contemporaneous Norwegian and Icelandic
+          farms, to separate grazing livestock from cultivated home-fields
+    method: editorial
+    note: >-
+      Farmers: the Norse who settled Greenland were farmers, and Iceland's settlements were farms with cultivated
+      home-fields; Table 2 describes the longhouse of both in its row on the farm. They lived largely by their livestock,
+      with shielings for the summer, but on fixed farmsteads, so they are not named herders.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in jackson-2018-norse-greenland.txt (sha256 dbb283ce484827de), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   dwelling:
     prop: dwelling
     value: { plan: long, walls: sod, roof_material: turf }

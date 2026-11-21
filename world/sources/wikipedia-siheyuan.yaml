@@ -1,0 +1,26 @@
+id: src:wikipedia-siheyuan
+type: database-record
+kind: review
+citation: >-
+  "Siheyuan." Wikipedia, the free encyclopedia (English edition), revision 1366302626.
+snapshot: 2026-11-20
+title: Siheyuan
+container: Wikipedia
+url: https://en.wikipedia.org/w/index.php?title=Siheyuan&oldid=1366302626
+license: CC-BY-SA-4.0
+license_note: Short quotes, with credit.
+reliability: >-
+  A general encyclopedia article, cited for the courtyard house of northern China because the studies of it that were
+  sought could not be read here (MDPI's site refused the request; Frances Wood's 1983 thesis on the houses of the
+  Beijing area could not be fetched). It is thinly sourced. That the house was prevalent in northern China rests on a
+  design magazine's web page (stirworld.com, 2023); that it began under the Han and became popular under the Ming and
+  Qing on an unnamed web page; that it goes back to the Western Zhou on Wang Qijun (2000), Vernacular Dwellings, p. 122,
+  and a magazine article ("Siheyuan: Old Beijing Style Appeals to Many", Beijing This Month, 2006). Its sentences on the
+  layout, the single storey, the ridged roof and the houses of the north-west and north-east cite nothing. None of those
+  works was read. Wang (2000), or R. G. Knapp's books on China's houses, should replace it.
+verified:
+  by: machine:claude-code
+  how: >-
+    The article's HTML, rendered from revision 1366302626, fetched from Wikipedia on 20 November 2026 and read as text,
+    with the reference marks taken out; the quotes checked by script against that text, and its footnotes matched to the
+    works they cite.

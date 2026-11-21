@@ -1,0 +1,34 @@
+id: src:hofmann-2019-governing-tripolye
+type: publication
+kind: measurement
+citation: >-
+  Hofmann, R., Müller, J., Shatilo, L., Videiko, M., Ohlrau, R., Rud, V., Burdo, N., Dal Corso, M., Dreibrodt, S., Kirleis,
+  W. & Biehl, P.F. (2019). Governing Tripolye: Integrative architecture in Tripolye settlements. PLOS ONE 14(9), e0222243.
+authors:
+  - "Hofmann, R."
+  - "Müller, J."
+  - "Shatilo, L."
+  - "Videiko, M."
+  - "Ohlrau, R."
+  - "Rud, V."
+  - "Burdo, N."
+  - "Dal Corso, M."
+  - "Dreibrodt, S."
+  - "Kirleis, W."
+  - "Biehl, P.F."
+published: 2019
+title: "Governing Tripolye: Integrative architecture in Tripolye settlements"
+container: PLOS ONE
+doi: 10.1371/journal.pone.0222243
+url: https://europepmc.org/article/PMC/PMC6760824
+license: CC-BY-4.0
+reliability: >-
+  A study of the large buildings set apart in Tripolye settlements, with the excavation of one at Maidanetske. It is
+  cited for its comparison of that building with two ordinary dwellings excavated at the same site, houses 44 and 59,
+  and for the dates of the giant settlements.
+verified:
+  by: machine:claude-code
+  how: >-
+    Full text read as text from Europe PMC's REST service (PMC6760824, fullTextXML) on 20 November 2026: the
+    introduction, the account of mega-structure 3 and the section "Comparison with residential buildings". Quotes
+    checked by script against that text.

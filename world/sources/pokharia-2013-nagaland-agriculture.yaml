@@ -1,0 +1,26 @@
+id: src:pokharia-2013-nagaland-agriculture
+type: publication
+kind: measurement
+citation: >-
+  Pokharia, A.K., Jamir, T., Tetso, D. & Venuh, Z. (2013). Late first millennium BC to second millennium AD agriculture
+  in Nagaland: a reconstruction based on archaeobotanical evidence and radiocarbon dates. Current Science 104(10),
+  1341–1353.
+authors:
+  - "Pokharia, A.K."
+  - "Jamir, T."
+  - "Tetso, D."
+  - "Venuh, Z."
+published: 2013
+title: "Late first millennium BC to second millennium AD agriculture in Nagaland: a reconstruction based on archaeobotanical evidence and radiocarbon dates"
+container: Current Science
+url: https://www.currentscience.ac.in/Volumes/104/10/1341.pdf
+license: free to read
+reliability: >-
+  The plant remains and radiocarbon dates of six excavated Naga ancestral sites. Of the houses it says only that pits
+  were found with them at Chungliyimti, where seven residential areas were excavated and their plans reconstructed;
+  those plans are not published in it. Its calibrated dates carry a ± that it does not say is one or two sigma.
+verified:
+  by: machine:claude-code
+  how: >-
+    The journal's PDF read on 20 November 2026, its text taken out with PyMuPDF; the quotes checked by script against
+    that text.

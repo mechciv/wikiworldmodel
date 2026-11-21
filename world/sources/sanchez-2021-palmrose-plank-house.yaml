@@ -1,0 +1,22 @@
+id: src:sanchez-2021-palmrose-plank-house
+type: publication
+kind: measurement
+citation: >-
+  Sanchez, G.M. (2021). Reevaluating the antiquity of the Palmrose site: Collections-based research of an early plank
+  house on the northern Oregon Coast. PLOS ONE 16(8), e0255223.
+authors: ["Sanchez, G.M."]
+published: 2021
+title: "Reevaluating the antiquity of the Palmrose site: Collections-based research of an early plank house on the northern Oregon Coast"
+container: PLOS ONE
+doi: 10.1371/journal.pone.0255223
+url: https://europepmc.org/article/PMC/PMC8370638
+license: CC-BY-4.0
+reliability: >-
+  New radiocarbon dates and Bayesian models for the Palmrose site at Seaside, Oregon, from collections excavated in the
+  1960s and 1970s. The house's size is the excavators' field notes as the paper reports them ("possibly measuring"), not
+  a new survey.
+verified:
+  by: machine:claude-code
+  how: >-
+    Full text read from Europe PMC (PMC8370638), its JATS XML fetched on 20 November 2026 and read as text; the abstract,
+    the background on the plank house and the discussion read, and the quotes checked by script against that text.

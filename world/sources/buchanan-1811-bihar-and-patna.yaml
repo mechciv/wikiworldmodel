@@ -1,0 +1,28 @@
+id: src:buchanan-1811-bihar-and-patna
+type: text
+kind: eyewitness
+citation: >-
+  Buchanan, F. An Account of the Districts of Bihar and Patna in 1811–1812, printed from the Buchanan MSS. in the India
+  Office Library. 2 vols. Patna: Bihar and Orissa Research Society, 1939.
+authors:
+  - "Buchanan, F."
+published: 1939
+written: { lo: 1811 CE, hi: 1812 CE }
+title: An Account of the Districts of Bihar and Patna in 1811–1812
+url: https://archive.org/details/in.ernet.dli.2015.43517
+via: >-
+  The Internet Archive's scans of the two volumes (in.ernet.dli.2015.43517 and in.ernet.dli.2015.43518), read in their
+  OCR text.
+reliability: >-
+  The report of the statistical survey that the Governor-General in Council ordered in 1807, for the districts of Patna
+  and Bihar, which Buchanan went over in 1811 and 1812: his own observation, division by division, with
+  counts he took from the police officers and the collector. His numbers of houses by kind are those officers'
+  estimates, as he says, and his six persons to a house in Patna is their conjecture from partial counts. He could not
+  go inside houses. It was printed from his manuscript only in 1939.
+verified:
+  by: machine:claude-code
+  how: >-
+    Read on 20 November 2026 in the OCR text of the two scans, kept as one file: the city of Patna (vol. 1, pp. 58 to 62),
+    the chapter on the condition and manner of living of the people (vol. 1, pp. 277 to 279), and the measures (vol. 2,
+    p. 703). The year of publication is the scan's title page ("published in 1939"). The quotes were checked by script
+    against the OCR, keeping to stretches it reads cleanly.

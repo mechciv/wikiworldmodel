@@ -305,7 +305,7 @@ export interface Kind {
 }
 
 export interface Property {
-  type: 'time' | 'point' | 'ref' | 'text' | 'string' | 'quantity' | 'color' | 'geometry' | 'form' | 'body-form' | 'footprint-form' | 'dwelling' | 'settlement-form' | 'field-system';
+  type: 'time' | 'point' | 'ref' | 'text' | 'string' | 'quantity' | 'color' | 'geometry' | 'form' | 'body-form' | 'footprint-form' | 'dwelling' | 'settlement-form' | 'field-system' | 'town-form' | 'lifeway' | 'taxa';
   unit?: string;
   /** for strings: the values allowed, each with what it means */
   values?: Record<string, string>;

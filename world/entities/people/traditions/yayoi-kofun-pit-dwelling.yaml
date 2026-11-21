@@ -1,0 +1,130 @@
+id: people/traditions/yayoi-kofun-pit-dwelling
+kind: tradition/building
+summary: >-
+  The pit dwelling of the rice farmers of Japan in the Yayoi and Kofun periods, about 950 BCE to 710 CE: a floor dug
+  into the ground under a roof of thatch or sod on posts, its rafters bedded on a low bank of the dug earth so that the
+  roof came down nearly to the ground. Raised-floor buildings stood beside the houses, most of them thought to be
+  granaries, and in the Middle and Late Yayoi large raised-floor halls for elites at political centres. Round and
+  rectangular pits were both built; in the Kofun period a square pit with four posts and, from the later fifth
+  century, a clay stove against a wall became the rule (people/traditions/kofun-square-pit-dwelling). In western Japan
+  the pit dwelling gave way to ground-level houses by the early eighth century; in eastern Japan it lasted into the
+  twelfth, which this record does not follow (people/traditions/japanese-ground-level-house).
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Pit dwelling of the Yayoi and Kofun periods }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 950 BCE
+    source:
+      - ref: src:west-2025-pit-to-surface-structures
+        loc: "p. 112, note 6"
+        quote: Northern Kyushu was the first region to adopt the Yayoi culture in 950 cal BC
+      - ref: src:west-2025-pit-to-surface-structures
+        loc: "p. 112, section 3.1"
+        quote: >-
+          Despite these revolutionary changes in subsistence, settlement pattern, and material culture, pit structures
+          continued to be the most common dwelling type throughout the period.
+    method: expert-estimate
+    note: >-
+      The start of the Yayoi period in northern Kyushu, in the dates West takes from Fujio (2009), which West calls a
+      matter of ongoing debate; on p. 99 the same paper gives 965 cal BC. The Yayoi reached the Chubu region last, and
+      the Jōmon pit dwelling (people/traditions/jomon-pit-dwelling) is drawn for Japan's foragers until about 350 BCE.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in west-2025-pit-to-surface-structures.txt (sha256 62e9aa916ad8c279), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  end:
+    prop: end
+    value: 710 CE
+    source:
+      - ref: src:west-2025-pit-to-surface-structures
+        loc: "pp. 99–100, section 1.3.1"
+        quote: >-
+          and Kofun period (250–710 AD), pit houses were the primary dwelling form used in mainland Japan (the islands of
+          Kyushu, Shikoku, and Honshu).
+      - ref: src:west-2025-pit-to-surface-structures
+        loc: "p. 113, section 3.1"
+        quote: >-
+          Pit dwellings in western Japan decreased in size and eventually disappeared between the late 7th century and
+          early 8th century AD
+    method: expert-estimate
+    note: >-
+      The end of the Kofun period, when the source has the pit dwelling end as the main house of western Japan. In
+      eastern Japan pit dwellings went on until the end of the twelfth century (same page); the ground-level house of
+      people/traditions/japanese-ground-level-house is drawn for the whole region after 710.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in west-2025-pit-to-surface-structures.txt (sha256 62e9aa916ad8c279), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["124"] }
+    source:
+      ref: src:west-2025-pit-to-surface-structures
+      loc: "pp. 99–100, section 1.3.1"
+      quote: >-
+        and Kofun period (250–710 AD), pit houses were the primary dwelling form used in mainland Japan (the islands of
+        Kyushu, Shikoku, and Honshu).
+    method: editorial
+    note: >-
+      Region 124 (Japan), for Kyushu, Shikoku and Honshu. Hokkaido and the Ryukyus, where the source has other peoples'
+      pit houses, are in the region too and are not claimed for this tradition.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in west-2025-pit-to-surface-structures.txt (sha256 62e9aa916ad8c279), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      - ref: src:west-2025-pit-to-surface-structures
+        loc: "p. 112, section 3.1"
+        quote: >-
+          During the Yayoi period (950 cal BC–250 AD) … intensive rice agriculture and sedentism became firmly
+          established throughout the Japanese archipelago, except in the Ryukyu Islands and Hokkaido.
+      - ref: src:west-2025-pit-to-surface-structures
+        loc: "p. 112, section 3.1"
+        quote: >-
+          Despite these revolutionary changes in subsistence, settlement pattern, and material culture, pit structures
+          continued to be the most common dwelling type throughout the period.
+    method: editorial
+    note: >-
+      Settled rice farmers lived in these houses. Elites at the political centres lived in raised-floor buildings (pp.
+      111–113), which are not this house; no source read puts townspeople in pit dwellings here.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in west-2025-pit-to-surface-structures.txt (sha256 62e9aa916ad8c279), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { walls: none, roof_material: thatch, floor: sunken }
+    source:
+      - ref: src:west-2025-pit-to-surface-structures
+        loc: "p. 112, section 3.1"
+        quote: >-
+          In mainland Japan (Honshu, Kyushu and Shikoku), pit structures typically have one or more of the following
+          components: 1) a thatch or sod roof supported by posts; 2) storage pits dug into the floor
+      - ref: src:jaanus-dictionary
+        loc: s.v. tateana jūkyo
+        quote: >-
+          Though occasionally dwarf walls were used, the ends of the rafters were generally bedded upon a low peripheral
+          baulk made from the excavated earth, and the roof extended virtually to ground level.
+      - ref: src:jaanus-dictionary
+        loc: s.v. tateana jūkyo
+        quote: To judge from archaeological evidence, during the Jōmon, Yayoi and Kofun periods, this was perhaps the most common Japanese house type.
+    method: expert-estimate
+    note: >-
+      A pit roofed with thatch or sod, the roof coming down to a bank of the dug earth: so no walls. Sod is the other
+      roof the source names, and is left to a narrower record. The plan was round or rectangular, varying by time and
+      region, so it is left out here, as is a size: the dictionary's range, 2.5 by 2.5 m to a long house of 31 by 9 m,
+      is for pit dwellings of all periods together.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in west-2025-pit-to-surface-structures.txt (sha256 62e9aa916ad8c279) and jaanus-dictionary.txt (sha256 9d242cd750c47f8e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  fields:
+    prop: field_system
+    value: { kind: paddies }
+    source:
+      ref: src:wikipedia-yayoi-period
+      loc: opening section
+      quote: >-
+        The most distinctive features of the Yayoi period are the emergence of a new style of pottery and the beginning
+        of intensive rice cultivation in paddy fields.
+    method: expert-estimate
+    note: The kind of field only; no plot size was found in a source that could be read.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-yayoi-period.txt (sha256 947c964f3543253b), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

@@ -1,0 +1,176 @@
+id: people/traditions/alpine-neolithic-lake-dwelling
+kind: tradition/building
+summary: >-
+  The house of the Neolithic lake dwellings of the northern Alpine foreland (the pile dwellings of the Swiss lakes, Lake
+  Constance and the bogs and lakes of Upper Swabia, Bavaria and Upper Austria), built between 4300 and 2450 BCE: a small
+  house of timber, 6 to 12 m long and 3 to 6 m wide, of one room or two, on posts sunk deep into the soft lake marl,
+  its walls of hazel wattle smeared with clay between posts and planks. The houses stood close together in two or more
+  rows, their short sides to the water, in villages of six to a hundred houses that lasted ten to thirty years. Some
+  stood above the ground on their posts and others at ground level.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Neolithic lake dwelling of the Alpine foreland }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 4300 BCE
+    source:
+      ref: src:schibler-2004-neolithic-lake-dwellings
+      loc: section "Distribution and dating"
+      quote: Swiss Neolithic lake dwellings were built between 4300 b.c. and 2450 b.c.
+    method: expert-estimate
+    note: >-
+      4300 BC, from the first of the Swiss lake dwellings, whose timbers are dated by their tree rings to the year. The
+      source dates the Swiss ones only.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in schibler-2004-neolithic-lake-dwellings.txt (sha256 88c52cf2d9287923), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  end:
+    prop: end
+    value: 2450 BCE
+    source:
+      - ref: src:schibler-2004-neolithic-lake-dwellings
+        loc: section "Distribution and dating"
+        quote: Swiss Neolithic lake dwellings were built between 4300 b.c. and 2450 b.c.
+      - ref: src:schibler-2004-neolithic-lake-dwellings
+        loc: section "Conclusion"
+        quote: >-
+          While Early and Late Bronze Age lake dwellings exist, sites from the Middle Bronze Age (1500–1250 b.c.) are
+          missing. After 800 b.c. information comes only from dry sites, where organic materials are poorly preserved and
+          dating is less exact.
+    method: expert-estimate
+    note: >-
+      2450 BC, the last of the Neolithic lake dwellings of Switzerland; the source has almost no sites preserved between
+      2400 and 1800 BC. Lake dwellings were built again in the Early and the Late Bronze Age, until about 800 BC, but
+      the source describes the houses of the Neolithic ones only, so the record ends with them. Within its span there
+      are gaps of decades to a century and more with no known sites.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in schibler-2004-neolithic-lake-dwellings.txt (sha256 88c52cf2d9287923), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["43"] }
+    source:
+      - ref: src:schibler-2004-neolithic-lake-dwellings
+        loc: opening paragraph
+        quote: >-
+          Neolithic lake dwellings of circum-alpine central Europe are found in Switzerland and southern Germany (mostly
+          around Lake Constance), Bavaria, northeastern France, northern Italy, western Austria, Slovenia, Croatia,
+          Albania, and Greece.
+      - ref: src:hafner-2020-pile-dwellings-introduction
+        loc: 'section "UNESCO World Heritage: Pile dwellings around the Alps", p. 4'
+        quote: >-
+          Particularly dense concentrations of settlement areas can be observed in western Switzerland in the area of the
+          three lakes (Neuenburgersee, Bielersee and Murtensee), in the Lake Zurich area, as well as on the Swiss-German
+          and Swiss-French border waters of Lake Constance and Lake Geneva.
+      - ref: src:hafner-2020-pile-dwellings-introduction
+        loc: 'section "UNESCO World Heritage: Pile dwellings around the Alps", p. 4'
+        quote: >-
+          This continues to the north with the numerous moor settlements in Upper Swabia in Baden-Württemberg, especially
+          around the Federsee and to the east, the sites at the lakes of the Bavarian and Upper Austrian foothills of the
+          Alps.
+    method: editorial
+    note: >-
+      Region 43 (Central Europe), for Switzerland, southern Germany and Austria, where the lake dwellings are densest
+      and where the first source's account of the houses and its dates belong. They are also found at the lakes of the
+      French Jura (region 42) and in northern Italy and Slovenia (region 44); those regions are left out, as the sources
+      read neither date the houses there nor describe them. Within region 43 they are houses of lake shores and bogs
+      at the foot of the Alps, not of the country to the north.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in schibler-2004-neolithic-lake-dwellings.txt (sha256 88c52cf2d9287923) and hafner-2020-pile-dwellings-introduction.txt (sha256 ef2373ac5448e7cd), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  prevalence:
+    prop: prevalence
+    value: few
+    source:
+      - ref: src:schibler-2004-neolithic-lake-dwellings
+        loc: opening paragraph
+        quote: >-
+          These Neolithic and Bronze Age settlements, with their spectacularly preserved wooden and organic objects
+          lying beneath the water table, are found near modern lakeshores or in peaty areas.
+      - ref: src:schibler-2004-neolithic-lake-dwellings
+        loc: opening paragraph
+        quote: >-
+          Most of these Neolithic settlement layers are located in the Swiss midlands between the Jura mountain range
+          and the Alps on the major lakes.
+    method: editorial
+    note: >-
+      A few of the farmers of region 43 (Central Europe): villages of the shores of lakes and of bogs about the Alps,
+      most of them in the Swiss midlands, and not the houses of the farmers of the rest of the region, of which
+      nothing was read for these centuries. The word is this record's reading of where they stood.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in schibler-2004-neolithic-lake-dwellings.txt (sha256 88c52cf2d9287923), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      - ref: src:schibler-2004-neolithic-lake-dwellings
+        loc: section "Conclusion"
+        quote: >-
+          The Swiss lake dwellings are unique in the way that they open a window on the world of small farming and hunting
+          societies in this region.
+      - ref: src:schibler-2004-neolithic-lake-dwellings
+        loc: 'section "Life in the Neolithic Alpine region", "Environment"'
+        quote: The settlers needed to clear forest to create fields for cultivation. At first, these arable fields were small.
+    method: editorial
+    note: >-
+      Farmers, who grew cereals in fields cleared from the forest and kept cattle, sheep, goats and pigs; cereals gave
+      most of their food in good years. They also hunted, fished and gathered, and more so when harvests failed.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in schibler-2004-neolithic-lake-dwellings.txt (sha256 88c52cf2d9287923), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { plan: rectangular, width: { lo: 3, hi: 6 }, length: { lo: 6, hi: 12 }, rooms: { lo: 1, hi: 2 }, walls: wattle-and-daub, roof_material: timber }
+    source:
+      - ref: src:schibler-2004-neolithic-lake-dwellings
+        loc: 'section "Life in the Neolithic Alpine region", "Villages and Houses"'
+        quote: >-
+          Most of these houses were 6 to 12 meters long and 3 to 6 meters wide. Some houses were divided into two rooms,
+          one large room with a fireplace and a smaller one.
+      - ref: src:schibler-2004-neolithic-lake-dwellings
+        loc: 'section "Life in the Neolithic Alpine region", "Villages and Houses"'
+        quote: >-
+          Smaller posts and planks between the main upright posts were used to construct the walls. Thin hazel withes were
+          woven between the smaller "posts," and clay was smeared over the wall to fill in gaps. Some roof shingles were
+          made of white fir.
+      - ref: src:schibler-2004-neolithic-lake-dwellings
+        loc: 'section "Life in the Neolithic Alpine region", "Villages and Houses"'
+        quote: >-
+          The lake dwelling villages of the alpine foreland were constructed on a soft, porous ground surface of lake marl
+          near the lakeshores. Deep-sunk posts were needed to stabilize the houses.
+      - ref: src:schibler-2004-neolithic-lake-dwellings
+        loc: second paragraph
+        quote: >-
+          This might be one of several reasons that prehistoric lake dwellings sometimes were built above the ground,
+          although ground-level houses also existed.
+    method: excavation
+    note: >-
+      A house with long and short sides, 6 to 12 m by 3 to 6 m, of one room or of two. The walls were of posts and planks
+      with hazel woven between and clay smeared over, which is wattle and daub. Of the roof the source says only that
+      some shingles were of white fir, which the vocabulary calls timber; its shape is not stated. The floor is left
+      out: some houses stood above the ground on their posts and others on it, the source says that each site differs,
+      and the vocabulary takes one word. The floors were built apart from the walls and roof and had to be renewed every
+      four or five years, the whole house about every ten.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in schibler-2004-neolithic-lake-dwellings.txt (sha256 88c52cf2d9287923), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  settlement:
+    prop: settlement_form
+    value: { pattern: nucleated, houses: { lo: 6, hi: 100 }, household: { lo: 6, hi: 8 } }
+    source:
+      - ref: src:schibler-2004-neolithic-lake-dwellings
+        loc: 'section "Life in the Neolithic Alpine region", "Villages and Houses"'
+        quote: >-
+          Houses stood in two or more rows and typically were oriented with their shorter sides facing the water. The
+          distances between the long sides of the houses were very small.
+      - ref: src:schibler-2004-neolithic-lake-dwellings
+        loc: 'section "Life in the Neolithic Alpine region", "Villages and Houses"'
+        quote: >-
+          There could have been villages with only six to ten houses but also villages with as many as one hundred
+          houses. If six to eight persons occupied each house, populations may have ranged from fifty to eight hundred
+          people.
+    method: expert-estimate
+    note: >-
+      Villages of houses set close in rows on the shore, of 500 to 10,000 square metres, each lived in for ten to thirty
+      years. The household is the six to eight persons to a house with which the authors reckon the villages' people,
+      an assumption of theirs and not a count; they call the house the centre of a large family of several generations.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in schibler-2004-neolithic-lake-dwellings.txt (sha256 88c52cf2d9287923), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

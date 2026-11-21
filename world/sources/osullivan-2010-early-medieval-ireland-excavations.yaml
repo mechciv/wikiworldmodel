@@ -1,0 +1,30 @@
+id: src:osullivan-2010-early-medieval-ireland-excavations
+type: publication
+kind: review
+citation: >-
+  O'Sullivan, A., McCormick, F., Kerr, T. & Harney, L. (2010). Early Medieval Ireland: Archaeological Excavations,
+  1930–2009. Text for Royal Irish Academy. Early Medieval Archaeology Project (EMAP) Report 4.5, December 2010. UCD School
+  of Archaeology, for the Irish National Strategic Archaeological Research (INSTAR) Programme 2010, grant AR01055.
+authors:
+  - "O'Sullivan, A."
+  - "McCormick, F."
+  - "Kerr, T."
+  - "Harney, L."
+published: 2010
+title: "Early Medieval Ireland: Archaeological Excavations, 1930–2009"
+container: Early Medieval Archaeology Project (EMAP) Report 4.5
+url: https://researchrepository.ucd.ie/rest/bitstreams/42708/retrieve
+via: University College Dublin's research repository.
+reliability: >-
+  A project report that gathers what the excavations of 1930–2009 found of early medieval Ireland, written, as its title
+  page says, as the text of a book for the Royal Irish Academy; the book was not read. Its account of houses rests on
+  Lynn's surveys of excavated houses (1978, 1994), and the sizes it gives are typical values, not a table of
+  measurements. A report, not a peer-reviewed publication.
+verified:
+  by: machine:claude-code
+  how: >-
+    The PDF downloaded from the repository on 20 November 2026 and converted to text. Of chapter 2, on dwellings and
+    settlements, these parts were read: the settlement landscape and raths (pp. 20–25), the houses (pp. 35–37) and the
+    dating of raths (pp. 40–41); of chapter 5, on agriculture, its opening (p. 117) and the passage on fields (p. 124).
+    Quotes checked by script against the text. The page numbers given are the report's own, printed at the head of each
+    page, five less than the PDF's.

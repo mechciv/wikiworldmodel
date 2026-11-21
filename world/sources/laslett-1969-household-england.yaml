@@ -1,0 +1,26 @@
+id: src:laslett-1969-household-england
+type: publication
+kind: measurement
+citation: >-
+  Laslett, P. (1969). Size and structure of the household in England over three centuries. Population Studies 23(2),
+  199–223.
+authors:
+  - "Laslett, P."
+published: 1969
+title: Size and structure of the household in England over three centuries
+container: Population Studies
+doi: 10.1080/00324728.1969.10405278
+url: https://europepmc.org/article/MED/22077606
+via: Europe PMC's record of the article (PMID 22077606), which carries its abstract.
+reliability: >-
+  The first report of the Cambridge Group's analysis of listings of the inhabitants of a hundred English communities,
+  made between the late sixteenth century and the early nineteenth, set beside the censuses from 1801. The mean it
+  gives is of households as the listings divide them, servants living in counted with the family; later work has
+  questioned how far a hundred listings, which survive by chance, stand for the country. Only the abstract was read.
+verified:
+  by: machine:claude-code
+  how: >-
+    The abstract only, read on 20 November 2026 in Europe PMC's record of the article (its REST search by DOI); the
+    article itself is behind the publisher's paywall and was not read. The record's text prints the decimal point as a
+    raised dot ("4·75") and the year 1911 as "19II". Quotes checked by script against the abstract as kept. Citation from
+    Crossref and from the record.

@@ -1,0 +1,23 @@
+id: src:stanley-1890-in-darkest-africa-vol-2
+type: text
+kind: eyewitness
+citation: >-
+  Stanley, H.M. In Darkest Africa, or the Quest, Rescue, and Retreat of Emin, Governor of Equatoria. Vol. II. New York:
+  Charles Scribner's Sons, 1890.
+authors: ["Stanley, H.M."]
+published: 1890
+written: 1890 CE
+title: In Darkest Africa, vol. II
+url: https://archive.org/details/indarkestafricao02stan
+via: The Internet Archive's scan of the Princeton Theological Seminary Library's copy (indarkestafricao02stan), read in its OCR text.
+license: public domain
+reliability: >-
+  The leader of the Emin Pasha Relief Expedition, which crossed the Ituri forest in 1887 to 1889. His chapter on the
+  great forest describes the camps of the "Wambutti" pygmies the expedition passed, in general terms and with the
+  prejudice of his time; it gives no measurements of their dwellings beyond the doorways.
+verified:
+  by: machine:claude-code
+  how: >-
+    The chapter "The Great Central African Forest" read on 20 November 2026 in the OCR text of the scan, the passage on the
+    dwellings of the pigmies at p. 103; the quotes were checked by script against the OCR, keeping to stretches it reads
+    cleanly.

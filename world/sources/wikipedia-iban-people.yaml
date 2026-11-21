@@ -1,0 +1,20 @@
+id: src:wikipedia-iban-people
+type: database-record
+kind: review
+citation: >-
+  "Iban people." Wikipedia, the free encyclopedia (English edition), revision 1385984952.
+snapshot: 2026-11-20
+title: Iban people
+container: Wikipedia
+url: https://en.wikipedia.org/w/index.php?title=Iban_people&oldid=1385984952
+license: CC-BY-SA-4.0
+reliability: >-
+  A general encyclopedia article, cited for when the Iban moved from the Kapuas basin into Sarawak and that they lived
+  in longhouses and practised shifting cultivation, because no history of the Iban could be read here. It gives the date
+  of the migration from Sandin (1968), The Sea Dayaks of Borneo before White Rajah Rule, which was not read and should
+  replace this.
+verified:
+  by: machine:claude-code
+  how: >-
+    The article's HTML fetched with the action=render view of index.php on 20 November 2026 and read as text, with the
+    reference marks taken out; the quotes checked by script against that text.

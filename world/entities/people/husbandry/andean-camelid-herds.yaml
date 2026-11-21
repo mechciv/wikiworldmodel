@@ -1,0 +1,56 @@
+id: people/husbandry/andean-camelid-herds
+kind: tradition/husbandry
+summary: >-
+  The llamas and alpacas of the herders of the Central Andes, domesticated in the high puna between about 5,500 and 3,500 years ago.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: "Llamas and alpacas of the Central Andes" }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: { lo: 5470 BP, hi: 3480 BP }
+    source:
+      ref: src:yacobaccio-2021-camelids
+      loc: "section \"Discussion and Conclusion\""
+      quote: "early domestication indicators in the Puna de Junín occurred between 5470 and 3480 cal. BP"
+    method: expert-estimate
+    note: >-
+      Calibrated ages of the first signs of domestication in the Puna de Junín, Peru. Still kept, so there is no end claim.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in yacobaccio-2021-camelids.txt (sha256 d272579fd3af292e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["32"] }
+    source:
+      ref: src:yacobaccio-2021-camelids
+      loc: "section \"Discussion and Conclusion\""
+      quote: "early domestication indicators in the Puna de Junín occurred between 5470 and 3480 cal. BP"
+    method: editorial
+    note: >-
+      Region 32 (Central Andes Mountains), which holds the Puna de Junín. The south-central Andes of Argentina and Chile, where the review dates llamas too, are left out for want of a date for the region as a whole.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in yacobaccio-2021-camelids.txt (sha256 d272579fd3af292e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [herders]
+    source:
+      ref: src:yacobaccio-2021-camelids
+      loc: "Introduction"
+      quote: "the Andean region sustained the only pastoralist societies in the pre-Hispanic New World"
+    method: editorial
+    note: >-
+      Herders. The farmers of the Andes kept llamas too, but no source read here says so.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in yacobaccio-2021-camelids.txt (sha256 d272579fd3af292e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  livestock:
+    prop: livestock
+    value: [life/taxa/lama-glama, life/taxa/vicugna-pacos]
+    source:
+      ref: src:yacobaccio-2021-camelids
+      loc: "Introduction"
+      quote: "two domestic (llamas Lama glama Linnaeus, 1758 and alpacas Lama pacos Cuvier, 1800"
+    method: compilation
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in yacobaccio-2021-camelids.txt (sha256 d272579fd3af292e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

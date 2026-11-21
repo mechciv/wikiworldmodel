@@ -52,6 +52,16 @@ claims:
       Oceania, so the rest of the region, from Palau to the Marshall Islands, is not claimed.
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in wp-Latte_stone.txt (sha256 01126542cf782d86), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    unsourced: >-
+      The article read, the record's only source, says who lived on latte, Chamorros of the Latte Period and perhaps only
+      those of high status, and that the houses stood in villages, with fish and animal bones among the remains at the
+      coastal ones; it does not say how they got their food. Farmers is the nearest word for villagers who gardened and
+      fished, as the Chamorro of that time are generally described: no source read here says so, and one that does should
+      replace this.
+    method: editorial
   dwelling:
     prop: dwelling
     value: { plan: rectangular, floor: stilts }

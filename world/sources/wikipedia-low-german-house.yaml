@@ -1,0 +1,23 @@
+id: src:wikipedia-low-german-house
+type: database-record
+kind: review
+citation: >-
+  "Low German house." Wikipedia, the free encyclopedia (English edition), revision 1364294372.
+snapshot: 2026-11-20
+title: Low German house
+container: Wikipedia
+url: https://en.wikipedia.org/w/index.php?title=Low_German_house&oldid=1364294372
+license: CC-BY-SA-4.0
+reliability: >-
+  A general encyclopedia article, cited for the farmhouse of northern Germany from the end of the Middle Ages to the
+  nineteenth century because no history of the German farmhouse could be read here. Its footnotes cite Dickinson (1964),
+  Germany: A regional and economic geography, pp. 151–153, and Elkins (1972), Germany, p. 266; it lists Baumgarten
+  (1980), Das deutsche Bauernhaus, Schepers (1994), Haus und Hof westfälischer Bauern, and other works as sources without
+  saying which sentence rests on which. Its opening sentence carries the editors' mark "need quotation to verify". None
+  of those works was read, and any of them should replace this.
+verified:
+  by: machine:claude-code
+  how: >-
+    The article's HTML fetched with the action=render view of index.php for revision 1364294372 on 20 November 2026 (the
+    revision's number from the API's list of the page's revisions) and read as text, with the reference marks taken out;
+    the quotes checked by script against that text.

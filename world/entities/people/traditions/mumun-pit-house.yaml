@@ -50,6 +50,28 @@ claims:
       like these in northern Kyushu late in the period, which are left out here. Not claimed for all of the region.
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-mumun-pottery-period.txt (sha256 1049b51639fe2ad3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+  lifeway:
+    prop: lifeway
+    value: [shifting-cultivators, farmers]
+    source:
+      - ref: src:wikipedia-mumun-pottery-period
+        loc: section "Chronology", "Early Mumun"
+        quote: >-
+          The Early (or Formative) Mumun (c. 1500–850 BC) is characterized by shifting cultivation, fishing, hunting, and
+          discrete settlements with rectangular semi-subterranean pit-houses.
+      - ref: src:wikipedia-mumun-pottery-period
+        loc: section "Subsistence"
+        quote: >-
+          Intensive wet-field agriculture (paddy farming) was in place in the Middle Mumun. However, even the pit-houses of
+          settlements associated with wet-field archaeological features show evidence that people were also engaged to some
+          degree in hunting and fishing.
+    method: editorial
+    note: >-
+      Shifting cultivators in the Early Mumun, and from the Middle Mumun farmers of paddy fields, whose settlements'
+      pit-houses the second quote names. Both hunted and fished as well, but the article has them live by their crops, so
+      foragers are not named.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-mumun-pottery-period.txt (sha256 47f0c0ac918a3b81), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   dwelling:
     prop: dwelling
     value: { floor: sunken }

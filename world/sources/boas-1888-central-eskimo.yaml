@@ -1,0 +1,26 @@
+id: src:boas-1888-central-eskimo
+type: publication
+kind: measurement
+citation: >-
+  Boas, F. (1888). The Central Eskimo. In Sixth Annual Report of the Bureau of Ethnology to the Secretary of the
+  Smithsonian Institution, 1884–1885, pp. 399–670. Washington: Government Printing Office.
+authors: ["Boas, F."]
+published: 1888
+title: The Central Eskimo
+container: Sixth Annual Report of the Bureau of Ethnology, 1884–1885
+url: https://archive.org/details/thecentraleskimo42084gut
+via: >-
+  Project Gutenberg's transcription (etext 42084), read in the copy the Internet Archive keeps of it
+  (thecentraleskimo42084gut, file 42084-0.txt), Project Gutenberg's own site being down for maintenance that day.
+license: public domain
+reliability: >-
+  The ethnography of the Inuit of Baffin Island and the coasts west of it that Boas wrote from his own year in Cumberland
+  Sound and on Davis Strait in 1883 and 1884, and from the accounts of the explorers before him (Parry, Ross, Hall,
+  M'Clintock), whom it cites by page. Its sizes of the snow house are his general description.
+verified:
+  by: machine:claude-code
+  how: >-
+    The transcription read on 20 November 2026: the section "Habitations and dress: The house" (pp. 539–546 of the
+    report) in full, the account of the Netchillirmiut, and the passages on food; the quotes checked by script against
+    that text. The transcription keeps no page numbers, so the locators give the section and the pages its list of
+    illustrations gives.

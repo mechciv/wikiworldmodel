@@ -1,0 +1,27 @@
+id: src:burckhardt-1831-notes-on-the-bedouins
+type: text
+kind: eyewitness
+citation: >-
+  Burckhardt, J.L. Notes on the Bedouins and Wahábys, collected during his travels in the East. Published by authority of
+  the Association for Promoting the Discovery of the Interior of Africa. In two volumes, vol. 1. London: Henry Colburn and
+  Richard Bentley, 1831.
+authors:
+  - "Burckhardt, J.L."
+published: 1831
+written: { lo: 1810 CE, hi: 1817 CE }
+title: Notes on the Bedouins and Wahábys, vol. 1
+url: https://archive.org/details/notesonbedouins01burcgoog
+via: The Internet Archive's copy of Google's scan of the book (notesonbedouins01burcgoog), read in its OCR text.
+license: public domain
+reliability: >-
+  A Swiss traveller who lived among the Arabs of the Syrian desert from 1810 and travelled in the Hejaz until 1816; his notes
+  were published after his death in 1817. He describes the 'Aneze and the other tribes of the Syrian desert from his own
+  stays in their camps and from what pedlars and Arabs told him; their brethren in Najd he knew by report. The year he
+  wrote each passage is not given, so the span of his travels stands for when it was written.
+verified:
+  by: machine:claude-code
+  how: >-
+    The chapters "Classification of Bedouin tribes", "Mode of encamping" and "The tent, and its different parts" (vol. 1,
+    pp. 1-42) read on 20 November 2026 in the OCR text of the scan, fetched from the Internet Archive. The OCR garbles some
+    words ("breaddi" for breadth); the quotes were checked by script against it, keeping to stretches it reads cleanly.
+    Page numbers are the printed ones, read where the OCR has them.

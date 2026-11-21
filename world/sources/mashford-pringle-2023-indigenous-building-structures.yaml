@@ -1,0 +1,28 @@
+id: src:mashford-pringle-2023-indigenous-building-structures
+type: publication
+kind: review
+citation: >-
+  Mashford-Pringle, A., Fu, R. & Stutz, S. (2023). Mamwi Gidaanjitoomin/Together We Build It: A Systematic Review of
+  Traditional Indigenous Building Structures in North America and Their Potential Application in Contemporary Designs to
+  Promote Environment and Well-Being. International Journal of Environmental Research and Public Health 20(6), 4761.
+authors:
+  - "Mashford-Pringle, A."
+  - "Fu, R."
+  - "Stutz, S."
+published: 2023
+title: >-
+  Mamwi Gidaanjitoomin/Together We Build It: A Systematic Review of Traditional Indigenous Building Structures in North
+  America and Their Potential Application in Contemporary Designs to Promote Environment and Well-Being
+container: International Journal of Environmental Research and Public Health
+doi: 10.3390/ijerph20064761
+url: https://europepmc.org/article/PMC/PMC10049054
+license: CC-BY-4.0
+reliability: >-
+  A systematic review, in a public-health journal, of six articles on traditional Indigenous buildings of North America
+  and their use in design today. Its descriptions of the tipi and the plank house are summaries of the works it cites
+  (Oldershaw 1987 for the Blackfoot tipi), not measurements of its own, and it dates neither building closely.
+verified:
+  by: machine:claude-code
+  how: >-
+    Full text read from Europe PMC (PMC10049054), its JATS XML fetched on 20 November 2026 and read as text; the sections
+    on the tipi and on the longhouse and plank house read in full, and the quotes checked by script against that text.

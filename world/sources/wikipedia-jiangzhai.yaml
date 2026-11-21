@@ -1,0 +1,23 @@
+id: src:wikipedia-jiangzhai
+type: database-record
+kind: review
+citation: >-
+  "Jiangzhai." Wikipedia, the free encyclopedia (English edition), revision 1374830185.
+snapshot: 2026-11-20
+title: Jiangzhai
+container: Wikipedia
+url: https://en.wikipedia.org/w/index.php?title=Jiangzhai&oldid=1374830185
+license: CC-BY-SA-4.0
+license_note: Short quotes, with credit.
+reliability: >-
+  A short general encyclopedia article, cited for one number, the houses of the one Yangshao village dug to its edges,
+  because the study it takes it from could not be read here: Peterson, C.E. and Shelach, G. (2012), "Jiangzhai: Social
+  and economic organization of a Middle Neolithic Chinese village", Journal of Anthropological Archaeology 31(3),
+  265–301, which is behind Elsevier's wall. The paragraph's other footnotes are two Chinese news pages. The article is
+  careless elsewhere (it has the homes built of bamboo), and Peterson and Shelach (2012) should replace it.
+verified:
+  by: machine:claude-code
+  how: >-
+    The article's HTML, rendered from revision 1374830185, fetched from Wikipedia on 20 November 2026 and read as text,
+    with the reference marks taken out; the quote checked by script against that text, and its footnotes matched to the
+    works they cite.

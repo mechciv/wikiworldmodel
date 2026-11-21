@@ -56,6 +56,25 @@ claims:
       source places the house, not a claim that it covered the region.
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in gretzinger-2025-PMC12507669-with-SI.txt (sha256 d607fb2a8efa123f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      - ref: src:gretzinger-2025-slavs
+        loc: main text, section "Main", third paragraph
+        quote: >-
+          Where Slavs lived, Roman, Germanic and other pre-Slavic infrastructures were usually replaced by rather simple
+          ways of life, archaeologically characterized by small settlements of pit houses
+      - ref: src:gretzinger-2025-slavs
+        loc: Supplementary Note 1.1 (W. Pohl), "A historical overview of Slavic expansion", subsection "Slavic diffusion and Slavicization"
+        quote: most early Slavic communities had relatively little social differentiation, division of labor and weak or no hierarchies
+    method: editorial
+    note: >-
+      Farmers, read from the settlements: small settlements of pit houses, in communities with little division of labour,
+      are the hamlets that the vocabulary gives to farmers. No source read says in so many words that their people farmed,
+      or how.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in gretzinger-2025-slavs.txt (sha256 64fa809ae6974700), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   dwelling:
     prop: dwelling
     value: { floor: sunken }

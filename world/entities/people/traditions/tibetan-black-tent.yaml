@@ -1,0 +1,120 @@
+id: people/traditions/tibetan-black-tent
+kind: tradition/building
+summary: >-
+  The black tent of the herders of the Tibetan plateau: a rectangular, flat-roofed tent of cloth woven of yak hair, held
+  up by a ridge-pole on two posts and stretched by cords run over short poles to pegs, with a slit along the top for light
+  and smoke, a long mud stove down the middle, and sometimes a low wall of turf, stones or dung around it against the wind.
+  The Chinese histories of the sixth and seventh centuries have the T'ang-hsiang living in tents woven of yak and goat
+  hair and moving them with the seasons; Rockhill describes the tent of the Koko-nor and eastern Tibet in 1888 to 1892. It
+  is still lived in; no end is given.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Black yak-hair tent of the Tibetan plateau }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 581 CE
+    source:
+      - ref: src:rockhill-1891-land-of-the-lamas
+        loc: 'supplementary note on the T''ang-hsiang, from the "T''ang shu", bk. 221, pp. 337-338'
+        quote: Since the time of the … Wei and Chou dynasties (a. d. 535-581), they nave greatly spread
+      - ref: src:rockhill-1891-land-of-the-lamas
+        loc: 'supplementary note on the T''ang-hsiang, from the "T''ang shu", bk. 221, p. 338'
+        quote: >-
+          They have no houses, but with the hair of their yak and the wool of their sheep they weave stuff out of which they
+          make tents, whose location they change according to the season of the year.
+      - ref: src:rockhill-1891-land-of-the-lamas
+        loc: 'supplementary note on the T''ang-hsiang, from the "Sui shu", bk. 83, p. 337'
+        quote: They weave yak and goat hair and sheep's wool, and make tents.
+    method: documentary
+    note: >-
+      The end of the Wei and Chou dynasties, 581, after which the T'ang history has the T'ang-hsiang spread; the history of
+      the Sui, the dynasty that followed from 581, already describes their tents of yak and goat hair. Read in Rockhill's
+      translation, which the OCR has as "nave" for "have". It bounds the start and does not date it; the tent may be
+      older. No end claim: the tent is still lived in.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in rockhill-1891-land-of-the-lamas.txt (sha256 3dccfc48df989a6e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["118", "119"] }
+    source:
+      - ref: src:rockhill-1891-land-of-the-lamas
+        loc: chapter on Lan-chou fu, Hsi-ning, Kumbum and Tankar, p. 73
+        quote: To the west of the Amdowa, living in the steppe or the mountains around the Koko-nor, are the Panak
+      - ref: src:rockhill-1891-land-of-the-lamas
+        loc: 'supplementary note on the T''ang-hsiang, from the "Sui shu", bk. 83, p. 337'
+        quote: They border to the east on Lin and T'ao Chou
+      - ref: src:rockhill-1894-diary-mongolia-tibet
+        loc: p. 286
+        quote: We camped near some black tents, at a placed called Churema
+    method: editorial
+    note: >-
+      North Central China (119), which in ArchaeoGLOBE's regions holds the Koko-nor and Amdo, where Rockhill describes the
+      tents, and the T'ang-hsiang country bordering T'ao Chou in southern Gansu; and Tibet (118), the eastern Tibet of his
+      second journey, where he camped by black tents. The tent is surely found further west on the plateau and in the
+      Himalayas (106), but no source read places it there, so they are left out.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in rockhill-1891-land-of-the-lamas.txt (sha256 3dccfc48df989a6e) and rockhill-1894-diary-mongolia-tibet.txt (sha256 2c0b46665c458baf), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [herders]
+    source:
+      - ref: src:rockhill-1891-land-of-the-lamas
+        loc: 'supplementary note on the T''ang-hsiang, from the "Sui shu", bk. 83, p. 337'
+        quote: >-
+          They move about from place to place, tending their herds of yak, sheep, and swine, of all of which they eat. They
+          do not till the soil.
+      - ref: src:rockhill-1894-diary-mongolia-tibet
+        loc: p. 286
+        quote: >-
+          the people use the word Drupa, which properly only applies to the persons inhabiting such abodes and leading
+          pastoral lives, to designate the dwelling, the black yak-hair tent itself
+    method: editorial
+    note: >-
+      Herders: the tent is the dwelling of the Drupa, the pastoral people, and the herders of the histories did not till.
+      Rockhill also lists a people near Kuei-te who "have black tents, but cultivate the soil"; their house is not described apart, and farmers are not
+      named.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in rockhill-1891-land-of-the-lamas.txt (sha256 3dccfc48df989a6e) and rockhill-1894-diary-mongolia-tibet.txt (sha256 2c0b46665c458baf), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { plan: rectangular, length: { lo: 3, hi: 15.2 }, walls: cloth, roof: tent, roof_material: cloth, floor: ground }
+    source:
+      - ref: src:rockhill-1891-land-of-the-lamas
+        loc: chapter on Lan-chou fu, Hsi-ning, Kumbum and Tankar, pp. 75-76
+        quote: >-
+          The Tibetan tents are rectangular, with a flat roof; some of them are not more than ten or twelve feet long, but I
+          have seen many fifty feet long by thirty feet broad. A space about two feet wide is left open along the center of
+          the top, to admit light and let smoke escape. Under it is a ridge-pole supported at each end by vertical posts;
+      - ref: src:rockhill-1891-land-of-the-lamas
+        loc: chapter on Lan-chou fu, Hsi-ning, Kumbum and Tankar, p. 75
+        quote: >-
+          the hair of these animals, which on the belly and legs is nearly a foot long, supplies the material of which they
+          make their tents.
+    method: survey
+    note: >-
+      From 10 to 50 ft long (3.0 to 15.2 m), the largest Rockhill saw 30 ft broad (9.1 m); the breadth of the smaller tents
+      is not given, nor the height. The cloth is woven of yak hair, the cover and its sides alike, so walls and roof are
+      cloth; the roof is flat in Rockhill's words, a cover stretched on a ridge-pole and cords, entered as a tent. A low wall
+      of mud and stones or dung was sometimes built round it against the wind, but seldom on the Koko-nor.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in rockhill-1891-land-of-the-lamas.txt (sha256 3dccfc48df989a6e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  settlement:
+    prop: settlement_form
+    value: { pattern: camp, household: 5 }
+    source:
+      - ref: src:rockhill-1891-land-of-the-lamas
+        loc: chapter on the Nam-ts'o tribe, on the Golok, p. 189
+        quote: a thousand tents (or about 5000 souls) in these
+      - ref: src:rockhill-1891-land-of-the-lamas
+        loc: chapter on Lan-chou fu, Hsi-ning, Kumbum and Tankar, p. 80
+        quote: Families are small ; two or three children are the most I have ever seen in any of their tents.
+    method: expert-estimate
+    note: >-
+      Five people to a tent, from the count Rockhill was told for the Golok tribes, a thousand tents or about five thousand
+      souls; it agrees with his small families of two or three children. Camps, which he counts at fifty tents in two camps
+      near one lamasery; how many tents stood in one is not otherwise stated.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in rockhill-1891-land-of-the-lamas.txt (sha256 3dccfc48df989a6e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

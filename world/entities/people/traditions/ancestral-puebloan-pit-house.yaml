@@ -90,6 +90,26 @@ claims:
       of the region, only for the places the sources name.
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in bocinsky-2016-pueblo-macrohistory-PMC4820384.txt (sha256 302f38d01d94ecdc), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      - ref: src:bocinsky-2016-pueblo-macrohistory
+        loc: Introduction
+        quote: >-
+          Maize was indeed critical to all pre-Hispanic Southwestern populations considered here. From at least the
+          first century A.D., maize constituted more than 60% of the Pueblo diet (9), increasing to 80% or more by the
+          mid–P III period (10).
+      - ref: src:bocinsky-2016-pueblo-macrohistory
+        loc: Discussion
+        quote: The typical practice of storing maize in underground cists outside the pit house in the BM III period
+    method: editorial
+    note: >-
+      Maize farmers: maize was most of what the Pueblo people ate from the first century on, and the households of this
+      period kept theirs in cists beside the pit house. The encyclopedia cited for the house has them hunt, trap and
+      gather wild plants as well, beside what they grew, so foragers are not named.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in bocinsky-2016-pueblo-macrohistory.txt (sha256 b05757fd61d02d99), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   dwelling:
     prop: dwelling
     value: { plan: round, diameter: { lo: 2.4, hi: 6.1 }, floor: sunken, walls: wattle-and-daub, roof_material: earth }

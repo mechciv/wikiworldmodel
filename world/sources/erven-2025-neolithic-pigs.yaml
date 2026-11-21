@@ -1,0 +1,22 @@
+id: src:erven-2025-neolithic-pigs
+type: publication
+kind: measurement
+citation: >-
+  Erven, J.A.M., Mattiangeli, V., Dreshaj, M., … & Çakirlar, C. (2025). Archaeogenomic insights into commensalism and regional variation in pig management in Neolithic northwest Europe. Proceedings of the National Academy of Sciences 122(12), e2410235122.
+authors:
+  - "Erven, J.A.M."
+  - "Mattiangeli, V."
+  - "Dreshaj, M."
+  - "Mullin, V.E."
+# the first four of 13 authors
+published: 2025
+title: "Archaeogenomic insights into commensalism and regional variation in pig management in Neolithic northwest Europe"
+container: "Proceedings of the National Academy of Sciences 122(12), e2410235122"
+doi: 10.1073/pnas.2410235122
+url: https://europepmc.org/article/PMC/PMC11962444
+license: CC-BY-NC-ND-4.0
+verified:
+  by: machine:claude-code
+  how: >-
+    Full text read as XML from Europe PMC (PMC11962444) on 20 November 2026, and turned into text. Each quote checked by script against that text; citation from the Europe PMC
+    record.

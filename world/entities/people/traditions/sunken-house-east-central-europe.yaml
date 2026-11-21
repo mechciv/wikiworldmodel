@@ -56,6 +56,27 @@ claims:
       covered the region.
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in herold-2012-PMC3617594.txt (sha256 318d9e61c91b1ace), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      - ref: src:herold-2012-fortified-settlements
+        loc: section "OTHER BUILDINGS IN THE FORTIFIED AREA"
+        quote: >-
+          The most common type of building in the contemporary unfortified, open settlements of the region is the so-called
+          sunken-featured building (Grubenhaus). These seem to have been used mainly as dwellings
+      - ref: src:herold-2012-fortified-settlements
+        loc: section "GRAVES WITHIN THE FORTIFICATIONS"
+        quote: >-
+          These differences indicate that the self-presentation of most inhabitants of the fortified sites included other
+          elements than that of the population living in open (mainly agrarian) settlements.
+    method: editorial
+    note: >-
+      Farmers: the house was the commonest dwelling of the open settlements, which the source calls mainly agrarian. It
+      also has sunken-featured buildings in large numbers in the suburbs of some fortified centres, and does not say how
+      the people there lived.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in herold-2012-fortified-settlements.txt (sha256 91476a79a06c5e33), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   dwelling:
     prop: dwelling
     value: { floor: sunken }

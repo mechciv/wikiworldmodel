@@ -62,6 +62,29 @@ claims:
     note: The conventional end of the period, as the encyclopedia gives it.
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-pueblo-i-period-1301434019.txt (sha256 d2343d54c9db5eb9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      - ref: src:bocinsky-2016-pueblo-macrohistory
+        loc: Introduction
+        quote: >-
+          Maize was indeed critical to all pre-Hispanic Southwestern populations considered here. From at least the
+          first century A.D., maize constituted more than 60% of the Pueblo diet (9), increasing to 80% or more by the
+          mid–P III period (10).
+      - ref: src:bocinsky-2016-pueblo-macrohistory
+        loc: Discussion
+        quote: >-
+          gave way, in P I, to a system in which storage became concentrated in aboveground rooms integrated with other
+          household living spaces.
+    method: editorial
+    note: >-
+      Maize farmers: maize was most of what the Pueblo people ate, and in Pueblo I a household kept its store of it in
+      rooms above ground, joined to the rooms it lived in. The encyclopedia cited for the walls says the same, that by
+      this period the people were reliant upon agriculture, and that they hunted, trapped and gathered as well; foragers
+      are not named.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in bocinsky-2016-pueblo-macrohistory.txt (sha256 b05757fd61d02d99), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   dwelling:
     prop: dwelling
     value: { walls: wattle-and-daub }

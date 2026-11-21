@@ -62,6 +62,27 @@ claims:
       for all of Egypt.
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in driaux-2016-water-supply-egypt.txt (sha256 ff7f3809d63434ad), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-09" }
+  lifeway:
+    prop: lifeway
+    value: [townspeople]
+    source:
+      - ref: src:driaux-2016-water-supply-egypt
+        loc: section "Evidence from New Kingdom workmen's villages"
+        quote: >-
+          the small village of Deir el-Medina at Thebes housed the workmen in charge of the construction and decoration of
+          the royal tombs in the Valley of the Kings
+      - ref: src:driaux-2016-water-supply-egypt
+        loc: section "Evidence from New Kingdom workmen's villages"
+        quote: >-
+          Placed under the authority of the Vizier, the isolated inhabitants were supplied with tools, materials, food and
+          water from economic centres in the Nile Valley.
+    method: editorial
+    note: >-
+      The people of these houses were the workmen of the royal tombs, whom the state supplied with food and water:
+      craftsmen who did not farm, and so, of the five ways of life, townspeople. The source calls both settlements
+      villages, each at the desert's edge beside a city, Thebes and Amarna.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in driaux-2016-water-supply-egypt.txt (sha256 564e625897a562e1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   dwelling:
     prop: dwelling
     value: { plan: rectangular, width: 5, length: 10, rooms: { lo: 4, hi: 5 }, storeys: { lo: 1, hi: 2 }, walls: mudbrick }

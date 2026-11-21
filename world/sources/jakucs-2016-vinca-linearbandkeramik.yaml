@@ -1,0 +1,39 @@
+id: src:jakucs-2016-vinca-linearbandkeramik
+type: publication
+kind: measurement
+citation: >-
+  Jakucs, J., Bánffy, E., Oross, K., Voicsek, V., Bronk Ramsey, C., Dunbar, E., Kromer, B., Bayliss, A., Hofmann, D.,
+  Marshall, P. & Whittle, A. (2016). Between the Vinča and Linearbandkeramik Worlds: The Diversity of Practices and
+  Identities in the 54th–53rd Centuries cal BC in Southwest Hungary and Beyond. Journal of World Prehistory 29(3),
+  267–336.
+authors:
+  - "Jakucs, J."
+  - "Bánffy, E."
+  - "Oross, K."
+  - "Voicsek, V."
+  - "Bronk Ramsey, C."
+  - "Dunbar, E."
+  - "Kromer, B."
+  - "Bayliss, A."
+  - "Hofmann, D."
+  - "Marshall, P."
+  - "Whittle, A."
+published: 2016
+title: >-
+  Between the Vinča and Linearbandkeramik Worlds: The Diversity of Practices and Identities in the 54th–53rd Centuries
+  cal BC in Southwest Hungary and Beyond
+container: Journal of World Prehistory
+doi: 10.1007/s10963-016-9096-x
+url: https://europepmc.org/article/PMC/PMC5040754
+license: CC-BY-4.0
+reliability: >-
+  A dating study of the settlement of Szederkény in south-west Hungary, with formal models of the radiocarbon dates for
+  the first longhouses with flanking pits across central Europe. Those models rest on dates measured over decades, which
+  the authors call of variable quality, many of them on charcoal that may be older than the houses; they give three
+  models, and say the pace of the spread within the 54th century cannot yet be told.
+verified:
+  by: machine:claude-code
+  how: >-
+    Full text read as text from Europe PMC's REST service (PMC5040754, fullTextXML) on 20 November 2026: the introduction,
+    the account of the buildings of Szederkény, the section "Looking North: Architecture" with its models, the discussion
+    and the conclusions. Quotes checked by script against that text.

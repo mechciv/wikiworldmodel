@@ -1,0 +1,24 @@
+id: src:thomson-1887-through-masai-land
+type: text
+kind: eyewitness
+citation: >-
+  Thomson, J. Through Masai Land: a journey of exploration among the snowclad volcanic mountains and strange tribes of
+  eastern equatorial Africa. Being the narrative of the Royal Geographical Society's expedition to Mount Kenia and Lake
+  Victoria Nyanza, 1883-1884. New and revised edition. London: Sampson Low, Marston, Searle, & Rivington, 1887.
+authors:
+  - "Thomson, J."
+published: 1887
+written: { lo: 1883 CE, hi: 1885 CE }
+title: Through Masai Land (new and revised edition)
+url: https://archive.org/details/throughmasailand01thomuoft
+via: The Internet Archive's scan of the University of Toronto's copy (throughmasailand01thomuoft), read in its OCR text.
+license: public domain
+reliability: >-
+  The narrative of the first European journey across the Maasai country, in 1883 and 1884. The chapter on the Maasai
+  tells the life of one man as a type, with the hut and kraal described in general terms from what the author saw in
+  their kraals; its sizes are his estimates ("might be").
+verified:
+  by: machine:claude-code
+  how: >-
+    The chapter on the Maasai (pp. 243-244 for the hut and the kraal) read on 20 November 2026 in the OCR text of the
+    scan, fetched from the Internet Archive; the quotes were checked by script against it.

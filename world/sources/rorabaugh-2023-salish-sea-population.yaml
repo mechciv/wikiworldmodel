@@ -1,0 +1,21 @@
+id: src:rorabaugh-2023-salish-sea-population
+type: publication
+kind: review
+citation: >-
+  Rorabaugh, A. (2023). Assessing population dynamics in the Central Salish Sea, Pacific Northwest Coast of North
+  America. PLOS ONE 18(8), e0285021.
+authors: ["Rorabaugh, A."]
+published: 2023
+title: Assessing population dynamics in the Central Salish Sea, Pacific Northwest Coast of North America
+container: PLOS ONE
+doi: 10.1371/journal.pone.0285021
+url: https://europepmc.org/article/PMC/PMC10399822
+license: CC-BY-4.0
+reliability: >-
+  A study of 538 radiocarbon dates from coastal and interior north-west Washington as a proxy for population. Its
+  sentences on plank house villages summarize the regional literature it cites.
+verified:
+  by: machine:claude-code
+  how: >-
+    Full text read from Europe PMC (PMC10399822), its JATS XML fetched on 20 November 2026 and read as text; the
+    introduction and the discussion read, and the quotes checked by script against that text.

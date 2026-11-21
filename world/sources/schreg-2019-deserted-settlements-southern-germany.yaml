@@ -1,0 +1,25 @@
+id: src:schreg-2019-deserted-settlements-southern-germany
+type: publication
+kind: review
+citation: >-
+  Schreg, R. (2019). Late medieval deserted settlements in southern Germany as a consequence of long-term landscape
+  transformations. In Brady, N. & Theune, C. (eds), Ruralia XII: Settlement change across Medieval Europe; old paradigms
+  and new vistas, 161–170. Leiden: Sidestone Press.
+authors:
+  - "Schreg, R."
+published: 2019
+title: Late medieval deserted settlements in southern Germany as a consequence of long-term landscape transformations
+container: "Ruralia XII: Settlement change across Medieval Europe; old paradigms and new vistas (Leiden, Sidestone Press), 161–170"
+url: https://www.sidestone.com/books/settlement-change-across-medieval-europe
+reliability: >-
+  An essay on why so many villages of southern Germany were deserted in the fourteenth century, which its author calls
+  very hypothetical in many points. It is cited here not for that argument but for what it sets out first: how the
+  village and its open fields were formed between the eleventh and the thirteenth centuries, which it gives as
+  established, from the author's earlier papers (Schreg 2006, 2012, 2016), not read here. It says that excavations of
+  late medieval villages in southern Germany are few and mostly published only in preliminary reports.
+verified:
+  by: machine:claude-code
+  how: >-
+    The publisher's open-access PDF of the whole volume (sidestone.com/openaccess/9789088908064.pdf) fetched on 20 November
+    2026 and turned into text with PyMuPDF; the chapter read in full (pages 163–172 of the file, which are pages 161–170
+    as printed). Quotes checked by script against the text of those pages.

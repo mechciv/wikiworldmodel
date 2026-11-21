@@ -1,0 +1,25 @@
+id: src:tanaka-1974-central-kalahari-bushmen
+type: publication
+kind: measurement
+citation: >-
+  Tanaka, J. (1974). The Central Kalahari Bushmen: A Study of Ecological Anthropology. Doctoral thesis, Kyoto University
+  (degree granted 24 September 1974).
+authors: ["Tanaka, J."]
+published: 1974
+title: "The Central Kalahari Bushmen: A Study of Ecological Anthropology"
+container: Kyoto University doctoral thesis
+doi: 10.14989/doctor.r2604
+url: http://hdl.handle.net/2433/86500
+license: open access
+license_note: As the Kyoto University Research Information Repository (KURENAI) gives it; no licence is named.
+reliability: >-
+  An ecological study of the G/wi and G//ana San of the /Kade area of the Central Kalahari Game Reserve, Botswana, from
+  fieldwork of December 1966 to March 1968 and April 1971 to August 1972. Its section on dwellings describes how the huts
+  are built and gives their size in round numbers.
+verified:
+  by: machine:claude-code
+  how: >-
+    The typescript's PDF from the Kyoto University repository (handle 2433/86500), downloaded on 20 November 2026 through
+    the repository's API, and its text layer read with PyMuPDF; the preface, the introduction and the section on
+    dwellings (p. 24) read in full. The text layer reads "but" for "hut" in places, and the quotes keep to stretches it
+    reads cleanly; they were checked by script against that text.

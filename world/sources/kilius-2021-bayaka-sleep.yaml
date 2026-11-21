@@ -1,0 +1,31 @@
+id: src:kilius-2021-bayaka-sleep
+type: publication
+kind: measurement
+citation: >-
+  Kilius, E., Samson, D.R., Lew-Levy, S., Sarma, M.S., Patel, U.A., Ouamba, Y.R., Miegakanda, V., Gettler, L.T. & Boyette,
+  A.H. (2021). Gender differences in BaYaka forager sleep-wake patterns in forest and village contexts. Scientific Reports
+  11, 13658.
+authors:
+  - "Kilius, E."
+  - "Samson, D.R."
+  - "Lew-Levy, S."
+  - "Sarma, M.S."
+  - "Patel, U.A."
+  - "Ouamba, Y.R."
+  - "Miegakanda, V."
+  - "Gettler, L.T."
+  - "Boyette, A.H."
+published: 2021
+title: Gender differences in BaYaka forager sleep-wake patterns in forest and village contexts
+container: Scientific Reports
+doi: 10.1038/s41598-021-92816-6
+url: https://europepmc.org/article/PMC/PMC8249621
+license: CC-BY-4.0
+reliability: >-
+  A study of the sleep of BaYaka foragers of the Republic of Congo in 2017 and 2018; its few sentences on their dwellings
+  and camps describe the community studied, citing earlier work for the camps' sizes.
+verified:
+  by: machine:claude-code
+  how: >-
+    Full text read from Europe PMC (PMC8249621), its JATS XML fetched on 20 November 2026 and read as text; the quotes
+    checked by script against that text.

@@ -1,0 +1,28 @@
+id: src:litvinsky-1994-cities-kushan-kingdom
+type: publication
+kind: review
+citation: >-
+  Litvinsky, B.A. (1994). Cities and urban life in the Kushan kingdom. In J. Harmatta, B.N. Puri & G.F. Etemadi (eds),
+  History of Civilizations of Central Asia, vol. II, The development of sedentary and nomadic civilizations: 700 B.C. to
+  A.D. 250, chapter 13. Paris: UNESCO Publishing.
+authors:
+  - "Litvinsky, B.A."
+published: 1994
+title: Cities and urban life in the Kushan kingdom
+container: "History of Civilizations of Central Asia, vol. II (UNESCO Publishing)"
+url: https://en.unesco.org/silkroad/sites/default/files/knowledge-bank-article/vol_II%20silk%20road_cities%20and%20urban%20life%20in%20the%20kushan%20kingdom.pdf
+via: >-
+  UNESCO's PDF of the chapter, from the knowledge bank of its Silk Roads programme, as archived at web.archive.org on
+  24 December 2024.
+reliability: >-
+  A survey of the excavated cities of the Kushan age from Chorasmia to the Ganges, by an archaeologist of Central Asia.
+  What it says of Bhita and Taxila is at second hand, from Marshall's reports of 1911, 1915 and 1951 and from Schlingloff
+  (1970), which could not be read here; the number of houses and of people at Bhita are their estimates. Its account of
+  Indian town houses from texts and sculpture mixes sources of several centuries.
+verified:
+  by: machine:claude-code
+  how: >-
+    Read on 20 November 2026 as UNESCO's PDF of the chapter (its pages bear ISBN 978-92-3-102846-5), in the copy archived
+    at web.archive.org on 24 December 2024: UNESCO's own address now redirects to the Silk Roads home page. The text was
+    extracted with PyMuPDF and the quotes checked by script against it. The pages cited are the PDF's own numbers (283 to
+    304). The year is that of the volume's first printing, as library catalogues give it; the PDF does not state it.

@@ -1,0 +1,30 @@
+id: src:sharif-thapar-1992-food-producing-communities
+type: publication
+kind: review
+citation: >-
+  Sharif, M. & Thapar, B.K. (1992). Food-producing communities in Pakistan and northern India. In A.H. Dani & V.M. Masson
+  (eds), History of Civilizations of Central Asia, vol. I, The dawn of civilization: earliest times to 700 B.C., chapter 6.
+  Paris: UNESCO Publishing.
+authors:
+  - "Sharif, M."
+  - "Thapar, B.K."
+published: 1992
+title: Food-producing communities in Pakistan and northern India
+container: "History of Civilizations of Central Asia, vol. I (UNESCO Publishing)"
+url: https://en.unesco.org/silkroad/sites/default/files/knowledge-bank-article/vol_I%20silk%20road_food%20producting%20communities%20in%20pakistan%20and%20northern%20india.pdf
+via: >-
+  UNESCO's PDF of the chapter, from the knowledge bank of its Silk Roads programme, as archived at web.archive.org on
+  12 March 2024.
+reliability: >-
+  A review of the Neolithic sites of Pakistan, Kashmir and the Ganges valley as they were known by the mid 1980s. For
+  the sites of Pakistan it says it follows Allchin and Allchin (1982) closely, and for Mehrgarh the excavators' reports
+  of 1974 to 1984, written while the site was still being dug; none of those could be read here. Its dates are
+  radiocarbon dates of that time. It does not agree with itself on Mehrgarh's beginning, about 7000 BCE in its account of
+  the site and perhaps the sixth millennium in a later passage.
+verified:
+  by: machine:claude-code
+  how: >-
+    Read on 20 November 2026 as UNESCO's PDF of the chapter (its pages bear ISBN 978-92-3-102719-2), in the copy archived
+    at web.archive.org on 12 March 2024: UNESCO's own address now redirects to the Silk Roads home page. The text was
+    extracted with PyMuPDF and the quotes checked by script against it. The pages cited are the PDF's own numbers (123 to
+    147). The year is that of the volume's first printing, as library catalogues give it; the PDF does not state it.

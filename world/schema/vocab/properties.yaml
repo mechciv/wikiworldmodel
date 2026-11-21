@@ -7,6 +7,9 @@
 #               names: […] } names the rows that belong to the subject, { from: src:…,
 #               elements: […] } the elements of a snapshot; a form says how a generator should
 #               raise a structure: { type: temple, order: corinthian, … }, core/city.ts)
+#               | dwelling | settlement-form | field-system | town-form | lifeway (a building tradition's
+#               house, how its houses stood together, its fields, its towns, and whom it housed: core/dwelling.ts)
+#               | taxa (a list of taxon records, as the animals a husbandry tradition kept)
 #   unit        for quantities: values are written in this unit
 #   values      for strings: the values allowed, each with what it means
 #   interp      how a state changes between known points: step | linear | log-time | slerp
@@ -459,6 +462,50 @@ properties:
     description: >-
       The fields around a building tradition's settlements: their kind (strips, terraces, paddies, swidden plots…),
       the size of a plot in hectares, and what divided them (core/dwelling.ts).
+  town_form:
+    type: town-form
+    interp: step
+    applies_to: [tradition/building, settlement]
+    description: >-
+      How a town or a city was laid out: its streets (on a grid, winding lanes, or canals among them), the size of
+      its blocks, what enclosed it (a rampart, a palisade, a wall of mudbrick, rammed earth, stone or brick), how
+      high, how many gates, a moat, an open square (core/dwelling.ts). A tradition that housed townspeople states
+      it for the towns of its region and time; a settlement's own record states it for that city, with the time it
+      held (`valid`). What neither says is the generator's guess, and the panel says so.
+  lifeway:
+    type: lifeway
+    interp: step
+    applies_to: [tradition]
+    description: >-
+      Whose a tradition was: one or more of the ways of life the model of how people lived tells apart
+      (core/dwelling.ts): foragers, herders, shifting-cultivators, farmers, townspeople. A building tradition's
+      house is drawn only for those: a herder's tent for the camps of herders, not for the farmers of the same
+      region; and a husbandry tradition's animals only among them. A tradition that does not say takes the answer of
+      the one it is a member of; one that has none is drawn for no one, and the validator says so.
+  prevalence:
+    type: string
+    interp: step
+    applies_to: [tradition/building]
+    values:
+      few: A few of them lived so. A house of some districts, of one people among others, or of those who could afford it.
+      some: A part of them, beside other houses.
+      most: Most of them.
+    description: >-
+      How many of the people a building tradition could house lived in its houses: of those of its way of life, in
+      the regions its extent names, while it held. An extent names regions where the tradition was, not ones it
+      covered, and a tradition that says nothing more is drawn as the house of everyone there whom no more particular
+      tradition houses. One that says is drawn for a part of their settlements, and the rest are another tradition's
+      or the generic house's. A word and not a number: a source says that a house was rare or common far more often
+      than it counts, and the part each word is drawn for is the settlement generator's (its params.prevalence). A
+      tradition does not take it from the one it is a member of.
+  livestock:
+    type: taxa
+    interp: step
+    applies_to: [tradition/husbandry]
+    description: >-
+      The animals a husbandry tradition's people kept, as a list of taxon records: domestic cattle, sheep, horses.
+      The settlement generator draws them, each with its taxon's body and size, in the pastures and about the yards
+      of the tradition's people. How many there were is not read from it: that is the generator's, and says so.
   extent:
     type: geometry
     interp: step

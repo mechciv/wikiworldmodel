@@ -575,6 +575,43 @@ person.
 - **Not written:** the agents' lists of what they could not reach or did not get to are in the slice's document; `npm run world -- dwellings-wanted` lists
   where the most people are drawn with generic houses.
 
+### Building traditions filled in, husbandry, and the animals people kept
+
+Written by agents for the [sixteenth slice](slices/SIXTEENTH-SLICE.md), from the top of `dwellings-wanted`: by people
+(South Asia, China, Japan and Korea, Europe) and by way of life (herders, foragers, shifting cultivators). All are
+`proposed`, and nothing has been looked at by a person.
+
+- **Building traditions:** 55 new records beside the 37, in `world/entities/people/traditions/`. Of their 376 claims
+  and relations, 319 cite a source, with 828 quotes, and every one of the 319 has its `quoted` step; the 57 that cite
+  none are the names and two editorial groupings of a tradition under a broader one. Each of the 37 older records gained a `lifeway` claim, and five of them
+  and eight recorded cities a `town_form`.
+- **Husbandry:** 20 records in `world/entities/people/husbandry/`: 107 claims and relations, 80 sourced and quoted;
+  the rest are the names and seven editorial groupings. The two camel traditions rest on Wikipedia alone.
+- **The animals people kept:** 14 domestic taxa in `world/entities/life/taxa/`, and sizes and a nearer parent for the
+  dog and the horse, which keep the parent they had as a second, unpreferred claim. Twelve are named by a husbandry
+  tradition and drawn; the Bactrian camel, the yak, the donkey and the reindeer wait for one.
+- **Sources:** 132 new, 27 of them Wikipedia articles at pinned revisions. The Low German hall house and the parent
+  North China courtyard house rest on Wikipedia alone.
+- **All the kept texts, checked again in one run:** 1,591 quotes of 243 sources. The 78 not found are all of older
+  claims whose pages were not kept this time: 72 of the Animal Diversity Web's, in 45 taxon records; five of Uruk's
+  from the CDLI wiki, whose page refused this time; and one of Harappa's start, from Meadow and Kenoyer's report.
+
+What to check first, beyond what the slice's document lists under *The records*:
+
+- **A house of one people drawn for a region.** Only five traditions say how many lived so (`prevalence`). The Ao
+  Naga house, the Ganda round house, the Iban longhouse, the Tupinambá village, the castro roundhouse, the snow house
+  and the English houses are drawn for everyone of their way of life in their regions.
+- **A start that is the year a traveller wrote.** Fifteen of the new traditions begin with the earliest account
+  read: the herders' seven, four of the foragers', the three later houses of southern and eastern India, and
+  Hindustan's. The five of the shifting cultivators begin when their people are first dated in the region.
+- **`lifeway` readings.** Where the model's way of life and the excavators' differ, the agents named what the sources
+  show and no more. Some records name a second way of life on a reading the note explains: the Painted Grey Ware hut
+  and Mehrgarh's house, farmers and herders.
+- **Sizes of animals** are mostly of today's breeds, and cattle have a mass and no length.
+- **Vocabulary the agents wanted** and wrote the nearest word for: a timber frame with infill; woven bamboo or
+  matting; a hip-and-gable and a half-hipped roof; a curved ridge; an L-shaped, a semicircular and an aisled plan; a
+  heated floor; a floor area; a homestead of several huts; a village that is one house; a village round a green.
+
 ### Set 16: day length and the Moon
 
 - 21 measurements from the Moodies Group (3.22 Ga) to today, 13 with the Earth–Moon distance, as records; the series are read

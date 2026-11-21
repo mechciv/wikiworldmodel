@@ -1,0 +1,212 @@
+id: people/traditions/medieval-village-farmhouse-central-europe
+kind: tradition/building
+summary: >-
+  The farmhouse of the villages of central Europe in the High and Late Middle Ages, from the eleventh century, when houses
+  built at ground level took the place of the pit house, to the fifteenth: set on posts at first and later built of
+  timber and earth on stone footings, of one room and then of two, three or four (an entrance, a store and a living
+  room, and in some a byre), standing with a yard and outbuildings as a farmstead. The farmsteads stood together in
+  villages, formed between the eleventh and the thirteenth centuries, along a green or a road, among open fields worked
+  in common. It is known from excavations in Austria, Bohemia, Moravia and southern Germany and from the villages founded
+  in Silesia; its plan, its size and its roof are not given in what was read.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Farmhouse of the medieval village of central Europe }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: { lo: 1001 CE, hi: 1100 CE }
+    source:
+      - ref: src:nowotny-2019-rural-settlement-eastern-central-europe
+        loc: 'section "Micro-scale", p. 283'
+        quote: >-
+          the decrease in pit houses at rural settlements … generally took place in the 11th century, although these
+          developments vary greatly from one region to another
+      - ref: src:schreg-2019-deserted-settlements-southern-germany
+        loc: 'section "The formation of the medieval village and the end of the shifting farmsteads system", p. 165'
+        quote: Between the 11th and the 13th century remarkable reorganisations of the rural settlement pattern took place.
+    method: expert-estimate
+    note: >-
+      The eleventh century, when in Austria, Moravia and Bohemia the pit house (people/traditions/sunken-house-east-central-europe)
+      gave way in the villages to buildings at ground level; the first source says the change came at different times in
+      different regions, and that it is hard to date. The villages these houses stood in were formed between the
+      eleventh and the thirteenth centuries.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in nowotny-2019-rural-settlement-eastern-central-europe.txt (sha256 303d384b1db44b87) and schreg-2019-deserted-settlements-southern-germany.txt (sha256 1cfded0b56c486a9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  end:
+    prop: end
+    value: { lo: 1401 CE, hi: 1500 CE }
+    source:
+      ref: src:nowotny-2019-rural-settlement-eastern-central-europe
+      loc: note 1, p. 281
+      quote: >-
+        In Austria, the Early Middle Ages refers to the 6th-10th centuries, the High Middle Ages to the 11th-mid-13th
+        centuries, and the Late Middle Ages to the 13th-15th centuries.
+    method: expert-estimate
+    note: >-
+      The fifteenth century, the end of the Late Middle Ages as the source reckons them and so of what it describes: not
+      an end of the house, nor of the villages, most of which the second source of this record has staying where they
+      were for some 700 years. The farmhouses of the centuries after 1500 are not described in what was read, and are
+      another record's to tell.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in nowotny-2019-rural-settlement-eastern-central-europe.txt (sha256 303d384b1db44b87), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["43", "45"] }
+    source:
+      - ref: src:nowotny-2019-rural-settlement-eastern-central-europe
+        loc: Introduction, p. 282
+        quote: >-
+          in eastern Central Europe – more precisely in Austria, Moravia, Bohemia, and Slovakia – from the Early to the
+          Later Middle Ages
+      - ref: src:schreg-2019-deserted-settlements-southern-germany
+        loc: 'section "Deserted medieval settlements in southern Germany", p. 162'
+        quote: As in other European landscapes, there are a huge number of deserted late medieval settlements in southern Germany
+      - ref: src:schreg-2019-deserted-settlements-southern-germany
+        loc: 'section "The state of research: Excavations and surveys", p. 162'
+        quote: >-
+          Early and high medieval sites in the periphery of existing villages represent a process of settlement
+          concentration of the 12th/13th centuries
+    method: editorial
+    note: >-
+      Region 43 (Central Europe) for Austria and southern Germany; region 45 (Eastern Europe) for Bohemia, Moravia and
+      Slovakia, and for Silesia, whose villages the third source of this record describes. For Slovakia the first source
+      reports that scattered groups of houses among the fields were the known form up to the fourteenth century. The
+      north of Germany and the Low Countries are in region 43 too, and are not described by what was read. A region named
+      is where the sources place the house, not a claim that it covered the region.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in nowotny-2019-rural-settlement-eastern-central-europe.txt (sha256 303d384b1db44b87) and schreg-2019-deserted-settlements-southern-germany.txt (sha256 1cfded0b56c486a9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      - ref: src:schreg-2019-deserted-settlements-southern-germany
+        loc: 'section "More-vulnerable open field landscapes", p. 166'
+        quote: >-
+          Now the fields were permanently used for grain cultivation only, with a fallow period every three years but
+          without the possibility for a longer regeneration period of the soil.
+      - ref: src:nowotny-2019-rural-settlement-eastern-central-europe
+        loc: 'section "Changes", p. 289'
+        quote: >-
+          is replaced by the rent assessment system (with autonomous farmers) in the course of the High and Late Middle
+          Ages
+    method: editorial
+    note: >-
+      Farmers: the houses are the farmhouses of villages whose fields were sown year after year, with a fallow every third
+      year, by peasants who came to hold their farms for rent. The houses of the towns founded in the same centuries are
+      not described by what was read, and are not these.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in schreg-2019-deserted-settlements-southern-germany.txt (sha256 1cfded0b56c486a9) and nowotny-2019-rural-settlement-eastern-central-europe.txt (sha256 303d384b1db44b87), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { rooms: { lo: 1, hi: 4 }, walls: timber, floor: ground }
+    source:
+      - ref: src:nowotny-2019-rural-settlement-eastern-central-europe
+        loc: 'section "Micro-scale", p. 284'
+        quote: >-
+          Over the course of time, domestic accommodation shifted from pit houses to ground-level buildings. Subsequently,
+          different activities increasingly took place in the same building instead of being divided among separate
+          structures.
+      - ref: src:nowotny-2019-rural-settlement-eastern-central-europe
+        loc: 'section "Micro-scale", p. 283'
+        quote: >-
+          These are four- or six-post structures, long buildings with a row of ridge posts and buildings with wall slots.
+      - ref: src:nowotny-2019-rural-settlement-eastern-central-europe
+        loc: 'section "Micro-scale", p. 284'
+        quote: >-
+          Here buildings were at first constructed with posts, which were gradually replaced by walls of timber and earth
+          set on stone foundations
+      - ref: src:nowotny-2019-rural-settlement-eastern-central-europe
+        loc: 'section "Micro-scale", pp. 283–284'
+        quote: >-
+          where the farmhouses consisted of several rooms. The foundations were built … of stone without the use of mortar
+          and, in two cases, the walls were entirely made of stone.
+      - ref: src:nowotny-2019-rural-settlement-eastern-central-europe
+        loc: 'section "Micro-scale", p. 284'
+        quote: >-
+          The two-room houses are seen as houses with one room for living and one for storage; while houses with three
+          rooms might have consisted of an entrance, storage area, and living room; and four-room layouts are seen as
+          houses that also incorporated a stable.
+      - ref: src:nowotny-2019-rural-settlement-eastern-central-europe
+        loc: 'section "Micro-scale", p. 284'
+        quote: >-
+          In Bohemia and Moravia, multipartite (often three-room) residential houses became more popular than one-room
+          houses.
+    method: excavation
+    note: >-
+      A house at the level of the ground. In the eleventh century, at Mitterretzbach in Lower Austria, the buildings stood
+      on posts; at Bystřec in Moravia, lived in from the middle of the thirteenth century to the early fifteenth, posts
+      gave way to walls of timber and earth on stone footings, for which the vocabulary's nearest word is timber. At Hard
+      in Lower Austria, of the thirteenth and fourteenth centuries, the footings were of dry stone and two houses were of
+      stone to the top, and in the Weinviertel building on posts went on into the Late Middle Ages. The rooms run
+      from the one room of the earlier houses to the two, three or four of Hard: a living room and a store, then an
+      entrance besides, then a stable; three rooms were common in Bohemia and Moravia. The shape of the plan, the size
+      and the roof are not stated in what was read, and are left to the generator.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in nowotny-2019-rural-settlement-eastern-central-europe.txt (sha256 303d384b1db44b87), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  settlement:
+    prop: settlement_form
+    value: { pattern: nucleated }
+    source:
+      - ref: src:schreg-2019-deserted-settlements-southern-germany
+        loc: 'section "The formation of the medieval village and the end of the shifting farmsteads system", p. 165'
+        quote: Only then were closed villages established around the most often already existing churches.
+      - ref: src:nowotny-2019-rural-settlement-eastern-central-europe
+        loc: 'section "Village shape and field forms", p. 287'
+        quote: >-
+          In Moravia and Bohemia, the layouts with village greens in different shapes became dominant in the 13th century
+      - ref: src:nowotny-2019-rural-settlement-eastern-central-europe
+        loc: 'section "Internal structure of the settlements and the emergence of farmsteads", p. 286'
+        quote: >-
+          Farmsteads consisting of a multipartite residential house, a courtyard, and various outbuildings became
+          characteristic during the Later Middle Ages
+      - ref: src:legut-pintal-2019-melioratio-terrae-silesia
+        loc: 'section "The colonization model applied in the land of Nysa and Otmuchów", pp. 297–298'
+        quote: >-
+          Villages located on relatively good soils usually became open-field villages with a rectangular or
+          spindle-shaped square or a … village green (a type known as Angerdorf). Villages located on worse soils in
+          forest areas and foothills usually became forest villages (Waldhufendorf type).
+    method: expert-estimate
+    note: >-
+      Villages: farmsteads gathered round a church in southern Germany, set in rows along a green in Bohemia, Moravia and
+      Lower Austria, and in Silesia laid out round a square or a green on the better soils and as forest villages
+      (Waldhufendorf) on the poorer soils of the hills. How many farmsteads made a village is not given as a rule: the first
+      source of this record has 17 along the green of Mstěnice in Moravia, and 6 to 8 homesteads in the short forest
+      villages of the Drahany highlands. The words left out of the last quote are the caption of a figure and the head
+      of a page.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in schreg-2019-deserted-settlements-southern-germany.txt (sha256 1cfded0b56c486a9), nowotny-2019-rural-settlement-eastern-central-europe.txt (sha256 303d384b1db44b87) and legut-pintal-2019-melioratio-terrae-silesia.txt (sha256 b7a43419f5424353), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  fields:
+    prop: field_system
+    value: { kind: strips, bounds: none }
+    source:
+      - ref: src:schreg-2019-deserted-settlements-southern-germany
+        loc: 'section "From shifting fields to an open regulated field system", p. 165'
+        quote: >-
+          The introduction of the regulated open field system was strongly connected with the formation of the late
+          medieval village, which clustered the farms at a central location.
+      - ref: src:schreg-2019-deserted-settlements-southern-germany
+        loc: 'section "From shifting fields to an open regulated field system", p. 165'
+        quote: >-
+          A regulated open field system in which adjoining fields were subject to coordinated crop and pastoral regimes
+          (‘Dreizelgenwirtschaft’) reduced the need for enclosures and allowed turning the plough team on neighbouring
+          ground.
+      - ref: src:schreg-2019-deserted-settlements-southern-germany
+        loc: 'section "From shifting fields to an open regulated field system", p. 165'
+        quote: >-
+          Former geographical research, however, has pointed to a development from block-shaped parcels into furlong
+          complexes
+      - ref: src:nowotny-2019-rural-settlement-eastern-central-europe
+        loc: 'section "Changes", p. 288'
+        quote: It may be reflected in the archaeological record by stable villages with regulated open fields
+    method: expert-estimate
+    note: >-
+      Open fields, with no hedge or fence between one farm's land and the next, sown and grazed by the whole village in
+      three courses. That the land lay in strips is read from the "furlong complexes" into which the block-shaped
+      parcels of earlier centuries were made: a furlong is a block of an open field divided into parallel strips. The
+      source does not use the word strips, nor give the size of one. In the foothills of Silesia the forest villages were
+      laid out at 50 Franconian greater Hufen each, as the third source of this record has it, without saying what that
+      is in hectares.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in schreg-2019-deserted-settlements-southern-germany.txt (sha256 1cfded0b56c486a9) and nowotny-2019-rural-settlement-eastern-central-europe.txt (sha256 303d384b1db44b87), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

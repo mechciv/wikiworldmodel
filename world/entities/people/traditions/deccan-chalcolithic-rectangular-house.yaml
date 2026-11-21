@@ -1,0 +1,122 @@
+id: people/traditions/deccan-chalcolithic-rectangular-house
+kind: tradition/building
+summary: >-
+  The house of the first farming villages of the Deccan, as excavated at Inamgaon on the Ghod river: rectangular, a
+  few metres a side, with thin walls of mud on a screen of reeds, a kind of wattle and daub, and floors plastered with
+  mud and lime, the houses set to a plan a metre and a half or two apart. It is the house of the Malwa and Early Jorwe
+  periods there, about 1700 or 1600 to 1100 BCE, after which the houses of the village were round.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Rectangular wattle-and-daub house of the Deccan Chalcolithic }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: { lo: 1700 BCE, hi: 1600 BCE }
+    source:
+      - ref: src:sankalia-1975-early-farmers-village
+        loc: the list of periods, before "The Site and Its Environs"
+        quote: Malwa (ca. 1700-1400 B.C.)
+      - ref: src:sankalia-1975-early-farmers-village
+        loc: section "Conclusions"
+        quote: The site was first settled at about 1600 B.C. and was abandoned about a thousand years later.
+    method: excavation
+    note: >-
+      The beginning of the Malwa period at Inamgaon, which the excavators put at about 1700 BCE in their list of
+      periods and at about 1600 BCE in their conclusions; the range holds both. They tie the rectangular house to the
+      late phase of that period, in which pit houses are also found. It dates the house at this one site, and the
+      site's radiocarbon dates have been revised since in works not read.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in sankalia-1975-early-farmers-village.txt (sha256 2487ae20dbb74eed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  end:
+    prop: end
+    value: 1100 BCE
+    source:
+      - ref: src:sankalia-1975-early-farmers-village
+        loc: the list of periods, before "The Site and Its Environs"
+        quote: Early Jorwe (ca. 1400-1100 B.C.)
+      - ref: src:sankalia-1975-early-farmers-village
+        loc: section "House and Settlement Pattern (Period III, Late Jorwe)"
+        quote: >-
+          Most of the houses, some thirty-nine in all, have been exposed in the uppermost levels of the site. They are
+          uniformly circular in plan and vary in diameter from 2.5 to 4.25 m.
+    method: excavation
+    note: >-
+      The end of the Early Jorwe period at Inamgaon, about 1100 BCE: all nine Early Jorwe houses exposed were
+      rectangular, and the houses of the Late Jorwe period that followed were uniformly round
+      (people/traditions/late-jorwe-round-hut).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in sankalia-1975-early-farmers-village.txt (sha256 2487ae20dbb74eed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["108"] }
+    source:
+      - ref: src:sankalia-1975-early-farmers-village
+        loc: opening paragraph
+        quote: it lies within the revenue limits of Inamgaon Village (Sirur Taluka, Poona District)
+    method: editorial
+    note: >-
+      Region 108 (Southwestern India), which holds Inamgaon, by its coordinates against the region outlines. The house
+      is known here from this one village: the article names Nasik, Jorwe and Nevasa as the first of these farming
+      settlements to be dug, and says the early settlements at Nevasa, Chandoli and Songaon were too disturbed to show
+      their houses. It is not claimed for all of the region.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in sankalia-1975-early-farmers-village.txt (sha256 2487ae20dbb74eed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      - ref: src:sankalia-1975-early-farmers-village
+        loc: section "Conclusions"
+        quote: it was a large, self-sufficient agricultural and pastoral settlement
+    method: editorial
+    note: >-
+      Farmers who also kept animals, in a village lived in for about a thousand years: barley, wheat, lentil and other
+      pulses were found, with the bones of goat or sheep, pig, deer and nilgai.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in sankalia-1975-early-farmers-village.txt (sha256 2487ae20dbb74eed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { plan: rectangular, length: { lo: 2.75, hi: 6.66 }, width: { lo: 2.57, hi: 4.4 }, walls: wattle-and-daub }
+    source:
+      - ref: src:sankalia-1975-early-farmers-village
+        loc: section "House Pattern (Period I)"
+        quote: >-
+          Two types of dwellings were found in the Malwa (Period I) levels at Inamgaon: first, rectangular houses with
+          mud and reed screen walls, a kind of wattle-and-daub, and second, pit houses.
+      - ref: src:sankalia-1975-early-farmers-village
+        loc: section "House Pattern (Period I)"
+        quote: >-
+          The rectangular, wattle-and-daub house seems to be associated with the late phase of Malwa occupation at the
+          settlement. A large house of this type (6.66 m. by 4.40 m.) was found on INM-I.
+      - ref: src:sankalia-1975-early-farmers-village
+        loc: section "House and Settlement Pattern (Period II, Early Jorwe)"
+        quote: >-
+          So far, nine Early Jorwe houses have been completely exposed. All are rectangular and fairly large, the
+          largest being 4.5 by 4.25 m., the smallest 2.75 by 2.57 m
+    method: excavation
+    note: >-
+      The sizes span the nine Early Jorwe houses, from 2.75 m by 2.57 m to 4.5 m by 4.25 m, and the one large Malwa
+      house, 6.66 m by 4.40 m, which a thin partition seems to have divided into two rooms and which the excavators
+      take for a potter's. The walls are named for the Malwa houses, mud on a screen of reeds; the article does not
+      describe the walls of the Early Jorwe houses apart, and says of the site as a whole that its house walls were
+      very thin screens of mud and reed that had fallen onto the floors. The roof is not described, and is left to
+      the generator. The pit houses of the Malwa period are not drawn: the article's sizes for them do not agree.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in sankalia-1975-early-farmers-village.txt (sha256 2487ae20dbb74eed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  settlement:
+    prop: settlement_form
+    value: { pattern: nucleated, spacing: { lo: 1.5, hi: 2 } }
+    source:
+      - ref: src:sankalia-1975-early-farmers-village
+        loc: section "House and Settlement Pattern (Period II, Early Jorwe)"
+        quote: Houses were constructed to a set plan and spaced about a meter and a half or two meters apart.
+    method: excavation
+    note: >-
+      A village of houses set close to a plan, in the Early Jorwe period. How many houses stood at once is not stated.
+      Of the people to a house the excavators say only that it seems unlikely that more than about five could have
+      slept in the large Malwa house, with its built-in furniture: a ceiling for the largest house, not a household,
+      so none is written.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in sankalia-1975-early-farmers-village.txt (sha256 2487ae20dbb74eed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

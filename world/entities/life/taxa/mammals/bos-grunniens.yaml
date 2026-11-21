@@ -1,0 +1,29 @@
+id: life/taxa/bos-grunniens
+kind: taxon
+summary: >-
+  The domestic yak of the Tibetan Plateau and the high mountains of Central Asia.
+same_as: { ott: 381164 }
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: "domestic yak", la: "Bos grunniens" }
+    source: { ref: src:opentree-taxonomy-3.7, loc: "tnrs/match_names: Bos grunniens, ott381164" }
+    note: Open Tree gives the scientific name; the English name is an editorial gloss.
+  mass:
+    prop: body_mass
+    value: { lo: 225, hi: 580 }
+    source:
+      ref: src:animal-diversity-web
+      loc: "account of Bos grunniens, Physical Description"
+      quote: "Domestic yaks can be considerably smaller in weight, with males ranging from 350 to 580 kg and females between 225 to 255 kg"
+    method: compilation
+    note: >-
+      From the lightest domestic female to the heaviest domestic male; the wild yak is much larger.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in animal-diversity-web.txt (sha256 5ae3d0bcfbf74dd9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+relations:
+  parent:
+    rel: descends-from
+    to: life/taxa/bovidae
+    source: { ref: src:opentree-taxonomy-3.7, loc: "taxonomy/taxon_info ott381164 with include_lineage: Bos grunniens lies within Bovidae" }

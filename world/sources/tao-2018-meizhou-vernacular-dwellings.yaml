@@ -1,0 +1,26 @@
+id: src:tao-2018-meizhou-vernacular-dwellings
+type: publication
+kind: measurement
+citation: >-
+  Tao, J., Chen, H., Zhang, S. & Xiao, D. (2018). Space and Culture: Isomerism in Vernacular Dwellings in Meizhou,
+  Guangdong Province, China. Journal of Asian Architecture and Building Engineering 17(1), 15–22.
+authors:
+  - "Tao, J."
+  - "Chen, H."
+  - "Zhang, S."
+  - "Xiao, D."
+published: 2018
+title: "Space and Culture: Isomerism in Vernacular Dwellings in Meizhou, Guangdong Province, China"
+container: Journal of Asian Architecture and Building Engineering
+doi: 10.3130/jaabe.17.15
+url: https://www.jstage.jst.go.jp/article/jaabe/17/1/17_15/_article
+reliability: >-
+  A survey, made from 2013 to 2015, of which of seven kinds of old Hakka house stand in each of 2,189 villages of
+  Meizhou in north-eastern Guangdong, with an argument about what the kinds share. It counts villages, not houses, and
+  gives no size or material for any kind.
+verified:
+  by: machine:claude-code
+  how: >-
+    The article's PDF fetched from J-STAGE on 20 November 2026 and turned into text with PyMuPDF; sections 1 and 2 and
+    most of section 3 read, and the rest searched; the quote checked by script against that text. Volume, pages and
+    DOI as the PDF's first page gives them.

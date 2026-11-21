@@ -1,0 +1,237 @@
+id: people/traditions/bengal-thatched-hut
+kind: tradition/building
+summary: >-
+  The hut of the villages and towns of Bengal: one room on a frame of bamboo, under a thatched roof of two slopes whose
+  ridge curves like a boat overturned (the banggolo, whose name Europeans gave to their own cottages), with walls of
+  reed or bamboo hurdles and mats, or of mud where the soil holds, on a floor raised a foot or two above the plain. A
+  family lived in several such huts about a yard within one fence, and in Lower Bengal each homestead stood apart in
+  its own orchard among the rice fields. Houses of bamboo are recorded in Bengal in 1595; the hut is described in
+  Dinajpur in 1808, in Dacca in the 1870s and in the gazetteer of 1908. No end is given: it was still the ordinary
+  house when the gazetteer was written.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Thatched hut (bangla) of Bengal }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: { lo: 1594 CE, hi: 1595 CE }
+    source:
+      - ref: src:abul-fazl-ain-i-akbari-jarrett-vol-2
+        loc: "Account of the Twelve Subahs, p. 129"
+        quote: >-
+          In the fortieth year of the Divine Era [1594] His Majesty’s dominions consisted of one hundred and five
+      - ref: src:abul-fazl-ain-i-akbari-jarrett-vol-2
+        loc: "p. 376, the editor's footnote"
+        quote: >-
+          the 40th year of Akbar’s reign is A.H. 1003, commencing 6th Dec. 1594 and ending 25th Nov. 1595 A.D.
+      - ref: src:abul-fazl-ain-i-akbari-jarrett-vol-2
+        loc: "Bengal Subah, p. 134"
+        quote: >-
+          Their houses are made of bamboos, some of which are so constructed that the cost of a single one will be five
+          thousand rupees or more and they last a long time.
+    method: documentary
+    note: >-
+      The year of the earliest account read: the A'in-i Akbari describes the provinces as they stood in the fortieth
+      year of Akbar's reign, which its editor puts from December 1594 to November 1595, and says of Bengal that the
+      houses are made of bamboos. It bounds the start and does not date it: the hut is surely older, and no earlier
+      account of the common house of Bengal was read. Bamboo is all the A'in says of it; the curved ridge, the thatch
+      and the walls are first described, in what was read, in 1808. No end is given, and none is known from what was
+      read: the latest account, the gazetteer of 1908, has it as the house of Lower Bengal in its own day.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in abul-fazl-ain-i-akbari-jarrett-vol-2.txt (sha256 ad8e62160e2b09ea), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["111"] }
+    source:
+      - ref: src:buchanan-1808-dinajpur
+        loc: 'Book III, chapter VIII, "Fine Arts", p. 922'
+        quote: >-
+          The style of private edifices that is proper and peculiar to Bengal, consists of a hut with a pent roof
+          constructed of two sloping sides, which meet in a ridge forming the segment of a circle; so that it has a
+          resemblance to a boat when overturned
+      - ref: src:hunter-1877-statistical-account-bengal-vol-5
+        loc: "Dacca District, Dwellings, p. 76"
+        quote: The dwelling of an average cultivator generally consists of four huts, built one on each side of the yard
+      - ref: src:imperial-gazetteer-of-india-1908
+        loc: "vol. VII, article Bengal, pp. 239–240"
+        quote: >-
+          The houses in Lower Bengal are not congregated into villages, but … each homestead stands in its own orchard
+    method: editorial
+    note: >-
+      Region 111 (Eastern India and Bangladesh), which holds the districts of Dinajpur, Dacca and Bakarganj and most
+      of Lower Bengal, by their towns' coordinates against the region outlines. The gazetteer sets Bihar apart,
+      with houses packed close on raised village sites, walls of mud and roofs tiled or thatched: that is region 107
+      and another record's. Of Orissa and Chota Nagpur, which region 111 also holds, it says only that the homesteads
+      are separate though they adjoin, so the hut is not claimed for all of the region. The ellipsis in the
+      gazetteer's sentence stands for the turn of the page, and leaves no words out.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in buchanan-1808-dinajpur.txt (sha256 39a013d2834e12bd), hunter-1877-statistical-account-bengal-vol-5.txt (sha256 ae6b5746534ab539) and imperial-gazetteer-of-india-1908.txt (sha256 6cdf9985eed79137), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [farmers, townspeople]
+    source:
+      - ref: src:hunter-1877-statistical-account-bengal-vol-5
+        loc: "Dacca District, Dwellings, p. 76"
+        quote: The dwelling of an average cultivator generally consists of four huts, built one on each side of the yard
+      - ref: src:buchanan-1808-dinajpur
+        loc: "Book III, chapter IV, p. 697"
+        quote: >-
+          larger and better houses than people living in towns, their respective situations in life being taken into
+          consideration
+      - ref: src:buchanan-1808-dinajpur
+        loc: "Book III, the town of Dinajpur, p. 623"
+        quote: It is about a mile in diameter, and closely built, but consists almost entirely of thatched huts.
+      - ref: src:imperial-gazetteer-of-india-1908
+        loc: "vol. VII, article Bengal, p. 223"
+        quote: many even of the so-called towns are merely overgrown villages.
+    method: editorial
+    note: >-
+      Farmers: the cultivators of Dacca in the 1870s, and the farmers of Dinajpur in 1808, whom Buchanan found better
+      housed than the people of the towns. Townspeople: Rajganj, the part of Dinajpur that Buchanan calls properly the
+      town, was almost wholly of thatched huts in 1808, and the gazetteer of 1908 calls many of the towns of Bengal
+      overgrown villages. The wealthy of the towns, who had houses of brick, are not drawn by this record.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in hunter-1877-statistical-account-bengal-vol-5.txt (sha256 ae6b5746534ab539), buchanan-1808-dinajpur.txt (sha256 39a013d2834e12bd) and imperial-gazetteer-of-india-1908.txt (sha256 6cdf9985eed79137), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { plan: rectangular, rooms: 1, walls: reed, roof: gable, roof_material: thatch, floor: raised }
+    source:
+      - ref: src:buchanan-1808-dinajpur
+        loc: 'Book III, chapter VIII, "Fine Arts", p. 922'
+        quote: >-
+          The style of private edifices that is proper and peculiar to Bengal, consists of a hut with a pent roof
+          constructed of two sloping sides, which meet in a ridge forming the segment of a circle; so that it has a
+          resemblance to a boat when overturned
+      - ref: src:buchanan-1808-dinajpur
+        loc: 'Book III, chapter VIII, "Fine Arts", p. 922'
+        quote: >-
+          Where the materials admit, the walls of the hut are made of mud, and the floor is always raised a foot or two
+          above the level of the plain
+      - ref: src:buchanan-1808-dinajpur
+        loc: 'Book III, chapter VIII, "Fine Arts", p. 922'
+        quote: >-
+          Where the soil is too loose for making walls, the sides of the hut are formed of hurdles, which are usually
+          made of straw grass or reeds confined between sticks
+      - ref: src:buchanan-1808-dinajpur
+        loc: 'Book III, chapter VIII, "Fine Arts", p. 922'
+        quote: frame of the house usually consists entirely of bamboos tied together
+      - ref: src:buchanan-1808-dinajpur
+        loc: "Book III, chapter IV, p. 696"
+        quote: thatched roofs are the only ones known in this district
+      - ref: src:hunter-1877-statistical-account-bengal-vol-5
+        loc: "Dacca District, Dwellings, p. 76"
+        quote: >-
+          consist of a species of reed called … lined internally with a coating of clay mixed with cow-dung
+      - ref: src:hunter-1877-statistical-account-bengal-vol-5
+        loc: "Dacca District, Dwellings, p. 76"
+        quote: A dwelling consists of several separate houses, each of which forms a single room
+      - ref: src:imperial-gazetteer-of-india-1908
+        loc: "vol. VII, article Bengal, p. 240"
+        quote: >-
+          the houses are erected on mud plinths and built round a courtyard with wooden or bamboo posts and interlaced
+          walls of split bamboo, with thatched roofs resting on a bamboo framework.
+    method: documentary
+    note: >-
+      The roof, the raised floor and the bamboo frame are Buchanan's, of Dinajpur in 1808; the single room is Hunter's,
+      of Dacca in the 1870s; the gazetteer of 1908 has the same hut on a mud plinth for all of Lower Bengal. The roof is
+      what the vocabulary calls a gable, two slopes meeting at a ridge, though here the ridge is curved. No source read
+      says in words that the plan is oblong: it is read from the roof, two slopes meeting in one ridge like a boat
+      overturned. The walls differ from place to place and no one word holds them: hurdles of straw, grass or reeds
+      between split bamboos in Dinajpur where the soil was loose, mats in its better houses, reeds lined with clay and
+      cow-dung in Dacca, interlaced split bamboo in the gazetteer. Reed, the vocabulary's bundled or woven reeds, is
+      the nearest. Where the soil held, the walls were of mud: in parts of Dinajpur every labourer's hut had mud walls.
+      In Hunter's sentence the ellipsis stands for the reed's name, which the scan's text misreads. Buchanan's other
+      hut, the chauyari with a roof of four sides, was used chiefly by the rich and is not drawn. No size is given:
+      the Calcutta printing of Buchanan's account has huts from 6 cubits by 5 to 15 by 8, in cubits whose length it
+      does not state.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in buchanan-1808-dinajpur.txt (sha256 39a013d2834e12bd), hunter-1877-statistical-account-bengal-vol-5.txt (sha256 ae6b5746534ab539) and imperial-gazetteer-of-india-1908.txt (sha256 6cdf9985eed79137), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  settlement:
+    prop: settlement_form
+    value: { pattern: dispersed, household: 5 }
+    source:
+      - ref: src:imperial-gazetteer-of-india-1908
+        loc: "vol. VII, article Bengal, pp. 239–240"
+        quote: >-
+          The houses in Lower Bengal are not congregated into villages, but … each homestead stands in its own orchard
+      - ref: src:hunter-1877-statistical-account-bengal-vol-5
+        loc: "Bakarganj District, p. 202"
+        quote: >-
+          The inhabitants seldom congregate together in villages, but each man builds his homestead on his own land
+      - ref: src:buchanan-1808-dinajpur
+        loc: "Book III, chapter IV, p. 696"
+        quote: >-
+          the natives in general build a separate house or hut for each purpose. The huts collectively sufficient for
+          the accommodation of a family are usually surrounded by a common fence
+      - ref: src:hunter-1877-statistical-account-bengal-vol-5
+        loc: "Dacca District, Population, p. 31"
+        quote: >-
+          The average number of inmates per house was reckoned at from four to five for different parts of the
+          District, the latter being the figure generally taken.
+      - ref: src:buchanan-1808-dinajpur
+        loc: "Book III, chapter IV, p. 686"
+        quote: these I imagine will be nearly one-fifth of their families, including old people and children
+      - ref: src:imperial-gazetteer-of-india-1908
+        loc: "vol. I, chapter IX, p. 458"
+        quote: compared with a general mean of 5-2), but elsewhere it is generally very uniform
+    method: survey
+    note: >-
+      Homesteads standing apart, each in its own orchard, in Lower Bengal in 1908 and in Bakarganj in the 1870s; farther
+      west, the gazetteer says, the houses were collected on one village site though each stood in its own patch of
+      homestead land, and in the swamps of East Bengal they lined the high banks of rivers or stood on mounds. The
+      house that was counted is the homestead, the huts of one family within one fence, about four of them for an
+      average cultivator of Dacca, twelve or fourteen for a rich farmer of Dinajpur and one for a poor man: so each
+      house the generator draws stands for a homestead and not for one hut. Five to a house is the figure the Revenue
+      Survey of 1857 to 1861 generally took for Dacca, having reckoned from four to five in different parts of the
+      district; Buchanan in 1808 reckoned the working men of Dinajpur at a fifth of their families; and the census of
+      1901 found a mean of 5·2 for India, about which the gazetteer says the provinces outside northern India vary
+      little. The scan's text writes that decimal point as a hyphen, and the quote keeps its characters. How many
+      homesteads made a village is not stated.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in imperial-gazetteer-of-india-1908.txt (sha256 6cdf9985eed79137), hunter-1877-statistical-account-bengal-vol-5.txt (sha256 ae6b5746534ab539) and buchanan-1808-dinajpur.txt (sha256 39a013d2834e12bd), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  fields:
+    prop: field_system
+    value: { kind: paddies, bounds: banks }
+    source:
+      - ref: src:abul-fazl-ain-i-akbari-jarrett-vol-2
+        loc: "Bengal Subah, p. 134"
+        quote: The principal cultivation is rice of which there are numerous kinds.
+      - ref: src:imperial-gazetteer-of-india-1908
+        loc: "vol. VII, article Bengal, p. 250"
+        quote: in Bengal proper, where every inch of land grows rice
+      - ref: src:imperial-gazetteer-of-india-1908
+        loc: "vol. VII, article Bengal, p. 242"
+        quote: >-
+          an elaborate system of small terraces and low embankments has to be constructed to hold up the rain-water
+      - ref: src:imperial-gazetteer-of-india-1908
+        loc: "vol. VII, article Bengal, p. 251"
+        quote: field boundary ridges
+    method: documentary
+    note: >-
+      Rice was the chief crop in 1595 and filled every inch of Bengal proper in 1908, in fields parted by boundary
+      ridges, on which the cattle grazed. The small terraces and low embankments that hold up the rain are those of
+      the older alluvium, whose surface undulates; the new alluvium of the delta is level, and the gazetteer says
+      nothing of banks there beyond the ridges. No size of a plot is given.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in abul-fazl-ain-i-akbari-jarrett-vol-2.txt (sha256 ad8e62160e2b09ea) and imperial-gazetteer-of-india-1908.txt (sha256 6cdf9985eed79137), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  town:
+    prop: town_form
+    value: { streets: lanes }
+    source:
+      - ref: src:buchanan-1808-dinajpur
+        loc: "Book III, the town of Dinajpur, p. 623"
+        quote: The other streets are quite irregular.
+      - ref: src:imperial-gazetteer-of-india-1908
+        loc: "vol. VII, article Bengal, p. 223"
+        quote: many even of the so-called towns are merely overgrown villages.
+    method: documentary
+    note: >-
+      Streets with no plan, in the one town whose layout was read: Rajganj, the part of Dinajpur that Buchanan calls
+      properly the town, in 1808 closely built and about a mile across, had four streets about a square of tiled sheds
+      that served as shops near its middle, and the other streets irregular. It is one town, set down for the towns of
+      the region on the strength of the gazetteer's remark that many of them were overgrown villages. No wall is
+      stated, as Buchanan describes none round the town.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in buchanan-1808-dinajpur.txt (sha256 39a013d2834e12bd) and imperial-gazetteer-of-india-1908.txt (sha256 6cdf9985eed79137), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

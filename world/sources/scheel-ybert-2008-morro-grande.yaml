@@ -1,0 +1,26 @@
+id: src:scheel-ybert-2008-morro-grande
+type: publication
+kind: measurement
+citation: >-
+  Scheel-Ybert, R., Macario, K., Buarque, A., Anjos, R.M. & Beauclair, M. (2008). A new age to an old site: the
+  earliest Tupiguarani settlement in Rio de Janeiro State? Anais da Academia Brasileira de Ciências 80(4), 763–770.
+authors:
+  - "Scheel-Ybert, R."
+  - "Macario, K."
+  - "Buarque, A."
+  - "Anjos, R.M."
+  - "Beauclair, M."
+published: 2008
+title: "A new age to an old site: the earliest Tupiguarani settlement in Rio de Janeiro State?"
+container: Anais da Academia Brasileira de Ciências
+url: https://www.scielo.br/j/aabc/a/dpG37LbvVdVp5hHD84PCGKK/?lang=en
+license: CC-BY-4.0
+reliability: >-
+  Radiocarbon dates from hearths at Morro Grande, a Tupiguarani village site at Araruama on the coast of Rio de Janeiro.
+  Its introduction summarizes the dates of the earliest Tupiguarani settlements in south-eastern Brazil from earlier
+  work (Noelli 1998, Moraes 2007), which was not read here. It dates settlements and pottery, not houses.
+verified:
+  by: machine:claude-code
+  how: >-
+    Full text read on 20 November 2026 from the article's page on SciELO Brazil, fetched as HTML and read as text; the
+    quotes checked by script against that text.

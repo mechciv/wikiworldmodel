@@ -1,0 +1,166 @@
+id: people/traditions/tupinamba-longhouse-village
+kind: tradition/building
+summary: >-
+  The longhouse villages of the Tupinambá of the Brazilian coast as Hans Staden saw them in 1554: a few long houses,
+  some fourteen feet wide and up to a hundred and fifty long, vaulted and thatched with palm leaves to the ground, each
+  for some forty couples with their own fires, set round an open space inside a palisade, and moved when the land round
+  them was used up. Cleared and burnt plots of manioc fed them. The span is a reading: from the time the ancestors of the
+  coastal Tupi are dated in their historic lands, which is not a date for the house, to after Staden and before 1874,
+  when Burton found no Indians left on that coast.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Longhouse village of the Tupinambá }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 2000 BP
+    source:
+      - ref: src:scheel-ybert-2008-morro-grande
+        loc: section "Introduction"
+        quote: >-
+          absolute dates do not support this hypothesis, as these now make clear that Tupiguarani populations were already
+          settled in their historically known territories at least as early as 2000 years BP
+      - ref: src:scheel-ybert-2008-morro-grande
+        loc: section "Introduction"
+        quote: >-
+          The earliest known Tupinambá supposed ancestrals' settlements come from São Paulo State: a site from Tietê valley
+          was dated at 2200 yr BP (TL)
+    method: expert-estimate
+    note: >-
+      When the makers of Tupiguarani pottery, whom archaeologists take for the ancestors of the Tupinambá, were settled in
+      the lands the Tupinambá held when Europeans came. It dates the settlements, not their houses: no source read here
+      describes a house before Staden's. Morro Grande, on the coast of Rio de Janeiro, has hearths dated to 2920 ± 70 BP,
+      which the same paper takes as the earliest; the consensus date it reports is used here.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scheel-ybert-2008-morro-grande.txt (sha256 65f49b2e1d22fbc4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  end:
+    prop: end
+    value: { lo: 1555 CE, hi: 1874 CE }
+    source:
+      - ref: src:staden-1874-captivity-of-hans-stade
+        loc: title page
+        quote: IN A.D. 1547-1555,
+      - ref: src:staden-1874-captivity-of-hans-stade
+        loc: introduction (Burton), at the end of the description of the coast
+        quote: upon these shores, where the Indian is now utterly extinct.
+    method: expert-estimate
+    note: >-
+      After Staden, who saw these houses standing in 1554 and left Brazil in 1555, and before 1874, when Burton, who had
+      travelled the coast between Santos and Ubatuba where Staden was held, wrote that no Indian was left there. When the
+      last such village was given up is not in what was read.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in staden-1874-captivity-of-hans-stade.txt (sha256 148559cf50fd0766), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["31"] }
+    source:
+      - ref: src:staden-1874-captivity-of-hans-stade
+        loc: "Part II, chap. IV, p. 124"
+        quote: great chain of mountains, close to the sea
+      - ref: src:staden-1874-captivity-of-hans-stade
+        loc: introduction (Burton)
+        quote: direct geographical miles of coast between Santos and Ubatuba, the scene of Hans Stade's travel
+      - ref: src:scheel-ybert-2008-morro-grande
+        loc: section "Introduction"
+        quote: >-
+          Tupinambá and Guarani are the better known of these groups, as they inhabited the Brazilian coast (at the
+          Southeastern/Northeastern and in Southern Brazil, respectively) when Europeans arrived in the XVI century.
+    method: editorial
+    note: >-
+      Region 31 (the Brazilian Highlands), which takes in the Atlantic coast from Bahia to São Paulo: Staden's Tupinambá
+      lived on the coast under the mountains between Santos and Rio de Janeiro, and the second source has them on the
+      south-eastern and north-eastern coast. The Guarani of the south, the Tupi of the Amazon and the peoples of the
+      interior are left out: no source read here describes their houses. It is not claimed for all the region's land.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in staden-1874-captivity-of-hans-stade.txt (sha256 148559cf50fd0766) and scheel-ybert-2008-morro-grande.txt (sha256 65f49b2e1d22fbc4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [shifting-cultivators]
+    source:
+      - ref: src:staden-1874-captivity-of-hans-stade
+        loc: "Part II, chap. IV, p. 125"
+        quote: After they have destroyed all in one district, they migrate to other places
+      - ref: src:staden-1874-captivity-of-hans-stade
+        loc: "Part II, chap. X, p. 130"
+        quote: then they light fire among them and burn them.
+      - ref: src:staden-1874-captivity-of-hans-stade
+        loc: "Part II, chap. X, p. 130"
+        quote: plant their roots between the trunks
+    method: documentary
+    note: >-
+      Cultivators who felled trees, left them three months to dry, burnt them and planted manioc between the trunks, and
+      who moved their villages when the land round them was used up. They also hunted and fished, as Staden tells at
+      length; the village, not the camp, was their home.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in staden-1874-captivity-of-hans-stade.txt (sha256 148559cf50fd0766), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { plan: long, width: 4.3, length: 46, height: 3.7, walls: pole-and-thatch, roof: vault, roof_material: thatch }
+    source:
+      - ref: src:staden-1874-captivity-of-hans-stade
+        loc: "Part II, chap. IV, p. 125"
+        quote: >-
+          They build a kind of hut, which is about fourteen feet wide, and perhaps a hundred and fifty feet long, according
+          to their number.
+      - ref: src:staden-1874-captivity-of-hans-stade
+        loc: "Part II, chap. IV, p. 125"
+        quote: >-
+          The tenements are about two fathoms high, and round at the top like a vaulted cellar; they thatch them thickly
+          with palm leaves, so that it may not rain therein, and the hut is all open inside.
+      - ref: src:staden-1874-captivity-of-hans-stade
+        loc: "Part II, chap. IV, p. 125"
+        quote: each couple, man and woman, has a space of twelve feet on one side
+    method: documentary
+    note: >-
+      Fourteen feet is 4.3 m and a hundred and fifty feet 46 m, a length Staden gives as "perhaps" and as varying with the
+      number who lived in it; two fathoms, twelve feet, is 3.7 m, taken as the height to the top of the vault. The house
+      was one open hall, twelve feet to a couple along each side. He says the houses were thatched thickly with palm leaves
+      and rounded at the top like a vaulted cellar, which is read here as a vault of thatch on poles coming down to the
+      ground, so that wall and roof are one; that reading is the writer's.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in staden-1874-captivity-of-hans-stade.txt (sha256 148559cf50fd0766), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  settlement:
+    prop: settlement_form
+    value: { pattern: walled, houses: 7, household: 80 }
+    source:
+      - ref: src:staden-1874-captivity-of-hans-stade
+        loc: "Part II, chap. IV, p. 125"
+        quote: >-
+          a chief among them assembles a party of men and women (some forty couples), or as many as he can get, and these
+          live together as friends and relations.
+      - ref: src:staden-1874-captivity-of-hans-stade
+        loc: "Part II, chap. IV, p. 125"
+        quote: Few of their villages have more than seven huts.
+      - ref: src:staden-1874-captivity-of-hans-stade
+        loc: "Part I, chap. XXI, p. 59"
+        quote: a village which had seven huts
+      - ref: src:staden-1874-captivity-of-hans-stade
+        loc: "Part II, chap. IV, pp. 125–126"
+        quote: They leave between their abodes a space wherein they kill their prisoners.
+      - ref: src:staden-1874-captivity-of-hans-stade
+        loc: "Part II, chap. IV, p. 126"
+        quote: they plant a palisade, made of split palm trees
+    method: documentary
+    note: >-
+      Villages of up to seven houses round an open space, inside a palisade of split palm trunks, with an outer fence of
+      high rails; the village where Staden was first brought had seven. Seven is the most Staden says most villages had,
+      and is written as the number; fewer were common. The household is the people of one house: some forty couples, 80
+      adults, with their children, whom he does not count.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in staden-1874-captivity-of-hans-stade.txt (sha256 148559cf50fd0766), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  fields:
+    prop: field_system
+    value: { kind: swidden }
+    source:
+      - ref: src:staden-1874-captivity-of-hans-stade
+        loc: "Part II, chap. X, p. 130"
+        quote: then they light fire among them and burn them.
+      - ref: src:staden-1874-captivity-of-hans-stade
+        loc: "Part II, chap. X, p. 130"
+        quote: plant their roots between the trunks
+    method: documentary
+    note: Plots cleared by felling and burning, the manioc planted among the burnt trunks.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in staden-1874-captivity-of-hans-stade.txt (sha256 148559cf50fd0766), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

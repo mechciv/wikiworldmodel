@@ -1,0 +1,32 @@
+id: src:chen-2015-sanyangzhuang-pottery-tile
+type: publication
+kind: measurement
+citation: >-
+  Chen, J.C., Huang, X., Liu, H.W. & Zhu, R.SH. (2015). Properties of Archaeological Pottery Tile Excavated from
+  Sanyangzhuang Site Henan, China. Proceedings of the 2015 International Conference on Industrial Technology and
+  Management Science (ITMS 2015), 1312–1314. Atlantis Press.
+authors:
+  - "Chen, J.C."
+  - "Huang, X."
+  - "Liu, H.W."
+  - "Zhu, R.SH."
+published: 2015
+title: Properties of Archaeological Pottery Tile Excavated from Sanyangzhuang Site Henan, China
+container: Proceedings of the 2015 International Conference on Industrial Technology and Management Science (ITMS 2015)
+doi: 10.2991/itms-15.2015.321
+url: https://download.atlantis-press.com/article/25843131.pdf
+license_note: >-
+  The paper says "© 2015. The authors - Published by Atlantis Press" and names no licence. Short quotes only.
+reliability: >-
+  A three-page conference paper on the conservation of the roof tiles of Sanyangzhuang, by staff of the Henan Provincial
+  Institute of Cultural Relics and Archaeology, which excavated the site, and a materials scientist of Zhengzhou
+  University. Its English is poor and its account of the site is one paragraph; it is cited only for what was found
+  there: the foundations of twelve courtyards, four of them excavated, with tiled roofs, walls, wells, latrines, a pond
+  and fields. It dates the flood that buried the village to the early Western Han in its abstract and speaks of the
+  Western Han elsewhere; the excavation reports, which could not be read here, should replace it.
+verified:
+  by: machine:claude-code
+  how: >-
+    The paper's PDF fetched from Atlantis Press on 20 November 2026 and read as text; the quotes checked by script
+    against it. Authors and proceedings title from Crossref's record of the DOI; the pages from the paper's own page
+    numbers.

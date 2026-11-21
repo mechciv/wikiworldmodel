@@ -2,11 +2,12 @@
 // and put together into what a scene's people are and what the globe paints. The same core code as the build's, so what
 // a scene draws rests on the same anthromes, assessments, cities and traditions.
 import { decodeTile } from '../../../core/container.ts';
-import { traditionAt, type Tradition } from '../../../core/dwelling.ts';
-import { anthromeTile, classAtStep, nearestStep, sceneTiles, scenePeople, assessmentAt, lifewayOf, citiesNear, cellOf, tileKey, type AnthromeTile, type AnthromeTileHeader, type AssessmentsFile, type CitiesFile, type LandscapeData, type LandscapeIndex, type Lifeway, type TraditionsFile } from '../../../core/landscape.ts';
+import { prevalenceOf, traditionFor, type Husbandry, type LifewayWord, type Tradition } from '../../../core/dwelling.ts';
+import type { Form } from '../../../core/form.ts';
+import { anthromeTile, classAtStep, nearestStep, sceneTiles, scenePeople, assessmentAt, lifewayOf, LIFEWAY_OF, citiesAround, cityGuess, cellOf, tileKey, type AnthromeTile, type AnthromeTileHeader, type AssessmentsFile, type CitiesFile, type CityNear, type LandscapeData, type LandscapeIndex, type Lifeway, type TraditionsFile } from '../../../core/landscape.ts';
 import { cellAt, stepsAround, type PeopleFile } from '../../../core/layers.ts';
 import type { ResolveWorld } from '../../../core/resolve.ts';
-import type { ScenePeople } from '../../../core/scene.ts';
+import type { LivingTaxon, ScenePeople } from '../../../core/scene.ts';
 
 async function getJSON<T>(url: string): Promise<T> {
   const r = await fetch(url);
@@ -28,14 +29,22 @@ export interface PlaceLandscape {
   density?: number;
   region?: { id: number; label: string; slice: string; assessment: ReturnType<typeof assessmentAt> };
   lifeway: Lifeway;
-  cities: ReturnType<typeof citiesNear>;
+  cities: CityNear[];
+  /** whose houses a scene would draw here: the way of life of the place, or townspeople where a list puts a city near */
+  whose?: LifewayWord;
+  /** the tradition written for that way of life, in the region and at the time; or for one kin to it, standing in */
   tradition?: Tradition;
+  kin?: LifewayWord;
 }
 
 export class LandscapeAtlas {
   index!: LandscapeIndex;
   assessments!: AssessmentsFile;
   traditions: Tradition[] = [];
+  /** the husbandry traditions, the animals they name as a scene draws them, and those animals' forms */
+  husbandry: Husbandry[] = [];
+  kept: LivingTaxon[] = [];
+  keptForms: Record<string, Form> = {};
   cities!: CitiesFile;
   globe?: AnthromeTile;
   private indexed: Promise<void> | null = null;
@@ -61,6 +70,9 @@ export class LandscapeAtlas {
       const [a, tr, c] = await Promise.all([getJSON<AssessmentsFile>(this.base + this.index.assessments), getJSON<TraditionsFile>(this.base + this.index.traditions), getJSON<CitiesFile>(this.base + this.index.cities)]);
       this.assessments = a;
       this.traditions = tr.traditions;
+      this.husbandry = tr.husbandry ?? [];
+      this.kept = tr.kept ?? [];
+      this.keptForms = tr.forms ?? {};
       this.cities = c;
     })();
     return this.ready;
@@ -108,6 +120,9 @@ export class LandscapeAtlas {
       tile: (key) => this.loaded.get(key),
       assessments: this.assessments,
       traditions: this.traditions,
+      husbandry: this.husbandry,
+      kept: this.kept,
+      keptForms: this.keptForms,
       cities: this.cities,
       people: (lat, lon, t) => {
         if (!people) return undefined;
@@ -135,6 +150,11 @@ export class LandscapeAtlas {
     return scenePeople(this.data(people), lat, lon, t);
   }
 
+  /** The cities a scene would draw near a place at a time: the lists', and the settlements with records (core/landscape.ts). */
+  private citiesAt(lat: number, lon: number, t: number): CityNear[] {
+    return citiesAround(this.cities, lat, lon, t, this.index.reach_km, cityGuess(this.index.generator?.params));
+  }
+
   /**
    * What the people layer of `resolve` asks (core/resolve.ts), as the build answers it: the lifeway at a place from its 5′
    * cell, and whether a city of the lists stands near. Undefined until the index, the assessments and the cities have come,
@@ -160,8 +180,8 @@ export class LandscapeAtlas {
         const cell = cellOf(tile, lat, lon);
         const anthrome = cell < 0 ? 0 : classAtStep(tile, cell, i);
         if (!anthrome) return undefined;
-        const city = citiesNear(this.cities, lat, lon, t, ix.reach_km)[0];
-        if (city) return { tier: 'evidence', pattern: 'city', city: city.city.name };
+        const city = this.citiesAt(lat, lon, t)[0];
+        if (city) return { tier: 'evidence', pattern: 'city', city: city.name };
         const region = tile.region[cell];
         const l = lifewayOf(ix.classes, anthrome, 0, region ? assessmentAt(this.assessments, region, t)?.a : undefined);
         return { tier: l.tier, pattern: l.pattern };
@@ -188,8 +208,13 @@ export class LandscapeAtlas {
     const p = await this.peopleFor(lat, lon, t).catch(() => undefined);
     const density = p ? p.grid.density[(Math.floor((p.grid.north - lat) / p.grid.res)) * p.grid.nx + Math.floor((lon - p.grid.west) / p.grid.res)] : undefined;
     const lifeway = lifewayOf(this.index.classes, anthrome, density ?? 0, at?.a);
-    const cities = citiesNear(this.cities, lat, lon, t, this.index.reach_km);
-    const tradition = region ? traditionAt(this.traditions, region, t) : undefined;
-    return { t, step: this.index.steps[i], anthrome, ...(density !== undefined ? { density } : {}), ...(region && label && at ? { region: { id: region, label, slice: this.assessments.slices[at.slice].label, assessment: at } } : {}), lifeway, cities, ...(tradition ? { tradition } : {}) };
+    const cities = this.citiesAt(lat, lon, t);
+    // The houses of the way of life here: a city's where a list puts one near, as a scene would draw it.
+    const pattern = cities.length ? 'city' : lifeway.pattern;
+    const whose = pattern !== 'none' ? LIFEWAY_OF[pattern] : undefined;
+    // Where several traditions share the region's people, the one most of them lived in.
+    const found = region && whose ? traditionFor(this.traditions, region, t, whose, prevalenceOf(this.index.generator?.params)) : undefined;
+    const tradition = found?.tradition;
+    return { t, step: this.index.steps[i], anthrome, ...(density !== undefined ? { density } : {}), ...(region && label && at ? { region: { id: region, label, slice: this.assessments.slices[at.slice].label, assessment: at } } : {}), lifeway, cities, ...(whose ? { whose } : {}), ...(tradition ? { tradition } : {}), ...(found?.kin ? { kin: found.kin } : {}) };
   }
 }

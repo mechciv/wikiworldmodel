@@ -7,7 +7,7 @@ summary: >-
   read and is known here as Valero (1990) reports it, and from the chroniclers who saw or heard of the city. It is the
   only house of the Basin of Mexico the sources read describe. The region it is found in, Central Mexico, is
   ArchaeoGLOBE's region 23, whose 19.3 million people in 1500 were all drawn with generic houses before; it is drawn
-  over all of it, though the sources describe one city.
+  for the townspeople of the region, as its lifeway says, though the sources describe one city.
 author: machine:claude-code
 claims:
   name:
@@ -49,6 +49,24 @@ claims:
       city the sources describe, not for the region.
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in city-estudios-americanos-778.txt (sha256 e2b341ec7d870461), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-19" }
+  lifeway:
+    prop: lifeway
+    value: [townspeople]
+    source:
+      - ref: src:valero-1990-indios-tenochtitlan
+        loc: "p. 41"
+        quote: Después vendría una zona «residencial» formada por casas con pequeñas chinampas de forma rectangular y con un plano ordenado, de alta densidad poblacional y que sería precisamente la masa de la ciudad, la de la vida diaria
+      - ref: src:valero-1990-indios-tenochtitlan
+        loc: "p. 30"
+        quote: mediante la construcción de chinampas usadas como tierra urbana, es decir, para habitar allí y no para sembrar
+    method: editorial
+    note: >-
+      The people of a city: the houses with small chinampas, thickly peopled, were the mass of the city (Valero, after
+      Calnek), and its chinampas were land to live on rather than to sow. Families of the outer neighbourhoods worked
+      the chinampas behind their houses (the fields claim) and were the city's people still; the sources read describe
+      this house in no village, so farmers are not named.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in valero-1990-indios-tenochtitlan.txt (sha256 1913bd4fdbbc9e7a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   dwelling:
     prop: dwelling
     value: { rooms: 1, walls: mudbrick, roof: flat }

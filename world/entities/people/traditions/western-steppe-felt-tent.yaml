@@ -1,0 +1,127 @@
+id: people/traditions/western-steppe-felt-tent
+kind: tradition/building
+summary: >-
+  The round felt tent of the herders of the steppe west of Mongolia, from the Don and the Volga to the Irtysh: a frame of
+  wooden lattice or poles rising to a ring at the top that let out the smoke, covered with sheets of felt, taken down and
+  carried on camels or carts as the camp moved between its pastures. Rubruck saw the tents of the Tartars between the Don
+  and the Volga in 1253; Bell those of the Kalmyks on the Volga in 1716; Atkinson measured the yurts of Kazakh chiefs east
+  of the Irtysh in the late 1840s or early 1850s. It is still lived in on the steppe; no end is given.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Felt tent of the western steppe }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 1253 CE
+    source:
+      ref: src:rockhill-1900-journey-of-william-of-rubruck
+      loc: chap. 2, on the Tartars and their dwellings, pp. 53-54
+      quote: >-
+        They set up the dwelling in which they sleep on a circular frame of interlaced sticks … converging into a little
+        round hoop on the top, from which projects above a collar as a chimney, and this (framework, they cover over with
+        white felt.
+    method: documentary
+    note: >-
+      The year of the earliest account read: Rubruck crossed the steppe from the Crimea to the Volga and beyond in 1253 (the
+      date of his journey, as his title gives it). It bounds the start and does not date it: Rockhill's notes cite Strabo and
+      Herodotus on the felt tents of the Scythians, which were not read. No end claim: the tent is still lived in.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in rockhill-1900-journey-of-william-of-rubruck.txt (sha256 5e85b5061bcdef34), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["51", "52", "101"] }
+    source:
+      - ref: src:rockhill-1900-journey-of-william-of-rubruck
+        loc: on reaching the camp of Sartach, 1253
+        quote: we found Sartach three days from the Etilia, and his ordu seemed to us very big
+      - ref: src:rockhill-1900-journey-of-william-of-rubruck
+        loc: on the camp of Baatu, 1253, p. 127
+        quote: with Baatu for v weeks, following the Etilia
+      - ref: src:bell-1788-travels-from-st-petersburgh
+        loc: 'vol. 1, at Saratov, June 1716, p. 31'
+        quote: a party of us crofled the river, to vifit a great horfe-market, held by the Kalmuck Tartars.
+      - ref: src:atkinson-1858-oriental-and-western-siberia
+        loc: 'chap. 16, "Among the Kirghis", p. 275'
+        quote: We landed on the Kirghis side
+    method: editorial
+    note: >-
+      Southern Russia (51), between the Don and the Volga, where Sartach's camp stood three days from the Volga ("Etilia");
+      the Volga (52), along which Rubruck travelled with Batu's camp, and where Bell saw the Kalmyks' tents across the river
+      from Saratov; and eastern Kazakhstan (101), the Kazakh ("Kirghis") side of the Irtysh where Atkinson stayed in the
+      chiefs' yurts. The steppe between, in western Kazakhstan, was surely theirs too, but no source read places the tent
+      there, so it is left out.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in rockhill-1900-journey-of-william-of-rubruck.txt (sha256 5e85b5061bcdef34), bell-1788-travels-from-st-petersburgh.txt (sha256 3052bc36db59833b) and atkinson-1858-oriental-and-western-siberia.txt (sha256 b13c698cd76a38ea), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [herders]
+    source:
+      - ref: src:rockhill-1900-journey-of-william-of-rubruck
+        loc: chap. 2, on the Tartars and their dwellings, p. 53
+        quote: >-
+          knows the limits of his pasture lands and where to graze in winter and summer, spring and autumn.
+      - ref: src:bell-1788-travels-from-st-petersburgh
+        loc: 'vol. 1, on the Kalmyks, June 1716, pp. 33-34'
+        quote: their wealth is their flocks.
+    method: editorial
+    note: >-
+      Herders, who moved between winter and summer pastures, as Rubruck has the Tartars, and whose wealth was their flocks,
+      as Bell has the Kalmyks.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in rockhill-1900-journey-of-william-of-rubruck.txt (sha256 5e85b5061bcdef34) and bell-1788-travels-from-st-petersburgh.txt (sha256 3052bc36db59833b), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value:
+      plan: round
+      diameter: { lo: 7.6, hi: 10.4 }
+      wall_height: 1.5
+      height: { lo: 3, hi: 3.7 }
+      walls: felt
+      roof: dome
+      roof_material: felt
+      floor: ground
+    source:
+      - ref: src:atkinson-1858-oriental-and-western-siberia
+        loc: 'chap. 17, "Their dwelling", p. 285'
+        quote: >-
+          was formed of willow trellis-work, put together with untanned … It was a circle of thirty-four feet in diameter,
+          five feet high to the springing of the dome, and twelve feet in the centre.
+      - ref: src:atkinson-1858-oriental-and-western-siberia
+        loc: 'chap. 17, "Their dwelling", p. 285'
+        quote: >-
+          The whole is then covered with large sheets of voilock, made of wool and camel's hair, fitting close, making it
+          watertight and warm.
+      - ref: src:atkinson-1858-oriental-and-western-siberia
+        loc: 'chap. 16, "Kirghis yourt", p. 278'
+        quote: The yourt was about twenty-five feet in diameter, and ten feet high in the centre.
+      - ref: src:bell-1788-travels-from-st-petersburgh
+        loc: 'vol. 1, at Saratov, June 1716, p. 32'
+        quote: Thefe tents are of a conical figure.
+    method: survey
+    note: >-
+      The sizes are Atkinson's, of two Kazakh chiefs' yurts: 25 and 34 ft across (7.6 to 10.4 m), 10 and 12 ft high in the
+      centre (3.0 to 3.7 m), the larger 5 ft (1.5 m) to where the dome springs from the lattice wall. They are chiefs' and
+      likely larger than most; the mean of eight herders' yurts in Tuva today is 5.6 m (people/traditions/mongolian-ger),
+      and Rubruck has the largest Tartar houses, carried whole on carts, thirty feet wide. The cover is felt ("voilock")
+      over walls and roof alike; the roof is a dome of bent willow rods in Atkinson's, and Bell's Kalmyk tents of poles
+      leaning to a hoop are conical, so the shape of the roof varied.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in atkinson-1858-oriental-and-western-siberia.txt (sha256 b13c698cd76a38ea) and bell-1788-travels-from-st-petersburgh.txt (sha256 3052bc36db59833b), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  settlement:
+    prop: settlement_form
+    value: { pattern: camp, houses: 18, household: 5 }
+    source:
+      - ref: src:atkinson-1858-oriental-and-western-siberia
+        loc: 'chap. 15, p. 258'
+        quote: There were eighteen … or dwellings, in this aoul
+      - ref: src:atkinson-1858-oriental-and-western-siberia
+        loc: 'chap. 16, "Kirghis yourt", p. 278'
+        quote: my host and his wife slept, and near them three children.
+    method: survey
+    note: >-
+      One aoul (camp) of eighteen yurts, the only count read; and one household of five, the chief, his wife and three
+      children, in the 25-ft yurt where Atkinson slept. Both are single instances, not means.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in atkinson-1858-oriental-and-western-siberia.txt (sha256 b13c698cd76a38ea), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

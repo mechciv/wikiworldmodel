@@ -17,6 +17,8 @@ claims:
       loc: section "Ravi Phase and Kot Diji Phase Occupations"
       quote: The use of pre-firing "potter's marks" and post-firing "graffiti" on pottery also indicates that concepts of graphic expression using abstract symbols were emerging
     note: Marks and signs, not writing as such.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in meadow-kenoyer-2001-harappa.txt (sha256 1f1cf53cc045e1a1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
   location:
     prop: location
     value: { lat: 30.629618, lon: 72.865257, frame: frame:earth/present-day }

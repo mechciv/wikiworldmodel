@@ -104,16 +104,21 @@ export interface GlanceInputs {
   land?: LandShares | null;
   /** how many taxa with fossil rows have a body of their own (coverage.json's forms) */
   forms?: { taxa: number; own_form: number };
+  /** at some times, how many people there were and how many are drawn in a house of a building tradition (coverage.json's landscape.housing) */
+  housing?: { t: number; people: number; housed: number }[];
   /** how many claims stand at each step of checking (core/ladder.ts) */
   ladder: Record<string, number>;
   formatTime: (t: number) => string;
 }
 
-export function glance({ matrix, until, land, forms, ladder, formatTime }: GlanceInputs): Glance {
+export function glance({ matrix, until, land, forms, housing, ladder, formatTime }: GlanceInputs): Glance {
   const layer = (id: string, label: string, l: LayerId, what = 'of the globe'): GlanceRow => {
     const s = layerShare(matrix, l, until);
     return { id, label, share: s?.share ?? null, of: s ? `${what} since ${formatTime(s.from)}` : 'not drawn yet' };
   };
+  // Each time counts the same, however many lived then: the first farmers' houses weigh as much as the last century's.
+  const counted = (housing ?? []).filter((h) => h.people > 0);
+  const housed = counted.length ? round(counted.reduce((s, h) => s + h.housed / h.people, 0) / counted.length) : null;
   const claims = Object.values(ladder).reduce((a, b) => a + b, 0);
   const checked = claims - (ladder.unchecked ?? 0);
   return {
@@ -138,6 +143,7 @@ export function glance({ matrix, until, land, forms, ladder, formatTime }: Glanc
         rows: [
           { id: 'lifeways', label: 'Ways of life', share: land?.lifeways ?? null, of: land ? `of inhabited land since ${formatTime(land.from)}` : 'not drawn yet' },
           { id: 'states', label: 'States drawn', share: land?.states ?? null, of: land?.statesFrom !== undefined ? `of inhabited land since ${formatTime(land.statesFrom)}` : 'not drawn yet' },
+          { id: 'houses', label: 'Houses of a tradition', share: housed, of: counted.length ? `of people, at ${counted.length} times since ${formatTime(counted[0].t)}` : 'not counted in this build' },
         ],
       },
       {

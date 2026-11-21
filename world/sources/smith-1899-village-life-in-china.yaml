@@ -1,0 +1,32 @@
+id: src:smith-1899-village-life-in-china
+type: publication
+kind: eyewitness
+citation: >-
+  Smith, A.H. (1899). Village Life in China: A Study in Sociology. New York, Chicago and Toronto: Fleming H. Revell
+  Company.
+authors:
+  - "Smith, A.H."
+published: 1899
+title: "Village Life in China: A Study in Sociology"
+url: https://archive.org/download/villagelifeinchi33485gut/33485-0.txt
+via: >-
+  Project Gutenberg's transcription of the 1899 edition (EBook #33485, released 22 August 2010), read from the Internet
+  Archive's copy of it (villagelifeinchi33485gut).
+license: public-domain
+reliability: >-
+  An American missionary's account of the villages he lived among: the book's own front matter calls him "For Twenty-six
+  Years a Missionary of the American Board in China". What he describes is the plain of North China: the tract whose
+  villages he counted lies east of the sub-prefecture of Lin Ch'ing, and he names southern and central Chih-li (the
+  province now called Hebei), western and southwestern Shan-tung and northern Ho-nan. He wrote for Western readers, to
+  argue that China needed Christianity,
+  and is often disparaging; and he warns that his statements "are true somewhere, although few of them may hold good
+  everywhere". His sizes are round figures and not measurements, and the five persons he reckons to a family is a
+  convention his own informant thought too low. He describes what he saw from the 1870s to the 1890s; what he says of
+  earlier times is tradition.
+verified:
+  by: machine:claude-code
+  how: >-
+    Chapters I and II (pp. 15 to 29 of the book) read on 20 November 2026 in Project Gutenberg's plain text, fetched
+    from the Internet Archive and kept as served; the rest searched for houses, walls and families. The quotes were
+    checked by script against that text. The transcription has no page numbers: the locators give the chapter, and the
+    page where the book's own index names one.

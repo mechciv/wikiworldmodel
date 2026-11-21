@@ -1,0 +1,24 @@
+id: src:tanno-1981-mbuti-plant-utilization
+type: publication
+kind: measurement
+citation: >-
+  Tanno, T. (1981). Plant Utilization of the Mbuti Pygmies: With Special Reference to Their Material Culture and Use of
+  Wild Vegetable Foods. African Study Monographs 1, 1–53.
+authors: ["Tanno, T."]
+published: 1981
+title: "Plant Utilization of the Mbuti Pygmies: With Special Reference to Their Material Culture and Use of Wild Vegetable Foods"
+container: African Study Monographs
+doi: 10.14989/67981
+url: http://hdl.handle.net/2433/67981
+license: open access
+license_note: As the Kyoto University Research Information Repository (KURENAI) gives it; no licence is named.
+reliability: >-
+  An ethnobotany of the Mbuti net-hunters of the central Ituri forest from fieldwork of August 1973 to February 1974 and
+  January to February 1977, with a section on the material culture of their camps, the hut among it. Its sizes are the
+  author's general description, not a table of measured huts.
+verified:
+  by: machine:claude-code
+  how: >-
+    The PDF from the Kyoto University repository (handle 2433/67981), downloaded on 20 November 2026 through the
+    repository's API, and its text layer read with PyMuPDF; the section on dwellings (pp. 29–30) read in full, and the
+    quotes checked by script against that text, keeping to stretches its text layer reads cleanly.

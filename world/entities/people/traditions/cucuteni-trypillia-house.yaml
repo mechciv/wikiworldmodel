@@ -1,0 +1,167 @@
+id: people/traditions/cucuteni-trypillia-house
+kind: tradition/building
+summary: >-
+  The house of the Cucuteni–Trypillia settlements of Romania, Moldova and Ukraine, about 4800 to 3000 BCE: a rectangular
+  house of timber and daub, some 3 to 6 m wide and 10 to 15 m long, in many cases with a platform of clay on split
+  timbers that its excavators read as an upper floor. From the middle phase the settlements were laid out in concentric
+  rings, and between about 4100 and 3600 BCE some in central Ukraine grew to thousands of houses. Most of the houses are
+  found burnt. The sizes are those of one such settlement, Maidanets'ke.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: House of the Cucuteni–Trypillia settlements }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 4800 BCE
+    source:
+      ref: src:fuchs-2024-kosenivka
+      loc: Introduction, first paragraph
+      quote: >-
+        Cucuteni-Trypillia societies (CTS) are the earliest Chalcolithic phenomenon in parts of modern-day Romania,
+        Moldova, and Ukraine ca. 4800–3000 BCE.
+    method: expert-estimate
+    note: >-
+      About 4800 BCE, the beginning the source gives the Cucuteni–Trypillia societies, which it says followed those with
+      Linear and Bug–Dniester pottery (people/traditions/linearbandkeramik-longhouse for the first).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in fuchs-2024-kosenivka.txt (sha256 dd1e9941e9f589a8), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  end:
+    prop: end
+    value: 3000 BCE
+    source:
+      - ref: src:fuchs-2024-kosenivka
+        loc: Introduction, first paragraph
+        quote: >-
+          Cucuteni-Trypillia societies (CTS) are the earliest Chalcolithic phenomenon in parts of modern-day Romania,
+          Moldova, and Ukraine ca. 4800–3000 BCE.
+      - ref: src:fuchs-2024-kosenivka
+        loc: 'Introduction, section "Cucuteni–Trypillia phenomena"'
+        quote: In the late phase (C2, ca. 3600–3300/3000 BCE), the domestic sites became smaller once more
+    method: expert-estimate
+    note: >-
+      About 3000 BCE; the source ends the last phase at 3300 or 3000 BCE. The sizes and storeys of the dwelling claim are
+      of a settlement of the middle phase, and the houses of the late phase, in smaller settlements, are less known.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in fuchs-2024-kosenivka.txt (sha256 dd1e9941e9f589a8), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["47", "48"] }
+    source:
+      ref: src:fuchs-2024-kosenivka
+      loc: Introduction, first paragraph
+      quote: >-
+        Cucuteni-Trypillia societies (CTS) are the earliest Chalcolithic phenomenon in parts of modern-day Romania,
+        Moldova, and Ukraine ca. 4800–3000 BCE.
+    method: editorial
+    note: >-
+      Region 48 (Romania, Bulgaria and Moldova) for Romania and Moldova, the Cucuteni sphere; region 47 for Ukraine, the
+      Trypillia sphere, where the houses described here were excavated. Only parts of each country, as the source says:
+      Bulgaria, in region 48, is not among them.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in fuchs-2024-kosenivka.txt (sha256 dd1e9941e9f589a8), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      - ref: src:fuchs-2024-kosenivka
+        loc: 'Introduction, section "Cucuteni–Trypillia phenomena"'
+        quote: >-
+          Sites in the Trypillia area of the Cucuteni–Trypillia phenomenon form a cultural network of agrarian communities
+          characterised by both local and unifying attributes.
+      - ref: src:fuchs-2024-kosenivka
+        loc: Introduction, first paragraph
+        quote: whose settlements later reached sub-urban dimensions, with highly productive agricultural economies
+    method: editorial
+    note: >-
+      Farmers: agrarian communities, who grew cereals and kept livestock. Some have argued that the largest settlements
+      were pre-urban centres of up to about 10,000 people, and readings of them run from early towns to places of
+      seasonal gathering; townspeople are not named here.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in fuchs-2024-kosenivka.txt (sha256 dd1e9941e9f589a8), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { plan: rectangular, width: { lo: 3, hi: 6 }, length: { lo: 10, hi: 15 }, storeys: { lo: 1, hi: 2 }, walls: wattle-and-daub }
+    source:
+      - ref: src:ohlrau-2020-maidanetske
+        loc: section 3.1.2, p. 44
+        quote: The burnt remains were generally between 3-6 m wide (median=4.5) and 10-15 m long (median=12.6)
+      - ref: src:ohlrau-2020-maidanetske
+        loc: section 3.1.3, p. 44
+        quote: The burnt architectural remains at Maidanets’ke were made of wood and daub.
+      - ref: src:ohlrau-2020-maidanetske
+        loc: section 4.3.8, on dwelling 54, p. 93
+        quote: >-
+          With a median of 2 cm, most rounded imprints are associated with the remains of wattle-and-daub walls.
+      - ref: src:ohlrau-2020-maidanetske
+        loc: section 9.4.1, p. 283
+        quote: >-
+          With the help of the wooden imprints, it could be shown in this study that buildings with a platform were indeed
+          ‘two-storeyed’ as suggested by many Ukrainian scholars.
+      - ref: src:hofmann-2019-governing-tripolye
+        loc: section "Comparison with residential buildings"
+        quote: >-
+          The architecture of mega-structure 3 (covering ca. 190 m2) differs substantially from that of dwellings 44 (77.5
+          m2) and 59 (42 m2). While the latter are characterized by massive platforms and indications of two storeys, the
+          former is a one-storey construction.
+      - ref: src:fuchs-2024-kosenivka
+        loc: 'Introduction, section "The Trypillia settlement of Kosenivka"'
+        quote: >-
+          uncovered a chaotic, rectangular accumulation of burnt daub measuring 12 × 4.5 m, which was designated house 6
+    method: excavation
+    note: >-
+      The width and length are those of the burnt remains of the buildings excavated at Maidanets'ke in central Ukraine
+      between 1971 and 1991, with medians of 4.5 and 12.6 m; house 6 of Kosenivka, of 12 by 4.5 m, is of the same size.
+      The walls were of wattle and daub on posts. Whether there was an upper floor is an old dispute: at Maidanets'ke the
+      houses with a platform of clay laid on split timbers are read as of two storeys, living rooms above a ground
+      floor, and the house of Kosenivka, which had no such platform, was assumed by its excavators to be raised or of two
+      storeys, which its damage leaves unsure; so one or two. The sizes are of one settlement of the middle Trypillia period and of
+      the Ukrainian side: no measure of a Cucuteni house in Romania was read. The roof is not stated, and is left to
+      the generator.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ohlrau-2020-maidanetske.txt (sha256 9d7b262e19cb3624), hofmann-2019-governing-tripolye.txt (sha256 ace77f81b1f55775) and fuchs-2024-kosenivka.txt (sha256 dd1e9941e9f589a8), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  settlement:
+    prop: settlement_form
+    value: { pattern: nucleated, household: { lo: 3.9, hi: 7 } }
+    source:
+      - ref: src:fuchs-2024-kosenivka
+        loc: 'Introduction, section "Cucuteni–Trypillia phenomena"'
+        quote: >-
+          In the early phase (Trypillia A1–B1, ca. 4800–4300/4100 BC), the population lived in small and medium-sized
+          settlements of less than 30 ha.
+      - ref: src:fuchs-2024-kosenivka
+        loc: 'Introduction, section "Cucuteni–Trypillia phenomena"'
+        quote: >-
+          From its middle phase onwards, the unifying attributes are very specific, including settlement layouts of
+          several concentric circles, some with monumental assembly houses
+      - ref: src:hofmann-2019-governing-tripolye
+        loc: Introduction, first paragraph
+        quote: >-
+          Between ca. 4100–3600 BCE ‘giant-settlements’ or ‘mega-sites’ with thousands of houses arranged in a very
+          specific centripetal layout emerged in a concentrated area of the Southern Bug-Dnieper Interfluve in the eastern
+          part of the Tripolye distribution area
+      - ref: src:ohlrau-2020-maidanetske
+        loc: section 7.2, p. 233
+        quote: >-
+          In result, the size of a nuclear family sharing a household was estimated to lie between 4.5-7 members
+      - ref: src:ohlrau-2020-maidanetske
+        loc: section 7.2, p. 233
+        quote: The average nuclear family size was then reconstructed to lie between 3.9-4.7 members
+      - ref: src:fuchs-2024-kosenivka
+        loc: section "Archaeological analogies"
+        quote: >-
+          Based on a commonly used size of a nuclear family, given as 4.5 to 7 people per household (according to Cook
+          [162])
+    method: expert-estimate
+    note: >-
+      Houses together in settlements: of less than 30 hectares in the early phase, and from the middle phase laid out in
+      concentric rings, which in central Ukraine between about 4100 and 3600 BCE grew to thousands of houses over more
+      than a hundred hectares, and grew smaller again after. No number of houses is given for an ordinary settlement,
+      and none is claimed. The household spans the two figures the second source reports: Cook's (1972) 4.5 to 7 for a
+      nuclear family in one dwelling, which is reckoned from many peoples and which both sources use for these houses,
+      and the 3.9 to 4.7 that Diachenko (2016) reconstructed from a cemetery of the latest Trypillia. Neither is a count
+      of who lived in a house; the remains of seven people in the burnt house 6 of Kosenivka, six of whom may have died
+      there, are probably of one household.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in fuchs-2024-kosenivka.txt (sha256 dd1e9941e9f589a8), hofmann-2019-governing-tripolye.txt (sha256 ace77f81b1f55775) and ohlrau-2020-maidanetske.txt (sha256 9d7b262e19cb3624), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

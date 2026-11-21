@@ -1,0 +1,37 @@
+id: life/taxa/camelus-bactrianus
+kind: taxon
+summary: >-
+  The two-humped domestic camel of Central Asia.
+same_as: { ott: 510768 }
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: "Bactrian camels", la: "Camelus bactrianus" }
+    source: { ref: src:opentree-taxonomy-3.7, loc: "tnrs/match_names: Camelus bactrianus, ott510768" }
+    note: Open Tree gives the scientific name; the English name is an editorial gloss.
+  length:
+    prop: body_length
+    value: { lo: 2.25, hi: 3.45 }
+    source:
+      ref: src:animal-diversity-web
+      loc: "account of Camelus bactrianus, Physical Description"
+      quote: "The length of the head and body is 2.25-3.45 m"
+    method: compilation
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in animal-diversity-web.txt (sha256 5ae3d0bcfbf74dd9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  mass:
+    prop: body_mass
+    value: { lo: 300, hi: 690 }
+    source:
+      ref: src:animal-diversity-web
+      loc: "account of Camelus bactrianus, Physical Description"
+      quote: "The weight of the adult camel can range from 300-690 kg"
+    method: compilation
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in animal-diversity-web.txt (sha256 5ae3d0bcfbf74dd9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+relations:
+  parent:
+    rel: descends-from
+    to: life/taxa/camelidae
+    source: { ref: src:opentree-taxonomy-3.7, loc: "taxonomy/taxon_info ott510768 with include_lineage: Camelus bactrianus lies within Camelidae" }

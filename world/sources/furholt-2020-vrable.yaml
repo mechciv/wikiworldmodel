@@ -1,0 +1,35 @@
+id: src:furholt-2020-vrable
+type: publication
+kind: measurement
+citation: >-
+  Furholt, M., Cheben, I., Müller, J., Bistáková, A., Wunderlich, M. & Müller-Scheeßel, N. (eds) (2020). Archaeology in
+  the Žitava Valley I: The LBK and Želiezovce settlement site of Vráble. Scales of Transformation in Prehistoric and
+  Archaic Societies 9. Leiden: Sidestone Press. ISBN 978-90-8890-897-2.
+authors:
+  - "Furholt, M."
+  - "Cheben, I."
+  - "Müller, J."
+  - "Bistáková, A."
+  - "Wunderlich, M."
+  - "Müller-Scheeßel, N."
+published: 2020
+title: "Archaeology in the Žitava Valley I: The LBK and Želiezovce settlement site of Vráble"
+container: Scales of Transformation in Prehistoric and Archaic Societies 9 (Leiden, Sidestone Press)
+url: https://www.sidestone.com/books/archaeology-in-the-zitava-valley-i
+reliability: >-
+  The report of the excavations of 2012–2017 and of the magnetic survey of the Linearbandkeramik settlement of Vráble in
+  south-west Slovakia, in chapters by the excavators and their specialists; the six named are its editors. It is cited
+  from five chapters: 2.1 (Winkelmann, Bátora, Hohle, Kalmbach, Müller-Scheeßel & Rassmann, on the magnetic survey),
+  5.4 (Eckelmann, Schmölcke & Makarewicz, on the animal bones), 5.5 (Filipović, Kroll & Kirleis, on the plant remains),
+  6.1 (Müller, Müller-Scheeßel, Cheben, Wunderlich & Furholt, on the population) and 6.3 (Wunderlich, Müller, Cheben,
+  Bistáková, Furholt & Müller-Scheeßel, on the political economy). What it says of the Linearbandkeramik at large, the
+  lengths of houses after Pechtl (2009) and Coudart (1998), the size of a household after Zimmermann et al. (2009) and
+  Kreuz (2010), and how the fields were worked after Bogaard (2004), is its summary of works not read here. Vráble
+  itself is of the later Linearbandkeramik, about 5300 to 4950 BCE, in the north-west of the Carpathian Basin.
+verified:
+  by: machine:claude-code
+  how: >-
+    The publisher's open-access PDF (sidestone.com/openaccess/9789088908972.pdf) fetched on 20 November 2026 and turned
+    into text with PyMuPDF. Chapter 6.1 read in full, and the passages cited from chapters 2.1, 5.4, 5.5 and 6.3 with
+    the pages around them; the tables of the fifteen excavated houses in chapter 3.1 read for their lengths and widths.
+    Quotes checked by script against the text of the whole volume; pages are given as printed.

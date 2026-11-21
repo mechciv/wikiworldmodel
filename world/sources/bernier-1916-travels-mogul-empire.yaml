@@ -1,0 +1,25 @@
+id: src:bernier-1916-travels-mogul-empire
+type: text
+kind: eyewitness
+citation: >-
+  Bernier, F. Travels in the Mogul Empire, A.D. 1656–1668, translated on the basis of Irving Brock's version and
+  annotated by Archibald Constable; second edition, revised by Vincent A. Smith. Oxford: Oxford University Press, 1916.
+authors:
+  - "Bernier, F."
+published: 1916
+written: 1 July 1663 CE
+title: Travels in the Mogul Empire, A.D. 1656–1668
+url: https://archive.org/details/travelsinmogulem00bernuoft
+via: The Internet Archive's scan of the University of Toronto's copy (travelsinmogulem00bernuoft), read in its OCR text.
+license: public domain
+reliability: >-
+  A French physician who lived for years at the Mughal court. The passage cited is from his letter to La Mothe le Vayer
+  describing Delhi and Agra, dated at Delhi on 1 July 1663, which is the date given here as when it was written; the
+  book's other letters are of other years. He describes the capital as he saw it, for readers in Paris, and compares it
+  with Paris throughout.
+verified:
+  by: machine:claude-code
+  how: >-
+    The letter describing Delhi and Agra read on 20 November 2026 in the OCR text of the scan, pp. 245 to 248 for the
+    houses; its date is the letter's own heading ("Written at Dehli the first of July 1663"). The quotes were checked by
+    script against the OCR, keeping to stretches it reads cleanly.

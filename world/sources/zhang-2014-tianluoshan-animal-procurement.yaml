@@ -1,0 +1,28 @@
+id: src:zhang-2014-tianluoshan-animal-procurement
+type: publication
+kind: review
+citation: >-
+  Zhang, Y. (2014). Animal procurement in the Late Neolithic of the Yangtze River Basin: Integrating the fish remains
+  into a case-study from Tianluoshan. PhD thesis, Institute of Archaeology, University College London.
+authors:
+  - "Zhang, Y."
+published: 2014
+title: "Animal procurement in the Late Neolithic of the Yangtze River Basin: Integrating the fish remains into a case-study from Tianluoshan"
+container: UCL Discovery (University College London), eprint 1473389
+url: https://discovery.ucl.ac.uk/id/eprint/1473389/1/Zhang_Ying_thesis_2015.pdf
+reliability: >-
+  A doctoral thesis on the animal bones of Tianluoshan. Its second chapter reviews the Neolithic cultures of the lower
+  Yangtze and the sites of Hemudu and Tianluoshan from the excavators' reports, in Chinese (Zhejiang Provincial
+  Institute of Cultural Relics and Archaeology 2003 for Hemudu; Sun 2011 for Tianluoshan), which were not read here:
+  what is cited is a zooarchaeologist's summary of them, not the reports. Its title page is dated 2014 and the
+  repository's file is named for 2015.
+verified:
+  by: machine:claude-code
+  how: >-
+    The thesis's PDF fetched from UCL Discovery on 20 November 2026 and turned into text with PyMuPDF; of its second
+    chapter, the paragraphs of section 2.3.1 on the Late and Final Neolithic, section 2.3.2 on the Hemudu culture and
+    the first pages of section 2.3.3 on Tianluoshan were read, and the rest was searched, not read. Page 40 of the PDF
+    (the thesis's p. 39) is stored in overlapping pieces that come out
+    scrambled: its characters were put back in reading order by their positions on the page, a character drawn twice
+    at one place kept once, and the result was read against an image of the page. The quotes were checked by script
+    against the text with that page so restored.

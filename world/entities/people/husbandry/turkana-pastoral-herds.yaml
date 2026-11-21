@@ -1,0 +1,56 @@
+id: people/husbandry/turkana-pastoral-herds
+kind: tradition/husbandry
+summary: >-
+  The cattle, sheep and goats that eastern Africa's first herders brought to Lake Turkana about 5,000 years ago.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: "Herds of the first pastoralists of eastern Africa" }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 5 ka
+    source:
+      ref: src:chritz-2026-turkana-pastoralists
+      loc: "Significance"
+      quote: "The region’s first herders—pastoralists buried in communal cemeteries around Lake Turkana c. 5000 years ago"
+    method: expert-estimate
+    note: >-
+      Herding goes on there today, so there is no end claim.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in chritz-2026-turkana-pastoralists.txt (sha256 31e954c67c069bc3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["93"] }
+    source:
+      ref: src:chritz-2026-turkana-pastoralists
+      loc: "Abstract"
+      quote: "earliest pastoralists in Kenya’s Turkana Basin ~5,000 years ago"
+    method: editorial
+    note: >-
+      Region 93 (Kenya).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in chritz-2026-turkana-pastoralists.txt (sha256 31e954c67c069bc3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [herders]
+    source:
+      ref: src:chritz-2026-turkana-pastoralists
+      loc: "Significance"
+      quote: "The region’s first herders—pastoralists buried in communal cemeteries around Lake Turkana c. 5000 years ago"
+    method: editorial
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in chritz-2026-turkana-pastoralists.txt (sha256 31e954c67c069bc3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  livestock:
+    prop: livestock
+    value: [life/taxa/bos-taurus, life/taxa/ovis-aries, life/taxa/capra-hircus]
+    source:
+      ref: src:chritz-2026-turkana-pastoralists
+      loc: "Abstract"
+      quote: "Pastoralists brought cattle, sheep, and goats to Lake Turkana during this period"
+    method: compilation
+    note: >-
+      The cattle are drawn as taurine: the paper does not say which, and the humped zebu came later to Africa.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in chritz-2026-turkana-pastoralists.txt (sha256 31e954c67c069bc3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

@@ -1,0 +1,108 @@
+id: people/traditions/joseon-tiled-town-house
+kind: tradition/building
+summary: >-
+  The tile-roofed house (giwa-jip) of Korea's towns under the Joseon dynasty, from 1392: the house of the upper and
+  middle classes and of urban commoners, a timber frame whose posts stood on cornerstones, under a roof of fired tiles,
+  as against the thatched house of the provincial commoners. The county seats (eupchi) where townspeople lived were
+  the seats of the magistrates; about a third of them, the larger ones most, stood inside walls (eupseong), which
+  Joseon rebuilt or built anew in stone, low and, where there was one, with a moat too narrow to defend.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Tile-roofed town house of Joseon Korea }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 1392 CE
+    source:
+      ref: src:kim-2025-eupchi-eupseong
+      loc: "p. 103, Introduction"
+      quote: Joseon (1392–1910), born from the dynasty-changing revolution
+    method: expert-estimate
+    note: >-
+      The start of the Joseon dynasty, the period whose classes the encyclopedia's sentence describes; tiled roofs are
+      far older in Korea. No end is given within this record's span.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in kim-2025-eupchi-eupseong.txt (sha256 5a260fd60a988efb), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["117"] }
+    source:
+      ref: src:kim-2025-eupchi-eupseong
+      loc: "p. 112, section \"Distribution of Eupchi and Eupseong\""
+      quote: Of the approximately 330 eupchi, about 230 were located in today’s South Korea, and about 100 in North Korea
+    method: editorial
+    note: Region 117 (Korea), whose county seats lay across the whole peninsula.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in kim-2025-eupchi-eupseong.txt (sha256 5a260fd60a988efb), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [townspeople]
+    source:
+      ref: src:wikipedia-hanok
+      loc: section "Variations", "By social class"
+      quote: >-
+        Typically the houses of yangban (upper class), jungin (middle class) and urban commoners, with giwa (tiled roof),
+        emphasized not only the function of the house, but also its aesthetics.
+    method: editorial
+    note: >-
+      The houses of the towns, of the upper and middle classes and of urban commoners. Yangban in the countryside lived
+      under tile too, and the poor of the towns under thatch; the record names townspeople only.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-hanok.txt (sha256 55aa6d202f1902e3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { roof_material: tile }
+    source:
+      - ref: src:wikipedia-hanok
+        loc: section "Variations", "By social class"
+        quote: >-
+          Typically the houses of yangban (upper class), jungin (middle class) and urban commoners, with giwa (tiled
+          roof), emphasized not only the function of the house, but also its aesthetics.
+      - ref: src:wikipedia-hanok
+        loc: section "Characteristics"
+        quote: >-
+          The posts, or daedulbo, are not inserted into the ground, but are fitted into the cornerstones to keep hanok
+          safe from earthquakes.
+      - ref: src:kim-2025-eupchi-eupseong
+        loc: "p. 123"
+        quote: The walls also contributed to differentiate the magistrate and local officials, who work from their splendid tile-roofed houses
+    method: expert-estimate
+    note: >-
+      A tiled roof on a timber frame set on cornerstones. The walls (the article speaks of wooden beams and stone-block
+      construction, without saying which), the plan (in a line, L-shaped or square by region) and the size are left
+      out; no source read here gives a town house's size.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-hanok.txt (sha256 55aa6d202f1902e3) and kim-2025-eupchi-eupseong.txt (sha256 5a260fd60a988efb), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  town:
+    prop: town_form
+    value: { wall: stone }
+    source:
+      - ref: src:kim-2025-eupchi-eupseong
+        loc: "p. 125"
+        quote: >-
+          This process involved the renovation and expansion of existing earthen fortresses into stone ones, or the
+          construction of new stone fortresses
+      - ref: src:kim-2025-eupchi-eupseong
+        loc: "p. 125"
+        quote: The number of eupseong increased from approximately 110
+      - ref: src:kim-2025-eupchi-eupseong
+        loc: "p. 112"
+        quote: >-
+          Even if the eupchi had a wall, the larger scale the wall had, the more likely private residences formed a
+          community within it.
+      - ref: src:kim-2025-eupchi-eupseong
+        loc: "p. 123"
+        quote: Joseon’s fortresses were built too low for defensive purposes.
+      - ref: src:kim-2025-eupchi-eupseong
+        loc: "p. 123"
+        quote: the moats, which were only built in some fortresses
+    method: documentary
+    note: >-
+      A stone wall, which Joseon gave its walled county seats from the fifteenth century. Only some had one: about 110
+      of some 330 county seats in the early fifteenth century, 132 to 144 in the late nineteenth (p. 125), and houses
+      stood inside the larger walls. So a wall is drawn round towns that in most counties had none. The wall was low,
+      and its height is not given; the moat, built at some, is not claimed. The streets are not described.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in kim-2025-eupchi-eupseong.txt (sha256 5a260fd60a988efb), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

@@ -1,0 +1,23 @@
+id: src:wikipedia-society-and-culture-of-the-han-dynasty
+type: database-record
+kind: review
+citation: >-
+  "Society and culture of the Han dynasty." Wikipedia, the free encyclopedia (English edition), revision 1384811558.
+snapshot: 2026-11-20
+title: Society and culture of the Han dynasty
+container: Wikipedia
+url: https://en.wikipedia.org/w/index.php?title=Society_and_culture_of_the_Han_dynasty&oldid=1384811558
+license: CC-BY-SA-4.0
+license_note: Short quotes, with credit.
+reliability: >-
+  A general encyclopedia article, cited for the Han hamlet and the wards of Chang'an because no study of Han
+  settlements could be read here. The sentence on the hamlet of about a hundred families within a wall is footnoted to
+  Nishijima (1986), pp. 551–553, and that on the 160 wards of Chang'an to Nishijima (1986), pp. 575–576, and Loewe
+  (1968), pp. 146–147; neither was read. These are the settlements of the Han texts, as historians read them: the one
+  excavated farming settlement read of here, Sanyangzhuang, had its compounds standing apart among their fields.
+verified:
+  by: machine:claude-code
+  how: >-
+    The article's HTML, rendered from revision 1384811558, fetched from Wikipedia on 20 November 2026 and read as text,
+    with the reference marks taken out; the quotes checked by script against that text, and their footnotes matched to
+    the works they cite, by author, year and page as the footnotes give them.

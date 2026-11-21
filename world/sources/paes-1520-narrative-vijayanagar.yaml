@@ -1,0 +1,28 @@
+id: src:paes-1520-narrative-vijayanagar
+type: text
+kind: eyewitness
+citation: >-
+  Paes, D. Narrative of the things which he saw and contrived to learn concerning the kingdom of Narsinga
+  (Vijayanagar), translated from the Portuguese in Sewell, R. (1900), A Forgotten Empire (Vijayanagar): A Contribution
+  to the History of India, pp. 236 to 290. London: Swan Sonnenschein & Co.
+authors:
+  - "Paes, D."
+published: 1900
+written: { lo: 1520 CE, hi: 1522 CE }
+title: Narrative of Domingos Paes
+container: "Sewell, R. (1900). A Forgotten Empire (Vijayanagar)"
+url: https://archive.org/details/aforgottenempir00paesgoog
+via: The Internet Archive's scan (aforgottenempir00paesgoog), read in its OCR text.
+license: public domain
+reliability: >-
+  The account of a Portuguese visitor to the city he calls Bisnaga, which his translator heads "written probably A.D.
+  1520-22" and calls an account of personal experiences. What he says of the houses of the city he gives as what
+  "they say", with a number of houses that is hearsay; what he says of the walls of towns he gives as the king's
+  rule. Read in Sewell's English, made from the Portuguese text that David Lopes published at Lisbon.
+verified:
+  by: machine:claude-code
+  how: >-
+    Read on 20 November 2026 in the OCR text of the scan: the heading of the narrative (p. 235), its account of the
+    country (p. 237) and of the city of Bisnaga (pp. 244 to 246 and 290), and Sewell's preface for how he dates and
+    translates it. The page numbers are those of the running heads nearest each passage. The quotes were checked by
+    script against the OCR.

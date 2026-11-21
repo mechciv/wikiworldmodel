@@ -1,0 +1,31 @@
+id: src:mueller-scheessel-2020-house-orientations
+type: publication
+kind: measurement
+citation: >-
+  Müller-Scheeßel, N., Müller, J., Cheben, I., Mainusch, W., Rassmann, K., Rabbel, W., Corradini, E. & Furholt, M. (2020).
+  A new approach to the temporal significance of house orientations in European Early Neolithic settlements. PLOS ONE
+  15(1), e0226082.
+authors:
+  - "Müller-Scheeßel, N."
+  - "Müller, J."
+  - "Cheben, I."
+  - "Mainusch, W."
+  - "Rassmann, K."
+  - "Rabbel, W."
+  - "Corradini, E."
+  - "Furholt, M."
+published: 2020
+title: A new approach to the temporal significance of house orientations in European Early Neolithic settlements
+container: PLOS ONE
+doi: 10.1371/journal.pone.0226082
+url: https://europepmc.org/article/PMC/PMC6953813
+license: CC-BY-4.0
+reliability: >-
+  A study of how the orientation of Linearbandkeramik houses turned with time, from the magnetic plans and radiocarbon
+  dates of Vráble and other settlements of the Žitava valley in Slovakia. It is cited for the short description of the
+  Linearbandkeramik longhouse in its introduction, which is general knowledge of the field stated without references.
+verified:
+  by: machine:claude-code
+  how: >-
+    Full text read as text from Europe PMC's REST service (PMC6953813, fullTextXML) on 20 November 2026: the abstract, the
+    introduction and the section on materials and methods. Quotes checked by script against that text.

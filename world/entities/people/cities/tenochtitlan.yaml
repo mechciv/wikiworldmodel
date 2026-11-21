@@ -271,3 +271,24 @@ claims:
     note: >-
       Chandler's figure, which the world's human landscape draws for the city (field:people/cities): 80,000 in 1500
       and 1520, and 30,000 in 1524. Near the low end of the estimates. Chandler's method is not in the row.
+  town-form:
+    prop: town_form
+    value: { streets: canals, square: true }
+    valid: { hi: { ref: people/conquest/fall-of-tenochtitlan, edge: start } }
+    source:
+      - ref: src:smith-2008-aztec-city-planning
+        loc: "\"Tenochtitlan\", p. 142"
+        quote: Spanish observers were struck by the great number of canals in the city, which they likened to Venice.
+      - ref: src:smith-2008-aztec-city-planning
+        loc: "\"Tenochtitlan\", p. 142"
+        quote: Tenochtitlan’s orthogonal layout is seen in the major avenues
+      - ref: src:smith-2008-aztec-city-planning
+        loc: "\"Tenochtitlan\", p. 143"
+        quote: The sacred precinct occupies the place of the public plaza in other Aztec (and Mesoamerican) cities.
+    method: compilation
+    note: >-
+      The Mexica city before the conquest: canals among its streets, an orthogonal plan whose avenues ran out from the walled
+      sacred precinct at its centre in the cardinal directions, and that precinct in place of a public plaza, drawn here as a
+      square. Smith names no wall round the city, only the precinct's, so no wall is claimed.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in smith-2008-aztec-city-planning.txt (sha256 8ad06786d1178be1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

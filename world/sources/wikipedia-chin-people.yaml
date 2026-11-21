@@ -1,0 +1,19 @@
+id: src:wikipedia-chin-people
+type: database-record
+kind: review
+citation: >-
+  "Chin people." Wikipedia, the free encyclopedia (English edition), revision 1386020930.
+snapshot: 2026-11-20
+title: Chin people
+container: Wikipedia
+url: https://en.wikipedia.org/w/index.php?title=Chin_people&oldid=1386020930
+license: CC-BY-SA-4.0
+reliability: >-
+  A general encyclopedia article, cited only for when the Chin settled the Chin Hills, because no history of the Chin
+  could be read here. The account it gives rests on Luce's reading of Pagan-era records and on Chin traditions, neither
+  of which was read.
+verified:
+  by: machine:claude-code
+  how: >-
+    The article's HTML fetched with the action=render view of index.php on 20 November 2026 and read as text, with the
+    reference marks taken out; the quotes checked by script against that text.

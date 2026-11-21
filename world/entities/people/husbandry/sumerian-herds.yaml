@@ -1,0 +1,69 @@
+id: people/husbandry/sumerian-herds
+kind: tradition/husbandry
+summary: >-
+  The herds of the cities of southern Mesopotamia in the Early Dynastic period and after: sheep and goats above all, fewer cattle, and pigs kept privately, as the bones and the texts of Ur show.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: "Herds of the Sumerian cities" }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 2900 BCE
+    source:
+      ref: src:greenfield-2022-early-dynastic-ur
+      loc: "Abstract"
+      quote: "Early Dynastic Ur (2900–2350 BC)"
+    method: expert-estimate
+    note: >-
+      The start of the Early Dynastic period, the earliest time the paper describes these herds for. The herds were older, as the broader tradition says; water buffalo and zebu reached southern Mesopotamia from the Indus in the mid to late third millennium BCE, as the same paper has it, and are not added here.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in greenfield-2022-early-dynastic-ur.txt (sha256 6b46031795fbe1ac), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["59"] }
+    source:
+      ref: src:greenfield-2022-early-dynastic-ur
+      loc: "Abstract"
+      quote: "Ur, in present-day southern Iraq, was one of the largest and most important of these cities"
+    method: editorial
+    note: >-
+      Region 59 (Iraq), which holds Ur and southern Mesopotamia.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in greenfield-2022-early-dynastic-ur.txt (sha256 6b46031795fbe1ac), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [farmers, townspeople]
+    source:
+      - ref: src:greenfield-2022-early-dynastic-ur
+        loc: "Introduction"
+        quote: "Irrigation-based agriculture and large herds of domesticated animals were the twin mainstays of the region’s economy and diet."
+      - ref: src:greenfield-2022-early-dynastic-ur
+        loc: "Abstract"
+        quote: "Ur, in present-day southern Iraq, was one of the largest and most important of these cities"
+    method: editorial
+    note: >-
+      Farmers and the people of the cities alike: the herds belonged to the temples, the palace and households of the cities, and grazed the land round them.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in greenfield-2022-early-dynastic-ur.txt (sha256 6b46031795fbe1ac), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  livestock:
+    prop: livestock
+    value: [life/taxa/ovis-aries, life/taxa/capra-hircus, life/taxa/bos-taurus, life/taxa/sus-domesticus]
+    source:
+      - ref: src:greenfield-2022-early-dynastic-ur
+        loc: "Introduction, \"Context\""
+        quote: "These herds were dominated by sheep and goats and, to a lesser degree, bovines (domestic cattle)"
+      - ref: src:greenfield-2022-early-dynastic-ur
+        loc: "Introduction"
+        quote: "Notably, privately owned animals such as pigs"
+    method: excavation
+    note: >-
+      Sheep and goats first, then cattle; pigs were kept privately and appear in the bones more than in the texts.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in greenfield-2022-early-dynastic-ur.txt (sha256 6b46031795fbe1ac), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+relations:
+  member-of:
+    rel: member-of
+    to: people/husbandry/fertile-crescent-farm-animals
+    unsourced: An editorial grouping.

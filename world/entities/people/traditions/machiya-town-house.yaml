@@ -1,0 +1,114 @@
+id: people/traditions/machiya-town-house
+kind: tradition/building
+summary: >-
+  The town house (machiya) of Japan's craftsmen and merchants, the townspeople (chōnin): a timber house on a narrow,
+  deep plot, built hard against the street with a shop at the front, an earth-floored passage (tōriniwa) running the
+  length of the house to the storehouses and workshops behind, and raised-floored rooms beside it; often of two storeys
+  under the eaves that overhung the street. In Edo-period Kyoto the standard frontage was about 6 m. Over the centuries
+  roofs of shingles weighted with stones, or of thatch, gave way to tiles, and walls of exposed timber to thick
+  plaster, against fire. Its towns are laid out as castle towns often were, on a grid.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Town house of Japan (machiya) }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: { lo: 901 CE, hi: 1000 CE }
+    source:
+      - ref: src:jaanus-dictionary
+        loc: s.v. machiya
+        quote: >-
+          the term was already in use in the mid-Heian period, since it is included in the 10th-century dictionary of
+          Japanese
+      - ref: src:jaanus-dictionary
+        loc: s.v. machiya
+        quote: >-
+          This seems to have referred to small houses outside the designated east and west market areas of the capital,
+          but facing the street and incorporating a space that served as a shop.
+    method: expert-estimate
+    note: >-
+      The tenth century, when the word is first written for small street-front houses with shops in the capital; late
+      Heian picture scrolls show rows of them. The oldest machiya standing is of 1607. No end is given: the source
+      carries the house into the Meiji period, past this record's span.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in jaanus-dictionary.txt (sha256 9d242cd750c47f8e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["124"] }
+    source:
+      - ref: src:jaanus-dictionary
+        loc: s.v. machiya
+        quote: This arrangement was particularly associated with the Kansai 関西 region and western Japan.
+      - ref: src:jaanus-dictionary
+        loc: s.v. machiya
+        quote: Notably in parts of the Kantō 関東, a different arrangement was widespread
+    method: editorial
+    note: Region 124 (Japan), for the towns of Kansai, western Japan and the Kantō the dictionary names.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in jaanus-dictionary.txt (sha256 9d242cd750c47f8e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [townspeople]
+    source:
+      ref: src:jaanus-dictionary
+      loc: s.v. machiya
+      quote: >-
+        the urban houses of craftsmen or artisans shokunin 職人 and merchants shōnin 商人, classes collectively referred
+        to as townspeople, chōnin 町人.
+    method: editorial
+    note: The house of the townspeople; the warriors' and nobles' houses in the same towns are not this one.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in jaanus-dictionary.txt (sha256 9d242cd750c47f8e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { plan: rectangular, width: 6, storeys: { lo: 1, hi: 2 }, walls: timber }
+    source:
+      - ref: src:jaanus-dictionary
+        loc: s.v. machiya
+        quote: The typical machiya plot was narrow but deep
+      - ref: src:jaanus-dictionary
+        loc: s.v. machiya
+        quote: >-
+          (approximately 6 m), was a standard maguchi in Kyoto during the Edo period, but a large machiya might have a
+          frontage of more than 10 ken (18-20 m).
+      - ref: src:jaanus-dictionary
+        loc: s.v. tōriniwa
+        quote: >-
+          which usually abutted the street directly and often occupied the entire frontage
+      - ref: src:jaanus-dictionary
+        loc: s.v. minka
+        quote: >-
+          The roof construction usually used the wagoyagumi system, and structures often had two stories called
+          nikaidate
+      - ref: src:jaanus-dictionary
+        loc: s.v. machiya
+        quote: >-
+          and from walls with the structural timbers exposed, to thick overall plastering
+    method: expert-estimate
+    note: >-
+      Rectangular and narrow across the street, deep behind; 6 m is the standard frontage (3 to 3.5 ken) of Edo-period
+      Kyoto, a large house reaching 18 to 20 m; the house took the whole frontage of its plot. No depth is given. One
+      or two storeys: "often" two, the upper floors at first low attics. Walls are of timber, plastered over in later
+      and richer houses (the vocabulary has no word for plaster over a frame). The roof is left out: shingle and
+      thatch gave way to tile over time, which the record cannot date, and its shape is not stated.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in jaanus-dictionary.txt (sha256 9d242cd750c47f8e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  town:
+    prop: town_form
+    value: { streets: grid }
+    source:
+      - ref: src:jaanus-dictionary
+        loc: s.v. jōkamachi
+        quote: Frequently, but not always, the town was laid out on a grid.
+      - ref: src:jaanus-dictionary
+        loc: s.v. minka
+        quote: Merchants' houses tended to be built in castle towns
+    method: expert-estimate
+    note: >-
+      The castle towns in which the dictionary puts the merchants' houses: often on a grid, though their roads were also
+      "frequently quite narrow, turned and twisted around" for defence. Kyoto's grid was older. A wall or a moat is not
+      claimed: only some castle towns were enclosed, or guarded by water on three sides.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in jaanus-dictionary.txt (sha256 9d242cd750c47f8e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

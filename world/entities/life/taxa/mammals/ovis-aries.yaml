@@ -1,0 +1,39 @@
+id: life/taxa/ovis-aries
+kind: taxon
+summary: >-
+  Domestic sheep, descended from the wild sheep of south-west Asia.
+same_as: { ott: 70819 }
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: "domestic sheep", la: "Ovis aries" }
+    source: { ref: src:opentree-taxonomy-3.7, loc: "tnrs/match_names: Ovis aries, ott70819" }
+    note: Open Tree gives the scientific name; the English name is an editorial gloss.
+  length:
+    prop: body_length
+    value: { lo: 1.2, hi: 1.8 }
+    source:
+      ref: src:animal-diversity-web
+      loc: "account of Ovis aries, Physical Description"
+      quote: "Head and body length is 1,200-1,800 mm"
+    method: compilation
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in animal-diversity-web.txt (sha256 5ae3d0bcfbf74dd9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  mass:
+    prop: body_mass
+    value: { lo: 20, hi: 200 }
+    source:
+      ref: src:animal-diversity-web
+      loc: "account of Ovis aries, Other Physical Features"
+      quote: "Range mass 20 to 200 kg"
+    method: compilation
+    note: >-
+      The range of today's breeds; animals of the past were often smaller, and no figure for them was read.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in animal-diversity-web.txt (sha256 5ae3d0bcfbf74dd9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+relations:
+  parent:
+    rel: descends-from
+    to: life/taxa/bovidae
+    source: { ref: src:opentree-taxonomy-3.7, loc: "taxonomy/taxon_info ott70819 with include_lineage: Ovis aries lies within Bovidae" }

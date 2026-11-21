@@ -1,0 +1,26 @@
+id: src:wikipedia-han-dynasty
+type: database-record
+kind: review
+citation: >-
+  "Han dynasty." Wikipedia, the free encyclopedia (English edition), revision 1386259962.
+snapshot: 2026-11-20
+title: Han dynasty
+container: Wikipedia
+url: https://en.wikipedia.org/w/index.php?title=Han_dynasty&oldid=1386259962
+license: CC-BY-SA-4.0
+license_note: Short quotes, with credit.
+reliability: >-
+  A general encyclopedia article, cited for the Han house, household and town walls because no study of Han houses
+  could be read here. The sentences cited are footnoted to standard works: the timber building and the courtyard house
+  to Ebrey (1999), p. 76, Wang Zhongshu (1982), Han Civilization, pp. 1–40, Steinhardt (2004) and Thorp (1986) in The
+  Art Bulletin; the rammed-earth city walls to Wang (1982) and Chang Chun-shu (2007), The Rise of the Chinese Empire,
+  vol. II, among others; the household of four to five to Hinsch (2002), Women in Imperial China, pp. 46–47, and Ch'ü
+  T'ung-tsu (1972), Han Social Structure, pp. 3–10. None was read here. It speaks of the whole empire and places nothing
+  in a region, and what it says of houses rests on models and pictures from tombs, as it says itself. Wang (1982)
+  should replace it.
+verified:
+  by: machine:claude-code
+  how: >-
+    The article's HTML, rendered from revision 1386259962, fetched from Wikipedia on 20 November 2026 and read as text,
+    with the reference marks taken out; the quotes checked by script against that text, and their footnotes matched to
+    the works they cite, by author, year and page as the footnotes give them.

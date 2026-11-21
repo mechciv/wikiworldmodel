@@ -1,0 +1,198 @@
+id: people/traditions/north-china-adobe-courtyard-house
+kind: tradition/building
+summary: >-
+  The house of the villages of the North China plain under the Ming and Qing, as a missionary who lived among them
+  described it in 1899: a main building of three divisions at the north end of a small walled yard, facing south, with
+  side buildings at right angles where they were needed; walls of sun-dried adobe brick on a footing of fired brick, a
+  roof of earth spread over reeds or sorghum stalks on purlins, an earthen floor, and a bed of adobe brick, the k'ang,
+  warmed by the smoke of the cooking fire. The villages were crowded clusters of thirty to a thousand families, many
+  within an earthen rampart, and many of the small walled cities were large villages of the same kind. No end is
+  given: it was the ordinary house when he wrote.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Adobe courtyard house of the North China plain }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: { lo: 1368 CE, hi: 1400 CE }
+    source:
+      - ref: src:wikipedia-siheyuan
+        loc: opening section
+        quote: >-
+          Siheyuan originated in the Han Dynasty (206 BCE – 220 CE) and became popular during the Ming (1368–1644) and
+          Qing (1644–1912) dynasties.
+      - ref: src:smith-1899-village-life-in-china
+        loc: 'chapter II, "Construction of Villages", first paragraph (p. 20)'
+        quote: >-
+          It is nearly 500 years since the great raid of the nephew of Hung Wu, founder of the Ming Dynasty, from the
+          southern capital of China, to what is now known as Peking
+      - ref: src:smith-1899-village-life-in-china
+        loc: 'chapter II, "Construction of Villages", first paragraph (p. 20)'
+        quote: >-
+          Certain it is that throughout great regions of the plain of northern China, the inhabitants have no other
+          knowledge of their origin than that they came from that city.
+    method: expert-estimate
+    note: >-
+      Between the first year of the Ming, under which the encyclopedia has the courtyard house become popular, and about
+      1400: Smith, writing in 1899, has the villages of the plain settled by people moved there after a war "nearly 500
+      years" before, and their people knowing no other origin. That is a tradition he reports, not a record, and it
+      dates the villages and not the house: his account of the house is of what he saw from the 1870s to the 1890s, and
+      nothing read describes a village house of the plain in the centuries between. The house is surely older; its
+      earlier form is the broader record's. No end is given, and none is known from what was read.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-siheyuan.txt (sha256 6f6140321b8817ea) and smith-1899-village-life-in-china.txt (sha256 924989bcd4918bb0), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["116", "120"] }
+    source:
+      - ref: src:smith-1899-village-life-in-china
+        loc: 'chapter I, "The Chinese Village" (pp. 15–19), last paragraph'
+        quote: >-
+          there are thousands of square miles in southern and central Chih-li, western and southwestern Shan-tung, and
+          northern Ho-nan, where the villages are as thick as in this one tract
+      - ref: src:wikipedia-siheyuan
+        loc: section "Siheyuan in other areas"
+        quote: >-
+          In the northeast, land is abundant but the weather is cold, so courtyards are built broad and large to
+          increase the exposure to sunlight, and there are more open areas inside the walls.
+      - ref: src:wikipedia-kang-heated-platform
+        loc: section "Culture"
+        quote: >-
+          The kang was also an important feature of traditional dwellings in often-frigid Manchuria, where it was known
+          as nahan in Manchu.
+    method: editorial
+    note: >-
+      Region 120 (Northern China), which holds Hebei (Smith's Chih-li), Shandong and Henan, by their chief cities'
+      coordinates against the region outlines: the plain Smith describes. Region 116 (Northeastern China) rests on two
+      sentences of the encyclopedia only, that courtyard houses were built there with broader courts and that the
+      houses of Manchuria had the heated bed; no account of a farmhouse of the north-east was read, and what is said
+      here of walls, roof and size is Smith's of the plain, carried there on that footing. The house is not claimed for
+      all of either region: Smith himself notes houses of stone in the mountains and caves in the loess.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in smith-1899-village-life-in-china.txt (sha256 924989bcd4918bb0), wikipedia-siheyuan.txt (sha256 6f6140321b8817ea) and wikipedia-kang-heated-platform.txt (sha256 9f25ab3fd6f923c9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [farmers, townspeople]
+    source:
+      - ref: src:smith-1899-village-life-in-china
+        loc: 'chapter II, "Construction of Villages" (the index puts the arrangement of a courtyard at p. 25)'
+        quote: >-
+          However numerous or however wealthy the family, this is the normal type of its dwelling. In cities this type
+          is greatly modified by the exigencies of the contracted space at disposal, but in the country it rules
+          supreme.
+      - ref: src:smith-1899-village-life-in-china
+        loc: 'chapter II, "Construction of Villages" (the index puts adobe houses at p. 23)'
+        quote: Where the roofs are flat, they serve as depositories for the crops, and for fuel.
+      - ref: src:smith-1899-village-life-in-china
+        loc: 'chapter I, "The Chinese Village", first paragraph (p. 15)'
+        quote: >-
+          Many of the district cities, capitals of divisions analogous to what we call counties, are merely large
+          villages with a wall and with government bureaus called yamêns.
+    method: editorial
+    note: >-
+      Farmers: the house of the country, where it "rules supreme", its roof a store for the crops. Townspeople: many of
+      the county towns were large villages within a wall, and in the cities the same type was built, altered to fit
+      less ground. He does not describe the larger houses of the great cities, and they are not this record's. No form
+      is given for the towns: Smith says that every city had a wall, lying roughly four-square, but not what it was
+      built of, and he describes the streets of villages, not of cities.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in smith-1899-village-life-in-china.txt (sha256 924989bcd4918bb0), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { length: { lo: 9.1, hi: 11 }, rooms: { lo: 2, hi: 3 }, walls: mudbrick, roof_material: earth, floor: ground }
+    source:
+      - ref: src:smith-1899-village-life-in-china
+        loc: 'chapter II, "Construction of Villages" (the index puts the arrangement of a courtyard at p. 25)'
+        quote: >-
+          The houses are generally built on the north end of the space reserved as a courtyard, so as to face the
+          south, and if additional structures are needed they are placed at right angles to the main one, facing east
+          and west.
+      - ref: src:smith-1899-village-life-in-china
+        loc: 'chapter II, "Construction of Villages" (the index puts the arrangement of a courtyard at p. 25)'
+        quote: >-
+          one division of a house will not often exceed ten or twelve feet in length, by a little less in width from
+          front to back. An ordinary house will comprise three of these divisions, though there may be but one
+          partition, forming one double and one single room.
+      - ref: src:smith-1899-village-life-in-china
+        loc: 'chapter II, "Construction of Villages" (the index puts adobe houses at p. 23)'
+        quote: >-
+          The vast majority of country dwellings are made simply of the soil, moulded into adobe bricks, dried till
+          they cease to shrink.
+      - ref: src:smith-1899-village-life-in-china
+        loc: 'chapter II, "Construction of Villages" (the index puts adobe houses at p. 23)'
+        quote: >-
+          The roof is meant to be supported by posts, no matter of what material the house is built, and this material
+          is regarded as only the filling between them, but in the cheaper houses, the posts are often omitted to save
+          expense.
+      - ref: src:smith-1899-village-life-in-china
+        loc: 'chapter II, "Construction of Villages" (the index puts adobe houses at p. 23)'
+        quote: >-
+          In either case the timbers running lengthwise of the building support small purlines upon which rest thin
+          bricks, or more frequently reeds, mats, or sorghum stalks, over which is spread the earth which forms the
+          greater part of all roofs.
+      - ref: src:smith-1899-village-life-in-china
+        loc: 'chapter II, "Construction of Villages", the paragraph on the floor and what stands on it'
+        quote: The floor of all common dwellings is merely the earth
+    method: documentary
+    note: >-
+      An eyewitness's account, in round figures and not measured. The court, the single storey and the ridged roof are
+      the broader record's; Smith's ordinary roof frame is of king and queen posts, read here as a pitched roof, and he
+      also knows flat roofs and thatched ones. Here: the length is that of the main building, three divisions each of no
+      more than "ten or twelve feet", so at most 30 to 36 feet, 9.1 to 11 m; he gives its depth from front to back only
+      as "a little less" than a division's length, and it is left out, as is the size of the yard, which he calls small.
+      Three divisions made two rooms where there was one partition, and three at most. Adobe is sun-dried brick, the
+      vocabulary's mudbrick, laid on a footing of fired brick with a course of reeds against the damp; the roof is
+      earth over reeds, mats or sorghum stalks on purlins, and in the better houses posts carried it. A bed of adobe
+      brick, the k'ang, heated by flues from the cooking fire, stood in the room: the vocabulary has no word for it.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in smith-1899-village-life-in-china.txt (sha256 924989bcd4918bb0), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  settlement:
+    prop: settlement_form
+    value: { pattern: nucleated, houses: { lo: 30, hi: 1000 }, household: 5 }
+    source:
+      - ref: src:smith-1899-village-life-in-china
+        loc: 'chapter II, "Construction of Villages" (the index puts streets, alleys and overcrowding at p. 21)'
+        quote: >-
+          A village is thus a city in miniature, having all the evils of over-crowding, though it may be situated in
+          the midst of a wide and comparatively uninhabited plain.
+      - ref: src:smith-1899-village-life-in-china
+        loc: 'chapter I, "The Chinese Village" (pp. 15–19), the second count of villages'
+        quote: >-
+          there are sixty-four villages, the smallest having thirty families and the largest more than 1,000, while the
+          average is 188 families.
+      - ref: src:smith-1899-village-life-in-china
+        loc: 'chapter I, "The Chinese Village" (pp. 15–19), the second count of villages'
+        quote: >-
+          The number of persons to a "family" was still taken at five, though, as he pointed out, this is a totally
+          inadequate allowance.
+      - ref: src:smith-1899-village-life-in-china
+        loc: 'chapter I, "The Chinese Village" (pp. 15–19), the first count of villages'
+        quote: >-
+          The villages were 150 in number, and the average size was taken as eighty families, which, reckoning five
+          persons to the family, gave a total of 60,000 persons.
+    method: documentary
+    note: >-
+      Crowded villages, the yards opening on narrow alleys off a crooked street, many within an earthen rampart that he
+      says was seldom more than fifteen or twenty feet high. The houses are his families, one to a yard: in the tract he
+      had counted, east of the sub-prefecture of Lin Ch'ing and some three miles in radius, 64 villages of thirty to
+      more than a thousand families, 188 on average; in an earlier and rougher count of 150 villages round a foreign
+      residence the average was taken as eighty. Five persons to a family is the reckoning he used in both, not a
+      count: the villager who made the second list told him it was far too low, since families that lived with all
+      things in common, some of twenty people, were each counted once. It is written as he used it, and the true
+      household was larger by an amount he does not give.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in smith-1899-village-life-in-china.txt (sha256 924989bcd4918bb0), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+relations:
+  broader:
+    rel: member-of
+    to: people/traditions/north-china-courtyard-house
+    source:
+      ref: src:smith-1899-village-life-in-china
+      loc: 'chapter II, "Construction of Villages" (the index puts the arrangement of a courtyard at p. 25)'
+      quote: >-
+        If the premises are large, the front wall of the yard is formed by another house, similar to the one in the
+        rear, and like it having side buildings.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in smith-1899-village-life-in-china.txt (sha256 924989bcd4918bb0), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

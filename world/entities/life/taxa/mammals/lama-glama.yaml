@@ -1,0 +1,37 @@
+id: life/taxa/lama-glama
+kind: taxon
+summary: >-
+  Llamas, the larger domestic camelid of the Andes, descended from the guanaco.
+same_as: { ott: 986973 }
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: "llamas", la: "Lama glama" }
+    source: { ref: src:opentree-taxonomy-3.7, loc: "tnrs/match_names: Lama glama, ott986973" }
+    note: Open Tree gives the scientific name; the English name is an editorial gloss.
+  length:
+    prop: body_length
+    value: { lo: 0.92, hi: 1.6 }
+    source:
+      ref: src:animal-diversity-web
+      loc: "account of Lama glama, Other Physical Features"
+      quote: "Range length .92 to 1.6 m"
+    method: compilation
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in animal-diversity-web.txt (sha256 5ae3d0bcfbf74dd9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  mass:
+    prop: body_mass
+    value: { lo: 130, hi: 155 }
+    source:
+      ref: src:animal-diversity-web
+      loc: "account of Lama glama, Other Physical Features"
+      quote: "Range mass 130 to 155 kg"
+    method: compilation
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in animal-diversity-web.txt (sha256 5ae3d0bcfbf74dd9), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+relations:
+  parent:
+    rel: descends-from
+    to: life/taxa/camelidae
+    source: { ref: src:opentree-taxonomy-3.7, loc: "taxonomy/taxon_info ott986973 with include_lineage: Lama glama lies within Camelidae" }

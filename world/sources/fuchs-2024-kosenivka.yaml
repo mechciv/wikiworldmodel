@@ -1,0 +1,35 @@
+id: src:fuchs-2024-kosenivka
+type: publication
+kind: measurement
+citation: >-
+  Fuchs, K., Hofmann, R., Shatilo, L., Schlütz, F., Storch, S., Chabanyuk, V., Kirleis, W. & Müller, J. (2024). Life and
+  death in Trypillia times: Interdisciplinary analyses of the unique human remains from the settlement of Kosenivka,
+  Ukraine (3700–3600 BCE). PLOS ONE 19(12), e0289769.
+authors:
+  - "Fuchs, K."
+  - "Hofmann, R."
+  - "Shatilo, L."
+  - "Schlütz, F."
+  - "Storch, S."
+  - "Chabanyuk, V."
+  - "Kirleis, W."
+  - "Müller, J."
+published: 2024
+title: >-
+  Life and death in Trypillia times: Interdisciplinary analyses of the unique human remains from the settlement of
+  Kosenivka, Ukraine (3700–3600 BCE)
+container: PLOS ONE
+doi: 10.1371/journal.pone.0289769
+url: https://europepmc.org/article/PMC/PMC11633957
+license: CC-BY-4.0
+reliability: >-
+  A study of the bones of seven people found in one burnt house at Kosenivka in central Ukraine. It is cited for the
+  account of the Cucuteni–Trypillia societies in its introduction, their dates, lands, phases and settlements, which
+  sums up the work of its authors' own project and of others, and for the size of household it reckons with, which
+  is Cook's for a nuclear family anywhere and no measure of these households.
+verified:
+  by: machine:claude-code
+  how: >-
+    Full text read as text from Europe PMC's REST service (PMC11633957, fullTextXML) on 20 November 2026: the abstract,
+    the introduction with its account of the Cucuteni–Trypillia phenomena and of Kosenivka, the section "Archaeological
+    analogies" and the conclusion. Quotes checked by script against that text.

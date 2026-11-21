@@ -166,3 +166,27 @@ claims:
       quote: "At its height (ca. 2900 BC), Uruk's population may have topped 50,000 people"
     method: expert-estimate
     note: A gazetteer's description, with no source named, and "may have".
+  town-form:
+    prop: town_form
+    value: { streets: canals, wall_height: { lo: 12, hi: 15 } }
+    valid: { lo: 3100 BCE }
+    source:
+      - ref: src:wikipedia-uruk
+        loc: section "History"
+        quote: Uruk was extremely well penetrated by a canal system that has been described as "Venice in the desert"
+      - ref: src:wikipedia-uruk
+        loc: section "Archaeology"
+        quote: >-
+          this 40-to-50-foot (12 to 15 m) high brick wall, probably utilized as a defense mechanism, totally encompassed the
+          city at a length of 9 km (5.6 mi)
+      - ref: src:wikipedia-uruk
+        loc: section "Archaeological levels of Uruk"
+        quote: "Uruk III Jemdet Nasr period (3100–2900 BC): the 9 km city wall is built"
+    method: excavation
+    note: >-
+      Canals through the city, and from the Jemdet Nasr period a brick wall 12 to 15 m high round it, 9 km long. The article
+      says "brick" and not whether sun-dried or fired, so no wall material is claimed and the wall is drawn only where a
+      tradition gives one; the height stands for it then. The canals are not dated in the article, and are held here with the
+      wall. An encyclopedia, as no excavation report could be read.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-uruk.txt (sha256 3882189dc2c1cdd8), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

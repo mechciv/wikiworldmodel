@@ -1,0 +1,117 @@
+id: src:gelabert-2025-lbk-first-farmers
+type: publication
+kind: measurement
+citation: >-
+  Gelabert, P., Bickle, P., Hofmann, D., Teschler-Nicola, M., Anders, A., Huang, X., Hämmerle, M., … Pinhasi, R. & Reich,
+  D. (2025). Social and genetic diversity in first farmers of central Europe. Nature Human Behaviour 9(1), 53–64.
+authors:
+  - "Gelabert, P."
+  - "Bickle, P."
+  - "Hofmann, D."
+  - "Teschler-Nicola, M."
+  - "Anders, A."
+  - "Huang, X."
+  - "Hämmerle, M."
+  - "Olalde, I."
+  - "Fournier, R."
+  - "Ringbauer, H."
+  - "Akbari, A."
+  - "Cheronet, O."
+  - "Lazaridis, I."
+  - "Broomandkhoshbacht, N."
+  - "Fernandes, D.M."
+  - "Buttinger, K."
+  - "Callan, K."
+  - "Candilio, F."
+  - "Morante, G.B."
+  - "Curtis, E."
+  - "Ferry, M."
+  - "Keating, D."
+  - "Freilich, S."
+  - "Kearns, A."
+  - "Harney, É."
+  - "Lawson, A.M."
+  - "Mandl, K."
+  - "Michel, M."
+  - "Oberreiter, V."
+  - "Zagorc, B."
+  - "Oppenheimer, J."
+  - "Sawyer, S."
+  - "Schattke, C."
+  - "Özdoğan, K.T."
+  - "Qiu, L."
+  - "Workman, J.N."
+  - "Zalzala, F."
+  - "Mallick, S."
+  - "Mah, M."
+  - "Micco, A."
+  - "Pieler, F."
+  - "Pavuk, J."
+  - "Šefčáková, A."
+  - "Lazar, C."
+  - "Starović, A."
+  - "Djuric, M."
+  - "Škrivanko, M.K."
+  - "Šlaus, M."
+  - "Bedić, Ž."
+  - "Novotny, F."
+  - "Szabó, L.D."
+  - "Cserpák-Laczi, O."
+  - "Hága, T."
+  - "Szolnoki, L."
+  - "Hajdú, Z."
+  - "Mirea, P."
+  - "Nagy, E.G."
+  - "Virág, Z.M."
+  - "Horváth, A.M."
+  - "Horváth, L.A."
+  - "Biró, K.T."
+  - "Domboróczki, L."
+  - "Szeniczey, T."
+  - "Jakucs, J."
+  - "Szelekovszky, M."
+  - "Farkas, Z."
+  - "Sztáncsuj, S.J."
+  - "Tóth, K."
+  - "Csengeri, P."
+  - "Pap, I."
+  - "Patay, R."
+  - "Putica, A."
+  - "Vasov, B."
+  - "Havasi, B."
+  - "Sebők, K."
+  - "Raczky, P."
+  - "Lovász, G."
+  - "Tvrdý, Z."
+  - "Rohland, N."
+  - "Novak, M."
+  - "Ruttkay, M."
+  - "Krošláková, M."
+  - "Bátora, J."
+  - "Paluch, T."
+  - "Borić, D."
+  - "Dani, J."
+  - "Kuhlwilm, M."
+  - "Palamara, P.F."
+  - "Hajdu, T."
+  - "Pinhasi, R."
+  - "Reich, D."
+published: 2025
+title: Social and genetic diversity in first farmers of central Europe
+container: Nature Human Behaviour
+doi: 10.1038/s41562-024-02034-z
+url: https://europepmc.org/article/PMC/PMC11774665
+license: CC-BY-4.0
+via: The authors' accepted manuscript as deposited in PubMed Central (PMC11774665), not the journal's typeset version.
+reliability: >-
+  A genetic study of 250 people of the Linearbandkeramik and its forerunners. It is cited for the summary of the
+  culture's dates and spread in its introduction, which rests on Bánffy (2019) and Bickle & Whittle (2013), not read
+  here. The paper was published online on 29 November 2024 and in the issue of January 2025; the names of the authors
+  are as the deposited record gives them.
+verified:
+  by: machine:claude-code
+  how: >-
+    The authors' manuscript read as text from Europe PMC's REST service (PMC11774665, fullTextXML) on 20 November 2026:
+    the abstract and the introduction, and the rest searched for what it says of houses and farming. The volume, issue
+    and pages are from that record. Quotes checked by script against that text; the journal's typeset version, which
+    may differ in wording, was not read.

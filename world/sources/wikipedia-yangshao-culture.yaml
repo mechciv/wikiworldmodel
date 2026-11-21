@@ -1,0 +1,25 @@
+id: src:wikipedia-yangshao-culture
+type: database-record
+kind: review
+citation: >-
+  "Yangshao culture." Wikipedia, the free encyclopedia (English edition), revision 1379047029.
+snapshot: 2026-11-20
+title: Yangshao culture
+container: Wikipedia
+url: https://en.wikipedia.org/w/index.php?title=Yangshao_culture&oldid=1379047029
+license: CC-BY-SA-4.0
+license_note: Short quotes, with credit.
+reliability: >-
+  A general encyclopedia article, cited for how a Yangshao house was built because the synthesis of the Yellow River's
+  Neolithic houses that was sought (Lü and others 2021, in Land) is on MDPI's site, which refused the request, and the
+  excavation reports are in Chinese. Its paragraphs on the kinds of house, on the pit, the wattle and the thatched roof,
+  and on the late Yangshao houses cite nothing. Its phases are footnoted to Liu and Chen (2012), The Archaeology of
+  China, pp. 190–191; its sentences on the size of villages and on shifting cultivation to a world-history textbook
+  (Pollard 2015, Worlds Together, Worlds Apart, pp. 69–70) and, for the farming, to Wang and others in The Holocene.
+  None was read here. Liu and Chen (2012) should replace it.
+verified:
+  by: machine:claude-code
+  how: >-
+    The article's HTML, rendered from revision 1379047029, fetched from Wikipedia on 20 November 2026 and read as text,
+    with the reference marks taken out; the quotes checked by script against that text, and their footnotes matched to
+    the works they cite.
