@@ -1,0 +1,24 @@
+id: src:krapf-1860-travels-in-eastern-africa
+type: text
+kind: eyewitness
+citation: >-
+  Krapf, J.L. Travels, Researches, and Missionary Labours, during an eighteen years' residence in Eastern Africa. London:
+  Trübner and Co., 1860.
+authors:
+  - "Krapf, J.L."
+published: 1860
+written: { lo: 1851 CE, hi: 1860 CE }
+title: Travels, Researches, and Missionary Labours, during an eighteen years' residence in Eastern Africa
+url: https://archive.org/details/travelsresearch00ravegoog
+via: The Internet Archive's copy of Google's scan of the book (travelsresearch00ravegoog), read in its OCR text.
+license: public domain
+reliability: >-
+  A missionary at Rabai near Mombasa from 1844, who went twice into Ukambani (1849 and 1851). His account of the Wakuafi
+  and Maasai stands in the narrative of his second journey there, of 1851, and rests on what he learnt from others: he
+  did not live in a Maasai settlement.
+verified:
+  by: machine:claude-code
+  how: >-
+    The section "The Wakuafi and Masai tribes" (pp. 358-364) and the start of his second journey (p. 213) read on 20 November 2026 in the OCR text of the scan, fetched
+    from the Internet Archive; the quotes were checked by script against it. The publisher is read from the title page in the
+    OCR, and agrees with the Internet Archive's catalogue.

@@ -1,0 +1,28 @@
+id: src:min-zhang-2026-yangtze-delta-dwellings
+type: publication
+kind: measurement
+citation: >-
+  Min, T. & Zhang, T. (2026). Climate resilience mechanisms of vernacular dwellings in China's Yangtze River delta
+  region: a study based on a multi-level analytical framework. Scientific Reports 16, 22749.
+authors:
+  - "Min, T."
+  - "Zhang, T."
+published: 2026
+title: >-
+  Climate resilience mechanisms of vernacular dwellings in China's Yangtze River delta region: a study based on a
+  multi-level analytical framework
+container: Scientific Reports
+doi: 10.1038/s41598-026-53874-w
+url: https://www.ebi.ac.uk/europepmc/webservices/rest/PMC13385705/fullTextXML
+license: CC-BY-NC-ND-4.0
+via: Europe PMC (PMC13385705).
+reliability: >-
+  A study of how the old houses of the Yangtze delta keep cool and warm, from the authors' field surveys of 705 houses
+  in 35 historic towns of Jiangsu, Zhejiang, Anhui and Shanghai between 2014 and 2025, 158 of them measured. It is a
+  study of climate, not of the house's history: it does not date the houses it measured, and what it says of the towns
+  of the Ming and Qing is a sentence of background resting on works not read here.
+verified:
+  by: machine:claude-code
+  how: >-
+    The full text read from Europe PMC's XML on 20 November 2026 and kept as text; the sections on the study area, the
+    survey and the sky-well read in full and the rest searched; the quotes checked by script against that text.

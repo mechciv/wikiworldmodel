@@ -1,0 +1,23 @@
+id: src:hayami-2010-population-family-central-japan
+type: publication
+kind: measurement
+citation: >-
+  Hayami, A. (2010). Population and Family in Early-modern Central Japan. Nichibunken Monograph Series 11. Kyoto:
+  International Research Center for Japanese Studies.
+authors:
+  - "Hayami, A."
+published: 2010
+title: Population and Family in Early-modern Central Japan
+container: International Research Center for Japanese Studies (Nichibunken)
+url: https://nichibun.repo.nii.ac.jp/records/162
+via: The Nichibunken repository, chapter by chapter.
+reliability: >-
+  The historical demographer who founded the study of Tokugawa village registers (shūmon aratame chō), on the Nōbi
+  plain (Owari and Mino provinces), from the registers and the domains' village surveys. Chapter 1 gives the average
+  household of the Owari Nagoya domain's villages in the 1670s and the 1830s; chapter 6 the people and households of one
+  farming village, Nishijo, year by year from 1773 to 1869.
+verified:
+  by: machine:claude-code
+  how: >-
+    Chapters 1 and 6 fetched as PDFs from the Nichibunken repository on 20 November 2026, their text extracted with
+    PyMuPDF (the scans' text layer, with some errors of recognition) and read; the quotes checked by script against it.

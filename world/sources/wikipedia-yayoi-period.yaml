@@ -1,0 +1,19 @@
+id: src:wikipedia-yayoi-period
+type: database-record
+kind: review
+citation: >-
+  "Yayoi period." Wikipedia, the free encyclopedia (English edition), revision 1379321741.
+snapshot: 2026-11-20
+title: Yayoi period
+container: Wikipedia
+url: https://en.wikipedia.org/w/index.php?title=Yayoi_period&oldid=1379321741
+license: CC-BY-SA-4.0
+license_note: Short quotes, with credit.
+reliability: >-
+  A general encyclopedia article, cited only for the rice paddies of the Yayoi period, because no study of Yayoi fields
+  could be read here; the sentence on bounded paddy fields quotes Hudson, not read here.
+verified:
+  by: machine:claude-code
+  how: >-
+    The article's HTML for revision 1379321741, fetched through the MediaWiki parse API on 20 November 2026 and read as
+    text with the reference marks taken out; the quotes checked by script against that text.

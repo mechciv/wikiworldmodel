@@ -1,0 +1,27 @@
+id: src:gao-2021-sunken-cave-dwellings
+type: publication
+kind: measurement
+citation: >-
+  Gao, J. (2021). Sunken cave dwellings – seen from typological & anthropological perspectives. The International
+  Archives of the Photogrammetry, Remote Sensing and Spatial Information Sciences XLVI-M-1-2021, 241–248.
+authors:
+  - "Gao, J."
+published: 2021
+title: Sunken cave dwellings – seen from typological & anthropological perspectives
+container: >-
+  The International Archives of the Photogrammetry, Remote Sensing and Spatial Information Sciences XLVI-M-1-2021,
+  241–248
+doi: 10.5194/isprs-archives-XLVI-M-1-2021-241-2021
+url: https://isprs-archives.copernicus.org/articles/XLVI-M-1-2021/241/2021/isprs-archives-XLVI-M-1-2021-241-2021.pdf
+license: CC-BY-4.0
+reliability: >-
+  A peer-reviewed conference paper by an author at McGill University, from the author's own measurement of 11
+  sunken-courtyard cave dwellings and their 104 caves in two villages of Sanmenxia, western Henan, with a laser meter,
+  and from talks with the people living in them. The depths of the caves cited here are from that survey: two villages of one district,
+  and the sunken-courtyard kind only. Its figure of forty million cave dwellers is taken from an assessment of 1981 that
+  was not read.
+verified:
+  by: machine:claude-code
+  how: >-
+    The paper's PDF fetched from the publisher (Copernicus) on 20 November 2026 and read as text; the quotes checked by
+    script against it. Volume and pages from the paper's own running foot and Crossref's record of the DOI.

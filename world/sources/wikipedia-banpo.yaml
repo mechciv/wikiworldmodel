@@ -1,0 +1,25 @@
+id: src:wikipedia-banpo
+type: database-record
+kind: review
+citation: >-
+  "Banpo." Wikipedia, the free encyclopedia (English edition), revision 1386725205.
+snapshot: 2026-11-20
+title: Banpo
+container: Wikipedia
+url: https://en.wikipedia.org/w/index.php?title=Banpo&oldid=1386725205
+license: CC-BY-SA-4.0
+license_note: Short quotes, with credit.
+reliability: >-
+  A general encyclopedia article on the best-known Yangshao village, cited for its houses and its people because the
+  excavation report (1963) is in Chinese and the studies of the site could not be read here. Its sentences on the sunken
+  floors, the timber poles and thatched roofs, and the population are footnoted to Liu Li (2020), "Banpocun, Archaeology
+  of", in the Encyclopedia of Global Archaeology, 2nd edition, pp. 1298–1302, and to Peterson's study of Jiangzhai in the
+  Journal of Anthropological Archaeology 31(3), 265–301 (2012); its opening sentence on round houses of mud and wood
+  rests on general works, among them Jarzombek and Prakash (2011), A Global History of Architecture, pp. 8–9. None was
+  read here. Liu (2020) should replace it.
+verified:
+  by: machine:claude-code
+  how: >-
+    The article's HTML, rendered from revision 1386725205, fetched from Wikipedia on 20 November 2026 and read as text,
+    with the reference marks taken out; the quotes checked by script against that text, and their footnotes matched to
+    the works they cite.

@@ -1,0 +1,192 @@
+id: people/traditions/yangshao-village-house
+kind: tradition/building
+summary: >-
+  The house of the Yangshao villages of the middle Yellow River, in the fifth and fourth millennia BCE: a round or
+  squarish house sunk about a metre into the loess, its walls of wattle plastered with mud, under a steep thatched
+  roof on timber poles, standing with a hundred or so others round an open space in the middle of a village ringed by
+  a ditch. It is known best from Banpo and Jiangzhai in the Wei valley; what is said of how it was built is from
+  encyclopedia articles, as the excavation reports are in Chinese and the syntheses could not be read. By the late
+  Yangshao square houses at ground level had become the commoner kind, and no size of a house is given in what was
+  read.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Sunken house of the Yangshao villages }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 7000 BP
+    source:
+      - ref: src:liu-2022-proto-sino-tibetan-migration
+        loc: 'section "Dadiwan of the Yangshao Culture", second paragraph'
+        quote: coinciding with the Yangshao culture (7000 to 5000 cal. BP)
+      - ref: src:liu-2022-proto-sino-tibetan-migration
+        loc: 'section "Dadiwan of the Yangshao Culture", first paragraph'
+        quote: >-
+          The Yangshao culture was centered in the Wei River valley during its early phase (ca. 7000 to 6000 cal. BP),
+          then expanded to the surrounding regions, particularly to the north and west, during its middle (Miaodigou
+          phase) and late phases (ca. 6000 to 4700 cal. BP), spreading over a very broad region in the middle and upper
+          Yellow River valley.
+    method: expert-estimate
+    note: >-
+      The beginning of the Yangshao culture as the paper dates it, in calibrated years before the present. The
+      encyclopedia has "around 5000 BC", which is the same.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in liu-2022-proto-sino-tibetan-migration.txt (sha256 0112a15e47cb6b15), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  end:
+    prop: end
+    value: { lo: 5000 BP, hi: 4700 BP }
+    source:
+      - ref: src:liu-2022-proto-sino-tibetan-migration
+        loc: 'section "Dadiwan of the Yangshao Culture", second paragraph'
+        quote: coinciding with the Yangshao culture (7000 to 5000 cal. BP)
+      - ref: src:liu-2022-proto-sino-tibetan-migration
+        loc: 'section "Dadiwan of the Yangshao Culture", first paragraph'
+        quote: >-
+          The Yangshao culture was centered in the Wei River valley during its early phase (ca. 7000 to 6000 cal. BP),
+          then expanded to the surrounding regions, particularly to the north and west, during its middle (Miaodigou
+          phase) and late phases (ca. 6000 to 4700 cal. BP), spreading over a very broad region in the middle and upper
+          Yellow River valley.
+    method: expert-estimate
+    note: >-
+      The paper ends the culture at 5000 cal. BP in one sentence and its late phase at about 4700 in another; the two
+      are the range. It is the end of the culture, not of the sunken house: the encyclopedia has square houses at
+      ground level become the commonest in the late Yangshao, from about 3500 BC, so that the house of this record was
+      giving way before the end written here.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in liu-2022-proto-sino-tibetan-migration.txt (sha256 0112a15e47cb6b15), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["119", "120"] }
+    source:
+      - ref: src:liu-2022-proto-sino-tibetan-migration
+        loc: 'section "Dadiwan of the Yangshao Culture", first paragraph'
+        quote: >-
+          The Yangshao culture was centered in the Wei River valley during its early phase (ca. 7000 to 6000 cal. BP),
+          then expanded to the surrounding regions, particularly to the north and west, during its middle (Miaodigou
+          phase) and late phases (ca. 6000 to 4700 cal. BP), spreading over a very broad region in the middle and upper
+          Yellow River valley.
+      - ref: src:wikipedia-yangshao-culture
+        loc: section "Phases"
+        quote: >-
+          The Early Yangshao period or Banpo phase (c. 5000–4000 BC) is represented by the Banpo, Jiangzhai,
+          Beishouling and Dadiwan sites in the Wei River valley in Shaanxi.
+      - ref: src:wikipedia-yangshao-culture
+        loc: section "Archaeological sites"
+        quote: >-
+          Yangshao, in Mianchi County, Sanmenxia, western Henan, the place which gave the culture its name, has a
+          museum next to the archaeological site.
+    method: editorial
+    note: >-
+      Region 119 (North Central China), which holds the Wei valley with Banpo and Jiangzhai, by the coordinates their
+      encyclopedia articles give, and Dadiwan, which the paper puts in Gansu; and region 120 (Northern China), which
+      holds western Henan and Yangshao village itself, by its county's coordinates, all against the region outlines.
+      The houses described are those of the Wei valley sites; for Henan the sources read name the culture's sites and
+      say nothing of their houses. The culture reached further, north and west, in its later phases; those regions are
+      not named, and the house is not claimed for all of either region.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in liu-2022-proto-sino-tibetan-migration.txt (sha256 0112a15e47cb6b15) and wikipedia-yangshao-culture.txt (sha256 9690f5e15f3ce0f5), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [farmers, shifting-cultivators]
+    source:
+      - ref: src:liu-2022-proto-sino-tibetan-migration
+        loc: 'section "Dadiwan of the Yangshao Culture", first paragraph'
+        quote: >-
+          The Yangshao culture that flourished in the middle Yellow River valley is characterized by sedentary villages,
+          production of painted pottery, domestication of pigs and dogs, and intensive dryland farming with broomcorn
+          millet
+      - ref: src:wikipedia-yangshao-culture
+        loc: section "Economy", "Subsistence"
+        quote: >-
+          The exact nature of early Yangshao agriculture, small-scale slash-and-burn cultivation versus intensive
+          agriculture in permanent fields, is currently a matter of debate. Once the soil was exhausted, residents
+          picked up their belongings, moved to new lands, and constructed new villages.
+      - ref: src:wikipedia-yangshao-culture
+        loc: section "Economy", "Subsistence"
+        quote: >-
+          During the late Yangshao period, the region became a fully settled farming society, with an economy centered
+          on growing crops and raising animals.
+    method: editorial
+    note: >-
+      Both, because the sources differ on which the villagers were. The paper has sedentary villages and intensive
+      dryland farming of millet. The encyclopedia has it a matter of debate whether the early villagers farmed
+      permanent fields or cut and burnt plots, moving and building new villages when the soil gave out, and has the
+      region fully settled only in the late Yangshao. Whichever the model of how people lived takes them for, these
+      were their houses.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in liu-2022-proto-sino-tibetan-migration.txt (sha256 0112a15e47cb6b15) and wikipedia-yangshao-culture.txt (sha256 9690f5e15f3ce0f5), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { plan: round, walls: wattle-and-daub, roof: conical, roof_material: thatch, floor: sunken }
+    source:
+      - ref: src:wikipedia-banpo
+        loc: opening section
+        quote: The houses at Banpo were circular, built of mud and wood on low foundations, with overhanging thatched roofs.
+      - ref: src:wikipedia-banpo
+        loc: section "Site"
+        quote: >-
+          Many of the houses were semi-subterranean with the floor typically 1 meter (3 ft) below the ground surface.
+          The houses were supported by timber poles and had steeply pitched thatched roofs.
+      - ref: src:wikipedia-yangshao-culture
+        loc: section "Structures"
+        quote: >-
+          Housing structures were categorized into five main types: small and medium round houses, small and medium
+          square or rectangular houses, and large square dwellings. These buildings were constructed either as
+          semi-subterranean homes, which provided insulation, or as ground-level structures.
+      - ref: src:wikipedia-yangshao-culture
+        loc: section "Structures"
+        quote: >-
+          Residential homes were typically built by digging a rounded rectangular pit around one meter deep. Then they
+          were rammed, and a lattice of wattle was woven over it. Then it was plastered with mud.
+      - ref: src:wikipedia-yangshao-culture
+        loc: section "Structures"
+        quote: >-
+          It was plastered with mud, and a framework of poles would be placed to make a cone shape for the roof. Poles
+          would be added to support the roof. It was then thatched with millet stalks.
+      - ref: src:wikipedia-yangshao-culture
+        loc: section "Structures"
+        quote: >-
+          In the late Yangshao period, architecture underwent significant changes. Square ground-level houses became
+          the most common form, and longhouses with multiple rooms began to appear.
+    method: excavation
+    note: >-
+      From two encyclopedia articles, which report what was excavated: nothing better could be read, and the paragraphs
+      on how a house was built cite no source. A floor sunk about a metre, walls of wattle plastered with mud, and a
+      roof of poles brought to a cone and thatched with millet stalks. Round is written, as the houses of Banpo are
+      said to have been; the same articles have square and rectangular houses beside the round ones, pits of a rounded
+      rectangle, and houses at ground level, which became the commoner kind in the late Yangshao. No size of a house
+      is given by anything read, and it is left to the generator. The few large square buildings, of which the paper
+      measures one at Dadiwan at 290 square metres, were public and are not drawn.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-banpo.txt (sha256 130534d6cf2e0b5f) and wikipedia-yangshao-culture.txt (sha256 9690f5e15f3ce0f5), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  settlement:
+    prop: settlement_form
+    value: { pattern: nucleated, houses: 100 }
+    source:
+      - ref: src:liu-2022-proto-sino-tibetan-migration
+        loc: 'section "Archaeological and Ethnographical Analogies in Settlement Pattern and Dancing–Drinking Rituals"'
+        quote: >-
+          typical Yangshao culture settlements are characterized by a centripetal layout, in which all the houses,
+          including large public buildings, were arranged with doors facing the central plaza, exemplified by the
+          Jiangzhai site in the Wei River valley
+      - ref: src:wikipedia-jiangzhai
+        loc: section "Site"
+        quote: The total area of the site is estimated at 50,000 m2, and consisted of a village with around 100 homes.
+      - ref: src:wikipedia-yangshao-culture
+        loc: section "Structures"
+        quote: Yangshao villages typically covered ten to fourteen acres and were composed of houses around a central square.
+      - ref: src:wikipedia-banpo
+        loc: section "Site"
+        quote: >-
+          Population estimates for the site typically range between 100-500 people, though estimations are limited
+          because of the large portion of the settlement still unexcavated.
+    method: excavation
+    note: >-
+      A village of houses set round an open space, their doors towards it, within a ditch. A hundred houses is
+      Jiangzhai, the one village dug to its edges, by the encyclopedia's report of Peterson and Shelach's study, which
+      could not be read; whether all hundred stood at once it does not say. The people of a house are not given: Banpo
+      is put at 100 to 500 people, with much of it undug, and that is not divided among its houses here.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in liu-2022-proto-sino-tibetan-migration.txt (sha256 0112a15e47cb6b15), wikipedia-jiangzhai.txt (sha256 98fb300a7f3b12c5), wikipedia-yangshao-culture.txt (sha256 9690f5e15f3ce0f5) and wikipedia-banpo.txt (sha256 130534d6cf2e0b5f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

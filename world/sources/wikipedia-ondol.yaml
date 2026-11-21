@@ -1,0 +1,20 @@
+id: src:wikipedia-ondol
+type: database-record
+kind: review
+citation: >-
+  "Ondol." Wikipedia, the free encyclopedia (English edition), revision 1384941741.
+snapshot: 2026-11-20
+title: Ondol
+container: Wikipedia
+url: https://en.wikipedia.org/w/index.php?title=Ondol&oldid=1384941741
+license: CC-BY-SA-4.0
+license_note: Short quotes, with credit.
+reliability: >-
+  A general encyclopedia article on the Korean heated floor, tagged for clean-up, cited for when the ondol came into the
+  thatched houses of ordinary people, because no study could be read here. That sentence carries no footnote; the
+  article's history section draws on the Annals of the Joseon Dynasty.
+verified:
+  by: machine:claude-code
+  how: >-
+    The article's HTML for revision 1384941741, fetched through the MediaWiki parse API on 20 November 2026 and read as
+    text with the reference marks taken out; the quotes checked by script against that text.

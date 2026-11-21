@@ -1,0 +1,28 @@
+id: src:dyer-1986-english-peasant-buildings
+type: publication
+kind: review
+citation: >-
+  Dyer, C. (1986). English peasant buildings in the later Middle Ages (1200–1500). Medieval Archaeology 30, 19–45.
+authors:
+  - "Dyer, C."
+published: 1986
+title: English peasant buildings in the later Middle Ages (1200–1500)
+container: Medieval Archaeology
+doi: 10.1080/00766097.1986.11735484
+url: https://archaeologydataservice.ac.uk/archiveDS/archiveDownload?t=arch-769-1/dissemination/pdf/vol30/30_019_045.pdf
+via: >-
+  The Society for Medieval Archaeology's volumes 1–50, kept open by the Archaeology Data Service (collection arch-769-1).
+reliability: >-
+  A historian's synthesis of the documents, the standing buildings and the excavations of peasant houses in England. Its own
+  research is in the manor court rolls of the West Midlands for 1350–1500 (building agreements between lords and tenants,
+  which give sizes in bays); the other regions and the years 1200–1350 are surveyed from print and from excavation reports.
+  It argues against an older view that peasant houses were flimsy, and says itself that regional variety makes
+  generalization hard. Sizes are of customary tenants' houses, not of the poorest cottages.
+verified:
+  by: machine:claude-code
+  how: >-
+    The scan of the article served by the Archaeology Data Service fetched on 20 November 2026. Its own text layer runs
+    words together ("oftwo", "offive"), so the pages were also read from their images by macOS text recognition, which
+    garbles a line here and there. Both readings are kept in one text file and the quotes were checked by script against
+    it; the passages that give sizes and the size of a family (pp. 35 and 42) were also read by eye on the page images,
+    where the two readings agree. Page numbers are the printed ones. DOI from Crossref.

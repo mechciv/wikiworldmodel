@@ -1,0 +1,28 @@
+id: src:abdo-2026-jeftelik-cereal-harvesting
+type: publication
+kind: measurement
+citation: >-
+  Abdo, K., Palomo Pérez, A., Anderson, P.C., Mazzucco, N., Haïdar-Boustani, M., Teira, L.C. & Ibáñez-Estévez, J.J.
+  (2026). Wild cereal harvesting ca. 14,000 years ago at Jeftelik (Western Syria). PLOS ONE 21(11), e0350364.
+authors:
+  - "Abdo, K."
+  - "Palomo Pérez, A."
+  - "Anderson, P.C."
+  - "Mazzucco, N."
+  - "Haïdar-Boustani, M."
+  - "Teira, L.C."
+  - "Ibáñez-Estévez, J.J."
+published: 2026
+title: Wild cereal harvesting ca. 14,000 years ago at Jeftelik (Western Syria)
+container: PLOS ONE
+doi: 10.1371/journal.pone.0350364
+url: https://europepmc.org/article/PMC/PMC13750610
+license: CC-BY-4.0
+reliability: >-
+  A use-wear study of sickle blades from the Early Natufian site of Jeftelik in the Homs Gap, with a short account of the
+  site's stone structures. Its span of the Natufian period is the conventional one, stated without its sources' detail.
+verified:
+  by: machine:claude-code
+  how: >-
+    Full text read from Europe PMC (PMC13750610), its JATS XML fetched on 20 November 2026 and read as text; the abstract,
+    the introduction and the description of the site read, and the quotes checked by script against that text.

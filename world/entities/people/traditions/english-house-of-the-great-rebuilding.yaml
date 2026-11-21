@@ -1,0 +1,135 @@
+id: people/traditions/english-house-of-the-great-rebuilding
+kind: tradition/building
+summary: >-
+  The rural house of England after its "Great Rebuilding", from the middle of the sixteenth century into the eighteenth:
+  the later medieval house given an upper floor, or built anew with two storeys throughout, first by yeomen and, by the
+  late seventeenth century in the east, by labourers. A thin record: it says only what the sources read say changed, the
+  second storey and the size of the household. What the house was built of they do not say, and that is left to the
+  generator; the houses of the nineteenth century are not described at all.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Rural house of England after the Great Rebuilding }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: { lo: 1540 CE, hi: 1570 CE }
+    source:
+      - ref: src:dyer-1986-english-peasant-buildings
+        loc: Conclusion, p. 41
+        quote: most of the new features adopted after 1540 can be shown to have at least an ancestry before 1500
+      - ref: src:dyer-1986-english-peasant-buildings
+        loc: Conclusion, p. 40
+        quote: >-
+          look for dramatic waves of innovation in rural building in the 13th and the 15th centuries as well as in the
+          period 1570-1640
+    method: expert-estimate
+    note: >-
+      Between 1540, after which the first source dates the new features of houses throughout the country, and 1570, when
+      the "Great Rebuilding" of Hoskins's theory begins. The source says the rebuilding is now seen as regional
+      movements at different times, and Gardiner (2000) has the yeomen of Kent building houses of two full storeys
+      already in the early sixteenth century.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in dyer-1986-english-peasant-buildings.txt (sha256 3ef1b244c818fded), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  end:
+    prop: end
+    value: { lo: 1701 CE, hi: 1800 CE }
+    source:
+      ref: src:dyer-1986-english-peasant-buildings
+      loc: Conclusion, p. 40
+      quote: >-
+        Now that the 'Great Rebuilding' idea is being revised and refined in terms of a series of regional movements at
+        different times within the 16th, 17th and 18th centuries
+    method: expert-estimate
+    note: >-
+      The eighteenth century, in which the last of the regional rebuildings fell: the end of the span the source gives
+      for the rebuilding, not an end of the houses, which stood and were lived in long after. What was built for the
+      people of the countryside and of the new towns after it, no source read says.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in dyer-1986-english-peasant-buildings.txt (sha256 3ef1b244c818fded), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["38"] }
+    source:
+      - ref: src:dyer-1986-english-peasant-buildings
+        loc: Conclusion, p. 40
+        quote: >-
+          which began with yeomen's houses in the 16th century, but did not benefit the labourers of eastern England until
+          the late 17th century
+      - ref: src:gardiner-2000-later-medieval-domestic-plan
+        loc: introduction, p. 160
+        quote: >-
+          Pearson has noted that in Kent the wealthy yeomen were in the vanguard of innovation in the early 16th century.
+    method: editorial
+    note: >-
+      Region 38 (United Kingdom and Ireland), for England: the sources name Kent, eastern England and Northumberland.
+      Wales, Scotland and Ireland are not claimed.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in dyer-1986-english-peasant-buildings.txt (sha256 3ef1b244c818fded) and gardiner-2000-later-medieval-domestic-plan.txt (sha256 5a4b9112c3348a56), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      - ref: src:dyer-1986-english-peasant-buildings
+        loc: Conclusion, p. 40
+        quote: >-
+          which began with yeomen's houses in the 16th century, but did not benefit the labourers of eastern England until
+          the late 17th century
+      - ref: src:dyer-1986-english-peasant-buildings
+        loc: Conclusion, p. 40
+        quote: >-
+          look for dramatic waves of innovation in rural building in the 13th and the 15th centuries as well as in the
+          period 1570-1640
+    method: editorial
+    note: >-
+      Farmers: the rebuilding is of rural houses, the yeomen's first and the labourers' later. The houses of towns are not
+      described.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in dyer-1986-english-peasant-buildings.txt (sha256 3ef1b244c818fded), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { storeys: 2 }
+    source:
+      - ref: src:dyer-1986-english-peasant-buildings
+        loc: 'section "West Midland peasant buildings, 1350–1500", p. 30'
+        quote: made them difficult to convert to two-storey dwellings in the 16th and 17th centuries
+      - ref: src:gardiner-2000-later-medieval-domestic-plan
+        loc: introduction, p. 160
+        quote: were able to experiment with fully two-storied buildings
+      - ref: src:gardiner-2000-later-medieval-domestic-plan
+        loc: 'section "The later medieval domestic plan", p. 162'
+        quote: As the need for first-floor rooms grew, they were found unsuitable and were replaced.
+      - ref: src:dyer-1986-english-peasant-buildings
+        loc: Conclusion, p. 41
+        quote: >-
+          the 'Great Rebuilding' is revealed not as a revolutionary innovation but as the gradual adaptation of late medieval
+          structures to the needs of a new age
+    method: expert-estimate
+    note: >-
+      Two storeys: medieval houses were given upper floors in the sixteenth and seventeenth centuries, and those too low
+      for one were replaced (the first quote is of cruck houses, whose lack of height made them hard to convert). That is
+      all the sources read say of the house itself. The first source judges the
+      rebuilding a gradual adaptation of the late medieval house (people/traditions/later-medieval-english-peasant-house),
+      but its plan, size, walls and roof are not stated for these centuries in anything read, and are left out: timber
+      and thatch, brick, stone, tile and slate are for a source on the houses of the seventeenth and eighteenth
+      centuries to say.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in dyer-1986-english-peasant-buildings.txt (sha256 3ef1b244c818fded) and gardiner-2000-later-medieval-domestic-plan.txt (sha256 5a4b9112c3348a56), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  settlement:
+    prop: settlement_form
+    value: { household: 4.75 }
+    source:
+      ref: src:laslett-1969-household-england
+      loc: abstract, point 1
+      quote: >-
+        Mean household size in England and Wales as a whole was relatively constant at 4·75 or a little below for the whole
+        period from the sixteenth century
+    method: documentary
+    note: >-
+      The mean of the households in listings of the inhabitants of a hundred English communities, with the censuses
+      from 1801: 4.75 "or a little below", from the sixteenth century until 1911, the sentence goes on. Servants who
+      lived in are counted in the household, and the abstract says a majority of people lived in households of six or
+      more. Only the abstract was read.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in laslett-1969-household-england.txt (sha256 aef17fe58c47379f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

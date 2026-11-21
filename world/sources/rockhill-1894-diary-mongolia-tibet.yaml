@@ -1,0 +1,22 @@
+id: src:rockhill-1894-diary-mongolia-tibet
+type: text
+kind: eyewitness
+citation: >-
+  Rockhill, W.W. Diary of a Journey through Mongolia and Tibet in 1891 and 1892. Washington: Smithsonian Institution,
+  1894.
+authors:
+  - "Rockhill, W.W."
+published: 1894
+written: { lo: 1891 CE, hi: 1892 CE }
+title: Diary of a Journey through Mongolia and Tibet in 1891 and 1892
+url: https://archive.org/details/cu31924023224656
+via: The Internet Archive's scan of Cornell University Library's copy (cu31924023224656), read in its OCR text.
+license: public domain
+reliability: >-
+  The diary of the author's second journey, across north-eastern Tibet towards Lhasa and back through Kham. The entry
+  cited, from a camp near black tents in eastern Tibet, records the herders' own word for their tent.
+verified:
+  by: machine:claude-code
+  how: >-
+    The entry of the camp at Churema near the Seremdo ch'u valley (p. 286) read on 20 November 2026 in the OCR text of the scan,
+    fetched from the Internet Archive; the quote was checked by script against it. The publisher is read from the title page.

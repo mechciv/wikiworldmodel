@@ -1,0 +1,111 @@
+id: people/traditions/north-china-courtyard-house
+kind: tradition/building
+summary: >-
+  The courtyard house of northern China, the siheyuan: ranges of rooms of one storey under ridged roofs about an open
+  court, the main range on the north side and facing south, the home of farmers and of townspeople from the Han to the
+  present. A broad record, read from encyclopedia articles only, that says the plan and little more and stands until
+  better is written. The house of the Han and the adobe house of the villages of the Ming and Qing are its members and
+  say how it was built in their times; for the thousand years between them it stands alone, on one sentence that the
+  homes of commoners changed little. No end is given: such houses are still lived in and built.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Courtyard house of northern China (siheyuan) }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 206 BCE
+    source:
+      ref: src:wikipedia-siheyuan
+      loc: opening section
+      quote: >-
+        Siheyuan originated in the Han Dynasty (206 BCE – 220 CE) and became popular during the Ming (1368–1644) and
+        Qing (1644–1912) dynasties.
+    method: expert-estimate
+    note: >-
+      The first year of the Han as the article dates it. The article has the house begin under the Han and does not say
+      when in its four centuries; the earliest reading is written, because the Han house, a member of this record,
+      is in evidence through the dynasty and begins with it. Its section on history says instead that the house "dates
+      back as early as the Western Zhou period", on a book that was not read; no house of that time is described in
+      what was read, and the earlier date is not taken. No end is given, and none is known: the article has the houses
+      that remain still lived in, and shows one built in rural Shanxi in 2017.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-siheyuan.txt (sha256 6f6140321b8817ea), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["119", "120"] }
+    source:
+      - ref: src:wikipedia-siheyuan
+        loc: opening section
+        quote: This design was prevalent throughout northern China, notably in Beijing and rural Shanxi.
+      - ref: src:wikipedia-siheyuan
+        loc: section "Siheyuan in other areas"
+        quote: >-
+          In Gansu, Qinghai and other northwest regions, where dust storms are very strong, courtyard walls tend to be
+          higher.
+    method: editorial
+    note: >-
+      Region 120 (Northern China), which holds Beijing and Shanxi, and region 119 (North Central China), which holds
+      Gansu and Qinghai, by their chief cities' coordinates against the region outlines. The article also has the house
+      in the north-east, with broad courts; that region (116) is named only by this record's member for the Ming and
+      Qing, as nothing read puts the house there in earlier times. It says too that such houses "exist all across
+      China": the houses of the south are other traditions and are not written here. The house is not claimed for all
+      of either region, and in region 119 many farmers lived instead in caves cut in the loess
+      (people/traditions/loess-plateau-yaodong).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-siheyuan.txt (sha256 6f6140321b8817ea), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [farmers, townspeople]
+    source:
+      - ref: src:wikipedia-chinese-architecture
+        loc: section "Architectural types", "Commoners"
+        quote: >-
+          This produced a U-shape, with a courtyard suitable (e.g., for farm work). Merchants and bureaucrats preferred
+          to close off the front with an imposing gate.
+      - ref: src:wikipedia-siheyuan
+        loc: opening section
+        quote: This design was prevalent throughout northern China, notably in Beijing and rural Shanxi.
+      - ref: src:wikipedia-siheyuan
+        loc: section "History", caption of a picture
+        quote: A gate into a siheyuan; the style of the gate indicates that it belongs to a lower-middle class urban family.
+    method: editorial
+    note: >-
+      Farmers, whose wings made a court to work in, and townspeople, the merchants and officials who closed theirs with
+      a gate: the first source's account of the homes of commoners, which is of China as a whole. The second has the
+      house in a city, Beijing, and in the countryside of Shanxi.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-chinese-architecture.txt (sha256 3ca3c5783e84cf0d) and wikipedia-siheyuan.txt (sha256 6f6140321b8817ea), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { plan: courtyard, court: true, storeys: 1, roof: gable }
+    source:
+      - ref: src:wikipedia-siheyuan
+        loc: opening section
+        quote: is a traditional Chinese architectural style characterized by a courtyard enclosed by buildings on all four sides.
+      - ref: src:wikipedia-siheyuan
+        loc: section "Layout of Beijing siheyuan"
+        quote: The building positioned to the north and facing the south is considered the main house
+      - ref: src:wikipedia-siheyuan
+        loc: section "Layout of Beijing siheyuan"
+        quote: the only place where two-story buildings are allowed to be constructed for the traditional siheyuan
+      - ref: src:wikipedia-siheyuan
+        loc: section "Layout of Beijing siheyuan"
+        quote: The rooftop is ridged to provide shade in the summer while retaining warmth in the winter.
+      - ref: src:wikipedia-chinese-architecture
+        loc: section "Architectural types", "Commoners"
+        quote: >-
+          Korman claimed the average commoner's home did not change much, even centuries after the establishment of
+          the universal style: early-20th-century homes were similar to late and mid-imperial homes.
+    method: expert-estimate
+    note: >-
+      Buildings on the four sides of a court: the main house on the north, side houses to east and west, and a house
+      opposite on the south; a commoner's home with fewer wings made a U about its court. One storey, as the article
+      allows a second only in a building behind the main house. A ridged roof is what the vocabulary calls a gable. The
+      article describes the house of Beijing and gives no size, and nothing of walls or roofing; the members of this
+      record say those for their times. That the house was much the same through the centuries between the Han and the
+      Ming rests on the last quote alone, the encyclopedia's report of a book review: no house of those centuries was
+      read of, and one built otherwise then would be a record of its own.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-siheyuan.txt (sha256 6f6140321b8817ea) and wikipedia-chinese-architecture.txt (sha256 3ca3c5783e84cf0d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

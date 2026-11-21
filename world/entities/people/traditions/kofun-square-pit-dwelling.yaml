@@ -1,0 +1,67 @@
+id: people/traditions/kofun-square-pit-dwelling
+kind: tradition/building
+summary: >-
+  The pit dwelling of the Kofun period in Japan, 250–710 CE, as it differed from the Yayoi house it came from: square in
+  plan with rounded corners and four posts, the round pit given up by the fifth century, and from the later fifth
+  century a clay stove (kamado) against a side wall with a chimney outside, which came with migrants from the Korean
+  peninsula. It inherits the rest from people/traditions/yayoi-kofun-pit-dwelling.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Square pit dwelling of the Kofun period }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 250 CE
+    source:
+      ref: src:west-2025-pit-to-surface-structures
+      loc: "p. 113, section 3.1"
+      quote: >-
+        By the Kofun period (250-710 AD), rectangular pit structures became the dominant type and by the 5th century,
+        round pit structures were completely phased out
+    method: expert-estimate
+    note: The start of the Kofun period in the source; the change from round to rectangular began in the Late Yayoi.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in west-2025-pit-to-surface-structures.txt (sha256 62e9aa916ad8c279), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  end:
+    prop: end
+    value: 710 CE
+    source:
+      ref: src:west-2025-pit-to-surface-structures
+      loc: "p. 113, section 3.1"
+      quote: >-
+        By the Kofun period (250-710 AD), rectangular pit structures became the dominant type and by the 5th century,
+        round pit structures were completely phased out
+    method: expert-estimate
+    note: The end of the Kofun period, as the end of the broader tradition.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in west-2025-pit-to-surface-structures.txt (sha256 62e9aa916ad8c279), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { plan: square }
+    source:
+      - ref: src:jaanus-dictionary
+        loc: s.v. tateana jūkyo
+        quote: >-
+          A square-plan type with rounded corners and four posts defining a putative
+      - ref: src:jaanus-dictionary
+        loc: s.v. tateana jūkyo
+        quote: became extremely widespread in the Kofun period.
+      - ref: src:west-2025-pit-to-surface-structures
+        loc: "p. 113, section 3.1"
+        quote: >-
+          By the Kofun period (250-710 AD), rectangular pit structures became the dominant type and by the 5th century,
+          round pit structures were completely phased out
+    method: expert-estimate
+    note: >-
+      The dictionary has the widespread Kofun pit square, with rounded corners; West calls the dominant pits
+      rectangular, which in the sense of four straight sides rather than longer than wide is taken to agree. The stove
+      against the wall has no word in the vocabulary. No size is given.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in jaanus-dictionary.txt (sha256 9d242cd750c47f8e) and west-2025-pit-to-surface-structures.txt (sha256 62e9aa916ad8c279), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+relations:
+  broader:
+    rel: member-of
+    to: people/traditions/yayoi-kofun-pit-dwelling
+    unsourced: An editorial grouping.

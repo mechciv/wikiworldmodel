@@ -1,0 +1,27 @@
+id: src:sankalia-1975-early-farmers-village
+type: publication
+kind: measurement
+citation: >-
+  Sankalia, H.D., Ansari, Z.D. & Dhavalikar, M.K. (1975). An Early Farmer's Village in Central India. Expedition
+  17(2). Philadelphia: University of Pennsylvania Museum.
+authors:
+  - "Sankalia, H.D."
+  - "Ansari, Z.D."
+  - "Dhavalikar, M.K."
+published: 1975
+title: An Early Farmer's Village in Central India
+container: Expedition 17(2)
+url: https://www.penn.museum/sites/expedition/an-early-farmers-village-in-central-india/
+reliability: >-
+  The excavators' own account of Inamgaon for a museum's magazine, after five seasons and before their final report:
+  the three periods are dated "ca.", the house sizes are of the houses exposed by then (nine of the Early Jorwe period,
+  some thirty-nine of the Late Jorwe), and the authors call their conclusions on family size and house type
+  tentative. It gives the pits of the Malwa pit houses a diameter of "approximately 12.50 meters" and the largest of
+  them 3 metres, which do not agree; the pit houses are not used here. The radiocarbon chronology of the site has
+  been revised since, in works not read.
+verified:
+  by: machine:claude-code
+  how: >-
+    The article as the Penn Museum's Expedition site gives it, the whole of it, fetched on 20 November 2026 and read
+    as text; the site gives no page numbers, so passages are cited by the article's section headings. The quotes were
+    checked by script against that text.

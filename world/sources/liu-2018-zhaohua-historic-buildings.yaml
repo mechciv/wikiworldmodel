@@ -1,0 +1,23 @@
+id: src:liu-2018-zhaohua-historic-buildings
+type: publication
+kind: measurement
+citation: >-
+  Liu, H. (2018). Lessons from Damaged Historic Buildings in the Sichuan Earthquake: A Case Study in Zhaohua, Sichuan
+  Province. Journal of Asian Architecture and Building Engineering 17(1), 9–14.
+authors:
+  - "Liu, H."
+published: 2018
+title: "Lessons from Damaged Historic Buildings in the Sichuan Earthquake: A Case Study in Zhaohua, Sichuan Province"
+container: Journal of Asian Architecture and Building Engineering
+doi: 10.3130/jaabe.17.9
+url: https://www.jstage.jst.go.jp/article/jaabe/17/1/17_9/_article
+reliability: >-
+  A survey of the damage the earthquake of 2008 did to the 232 historic buildings of one town of north-eastern
+  Sichuan, with a short account of how such buildings are framed, walled and roofed. It does not date the buildings,
+  and it calls their frame the "Post-and-beam System" without its Chinese name.
+verified:
+  by: machine:claude-code
+  how: >-
+    The article's PDF fetched from J-STAGE on 20 November 2026 and turned into text with PyMuPDF; sections 1 to 3 read
+    in full and the rest searched; the quotes checked by script against that text. Volume, pages and DOI as the PDF's
+    first page gives them.

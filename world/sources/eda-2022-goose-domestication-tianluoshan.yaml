@@ -1,0 +1,37 @@
+id: src:eda-2022-goose-domestication-tianluoshan
+type: publication
+kind: measurement
+citation: >-
+  Eda, M., Itahashi, Y., Kikuchi, H., Sun, G., Hsu, K., Gakuhari, T., Yoneda, M., Jiang, L., Yang, G. & Nakamura, S.
+  (2022). Multiple lines of evidence of early goose domestication in a 7,000-y-old rice cultivation village in the
+  lower Yangtze River, China. Proceedings of the National Academy of Sciences 119(12), e2117064119.
+authors:
+  - "Eda, M."
+  - "Itahashi, Y."
+  - "Kikuchi, H."
+  - "Sun, G."
+  - "Hsu, K."
+  - "Gakuhari, T."
+  - "Yoneda, M."
+  - "Jiang, L."
+  - "Yang, G."
+  - "Nakamura, S."
+published: 2022
+title: >-
+  Multiple lines of evidence of early goose domestication in a 7,000-y-old rice cultivation village in the lower
+  Yangtze River, China
+container: Proceedings of the National Academy of Sciences
+doi: 10.1073/pnas.2117064119
+url: https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8944903/fullTextXML
+license: CC-BY-NC-ND-4.0
+via: Europe PMC (PMC8944903).
+reliability: >-
+  A study of the goose bones of Tianluoshan, with the site's excavators among its authors. What it says of the
+  village, its buildings, its fields and how its people lived is its introduction's summary of the excavations and of
+  earlier studies of the site's plants and animals, not new work, and it gives no size for any building.
+verified:
+  by: machine:claude-code
+  how: >-
+    The full text fetched from Europe PMC's XML on 20 November 2026 and kept as text; the introduction's paragraphs on
+    the site and the discussion's last section read, and the rest searched; the quotes checked by script against that
+    text.

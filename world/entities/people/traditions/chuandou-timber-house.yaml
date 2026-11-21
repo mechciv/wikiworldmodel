@@ -1,0 +1,163 @@
+id: people/traditions/chuandou-timber-house
+kind: tradition/building
+summary: >-
+  The timber house of the Sichuan basin and the hills of south-western China: a frame of posts tied through by beams
+  (chuandou), the posts carrying the roof themselves, with light walls that bear no load, of woven bamboo and mud, of
+  mud or of brick, under a tiled roof of two slopes, the house raised on a stone base. A broad tradition that stands
+  until narrower ones are written. Its frame is traced to models of buildings from Han tombs and is still built; its
+  walls and roof are those of houses standing in Sichuan today, and how they changed in two thousand years the works
+  read do not say. On the Chengdu Plain the houses stand a few together in wooded farmsteads scattered among the
+  fields.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Post-and-tie timber house (chuandou) of Sichuan and the south-western hills }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 206 BCE
+    source:
+      - ref: src:kim-park-2017-tectonic-traditions
+        loc: "p. 32, section 2"
+        quote: >-
+          Such structural forms have been widespread since the Neolithic period, confirmed by archaeological remains
+          from the Hemudu culture as well as building miniatures excavated from tombs in the Han era (206 BCE to 220
+          CE).
+      - ref: src:kim-park-2017-tectonic-traditions
+        loc: "p. 32, section 2"
+        quote: Chuandou are still built by minority groups in Yunnan, Guizhou, Guangxi, Hunan, and Sichuan
+    method: expert-estimate
+    note: >-
+      The first year the source gives the Han era, whose tomb models of buildings are the earliest evidence it names
+      for this frame in historical times; which tombs, and where, it does not say. It bounds the start rather than
+      dating it: the source has such frames since the Neolithic, and the pile dwelling of the Hemudu culture it names
+      is another record (people/traditions/hemudu-pile-dwelling). Only the frame is dated so; no house of Sichuan read
+      here is dated at all. There is no end claim: the source has the frame built still.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in kim-park-2017-tectonic-traditions.txt (sha256 5bbdbcbe0b002f20), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["121", "123"] }
+    source:
+      - ref: src:kim-park-2017-tectonic-traditions
+        loc: "p. 32, section 2"
+        quote: Chuandou are still built by minority groups in Yunnan, Guizhou, Guangxi, Hunan, and Sichuan
+      - ref: src:liu-2018-zhaohua-historic-buildings
+        loc: "p. 10, section 2"
+        quote: >-
+          The buildings with Post-and-beam System are distributed in the south of China, especially in Sichuan
+          province, Chongqing city, Yunnan province, Hubei province, and Hunan province.
+      - ref: src:hou-2021-northeastern-sichuan-dwellings
+        loc: "p. 279, section 2.1"
+        quote: >-
+          Liyuanba Village, as shown by Fig.1 is located in Nixi Town, Tongjiang County, Bazhong City, in the
+          northeastern part of Sichuan Basin
+    method: editorial
+    note: >-
+      Region 121 (South Central China) holds Sichuan, Chongqing, Guizhou and Yunnan, and region 123 (Eastern China)
+      holds Hunan and Hubei. The second source's "Post-and-beam System", of three or five posts with members run
+      through them, is read here as the same frame, though it does not give its Chinese name. Guangxi (region 122) is
+      left out: the first source names it for minority groups only, and no house there was read. The houses
+      described are all of north-eastern Sichuan; the house is not claimed for all of either region, and in region
+      123 the lower Yangtze's own house (people/traditions/lower-yangtze-skywell-house) is another record.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in kim-park-2017-tectonic-traditions.txt (sha256 5bbdbcbe0b002f20), liu-2018-zhaohua-historic-buildings.txt (sha256 bc80e813b7a4a8e1) and hou-2021-northeastern-sichuan-dwellings.txt (sha256 f26e5a6b20134699), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [farmers, townspeople]
+    source:
+      - ref: src:hou-2021-northeastern-sichuan-dwellings
+        loc: "p. 279, abstract"
+        quote: The village of Liyuanba is a typical representative of the traditional countryside in northeast Sichuan province
+      - ref: src:hou-2021-northeastern-sichuan-dwellings
+        loc: "p. 284, section 4.2"
+        quote: The residents of the village use it to place firewood and raise livestock
+      - ref: src:zhang-2022-linpan-thermal-comfort
+        loc: section 1, "Introduction"
+        quote: Linpan is dominated by buildings and trees, surrounded by fields for farming
+      - ref: src:liu-2018-zhaohua-historic-buildings
+        loc: "p. 9, section 1"
+        quote: The 232 historic buildings in town were built using the Post-and beam System as their main structure
+    method: editorial
+    note: >-
+      Houses of a mountain village and of the farmsteads of the Chengdu Plain, among their fields, and the 232 old
+      buildings of Zhaohua, a town of north-eastern Sichuan.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in hou-2021-northeastern-sichuan-dwellings.txt (sha256 f26e5a6b20134699), zhang-2022-linpan-thermal-comfort.txt (sha256 3d2dc4a24f2c9cc1) and liu-2018-zhaohua-historic-buildings.txt (sha256 bc80e813b7a4a8e1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { plan: rectangular, walls: wattle-and-daub, roof: gable, roof_material: tile, floor: raised }
+    source:
+      - ref: src:kim-park-2017-tectonic-traditions
+        loc: "p. 32, section 2"
+        quote: >-
+          The framework of this structural style includes transverse tie-beams connected into columns, lacking beams
+          and struts.
+      - ref: src:hou-2021-northeastern-sichuan-dwellings
+        loc: "p. 280, section 2.2"
+        quote: >-
+          "I" shape dwelling is the basic form, and the other three types can be derived based on it.
+      - ref: src:hou-2021-northeastern-sichuan-dwellings
+        loc: "p. 280, section 2.2"
+        quote: The roofs are all sloping on both sides, and the upper cover is thin and light blue tiles
+      - ref: src:hou-2021-northeastern-sichuan-dwellings
+        loc: "p. 283, section 4.1"
+        quote: >-
+          the outer protective structure of traditional dwellings in northeastern Sichuan is mostly bamboo mud walls
+          made of bamboo strips and mud
+      - ref: src:hou-2021-northeastern-sichuan-dwellings
+        loc: "p. 284, section 4.2"
+        quote: there are steps and platforms connected between the house and the courtyard, which can raise the house
+      - ref: src:hou-2021-northeastern-sichuan-dwellings
+        loc: "p. 284, section 4.2"
+        quote: stilted dwellings are typical of the houses of Liyuanba Village
+      - ref: src:liu-2018-zhaohua-historic-buildings
+        loc: "p. 10, section 2"
+        quote: The buildings with Post-and-beam System utilize tile roofing.
+      - ref: src:liu-2018-zhaohua-historic-buildings
+        loc: "p. 10, section 2"
+        quote: >-
+          Commonly, the substructures such as walls are composed of mud, adobe, pebble wood, walls, and bamboo, which
+          are easily found nearby.
+      - ref: src:liu-2018-zhaohua-historic-buildings
+        loc: "p. 10, section 3"
+        quote: among the 62 buildings built with mud walls … among the 162 buildings with brick walls
+    method: survey
+    note: >-
+      The frame is the first source's; the rest is of houses standing in north-eastern Sichuan today. The plan is the
+      single range the village survey calls the "I" shape, the basic form from which its L-shaped, U-shaped and
+      four-sided courtyard houses grow, written here as rectangular. Walls of bamboo strips and mud, which the survey
+      has for most houses of the countryside, are what the vocabulary calls wattle and daub; in the town of Zhaohua
+      62 of the old buildings had walls of mud and 162 of brick. A roof sloping on both sides is a gable roof. The
+      house stands on a stone base with steps up from the yard; on slopes the survey has houses half on stilts, the
+      space beneath for firewood and animals. No size is given in any work read, and none is claimed.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in kim-park-2017-tectonic-traditions.txt (sha256 5bbdbcbe0b002f20), hou-2021-northeastern-sichuan-dwellings.txt (sha256 f26e5a6b20134699) and liu-2018-zhaohua-historic-buildings.txt (sha256 bc80e813b7a4a8e1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  settlement:
+    prop: settlement_form
+    value: { pattern: hamlet, houses: { lo: 1, hi: 5 } }
+    source:
+      - ref: src:zhang-2022-linpan-thermal-comfort
+        loc: section 1, "Introduction"
+        quote: Linpan refers to scattered traditional Chinese settlements distributed on the Chengdu Plain in Southwestern China.
+      - ref: src:zhang-2022-linpan-thermal-comfort
+        loc: section 1, "Introduction"
+        quote: the total number of Linpan settlements in Chengdu Plain is about 200,000
+      - ref: src:zhang-2022-linpan-thermal-comfort
+        loc: section 1, "Introduction"
+        quote: >-
+          Woodlands, houses, courtyards, surrounding ditches, and fields are usually the basic elements of each
+          traditional Linpan settlement
+      - ref: src:zhang-2022-linpan-thermal-comfort
+        loc: section 3, "Spatial Composition Analysis and Design"
+        quote: Linpan containing 1–5 buildings account for the largest proportion
+    method: survey
+    note: >-
+      The wooded farmsteads (linpan) of the Chengdu Plain, each a few houses in its trees with its fields about it,
+      some 200,000 of them on the plain by the source's count. The houses are the commonest class among 1,194 of them
+      counted from imagery of two towns today, where a building need not be a dwelling; how old the pattern is the
+      source does not say. It is the plain's pattern, not that of the hill villages, such as the one the house is
+      described from. How many people lived in a house is not stated.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zhang-2022-linpan-thermal-comfort.txt (sha256 3d2dc4a24f2c9cc1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

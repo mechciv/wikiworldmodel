@@ -1,0 +1,21 @@
+id: src:wikipedia-fujian-tulou
+type: database-record
+kind: review
+citation: >-
+  "Fujian tulou." Wikipedia, the free encyclopedia (English edition), revision 1385643994.
+snapshot: 2026-11-20
+title: Fujian tulou
+container: Wikipedia
+url: https://en.wikipedia.org/w/index.php?title=Fujian_tulou&oldid=1385643994
+license: CC-BY-SA-4.0
+reliability: >-
+  A general encyclopedia article, cited for the smallest and the largest round tulou, for their tiled roofs and for
+  how many people lived in one, because the paper read on the tulou (src:colafranceschi-2020-tulou) gives only
+  ceilings for their size and says nothing of the other two. Most of what is quoted stands in the article without a
+  reference; its account leans on Huang Hanmin's Fujian Tulou and on the World Heritage listing, neither read here,
+  and either should replace it.
+verified:
+  by: machine:claude-code
+  how: >-
+    The article's HTML fetched with the action=render view of index.php on 20 November 2026 (the parser's note names
+    the revision) and read as text, with the reference marks taken out; the quotes checked by script against that text.

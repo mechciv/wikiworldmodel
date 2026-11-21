@@ -1,0 +1,26 @@
+id: src:rockhill-1900-journey-of-william-of-rubruck
+type: text
+kind: eyewitness
+citation: >-
+  Rockhill, W.W. (translator and editor). The Journey of William of Rubruck to the Eastern Parts of the World, 1253-55, as
+  narrated by himself, with two accounts of the earlier journey of John of Pian de Carpine. London: printed for the Hakluyt
+  Society, 1900.
+authors:
+  - "Rubruck, William of"
+  - "Rockhill, W.W."
+published: 1900
+written: { lo: 1253 CE, hi: 1255 CE }
+title: The Journey of William of Rubruck to the Eastern Parts of the World, 1253-55
+url: https://archive.org/details/journeyofwilliam00ruys_0
+via: The Internet Archive's scan of the Hakluyt Society's edition (journeyofwilliam00ruys_0), read in its OCR text.
+license: public domain
+reliability: >-
+  A Franciscan friar's report to Louis IX of his journey from the Crimea across the steppe of the Comans, by the camps of
+  Sartach and Batu on the Volga, to the Mongol court at Karakorum, in 1253-1255; translated from the Latin by Rockhill,
+  whose footnotes gather what other writers said of the same things. His chapter on the dwellings of the Tartars is of
+  the Mongol host as he met it, not of any one camp. The footnotes are Rockhill's, of 1900, and are cited as his.
+verified:
+  by: machine:claude-code
+  how: >-
+    Chapter 2 of the narrative, on the Tartars and their dwellings (pp. 52-56, text and notes), and the chapters on reaching the camps of Sartach and of Batu on the Volga (to p. 127), read on 20 November 2026
+    in the OCR text of the scan, fetched from the Internet Archive; the quotes were checked by script against it.

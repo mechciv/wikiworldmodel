@@ -1,0 +1,136 @@
+id: people/traditions/chin-hills-plank-house
+kind: tradition/building
+summary: >-
+  The house of the Chin of the Chin Hills of western Myanmar as the British found it in the 1890s: a one-storeyed house
+  of pine planks under a thick thatch, some 30 feet broad and 50 to 200 long by its owner's wealth, raised on posts over
+  the pig and cattle pen on the downhill side, with a platform in front; each in its own fenced compound on a terrace cut
+  into the hillside, the compounds making up the village. The house of the Haka, which the source takes for all. It
+  starts here with the founding of Hakha and the move into the hills about 1400, which is not a date for the house, and
+  has no end claim.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Plank house of the Chin Hills }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 1400 CE
+    source:
+      - ref: src:wikipedia-hakha
+        loc: section "History"
+        quote: Hakha was founded around 1400 CE by the Lai ethnic group.
+      - ref: src:wikipedia-chin-people
+        loc: section "History", "Movement into the Chin Hills"
+        quote: After 1395, Chin people began leaving Kale and established new settlements in the Chin Hills
+    method: tradition
+    note: >-
+      About when the Chin are said to have moved from the Kale valley into the hills and founded Hakha, whose house the
+      source describes; a date from tradition, and not one for the house, which no source read here describes before 1896.
+      There is no end claim: no source read says when such houses ceased to be built.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-hakha.txt (sha256 f2050f09231a1722) and wikipedia-chin-people.txt (sha256 113f5ee45c7f2f7a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["125"] }
+    source:
+      - ref: src:carey-tuck-1896-chin-hills-vol-1
+        loc: "chap. on manners and customs, p. 176"
+        quote: The houses in the Haka jurisdiction are the finest in the hills
+      - ref: src:wikipedia-chin-people
+        loc: section "History", "Movement into the Chin Hills"
+        quote: After 1395, Chin people began leaving Kale and established new settlements in the Chin Hills
+    method: editorial
+    note: >-
+      Region 125 (Myanmar), which holds the Chin Hills. The Chin of Mizoram, Manipur and Arakan, whose houses the source
+      does not describe, are left out.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in carey-tuck-1896-chin-hills-vol-1.txt (sha256 550f7d4928681337) and wikipedia-chin-people.txt (sha256 113f5ee45c7f2f7a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  prevalence:
+    prop: prevalence
+    value: few
+    source:
+      - ref: src:wikipedia-chin-people
+        loc: section "Geographic distribution", "In Myanmar"
+        quote: The Chin peoples predominantly live in the western part of Myanmar in Chin State and Rakhine State.
+      - ref: src:wikipedia-chin-people
+        loc: section "Geographic distribution", "In Myanmar"
+        quote: Chin settlements are usually above 1,000 metres (3,300 ft) in elevation.
+    method: editorial
+    note: >-
+      A few of the farmers of region 125 (Myanmar): the house of one people of the hills in the west of it, not of the
+      farmers of the plains, of whose houses nothing was read. The article says where the Chin live now; the word is
+      this record's reading of it.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-chin-people.txt (sha256 113f5ee45c7f2f7a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      - ref: src:carey-tuck-1896-chin-hills-vol-1
+        loc: "chap. on crops, p. 210"
+        quote: The Chin relies on agriculture for his sustenance
+      - ref: src:carey-tuck-1896-chin-hills-vol-1
+        loc: "chap. on crops, p. 211"
+        quote: most fields are partially terraced by trunks of trees and by stone supports
+      - ref: src:carey-tuck-1896-chin-hills-vol-1
+        loc: "chap. on manners and customs, p. 175"
+        quote: the people fix on the site for the village.
+      - ref: src:carey-tuck-1896-chin-hills-vol-1
+        loc: "chap. on manners and customs, p. 174"
+        quote: These jhoomers form an unimportant community in the Chin Hills
+    method: documentary
+    note: >-
+      Farmers of fixed villages, whose hillside fields were partly terraced with logs and stones. The source sets apart a
+      few Thado who cleared fresh land every year and moved their villages, and who lived in bamboo huts, not in these
+      houses. It also has the land enriched by burning, on old ground and on ground cleared for the first time, so some
+      fields were new clearings; how long a field was kept is not said. The model calls the region's cultivators shifting
+      cultivators, for whom this house stands in.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in carey-tuck-1896-chin-hills-vol-1.txt (sha256 550f7d4928681337), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { plan: rectangular, width: 9.1, length: { lo: 15, hi: 61 }, height: 6.1, storeys: 1, walls: timber, roof_material: thatch, floor: stilts }
+    source:
+      - ref: src:carey-tuck-1896-chin-hills-vol-1
+        loc: "chap. on manners and customs, p. 177"
+        quote: As the houses of all are built on the same general principles and vary
+      - ref: src:carey-tuck-1896-chin-hills-vol-1
+        loc: "chap. on manners and customs, p. 177"
+        quote: >-
+          The house is one-storeyed, built of plank, with a thatch roof, and is 20 feet high by 50 to 200 feet long and
+          some 30 feet broad, according to the
+      - ref: src:carey-tuck-1896-chin-hills-vol-1
+        loc: "chap. on manners and customs, p. 177"
+        quote: It is built off the ground and underneath is the pig and cattle pen.
+      - ref: src:carey-tuck-1896-chin-hills-vol-1
+        loc: "chap. on manners and customs, p. 178"
+        quote: it is laid on a foot thick
+    method: documentary
+    note: >-
+      The house of the Haka, which the source describes for all as built on the same principles and varying in size and
+      quality with the owner's wealth. Twenty feet high is 6.1 m, 30 feet broad 9.1 m, and 50 to 200 feet long 15 to 61 m.
+      It stood on the hillside some three feet off the ground uphill and fifteen or twenty downhill, on posts, over the
+      pen. The shape of the roof is not given.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in carey-tuck-1896-chin-hills-vol-1.txt (sha256 550f7d4928681337), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  settlement:
+    prop: settlement_form
+    value: { pattern: compound, household: 5 }
+    source:
+      - ref: src:carey-tuck-1896-chin-hills-vol-1
+        loc: "chap. on manners and customs, p. 175"
+        quote: >-
+          When the site is chosen, the village is marked off in compounds, and each household constructs its own
+          platforms, builds its own house, and plants its own hedges or in lieu builds a fence.
+      - ref: src:carey-tuck-1896-chin-hills-vol-1
+        loc: "introduction, p. 4"
+        quote: >-
+          it is probable that the Chin household will not average more than five persons in any part of the hills.
+    method: documentary
+    note: >-
+      Each household's house in its own compound, fenced or hedged, on a platform cut into the hillside. The household of
+      five is the source's upper bound on the average, from enquiries and not a census; it multiplied the houses by five to
+      estimate the people.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in carey-tuck-1896-chin-hills-vol-1.txt (sha256 550f7d4928681337), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

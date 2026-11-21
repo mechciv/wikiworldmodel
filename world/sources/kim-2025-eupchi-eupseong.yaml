@@ -1,0 +1,21 @@
+id: src:kim-2025-eupchi-eupseong
+type: publication
+kind: review
+citation: >-
+  Kim, J. (2025). Eupchi and Eupseong of the Joseon Dynasty. The Review of Korean Studies 28(2), 102–132.
+authors:
+  - "Kim, J."
+published: 2025
+title: Eupchi and Eupseong of the Joseon Dynasty
+container: The Review of Korean Studies 28(2), 102–132
+doi: 10.25024/review.2025.28.2.102
+url: https://www.accesson.kr/rks/assets/pdf/57801/journal-28-2-102.pdf
+via: AccessOn, the Academy of Korean Studies' journal platform.
+reliability: >-
+  A historical geographer's study of the county seats (eupchi) of Joseon and their walls (eupseong), from the
+  dynasty's geographies (1454, 1530 and later). Cited for the span of the dynasty and the walls of its towns.
+verified:
+  by: machine:claude-code
+  how: >-
+    The PDF fetched on 20 November 2026, its text extracted with PyMuPDF and read; the quotes checked by script against
+    that text.

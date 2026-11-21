@@ -1,0 +1,29 @@
+id: src:babur-nama-beveridge-1922
+type: text
+kind: eyewitness
+citation: >-
+  Babur, Zahiru'd-din Muhammad. The Babur-nama in English (Memoirs of Babur), translated from the original Turki text by
+  Annette Susannah Beveridge. London: Luzac & Co., 1922.
+authors:
+  - "Babur, Z.M."
+published: 1922
+written: { lo: 1526 CE, hi: 1530 CE }
+title: The Babur-nama in English (Memoirs of Babur)
+url: https://archive.org/details/thebburnmainengl44608gut
+via: >-
+  Project Gutenberg's transcription of the 1922 printing (eBook 44608), in the copy the Internet Archive keeps
+  (thebburnmainengl44608gut, file 44608-0.txt).
+license: public domain
+reliability: >-
+  The conqueror's own memoir. His description of Hindustan stands under the year 932 AH (18 October 1525 to 8 October
+  1526), the year of his conquest, and was written between then and his death on 26 December 1530, as the translator
+  dates it. He writes of the country as a newcomer from Kabul who found little charm in it, and of the parts he had
+  marched through, not of all India. The translation is Beveridge's, from the Turki text.
+verified:
+  by: machine:claude-code
+  how: >-
+    The section "Other particulars about Hindustan" (folios 274b to 275, as the translation's side-notes mark them)
+    read on 20 November 2026 in Project Gutenberg's text, fetched from the Internet Archive's copy, gutenberg.org
+    being down for maintenance that day; the same passage was also read in the OCR of the University of Toronto's scan
+    of volume 2 (baburnamainengli02babuuoft, p. 487 to 488). The quotes were checked by script against the Gutenberg
+    text, which marks italics with underscores: the quotes are cut so as to leave the italic words out.

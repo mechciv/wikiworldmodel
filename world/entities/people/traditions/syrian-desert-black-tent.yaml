@@ -1,0 +1,125 @@
+id: people/traditions/syrian-desert-black-tent
+kind: tradition/building
+summary: >-
+  The black tent of the Bedouin of the Syrian desert and northern Arabia: a long, low tent of strips of black goat's-hair
+  cloth stitched together and stretched on rows of poles and ropes, its back closed by a hanging wall of the same cloth and
+  its inside parted by a curtain into the men's side and the women's. The 'Aneze and the other tribes pitched their tents in
+  circles or rows and moved them with their herds between the desert and the edge of the sown. Its earliest description read
+  here is Burckhardt's, of 1810 to 1816; it is surely older, and no earlier source was read.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Black goat's-hair tent of the Syrian desert }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 1810 CE
+    source:
+      ref: src:burckhardt-1831-notes-on-the-bedouins
+      loc: 'vol. 1, chapter "Classification of Bedouin tribes", on the Hdib, pp. 14-17'
+      quote: I found them encamped, with their cattle in September 1810, on the Ardh Lahlouh
+    method: documentary
+    note: >-
+      The year of the earliest account read: Burckhardt lived among the Arabs of the Syrian desert from 1810 and dates his
+      stays in their camps from then. It bounds the start and does not date it; the tent is surely older. No end is given:
+      no source read says when it went out of use.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in burckhardt-1831-notes-on-the-bedouins.txt (sha256 d485a71826c744ed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["58", "59", "63"] }
+    source:
+      - ref: src:burckhardt-1831-notes-on-the-bedouins
+        loc: 'vol. 1, chapter "Classification of Bedouin tribes", pp. 1-2'
+        quote: >-
+          The Aenezes are the most powerful Arab … nation in the vicinity of Syria, and, if we add to them their brethren in
+          Nedjd, may be reckoned one of the most considerable bodies of Bedouins in the Arabian deserts.
+      - ref: src:burckhardt-1831-notes-on-the-bedouins
+        loc: 'vol. 1, chapter "Classification of Bedouin tribes", p. 2'
+        quote: have likewise been known to pass the Euphrates and encamp in Irak Arabi, and near Baghdad.
+    method: editorial
+    note: >-
+      The Syrian desert and the edge of the sown in Syria (58), where the 'Aneze summered and Burckhardt saw their tents;
+      Najd (63), where their brethren lived, whom he knew by report; and Iraq (59), where they sometimes camped. The tents
+      he describes are of the 'Aneze and the tribes of the north; he says other tribes' differ in the number of poles.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in burckhardt-1831-notes-on-the-bedouins.txt (sha256 d485a71826c744ed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [herders]
+    source:
+      - ref: src:burckhardt-1831-notes-on-the-bedouins
+        loc: 'vol. 1, chapter "Mode of encamping", p. 33'
+        quote: >-
+          The Aenezes are nomades in the strictest acceptation of the word, for they continue during the whole year in
+          almost constant motion.
+      - ref: src:burckhardt-1831-notes-on-the-bedouins
+        loc: 'vol. 1, chapter "Mode of encamping", p. 33'
+        quote: >-
+          as soon as their cattle have consumed the herbage near a watering-place, the tribe removes in search of pasture
+    method: editorial
+    note: >-
+      Herders who moved their tents with their camels, sheep and goats. Burckhardt also has tribes who camped the year
+      round among the villages of Syria, some of whom tilled; their tents are not described apart, and farmers are not named.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in burckhardt-1831-notes-on-the-bedouins.txt (sha256 d485a71826c744ed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value:
+      plan: rectangular
+      length: { lo: 7.6, hi: 9.1 }
+      width: 3
+      wall_height: 1.5
+      height: 2.1
+      walls: cloth
+      roof: tent
+      roof_material: cloth
+      floor: ground
+    source:
+      - ref: src:burckhardt-1831-notes-on-the-bedouins
+        loc: 'vol. 1, chapter "The tent, and its different parts", p. 37'
+        quote: >-
+          The covering of a tent, zkaker el beit, consists of pieces of stuff made of black goat's-hair, about three quarters
+          of a yard in breadth, its length being equal to that of the tent
+      - ref: src:burckhardt-1831-notes-on-the-bedouins
+        loc: 'vol. 1, chapter "The tent, and its different parts", p. 37'
+        quote: >-
+          It is usual to have nine poles or posts, three in the middle and an equal number on each side of the tent
+      - ref: src:burckhardt-1831-notes-on-the-bedouins
+        loc: 'vol. 1, chapter "The tent, and its different parts", p. 42'
+        quote: >-
+          The height of the makdoum and wasat is about seven feet ; that of the other posts about five feet. The tent, if it
+          have two wasat, is between twenty-five and thirty feet
+      - ref: src:burckhardt-1831-notes-on-the-bedouins
+        loc: 'vol. 1, chapter "The tent, and its different parts", p. 42'
+        quote: The Aeneze tents are always of black goat's-hair.
+    method: survey
+    note: >-
+      Burckhardt gives the sizes in feet: the middle posts about 7 ft (2.1 m), the side posts about 5 ft (1.5 m), here the
+      height of the eaves; a tent with two middle posts 25 to 30 ft long (7.6 to 9.1 m), and its depth, with all the poles
+      up, "at most ten feet" (3.0 m), so the width given is the most, not the usual. Smaller tents had one middle post and
+      a sheikh's four or five. The cloth is woven goat's hair, the cover and the hanging back wall alike, so walls and roof
+      are cloth; the roof is a tent on poles. The ground is the floor, covered with carpets in the men's part.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in burckhardt-1831-notes-on-the-bedouins.txt (sha256 d485a71826c744ed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  settlement:
+    prop: settlement_form
+    value: { pattern: camp, houses: { lo: 10, hi: 800 } }
+    source:
+      - ref: src:burckhardt-1831-notes-on-the-bedouins
+        loc: 'vol. 1, chapter "Mode of encamping", p. 33'
+        quote: >-
+          The encampments vary in number of tents, from ten to eight hundred : when the tents are but few, they are pitched
+          in a circle
+      - ref: src:burckhardt-1831-notes-on-the-bedouins
+        loc: 'vol. 1, chapter "Mode of encamping", p. 33'
+        quote: >-
+          The whole tribe then spreads itself over the plain in parties of three or four tents each
+    method: survey
+    note: >-
+      Camps of ten to eight hundred tents, in a circle when few and in rows along a stream when many; in winter a tribe
+      spread out in parties of three or four tents. One family to a tent: Burckhardt says the richest man has but one,
+      unless a second wife or a kinsman's family needs another. How many people lived in a tent is not stated.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in burckhardt-1831-notes-on-the-bedouins.txt (sha256 d485a71826c744ed), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

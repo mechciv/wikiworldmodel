@@ -1,0 +1,24 @@
+id: src:hou-2021-northeastern-sichuan-dwellings
+type: publication
+kind: measurement
+citation: >-
+  Hou, C., Gao, W. & Zhang, M. (2021). Climate Responsive Strategies of Traditional Dwellings Located in an Ancient
+  Village in the Northeastern Sichuan Province. Journal of Asian Urban Environment, Annual 2021, 279–284.
+authors:
+  - "Hou, C."
+  - "Gao, W."
+  - "Zhang, M."
+published: 2021
+title: Climate Responsive Strategies of Traditional Dwellings Located in an Ancient Village in the Northeastern Sichuan Province
+container: Journal of Asian Urban Environment
+doi: 10.69457/aiue20210056
+url: https://www.jstage.jst.go.jp/article/aiue/2021/1/2021_aiue2021056/_article
+reliability: >-
+  A conference-journal paper on how the old houses of one village, Liyuanba in Tongjiang County, keep warm and cool,
+  from the authors' field survey and measurements. It describes the houses' plans, walls and roofs in a few
+  paragraphs, gives no size and no date for any of them, and its English is rough in places.
+verified:
+  by: machine:claude-code
+  how: >-
+    The article's PDF fetched from J-STAGE on 20 November 2026 and turned into text with PyMuPDF; sections 1, 2 and 4
+    read in full; the quotes checked by script against that text. Pages and DOI as the PDF's first page gives them.

@@ -1,0 +1,22 @@
+id: src:yun-ko-lee-pyeonggeo-dong
+type: publication
+kind: measurement
+citation: >-
+  Yun, H., Ko, M.-J. & Lee, G.-A. The Pyeonggeo-dong settlements: sustained farming villages of prehistoric and early
+  historic Korea. Antiquity, Project Gallery.
+authors:
+  - "Yun, H."
+  - "Ko, M.-J."
+  - "Lee, G.-A."
+title: "The Pyeonggeo-dong settlements: sustained farming villages of prehistoric and early historic Korea"
+container: Antiquity, Project Gallery
+url: https://antiquity.ac.uk/projgall/lee351
+reliability: >-
+  A short report of the salvage excavations (2006–2010) at Pyeonggeo-dong in south-central Korea, by members of the
+  projects, cited for the rice paddies of the Three Kingdoms period. The page gives no date of publication; its latest
+  references are of 2012.
+verified:
+  by: machine:claude-code
+  how: >-
+    The page fetched from the Antiquity site on 20 November 2026 and read as text; the quotes checked by script against
+    that text.

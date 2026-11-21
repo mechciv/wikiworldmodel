@@ -1,0 +1,227 @@
+id: people/traditions/linearbandkeramik-longhouse
+kind: tradition/building
+summary: >-
+  The longhouse of the Linearbandkeramik (LBK, the Linear Pottery culture), the first farmers of central Europe, from
+  about 5500 BCE to about 4900 BCE: a massive timber house some 7 m wide and mostly 10 to 25 m long, a few of 40 m, its
+  roof carried on cross-rows of three oak posts and its walls of posts plastered with clay dug from the long pits that
+  flank it. Each house stood in a yard of its own, one household's for generations, and the yards stood together in
+  loose villages, among small plots tilled and weeded by hand year after year. The house is found wherever the culture
+  is, from Hungary and Slovakia west to the Paris basin and east to Ukraine.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Longhouse of the Linearbandkeramik }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 5500 BCE
+    source:
+      - ref: src:jakucs-2016-vinca-linearbandkeramik
+        loc: 'section "Looking North: Architecture", on Figure 24'
+        quote: >-
+          It is clear that the first examples are associated with the Formative phase of the LBK and probably appeared in
+          the decades around 5500 cal BC.
+      - ref: src:jakucs-2016-vinca-linearbandkeramik
+        loc: 'section "Looking North: Architecture", on Figure 24'
+        quote: >-
+          The expansion of the distribution of longhouses with flanking pits appears to have begun in the middle part of
+          54th century cal BC, when in the space of a generation or two they spread across an area of central Europe more
+          than 1000 km across.
+    method: radiometric/radiocarbon
+    note: >-
+      The decades around 5500 cal BC, when the first longhouses with flanking pits were built in Transdanubia and eastern
+      Austria: the summary of three formal models of the radiocarbon dates, one of which puts the beginning between 5565
+      and 5490 cal BC at 68% probability. Over most of central Europe the house is later: its spread began in the
+      middle of the 54th century cal BC, and it reached the Paris basin, Ukraine, Moldova and Romania some centuries
+      after.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in jakucs-2016-vinca-linearbandkeramik.txt (sha256 9edc67e4f2edca93), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  end:
+    prop: end
+    value: { lo: 5000 BCE, hi: 4900 BCE }
+    source:
+      - ref: src:gelabert-2025-lbk-first-farmers
+        loc: Introduction, second paragraph
+        quote: The LBK culture is no longer recognized after around 5000-4900 BCE.
+      - ref: src:furholt-2020-vrable
+        loc: 'ch. 6.1 (Müller et al.), section "The population of Vráble", p. 497'
+        quote: Shortly after 4950 BCE, the settlement was abandoned.
+    method: expert-estimate
+    note: >-
+      Around 5000 to 4900 BCE, after which the culture is no longer recognized; the settlement of Vráble in Slovakia, of
+      its latest phase, was left shortly after 4950 BCE. The houses of the cultures that came of it, Rössen, Lengyel and
+      others, are not this record's.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in gelabert-2025-lbk-first-farmers.txt (sha256 da2a6366be45f774) and furholt-2020-vrable.txt (sha256 349a4a283413862c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["42", "43", "45", "47", "48"] }
+    source:
+      - ref: src:gelabert-2025-lbk-first-farmers
+        loc: Introduction, first paragraph
+        quote: >-
+          The western LBK has been reconstructed to have spread in two waves, first from Transdanubia, at ca. 5500 BCE, to
+          Slovakia, Austria, Moravia, Bohemia, and central and eastern Germany. Several centuries later, a second wave
+          reached the Paris basin and adjacent areas of France as far west as Normandy and as far east as Poland, Ukraine,
+          Moldova, and Romania
+      - ref: src:keeley-golitko-2004-first-farmers-central-europe
+        loc: section "History of research"
+        quote: >-
+          LBK sites have been excavated in Hungary, the Czech Republic, Slovakia, the Ukraine, Moldavia, Romania, Poland,
+          Austria, Germany, Luxembourg, the Netherlands, Belgium, and France.
+      - ref: src:mueller-scheessel-2020-house-orientations
+        loc: Introduction, third paragraph
+        quote: >-
+          What sets LBK settlements apart from any other archaeological culture, is their use of very characteristic long
+          houses.
+    method: editorial
+    note: >-
+      Region 45 (Eastern Europe) for Hungary west of the Danube, Slovakia, Moravia, Bohemia and Poland; region 43
+      (Central Europe) for Austria, Germany, Luxembourg, the Netherlands and Belgium; region 42 for France, from Alsace to
+      Normandy; region 47 for Ukraine; region 48 for Moldova and Romania. The sources place the culture in these
+      countries and call the longhouse its mark; they do not describe houses in each. The culture kept mostly to the
+      loess and never held the whole of any of these regions, and it reached France, Ukraine, Moldova and Romania only
+      in its later centuries.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in gelabert-2025-lbk-first-farmers.txt (sha256 da2a6366be45f774), keeley-golitko-2004-first-farmers-central-europe.txt (sha256 c2459ef75b569106) and mueller-scheessel-2020-house-orientations.txt (sha256 cfcc39b9ea6dd1fa), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      - ref: src:gelabert-2025-lbk-first-farmers
+        loc: Abstract
+        quote: >-
+          The Linearbandkeramik (LBK) Neolithic communities were the first to spread farming across large parts of Europe.
+      - ref: src:furholt-2020-vrable
+        loc: 'ch. 5.5 (Filipović, Kroll & Kirleis), p. 439'
+        quote: >-
+          These include maintenance of long-lived arable plots at a small, household scale, with significant effort
+          invested, in the form of thorough tilling and hand-weeding, and with variable levels of manuring
+      - ref: src:keeley-golitko-2004-first-farmers-central-europe
+        loc: section "Subsistence economy"
+        quote: >-
+          Initially, it was believed that LBK communities practiced slash-and-burn cultivation and that the constant need
+          for new land fueled the rapid dispersal of LBK peoples into central Europe. It has since become clear that many
+          LBK sites were settled continuously for several hundred years.
+    method: editorial
+    note: >-
+      Farmers, who kept the same small plots in use for long and manured them, with cattle, sheep, goats and pigs. That
+      they were shifting cultivators who burnt new clearings and moved on was the older view, which the sources read
+      give up.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in gelabert-2025-lbk-first-farmers.txt (sha256 da2a6366be45f774), furholt-2020-vrable.txt (sha256 349a4a283413862c) and keeley-golitko-2004-first-farmers-central-europe.txt (sha256 c2459ef75b569106), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { plan: long, width: 7, length: { lo: 10, hi: 40 }, walls: wattle-and-daub }
+    source:
+      - ref: src:mueller-scheessel-2020-house-orientations
+        loc: Introduction, third paragraph
+        quote: >-
+          These are massive buildings of lengths of 30 meters and more, the roof supported by solid posts of oak, always
+          set in cross-rows of three. Additionally, the houses are uniquely marked by long clay extraction and refuse pits
+          at each side.
+      - ref: src:furholt-2020-vrable
+        loc: 'ch. 6.3 (Wunderlich et al.), p. 517'
+        quote: >-
+          A kernel-density curve of the house sizes following Pechtl (2009), as well as the house lengths documented by
+          the magnetic plans of Vráble, shows a multi-peaked distribution with a clear centre of gravity at a maximum
+          length of between 10 and 20 m. Both curves show smaller maxima at a maximum length of about 25 m, 30 m, and 40 m.
+      - ref: src:furholt-2020-vrable
+        loc: 'ch. 2.1 (Winkelmann et al.), p. 43'
+        quote: >-
+          Apart from some regional variations, the average size of Early Neolithic longhouses is mostly around 20-25 m
+      - ref: src:furholt-2020-vrable
+        loc: 'ch. 2.1 (Winkelmann et al.), p. 46'
+        quote: >-
+          For an average longhouse of 20-25 m length and 7 m width (with the typical three-part subdivision), around 100
+          m³ is needed for wall plaster.
+      - ref: src:furholt-2020-vrable
+        loc: 'ch. 2.1 (Winkelmann et al.), p. 45'
+        quote: >-
+          Generally, the typical elongated house pits are interpreted as pits from which clay was extracted for use as
+          wall plaster.
+      - ref: src:keeley-golitko-2004-first-farmers-central-europe
+        loc: section "Linearbandkeramik material culture"
+        quote: >-
+          Longhouses (recognizable only as post molds) typically consist of two or four outer post rows (the walls) and
+          three rows of inner support posts that held up the roof.
+    method: excavation
+    note: >-
+      A longhouse. The length is that of the houses of the culture at large as Pechtl (2009) compiled them and of those
+      of Vráble: most between 10 and 20 m, with fewer about 25, 30 and 40 m; the same book puts the average of
+      Linearbandkeramik longhouses at 20 to 25 m, and the first source's "30 meters and more" is of the largest. The
+      width is the 7 m it takes for an average house in reckoning the clay its walls needed; the twelve houses excavated
+      at Vráble whose width is given measure from 4.9 to 11.1 m between their walls (ch. 3.1). The walls were rows of
+      posts plastered with clay; that the posts were filled between with wattle is not said in what was read, and wattle
+      and daub is the vocabulary's nearest word. Three rows of posts inside carried the roof, whose shape and covering
+      are not stated, and are left to the generator; no original floor has been recovered, as the last source has it.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in mueller-scheessel-2020-house-orientations.txt (sha256 cfcc39b9ea6dd1fa), furholt-2020-vrable.txt (sha256 349a4a283413862c) and keeley-golitko-2004-first-farmers-central-europe.txt (sha256 c2459ef75b569106), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  settlement:
+    prop: settlement_form
+    value: { pattern: nucleated, houses: { lo: 9, hi: 18 }, household: 8.5 }
+    source:
+      - ref: src:furholt-2020-vrable
+        loc: 'ch. 6.3 (Wunderlich et al.), p. 514'
+        quote: >-
+          These farmsteads are composed of economic areas with an average size of about 0.5 ha, within which at any given
+          time only one or two houses were contemporaneously in use. Each farmstead thus represents one household spanning
+          several generations.
+      - ref: src:furholt-2020-vrable
+        loc: 'ch. 6.1 (Müller et al.), section "Population development in the Upper Žitava Valley", p. 499'
+        quote: >-
+          For these five, the number of house yards per settlement lies between 9 and 18, with an arithmetic mean of 13.0.
+      - ref: src:furholt-2020-vrable
+        loc: 'ch. 6.1 (Müller et al.), section "The population of Vráble", p. 497'
+        quote: >-
+          Therefore, the estimates for the size of a household range from 5 to 25 persons … suggest the use of an average
+          value of 8.5 inhabitants per household, for what in our opinion are good reasons.
+      - ref: src:furholt-2020-vrable
+        loc: 'ch. 6.3 (Wunderlich et al.), p. 514'
+        quote: >-
+          Most studies assume that the individual longhouses can be assigned to core families or extended families and
+          that the number of occupants does not exceed 10 persons per house
+      - ref: src:keeley-golitko-2004-first-farmers-central-europe
+        loc: section "Linearbandkeramik material culture"
+        quote: >-
+          In many cases, sites (Köln-Lindenthal, Elsloo, and Olszanica, for instance) clearly were large, permanent
+          settlements with numerous contemporaneous long-houses and, sometimes, associated cemeteries. Excavations on the
+          Aldenhovener Platte indicate, however, that in other instances, LBK "villages" actually were isolated farmsteads
+          separated by several hundred meters.
+    method: expert-estimate
+    note: >-
+      Villages of farmsteads: each household had a yard of about half a hectare in which one house, or two, stood at a
+      time and was rebuilt generation by generation. The number of houses is that of the yards in each of the five
+      settlements of the upper Žitava valley in Slovakia whose whole extent is known, 9 to 18 with a mean of 13, taken
+      as one house each: one valley's figure, the only one read. Vráble itself, the largest there, had some 70 houses at
+      its height, and on the Aldenhovener Platte near Cologne farmsteads stood alone, some hundreds of metres apart.
+      Nobody knows how many lived in a longhouse: estimates run from 5 to 25, the excavators of Vráble reckon with the
+      8.5 of Zimmermann et al. (2009), and most studies assume no more than ten.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in furholt-2020-vrable.txt (sha256 349a4a283413862c) and keeley-golitko-2004-first-farmers-central-europe.txt (sha256 c2459ef75b569106), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  fields:
+    prop: field_system
+    value: { kind: gardens }
+    source:
+      - ref: src:furholt-2020-vrable
+        loc: 'ch. 5.4 (Eckelmann, Schmölcke & Makarewicz), p. 427'
+        quote: Manuring was a part of LBK small-scale, intensive horticultural cultivation
+      - ref: src:furholt-2020-vrable
+        loc: 'ch. 5.5 (Filipović, Kroll & Kirleis), p. 439'
+        quote: >-
+          These include maintenance of long-lived arable plots at a small, household scale, with significant effort
+          invested, in the form of thorough tilling and hand-weeding, and with variable levels of manuring
+      - ref: src:keeley-golitko-2004-first-farmers-central-europe
+        loc: section "Subsistence economy"
+        quote: >-
+          LBK peoples probably cleared small fields within about a kilometer of villages for both farming and grazing,
+          with one person estimated to require approximately 0.4 hectare of land per year.
+    method: expert-estimate
+    note: >-
+      Small plots worked by hand, each household's own, kept in use for long and manured: what the sources call
+      horticultural cultivation, and the vocabulary gardens. They lay within about a kilometre of the houses. The size of
+      a plot is not given: the 0.4 hectare is the land one person is reckoned to have needed, and the excavators of
+      Vráble cite 0.5 to 1 hectare a person from other authors. What bounded the plots is not known.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in furholt-2020-vrable.txt (sha256 349a4a283413862c) and keeley-golitko-2004-first-farmers-central-europe.txt (sha256 c2459ef75b569106), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

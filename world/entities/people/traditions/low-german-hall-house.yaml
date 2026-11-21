@@ -1,0 +1,172 @@
+id: people/traditions/low-german-hall-house
+kind: tradition/building
+summary: >-
+  The hall house of the farmers of the North German Plain and the eastern Netherlands (Fachhallenhaus, or
+  Niedersachsenhaus), from the end of the Middle Ages to the nineteenth century: one large timber-framed house with
+  people, cattle and harvest under a single roof, a threshing floor down its middle between two rows of posts, stalls
+  in the aisles at its sides, the open hearth and the living quarters at the far end and the crop in the loft above. The
+  panels of its frame were filled with wattle and daub, later with brick, and its great roof was thatched with reed. A
+  broad tradition, read from an encyclopedia article only, that stands until better sources are read.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Low German hall house (Fachhallenhaus) }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: { lo: 1201 CE, hi: 1500 CE }
+    source:
+      - ref: src:wikipedia-low-german-house
+        loc: opening section
+        quote: >-
+          The Low German house appeared during the 13th to 15th centuries and was referred to as the Low Saxon house
+          (Niedersachsenhaus) in early research works.
+      - ref: src:wikipedia-low-german-house
+        loc: section "Predecessors"
+        quote: >-
+          These posts were first used for farmhouses in northern Germany from the 13th century, and enable them to be
+          furnished with a load-bearing loft.
+      - ref: src:wikipedia-low-german-house
+        loc: section "Early history"
+        quote: The oldest surviving houses of this type in Germany date to the late 15th century
+    method: expert-estimate
+    note: >-
+      The thirteenth to the fifteenth centuries, as the article dates the house's appearing: from the thirteenth century
+      the posts of farmhouses in northern Germany were set on footings and could carry a loft, and the oldest houses
+      still standing in Germany are of the late fifteenth. The article names two older frames in the Netherlands, of 1262
+      and 1386. Before it, the article has the farmers of north-west Europe in three-aisled longhouses whose posts were
+      set in the ground, as people/traditions/iron-age-longhouse-village records for earlier centuries.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-low-german-house.txt (sha256 c275f84dc2238367), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  end:
+    prop: end
+    value: { lo: 1850 CE, hi: 1900 CE }
+    source:
+      - ref: src:wikipedia-low-german-house
+        loc: section "Decline"
+        quote: Since the middle of the 19th century fewer and fewer of these farmhouses were built
+      - ref: src:wikipedia-low-german-house
+        loc: section "Decline"
+        quote: By the end of the 19th century this type of farmhouse was outmoded.
+    method: expert-estimate
+    note: >-
+      The second half of the nineteenth century, when fewer and fewer were built and the type went out of use: an end of
+      the building of such houses, not of the houses, many of which stand and are lived in.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-low-german-house.txt (sha256 c275f84dc2238367), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["43"] }
+    source:
+      - ref: src:wikipedia-low-german-house
+        loc: opening section
+        quote: >-
+          is a type of timber-framed farmhouse found in northern Germany and the easternmost Netherlands, which combines
+          living quarters, byre and barn under one roof
+      - ref: src:wikipedia-low-german-house
+        loc: opening section
+        quote: >-
+          this rural, agricultural farmhouse style was widely distributed through the North German Plain, all the way from
+          the Lower Rhine to Mecklenburg
+      - ref: src:wikipedia-low-german-house
+        loc: section "Distribution"
+        quote: >-
+          Further east it was found as far as the Danzig Bay, but manor houses (Gutshaus) and farm workers houses were
+          more common.
+    method: editorial
+    note: >-
+      Region 43 (Central Europe), for northern Germany and the eastern Netherlands. The coast east of Mecklenburg as far
+      as Danzig Bay, now in Poland (region 45), is left out, as the article has other houses commoner there. The house is
+      not claimed for the centre and south of Germany, where the article has other farmhouses, nor for the marshes of the
+      North Sea coast, where it has the Gulf house from the sixteenth century. A region named is where the source places
+      the house, not a claim that it covered the region.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-low-german-house.txt (sha256 c275f84dc2238367), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  prevalence:
+    prop: prevalence
+    value: some
+    source:
+      - ref: src:wikipedia-low-german-house
+        loc: section "Distribution"
+        quote: From the Lower Rhine region to western Mecklenburg the Low German house was the dominant type of farmhouse.
+      - ref: src:wikipedia-low-german-house
+        loc: section "Neighbouring farmhouse types"
+        quote: >-
+          On the southern boundary of the Low German house region, as well as the multi-sided farmsteads, there is the
+          historical Ernhaus type of farm, also referred to as the Middle German house
+    method: editorial
+    note: >-
+      A part of the farmers of region 43 (Central Europe): the commonest farmhouse of the plain in the north of it,
+      and not a house of the centre and south of Germany, where the article has the Middle German house and
+      farmsteads of several buildings, nor of the Alps. Nothing read says what part of the region's farmers lived on
+      the plain: the word is this record's reading of where the house stood.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-low-german-house.txt (sha256 c275f84dc2238367), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-21" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      - ref: src:wikipedia-low-german-house
+        loc: section "Internal layout"
+        quote: >-
+          The farmhouse combined all the functions of life on the farm. In this way it was easy for the farmers to manage
+          the whole of his livestock, family and farmhands.
+      - ref: src:wikipedia-low-german-house
+        loc: section "Early history"
+        quote: >-
+          From the outset, and for a long time thereafter, people and animals were accommodated in different areas within
+          a large room.
+    method: editorial
+    note: >-
+      Farmers: the house is a farmhouse, lived in by the farmer's family, farmhands and maids together with the cattle
+      and horses. The article says nothing of the houses of towns.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-low-german-house.txt (sha256 c275f84dc2238367), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { plan: rectangular, length: { lo: 5, hi: 25 }, walls: wattle-and-daub, roof: gable, roof_material: thatch, floor: ground }
+    source:
+      - ref: src:wikipedia-low-german-house
+        loc: opening section
+        quote: >-
+          It is built as a large hall with bays on the sides for livestock and storage and with the living accommodation at
+          one end.
+      - ref: src:wikipedia-low-german-house
+        loc: section "Name"
+        quote: >-
+          which are spaced about 2.5 metres (8.2 ft) apart. This was also used as a measure of house size: the smallest
+          only had 2 bays, the largest, with 10 bays, were about 25 metres (82 ft) long.
+      - ref: src:wikipedia-low-german-house
+        loc: section "Internal layout"
+        quote: >-
+          In the 18th century the Low German house was built ever larger, with a length of up to 50 m and width of 15 m.
+      - ref: src:wikipedia-low-german-house
+        loc: section "Construction"
+        quote: >-
+          The non weight-bearing external walls were built as timber frames, the panels of which were originally filled in
+          with willow wickerwork and clay (wattle and daub) and, later, with brick.
+      - ref: src:wikipedia-low-german-house
+        loc: section "Roof shapes"
+        quote: >-
+          In Westphalia all these farmhouses have a gable roof. In parts of Lower Saxony and in Holstein there is a mix of
+          farmhouses with gable and hipped-gable roofs, and in Mecklenburg almost all have hipped-gables.
+      - ref: src:wikipedia-low-german-house
+        loc: section "Construction"
+        quote: Originally it would have been thatched with reed
+      - ref: src:wikipedia-low-german-house
+        loc: section "Diele"
+        quote: With its tamped clay floor it was the working room of the farmhouse.
+    method: expert-estimate
+    note: >-
+      A rectangular hall. The length runs from the smallest houses, of two bays, to the largest, of ten, which the
+      article puts at about 25 m: it gives the bay as about 2.5 m, so the 5 m of two bays is that figure doubled, not
+      one the article states. In the eighteenth century houses were built up to 50 m long and 15 m wide; no usual width
+      is given, and it is left to the generator. The walls are a timber frame whose panels were filled with wattle and
+      daub, later with brick; the vocabulary has no word for a frame so filled, and wattle and daub is the nearest. The
+      frame itself, which carried the loft and the roof on two rows of posts down the hall (on four rows, the outer walls
+      among them, in the houses of richer farmers), stood on a low stone footing. The roof was gabled in Westphalia and
+      "hipped-gable" in Mecklenburg, for which there is no word, and thatched with reed. The floor is the tamped clay of
+      the threshing floor; the living rooms added at the back after the Thirty Years' War were raised a little above it.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-low-german-house.txt (sha256 c275f84dc2238367), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

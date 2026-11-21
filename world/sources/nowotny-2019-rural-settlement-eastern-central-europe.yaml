@@ -1,0 +1,25 @@
+id: src:nowotny-2019-rural-settlement-eastern-central-europe
+type: publication
+kind: review
+citation: >-
+  Nowotny, E. (2019). Change in rural settlement in eastern Central Europe from the Early to the Later Middle Ages. In
+  Brady, N. & Theune, C. (eds), Ruralia XII: Settlement change across Medieval Europe; old paradigms and new vistas,
+  281–291. Leiden: Sidestone Press.
+authors:
+  - "Nowotny, E."
+published: 2019
+title: Change in rural settlement in eastern Central Europe from the Early to the Later Middle Ages
+container: "Ruralia XII: Settlement change across Medieval Europe; old paradigms and new vistas (Leiden, Sidestone Press), 281–291"
+url: https://www.sidestone.com/books/settlement-change-across-medieval-europe
+reliability: >-
+  A short synthesis of the excavated rural settlements of Austria, Moravia, Bohemia and Slovakia from the sixth century
+  to the fifteenth, built round the author's own site of Mitterretzbach in Lower Austria. For Bohemia and Moravia it
+  rests on Klápště (2012), for the early Middle Ages on Milo (2014), and for the village of Hard on Felgenhauer-Schmiedt
+  (2008), none of which was read here. It says itself that buildings at ground level leave few traces, that villages are
+  seldom excavated whole, and that developments differ much from one region to another.
+verified:
+  by: machine:claude-code
+  how: >-
+    The publisher's open-access PDF of the whole volume (sidestone.com/openaccess/9789088908064.pdf) fetched on 20 November
+    2026 and turned into text with PyMuPDF; the chapter read in full (pages 283–293 of the file, which are pages 281–291
+    as printed). Quotes checked by script against the text of those pages.

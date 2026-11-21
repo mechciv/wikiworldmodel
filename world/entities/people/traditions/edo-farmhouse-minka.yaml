@@ -1,0 +1,135 @@
+id: people/traditions/edo-farmhouse-minka
+kind: tradition/building
+summary: >-
+  The farmhouse (nōka) of early modern Japan, from about 1600: a timber house under a thatched roof, half of it, in
+  older houses, an earth-floored work space (doma) entered by the great door, with the cooking range, a place for
+  milling rice and often a stable, and beside it a raised timber floor of living rooms, most often a large hall
+  (hiroma) and two rooms beyond it, or later four rooms in a square. Households of four to six people lived in them. It
+  is a member of people/traditions/japanese-ground-level-house and differs from it in what it states; regional forms
+  (the L-shaped farmhouse with its stable, the steep-roofed gasshō house) are left to narrower records.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Farmhouse of early modern Japan (minka) }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 1600 CE
+    source:
+      - ref: src:hayami-2010-population-family-central-japan
+        loc: "ch. 1, p. 10"
+        quote: If the population at the beginning of the Tokugawa period (ca. 1600) can be fixed at 12 million
+      - ref: src:jaanus-dictionary
+        loc: s.v. doma
+        quote: of the Edo period almost always possessed a doma to which the main entrance of the building
+    method: expert-estimate
+    note: >-
+      The beginning of the Tokugawa (Edo) period, about 1600, as Hayami puts it, taken as the start of the farmhouse the
+      dictionary describes for that period. Such houses are older; the earliest that survive, and the plans the
+      dictionary dates, are of the later seventeenth century and after. No end is given: farmhouses of this kind were
+      built into the Meiji period, past the span of this record's sources.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in hayami-2010-population-family-central-japan.txt (sha256 801f4f30e86ac227) and jaanus-dictionary.txt (sha256 9d242cd750c47f8e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["124"] }
+    source:
+      ref: src:jaanus-dictionary
+      loc: s.v. hiromagata
+      quote: >-
+        especially in the Kantō 関東, parts of Tōhoku 東北, Chūbu 中部, and Western Honshū 本州. It was less common in
+        Kyūshū 九州 and Shikoku 四国, and very rare in the Kinki 近畿 district.
+    method: editorial
+    note: >-
+      Region 124 (Japan), where the dictionary places the hall-plan farmhouse and its kin across Honshu, Kyushu and
+      Shikoku. Hokkaido and the Ryukyus are not claimed.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in jaanus-dictionary.txt (sha256 9d242cd750c47f8e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      - ref: src:jaanus-dictionary
+        loc: s.v. minka
+        quote: Broadly divided into country dwellings; farmhouses nōka 農家, fishermen's dwellings gyoka 漁家
+      - ref: src:jaanus-dictionary
+        loc: s.v. hiromagata
+        quote: >-
+          In the Edo period, especially from the late 17th-early 18th century, it was the house type of relatively
+          prosperous middle-ranking farmers and village headmen
+    method: editorial
+    note: >-
+      The farmhouse, as against the fishermen's and mountain dwellings and the town house. The hall plan was the house
+      of prosperous farmers and headmen; the houses of poorer farmers were smaller (see the household claim's sources),
+      and the record does not tell them apart.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in jaanus-dictionary.txt (sha256 9d242cd750c47f8e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { walls: timber, roof_material: thatch, floor: raised, rooms: { lo: 3, hi: 5 } }
+    source:
+      - ref: src:jaanus-dictionary
+        loc: s.v. minka
+        quote: >-
+          Minka in Japan are primarily constructed of wood, and are characterized by combining an area of packed earth
+          floor
+      - ref: src:jaanus-dictionary
+        loc: s.v. minka
+        quote: with a raised-floor living area yukaue bubun 床上部分
+      - ref: src:jaanus-dictionary
+        loc: s.v. kayabuki
+        quote: Although thatched roofs are usually associated with vernacular dwellings
+      - ref: src:jaanus-dictionary
+        loc: s.v. doma
+        quote: >-
+          In farmhouses, nōka 農家, the doma tended to be extensive, particularly in older houses, sometimes occupying
+          half the total area of the building.
+      - ref: src:jaanus-dictionary
+        loc: s.v. minka
+        quote: >-
+          There are a large variety of floor-plans used in minka, the most common being the so-called hall plan
+      - ref: src:jaanus-dictionary
+        loc: s.v. hiromagata
+        quote: >-
+          The number of rooms at the upper end beyond the hiroma varies: most commonly there are two, but sometimes
+          there are three or four rooms.
+    method: expert-estimate
+    note: >-
+      A timber house under thatch. The floor is half earth and half raised timber; the vocabulary has no word for that,
+      and "raised" stands for the living rooms' timber floor above the earth floor, not for a base under the whole
+      house; how high it stood is not given by the sources read here. Rooms are those with raised floors: the hall and two to four more in
+      the hall plan, four in the four-room plan; the earth-floored space is not counted. The roof was gabled, hipped or
+      hipped-and-gabled, and the dictionary names no one of them as usual, so its shape is left out; so is a size, which
+      no source read gives in metres. The one village whose houses were measured (Shitsukawa, in 1884) gives building
+      areas of 6.75, 13.63 and 16.90 tsubo for houses of one, two and three rooms.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in jaanus-dictionary.txt (sha256 9d242cd750c47f8e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  settlement:
+    prop: settlement_form
+    value: { household: { lo: 4.19, hi: 5.76 } }
+    source:
+      - ref: src:hayami-2010-population-family-central-japan
+        loc: "ch. 1, p. 5"
+        quote: >-
+          and consequently, the average household size shrank from 5.55 during the 1670s, to 4 .19 during the 1830s.
+      - ref: src:miura-tani-2010-shitsukawa-farmhouses
+        loc: English abstract
+        quote: >-
+          The average number of family members per household in the entire village was 5.76, implying that there were
+          5 to 6 people per household.
+    method: documentary
+    note: >-
+      Hayami gives the average household of the villages of Owari province (the Owari Nagoya domain's village surveys)
+      as 5.55 people in the 1670s and 4.19 in the 1830s (the scan's text layer reads "4 .19", kept as it is in the
+      quote); Miura and Tani 5.76 for a mountain village of Shikoku in 1884. In Nishijo, a farming village of Mino,
+      Hayami's registers give about 3.8 to 4.0 people to a household in the 1770s and 1780s (ch. 6, Table 6-2). The
+      range runs from the lowest of the averages cited to the highest; a household is not a house, but the sources
+      count one house to a household.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in hayami-2010-population-family-central-japan.txt (sha256 801f4f30e86ac227) and miura-tani-2010-shitsukawa-farmhouses.txt (sha256 f087a308f4ab6802), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+relations:
+  broader:
+    rel: member-of
+    to: people/traditions/japanese-ground-level-house
+    unsourced: An editorial grouping.

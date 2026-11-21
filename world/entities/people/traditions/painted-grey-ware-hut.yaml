@@ -1,0 +1,137 @@
+id: people/traditions/painted-grey-ware-hut
+kind: tradition/building
+summary: >-
+  The hut of the small villages of the Painted Grey Ware culture, on the upper Ganges and Jumna and the country west of
+  them in the early Iron Age: round or rectangular, of posts with cane and bamboo between them plastered with mud. Its
+  people farmed wheat, barley and rice and bred cattle. The better-off had houses of mud walls with many rooms. Few
+  plans are known: only one site had been dug over a large area when the account read was written.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Wattle-and-daub hut of the Painted Grey Ware villages }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 1100 BCE
+    source:
+      ref: src:lal-1992-painted-grey-ware
+      loc: "p. 428"
+      quote: >-
+        The Painted Grey Ware levels in the iron-using sites of the upper Ganges-Jamuna basin may broadly be dated between
+        the limits of 1100 and 700 b.c. and the Painted Grey Ware/ Northern Black Polished Ware overlap between 700 and
+        500 b.c.
+    method: expert-estimate
+    note: >-
+      The earlier limit the source gives to the levels of the iron-using sites. It adds that a phase before iron, not
+      yet firmly established, may be older than 1100 BCE.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in lal-1992-painted-grey-ware.txt (sha256 0ff9834c782ba152), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  end:
+    prop: end
+    value: 500 BCE
+    source:
+      ref: src:lal-1992-painted-grey-ware
+      loc: "p. 428"
+      quote: >-
+        The Painted Grey Ware levels in the iron-using sites of the upper Ganges-Jamuna basin may broadly be dated between
+        the limits of 1100 and 700 b.c. and the Painted Grey Ware/ Northern Black Polished Ware overlap between 700 and
+        500 b.c.
+    method: expert-estimate
+    note: >-
+      The end of the two centuries in which the ware overlaps with the Northern Black Polished Ware, the last the source
+      gives to it. It describes no house of those two centuries apart from the earlier ones, and has structures of burnt
+      brick appear with the Northern Black Polished Ware at Hastinapura, which are not this tradition.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in lal-1992-painted-grey-ware.txt (sha256 0ff9834c782ba152), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["107", "109"] }
+    source:
+      ref: src:lal-1992-painted-grey-ware
+      loc: "p. 412"
+      quote: >-
+        While the main concentration of sites is in Indian Punjab, Haryana, north-eastern Rajasthan and the upper
+        Ganges-Jamuna basin in Uttar Pradesh
+    method: editorial
+    note: >-
+      Region 107 (Northern India) for Indian Punjab, Haryana and Uttar Pradesh, where the houses described were dug (at
+      Bhagwanpura, Hastinapura, Atranjikhera and Jakhera), and region 109 (Northwestern India) for Rajasthan, by their
+      cities' coordinates against the region outlines. The source also reports the ware from Pakistan (Harappa, a site in
+      Sind, and fourteen sites in Bahawalpur) and from one site in the Himalaya; it describes no house from them, so
+      regions 105 and 106 are left out. The house is not claimed for all of either region.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in lal-1992-painted-grey-ware.txt (sha256 0ff9834c782ba152), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [farmers, herders]
+    source:
+      - ref: src:lal-1992-painted-grey-ware
+        loc: "p. 425"
+        quote: Agriculture was the mainstay of the people who produced wheat, barley and rice.
+      - ref: src:lal-1992-painted-grey-ware
+        loc: "p. 417"
+        quote: Next to agriculture, the people depended for their subsistence on domesticated animals.
+      - ref: src:lal-1992-painted-grey-ware
+        loc: "p. 414"
+        quote: These settlements were mostly small villages.
+    method: editorial
+    note: >-
+      One people, in small villages, whose mainstay was farming and who next to it lived by their animals, cattle the most
+      numerous of them. Farmers, then; and herders are named because the cattle-breeders the source shows are these same
+      villagers: it knows no camps of herders apart from the villages, so the hut is the only house the evidence gives to
+      those who lived by herds here. It is a reading of one people into two of the ways of life the world tells apart,
+      and a reviewer may prefer farmers alone. The source has no towns: at no stage, it says, did a city come into being.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in lal-1992-painted-grey-ware.txt (sha256 0ff9834c782ba152), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { plan: round, diameter: { lo: 4.25, hi: 6.85 }, walls: wattle-and-daub }
+    source:
+      - ref: src:lal-1992-painted-grey-ware
+        loc: "p. 425"
+        quote: >-
+          The nature of the houses varied: while the lowlier members of the community lived in round or rectangular huts
+          of modest size, constructed essentially of wattle-and-daub, the more well-to-do lived in sizable houses with
+          mud-walls, sometimes having as many as a dozen rooms.
+      - ref: src:lal-1992-painted-grey-ware
+        loc: "p. 414"
+        quote: >-
+          One of these is a round hut, indicated by the arrangement of twenty-three post-holes. It covered an overall area
+          of 4.25 × 6.85 m.
+      - ref: src:lal-1992-painted-grey-ware
+        loc: "p. 415"
+        quote: >-
+          was then plastered over on both the inner and outer surfaces with mud, strengthened with the addition of
+          rice-husks
+    method: excavation
+    note: >-
+      The hut the source gives to the lowlier members of the community. It was round or rectangular; round is written, as
+      the one hut measured, at Bhagwanpura, is called round. That hut covered 4.25 by 6.85 m: the span is its two
+      measures, not a range of sizes. The walls, from the plaster found at Hastinapura, Atranjikhera and other sites, were
+      of posts with wild cane and bamboo tied between them and mud plastered on both faces. The roof is not described.
+      The well-to-do had houses of mud walls: one at Bhagwanpura had thirteen rooms, from 1.6 by 1.6 m to 3.35 by 4.2 m,
+      a corridor and a courtyard, and this record does not draw it. Burnt bricks were found but not, the source thinks,
+      in houses.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in lal-1992-painted-grey-ware.txt (sha256 0ff9834c782ba152), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  settlement:
+    prop: settlement_form
+    value: { pattern: nucleated }
+    source:
+      - ref: src:lal-1992-painted-grey-ware
+        loc: "p. 414"
+        quote: These settlements were mostly small villages.
+      - ref: src:lal-1992-painted-grey-ware
+        loc: "p. 414"
+        quote: >-
+          The sites of this culture are located along river-banks, the average distance from one site to another being
+          about 10 to 12 km.
+    method: expert-estimate
+    note: >-
+      Small villages along the river banks, some 10 to 12 km apart and as little as 5 km where the land was good; in
+      northern Haryana their sites cover from 1,570 to 96,193 square metres. How many houses stood in one is not stated,
+      nor how many people lived in a house: from the size of the hearths at Atranjikhera the source infers large, joint
+      families, and gives no number.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in lal-1992-painted-grey-ware.txt (sha256 0ff9834c782ba152), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

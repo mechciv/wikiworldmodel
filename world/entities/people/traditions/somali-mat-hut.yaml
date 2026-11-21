@@ -1,0 +1,99 @@
+id: people/traditions/somali-mat-hut
+kind: tradition/building
+summary: >-
+  The gurgi of the Somali herders: a small hemispheric hut like an old beehive, of sticks bent and hardened in the fire,
+  planted in the ground, tied together and covered with grass mats, with hides over it in the rains; the women took it
+  down and loaded it on the camels when the camp moved. The huts stood in a line on the plains, or round the inside of a
+  thorn fence in the hills, with the cattle penned in rings within. Its earliest description read here is Burton's, of
+  1854 and 1855.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Mat hut (gurgi) of the Somali }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 1854 CE
+    source:
+      ref: src:burton-1856-first-footsteps-in-east-africa
+      loc: preface, p. xxii
+      quote: He left Aden on the 29th of October 1854, arrived at the capital of the ancient Hadiyah Empire on the 3rd January 1855
+    method: documentary
+    note: >-
+      The year of the earliest account read: Burton crossed the country of the northern Somali to Harar from the end of
+      October 1854. It bounds the start and does not date it: the hut is surely older. No end is given: no source read says
+      when it went out of use.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in burton-1856-first-footsteps-in-east-africa.txt (sha256 d84e27a324e82dd3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["94"] }
+    source:
+      ref: src:burton-1856-first-footsteps-in-east-africa
+      loc: '"The kraal", p. 213'
+      quote: attempt a description of a village in Eastern Africa.
+    method: editorial
+    note: >-
+      Somalia (94): the kraal described is one of the Gudabirsi, in the hills of what is now Somaliland, where Burton
+      camped inside it; he gives it as the Somali village in general. The Somali also lived in the Ogaden, now in Ethiopia,
+      which he did not cross; it is left out.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in burton-1856-first-footsteps-in-east-africa.txt (sha256 d84e27a324e82dd3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [herders]
+    source:
+      - ref: src:burton-1856-first-footsteps-in-east-africa
+        loc: p. 184
+        quote: >-
+          and the Nomads migrate to the plains: when the monsoon covers them with rich pastures, the people revisit their
+          deserted kraals.
+      - ref: src:burton-1856-first-footsteps-in-east-africa
+        loc: p. 133
+        quote: dispose the parcels in a semicircle, pitch over them the Gurgi or mat tent
+    method: editorial
+    note: >-
+      Herders who moved between the hills and the plains with the seasons, and whose women pitched the mat hut at each halt.
+      Burton has the Somali of the towns and the farmers near Harar living otherwise; they are not named.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in burton-1856-first-footsteps-in-east-africa.txt (sha256 d84e27a324e82dd3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { plan: round, diameter: 1.8, height: 1.5, walls: none, roof: dome, roof_material: reed, floor: ground }
+    source:
+      - ref: src:burton-1856-first-footsteps-in-east-africa
+        loc: '"The kraal", pp. 213-214'
+        quote: >-
+          are built the Gurgi or wigwams,— hemispheric huts … like old bee-hives about five feet high by six in …
+          diameter: they are even smaller in the warm regions, but they increase in size as the elevation of the country
+          renders climate less genial.
+      - ref: src:burton-1856-first-footsteps-in-east-africa
+        loc: '"The kraal", p. 214'
+        quote: >-
+          or sticks bent and hardened in the fire: to build the hut, these are planted in the ground, tied together with
+          cords, and covered with mats of two different kinds
+    method: survey
+    note: >-
+      About 5 ft high and 6 ft across (1.5 and 1.8 m), smaller in the hot lowlands and larger in the cool hills, as Burton
+      gives it. A hemisphere, so a dome to the ground and no walls. The mats are of grass, "small bundles of grass neatly
+      joined" and one of long pile, entered as reed, the nearest word, which is mats of reed; hides were laid on top in the
+      rains.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in burton-1856-first-footsteps-in-east-africa.txt (sha256 d84e27a324e82dd3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  settlement:
+    prop: settlement_form
+    value: { pattern: compound }
+    source:
+      ref: src:burton-1856-first-footsteps-in-east-africa
+      loc: '"The kraal", p. 213'
+      quote: >-
+        is a line of scattered huts on plains where thorns are rare, beast of prey scarce, and raids not expected. In the
+        hills it is surrounded by a strong fence to prevent cattle straying
+    method: survey
+    note: >-
+      A kraal: in the hills a thorn fence with huts round its inside and the cattle in rings within, which is the form
+      entered; on the open plains a line of scattered huts. How many huts stood in a kraal, and how many people lived in
+      one, is not stated.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in burton-1856-first-footsteps-in-east-africa.txt (sha256 d84e27a324e82dd3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

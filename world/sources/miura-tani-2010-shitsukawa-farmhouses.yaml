@@ -1,0 +1,25 @@
+id: src:miura-tani-2010-shitsukawa-farmhouses
+type: publication
+kind: measurement
+citation: >-
+  Miura, Y. & Tani, N. (2010). Meiji zenki no sankan shūraku ni okeru nōka jūtaku no heimen kōsei: Tokushima-ken
+  Miyoshi-gun Shitsukawa-mura no jirei [The plans of farmhouses in a mountain village in the early Meiji period: the
+  case of Shitsukawa village, Miyoshi county, Tokushima prefecture]. Journal of Home Economics of Japan 61(12), 795–803.
+authors:
+  - "Miura, Y."
+  - "Tani, N."
+published: 2010
+title: 明治前期の山間集落における農家住宅の平面構成 徳島県三好郡漆川村の事例
+container: Journal of Home Economics of Japan 61(12), 795–803
+doi: 10.11428/jhej.61.795
+url: https://www.jstage.jst.go.jp/article/jhej/61/12/61_795/_article/-char/en
+via: J-STAGE.
+reliability: >-
+  A study of one mountain village's farmhouses from the house plans drawn for it in 1884 (Kaokuezumen). Cited from its
+  English abstract only: the article is in Japanese and was not read. A village of Shikoku in early Meiji, some years
+  after the span it is cited for.
+verified:
+  by: machine:claude-code
+  how: >-
+    The article's J-STAGE page fetched on 20 November 2026 and read as text, the English abstract and the citation
+    metadata only; the quotes checked by script against it.

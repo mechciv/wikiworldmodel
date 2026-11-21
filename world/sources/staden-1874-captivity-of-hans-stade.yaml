@@ -1,0 +1,26 @@
+id: src:staden-1874-captivity-of-hans-stade
+type: text
+kind: eyewitness
+citation: >-
+  Staden, H. The Captivity of Hans Stade of Hesse, in A.D. 1547–1555, among the Wild Tribes of Eastern Brazil,
+  translated by Albert Tootal and annotated by Richard F. Burton. London: Hakluyt Society (Works issued by the Hakluyt
+  Society, No. 51), 1874.
+authors:
+  - "Staden, H."
+published: 1874
+written: 1557
+title: The Captivity of Hans Stade of Hesse, in A.D. 1547–1555, among the Wild Tribes of Eastern Brazil
+url: https://archive.org/details/no51works01hakluoft
+via: The Internet Archive's scan of the University of Toronto's copy (no51works01hakluoft), read in its OCR text.
+license: public domain
+reliability: >-
+  A German gunner held captive by the Tupinambá near Ubatuba, on the coast between Santos and Rio de Janeiro, in 1554;
+  his account was printed at Marburg in 1557, the year given here as when it was written, and is read here in the English
+  translation of 1874. Part II, his description of the people's ways, is written from what he saw while a captive. The
+  introduction and the footnotes are Burton's, written in 1874, and are cited as his where they are cited.
+verified:
+  by: machine:claude-code
+  how: >-
+    Part I, chapter XX, Part II, chapters IV and X (pp. 124 to 126 and 130), and Burton's introduction read on 20
+    November 2026 in the OCR text of the scan. The quotes keep to stretches the OCR reads cleanly, and were checked by
+    script against it.

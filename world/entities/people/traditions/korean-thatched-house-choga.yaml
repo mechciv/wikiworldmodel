@@ -1,0 +1,97 @@
+id: people/traditions/korean-thatched-house-choga
+kind: tradition/building
+summary: >-
+  The thatched house (choga) of Korea's farmers and the poor under the Joseon dynasty, from 1392: a timber frame on a
+  platform under a roof of rice straw, renewed every one to three years, with walls of wattle and daub or, later, rammed
+  earth, inside a low earth wall (todam). Its plan followed region and means: rooms in a straight line in the south, an
+  L in the centre and around Seoul, a closed square in the cold north; the poorest lived in a small rectangle of earth
+  walls under straw. Through the sixteenth and seventeenth centuries the heated floor (ondol) spread, and in the late
+  Joseon it was widely used in these houses. Choga remained the house of the working people until the mid-twentieth
+  century.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Thatched house of Korea (choga) }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 1392 CE
+    source:
+      - ref: src:kim-2025-eupchi-eupseong
+        loc: "p. 103, Introduction"
+        quote: Joseon (1392–1910), born from the dynasty-changing revolution
+      - ref: src:wikipedia-choga-architecture
+        loc: opening section
+        quote: >-
+          Choga was the representative housing for the working class in Korea from prehistoric times until mid 20th
+          century.
+    method: expert-estimate
+    note: >-
+      The start of the Joseon dynasty, from when the record has the thatched surface house as the farmers' house. It is
+      a choice: the encyclopedia makes the choga far older, and pit houses were still built in the sixteenth and
+      seventeenth centuries (West 2025, p. 100); the pit house of people/traditions/korean-pit-house-three-kingdoms-goryeo
+      is drawn before 1392. No end is given: the choga declined from the 1960s, past this record's span.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in kim-2025-eupchi-eupseong.txt (sha256 5a260fd60a988efb) and wikipedia-choga-architecture.txt (sha256 cbbec5f071f39d24), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["117"] }
+    source:
+      ref: src:wikipedia-hanok
+      loc: section "Variations", "By social class"
+      quote: >-
+        The houses of provincial commoners (as well as some impoverished yangban), with choga (a roof plaited by rice
+        straw), were built in a more strictly functional manner.
+    method: editorial
+    note: Region 117 (Korea), the peninsula, from Jeju to the north, whose regional forms the article names.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-hanok.txt (sha256 55aa6d202f1902e3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      - ref: src:wikipedia-choga-architecture
+        loc: opening section
+        quote: Thatched-roofing was especially popular among farmers and low-income classes in traditional Korean society.
+      - ref: src:wikipedia-hanok
+        loc: section "Variations", "By social class"
+        quote: >-
+          The houses of provincial commoners (as well as some impoverished yangban), with choga (a roof plaited by rice
+          straw), were built in a more strictly functional manner.
+    method: editorial
+    note: >-
+      Farmers and provincial commoners. Urban commoners lived under tile (people/traditions/joseon-tiled-town-house),
+      though the poor of the towns surely lived under thatch too; no source read says so, and townspeople are not named.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-choga-architecture.txt (sha256 cbbec5f071f39d24) and wikipedia-hanok.txt (sha256 55aa6d202f1902e3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { walls: wattle-and-daub, roof_material: thatch }
+    source:
+      - ref: src:wikipedia-choga-architecture
+        loc: opening section
+        quote: The main building materials used to build these houses are straw, wood and soil.
+      - ref: src:wikipedia-choga-architecture
+        loc: section "Building techniques and materials"
+        quote: Earlier models of choga were most commonly built using the wattle and daub technique.
+      - ref: src:wikipedia-choga-architecture
+        loc: section "Building techniques and materials"
+        quote: >-
+          Over time, rammed earth became another popular building technique as it has better thermal mass property and
+          is more resistant against earthquake compared to wattle and daub.
+      - ref: src:wikipedia-choga-architecture
+        loc: section "Building techniques and materials"
+        quote: The roof of the house is most commonly covered with rice straw due to its inexpensiveness and abundance.
+      - ref: src:wikipedia-ondol
+        loc: section "Goryeo to Joseon"
+        quote: in the late Joseon dynasty, ondol was widely used in thatched houses of ordinary people.
+    method: expert-estimate
+    note: >-
+      Walls of wattle and daub, the earlier way, which rammed earth joined over a time the article does not date; a
+      narrower record of the later house should give rammed earth. A roof of rice straw. The plan is left out: the
+      layouts were L-shaped, in a line or square by region, and the vocabulary has no L. The heated stone floor (ondol)
+      of the late Joseon has no word of its own; "raised" would misdraw the earlier houses, so the floor is left out.
+      No size is given by any source read here.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-choga-architecture.txt (sha256 cbbec5f071f39d24) and wikipedia-ondol.txt (sha256 b3e9bd80168fb51f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

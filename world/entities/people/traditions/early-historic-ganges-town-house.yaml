@@ -1,0 +1,164 @@
+id: people/traditions/early-historic-ganges-town-house
+kind: tradition/building
+summary: >-
+  The house of a walled town of the middle Ganges plain in the centuries either side of the turn of the era, as Marshall
+  dug it at Bhita near Allahabad: rooms about a rectangular court, mostly of burnt brick, of two or three storeys, a shop
+  on the street where the house fronted one, and lanes on its other sides. The town stood on straight parallel streets
+  inside a wall. It is known here at second hand, from one review, and from that one town.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Brick courtyard house of the early historic towns of the Ganges plain }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: { lo: 100 BCE, hi: 1 BCE }
+    source:
+      ref: src:litvinsky-1994-cities-kushan-kingdom
+      loc: "p. 286, note 5"
+      quote: >-
+        many of the surviving structures on the Main Street and Bastion Street were built and existed during the period
+        from the first century b.c. to the third century a.d.
+    method: expert-estimate
+    note: >-
+      The first century BCE, when the source has many of the standing structures on Bhita's two streets built, one house
+      among them by its owner's seal. It bounds the start: the same note has the buildings' foundations go back to the
+      Mauryan period, and Marshall thought one of the two houses measured here could have been built then.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in litvinsky-1994-cities-kushan-kingdom.txt (sha256 b072ec581df12ac1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  end:
+    prop: end
+    value: { lo: 201 CE, hi: 300 CE }
+    source:
+      ref: src:litvinsky-1994-cities-kushan-kingdom
+      loc: "p. 286, note 5"
+      quote: >-
+        many of the surviving structures on the Main Street and Bastion Street were built and existed during the period
+        from the first century b.c. to the third century a.d.
+    method: expert-estimate
+    note: >-
+      The third century CE, to which the source has the structures on the two streets last. The same note says the
+      buildings put up after the Kushan period no longer lined up with the streets; a house of the old layout was still
+      lived in then, as a seal from its stratum of the fourth to fifth century shows.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in litvinsky-1994-cities-kushan-kingdom.txt (sha256 b072ec581df12ac1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["107"] }
+    source:
+      ref: src:litvinsky-1994-cities-kushan-kingdom
+      loc: "p. 284"
+      quote: Bhita is the modern name for the ruins located 16 km south-east of Allahabad.
+    method: editorial
+    note: >-
+      Region 107 (Northern India), which holds Allahabad by its coordinates against the region outlines. The source adds
+      that houses stood within lanes in the same way at Vaisali and Rajagriha, which are in the same region, at Sambhar
+      and at Kolhapur, but describes no house from them. Taxila's houses, in Pakistan, are another record's. The house is
+      not claimed for all of the region, nor for its villages.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in litvinsky-1994-cities-kushan-kingdom.txt (sha256 b072ec581df12ac1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [townspeople]
+    source:
+      - ref: src:litvinsky-1994-cities-kushan-kingdom
+        loc: "p. 287"
+        quote: >-
+          It has also been estimated that the city had about 940 such houses and a population of between 10,000 and 20,000
+          persons.
+      - ref: src:litvinsky-1994-cities-kushan-kingdom
+        loc: 'p. 297, "Bazaars and dwelling-houses"'
+        quote: >-
+          Iconographic sources, supplemented by literature, provide a wealth of information on houses occupied by
+          city-dwellers.
+    method: editorial
+    note: >-
+      The houses of a walled city and of those who lived in it: the owners known by their seals were a man with a shop on
+      the main street and one styled banker or guild elder. Nothing is said of the houses of the villages around.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in litvinsky-1994-cities-kushan-kingdom.txt (sha256 b072ec581df12ac1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { plan: courtyard, court: true, width: { lo: 10.4, hi: 13.4 }, length: { lo: 11.3, hi: 14 }, storeys: { lo: 2, hi: 3 }, rooms: 12, walls: fired-brick }
+    source:
+      - ref: src:litvinsky-1994-cities-kushan-kingdom
+        loc: "p. 287"
+        quote: a house (14 × 13.4 m), consisting of a rectangular courtyard flanked by twelve rectangular square rooms
+      - ref: src:litvinsky-1994-cities-kushan-kingdom
+        loc: "p. 287"
+        quote: built in the first century b.c., mostly of burnt bricks
+      - ref: src:litvinsky-1994-cities-kushan-kingdom
+        loc: "p. 287"
+        quote: >-
+          the living quarters (11.3 × 10.4 m), an inner courtyard surrounded by structures mainly rectangular in design
+      - ref: src:litvinsky-1994-cities-kushan-kingdom
+        loc: "p. 287"
+        quote: >-
+          two rows of two- or three-storey houses each accommodating between ten and twenty occupants, family members and
+          servants included
+    method: excavation
+    note: >-
+      Two houses of Bhita as Marshall dug them, at second hand. One was 14 by 13.4 m, a rectangular court with twelve
+      rooms about it, and may be Mauryan; the other, of the first century BCE and mostly of burnt brick, had living
+      quarters of 11.3 by 10.4 m about an inner court, behind a shop of three rooms on the street and a court between.
+      The spans of width and length are those two houses, not a range the source states, and the twelve rooms are the
+      first's. Two or three storeys is the source's reckoning for the houses between the streets; of the first house it
+      says only that, by the thickness of its walls, part may have had a second floor. The roof is not described.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in litvinsky-1994-cities-kushan-kingdom.txt (sha256 b072ec581df12ac1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  settlement:
+    prop: settlement_form
+    value: { pattern: walled, houses: 940, household: { lo: 10, hi: 20 } }
+    source:
+      - ref: src:litvinsky-1994-cities-kushan-kingdom
+        loc: "p. 285"
+        quote: surrounded by a fortification wall 3.4 m thick by 12 m high
+      - ref: src:litvinsky-1994-cities-kushan-kingdom
+        loc: "p. 287"
+        quote: >-
+          It has also been estimated that the city had about 940 such houses and a population of between 10,000 and 20,000
+          persons.
+      - ref: src:litvinsky-1994-cities-kushan-kingdom
+        loc: "p. 287"
+        quote: >-
+          two rows of two- or three-storey houses each accommodating between ten and twenty occupants, family members and
+          servants included
+    method: expert-estimate
+    note: >-
+      A walled city of about 26 hectares. The 940 houses and the ten to twenty people to a house, servants among them, are
+      an estimate the source reports from Marshall (1911) and Schlingloff (1970) for this one city, reckoned from the
+      houses that would fit between its streets, not a count.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in litvinsky-1994-cities-kushan-kingdom.txt (sha256 b072ec581df12ac1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  town:
+    prop: town_form
+    value: { streets: grid, block: 45, main_street: 9, street: 4.5, wall_height: 12, wall_thickness: 3.4 }
+    source:
+      - ref: src:litvinsky-1994-cities-kushan-kingdom
+        loc: "p. 285"
+        quote: >-
+          The city area was traversed by straight parallel streets, one of which, 9 m wide, the 'Main Street', began at
+          the city gates and led to a sanctuary in the centre of the town.
+      - ref: src:litvinsky-1994-cities-kushan-kingdom
+        loc: "pp. 285 to 286"
+        quote: >-
+          Another, half its width, which Marshall … called 'Bastion Street', ran directly parallel to the Main Street at a
+          distance of 45 m.
+      - ref: src:litvinsky-1994-cities-kushan-kingdom
+        loc: "p. 285"
+        quote: surrounded by a fortification wall 3.4 m thick by 12 m high
+      - ref: src:litvinsky-1994-cities-kushan-kingdom
+        loc: "pp. 297 to 298"
+        quote: >-
+          In every section of the city there was a network of alleyways, which crossed one another at right angles and
+          divided … the city into blocks
+    method: excavation
+    note: >-
+      Bhita's two known streets ran straight and parallel, 45 m apart, which is taken as the side of a block; the main
+      one was 9 m wide and the other half that, written as 4.5. Each house stood within lanes, and the last quote, which
+      is the source's general account of the cities of the age and not of Bhita alone, has such alleys cross at right
+      angles: on that the streets are called a grid. The wall's height and thickness are given, but not what it was built
+      of, so no material is stated; nor is the number of its gates.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in litvinsky-1994-cities-kushan-kingdom.txt (sha256 b072ec581df12ac1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

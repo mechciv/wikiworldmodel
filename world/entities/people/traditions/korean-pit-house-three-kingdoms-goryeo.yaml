@@ -1,0 +1,128 @@
+id: people/traditions/korean-pit-house-three-kingdoms-goryeo
+kind: tradition/building
+summary: >-
+  The pit house of Korea's farmers after the Mumun period, from the Proto-Three Kingdoms, about 300 BCE, through the
+  Three Kingdoms, Unified Silla and Goryeo, to 1392: a house dug into the ground, in the Mahan-Baekje sphere either
+  pentagonal or hexagonal with an entrance passage at the side (in the centre of the peninsula) or square with four
+  posts, entered by a ladder from the roof (in the southwest), with a cooking and heating place against the wall
+  opposite the door and a chimney outside. In the capitals surface buildings replaced it, in Baekje's from the Ungjin
+  period (475–538) and in Unified Silla's capital entirely; in the countryside it stayed the main house through Goryeo,
+  and some were still built in the sixteenth and seventeenth centuries. Around the villages lay rice paddies.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Pit house of Korea from the Proto-Three Kingdoms to Goryeo }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 300 BCE
+    source:
+      ref: src:west-2025-pit-to-surface-structures
+      loc: "p. 100, section 1.3.1"
+      quote: >-
+        Pit houses continued to be used throughout the peninsula during the Proto-Three Kingdoms and Three Kingdoms
+        periods (300 BC–668 AD)
+    method: expert-estimate
+    note: >-
+      The start of the Proto-Three Kingdoms period in the source, where the Mumun pit house
+      (people/traditions/mumun-pit-house) ends.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in west-2025-pit-to-surface-structures.txt (sha256 62e9aa916ad8c279), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  end:
+    prop: end
+    value: 1392 CE
+    source:
+      - ref: src:west-2025-pit-to-surface-structures
+        loc: "p. 100, section 1.3.1"
+        quote: >-
+          Pit houses continued to be the main dwelling type in rural settlements after the unification of the peninsula
+          by Goryeo (935–1392 AD)
+      - ref: src:west-2025-pit-to-surface-structures
+        loc: "p. 100, section 1.3.1"
+        quote: and pit houses continued to be used in the 16th and 17th centuries during the Joseon period
+    method: expert-estimate
+    note: >-
+      The end of Goryeo, the last period in which the source calls the pit house the main rural dwelling. Pit houses
+      were still built under the Joseon, which this record leaves to the thatched house
+      (people/traditions/korean-thatched-house-choga); when the thatched surface house took over is not dated by any
+      source read here.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in west-2025-pit-to-surface-structures.txt (sha256 62e9aa916ad8c279), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["117"] }
+    source:
+      ref: src:west-2025-pit-to-surface-structures
+      loc: "p. 100, section 1.3.1"
+      quote: >-
+        Pit houses continued to be used throughout the peninsula during the Proto-Three Kingdoms and Three Kingdoms
+        periods (300 BC–668 AD)
+    method: editorial
+    note: Region 117 (Korea), the peninsula.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in west-2025-pit-to-surface-structures.txt (sha256 62e9aa916ad8c279), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      - ref: src:west-2025-pit-to-surface-structures
+        loc: "p. 108, section 2.3"
+        quote: >-
+          In state societies where both pit dwellings and surface dwellings were used, such as Unified Silla–Goryeo
+          period Korea, and Nara–Heian period Japan, pit houses were often relegated to rural settlements and the urban
+          capital sites used surface structures.
+      - ref: src:yun-ko-lee-pyeonggeo-dong
+        loc: section "Succession of farming villages"
+        quote: >-
+          Both the expansion of agricultural fields and the increased number of residential features reflect, however,
+          an influx of people to the region during the Three Kingdom period.
+    method: editorial
+    note: >-
+      Farmers of rural settlements. Pit houses were also used at provincial towns of Unified Silla (West, p. 100), but
+      not in its capital, and no townspeople's house is written for Korea before 1392, so townspeople are not named.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in west-2025-pit-to-surface-structures.txt (sha256 62e9aa916ad8c279) and yun-ko-lee-pyeonggeo-dong.txt (sha256 aa2af5d29a405c58), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { floor: sunken }
+    source:
+      - ref: src:kwon-2015-baekje-royal-city-periphery
+        loc: section "Residential culture of the Baekje center", "Pillar-wall buildings"
+        quote: >-
+          The first type of pit dwellings had a pentagonal or hexagonal floor and a separate entrance structure for an
+          access from the side added to the main structure of the house, and predominated in the central region of
+          Korea
+      - ref: src:kwon-2015-baekje-royal-city-periphery
+        loc: section "Residential culture of the Baekje center", "Pillar-wall buildings"
+        quote: >-
+          The second type were “four-pillar type” (四柱式) houses, which were sunken structures, square in shape, with four
+          pillars; the houses were entered directly from the roof to the house floor below by using a ladder.
+      - ref: src:kwon-2015-baekje-royal-city-periphery
+        loc: section "Decorated chimney caps"
+        quote: >-
+          From the Proto-Three Kingdoms Period, cooking and heating facilities were installed along the wall opposite
+          the entrance in dwellings
+    method: excavation
+    note: >-
+      A sunken floor, in both of the Mahan-Baekje types. The plan is left out: one type was pentagonal or hexagonal (no
+      word in the vocabulary), the other square, and they held different parts of the peninsula, which one region
+      cannot tell apart. No size is given by any source read here.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in kwon-2015-baekje-royal-city-periphery.txt (sha256 137a0222d74f45c8), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  fields:
+    prop: field_system
+    value: { kind: paddies }
+    source:
+      - ref: src:yun-ko-lee-pyeonggeo-dong
+        loc: Figure 4 caption
+        quote: Three Kingdom-period rice paddy fields at Pyeonggeo-dong locality 3-1
+      - ref: src:yun-ko-lee-pyeonggeo-dong
+        loc: section "Succession of farming villages"
+        quote: Rice production increased with the use of iron tools and draft cattle for ploughing irrigated fields
+    method: excavation
+    note: >-
+      Irrigated rice paddies at one excavated site of south-central Korea, ploughed with cattle; dry fields lay beside
+      them. No plot size is given.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in yun-ko-lee-pyeonggeo-dong.txt (sha256 aa2af5d29a405c58), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

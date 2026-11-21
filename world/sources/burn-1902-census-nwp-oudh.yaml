@@ -1,0 +1,24 @@
+id: src:burn-1902-census-nwp-oudh
+type: publication
+kind: measurement
+citation: >-
+  Burn, R. (1902). Census of India, 1901. Volume XVI: N.-W. Provinces and Oudh. Part I: Report.
+authors:
+  - "Burn, R."
+published: 1902
+title: "Census of India, 1901, vol. XVI: N.-W. Provinces and Oudh, Part I, Report"
+url: https://archive.org/details/in.ernet.dli.2015.55950
+via: The Internet Archive's scan (in.ernet.dli.2015.55950), read in its OCR text and, for the numbers quoted, in the page image.
+license: public domain
+reliability: >-
+  The report of the superintendent of the census of 1901 in the provinces later called the United Provinces. Its
+  count of houses rests on a definition that changed from census to census: in 1901 the part of an enclosure that each
+  family eating together lived in was one house, so that the number of houses stands for the number of such families.
+  The report itself says the rule was not kept alike everywhere, and that the true family is smaller than the figure.
+verified:
+  by: machine:claude-code
+  how: >-
+    Chapter I, paragraphs 30 to 32 (pp. 15 to 19), read on 20 November 2026 in the OCR text of the scan. The OCR reads the
+    raised decimal points of the persons to a house as an apostrophe and a hyphen ("5'49", "5-7", "6'42"); the page
+    image (leaf 33 of the scan, p. 19) has 5·49, 5·7 and 6·42, and the quote keeps the OCR's characters. The quotes were
+    checked by script against the OCR.

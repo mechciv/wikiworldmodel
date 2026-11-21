@@ -1,0 +1,213 @@
+id: people/traditions/han-courtyard-house
+kind: tradition/building
+summary: >-
+  The house of north China under the Han: halls framed in timber, their roofs of tile or thatch carried on wooden
+  pillars and their walls of rammed earth, brick or mud, raised a little above the court they stood about. It is known
+  from the models and pictures put in tombs and from one farming settlement, Sanyangzhuang in Henan, which the Yellow
+  River buried: compounds of one to several courtyard buildings with tiled roofs, each among its own fields. The
+  historians' hamlet of the Han texts was a hundred families within a wall, a household four to five people, and the
+  towns stood within walls of rammed earth. What is said of the house is from encyclopedia articles, as no study of
+  Han houses could be read.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Courtyard house of Han China }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 206 BCE
+    source:
+      ref: src:zhuang-2016-heaven-human-induction
+      loc: abstract, p. 1 of the manuscript
+      quote: >-
+        Han China (206 BC – 220 AD) witnessed significant population growth, pronounced technological development,
+        intensified agricultural practices, and the construction of large-scale hydraulic engineering projects in the
+        Yellow River.
+    method: expert-estimate
+    note: >-
+      The first year of the Han as the paper dates it. The dynasty's years stand for the time the evidence read belongs
+      to, the tombs' models and pictures and the buried settlement of Sanyangzhuang; the house did not begin with the
+      dynasty, and nothing read describes the houses of the centuries before it.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zhuang-2016-heaven-human-induction.txt (sha256 9afe2a803360abb2), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  end:
+    prop: end
+    value: 220 CE
+    source:
+      - ref: src:zhuang-2016-heaven-human-induction
+        loc: abstract, p. 1 of the manuscript
+        quote: >-
+          Han China (206 BC – 220 AD) witnessed significant population growth, pronounced technological development,
+          intensified agricultural practices, and the construction of large-scale hydraulic engineering projects in the
+          Yellow River.
+      - ref: src:wikipedia-han-dynasty
+        loc: opening section
+        quote: The Han dynasty came to an end in 220 AD when Cao Pi, king of Wei, usurped the throne from Emperor Xian.
+    method: expert-estimate
+    note: >-
+      The last year of the Han, an end of the evidence and not of the house: the courtyard house went on, and the
+      broader record this one is a member of carries it from there.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zhuang-2016-heaven-human-induction.txt (sha256 9afe2a803360abb2) and wikipedia-han-dynasty.txt (sha256 460285e70f0f0ca8), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["119", "120"] }
+    source:
+      - ref: src:zhuang-2016-heaven-human-induction
+        loc: 'section "Socio-environmental consequences of agricultural development", p. 8 of the manuscript'
+        quote: >-
+          Excavations at Sanyangzhuang, a well-preserved settlement located in central Henan province on the ancient
+          river channel of the Yellow River, provide unambiguous evidence for the beginning of large-scale river
+          floodplain occupation and cultivation
+      - ref: src:zhuang-2016-heaven-human-induction
+        loc: Introduction, p. 3 of the manuscript
+        quote: >-
+          the two most developed regions of the Han empire: the Guanzhong Plain in the Wei River (tributary of the
+          Yellow River) where the capital was located, and the Lower Yellow River
+      - ref: src:wikipedia-society-and-culture-of-the-han-dynasty
+        loc: section "Urban and rural life"
+        quote: The Western Han capital at Chang'an was divided into one hundred and sixty walled residential wards.
+    method: editorial
+    note: >-
+      Region 120 (Northern China), which holds Henan and the lower Yellow River, with Sanyangzhuang in Neihuang county
+      and the later capital Luoyang; and region 119 (North Central China), which holds the Guanzhong plain and Chang'an,
+      now Xi'an, by those places' coordinates against the region outlines. For region 119 no excavated house was read
+      of: it is named for the capital's wards of houses and as one of the two most densely farmed parts of the empire,
+      and the encyclopedia's sentences on Han homes are of the empire as a whole. The house is not claimed for all of
+      either region, nor denied elsewhere in the empire.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zhuang-2016-heaven-human-induction.txt (sha256 9afe2a803360abb2) and wikipedia-society-and-culture-of-the-han-dynasty.txt (sha256 0d4e005cc2eee511), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [farmers, townspeople]
+    source:
+      - ref: src:zhuang-2016-heaven-human-induction
+        loc: 'section "Socio-environmental consequences of agricultural development", p. 8 of the manuscript'
+        quote: indicating the farmers were farming on fixed fields with significant labour investment and intensive practices
+      - ref: src:chen-2015-sanyangzhuang-pottery-tile
+        loc: "section 1, Introduction, p. 1312"
+        quote: the real scene of Han agriculture village
+      - ref: src:wikipedia-han-dynasty
+        loc: section "Science and technology", "Structural and geo-technical engineering"
+        quote: The courtyard house is the most common type of home portrayed in Han artwork.
+      - ref: src:wikipedia-society-and-culture-of-the-han-dynasty
+        loc: section "Urban and rural life"
+        quote: The Western Han capital at Chang'an was divided into one hundred and sixty walled residential wards.
+    method: editorial
+    note: >-
+      Farmers on good ground: the people of Sanyangzhuang farmed fixed fields round their compounds. Townspeople on
+      weaker ground: no house of a Han town was read of. The encyclopedia has the courtyard house as the commonest home
+      in Han pictures and models, which come from tombs and show the homes of those who could pay for them, and has the
+      capital's people living in walled wards; that the houses in those wards were courtyard houses is a reading, not a
+      statement of either source.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zhuang-2016-heaven-human-induction.txt (sha256 9afe2a803360abb2), chen-2015-sanyangzhuang-pottery-tile.txt (sha256 4e383b4d42e9991c), wikipedia-han-dynasty.txt (sha256 460285e70f0f0ca8) and wikipedia-society-and-culture-of-the-han-dynasty.txt (sha256 0d4e005cc2eee511), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { walls: rammed-earth, roof_material: tile, floor: raised }
+    source:
+      - ref: src:wikipedia-science-and-technology-of-the-han-dynasty
+        loc: section "Structural engineering and public works", "Materials and construction"
+        quote: >-
+          Thatched or tiled roofs were supported by wooden pillars, since the addition of brick, rammed earth, or mud
+          walls of these halls did not actually support the roof.
+      - ref: src:wikipedia-science-and-technology-of-the-han-dynasty
+        loc: section "Structural engineering and public works", "Courtyard homes"
+        quote: >-
+          Han homes had a courtyard area (and some had multiple courtyards) with halls that were slightly elevated
+          above it and connected by stairways.
+      - ref: src:wikipedia-han-dynasty
+        loc: section "Science and technology", "Structural and geo-technical engineering"
+        quote: >-
+          Timber was the chief building material during the Han; it was used to build palace halls, multi-story
+          residential towers and halls, and single-story houses.
+      - ref: src:chen-2015-sanyangzhuang-pottery-tile
+        loc: "section 1, Introduction, p. 1312"
+        quote: >-
+          So far, there were 12 courtyard foundations have been confirmed. With excavating 4 of the courtyards, we found
+          a number of important relics, such as house tile roof, wall, water wells, toilets, pond, farmland, and some
+          trees.
+    method: expert-estimate
+    note: >-
+      The court and the single storey are the broader record's. Here: a frame of wooden pillars carried the roof, and the
+      walls between them, which bore no load, were of brick, rammed earth or mud; rammed earth is written as one of the
+      three, and brick or mud would be as true to the source. Roofs were thatched or tiled; tile is written because the
+      farmers' houses excavated at Sanyangzhuang had tiled roofs. The
+      halls stood a little above the court, which the vocabulary calls a raised floor. No source read gives the size of
+      a house or of a court. The towers of several storeys that the tomb models show are the houses of the rich and are
+      not drawn.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-science-and-technology-of-the-han-dynasty.txt (sha256 add9920dbb9bc5f3), wikipedia-han-dynasty.txt (sha256 460285e70f0f0ca8) and chen-2015-sanyangzhuang-pottery-tile.txt (sha256 4e383b4d42e9991c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  settlement:
+    prop: settlement_form
+    value: { pattern: walled, houses: 100, household: { lo: 4, hi: 5 } }
+    source:
+      - ref: src:wikipedia-society-and-culture-of-the-han-dynasty
+        loc: section "Urban and rural life"
+        quote: An average hamlet contained about a hundred families and usually was enclosed by a wall with two gates.
+      - ref: src:wikipedia-han-dynasty
+        loc: section "Culture and society", "Marriage, gender, and kinship"
+        quote: The Han-era family was patrilineal and typically had four to five nuclear family members living in one household.
+    method: expert-estimate
+    rank: preferred
+    note: >-
+      The hamlet of the Han texts as historians read them: about a hundred families inside a wall with two gates, each
+      household a family of four to five, so that a hundred families are taken as a hundred houses. Preferred over the
+      scattered compounds of Sanyangzhuang because it is said of the average hamlet of the whole empire, and that is one
+      settlement on newly taken floodplain. It is the weaker kind of evidence all the same, an encyclopedia's summary of
+      a history that was not read against an excavation, and a reader may well choose the other.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-society-and-culture-of-the-han-dynasty.txt (sha256 0d4e005cc2eee511) and wikipedia-han-dynasty.txt (sha256 460285e70f0f0ca8), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  settlement-sanyangzhuang:
+    prop: settlement_form
+    value: { pattern: dispersed }
+    source:
+      ref: src:zhuang-2016-heaven-human-induction
+      loc: 'section "Socio-environmental consequences of agricultural development", p. 8 of the manuscript'
+      quote: >-
+        Here more than 15 building compounds have been found. Each compound consists of one to several courtyard
+        buildings and was surrounded by farming fields.
+    method: excavation
+    note: >-
+      The one Han farming settlement excavated that was read of, on the Yellow River's floodplain in Henan: more than 15
+      compounds, each standing apart among its own fields. The review that reports it sets it at the time when, by the
+      end of the Western Han, the bans on settling the floodplains had broken down, so it may not show how the older
+      villages stood; it is kept as another reading and not preferred.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zhuang-2016-heaven-human-induction.txt (sha256 9afe2a803360abb2), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  town:
+    prop: town_form
+    value: { wall: rammed-earth }
+    source:
+      - ref: src:wikipedia-han-dynasty
+        loc: section "Science and technology", "Structural and geo-technical engineering"
+        quote: This includes stone pillar-gates, brick tomb chambers, rammed-earth city walls
+      - ref: src:wikipedia-han-dynasty
+        loc: section "Science and technology", "Structural and geo-technical engineering"
+        quote: The ruins of rammed-earth walls that once surrounded the capitals Chang'an and Luoyang still stand
+      - ref: src:wikipedia-society-and-culture-of-the-han-dynasty
+        loc: section "Urban and rural life"
+        quote: The Western Han capital at Chang'an was divided into one hundred and sixty walled residential wards.
+    method: expert-estimate
+    note: >-
+      Walls of rammed earth round the towns, as their ruins show, those of the two capitals among them. Inside,
+      Chang'an's houses stood in 160 walled wards, for which the vocabulary has no word; how its streets ran is not said
+      in what was read, and they are left to the generator. The encyclopedia's article on Han science and technology
+      gives more for the two capitals alone (walls whose ruins stand 12 m high at Chang'an and 10 m at Luoyang, twelve
+      gates each, a moat 8 m wide at Chang'an): those belong to the cities' own records and are not written for every
+      town.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-han-dynasty.txt (sha256 460285e70f0f0ca8) and wikipedia-society-and-culture-of-the-han-dynasty.txt (sha256 0d4e005cc2eee511), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+relations:
+  broader:
+    rel: member-of
+    to: people/traditions/north-china-courtyard-house
+    source:
+      ref: src:wikipedia-siheyuan
+      loc: opening section
+      quote: >-
+        Siheyuan originated in the Han Dynasty (206 BCE – 220 CE) and became popular during the Ming (1368–1644) and
+        Qing (1644–1912) dynasties.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-siheyuan.txt (sha256 6f6140321b8817ea), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

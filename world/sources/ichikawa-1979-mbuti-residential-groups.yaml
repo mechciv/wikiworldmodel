@@ -1,0 +1,26 @@
+id: src:ichikawa-1979-mbuti-residential-groups
+type: publication
+kind: measurement
+citation: >-
+  Ichikawa, M. (1979). The Residential Groups of the Mbuti Pygmies. Doctoral thesis, Kyoto University (degree granted 23
+  March 1979).
+authors: ["Ichikawa, M."]
+published: 1979
+title: The Residential Groups of the Mbuti Pygmies
+container: Kyoto University doctoral thesis
+doi: 10.14989/doctor.k2162
+url: http://hdl.handle.net/2433/86272
+license: open access
+license_note: As the Kyoto University Research Information Repository (KURENAI) gives it; no licence is named.
+reliability: >-
+  A study of the bands and camps of the Mbuti net-hunters of the Tetri area of the Ituri forest, from fieldwork of 1974
+  and 1975, with counts of the families of bands and of the huts of camps. The file the repository holds is a printed
+  paper in a series whose name its cover gives as "Senri ... Studies Vol. 1"; it is cited here as the thesis it was
+  deposited as, with its printed page numbers.
+verified:
+  by: machine:claude-code
+  how: >-
+    The PDF from the Kyoto University repository (handle 2433/86272), downloaded on 20 November 2026 through the
+    repository's API, and its text layer read with PyMuPDF and its whitespace run together; the sections on the size of
+    the bands (pp. 13–14), the family (p. 35) and the plan of the camp (p. 39) read in full. The text layer reads "but" for
+    "hut" in places, and the quotes keep to stretches it reads cleanly; they were checked by script against that text.

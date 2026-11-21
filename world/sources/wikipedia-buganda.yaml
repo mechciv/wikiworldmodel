@@ -1,0 +1,20 @@
+id: src:wikipedia-buganda
+type: database-record
+kind: review
+citation: >-
+  "Buganda." Wikipedia, the free encyclopedia (English edition), revision 1386756088.
+snapshot: 2026-11-20
+title: Buganda
+container: Wikipedia
+url: https://en.wikipedia.org/w/index.php?title=Buganda&oldid=1386756088
+license: CC-BY-SA-4.0
+reliability: >-
+  A general encyclopedia article, cited only for when the kingdom is reckoned to have been founded, because no history
+  of Buganda could be read here. The sentence cited rests on the king lists of oral tradition; the article cites
+  Kiyaga-Mulindwa (2005) in the Encyclopedia of African History for the kingdom's early history, which was not read and
+  should replace this.
+verified:
+  by: machine:claude-code
+  how: >-
+    The article's HTML fetched with the action=render view of index.php on 20 November 2026 and read as text, with the
+    reference marks taken out; the quotes checked by script against that text.

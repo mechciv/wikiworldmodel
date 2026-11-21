@@ -1,0 +1,158 @@
+id: people/traditions/ao-naga-house
+kind: tradition/building
+summary: >-
+  The house of the Ao Naga of the Naga Hills: a rectangular house of posts and plaited split bamboo under a gabled roof
+  of thatch grass or palm leaves, a front room on the earth for wood, rice-pounding and the pigs and a main room behind
+  with a bamboo floor and the hearth, packed close along the streets of large villages on the ridges, whose fields were
+  cleared, burnt, cropped two years and left fallow seven to ten. Described in the 1920s; it starts here with the
+  earliest date from Chungliyimti, the village Ao tradition names as its cradle, where houses were excavated, which dates
+  houses there but not their form.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Ao Naga house }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: { mean: 1018 CE, sd: 98 yr }
+    source:
+      - ref: src:pokharia-2013-nagaland-agriculture
+        loc: "Table 3, p. 1352, row \"Chungliyimti (CTI)\", BS-2978"
+        quote: AD 1018 ± 98
+      - ref: src:pokharia-2013-nagaland-agriculture
+        loc: "p. 1342, \"Chungliyimti\""
+        quote: In all, seven residential areas were excavated and their plans reconstructed.
+      - ref: src:pokharia-2013-nagaland-agriculture
+        loc: "p. 1342, \"Chungliyimti\""
+        quote: The excavations revealed 25 large pits from locality 3 (Longtrok area)
+      - ref: src:smith-1925-ao-naga-tribe
+        loc: "chap. V, p. 80"
+        quote: (six stones) near the village of Chongliyimti.
+    method: radiometric/radiocarbon
+    note: >-
+      The oldest of the four calibrated dates from Chungliyimti, from layer 9 of trench 2, taken as when houses stood
+      there: the excavators found the residential areas with pits beside the houses, and Ao tradition, as Smith heard it,
+      has the first men come out of the six stones of Lungtrok near Chongliyimti. The ± is read as 1σ, as the paper does
+      not say. It dates the village, not the form of its houses, whose plans are not published in what was read; the house
+      is described only from Smith's time. There is no end claim: no source read says when such houses ceased to be built.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in pokharia-2013-nagaland-agriculture.txt (sha256 409d573fff5ab1ee) and smith-1925-ao-naga-tribe.txt (sha256 15e18b7948a60774), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["112"] }
+    source:
+      - ref: src:pokharia-2013-nagaland-agriculture
+        loc: "p. 1342, \"Chungliyimti\""
+        quote: located in the northernmost corner of Tuensang District
+      - ref: src:smith-1925-ao-naga-tribe
+        loc: "chap. III, p. 27"
+        quote: In the land of the Ao Nagas the villages are some distance apart and are always entirely distinct.
+    method: editorial
+    note: >-
+      Region 112 (north-eastern India and Bhutan), which holds the Naga Hills, where Smith knew the Ao and where
+      Chungliyimti lies, in Tuensang. The other Naga peoples' houses, and the terraced villages of the Angami, are not
+      described in what was read and are not claimed; the region is named for the Ao.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in pokharia-2013-nagaland-agriculture.txt (sha256 409d573fff5ab1ee) and smith-1925-ao-naga-tribe.txt (sha256 15e18b7948a60774), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [shifting-cultivators]
+    source:
+      - ref: src:smith-1925-ao-naga-tribe
+        loc: "chap. III, p. 40"
+        quote: >-
+          The Ao Nagas cultivate their land in the most primitive fashion by what is known as the jhum system of
+          cultivation.
+      - ref: src:smith-1925-ao-naga-tribe
+        loc: "chap. III, p. 41"
+        quote: >-
+          A certain tract of ground is used for a period of two years, after which it is abandoned to lie fallow from seven
+          to ten years.
+      - ref: src:smith-1925-ao-naga-tribe
+        loc: "chap. III, p. 27"
+        quote: >-
+          Intense love for the ancestral village site seems to be a characteristic of the people which keeps the villages
+          from breaking up readily.
+    method: documentary
+    note: >-
+      Shifting cultivators in the model's sense: the jungle was cut, burnt, cropped for two years and left fallow seven to
+      ten. The fields moved and the villages did not; the people kept to their ancestral sites.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in smith-1925-ao-naga-tribe.txt (sha256 15e18b7948a60774), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { plan: rectangular, width: 6.1, length: 12.2, walls: reed, roof: gable, roof_material: thatch }
+    source:
+      - ref: src:smith-1925-ao-naga-tribe
+        loc: "chap. III, p. 28"
+        quote: >-
+          In the construction of a Naga house, bamboo is the principal material used, together with some posts and thatch
+          grass
+      - ref: src:smith-1925-ao-naga-tribe
+        loc: "chap. III, p. 28"
+        quote: These large posts support the ridge-pole, while several smaller posts are used in the walls.
+      - ref: src:smith-1925-ao-naga-tribe
+        loc: "chap. III, p. 28"
+        quote: The walls are made of thin bamboo, split and plaited together.
+      - ref: src:smith-1925-ao-naga-tribe
+        loc: "chap. III, p. 28"
+        quote: >-
+          For the roof, long thatch grass is bound to strips of bamboo and put on in layers, while in some villages palm
+          leaves take the place of the grass.
+      - ref: src:smith-1925-ao-naga-tribe
+        loc: "chap. III, p. 28"
+        quote: >-
+          The ordinary Naga house is divided into two rooms. The main living-room is about twenty by thirty feet and has a
+          bamboo floor, in the centre of which is the hearth.
+      - ref: src:smith-1925-ao-naga-tribe
+        loc: "chap. III, p. 28"
+        quote: In the front part of the house is a room about twenty by ten feet, without floor
+      - ref: src:smith-1925-ao-naga-tribe
+        loc: "chap. III, p. 29"
+        quote: a sort of semi-circular verandah roof over the front gable
+    method: documentary
+    note: >-
+      Two rooms twenty feet wide, the main room thirty feet long and the front room ten, so the house is twenty feet by
+      forty, 6.1 by 12.2 m; the sum is the writer's. Walls of split bamboo plaited together, which the vocabulary has no
+      word for: written as reed, the nearest. A gabled roof on a ridge-pole, thatched with grass or palm leaves. The floor
+      is left out: the main room has a floor of bamboo and the front room none, and many houses stood on steep slopes with
+      a platform behind, which the vocabulary's words do not describe.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in smith-1925-ao-naga-tribe.txt (sha256 15e18b7948a60774), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  settlement:
+    prop: settlement_form
+    value: { pattern: nucleated }
+    source:
+      - ref: src:smith-1925-ao-naga-tribe
+        loc: "chap. III, p. 27"
+        quote: The Ao Naga villages are large.
+      - ref: src:smith-1925-ao-naga-tribe
+        loc: "chap. III, p. 27"
+        quote: The villages are built on the summits of big hills or on ridges.
+      - ref: src:smith-1925-ao-naga-tribe
+        loc: "chap. III, p. 28"
+        quote: >-
+          The principal street runs along the crest of the ridge with a row of houses fronting it on each side.
+      - ref: src:smith-1925-ao-naga-tribe
+        loc: "chap. III, p. 28"
+        quote: houses are huddled very closely together.
+    method: documentary
+    note: >-
+      Large villages on hilltops and ridges, the houses packed along a street on the crest; in the old days they were
+      defended by stockades, gates and ditches set with bamboo spikes. How many houses a village had is not given in what
+      was read.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in smith-1925-ao-naga-tribe.txt (sha256 15e18b7948a60774), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  fields:
+    prop: field_system
+    value: { kind: swidden }
+    source:
+      ref: src:smith-1925-ao-naga-tribe
+      loc: "chap. III, p. 41"
+      quote: >-
+        A certain tract of ground is used for a period of two years, after which it is abandoned to lie fallow from seven
+        to ten years.
+    method: documentary
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in smith-1925-ao-naga-tribe.txt (sha256 15e18b7948a60774), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

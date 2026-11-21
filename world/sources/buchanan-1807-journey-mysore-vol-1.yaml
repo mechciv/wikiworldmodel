@@ -1,0 +1,29 @@
+id: src:buchanan-1807-journey-mysore-vol-1
+type: publication
+kind: eyewitness
+citation: >-
+  Buchanan, F. (1807). A Journey from Madras through the Countries of Mysore, Canara, and Malabar, performed under the
+  orders of the Most Noble the Marquis Wellesley, Governor General of India, vol. I. London: T. Cadell and W. Davies;
+  Black, Parry, and Kingsbury.
+authors:
+  - "Buchanan, F."
+published: 1807
+written: 1800 CE
+title: "A Journey from Madras through the Countries of Mysore, Canara, and Malabar, vol. I"
+url: https://archive.org/details/b30455091_0001
+via: The Internet Archive's scan of the Wellcome Library's copy (b30455091_0001), read in its OCR text.
+license: public domain
+reliability: >-
+  The journal of a survey of the agriculture, arts and commerce of Mysore and the countries lately taken from Tipu
+  Sultan, kept day by day from 23 April 1800: what the author saw of houses, towns and villages from the road, in the
+  country behind Madras, at Conjeveram and above the Ghats. He says himself that the houses of the natives were
+  inaccessible to a European, so that what he describes is their plan and their outsides.
+verified:
+  by: machine:claude-code
+  how: >-
+    The first chapters of vol. I (pp. 1 to 38) read on 20 November 2026 in the OCR text of the scan, and the rest of
+    the volume searched for what it says of houses and of fortified villages. The page numbers are counted from the
+    running heads, which the OCR numbers only here and there. The year of publication is the Internet Archive's record
+    of the scan: the date on the title page is not legible in the OCR. The second volume, read in the same way, has
+    the detached houses in gardens of Malabar, which are not this record's. The quotes were checked by script against
+    the OCR, keeping to stretches it reads cleanly.

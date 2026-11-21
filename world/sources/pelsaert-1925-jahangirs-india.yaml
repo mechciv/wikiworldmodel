@@ -1,0 +1,23 @@
+id: src:pelsaert-1925-jahangirs-india
+type: text
+kind: eyewitness
+citation: >-
+  Pelsaert, F. Jahangir's India: the Remonstrantie of Francisco Pelsaert, translated from the Dutch by W.H. Moreland and
+  P. Geyl. Cambridge: W. Heffer & Sons, 1925.
+authors:
+  - "Pelsaert, F."
+published: 1925
+written: 1626 CE
+title: "Jahangir's India: the Remonstrantie of Francisco Pelsaert"
+url: https://archive.org/details/jahangirsindia035084mbp
+via: The Internet Archive's scan (jahangirsindia035084mbp), read in its OCR text.
+reliability: >-
+  A report to the Dutch East India Company by its senior factor at Agra, written in 1626 after seven years there, on the
+  trade of the country and the life of its people. What it says of the common people's houses is what a merchant saw of
+  the workmen, servants and shopkeepers of Agra and the towns he traded in, and is written to show their poverty.
+verified:
+  by: machine:claude-code
+  how: >-
+    The opening on the city of Agra (p. 1) and the section "The manner of life" (pp. 60 to 61) read on 20 November 2026 in
+    the OCR text of the Internet Archive's scan; the year of writing is the text's own ("this year, 1626"). The quotes
+    were checked by script against that text.

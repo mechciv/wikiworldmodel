@@ -1,0 +1,94 @@
+id: people/traditions/kalahari-grass-hut
+kind: tradition/building
+summary: >-
+  The grass hut of the San foragers of the central Kalahari: a small dome of poles stuck in the ground and thatched with
+  the tall grass that grows nearby, about two metres across and two high, built by the women over a few days at each new
+  camp, one to a family, the huts of a camp set in a circle in the acacia woodland. It is known here from the G/wi and
+  G//ana of the /Kade area, as they lived in the late 1960s and early 1970s.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Grass hut of the Kalahari San }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 1967 CE
+    source:
+      ref: src:tanaka-1974-central-kalahari-bushmen
+      loc: 'ch. 1, p. 10'
+      quote: >-
+        I did research in /Kade for 7 months from 1 September 1967 to 31 March 1968 in the first fieldwork and for 15
+        months from May 1971 to 15 August 1972 in the second fieldwork.
+    method: documentary
+    note: >-
+      The year the source's author began his fieldwork at /Kade, where he saw the huts built. It bounds the start and does
+      not date it: the hut is surely older, and no source read here says how much. No end is given: the source read
+      describes camps still moving, and none read says when the hut went out of use.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in tanaka-1974-central-kalahari-bushmen.txt (sha256 f65c726b5b2f5134), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["87"] }
+    source:
+      ref: src:tanaka-1974-central-kalahari-bushmen
+      loc: preface, p. i
+      quote: I carried out a research project on the Bushmen who live in the Kalahari Desert in .the southern African Republic of Botswana
+    method: editorial
+    note: >-
+      Botswana (87), where the /Kade area of the Central Kalahari Game Reserve is. The other San of the Kalahari, in Namibia
+      and South Africa, may have built such huts too, but no source read here describes theirs, so their regions are left
+      out; nor is the hut claimed for all of Botswana.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in tanaka-1974-central-kalahari-bushmen.txt (sha256 f65c726b5b2f5134), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  lifeway:
+    prop: lifeway
+    value: [foragers]
+    source:
+      ref: src:tanaka-1974-central-kalahari-bushmen
+      loc: 'ch. 1, p. 1'
+      quote: It is on this desolate Kalahari plain that the Bushmen make their home, living by hunting and gathering wild animals and plants.
+    method: editorial
+    note: >-
+      Foragers: the G/wi and G//ana of the source lived by hunting and gathering, moving their camps with the seasons. The
+      source also has many San already living among the Tswana and on white farms; their houses are not this tradition.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in tanaka-1974-central-kalahari-bushmen.txt (sha256 f65c726b5b2f5134), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  dwelling:
+    prop: dwelling
+    value: { plan: round, diameter: 2, height: 2, walls: pole-and-thatch, roof: dome, roof_material: thatch, floor: ground }
+    source:
+      - ref: src:tanaka-1974-central-kalahari-bushmen
+        loc: 'ch. 3, section "2. Dwellings", p. 24'
+        quote: >-
+          she makes a dome-like frame, sticking one end of each pole into the ground. The frame is then thatched over with
+          tall grass growing nearby
+      - ref: src:tanaka-1974-central-kalahari-bushmen
+        loc: 'ch. 3, section "2. Dwellings", p. 24'
+        quote: It is a small, crude piece of work, about two meters across and two meters high.
+    method: survey
+    note: >-
+      A dome of poles thatched with grass, about 2 m across and 2 m high, as the source gives it in round numbers for the
+      huts in general. The grass covers the frame down to the ground, so wall and roof are one: walls of pole-and-thatch
+      under a thatched dome. The source has the hut as a shade and windbreak, life being lived at the fire in front of it.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in tanaka-1974-central-kalahari-bushmen.txt (sha256 f65c726b5b2f5134), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  settlement:
+    prop: settlement_form
+    value: { pattern: camp, houses: { lo: 1, hi: 20 } }
+    source:
+      - ref: src:tanaka-1974-central-kalahari-bushmen
+        loc: 'ch. 3, section "2. Dwellings", p. 24'
+        quote: >-
+          Camp sizes vary, also changing over time; the range seems to be from one family to about 20. The huts are usually
+          arranged in a circle.
+      - ref: src:tanaka-1974-central-kalahari-bushmen
+        loc: 'ch. 3, section "2. Dwellings", p. 24'
+        quote: the work of building the huts is left largely to the women
+    method: survey
+    note: >-
+      Camps of one family to about twenty, the huts set in a circle; the same passage has a hut for each nuclear family,
+      though the text layer garbles that sentence and it is not quoted, so camps of 1 to 20 families are taken as 1 to 20
+      huts. How many people lived in a hut is not stated.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in tanaka-1974-central-kalahari-bushmen.txt (sha256 f65c726b5b2f5134), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }

@@ -1,0 +1,25 @@
+id: src:rockhill-1891-land-of-the-lamas
+type: text
+kind: eyewitness
+citation: >-
+  Rockhill, W.W. The Land of the Lamas: notes of a journey through China, Mongolia and Tibet. New York: The Century Co.,
+  1891.
+authors:
+  - "Rockhill, W.W."
+published: 1891
+written: { lo: 1888 CE, hi: 1891 CE }
+title: "The Land of the Lamas: notes of a journey through China, Mongolia and Tibet"
+url: https://archive.org/details/cu31924098819877
+via: The Internet Archive's scan of Cornell University Library's copy (cu31924098819877), read in its OCR text.
+license: public domain
+reliability: >-
+  An American diplomat who travelled in 1888 and 1889 through Amdo, the Koko-nor and eastern Tibet, speaking Tibetan. He
+  describes the tents of the Tibetan herders from his own stays among them; his counts of tents and people in a tribe
+  are what he was told. His supplementary notes translate passages of the Chinese dynastic histories on the peoples of
+  the Tibetan borderlands; the translation is his.
+verified:
+  by: machine:claude-code
+  how: >-
+    The chapter on Hsi-ning, Kumbum and Tankar (pp. 73-80, on the Koko-nor Tibetans and their tents), the account of the
+    Golok (p. 189), and supplementary note on the T'ang-hsiang (pp. 336-338) read on 20 November 2026 in the OCR text of
+    the scan, fetched from the Internet Archive; the quotes were checked by script against it.
