@@ -1650,7 +1650,11 @@ vec3 peopled(vec3 c, vec3 p, float dist) {
   vec2 fuv = (p.xy - uFieldsBox.xy) / uFieldsBox.zw;
   if (fuv.x <= 0.0 || fuv.y <= 0.0 || fuv.x >= 1.0 || fuv.y >= 1.0) return c;
   vec4 f = texture(uFields, fuv);
-  vec3 grazed = mix(vec3(0.30, 0.31, 0.15), vec3(0.37, 0.35, 0.19), noiseM(p, 30.0));
+  // Pasture: the place's own low plants, grazed short and worn toward its bare ground, the more so the barer its climate
+  // leaves it: green where the climate is green, and in a desert hardly to be told from the ground around it.
+  vec3 herbTone = mix(uTone[2], uTone[3], noiseM(p, 30.0));
+  vec3 bareTone = mix(uTone[4], uTone[5], noiseM(p + 5.0, 24.0));
+  vec3 grazed = mix(herbTone, bareTone, 0.3 + 0.6 * uShare.z) * 0.94;
   c = mix(c, grazed, f.g * 0.75);
   c = mix(c, plots(p, dist, f.a), f.r);
   // Among the houses the ground is trodden bare in patches, where feet and hooves go; between them it keeps what grew.
@@ -1669,16 +1673,20 @@ vec3 bumped(vec3 n, vec3 p, float h, float strength) {
   return normalize(abs(det) * n - strength * grad);
 }
 // How near the water a point is, and how far above its level: from the water seen from above, blurred to its banks.
-float nearWater(vec3 p, out float above) {
+// And how much of it is the bed of a river dry in the month, which holds no water.
+float nearWater(vec3 p, out float above, out float dryBed) {
   above = 1e4;
+  dryBed = 0.0;
   if (uBanks < 0.5) return 0.0;
   vec2 wuv = (p.xy - uWaterBox.xy) / uWaterBox.zw;
   if (wuv.x <= 0.0 || wuv.y <= 0.0 || wuv.x >= 1.0 || wuv.y >= 1.0) return 0.0;
-  vec2 w = texture(uWaterMap, wuv).rg;
+  vec3 w = texture(uWaterMap, wuv).rgb;
+  vec2 e = min(wuv, 1.0 - wuv);
+  float inBox = smoothstep(0.0, 0.05, min(e.x, e.y));
+  dryBed = smoothstep(0.25, 0.6, w.b) * inBox;
   if (w.g < 0.002) return 0.0;
   above = p.z - w.r / w.g;
-  vec2 e = min(wuv, 1.0 - wuv);
-  return smoothstep(0.002, 0.05, w.g) * smoothstep(0.0, 0.05, min(e.x, e.y));
+  return smoothstep(0.002, 0.05, w.g) * inBox;
 }
 // The edges of a tiling of uneven cells, one to a unit: how far a point is from the nearest edge, in cell widths, and a
 // number for the cell it is in. Mud dries into such cells, a crust of salt heaves into them, and pebbles lie as them.
@@ -1813,9 +1821,12 @@ vec3 groundClose(vec3 c, vec3 p, vec3 n, float dist, vec4 mask, float slope, out
   nd = n;
   float close = 1.0 - smoothstep(70.0, 260.0, dist);
   float aboveWater;
-  float water = nearWater(p, aboveWater);
-  // Wet within the water's rise of its level; the bars of its channel where the bank is gentle.
-  float wet = water * smoothstep(1.3, 0.1, aboveWater);
+  float dryBed;
+  float water = nearWater(p, aboveWater, dryBed);
+  // The bed of a river dry in the month: from the water's map close by, and from the plan's (A 128) further off.
+  float wash = max(dryBed, smoothstep(0.3, 0.45, mask.a) * (1.0 - smoothstep(0.55, 0.7, mask.a)));
+  // Wet within the water's rise of its level; the bars of its channel where the bank is gentle. A dry bed is not wet.
+  float wet = water * smoothstep(1.3, 0.1, aboveWater) * (1.0 - wash);
   float bar = water * smoothstep(0.16, 0.04, slope) * smoothstep(2.2, 0.2, aboveWater);
   if (close <= 0.0) return mix(c, c * 0.62, wet * 0.8);
   vec3 soil = mix(uTone[0], uTone[1], fbmM(p, 2.4)) * (0.75 + 0.5 * noiseM(p, 0.2));
@@ -1840,9 +1851,11 @@ vec3 groundClose(vec3 c, vec3 p, vec3 n, float dist, vec4 mask, float slope, out
   float hRock = fbmM(p, 0.8) + 0.2;
   float wRock = smoothstep(0.2, 0.42, slope);
   float wMud = max(wet * (1.0 - wRock), bar * smoothstep(0.5, 0.1, aboveWater));
-  float wSand = max(mask.b * (1.0 - wet) * (1.0 - wRock), bar * smoothstep(0.1, 0.6, aboveWater));
-  float wGravel = mask.b * smoothstep(0.06, 0.2, slope) * 0.8;
-  float wLitter = mask.r * (1.0 - wet);
+  // A dry bed is loose sand, with sheets of gravel where the last flood left its bars.
+  float bars = smoothstep(0.52, 0.68, fbmM(p, 9.0));
+  float wSand = max(max(mask.b * (1.0 - wet) * (1.0 - wRock), bar * smoothstep(0.1, 0.6, aboveWater)), wash * 1.25 * (1.0 - bars));
+  float wGravel = max(mask.b * smoothstep(0.06, 0.2, slope) * 0.8, wash * 1.2 * bars);
+  float wLitter = mask.r * (1.0 - wet) * (1.0 - wash);
   float wSoil = 0.45;
   float s0 = hSoil + wSoil;
   float s1 = hLitter + wLitter * 1.2;
@@ -1864,7 +1877,8 @@ vec3 groundClose(vec3 c, vec3 p, vec3 n, float dist, vec4 mask, float slope, out
   // Where the world says what the ground is made of, that takes the place of what the climate gave it: all of the bare
   // sand and gravel, and as much of the earth under plants as takes its parent material's colour (uSubSoil.x; the rest
   // is its own dark earth). Litter, the wet of a bank and steep rock stay as they are.
-  float k = uSub.x * (b0 * uSubSoil.x + b3 + b4) / sum;
+  // A dry bed keeps most of its own loose sand: what a flood brought and sorted, not the ground of the plain around it.
+  float k = uSub.x * (b0 * uSubSoil.x + b3 + b4) / sum * (1.0 - 0.7 * wash);
   if (k > 0.004) {
     float sh;
     float sr;
@@ -1900,7 +1914,9 @@ vec3 wilderness(vec3 p, vec3 n, float dist, out float water, out float rough, ou
     vec2 e = min(muv, 1.0 - muv);
     mask = mix(beyond, texture(uMask, muv), smoothstep(0.0, 0.1, min(e.x, e.y)));
   }
-  water = mask.a * smoothstep(450.0, 1000.0, dist);
+  // Water where the plan's A is full; a dry bed where it is half (scene/v8.ts, coverMask), which is no water.
+  water = smoothstep(0.6, 0.95, mask.a) * smoothstep(450.0, 1000.0, dist);
+  float wash = smoothstep(0.3, 0.45, mask.a) * (1.0 - smoothstep(0.55, 0.7, mask.a));
   shaded = mask.r;
   float slope = 1.0 - n.z;
   float nearby = 1.0 - smoothstep(40.0, 600.0, dist);
@@ -1917,6 +1933,8 @@ vec3 wilderness(vec3 p, vec3 n, float dist, out float water, out float rough, ou
   vec3 under = mix(soil, herb, (0.35 + 0.65 * smoothstep(0.34, 0.6, fbmM(p, 9.0))) * uShare.y);
   vec3 c = mix(under, herb, mask.g);
   c = mix(c, bare, mask.b);
+  // The sand of a dry bed, paler than the ground around it: what a flood sorted and left loose.
+  c = mix(c, mix(uTone[4], uTone[5], 0.3 + 0.3 * fbmM(p, 14.0)) * 1.12, wash);
   // From afar the canopy hides all that, and at the plain's edge no trees are drawn at all.
   float grain = 1.0 - smoothstep(3000.0, 40000.0, dist);
   vec3 canopy = mix(uTone[6], uTone[7], mix(0.5, fbmM(p, 55.0), grain)) * mix(1.0, 0.8 + 0.4 * noiseM(p, 7.0), grain);
@@ -2130,6 +2148,8 @@ vec4 reflected(vec3 p, vec3 r) {
   return vec4(0.0);
 }
 void main() {
+  // The bed of a river dry in the month: its ribbon says where it is, and it holds no water (scene/v8.ts, DRY_BED).
+  if (vFlow.z < -0.5) discard;
   vec3 p = vPos;
   float dist = distance(p, uEye);
   // Ripples, stilled with distance, before they could break up into glitter; drawn out along the current where it flows,
@@ -2201,24 +2221,34 @@ void main() {
 
 // ——— The water seen from above, for its banks (docs/plans/RENDERING.md, step 2) ———
 
-/** The water's mesh from straight above, over a box around the eye: its level, and that it is there. */
+/**
+ * The water's mesh from straight above, over a box around the eye: its level, and that it is there; or, for the bed of
+ * a river dry in the month, that a dry bed is there, and no water.
+ */
 export const WATERMAP_VS = /* glsl */ `#version 300 es
 precision highp float;
 layout(location = 0) in vec3 aPos;
+layout(location = 1) in vec3 aFlow;
 uniform vec4 uBox;
 out float vZ;
+out float vDry;
 void main() {
   vZ = aPos.z;
+  vDry = aFlow.z < -0.5 ? 1.0 : 0.0;
   gl_Position = vec4((aPos.xy - uBox.xy) / uBox.zw * 2.0 - 1.0, 0.0, 1.0);
 }`;
 
 export const WATERMAP_FS = /* glsl */ `#version 300 es
 precision highp float;
 in float vZ;
+in float vDry;
 out vec4 o;
-void main() { o = vec4(vZ, 1.0, 0.0, 1.0); }`;
+void main() { o = vDry > 0.5 ? vec4(0.0, 0.0, 1.0, 1.0) : vec4(vZ, 1.0, 0.0, 1.0); }`;
 
-/** A blur of the water's map along one direction, its level weighted by how much water there is, so that both reach the banks. */
+/**
+ * A blur of the water's map along one direction, its level weighted by how much water there is, so that both reach the
+ * banks; and a dry bed's mark, a little way out to its banks.
+ */
 export const WATERBLUR_FS = /* glsl */ `#version 300 es
 precision highp float;
 in vec2 vUv;
@@ -2226,14 +2256,14 @@ uniform highp sampler2D uTex;
 uniform vec2 uDir;
 out vec4 o;
 void main() {
-  vec2 sum = vec2(0.0);
+  vec3 sum = vec3(0.0);
   for (int i = -4; i <= 4; i++) {
     float w = exp(-float(i * i) * 0.12);
-    vec2 t = texture(uTex, vUv + uDir * float(i)).rg;
+    vec3 t = texture(uTex, vUv + uDir * float(i)).rgb;
     // Premultiplied: a level counts as much as the water it stands for.
-    sum += vec2(t.r, t.g) * w;
+    sum += t * w;
   }
-  o = vec4(sum / 6.43, 0.0, 1.0);
+  o = vec4(sum / 6.43, 1.0);
 }`;
 
 // ——— The sea's surface, in a scene of the sea ———

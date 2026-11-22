@@ -11,7 +11,9 @@ description: >-
   the stack; each keyframe has the sea of its time, where its rivers end, and before the climate of the last 120,000
   years begins, the water of the keyframe of it whose sea stood nearest. Before the glacial cycles it is each PaleoDEM.
   A river's channel is drawn by laws of rivers in general: its width and depth from its flow, the length and radius of
-  its bends from its width, and whether it braids from its slope and its flow.
+  its bends from its width, and whether it braids from its slope and its flow. Which months a river's bed holds water
+  in is routed the same way, month by month: what the basin's soils let go of their surplus in each month, through each
+  hollow in the share of the year's water that gets out of it.
 author: machine:claude-code
 code: tools/world/src/build/drainage.ts
 inputs:
@@ -34,6 +36,23 @@ params:
     choice: >-
       A keyframe every 10,000 years before the climate of the last 120,000 years begins: rivers change at their mouths as
       the sea moves, and that is about as fast as the stack's sea moves through a glacial cycle.
+  wet_share:
+    choice: >-
+      A river's bed holds water in a month where the slow water its basin's soils let go reaches it then at no less than
+      0.15 of its mean flow. The water balance runs a share of the rain straight off as it falls, and lets the rest of
+      what the soil cannot hold go over the months after it filled (model:earth/water-balance). Only that second part
+      keeps water in a bed between rains: a basin whose soil never fills gives its river floods of a storm and a dry bed
+      between them, as a wadi has. Held to the river's own mean flow, a river fed from wet uplands keeps its water across
+      a desert, as the Nile and the Niger do, where held to its basin's area it would not. 0.15 is where the surplus of a
+      wet season, halved each month after, is taken to have run out, two or three months after the rains; nobody's
+      measure.
+  perennial_mm:
+    choice: >-
+      A river holds water in every month where the ground it drains gives it at least 150 mm a year. The water balance
+      lets a soil's surplus go by half each month, which is faster than the ground water of a wet basin runs out: read
+      month by month, it dries a third of the small rivers north of the Alps in September and the rivers of Siberia
+      all winter, where they run under the ice. 150 mm a year is about where runoff divides the wetter basins, whose
+      rivers run all year, from the dry ones whose small rivers stop; a choice, and nobody's measure.
   min_lake_km2:
     choice: "A lake is kept where it covers at least 500 km²: about four cells of the relief's grid."
   spill_overlap:
@@ -95,3 +114,6 @@ checks:
   - { test: tools/world/test/build.test.ts, holds: "ends its rivers at the sea of the time: across the Sunda shelf at the Last Glacial Maximum, and at today's coast today" }
   - { test: tools/world/test/drainage.test.ts, holds: "holds a lake in a hollow that evaporates what comes in, and spills it when the climate is wet" }
   - { test: tools/world/test/drainage.test.ts, holds: "neither makes nor loses water where nothing evaporates" }
+  - { test: tools/world/test/build.test.ts, holds: "gives a river its season: the tropics' great rivers and Europe's wet in every month, the Sahara's own beds in none, and the Sahel's in the rains" }
+  - { test: tools/world/test/drainage.test.ts, holds: "keeps a river's bed wet in the months its basin's soil lets water go, and dry in the rest" }
+  - { test: tools/world/test/drainage.test.ts, holds: "carries no slow water out of a lake that keeps all it gets, and all of it out of one that spills" }

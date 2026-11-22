@@ -494,13 +494,13 @@ void main() {
     this.mask = texture2D(gl, { width: 1, height: 1, internal: gl.RGBA8, format: gl.RGBA, type: gl.UNSIGNED_BYTE, data: new Uint8Array([0, 0, 0, 0]), filter: gl.LINEAR });
     gl.activeTexture(gl.TEXTURE0 + UNIT.fields);
     this.fields = texture2D(gl, { width: 1, height: 1, internal: gl.RGBA8, format: gl.RGBA, type: gl.UNSIGNED_BYTE, data: new Uint8Array([0, 0, 0, 0]), filter: gl.LINEAR });
-    // The water's map: in floats, as a level needs; filtered where the browser can filter floats. The fast way has none.
+    // The water's map: in floats, as a level needs, with a dry bed's mark beside it; filtered where the browser can filter floats. The fast way has none.
     if (!this.fast) {
       gl.activeTexture(gl.TEXTURE0 + UNIT.waterMap);
       const linear = !!gl.getExtension('OES_texture_float_linear');
       this.floatBlend = !!gl.getExtension('EXT_float_blend');
       for (let k = 0; k < 2; k++) {
-        const t = texture2D(gl, { width: WATER_MAP.size, height: WATER_MAP.size, internal: gl.RG32F, format: gl.RG, type: gl.FLOAT, data: null, filter: linear ? gl.LINEAR : gl.NEAREST });
+        const t = texture2D(gl, { width: WATER_MAP.size, height: WATER_MAP.size, internal: gl.RGBA32F, format: gl.RGBA, type: gl.FLOAT, data: null, filter: linear ? gl.LINEAR : gl.NEAREST });
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
         const fb = gl.createFramebuffer()!;

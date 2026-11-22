@@ -37,7 +37,7 @@ export interface ClimateKeyframe {
   /** the same nodes as numbers, for the build's checks; NaN where the model has no land near */
   nodes: Float32Array;
   /** what its months give the rivers at each node (field:earth/runoff), where the water balance was asked for */
-  water?: { runoff: Float32Array; loss: Float32Array };
+  water?: NodeWater;
   /** its months at each node with land, and the height they stand for (field:earth/climate-at-height), where asked for */
   months?: NodeMonths;
   /** what else its source says of each of those nodes (core/months.ts PARTS), where fields read it `as: months` */
@@ -315,19 +315,37 @@ export interface WaterOptions {
   height: (ageMa: number) => (lat: number, lon: number) => number;
 }
 
+/** A month's runoff of the soil's surplus, as a keyframe keeps it: tenths of a millimetre, in a 16-bit number. */
+export const SLOW_STEP_MM = 0.1;
+
+/** What the water balance gives the rivers at each node of a keyframe (field:earth/runoff). */
+export interface NodeWater {
+  /** the runoff of its land, and what a lake's surface would lose to evaporation beyond the rain on it, mm in a year */
+  runoff: Float32Array;
+  loss: Float32Array;
+  /**
+   * each month's runoff of the soil's surplus, in steps of SLOW_STEP_MM, month by month: January's at every node, then
+   * February's. The part of the runoff that comes in the months after the soil fills, and not with the rain.
+   */
+  slow: Uint16Array;
+}
+
 /**
  * What a run's months give the rivers at each node: the runoff of its land, and what a lake's surface would lose to
- * evaporation beyond the rain on it, mm in a year (model:earth/water-balance). Each land cell of the run is balanced
- * on its own and the cells averaged into each node, then spread out over the sea as the climate is.
+ * evaporation beyond the rain on it, mm in a year, and each month's runoff of the soil's surplus (model:earth/water-
+ * balance). Each land cell of the run is balanced on its own and the cells averaged into each node, then spread out over
+ * the sea as the climate is.
  */
-export function waterOfRun(grid: FieldGrid, lat: ArrayLike<number>, lon: ArrayLike<number>, land: ArrayLike<number>, t: ArrayLike<number>, p: ArrayLike<number>, w: WaterOptions['params'], height: (lat: number, lon: number) => number): { runoff: Float32Array; loss: Float32Array } {
+export function waterOfRun(grid: FieldGrid, lat: ArrayLike<number>, lon: ArrayLike<number>, land: ArrayLike<number>, t: ArrayLike<number>, p: ArrayLike<number>, w: WaterOptions['params'], height: (lat: number, lon: number) => number): NodeWater {
   const nlat = lat.length;
   const nlon = lon.length;
   const n = grid.nx * grid.ny;
   const sum = new Float64Array(n * 2);
+  const slowSum = new Float64Array(n * 12);
   const count = new Float64Array(n);
   const months = new Float64Array(12);
   const rains = new Float64Array(12);
+  const slowOf: number[] = new Array(12).fill(0);
   for (let j = 0; j < nlat; j++) {
     const row = Math.round((grid.lat0 - lat[j]) / grid.step);
     if (row < 0 || row >= grid.ny) continue;
@@ -339,30 +357,37 @@ export function waterOfRun(grid: FieldGrid, lat: ArrayLike<number>, lon: ArrayLi
         rains[m] = p[at];
       }
       const lo = ((lon[i] + 180) % 360) - 180;
-      const y = waterYear(months, rains, lat[j], height(lat[j], lo), w);
+      const y = waterYear(months, rains, lat[j], height(lat[j], lo), w, 5, undefined, slowOf);
       const col = ((Math.round((lo - grid.lon0) / grid.step) % grid.nx) + grid.nx) % grid.nx;
       const k = row * grid.nx + col;
       sum[k * 2] += y.runoff;
       sum[k * 2 + 1] += w.lake_factor * y.pet - y.precip;
+      for (let m = 0; m < 12; m++) slowSum[k * 12 + m] += slowOf[m];
       count[k]++;
     }
   }
-  const packed = new Float32Array(n * 4).fill(NaN);
+  // Spread over the sea together, fourteen values a node: the year's runoff and loss, then the months' slow water.
+  const C = 14;
+  const packed = new Float32Array(n * C).fill(NaN);
   for (let k = 0; k < n; k++) {
     if (!count[k]) continue;
-    packed[k * 4] = sum[k * 2] / count[k];
-    packed[k * 4 + 1] = sum[k * 2 + 1] / count[k];
-    packed[k * 4 + 2] = 0;
-    packed[k * 4 + 3] = 0;
+    packed[k * C] = sum[k * 2] / count[k];
+    packed[k * C + 1] = sum[k * 2 + 1] / count[k];
+    for (let m = 0; m < 12; m++) packed[k * C + 2 + m] = slowSum[k * 12 + m] / count[k];
   }
-  const spread = spreadOverSea(grid, packed, 16);
+  const spread = spreadOverSea(grid, packed, 16, C);
   const runoff = new Float32Array(n);
   const loss = new Float32Array(n);
+  const slow = new Uint16Array(n * 12);
   for (let k = 0; k < n; k++) {
-    runoff[k] = Number.isNaN(spread[k * 4]) ? 0 : spread[k * 4];
-    loss[k] = Number.isNaN(spread[k * 4 + 1]) ? 0 : spread[k * 4 + 1];
+    runoff[k] = Number.isNaN(spread[k * C]) ? 0 : spread[k * C];
+    loss[k] = Number.isNaN(spread[k * C + 1]) ? 0 : spread[k * C + 1];
+    for (let m = 0; m < 12; m++) {
+      const v = spread[k * C + 2 + m];
+      slow[m * n + k] = Number.isNaN(v) ? 0 : Math.min(65535, Math.round(Math.max(0, v) / SLOW_STEP_MM));
+    }
   }
-  return { runoff, loss };
+  return { runoff, loss, slow };
 }
 
 /** The water balance's parameters as field:earth/runoff writes them, one per value so each can say where it comes from. */
@@ -427,31 +452,33 @@ export function nodesOfRun(grid: FieldGrid, lat: ArrayLike<number>, lon: ArrayLi
   return out;
 }
 
-/** Spread the land's climate out over the sea, a ring of nodes at a time. */
-export function spreadOverSea(grid: FieldGrid, nodes: Float32Array, rings: number): Float32Array {
+/** Spread the land's climate out over the sea, a ring of nodes at a time: `channels` values a node, NaN where it has none. */
+export function spreadOverSea(grid: FieldGrid, nodes: Float32Array, rings: number, channels = 4): Float32Array {
   const out = nodes.slice();
   const { nx, ny } = grid;
+  const C = channels;
+  const s = new Float64Array(C);
   for (let r = 0; r < rings; r++) {
     const prev = out.slice();
     let changed = false;
     for (let j = 0; j < ny; j++) {
       for (let i = 0; i < nx; i++) {
         const k = j * nx + i;
-        if (!Number.isNaN(prev[k * 4])) continue;
-        const s = [0, 0, 0, 0];
+        if (!Number.isNaN(prev[k * C])) continue;
+        s.fill(0);
         let c = 0;
         for (let dj = -1; dj <= 1; dj++) {
           const jj = j + dj;
           if (jj < 0 || jj >= ny) continue;
           for (let di = -1; di <= 1; di++) {
             const q = jj * nx + ((i + di + nx) % nx);
-            if (Number.isNaN(prev[q * 4])) continue;
-            for (let e = 0; e < 4; e++) s[e] += prev[q * 4 + e];
+            if (Number.isNaN(prev[q * C])) continue;
+            for (let e = 0; e < C; e++) s[e] += prev[q * C + e];
             c++;
           }
         }
         if (!c) continue;
-        for (let e = 0; e < 4; e++) out[k * 4 + e] = s[e] / c;
+        for (let e = 0; e < C; e++) out[k * C + e] = s[e] / c;
         changed = true;
       }
     }

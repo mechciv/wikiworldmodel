@@ -97,6 +97,7 @@ export function livingTaxon(e: AtlasEntry, forms: Record<string, Form>): LivingT
     ...(size && !size.own ? { size_from: size.from } : {}),
     ...(fromMass ? { fromMass: true } : {}),
     ...(t.diet ? { diet: t.diet } : {}),
+    ...(t.climate ? { climate: t.climate } : {}),
     time: timeOf(t.span[0], t.span[1]),
   };
 }

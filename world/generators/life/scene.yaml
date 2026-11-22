@@ -1,18 +1,19 @@
 id: gen:life/scene
 type: generator
 title: A living scene of any place, on land or in the sea
-version: 7
-code: generators/life/scene/v7.ts
+version: 8
+code: generators/life/scene/v8.ts
 runs_in: [build, client]
 outputs: { basis: procedural }
 # What it reads from the world: who may stand where and how big each grew, the ground and the climate
 # of the time, and, for the Hell Creek's slot, the formation's own fossils and record.
 inputs:
-  - { ref: field:life/community, note: "who may stand at a place and a time, and how sure" }
+  - { ref: field:life/community, note: "who may stand at a place and a time, and how sure; and the climate each kind's rows lived in" }
   - { ref: field:life/community-sea, note: "who may live at a place in the sea and a time, and how sure: the genera it can draw" }
   - { ref: field:earth/elevation, note: "the ground, at the field's heights" }
   - { ref: field:earth/relief, note: "today's ground, for the glacial cycles" }
-  - { ref: field:earth/rivers, note: "where the drainage routes rivers, how much they carry, and the laws their channels are drawn by" }
+  - { ref: field:earth/rivers, note: "where the drainage routes rivers, how much they carry, in which months their beds hold water, and the laws their channels are drawn by" }
+  - { ref: field:earth/lakes, note: "where the lakes of the time stand, and at what level" }
   - { ref: field:earth/river-widths, note: "where rivers wider than 30 m were seen, and how wide" }
   - { ref: field:earth/coastline, note: "where the water is" }
   - { ref: field:earth/climate, note: "the cover and the tones of the place, where no finer climate covers its time" }
@@ -31,13 +32,13 @@ inputs:
   - { ref: life/hell-creek/ecosystem, note: "the Hell Creek slot: where it was, and on which plate" }
 # What it makes, held in aggregate to what it samples (docs/STRUCTURE.md section 3.4).
 checks:
-  - { test: world/generators/life/scene/v7.test.ts, holds: "is only the taxa it is given, each near the arrival at least once" }
-  - { test: world/generators/life/scene/v7.test.ts, holds: "draws each taxon as often as the atlas's weight and the density rule say, in aggregate, below a cell's cap" }
-  - { test: world/generators/life/scene/v7.test.ts, holds: "has no forest before forests, only the few set by the arrival" }
-  - { test: world/generators/life/scene/v7.test.ts, holds: "has bare ground and no low plants at all before land plants" }
-  - { test: world/generators/life/scene/v7.test.ts, holds: "has a desert mostly bare, with no forest" }
-  - { test: world/generators/life/scene/v7.test.ts, holds: "grows what the climate of each height bears: forest below the treeline, none above it" }
-  - { test: world/generators/life/scene/v7.test.ts, holds: "lays snow down to where the month holds it: low in winter, high or not at all in summer" }
+  - { test: world/generators/life/scene/v8.test.ts, holds: "is only the taxa it is given, each near the arrival at least once" }
+  - { test: world/generators/life/scene/v8.test.ts, holds: "draws each taxon as often as the atlas's weight and the density rule say, in aggregate, below a cell's cap" }
+  - { test: world/generators/life/scene/v8.test.ts, holds: "has no forest before forests, only the few set by the arrival" }
+  - { test: world/generators/life/scene/v8.test.ts, holds: "has bare ground and no low plants at all before land plants" }
+  - { test: world/generators/life/scene/v8.test.ts, holds: "has a desert mostly bare, with no forest" }
+  - { test: world/generators/life/scene/v8.test.ts, holds: "grows what the climate of each height bears: forest below the treeline, none above it" }
+  - { test: world/generators/life/scene/v8.test.ts, holds: "lays snow down to where the month holds it: low in winter, high or not at all in summer" }
   - { test: world/generators/life/meander.test.ts, holds: "winds as a meandering river does, its bends of many sizes, and never comes within a neck of itself" }
   - { test: world/generators/life/meander.test.ts, holds: "cuts off loops where a neck closes, and keeps where it lay" }
   - { test: world/generators/life/meander.test.ts, holds: "is the same river from the same seed, to the last bit, and another river from another" }
@@ -45,14 +46,30 @@ checks:
   - { test: world/generators/life/meander.test.ts, holds: "brings a visitor to dry ground inside a bend, off its other limb and off the old bends" }
   - { test: world/generators/life/rivers.test.ts, holds: "winds by the sine-generated curve, as long as its sinuosity says" }
   - { test: world/generators/life/rivers.test.ts, holds: "draws its channel by the laws, and braids, winds or runs straight as its slope and flow say" }
-  - { test: world/generators/life/scene/v7.test.ts, holds: "runs its rivers where the world says, with the water falling downstream" }
-  - { test: world/generators/life/scene/v7.test.ts, holds: "puts what lives on the sea floor on it, and what swims in the water over it, never on land" }
+  - { test: world/generators/life/scene/v8.test.ts, holds: "runs its rivers where the world says, with the water falling downstream" }
+  - { test: world/generators/life/scene/v8.test.ts, holds: "draws a river dry in a month its bed holds no water: no water in its bed, its bed bare, and its ribbon marked dry" }
+  - { test: world/generators/life/scene/v8.test.ts, holds: "holds a lake where the world gives one: its bed under its level, its shore above it, and its water drawn" }
+  - { test: world/generators/life/scene/v8.test.ts, holds: "lines water with trees, flowing or dry, and stands the kinds that like it wet by it" }
+  - { test: world/generators/life/scene/v8.test.ts, holds: "stands its kinds in stands: each is commonest in patches of its own" }
+  - { test: world/generators/life/scene/v8.test.ts, holds: "grows each kind where its height's climate is like its rows': what grows changes up a slope" }
+  - { test: world/generators/life/scene/v8.test.ts, holds: "sows the understory as tall as a person as far as the big animals, and the lower only close by" }
+  - { test: world/generators/life/scene/v8.test.ts, holds: "puts what lives on the sea floor on it, and what swims in the water over it, never on land" }
   - { test: world/generators/life/rivers.test.ts, holds: "brings a river that runs into another to the other's water, and draws it only to the other's bank" }
 limits:
   - with: field:life/community
     note: >-
       Small animals reach the most a cell holds (params.animals.most_in_cell), and past it the atlas's weight no
       longer sets how many are drawn: two small mammals the atlas weighs nine to one come out about as many.
+  - with: field:life/community
+    note: >-
+      A kind's liking for a climate is that of its rows' places in the whole stage, worldwide: where its rows lean to one
+      region, as most lean to Europe and North America, its liking is that region's climate; and a stand-in, with no
+      rows, likes every climate alike.
+  - with: field:earth/rivers
+    note: >-
+      A river's months are its basin's, routed in the month with no time to travel: the flood of a long river comes down
+      to its lower reaches later than it is drawn. Only a lake that spills passes its basin's water on, in the month it
+      comes; a lake's buffering of a river's season is not drawn.
   - with: field:life/community-sea
     note: >-
       How many of each kind live on a sea's floor follows the land's density rule, which no work gives for the sea: a
@@ -117,15 +134,30 @@ params:
     glade: 0.41
     clearing: 150
     bare: 0.62
+    # By each climate's class: how much of the land is forest, low plants and bare ground, whether a scene with no water
+    # of the world's invents a river, and how much of the ground by water, flowing or dry, stands under trees: a gallery
+    # along a river through a steppe, a line of trees along a dry bed in a desert, willows in the tundra. All choices.
     climates:
-      rainforest: { forest: 1, herb: 0.95, bare: 0, river: 1, tones: rainforest }
-      savanna: { forest: 0.45, herb: 0.9, bare: 0.1, river: 0.7, tones: savanna }
-      temperate: { forest: 0.95, herb: 0.9, bare: 0, river: 1, tones: plain }
-      cold: { forest: 0.8, herb: 0.85, bare: 0, river: 1, tones: plain }
-      steppe: { forest: 0.15, herb: 0.75, bare: 0.35, river: 0.35, tones: steppe }
-      desert: { forest: 0, herb: 0.12, bare: 0.92, river: 0.05, dunes: 7, tones: desert }
-      tundra: { forest: 0, herb: 0.6, bare: 0.35, river: 0.6, tones: tundra }
-      ice: { forest: 0, herb: 0, bare: 1, river: 0, tones: ice }
+      rainforest: { forest: 1, herb: 0.95, bare: 0, river: 1, riverside: 1, tones: rainforest }
+      savanna: { forest: 0.45, herb: 0.9, bare: 0.1, river: 0.7, riverside: 0.85, tones: savanna }
+      temperate: { forest: 0.95, herb: 0.9, bare: 0, river: 1, riverside: 0.95, tones: plain }
+      cold: { forest: 0.8, herb: 0.85, bare: 0, river: 1, riverside: 0.85, tones: plain }
+      steppe: { forest: 0.15, herb: 0.75, bare: 0.35, river: 0.35, riverside: 0.6, tones: steppe }
+      desert: { forest: 0, herb: 0.12, bare: 0.92, river: 0.05, riverside: 0.35, dunes: 7, tones: desert }
+      tundra: { forest: 0, herb: 0.6, bare: 0.35, river: 0.6, riverside: 0.3, tones: tundra }
+      ice: { forest: 0, herb: 0, bare: 1, river: 0, riverside: 0, tones: ice }
+    # What grows by water reaches 12 m beyond a bank in full and is gone by 55 m, and grows there in clumps. In it a
+    # kind's liking for wet ground (its form's `behave.wet`) counts in full, as it does by the water's level.
+    strip: [12, 55]
+    # Kinds in stands: each kind of a layer has a field of noise of its own, in patches about 160 m across, and its
+    # weight on the list is multiplied by that field to the fourth power, so that where its field stands highest it is
+    # most of what grows.
+    stands: { size: 160, sharpness: 4 }
+    # Each kind's liking for the climate of a height: 1 at the mean warmest and coldest month of its rows' places in the
+    # stage (field:life/community), falling as 1 / (1 + d²), with d the distance in spreads of its rows' own, or of 3 °C
+    # in the warmest month and 4 °C in the coldest where they spread less. What grows at a height is weighted by each
+    # kind's liking over the best of its layer's there.
+    liking: { hot_c: 3, cold_c: 4 }
     # Soil, low plants, bare ground, canopy and low plants from afar, each from one tone to another, and the water's
     # shallows and depths; and the same again for a land before plants, which has none of them. Nobody recorded these
     # colours: a tropical river is drawn brown with silt, a cold one clear, a glacier's milky.
@@ -197,6 +229,10 @@ params:
     # The ground's cover close by: clumps of the understory a metre apart where the cover's share of low plants says, out
     # to 70 m from the eye, and no more than 40,000 in a view.
     clumps: { step: 1, reach: 70, most: 40000 }
+    # The understory 0.9 m tall and more, a shrub or a fern: sown on a grid of 4 m, 140 to the hectare where the cover
+    # allows, as far as the big animals are, and drawn as far as it shows; beside it, all of the understory, tall and
+    # low, is sown close by as before.
+    shrubs: { step: 4, least_m: 0.9, per_ha: 140 }
   animals:
     # Damuth's rule, for a species of plant-eating mammals: log10 D = 4.23 − 0.75 log10 M, in grams and km².
     density: 95
@@ -230,6 +266,10 @@ params:
   # at the floor sees it; the sea's whole depth is no claim about where anything swam.
   sea:
     swim_m: 40
+  # A lake of the world's (field:earth/lakes) below the drainage's grid, which gives the cells it covers and its level:
+  # its shore wanders up to 1.8 km either way off the cells' edges, in turns about 4.2 km across; its bed falls 1.2 m in
+  # every 100 m from the shore, to 18 m at most; and the land within 400 m of its shore rises from it by 2.5 m.
+  lakes: { wander: 1800, scale: 4200, slope: 0.012, deepest: 18, rise: 2.5, band: 400 }
   rivers:
     step: [8, 4]
     detail: 3

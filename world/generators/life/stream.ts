@@ -8,7 +8,7 @@ import { fingerprint, type Fingerprint, type Part } from '../../../core/fingerpr
 import { MAT, Mesh, meshParts } from '../city/kit.ts';
 import { hash2, hashString, TAU } from '../city/math.ts';
 import { drawAnimal, drawClump, drawPlant, POSE, type Detail, type Stance } from './forms.ts';
-import { CELL, CELLS, cellParts, cellKey, coverMask, EXTENT, groundGrids, LandCover, makePlan, placeLook, waterLevels, waterRibbons, waterSheet, watersFor, type CellRows, type LivingParams, type LivingPlan, type PlaceLook } from './scene/v7.ts';
+import { banksOf, CELL, CELLS, cellParts, cellKey, coverMask, EXTENT, groundGrids, LandCover, makePlan, placeLook, waterLevels, waterRibbons, waterSheet, watersFor, type CellRows, type LivingParams, type LivingPlan, type PlaceLook } from './scene/v8.ts';
 import { freshOf, type Waters } from './land.ts';
 import { drawDwelling, HOUSE_VARIANTS, houseSize, type HouseDetail } from '../people/dwellings.ts';
 import { LandUseMap, landUseMask, makeSettlement, type SettlementPlan } from '../people/settlement/v3.ts';
@@ -124,6 +124,8 @@ export class SceneStream {
   private unsettled = 0;
   private fullReach: number;
   private nearReach: number;
+  /** how tall an understory plant must be to be drawn as a mesh from a way off */
+  private shrubFrom: number;
   /** the people's houses, settlements and fields, where the scene has people */
   readonly people?: SettlementPlan;
   private landUse?: LandUseMap;
@@ -150,11 +152,12 @@ export class SceneStream {
     const levelAt = waters.paths ? waterLevels(waters) : undefined;
     // The people, where the scene has any: their houses and fields, on this ground and away from this water. Where they
     // cleared the land no tree stands. A scene of the sea has them too, on whatever ground stands above its water: a place
-    // a few metres above the sea, a delta or a lower plain, is a scene of the sea (scene/v7.ts, sea_below), and among the
+    // a few metres above the sea, a delta or a lower plain, is a scene of the sea (scene/v8.ts, sea_below), and among the
     // most crowded land there was.
     let clearing: ((x: number, y: number) => number) | undefined;
     if (spec.people) {
-      const water = levelAt ?? (() => this.look.water);
+      // People keep their houses and fields out of a river's bed, dry in the month or not: its floods come down it.
+      const water = (waters.paths?.some((p) => p.dry) ? waterLevels(waters, true) : levelAt) ?? (() => this.look.water);
       this.people = makeSettlement(spec, this.ground, water, EXTENT);
       const use = new LandUseMap(this.people, this.ground, water, this.look.seed);
       this.landUse = use;
@@ -195,11 +198,14 @@ export class SceneStream {
     // Nor does a tree stand yet on the bars an invented river has lately left.
     const fresh = freshOf(waters, this.params.ground.migration);
     const treeless = clearing && fresh ? (x: number, y: number) => Math.max(clearing(x, y), fresh(x, y)) : (clearing ?? fresh);
-    this.plan = makePlan(spec, this.ground, this.look, waters, levelAt, treeless);
-    this.cover = new LandCover(spec, this.ground, this.look.water, this.plan.focus, levelAt, treeless);
+    // How far each point is from the banks of the water the world gives, flowing, still or dry: what grows by water.
+    const banks = banksOf(spec, waters);
+    this.plan = makePlan(spec, this.ground, this.look, waters, levelAt, treeless, banks);
+    this.cover = new LandCover(spec, this.ground, this.look.water, this.plan.focus, levelAt, treeless, banks);
     this.tones = spec.taxa.map((t) => hashString(t.id) & 255);
     this.fullReach = this.params.reach.full;
     this.nearReach = this.params.reach.near;
+    this.shrubFrom = this.params.plants.shrubs?.least_m ?? Infinity;
   }
 
   /** What the ground is, as an image: as fine as asked for. */
@@ -454,8 +460,8 @@ export class SceneStream {
         const detail: Detail = this.budget.fast ? (pxs >= 26 ? 1 : 0) : pxs >= (rich ? 36 : 70) ? 2 : pxs >= (rich ? 4 : 9) ? 1 : 0;
         const t0 = taxa[k];
         const form = this.spec.forms[t0.form];
-        // A low plant is a mesh only close by.
-        if (form.kind === 'plant' && form.behave?.layer === 'under' && detail < 2) continue;
+        // A low plant is a mesh only close by; one as tall as a person or more, a shrub or a fern, from a way off too.
+        if (form.kind === 'plant' && form.behave?.layer === 'under' && detail < (heights[k] >= this.shrubFrom ? 1 : 2)) continue;
         const proto = protoOf(k, this.variantOf(t0, form, pose[q], phase[q], shade[q], detail), detail);
         let b = buckets.get(proto);
         if (!b) {
@@ -700,8 +706,10 @@ export class SceneStream {
         if (cover.water || u >= cover.low * keep) continue;
         // Among the houses the ground is trodden: little grows where feet go.
         if (this.landUse && hash2(i, j, seed + 78) < this.landUse.at(x, y).yard * 0.9) continue;
-        const k = this.plan.underAt(cover.above, hash2(i, j, seed + 74));
-        if (k < 0) return 0;
+        const k = this.plan.underAt(x, y, cover, hash2(i, j, seed + 74));
+        // None at all in the scene, or none that suits this ground: the ground's own colour for low plants is all there is.
+        if (k === -1) return 0;
+        if (k < 0) continue;
         const shade = (hash2(i, j, seed + 75) * 256) | 0;
         const proto = protoOf(k, shade & 3, CLUMP);
         let b = buckets.get(proto);

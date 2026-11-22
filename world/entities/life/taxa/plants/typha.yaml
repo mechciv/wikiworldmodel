@@ -1,0 +1,44 @@
+id: life/taxa/typha
+kind: taxon
+summary: >-
+  The cattails or bulrushes: tall plants of long strap-shaped leaves, which stand in shallow water and on the wet ground
+  at its edge.
+same_as: { pbdb: "txn:252000" }
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { la: Typha, en: cattails }
+    unsourced: "The classification's own name; the English an editorial gloss."
+  body-plan:
+    prop: body_plan
+    value: reed
+    source:
+      - ref: src:gucker-2008-feis-typha-latifolia
+        loc: "GENERAL BOTANICAL CHARACTERISTICS, Aboveground description"
+        quote: "Broadleaf cattail is an aquatic or semiaquatic emergent perennial."
+      - ref: src:snyder-1993-feis-typha-angustifolia
+        loc: "SITE CHARACTERISTICS"
+        quote: "Typha spp. grow best under stable moisture conditions, saturated soil, and water up to 1.5 feet (45 cm) deep."
+    note: >-
+      Drawn as a reed, which stands only by water and in its shallows (world/plans/reed.yaml): the plan is the
+      generator's, and these say what a living cattail is and where it grows.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in typha-latifolia-feis-gucker-2008.txt (sha256 59f4b6895759827c) and typha-angustifolia-feis-snyder-1993.txt (sha256 e1a3e947938fd16a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-22" }
+  height:
+    prop: plant_height
+    value: { lo: 1, hi: 3 }
+    source:
+      - ref: src:gucker-2008-feis-typha-latifolia
+        loc: "GENERAL BOTANICAL CHARACTERISTICS, Aboveground description"
+        quote: "Plants are normally 3 to 10 feet (1-3 m) tall, reedlike, and extensively clonal"
+      - ref: src:martinez-martinez-2023-typha-roots
+        loc: "section 3, Typha Genus, paragraph 1"
+        quote: "Plants belonging to this genus are erect, rhizomatous, perennial herbs that flourish on a slender stem up to 3 m high"
+    method: compilation
+    basis: reconstruction
+    note: >-
+      The living broadleaf cattail, and the genus as a review gives it, standing for a cattail with no height of its own:
+      modern relatives.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in typha-latifolia-feis-gucker-2008.txt (sha256 59f4b6895759827c) and typha-martinez-martinez-2023-microorganisms.txt (sha256 465ba17c1da4052d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-22" }

@@ -52,6 +52,8 @@ export interface RiverPath {
   plain: number;
   /** where its water is drawn to: short of its last point where it runs into another river's channel */
   end?: number;
+  /** its bed holds no water in the month drawn: a dry bed, which only a storm's flood fills */
+  dry?: boolean;
 }
 
 /**
@@ -370,7 +372,10 @@ export function drawRiver(river: SceneRiver, laws: ChannelLaws, c: RiverChoices,
   })());
   const step = Math.max(c.step[0], w / c.step[1]);
   const slope = (zAt(0) - zAt(guide.length)) / Math.max(1, guide.length);
-  const pattern: Pattern = slope > c.steep ? 'steep' : braids(q, Math.max(0, slope), laws) ? 'braided' : 'meandering';
+  // A river whose bed holds water in no month is a wash: its floods spread over a wide, shallow bed, as a braided river's
+  // water does, and it leaves no oxbow lakes behind.
+  const wash = r.wet === 0;
+  const pattern: Pattern = slope > c.steep ? 'steep' : wash || braids(q, Math.max(0, slope), laws) ? 'braided' : 'meandering';
   const range = (a: number, b: number) => Math.round((a + (b - a) * unit(keyOf, 1, 3)) * 1000) / 1000;
   const wavelength = w * range(laws.wavelength_widths[0], laws.wavelength_widths[1]);
   const sinuosity = pattern === 'meandering' ? range(laws.sinuosity_least, laws.sinuosity_most) : 1.06;
@@ -403,7 +408,7 @@ export function drawRiver(river: SceneRiver, laws: ChannelLaws, c: RiverChoices,
     const wound = meanders(guide, keyOf, r.s0, from, to, wavelength, omega, c, step);
     const cut = cutOff(wound, c.neck * w, wavelength * 1.2);
     xy = cut.path;
-    for (const loop of cut.loops) oxbows.push({ key: `${r.key}#cut`, xy: loop, half: w * 0.4, z: 0 });
+    if (!wash) for (const loop of cut.loops) oxbows.push({ key: `${r.key}#cut`, xy: loop, half: w * 0.4, z: 0 });
     // The older courses: the same river's bends, shifted, of which a share of the loops are left as oxbows.
     if (pattern === 'meandering') {
       const belt = (wavelength * sinuosity) / 4;

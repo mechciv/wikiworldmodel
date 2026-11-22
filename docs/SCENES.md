@@ -127,6 +127,49 @@ Limits:
 - The vegetation of the last 120,000 years has no people in it, and nothing on most of the shelves the low sea bared
   (field:earth/biome-late-quaternary).
 
+## Water, and what grows by it
+
+Since `gen:life/scene` version 8 ([docs/plans/PARITY.md](plans/PARITY.md), items 4 and 7):
+
+- **A river has a season.** The water balance keeps each month's runoff of the soil's surplus beside the year's: what
+  the soil, once full, lets go in the months after (model:earth/water-balance). The drainage routes it month by month as
+  it routes the year's water, and each reach's months with water in its bed are those in which that slow water reaches
+  it at no less than 0.15 of its mean flow (field:earth/rivers, `wet_share`); and every month, where the ground it drains
+  gives it 150 mm a year or more (`perennial_mm`), since the water balance lets a soil's surplus go faster than a wet
+  basin's ground water runs out. What the rain sends off as it falls runs in floods of a day or two, and between them
+  the bed is dry. So a river fed from wet uplands keeps its water across a desert, and a desert's own beds have none.
+- **A dry bed is drawn dry.** In a month its bed holds no water, a river has no water in its channel, its oxbows are dry
+  hollows, and its bed is bare: loose sand, paler than the plain, with sheets of gravel on its bars. A river whose bed
+  holds water in no month is a wash, wide and shallow as a braided river's bed, with no oxbow lakes.
+- **The world's lakes stand in a scene** (field:earth/lakes): the cells of the drainage's grid a lake covers, with its
+  level, carved into a basin below it, its shore wandering off the cells' edges by a noise of the place, the land just
+  beyond rising from it.
+- **What grows by water stands along it,** flowing, still or dry: within 12 m of a bank in full and gone by 55 m, more
+  trees than the climate keeps away from water, in clumps, and the kinds that like wet ground by it. A kind's liking cuts
+  both ways: a willow is nine times as likely by water as away from it, and a reed grows only by water, in its shallows
+  too.
+- **Kinds stand in stands.** Each kind of a layer is commonest in patches of its own, about 160 m across.
+- **What grows changes up a slope.** Each taxon carries the climate its rows lived in, the mean and the spread of their
+  places' warmest and coldest months (field:life/community), and at each height the kinds are weighted by how like their
+  own its climate is.
+- **Shrubs and ferns show from a way off.** The understory as tall as a person is sown as far as the big animals and drawn
+  as far as it shows; lower plants stay close by. What floats is sown only on still water.
+
+Limits:
+- A month's water is routed in the month, with no time to travel: a long river's flood reaches its lower course later
+  than it is drawn. A lake that spills passes its basin's water on in the month it comes, with none of a lake's
+  steadying of a river's season.
+- The water balance's soil lets its surplus go by half each month, so in a basin that gives less than 150 mm a year the
+  slow water of a long dry season or a cold winter runs out sooner than real groundwater would. Where 150 mm divides
+  the two is a choice. Rivers Landsat saw hold water in every month.
+- A lake's shore and depth below the drainage's grid are invented, and only lakes of 500 km² and more are kept. Its
+  water is drawn within 34 km of a scene's middle; further off, a great lake's far reaches are the ground at its level.
+  Lake Victoria is not among the drainage's lakes, and so not in a scene (docs/slices/EIGHTH-SLICE.md).
+- A kind's liking is its rows' places' climate in the whole stage, worldwide, which leans to Europe and North America; a
+  stand-in has no rows and likes every climate alike.
+- Beyond 16 km the ground's cover still ignores its height, and heights are cut at 3,200 m (PARITY.md, section 3): a far
+  range has no treeline.
+
 ## What the ground is made of
 
 A scene's ground is made of what the world says it was (`field:earth/substrate`,
@@ -221,6 +264,7 @@ Each step has a budget, and a test.
    topsoil and bedrock at half a degree, and rock units with their ages where Macrostrat has columns
    ([above](#what-the-ground-is-made-of)). Finer maps, rock units for the rest of the Earth, a soil's colour and land
    cover remain.
-6. **Season and weather** from the monthly climate. The month's snow and sun are done (above); leaf, grass, a river's
-   season, the weather and the sky remain. The months of cloudiness, humidity and wind they will read are kept (above).
+6. **Season and weather** from the monthly climate. The month's snow and sun are done (above), and a river's season
+   ([above](#water-and-what-grows-by-it)); leaf, grass, the weather and the sky remain. The months of cloudiness,
+   humidity and wind they will read are kept (above).
 7. **Seamless ground,** keyed in the world's coordinates, which the rivers' keying begins.

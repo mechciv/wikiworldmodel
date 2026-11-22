@@ -1,0 +1,16 @@
+id: src:gucker-2008-feis-typha-latifolia
+type: publication
+kind: review
+citation: >-
+  Gucker, C.L. (2008). Typha latifolia. In: Fire Effects Information System. U.S. Department of Agriculture, Forest
+  Service, Rocky Mountain Research Station, Fire Sciences Laboratory.
+authors: ["Gucker, C.L."]
+published: 2008
+title: "Typha latifolia"
+container: "Fire Effects Information System"
+url: https://www.fs.usda.gov/database/feis/plants/graminoid/typlat/all.html
+verified:
+  by: machine:claude-code
+  how: >-
+    Read on the Forest Service's page; quotes checked by script against its text with the tags taken out. A review
+    of the living plant, a work of the United States government.

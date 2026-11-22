@@ -149,7 +149,8 @@ of GRWL's tiles. A viewer fetches a network once and a file of keyframes as the 
 - **Rivers under the ice sheets** are routed as if the ground were bare: the ice field is not read.
 - **The past's courses are today's.** GRWL's rivers are held back as they run today; avulsions and moving deltas are not
   recorded. Rivers narrower than 30 m are the drainage's, whose course is known only to 0.1°.
-- **A scene's lakes are its oxbows.** The drainage's lakes are drawn on the globe but not yet in scenes.
+- **A scene's lakes were its oxbows.** Since `gen:life/scene` version 8 the drainage's lakes stand in scenes too, and a
+  river has a season, which the drainage routes month by month ([SCENES.md](../SCENES.md#water-and-what-grows-by-it)).
 - **A braided river is a wide, shallow bed,** without its threads and bars.
 - **The deep past's rivers are on 1° grids,** and a fossil site's own record of its setting (a channel, a floodplain,
   a lake) is not read yet.
@@ -164,7 +165,7 @@ of GRWL's tiles. A viewer fetches a network once and a file of keyframes as the 
 
 ## Next
 
-Lakes in scenes, from the drainage and today's lakes; the ice sheets; losses along rivers and a lake evaporation from
+Today's lakes smaller than the drainage keeps, in scenes; the ice sheets; losses along rivers and a lake evaporation from
 a source; hollows routed to their lowest point; a scene's climate from the finest field of its time; braided threads; the
 migration of bends, which would leave scroll bars; and the rock record's environments for the deep past's scenes, as
 [SCENES.md](../SCENES.md) orders them.

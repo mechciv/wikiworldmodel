@@ -6,6 +6,7 @@
 // agree within the tolerance of core/fingerprint.ts.
 import { dsin, hash2, Rng, TAU } from '../city/math.ts';
 import { decay, migrate, place, resample, type Migration } from './meander.ts';
+import type { LakeMap } from './lakes.ts';
 import type { Oxbow, RiverPath } from './rivers.ts';
 
 /** How a river and its plain are drawn. Nothing here is a claim about any river. */
@@ -68,7 +69,7 @@ export const NEVER = 1e9;
 /** How long a valley an invented river is migrated down, m: past the edge of the plain it is drawn on, either way. */
 const VALLEY = 76000;
 
-/** The grids the swept ground is worked out on: the ground's own fine and middle grids (scene/v7.ts). */
+/** The grids the swept ground is worked out on: the ground's own fine and middle grids (scene/v8.ts). */
 const SWEPT_GRIDS: GridSpec[] = [
   { nx: 1281, ny: 1281, x0: -6400, y0: -6400, cell: 10 },
   { nx: 1281, ny: 1281, x0: -32000, y0: -32000, cell: 50 },
@@ -284,6 +285,8 @@ export interface Waters {
   /** an invented river's older bends, silted up: hollows on the plain, as lines; and the ground it has swept */
   scars?: number[][];
   swept?: Swept;
+  /** where the world says where its lakes stand: a map of how far each point lies inside a shore */
+  lakes?: LakeMap;
   /** where the world says where the rivers run: each drawn, and the oxbows of their older courses */
   paths?: RiverPath[];
   oxbowList?: Oxbow[];

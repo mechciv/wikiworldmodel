@@ -1,0 +1,18 @@
+id: src:tang-2019-glyptostrobus-pensilis
+type: publication
+kind: measurement
+citation: >-
+  Tang, C.Q., Yang, Y., Momohara, A., Wang, H.-C., Luu, H.T., Li, S., Song, K., Qian, S., LePage, B., Dong, Y.-F., Han,
+  P.-B., Ohsawa, M., Le, B.T., Tran, H.D., Dang, M.T., Peng, M.-C. & Wang, C.-Y. (2019). Forest characteristics and
+  population structure of Glyptostrobus pensilis, a globally endangered relict species of southeastern China. Plant
+  Diversity 41(4), 237–249.
+authors: ["Tang, C.Q.", "Yang, Y.", "Momohara, A.", "Wang, H.-C.", "Luu, H.T.", "Li, S.", "Song, K.", "Qian, S.", "LePage, B.", "Dong, Y.-F.", "Han, P.-B.", "Ohsawa, M.", "Le, B.T.", "Tran, H.D.", "Dang, M.T.", "Peng, M.-C.", "Wang, C.-Y."]
+published: 2019
+title: "Forest characteristics and population structure of Glyptostrobus pensilis, a globally endangered relict species of southeastern China"
+container: "Plant Diversity 41(4), 237–249"
+doi: 10.1016/j.pld.2019.06.007
+verified:
+  by: machine:claude-code
+  how: >-
+    Read in full from Europe PMC (PMC6742968), CC BY-NC-ND, quoted only briefly as evidence; quotes checked by script
+    against its text.

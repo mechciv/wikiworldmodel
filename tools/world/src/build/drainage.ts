@@ -275,6 +275,8 @@ export interface Flow {
   lakes: Lake[];
   /** the sea the water ran to */
   sea: Uint8Array;
+  /** for each hollow, the share of what flows into it in a year that gets out of it: 1 for one the sea floods, 0 for a lake that keeps all of it */
+  passes: Float32Array;
 }
 
 /**
@@ -292,7 +294,13 @@ export function flow(z: ArrayLike<number>, g: NodeGrid, r: Routing, h: Hollows, 
   const av = new Float64Array(n);
   const lake = new Int32Array(n).fill(-1);
   const lakes: Lake[] = [];
+  const passes = new Float32Array(h.sets.length);
   const settle = (id: number): number => {
+    const out = settleOne(id);
+    passes[id] = pool[id] > 0 ? out / pool[id] : 0;
+    return out;
+  };
+  const settleOne = (id: number): number => {
     const nodes = h.sets[id];
     const inflow = pool[id];
     for (const k of nodes) if (sea[k]) return inflow;
@@ -342,7 +350,97 @@ export function flow(z: ArrayLike<number>, g: NodeGrid, r: Routing, h: Hollows, 
     q[k] = sea[k] ? 0 : lake[k] >= 0 ? lakes[lake[k]].outflow : qv[k] / YEAR;
     km2[k] = av[k];
   }
-  return { q, km2, lake, lakes, sea };
+  return { q, km2, lake, lakes, sea, passes };
+}
+
+/** For each node of a grid, the nearest node of a climate's grid, where it reads that climate's months. */
+export function nearestNodes(sg: { lon0: number; lat0: number; step: number; nx: number; ny: number }, g: NodeGrid): Int32Array {
+  const out = new Int32Array(g.nx * g.ny);
+  for (let r = 0; r < g.ny; r++) {
+    const j = Math.min(sg.ny - 1, Math.max(0, Math.round((sg.lat0 - (90 - r * g.step)) / sg.step)));
+    for (let c = 0; c < g.nx; c++) {
+      const i = ((Math.round((-180 + c * g.step - sg.lon0) / sg.step) % sg.nx) + sg.nx) % sg.nx;
+      out[r * g.nx + c] = j * sg.nx + i;
+    }
+  }
+  return out;
+}
+
+/** The hollows that drain out by each node, as chains: the first at a node, then each to the next. */
+export interface OutletChains {
+  first: Int32Array;
+  next: Int32Array;
+}
+
+export function outletChains(h: Hollows, n: number): OutletChains {
+  const first = new Int32Array(n).fill(-1);
+  const next = new Int32Array(h.sets.length).fill(-1);
+  h.outlet.forEach((o, id) => {
+    if (o < 0) return;
+    next[id] = first[o];
+    first[o] = id;
+  });
+  return { first, next };
+}
+
+/** Each month's runoff of the soil's surplus at the nodes of a climate's grid (field:earth/runoff), as a keyframe keeps it. */
+export interface SlowWater {
+  /** in steps of `step` mm, month by month: January's at every node of the climate's grid, then February's */
+  slow: Uint16Array;
+  step: number;
+  /** how many nodes the climate's grid has, and the one each node of the routed grid reads */
+  nodes: number;
+  near: Int32Array;
+}
+
+/**
+ * The months in which water stands in a river's bed at some nodes of a flow (field:earth/rivers, `wet_share`), as bits,
+ * January the lowest. Each month's runoff of the soil's surplus is routed as the year's water is, and out of each hollow
+ * in the share of the year's that gets out of it; a node's month is wet where what reaches it then is at least `share` of
+ * its mean flow. What the rain sends off as it falls is left out: it runs in floods of a day or two, and between them the
+ * bed is dry. So a river fed from wet uplands keeps water across a desert, and a desert's own bed has none. A month's
+ * water is routed in the month, with no time to travel down a long river. Where the ground it drains gives it at least
+ * `perennialMm` a year, it holds water in every month: the water balance lets a soil's surplus go faster than a wet
+ * basin's ground water runs out.
+ */
+export function wetMonthsAt(g: NodeGrid, r: Routing, f: Flow, h: Hollows, chains: OutletChains, w: SlowWater, share: number, at: ArrayLike<number>, perennialMm = Infinity): Uint16Array {
+  const n = g.nx * g.ny;
+  const areas = rowAreas(g);
+  const qm = new Float64Array(n);
+  const pool = new Float64Array(h.sets.length);
+  const out = new Uint16Array(at.length);
+  // A basin wet enough runs all year: the mm a year the ground a node drains gives it.
+  for (let j = 0; j < at.length; j++) {
+    const k = at[j];
+    if (k >= 0 && f.q[k] > 0 && (f.q[k] * YEAR) / (f.km2[k] * 1000) >= perennialMm) out[j] = 0xfff;
+  }
+  // A month's slow water, in steps of the store times m², as a mean flow in m³/s.
+  const toFlow = w.step / 1000 / (YEAR / 12);
+  const { order, down } = r;
+  const { sea, passes } = f;
+  const of = h.of;
+  for (let m = 0; m < 12; m++) {
+    qm.fill(0);
+    pool.fill(0);
+    const base = m * w.nodes;
+    for (let i = order.length - 1; i >= 0; i--) {
+      const k = order[i];
+      if (sea[k]) continue;
+      let v = qm[k] + w.slow[base + w.near[k]] * areas[(k / g.nx) | 0];
+      for (let id = chains.first[k]; id >= 0; id = chains.next[id]) v += pool[id] * passes[id];
+      qm[k] = v;
+      const d = down[k];
+      if (d < 0 || sea[d]) continue;
+      const from = of[k];
+      if (from >= 0 && of[d] !== from) pool[from] += v;
+      else qm[d] += v;
+    }
+    for (let j = 0; j < at.length; j++) {
+      const k = at[j];
+      if (k >= 0 && f.q[k] > 0 && qm[k] * toFlow >= share * f.q[k]) out[j] |= 1 << m;
+    }
+  }
+  return out;
 }
 
 export interface Reach {

@@ -12,7 +12,7 @@ import type { LivingTaxon, ScenePeople, SceneSpec } from '../../../core/scene.ts
 import type { FeatureTime } from '../../../core/tileset.ts';
 import { STRIDE } from '../city/kit.ts';
 import { houseSize } from './dwellings.ts';
-import { GENERATOR, VERSION, type LivingParams } from '../life/scene/v7.ts';
+import { GENERATOR, VERSION, type LivingParams } from '../life/scene/v8.ts';
 import { HOUSE, INSTANCE_STRIDE, KEPT, protoParts, SceneStream, WORK, type LifeView } from '../life/stream.ts';
 
 const ROOT = join(import.meta.dirname, '../..');

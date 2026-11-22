@@ -17,7 +17,7 @@ import type { SceneFileV2 } from '../../../core/scene.ts';
 import { parsePoint, toMa, type TimePointInput } from '../../../core/time.ts';
 import type { FramesFile, Tileset } from '../../../core/tileset.ts';
 import { indexTree, layoutTree, type TreeFile } from '../../../core/tree.ts';
-import { CELL } from '../../../world/generators/life/scene/v7.ts';
+import { CELL } from '../../../world/generators/life/scene/v8.ts';
 import { FULL_BUDGET, SceneStream } from '../../../world/generators/life/stream.ts';
 import type { LandSnapshot, PbdbSnapshot } from '../src/pbdb.ts';
 import { pbdbNumber } from '../src/pbdb.ts';
@@ -215,6 +215,30 @@ describe('the atlas', () => {
         expect(t.span[1]).toBeLessThan(older + 1e-3);
       }
     }
+  });
+
+  it('gives each taxon of a stage the climate its rows lived in: reindeer of colder places than hippopotamuses', () => {
+    const ref = index.bins.find((b) => b.name === 'Holocene')!;
+    const bin = json<AtlasBin>(ref.file);
+    const real = bin.taxa.filter((t) => !t.standin);
+    // Nearly every taxon with rows has one, each a climate there could be: a warmest month no colder than its coldest.
+    expect(real.filter((t) => t.climate).length / real.length).toBeGreaterThan(0.9);
+    for (const t of real) {
+      if (!t.climate) continue;
+      const [hot, hotSd, cold, coldSd] = t.climate;
+      expect(hot, t.label).toBeGreaterThanOrEqual(cold);
+      expect(hot).toBeLessThan(50);
+      expect(cold).toBeGreaterThan(-60);
+      expect(Math.min(hotSd, coldSd)).toBeGreaterThanOrEqual(0);
+    }
+    // A deer of the Arctic's tundra and taiga against an animal of Africa's rivers.
+    const of = (label: string) => real.find((t) => t.label === label)?.climate;
+    const reindeer = of('Rangifer');
+    const hippo = of('Hippopotamus');
+    expect(reindeer).toBeDefined();
+    expect(hippo).toBeDefined();
+    expect(hippo![0] - reindeer![0]).toBeGreaterThan(5);
+    expect(hippo![2] - reindeer![2]).toBeGreaterThan(15);
   });
 
   it('has a tier that is true: *here* has a row of the taxon close by at the time, recounted from the snapshot', () => {

@@ -1,0 +1,17 @@
+id: src:harrington-2008-wpsm-alnus
+type: publication
+kind: compilation
+citation: >-
+  Harrington, C.A., Brodie, L.C., DeBell, D.S. & Schopmeyer, C.S. (2008). Alnus P. Mill.: alder. In: Bonner, F.T. &
+  Karrfalt, R.P. (eds.), The Woody Plant Seed Manual, 232–242. Agriculture Handbook 727. U.S. Department of
+  Agriculture, Forest Service, Washington, DC.
+authors: ["Harrington, C.A.", "Brodie, L.C.", "DeBell, D.S.", "Schopmeyer, C.S."]
+published: 2008
+title: "Alnus P. Mill.: alder"
+container: "The Woody Plant Seed Manual (Agriculture Handbook 727), 232–242"
+url: https://rngr.net/publications/wpsm/genera/a/at_download/file
+verified:
+  by: machine:claude-code
+  how: >-
+    Read in the chapter's PDF from the Reforestation, Nurseries and Genetic Resources site, its text taken out of the
+    PDF page by page; quotes checked by script against that text. A work of the United States government.

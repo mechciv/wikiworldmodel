@@ -43,6 +43,12 @@ export interface AtlasTaxon {
   habit?: string;
   /** the rows of this stage that name it or a taxon below it, worldwide */
   rows: number;
+  /**
+   * What those rows say of the climate it lived in: the mean and the spread of the warmest month and of the coldest, °C,
+   * at their places in the stage, weighted as the rows are. Undefined for a stand-in, and where no climate of the stage
+   * reaches its rows.
+   */
+  climate?: [number, number, number, number];
   /** the oldest and youngest ages those rows allow, in Ma */
   span: [number, number];
   /** drawn as this clade because nothing nearer is known: not a claim that this clade lived here */

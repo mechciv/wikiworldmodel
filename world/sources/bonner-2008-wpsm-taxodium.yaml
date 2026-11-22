@@ -1,0 +1,16 @@
+id: src:bonner-2008-wpsm-taxodium
+type: publication
+kind: compilation
+citation: >-
+  Bonner, F.T. (2008). Taxodium L.C. Rich.: baldcypress. In: Bonner, F.T. & Karrfalt, R.P. (eds.), The Woody Plant
+  Seed Manual, 1089–1091. Agriculture Handbook 727. U.S. Department of Agriculture, Forest Service, Washington, DC.
+authors: ["Bonner, F.T."]
+published: 2008
+title: "Taxodium L.C. Rich.: baldcypress"
+container: "The Woody Plant Seed Manual (Agriculture Handbook 727), 1089–1091"
+url: https://rngr.net/publications/wpsm/genera/t/at_download/file
+verified:
+  by: machine:claude-code
+  how: >-
+    Read in the chapter's PDF from the Reforestation, Nurseries and Genetic Resources site, its text taken out of the
+    PDF page by page; quotes checked by script against that text. A work of the United States government.

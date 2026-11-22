@@ -1,0 +1,17 @@
+id: src:juvik-2016-metasequoia-natural-products
+type: publication
+kind: review
+citation: >-
+  Juvik, O.J., Nguyen, X.H.T., Andersen, H.L. & Fossen, T. (2016). Growing with dinosaurs: natural products from the
+  Cretaceous relict Metasequoia glyptostroboides Hu & Cheng, a molecular reservoir from the ancient world with
+  potential in modern medicine. Phytochemistry Reviews 15(2), 161–195.
+authors: ["Juvik, O.J.", "Nguyen, X.H.T.", "Andersen, H.L.", "Fossen, T."]
+published: 2016
+title: "Growing with dinosaurs: natural products from the Cretaceous relict Metasequoia glyptostroboides Hu & Cheng, a molecular reservoir from the ancient world with potential in modern medicine"
+container: "Phytochemistry Reviews 15(2), 161–195"
+doi: 10.1007/s11101-015-9395-3
+verified:
+  by: machine:claude-code
+  how: >-
+    Read in full from Europe PMC (PMC4799292), open access; quotes checked by script against its text. A review of the
+    tree's chemistry, with a section on its natural habitat.

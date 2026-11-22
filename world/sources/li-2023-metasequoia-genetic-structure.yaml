@@ -1,0 +1,17 @@
+id: src:li-2023-metasequoia-genetic-structure
+type: publication
+kind: measurement
+citation: >-
+  Li, Y.-Y., Cui, M.-Y., Le, X.-W., Gong, J., Jiang, K., Tong, X., Zhang, Q., Li, J.-H., Li, H.-Y., Lu, L., Zou, J.,
+  Wang, R. & Chen, X.-Y. (2023). Genetic structure shows the presence of small-scale management units in a relict tree
+  species. Ecology and Evolution 13(9), e10500.
+authors: ["Li, Y.-Y.", "Cui, M.-Y.", "Le, X.-W.", "Gong, J.", "Jiang, K.", "Tong, X.", "Zhang, Q.", "Li, J.-H.", "Li, H.-Y.", "Lu, L.", "Zou, J.", "Wang, R.", "Chen, X.-Y."]
+published: 2023
+title: "Genetic structure shows the presence of small-scale management units in a relict tree species"
+container: "Ecology and Evolution 13(9), e10500"
+doi: 10.1002/ece3.10500
+verified:
+  by: machine:claude-code
+  how: >-
+    Read in full from Europe PMC (PMC10495812), open access; quotes checked by script against its text. Its study
+    species is Metasequoia glyptostroboides, in its wild stands.

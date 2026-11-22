@@ -1,7 +1,7 @@
 // The drainage model's routing, on made-up continents of a 1° grid: every node of land reaches the sea, water is
 // neither made nor lost, a hollow holds a lake that spills only when the climate fills it, and the rivers join up.
 import { describe, expect, it } from 'vitest';
-import { flow as flowOf, hollowsOf, latOf, lonOf, reaches, route, rowAreas, seaAt, type NodeGrid, type Routing } from '../src/build/drainage.ts';
+import { flow as flowOf, hollowsOf, latOf, lonOf, nearestNodes, outletChains, reaches, route, rowAreas, seaAt, wetMonthsAt, type NodeGrid, type Routing, type SlowWater } from '../src/build/drainage.ts';
 
 const g: NodeGrid = { nx: 360, ny: 181, step: 1 };
 const YEAR = 365.25 * 86400;
@@ -118,5 +118,59 @@ describe('the drainage model', () => {
     const mouth = rs.filter((x) => x.ends === 'sea').reduce((a, b) => (b.km2 > a.km2 ? b : a));
     expect(lonOf(g, mouth.nodes[mouth.nodes.length - 2])).toBe(0);
     expect(mouth.order).toBe(Math.max(...rs.map((x) => x.order)));
+  });
+
+  // Each month's runoff of the soil's surplus at every node, in steps of 0.1 mm, on the routed grid itself.
+  const slowWater = (n: number, mm: (m: number, k: number) => number): SlowWater => {
+    const slow = new Uint16Array(n * 12);
+    for (let m = 0; m < 12; m++) for (let k = 0; k < n; k++) slow[m * n + k] = Math.round(mm(m, k) / 0.1);
+    return { slow, step: 0.1, nodes: n, near: nearestNodes({ lon0: -180, lat0: 90, step: 1, nx: 360, ny: 181 }, g) };
+  };
+
+  it("keeps a river's bed wet in the months its basin's soil lets water go, and dry in the rest", () => {
+    const z = valley();
+    const r = route(z, g, seaAt(z, g, oceanOf(z), 0));
+    const h = hollowsOf(z, g, r);
+    // 120 mm a year runs off everywhere: 10 mm a month on the year's mean.
+    const f = flowOf(z, g, r, h, new Float32Array(z.length).fill(120), new Float32Array(z.length));
+    const mouth = reaches(r, f, 30000)
+      .filter((x) => x.ends === 'sea')
+      .reduce((a, b) => (b.km2 > a.km2 ? b : a));
+    const end = mouth.nodes[mouth.nodes.length - 2];
+    const chains = outletChains(h, z.length);
+    // Slow water of 6 mm a month from January to June, more than 0.15 of the mean; nothing from July on.
+    const halfYear = slowWater(z.length, (m) => (m < 6 ? 6 : 0));
+    expect(wetMonthsAt(g, r, f, h, chains, halfYear, 0.15, [end])[0]).toBe(0b111111);
+    // A millimetre a month is a tenth of the mean: the rest of the year's water came in floods, and the bed is dry.
+    const thin = slowWater(z.length, () => 1);
+    expect(wetMonthsAt(g, r, f, h, chains, thin, 0.15, [end])[0]).toBe(0);
+    // The slow water of a wet upland reaches the plain below it: the river's months are its basin's, not its mouth's.
+    const upland = slowWater(z.length, (_, k) => (latOf(g, k) > 0 ? 8 : 0));
+    expect(wetMonthsAt(g, r, f, h, chains, upland, 0.15, [end])[0]).toBe(0xfff);
+    // A river that carries nothing holds nothing.
+    const none = flowOf(z, g, r, h, new Float32Array(z.length), new Float32Array(z.length));
+    expect(wetMonthsAt(g, r, none, h, chains, upland, 0.15, [end])[0]).toBe(0);
+    // A basin that gives its river 120 mm a year runs it all year where that is wet enough to, and not where it is not.
+    expect(wetMonthsAt(g, r, f, h, chains, halfYear, 0.15, [end], 100)[0]).toBe(0xfff);
+    expect(wetMonthsAt(g, r, f, h, chains, halfYear, 0.15, [end], 150)[0]).toBe(0b111111);
+  });
+
+  it('carries no slow water out of a lake that keeps all it gets, and all of it out of one that spills', () => {
+    const z = crater();
+    const r = route(z, g, seaAt(z, g, oceanOf(z), 0));
+    const h = hollowsOf(z, g, r);
+    const inside = (k: number) => Math.hypot(latOf(g, k), lonOf(g, k)) < 6;
+    // Only the crater's own ground gives slow water, 6 mm a month of its 100 a year: what reaches its pass is the crater's.
+    const fromCrater = slowWater(z.length, (_, k) => (inside(k) ? 6 : 0));
+    // Where the crater's hollow spills: the node at its pass, outside it.
+    const hollow = h.of[90 * g.nx + 180];
+    expect(hollow).toBeGreaterThanOrEqual(0);
+    const outlet = h.outlet[hollow];
+    expect(outlet).toBeGreaterThanOrEqual(0);
+    const runoff = new Float32Array(z.length).fill(100);
+    const dry = flowOf(z, g, r, h, runoff, new Float32Array(z.length).fill(2000));
+    const wet = flowOf(z, g, r, h, runoff, new Float32Array(z.length));
+    expect(wetMonthsAt(g, r, dry, h, outletChains(h, z.length), fromCrater, 0.15, [outlet])[0]).toBe(0);
+    expect(wetMonthsAt(g, r, wet, h, outletChains(h, z.length), fromCrater, 0.15, [outlet])[0]).toBe(0xfff);
   });
 });

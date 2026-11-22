@@ -39,3 +39,20 @@ claims:
     note: >-
       The greatest height of the living species T. distichum: a modern relative, not a Hell
       Creek plant.
+  wet-ground:
+    prop: body_form
+    value:
+      behave: { wet: 2.4 }
+    source:
+      - ref: src:bonner-2008-wpsm-taxodium
+        loc: "p. 1089, paragraph 1"
+        quote: "Baldcypresses are large deciduous conifers that occur naturally in wetlands of the Southeastern and Gulf Coastal Plains."
+      - ref: src:bonness-2026-cypress-knees
+        loc: "Introduction, paragraph 2"
+        quote: "Cypress trees are at their competitive best in swamps seasonally inundated for 6–10 months"
+    note: >-
+      Where it grows, as these say of the living bald cypresses, modern relatives. How strongly the scene stands it
+      by water is the generator's choice, and no claim: the liking the conifer plan gave every conifer before version 8
+      of gen:life/scene, which was set for these swamp conifers of the Hell Creek and now stays with them.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in taxodium-wpsm-bonner-2008.txt (sha256 41de2de80a1aab03) and taxodium-bonness-2026-ecolevol.txt (sha256 c3a0bdeb7e369650), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-22" }
