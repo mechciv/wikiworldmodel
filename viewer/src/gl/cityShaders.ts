@@ -80,7 +80,7 @@ float standing(vec4 e) {
  * plant has needles, fronds or broad leaves is its form's.
  */
 const LEAVES = /* glsl */ `
-const int NEEDLE_CARD = 44, FROND_CARD = 45, BROAD_CARD = 46, FAN_CARD = 47, LEAF_MASS = 48, BLADE_CARD = 49;
+const int NEEDLE_CARD = 44, FROND_CARD = 45, BROAD_CARD = 46, FAN_CARD = 47, LEAF_MASS = 48, BLADE_CARD = 49, BLADE = 71;
 bool onCard(int m) { return (m >= NEEDLE_CARD && m <= FAN_CARD) || m == BLADE_CARD; }
 float leafHash(vec2 p) {
   vec3 q = fract(vec3(p.xyx) * 0.1031);
@@ -246,6 +246,9 @@ vec3 turnXY(vec3 p, vec3 o, float a) {
   return o + vec3(r.x * cos(a) - r.y * sin(a), r.x * sin(a) + r.y * cos(a), r.z);
 }
 out vec3 vPos;
+// the point from the eye: across a pixel its differences are fine, where the world's position, kilometres from the
+// scene's middle, would change by steps of a float's last place
+out vec3 vRel;
 out vec3 vN;
 out vec2 vUv;
 out float vLight;
@@ -304,9 +307,10 @@ void main() {
     n = vec3(n.x * iFace.y + n.y * iFace.x, -n.x * iFace.x + n.y * iFace.y, n.z);
     if (aMat.x != 32u && aMat.x != 10u && aMat.x != 37u) tint = fract(tint + float(iMeta.y) / 255.0);
   }
-  // A plant drawn by instancing leans with the wind, the more the higher, in gusts that cross the ground; its leaves flutter.
+  // A plant drawn by instancing leans with the wind, the more the higher, in gusts that cross the ground; its leaves on
+  // cards flutter.
   int mat = int(aMat.x);
-  bool plant = mat == 35 || mat == 36 || mat == 37 || mat == 38 || (mat >= 44 && mat <= 49);
+  bool plant = mat == 35 || mat == 36 || mat == 37 || mat == 38 || (mat >= 44 && mat <= 49) || mat == 71;
   if (many && plant && dot(uWind, uWind) > 0.0) {
     float h = max(aPos.z * iPlace.w, 0.0);
     float speed = length(uWind);
@@ -314,12 +318,13 @@ void main() {
     float gust = 0.55 + 0.45 * sin(uClock * 0.6 - dot(iPlace.xy, dir) * 0.035) * sin(uClock * 0.21 + own * 6.2831853);
     float lean = gust * speed * 0.05 * h / (1.0 + h * 0.15) * (0.8 + 0.2 * sin(uClock * 1.7 + own * 19.0));
     vec3 off = vec3(dir * lean, -0.5 * lean * lean / max(h, 0.5));
-    if (mat >= 44) off += 0.015 * speed * min(h, 4.0) * 0.25 * vec3(sin(uClock * 7.0 + aPos.x * 3.1 + own * 31.0), sin(uClock * 6.3 + aPos.y * 2.7), sin(uClock * 8.1 + aPos.z * 2.3));
+    if (mat >= 44 && mat <= 49) off += 0.015 * speed * min(h, 4.0) * 0.25 * vec3(sin(uClock * 7.0 + aPos.x * 3.1 + own * 31.0), sin(uClock * 6.3 + aPos.y * 2.7), sin(uClock * 8.1 + aPos.z * 2.3));
     p += off;
   }
   // A structure rises from the ground it stands on.
   if (up < 1.0) p.z = e.w + (p.z - e.w) * up;
   vPos = p;
+  vRel = p - uEye;
   p.z -= drop(p.xy);
   vN = n;
   vLight = aNormal.w;
@@ -572,6 +577,7 @@ precision highp int;
 precision highp sampler3D;
 precision highp sampler2DArrayShadow;
 in vec3 vPos;
+in vec3 vRel;
 in vec3 vN;
 in vec2 vUv;
 in float vLight;
@@ -1294,11 +1300,12 @@ Surface leaves(int m, vec3 p, float tint, float shade, float family) {
   }
   vec3 dark = mix(vec3(0.028, 0.06, 0.024), vec3(0.052, 0.078, 0.022), tint);
   vec3 lite = mix(vec3(0.085, 0.14, 0.04), vec3(0.16, 0.185, 0.05), tint);
-  if (m == NEEDLE_CARD || (m == BLADE_CARD && family > 1.5 && family < 2.5)) {
+  bool blades = m == BLADE_CARD || m == BLADE;
+  if (m == NEEDLE_CARD || (blades && family > 1.5 && family < 2.5)) {
     dark = mix(vec3(0.03, 0.064, 0.032), vec3(0.05, 0.085, 0.036), tint);
     lite = mix(vec3(0.075, 0.135, 0.05), vec3(0.135, 0.185, 0.06), tint);
     s.rough = 0.7;
-  } else if (m == FROND_CARD || m == FAN_CARD || (m == BLADE_CARD && family < 1.5)) {
+  } else if (m == FROND_CARD || m == FAN_CARD || (blades && family < 1.5)) {
     dark = mix(vec3(0.05, 0.11, 0.035), vec3(0.075, 0.13, 0.04), tint);
     lite = mix(vec3(0.16, 0.25, 0.07), vec3(0.25, 0.30, 0.085), tint);
     s.rough = 0.5;
@@ -1307,9 +1314,17 @@ Surface leaves(int m, vec3 p, float tint, float shade, float family) {
   return s;
 }
 
+// A tuft's own blade close by (world/generators/life/forms.ts, tuft), as leafCover says of a card: all of it leaf; its
+// shade, from its number and paler towards its tip, as a card's blades have it; and whose colour it takes.
+vec3 bladeCover(vec2 uv) {
+  float k = floor(uv.y);
+  return vec3(1.0, 0.72 + 0.4 * leafHash(vec2(mod(k, 8.0) + 2.0, 19.0)) + 0.2 * (uv.y - k), floor(k / 8.0 + 0.001));
+}
+
 // Leaves are lit as the mass they make, by a normal bent out from their crown's middle, softly round the side away from
-// the sun; on a card, with the light that comes through a leaf where the sun is behind it, and a little sheen; and with
-// as much of the sky as the crown lets in. g is the card's own face.
+// the sun; on a card or a tuft's blade, with the light that comes through a leaf where the sun is behind it, and a little
+// sheen of the sun on its own face, but none of the sky, which the leaves around it hide; and with as much of the sky as
+// the crown lets in. g is the leaf's own face.
 vec3 foliage(vec3 albedo, float rough, vec3 n, vec3 g, vec3 p, float sky, float shadow, bool thin) {
   vec3 v = normalize(uEye - p);
   float wrap = clamp((dot(n, uSun) + 0.3) / 1.3, 0.0, 1.0);
@@ -1366,7 +1381,10 @@ void main() {
   float glass = 0.0;
   vec3 bumped = n;
   bool card = onCard(vMaterial);
-  bool leafy = card || vMaterial == LEAF_MASS;
+  // A tuft's own blades are thin leaves, lit as the leaves on cards are (world/generators/life/forms.ts, tuft): by the
+  // tuft's normal on either side, with the sun through them and none of the sky mirrored, and never holed.
+  bool blade = vMaterial == BLADE;
+  bool leafy = card || blade || vMaterial == LEAF_MASS;
   float alpha = 1.0;
   vec3 cover = vec3(1.0, 0.9, 0.0);
   if (card) {
@@ -1376,7 +1394,7 @@ void main() {
       if (alpha < 0.5) discard;
       alpha = 1.0;
     } else if (alpha < 0.01) discard;
-  }
+  } else if (blade) cover = bladeCover(vUv);
   Surface s;
   if (leafy) s = leaves(vMaterial, vPos, vTint, cover.y, cover.z);
   else if (vMaterial == FACADE) s = facade(vPos, vUv, vTint, fw, n, glass);
@@ -1409,8 +1427,9 @@ void main() {
   if (leafy) {
     // A leaf's normal is its crown's, whichever side of it is seen; and what it sees of the sky is the crown's to say.
     float sh = shadowAt(vPos, n, pixel) * cloudShade(vPos);
-    vec3 g = normalize(cross(dFdx(vPos), dFdy(vPos)));
-    c = foliage(s.albedo, s.rough, n, g, vPos, vLight * under, sh, card);
+    // Its own face, from the point's place from the eye: from the world's, far from the scene's middle, it would speckle.
+    vec3 g = normalize(cross(dFdx(vRel), dFdy(vRel)));
+    c = foliage(s.albedo, s.rough, n, g, vPos, vLight * under, sh, card || blade);
   } else {
     vec3 w = gl_FrontFacing ? bumped : -bumped;
     float sh = shadowAt(vPos, gl_FrontFacing ? n : -n, pixel) * cloudShade(vPos);
@@ -1914,7 +1933,7 @@ vec3 wilderness(vec3 p, vec3 n, float dist, out float water, out float rough, ou
     vec2 e = min(muv, 1.0 - muv);
     mask = mix(beyond, texture(uMask, muv), smoothstep(0.0, 0.1, min(e.x, e.y)));
   }
-  // Water where the plan's A is full; a dry bed where it is half (scene/v8.ts, coverMask), which is no water.
+  // Water where the plan's A is full; a dry bed where it is half (scene/v9.ts, coverMask), which is no water.
   water = smoothstep(0.6, 0.95, mask.a) * smoothstep(450.0, 1000.0, dist);
   float wash = smoothstep(0.3, 0.45, mask.a) * (1.0 - smoothstep(0.55, 0.7, mask.a));
   shaded = mask.r;
@@ -2148,7 +2167,7 @@ vec4 reflected(vec3 p, vec3 r) {
   return vec4(0.0);
 }
 void main() {
-  // The bed of a river dry in the month: its ribbon says where it is, and it holds no water (scene/v8.ts, DRY_BED).
+  // The bed of a river dry in the month: its ribbon says where it is, and it holds no water (scene/v9.ts, DRY_BED).
   if (vFlow.z < -0.5) discard;
   vec3 p = vPos;
   float dist = distance(p, uEye);

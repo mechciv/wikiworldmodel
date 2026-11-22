@@ -1,4 +1,4 @@
-// A living scene, version 7: any place at any moment, on land or in the sea, from a spec. Nothing is laid out until it is looked at:
+// A living scene, version 9: any place at any moment, on land or in the sea, from a spec. Nothing is laid out until it is looked at:
 // each 400 m cell makes what stands in it from hashes of where it is, so the scene has no edge to speak of, and what a
 // far view shows is the top of the same list a near view shows in full. The records say which taxa could be here and how
 // big they grew; this says where each stands, how many there are, what it is doing and what colour it is, all invented
@@ -20,8 +20,10 @@
 // that like wet ground by it. Each kind of plant stands in stands of its own, and grows the more the more like the
 // climate its fossils lived in its height's is, so that what grows changes up a slope; shrubs and ferns are sown and
 // drawn as far as the big animals; and what floats is sown only on still water. Away from water a tree stands where
-// version 7's did, and its kind is new. The build and every browser are held to agree within the tolerance of
-// core/fingerprint.ts.
+// version 7's did, and its kind is new. Since version 9 (docs/plans/RENDERING.md, step 1) a tuft's blades are in a
+// material of their own, which carries their form's colour in their uv and is lit as the leaves on cards are: what
+// grows where, and every vertex's place, is what version 8 made. The build and every browser are held to agree within
+// the tolerance of core/fingerprint.ts.
 import type { Part } from '../../../../core/fingerprint.ts';
 import type { Form, Pose } from '../../../../core/form.ts';
 import type { LivingTaxon, ReliefPatch, SceneCover, SceneSpec } from '../../../../core/scene.ts';
@@ -36,7 +38,7 @@ import { LakeMap, lakeSheets } from '../lakes.ts';
 import { drawRiver, meet, type Oxbow, type RiverChoices, type RiverPath } from '../rivers.ts';
 
 export const GENERATOR = 'gen:life/scene';
-export const VERSION = 8;
+export const VERSION = 9;
 
 /** The side of a cell of the ground, in metres. */
 export const CELL = 400;

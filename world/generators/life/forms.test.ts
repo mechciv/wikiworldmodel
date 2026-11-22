@@ -146,6 +146,34 @@ describe('the plans', () => {
     }
   });
 
+  it('make a tuft\'s blades thin leaves, each the colour of its material in a shade of its own, as on a card of blades', () => {
+    // Whose colour a blade takes, by its material: as a card of blades has it.
+    const family: Record<string, number> = { frond: 1, needle: 2, broad: 3 };
+    let tufts = 0;
+    for (const n of names) {
+      const f = canonicalForm(plans[n]);
+      const parts = Object.values(f.parts).filter((p) => !!p);
+      if (!parts.length || !parts.every((p) => p!.type === 'tuft')) continue;
+      tufts++;
+      const m = new Mesh(4096);
+      drawPlant(m, f, 1, 7, 2, 90);
+      const { vertices } = m.arrays();
+      const b = new Uint8Array(vertices);
+      const fl = new Float32Array(vertices);
+      const shades = new Set<number>();
+      for (let i = 0; i < m.verts; i++) {
+        expect(b[i * STRIDE + 24], n).toBe(MAT.blade);
+        // u across the blade; v's whole part the family by eight and the blade's own number, its fraction the way up.
+        expect(Math.abs(fl[i * 7 + 4]), n).toBe(1);
+        const k = Math.floor(fl[i * 7 + 5]);
+        expect(Math.floor(k / 8), n).toBe(family[(parts[0]!.mat as string) ?? 'frond']);
+        shades.add(k % 8);
+      }
+      expect(shades.size, n).toBeGreaterThan(4);
+    }
+    expect(tufts).toBeGreaterThanOrEqual(3);
+  });
+
   it('stand on the ground', () => {
     for (const n of names) {
       const f = canonicalForm(plans[n]);

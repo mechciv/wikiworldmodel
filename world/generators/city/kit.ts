@@ -84,6 +84,9 @@ export const MAT = {
   adobe: 69,
   // Fired tiles on a house's roof: the city's own tile is Rome's.
   claytile: 70,
+  // A tuft's own blades close by, thin leaves lit as the leaves on cards are: whose colour they take, a frond's, a
+  // needle's or a broad leaf's, is in their uv, as on a card of blades (world/generators/life/forms.ts, tuft).
+  blade: 71,
 } as const;
 
 export type Material = (typeof MAT)[keyof typeof MAT];
