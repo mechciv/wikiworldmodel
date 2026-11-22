@@ -64,10 +64,13 @@ jobs:
           npm ci
           python -m pip install -r tools/world/importers/requirements.txt
 
+      # As in build.yml: a changed manifest starts from the newest set of datasets kept before, and
+      # the fetch downloads only what that lacks.
       - uses: actions/cache@v6
         with:
           path: .cache/datasets
           key: datasets-${{ hashFiles('world/manifest.yaml') }}
+          restore-keys: datasets-
 
       - uses: actions/cache@v6
         with:
@@ -149,10 +152,12 @@ jobs:
           npm ci
           python -m pip install -r tools/world/importers/requirements.txt
 
+      # The datasets the world job fetched and saved, or else, as there, the newest set kept before.
       - uses: actions/cache@v6
         with:
           path: .cache/datasets
           key: datasets-${{ hashFiles('world/manifest.yaml') }}
+          restore-keys: datasets-
 
       - uses: actions/cache@v6
         with:

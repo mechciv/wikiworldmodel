@@ -58,10 +58,18 @@ jobs:
           npm ci
           python -m pip install -r tools/world/importers/requirements.txt
 
+      # The datasets, each version in a directory of its own, which the fetch below downloads only
+      # if it is not here with its checksum. So a changed manifest starts from the newest set kept
+      # before and asks the hosts only for what that lacks, and a host that does not answer fails
+      # only a build that needs something from it. A run can start from a set kept by its own
+      # branch or pull request, by the branch a pull request is to merge into, or by master, and
+      # never from another pull request's: what one added is fetched once more when it is merged.
+      # The set is saved again, under the new key, when the job passes.
       - uses: actions/cache@v6
         with:
           path: .cache/datasets
           key: datasets-${{ hashFiles('world/manifest.yaml') }}
+          restore-keys: datasets-
 
       # What the importers make of the datasets, keyed by everything that could change it. No
       # partial restores: a change to the code imports afresh.
