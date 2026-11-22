@@ -10,7 +10,7 @@ import type { LivingTaxon, ReliefPatch, SceneCover, SceneSpec } from '../../../.
 import type { FeatureTime } from '../../../../core/tileset.ts';
 import { cubeRoot, latticeOf, sizeWithin } from '../spec.ts';
 import { FAST_BUDGET, FULL_BUDGET, INSTANCE_STRIDE, protoParts, SceneStream, type LifeView } from '../stream.ts';
-import { CELL, cellParts, densityOf, EXTENT, GENERATOR, placeLook, VERSION, watersFor, type CellRows, type LivingParams } from './v7.ts';
+import { CELL, cellParts, densityOf, EXTENT, GENERATOR, placeLook, VERSION, watersFor, type CellRows, type LivingParams } from './v8.ts';
 import type { ChannelLaws } from '../../../../core/scene.ts';
 import { snowOf } from '../climate.ts';
 
@@ -497,6 +497,200 @@ describe('where the world gives the rivers', () => {
     // A visitor arrives by it.
     const [fx, fy] = s.plan.focus;
     expect(toGuide(fx, fy)).toBeLessThan(path.plain);
+  });
+
+  // The same river, in a steppe, with its months: wet from January to March only, as the drainage gives it (bits, January the lowest).
+  const DRY = { t: TEMPERATE.t, p: Array(12).fill(18) };
+  const steppe = (month: number, wet: number | undefined, taxa?: LivingTaxon[], q = [240, 250, 260]): SceneSpec => {
+    const base = specOf({ seed: 'life/rivers', climate: 'steppe', atHeight: climateOf(DRY, 300, month), ...(taxa ? { taxa } : {}) });
+    return { ...base, water: { rivers: [{ key: 'test#river', from: 'model' as const, xy: course, s0: 0, q, z: [20, 15, 10], ...(wet !== undefined ? { wet } : {}) }], laws, tier: 'model' as const, from: ['field:earth/rivers'] } };
+  };
+  const onCourse = (s: SceneStream): [number, number][] => {
+    const path = watersFor(s.spec, s.look).paths![0];
+    const out: [number, number][] = [];
+    for (let i = 0; i < path.xy.length; i += 40) if (Math.hypot(path.xy[i], path.xy[i + 1]) < 6000) out.push([path.xy[i], path.xy[i + 1]]);
+    return out;
+  };
+
+  it('draws a river dry in a month its bed holds no water: no water in its bed, its bed bare, and its ribbon marked dry', () => {
+    const wet = new SceneStream(steppe(2, 0b111));
+    const dry = new SceneStream(steppe(7, 0b111));
+    const points = onCourse(dry);
+    expect(points.length).toBeGreaterThan(10);
+    let inWater = 0;
+    let inBed = 0;
+    for (const [x, y] of points) {
+      if (wet.cover.at(x, y).water) inWater++;
+      const c = dry.cover.at(x, y);
+      expect(c.water).toBe(0);
+      if (c.bed) {
+        inBed++;
+        expect(c.bare).toBe(1);
+        expect(c.canopy).toBe(0);
+      }
+    }
+    expect(inWater / points.length).toBeGreaterThan(0.8);
+    expect(inBed / points.length).toBeGreaterThan(0.8);
+    // Its ribbon is there, to say where the bed is, and every point of it says it holds no water.
+    const flow = dry.water().flow;
+    let marked = 0;
+    for (let k = 2; k < flow.length; k += 3) if (flow[k] === -1) marked++;
+    expect(marked).toBe(flow.length / 3);
+    // A river whose bed holds water in no month is a wash, wide and shallow, with no oxbow lakes.
+    const never = watersFor(steppe(7, 0), placeLook(steppe(7, 0)));
+    expect(never.paths![0].pattern).toBe('braided');
+    expect(never.oxbowList).toHaveLength(0);
+  });
+
+  it('lines water with trees, flowing or dry, and stands the kinds that like it wet by it', () => {
+    const willow: Form = { ...plans.broadleaf, behave: { ...plans.broadleaf.behave, wet: 1.6 } };
+    const kinds = [taxon('dryland', 'broadleaf', 18), { ...taxon('willow', 'broadleaf', 14), form: 'test-willow' }];
+    // A small river, whose floodplain is narrow: away from it is the dry steppe.
+    for (const month of [2, 7]) {
+      const spec = steppe(month, 0b111, kinds, [8, 9, 10]);
+      spec.forms['test-willow'] = willow;
+      const s = new SceneStream(spec);
+      const path = watersFor(spec, s.look).paths![0];
+      const fromBank = (x: number, y: number) => {
+        let d = Infinity;
+        for (let i = 0; i < path.xy.length; i += 2) d = Math.min(d, Math.hypot(x - path.xy[i], y - path.xy[i + 1]) - path.half[i / 2]);
+        return d;
+      };
+      const near = { trees: 0, willows: 0, canopy: 0, n: 0 };
+      const far = { trees: 0, willows: 0, canopy: 0, n: 0 };
+      for (const c of cellsOf(s, 0, 2400)) {
+        for (let q = 0; q < c.count; q++) {
+          const [x, y] = [c.place[q * 6], c.place[q * 6 + 1]];
+          const d = fromBank(x, y);
+          const band = d < 25 ? near : d > path.plain + 200 ? far : undefined;
+          if (!band) continue;
+          band.trees++;
+          if (kinds[c.taxon[q]].label === 'willow') band.willows++;
+        }
+      }
+      // The canopy 6 m beyond either bank, along the course near the middle; and over the steppe beyond its floodplain.
+      for (let k = 0; k + 3 < path.xy.length; k += 20) {
+        const [ax, ay] = [path.xy[k], path.xy[k + 1]];
+        if (Math.hypot(ax, ay) > 5000) continue;
+        const [bx, by] = [path.xy[k + 2] - ax, path.xy[k + 3] - ay];
+        const l = Math.hypot(bx, by);
+        for (const side of [-1, 1]) {
+          const off = side * (path.half[k / 2] + 6);
+          near.canopy += s.cover.at(ax - (by / l) * off, ay + (bx / l) * off).canopy;
+          near.n++;
+        }
+      }
+      for (let k = 0; k < 4000; k++) {
+        const x = -2400 + (k % 80) * 60;
+        const y = -2400 + Math.floor(k / 80) * 60;
+        if (fromBank(x, y) <= path.plain + 200) continue;
+        far.canopy += s.cover.at(x, y).canopy;
+        far.n++;
+      }
+      expect(near.n).toBeGreaterThan(50);
+      expect(far.n).toBeGreaterThan(200);
+      expect(near.canopy / near.n, `month ${month}`).toBeGreaterThan((2 * far.canopy) / far.n);
+      // Willows are the most of what stands by water, and few away from it, where the other broadleaf has no liking either way.
+      expect(near.willows / near.trees, `month ${month}`).toBeGreaterThan(0.5);
+      expect(far.willows / far.trees, `month ${month}`).toBeLessThan(0.3);
+      expect(near.willows / near.trees, `month ${month}`).toBeGreaterThan((2 * far.willows) / far.trees);
+    }
+  });
+
+  it('holds a lake where the world gives one: its bed under its level, its shore above it, and its water drawn', () => {
+    // A made-up lake of two cells of a tenth of a degree side by side, north of the middle, its surface 20 m under the plain.
+    const lake = { key: 'test#lake:1', level: 280, spills: false, cells: [0, 9000, 8600, 9000], half: [4300, 5560] as [number, number] };
+    const spec: SceneSpec = { ...specOf({ seed: 'life/lake' }), water: { lakes: [lake], rivers: [], laws, tier: 'model', from: ['field:earth/rivers', 'field:earth/lakes'] } };
+    const s = new SceneStream(spec);
+    // Under its middle, water over a bed below its level.
+    const mid = s.cover.at(4300, 9000);
+    expect(mid.water).toBe(1);
+    expect(s.ground.at(4300, 9000)).toBeLessThan(lake.level - 1);
+    // Well away from it, the plain as it was, and dry.
+    expect(s.cover.at(0, -6000).water).toBe(0);
+    expect(s.ground.at(0, -6000)).toBeGreaterThan(lake.level + 5);
+    // Its surface is in the scene's water, at its level.
+    const w = s.water();
+    let atLevel = 0;
+    for (let k = 2; k < w.vertices.length; k += 3) if (Math.abs(w.vertices[k] - lake.level - 0.03) < 1e-3) atLevel++;
+    expect(atLevel).toBeGreaterThan(100);
+  });
+});
+
+describe('kinds, and where each grows', () => {
+  const treesOf = (s: SceneStream, reach: number, tier = 1) => {
+    const out: { x: number; y: number; z: number; k: number }[] = [];
+    for (const c of cellsOf(s, tier, reach)) for (let q = 0; q < c.count; q++) out.push({ x: c.place[q * 6], y: c.place[q * 6 + 1], z: c.place[q * 6 + 2], k: c.taxon[q] });
+    return out;
+  };
+
+  it('stands its kinds in stands: each is commonest in patches of its own', () => {
+    // Three trees alike in all but their names.
+    const kinds = [taxon('a', 'broadleaf', 20), taxon('b', 'broadleaf', 20), taxon('c', 'broadleaf', 20)];
+    const s = new SceneStream(specOf({ taxa: kinds, seed: 'life/stands' }));
+    const trees = treesOf(s, 1600).filter((t) => t.k < 3);
+    expect(trees.length).toBeGreaterThan(2000);
+    // Each tree's nearest neighbour is of its own kind far more often than a third of the time.
+    const grid = new Map<string, typeof trees>();
+    for (const t of trees) {
+      const key = `${Math.floor(t.x / 30)},${Math.floor(t.y / 30)}`;
+      const l = grid.get(key);
+      if (l) l.push(t);
+      else grid.set(key, [t]);
+    }
+    let same = 0;
+    let pairs = 0;
+    for (const t of trees) {
+      let best: (typeof trees)[number] | undefined;
+      let d = 30;
+      for (let dj = -1; dj <= 1; dj++) {
+        for (let di = -1; di <= 1; di++) {
+          for (const o of grid.get(`${Math.floor(t.x / 30) + di},${Math.floor(t.y / 30) + dj}`) ?? []) {
+            const e = Math.hypot(o.x - t.x, o.y - t.y);
+            if (o !== t && e < d) {
+              d = e;
+              best = o;
+            }
+          }
+        }
+      }
+      if (!best) continue;
+      pairs++;
+      if (best.k === t.k) same++;
+    }
+    expect(same / pairs).toBeGreaterThan(0.55);
+    // And no kind is lost: each is still a good share of the whole.
+    for (let k = 0; k < 3; k++) expect(trees.filter((t) => t.k === k).length / trees.length).toBeGreaterThan(0.15);
+  });
+
+  it("grows each kind where its height's climate is like its rows': what grows changes up a slope", () => {
+    // A slope rising 270 m a km to the north, on a field of a hundredth of a degree, and two trees, one of the climate of
+    // its foot and one of 1,600 m above it.
+    const n = 61;
+    const relief: ReliefPatch = { lat0: 40.3, lon0: -0.3, step: 0.01, nx: n, ny: n, z: [] };
+    for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) relief.z.push(Math.max(100, Math.min(3100, 2000 + 300 * (30 - j))));
+    const kinds = [taxon('lowland', 'broadleaf', 20, { climate: [23.7, 1, 2.7, 1] }), taxon('upland', 'broadleaf', 20, { climate: [15, 1, -6.4, 1] })];
+    // With the world's water, and no river in it: the ground is the field's, as the slope has it, with no plain invented over it.
+    const laws = parse(readFileSync(join(ROOT, 'fields/earth/rivers.yaml'), 'utf8')).params as ChannelLaws;
+    const s = new SceneStream({ ...specOf({ taxa: kinds, relief, atHeight: climateOf(TEMPERATE, 2000, 7), seed: 'life/slope' }), water: { rivers: [], laws, tier: 'model', from: ['field:earth/rivers'] } });
+    const trees = treesOf(s, 2800);
+    const share = (band: typeof trees) => band.filter((t) => kinds[t.k].label === 'upland').length / band.length;
+    const low = trees.filter((t) => t.z < 1600);
+    const high = trees.filter((t) => t.z > 2400);
+    expect(low.length).toBeGreaterThan(200);
+    expect(high.length).toBeGreaterThan(200);
+    expect(share(low)).toBeLessThan(0.3);
+    expect(share(high)).toBeGreaterThan(0.7);
+  });
+
+  it('sows the understory as tall as a person as far as the big animals, and the lower only close by', () => {
+    const kinds = [taxon('oak', 'broadleaf', 20), taxon('bracken', 'fern', 1.2), taxon('sorrel', 'herb', 0.3)];
+    const s = new SceneStream(specOf({ taxa: kinds, seed: 'life/under' }));
+    const count = (tier: number, label: string) => cellsOf(s, tier, 800).reduce((n, c) => n + Array.from(c.taxon).filter((k) => kinds[k].label === label).length, 0);
+    expect(count(1, 'bracken')).toBeGreaterThan(50);
+    // Only the one set by the arrival, so that every kind is near it.
+    expect(count(1, 'sorrel')).toBeLessThanOrEqual(1);
+    expect(count(2, 'sorrel')).toBeGreaterThan(50);
   });
 });
 

@@ -7,8 +7,10 @@ quantity: what the land gives its rivers in a year, and what a lake's surface lo
 unit: mm a year
 description: >-
   How much of each year's rain and snow runs off the land, from the months of the climate that paints the land: the
-  climate of the last 120,000 years where it covers the time, and the deep past's runs before it. It is a model's
-  answer twice over, the climate model's and then the water balance's.
+  climate of the last 120,000 years where it covers the time, and the deep past's runs before it. Beside the year's, the
+  runoff of the soil's surplus in each month, in millimetres that month: what the soil lets go in the months after it
+  filled, which keeps a river's bed wet between rains. It is a model's answer twice over, the climate model's and then
+  the water balance's.
 kind: raster
 derived: true
 from: [field:earth/climate-late-quaternary, field:earth/climate]

@@ -1,0 +1,31 @@
+id: life/taxa/salicaceae
+kind: taxon
+summary: >-
+  The willow family: the willows and the poplars, trees and shrubs of river banks, floodplains and other wet ground.
+same_as: { pbdb: "txn:54581" }
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { la: Salicaceae, en: willows and poplars }
+    unsourced: "The classification's own name; the English an editorial gloss."
+  wet-ground:
+    prop: body_form
+    value:
+      behave: { wet: 1.6 }
+    source:
+      - ref: src:scheuerell-leroy-2023-riparian-plant-sex
+        loc: "section 7.2, paragraph 1"
+        quote: "for some members of the Salicaceae—a key riparian group"
+      - ref: src:wyckoff-zasada-2008-wpsm-populus
+        loc: "p. 856, Growth habit, occurrence, and use"
+        quote: "Although some poplar species may have fairly large geographic ranges, they are restricted in occurrence and often exhibit their best development in (or are restricted to) riparian areas."
+      - ref: src:zasada-2008-wpsm-salix
+        loc: "p. 1000, paragraph 4"
+        quote: "Under appropriate moisture conditions, seeds germinate and seedlings establish in riparian and upland habitats"
+    note: >-
+      Where they grow, as these say of the living family: most of all by water, the willows on upland too. How strongly
+      the scene stands them by water is the generator's choice, and no claim: about nine times as likely there as away
+      from it, where a broad-leaved tree with no liking of its own is as likely by water as away from it.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in salicaceae-scheuerell-leroy-2023-ecolevol.txt (sha256 e1513668c2816533), populus-wpsm-wyckoff-zasada-2008.txt (sha256 7280fc6c0440f835) and salix-wpsm-zasada-2008.txt (sha256 34faa19e22d8ba8f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-22" }

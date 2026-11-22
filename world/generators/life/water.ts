@@ -2,7 +2,7 @@
 // drainage's reaches where it saw none, each in the scene's metres about where its relief is read and its water's
 // height above the coast. One function, so that a browser and the build make the same scene from the same files.
 import { tileKey, type ObservedRivers, type RiverKey, type RiverNet, type RiversInfo, type RiversSet, type RiverWidths } from '../../../core/rivers.ts';
-import type { ChannelLaws, SceneRiver, SceneWater } from '../../../core/scene.ts';
+import type { ChannelLaws, SceneLake, SceneRiver, SceneWater } from '../../../core/scene.ts';
 
 /** How far from where its relief is read a scene takes rivers from, m; and the tiles of observed rivers it reads, in degrees. */
 export const WATER_REACH = 40000;
@@ -102,9 +102,25 @@ export function sceneWater(info: RiversInfo, set: RiversSet, net: RiverNet, key:
       }
     }
     if (!inside || xy.length < 4 || covered > inside * 0.6) continue;
-    rivers.push({ key: `${set.network}#${i}`, from: 'model', xy, s0: 0, q, z });
+    rivers.push({ key: `${set.network}#${i}`, from: 'model', xy, s0: 0, q, z, ...(key.wet ? { wet: key.wet[i] } : {}) });
   }
-  return { rivers, laws: info.params as unknown as ChannelLaws, tier: observed ? 'evidence' : 'model', from: [...(observed && info.observed ? [info.observed.field] : []), info.field] };
+  // The lakes of the keyframe that come within its reach, cell by cell of the network's grid.
+  const lakes: SceneLake[] = [];
+  const half: [number, number] = [(net.grid.step / 2) * kx, (net.grid.step / 2) * ky];
+  const near = (reach + Math.max(half[0], half[1]) * 2) ** 2;
+  for (let l = 0; l + 1 < key.lakeStart.length; l++) {
+    const cells: number[] = [];
+    let close = false;
+    for (let j = key.lakeStart[l]; j < key.lakeStart[l + 1]; j++) {
+      const [la, lo] = net.latLon(key.lakeNodes[j]);
+      const [x, y] = local(la, lo);
+      cells.push(Math.round(x), Math.round(y));
+      if (x * x + y * y < near) close = true;
+    }
+    if (!close) continue;
+    lakes.push({ key: `${set.network}#lake:${key.lakeNodes[key.lakeStart[l]]}`, level: Math.round((key.lakeLevel[l] - isoline) * 10) / 10, spills: key.lakeSpills[l] === 1, cells, half: [Math.round(half[0]), Math.round(half[1])] });
+  }
+  return { ...(lakes.length ? { lakes } : {}), rivers, laws: info.params as unknown as ChannelLaws, tier: observed ? 'evidence' : 'model', from: [...(observed && info.observed ? [info.observed.field] : []), info.field, ...(lakes.length && info.lakes ? [info.lakes.field] : [])] };
 }
 
 /**

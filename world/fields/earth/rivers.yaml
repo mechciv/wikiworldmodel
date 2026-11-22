@@ -19,6 +19,8 @@ params:
   min_km2: 2000
   deep_min_km2: 50000
   older_step_yr: 10000
+  wet_share: 0.15
+  perennial_mm: 150
   width: [7.2, 0.5]
   depth: [0.27, 0.3]
   bankfull_ratio: 1

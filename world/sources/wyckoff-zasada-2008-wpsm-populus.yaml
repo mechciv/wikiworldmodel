@@ -1,0 +1,17 @@
+id: src:wyckoff-zasada-2008-wpsm-populus
+type: publication
+kind: compilation
+citation: >-
+  Wyckoff, G.W. & Zasada, J.C. (2008). Populus L.: poplar, cottonwood, aspen. In: Bonner, F.T. & Karrfalt, R.P.
+  (eds.), The Woody Plant Seed Manual, 856–871. Agriculture Handbook 727. U.S. Department of Agriculture, Forest
+  Service, Washington, DC.
+authors: ["Wyckoff, G.W.", "Zasada, J.C."]
+published: 2008
+title: "Populus L.: poplar, cottonwood, aspen"
+container: "The Woody Plant Seed Manual (Agriculture Handbook 727), 856–871"
+url: https://rngr.net/publications/wpsm/genera/p/at_download/file
+verified:
+  by: machine:claude-code
+  how: >-
+    Read in the chapter's PDF from the Reforestation, Nurseries and Genetic Resources site, its text taken out of the
+    PDF page by page; quotes checked by script against that text. A work of the United States government.

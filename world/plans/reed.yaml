@@ -1,0 +1,7 @@
+description: >-
+  A reed or a cattail: a tall, upright tuft of long strap-shaped leaves, which stands in shallow water and on the wet
+  ground at its edge.
+kind: plant
+behave: { layer: under, weight: 1.2, wet: 3 }
+parts:
+  plant: { type: tuft, blades: 28, spread: 0.16, wide: 0.012 }

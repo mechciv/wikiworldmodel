@@ -7,7 +7,9 @@ description: >-
   land, in tiers: here, where a row of the taxon lies within a few hundred km at the time; region, where
   one can be reached overland in a like climate; and stand-in, where nothing of a kind is near and the
   nearest clade that has it stands for it. Distance is over the land of the time, with the sea costing
-  far more. It is a simple distribution model, and its lists partly show where people have dug: the
+  far more. Each taxon of a stage also carries the climate its rows lived in: the mean and the spread of
+  the warmest and the coldest month at the places of its rows, weighted as they are, which a scene grows
+  it by. It is a simple distribution model, and its lists partly show where people have dug: the
   record leans heavily to Europe and North America.
 author: machine:claude-code
 code: tools/world/src/build/atlas.ts
@@ -60,4 +62,5 @@ uncertainty:
     no measure, and the distances that set the tiers are choices.
 checks:
   - { test: tools/world/test/life.test.ts, holds: "has a tier that is true: *here* has a row of the taxon close by at the time, recounted from the snapshot" }
+  - { test: tools/world/test/life.test.ts, holds: "gives each taxon of a stage the climate its rows lived in: reindeer of colder places than hippopotamuses" }
   - { test: tools/world/test/life.test.ts, holds: "puts the Hell Creek's own taxa in the Hell Creek's patch, as recorded here" }

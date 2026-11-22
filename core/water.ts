@@ -64,9 +64,11 @@ export function hamon(t: number, days: number, D: number, w: Pick<WaterParams, '
 /**
  * A year's water at a place from its twelve months: temperature in °C and precipitation in mm, January first. The
  * place's latitude sets its daylight, and its height which snow threshold holds. Given `snow`, the snow lying at the end
- * of each month of the last year is written into it, mm of water.
+ * of each month of the last year is written into it, mm of water. Given `slow`, each month's runoff of the soil's
+ * surplus in the last year, mm: what the soil, once full, lets go in the months after, as against the share of the rain
+ * that runs straight off as it falls.
  */
-export function waterYear(t: ArrayLike<number>, p: ArrayLike<number>, latDeg: number, elevation: number, w: WaterParams, years = 5, snowOut?: number[]): WaterYear {
+export function waterYear(t: ArrayLike<number>, p: ArrayLike<number>, latDeg: number, elevation: number, w: WaterParams, years = 5, snowOut?: number[], slowOut?: number[]): WaterYear {
   const tSnow = elevation > w.high_m ? w.t_snow_high : w.t_snow;
   const D = MID.map((d) => daylight(latDeg, d, w));
   let soil = w.soil_mm;
@@ -105,6 +107,7 @@ export function waterYear(t: ArrayLike<number>, p: ArrayLike<number>, latDeg: nu
       }
       const ran = surplus * w.rfactor;
       surplus -= ran;
+      if (slowOut && y === years - 1) slowOut[m] = ran;
       year.precip += P;
       year.pet += pet;
       year.aet += aet;

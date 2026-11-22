@@ -39,6 +39,25 @@ describe('the water balance', () => {
     expect(desert.pet).toBeGreaterThan(desert.precip * 10);
   });
 
+  it("lets the soil's surplus go in the months after a wet season, and none where the soil never fills", () => {
+    // A monsoon: four wet months and eight dry ones, at 12° north.
+    const t = [24, 26, 29, 31, 31, 29, 27, 26, 27, 28, 26, 24];
+    const p = [0, 0, 2, 10, 40, 150, 260, 300, 160, 30, 2, 0];
+    const slow: number[] = [];
+    const monsoon = waterYear(t, p, 12, 300, W, 5, undefined, slow);
+    expect(slow.reduce((a, b) => a + b, 0)).toBeLessThanOrEqual(monsoon.runoff);
+    // Wet in the late rains and the months after them; by the hot season before the next rains, it is spent.
+    expect(slow[8]).toBeGreaterThan(5);
+    expect(slow[9]).toBeLessThan(slow[8]);
+    expect(slow[11]).toBeLessThan(slow[9]);
+    expect(Math.max(slow[2], slow[3], slow[4])).toBeLessThan(1);
+    // A desert's few showers wet the ground and are taken up: none of it is the soil's surplus.
+    const dry: number[] = [];
+    const desert = waterYear(Array(12).fill(30), [0, 0, 0, 0, 0, 2, 12, 15, 3, 0, 0, 0], 20, 300, W, 5, undefined, dry);
+    expect(Math.max(...dry)).toBe(0);
+    expect(desert.runoff).toBeGreaterThan(0);
+  });
+
   it('holds what falls as snow while it is cold, and lets it go when it warms', () => {
     const frozen = waterYear(Array(12).fill(-30), Array(12).fill(30), 62, 300, W);
     expect(frozen.runoff).toBe(0);

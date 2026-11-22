@@ -1,0 +1,16 @@
+id: src:eller-2017-phragmites-global-change
+type: publication
+kind: review
+citation: >-
+  Eller, F., Skálová, H., Caplan, J.S., Bhattarai, G.P., Burger, M.K., Cronin, J.T., Guo, W.-Y., Guo, X., Hazelton,
+  E.L.G., Kettenring, K.M., Lambertini, C., McCormick, M.K., Meyerson, L.A., Mozdzer, T.J., Pyšek, P., Sorrell, B.K.,
+  Whigham, D.F. & Brix, H. (2017). Cosmopolitan species as models for ecophysiological responses to global change: the
+  common reed Phragmites australis. Frontiers in Plant Science 8, 1833.
+authors: ["Eller, F.", "Skálová, H.", "Caplan, J.S.", "Bhattarai, G.P.", "Burger, M.K.", "Cronin, J.T.", "Guo, W.-Y.", "Guo, X.", "Hazelton, E.L.G.", "Kettenring, K.M.", "Lambertini, C.", "McCormick, M.K.", "Meyerson, L.A.", "Mozdzer, T.J.", "Pyšek, P.", "Sorrell, B.K.", "Whigham, D.F.", "Brix, H."]
+published: 2017
+title: "Cosmopolitan species as models for ecophysiological responses to global change: the common reed Phragmites australis"
+container: "Frontiers in Plant Science 8, 1833"
+doi: 10.3389/fpls.2017.01833
+verified:
+  by: machine:claude-code
+  how: Read in full from Europe PMC (PMC5715336), CC BY; quotes checked by script against its text.

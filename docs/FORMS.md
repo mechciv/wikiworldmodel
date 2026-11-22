@@ -141,7 +141,10 @@ And for any form, `behave` says how the generator lays it out, which is no claim
 - `group: [least, most]`, `habitat` (open, any, edge, forest, air, canopy, wet, water, floor), `poses: [...]` (stand, walk, graze, drink, alert, rest, fly), `flies: [low, high]` in metres.
   In a scene of the sea, `water` swims above the floor and `floor` rests on it, as do `any` and `edge` under water; only
   a body whose plan says one of these, or `air`, is drawn in the sea.
-- For a plant: `layer` (canopy, under, float), `weight`, `wet`.
+- For a plant: `layer` (canopy, under, float), `weight`, `wet`. `wet` is its liking for wet ground, by water's level or
+  within a few tens of metres of a bank, flowing, still or dry: its weight is multiplied by 1 + `wet` × (how wet − ½),
+  and never by less than nothing, so a willow at 1.6 is nine times as likely by water as away from it, and a reed at 3
+  grows only by water. An understory plant whose `wet` is 2 or more stands in the shallows too.
 
 `hip` says how high the hips are as a share of the length, where no claim does; `mass_length` what the body weighs in kg per
 cubic metre of its length, for what a mass claim gives or needs.

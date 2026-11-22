@@ -63,6 +63,11 @@ export interface LivingTaxon {
   /** its length follows from a claimed mass */
   fromMass?: boolean;
   diet?: string;
+  /**
+   * the climate its rows lived in, as the atlas gives it: the mean and the spread of the warmest month and of the
+   * coldest, °C. A scene grows a plant where the climate of its own heights is most like it.
+   */
+  climate?: [number, number, number, number];
   time: FeatureTime;
   variants?: Record<string, FeatureTime>;
 }
@@ -97,6 +102,12 @@ export interface SceneRiver {
   width?: number[];
   /** the height of its water at each point, m above the coast, where the world gives it */
   z?: number[];
+  /**
+   * the months its bed holds water in, as bits, January the lowest (field:earth/rivers, `wet_share`); undefined where the
+   * world does not say, as for a river Landsat saw, which holds water in every month. In a month without its bit the
+   * river is a dry bed, with only the floods of a storm.
+   */
+  wet?: number;
 }
 
 /** The laws a channel is drawn by: the rivers field's parameters (field:earth/rivers). */
@@ -111,8 +122,26 @@ export interface ChannelLaws {
   deflection_most: number;
 }
 
+/**
+ * A lake as the world gives a scene (field:earth/lakes): the cells of the drainage's grid it covers, in the scene's
+ * metres, and its level. Its shore below a cell is the scene's to invent.
+ */
+export interface SceneLake {
+  /** what names it: its set, and the first node it covers */
+  key: string;
+  /** its surface, m above the coast */
+  level: number;
+  /** whether it spills over its pass, or holds only what its surface does not evaporate */
+  spills: boolean;
+  /** the middles of the cells it covers, flat [x, y, …], and each cell's half width east and north, m */
+  cells: number[];
+  half: [number, number];
+}
+
 /** The water the world gives a place: its rivers, the laws their channels are drawn by, and what they rest on. */
 export interface SceneWater {
+  /** the lakes of the time near it, where the world has them */
+  lakes?: SceneLake[];
   rivers: SceneRiver[];
   laws: ChannelLaws;
   /** evidence where a dataset measured a river here, model where only the drainage routes one */

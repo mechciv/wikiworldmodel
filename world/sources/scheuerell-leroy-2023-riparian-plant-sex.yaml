@@ -1,0 +1,14 @@
+id: src:scheuerell-leroy-2023-riparian-plant-sex
+type: publication
+kind: review
+citation: >-
+  Scheuerell, R.P. & LeRoy, C.J. (2023). Plant sex influences on riparian communities and ecosystems. Ecology and
+  Evolution 13(7), e10308.
+authors: ["Scheuerell, R.P.", "LeRoy, C.J."]
+published: 2023
+title: "Plant sex influences on riparian communities and ecosystems"
+container: "Ecology and Evolution 13(7), e10308"
+doi: 10.1002/ece3.10308
+verified:
+  by: machine:claude-code
+  how: Read in full from Europe PMC (PMC10337289), open access; quotes checked by script against its text.

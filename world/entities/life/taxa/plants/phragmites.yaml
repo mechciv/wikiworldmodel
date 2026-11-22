@@ -1,0 +1,40 @@
+id: life/taxa/phragmites
+kind: taxon
+summary: >-
+  The reeds: tall grasses that stand in dense stands of their own on the wet ground and in the shallows at the edges of
+  lakes, rivers and marshes.
+same_as: { pbdb: "txn:55514" }
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { la: Phragmites, en: reeds }
+    unsourced: "The classification's own name; the English an editorial gloss."
+  body-plan:
+    prop: body_plan
+    value: reed
+    source:
+      - ref: src:gucker-2008-feis-phragmites-australis
+        loc: "SITE CHARACTERISTICS, paragraph 1"
+        quote: "Throughout its range, common reed is most common on wet, muddy, or flooded areas around ponds, marshes, lakes, springs, irrigation ditches, and other waterways."
+      - ref: src:gucker-2008-feis-phragmites-australis
+        loc: "HABITAT TYPES AND PLANT COMMUNITIES, paragraph 1"
+        quote: "It often forms monotypic stands"
+    note: >-
+      Drawn as a reed, which stands only by water and in its shallows (world/plans/reed.yaml): the plan is the
+      generator's, and these say where the living common reed grows.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in phragmites-feis-gucker-2008.txt (sha256 efd0423be2c2a44c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-22" }
+  height:
+    prop: plant_height
+    value: { lo: 2, hi: 5 }
+    source:
+      ref: src:eller-2017-phragmites-global-change
+      loc: "section Influences of Environmental Gradients and Phenotypic Plasticity on P. australis Phenotypic Diversity, paragraph 2"
+      quote: "In the Mediterranean region P. australis can reach heights of up to 5 m, while temperate European Phragmites usually has stem heights of 2–3.5 m"
+    method: compilation
+    basis: reconstruction
+    note: >-
+      The living common reed, Phragmites australis, standing for the genus: a modern relative.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in phragmites-eller-2017-frontiers.txt (sha256 0829a1c28e6693c1), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-22" }

@@ -8,7 +8,8 @@ description: >-
   straight off; the snow melts at a rate the temperature sets; potential evapotranspiration is Hamon's, from the
   temperature and the hours of daylight; the soil holds what is not taken up, to its capacity, and gives some back in a
   dry month; and a share of what it cannot hold runs off. The year is run until the soil and the snow come round, and
-  the last year is summed. A lake's surface is taken to lose its potential evapotranspiration less the rain on it. It
+  the last year is summed, with each month's runoff of the soil's surplus kept beside the year's: what the rivers carry
+  after the rain, as against with it. A lake's surface is taken to lose its potential evapotranspiration less the rain on it. It
   was made for the United States' gauged basins, and is used here for any land and any climate, which is a stretch.
 author: machine:claude-code
 code: core/water.ts
@@ -58,3 +59,4 @@ uncertainty:
 checks:
   - { test: core/water.test.ts, holds: "adds up, once the soil has settled: what falls is what is taken up and what runs off" }
   - { test: core/water.test.ts, holds: "runs a wet tropical year off in rivers, and a desert year hardly at all" }
+  - { test: core/water.test.ts, holds: "lets the soil's surplus go in the months after a wet season, and none where the soil never fills" }

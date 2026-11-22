@@ -439,6 +439,31 @@ export function buildAtlas(s: Solved, periods: PeriodRecord[], elevation: Snapsh
     const nodeLon = (k: number) => -180 + (k % graph.nx) * graph.step;
     const occupied = [...atNode.keys()].sort((a, b) => a - b);
     const occClimate = new Map(occupied.map((k) => [k, climateAt(nodeLat(k), nodeLon(k))]));
+    // What each taxon's rows say of the climate it lived in this stage: the mean and the spread of the warmest and the
+    // coldest month at their places, weighted as the rows are. A scene grows each where its own heights' climate is like it.
+    const climateOf = new Map<number, [number, number, number, number]>();
+    {
+      const acc = new Map<number, Float64Array>();
+      for (const o of occupied) {
+        const c = occClimate.get(o);
+        if (!c) continue;
+        for (const [t, e] of atNode.get(o)!) {
+          let a = acc.get(t);
+          if (!a) acc.set(t, (a = new Float64Array(5)));
+          a[0] += e.w;
+          a[1] += e.w * c.hot;
+          a[2] += e.w * c.hot * c.hot;
+          a[3] += e.w * c.cold;
+          a[4] += e.w * c.cold * c.cold;
+        }
+      }
+      for (const [t, a] of acc) {
+        if (!(a[0] > 0)) continue;
+        const hot = a[1] / a[0];
+        const cold = a[3] / a[0];
+        climateOf.set(t, [round(hot, 10), round(Math.sqrt(Math.max(0, a[2] / a[0] - hot * hot)), 10), round(cold, 10), round(Math.sqrt(Math.max(0, a[4] / a[0] - cold * cold)), 10)]);
+      }
+    }
 
     // The patches: each is read at its land node nearest its middle, if it has any land.
     const patchOf = new Map<number, number>();
@@ -577,7 +602,8 @@ export function buildAtlas(s: Solved, periods: PeriodRecord[], elevation: Snapsh
             const i = entry(`t${t}`, () => {
               const q = spanOf.get(t)!;
               const kn = known.get(t)!;
-              return { ...kn.taxon, rows: q[2], span: [round(q[0], YEAR), round(Math.max(q[1], endOf(t) ?? -Infinity), YEAR)] };
+              const climate = climateOf.get(t);
+              return { ...kn.taxon, rows: q[2], ...(climate ? { climate } : {}), span: [round(q[0], YEAR), round(Math.max(q[1], endOf(t) ?? -Infinity), YEAR)] };
             });
             flat.push(i, Math.max(1, Math.round((sc / top) * 255)), km <= p.here_km ? TIER.here : TIER.region, Math.round(Math.min(65535, km / 10)));
           }

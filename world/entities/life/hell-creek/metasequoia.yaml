@@ -40,3 +40,20 @@ claims:
     note: >-
       The greatest height of the living species M. glyptostroboides: a modern relative, not a
       Hell Creek plant.
+  wet-ground:
+    prop: body_form
+    value:
+      behave: { wet: 1.2 }
+    source:
+      - ref: src:li-2023-metasequoia-genetic-structure
+        loc: "section 2.1, paragraph 1"
+        quote: "Its typical habitats are humid forests and riparian zones."
+      - ref: src:juvik-2016-metasequoia-natural-products
+        loc: "section Natural habitat and distribution of M. glyptostroboides, paragraph 1"
+        quote: "The natural habitat of the tree is in the humid and warm lower mountain slopes with river and stream valleys."
+    note: >-
+      Where it grows, as these say of the living dawn redwood, a modern relative: by rivers and streams, but in humid
+      forest too, and no swamp tree. How strongly the scene stands it by water is the generator's choice, and no claim:
+      half the liking the swamp cypresses keep, where before version 8 of gen:life/scene the conifer plan gave it theirs.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in metasequoia-li-2023-ecolevol.txt (sha256 6cdcbb4368927fe3) and metasequoia-juvik-2016-phytochemrev.txt (sha256 ccb429c2f9016738), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-22" }

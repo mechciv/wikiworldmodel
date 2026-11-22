@@ -1,0 +1,25 @@
+id: life/taxa/alnus
+kind: taxon
+summary: >-
+  The alders: trees and shrubs of the birch family, of stream banks and wet ground.
+same_as: { pbdb: "txn:54588" }
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { la: Alnus, en: alders }
+    unsourced: "The classification's own name; the English an editorial gloss."
+  wet-ground:
+    prop: body_form
+    value:
+      behave: { wet: 1.4 }
+    source:
+      ref: src:harrington-2008-wpsm-alnus
+      loc: "p. 232, Growth habit and occurrence, paragraph 1"
+      quote: "Most alders are tolerant of moist sites and thus are commonly found along streams, rivers, and lakes and on poorly drained soils; in addition, some species occur on steep slopes and at high elevations."
+    note: >-
+      Where they grow, as this says of the living genus: mostly by water, some on slopes and high up. How strongly the
+      scene stands them by water is the generator's choice, and no claim: a little less than the willows, where a
+      broad-leaved tree with no liking of its own is as likely by water as away from it.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in alnus-wpsm-harrington-2008.txt (sha256 6c78517cb23b2f10), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-22" }

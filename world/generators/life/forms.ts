@@ -1347,13 +1347,17 @@ function scaleTree(m: Mesh, p: Part, h: number, seed: number, detail: Detail, ti
 
 /** A tuft of thin blades: a grass, a sedge or a rush, or a low clump of anything. */
 function tuft(m: Mesh, p: Part, h: number, seed: number, detail: Detail, tint: number): void {
-  if (detail < 2) return;
+  // A low tuft is drawn only close by (stream.ts); a tall one, a reed's, from a way off too, as a third of its blades,
+  // each in two pieces, a little wider so that the clump keeps its mass.
+  if (detail < 1) return;
   m.mat = MATERIALS[(p.mat as string) ?? 'frond'];
   m.tint = tint;
   m.light = 0.85;
-  const blades = num(p, 'blades', 12);
+  const coarse = detail === 1;
+  const blades = coarse ? Math.max(4, Math.round(num(p, 'blades', 12) / 3)) : num(p, 'blades', 12);
   const spread = h * num(p, 'spread', 0.5);
-  const wide = h * num(p, 'wide', 0.025);
+  const wide = h * num(p, 'wide', 0.025) * (coarse ? 1.7 : 1);
+  const steps = coarse ? 2 : 3;
   for (let k = 0; k < blades; k++) {
     const t = TAU * hash2(k, 1, seed);
     const out = spread * (0.3 + 0.7 * hash2(k, 2, seed));
@@ -1361,14 +1365,14 @@ function tuft(m: Mesh, p: Part, h: number, seed: number, detail: Detail, tint: n
     const dx = dcos(t);
     const dy = dsin(t);
     const base = m.verts;
-    for (let i = 0; i <= 3; i++) {
-      const f = i / 3;
+    for (let i = 0; i <= steps; i++) {
+      const f = i / steps;
       const w = wide * (1 - f);
       const r = out * f * f;
       m.v(dx * r - dy * w, dy * r + dx * w, tall * f, dx * 0.3, dy * 0.3, 0.9, i, -1, 0.5 + 0.5 * f);
       m.v(dx * r + dy * w, dy * r - dx * w, tall * f, dx * 0.3, dy * 0.3, 0.9, i, 1, 0.5 + 0.5 * f);
     }
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < steps; i++) {
       const a = base + i * 2;
       m.quad(a, a + 1, a + 3, a + 2);
     }

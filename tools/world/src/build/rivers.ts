@@ -12,7 +12,8 @@ import type { RiversKeyframe, RiversKeysHeader, RiversNetworkHeader, RiversSet }
 import { seaLevelAt, type SeaLevelRows } from '../../../../core/sealevel.ts';
 import { fromMa } from '../../../../core/time.ts';
 import { stableStringify } from '../util.ts';
-import { flow, hollowsOf, reaches, route, seaAt, type Flow, type Hollows, type Lake, type NodeGrid, type Reach, type Routing } from './drainage.ts';
+import { SLOW_STEP_MM } from './climate.ts';
+import { flow, hollowsOf, nearestNodes, outletChains, reaches, route, seaAt, wetMonthsAt, type Flow, type Hollows, type Lake, type NodeGrid, type OutletChains, type Reach, type Routing } from './drainage.ts';
 
 /** How the drainage model draws its rivers and lakes: the model's choices, from its record. */
 export interface DrainageParams {
@@ -25,14 +26,19 @@ export interface DrainageParams {
   spill_overlap: number;
   /** before the climate of the last 120,000 years begins, a keyframe every this many years */
   older_step_yr: number;
+  /** a river's bed holds water in a month where the slow water its basin's soils let go reaches it at no less than this share of its mean flow */
+  wet_share?: number;
+  /** and in every month, where the ground it drains gives it at least this much in a year, mm */
+  perennial_mm?: number;
 }
 
-/** The water a climate keyframe gives, on its own grid of nodes: runoff and a lake's net loss, mm in a year. */
+/** The water a climate keyframe gives, on its own grid of nodes: runoff and a lake's net loss, mm in a year; and each month's runoff of the soil's surplus, as climate.ts keeps it. */
 export interface Water {
   ageMa: number;
   grid: { lon0: number; lat0: number; step: number; nx: number; ny: number };
   runoff: Float32Array;
   loss: Float32Array;
+  slow?: Uint16Array;
 }
 
 /** A climate grid's values at each node of another grid: straight between its four nodes, wrapping east. */
@@ -80,19 +86,45 @@ export interface RiverKeyframe {
   seaLevel: number;
   /** per reach: the mean flow where its water is when it ends, m³/s */
   q: Float32Array;
+  /** per reach, where the water balance gives the months: the months its bed holds water where it ends, as bits, January the lowest */
+  wet?: Uint16Array;
   lakes: Lake[];
 }
 
+/** What a keyframe needs to say which months a reach holds water in: the slow water of its climate, read on the routed grid. */
+interface Season {
+  g: NodeGrid;
+  r: Routing;
+  h: Hollows;
+  chains: OutletChains;
+  slow: Uint16Array;
+  near: Int32Array;
+  nodes: number;
+  wetShare: number;
+  perennialMm: number;
+}
+
 /** What a keyframe keeps of a flow over the whole grid (see `drawn` and `lastDry`). */
-function keyframeOf(reaches: Reach[], today: Uint8Array | undefined, ageMa: number, seaLevel: number, f: Flow, p: DrainageParams): RiverKeyframe {
+function keyframeOf(reaches: Reach[], today: Uint8Array | undefined, ageMa: number, seaLevel: number, f: Flow, p: DrainageParams, season?: Season): RiverKeyframe {
   const lakes = drawn(today, f, p);
   const under = new Set<number>();
   for (const l of lakes) for (const k of l.nodes) under.add(k);
-  const q = Float32Array.from(reaches, (x) => {
-    const k = lastDry(x, f, under);
-    return k < 0 ? 0 : f.q[k];
-  });
-  return { ageMa, seaLevel, q, lakes };
+  const ends = Int32Array.from(reaches, (x) => lastDry(x, f, under));
+  const q = Float32Array.from(ends, (k) => (k < 0 ? 0 : f.q[k]));
+  const wet = season ? wetMonthsAt(season.g, season.r, f, season.h, season.chains, { slow: season.slow, step: SLOW_STEP_MM, nodes: season.nodes, near: season.near }, season.wetShare, ends, season.perennialMm) : undefined;
+  return { ageMa, seaLevel, q, ...(wet ? { wet } : {}), lakes };
+}
+
+/** What a keyframe's season is read from, where its water has the months and the model says how wet a bed's month must be. */
+function seasonOf(g: NodeGrid, r: Routing, h: Hollows, water: Water, p: DrainageParams, near: () => Int32Array, chains: () => OutletChains): Season | undefined {
+  if (!water.slow || p.wet_share === undefined) return undefined;
+  return { g, r, h, chains: chains(), slow: water.slow, near: near(), nodes: water.grid.nx * water.grid.ny, wetShare: p.wet_share, perennialMm: p.perennial_mm ?? Infinity };
+}
+
+/** Made once and kept: what every keyframe on one routed grid shares. */
+function once<T>(make: () => T): () => T {
+  let v: T | undefined;
+  return () => (v ??= make());
 }
 
 const zeros = (n: number) => new Float32Array(n);
@@ -113,11 +145,20 @@ export function recentRivers(z: Float32Array, ocean: Uint8Array, g: NodeGrid, st
   const r = route(z, g, seaAt(z, g, ocean, lowest));
   const h = hollowsOf(z, g, r);
   const { reaches: rs, km2 } = networkOf(z, g, r, h, p.min_km2);
+  const chains = once(() => outletChains(h, g.nx * g.ny));
+  // The keyframes' climates share one grid, so the node each routed node reads is found once for them all.
+  const nears = new Map<string, Int32Array>();
+  const nearOf = (w: Water) => () => {
+    const key = `${w.grid.step},${w.grid.lon0},${w.grid.lat0}`;
+    let v = nears.get(key);
+    if (!v) nears.set(key, (v = nearestNodes(w.grid, g)));
+    return v;
+  };
   const keyframes = times.map(({ ageMa, water }) => {
     const seaLevel = seaLevelAt(stack, fromMa(ageMa));
     const sea = seaAt(z, g, ocean, seaLevel);
     const f = flow(z, g, r, h, regrid(water.runoff, water.grid, g), regrid(water.loss, water.grid, g), sea);
-    return keyframeOf(rs, today, ageMa, seaLevel, f, p);
+    return keyframeOf(rs, today, ageMa, seaLevel, f, p, seasonOf(g, r, h, water, p, nearOf(water), chains));
   });
   return { grid: g, frameMa: 0, reaches: rs, km2, z, plate, today, keyframes };
 }
@@ -132,7 +173,8 @@ export function deepRivers(z: ArrayLike<number>, g: NodeGrid, isoline: number, a
   const h = hollowsOf(z, g, r);
   const { reaches: rs, km2 } = networkOf(z, g, r, h, p.deep_min_km2);
   const f = flow(z, g, r, h, regrid(water.runoff, water.grid, g), regrid(water.loss, water.grid, g), sea);
-  return { grid: g, frameMa: ageMa, reaches: rs, km2, z, plate, keyframes: [keyframeOf(rs, undefined, ageMa, isoline, f, p)] };
+  const season = seasonOf(g, r, h, water, p, () => nearestNodes(water.grid, g), () => outletChains(h, n));
+  return { grid: g, frameMa: ageMa, reaches: rs, km2, z, plate, keyframes: [keyframeOf(rs, undefined, ageMa, isoline, f, p, season)] };
 }
 
 /**
@@ -160,7 +202,7 @@ function lastDry(reach: Reach, f: Flow, under: Set<number>): number {
   return -1;
 }
 
-type Arr = Int32Array | Uint32Array | Float32Array | Int16Array | Uint8Array;
+type Arr = Int32Array | Uint32Array | Float32Array | Int16Array | Uint16Array | Uint8Array;
 
 /** A network's reaches as one file (core/rivers.ts). */
 export function encodeNetwork(net: RiverNetwork): Uint8Array {
@@ -212,6 +254,7 @@ export function encodeKeyframes(keys: RiverKeyframe[]): Uint8Array {
       ageMa: kf.ageMa,
       seaLevel: Math.round(kf.seaLevel * 10) / 10,
       q: add(q),
+      ...(kf.wet ? { wet: add(kf.wet) } : {}),
       lakeNodes: add(lakeNodes),
       lakeStart: add(lakeStart),
       lakeLevel: add(Float32Array.from(lakes, (l) => Math.round(l.level * 10) / 10)),

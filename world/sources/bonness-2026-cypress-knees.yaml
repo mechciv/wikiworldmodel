@@ -1,0 +1,14 @@
+id: src:bonness-2026-cypress-knees
+type: publication
+kind: measurement
+citation: >-
+  Bonness, M.S. (2026). Cypress (Taxodium) knee seasonal growth is stimulated by flood water levels and constrained by
+  the tree dormant season: a 14-year study. Ecology and Evolution 16(6), e73853.
+authors: ["Bonness, M.S."]
+published: 2026
+title: "Cypress (Taxodium) knee seasonal growth is stimulated by flood water levels and constrained by the tree dormant season: a 14-year study"
+container: "Ecology and Evolution 16(6), e73853"
+doi: 10.1002/ece3.73853
+verified:
+  by: machine:claude-code
+  how: Read in full from Europe PMC (PMC13268810), open access; quotes checked by script against its text.

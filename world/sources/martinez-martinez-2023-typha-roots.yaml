@@ -1,0 +1,17 @@
+id: src:martinez-martinez-2023-typha-roots
+type: publication
+kind: review
+citation: >-
+  Martínez-Martínez, J.G., Rosales-Loredo, S., Hernández-Morales, A., Arvizu-Gómez, J.L., Carranza-Álvarez, C.,
+  Macías-Pérez, J.R., Rolón-Cárdenas, G.A. & Pacheco-Aguilar, J.R. (2023). Bacterial communities associated with the
+  roots of Typha spp. and its relationship in phytoremediation processes. Microorganisms 11(6), 1587.
+authors: ["Martínez-Martínez, J.G.", "Rosales-Loredo, S.", "Hernández-Morales, A.", "Arvizu-Gómez, J.L.", "Carranza-Álvarez, C.", "Macías-Pérez, J.R.", "Rolón-Cárdenas, G.A.", "Pacheco-Aguilar, J.R."]
+published: 2023
+title: "Bacterial communities associated with the roots of Typha spp. and its relationship in phytoremediation processes"
+container: "Microorganisms 11(6), 1587"
+doi: 10.3390/microorganisms11061587
+verified:
+  by: machine:claude-code
+  how: >-
+    Read in full from Europe PMC (PMC10300723), open access; quotes checked by script against its text. Its section on
+    the genus describes the living plants.

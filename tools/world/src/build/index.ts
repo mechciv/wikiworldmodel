@@ -742,7 +742,7 @@ export async function runBuild(args: string[]): Promise<number> {
     if (relief && recent) {
       const stack = seriesList.find((x) => x.id === relief.seaLevel)!.points as unknown as [number, number][];
       const rg = climateGrid((recent.field.grid as { res_deg: number }).res_deg);
-      const waterOf = (k: ClimateKeyframe): Water => ({ ageMa: k.ageMa, grid: rg, runoff: k.water!.runoff, loss: k.water!.loss });
+      const waterOf = (k: ClimateKeyframe): Water => ({ ageMa: k.ageMa, grid: rg, runoff: k.water!.runoff, loss: k.water!.loss, slow: k.water!.slow });
       const times = recent.keys.map((k) => ({ ageMa: k.ageMa, water: waterOf(k) }));
       // Before the climate begins, the keyframe of it whose sea stood nearest: a glacial for a glacial, an interglacial for an interglacial.
       const levelOf = (ageMa: number) => seaLevelAt(stack, fromMa(ageMa));
@@ -771,7 +771,7 @@ export async function runBuild(args: string[]): Promise<number> {
       if (!snap || !cg) continue;
       const span: [number, number] = [fromMa(k.ageMa + half), Math.min(fromMa(Math.max(0, k.ageMa - half)), recentFrom)];
       if (span[1] <= span[0]) continue;
-      const net = deepRivers(snap.elev, { nx: 360, ny: 181, step: 1 }, coast, k.ageMa, { ageMa: k.ageMa, grid: cg, runoff: k.water!.runoff, loss: k.water!.loss }, p, (n) => snap.plate[n]);
+      const net = deepRivers(snap.elev, { nx: 360, ny: 181, step: 1 }, coast, k.ageMa, { ageMa: k.ageMa, grid: cg, runoff: k.water!.runoff, loss: k.water!.loss, slow: k.water!.slow }, p, (n) => snap.plate[n]);
       const out = riverFiles(net, `rivers/deep/${k.ageMa}`, span);
       for (const [path, bytes] of out.files) putRiver(path, bytes);
       sets.push(out.set);

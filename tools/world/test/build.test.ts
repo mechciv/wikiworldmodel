@@ -799,6 +799,30 @@ describe('rivers', () => {
     const today = keyAt(0);
     for (let j = 0; j < net.nodes.length; j += 7) if (net.wet(j, today)) expect(net.z[j]).toBeGreaterThan(today.seaLevel);
   });
+
+  it("gives a river its season: the tropics' great rivers and Europe's wet in every month, the Sahara's own beds in none, and the Sahel's in the rains", () => {
+    const today = keyAt(0);
+    const wet = today.wet!;
+    expect(wet).toBeDefined();
+    const where = (i: number) => net.latLon(net.nodes[net.start[i]]);
+    const reaches = (pick: (i: number, lat: number, lon: number) => boolean) => [...Array(net.count).keys()].filter((i) => today.q[i] > 0 && pick(i, ...where(i)));
+    // The great rivers of the tropics, whose basins are wet most of the year.
+    const great = reaches((i, lat) => today.q[i] >= 5000 && Math.abs(lat) < 15);
+    expect(great.length).toBeGreaterThan(5);
+    expect(great.filter((i) => wet[i] === 0xfff).length / great.length).toBeGreaterThan(0.9);
+    // The rivers of the wet ground north of the Alps, small and large.
+    const europe = reaches((_, lat, lon) => lat > 47 && lat < 55 && lon > 0 && lon < 15);
+    expect(europe.length).toBeGreaterThan(50);
+    expect(europe.filter((i) => wet[i] === 0xfff).length / europe.length).toBeGreaterThan(0.8);
+    // The central Sahara's own beds, west of the Nile: no month's slow water.
+    const sahara = reaches((i, lat, lon) => today.q[i] < 50 && lat > 19 && lat < 28 && lon > -8 && lon < 28);
+    expect(sahara.length).toBeGreaterThan(10);
+    expect(sahara.filter((i) => wet[i] === 0).length / sahara.length).toBeGreaterThan(0.9);
+    // The Sahel's smaller rivers, west of Lake Chad: water in the rains, in September, and none in April before them.
+    const sahel = reaches((i, lat, lon) => today.q[i] < 200 && lat > 11 && lat < 15 && lon > -12 && lon < 13);
+    expect(sahel.length).toBeGreaterThan(10);
+    expect(sahel.filter((i) => ((wet[i] >> 8) & 1) === 1 && ((wet[i] >> 3) & 1) === 0).length / sahel.length).toBeGreaterThan(0.5);
+  });
 });
 
 describe('the climate at a height', () => {

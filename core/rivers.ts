@@ -9,6 +9,11 @@ export interface RiversKeyframe {
   seaLevel: number;
   /** each reach's flow where it ends, m³/s: 0 where its water never gets there */
   q: number;
+  /**
+   * each reach's months with water in its bed where it ends, as bits, January the lowest (field:earth/rivers, `wet_share`):
+   * where the keyframe's climate gives the months. A month without its bit has only floods of a storm, and a dry bed between.
+   */
+  wet?: number;
   /** the lakes: their nodes, concatenated; where each starts; its level; whether it spills */
   lakeNodes: number;
   lakeStart: number;
@@ -114,11 +119,16 @@ export interface RiverKey {
   ageMa: number;
   seaLevel: number;
   q: Float32Array;
+  /** each reach's months with water in its bed, as bits, January the lowest; undefined where the keyframe has none */
+  wet?: Uint16Array;
   lakeNodes: Int32Array;
   lakeStart: Uint32Array;
   lakeLevel: Float32Array;
   lakeSpills: Uint8Array;
 }
+
+/** Whether a reach's bed holds water in a month, 1–12: always, where the keyframe does not say. */
+export const wetIn = (key: RiverKey, reach: number, month: number): boolean => !key.wet || ((key.wet[reach] >> (month - 1)) & 1) === 1;
 
 /** A file of keyframes, read. */
 export function riverKeys(h: RiversKeysHeader, a: ArrayLike<unknown>[]): RiverKey[] {
@@ -126,6 +136,7 @@ export function riverKeys(h: RiversKeysHeader, a: ArrayLike<unknown>[]): RiverKe
     ageMa: k.ageMa,
     seaLevel: k.seaLevel,
     q: a[k.q] as Float32Array,
+    ...(k.wet !== undefined ? { wet: a[k.wet] as Uint16Array } : {}),
     lakeNodes: a[k.lakeNodes] as Int32Array,
     lakeStart: a[k.lakeStart] as Uint32Array,
     lakeLevel: a[k.lakeLevel] as Float32Array,

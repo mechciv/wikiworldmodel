@@ -40,3 +40,20 @@ claims:
     note: >-
       The living species G. pensilis, which reaches 15 m, and 25 m at most: a modern relative,
       not a Hell Creek plant.
+  wet-ground:
+    prop: body_form
+    value:
+      behave: { wet: 2.4 }
+    source:
+      - ref: src:tang-2019-glyptostrobus-pensilis
+        loc: "1 Introduction, paragraph 2"
+        quote: "Today G. pensilis grows in swamps or on waterlogged soils along river banks, streams, floodplains, ponds, paddies, and low-lying wet areas"
+      - ref: src:bonness-2026-cypress-knees
+        loc: "Introduction, paragraph 1"
+        quote: "In freshwater swamps, only Taxodium and its rare Asian cousin, Glyptostrobus, have evolved the hormone/genetic combination to create woody root structures"
+    note: >-
+      Where it grows, as these say of the living Chinese water pine, a modern relative. How strongly the scene stands it
+      by water is the generator's choice, and no claim: the liking the conifer plan gave every conifer before version 8
+      of gen:life/scene, which was set for these swamp conifers of the Hell Creek and now stays with them.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in glyptostrobus-tang-2019-plantdivers.txt (sha256 ee1da76d4170c32f) and taxodium-bonness-2026-ecolevol.txt (sha256 c3a0bdeb7e369650), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-22" }

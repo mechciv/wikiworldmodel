@@ -13,21 +13,30 @@
 // plant's mesh is new, and where and what everything is, is what version 5 made. Since version 7 the river a scene
 // invents, where the world gives it none, is a channel that has migrated (../meander.ts): its bends are what migration
 // left, its oxbows the loops it cut off, and the inside of each bend a bar that rises and grows over with the time
-// since the channel left it. A scene whose rivers the world gives is what version 6 made. The build and every browser
-// are held to agree within the tolerance of core/fingerprint.ts.
+// since the channel left it. A scene whose rivers the world gives is what version 6 made. Since version 8 (docs/plans/
+// PARITY.md, items 4 and 7) a river the world gives has a season: in a month its basin gives it none of its soils' slow
+// water it is a dry bed, and one that has water in no month is a wash, wide and shallow. The world's lakes stand in it,
+// in basins below their level. What grows by water, flowing, still or dry, stands in a strip along each bank, the kinds
+// that like wet ground by it. Each kind of plant stands in stands of its own, and grows the more the more like the
+// climate its fossils lived in its height's is, so that what grows changes up a slope; shrubs and ferns are sown and
+// drawn as far as the big animals; and what floats is sown only on still water. Away from water a tree stands where
+// version 7's did, and its kind is new. The build and every browser are held to agree within the tolerance of
+// core/fingerprint.ts.
 import type { Part } from '../../../../core/fingerprint.ts';
 import type { Form, Pose } from '../../../../core/form.ts';
 import type { LivingTaxon, ReliefPatch, SceneCover, SceneSpec } from '../../../../core/scene.ts';
-import { classAtHeight } from '../../../../core/months.ts';
+import { climateClass } from '../../../../core/climate.ts';
+import { nodeAtHeight } from '../../../../core/months.ts';
 import type { ClimateChoices } from '../climate.ts';
 import { GroundSampler, type GroundGridData } from '../../city/ground.ts';
 import { dcos, dsin, hash2, hash3, hashString, PI, Rng, TAU } from '../../city/math.ts';
 import { POSE } from '../forms.ts';
 import { arrival, distanceField, fbm, noise, plainGrid, watersOf, type GridSpec, type PlainParams, type Waters } from '../land.ts';
+import { LakeMap, lakeSheets } from '../lakes.ts';
 import { drawRiver, meet, type Oxbow, type RiverChoices, type RiverPath } from '../rivers.ts';
 
 export const GENERATOR = 'gen:life/scene';
-export const VERSION = 7;
+export const VERSION = 8;
 
 /** The side of a cell of the ground, in metres. */
 export const CELL = 400;
@@ -76,8 +85,17 @@ export interface LivingParams {
     glade: number;
     clearing: number;
     bare: number;
-    /** by climate class: how much of the land is forest, low plants and bare ground, and whether it has rivers, all 0–1 */
-    climates: Record<string, { forest: number; herb: number; bare: number; river: number; dunes?: number; tones: string }>;
+    /**
+     * by climate class: how much of the land is forest, low plants and bare ground, and whether it has rivers, all 0–1;
+     * and how much of the ground by water, flowing or dry, is under trees, where `riverside` says
+     */
+    climates: Record<string, { forest: number; herb: number; bare: number; river: number; riverside?: number; dunes?: number; tones: string }>;
+    /** how far beyond a bank of a river or a lake, flowing or dry, what grows by water reaches, m: all of it to the first, none past the second */
+    strip?: [number, number];
+    /** kinds in stands: each kind of a layer is commonest in patches about `size` metres across, the more so the higher `sharpness` */
+    stands?: { size: number; sharpness: number };
+    /** the least a kind's liking for a climate spreads, °C, in its warmest month and in its coldest, however alike its rows' places were */
+    liking?: { hot_c: number; cold_c: number };
     /** what colours each kind of land has: the generator's choice, and nobody's record */
     tones: Record<string, Record<string, number[]>>;
   };
@@ -98,7 +116,19 @@ export interface LivingParams {
      * third, and at most `most` of them in a view.
      */
     clumps?: { step: number; reach: number; most: number };
+    /**
+     * The understory that stands as tall as a person or more, a shrub or a fern, sown on a grid this many metres apart
+     * as far as the big animals are, and drawn as far as it shows: what is lower than `least_m` is sown only close by.
+     */
+    shrubs?: { step: number; least_m: number; per_ha: number };
   };
+  /**
+   * How the world's lakes are drawn below the drainage's grid, which gives the cells a lake covers and its level: its
+   * shore wanders by up to `wander` metres either way, in turns about `scale` across; its bed falls `slope` from the shore
+   * to `deepest`; and the land within `band` of its shore rises from it by `rise`, so that no lake spills over the
+   * invented ground. Its shore and bed are invented, and nobody's record.
+   */
+  lakes?: { wander: number; scale: number; slope: number; deepest: number; rise: number; band: number };
   animals: {
     /** Damuth's rule: a species of 1 kg at this many to the km², falling as mass to the −¾ */
     density: number;
@@ -127,17 +157,21 @@ export interface LivingParams {
 
 const clamp01 = (x: number) => (x < 0 ? 0 : x > 1 ? 1 : x);
 
-/** What a share of the land grows, as the cover's table has it for a class, where the world allows it. */
+/** What a share of the land grows, as the cover's table has it for a class, where the world allows it; and how much stands by water. */
 interface Growth {
   forest: number;
   herb: number;
   bare: number;
+  riverside: number;
+  /** the warmest month and the coldest there, °C, which each kind's liking is held to */
+  hot: number;
+  cold: number;
 }
 
-function growthOf(cl: { forest: number; herb: number; bare: number } | undefined, cover: SceneCover): Growth {
+function growthOf(cl: { forest: number; herb: number; bare: number; riverside?: number } | undefined, cover: SceneCover, node: { hot: number; cold: number }): Growth {
   const c = cl ?? { forest: 0, herb: 0, bare: 1 };
   // What may grow is what the climate bears and what has come to exist by now.
-  return { forest: Math.min(c.forest, cover.forests), herb: Math.min(c.herb, cover.plants), bare: 1 - cover.plants * (1 - c.bare) };
+  return { forest: Math.min(c.forest, cover.forests), herb: Math.min(c.herb, cover.plants), bare: 1 - cover.plants * (1 - c.bare), riverside: Math.min(c.riverside ?? 0, cover.forests), hot: node.hot, cold: node.cold };
 }
 
 /**
@@ -165,8 +199,8 @@ export class Heights {
     const k = Math.round((z - this.c.height) / this.step);
     let g = this.rows.get(k);
     if (!g) {
-      const cls = classAtHeight(this.c.months, k * this.step, this.c.lapse, this.c.rule);
-      g = growthOf(this.table[cls], this.cover);
+      const node = nodeAtHeight(this.c.months, k * this.step, this.c.lapse);
+      g = growthOf(this.table[climateClass(node, this.c.rule)], this.cover, node);
       this.rows.set(k, g);
     }
     return g;
@@ -288,19 +322,32 @@ export const watersFor = (spec: SceneSpec, look: PlaceLook): Waters => (spec.wat
 /** How far from the middle a scene draws the rivers it is given: a little beyond its middle grid. */
 export const REACH = 34000;
 
-/** The waters of a place whose spec says where its rivers run: each drawn, and the one nearest the middle to arrive by. */
+/**
+ * Whether a river's bed holds water in a month, 1–12: always where the world does not say; never where it says no month
+ * does; and where the scene has no month, if any month does.
+ */
+export const wetInMonth = (wet: number | undefined, month: number | undefined): boolean => wet === undefined || (wet !== 0 && (month === undefined || ((wet >> (month - 1)) & 1) === 1));
+
+/**
+ * The waters of a place whose spec says where its rivers run: each drawn, dry in the scene's month where the world says
+ * its bed is; the lakes it gives; and the river nearest the middle to arrive by.
+ */
 function riversFor(spec: SceneSpec): Waters {
   const p = spec.generator.params as unknown as LivingParams;
   const w = spec.water!;
   const rel = new Relief(spec.relief, spec.site.relief_at ?? spec.site.origin);
   const paths: RiverPath[] = [];
   const oxbowList: Oxbow[] = [];
+  const month = spec.climate?.month;
   for (const r of w.rivers) {
     const drawn = drawRiver(r, w.laws, p.rivers, (x, y) => rel.at(x, y), REACH);
     if (drawn.path.xy.length < 4) continue;
+    if (!wetInMonth(r.wet, month)) drawn.path.dry = true;
     paths.push(drawn.path);
-    oxbowList.push(...drawn.oxbows);
+    // The old bends of a river dry in the month are dry hollows, and are not drawn as water.
+    if (!drawn.path.dry) oxbowList.push(...drawn.oxbows);
   }
+  const lakes = w.lakes?.length && p.lakes ? new LakeMap(w.lakes, p.lakes, hashString(spec.generator.seed)) : undefined;
   meet(paths, p.rivers.smooth);
   let main: RiverPath | undefined;
   let best = Infinity;
@@ -313,7 +360,7 @@ function riversFor(spec: SceneSpec): Waters {
       }
     }
   }
-  return { river: main ? Array.from(main.xy) : [], oxbows: [], ponds: [], paths, oxbowList };
+  return { river: main ? Array.from(main.xy) : [], oxbows: [], ponds: [], paths, oxbowList, ...(lakes ? { lakes } : {}) };
 }
 
 /**
@@ -462,11 +509,13 @@ function riverGround(gs: GridSpec, w: Waters, g: LivingParams['ground'], c: Rive
 }
 
 /**
- * Where water stands, over the scene: the level of the nearest river within its floodplain, of its old bends, and
- * of the sea; a point lower than it is under water. Read from a grid of 100 m.
+ * Where water stands, over the scene: the level of the nearest river within its floodplain, of its old bends, of a lake
+ * over it or by its shore, and of the sea; a point lower than it is under water. A river dry in the month holds none,
+ * unless `withDry` asks for the level its floods come to: where people would not build or sow, as in its bed.
+ * Read from a grid of 100 m.
  */
-export function waterLevels(w: Waters): (x: number, y: number) => number {
-  const paths = w.paths ?? [];
+export function waterLevels(w: Waters, withDry = false): (x: number, y: number) => number {
+  const paths = (w.paths ?? []).filter((p) => withDry || !p.dry);
   const gs: GridSpec = { nx: 681, ny: 681, x0: -34000, y0: -34000, cell: 100 };
   const level = new Float32Array(gs.nx * gs.ny).fill(0);
   if (paths.length) {
@@ -480,6 +529,16 @@ export function waterLevels(w: Waters): (x: number, y: number) => number {
       if (near.d[k] <= pa.plain) level[k] = Math.max(0, zw);
     }
   }
+  const lakes = w.lakes;
+  if (lakes && !lakes.empty) {
+    for (let j = 0; j < gs.ny; j++) {
+      for (let i = 0; i < gs.nx; i++) {
+        const lv = lakes.levelAt(gs.x0 + i * gs.cell, gs.y0 + j * gs.cell);
+        const k = j * gs.nx + i;
+        if (lv !== undefined && lv > level[k]) level[k] = lv;
+      }
+    }
+  }
   return (x, y) => {
     const i = Math.round((x - gs.x0) / gs.cell);
     const j = Math.round((y - gs.y0) / gs.cell);
@@ -488,7 +547,104 @@ export function waterLevels(w: Waters): (x: number, y: number) => number {
   };
 }
 
-/** The water of a scene whose rivers the world gives: a ribbon along each river and old bend, with its flow and depth. */
+/** What lies at the nearest bank: a river with water in it, a dry bed, or still water, a lake or an old bend. */
+export const BANK = { none: 0, river: 1, dry: 2, still: 3 } as const;
+
+/**
+ * How far each point of a scene lies beyond the nearest bank of the water the world gives it, flowing, still or dry, m:
+ * in a river's bed or a lake, below zero; and what that water is. Read from a grid of 25 m over the scene's cells, and
+ * only within `reach` of a bank: further off, no water is near.
+ */
+export class Banks {
+  static readonly GRID: GridSpec = { nx: 1281, ny: 1281, x0: -16000, y0: -16000, cell: 25 };
+  private d: Float32Array;
+  private kind: Uint8Array;
+  constructor(w: Waters, readonly reach: number) {
+    const gs = Banks.GRID;
+    const n = gs.nx * gs.ny;
+    this.d = new Float32Array(n).fill(1e9);
+    this.kind = new Uint8Array(n);
+    const paths = w.paths ?? [];
+    if (paths.length) {
+      let widest = 0;
+      for (const p of paths) for (let i = 0; i < p.half.length; i++) widest = Math.max(widest, p.half[i]);
+      const near = nearestCourse(gs, paths, widest + reach);
+      for (let k = 0; k < n; k++) {
+        const p = near.path[k];
+        if (p < 0) continue;
+        const pa = paths[p];
+        const s = near.seg[k];
+        const half = pa.half[s] + (pa.half[Math.min(pa.half.length - 1, s + 1)] - pa.half[s]) * near.t[k];
+        this.d[k] = near.d[k] - half;
+        this.kind[k] = pa.dry ? BANK.dry : BANK.river;
+      }
+    }
+    const ox = w.oxbowList ?? [];
+    if (ox.length) {
+      const half = Math.max(...ox.map((o) => o.half));
+      const dx = distanceField(gs.nx, gs.ny, gs.x0, gs.y0, gs.cell, ox.map((o) => Array.from(o.xy)), half + reach);
+      for (let k = 0; k < n; k++) {
+        const b = dx[k] - half;
+        if (b < this.d[k]) {
+          this.d[k] = b;
+          this.kind[k] = BANK.still;
+        }
+      }
+    }
+    const lakes = w.lakes;
+    if (lakes && !lakes.empty) {
+      for (let j = 0; j < gs.ny; j++) {
+        for (let i = 0; i < gs.nx; i++) {
+          const k = j * gs.nx + i;
+          const b = -lakes.signed(gs.x0 + i * gs.cell, gs.y0 + j * gs.cell);
+          if (b < this.d[k]) {
+            this.d[k] = b;
+            this.kind[k] = BANK.still;
+          }
+        }
+      }
+    }
+    for (let k = 0; k < n; k++) if (this.d[k] > reach) this.kind[k] = BANK.none;
+  }
+  /** How far beyond the nearest bank, m: below zero in the water or the bed. Far from any, more than the reach. */
+  at(x: number, y: number): number {
+    const gs = Banks.GRID;
+    const fx = (x - gs.x0) / gs.cell;
+    const fy = (y - gs.y0) / gs.cell;
+    if (fx < 0 || fy < 0 || fx > gs.nx - 1.001 || fy > gs.ny - 1.001) return 1e9;
+    const i = Math.floor(fx);
+    const j = Math.floor(fy);
+    const u = fx - i;
+    const v = fy - j;
+    const k = j * gs.nx + i;
+    const d = this.d;
+    // Where a corner has no water near, the point has none.
+    if (d[k] > this.reach || d[k + 1] > this.reach || d[k + gs.nx] > this.reach || d[k + gs.nx + 1] > this.reach) return Math.min(d[k], d[k + 1], d[k + gs.nx], d[k + gs.nx + 1]);
+    return (d[k] * (1 - u) + d[k + 1] * u) * (1 - v) + (d[k + gs.nx] * (1 - u) + d[k + gs.nx + 1] * u) * v;
+  }
+  /** What the nearest water is (BANK). */
+  kindAt(x: number, y: number): number {
+    const gs = Banks.GRID;
+    const i = Math.round((x - gs.x0) / gs.cell);
+    const j = Math.round((y - gs.y0) / gs.cell);
+    if (i < 0 || j < 0 || i >= gs.nx || j >= gs.ny) return BANK.none;
+    return this.kind[j * gs.nx + i];
+  }
+}
+
+/** A scene's banks, where the world gives it water: none where it gives none, or where nothing grows by water. */
+export function banksOf(spec: SceneSpec, w: Waters): Banks | undefined {
+  const strip = (spec.generator.params as unknown as LivingParams).cover.strip;
+  if (!strip || !(w.paths?.length || w.lakes)) return undefined;
+  return new Banks(w, strip[1] + 25);
+}
+
+/**
+ * The water of a scene whose rivers the world gives: a ribbon along each river and old bend, with its flow and depth,
+ * and a sheet over each lake. A river dry in the month keeps its ribbon, which says where its bed is, with a depth of −1
+ * at every point: the renderer draws no water on it, and draws its bed dry.
+ */
+export const DRY_BED = -1;
 export function waterRibbons(w: Waters): { vertices: Float32Array; flow: Float32Array; indices: Uint32Array } {
   const verts: number[] = [];
   const flow: number[] = [];
@@ -521,9 +677,17 @@ export function waterRibbons(w: Waters): { vertices: Float32Array; flow: Float32
     }
   };
   for (const p of w.paths ?? []) {
+    if (p.dry) {
+      const from = flow.length;
+      // Its bed, at the floor of its channel.
+      ribbon(p.xy, (i) => p.z[i] - p.depth[i], (i) => p.half[i], () => 0, () => 0, p.end);
+      for (let k = from + 2; k < flow.length; k += 3) flow[k] = DRY_BED;
+      continue;
+    }
     ribbon(p.xy, (i) => p.z[i], (i) => p.half[i], (i) => p.depth[i], (i) => p.q[i] / Math.max(1, p.half[i] * 2 * p.depth[i]), p.end);
   }
   for (const o of w.oxbowList ?? []) ribbon(o.xy, () => o.z, () => o.half, () => 2.2, () => 0);
+  if (w.lakes) lakeSheets(w.lakes, 250, verts, flow, idx);
   return { vertices: Float32Array.from(verts), flow: Float32Array.from(flow), indices: Uint32Array.from(idx) };
 }
 
@@ -569,6 +733,17 @@ export function groundGrids(spec: SceneSpec, look: PlaceLook, waters: Waters, si
     const params = spec.generator.params as unknown as LivingParams;
     const land = (x: number, y: number) => withDunes(x, y, landAt(rel, g, x, y, seed));
     const grids = [fine, mid, far].map((gs) => riverGround(gs, waters, g, params.rivers, land, seed));
+    // The lakes the world gives: their beds under their level, and the land by their shores above it.
+    const lakes = waters.lakes;
+    if (lakes && !lakes.empty) {
+      [fine, mid, far].forEach((gs, q) => {
+        const z = grids[q];
+        for (let j = 0; j < gs.ny; j++) {
+          const y = gs.y0 + j * gs.cell;
+          for (let i = 0; i < gs.nx; i++) z[j * gs.nx + i] = lakes.ground(gs.x0 + i * gs.cell, y, z[j * gs.nx + i]);
+        }
+      });
+    }
     blurFar(grids[2], far);
     return [
       { ...fine, z: encode(grids[0]) },
@@ -646,17 +821,31 @@ export const GRIDS: { fine: GridSpec; mid: GridSpec; far: GridSpec } = {
 
 // ——— What covers the ground ———
 
-/** What a point of the land is: water, bare ground, canopy, low plants. Reused, to save making an object per point. */
+/**
+ * What a point of the land is: water, bare ground, canopy, low plants; whether it is the bed of a river dry in the month;
+ * how wet its ground is, for the kinds that like it wet; and the climate of its height. Reused, to save making an object
+ * per point.
+ */
 export class LandCover {
   water = 0;
   bare = 0;
   canopy = 0;
   low = 0;
   above = 0;
+  /** in the bed of a river dry in the month: 1 */
+  bed = 0;
+  /** how wet its ground is, 0–1: by the water's level, or within the strip along a bank, flowing, still or dry */
+  wet = 0;
+  /** the warmest and coldest month of its height, °C */
+  hot = 0;
+  cold = 0;
   private c: LivingParams['cover'];
   private forest: number;
   private herb: number;
   private baren: number;
+  private riverside: number;
+  private placeHot: number;
+  private placeCold: number;
   private fx: number;
   private fy: number;
   private seed: number;
@@ -665,14 +854,18 @@ export class LandCover {
   /**
    * `clearing`: how much of the ground is clear of trees, 0–1, where people's fields, pastures and yards are
    * (gen:people/settlement) and where an invented river has lately left a bar (../land.ts). Without it, nothing is.
+   * `banks`: how far a point is from the banks of the water the world gives (Banks).
    */
-  constructor(spec: SceneSpec, private ground: GroundSampler, private level: number, focus: [number, number], private levelAt?: (x: number, y: number) => number, private clearing?: (x: number, y: number) => number) {
+  constructor(spec: SceneSpec, private ground: GroundSampler, private level: number, focus: [number, number], private levelAt?: (x: number, y: number) => number, private clearing?: (x: number, y: number) => number, private banks?: Banks) {
     const p = spec.generator.params as unknown as LivingParams;
     this.c = p.cover;
-    const g = growthOf(p.cover.climates[spec.biome.climate], spec.biome.cover);
+    const g = growthOf(p.cover.climates[spec.biome.climate], spec.biome.cover, spec.biome.node);
     this.forest = g.forest;
     this.herb = g.herb;
     this.baren = g.bare;
+    this.riverside = g.riverside;
+    this.placeHot = g.hot;
+    this.placeCold = g.cold;
     if (spec.climate && p.climate) this.heights = new Heights(spec);
     this.seed = hashString(spec.generator.seed);
     this.fx = focus[0];
@@ -685,18 +878,13 @@ export class LandCover {
     const z = this.ground.at(x, y);
     const above = z - (this.levelAt ? this.levelAt(x, y) : this.level);
     this.above = above;
-    if (above < 0) {
-      this.water = 1;
-      this.bare = 0;
-      this.canopy = 0;
-      this.low = 0;
-      return this;
-    }
-    this.water = 0;
-    const c = this.c;
+    this.bed = 0;
     let forest = this.forest;
     let herb = this.herb;
     let baren = this.baren;
+    let riverside = this.riverside;
+    this.hot = this.placeHot;
+    this.cold = this.placeCold;
     if (this.heights) {
       // The height's own climate, its edge wandering over the band.
       const h = this.heights;
@@ -704,26 +892,65 @@ export class LandCover {
       forest = g.forest;
       herb = g.herb;
       baren = g.bare;
+      riverside = g.riverside;
+      this.hot = g.hot;
+      this.cold = g.cold;
     }
+    if (above < 0) {
+      this.water = 1;
+      this.bare = 0;
+      this.canopy = 0;
+      this.low = 0;
+      this.wet = 1;
+      return this;
+    }
+    this.water = 0;
+    const c = this.c;
     const wob = noise(x / 34, y / 34, this.seed + 31);
+    // By water, flowing, still or dry: how near the bank, 0–1. A dry river's bed is bare, its sand and gravel, and
+    // nothing rooted in it.
+    let beside = 0;
+    if (this.banks && c.strip) {
+      const b = this.banks.at(x, y);
+      if (b < c.strip[1]) {
+        if (b < 0 && this.banks.kindAt(x, y) === BANK.dry) {
+          this.bed = 1;
+          this.bare = 1;
+          this.canopy = 0;
+          this.low = 0;
+          this.wet = 0;
+          return this;
+        }
+        beside = 1 - smooth(c.strip[0], c.strip[1], b + (wob - 0.5) * c.strip[0]);
+      }
+    }
+    this.wet = Math.max(smooth(2.4, 0.5, above), beside);
     const shore = smooth(c.bare * 1.5, c.bare * 0.5, above + (wob - 0.5) * c.bare * 0.9);
     const patchy = fbm(x / c.patch, y / c.patch, this.seed + 32);
-    // Bare ground in patches, as much as the climate leaves; all of it where nothing grows yet.
+    // Bare ground in patches, as much as the climate leaves; all of it where nothing grows yet; and less of it by water.
     const dry = baren >= 1 ? 1 : smooth(1 - baren - 0.12, 1 - baren + 0.12, 0.5 * patchy + 0.5 * noise(x / 260, y / 260, this.seed + 33));
-    this.bare = shore > dry ? shore : dry;
+    this.bare = (shore > dry ? shore : dry) * (1 - beside * 0.8);
     let canopy = smooth(c.glade - 0.05, c.glade + 0.07, patchy);
     const dx = x - this.fx;
     const dy = y - this.fy;
     const r = Math.sqrt(dx * dx + dy * dy);
-    canopy *= smooth(c.clearing, c.clearing * 1.5, r + (wob - 0.5) * c.clearing * 0.7);
+    const open = smooth(c.clearing, c.clearing * 1.5, r + (wob - 0.5) * c.clearing * 0.7);
+    canopy *= open;
     this.canopy = canopy * forest * (1 - this.bare);
+    // Along water, its own trees, in clumps: as many as the climate keeps by water, where that is more than it keeps away from it.
+    if (beside > 0 && riverside > 0) {
+      const clumps = smooth(0.3, 0.62, noise(x / 48, y / 48, this.seed + 35));
+      const along = riverside * beside * clumps * open;
+      if (along > this.canopy) this.canopy = along;
+    }
     if (this.clearing) this.canopy *= 1 - this.clearing(x, y);
+    herb += (1 - herb) * beside * 0.4;
     this.low = herb * (1 - this.canopy) * (1 - this.bare);
     return this;
   }
 }
 
-/** What the plan says the ground is, as an image: R canopy, G low plants, B bare ground, A water. */
+/** What the plan says the ground is, as an image: R canopy, G low plants, B bare ground, A water: 255 under water, 128 in a dry bed. */
 export function coverMask(cover: LandCover, size: number, half: number): Uint8Array {
   const data = new Uint8Array(size * size * 4);
   const scale = (half * 2) / size;
@@ -740,6 +967,7 @@ export function coverMask(cover: LandCover, size: number, half: number): Uint8Ar
       data[at] = (cover.canopy * 255) | 0;
       data[at + 1] = (cover.low * 255) | 0;
       data[at + 2] = (cover.bare * 255) | 0;
+      if (cover.bed) data[at + 3] = 128;
     }
   }
   return data;
@@ -803,10 +1031,29 @@ export interface LivingPlan {
   toRiver: [number, number];
   cell(i: number, j: number, tier: number): CellRows;
   /**
-   * Which of the understory grows at a place this far above the water, chosen by `u` (0–1) as the understory is sown:
-   * its index among the taxa, or −1 where the scene has none.
+   * Which of the understory grows at a place whose cover has just been read, chosen by `u` (0–1) as the understory is
+   * sown: its index among the taxa, −1 where the scene has none, and −2 where none of it suits the ground.
    */
-  underAt(above: number, u: number): number;
+  underAt(x: number, y: number, cover: LandCover, u: number): number;
+}
+
+/** An integer power, by multiplication alone: the same on every machine. */
+const power = (x: number, k: number) => {
+  let r = 1;
+  for (let i = 0; i < k; i++) r *= x;
+  return r;
+};
+
+/**
+ * How much a kind likes a climate, 0–1: 1 at the climate its rows lived in, less the further the warmest and the coldest
+ * month are from theirs, in spreads of its rows' own, or of `least` where they spread less.
+ */
+export function liking(t: LivingTaxon, hot: number, cold: number, least: { hot_c: number; cold_c: number }): number {
+  const c = t.climate;
+  if (!c) return 1;
+  const dh = (hot - c[0]) / Math.max(c[1], least.hot_c);
+  const dc = (cold - c[2]) / Math.max(c[3], least.cold_c);
+  return 1 / (1 + dh * dh + dc * dc);
 }
 
 /** How many to the km² a taxon is drawn at, by Damuth's rule and how common it is on its list. */
@@ -821,7 +1068,7 @@ export function densityOf(t: LivingTaxon, form: Form, a: LivingParams['animals']
   return rule * prey * a.show * (0.25 + 1.5 * t.weight) * productivity;
 }
 
-export function makePlan(spec: SceneSpec, ground: GroundSampler, look: PlaceLook, waters: Waters, levelAt?: (x: number, y: number) => number, clearing?: (x: number, y: number) => number): LivingPlan {
+export function makePlan(spec: SceneSpec, ground: GroundSampler, look: PlaceLook, waters: Waters, levelAt?: (x: number, y: number) => number, clearing?: (x: number, y: number) => number, banks?: Banks): LivingPlan {
   const params = spec.generator.params as unknown as LivingParams;
   const seed = look.seed;
   const level = look.water;
@@ -833,7 +1080,7 @@ export function makePlan(spec: SceneSpec, ground: GroundSampler, look: PlaceLook
   const arrive = waters.river.length ? arrival(waters, 2600, params.cover.clearing * 0.72, firm) : { at: [Math.round(hash2(4, 1, seed) * 800 - 400), Math.round(hash2(4, 2, seed) * 800 - 400)] as [number, number], toRiver: [0, 1] as [number, number] };
   const focus: [number, number] = [Math.round(arrive.at[0]), Math.round(arrive.at[1])];
   const toRiver: [number, number] = [Math.round(arrive.toRiver[0] * 1000) / 1000, Math.round(arrive.toRiver[1] * 1000) / 1000];
-  const land = new LandCover(spec, ground, level, focus, levelAt, clearing);
+  const land = new LandCover(spec, ground, level, focus, levelAt, clearing, banks);
   const productivity = 0.2 + 0.8 * (land.forestShare > 0.5 ? 1 : land.forestShare + 0.3);
   const layouts: TaxonLayout[] = spec.taxa.map((t, index) => {
     const form = spec.forms[t.form];
@@ -847,6 +1094,9 @@ export function makePlan(spec: SceneSpec, ground: GroundSampler, look: PlaceLook
   });
   const canopy = layouts.filter((x) => x.plant && (x.form.behave?.layer ?? 'canopy') === 'canopy' && x.t.height !== undefined);
   const under = layouts.filter((x) => x.plant && x.form.behave?.layer === 'under' && x.t.height !== undefined);
+  // The understory as tall as a person or more is sown as far as the big animals are, besides all of it close by.
+  const tallAt = P.shrubs?.least_m ?? Infinity;
+  const shrubs = under.filter((x) => x.size >= tallAt);
   const mats = layouts.filter((x) => x.plant && x.form.behave?.layer === 'float');
   // On land, nothing that has to swim; in the sea, all of it.
   const atSea = look.sea;
@@ -854,16 +1104,62 @@ export function makePlan(spec: SceneSpec, ground: GroundSampler, look: PlaceLook
   const swim = params.sea?.swim_m ?? 40;
   /** How deep the water is over a place, in metres: zero on land. */
   const depthAt = (x: number, y: number) => Math.max(0, (levelAt ? levelAt(x, y) : level) - ground.at(x, y));
-  const plantWeight = (e: TaxonLayout, wet: number) => (0.1 + e.t.weight) * ((e.form.behave?.weight ?? 1) + (e.form.behave?.wet ?? 0) * wet);
-  const choose = (of: TaxonLayout[], wet: number, u0: number): TaxonLayout => {
+  // A kind's liking for wet ground cuts both ways: more of it on wet ground and less on dry, by 1 + its liking × (how wet
+  // − ½), and none where that comes to nothing. Where it comes to nothing for every kind of a layer, they are weighed as
+  // if the ground did not matter, so that a layer of kinds that all want water still grows where there is none.
+  const wetFactor = (liking: number, wet: number) => {
+    const f = 1 + liking * (wet - 0.5);
+    return f > 0 ? f : 0;
+  };
+  const plantWeight = (e: TaxonLayout, wet: number) => (0.1 + e.t.weight) * (e.form.behave?.weight ?? 1) * (wet < 0 ? 1 : wetFactor(e.form.behave?.wet ?? 0, wet));
+  // Kinds in stands: each kind of a layer has a field of its own over the scene, and is the more likely the higher its
+  // field stands at a place, so that each is commonest in patches of its own. And each the more likely the more like its
+  // own the climate of the place's height is, so that what grows changes up a slope: its liking over the best liking
+  // there of any kind of its layer.
+  const stands = params.cover.stands;
+  const least = params.cover.liking;
+  const standSeed = layouts.map((e) => hashString(e.t.id) & 0xffffff);
+  const likes = new Float64Array(layouts.length);
+  const weightAt = (e: TaxonLayout, wet: number, x: number, y: number, best: number) => {
+    let w = plantWeight(e, wet);
+    if (w <= 0) return 0;
+    if (stands) w *= power(noise(x / stands.size, y / stands.size, seed + standSeed[e.index]), stands.sharpness);
+    if (least && e.t.climate && best > 0) w *= likes[e.index] / best;
+    return w;
+  };
+  /**
+   * One kind of a layer for a place: by its weight on the list, its stand, its liking for the height's climate and for
+   * the wet of the ground. Where no kind likes the ground, a tree is still one of them, weighed as if the ground did not
+   * matter, since the climate says trees stand there (`fallback`); an understory plant is none, and undefined.
+   */
+  const choose = (of: TaxonLayout[], wet0: number, u0: number, x: number, y: number, hot: number, cold: number, fallback = true): TaxonLayout | undefined => {
+    let best = 0;
+    if (least) {
+      for (const e of of) {
+        if (!e.t.climate) continue;
+        const l = liking(e.t, hot, cold, least);
+        likes[e.index] = l;
+        if (l > best) best = l;
+      }
+    }
+    let wet = wet0;
     let sum = 0;
     for (const e of of) {
-      const w = plantWeight(e, wet);
+      const w = weightAt(e, wet, x, y, best);
       if (w > 0) sum += w;
+    }
+    if (!(sum > 0)) {
+      // Every kind wants ground wetter or drier than this: weigh them as if it did not matter, or have none.
+      if (!fallback) return undefined;
+      wet = -1;
+      for (const e of of) {
+        const w = weightAt(e, wet, x, y, best);
+        if (w > 0) sum += w;
+      }
     }
     let u = u0 * sum;
     for (const e of of) {
-      const w = plantWeight(e, wet);
+      const w = weightAt(e, wet, x, y, best);
       if (w <= 0) continue;
       u -= w;
       if (u <= 0) return e;
@@ -873,15 +1169,15 @@ export function makePlan(spec: SceneSpec, ground: GroundSampler, look: PlaceLook
   const S = P.step;
   const perSide = Math.round(CELL / S);
   const treeChance = (P.trees * S * S) / 10000;
-  /** If a tree stands at this node of the sowing grid: its x, y and how it was chosen. */
-  const treeAt = (U: number, V: number): [number, number, number] | null => {
+  /** If a tree stands at this node of the sowing grid: its x, y, and how wet and how warm its ground is, by which its kind is chosen. */
+  const treeAt = (U: number, V: number): [number, number, number, number, number] | null => {
     if (!canopy.length) return null;
     const x = (U + hash2(U, V, seed + 41)) * S;
     const y = (V + hash2(U, V, seed + 42)) * S;
     land.at(x, y);
     if (land.water || land.canopy <= 0) return null;
     if (hash2(U, V, seed + 43) >= treeChance * land.canopy) return null;
-    return [x, y, smooth(2.4, 0.5, land.above)];
+    return [x, y, land.wet, land.hot, land.cold];
   };
   const clearOfTrees = (x: number, y: number, r: number): boolean => {
     const span = Math.ceil(r / S);
@@ -1013,6 +1309,34 @@ export function makePlan(spec: SceneSpec, ground: GroundSampler, look: PlaceLook
     stage(x, y, (rows) => rows.add(x, y, z, dcos(a0), dsin(a0), size, e.index, POSE.stand, shade, 0, 0));
   }
 
+  /**
+   * Sow a cell's understory of these kinds on a grid `step` apart, `perHa` to the hectare where its cover allows, by its
+   * own salt. The kinds of the water's edge, a reed's or a cattail's, which like wet ground most, stand in its shallows too.
+   */
+  const EDGE_WET = 2;
+  const sowUnder = (rows: Rows, i: number, j: number, of: TaxonLayout[], step: number, perHa: number, salt: number) => {
+    const side = Math.round(CELL / step);
+    const edge = of.filter((e) => (e.form.behave?.wet ?? 0) >= EDGE_WET);
+    for (let v = j * side; v < (j + 1) * side; v++) {
+      for (let u = i * side; u < (i + 1) * side; u++) {
+        const x = (u + hash2(u, v, seed + salt)) * step;
+        const y = (v + hash2(u, v, seed + salt + 1)) * step;
+        const clump = noise(x / 22, y / 22, seed + salt + 2);
+        const chance = (perHa * clump * clump * 4 * step * step) / 10000;
+        if (hash2(u, v, seed + salt + 3) >= chance) continue;
+        land.at(x, y);
+        let shallows = false;
+        if (land.water) {
+          if (!edge.length || -land.above > 0.7) continue;
+          shallows = true;
+        } else if (land.bare > 0.5 || land.low + land.canopy <= 0) continue;
+        const e = choose(shallows ? edge : of, land.wet, hash2(u, v, seed + salt + 4), x, y, land.hot, land.cold, false);
+        if (!e) continue;
+        const a = hash2(u, v, seed + salt + 5) * TAU;
+        rows.add(x, y, ground.at(x, y), dcos(a), dsin(a), 0.5 + 0.5 * hash2(u, v, seed + salt + 6), e.index, POSE.stand, (hash2(u, v, seed + salt + 7) * 256) | 0, 0, (hash2(u, v, seed + salt + 8) * 256) | 0);
+      }
+    }
+  };
   const cell = (i: number, j: number, tier: number): CellRows => {
     const rows = new Rows();
     const groups: number[] = [];
@@ -1027,7 +1351,7 @@ export function makePlan(spec: SceneSpec, ground: GroundSampler, look: PlaceLook
           if (hash2(u, v, seed + 43) >= treeChance) continue;
           const q = treeAt(u, v);
           if (!q) continue;
-          const e = choose(canopy, q[2], hash2(u, v, seed + 45));
+          const e = choose(canopy, q[2], hash2(u, v, seed + 45), q[0], q[1], q[3], q[4])!;
           // A claim gives what a grown plant reaches: most of these have not, and none is past it.
           const grown = hash2(u, v, seed + 46);
           const size = 0.42 + 0.58 * grown * grown;
@@ -1058,7 +1382,7 @@ export function makePlan(spec: SceneSpec, ground: GroundSampler, look: PlaceLook
           placeGroup(rows, groups, a, cx, cy, salt, (hash3(i, j, g, seed + a.index) * 256) | 0);
         }
       }
-      // What floats, on the still water.
+      // What floats, on still water: a pond, an old bend, a lake or the slack edge of a river, never on dry ground.
       if (mats.length) {
         const step = P.mat_step;
         const side = Math.round(CELL / step);
@@ -1068,33 +1392,21 @@ export function makePlan(spec: SceneSpec, ground: GroundSampler, look: PlaceLook
             const x = (u + hash2(u, v, seed + 61)) * step;
             const y = (v + hash2(u, v, seed + 62)) * step;
             const z = ground.at(x, y);
-            // Shallow: a pond, an old bend or the river's margin.
-            if (z >= level || z < level - 1.6) continue;
-            const e = choose(mats, 1, hash2(u, v, seed + 64));
-            rows.add(x, y, level, 1, 0, 0.6 + 0.8 * hash2(u, v, seed + 65), e.index, POSE.stand, (hash2(u, v, seed + 66) * 256) | 0, 0, (hash2(u, v, seed + 67) * 256) | 0);
+            const lv = levelAt ? levelAt(x, y) : level;
+            // Shallow, and still: where the world gives the water, a lake's or an old bend's, or within a few metres of a river's bank.
+            if (z >= lv || z < lv - 1.6) continue;
+            if (banks && banks.kindAt(x, y) !== BANK.still && banks.at(x, y) < -4) continue;
+            land.at(x, y);
+            const e = choose(mats, 1, hash2(u, v, seed + 64), x, y, land.hot, land.cold)!;
+            rows.add(x, y, lv, 1, 0, 0.6 + 0.8 * hash2(u, v, seed + 65), e.index, POSE.stand, (hash2(u, v, seed + 66) * 256) | 0, 0, (hash2(u, v, seed + 67) * 256) | 0);
           }
         }
       }
+      // The understory as tall as a person or more, on a grid of its own, as far as the big animals are.
+      if (shrubs.length && P.shrubs) sowUnder(rows, i, j, shrubs, P.shrubs.step, P.shrubs.per_ha, 151);
     }
-    if (tier >= 2 && under.length) {
-      // The understory, only for what is nearly underfoot.
-      const step = P.under_step;
-      const side = Math.round(CELL / step);
-      for (let v = j * side; v < (j + 1) * side; v++) {
-        for (let u = i * side; u < (i + 1) * side; u++) {
-          const x = (u + hash2(u, v, seed + 51)) * step;
-          const y = (v + hash2(u, v, seed + 52)) * step;
-          const clump = noise(x / 22, y / 22, seed + 53);
-          const chance = (P.under * clump * clump * 4 * step * step) / 10000;
-          if (hash2(u, v, seed + 54) >= chance) continue;
-          land.at(x, y);
-          if (land.water || land.bare > 0.5 || land.low + land.canopy <= 0) continue;
-          const e = choose(under, smooth(2.4, 0.5, land.above), hash2(u, v, seed + 55));
-          const a = hash2(u, v, seed + 56) * TAU;
-          rows.add(x, y, ground.at(x, y), dcos(a), dsin(a), 0.5 + 0.5 * hash2(u, v, seed + 57), e.index, POSE.stand, (hash2(u, v, seed + 58) * 256) | 0, 0, (hash2(u, v, seed + 59) * 256) | 0);
-        }
-      }
-    }
+    // All of the understory, tall and low, as thick as version 7 sowed it where it is nearly underfoot.
+    if (tier >= 2 && under.length) sowUnder(rows, i, j, under, P.under_step, P.under, 51);
     if (tier >= 1) for (const draw of staged.get(cellKey(i, j)) ?? []) draw(rows, groups);
     return {
       key: cellKey(i, j),
@@ -1109,7 +1421,7 @@ export function makePlan(spec: SceneSpec, ground: GroundSampler, look: PlaceLook
       groups,
     };
   };
-  const underAt = (above: number, u: number): number => (under.length ? choose(under, smooth(2.4, 0.5, above), u).index : -1);
+  const underAt = (x: number, y: number, cover: LandCover, u: number): number => (under.length ? choose(under, cover.wet, u, x, y, cover.hot, cover.cold, false)?.index ?? -2 : -1);
   return { look, focus, toRiver, cell, underAt };
 }
 

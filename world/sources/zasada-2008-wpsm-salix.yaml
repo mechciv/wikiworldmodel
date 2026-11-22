@@ -1,0 +1,17 @@
+id: src:zasada-2008-wpsm-salix
+type: publication
+kind: compilation
+citation: >-
+  Zasada, J.C., Douglas, D.A. & Buechler, W. (2008). Salix L.: willow. In: Bonner, F.T. & Karrfalt, R.P. (eds.), The
+  Woody Plant Seed Manual, 1000–1009. Agriculture Handbook 727. U.S. Department of Agriculture, Forest Service,
+  Washington, DC.
+authors: ["Zasada, J.C.", "Douglas, D.A.", "Buechler, W."]
+published: 2008
+title: "Salix L.: willow"
+container: "The Woody Plant Seed Manual (Agriculture Handbook 727), 1000–1009"
+url: https://rngr.net/publications/wpsm/genera/s/at_download/file
+verified:
+  by: machine:claude-code
+  how: >-
+    Read in the chapter's PDF from the Reforestation, Nurseries and Genetic Resources site, its text taken out of the
+    PDF page by page; quotes checked by script against that text. A work of the United States government.
