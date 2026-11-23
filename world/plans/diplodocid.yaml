@@ -24,8 +24,8 @@ parts:
       - [0.1, 0.97, 0.4, 0.04]
       - [0.14, 0.96, 0.6, 0.026]
     neck: { r: 0.0075, steps: [8, 2] }
-  hind: { type: pillar, y: -0.065, x: 0.032, top: 0.74, r: 0.028, swing: 0.03 }
-  fore: { type: pillar, y: 0.085, x: 0.034, top: 0.76, r: 0.023, swing: 0.03, phase: 1 }
+  hind: { type: pillar, y: -0.065, x: 0.027, top: 0.8, r: 0.021, swing: 0.03 }
+  fore: { type: pillar, y: 0.085, x: 0.029, top: 0.78, r: 0.018, swing: 0.03, phase: 1 }
   head:
     type: head
     thin: false

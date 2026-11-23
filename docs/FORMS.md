@@ -111,8 +111,8 @@ or `four`, `sides: [fine, coarse]`.
 | `chain` | `points` of `[x, y, z, r]`: an arm, a neck, a splayed leg. With `swing` and `phase` it walks, from its first joint out to its last |
 | `lump` | `at`, `r: [rx, ry, rz]`: a body, a dome, a club |
 | `spike` | `from`, `to`, `r`: a horn, a claw, a thumb, a tail spike |
-| `pillar` | `y`, `x`, `top`, `r`, `swing`, `phase` (0 or 1): a pair of straight legs |
-| `digitigrade` | `y`, `x`, `top`, `knee`, `ankle`, `r`, `swing`, `phase`, `toes`: a pair of bent legs |
+| `pillar` | `y`, `x`, `top`, `r`, `swing`, `phase` (0 or 1), `muscle`: a pair of straight legs |
+| `digitigrade` | `y`, `x`, `top`, `knee`, `ankle`, `r`, `swing`, `phase`, `toes`, `muscle`: a pair of bent legs |
 | `fan` | `on: head`, `at: [along, up]`, `dir: [along, up]`, `r`, `across`, `tall`, `raise`, `scallop`, `scallops`, `arc`, `gap`: a frill or a crest |
 | `eyes` | `at: [across, along, up]`, `r` |
 | `bands` | `rows`, `y`, `step`, `wide`, `top`, `low`, `out`, `spike`, `scute`: armour bands |
@@ -121,6 +121,9 @@ or `four`, `sides: [fine, coarse]`.
 | `shell` | `r: [rx, ry, rz]`, `lift` |
 | `sheet` | `points` of `[x, y, z]`, a fan from the first; `gap`: a sail, a fin, a membrane |
 | `wing` | `shoulder: [x, y, z]`, `span`, `chord`, `sweep`, `beat`, `arm`, `folded`, `drop`, `mat`: spread when flying, folded along the flank otherwise. Give flyers `not: [fly]` on their legs if they should tuck them |
+
+A leg has the muscle of its haunch or shoulder where it leaves the body, drawn close by: `muscle` says how much of it,
+1 where nothing does, 0 for none, as under a belly it would hang out of.
 
 **Plants.** Everything is a share of the plant's height. A plant's part grows a skeleton by its type's own rule, and
 holds its leaves on cards that show a spray of one kind of leaf (`leaf`), or from further off a bough of them: say

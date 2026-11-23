@@ -34,7 +34,7 @@ parts:
     at:
       stand: { y: 0.17, z: 2.5, pitch: 0.1 }
       alert: { y: 0.16, z: 2.8, pitch: 0.0 }
-      low: { y: 0.24, reach: 0.15, clear: 0.05, pitch: 1.0 }
+      low: { y: 0.24, reach: 0.21, clear: 0.05, pitch: 1.0 }
       fly: { y: 0.18, z: 2.0, pitch: 0.08 }
     rings:
       - [-0.012, 0, 0.018, 0.026]

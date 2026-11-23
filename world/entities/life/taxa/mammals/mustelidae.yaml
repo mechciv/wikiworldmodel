@@ -29,8 +29,8 @@ claims:
             - [0.14, 1.28, 0.64, 0.05]
             - [0.2, 1.3, 0.74, 0.044]
           neck: { r: 0.034, steps: [3, 1] }
-        hind: { y: -0.2, x: 0.05, top: 1.0, knee: 0.56, ankle: 0.2, r: 0.04 }
-        fore: { y: 0.14, x: 0.052, top: 0.8, r: 0.026 }
+        hind: { y: -0.2, ankle: 0.2 }
+        fore: { y: 0.14 }
         head:
           at:
             stand: { y: 0.3, z: 1.34, pitch: 0.08 }
@@ -47,6 +47,7 @@ claims:
     unsourced: >-
       A machine's reconstruction, from the family's account on the Animal Diversity Web:
       elongate bodies with short legs and a short rostrum. Only compared with its sheet.
+      The legs are the plan's own, set where this body needs them.
   length:
     prop: body_length
     value: { lo: 0.165, hi: 1.5 }

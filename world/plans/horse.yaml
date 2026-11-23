@@ -1,0 +1,57 @@
+description: >-
+  A horse, ass or zebra: a deep barrel of a body, level-backed between high withers and a round croup, on long slender legs
+  with the hocks well behind; a long thick neck carried at a slope, an upright mane along its crest, a long deep-jawed head
+  held at a slant, pointed ears, and a tail of long hair hanging nearly to the ground.
+kind: animal
+hip: 0.62
+# Its mesh, head and all, at the density of water, for its length.
+mass_length: 35
+behave: { group: [3, 16], habitat: open, poses: [graze, graze, stand, walk, alert] }
+parts:
+  body:
+    type: trunk
+    mat: fur
+    sides: [14, 8]
+    rings:
+      # The tail's hair, from its end up to the dock, which is folded into the croup.
+      - [-0.43, 0.19, 0.17, 0.005]
+      - [-0.438, 0.36, 0.28, 0.026]
+      - [-0.443, 0.62, 0.52, 0.034]
+      - [-0.435, 0.84, 0.76, 0.027]
+      - [-0.412, 0.955, 0.895, 0.019]
+      - [-0.387, 0.8, 0.75, 0.024]
+      # Hindquarters, loin, barrel, girth, withers, and the base of the neck.
+      - [-0.362, 0.945, 0.63, 0.066]
+      - [-0.332, 0.99, 0.565, 0.09]
+      - [-0.275, 1.008, 0.55, 0.101]
+      - [-0.195, 0.992, 0.585, 0.098]
+      - [-0.105, 0.974, 0.54, 0.103]
+      - [-0.015, 0.968, 0.525, 0.104]
+      - [0.07, 0.985, 0.525, 0.099]
+      - [0.14, 1.03, 0.53, 0.09]
+      - [0.19, 1.045, 0.575, 0.078]
+      - [0.22, 1.02, 0.66, 0.062]
+    neck: { r: 0.052, steps: [4, 2] }
+  rump: { type: lump, mat: fur, sides: [10, 6], bands: [5, 3], at: [0, -0.322, 0.79], r: [0.097, 0.085, 0.13] }
+  hind: { type: digitigrade, mat: fur, y: -0.292, x: 0.059, top: 0.86, knee: 0.58, ankle: 0.36, r: 0.058, swing: 0.07, toes: false }
+  fore: { type: pillar, mat: fur, y: 0.125, x: 0.057, top: 0.62, r: 0.032, swing: 0.07, phase: 1 }
+  head:
+    type: head
+    mat: fur
+    sides: [12, 6]
+    flat: true
+    at:
+      stand: { y: 0.41, z: 1.27, pitch: 0.85 }
+      alert: { y: 0.405, z: 1.32, pitch: 0.5 }
+      low: { y: 0.38, reach: 0.24, pitch: 1.3 }
+    rings:
+      - [-0.01, -0.014, 0.03, 0.044]
+      - [0.035, -0.024, 0.04, 0.058]
+      - [0.09, -0.021, 0.036, 0.05]
+      - [0.15, -0.014, 0.029, 0.038]
+      - [0.205, -0.011, 0.026, 0.031]
+      - [0.238, -0.01, 0.025, 0.028]
+  ears: { type: spike, on: head, mat: fur, mirror: true, sides: [5, 4], from: [0.022, -0.004, 0.026], to: [0.03, -0.04, 0.078], r: 0.013 }
+  eyes: { type: eyes, on: head, near: true, at: [0.037, 0.07, 0.006], r: 0.0068 }
+  mane: { type: sheet, mat: fur, tint_add: -40, poses: [stand, walk, rest, alert], points: [[0, 0.3, 0.95], [0, 0.165, 1.0], [0, 0.195, 1.055], [0, 0.225, 1.1], [0, 0.26, 1.16], [0, 0.29, 1.225], [0, 0.32, 1.295], [0, 0.345, 1.36], [0, 0.37, 1.415], [0, 0.39, 1.43], [0, 0.4, 1.3]] }
+  mane-low: { type: sheet, mat: fur, tint_add: -40, poses: [graze, drink], points: [[0, 0.32, 0.7], [0, 0.175, 1.02], [0, 0.215, 1.048], [0, 0.25, 1.056], [0, 0.285, 1.035], [0, 0.32, 0.99], [0, 0.35, 0.935], [0, 0.38, 0.86], [0, 0.405, 0.77], [0, 0.425, 0.66], [0, 0.432, 0.56], [0, 0.415, 0.47]] }

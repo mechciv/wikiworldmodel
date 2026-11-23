@@ -33,8 +33,6 @@ claims:
             - [0.22, 0.94, 0.46, 0.094]
           neck: { r: 0.076, steps: [2, 1] }
         rump: { type: lump, mat: fur, sides: [12, 8], bands: [6, 4], at: [0, -0.35, 0.667], r: [0.136, 0.11, 0.165] }
-        hind: { y: -0.31, x: 0.078, top: 0.66, knee: 0.44, ankle: 0.23, r: 0.07, swing: 0.045 }
-        fore: { y: 0.14, x: 0.075, top: 0.48, r: 0.04, swing: 0.045 }
         head:
           sides: [12, 6]
           flat: true
@@ -54,7 +52,7 @@ claims:
     unsourced: >-
       A machine's reconstruction of a domestic pig, from Wikipedia's article on the pig: a large head, and a long
       snout with a disc at its tip. The rest is as pigs are generally known: a long low barrel of a body with round
-      hams on short legs, hardly any neck, pricked ears and a short thin tail. No tusks are drawn. Its proportions are
+      hams, hardly any neck, pricked ears and a short thin tail, on the plan's own legs, which the low body leaves short. No tusks are drawn. Its proportions are
       a drawing's, and no measurements of any animal. Only compared with its sheet.
   mass:
     prop: body_mass

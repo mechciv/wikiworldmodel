@@ -31,8 +31,8 @@ claims:
             - [0.12, 0.98, 0.42, 0.104]
             - [0.18, 0.92, 0.5, 0.086]
           neck: { r: 0.074, steps: [2, 1] }
-        hind: { y: -0.28, x: 0.082, top: 0.78, r: 0.05 }
-        fore: { y: 0.1, x: 0.082, top: 0.62, r: 0.046 }
+        hind: { y: -0.28, x: 0.058, top: 0.92, r: 0.058 }
+        fore: { y: 0.1, x: 0.052, top: 0.76, r: 0.054 }
         head:
           at:
             stand: { y: 0.23, z: 0.72, pitch: 0.2 }
@@ -48,6 +48,8 @@ claims:
       A machine's reconstruction, from the photograph of the mounted Toxodon skeleton on
       Wikipedia's page for the genus (Toxodon_skeleton_in_BA.JPG): the back highest behind the
       shoulders, short forelegs, a great blunt head held low.
+      The legs are set under the body with their tops inside it, and thickened to the plan's shaped legs: a choice
+      of the drawing.
   mass:
     prop: body_mass
     value: { lo: 100, hi: 2295 }

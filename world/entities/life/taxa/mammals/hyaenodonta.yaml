@@ -37,13 +37,14 @@ claims:
             - [0.12, 0.002, 0.044, 0.05]
             - [0.18, -0.014, 0.032, 0.034]
             - [0.225, -0.022, 0.026, 0.022]
-        hind: { y: -0.17, x: 0.046, top: 0.86, knee: 0.56, ankle: 0.2, r: 0.046 }
-        fore: { y: 0.09, x: 0.05, top: 0.8, r: 0.028 }
+        hind: { y: -0.17, ankle: 0.2 }
+        fore: { y: 0.09 }
         ears: { from: [0.04, 0.004, 0.044], to: [0.052, -0.012, 0.075], r: 0.014 }
         eyes: { at: [0.04, 0.1, 0.03] }
     unsourced: >-
       A machine's reconstruction, from the photograph of Hyaenodon horridus on Wikipedia's
       page for the genus: a long, heavy skull on a long low body, with a thin tail.
+      The legs are the plan's own, set where this body needs them.
   mass:
     prop: body_mass
     value: { lo: 0.03, hi: 880 }

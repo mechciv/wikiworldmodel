@@ -13,7 +13,7 @@ claims:
     prop: body_form
     value:
       parts:
-        legs: { r: 0.034 }
+        legs: { r: 0.031 }
         head:
           rings:
             - [-0.006, 0, 0.018, 0.022]
@@ -25,7 +25,9 @@ claims:
     unsourced: >-
       A machine's reconstruction from memory of published descriptions, unchecked, and the heading
       of the table "Dromaeosaurines" in Holtz (2012) ("Heavy Raptor Dinosaurs"): a short deep skull
-      and thicker legs. No skeletal figure of it was looked at.
+      and thicker legs. No skeletal figure of it was looked at. Its legs are written a little
+      thinner than at first, with the plan's, since a leg is now drawn deep at the thigh with its
+      muscle on the flank; they are as much thicker than the plan's as before.
   length-holtz-2012:
     prop: body_length
     value: 1.8

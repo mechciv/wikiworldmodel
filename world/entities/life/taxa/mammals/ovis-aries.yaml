@@ -36,8 +36,8 @@ claims:
           neck: { r: 0.066, steps: [4, 2] }
         rump: { type: lump, mat: fur, tint: 192, sides: [12, 8], bands: [6, 4], at: [0, -0.345, 0.715], r: [0.176, 0.14, 0.19] }
         chest: { type: lump, mat: fur, tint: 192, sides: [12, 8], bands: [6, 4], at: [0, 0.18, 0.66], r: [0.145, 0.118, 0.16] }
-        hind: { tint: 12, y: -0.3, x: 0.08, top: 0.72, knee: 0.5, ankle: 0.26, r: 0.06, swing: 0.06 }
-        fore: { tint: 12, y: 0.135, x: 0.08, top: 0.6, r: 0.031, swing: 0.06 }
+        hind: { tint: 12 }
+        fore: { tint: 12 }
         head:
           tint: 12
           sides: [12, 6]
@@ -57,7 +57,7 @@ claims:
     unsourced: >-
       A machine's reconstruction of a domestic sheep in its fleece, as woolly sheep are generally known: a deep, wide
       barrel of wool with a rounded rump and chest, a short neck carried level in the wool, a short narrow face with
-      the ears held out to the sides, thin legs and a short hanging tail. No horns are drawn: the account of Ovis
+      the ears held out to the sides, and a short hanging tail; the thin legs under the wool are the plan's own. No horns are drawn: the account of Ovis
       aries on the Animal Diversity Web has sheep bred with and without them. The fleece is set to the palest fur the
       shader has and the face and legs to a dark one, a choice of the drawing and no claim of any breed's colour. Its
       proportions are a drawing's, and no measurements of any animal. Only compared with its sheet.

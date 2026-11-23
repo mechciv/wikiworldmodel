@@ -13,10 +13,11 @@ claims:
     prop: body_form
     value:
       parts:
-        arms: { points: [[0.058, 0.13, 0.8, 0.011], [0.064, 0.14, 0.73, 0.007], [0.056, 0.17, 0.7, 0.004]] }
+        arms: { points: [[0.05, 0.175, 0.74, 0.011], [0.055, 0.167, 0.65, 0.007], [0.05, 0.195, 0.61, 0.004]] }
     unsourced: >-
-      A machine's reconstruction: the plan with arms a little shorter still, from the silhouette
-      "Tarbosaurus Scale.svg" on Wikimedia Commons.
+      A machine's reconstruction: the plan with arms a little shorter still, first drawn from the
+      silhouette "Tarbosaurus Scale.svg" on Wikimedia Commons and since moved, without looking at it
+      again, to the shoulders of the plan's trunk as it was redrawn.
   length-holtz-2012:
     prop: body_length
     value: 10

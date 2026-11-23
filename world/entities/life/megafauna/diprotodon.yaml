@@ -75,8 +75,8 @@ claims:
             - [0.11, 1.2, 0.42, 0.124]
             - [0.18, 1.14, 0.52, 0.1]
           neck: { r: 0.08, steps: [2, 1] }
-        hind: { mat: fur, y: -0.26, x: 0.09, top: 0.74, r: 0.052 }
-        fore: { mat: fur, y: 0.1, x: 0.09, top: 0.74, r: 0.05 }
+        hind: { mat: fur, y: -0.26, x: 0.065, top: 0.84, r: 0.06 }
+        fore: { mat: fur, y: 0.1, x: 0.062, top: 0.88, r: 0.06 }
         head:
           mat: fur
           at:

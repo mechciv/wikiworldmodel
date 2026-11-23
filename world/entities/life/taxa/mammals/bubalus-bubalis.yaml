@@ -20,42 +20,25 @@ claims:
     value:
       hip: 0.48
       parts:
-        body:
-          mat: hide
-          rings:
-            - [-0.468, 0.3, 0.28, 0.006]
-            - [-0.468, 0.38, 0.34, 0.016]
-            - [-0.466, 0.5, 0.48, 0.008]
-            - [-0.458, 0.74, 0.72, 0.011]
-            - [-0.415, 0.975, 0.935, 0.02]
-            - [-0.395, 0.74, 0.68, 0.03]
-            - [-0.37, 0.955, 0.46, 0.112]
-            - [-0.342, 1.005, 0.405, 0.146]
-            - [-0.26, 1.0, 0.4, 0.156]
-            - [-0.14, 1.0, 0.38, 0.162]
-            - [-0.03, 1.01, 0.385, 0.158]
-            - [0.06, 1.04, 0.4, 0.144]
-            - [0.12, 1.05, 0.43, 0.124]
-            - [0.16, 1.03, 0.48, 0.1]
-          neck: { r: 0.07, steps: [4, 2] }
-        rump: { mat: hide, at: [0, -0.342, 0.705], r: [0.143, 0.105, 0.139] }
+        body: { mat: hide }
+        rump: { mat: hide }
         dewlap: null
-        hind: { mat: hide, y: -0.3, top: 0.72, knee: 0.5, ankle: 0.3, r: 0.058 }
-        fore: { mat: hide, y: 0.1, top: 0.54, r: 0.034 }
+        hind: { mat: hide }
+        fore: { mat: hide }
         head:
           mat: hide
           at:
-            stand: { y: 0.325, z: 0.88, pitch: 0.38 }
-            alert: { y: 0.32, z: 0.98, pitch: 0.2 }
-            low: { y: 0.37, reach: 0.225, pitch: 1.2 }
+            stand: { y: 0.35, z: 0.88, pitch: 0.38 }
+            alert: { y: 0.345, z: 0.98, pitch: 0.2 }
         horns: { tint: 170, points: [[0.045, 0.0, 0.03, 0.022], [0.11, -0.03, 0.04, 0.02], [0.17, -0.09, 0.05, 0.016], [0.19, -0.17, 0.06, 0.011], [0.165, -0.24, 0.07, 0.004]] }
         ears: { mat: hide }
     unsourced: >-
-      A machine's reconstruction of a water buffalo: the ox it starts from, in bare hide and with no dewlap, changed
-      as the account of Bubalus bubalis on the Animal Diversity Web and Wikipedia's article describe the swamp
-      buffalo: a heavy, low body, a long face and small ears, a drooping neck, and heavy horns set far apart that
-      sweep out and back in a half circle, on the plane of the forehead. Its proportions are a drawing's, and no
-      measurements of any animal. Only compared with its sheet.
+      A machine's editorial drawing of a water buffalo: the ox it starts from, whole, in bare hide and with no
+      dewlap, standing lower at the hips, the head carried level with the nose forward on a drooping neck and, as the
+      account of Bubalus bubalis on the Animal Diversity Web and Wikipedia's article describe the swamp buffalo,
+      heavy horns set far apart that sweep out and back in a half circle, on the plane of the forehead. The body,
+      legs, face and ears are the ox plan's. Its proportions are a drawing's, and no measurements of any animal. Only
+      compared with its sheet.
   length:
     prop: body_length
     value: { lo: 2.4, hi: 3.0 }

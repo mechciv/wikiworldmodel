@@ -23,9 +23,11 @@ claims:
             - [0, 0.0, 0.71, 0.094, 0.066]
             - [0, 0.0, 0.79, 0.086, 0.056]
             - [0, 0.0, 0.825, 0.05, 0.036]
+        head: { at: { stand: { z: 1.84 }, low: { z: 1.66 } } }
     unsourced: >-
-      A machine's reconstruction, the plan with longer arms for its height and a wider trunk,
-      as the group is generally described; only compared with its sheet.
+      A machine's reconstruction, the plan with longer arms for its height and a wider trunk, as the group is
+      generally described. The head is raised to sit on the neck, as the hips it is measured from stand lower than the
+      plan's. Only compared with its sheet.
   length:
     prop: body_length
     value: { lo: 1.05, hi: 1.51 }

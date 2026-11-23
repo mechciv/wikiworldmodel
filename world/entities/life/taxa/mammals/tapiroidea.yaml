@@ -33,8 +33,8 @@ claims:
             - [0.12, 1.02, 0.52, 0.08]
             - [0.18, 1.02, 0.62, 0.062]
           neck: { r: 0.052, steps: [3, 1] }
-        hind: { y: -0.3, x: 0.066, top: 0.74, r: 0.038 }
-        fore: { y: 0.1, x: 0.066, top: 0.68, r: 0.032 }
+        hind: { y: -0.3, x: 0.05, top: 0.88, r: 0.042 }
+        fore: { y: 0.1, x: 0.045, top: 0.84, r: 0.04 }
         head:
           at:
             stand: { y: 0.245, z: 0.92, pitch: 0.42 }
@@ -52,6 +52,8 @@ claims:
       A machine's reconstruction, from the family's account on the Animal Diversity Web: a
       short fleshy proboscis, a body rounded behind and tapering in front. Only compared with
       its sheet.
+      The legs are set under the body with their tops inside it, and thickened to the plan's shaped legs: a choice
+      of the drawing.
   length:
     prop: body_length
     value: { lo: 1.8, hi: 2.5 }

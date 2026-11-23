@@ -32,8 +32,8 @@ claims:
             - [0.13, 1.24, 0.42, 0.132]
             - [0.19, 1.14, 0.54, 0.098]
           neck: { r: 0.086, steps: [2, 1] }
-        hind: { y: -0.29, x: 0.105, top: 0.72, r: 0.05 }
-        fore: { y: 0.1, x: 0.105, top: 0.7, r: 0.05 }
+        hind: { y: -0.29, x: 0.088, top: 0.84, r: 0.058 }
+        fore: { y: 0.1, x: 0.08, top: 0.86, r: 0.058 }
         head:
           at:
             stand: { y: 0.24, z: 0.96, pitch: 0.12 }
@@ -51,6 +51,8 @@ claims:
       A machine's reconstruction, from the account of Hippopotamus amphibius on the Animal
       Diversity Web: a bulky barrel on short legs, eyes and ears set high on the head. Only
       compared with its sheet.
+      The legs are set under the body with their tops inside it, and thickened to the plan's shaped legs: a choice
+      of the drawing.
   length:
     prop: body_length
     value: { lo: 1.5, hi: 5.05 }

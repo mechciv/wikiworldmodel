@@ -29,8 +29,8 @@ claims:
             - [0.08, 0.98, 0.56, 0.072]
             - [0.15, 0.98, 0.64, 0.056]
           neck: { r: 0.028, steps: [3, 1] }
-        hind: { y: -0.26, x: 0.046, top: 0.86, knee: 0.56, ankle: 0.3, r: 0.05 }
-        fore: { y: 0.1, x: 0.046, top: 0.7, r: 0.018 }
+        hind: { y: -0.26 }
+        fore: { y: 0.1 }
         head:
           at:
             stand: { y: 0.25, z: 1.14, pitch: 0.42 }
@@ -40,7 +40,7 @@ claims:
     unsourced: >-
       A machine's reconstruction, from the photograph of the Hyracotherium mount at the Field
       Museum on Wikipedia's page for that genus (FMNH_Hyracotherium.jpg), a close relative: an
-      arched back, a long tail, no mane.
+      arched back, a long tail, no mane. Its legs are the plan's own, set under its shorter body.
   mass:
     prop: body_mass
     value: { lo: 3.9, hi: 5.4 }

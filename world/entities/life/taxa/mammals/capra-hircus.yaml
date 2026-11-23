@@ -20,28 +20,29 @@ claims:
           tint: 44
           sides: [14, 8]
           rings:
-            - [-0.49, 1.11, 1.08, 0.007]
-            - [-0.455, 1.06, 1.0, 0.013]
-            - [-0.41, 0.99, 0.91, 0.019]
-            - [-0.385, 0.77, 0.7, 0.03]
-            - [-0.35, 0.955, 0.5, 0.1]
-            - [-0.33, 1.003, 0.457, 0.132]
-            - [-0.24, 0.995, 0.435, 0.14]
-            - [-0.12, 0.985, 0.42, 0.144]
-            - [0.0, 0.985, 0.43, 0.14]
-            - [0.09, 1.0, 0.46, 0.127]
-            - [0.15, 1.03, 0.52, 0.108]
-            - [0.195, 1.06, 0.61, 0.086]
-          neck: { r: 0.052, steps: [4, 2] }
-        rump: { type: lump, mat: fur, tint: 44, sides: [12, 8], bands: [6, 4], at: [0, -0.33, 0.73], r: [0.128, 0.115, 0.155] }
-        hind: { tint: 44, y: -0.3, x: 0.054, top: 0.76, knee: 0.54, ankle: 0.28, r: 0.054, swing: 0.065 }
-        fore: { tint: 44, y: 0.11, x: 0.062, top: 0.62, r: 0.032, swing: 0.065 }
+            - [-0.47, 1.12, 1.09, 0.007]
+            - [-0.445, 1.07, 1.01, 0.013]
+            - [-0.415, 1.0, 0.92, 0.019]
+            - [-0.395, 0.8, 0.74, 0.028]
+            - [-0.37, 0.97, 0.62, 0.07]
+            - [-0.32, 1.005, 0.55, 0.092]
+            - [-0.22, 0.995, 0.54, 0.1]
+            - [-0.11, 0.985, 0.5, 0.108]
+            - [0.0, 0.985, 0.49, 0.106]
+            - [0.085, 1.0, 0.5, 0.096]
+            - [0.145, 1.025, 0.525, 0.082]
+            - [0.185, 1.03, 0.59, 0.068]
+            - [0.21, 1.01, 0.68, 0.054]
+          neck: { r: 0.044, steps: [4, 2] }
+        rump: { type: lump, mat: fur, tint: 44, sides: [12, 8], bands: [6, 4], at: [0, -0.335, 0.76], r: [0.088, 0.075, 0.125] }
+        hind: { tint: 44 }
+        fore: { tint: 44 }
         head:
           tint: 44
           sides: [12, 6]
           at:
-            stand: { y: 0.3, z: 1.23, pitch: 0.62 }
-            alert: { y: 0.29, z: 1.35, pitch: 0.38 }
+            stand: { y: 0.315, z: 1.25, pitch: 0.62 }
+            alert: { y: 0.305, z: 1.37, pitch: 0.38 }
             low: { y: 0.36, reach: 0.22, pitch: 1.2 }
           rings:
             - [-0.018, 0.004, 0.038, 0.041]
@@ -56,7 +57,7 @@ claims:
     unsourced: >-
       A machine's reconstruction of a domestic goat, from the account of Capra hircus on the Animal Diversity Web: a
       beard and scimitar horns, which it gives the males, erect ears, and a short tail curved upward. The rest is as
-      goats are generally known: a leaner and narrower body than a sheep's, on longer legs, with the neck held up. Its
+      goats are generally known: a leaner and narrower body than a sheep's, with the neck held up, on the plan's own legs. Its
       coat is set to a plain brown fur, to tell it from the sheep beside it: a choice of the drawing and no claim of
       any breed's colour. Its proportions are a drawing's, and no measurements of any animal. Only compared with its
       sheet.

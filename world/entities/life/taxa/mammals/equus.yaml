@@ -10,13 +10,20 @@ claims:
     prop: name
     value: { la: Equus, en: "horses, asses and zebras" }
     unsourced: The classification's own name, with an editorial gloss in English.
+  body-plan:
+    prop: body_plan
+    value: horse
+    unsourced: >-
+      Which plan draws it and everything below it: an editorial classification, from its place in the tree. The plan
+      is a machine's drawing of a horse as horses, asses and zebras are generally known, with the short upright mane
+      of the wild ones; it was only compared with its sheet.
   form:
     prop: body_form
     value:
       hip: 0.62
     unsourced: >-
-      A machine's reconstruction, the same as its family's, a little taller at the hips; only
-      compared with its sheet.
+      A machine's editorial drawing: the hips stand as high as the horse plan the genus names has them, and no part
+      of that plan is changed; only compared with its sheet.
   length:
     prop: body_length
     value: { lo: 2.25, hi: 2.7 }

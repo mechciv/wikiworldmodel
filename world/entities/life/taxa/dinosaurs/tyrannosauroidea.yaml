@@ -32,7 +32,7 @@ claims:
             - [0.17, 1.0, 0.6, 0.04]
             - [0.22, 1.04, 0.8, 0.026]
           neck: { r: 0.02, steps: [4, 1] }
-        legs: { x: 0.042, top: 0.86, knee: 0.52, ankle: 0.26, r: 0.034 }
+        legs: { x: 0.03, top: 0.86, knee: 0.52, ankle: 0.26, r: 0.032 }
         arms: { points: [[0.044, 0.17, 0.76, 0.012], [0.05, 0.16, 0.5, 0.009], [0.046, 0.22, 0.34, 0.007], [0.042, 0.26, 0.28, 0.004]] }
         claws: { from: [0.042, 0.255, 0.285], to: [0.04, 0.285, 0.18], r: 0.0042 }
         head:
@@ -42,7 +42,9 @@ claims:
             low: { y: 0.31, z: 0.66, pitch: 0.55 }
     unsourced: >-
       A machine's reconstruction: a slim long-armed body on the plan's head, from the silhouette
-      "Guanlong scale.png" on Wikimedia Commons.
+      "Guanlong scale.png" on Wikimedia Commons. Its legs are written a little thinner and nearer
+      the middle than at first, by eye on its sheet: a leg is now drawn deep at the thigh with its
+      muscle on the flank, and the first figures made the thighs stand out of the hips.
   length:
     prop: body_length
     value: { lo: 1.3, hi: 10 }

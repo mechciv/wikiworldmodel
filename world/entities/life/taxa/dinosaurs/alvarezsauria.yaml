@@ -43,11 +43,13 @@ claims:
             - [0.04, -0.003, 0.006, 0.0065]
             - [0.085, -0.008, 0.002, 0.002]
         eyes: { at: [0.011, 0.018, 0.005], r: 0.0034 }
+        jaw: { rings: [[0.004, -0.0095, 0.009, 0.004], [0.04, -0.008, 0.005, 0.003], [0.08, -0.0095, 0.002, 0.0015]] }
     unsourced: >-
       A machine's reconstruction: long legs, a thin snout and a long tail, from Mononykus and
       Shuvuuia in the silhouette "Alvarezsaurid scale martyniuk.png" on Wikimedia Commons; its arm
       and single claw, too small to see there, follow the heading of the tables in Holtz (2012)
-      ("Thumb-Clawed Dinosaurs").
+      ("Thumb-Clawed Dinosaurs"). Its lower jaw is the plan's, drawn down to fit under this thin
+      snout.
   length:
     prop: body_length
     value: { lo: 0.3, hi: 2.5 }

@@ -33,8 +33,6 @@ claims:
             - [0.19, 1.02, 0.66, 0.07]
           neck: { r: 0.046, steps: [5, 2] }
         rump: { type: lump, mat: fur, sides: [12, 8], bands: [6, 4], at: [0, -0.36, 0.76], r: [0.108, 0.1, 0.143] }
-        hind: { y: -0.31, x: 0.06, top: 0.78, knee: 0.56, ankle: 0.32, r: 0.06, swing: 0.07 }
-        fore: { y: 0.1, x: 0.058, top: 0.62, r: 0.033, swing: 0.07 }
         head:
           sides: [12, 6]
           at:
@@ -52,7 +50,7 @@ claims:
     unsourced: >-
       A machine's reconstruction of a llama, from the account of Lama glama on the Animal Diversity Web: a long neck
       and long limbs, a rounded muzzle, no hump, and a long shaggy coat. The rest is as llamas are generally known:
-      the neck held upright, long ears, and a short tail. Its proportions are a drawing's, and no measurements of any
+      the neck held upright, long ears, and a short tail; the legs are the plan's own. Its proportions are a drawing's, and no measurements of any
       animal. Only compared with its sheet.
   length:
     prop: body_length

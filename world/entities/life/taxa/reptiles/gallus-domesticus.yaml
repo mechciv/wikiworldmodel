@@ -30,7 +30,7 @@ claims:
             - [0.165, 1.5, 0.82, 0.1]
             - [0.2, 1.52, 1.0, 0.072]
           neck: { r: 0.04, steps: [3, 1] }
-        legs: { y: -0.01, x: 0.055, top: 0.85, knee: 0.56, ankle: 0.32, r: 0.042, swing: 0.07 }
+        legs: { y: -0.01, x: 0.055, top: 0.85, knee: 0.56, ankle: 0.32, r: 0.03, swing: 0.07 }
         wings: { shoulder: [0.13, 0.12, 1.35], span: 0.5, chord: 0.3, sweep: 0.08, folded: 0.3, drop: 0.4 }
         head:
           at:
@@ -51,7 +51,8 @@ claims:
       A machine's reconstruction of a domestic hen, as hens are generally known: a plump upright body on short legs,
       the tail carried up as a blade of feathers, a small head with a comb and wattles, a short bill, and the wings
       folded on the flanks. The comb and wattles are drawn in the shader's membrane, the warmest colour it has. Its
-      proportions are a drawing's, and no measurements of any animal. Only compared with its sheet.
+      proportions are a drawing's, and no measurements of any animal. The legs are drawn slim enough for the thighs to sit
+      inside the body. Only compared with its sheet.
   mass:
     prop: body_mass
     value: { lo: 1.26, hi: 3.55 }

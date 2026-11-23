@@ -32,14 +32,16 @@ claims:
             stand: { y: 0.25, z: 1.1, pitch: 0.34 }
             alert: { y: 0.25, z: 1.26, pitch: 0.14 }
             low: { y: 0.27, reach: 0.21, pitch: 0.75 }
-        hind: { y: -0.27, x: 0.1, top: 0.86, r: 0.05 }
-        fore: { y: 0.1, x: 0.1, top: 0.84, r: 0.048 }
+        hind: { y: -0.27, x: 0.086, top: 0.92, r: 0.056 }
+        fore: { y: 0.1, x: 0.077, top: 0.94, r: 0.056 }
         frontal: null
         nasal: { from: [0, 0.2, 0.024], to: [0, 0.205, 0.08], r: 0.022 }
     unsourced: >-
       A machine's reconstruction, from the restoration by Horsfall (1912) on Wikipedia's page
       for the genus (Teleoceras_Horsfall.jpg): a hippopotamus-like barrel on very short legs,
       and a small horn.
+      The legs are set under the body with their tops inside it, and thickened to the plan's shaped legs: a choice
+      of the drawing.
   length:
     prop: body_length
     value: 4

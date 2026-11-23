@@ -13,10 +13,11 @@ claims:
     prop: body_form
     value:
       parts:
-        crest: { at: [0, 0.05, 0.05], r: [0.012, 0.056, 0.042] }
+        crest: { at: [0, 0.05, 0.036], r: [0.012, 0.052, 0.046] }
     unsourced: >-
-      A machine's reconstruction: a tall rounded helmet of a crest, from the silhouette
-      "Corythosaurus Scale.svg" on Wikimedia Commons.
+      A machine's reconstruction: a tall rounded helmet of a crest, first drawn from the silhouette
+      "Corythosaurus Scale.svg" on Wikimedia Commons and since set, without looking at it again, on
+      the roof of the plan's head as it was redrawn shorter and lower.
   length-holtz-2012:
     prop: body_length
     value: 9

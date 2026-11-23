@@ -29,7 +29,7 @@ claims:
             - [0.17, 1.76, 1.14, 0.044]
           neck: { r: 0.028, steps: [3, 1] }
         tail-vanes: { type: sheet, mat: feather, mirror: true, near: true, points: [[0.006, -0.17, 1.12], [0.05, -0.24, 1.08], [0.056, -0.44, 1.05], [0.008, -0.52, 1.04]] }
-        legs: { y: -0.02, x: 0.04, top: 1.0, knee: 0.66, ankle: 0.34, r: 0.034, swing: 0.1 }
+        legs: { y: -0.02, x: 0.04, top: 1.0, knee: 0.66, ankle: 0.34, r: 0.022, swing: 0.1 }
         wings: { shoulder: [0.07, 0.12, 1.5], span: 0.72, chord: 0.24, sweep: 0.14, folded: 0.32, drop: 0.5 }
         finger-claws: { type: spike, mat: horn, mirror: true, near: true, not: [fly], from: [0.08, 0.14, 1.38], to: [0.09, 0.19, 1.16], r: 0.006, sides: [4, 3] }
         head:
@@ -46,7 +46,7 @@ claims:
         bill: null
         snout: { type: tube, on: head, sides: [6, 4], rings: [[0.09, -0.005, 0.018, 0.018], [0.14, -0.01, 0.012, 0.012], [0.18, -0.014, 0.006, 0.006]] }
         eyes: { at: [0.03, 0.04, 0.012], r: 0.01 }
-    unsourced: "A machine's reconstruction from what is known of the animal in general: a long bony tail with feathers down both sides, jaws in place of a bill and clawed fingers on the wing. No skeletal figure was looked at. It is drawn on the ground, as how well it flew is not settled by anything read here."
+    unsourced: "A machine's reconstruction from what is known of the animal in general: a long bony tail with feathers down both sides, jaws in place of a bill and clawed fingers on the wing. No skeletal figure was looked at. It is drawn on the ground, as how well it flew is not settled by anything read here. Its legs are drawn slim, so that the thighs sit in the feathers of the body: a choice of the drawing."
   length:
     prop: body_length
     value: 0.4

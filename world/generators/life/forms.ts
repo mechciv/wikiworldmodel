@@ -399,11 +399,12 @@ function digitigrade(m: Mesh, side: number, s: Stance, p: Part, swing: number): 
     [x, fy + r * 0.12, fz * 0.3, r * 0.34, 1.3],
   ];
   leg(m, pts, n);
-  // Where it leaves the body, the muscle of the haunch.
-  if (detail >= 2) {
+  // Where it leaves the body, the muscle of the haunch: as much of it as `muscle` says, none at 0.
+  const muscle = num(p, 'muscle', 1);
+  if (detail >= 2 && muscle > 0) {
     // No higher than the hip itself: it rounds the flank, and stands out of the back nowhere.
-    const rz = Math.min(r * 1.9, top * H * 0.3);
-    lump(m, x, y0 + (ky - y0) * 0.14, top * H - rz * 0.9, r * 0.78, r * 1.5, rz, 9, 5);
+    const rz = Math.min(r * 1.9, top * H * 0.3) * muscle;
+    lump(m, x, y0 + (ky - y0) * 0.14, top * H - rz * 0.9, r * 0.78 * Math.min(1, muscle), r * 1.5 * muscle, rz, 9, 5);
   }
   if (p.toes !== false && detail >= 2) {
     for (const k of [-1, 0, 1]) {
@@ -436,9 +437,13 @@ function pillar(m: Mesh, side: number, s: Stance, p: Part, swing: number): void 
     [x * 1.05, fy + r * 0.1, lift, r * 0.82, 1.2],
   ];
   leg(m, pts, n);
-  if (detail >= 2) {
-    const rz = Math.min(r * 2, top * H * 0.28);
-    lump(m, x, y0, top * H - rz * 0.9, r * 0.8, r * 1.5, rz, 9, 5);
+  // Where it leaves the body, the muscle of the shoulder or the hip: no deeper fore and aft than the leg's own top, and
+  // short, so that under a high belly it rounds the joint and does not stand out of the leg as a pad. `muscle` is how
+  // much of it there is, none at 0.
+  const muscle = num(p, 'muscle', 1);
+  if (detail >= 2 && muscle > 0) {
+    const rz = Math.min(r * 1.5, top * H * 0.22) * muscle;
+    lump(m, x, y0, top * H - rz * 0.9, r * 0.8 * Math.min(1, muscle), r * 1.2 * muscle, rz, 9, 5);
   }
 }
 
@@ -814,8 +819,8 @@ export const PART_TYPES: Record<string, { kind: 'animal' | 'plant'; fields: stri
   chain: { kind: 'animal', fields: ['points', 'flat', 'swing', 'phase'], needs: ['points'] },
   lump: { kind: 'animal', fields: ['at', 'r', 'bands', 'sway'], needs: ['at', 'r'] },
   spike: { kind: 'animal', fields: ['from', 'to', 'r', 'sway'], needs: ['from', 'to'] },
-  pillar: { kind: 'animal', fields: ['y', 'x', 'top', 'r', 'swing', 'phase'], needs: ['y', 'x', 'top', 'r'] },
-  digitigrade: { kind: 'animal', fields: ['y', 'x', 'top', 'knee', 'ankle', 'r', 'swing', 'phase', 'toes'], needs: ['y', 'x', 'top', 'r'] },
+  pillar: { kind: 'animal', fields: ['y', 'x', 'top', 'r', 'swing', 'phase', 'muscle'], needs: ['y', 'x', 'top', 'r'] },
+  digitigrade: { kind: 'animal', fields: ['y', 'x', 'top', 'knee', 'ankle', 'r', 'swing', 'phase', 'toes', 'muscle'], needs: ['y', 'x', 'top', 'r'] },
   fan: { kind: 'animal', fields: ['at', 'dir', 'r', 'across', 'tall', 'raise', 'scallop', 'scallops', 'arc', 'gap'], needs: ['at', 'dir', 'r'] },
   eyes: { kind: 'animal', fields: ['at', 'r'], needs: ['at', 'r'] },
   bands: { kind: 'animal', fields: ['rows', 'y', 'step', 'middle', 'fall', 'wide', 'top', 'low', 'out', 'spike', 'scute'], needs: [] },

@@ -1,5 +1,6 @@
 description: >-
-  A horned, frilled, four-legged plant-eating dinosaur.
+  A horned, frilled, four-legged plant-eating dinosaur: a barrel of a body highest at the hips, a short drooping
+  tail, and a great low-slung head with a parrot's beak, cheek horns and a shield over the neck.
 kind: animal
 hip: 0.32
 behave: { group: [1, 5], habitat: open, poses: [graze, graze, stand, walk, alert] }
@@ -7,33 +8,44 @@ parts:
   body:
     type: trunk
     rings:
-      - [-0.52, 0.2, 0.17, 0.006]
-      - [-0.44, 0.36, 0.22, 0.026]
-      - [-0.34, 0.6, 0.28, 0.052]
-      - [-0.24, 0.87, 0.32, 0.08]
-      - [-0.14, 1.07, 0.32, 0.112]
-      - [-0.05, 1.14, 0.28, 0.14]
-      - [0.05, 1.12, 0.26, 0.15]
-      - [0.14, 1.02, 0.3, 0.135]
-      - [0.2, 0.9, 0.38, 0.105]
-    neck: { r: 0.066, steps: [3, 1] }
-  hind: { type: pillar, y: -0.11, x: 0.112, top: 0.74, r: 0.064, swing: 0.05 }
-  fore: { type: pillar, y: 0.15, x: 0.122, top: 0.62, r: 0.05, swing: 0.05, phase: 1 }
+      - [-0.5, 0.36, 0.3, 0.006]
+      - [-0.43, 0.52, 0.36, 0.02]
+      - [-0.35, 0.72, 0.4, 0.04]
+      - [-0.27, 0.9, 0.4, 0.064]
+      - [-0.19, 1.02, 0.37, 0.09]
+      - [-0.11, 1.08, 0.33, 0.115]
+      - [-0.02, 1.07, 0.3, 0.122]
+      - [0.07, 1.01, 0.3, 0.12]
+      - [0.15, 0.93, 0.33, 0.108]
+      - [0.21, 0.86, 0.33, 0.095]
+      - [0.235, 0.8, 0.38, 0.078]
+      - [0.262, 0.75, 0.42, 0.06]
+    neck: { r: 0.045, steps: [2, 1] }
+  hind: { type: pillar, y: -0.1, x: 0.062, top: 0.76, r: 0.045, swing: 0.05 }
+  fore: { type: pillar, y: 0.165, x: 0.06, top: 0.7, r: 0.035, swing: 0.05, phase: 1 }
+  # From the neck joint forward: a short neck under the shield, then the skull, widest at the cheeks, narrowing down to
+  # the beak. The snout ends where it always did, so that a beak or a horn written for it still sits on it.
   head:
     type: head
     at:
-      stand: { y: 0.25, z: 0.68, pitch: 0.16 }
-      alert: { y: 0.24, z: 0.8, pitch: -0.1 }
-      low: { y: 0.27, reach: 0.28, pitch: 0.62 }
+      stand: { y: 0.238, z: 0.6, pitch: 0.24 }
+      alert: { y: 0.235, z: 0.72, pitch: 0.02 }
+      low: { y: 0.262, z: 0.62, pitch: 0.6 }
     rings:
-      - [-0.01, 0.0, 0.06, 0.06]
-      - [0.06, 0.012, 0.074, 0.08]
-      - [0.12, 0.0, 0.062, 0.066]
-      - [0.18, -0.02, 0.038, 0.046]
+      - [0, 0, 0.042, 0.04]
+      - [0.045, 0.002, 0.044, 0.043]
+      - [0.08, -0.002, 0.058, 0.058]
+      - [0.11, -0.003, 0.066, 0.059]
+      - [0.14, -0.004, 0.054, 0.054]
+      - [0.185, -0.016, 0.036, 0.042]
       - [0.23, -0.034, 0.02, 0.028]
-    thin: false
-  beak: { type: tube, on: head, mat: horn, tint: 90, sides: [8, 4], thin: false, rings: [[0.23, -0.034, 0.019, 0.026], [0.27, -0.052, 0.002, 0.004]] }
-  frill: { type: fan, on: head, tint_add: 40, at: [0, 0.05], dir: [-0.62, 0.78], r: 0.2, scallop: 0.045, scallops: 18 }
-  brow: { type: spike, on: head, mirror: true, tint: 60, from: [0.036, 0.09, 0.07], to: [0.05, 0.235, 0.17], r: 0.02, sides: [7, 4] }
-  nose: { type: spike, on: head, tint: 60, from: [0, 0.185, 0.012], to: [0, 0.205, 0.066], r: 0.015, sides: [7, 4] }
-  eyes: { type: eyes, on: head, near: true, at: [0.066, 0.095, 0.036], r: 0.01 }
+  mouth: { type: tube, on: head, near: true, mat: dark, sides: [8, 4], rings: [[0.11, -0.03, 0.06, 0.003], [0.14, -0.032, 0.0475, 0.003], [0.185, -0.036, 0.033, 0.003], [0.228, -0.042, 0.021, 0.003]] }
+  beak: { type: tube, on: head, mat: horn, tint: 90, sides: [8, 4], thin: false, rings: [[0.225, -0.03, 0.02, 0.028], [0.248, -0.046, 0.011, 0.018], [0.262, -0.066, 0.002, 0.004]] }
+  # The shield: a fan for its middle and its rim, and a wing on each side of it that slopes down over the neck to the cheek.
+  frill: { type: fan, on: head, tint_add: 40, at: [0.07, 0.04], dir: [-0.87, 0.5], r: 0.105, across: 0.72, scallop: 0.04, scallops: 14 }
+  frill-sides: { type: sheet, on: head, mirror: true, mat: hide, tint_add: 40, points: [[0.058, 0.098, 0.03], [0.068, 0.02, 0.07], [0.06, -0.03, 0.096], [0.115, -0.012, 0.05], [0.105, 0.07, -0.006]] }
+  brow: { type: spike, on: head, mirror: true, tint: 60, from: [0.04, 0.125, 0.04], to: [0.055, 0.215, 0.135], r: 0.016, sides: [7, 4] }
+  nose: { type: spike, on: head, tint: 60, from: [0, 0.19, 0.012], to: [0, 0.207, 0.056], r: 0.013, sides: [7, 4] }
+  cheeks: { type: lump, on: head, mirror: true, at: [0.06, 0.106, -0.03], r: [0.013, 0.022, 0.024], sides: [10, 5], bands: [6, 3] }
+  jugals: { type: spike, on: head, near: true, mirror: true, tint: 60, from: [0.066, 0.104, -0.042], to: [0.084, 0.1, -0.062], r: 0.008, sides: [6, 4] }
+  eyes: { type: eyes, on: head, near: true, at: [0.055, 0.128, 0.022], r: 0.0065 }

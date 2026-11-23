@@ -14,20 +14,14 @@ claims:
     prop: body_form
     value:
       parts:
-        nose: { from: [0, 0.18, 0.016], to: [0, 0.225, 0.13], r: 0.019 }
-        brow: { from: [0.036, 0.09, 0.07], to: [0.044, 0.125, 0.11], r: 0.012 }
-        frill: { r: 0.17, across: 0.76, scallop: 0.09, scallops: 10 }
-        head:
-          rings:
-            - [-0.01, 0.0, 0.06, 0.06]
-            - [0.06, 0.012, 0.074, 0.08]
-            - [0.12, 0.004, 0.062, 0.072]
-            - [0.18, -0.014, 0.04, 0.056]
-            - [0.23, -0.034, 0.02, 0.032]
+        nose: { from: [0, 0.185, 0.012], to: [0, 0.215, 0.092], r: 0.014 }
+        brow: { from: [0.04, 0.125, 0.04], to: [0.046, 0.15, 0.068], r: 0.009 }
+        frill: { r: 0.095, across: 0.8, scallop: 0.09, scallops: 10 }
     unsourced: >-
-      A machine's reconstruction: a big upright nose horn, small brow horns, a short scalloped frill
-      and a deeper snout than the plan, from the silhouettes "Centrosaurus Scale.svg" and
-      "Styracosaurus Scale.svg" on Wikimedia Commons.
+      A machine's reconstruction: a big upright nose horn, small brow horns and a short scalloped
+      frill, first drawn from the silhouettes "Centrosaurus Scale.svg" and "Styracosaurus Scale.svg"
+      on Wikimedia Commons and since scaled, without looking at them again, to the plan's head as
+      it was redrawn smaller. The deeper snout once written here is left to the plan.
   length:
     prop: body_length
     value: { lo: 2.5, hi: 8 }

@@ -13,11 +13,13 @@ claims:
     prop: body_form
     value:
       parts:
-        frill: { r: 0.1, dir: [-0.9, 0.42], scallop: 0.0 }
+        frill: { r: 0.05, dir: [-0.95, 0.31], scallop: 0.0 }
+        frill-sides: { points: [[0.058, 0.098, 0.03], [0.041, 0.044, 0.048], [0.037, 0.018, 0.055], [0.07, 0.027, 0.034], [0.072, 0.07, 0.0]] }
     unsourced: >-
       A machine's reconstruction: a very small frill, from the heading of the table
       "Leptoceratopsids" in Holtz (2012) ("Small-Frilled Dinosaurs"); no skeletal figure of them was
-      looked at.
+      looked at. It is scaled to the plan's head and frill as they were redrawn smaller, and the
+      plan's side panels are drawn in to this frill's rim.
   length:
     prop: body_length
     value: { lo: 0.6, hi: 4.5 }

@@ -32,8 +32,8 @@ claims:
             - [0.08, 1.06, 0.58, 0.068]
             - [0.15, 1.02, 0.64, 0.056]
           neck: { r: 0.038, steps: [3, 1] }
-        hind: { y: -0.15, x: 0.048, top: 0.92, knee: 0.56, ankle: 0.2, r: 0.05 }
-        fore: { y: 0.1, x: 0.05, top: 0.78, r: 0.024 }
+        hind: { y: -0.15, top: 0.92, knee: 0.56, ankle: 0.2 }
+        fore: { y: 0.1 }
         head:
           at:
             stand: { y: 0.24, z: 1.1, pitch: 0.2 }
@@ -49,7 +49,7 @@ claims:
         eyes: { at: [0.03, 0.065, 0.018] }
     unsourced: >-
       A machine's reconstruction, from the form written for Phenacodontidae, whose mount was
-      looked at; no skeleton of this family was.
+      looked at; no skeleton of this family was. The legs take their thickness from the plan.
   length:
     prop: body_length
     value: 1

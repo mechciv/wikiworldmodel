@@ -32,7 +32,7 @@ claims:
             - [0.249, 1.73, 1.55, 0.019]
             - [0.287, 1.88, 1.72, 0.016]
           neck: { r: 0.012, steps: [2, 1] }
-        legs: { y: 0.0, x: 0.045, top: 0.9, knee: 0.52, ankle: 0.2, r: 0.03 }
+        legs: { y: 0.0, x: 0.036, top: 0.9, knee: 0.52, ankle: 0.2, r: 0.028 }
         arms: { points: [[0.05, 0.2, 0.98, 0.013], [0.056, 0.18, 0.6, 0.011], [0.052, 0.2, 0.3, 0.008], [0.05, 0.225, 0.2, 0.005]] }
         claws: { from: [0.05, 0.222, 0.21], to: [0.045, 0.268, 0.09], r: 0.0065 }
         head:
@@ -50,7 +50,9 @@ claims:
       A machine's reconstruction, its proportions and the outline of its sail measured from the
       digital skeleton in Figure 1A of Sereno et al. (2022), in the copy "Digital skeletal
       reconstructions of Spinosaurus and Suchomimus.png" on Wikimedia Commons. The skin between the
-      spines is assumed.
+      spines is assumed. Its legs are written a little thinner and nearer the middle than they were
+      measured, by eye on its sheet: a leg is now drawn deep at the thigh with its muscle on the
+      flank, and the first figures made the thighs stand out of the hips.
   length-holtz-2012:
     prop: body_length
     value: 16

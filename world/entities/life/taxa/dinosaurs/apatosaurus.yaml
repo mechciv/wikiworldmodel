@@ -13,12 +13,14 @@ claims:
     prop: body_form
     value:
       parts:
-        hind: { r: 0.044 }
-        fore: { r: 0.034 }
+        hind: { r: 0.033 }
+        fore: { r: 0.026 }
     unsourced: >-
       A machine's reconstruction: thicker limbs than the Brontosaurus parvus the family's form was
       measured from, as A. louisae and A. ajax show beside it in "Apatosaurus scale mmartyniuk
-      wiki.png" on Wikimedia Commons.
+      wiki.png" on Wikimedia Commons. They are written thinner than at first, with the family's,
+      since a leg is now drawn deep at the thigh with its muscle on the flank; they are as much
+      thicker than the family's as before.
   length-holtz-2012:
     prop: body_length
     value: 26

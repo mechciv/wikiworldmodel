@@ -13,11 +13,13 @@ claims:
     prop: body_form
     value:
       parts:
-        crest: { at: [0, 0.06, 0.05], r: [0.012, 0.034, 0.036] }
-        spur: { type: spike, on: head, tint_add: 18, from: [0, 0.035, 0.05], to: [0, -0.05, 0.088], r: 0.012, sides: [6, 3] }
+        crest: { at: [0, 0.062, 0.04], r: [0.012, 0.03, 0.036] }
+        spur: { type: spike, on: head, tint_add: 18, from: [0, 0.04, 0.046], to: [0, -0.035, 0.07], r: 0.01, sides: [6, 3] }
     unsourced: >-
-      A machine's reconstruction: a forward lobe and a backward spur, from the silhouette
-      "Lambeosaurus size comparison II-v1.svg" on Wikimedia Commons.
+      A machine's reconstruction: a forward lobe and a backward spur, first drawn from the
+      silhouette "Lambeosaurus size comparison II-v1.svg" on Wikimedia Commons and since set,
+      without looking at it again, on the roof of the plan's head as it was redrawn shorter and
+      lower.
   length-holtz-2012:
     prop: body_length
     value: 9

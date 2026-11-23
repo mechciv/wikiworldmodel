@@ -25,7 +25,7 @@ claims:
             - [0.16, 0.97, 0.54, 0.05]
             - [0.22, 1.02, 0.74, 0.04]
           neck: { r: 0.03, steps: [3, 1] }
-        legs: { x: 0.05, top: 0.82, knee: 0.52, ankle: 0.2, r: 0.046 }
+        legs: { x: 0.036, top: 0.82, knee: 0.52, ankle: 0.2, r: 0.04 }
         arms: { points: [[0.05, 0.19, 0.68, 0.01], [0.054, 0.205, 0.6, 0.007], [0.052, 0.225, 0.56, 0.0045]] }
         claws: null
         head:
@@ -45,7 +45,9 @@ claims:
     unsourced: >-
       A machine's reconstruction: a short deep skull, a thick neck and arms cut down to stumps, from
       the silhouettes "Carnotaurus Size Chart.png" and "Majungasaurus size chart.png" on Wikimedia
-      Commons.
+      Commons. Its legs are written a little thinner and nearer the middle than at first, by eye on
+      its sheet: a leg is now drawn deep at the thigh with its muscle on the flank, and the first
+      figures made the thighs stand out of the hips.
   length:
     prop: body_length
     value: { lo: 4.2, hi: 11 }

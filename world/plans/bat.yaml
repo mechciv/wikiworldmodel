@@ -6,7 +6,7 @@ hip: 0.5
 mass_length: 25
 behave: { group: [4, 24], habitat: air, poses: [fly], flies: [2, 40] }
 parts:
-  body: { type: lump, mat: fur, zl: true, sides: [8, 4], bands: [5, 3], at: [0, -0.06, 0.5], r: [0.12, 0.36, 0.12] }
+  body: { type: lump, mat: fur, zl: true, sides: [10, 5], bands: [7, 3], at: [0, -0.06, 0.5], r: [0.12, 0.36, 0.12] }
   head: 
     type: head
     mat: fur

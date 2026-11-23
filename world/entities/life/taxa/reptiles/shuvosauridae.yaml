@@ -21,9 +21,9 @@ claims:
       parts:
         body: { mat: hide }
         legs: { mat: hide }
-        arms: { mat: hide, points: [[0.03, 0.06, 1.06, 0.01], [0.04, 0.04, 0.9, 0.007], [0.036, 0.08, 0.8, 0.005]] }
+        arms: { mat: hide, points: [[0.04, 0.14, 0.86, 0.01], [0.048, 0.11, 0.74, 0.007], [0.044, 0.15, 0.68, 0.005]] }
         head: { mat: hide }
-    unsourced: "A machine's reconstruction from what is known of the group in general: the two-legged body of the plan, scaled and not feathered, with short arms. No skeletal figure was looked at."
+    unsourced: "A machine's reconstruction from what is known of the group in general: the two-legged body of the plan, scaled and not feathered, with short arms, which are moved to the shoulders of the plan's trunk as it was redrawn. No skeletal figure was looked at."
   posture:
     prop: posture
     value: biped

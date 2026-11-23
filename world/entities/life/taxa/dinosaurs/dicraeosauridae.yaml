@@ -42,8 +42,8 @@ claims:
             - [0.131, 0.96, 0.23, 0.06]
             - [0.196, 0.92, 0.615, 0.036]
           neck: { r: 0.012, steps: [6, 2] }
-        hind: { y: 0.0, x: 0.04, top: 0.72, r: 0.034 }
-        fore: { y: 0.163, x: 0.042, top: 0.72, r: 0.027 }
+        hind: { y: 0.0, x: 0.028, top: 0.72, r: 0.026 }
+        fore: { y: 0.163, x: 0.03, top: 0.72, r: 0.021 }
         head:
           at:
             stand: { y: 0.327, z: 1.08, pitch: 0.5 }
@@ -59,7 +59,9 @@ claims:
     unsourced: >-
       A machine's reconstruction, its outline measured from the skeletal diagram "Dicraeosaurus
       hansemanni Skeletal Diagram.svg" on Wikimedia Commons: a short arched neck, a deep body and a
-      downturned head. The tall spines are drawn as the height of the back.
+      downturned head. The tall spines are drawn as the height of the back. Its legs are written
+      thinner and nearer the middle than at first, by eye on its sheet: a leg is now drawn deep at
+      the thigh with its muscle on the flank, and the first figures made them stand out of the body.
   length:
     prop: body_length
     value: { lo: 10, hi: 21 }

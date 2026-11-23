@@ -19,30 +19,11 @@ claims:
     prop: body_form
     value:
       mass_length: 4.4
-      parts:
-        body:
-          rings:
-            - [-0.66, 0.92, 0.9, 0.003]
-            - [-0.52, 0.98, 0.92, 0.009]
-            - [-0.37, 1.03, 0.93, 0.016]
-            - [-0.22, 1.1, 0.88, 0.028]
-            - [-0.09, 1.19, 0.74, 0.0414]
-            - [0.02, 1.22, 0.64, 0.046]
-            - [0.09, 1.22, 0.72, 0.0368]
-        head:
-          at:
-            stand: { y: 0.2, z: 1.42, pitch: 0.12 }
-            low: { y: 0.27, reach: 0.0825, clear: 0.06, pitch: 0.8 }
-          rings:
-            - [-0.0075, 0, 0.02, 0.02]
-            - [0.03, 0.0015, 0.023, 0.023]
-            - [0.07, -0.0045, 0.0135, 0.012]
-            - [0.095, -0.0075, 0.004, 0.004]
-        eyes: { at: [0.019, 0.03, 0.008], r: 0.0042 }
     unsourced: >-
-      A machine's reconstruction: the plan's body drawn out to its full length, with a longer tail
-      and a longer head. No skeletal figure of this group was looked at; the tail is drawn after
-      those of the dromaeosaurs and of Coelophysis.
+      Only the bulk the generator assumes where no mass is claimed, as it was worked out for the
+      body once written here: the plan's body drawn out to its full length, with a longer tail and
+      a longer head. That body is left to the plan, which is now drawn at its full length itself,
+      with such a tail and head. No skeletal figure of this group was looked at.
   length:
     prop: body_length
     value: { lo: 0.3, hi: 4 }
