@@ -1,8 +1,8 @@
 id: gen:life/scene
 type: generator
 title: A living scene of any place, on land or in the sea
-version: 10
-code: generators/life/scene/v10.ts
+version: 11
+code: generators/life/scene/v11.ts
 runs_in: [build, client]
 outputs: { basis: procedural }
 # What it reads from the world: who may stand where and how big each grew, the ground and the climate
@@ -11,7 +11,8 @@ inputs:
   - { ref: field:life/community, note: "who may stand at a place and a time, and how sure; and the climate each kind's rows lived in" }
   - { ref: field:life/community-sea, note: "who may live at a place in the sea and a time, and how sure: the genera it can draw" }
   - { ref: field:earth/elevation, note: "the ground, at the field's heights" }
-  - { ref: field:earth/relief, note: "today's ground, for the glacial cycles" }
+  - { ref: field:earth/relief, note: "today's ground, for the glacial cycles: on its grid, and below it the survey's own cells around the place" }
+  - { ref: field:earth/relief-carried, note: "before the glacial cycles, the shape of today's ground within the elevation's cells, as much of it as stood" }
   - { ref: field:earth/rivers, note: "where the drainage routes rivers, how much they carry, in which months their beds hold water, and the laws their channels are drawn by" }
   - { ref: field:earth/lakes, note: "where the lakes of the time stand, and at what level" }
   - { ref: field:earth/river-widths, note: "where rivers wider than 30 m were seen, and how wide" }
@@ -32,13 +33,13 @@ inputs:
   - { ref: life/hell-creek/ecosystem, note: "the Hell Creek slot: where it was, and on which plate" }
 # What it makes, held in aggregate to what it samples (docs/STRUCTURE.md section 3.4).
 checks:
-  - { test: world/generators/life/scene/v10.test.ts, holds: "is only the taxa it is given, each near the arrival at least once" }
-  - { test: world/generators/life/scene/v10.test.ts, holds: "draws each taxon as often as the atlas's weight and the density rule say, in aggregate, below a cell's cap" }
-  - { test: world/generators/life/scene/v10.test.ts, holds: "has no forest before forests, only the few set by the arrival" }
-  - { test: world/generators/life/scene/v10.test.ts, holds: "has bare ground and no low plants at all before land plants" }
-  - { test: world/generators/life/scene/v10.test.ts, holds: "has a desert mostly bare, with no forest" }
-  - { test: world/generators/life/scene/v10.test.ts, holds: "grows what the climate of each height bears: forest below the treeline, none above it" }
-  - { test: world/generators/life/scene/v10.test.ts, holds: "lays snow down to where the month holds it: low in winter, high or not at all in summer" }
+  - { test: world/generators/life/scene/v11.test.ts, holds: "is only the taxa it is given, each near the arrival at least once" }
+  - { test: world/generators/life/scene/v11.test.ts, holds: "draws each taxon as often as the atlas's weight and the density rule say, in aggregate, below a cell's cap" }
+  - { test: world/generators/life/scene/v11.test.ts, holds: "has no forest before forests, only the few set by the arrival" }
+  - { test: world/generators/life/scene/v11.test.ts, holds: "has bare ground and no low plants at all before land plants" }
+  - { test: world/generators/life/scene/v11.test.ts, holds: "has a desert mostly bare, with no forest" }
+  - { test: world/generators/life/scene/v11.test.ts, holds: "grows what the climate of each height bears: forest below the treeline, none above it" }
+  - { test: world/generators/life/scene/v11.test.ts, holds: "lays snow down to where the month holds it: low in winter, high or not at all in summer" }
   - { test: world/generators/life/meander.test.ts, holds: "winds as a meandering river does, its bends of many sizes, and never comes within a neck of itself" }
   - { test: world/generators/life/meander.test.ts, holds: "cuts off loops where a neck closes, and keeps where it lay" }
   - { test: world/generators/life/meander.test.ts, holds: "is the same river from the same seed, to the last bit, and another river from another" }
@@ -46,16 +47,62 @@ checks:
   - { test: world/generators/life/meander.test.ts, holds: "brings a visitor to dry ground inside a bend, off its other limb and off the old bends" }
   - { test: world/generators/life/rivers.test.ts, holds: "winds by the sine-generated curve, as long as its sinuosity says" }
   - { test: world/generators/life/rivers.test.ts, holds: "draws its channel by the laws, and braids, winds or runs straight as its slope and flow say" }
-  - { test: world/generators/life/scene/v10.test.ts, holds: "runs its rivers where the world says, with the water falling downstream" }
-  - { test: world/generators/life/scene/v10.test.ts, holds: "draws a river dry in a month its bed holds no water: no water in its bed, its bed bare, and its ribbon marked dry" }
-  - { test: world/generators/life/scene/v10.test.ts, holds: "holds a lake where the world gives one: its bed under its level, its shore above it, and its water drawn" }
-  - { test: world/generators/life/scene/v10.test.ts, holds: "lines water with trees, flowing or dry, and stands the kinds that like it wet by it" }
-  - { test: world/generators/life/scene/v10.test.ts, holds: "stands its kinds in stands: each is commonest in patches of its own" }
-  - { test: world/generators/life/scene/v10.test.ts, holds: "grows each kind where its height's climate is like its rows': what grows changes up a slope" }
-  - { test: world/generators/life/scene/v10.test.ts, holds: "sows the understory as tall as a person as far as the big animals, and the lower only close by" }
-  - { test: world/generators/life/scene/v10.test.ts, holds: "puts what lives on the sea floor on it, and what swims in the water over it, never on land" }
+  - { test: world/generators/life/scene/v11.test.ts, holds: "runs its rivers where the world says, with the water falling downstream" }
+  - { test: world/generators/life/scene/v11.test.ts, holds: "draws a river dry in a month its bed holds no water: no water in its bed, its bed bare, and its ribbon marked dry" }
+  - { test: world/generators/life/scene/v11.test.ts, holds: "holds a lake where the world gives one: its bed under its level, its shore above it, and its water drawn" }
+  - { test: world/generators/life/scene/v11.test.ts, holds: "lines water with trees, flowing or dry, and stands the kinds that like it wet by it" }
+  - { test: world/generators/life/scene/v11.test.ts, holds: "stands its kinds in stands: each is commonest in patches of its own" }
+  - { test: world/generators/life/scene/v11.test.ts, holds: "grows each kind where its height's climate is like its rows': what grows changes up a slope" }
+  - { test: world/generators/life/scene/v11.test.ts, holds: "sows the understory as tall as a person as far as the big animals, and the lower only close by" }
+  - { test: world/generators/life/scene/v11.test.ts, holds: "puts what lives on the sea floor on it, and what swims in the water over it, never on land" }
   - { test: world/generators/life/rivers.test.ts, holds: "brings a river that runs into another to the other's water, and draws it only to the other's bank" }
+  - { test: world/generators/life/scene/v11.test.ts, holds: "stands on the shape the world gives within its relief's cells, as far as the eye reaches: a crest the field's grid has not is there" }
+  - { test: world/generators/life/scene/v11.test.ts, holds: "keeps a summit above 3,200 m and a floor below it: heights are held as finely as their range allows" }
+  - { test: world/generators/life/scene/v11.test.ts, holds: "invents no hills on a plain the survey shows level, and rough ground below a rough survey" }
+  - { test: world/generators/life/scene/v11.test.ts, holds: "draws a river the drainage routes in the valley the shape shows between the nodes of its grid" }
+  - { test: world/generators/life/relief.test.ts, holds: "invents nothing on ground the world shows level, and more the rougher the world's ground is at its grain" }
+  - { test: world/generators/life/relief.test.ts, holds: "invents only below the grain of the world's ground: under a degree's field wide hills, under the survey's cells none wider than a cell" }
+  - { test: world/generators/life/relief.test.ts, holds: "adds nothing to the mean of a cell of the world's ground" }
+  - { test: world/generators/life/relief.test.ts, holds: "reads its ground straight between the survey's cells, so that a corner of the field's own grid leaves no crease in it" }
+  - { test: world/generators/life/relief.test.ts, holds: "holds ground that is dry today above the coast where the elevation of its time has land, and no higher than it stands today" }
+  - { test: world/generators/life/spec.test.ts, holds: "is the plate whose ground has come there since the keyframe, where the keyframe has none at the place" }
+  - { test: world/generators/life/spec.test.ts, holds: "goes by today's plates where the world has them more finely: the plate that carries the place to ground of its own today" }
+  - { test: world/generators/life/relief.test.ts, holds: "leads its valleys to the water the world gives, and leaves that water where it is" }
+  - { test: world/generators/life/relief.test.ts, holds: "runs a river the drainage routes down the valley between the nodes of its grid, its water at the ground's height" }
+  - { test: world/generators/life/erosion.test.ts, holds: "cuts valleys that lead to what drains them, deepest where most water gathers, and leaves no hollow" }
+  - { test: tools/world/test/build.test.ts, holds: "gives a node of the relief its mean back: the survey's cells about it, laid over the grid, come to the node's own height" }
 limits:
+  - with: field:earth/relief
+    note: >-
+      The survey's cells are read two degrees either way of the place, and no further east and west than six degrees
+      of longitude: beyond that a scene's far ground is the relief's own grid, a tenth of a degree. A cell is a
+      sixtieth of a degree, some 1,850 m: a gorge or a summit narrower than that is the survey's mean of it. What is
+      invented below the cell goes on from how rough the survey's cells are among themselves, and knows nothing of
+      the rock or the ice that shaped the place: a glacial trough and a canyon come out alike, as valleys water cut.
+  - with: field:earth/relief
+    note: >-
+      Hills invented below the world's ground are the scene's own, made over grids that reach as far as its ground
+      does from its own middle: two scenes that overlap draw different valleys below the survey's cells. And they hold
+      no water of their own: only the rivers and lakes the world gives are drawn, so a valley the scene cut has no
+      stream in it.
+  - with: field:earth/relief
+    note: >-
+      Water cuts the invented ground in valleys a node or two wide, with walls far steeper than a hillside stands.
+      Where the world's ground is rough they are a hundred metres deep and more, and from the air over a range they
+      read as dark slots. The cutting has no rule for how steep a wall may stand, and its creep is too slow to widen
+      them.
+  - with: field:earth/relief-carried
+    note: >-
+      How much of today's shape stood is read once, at the scene's place, for what the scene invents beside it: where
+      a scene looks across the edge of a range's outline at a time only the range's record reaches, the hills invented
+      inside the outline are as many as outside it.
+  - with: field:earth/rivers
+    note: >-
+      A river the drainage routes is run down the finer ground only where the scene has the shape of that ground, and
+      only between nodes within 36 km of its middle. Its course there is the way that keeps lowest, which is the
+      valley's floor where the survey's cells show a valley, and may cut a corner the river does not. Before the
+      glacial cycles the drainage's nodes are a degree apart, and a node is moved no further than 6 km to low ground:
+      a river then may still cross a ridge of today's shape, in a cut the scene makes for it.
   - with: field:life/community
     note: >-
       Small animals reach the most a cell holds (params.animals.most_in_cell), and past it the atlas's weight no
@@ -126,7 +173,31 @@ params:
     blend: [20000, 34000]
     lowest_water: 12
     sea_below: 12
+    # The ground invented below the world's (relief.ts). Its features go on from the roughness the world's ground shows
+    # at its own grain: how far each node of it stands from the mean of the nodes a grain away either side. Seven tenths
+    # of that is carried on below the grain, a feature half as long standing 2^-0.75 as high; none of it on ground under
+    # 20 m above the coast, where a plain is the plain's own, and all of it from 120 m. Then water is run over it and
+    # cuts it (erosion.ts), ten times: a node that one cell drains through comes 0.06 of the way to the node it drains
+    # to at each, and more by the drained cells to the power 0.45; and every slope creeps 0.08 of the way to the mean of
+    # its neighbours. Cut so, about a fortieth of the invented ground is left lying in hollows, where a sixth of it
+    # would without.
     rugged: 0.7
+    hurst: 0.75
+    lowland: [20, 120]
+    erosion:
+      steps: 10
+      power: 0.06
+      area_exp: 0.45
+      creep: 0.08
+    # A river the drainage routes is run down the world's ground between the nodes of its grid, where that ground is
+    # finer than the grid: on a grid of 250 m, its points kept a kilometre apart; each node moved to the lowest ground
+    # within 6 km, or half the way to the next; and a course that stands 25 m above the lowest ground about costs as
+    # much as one twice as long.
+    trace:
+      cell: 250
+      keep: 1000
+      snap: 6000
+      height: 25
     swell: 0.004
     coast: 90
   cover:

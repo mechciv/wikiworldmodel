@@ -8,11 +8,11 @@ import { defaultLeaf, LEAF_KINDS, type LeafKindName } from '../../../core/leaves
 import { lookup, type Scenario } from '../../../core/scenario.ts';
 import type { LivingTaxon, SceneSpec } from '../../../core/scene.ts';
 import { GroundSampler } from '../../../world/generators/city/ground.ts';
-import { placeLook, type LivingParams } from '../../../world/generators/life/scene/v10.ts';
+import { Heights, placeLook, type LivingParams } from '../../../world/generators/life/scene/v11.ts';
 import { snowOf } from '../../../world/generators/life/climate.ts';
 import { declination, MID_DAY } from '../../../core/water.ts';
 import { protoParts } from '../../../world/generators/life/stream.ts';
-import { CityRenderer, type CellGPU, type CityFrame } from '../gl/city.ts';
+import { CityRenderer, SHARE_STEPS, type CellGPU, type CityFrame } from '../gl/city.ts';
 import type { GL } from '../gl/context.ts';
 import type { V3 } from '../mat.ts';
 import { groundLook, groundTones, rockLook } from './groundlook.ts';
@@ -67,6 +67,36 @@ function groundCover(spec: SceneSpec): [number, boolean, { first: LeafKindName; 
   const most = [...kinds.entries()].sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1));
   const fallen = most.length ? { first: most[0][0], next: (most[1] ?? most[0])[0], share: most[1] ? most[1][1] / (most[0][1] + most[1][1]) : 0 } : undefined;
   return [all > 0 ? needles / all : 0, under, fallen];
+}
+
+/**
+ * What the land bears at each of a run of heights, from the lowest ground of a scene's widest grid to its highest, where
+ * the world gives the climate at a height: the shares of forest, low plants and bare ground of each height's own
+ * climate, as the generator has them (Heights), for the ground beyond the plan's map.
+ */
+function sharesByHeight(spec: SceneSpec, far: { z: Int16Array; unit?: number; base?: number }): { from: number; step: number; band: number; shares: Float32Array } | undefined {
+  const params = spec.generator.params as unknown as LivingParams;
+  if (!spec.climate || !params.climate) return undefined;
+  let lo = Infinity;
+  let hi = -Infinity;
+  for (let k = 0; k < far.z.length; k++) {
+    const v = far.z[k];
+    if (v < lo) lo = v;
+    if (v > hi) hi = v;
+  }
+  const from = Math.max(0, lo * (far.unit ?? 0.1) + (far.base ?? 0));
+  const top = hi * (far.unit ?? 0.1) + (far.base ?? 0);
+  if (!(top > from + 1)) return undefined;
+  const step = (top - from) / (SHARE_STEPS - 1);
+  const heights = new Heights(spec);
+  const shares = new Float32Array(SHARE_STEPS * 3);
+  for (let k = 0; k < SHARE_STEPS; k++) {
+    const g = heights.at(from + k * step);
+    shares[k * 3] = g.forest;
+    shares[k * 3 + 1] = g.herb;
+    shares[k * 3 + 2] = g.bare;
+  }
+  return { from, step, band: heights.band, shares };
 }
 
 /** What a camera or a name stands on on land: the ground, or the top of the sea over it. In a scene of the sea, the ground. */
@@ -212,7 +242,7 @@ export class LifeScene {
     // afar. And the rock under it: what its outcrops and its stones are drawn of.
     const rock = rockLook(this.spec.bedrock);
     const ground = groundLook(this.spec.substrate, rock);
-    r.setLand(Float32Array.from(groundTones(['soil', 'herb', 'bare', 'canopy', 'distant'].flatMap((k) => tones[k]), ground)), [Math.min(clim?.forest ?? 0, cover.forests), Math.min(clim?.herb ?? 0, cover.plants), 1 - cover.plants * (1 - (clim?.bare ?? 1))], snowOf(this.spec));
+    r.setLand(Float32Array.from(groundTones(['soil', 'herb', 'bare', 'canopy', 'distant'].flatMap((k) => tones[k]), ground)), [Math.min(clim?.forest ?? 0, cover.forests), Math.min(clim?.herb ?? 0, cover.plants), 1 - cover.plants * (1 - (clim?.bare ?? 1))], snowOf(this.spec), sharesByHeight(this.spec, g.levels[g.levels.length - 1]));
     r.setSubstrate(ground);
     r.setRock(rock);
     r.setGroundCover(...groundCover(this.spec));

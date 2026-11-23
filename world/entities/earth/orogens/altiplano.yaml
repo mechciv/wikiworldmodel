@@ -1,0 +1,115 @@
+id: earth/orogens/altiplano
+kind: landform/mountain-range
+summary: The high plateau of the Central Andes, between their Western and Eastern Cordilleras.
+author: machine:claude-code
+# Phases tile the lifetime: the plateau rises from the start of its growth, and then stands at about the height it has
+# today. Where its sources show it standing so, today's relief is carried back for it (model:earth/relief-carried).
+phases:
+  - id: rising
+    label: Rising
+  - id: standing
+    label: At about its present height
+claims:
+  name:
+    prop: name
+    value: { en: Altiplano }
+    unsourced: An editorial label.
+  extent:
+    prop: extent
+    value:
+      type: Polygon
+      frame: frame:earth/present-day
+      coordinates:
+        - [[-71.0, -15.2], [-70.4, -14.6], [-69.6, -14.9], [-68.8, -15.9], [-68.1, -16.6], [-67.4, -17.6], [-66.9, -18.6], [-66.5, -19.8], [-66.4, -21.0], [-66.8, -22.2], [-67.9, -22.2], [-68.2, -21.0], [-68.5, -20.0], [-68.7, -19.0], [-68.8, -18.0], [-69.5, -17.2], [-70.2, -16.4], [-71.0, -15.2]]
+    unsourced: >-
+      An outline drawn loosely round the plateau on today's relief, from the basin of Lake Titicaca south to the
+      salt flats of southern Bolivia, between the volcanoes of the Western Cordillera and the foot of the Eastern
+      Cordillera, to say which ground its record speaks for. The two cordilleras are left out, since the sources
+      give them histories of their own, and so is the Puna to the south. On the west it laps a tenth of a degree
+      over the outline of the Western Cordillera's record, so that no ground between the two is left to neither.
+      The plateau has no agreed edge.
+    method: editorial
+    basis: reconstruction
+  location:
+    prop: location
+    value: { lat: -17.5, lon: -68.1, frame: frame:earth/present-day }
+    unsourced: >-
+      A representative point in the Corque syncline of the Bolivian Altiplano, near 17.5°S, where the beds its
+      record rests on were measured, chosen to place the marker; the plateau has no single location.
+    method: editorial
+    basis: reconstruction
+  frame:
+    prop: frame
+    value: frame:paleomap/plate-201
+    source: { ref: src:paleomap-plate-model, loc: PALEOMAP_PlatePolygons.gpml }
+    method: plate-polygon
+    basis: reconstruction
+  # When the plateau began to grow: counted from when its ground left the sea.
+  start:
+    prop: start
+    value: { ref: ics/mesozoic, edge: end }
+    source:
+      ref: src:boschman-2021-andes-paleoelevation
+      loc: "section 5.2, p. 32"
+      quote: >-
+        Around the end of the Mesozoic, a transition from marine to continental sediments is recorded in all the
+        above-mentioned domains except for the northernmost part of the orogen.
+    method: stratigraphic
+    note: >-
+      The domains named just before are those east of the magmatic arc in the north-central and central Andes,
+      the Altiplano-Puna among them, which the source has still below sea level in the Campanian and
+      Maastrichtian; its table has shallow sea on the Altiplano at 65 Ma. The plateau's growth is counted here
+      from when its ground left the sea, which is this record's choice: for long after, the source has it a low
+      basin, and its great rise came in the Miocene.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in boschman-2021-andes-paleoelevation.txt (sha256 524752a53caf88cc), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-23" }
+  # When the plateau came to stand at about its present height.
+  standing-start-boschman-2021:
+    prop: start
+    subject: "@standing"
+    value: { lo: 10.3 Ma, hi: 6.8 Ma }
+    source:
+      - ref: src:boschman-2021-andes-paleoelevation
+        loc: "Table 1, Altiplano – C, the row of the Corque syncline for 10.3–6.8 Ma, p. 14"
+        quote: Rapid uplift of 1.5–3.5 (2.5 ± 1) km to modern elevations
+      - ref: src:ghosh-2006-altiplano
+        loc: abstract
+        quote: >-
+          the Altiplano plateau in the Bolivian Andes rose at an average rate of 1.03 +/- 0.12 millimeters per year
+          between approximately 10.3 and approximately 6.7 million years ago
+    against:
+      ref: src:poulsen-2010-central-andes
+      loc: abstract
+      quote: Our results indicate that late Miocene delta18O depletion reflects initiation and intensification of convective rainfall.
+    method: paleoaltimetry
+    rank: preferred
+    note: >-
+      Isotopes of the carbonates of old soils and lake beds and of clays in one section of the Corque syncline,
+      at 17.5°S: the review's table has the ground there at 0 to 1.7 ± 0.7 km at 11.5 to 10.3 Ma and at its modern
+      height by 6.8 Ma, and gives this row to Garzione et al. (2008), which was not read. Ghosh et al. (2006), who
+      measured old soils of the same syncline, end the rise at about 6.7 Ma. The window is the rise itself, at
+      whose end the plateau stood as it does now. It is disputed: Poulsen et al. (2010) read the isotopes as the
+      onset of heavy summer rain on a plateau that rose gradually, and the review says the first studies may
+      have overstated the rise by up to several kilometres, and that one section may not speak for the whole
+      plateau. It takes the heights at face value all the same, and they are preferred here as the measured
+      ones; the other view gives no date of its own in what was read.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in boschman-2021-andes-paleoelevation.txt (sha256 524752a53caf88cc), ghosh-2006-altiplano.txt (sha256 0e20e0d62068d180) and poulsen-2010-central-andes.txt (sha256 686be145e578d283), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-23" }
+  standing-start-gregory-wodzicki-2000:
+    prop: start
+    subject: "@standing"
+    value: { lo: 10.7 Ma }
+    source:
+      ref: src:gregory-wodzicki-2000-andes-uplift
+      loc: abstract
+      quote: >-
+        paleobotanical evidence suggests that the Altiplano-Puna had attained no more than a third of its modern
+        elevation of 3700 m by 20 Ma and no more than half its modern elevation by 10.7 Ma
+    method: paleoaltimetry
+    note: >-
+      Fossil leaves, an earlier and independent line of evidence: the plateau was at most half as high as now at
+      10.7 Ma, so it came to its present height after that. Written with only its earlier end, since the source
+      gives a time at which the ground was not yet high. It agrees with the preferred claim, which also says when
+      the rise ended. Read only in the abstract.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in gregory-wodzicki-2000-andes-uplift.txt (sha256 8c4d5b1199a8fc9d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-23" }

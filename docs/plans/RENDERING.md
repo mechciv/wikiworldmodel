@@ -338,7 +338,7 @@ plants, the bodies, the people and what they build, and raised each by the means
   four ways from one seed, so that it keeps its shape as it nears: to its twigs close by, with boughs for its sprays a
   little way off, as a trunk, a mass and boughs laid like shingles from a way off, and as a plain shape far off.
   Limbs carry bark laid along them, of six kinds by part type: furrowed, smooth, in scales, in diamond cushions,
-  ringed, ribbed and jointed. `gen:life/scene` is version 10.
+  ringed, ribbed and jointed. `gen:life/scene` is version 11: version 10 gave a scene the world's relief below its grid.
 - **The ground's cover closes, in patches.** Three grids of clumps lie over one another: the scene's own, a finer one
   near the eye, and a wider one of larger clumps out to 170 m; a wide plant is sown further from its neighbours than a
   narrow one. Each grid is made a tile at a time and kept. A tuft's own blades are finer and bent over. Low plants

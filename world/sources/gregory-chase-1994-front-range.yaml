@@ -1,0 +1,21 @@
+id: src:gregory-chase-1994-front-range
+type: publication
+kind: measurement
+citation: >-
+  Gregory, K.M. & Chase, C.G. (1994). Tectonic and climatic significance of a late Eocene
+  low-relief, high-level geomorphic surface, Colorado. Journal of Geophysical Research: Solid Earth
+  99(B10), 20141–20160.
+authors:
+  - "Gregory, K.M."
+  - "Chase, C.G."
+published: 1994
+title: Tectonic and climatic significance of a late Eocene low-relief, high-level geomorphic surface, Colorado
+container: "Journal of Geophysical Research: Solid Earth 99(B10), 20141–20160"
+doi: 10.1029/94JB00132
+verified:
+  by: machine:claude-code
+  how: >-
+    Abstract only, read on 22 November 2026 as OpenAlex's record of the article carries it (work
+    W1965207236; OpenAlex keeps an abstract as its words with their places, and a script set them
+    back in order); citation from Crossref. The article itself was not read: the publisher's site
+    (Wiley, for the American Geophysical Union) is closed to automated readers.

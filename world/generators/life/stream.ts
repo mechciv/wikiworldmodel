@@ -8,7 +8,8 @@ import { fingerprint, type Fingerprint, type Part } from '../../../core/fingerpr
 import { MAT, Mesh, meshParts } from '../city/kit.ts';
 import { hash2, hashString, TAU } from '../city/math.ts';
 import { clumpWidth, drawAnimal, drawClump, drawPlant, POSE, type Detail, type Stance } from './forms.ts';
-import { banksOf, CELL, CELLS, cellParts, cellKey, coverMask, EXTENT, groundGrids, LandCover, makePlan, placeLook, waterLevels, waterRibbons, waterSheet, watersFor, type CellRows, type LivingParams, type LivingPlan, type PlaceLook } from './scene/v10.ts';
+import { banksOf, CELL, CELLS, cellParts, cellKey, coverMask, EXTENT, groundGrids, LandCover, makePlan, placeLook, waterLevels, waterRibbons, waterSheet, watersFor, worldGround, type CellRows, type LivingParams, type LivingPlan, type PlaceLook } from './scene/v11.ts';
+import type { WorldGround } from './relief.ts';
 import { freshOf, noise, type Waters } from './land.ts';
 import { drawDwelling, HOUSE_VARIANTS, houseSize, type HouseDetail } from '../people/dwellings.ts';
 import { LandUseMap, landUseMask, makeSettlement, type SettlementPlan } from '../people/settlement/v4.ts';
@@ -143,6 +144,8 @@ export class SceneStream {
   private waters: Waters;
   readonly levels: GroundGridData[];
   readonly ground: GroundSampler;
+  /** the world's ground under the scene: the field's and the shape within its cells, before anything is invented or cut */
+  readonly worldGround: WorldGround;
   readonly plan: LivingPlan;
   readonly params: LivingParams;
   readonly cover: LandCover;
@@ -184,11 +187,12 @@ export class SceneStream {
     this.waters = waters;
     this.levels = groundGrids(spec, this.look, waters);
     this.ground = new GroundSampler(this.levels);
+    this.worldGround = worldGround(spec);
     // Where the world gives the rivers, the water's level varies over the scene; otherwise it is the place's one level.
     const levelAt = waters.paths ? waterLevels(waters) : undefined;
     // The people, where the scene has any: their houses and fields, on this ground and away from this water. Where they
     // cleared the land no tree stands. A scene of the sea has them too, on whatever ground stands above its water: a place
-    // a few metres above the sea, a delta or a lower plain, is a scene of the sea (scene/v10.ts, sea_below), and among the
+    // a few metres above the sea, a delta or a lower plain, is a scene of the sea (scene/v11.ts, sea_below), and among the
     // most crowded land there was.
     let clearing: ((x: number, y: number) => number) | undefined;
     if (spec.people) {

@@ -1,0 +1,36 @@
+# Today's shape of the ground, carried back before the times today's relief is held for (model:earth/relief-carried).
+# It is not drawn on the globe: a scene reads it at the place it shows, and lays it over the elevation of its time.
+id: field:earth/relief-carried
+type: field
+title: Today's relief, carried back on its plates
+quantity: elevation, as the shape of the ground within a degree
+unit: m
+description: >-
+  Before the glacial cycles, the elevation of each time is a reconstruction on a grid of a degree: it says where the
+  land stood and about how high, and nothing of its ranges' crests and valleys. This lays today's shape over it:
+  today's ground less what that reconstruction makes of today, moved with the plate under it to where that plate
+  stood. So where the reconstruction is its picture of today, the ground is today's; and further back it is today's
+  ground, raised or lowered as the reconstruction says the land has risen or sunk since. All of today's shape is held
+  through the Quaternary, less and less of it back to the start of the Pliocene, and none before; further back only
+  within a range whose record says it already stood at about its present height, and before that as far as the
+  record says it had risen. So a range that stood is drawn with its own crests, and the hills a scene invents make
+  way for them. Where the reconstruction has the land lower than today, ground that is dry today is still held above
+  its coast: a valley is cut no lower than the sea it drains to. It is a model's answer: valleys were cut deeper,
+  glaciers carved them, volcanoes were built and faults moved in the time it is carried across, and none of that is
+  in it.
+kind: raster
+derived: true
+from: [field:earth/elevation, field:earth/relief]
+rule: relief-carried
+spread: unknown
+params:
+  # The records whose starts the rule follows, and the phase of a range's record in which it stands.
+  held_through: ics/quaternary
+  gone_before: ics/pliocene
+  standing_phase: standing
+  # How far a plate may have moved against a place's own since the elevation's keyframe, in nodes of the relief's
+  # grid, before its ground has none of its shape there: it has all of it where it has not moved, and less evenly to this.
+  other_plates: 1
+  # Ground that is dry today is held above the coast wherever the elevation of the time has land: no lower than this
+  # share of the height that elevation gives the land there, and no higher than it stands today.
+  valley_floor: 0.02

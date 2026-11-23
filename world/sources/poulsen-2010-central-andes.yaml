@@ -1,0 +1,21 @@
+id: src:poulsen-2010-central-andes
+type: publication
+kind: model
+citation: >-
+  Poulsen, C.J., Ehlers, T.A. & Insel, N. (2010). Onset of convective rainfall during gradual late
+  Miocene rise of the central Andes. Science 328(5977), 490–493.
+authors:
+  - "Poulsen, C.J."
+  - "Ehlers, T.A."
+  - "Insel, N."
+published: 2010
+title: Onset of convective rainfall during gradual late Miocene rise of the central Andes
+container: Science 328(5977), 490–493
+doi: 10.1126/science.1185078
+verified:
+  by: machine:claude-code
+  how: >-
+    Abstract only, read on 22 November 2026 from the Europe PMC record (PMID 20360069); citation
+    from Crossref. The article itself was not read: Science's site is closed to automated readers.
+    So what history of the plateau's height the authors put in the place of a rapid rise, beyond the
+    word gradual in their title, is not known here.

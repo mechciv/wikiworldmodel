@@ -1,0 +1,26 @@
+id: src:spicer-2003-southern-tibet
+type: publication
+kind: measurement
+citation: >-
+  Spicer, R.A., Harris, N.B.W., Widdowson, M., Herman, A.B., Guo, S., Valdes, P.J., Wolfe, J.A. &
+  Kelley, S.P. (2003). Constant elevation of southern Tibet over the past 15 million years. Nature
+  421(6923), 622–624.
+authors:
+  - "Spicer, R.A."
+  - "Harris, N.B.W."
+  - "Widdowson, M."
+  - "Herman, A.B."
+  - "Guo, S."
+  - "Valdes, P.J."
+  - "Wolfe, J.A."
+  - "Kelley, S.P."
+published: 2003
+title: Constant elevation of southern Tibet over the past 15 million years
+container: Nature 421(6923), 622–624
+doi: 10.1038/nature01356
+verified:
+  by: machine:claude-code
+  how: >-
+    Abstract only, read on 22 November 2026 from the Europe PMC record (PMID 12571593); citation
+    from Crossref. The article itself was not read: Nature's site is closed to automated readers.
+    So how the beds were dated, and what the ± of the heights stands for, are not known here.

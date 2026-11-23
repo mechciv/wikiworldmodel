@@ -88,6 +88,38 @@ export interface ReliefPatch {
   z: number[];
 }
 
+/**
+ * The shape of today's ground within the cells of a scene's relief (core/relief.ts): the cells of the survey that
+ * today's relief is read from, around where the scene's origin stands today. Where today's relief is held for the
+ * scene's time, each is what the survey has there less what the relief's grid makes of it, and the two together are the
+ * survey's ground. Before that it is carried back on its plate (model:earth/relief-carried): today's ground less
+ * what the elevation of the scene's time makes of today, as much of it as the model says stood at each place, laid
+ * over that elevation.
+ */
+export interface ReliefShape {
+  /** the field it is: today's relief, or today's relief carried back; and whether today's relief is held for the scene's time, so that it is the survey's own */
+  field: string;
+  held: boolean;
+  /** where the scene's origin stands today, and the bearing there of the scene's north, radians clockwise: how far its plate has turned since */
+  at: { lat: number; lon: number };
+  turn: number;
+  /** how much of today's shape stood at the scene's place and time, 0–1: all of it where today's relief is held */
+  share: number;
+  /** the range whose record says so, where one says more than the model's rule */
+  range?: { id: string; label: string };
+  /** the survey's cells, rows from the north, in metres: `lat0` and `lon0` are the middle of the first */
+  patch: ReliefPatch;
+  /**
+   * For a shape carried back: today's ground at each of those cells, in metres above today's sea; and the least share
+   * of the height the scene's elevation gives the land of a place that ground above today's sea keeps above the coast
+   * there. Where that elevation has the land lower than today, today's valleys would lie under its sea, and a valley
+   * is cut no lower than the sea it drains to: so ground that is dry today is held above the coast wherever that
+   * elevation has land, and no higher than it stands today.
+   */
+  today?: number[];
+  floor?: number;
+}
+
 /** A river as a scene's spec gives it: its course in local metres, upstream first (world/generators/life/rivers.ts draws it). */
 export interface SceneRiver {
   /** what names it: its set and reach, or its dataset's row; what is invented of it is keyed by this */
@@ -260,6 +292,8 @@ export interface SceneSpec {
     stage?: string;
   };
   relief: ReliefPatch;
+  /** the shape of today's ground within the relief's cells, where the world has it for the place and the time */
+  shape?: ReliefShape;
   /** where the world says the rivers run; without it a scene invents its river */
   water?: SceneWater;
   biome: { climate: ClimateClass; label: string; field: string; ageMa: number; cover: SceneCover; node: ClimateNode };

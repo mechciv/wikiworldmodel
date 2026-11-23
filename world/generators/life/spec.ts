@@ -6,7 +6,8 @@ import { climateClass, CLIMATE_LABEL, reduceMonths, type ClimateNode, type Clima
 import { warmestMonth, type Months } from '../../../core/months.ts';
 import type { WaterParams } from '../../../core/water.ts';
 import type { Form } from '../../../core/form.ts';
-import type { LivingTaxon, ReliefPatch, SceneCover, SceneParts, SceneSpec, SceneTier } from '../../../core/scene.ts';
+import { arcBetween, turnOf } from '../../../core/relief.ts';
+import type { LivingTaxon, ReliefPatch, ReliefShape, SceneCover, SceneParts, SceneSpec, SceneTier } from '../../../core/scene.ts';
 import { firstGround, firstRock, type SceneBedrock, type SceneSubstrate } from '../../../core/substrate.ts';
 import { fromMa, toMa } from '../../../core/time.ts';
 import type { FeatureTime } from '../../../core/tileset.ts';
@@ -187,6 +188,8 @@ export interface PlaceWorld {
   step?: number;
   elevation: (lat: number, lon: number) => number;
   plate: (lat: number, lon: number) => number;
+  /** the plate under a place of today's Earth, where the world has today's plates more finely than the keyframe's */
+  plateNow?: (lat: number, lon: number) => number;
   /** carry a point on a plate from one age to another */
   carry: (plate: number, lat: number, lon: number, fromAge: number, toAge: number) => [number, number];
   /** the keyframe of the climate nearest the time, and its node nearest a place */
@@ -212,6 +215,15 @@ export interface PlaceWorld {
     month?: number;
   };
   /**
+   * The shape of today's ground within the relief's cells (core/relief.ts), asked where the place stands today.
+   * `held` says the scene's relief is today's, held for its time: then the shape is the survey's own, laid over that
+   * relief. If not, it is carried back (model:earth/relief-carried), and is asked with the scene's age, the bearing
+   * today of the scene's north, which is its elevation's keyframe's, and how far the ground of any plate has moved
+   * against the scene's own since that keyframe, in degrees.
+   */
+  shape?: (today: { lat: number; lon: number }, back?: { ageMa: number; turn: number; apart: (plate: number, lat: number, lon: number) => number }) => ReliefShape | undefined;
+  held?: boolean;
+  /**
    * What the ground of a place of land is made of, where the world says (field:earth/substrate): asked where the place
    * stood at the stage's slice, as the rock record's sites are placed. The generator does not read it: the renderer does.
    */
@@ -234,12 +246,90 @@ const round5 = (x: number) => Math.floor(x * 1e5 + 0.5) / 1e5;
 const round2 = (x: number) => Math.round(x * 100) / 100;
 
 /**
+ * How far round a place the plates of the ground about it are tried, and how far apart, in degrees. A bound on the
+ * search and no fact about any plate: a place whose plate's ground lies further off at the keyframe keeps the
+ * keyframe's own answer.
+ */
+const PLATE_REACH = 3;
+const PLATE_STEP = 0.5;
+
+/**
+ * The plates a place may be on: the one its elevation's keyframe has at its own coordinates, and then those of the
+ * ground round about, nearest first. None twice, and no plate at all only where the keyframe has none at the place.
+ */
+export function platesNear(w: Pick<PlaceWorld, 'plate'>, lat: number, lon: number): number[] {
+  const out = [w.plate(lat, lon)];
+  const c = dcos((lat * PI) / 180);
+  const wide = 1 / (c > 0.2 ? c : 0.2);
+  const rings = Math.round(PLATE_REACH / PLATE_STEP);
+  for (let ring = 1; ring <= rings; ring++) {
+    for (let dj = -ring; dj <= ring; dj++) {
+      const la = lat + dj * PLATE_STEP;
+      if (la > 90 || la < -90) continue;
+      for (let di = -ring; di <= ring; di++) {
+        if (Math.max(Math.abs(di), Math.abs(dj)) !== ring) continue;
+        const p = w.plate(la, ((lon + di * PLATE_STEP * wide + 540) % 360) - 180);
+        if (p && !out.includes(p)) out.push(p);
+      }
+    }
+  }
+  return out;
+}
+
+/**
+ * The plate under a place at an age: the one that carries the place to ground of its own. Away from a plate's edge
+ * that is the plate the elevation's keyframe has at the place's own coordinates. By an edge it may not be: the edge
+ * has moved between the keyframe and the age, the keyframe may have no plate there where two had not yet met or have
+ * since parted, and its grid is coarser than an edge is sharp. So the keyframe's plate and those of the ground round
+ * about are tried, nearest first, and the first is taken that
+ *
+ *   - carries the place to ground of its own today, on today's plates, where the world has those more finely
+ *     (`plateNow`): the plates are outlines of today's Earth, and that is the finest picture of them;
+ *   - or, failing that, carries it onto a node of its own on the keyframe;
+ *   - or, failing that, carries it into a cell of the keyframe with a node of its own at a corner.
+ *
+ * Where none does, the keyframe's own answer stands. Where the ground of two plates lay over the same place, as that
+ * of blocks that have since pulled apart did, the first tried is taken: the keyframe's own, if it is one of them.
+ */
+export function plateUnder(w: Pick<PlaceWorld, 'plate' | 'carry' | 'keyAge' | 'step' | 'plateNow'>, lat: number, lon: number, ageMa: number): number {
+  const here = w.plate(lat, lon);
+  const now = w.plateNow;
+  if (!now && ageMa === w.keyAge && here) return here;
+  const tried = platesNear(w, lat, lon);
+  if (now) {
+    for (const p of tried) {
+      if (!p) continue;
+      const [la, lo] = w.carry(p, lat, lon, ageMa, 0);
+      if (now(la, lo) === p) return p;
+    }
+  }
+  if (ageMa === w.keyAge && here) return here;
+  for (const p of tried) {
+    if (!p) continue;
+    const [la, lo] = w.carry(p, lat, lon, ageMa, w.keyAge);
+    if (w.plate(la, lo) === p) return p;
+  }
+  const step = w.step ?? 1;
+  for (const p of tried) {
+    if (!p) continue;
+    const [la, lo] = w.carry(p, lat, lon, ageMa, w.keyAge);
+    const south = Math.floor(la / step) * step;
+    const west = Math.floor(lo / step) * step;
+    for (const y of [south, south + step]) {
+      if (y > 90 || y < -90) continue;
+      for (const x of [west, west + step]) if (w.plate(y, ((x + 540) % 360) - 180) === p) return p;
+    }
+  }
+  return here;
+}
+
+/**
  * The scene of a place at an age, on the lattice: undefined if neither atlas has a list there. A land with an empty list
  * has a scene, of bare ground; a sea with nothing it can draw, of an empty sea.
  */
 export function placeSpec(w: PlaceWorld, lat: number, lon: number, ageMa: number): SceneSpec | undefined {
   const origin = latticeOf(lat, lon);
-  const plate = w.plate(origin.lat, origin.lon);
+  const plate = plateUnder(w, origin.lat, origin.lon, ageMa);
   const [rl, ro] = plate ? w.carry(plate, origin.lat, origin.lon, ageMa, w.keyAge) : [origin.lat, origin.lon];
   const relief_at = { lat: round5(rl), lon: round5(ro) };
   const land = w.list(origin.lat, origin.lon);
@@ -259,6 +349,19 @@ export function placeSpec(w: PlaceWorld, lat: number, lon: number, ageMa: number
   const age = here ? m!.ageMa : w.climateAge;
   const spec = specFor({ atlas, bin: w.bin, origin: { lat: round5(origin.lat), lon: round5(origin.lon) }, list, forms: w.forms, relief, node, rule: w.rule, climateField: field, climateAge: age, cover: w.cover, generator: w.generator });
   spec.site.relief_at = relief_at;
+  // The shape of the ground within the relief's cells: the survey's, where today's relief is held; else today's carried back.
+  if (w.shape) {
+    const [tl, to] = plate ? w.carry(plate, origin.lat, origin.lon, ageMa, 0) : [origin.lat, origin.lon];
+    // A scene's ground is laid out on its elevation's keyframe, north as that keyframe has it: the shape is turned as
+    // the plate has turned since that keyframe, so that the two lie the same way.
+    const fromKey = (la: number, lo: number): [number, number] => (plate ? w.carry(plate, la, lo, w.keyAge, 0) : [la, lo]);
+    // And how far another plate's ground has moved against the scene's own since that keyframe: where each would
+    // carry a place of today back to, apart.
+    const toKey = (p: number, la: number, lo: number): [number, number] => (p ? w.carry(p, la, lo, 0, w.keyAge) : [la, lo]);
+    const apart = (p: number, la: number, lo: number): number => (p === plate ? 0 : arcBetween(toKey(plate, la, lo), toKey(p, la, lo)));
+    const shape = w.held ? w.shape({ lat: tl, lon: to }) : w.shape({ lat: tl, lon: to }, { ageMa, turn: turnOf(fromKey, relief_at.lat, relief_at.lon), apart });
+    if (shape) spec.shape = shape;
+  }
   if (here) {
     const months: Months = { t: here.months.t.map(round2), p: here.months.p.map(round2) };
     spec.climate = { field, ageMa: age, months, height: Math.round(here.height - w.isoline), coast: Math.round(w.isoline), lapse: m!.lapse, rule: w.rule, water: m!.water, month: m!.month ?? warmestMonth(months), lat: round5(here.lat), ...(here.parts ? { parts: here.parts } : {}) };
