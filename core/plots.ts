@@ -111,6 +111,16 @@ export function plotAt(x: number, y: number, s: PlotStyle): PlotAt {
 /** How far the plots' lines are shifted from the scene's at most, m: a square of ground lies within that of its own lines. */
 export const plotReach = (s: PlotStyle): number => sizes(s).warp;
 
+/**
+ * About where, in the scene's metres, a place across and along the plots' own lines lies: within a quarter of
+ * plotReach of it, at a fraction of plotPlace's cost. For leaving out what is plainly elsewhere.
+ */
+export function plotNear(across: number, along: number, s: PlotStyle): [number, number] {
+  const { side, warp } = sizes(s);
+  const [wx, wy] = wander(across, along, side);
+  return [across - wx * warp, along - wy * warp];
+}
+
 /** The place, in the scene's metres, that lies at a place across and along the plots' own lines: plotAt, the other way. */
 export function plotPlace(across: number, along: number, s: PlotStyle): [number, number] {
   const { side, warp } = sizes(s);

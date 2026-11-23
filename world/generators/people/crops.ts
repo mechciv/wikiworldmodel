@@ -7,7 +7,7 @@
 // is the same plain one everywhere, upright blades as nearly any grain is from a few steps off, and no taxon of the
 // world's. That it stands in rows, how far apart, and how tall, are the generator's look (its params.crops), and a click
 // on it says so.
-import { PLOT, PLOT_LOOK, plotOf, plotPlace, plotReach, type PlotStyle } from '../../../core/plots.ts';
+import { PLOT, PLOT_LOOK, plotNear, plotOf, plotPlace, plotReach, type PlotStyle } from '../../../core/plots.ts';
 import type { Mesh } from '../city/kit.ts';
 import { hash2 } from '../city/math.ts';
 import { drawCropStand } from '../life/plants.ts';
@@ -66,6 +66,7 @@ export function sow(x0: number, y0: number, x1: number, y1: number, style: PlotS
   const l0 = Math.floor(y0 / step);
   const l1 = Math.ceil((y1 + reach) / step);
   const salt = seed + (long ? 977 : 0);
+  const near = reach * 0.25 + 0.1;
   for (let k = k0; k <= k1; k++) {
     for (let l = l0; l <= l1; l++) {
       // A little off its row's line, as a hand sows; anywhere in its own length of the row.
@@ -74,6 +75,9 @@ export function sow(x0: number, y0: number, x1: number, y1: number, style: PlotS
       const plot = plotOf(across, along, style);
       if (plot.state !== PLOT.ripe && plot.state !== PLOT.green) continue;
       if (plot.edge < PLOT_LOOK.balk + (long ? p.length * 0.5 : 0)) continue;
+      // Plainly in another square: left to that square, before its place is worked out to the finger's breadth.
+      const [nx, ny] = plotNear(across, along, style);
+      if (nx < x0 - near || nx >= x1 + near || ny < y0 - near || ny >= y1 + near) continue;
       const [x, y] = plotPlace(across, along, style);
       if (x < x0 || x >= x1 || y < y0 || y >= y1) continue;
       // Its row's direction there: the plots' lines wander, and the rows with them.

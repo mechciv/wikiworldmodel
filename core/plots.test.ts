@@ -1,6 +1,6 @@
 // The plots of people's fields (core/plots.ts): one layout for the ground's colour and for what is sown on it.
 import { describe, expect, it } from 'vitest';
-import { PLOT, PLOT_LOOK, PLOTS_GLSL, plotAt, plotNumber, plotOf, plotPlace, plotReach, plotState, plotStyle } from './plots.ts';
+import { PLOT, PLOT_LOOK, PLOTS_GLSL, plotAt, plotNear, plotNumber, plotOf, plotPlace, plotReach, plotState, plotStyle } from './plots.ts';
 
 const BLOCKS = plotStyle({ kind: 'blocks', plot: 0.5 });
 const SWIDDEN = plotStyle({ kind: 'swidden', plot: 0.8 });
@@ -18,6 +18,9 @@ describe("the plots of people's fields", () => {
         expect(at.across - x).toBeGreaterThanOrEqual(0);
         expect(at.across - x).toBeLessThanOrEqual(plotReach(style) + 1e-9);
         expect(plotOf(at.across, at.along, style)).toEqual(at);
+        // The quick guess of where it lies is within a quarter of that reach, as what leaves places out by it trusts.
+        const [nx, ny] = plotNear(at.across, at.along, style);
+        expect(Math.max(Math.abs(nx - x), Math.abs(ny - y))).toBeLessThan(plotReach(style) * 0.25);
       }
     }
   });

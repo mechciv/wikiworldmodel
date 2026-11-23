@@ -119,6 +119,8 @@ test.describe('the human landscape', () => {
       expect(p.works).toContain('A person');
       expect(p.pieces).toBeGreaterThan(500);
       expect(p.paths).toBeGreaterThan(20);
+      // The build hands the scene how its fields' crop is drawn: at full quality, close by, it stands as plants.
+      expect(p.crops).toBe(true);
     });
 
     test('a hamlet far from a city with a scene of its own is drawn while that city stands, in the house of its region', async ({ page }) => {
