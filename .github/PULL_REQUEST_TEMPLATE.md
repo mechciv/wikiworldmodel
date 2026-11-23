@@ -13,6 +13,8 @@ Each work cited, and how it was read (publisher's page, archive.org scan, Perseu
 - [ ] `npm test` passes; for a change to how the world is built, `npm run build:world` and
       `npm run test:build` too (or: could not fetch <dataset>, so not run)
 - [ ] seen in the viewer at <link>
+- [ ] if the render changed, included **Before** and **After** viewer screenshots of the same
+      scene and noted what changed (or explained why a shot was unavailable)
 
 ## Open questions
 
