@@ -97,7 +97,7 @@ body's frame, x, y and every radius are shares of the **length** L, and z is a s
 true` to have z in L too). In a head's frame (`on: head`), everything is a share of L, as `[across, along, up]`.
 
 Every part may have: `mat` (hide, horn, shell, fur, feather, membrane, chitin, dark; for plants bark, needle, frond,
-broad), `tint` (0–255, fixed) or `tint_add` (added to the taxon's colour), `on: head`, `mirror: true` (both sides), `near:
+broad; and a plant's part its `leaf`, below), `tint` (0–255, fixed) or `tint_add` (added to the taxon's colour), `on: head`, `mirror: true` (both sides), `near:
 true` (only when close, for small things), `far: true` (only from a way off, standing for what `near` parts add), `poses: [...]` or `not: [...]` (only in those poses, or not), `stance: upright`
 or `four`, `sides: [fine, coarse]`.
 
@@ -122,7 +122,31 @@ or `four`, `sides: [fine, coarse]`.
 | `sheet` | `points` of `[x, y, z]`, a fan from the first; `gap`: a sail, a fin, a membrane |
 | `wing` | `shoulder: [x, y, z]`, `span`, `chord`, `sweep`, `beat`, `arm`, `folded`, `drop`, `mat`: spread when flying, folded along the flank otherwise. Give flyers `not: [fly]` on their legs if they should tuck them |
 
-**Plants.** Everything is a share of the plant's height.
+**Plants.** Everything is a share of the plant's height. A plant's part grows a skeleton by its type's own rule, and
+holds its leaves on cards that show a spray of one kind of leaf (`leaf`), or from further off a bough of them: say
+which, where the default for its type and material is not it.
+
+| `leaf` | What it is | The default for |
+|---|---|---|
+| `needle-flat` | needles in two flat ranks along feathery shoots: a redwood, a swamp cypress, a yew, a fir | a `conifer` |
+| `needle-tuft` | long needles in bundles, brushes at the ends of twigs: a pine | a `broadleaf` whose `mat` is needle |
+| `needle-scale` | shoots clothed in scale leaves, in flattened sprays: a cypress, a cheirolepid | a `conifer` or a `shrub` of scales |
+| `needle-awl` | short stiff leaves all round a shoot: a spruce, a monkey puzzle, a walchian, a scale tree | a `scale-tree`, a calamite's branches |
+| `frond-fern`, `frond-seed` | a fern's frond; a great frond twice divided: a seed fern, a tree fern | a `fern` |
+| `frond-cycad` | a stiff frond of narrow leaflets: a cycad, a bennettite | |
+| `frond-fan`, `frond-feather` | a pleated fan on a stalk; a long frond of drooping leaflets | a `palm` (the fan) |
+| `broad-oval` | plain oval leaves, alternate along a twig | a `broadleaf` |
+| `broad-lobed`, `broad-compound` | leaves cut into lobes, as a plane's; leaves of many leaflets, as an acacia's | |
+| `broad-fan` | fan-shaped leaves on short spurs: a ginkgo | |
+| `broad-tongue` | tongue-shaped leaves in tufts: a glossopterid | a `conifer` whose `mat` is broad |
+| `broad-strap` | long strap leaves at the ends of twigs: a cordaite | a `broadleaf` whose `mat` is frond |
+| `broad-small` | small leaves on wiry twigs: a shrub of dry ground | a `shrub` |
+| `blade-grass`, `blade-reed`, `blade-rush` | a tuft of narrow blades; tall strap leaves; thin bare stems | a `tuft` (grass; rush where its `mat` is needle) |
+| `whorl` | a jointed stem with a ring of thin branches at each joint: a horsetail | a `whorled` |
+| `herb`, `moss` | a low leafy plant; a cushion of tiny leaves | a `tuft` of broad leaves; a `shrub` of fronds |
+
+The kinds are a vocabulary (`core/leaves.ts`), and how each looks is the renderer's: `npx tsx tools/look/leaves.ts
+out.png` draws them all. A new kind is a few lines there and a painter in `viewer/src/gl/leafatlas.ts`.
 
 | Type | Fields |
 |---|---|

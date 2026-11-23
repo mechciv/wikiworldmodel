@@ -47,7 +47,7 @@ import { ENCLOSURE_SIZE } from '../yard.ts';
 import { MAT } from '../../city/kit.ts';
 
 export const GENERATOR = 'gen:people/settlement';
-export const VERSION = 3;
+export const VERSION = 4;
 
 const EARTH = 6371000;
 const DEG = PI / 180;

@@ -1,8 +1,8 @@
 id: gen:life/scene
 type: generator
 title: A living scene of any place, on land or in the sea
-version: 9
-code: generators/life/scene/v9.ts
+version: 10
+code: generators/life/scene/v10.ts
 runs_in: [build, client]
 outputs: { basis: procedural }
 # What it reads from the world: who may stand where and how big each grew, the ground and the climate
@@ -32,13 +32,13 @@ inputs:
   - { ref: life/hell-creek/ecosystem, note: "the Hell Creek slot: where it was, and on which plate" }
 # What it makes, held in aggregate to what it samples (docs/STRUCTURE.md section 3.4).
 checks:
-  - { test: world/generators/life/scene/v9.test.ts, holds: "is only the taxa it is given, each near the arrival at least once" }
-  - { test: world/generators/life/scene/v9.test.ts, holds: "draws each taxon as often as the atlas's weight and the density rule say, in aggregate, below a cell's cap" }
-  - { test: world/generators/life/scene/v9.test.ts, holds: "has no forest before forests, only the few set by the arrival" }
-  - { test: world/generators/life/scene/v9.test.ts, holds: "has bare ground and no low plants at all before land plants" }
-  - { test: world/generators/life/scene/v9.test.ts, holds: "has a desert mostly bare, with no forest" }
-  - { test: world/generators/life/scene/v9.test.ts, holds: "grows what the climate of each height bears: forest below the treeline, none above it" }
-  - { test: world/generators/life/scene/v9.test.ts, holds: "lays snow down to where the month holds it: low in winter, high or not at all in summer" }
+  - { test: world/generators/life/scene/v10.test.ts, holds: "is only the taxa it is given, each near the arrival at least once" }
+  - { test: world/generators/life/scene/v10.test.ts, holds: "draws each taxon as often as the atlas's weight and the density rule say, in aggregate, below a cell's cap" }
+  - { test: world/generators/life/scene/v10.test.ts, holds: "has no forest before forests, only the few set by the arrival" }
+  - { test: world/generators/life/scene/v10.test.ts, holds: "has bare ground and no low plants at all before land plants" }
+  - { test: world/generators/life/scene/v10.test.ts, holds: "has a desert mostly bare, with no forest" }
+  - { test: world/generators/life/scene/v10.test.ts, holds: "grows what the climate of each height bears: forest below the treeline, none above it" }
+  - { test: world/generators/life/scene/v10.test.ts, holds: "lays snow down to where the month holds it: low in winter, high or not at all in summer" }
   - { test: world/generators/life/meander.test.ts, holds: "winds as a meandering river does, its bends of many sizes, and never comes within a neck of itself" }
   - { test: world/generators/life/meander.test.ts, holds: "cuts off loops where a neck closes, and keeps where it lay" }
   - { test: world/generators/life/meander.test.ts, holds: "is the same river from the same seed, to the last bit, and another river from another" }
@@ -46,14 +46,14 @@ checks:
   - { test: world/generators/life/meander.test.ts, holds: "brings a visitor to dry ground inside a bend, off its other limb and off the old bends" }
   - { test: world/generators/life/rivers.test.ts, holds: "winds by the sine-generated curve, as long as its sinuosity says" }
   - { test: world/generators/life/rivers.test.ts, holds: "draws its channel by the laws, and braids, winds or runs straight as its slope and flow say" }
-  - { test: world/generators/life/scene/v9.test.ts, holds: "runs its rivers where the world says, with the water falling downstream" }
-  - { test: world/generators/life/scene/v9.test.ts, holds: "draws a river dry in a month its bed holds no water: no water in its bed, its bed bare, and its ribbon marked dry" }
-  - { test: world/generators/life/scene/v9.test.ts, holds: "holds a lake where the world gives one: its bed under its level, its shore above it, and its water drawn" }
-  - { test: world/generators/life/scene/v9.test.ts, holds: "lines water with trees, flowing or dry, and stands the kinds that like it wet by it" }
-  - { test: world/generators/life/scene/v9.test.ts, holds: "stands its kinds in stands: each is commonest in patches of its own" }
-  - { test: world/generators/life/scene/v9.test.ts, holds: "grows each kind where its height's climate is like its rows': what grows changes up a slope" }
-  - { test: world/generators/life/scene/v9.test.ts, holds: "sows the understory as tall as a person as far as the big animals, and the lower only close by" }
-  - { test: world/generators/life/scene/v9.test.ts, holds: "puts what lives on the sea floor on it, and what swims in the water over it, never on land" }
+  - { test: world/generators/life/scene/v10.test.ts, holds: "runs its rivers where the world says, with the water falling downstream" }
+  - { test: world/generators/life/scene/v10.test.ts, holds: "draws a river dry in a month its bed holds no water: no water in its bed, its bed bare, and its ribbon marked dry" }
+  - { test: world/generators/life/scene/v10.test.ts, holds: "holds a lake where the world gives one: its bed under its level, its shore above it, and its water drawn" }
+  - { test: world/generators/life/scene/v10.test.ts, holds: "lines water with trees, flowing or dry, and stands the kinds that like it wet by it" }
+  - { test: world/generators/life/scene/v10.test.ts, holds: "stands its kinds in stands: each is commonest in patches of its own" }
+  - { test: world/generators/life/scene/v10.test.ts, holds: "grows each kind where its height's climate is like its rows': what grows changes up a slope" }
+  - { test: world/generators/life/scene/v10.test.ts, holds: "sows the understory as tall as a person as far as the big animals, and the lower only close by" }
+  - { test: world/generators/life/scene/v10.test.ts, holds: "puts what lives on the sea floor on it, and what swims in the water over it, never on land" }
   - { test: world/generators/life/rivers.test.ts, holds: "brings a river that runs into another to the other's water, and draws it only to the other's bank" }
 limits:
   - with: field:life/community

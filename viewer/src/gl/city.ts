@@ -4,6 +4,7 @@
 // sky, the distant land, the near land and the city are lit by one sun, in floating point, with
 // cascaded shadows, and finished with bloom and a filmic curve.
 import type { GroundLevel } from '../../../core/city.ts';
+import { sprayTile } from '../../../core/leaves.ts';
 import { GROUND_LAYERS } from '../../../core/materials.ts';
 import { hash3 } from '../../../world/generators/city/math.ts';
 import { invert, multiply, type Mat4, type V3 } from '../mat.ts';
@@ -15,6 +16,9 @@ import { AO_FS, BLUR_FS, BRIGHT_FS, DEPTH_FS, FULLSCREEN_VS, ID_FS, LUM_FS, MESH
 
 /** Texture units, the same for every program; 12 to 16 are the passes' own, for their targets. */
 const UNIT = { noise: 0, sky: 1, shadow: 2, ao: 3, entities: 4, ground: 5, normal: 8, mask: 11, fields: 17, waterMap: 18, scene: 19, sceneDepth: 20, matColour: 21, matNormal: 22, leaves: 23 } as const;
+
+/** The first tiles of the atlas of leaves that lie fallen under trees: a broad-leaved canopy's sprays, and a needle-leaved one's. */
+const LITTER_TILES = [sprayTile('broad-oval', 0), sprayTile('needle-flat', 0)];
 
 /** The grid of hexagons a scanned material is read among (cityShaders.ts, MATERIALS): tiles to a repeat, and where their numbers repeat. */
 const MAT_TILES = 3;
@@ -620,10 +624,10 @@ void main() {
     };
     const lit = { uNoise: UNIT.noise, uSkyLut: UNIT.sky, uShadow: UNIT.shadow, uAO: UNIT.ao, uEntities: UNIT.entities };
     const ground = { uGround0: UNIT.ground, uGround1: UNIT.ground + 1, uGround2: UNIT.ground + 2, uNormal0: UNIT.normal, uNormal1: UNIT.normal + 1, uNormal2: UNIT.normal + 2, uMask: UNIT.mask, uFields: UNIT.fields };
-    ints(this.meshP, { ...lit, uMask: UNIT.mask, uLeaves: UNIT.leaves });
+    ints(this.meshP, { ...lit, uMask: UNIT.mask, uLeaves: UNIT.leaves, uMatColour: UNIT.matColour, uMatNormal: UNIT.matNormal });
     ints(this.depthP, { uEntities: UNIT.entities, uLeaves: UNIT.leaves });
     ints(this.idP, { uEntities: UNIT.entities, uLeaves: UNIT.leaves });
-    ints(this.terrainP, { ...lit, ...ground, uWaterMap: UNIT.waterMap, uMatColour: UNIT.matColour, uMatNormal: UNIT.matNormal });
+    ints(this.terrainP, { ...lit, ...ground, uWaterMap: UNIT.waterMap, uMatColour: UNIT.matColour, uMatNormal: UNIT.matNormal, uLeaves: UNIT.leaves });
     ints(this.waterBlurP, { uTex: UNIT.waterMap });
     ints(this.terrainDepthP, ground);
     ints(this.waterP, { ...lit, uScene: UNIT.scene, uSceneDepth: UNIT.sceneDepth });
@@ -1233,6 +1237,7 @@ void main() {
       uLitter: this.litter,
       uClumps: this.clumps,
       uMaterials: this.materials.ready ? 1 : 0,
+      uLitterTile: LITTER_TILES,
     });
     const matMean = p.uniforms.get('uMatMean');
     if (matMean && this.materials.ready) {
@@ -1249,9 +1254,13 @@ void main() {
         this.matCell.set([((Math.floor(sx) % MAT_WRAP) + MAT_WRAP) % MAT_WRAP, ((Math.floor(sy) % MAT_WRAP) + MAT_WRAP) % MAT_WRAP], k * 2);
       }
       gl.uniform4fv(matMean, m.mean);
-      gl.uniform4fv(p.uniforms.get('uMatLook')!, m.look);
-      gl.uniform4fv(p.uniforms.get('uMatAt')!, this.matAt);
-      gl.uniform2fv(p.uniforms.get('uMatCell')!, this.matCell);
+      const look = p.uniforms.get('uMatLook');
+      if (look) gl.uniform4fv(look, m.look);
+      // Only the ground reads a material among its tiles, from the eye: what is built reads it by its own face.
+      const at = p.uniforms.get('uMatAt');
+      if (at) gl.uniform4fv(at, this.matAt);
+      const cell = p.uniforms.get('uMatCell');
+      if (cell) gl.uniform2fv(cell, this.matCell);
       const up = p.uniforms.get('uMatUp');
       // The one read from the side, a face of rock in beds: where the eye's height is in its repeat.
       if (up) {
@@ -1355,7 +1364,9 @@ void main() {
     const sun = f.sun;
     if (sun[2] <= 0) return;
     const range = Math.max(30, Math.hypot(f.eye[0] - f.focus[0], f.eye[1] - f.focus[1], f.eye[2] - f.focus[2]));
-    const r0 = Math.min(Math.max(70, range * 1.0), 1400);
+    // The nearest cascade is as wide as the view is far, and no narrower than a clearing: close to, a shadow is fine
+    // enough to meet the foot that casts it.
+    const r0 = Math.min(Math.max(24, range * 1.0), 1400);
     const r1 = Math.min(r0 * 5, 7000);
     const r2 = Math.max(r1 * 2.5, 9000);
     this.shadowRadii = [r0, r1, r2];

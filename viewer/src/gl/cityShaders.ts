@@ -207,7 +207,7 @@ void main() {
     vec3 q = p;
     p = iPlace.xyz + vec3(q.x * iFace.y + q.y * iFace.x, -q.x * iFace.x + q.y * iFace.y, q.z) * iPlace.w;
     n = vec3(n.x * iFace.y + n.y * iFace.x, -n.x * iFace.x + n.y * iFace.y, n.z);
-    if (aMat.x != 32u && aMat.x != 10u && aMat.x != 37u) tint = fract(tint + float(iMeta.y) / 255.0);
+    if (aMat.x != 32u && aMat.x != 10u && aMat.x != 37u && aMat.x != 72u) tint = fract(tint + float(iMeta.y) / 255.0);
   }
   // A plant drawn by instancing leans with the wind, the more the higher, in gusts that cross the ground; its leaves on
   // cards flutter.
@@ -502,9 +502,30 @@ uniform float uCoverage;
 // The tones of the land, as the place's climate gives them (world/generators/life/scene.yaml): soil, low plants, bare
 // ground, canopy and low plants from afar, each from one tone to another. What grows takes its hue from them.
 uniform vec3 uTone[10];
+// The ground's scanned materials (core/materials.ts), where they are loaded: what is built of earth or of stone takes
+// its grain from the scan of it, in its own colour, as the ground does.
+uniform highp sampler2DArray uMatColour;
+uniform highp sampler2DArray uMatNormal;
+uniform vec4 uMatMean[${GROUND_LAYERS.length}];
+uniform vec4 uMatLook[${GROUND_LAYERS.length}];
+uniform float uMaterials;
+const int ${GROUND_LAYERS.map((k, i) => `M_${k.toUpperCase()} = ${i}`).join(', ')};
 out vec4 o;
 ${LIGHTING}
 ${LEAVES}
+// A scanned material's grain on a built face, laid by the face's own uv in metres: what to multiply its colour by; and
+// its height, 0 to 1, for the light to be bumped by. Nothing where the scans are not loaded, or from too far to show.
+vec4 builtGrain(int layer, vec2 uv, float scale, vec3 p) {
+  float near = uMaterials * (1.0 - smoothstep(40.0, 110.0, length(uEye - p)));
+  if (near <= 0.0) return vec4(1.0, 1.0, 1.0, 0.5);
+  vec3 at = vec3(uv / (uMatMean[layer].w * scale), float(layer));
+  vec4 c = texture(uMatColour, at);
+  vec3 mean = uMatMean[layer].rgb;
+  const vec3 LUMA = vec3(0.2126, 0.7152, 0.0722);
+  float light = dot(c.rgb, LUMA) / max(dot(mean, LUMA), 1e-4);
+  vec3 detail = mix(vec3(light), c.rgb / max(mean, vec3(1e-4)), uMatLook[layer].x * 0.6);
+  return vec4(mix(vec3(1.0), clamp(detail, 0.2, 2.6), near), mix(0.5, c.a, near));
+}
 
 const int MARBLE=1, TRAVERTINE=2, BRICK=3, PLASTER=4, TILE=5, GILT=6, BRONZE=7, GRANITE=8, WOOD=9, DARK=10, PAVING=11, BASALT=12, SAND=13, CONCRETE=14, LEAD=15, LEAF=16, TRUNK=17, GRASS=18, SHAFT=19, FACADE=20, STATUE=21, EARTH=22, SEATS=23, AWNING=24, SPIRAL=25, CLOTH=26, SKIN=27, DENTIL=28, FRIEZE=29, POOL=30, HIDE=31, HORN=32, SHELL=33, FUR=34, NEEDLE=35, FROND=36, BARK=37, BROAD=38, FEATHER=39, MEMBRANE=40, CHITIN=41, THATCH=42, MUD=43;
 
@@ -743,18 +764,22 @@ Surface surface(int m, vec3 p, vec2 uv, float tint, vec3 n, float fw, out vec3 b
     vec3 c = vec3(0.215, 0.14, 0.075);
     vec3 d = vec3(0.105, 0.115, 0.10);
     vec3 base = k < 1.0 ? mix(a, b, k) : k < 2.0 ? mix(b, c, k - 1.0) : k < 3.0 ? mix(c, d, k - 2.0) : mix(d, a, k - 3.0);
-    float mott = fbmM(p, 0.32);
-    float band = smoothstep(0.44, 0.62, fbmM(p * vec3(1.0, 0.45, 0.8), 0.5) + (mott - 0.5) * 0.35);
+    // Its mottling is laid in the body's own frame, and goes with it as it moves.
+    vec3 b3 = vLocal;
+    float mott = fbmM(b3, 0.32);
+    float band = smoothstep(0.44, 0.62, fbmM(b3 * vec3(1.0, 0.45, 0.8), 0.5) + (mott - 0.5) * 0.35);
     vec3 skin = base * mix(1.25, 0.55, band);
     float back = smoothstep(0.2, 0.95, n.z);
     float belly = smoothstep(-0.15, -0.8, n.z);
     skin = mix(skin, skin * 0.58, back);
     skin = mix(skin, mix(skin, vec3(0.42, 0.37, 0.27), 0.68), belly);
-    s.albedo = skin * (0.66 + 0.68 * noiseM(p, 0.06));
-    s.rough = 0.66;
-    vec3 q = p / (64.0 * 0.045);
+    // Creases round the body, where its skin folds as it moves: darker in them.
+    float crease = abs(noiseS(b3, vec3(0.5, 0.05, 0.5)) - 0.5) * 2.0;
+    s.albedo = skin * (0.7 + 0.6 * noiseM(b3, 0.06)) * (0.82 + 0.18 * smoothstep(0.0, 0.3, crease));
+    s.rough = 0.62;
+    vec3 q = b3 / (64.0 * 0.045);
     vec3 wob = vec3(texture(uNoise, q).r, texture(uNoise, q).g, texture(uNoise, q).b) - 0.5;
-    bumpN = normalize(n + wob * 1.5);
+    bumpN = normalize(n + wob * 1.2);
   } else if (m == HORN) {
     s.albedo = mix(vec3(0.58, 0.52, 0.40), vec3(0.20, 0.17, 0.13), tint) * (0.84 + 0.3 * noiseM(p, 0.05));
     s.rough = 0.48;
@@ -772,7 +797,9 @@ Surface surface(int m, vec3 p, vec2 uv, float tint, vec3 n, float fw, out vec3 b
     vec3 base = tint < 0.34 ? mix(vec3(0.20, 0.145, 0.09), vec3(0.34, 0.25, 0.14), k) : tint < 0.67 ? mix(vec3(0.27, 0.20, 0.11), vec3(0.16, 0.14, 0.11), k) : mix(vec3(0.42, 0.34, 0.20), vec3(0.22, 0.17, 0.12), k);
     float back = smoothstep(0.2, 0.9, n.z);
     float belly = smoothstep(-0.1, -0.8, n.z);
-    s.albedo = mix(mix(base, base * 0.6, back), vec3(0.56, 0.50, 0.40), belly * 0.7) * (0.74 + 0.5 * noiseS(p, vec3(0.03, 0.03, 0.14)));
+    // Its hair lies along its body, in strokes; and catches the light at its edge, as a coat does.
+    s.albedo = mix(mix(base, base * 0.6, back), vec3(0.56, 0.50, 0.40), belly * 0.7) * (0.74 + 0.5 * noiseS(vLocal, vec3(0.012, 0.14, 0.012))) * (0.9 + 0.2 * noiseM(vLocal, 0.2));
+    s.albedo *= 1.0 + 0.5 * pow(1.0 - abs(dot(n, normalize(uEye - p))), 3.0);
     s.rough = 0.95;
   } else if (m == FEATHER) {
     // Vanes in long strokes, darker on the back and paler beneath. Their colours are nobody's record: the generator's.
@@ -784,7 +811,8 @@ Surface surface(int m, vec3 p, vec2 uv, float tint, vec3 n, float fw, out vec3 b
     vec3 base = k < 1.0 ? mix(a, b, k) : k < 2.0 ? mix(b, c, k - 1.0) : k < 3.0 ? mix(c, d, k - 2.0) : mix(d, a, k - 3.0);
     float back = smoothstep(0.2, 0.9, n.z);
     float belly = smoothstep(-0.1, -0.8, n.z);
-    s.albedo = mix(mix(base, base * 0.7, back), vec3(0.62, 0.58, 0.50), belly * 0.6) * (0.78 + 0.44 * noiseS(p, vec3(0.018, 0.09, 0.018)));
+    s.albedo = mix(mix(base, base * 0.7, back), vec3(0.62, 0.58, 0.50), belly * 0.6) * (0.78 + 0.44 * noiseS(vLocal, vec3(0.018, 0.09, 0.018)));
+    s.albedo *= 1.0 + 0.3 * pow(1.0 - abs(dot(n, normalize(uEye - p))), 3.0);
     s.rough = 0.82;
   } else if (m == MEMBRANE) {
     // A wing's skin: thin, leathery and a little see-through against the light.
@@ -845,18 +873,20 @@ Surface surface(int m, vec3 p, vec2 uv, float tint, vec3 n, float fw, out vec3 b
     float v = uv.y - kind * 1000.0;
     vec3 base = mix(vec3(0.17, 0.13, 0.095), vec3(0.31, 0.22, 0.14), tint);
     base = mix(base, vec3(dot(base, vec3(0.333))) * vec3(1.03, 1.0, 0.95), 0.4 * fract(tint * 7.3));
-    float near = 1.0 - smoothstep(20.0, 80.0, length(uEye - p));
+    // Its ridges show while each is a few pixels wide; finer than that they are left out, so that nothing shimmers.
+    float near = (1.0 - smoothstep(14.0, 50.0, length(uEye - p))) * (1.0 - smoothstep(0.12, 0.4, fw));
     float fine = noiseS(p, vec3(0.012, 0.012, 0.3));
     float h = 0.6;
     if (near > 0.0) {
-      float wander = (noiseM(p, 0.22) - 0.5) * 1.3 + (noiseS(p, vec3(0.05, 0.05, 0.6)) - 0.5) * 0.5;
+      float wander = (noiseM(p, 0.3) - 0.5) * 2.2 + (noiseS(p, vec3(0.06, 0.06, 0.5)) - 0.5) * 0.9;
       if (kind < 0.5) {
-        // Ridges along the limb, wandering, parting and joining; broken across into plates.
+        // Ridges along the limb, wandering, parting and joining, each broken across here and there, nowhere in line
+        // with its neighbour's breaks.
         float ph = uv.x + wander;
-        float furrow = smoothstep(0.45, 0.95, abs(fract(ph) - 0.5) * 2.0);
-        float cv = v / 0.17 + hash(vec2(floor(ph), 3.0)) * 9.0;
-        float crack = 1.0 - smoothstep(0.02, 0.1, abs(fract(cv) - 0.5));
-        h = (1.0 - furrow) * (1.0 - 0.55 * crack) * (0.72 + 0.28 * fine);
+        float furrow = smoothstep(0.5, 0.92, abs(fract(ph) - 0.5) * 2.0);
+        float cv = v / (0.2 + 0.25 * hash(vec2(floor(ph), 5.0))) + hash(vec2(floor(ph), 3.0)) * 9.0 + (noiseM(p, 0.12) - 0.5) * 1.5;
+        float crack = (1.0 - smoothstep(0.02, 0.08, abs(fract(cv) - 0.5))) * step(0.4, hash(vec2(floor(ph), floor(cv))));
+        h = (1.0 - 0.85 * furrow) * (1.0 - 0.4 * crack) * (0.7 + 0.3 * fine);
       } else if (kind < 1.5) {
         // Smooth, with short marks across it.
         float lv = v / 0.03;
@@ -891,6 +921,10 @@ Surface surface(int m, vec3 p, vec2 uv, float tint, vec3 n, float fw, out vec3 b
     s.albedo = mix(s.albedo, vec3(0.2, 0.22, 0.15) * (0.6 + 0.6 * h), 0.3 * smoothstep(0.55, 0.78, fbmM(p + 3.7, 0.9)));
     s.rough = 0.92;
     if (near > 0.0) bumpN = bumpBy(n, vRel, h, 0.014 * near);
+  } else if (m == 72) {
+    // An eye: dark and wet.
+    s.albedo = vec3(0.016, 0.012, 0.009);
+    s.rough = 0.08;
   } else if (m == DARK) {
     s.albedo = vec3(0.012, 0.011, 0.01);
     s.rough = 0.9;
@@ -958,11 +992,16 @@ Surface surface(int m, vec3 p, vec2 uv, float tint, vec3 n, float fw, out vec3 b
   } else if (m == CLOTH) {
     int k = int(tint * 255.0) & 7;
     vec3 c = k < 3 ? vec3(0.78, 0.75, 0.68) : k == 3 ? vec3(0.62, 0.48, 0.30) : k == 4 ? vec3(0.50, 0.17, 0.14) : k == 5 ? vec3(0.22, 0.28, 0.42) : k == 6 ? vec3(0.55, 0.52, 0.45) : vec3(0.36, 0.28, 0.20);
-    s.albedo = c * (0.8 + 0.3 * noiseM(p, 0.12));
+    // Cloth hangs in folds, down its length: darker in them, and the light is bumped across them; its weave close by.
+    float folds = noiseS(vLocal, vec3(0.035, 0.035, 0.5)) * 0.65 + noiseS(vLocal + 3.0, vec3(0.09, 0.09, 0.9)) * 0.35;
+    float weave = noiseM(vLocal, 0.006);
+    s.albedo = c * (0.72 + 0.42 * folds) * (0.92 + 0.16 * weave) * (0.9 + 0.2 * noiseM(p, 0.3));
     s.rough = 0.95;
+    float near = 1.0 - smoothstep(15.0, 60.0, length(uEye - p));
+    if (near > 0.0) bumpN = bumpBy(n, vRel, folds, 0.02 * near);
   } else if (m == SKIN) {
-    s.albedo = mix(vec3(0.47, 0.31, 0.22), vec3(0.28, 0.18, 0.12), tint);
-    s.rough = 0.7;
+    s.albedo = mix(vec3(0.47, 0.31, 0.22), vec3(0.28, 0.18, 0.12), tint) * (0.92 + 0.16 * noiseM(vLocal, 0.05));
+    s.rough = 0.62;
   } else if (m == DENTIL) {
     // A row of small blocks under a cornice.
     vec3 base = vec3(0.82, 0.80, 0.75) * (0.92 + 0.14 * fbmM(p, 1.0));
@@ -1021,6 +1060,8 @@ Surface built(int m, vec3 q, vec3 p, vec2 uv, float tint, vec3 n, float fw, out 
   // Each house its own age and its own shade, from its tint.
   float age = fract(tint * 11.3);
   float shade = fract(tint * 29.7);
+  // How close it is: its finest grain shows only close by.
+  float near = 1.0 - smoothstep(12.0, 45.0, length(uEye - p));
   if (m == THATCH) {
     // Thatch of straw, grass or reed: bundles in courses down the slope, their butts ragged; gold when new, grey-brown
     // and mossy when old.
@@ -1033,6 +1074,8 @@ Surface built(int m, vec3 q, vec3 p, vec2 uv, float tint, vec3 n, float fw, out 
     straw = mix(straw, vec3(0.19, 0.23, 0.10), smoothstep(0.56, 0.8, fbmM(p + 11.0, 1.9)) * age * 0.6);
     s.albedo = straw * (0.84 + 0.32 * fbmM(p, 1.3));
     s.rough = 0.96;
+    // Each course stands proud of the one below it, and its straws run down the slope.
+    s.bump = (1.0 - lap) * 0.7 * vis + noiseS(p, vec3(0.012, 0.012, 0.5)) * 0.5 * near;
   } else if (m == MUD) {
     // Mud plaster, cob or rammed earth: smoothed by hand, runnelled by rain, dark at its foot.
     vec3 earth = mix(vec3(0.52, 0.42, 0.30), vec3(0.41, 0.32, 0.23), shade);
@@ -1040,7 +1083,12 @@ Surface built(int m, vec3 q, vec3 p, vec2 uv, float tint, vec3 n, float fw, out 
     earth *= 0.93 + 0.14 * noiseM(p, 0.07) * visible(0.07, fw);
     // The lifts it was built up in, faintly.
     earth *= 1.0 - 0.06 * smoothstep(0.86, 0.97, fract(q.z / 0.5)) * visible(0.3, fw);
-    s.albedo = walled(earth, p, q, 0.7);
+    // Its grain is the earth's own; cracked a little where it has dried.
+    vec4 g = builtGrain(M_EARTH, vec2(uv.x, q.z), 0.7, p);
+    vec4 c2 = builtGrain(M_CRACKED, vec2(uv.x, q.z) + 3.7, 1.6, p);
+    float dried = smoothstep(0.5, 0.75, fbmM(p + 6.0, 1.7));
+    s.albedo = walled(earth, p, q, 0.7) * mix(g.rgb, c2.rgb, dried * 0.7);
+    s.bump = mix(g.a, c2.a, dried * 0.7) * 1.2 + fbmM(p, 0.35) * 0.9;
   } else if (m == ADOBE) {
     // Sun-dried bricks in their courses, in mud mortar.
     vec3 earth = mix(vec3(0.53, 0.43, 0.31), vec3(0.43, 0.34, 0.25), shade);
@@ -1048,7 +1096,10 @@ Surface built(int m, vec3 q, vec3 p, vec2 uv, float tint, vec3 n, float fw, out 
     float vis = visible(0.12, fw);
     earth *= mix(0.94, (0.84 + 0.26 * c.y) * (0.7 + 0.3 * smoothstep(0.0, 0.014, c.x)), vis);
     earth *= 0.84 + 0.3 * fbmM(p, 1.0);
-    s.albedo = walled(earth, p, q, 0.8);
+    // Each brick's own grain, and its face a little proud of its mortar, its edges worn round.
+    vec4 g = builtGrain(M_EARTH, vec2(uv.x, q.z), 0.5, p);
+    s.albedo = walled(earth, p, q, 0.8) * g.rgb;
+    s.bump = smoothstep(0.0, 0.03, c.x) * vis * 1.3 + g.a * 0.8 + c.y * 0.3 * vis;
   } else if (m == WATTLE) {
     // Rods woven round stakes.
     float row = floor(q.z / 0.05);
@@ -1057,6 +1108,7 @@ Surface built(int m, vec3 q, vec3 p, vec2 uv, float tint, vec3 n, float fw, out 
     vec3 base = mix(vec3(0.31, 0.24, 0.15), vec3(0.42, 0.33, 0.21), shade);
     base *= mix(0.86, (0.6 + 0.4 * weave) * (1.0 - 0.5 * rod * rod), visible(0.05, fw));
     s.albedo = weathered(base, p, age) * (0.8 + 0.4 * fbmM(p, 1.1));
+    s.bump = (weave * (1.0 - rod * rod)) * visible(0.05, fw) * 1.6;
   } else if (m == LIMEWASH || m == PAINTED) {
     // Lime on a wall: white, stained at its foot, flaked in patches to the daub beneath. Painted, it has bands of red
     // earth: a dado, or stripes.
@@ -1070,7 +1122,10 @@ Surface built(int m, vec3 q, vec3 p, vec2 uv, float tint, vec3 n, float fw, out 
     base *= 0.86 + 0.2 * fbmM(p, 1.6);
     float worn = smoothstep(0.64, 0.76, fbmM(p + 3.1, 0.9));
     base = mix(base, vec3(0.50, 0.41, 0.29), worn * (0.25 + 0.4 * age));
-    s.albedo = walled(base, p, q, 0.9);
+    // The wash follows the wall under it: an earth wall's unevenness shows through, and where it has flaked it lies lower.
+    vec4 g = builtGrain(M_EARTH, vec2(uv.x, q.z), 0.9, p);
+    s.albedo = walled(base, p, q, 0.9) * mix(vec3(1.0), g.rgb, 0.35 + 0.5 * worn);
+    s.bump = g.a * 0.6 + fbmM(p, 0.4) * 0.8 - worn * 0.5;
     s.rough = 0.88;
   } else if (m == HALFTIMBER) {
     // A frame of timber, its panels filled and daubed: posts, rails, and a brace in a panel here and there.
@@ -1085,6 +1140,8 @@ Surface built(int m, vec3 q, vec3 p, vec2 uv, float tint, vec3 n, float fw, out 
     daub = walled(daub, p, q, 0.8);
     float vis = visible(0.5, fw);
     s.albedo = mix(mix(daub, wood, 0.2), mix(daub, wood, timber), vis);
+    // The timbers stand proud of their panels.
+    s.bump = timber * vis * 1.5 + (1.0 - timber) * fbmM(p, 0.3) * 0.5;
   } else if (m == LOGS) {
     // Logs laid one on another: each round, with the seam between them in shadow.
     float t = fract(q.z / 0.22);
@@ -1103,6 +1160,8 @@ Surface built(int m, vec3 q, vec3 p, vec2 uv, float tint, vec3 n, float fw, out 
     base *= mix(0.92, 0.5 + 0.5 * smoothstep(0.0, 0.07, min(a, 1.0 - a)), visible(0.26, fw));
     s.albedo = weathered(base, p, age);
     s.rough = 0.88;
+    // Each board a little cupped, a gap between it and the next, and its grain along it.
+    s.bump = smoothstep(0.0, 0.05, min(a, 1.0 - a)) * visible(0.26, fw) * 1.5 + noiseS(p, vec3(0.012, 0.012, 0.6)) * 0.4 * near;
   } else if (m == RUBBLE) {
     // Rough stone, laid dry or in mud: stones of many sizes in wandering courses.
     vec2 w = vec2(uv.x + 0.14 * noiseM(p, 0.5), q.z + 0.06 * noiseM(p + 2.0, 0.4));
@@ -1114,7 +1173,10 @@ Surface built(int m, vec3 q, vec3 p, vec2 uv, float tint, vec3 n, float fw, out 
     stone *= 0.8 + 0.4 * fbmM(p, 0.7);
     // Lichen and moss where it is damp.
     stone = mix(stone, vec3(0.30, 0.33, 0.20), smoothstep(0.62, 0.8, fbmM(p + 8.0, 1.4)) * 0.4);
-    s.albedo = stone;
+    // Each stone has the rock's own face, and stands out of its joints.
+    vec4 g = builtGrain(M_ROCK, vec2(uv.x, q.z), 0.6, p);
+    s.albedo = stone * g.rgb;
+    s.bump = smoothstep(0.0, 0.05, c.x) * vis * 2.2 + c.y * 0.8 * vis + g.a * 0.8;
     s.rough = 0.95;
   } else if (m == MATTING) {
     // Mats woven of split bamboo, palm leaf or grass, lashed on in sheets.
@@ -1126,6 +1188,7 @@ Surface built(int m, vec3 q, vec3 p, vec2 uv, float tint, vec3 n, float fw, out 
     float seam = abs(fract(uv.x / 1.8 + 0.5) - 0.5) * 1.8;
     base *= mix(1.0, 0.62 + 0.38 * smoothstep(0.0, 0.05, seam), visible(0.4, fw));
     s.albedo = base * (0.82 + 0.36 * fbmM(p, 1.3));
+    s.bump = (ch * 0.6 + strand * 0.8) * visible(0.11, fw);
   } else if (m == FELT) {
     // Felt: pale, soft, grimed at its foot and smoked at its top.
     vec3 base = mix(vec3(0.63, 0.60, 0.53), vec3(0.74, 0.72, 0.66), shade);
@@ -1138,6 +1201,8 @@ Surface built(int m, vec3 q, vec3 p, vec2 uv, float tint, vec3 n, float fw, out 
     base *= mix(1.0, 0.86 + 0.14 * smoothstep(0.0, 0.04, lap), visible(0.4, fw));
     s.albedo = base;
     s.rough = 0.97;
+    // Soft, sagging a little between its ropes and poles.
+    s.bump = fbmM(p, 0.45) * 1.4 + smoothstep(0.0, 0.04, lap) * 0.4;
   } else if (m == TANNED) {
     // Hides sewn together: each its own shade, the seams between them, the top dark with smoke.
     vec2 c = courses(vec2(uv.x + 0.2 * noiseM(p, 0.7), uv.y), vec2(1.5, 1.15));
@@ -1146,6 +1211,7 @@ Surface built(int m, vec3 q, vec3 p, vec2 uv, float tint, vec3 n, float fw, out 
     base = mix(base, base * vec3(0.36, 0.31, 0.27), smoothstep(2.4, 4.4, q.z) * 0.8);
     s.albedo = base * (0.85 + 0.3 * fbmM(p, 0.8));
     s.rough = 0.8;
+    s.bump = fbmM(p, 0.5) * 1.3 + smoothstep(0.0, 0.03, c.x) * 0.7;
   } else if (m == HAIRCLOTH) {
     // Cloth woven of goat's or yak's hair, in long strips sewn edge to edge: near black, browner where it has worn.
     vec3 base = mix(vec3(0.045, 0.04, 0.035), vec3(0.09, 0.075, 0.058), shade);
@@ -1154,6 +1220,7 @@ Surface built(int m, vec3 q, vec3 p, vec2 uv, float tint, vec3 n, float fw, out 
     base *= mix(1.0, 0.78 + 0.44 * noiseM(p, 0.012), visible(0.012, fw));
     s.albedo = base * (0.72 + 0.6 * fbmM(p, 0.6));
     s.rough = 0.97;
+    s.bump = fbmM(p, 0.6) * 1.5 + smoothstep(0.0, 0.03, strip) * 0.5;
   } else if (m == SOD) {
     // Turf: grass where it faces the sky, and cut sods in their courses where it is a wall.
     float up = smoothstep(0.35, 0.7, n.z);
@@ -1161,8 +1228,10 @@ Surface built(int m, vec3 q, vec3 p, vec2 uv, float tint, vec3 n, float fw, out 
     vec3 earth = mix(vec3(0.20, 0.16, 0.10), vec3(0.29, 0.23, 0.15), shade) * (0.8 + 0.4 * noiseM(p, 0.25));
     float vis = visible(0.14, fw);
     vec3 side = mix(earth, grass * 0.8, smoothstep(0.7, 0.95, fract(q.z / 0.14)) * vis + 0.25 * (1.0 - vis));
-    s.albedo = mix(side, grass, up);
+    vec4 g = builtGrain(M_SOIL, vec2(uv.x, q.z), 0.8, p);
+    s.albedo = mix(side * g.rgb, grass, up);
     s.rough = 0.96;
+    s.bump = mix(g.a * 1.2 + smoothstep(0.0, 0.2, fract(q.z / 0.14)) * 0.8 * vis, noiseM(p, 0.12) * 1.2, up);
   } else if (m == SNOW) {
     // Blocks of snow, their joints faint.
     vec2 c = courses(uv, vec2(0.8, 0.42));
@@ -1176,7 +1245,9 @@ Surface built(int m, vec3 q, vec3 p, vec2 uv, float tint, vec3 n, float fw, out 
     float weeds = smoothstep(0.58, 0.72, fbmM(p + 9.0, 1.7)) * smoothstep(0.3, 0.8, n.z);
     earth = mix(earth, vec3(0.30, 0.30, 0.14) * (0.8 + 0.4 * noiseM(p, 0.2)), weeds * 0.7);
     float crack = 1.0 - smoothstep(0.0, 0.035, abs(noiseM(p, 0.5) - 0.5));
-    s.albedo = earth * (1.0 - 0.3 * crack * visible(0.1, fw));
+    vec4 g = builtGrain(M_CRACKED, p.xy, 1.3, p);
+    s.albedo = earth * (1.0 - 0.3 * crack * visible(0.1, fw) * (1.0 - uMaterials)) * g.rgb;
+    s.bump = g.a * 1.6 + fbmM(p, 0.6) * 0.8;
   } else if (m == SHINGLE) {
     // Shingles or boards on a roof: rows lapping down the slope, weathered grey.
     vec2 g = uv / vec2(0.15, 0.32);
@@ -1188,6 +1259,8 @@ Surface built(int m, vec3 q, vec3 p, vec2 uv, float tint, vec3 n, float fw, out 
     base *= mix(0.9, (0.58 + 0.42 * smoothstep(0.0, 0.08, min(a, 1.0 - a))) * (0.7 + 0.3 * smoothstep(0.0, 0.14, fract(g.y))), vis);
     s.albedo = base * (0.8 + 0.4 * fbmM(p, 1.8));
     s.rough = 0.9;
+    // Each laps the row below: thick at its butt, thin where the next covers it.
+    s.bump = (1.0 - fract(g.y)) * vis * 1.4 + smoothstep(0.0, 0.06, min(a, 1.0 - a)) * vis * 0.6;
   } else if (m == CLAYTILE) {
     // Fired tiles in rows down the slope, a ridge over each joint: dull red to grey, as the kiln left them.
     vec2 g = uv / vec2(0.3, 0.42);
@@ -1216,6 +1289,7 @@ Surface built(int m, vec3 q, vec3 p, vec2 uv, float tint, vec3 n, float fw, out 
     base *= 0.74 + 0.3 * hash(vec2(floor(x), row));
     base *= mix(0.9, (0.55 + 0.45 * edge) * (0.82 + 0.18 * (1.0 - leaf)), visible(0.24, fw));
     s.albedo = base * (0.82 + 0.36 * fbmM(p, 1.5));
+    s.bump = (1.0 - fract(g.y)) * visible(0.24, fw) * 1.4 + (1.0 - leaf) * 0.5;
   } else if (m == BRUSHWOOD) {
     // Boughs and brushwood: a tangle of sticks, grey where it is dead thorn, with a little green where it still grows.
     vec3 base = mix(vec3(0.15, 0.125, 0.095), vec3(0.22, 0.18, 0.125), shade);
@@ -1223,6 +1297,7 @@ Surface built(int m, vec3 q, vec3 p, vec2 uv, float tint, vec3 n, float fw, out 
     base = mix(base, vec3(0.10, 0.15, 0.06), smoothstep(0.55, 0.75, fbmM(p + 2.0, 0.7)) * 0.5);
     s.albedo = base * (0.45 + 1.1 * tw) * (0.8 + 0.4 * fbmM(p, 0.9));
     s.rough = 0.97;
+    s.bump = tw * 2.4;
   } else if (m == REEDWORK) {
     // Reeds in bundles, bound at every few spans.
     vec3 base = mix(vec3(0.51, 0.43, 0.23), vec3(0.41, 0.36, 0.22), 0.2 + 0.6 * age);
@@ -1232,6 +1307,8 @@ Surface built(int m, vec3 q, vec3 p, vec2 uv, float tint, vec3 n, float fw, out 
     float tie = abs(fract(uv.y / 0.7 + 0.5) - 0.5) * 0.7;
     base *= mix(1.0, 0.68 + 0.32 * smoothstep(0.0, 0.03, tie), visible(0.2, fw));
     s.albedo = base * (0.85 + 0.3 * fbmM(p, 1.6));
+    // Bundles side by side, each round, bound in at its ties.
+    s.bump = (1.0 - bundle * bundle) * visible(0.24, fw) * 1.6 - (1.0 - smoothstep(0.0, 0.03, tie)) * 0.6 + noiseS(p, vec3(0.012, 0.012, 0.8)) * 0.4 * near;
   } else if (m == ROPE) {
     s.albedo = vec3(0.21, 0.16, 0.10) * (0.7 + 0.6 * noiseM(p, 0.02));
     s.rough = 0.95;
@@ -1314,9 +1391,11 @@ vec3 foliage(vec3 albedo, float rough, vec3 n, vec3 g, vec3 p, float sky, float 
 // shell's scutes, the plates of chitin, the veins of a wing. Which a body has is its form's; how it looks is this.
 float skinGrain(int m, vec3 q) {
   if (m == HIDE) {
+    // Pebbled scales, and the creases round the body that the skin folds along.
     float a = texture(uNoise, q / (64.0 * 0.012)).r;
     float b = texture(uNoise, q / (64.0 * 0.035) + 0.3).g;
-    return smoothstep(0.35, 0.75, a) * 0.7 + b * 0.3;
+    float crease = abs(texture(uNoise, q / (64.0 * vec3(0.5, 0.05, 0.5))).g - 0.5) * 2.0;
+    return smoothstep(0.35, 0.75, a) * 0.5 + b * 0.25 + smoothstep(0.0, 0.3, crease) * 1.6;
   }
   if (m == FUR) return texture(uNoise, q * vec3(1.0, 0.12, 1.0) / (64.0 * 0.004)).r;
   if (m == FEATHER) {
@@ -1394,7 +1473,12 @@ void main() {
     }
   }
   else if (vMaterial == FACADE) s = facade(vPos, vUv, vTint, fw, n, glass);
-  else if (isBuilt(vMaterial)) s = built(vMaterial, vLocal, vPos, vUv, vTint, n, fw, bumped);
+  else if (isBuilt(vMaterial)) {
+    s = built(vMaterial, vLocal, vPos, vUv, vTint, n, fw, bumped);
+    // What it is built of stands in relief, as each material says with a height: the light is bumped by it close by.
+    float close = 1.0 - smoothstep(25.0, 90.0, length(uEye - vPos));
+    if (s.bump != 0.0 && close > 0.0) bumped = bumpBy(bumped, vRel, s.bump, 0.012 * close);
+  }
   else s = surface(vMaterial, vPos, vUv, vTint, n, fw, bumped);
   bool skin = vMaterial == HIDE || vMaterial == FUR || vMaterial == FEATHER || vMaterial == CHITIN || vMaterial == MEMBRANE;
   if (skin) {
@@ -1448,6 +1532,8 @@ void main() {
     vec3 w = gl_FrontFacing ? bumped : -bumped;
     float sh = shadowAt(vPos, gl_FrontFacing ? n : -n, pixel) * cloudShade(vPos);
     float ao = texture(uAO, gl_FragCoord.xy / uAOSize).r;
+    // Under a body, and about its legs, less of the sky is seen than on its back.
+    if (skin) ao *= 0.62 + 0.38 * smoothstep(-0.7, 0.35, n.z);
     float occl = ao * (vLight * 0.5 + 0.5) * under;
     c = shade(s.albedo, s.rough, s.metal, w, vPos, uEye, occl, sh * mix(1.0, ao, 0.35));
   }
@@ -1608,8 +1694,9 @@ vec3 groundGrain(vec3 rel, vec3 dx, vec3 dy, vec3 n, float amount, out vec3 deta
   detail = mix(vec3(1.0), m.detail, k);
   rough = m.rough * k * 0.7;
   sky = mix(1.0, m.sky, k);
-  vec3 lean = m.lean * k;
-  return normalize(n * sqrt(max(0.05, 1.0 - dot(lean, lean))) + lean);
+  // A little more than the scan has it, so that the ground's grain still shows under a high sun.
+  vec3 lean = m.lean * k * 1.35;
+  return normalize(n * sqrt(max(0.05, 1.0 - min(dot(lean, lean), 0.9))) + lean);
 }
 `;
 
@@ -1758,6 +1845,31 @@ float hash(vec2 p) {
   vec3 q = fract(vec3(p.xyx) * 0.1031);
   q += dot(q, q.yzx + 33.33);
   return fract((q.x + q.y) * q.z);
+}
+// What lies under trees, close by: fallen sprays of the canopy's own leaves, from the atlas of leaves a plant's cards
+// show (leafatlas.ts), each lying where it fell, turned its own way. uLitterTile is the first tile of the broad leaves'
+// sprays and of the needles'. Gives how much of a point is fallen leaf, and how light that leaf is.
+uniform highp sampler2DArray uLeaves;
+uniform vec2 uLitterTile;
+vec2 fallenLeaves(vec3 p, vec2 dx, vec2 dy, float needles) {
+  float cover = 0.0;
+  float light = 0.5;
+  for (int k = 0; k < 3; k++) {
+    float size = k == 0 ? 0.52 : k == 1 ? 0.36 : 0.27;
+    vec2 q = p.xy / size + float(k) * 17.3;
+    vec2 id = floor(q);
+    vec2 f = q - id - 0.5;
+    float h = hash(id + float(k) * 7.7);
+    float a = h * 6.2831853;
+    vec2 ca = vec2(cos(a), sin(a)) * 1.3;
+    vec2 r = vec2(ca.x * f.x - ca.y * f.y, ca.y * f.x + ca.x * f.y) + 0.5;
+    if (r.x <= 0.01 || r.x >= 0.99 || r.y <= 0.01 || r.y >= 0.99) continue;
+    // One of its kind's three sprays; needles or broad leaves by how much of the canopy is each.
+    float tile = (fract(h * 13.7) < needles ? uLitterTile.y : uLitterTile.x) + floor(fract(h * 5.3) * 2.999);
+    vec4 t = textureGrad(uLeaves, vec3(r, tile), dx * 1.3 / size, dy * 1.3 / size);
+    if (t.a > cover) { cover = t.a; light = t.r * (0.7 + 0.6 * fract(h * 3.1)); }
+  }
+  return vec2(cover, light);
 }
 // Fields and woods, seen from the air: a patchwork of plots whose size and tone are chosen by cell.
 vec3 countryside(vec3 p, vec3 n, float dist) {
@@ -2077,6 +2189,15 @@ vec3 groundClose(vec3 c, vec3 p, vec3 n, float dist, vec4 mask, float slope, out
   float b4 = max(s4 - top, 0.0);
   float b5 = max(s5 - top, 0.0);
   float sum = b0 + b1 + b2 + b3 + b4 + b5 + 1e-4;
+  // Close by, with the atlas of leaves, what lies under trees is fallen sprays of their leaves over the earth, each
+  // browner or paler than the next: more of them the more canopy there is over the place.
+  float litterNear = uMaterials * (1.0 - smoothstep(14.0, 34.0, dist));
+  if (litterNear > 0.0 && b1 > 0.0) {
+    vec2 leaf = fallenLeaves(p, dFdx(p.xy), dFdy(p.xy), uLitter);
+    vec3 dead = mix(vec3(0.16, 0.1, 0.05), vec3(0.42, 0.3, 0.14), leaf.y) * mix(vec3(1.0), vec3(0.8, 0.9, 0.8), fract(leaf.y * 7.0) * 0.4);
+    litter = mix(litter, mix(litter * 0.62, dead, smoothstep(0.3, 0.55, leaf.x)), litterNear);
+    hLitter = mix(hLitter, hLitter * 0.5 + 0.5 * leaf.x, litterNear);
+  }
   vec3 g = (soil * b0 + litter * b1 + mud * b2 + sand * b3 + gravel * b4 + rock * b5) / sum;
   float h = (hSoil * b0 + hLitter * b1 + hMud * b2 * 0.3 + hSand * b3 * 0.5 + hGravel * b4 + hRock * b5) / sum;
   float r = (0.95 * b0 + 0.9 * b1 + 0.45 * b2 + 0.9 * b3 + 0.85 * b4 + 0.8 * b5) / sum;
@@ -2133,7 +2254,7 @@ vec3 wilderness(vec3 p, vec3 n, float dist, out float water, out float rough, ou
     vec2 e = min(muv, 1.0 - muv);
     mask = mix(beyond, texture(uMask, muv), smoothstep(0.0, 0.1, min(e.x, e.y)));
   }
-  // Water where the plan's A is full; a dry bed where it is half (scene/v9.ts, coverMask), which is no water.
+  // Water where the plan's A is full; a dry bed where it is half (scene/v10.ts, coverMask), which is no water.
   water = smoothstep(0.6, 0.95, mask.a) * smoothstep(450.0, 1000.0, dist);
   float wash = smoothstep(0.3, 0.45, mask.a) * (1.0 - smoothstep(0.55, 0.7, mask.a));
   shaded = mask.r;
@@ -2409,7 +2530,7 @@ vec4 reflected(vec3 p, vec3 r) {
   return vec4(0.0);
 }
 void main() {
-  // The bed of a river dry in the month: its ribbon says where it is, and it holds no water (scene/v9.ts, DRY_BED).
+  // The bed of a river dry in the month: its ribbon says where it is, and it holds no water (scene/v10.ts, DRY_BED).
   if (vFlow.z < -0.5) discard;
   vec3 p = vPos;
   float dist = distance(p, uEye);

@@ -157,6 +157,19 @@ function chain(m: Mesh, pts: number[][], n: number, flatEnd = false): void {
   );
 }
 
+/**
+ * A leg through joints, each [x, y, z, radius, depth]: `depth` is how much deeper it is fore and aft than it is wide,
+ * as a thigh is and a shank is not. It stands on its last joint.
+ */
+function leg(m: Mesh, pts: number[][], n: number): void {
+  loft(
+    m,
+    pts.map(([x, y, z, r, deep]) => ({ x, y, z, w: r, h: r * (deep ?? 1) })),
+    n,
+    true,
+  );
+}
+
 /** A flat outline, drawn as two faces a little apart, each lit for the side it faces. Points are [x, y, z], a fan from the first. */
 function sheet(m: Mesh, pts: number[][], gap: number): void {
   const [ax, ay, az] = pts[0];
@@ -371,7 +384,27 @@ function digitigrade(m: Mesh, side: number, s: Stance, p: Part, swing: number): 
   const az = ankle * H + lift;
   const fz = 0.022 * H + lift;
   const x = x0 * side;
-  chain(m, [[x, y0, top * H, r0 * L * 0.92], [x * 1.04, y0 + (ky - y0) * 0.45, (top * H + kz) * 0.5, r0 * L], [x * 1.08, ky, kz, r0 * L * 0.55], [x * 1.08, (ky + ay) * 0.5, (kz + az) * 0.5, r0 * L * 0.42], [x * 1.04, ay, az, r0 * L * 0.28], [x, fy, fz, r0 * L * 0.26]], n, true);
+  const r = r0 * L;
+  // A thigh deep fore and aft, a knee, a shank with its calf behind it, a narrow hock, a foot that spreads on the ground.
+  const pts = [
+    [x, y0, top * H, r * 0.9, 1.5],
+    [x * 1.04, y0 + (ky - y0) * 0.45, (top * H + kz) * 0.5, r * 1.02, 1.45],
+    [x * 1.07, y0 + (ky - y0) * 0.86, kz + (top * H - kz) * 0.14, r * 0.72, 1.2],
+    [x * 1.08, ky, kz, r * 0.56, 1.05],
+    [x * 1.08, ky + (ay - ky) * 0.3, kz + (az - kz) * 0.3, r * 0.5, 1.25],
+    [x * 1.07, ky + (ay - ky) * 0.72, kz + (az - kz) * 0.72, r * 0.36, 1.1],
+    [x * 1.04, ay, az, r * 0.27, 1],
+    [x * 1.02, ay + (fy - ay) * 0.6, az + (fz - az) * 0.6, r * 0.22, 1],
+    [x, fy, fz + r * 0.2, r * 0.25, 1.1],
+    [x, fy + r * 0.12, fz * 0.3, r * 0.34, 1.3],
+  ];
+  leg(m, pts, n);
+  // Where it leaves the body, the muscle of the haunch.
+  if (detail >= 2) {
+    // No higher than the hip itself: it rounds the flank, and stands out of the back nowhere.
+    const rz = Math.min(r * 1.9, top * H * 0.3);
+    lump(m, x, y0 + (ky - y0) * 0.14, top * H - rz * 0.9, r * 0.78, r * 1.5, rz, 9, 5);
+  }
   if (p.toes !== false && detail >= 2) {
     for (const k of [-1, 0, 1]) {
       const tx = x + k * r0 * L * 0.42;
@@ -390,12 +423,23 @@ function pillar(m: Mesh, side: number, s: Stance, p: Part, swing: number): void 
   const r0 = num(p, 'r', 0.05);
   const fy = y0 + swing * L;
   const lift = swing > 0.02 ? swing * 0.25 * H : 0;
-  chain(m, [
-    [x, y0, top * H, r0 * L],
-    [x * 1.03, y0 + (fy - y0) * 0.4, (top * 0.55 + 0.04) * H + lift * 0.4, r0 * L * 0.78],
-    [x * 1.05, y0 + (fy - y0) * 0.75, (top * 0.22 + 0.02) * H + lift, r0 * L * 0.62],
-    [x * 1.05, fy, lift, r0 * L * 0.78],
-  ], n, true);
+  const r = r0 * L;
+  // Deep at the shoulder, a knee half way down, a slender cannon, and a foot that spreads where it stands.
+  const pts = [
+    [x, y0, top * H, r, 1.4],
+    [x * 1.02, y0 + (fy - y0) * 0.2, (top * 0.78 + 0.02) * H + lift * 0.2, r * 0.9, 1.3],
+    [x * 1.03, y0 + (fy - y0) * 0.4, (top * 0.55 + 0.04) * H + lift * 0.4, r * 0.76, 1.05],
+    [x * 1.04, y0 + (fy - y0) * 0.5, (top * 0.47 + 0.035) * H + lift * 0.5, r * 0.8, 1.15],
+    [x * 1.05, y0 + (fy - y0) * 0.75, (top * 0.22 + 0.02) * H + lift, r * 0.6, 1],
+    [x * 1.05, y0 + (fy - y0) * 0.92, (top * 0.08 + 0.01) * H + lift, r * 0.58, 1],
+    [x * 1.05, fy, lift + r * 0.5, r * 0.7, 1.1],
+    [x * 1.05, fy + r * 0.1, lift, r * 0.82, 1.2],
+  ];
+  leg(m, pts, n);
+  if (detail >= 2) {
+    const rz = Math.min(r * 2, top * H * 0.28);
+    lump(m, x, y0, top * H - rz * 0.9, r * 0.8, r * 1.5, rz, 9, 5);
+  }
 }
 
 /** A wing: spread when flying, as a membrane or feathers from the shoulder out; folded along the flank otherwise. */
@@ -461,7 +505,8 @@ function drawPart(m: Mesh, p: Part, s: Stance, head: HeadPlace, tailEnd: number)
       const body = trunkRings(s, table(p, 'rings'));
       const neck = p.neck as { r: number; steps?: [number, number] } | undefined;
       const necked = neck ? neckRings(body[body.length - 1], head.jy, head.jz, neck.r * L, detail >= 2 ? (neck.steps?.[0] ?? 3) : (neck.steps?.[1] ?? 1)) : [];
-      const rings = thin([...body, ...necked], detail);
+      // Close by, one more ring between each two of the body's, on a smooth curve through them, as a head has (step 6).
+      const rings = detail >= 2 ? [...finer(body), ...necked] : thin([...body, ...necked], detail);
       // Behind the hips the tail swings, the more the further back; the neck goes with the head, the more the nearer it;
       // the rest breathes.
       const tailEnd = body[0].y;
@@ -577,7 +622,7 @@ function drawPart(m: Mesh, p: Part, s: Stance, head: HeadPlace, tailEnd: number)
     }
     case 'eyes': {
       const keep = m.mat;
-      m.mat = MAT.dark;
+      m.mat = MAT.eye;
       const [x, y, z] = list(p, 'at');
       const r = num(p, 'r', 0.01) * L;
       for (const side of [-1, 1]) {

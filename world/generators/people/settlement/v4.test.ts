@@ -9,7 +9,7 @@ import type { Form } from '../../../../core/form.ts';
 import { lifewayOf, type AnthromeClass, type Assessment } from '../../../../core/landscape.ts';
 import type { LivingTaxon, SceneSpec, ScenePeople } from '../../../../core/scene.ts';
 import { houseSize, HOUSE_VARIANTS } from '../dwellings.ts';
-import { LandUseMap, makeSettlement, toLocal, type Ground } from './v3.ts';
+import { LandUseMap, makeSettlement, toLocal, type Ground } from './v4.ts';
 
 const ROOT = join(import.meta.dirname, '../../../..');
 const classes = (parse(readFileSync(join(ROOT, 'world/fields/people/anthromes.yaml'), 'utf8')) as { params: { classes: AnthromeClass[] } }).params.classes;

@@ -30,7 +30,7 @@ import type { AtlasWhere } from '../../core/atlas.ts';
 import type { SceneFileV2 } from '../../core/scene.ts';
 import { bedrockShort, groundAnswer, substrateShort } from '../../core/substrate.ts';
 import { LATTICE_DEG, latticeOf } from '../../world/generators/life/spec.ts';
-import { wetInMonth, type LivingParams } from '../../world/generators/life/scene/v9.ts';
+import { wetInMonth, type LivingParams } from '../../world/generators/life/scene/v10.ts';
 import { Camera, MAX_DIST, MIN_DIST } from './camera.ts';
 import { LifeAtlas, type ClimateData } from './city/lifeatlas.ts';
 import { Climates, type ClimateAt } from './climates.ts';

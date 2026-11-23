@@ -38,7 +38,7 @@ import { LakeMap, lakeSheets } from '../lakes.ts';
 import { drawRiver, meet, type Oxbow, type RiverChoices, type RiverPath } from '../rivers.ts';
 
 export const GENERATOR = 'gen:life/scene';
-export const VERSION = 9;
+export const VERSION = 10;
 
 /** The side of a cell of the ground, in metres. */
 export const CELL = 400;

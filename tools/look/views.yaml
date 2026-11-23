@@ -53,6 +53,21 @@ views:
   - name: open-plain
     what: The Great Plains in 1950, a river winding through the open land.
     link: t=1950&lat=38.5&lon=-99.5&d=1.00003&h=30&v=80&clock=0
+  - name: grassland
+    what: "A grassland of the early Pleistocene in north China, at eye height: a sward that closes, each tuft a shade of its own."
+    link: t=1.830023Ma&lat=35.85822&lon=113.74450&d=1.0000023544&h=280&v=84&hour=13&mo=1&clock=0
+  - name: grassland-herd
+    what: "A herd of horses on that grassland, from fourteen metres: bodies against the sky, their feet in the grass."
+    link: t=1.830023Ma&lat=35.855984&lon=113.743052&d=1.0000022&h=200&v=84&hour=13&mo=1&clock=0
+  - name: forest-giant
+    what: "A tyrannosaur among the Hell Creek's trees, from eighteen metres: a body under a canopy, in its shade."
+    link: t=-66498050&lat=54.21206&lon=-81.229759&d=1.0000028&h=60&v=82&clock=0
+  - name: hamlet-house
+    what: A house of a hamlet in the Tihama in 1887, from before its door, with someone by it.
+    link: t=1887.824&lat=14.159387&lon=43.371896&d=1.0000026&h=300.9&v=80&hour=14&mo=7&clock=0
+  - name: hamlet
+    what: That hamlet and its fields from seventy metres up.
+    link: t=1887.824&lat=14.159263&lon=43.371993&d=1.000012&h=40&v=72&hour=14&mo=7&clock=0
   - name: rome-forum
     what: Rome's forum in 315, as the city's golden image has it.
     link: t=315.5&lat=41.89185&lon=12.48665&d=1.00004&h=300&v=72&clock=0

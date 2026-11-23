@@ -57,6 +57,7 @@ const TONE: Record<number, Rgb> = {
   68: [208, 170, 120],
   69: [166, 132, 96],
   70: [122, 108, 100],
+  72: [16, 14, 12],
 };
 
 export class Canvas {
