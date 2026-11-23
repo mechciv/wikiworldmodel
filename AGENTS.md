@@ -1,8 +1,9 @@
 # Contributing to WikiWorldModel, for agents
 
-WikiWorldModel is a sourced, four-dimensional history of Earth,
-life and civilization, with a viewer to fly through it. Every fact in it is a claim that cites a
-source, and nothing is made up to fill a gap without saying it was.
+WikiWorldModel is an audacious project to recreate the entire history of Earth, life, and
+civilization *in silico*, from the Solar System's first solids to the far future, with a viewer to
+fly through it. Known facts are anchored to sources, and unknown details are filled in with our
+best informed guesses—labelled clearly as reconstructed or procedural rather than omitted.
 
 **Before your first change, read [CONTRIBUTING.md](CONTRIBUTING.md) in full**: the rules, setting
 up, the loop, finding work, code and pull requests. **Then read
@@ -15,13 +16,15 @@ agent. [docs/README.md](docs/README.md) is a map of the other documents.
 The full text, which is what binds, is in [CONTRIBUTING.md](CONTRIBUTING.md#the-rules). A pull
 request that breaks one is closed.
 
-1. Never invent a source, a locator, a quote, a number or an identifier.
+1. Never fabricate a source, citation, locator, quote or external identifier; label best-guess
+   details honestly instead of attributing them to a source.
 2. Machine work is labelled `author: machine:<tool>` and stays `proposed`. Never set
    `status: accepted`.
-3. Every claim has a source with a locator and a short verbatim quote, or says `unsourced: <why>`.
+3. Keep provenance clear: cite a source with a locator and verbatim quote for sourced claims, or
+   mark inferred/generated details as `unsourced: <why>` or `reconstruction` / `procedural`.
 4. Disagreement is data: add a competing claim. Never overwrite or delete another.
 5. Derived values are never stored.
-6. Only CC0, CC BY and public-domain datasets come in.
+6. Only CC0, CC BY and public-domain datasets and assets come in.
 7. Ids are stable and mean nothing.
 8. Small, scoped, green.
 

@@ -1,15 +1,34 @@
 # Contributing to WikiWorldModel
 
-WikiWorldModel is a sourced, four-dimensional history of Earth,
-life and civilization, from the Solar System's first solids to the far future, with a viewer to fly
-through it. It is a world model of the base-reality kind: every fact in it is a claim that cites a
-source, and nothing is made up to fill a gap without saying it was. The design is in
-[docs/WORLD-MODEL.md](docs/WORLD-MODEL.md), and [docs/README.md](docs/README.md) is a map of the
-rest.
+WikiWorldModel is an audacious project to recreate the entire history of Earth, life, and
+civilization *in silico*, from the Solar System's first solids to the far future, with a viewer to
+fly through it.
+
+## How it works
+
+Every view is a stack of five layers, each a different kind of knowledge. Follow a tyrannosaur in
+the Hell Creek at 66.5 Ma down through them: a generator chose where it stands, a plate model
+carried its ground to where it lay then, fossils from the Hell Creek Formation say it lived there,
+and the Paleobiology Database is where they were read. Where evidence is thin, the layers above
+fill in the gaps with our best informed guesses and say so.
+
+- **The view.** What you see in the viewer: the layers below, drawn. Click anything to see what it
+  rests on (*a tyrannosaur by the river, 66.5 Ma*).
+- **Generators.** Detail finer than anything known—where each tree, animal, house, or visual detail
+  stands. Seeded so a place always looks the same, and marked as generated (*`gen:life/scene` chose
+  where it stands*).
+- **Models.** Fill the space between the evidence: the plates, the climate, who lived where. Each
+  says what it reads and where its numbers come from (*PALEOMAP carries its ground to where it lay
+  then*).
+- **Evidence.** Claims, each with its source, where in it, and a quote copied from it. Where
+  sources disagree, both stay (*its fossils in the formation; its size, Sue's*).
+- **Sources.** Papers, excavation reports, ancient texts, and open datasets pinned to the version
+  read (*the Paleobiology Database, read 4 November 2026*).
 
 This is the guide for everyone who contributes, people and AI agents alike. Agents start at
-[AGENTS.md](AGENTS.md), which adds what applies to them only. How to research a fact and write it
-as a record is in [docs/RECORDS.md](docs/RECORDS.md).
+[AGENTS.md](AGENTS.md), which adds what applies to them only. The design is in
+[docs/WORLD-MODEL.md](docs/WORLD-MODEL.md), [docs/README.md](docs/README.md) is a map of the rest,
+and how to research a fact and write it as a record is in [docs/RECORDS.md](docs/RECORDS.md).
 
 ## Ways to contribute
 
@@ -34,19 +53,21 @@ Questions and proposals go to GitHub Discussions. Everyone taking part follows t
 
 These are not style preferences. A pull request that breaks one is closed.
 
-1. **Never invent a source, a locator, a quote, a number or an identifier.** Cite only works
-   you have actually retrieved and read. A quote must be copied from the text you retrieved,
-   character for character. If you could not read a source, do not cite it: leave the claim
-   out, or open an issue saying what you could not reach.
+1. **Never fabricate a source, citation, locator, quote or external identifier.** Cite only works
+   you have actually retrieved and read, and copy quotes character for character from the text you
+   retrieved. Never attribute a guessed or reconstructed value to a source that does not state it.
+   Where evidence is missing, filling in a best guess is welcome—just label it honestly (as
+   `unsourced:`, `reconstruction`, or `procedural`) rather than citing a source for it.
 2. **Machine work is labelled and proposed.** Every claim a machine writes has
    `author: machine:<tool>` (for example `machine:claude-code`), on the claim or for the whole
    file. Its status is then `proposed` by default. Never set `status: accepted`: only a person
    who has checked a claim may accept it, and the validator refuses a machine claim marked
    accepted.
-3. **Every claim has a source with a locator, or says why it has none.** `source:` names a
-   work (`ref: src:…`) and where in it (`loc:`: page, section, table row, record id), with a
-   short `quote:` that shows the claim. A claim that rests on no source, such as an editorial
-   label or a marker's placement, has `unsourced: <why>` instead.
+3. **Keep provenance clear.** Sourced claims name a work (`ref: src:…`), where in it (`loc:`: page,
+   section, table row, record id), and a short `quote:` that shows the claim. Best-guess
+   reconstructions, editorial labels, placements and generated details are welcome where sources
+   are silent—mark them with `unsourced: <why>` (on a claim) or the appropriate `basis`
+   (`reconstruction` or `procedural`) rather than omitting them.
 4. **Disagreement is data.** If sources disagree, write competing claims on the same property,
    each with its source, and mark one `rank: preferred` with a note saying why. Never overwrite
    or delete another claim because you think it is wrong: add yours and say so. If a whole
@@ -55,10 +76,12 @@ These are not style preferences. A pull request that breaks one is closed.
 5. **Derived values are never stored.** Dates that follow from other dates, coastlines,
    paleo-positions, inverse relations and coverage are computed by the build. Write the
    evidence ("after X", "within the Artinskian", "caused by Y"), not the result.
-6. **Licenses are checked before data comes in.** A dataset the build reads must be CC0,
-   CC BY or public domain (`publish.licenses` in [world/manifest.yaml](world/manifest.yaml)).
-   Share-alike (CC BY-SA, ODbL) and non-commercial (CC BY-NC) data may not be imported. Quotes
-   stay short (the schema caps them at 400 characters); never copy a text wholesale.
+6. **Licenses are checked before data or assets come in.** Datasets and visual assets (scanned
+   materials, textures, 3D models) the build or viewer ships must be CC0, CC BY or public domain
+   (`publish.licenses` in [world/manifest.yaml](world/manifest.yaml)) and credited in
+   [ATTRIBUTION.md](ATTRIBUTION.md). Share-alike (CC BY-SA, ODbL) and non-commercial (CC BY-NC)
+   material may not be imported. Quotes stay short (the schema caps them at 400 characters); never
+   copy a text wholesale.
 7. **Ids are stable and mean nothing.** Never rename an id or reuse one. No tool reads meaning
    into an id, and neither should you; moving a file never changes its id.
 
@@ -178,8 +201,12 @@ write its document in the same form, and make every criterion a test.
 
 - TypeScript, strict; `npm run typecheck` must pass. Match the code around you: its comments,
   its names, its idioms.
-- **No facts in code.** The renderer, the viewer and the generators read every fact from
-  records; a number about the world in code is a bug.
+- **Records for specific claims; code for models, rules and craft.** Specific, sourceable claims
+  about particular entities, dates, places or datasets belong in records and datasets so they can
+  be cited, contested and inspected. General domain knowledge—physics, ecology, anatomy,
+  behaviour, architectural proportions, material properties, animation and best-guess procedural
+  defaults—belongs in code, shaders or shared assets whenever that is the most natural way to
+  express it, with generated details labelled accordingly for inspection and evidence mode.
 - **Generators are seeded, not exact.** A generator is seeded by stable slot ids and may use any
   arithmetic: `Math.*`, libraries, WebAssembly, the GPU. What it makes is compared by its
   fingerprint ([core/fingerprint.ts](core/fingerprint.ts)): which things there are, exactly, and
