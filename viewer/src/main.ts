@@ -49,7 +49,7 @@ import { CityLabels } from './ui/citylabels.ts';
 import { FeatureTiles } from './features.ts';
 import { builds, fetchLog, getBytes, getJSON, loadBuild, loadRecord, type Build } from './data.ts';
 import { FieldRenderer, type FieldTileGPU } from './gl/field.ts';
-import { globeLook, GlobeRenderer, type CloudDrift } from './gl/globe.ts';
+import { cloudDriftAt, globeLook, GlobeRenderer, type CloudDrift } from './gl/globe.ts';
 import type { FrameProfile } from './gl/timer.ts';
 import { savePicture } from './picture.ts';
 import { add, cross, norm, scale, type V3 } from './mat.ts';
@@ -1242,7 +1242,7 @@ async function start(root: HTMLElement): Promise<void> {
         ice: iceNow ? { mix: iceNow.mix } : undefined,
         people: peopleDrawn,
         anthromes: anthromesDrawn,
-        drift: cloudDrift,
+        drift: cloudDrift ?? cloudDriftAt(state.t),
       },
       w,
       h,

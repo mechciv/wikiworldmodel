@@ -4,7 +4,8 @@
 import { describe, expect, it } from 'vitest';
 import { chosenClaim, coverAt, lookAt, type PlanetFile, type StateClaim } from '../../../core/planet.ts';
 import type { FeatureTime } from '../../../core/tileset.ts';
-import { globeLook, PLAIN_LOOK } from '../../../viewer/src/gl/globe.ts';
+import { fromMa, PRESENT_YEAR } from '../../../core/time.ts';
+import { cloudDriftAt, globeLook, PLAIN_LOOK } from '../../../viewer/src/gl/globe.ts';
 import { apart, drawn } from './drawn.ts';
 
 const span = (start: number, end: number | null): FeatureTime => ({
@@ -240,5 +241,30 @@ describe('how the globe draws the planet between its states', () => {
 
   it('changes all at once where the record gives a state no passage', () => {
     expect(apart(drawn(at(FILE, 99.999)), drawn(at(FILE, 100)))).toBeGreaterThan(0.5);
+  });
+});
+
+describe('orbital cloud drift across time', () => {
+  it('stays at zero in the present and is deterministic for any time', () => {
+    expect(cloudDriftAt(PRESENT_YEAR)).toEqual({ tropics: 0, beyond: 0, between: [16, 32] });
+    expect(cloudDriftAt(fromMa(66.03))).toEqual(cloudDriftAt(fromMa(66.03)));
+  });
+
+  it('drifts westward in the tropics and eastward beyond them as time moves forward', () => {
+    for (const [earlier, later] of [[fromMa(200), fromMa(66)], [100, 1500]] as const) {
+      const a = cloudDriftAt(earlier);
+      const b = cloudDriftAt(later);
+      expect(b.tropics).toBeLessThan(a.tropics);
+      expect(b.beyond).toBeGreaterThan(a.beyond);
+    }
+  });
+
+  it('moves smoothly across era boundaries without jumping', () => {
+    for (const boundary of [fromMa(66), fromMa(2.6), 1, PRESENT_YEAR]) {
+      const before = cloudDriftAt(boundary - 1e-3);
+      const after = cloudDriftAt(boundary + 1e-3);
+      expect(Math.abs(after.tropics - before.tropics)).toBeLessThan(0.01);
+      expect(Math.abs(after.beyond - before.beyond)).toBeLessThan(0.01);
+    }
   });
 });

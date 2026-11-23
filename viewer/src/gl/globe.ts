@@ -27,6 +27,8 @@
 // dense they are, on the viewer's scale. Its coasts are the field's as well.
 import { THICKNESS_TOP } from '../../../core/ice.ts';
 import type { Cover, Look } from '../../../core/planet.ts';
+import { PRESENT_YEAR } from '../../../core/time.ts';
+import { positionOf } from '../../../core/timescale.ts';
 import type { SurfaceParams } from '../../../world/generators/earth/surface/v1.ts';
 import { program, setUniforms, texture2D, type GL, type Program } from './context.ts';
 import type { Mat4 } from '../mat.ts';
@@ -494,9 +496,9 @@ float cloudDensity(vec3 n, float footprint) {
   vec2 uv = vec2(atan(n.y, n.x) / 6.2831853 + 0.5, 0.5 - lat / 3.14159265);
   vec2 dx = vec2(footprint / (6.2831853 * max(length(n.xy), 0.01)), 0.0);
   vec2 dy = vec2(0.0, footprint / 3.14159265);
-  float d = textureGrad(uClouds, uv + vec2(uDrift.x / 6.2831853, 0.0), dx, dy).r;
+  float d = textureGrad(uClouds, uv - vec2(uDrift.x / 6.2831853, 0.0), dx, dy).r;
   if (uDrift.x != uDrift.y) {
-    float beyond = textureGrad(uClouds, uv + vec2(uDrift.y / 6.2831853, 0.0), dx, dy).r;
+    float beyond = textureGrad(uClouds, uv - vec2(uDrift.y / 6.2831853, 0.0), dx, dy).r;
     d = mix(d, beyond, smoothstep(uDrift.z, uDrift.w, abs(lat)));
   }
   return d;
@@ -760,20 +762,34 @@ export interface GlobeFrame {
   people?: boolean;
   /** the human landscape's classes are drawn */
   anthromes?: boolean;
-  /** how far the clouds have drifted along their bands; none unless a capture asks */
+  /** how far the clouds have drifted along their bands */
   drift?: CloudDrift;
 }
 
 /**
  * How far the clouds have drifted east along their bands, in degrees: in the tropics, beyond them,
  * and the latitudes between which the one gives way to the other. The weather is made up, like the
- * clouds themselves (gen:earth/clouds), so the viewer leaves them where the generator put them;
- * a capture moves them, to show that weather passes (tools/site/timelapse.ts).
+ * clouds themselves (gen:earth/clouds); drifting with time keeps the layer from hanging still over
+ * moving continents while staying fixed for any given time (and a capture may override it,
+ * tools/site/timelapse.ts).
  */
 export interface CloudDrift {
   tropics: number;
   beyond: number;
   between: [number, number];
+}
+
+const PRESENT_POS = positionOf(PRESENT_YEAR);
+
+/**
+ * Procedural cloud drift at astronomical year `t`, anchored at zero in the present so today's view
+ * stays where the generator put it. Driven by the timebar's warped scale (`positionOf`) so scrubbing
+ * moves clouds at an even visual pace across deep time and historical centuries alike: westward in
+ * the tropics (trade winds) and eastward beyond them (westerlies).
+ */
+export function cloudDriftAt(t: number): CloudDrift {
+  const p = positionOf(t) - PRESENT_POS;
+  return { tropics: p ? -18 * p : 0, beyond: p ? 22 * p : 0, between: [16, 32] };
 }
 
 export class GlobeRenderer {
