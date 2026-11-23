@@ -731,7 +731,7 @@ async function start(root: HTMLElement): Promise<void> {
   let urlTimer = 0;
   let playing = false;
   let navigation = 0;
-  let travel: { from: number; to: number; start: number; last: number; arrive: () => void } | null = null;
+  let travel: { from: number; to: number; ms: number; start: number; last: number; arrive: () => void } | null = null;
   let lastFrame = performance.now();
   /** when the visit's clock started, and whether the last frame drew a scene whose clock runs */
   const clockStart = performance.now();
@@ -1307,7 +1307,8 @@ async function start(root: HTMLElement): Promise<void> {
       const words = [life, folk ? peopleWords(folk) : '', made].filter(Boolean).join(' · ');
       if (lifeHere.textContent !== words) lifeHere.textContent = words;
     }
-    const enter = !!site && !made && !inCity && state.cam.dist < 2.2 && siteDistance(state.cam.lat, state.cam.lon) < 1.5e6 && !awayFromSite();
+    // The way down is offered from near above, but not during a flight: one that passes here on its way down is already taking it.
+    const enter = !!site && !made && !inCity && !flight && state.cam.dist < 2.2 && siteDistance(state.cam.lat, state.cam.lon) < 1.5e6 && !awayFromSite();
     cityEnter.hidden = !enter;
     if (enter) cityEnter.textContent = `Fly down into ${site!.label}, ${formatTime(site!.slice)}`;
     if (inCity && site!.kind === 'city') {
@@ -1624,12 +1625,17 @@ async function start(root: HTMLElement): Promise<void> {
     setState({ cam: { lat, lon, dist, heading: high ? 0 : cam.heading, tilt: high ? 0 : tilt } });
   }
 
-  /** A flight: from where the camera is to a view, over a few seconds, in the logarithm of its height. */
+  /**
+   * A flight: from where the camera is to a view, over a few seconds, in the logarithm of its height. From high up
+   * to a place a long way off, the globe is turned to the place first, in time of its own.
+   */
   interface Flight {
     from: ViewState['cam'];
     to: ViewState['cam'];
     t0: number;
     ms: number;
+    /** the share of its time in which the globe is turned to the place, before the camera comes down over it: 0 where it is flown in one move */
+    turn: number;
   }
   let flight: Flight | null = null;
   /** In a scene of the sea, "Go and see" goes on to the biggest of what is near once it is down: when it was asked, or 0 */
@@ -1637,10 +1643,24 @@ async function start(root: HTMLElement): Promise<void> {
   /** and the frames drawn since its flight came down */
   let seaDown = 0;
 
+  /** The way from one view to another, the short way round: in degrees north and east, and in radians in all; and the height a long way is flown at, as its logarithm. */
+  function wayOf(from: ViewState['cam'], to: ViewState['cam']): { dLat: number; dLon: number; reach: number; top: number } {
+    const dLon = ((to.lon - from.lon + 540) % 360) - 180;
+    const dLat = to.lat - from.lat;
+    const reach = Math.hypot(dLat, dLon * Math.cos(((from.lat + to.lat) / 2) * RAD)) * RAD;
+    // A long way is flown high, whatever the heights at its ends.
+    return { dLat, dLon, reach, top: reach > 0.03 ? Math.max(Math.log(MIN_DIST - 1), Math.log(reach * 0.5)) : -Infinity };
+  }
+
   function flyTo(to: ViewState['cam'], ms = 3600): void {
     // A link is the place it names: tests and shared views arrive at once.
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return setState({ cam: to });
-    flight = { from: { ...state.cam, heading: state.cam.heading ?? 0, tilt: state.cam.tilt ?? 0 }, to: { ...to, heading: to.heading ?? 0, tilt: to.tilt ?? 0 }, t0: performance.now(), ms };
+    const from = { ...state.cam, heading: state.cam.heading ?? 0, tilt: state.cam.tilt ?? 0 };
+    const { reach, top } = wayOf(from, to);
+    // From as high as a long way is flown, the camera would come down beside the place and slide to it near the
+    // ground: the globe is turned first, for longer the further round it is.
+    const turn = Number.isFinite(top) && Math.log(from.dist - 1) >= top ? Math.min(4000, 600 + 1700 * reach) : 0;
+    flight = { from, to: { ...to, heading: to.heading ?? 0, tilt: to.tilt ?? 0 }, t0: performance.now(), ms: ms + turn, turn: turn / (ms + turn) };
     dirty = true;
   }
 
@@ -1670,27 +1690,35 @@ async function start(root: HTMLElement): Promise<void> {
   function stepFlight(now: number): void {
     const f = flight!;
     let u = Math.min(1, (now - f.t0) / f.ms);
-    // A flight into a scene waits above it until the scene is ready.
-    if (u > 0.3 && f.to.dist < MIN_DIST && sceneComing(f.to)) {
-      u = 0.3;
+    // A flight into a scene waits above it until the scene is ready: over the place, where the globe is turned to it first.
+    const above = f.turn || 0.3;
+    if (u > above && f.to.dist < MIN_DIST && sceneComing(f.to)) {
+      u = above;
       f.t0 = now - u * f.ms;
     }
-    const e = u * u * (3 - 2 * u);
-    // The place arrives before the height does, so the descent ends over the city.
-    const g = Math.min(1, e * 1.5);
-    const a0 = Math.log(f.from.dist - 1);
-    const a1 = Math.log(f.to.dist - 1);
-    // A long way is flown high, whatever the heights at its ends, and the short way round.
-    const dLon = ((f.to.lon - f.from.lon + 540) % 360) - 180;
-    const dLat = f.to.lat - f.from.lat;
-    const reach = Math.hypot(dLat, dLon * Math.cos(((f.from.lat + f.to.lat) / 2) * RAD)) * RAD;
-    const top = reach > 0.03 ? Math.max(Math.log(MIN_DIST - 1), Math.log(reach * 0.5)) : -Infinity;
     const smooth = (x: number) => {
       const c = Math.max(0, Math.min(1, x));
       return c * c * (3 - 2 * c);
     };
-    // Up, across, and down over the place: it comes down once it is there.
-    const height = top > Math.max(a0, a1) ? a0 + (top - a0) * smooth(e / 0.15) + (a1 - top) * smooth((e - 2 / 3) * 3) : a0 + (a1 - a0) * e;
+    const a0 = Math.log(f.from.dist - 1);
+    const a1 = Math.log(f.to.dist - 1);
+    const { dLat, dLon, top } = wayOf(f.from, f.to);
+    // How far it is along its way over the globe; and through the rest of what it does, its height, heading and tilt.
+    let g: number;
+    let e: number;
+    let height: number;
+    if (f.turn) {
+      // The globe turns to the place, and only then does the camera come down, over it.
+      g = smooth(u / f.turn);
+      e = smooth((u - f.turn) / (1 - f.turn));
+      height = a0 + (a1 - a0) * e;
+    } else {
+      e = smooth(u);
+      // The place arrives before the height does, so the descent ends over the city.
+      g = Math.min(1, e * 1.5);
+      // From below the height a long way is flown at: up, across, and down over the place. It comes down once it is there.
+      height = top > Math.max(a0, a1) ? a0 + (top - a0) * smooth(e / 0.15) + (a1 - top) * smooth((e - 2 / 3) * 3) : a0 + (a1 - a0) * e;
+    }
     let dh = ((f.to.heading! - f.from.heading! + 540) % 360) - 180;
     if (Math.abs(dh) < 1e-6) dh = 0;
     setState({
@@ -2515,13 +2543,15 @@ async function start(root: HTMLElement): Promise<void> {
     const climb = state.cam.dist < 2 ? 1400 : 0;
     if (climb) flyTo({ lat: state.cam.lat, lon: state.cam.lon, dist: 2.6 }, climb);
     setState({ sel: null, window: fitWindow(Math.min(state.t, t), Math.max(state.t, t), limits) });
-    travel = { from, to, start: performance.now() + climb, last: -Infinity, arrive };
+    // A longer way along the strip takes longer, so that what changes on the way can be seen: a second and a half,
+    // and about as long again for each fifth of the strip.
+    travel = { from, to, ms: 1500 + 80 * Math.abs(to - from), start: performance.now() + climb, last: -Infinity, arrive };
   }
 
   function stepTravel(now: number): void {
     const trip = travel!;
     if (now < trip.start) return;
-    const u = Math.min(1, (now - trip.start) / 2700);
+    const u = Math.min(1, (now - trip.start) / trip.ms);
     if (u === 1) {
       travel = null;
       setState({ t: timeAt(trip.to) });
