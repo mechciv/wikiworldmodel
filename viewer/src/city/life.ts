@@ -8,7 +8,7 @@ import { defaultLeaf, LEAF_KINDS, type LeafKindName } from '../../../core/leaves
 import { lookup, type Scenario } from '../../../core/scenario.ts';
 import type { LivingTaxon, SceneSpec } from '../../../core/scene.ts';
 import { GroundSampler } from '../../../world/generators/city/ground.ts';
-import { placeLook, type LivingParams } from '../../../world/generators/life/scene/v11.ts';
+import { placeLook, type LivingParams } from '../../../world/generators/life/scene/v12.ts';
 import { snowOf } from '../../../world/generators/life/climate.ts';
 import { declination, MID_DAY } from '../../../core/water.ts';
 import { meanBears } from '../../../world/generators/life/sorting.ts';
@@ -214,7 +214,7 @@ export class LifeScene {
     const rock = rockLook(this.spec.bedrock);
     const ground = groundLook(this.spec.substrate, rock);
     // The land's shares are its climate's, as far as what its ground is made of bears them: bare ground has the rest
-    // (world/generators/life/scene/v11.ts, LandCover).
+    // (world/generators/life/scene/v12.ts, LandCover).
     const bears = meanBears(this.spec.substrate, params.cover.bears);
     r.setLand(Float32Array.from(groundTones(['soil', 'herb', 'bare', 'canopy', 'distant'].flatMap((k) => tones[k]), ground)), [Math.min(clim?.forest ?? 0, cover.forests) * bears, Math.min(clim?.herb ?? 0, cover.plants) * bears, 1 - cover.plants * (1 - (clim?.bare ?? 1)) * bears], snowOf(this.spec));
     r.setSubstrate(ground);

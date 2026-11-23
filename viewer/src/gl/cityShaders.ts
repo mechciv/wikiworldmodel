@@ -2347,7 +2347,7 @@ vec3 wilderness(vec3 p, vec3 n, float dist, out float water, out float rough, ou
     vec2 e = min(muv, 1.0 - muv);
     mask = mix(beyond, texture(uMask, muv), smoothstep(0.0, 0.1, min(e.x, e.y)));
   }
-  // Water where the plan's A is full; a dry bed where it is half (scene/v11.ts, coverMask), which is no water.
+  // Water where the plan's A is full; a dry bed where it is half (scene/v12.ts, coverMask), which is no water.
   water = smoothstep(0.6, 0.95, mask.a) * smoothstep(450.0, 1000.0, dist);
   float wash = smoothstep(0.3, 0.45, mask.a) * (1.0 - smoothstep(0.55, 0.7, mask.a));
   shaded = mask.r;
@@ -2625,7 +2625,7 @@ vec4 reflected(vec3 p, vec3 r) {
   return vec4(0.0);
 }
 void main() {
-  // The bed of a river dry in the month: its ribbon says where it is, and it holds no water (scene/v11.ts, DRY_BED).
+  // The bed of a river dry in the month: its ribbon says where it is, and it holds no water (scene/v12.ts, DRY_BED).
   if (vFlow.z < -0.5) discard;
   vec3 p = vPos;
   float dist = distance(p, uEye);
