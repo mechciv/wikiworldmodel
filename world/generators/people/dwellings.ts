@@ -82,6 +82,41 @@ const SKIN: Record<RoofMaterial, Skin> = {
 /** Walls that are a covering on a frame, and have no door of boards in a frame of timber. */
 const SOFT = new Set<number>([MAT.thatch, MAT.matting, MAT.reedwork, MAT.tanned, MAT.felt, MAT.haircloth, MAT.bark, MAT.wattle, MAT.snow, MAT.leafthatch, MAT.brushwood]);
 
+/**
+ * How a wall of each kind is built, as it shows close by: how thick it is where a door or a window is cut through it,
+ * in metres, and how far its foot stands out for each metre it rises, as a wall of earth, turf or dry stone is built
+ * thicker below. That a house had walls of a kind is its claim; these sizes are the generator's look, and no claim
+ * about any wall.
+ */
+const BUILT: Record<Walls, { thick: number; batter: number }> = {
+  mudbrick: { thick: 0.45, batter: 0.035 },
+  'fired-brick': { thick: 0.36, batter: 0 },
+  stone: { thick: 0.55, batter: 0.02 },
+  timber: { thick: 0.14, batter: 0 },
+  log: { thick: 0.24, batter: 0 },
+  plank: { thick: 0.08, batter: 0 },
+  'timber-frame': { thick: 0.16, batter: 0 },
+  wattle: { thick: 0.08, batter: 0 },
+  mat: { thick: 0.04, batter: 0 },
+  'wattle-and-daub': { thick: 0.18, batter: 0 },
+  'pole-and-thatch': { thick: 0.2, batter: 0 },
+  reed: { thick: 0.12, batter: 0 },
+  'rammed-earth': { thick: 0.55, batter: 0.05 },
+  cob: { thick: 0.55, batter: 0.04 },
+  hide: { thick: 0.02, batter: 0 },
+  felt: { thick: 0.04, batter: 0 },
+  cloth: { thick: 0.02, batter: 0 },
+  bark: { thick: 0.04, batter: 0 },
+  sod: { thick: 0.8, batter: 0.08 },
+  snow: { thick: 0.4, batter: 0 },
+  'earth-cut': { thick: 0.6, batter: 0 },
+  none: { thick: 0, batter: 0 },
+};
+
+/** A flat roof of earth: how thick its deck is; and how thick and how high above the deck the parapet round it stands. Metres, the generator's look. */
+const DECK = 0.26;
+const PARAPET = { thick: 0.22, rise: 0.32 };
+
 // ——— What a house is, before it is drawn ———
 
 /** A house's footprint as it stands, across its front and from front to back, its height to the eaves and the top, and whether it is round. */
@@ -409,7 +444,7 @@ function ridgeRoof(m: Mesh, hw: number, hl: number, z: number, rise: number, ski
 }
 
 /** A roof whose ridge and eaves curve down towards its ends, as the thatch of Bengal does; with the tops of its walls, which follow it. */
-function curvedRoof(m: Mesh, b: Body, z0: number): void {
+function curvedRoof(m: Mesh, b: Body, z0: number, cuts?: Partial<Record<Side, Cut[]>>): void {
   const { hw, hl, rise, skin } = b;
   const fine = b.detail < 2;
   const n = b.detail === 0 ? 10 : b.detail === 1 ? 6 : 4;
@@ -420,15 +455,22 @@ function curvedRoof(m: Mesh, b: Body, z0: number): void {
   const ze = (-over / hw) * rise;
   // The long walls, their tops under the curve; then the gables.
   m.mat = b.wallMat;
-  for (let i = 0; i < n; i++) {
-    const y0 = -hl + (2 * hl * i) / n;
-    const y1 = -hl + (2 * hl * (i + 1)) / n;
-    quad(m, [hw, y0, z0], [hw, y1, z0], [hw, y1, b.eaves + sag(y1)], [hw, y0, b.eaves + sag(y0)], y0 + hl);
-    quad(m, [-hw, y1, z0], [-hw, y0, z0], [-hw, y0, b.eaves + sag(y0)], [-hw, y1, b.eaves + sag(y1)], hl - y1);
-  }
   const end = b.eaves + sag(hl);
+  if (cuts) {
+    // Close by, with their thickness where they are cut: the long walls' tops turn where the roof's strips do.
+    const long: Top = { at: (x) => b.eaves + sag(x), breaks: Array.from({ length: n - 1 }, (_, i) => -hl + (2 * hl * (i + 1)) / n) };
+    wallsCut(m, b, hw, hl, z0, b.base, { front: end, back: end, right: long, left: long }, cuts, b.eaves);
+  } else {
+    for (let i = 0; i < n; i++) {
+      const y0 = -hl + (2 * hl * i) / n;
+      const y1 = -hl + (2 * hl * (i + 1)) / n;
+      quad(m, [hw, y0, z0], [hw, y1, z0], [hw, y1, b.eaves + sag(y1)], [hw, y0, b.eaves + sag(y0)], y0 + hl);
+      quad(m, [-hw, y1, z0], [-hw, y0, z0], [-hw, y0, b.eaves + sag(y0)], [-hw, y1, b.eaves + sag(y1)], hl - y1);
+    }
+  }
+  m.mat = b.wallMat;
   for (const dir of [1, -1]) {
-    quad(m, [-dir * hw, dir * hl, z0], [dir * hw, dir * hl, z0], [dir * hw, dir * hl, end], [-dir * hw, dir * hl, end]);
+    if (!cuts) quad(m, [-dir * hw, dir * hl, z0], [dir * hw, dir * hl, z0], [dir * hw, dir * hl, end], [-dir * hw, dir * hl, end]);
     tri(m, [-dir * hw, dir * hl, end], [dir * hw, dir * hl, end], [0, dir * hl, end + rise]);
   }
   m.mat = skin.mat;
@@ -466,15 +508,21 @@ function curvedRoof(m: Mesh, b: Body, z0: number): void {
 }
 
 /** A roof of one slope, from a high wall at the body's +x down to a low one, with the walls under it. */
-function shedRoof(m: Mesh, b: Body, z0: number): void {
+function shedRoof(m: Mesh, b: Body, z0: number, cuts?: Partial<Record<Side, Cut[]>>): void {
   const { hw, hl, rise, skin } = b;
   const lo = b.eaves;
   const hi = b.eaves + rise;
   m.mat = b.wallMat;
-  quad(m, [hw, -hl, z0], [hw, hl, z0], [hw, hl, hi], [hw, -hl, hi]);
-  quad(m, [-hw, hl, z0], [-hw, -hl, z0], [-hw, -hl, lo], [-hw, hl, lo]);
-  quad(m, [hw, hl, z0], [-hw, hl, z0], [-hw, hl, lo], [hw, hl, hi]);
-  quad(m, [-hw, -hl, z0], [hw, -hl, z0], [hw, -hl, hi], [-hw, -hl, lo]);
+  if (cuts) {
+    // Close by, with their thickness where they are cut: the two walls under the slope rise with it.
+    const up = (dir: number): Top => ({ at: (x) => lo + ((dir * x + hw) / (2 * hw)) * rise, breaks: [] });
+    wallsCut(m, b, hw, hl, z0, b.base, { front: up(1), back: up(-1), right: hi, left: lo }, cuts, lo);
+  } else {
+    quad(m, [hw, -hl, z0], [hw, hl, z0], [hw, hl, hi], [hw, -hl, hi]);
+    quad(m, [-hw, hl, z0], [-hw, -hl, z0], [-hw, -hl, lo], [-hw, hl, lo]);
+    quad(m, [hw, hl, z0], [-hw, hl, z0], [-hw, hl, lo], [hw, hl, hi]);
+    quad(m, [-hw, -hl, z0], [hw, -hl, z0], [hw, -hl, hi], [-hw, -hl, lo]);
+  }
   m.mat = skin.mat;
   const over = skin.over;
   const s = rise / (2 * hw);
@@ -492,31 +540,81 @@ function shedRoof(m: Mesh, b: Body, z0: number): void {
   }
 }
 
-/** A flat roof of earth on beams: a slab that stands a little proud, a low parapet, and the ends of its beams close by. */
-function flatRoof(m: Mesh, b: Body, hw: number, hl: number, z: number): void {
+/** Whether a flat roof has a parapet round it, of the walls' own stuff: where the walls are of earth, brick or stone. */
+const parapeted = (b: Body): boolean => !SOFT.has(b.wallMat) && b.wallMat !== MAT.planks && b.wallMat !== MAT.logs && b.wallH >= 1.8;
+
+/** What a parapet's top is finished with: a coping of mud on a wall of earth, of the wall's own stuff otherwise. */
+const copingOf = (b: Body): number => (b.wallMat === MAT.adobe || b.wallMat === MAT.mud ? MAT.mud : b.wallMat);
+
+/**
+ * The parapet of a flat roof whose walls rise past its deck, close by: its faces towards the roof, and the coping on
+ * its top. The walls themselves are its outside (wallsCut). `x0 … y1` is the roof's outer edge.
+ */
+function parapetWithin(m: Mesh, b: Body, x0: number, y0: number, x1: number, y1: number, z: number): void {
+  const p = Math.max(PARAPET.thick, Math.min(0.4, BUILT[b.d.walls ?? 'wattle-and-daub'].thick));
+  const top = z + DECK + PARAPET.rise;
+  m.mat = b.wallMat;
+  const keep = m.light;
+  m.light = keep * 0.85;
+  wall(m, x1 - p, y0 + p, x0 + p, y0 + p, z + DECK, top);
+  wall(m, x0 + p, y1 - p, x1 - p, y1 - p, z + DECK, top);
+  wall(m, x0 + p, y0 + p, x0 + p, y1 - p, z + DECK, top);
+  wall(m, x1 - p, y1 - p, x1 - p, y0 + p, z + DECK, top);
+  m.light = keep;
+  m.mat = copingOf(b);
+  const o = 0.035;
+  box(m, x0 - o, y0 - o, top - 0.02, x1 + o, y0 + p + o, top + 0.06, true, true);
+  box(m, x0 - o, y1 - p - o, top - 0.02, x1 + o, y1 + o, top + 0.06, true, true);
+  box(m, x0 - o, y0 + p + o, top - 0.02, x0 + p + o, y1 - p - o, top + 0.06, true, true);
+  box(m, x1 - p - o, y0 + p + o, top - 0.02, x1 + o, y1 - p - o, top + 0.06, true, true);
+}
+
+/** The ends of a flat roof's beams, through a wall along x at y, standing out of it towards `dir`: close by. */
+function beamEnds(m: Mesh, x0: number, x1: number, y: number, dir: number, z: number, along: 'x' | 'y'): void {
+  m.mat = MAT.wood;
+  const n = Math.max(2, Math.round((x1 - x0) / 0.9));
+  for (let i = 0; i < n; i++) {
+    const x = x0 + ((i + 0.5) * (x1 - x0)) / n;
+    const a = Math.min(y, y + dir * 0.32);
+    const c = Math.max(y, y + dir * 0.32);
+    if (along === 'x') box(m, x - 0.07, a, z - 0.2, x + 0.07, c, z - 0.06, true, true);
+    else box(m, a, x - 0.07, z - 0.2, c, x + 0.07, z - 0.06, true, true);
+  }
+}
+
+/**
+ * A flat roof of earth on beams: a slab that stands a little proud, a low parapet, and the ends of its beams close by.
+ * `raised`: its walls rise past it as its parapet (wallsCut), so that only its deck within them, the parapet's inner
+ * faces and its coping are drawn here.
+ */
+function flatRoof(m: Mesh, b: Body, hw: number, hl: number, z: number, raised = false): void {
+  if (raised) {
+    const p = Math.max(PARAPET.thick, Math.min(0.4, BUILT[b.d.walls ?? 'wattle-and-daub'].thick));
+    m.mat = b.skin.mat;
+    cap(m, [-hw + p, -hl + p, hw - p, -hl + p, hw - p, hl - p, -hw + p, hl - p], z + DECK);
+    parapetWithin(m, b, -hw, -hl, hw, hl, z);
+    beamEnds(m, -hl, hl, hw, 1, z, 'y');
+    beamEnds(m, -hl, hl, -hw, -1, z, 'y');
+    return;
+  }
   const out = b.detail === 2 ? 0 : 0.12;
   m.mat = b.skin.mat;
-  box(m, -hw - out, -hl - out, z, hw + out, hl + out, z + 0.26, true);
+  box(m, -hw - out, -hl - out, z, hw + out, hl + out, z + DECK, true);
   if (b.detail === 2) return;
   // A parapet round it, of the walls' own stuff, where the walls are of earth, brick or stone.
-  if (!SOFT.has(b.wallMat) && b.wallMat !== MAT.planks && b.wallMat !== MAT.logs && b.wallH >= 1.8) {
+  if (parapeted(b)) {
     m.mat = b.wallMat;
-    const p = 0.22;
-    const h = z + 0.26 + 0.32;
-    box(m, -hw - out, -hl - out, z + 0.26, hw + out, -hl - out + p, h, true);
-    box(m, -hw - out, hl + out - p, z + 0.26, hw + out, hl + out, h, true);
-    box(m, -hw - out, -hl - out + p, z + 0.26, -hw - out + p, hl + out - p, h, true);
-    box(m, hw + out - p, -hl - out + p, z + 0.26, hw + out, hl + out - p, h, true);
+    const p = PARAPET.thick;
+    const h = z + DECK + PARAPET.rise;
+    box(m, -hw - out, -hl - out, z + DECK, hw + out, -hl - out + p, h, true);
+    box(m, -hw - out, hl + out - p, z + DECK, hw + out, hl + out, h, true);
+    box(m, -hw - out, -hl - out + p, z + DECK, -hw - out + p, hl + out - p, h, true);
+    box(m, hw + out - p, -hl - out + p, z + DECK, hw + out, hl + out - p, h, true);
   }
   if (b.detail === 0) {
     // The ends of the roof's beams, through the long walls.
-    m.mat = MAT.wood;
-    const n = Math.max(2, Math.round((2 * hl) / 0.9));
-    for (let i = 0; i < n; i++) {
-      const y = -hl + ((i + 0.5) * 2 * hl) / n;
-      box(m, hw, y - 0.07, z - 0.2, hw + 0.32, y + 0.07, z - 0.06, true, true);
-      box(m, -hw - 0.32, y - 0.07, z - 0.2, -hw, y + 0.07, z - 0.06, true, true);
-    }
+    beamEnds(m, -hl, hl, hw, 1, z, 'y');
+    beamEnds(m, -hl, hl, -hw, -1, z, 'y');
   }
 }
 
@@ -654,9 +752,24 @@ function windowsOf(b: Body): 'none' | 'few' | 'small' | 'large' {
   return b.storeys > 1 ? 'small' : 'few';
 }
 
+/**
+ * An opening in a wall, in the wall's frame: where it is along the wall, half its width, from what height to what
+ * above the floor, and what it is: a door of one leaf, a wide one of two, a small window, or a large one of lattice and
+ * paper. `k` is what its own numbers are drawn by.
+ */
+interface Cut {
+  x: number;
+  half: number;
+  z0: number;
+  z1: number;
+  kind: 'door' | 'wide' | 'window' | 'lattice';
+  k: number;
+}
+
 /** What is in one wall, in the wall's frame: a door, and windows on each storey between the wall's ends. */
-function openings(m: Mesh, b: Body, half: number, door: 'door' | 'byre' | 'gate' | undefined, k: number): void {
-  if (b.detail === 2) return;
+function cutsOf(b: Body, half: number, door: 'door' | 'byre' | 'gate' | undefined, k: number): Cut[] {
+  const out: Cut[] = [];
+  if (b.detail === 2) return out;
   // One door; or, where the house stands for several, a door to each share of its wall.
   const doors = door ? Math.max(1, Math.round(b.grow)) : 0;
   const part = half / Math.max(1, doors);
@@ -666,10 +779,10 @@ function openings(m: Mesh, b: Body, half: number, door: 'door' | 'byre' | 'gate'
   for (let i = 0; i < doors; i++) {
     const dx = -half + (2 * i + 1) * part + (door !== 'gate' ? (b.u(k + i * 3) - 0.5) * 2 * Math.max(0, part - dw - 0.7) * 0.7 : 0);
     at.push(dx);
-    doorway(m, b, dx, dw, dh, k + 1 + i, door !== 'door');
+    if (dh >= 0.5) out.push({ x: dx, half: dw, z0: 0, z1: dh, kind: door === 'door' ? 'door' : 'wide', k: k + 1 + i });
   }
   const kind = windowsOf(b);
-  if (kind === 'none' || b.wallH < 1.9) return;
+  if (kind === 'none' || b.wallH < 1.9) return out;
   const large = kind === 'large';
   const ww = large ? 0.45 : 0.2;
   const wh = large ? 0.95 : 0.42;
@@ -682,13 +795,221 @@ function openings(m: Mesh, b: Body, half: number, door: 'door' | 'byre' | 'gate'
       if (s === 0 && at.some((dx) => Math.abs(x - dx) < dw + ww + 0.35)) continue;
       // Where nothing says, a house of one storey has a window or none, by its door.
       if (kind === 'few' && (!door || b.u(k + 7 + i) > 0.4)) continue;
-      windowAt(m, b, x, s * b.wallH + sill, ww, wh, large);
+      out.push({ x, half: ww, z0: s * b.wallH + sill, z1: s * b.wallH + sill + wh, kind: large ? 'lattice' : 'window', k: 40 + Math.round(x * 3) });
     }
+  }
+  return out;
+}
+
+/** A wall's openings drawn on its face, as they are from a way off and on a wall that is a covering on a frame. */
+function openings(m: Mesh, b: Body, half: number, door: 'door' | 'byre' | 'gate' | undefined, k: number): void {
+  for (const c of cutsOf(b, half, door, k)) {
+    if (c.kind === 'door' || c.kind === 'wide') doorway(m, b, c.x, c.half, c.z1, c.k, c.kind === 'wide');
+    else windowAt(m, b, c.x, c.z0, c.half, c.z1 - c.z0, c.kind === 'lattice');
+  }
+}
+
+// ——— Walls with their thickness, close by ———
+
+type Side = 'front' | 'back' | 'right' | 'left';
+
+/**
+ * Whether a house's walls are drawn with their thickness: close by only, and where they are built up of something, not
+ * a covering hung on a frame.
+ */
+const solidOf = (b: Body): boolean => b.detail === 0 && !SOFT.has(b.wallMat) && b.d.walls !== 'none' && b.d.walls !== 'earth-cut';
+
+/**
+ * How a wall's face is drawn where openings are cut through it: how thick the wall is and how its foot stands out
+ * (BUILT); the height, in the wall's frame, at which it stands out no more; how far its frame is above the house's,
+ * for its courses; and how its ends lean: 1 where it meets its neighbours at a corner that stands out, −1 at one that
+ * goes in, as in a court, and a share between where it is a flat piece of a round wall.
+ */
+interface Face {
+  thick: number;
+  batter: number;
+  zr: number;
+  v0: number;
+  spread: number;
+}
+
+const faceOf = (b: Body, zr: number, v0: number, spread = 1): Face => ({ ...BUILT[b.d.walls ?? 'wattle-and-daub'], zr, v0, spread });
+
+/**
+ * The face of a wall in its own frame, from x0 to x1 along it and from zb up to its top, which may change along it;
+ * with its openings cut through it, and the wall's thickness shown round each: its two sides, its head and its sill.
+ * `breaks`: where along it the top turns.
+ */
+function facade(m: Mesh, x0: number, x1: number, zb: number, top: number | ((x: number) => number), cuts: Cut[], f: Face, breaks: number[] = []): void {
+  const topAt = typeof top === 'number' ? () => top : top;
+  const out = (z: number) => f.batter * Math.max(0, f.zr - z);
+  // Its ends lean with the walls they meet, so that a corner closes.
+  const X = (x: number, z: number) => (x <= x0 + 1e-9 ? x0 - out(z) * f.spread : x >= x1 - 1e-9 ? x1 + out(z) * f.spread : x);
+  const l = Math.hypot(1, f.batter);
+  const ny = 1 / l;
+  const nz = f.batter / l;
+  // A piece of the face between two places along it, from one height to another at each.
+  const piece = (xa: number, xb: number, a0: number, a1: number, b0: number, b1: number) => {
+    if (a1 - a0 < 1e-4 && b1 - b0 < 1e-4) return;
+    const p = m.v(X(xb, b0), out(b0), b0, 0, ny, nz, -xb, b0 + f.v0);
+    const q = m.v(X(xa, a0), out(a0), a0, 0, ny, nz, -xa, a0 + f.v0);
+    const r = m.v(X(xa, a1), out(a1), a1, 0, ny, nz, -xa, a1 + f.v0);
+    const s = m.v(X(xb, b1), out(b1), b1, 0, ny, nz, -xb, b1 + f.v0);
+    m.quad(p, q, r, s);
+  };
+  const xs = [x0, x1, ...cuts.flatMap((c) => [c.x - c.half, c.x + c.half]), ...breaks].filter((x) => x >= x0 - 1e-9 && x <= x1 + 1e-9).sort((a, c) => a - c);
+  for (let i = 0; i + 1 < xs.length; i++) {
+    const xa = xs[i];
+    const xb = xs[i + 1];
+    if (xb - xa < 1e-6) continue;
+    const mid = (xa + xb) / 2;
+    const c = cuts.find((q) => Math.abs(mid - q.x) < q.half);
+    if (!c) piece(xa, xb, zb, topAt(xa), zb, topAt(xb));
+    else {
+      piece(xa, xb, zb, c.z0, zb, c.z0);
+      piece(xa, xb, c.z1, topAt(xa), c.z1, topAt(xb));
+    }
+  }
+  // The wall's thickness round each opening.
+  const keep = m.light;
+  m.light = keep * 0.75;
+  const t = -f.thick;
+  for (const c of cuts) {
+    const xl = c.x - c.half;
+    const xr = c.x + c.half;
+    const y0 = out(c.z0);
+    const y1 = out(c.z1);
+    quad(m, [xl, t, c.z0], [xl, y0, c.z0], [xl, y1, c.z1], [xl, t, c.z1]);
+    quad(m, [xr, y0, c.z0], [xr, t, c.z0], [xr, t, c.z1], [xr, y1, c.z1]);
+    quad(m, [xl, y1, c.z1], [xr, y1, c.z1], [xr, t, c.z1], [xl, t, c.z1]);
+    quad(m, [xl, t, c.z0], [xr, t, c.z0], [xr, y0, c.z0], [xl, y0, c.z0]);
+  }
+  m.light = keep;
+}
+
+/**
+ * A door set back in its wall, in the wall's frame: the dark of the room behind it, its posts and its lintel of
+ * timber, its threshold, and its leaf, shut, standing ajar into the room or out of sight.
+ */
+function setDoor(m: Mesh, b: Body, c: Cut, f: Face): void {
+  const xl = c.x - c.half;
+  const xr = c.x + c.half;
+  const back = -f.thick;
+  const out = (z: number) => f.batter * Math.max(0, f.zr - z);
+  const wide = c.kind === 'wide';
+  const across = wide ? c.half : 2 * c.half;
+  const state = b.u(c.k);
+  const ajar = state >= 0.3 && state < 0.7;
+  // The dark of the room: further in where a leaf stands ajar in it, with the dark to either side of the leaf.
+  const deep = ajar ? across + 0.1 : 0;
+  m.mat = MAT.dark;
+  wall(m, xr, back - deep, xl, back - deep, c.z0, c.z1);
+  if (deep) {
+    quad(m, [xl, back - deep, c.z0], [xl, back, c.z0], [xl, back, c.z1], [xl, back - deep, c.z1]);
+    quad(m, [xr, back, c.z0], [xr, back - deep, c.z0], [xr, back - deep, c.z1], [xr, back, c.z1]);
+    quad(m, [xl, back, c.z1], [xr, back, c.z1], [xr, back - deep, c.z1], [xl, back - deep, c.z1]);
+    quad(m, [xl, back - deep, c.z0], [xr, back - deep, c.z0], [xr, back, c.z0], [xl, back, c.z0]);
+  }
+  // Its posts, at the back of the wall's thickness, where the leaf hangs; and its lintel, bedded in the wall over the
+  // opening, its face a little proud of the wall's.
+  m.mat = MAT.wood;
+  m.tint = 96;
+  box(m, xl, back, c.z0, xl + 0.07, back + 0.1, c.z1, false);
+  box(m, xr - 0.07, back, c.z0, xr, back + 0.1, c.z1, false);
+  box(m, xl - 0.2, back * 0.6, c.z1, xr + 0.2, out(c.z1) + 0.03, c.z1 + 0.15, true, true);
+  // Its threshold: a slab of stone in a wall of stone or brick, a baulk of timber otherwise.
+  const stone = b.wallMat === MAT.rubble || b.wallMat === MAT.brick;
+  m.mat = stone ? MAT.rubble : MAT.wood;
+  m.tint = stone ? b.tint : 88;
+  box(m, xl, back, c.z0 - 0.08, xr, out(c.z0) + 0.06, c.z0 + 0.06, true);
+  // Its leaf of boards.
+  m.mat = MAT.planks;
+  m.tint = 84;
+  if (state < 0.3) wall(m, xr - 0.07, back + 0.05, xl + 0.07, back + 0.05, c.z0 + 0.06, c.z1 - 0.02);
+  else if (ajar) {
+    for (const side of wide ? [-1, 1] : [-1]) {
+      const hx = c.x + side * (c.half - 0.07);
+      const ex = hx - side * across * 0.3;
+      const ey = back - across * 0.92;
+      wall(m, hx, back, ex, ey, c.z0 + 0.06, c.z1 - 0.02);
+      wall(m, ex, ey, hx, back, c.z0 + 0.06, c.z1 - 0.02);
+    }
+  }
+  m.tint = b.tint;
+}
+
+/** A window set back in its wall, in the wall's frame: its dark, its lintel and its sill of timber, a shutter folded back; or a lattice with paper behind it. */
+function setWindow(m: Mesh, b: Body, c: Cut, f: Face): void {
+  const xl = c.x - c.half;
+  const xr = c.x + c.half;
+  const back = -f.thick;
+  const out = (z: number) => f.batter * Math.max(0, f.zr - z);
+  const h = c.z1 - c.z0;
+  if (c.kind === 'lattice') {
+    // Paper behind a lattice, part of the way into the wall.
+    const y = back * 0.5;
+    m.mat = MAT.limewash;
+    m.tint = 40;
+    wall(m, xr, y, xl, y, c.z0, c.z1);
+    m.mat = MAT.wood;
+    m.tint = 70;
+    for (const dx of [-0.5, 0, 0.5]) box(m, c.x + dx * c.half - 0.02, y, c.z0, c.x + dx * c.half + 0.02, y + 0.03, c.z1, false);
+    for (const dz of [0.33, 0.66]) box(m, xl, y, c.z0 + dz * h - 0.02, xr, y + 0.03, c.z0 + dz * h + 0.02, true, true);
+    box(m, xl - 0.05, y, c.z0 - 0.05, xr + 0.05, out(c.z0) + 0.05, c.z0, true, true);
+    box(m, xl - 0.05, y, c.z1, xr + 0.05, out(c.z1) + 0.03, c.z1 + 0.06, true, true);
+    m.tint = b.tint;
+    return;
+  }
+  m.mat = MAT.dark;
+  wall(m, xr, back, xl, back, c.z0, c.z1);
+  m.mat = MAT.wood;
+  m.tint = 92;
+  box(m, xl - 0.12, back * 0.6, c.z1, xr + 0.12, out(c.z1) + 0.025, c.z1 + 0.09, true, true);
+  box(m, xl - 0.04, back * 0.6, c.z0 - 0.04, xr + 0.04, out(c.z0) + 0.05, c.z0, true, true);
+  // A shutter, folded back against the wall.
+  if (b.u(c.k) < 0.6) {
+    m.mat = MAT.planks;
+    m.tint = 84;
+    const y = out(c.z0) + 0.03;
+    wall(m, xr + 0.06 + 2 * c.half * 0.92, y, xr + 0.06, y, c.z0, c.z1);
+  }
+  m.tint = b.tint;
+}
+
+/** What stands in each opening of a wall drawn with its thickness. */
+function setCuts(m: Mesh, b: Body, cuts: Cut[], f: Face): void {
+  for (const c of cuts) {
+    if (c.kind === 'door' || c.kind === 'wide') setDoor(m, b, c, f);
+    else setWindow(m, b, c, f);
+  }
+  m.mat = b.wallMat;
+  m.tint = b.tint;
+}
+
+/** A wall's top, at one height or changing along it: then also where along it the top turns. */
+type Top = number | { at: (x: number) => number; breaks: number[] };
+
+/**
+ * The four walls of a body of corners, close by: each drawn in its own frame, from z0 up to its top, with its openings
+ * cut through it and what stands in them. `fz` is the floor the openings are measured from, and `zr` the height at
+ * which the walls stand out no more: their tops, or a parapet's.
+ */
+function wallsCut(m: Mesh, b: Body, hw: number, hl: number, z0: number, fz: number, tops: Top | Record<Side, Top>, cuts: Partial<Record<Side, Cut[]>>, zr: number): void {
+  for (const side of ['front', 'back', 'right', 'left'] as const) {
+    const top = typeof tops === 'object' && 'front' in tops ? tops[side] : tops;
+    onWall(m, b, side, hw, hl, fz, (half) => {
+      const f = faceOf(b, zr - fz, fz);
+      m.mat = b.wallMat;
+      m.tint = b.tint;
+      if (typeof top === 'number') facade(m, -half, half, z0 - fz, top - fz, cuts[side] ?? [], f);
+      else facade(m, -half, half, z0 - fz, (x) => top.at(x) - fz, cuts[side] ?? [], f, top.breaks);
+      setCuts(m, b, cuts[side] ?? [], f);
+    });
   }
 }
 
 /** Draw in the frame of one wall of a body: `front` its +y, `back` its −y, `right` its +x, `left` its −x. */
-function onWall(m: Mesh, b: Body, which: 'front' | 'back' | 'right' | 'left', hw: number, hl: number, z: number, draw: (half: number) => void): void {
+function onWall(m: Mesh, b: Body, which: Side, hw: number, hl: number, z: number, draw: (half: number) => void): void {
   if (which === 'front') enter(m, 0, hl, z, 0, 1);
   else if (which === 'back') enter(m, 0, -hl, z, 0, -1);
   else if (which === 'right') enter(m, hw, 0, z, 1, 0);
@@ -859,9 +1180,9 @@ function endsOf(b: Body): [RoofEnd, RoofEnd] {
 }
 
 /** The roof of a body of corners, over its walls' tops, and what of its walls the roof decides. */
-function roofOver(m: Mesh, b: Body, hw: number, hl: number, z0: number): void {
+function roofOver(m: Mesh, b: Body, hw: number, hl: number, z0: number, raised = false): void {
   const fine = b.detail < 2;
-  if (b.roof === 'flat') return flatRoof(m, b, hw, hl, b.eaves);
+  if (b.roof === 'flat') return flatRoof(m, b, hw, hl, b.eaves, raised);
   if (b.roof === 'vault') {
     m.mat = b.skin.mat;
     barrel(m, -hw - 0.08, -hl, hw + 0.08, hl, b.eaves, b.detail === 0 ? 10 : b.detail === 1 ? 6 : 4, b.rise, b.d.walls === 'none' ? b.skin.mat : b.wallMat);
@@ -937,9 +1258,29 @@ function drawRect(m: Mesh, b: Body): void {
   standing(m, b, hw, hl);
   const z0 = b.base > 0 ? b.base : -0.4;
   m.tint = b.tint;
+  // The floor the doors stand on: the house's own, or the ground where it is dug in.
+  const fz = b.base;
+  const low = b.wallH * b.storeys - b.sink < 1.3;
+  const doorWall = b.turned ? 'right' : 'front';
+  const farWall = b.turned ? 'left' : 'back';
+  const doorEnd = b.turned ? hw : hl;
+  const sides: Side[] = b.turned ? ['front', 'back'] : ['right', 'left'];
+  const halfOf = (side: Side) => (side === 'front' || side === 'back' ? hw : hl);
+  // Whether it is walked into by a door in a wall, with windows in its walls: not by its roof, a tunnel or a hood.
+  const doored = !b.open && b.entrance !== 'roof' && b.entrance !== 'tunnel' && !low && d.walls !== 'none';
+  // Close by, walls that are built up are drawn with their thickness, what is cut through each wall known before it
+  // is drawn: a door in the front, windows, and at the far end the wide door of a byre.
+  const thick = solidOf(b) && !b.open && !low && d.plan !== 'apsidal';
+  const cuts: Partial<Record<Side, Cut[]>> | undefined = !thick
+    ? undefined
+    : doored
+      ? { [doorWall]: cutsOf(b, halfOf(doorWall), 'door', 12), [farWall]: cutsOf(b, halfOf(farWall), undefined, 14), [sides[0]]: cutsOf(b, halfOf(sides[0]), undefined, 16), [sides[1]]: cutsOf(b, halfOf(sides[1]), d.byre ? 'byre' : undefined, 18) }
+      : {};
+  // A flat roof's parapet is the walls themselves, risen past its deck.
+  const raised = !!cuts && b.roof === 'flat' && parapeted(b);
   // The walls; a roof that comes down to the ground has none, and one that curves or leans draws its own.
-  if (b.roof === 'curved') curvedRoof(m, b, z0);
-  else if (b.roof === 'shed') shedRoof(m, b, z0);
+  if (b.roof === 'curved') curvedRoof(m, b, z0, cuts);
+  else if (b.roof === 'shed') shedRoof(m, b, z0, cuts);
   else {
     if (b.open) {
       // A roof on posts, open on every side.
@@ -949,6 +1290,9 @@ function drawRect(m: Mesh, b: Body): void {
       const ny = b.detail === 2 ? 2 : Math.max(2, Math.round((2 * hl) / 2.2) + 1);
       for (let i = 0; i < nx; i++) for (let j = 0; j < ny; j++) if (i === 0 || j === 0 || i === nx - 1 || j === ny - 1) post(m, -hw + 0.1 + ((2 * hw - 0.2) * i) / (nx - 1), -hl + 0.1 + ((2 * hl - 0.2) * j) / (ny - 1), z0, b.eaves, 0.09);
       m.tint = b.tint;
+    } else if (cuts) {
+      const top = b.eaves + (raised ? DECK + PARAPET.rise : 0);
+      wallsCut(m, b, hw, hl, z0, fz, top, cuts, top);
     } else if (d.walls !== 'none' || b.eaves - z0 > 0.5) {
       m.mat = d.walls === 'none' ? b.skin.mat : b.wallMat;
       box(m, -hw, -hl, z0, hw, hl, b.eaves, false);
@@ -965,15 +1309,9 @@ function drawRect(m: Mesh, b: Body): void {
       for (let s = 1; s < b.storeys; s++) box(m, -hw - 0.05, -hl - 0.05, b.base + s * b.wallH - 0.1, hw + 0.05, hl + 0.05, b.base + s * b.wallH + 0.06, true, true);
       m.tint = b.tint;
     }
-    roofOver(m, b, hw, hl, z0);
+    roofOver(m, b, hw, hl, z0, raised);
   }
   smokeOf(m, b, hw, hl);
-  // The floor the doors stand on: the house's own, or the ground where it is dug in.
-  const fz = b.base;
-  const low = b.wallH * b.storeys - b.sink < 1.3;
-  const doorWall = b.turned ? 'right' : 'front';
-  const farWall = b.turned ? 'left' : 'back';
-  const doorEnd = b.turned ? hw : hl;
   if (b.open) {
     // Open on every side: nothing to come in by.
   } else if (b.entrance === 'roof') {
@@ -1001,7 +1339,7 @@ function drawRect(m: Mesh, b: Body): void {
     });
   } else {
     onWall(m, b, doorWall, hw, hl, fz, (half) => {
-      openings(m, b, half, 'door', 12);
+      if (!cuts) openings(m, b, half, 'door', 12);
       const dx = (b.u(12) - 0.5) * 2 * Math.max(0, half - 0.46 - 0.7) * 0.7;
       if (floor === 'stilts') ladder(m, b, dx, 0.25 + b.base * 0.55, -b.base, 0.02, 0, 0.6);
       else if (b.base > 0.15 && b.detail < 2) {
@@ -1012,10 +1350,11 @@ function drawRect(m: Mesh, b: Body): void {
       if (d.veranda) veranda(m, b, half, Math.min(b.wallH - 0.05, 2.6));
     });
     // The other walls: windows, and at the far end the wide door of a byre.
-    onWall(m, b, farWall, hw, hl, fz, (half) => openings(m, b, half, undefined, 14));
-    const sides: ('front' | 'back' | 'right' | 'left')[] = b.turned ? ['front', 'back'] : ['right', 'left'];
-    onWall(m, b, sides[0], hw, hl, fz, (half) => openings(m, b, half, undefined, 16));
-    onWall(m, b, sides[1], hw, hl, fz, (half) => openings(m, b, half, d.byre ? 'byre' : undefined, 18));
+    if (!cuts) {
+      onWall(m, b, farWall, hw, hl, fz, (half) => openings(m, b, half, undefined, 14));
+      onWall(m, b, sides[0], hw, hl, fz, (half) => openings(m, b, half, undefined, 16));
+      onWall(m, b, sides[1], hw, hl, fz, (half) => openings(m, b, half, d.byre ? 'byre' : undefined, 18));
+    }
   }
   if (b.turned) leave(m);
 }
@@ -1033,21 +1372,32 @@ function drawEll(m: Mesh, b: Body): void {
     [0, -L / 2 + depth / 2, 1, 0, depth / 2, W / 2],
     [-W / 2 + depth / 2, 0, 0, 1, depth / 2, L / 2],
   ];
-  for (const [x, y, gx, gy, hw, hl] of wings) {
+  // Close by, walls that are built up are drawn with their thickness: what is cut through the two faces that look into
+  // the yard is known before they are drawn, each along the part of its wall that stands clear of the other range.
+  const thick = solidOf(b);
+  const raised = thick && b.roof === 'flat' && parapeted(b);
+  const along = (cuts: Cut[], by: number): Cut[] => cuts.map((c) => ({ ...c, x: c.x + by }));
+  const cut: Partial<Record<Side, Cut[]>>[] = [{ left: along(cutsOf(b, W / 2 - depth / 2, 'door', 12), depth / 2) }, { right: along(cutsOf(b, L / 2 - depth / 2, 'door', 15), -depth / 2) }];
+  wings.forEach(([x, y, gx, gy, hw, hl], i) => {
     enter(m, x, y, 0, gx, gy);
     m.mat = b.wallMat;
-    box(m, -hw, -hl, z0, hw, hl, b.eaves, false);
-    roofOver(m, b, hw, hl, z0);
+    if (thick) {
+      const top = b.eaves + (raised ? DECK + PARAPET.rise : 0);
+      wallsCut(m, b, hw, hl, z0, b.base, top, cut[i], top);
+    } else box(m, -hw, -hl, z0, hw, hl, b.eaves, false);
+    roofOver(m, b, hw, hl, z0, raised);
     leave(m);
-  }
+  });
   // Doors and windows on the two faces that look into the yard.
   enter(m, depth / 2, -L / 2 + depth, b.base, 0, 1);
-  openings(m, b, W / 2 - depth / 2, 'door', 12);
+  if (!thick) openings(m, b, W / 2 - depth / 2, 'door', 12);
   if (b.d.veranda) veranda(m, b, W / 2 - depth / 2, Math.min(b.wallH - 0.05, 2.6));
   leave(m);
-  enter(m, -W / 2 + depth, depth / 2, b.base, 1, 0);
-  openings(m, b, L / 2 - depth / 2, 'door', 15);
-  leave(m);
+  if (!thick) {
+    enter(m, -W / 2 + depth, depth / 2, b.base, 1, 0);
+    openings(m, b, L / 2 - depth / 2, 'door', 15);
+    leave(m);
+  }
   if (b.d.smoke === 'chimney' && b.detail < 2) chimney(m, b, -W / 2 + depth / 2, L / 2 - 0.5, b.eaves, b.top + 0.6);
 }
 
@@ -1065,34 +1415,112 @@ function drawCourt(m: Mesh, b: Body): void {
   m.tint = b.tint;
   const outer: Poly = [-hw, -hl, hw, -hl, hw, hl, -hw, hl];
   const inner: Poly = [-hw + depth, -hl + depth, hw - depth, -hl + depth, hw - depth, hl - depth, -hw + depth, hl - depth];
+  const ix = hw - depth;
+  const iy = hl - depth;
+  // The four walls that look into the court, each as the frame it is drawn in and half its length.
+  const within = [[0, iy, 0, -1, ix], [0, -iy, 0, 1, ix], [ix, 0, -1, 0, iy], [-ix, 0, 1, 0, iy]] as const;
+  // Close by, walls that are built up are drawn with their thickness, what is cut through each known before it is
+  // drawn: the gate in the front, windows where its claims say there were, and doors from the court into the ranges.
+  const thick = solidOf(b);
+  const raised = thick && b.roof === 'flat' && parapeted(b);
+  const gates = Math.max(1, Math.round(b.grow));
+  const gateCuts: Cut[] = [];
+  for (let i = 0; i < gates; i++) gateCuts.push({ x: -hw + ((i + 0.5) * 2 * hw) / gates, half: Math.min(0.8, (hw / gates) * 0.4), z0: 0, z1: Math.min(2.15, b.wallH - 0.15), kind: 'wide', k: 13 + i });
+  const windowed = !!d.windows && d.windows !== 'none';
+  const courtDoors = (half: number): Cut[] => {
+    const n = Math.max(1, Math.round((2 * half) / 4));
+    return Array.from({ length: n }, (_, i) => ({ x: -half + ((i + 0.5) * 2 * half) / n, half: 0.42, z0: 0, z1: Math.min(1.85, b.wallH - 0.15), kind: 'door' as const, k: 24 + i }));
+  };
   m.mat = b.wallMat;
-  prism(m, outer, z0, b.eaves, false);
+  if (thick) {
+    // A window keeps clear of the gates.
+    const clear = (cuts: Cut[]) => cuts.filter((c) => !gateCuts.some((g) => Math.abs(c.x - g.x) < c.half + g.half + 0.3));
+    const top = b.eaves + (raised ? DECK + PARAPET.rise : 0);
+    wallsCut(
+      m,
+      b,
+      hw,
+      hl,
+      z0,
+      b.base,
+      top,
+      {
+        front: [...(gateCuts[0].z1 >= 0.5 ? gateCuts : []), ...(windowed ? clear(cutsOf(b, hw, undefined, 20)) : [])],
+        ...(windowed ? { back: cutsOf(b, hw, undefined, 20), right: cutsOf(b, hl, undefined, 20), left: cutsOf(b, hl, undefined, 20) } : {}),
+      },
+      top,
+    );
+  } else prism(m, outer, z0, b.eaves, false);
   // A court keeps its walls from far off where it is wide enough to see into: it is what tells the house from a slab.
   const open = b.detail < 2 || Math.min(hw, hl) - depth > 1.6;
   if (open) {
     // The walls that look into the court.
     const keep = m.light;
     m.light = keep * 0.8;
-    const ix = hw - depth;
-    const iy = hl - depth;
-    quad(m, [ix, -iy, z0], [-ix, -iy, z0], [-ix, -iy, b.eaves], [ix, -iy, b.eaves]);
-    quad(m, [-ix, iy, z0], [ix, iy, z0], [ix, iy, b.eaves], [-ix, iy, b.eaves]);
-    quad(m, [ix, iy, z0], [ix, -iy, z0], [ix, -iy, b.eaves], [ix, iy, b.eaves]);
-    quad(m, [-ix, -iy, z0], [-ix, iy, z0], [-ix, iy, b.eaves], [-ix, -iy, b.eaves]);
+    if (thick) {
+      for (const [x, y, gx, gy, half] of within) {
+        enter(m, x, y, b.base, gx, gy);
+        const f = faceOf(b, b.eaves - b.base, b.base, -1);
+        const cuts = b.wallH - 0.15 >= 0.5 ? courtDoors(half) : [];
+        m.mat = b.wallMat;
+        facade(m, -half, half, z0 - b.base, b.eaves - b.base, cuts, f);
+        setCuts(m, b, cuts, f);
+        leave(m);
+      }
+    } else {
+      quad(m, [ix, -iy, z0], [-ix, -iy, z0], [-ix, -iy, b.eaves], [ix, -iy, b.eaves]);
+      quad(m, [-ix, iy, z0], [ix, iy, z0], [ix, iy, b.eaves], [-ix, iy, b.eaves]);
+      quad(m, [ix, iy, z0], [ix, -iy, z0], [ix, -iy, b.eaves], [ix, iy, b.eaves]);
+      quad(m, [-ix, -iy, z0], [-ix, iy, z0], [-ix, iy, b.eaves], [-ix, -iy, b.eaves]);
+    }
     m.light = keep;
   }
-  if (b.roof === 'flat') {
+  if (b.roof === 'flat' && b.detail === 0) {
+    // Close by: the deck within the parapet, where the walls rise past it as one, or out to their faces; over the
+    // court it stands out a little as eaves, its edge of mud; and the ends of its beams come through the outer walls.
+    const p = raised ? Math.max(PARAPET.thick, Math.min(0.4, BUILT[d.walls ?? 'wattle-and-daub'].thick)) : 0;
+    const e = 0.1;
     m.mat = b.skin.mat;
-    cap(m, outer, b.eaves + 0.26, open ? [inner] : []);
-    prism(m, outer, b.eaves, b.eaves + 0.26, false);
+    cap(m, [-hw + p, -hl + p, hw - p, -hl + p, hw - p, hl - p, -hw + p, hl - p], b.eaves + DECK, [[-ix + e, -iy + e, ix - e, -iy + e, ix - e, iy - e, -ix + e, iy - e]]);
+    if (!raised) prism(m, outer, b.eaves, b.eaves + DECK, false);
+    m.mat = MAT.mud;
+    const keep = m.light;
+    for (const [x, y, gx, gy, half] of within) {
+      enter(m, x, y, b.eaves, gx, gy);
+      m.light = keep * 0.9;
+      wall(m, half - e, e, -half + e, e, 0, DECK);
+      m.light = keep * 0.45;
+      quad(m, [half, 0, 0], [-half, 0, 0], [-half + e, e, 0], [half - e, e, 0]);
+      leave(m);
+    }
+    m.light = keep;
+    if (raised) {
+      parapetWithin(m, b, -hw, -hl, hw, hl, b.eaves);
+      beamEnds(m, -hw + 0.5, hw - 0.5, hl, 1, b.eaves, 'x');
+      beamEnds(m, -hw + 0.5, hw - 0.5, -hl, -1, b.eaves, 'x');
+      beamEnds(m, -hl + depth, hl - depth, hw, 1, b.eaves, 'y');
+      beamEnds(m, -hl + depth, hl - depth, -hw, -1, b.eaves, 'y');
+    } else if (parapeted(b)) {
+      m.mat = b.wallMat;
+      const q = PARAPET.thick;
+      const h = b.eaves + DECK + PARAPET.rise;
+      box(m, -hw, -hl, b.eaves + DECK, hw, -hl + q, h, true);
+      box(m, -hw, hl - q, b.eaves + DECK, hw, hl, h, true);
+      box(m, -hw, -hl + q, b.eaves + DECK, -hw + q, hl - q, h, true);
+      box(m, hw - q, -hl + q, b.eaves + DECK, hw, hl - q, h, true);
+    }
+  } else if (b.roof === 'flat') {
+    m.mat = b.skin.mat;
+    cap(m, outer, b.eaves + DECK, open ? [inner] : []);
+    prism(m, outer, b.eaves, b.eaves + DECK, false);
     if (b.detail < 2) {
       m.mat = b.wallMat;
-      const p = 0.22;
-      const h = b.eaves + 0.58;
-      box(m, -hw, -hl, b.eaves + 0.26, hw, -hl + p, h, true);
-      box(m, -hw, hl - p, b.eaves + 0.26, hw, hl, h, true);
-      box(m, -hw, -hl + p, b.eaves + 0.26, -hw + p, hl - p, h, true);
-      box(m, hw - p, -hl + p, b.eaves + 0.26, hw, hl - p, h, true);
+      const p = PARAPET.thick;
+      const h = b.eaves + DECK + PARAPET.rise;
+      box(m, -hw, -hl, b.eaves + DECK, hw, -hl + p, h, true);
+      box(m, -hw, hl - p, b.eaves + DECK, hw, hl, h, true);
+      box(m, -hw, -hl + p, b.eaves + DECK, -hw + p, hl - p, h, true);
+      box(m, hw - p, -hl + p, b.eaves + DECK, hw, hl - p, h, true);
     }
   } else {
     // A roof to each range, its ridge along the range.
@@ -1108,27 +1536,24 @@ function drawCourt(m: Mesh, b: Body): void {
   }
   if (b.detail === 2) return;
   // The gate in the front, and windows only where its claims say there were: such a house turns its back on the street.
-  onWall(m, b, 'front', hw, hl, b.base, (half) => {
+  onWall(m, b, 'front', hw, hl, b.base, () => {
     // One gate; or, where it stands for several houses, a gate to each along its front.
-    const gates = Math.max(1, Math.round(b.grow));
-    for (let i = 0; i < gates; i++) {
-      const x = -half + ((i + 0.5) * 2 * half) / gates;
-      doorway(m, b, x, Math.min(0.8, (half / gates) * 0.4), Math.min(2.15, b.wallH - 0.15), 13 + i, true);
+    for (const g of gateCuts) {
+      if (!thick) doorway(m, b, g.x, g.half, g.z1, g.k, true);
       if (b.base > 0.15) {
         m.mat = MAT.rubble;
-        steps(m, x, 1, b.base, 0.35);
+        steps(m, g.x, 1, b.base, 0.35);
       }
     }
   });
-  if (d.windows && d.windows !== 'none') {
+  if (windowed && !thick) {
     for (const which of ['front', 'back', 'right', 'left'] as const) onWall(m, b, which, hw, hl, b.base, (half) => openings(m, b, half, undefined, 20));
   }
-  if (b.detail === 0) {
+  if (b.detail === 0 && !thick) {
     // Doors from the court into the ranges.
-    for (const [x, y, gx, gy, half] of [[0, hl - depth, 0, -1, hw - depth], [0, -hl + depth, 0, 1, hw - depth], [hw - depth, 0, -1, 0, hl - depth], [-hw + depth, 0, 1, 0, hl - depth]] as const) {
+    for (const [x, y, gx, gy, half] of within) {
       enter(m, x, y, b.base, gx, gy);
-      const n = Math.max(1, Math.round((2 * half) / 4));
-      for (let i = 0; i < n; i++) doorway(m, b, -half + ((i + 0.5) * 2 * half) / n, 0.42, Math.min(1.85, b.wallH - 0.15), 24 + i);
+      for (const c of courtDoors(half)) doorway(m, b, c.x, c.half, c.z1, c.k);
       leave(m);
     }
   }
@@ -1188,6 +1613,7 @@ function drawBlock(m: Mesh, b: Body): void {
   const cl = l / rows;
   m.tint = b.tint;
   const fine = b.detail === 0;
+  const thick = solidOf(b) && b.entrance !== 'roof' && b.wallH - 0.3 >= 0.5;
   for (let c = 0; c < cells; c++) {
     const i = c % across;
     // The first row is at the front, the last at the back and highest.
@@ -1197,12 +1623,24 @@ function drawBlock(m: Mesh, b: Body): void {
     const x0 = -w / 2 + i * cw;
     const y1 = l / 2 - j * cl;
     m.mat = b.wallMat;
-    box(m, x0, y1 - cl, -0.4, x0 + cw, y1, h, false);
+    // Close by, a door is cut through the front of a cell whose walls are built up, with the wall's thickness round it.
+    const cut: Cut | undefined = thick ? { x: (b.u(30 + c) - 0.5) * cw * 0.4, half: 0.36, z0: 0, z1: Math.min(1.5, b.wallH - 0.3), kind: 'door', k: 30 + c } : undefined;
+    if (cut) {
+      wall(m, x0, y1 - cl, x0 + cw, y1 - cl, -0.4, h, x0);
+      wall(m, x0 + cw, y1 - cl, x0 + cw, y1, -0.4, h, y1 - cl);
+      wall(m, x0, y1, x0, y1 - cl, -0.4, h, -y1);
+    } else box(m, x0, y1 - cl, -0.4, x0 + cw, y1, h, false);
     m.mat = b.skin.mat;
     box(m, x0 - 0.04, y1 - cl - 0.04, h, x0 + cw + 0.04, y1 + 0.04, h + 0.24, true);
     if (b.detail === 2) continue;
     // Its front, where it stands clear of the row before it: a door, or a hatch in its roof with a ladder to it.
     enter(m, x0 + cw / 2, y1, h - b.wallH, 0, 1);
+    if (cut) {
+      const f: Face = { ...faceOf(b, b.wallH, h - b.wallH, 0), batter: 0 };
+      m.mat = b.wallMat;
+      facade(m, -cw / 2, cw / 2, -0.4 - (h - b.wallH), b.wallH, [cut], f);
+      setCuts(m, b, [cut], f);
+    }
     if (b.entrance === 'roof') {
       if (fine) {
         m.mat = MAT.dark;
@@ -1210,7 +1648,7 @@ function drawBlock(m: Mesh, b: Body): void {
         if ((c + (b.u(9) < 0.5 ? 0 : 1)) % 2 === 0) ladder(m, b, cw * 0.25, 0.9, tiers > 1 ? 0.24 : 0, 0.06, b.wallH + 0.24, 0.8);
       }
     } else {
-      doorway(m, b, (b.u(30 + c) - 0.5) * cw * 0.4, 0.36, Math.min(1.5, b.wallH - 0.3), 30 + c);
+      if (!cut) doorway(m, b, (b.u(30 + c) - 0.5) * cw * 0.4, 0.36, Math.min(1.5, b.wallH - 0.3), 30 + c);
       if (fine && tiers > 1 && c % 2 === 0) ladder(m, b, cw * 0.3, 0.9, 0.24, 0.06, b.wallH + 0.24, 0.8);
     }
     if (fine) {
@@ -1314,7 +1752,17 @@ function drawRound(m: Mesh, b: Body): void {
     turn(m, [[r + 0.55, -0.1], [r - 0.08, 0.32]], n, sx, sy);
   }
   const z0 = b.base > 0 ? b.base : -0.4;
-  if (walled) {
+  // Close by, a wall that is built up is drawn with its thickness where its door and its windows are cut through it:
+  // each in a flat piece of the wall, which stops either side of it.
+  const thick = walled && solidOf(b);
+  const doored = walled && b.entrance !== 'roof' && b.entrance !== 'tunnel' && b.eaves - b.base >= 1.3;
+  const windowed = !!d.windows && d.windows !== 'none' && b.detail < 2;
+  if (thick) {
+    const holes: { angle: number; cut: Cut }[] = [];
+    if (doored) holes.push({ angle: PI / 2, cut: { x: 0, half: Math.min(0.46, r * 0.3), z0: 0, z1: Math.min(1.8, b.eaves - b.base - 0.12), kind: 'door', k: 13 } });
+    if (windowed) for (const a of [PI, (3 * PI) / 2, TAU]) holes.push({ angle: a, cut: { x: 0, half: d.windows === 'large' ? 0.4 : 0.2, z0: 1.25, z1: 1.25 + (d.windows === 'large' ? 0.9 : 0.42), kind: d.windows === 'large' ? 'lattice' : 'window', k: 40 } });
+    roundWall(m, b, r, sx, sy, n, z0, holes.filter((h) => h.cut.z1 < b.eaves - b.base - 0.05));
+  } else if (walled) {
     m.mat = b.wallMat;
     turn(m, [[r, z0], [r, b.eaves]], n, sx, sy);
   } else if (b.open) {
@@ -1385,7 +1833,7 @@ function drawRound(m: Mesh, b: Body): void {
     return;
   }
   enter(m, 0, front - 0.02, b.base, 0, 1);
-  doorway(m, b, 0, Math.min(0.46, r * 0.3), Math.min(1.8, b.eaves - b.base - 0.12), 13);
+  if (!thick) doorway(m, b, 0, Math.min(0.46, r * 0.3), Math.min(1.8, b.eaves - b.base - 0.12), 13);
   if (floor === 'stilts') ladder(m, b, 0, 0.3 + b.base * 0.55, -b.base, 0.04, 0, 0.6);
   else if (b.base > 0.15 && b.detail < 2) {
     m.mat = MAT.mud;
@@ -1394,12 +1842,55 @@ function drawRound(m: Mesh, b: Body): void {
   if (d.porch) porch(m, b, 0, Math.min(1.9, b.eaves - b.base - 0.05));
   leave(m);
   // Windows, where its claims say it had them.
-  if (d.windows && d.windows !== 'none' && b.detail < 2) {
+  if (windowed && !thick) {
     for (const a of [0, PI, (3 * PI) / 2]) {
       enter(m, dcos(a) * (r - 0.02) * sx, dsin(a) * (r - 0.02) * sy, b.base, dcos(a), dsin(a));
       windowAt(m, b, 0, 1.25, d.windows === 'large' ? 0.4 : 0.2, d.windows === 'large' ? 0.9 : 0.42, d.windows === 'large');
       leave(m);
     }
+  }
+}
+
+/**
+ * The wall of a round or an oval house, close by, with its thickness: it leans in as it rises where it is of earth, and
+ * stops either side of each opening, which is cut through a flat piece of the wall set between: a door at its front,
+ * windows at its sides and its back. Each hole is at an angle that is one of the house's four ways.
+ */
+function roundWall(m: Mesh, b: Body, r: number, sx: number, sy: number, n: number, z0: number, holes: { angle: number; cut: Cut }[]): void {
+  const built = BUILT[b.d.walls ?? 'wattle-and-daub'];
+  const profile = [[r + built.batter * (b.eaves - z0), z0], [r, b.eaves]];
+  m.mat = b.wallMat;
+  if (!holes.length) {
+    turn(m, profile, n, sx, sy);
+    return;
+  }
+  // Each hole's flat piece: half as wide as the opening and a little more, and so how much of the round it takes.
+  const pieces = holes
+    .map((h) => {
+      const c = dcos(h.angle);
+      const s = dsin(h.angle);
+      // Along the wall there the house is as wide as its other way is; out from it, as this way is.
+      const wide = Math.abs(c) > 0.5 ? sy : sx;
+      const far = Math.abs(c) > 0.5 ? sx : sy;
+      const hp = h.cut.half + 0.14;
+      const delta = Math.asin(Math.min(0.9, hp / (r * wide)));
+      return { ...h, c: Math.round(c), s: Math.round(s), hp: r * wide * dsin(delta), delta, out: r * far * dcos(delta), lean: wide * dsin(delta) };
+    })
+    .sort((p, q) => p.angle - q.angle);
+  // The wall between the holes, each stretch with its share of the round's sides.
+  pieces.forEach((p, i) => {
+    const next = pieces[(i + 1) % pieces.length];
+    const a0 = p.angle + p.delta;
+    const a1 = next.angle - next.delta + (i + 1 === pieces.length ? TAU : 0);
+    if (a1 - a0 > 1e-3) turn(m, profile, Math.max(1, Math.round((n * (a1 - a0)) / TAU)), sx, sy, a0, a1);
+  });
+  for (const p of pieces) {
+    enter(m, p.c * p.out, p.s * p.out, b.base, p.c, p.s);
+    const f = faceOf(b, b.eaves - b.base, b.base, p.lean);
+    m.mat = b.wallMat;
+    facade(m, -p.hp, p.hp, z0 - b.base, b.eaves - b.base, [p.cut], f);
+    setCuts(m, b, [p.cut], f);
+    leave(m);
   }
 }
 

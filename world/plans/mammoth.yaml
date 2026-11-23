@@ -21,9 +21,13 @@ parts:
       - [0.085, 1.47, 0.49, 0.118]
       - [0.15, 1.44, 0.56, 0.1]
       - [0.195, 1.34, 0.68, 0.082]
+    # Under its long hair the body is widest below its middle and a little flat beneath, from the hips to the girth.
+    widest: [[-0.41, 0], [-0.34, -0.35], [0.085, -0.35], [0.195, -0.1]]
+    under: [[-0.41, 0], [-0.34, 0.3], [0.085, 0.3], [0.195, 0]]
     neck: { r: 0.085, steps: [2, 1] }
-  hind: { type: pillar, mat: fur, y: -0.24, x: 0.058, top: 0.84, r: 0.064, swing: 0.045 }
-  fore: { type: pillar, mat: fur, y: 0.12, x: 0.054, top: 0.94, r: 0.06, swing: 0.045, phase: 1 }
+  # Columns, narrower across at the top than fore and aft, so that they stay inside the flank where the body tapers.
+  hind: { type: pillar, mat: fur, y: -0.24, x: 0.058, top: 0.84, r: 0.064, swing: 0.045, across: [0.62, 1], column: 0.7 }
+  fore: { type: pillar, mat: fur, y: 0.12, x: 0.054, top: 0.94, r: 0.06, swing: 0.045, phase: 1, across: [0.62, 1], column: 0.7 }
   head:
     type: head
     mat: fur

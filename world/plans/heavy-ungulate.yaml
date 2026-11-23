@@ -22,9 +22,13 @@ parts:
       - [0.115, 1.1, 0.36, 0.126]
       - [0.165, 1.08, 0.42, 0.104]
       - [0.195, 1.0, 0.5, 0.082]
+    # The barrel is widest below its middle, from the hips to the girth; the tail and the shoulders are round.
+    widest: [[-0.44, 0], [-0.38, -0.25], [0.04, -0.25], [0.195, 0]]
     neck: { r: 0.07, steps: [3, 1] }
-  hind: { type: pillar, y: -0.3, x: 0.066, top: 0.76, r: 0.064, swing: 0.05 }
-  fore: { type: pillar, y: 0.11, x: 0.066, top: 0.76, r: 0.062, swing: 0.05, phase: 1 }
+  # Stout legs that thin less above the foot than a slender hoofed leg does, and are narrower across at the top than
+  # fore and aft, so that where the body tapers past them they stay inside its flank.
+  hind: { type: pillar, y: -0.3, x: 0.066, top: 0.76, r: 0.064, swing: 0.05, across: [0.64, 1], column: 0.4 }
+  fore: { type: pillar, y: 0.11, x: 0.066, top: 0.76, r: 0.062, swing: 0.05, phase: 1, across: [0.64, 1], column: 0.4 }
   head:
     type: head
     at:

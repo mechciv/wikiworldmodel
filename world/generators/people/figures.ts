@@ -125,14 +125,28 @@ export function drawPerson(m: Mesh, height: number, variant: number, detail: 0 |
   clothed();
   const standing = p.hip[1] > 0.4;
   if (standing) {
-    // A robe falls to the ground and hides the feet; a tunic to the knee; a wrap covers the hips.
-    const hem = p.dress === 'robe' ? -0.015 : p.dress === 'tunic' ? 0.3 : 0.36;
+    // A robe falls to the ankle close by, and to the ground from a way off, where no feet are drawn; a tunic to the
+    // knee; a wrap covers the hips.
+    const hem = p.dress === 'robe' ? (detail === 0 ? 0.055 : -0.015) : p.dress === 'tunic' ? 0.3 : 0.36;
     const spread = p.dress === 'robe' ? 0.14 : 0.115;
     const stride = p.foot2 ? (p.foot[1] + p.foot2[1]) * 0.5 * H : 0;
     const top = hip[2] + 0.03 * H;
     const fall = (f: number, w: number, d: number) => ({ x: 0, y: hip[1] + stride * 0.5 * f, z: top + (hem * H - top) * f, w: w * H, h: d * H });
     // It hangs from the hips, a little fuller at its hem, and deeper where a stride pulls it.
     loft(m, [fall(0, 0.094, 0.068), fall(0.3, 0.1, 0.076), fall(0.7, 0.094 + (spread - 0.094) * 0.7, 0.08 + Math.abs(stride / H) * 0.3), fall(1, spread, 0.09 + Math.abs(stride / H) * 0.5)], n + 4, true);
+    // Under a robe's hem, close by, the feet it stands on: an ankle and a foot each, on the ground. Where it walks they
+    // stride as the feet of legs from its hips would, the ankle a little less far than the foot.
+    if (p.dress === 'robe' && detail === 0) {
+      skinTone();
+      for (const side of [1, -1]) {
+        const foot = at(side < 0 && p.foot2 ? p.foot2 : p.foot, side);
+        const first = side > 0;
+        const ankle = hip[2] > foot[2] ? Math.max(0, 1 - (0.07 * H) / (hip[2] - foot[2])) : 1;
+        limb(m, foot[0], foot[1], foot[2] + 0.07 * H, foot[0], foot[1], foot[2], 0.03 * H, 0.027 * H, n, strides ? [code(first, ankle), code(first, 1)] : undefined);
+        limb(m, foot[0], foot[1] - 0.02 * H, foot[2] - 0.012 * H, foot[0], foot[1] + 0.075 * H, foot[2] - 0.016 * H, 0.026 * H, 0.02 * H, 4, strides ? [code(first, 1), code(first, 1)] : undefined);
+      }
+      clothed();
+    }
   } else limb(m, hip[0], hip[1] - 0.02 * H, hip[2] + 0.005 * H, 0, hip[1] + 0.07 * H, hip[2] + 0.05 * H, 0.1 * H, 0.09 * H, n + 2);
   // The arms.
   for (const side of [1, -1]) {

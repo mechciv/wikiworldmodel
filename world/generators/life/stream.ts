@@ -15,7 +15,9 @@ import { freshOf, noise, type Waters } from './land.ts';
 import { GroundSort } from './sorting.ts';
 import { drawStone, drawWood, shedsWood, STONE_FINE, STONE_VARIANTS, WOOD, WOOD_SEEDS, woodLength } from './strewn.ts';
 import { drawDwelling, HOUSE_VARIANTS, houseSize, type HouseDetail } from '../people/dwellings.ts';
-import { LandUseMap, landUseMask, makeSettlement, type SettlementPlan } from '../people/settlement/v5.ts';
+import { LandUseMap, landUseMask, makeSettlement, type LandUse, type SettlementParams, type SettlementPlan } from '../people/settlement/v6.ts';
+import { drawCrop, sow, type CropParams } from '../people/crops.ts';
+import { PLOT, PLOT_LOOK, plotAt, plotStyle, type PlotStyle } from '../../../core/plots.ts';
 import { drawWork, smallWork, WORK_VARIANTS, workTop } from '../people/works.ts';
 import { personStride } from '../people/figures.ts';
 
@@ -25,8 +27,10 @@ export const HOUSE = 0x4000;
 export const WORK = 0x6000;
 /** Where the animals people kept start, above the works: each kind the scene's husbandry names (ScenePeople.kept). */
 export const KEPT = 0x7000;
-/** Where what lies strewn on the ground starts, above the kept animals: a stone, in each of its shapes (strewn.ts). */
-export const STREWN = 0x7800;
+/** The crop of the fields, above the kept animals: one kind, which nobody names (world/generators/people/crops.ts). */
+export const CROP = 0x7800;
+/** Where what lies strewn on the ground starts, above the fields' crop: a stone, in each of its shapes (strewn.ts). */
+export const STREWN = 0x7c00;
 
 export const INSTANCE_STRIDE = 28;
 
@@ -225,7 +229,12 @@ class TileRows {
   proto = new Uint32Array(256);
   tint = new Uint16Array(256);
   count = 0;
+  /** A thing turned by `turn` radians about the vertical. */
   add(x: number, y: number, z: number, scale: number, turn: number, keep: number, reach: number, proto: number, tint: number): void {
+    this.put(x, y, z, scale, Math.sin(turn), Math.cos(turn), keep, reach, proto, tint);
+  }
+  /** A thing whose own +y goes to (fx, fy): not a unit's length for a crop, whose mesh is stretched along its row by it. */
+  put(x: number, y: number, z: number, scale: number, fx: number, fy: number, keep: number, reach: number, proto: number, tint: number): void {
     if (this.count === this.proto.length) {
       const f = new Float32Array(this.f.length * 2);
       f.set(this.f);
@@ -242,8 +251,8 @@ class TileRows {
     this.f[o + 1] = y;
     this.f[o + 2] = z;
     this.f[o + 3] = scale;
-    this.f[o + 4] = Math.sin(turn);
-    this.f[o + 5] = Math.cos(turn);
+    this.f[o + 4] = fx;
+    this.f[o + 5] = fy;
     this.f[o + 6] = keep;
     this.f[o + 7] = reach;
     this.proto[this.count] = proto;
@@ -254,6 +263,9 @@ class TileRows {
     return { f: this.f.slice(0, this.count * COVER_ROW), proto: this.proto.slice(0, this.count), tint: this.tint.slice(0, this.count), count: this.count, used: 0 };
   }
 }
+
+/** Between which shares of field in the land's use a crop goes from none standing to all of it: the generator's choice. */
+const CROP_FROM = [0.45, 0.8];
 
 /** The bit of a plant's variant that says it is drawn a little way off (plants.ts, `coarse`). */
 const COARSE = 4;
@@ -306,6 +318,9 @@ export class SceneStream {
   /** each cell's kept animals, by their place in the plan; and each kind's tone */
   private keptCells = new Map<number, number[]>();
   private keptTones: number[] = [];
+  /** how the fields' crop is drawn, where the scene's people have fields and their generator says how; and their plots */
+  readonly crops?: CropParams;
+  private plots?: PlotStyle;
 
   constructor(readonly spec: SceneSpec, private budget: Budget = FULL_BUDGET) {
     this.params = spec.generator.params as unknown as LivingParams;
@@ -328,6 +343,8 @@ export class SceneStream {
       this.people = makeSettlement(spec, this.ground, water, EXTENT, this.params.animals.routines);
       const use = new LandUseMap(this.people, this.ground, water, this.look.seed);
       this.landUse = use;
+      this.crops = (spec.people.generator.params as unknown as SettlementParams).crops;
+      this.plots = plotStyle(this.people.style);
       clearing = (x, y) => {
         const u = use.at(x, y);
         return Math.max(u.crop, u.pasture * 0.85, u.yard);
@@ -452,6 +469,11 @@ export class SceneStream {
     return this.keptBase() + (this.spec.people?.kept?.length ?? 0);
   }
 
+  /** The entity of the fields' crop: after the paths. */
+  cropEntity(): number {
+    return this.pathEntity() + 1;
+  }
+
   /** The water: ribbons along the world's rivers, or the place's one sheet; with each vertex's flow and depth. */
   water(): { vertices: Float32Array; indices: Uint32Array; flow: Float32Array } {
     if (this.waters.paths) return waterRibbons(this.waters);
@@ -477,6 +499,15 @@ export class SceneStream {
       const m = new Mesh(variant & STONE_FINE ? 1024 : 256);
       m.entity = this.strewnEntity();
       drawStone(m, variant);
+      const { vertices, indices } = m.arrays();
+      this.meshes.set(proto, { tris: indices.length / 3 });
+      return { proto, vertices, indices };
+    }
+    if (taxon >= CROP) {
+      // The crop of the fields: a clump of it, or a length of a row, the same wherever it stands.
+      const m = new Mesh(64);
+      m.entity = this.cropEntity();
+      drawCrop(m, this.crops!, variant);
       const { vertices, indices } = m.arrays();
       this.meshes.set(proto, { tris: indices.length / 3 });
       return { proto, vertices, indices };
@@ -543,9 +574,9 @@ export class SceneStream {
     return { proto, vertices, indices };
   }
 
-  /** The entity of what lies strewn on the ground and is no taxon's, its stones: after the paths. */
+  /** The entity of what lies strewn on the ground and is no taxon's, its stones: after the fields' crop. */
   strewnEntity(): number {
-    return this.pathEntity() + 1;
+    return this.cropEntity() + 1;
   }
 
   /** The entity of the first kind of kept animal: after the taxa, the houses' forms and the works' pieces. */
@@ -946,8 +977,11 @@ export class SceneStream {
   private groundCover(v: LifeView, buckets: Map<number, Bucket>, spendMs: () => boolean): { clumps: number; pending: number } {
     const c = this.params.plants.clumps;
     const rings = this.grids;
-    // Nothing to sow: no low plants in the scene, no stones in its ground and no wood under its trees.
-    if (!c || (this.noUnder && !rings.some((g) => g.stones || g.trunks || g.branches))) return { clumps: 0, pending: 0 };
+    // Nothing to sow: no low plants in the scene, no crop in its fields, no stones in its ground and no wood under its
+    // trees.
+    const sows = !!this.crops && !!this.landUse;
+    if (!c || (this.noUnder && !sows && !rings.some((g) => g.stones || g.trunks || g.branches))) return { clumps: 0, pending: 0 };
+    const cropEntity = this.cropEntity();
     const [ex, ey, ez] = v.eye;
     const gz = this.ground.at(ex, ey);
     const t = Math.tan(v.fov / 2);
@@ -957,6 +991,10 @@ export class SceneStream {
     let n = 0;
     let pending = 0;
     this.coverClock++;
+    // Whether the scene's own grid is drawn: from high up it is not, and the wider grid's lengths of a crop's rows
+    // then stand everywhere; with it, they take over from its plants where those thin.
+    const R0 = rings[0].reach;
+    const ownOn = ez - gz <= R0 * 0.6;
     for (let ring = 0; ring < rings.length && n < c.most; ring++) {
       const { step, reach: R } = rings[ring];
       // From high enough up the clumps would be too small to see.
@@ -1007,7 +1045,7 @@ export class SceneStream {
               // The eye does not stand inside a stone; and a big one has its finer mesh only where it is big on the screen.
               if (d < size) continue;
               if (mesh & (STONE_FINE << 2) && size * K < STONE_FINE_PX * Math.sqrt(d * d + (f[o8 + 2] - ez) * (f[o8 + 2] - ez))) mesh &= ~(STONE_FINE << 2);
-            } else if (((proto[q] >> 2) & 63) < FALLEN) {
+            } else if (kind >= CROP || ((proto[q] >> 2) & 63) < FALLEN) {
               // Where the eye stands the ground is trodden: no clump within half a pace of it, and small ones just beyond.
               const trodden = d < COVER_TROD[1] ? (d - COVER_TROD[0]) / (COVER_TROD[1] - COVER_TROD[0]) : 1;
               if (trodden <= 0) continue;
@@ -1016,6 +1054,10 @@ export class SceneStream {
             // Fewer over the last third of the way out: each has its own place in that thinning.
             const keep = d < R * 0.66 ? 1 : 1 - (d - R * 0.66) / (R * 0.34);
             if (f[o8 + 6] >= keep) continue;
+            // A length of a crop's row stands where the plants of the scene's own grid do not: beyond them, and among
+            // them as they thin.
+            const crop = kind >= CROP && kind < STREWN;
+            if (crop && ring > 0 && ownOn && d < R0 && f[o8 + 6] < (d < R0 * 0.66 ? 1 : 1 - (d - R0 * 0.66) / (R0 * 0.34))) continue;
             const reach = f[o8 + 7];
             const dz = f[o8 + 2] - ez;
             const fwd = dx * v.forward[0] + dy * v.forward[1] + dz * v.forward[2];
@@ -1042,8 +1084,8 @@ export class SceneStream {
             b.f[o + 3] = size;
             b.f[o + 4] = f[o8 + 4];
             b.f[o + 5] = f[o8 + 5];
-            // A stone is the ground's own; a clump, and the wood a tree shed, its taxon's.
-            b.s[b.n * 14 + 12] = kind >= STREWN ? strewn : kind + 1;
+            // A stone is the ground's own, and a crop the fields'; a clump, and the wood a tree shed, its taxon's.
+            b.s[b.n * 14 + 12] = kind >= STREWN ? strewn : crop ? cropEntity : kind + 1;
             b.s[b.n * 14 + 13] = tint[q];
             b.n++;
             n++;
@@ -1196,7 +1238,10 @@ export class SceneStream {
 
   /**
    * One tile of a grid of the ground's cover: every clump that stands in it, and every stone and piece of fallen wood
-   * that lies in it, wherever the eye is.
+   * that lies in it, wherever the eye is. Where the scene's people have fields, a plot under a crop or the plough has
+   * none of what grows wild, and the crop itself in rows (world/generators/people/crops.ts): a plant at a time on the
+   * scene's own grid, a length of row at a time on the wider one, and none on the finest, which is there to close a
+   * sward.
    */
   private coverTile(ring: number, grid: CoverGrid, ti: number, tj: number): CoverTile {
     const { step, size } = grid;
@@ -1204,6 +1249,8 @@ export class SceneStream {
     const seed = this.look.seed + ring * 97;
     const rows = new TileRows();
     const sort = this.sort;
+    const fields = this.crops && this.plots && this.landUse ? { crop: this.crops, plots: this.plots, use: this.landUse } : undefined;
+    const use: LandUse = { crop: 0, pasture: 0, yard: 0, paddy: 0 };
     const wood = grid.trunks || grid.branches ? this.params.strewn?.wood : undefined;
     for (let j = tj * COVER_TILE; j < (tj + 1) * COVER_TILE; j++) {
       for (let i = ti * COVER_TILE; i < (ti + 1) * COVER_TILE; i++) {
@@ -1229,8 +1276,16 @@ export class SceneStream {
         const sward = closed < 0 ? 0 : closed > 1 ? 1 : closed;
         const low = share * (patch.thick + (1 - patch.thick) * sward * (patch.open ? 0.5 : 0.85));
         if (u >= low) continue;
-        // Among the houses the ground is trodden: little grows where feet go.
-        if (this.landUse && hash2(i, j, seed + 78) < this.landUse.at(x, y).yard * 0.9) continue;
+        if (this.landUse) {
+          this.landUse.at(x, y, use);
+          // Among the houses the ground is trodden: little grows where feet go.
+          if (hash2(i, j, seed + 78) < use.yard * 0.9) continue;
+          // In a plot under a crop or the plough what grows wild is weeded out: it keeps the balks and the fallow.
+          if (fields && hash2(i, j, seed + 82) < (use.crop - CROP_FROM[0]) / (CROP_FROM[1] - CROP_FROM[0])) {
+            const plot = plotAt(x, y, fields.plots);
+            if (plot.state !== PLOT.fallow && plot.edge > PLOT_LOOK.balk * 0.5) continue;
+          }
+        }
         // Most of a patch is of its own kind, the same on every grid, and the rest whatever else grows here.
         const own = hash2(i, j, seed + 80) < COVER_PATCH.own;
         const k = this.plan.underAt(x, y, cover, own ? patch.kind : hash2(i, j, seed + 74));
@@ -1251,6 +1306,20 @@ export class SceneStream {
         // Where it stands in the thinning at its grid's edge: kept while this is under what is kept there.
         rows.add(x, y, this.ground.at(x, y), scale, hash2(i, j, seed + 76) * TAU, u / low, 2, protoOf(k, shade & 3, CLUMP), shade >> 2);
       }
+    }
+    // The fields' crop: wherever it stands, the same from every grid's tiles; as tall as its plot's stand, its mesh's
+    // own length along its row, and as wide whatever its height.
+    const far = size > 1;
+    if (fields && (ring === 0 || far)) {
+      const tile = step * COVER_TILE;
+      sow(ti * tile, tj * tile, (ti + 1) * tile, (tj + 1) * tile, fields.plots, fields.crop, far, this.look.seed + 131, (s) => {
+        fields.use.at(s.x, s.y, use);
+        // The crop thins out where the fields do, at their edge; among the houses, where the ground is trodden and
+        // little of it is field, none stands.
+        const share = (use.crop - CROP_FROM[0]) / (CROP_FROM[1] - CROP_FROM[0]);
+        if (!(share > 0) || s.u >= share) return;
+        rows.put(s.x, s.y, this.ground.at(s.x, s.y), s.tall, s.dx / s.tall, s.dy / s.tall, s.u / Math.min(1, share), 2, protoOf(CROP, s.variant, CLUMP), s.tint);
+      });
     }
     return rows.tile();
   }

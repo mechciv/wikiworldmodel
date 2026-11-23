@@ -1,4 +1,4 @@
-// The settlement generator, version 4 (docs/HUMAN-LANDSCAPE.md): the anonymous human landscape of a scene. From the
+// The settlement generator, version 6 (docs/HUMAN-LANDSCAPE.md): the anonymous human landscape of a scene. From the
 // people part of a scene's spec it lays out where people lived, how many houses, of what kind, and the fields and
 // pastures around them, in the scene's local metres. Nobody recorded any of these houses: how many there are follows
 // HYDE's people through the anthromes, and the cities of the lists and of the world's records where they name one; what
@@ -41,6 +41,20 @@
 //     starts is what version 3 made. No record says anything of any of it: who walks, where to, how fast and how long
 //     they stay are the generator's.
 //
+// Version 5 (docs/plans/RENDERING.md, the fidelity pass): a figure's body and dress, and what houses are built of, are
+// drawn afresh, on the legs and arms that version 4 set walking; where everything stands is what version 4 made.
+//
+// Version 6 (docs/plans/RENDERING.md, the fidelity pass):
+//   - A house close by has the relief its claims support (dwellings.ts): a wall that is built up is as thick as its
+//     kind where a door or a window is cut through it, with a lintel, a sill and a threshold; a wall of earth, turf or
+//     dry stone leans in as it rises; a flat roof's walls rise past its deck as its parapet, under a coping, with the
+//     ends of its beams through them. From a way off a house is what version 5 drew.
+//   - A field under a crop has the crop standing on it close by, in rows along its plot (crops.ts): one plain stand,
+//     the same everywhere, which names no crop. The plots are laid out by core/plots.ts, for the ground's colour and for
+//     what is sown alike.
+//   - A figure in a robe has feet under its hem, close by, which stride with it as it walks.
+//   Where every house, work, animal and path stands, and every way that is walked, is what version 5 made.
+//
 // Everything is seeded by the world's 5′ cells and the anthromes' step, not by the scene, so two scenes that overlap put
 // their settlements in the same places: only the ground they stand on, which is the scene's, can move one a little.
 import { fillDwelling, homesteadOf, houseSize, HOUSE_VARIANTS, outbuildingSpec, type Homestead, type HouseDims, type OutbuildingParams } from '../dwellings.ts';
@@ -55,10 +69,11 @@ import { routineOf, wayBeside, wayFor, type Pace, type RoutineParams } from '../
 import { personGoes, PERSON_HIP } from '../figures.ts';
 import { PIECE, towered, towerSide, WORK_VARIANTS, type WallWord, type WorkSpec } from '../works.ts';
 import { ENCLOSURE_SIZE } from '../yard.ts';
+import type { CropParams } from '../crops.ts';
 import { MAT } from '../../city/kit.ts';
 
 export const GENERATOR = 'gen:people/settlement';
-export const VERSION = 5;
+export const VERSION = 6;
 
 const EARTH = 6371000;
 const DEG = PI / 180;
@@ -192,6 +207,11 @@ export interface SettlementParams {
    * most lengths a scene draws, laid from its middle outward
    */
   enclosures?: { run: number; gates: number; unstated: Exclude<EnclosureWord, 'none'>; most: number };
+  /**
+   * The crop of the fields, drawn close by as plants in rows along each plot (crops.ts). Which crop grew is nobody's
+   * record here, and none is named: these say only how the one plain stand is drawn; without them none is
+   */
+  crops?: CropParams;
   boats?: { length: number; beam: number; side: number; reach: number; depth: number; most_in_settlement: number };
   paths?: { width: number; reach: number; each: number; most_km: number; wander: number; patterns: Pattern[] };
   /** the most houses a scene draws: past it, each house stands for more people, and the plan says how many */

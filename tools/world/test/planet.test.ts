@@ -4,7 +4,7 @@
 import { describe, expect, it } from 'vitest';
 import { chosenClaim, coverAt, lookAt, type PlanetFile, type StateClaim } from '../../../core/planet.ts';
 import type { FeatureTime } from '../../../core/tileset.ts';
-import { globeLook } from '../../../viewer/src/gl/globe.ts';
+import { globeLook, PLAIN_LOOK } from '../../../viewer/src/gl/globe.ts';
 import { apart, drawn } from './drawn.ts';
 
 const span = (start: number, end: number | null): FeatureTime => ({
@@ -171,7 +171,7 @@ describe('how the globe draws the planet between its states', () => {
     expect(molten.clouds!.base).toBeGreaterThan(0.5);
     const wet = at(FILE, 300);
     expect([wet.surface, wet.molten, wet.ember]).toEqual([1, 0, 0]);
-    expect(wet.clouds).toEqual({ opacity: 0.78, base: 0, tint: [1, 1, 1], glow: [0, 0, 0] });
+    expect(wet.clouds).toEqual(PLAIN_LOOK.clouds);
   });
 
   it('spreads a magma ocean\'s crust as far as its passage has gone, and dims the glow under its steam with it', () => {
@@ -198,7 +198,7 @@ describe('how the globe draws the planet between its states', () => {
     const clear = at(PASSING, 220);
     expect(veiled.clouds!.base).toBeGreaterThan(thinning.clouds!.base);
     expect(thinning.clouds!.base).toBeGreaterThan(0);
-    expect([clear.clouds, clear.rim, clear.halo]).toEqual([{ opacity: 0.78, base: 0, tint: [1, 1, 1], glow: [0, 0, 0] }, [0.25, 0.45, 0.85], [0.22, 0.42, 0.95]]);
+    expect([clear.clouds, clear.rim, clear.halo]).toEqual([PLAIN_LOOK.clouds, PLAIN_LOOK.rim, PLAIN_LOOK.halo]);
     expect([veiled.surface, thinning.surface, clear.surface]).toEqual([1, 1, 1]);
   });
 
@@ -218,7 +218,7 @@ describe('how the globe draws the planet between its states', () => {
     const g = at(drying, 25);
     expect([g.surface, g.surfaceTo, g.surfaceMix, g.molten]).toEqual([1, 4, 0.25, 0]);
     // The clouds thin out with the water.
-    expect(g.clouds!.opacity).toBeCloseTo(0.78 * 0.75);
+    expect(g.clouds!.opacity).toBeCloseTo(PLAIN_LOOK.clouds!.opacity * 0.75);
   });
 
   it('changes at no moment all at once, from the first rock vapour to the oceans', () => {

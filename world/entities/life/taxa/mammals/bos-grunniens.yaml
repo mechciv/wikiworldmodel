@@ -36,10 +36,12 @@ claims:
             - [0.09, 1.12, 0.22, 0.146]
             - [0.16, 1.13, 0.27, 0.126]
             - [0.205, 1.08, 0.36, 0.102]
+          widest: [[-0.42, 0], [-0.372, -0.55], [0.09, -0.55], [0.205, -0.2]]
+          under: [[-0.42, 0], [-0.372, 0.6], [0.09, 0.6], [0.205, 0.2]]
           neck: { r: 0.075, steps: [4, 2] }
         rump: { at: [0, -0.372, 0.625], r: [0.143, 0.105, 0.19] }
-        hind: { top: 0.7, knee: 0.46, ankle: 0.27, r: 0.062 }
-        fore: { top: 0.5, r: 0.038 }
+        hind: { top: 0.7, knee: 0.46, ankle: 0.27, x: 0.092, r: 0.068, across: [0.7, 1], column: 0.4, muscle: 0 }
+        fore: { top: 0.5, x: 0.088, r: 0.046, across: [0.8, 1], column: 0.35, muscle: 0 }
         head:
           at:
             stand: { y: 0.345, z: 0.8, pitch: 0.9 }
@@ -51,7 +53,9 @@ claims:
       A machine's reconstruction of a domestic yak: the ox it starts from, changed as Wikipedia's article and the
       account of Bos grunniens on the Animal Diversity Web describe it: long hair hanging lower than the belly, so
       that the legs look short, a hump over the shoulders, horns that sweep out from the sides of the head and up, a
-      head carried low, and a long tail haired like a horse's from its root. Its proportions are a drawing's, and no
+      head carried low, and a long tail haired like a horse's from its root. The hanging hair is drawn as the body's
+      own section, widest near its foot and flat beneath, as a skirt; the legs under it are stouter than the ox's, set
+      as far apart as the skirt's sides, and have no muscle drawn where they go up into it. Its proportions are a drawing's, and no
       measurements of any animal. Only compared with its sheet.
   length:
     prop: body_length

@@ -395,9 +395,48 @@ plants, the bodies, the people and what they build, and raised each by the means
   restated the old proportions were refitted with them: what only repeated the old plan was dropped, and what makes
   the taxon itself was set on the new body.
 - **People and what they build.** A figure's body is wider than it is deep, its head longer than wide, with a nose
-  and hair; a robe falls to the ground; cloth hangs in folds. What houses are built of stands in relief, each
-  material by a height of its own, and what is of earth or stone takes the scans' grain. `gen:people/settlement` is
-  version 5: version 4 set its people walking.
+  and hair; cloth hangs in folds. What houses are built of stands in relief, each material by a height of its own,
+  and what is of earth or stone takes the scans' grain. `gen:people/settlement` was version 5 with these, on the
+  legs that version 4 had set walking, and is version 6 with the three that follow.
+- **A house has the relief its claims support, close by.** Its shapes were plain boxes with a dark patch for a door
+  ([dwellings.ts](../../world/generators/people/dwellings.ts)). At the finest of its three details a wall that is built
+  up, of earth, brick, stone, timber or daub, is now drawn face by face with its openings cut through it: a door or a
+  window is set back by the wall's thickness, which shows at its sides, its head and its sill, under a lintel of timber
+  bedded in the wall, a door on a threshold with its leaf shut, standing ajar into the dark of the room, or out of
+  sight. A wall of mudbrick, rammed earth, cob, turf or dry stone leans in as it rises, its foot the thicker. A flat
+  roof's walls rise past its deck as its parapet, under a coping, with the deck seen within them from above and the
+  ends of its beams through them below; a court's deck stands out over the court as eaves. A round house's door is cut
+  through a flat piece of its wall. How thick each kind of wall is, and how far it leans, is the generator's look
+  (`BUILT`), as a roof's pitch already was: no tradition's record states it, and nothing was added that a record would
+  have to state, so an empty yard stays empty. A wall that is a covering on a frame, thatch, mats, hides, felt, has
+  no thickness to cut, and its door stays on its face.
+- **A field under a crop is plants, close by.** The fields were flat colours on the ground. The plots are now laid out
+  once ([core/plots.ts](../../core/plots.ts)), by whole-number hashes and sines that a shader and a worker reckon alike,
+  for the ground's colour and for what is sown on it. Where the land use has fields and a plot is under a crop, the
+  crop stands on it in rows along the plot, clear of its balks, sown through the ground's cover
+  ([crops.ts](../../world/generators/people/crops.ts)): a plant at a time out to the cover's own reach, a length of row
+  at a time on its wider grid out to 170 m, the colour of the field beyond. Between the rows close by the ground is
+  tilled earth; in a plot under a crop or the plough what grows wild is weeded out, and keeps the balks and the fallow.
+  Which crop grew is not known where no record says, and none is invented: it is one plain stand of upright blades, of
+  two tiles the atlas of leaves already had, on a material of its own that takes the plot's colour, ripe or green,
+  and not the wild land's tones. It has an entity of its own, and a click on it says that it is the generator's and
+  names no crop.
+- **A robed figure stands on feet.** Under a robe no legs were drawn, and a robe that reached the ground seemed to
+  hover over it. Close by its hem stops at the ankle, over an ankle and a foot each side, on the ground; where the
+  figure walks they stride as the feet of the legs that are drawn do.
+
+  These three were judged on the look book's `hamlet-house`, `hamlet` and `village-house`, the last a hamlet of
+  England in 1300 in the house its tradition's records describe; and the feet on the sheet of figures
+  (`npm run world -- dwelling-sheet work:person`), since the figure that stands before the door in `hamlet-house`
+  wears no robe. What they cost, at 1600 × 900 on an Apple M3 Max, which is not the reference GPU: a frame's total was
+  as unsteady from load to load as it has been on this machine, before and after (19.6 and 23.4 ms, 28.8 and 28.9 ms,
+  32.0 and 35.9 ms, the passes the change does not touch moving as much as those it does), and all three views were
+  over the budget by that measure before the change as after it. What holds within a load is one pass against
+  another: the meshes against the resolve went from 1.06 to 1.20 on `hamlet-house`, from 1.14 to 1.07 on `hamlet`, and
+  from 1.70 to 1.55 on `village-house`, where rows of a crop took the place of the wild cover's clumps. The triangles
+  drawn went from 12 to 144 thousand, from 8 to 72 thousand, and from 1.63 to 1.43 million. Nothing was thinned: the
+  crop is drawn within the cover's own budget of clumps, and a house's relief only at its finest detail. The lighter
+  way draws none of the three.
 - **Stones stand on stony ground.** Where a scene's substrate has gravel ([core/substrate.ts](../../core/substrate.ts)),
   stones stand on its ground close by, as meshes: eight shapes of a rounded cobble, an angular block, a slab and a
   pointed stone ([strewn.ts](../../world/generators/life/strewn.ts)), each a ball swollen, cut by planes and squashed,
@@ -450,13 +489,25 @@ and 4.9 and 5.4 ms on `forest-floor`. Whole frames were too unsteady to say more
 ms before and after alike: over the 16 ms target either way, on a machine that is not the reference GPU, on which
 none of this has been measured.
 
-*Not done:* parallax in the ground's grain; impostors; a house's yard where no tradition says what stood in it;
-crops as plants; a house's own shape, which is still a plain box. Stones stand only where a substrate says the ground
-has gravel: the gravel the renderer lays on a climate's bare slopes and on the bars of a dry bed, and the rock of a
-steep face, have no stones standing on them, and there is no scree. Fallen wood lies level, and has no fungi, no
-hollow and no root plate; a fallen frond is not drawn. Neither stones nor wood are in the scene's fingerprint, which
-proves its ground, a cell and a mesh. The lighter way draws none of this: its plants are the plain shapes they were,
-and it has no stones and no fallen wood, though what its ground bears is the same.
+*Not done:* parallax in the ground's grain; impostors; a house's yard where no tradition says what stood in it, which
+stays empty. Stones stand only where a substrate says the ground has gravel: the gravel the renderer lays on a
+climate's bare slopes and on the bars of a dry bed, and the rock of a steep face, have no stones standing on them, and
+there is no scree. Fallen wood lies level, and has no fungi, no hollow and no root plate; a fallen frond is not drawn.
+Neither stones nor wood are in the scene's fingerprint, which proves its ground, a cell and a mesh. The lighter way
+draws none of this: its plants are the plain shapes they were, it has no stones and no fallen wood, though what its
+ground bears is the same, its houses' doors lie on their walls, and its fields are colours on the ground.
+
+*Not done, of houses:* a house walked into under its gable or a hood, one with a rounded end, a ring of rooms round a
+court, a front cut in the earth and every tent keep their openings on the face of their walls. A wall has no inside:
+a door ajar shows the dark, not a room. A roof of thatch or tile is the slab with thick edges it was, with no rafters'
+feet or courses at its eaves, and a wall of timber no posts standing proud of its panels. From a middle distance a
+house is what it was, so that as the eye nears one its door steps back into its wall.
+
+*Not done, of fields:* every plot lies north and south, as the ground's plots always did; a crop is green or ripe by
+its plot and not by the month, and stands under snow; a field has no stubble, stooks or weeds among its rows; a crop a
+record names is not drawn as itself, since no record of a field's crop is read. Rows are the generator's look: most
+grain was sown broadcast. A robe does not swing with the feet that stride under it: its cloth has no paces, so a
+foot steps out past a hem that hangs still.
 
 *What the plans could not say,* as those who redrew them found: a section that is not an ellipse (a flat belly, a
 pear-shaped body); a leg narrower across than fore and aft, which a thigh is; a part that hangs on another part's end,
@@ -464,6 +515,29 @@ so that a turtle's head has eyes and a crocodile a line to its jaw; a row of pla
 frill with thickness at its rim; a crest that turns with the head it stands on; one ring of a body changed without
 writing them all. Forms with a source of their own were left as they were, among them most birds, whose thighs still
 hang under their bellies.
+
+*What they can say now* ([FORMS.md](../FORMS.md)), each a field that changes nothing where it is not written: a
+section's shape (`widest`, `under`, `over`); a leg's width across and how much of a column it is (`across`,
+`column`); a part on another part's end (`on: <part>`) or on its skin (`ride: <part>`), which goes where a child's
+rings or joints put it; plates that lean and items that stand off a skin as it faces (`lean`); an edge to a frill
+or a sheet (`rim`); a lump that turns with its frame (`turn`); and rows of a list changed by their numbers. They
+were used where the sheets were worst. The elephants', the mammoth's and the heavy hoofed plan's legs are columns
+narrow across at the top, under barrels widest below their middles, so that no leg's top stands out of a flank. The
+sheep, the pig, the yak and the bison stand on stouter legs set as far apart as their bodies' sides, the sheep's
+fleece and the yak's skirt of hair widest low. A turtle's eyes and the line of its mouth ride its neck, and a
+crocodile's jaw line its snout, each on whatever head a family below has, sourced or not. The horned dinosaurs'
+shield has a roll along its edge, and the duck-bills' crests turn with their heads.
+
+*What is left.* The birds' thigh is the muscle a leg is given where it leaves the body, which hangs under a belly
+higher than the plan's: `muscle: 0` on the `bird` plan's legs takes it away on every bird below that does not say
+otherwise, the sourced ones among them, with no claim touched, and leaves a drumstick that is still the colour of
+the leg and should be feathered. It was tried on a sheet and not written, since it changes every bird. The ox, the
+water buffalo, the goat and the plain pigs and peccaries still have the pad of a haunch standing out of a narrow
+flank, as the bison had. The stegosaur's plates still stand on a straight line under its back's arch, and the
+crocodile's scutes on straight lines over its back: a row that rides would follow them, but the four records below
+the crocodile that restate its neck's row and its eyes in the body's frame each cite a source, and would have to be
+written again with it. The gharial's and the long-snouted kin's eyes and neck scutes float over their lower skulls
+for the same reason. Domes, brows and head shields on other plans still lie level when a head pitches.
 
 ## The standard
 
@@ -478,7 +552,10 @@ against the sky. Each kind of thing is held to its own test, on the look book's 
   leaves it.
 - **An animal** reads as its group from its side at any distance, by its back line, its neck, its head and its legs:
   its sheet (`form-sheet`) is looked at against a skeletal reconstruction whenever its plan is touched.
-- **A person and a house** stand on the ground, and cast a shadow that meets them.
+- **A person and a house** stand on the ground, and cast a shadow that meets them. A house's door and windows are set
+  in the thickness of its wall, and nothing stands by it that its records do not say stood there.
+- **A field** under a crop is plants close by and the colour of those plants from afar; what the crop was is not said
+  where no record says.
 - **What lies on the ground** lies in it: a stone's foot is banked with the ground's own colour and a log's underside
   is dark where it meets the earth. A stone is of what the ground's own stones are drawn of, and no two beside each
   other are alike; fallen wood is of a tree that stands over it.

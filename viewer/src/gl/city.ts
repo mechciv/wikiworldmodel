@@ -315,6 +315,8 @@ export class CityRenderer {
   private fields: WebGLTexture;
   private fieldsBox: [number, number, number, number] = [0, 0, 1, 1];
   private fieldStyle: [number, number, number, number] = [0, 1, 0, 0];
+  /** how far from the eye a field's crop is drawn plant by plant, in rows, m: 0 where it is not */
+  private sown = 0;
   private ringVao: WebGLVertexArrayObject;
   private ringCount = 0;
   private fullCount = 0;
@@ -950,7 +952,7 @@ void main() {
    * What people made of the ground (gen:people/settlement): R crops, G pasture, B yards and lanes, A flooded paddies; and how
    * the plots of its fields are drawn: their size in m, how much longer than wide, and their kind. Without it, none.
    */
-  setFields(data: Uint8Array | null, size: number, box: [number, number, number, number], style: { plot: number; aspect: number; kind: number }): void {
+  setFields(data: Uint8Array | null, size: number, box: [number, number, number, number], style: { plot: number; aspect: number; kind: number; sown?: number }): void {
     const gl = this.gl;
     gl.activeTexture(gl.TEXTURE0 + UNIT.fields);
     gl.bindTexture(gl.TEXTURE_2D, this.fields);
@@ -964,6 +966,7 @@ void main() {
     gl.activeTexture(gl.TEXTURE0);
     this.fieldsBox = box;
     this.fieldStyle = [style.plot, style.aspect, style.kind, data ? 1 : 0];
+    this.sown = data ? style.sown ?? 0 : 0;
   }
 
   /**
@@ -1320,6 +1323,7 @@ void main() {
       uWaterBox: this.waterBox,
       uLitter: this.litter,
       uClumps: this.clumps,
+      uCrops: this.fast ? 0 : this.sown,
       uMaterials: this.materials.ready ? 1 : 0,
       uLitterTile: this.litterTiles,
       uLitterNext: this.litterNext,

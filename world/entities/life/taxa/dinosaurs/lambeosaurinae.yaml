@@ -13,12 +13,13 @@ claims:
     prop: body_form
     value:
       parts:
-        crest: { type: lump, on: head, tint_add: 18, at: [0, 0.045, 0.034], r: [0.012, 0.042, 0.036], sides: [10, 5], bands: [6, 3] }
+        crest: { type: lump, on: head, turn: true, tint_add: 18, at: [0, 0.045, 0.034], r: [0.012, 0.042, 0.036], sides: [10, 5], bands: [6, 3] }
     unsourced: >-
       A machine's reconstruction: a rounded hollow crest on top of the skull, first drawn from the
       silhouettes "Corythosaurus Scale.svg" and "Hypacrosaurus Size.svg" on Wikimedia Commons and
       since set, without looking at them again, on the roof of the plan's head as it was redrawn
-      shorter and lower. Each genus differs in its crest.
+      shorter and lower. It turns with the head, so that it stands on the skull's roof whichever way the
+      head is held. Each genus differs in its crest.
   length:
     prop: body_length
     value: { lo: 5, hi: 12 }

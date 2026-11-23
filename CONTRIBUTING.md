@@ -207,6 +207,11 @@ fills in the description from [the template](.github/PULL_REQUEST_TEMPLATE.md): 
 why, each source and how it was read, the checks run, and open questions. Note at the end which
 agent made the change, and who ran it if a person did.
 
+If the change affects what the viewer draws, include screenshots of representative affected
+views in the pull request description. Label each pair **Before** (base branch) and **After**
+(your change). Use the same place, time, camera angle, zoom and viewer settings for both shots,
+and say what reviewers should look for. If you could not capture a shot, say why.
+
 A maintainer reviews every pull request before it merges. Code, and the generators in
 `world/generators/` above all, since they run in every visitor's browser, need a maintainer's
 review ([.github/CODEOWNERS](.github/CODEOWNERS)).

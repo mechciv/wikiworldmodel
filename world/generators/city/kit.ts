@@ -89,11 +89,14 @@ export const MAT = {
   blade: 71,
   // An animal's eye: dark and wet, so that it catches the light.
   eye: 72,
+  // A card of the blades of a crop nobody names (world/generators/people/crops.ts): coloured by the plot it stands in,
+  // ripe or green, and not by the wild land's tones.
+  cropCard: 73,
   // What lies strewn on wild ground (world/generators/life/strewn.ts): a stone, of the rock under the place; the bark
   // of fallen wood, which is its tree's own and does not sway; and the wood where it broke, or where the bark is gone.
-  stone: 73,
-  fallenBark: 74,
-  heartwood: 75,
+  stone: 74,
+  fallenBark: 75,
+  heartwood: 76,
 } as const;
 
 export type Material = (typeof MAT)[keyof typeof MAT];

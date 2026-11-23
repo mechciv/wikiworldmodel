@@ -162,8 +162,15 @@ long they stay is the generator's, and no record's.
   house however it is turned. That a wall was of mud is its tradition's claim; what colour the mud was is the
   renderer's, and no record's.
 - **The ground is trodden round each house**, and among houses that stand together; little grows there.
-- **Fields painted on the ground**: the generator gives where they are; the shader draws their plots by the tradition's
-  field system (strips, blocks, paddies flooded within their banks, swidden plots).
+- **A house has relief, close by**: a wall that is built up is as thick as its kind where a door or a window is cut
+  through it, the opening set back under a lintel, with a sill or a threshold; a wall of earth, turf or dry stone leans
+  in as it rises; a flat roof's walls rise past its deck as its parapet. That a wall was of mudbrick is its tradition's
+  claim; how thick mudbrick is drawn is the generator's.
+- **Fields painted on the ground, and sown close by**: the generator gives where they are; their plots are laid out by
+  the tradition's field system (strips, blocks, paddies flooded within their banks, swidden plots), once, for the
+  ground's colour and for what stands on it ([core/plots.ts](../core/plots.ts)). A plot under a crop has the crop
+  standing on it close by, in rows along the plot: one plain stand of upright blades, the same everywhere. Which crop
+  grew is no record's here, and none is named; a click on it says so.
 - **On the globe**, the anthromes' classes in the legend's colours, under *Settlement* in the *Layers* menu; and a click on
   land says how people lived there, from all of the above.
 
