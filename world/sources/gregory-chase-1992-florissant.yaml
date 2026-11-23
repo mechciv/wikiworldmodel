@@ -1,0 +1,21 @@
+id: src:gregory-chase-1992-florissant
+type: publication
+kind: measurement
+citation: >-
+  Gregory, K.M. & Chase, C.G. (1992). Tectonic significance of paleobotanically estimated climate
+  and altitude of the late Eocene erosion surface, Colorado. Geology 20(7), 581 ff.
+authors:
+  - "Gregory, K.M."
+  - "Chase, C.G."
+published: 1992
+title: Tectonic significance of paleobotanically estimated climate and altitude of the late Eocene erosion surface, Colorado
+container: Geology 20(7), 581 ff.
+doi: "10.1130/0091-7613(1992)020<0581:TSOPEC>2.3.CO;2"
+verified:
+  by: machine:claude-code
+  how: >-
+    Abstract only, read on 22 November 2026 as OpenAlex's record of the article carries it (work
+    W2036593632; OpenAlex keeps an abstract as its words with their places, and a script set them
+    back in order); citation from Crossref, which gives the article's first page and not its last.
+    The article itself was not read: the publisher's site (GeoScienceWorld) answers with a bot
+    check.

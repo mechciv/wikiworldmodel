@@ -1,0 +1,21 @@
+id: src:schlunegger-kissling-2015-alps
+type: publication
+kind: review
+citation: >-
+  Schlunegger, F. & Kissling, E. (2015). Slab rollback orogeny in the Alps and evolution of the
+  Swiss Molasse basin. Nature Communications 6, 8605.
+authors:
+  - "Schlunegger, F."
+  - "Kissling, E."
+published: 2015
+title: Slab rollback orogeny in the Alps and evolution of the Swiss Molasse basin
+container: Nature Communications 6, 8605
+doi: 10.1038/ncomms9605
+license: CC-BY-4.0
+verified:
+  by: machine:claude-code
+  how: >-
+    Abstract and full text read on 22 November 2026 in the article's XML from the National Library
+    of Medicine's E-utilities (PMC4634323), turned to plain text by script; citation from Crossref.
+    The figures were not looked at, so what is said of its Fig. 4d rests on the text's account of
+    it. The article has no page numbers, so locators name the section.

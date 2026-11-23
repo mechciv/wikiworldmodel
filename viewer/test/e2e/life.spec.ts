@@ -75,6 +75,25 @@ test.describe('the Hell Creek', () => {
     expect((await canvasPng(page)).equals(before)).toBe(false);
   });
 
+  test('its animals go from place to place by the visit\'s clock: a second of it is the same picture again, and another has them elsewhere', async ({ page, context }) => {
+    const s = site();
+    const at = (clock: number) => `/?b=${latestBuild()}&${arrival(s)}&quality=fast&clock=${clock}`;
+    await page.goto(at(0));
+    await idle(page);
+    // Some of those drawn go a way of their own (world/generators/life/routines.ts).
+    expect((await page.evaluate(() => window.__wikiworldmodel!.scene()))!.going).toBeGreaterThan(3);
+    const start = await canvasPng(page);
+    await page.goto(at(40));
+    await idle(page);
+    const later = await canvasPng(page);
+    expect(later.equals(start)).toBe(false);
+    // Where each is follows from the clock alone: the same second, loaded afresh, is the same picture.
+    const other = await context.newPage();
+    await other.goto(at(40));
+    await idle(other);
+    expect((await canvasPng(other)).equals(later)).toBe(true);
+  });
+
   test('the way down: offered when near at the time it is drawn for, flying there, and ready when it arrives', async ({ page }) => {
     const s = site();
     await page.goto(`/?b=${latestBuild()}&t=${s.slice}&lat=${s.origin.lat}&lon=${s.origin.lon}&d=1.6&${FAST}`);
@@ -433,6 +452,52 @@ test.describe('anywhere else', () => {
     // A visitor arrives at a real place, facing a river.
     for (const v of [...scene.focus, ...scene.toRiver]) expect(Number.isFinite(v)).toBe(true);
     expect(Math.hypot(...scene.toRiver)).toBeCloseTo(1, 2);
+  });
+
+  test("a scene has the shape of the ground within its relief's cells: the survey's own where today's relief is held, and today's carried back before the glacial cycles, and further for a range that stood", async ({ page }) => {
+    // A valley of eastern Afghanistan in 4534 BCE, with the Safed Koh thirty kilometres south of it.
+    await page.goto(`/?b=${latestBuild()}&${lowOver(34.30255, 69.87607, -4532.55, 300)}&${FAST}`);
+    await idle(page);
+    await expect.poll(async () => (await page.evaluate(() => window.__wikiworldmodel!.scene()))?.shape?.field, { timeout: 60_000 }).toBe('field:earth/relief');
+    const held = (await page.evaluate(() => window.__wikiworldmodel!.scene()))!;
+    expect(held.shape).toMatchObject({ held: true, share: 1, range: null });
+    expect(held.shape!.cells).toBeGreaterThan(50_000);
+    expect(held.relief.step).toBe(0.1);
+    // Its ground is kept as finely as its range of heights allows: decimetres near the eye.
+    expect(held.relief.units[0]).toBe(0.1);
+    // The panel says what the shape rests on, and what is invented below it.
+    await page.locator('.life-here').click();
+    const shape = page.locator('.inspect .shape');
+    await expect(shape).toContainText('the survey’s of today’s Earth');
+    await expect(shape).toContainText('smaller than a cell are invented');
+    await expect(shape).toContainText('field:earth/relief');
+    // The foot of the Taihang at 1.83 Ma: the elevation of its time, a degree's, and all of today's shape over it.
+    await page.goto(`/?b=${latestBuild()}&${lowOver(35.85822, 113.7445, fromMa(1.830023), 300)}&${FAST}`);
+    await idle(page);
+    await expect.poll(async () => (await page.evaluate(() => window.__wikiworldmodel!.scene()))?.shape?.field, { timeout: 60_000 }).toBe('field:earth/relief-carried');
+    const carried = (await page.evaluate(() => window.__wikiworldmodel!.scene()))!;
+    expect(carried.shape).toMatchObject({ held: false, share: 1, range: null });
+    expect(carried.relief.step).toBe(1);
+    await page.locator('.life-here').click();
+    await expect(page.locator('.inspect .shape')).toContainText('carried back on its plate');
+    await expect(page.locator('.inspect .shape')).toContainText('all of it stood here then, by the model’s rule');
+    // The same place at 9 Ma, before the Pliocene: none of today's shape is carried there, and the scene says so.
+    await page.goto(`/?b=${latestBuild()}&${lowOver(35.85822, 113.7445, fromMa(9), 300)}&${FAST}`);
+    await idle(page);
+    await expect.poll(async () => (await page.evaluate(() => window.__wikiworldmodel!.scene()))?.stage, { timeout: 60_000 }).toBe('Tortonian');
+    expect((await page.evaluate(() => window.__wikiworldmodel!.scene()))!.shape).toBeNull();
+    await page.locator('.life-here').click();
+    await expect(page.locator('.inspect .shape')).toContainText('the elevation field’s alone');
+    // The foothills of the Himalaya at 12 Ma, where they stood then: before the Pliocene too, but the range's record
+    // has it standing by then, and all of its shape is carried back for it, on the elevation of that time.
+    await page.goto(`/?b=${latestBuild()}&${lowOver(22.92432, 84.10332, fromMa(12), 300)}&${FAST}`);
+    await idle(page);
+    await expect.poll(async () => (await page.evaluate(() => window.__wikiworldmodel!.scene()))?.shape?.range, { timeout: 60_000 }).toBe('earth/orogens/himalaya');
+    const ranged = (await page.evaluate(() => window.__wikiworldmodel!.scene()))!;
+    expect(ranged.shape).toMatchObject({ field: 'field:earth/relief-carried', held: false, share: 1 });
+    expect(ranged.relief.step).toBe(1);
+    await page.locator('.life-here').click();
+    await expect(page.locator('.inspect .shape')).toContainText('all of it stood here then, as the record of Himalaya says');
   });
 
   test('a scene reads the finest climate of its time, and draws its month: snow low in January, high in July', async ({ page }) => {

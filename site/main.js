@@ -1,5 +1,22 @@
-// The landing page's three small behaviours: copying the starter prompt, saying how wide Rome
-// would be on the time scale at the width it is drawn, and drawing the bars of how much is known.
+// The landing page's four small behaviours: spreading the layers apart as they come into view,
+// copying the starter prompt, saying how wide Rome would be on the time scale at the width it is
+// drawn, and drawing the bars of how much is known.
+
+// The layers (tools/site/layers.ts): closed up until the drawing is in view, then spread apart, once. With less motion
+// asked for, or no observer to say when, they stay spread, as the page draws them.
+for (const fig of document.querySelectorAll('[data-layers]')) {
+  if (!('IntersectionObserver' in window) || matchMedia('(prefers-reduced-motion: reduce)').matches) continue;
+  fig.classList.add('shut');
+  const seen = new IntersectionObserver(
+    (entries) => {
+      if (!entries.some((e) => e.isIntersecting)) return;
+      fig.classList.remove('shut');
+      seen.disconnect();
+    },
+    { threshold: 0.3 },
+  );
+  seen.observe(fig);
+}
 
 for (const button of document.querySelectorAll('[data-copy]')) {
   const text = document.getElementById(button.dataset.copy);

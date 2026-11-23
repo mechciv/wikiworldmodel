@@ -3,8 +3,8 @@
 // within the tolerance of core/fingerprint.ts.
 import type { Fingerprint } from '../../../core/fingerprint.ts';
 import type { SceneSpec } from '../../../core/scene.ts';
-import { FAST_BUDGET, FULL_BUDGET, SceneStream, type Batch, type LifeView, type ProtoMesh } from '../../../world/generators/life/stream.ts';
-import type { PlanForm, Settlement, SettlementPlan, WorkForm } from '../../../world/generators/people/settlement/v4.ts';
+import { FAST_BUDGET, FULL_BUDGET, SceneStream, type Batch, type LifeView, type NamedGroup, type ProtoMesh } from '../../../world/generators/life/stream.ts';
+import type { PlanForm, Settlement, SettlementPlan, WorkForm } from '../../../world/generators/people/settlement/v5.ts';
 
 /** What a scene's people are, for its panel: the plan without its houses. */
 export interface PeopleSummary {
@@ -36,9 +36,9 @@ export function fieldStyle(s: SettlementPlan['style']): { plot: number; aspect: 
 export type ToLifeWorker = { type: 'init'; spec: SceneSpec; fast: boolean } | { type: 'view'; view: LifeView; serial: number } | { type: 'reset' };
 
 export type FromLifeWorker =
-  | { type: 'ground'; levels: { nx: number; ny: number; x0: number; y0: number; cell: number; z: Int16Array }[]; focus: [number, number]; toRiver: [number, number]; water: { vertices: Float32Array; indices: Uint32Array; flow: Float32Array }; waterLevel: number; mask: Uint8Array; maskSize: number; maskBox: [number, number, number, number]; print: Fingerprint; ms: number; people?: PeopleSummary; fields?: Uint8Array; paths?: { vertices: ArrayBuffer; indices: Uint32Array } }
+  | { type: 'ground'; levels: { nx: number; ny: number; x0: number; y0: number; cell: number; z: Int16Array; unit?: number; base?: number }[]; focus: [number, number]; toRiver: [number, number]; water: { vertices: Float32Array; indices: Uint32Array; flow: Float32Array }; waterLevel: number; mask: Uint8Array; maskSize: number; maskBox: [number, number, number, number]; print: Fingerprint; ms: number; people?: PeopleSummary; fields?: Uint8Array; paths?: { vertices: ArrayBuffer; indices: Uint32Array } }
   | { type: 'mask'; mask: Uint8Array; maskSize: number; maskBox: [number, number, number, number]; fields?: Uint8Array }
-  | { type: 'selection'; serial: number; batches: Batch[]; protos: ProtoMesh[]; instances: number; triangles: number; pending: number; groups: { taxon: number; at: [number, number]; base: number; top: number }[]; ms: number };
+  | { type: 'selection'; serial: number; batches: Batch[]; protos: ProtoMesh[]; instances: number; triangles: number; pending: number; groups: NamedGroup[]; ms: number };
 
 let stream: SceneStream | null = null;
 const sent = new Set<number>();
@@ -53,7 +53,7 @@ self.onmessage = (e: MessageEvent<ToLifeWorker>) => {
     const print = stream.print();
     const { data, box } = stream.mask(512);
     const water = stream.water();
-    const levels = stream.levels.map((l) => ({ nx: l.nx, ny: l.ny, x0: l.x0, y0: l.y0, cell: l.cell, z: (l.z as Int16Array).slice() }));
+    const levels = stream.levels.map((l) => ({ nx: l.nx, ny: l.ny, x0: l.x0, y0: l.y0, cell: l.cell, z: (l.z as Int16Array).slice(), ...(l.unit !== undefined ? { unit: l.unit } : {}), ...(l.base !== undefined ? { base: l.base } : {}) }));
     const fields = stream.fields(512)?.data;
     const paths = stream.paths();
     const pl = stream.people;
@@ -102,6 +102,6 @@ self.onmessage = (e: MessageEvent<ToLifeWorker>) => {
   if (!stream) return;
   const t0 = performance.now();
   const s = stream.select(m.view, sent, () => performance.now() - t0 < 28);
-  const buffers: ArrayBuffer[] = [...s.batches.map((b) => b.data), ...s.protos.flatMap((p) => [p.vertices, p.indices.buffer as ArrayBuffer])];
+  const buffers: ArrayBuffer[] = [...s.batches.flatMap((b) => (b.ways ? [b.data, b.ways] : [b.data])), ...s.protos.flatMap((p) => [p.vertices, p.indices.buffer as ArrayBuffer])];
   post({ type: 'selection', serial: m.serial, batches: s.batches, protos: s.protos, instances: s.instances, triangles: s.triangles, pending: s.pending, groups: s.groups, ms: performance.now() - t0 }, buffers);
 };

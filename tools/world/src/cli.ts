@@ -378,6 +378,19 @@ const commands: Record<string, (args: string[]) => Promise<number | void>> = {
     const t = parsePoint(time).t;
     console.log(monthsText(Number(lat), Number(lon), t, monthsAt(join(REPO, 'dist/builds', JSON.parse(readFileSync(index, 'utf8')).latest), Number(lat), Number(lon), t), month === undefined ? undefined : Number(month)));
   },
+  // What the latest build's files say of the ground at a place and a time, as a scene is given it: the elevation read,
+  // and the shape of the ground within its cells, the survey's own or today's carried back. The place is where it stood
+  // then, as a link to the viewer gives it: `npm run world -- relief 33.97 70.6 "475 CE"`.
+  async relief([lat, lon, ...when]) {
+    const time = when.join(' ');
+    if (lat === undefined || lon === undefined || !time || [lat, lon].some((x) => !Number.isFinite(Number(x)))) throw new Error('usage: world relief <lat> <lon> <time>');
+    const index = join(REPO, 'dist/builds/index.json');
+    if (!existsSync(index)) throw new Error('no world build: run `npm run build:world` first');
+    const { reliefAt, reliefText } = await import('./reliefat.ts');
+    const { parsePoint } = await import('../../../core/time.ts');
+    const t = parsePoint(time).t;
+    console.log(reliefText(Number(lat), Number(lon), t, reliefAt(join(REPO, 'dist/builds', JSON.parse(readFileSync(index, 'utf8')).latest), Number(lat), Number(lon), t)));
+  },
   async validate(args) {
     const { runValidate } = await import('./validate/index.ts');
     return runValidate(args);

@@ -1,0 +1,26 @@
+id: src:chamberlain-1999-southern-alps
+type: publication
+kind: measurement
+citation: >-
+  Chamberlain, C.P., Poage, M.A., Craw, D. & Reynolds, R.C. (1999). Topographic development of the
+  Southern Alps recorded by the isotopic composition of authigenic clay minerals, South Island, New
+  Zealand. Chemical Geology 155(3–4), 279–294.
+authors:
+  - "Chamberlain, C.P."
+  - "Poage, M.A."
+  - "Craw, D."
+  - "Reynolds, R.C."
+published: 1999
+title: >-
+  Topographic development of the Southern Alps recorded by the isotopic composition of authigenic
+  clay minerals, South Island, New Zealand
+container: Chemical Geology 155(3–4), 279–294
+doi: 10.1016/S0009-2541(98)00165-X
+verified:
+  by: machine:claude-code
+  how: >-
+    Abstract only, read on 22 November 2026 as OpenAlex's record of the article carries it (work
+    W2045336372; OpenAlex keeps an abstract as its words with their places, and a script set them
+    back in order); citation from Crossref. The article itself was not read: Elsevier's site is
+    closed to automated readers. So the ages of the single samples, which the abstract gives only as
+    early Pliocene, are not given here as numbers.

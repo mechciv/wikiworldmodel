@@ -1,0 +1,15 @@
+id: frame:paleomap/plate-131
+type: frame
+kind: plate
+title: Western Basin & Range (PALEOMAP plate 131)
+entity: earth/plates/western-basin-and-range
+parent: frame:earth/geographic
+transform:
+  rotations: src:paleomap-plate-model
+  file: rotations
+  plate: 131
+  interp: slerp
+extent:
+  polygons: src:paleomap-plate-model
+  file: polygons
+  plate: 131

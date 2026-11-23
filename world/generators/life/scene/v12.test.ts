@@ -6,13 +6,15 @@ import { parse } from 'yaml';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { fingerprint, fingerprintProblems } from '../../../../core/fingerprint.ts';
 import { canonicalForm, type Form } from '../../../../core/form.ts';
-import type { LivingTaxon, ReliefPatch, SceneCover, SceneSpec } from '../../../../core/scene.ts';
+import type { LivingTaxon, ReliefPatch, ReliefShape, SceneCover, SceneSpec } from '../../../../core/scene.ts';
 import type { FeatureTime } from '../../../../core/tileset.ts';
 import { cubeRoot, latticeOf, sizeWithin } from '../spec.ts';
 import { FAST_BUDGET, FULL_BUDGET, INSTANCE_STRIDE, protoParts, SceneStream, type LifeView } from '../stream.ts';
-import { CELL, cellParts, densityOf, EXTENT, GENERATOR, placeLook, VERSION, watersFor, type CellRows, type LivingParams } from './v10.ts';
+import { CELL, cellParts, densityOf, EXTENT, GENERATOR, placeLook, VERSION, watersFor, type CellRows, type LivingParams } from './v12.ts';
 import type { ChannelLaws } from '../../../../core/scene.ts';
 import { snowOf } from '../climate.ts';
+import { POSE } from '../forms.ts';
+import { ROUTE, roundOf, routineOf, WAY, wayAt } from '../routines.ts';
 
 const ROOT = join(import.meta.dirname, '../../..');
 const record = parse(readFileSync(join(ROOT, 'generators/life/scene.yaml'), 'utf8'));
@@ -68,10 +70,28 @@ const TROPICS = { t: [26, 26.5, 27, 26.5, 26, 25.5, 25, 25.5, 26, 26.5, 26.5, 26
 const TEMPERATE = { t: [-2, -1, 3, 8, 13, 17, 19, 18, 14, 9, 4, 0], p: Array(12).fill(80) };
 const climateOf = (months: { t: number[]; p: number[] }, height: number, month: number): NonNullable<SceneSpec['climate']> => ({ field: 'field:test', ageMa: 0, months, height, coast: 0, month, lat: 0, ...AT_HEIGHT });
 
-function specOf(opts: { climate?: SceneSpec['biome']['climate']; cover?: SceneCover; relief?: ReliefPatch; seed?: string; taxa?: LivingTaxon[]; atHeight?: SceneSpec['climate'] } = {}): SceneSpec {
+/**
+ * A made-up shape of the ground within a field's cells, about the test's place: cells a sixtieth of a degree across, two
+ * degrees either way, from heights by metres east and north of the place.
+ */
+const shapeOf = (at: (x: number, y: number) => number, share = 1): ReliefShape => {
+  const step = 1 / 60;
+  const ny = 241;
+  const nx = 313;
+  const lat0 = 42 - step / 2;
+  const lon0 = -((nx - 1) / 2) * step;
+  const kLat = 111194.93;
+  const kLon = kLat * Math.cos((40 * Math.PI) / 180);
+  const z: number[] = [];
+  for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) z.push(Math.round(at((lon0 + i * step) * kLon, (lat0 - j * step - 40) * kLat) * 4) / 4);
+  return { field: 'field:test', held: true, at: { lat: 40, lon: 0 }, turn: 0, share, patch: { lat0, lon0, step, nx, ny, z } };
+};
+
+function specOf(opts: { climate?: SceneSpec['biome']['climate']; cover?: SceneCover; relief?: ReliefPatch; seed?: string; taxa?: LivingTaxon[]; atHeight?: SceneSpec['climate']; shape?: ReliefShape } = {}): SceneSpec {
   const taxa = opts.taxa ?? TAXA;
   return {
     ...(opts.atHeight ? { climate: opts.atHeight } : {}),
+    ...(opts.shape ? { shape: opts.shape } : {}),
     format: 'lightworld-scene@2',
     site: { id: 'test', label: 'a test', origin: { lat: 40, lon: 0 }, span: [-1e6, 1e6], slice: 0 },
     relief: opts.relief ?? flat(300),
@@ -449,6 +469,108 @@ describe('what a view draws', () => {
   });
 });
 
+describe('what its animals do', () => {
+  const R = PARAMS.animals.routines!;
+  const formOf = (k: number) => plans[TAXA[k].form];
+  /** Each animal of some cells that goes a way: its cell, its row and where its way starts among the cell's. */
+  const goers = (cells: CellRows[]) => cells.flatMap((c) => Array.from(c.movers, (row, m) => ({ c, row, o: m * ROUTE })));
+
+  it('gives them somewhere to go: most that could go do, a plant never, and one that rests or has no routine stays', () => {
+    let could = 0;
+    let go = 0;
+    for (const c of cellsOf(stream, 2)) {
+      expect(c.ways.length).toBe(c.movers.length * ROUTE);
+      const moving = new Set(c.movers);
+      for (let q = 0; q < c.count; q++) {
+        const form = formOf(c.taxon[q]);
+        if (form.kind === 'plant' || c.pose[q] === POSE.rest || routineOf(form.behave) === 'none') {
+          expect(moving.has(q), TAXA[c.taxon[q]].label).toBe(false);
+          continue;
+        }
+        could++;
+        if (moving.has(q)) go++;
+      }
+    }
+    expect(could).toBeGreaterThan(100);
+    expect(go / could).toBeGreaterThan(0.6);
+  });
+
+  it('keeps every way on ground the animal could have been put on, out of the water, on lines the ground lies near', () => {
+    const all = goers(cellsOf(stream, 2));
+    expect(all.length).toBeGreaterThan(60);
+    for (const { c, row, o } of all) {
+      const t = TAXA[c.taxon[row]];
+      const form = formOf(c.taxon[row]);
+      const q = row * 6;
+      const [x, y, z, size, fx, fy] = c.place.subarray(q, q + 6);
+      const H = (t.hip ?? t.length! * (form.hip ?? 0.3)) * size;
+      const sag = Math.max(R.sag[1], R.sag[0] * H);
+      const T = roundOf(c.ways, o);
+      expect(T, t.label).toBeGreaterThan(1);
+      for (let k = 0; k < 24; k++) {
+        const at = wayAt(c.ways, o, fx, fy, (T * k) / 24);
+        const px = x + at.x;
+        const py = y + at.y;
+        // What walks is on the ground, give or take what the generator allows; and only what lives at the water's edge is in it.
+        expect(Math.abs(z + at.z - stream.ground.at(px, py)), t.label).toBeLessThan(sag + 0.03);
+        if (form.behave?.habitat !== 'edge' && form.behave?.habitat !== 'wet') expect(stream.cover.at(px, py).water, t.label).toBeFalsy();
+      }
+      // As the clock starts it is where the scene put it, or a first step from there if it was put walking.
+      const start = wayAt(c.ways, o, fx, fy, 0);
+      // One whose group is already on the move is a step on with it, however it was put itself.
+      expect(Math.hypot(start.x, start.y), t.label).toBeLessThan(c.ways[o + 3] < 0 ? t.length! * size * 0.3 + 0.2 : 1e-9);
+      if (c.pose[row] === POSE.walk && c.ways[o + 3] < 0) expect(start.going, t.label).toBeGreaterThan(0.9);
+    }
+  });
+
+  it('gives an animal the same way however near its cell is made', () => {
+    const fresh = new SceneStream(specOf());
+    const [fx, fy] = fresh.plan.focus;
+    let same = 0;
+    for (const [di, dj] of [[0, 0], [1, 0], [0, 1], [-1, -1], [2, 1]]) {
+      const i = Math.floor(fx / CELL) + di;
+      const j = Math.floor(fy / CELL) + dj;
+      const far = fresh.plan.cell(i, j, 1);
+      const near = fresh.plan.cell(i, j, 2);
+      const way = (c: CellRows) => new Map(goers([c]).map(({ row, o }) => [`${c.place[row * 6]},${c.place[row * 6 + 1]},${c.taxon[row]}`, Array.from(c.ways.subarray(o, o + ROUTE))]));
+      const a = way(far);
+      const b = way(near);
+      // The big ones, made from a way off, go the ways they go close by; the small ones are only made close by.
+      expect(b.size).toBeGreaterThanOrEqual(a.size);
+      for (const [k, w] of a) {
+        expect(b.get(k), k).toEqual(w);
+        same++;
+      }
+    }
+    expect(same).toBeGreaterThan(5);
+  });
+
+  it('hands a view the ways of those it draws, in step with them, and draws one that walks its way standing', () => {
+    const s = stream.select(viewAt(stream.plan.focus[0], stream.plan.focus[1] - 60, 6, stream), new Set());
+    const going = s.batches.filter((b) => b.ways);
+    expect(going.length).toBeGreaterThan(0);
+    let walkers = 0;
+    for (const b of s.batches) {
+      const { taxon, variant, detail } = protoParts(b.proto);
+      // A plant goes nowhere: its batch has no ways at all.
+      if (formOf(taxon).kind === 'plant') expect(b.ways).toBeUndefined();
+      if (!b.ways) continue;
+      expect(b.ways.byteLength).toBe(b.count * ROUTE * 4);
+      const w = new Float32Array(b.ways);
+      for (let i = 0; i < b.count; i++) {
+        if (Math.floor(w[i * ROUTE + 11]) !== WAY.walk) continue;
+        walkers++;
+        // The renderer strides its legs: it is not drawn caught in a stride of the mesh's own.
+        if (detail > 0) expect(variant >> 3, TAXA[taxon].label).not.toBe(POSE.walk);
+      }
+    }
+    expect(walkers).toBeGreaterThan(3);
+    // Its mesh says how long its stride is, for the renderer to walk it by.
+    const moved = going.find((b) => formOf(protoParts(b.proto).taxon).parts && protoParts(b.proto).detail > 0)!;
+    expect(stream.mesh(moved.proto).idle![15]).toBeGreaterThan(0);
+  });
+});
+
 describe('where the world gives the rivers', () => {
   const fields = parse(readFileSync(join(ROOT, 'fields/earth/rivers.yaml'), 'utf8'));
   const laws = fields.params as ChannelLaws;
@@ -614,6 +736,122 @@ describe('where the world gives the rivers', () => {
     let atLevel = 0;
     for (let k = 2; k < w.vertices.length; k += 3) if (Math.abs(w.vertices[k] - lake.level - 0.03) < 1e-3) atLevel++;
     expect(atLevel).toBeGreaterThan(100);
+  });
+});
+
+describe("the shape of the ground within the relief's cells", () => {
+  const fields = parse(readFileSync(join(ROOT, 'fields/earth/rivers.yaml'), 'utf8'));
+  const laws = fields.params as ChannelLaws;
+  const dry = { rivers: [], laws, tier: 'model' as const, from: ['field:earth/rivers'] };
+  // A crest of the survey's: a ridge 1,500 m over the field's ground, running east and west.
+  const ridge = (north: number) => (_x: number, y: number) => 1500 * Math.exp(-(((y - north) / 3000) ** 2));
+
+  it("stands on the shape the world gives within its relief's cells, as far as the eye reaches: a crest the field's grid has not is there", () => {
+    // The field alone is level at 900 m; the survey's cells have a crest 40 km north of the place, and another 150 km north.
+    const both = (x: number, y: number) => ridge(40000)(x, y) + ridge(150000)(x, y);
+    const s = new SceneStream({ ...specOf({ relief: flat(900), shape: shapeOf(both), seed: 'life/shape' }), water: dry });
+    const bare = new SceneStream({ ...specOf({ relief: flat(900), seed: 'life/shape' }), water: dry });
+    // With the field alone the ground is level all the way.
+    for (const y of [0, 40000, 150000]) expect(Math.abs(bare.ground.at(0, y) - 900)).toBeLessThan(5);
+    // With the shape the place itself is where it was, and both crests stand: the nearer on the ground's middle grid,
+    // the further on its far one, each nearly as high as the survey has it.
+    expect(Math.abs(s.ground.at(0, 0) - 900)).toBeLessThan(30);
+    let near = 0;
+    let far = 0;
+    for (let y = 36000; y <= 44000; y += 250) near = Math.max(near, s.ground.at(0, y));
+    for (let y = 146000; y <= 154000; y += 400) far = Math.max(far, s.ground.at(0, y));
+    expect(near).toBeGreaterThan(900 + 1300);
+    expect(far).toBeGreaterThan(900 + 1300);
+    // Between them the plain, as the survey has it.
+    expect(Math.abs(s.ground.at(0, 95000) - 900)).toBeLessThan(40);
+  });
+
+  it('keeps a summit above 3,200 m and a floor below it: heights are held as finely as their range allows', () => {
+    // A plateau at 5,200 m with a crest 3,000 m over it, 20 km north: above anything a count of decimetres holds.
+    const high = new SceneStream({ ...specOf({ relief: flat(5200), shape: shapeOf((_x, y) => 3000 * Math.exp(-(((y - 20000) / 4000) ** 2))), seed: 'life/high' }), water: dry });
+    let top = 0;
+    for (let y = 16000; y <= 24000; y += 200) top = Math.max(top, high.ground.at(0, y));
+    expect(top).toBeGreaterThan(7900);
+    expect(Math.abs(high.ground.at(0, -3000) - 5200)).toBeLessThan(60);
+    // The ground near the eye keeps its decimetres, up there too; the grids that hold the crest take wider steps.
+    expect(high.levels[0].unit).toBe(0.1);
+    expect(high.levels[0].base).toBeGreaterThan(5000);
+    expect(high.levels[1].unit).toBeLessThanOrEqual(0.25);
+    for (const l of high.levels) for (const v of l.z as Int16Array) expect(Math.abs(v)).toBeLessThan(32000);
+    // A lowland keeps decimetres above nought on every grid, as it always did.
+    const low = new SceneStream(specOf({ relief: flat(300) }));
+    for (const l of low.levels) expect([l.unit, l.base]).toEqual([0.1, 0]);
+    // And a deep sea floor is not cut off either.
+    const deep = new SceneStream(specOf({ relief: flat(-5200) }));
+    expect(deep.ground.at(0, 30000)).toBeLessThan(-5100);
+  });
+
+  it("invents no hills on a plain the survey shows level, and rough ground below a rough survey", () => {
+    // The same height above the sea, 1,500 m: once level in the survey's cells, once with ridges 400 m high three or
+    // four cells across.
+    const level = new SceneStream({ ...specOf({ relief: flat(1500), shape: shapeOf(() => 0.25), seed: 'life/level' }), water: dry });
+    const rough = new SceneStream({ ...specOf({ relief: flat(1500), shape: shapeOf((x, y) => 400 * Math.sin(x / 1100) * Math.sin(y / 1400 + x / 5000)), seed: 'life/level' }), water: dry });
+    // Within a kilometre of a point five kilometres off, on ground no finer than 50 m: how far it stands from a plane.
+    const spread = (s: SceneStream) => {
+      let sum = 0;
+      let sq = 0;
+      let n = 0;
+      for (let y = 4500; y <= 5500; y += 50) {
+        for (let x = -500; x <= 500; x += 50) {
+          const v = s.ground.at(x, y) - s.worldGround.at(x, y);
+          sum += v;
+          sq += v * v;
+          n++;
+        }
+      }
+      return Math.sqrt(Math.max(0, sq / n - (sum / n) ** 2));
+    };
+    expect(spread(level)).toBeLessThan(1);
+    expect(spread(rough)).toBeGreaterThan(8);
+    // What is invented is less than the survey's own cells differ by, and adds next to nothing to their mean.
+    expect(spread(rough)).toBeLessThan(200);
+    let mean = 0;
+    let n = 0;
+    for (let y = 2000; y <= 8000; y += 250) {
+      for (let x = -3000; x <= 3000; x += 250) {
+        mean += rough.ground.at(x, y) - rough.worldGround.at(x, y);
+        n++;
+      }
+    }
+    expect(Math.abs(mean / n)).toBeLessThan(6);
+  });
+
+  it('draws a river the drainage routes in the valley the shape shows between the nodes of its grid', () => {
+    // A valley that swings east round a ridge that stands on the straight line between two nodes.
+    const floorX = (y: number) => 5000 * Math.sin(((y + 5500) / 11000) * Math.PI);
+    const valley = (x: number, y: number) => Math.min(400, ((x - floorX(y)) ** 2) / 9000) - y / 500;
+    const water = { rivers: [{ key: 'test#valley', from: 'model' as const, xy: [0, -5500, 0, 5500, 0, 16500], s0: 0, q: [40, 50, 60], z: [611, 589, 567] }], laws, tier: 'model' as const, from: ['field:earth/rivers'] };
+    const spec = { ...specOf({ relief: flat(600), shape: shapeOf(valley), seed: 'life/valley' }), water };
+    const path = watersFor(spec, placeLook(spec)).paths![0];
+    let east = 0;
+    for (let i = 0; i < path.xy.length; i += 2) if (Math.abs(path.xy[i + 1]) < 4000) east = Math.max(east, path.xy[i]);
+    expect(east).toBeGreaterThan(2500);
+    // Its water falls north with the valley's floor, and is never far above it or below it.
+    for (let i = 1; i < path.z.length; i++) expect(path.z[i]).toBeLessThanOrEqual(path.z[i - 1]);
+    const s = new SceneStream(spec);
+    for (let i = 0; i < path.xy.length; i += 40) {
+      const [x, y] = [path.xy[i], path.xy[i + 1]];
+      if (Math.abs(y) > 5000) continue;
+      expect(Math.abs(path.z[i / 2] - (600 + valley(floorX(y), y)))).toBeLessThan(130);
+      // And its bed is cut into the ground the scene has.
+      expect(s.ground.at(x, y)).toBeLessThan(path.z[i / 2]);
+    }
+    // Without the shape the same river runs straight between its nodes, as before.
+    const plain = { ...specOf({ relief: flat(600), seed: 'life/valley' }), water };
+    const straight = watersFor(plain, placeLook(plain)).paths![0];
+    let off = 0;
+    for (let i = 0; i < straight.xy.length; i += 2) if (Math.abs(straight.xy[i + 1]) < 4000) off = Math.max(off, Math.abs(straight.xy[i]));
+    expect(off).toBeLessThan(east);
+  });
+
+  it('is the same ground from the same spec with a shape, within the tolerance', () => {
+    const make = () => new SceneStream({ ...specOf({ relief: flat(1500), shape: shapeOf((x, y) => 300 * Math.sin(x / 1100) * Math.sin(y / 1400)), seed: 'life/same' }), water: dry });
+    expect(fingerprintProblems(make().print(), make().print())).toEqual([]);
   });
 });
 

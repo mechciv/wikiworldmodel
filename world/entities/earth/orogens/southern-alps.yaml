@@ -1,0 +1,91 @@
+id: earth/orogens/southern-alps
+kind: landform/mountain-range
+summary: The mountain range along the west of New Zealand's South Island, raised where the Pacific plate runs into the Australian one.
+author: machine:claude-code
+# Phases tile the lifetime: the range rises from the start of its growth, and then stands at about the height it has
+# today. Where its sources show it standing so, today's relief is carried back for it (model:earth/relief-carried).
+phases:
+  - id: rising
+    label: Rising
+  - id: standing
+    label: At about its present height
+claims:
+  name:
+    prop: name
+    value: { en: Southern Alps }
+    unsourced: An editorial label.
+  extent:
+    prop: extent
+    value:
+      type: Polygon
+      frame: frame:earth/present-day
+      coordinates:
+        - [[172.5, -42.2], [172.7, -42.6], [172.0, -43.2], [171.3, -43.7], [170.6, -44.0], [170.0, -44.3], [169.3, -44.6], [168.6, -44.75], [168.3, -44.45], [168.9, -44.05], [169.9, -43.5], [170.6, -43.15], [171.4, -42.75], [172.0, -42.35], [172.5, -42.2]]
+    unsourced: >-
+      An outline drawn loosely round the range on today's relief, from about Lewis Pass south-west to the
+      mountains at the head of Lake Wakatipu, between the Alpine Fault at its western foot and the basins and
+      plains to its east, to say which ground its record speaks for. The range has no agreed edge.
+    method: editorial
+    basis: reconstruction
+  location:
+    prop: location
+    value: { lat: -43.595, lon: 170.142, frame: frame:earth/present-day }
+    unsourced: >-
+      A representative point at Aoraki / Mount Cook, the range's highest peak, chosen to place the marker; the
+      range has no single location.
+    method: editorial
+    basis: reconstruction
+  frame:
+    prop: frame
+    value: frame:paleomap/plate-807
+    source: { ref: src:paleomap-plate-model, loc: PALEOMAP_PlatePolygons.gpml }
+    method: plate-polygon
+    basis: reconstruction
+  # When the range began to grow.
+  start:
+    prop: start
+    value: 8 Ma
+    source:
+      ref: src:tippett-kamp-1993-southern-alps
+      loc: abstract
+      quote: >-
+        The age of the start of rock uplift varies spatially across the Southern Alps, the earliest indications
+        from fission track analysis being at 8 Ma at the southern end of the Alps, decreasing to 5 Ma at the northern
+        end and 3 Ma along the southeastern margin.
+    method: radiometric
+    note: >-
+      Fission-track ages of 140 samples on 13 lines across the range: its rocks began to rise 8 Ma ago at its
+      southern end and later elsewhere, 5 Ma ago in the north and 3 Ma ago along its south-eastern edge. The
+      range's growth is counted here from the earliest of these. It is the rocks' rise that is dated, which the
+      wearing down of the range went with, and not the rise of its surface. The abstract gives no uncertainty.
+      The vocabulary has no term for fission-track dating, so the general one is used. Read only in the abstract.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in tippett-kamp-1993-southern-alps.txt (sha256 c3a509b83ac68910), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-23" }
+  # When the range came to stand at about its present height.
+  standing-start-chamberlain-poage-2000:
+    prop: start
+    subject: "@standing"
+    value: { ref: ics/zanclean }
+    source:
+      - ref: src:chamberlain-poage-2000-paleotopography
+        loc: abstract
+        quote: >-
+          The δ18O values of kaolinites from New Zealand show an ∼6‰ decrease in the early Pliocene that
+          corresponds to an ∼2 km elevation change in the Southern Alps.
+      - ref: src:chamberlain-1999-southern-alps
+        loc: abstract
+        quote: >-
+          Changes in the isotopic composition of authigenic clay minerals forming in equilibrium with meteoric
+          water in the stratigraphic sequence record the development of Southern Alps topography and the resultant
+          rain shadow.
+    method: paleoaltimetry
+    note: >-
+      Oxygen isotopes of kaolinite that grew in the beds east of the range, in its rain shadow, from the
+      Cretaceous to the Pleistocene: they fall by 5 to 6‰ in the early Pliocene, which the authors read as the
+      range rising by about 2 km and casting its rain shadow. The early Pliocene is written as the Zanclean. The
+      sources date the rise and give its size, and not the range's height after it: that the range has stood at
+      about its present height since is this record's reading, which rests on the fall in the clays being as
+      large as the difference between today's rain west and east of the range (δ18O of −5.5‰ against −9.8‰ in
+      the 1999 abstract). Both read only in their abstracts.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in chamberlain-poage-2000-paleotopography.txt (sha256 b7cdf1db50f58cb6) and chamberlain-1999-southern-alps.txt (sha256 25d0aac12d55347b), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-23" }

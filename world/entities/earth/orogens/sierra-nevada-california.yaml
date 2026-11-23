@@ -1,0 +1,138 @@
+id: earth/orogens/sierra-nevada-california
+kind: landform/mountain-range
+summary: The mountain range that runs down the eastern side of California.
+author: machine:claude-code
+# Phases tile the lifetime: the range rises from the start of its growth, and then stands at about the height it has
+# today. Where its sources show it standing so, today's relief is carried back for it (model:earth/relief-carried).
+phases:
+  - id: rising
+    label: Rising
+  - id: standing
+    label: At about its present height
+claims:
+  name:
+    prop: name
+    value: { en: Sierra Nevada }
+    unsourced: An editorial label.
+  extent:
+    prop: extent
+    value:
+      type: Polygon
+      frame: frame:earth/present-day
+      coordinates:
+        - [[-121.2, 40.3], [-120.3, 39.9], [-119.8, 39.3], [-119.6, 38.6], [-119.15, 38.0], [-118.5, 37.4], [-118.15, 36.6], [-117.9, 35.8], [-118.3, 35.1], [-118.7, 35.2], [-118.9, 35.9], [-119.1, 36.6], [-119.6, 37.1], [-120.2, 37.6], [-120.7, 38.2], [-121.1, 38.9], [-121.5, 39.5], [-121.7, 40.0], [-121.2, 40.3]]
+    unsourced: >-
+      An outline drawn loosely round the range on today's relief, from Lake Almanor south to Tehachapi Pass,
+      between the foothills above the Central Valley and the foot of the eastern scarp, to say which ground its
+      record speaks for. The heights cited here were measured in the north of the range. The range has no
+      agreed edge.
+    method: editorial
+    basis: reconstruction
+  location:
+    prop: location
+    value: { lat: 39.4, lon: -120.6, frame: frame:earth/present-day }
+    unsourced: >-
+      A representative point on the western slope of the northern Sierra Nevada, in the country of the Yuba
+      River, where the old river gravels and ash-flow tuffs its record rests on lie, chosen to place the marker;
+      the range has no single location.
+    method: editorial
+    basis: reconstruction
+  frame:
+    prop: frame
+    value: frame:paleomap/plate-131
+    source: { ref: src:paleomap-plate-model, loc: PALEOMAP_PlatePolygons.gpml }
+    method: plate-polygon
+    basis: reconstruction
+  # When the range began to grow: a bound, on which both sides of the dispute below agree.
+  start-before-wakabayashi-sawyer-2001:
+    prop: start_before
+    value: { ref: ics/eocene, edge: start }
+    source:
+      ref: src:wakabayashi-sawyer-2001-sierra-nevada
+      loc: "abstract, p. 539"
+      quote: Minimal Eocene-Miocene stream incision suggests that paleorelief and paleoelevations are relics of pre-Eocene uplift.
+    method: stratigraphic
+    note: >-
+      The relief in which the range's old river channels lie, and how little its streams cut down between the
+      Eocene and the Miocene, are read as the mark of a rise before the Eocene. The source puts that rise between
+      about 99 and 57 Ma, in a sequence of events it calls speculative, with its fastest part from the rate at
+      which the beds of the Great Valley Group built up; Cassel et al. (2009) too put most of the range's uplift
+      in the Late Cretaceous to early Cenozoic.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wakabayashi-sawyer-2001-sierra-nevada.txt (sha256 b0c49f18ffefc9ac), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-23" }
+  # When the range came to stand at about its present height: what its sources dispute. Each reading is a claim
+  # of start, written with one end where its source gives only a time by which, or after which, the range stood so.
+  standing-start-cassel-2009:
+    prop: start
+    subject: "@standing"
+    value: { hi: 28 Ma }
+    source:
+      ref: src:cassel-2009-sierra-nevada
+      loc: abstract
+      quote: These data show that 31–28 Ma ago, the northern Sierra Nevada had a steep western gradient and elevations similar to the present.
+    against:
+      ref: src:wakabayashi-2013-sierra-nevada
+      loc: abstract
+      quote: >-
+        Stable-isotope paleoaltimetry apparently records a profile similar to that of the modern range and areas
+        east of it, in spite of significant vertical deformation that postdates the age of the sampled deposits,
+        suggesting fairly recent reequilibration, in contrast to the published interpretations of closed-system
+        behavior since the Oligocene or Eocene.
+    method: paleoaltimetry
+    rank: preferred
+    note: >-
+      Hydrogen isotopes of the water taken up by the glass of Oligocene ash-flow tuffs, sampled across the north
+      of the range: they grow lighter eastward by 48‰ in 100 km, as rain does over a range as high and as steep
+      as today's. Written with only its later end, the later of the two ages the source gives, since it gives a
+      time by which the range stood so. Preferred as a measure of height itself, in rocks of the range, with which
+      another of its kind agrees (Mulch et al. 2006, below), where Wakabayashi and Sawyer reckon heights back
+      from the cutting of streams. The question is not closed: Wakabayashi (2013), cited against, holds that the
+      glass took up its water after the range had been tilted and raised. Read only in the abstract.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in cassel-2009-sierra-nevada.txt (sha256 84374140e5925751) and wakabayashi-2013-sierra-nevada.txt (sha256 19f0e7bc92ff3783), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-23" }
+  standing-start-mulch-2006:
+    prop: start
+    subject: "@standing"
+    value: { hi: 40 Ma }
+    source:
+      ref: src:mulch-2006-sierra-nevada
+      loc: abstract
+      quote: >-
+        show that about 40 to 50 million years ago the Sierra Nevada stood tall (>/=2200 meters), a result in
+        conflict with proposed young surface uplift by tectonic and climatic forcing
+    method: paleoaltimetry
+    note: >-
+      Hydrogen isotopes of kaolinite in the gravels of the Eocene Yuba River, 40 to 50 million years old: the range
+      stood 2200 m high or more. Written with only its later end, the younger age of the gravels. The abstract
+      sets the height against a young rise of the range and does not say how it compares with today's, so it
+      stands beside the preferred claim, which does, and with which it agrees. Read only in the abstract.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in mulch-2006-sierra-nevada.txt (sha256 25e0bee5440d3f76), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-23" }
+  standing-start-wakabayashi-sawyer-2001:
+    prop: start
+    subject: "@standing"
+    value: { lo: 5 Ma }
+    source:
+      - ref: src:wakabayashi-sawyer-2001-sierra-nevada
+        loc: "abstract, p. 539"
+        quote: >-
+          Uplift of the Sierra Nevada, westward tilting, stream incision, and east-down normal and dextral faulting
+          along the present eastern escarpment of the range began at ∼5 Ma. Estimates of Late Cenozoic crestal rock
+          uplift for different areas in the Sierra Nevada range from 1440 to 2150 m.
+      - ref: src:wakabayashi-sawyer-2001-sierra-nevada
+        loc: p. 556
+        quote: >-
+          The evaluation of paleoelevations suggests that Late Cenozoic uplift accounts for more than half of the
+          elevation of the northern Sierra, but less than half of the elevation of the southern Sierra.
+    method: stratigraphic
+    note: >-
+      The other view of the range, from the work of its streams: they cut down no more than 150 m between the
+      Eocene and the Miocene, and have cut as much as 1 km since about 5 Ma, the age of the youngest beds laid
+      down before the cutting, when the range began to tilt west and its eastern scarp to form. Taking that late
+      uplift from today's heights leaves the crest under 900 m in the north at about 5 Ma and above 2500 m in the
+      south. So the range came to its present height after about 5 Ma, and the claim is written with only its
+      earlier end. It contradicts the heights from isotopes, which were measured in the north, where it has the
+      range lowest. Wakabayashi (2013) holds to late uplift, and has the streams begin to cut from about 20 Ma
+      in the south to about 3 Ma in the north.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wakabayashi-sawyer-2001-sierra-nevada.txt (sha256 b0c49f18ffefc9ac), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-23" }

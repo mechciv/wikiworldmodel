@@ -251,6 +251,52 @@ describe('the plans', () => {
       expect(high, n).toBeGreaterThan(0);
     }
   });
+
+  it('say how far each point of a leg goes with its stride: not at all at the hip, wholly at the foot, half its legs against the other half', () => {
+    // What each vertex moves with, and how far, with where it is: its side, how far along the body, and how high.
+    const legs = (n: string, pose: number = POSE.stand) => {
+      const f = canonicalForm(plans[n]);
+      const m = new Mesh(4096);
+      drawAnimal(m, f, unitStance(f, pose, 2));
+      const { vertices } = m.arrays();
+      const at = new Float32Array(vertices);
+      const code = new Uint16Array(vertices);
+      const out: { bone: number; w: number; x: number; y: number; z: number }[] = [];
+      for (let i = 0; i < m.verts; i++) {
+        const c = code[i * 14 + 13];
+        if ((c & 15) === BONE.stride || (c & 15) === BONE.counter) out.push({ bone: c & 15, w: (c >> 4) / 255, x: at[i * 7], y: at[i * 7 + 1], z: at[i * 7 + 2] });
+      }
+      return out;
+    };
+    for (const n of ['ceratopsian', 'tyrannosaur', 'hadrosaur', 'lizard', 'ox']) {
+      const pts = legs(n);
+      expect(pts.length, n).toBeGreaterThan(50);
+      // The further down, the more: what goes least with a stride is high on the body, what goes wholly is on the ground.
+      const top = Math.max(...pts.map((p) => p.z));
+      expect(Math.max(...pts.filter((p) => p.w < 0.1).map((p) => p.z)), n).toBeGreaterThan(top * 0.7);
+      for (const p of pts.filter((q) => q.w > 0.98)) expect(p.z, n).toBeLessThan(top * 0.2);
+      // The left and the right of each pair of legs stride against each other: of the feet that stand side by side,
+      // those on one side go with one stride and those on the other with the other.
+      const feet = pts.filter((p) => p.w > 0.98);
+      const pairs = new Map<number, { left: Set<number>; right: Set<number> }>();
+      for (const p of feet) {
+        const k = Math.round(p.y / 0.1);
+        const pair = pairs.get(k) ?? pairs.set(k, { left: new Set(), right: new Set() }).get(k)!;
+        (p.x < 0 ? pair.left : pair.right).add(p.bone);
+      }
+      let both = 0;
+      for (const { left, right } of pairs.values()) {
+        if (!left.size || !right.size) continue;
+        both++;
+        expect([left.size, right.size], n).toEqual([1, 1]);
+        expect([...left][0], n).not.toBe([...right][0]);
+      }
+      expect(both, n).toBeGreaterThan(0);
+    }
+    // What has no legs strides with nothing; and a head, a trunk and a tail still move with what they did.
+    expect(legs('fish')).toEqual([]);
+    expect(legs('snake')).toEqual([]);
+  });
 });
 
 // What the vertices of one material are, so that a test can look at one part of a body: [x, y, z] each.
@@ -457,6 +503,48 @@ describe('what a plan can say of a shape', () => {
     expect(points(walking, MAT.horn).length).toBeGreaterThan(0);
   });
 
+  it('strides what a leg bears with the leg: a claw on its foot wholly, a cuff half way down it by half', () => {
+    // A pair of legs that swing, as a lizard's: out from the body and down to the ground.
+    const f = plain({
+      leg: { type: 'chain', mirror: true, zl: true, swing: 0.04, points: [[0.1, 0.2, 0.4, 0.02], [0.2, 0.2, 0.2, 0.02], [0.2, 0.2, 0, 0.02]] },
+      claw: { type: 'spike', mat: 'horn', mirror: true, on: 'leg', from: [0, 0, 0], to: [0, 0.03, 0], r: 0.005 },
+      cuff: { type: 'lump', mat: 'shell', mirror: true, ride: 'leg', at: [0, 0.5, 0], r: [0.004, 0.004, 0.004] },
+    });
+    const m = draw(f);
+    const { vertices } = m.arrays();
+    const fl = new Float32Array(vertices);
+    const b = new Uint8Array(vertices);
+    const e = new Uint16Array(vertices);
+    const codes = (mat: number, side: number) => {
+      const out = new Set<number>();
+      for (let i = 0; i < m.verts; i++) if (b[i * STRIDE + 24] === mat && fl[i * 7] * side > 0) out.add(e[i * 14 + 13]);
+      return [...out];
+    };
+    // The legs of the two sides stride against each other, and each claw goes with its own foot, all the way.
+    const right = codes(MAT.horn, 1);
+    const left = codes(MAT.horn, -1);
+    expect(right).toHaveLength(1);
+    expect(left).toHaveLength(1);
+    expect(new Set([right[0] & 15, left[0] & 15])).toEqual(new Set([BONE.stride, BONE.counter]));
+    expect(right[0] >> 4).toBe(255);
+    expect(left[0] >> 4).toBe(255);
+    // The foot's own vertices have the same code as the claw on it.
+    const legs = codes(MAT.hide, 1).filter((c) => (c & 15) === (right[0] & 15));
+    expect(legs).toContain(right[0]);
+    // Half way along the leg's length is its knee, half way down: the cuff goes half as far.
+    for (const side of [-1, 1]) {
+      const [cuff] = codes(MAT.shell, side);
+      expect(cuff & 15).toBe((side > 0 ? right[0] : left[0]) & 15);
+      expect((cuff >> 4) / 255).toBeCloseTo(0.5, 1);
+    }
+    // What hangs on a part that does not stride moves as it did: with nothing, on a chain that is no leg.
+    const still = plain({
+      neck: { type: 'chain', zl: true, points: [[0, 0.4, 0.4, 0.02], [0, 0.6, 0.4, 0.02]] },
+      nose: { type: 'spike', mat: 'horn', on: 'neck', from: [0, 0, 0], to: [0, 0.03, 0], r: 0.005 },
+    });
+    expect([...bones(draw(still), MAT.horn)]).toEqual([bone(BONE.none)]);
+  });
+
   it('sets what rides a body on its skin: on its back, round its flank and under it, wherever its rings put them', () => {
     const rider = (round: number, y: number, off = 0) => plain({ stud: { type: 'lump', mat: 'horn', ride: 'body', at: [round, y, off], r: [0.004, 0.004, 0.004] } });
     const at = (f: Form) => middle(points(draw(f), MAT.horn));
@@ -605,6 +693,14 @@ describe('what a plan can say of a shape', () => {
 
 describe('the validator', () => {
   const good = () => canonicalForm(plans.ceratopsian);
+
+  it('refuses a routine there is not', () => {
+    const f = good();
+    (f.behave as Record<string, unknown>).routine = 'dance';
+    expect(checkForm(f).join()).toContain('no routine "dance"');
+    f.behave!.routine = 'stalk';
+    expect(checkForm(f)).toEqual([]);
+  });
 
   it('refuses a part it does not know', () => {
     const f = good();

@@ -6,10 +6,21 @@
 export type Pose = 'stand' | 'walk' | 'graze' | 'drink' | 'alert' | 'rest' | 'fly';
 
 /**
+ * What a kind of body does once it is drawn, by name (world/generators/life/routines.ts): `feed`, it stays and feeds,
+ * then moves on a little way; `wander`, it walks from place to place and stops a while at each; `patrol`, it walks a
+ * round without stopping; `stalk`, it goes slowly up to the nearest group of something else, watches it and comes
+ * back; `circle`, it flies or swims round; `none`, it stays where it is.
+ */
+export type Routine = 'none' | 'feed' | 'wander' | 'patrol' | 'stalk' | 'circle';
+export const ROUTINES: Routine[] = ['none', 'feed', 'wander', 'patrol', 'stalk', 'circle'];
+
+/**
  * How a kind of body keeps. All of it is the generator's: what the records say is who lived there and
  * how big they grew, and these only say how a body plan is laid out for a visitor to see.
  */
 export interface Behave {
+  /** what it does once it is drawn; unsaid, what its poses and its habitat suggest (routines.ts, routineOf) */
+  routine?: Routine;
   /** the fewest and most in a group */
   group?: [number, number];
   /** where it is looked for, and where it lives: on land, in the air, by the water, swimming in it (water), or on the sea's floor (floor) */
