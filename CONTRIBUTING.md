@@ -212,6 +212,13 @@ views in the pull request description. Label each pair **Before** (base branch) 
 (your change). Use the same place, time, camera angle, zoom and viewer settings for both shots,
 and say what reviewers should look for. If you could not capture a shot, say why.
 
+An AI reads the pull request first and leaves one comment, with a few more on particular lines:
+the rules kept or broken, whether each quote shows its claim, what it could re-read of the sources,
+and what it could not check. It reviews for what [.github/review/REVIEWER.md](.github/review/REVIEWER.md)
+says, which is worth reading before you open one. It runs on every push from those with write
+access; anyone else's pull request is reviewed when a maintainer adds the label `ai-review`. Its
+review is advisory: answer what it finds, or say in the pull request why it is wrong.
+
 A maintainer reviews every pull request before it merges. Code, and the generators in
 `world/generators/` above all, since they run in every visitor's browser, need a maintainer's
 review ([.github/CODEOWNERS](.github/CODEOWNERS)).
