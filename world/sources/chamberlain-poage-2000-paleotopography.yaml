@@ -1,0 +1,22 @@
+id: src:chamberlain-poage-2000-paleotopography
+type: publication
+kind: measurement
+citation: >-
+  Chamberlain, C.P. & Poage, M.A. (2000). Reconstructing the paleotopography of mountain belts from
+  the isotopic composition of authigenic minerals. Geology 28(2), 115–118.
+authors:
+  - "Chamberlain, C.P."
+  - "Poage, M.A."
+published: 2000
+title: Reconstructing the paleotopography of mountain belts from the isotopic composition of authigenic minerals
+container: Geology 28(2), 115–118
+doi: "10.1130/0091-7613(2000)28<115:RTPOMB>2.0.CO;2"
+verified:
+  by: machine:claude-code
+  how: >-
+    Abstract only, read on 22 November 2026 as OpenAlex's record of the article carries it (work
+    W1986570030; OpenAlex keeps an abstract as its words with their places, and a script set them
+    back in order); citation from Crossref, whose two records of the article give its first page
+    and its page range, and one of which reads the first author's name as "Page Chamberlain, C.".
+    The article itself was not read: the publisher's site (GeoScienceWorld) answers with a bot
+    check.

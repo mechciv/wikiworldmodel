@@ -1,0 +1,21 @@
+id: src:wakabayashi-2013-sierra-nevada
+type: publication
+kind: measurement
+citation: >-
+  Wakabayashi, J. (2013). Paleochannels, stream incision, erosion, topographic evolution, and
+  alternative explanations of paleoaltimetry, Sierra Nevada, California. Geosphere 9(2), 191–215.
+authors:
+  - "Wakabayashi, J."
+published: 2013
+title: >-
+  Paleochannels, stream incision, erosion, topographic evolution, and alternative explanations of
+  paleoaltimetry, Sierra Nevada, California
+container: Geosphere 9(2), 191–215
+doi: 10.1130/GES00814.1
+verified:
+  by: machine:claude-code
+  how: >-
+    Abstract only, read on 22 November 2026 as OpenAlex's record of the article carries it (work
+    W2152802127; OpenAlex keeps an abstract as its words with their places, and a script set them
+    back in order); citation from Crossref. The article itself was not read, though the journal is
+    open access: the publisher's site (GeoScienceWorld) answers with a bot check.

@@ -71,6 +71,9 @@ As for the other slices (see the [README](../../README.md)); it needs no dataset
 
 ## Pass criteria
 
+The generator's tests named here as `v3.test.ts` are in `v4.test.ts` since its version 4 gave its people and their
+animals somewhere to go ([docs/plans/RENDERING.md](../plans/RENDERING.md), step 5); their names are as they were.
+
 | Criterion | Where it is checked |
 |---|---|
 | A dwelling's new parameters are checked word by word, a flag as a flag, a pitch as less than 90°; a settlement form's likewise | `tools/world/test/landscape.test.ts`: checks the house in detail |
@@ -129,7 +132,7 @@ house its five metres of width.
 ### The generator
 
 `gen:people/settlement` is **version 3**
-([world/generators/people/settlement/v3.ts](../../world/generators/people/settlement/v3.ts)): what it makes of a
+([world/generators/people/settlement/v3.ts](../../world/generators/people/settlement/v6.ts), now `v5.ts`): what it makes of a
 scene changed beyond the tolerance, so it is a new version and not an edit.
 
 - **A house's shape** is one of eight, by a hash of its place in its settlement; its size is no longer a share of its
@@ -167,7 +170,7 @@ scene changed beyond the tolerance, so it is a new version and not an edit.
   one gate.
 - **A cluster with no stated layout** is thrown: places at random on the ground its houses would take, none nearer
   another than a house and its yard need, none on the open ground at its middle.
-- **The ground is trodden round each house** ([LandUseMap](../../world/generators/people/settlement/v3.ts)), on a grid
+- **The ground is trodden round each house** ([LandUseMap](../../world/generators/people/settlement/v6.ts)), on a grid
   of 16 m, and among houses that stand together; houses that stand apart leave the ground between them as it was. No
   tree stands there, and little grass.
 

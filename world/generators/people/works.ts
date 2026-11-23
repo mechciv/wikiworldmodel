@@ -118,8 +118,11 @@ function tower(m: Mesh, s: WorkSpec, x: number, detail: HouseDetail): void {
 /** How many ways one kind of piece is drawn. */
 export const WORK_VARIANTS = 8;
 
-/** A piece of a settlement's works, drawn into a mesh at the frame's origin. `variant` is which of its shapes it is. */
-export function drawWork(m: Mesh, s: WorkSpec, detail: HouseDetail, variant = 0): void {
+/**
+ * A piece of a settlement's works, drawn into a mesh at the frame's origin. `variant` is which of its shapes it is.
+ * With `walks`, a person's mesh is one the renderer may walk (figures.ts).
+ */
+export function drawWork(m: Mesh, s: WorkSpec, detail: HouseDetail, variant = 0, walks = false): void {
   reset(m);
   const tint = 118 + (variant & 3) * 6;
   m.tint = tint;
@@ -127,7 +130,7 @@ export function drawWork(m: Mesh, s: WorkSpec, detail: HouseDetail, variant = 0)
   const half = PIECE / 2;
   if (s.kind === 'person') {
     // Someone by the houses: how they stand and what they wear is the generator's, and no record's.
-    drawPerson(m, s.height, variant, detail, (variant * 53 + 40) & 255, 128 + (variant & 3));
+    drawPerson(m, s.height, variant, detail, (variant * 53 + 40) & 255, 128 + (variant & 3), walks);
     return;
   }
   if (s.kind === 'enclosure') return enclosurePiece(m, s.word ?? 'fence', s.run ?? PIECE, detail, variant, s.stuff ?? MAT.mud, s.height || undefined);

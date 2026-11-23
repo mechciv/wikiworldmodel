@@ -147,6 +147,26 @@ test.describe('the human landscape', () => {
       expect(p.animals).toBeGreaterThan(20);
     });
 
+    test('the people of a village go about, and the herds of a camp feed and move on, by the visit\'s clock', async ({ page }) => {
+      // The Nile's delta in 1500 BCE: the nearest of its villages, from low over its middle, where a person is tall
+      // enough on the screen to be drawn. Some of those drawn go a way of their own.
+      await page.goto(`/?b=${latestBuild()}&${low(30.8, 31.0, -1499, 900)}`);
+      await idle(page);
+      const near = (await scene(page))!.people!.near.find((s) => s.pattern === 'villages')!;
+      expect(near).toBeTruthy();
+      await page.goto(`/?b=${latestBuild()}&${low(near.lat, near.lon, -1499, 45)}`);
+      await idle(page);
+      const village = (await scene(page))!;
+      expect(village.people!.houses).toBeGreaterThan(100);
+      expect(village.going).toBeGreaterThan(0);
+      // Herders of the steppe, among their herds.
+      await page.goto(`/?b=${latestBuild()}&${low(47.2, 102.8, 1200, 80)}`);
+      await idle(page);
+      const camp = (await scene(page))!;
+      expect(camp.people!.animals).toBeGreaterThan(20);
+      expect(camp.going).toBeGreaterThan(2);
+    });
+
     test('a house stands in its yard, and a village has what its tradition says stood in it and round it', async ({ page }) => {
       // East Anglia in 1300: a peasant's house in its toft, with what its tradition says a holding had.
       await page.goto(`/?b=${latestBuild()}&${low(52.2, 0.4, 1300, 900)}`);

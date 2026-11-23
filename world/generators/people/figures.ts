@@ -4,11 +4,26 @@
 // the origin and faces +y.
 import { dome, figure, limb, MAT, type Mesh } from '../city/kit.ts';
 import { PI } from '../city/math.ts';
-import { loft } from '../life/forms.ts';
+import { bone, BONE, loft, STRIDE_HIPS } from '../life/forms.ts';
 import { enter, leave, turn } from './parts.ts';
 
 /** How many ways a person is drawn. */
 export const PERSON_VARIANTS = 8;
+
+/** How high a standing person's hips are, as a share of their height. */
+export const PERSON_HIP = 0.52;
+
+/**
+ * Whether a person drawn in a way goes about (life/routines.ts): one drawn walking or carrying is on their way as the
+ * clock starts; one who stands may set out; one who sits or kneels at work stays.
+ */
+export function personGoes(variant: number): 'going' | 'may' | 'stays' {
+  const v = ((variant % PERSON_VARIANTS) + PERSON_VARIANTS) % PERSON_VARIANTS;
+  return v === 2 || v === 3 ? 'going' : v === 4 || v === 5 ? 'stays' : 'may';
+}
+
+/** How long a stride of a person so tall is, in metres, drawn in a way: a child's is shorter. */
+export const personStride = (height: number, variant: number): number => STRIDE_HIPS * PERSON_HIP * height * (((variant % PERSON_VARIANTS) + PERSON_VARIANTS) % PERSON_VARIANTS === 6 ? 0.68 : 1);
 
 type P = [number, number, number];
 
@@ -51,18 +66,29 @@ const POSES: Pose[] = [
 
 /**
  * A person, drawn into a mesh at the frame's origin, facing +y: `variant` picks how it stands and what it wears,
- * `height` is a grown person's, and `cloth` and `skin` are the tints its cloth and its skin start from.
+ * `height` is a grown person's, and `cloth` and `skin` are the tints its cloth and its skin start from. With `walks`,
+ * the mesh is one the renderer may walk (life/routines.ts): its points say what they move with, as an animal's do
+ * (life/forms.ts, BONE), its legs striding one against the other and an arm that hangs swinging against its leg; and
+ * one drawn walking stands with its feet together, for the renderer to stride them.
  */
-export function drawPerson(m: Mesh, height: number, variant: number, detail: 0 | 1 | 2, cloth: number, skin: number): void {
+export function drawPerson(m: Mesh, height: number, variant: number, detail: 0 | 1 | 2, cloth: number, skin: number, walks = false): void {
   const v = ((variant % PERSON_VARIANTS) + PERSON_VARIANTS) % PERSON_VARIANTS;
   const H = v === 6 ? height * 0.68 : height;
+  const keep = m.entity;
+  if (walks) m.entity = bone(BONE.none);
   if (detail === 2) {
     m.mat = MAT.cloth;
     m.tint = cloth;
     figure(m, 0, 0, 0, H * (v === 4 || v === 5 ? 0.55 : 1), 0);
+    m.entity = keep;
     return;
   }
-  const p = POSES[v];
+  const drawn = POSES[v];
+  // One who goes about is drawn with the legs of one who stands: the stride is the renderer's.
+  const p: Pose = walks && personGoes(v) === 'going' ? { ...drawn, knee: STAND.knee, foot: STAND.foot, knee2: undefined, foot2: undefined } : drawn;
+  const strides = walks && personGoes(v) !== 'stays';
+  /** What a point of a limb moves with: `first` for the limbs that swing with the left leg, and how far down the limb it is. */
+  const code = (first: boolean, share: number): number => bone(first ? BONE.stride : BONE.counter, share);
   const n = detail === 0 ? 6 : 4;
   const at = (q: P, side: number): P => [q[0] * side * H, q[1] * H, q[2] * H];
   const hip: P = [0, p.hip[0] * H, p.hip[1] * H];
@@ -82,9 +108,12 @@ export function drawPerson(m: Mesh, height: number, variant: number, detail: 0 |
     const top: P = [side * 0.06 * H, hip[1], hip[2]];
     if (p.dress === 'robe' && p.hip[1] > 0.4) continue;
     skinTone();
-    limb(m, top[0], top[1], top[2], knee[0], knee[1], knee[2], 0.05 * H, 0.04 * H, n);
-    limb(m, knee[0], knee[1], knee[2], foot[0], foot[1], foot[2], 0.038 * H, 0.027 * H, n);
-    if (detail === 0) limb(m, foot[0], foot[1] - 0.02 * H, foot[2] - 0.012 * H, foot[0], foot[1] + 0.075 * H, foot[2] - 0.016 * H, 0.026 * H, 0.02 * H, 4);
+    // A leg strides from the hip: its knee half as far as its foot.
+    const first = side > 0;
+    const share = (z: number) => (top[2] > foot[2] ? Math.max(0, Math.min(1, (top[2] - z) / (top[2] - foot[2]))) : 0);
+    limb(m, top[0], top[1], top[2], knee[0], knee[1], knee[2], 0.05 * H, 0.04 * H, n, strides ? [code(first, 0), code(first, share(knee[2]))] : undefined);
+    limb(m, knee[0], knee[1], knee[2], foot[0], foot[1], foot[2], 0.038 * H, 0.027 * H, n, strides ? [code(first, share(knee[2])), code(first, 1)] : undefined);
+    if (detail === 0) limb(m, foot[0], foot[1] - 0.02 * H, foot[2] - 0.012 * H, foot[0], foot[1] + 0.075 * H, foot[2] - 0.016 * H, 0.026 * H, 0.02 * H, 4, strides ? [code(first, 1), code(first, 1)] : undefined);
   }
   // The body: the hips, the chest, the shoulders.
   if (p.dress === 'wrap') skinTone();
@@ -105,13 +134,16 @@ export function drawPerson(m: Mesh, height: number, variant: number, detail: 0 |
     const fall = (f: number, w: number, d: number) => ({ x: 0, y: hip[1] + stride * 0.5 * f, z: top + (hem * H - top) * f, w: w * H, h: d * H });
     // It hangs from the hips, a little fuller at its hem, and deeper where a stride pulls it.
     loft(m, [fall(0, 0.094, 0.068), fall(0.3, 0.1, 0.076), fall(0.7, 0.094 + (spread - 0.094) * 0.7, 0.08 + Math.abs(stride / H) * 0.3), fall(1, spread, 0.09 + Math.abs(stride / H) * 0.5)], n + 4, true);
-    // Under a robe's hem, close by, the feet it stands on: an ankle and a foot each, on the ground.
+    // Under a robe's hem, close by, the feet it stands on: an ankle and a foot each, on the ground. Where it walks they
+    // stride as the feet of legs from its hips would, the ankle a little less far than the foot.
     if (p.dress === 'robe' && detail === 0) {
       skinTone();
       for (const side of [1, -1]) {
         const foot = at(side < 0 && p.foot2 ? p.foot2 : p.foot, side);
-        limb(m, foot[0], foot[1], foot[2] + 0.07 * H, foot[0], foot[1], foot[2], 0.03 * H, 0.027 * H, n);
-        limb(m, foot[0], foot[1] - 0.02 * H, foot[2] - 0.012 * H, foot[0], foot[1] + 0.075 * H, foot[2] - 0.016 * H, 0.026 * H, 0.02 * H, 4);
+        const first = side > 0;
+        const ankle = hip[2] > foot[2] ? Math.max(0, 1 - (0.07 * H) / (hip[2] - foot[2])) : 1;
+        limb(m, foot[0], foot[1], foot[2] + 0.07 * H, foot[0], foot[1], foot[2], 0.03 * H, 0.027 * H, n, strides ? [code(first, ankle), code(first, 1)] : undefined);
+        limb(m, foot[0], foot[1] - 0.02 * H, foot[2] - 0.012 * H, foot[0], foot[1] + 0.075 * H, foot[2] - 0.016 * H, 0.026 * H, 0.02 * H, 4, strides ? [code(first, 1), code(first, 1)] : undefined);
       }
       clothed();
     }
@@ -123,9 +155,14 @@ export function drawPerson(m: Mesh, height: number, variant: number, detail: 0 |
     const shoulder: P = [side * 0.118 * H, neck[1], neck[2] - 0.04 * H];
     if (p.dress === 'wrap') skinTone();
     else clothed();
-    limb(m, shoulder[0], shoulder[1], shoulder[2], elbow[0], elbow[1], elbow[2], 0.038 * H, 0.03 * H, n);
+    // An arm that hangs swings against the leg of its side, less far than a leg strides; one that holds or carries is
+    // held as it is.
+    const hangs = strides && hand[2] < 0.5 * H && hand[1] < 0.12 * H;
+    const first = side < 0;
+    const far = 0.4;
+    limb(m, shoulder[0], shoulder[1], shoulder[2], elbow[0], elbow[1], elbow[2], 0.038 * H, 0.03 * H, n, hangs ? [code(first, 0), code(first, far * 0.5)] : undefined);
     skinTone();
-    limb(m, elbow[0], elbow[1], elbow[2], hand[0], hand[1], hand[2], 0.028 * H, 0.022 * H, n);
+    limb(m, elbow[0], elbow[1], elbow[2], hand[0], hand[1], hand[2], 0.028 * H, 0.022 * H, n, hangs ? [code(first, far * 0.5), code(first, far)] : undefined);
   }
   // The neck and the head, and its hair.
   skinTone();
@@ -163,6 +200,7 @@ export function drawPerson(m: Mesh, height: number, variant: number, detail: 0 |
     m.tint = 128;
     turnAt(m, 0, 0.44 * H, 0, [[0.16, 0], [0.15, 0.08], [0.02, 0.085]].map(([r, z]) => [r * H, z * H]), detail === 0 ? 8 : 5, 0.7);
   }
+  m.entity = keep;
 }
 
 /** A turned shape about a point of the figure's frame. */

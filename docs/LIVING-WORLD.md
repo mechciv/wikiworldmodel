@@ -116,7 +116,10 @@ WebGPU compute culling can come later, and is not needed yet. Virtual geometry i
 
 - At a past time a valley at street level is invented, as the heights are only 1° across.
 - Colour, feathers and behaviour are mostly unknowable. A stand-in is a guess at the kind of thing, and is
-  labelled as one.
+  labelled as one. What an animal does once it is drawn, feeding and moving on, wandering, walking a round, going
+  slowly up to a herd and watching it, circling in the air or the water, is a routine its body plan names
+  ([FORMS.md](FORMS.md)), the generator's own and no claim about the animal; and none answers another: nothing eats,
+  flees or is caught ([plans/RENDERING.md](plans/RENDERING.md), step 5).
 - A place's richness partly reflects where people have dug.
 - Some of the best data may be closed to us: the licences of species ranges and trait databases have to be
   read one at a time, and share-alike or non-commercial ones cannot come in.

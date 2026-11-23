@@ -313,7 +313,7 @@ function checkedTitle(c: ClaimRecord): string {
 const CLOSE = '<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8"/></svg>';
 
 /** The properties whose values are times, which competing claims of can be set on a line. */
-const TIME_PROPS = new Set(['date', 'start', 'end', 'earlier_than', 'later_than', 'end_before']);
+const TIME_PROPS = new Set(['date', 'start', 'end', 'earlier_than', 'later_than', 'end_before', 'start_before']);
 
 /**
  * Competing claims of a time, as points on a line: each where it puts the time, with a bar for its spread (its 1σ, or the
@@ -668,7 +668,20 @@ export class InspectPanel {
     const rock = under
       ? `<p>${esc(bedrockWords(under))}.${stripped} ${under.rock ? 'Its outcrops and its stones are drawn as that rock; how the rock looks is the renderer’s.' : 'That it is loose says nothing of its grain, and nothing is drawn from it.'}</p><p class="note">${under_rests}</p>`
       : '';
-    const ground = where.sea ? '' : `<section class="here ground"><h3>The ground</h3>${made}${rock}</section>`;
+    // The shape of the ground: the elevation's own grid; what the world gives within its cells, the survey's own or
+    // today's carried back; and what is invented below that.
+    const sh = spec.shape;
+    const cell = sh ? `${Math.round(sh.patch.step * 3600)}″` : '';
+    const invented = 'are invented: as rough as the ground about them is at its own grain, and cut by water run over them.';
+    const shaped = !sh
+      ? `<p>Its shape is the elevation field’s alone, on a grid of ${esc(String(spec.relief.step))}°. The hills and valleys within a cell ${invented}</p>`
+      : sh.held
+        ? `<p>Its shape is the survey’s of today’s Earth, cell by cell of ${esc(cell)} about the place, laid over the relief’s grid. Hills and valleys smaller than a cell ${invented}</p>`
+        : `<p>Its shape is today’s, carried back on its plate and laid over the elevation of the time, a grid of ${esc(String(spec.relief.step))}°: ${
+            sh.share >= 1 ? 'all of it stood here then' : sh.share > 0 ? `${Math.round(sh.share * 100)}% of it stood here then` : 'none of it stood at this place then, and a range within sight keeps its own'
+          }, ${sh.range ? `as the record of ${this.link(sh.range.id, sh.range.label)} says` : 'by the model’s rule'}. A model’s answer: its valleys are today’s, and it stands higher or lower than today by as much as that elevation says the land has risen or sunk since. What is left, and everything smaller than the survey’s cells of ${esc(cell)}, ${invented.replace('are invented', 'is invented')}</p>`;
+    const shape = `<section class="here shape"><h3>The ground’s shape</h3>${shaped}${sh ? `<p class="note">${esc(sh.field)}</p>` : ''}</section>`;
+    const ground = where.sea ? '' : `${shape}<section class="here ground"><h3>The ground</h3>${made}${rock}</section>`;
     this.frame(spec.site.place ? spec.site.label : spec.site.stage ?? 'This place', `<p class="summary">${summary}</p>
       <div class="meta"><span class="badge basis-procedural">procedural</span></div>
       ${when}${thin}${none}${formation}${tiers}${ground}

@@ -1,0 +1,22 @@
+id: src:ghosh-2006-altiplano
+type: publication
+kind: measurement
+citation: >-
+  Ghosh, P., Garzione, C.N. & Eiler, J.M. (2006). Rapid uplift of the Altiplano revealed through
+  13C-18O bonds in paleosol carbonates. Science 311(5760), 511–515.
+authors:
+  - "Ghosh, P."
+  - "Garzione, C.N."
+  - "Eiler, J.M."
+published: 2006
+title: Rapid uplift of the Altiplano revealed through 13C-18O bonds in paleosol carbonates
+container: Science 311(5760), 511–515
+doi: 10.1126/science.1119365
+verified:
+  by: machine:claude-code
+  how: >-
+    Abstract only, read on 22 November 2026 from the Europe PMC record (PMID 16439658); citation
+    from Crossref. The article itself was not read: Science's site is closed to automated readers,
+    and the California Institute of Technology's repository record holds the abstract and no file.
+    So the heights reckoned for the single soils are known here only as Boschman (2021) tabulates
+    them.

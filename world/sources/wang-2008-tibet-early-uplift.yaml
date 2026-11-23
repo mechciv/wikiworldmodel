@@ -1,0 +1,28 @@
+id: src:wang-2008-tibet-early-uplift
+type: publication
+kind: measurement
+citation: >-
+  Wang, C., Zhao, X., Liu, Z., Lippert, P.C., Graham, S.A., Coe, R.S., Yi, H., Zhu, L., Liu, S. &
+  Li, Y. (2008). Constraints on the early uplift history of the Tibetan Plateau. Proceedings of the
+  National Academy of Sciences 105(13), 4987–4992.
+authors:
+  - "Wang, C."
+  - "Zhao, X."
+  - "Liu, Z."
+  - "Lippert, P.C."
+  - "Graham, S.A."
+  - "Coe, R.S."
+  - "Yi, H."
+  - "Zhu, L."
+  - "Liu, S."
+  - "Li, Y."
+published: 2008
+title: Constraints on the early uplift history of the Tibetan Plateau
+container: Proceedings of the National Academy of Sciences 105(13), 4987–4992
+doi: 10.1073/pnas.0703595105
+verified:
+  by: machine:claude-code
+  how: >-
+    Abstract and full text read on 22 November 2026 on the article's page at PubMed Central
+    (PMC2278176), which came whole to a plain request; citation from Crossref. The supporting
+    information was not read. The page has no page numbers, so locators name the section.

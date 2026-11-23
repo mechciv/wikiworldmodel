@@ -8,11 +8,12 @@ import { defaultLeaf, LEAF_KINDS, type LeafKindName } from '../../../core/leaves
 import { lookup, type Scenario } from '../../../core/scenario.ts';
 import type { LivingTaxon, SceneSpec } from '../../../core/scene.ts';
 import { GroundSampler } from '../../../world/generators/city/ground.ts';
-import { placeLook, type LivingParams } from '../../../world/generators/life/scene/v10.ts';
+import { Heights, placeLook, type LivingParams } from '../../../world/generators/life/scene/v12.ts';
 import { snowOf } from '../../../world/generators/life/climate.ts';
 import { declination, MID_DAY } from '../../../core/water.ts';
-import { protoParts } from '../../../world/generators/life/stream.ts';
-import { CityRenderer, type CellGPU, type CityFrame } from '../gl/city.ts';
+import { protoParts, type NamedGroup } from '../../../world/generators/life/stream.ts';
+import { ROUTE, wayAt } from '../../../world/generators/life/routines.ts';
+import { CityRenderer, SHARE_STEPS, type CellGPU, type CityFrame } from '../gl/city.ts';
 import type { GL } from '../gl/context.ts';
 import type { V3 } from '../mat.ts';
 import { groundLook, groundTones, rockLook } from './groundlook.ts';
@@ -69,6 +70,36 @@ function groundCover(spec: SceneSpec): [number, boolean, { first: LeafKindName; 
   return [all > 0 ? needles / all : 0, under, fallen];
 }
 
+/**
+ * What the land bears at each of a run of heights, from the lowest ground of a scene's widest grid to its highest, where
+ * the world gives the climate at a height: the shares of forest, low plants and bare ground of each height's own
+ * climate, as the generator has them (Heights), for the ground beyond the plan's map.
+ */
+function sharesByHeight(spec: SceneSpec, far: { z: Int16Array; unit?: number; base?: number }): { from: number; step: number; band: number; shares: Float32Array } | undefined {
+  const params = spec.generator.params as unknown as LivingParams;
+  if (!spec.climate || !params.climate) return undefined;
+  let lo = Infinity;
+  let hi = -Infinity;
+  for (let k = 0; k < far.z.length; k++) {
+    const v = far.z[k];
+    if (v < lo) lo = v;
+    if (v > hi) hi = v;
+  }
+  const from = Math.max(0, lo * (far.unit ?? 0.1) + (far.base ?? 0));
+  const top = hi * (far.unit ?? 0.1) + (far.base ?? 0);
+  if (!(top > from + 1)) return undefined;
+  const step = (top - from) / (SHARE_STEPS - 1);
+  const heights = new Heights(spec);
+  const shares = new Float32Array(SHARE_STEPS * 3);
+  for (let k = 0; k < SHARE_STEPS; k++) {
+    const g = heights.at(from + k * step);
+    shares[k * 3] = g.forest;
+    shares[k * 3 + 1] = g.herb;
+    shares[k * 3 + 2] = g.bare;
+  }
+  return { from, step, band: heights.band, shares };
+}
+
 /** What a camera or a name stands on on land: the ground, or the top of the sea over it. In a scene of the sea, the ground. */
 class SurfaceSampler extends GroundSampler {
   override at(x: number, y: number): number {
@@ -100,8 +131,8 @@ export class LifeScene {
   people?: PeopleSummary;
   waterLevel = 0;
   onChange: () => void = () => {};
-  /** what the last view drew */
-  last = { instances: 0, triangles: 0, meshes: 0, pending: 0, ms: 0 };
+  /** what the last view drew; and how many of them go a way of their own, by the visit's clock (world/generators/life/routines.ts) */
+  last = { instances: 0, triangles: 0, meshes: 0, pending: 0, ms: 0, going: 0 };
   /** how long the ground took, in ms */
   groundMs = 0;
   private worker: Worker | null = null;
@@ -212,7 +243,7 @@ export class LifeScene {
     // afar. And the rock under it: what its outcrops and its stones are drawn of.
     const rock = rockLook(this.spec.bedrock);
     const ground = groundLook(this.spec.substrate, rock);
-    r.setLand(Float32Array.from(groundTones(['soil', 'herb', 'bare', 'canopy', 'distant'].flatMap((k) => tones[k]), ground)), [Math.min(clim?.forest ?? 0, cover.forests), Math.min(clim?.herb ?? 0, cover.plants), 1 - cover.plants * (1 - (clim?.bare ?? 1))], snowOf(this.spec));
+    r.setLand(Float32Array.from(groundTones(['soil', 'herb', 'bare', 'canopy', 'distant'].flatMap((k) => tones[k]), ground)), [Math.min(clim?.forest ?? 0, cover.forests), Math.min(clim?.herb ?? 0, cover.plants), 1 - cover.plants * (1 - (clim?.bare ?? 1))], snowOf(this.spec), sharesByHeight(this.spec, g.levels[g.levels.length - 1]));
     r.setSubstrate(ground);
     r.setRock(rock);
     r.setGroundCover(...groundCover(this.spec));
@@ -246,7 +277,14 @@ export class LifeScene {
 
   private selection(m: Extract<FromLifeWorker, { type: 'selection' }>): void {
     this.waiting = false;
-    this.last = { instances: m.instances, triangles: m.triangles, meshes: m.batches.length, pending: m.pending, ms: m.ms };
+    // Those among them that go somewhere: a way's ninth number is how fast.
+    let going = 0;
+    for (const b of m.batches) {
+      if (!b.ways) continue;
+      const w = new Float32Array(b.ways);
+      for (let i = 8; i < w.length; i += ROUTE) if (w[i] > 0) going++;
+    }
+    this.last = { instances: m.instances, triangles: m.triangles, meshes: m.batches.length, pending: m.pending, ms: m.ms, going };
     if (this.active) this.apply(m);
     else this.held = [m];
     const taxa = this.spec.taxa;
@@ -255,9 +293,30 @@ export class LifeScene {
       return { id: t.id, label: t.label, kind: 'taxon', form: { type: 'generic' }, rings: [], at: g.at, base: g.base, time: t.time, basis: 'procedural', curated: true, rank: (t.length ?? 0) >= 2 ? 2 : 3 } as CityStructure;
     });
     this.tops = Float32Array.from(m.groups, (g) => g.top);
+    this.homes = m.groups;
+    this.follow(this.clock);
     this.labelSerial++;
     this.onChange();
     this.send();
+  }
+
+  /** the groups named, as the scene put them: where each one's first stands, and the way it goes, if it goes one */
+  private homes: NamedGroup[] = [];
+  /** the second of the visit's clock the last frame was drawn at */
+  private clock = 0;
+
+  /** Each name goes with the first of its group as that one goes its way, by the visit's clock (world/generators/life/routines.ts). */
+  private follow(clock: number): void {
+    this.clock = clock;
+    for (let i = 0; i < this.homes.length && i < this.names.length; i++) {
+      const g = this.homes[i];
+      if (!g.way || !g.face) continue;
+      const at = wayAt(g.way, 0, g.face[0], g.face[1], clock);
+      const name = this.names[i];
+      name.at = [g.at[0] + at.x, g.at[1] + at.y];
+      name.base = g.base + at.z;
+      this.tops[i] = g.top + at.z;
+    }
   }
 
   private apply(m: Extract<FromLifeWorker, { type: 'selection' }>): void {
@@ -318,6 +377,7 @@ export class LifeScene {
       width: outW,
       height: outH,
     };
+    this.follow(clock);
     this.renderer.render(f, this.pathsGpu ? [this.pathsGpu] : [], outW, outH);
   }
 

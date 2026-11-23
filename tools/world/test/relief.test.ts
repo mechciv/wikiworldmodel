@@ -1,8 +1,16 @@
 // Today's relief under the sea of each time (field:earth/relief): today's water on the grid, hollows the ocean does not
 // reach held at the pass they would spill over, and the finer tiles a field of a tenth of a degree is cut into.
+import { mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { inflateSync } from 'node:zlib';
 import { describe, expect, it } from 'vitest';
+import { decodeTile } from '../../../core/container.ts';
+import { fineHas, sceneShape, type ReliefFineHeader, type ReliefInfo } from '../../../core/relief.ts';
 import { fieldFor, fieldLods, sliceField, tileGrid, timeBins, type GridField, type Snapshot } from '../src/build/fields.ts';
 import { fillFromOcean, rasterize, WATER, waterMask, type Areas } from '../src/build/relief.ts';
+import { encodeFineTile, fineLevel } from '../src/build/shape.ts';
+import { meanGrid } from '../src/tiff.ts';
 import type { Field } from '../src/world.ts';
 
 const square = (w: number, s: number, e: number, n: number) => [[w, s], [e, s], [e, n], [w, n], [w, s]];
@@ -111,5 +119,103 @@ describe('the tiles of a field finer than 1°', () => {
     const [b] = sliceField([s], coarse, new Map());
     // A tent over ±1° is symmetric, so a straight ramp averages to its middle.
     expect(b.elev[coarse.nx + 1]).toBe(1800);
+  });
+});
+
+describe("the relief's finer level", () => {
+  /** A global raster as a GeoTIFF: one strip of 32-bit floats, its cells `step` degrees across from 90°N and 180°W. */
+  const globalTiff = (step: number, at: (lat: number, lon: number) => number): string => {
+    const width = Math.round(360 / step);
+    const height = Math.round(180 / step);
+    const px = new Float32Array(width * height);
+    for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) px[y * width + x] = at(90 - (y + 0.5) * step, -180 + (x + 0.5) * step);
+    const data = new Uint8Array(px.buffer);
+    const doubles = (v: number[]) => new Uint8Array(Float64Array.from(v).buffer);
+    const scale = doubles([step, step, 0]);
+    const tie = doubles([0, 0, 0, -180, 90, 0]);
+    const tags: [number, number, number, number][] = [];
+    const dir = 8;
+    const count = 11;
+    let at2 = dir + 2 + count * 12 + 4;
+    const place = (b: Uint8Array) => {
+      const o = at2;
+      at2 += b.length;
+      return o;
+    };
+    const dataAt = place(data);
+    const scaleAt = place(scale);
+    const tieAt = place(tie);
+    tags.push([256, 4, 1, width], [257, 4, 1, height], [258, 3, 1, 32], [259, 3, 1, 1], [273, 4, 1, dataAt], [277, 3, 1, 1], [278, 4, 1, height], [279, 4, 1, data.length], [339, 3, 1, 3], [33550, 12, 3, scaleAt], [33922, 12, 6, tieAt]);
+    const out = new Uint8Array(at2);
+    const v = new DataView(out.buffer);
+    out[0] = 0x49;
+    out[1] = 0x49;
+    v.setUint16(2, 42, true);
+    v.setUint32(4, dir, true);
+    v.setUint16(dir, count, true);
+    tags.forEach(([tag, type, n, value], i) => {
+      const o = dir + 2 + i * 12;
+      v.setUint16(o, tag, true);
+      v.setUint16(o + 2, type, true);
+      v.setUint32(o + 4, n, true);
+      if (type === 3) v.setUint16(o + 8, value, true);
+      else v.setUint32(o + 8, value, true);
+    });
+    out.set(data, dataAt);
+    out.set(scale, scaleAt);
+    out.set(tie, tieAt);
+    const path = join(mkdtempSync(join(tmpdir(), 'relief-')), 'survey.tif');
+    writeFileSync(path, out);
+    return path;
+  };
+
+  // A made-up survey, its cells a degree across: a sea 3,000 m deep west of the prime meridian, a level plain at 200 m
+  // east of it to 90°E, and beyond that hills 400 m either way of 1,000 m, three or four cells across.
+  const survey = (lat: number, lon: number) => (lon < 0 ? -3000 : lon < 90 ? 200 : 1000 + 400 * Math.sin(lon * 1.9) * Math.cos(lat * 1.7));
+  const PARAMS = { res_arcsec: 3600, tile_deg: 30, reach_deg: 30, floor_m: -200, least_m: 2 };
+
+  it("keeps, for each cell of the survey, what it has less what the field's grid makes of the place; and only where there is ground the grid does not give", async () => {
+    const path = globalTiff(1, survey);
+    const mean = await meanGrid(path, 6);
+    const level = await fineLevel(path, mean, PARAMS);
+    expect(level.step).toBe(1);
+    // Tiles of the hills, and none of the deep sea nor of the level plain, which the grid's means already are.
+    expect(level.tiles.has('30_120')).toBe(true);
+    expect(level.tiles.has('30_-90')).toBe(false);
+    expect(level.tiles.has('30_30')).toBe(false);
+    const info: ReliefInfo = { format: 'lightworld-relief@1', field: 'field:test', title: 't', source: 'src:test', fine: { step: 1, tile_deg: 30, dir: 'relief/fine', reach_deg: 30, rows: level.rows } };
+    expect(fineHas(info.fine, 10, 2)).toBe(true);
+    expect(fineHas(info.fine, 3, 2)).toBe(false);
+    // Laid back over the grid's means read straight between its nodes, the cells are the survey's, as near as a byte holds.
+    const between = (lat: number, lon: number) => {
+      const fy = (90 - lat) / 6;
+      const fx = (lon + 180) / 6;
+      const j = Math.floor(fy);
+      const i = Math.floor(fx);
+      const v = fy - j;
+      const u = fx - i;
+      const m = (jj: number, ii: number) => mean.data[jj * mean.nx + (ii % mean.nx)];
+      return (m(j, i) * (1 - u) + m(j, i + 1) * u) * (1 - v) + (m(j + 1, i) * (1 - u) + m(j + 1, i + 1) * u) * v;
+    };
+    const shape = sceneShape({ info, tile: (key) => level.tiles.get(key), at: { lat: 10, lon: 130 } })!;
+    let worst = 0;
+    // (A scene reads no further east and west than six degrees.)
+    for (const [lat, lon] of [[10.5, 130.5], [3.5, 127.5], [17.5, 134.5], [-8.5, 125.5]]) {
+      const cell = shape.patch.z[Math.round((shape.patch.lat0 - lat) / shape.patch.step) * shape.patch.nx + Math.round((lon - shape.patch.lon0) / shape.patch.step)];
+      worst = Math.max(worst, Math.abs(between(lat, lon) + cell - survey(lat, lon)));
+    }
+    expect(worst).toBeLessThan(12);
+    // A tile as a file: its codes deflated, and the same codes when it is read again.
+    const file = encodeFineTile('30_120', level.tiles.get('30_120')!, level);
+    const { header, arrays } = decodeTile<ReliefFineHeader>(file.buffer.slice(file.byteOffset, file.byteOffset + file.byteLength) as ArrayBuffer);
+    expect([header.north, header.west, header.n, header.packed]).toEqual([30, 120, 30, 'deflate']);
+    const back = inflateSync(arrays[header.codes] as Uint8Array);
+    expect([...new Int8Array(back.buffer, back.byteOffset, back.byteLength)]).toEqual([...level.tiles.get('30_120')!]);
+  });
+
+  it('refuses a survey whose cells are not the size the field says', async () => {
+    const path = globalTiff(1, survey);
+    const mean = await meanGrid(path, 6);
+    await expect(fineLevel(path, mean, { ...PARAMS, res_arcsec: 60 })).rejects.toThrow(/cells of 3600″, where the field's finer level says 60″/);
   });
 });

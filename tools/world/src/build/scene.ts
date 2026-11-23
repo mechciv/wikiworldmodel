@@ -15,7 +15,7 @@ import { cubeRoot, placeSpec, reliefPatch, sizeWithin, type PlaceWorld } from '.
 import type { SceneWater } from '../../../../core/scene.ts';
 import { bedrockWords, substrateWords, type SceneBedrock, type SceneSubstrate } from '../../../../core/substrate.ts';
 import { FULL_BUDGET, SceneStream } from '../../../../world/generators/life/stream.ts';
-import { VERSION, type LivingParams } from '../../../../world/generators/life/scene/v10.ts';
+import { VERSION, type LivingParams } from '../../../../world/generators/life/scene/v12.ts';
 import { FormTree } from '../forms.ts';
 import { pbdbNumber } from '../pbdb.ts';
 import { sha256, stableStringify } from '../util.ts';
@@ -281,7 +281,7 @@ export interface Witness {
 }
 
 /** A few places the browser is held to: the same scene, within the tolerance of core/fingerprint.ts, as the build makes here. */
-export function witnesses(s: Solved, index: AtlasIndex, files: Map<string, string>, elevation: Snapshot[], climate: ClimateKeyframe[], climateGridInfo: { step: number; nx: number; ny: number; lon0: number; lat0: number }, rule: ClimateRule, planet: PlanetFile, log: (m: string) => void, water?: (t: number, ageMa: number, at: { lat: number; lon: number }, isoline: number) => SceneWater | undefined, months?: (pw: PlaceWorld, lat: number, lon: number, ageMa: number) => PlaceWorld['months'], sea?: SeaOut): Witness[] {
+export function witnesses(s: Solved, index: AtlasIndex, files: Map<string, string>, elevation: Snapshot[], climate: ClimateKeyframe[], climateGridInfo: { step: number; nx: number; ny: number; lon0: number; lat0: number }, rule: ClimateRule, planet: PlanetFile, log: (m: string) => void, water?: (t: number, ageMa: number, at: { lat: number; lon: number }, isoline: number) => SceneWater | undefined, months?: (pw: PlaceWorld, lat: number, lon: number, ageMa: number) => PlaceWorld['months'], sea?: SeaOut, shape?: { at: NonNullable<PlaceWorld['shape']>; when?: number; plateNow?: PlaceWorld['plateNow'] }): Witness[] {
   // The land's forms and the sea's, keyed by what they are, so they never clash.
   const seaForms = sea?.index.forms ? (JSON.parse(sea.files.get(sea.index.forms)!) as Record<string, Form>) : {};
   const forms = { ...seaForms, ...(JSON.parse(files.get(index.forms)!) as Record<string, Form>) };
@@ -290,14 +290,34 @@ export function witnesses(s: Solved, index: AtlasIndex, files: Map<string, strin
   // places a mistake would hide: as far toward a pole as it has land, and by the line where longitude wraps.
   const stages = index.bins.filter((b) => b.rows > 200);
   const chosen = [stages[Math.floor(stages.length * 0.3)], stages[Math.floor(stages.length * 0.6)], stages[Math.floor(stages.length * 0.9)]].filter(Boolean);
+  // And the stage of a time today's shape is carried back to, where the world carries it: at the patch, of those with
+  // the longest lists, where that shape stands highest.
+  const carriedStage = shape?.when !== undefined ? index.bins.find((b) => b.from <= shape.when! && shape.when! <= b.to && !chosen.includes(b)) : undefined;
+  if (carriedStage) chosen.push(carriedStage);
   const patchPlace = (key: number): [number, number] => [90 - (Math.floor(key / index.grid.nx) + 0.5) * index.grid.step, -180 + ((key % index.grid.nx) + 0.5) * index.grid.step];
   chosen.forEach((ref, order) => {
     const bin = JSON.parse(files.get(ref.file)!) as AtlasBin;
     // The sea's stage of the same span, if its atlas has one.
     const seaBin = sea?.bins.find((b) => b.from === bin.from && b.to === bin.to);
     const pw = placeWorld(s, index, bin, forms, elevation, climate, climateGridInfo, rule, planet, seaBin && sea ? { bin: seaBin, grid: sea.index.grid, index: sea.index } : undefined);
+    // Today's shape, where the world carries it back to the stage's time: the build's scenes stand on the elevation of
+    // their time. And today's plates, which a browser has too, to find the plate under a place by.
+    if (shape) {
+      pw.shape = shape.at;
+      pw.held = false;
+      if (shape.plateNow) pw.plateNow = shape.plateNow;
+    }
     const keys = Object.keys(bin.nodes).map(Number);
     const places: [number, number][] = [patchPlace(keys.sort((a, b) => bin.nodes[String(b)].length - bin.nodes[String(a)].length || a - b)[0])];
+    if (ref === carriedStage) {
+      const reliefOf = (k: number) => {
+        const z = placeSpec(pw, ...patchPlace(k), toMa(bin.slice))?.shape?.patch.z;
+        return z ? z.reduce((m, v) => Math.max(m, Math.abs(v)), 0) : 0;
+      };
+      const high = keys.slice(0, 12).map((k) => ({ k, relief: reliefOf(k) })).sort((a, b) => b.relief - a.relief || a.k - b.k)[0];
+      places.length = 0;
+      if (high && high.relief > 0) places.push(patchPlace(high.k));
+    }
     if (order === 1) {
       const polar = [...keys].sort((a, b) => Math.abs(patchPlace(b)[0]) - Math.abs(patchPlace(a)[0]) || a - b)[0];
       places.push(patchPlace(polar));
@@ -321,7 +341,7 @@ export function witnesses(s: Solved, index: AtlasIndex, files: Map<string, strin
       if (w) spec.water = w;
       const stream = new SceneStream(spec, FULL_BUDGET);
       out.push({ lat, lon, t: bin.slice, print: stream.print(), taxa: spec.taxa.length });
-      log(`witness ${ref.name}: ${spec.taxa.length} taxa at ${lat}, ${lon}, ${spec.biome.climate}${spec.climate ? ` (${spec.climate.field.replace('field:earth/', '')} at ${spec.climate.ageMa} Ma, month ${spec.climate.month})` : ''}, water ${stream.look.water} m, ${spec.water ? `${spec.water.rivers.length} rivers (${spec.water.tier})` : 'an invented river'}`);
+      log(`witness ${ref.name}: ${spec.taxa.length} taxa at ${lat}, ${lon}, ${spec.biome.climate}${spec.climate ? ` (${spec.climate.field.replace('field:earth/', '')} at ${spec.climate.ageMa} Ma, month ${spec.climate.month})` : ''}, water ${stream.look.water} m, ${spec.water ? `${spec.water.rivers.length} rivers (${spec.water.tier})` : 'an invented river'}${spec.shape ? `, ${Math.round(spec.shape.share * 100)}% of today's shape${spec.shape.range ? ` (${spec.shape.range.label})` : ''}` : ''}`);
     }
   });
   return out;

@@ -1,4 +1,4 @@
-// The settlement generator, version 5 (docs/HUMAN-LANDSCAPE.md): the anonymous human landscape of a scene. From the
+// The settlement generator, version 6 (docs/HUMAN-LANDSCAPE.md): the anonymous human landscape of a scene. From the
 // people part of a scene's spec it lays out where people lived, how many houses, of what kind, and the fields and
 // pastures around them, in the scene's local metres. Nobody recorded any of these houses: how many there are follows
 // HYDE's people through the anthromes, and the cities of the lists and of the world's records where they name one; what
@@ -32,19 +32,28 @@
 //     what it does say (dwellings.ts, fillDwelling): a round house takes no gable, a court no farmhouse's width.
 //   - The ground is trodden round each house, and no longer in a disc at the middle of houses that stand far apart.
 //
-// Version 4 (docs/plans/RENDERING.md, the fidelity pass): a figure's body and dress, and what houses are built of, are
-// drawn afresh; where everything stands is what version 3 made.
+// Version 4:
+//   - People go about, and the animals they kept feed and move on (life/routines.ts): each has a way of its own, to a
+//     place or two near where it stands and back, which the renderer moves it along by the visit's clock. A person makes
+//     for the door of another house of the settlement or for something the settlement had of its own, a well or an oven,
+//     and keeps clear of every house and of the yards that are enclosed; one who stands in such a yard leaves it by its
+//     front, where its way in is. A herd keeps together, and out from among the houses. Where each stands as the clock
+//     starts is what version 3 made. No record says anything of any of it: who walks, where to, how fast and how long
+//     they stay are the generator's.
 //
-// Version 5 (docs/plans/RENDERING.md, the fidelity pass):
+// Version 5 (docs/plans/RENDERING.md, the fidelity pass): a figure's body and dress, and what houses are built of, are
+// drawn afresh, on the legs and arms that version 4 set walking; where everything stands is what version 4 made.
+//
+// Version 6 (docs/plans/RENDERING.md, the fidelity pass):
 //   - A house close by has the relief its claims support (dwellings.ts): a wall that is built up is as thick as its
 //     kind where a door or a window is cut through it, with a lintel, a sill and a threshold; a wall of earth, turf or
 //     dry stone leans in as it rises; a flat roof's walls rise past its deck as its parapet, under a coping, with the
-//     ends of its beams through them. From a way off a house is what version 4 drew.
+//     ends of its beams through them. From a way off a house is what version 5 drew.
 //   - A field under a crop has the crop standing on it close by, in rows along its plot (crops.ts): one plain stand,
 //     the same everywhere, which names no crop. The plots are laid out by core/plots.ts, for the ground's colour and for
 //     what is sown alike.
-//   - A figure in a robe has feet under its hem, close by.
-//   Where every house, work, animal and path stands is what version 4 made.
+//   - A figure in a robe has feet under its hem, close by, which stride with it as it walks.
+//   Where every house, work, animal and path stands, and every way that is walked, is what version 5 made.
 //
 // Everything is seeded by the world's 5′ cells and the anthromes' step, not by the scene, so two scenes that overlap put
 // their settlements in the same places: only the ground they stand on, which is the scene's, can move one a little.
@@ -56,13 +65,15 @@ import type { SceneSpec } from '../../../../core/scene.ts';
 import { dcos, hash2, hash3, PI, Rng, TAU } from '../../city/math.ts';
 import { POSE } from '../../life/forms.ts';
 import { fbm, noise } from '../../life/land.ts';
-import { PIECE, towered, towerSide, type WallWord, type WorkSpec } from '../works.ts';
+import { routineOf, wayBeside, wayFor, type Pace, type RoutineParams } from '../../life/routines.ts';
+import { personGoes, PERSON_HIP } from '../figures.ts';
+import { PIECE, towered, towerSide, WORK_VARIANTS, type WallWord, type WorkSpec } from '../works.ts';
 import { ENCLOSURE_SIZE } from '../yard.ts';
 import type { CropParams } from '../crops.ts';
 import { MAT } from '../../city/kit.ts';
 
 export const GENERATOR = 'gen:people/settlement';
-export const VERSION = 5;
+export const VERSION = 6;
 
 const EARTH = 6371000;
 const DEG = PI / 180;
@@ -179,7 +190,12 @@ export interface SettlementParams {
    * People by the houses, boats on the water beside a settlement, and paths between settlements: drawn so that a scene
    * has its scale and its ways. No record says anything of any of them; without these parameters none are drawn.
    */
-  figures?: { per_house: number; most_in_settlement: number; most: number; height: number };
+  /**
+   * `walk`: how the people go about once they are drawn (life/routines.ts): how fast, m/s; how long one takes to get
+   * going, s; how far each leg of a way is, m; how long one stays at each place, s; how far the ground may lie off the
+   * straight line of a leg, m; and how many places are tried before one stays put. Unsaid, they stay where they stand.
+   */
+  figures?: { per_house: number; most_in_settlement: number; most: number; height: number; walk?: { speed: number; go: number; range: [number, number]; stay: [number, number]; sag: number; tries: number } };
   /**
    * What stood by the houses, where a tradition's `outbuildings` name it: how many where none is counted, and the plain
    * one of each use (dwellings.ts, OutbuildingParams); and the most of a settlement's own things a scene draws
@@ -219,6 +235,8 @@ export interface Kept {
   phase: number;
   /** 0–255: lower ones stay in view from further off */
   rank: number;
+  /** where its way starts among the plan's ways, if it goes one (life/routines.ts) */
+  way?: number;
 }
 
 /** A house: where it stands, which way it faces, which dwelling it is, and its rank for the view. */
@@ -272,6 +290,8 @@ export interface Work {
   /** which piece it is, in the plan's list, and its settlement */
   form: number;
   settlement: number;
+  /** for a person who goes about: where their way starts among the plan's ways (life/routines.ts) */
+  way?: number;
 }
 
 /** A kind of piece the plan draws, and what says the town had it: a tradition's id, a record's, or `generic`. */
@@ -320,6 +340,8 @@ export interface SettlementPlan {
   workForms: WorkForm[];
   /** the animals its people kept, where a husbandry tradition names them */
   animals: Kept[];
+  /** the ways its people and their animals go, ROUTE numbers each (life/routines.ts): a person's or an animal's `way` says where its own starts */
+  ways: number[];
   /** the paths between its settlements: each a line of points, flat [x, y, …] in the scene's metres; and how wide they are */
   paths: number[][];
   pathWidth: number;
@@ -374,9 +396,11 @@ interface TownOf {
 
 /**
  * The plan of a scene's people. `ground` gives the height at a place and `water` the level of the water there, so that no
- * house stands in a river or on a cliff. The climate class picks the generic house where no tradition holds.
+ * house stands in a river or on a cliff. The climate class picks the generic house where no tradition holds. `beasts` is
+ * how the animals its people kept go about once they are drawn: the living scene's own parameters for its wild ones
+ * (gen:life/scene, animals.routines), handed over by whoever draws both. Without it they stay where they stand.
  */
-export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: number, y: number) => number, extent: number): SettlementPlan {
+export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: number, y: number) => number, extent: number, beasts?: RoutineParams): SettlementPlan {
   const P = spec.people!;
   const p = P.generator.params as unknown as SettlementParams;
   const origin = spec.site.origin;
@@ -754,6 +778,10 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
   // those that graze in herds, on the pasture of people who herd and at the edge of the houses of people who farm; the
   // rest about the houses. Which animals is the tradition's; how many, and where each stands, is invented.
   const animals: Kept[] = [];
+  /** which herd each animal is of, in step with them; −1 for one kept about the houses, which is its own */
+  const herdOf: number[] = [];
+  let herdNow = -1;
+  let herds = 0;
   const keptList = P.kept ?? [];
   const L = p.livestock;
   if (L && keptList.length && P.husbandry?.length) {
@@ -780,6 +808,7 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
       const stand = (x: number, y: number, kind: number, pose: number, size: number, face: number): boolean => {
         if (!fit(x, y)) return false;
         animals.push({ x, y, z: ground.at(x, y), face, kind, settlement: si, pose, size, shade: rng.int(0, 255), phase: rng.int(0, 255), rank: rng.int(0, 255) });
+        herdOf.push(herdNow);
         return true;
       };
       mine.forEach((k, j) => {
@@ -788,7 +817,8 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
         const long = keptList[k].length ?? 1;
         const poses = posesOf[k];
         if (!grazes[k]) {
-          // About the houses: before one of them, a few steps out from its walls.
+          // About the houses: before one of them, a few steps out from its walls. Each is its own.
+          herdNow = -1;
           for (; left > 0 && h1 > h0; left--) {
             const [x, y] = before(houses[h0 + rng.int(0, h1 - h0 - 1)], 1.5 + 4 * rng.next(), rng.next() - 0.5, 4);
             const still = poses.filter((x) => x !== POSE.graze);
@@ -797,6 +827,7 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
           return;
         }
         for (let herd = 0; left > 0 && herd < 64; herd++) {
+          herdNow = herds++;
           const size = Math.min(left, L.herd[0] + rng.int(0, L.herd[1] - L.herd[0]));
           left -= size;
           const r0 = s.r * 1.15 + 15;
@@ -820,8 +851,12 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
   // People by the houses, and boats on the water beside a settlement: no record says anything of them. They are the
   // plainest figures there are, the same everywhere, there so that a scene has its scale.
   const F = p.figures;
+  /** which piece of the works a person is, and the house each stands before */
+  let person = -1;
+  const homeOf = new Map<number, number>();
   if (F) {
     const who = workOf({ kind: 'person', height: F.height, thickness: 0.5 }, 'A person', 'generic');
+    person = who;
     let stood = 0;
     settlements.forEach((s, si) => {
       const [h0, h1] = housesOf[si] ?? [0, 0];
@@ -830,8 +865,10 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
       const n = Math.min(F.most_in_settlement, F.most - stood, Math.floor((h1 - h0) * F.per_house + rng.next()));
       for (let q = 0; q < n; q++) {
         // Before the door of one of its houses, a step or two out: never within its walls.
-        const [x, y] = before(houses[h0 + rng.int(0, h1 - h0 - 1)], 0.8 + 1.7 * rng.next(), rng.next() - 0.5, 0);
+        const home = h0 + rng.int(0, h1 - h0 - 1);
+        const [x, y] = before(houses[home], 0.8 + 1.7 * rng.next(), rng.next() - 0.5, 0);
         if (!fit(x, y)) continue;
+        homeOf.set(works.length, home);
         works.push({ x, y, z: ground.at(x, y), face: rng.next() * TAU, form: who, settlement: si });
         stood++;
       }
@@ -856,6 +893,137 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
         afloat++;
       }
     });
+  }
+  // What its people and their animals do once they are drawn (life/routines.ts): each goes a way of its own, which the
+  // renderer moves it along by the visit's clock. A person makes for the door of another house or for something the
+  // settlement had of its own, a well, an oven, a threshing floor; an animal feeds and moves on, as a wild one of its
+  // body plan does, by the living scene's own parameters. None may go through a house, nor into a yard that is
+  // enclosed, unless it stands in it, and then it leaves by its front; a herd keeps out from among the houses, and what is
+  // about the houses stays among them. No record says anything of any of this.
+  const ways: number[] = [];
+  const walk = F?.walk;
+  if ((beasts && animals.length) || (walk && person >= 0)) {
+    // Which houses are near a place: each under the squares of a grid its ground, or its enclosed yard, reaches.
+    const GRID = 24;
+    const cellOf = (x: number, y: number) => (Math.floor(x / GRID) + 32768) * 65536 + Math.floor(y / GRID) + 32768;
+    const nearby = new Map<number, number[]>();
+    // The ground a house's enclosure takes, in the house's own frame: how far it reaches across, before the house and
+    // behind it, at the most its yard is drawn (dwellings.ts, drawYard). Its way in is in its front, before the door.
+    // Undefined where no enclosure stands round it: none is said, or the house is built round its own court.
+    const yardOf = (h: House): { across: number; front: number; back: number } | undefined => {
+      const f = forms[h.form];
+      if (!f.home?.yard || f.spec.plan === 'courtyard' || f.spec.court) return undefined;
+      const sz = sizeOf(h);
+      const most = f.home.lot / 2 - 0.3;
+      return { across: Math.min(most, sz.w / 2 + 5.5), front: Math.min(most, sz.l / 2 + 3.2), back: most };
+    };
+    houses.forEach((h, hi) => {
+      const sz = sizeOf(h);
+      const yard = yardOf(h);
+      const r = Math.max(Math.sqrt(sz.w * sz.w + sz.l * sz.l) / 2, yard ? Math.sqrt(yard.across * yard.across + yard.back * yard.back) + 2.5 : 0) + 2;
+      for (let j = Math.floor((h.y - r) / GRID); j <= Math.floor((h.y + r) / GRID); j++) {
+        for (let i = Math.floor((h.x - r) / GRID); i <= Math.floor((h.x + r) / GRID); i++) {
+          const k = (i + 32768) * 65536 + j + 32768;
+          (nearby.get(k) ?? nearby.set(k, []).get(k)!).push(hi);
+        }
+      }
+    });
+    // Whether a place is free of the houses: outside every one's walls, by a step, and outside every enclosed yard but
+    // that of the house `own`. Its own yard it may be in, and leaves by its front, where its way in is: a place just
+    // beside or behind that yard is not free, so that no straight way from within it goes out through its sides.
+    const clearOfHouses = (x: number, y: number, own: number): boolean => {
+      for (const hi of nearby.get(cellOf(x, y)) ?? []) {
+        const h = houses[hi];
+        const sz = sizeOf(h);
+        const sf = Math.sin(h.face);
+        const cf = Math.cos(h.face);
+        const along = (x - h.x) * sf + (y - h.y) * cf;
+        const across = Math.abs((x - h.x) * cf - (y - h.y) * sf);
+        if (Math.abs(along) < sz.l / 2 + 0.6 && across < sz.w / 2 + 0.6) return false;
+        const yard = yardOf(h);
+        if (!yard) continue;
+        if (hi !== own) {
+          if (across < yard.across + 0.4 && along < yard.front + 0.4 && along > -yard.back - 0.4) return false;
+        } else {
+          const beside = across >= yard.across - 0.4 && across < yard.across + 2.5 && along < yard.front && along > -yard.back - 2.5;
+          const behind = along <= -yard.back + 0.4 && along > -yard.back - 2.5 && across < yard.across + 2.5;
+          if (beside || behind) return false;
+        }
+      }
+      return true;
+    };
+    const reaches = settlements.map((_, si) => reachOf(si));
+    const within = (si: number, x: number, y: number, r: number) => (x - settlements[si].x) * (x - settlements[si].x) + (y - settlements[si].y) * (y - settlements[si].y) < r * r;
+    const groundAt = (x: number, y: number) => ground.at(x, y);
+    if (beasts) {
+      const leads = new Map<number, number[]>();
+      animals.forEach((a, ai) => {
+        const k = keptList[a.kind];
+        const form = P.keptForms?.[k.form];
+        const routine = routineOf(form?.behave);
+        // One that lies resting stays where it lies; and what flies or swims is no one's herd.
+        if (routine === 'none' || routine === 'circle' || a.pose === POSE.rest) return;
+        const s = settlements[a.settlement];
+        const L = (k.length ?? 1) * a.size;
+        const H = (k.hip ?? (k.length ?? 1) * (form?.hip ?? 0.3)) * a.size;
+        // A herd grazes out from the houses, and stays out; what is kept about the houses stays among them.
+        const herd = !within(a.settlement, a.x, a.y, reaches[a.settlement] + 6);
+        const free = (x: number, y: number) => fit(x, y) && clearOfHouses(x, y, -1) && (herd ? !within(a.settlement, x, y, reaches[a.settlement] + 4) : within(a.settlement, x, y, reaches[a.settlement] + 8));
+        const body = { x: a.x, y: a.y, z: a.z, fx: Math.sin(a.face), fy: Math.cos(a.face), L, H, going: a.pose === POSE.walk };
+        const rng = new Rng((s.seed ^ Math.imul(ai + 1, 0x9e3779b1) ^ 0x3a1f) >>> 0);
+        // A herd keeps together: the first of it that goes anywhere leads, and the rest go its way beside it.
+        const lead = herdOf[ai] >= 0 ? leads.get(herdOf[ai]) : undefined;
+        const way = (lead && wayBeside(lead, body, { ground: groundAt, free }, beasts, rng)) ?? wayFor(routine === 'stalk' ? 'wander' : routine, body, { ground: groundAt, free }, beasts, rng);
+        if (!way) return;
+        if (!lead && herdOf[ai] >= 0) leads.set(herdOf[ai], way);
+        a.way = ways.length;
+        ways.push(...way);
+      });
+    }
+    if (walk && F && person >= 0) {
+      // What each settlement had of its own that people went to: where each stands.
+      const draws = new Map<number, [number, number][]>();
+      works.forEach((w) => {
+        const kind = workForms[w.form].spec.kind;
+        if (kind !== 'well' && kind !== 'oven' && kind !== 'floor' && kind !== 'rack' && kind !== 'stack' && kind !== 'pond') return;
+        (draws.get(w.settlement) ?? draws.set(w.settlement, []).get(w.settlement)!).push([w.x, w.y]);
+      });
+      works.forEach((w, wi) => {
+        if (w.form !== person) return;
+        const goes = personGoes(wi % WORK_VARIANTS);
+        if (goes === 'stays') return;
+        const si = w.settlement;
+        const s = settlements[si];
+        const own = homeOf.get(wi) ?? -1;
+        const rng = new Rng((s.seed ^ Math.imul(wi + 1, 0x9e3779b1) ^ 0x77c1) >>> 0);
+        const tall = F.height * (wi % WORK_VARIANTS === 6 ? 0.68 : 1);
+        const hips = tall * PERSON_HIP;
+        const pace: Pace = { range: [walk.range[0] / tall, walk.range[1] / tall], stay: walk.stay, pace: 1 };
+        const params: RoutineParams = { froude: (walk.speed * walk.speed) / (9.81 * hips), go: [walk.go, 0], sag: [0, walk.sag], tries: walk.tries, feed: pace, wander: pace, patrol: pace, stalk: { ...pace, reach: 0, hold: [0, 0], round: 0 }, circle: { radius: [0, 0], least: 0, fly: 0, swim: 0 } };
+        const free = (x: number, y: number) => fit(x, y) && clearOfHouses(x, y, own) && within(si, x, y, reaches[si] + 6);
+        // Where they would go: before the doors of two other houses of the settlement, and to something it had of its
+        // own, a step short of it; in no order.
+        const goals: [number, number][] = [];
+        const [h0, h1] = housesOf[si] ?? [0, 0];
+        for (let q = 0; q < 2 && h1 - h0 > 1; q++) {
+          const other = h0 + rng.int(0, h1 - h0 - 1);
+          // Before its door; or, where it stands in an enclosed yard, before the way into that.
+          if (other !== own && !forms[houses[other].form].outbuilding) goals.push(before(houses[other], (yardOf(houses[other]) ? 3.8 : 1) + 1.5 * rng.next(), yardOf(houses[other]) ? 0 : rng.next() - 0.5, 0));
+        }
+        const drawn = draws.get(si);
+        if (drawn?.length) {
+          const [dx, dy] = drawn[rng.int(0, drawn.length - 1)];
+          const d = Math.sqrt((dx - w.x) * (dx - w.x) + (dy - w.y) * (dy - w.y));
+          if (d > 3) goals.splice(rng.int(0, goals.length), 0, [dx + ((w.x - dx) / d) * 1.6, dy + ((w.y - dy) / d) * 1.6]);
+        }
+        // Not so far that the way is no errand: a house across a town is another's to go to.
+        const near = goals.filter(([gx, gy]) => (gx - w.x) * (gx - w.x) + (gy - w.y) * (gy - w.y) < walk.range[1] * walk.range[1] * 4);
+        const way = wayFor('wander', { x: w.x, y: w.y, z: w.z, fx: Math.sin(w.face), fy: Math.cos(w.face), L: tall, H: hips, going: goes === 'going' }, { ground: groundAt, free, goals: near }, params, rng);
+        if (!way) return;
+        w.way = ways.length;
+        ways.push(...way);
+      });
+    }
   }
   // Paths between the settlements of people who stayed in one place: each to the nearest few within reach, by a line
   // that wanders a little. No record gives any of them; they say only that neighbours went to and fro.
@@ -931,7 +1099,7 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
   const use = P.lifeway.fields === 'none' ? 'rainfed' : P.lifeway.fields;
   const generic = p.plots[use];
   const style = tc?.fields.kind ? { kind: tc.fields.kind, plot: mid(tc.fields.plot, generic.plot), from: 'tradition' as const, tradition: tc.id } : { kind: generic.kind, plot: generic.plot, from: 'generic' as const };
-  return { settlements, forms, houses: kept, works, workForms, animals, paths, pathWidth: W?.width ?? 0, drawn: Math.round(drawn), expected: Math.round(expected), perHouse: Math.round(perHouse * 10) / 10, style, lifeway: P.lifeway };
+  return { settlements, forms, houses: kept, works, workForms, animals, ways, paths, pathWidth: W?.width ?? 0, drawn: Math.round(drawn), expected: Math.round(expected), perHouse: Math.round(perHouse * 10) / 10, style, lifeway: P.lifeway };
 
   /**
    * Houses of a settlement, as its tradition's pattern sets them out: clustered, in a ring, in rows, along a line or

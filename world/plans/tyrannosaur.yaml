@@ -3,7 +3,7 @@ description: >-
   heavy tail held out level.
 kind: animal
 hip: 0.3
-behave: { group: [1, 2], habitat: any, poses: [walk, stand, alert] }
+behave: { routine: stalk, group: [1, 2], habitat: any, poses: [walk, stand, alert] }
 parts:
   # Tail tip to shoulder: the tail deep at its base, the back highest over the hips, the belly deepest just ahead of them.
   body:

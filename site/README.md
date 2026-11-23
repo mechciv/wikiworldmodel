@@ -12,8 +12,14 @@ two are served together.
   `npm run validate`, the time scale from the eon and era records in
   `world/entities/periods/ics/`, and the views' times and places from the golden tests. Update
   them when the world moves.
-- `main.js`: copies the starter prompt, works out how wide Rome would be on the time scale
-  at the width it is drawn, and draws the bars of how much is known from `glance.json`.
+- `main.js`: spreads the layers apart as they come into view, copies the starter prompt, works
+  out how wide Rome would be on the time scale at the width it is drawn, and draws the bars of how
+  much is known from `glance.json`.
+- `img/layers.svg`: the five plates of "How it works", a diagram of the Hell Creek at 66.5 Ma
+  pulled apart into its layers, which reads nothing from the world. `npx tsx tools/site/layers.ts`
+  draws it, and writes the stack that places the plates, and the spacing of their labels, into
+  `index.html` between its `layers:start` and `layers:end` marks. Edit the drawing there, not here;
+  the words beside the plates are the page's own. A unit test (`tools/world/test/landing-layers.test.ts`) fails when the two drift apart.
 - `glance.json` is not here: `npm run build:site` writes it beside the page from the latest build's
   `coverage.json` (its `glance`, made by [core/glance.ts](../core/glance.ts)), so the bars follow
   the world with no copying by hand. Without it, as when the page is served from `site/` alone,

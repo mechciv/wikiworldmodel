@@ -12,7 +12,7 @@ import type { LivingTaxon, ScenePeople, SceneSpec } from '../../../core/scene.ts
 import type { FeatureTime } from '../../../core/tileset.ts';
 import { STRIDE } from '../city/kit.ts';
 import { houseSize } from './dwellings.ts';
-import { GENERATOR, VERSION, type LivingParams } from '../life/scene/v10.ts';
+import { GENERATOR, VERSION, type LivingParams } from '../life/scene/v12.ts';
 import { CROP, HOUSE, INSTANCE_STRIDE, KEPT, protoParts, SceneStream, WORK, type LifeView } from '../life/stream.ts';
 
 const ROOT = join(import.meta.dirname, '../..');
@@ -127,7 +127,8 @@ describe('the people of a scene, drawn', () => {
     // From the edge of a village's houses, low down, looking over its fields: their crop, standing as plants.
     const farm = plan.settlements.find((s) => !s.city && s.fields === 'rainfed' && s.houses > 3)!;
     expect(look(farm.x, farm.y + farm.r * 1.2, 6).crops).toBeGreaterThan(200);
-    // A kept animal's mesh is an animal's: it idles, as the wild ones do; a wall's, a house's and a crop's do not.
+    // A kept animal's mesh is an animal's: it idles, as the wild ones do, and has a stride to walk with; so has a
+    // person's, who goes about; a wall's, a house's and a crop's have neither.
     const kinds = new Set<string>();
     for (const proto of sent) {
       const m = stream.mesh(proto);
@@ -138,7 +139,12 @@ describe('the people of a scene, drawn', () => {
         kinds.add('crop');
       } else if (taxon >= KEPT) {
         expect(m.idle).toHaveLength(16);
+        expect(m.idle![15]).toBeGreaterThan(0);
         kinds.add('kept');
+      } else if (taxon >= WORK && plan.workForms[taxon - WORK].spec.kind === 'person') {
+        expect(m.idle).toHaveLength(16);
+        expect(m.idle![15]).toBeGreaterThan(0.5);
+        kinds.add('work');
       } else if (taxon >= HOUSE) {
         expect(m.idle).toBeUndefined();
         kinds.add(taxon >= WORK ? 'work' : 'house');
