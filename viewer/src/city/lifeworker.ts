@@ -2,6 +2,8 @@
 // needs and who to draw at what detail. They are the same code as the build's, so what they make agrees with it
 // within the tolerance of core/fingerprint.ts.
 import type { Fingerprint } from '../../../core/fingerprint.ts';
+import { groundNormals } from '../gl/groundNormals.ts';
+import { encodeGround, GRIDS, placeLook, worldGround } from '../../../world/generators/life/scene/v14.ts';
 import { plotStyle } from '../../../core/plots.ts';
 import type { SceneSpec } from '../../../core/scene.ts';
 import { FAST_BUDGET, FULL_BUDGET, SceneStream, type Batch, type LifeView, type NamedGroup, type ProtoMesh } from '../../../world/generators/life/stream.ts';
@@ -34,10 +36,13 @@ export function fieldStyle(s: SettlementPlan['style']): { plot: number; aspect: 
   return plotStyle(s);
 }
 
-export type ToLifeWorker = { type: 'init'; spec: SceneSpec; fast: boolean } | { type: 'view'; view: LifeView; serial: number } | { type: 'reset' };
+export type ToLifeWorker = { type: 'init'; spec: SceneSpec; fast: boolean; preview: boolean } | { type: 'view'; view: LifeView; serial: number } | { type: 'reset' };
+
+type GroundLevel = ReturnType<typeof encodeGround>;
 
 export type FromLifeWorker =
-  | { type: 'ground'; levels: { nx: number; ny: number; x0: number; y0: number; cell: number; z: Int16Array; unit?: number; base?: number }[]; focus: [number, number]; toRiver: [number, number]; water: { vertices: Float32Array; indices: Uint32Array; flow: Float32Array }; waterLevel: number; mask: Uint8Array; maskSize: number; maskBox: [number, number, number, number]; print: Fingerprint; ms: number; people?: PeopleSummary; fields?: Uint8Array; paths?: { vertices: ArrayBuffer; indices: Uint32Array } }
+  | { type: 'preview'; levels: GroundLevel[]; waterLevel: number }
+  | { type: 'ground'; levels: GroundLevel[]; normals: Uint8Array<ArrayBuffer>[]; focus: [number, number]; toRiver: [number, number]; water: { vertices: Float32Array; indices: Uint32Array; flow: Float32Array }; waterLevel: number; mask: Uint8Array; maskSize: number; maskBox: [number, number, number, number]; print: Fingerprint; ms: number; people?: PeopleSummary; fields?: Uint8Array; paths?: { vertices: ArrayBuffer; indices: Uint32Array } }
   | { type: 'mask'; mask: Uint8Array; maskSize: number; maskBox: [number, number, number, number]; fields?: Uint8Array }
   | { type: 'selection'; serial: number; batches: Batch[]; protos: ProtoMesh[]; instances: number; triangles: number; pending: number; groups: NamedGroup[]; ms: number };
 
@@ -49,12 +54,28 @@ self.onmessage = (e: MessageEvent<ToLifeWorker>) => {
   const m = e.data;
   if (m.type === 'init') {
     const t0 = performance.now();
+    if (m.preview) {
+      // Use the same relief field and extents as the finished grids. The carved channels, buildings and ground
+      // cover follow with the plan. Keep this cheap enough to send before starting any of that work.
+      const relief = worldGround(m.spec);
+      const levels = [GRIDS.fine, GRIDS.mid, GRIDS.far].map(g => {
+        const n = 65;
+        const cell = g.cell * (g.nx - 1) / (n - 1);
+        const z = new Float32Array(n * n);
+        for (let j = 0; j < n; j++) {
+          for (let i = 0; i < n; i++) z[j * n + i] = relief.at(g.x0 + i * cell, g.y0 + j * cell);
+        }
+        return encodeGround({ nx: n, ny: n, x0: g.x0, y0: g.y0, cell }, z);
+      });
+      post({ type: 'preview', levels, waterLevel: placeLook(m.spec).water }, levels.map(l => l.z.buffer as ArrayBuffer));
+    }
     stream = new SceneStream(m.spec, m.fast ? FAST_BUDGET : FULL_BUDGET);
     sent.clear();
     const print = stream.print();
     const { data, box } = stream.mask(512);
     const water = stream.water();
     const levels = stream.levels.map((l) => ({ nx: l.nx, ny: l.ny, x0: l.x0, y0: l.y0, cell: l.cell, z: (l.z as Int16Array).slice(), ...(l.unit !== undefined ? { unit: l.unit } : {}), ...(l.base !== undefined ? { base: l.base } : {}) }));
+    const normals = levels.map(g => groundNormals(g, g.z));
     const fields = stream.fields(512)?.data;
     const paths = stream.paths();
     const pl = stream.people;
@@ -86,7 +107,7 @@ self.onmessage = (e: MessageEvent<ToLifeWorker>) => {
       style: pl.style,
       lifeway: pl.lifeway,
     };
-    post({ type: 'ground', levels, focus: stream.plan.focus, toRiver: stream.plan.toRiver, water, waterLevel: stream.look.water, mask: data, maskSize: 512, maskBox: box, print, ms: performance.now() - t0, ...(people ? { people } : {}), ...(fields ? { fields } : {}), ...(paths ? { paths } : {}) }, [data.buffer as ArrayBuffer, water.vertices.buffer as ArrayBuffer, water.indices.buffer as ArrayBuffer, water.flow.buffer as ArrayBuffer, ...levels.map((l) => l.z.buffer as ArrayBuffer), ...(fields ? [fields.buffer as ArrayBuffer] : []), ...(paths ? [paths.vertices, paths.indices.buffer as ArrayBuffer] : [])]);
+    post({ type: 'ground', levels, normals, focus: stream.plan.focus, toRiver: stream.plan.toRiver, water, waterLevel: stream.look.water, mask: data, maskSize: 512, maskBox: box, print, ms: performance.now() - t0, ...(people ? { people } : {}), ...(fields ? { fields } : {}), ...(paths ? { paths } : {}) }, [data.buffer as ArrayBuffer, water.vertices.buffer as ArrayBuffer, water.indices.buffer as ArrayBuffer, water.flow.buffer as ArrayBuffer, ...levels.map((l) => l.z.buffer as ArrayBuffer), ...normals.map(n => n.buffer), ...(fields ? [fields.buffer as ArrayBuffer] : []), ...(paths ? [paths.vertices, paths.indices.buffer as ArrayBuffer] : [])]);
     // A finer picture of the ground, once there is something to look at.
     setTimeout(() => {
       if (!stream) return;

@@ -193,4 +193,32 @@ test.describe('the human landscape', () => {
       await expect(page.locator('.life-here')).not.toContainText('houses');
     });
   });
+
+  test.describe('descending on a high-density screen', () => {
+    test.use({ viewport: { width: 640, height: 380 }, deviceScaleFactor: 2 });
+
+    test('Tenochtitlan shows terrain before its houses and restores full resolution at rest', async ({ page }) => {
+      await page.goto(`/?b=${latestBuild()}&${low(19.4326, -99.1332, 1500, 600000)}`);
+      await idle(page);
+      const result = await page.evaluate(async () => {
+        const api = window.__wikiworldmodel!;
+        const canvas = document.querySelector<HTMLCanvasElement>('canvas.globe')!;
+        const bar = document.querySelector<HTMLElement>('.citybar')!;
+        const native = canvas.width;
+        let smallest = native;
+        let preview = false;
+        api.set({ cam: { ...api.state().cam, dist: 1 + 2800 / 6371000 } });
+        do {
+          await new Promise(requestAnimationFrame);
+          smallest = Math.min(smallest, canvas.width);
+          if (!bar.hidden && api.scene()?.plan.actual === null) preview = true;
+        } while (!api.scene()?.plan.actual || !api.idle());
+        return { native, smallest, preview, final: canvas.width, houses: api.scene()?.people?.houses ?? 0 };
+      });
+      expect(result.preview).toBe(true);
+      expect(result.smallest).toBeLessThan(result.native);
+      expect(result.final).toBe(result.native);
+      expect(result.houses).toBeGreaterThan(0);
+    });
+  });
 });

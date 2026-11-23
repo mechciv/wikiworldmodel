@@ -12,7 +12,7 @@ import { Heights, placeLook, type LivingParams } from '../../../world/generators
 import { snowOf } from '../../../world/generators/life/climate.ts';
 import { declination, MID_DAY } from '../../../core/water.ts';
 import { meanBears } from '../../../world/generators/life/sorting.ts';
-import { protoParts, type NamedGroup } from '../../../world/generators/life/stream.ts';
+import { CROP, HOUSE, KEPT, protoParts, type NamedGroup } from '../../../world/generators/life/stream.ts';
 import { ROUTE, wayAt } from '../../../world/generators/life/routines.ts';
 import { CityRenderer, SHARE_STEPS, type CellGPU, type CityFrame } from '../gl/city.ts';
 import type { GL } from '../gl/context.ts';
@@ -25,18 +25,9 @@ import type { LocalView } from './view.ts';
 const TIMELESS = 2e7;
 
 /** One renderer for all of a viewer's living scenes: a new place should not compile its shaders again. */
-const renderers = new WeakMap<GL, CityRenderer>();
+const renderers = new WeakMap<GL, Promise<CityRenderer>>();
 /** Which scene has the renderer now. */
 const owners = new WeakMap<CityRenderer, LifeScene>();
-function rendererFor(gl: GL, fast: boolean): CityRenderer {
-  let r = renderers.get(gl);
-  if (!r) {
-    r = new CityRenderer(gl, { fast });
-    r.wild = true;
-    renderers.set(gl, r);
-  }
-  return r;
-}
 
 /** The leaves a plant's part holds when its form does not say: as the part types draw them (world/generators/life/forms.ts). */
 const LEAVES_OF: Record<string, string> = { conifer: 'needle', whorled: 'needle', 'scale-tree': 'needle', broadleaf: 'broad', shrub: 'broad', palm: 'frond', fern: 'frond', tuft: 'frond', mat: 'frond' };
@@ -111,7 +102,6 @@ class SurfaceSampler extends GroundSampler {
 }
 
 export class LifeScene {
-  readonly renderer: CityRenderer;
   ground!: GroundSampler;
   ready = false;
   /** the ground, a cell and a mesh, as fingerprints made here and by the build if it was there */
@@ -137,6 +127,7 @@ export class LifeScene {
   last = { instances: 0, triangles: 0, meshes: 0, pending: 0, ms: 0, going: 0 };
   /** how long the ground took, in ms */
   groundMs = 0;
+  movingInstances = false;
   private worker: Worker | null = null;
   private selected = 0;
   private waiting = false;
@@ -147,6 +138,7 @@ export class LifeScene {
   private sentRich = false;
   private active = false;
   private wasActive = false;
+  private scenario: Scenario = {};
 
   /**
    * Whether the scene is of the sea, as its generator says of its place: then its floor is drawn at its depth under the
@@ -154,10 +146,22 @@ export class LifeScene {
    */
   readonly sea: boolean;
 
-  constructor(gl: GL, source: SceneSpec, expected: Fingerprint | null, private opts: { fast?: boolean } = {}) {
+  static async create(gl: GL, source: SceneSpec, expected: Fingerprint | null, opts: { fast?: boolean } = {}): Promise<LifeScene> {
+    let renderer = renderers.get(gl);
+    if (!renderer) {
+      renderer = CityRenderer.create(gl, opts).catch(err => {
+        renderers.delete(gl);
+        throw err;
+      });
+      renderers.set(gl, renderer);
+    }
+    return new LifeScene(await renderer, source, expected, opts);
+  }
+
+  private constructor(readonly renderer: CityRenderer, source: SceneSpec, expected: Fingerprint | null, private opts: { fast?: boolean }) {
     this.spec = source;
     this.plan.expected = expected;
-    this.renderer = rendererFor(gl, !!opts.fast);
+    this.renderer.wild = true;
     this.sea = placeLook(source).sea;
   }
 
@@ -170,24 +174,29 @@ export class LifeScene {
   }
 
   /** Make the ground, and be ready to take over the renderer. */
-  async load(): Promise<void> {
+  async load(onPreview?: () => void): Promise<void> {
     await new Promise<void>((resolve, reject) => {
       this.worker = new Worker(new URL('./lifeworker.ts', import.meta.url), { type: 'module' });
       this.worker.onerror = (e) => reject(new Error(`the scene's generators failed: ${e.message} (${e.filename}:${e.lineno})`));
       this.worker.onmessage = (e: MessageEvent<FromLifeWorker>) => {
         const m = e.data;
-        if (m.type === 'ground') {
+        if (m.type === 'preview' || m.type === 'ground') {
           this.groundData = m;
-          this.groundMs = m.ms;
           this.ground = this.sea ? new GroundSampler(m.levels) : new SurfaceSampler(m.levels);
-          this.focus = m.focus;
-          this.toRiver = m.toRiver;
           this.waterLevel = m.waterLevel;
-          this.people = m.people;
-          const problems = settlePrint(this.plan, m.print);
-          if (problems.length) console.error(`the scene's generator made something different from the build: ${problems.join('; ')}`);
-          this.ready = true;
-          resolve();
+          this.active = false;
+          if (m.type === 'preview') {
+            onPreview?.();
+          } else {
+            this.groundMs = m.ms;
+            this.focus = m.focus;
+            this.toRiver = m.toRiver;
+            this.people = m.people;
+            const problems = settlePrint(this.plan, m.print);
+            if (problems.length) console.error(`the scene's generator made something different from the build: ${problems.join('; ')}`);
+            this.ready = true;
+            resolve();
+          }
           this.onChange();
         } else if (m.type === 'mask') {
           this.maskData = m;
@@ -198,12 +207,12 @@ export class LifeScene {
           this.onChange();
         } else this.selection(m);
       };
-      const msg: ToLifeWorker = { type: 'init', spec: this.spec, fast: !!this.opts.fast };
+      const msg: ToLifeWorker = { type: 'init', spec: this.spec, fast: !!this.opts.fast, preview: !!onPreview };
       this.worker.postMessage(msg);
     });
   }
 
-  private groundData: Extract<FromLifeWorker, { type: 'ground' }> | null = null;
+  private groundData: Extract<FromLifeWorker, { type: 'ground' | 'preview' }> | null = null;
   private maskData: Extract<FromLifeWorker, { type: 'mask' }> | null = null;
   /** the paths between the scene's settlements, on the GPU once the scene has been shown */
   private pathsGpu: CellGPU | null = null;
@@ -217,7 +226,7 @@ export class LifeScene {
     if (before && before !== this) before.active = false;
     owners.set(r, this);
     // Whatever meshes it handed over before have gone with the last scene: it must hand them over again.
-    if (this.wasActive) {
+    if (this.wasActive && before !== this) {
       const reset: ToLifeWorker = { type: 'reset' };
       this.worker?.postMessage(reset);
       this.lastSent = null;
@@ -228,19 +237,22 @@ export class LifeScene {
     r.sea = this.sea;
     r.clearGround();
     r.clearInstanced();
-    r.setGround(g.levels.map((l) => ({ ...l, url: '' })), g.levels.map((l) => l.z));
-    const mask = this.maskData ?? g;
-    r.setMask(mask.mask, mask.maskSize, mask.maskBox);
+    const detail = g.type === 'ground' ? g : undefined;
+    r.setGround(g.levels.map((l) => ({ ...l, url: '' })), g.levels.map((l) => l.z), detail?.normals);
+    const mask = this.maskData ?? detail;
+    // Outside the mask the shader uses the biome's broad cover. Let it do so everywhere during the preview.
+    const box: [number, number, number, number] = mask?.maskBox ?? [0, 0, 1, 1];
+    r.setMask(mask?.mask ?? new Uint8Array(4), mask?.maskSize ?? 1, box);
     // What people made of the ground, or nothing where there are no people.
-    const fields = this.maskData?.fields ?? g.fields;
-    r.setFields(fields && this.people ? fields : null, mask.maskSize, mask.maskBox, this.fieldLook());
+    const fields = mask?.fields;
+    r.setFields(fields && this.people ? fields : null, mask?.maskSize ?? 1, box, this.fieldLook());
     const params = this.spec.generator.params as unknown as LivingParams;
     const clim = params.cover.climates[this.spec.biome.climate];
     const cover = this.spec.biome.cover;
     // A land before plants has none of its climate's colours: only rock.
     const tones = params.cover.tones[cover.plants > 0 ? clim?.tones ?? 'plain' : 'barren'] ?? params.cover.tones.plain;
     // Where the world gives the rivers their water falls downstream, and no one level bands the banks.
-    r.setWater(g.water.vertices, g.water.indices, this.spec.water ? -1e4 : g.waterLevel, g.water.flow, tones.water);
+    r.setWater(detail?.water.vertices ?? new Float32Array(0), detail?.water.indices ?? new Uint32Array(0), this.spec.water ? -1e4 : g.waterLevel, detail?.water.flow, tones.water);
     // What the ground is made of, where the world says: its own materials close by, and their colour in the land's from
     // afar. And the rock under it: what its outcrops and its stones are drawn of.
     const rock = rockLook(this.spec.bedrock);
@@ -258,7 +270,7 @@ export class LifeScene {
     // the stones that stand on its ground, which are no taxon's (world/generators/life/stream.ts, strewnEntity).
     const houseKinds = (this.people?.forms.length ?? 0) + (this.people?.works.length ?? 0) + (this.people?.kept ?? 0) + 3;
     // The paths are one mesh of the scene's own, put on the GPU the first time it is shown.
-    if (g.paths && !this.pathsGpu) this.pathsGpu = r.upload(g.paths.vertices, g.paths.indices);
+    if (detail?.paths && !this.pathsGpu) this.pathsGpu = r.upload(detail.paths.vertices, detail.paths.indices);
     const out = new Float32Array((this.spec.taxa.length + 1 + houseKinds) * 4);
     for (let f = 0; f < houseKinds; f++) {
       const k = (this.spec.taxa.length + 1 + f) * 4;
@@ -270,8 +282,9 @@ export class LifeScene {
     const clamp = (x: number | null | undefined, d: number) => (x === null || x === undefined || !Number.isFinite(x) ? d : Math.max(-TIMELESS, Math.min(TIMELESS, x - this.spec.site.slice)));
     this.spec.taxa.forEach((t, i) => {
       const k = (i + 1) * 4;
-      out[k] = clamp(t.time.start.best, -TIMELESS);
-      out[k + 1] = clamp(t.time.end.best, TIMELESS);
+      const time = lookup(t.variants, this.scenario, t.time);
+      out[k] = clamp(time.start.best, -TIMELESS);
+      out[k + 1] = clamp(time.end.best, TIMELESS);
       out[k + 2] = 3;
       out[k + 3] = g.waterLevel;
     });
@@ -290,6 +303,10 @@ export class LifeScene {
       const w = new Float32Array(b.ways);
       for (let i = 8; i < w.length; i += ROUTE) if (w[i] > 0) going++;
     }
+    this.movingInstances = m.batches.some(b => {
+      const { taxon } = protoParts(b.proto);
+      return b.count > 0 && (taxon < HOUSE || (taxon >= KEPT && taxon <= CROP) || !!b.ways);
+    });
     this.last = { instances: m.instances, triangles: m.triangles, meshes: m.batches.length, pending: m.pending, ms: m.ms, going };
     if (this.active) this.apply(m);
     else this.held = [m];
@@ -346,7 +363,7 @@ export class LifeScene {
   }
 
   private send(): void {
-    if (this.waiting || !this.worker || !this.want) return;
+    if (!this.ready || this.waiting || !this.worker || !this.want) return;
     if (!this.moved() && !this.last.pending) return;
     const v = this.want;
     this.lastSent = v;
@@ -359,7 +376,7 @@ export class LifeScene {
 
   /** Draw a frame. */
   render(v: LocalView, sun: V3, time: number, evidence: boolean, alpha: number, solid: boolean, outW: number, outH: number, clock = 0): void {
-    if (!this.ready) return;
+    if (!this.groundData) return;
     this.activate();
     this.want = v;
     this.send();
@@ -421,6 +438,7 @@ export class LifeScene {
 
   /** Date the taxa as a scenario does: a competing claim for a first appearance moves them. */
   setScenario(s: Scenario): void {
+    this.scenario = s;
     if (!this.active) return;
     const clamp = (x: number | null, d: number) => (x === null || !Number.isFinite(x) ? d : Math.max(-TIMELESS, Math.min(TIMELESS, x - this.spec.site.slice)));
     this.spec.taxa.forEach((t, i) => {

@@ -791,7 +791,7 @@ export function groundGrids(spec: SceneSpec, look: PlaceLook, waters: Waters, si
       });
     }
     if (blur) blurFar(grids[2], far);
-    return [encode(fine, grids[0]), encode(mid, grids[1]), encode(far, grids[2])];
+    return [encodeGround(fine, grids[0]), encodeGround(mid, grids[1]), encodeGround(far, grids[2])];
   }
   const z0 = plainGrid(fine, g, water, seed, waters);
   const near = landOf(0);
@@ -823,7 +823,7 @@ export function groundGrids(spec: SceneSpec, look: PlaceLook, waters: Waters, si
     }
   }
   if (blur) blurFar(z2, far);
-  return [encode(fine, z0), encode(mid, z1), encode(far, z2)];
+  return [encodeGround(fine, z0), encodeGround(mid, z1), encodeGround(far, z2)];
 }
 
 /** A small blur of the far grid, with fixed weights: the field under it is a degree's, and has no business with corners. */
@@ -850,7 +850,7 @@ const UNITS = [0.1, 0.25, 0.5, 1];
  * A grid's heights as the renderer's textures hold them: whole steps above a base, the steps as fine as the grid's range
  * of heights allows, so that neither a trench nor a summit is cut off and a plain keeps its decimetres.
  */
-function encode(gs: GridSpec, z: Float32Array): GroundGridData {
+export function encodeGround(gs: GridSpec, z: Float32Array): GroundGridData & { z: Int16Array } {
   let lo = Infinity;
   let hi = -Infinity;
   for (let i = 0; i < z.length; i++) {

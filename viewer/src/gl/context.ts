@@ -7,27 +7,35 @@ export interface Program {
   uniforms: Map<string, WebGLUniformLocation>;
 }
 
-function compile(gl: GL, type: number, src: string, name: string): WebGLShader {
-  const s = gl.createShader(type)!;
-  gl.shaderSource(s, src);
-  gl.compileShader(s);
-  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
-    const log = gl.getShaderInfoLog(s) ?? '';
-    // The lines the compiler complains of, not the whole source.
-    const lines = src.split('\n');
-    const named = [...log.matchAll(/ERROR: \d+:(\d+)/g)].map((m) => Number(m[1]));
-    const shown = [...new Set(named)].slice(0, 8).map((n) => `${String(n).padStart(4)} ${lines[n - 1]?.trim().slice(0, 140)}`).join('\n');
-    throw new Error(`${name} ${type === gl.VERTEX_SHADER ? 'vertex' : 'fragment'} shader: ${log}\n${shown}`);
+/** Submit both stages before asking the driver for any results. */
+export function linkProgram(gl: GL, name: string, vs: string, fs: string) {
+  const p = gl.createProgram()!;
+  for (const [type, src] of [[gl.VERTEX_SHADER, vs], [gl.FRAGMENT_SHADER, fs]] as const) {
+    const shader = gl.createShader(type)!;
+    gl.shaderSource(shader, src);
+    gl.compileShader(shader);
+    gl.attachShader(p, shader);
+    gl.deleteShader(shader); // retained by the program while attached
   }
-  return s;
+  gl.linkProgram(p);
+  return { program: p, finish: () => finishProgram(gl, p, name) };
 }
 
-export function program(gl: GL, name: string, vs: string, fs: string): Program {
-  const p = gl.createProgram()!;
-  gl.attachShader(p, compile(gl, gl.VERTEX_SHADER, vs, name));
-  gl.attachShader(p, compile(gl, gl.FRAGMENT_SHADER, fs, name));
-  gl.linkProgram(p);
-  if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(`${name}: link failed: ${gl.getProgramInfoLog(p)}`);
+function finishProgram(gl: GL, p: WebGLProgram, name: string): Program {
+  if (!gl.getProgramParameter(p, gl.LINK_STATUS)) {
+    let why = gl.getProgramInfoLog(p) ?? 'link failed';
+    for (const shader of gl.getAttachedShaders(p) ?? []) {
+      if (gl.getShaderParameter(shader, gl.COMPILE_STATUS)) continue;
+      const stage = gl.getShaderParameter(shader, gl.SHADER_TYPE) === gl.VERTEX_SHADER ? 'vertex' : 'fragment';
+      const log = gl.getShaderInfoLog(shader) ?? '';
+      const lines = (gl.getShaderSource(shader) ?? '').split('\n');
+      const named = [...log.matchAll(/ERROR: \d+:(\d+)/g)].map(m => Number(m[1]));
+      const shown = [...new Set(named)].slice(0, 8).map(n => `${n} ${lines[n - 1]?.trim().slice(0, 140)}`);
+      why += `\n${stage} shader: ${log}\n${shown.join('\n')}`;
+    }
+    gl.deleteProgram(p);
+    throw new Error(`${name}: ${why}`);
+  }
   const uniforms = new Map<string, WebGLUniformLocation>();
   const n = gl.getProgramParameter(p, gl.ACTIVE_UNIFORMS) as number;
   for (let i = 0; i < n; i++) {
@@ -36,6 +44,10 @@ export function program(gl: GL, name: string, vs: string, fs: string): Program {
     if (loc) uniforms.set(info.name.replace(/\[0\]$/, ''), loc);
   }
   return { program: p, uniforms };
+}
+
+export function program(gl: GL, name: string, vs: string, fs: string): Program {
+  return linkProgram(gl, name, vs, fs).finish();
 }
 
 /** Set uniforms by name; numbers become floats unless listed in `ints`. */
