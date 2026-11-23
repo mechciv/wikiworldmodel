@@ -68,6 +68,9 @@ views:
   - name: hamlet
     what: That hamlet and its fields from seventy metres up.
     link: t=1887.824&lat=14.159263&lon=43.371993&d=1.000012&h=40&v=72&hour=14&mo=7&clock=0
+  - name: village-house
+    what: "A house of a hamlet in the east of England in 1300, as its building tradition's records describe it, across the crop of one of its fields."
+    link: t=1300.5&lat=52.24790&lon=0.33550&d=1.0000042&h=78&v=82&hour=14&mo=7&clock=0
   - name: rome-forum
     what: Rome's forum in 315, as the city's golden image has it.
     link: t=315.5&lat=41.89185&lon=12.48665&d=1.00004&h=300&v=72&clock=0

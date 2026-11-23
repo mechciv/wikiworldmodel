@@ -2,6 +2,7 @@
 // physically based sky, so that the same light falls on everything the records raise.
 import { LEAF_TILE, LITTER_SPAN } from '../../../core/leaves.ts';
 import { GROUND_LAYERS } from '../../../core/materials.ts';
+import { PLOT_LOOK, PLOTS_GLSL } from '../../../core/plots.ts';
 
 /** Structures rise over the years up to their start, and fall over the years after their end. */
 export const RISE_YEARS = 7;
@@ -82,8 +83,8 @@ float standing(vec4 e) {
  * leaf looks is the atlas's; which kind a plant has is its form's.
  */
 const LEAVES = /* glsl */ `
-const int NEEDLE_CARD = 44, FROND_CARD = 45, BROAD_CARD = 46, FAN_CARD = 47, LEAF_MASS = 48, BLADE_CARD = 49, BLADE = 71;
-bool onCard(int m) { return (m >= NEEDLE_CARD && m <= FAN_CARD) || m == BLADE_CARD; }
+const int NEEDLE_CARD = 44, FROND_CARD = 45, BROAD_CARD = 46, FAN_CARD = 47, LEAF_MASS = 48, BLADE_CARD = 49, BLADE = 71, CROP_CARD = 73;
+bool onCard(int m) { return (m >= NEEDLE_CARD && m <= FAN_CARD) || m == BLADE_CARD || m == CROP_CARD; }
 uniform highp sampler2DArray uLeaves;
 // How much of a texel must be leaf for it to be leaf where the answer is yes or no: under a half, so that a needle
 // thinner than a texel is kept.
@@ -213,7 +214,7 @@ void main() {
   // A plant drawn by instancing leans with the wind, the more the higher, in gusts that cross the ground; its leaves on
   // cards flutter.
   int mat = int(aMat.x);
-  bool plant = mat == 35 || mat == 36 || mat == 37 || mat == 38 || (mat >= 44 && mat <= 49) || mat == 71;
+  bool plant = mat == 35 || mat == 36 || mat == 37 || mat == 38 || (mat >= 44 && mat <= 49) || mat == 71 || mat == 73;
   if (many && plant && dot(uWind, uWind) > 0.0) {
     float h = max(aPos.z * iPlace.w, 0.0);
     float speed = length(uWind);
@@ -221,7 +222,7 @@ void main() {
     float gust = 0.55 + 0.45 * sin(uClock * 0.6 - dot(iPlace.xy, dir) * 0.035) * sin(uClock * 0.21 + own * 6.2831853);
     float lean = gust * speed * 0.05 * h / (1.0 + h * 0.15) * (0.8 + 0.2 * sin(uClock * 1.7 + own * 19.0));
     vec3 off = vec3(dir * lean, -0.5 * lean * lean / max(h, 0.5));
-    if (mat >= 44 && mat <= 49) off += 0.015 * speed * min(h, 4.0) * 0.25 * vec3(sin(uClock * 7.0 + aPos.x * 3.1 + own * 31.0), sin(uClock * 6.3 + aPos.y * 2.7), sin(uClock * 8.1 + aPos.z * 2.3));
+    if ((mat >= 44 && mat <= 49) || mat == 73) off += 0.015 * speed * min(h, 4.0) * 0.25 * vec3(sin(uClock * 7.0 + aPos.x * 3.1 + own * 31.0), sin(uClock * 6.3 + aPos.y * 2.7), sin(uClock * 8.1 + aPos.z * 2.3));
     p += off;
   }
   // A structure rises from the ground it stands on.
@@ -521,6 +522,7 @@ const int ${GROUND_LAYERS.map((k, i) => `M_${k.toUpperCase()} = ${i}`).join(', '
 out vec4 o;
 ${LIGHTING}
 ${LEAVES}
+${PLOTS_GLSL}
 // A scanned material's grain on a built face, laid by the face's own uv in metres: what to multiply its colour by; and
 // its height, 0 to 1, for the light to be bumped by. Nothing where the scans are not loaded, or from too far to show.
 vec4 builtGrain(int layer, vec2 uv, float scale, vec3 p) {
@@ -1340,6 +1342,20 @@ Surface leaves(int m, vec3 p, float tint, float light, float wood, float family)
     s.rough = 0.9;
     return s;
   }
+  if (m == CROP_CARD) {
+    // A crop nobody names (world/generators/people/crops.ts): a stand of blades the colour of the plot it stands in,
+    // ripe or green and of the plot's own tone, as the ground is coloured from afar (core/plots.ts); each clump a
+    // shade of its own. Its tint says which: ripe from 128, the plot's tone in sixteenths, and its own shade in the rest.
+    float v = floor(tint * 255.0 + 0.5);
+    bool ripe = v >= 128.0;
+    float tone = floor(mod(v, 128.0) / 8.0) / 15.0;
+    float own = mod(v, 8.0) / 7.0;
+    vec3 stand = ripe ? mix(PLOT_RIPE0, PLOT_RIPE1, tone) : mix(PLOT_GREEN0, PLOT_GREEN1, tone);
+    // A blade in the light is lighter than its stand seen from afar, which is half its own shade.
+    s.albedo = mix(stand * (0.5 + 1.0 * light) * (0.86 + 0.28 * own), stand * 0.7, wood);
+    s.rough = ripe ? 0.75 : 0.5;
+    return s;
+  }
   vec3 dark = mix(vec3(0.028, 0.06, 0.024), vec3(0.052, 0.078, 0.022), tint);
   vec3 lite = mix(vec3(0.085, 0.14, 0.04), vec3(0.16, 0.185, 0.05), tint);
   bool blades = m == BLADE_CARD || m == BLADE;
@@ -1465,7 +1481,8 @@ void main() {
     // from its low plants' tone, a crown from its canopy's. So a steppe's tufts are the straw of its ground and a
     // rainforest's ferns its dark green, and a plant and the ground from afar are of one colour. How light a leaf is
     // stays its own.
-    if (uWild > 0.5) {
+    // A crop is the colour of its plot, whatever grows wild about it.
+    if (uWild > 0.5 && vMaterial != CROP_CARD) {
       const vec3 LUMA = vec3(0.2126, 0.7152, 0.0722);
       float low = 1.0 - smoothstep(1.5, 4.5, vLow);
       vec3 place = mix(mix(uTone[6], uTone[7], leafLight), mix(uTone[2], uTone[3], leafLight), low);
@@ -1792,6 +1809,9 @@ uniform vec4 uMaskBox;
 uniform highp sampler2D uFields;
 uniform vec4 uFieldsBox;
 uniform vec4 uFieldStyle;
+// How far from the eye a field's crop is drawn plant by plant, in rows (world/generators/people/crops.ts), m: 0 where
+// it is not, and the ground is the crop's colour everywhere.
+uniform float uCrops;
 uniform highp sampler2D uAO;
 uniform vec2 uAOSize;
 uniform float uUseAO;
@@ -1922,34 +1942,46 @@ vec3 countryside(vec3 p, vec3 n, float dist) {
   c = mix(c, vec3(0.38, 0.35, 0.30), smoothstep(0.3, 0.55, slope));
   return c * (0.82 + 0.36 * fbmM(p, 60.0));
 }
-// People's fields: plots as the scene's field system shapes them, each its own crop or fallow, with furrows close by;
-// flooded within their banks where they are paddies. The colours are the renderer's, and nobody's record.
-vec3 plots(vec3 p, float dist, float paddy) {
-  float side = max(8.0, uFieldStyle.x);
-  float aspect = max(1.0, uFieldStyle.y);
+// People's fields: plots as the scene's field system shapes them (core/plots.ts, which what is sown on them reads too),
+// each its own crop or fallow, with furrows close by along its rows; flooded within their banks where they are paddies.
+// Where a plot's crop stands as plants close by, the ground between its rows is the earth they stand in, and tilled
+// says how much of the ground here is that. The colours are the renderer's, and nobody's record.
+${PLOTS_GLSL}
+vec3 plots(vec3 wild, vec3 p, float dist, float paddy, out float tilled) {
   float kind = uFieldStyle.z;
-  // Kinds: 1 strips, 2 irregular, 4 paddies, 5 basins, 7 swidden; the rest as blocks.
-  float warp = kind > 1.5 && kind < 2.5 || kind > 6.5 && kind < 7.5 ? 0.55 : 0.18;
-  vec2 q = p.xy + vec2(noiseM(p, side * 1.7), noiseM(p + 61.0, side * 1.7)) * side * warp;
-  vec2 size = vec2(side / sqrt(aspect), side * sqrt(aspect));
-  vec2 cell = floor(q / size);
-  vec2 f = q / size - cell;
-  float h = hash(cell);
-  vec3 ripe = mix(vec3(0.50, 0.42, 0.21), vec3(0.42, 0.36, 0.17), hash(cell + 3.0));
-  vec3 green = mix(vec3(0.20, 0.27, 0.10), vec3(0.28, 0.32, 0.13), hash(cell + 7.0));
-  vec3 ploughed = mix(vec3(0.33, 0.25, 0.17), vec3(0.28, 0.21, 0.15), hash(cell + 9.0));
+  vec2 size;
+  float across;
+  vec4 at = plotAt(p.xy, uFieldStyle, size, across);
+  ivec2 cell = ivec2(at.xy);
+  vec2 f = at.zw;
+  float h = plotNumber(cell, 0);
+  float tone = plotNumber(cell, 3);
+  vec3 ripe = mix(PLOT_RIPE0, PLOT_RIPE1, tone);
+  vec3 green = mix(PLOT_GREEN0, PLOT_GREEN1, tone);
+  vec3 ploughed = mix(vec3(0.33, 0.25, 0.17), vec3(0.28, 0.21, 0.15), plotNumber(cell, 9));
   vec3 fallow = vec3(0.32, 0.32, 0.19);
-  vec3 c = h < 0.4 ? ripe : h < 0.72 ? green : h < 0.88 ? ploughed : fallow;
-  if (kind > 6.5 && kind < 7.5) c = h < 0.5 ? mix(ploughed, vec3(0.12, 0.10, 0.08), 0.4) : green;
+  bool swidden = kind > 6.5 && kind < 7.5;
+  bool cropped = swidden ? h >= ${PLOT_LOOK.shares.cleared.toFixed(4)} : h < ${PLOT_LOOK.shares.green.toFixed(4)};
+  vec3 c = h < ${PLOT_LOOK.shares.ripe.toFixed(4)} ? ripe : h < ${PLOT_LOOK.shares.green.toFixed(4)} ? green : h < ${PLOT_LOOK.shares.ploughed.toFixed(4)} ? ploughed : fallow;
+  if (swidden) c = cropped ? green : mix(ploughed, vec3(0.12, 0.10, 0.08), 0.4);
   float vis = 1.0 - smoothstep(800.0, 9000.0, dist);
-  float edge = min(min(f.x, 1.0 - f.x), min(f.y, 1.0 - f.y)) * min(size.x, size.y);
+  float edge = min(min(f.x, 1.0 - f.x) * size.x, min(f.y, 1.0 - f.y) * size.y);
+  // Its crop as plants close by: between their rows the earth shows; and the balk round the plot, which is bare of
+  // them, is the ground as it was, a little worn.
+  float rows = cropped && uCrops > 0.0 ? 1.0 - smoothstep(uCrops * 0.45, uCrops * 1.05, dist) : 0.0;
+  float within = smoothstep(${(PLOT_LOOK.balk * 0.6).toFixed(3)}, ${(PLOT_LOOK.balk * 1.4).toFixed(3)}, edge);
+  tilled = rows * within;
+  c = mix(c, mix(wild, ploughed, 0.3), rows * (1.0 - within));
+  c = mix(c, ploughed * 1.06, tilled * 0.86);
   // A balk or a bank between plots, darker, seen until the plots melt together.
   c *= mix(1.0, 0.78 + 0.22 * smoothstep(0.4, 1.6, edge), vis);
   float fur = (1.0 - smoothstep(60.0, 420.0, dist)) * smoothstep(3.0, 24.0, dist);
-  c *= 1.0 - 0.07 * fur * smoothstep(0.25, 0.75, abs(fract(f.y * size.y / 1.3) - 0.5) * 2.0);
-  // Water stands in a paddy within its banks, and shows the sky.
+  c *= 1.0 - 0.07 * fur * smoothstep(0.25, 0.75, abs(fract(across / ${PLOT_LOOK.furrow.toFixed(3)}) - 0.5) * 2.0);
+  // Water stands in a paddy within its banks, and shows the sky; among a crop's rows close by, the earth of a field
+  // that is only watered is wet and dark.
   float wet = paddy * smoothstep(0.4, 1.4, edge);
-  c = mix(c, vec3(0.16, 0.22, 0.24), wet * 0.75);
+  c = mix(c, mix(vec3(0.16, 0.22, 0.24), c * 0.66, tilled * (1.0 - smoothstep(0.55, 0.9, paddy))), wet * 0.75);
+  tilled *= 1.0 - wet * smoothstep(0.55, 0.9, paddy);
   return c;
 }
 // How much of the ground at a point people made: fields, pasture and yards, all generated.
@@ -1960,8 +1992,9 @@ float peopledShare(vec3 p) {
   vec4 f = texture(uFields, fuv);
   return max(f.r, max(f.g * 0.75, f.b));
 }
-vec3 peopled(vec3 c, vec3 p, float dist, out float yard) {
+vec3 peopled(vec3 c, vec3 p, float dist, out float yard, out float tilled) {
   yard = 0.0;
+  tilled = 0.0;
   if (uFieldStyle.w < 0.5) return c;
   vec2 fuv = (p.xy - uFieldsBox.xy) / uFieldsBox.zw;
   if (fuv.x <= 0.0 || fuv.y <= 0.0 || fuv.x >= 1.0 || fuv.y >= 1.0) return c;
@@ -1972,7 +2005,8 @@ vec3 peopled(vec3 c, vec3 p, float dist, out float yard) {
   vec3 bareTone = mix(uTone[4], uTone[5], noiseM(p + 5.0, 24.0));
   vec3 grazed = mix(herbTone, bareTone, 0.3 + 0.6 * uShare.z) * 0.94;
   c = mix(c, grazed, f.g * 0.75);
-  c = mix(c, plots(p, dist, f.a), f.r);
+  c = mix(c, plots(c, p, dist, f.a, tilled), f.r);
+  tilled *= f.r;
   // Among the houses the ground is trodden bare in patches, where feet and hooves go; between them it keeps what grew.
   vec3 trodden = mix(vec3(0.36, 0.30, 0.22), vec3(0.46, 0.40, 0.30), noiseM(p, 6.0));
   float worn = smoothstep(0.36, 0.6, noiseM(p, 11.0) * 0.55 + noiseM(p + 7.0, 3.0) * 0.45);
@@ -2317,9 +2351,12 @@ vec3 wilderness(vec3 p, vec3 n, float dist, out float water, out float rough, ou
   c = groundClose(c, p, n, dist, mask, slope, rough, nd);
   // What people made of it, where the scene has people: a yard is trodden earth.
   float yard;
-  c = peopled(c, p, dist, yard);
-  matKeep(1.0 - yard);
-  gMat[M_EARTH] += yard;
+  float tilled;
+  c = peopled(c, p, dist, yard, tilled);
+  // Between a crop's rows the ground is tilled earth, as a yard's is trodden.
+  float bared = max(yard, tilled * 0.8 * (1.0 - yard));
+  matKeep(1.0 - bared);
+  gMat[M_EARTH] += bared;
   // Rock on the steep slopes, in beds where it is a face, and snow where the month's climate lays it, off the steepest.
   float steep = smoothstep(0.28, 0.5, slope);
   float face = smoothstep(0.5, 0.72, slope);

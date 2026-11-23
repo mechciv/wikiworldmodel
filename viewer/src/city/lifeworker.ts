@@ -2,9 +2,10 @@
 // needs and who to draw at what detail. They are the same code as the build's, so what they make agrees with it
 // within the tolerance of core/fingerprint.ts.
 import type { Fingerprint } from '../../../core/fingerprint.ts';
+import { plotStyle } from '../../../core/plots.ts';
 import type { SceneSpec } from '../../../core/scene.ts';
 import { FAST_BUDGET, FULL_BUDGET, SceneStream, type Batch, type LifeView, type ProtoMesh } from '../../../world/generators/life/stream.ts';
-import type { PlanForm, Settlement, SettlementPlan, WorkForm } from '../../../world/generators/people/settlement/v4.ts';
+import type { PlanForm, Settlement, SettlementPlan, WorkForm } from '../../../world/generators/people/settlement/v5.ts';
 
 /** What a scene's people are, for its panel: the plan without its houses. */
 export interface PeopleSummary {
@@ -17,6 +18,8 @@ export interface PeopleSummary {
   animals: number;
   /** how many paths run between its settlements */
   paths: number;
+  /** whether its fields' crop is drawn as plants close by (world/generators/people/crops.ts) */
+  crops: boolean;
   settlements: { pattern: string; houses: number; people: number; city?: string; record?: string; from?: Settlement['from']; town?: Settlement['town']; husbandry?: string; tier: string; form: number; region: number; x: number; y: number; r: number; house?: [number, number, number] }[];
   houses: number;
   drawn: number;
@@ -28,9 +31,7 @@ export interface PeopleSummary {
 
 /** How a field system's plots are drawn: their side in metres, how much longer than wide, and the shader's code for their kind. */
 export function fieldStyle(s: SettlementPlan['style']): { plot: number; aspect: number; kind: number } {
-  const KIND: Record<string, [number, number]> = { blocks: [0, 1.5], strips: [1, 6], irregular: [2, 1.2], terraces: [3, 4], paddies: [4, 1.3], basins: [5, 2], raised: [6, 3], swidden: [7, 1.2], gardens: [8, 1.2], none: [0, 1] };
-  const [kind, aspect] = KIND[s.kind] ?? [0, 1.5];
-  return { plot: Math.sqrt(s.plot * 10000), aspect, kind };
+  return plotStyle(s);
 }
 
 export type ToLifeWorker = { type: 'init'; spec: SceneSpec; fast: boolean } | { type: 'view'; view: LifeView; serial: number } | { type: 'reset' };
@@ -76,6 +77,7 @@ self.onmessage = (e: MessageEvent<ToLifeWorker>) => {
       kept: m.spec.people?.kept?.length ?? 0,
       animals: pl.animals.length,
       paths: pl.paths.length,
+      crops: !!stream.crops,
       settlements: pl.settlements.map((x, i) => ({ ...(houseOf.has(i) ? { house: houseOf.get(i)! } : {}), pattern: x.pattern, houses: x.houses, people: Math.round(x.people), ...(x.city ? { city: x.city } : {}), ...(x.record ? { record: x.record } : {}), ...(x.from ? { from: x.from } : {}), ...(x.town ? { town: x.town } : {}), ...(x.husbandry ? { husbandry: x.husbandry } : {}), tier: x.tier, form: x.form, region: x.region, x: Math.round(x.x), y: Math.round(x.y), r: Math.round(x.r) })),
       houses: pl.houses.length,
       drawn: pl.drawn,

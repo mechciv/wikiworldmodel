@@ -126,7 +126,7 @@ export interface WikiWorldModelHandle {
   organismsAt(id: string): { x: number; y: number; depth: number }[];
   organismPlaces(id: string): { lat: number; lon: number; x: number; y: number }[];
   /** what a click at a point of the view finds in the living scene drawn: a taxon, a house the generator drew, or the ground (not the sky); null with no scene */
-  foundAt(x: number, y: number): { taxon?: string; kept?: string; house?: number; work?: number; path?: boolean; ground: boolean } | null;
+  foundAt(x: number, y: number): { taxon?: string; kept?: string; house?: number; work?: number; path?: boolean; crop?: boolean; ground: boolean } | null;
   set(s: Partial<ViewState>): void;
   /**
    * How long each pass of the local scene's frame takes, the median over this many frames drawn again of the view as it
@@ -2032,6 +2032,19 @@ async function start(root: HTMLElement): Promise<void> {
           const why = `${gen.generator}, version ${gen.version}: nobody surveyed this path. Which settlements it joins follows where the generator put them; its line is invented.`;
           return inspect.showGenerated('A path', 'Generated path', text, why);
         }
+        // The crop of a field: that the land was farmed is the world's; which crop, and every plant, is the generator's.
+        if (found.crop && city.people && city.spec.people) {
+          setState({ sel: null });
+          shownRecord = null;
+          const sp = city.spec.people;
+          const gen = sp.generator;
+          const style = city.people.style;
+          const tradition = style.from === 'tradition' ? sp.traditions.find((t) => t.id === style.tradition) : undefined;
+          const plots = tradition ? `Its plots are drawn as the world's records of ${tradition.label} say its fields were laid out (${style.kind})` : `No record says how the fields here were laid out: its plots are the generator's plain ones for this use of the land (${style.kind})`;
+          const text = `A crop standing in a field, as the scene draws every field that is under one. No record says which crop grew here, and the generator names none: this is one plain stand of upright blades, the same in every field of every place and time, coloured ripe or green by its plot, and no plant of the world's records. That people farmed this land follows the anthromes and the way of life recorded for the place and time. ${plots}; where one plot ends and the next begins, which plots are under a crop, ploughed or fallow, that the crop stands in rows, and how tall it is, are all invented.`;
+          const why = `${gen.generator}, version ${gen.version}: nobody recorded this field or what grew in it. A generic stand is drawn so that a field close by is plants and not a colour on the ground; it says nothing of what was sown.`;
+          return inspect.showGenerated('A crop, not named', 'Generated crop', text, why);
+        }
         // A piece of a town's works: its wall, a gate, a tower, the water of a canal or a moat.
         if (found.work !== undefined && city.people && city.spec.people) {
           setState({ sel: null });
@@ -2708,7 +2721,7 @@ async function start(root: HTMLElement): Promise<void> {
       // As a click picks (pickAt), in the canvas's pixels.
       const dpr = canvas.width / stage.clientWidth;
       const found = city.pick(Math.round(x * dpr), canvas.height - 1 - Math.round(y * dpr));
-      if (found.taxon || found.kept || found.path || found.house !== undefined || found.work !== undefined) return { taxon: found.taxon?.id, kept: found.kept?.id, house: found.house, work: found.work, ...(found.path ? { path: true } : {}), ground: false };
+      if (found.taxon || found.kept || found.path || found.crop || found.house !== undefined || found.work !== undefined) return { taxon: found.taxon?.id, kept: found.kept?.id, house: found.house, work: found.work, ...(found.path ? { path: true } : {}), ...(found.crop ? { crop: true } : {}), ground: false };
       return { ground: !!groundHit(frameView, rayOf(frameView, x, y), city.ground) };
     },
     set: (s) => setState(s),

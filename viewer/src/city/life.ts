@@ -160,7 +160,7 @@ export class LifeScene {
           this.maskData = m;
           if (this.active) {
             this.renderer.setMask(m.mask, m.maskSize, m.maskBox);
-            if (m.fields && this.people) this.renderer.setFields(m.fields, m.maskSize, m.maskBox, fieldStyle(this.people.style));
+            if (m.fields && this.people) this.renderer.setFields(m.fields, m.maskSize, m.maskBox, this.fieldLook());
           }
           this.onChange();
         } else this.selection(m);
@@ -200,7 +200,7 @@ export class LifeScene {
     r.setMask(mask.mask, mask.maskSize, mask.maskBox);
     // What people made of the ground, or nothing where there are no people.
     const fields = this.maskData?.fields ?? g.fields;
-    r.setFields(fields && this.people ? fields : null, mask.maskSize, mask.maskBox, this.people ? fieldStyle(this.people.style) : { plot: 0, aspect: 1, kind: 0 });
+    r.setFields(fields && this.people ? fields : null, mask.maskSize, mask.maskBox, this.fieldLook());
     const params = this.spec.generator.params as unknown as LivingParams;
     const clim = params.cover.climates[this.spec.biome.climate];
     const cover = this.spec.biome.cover;
@@ -218,8 +218,8 @@ export class LifeScene {
     r.setGroundCover(...groundCover(this.spec));
     // Each taxon is an entity, and after them each kind of house and each kind of piece of a town's works, which stand
     // for as long as the scene does: generated.
-    // And one more for the paths between its settlements, if it has any.
-    const houseKinds = (this.people?.forms.length ?? 0) + (this.people?.works.length ?? 0) + (this.people?.kept ?? 0) + 1;
+    // And one more for the paths between its settlements, if it has any, and one for the crop of its fields.
+    const houseKinds = (this.people?.forms.length ?? 0) + (this.people?.works.length ?? 0) + (this.people?.kept ?? 0) + 2;
     // The paths are one mesh of the scene's own, put on the GPU the first time it is shown.
     if (g.paths && !this.pathsGpu) this.pathsGpu = r.upload(g.paths.vertices, g.paths.indices);
     const out = new Float32Array((this.spec.taxa.length + 1 + houseKinds) * 4);
@@ -322,16 +322,28 @@ export class LifeScene {
   }
 
   /**
+   * How the plots of the scene's fields are drawn, and how far from the eye their crop stands plant by plant (`sown`):
+   * as far as the cover's own grid reaches, where the settlement generator says how a crop is drawn. Within that the
+   * ground between a crop's rows is earth; beyond it, under the lengths of row the wider grid draws, the crop's colour.
+   */
+  private fieldLook(): { plot: number; aspect: number; kind: number; sown?: number } {
+    if (!this.people) return { plot: 0, aspect: 1, kind: 0 };
+    const clumps = (this.spec.generator.params as unknown as LivingParams).plants.clumps;
+    return { ...fieldStyle(this.people.style), sown: this.people.crops && clumps ? clumps.reach : 0 };
+  }
+
+  /**
    * What is at a screen position: a taxon, a kind of house or of a piece of a town's works the generator drew, an animal
    * the scene's people kept, or nothing.
    */
-  pick(x: number, y: number): { taxon?: LivingTaxon; house?: number; work?: number; kept?: LivingTaxon; path?: boolean } {
+  pick(x: number, y: number): { taxon?: LivingTaxon; house?: number; work?: number; kept?: LivingTaxon; path?: boolean; crop?: boolean } {
     const e = this.renderer.pick(x, y);
     if (!e) return {};
     const made = e - this.spec.taxa.length - 1;
     const forms = this.people?.forms.length ?? 0;
     const works = this.people?.works.length ?? 0;
     const kept = this.people?.kept ?? 0;
+    if (made > forms + works + kept) return { crop: true };
     if (made >= forms + works + kept) return { path: true };
     if (made >= forms + works) return { kept: this.spec.people?.kept?.[made - forms - works] };
     if (made >= forms) return { work: made - forms };
