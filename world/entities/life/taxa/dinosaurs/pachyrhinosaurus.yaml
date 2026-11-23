@@ -16,7 +16,7 @@ claims:
       parts:
         nose: null
         brow: null
-        boss: { type: lump, on: head, mat: horn, tint: 150, at: [0, 0.16, 0.026], r: [0.026, 0.045, 0.018], sides: [10, 5], bands: [6, 3] }
+        boss: { type: lump, on: head, turn: true, mat: horn, tint: 150, at: [0, 0.16, 0.026], r: [0.026, 0.045, 0.018], sides: [10, 5], bands: [6, 3] }
         spike: { type: spike, on: head, tint: 60, from: [0.012, -0.02, 0.092], to: [0.019, -0.058, 0.134], r: 0.008, mirror: true, sides: [6, 3] }
     unsourced: >-
       A machine's reconstruction: a boss over the snout and brows and a pair of frill spikes, first

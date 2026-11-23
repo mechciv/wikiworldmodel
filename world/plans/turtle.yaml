@@ -11,6 +11,11 @@ parts:
   hind: { type: chain, zl: true, mirror: true, sides: [6, 3], points: [[0.19, -0.3, 0.1, 0.06], [0.33, -0.36, 0.085, 0.05], [0.37, -0.4, 0.04, 0.04], [0.39, -0.46, 0.02, 0.032]] }
   # The neck and the head are one chain: slender out of the shell, then the head's swelling and its blunt snout.
   neck: { type: chain, zl: true, sides: [8, 4], points: [[0, 0.4, 0.11, 0.04], [0, 0.53, 0.135, 0.032], [0, 0.6, 0.155, 0.048], [0, 0.665, 0.158, 0.046], [0, 0.72, 0.15, 0.024]] }
+  # Eyes and the line of the mouth ride the neck's own skin, near its end: so they sit on the head whatever neck a
+  # turtle below is given, long or short, thick or thin. The mouth's line runs back along one side of the jaw, across
+  # inside the snout's tip, and back along the other.
+  eyes: { type: eyes, ride: neck, near: true, at: [0.55, 0.84, -0.003], r: 0.008 }
+  mouth: { type: tube, ride: neck, near: true, mat: dark, sides: [5, 4], thin: false, rings: [[1.22, 0.74, 0, 0.0018, 0.0018], [1.22, 0.88, 0, 0.0018, 0.0018], [1.22, 1.0, 0, 0.0018, 0.0018], [-1.22, 1.0, 0, 0.0018, 0.0018], [-1.22, 0.88, 0, 0.0018, 0.0018], [-1.22, 0.74, 0, 0.0018, 0.0018]] }
   tail: { type: spike, zl: true, mat: hide, sides: [4, 4], from: [0, -0.46, 0.09], to: [0, -0.63, 0.05], r: 0.026 }
   shell: { type: shell, r: [0.39, 0.5, 0.22], lift: 0.08, sides: [16, 6], bands: [7, 3] }
   plastron: { type: lump, zl: true, mat: shell, at: [0, 0, 0.075], r: [0.33, 0.44, 0.04], sides: [12, 6], bands: [4, 2] }
