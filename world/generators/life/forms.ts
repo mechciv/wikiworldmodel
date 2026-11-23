@@ -1345,14 +1345,24 @@ function scaleTree(m: Mesh, p: Part, h: number, seed: number, detail: Detail, ti
   fork(0, 0, at, 1, 0, spread, tr * 0.5, num(p, 'forks', 2), 1);
 }
 
-/** A tuft of thin blades: a grass, a sedge or a rush, or a low clump of anything. */
+/** Whose colour a tuft's blades take, on a card or close by, by its material: a frond's, a needle's or a broad leaf's. */
+const BLADES: Record<number, number> = { [MAT.frond]: 1, [MAT.needle]: 2, [MAT.broad]: 3 };
+
+/**
+ * A tuft of thin blades: a grass, a sedge or a rush, or a low clump of anything. Its blades are thin leaves, lit as the
+ * leaves on cards are, as the mass they make and with the sun through them: each vertex's normal is the tuft's, up and
+ * out from its foot, whichever side of a blade is seen. Its uv is as on a card of blades: u across a blade, from −1 to 1;
+ * v's whole part the family of its colour by eight and the blade's own number, which gives it its shade, and its
+ * fraction the way up the blade.
+ */
 function tuft(m: Mesh, p: Part, h: number, seed: number, detail: Detail, tint: number): void {
   // A low tuft is drawn only close by (stream.ts); a tall one, a reed's, from a way off too, as a third of its blades,
   // each in two pieces, a little wider so that the clump keeps its mass.
   if (detail < 1) return;
-  m.mat = MATERIALS[(p.mat as string) ?? 'frond'];
+  m.mat = MAT.blade;
   m.tint = tint;
   m.light = 0.85;
+  const family = BLADES[MATERIALS[(p.mat as string) ?? 'frond']] ?? 1;
   const coarse = detail === 1;
   const blades = coarse ? Math.max(4, Math.round(num(p, 'blades', 12) / 3)) : num(p, 'blades', 12);
   const spread = h * num(p, 'spread', 0.5);
@@ -1364,13 +1374,14 @@ function tuft(m: Mesh, p: Part, h: number, seed: number, detail: Detail, tint: n
     const tall = h * (0.55 + 0.45 * hash2(k, 3, seed));
     const dx = dcos(t);
     const dy = dsin(t);
+    const v0 = 8 * family + ((seed + k) & 7);
     const base = m.verts;
     for (let i = 0; i <= steps; i++) {
       const f = i / steps;
       const w = wide * (1 - f);
       const r = out * f * f;
-      m.v(dx * r - dy * w, dy * r + dx * w, tall * f, dx * 0.3, dy * 0.3, 0.9, i, -1, 0.5 + 0.5 * f);
-      m.v(dx * r + dy * w, dy * r - dx * w, tall * f, dx * 0.3, dy * 0.3, 0.9, i, 1, 0.5 + 0.5 * f);
+      m.v(dx * r - dy * w, dy * r + dx * w, tall * f, dx * 0.3, dy * 0.3, 0.9, -1, v0 + 0.999 * f, 0.5 + 0.5 * f);
+      m.v(dx * r + dy * w, dy * r - dx * w, tall * f, dx * 0.3, dy * 0.3, 0.9, 1, v0 + 0.999 * f, 0.5 + 0.5 * f);
     }
     for (let i = 0; i < steps; i++) {
       const a = base + i * 2;
@@ -1417,9 +1428,6 @@ function shrub(m: Mesh, p: Part, h: number, seed: number, detail: Detail, tint: 
     leafBall(m, x, y, r * 0.8, r, r * 0.86, Math.max(10, Math.min(120, Math.round((area * 1.2) / (len * len * 0.4)))), len, len * 0.8, crown, seed * 5 + k);
   }
 }
-
-/** The family of colour a card of a tuft's blades takes, in the place of its width: a frond's, a needle's or a broad leaf's. */
-const BLADES: Record<number, number> = { [MAT.frond]: 1, [MAT.needle]: 2, [MAT.broad]: 3 };
 
 /** A card standing at a clump's foot, `turn` turns about the vertical, its top leaning out by `lean` of its height. */
 function standing(m: Mesh, turn: number, wide: number, tall: number, lean: number, v0: number): void {

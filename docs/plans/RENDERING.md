@@ -252,9 +252,13 @@ above, it says so here.
   leaves behind. From a way off (detail 1) a plant is its trunk, that mass and fewer,
   larger cards, so that it keeps its ragged edge and its colour; the lighter way keeps its plain shapes. Leaves are lit
   as their crown's mass, with light through them. The shadow, depth and pick passes cut them as the lit pass does; the
-  depth before the lit pass leaves them out, and they write their own. `gen:life/scene` is version 6. *Not built:*
-  impostors. A crown far off is still detail 1's cards or detail 0's shape; baking a tree into an atlas of views, as
-  planned, is left until a view on the sheet needs it.
+  depth before the lit pass leaves them out, and they write their own. `gen:life/scene` is version 6. A tuft's own blades
+  are thin leaves, and since version 9 are lit so too: in a material of their own that carries their form's colour, by
+  the tuft's normal on either side of a blade, with the sun through them and none of the sky mirrored, and never holed as
+  a mass of leaves is. Drawn as a mass of broad leaves or needles, the back of a blade had been lit as if it faced the
+  ground, and the holes cut in it showed the sky, which the depth drawn before kept the ground from covering. *Not
+  built:* impostors. A crown far off is still detail 1's cards or detail 0's shape; baking a tree into an atlas of views,
+  as planned, is left until a view on the sheet needs it.
 - **2. The ground.** The understory the atlas has there covers the ground close by, as clumps on a grid of a metre, out
   to 70 m, thinning into the ground's own colour, with a budget of 40,000 of its own (`plants.clumps`); a tuft is a pair
   of cards of blades, a fern a few fronds, anything else a few sprays of its leaves. Soil, litter, mud, sand, gravel and
