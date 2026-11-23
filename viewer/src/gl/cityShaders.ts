@@ -2,7 +2,7 @@
 // physically based sky, so that the same light falls on everything the records raise.
 import { LEAF_TILE, LITTER_SPAN } from '../../../core/leaves.ts';
 import { GROUND_LAYERS } from '../../../core/materials.ts';
-import { DRIED_AT, SOIL_STONES, SORT_EDGE, SORTING } from '../../../world/generators/life/sorting.ts';
+import { DRIED_BY, SOIL_STONES, SORT_EDGE, SORTING } from '../../../world/generators/life/sorting.ts';
 
 /** A number as GLSL writes a float. */
 const glf = (x: number): string => (Number.isInteger(x) ? x.toFixed(1) : String(x));
@@ -418,7 +418,11 @@ float shadowAt(vec3 p, vec3 n, float pixel) {
   vec4 c = uShadowM[k] * vec4(q, 1.0);
   vec3 u = c.xyz * 0.5 + 0.5;
   if (u.x < 0.0 || u.x > 1.0 || u.y < 0.0 || u.y > 1.0 || u.z > 1.0) return 1.0;
-  float bias = 0.00012;
+  // How far along the sun's way a point must be behind what shades it: three texels of its cascade's map, as a share
+  // of the depth the map spans (city.ts, the shadows' depthRange), and no more than it was when it was one number for
+  // all three. In the nearest cascade that is a hand's breadth, where it was more than half a metre: a stone, a tuft
+  // and a foot cast a shadow that meets them.
+  float bias = min(0.00012, texel * 3.0 / (2.0 * max(uShadowRadii[k] * 4.0, 2500.0)));
   float s = 0.0;
   float o = 1.1 / 2048.0;
   s += texture(uShadow, vec4(u.xy, float(k), u.z - bias));
@@ -2138,7 +2142,7 @@ vec3 substrateGround(vec3 p, float dist, float ripple, vec3 under, float hUnder,
   vec2 crack = cracks ? cellsOf(p.xy / 0.3 + n2 * 0.6) : vec2(0.2, 0.5);
   vec2 crust = uSubShare[5] > 0.0 && uMaterials < 0.5 ? cellsOf(p.xy / 1.6 + n2 * 0.8) : vec2(0.2, 0.5);
   // How much of a mud is drawn cracked, where its sources say it dried; and how coarse a sand is.
-  float dried = min(1.0, uSub.y / ${glf(DRIED_AT)});
+  float dried = min(1.0, uSub.y * ${glf(DRIED_BY)});
   float coarse = clamp(uSub.w, 0.0, 1.0);
   float cracked = (1.0 - smoothstep(0.015, 0.07, crack.x)) * near * dried;
   // The ground's own gentle height: the coarse stands a little proud of the fine.

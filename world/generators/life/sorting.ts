@@ -29,9 +29,12 @@ export const SORT_EDGE = 0.02;
  * times their share, and thinning to none in its hollows, between these two values of the field.
  */
 export const SOIL_STONES = { most: 2, rises: [0.38, 0.62] } as const;
-/** How much of a mud is drawn dried into cracks: all of it once this share of what its sources say names cracks. */
-export const DRIED_AT = 1 / 3;
-export const driedShare = (cracks: number): number => Math.min(1, cracks / DRIED_AT);
+/**
+ * How much of a mud is drawn dried into cracks: this many times the share of what its sources say that names cracks,
+ * and no more than all of it. So all of it, once a third of what they say names them.
+ */
+export const DRIED_BY = 3;
+export const driedShare = (cracks: number): number => Math.min(1, cracks * DRIED_BY);
 
 /**
  * The order the materials lie in across a ground, from its rises to its hollows: the coarsest first, and last what a

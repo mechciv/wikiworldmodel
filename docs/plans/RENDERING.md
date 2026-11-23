@@ -400,7 +400,11 @@ plants, the bodies, the people and what they build, and raised each by the means
   and next to none on it. `gen:life/scene` is version 11: a scene whose ground bears all its climate grows has every
   tree and animal where version 10 put it.
 - **Shadows close to.** The nearest cascade is as wide as the view is far, down to 24 m, so that close by a shadow is
-  fine enough to meet the foot that casts it.
+  fine enough to meet the foot that casts it. How far behind what shades it a point must be, along the sun's way, was
+  one number for all three cascades, which in the nearest came to more than half a metre: nothing lower than that
+  cast a shadow on the ground beside it. It is now three texels of each cascade's own map, a hand's breadth in the
+  nearest, so that a stone a foot high, a tuft and a foot cast one. A stone lower than two texels, some 6 cm at the
+  nearest, still casts none: the map is no finer.
 - **Clouds without streaks.** A march of 24 steps through the cloud layer hit or missed the edges of its heaps so
   much at random that eight frames' average kept the pattern of the marches' starts, as fine streaks along the rows of
   the screen. The march has 48 steps; each frame of a view at rest starts an even eighth of a step on from the last,
