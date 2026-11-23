@@ -30,6 +30,7 @@ import type { Cover, Look } from '../../../core/planet.ts';
 import type { SurfaceParams } from '../../../world/generators/earth/surface/v1.ts';
 import { program, setUniforms, texture2D, type GL, type Program } from './context.ts';
 import type { Mat4 } from '../mat.ts';
+import { CLOUD_MAP_FS, MATERIAL, RIDGE_LIGHT } from './orbital.ts';
 
 const SPHERE_VS = `#version 300 es
 precision highp float;
@@ -83,7 +84,8 @@ uniform float uReefs;
 // The biome rule's thresholds: polar, frost, tropical, cold; arid, desert, reef depth and latitude.
 uniform vec4 uRule;
 uniform vec4 uRule2;
-uniform highp sampler2D uBiomeTex;
+${MATERIAL}
+${RIDGE_LIGHT}
 // The ice sheets, moved with their plates: R and G how far the keyframes on either side of the time
 // shown are from their margin, with 0.5 at the margin; B and A the root of their thickness.
 uniform highp samplerCube uIce;
@@ -130,28 +132,37 @@ float coastLine(float e, float de) {
   return 1.0 - smoothstep(0.5, 1.5, abs(e) / de);
 }
 
-vec3 ramp(float e) {
-  if (e < 0.0) {
-    float d = clamp(-e / 6500.0, 0.0, 1.0);
-    vec3 shelf = vec3(0.20, 0.52, 0.66);
-    vec3 mid = vec3(0.06, 0.25, 0.45);
-    vec3 deep = vec3(0.025, 0.08, 0.20);
-    vec3 c = mix(shelf, mid, smoothstep(0.0, 0.35, d));
-    return mix(c, deep, smoothstep(0.35, 1.0, d));
-  }
-  float h = e / 1000.0;
-  vec3 low = vec3(0.47, 0.53, 0.33);
-  vec3 up = vec3(0.62, 0.57, 0.38);
-  vec3 high = vec3(0.55, 0.45, 0.33);
-  vec3 peak = vec3(0.86, 0.84, 0.80);
-  vec3 c = mix(low, up, smoothstep(0.1, 0.9, h));
-  c = mix(c, high, smoothstep(0.9, 2.4, h));
-  return mix(c, peak, smoothstep(2.8, 5.0, h));
+// Light returning from a shallow bottom falls away rapidly with water depth. Far offshore,
+// retain only a little colour variation: an orbital camera cannot see abyssal relief.
+vec3 ocean(float depth, vec4 stone) {
+  float shoal = exp(-depth / 105.0);
+  float shelf = exp(-depth / 520.0);
+  vec3 deep = mix(vec3(0.031, 0.091, 0.154), vec3(0.047, 0.107, 0.17), stone.x);
+  vec3 blue = vec3(0.043, 0.27, 0.34);
+  vec3 shoals = mix(vec3(0.16, 0.48, 0.47), vec3(0.49, 0.68, 0.60), stone.x);
+  return mix(mix(deep, blue, shelf), shoals, shoal) * (1.0 + shelf * (stone.y - 0.5) * 0.33);
 }
 
-// Continental blocks: bare crust and open water, their relief and depth unknown.
-vec3 blockRamp(float e) {
-  return e < 0.0 ? vec3(0.07, 0.24, 0.40) : vec3(0.52, 0.48, 0.42);
+vec3 bedrock(vec4 stone) {
+  return mix(vec3(0.29, 0.265, 0.24), vec3(0.60, 0.52, 0.42),
+             clamp(stone.x * 0.52 + stone.y * 0.34 + stone.w * 0.14, 0.0, 1.0));
+}
+
+vec3 daylight(float cosine) {
+  float light = sqrt(max(cosine, 0.0));
+  return vec3(0.045, 0.055, 0.08) + vec3(1.02, 1.00, 0.96) * light;
+}
+
+vec3 air(vec3 c, float facing, float sun) {
+  float path = pow(1.0 - facing, 3.8);
+  // A longer path through sunlit air softens distant ground and lifts the blue horizon.
+  float scatter = path * smoothstep(-0.22, 0.55, sun);
+  return c * (1.0 - 0.34 * scatter) + uRim * scatter * 0.69;
+}
+
+vec3 snow(vec4 stone, float land) {
+  vec3 ice = mix(vec3(0.62, 0.75, 0.81), vec3(0.87, 0.91, 0.93), stone.z);
+  return mix(ice, vec3(0.92, 0.94, 0.94), land * 0.75) * (0.90 + 0.16 * stone.y);
 }
 
 float graticule(vec3 n) {
@@ -191,40 +202,40 @@ vec4 coverTex(vec3 n, float scale) {
 
 // What covers the land here: the climate says what could grow, and the world's transitions what had
 // come to exist by now. With no land plants yet, only rock, sand, frost and a film of microbes are drawn.
-vec3 biome(vec3 n, float e, float reach) {
+vec3 biome(vec3 n, float e, float reach, vec4 stone, float rugged) {
   vec4 k = mix(texture(uClimate0, n), texture(uClimate1, n), uClimateMix);
   vec4 wide = coverTex(n, 5.0);
   vec4 near = coverTex(n, 37.0);
-  float rag = (wide.b - 0.5) + (near.b - 0.5) * 0.5;
+  float rag = 0.55 * (wide.b - 0.5) + 0.25 * (near.b - 0.5) + 0.65 * (stone.y - 0.5);
   float hot = k.r * 110.0 - 60.0 + rag * 6.0;
   float cold = k.g * 110.0 - 60.0 + rag * 6.0;
   float wetness = k.b * k.b * 4.0 * (1.0 + rag * 0.8);
   float margin = k.a * 300.0 - 150.0 + rag * 50.0;
-  float polar = smoothstep(uRule.x + 1.0, uRule.x - 1.0, hot);
-  float frost = smoothstep(uRule.y + 1.0, uRule.y - 1.0, hot);
-  float dry = smoothstep(uRule2.x * 1.06, uRule2.x * 0.94, wetness) * (1.0 - polar);
-  float desert = smoothstep(uRule2.y * 1.1, uRule2.y * 0.9, wetness) * (1.0 - polar);
+  float polar = 1.0 - smoothstep(uRule.x - 2.0, uRule.x + 2.0, hot);
+  float frost = 1.0 - smoothstep(uRule.y - 1.5, uRule.y + 1.5, hot);
+  float dry = (1.0 - smoothstep(uRule2.x * 0.58, uRule2.x * 1.42, wetness)) * (1.0 - polar);
+  float desert = (1.0 - smoothstep(uRule2.y * 0.54, uRule2.y * 1.46, wetness)) * (1.0 - polar);
   float tropical = smoothstep(uRule.z - 1.0, uRule.z + 1.0, cold);
-  float boreal = smoothstep(uRule.w + 1.0, uRule.w - 1.0, cold);
+  float boreal = 1.0 - smoothstep(uRule.w - 2.0, uRule.w + 2.0, cold);
   float rainy = smoothstep(-8.0, 8.0, margin);
   float fine = mix(wide.a, near.a, reach);
   float mott = mix(wide.r, near.r, reach);
   float streak = mix(wide.g, near.g, reach);
   // Bare ground: rock and weathered regolith, and sand where it is driest.
-  vec3 rock = mix(vec3(0.44, 0.37, 0.30), vec3(0.58, 0.50, 0.41), fine);
-  vec3 sand = mix(vec3(0.80, 0.68, 0.47), vec3(0.67, 0.53, 0.35), streak);
+  vec3 rock = bedrock(stone);
+  vec3 sand = mix(vec3(0.78, 0.67, 0.51), vec3(0.55, 0.43, 0.32), streak * 0.5 + stone.x * 0.5);
   vec3 c = mix(rock, sand, desert);
   // Microbial crusts darken damp ground.
   c = mix(c, c * vec3(0.72, 0.70, 0.60), uCover.x * (1.0 - dry) * (1.0 - frost) * 0.8);
   // Low plants on damp ground, patchy at first and thickening as they spread; tundra is the same to the eye.
   vec3 low = mix(vec3(0.30, 0.34, 0.15), vec3(0.42, 0.42, 0.22), fine);
-  float patches = smoothstep(1.0 - uCover.y * 1.15, 1.0 - uCover.y * 0.75, mott);
+  float patches = smoothstep(1.0 - uCover.y * 1.15, 1.001 - uCover.y * 0.75, mott) * min(1.0, 8.0 * uCover.y);
   c = mix(c, low, patches * (1.0 - dry) * (1.0 - frost));
   // Trees, in the colours of their climates, where it is warm and wet enough.
-  vec3 trees = mix(vec3(0.17, 0.30, 0.11), vec3(0.11, 0.22, 0.08), mott);
+  vec3 trees = mix(vec3(0.24, 0.29, 0.16), vec3(0.13, 0.20, 0.11), mott);
   trees = mix(trees, mix(vec3(0.10, 0.19, 0.11), vec3(0.06, 0.13, 0.08), mott), boreal);
-  trees = mix(trees, mix(vec3(0.05, 0.19, 0.06), vec3(0.10, 0.27, 0.08), mott), tropical * rainy);
-  float woods = smoothstep(1.0 - uCover.z * 1.15, 1.0 - uCover.z * 0.75, wide.r * 0.5 + 0.25) * (1.0 - dry) * (1.0 - polar);
+  trees = mix(trees, mix(vec3(0.085, 0.17, 0.095), vec3(0.17, 0.25, 0.14), mott), tropical * rainy);
+  float woods = smoothstep(1.0 - uCover.z * 1.15, 1.001 - uCover.z * 0.75, mott * 0.35 + 0.35) * min(1.0, 8.0 * uCover.z) * (1.0 - dry) * (1.0 - polar);
   c = mix(c, trees, woods * (1.0 - tropical * (1.0 - rainy) * 0.8));
   // Open country: where grasses have come it is grassland, before them scrub.
   vec3 grass = mix(vec3(0.55, 0.49, 0.24), vec3(0.43, 0.43, 0.19), mott);
@@ -235,10 +246,11 @@ vec3 biome(vec3 n, float e, float reach) {
   // Above the trees, bare rock; and ice where no month thaws, unless a field says where the ice sheets
   // are: then that is theirs to say, and ground that never thaws is left bare.
   float h = e / 1000.0;
-  vec3 bare = vec3(0.50, 0.44, 0.37) * (0.85 + 0.3 * fine);
-  c = mix(c, bare, smoothstep(2.6, 3.6, h));
+  vec3 bare = rock;
+  float outcrop = rugged * smoothstep(0.28, 0.88, stone.z) * (0.25 + 0.48 * stone.y);
+  c = mix(c, bare, max(outcrop, smoothstep(2.6, 3.6, h + rag * 0.65)));
   if (uIceOn > 0.5) c = mix(c, bare, frost);
-  c = mix(c, vec3(0.90, 0.92, 0.95) * (0.92 + 0.14 * fine), max(uIceOn > 0.5 ? 0.0 : frost, smoothstep(4.2, 5.4, h)));
+  c = mix(c, vec3(0.90, 0.92, 0.95) * (0.92 + 0.14 * fine), max(uIceOn > 0.5 ? 0.0 : frost, smoothstep(4.2, 5.4, h + (stone.z - 0.5) * 1.2)));
   return c;
 }
 
@@ -284,13 +296,15 @@ vec3 anthromes(vec3 c, vec3 n, float land) {
 
 // Molten rock where the crust has not formed yet, dark crust where it has; the crust glows
 // a little where it is youngest, next to the melt.
-vec3 magma(vec4 p, float crust, float light) {
+vec3 magma(vec4 p, vec4 stone, float crust, float light) {
+  p.r = clamp(p.r + (stone.z - 0.5) * 0.065, 0.0, 1.0);
   float w = max(fwidth(p.r), 0.004);
   float solid = 1.0 - smoothstep(crust - w, crust + w, p.r);
   float hot = clamp((p.r - crust) / 0.3, 0.0, 1.0);
-  vec3 melt = heat(clamp(0.38 + 0.42 * hot + 1.1 * (p.g - 0.5), 0.0, 1.0));
+  vec3 melt = heat(clamp(0.38 + 0.42 * hot + 1.1 * (p.g - 0.5) + (stone.y - 0.5) * 0.45, 0.0, 1.0));
   float young = smoothstep(crust - 0.1, crust, p.r);
-  vec3 rock = vec3(0.075, 0.062, 0.058) * (0.25 + 0.9 * light) * (0.8 + 0.4 * p.a) + vec3(0.32, 0.05, 0.0) * young * 0.55;
+  vec3 rock = bedrock(stone) * vec3(0.40, 0.37, 0.35) * (0.25 + 0.9 * light) + vec3(0.32, 0.05, 0.0) * young * 0.55;
+  rock *= 0.66 + 0.47 * stone.y + 0.36 * stone.z;
   return mix(melt, rock, solid);
 }
 
@@ -306,17 +320,17 @@ float iceCover(vec3 n, vec4 p) {
 
 // No map: the plain globe, or the oceans or bare rock of the time with a faint graticule, since where
 // the land was is not known.
-vec3 plain(int surface, vec3 n, vec3 view, vec4 p, float diffuse) {
+vec3 plain(int surface, vec3 n, vec3 view, vec4 stone, float diffuse) {
   vec3 c = unknownSurface(n);
   if (surface == 1) {
     float land = uGenericOn > 0.5 ? smoothstep(0.49, 0.53, texture(uGenericLand, mapUv(n)).r) : 0.0;
-    vec3 sea = vec3(0.035, 0.15, 0.30) * (0.22 + 0.85 * diffuse);
+    vec3 sea = vec3(0.027, 0.10, 0.16) * daylight(diffuse);
     sea += vec3(0.55, 0.65, 0.75) * pow(max(dot(reflect(-uSun, n), view), 0.0), 60.0) * 0.35;
-    vec3 ground = vec3(0.34, 0.33, 0.31) * (0.85 + 0.3 * p.a) * (0.22 + 0.85 * diffuse);
+    vec3 ground = mix(vec3(0.34, 0.33, 0.31), bedrock(stone), 0.35) * daylight(diffuse);
     c = mix(sea, ground, land);
     c += vec3(0.32, 0.38, 0.50) * graticule(n) * 0.12;
   } else if (surface == 4) {
-    c = vec3(0.46, 0.38, 0.30) * (0.75 + 0.5 * p.a) * (0.22 + 0.85 * diffuse);
+    c = bedrock(stone) * daylight(diffuse);
     c += vec3(0.32, 0.38, 0.50) * graticule(n) * 0.12;
   }
   return c;
@@ -333,7 +347,11 @@ float iceSurface(vec3 n) {
 void main() {
   vec3 n = normalize(vN);
   vec3 view = normalize(uEye - n);
-  float rim = pow(1.0 - max(dot(n, view), 0.0), 3.0);
+  float facing = clamp(dot(n, view), 0.0, 1.0);
+  float sun = dot(n, uSun);
+  float closeUp = 1.0 - smoothstep(1.25, 1.9, length(uEye));
+  vec4 stone = lithology(n, closeUp);
+  float detail = ridgeLight(n, uSun, 0.0024 * stone.z + 0.00036 * stone.w);
   float hatch = step(0.62, fract((gl_FragCoord.x + gl_FragCoord.y) / 9.0));
   vec3 magenta = vec3(0.92, 0.25, 0.75);
   vec4 p = pattern(n);
@@ -341,33 +359,36 @@ void main() {
   vec3 ember = vec3(0.0);
   if (uEmber > 0.0) {
     float mu = max(dot(n, view), 0.0);
-    ember = heat(clamp(0.74 + 0.9 * (p.g - 0.5), 0.0, 1.0)) * (0.5 + 0.5 * pow(mu, 0.45));
+    ember = heat(clamp(0.74 + 0.9 * (p.g - 0.5) + 0.23 * (stone.y - 0.5), 0.0, 1.0)) * (0.5 + 0.5 * pow(mu, 0.45));
     ember = mix(ember, magenta, uEvidence * (0.14 + 0.26 * hatch));
     if (uEmber >= 1.0) {
-      o = vec4(ember + uRim * rim * 0.45, 1.0);
+      o = vec4(air(ember, facing, 1.0), 1.0);
       return;
     }
   }
   // Magma, or crust over magma, covers whatever the map has.
   vec3 molten = vec3(0.0);
   if (uMolten > 0.0) {
-    molten = magma(p, uCrust, max(dot(n, uSun), 0.0));
+    // The generator locates the last hot cracks. Give their edges the same grain as the
+    // basalt on their banks, leaving the phase and its share of solid crust in control.
+    vec3 warp = vec3(stone.x, stone.y, stone.z) - 0.5;
+    molten = magma(pattern(normalize(n + warp * 0.033)), stone, uCrust, max(sun + detail, 0.0));
     molten = mix(molten, vec3(0.88, 0.9, 0.93) * (0.35 + 0.75 * max(dot(n, uSun), 0.0)), iceCover(n, p));
     molten = mix(molten, magenta, uEvidence * (0.14 + 0.26 * hatch));
     if (uMolten >= 1.0) {
-      o = vec4(mix(molten, ember, uEmber) + uRim * rim * 0.45, 1.0);
+      o = vec4(air(mix(molten, ember, uEmber), facing, mix(sun, 1.0, uEmber)), 1.0);
       return;
     }
   }
   if (uMode == 2) {
     // No map: what the state says covers the planet, or, in a passage, part of the way from that to the next.
     float diffuse = max(dot(n, uSun), 0.0);
-    vec3 c = plain(uSurface, n, view, p, diffuse);
-    if (uSurfaceMix > 0.0) c = mix(c, plain(uSurfaceTo, n, view, p, diffuse), uSurfaceMix);
+    vec3 c = plain(uSurface, n, view, stone, diffuse);
+    if (uSurfaceMix > 0.0) c = mix(c, plain(uSurfaceTo, n, view, stone, diffuse), uSurfaceMix);
     float ice = iceCover(n, p);
-    c = mix(c, vec3(0.80, 0.87, 0.93) * (0.86 + 0.24 * p.a) * (0.35 + 0.75 * diffuse), ice);
+    c = mix(c, snow(stone, 0.0) * daylight(sun + 0.35 * detail), ice);
     if (uSurface != 0 || (uSurfaceMix > 0.0 && uSurfaceTo != 0)) c = mix(c, magenta, uEvidence * (0.14 + 0.26 * hatch));
-    o = vec4(mix(mix(c, molten, uMolten), ember, uEmber) + uRim * rim * 0.45, 1.0);
+    o = vec4(air(mix(mix(c, molten, uMolten), ember, uEmber), facing, mix(sun, 1.0, uEmber)), 1.0);
     return;
   }
   vec3 ref = abs(n.z) < 0.99 ? vec3(0.0, 0.0, 1.0) : vec3(1.0, 0.0, 0.0);
@@ -388,36 +409,38 @@ void main() {
   float h = uTexel;
   float ex = elev(normalize(n + t1 * h)) - elev(normalize(n - t1 * h));
   float ey = elev(normalize(n + t2 * h)) - elev(normalize(n - t2 * h));
-  float exaggeration = uMode == 1 ? 0.0 : e > 0.0 ? 30.0 : 8.0;  // e is relative to the coastline isoline
-  vec3 grad = (t1 * ex + t2 * ey) / (2.0 * h * 6371000.0) * exaggeration;
-  vec3 bump = normalize(n - grad);
-  float diffuse = max(dot(bump, uSun), 0.0);
-  vec3 base = uMode == 1 ? mix(blockRamp(k.x), blockRamp(k.y), uMix) : ramp(e);
+  vec3 grad = (t1 * ex + t2 * ey) / (2.0 * h * 6371000.0);
+  float rugged = clamp(length(grad) * 48.0 + max(e, 0.0) / 4300.0, 0.0, 1.0);
+  float de = max(fwidth(e), 1.0);
+  vec2 blockLand = smoothstep(vec2(-0.5), vec2(0.5), k / dk);
+  float land = uMode == 1 ? mix(blockLand.x, blockLand.y, uMix) : smoothstep(-0.5, 0.5, e / de);
+  float sea = 1.0 - land;
+  // Only exposed elevation casts relief shading. Blocks locate crust but give no height or depth.
+  float relief = uMode == 0 ? land : 0.0;
+  vec3 bump = normalize(n - grad * 13.0 * relief);
+  float diffuse = dot(bump, uSun) + detail * (0.20 + 0.80 * rugged) * relief;
+  vec3 water = uMode == 0 ? ocean(max(-e, 0.0), stone) : vec3(0.035, 0.105, 0.165);
+  vec3 ground = bedrock(stone);
   if (uMode == 0 && uClimateOn > 0.5) {
-    // Close up the cover's texture is finer: from a third of an Earth radius above the ground.
-    float reach = smoothstep(1.9, 1.25, length(uEye));
-    if (e >= 0.0) base = biome(n, e, reach);
-    else if (uReefs > 0.5 && e > -uRule2.z && abs(n.z) < sin(radians(uRule2.w))) {
+    if (land > 0.0) {
+      ground = biome(n, e, closeUp, stone, rugged) * (0.65 + 0.32 * stone.x + 0.26 * stone.y + 0.12 * stone.w);
+    }
+    if (sea > 0.0 && uReefs > 0.5 && e > -uRule2.z && abs(n.z) < sin(radians(uRule2.w))) {
       // Reefs on warm shelves, broken up by the generator's speckle.
       vec4 t = coverTex(n, 37.0);
       float reef = smoothstep(0.55, 0.8, t.a) * smoothstep(-uRule2.z, -uRule2.z * 0.4, e);
-      base = mix(base, vec3(0.42, 0.78, 0.72), reef * 0.75);
+      water = mix(water, vec3(0.42, 0.78, 0.72), reef * 0.75);
     }
   }
-  vec3 c = base * (0.22 + 0.85 * diffuse);
-  float sea = uMode == 1 ? mix(float(k.x < 0.0), float(k.y < 0.0), uMix) : float(e < 0.0);
+  vec3 base = mix(water, ground, land);
+  vec3 c = base * daylight(diffuse);
   if (sea > 0.0) {
     float spec = pow(max(dot(reflect(-uSun, n), view), 0.0), 60.0);
-    c += vec3(0.55, 0.65, 0.75) * spec * 0.35 * sea;
+    c += vec3(0.52, 0.58, 0.60) * spec * (0.16 + 0.12 * stone.y) * sea;
   }
   // Ice: sheets over the land, sea ice over the water, their pattern procedural.
-  float de = max(fwidth(e), 1.0);
   float ice = iceCover(n, p);
-  if (ice > 0.0) {
-    float ground = uMode == 1 ? mix(smoothstep(-0.5, 0.5, k.x / dk.x), smoothstep(-0.5, 0.5, k.y / dk.y), uMix) : smoothstep(-0.5, 0.5, e / de);
-    vec3 sheet = mix(vec3(0.80, 0.87, 0.93) * (0.86 + 0.24 * p.a), vec3(0.93, 0.95, 0.97), ground);
-    c = mix(c, sheet * (0.35 + 0.75 * diffuse), ice);
-  }
+  if (ice > 0.0) c = mix(c, snow(stone, land) * daylight(diffuse + 0.25 * detail), ice);
   // The ice sheets of a field: their edge between the keyframes is where the distance to it, moved
   // evenly from one to the next, comes to nothing. Grounded ice, whether the sea or the land is under it.
   float sheets = 0.0;
@@ -433,27 +456,25 @@ void main() {
       float iy = iceSurface(normalize(n + t2 * ih)) - iceSurface(normalize(n - t2 * ih));
       vec3 domes = normalize(n - (t1 * ix + t2 * iy) / (2.0 * ih * 6371000.0) * 22.0);
       float thin = smoothstep(0.0, 0.14, mix(s.b * s.b, s.a * s.a, uIceMix));
-      vec3 sheet = mix(vec3(0.76, 0.84, 0.92), vec3(0.95, 0.97, 0.98), thin) * (0.95 + 0.1 * p.a);
+      vec3 sheet = mix(vec3(0.76, 0.84, 0.92), vec3(0.95, 0.97, 0.98), thin) * (0.94 + 0.10 * stone.y);
       c = mix(c, sheet * (0.3 + 0.8 * max(dot(domes, uSun), 0.0)), sheets);
     }
   }
-  // Coastline: the sea-level isoline, about one pixel wide; fainter under ice.
+  // In evidence mode trace the reconstructed shoreline, fainter under the ice.
   float line = uMode == 1 ? mix(coastLine(k.x, dk.x), coastLine(k.y, dk.y), uMix) : coastLine(e, de);
   if (uPeopleOn > 0.5) c = people(c, n, smoothstep(0.5, 1.5, e / de));
   if (uAnthromesOn > 0.5) c = anthromes(c, n, smoothstep(0.5, 1.5, e / de));
   if (uTerritoryOn > 0.5) c = territory(c, n, smoothstep(0.5, 1.5, e / de), diffuse);
-  c = mix(c, vec3(0.93, 0.96, 0.95), line * 0.85 * (1.0 - 0.5 * max(ice, sheets)));
+  c = mix(c, vec3(0.93, 0.96, 0.95), line * uEvidence * 0.85 * (1.0 - 0.5 * max(ice, sheets)));
   // Evidence mode: the whole field is a reconstruction — amber hatching, the ice sheets of a field too;
   // ice from a claimed latitude is procedural.
   c = mix(c, mix(vec3(0.95, 0.65, 0.18), magenta, ice), uEvidence * (0.14 + 0.26 * hatch));
   c = mix(mix(c, molten, uMolten), ember, uEmber);
-  c += uRim * rim * 0.45;
-  o = vec4(c, 1.0);
+  o = vec4(air(c, facing, mix(sun, 1.0, uEmber)), 1.0);
 }`;
 
 const CLOUD_FS = `#version 300 es
 precision highp float;
-uniform sampler2D uClouds;
 uniform vec3 uSun;
 uniform vec3 uEye;
 uniform float uEvidence;
@@ -461,31 +482,54 @@ uniform float uOpacity;
 uniform float uBase;
 uniform vec3 uTint;
 uniform vec3 uGlow;
-// How far the clouds have drifted east along their bands, in radians: in the tropics, beyond them,
-// and the latitudes between which the one gives way to the other (GlobeFrame's drift).
+uniform float uRadius;
+uniform highp sampler2D uClouds;
 uniform vec4 uDrift;
+${RIDGE_LIGHT}
+
+// Size the footprint from the spherical direction. Longitude jumps at the date line, and
+// increasingly many longitudes fall in a pixel towards a pole.
+float cloudDensity(vec3 n, float footprint) {
+  float lat = asin(clamp(n.z, -1.0, 1.0));
+  vec2 uv = vec2(atan(n.y, n.x) / 6.2831853 + 0.5, 0.5 - lat / 3.14159265);
+  vec2 dx = vec2(footprint / (6.2831853 * max(length(n.xy), 0.01)), 0.0);
+  vec2 dy = vec2(0.0, footprint / 3.14159265);
+  float d = textureGrad(uClouds, uv + vec2(uDrift.x / 6.2831853, 0.0), dx, dy).r;
+  if (uDrift.x != uDrift.y) {
+    float beyond = textureGrad(uClouds, uv + vec2(uDrift.y / 6.2831853, 0.0), dx, dy).r;
+    d = mix(d, beyond, smoothstep(uDrift.z, uDrift.w, abs(lat)));
+  }
+  return d;
+}
 in vec3 vN;
 out vec4 o;
 void main() {
   vec3 n = normalize(vN);
-  float lon = atan(n.y, n.x);
-  float lat = asin(clamp(n.z, -1.0, 1.0));
-  vec2 uv = vec2(lon / 6.28318530718 + 0.5, 0.5 - lat / 3.14159265359);
-  float d = textureGrad(uClouds, uv + vec2(uDrift.x / 6.28318530718, 0.0), vec2(0.0), vec2(0.0)).r;
-  // Each band drifts as a whole, and between them the one's clouds give way to the other's: a drift
-  // that varied smoothly with latitude would shear them, more the longer it ran, into streaks.
-  if (uDrift.y != uDrift.x) {
-    float beyond = textureGrad(uClouds, uv + vec2(uDrift.y / 6.28318530718, 0.0), vec2(0.0), vec2(0.0)).r;
-    d = mix(d, beyond, smoothstep(uDrift.z, uDrift.w, abs(lat)));
+  vec3 view = normalize(uEye - uRadius * n);
+  float sun = dot(n, uSun);
+  float footprint = max(length(dFdx(n)), length(dFdy(n)));
+  float d = cloudDensity(n, footprint);
+  float top = ridgeLight(n, uSun, d * 0.00065);
+  float light = sqrt(max(0.0, sun + 0.32 * top));
+  vec3 c = uTint * (vec3(0.08, 0.10, 0.14) + light * (0.76 + 0.19 * d))
+         + uGlow * (1.0 - min(1.0, light));
+  float a = clamp(d * uOpacity + uBase, 0.0, 1.0);
+  // Follow the eye ray down to the ground, then the sunlight back up to the same cloud shell.
+  // Rays beyond the solid limb carry clouds but cast no shadow into space.
+  vec3 origin = n * uRadius;
+  float along = dot(origin, view);
+  float hit = along * along - (uRadius * uRadius - 1.0);
+  float shadow = 0.0;
+  if (hit > 0.0 && sun > 0.04) {
+    vec3 ground = origin - view * ((uRadius * uRadius - 1.0) / (along + sqrt(hit)));
+    float cosine = dot(ground, uSun);
+    float rise = (uRadius * uRadius - 1.0) / (sqrt(cosine * cosine + uRadius * uRadius - 1.0) + cosine);
+    shadow = cloudDensity(normalize(ground + uSun * rise), footprint) * uOpacity * 0.32 * smoothstep(0.04, 0.35, sun);
   }
-  float light = 0.35 + 0.75 * max(dot(n, uSun), 0.0);
-  // Lit from above, and from below by anything glowing under the clouds.
-  vec3 c = uTint * light + uGlow * max(1.0 - light, 0.0);
-  float a = min(d * uOpacity + uBase, 1.0);
   // Evidence mode: procedural — magenta, thinned.
   c = mix(c, vec3(0.92, 0.25, 0.75), uEvidence * 0.75);
   a *= 1.0 - 0.45 * uEvidence;
-  o = vec4(c * a, a);
+  o = vec4(c * a, a + (1.0 - a) * shadow * (1.0 - uEvidence));
 }`;
 
 const SKY_VS = `#version 300 es
@@ -502,6 +546,8 @@ precision highp float;
 uniform mat4 uInvViewProj;
 uniform vec3 uEye;
 uniform vec3 uHalo;
+uniform vec3 uSun;
+uniform float uEmber;
 in vec2 vNdc;
 out vec4 o;
 float hash(vec3 p) {
@@ -515,18 +561,21 @@ void main() {
   vec3 d = normalize(b.xyz / b.w - a.xyz / a.w);
   float bq = dot(uEye, d);
   float r = sqrt(max(dot(uEye, uEye) - bq * bq, 0.0));
-  vec3 c = vec3(0.008, 0.012, 0.03);
+  vec3 c = vec3(0.003, 0.005, 0.009);
   // Stars: at most one per cell of a direction grid, at a random spot in the cell.
   vec3 g = d * 180.0;
   vec3 cell = floor(g);
   float s = hash(cell);
   vec3 spot = vec3(hash(cell + 1.3), hash(cell + 2.7), hash(cell + 4.1)) * 0.6 + 0.2;
   float sr = length(fract(g) - spot);
-  float star = step(0.985, s) * smoothstep(0.09, 0.0, sr) * (0.25 + 0.75 * hash(cell + 7.0));
+  float star = step(0.985, s) * (1.0 - smoothstep(0.0, 0.09, sr)) * (0.25 + 0.75 * hash(cell + 7.0));
   c += vec3(0.9, 0.93, 1.0) * star;
   if (bq < 0.0) {
-    float glow = exp(-max(r - 1.0, 0.0) * 28.0) * smoothstep(0.97, 1.0, r);
-    c += uHalo * glow * 0.9;
+    vec3 tangent = normalize(uEye - bq * d);
+    float lit = mix(0.08 + 0.92 * smoothstep(-0.24, 0.60, dot(tangent, uSun)), 1.0, uEmber);
+    float height = max(r - 1.0, 0.0);
+    float glow = (0.77 * exp(-height * 230.0) + 0.23 * exp(-height * 85.0)) * lit;
+    c += uHalo * glow * smoothstep(0.97, 1.0, r);
   }
   o = vec4(c, 1.0);
 }`;
@@ -588,9 +637,9 @@ export interface GlobeLook {
 
 type Clouds = NonNullable<GlobeLook['clouds']>;
 
-const RIM: RGB = [0.25, 0.45, 0.85];
-const HALO: RGB = [0.22, 0.42, 0.95];
-const CLEAR_CLOUDS: Clouds = { opacity: 0.78, base: 0, tint: [1, 1, 1], glow: [0, 0, 0] };
+const RIM: RGB = [0.32, 0.52, 0.74];
+const HALO: RGB = [0.38, 0.62, 0.85];
+const CLEAR_CLOUDS: Clouds = { opacity: 0.96, base: 0, tint: [1, 1, 1], glow: [0, 0, 0] };
 const NONE: RGB = [0, 0, 0];
 
 /** As the world was drawn before it had states: today's sky, clouds, no ice. */
@@ -731,6 +780,8 @@ export class GlobeRenderer {
   private surface: Program;
   private clouds: Program;
   private sky: Program;
+  private cloudMap: Program;
+  private cloudDetail: WebGLTexture | null = null;
   private vao: WebGLVertexArrayObject;
   private count: number;
   private cloudTex: WebGLTexture | null = null;
@@ -754,6 +805,7 @@ export class GlobeRenderer {
     this.surface = program(gl, 'surface', SPHERE_VS, SURFACE_FS);
     this.clouds = program(gl, 'clouds', SPHERE_VS, CLOUD_FS);
     this.sky = program(gl, 'sky', SKY_VS, SKY_FS);
+    this.cloudMap = program(gl, 'cloud material', SKY_VS, CLOUD_MAP_FS);
     const { pos, idx } = sphere(256, 128);
     this.vao = gl.createVertexArray()!;
     gl.bindVertexArray(this.vao);
@@ -791,6 +843,8 @@ export class GlobeRenderer {
   /** The generator's texture of the land's cover: a tile that repeats both ways. */
   setBiomeTexture(size: number, rgba: Uint8Array): void {
     const gl = this.gl;
+    gl.deleteTexture(this.cloudDetail);
+    this.cloudDetail = null;
     gl.deleteTexture(this.biomeTex);
     this.biomeTex = texture2D(gl, { width: size, height: size, internal: gl.RGBA8, format: gl.RGBA, type: gl.UNSIGNED_BYTE, data: rgba, filter: gl.LINEAR, wrapS: gl.REPEAT });
     gl.bindTexture(gl.TEXTURE_2D, this.biomeTex);
@@ -841,6 +895,8 @@ export class GlobeRenderer {
 
   setClouds(width: number, height: number, density: Uint8Array): void {
     const gl = this.gl;
+    gl.deleteTexture(this.cloudDetail);
+    this.cloudDetail = null;
     if (this.cloudTex) gl.deleteTexture(this.cloudTex);
     this.cloudTex = texture2D(gl, { width, height, internal: gl.R8, format: gl.RED, type: gl.UNSIGNED_BYTE, data: density, filter: gl.LINEAR, wrapS: gl.REPEAT });
   }
@@ -852,9 +908,41 @@ export class GlobeRenderer {
     this.patternTex = texture2D(gl, { width, height, internal: gl.RGBA8, format: gl.RGBA, type: gl.UNSIGNED_BYTE, data: rgba, filter: gl.LINEAR, wrapS: gl.REPEAT });
   }
 
+  /** Precompute the cloud material once per pair of source textures. Both the shell and its
+   * shadow then read the same filtered map, including while the camera or the clouds move. */
+  private bakeClouds(): WebGLTexture {
+    const gl = this.gl;
+    const width = 2048;
+    const height = width / 2;
+    const map = texture2D(gl, { width, height, internal: gl.R8, format: gl.RED, type: gl.UNSIGNED_BYTE, data: null, filter: gl.LINEAR, wrapS: gl.REPEAT });
+    const fb = gl.createFramebuffer()!;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, map, 0);
+    gl.viewport(0, 0, width, height);
+    gl.disable(gl.DEPTH_TEST);
+    gl.disable(gl.BLEND);
+    gl.disable(gl.CULL_FACE);
+    gl.useProgram(this.cloudMap.program);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, this.cloudTex);
+    gl.activeTexture(gl.TEXTURE3);
+    gl.bindTexture(gl.TEXTURE_2D, this.biomeTex);
+    setUniforms(gl, this.cloudMap, { uClouds: 0, uBiomeTex: 3 }, ['uClouds', 'uBiomeTex']);
+    gl.bindVertexArray(this.emptyVao);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.deleteFramebuffer(fb);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, map);
+    gl.generateMipmap(gl.TEXTURE_2D);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+    return map;
+  }
+
   render(f: GlobeFrame, width: number, height: number): void {
     const gl = this.gl;
     const look = f.look;
+    if (look.formed && look.clouds && f.showClouds && this.cloudTex && !this.cloudDetail) this.cloudDetail = this.bakeClouds();
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     gl.viewport(0, 0, width, height);
     gl.clearColor(0, 0, 0, 1);
@@ -863,7 +951,7 @@ export class GlobeRenderer {
     gl.disable(gl.DEPTH_TEST);
     gl.disable(gl.BLEND);
     gl.useProgram(this.sky.program);
-    setUniforms(gl, this.sky, { uInvViewProj: f.invViewProj, uEye: f.eye, uHalo: look.halo });
+    setUniforms(gl, this.sky, { uInvViewProj: f.invViewProj, uEye: f.eye, uHalo: look.halo, uSun: f.sun, uEmber: look.ember });
     gl.bindVertexArray(this.emptyVao);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     if (!look.formed) {
@@ -939,19 +1027,19 @@ export class GlobeRenderer {
     gl.drawElements(gl.TRIANGLES, this.count, gl.UNSIGNED_INT, 0);
     gl.activeTexture(gl.TEXTURE0);
 
-    if (f.showClouds && this.cloudTex && look.clouds) {
+    if (f.showClouds && this.cloudDetail && look.clouds) {
       gl.enable(gl.BLEND);
       gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
       gl.depthMask(false);
       gl.useProgram(this.clouds.program);
       gl.activeTexture(gl.TEXTURE0);
-      gl.bindTexture(gl.TEXTURE_2D, this.cloudTex);
+      gl.bindTexture(gl.TEXTURE_2D, this.cloudDetail);
       setUniforms(gl, this.clouds, { uClouds: 0 }, ['uClouds']);
       const thin = f.people ? 0.3 : 1;
       const d = f.drift;
       const rad = Math.PI / 180;
       const drift = d ? [d.tropics * rad, d.beyond * rad, d.between[0] * rad, d.between[1] * rad] : [0, 0, 0, 1];
-      setUniforms(gl, this.clouds, { uViewProj: f.viewProj, uRadius: 1.008, uSun: f.sun, uEye: f.eye, uEvidence: f.evidence, uOpacity: look.clouds.opacity * thin, uBase: look.clouds.base * thin, uTint: look.clouds.tint, uGlow: look.clouds.glow, uDrift: drift });
+      setUniforms(gl, this.clouds, { uViewProj: f.viewProj, uRadius: 1.0025, uSun: f.sun, uEye: f.eye, uEvidence: f.evidence, uOpacity: look.clouds.opacity * thin, uBase: look.clouds.base * thin, uTint: look.clouds.tint, uGlow: look.clouds.glow, uDrift: drift });
       gl.drawElements(gl.TRIANGLES, this.count, gl.UNSIGNED_INT, 0);
       gl.depthMask(true);
       gl.disable(gl.BLEND);
