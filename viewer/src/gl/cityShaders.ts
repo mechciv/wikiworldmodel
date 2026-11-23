@@ -2,6 +2,10 @@
 // physically based sky, so that the same light falls on everything the records raise.
 import { LEAF_TILE, LITTER_SPAN } from '../../../core/leaves.ts';
 import { GROUND_LAYERS } from '../../../core/materials.ts';
+import { DRIED_AT, SOIL_STONES, SORT_EDGE, SORTING } from '../../../world/generators/life/sorting.ts';
+
+/** A number as GLSL writes a float. */
+const glf = (x: number): string => (Number.isInteger(x) ? x.toFixed(1) : String(x));
 
 /** Structures rise over the years up to their start, and fall over the years after their end. */
 export const RISE_YEARS = 7;
@@ -518,6 +522,11 @@ uniform vec4 uMatMean[${GROUND_LAYERS.length}];
 uniform vec4 uMatLook[${GROUND_LAYERS.length}];
 uniform float uMaterials;
 const int ${GROUND_LAYERS.map((k, i) => `M_${k.toUpperCase()} = ${i}`).join(', ')};
+// What the ground's stones are drawn of, as the terrain draws them: the two tones of its gravel, where the world says
+// what the ground is made of, which are the rock's under the place where that is known (groundlook.ts); and the rock
+// itself and its stones, for a ground nothing is said of. A stone that stands on the ground is of the same.
+uniform vec3 uSubTone[16];
+uniform vec3 uRock[2];
 out vec4 o;
 ${LIGHTING}
 ${LEAVES}
@@ -536,6 +545,9 @@ vec4 builtGrain(int layer, vec2 uv, float scale, vec3 p) {
 }
 
 const int MARBLE=1, TRAVERTINE=2, BRICK=3, PLASTER=4, TILE=5, GILT=6, BRONZE=7, GRANITE=8, WOOD=9, DARK=10, PAVING=11, BASALT=12, SAND=13, CONCRETE=14, LEAD=15, LEAF=16, TRUNK=17, GRASS=18, SHAFT=19, FACADE=20, STATUE=21, EARTH=22, SEATS=23, AWNING=24, SPIRAL=25, CLOTH=26, SKIN=27, DENTIL=28, FRIEZE=29, POOL=30, HIDE=31, HORN=32, SHELL=33, FUR=34, NEEDLE=35, FROND=36, BARK=37, BROAD=38, FEATHER=39, MEMBRANE=40, CHITIN=41, THATCH=42, MUD=43;
+// What lies strewn on wild ground (world/generators/life/strewn.ts): a stone, the bark of fallen wood, and the wood
+// where it broke.
+const int STONE=73, FALLEN_BARK=74, HEARTWOOD=75;
 
 float hash(vec2 p) {
   vec3 q = fract(vec3(p.xyx) * 0.1031);
@@ -872,15 +884,17 @@ Surface surface(int m, vec3 p, vec2 uv, float tint, vec3 n, float fw, out vec3 b
     vec3 q = p / (64.0 * 0.14);
     vec3 wob = vec3(texture(uNoise, q).r, texture(uNoise, q).g, texture(uNoise, q).b) - 0.5;
     bumpN = normalize(n + wob * 2.2);
-  } else if (m == BARK) {
+  } else if (m == BARK || m == FALLEN_BARK) {
     // Bark, laid along a limb (world/generators/life/plants.ts, tube): u counts ridges round it, a whole number of
     // them; v is metres along it, and its thousands say which bark: 0 furrowed, 1 smooth, 2 in scales, 3 in diamond
     // cushions, 4 ringed, 5 ribbed and jointed. Which a plant has follows from its part's type; how each looks is
     // this, and nobody's record. Its unevenness is read in the world, so that it runs round a limb with no seam.
     float kind = floor(uv.y / 1000.0 + 0.001);
     float v = uv.y - kind * 1000.0;
-    vec3 base = mix(vec3(0.17, 0.13, 0.095), vec3(0.31, 0.22, 0.14), tint);
-    base = mix(base, vec3(dot(base, vec3(0.333))) * vec3(1.03, 1.0, 0.95), 0.4 * fract(tint * 7.3));
+    // Fallen wood keeps its tree's own tone, which is its mesh's: what each piece adds to it is how long it has lain.
+    float bt = m == FALLEN_BARK ? vKind : tint;
+    vec3 base = mix(vec3(0.17, 0.13, 0.095), vec3(0.31, 0.22, 0.14), bt);
+    base = mix(base, vec3(dot(base, vec3(0.333))) * vec3(1.03, 1.0, 0.95), 0.4 * fract(bt * 7.3));
     // Its ridges show while each is a few pixels wide; finer than that they are left out, so that nothing shimmers.
     float near = (1.0 - smoothstep(14.0, 50.0, length(uEye - p))) * (1.0 - smoothstep(0.12, 0.4, fw));
     float fine = noiseS(p, vec3(0.012, 0.012, 0.3));
@@ -927,8 +941,54 @@ Surface surface(int m, vec3 p, vec2 uv, float tint, vec3 n, float fw, out vec3 b
     s.albedo = base * (0.4 + 0.85 * h) * (0.82 + 0.36 * fine) * (0.86 + 0.28 * fbmM(p, 1.3));
     // Lichen and damp, in patches, the more the paler the bark.
     s.albedo = mix(s.albedo, vec3(0.2, 0.22, 0.15) * (0.6 + 0.6 * h), 0.3 * smoothstep(0.55, 0.78, fbmM(p + 3.7, 0.9)));
+    if (m == FALLEN_BARK) {
+      // Wood that lies greys as it dries and rots, each piece as long as it has lain; what grows low takes its upper
+      // side, in the place's own tone for it; and it is dark and damp where it meets the ground.
+      float lain = fract(vTint - vKind + 1.0);
+      s.albedo = mix(s.albedo, vec3(dot(s.albedo, vec3(0.333))) * vec3(1.02, 1.0, 0.96), 0.1 + 0.4 * lain) * (0.86 - 0.22 * lain);
+      float grown = smoothstep(0.42, 0.66, fbmM(p + 11.0, 0.45)) * smoothstep(0.15, 0.75, n.z) * (0.25 + 0.75 * lain);
+      vec3 moss = uWild > 0.5 ? mix(uTone[2], uTone[3], 0.35) * 0.8 : vec3(0.09, 0.12, 0.05);
+      s.albedo = mix(s.albedo, moss * (0.7 + 0.5 * h), 0.6 * grown);
+      s.albedo *= 0.62 + 0.38 * smoothstep(0.0, 0.12, vLow);
+    }
     s.rough = 0.92;
     if (near > 0.0) bumpN = bumpBy(n, vRel, h, 0.014 * near);
+  } else if (m == HEARTWOOD) {
+    // Wood where a trunk or a limb broke: pale where the break is fresh and grey where it has weathered, each piece as
+    // long as it has lain; its rings, a finger apart, from the middle of the break out; and its grain along the limb.
+    float lain = fract(vTint - vKind + 1.0);
+    vec3 fresh = mix(vec3(0.25, 0.165, 0.085), vec3(0.33, 0.23, 0.12), vKind);
+    vec3 old = vec3(0.17, 0.155, 0.135);
+    float ring = 0.5 + 0.5 * sin(length(uv) * 330.0 + noiseM(p, 0.06) * 5.0);
+    float splinter = noiseS(vLocal, vec3(0.01, 0.01, 0.01) + abs(n) * 0.2);
+    s.albedo = mix(fresh, old, 0.25 + 0.65 * lain) * (0.78 + 0.26 * ring * visible(0.02, fw)) * (0.7 + 0.5 * splinter);
+    s.albedo *= 0.62 + 0.38 * smoothstep(0.0, 0.12, vLow);
+    s.rough = 0.9;
+  } else if (m == STONE) {
+    // A stone standing on the ground (world/generators/life/strewn.ts): of what the terrain draws the ground's own
+    // stones of, the two tones of its gravel, each stone a shade of its own between and about them; or, where nothing
+    // says what the ground is made of, of the rock under the place. Its grain is the scanned rock's, read on its own
+    // faces, from above where they face up and from the side where they do not, each stone from a place of its own in
+    // the scan. Where it meets the ground, and in the lee of its top, the ground's own bare colour lies banked on it.
+    float own = tint;
+    bool said = dot(uSubTone[3], vec3(1.0)) > 0.0;
+    vec3 tone = said ? mix(uSubTone[2], uSubTone[3], fract(own * 7.0)) : uRock[1];
+    tone *= 0.62 + 0.7 * fract(own * 37.0);
+    vec3 q = vLocal + vec3(own * 31.0, own * 17.0, own * 5.0);
+    vec4 above = builtGrain(M_ROCK, q.xy, 0.5, p);
+    vec4 beside = builtGrain(M_ROCK, vec2(q.x + q.y, q.z), 0.5, p);
+    vec4 g = mix(beside, above, smoothstep(0.45, 0.75, abs(n.z)));
+    s.albedo = tone * g.rgb * (0.86 + 0.28 * noiseM(q, 0.07));
+    // Each stone is dusted with it as much as its own number says, on the faces that look up: one is dark and clean,
+    // the next the colour of the ground it lies on.
+    vec3 dust = mix(uTone[4], uTone[5], 0.5) * g.rgb;
+    float foot = 1.0 - smoothstep(0.0, 0.035, vLow);
+    float lee = smoothstep(0.55, 0.95, n.z) * smoothstep(0.45, 0.7, noiseM(q, 0.11));
+    float dusted = (0.1 + 0.6 * fract(own * 13.0)) * smoothstep(-0.3, 0.7, n.z);
+    s.albedo = mix(s.albedo, dust, uWild * max(max(0.75 * foot, 0.4 * lee), dusted));
+    s.rough = 0.86;
+    float close = 1.0 - smoothstep(10.0, 40.0, length(uEye - p));
+    if (close > 0.0) bumpN = bumpBy(n, vRel, g.a, 0.01 * close);
   } else if (m == 72) {
     // An eye: dark and wet.
     s.albedo = vec3(0.016, 0.012, 0.009);
@@ -1044,7 +1104,7 @@ Surface surface(int m, vec3 p, vec2 uv, float tint, vec3 n, float fw, out vec3 b
 // the renderer's, and nobody's record: what a house was built of is its tradition's claim, what colour that was is not.
 const int WATTLE=50, LIMEWASH=51, HALFTIMBER=52, LOGS=53, PLANKS=54, RUBBLE=55, MATTING=56, FELT=57, TANNED=58, HAIRCLOTH=59, SOD=60, SNOW=61, EARTHROOF=62, SHINGLE=63, LEAFTHATCH=64, BRUSHWOOD=65, REEDWORK=66, ROPE=67, PAINTED=68, ADOBE=69, CLAYTILE=70;
 
-bool isBuilt(int m) { return m >= 50 || m == THATCH || m == MUD; }
+bool isBuilt(int m) { return (m >= 50 && m < STONE) || m == THATCH || m == MUD; }
 
 // Old wood goes grey where the weather reaches it.
 vec3 weathered(vec3 wood, vec3 p, float age) {
@@ -2024,7 +2084,8 @@ vec2 cellsOf(vec2 q) {
 }
 // Where a place lies in the sorting of its ground, 0 to 1: one field of noise, in patches from a few metres to tens of
 // metres across with ragged edges. It is read flat, from one sheet of the noise, so that how often it takes each value
-// is known, and a material can be given the share of the ground its sources give it (groundlook.ts has the same field).
+// is known, and a material can be given the share of the ground its sources give it. The field is the generator's
+// (world/generators/life/sorting.ts), which sows by it what stands on the ground: this reads it as that says.
 // Where to read a sheet of the noise for a place, given in the noise's own cells: between its values the step is eased,
 // so that the levels of what is read curve and do not run straight from one value to the next.
 vec2 eased(vec2 x) {
@@ -2034,11 +2095,11 @@ vec2 eased(vec2 x) {
 }
 float sorting(vec3 p) {
   // Read a few metres aside, by a noise of its own, so that its patches wander.
-  vec2 q = p.xy + 7.0 * (texture(uNoise, vec3(eased(p.xy / 5.0), 40.5 / 64.0)).ba - 0.5);
-  return 0.6 * texture(uNoise, vec3(eased(q / 9.0), 0.5 / 64.0)).r + 0.4 * texture(uNoise, vec3(eased(q / 2.2 + 23.7), 20.5 / 64.0)).g;
+  vec2 q = p.xy + ${glf(SORTING.aside.by)} * (texture(uNoise, vec3(eased(p.xy / ${glf(SORTING.aside.span)}), ${glf(SORTING.aside.sheet + 0.5)} / 64.0)).ba - 0.5);
+  return ${glf(SORTING.broad.weight)} * texture(uNoise, vec3(eased(q / ${glf(SORTING.broad.span)}), ${glf(SORTING.broad.sheet + 0.5)} / 64.0)).${'rgba'[SORTING.broad.channel]} + ${glf(SORTING.fine.weight)} * texture(uNoise, vec3(eased(q / ${glf(SORTING.fine.span)} + ${glf(SORTING.fine.offset)}), ${glf(SORTING.fine.sheet + 0.5)} / 64.0)).${'rgba'[SORTING.fine.channel]};
 }
 // How wide the edge between two materials is, in that field's units.
-const float SUB_EDGE = 0.02;
+const float SUB_EDGE = ${glf(SORT_EDGE)};
 // The ground where the world says what it is made of (core/substrate.ts): its materials sorted across it, the coarsest
 // on its rises and the finest in its hollows, each over the share of it the sources give and with its own grain. Sand
 // ripples; gravel is pebbles close by; mud and lime mud crack where their sources say they dried; a crust of salt
@@ -2057,7 +2118,7 @@ vec3 substrateGround(vec3 p, float dist, float ripple, vec3 under, float hUnder,
     // ground's rises, up to twice their share, and thinning to none in its hollows.
     vec3 earth = under * uSubSoil.y;
     vec3 stoneTone = mix(uSubTone[2], uSubTone[3], noiseM(p + 3.0, 0.6));
-    float thick = min(1.0, uSubShare[1] * 2.0 * (1.0 - smoothstep(0.38, 0.62, sorting(p))));
+    float thick = min(1.0, uSubShare[1] * ${glf(SOIL_STONES.most)} * (1.0 - smoothstep(${glf(SOIL_STONES.rises[0])}, ${glf(SOIL_STONES.rises[1])}, sorting(p))));
     gSub[M_STONES] = thick;
     gSub[M_SOIL] = 1.0 - thick;
     // Close by each stone is there or not by a number of its own; from afar they are a share of the ground's colour.
@@ -2077,9 +2138,9 @@ vec3 substrateGround(vec3 p, float dist, float ripple, vec3 under, float hUnder,
   vec2 crack = cracks ? cellsOf(p.xy / 0.3 + n2 * 0.6) : vec2(0.2, 0.5);
   vec2 crust = uSubShare[5] > 0.0 && uMaterials < 0.5 ? cellsOf(p.xy / 1.6 + n2 * 0.8) : vec2(0.2, 0.5);
   // How much of a mud is drawn cracked, where its sources say it dried; and how coarse a sand is.
-  float dried = min(1.0, uSub.y * 3.0);
+  float dried = min(1.0, uSub.y / ${glf(DRIED_AT)});
   float coarse = clamp(uSub.w, 0.0, 1.0);
-  float cracked = (1.0 - smoothstep(0.015, 0.07, crack.x)) * near * min(1.0, uSub.y * 3.0);
+  float cracked = (1.0 - smoothstep(0.015, 0.07, crack.x)) * near * dried;
   // The ground's own gentle height: the coarse stands a little proud of the fine.
   float lie = 1.0 - u;
   vec3 c = vec3(0.0);
@@ -2282,7 +2343,7 @@ vec3 wilderness(vec3 p, vec3 n, float dist, out float water, out float rough, ou
     vec2 e = min(muv, 1.0 - muv);
     mask = mix(beyond, texture(uMask, muv), smoothstep(0.0, 0.1, min(e.x, e.y)));
   }
-  // Water where the plan's A is full; a dry bed where it is half (scene/v10.ts, coverMask), which is no water.
+  // Water where the plan's A is full; a dry bed where it is half (scene/v11.ts, coverMask), which is no water.
   water = smoothstep(0.6, 0.95, mask.a) * smoothstep(450.0, 1000.0, dist);
   float wash = smoothstep(0.3, 0.45, mask.a) * (1.0 - smoothstep(0.55, 0.7, mask.a));
   shaded = mask.r;
@@ -2560,7 +2621,7 @@ vec4 reflected(vec3 p, vec3 r) {
   return vec4(0.0);
 }
 void main() {
-  // The bed of a river dry in the month: its ribbon says where it is, and it holds no water (scene/v10.ts, DRY_BED).
+  // The bed of a river dry in the month: its ribbon says where it is, and it holds no water (scene/v11.ts, DRY_BED).
   if (vFlow.z < -0.5) discard;
   vec3 p = vPos;
   float dist = distance(p, uEye);

@@ -206,9 +206,19 @@ A place's loose ground is the first of these to answer: a collection at the plac
 column's unit; then the collections of the country round ([core/substrate.ts](../core/substrate.ts), `firstGround`,
 which says why). The rock under it is today's map's through the Quaternary, and its column's before.
 
-Where none answers, the ground is drawn by the climate's class alone, as it was before, and says so. The generator
-does not read the substrate: the renderer does, so a scene's plants, animals and river are the same with it and
-without. Leaf litter under a canopy, the wet of a bank and steep rock cover the ground as they did.
+Where none answers, the ground is drawn by the climate's class alone, as it was before, and says so. Leaf litter
+under a canopy, the wet of a bank and steep rock cover the ground as they did.
+
+Since `gen:life/scene` version 11 the generator reads the substrate too, for two things
+([docs/plans/RENDERING.md](plans/RENDERING.md), the fidelity pass):
+
+- **What a ground bears.** A crust of salt bears a thirtieth of what its climate would grow on it, and a mud or a lime
+  mud that its sources say dried into cracks a tenth; every other ground all of it. Bare ground takes the rest, so
+  that fewer trees and low plants stand there. The two shares are the generator's choice (`cover.bears`), and no
+  source's. A scene whose ground bears everything has every tree and animal where it had them without a substrate.
+- **Stones.** Where the ground has gravel, stones stand on it close by, the more the more of it is gravel and the
+  wider the coarser its sources name its grain; how many stones a share of gravel comes to is the generator's choice
+  (`strewn.stones`). They are the colour the ground's own stones are drawn in.
 
 Limits:
 - A fossil collection is where fossils were kept, mostly in beds laid down under or beside water. The ground between
@@ -219,7 +229,8 @@ Limits:
 - Half a degree is some 50 km. A scene takes one cell's soil and one class of rock for all of its ground, where a real
   one has wadi floors of silt beside plains of pebbles. SoilGrids is weakest in deserts, and does not know a sea of
   dunes from the plain beside it.
-- Where each material lies is the renderer's, by a noise: the amounts are the world's, and the places are not. The
+- Where each material lies is invented, by a noise the generator and the renderer both read
+  ([sorting.ts](../world/generators/life/sorting.ts)): the amounts are the world's, and the places are not. The
   rises and hollows it sorts them by are not the scene's own relief, and no stones gather on its slopes.
 - A column of rock stands for an area, some 150 km across in North America, and does not say where in it each rock
   lies. Its unit is drawn over all of a scene's ground, and two units of one age share the ground alike, whatever

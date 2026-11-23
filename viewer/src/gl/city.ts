@@ -6,7 +6,7 @@
 import type { GroundLevel } from '../../../core/city.ts';
 import { LEAF_KINDS, litterTile, type LeafKindName } from '../../../core/leaves.ts';
 import { GROUND_LAYERS } from '../../../core/materials.ts';
-import { hash3 } from '../../../world/generators/city/math.ts';
+import { NOISE_SIZE, noiseByte } from '../../../world/generators/life/sorting.ts';
 import { invert, multiply, type Mat4, type V3 } from '../mat.ts';
 import { program, setUniforms, texture2D, type GL, type Program } from './context.ts';
 import type { LeafAtlas } from './leafatlas.ts';
@@ -503,14 +503,16 @@ void main() {
     this.waterBlurP = program(gl, 'city water blur', FULLSCREEN_VS, WATERBLUR_FS);
 
     // Noise, tiling, in four independent channels: everything's roughness and grain comes from it.
-    const size = 64;
+    // Its values are the generator's (world/generators/life/sorting.ts), which reads the same noise where it sows what
+    // stands on the ground.
+    const size = NOISE_SIZE;
     const data = new Uint8Array(size * size * size * 4);
     for (let i = 0; i < data.length; i += 4) {
       const n = i / 4;
       const x = n % size;
       const y = Math.floor(n / size) % size;
       const z = Math.floor(n / (size * size));
-      for (let c = 0; c < 4; c++) data[i + c] = Math.floor(hash3(x, y, z, 0x3779 + c * 101) * 256);
+      for (let c = 0; c < 4; c++) data[i + c] = noiseByte(x, y, z, c);
     }
     this.noise = gl.createTexture()!;
     gl.activeTexture(gl.TEXTURE0 + UNIT.noise);

@@ -89,6 +89,11 @@ export const MAT = {
   blade: 71,
   // An animal's eye: dark and wet, so that it catches the light.
   eye: 72,
+  // What lies strewn on wild ground (world/generators/life/strewn.ts): a stone, of the rock under the place; the bark
+  // of fallen wood, which is its tree's own and does not sway; and the wood where it broke, or where the bark is gone.
+  stone: 73,
+  fallenBark: 74,
+  heartwood: 75,
 } as const;
 
 export type Material = (typeof MAT)[keyof typeof MAT];

@@ -370,6 +370,35 @@ plants, the bodies, the people and what they build, and raised each by the means
   and hair; a robe falls to the ground; cloth hangs in folds. What houses are built of stands in relief, each
   material by a height of its own, and what is of earth or stone takes the scans' grain. `gen:people/settlement` is
   version 4.
+- **Stones stand on stony ground.** Where a scene's substrate has gravel ([core/substrate.ts](../../core/substrate.ts)),
+  stones stand on its ground close by, as meshes: eight shapes of a rounded cobble, an angular block, a slab and a
+  pointed stone ([strewn.ts](../../world/generators/life/strewn.ts)), each a ball swollen, cut by planes and squashed,
+  part of it under the ground, sized and turned where it is sown. They are sown through the ground's cover, on its
+  three grids and within its budget: the small on the grid nearest the eye and the big on the one that reaches
+  furthest, a stone twice as wide a fifth as common. How stony a ground is, is its substrate's to say: its share of
+  gravel, and how coarse its sources name its grain; how many stones that comes to is the generator's choice
+  (`strewn.stones` in [scene.yaml](../../world/generators/life/scene.yaml)). A stone stands where the terrain draws
+  the ground's own stones, since both read one field: where each material of a ground lies was the renderer's noise,
+  and is now the generator's ([sorting.ts](../../world/generators/life/sorting.ts)), which the shader is written from.
+  A sheet of gravel has stones all over it, and a topsoil's stones thicken on its rises. A stone is coloured as the
+  terrain colours the ground's stones, by the two tones of its gravel, which are the rock's under the place where the
+  world says what rock that is, each stone a shade of its own; its grain is the scanned rock's, read on its own
+  faces; and the ground's bare colour lies banked at its foot and dusted on its top.
+- **Fallen wood lies under trees.** Where at least three tenths of the ground is under canopy, lengths of fallen
+  trunk, some broken in two, stumps, fallen branches and boughs lie on it, of the kind of tree that stands over the
+  place, chosen as the trees are: in that tree's own bark, of its form's own thickness and a share of its height.
+  A trunk lies where there is room between the standing trunks, turned the way the ground is most level under it,
+  and not at all where the ground falls too much along it, since a mesh drawn many times can be turned but not
+  tilted. Its bark is its tree's, greyed by how long it has lain, with what grows low on its upper side and the wood
+  pale where it broke; it does not sway. A click on it finds its taxon. How much wood lies to the hectare is the
+  generator's choice (`strewn.wood`): nobody counted it. A palm, a tree fern and a calamite shed a trunk and no
+  branches.
+- **Bare ground is bare.** A ground bears what its climate grows only as far as what it is made of lets it: a crust of
+  salt a thirtieth of it, and a mud or a lime mud its sources say dried into cracks a tenth (`cover.bears`, the
+  generator's choice). Bare ground takes the rest, so that fewer trees and fewer low plants stand there, from afar
+  by the mean of the scene's ground and close by where each material lies: tufts stand on the sand beside a crust,
+  and next to none on it. `gen:life/scene` is version 11: a scene whose ground bears all its climate grows has every
+  tree and animal where version 10 put it.
 - **Shadows close to.** The nearest cascade is as wide as the view is far, down to 24 m, so that close by a shadow is
   fine enough to meet the foot that casts it.
 - **Clouds without streaks.** A march of 24 steps through the cloud layer hit or missed the edges of its heaps so
@@ -379,11 +408,13 @@ plants, the bodies, the people and what they build, and raised each by the means
   horizon, is left out; and the light that has come a long way through the cloud is reckoned by its broad shape alone,
   which pays for some of the steps.
 
-*Not done:* stones and logs as things standing on the ground; parallax in the ground's grain; impostors; a house's
-yard where no tradition says what stood in it; crops as plants; a house's own shape, which is still a plain box.
-Nothing yet says that a crust of salt or a mud that dries to cracks grows less than its climate's share of low
-plants: the cover is the climate's, whatever the ground is made of. The lighter way draws none of this: its plants
-are the plain shapes they were.
+*Not done:* parallax in the ground's grain; impostors; a house's yard where no tradition says what stood in it;
+crops as plants; a house's own shape, which is still a plain box. Stones stand only where a substrate says the ground
+has gravel: the gravel the renderer lays on a climate's bare slopes and on the bars of a dry bed, and the rock of a
+steep face, have no stones standing on them, and there is no scree. Fallen wood lies level, and has no fungi, no
+hollow and no root plate; a fallen frond is not drawn. Neither stones nor wood are in the scene's fingerprint, which
+proves its ground, a cell and a mesh. The lighter way draws none of this: its plants are the plain shapes they were,
+and it has no stones and no fallen wood, though what its ground bears is the same.
 
 *What the plans could not say,* as those who redrew them found: a section that is not an ellipse (a flat belly, a
 pear-shaped body); a leg narrower across than fore and aft, which a thigh is; a part that hangs on another part's end,
@@ -406,6 +437,9 @@ against the sky. Each kind of thing is held to its own test, on the look book's 
 - **An animal** reads as its group from its side at any distance, by its back line, its neck, its head and its legs:
   its sheet (`form-sheet`) is looked at against a skeletal reconstruction whenever its plan is touched.
 - **A person and a house** stand on the ground, and cast a shadow that meets them.
+- **What lies on the ground** lies in it: a stone's foot is banked with the ground's own colour and a log's underside
+  is dark where it meets the earth. A stone is of what the ground's own stones are drawn of, and no two beside each
+  other are alike; fallen wood is of a tree that stands over it.
 - **Nothing is a photograph of a living thing,** and nothing drawn says more than its record: a finer picture of a
   taxon with no form of its own is a finer picture of its nearest node's.
 
