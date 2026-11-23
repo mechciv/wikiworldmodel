@@ -45,7 +45,7 @@ its own generator below its finest field.
 
 | Layer | What it reads | Finest evidence today (candidates, licences to be read) | The past | Below the fields |
 | --- | --- | --- | --- | --- |
-| Relief | elevation, sea level, ice | ETOPO 2022 (0.1° in use; 15″ exists); SRTM 30 m | today's ground at the sea level of the time (800 kyr); PaleoDEMs at 1° | landforms by process: valleys cut by the rivers, hills by erosion, dunes, glacial forms |
+| Relief | elevation, sea level, ice | ETOPO 2022: its 60″ cells around a scene's place, over the 0.1° grid the globe draws (15″ exists); SRTM 30 m | today's ground at the sea level of the time (800 kyr); before that the PaleoDEMs at 1°, with today's shape carried back on its plate through the Quaternary and for as long as a range's record says it stood ([below](#the-grounds-shape)) | landforms by process: hills and valleys cut by water, leading to the rivers; dunes; glacial forms and coasts not yet |
 | Water | relief, climate, water balance | HydroRIVERS; Natural Earth lakes | the drainage routed over the relief of the time, with runoff from its climate | channels from discharge; meanders, bars and oxbows; banks and floodplains |
 | Substrate | the rock record, soils, geology | SoilGrids 2.0 and the Global Lithological Map, both at half a degree; Macrostrat's columns of rock units, which have ages | the rocks of the stage's fossil collections; today's topsoil held through the Holocene, and today's bedrock carried back through the Quaternary; at any time, the units of the column of rock a place lies in, where Macrostrat has one; generic by climate elsewhere ([below](#what-the-ground-is-made-of)) | the ground's materials in patches, with pebbles, cracks and crusts; outcrops and stones in the colour of the rock |
 | Cover | biome, transitions, land cover | ESA WorldCover (10 m) | biome from climate; pollen biomes (BIOME 6000) for the late Quaternary | stands, glades and edges; trees along water |
@@ -65,6 +65,10 @@ What answers a layer changes with the era, and the scene must say which:
 - **The glacial cycles:** today's ground at the sea level of the time. Rivers cross the exposed shelves,
   as the Channel River and the rivers of Sundaland did. Lakes fill where the climate fed them, as
   Bonneville did. Ice covers what the ice sheets covered.
+- **The Quaternary before them, and the Pliocene:** the PaleoDEM of the time for where the land stood and
+  how high, and today's shape within its cells, carried back on its plate: all of it to the start of the
+  Quaternary, less and less of it to the start of the Pliocene. Further back only where a range's record
+  says it already stood.
 - **The Phanerozoic:** the PaleoDEMs and the climate runs, at 1–2°, routed into rivers as big as those
   grids can hold. The rock record says what the place itself was. A fossil site's collection names its
   environment: channel, floodplain, lake, delta, dune or reef. Where it names one, the scene must draw it.
@@ -83,7 +87,9 @@ that makes it, at a scale a worker can afford:
   off. Its oxbows are the loops it cut, and the inside of each bend is the ground it swept, a bar crossed
   by scrolls. Later, the same for the rivers the world gives.
 - **Hills and valleys below the relief's cell:** stream-power erosion on the generated relief, so that
-  valleys lead to the rivers that drain them.
+  valleys lead to the rivers that drain them. Built ([below](#the-grounds-shape)): what a scene invents is
+  cut by water run over it, which drains to the sea, to the rivers and lakes the world gives and to the edge
+  ([erosion.ts](../world/generators/life/erosion.ts)).
 - **Dunes** from the wind of the climate runs, **glacial forms** from the ice's history, and **coasts**
   from the sea level's history: terraces, beaches and drowned valleys.
 
@@ -167,8 +173,107 @@ Limits:
   Lake Victoria is not among the drainage's lakes, and so not in a scene (docs/slices/EIGHTH-SLICE.md).
 - A kind's liking is its rows' places' climate in the whole stage, worldwide, which leans to Europe and North America; a
   stand-in has no rows and likes every climate alike.
-- Beyond 16 km the ground's cover still ignores its height, and heights are cut at 3,200 m (PARITY.md, section 3): a far
-  range has no treeline.
+- Beyond 16 km the ground's cover is read by its height, each height bearing what its own climate does (below), in the
+  colours of the scene's own place: a far range has its treeline, and not the tones of the class its heights are.
+
+## The ground's shape
+
+Since `gen:life/scene` version 10 ([docs/plans/PARITY.md](plans/PARITY.md), item 6). A scene's ground is the world's as
+finely as the world has it, and invented only below that
+([core/relief.ts](../core/relief.ts), [relief.ts](../world/generators/life/relief.ts)).
+`npm run world -- relief <lat> <lon> <time>` prints what a build gives a scene of a place: the elevation it reads, the
+shape within its cells, and the highest ground about it with and without that shape.
+
+- **The survey's own cells.** Today's relief is held on a grid of a tenth of a degree, some 11 km, which is what the
+  globe draws; its survey, ETOPO 2022, is a sixtieth of a degree, some 1,850 m. The build keeps what the survey has at
+  each of its cells less what the relief's grid makes of the place, one byte a cell, in tiles of two degrees wherever
+  some ground stands above −200 m and departs from the grid by two metres (`field:earth/relief`, `fine`: 8,129 tiles,
+  62 MB). A scene sends for the tiles within two degrees of its place and lays them over the grid: the two together are
+  the survey's ground, read straight from one of the survey's cells to the next. So a range thirty kilometres off has
+  its own crest and not the mean of eleven kilometres of it, as far as the scene's ground reaches.
+- **Carried back.** Before the glacial cycles the elevation is a PaleoDEM, a degree's: where the land stood and about
+  how high. `model:earth/relief-carried` lays today's shape over it: today's ground less what the PaleoDEM makes of
+  today, its grid of the present, read where the place stands today and turned as its plate has turned since. So
+  from 798 ka back to 2.5 Ma, where the PaleoDEM a scene reads is that grid of the present, it stands on today's
+  ground as surveyed; and before that on today's ground, raised or lowered by as much as the PaleoDEM's grids say the
+  land has risen or sunk since. All of today's shape stood through the Quaternary and none before the Pliocene,
+  falling evenly between: a choice, whose two times follow the records of those periods. Within the outline of a
+  range whose record says by when it stood at about its present height, all of its shape is carried back to then,
+  and before that as much as an even rise from the start of its growth gives
+  ([RECORDS.md](RECORDS.md#a-mountain-range)). Eight ranges have such records: the Himalaya's crests are carried back
+  to 16 Ma, the Tibetan Plateau's to 23 Ma, the Front Range's to 35 Ma. The scene's own plate carries its shape. The
+  ground of another plate keeps its shape only as far as that plate has not moved against the scene's own since the
+  PaleoDEM's grid: all of it at the grid of the present, when none has moved, and none once it has moved a node of
+  the relief's grid (`other_plates`). Where the shape stops, at a range's outline or the edge of a plate that has
+  moved, its hills and valleys stop there, and what today's ground stands above the PaleoDEM's grid of the present by
+  on the whole falls away over a degree, so that no step is left along the line. Where the PaleoDEM has the land
+  lower than today, today's valleys would lie
+  under its sea; but a valley is cut no lower than the sea it drains to. So ground that is dry today is held above
+  the coast wherever the PaleoDEM has land, at a fiftieth of the height it gives the land there and no higher than
+  the ground stands today (`valley_floor`).
+- **Invented below that.** Under the grain of the world's ground, hills and valleys nobody surveyed. How high they
+  stand goes on from that ground itself: the roughness it shows at its own grain (how far each node of it stands from
+  the mean of the nodes a grain away either side), seven tenths of it, a feature half as long standing 2^-0.75 as
+  high. So a plain the survey shows level stays level, however high it lies, and a range the survey shows rough is
+  rough below its cells. Under the survey's cells the features are shorter than a cell; under a PaleoDEM's alone they
+  are as wide as tens of kilometres. Over a cell of the world's ground they add nothing to its mean.
+- **Cut by water.** What is invented is then routed and cut ten times: the ground is flooded from its outlets upward,
+  each node cuts toward the node it drains to, the faster the more ground drains through it, and slopes creep. The
+  outlets are the sea, the scene's edge, and the rivers and lakes the world gives, which keep their heights. So the
+  valleys lead to what drains them, and about a fortieth of the invented ground is left in hollows where a sixth of
+  it would be. Only what is cut below the longest invented feature is kept: the broad slopes are the world's.
+- **A modelled river runs down the finer ground.** The drainage gives a river as the nodes of its grid, a tenth of a
+  degree apart. Where the scene has the survey's shape, each node is moved to the lowest ground within its cell, and
+  the river's course between two is the way that keeps lowest; its water is at that ground's height. A river Landsat
+  saw is where Landsat saw it, and needs none of this.
+- **Heights are not cut.** The ground's three grids keep their heights in sixteen bits each, in steps as fine as the
+  grid's own range allows: decimetres near the eye, on a plateau as on a plain, and a quarter or half a metre where a
+  grid holds both a summit and a sea floor.
+
+What reads the ground reads the new one. Each height bears what its own climate does and holds the month's snow
+(above), on the scene's own cells and now beyond them; a river's bed, banks and valley walls are cut into it, and a
+lake's basin; houses and fields stand on it.
+
+Limits:
+- The survey's cells are read two degrees either way of a place, less far east and west toward the poles; beyond that
+  the far ground is the relief's own grid. Only tiles with ground above −200 m are kept: a scene of the deep sea
+  stands on the grid alone.
+- A cell is 1,850 m. A gorge or a summit narrower than that is the survey's mean of it, and what is invented below it
+  knows nothing of the rock or the ice that shaped the place: a glacial trough and a canyon come out alike.
+- Carried back, a range has today's valleys, though rivers have cut them deeper and glaciers reshaped them since; a
+  volcano younger than the time shown stands; and a coast has today's shape where the PaleoDEM's lies near today's.
+  The crust that sank under the ice and rose again is left out, as it is through the glacial cycles.
+- Carried back, the ground keeps the PaleoDEM's level, so that a scene stands where the globe, the climate and the
+  rivers of its time have the land; and the PaleoDEM's grids do not hold a range at the height its record gives.
+  Within 50 km of Mount Everest the grid of 10 Ma stands a kilometre above the grid of the present and the grid of
+  5 Ma seven hundred metres below it, and the western Alps are a kilometre to a kilometre and a half lower than
+  today from 20 Ma to 5 Ma. So a range its record has at about its present height is drawn with today's crests and
+  valleys, as much higher or lower (`model:earth/relief-carried`, `disagrees`). The PaleoDEM is read at its nearest
+  grid, and its grids are five million years apart: the ground steps at 2.5 Ma, at 7.5 Ma and so on.
+- A valley the PaleoDEM's lower land would drown is held just above the coast, and its floor comes out broad and
+  smooth, sloping as the PaleoDEM's land does: the Arve below Mont Blanc at 15 Ma. Nothing measured says how high any
+  valley's floor stood; and an arm of the sea narrower than a degree, which the PaleoDEM cannot hold, is not there.
+- Just before 798 ka the coast is today's, at today's sea level, and just after it the sea's of the time: the ground
+  of the two scenes meets, and their shores may not.
+- A scene's plate is the one that carries its place to ground of its own today, by today's plates on the relief's
+  grid: the PaleoDEM's own grid of plates is a degree's, too coarse by a plate's edge, where the ranges are. The
+  plate that grid has at the place is tried first, and then those of the ground round about, out to three degrees.
+  Where the ground of two plates lay over the same place at a time, as that of blocks that have since pulled apart
+  did, the scene stands on the first of them tried, and the other's ground is not there.
+- A range's record gives a height at a basin or a summit, at a time; the model draws all of the range within its
+  outline alike. The outlines are loose and editorial. Where the sources disagree about when a range stood, the
+  scene follows the claim the default picture shows.
+- How much of today's shape stood is read at the scene's own place for what it invents: across the edge of a range's
+  outline, the hills invented inside it are as many as outside.
+- Before the glacial cycles the drainage's nodes are a degree apart, and a node is moved no further than 6 km to low
+  ground: a river then may cross a ridge of today's shape, in a cut the scene makes for it. Small rivers, below what
+  the drainage keeps, are still not drawn: an invented valley has no stream.
+- The globe still draws the PaleoDEM alone before the glacial cycles: only a scene has the shape carried back.
+- Water cuts the invented ground in valleys a node or two wide, with walls far steeper than a hillside stands: a
+  hundred metres deep and more where the world's ground is rough. From the air over a range they read as dark slots.
+  The cutting has no rule for how steep a wall may stand.
+- Hills invented below the world's ground are the scene's own: two scenes that overlap draw different valleys
+  below the survey's cells. Seamless ground is the last step of the order.
 
 ## What the ground is made of
 
@@ -259,7 +364,10 @@ Each step has a budget, and a test.
    environment and rock is in the build by stage, as sites a place can ask for those near it
    (`field:earth/rock-record`, [core/rocks.ts](../core/rocks.ts)). A scene's ground is drawn from their rocks
    ([above](#what-the-ground-is-made-of)); no scene reads their environments yet.
-4. **Relief below the field,** by erosion, and today's ground from finer tiles of evidence.
+4. **Relief below the field,** by erosion, and today's ground from finer tiles of evidence. Built
+   ([above](#the-grounds-shape)): the survey's 60″ cells in tiles, today's shape carried back before the glacial
+   cycles, and what is invented below them cut by water. Finer surveys where a licence allows (SRTM's 30 m),
+   glacial forms, coasts and streams in the invented valleys remain.
 5. **Cover and substrate today:** land cover, soils and geology, licence by licence. The substrate is begun: today's
    topsoil and bedrock at half a degree, and rock units with their ages where Macrostrat has columns
    ([above](#what-the-ground-is-made-of)). Finer maps, rock units for the rest of the Earth, a soil's colour and land

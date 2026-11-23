@@ -1,0 +1,23 @@
+id: src:tippett-kamp-1993-southern-alps
+type: publication
+kind: measurement
+citation: >-
+  Tippett, J.M. & Kamp, P.J.J. (1993). Fission track analysis of the Late Cenozoic vertical
+  kinematics of continental Pacific crust, South Island, New Zealand. Journal of Geophysical
+  Research: Solid Earth 98(B9), 16119–16148.
+authors:
+  - "Tippett, J.M."
+  - "Kamp, P.J.J."
+published: 1993
+title: >-
+  Fission track analysis of the Late Cenozoic vertical kinematics of continental Pacific crust,
+  South Island, New Zealand
+container: "Journal of Geophysical Research: Solid Earth 98(B9), 16119–16148"
+doi: 10.1029/92JB02115
+verified:
+  by: machine:claude-code
+  how: >-
+    Abstract only, read on 22 November 2026 as OpenAlex's record of the article carries it (work
+    W2039380582; OpenAlex keeps an abstract as its words with their places, and a script set them
+    back in order); citation from Crossref. The article itself was not read: the publisher's site
+    (Wiley, for the American Geophysical Union) is closed to automated readers.

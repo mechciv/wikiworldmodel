@@ -1,0 +1,26 @@
+id: src:gebelin-2013-everest
+type: publication
+kind: measurement
+citation: >-
+  Gébelin, A., Mulch, A., Teyssier, C., Jessup, M.J., Law, R.D. & Brunel, M. (2013). The Miocene
+  elevation of Mount Everest. Geology 41(7), 799–802.
+authors:
+  - "Gébelin, A."
+  - "Mulch, A."
+  - "Teyssier, C."
+  - "Jessup, M.J."
+  - "Law, R.D."
+  - "Brunel, M."
+published: 2013
+title: The Miocene elevation of Mount Everest
+container: Geology 41(7), 799–802
+doi: 10.1130/G34331.1
+verified:
+  by: machine:claude-code
+  how: >-
+    Abstract only, read on 22 November 2026 as OpenAlex's record of the article carries it (work
+    W2081315541; OpenAlex keeps an abstract as its words with their places, and a script set them
+    back in order); citation from Crossref. The article itself was not read: the publisher's site
+    (GeoScienceWorld) and the copy in the University of Plymouth's repository both answered with a
+    bot check, and HAL's record of it has no abstract. So the age of the minerals, which the
+    abstract gives only as late Early Miocene, is not given here as a number.

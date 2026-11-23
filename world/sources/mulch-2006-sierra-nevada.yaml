@@ -1,0 +1,21 @@
+id: src:mulch-2006-sierra-nevada
+type: publication
+kind: measurement
+citation: >-
+  Mulch, A., Graham, S.A. & Chamberlain, C.P. (2006). Hydrogen isotopes in Eocene river gravels and
+  paleoelevation of the Sierra Nevada. Science 313(5783), 87–89.
+authors:
+  - "Mulch, A."
+  - "Graham, S.A."
+  - "Chamberlain, C.P."
+published: 2006
+title: Hydrogen isotopes in Eocene river gravels and paleoelevation of the Sierra Nevada
+container: Science 313(5783), 87–89
+doi: 10.1126/science.1125986
+verified:
+  by: machine:claude-code
+  how: >-
+    Abstract only, read on 22 November 2026 from the Europe PMC record (PMID 16825568), which
+    writes the abstract's "at least" sign as ">/="; citation from Crossref. The article itself was
+    not read: Science's site is closed to automated readers. So how the height the abstract gives
+    compares with the range's height today, which the abstract does not say, is not known here.

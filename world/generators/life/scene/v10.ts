@@ -1,4 +1,4 @@
-// A living scene, version 9: any place at any moment, on land or in the sea, from a spec. Nothing is laid out until it is looked at:
+// A living scene, version 10: any place at any moment, on land or in the sea, from a spec. Nothing is laid out until it is looked at:
 // each 400 m cell makes what stands in it from hashes of where it is, so the scene has no edge to speak of, and what a
 // far view shows is the top of the same list a near view shows in full. The records say which taxa could be here and how
 // big they grew; this says where each stands, how many there are, what it is doing and what colour it is, all invented
@@ -22,11 +22,16 @@
 // drawn as far as the big animals; and what floats is sown only on still water. Away from water a tree stands where
 // version 7's did, and its kind is new. Since version 9 (docs/plans/RENDERING.md, step 1) a tuft's blades are in a
 // material of their own, which carries their form's colour in their uv and is lit as the leaves on cards are: what
-// grows where, and every vertex's place, is what version 8 made. The build and every browser are held to agree within
-// the tolerance of core/fingerprint.ts.
+// grows where, and every vertex's place, is what version 8 made. Since version 10 (docs/plans/PARITY.md, item 6) the
+// ground has the shape the world gives it within its relief's cells (core/relief.ts): the survey's own where today's
+// relief is held, and today's carried back on its plate before that. What a scene invents below that goes on from the
+// roughness the world's ground shows, and is cut by water run over it, so that its valleys lead to the rivers and lakes
+// the world gives (../relief.ts, ../erosion.ts); a river the drainage routes is run down the finer ground between the
+// nodes of its grid; and heights are kept as finely as their range allows, so that no range is cut off at 3,200 m. Every
+// scene's ground is new. The build and every browser are held to agree within the tolerance of core/fingerprint.ts.
 import type { Part } from '../../../../core/fingerprint.ts';
 import type { Form, Pose } from '../../../../core/form.ts';
-import type { LivingTaxon, ReliefPatch, SceneCover, SceneSpec } from '../../../../core/scene.ts';
+import type { LivingTaxon, SceneCover, SceneSpec } from '../../../../core/scene.ts';
 import { climateClass } from '../../../../core/climate.ts';
 import { nodeAtHeight } from '../../../../core/months.ts';
 import type { ClimateChoices } from '../climate.ts';
@@ -35,10 +40,11 @@ import { dcos, dsin, hash2, hash3, hashString, PI, Rng, TAU } from '../../city/m
 import { POSE } from '../forms.ts';
 import { arrival, distanceField, fbm, noise, plainGrid, watersOf, type GridSpec, type PlainParams, type Waters } from '../land.ts';
 import { LakeMap, lakeSheets } from '../lakes.ts';
+import { EARTH, Invented, Tracer, WorldGround, type InventChoices, type TraceChoices } from '../relief.ts';
 import { drawRiver, meet, type Oxbow, type RiverChoices, type RiverPath } from '../rivers.ts';
 
 export const GENERATOR = 'gen:life/scene';
-export const VERSION = 9;
+export const VERSION = 10;
 
 /** The side of a cell of the ground, in metres. */
 export const CELL = 400;
@@ -48,8 +54,7 @@ export const EXTENT = 16000;
 export const CELLS = (EXTENT * 2) / CELL;
 export const cellKey = (i: number, j: number) => (j + CELLS / 2) * CELLS + (i + CELLS / 2);
 
-export const EARTH = 6371000;
-const DEG = PI / 180;
+export { EARTH };
 
 export interface LivingParams {
   /** the sea, where a place lies in it: how far above its floor what swims is drawn, in metres, at most */
@@ -73,9 +78,17 @@ export interface LivingParams {
     lowest_water: number;
     /** below this height at the place, in metres, its water is the sea */
     sea_below: number;
-    /** how much invented relief the land has beyond the plain, as a share of its height above the coast, for a field a
-     * degree across: a finer field's by the square root of its spacing, as it draws more of the hills itself */
+    /**
+     * The ground invented below the world's (../relief.ts): how much of the roughness the world's ground shows at its own
+     * grain goes on below it, as a share; how fast it falls with the size of a feature; between which heights above the
+     * coast it comes in, m; and how water cuts it (../erosion.ts).
+     */
     rugged: number;
+    hurst: number;
+    lowland: [number, number];
+    erosion: InventChoices['erosion'];
+    /** how a river the drainage routes is run down the world's ground between the nodes of its grid (../relief.ts) */
+    trace: TraceChoices;
     /** how rough the plain gets for each metre the land around it varies by */
     swell: number;
     /** a shore: how far the land's height wanders with noise, in metres, within the cells of a 1° grid the coast crosses;
@@ -216,47 +229,16 @@ const smooth = (a: number, b: number, x: number) => {
 
 // ——— The land ———
 
-/** The field's height at a local point: bilinear on the patch. */
-export class Relief {
-  private kx: number;
-  constructor(private p: ReliefPatch, private origin: { lat: number; lon: number }) {
-    this.kx = 1 / (EARTH * dcos(origin.lat * DEG) * DEG);
-  }
-  /** the spacing of the field, in degrees */
-  get step(): number {
-    return this.p.step;
-  }
-  /** Whether the cell of the field a point is in has the coast through it: land at one of its corners and sea at another. */
-  coastal(x: number, y: number): boolean {
-    const { p } = this;
-    const lat = this.origin.lat + y / (EARTH * DEG);
-    const lon = this.origin.lon + x * this.kx;
-    const cy = Math.min(p.ny - 1.001, Math.max(0, (p.lat0 - lat) / p.step));
-    const cx = Math.min(p.nx - 1.001, Math.max(0, (lon - p.lon0) / p.step));
-    const at = Math.floor(cy) * p.nx + Math.floor(cx);
-    const c = [p.z[at], p.z[at + 1], p.z[at + p.nx], p.z[at + p.nx + 1]];
-    return Math.min(...c) <= 0 && Math.max(...c) > 0;
-  }
-  at(x: number, y: number): number {
-    const { p } = this;
-    const lat = this.origin.lat + y / (EARTH * DEG);
-    const lon = this.origin.lon + x * this.kx;
-    const fy = (p.lat0 - lat) / p.step;
-    const fx = (lon - p.lon0) / p.step;
-    const cy = fy < 0 ? 0 : fy > p.ny - 1.001 ? p.ny - 1.001 : fy;
-    const cx = fx < 0 ? 0 : fx > p.nx - 1.001 ? p.nx - 1.001 : fx;
-    const j = Math.floor(cy);
-    const i = Math.floor(cx);
-    const u = cx - i;
-    const v = cy - j;
-    const at = j * p.nx + i;
-    const z = p.z;
-    return (z[at] * (1 - u) + z[at + 1] * u) * (1 - v) + (z[at + p.nx] * (1 - u) + z[at + p.nx + 1] * u) * v;
-  }
+/** The world's ground under a scene (../relief.ts), made once for each spec. */
+const grounds = new WeakMap<SceneSpec, WorldGround>();
+export function worldGround(spec: SceneSpec): WorldGround {
+  let g = grounds.get(spec);
+  if (!g) grounds.set(spec, (g = new WorldGround(spec.relief, spec.site.relief_at ?? spec.site.origin, spec.shape)));
+  return g;
 }
 
 /** The bearing downhill from the place, in one of sixteen directions, chosen with no inverse trigonometry. */
-export function downhill(r: Relief, seed: number): number {
+export function downhill(r: WorldGround, seed: number): number {
   let best = hash2(1, 1, seed) * TAU;
   let low = r.at(0, 0);
   for (let k = 0; k < 16; k++) {
@@ -286,7 +268,7 @@ export interface PlaceLook {
 export function placeLook(spec: SceneSpec): PlaceLook {
   const params = spec.generator.params as unknown as LivingParams;
   const seed = hashString(spec.generator.seed);
-  const r = new Relief(spec.relief, spec.site.relief_at ?? spec.site.origin);
+  const r = worldGround(spec);
   const g = params.ground;
   const e0 = r.at(0, 0);
   let lo = e0;
@@ -337,11 +319,15 @@ export const wetInMonth = (wet: number | undefined, month: number | undefined): 
 function riversFor(spec: SceneSpec): Waters {
   const p = spec.generator.params as unknown as LivingParams;
   const w = spec.water!;
-  const rel = new Relief(spec.relief, spec.site.relief_at ?? spec.site.origin);
+  const rel = worldGround(spec);
   const paths: RiverPath[] = [];
   const oxbowList: Oxbow[] = [];
   const month = spec.climate?.month;
-  for (const r of w.rivers) {
+  // Where the world's ground is finer than the drainage's grid, a river the drainage routes is run down it between the
+  // grid's nodes, and its water is at that ground's height.
+  const tracer = rel.shaped && p.ground.trace && w.rivers.some((r) => r.from === 'model') ? new Tracer(rel, p.ground.trace, REACH + 2000) : undefined;
+  for (const given of w.rivers) {
+    const r = tracer ? tracer.trace(given) : given;
     const drawn = drawRiver(r, w.laws, p.rivers, (x, y) => rel.at(x, y), REACH);
     if (drawn.path.xy.length < 4) continue;
     if (!wetInMonth(r.wet, month)) drawn.path.dry = true;
@@ -693,31 +679,48 @@ export function waterRibbons(w: Waters): { vertices: Float32Array; flow: Float32
   return { vertices: Float32Array.from(verts), flow: Float32Array.from(flow), indices: Uint32Array.from(idx) };
 }
 
-/** Far from a plain, the land's own lie, with ridges made up in proportion to its height. */
-function landAt(rel: Relief, g: LivingParams['ground'], x: number, y: number, seed: number): number {
+/** The world's ground, with a coast that wanders within the cells it crosses: what is invented below it is added to this (../relief.ts). */
+function landAt(rel: WorldGround, g: LivingParams['ground'], x: number, y: number, seed: number): number {
   const b = rel.at(x, y);
+  if (!rel.coastal(x, y)) return b;
+  // A coast wanders within the cells of the ground it crosses, as far as a cell lets it: the parameter is a degree's,
+  // and where the scene has the shape of the ground within the field's cells, the cell is the shape's.
+  const cell = Math.min(1, rel.step) * (1 - rel.share) + (rel.fineM / (EARTH * (PI / 180))) * rel.share;
+  const wander = g.coast * cell;
+  const near = 1 - smooth(0, wander * 3, b < 0 ? -b : b);
+  if (!(near > 0)) return b;
   const n1 = fbm(x / 26000, y / 26000, seed + 71) - 0.5;
   const n2 = fbm(x / 6200, y / 6200, seed + 72) - 0.5;
-  const high = b > 80 ? b - 80 : 0;
-  // A coast wanders within the cells of the field it crosses, as far as a cell lets it; and hills stand in proportion
-  // to what is under them, the less the finer the field already draws them. The parameters are a degree's.
-  const cell = Math.min(1, rel.step);
-  const wander = g.coast * cell;
-  const near = rel.coastal(x, y) ? 1 - smooth(0, wander * 3, b < 0 ? -b : b) : 0;
-  return b + near * wander * (n1 + n2) * 2 + high * g.rugged * Math.sqrt(cell) * (n1 * 1.4 + n2 * 0.6);
+  return b + near * wander * (n1 + n2) * 2;
+}
+
+/** The ground a scene invents below the world's, with the water the world gives held as it is: made once for each scene's waters. */
+function inventedFor(spec: SceneSpec, rel: WorldGround, seed: number, waters: Waters): Invented | undefined {
+  const g = (spec.generator.params as unknown as LivingParams).ground;
+  if (!g.erosion || !(g.rugged > 0)) return undefined;
+  const lakes = waters.lakes && !waters.lakes.empty ? waters.lakes : undefined;
+  const made = new Invented(rel, g, seed, { courses: waters.paths ?? [], ...(lakes ? { lake: (x, y) => lakes.levelAt(x, y) } : {}) });
+  return made.any ? made : undefined;
 }
 
 /** The ground's three grids, in metres above the coast: what a browser makes for itself. */
 export function groundGrids(spec: SceneSpec, look: PlaceLook, waters: Waters, sizes: { fine: GridSpec; mid: GridSpec; far: GridSpec } = GRIDS): GroundGridData[] {
   const g = plainOf(spec, look);
-  const rel = new Relief(spec.relief, spec.site.relief_at ?? spec.site.origin);
+  const rel = worldGround(spec);
   const { seed, water } = look;
   const clim = (spec.generator.params as unknown as LivingParams).cover.climates[spec.biome.climate];
   const dune = clim?.dunes ?? 0;
-  const mixed = (x: number, y: number, plain: number) => {
+  const invented = inventedFor(spec, rel, seed, waters);
+  // The land at a node of the grid `q`: 0 the near one, 1 the middle, 2 the far. What is invented is laid over each grid once.
+  const landOf = (q: number) => {
+    const gs = [sizes.fine, sizes.mid, sizes.far][q];
+    const added = invented?.over(gs, q);
+    if (!added) return (x: number, y: number) => landAt(rel, g, x, y, seed);
+    return (x: number, y: number) => landAt(rel, g, x, y, seed) + added[Math.round((y - gs.y0) / gs.cell) * gs.nx + Math.round((x - gs.x0) / gs.cell)];
+  };
+  const mixed = (land: number, x: number, y: number, plain: number) => {
     const r = Math.sqrt(x * x + y * y);
     const k = smooth(g.blend[0], g.blend[1], r);
-    const land = landAt(rel, g, x, y, seed);
     // Where the land the field has lies under the sea, so does the plain: it has a shore.
     const dry = look.sea ? smooth(-g.coast * 0.5, g.coast * 0.5, land) : 1;
     const w = (1 - k) * dry;
@@ -731,10 +734,15 @@ export function groundGrids(spec: SceneSpec, look: PlaceLook, waters: Waters, si
   const fine = sizes.fine;
   const mid = sizes.mid;
   const far = sizes.far;
+  // A far grid whose ground is a field's alone is blurred a little, as that field has no business with corners; one
+  // with the survey's shape in it is left as the survey has it.
+  const blur = !rel.shaped;
   if (waters.paths) {
     const params = spec.generator.params as unknown as LivingParams;
-    const land = (x: number, y: number) => withDunes(x, y, landAt(rel, g, x, y, seed));
-    const grids = [fine, mid, far].map((gs) => riverGround(gs, waters, g, params.rivers, land, seed));
+    const grids = [fine, mid, far].map((gs, q) => {
+      const at = landOf(q);
+      return riverGround(gs, waters, g, params.rivers, (x, y) => withDunes(x, y, at(x, y)), seed);
+    });
     // The lakes the world gives: their beds under their level, and the land by their shores above it.
     const lakes = waters.lakes;
     if (lakes && !lakes.empty) {
@@ -746,45 +754,40 @@ export function groundGrids(spec: SceneSpec, look: PlaceLook, waters: Waters, si
         }
       });
     }
-    blurFar(grids[2], far);
-    return [
-      { ...fine, z: encode(grids[0]) },
-      { ...mid, z: encode(grids[1]) },
-      { ...far, z: encode(grids[2]) },
-    ];
+    if (blur) blurFar(grids[2], far);
+    return [encode(fine, grids[0]), encode(mid, grids[1]), encode(far, grids[2])];
   }
   const z0 = plainGrid(fine, g, water, seed, waters);
+  const near = landOf(0);
   for (let j = 0; j < fine.ny; j++) {
     for (let i = 0; i < fine.nx; i++) {
       const x = fine.x0 + i * fine.cell;
       const y = fine.y0 + j * fine.cell;
       const at = j * fine.nx + i;
-      z0[at] = mixed(x, y, withDunes(x, y, z0[at]));
+      z0[at] = mixed(near(x, y), x, y, withDunes(x, y, z0[at]));
     }
   }
   const z1 = plainGrid(mid, g, water, seed, waters);
+  const middle = landOf(1);
   for (let j = 0; j < mid.ny; j++) {
     for (let i = 0; i < mid.nx; i++) {
       const x = mid.x0 + i * mid.cell;
       const y = mid.y0 + j * mid.cell;
       const at = j * mid.nx + i;
-      z1[at] = mixed(x, y, withDunes(x, y, z1[at]));
+      z1[at] = mixed(middle(x, y), x, y, withDunes(x, y, z1[at]));
     }
   }
   const z2 = new Float32Array(far.nx * far.ny);
+  const beyond = landOf(2);
   for (let j = 0; j < far.ny; j++) {
     const y = far.y0 + j * far.cell;
     for (let i = 0; i < far.nx; i++) {
       const x = far.x0 + i * far.cell;
-      z2[j * far.nx + i] = mixed(x, y, water + g.rise);
+      z2[j * far.nx + i] = mixed(beyond(x, y), x, y, water + g.rise);
     }
   }
-  blurFar(z2, far);
-  return [
-    { ...fine, z: encode(z0) },
-    { ...mid, z: encode(z1) },
-    { ...far, z: encode(z2) },
-  ];
+  if (blur) blurFar(z2, far);
+  return [encode(fine, z0), encode(mid, z1), encode(far, z2)];
 }
 
 /** A small blur of the far grid, with fixed weights: the field under it is a degree's, and has no business with corners. */
@@ -804,15 +807,33 @@ function blurFar(z2: Float32Array, far: GridSpec): void {
   line(blurred, z2, far.ny, far.nx, (l, k) => k * far.nx + l);
 }
 
-/** Heights to decimetres: what the renderer's textures hold. */
-function encode(z: Float32Array): Int16Array {
+/** The steps heights are kept in, m: the finest that holds a grid's whole range in sixteen bits. */
+const UNITS = [0.1, 0.25, 0.5, 1];
+
+/**
+ * A grid's heights as the renderer's textures hold them: whole steps above a base, the steps as fine as the grid's range
+ * of heights allows, so that neither a trench nor a summit is cut off and a plain keeps its decimetres.
+ */
+function encode(gs: GridSpec, z: Float32Array): GroundGridData {
+  let lo = Infinity;
+  let hi = -Infinity;
+  for (let i = 0; i < z.length; i++) {
+    const v = z[i];
+    if (v < lo) lo = v;
+    if (v > hi) hi = v;
+  }
+  // The finest step that holds the range; and a base of nought where that step reaches all of it from there, else a
+  // whole metre about its middle. So ground near the eye keeps its decimetres however high it lies.
+  const half = (hi - lo) / 2;
+  const unit = UNITS.find((u) => half <= 32000 * u) ?? UNITS[UNITS.length - 1];
+  const base = Math.max(Math.abs(lo), Math.abs(hi)) <= 32000 * unit ? 0 : Math.round((lo + hi) / 2);
   const out = new Int16Array(z.length);
   for (let i = 0; i < z.length; i++) {
-    const v = z[i] * 10;
+    const v = (z[i] - base) / unit;
     const r = v < 0 ? -Math.floor(-v + 0.5) : Math.floor(v + 0.5);
     out[i] = r < -32000 ? -32000 : r > 32000 ? 32000 : r;
   }
-  return out;
+  return { ...gs, z: out, unit, base };
 }
 
 export const GRIDS: { fine: GridSpec; mid: GridSpec; far: GridSpec } = {

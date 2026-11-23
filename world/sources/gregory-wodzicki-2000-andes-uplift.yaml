@@ -1,0 +1,19 @@
+id: src:gregory-wodzicki-2000-andes-uplift
+type: publication
+kind: review
+citation: >-
+  Gregory-Wodzicki, K.M. (2000). Uplift history of the Central and Northern Andes: A review.
+  Geological Society of America Bulletin 112(7), 1091–1105.
+authors:
+  - "Gregory-Wodzicki, K.M."
+published: 2000
+title: "Uplift history of the Central and Northern Andes: A review"
+container: Geological Society of America Bulletin 112(7), 1091–1105
+doi: "10.1130/0016-7606(2000)112<1091:UHOTCA>2.0.CO;2"
+verified:
+  by: machine:claude-code
+  how: >-
+    Abstract only, read on 22 November 2026 as OpenAlex's record of the article carries it (work
+    W2022380393; OpenAlex keeps an abstract as its words with their places, and a script set them
+    back in order); citation from Crossref. The article itself was not read: the publisher's site
+    (GeoScienceWorld) answers with a bot check.

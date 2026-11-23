@@ -1,0 +1,118 @@
+# A model run here (section 4.10 of the design). The values of its parameters stay in the field.
+id: model:earth/relief-carried
+type: model
+title: Today's shape of the ground, carried back on its plates
+description: >-
+  The elevation of the deep past is a degree's: each of its nodes says about how high the land of a time stood, and it
+  holds none of the shape within its cells. Today's relief is known to a sixtieth of a degree. This model keeps what
+  that elevation says has changed since, and takes the rest from today. At a place it reads today's ground where the
+  place stands today, takes away what the same elevation makes of today there, its keyframe of the present, and lays
+  what is left over the elevation of the time, turned as the plate has turned since. So where the elevation of the
+  time is its picture of today, as it is through the Quaternary before the glacial cycles, the ground is today's as
+  surveyed; and further back it is today's ground, raised or lowered by as much as the elevation's grids say the
+  land has risen or sunk since. How much of today's shape stood is a rule: all of it through the Quaternary, and none
+  before the Pliocene, falling evenly between. Within the outline of a range whose record says when it stood at about
+  its present height, all of its shape is carried back to then, and before that as much as an even rise from the
+  start of its growth gives; where its record gives no start, it is let go over as long as the rule takes to let go
+  of any ground. The place's own plate carries it. The ground of another plate keeps its shape only as far as that
+  plate has not moved against the place's own since the elevation's keyframe, and has none once it has moved a node
+  of the relief's grid. Where the shape stops, its hills and valleys stop, and what today's ground stands above the
+  elevation's picture of today by on the whole falls away over the elevation's own grain, so that no step is left
+  along the line. Where the elevation has the land lower than today, today's valleys would lie under its sea;
+  but a valley is cut no lower than the sea it drains to. So ground that is dry today is held above the coast
+  wherever the elevation of the time has land, a little above it and no higher than it stands today: a scene does
+  this as it lays the shape over its elevation (gen:life/scene). The rest of a scene's relief is what its generator
+  invents. The model knows nothing of how any landscape changed: it has no erosion, no ice, no faults and no
+  volcanoes, only when each range stood, and what the elevation's grids say of the height of the land.
+author: machine:claude-code
+code: core/relief.ts
+inputs:
+  - { ref: field:earth/elevation, note: "the land of each time, on a grid of a degree: how high it stood, and by its keyframe of the present what it makes of today" }
+  - { ref: field:earth/relief, note: "today's ground, on its grid and in its survey's cells below it" }
+  - { ref: src:paleomap-plate-model, note: "where each place of today's Earth stood, how far its plate has turned since, and how far two plates have moved against each other" }
+  - { kind: landform/mountain-range, note: "the ranges, with the phase in which each stands at about its present height" }
+  - { prop: extent, note: "the ground a range's record speaks for, as an outline on today's Earth" }
+  - { prop: start_before, note: "by when a range stood: a height like today's, measured at a dated time" }
+  - { prop: start, note: "when a range stood, where a source dates it, and when its growth began" }
+  - { rel: caused-by, note: "what raised a range, before which it had not begun to grow" }
+outputs: [field:earth/relief-carried]
+params:
+  held_through:
+    follows: ics/quaternary#ics-start
+    note: >-
+      All of today's shape is held back to the start of the Quaternary. That it is held so far is a choice: the
+      Quaternary is the span in which today's valleys were cut and its ice ages ran, and no source read says how like
+      today's the ground of any place was at its start.
+  gone_before:
+    follows: ics/pliocene#ics-start
+    note: >-
+      None of today's shape is held before the start of the Pliocene, and between that and the start of the
+      Quaternary it falls evenly. A choice, as the other end is: it is where the elevation's next grid before today's
+      stands, and a range's record may say more.
+  other_plates:
+    choice: >-
+      How far a plate other than the place's own may have moved against it since the elevation's keyframe, in nodes
+      of the relief's grid, before its ground has none of its shape: it keeps all of it where it has not moved, and
+      evenly less to that distance. Ground that has moved further lies where this model cannot say. At the
+      elevation's keyframe of the present no plate has moved, and every plate's ground has its shape.
+  valley_floor:
+    choice: >-
+      The least height above the coast at which ground that is dry today is held where the elevation of the time has
+      land, as a share of the height that elevation gives the land there; it is held no higher than it stands today.
+      A fiftieth: enough that such ground is land and falls toward the sea as the land about it does, and no more.
+      Nothing measured says how high the floor of any valley stood.
+  standing_phase:
+    choice: >-
+      A range's record has a phase named `standing`, in which it stands at about its present height. Its start is read
+      at the latest time the evidence allows: the younger end of a date for the range's coming to that height, or the
+      time of the oldest measurement that shows it standing so, whichever is the earlier. So today's shape is carried
+      back no further than the evidence shows the range standing, and not to the middle of a window in which it may
+      still have been rising.
+uncertainty:
+  kind: none
+  note: >-
+    One shape at each place and time, with nothing to say how sure it is. A range's record often gives a height at one
+    basin or one summit, with an uncertainty of several hundred metres or more, and competing claims of when it stood:
+    the model follows the claim the default picture shows and draws all of the range within its outline alike.
+disagrees:
+  - with: earth/orogens/himalaya
+    note: >-
+      The record has the range at about its present height since the end of the Early Miocene, by heights measured
+      near Mount Everest and in the Thakkhola graben. The model keeps the level of the elevation it lays today's shape
+      on, so that a scene stands where the globe, the climate and the rivers of its time have the land; and that
+      elevation does not hold the range at today's height. Within 50 km of Mount Everest its grid of 10 Ma stands
+      about a kilometre above its own picture of today and its grid of 5 Ma some seven hundred metres below it, and
+      round Annapurna its grid of 15 Ma stands a kilometre and a half above. The model's ground follows: summits that
+      the survey's cells have near 7,900 m today come out near 8,800 m at 10 Ma and near 7,100 m at 5 Ma, and those
+      round Annapurna, near 7,300 m today, near 9,400 m at 15 Ma. `npm run world -- relief <lat> <lon> <time>` prints
+      what it gives a place.
+  - with: earth/orogens/alps
+    note: >-
+      The record has the range at about its present height by 20 Ma. The elevation the model stands on has the
+      western Alps lower than today through all that time: within 50 km of the ground between Mont Blanc and Monte
+      Rosa, by about a kilometre at its grids of 5 and 10 Ma and a kilometre and a half at those of 15 and 20 Ma. So
+      the model draws the range's own crests and valleys, as much lower.
+  - with: earth/orogens/front-range
+    note: >-
+      The record has the range at about its present height by 35 Ma. The elevation the model stands on has it lower
+      than today at every grid since: within 50 km of Longs Peak by a kilometre or more at those of 10, 15, 20, 25
+      and 35 Ma, and by a few hundred metres at those of 5 and 30 Ma. The model's ground is as much lower, and rises
+      and falls with the grids.
+  - with: earth/orogens/altiplano
+    note: >-
+      The model takes a range to have risen evenly from the start of its growth to the time it stood. The
+      Altiplano's record counts its growth from when its ground left the sea, at the end of the Mesozoic, and has it
+      a low basin for long after, its great rise coming between 10.3 and 6.8 Ma. So in the Paleogene and the early
+      Miocene the model gives the plateau a share of today's shape that its sources do not.
+checks:
+  - { test: core/relief.test.ts, holds: "holds all of today's shape through the Quaternary, lets go of it evenly to the Pliocene, and keeps none before" }
+  - { test: core/relief.test.ts, holds: "carries a range's shape back to when its record says it stood, and before that as far as it had risen" }
+  - { test: core/relief.test.ts, holds: "takes what the elevation makes of today out of today's ground: laid back over that, it is today's ground" }
+  - { test: core/relief.test.ts, holds: "gives ground on another plate its shape only as far as that plate has not moved against the scene's own" }
+  - { test: core/relief.test.ts, holds: "finds the latest time a scene reads an elevation at its keyframe of the present" }
+  - { test: core/relief.test.ts, holds: "leaves no trench where the outlines of two ranges that both stood do not quite meet" }
+  - { test: world/generators/life/relief.test.ts, holds: "holds ground that is dry today above the coast where the elevation of its time has land, and no higher than it stands today" }
+  - { test: tools/world/test/build.test.ts, holds: "keeps today's valleys out of the sea where the elevation of the time has the land lower than today: the Alps in the Miocene" }
+  - { test: tools/world/test/build.test.ts, holds: "carries today's ranges back into the early Pleistocene: a scene there has its range's crest, on the elevation of its time" }
+  - { test: tools/world/test/build.test.ts, holds: "carries a range that stood back as far as its record says: the Himalaya's crests in the Miocene, and none of them before the range began" }
+  - { test: tools/world/test/shape.test.ts, holds: "reads the latest time the evidence allows a range to have stood by, and when its growth began from what raised it" }

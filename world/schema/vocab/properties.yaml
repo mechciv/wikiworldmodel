@@ -59,6 +59,15 @@ properties:
       An entity or phase had ended by this time (a terminus ante quem for its end): a resolution that says a state
       has ceased to exist, a traveller who found a city in ruins. It is a bound and not a date: it holds beside
       whatever the end claims say, in every picture, and does not compete with them.
+  start_before:
+    type: time
+    moment: true
+    applies_to: [lasting]
+    description: >-
+      An entity or phase had begun by this time (a terminus ante quem for its start): a first mention, or the beds
+      of a basin that show a range already stood as high as it does now. It is a bound and not a date: it holds
+      beside whatever the start claims say, in every picture, and does not compete with them. Two bounds of one
+      start are competing claims of the bound, as two of anything are, and the one preferred binds.
   earlier_than:
     type: time
     moment: true
@@ -528,10 +537,15 @@ properties:
   extent:
     type: geometry
     interp: step
-    applies_to: [tradition]
+    applies_to: [tradition, landform/mountain-range]
+    # A range's ground may be written in the claim itself, as a territory's may: no dataset read here outlines ranges.
+    inline: true
     description: >-
       Where a tradition is found: the rows of a dataset of regions that its sources place it in, such as the
       ArchaeoGLOBE regions. A region named is a region where the tradition was, not a claim that it covered all of it.
+      Of a mountain range, the ground its record speaks for, as an outline on today's Earth: where the relief of
+      today is carried back for as long as the record says the range stood (model:earth/relief-carried). A range
+      has no agreed edge, and an outline drawn round it says so.
   insulae:
     type: quantity
     unit: blocks
@@ -625,6 +639,14 @@ methods:
   paleomagnetic:
     label: Palaeomagnetism
     description: A latitude or a position read from the magnetization that rocks kept from when they formed.
+  paleoaltimetry:
+    label: Palaeoaltimetry
+    description: >-
+      The height of the ground in the past, read from what it left: the isotopes of old rain and snow in soils,
+      lake beds and minerals, which grow lighter with height; the shapes of fossil leaves and the plants that
+      could not have borne a height's cold, which follow the air's warmth and its thinness; the bubbles of old
+      lavas, or their chemistry, which follows the thickness of the crust they rose through; or the size and
+      spacing of the fans of gravel a range's rivers left at its foot.
   compilation:
     label: Compilation
     description: Read from a database or chart that compiles the literature.

@@ -363,9 +363,69 @@ end. It is not a competing end: it holds in every picture, beside whichever end 
     source: { ref: src:…, loc: "preamble", quote: "…has ceased to exist" }
 ```
 
-A first mention bounds a start in the same way, and a last mention an end from the other side;
-those properties are not yet in the vocabulary, and are added with the first records that need
-them ([a new term](#a-new-term)).
+`start_before` holds the same kind of bound on a start: a first mention, or a measurement that
+shows a thing already there. It is how a range's record says by when it stood
+([a mountain range](#a-mountain-range)). Two bounds of one start or one end are competing claims
+of the bound: rank the tighter `preferred`, and say in its note that the other agrees. A bound
+that is itself disputed is not a bound: write it as a `start` or an `end` with one end left open,
+`{ hi: 28 Ma }`, among the readings it competes with. A last mention bounds an end from the other side; that
+property is not yet in the vocabulary, and is added with the first records that need it
+([a new term](#a-new-term)).
+
+### A mountain range
+
+A range is `kind: landform/mountain-range`, from the start of its growth on. Its record says where it is and by
+when it stood at about the height it has today, in two phases, and a model carries today's relief back for it
+that far (`model:earth/relief-carried`, [SCENES.md](SCENES.md#the-grounds-shape)):
+
+```yaml
+# world/entities/earth/orogens/himalaya.yaml
+phases:
+  - id: rising
+    label: Rising
+  - id: standing
+    label: At about its present height
+claims:
+  extent:
+    prop: extent
+    value:
+      type: Polygon
+      frame: frame:earth/present-day
+      coordinates:
+        - [[73.5, 35.8], [76.5, 34.6], …, [73.5, 35.8]]
+    unsourced: >-
+      An outline drawn loosely round the range on today's relief, …, to say which ground its record speaks for.
+      The range has no agreed edge.
+    method: editorial
+    basis: reconstruction
+  standing-start-before-gebelin-2013:
+    prop: start_before
+    subject: "@standing"
+    value: { ref: ics/burdigalian, edge: end }
+    source: { ref: src:gebelin-2013-everest, loc: abstract, quote: "…" }
+    method: paleoaltimetry
+    note: What was measured and where, the height the source gives, and how its date is written here.
+```
+
+- **A height like today's, measured at a dated time, is a bound:** the range stood so by then, and may have
+  long before. Write it as `start_before` of the phase `@standing`. Where a source dates the range's coming to
+  its height, that is a `start` of the phase, as a value or a range. Both may stand together: a bound holds
+  beside the date.
+- **The claim's value is only the time.** The note says what was measured (the isotopes of old rain in a
+  basin's beds, the shapes of fossil leaves), where in the range, and the height the source gives with its
+  uncertainty. `method: paleoaltimetry` where a height was read so.
+- **The model reads the latest time the evidence allows** the standing to have begun: the younger end of a
+  dated window, or the oldest measurement that shows the range standing, whichever is the earlier. It carries
+  today's shape back no further. It reads the time and not the height: the range is drawn with today's crests
+  and valleys on the elevation of each time, which may have the land there higher or lower than today.
+- **Where sources disagree about when a range stood,** as they do for the Tibetan Plateau, write competing
+  claims of the phase's `start`, one `rank: preferred` with a note saying why
+  ([competing claims](#competing-claims)): a window where a source dates the rise, `{ hi: 35 Ma }` where one
+  shows it high by a time that others dispute, `{ lo: 25 Ma }` where one shows it not yet high.
+- **When its growth began** is the range's own `start`, or follows from what raised it: a `caused-by` relation
+  to the event's record. Before the range stood, the model takes it to have risen evenly from then.
+- **The outline** is an area written in the claim, [lon, lat] on today's Earth, its ring closed: drawn round
+  the high ground the record's evidence speaks for, and no wider. It is editorial, and says so.
 
 ### A state that gave way little by little
 

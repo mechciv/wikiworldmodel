@@ -1,0 +1,38 @@
+id: src:su-2019-no-high-tibet
+type: publication
+kind: measurement
+citation: >-
+  Su, T., Farnsworth, A., Spicer, R.A., Huang, J., Wu, F.-X., Liu, J., Li, S.-F., Xing, Y.-W.,
+  Huang, Y.-J., Deng, W.-Y.-D., Tang, H., Xu, C.-L., Zhao, F., Srivastava, G., Valdes, P.J.,
+  Deng, T. & Zhou, Z.-K. (2019). No high Tibetan Plateau until the Neogene. Science Advances 5(3),
+  eaav2189.
+authors:
+  - "Su, T."
+  - "Farnsworth, A."
+  - "Spicer, R.A."
+  - "Huang, J."
+  - "Wu, F.-X."
+  - "Liu, J."
+  - "Li, S.-F."
+  - "Xing, Y.-W."
+  - "Huang, Y.-J."
+  - "Deng, W.-Y.-D."
+  - "Tang, H."
+  - "Xu, C.-L."
+  - "Zhao, F."
+  - "Srivastava, G."
+  - "Valdes, P.J."
+  - "Deng, T."
+  - "Zhou, Z.-K."
+published: 2019
+title: No high Tibetan Plateau until the Neogene
+container: Science Advances 5(3), eaav2189
+doi: 10.1126/sciadv.aav2189
+license: CC-BY-NC-4.0
+verified:
+  by: machine:claude-code
+  how: >-
+    Abstract and full text read on 22 November 2026 in the article's XML from Europe PMC's
+    full-text service (PMC6402856), turned to plain text by script; citation from Crossref. The
+    supplementary materials were not read. The article has no page numbers, so locators name the
+    section.

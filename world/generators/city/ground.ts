@@ -8,8 +8,10 @@ export interface GroundGridData {
   x0: number;
   y0: number;
   cell: number;
-  /** heights, row 0 at the south: in metres (Float32) or decimetres (Int16) */
+  /** heights, row 0 at the south: in metres (Float32), or in whole steps (Int16) of `unit` metres above `base`: decimetres above nought where they are not said */
   z: Float32Array | Int16Array;
+  unit?: number;
+  base?: number;
 }
 
 const smooth = (t: number) => {
@@ -22,8 +24,10 @@ export const EASE_CELLS = 32;
 
 export class GroundSampler {
   private scale: number[];
+  private base: number[];
   constructor(readonly levels: GroundGridData[]) {
-    this.scale = levels.map((g) => (g.z instanceof Int16Array ? 0.1 : 1));
+    this.scale = levels.map((g) => (g.z instanceof Int16Array ? g.unit ?? 0.1 : 1));
+    this.base = levels.map((g) => (g.z instanceof Int16Array ? g.base ?? 0 : 0));
   }
 
   private read(k: number, x: number, y: number): number {
@@ -37,7 +41,7 @@ export class GroundSampler {
     const u = cx - i;
     const v = cy - j;
     const at = j * g.nx + i;
-    return (g.z[at] * (1 - u) * (1 - v) + g.z[at + 1] * u * (1 - v) + g.z[at + g.nx] * (1 - u) * v + g.z[at + g.nx + 1] * u * v) * this.scale[k];
+    return (g.z[at] * (1 - u) * (1 - v) + g.z[at + 1] * u * (1 - v) + g.z[at + g.nx] * (1 - u) * v + g.z[at + g.nx + 1] * u * v) * this.scale[k] + this.base[k];
   }
 
   /** How far a point is inside a grid, as a share of the easing: 0 at its edge or outside, 1 well inside. */
