@@ -56,7 +56,7 @@ import { drawRiver, meet, type Oxbow, type RiverChoices, type RiverPath } from '
 import { meanBears, type Bears } from '../sorting.ts';
 
 export const GENERATOR = 'gen:life/scene';
-export const VERSION = 13;
+export const VERSION = 14;
 
 /** The side of a cell of the ground, in metres. */
 export const CELL = 400;

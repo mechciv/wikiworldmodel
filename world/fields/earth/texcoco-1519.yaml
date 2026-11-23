@@ -1,0 +1,27 @@
+id: field:earth/texcoco-1519
+type: field
+title: Lake Texcoco in 1519
+description: >-
+  The waters of the Basin of Mexico at the Spanish arrival, from IPDP's reconstruction. Openings in the mapped
+  water include the island of Tenochtitlan. The map gives the shoreline for one year. Street canals and house plots
+  are generated from the city's records. For the scene, the median height of the modern relief sampled around the
+  mapped banks supplies an approximate surface. Water depth is generated.
+grid: { kind: rows }
+kind: areas
+refines: field:earth/lakes
+frame: frame:earth/present-day
+time: { lo: 1519 CE, hi: 1520 CE }
+data: { from: src:ipdp-texcoco-1519 }
+basis: reconstruction
+spread: unknown
+layer:
+  thin: 0.00015
+  color: { value: "#327a95" }
+  opacity: 1
+  width: 0.7
+  describe: Lake shoreline reconstructed by IPDP for 1519
+rows:
+  kind: landform
+  key: "{ID}"
+  claims:
+    name: { column: Nombre, as: text, method: compilation, basis: reconstruction }

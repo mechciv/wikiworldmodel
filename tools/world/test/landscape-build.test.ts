@@ -9,6 +9,10 @@ import { decodeTile } from '../../../core/container.ts';
 import { anthromeTile, citiesAround, cityGuess, classAtStep, cellOf, nameAt, nearestStep, scenePeople, tileKey, type AnthromeTile, type AnthromeTileHeader, type AssessmentsFile, type CitiesFile, type LandscapeIndex, type TraditionsFile } from '../../../core/landscape.ts';
 import { cellAt, stepsAround, type PeopleFile, type PeopleHeader } from '../../../core/layers.ts';
 import type { CoverageFile } from '../../../core/records.ts';
+import { mappedLake, shoresNear } from '../../../core/shorelines.ts';
+import type { LayerBin } from '../../../core/fieldlayers.ts';
+import { LakeMap } from '../../../world/generators/life/lakes.ts';
+import { WATER_REACH } from '../../../world/generators/life/water.ts';
 import type { SceneSpec } from '../../../core/scene.ts';
 import type { Tileset } from '../../../core/tileset.ts';
 import { makeSettlement } from '../../../world/generators/people/settlement/v6.ts';
@@ -146,6 +150,25 @@ describe('the human landscape, built', () => {
     const near = citiesAround(cities, t.lat, t.lon, 1519.5, index.reach_km, cityGuess(index.generator!.params));
     expect(near[0]).toMatchObject({ name: 'Tenochtitlan', record: 'people/cities/tenochtitlan', from: 'record' });
     expect(near[0].also.length).toBeGreaterThan(0);
+  });
+
+  it('puts the recorded city point on an island in the mapped lake for 1519', () => {
+    const at = json<CitiesFile>(index.cities).records!.find(r => r.id === 'people/cities/tenochtitlan')!;
+    const info = json<Tileset>('tileset.json').rivers!;
+    const mapped = info.mappedShores!;
+    const shores = shoresNear(mapped, 1519.5, at, WATER_REACH);
+    expect(shores).toHaveLength(1);
+    for (const t of [1518.99, 1520, 2020]) expect(shoresNear(mapped, t, at, WATER_REACH)).toHaveLength(0);
+    expect(shoresNear(mapped, 1519.5, { lat: 0, lon: 0 }, WATER_REACH)).toHaveLength(0);
+    const shore = shores[0];
+    const row = json<LayerBin>(shore.file).rows.find(r => r.row === shore.row)!;
+    expect(row.label).toBe('Lago de Texcoco 1519');
+    const lake = mappedLake(shore, row, at, 0);
+    const choices = { wander: 1800, scale: 4200, slope: 0.012, deepest: 18, rise: 2.5, band: 400 };
+    const map = new LakeMap([lake], choices, 77);
+    expect(map.signed(0, 0)).toBeLessThan(0);
+    expect(map.signed(2700, 0)).toBeGreaterThan(0);
+    expect(map.ground(2700, 0, lake.level + 5)).toBeLessThan(lake.level);
   });
 
   it('puts the city of the lists in a scene of it: Uruk in 3000 BCE, which HYDE does not have', () => {

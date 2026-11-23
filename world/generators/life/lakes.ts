@@ -6,7 +6,7 @@ import type { SceneLake } from '../../../core/scene.ts';
 import { fbm } from './land.ts';
 import type { GridSpec } from './land.ts';
 
-/** How the generator draws a lake's shore and bed: its parameters' meaning is in LivingParams['lakes'] (scene/v13.ts). */
+/** How the generator draws a lake's shore and bed: its parameters' meaning is in LivingParams['lakes'] (scene/v14.ts). */
 export interface LakeChoices {
   wander: number;
   scale: number;
@@ -35,6 +35,27 @@ export class LakeMap {
     // Which lake covers each node, if any: a node lies in a cell where it is within its half widths of the cell's middle.
     const of = new Int16Array(n).fill(-1);
     lakes.forEach((l, li) => {
+      if (l.rings) {
+        // Fill the water spans on each scanline. Crossing a nested ring leaves the island dry.
+        const crossings: number[][] = Array.from({ length: ny }, () => []);
+        for (const ring of l.rings) {
+          for (let k = 2; k < ring.length; k += 2) {
+            const ax = ring[k - 2], ay = ring[k - 1], bx = ring[k], by = ring[k + 1];
+            const start = Math.max(0, Math.ceil((Math.min(ay, by) - y0) / cell));
+            const end = Math.min(ny, Math.ceil((Math.max(ay, by) - y0) / cell));
+            for (let j = start; j < end; j++) crossings[j].push(ax + (y0 + j * cell - ay) * (bx - ax) / (by - ay));
+          }
+        }
+        crossings.forEach((xs, j) => {
+          xs.sort((a, b) => a - b);
+          for (let k = 0; k + 1 < xs.length; k += 2) {
+            const first = Math.max(0, Math.min(nx, Math.ceil((xs[k] - x0) / cell)));
+            const end = Math.max(0, Math.min(nx, Math.ceil((xs[k + 1] - x0) / cell)));
+            of.fill(li, j * nx + first, j * nx + end);
+          }
+        });
+        return;
+      }
       for (let k = 0; k + 1 < l.cells.length; k += 2) {
         const cx = l.cells[k];
         const cy = l.cells[k + 1];
@@ -111,6 +132,9 @@ export class LakeMap {
     const k = j * nx + i;
     const a = this.inside;
     const s = (a[k] * (1 - u) + a[k + 1] * u) * (1 - v) + (a[k + nx] * (1 - u) + a[k + nx + 1] * u) * v;
+    // The mapped shoreline already resolves islands. Only a drainage-grid shore wanders.
+    const nearest = this.which[Math.round(fy) * nx + Math.round(fx)];
+    if (this.lakes[nearest]?.rings) return s;
     if (s < -this.c.wander * 2 - this.c.band) return s;
     // The shore off the drainage's grid: a wander of a few turns, the larger the coarser.
     return s + this.c.wander * (fbm(x / this.c.scale, y / this.c.scale, this.seed + 91) - 0.5) * 2.6;

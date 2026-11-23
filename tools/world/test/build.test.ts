@@ -174,6 +174,7 @@ describe('build', () => {
       'src:hyde-3.2.1-population-grid',
       'src:hyde-3.2.1-world-land-use',
       'src:hyde-3.2.1-world-population',
+      'src:ipdp-texcoco-1519',
       'src:itinere-2024',
       'src:jouzel-2007-epica-dome-c',
       'src:li-2022-phanerozoic-climate',

@@ -428,6 +428,15 @@ Gowan, E.J. (2019). Global ice sheet reconstruction for the past 80000 years [da
 - From: <https://doi.org/10.1594/PANGAEA.905800>
 - Source id: `src:paleomist-1.0`
 
+### Lago de Texcoco 1519
+
+Instituto de Planeación Democrática y Prospectiva. Lago de Texcoco 1519. Portal de Datos Abiertos de la Ciudad de México.
+
+- Licence: CC-BY-4.0. The resource page lists Creative Commons Attribution 4.0.
+- Credit: Instituto de Planeación Democrática y Prospectiva, Ciudad de México
+- From: <https://datos.cdmx.gob.mx/dataset/lago-de-texcoco-1519/resource/5f5de1e3-e530-460d-9829-0f1c61099b7e>
+- Source id: `src:ipdp-texcoco-1519`
+
 ## Databases the records cite
 
 Records cite entries in these databases for facts, with short quotes as evidence. Nothing is imported

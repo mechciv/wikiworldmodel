@@ -3,6 +3,7 @@
 // its overlays, and written as time-binned files of rows ready to draw: each with its address, its time, its place or
 // its lines, its group and what the panel says of it. How it looks is the style's, read by one renderer in the viewer.
 import { byValue, type LayerBin, type LayerInfo, type LayerRow, type LayerStyle } from '../../../../core/fieldlayers.ts';
+import type { MappedShore } from '../../../../core/shorelines.ts';
 import { rowRef } from '../../../../core/refs.ts';
 import { parsePoint, parseTime, type TimePointInput } from '../../../../core/time.ts';
 import type { ClaimIndex } from '../claimindex.ts';
@@ -15,12 +16,14 @@ import { sourceRecord } from './records.ts';
 /** How many rows a file holds at most: a time loads the files that cover it. */
 export const BIN_ROWS = 4000;
 
-const hundredths = (x: number) => Math.round(x * 100);
-
 /** A row's geometry as flat lines of hundredths of a degree: a line's points, or an area's rings. */
 export function geometryLines(geometry: unknown, crs: LayerStyle['crs'], tolerance = 0): number[][] {
   const g = geometry as { type?: string; coordinates?: unknown } | null;
   if (!g?.type) return [];
+  // Lines keep their compact integer encoding. An area can contain an island or channel narrower
+  // than that grid, so keep its fractional hundredths until any thinning requested by the field.
+  const area = g.type === 'Polygon' || g.type === 'MultiPolygon';
+  const hundredths = (degree: number) => area ? degree * 100 : Math.round(degree * 100);
   const lists: number[][][] =
     g.type === 'LineString' ? [g.coordinates as number[][]] : g.type === 'MultiLineString' || g.type === 'Polygon' ? (g.coordinates as number[][][]) : g.type === 'MultiPolygon' ? (g.coordinates as number[][][][]).flat() : [];
   const out: number[][] = [];
@@ -33,7 +36,9 @@ export function geometryLines(geometry: unknown, crs: LayerStyle['crs'], toleran
       if (flat.length >= 2 && flat[flat.length - 2] === x && flat[flat.length - 1] === y) continue;
       flat.push(x, y);
     }
-    const kept = tolerance > 0 ? thin(flat, tolerance * 100) : flat;
+    const thinned = tolerance > 0 ? thin(flat, tolerance * 100) : flat;
+    // A small island still separates land from water even if all its vertices fit within the tolerance.
+    const kept = area && thinned.length < 8 ? flat : thinned;
     if (kept.length >= 4 && !(kept.length === 4 && kept[0] === kept[2] && kept[1] === kept[3])) out.push(kept);
   }
   return out;
@@ -132,4 +137,37 @@ export async function fieldLayers(world: World, claims: ClaimIndex): Promise<{ i
     });
   }
   return { infos, files };
+}
+
+/** The dated water rows a scene can use, referring back to the globe's files. */
+export function mappedShores(world: World, layers: Awaited<ReturnType<typeof fieldLayers>>, lakesField: string, height: (lat: number, lon: number) => number) {
+  const shores: MappedShore[] = [];
+  const rows = new Map<string, LayerRow>();
+  const fields = new Set(world.fields.filter(f => f.refines === lakesField && f.kind === 'areas').map(f => f.id));
+  for (const info of layers.infos.filter(layer => fields.has(layer.field))) {
+    for (const bin of info.bins) {
+      const part: LayerBin = JSON.parse(layers.files.get(bin.file)!);
+      for (const row of part.rows) {
+        const box: MappedShore['box'] = [Infinity, Infinity, -Infinity, -Infinity];
+        const heights: number[] = [];
+        for (const ring of row.lines ?? []) {
+          for (let i = 0; i + 3 < ring.length; i += 2) {
+            const lon = ring[i] / 100, lat = ring[i + 1] / 100;
+            box[0] = Math.min(box[0], lon);
+            box[1] = Math.min(box[1], lat);
+            box[2] = Math.max(box[2], lon);
+            box[3] = Math.max(box[3], lat);
+            heights.push(height(lat, lon));
+          }
+        }
+        if (!heights.length) continue;
+        heights.sort((a, b) => a - b);
+        const middle = Math.floor(heights.length / 2);
+        const level = (heights[middle] + heights[Math.floor((heights.length - 1) / 2)]) / 2;
+        shores.push({ field: info.field, file: bin.file, row: row.row, span: [row.from, row.to], box, level });
+        rows.set(row.row, row);
+      }
+    }
+  }
+  return { shores, rows };
 }

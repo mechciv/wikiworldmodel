@@ -23,7 +23,7 @@ import { Rivers } from '../rivers.ts';
 import { MonthTiles } from '../months.ts';
 import { monthsPlace, placeMonths } from '../../../world/generators/life/climate.ts';
 import type { SceneWater } from '../../../core/scene.ts';
-import { sceneWater } from '../../../world/generators/life/water.ts';
+import { sceneWater, WATER_REACH } from '../../../world/generators/life/water.ts';
 
 interface LoadedField {
   /** the field its tile carries */
@@ -611,7 +611,7 @@ export class LifeAtlas {
     const net = this.rivers.net(set);
     const key = this.rivers.key(set, ageMa);
     if (!net || !key) return undefined;
-    const observed = set.today && info.observed ? await this.rivers.observedNear(at.lat, at.lon) : [];
-    return sceneWater(info, set, net, key, observed, at, isoline);
+    const [observed, mapped] = await Promise.all([set.today && info.observed ? this.rivers.observedNear(at.lat, at.lon) : [], this.rivers.mappedNear(t, at, isoline)]);
+    return sceneWater(info, set, net, key, observed, at, isoline, WATER_REACH, mapped);
   }
 }
