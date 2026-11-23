@@ -102,6 +102,7 @@ export const tileKey = (lon: number, lat: number, step: number) => `${Math.floor
 
 /** The rivers and lakes, as the tile set lists them. */
 export interface RiversInfo {
+  mappedShores?: import('./shorelines.ts').MappedShore[];
   field: string;
   title: string;
   description?: string;

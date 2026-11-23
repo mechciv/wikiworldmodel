@@ -9,7 +9,7 @@ import { MAT, Mesh, meshParts } from '../city/kit.ts';
 import { hash2, hashString, TAU } from '../city/math.ts';
 import { clumpWidth, drawAnimal, drawClump, drawPlant, POSE, STRIDE_HIPS, type Detail, type Stance } from './forms.ts';
 import { ROUTE, WAY } from './routines.ts';
-import { banksOf, CELL, CELLS, cellParts, cellKey, coverMask, EXTENT, groundGrids, LandCover, makePlan, placeLook, waterLevels, waterRibbons, waterSheet, watersFor, worldGround, type CellRows, type LivingParams, type LivingPlan, type PlaceLook } from './scene/v13.ts';
+import { banksOf, CELL, CELLS, cellParts, cellKey, coverMask, EXTENT, groundGrids, LandCover, makePlan, placeLook, waterLevels, waterRibbons, waterSheet, watersFor, worldGround, type CellRows, type LivingParams, type LivingPlan, type PlaceLook } from './scene/v14.ts';
 import type { WorldGround } from './relief.ts';
 import { freshOf, noise, type Waters } from './land.ts';
 import { GroundSort } from './sorting.ts';
@@ -334,7 +334,7 @@ export class SceneStream {
     const levelAt = waters.paths ? waterLevels(waters) : undefined;
     // The people, where the scene has any: their houses and fields, on this ground and away from this water. Where they
     // cleared the land no tree stands. A scene of the sea has them too, on whatever ground stands above its water: a place
-    // a few metres above the sea, a delta or a lower plain, is a scene of the sea (scene/v13.ts, sea_below), and among the
+    // a few metres above the sea, a delta or a lower plain, is a scene of the sea (scene/v14.ts, sea_below), and among the
     // most crowded land there was.
     let clearing: ((x: number, y: number) => number) | undefined;
     if (spec.people) {

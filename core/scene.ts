@@ -155,20 +155,25 @@ export interface ChannelLaws {
 }
 
 /**
- * A lake as the world gives a scene (field:earth/lakes): the cells of the drainage's grid it covers, in the scene's
- * metres, and its level. Its shore below a cell is the scene's to invent.
+ * A lake in scene metres. A drainage-grid lake gives its cells; a mapped lake gives its shore and island rings.
  */
-export interface SceneLake {
-  /** what names it: its set, and the first node it covers */
+export type SceneLake = {
+  /** Its drainage set and first node, or the address of its mapped row. */
   key: string;
   /** its surface, m above the coast */
   level: number;
   /** whether it spills over its pass, or holds only what its surface does not evaporate */
-  spills: boolean;
+  spills?: boolean;
+} & ({
+  rings?: undefined;
   /** the middles of the cells it covers, flat [x, y, …], and each cell's half width east and north, m */
   cells: number[];
   half: [number, number];
-}
+} | {
+  /** Reconstructed shoreline, including islands, as closed rings in scene metres. */
+  rings: number[][];
+  field: string;
+});
 
 /** The water the world gives a place: its rivers, the laws their channels are drawn by, and what they rest on. */
 export interface SceneWater {

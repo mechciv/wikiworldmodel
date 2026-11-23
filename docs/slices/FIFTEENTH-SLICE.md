@@ -356,7 +356,24 @@ All of it here, in the session that made it.
 - **Sides of a war**, and a competing start that carries its parts with it: what the Second World War probe will ask
   for too.
 - **The lists' rows as claims**, so that a city's record can say which estimate the landscape draws.
-- **The lakes of the Basin of Mexico**, from a source for their shores in 1519, so that the city stands in water among
-  its chinampas.
+- **The changing lake** before and after the [1519 shoreline](#the-1519-shoreline), where other dated maps can fix its banks.
 - **The borders of the Basin**, reported to the dataset's makers, with what the sources read here say.
 - **A scene's animals at a historical time**: only taxa whose records reach the time shown.
+
+### The 1519 shoreline
+
+IPDP's *Lago de Texcoco 1519* supplies a dated reconstruction of water across the Basin of Mexico.
+The original GeoJSON is pinned in the manifest. Its companion dictionary identifies two attributes,
+the feature's ID and name. Island, canal and neighborhood names cannot be read from those attributes.
+The city record supplies a separate check on the map: its Templo Mayor point falls on land enclosed by water.
+
+The globe draws the shoreline as an area layer during 1519. Version 13 of the living scene reads the
+same rings into its 100 m water grid. Interior rings leave land for settlements, and the mapped
+banks receive no procedural displacement. The scene estimates a water level from the median modern
+relief at the shoreline vertices. This gives the water and the generated ground a common height.
+The source gives neither a historical water level nor a depth. Narrow channels and islets can be
+smaller than the ground grid, and the city generator still lays out individual streets and houses.
+
+The landscape build test checks the dated row, the city point inside its island, and open water to
+its east. It also checks the time and place limits. The landscape browser test checks that a visit
+to the city in 1519 receives both its canal street plan and the mapped lake.

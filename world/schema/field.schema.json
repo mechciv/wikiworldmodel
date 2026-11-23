@@ -14,7 +14,7 @@
     "unit": { "type": "string" },
     "datum": { "type": "string" },
     "frame": { "$ref": "defs.json#/$defs/ref" },
-    "refines": { "$ref": "defs.json#/$defs/ref", "description": "For a series: the series of the same quantity that this one is finer than, over part of its span. Where both have a value, the panel shows this one" },
+    "refines": { "$ref": "defs.json#/$defs/ref", "description": "The coarser field this one refines. A series can supply a finer value over part of its span; mapped lake areas refine the modeled lakes at their place and time." },
     "grid": {
       "oneOf": [
         {

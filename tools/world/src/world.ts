@@ -166,7 +166,7 @@ export interface Field {
   /** a grid on a frame, or a series: one value for the whole planet at each time */
   grid?: { kind: 'lonlat'; res_deg: number } | { kind: 'series' } | { kind: 'rows' };
   time?: { lo: TimeInput; hi: TimeInput; step?: string };
-  /** for a series: the series of the same quantity that this one is finer than, over part of its span */
+  /** the coarser field this one refines over part of its span or area */
   refines?: string;
   data?: {
     from: string;

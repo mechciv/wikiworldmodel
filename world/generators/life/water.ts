@@ -37,7 +37,7 @@ export function keyFile(set: RiversSet, ageMa: number): { file: string; i: numbe
  * on today's ground, and the drainage's reaches where Landsat saw none. A reach most of whose course here runs within
  * a few km of a river Landsat saw is that river, drawn coarsely, and is left out.
  */
-export function sceneWater(info: RiversInfo, set: RiversSet, net: RiverNet, key: RiverKey, observedTiles: RiverWidths[], at: { lat: number; lon: number }, isoline: number, reach = WATER_REACH): SceneWater {
+export function sceneWater(info: RiversInfo, set: RiversSet, net: RiverNet, key: RiverKey, observedTiles: RiverWidths[], at: { lat: number; lon: number }, isoline: number, reach = WATER_REACH, mapped: SceneLake[] = []): SceneWater {
   const ky = (6371000 * Math.PI) / 180;
   const kx = ky * Math.cos((at.lat * Math.PI) / 180);
   const local = (la: number, lo: number): [number, number] => [(((lo - at.lon + 540) % 360) - 180) * kx, (la - at.lat) * ky];
@@ -120,7 +120,8 @@ export function sceneWater(info: RiversInfo, set: RiversSet, net: RiverNet, key:
     if (!close) continue;
     lakes.push({ key: `${set.network}#lake:${key.lakeNodes[key.lakeStart[l]]}`, level: Math.round((key.lakeLevel[l] - isoline) * 10) / 10, spills: key.lakeSpills[l] === 1, cells, half: [Math.round(half[0]), Math.round(half[1])] });
   }
-  return { ...(lakes.length ? { lakes } : {}), rivers, laws: info.params as unknown as ChannelLaws, tier: observed ? 'evidence' : 'model', from: [...(observed && info.observed ? [info.observed.field] : []), info.field, ...(lakes.length && info.lakes ? [info.lakes.field] : [])] };
+  const mappedFields = [...new Set(mapped.flatMap(lake => lake.rings ? [lake.field] : []))];
+  return { ...(lakes.length || mapped.length ? { lakes: [...lakes, ...mapped] } : {}), rivers, laws: info.params as unknown as ChannelLaws, tier: observed ? 'evidence' : 'model', from: [...(observed && info.observed ? [info.observed.field] : []), info.field, ...(lakes.length && info.lakes ? [info.lakes.field] : []), ...mappedFields] };
 }
 
 /**

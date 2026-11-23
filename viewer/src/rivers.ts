@@ -3,12 +3,15 @@
 // the globe's layer and a scene read them from here, so each file comes once.
 import { decodeTile } from '../../core/container.ts';
 import { RiverNet, riverKeys, riverWidths, tileKey, type RiverKey, type RiversKeysHeader, type RiversNetworkHeader, type RiversSet, type RiverWidths, type RiverWidthsHeader } from '../../core/rivers.ts';
-import { getBytes, type Build } from './data.ts';
-import { keyFile, observedFiles } from '../../world/generators/life/water.ts';
+import { mappedLake, shoresNear } from '../../core/shorelines.ts';
+import type { LayerBin } from '../../core/fieldlayers.ts';
+import { getJSON, getBytes, type Build } from './data.ts';
+import { keyFile, observedFiles, WATER_REACH } from '../../world/generators/life/water.ts';
 
 export class Rivers {
   private nets = new Map<string, RiverNet>();
   private keys = new Map<string, RiverKey[]>();
+  private shoreBins = new Map<string, Promise<LayerBin>>();
   private widths = new Map<string, RiverWidths>();
   private loading = new Map<string, Promise<void>>();
 
@@ -66,6 +69,23 @@ export class Rivers {
       return undefined;
     }
     return ks[best.i];
+  }
+
+  async mappedNear(t: number, at: { lat: number; lon: number }, isoline: number) {
+    const refs = shoresNear(this.info?.mappedShores ?? [], t, at, WATER_REACH);
+    return Promise.all(refs.map(async ref => {
+      let bin = this.shoreBins.get(ref.file);
+      if (!bin) {
+        bin = getJSON<LayerBin>(this.build.base + ref.file).catch(err => {
+          this.shoreBins.delete(ref.file);
+          throw err;
+        });
+        this.shoreBins.set(ref.file, bin);
+      }
+      const row = (await bin).rows.find(r => r.row === ref.row);
+      if (!row?.lines) throw new Error(`Missing mapped shoreline ${ref.row} in ${ref.file}`);
+      return mappedLake(ref, row, at, isoline);
+    }));
   }
 
   private widthsOf(file: string): RiverWidths | undefined {

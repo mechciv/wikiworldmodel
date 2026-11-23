@@ -107,6 +107,7 @@ test.describe('the human landscape', () => {
       expect(city.name).toBe('Tenochtitlan');
       expect(city.from).toBe('record');
       expect(city.people).toBeGreaterThanOrEqual(150000);
+      expect((await scene(page))!.water!.lakes.some(l => l.field === 'field:earth/texcoco-1519')).toBe(true);
       // A town has streets, whatever says how they ran; the bar names it.
       expect(city.town).toBeTruthy();
       await expect(page.locator('.life-here')).toContainText('Tenochtitlan');

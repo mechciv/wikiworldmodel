@@ -27,7 +27,7 @@ import { deepRivers, recentRivers, riverFiles, type DrainageParams, type Water }
 import { encodeSegments, grwlSegments, thin, tiles as segmentTiles } from './grwl.ts';
 import { RiverNet, riverKeys, riverWidths, type RiverKey, type RiversInfo, type RiversKeysHeader, type RiversNetworkHeader, type RiversSet, type RiverWidths, type RiverWidthsHeader } from '../../../../core/rivers.ts';
 import type { SceneWater } from '../../../../core/scene.ts';
-import { keyFile, observedFiles, sceneWater } from '../../../../world/generators/life/water.ts';
+import { WATER_REACH, keyFile, observedFiles, sceneWater } from '../../../../world/generators/life/water.ts';
 import { seaLevelAt } from '../../../../core/sealevel.ts';
 import { datasetFile } from '../manifest.ts';
 import { BUILDS, REPO } from '../paths.ts';
@@ -55,7 +55,9 @@ import { prominenceOf, tileFeatures } from './featuretiles.ts';
 import { buildIce, type IceBuilt } from './ice.ts';
 import { hazardLayer, peopleLayer, polityLayer, presentLayer, stateRowKey } from './layers.ts';
 import { buildLandscape, disagreement, farmingAgreement, housing, housingCounts, HOUSING_TIMES, landscapeResolve } from './landscape.ts';
-import { fieldLayers } from './fieldlayers.ts';
+import { mappedLake, shoresNear } from '../../../../core/shorelines.ts';
+import type { LayerRow } from '../../../../core/fieldlayers.ts';
+import { fieldLayers, mappedShores } from './fieldlayers.ts';
 import { buildAtlas } from './atlas.ts';
 import { buildSeaAtlas, type SeaOut, type SeaParams } from './sea.ts';
 import { buildRocks, type NoneWords, type RocksOut, type RocksParams } from './rocks.ts';
@@ -598,6 +600,7 @@ export async function runBuild(args: string[]): Promise<number> {
   // place; and the rule and the ranges' records by which today's shape is carried back before the relief's own times.
   const reliefGrid = grids.find((g) => g.fine);
   let reliefInfo: ReliefInfo | undefined;
+  let reliefHeight: ((lat: number, lon: number) => number) | undefined;
   let shapeAt: PlaceWorld['shape'];
   let plateNow: PlaceWorld['plateNow'];
   if (reliefGrid?.fine) {
@@ -620,6 +623,7 @@ export async function runBuild(args: string[]): Promise<number> {
     const snap = reliefGrid.snapshots[0];
     const { width, height, step } = snap.src!;
     const node = (lat: number, lon: number) => Math.max(0, Math.min(height - 1, Math.round((90 - lat) / step))) * width + ((((Math.round((lon + 180) / step) % width) + width) % width));
+    reliefHeight = between((lat, lon) => snap.elev[node(lat, lon)], step);
     const info = reliefInfo;
     // What the elevation a scene of the deep past stands on makes of today: its keyframe of the present, above its
     // coast. Today's shape is carried back as what today's ground stands above that by.
@@ -857,6 +861,7 @@ export async function runBuild(args: string[]): Promise<number> {
   const nets = new Map<string, RiverNet>();
   const keySets = new Map<string, RiverKey[]>();
   const tilesRead = new Map<string, RiverWidths>();
+  let shoreRows = new Map<string, LayerRow>();
   const waterAt = riversInfo
     ? (t: number, ageMa: number, at: { lat: number; lon: number }, isoline: number): SceneWater | undefined => {
         const info = riversInfo!;
@@ -881,7 +886,8 @@ export async function runBuild(args: string[]): Promise<number> {
                 return tilesRead.get(f)!;
               })
             : [];
-        return sceneWater(info, set, nets.get(set.network)!, keySets.get(kf.file)![kf.i], observed, at, isoline);
+        const localLakes = shoresNear(info.mappedShores ?? [], t, at, WATER_REACH).map(s => mappedLake(s, shoreRows.get(s.row)!, at, isoline));
+        return sceneWater(info, set, nets.get(set.network)!, keySets.get(kf.file)![kf.i], observed, at, isoline, WATER_REACH, localLakes);
       }
     : undefined;
   // The ice sheets, on the plates of the present.
@@ -937,6 +943,11 @@ export async function runBuild(args: string[]): Promise<number> {
   put('search.json', stableStringify(searchRows(found, polities, statesField?.rows?.kind ?? 'polity', gap, adopted, territoryFile)));
   // Fields of points, lines and areas, the one way (docs/STRUCTURE.md section 3.6): the languages and the roads.
   const layers = await fieldLayers(world, claims);
+  if (lakesField && riversInfo && reliefHeight) {
+    const mapped = mappedShores(world, layers, lakesField.id, reliefHeight);
+    if (mapped.shores.length) riversInfo.mappedShores = mapped.shores;
+    shoreRows = mapped.rows;
+  }
   for (const [path, content] of layers.files) put(path, content);
   // What the overlays say of the rows they name, for the inspect panel.
   const overlays = overlayFile(world, claims);

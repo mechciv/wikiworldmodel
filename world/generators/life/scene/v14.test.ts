@@ -12,7 +12,7 @@ import { cubeRoot, latticeOf, sizeWithin } from '../spec.ts';
 import type { SceneSubstrate } from '../../../../core/substrate.ts';
 import { CLUMP, FALLEN, FAST_BUDGET, FULL_BUDGET, INSTANCE_STRIDE, protoParts, SceneStream, STREWN, type LifeView, type Selection } from '../stream.ts';
 import { shedsWood } from '../strewn.ts';
-import { CELL, cellParts, densityOf, EXTENT, GENERATOR, LandCover, placeLook, VERSION, watersFor, type CellRows, type LivingParams } from './v13.ts';
+import { CELL, cellParts, densityOf, EXTENT, GENERATOR, LandCover, placeLook, VERSION, watersFor, type CellRows, type LivingParams } from './v14.ts';
 import type { ChannelLaws } from '../../../../core/scene.ts';
 import { snowOf } from '../climate.ts';
 import { POSE } from '../forms.ts';
