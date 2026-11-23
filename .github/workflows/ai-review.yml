@@ -1,0 +1,150 @@
+# An AI's first reading of a pull request, posted as one comment and a few on its lines. It is
+# advisory: a maintainer still reviews every pull request before it merges.
+#
+# What it reviews for is in .github/review/REVIEWER.md, read from the base branch, so a pull
+# request cannot change its own review. It runs by itself on pull requests from those with write
+# access, on every push. Anyone else's is reviewed when a maintainer adds the label `ai-review`;
+# the label is taken off once the review is posted, so adding it again reviews the newest push.
+# That keeps the cost in a maintainer's hands, and the action itself refuses to run for someone
+# without write access.
+#
+# Pull requests from forks: this runs on pull_request_target, with the base repository's secrets,
+# so it never checks out or runs the pull request's code. The changed files are fetched as data,
+# outside the working directory, and Claude can read them and the web, and post comments, and
+# nothing else: no shell, no edits. Its summary comes back as structured output, which the step
+# after it posts.
+#
+# Needs the repository secret ANTHROPIC_API_KEY, and the label `ai-review`.
+name: AI review
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review, labeled]
+
+concurrency:
+  group: ai-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    if: >-
+      (github.event.action == 'labeled' && github.event.label.name == 'ai-review') ||
+      (github.event.action != 'labeled' && !github.event.pull_request.draft &&
+       github.event.pull_request.user.type != 'Bot' &&
+       contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.pull_request.author_association))
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+    steps:
+      # The base branch, never the pull request's: the rules, the records as they were, and the
+      # reviewer's instructions. No token is left in .git/config for Claude to read.
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      # The pull request as data, in $RUNNER_TEMP/pr: its description, its diff, the list of
+      # changed files, and each changed file as it has it, under head/. Fetching a ref and reading
+      # blobs from it runs none of its code. A file Claude Code would take as its own configuration
+      # (CLAUDE.md, .mcp.json, .claude/) is written with `.from-pr` added to its name.
+      - name: Fetch the pull request as data
+        id: pr
+        run: |
+          set -euo pipefail
+          pr="$RUNNER_TEMP/pr"
+          mkdir -p "$pr/head"
+          gh pr view "$PR_NUMBER" -R "$REPO" \
+            --json number,url,title,body,author,isCrossRepository,baseRefName,baseRefOid,headRefName,headRefOid,labels \
+            > "$pr/pr.json"
+          gh pr diff "$PR_NUMBER" -R "$REPO" > "$pr/pr.diff" \
+            || echo "The diff was too large to fetch whole: compare the files in head/ with the base." > "$pr/pr.diff"
+          gh api --paginate "repos/$REPO/pulls/$PR_NUMBER/files" \
+            --jq '.[] | [.status, .filename, (.previous_filename // "")] | @tsv' > "$pr/files.txt"
+          git fetch --no-tags --depth=1 origin "+refs/pull/$PR_NUMBER/head:refs/remotes/pr/head"
+          head=$(git rev-parse refs/remotes/pr/head)
+          while IFS=$'\t' read -r status path _; do
+            [ "$status" = removed ] && continue
+            # Only plain files: not a symbolic link, nor a submodule.
+            mode=$(git ls-tree refs/remotes/pr/head -- "$path" | cut -d' ' -f1)
+            case "$mode" in 100644|100755) ;; *) continue ;; esac
+            out="$pr/head/$path"
+            case "/$path" in
+              */CLAUDE.md|*/CLAUDE.local.md|*/.mcp.json|*/.claude.json|*/.claude/*) out="$out.from-pr" ;;
+            esac
+            mkdir -p "$(dirname "$out")"
+            git cat-file blob "$head:$path" > "$out"
+          done < "$pr/files.txt"
+          echo "dir=$pr" >> "$GITHUB_OUTPUT"
+          echo "head=$head" >> "$GITHUB_OUTPUT"
+          echo "Fetched $(wc -l < "$pr/files.txt") changed files at $head."
+
+      - name: Review
+        id: review
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ github.token }}
+          prompt: |
+            Review pull request #${{ github.event.pull_request.number }} of ${{ github.repository }},
+            at commit ${{ steps.pr.outputs.head }}.
+
+            Follow .github/review/REVIEWER.md, in the working directory, which is the base branch.
+            The pull request is in ${{ steps.pr.outputs.dir }} (pr.json, pr.diff, files.txt, and
+            head/ with each changed file as the pull request has it). A changed file that Claude Code
+            would read as configuration is in head/ with `.from-pr` added to its name.
+
+            Post comments on particular lines with the inline comment tool, at most ten. Return the
+            review itself as the structured output: `verdict` (ready, changes or attention), and
+            `review`, the comment in Markdown.
+          claude_args: >-
+            --model claude-opus-5-5
+            --max-turns 80
+            --permission-mode default
+            --add-dir ${{ steps.pr.outputs.dir }}
+            --allowedTools "Read,Grep,Glob,WebFetch,WebSearch,mcp__github_inline_comment__create_inline_comment"
+            --disallowedTools "Bash,Edit,Write,NotebookEdit"
+            --json-schema '{"type":"object","properties":{"verdict":{"type":"string","enum":["ready","changes","attention"]},"review":{"type":"string"}},"required":["verdict","review"]}'
+
+      # One comment per pull request, edited in place on each review, so a pull request that
+      # gets many pushes does not gather many comments.
+      - name: Post the review
+        if: steps.review.outputs.structured_output != ''
+        env:
+          OUTPUT: ${{ steps.review.outputs.structured_output }}
+          HEAD: ${{ steps.pr.outputs.head }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+        run: |
+          set -euo pipefail
+          marker='<!-- ai-review -->'
+          body="$RUNNER_TEMP/review.md"
+          case "$(jq -r '.verdict' <<< "$OUTPUT")" in
+            ready) verdict="Ready for a maintainer" ;;
+            changes) verdict="Changes suggested" ;;
+            *) verdict="Needs a person's attention" ;;
+          esac
+          {
+            echo "$marker"
+            echo "**AI review: $verdict** (at ${HEAD:0:7})"
+            echo
+            jq -r '.review' <<< "$OUTPUT"
+            echo
+            echo "---"
+            echo "*Advisory review by \`machine:claude-code@ai-review\`, following [its instructions]($GITHUB_SERVER_URL/$REPO/blob/$BASE_REF/.github/review/REVIEWER.md). A maintainer reviews every pull request before it merges.*"
+          } > "$body"
+          id=$(gh api --paginate "repos/$REPO/issues/$PR_NUMBER/comments" \
+            --jq ".[] | select(.user.login == \"github-actions[bot]\" and (.body | startswith(\"$marker\"))) | .id" | tail -n 1)
+          if [ -n "$id" ]; then
+            gh api -X PATCH "repos/$REPO/issues/comments/$id" -F "body=@$body" > /dev/null
+          else
+            gh pr comment "$PR_NUMBER" -R "$REPO" --body-file "$body"
+          fi
+
+      - name: Take the label off
+        if: always() && github.event.action == 'labeled'
+        run: gh api -X DELETE "repos/$REPO/issues/$PR_NUMBER/labels/ai-review" > /dev/null || true
