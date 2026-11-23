@@ -10,6 +10,9 @@ import { program, setUniforms, texture2D, type GL, type Program } from './contex
 import { FrameTimer } from './timer.ts';
 import { AO_FS, BLUR_FS, BRIGHT_FS, DEPTH_FS, FULLSCREEN_VS, ID_FS, LUM_FS, MESH_FS, MESH_VS, POST_FS, SHAFTS_ADD_FS, SHAFTS_FS, TAA_FS, SEA, SEA_FS, SEA_VS, SKY_FS, SKY_LUT_FS, TERRAIN_FS, TERRAIN_VS, WATER_FS, WATER_VS, WATERBLUR_FS, WATERMAP_FS, WATERMAP_VS } from './cityShaders.ts';
 
+/** How many heights the land's shares are given at, beyond the plan's map (setLand). */
+export const SHARE_STEPS = 32;
+
 /** Texture units, the same for every program; 12 to 16 are the passes' own, for their targets. */
 const UNIT = { noise: 0, sky: 1, shadow: 2, ao: 3, entities: 4, ground: 5, normal: 8, mask: 11, fields: 17, waterMap: 18, scene: 19, sceneDepth: 20 } as const;
 
@@ -345,6 +348,9 @@ export class CityRenderer {
   private rock: Float32Array = Float32Array.of(...PLAIN_ROCK);
   /** where snow lies on the wild land: from a height, thickening over a height, off slopes steeper than a share */
   private snow: V3 = [1e6, 1, 1];
+  /** the land's shares at each of a run of heights, and the run: its first height, its step and the height its edges wander over */
+  private sharesAt: Float32Array = new Float32Array(SHARE_STEPS * 3);
+  private shareSpan: V3 = [0, 0, 0];
   /** everything drawn by instancing, by what mesh it is */
   private instanced = new Map<number, InstancedGPU>();
 
@@ -590,7 +596,10 @@ void main() {
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
       this.groundTex.push(t);
       const n = new Uint8Array(g.nx * g.ny * 4);
-      const scale = 0.1 / (2 * g.cell);
+      // Its heights are whole steps of its unit above its base: decimetres above nought, where it does not say.
+      const unit = g.unit ?? 0.1;
+      const base = g.base ?? 0;
+      const scale = unit / (2 * g.cell);
       for (let j = 0; j < g.ny; j++) {
         for (let i = 0; i < g.nx; i++) {
           const l = z[j * g.nx + Math.max(0, i - 1)];
@@ -604,7 +613,7 @@ void main() {
           n[at] = Math.round((nx * q * 0.5 + 0.5) * 255);
           n[at + 1] = Math.round((ny * q * 0.5 + 0.5) * 255);
           // How far above the sea, finely near the shore: the coast is drawn where this crosses a half.
-          n[at + 2] = Math.max(0, Math.min(255, Math.floor(127 + z[j * g.nx + i] * 0.04)));
+          n[at + 2] = Math.max(0, Math.min(255, Math.floor(127 + (z[j * g.nx + i] * unit + base) * 0.4)));
           n[at + 3] = 255;
         }
       }
@@ -650,11 +659,17 @@ void main() {
     this.cloudCover = Math.max(0, Math.min(1, cover));
   }
 
-  /** The colours and shares of the land, as a place's climate gives them. */
-  setLand(tones: Float32Array, shares: V3, snow?: { line: number; band: number; slope: number }): void {
+  /**
+   * The colours and shares of the land, as a place's climate gives them; and where the world gives the climate at a
+   * height, the shares at each of `SHARE_STEPS` heights from `from`, `step` apart, with the height their edges wander
+   * over: what covers the ground beyond the plan's map, where a far range has its own treeline.
+   */
+  setLand(tones: Float32Array, shares: V3, snow?: { line: number; band: number; slope: number }, byHeight?: { from: number; step: number; band: number; shares: Float32Array }): void {
     this.tones = tones;
     this.shares = shares;
     this.snow = snow && Number.isFinite(snow.line) ? [snow.line, snow.band, snow.slope] : [1e6, 1, 1];
+    this.sharesAt = byHeight && byHeight.shares.length === SHARE_STEPS * 3 ? byHeight.shares : new Float32Array(SHARE_STEPS * 3);
+    this.shareSpan = byHeight && byHeight.shares.length === SHARE_STEPS * 3 ? [byHeight.from, byHeight.step, byHeight.band] : [0, 0, 0];
   }
 
   /**
@@ -1201,6 +1216,10 @@ void main() {
     if (tone) gl.uniform3fv(tone, this.tones);
     const share = p.uniforms.get('uShare');
     if (share) gl.uniform3fv(share, this.shares);
+    const shareAt = p.uniforms.get('uShareAt');
+    if (shareAt) gl.uniform3fv(shareAt, this.sharesAt);
+    const shareSpan = p.uniforms.get('uShareSpan');
+    if (shareSpan) gl.uniform3fv(shareSpan, this.shareSpan);
     const sub = p.uniforms.get('uSub');
     if (sub) gl.uniform4fv(sub, this.sub);
     const subShare = p.uniforms.get('uSubShare');
@@ -1240,6 +1259,8 @@ void main() {
     const size = p.uniforms.get('uGridSize');
     if (grid) gl.uniform4fv(grid, this.grids.flatMap((g) => [g.x0, g.y0, g.cell, 32 * g.cell]));
     if (size) gl.uniform2fv(size, this.grids.flatMap((g) => [g.nx, g.ny]));
+    const unit = p.uniforms.get('uGridUnit');
+    if (unit) gl.uniform2fv(unit, this.grids.flatMap((g) => [g.unit ?? 0.1, g.base ?? 0]));
   }
 
   /**

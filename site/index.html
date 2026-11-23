@@ -104,6 +104,17 @@
         --ics-mesozoic: #67c5ca;
         --ics-cenozoic: #f2f91d;
 
+        /* Where a thing comes from, in the viewer's hues as its coverage page darkens them: evidence blue, models
+           orange, generated magenta. The -ink steps are darker, for words on the limestone. */
+        --evidence: #259ed6;
+        --evidence-ink: #16719e;
+        --model: #d27908;
+        --model-ink: #9a5300;
+        --generated: #d446a1;
+        --generated-ink: #a61d78;
+        --source: #b8af98;
+        --source-ink: #5b5440;
+
         --serif:
           "Newsreader", "Iowan Old Style", "Palatino Linotype", Palatino,
           Georgia, serif;
@@ -372,6 +383,130 @@
       }
       .section > .eyebrow {
         margin-bottom: -0.5rem;
+      }
+
+      /* How it works: one place pulled apart into its layers, drawn by tools/site/layers.ts, each named beside its
+   plate. The plates close up until the drawing comes into view, then spread apart (main.js); without script, or
+   with less motion asked for, they are drawn spread. */
+      /* layers:start */
+      .layers { --first: 15.37%; --step: 17.61%; --closed: 104px; }
+      /* layers:end */
+      .layers {
+        display: grid;
+        grid-template-columns: minmax(0, 27.5rem) minmax(0, 1fr);
+        column-gap: 3rem;
+        margin-top: 1rem;
+      }
+      .layers-art {
+        display: block;
+        width: 100%;
+        height: auto;
+        overflow: visible;
+      }
+      .layers-art .drill {
+        stroke: var(--ink);
+        stroke-width: 1;
+        stroke-dasharray: 3 3;
+      }
+      .layers-key {
+        list-style: none;
+        position: relative;
+      }
+      .layers-key li {
+        position: absolute;
+        left: 0;
+        top: calc(var(--first) + var(--k) * var(--step));
+        max-width: 34rem;
+        transform: translateY(-0.9rem);
+      }
+      .layers-key li::before {
+        content: "";
+        position: absolute;
+        right: calc(100% + 0.75rem);
+        top: 0.9rem;
+        width: 2.25rem;
+        height: 1px;
+        background: var(--rule-strong);
+      }
+      .layers-key h3 {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        font: 400 1.3rem/1.4 var(--serif);
+      }
+      .layers-key h3::before {
+        content: "";
+        flex: none;
+        width: 0.6rem;
+        height: 0.6rem;
+        background: var(--c);
+        box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.18);
+      }
+      .layers-key p {
+        font-size: 0.9375rem;
+        line-height: 1.5;
+        color: var(--ink-soft);
+      }
+      .layers-key p.eg {
+        margin-top: 0.3rem;
+        font: 400 0.8125rem/1.45 var(--mono);
+        color: var(--c-ink);
+      }
+      .layers figcaption {
+        grid-column: 1 / -1;
+        margin-top: 1.75rem;
+        font: 400 0.875rem/1.55 var(--mono);
+        color: var(--ink-soft);
+        max-width: 44rem;
+      }
+      @media (prefers-reduced-motion: no-preference) {
+        .layers-art .plate {
+          transition: transform 1.2s cubic-bezier(0.2, 0.75, 0.25, 1);
+        }
+        .layers-art .drill,
+        .layers-key li {
+          transition: opacity 0.5s ease 0.85s;
+        }
+        .layers.shut .plate {
+          transform: translateY(calc((2 - var(--k)) * var(--closed)));
+        }
+        .layers.shut .drill,
+        .layers.shut .layers-key li {
+          opacity: 0;
+          transition-delay: 0s;
+        }
+      }
+      /* Too narrow for each label to fit beside its plate: the drawing, and the labels under it. */
+      @media (max-width: 1100px) {
+        .layers {
+          grid-template-columns: minmax(0, 1fr);
+        }
+        .layers-art {
+          max-width: 27.5rem;
+          margin-inline: auto;
+        }
+        .layers-key {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 1.5rem var(--gap);
+          margin-top: 2rem;
+        }
+        .layers-key li {
+          position: static;
+          max-width: none;
+          transform: none;
+        }
+        .layers-key li::before {
+          display: none;
+        }
+        .layers.shut .layers-key li {
+          opacity: 1;
+        }
+      }
+      @media (max-width: 600px) {
+        .layers-key {
+          grid-template-columns: minmax(0, 1fr);
+        }
       }
 
       /* The time scale, to scale */
@@ -903,6 +1038,84 @@
             <a href="#contribute">Put Claude to work</a>
           </div>
         </div>
+      </section>
+
+      <section class="wrap section" id="layers" aria-labelledby="layers-title">
+        <p class="eyebrow">Five layers, from what you see to its sources</p>
+        <h2 id="layers-title">How it works</h2>
+        <p class="prose">
+          Every view is a stack of layers, each a different kind of knowledge.
+          Follow the tyrannosaur on top down through them: a generator chose
+          where it stands, a plate model carried its ground to where it lay
+          66.5 million years ago, fossils from the Hell Creek Formation say it
+          lived there then, and the Paleobiology Database is where they were
+          read.
+        </p>
+
+        <figure class="layers" data-layers>
+          <!-- layers:start -->
+          <svg class="layers-art" viewBox="0 0 441 670" aria-hidden="true" focusable="false">
+            <g class="plate" style="--k: 4"><use href="img/layers.svg#layer-sources" y="472" /></g>
+            <line class="drill" x1="216" y1="472.2" x2="216" y2="590.2" />
+            <g class="plate" style="--k: 3"><use href="img/layers.svg#layer-evidence" y="354" /></g>
+            <line class="drill" x1="216" y1="354.2" x2="216" y2="472.2" />
+            <g class="plate" style="--k: 2"><use href="img/layers.svg#layer-models" y="236" /></g>
+            <line class="drill" x1="216" y1="236.2" x2="216" y2="354.2" />
+            <g class="plate" style="--k: 1"><use href="img/layers.svg#layer-generators" y="118" /></g>
+            <line class="drill" x1="216" y1="118.2" x2="216" y2="236.2" />
+            <g class="plate" style="--k: 0"><use href="img/layers.svg#layer-view" y="0" /></g>
+          </svg>
+          <!-- layers:end -->
+          <ol class="layers-key">
+            <li style="--k: 0; --c: #8da45b; --c-ink: var(--ink)">
+              <h3>The view</h3>
+              <p>
+                What you see in the viewer: the layers below, drawn. Click
+                anything to see what it rests on.
+              </p>
+              <p class="eg">↳ A tyrannosaur by the river, 66.5 Ma</p>
+            </li>
+            <li style="--k: 1; --c: var(--generated); --c-ink: var(--generated-ink)">
+              <h3>Generators</h3>
+              <p>
+                Detail finer than anything known: where each tree and animal
+                stands. Seeded, so a place always looks the same, and marked
+                as generated.
+              </p>
+              <p class="eg">↳ gen:life/scene chose where it stands</p>
+            </li>
+            <li style="--k: 2; --c: var(--model); --c-ink: var(--model-ink)">
+              <h3>Models</h3>
+              <p>
+                Fill the space between the evidence: the plates, the climate,
+                who lived where. Each says what it reads and where its numbers
+                come from.
+              </p>
+              <p class="eg">↳ PALEOMAP carries its ground to where it lay then</p>
+            </li>
+            <li style="--k: 3; --c: var(--evidence); --c-ink: var(--evidence-ink)">
+              <h3>Evidence</h3>
+              <p>
+                Claims, each with its source, where in it, and a quote copied
+                from it. Where sources disagree, both stay.
+              </p>
+              <p class="eg">↳ Its fossils in the formation; its size, Sue’s</p>
+            </li>
+            <li style="--k: 4; --c: var(--source); --c-ink: var(--source-ink)">
+              <h3>Sources</h3>
+              <p>
+                Papers, excavation reports, ancient texts, and open datasets
+                pinned to the version read.
+              </p>
+              <p class="eg">↳ The Paleobiology Database, read 4 November 2026</p>
+            </li>
+          </ol>
+          <figcaption>
+            The Hell Creek at 66.5 Ma, drawn as a diagram. Where evidence is
+            thin, the layers above it invent more, and say so: the
+            <a href="world/coverage.html">coverage chart</a> shows where.
+          </figcaption>
+        </figure>
       </section>
 
       <section

@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import type { FieldGrid } from '../../../../core/tileset.ts';
 import type { Field } from '../world.ts';
+import type { FineLevel } from './shape.ts';
 
 export const SRC_W = 360;
 export const SRC_H = 181;
@@ -91,6 +92,8 @@ export interface GridField {
   plateOffset?: number;
   /** for today's relief: the ground as measured, with its hollows, and today's ocean, which the drainage routes over */
   drain?: { z: Float32Array; ocean: Uint8Array; lakes: Uint8Array };
+  /** for today's relief: its finer level, the survey's cells below its grid (shape.ts) */
+  fine?: FineLevel;
 }
 
 /** The gridded field covering a span, if any: the first whose cover overlaps the span's inside. */

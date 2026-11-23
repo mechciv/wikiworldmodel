@@ -1,0 +1,30 @@
+id: src:krsnik-2021-central-alps
+type: publication
+kind: measurement
+citation: >-
+  Krsnik, E., Methner, K., Campani, M., Botsyun, S., Mutz, S.G., Ehlers, T.A., Kempf, O., Fiebig, J.,
+  Schlunegger, F. & Mulch, A. (2021). Miocene high elevation in the Central Alps. Solid Earth
+  12(11), 2615–2631.
+authors:
+  - "Krsnik, E."
+  - "Methner, K."
+  - "Campani, M."
+  - "Botsyun, S."
+  - "Mutz, S.G."
+  - "Ehlers, T.A."
+  - "Kempf, O."
+  - "Fiebig, J."
+  - "Schlunegger, F."
+  - "Mulch, A."
+published: 2021
+title: Miocene high elevation in the Central Alps
+container: Solid Earth 12(11), 2615–2631
+doi: 10.5194/se-12-2615-2021
+license: CC-BY-4.0
+verified:
+  by: machine:claude-code
+  how: >-
+    Abstract, introduction, sections 5.3 to 5.5 and the conclusions read on 22 November 2026 on the
+    article's page at the journal (se.copernicus.org), saved and turned to plain text by script;
+    citation from Crossref. The sections on the sampled beds and the measurements, and the
+    supplement, were not read through. The page has no page numbers, so locators name the section.

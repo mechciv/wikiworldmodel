@@ -702,6 +702,64 @@ What to check first:
 - **Not seen in the viewer.** Each was looked at on its sheet. The pig and the dog are `habitat: any`, so that the
   generator keeps them about the houses and does not herd them on the pasture: one word reverses it.
 
+### Mountain ranges, and by when each stood
+
+Written by an agent for the relief of a scene before the glacial cycles ([SCENES.md](SCENES.md#the-grounds-shape),
+[RECORDS.md](RECORDS.md#a-mountain-range)), in `world/entities/earth/orogens/`: eight ranges, each with an outline, the
+phase in which it stands at about its present height, and the evidence of when that began. The Himalaya (which had
+only its cause), the Tibetan Plateau, the Altiplano and the Western Cordillera of the central Andes, the Alps, the
+Sierra Nevada of California, the Southern Alps of New Zealand and the Front Range of Colorado. 25 sources; all 27
+quoted claims were found by script in the texts the agent kept, and found again when the check was run a second
+time over all of them. Nothing has been looked at by a person. The model carries today's shape back for each to the
+latest time its evidence allows: 15.97 Ma for the Himalaya, 23.03 Ma for the Tibetan Plateau, 6.8 Ma for the
+Altiplano, 23 Ma for the Western Cordillera, 20 Ma for the Alps, 28 Ma for the Sierra Nevada, 3.6 Ma for the Southern
+Alps, 35 Ma for the Front Range.
+
+- **Abstracts.** Sixteen of the 25 sources were read only in their abstracts, as carried by Europe PMC, Crossref or
+  OpenAlex: the publishers' pages for Geology, the GSA Bulletin, Nature, Science and Elsevier's journals answered an
+  automated reader with a check or a refusal. Each source's `verified` note says which. So a height is often given
+  with no uncertainty, or a date only as "late Early Miocene", written as the stage it names. The full texts are
+  the first thing to read.
+- **One basin, one summit.** A height measured at one place is taken for the whole of an outline: the Lunpola basin
+  and the Namling basin for the Tibetan Plateau, the detachment below Mount Everest and the Thakkhola graben for
+  the Himalaya, one section of the Corque syncline for the Altiplano, the Simplon fault for the Alps, the river
+  gravels of the northern Sierra Nevada for the whole range, the Florissant beds for the Front Range. Where the
+  sources give parts different histories they are separate records, as the Altiplano and the Western Cordillera are.
+- **The outlines are editorial.** Each is 12 to 21 points drawn loosely round the high ground its evidence speaks
+  for, unsourced, and says what it leaves out: the Karakoram, the Pamir and the gorge country east of the Tibetan
+  Plateau; the Eastern Alps beyond the Hohe Tauern; the cordilleras either side of the Altiplano. Where two adjoin,
+  one laps a tenth of a degree over the other, so that no ground between them is left to neither: the Altiplano's
+  over the Western Cordillera's, the Tibetan Plateau's over the Himalaya's. A dataset of ranges' outlines with a
+  licence that may come in would take their place.
+- **Competing claims.** The Tibetan Plateau has five readings of when it stood: the late Oligocene (Xiong et al.
+  2022, preferred: the latest, dated by ash layers through the whole succession, and several authors of the
+  reading it replaces among its own); between 39.5 and 26 Ma (Fang et al. 2020); by 40 Ma (Wang et al. 2008); by
+  35 Ma (Rowley & Currie 2006) and not before 25 Ma (Su et al. 2019), both deprecated, as the beds they rest on have
+  been dated anew. The Sierra Nevada: at about its present height by 28 Ma (Cassel et al. 2009, preferred), by
+  40 Ma (Mulch et al. 2006), or raised after about 5 Ma (Wakabayashi & Sawyer 2001, kept unranked, as its author
+  still holds it). The Altiplano's rapid rise of 10.3 to 6.8 Ma is cited `against` by Poulsen et al. (2010), who
+  read the same isotopes as a change of rainfall. The Western Cordillera: by 23 Ma (Scott et al. 2018, preferred)
+  or between 22 and 10 Ma.
+- **Readings that are the record's own.** The Altiplano's growth is counted from when its ground left the sea, at
+  the end of the Mesozoic, though its sources have it a low basin for long after: the model, which takes a range
+  to rise evenly, disagrees with them there, and its record says so (`model:earth/relief-carried`, `disagrees`).
+  That the Southern Alps have stood at about their present height since their rise in the early Pliocene is the
+  agent's reading of two abstracts that date the rise. The Himalaya's window is written from the older end of one
+  flora's age to the abstract's "by ca. 15 Ma".
+- **The time, and not the height.** The model reads from a record only by when its range stood. It draws the range
+  with today's crests and valleys at the level the elevation of each time gives the land, and that level is a
+  kilometre and more above or below today's for the Himalaya, the Alps and the Front Range at some of its grids
+  (`model:earth/relief-carried`, `disagrees`). Whether a record that has a range at about its present height should
+  set its level too, against the elevation the globe, the climate and the rivers are read from, is not decided.
+- **Bounds.** A height like today's at a dated time is a `start_before` of the standing phase. Two bounds of one
+  start compete, as the rules stand, so of the Himalaya's two the earlier is preferred, though both hold; a bound
+  that is disputed is written as a `start` with one end open. `paleoaltimetry` is used for heights read from
+  isotopes, from fossil leaves and palms, from the chemistry of lavas and from fans of gravel.
+- **Not reached, and not written:** DeCelles et al. (2007), Ding et al. (2014), Garzione et al. (2006) and
+  Campani et al. (2012), all Elsevier's; Garzione et al. (2008) is cited only as a review reports it. The Pyrenees
+  were left out, as the abstract reached gives a height and does not set it beside today's. The Zagros, the Tian
+  Shan, the Taihang and the Colorado Plateau were not attempted; nor any range of Africa, Australia or Antarctica.
+
 ### Set 16: day length and the Moon
 
 - 21 measurements from the Moodies Group (3.22 Ga) to today, 13 with the Earth–Moon distance, as records; the series are read

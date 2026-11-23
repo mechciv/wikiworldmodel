@@ -1,0 +1,24 @@
+id: src:wakabayashi-sawyer-2001-sierra-nevada
+type: publication
+kind: measurement
+citation: >-
+  Wakabayashi, J. & Sawyer, T.L. (2001). Stream incision, tectonics, uplift, and evolution of
+  topography of the Sierra Nevada, California. The Journal of Geology 109(5), 539–562.
+authors:
+  - "Wakabayashi, J."
+  - "Sawyer, T.L."
+published: 2001
+title: Stream incision, tectonics, uplift, and evolution of topography of the Sierra Nevada, California
+container: The Journal of Geology 109(5), 539–562
+doi: 10.1086/321962
+verified:
+  by: machine:claude-code
+  how: >-
+    Abstract, the passages on the age of the youngest volcanic beds and of the onset of the streams'
+    cutting (pp. 542–545), and the sections on palaeoelevations and on tectonics, uplift and
+    topography (pp. 555–559), read on 22 November 2026 in a PDF of the published article (the
+    journal's pages 539–562, in a copy from JSTOR) on an Arizona State University research group's
+    website, turned to text with PyMuPDF; the rest was not read through. The abstract was also read
+    as OpenAlex carries it (work W2008058387), and the two agree. The PDF's text gives the "less
+    than" and "more than" signs before numbers as "!" and "1", so no quote here has them. Citation
+    from Crossref. Page numbers in locators are the journal's.

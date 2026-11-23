@@ -1,0 +1,110 @@
+id: earth/orogens/alps
+kind: landform/mountain-range
+summary: The mountain range of central Europe, raised where the Adriatic plate ran into the European one.
+author: machine:claude-code
+# Phases tile the lifetime: the range rises from the start of its growth, and then stands at about the height it has
+# today. Where its sources show it standing so, today's relief is carried back for it (model:earth/relief-carried).
+phases:
+  - id: rising
+    label: Rising
+  - id: standing
+    label: At about its present height
+claims:
+  name:
+    prop: name
+    value: { en: Alps }
+    unsourced: An editorial label.
+  extent:
+    prop: extent
+    value:
+      type: Polygon
+      frame: frame:earth/present-day
+      coordinates:
+        - [[7.0, 43.9], [5.9, 44.2], [5.5, 45.0], [5.8, 45.8], [6.4, 46.4], [7.4, 46.8], [8.4, 47.1], [9.5, 47.4], [10.6, 47.6], [12.0, 47.75], [13.5, 47.7], [13.7, 46.6], [12.6, 46.1], [11.3, 45.75], [10.0, 45.75], [8.7, 45.85], [7.9, 45.5], [7.3, 45.0], [7.5, 44.4], [8.0, 44.1], [7.0, 43.9]]
+    unsourced: >-
+      An outline drawn loosely round the range on today's relief, from the Maritime Alps round the arc of the
+      Western and Central Alps and east to the Hohe Tauern, between the Molasse basin and the plain of the Po, to
+      say which ground its record speaks for. The lower ranges east of the Tauern are left out: the heights cited
+      here were measured in the Central Alps of Switzerland, and the sources read do not speak for the east. The
+      range has no agreed edge.
+    method: editorial
+    basis: reconstruction
+  location:
+    prop: location
+    value: { lat: 46.25, lon: 8.03, frame: frame:earth/present-day }
+    unsourced: >-
+      A representative point at the Simplon Pass in the Central Alps, by the fault whose rocks gave the range's
+      height in the Miocene, chosen to place the marker; the range has no single location.
+    method: editorial
+    basis: reconstruction
+  frame:
+    prop: frame
+    value: frame:paleomap/plate-307
+    source: { ref: src:paleomap-plate-model, loc: PALEOMAP_PlatePolygons.gpml }
+    method: plate-polygon
+    basis: reconstruction
+  # When the range began to grow: counted from the meeting of the two continents.
+  start:
+    prop: start
+    value: 35 Ma
+    source:
+      ref: src:schlunegger-kissling-2015-alps
+      loc: "Results, 'Evolution of the Alps'"
+      quote: At ca. 35 Ma, ocean–continent subduction was superseded by continent–continent collision
+    method: expert-estimate
+    note: >-
+      The meeting of the European and Adriatic continents, from which the range's growth is counted here, which
+      is this record's choice: before it, the source has ocean floor going down beneath the Adriatic plate since
+      the Late Cretaceous, and at 35 Ma marls still laid down in water a kilometre deep before the range; at
+      31 Ma it has the drainage divide only 300 ± 200 m above its foot. The source takes the date from the
+      literature and gives no uncertainty for it.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in schlunegger-kissling-2015-alps.txt (sha256 b2971d40b4f99c0e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-23" }
+  # When the range came to stand at about its present height.
+  standing-start-schlunegger-kissling-2015:
+    prop: start
+    subject: "@standing"
+    value: { lo: 22 Ma, hi: 20 Ma }
+    source:
+      - ref: src:schlunegger-kissling-2015-alps
+        loc: "Results, 'Evolution of Alpine topography'"
+        quote: >-
+          the relative elevation of the drainage divides increased from 300±200 to 1,200±900 m between 31 and 25 Ma,
+          and then to 1,900±1,000 m after 22 Ma. The latter value corresponds to the currently measured total
+          fluvial relief between ca. 1,000 and 2,500 m
+      - ref: src:schlunegger-kissling-2015-alps
+        loc: abstract
+        quote: paleoaltimetry estimates suggest that the topography has not increased since 20 Ma
+    method: paleoaltimetry
+    note: >-
+      The height of the drainage divide of the Central Alps of Switzerland above the range's foot, reckoned from
+      the spacing and the widths of the gravel fans its rivers built in the Molasse basin and the steepness of
+      mountain streams: after 22 Ma it was what it is now, and the fans kept their spacing from 22 to 20 Ma on.
+      The window is written from the 22 Ma after which today's relief was reached to the 20 Ma since which the
+      source has the range no higher. The authors call the uncertainties of the heights large, and hold the trend
+      sound.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in schlunegger-kissling-2015-alps.txt (sha256 b2971d40b4f99c0e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-23" }
+  standing-start-before-krsnik-2021:
+    prop: start_before
+    subject: "@standing"
+    value: { lo: 15.5 Ma, hi: 14.0 Ma }
+    source:
+      - ref: src:krsnik-2021-central-alps
+        loc: "section 6, Conclusions"
+        quote: >-
+          Our revised stable isotope paleoaltimetry estimates indicate high (>4000 m) paleoelevations for the
+          mid-Miocene (15.5–14.0 Ma) central Alpine region surrounding the Simplon Fault Zone.
+      - ref: src:krsnik-2021-central-alps
+        loc: "section 5.3"
+        quote: For comparison, peaks in the region today reach elevations in excess of 3500 m.
+    method: paleoaltimetry
+    note: >-
+      Hydrogen isotopes of sheet silicates that grew in the Simplon fault while it moved, in water that had
+      fallen as rain or snow high up, set against the oxygen isotopes and the temperatures of growth of soil
+      carbonates laid down near sea level in the Swiss Molasse basin: the ground round the fault stood
+      4400 ± 770 m above the basin in the middle Miocene, higher than it does now. So the Central Alps stood at
+      least as high as today by then. The authors hold that the Alps of that time were high in some places and
+      lower in others, and their figure revises the 2850 +800/−600 m of Campani et al. (2012), which was not read.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in krsnik-2021-central-alps.txt (sha256 006dc30880c6eb7c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-23" }

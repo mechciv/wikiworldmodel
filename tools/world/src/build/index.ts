@@ -20,7 +20,9 @@ import { GENERATOR as SURFACE, VERSION as SURFACE_VERSION, generateSurface, type
 import { GENERATOR as GENERIC_LAND, VERSION as GENERIC_LAND_VERSION, generateGenericLand, genericLandAt, type GenericLandParams } from '../../../../world/generators/earth/generic-land/v1.ts';
 import { claimGroups, solveScenario, solveVariants } from '../chronology.ts';
 import { fieldAgesMa, fieldSource, importBlocks, importElevation, importMeanGrid, importMonths, importReliefPlates, PLATE_MODEL, tiledField, type MonthsMore } from '../importer.ts';
+import { between, carriedReach, sceneShape, type ReliefInfo } from '../../../../core/relief.ts';
 import { fillFromOcean, WATER, waterMask, type Areas } from './relief.ts';
+import { carriedInfo, encodeFineTile, fineLevel, type FineParams } from './shape.ts';
 import { deepRivers, recentRivers, riverFiles, type DrainageParams, type Water } from './rivers.ts';
 import { encodeSegments, grwlSegments, thin, tiles as segmentTiles } from './grwl.ts';
 import { RiverNet, riverKeys, riverWidths, type RiverKey, type RiversInfo, type RiversKeysHeader, type RiversNetworkHeader, type RiversSet, type RiverWidths, type RiverWidthsHeader } from '../../../../core/rivers.ts';
@@ -42,7 +44,7 @@ import { spanOf, type PlanetFile } from '../../../../core/planet.ts';
 import { insideRow, politiesAt, type PeopleFile, type PolitiesFile } from '../../../../core/layers.ts';
 import type { HousingCount } from '../../../../core/landscape.ts';
 import type { AtlasBin } from '../../../../core/atlas.ts';
-import { fieldFor, fieldLods, loadBlocks, loadRelief, loadSnapshots, paleoElevation, sliceField, tileGrid, timeBins, type GridField } from './fields.ts';
+import { fieldFor, fieldLods, loadBlocks, loadRelief, loadSnapshots, paleoElevation, sliceField, SRC_H, SRC_W, tileGrid, timeBins, type GridField } from './fields.ts';
 import { buildCity } from './city.ts';
 import { climateGrid, climateKeyframes, encodeClimate, forestChecks, heightOn, monthsFiles, monthsKeyframes, partClasses, partsFiles, waterParamsOf, type ClimateKeyframe, type PartRead, type WaterOptions } from './climate.ts';
 import { MONTHS_PARTS, MonthsTile, PARTS, PartsTile, partsFile, tilesNear, type MonthsInfo, type MonthsPart, type MonthsSet, type MonthsTileHeader, type PartInfo, type PartsTileHeader } from '../../../../core/months.ts';
@@ -446,8 +448,11 @@ export async function runBuild(args: string[]): Promise<number> {
       const until = f.projection ? toMa(parsePoint(f.projection.until as TimePointInput).t) : 0;
       // The drainage routes over each cell's lowest ground, so that a gorge narrower than a cell stays open.
       const drain = mask ? { z: relief.low, ocean: Uint8Array.from(mask, (v) => (v === WATER.ocean ? 1 : 0)), lakes: Uint8Array.from(mask, (v) => (v === WATER.lake ? 1 : 0)) } : undefined;
-      grids.push({ field: f, mode: 'elevation', snapshots: [snap], coverMa: [oldest, until], res, seaLevel: coast?.from?.[1], drain });
-      log(`relief  ${f.id}: ${snap.src!.width} × ${snap.src!.height} nodes at ${res}° from ${d.id} in ${((Date.now() - started) / 1000).toFixed(1)} s${coast?.from?.[1] ? `; its coast at the sea level of ${coast.from[1]}` : ''}`);
+      // Below its grid, the survey's own cells: what each has less what the grid of means makes of the place (core/relief.ts).
+      const fineParams = f.params?.fine as FineParams | undefined;
+      const fine = fineParams ? await fineLevel(datasetFile(d.id, d), relief, fineParams) : undefined;
+      grids.push({ field: f, mode: 'elevation', snapshots: [snap], coverMa: [oldest, until], res, seaLevel: coast?.from?.[1], drain, ...(fine ? { fine } : {}) });
+      log(`relief  ${f.id}: ${snap.src!.width} × ${snap.src!.height} nodes at ${res}° from ${d.id}${fine ? `, and ${fine.tiles.size} tiles of its cells of ${fineParams!.res_arcsec}″` : ''} in ${((Date.now() - started) / 1000).toFixed(1)} s${coast?.from?.[1] ? `; its coast at the sea level of ${coast.from[1]}` : ''}`);
       continue;
     }
     const mode = fieldSource(f) as 'elevation' | 'blocks';
@@ -587,6 +592,50 @@ export async function runBuild(args: string[]): Promise<number> {
         tiles.push({ id, lod: lod.lod, bbox: cell, time, url, bytes: bytes.length, sha256: sha256(bytes), parent: lod.lod === 0 ? null : `0/0-0/b${parentBin}` });
       });
     });
+  }
+
+  // The ground below the relief's grid (core/relief.ts): the survey's cells in tiles, which a scene sends for at its
+  // place; and the rule and the ranges' records by which today's shape is carried back before the relief's own times.
+  const reliefGrid = grids.find((g) => g.fine);
+  let reliefInfo: ReliefInfo | undefined;
+  let shapeAt: PlaceWorld['shape'];
+  let plateNow: PlaceWorld['plateNow'];
+  if (reliefGrid?.fine) {
+    const fine = reliefGrid.fine;
+    const rf = reliefGrid.field;
+    let bytes = 0;
+    for (const [key, codes] of fine.tiles) {
+      const file = encodeFineTile(key, codes, fine);
+      bytes += file.length;
+      put(`relief/fine/${key}.lwt`, file);
+    }
+    const carriedField = world.fields.find((x) => x.rule === 'relief-carried');
+    const carriedModel = carriedField && world.models.find((m) => m.outputs?.includes(carriedField.id));
+    const carried = carriedField && carriedModel ? carriedInfo(solved, carriedField, carriedModel.id) : undefined;
+    const credit = world.manifest.datasets[rf.data!.from]?.credit;
+    reliefInfo = { format: 'lightworld-relief@1', field: rf.id, title: rf.title, source: rf.data!.from, ...(credit ? { credit } : {}), fine: { step: fine.step, tile_deg: fine.tile_deg, dir: 'relief/fine', reach_deg: fine.reach_deg, rows: fine.rows }, ...(carried ? { carried } : {}) };
+    put('relief/index.json', stableStringify(reliefInfo));
+    log(`relief  ${fine.tiles.size} tiles of the survey's cells, ${(bytes / 1e6).toFixed(1)} MB${carried ? `; today's shape carried back whole to ${carried.fullMa} Ma and gone by ${carried.goneMa} Ma${carried.ranges.length ? `, and for ${carried.ranges.length} range${carried.ranges.length === 1 ? '' : 's'} as their records say: ${carried.ranges.map((r) => `${r.label} stood by ${r.standingMa} Ma${r.startMa !== undefined ? `, rising from ${r.startMa} Ma` : ''}`).join('; ')}` : '; no range has a record of when it stood'}` : ''}`);
+    // A scene's shape, from the same tiles and the same grid a browser reads (core/relief.ts).
+    const snap = reliefGrid.snapshots[0];
+    const { width, height, step } = snap.src!;
+    const node = (lat: number, lon: number) => Math.max(0, Math.min(height - 1, Math.round((90 - lat) / step))) * width + ((((Math.round((lon + 180) / step) % width) + width) % width));
+    const info = reliefInfo;
+    // What the elevation a scene of the deep past stands on makes of today: its keyframe of the present, above its
+    // coast. Today's shape is carried back as what today's ground stands above that by.
+    const deep = paleoElevation(grids);
+    const latest = deep?.snapshots.find((x) => x.ageMa === 0);
+    const deepCoast = world.fields.find((c) => c.derived && c.rule === 'isoline' && c.from?.[0] === deep?.field.id)?.isoline_m ?? 0;
+    const pg = latest?.src ?? { width: SRC_W, height: SRC_H, step: 1 };
+    const pnode = (lat: number, lon: number) => Math.max(0, Math.min(pg.height - 1, Math.round((90 - lat) / pg.step))) * pg.width + ((((Math.round((lon + 180) / pg.step) % pg.width) + pg.width) % pg.width));
+    const base = latest ? between((lat, lon) => latest.elev[pnode(lat, lon)] - deepCoast, pg.step) : undefined;
+    // Today's plates on the relief's grid, finer than a keyframe's: what a scene finds the plate under its place by.
+    plateNow = (lat, lon) => snap.plate[node(lat, lon)];
+    shapeAt = (today, back) => {
+      if (!back) return sceneShape({ info, tile: (key) => fine.tiles.get(key), at: today });
+      if (!base) return undefined;
+      return sceneShape({ info, tile: (key) => fine.tiles.get(key), at: today, carried: { ...back, today: { step, elevation: (lat, lon) => snap.elev[node(lat, lon)], plate: (lat, lon) => snap.plate[node(lat, lon)] }, base, grain: pg.step } });
+    };
   }
 
   // 8. Records, periods, search, series, coverage.
@@ -1056,7 +1105,9 @@ export async function runBuild(args: string[]): Promise<number> {
             return tiles.length ? placeMonths(monthsInfo, where, tiles, undefined, parts) : undefined;
           }
         : undefined;
-      const seen = witnesses(solved, atlas.index, atlas.files, elevation.snapshots, climateKeys, cg, biomeField.params as unknown as ClimateRule, buildPlanet(solved), log, waterAt, monthsAt, seaAtlas);
+      // A witness within the times today's shape is carried back whole, so that a browser is held to that too.
+      const carriedAt = reliefInfo?.carried ? fromMa(reliefInfo.carried.fullMa * 0.8) : undefined;
+      const seen = witnesses(solved, atlas.index, atlas.files, elevation.snapshots, climateKeys, cg, biomeField.params as unknown as ClimateRule, buildPlanet(solved), log, waterAt, monthsAt, seaAtlas, shapeAt ? { at: shapeAt, when: carriedAt, plateNow } : undefined);
       put('life/witness.json', stableStringify(seen));
       atlasFile = 'life/atlas.json';
       coverageFile.forms = { ...atlas.index.coverage, wanted: atlas.wanted.slice(0, 200) };
@@ -1119,6 +1170,13 @@ export async function runBuild(args: string[]): Promise<number> {
     sources.push({ layer: 'substrate', id: rocks.index.source, title: world.source.get(rocks.index.source)?.title ?? rocks.index.source, tier: 'evidence', span: stages, lane: 'rocks' });
     sources.push({ layer: 'substrate', id: substrateField.id, title: substrateField.title, tier: 'model', span: stages, lane: 'substrate' });
   }
+  // The ground below the relief's grid, which a scene reads: the survey's cells for as long as today's relief is held,
+  // and before that today's shape carried back, as far as the rule and the ranges' records carry any of it.
+  if (reliefInfo && reliefGrid) {
+    const held: [number, number] = [fromMa(reliefGrid.coverMa[0]), fromMa(reliefGrid.coverMa[1])];
+    sources.push({ layer: 'geography', id: reliefInfo.field, title: `${reliefInfo.title}: the survey's cells, in a scene`, tier: 'model', span: held, res_deg: Math.round(reliefInfo.fine.step * 1e5) / 1e5, lane: 'relief-fine' });
+    if (reliefInfo.carried) sources.push({ layer: 'geography', id: reliefInfo.carried.field, title: reliefInfo.carried.title, tier: 'model', span: [fromMa(carriedReach(reliefInfo.carried)), held[0]], res_deg: Math.round(reliefInfo.fine.step * 1e5) / 1e5, lane: 'relief-fine' });
+  }
   // Today's maps of the ground, each for the span it is held for: models both, of the place itself.
   if (ground && substrateRule) {
     for (const m of [ground.header.soil, ground.header.bedrock]) if (m) sources.push({ layer: 'substrate', id: m.field, title: m.title, tier: 'model', span: m.span, res_deg: m.res, lane: m.field });
@@ -1158,7 +1216,7 @@ export async function runBuild(args: string[]): Promise<number> {
     timeRange: span,
     lods: lods.map((l) => ({ lod: l.lod, step: l.step, cell: [l.cells[0][2] - l.cells[0][0], l.cells[0][3] - l.cells[0][1]], binsMa: l.binsMa })),
     tiles,
-    files: { frames: 'frames.json', periods: 'periods.json', search: 'search.json', records: 'records/', coverage: 'coverage.json', series: 'series.json', planet: 'planet.json', territory: 'territory.json', city: city ? `city/${city.file.site.id}.json` : undefined, climate: climateKeys.length ? 'climate.lwt' : undefined, ice: ice ? 'ice.lwt' : undefined, tree: 'tree.json', ...(present ? { present: 'present.json' } : {}), ...(hazards ? { hazards: 'hazards.json' } : {}), ...(polities ? { polities: 'polities.json' } : {}), ...(overlays ? { overlays: 'overlays.json' } : {}), ...(people ? { people: 'people.lwt' } : {}), ...(atlasFile ? { atlas: atlasFile } : {}), ...(seaAtlas ? { sea: 'life/sea.json' } : {}), ...(rocks ? { rocks: 'rocks/index.json' } : {}), ...(substrateRule ? { substrate: 'substrate.json' } : {}), ...(ground ? { ground: 'ground.lwt' } : {}), ...(strata ? { strata: 'strata.lwt' } : {}), ...(landscape ? { landscape: 'people/landscape.json' } : {}), features: FEATURE_INDEX },
+    files: { frames: 'frames.json', periods: 'periods.json', search: 'search.json', records: 'records/', coverage: 'coverage.json', series: 'series.json', planet: 'planet.json', territory: 'territory.json', city: city ? `city/${city.file.site.id}.json` : undefined, climate: climateKeys.length ? 'climate.lwt' : undefined, ice: ice ? 'ice.lwt' : undefined, tree: 'tree.json', ...(present ? { present: 'present.json' } : {}), ...(hazards ? { hazards: 'hazards.json' } : {}), ...(polities ? { polities: 'polities.json' } : {}), ...(overlays ? { overlays: 'overlays.json' } : {}), ...(people ? { people: 'people.lwt' } : {}), ...(atlasFile ? { atlas: atlasFile } : {}), ...(seaAtlas ? { sea: 'life/sea.json' } : {}), ...(rocks ? { rocks: 'rocks/index.json' } : {}), ...(substrateRule ? { substrate: 'substrate.json' } : {}), ...(ground ? { ground: 'ground.lwt' } : {}), ...(strata ? { strata: 'strata.lwt' } : {}), ...(landscape ? { landscape: 'people/landscape.json' } : {}), ...(reliefInfo ? { relief: 'relief/index.json' } : {}), features: FEATURE_INDEX },
     rivers: riversInfo,
     months: monthsInfo,
     climates: recentClimates.length

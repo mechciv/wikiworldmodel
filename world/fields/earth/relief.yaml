@@ -8,7 +8,8 @@ quantity: elevation
 unit: m
 description: >-
   The height of today's land and the depth of today's sea floor, with the top of today's ice sheets, from a compilation
-  of surveys, averaged onto a grid of a tenth of a degree. Ground below today's sea level that today's ocean does not
+  of surveys, averaged onto a grid of a tenth of a degree; below that grid a scene reads the survey's own cells, a
+  sixtieth of a degree across, around its place. Ground below today's sea level that today's ocean does not
   reach, such as the Dead Sea's valley or the Qattara Depression, is held at the height of the pass it would spill over,
   so that only the ocean floods it; today's lakes keep their depth. Measured for the present only: before it, the ground is held
   as it is today, moved with its plates, and the sea of each time is laid over it. How the ground itself changed in that
@@ -34,6 +35,18 @@ spread: unknown
 # Every node moves with the plate under it today, as the ice sheets' do.
 interp: plate-warp
 moves_with: src:paleomap-plate-model
+# Below its grid, the survey's own cells: what each has less what this grid makes of the place, read straight between
+# its nodes, kept in tiles a scene sends for at its place (core/relief.ts). Laid over the grid, they are the survey's
+# ground, so a scene's skyline is the survey's and not a tenth of a degree's. A tile is kept where some of its ground
+# stands above the floor, which is below every sea of the times the field covers, and departs from the grid by at
+# least `least_m` somewhere: the deep sea floor and a level plain are the grid's own.
+params:
+  fine:
+    res_arcsec: 60
+    tile_deg: 2
+    reach_deg: 2
+    floor_m: -200
+    least_m: 2
 projection:
   method: hold
   until: 10 kyr from now

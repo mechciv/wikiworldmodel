@@ -169,7 +169,7 @@ forest views while the camera moves slowly.
 - **Idle movement.** A body's parts become bones: each vertex keeps the part it belongs to and that part's joint,
   and the vertex shader turns it. The poses already written (stand, walk, graze, drink, alert, rest, fly) become
   the ends of loops: a head lowered to graze and raised again, a tail's swing, breathing, at a pace set by the
-  body's size. Animals moving from place to place come later (they came with `gen:life/scene` version 10: see what
+  body's size. Animals moving from place to place come later (they came with `gen:life/scene` version 11: see what
   was built, below).
 
 Pass: with the clock fixed, two loads of a link give the same picture; with it running, the forest moves and the
@@ -289,7 +289,7 @@ above, it says so here.
   breathing trunk, and the shader turns it about its joint, at a pace set by the body's length. The wind's direction is
   the renderer's, as no field gives it.
 
-  **Animals and people go from place to place** (`gen:life/scene` version 10, `gen:people/settlement` version 4): what
+  **Animals and people go from place to place** (`gen:life/scene` version 11, `gen:people/settlement` version 4): what
   is drawn has something to do, and does it for as long as it is drawn. A body plan's `behave` names a routine, `feed`,
   `wander`, `patrol`, `stalk` or `circle`, or its habitat and poses suggest one ([FORMS.md](../FORMS.md)); the generator
   gives each animal a way by it ([routines.ts](../../world/generators/life/routines.ts)): a place or two near where it

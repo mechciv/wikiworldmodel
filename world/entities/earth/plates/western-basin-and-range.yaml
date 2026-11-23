@@ -1,0 +1,9 @@
+id: earth/plates/western-basin-and-range
+kind: plate
+summary: Plate 131 of the PALEOMAP plate model.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Western Basin & Range }
+    source: { ref: src:paleomap-plate-model, loc: "PALEOMAP_PlateModel.rot, plate 131", quote: "WBR Western Basin & Range" }
