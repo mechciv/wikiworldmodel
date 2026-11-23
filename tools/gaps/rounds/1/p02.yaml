@@ -1,0 +1,255 @@
+view: t=484.807163Ma&lat=-55.87578&lon=122.37675&d=1.0000023544&h=310&v=84&hour=15&mo=5&clock=0
+when: 484.8 Ma
+place: >-
+  The northern (seaward) edge of Gondwana where North Africa now is, at about 56°S in the Early Ordovician
+  (Tremadocian). Rotated back to today with the build's own PALEOMAP rotations on the nearest plates (north-east
+  Africa, Malta, Italy: their polygons come within 0.4° to 1.2° of the point), it is about 35°N 15°E: the sea floor
+  just east of Malta, off Tunisia and north-west Libya. No plate polygon holds the point itself, and Scotese's own
+  maps were not read.
+author: machine:claude-code
+expects:
+  - id: geography-passive-margin
+    layer: geography
+    what: >-
+      The place lies on the passive, north-facing margin of Gondwana, a platform of sand shed from the continent
+      behind it. No rock of this age has been reached under the place itself: what was there is carried from the
+      Saharan Platform to the south.
+    reach: place
+    source:
+      cite: "Klett, T.R. (2001). Total Petroleum Systems of the Pelagian Province, Tunisia, Libya, Italy, and Malta: The Bou Dabbous-Tertiary and Jurassic-Cretaceous Composite. U.S. Geological Survey Bulletin 2202-D."
+      url: https://pubs.usgs.gov/bul/b2202-d/b2202-d.pdf
+      text: usgs-b2202d-pelagian.txt
+      loc: "Tectonic History, p. 5 (PDF p. 9), running on after Figure 3"
+      quote: "The Paleozoic record is not well known in the Pelagian Province, but based on better known Paleozoic sections of the Saharan Platform … in southern Tunisia, the area was part of a passive continental margin"
+    note: >-
+      The source speaks of the whole Paleozoic of the Pelagian Province (the shelf between Tunisia, Libya, Malta and
+      Sicily, near whose eastern edge the point falls), not of the Tremadocian. That the point is there is this
+      brief's own arithmetic from the build's rotation model, not a statement of any source.
+  - id: geography-pole-under-north-africa
+    layer: geography
+    what: >-
+      A very large continent lies behind the viewer, with the South Pole under its north African part (about
+      3,800 km away by the build's rotations); in front, toward lower latitudes, wide shallow shelf seas over the
+      edge of the continent, floored with coarse sand.
+    reach: region
+    source:
+      cite: "Cocks, L.R.M. & Torsvik, T.H. (2021). Ordovician palaeogeography and climate change. Gondwana Research, centennial volume (the accepted manuscript)."
+      url: https://www.mn.uio.no/ceed/english/research/publications/articles/2020/ordovician_all_cocks_torsvik_2021.pdf
+      text: cocks-torsvik-2021.txt
+      loc: "section 2.1.2, Gondwana and its periphery, manuscript p. 5"
+      quote: "The South Pole lay beneath northern Africa and the extensive area of high-latitude shelves in that region includes many pockets of coarse sandstone"
+    note: Said of the Ordovician of northern Gondwana as a whole; the paper's map (its Fig. 1) is for 480 Ma.
+  - id: relief-low-undulating-platform
+    layer: relief
+    what: >-
+      Low, gently undulating ground with no mountains in sight: a platform of very low slope, with what was left of
+      an older (Precambrian) relief running north-west to south-east.
+    reach: region
+    source:
+      cite: "Bretones Villuendas, A. (2006). Estratigrafía de la sucesión paleozoica en la zona noroeste de la Cuenca de Murzuq (Libia). Diploma de Estudios Avanzados, Universidad Complutense de Madrid."
+      url: https://docta.ucm.es/bitstreams/d7d85e07-2869-4354-a285-b8fb453b266e/download
+      text: ucm-docta.txt
+      loc: "section 4.2.1, Cambro-Ordovícico, p. 14 (PDF p. 19)"
+      quote: "El depósito sedimentario tuvo lugar en una plataforma ondulada de bajo ángulo en el margen pasivo de Gondwana Norte."
+    note: >-
+      Of the Murzuq and Ghadames basins of Libya, 700 to 1,100 km from the point as the plates stood then, and of the
+      Cambrian and Ordovician together. An unpublished thesis that summarizes Hallett (2002) and others, which could
+      not be read. The build has the ground 230 m above the sea here; nothing read gives a height.
+  - id: substrate-quartz-sand
+    layer: substrate
+    what: >-
+      The ground is loose quartz sand, coarse, with pebbly patches: sheets of sand washed north off the eroding
+      continent by rivers. No soil and no mud to speak of.
+    reach: region
+    source:
+      cite: "Klett, T.R. (2000). Total Petroleum Systems of the Trias/Ghadames Province, Algeria, Tunisia, and Libya: The Tanezzuft-Oued Mya, Tanezzuft-Melrhir, and Tanezzuft-Ghadames. U.S. Geological Survey Bulletin 2202-C."
+      url: https://pubs.usgs.gov/bul/b2202-c/b2202c.pdf
+      text: usgs-b2202c-ghadames.txt
+      loc: "Province Geology, p. 11 (PDF p. 15)"
+      quote: "Eroded sediments were deposited northward as alluvial and ﬂuvial deposits and make up the thick Cambrian sandstone of the Mourizidie and Hassaouna Formations."
+    note: >-
+      Of the Ghadames province (eastern Algeria, southern Tunisia, westernmost Libya), about 700 km from the point
+      then, and of the Cambrian, the stretch just before this one: the sand plain the Tremadocian sea came in over.
+      "No mud" is from the formations being sandstone and conglomerate throughout, not from a sentence that says so.
+  - id: water-rivers-wide-sand-beds
+    layer: water
+    what: >-
+      Any river in view is wide, shallow and sandy, its banks bare sand with nothing growing to hold them; beside
+      it, tracts of wind-blown sand.
+    reach: region
+    source:
+      cite: "Gibling, M.R. & Davies, N.S. (2012). Palaeozoic landscapes shaped by plant evolution. Nature Geoscience 5, 99-105."
+      url: https://www.nature.com/ngeo/journal/v5/n2/pdf/ngeo1376.pdf
+      text: gibling-davies-2012.txt
+      loc: "Abstract"
+      quote: "In the absence of widespread vegetation, landscapes during the Cambrian and Ordovican periods were dominated by rivers with wide sand-beds and aeolian tracts."
+    note: >-
+      A statement about the whole world in the Cambrian and Ordovician; only the abstract could be read (the paper is
+      behind a paywall). The form of rivers before plants is disputed: Ganti et al. (2019, PNAS 116, 11652, read at
+      PMC6575162) argue from Proterozoic rivers that they were deep and single-threaded rather than braided. The
+      build's river here is a model's.
+  - id: water-sandy-coast-deltas-tidal-flats
+    layer: water
+    what: >-
+      Where the land meets the sea it is a low sandy coast: river and delta sands with a pebble bed at the base,
+      silty tidal flats, and sand bars offshore.
+    reach: region
+    source:
+      cite: "Geolex, Middle East lexicon: Hasawnah Formation (Libya, Fezzan Basin). Descriptions from Hallett, D. (2002), Petroleum Geology of Libya."
+      url: https://mideastlex.geolex.org/formations/Hasawnah%20Fm
+      text: mideastlex-hasawnah.txt
+      loc: "Lithology and Thickness"
+      quote: "a lower layer with a basal conglomerate of quartz pebbles (2m thick) overlain by massive banks of cross-bedded sandstone (fluvial and deltaic), a middle fine-grained siltstone layer (intertidal and subtidal), and an upper unit of massive cross-bedded quartz sanstone (offshore bars)"
+    note: >-
+      A lexicon's summary of Hallett (2002), which could not be read; the formation crops out on the Gargaf arch,
+      about 800 km from the point then. This lexicon gives it an age from the Fortunian to the Tremadocian; others
+      (the Niger lexicon, Bretones 2006) end it in the Cambrian, below the Tremadocian Ash Shabiyat Formation.
+  - id: water-shallow-sea-over-the-platform
+    layer: water
+    what: >-
+      Sea, not land, is the likelier sight at the place itself: in the Tremadocian a shallow sea had flooded the
+      sand plain far inland of here, leaving silty marine sand.
+    reach: region
+    source:
+      cite: "Bretones Villuendas, A. (2006). Estratigrafía de la sucesión paleozoica en la zona noroeste de la Cuenca de Murzuq (Libia). Diploma de Estudios Avanzados, Universidad Complutense de Madrid."
+      url: https://docta.ucm.es/bitstreams/d7d85e07-2869-4354-a285-b8fb453b266e/download
+      text: ucm-docta.txt
+      loc: "section 4.2.1.2, Formación Ash Shabiyat, p. 16 (PDF p. 21)"
+      quote: "La Formación Ash Shabiyat representa un intervalo de máxima inundación y está compuesta esencialmente por arenisca limolítica marina que contiene huellas fósiles de Tigillites (Figura 8), Cruziana y Harlania."
+    note: >-
+      Disagrees with the build, which has land 230 m above the sea at the point (from PaleoDEM, a model). The
+      Tremadocian Ash Shabiyat Formation of the Murzuq basin and the Gargaf arch lay 800 to 1,100 km from the point
+      and nearer the pole, that is farther into the continent; the same thesis says the sea came in from the
+      north-west and the beds are more marine that way, and reads its lower unit as a shelf 0 to 10 m deep with
+      spells of exposure. That the point, farther out on the margin, was under that sea is an inference: no source
+      read says so of the place, and its age rests on correlation with dated rocks in wells.
+  - id: life-burrows-and-trails-in-shore-sand
+    layer: life
+    what: >-
+      The only signs of animals are at the water's edge and under it: sand crowded with vertical burrows
+      (Tigillites, pipes up to half a metre deep) and the furrowed trails of trilobites (Cruziana). No shells, bones
+      or anything living on the dry ground.
+    reach: region
+    source:
+      cite: "LeBlanc, J. (2022). Stratigraphic Lexicon: The Sedimentary Formations of The Republic of Niger, Africa (Geolex, Niger lexicon): Ash Shabiyat Formation."
+      url: https://nigerlex.geolex.org/formations/Ash%20Shabiyat%20Fm
+      text: geolex-ash-shabiyat.txt
+      loc: "Fossils"
+      quote: "Common trace fossils (contains abundant Tigillites, Cruziana and Harlania trace fossils.)"
+    note: >-
+      A lexicon entry for the Tremadocian formation whose type area is the Gargaf arch of Libya, about 800 km from
+      the point then; it cites Havlicek et al. (1973) and others, not read. The half metre is from Bretones (2006,
+      p. 17: "con una longitud media de 50 cm"), of the same formation near Ghat. That trilobites made Cruziana is
+      the usual reading, not something these sources say.
+  - id: cover-microbial-mats-and-crusts
+    layer: cover
+    what: >-
+      What life there is on land is a film: microbial mats on ground that rivers and lakes wet from time to time,
+      and thin microbial crusts on raw mineral soil. Nothing stands above the ground surface.
+    reach: region
+    source:
+      cite: "Wellman, C.H., Cascales-Miñana, B. & Servais, T. (2023). Terrestrialization in the Ordovician. Geological Society, London, Special Publications 532, 171-190."
+      url: https://eprints.whiterose.ac.uk/194499/1/SP532-2022-92.pdf
+      text: wellman-2023-terrestrialization.txt
+      loc: "section 'An Early Ordovican terrestrial microbial world', first paragraph (PDF p. 2)"
+      quote: "The earliest terrestrial ecosystems were essentially microbial comprising freshwater ecosystems, periodically inundated microbial mats adjacent to rivers and lakes, and microbial crusts developed on rudimentary soils"
+    note: >-
+      A review of the whole world; the Early Ordovician evidence it shows is microfossils from Oman. Nothing read
+      describes a land surface of this age from North Africa, so whether mats or crusts grew at 56°S, and what
+      colour they gave the ground, is not known.
+  - id: cover-no-land-plants
+    layer: cover
+    what: >-
+      No plants of any kind on the land: no grass, moss, shrubs or trees, and no green cover. The first spores of
+      land plants come from rocks some fifteen million years younger.
+    reach: region
+    source:
+      cite: "Wellman, C.H., Cascales-Miñana, B. & Servais, T. (2023). Terrestrialization in the Ordovician. Geological Society, London, Special Publications 532, 171-190."
+      url: https://eprints.whiterose.ac.uk/194499/1/SP532-2022-92.pdf
+      text: wellman-2023-terrestrialization.txt
+      loc: "section on the dispersed spore record (PDF p. 4)"
+      quote: "The oldest reported occurrence of cryptospores clearly related to land plants is currently considered to be in the Middle Ordovician (Dapingian or Darriwilian) suggesting that land plants had successfully invaded the land by this time."
+    note: >-
+      Global, and an argument from absence. The same review notes older spore-like fossils (Cambrian and
+      Tremadocian) that some authors count as cryptospores, and Cocks and Torsvik (2021) allow that land plants
+      "might have begun as early as the Late Cambrian". "Fifteen million years" is the gap from 485 Ma to the
+      Dapingian by the time scale, not the source's figure.
+  - id: life-no-land-animals
+    layer: life
+    what: >-
+      No animal lives on the land. At most, something from the sea (an arthropod) crosses wet sand near the shore
+      and goes back.
+    reach: region
+    source:
+      cite: "Wellman, C.H., Cascales-Miñana, B. & Servais, T. (2023). Terrestrialization in the Ordovician. Geological Society, London, Special Publications 532, 171-190."
+      url: https://eprints.whiterose.ac.uk/194499/1/SP532-2022-92.pdf
+      text: wellman-2023-terrestrialization.txt
+      loc: "Conclusions (PDF p. 14)"
+      quote: "it seems that the only animals on the land were probably temporary visitors that were not obligate subaerial dwellers"
+    note: >-
+      Of the Ordovician as a whole and the whole world. That the visitors were arthropods is from the same review's
+      account of trackways in Cambrian-Ordovician wind-blown sands "from a marginal marine setting"; it names none
+      from North Africa.
+  - id: ice-none-in-view
+    layer: ice
+    what: >-
+      No ice sheet, glacier or sea ice, though the place is at 56°S and the pole is on the same continent: the
+      world was very warm, with warm-water limestones forming at latitudes as high as this one.
+    reach: region
+    source:
+      cite: "Cocks, L.R.M. & Torsvik, T.H. (2021). Ordovician palaeogeography and climate change. Gondwana Research, centennial volume (the accepted manuscript)."
+      url: https://www.mn.uio.no/ceed/english/research/publications/articles/2020/ordovician_all_cocks_torsvik_2021.pdf
+      text: cocks-torsvik-2021.txt
+      loc: "section 7.1, The climate before 460 Ma, manuscript p. 23"
+      quote: "There is general agreement that the latest Cambrian and earlier Ordovician were relatively very warm (Fig. 3b); a warmth reflected in the massive carbonates widespread in many continents, some even in high paleolatitudes such as Sardinia."
+    note: >-
+      Global. Sardinia stood at about 59°S then by the build's rotations, some 1,150 km from the point. The paper
+      knows of no glacial deposits anywhere before the late Katian; it does not speak of winter snow or frost on
+      land, which stay unknown. The build's ice here is its generic answer.
+  - id: sky-short-day-and-nearer-moon
+    layer: sky
+    what: >-
+      The day is about 22 hours long, so the Sun crosses the sky a little faster than now, and the Moon, when up,
+      is a few per cent nearer and larger (about 58 Earth radii away against 60 now).
+    reach: region
+    source:
+      cite: "Farhat, M., Auclair-Desrotour, P., Boué, G. & Laskar, J. (2022). The Resonant Tidal Evolution of the Earth-Moon Distance. Astronomy & Astrophysics (manuscript, arXiv:2207.00438)."
+      url: https://arxiv.org/pdf/2207.00438
+      text: farhat-2022-tides.txt
+      loc: "Table D.1, row 'Alum shale' (time in Ga, precession, lunar distance in Earth radii and km, day in hours)"
+      quote: "Alum shale Sørensen et al. (2020) 0.493 60.11 ± 1.59 57.88 ± 0.34 369153 ± 2200 21.99 ± 0.28"
+    note: >-
+      A value for the whole Earth at 493 Ma, eight million years before the scene, worked out by the paper's model
+      from a precession rate measured in the Alum Shale of Scandinavia; the next row, for 500 Ma, gives 21.82 hours.
+      By this brief's own arithmetic from the view (56°S, mid-May, three hours after noon, today's tilt of the
+      axis), the Sun stands about 6° above the horizon in the north-west, almost dead ahead of a camera facing 310°;
+      that is a calculation, not a source's statement.
+unknown:
+  - Whether the place was land or sea. No Cambrian or Ordovician rock has been reached under the Pelagian shelf or the sea floor east of Malta; the nearest dated Tremadocian rocks, 700 to 1,100 km away, are shallow-marine.
+  - The shape of the ground in view, if it was land - hills, valleys, outcrops of older rock, and its height above the sea (the build's 230 m is a model's).
+  - The colour of the ground. The sandstones are grey, white and brown now; no source read says what colour the loose sand and its weathered surface were then, or whether iron stained it red.
+  - Whether microbial mats or crusts covered the ground thickly enough to see, and what colour they were, at this latitude.
+  - The weather of late autumn at 56°S - how cold it was, whether there was frost or snow, how much rain and cloud, how strong the wind. The sources give sea temperatures in the tropics and "very warm" for the world; the build's coldest month of 2.8 °C and warmest of 36.3 °C could not be tested against anything.
+  - How much sand and dust the wind carried over ground with nothing growing on it, and so how hazy the air and how sharp the horizon were.
+  - The tilt of the Earth's axis then, and so the Sun's true height at this hour in May; the 6° given above assumes today's tilt.
+  - The river the build draws here (river 369 of its model for 480 Ma) - no source says there was a river at this place, and whether rivers before plants were braided sheets or single deep channels is disputed.
+  - The tides on this coast with the Moon nearer, and how wide a strip of sand they bared.
+  - What the sea threw up on the beach - shells, trilobite moults, weed. Nothing was read for this coast.
+  - What Scotese's own maps and atlas text draw at this point. They were not read; the landmass was found by rotating the build's plate polygons.
+pictures:
+  - { url: "https://www.mn.uio.no/ceed/english/research/publications/articles/2020/ordovician_all_cocks_torsvik_2021.pdf", what: "Cocks and Torsvik (2021), Fig. 1: a map of lands and oceans at about 480 Ma, centred on the South Pole." }
+  - { url: "https://docta.ucm.es/bitstreams/d7d85e07-2869-4354-a285-b8fb453b266e/download", what: "Bretones (2006), Figs 7 and 8: photographs of the Tremadocian Ash Shabiyat sandstones south of Ghat as they are today, flaggy beds and Tigillites burrows." }
+effort:
+  fetched: 17
+  cited: 9
+  failed: 9
+  note: >-
+    Read and kept but not cited: Pohl et al. (2014, Climate of the Past), whose Ordovician climate model draws all
+    land as bare rocky desert under a Sun 3.5 % fainter; Ganti et al. (2019); Ghienne et al. (2023) on the Ennedi
+    of Chad; Abuhmida and Wellman (2017); the Niger lexicon's Hasawnah entry; a Ghadames Basin paper in Geologica
+    Carpathica; Cosgrove et al. (2024). Not reached: the Durham thesis on the Hawaz Formation (timed out), the full
+    text of Gibling and Davies (2012) and of Davies and Gibling (2010), McMahon and Davies's papers on rivers
+    before plants (CORE refused), a University of Barcelona thesis, a Libyan Journal of Science paper (a PDF the
+    script could not read), the glendonite preprint on cold Tremadocian sea floors (bioRxiv refused), and anything
+    on the Tremadocian of Tunisia (Sanrhar Formation) or of Sicily and Calabria. Finding where the point is today
+    took longest: it was done by rotating the build's PALEOMAP polygons.

@@ -1,0 +1,247 @@
+view: t=1482.042&lat=20.15893&lon=34.02320&d=1.0000941767&h=230&v=60&hour=14&mo=7&clock=0
+when: 1482 CE
+place: The Nubian Desert of north-eastern Sudan, about 100 km north-east of Abu Hamed on the Nile, on the plain west of the Red Sea Hills near the head of the Wadi Gabgaba.
+author: machine:claude-code
+expects:
+  - id: sky-heat-whitened-horizon
+    layer: sky
+    what: >-
+      A sky bleached white by heat towards the horizon, which blurs into the plain; the light is blinding at
+      early afternoon.
+    reach: region
+    source:
+      cite: "Castiglioni, A. & Castiglioni, A. (2020). Traces of the Past – Second Expedition. In W. V. Davies & D. A. Welsby (eds), Travelling the Korosko Road: Archaeological Exploration in Sudan's Eastern Desert (Sudan Archaeological Research Society Publication 24). Archaeopress, Oxford."
+      url: https://www.archaeopress.com/Archaeopress/download/9781789698039
+      text: davies-welsby-2020-korosko-road.txt
+      loc: "ch. 6, p. 56 (page 84 of the PDF)"
+      quote: "Vast plains, where the horizon blurs and blends into the heat-whitened sky shimmering with blinding light, alternate with dark mountains crossed by narrow khors"
+    note: >-
+      Said of a journey in early 2005 through the desert north-east of Jebel Umm Nabari, to the north of this
+      point; a modern description of the same desert, carried here.
+  - id: sky-mirage-lakes
+    layer: sky
+    what: >-
+      Over the hot plain, sheets of mirage like lakes of clear blue water lying in the low ground, a dozen at a
+      time, towards the horizon.
+    reach: place
+    source:
+      cite: "Burckhardt, J. L. (1819). Travels in Nubia. London: John Murray."
+      url: https://archive.org/download/travelsinnubia00burcgoog/travelsinnubia00burcgoog_djvu.txt
+      text: burckhardt-1819-travels-in-nubia-scan2.txt
+      loc: "Journey from Daraou to Berber, 16th March [1814], pp. 192-193"
+      quote: "lakes of mirage, called by the Arabs Serab. Its colour was of the purest azure"
+    note: >-
+      Seen on 16 March 1814, 332 years after the scene, on the day's march between Wady Tarfawy and the well of
+      Shigre, which by his hours and bearings ran through or within some tens of kilometres of this point (dead
+      reckoning from Wadi Terfowi; no source read puts his wells on a modern map). He saw it from the ground: from
+      300 m up and looking down, a mirage would show only towards the horizon, if at all.
+  - id: weather-july-heat
+    layer: weather
+    what: >-
+      The hottest part of the year: a July whose days and nights average about 36 °C, with next to no rain (a few
+      millimetres in the month, on average).
+    reach: region
+    source:
+      cite: "Japan Meteorological Agency. World climate normals by station: Abu Hamed, Sudan (station 62640)."
+      url: https://ds.data.jma.go.jp/cpd/monitor/nrmlist/NrmMonth.php?stn=62640
+      text: jma-abu-hamed-normals.txt
+      loc: "table of monthly normals, the row for month 7 (mean temperature °C, precipitation mm)"
+      quote: "緯度：19.53°N 経度：33.32°E 高度：312 (m) … 7 35.9 3.5"
+    note: >-
+      A modern station normal (the page does not give its years), about 100 km south-west of the point and 80 m
+      lower. The build's warmest month here, 33.6 °C, is nearly 3 °C cooler than this station's June (36.3 °C).
+      No climate record of the 15th century for this desert was read.
+  - id: relief-sandy-flat-far-mountains
+    layer: relief
+    what: >-
+      A wide, nearly level sandy plain; high mountains stand far off to the east (the Red Sea Hills side), behind
+      a camera that faces south-west.
+    reach: place
+    source:
+      cite: "Burckhardt, J. L. (1819). Travels in Nubia. London: John Murray."
+      url: https://archive.org/download/travelsinnubia00burcgoog/travelsinnubia00burcgoog_djvu.txt
+      text: burckhardt-1819-travels-in-nubia-scan2.txt
+      loc: "Journey from Daraou to Berber, 16th March [1814], p. 192"
+      quote: "Our road lay over a sandy flat. High mountains appeared far in the east."
+    note: >-
+      Written in 1814 of the caravan road a day north of the well of Shigre; the landform will not have changed
+      since 1482. Where his road lay is by dead reckoning from his hours and bearings (see sky-mirage-lakes).
+  - id: relief-granite-hills
+    layer: relief
+    what: >-
+      Isolated ranges of granite hills, wild in outline, standing no more than 250 to 300 m above the plain; at
+      their foot the plain is sand strewn with sharp stones.
+    reach: place
+    source:
+      cite: "Burckhardt, J. L. (1819). Travels in Nubia. London: John Murray."
+      url: https://archive.org/download/travelsinnubia00burcgoog/travelsinnubia00burcgoog_djvu.txt
+      text: burckhardt-1819-travels-in-nubia-scan2.txt
+      loc: "Journey from Daraou to Berber, 18th March [1814], p. 196"
+      quote: "summit is not more than eight hundred or one thousand feet above the plain. All these mountains are of granite … by a slight descent reached a sandy plain, covered with sharp stones"
+    note: >-
+      Of Djebel Shigre, which he took four hours to cross in 1814; he passed his "Wady Kabkaba" an hour after
+      leaving the hills. Whether these hills, or only the plain, lie in this camera's view to the south-west is
+      not known.
+  - id: substrate-gravel-sand-low-jebels
+    layer: substrate
+    what: >-
+      From above, a patchwork: sheets of gravel broken by stretches of sand, dotted with low rocky hills; here
+      and there white quartz veins show against dark rock.
+    reach: region
+    source:
+      cite: "Castiglioni, A. & Castiglioni, A. (2020). The gold mines of Kerma and exploration of the South-Eastern Nubian Desert. In W. V. Davies & D. A. Welsby (eds), Travelling the Korosko Road (Sudan Archaeological Research Society Publication 24). Archaeopress, Oxford."
+      url: https://www.archaeopress.com/Archaeopress/download/9781789698039
+      text: davies-welsby-2020-korosko-road.txt
+      loc: "ch. 3, 'The journey', p. 11 (page 39 of the PDF)"
+      quote: "We cross a vast plain of gravel areas interspersed with sandy stretches dotted with low jebels."
+    note: >-
+      Seen in 2006 between Abu Hamed and Jebel en-Nigeim, which the authors put about 100 km from Abu Hamed, as
+      this point is. But they give their bearing from Abu Hamed as east-south-east, and this point lies to the
+      north-east, so their track may have passed well south of it: carried here as of the region. The quartz
+      veins against dark rock are from the same chapter's account of the Nigeim mine.
+  - id: substrate-dark-rock-through-sand
+    layer: substrate
+    what: >-
+      Bare bedrock with no plant cover showing through thin sand: banded strata in lines, and dark, raised rings
+      of hardened rock around circular granite bodies.
+    reach: region
+    source:
+      cite: "Gaboury, D., Nabil, H., Ennaciri, A. & Maacha, L. Structural setting and fluid composition of gold mineralization along the central segment of the Keraf suture, Neoproterozoic Nubian Shield, Sudan: implications for the source of gold. Authors' manuscript, Constellation (Université du Québec à Chicoutimi), item 7812."
+      url: https://constellation.uqac.ca/7812/1/Structural%20setting%20and%20fluid%20composition%20of%20gold%20mineralization%20along%20the%20central%20segment%20of%20the%20Keraf%20suture%2C%20Neoproterozoic%20Nubian%20Shield%2C%20Sudan.pdf
+      text: gaboury-keraf-gabgaba-gold.txt
+      loc: "section on methods, manuscript lines 186-193 (page 7 of the PDF)"
+      quote: "because there is no vegetation, outcrop features can be interpreted easily where sand … cover is thin … positive and dark-coloured relief"
+    note: >-
+      Said of satellite pictures of an area 250 km by 100 km along the central Keraf suture in northern Sudan,
+      with the Gabgaba gold deposits in it; whether this point is inside the mapped area was not checked. The
+      manuscript's own line numbers fall inside the quote and are left out at the ellipses. The journal it
+      appeared in is not named in the text read.
+  - id: water-dry-wadis-rain-strips
+    layer: water
+    what: >-
+      No standing or running water. Shallow strips of lower ground cross the plain from east to west, where rain
+      water gathers when it falls; they are marked by a line of trees and shrubs, and run as torrents towards the
+      Nile only after rain in the hills.
+    reach: place
+    source:
+      cite: "Burckhardt, J. L. (1819). Travels in Nubia. London: John Murray."
+      url: https://archive.org/download/travelsinnubia00burcgoog/travelsinnubia00burcgoog_djvu.txt
+      text: burckhardt-1819-travels-in-nubia-scan2.txt
+      loc: "Journey from Daraou to Berber, 16th March [1814], p. 192 (Wady Safyha); the wadis' direction, 18th March, p. 197"
+      quote: "cannot properly be called a valley, being a strip of lower land, running across the plain … where the rain water collects … and produces some trees and shrubs."
+    note: >-
+      1814, on the road a day north of Shigre; the ellipses pass over stray marks of the scan. Two days on he
+      crossed "Wady Kabkaba" and says of it and its neighbours that they "extend from east to west". The build
+      draws three modelled rivers here: by this account they are dry beds, wet for hours or days after rain.
+  - id: cover-bare-plain-trees-in-wadis
+    layer: cover
+    what: >-
+      The plain itself is bare gravel and sand. Trees, thin-crowned acacias giving little shade, stand only along
+      the wadi beds, and few of them.
+    reach: region
+    source:
+      cite: "Burckhardt, J. L. (1819). Travels in Nubia. London: John Murray."
+      url: https://archive.org/download/travelsinnubia00burcgoog/travelsinnubia00burcgoog_djvu.txt
+      text: burckhardt-1819-travels-in-nubia-scan2.txt
+      loc: "Journey from Daraou to Berber, 22nd March [1814], p. 203"
+      quote: "over an extensive gravelly plain, intersected by several Wadys or low grounds, running towards the river, and in general bearing few trees"
+    note: >-
+      1814, four days' march south of Shigre towards Berber, in the same desert; he adds there that the acacia's
+      foliage is too scanty to give much shade. He travelled after nearly three years without rain, and found many
+      trees dried up. Nothing read says what grew here in the 15th century.
+  - id: life-few-animals-crows
+    layer: life
+    what: >-
+      Almost no animals in sight: no tracks of large game in the sand, and of birds only a few crows.
+    reach: region
+    source:
+      cite: "Burckhardt, J. L. (1819). Travels in Nubia. London: John Murray."
+      url: https://archive.org/download/travelsinnubia00burcgoog/travelsinnubia00burcgoog_djvu.txt
+      text: burckhardt-1819-travels-in-nubia-scan2.txt
+      loc: "Journey from Daraou to Berber, 11th March [1814], p. 185 (Wady Om-gat)"
+      quote: "not to see the footsteps of any wild animals in the sand, and no birds, except a few crows"
+    note: >-
+      1814, in a year of drought, further north on the same road. Of the build's list, Corvus fits. Nearer Berber
+      he saw ostriches, hares and large lizards and was told of wild asses, and the Castiglionis name the Dorcas
+      gazelle in Wadi Terfowi today; no source read puts the atlas's elephant, giraffe, rhinoceroses, warthog,
+      pelican or Nile fishes and mussels in this desert at this date.
+  - id: people-beja-tents-no-villages
+    layer: people
+    what: >-
+      The only dwellings are the tents of Beja herders, of woven hair: no town, no village, no tilled field
+      anywhere in view.
+    reach: region
+    source:
+      cite: "al-Maqrizi (before 1442). Khitat, the description of the Beja, translated in Burckhardt, J. L. (1819). Travels in Nubia, Appendix III. London: John Murray."
+      url: https://archive.org/download/travelsinnubia00burc/travelsinnubia00burc_djvu.txt
+      text: burckhardt-1819-travels-in-nubia.txt
+      loc: "Appendix III, p. 510"
+      quote: "The Bedja live under tents of hair … They have no towns, no villages, no fields."
+    note: >-
+      Of the Beja as a whole, between the Nile and the Red Sea. Maqrizi wrote in the generation before 1482, but
+      compiles older writers: this sentence follows his citation of Hamadani, of the 10th century. Burckhardt in
+      1813 saw tents of palm-leaf mats among a neighbouring people on the Nile; which the Beja of this desert used
+      in 1482 is not settled by anything read. The build draws herders' tents, which agrees; its 45 settlements
+      and 940 people in one view of a waterless plain are far more than any account read suggests.
+  - id: people-camel-herders
+    layer: people
+    what: >-
+      Where there are people there are camels: the Beja of the desert between the Nile and the Red Sea keep
+      camels and live on their milk and meat and on game.
+    reach: region
+    source:
+      cite: "Leo Africanus (1896 [1600]). The History and Description of Africa, done into English by John Pory, ed. R. Brown, vol. III. London: Hakluyt Society."
+      url: https://archive.org/download/no94v3works01hakluoft/no94v3works01hakluoft_djvu.txt
+      text: leo-africanus-1896-vol3.txt
+      loc: "Book 7, 'Of the kingdome of Nubia', pp. 836-837"
+      quote: "dwelling vpon the desert which lieth eastward of Nilus, and stretcheth towards the red sea … milke, camels-flesh and the flesh of such beasts as are taken in those deserts"
+    note: >-
+      The editor's notes in the same volume put Leo's visit to Egypt about 1517 and his writing in 1526: within
+      fifty years of the scene, and the nearest in time of the sources read. It is of the whole desert, not of
+      this spot.
+  - id: people-summer-camps-at-wells
+    layer: people
+    what: >-
+      In July the herders are on this side of the desert, not in the Red Sea Hills: small camps of a few families
+      with camels and sheep, in the wadis near the few wells.
+    reach: region
+    source:
+      cite: "Burckhardt, J. L. (1819). Travels in Nubia. London: John Murray."
+      url: https://archive.org/download/travelsinnubia00burc/travelsinnubia00burc_djvu.txt
+      text: burckhardt-1819-travels-in-nubia.txt
+      loc: "Journey from Daraou to Berber, 7th March [1814], p. 175"
+      quote: "they are obliged to approach in summer nearer to the Nile, where wells are more numerous"
+    note: >-
+      Of the Bisharin, the Beja of this desert, in 1814. At Shigre he says they often camp in the neighbouring
+      wadis, and at another well he found "only a few families". Whether the herders of 1482 moved by the same
+      round is an inference from a source 332 years later.
+  - id: people-old-gold-workings
+    layer: people
+    what: >-
+      Ruins of medieval gold workings may show on the hills: clusters of round dry-stone huts about 4 m across,
+      with trenches dug into the surface beside them.
+    reach: region
+    source:
+      cite: "Castiglioni, A. & Castiglioni, A. (2020). The Tracks of Egyptian Penetration. In W. V. Davies & D. A. Welsby (eds), Travelling the Korosko Road (Sudan Archaeological Research Society Publication 24). Archaeopress, Oxford."
+      url: https://www.archaeopress.com/Archaeopress/download/9781789698039
+      text: davies-welsby-2020-korosko-road.txt
+      loc: "ch. 4, 'The Medieval Mines', p. 29 (page 57 of the PDF)"
+      quote: "many well preserved circular buildings made of dry-stone walls. They have a diameter of about 4m"
+    note: >-
+      Of thirteen medieval Islamic mining settlements between 33°30' and 33°50' E, north of this point. The same
+      authors found old workings of "pre-Islamic Beja, medieval Arabs" at Jebel en-Nigeim, about 100 km from Abu
+      Hamed, and say the Wadi Allaqi mines were given up towards the end of the 12th century. None is placed at
+      this spot, and none is dated to 1482.
+unknown:
+  - What exactly lay in this camera's view to the south-west. No source read puts Burckhardt's wells (Shigre, Nedjeym) or his "Wady Kabkaba" on a modern map, so whether the frame holds the granite hills of Shigre, a wadi line, or only open plain is not known.
+  - Whether any camp stood within sight in July 1482, and how many people this desert held. No account of the 15th century describes this stretch; the nearest (Maqrizi, Leo Africanus) speak of the Beja as a whole, and give no numbers.
+  - What a Beja tent of this desert looked like in 1482, hair cloth as Maqrizi's sources say or palm-leaf mats as among later herders, its size and colour, and how many made a camp.
+  - Whether a caravan road crossed here in 1482. The road from Daraw to Berber by Shigre is described in the 1770s and in 1814, and ruts of "recent and ancient" caravans are reported today between Abu Hamed and Jebel en-Nigeim, but nothing read says the road was used in the 15th century, after the fall of Aydhab.
+  - Whether the gold workings nearest this point were being worked, or had long been abandoned, in 1482; the ruins near here are not dated in what was read.
+  - What grew here in the 15th century, and how thickly the wadis were wooded. There is no pollen or charcoal record near the point in what was read; the trees named (acacia, "sellam", doum palm at the wells, senna, colocynth on sand) are from 1814 and from today.
+  - Which large animals lived here then. Ostrich and wild ass (1814) and Dorcas gazelle (today) are named for the region; nothing read says how common they were in 1482.
+  - The July sky on a given day, cloud from the edge of the summer rains, dust haze or clear, and whether rain had fallen that year. Burckhardt describes dust storms that turn the air yellowish, but not for this month or place.
+  - The colour of the ground at this spot. South of Nedjeym Burckhardt found a dark plain of black flints, north of Shigre pale sand; which holds here is not said.
+pictures:
+  - { url: "https://www.archaeopress.com/Archaeopress/Products/9781789698039", what: "Davies & Welsby (eds), Travelling the Korosko Road (open access): photographs of the Nubian Desert, among them Plate 11.2, the desert between Bab es-Silik and Wadi Murat, and Plates 3.1-3.2, the old mine of Jebel en-Nigeim about 100 km from Abu Hamed." }
+effort: { fetched: 10, cited: 6, failed: 7, note: "Ten texts saved, six cited (five works: Burckhardt in two scans). Cooper 2021 on the Atbai survey was read and not cited: it is of the central Atbai, further east. Could not reach Project Gutenberg's text of Burckhardt (503, twice), the OAPEN copy of the Korosko Road volume (403, twice; read from Archaeopress instead), CORE's copy of Andersen et al. 2014 on Acacia tortilis (403, twice) or PMC directly (read through Europe PMC, not cited: it is of Egypt). The first archive.org scan of Burckhardt lacks pp. 187-197, the days nearest this point, so a second scan was fetched and both are cited. Longest: working out from Burckhardt's hours and bearings that his road of 16-18 March 1814 ran by this point." }

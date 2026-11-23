@@ -1,0 +1,8289 @@
+{
+ "build": "46369419beeb44e6",
+ "size": {
+  "width": 1600,
+  "height": 900
+ },
+ "views": {
+  "p01": {
+   "tiers": {
+    "planet": {
+     "layer": "planet",
+     "tier": "evidence",
+     "value": "Oceans",
+     "why": "The planet's state at this time, from its records."
+    },
+    "geography": {
+     "layer": "geography",
+     "tier": "generic",
+     "value": "sea",
+     "why": "Nothing records where the land was at this time: generic land is drawn, its places invented and its amount a placeholder."
+    },
+    "climate": {
+     "layer": "climate",
+     "tier": "model",
+     "value": "energy-balance model",
+     "why": "No climate model's run covers this time. An energy-balance model gives the CO₂ at which the Earth froze over, below 0.0044 bar of CO₂ under the Sun of this time: set it beside what the evidence says the CO₂ was, where it says."
+    },
+    "ice": {
+     "layer": "ice",
+     "tier": "generic",
+     "value": "none",
+     "why": "No ice is drawn: nothing records ice here then, which does not mean there was none."
+    },
+    "water": {
+     "layer": "water",
+     "tier": "generic",
+     "value": "invented",
+     "why": "Nothing routes water here then: a scene invents its river."
+    },
+    "life": {
+     "layer": "life",
+     "tier": "unknown",
+     "value": null,
+     "why": "The atlases of who lived where reach only the Phanerozoic."
+    },
+    "people": {
+     "layer": "people",
+     "tier": "unknown",
+     "value": null,
+     "why": "No grid of where people lived covers this time."
+    },
+    "polity": {
+     "layer": "polity",
+     "tier": "unknown",
+     "value": null,
+     "why": "No dataset of states covers this time."
+    }
+   },
+   "biome": null,
+   "climate": null,
+   "climateField": null,
+   "ground": null,
+   "ice": null,
+   "scene": null,
+   "settlements": [],
+   "text": [],
+   "settled": [],
+   "errors": [],
+   "seconds": 13
+  },
+  "p02": {
+   "tiers": {
+    "planet": {
+     "layer": "planet",
+     "tier": "evidence",
+     "value": "Oceans",
+     "why": "The planet's state at this time, from its records."
+    },
+    "geography": {
+     "layer": "geography",
+     "tier": "model",
+     "value": "elevation",
+     "why": "Surface elevation and ocean depth covers this time."
+    },
+    "climate": {
+     "layer": "climate",
+     "tier": "model",
+     "value": "climate field",
+     "why": "A climate model's run covers this time."
+    },
+    "ice": {
+     "layer": "ice",
+     "tier": "generic",
+     "value": "none",
+     "why": "No ice is drawn: nothing records ice here then, which does not mean there was none."
+    },
+    "water": {
+     "layer": "water",
+     "tier": "model",
+     "value": "drainage",
+     "why": "The water of the climate, routed over the ground of the time, says where rivers ran and how much they carried."
+    },
+    "life": {
+     "layer": "life",
+     "tier": "unknown",
+     "value": null,
+     "why": "The atlases of who lived where reach only the Phanerozoic."
+    },
+    "people": {
+     "layer": "people",
+     "tier": "unknown",
+     "value": null,
+     "why": "No grid of where people lived covers this time."
+    },
+    "polity": {
+     "layer": "polity",
+     "tier": "unknown",
+     "value": null,
+     "why": "No dataset of states covers this time."
+    }
+   },
+   "biome": {
+    "climate": "temperate",
+    "cover": {
+     "crust": 1,
+     "plants": 0,
+     "forests": 0,
+     "grasses": 0,
+     "reefs": 1
+    }
+   },
+   "climate": {
+    "hot": 36.26262610196078,
+    "cold": 2.806298176470591,
+    "aridity": 3.00654207036539,
+    "margin": 36.96807670588231
+   },
+   "climateField": "field:earth/climate",
+   "ground": 230.344694025,
+   "ice": null,
+   "scene": {
+    "site": "gsfbx9",
+    "plan": {
+     "expected": null,
+     "actual": {
+      "ground.0": {
+       "n": 1640961,
+       "mean": 2181.7234370591377,
+       "sd": 127.35164971422628,
+       "min": 1980,
+       "max": 2658,
+       "hist": [
+        257014,
+        478687,
+        504940,
+        173369,
+        100463,
+        69630,
+        36103,
+        20755
+       ]
+      },
+      "ground.1": {
+       "n": 1640961,
+       "mean": 2320.38870454569,
+       "sd": 481.7841892404357,
+       "min": 1474,
+       "max": 3725,
+       "hist": [
+        221161,
+        241484,
+        501259,
+        224284,
+        191851,
+        166664,
+        81502,
+        12756
+       ]
+      },
+      "ground.2": {
+       "n": 1442401,
+       "mean": 2774.298620147934,
+       "sd": 1890.8337322879888,
+       "min": 200,
+       "max": 15297,
+       "hist": [
+        643022,
+        482403,
+        219117,
+        68125,
+        17584,
+        8664,
+        2873,
+        613
+       ]
+      },
+      "cell.place": {
+       "n": 0
+      },
+      "cell.taxon": {
+       "n": 0,
+       "hash": "811c9dc5"
+      },
+      "cell.pose": {
+       "n": 0,
+       "hash": "811c9dc5"
+      },
+      "cell.shade": {
+       "n": 0
+      },
+      "cell.phase": {
+       "n": 0
+      },
+      "cell.rank": {
+       "n": 0,
+       "hash": "811c9dc5"
+      }
+     },
+     "problems": []
+    },
+    "taxa": [],
+    "instances": 0,
+    "triangles": 0,
+    "meshes": 0,
+    "groundMs": 957.6000001430511,
+    "stage": "Tremadocian",
+    "climate": "temperate",
+    "climateField": "field:earth/climate",
+    "month": 5,
+    "snow": 1516,
+    "focus": [
+     -17975,
+     -16221
+    ],
+    "toRiver": [
+     -0.742,
+     -0.67
+    ],
+    "origin": {
+     "lat": -55.85,
+     "lon": 122.34653
+    },
+    "water": {
+     "tier": "model",
+     "rivers": [
+      {
+       "key": "rivers/deep/480/network.lwt#369",
+       "from": "model"
+      }
+     ]
+    },
+    "sea": false,
+    "list": "land",
+    "eye": {
+     "z": 224.77776339394632,
+     "floor": 223.07776339394633
+    },
+    "people": null
+   },
+   "settlements": [],
+   "text": [
+    "Nothing recorded here"
+   ],
+   "settled": [],
+   "errors": [],
+   "seconds": 16
+  },
+  "p03": {
+   "tiers": {
+    "planet": {
+     "layer": "planet",
+     "tier": "evidence",
+     "value": "Oceans",
+     "why": "The planet's state at this time, from its records."
+    },
+    "geography": {
+     "layer": "geography",
+     "tier": "model",
+     "value": "elevation",
+     "why": "Surface elevation and ocean depth covers this time."
+    },
+    "climate": {
+     "layer": "climate",
+     "tier": "model",
+     "value": "climate field",
+     "why": "A climate model's run covers this time."
+    },
+    "ice": {
+     "layer": "ice",
+     "tier": "generic",
+     "value": "none",
+     "why": "No ice is drawn: nothing records ice here then, which does not mean there was none."
+    },
+    "water": {
+     "layer": "water",
+     "tier": "model",
+     "value": "drainage",
+     "why": "The water of the climate, routed over the ground of the time, says where rivers ran and how much they carried."
+    },
+    "life": {
+     "layer": "life",
+     "tier": "unknown",
+     "value": null,
+     "why": "The atlases of who lived where reach only the Phanerozoic."
+    },
+    "people": {
+     "layer": "people",
+     "tier": "unknown",
+     "value": null,
+     "why": "No grid of where people lived covers this time."
+    },
+    "polity": {
+     "layer": "polity",
+     "tier": "unknown",
+     "value": null,
+     "why": "No dataset of states covers this time."
+    }
+   },
+   "biome": {
+    "climate": "savanna",
+    "cover": {
+     "crust": 1,
+     "plants": 1,
+     "forests": 1,
+     "grasses": 0,
+     "reefs": 1
+    }
+   },
+   "climate": {
+    "hot": 26.121198101960786,
+    "cold": 23.57930628235293,
+    "aridity": 1.8824654987581912,
+    "margin": -38.06040941176475
+   },
+   "climateField": "field:earth/climate",
+   "ground": 130.06310447499988,
+   "ice": null,
+   "scene": {
+    "site": "vgshs0",
+    "plan": {
+     "expected": null,
+     "actual": {
+      "ground.0": {
+       "n": 1640961,
+       "mean": 1240.604685912706,
+       "sd": 155.39094797681653,
+       "min": 955,
+       "max": 1590,
+       "hist": [
+        166882,
+        253478,
+        300024,
+        211418,
+        214177,
+        289144,
+        152667,
+        53171
+       ]
+      },
+      "ground.1": {
+       "n": 1640961,
+       "mean": 1260.5242446346988,
+       "sd": 715.5947702757994,
+       "min": -199,
+       "max": 2926,
+       "hist": [
+        32735,
+        342398,
+        297409,
+        246059,
+        232958,
+        243588,
+        194709,
+        51105
+       ]
+      },
+      "ground.2": {
+       "n": 1442401,
+       "mean": 3159.753244763419,
+       "sd": 5116.154142262613,
+       "min": -1654,
+       "max": 25761,
+       "hist": [
+        874789,
+        215898,
+        119732,
+        99023,
+        77726,
+        38674,
+        13921,
+        2638
+       ]
+      },
+      "cell.place": {
+       "n": 48138,
+       "mean": 23.866448775553092,
+       "sd": 140.6082393306565,
+       "min": -398.99578857421875,
+       "max": 399.83880615234375,
+       "hist": [
+        1672,
+        2170,
+        2135,
+        12308,
+        15701,
+        9819,
+        2157,
+        2176
+       ]
+      },
+      "cell.taxon": {
+       "n": 8023,
+       "hash": "d54fc4f7"
+      },
+      "cell.pose": {
+       "n": 8023,
+       "hash": "774d8122"
+      },
+      "cell.shade": {
+       "n": 8023,
+       "mean": 127.72528979184844,
+       "sd": 73.73423524508111,
+       "min": 0,
+       "max": 255,
+       "hist": [
+        985,
+        1015,
+        972,
+        1056,
+        995,
+        1015,
+        946,
+        1039
+       ]
+      },
+      "cell.phase": {
+       "n": 8023,
+       "mean": 1.2489093855166398,
+       "sd": 14.88376975144083,
+       "min": 0,
+       "max": 255,
+       "hist": [
+        7957,
+        12,
+        5,
+        9,
+        7,
+        9,
+        13,
+        11
+       ]
+      },
+      "cell.rank": {
+       "n": 8023,
+       "hash": "1cde1c7e"
+      },
+      "mesh.position": {
+       "n": 1662,
+       "mean": 0.03482585099134932,
+       "sd": 0.06382689740362271,
+       "min": -0.2520415484905243,
+       "max": 0.2520415484905243,
+       "hist": [
+        8,
+        56,
+        28,
+        240,
+        836,
+        409,
+        77,
+        8
+       ]
+      },
+      "mesh.uv": {
+       "n": 1108,
+       "mean": 1.750937898767295,
+       "sd": 2.2111382645871602,
+       "min": 0,
+       "max": 9,
+       "hist": [
+        648,
+        127,
+        127,
+        73,
+        41,
+        33,
+        23,
+        36
+       ]
+      },
+      "mesh.shade": {
+       "n": 2216,
+       "mean": 162.48916967509027,
+       "sd": 82.89208803109833,
+       "min": 1,
+       "max": 255,
+       "hist": [
+        203,
+        128,
+        146,
+        163,
+        509,
+        108,
+        127,
+        832
+       ]
+      },
+      "mesh.material": {
+       "n": 1662,
+       "hash": "63c08dbd"
+      },
+      "mesh.indices": {
+       "n": 2172,
+       "hash": "bf0561a2"
+      }
+     },
+     "problems": []
+    },
+    "taxa": [
+     {
+      "id": "life/taxa/meganisoptera",
+      "label": "griffinflies",
+      "form": "griffinflies",
+      "own": true,
+      "tier": "standin",
+      "km": 0,
+      "rows": 0,
+      "drawn": true
+     },
+     {
+      "id": "life/pbdb/txn-264974",
+      "label": "Alisporites",
+      "form": "gymnosperms",
+      "own": false,
+      "tier": "here",
+      "km": 0,
+      "rows": 8,
+      "drawn": false
+     },
+     {
+      "id": "txn:340635",
+      "label": "Platysaccus",
+      "form": "podocarps",
+      "own": false,
+      "tier": "here",
+      "km": 0,
+      "rows": 4,
+      "drawn": false
+     },
+     {
+      "id": "txn:404083",
+      "label": "Odontopteris",
+      "form": "peltasperms and glossopterids",
+      "own": false,
+      "tier": "region",
+      "km": 1090,
+      "rows": 11,
+      "drawn": false
+     },
+     {
+      "id": "txn:125753",
+      "label": "Cordaites",
+      "form": "cordaites",
+      "own": false,
+      "tier": "region",
+      "km": 1090,
+      "rows": 21,
+      "drawn": false
+     },
+     {
+      "id": "txn:405674",
+      "label": "Dadoxylon",
+      "form": "monkey puzzles",
+      "own": false,
+      "tier": "region",
+      "km": 1090,
+      "rows": 3,
+      "drawn": false
+     },
+     {
+      "id": "life/taxa/annularia",
+      "label": "Annularia",
+      "form": "Annularia",
+      "own": true,
+      "tier": "region",
+      "km": 1090,
+      "rows": 10,
+      "drawn": false
+     },
+     {
+      "id": "txn:389061",
+      "label": "Walchia",
+      "form": "conifers and cordaites",
+      "own": false,
+      "tier": "region",
+      "km": 1090,
+      "rows": 9,
+      "drawn": false
+     },
+     {
+      "id": "txn:404040",
+      "label": "Callipteris",
+      "form": "peltasperms and glossopterids",
+      "own": false,
+      "tier": "region",
+      "km": 1090,
+      "rows": 12,
+      "drawn": false
+     },
+     {
+      "id": "txn:36981",
+      "label": "Acroplous",
+      "form": "temnospondyls",
+      "own": false,
+      "tier": "here",
+      "km": 0,
+      "rows": 2,
+      "drawn": false
+     },
+     {
+      "id": "life/taxa/eryops",
+      "label": "Eryops",
+      "form": "Eryops",
+      "own": true,
+      "tier": "region",
+      "km": 630,
+      "rows": 11,
+      "drawn": false
+     },
+     {
+      "id": "txn:37265",
+      "label": "Diploceraspis",
+      "form": "Diplocaulidae",
+      "own": false,
+      "tier": "region",
+      "km": 1290,
+      "rows": 20,
+      "drawn": false
+     },
+     {
+      "id": "txn:38888",
+      "label": "Ophiacodon",
+      "form": "Ophiacodontidae",
+      "own": false,
+      "tier": "region",
+      "km": 850,
+      "rows": 8,
+      "drawn": true
+     },
+     {
+      "id": "life/taxa/dimetrodon",
+      "label": "Dimetrodon",
+      "form": "Dimetrodon",
+      "own": true,
+      "tier": "region",
+      "km": 630,
+      "rows": 6,
+      "drawn": true
+     },
+     {
+      "id": "txn:345960",
+      "label": "Ductilodon",
+      "form": "Diplocaulidae",
+      "own": false,
+      "tier": "here",
+      "km": 0,
+      "rows": 1,
+      "drawn": false
+     },
+     {
+      "id": "txn:37197",
+      "label": "Cricotus",
+      "form": "embolomeres",
+      "own": false,
+      "tier": "region",
+      "km": 850,
+      "rows": 3,
+      "drawn": false
+     },
+     {
+      "id": "txn:37247",
+      "label": "Diadectes",
+      "form": "diadectomorphs",
+      "own": false,
+      "tier": "region",
+      "km": 850,
+      "rows": 3,
+      "drawn": true
+     },
+     {
+      "id": "txn:38911",
+      "label": "Edaphosaurus",
+      "form": "Edaphosauridae",
+      "own": false,
+      "tier": "region",
+      "km": 630,
+      "rows": 4,
+      "drawn": true
+     },
+     {
+      "id": "txn:37056",
+      "label": "Zatrachys",
+      "form": "temnospondyls",
+      "own": false,
+      "tier": "region",
+      "km": 850,
+      "rows": 2,
+      "drawn": false
+     },
+     {
+      "id": "txn:227167",
+      "label": "Brachydectes",
+      "form": "recumbirostrans",
+      "own": false,
+      "tier": "here",
+      "km": 0,
+      "rows": 2,
+      "drawn": false
+     },
+     {
+      "id": "txn:37023",
+      "label": "Brevidorsum",
+      "form": "dissorophoids",
+      "own": false,
+      "tier": "region",
+      "km": 850,
+      "rows": 1,
+      "drawn": true
+     },
+     {
+      "id": "txn:37052",
+      "label": "Parioxys",
+      "form": "dissorophoids",
+      "own": false,
+      "tier": "region",
+      "km": 850,
+      "rows": 1,
+      "drawn": true
+     },
+     {
+      "id": "txn:362805",
+      "label": "Reiszerpeton",
+      "form": "dissorophoids",
+      "own": false,
+      "tier": "region",
+      "km": 850,
+      "rows": 1,
+      "drawn": true
+     },
+     {
+      "id": "txn:37028",
+      "label": "Ecolsonia",
+      "form": "dissorophoids",
+      "own": false,
+      "tier": "region",
+      "km": 1700,
+      "rows": 3,
+      "drawn": true
+     },
+     {
+      "id": "txn:193399",
+      "label": "Rubeostratilia",
+      "form": "dissorophoids",
+      "own": false,
+      "tier": "region",
+      "km": 630,
+      "rows": 1,
+      "drawn": true
+     },
+     {
+      "id": "life/taxa/blattodea",
+      "label": "Holopandictyoptera",
+      "form": "Holopandictyoptera",
+      "own": true,
+      "tier": "standin",
+      "km": 0,
+      "rows": 0,
+      "drawn": true
+     },
+     {
+      "id": "txn:460639",
+      "label": "Striatites",
+      "form": "plants",
+      "own": false,
+      "tier": "here",
+      "km": 0,
+      "rows": 13,
+      "drawn": false
+     },
+     {
+      "id": "txn:379237",
+      "label": "Vesicaspora",
+      "form": "plants",
+      "own": false,
+      "tier": "here",
+      "km": 0,
+      "rows": 5,
+      "drawn": false
+     },
+     {
+      "id": "txn:404097",
+      "label": "Callipteridium",
+      "form": "plants",
+      "own": false,
+      "tier": "region",
+      "km": 1090,
+      "rows": 5,
+      "drawn": false
+     },
+     {
+      "id": "txn:249938",
+      "label": "Sphenophyllum",
+      "form": "land plants",
+      "own": false,
+      "tier": "region",
+      "km": 1090,
+      "rows": 5,
+      "drawn": false
+     },
+     {
+      "id": "txn:244576",
+      "label": "Barbclabornia",
+      "form": "xenacanths",
+      "own": false,
+      "tier": "region",
+      "km": 1290,
+      "rows": 3,
+      "drawn": false
+     },
+     {
+      "id": "txn:55009",
+      "label": "Orthacanthus",
+      "form": "cartilaginous fishes",
+      "own": false,
+      "tier": "region",
+      "km": 1090,
+      "rows": 2,
+      "drawn": false
+     },
+     {
+      "id": "txn:137509",
+      "label": "Sagenodus",
+      "form": "lungfishes",
+      "own": false,
+      "tier": "region",
+      "km": 1090,
+      "rows": 1,
+      "drawn": false
+     }
+    ],
+    "instances": 23611,
+    "triangles": 1094612,
+    "meshes": 76,
+    "groundMs": 680.8999998569489,
+    "stage": "Sakmarian",
+    "climate": "savanna",
+    "climateField": "field:earth/climate",
+    "month": 12,
+    "snow": 3648,
+    "focus": [
+     191,
+     -129
+    ],
+    "toRiver": [
+     0,
+     1
+    ],
+    "origin": {
+     "lat": -0.65,
+     "lon": -25.60711
+    },
+    "water": {
+     "tier": "model",
+     "rivers": []
+    },
+    "sea": false,
+    "list": "land",
+    "eye": {
+     "z": 409.5149365684298,
+     "floor": 111.10000000000001
+    },
+    "people": null
+   },
+   "settlements": [],
+   "text": [
+    "7 recorded here, 24 nearby, 2 stand-ins"
+   ],
+   "settled": [
+    "refining"
+   ],
+   "errors": [],
+   "seconds": 14
+  },
+  "p04": {
+   "tiers": {
+    "planet": {
+     "layer": "planet",
+     "tier": "evidence",
+     "value": "Oceans",
+     "why": "The planet's state at this time, from its records."
+    },
+    "geography": {
+     "layer": "geography",
+     "tier": "model",
+     "value": "elevation",
+     "why": "Surface elevation and ocean depth covers this time."
+    },
+    "climate": {
+     "layer": "climate",
+     "tier": "model",
+     "value": "climate field",
+     "why": "A climate model's run covers this time."
+    },
+    "ice": {
+     "layer": "ice",
+     "tier": "generic",
+     "value": "none",
+     "why": "No ice is drawn: nothing records ice here then, which does not mean there was none."
+    },
+    "water": {
+     "layer": "water",
+     "tier": "model",
+     "value": "drainage",
+     "why": "The water of the climate, routed over the ground of the time, says where rivers ran and how much they carried."
+    },
+    "life": {
+     "layer": "life",
+     "tier": "unknown",
+     "value": null,
+     "why": "The atlases of who lived where reach only the Phanerozoic."
+    },
+    "people": {
+     "layer": "people",
+     "tier": "unknown",
+     "value": null,
+     "why": "No grid of where people lived covers this time."
+    },
+    "polity": {
+     "layer": "polity",
+     "tier": "unknown",
+     "value": null,
+     "why": "No dataset of states covers this time."
+    }
+   },
+   "biome": {
+    "climate": "rainforest",
+    "cover": {
+     "crust": 1,
+     "plants": 1,
+     "forests": 1,
+     "grasses": 0,
+     "reefs": 1
+    }
+   },
+   "climate": {
+    "hot": 31.292253023529412,
+    "cold": 26.864609721568627,
+    "aridity": 3.4108103259259317,
+    "margin": 125.97142623529413
+   },
+   "climateField": "field:earth/climate",
+   "ground": 631.9430159999996,
+   "ice": null,
+   "scene": {
+    "site": "1t6eeie",
+    "plan": {
+     "expected": null,
+     "actual": {
+      "ground.0": {
+       "n": 1640961,
+       "mean": 5723.82529688396,
+       "sd": 297.39243840004866,
+       "min": 4804,
+       "max": 6271,
+       "hist": [
+        33532,
+        49188,
+        86671,
+        218482,
+        429690,
+        303419,
+        318269,
+        201710
+       ]
+      },
+      "ground.1": {
+       "n": 1640961,
+       "mean": 5280.487320539611,
+       "sd": 527.7904943540274,
+       "min": 4186,
+       "max": 7157,
+       "hist": [
+        93252,
+        378413,
+        440668,
+        376210,
+        203989,
+        90787,
+        46093,
+        11549
+       ]
+      },
+      "ground.2": {
+       "n": 1442401,
+       "mean": 5400.43486728032,
+       "sd": 2212.708530218851,
+       "min": 1032,
+       "max": 12724,
+       "hist": [
+        166204,
+        263277,
+        273320,
+        353996,
+        244910,
+        109736,
+        29248,
+        1710
+       ]
+      },
+      "cell.place": {
+       "n": 52464,
+       "mean": 106.3289091850321,
+       "sd": 265.4366891562186,
+       "min": -399.3797302246094,
+       "max": 736.6282348632812,
+       "hist": [
+        3043,
+        2989,
+        29511,
+        2690,
+        3154,
+        2333,
+        0,
+        8744
+       ]
+      },
+      "cell.taxon": {
+       "n": 8744,
+       "hash": "2a9f86cd"
+      },
+      "cell.pose": {
+       "n": 8744,
+       "hash": "d60e6697"
+      },
+      "cell.shade": {
+       "n": 8744,
+       "mean": 126.84446477584629,
+       "sd": 73.4191572571076,
+       "min": 0,
+       "max": 255,
+       "hist": [
+        1121,
+        1066,
+        1062,
+        1134,
+        1135,
+        1107,
+        1078,
+        1041
+       ]
+      },
+      "cell.phase": {
+       "n": 8744,
+       "mean": 0.9296660567246111,
+       "sd": 11.929505429689932,
+       "min": 0,
+       "max": 251,
+       "hist": [
+        8681,
+        11,
+        14,
+        11,
+        7,
+        5,
+        11,
+        4
+       ]
+      },
+      "cell.rank": {
+       "n": 8744,
+       "hash": "479960ea"
+      },
+      "mesh.position": {
+       "n": 3096,
+       "mean": 0.036889628576668665,
+       "sd": 0.1404426857742883,
+       "min": -0.2763228118419647,
+       "max": 0.425976425409317,
+       "hist": [
+        135,
+        288,
+        567,
+        1045,
+        428,
+        257,
+        372,
+        4
+       ]
+      },
+      "mesh.uv": {
+       "n": 2064,
+       "mean": 2.5935177603432398,
+       "sd": 3.6874699393195454,
+       "min": 0,
+       "max": 15,
+       "hist": [
+        1216,
+        254,
+        200,
+        148,
+        102,
+        48,
+        48,
+        48
+       ]
+      },
+      "mesh.shade": {
+       "n": 4128,
+       "mean": 161.6826550387597,
+       "sd": 83.20970909409725,
+       "min": 1,
+       "max": 255,
+       "hist": [
+        369,
+        327,
+        205,
+        407,
+        821,
+        218,
+        303,
+        1478
+       ]
+      },
+      "mesh.material": {
+       "n": 3096,
+       "hash": "730ac3e5"
+      },
+      "mesh.indices": {
+       "n": 4752,
+       "hash": "d4043420"
+      }
+     },
+     "problems": []
+    },
+    "taxa": [
+     {
+      "id": "txn:163702",
+      "label": "Tupandactylus",
+      "form": "tapejarids",
+      "own": false,
+      "tier": "here",
+      "km": 310,
+      "rows": 3,
+      "drawn": true
+     },
+     {
+      "id": "txn:163695",
+      "label": "Arthurdactylus",
+      "form": "short-tailed pterosaurs",
+      "own": false,
+      "tier": "here",
+      "km": 310,
+      "rows": 1,
+      "drawn": true
+     },
+     {
+      "id": "txn:163697",
+      "label": "Ludodactylus",
+      "form": "pteranodontians",
+      "own": false,
+      "tier": "here",
+      "km": 310,
+      "rows": 1,
+      "drawn": true
+     },
+     {
+      "id": "txn:163710",
+      "label": "Lacusovagus",
+      "form": "short-tailed pterosaurs",
+      "own": false,
+      "tier": "here",
+      "km": 310,
+      "rows": 1,
+      "drawn": false
+     },
+     {
+      "id": "life/taxa/ouranosaurus",
+      "label": "Ouranosaurus",
+      "form": "Ouranosaurus",
+      "own": true,
+      "tier": "region",
+      "km": 1920,
+      "rows": 3,
+      "drawn": false
+     },
+     {
+      "id": "txn:64272",
+      "label": "Irritator",
+      "form": "Spinosauridae",
+      "own": false,
+      "tier": "region",
+      "km": 530,
+      "rows": 1,
+      "drawn": false
+     },
+     {
+      "id": "txn:64275",
+      "label": "Angaturama",
+      "form": "Spinosauridae",
+      "own": false,
+      "tier": "region",
+      "km": 530,
+      "rows": 1,
+      "drawn": false
+     },
+     {
+      "id": "txn:520235",
+      "label": "Dasosaurus",
+      "form": "Somphospondyli",
+      "own": false,
+      "tier": "region",
+      "km": 760,
+      "rows": 1,
+      "drawn": false
+     },
+     {
+      "id": "txn:176783",
+      "label": "Tapuiasaurus",
+      "form": "Titanosauria",
+      "own": false,
+      "tier": "region",
+      "km": 1420,
+      "rows": 1,
+      "drawn": false
+     },
+     {
+      "id": "txn:438220",
+      "label": "Spectrovenator",
+      "form": "Abelisauridae",
+      "own": false,
+      "tier": "region",
+      "km": 1420,
+      "rows": 1,
+      "drawn": false
+     },
+     {
+      "id": "txn:89458",
+      "label": "Amazonsaurus",
+      "form": "Rebbachisauridae",
+      "own": false,
+      "tier": "here",
+      "km": 220,
+      "rows": 1,
+      "drawn": false
+     },
+     {
+      "id": "life/taxa/nigersaurus",
+      "label": "Nigersaurus",
+      "form": "Nigersaurus",
+      "own": true,
+      "tier": "region",
+      "km": 1920,
+      "rows": 1,
+      "drawn": false
+     },
+     {
+      "id": "txn:161157",
+      "label": "Elrhazosaurus",
+      "form": "Dryosauridae",
+      "own": false,
+      "tier": "region",
+      "km": 1920,
+      "rows": 1,
+      "drawn": true
+     },
+     {
+      "id": "life/taxa/carcharodontosaurus",
+      "label": "Carcharodontosaurus",
+      "form": "Carcharodontosaurus",
+      "own": true,
+      "tier": "region",
+      "km": 2140,
+      "rows": 5,
+      "drawn": false
+     },
+     {
+      "id": "txn:276495",
+      "label": "Balmeiopsis",
+      "form": "monkey puzzles",
+      "own": false,
+      "tier": "region",
+      "km": 540,
+      "rows": 22,
+      "drawn": false
+     },
+     {
+      "id": "txn:264499",
+      "label": "Araucariacites",
+      "form": "monkey puzzles",
+      "own": false,
+      "tier": "here",
+      "km": 220,
+      "rows": 32,
+      "drawn": false
+     },
+     {
+      "id": "txn:277278",
+      "label": "Phimopollenites",
+      "form": "flowering plants",
+      "own": false,
+      "tier": "region",
+      "km": 630,
+      "rows": 5,
+      "drawn": false
+     },
+     {
+      "id": "txn:252701",
+      "label": "Gnetaceaepollenites",
+      "form": "gymnosperms",
+      "own": false,
+      "tier": "here",
+      "km": 220,
+      "rows": 5,
+      "drawn": false
+     },
+     {
+      "id": "txn:252723",
+      "label": "Afropollis",
+      "form": "flowering plants",
+      "own": false,
+      "tier": "region",
+      "km": 540,
+      "rows": 28,
+      "drawn": false
+     },
+     {
+      "id": "txn:276504",
+      "label": "Singhia",
+      "form": "corystosperms",
+      "own": false,
+      "tier": "here",
+      "km": 220,
+      "rows": 4,
+      "drawn": false
+     },
+     {
+      "id": "txn:251535",
+      "label": "Rousea",
+      "form": "seed plants",
+      "own": false,
+      "tier": "region",
+      "km": 630,
+      "rows": 2,
+      "drawn": false
+     },
+     {
+      "id": "txn:264520",
+      "label": "Clavatipollenites",
+      "form": "flowering plants",
+      "own": false,
+      "tier": "region",
+      "km": 630,
+      "rows": 10,
+      "drawn": false
+     },
+     {
+      "id": "txn:411540",
+      "label": "Nymphaeites",
+      "form": "water lilies",
+      "own": false,
+      "tier": "here",
+      "km": 0,
+      "rows": 1,
+      "drawn": false
+     },
+     {
+      "id": "txn:276599",
+      "label": "Pennipollis",
+      "form": "pondweeds and frogbits",
+      "own": false,
+      "tier": "region",
+      "km": 630,
+      "rows": 9,
+      "drawn": false
+     },
+     {
+      "id": "txn:190783",
+      "label": "Susisuchus",
+      "form": "crocodiles and their extinct relatives",
+      "own": false,
+      "tier": "here",
+      "km": 310,
+      "rows": 3,
+      "drawn": false
+     },
+     {
+      "id": "txn:196995",
+      "label": "Brillanceausuchus",
+      "form": "crocodiles and their extinct relatives",
+      "own": false,
+      "tier": "region",
+      "km": 1550,
+      "rows": 1,
+      "drawn": false
+     },
+     {
+      "id": "txn:36607",
+      "label": "Sarcosuchus",
+      "form": "crocodiles and their extinct relatives",
+      "own": false,
+      "tier": "region",
+      "km": 1920,
+      "rows": 3,
+      "drawn": false
+     },
+     {
+      "id": "txn:93882",
+      "label": "Stolokrosuchus",
+      "form": "crocodiles and their extinct relatives",
+      "own": false,
+      "tier": "region",
+      "km": 1920,
+      "rows": 1,
+      "drawn": false
+     },
+     {
+      "id": "txn:215206",
+      "label": "Beurlenia",
+      "form": "crayfish, crabs and shrimps",
+      "own": false,
+      "tier": "here",
+      "km": 310,
+      "rows": 4,
+      "drawn": false
+     },
+     {
+      "id": "txn:67324",
+      "label": "Araripemys",
+      "form": "turtles",
+      "own": false,
+      "tier": "here",
+      "km": 310,
+      "rows": 4,
+      "drawn": false
+     },
+     {
+      "id": "txn:301180",
+      "label": "Atolchelys",
+      "form": "turtles",
+      "own": false,
+      "tier": "region",
+      "km": 940,
+      "rows": 1,
+      "drawn": false
+     },
+     {
+      "id": "txn:305234",
+      "label": "Calanguban",
+      "form": "lizards and snakes",
+      "own": false,
+      "tier": "here",
+      "km": 310,
+      "rows": 1,
+      "drawn": true
+     },
+     {
+      "id": "txn:492810",
+      "label": "Priorhyncha",
+      "form": "crayfish, crabs and shrimps",
+      "own": false,
+      "tier": "region",
+      "km": 540,
+      "rows": 1,
+      "drawn": false
+     },
+     {
+      "id": "txn:478359",
+      "label": "Cryptobicuspidon",
+      "form": "lizards and snakes",
+      "own": false,
+      "tier": "region",
+      "km": 1420,
+      "rows": 1,
+      "drawn": true
+     },
+     {
+      "id": "txn:176213",
+      "label": "Araripegryllus",
+      "form": "grasshoppers and crickets",
+      "own": false,
+      "tier": "here",
+      "km": 310,
+      "rows": 29,
+      "drawn": true
+     },
+     {
+      "id": "txn:139747",
+      "label": "Leptotarsus",
+      "form": "crane flies and their relatives",
+      "own": false,
+      "tier": "here",
+      "km": 310,
+      "rows": 31,
+      "drawn": true
+     },
+     {
+      "id": "txn:276273",
+      "label": "Caririgryllus",
+      "form": "grasshoppers and crickets",
+      "own": false,
+      "tier": "here",
+      "km": 310,
+      "rows": 19,
+      "drawn": true
+     },
+     {
+      "id": "txn:175160",
+      "label": "Cordulagomphus",
+      "form": "dragonflies and griffinflies",
+      "own": false,
+      "tier": "here",
+      "km": 310,
+      "rows": 16,
+      "drawn": true
+     },
+     {
+      "id": "txn:274327",
+      "label": "Appendicisporites",
+      "form": "ferns and their allies",
+      "own": false,
+      "tier": "region",
+      "km": 540,
+      "rows": 13,
+      "drawn": false
+     },
+     {
+      "id": "txn:252666",
+      "label": "Equisetosporites",
+      "form": "joint firs",
+      "own": false,
+      "tier": "here",
+      "km": 220,
+      "rows": 9,
+      "drawn": false
+     },
+     {
+      "id": "txn:277960",
+      "label": "Stellatopollis",
+      "form": "monocots",
+      "own": false,
+      "tier": "here",
+      "km": 220,
+      "rows": 18,
+      "drawn": false
+     },
+     {
+      "id": "txn:276791",
+      "label": "Concavissimisporites",
+      "form": "land plants",
+      "own": false,
+      "tier": "region",
+      "km": 540,
+      "rows": 31,
+      "drawn": false
+     },
+     {
+      "id": "txn:35477",
+      "label": "Dastilbe",
+      "form": "bony fishes",
+      "own": false,
+      "tier": "here",
+      "km": 0,
+      "rows": 2,
+      "drawn": false
+     },
+     {
+      "id": "txn:68074",
+      "label": "Mawsonia",
+      "form": "lobe-finned fishes",
+      "own": false,
+      "tier": "region",
+      "km": 540,
+      "rows": 3,
+      "drawn": false
+     },
+     {
+      "id": "txn:526299",
+      "label": "Gondwanacanthus",
+      "form": "bony fishes",
+      "own": false,
+      "tier": "region",
+      "km": 940,
+      "rows": 1,
+      "drawn": false
+     },
+     {
+      "id": "txn:416999",
+      "label": "Pattersoncypris",
+      "form": "ostracods",
+      "own": false,
+      "tier": "here",
+      "km": 310,
+      "rows": 2,
+      "drawn": false
+     }
+    ],
+    "instances": 40751,
+    "triangles": 4798134,
+    "meshes": 126,
+    "groundMs": 660.6000001430511,
+    "stage": "Aptian, part 1 of 2",
+    "climate": "rainforest",
+    "climateField": "field:earth/climate",
+    "month": 7,
+    "snow": null,
+    "focus": [
+     58,
+     -392
+    ],
+    "toRiver": [
+     0,
+     1
+    ],
+    "origin": {
+     "lat": -3.45,
+     "lon": -10.72085
+    },
+    "water": {
+     "tier": "model",
+     "rivers": []
+    },
+    "sea": false,
+    "list": "land",
+    "eye": {
+     "z": 559.3657661349517,
+     "floor": 557.5082305926962
+    },
+    "people": null
+   },
+   "settlements": [],
+   "text": [
+    "6 recorded here, 11 nearby, 0 stand-ins"
+   ],
+   "settled": [],
+   "errors": [],
+   "seconds": 14
+  },
+  "p05": {
+   "tiers": {
+    "planet": {
+     "layer": "planet",
+     "tier": "evidence",
+     "value": "Oceans",
+     "why": "The planet's state at this time, from its records."
+    },
+    "geography": {
+     "layer": "geography",
+     "tier": "model",
+     "value": "elevation",
+     "why": "Surface elevation and ocean depth covers this time."
+    },
+    "climate": {
+     "layer": "climate",
+     "tier": "model",
+     "value": "climate field",
+     "why": "A climate model's run covers this time."
+    },
+    "ice": {
+     "layer": "ice",
+     "tier": "generic",
+     "value": "none",
+     "why": "No ice is drawn: nothing records ice here then, which does not mean there was none."
+    },
+    "water": {
+     "layer": "water",
+     "tier": "model",
+     "value": "drainage",
+     "why": "The water of the climate, routed over the ground of the time, says where rivers ran and how much they carried."
+    },
+    "life": {
+     "layer": "life",
+     "tier": "unknown",
+     "value": null,
+     "why": "The atlases of who lived where reach only the Phanerozoic."
+    },
+    "people": {
+     "layer": "people",
+     "tier": "unknown",
+     "value": null,
+     "why": "No grid of where people lived covers this time."
+    },
+    "polity": {
+     "layer": "polity",
+     "tier": "unknown",
+     "value": null,
+     "why": "No dataset of states covers this time."
+    }
+   },
+   "biome": {
+    "climate": "temperate",
+    "cover": {
+     "crust": 1,
+     "plants": 1,
+     "forests": 1,
+     "grasses": 0.007072004012866849,
+     "reefs": 1
+    }
+   },
+   "climate": {
+    "hot": 32.03102557647058,
+    "cold": 3.999132568627452,
+    "aridity": 1.4920426351695628,
+    "margin": -17.444323411764714
+   },
+   "climateField": "field:earth/climate",
+   "ground": 228.95871877500002,
+   "ice": null,
+   "scene": {
+    "site": "dj8nj6",
+    "plan": {
+     "expected": null,
+     "actual": {
+      "ground.0": {
+       "n": 1640961,
+       "mean": 1968.9190047782977,
+       "sd": 123.73885434336202,
+       "min": 1714,
+       "max": 2238,
+       "hist": [
+        96111,
+        186488,
+        255627,
+        423735,
+        222360,
+        125103,
+        275879,
+        55658
+       ]
+      },
+      "ground.1": {
+       "n": 1640961,
+       "mean": 1935.6886342819848,
+       "sd": 184.19235836185126,
+       "min": 1534,
+       "max": 2621,
+       "hist": [
+        66048,
+        388430,
+        476986,
+        341261,
+        241365,
+        82928,
+        36614,
+        7329
+       ]
+      },
+      "ground.2": {
+       "n": 1442401,
+       "mean": 2654.512280565529,
+       "sd": 1073.9939691817192,
+       "min": 953,
+       "max": 8737,
+       "hist": [
+        385318,
+        593242,
+        287511,
+        106575,
+        44310,
+        20423,
+        4456,
+        566
+       ]
+      },
+      "cell.place": {
+       "n": 49866,
+       "mean": 35.77583984060462,
+       "sd": 153.68805091760274,
+       "min": -398.99725341796875,
+       "max": 405.27996826171875,
+       "hist": [
+        2024,
+        2177,
+        2032,
+        27094,
+        1855,
+        10195,
+        2414,
+        2075
+       ]
+      },
+      "cell.taxon": {
+       "n": 8311,
+       "hash": "e0e93e1f"
+      },
+      "cell.pose": {
+       "n": 8311,
+       "hash": "879983c0"
+      },
+      "cell.shade": {
+       "n": 8311,
+       "mean": 126.64901937191674,
+       "sd": 74.55050978461172,
+       "min": 0,
+       "max": 255,
+       "hist": [
+        1050,
+        1110,
+        1071,
+        972,
+        1000,
+        1012,
+        1047,
+        1049
+       ]
+      },
+      "cell.phase": {
+       "n": 8311,
+       "mean": 2.428468295030682,
+       "sd": 19.90198345144413,
+       "min": 0,
+       "max": 255,
+       "hist": [
+        8169,
+        21,
+        18,
+        26,
+        21,
+        22,
+        16,
+        18
+       ]
+      },
+      "cell.rank": {
+       "n": 8311,
+       "hash": "9078c11d"
+      },
+      "mesh.position": {
+       "n": 2172,
+       "mean": 0.01612163930913486,
+       "sd": 0.029426611237895854,
+       "min": -0.06723715364933014,
+       "max": 0.07688196748495102,
+       "hist": [
+        55,
+        29,
+        72,
+        861,
+        310,
+        436,
+        140,
+        269
+       ]
+      },
+      "mesh.uv": {
+       "n": 1448,
+       "mean": 2.8719465836994504,
+       "sd": 4.056452197105553,
+       "min": 0,
+       "max": 15,
+       "hist": [
+        826,
+        172,
+        138,
+        100,
+        68,
+        48,
+        48,
+        48
+       ]
+      },
+      "mesh.shade": {
+       "n": 2896,
+       "mean": 160.93370165745856,
+       "sd": 83.50470028190387,
+       "min": 1,
+       "max": 255,
+       "hist": [
+        277,
+        221,
+        112,
+        370,
+        541,
+        142,
+        204,
+        1029
+       ]
+      },
+      "mesh.material": {
+       "n": 2172,
+       "hash": "0fbccec1"
+      },
+      "mesh.indices": {
+       "n": 3336,
+       "hash": "d93da6cb"
+      }
+     },
+     "problems": []
+    },
+    "taxa": [
+     {
+      "id": "txn:479031",
+      "label": "Sericuloides",
+      "form": "birds",
+      "own": false,
+      "tier": "here",
+      "km": 220,
+      "rows": 1,
+      "drawn": true
+     },
+     {
+      "id": "txn:39673",
+      "label": "Pelecanus",
+      "form": "birds",
+      "own": false,
+      "tier": "region",
+      "km": 890,
+      "rows": 2,
+      "drawn": true
+     },
+     {
+      "id": "txn:453677",
+      "label": "Archaehierax",
+      "form": "hawks and eagles",
+      "own": false,
+      "tier": "region",
+      "km": 1160,
+      "rows": 1,
+      "drawn": true
+     },
+     {
+      "id": "txn:99165",
+      "label": "Menura",
+      "form": "birds",
+      "own": false,
+      "tier": "here",
+      "km": 220,
+      "rows": 1,
+      "drawn": true
+     },
+     {
+      "id": "life/taxa/rhinocerotidae",
+      "label": "rhinoceroses",
+      "form": "rhinoceroses",
+      "own": true,
+      "tier": "standin",
+      "km": 220,
+      "rows": 0,
+      "drawn": false
+     },
+     {
+      "id": "life/taxa/rhinocerotoidea",
+      "label": "rhinoceroses and their kin",
+      "form": "rhinoceroses and their kin",
+      "own": true,
+      "tier": "standin",
+      "km": 220,
+      "rows": 0,
+      "drawn": false
+     },
+     {
+      "id": "life/pbdb/txn-54692",
+      "label": "flowering plants",
+      "form": "flowering plants",
+      "own": true,
+      "tier": "standin",
+      "km": 220,
+      "rows": 0,
+      "drawn": false
+     },
+     {
+      "id": "life/pbdb/txn-183023",
+      "label": "flowering plants",
+      "form": "flowering plants",
+      "own": true,
+      "tier": "standin",
+      "km": 220,
+      "rows": 0,
+      "drawn": false
+     },
+     {
+      "id": "txn:157923",
+      "label": "Baru",
+      "form": "crocodiles and their extinct relatives",
+      "own": false,
+      "tier": "here",
+      "km": 220,
+      "rows": 9,
+      "drawn": false
+     },
+     {
+      "id": "txn:157972",
+      "label": "Mekosuchus",
+      "form": "crocodiles and their extinct relatives",
+      "own": false,
+      "tier": "here",
+      "km": 220,
+      "rows": 4,
+      "drawn": false
+     },
+     {
+      "id": "txn:40202",
+      "label": "Ngapakaldia",
+      "form": "wombats, koalas and diprotodonts",
+      "own": false,
+      "tier": "here",
+      "km": 220,
+      "rows": 3,
+      "drawn": true
+     },
+     {
+      "id": "txn:64892",
+      "label": "Yurlunggur",
+      "form": "snakes",
+      "own": false,
+      "tier": "here",
+      "km": 220,
+      "rows": 7,
+      "drawn": true
+     },
+     {
+      "id": "txn:429139",
+      "label": "Nambashag",
+      "form": "cormorants, boobies and frigatebirds",
+      "own": false,
+      "tier": "region",
+      "km": 890,
+      "rows": 6,
+      "drawn": false
+     },
+     {
+      "id": "txn:40175",
+      "label": "Litokoala",
+      "form": "wombats, koalas and diprotodonts",
+      "own": false,
+      "tier": "here",
+      "km": 220,
+      "rows": 5,
+      "drawn": true
+     },
+     {
+      "id": "txn:367887",
+      "label": "Pinpanetta",
+      "form": "waterfowl",
+      "own": false,
+      "tier": "region",
+      "km": 720,
+      "rows": 4,
+      "drawn": false
+     },
+     {
+      "id": "txn:53065",
+      "label": "Muramura",
+      "form": "wombats, koalas and diprotodonts",
+      "own": false,
+      "tier": "region",
+      "km": 730,
+      "rows": 4,
+      "drawn": true
+     },
+     {
+      "id": "txn:247560",
+      "label": "Ilaria",
+      "form": "wombats, koalas and diprotodonts",
+      "own": false,
+      "tier": "region",
+      "km": 890,
+      "rows": 4,
+      "drawn": true
+     },
+     {
+      "id": "txn:40176",
+      "label": "Perikoala",
+      "form": "wombats, koalas and diprotodonts",
+      "own": false,
+      "tier": "region",
+      "km": 890,
+      "rows": 3,
+      "drawn": true
+     },
+     {
+      "id": "txn:38044",
+      "label": "Varanus",
+      "form": "monitor lizards",
+      "own": false,
+      "tier": "here",
+      "km": 220,
+      "rows": 6,
+      "drawn": true
+     },
+     {
+      "id": "txn:247595",
+      "label": "Galadi",
+      "form": "mammals",
+      "own": false,
+      "tier": "here",
+      "km": 220,
+      "rows": 3,
+      "drawn": true
+     },
+     {
+      "id": "txn:346071",
+      "label": "Proegernia",
+      "form": "lizards and snakes",
+      "own": false,
+      "tier": "region",
+      "km": 890,
+      "rows": 5,
+      "drawn": true
+     },
+     {
+      "id": "txn:180390",
+      "label": "Ganawamaya",
+      "form": "Macropodoidea",
+      "own": false,
+      "tier": "here",
+      "km": 220,
+      "rows": 3,
+      "drawn": false
+     },
+     {
+      "id": "txn:247147",
+      "label": "Badjcinus",
+      "form": "marsupial carnivores",
+      "own": false,
+      "tier": "here",
+      "km": 220,
+      "rows": 1,
+      "drawn": true
+     },
+     {
+      "id": "txn:261779",
+      "label": "Warkalania",
+      "form": "turtles",
+      "own": false,
+      "tier": "here",
+      "km": 220,
+      "rows": 1,
+      "drawn": false
+     },
+     {
+      "id": "txn:153545",
+      "label": "Litoria",
+      "form": "frogs and toads",
+      "own": false,
+      "tier": "region",
+      "km": 890,
+      "rows": 3,
+      "drawn": false
+     },
+     {
+      "id": "txn:153541",
+      "label": "Limnodynastes",
+      "form": "frogs and toads",
+      "own": false,
+      "tier": "region",
+      "km": 890,
+      "rows": 2,
+      "drawn": false
+     },
+     {
+      "id": "txn:153543",
+      "label": "Australobatrachus",
+      "form": "frogs and toads",
+      "own": false,
+      "tier": "region",
+      "km": 890,
+      "rows": 1,
+      "drawn": false
+     },
+     {
+      "id": "txn:92089",
+      "label": "Brachipposideros",
+      "form": "bats",
+      "own": false,
+      "tier": "here",
+      "km": 220,
+      "rows": 4,
+      "drawn": true
+     },
+     {
+      "id": "life/taxa/plantae",
+      "label": "plants",
+      "form": "plants",
+      "own": true,
+      "tier": "standin",
+      "km": 220,
+      "rows": 0,
+      "drawn": false
+     },
+     {
+      "id": "txn:91691",
+      "label": "Neoceratodus",
+      "form": "lungfishes",
+      "own": false,
+      "tier": "region",
+      "km": 1160,
+      "rows": 8,
+      "drawn": false
+     },
+     {
+      "id": "txn:321037",
+      "label": "Mioceratodus",
+      "form": "lungfishes",
+      "own": false,
+      "tier": "region",
+      "km": 1160,
+      "rows": 5,
+      "drawn": false
+     },
+     {
+      "id": "txn:321036",
+      "label": "Archaeoceratodus",
+      "form": "lungfishes",
+      "own": false,
+      "tier": "region",
+      "km": 1160,
+      "rows": 3,
+      "drawn": false
+     },
+     {
+      "id": "txn:36129",
+      "label": "Percalates",
+      "form": "bony fishes",
+      "own": false,
+      "tier": "region",
+      "km": 940,
+      "rows": 1,
+      "drawn": false
+     }
+    ],
+    "instances": 39287,
+    "triangles": 3292170,
+    "meshes": 43,
+    "groundMs": 626.7999999523163,
+    "stage": "Chattian",
+    "climate": "temperate",
+    "climateField": "field:earth/climate",
+    "month": 8,
+    "snow": 980,
+    "focus": [
+     -29,
+     49
+    ],
+    "toRiver": [
+     0,
+     1
+    ],
+    "origin": {
+     "lat": -36.95,
+     "lon": 134.24896
+    },
+    "water": {
+     "tier": "model",
+     "rivers": []
+    },
+    "sea": false,
+    "list": "land",
+    "eye": {
+     "z": 199.7941939530903,
+     "floor": 198.09419395309033
+    },
+    "people": null
+   },
+   "settlements": [],
+   "text": [
+    "11 recorded here, 15 nearby, 5 stand-ins"
+   ],
+   "settled": [],
+   "errors": [],
+   "seconds": 14
+  },
+  "p06": {
+   "tiers": {
+    "planet": {
+     "layer": "planet",
+     "tier": "evidence",
+     "value": "Oceans",
+     "why": "The planet's state at this time, from its records."
+    },
+    "geography": {
+     "layer": "geography",
+     "tier": "model",
+     "value": "elevation",
+     "why": "Surface elevation and ocean depth covers this time."
+    },
+    "climate": {
+     "layer": "climate",
+     "tier": "model",
+     "value": "climate field",
+     "why": "A climate model's run covers this time."
+    },
+    "ice": {
+     "layer": "ice",
+     "tier": "generic",
+     "value": "none",
+     "why": "No ice is drawn: nothing records ice here then, which does not mean there was none."
+    },
+    "water": {
+     "layer": "water",
+     "tier": "model",
+     "value": "drainage",
+     "why": "The water of the climate, routed over the ground of the time, says where rivers ran and how much they carried."
+    },
+    "life": {
+     "layer": "life",
+     "tier": "unknown",
+     "value": null,
+     "why": "The atlases of who lived where reach only the Phanerozoic."
+    },
+    "people": {
+     "layer": "people",
+     "tier": "unknown",
+     "value": null,
+     "why": "No grid of where people lived covers this time."
+    },
+    "polity": {
+     "layer": "polity",
+     "tier": "unknown",
+     "value": null,
+     "why": "No dataset of states covers this time."
+    }
+   },
+   "biome": {
+    "climate": "cold",
+    "cover": {
+     "crust": 1,
+     "plants": 1,
+     "forests": 1,
+     "grasses": 0.640947069811217,
+     "reefs": 1
+    }
+   },
+   "climate": {
+    "hot": 21.994680662745097,
+    "cold": -8.167501419607845,
+    "aridity": 2.1248992595364,
+    "margin": -52.71428317647059
+   },
+   "climateField": "field:earth/climate",
+   "ground": 1356.0143418,
+   "ice": null,
+   "scene": {
+    "site": "cdm6j8",
+    "plan": {
+     "expected": null,
+     "actual": {
+      "ground.0": {
+       "n": 1640961,
+       "mean": 12555.245631675585,
+       "sd": 1027.519896017228,
+       "min": 9764,
+       "max": 15126,
+       "hist": [
+        39204,
+        154278,
+        209011,
+        224419,
+        485918,
+        398024,
+        98074,
+        32033
+       ]
+      },
+      "ground.1": {
+       "n": 1640961,
+       "mean": 12879.138611459992,
+       "sd": 1503.5568218113067,
+       "min": 8205,
+       "max": 17060,
+       "hist": [
+        9701,
+        69362,
+        252421,
+        357096,
+        491279,
+        307704,
+        112036,
+        41362
+       ]
+      },
+      "ground.2": {
+       "n": 1442401,
+       "mean": 12783.715749642437,
+       "sd": 4375.065110401693,
+       "min": 1910,
+       "max": 28122,
+       "hist": [
+        43321,
+        197823,
+        378735,
+        394038,
+        260185,
+        127049,
+        38321,
+        2929
+       ]
+      },
+      "cell.place": {
+       "n": 48036,
+       "mean": 144.74011008773934,
+       "sd": 517.4827046744923,
+       "min": -400.2555847167969,
+       "max": 1498.359130859375,
+       "hist": [
+        9665,
+        30365,
+        0,
+        0,
+        0,
+        0,
+        0,
+        8006
+       ]
+      },
+      "cell.taxon": {
+       "n": 8006,
+       "hash": "27427ac9"
+      },
+      "cell.pose": {
+       "n": 8006,
+       "hash": "1f5f5816"
+      },
+      "cell.shade": {
+       "n": 8006,
+       "mean": 127.31413939545341,
+       "sd": 73.7699404523399,
+       "min": 0,
+       "max": 255,
+       "hist": [
+        992,
+        995,
+        1014,
+        1033,
+        978,
+        1037,
+        968,
+        989
+       ]
+      },
+      "cell.phase": {
+       "n": 8006,
+       "mean": 2.693604796402698,
+       "sd": 21.262040607441627,
+       "min": 0,
+       "max": 255,
+       "hist": [
+        7860,
+        22,
+        13,
+        23,
+        24,
+        21,
+        23,
+        20
+       ]
+      },
+      "cell.rank": {
+       "n": 8006,
+       "hash": "f4852802"
+      },
+      "mesh.position": {
+       "n": 2850,
+       "mean": 0.09087381348493824,
+       "sd": 0.16293846572520324,
+       "min": -0.32266899943351746,
+       "max": 0.4626850187778473,
+       "hist": [
+        61,
+        23,
+        461,
+        1147,
+        413,
+        314,
+        64,
+        367
+       ]
+      },
+      "mesh.uv": {
+       "n": 1900,
+       "mean": 2.8063066698914687,
+       "sd": 3.7434613796906575,
+       "min": 0,
+       "max": 15,
+       "hist": [
+        1052,
+        262,
+        202,
+        140,
+        100,
+        48,
+        48,
+        48
+       ]
+      },
+      "mesh.shade": {
+       "n": 3800,
+       "mean": 160.9478947368421,
+       "sd": 83.50935605187796,
+       "min": 1,
+       "max": 255,
+       "hist": [
+        368,
+        278,
+        175,
+        366,
+        781,
+        218,
+        251,
+        1363
+       ]
+      },
+      "mesh.material": {
+       "n": 2850,
+       "hash": "73303b35"
+      },
+      "mesh.indices": {
+       "n": 4320,
+       "hash": "dcbb87ce"
+      }
+     },
+     "problems": []
+    },
+    "taxa": [
+     {
+      "id": "life/taxa/accipitriformes",
+      "label": "hawks and eagles",
+      "form": "hawks and eagles",
+      "own": true,
+      "tier": "standin",
+      "km": 180,
+      "rows": 0,
+      "drawn": true
+     },
+     {
+      "id": "txn:43254",
+      "label": "Platybelodon",
+      "form": "gomphotheres",
+      "own": false,
+      "tier": "here",
+      "km": 180,
+      "rows": 10,
+      "drawn": false
+     },
+     {
+      "id": "txn:43207",
+      "label": "Hispanotherium",
+      "form": "rhinoceroses",
+      "own": false,
+      "tier": "here",
+      "km": 180,
+      "rows": 6,
+      "drawn": false
+     },
+     {
+      "id": "txn:43188",
+      "label": "Aceratherium",
+      "form": "rhinoceroses",
+      "own": false,
+      "tier": "here",
+      "km": 180,
+      "rows": 14,
+      "drawn": false
+     },
+     {
+      "id": "txn:97742",
+      "label": "Huaqingtherium",
+      "form": "rhinoceroses",
+      "own": false,
+      "tier": "here",
+      "km": 180,
+      "rows": 1,
+      "drawn": false
+     },
+     {
+      "id": "txn:43247",
+      "label": "Gomphotherium",
+      "form": "gomphotheres",
+      "own": false,
+      "tier": "region",
+      "km": 360,
+      "rows": 108,
+      "drawn": false
+     },
+     {
+      "id": "txn:53402",
+      "label": "Alicornops",
+      "form": "rhinoceroses",
+      "own": false,
+      "tier": "region",
+      "km": 360,
+      "rows": 2,
+      "drawn": false
+     },
+     {
+      "id": "txn:95509",
+      "label": "Zygolophodon",
+      "form": "mastodons",
+      "own": false,
+      "tier": "region",
+      "km": 510,
+      "rows": 31,
+      "drawn": false
+     },
+     {
+      "id": "txn:157615",
+      "label": "Eozygodon",
+      "form": "mastodons",
+      "own": false,
+      "tier": "here",
+      "km": 220,
+      "rows": 1,
+      "drawn": false
+     },
+     {
+      "id": "txn:43194",
+      "label": "Brachypotherium",
+      "form": "rhinoceroses",
+      "own": false,
+      "tier": "region",
+      "km": 540,
+      "rows": 19,
+      "drawn": false
+     },
+     {
+      "id": "txn:97731",
+      "label": "Caementodon",
+      "form": "rhinoceroses",
+      "own": false,
+      "tier": "region",
+      "km": 510,
+      "rows": 3,
+      "drawn": false
+     },
+     {
+      "id": "txn:54676",
+      "label": "Mallotus",
+      "form": "flowering plants",
+      "own": false,
+      "tier": "region",
+      "km": 560,
+      "rows": 5,
+      "drawn": false
+     },
+     {
+      "id": "txn:55955",
+      "label": "Populus",
+      "form": "flowering plants",
+      "own": false,
+      "tier": "region",
+      "km": 1120,
+      "rows": 84,
+      "drawn": false
+     },
+     {
+      "id": "txn:54594",
+      "label": "Quercus",
+      "form": "flowering plants",
+      "own": false,
+      "tier": "region",
+      "km": 1120,
+      "rows": 63,
+      "drawn": false
+     },
+     {
+      "id": "txn:55062",
+      "label": "Pinus",
+      "form": "pines, firs and spruces",
+      "own": false,
+      "tier": "region",
+      "km": 1120,
+      "rows": 108,
+      "drawn": false
+     },
+     {
+      "id": "txn:54580",
+      "label": "Salix",
+      "form": "flowering plants",
+      "own": false,
+      "tier": "region",
+      "km": 1120,
+      "rows": 67,
+      "drawn": false
+     },
+     {
+      "id": "txn:55972",
+      "label": "Castanea",
+      "form": "flowering plants",
+      "own": false,
+      "tier": "region",
+      "km": 1120,
+      "rows": 8,
+      "drawn": false
+     },
+     {
+      "id": "txn:453670",
+      "label": "Podocarpium",
+      "form": "flowering plants",
+      "own": false,
+      "tier": "region",
+      "km": 1120,
+      "rows": 1,
+      "drawn": false
+     },
+     {
+      "id": "life/pbdb/txn-54678",
+      "label": "Celastrus",
+      "form": "flowering plants",
+      "own": false,
+      "tier": "region",
+      "km": 1760,
+      "rows": 1,
+      "drawn": false
+     },
+     {
+      "id": "txn:55502",
+      "label": "Trapa",
+      "form": "water chestnuts",
+      "own": false,
+      "tier": "region",
+      "km": 560,
+      "rows": 5,
+      "drawn": false
+     },
+     {
+      "id": "txn:42394",
+      "label": "Kubanochoerus",
+      "form": "pigs and peccaries",
+      "own": false,
+      "tier": "here",
+      "km": 180,
+      "rows": 4,
+      "drawn": true
+     },
+     {
+      "id": "txn:42395",
+      "label": "Listriodon",
+      "form": "pigs and peccaries",
+      "own": false,
+      "tier": "here",
+      "km": 180,
+      "rows": 33,
+      "drawn": true
+     },
+     {
+      "id": "txn:40887",
+      "label": "Pliopithecus",
+      "form": "primates",
+      "own": false,
+      "tier": "here",
+      "km": 180,
+      "rows": 7,
+      "drawn": true
+     },
+     {
+      "id": "txn:41032",
+      "label": "Percrocuta",
+      "form": "carnivorans and their extinct kin",
+      "own": false,
+      "tier": "here",
+      "km": 180,
+      "rows": 9,
+      "drawn": true
+     },
+     {
+      "id": "txn:41271",
+      "label": "Amphicyon",
+      "form": "carnivorans and their extinct kin",
+      "own": false,
+      "tier": "region",
+      "km": 360,
+      "rows": 43,
+      "drawn": true
+     },
+     {
+      "id": "txn:42689",
+      "label": "Stephanocemas",
+      "form": "even-toed ungulates",
+      "own": false,
+      "tier": "here",
+      "km": 180,
+      "rows": 3,
+      "drawn": false
+     },
+     {
+      "id": "txn:42769",
+      "label": "Eotragus",
+      "form": "bovids",
+      "own": false,
+      "tier": "here",
+      "km": 180,
+      "rows": 12,
+      "drawn": false
+     },
+     {
+      "id": "txn:41034",
+      "label": "Protictitherium",
+      "form": "hyenas",
+      "own": false,
+      "tier": "here",
+      "km": 180,
+      "rows": 3,
+      "drawn": false
+     },
+     {
+      "id": "txn:41035",
+      "label": "Thalassictis",
+      "form": "hyenas",
+      "own": false,
+      "tier": "here",
+      "km": 180,
+      "rows": 1,
+      "drawn": false
+     },
+     {
+      "id": "txn:41075",
+      "label": "Sansanosmilus",
+      "form": "carnivorans and their extinct kin",
+      "own": false,
+      "tier": "here",
+      "km": 180,
+      "rows": 7,
+      "drawn": false
+     },
+     {
+      "id": "txn:41803",
+      "label": "Megacricetodon",
+      "form": "mammals",
+      "own": false,
+      "tier": "region",
+      "km": 360,
+      "rows": 87,
+      "drawn": true
+     },
+     {
+      "id": "txn:53231",
+      "label": "Alloptox",
+      "form": "pikas",
+      "own": false,
+      "tier": "here",
+      "km": 180,
+      "rows": 6,
+      "drawn": false
+     },
+     {
+      "id": "txn:41832",
+      "label": "Paracricetulus",
+      "form": "mammals",
+      "own": false,
+      "tier": "region",
+      "km": 360,
+      "rows": 1,
+      "drawn": true
+     },
+     {
+      "id": "txn:54369",
+      "label": "Plesiodipus",
+      "form": "mammals",
+      "own": false,
+      "tier": "region",
+      "km": 360,
+      "rows": 1,
+      "drawn": true
+     },
+     {
+      "id": "txn:494292",
+      "label": "Ganocricetodon",
+      "form": "mammals",
+      "own": false,
+      "tier": "region",
+      "km": 360,
+      "rows": 1,
+      "drawn": true
+     },
+     {
+      "id": "txn:41710",
+      "label": "Plesiosminthus",
+      "form": "mammals",
+      "own": false,
+      "tier": "region",
+      "km": 540,
+      "rows": 3,
+      "drawn": true
+     },
+     {
+      "id": "txn:469059",
+      "label": "Jingguaeshna",
+      "form": "dragonflies and griffinflies",
+      "own": false,
+      "tier": "region",
+      "km": 1760,
+      "rows": 1,
+      "drawn": true
+     },
+     {
+      "id": "txn:405692",
+      "label": "Bambusium",
+      "form": "grasses",
+      "own": false,
+      "tier": "region",
+      "km": 1760,
+      "rows": 2,
+      "drawn": false
+     },
+     {
+      "id": "txn:453179",
+      "label": "Bambusiculmus",
+      "form": "grasses",
+      "own": false,
+      "tier": "region",
+      "km": 1760,
+      "rows": 2,
+      "drawn": false
+     },
+     {
+      "id": "txn:453643",
+      "label": "Palaeosorum",
+      "form": "polypody ferns",
+      "own": false,
+      "tier": "region",
+      "km": 1760,
+      "rows": 1,
+      "drawn": false
+     },
+     {
+      "id": "txn:444514",
+      "label": "Coniogramme",
+      "form": "ferns and their allies",
+      "own": false,
+      "tier": "region",
+      "km": 2150,
+      "rows": 1,
+      "drawn": false
+     },
+     {
+      "id": "txn:388332",
+      "label": "Stereolepis",
+      "form": "bony fishes",
+      "own": false,
+      "tier": "region",
+      "km": 2150,
+      "rows": 1,
+      "drawn": false
+     }
+    ],
+    "instances": 33105,
+    "triangles": 2411364,
+    "meshes": 129,
+    "groundMs": 635.6999998092651,
+    "stage": "Serravallian",
+    "climate": "cold",
+    "climateField": "field:earth/climate",
+    "month": 10,
+    "snow": 1898,
+    "focus": [
+     -68,
+     -321
+    ],
+    "toRiver": [
+     0,
+     1
+    ],
+    "origin": {
+     "lat": 35.15,
+     "lon": 105.19878
+    },
+    "water": {
+     "tier": "model",
+     "rivers": []
+    },
+    "sea": false,
+    "list": "land",
+    "eye": {
+     "z": 1345.9347877204425,
+     "floor": 1343.7792299472087
+    },
+    "people": null
+   },
+   "settlements": [],
+   "text": [
+    "15 recorded here, 26 nearby, 1 stand-ins"
+   ],
+   "settled": [],
+   "errors": [],
+   "seconds": 14
+  },
+  "p07": {
+   "tiers": {
+    "planet": {
+     "layer": "planet",
+     "tier": "evidence",
+     "value": "Oceans",
+     "why": "The planet's state at this time, from its records."
+    },
+    "geography": {
+     "layer": "geography",
+     "tier": "model",
+     "value": "elevation",
+     "why": "Surface elevation and ocean depth covers this time."
+    },
+    "climate": {
+     "layer": "climate",
+     "tier": "model",
+     "value": "climate field",
+     "why": "A climate model's run covers this time."
+    },
+    "ice": {
+     "layer": "ice",
+     "tier": "generic",
+     "value": "none",
+     "why": "No ice is drawn: nothing records ice here then, which does not mean there was none."
+    },
+    "water": {
+     "layer": "water",
+     "tier": "model",
+     "value": "drainage",
+     "why": "The water of the climate, routed over the ground of the time, says where rivers ran and how much they carried."
+    },
+    "life": {
+     "layer": "life",
+     "tier": "unknown",
+     "value": null,
+     "why": "The atlases of who lived where reach only the Phanerozoic."
+    },
+    "people": {
+     "layer": "people",
+     "tier": "unknown",
+     "value": null,
+     "why": "No grid of where people lived covers this time."
+    },
+    "polity": {
+     "layer": "polity",
+     "tier": "unknown",
+     "value": null,
+     "why": "No dataset of states covers this time."
+    }
+   },
+   "biome": {
+    "climate": "cold",
+    "cover": {
+     "crust": 1,
+     "plants": 1,
+     "forests": 1,
+     "grasses": 1,
+     "reefs": 1
+    }
+   },
+   "climate": {
+    "hot": 29.488663690196077,
+    "cold": -3.611418709803921,
+    "aridity": 1.876018906535469,
+    "margin": -54.70588235294119
+   },
+   "climateField": "field:earth/climate",
+   "ground": 276.089954,
+   "ice": null,
+   "scene": {
+    "site": "5dc78z",
+    "plan": {
+     "expected": null,
+     "actual": {
+      "ground.0": {
+       "n": 1640961,
+       "mean": 2212.32380903629,
+       "sd": 146.71147896692028,
+       "min": 1961,
+       "max": 2629,
+       "hist": [
+        156898,
+        423548,
+        338878,
+        233381,
+        224015,
+        167538,
+        60208,
+        36495
+       ]
+      },
+      "ground.1": {
+       "n": 1640961,
+       "mean": 2725.4671987938773,
+       "sd": 1001.8178181705451,
+       "min": 1476,
+       "max": 6539,
+       "hist": [
+        538533,
+        554679,
+        170462,
+        134787,
+        131549,
+        69947,
+        33536,
+        7468
+       ]
+      },
+      "ground.2": {
+       "n": 1442401,
+       "mean": 4860.56468069559,
+       "sd": 5209.95353718641,
+       "min": -1522,
+       "max": 25713,
+       "hist": [
+        724324,
+        148845,
+        170330,
+        199838,
+        166546,
+        28772,
+        3107,
+        639
+       ]
+      },
+      "cell.place": {
+       "n": 52566,
+       "mean": -32.035124324054415,
+       "sd": 154.7027641498962,
+       "min": -399.52972412109375,
+       "max": 447.4621276855469,
+       "hist": [
+        4796,
+        4462,
+        4562,
+        29985,
+        0,
+        8723,
+        36,
+        2
+       ]
+      },
+      "cell.taxon": {
+       "n": 8761,
+       "hash": "30a00a36"
+      },
+      "cell.pose": {
+       "n": 8761,
+       "hash": "b4054f02"
+      },
+      "cell.shade": {
+       "n": 8761,
+       "mean": 126.83917361031845,
+       "sd": 74.18390939824957,
+       "min": 0,
+       "max": 255,
+       "hist": [
+        1145,
+        1093,
+        1072,
+        1073,
+        1107,
+        1081,
+        1118,
+        1072
+       ]
+      },
+      "cell.phase": {
+       "n": 8761,
+       "mean": 3.6269832210934827,
+       "sd": 24.981136545462572,
+       "min": 0,
+       "max": 254,
+       "hist": [
+        8549,
+        29,
+        33,
+        24,
+        29,
+        29,
+        30,
+        38
+       ]
+      },
+      "cell.rank": {
+       "n": 8761,
+       "hash": "cc69ede4"
+      },
+      "mesh.position": {
+       "n": 2850,
+       "mean": 0.09087381348493824,
+       "sd": 0.16293846572520324,
+       "min": -0.32266899943351746,
+       "max": 0.4626850187778473,
+       "hist": [
+        61,
+        23,
+        461,
+        1147,
+        413,
+        314,
+        64,
+        367
+       ]
+      },
+      "mesh.uv": {
+       "n": 1900,
+       "mean": 2.8063066698914687,
+       "sd": 3.7434613796906575,
+       "min": 0,
+       "max": 15,
+       "hist": [
+        1052,
+        262,
+        202,
+        140,
+        100,
+        48,
+        48,
+        48
+       ]
+      },
+      "mesh.shade": {
+       "n": 3800,
+       "mean": 160.9478947368421,
+       "sd": 83.50935605187796,
+       "min": 1,
+       "max": 255,
+       "hist": [
+        368,
+        278,
+        175,
+        366,
+        781,
+        218,
+        251,
+        1363
+       ]
+      },
+      "mesh.material": {
+       "n": 2850,
+       "hash": "73303b35"
+      },
+      "mesh.indices": {
+       "n": 4320,
+       "hash": "dcbb87ce"
+      }
+     },
+     "problems": []
+    },
+    "taxa": [
+     {
+      "id": "life/taxa/accipitriformes",
+      "label": "hawks and eagles",
+      "form": "hawks and eagles",
+      "own": true,
+      "tier": "standin",
+      "km": 180,
+      "rows": 0,
+      "drawn": true
+     },
+     {
+      "id": "txn:43222",
+      "label": "Rhinoceros",
+      "form": "rhinoceroses",
+      "own": false,
+      "tier": "region",
+      "km": 440,
+      "rows": 34,
+      "drawn": true
+     },
+     {
+      "id": "txn:43271",
+      "label": "Stegodon",
+      "form": "proboscideans",
+      "own": false,
+      "tier": "region",
+      "km": 870,
+      "rows": 40,
+      "drawn": false
+     },
+     {
+      "id": "txn:43203",
+      "label": "Elasmotherium",
+      "form": "rhinoceroses",
+      "own": false,
+      "tier": "here",
+      "km": 180,
+      "rows": 5,
+      "drawn": true
+     },
+     {
+      "id": "txn:157618",
+      "label": "Sinomastodon",
+      "form": "gomphotheres",
+      "own": false,
+      "tier": "region",
+      "km": 1030,
+      "rows": 7,
+      "drawn": false
+     },
+     {
+      "id": "txn:43264",
+      "label": "Elephas",
+      "form": "proboscideans",
+      "own": false,
+      "tier": "region",
+      "km": 440,
+      "rows": 49,
+      "drawn": false
+     },
+     {
+      "id": "txn:43199",
+      "label": "Dicerorhinus",
+      "form": "rhinoceroses",
+      "own": false,
+      "tier": "region",
+      "km": 580,
+      "rows": 8,
+      "drawn": true
+     },
+     {
+      "id": "txn:374400",
+      "label": "Sinomammut",
+      "form": "mastodons",
+      "own": false,
+      "tier": "region",
+      "km": 580,
+      "rows": 1,
+      "drawn": false
+     },
+     {
+      "id": "life/taxa/bison",
+      "label": "Bison",
+      "form": "bison",
+      "own": true,
+      "tier": "region",
+      "km": 440,
+      "rows": 92,
+      "drawn": true
+     },
+     {
+      "id": "life/taxa/coelodonta-antiquitatis",
+      "label": "Coelodonta antiquitatis",
+      "form": "woolly rhinoceros",
+      "own": true,
+      "tier": "region",
+      "km": 440,
+      "rows": 11,
+      "drawn": false
+     },
+     {
+      "id": "txn:43197",
+      "label": "Coelodonta",
+      "form": "rhinoceroses",
+      "own": false,
+      "tier": "region",
+      "km": 440,
+      "rows": 3,
+      "drawn": true
+     },
+     {
+      "id": "txn:54580",
+      "label": "Salix",
+      "form": "flowering plants",
+      "own": false,
+      "tier": "region",
+      "km": 470,
+      "rows": 30,
+      "drawn": false
+     },
+     {
+      "id": "txn:54594",
+      "label": "Quercus",
+      "form": "flowering plants",
+      "own": false,
+      "tier": "region",
+      "km": 1470,
+      "rows": 58,
+      "drawn": false
+     },
+     {
+      "id": "txn:54745",
+      "label": "Phyllites",
+      "form": "flowering plants",
+      "own": false,
+      "tier": "region",
+      "km": 470,
+      "rows": 6,
+      "drawn": false
+     },
+     {
+      "id": "txn:55984",
+      "label": "Ulmus",
+      "form": "flowering plants",
+      "own": false,
+      "tier": "region",
+      "km": 470,
+      "rows": 30,
+      "drawn": false
+     },
+     {
+      "id": "txn:55955",
+      "label": "Populus",
+      "form": "flowering plants",
+      "own": false,
+      "tier": "region",
+      "km": 470,
+      "rows": 13,
+      "drawn": false
+     },
+     {
+      "id": "life/taxa/cinnamomum",
+      "label": "Cinnamomum",
+      "form": "cinnamon",
+      "own": true,
+      "tier": "region",
+      "km": 1620,
+      "rows": 9,
+      "drawn": false
+     },
+     {
+      "id": "txn:83629",
+      "label": "Picea",
+      "form": "pines, firs and spruces",
+      "own": false,
+      "tier": "region",
+      "km": 1470,
+      "rows": 25,
+      "drawn": false
+     },
+     {
+      "id": "txn:55062",
+      "label": "Pinus",
+      "form": "pines, firs and spruces",
+      "own": false,
+      "tier": "region",
+      "km": 2190,
+      "rows": 38,
+      "drawn": false
+     },
+     {
+      "id": "txn:55502",
+      "label": "Trapa",
+      "form": "water chestnuts",
+      "own": false,
+      "tier": "region",
+      "km": 440,
+      "rows": 15,
+      "drawn": false
+     },
+     {
+      "id": "txn:42416",
+      "label": "Sus",
+      "form": "pigs and peccaries",
+      "own": false,
+      "tier": "region",
+      "km": 440,
+      "rows": 84,
+      "drawn": true
+     },
+     {
+      "id": "txn:42666",
+      "label": "Cervus",
+      "form": "deer",
+      "own": false,
+      "tier": "region",
+      "km": 360,
+      "rows": 118,
+      "drawn": false
+     },
+     {
+      "id": "txn:42010",
+      "label": "Hystrix",
+      "form": "cavies, porcupines and their kin",
+      "own": false,
+      "tier": "region",
+      "km": 580,
+      "rows": 79,
+      "drawn": true
+     },
+     {
+      "id": "txn:41225",
+      "label": "Nyctereutes",
+      "form": "dogs and foxes",
+      "own": false,
+      "tier": "region",
+      "km": 440,
+      "rows": 16,
+      "drawn": true
+     },
+     {
+      "id": "txn:41030",
+      "label": "Pachycrocuta",
+      "form": "hyenas",
+      "own": false,
+      "tier": "region",
+      "km": 440,
+      "rows": 40,
+      "drawn": true
+     },
+     {
+      "id": "life/taxa/equus",
+      "label": "Equus",
+      "form": "horses, asses and zebras",
+      "own": true,
+      "tier": "region",
+      "km": 440,
+      "rows": 610,
+      "drawn": true
+     },
+     {
+      "id": "txn:41055",
+      "label": "Felis",
+      "form": "cats",
+      "own": false,
+      "tier": "region",
+      "km": 440,
+      "rows": 66,
+      "drawn": false
+     },
+     {
+      "id": "txn:42774",
+      "label": "Gazella",
+      "form": "bovids",
+      "own": false,
+      "tier": "region",
+      "km": 360,
+      "rows": 125,
+      "drawn": true
+     },
+     {
+      "id": "txn:41304",
+      "label": "Ailuropoda",
+      "form": "bears",
+      "own": false,
+      "tier": "region",
+      "km": 580,
+      "rows": 9,
+      "drawn": false
+     },
+     {
+      "id": "txn:43137",
+      "label": "Tapirus",
+      "form": "tapirs and their kin",
+      "own": false,
+      "tier": "region",
+      "km": 580,
+      "rows": 83,
+      "drawn": false
+     },
+     {
+      "id": "txn:41812",
+      "label": "Mimomys",
+      "form": "mammals",
+      "own": false,
+      "tier": "region",
+      "km": 440,
+      "rows": 239,
+      "drawn": false
+     },
+     {
+      "id": "txn:41915",
+      "label": "Orientalomys",
+      "form": "mammals",
+      "own": false,
+      "tier": "region",
+      "km": 440,
+      "rows": 16,
+      "drawn": true
+     },
+     {
+      "id": "txn:41815",
+      "label": "Myospalax",
+      "form": "mammals",
+      "own": false,
+      "tier": "region",
+      "km": 360,
+      "rows": 8,
+      "drawn": false
+     },
+     {
+      "id": "txn:41778",
+      "label": "Germanomys",
+      "form": "mammals",
+      "own": false,
+      "tier": "region",
+      "km": 440,
+      "rows": 15,
+      "drawn": true
+     },
+     {
+      "id": "txn:42159",
+      "label": "Ochotona",
+      "form": "pikas",
+      "own": false,
+      "tier": "region",
+      "km": 440,
+      "rows": 28,
+      "drawn": true
+     },
+     {
+      "id": "txn:109230",
+      "label": "Nannocricetus",
+      "form": "mammals",
+      "own": false,
+      "tier": "region",
+      "km": 440,
+      "rows": 9,
+      "drawn": true
+     },
+     {
+      "id": "txn:40486",
+      "label": "Sorex",
+      "form": "shrews, moles and hedgehogs",
+      "own": false,
+      "tier": "region",
+      "km": 440,
+      "rows": 141,
+      "drawn": true
+     },
+     {
+      "id": "txn:40488",
+      "label": "Soriculus",
+      "form": "shrews, moles and hedgehogs",
+      "own": false,
+      "tier": "region",
+      "km": 580,
+      "rows": 4,
+      "drawn": true
+     },
+     {
+      "id": "txn:40646",
+      "label": "Rhinolophus",
+      "form": "bats",
+      "own": false,
+      "tier": "region",
+      "km": 580,
+      "rows": 36,
+      "drawn": true
+     },
+     {
+      "id": "txn:40649",
+      "label": "Hipposideros",
+      "form": "bats",
+      "own": false,
+      "tier": "region",
+      "km": 580,
+      "rows": 5,
+      "drawn": true
+     },
+     {
+      "id": "txn:55273",
+      "label": "Cyperacites",
+      "form": "grasses, sedges and rushes",
+      "own": false,
+      "tier": "region",
+      "km": 470,
+      "rows": 1,
+      "drawn": false
+     },
+     {
+      "id": "txn:467275",
+      "label": "Lepisorus",
+      "form": "polypody ferns",
+      "own": false,
+      "tier": "region",
+      "km": 2190,
+      "rows": 8,
+      "drawn": false
+     },
+     {
+      "id": "txn:319879",
+      "label": "Davallia",
+      "form": "ferns and their allies",
+      "own": false,
+      "tier": "region",
+      "km": 2190,
+      "rows": 8,
+      "drawn": false
+     },
+     {
+      "id": "txn:451227",
+      "label": "Polystichum",
+      "form": "ferns and their allies",
+      "own": false,
+      "tier": "region",
+      "km": 2190,
+      "rows": 8,
+      "drawn": false
+     },
+     {
+      "id": "txn:98345",
+      "label": "Ilyocypris",
+      "form": "ostracods",
+      "own": false,
+      "tier": "region",
+      "km": 1950,
+      "rows": 13,
+      "drawn": false
+     },
+     {
+      "id": "txn:477868",
+      "label": "Candoniella",
+      "form": "ostracods",
+      "own": false,
+      "tier": "region",
+      "km": 1950,
+      "rows": 6,
+      "drawn": false
+     },
+     {
+      "id": "txn:236965",
+      "label": "Candona",
+      "form": "ostracods",
+      "own": false,
+      "tier": "region",
+      "km": 1950,
+      "rows": 5,
+      "drawn": false
+     },
+     {
+      "id": "txn:443023",
+      "label": "Cypria",
+      "form": "ostracods",
+      "own": false,
+      "tier": "region",
+      "km": 1950,
+      "rows": 2,
+      "drawn": false
+     }
+    ],
+    "instances": 26633,
+    "triangles": 841812,
+    "meshes": 113,
+    "groundMs": 631.6999998092651,
+    "stage": "Gelasian",
+    "climate": "cold",
+    "climateField": "field:earth/climate",
+    "month": 1,
+    "snow": 980,
+    "focus": [
+     -301,
+     -369
+    ],
+    "toRiver": [
+     0,
+     1
+    ],
+    "origin": {
+     "lat": 35.85,
+     "lon": 113.78814
+    },
+    "water": {
+     "tier": "model",
+     "rivers": []
+    },
+    "sea": false,
+    "list": "land",
+    "eye": {
+     "z": 230.10037855033764,
+     "floor": 228.2998717507013
+    },
+    "people": null
+   },
+   "settlements": [],
+   "text": [
+    "1 recorded here, 46 nearby, 1 stand-ins"
+   ],
+   "settled": [],
+   "errors": [],
+   "seconds": 14
+  },
+  "p08": {
+   "tiers": {
+    "planet": {
+     "layer": "planet",
+     "tier": "evidence",
+     "value": "Oceans",
+     "why": "The planet's state at this time, from its records."
+    },
+    "geography": {
+     "layer": "geography",
+     "tier": "model",
+     "value": "elevation",
+     "why": "Today's relief, through the glacial cycles covers this time."
+    },
+    "climate": {
+     "layer": "climate",
+     "tier": "model",
+     "value": "climate field",
+     "why": "A climate model's run covers this time."
+    },
+    "ice": {
+     "layer": "ice",
+     "tier": "model",
+     "value": "ice-sheet field",
+     "why": "A reconstruction of the ice sheets covers this time."
+    },
+    "water": {
+     "layer": "water",
+     "tier": "model",
+     "value": "drainage",
+     "why": "The water of the climate, routed over the ground of the time, says where rivers ran and how much they carried."
+    },
+    "life": {
+     "layer": "life",
+     "tier": "unknown",
+     "value": null,
+     "why": "The atlases of who lived where reach only the Phanerozoic."
+    },
+    "people": {
+     "layer": "people",
+     "tier": "evidence",
+     "value": "foragers",
+     "why": "The region's archaeologists say this way of life was there then; HYDE says where and how many."
+    },
+    "polity": {
+     "layer": "polity",
+     "tier": "unknown",
+     "value": null,
+     "why": "No dataset of states covers this time."
+    }
+   },
+   "biome": {
+    "climate": "cold",
+    "cover": {
+     "crust": 1,
+     "plants": 1,
+     "forests": 1,
+     "grasses": 1,
+     "reefs": 1
+    }
+   },
+   "climate": {
+    "hot": 22.168943137254914,
+    "cold": -5.408790196078428,
+    "aridity": 1.8425624404176852,
+    "margin": -51.826294117647066
+   },
+   "climateField": "field:earth/climate-late-quaternary",
+   "ground": 1665.631019,
+   "ice": {
+    "drawn": false,
+    "marginKm": -1020,
+    "thickness": 0
+   },
+   "scene": {
+    "site": "1e8mp2o",
+    "plan": {
+     "expected": null,
+     "actual": {
+      "ground.0": {
+       "n": 1640961,
+       "mean": 17585.14524903395,
+       "sd": 1115.3524816428176,
+       "min": 15441,
+       "max": 20497,
+       "hist": [
+        132644,
+        251886,
+        304069,
+        464301,
+        190661,
+        125042,
+        101774,
+        70584
+       ]
+      },
+      "ground.1": {
+       "n": 1640961,
+       "mean": 19264.094406874996,
+       "sd": 6947.855377659174,
+       "min": 8064,
+       "max": 32000,
+       "hist": [
+        200181,
+        287342,
+        233099,
+        213726,
+        217483,
+        125571,
+        137888,
+        225671
+       ]
+      },
+      "ground.2": {
+       "n": 1442401,
+       "mean": 17190.640023821394,
+       "sd": 11253.189669713665,
+       "min": 1191,
+       "max": 32000,
+       "hist": [
+        344182,
+        106318,
+        135801,
+        116423,
+        122422,
+        129959,
+        104056,
+        383240
+       ]
+      },
+      "cell.place": {
+       "n": 45282,
+       "mean": 3616.0642589785252,
+       "sd": 5663.162710412675,
+       "min": -0.9999999403953552,
+       "max": 15999.24609375,
+       "hist": [
+        30188,
+        0,
+        7547,
+        0,
+        0,
+        0,
+        0,
+        7547
+       ]
+      },
+      "cell.taxon": {
+       "n": 7547,
+       "hash": "68d6eea9"
+      },
+      "cell.pose": {
+       "n": 7547,
+       "hash": "043fa277"
+      },
+      "cell.shade": {
+       "n": 7547,
+       "mean": 127.38346362793163,
+       "sd": 73.40772857528938,
+       "min": 0,
+       "max": 255,
+       "hist": [
+        938,
+        936,
+        915,
+        996,
+        960,
+        935,
+        948,
+        919
+       ]
+      },
+      "cell.phase": {
+       "n": 7547,
+       "mean": 3.30806943156221,
+       "sd": 23.836827541296955,
+       "min": 0,
+       "max": 254,
+       "hist": [
+        7381,
+        19,
+        22,
+        23,
+        23,
+        24,
+        30,
+        25
+       ]
+      },
+      "cell.rank": {
+       "n": 7547,
+       "hash": "74452dda"
+      },
+      "mesh.position": {
+       "n": 2172,
+       "mean": 0.048868719117576495,
+       "sd": 0.08919941528204658,
+       "min": -0.2038126140832901,
+       "max": 0.2330484688282013,
+       "hist": [
+        55,
+        29,
+        72,
+        861,
+        310,
+        436,
+        140,
+        269
+       ]
+      },
+      "mesh.uv": {
+       "n": 1448,
+       "mean": 2.9036198504441493,
+       "sd": 4.035083305513005,
+       "min": 0,
+       "max": 15,
+       "hist": [
+        826,
+        172,
+        138,
+        100,
+        68,
+        48,
+        48,
+        48
+       ]
+      },
+      "mesh.shade": {
+       "n": 2896,
+       "mean": 160.93370165745856,
+       "sd": 83.50470028190387,
+       "min": 1,
+       "max": 255,
+       "hist": [
+        277,
+        221,
+        112,
+        370,
+        541,
+        142,
+        204,
+        1029
+       ]
+      },
+      "mesh.material": {
+       "n": 2172,
+       "hash": "1d65f829"
+      },
+      "mesh.indices": {
+       "n": 3336,
+       "hash": "d93da6cb"
+      }
+     },
+     "problems": []
+    },
+    "taxa": [
+     {
+      "id": "txn:39701",
+      "label": "Pterodroma",
+      "form": "birds",
+      "own": false,
+      "tier": "region",
+      "km": 760,
+      "rows": 151,
+      "drawn": true
+     },
+     {
+      "id": "txn:39702",
+      "label": "Puffinus",
+      "form": "birds",
+      "own": false,
+      "tier": "region",
+      "km": 760,
+      "rows": 124,
+      "drawn": true
+     },
+     {
+      "id": "txn:39424",
+      "label": "Apus",
+      "form": "nightjars, swifts and hummingbirds",
+      "own": false,
+      "tier": "region",
+      "km": 2120,
+      "rows": 6,
+      "drawn": true
+     },
+     {
+      "id": "life/taxa/bison",
+      "label": "bison",
+      "form": "bison",
+      "own": true,
+      "tier": "standin",
+      "km": 510,
+      "rows": 0,
+      "drawn": true
+     },
+     {
+      "id": "txn:55062",
+      "label": "Pinus",
+      "form": "pines, firs and spruces",
+      "own": false,
+      "tier": "region",
+      "km": 650,
+      "rows": 21,
+      "drawn": false
+     },
+     {
+      "id": "txn:54594",
+      "label": "Quercus",
+      "form": "flowering plants",
+      "own": false,
+      "tier": "region",
+      "km": 650,
+      "rows": 13,
+      "drawn": false
+     },
+     {
+      "id": "txn:54588",
+      "label": "Alnus",
+      "form": "flowering plants",
+      "own": false,
+      "tier": "region",
+      "km": 650,
+      "rows": 11,
+      "drawn": false
+     },
+     {
+      "id": "txn:55065",
+      "label": "Abies",
+      "form": "pines, firs and spruces",
+      "own": false,
+      "tier": "region",
+      "km": 650,
+      "rows": 9,
+      "drawn": false
+     },
+     {
+      "id": "txn:55294",
+      "label": "Betula",
+      "form": "flowering plants",
+      "own": false,
+      "tier": "region",
+      "km": 650,
+      "rows": 11,
+      "drawn": false
+     },
+     {
+      "id": "txn:55296",
+      "label": "Corylus",
+      "form": "flowering plants",
+      "own": false,
+      "tier": "region",
+      "km": 650,
+      "rows": 8,
+      "drawn": false
+     },
+     {
+      "id": "txn:55942",
+      "label": "Juglans",
+      "form": "flowering plants",
+      "own": false,
+      "tier": "region",
+      "km": 650,
+      "rows": 8,
+      "drawn": false
+     },
+     {
+      "id": "txn:55984",
+      "label": "Ulmus",
+      "form": "flowering plants",
+      "own": false,
+      "tier": "region",
+      "km": 650,
+      "rows": 8,
+      "drawn": false
+     },
+     {
+      "id": "txn:83632",
+      "label": "Potamogeton",
+      "form": "pondweeds and frogbits",
+      "own": false,
+      "tier": "region",
+      "km": 1050,
+      "rows": 7,
+      "drawn": false
+     },
+     {
+      "id": "txn:157335",
+      "label": "Nymphaea",
+      "form": "water lilies",
+      "own": false,
+      "tier": "region",
+      "km": 1230,
+      "rows": 5,
+      "drawn": false
+     },
+     {
+      "id": "txn:83440",
+      "label": "Aythya",
+      "form": "waterfowl",
+      "own": false,
+      "tier": "region",
+      "km": 2120,
+      "rows": 39,
+      "drawn": false
+     },
+     {
+      "id": "txn:83457",
+      "label": "Bucephala",
+      "form": "waterfowl",
+      "own": false,
+      "tier": "region",
+      "km": 2120,
+      "rows": 14,
+      "drawn": false
+     },
+     {
+      "id": "life/taxa/anas",
+      "label": "Anas",
+      "form": "waterfowl",
+      "own": false,
+      "tier": "region",
+      "km": 2120,
+      "rows": 108,
+      "drawn": false
+     },
+     {
+      "id": "txn:105367",
+      "label": "Malaclemys",
+      "form": "turtles",
+      "own": false,
+      "tier": "region",
+      "km": 760,
+      "rows": 2,
+      "drawn": false
+     },
+     {
+      "id": "txn:143789",
+      "label": "Coturnix",
+      "form": "fowls",
+      "own": false,
+      "tier": "region",
+      "km": 2120,
+      "rows": 41,
+      "drawn": true
+     },
+     {
+      "id": "txn:365988",
+      "label": "Alectoris",
+      "form": "fowls",
+      "own": false,
+      "tier": "region",
+      "km": 2120,
+      "rows": 9,
+      "drawn": true
+     },
+     {
+      "id": "txn:368614",
+      "label": "Lagopus",
+      "form": "fowls",
+      "own": false,
+      "tier": "region",
+      "km": 2120,
+      "rows": 24,
+      "drawn": true
+     },
+     {
+      "id": "txn:138321",
+      "label": "Chironomus",
+      "form": "mosquitoes and midges",
+      "own": false,
+      "tier": "region",
+      "km": 510,
+      "rows": 5,
+      "drawn": true
+     },
+     {
+      "id": "txn:434783",
+      "label": "Artemisia",
+      "form": "daisies and their relatives",
+      "own": false,
+      "tier": "region",
+      "km": 650,
+      "rows": 13,
+      "drawn": false
+     },
+     {
+      "id": "txn:252000",
+      "label": "Typha",
+      "form": "grasses, sedges and rushes",
+      "own": false,
+      "tier": "region",
+      "km": 650,
+      "rows": 8,
+      "drawn": false
+     },
+     {
+      "id": "txn:251997",
+      "label": "Ephedra",
+      "form": "joint firs",
+      "own": false,
+      "tier": "region",
+      "km": 940,
+      "rows": 4,
+      "drawn": false
+     },
+     {
+      "id": "txn:319856",
+      "label": "Lemna",
+      "form": "monocots",
+      "own": false,
+      "tier": "region",
+      "km": 1230,
+      "rows": 5,
+      "drawn": false
+     },
+     {
+      "id": "txn:63564",
+      "label": "Platanista",
+      "form": "whales, dolphins and porpoises",
+      "own": false,
+      "tier": "region",
+      "km": 890,
+      "rows": 3,
+      "drawn": false
+     }
+    ],
+    "instances": 32038,
+    "triangles": 1804874,
+    "meshes": 124,
+    "groundMs": 991.4000000953674,
+    "stage": "Holocene",
+    "climate": "cold",
+    "climateField": "field:earth/climate-late-quaternary",
+    "month": 3,
+    "snow": 2290,
+    "focus": [
+     4730,
+     15887
+    ],
+    "toRiver": [
+     0.285,
+     0.958
+    ],
+    "origin": {
+     "lat": 34.35,
+     "lon": 69.83176
+    },
+    "water": {
+     "tier": "evidence",
+     "rivers": [
+      {
+       "key": "grwl#69.8916,34.4994",
+       "from": "observed"
+      }
+     ]
+    },
+    "sea": false,
+    "list": "land",
+    "eye": {
+     "z": 1595.061977989983,
+     "floor": 1593.361977989983
+    },
+    "people": {
+     "asked": true,
+     "houses": 470,
+     "drawn": 2350,
+     "expected": 2251,
+     "settlements": 140,
+     "pattern": "foragers",
+     "tier": "evidence",
+     "forms": [
+      "A forager's shelter"
+     ]
+    }
+   },
+   "settlements": [
+    {
+     "pattern": "foragers",
+     "houses": 5,
+     "x": 1478.9291344672463,
+     "y": 293.5442190691936
+    },
+    {
+     "pattern": "foragers",
+     "houses": 5,
+     "x": 243.1654083899936,
+     "y": 287.5983810638404
+    },
+    {
+     "pattern": "foragers",
+     "houses": 3,
+     "x": 1463.2161097574995,
+     "y": 245.85883565905928
+    },
+    {
+     "pattern": "foragers",
+     "houses": 3,
+     "x": 1466.2114499968543,
+     "y": 244.12672575996766
+    },
+    {
+     "pattern": "foragers",
+     "houses": 3,
+     "x": 1349.5101087491196,
+     "y": 247.91878034309767
+    },
+    {
+     "pattern": "foragers",
+     "houses": 5,
+     "x": 1210.6709220450575,
+     "y": 252.47042140831994
+    },
+    {
+     "pattern": "foragers",
+     "houses": 5,
+     "x": 1011.9911550683364,
+     "y": 257.2103083800132
+    },
+    {
+     "pattern": "foragers",
+     "houses": 5,
+     "x": 703.6853542884917,
+     "y": 261.55073806330574
+    },
+    {
+     "pattern": "foragers",
+     "houses": 5,
+     "x": 962.3062906445871,
+     "y": 259.3795824344069
+    },
+    {
+     "pattern": "foragers",
+     "houses": 6,
+     "x": 461.5638533138596,
+     "y": 275.7065234575837
+    },
+    {
+     "pattern": "foragers",
+     "houses": 6,
+     "x": 246.41747454048053,
+     "y": 286.6338872626363
+    },
+    {
+     "pattern": "foragers",
+     "houses": 6,
+     "x": 66.2957018305045,
+     "y": 299.0252684862891
+    },
+    {
+     "pattern": "foragers",
+     "houses": 6,
+     "x": 453.2672057603021,
+     "y": 280.5348033846926
+    }
+   ],
+   "text": [
+    "0 recorded here, 26 nearby, 1 stand-ins · Foragers' camps, 470 houses"
+   ],
+   "settled": [],
+   "errors": [],
+   "seconds": 15
+  },
+  "p09": {
+   "tiers": {
+    "planet": {
+     "layer": "planet",
+     "tier": "evidence",
+     "value": "Oceans",
+     "why": "The planet's state at this time, from its records."
+    },
+    "geography": {
+     "layer": "geography",
+     "tier": "model",
+     "value": "elevation",
+     "why": "Today's relief, through the glacial cycles covers this time."
+    },
+    "climate": {
+     "layer": "climate",
+     "tier": "model",
+     "value": "climate field",
+     "why": "A climate model's run covers this time."
+    },
+    "ice": {
+     "layer": "ice",
+     "tier": "model",
+     "value": "ice-sheet field",
+     "why": "A reconstruction of the ice sheets covers this time."
+    },
+    "water": {
+     "layer": "water",
+     "tier": "model",
+     "value": "drainage",
+     "why": "The water of the climate, routed over the ground of the time, says where rivers ran and how much they carried."
+    },
+    "life": {
+     "layer": "life",
+     "tier": "unknown",
+     "value": null,
+     "why": "The atlases of who lived where reach only the Phanerozoic."
+    },
+    "people": {
+     "layer": "people",
+     "tier": "model",
+     "value": "none",
+     "why": "HYDE's people and land use, classed as anthromes, say how people lived here; the region's archaeologists do not say it, or disagree."
+    },
+    "polity": {
+     "layer": "polity",
+     "tier": "unknown",
+     "value": null,
+     "why": "No state is drawn here: the dataset has none, which does not mean there was none."
+    }
+   },
+   "biome": {
+    "climate": "desert",
+    "cover": {
+     "crust": 1,
+     "plants": 1,
+     "forests": 1,
+     "grasses": 1,
+     "reefs": 1
+    }
+   },
+   "climate": {
+    "hot": 34.24411678431373,
+    "cold": 19.146077568627447,
+    "aridity": 0.14544508096886427,
+    "margin": -59.41176470588236
+   },
+   "climateField": "field:earth/climate-late-quaternary",
+   "ground": 495.25,
+   "ice": {
+    "drawn": false,
+    "marginKm": -1020,
+    "thickness": 0
+   },
+   "scene": {
+    "site": "3wtccz",
+    "plan": {
+     "expected": null,
+     "actual": {
+      "ground.0": {
+       "n": 1640961,
+       "mean": 4833.982243331804,
+       "sd": 86.8582102832097,
+       "min": 4580,
+       "max": 5036,
+       "hist": [
+        58530,
+        60911,
+        170886,
+        263607,
+        426283,
+        403930,
+        221353,
+        35461
+       ]
+      },
+      "ground.1": {
+       "n": 1640961,
+       "mean": 4800.014426912035,
+       "sd": 233.0426491275661,
+       "min": 4007,
+       "max": 5719,
+       "hist": [
+        25036,
+        91308,
+        270778,
+        583725,
+        507387,
+        134712,
+        26258,
+        1757
+       ]
+      },
+      "ground.2": {
+       "n": 1442401,
+       "mean": 4408.212172620512,
+       "sd": 1646.2919625116579,
+       "min": 2197,
+       "max": 19591,
+       "hist": [
+        911011,
+        404709,
+        92641,
+        18975,
+        9051,
+        4013,
+        1615,
+        386
+       ]
+      },
+      "cell.place": {
+       "n": 564,
+       "mean": -4532.194128987003,
+       "sd": 6764.6103083576145,
+       "min": -16784.703125,
+       "max": 484.3306579589844,
+       "hist": [
+        94,
+        0,
+        94,
+        0,
+        0,
+        0,
+        0,
+        376
+       ]
+      },
+      "cell.taxon": {
+       "n": 94,
+       "hash": "941535e4"
+      },
+      "cell.pose": {
+       "n": 94,
+       "hash": "286aa630"
+      },
+      "cell.shade": {
+       "n": 94,
+       "mean": 130.58510638297872,
+       "sd": 74.18040252388568,
+       "min": 2,
+       "max": 252,
+       "hist": [
+        12,
+        9,
+        13,
+        10,
+        17,
+        8,
+        6,
+        19
+       ]
+      },
+      "cell.phase": {
+       "n": 94,
+       "mean": 106.88297872340425,
+       "sd": 78.07836439675134,
+       "min": 0,
+       "max": 251,
+       "hist": [
+        22,
+        12,
+        13,
+        11,
+        11,
+        6,
+        5,
+        14
+       ]
+      },
+      "cell.rank": {
+       "n": 94,
+       "hash": "73987a69"
+      },
+      "mesh.position": {
+       "n": 2172,
+       "mean": 0.010428685469351452,
+       "sd": 0.01903533922137789,
+       "min": -0.043494030833244324,
+       "max": 0.04973302409052849,
+       "hist": [
+        55,
+        29,
+        72,
+        861,
+        310,
+        436,
+        140,
+        269
+       ]
+      },
+      "mesh.uv": {
+       "n": 1448,
+       "mean": 2.8664403083212115,
+       "sd": 4.06025733901036,
+       "min": 0,
+       "max": 15,
+       "hist": [
+        826,
+        172,
+        138,
+        100,
+        68,
+        48,
+        48,
+        48
+       ]
+      },
+      "mesh.shade": {
+       "n": 2896,
+       "mean": 160.93370165745856,
+       "sd": 83.50470028190387,
+       "min": 1,
+       "max": 255,
+       "hist": [
+        277,
+        221,
+        112,
+        370,
+        541,
+        142,
+        204,
+        1029
+       ]
+      },
+      "mesh.material": {
+       "n": 2172,
+       "hash": "cf1a7051"
+      },
+      "mesh.indices": {
+       "n": 3336,
+       "hash": "d93da6cb"
+      }
+     },
+     "problems": []
+    },
+    "taxa": [
+     {
+      "id": "life/taxa/aves",
+      "label": "birds",
+      "form": "birds",
+      "own": true,
+      "tier": "standin",
+      "km": 420,
+      "rows": 0,
+      "drawn": true
+     },
+     {
+      "id": "txn:43265",
+      "label": "Loxodonta",
+      "form": "proboscideans",
+      "own": false,
+      "tier": "region",
+      "km": 820,
+      "rows": 15,
+      "drawn": false
+     },
+     {
+      "id": "life/pbdb/txn-466628",
+      "label": "flowering plants",
+      "form": "flowering plants",
+      "own": true,
+      "tier": "standin",
+      "km": 420,
+      "rows": 0,
+      "drawn": false
+     },
+     {
+      "id": "life/taxa/pinaceae",
+      "label": "pines, firs and spruces",
+      "form": "pines, firs and spruces",
+      "own": true,
+      "tier": "standin",
+      "km": 420,
+      "rows": 0,
+      "drawn": false
+     },
+     {
+      "id": "txn:38441",
+      "label": "Crocodylus",
+      "form": "crocodiles and their extinct relatives",
+      "own": false,
+      "tier": "region",
+      "km": 1030,
+      "rows": 13,
+      "drawn": false
+     },
+     {
+      "id": "txn:42481",
+      "label": "Hippopotamus",
+      "form": "hippopotamuses and anthracotheres",
+      "own": false,
+      "tier": "region",
+      "km": 1030,
+      "rows": 17,
+      "drawn": false
+     },
+     {
+      "id": "txn:42853",
+      "label": "Redunca",
+      "form": "bovids",
+      "own": false,
+      "tier": "region",
+      "km": 1030,
+      "rows": 24,
+      "drawn": false
+     },
+     {
+      "id": "txn:42774",
+      "label": "Gazella",
+      "form": "bovids",
+      "own": false,
+      "tier": "region",
+      "km": 1030,
+      "rows": 11,
+      "drawn": false
+     },
+     {
+      "id": "life/taxa/struthio",
+      "label": "Struthio",
+      "form": "ostriches",
+      "own": true,
+      "tier": "region",
+      "km": 1030,
+      "rows": 13,
+      "drawn": false
+     },
+     {
+      "id": "txn:38114",
+      "label": "Python",
+      "form": "boas",
+      "own": false,
+      "tier": "region",
+      "km": 1030,
+      "rows": 4,
+      "drawn": true
+     },
+     {
+      "id": "txn:42788",
+      "label": "Kobus",
+      "form": "bovids",
+      "own": false,
+      "tier": "region",
+      "km": 1030,
+      "rows": 12,
+      "drawn": false
+     },
+     {
+      "id": "txn:42027",
+      "label": "Thryonomys",
+      "form": "cavies, porcupines and their kin",
+      "own": false,
+      "tier": "region",
+      "km": 1030,
+      "rows": 10,
+      "drawn": true
+     },
+     {
+      "id": "life/taxa/homo-sapiens",
+      "label": "Homo sapiens",
+      "form": "hominins",
+      "own": false,
+      "tier": "region",
+      "km": 1030,
+      "rows": 34,
+      "drawn": true
+     },
+     {
+      "id": "txn:42753",
+      "label": "Bos",
+      "form": "bovids",
+      "own": false,
+      "tier": "region",
+      "km": 1030,
+      "rows": 39,
+      "drawn": false
+     },
+     {
+      "id": "txn:128019",
+      "label": "Pelusios",
+      "form": "turtles",
+      "own": false,
+      "tier": "region",
+      "km": 420,
+      "rows": 6,
+      "drawn": false
+     },
+     {
+      "id": "txn:37677",
+      "label": "Cyclanorbis",
+      "form": "softshell turtles",
+      "own": false,
+      "tier": "region",
+      "km": 420,
+      "rows": 2,
+      "drawn": false
+     },
+     {
+      "id": "life/pbdb/txn-37682",
+      "label": "Trionyx",
+      "form": "softshell turtles",
+      "own": false,
+      "tier": "region",
+      "km": 630,
+      "rows": 4,
+      "drawn": false
+     },
+     {
+      "id": "txn:38044",
+      "label": "Varanus",
+      "form": "monitor lizards",
+      "own": false,
+      "tier": "region",
+      "km": 1030,
+      "rows": 20,
+      "drawn": false
+     },
+     {
+      "id": "txn:380471",
+      "label": "Mutela",
+      "form": "freshwater mussels",
+      "own": false,
+      "tier": "region",
+      "km": 1030,
+      "rows": 5,
+      "drawn": false
+     },
+     {
+      "id": "txn:380468",
+      "label": "Aspatharia",
+      "form": "freshwater mussels",
+      "own": false,
+      "tier": "region",
+      "km": 1030,
+      "rows": 5,
+      "drawn": false
+     },
+     {
+      "id": "txn:99590",
+      "label": "Melanoides",
+      "form": "snails and slugs",
+      "own": false,
+      "tier": "region",
+      "km": 1030,
+      "rows": 5,
+      "drawn": true
+     },
+     {
+      "id": "txn:37887",
+      "label": "Uromastyx",
+      "form": "lizards and snakes",
+      "own": false,
+      "tier": "region",
+      "km": 1410,
+      "rows": 1,
+      "drawn": true
+     },
+     {
+      "id": "life/taxa/asterales",
+      "label": "daisies and their relatives",
+      "form": "daisies and their relatives",
+      "own": true,
+      "tier": "standin",
+      "km": 420,
+      "rows": 0,
+      "drawn": false
+     },
+     {
+      "id": "txn:131415",
+      "label": "Clarias",
+      "form": "catfishes",
+      "own": false,
+      "tier": "region",
+      "km": 1030,
+      "rows": 10,
+      "drawn": false
+     },
+     {
+      "id": "txn:131417",
+      "label": "Lates",
+      "form": "bony fishes",
+      "own": false,
+      "tier": "region",
+      "km": 1030,
+      "rows": 6,
+      "drawn": false
+     },
+     {
+      "id": "txn:131420",
+      "label": "Polypterus",
+      "form": "bony fishes",
+      "own": false,
+      "tier": "region",
+      "km": 1030,
+      "rows": 3,
+      "drawn": false
+     },
+     {
+      "id": "txn:131423",
+      "label": "Heterotis",
+      "form": "bony fishes",
+      "own": false,
+      "tier": "region",
+      "km": 1030,
+      "rows": 2,
+      "drawn": false
+     }
+    ],
+    "instances": 43,
+    "triangles": 13440,
+    "meshes": 3,
+    "groundMs": 1651,
+    "stage": "Holocene",
+    "climate": "desert",
+    "climateField": "field:earth/climate-late-quaternary",
+    "month": 8,
+    "snow": null,
+    "focus": [
+     -11004,
+     -16559
+    ],
+    "toRiver": [
+     -0.553,
+     -0.833
+    ],
+    "origin": {
+     "lat": 18.75,
+     "lon": 2.90493
+    },
+    "water": {
+     "tier": "model",
+     "rivers": [
+      {
+       "key": "rivers/recent/network.lwt#24990",
+       "from": "model"
+      },
+      {
+       "key": "rivers/recent/network.lwt#25975",
+       "from": "model"
+      }
+     ]
+    },
+    "sea": false,
+    "list": "land",
+    "eye": {
+     "z": 474.90000000000003,
+     "floor": 473.20000000000005
+    },
+    "people": {
+     "asked": true,
+     "houses": 12,
+     "drawn": 60,
+     "expected": 85,
+     "settlements": 6,
+     "pattern": "none",
+     "tier": "model",
+     "forms": [
+      "A herder's tent"
+     ]
+    }
+   },
+   "settlements": [
+    {
+     "pattern": "herders",
+     "houses": 2,
+     "x": 1361.3527364499714,
+     "y": 318.69986891089434
+    },
+    {
+     "pattern": "herders",
+     "houses": 2,
+     "x": 1206.5411614630204,
+     "y": 319.097093191389
+    },
+    {
+     "pattern": "herders",
+     "houses": 2,
+     "x": 1056.6989362596946,
+     "y": 318.95809255009937
+    },
+    {
+     "pattern": "herders",
+     "houses": 2,
+     "x": 1406.8727050588545,
+     "y": 318.3867579460881
+    },
+    {
+     "pattern": "herders",
+     "houses": 2,
+     "x": 1258.8487282920569,
+     "y": 319.3359130280233
+    },
+    {
+     "pattern": "herders",
+     "houses": 2,
+     "x": 1109.019169326337,
+     "y": 319.71621200489386
+    }
+   ],
+   "text": [
+    "0 recorded here, 23 nearby, 4 stand-ins · No one lived here, 12 houses"
+   ],
+   "settled": [
+    "refining"
+   ],
+   "errors": [],
+   "seconds": 15
+  },
+  "p10": {
+   "tiers": {
+    "planet": {
+     "layer": "planet",
+     "tier": "evidence",
+     "value": "Oceans",
+     "why": "The planet's state at this time, from its records."
+    },
+    "geography": {
+     "layer": "geography",
+     "tier": "model",
+     "value": "elevation",
+     "why": "Today's relief, through the glacial cycles covers this time."
+    },
+    "climate": {
+     "layer": "climate",
+     "tier": "model",
+     "value": "climate field",
+     "why": "A climate model's run covers this time."
+    },
+    "ice": {
+     "layer": "ice",
+     "tier": "model",
+     "value": "ice-sheet field",
+     "why": "A reconstruction of the ice sheets covers this time."
+    },
+    "water": {
+     "layer": "water",
+     "tier": "model",
+     "value": "drainage",
+     "why": "The water of the climate, routed over the ground of the time, says where rivers ran and how much they carried."
+    },
+    "life": {
+     "layer": "life",
+     "tier": "unknown",
+     "value": null,
+     "why": "The atlases of who lived where reach only the Phanerozoic."
+    },
+    "people": {
+     "layer": "people",
+     "tier": "unknown",
+     "value": null,
+     "why": "No grid of where people lived covers this time."
+    },
+    "polity": {
+     "layer": "polity",
+     "tier": "evidence",
+     "value": "County of Blôis",
+     "why": "A row of a dataset of states, or a record, draws one here."
+    }
+   },
+   "biome": {
+    "climate": "temperate",
+    "cover": {
+     "crust": 1,
+     "plants": 1,
+     "forests": 1,
+     "grasses": 1,
+     "reefs": 1
+    }
+   },
+   "climate": {
+    "hot": 19.19075396078432,
+    "cold": 1.3155003137254937,
+    "aridity": 2.499587436869903,
+    "margin": -5.459385882352933
+   },
+   "climateField": "field:earth/climate-late-quaternary",
+   "ground": 143.875,
+   "ice": {
+    "drawn": false,
+    "marginKm": -1020,
+    "thickness": 0
+   },
+   "scene": null,
+   "settlements": [],
+   "text": [],
+   "settled": [],
+   "errors": [],
+   "seconds": 13
+  },
+  "p11": {
+   "tiers": {
+    "planet": {
+     "layer": "planet",
+     "tier": "evidence",
+     "value": "Oceans",
+     "why": "The planet's state at this time, from its records."
+    },
+    "geography": {
+     "layer": "geography",
+     "tier": "model",
+     "value": "elevation",
+     "why": "Today's relief, through the glacial cycles covers this time."
+    },
+    "climate": {
+     "layer": "climate",
+     "tier": "model",
+     "value": "climate field",
+     "why": "A climate model's run covers this time."
+    },
+    "ice": {
+     "layer": "ice",
+     "tier": "model",
+     "value": "ice-sheet field",
+     "why": "A reconstruction of the ice sheets covers this time."
+    },
+    "water": {
+     "layer": "water",
+     "tier": "model",
+     "value": "drainage",
+     "why": "The water of the climate, routed over the ground of the time, says where rivers ran and how much they carried."
+    },
+    "life": {
+     "layer": "life",
+     "tier": "unknown",
+     "value": null,
+     "why": "The atlases of who lived where reach only the Phanerozoic."
+    },
+    "people": {
+     "layer": "people",
+     "tier": "evidence",
+     "value": "herders",
+     "why": "The region's archaeologists say this way of life was there then; HYDE says where and how many."
+    },
+    "polity": {
+     "layer": "polity",
+     "tier": "evidence",
+     "value": "Makuria Kingdom",
+     "why": "A row of a dataset of states, or a record, draws one here."
+    }
+   },
+   "biome": {
+    "climate": "desert",
+    "cover": {
+     "crust": 1,
+     "plants": 1,
+     "forests": 1,
+     "grasses": 1,
+     "reefs": 1
+    }
+   },
+   "climate": {
+    "hot": 33.6078431372549,
+    "cold": 19.803921568627445,
+    "aridity": 0.031053234090873606,
+    "margin": -59.41176470588236
+   },
+   "climateField": "field:earth/climate-late-quaternary",
+   "ground": 391.25,
+   "ice": {
+    "drawn": false,
+    "marginKm": -1020,
+    "thickness": 0
+   },
+   "scene": {
+    "site": "i41yn",
+    "plan": {
+     "expected": null,
+     "actual": {
+      "ground.0": {
+       "n": 1640961,
+       "mean": 3995.839886505529,
+       "sd": 131.49119132091334,
+       "min": 3715,
+       "max": 4360,
+       "hist": [
+        87675,
+        198165,
+        418565,
+        381266,
+        274442,
+        128693,
+        96997,
+        55158
+       ]
+      },
+      "ground.1": {
+       "n": 1640961,
+       "mean": 3893.0496562684916,
+       "sd": 279.4755655613294,
+       "min": 3307,
+       "max": 4862,
+       "hist": [
+        146371,
+        316495,
+        333625,
+        400489,
+        308896,
+        105557,
+        22970,
+        6558
+       ]
+      },
+      "ground.2": {
+       "n": 1442401,
+       "mean": 2549.1974638120746,
+       "sd": 4627.618608212881,
+       "min": -21992,
+       "max": 20971,
+       "hist": [
+        6758,
+        28498,
+        88047,
+        63094,
+        969677,
+        266311,
+        15918,
+        4098
+       ]
+      },
+      "cell.place": {
+       "n": 714,
+       "mean": 4937.6798417970995,
+       "sd": 7153.21787408656,
+       "min": -0.9998896718025208,
+       "max": 18373.466796875,
+       "hist": [
+        476,
+        0,
+        0,
+        0,
+        119,
+        0,
+        0,
+        119
+       ]
+      },
+      "cell.taxon": {
+       "n": 119,
+       "hash": "9ca4a947"
+      },
+      "cell.pose": {
+       "n": 119,
+       "hash": "e902c803"
+      },
+      "cell.shade": {
+       "n": 119,
+       "mean": 125.95798319327731,
+       "sd": 73.84248452146122,
+       "min": 2,
+       "max": 255,
+       "hist": [
+        12,
+        21,
+        18,
+        8,
+        13,
+        16,
+        17,
+        14
+       ]
+      },
+      "cell.phase": {
+       "n": 119,
+       "mean": 130.45378151260505,
+       "sd": 76.06230837022845,
+       "min": 0,
+       "max": 253,
+       "hist": [
+        17,
+        10,
+        14,
+        11,
+        18,
+        11,
+        25,
+        13
+       ]
+      },
+      "cell.rank": {
+       "n": 119,
+       "hash": "07f480f7"
+      },
+      "mesh.position": {
+       "n": 2172,
+       "mean": 0.06183945082544935,
+       "sd": 0.11288584298667002,
+       "min": -0.25791752338409424,
+       "max": 0.2949144244194031,
+       "hist": [
+        55,
+        29,
+        72,
+        861,
+        310,
+        436,
+        133,
+        276
+       ]
+      },
+      "mesh.uv": {
+       "n": 1448,
+       "mean": 2.9162046718668417,
+       "sd": 4.026838056461255,
+       "min": 0,
+       "max": 15,
+       "hist": [
+        826,
+        172,
+        138,
+        100,
+        68,
+        48,
+        48,
+        48
+       ]
+      },
+      "mesh.shade": {
+       "n": 2896,
+       "mean": 160.93370165745856,
+       "sd": 83.50456795722664,
+       "min": 1,
+       "max": 255,
+       "hist": [
+        277,
+        221,
+        112,
+        370,
+        541,
+        142,
+        204,
+        1029
+       ]
+      },
+      "mesh.material": {
+       "n": 2172,
+       "hash": "7fcd4f99"
+      },
+      "mesh.indices": {
+       "n": 3336,
+       "hash": "d93da6cb"
+      }
+     },
+     "problems": []
+    },
+    "taxa": [
+     {
+      "id": "life/taxa/corvus",
+      "label": "Corvus",
+      "form": "crows and jays",
+      "own": false,
+      "tier": "region",
+      "km": 440,
+      "rows": 67,
+      "drawn": true
+     },
+     {
+      "id": "txn:39673",
+      "label": "Pelecanus",
+      "form": "birds",
+      "own": false,
+      "tier": "region",
+      "km": 440,
+      "rows": 32,
+      "drawn": true
+     },
+     {
+      "id": "txn:158293",
+      "label": "Streptopelia",
+      "form": "pigeons and doves",
+      "own": false,
+      "tier": "region",
+      "km": 440,
+      "rows": 9,
+      "drawn": true
+     },
+     {
+      "id": "life/taxa/giraffa",
+      "label": "Giraffa",
+      "form": "giraffes",
+      "own": true,
+      "tier": "region",
+      "km": 440,
+      "rows": 10,
+      "drawn": false
+     },
+     {
+      "id": "txn:43265",
+      "label": "Loxodonta",
+      "form": "proboscideans",
+      "own": false,
+      "tier": "here",
+      "km": 220,
+      "rows": 15,
+      "drawn": true
+     },
+     {
+      "id": "txn:43200",
+      "label": "Diceros",
+      "form": "rhinoceroses",
+      "own": false,
+      "tier": "region",
+      "km": 530,
+      "rows": 2,
+      "drawn": false
+     },
+     {
+      "id": "txn:43195",
+      "label": "Ceratotherium",
+      "form": "rhinoceroses",
+      "own": false,
+      "tier": "region",
+      "km": 530,
+      "rows": 1,
+      "drawn": false
+     },
+     {
+      "id": "txn:108486",
+      "label": "Palaeoloxodon",
+      "form": "proboscideans",
+      "own": false,
+      "tier": "region",
+      "km": 920,
+      "rows": 1,
+      "drawn": false
+     },
+     {
+      "id": "life/pbdb/txn-466628",
+      "label": "flowering plants",
+      "form": "flowering plants",
+      "own": true,
+      "tier": "standin",
+      "km": 220,
+      "rows": 0,
+      "drawn": false
+     },
+     {
+      "id": "life/taxa/pinaceae",
+      "label": "pines, firs and spruces",
+      "form": "pines, firs and spruces",
+      "own": true,
+      "tier": "standin",
+      "km": 220,
+      "rows": 0,
+      "drawn": false
+     },
+     {
+      "id": "txn:42774",
+      "label": "Gazella",
+      "form": "bovids",
+      "own": false,
+      "tier": "region",
+      "km": 510,
+      "rows": 11,
+      "drawn": false
+     },
+     {
+      "id": "txn:42010",
+      "label": "Hystrix",
+      "form": "cavies, porcupines and their kin",
+      "own": false,
+      "tier": "region",
+      "km": 440,
+      "rows": 21,
+      "drawn": true
+     },
+     {
+      "id": "txn:41198",
+      "label": "Canis",
+      "form": "dogs and foxes",
+      "own": false,
+      "tier": "region",
+      "km": 440,
+      "rows": 61,
+      "drawn": true
+     },
+     {
+      "id": "txn:42404",
+      "label": "Phacochoerus",
+      "form": "pigs and peccaries",
+      "own": false,
+      "tier": "region",
+      "km": 440,
+      "rows": 23,
+      "drawn": false
+     },
+     {
+      "id": "txn:41055",
+      "label": "Felis",
+      "form": "cats",
+      "own": false,
+      "tier": "region",
+      "km": 440,
+      "rows": 25,
+      "drawn": false
+     },
+     {
+      "id": "txn:42885",
+      "label": "Tragelaphus",
+      "form": "bovids",
+      "own": false,
+      "tier": "region",
+      "km": 440,
+      "rows": 26,
+      "drawn": false
+     },
+     {
+      "id": "life/taxa/struthio",
+      "label": "Struthio",
+      "form": "ostriches",
+      "own": true,
+      "tier": "region",
+      "km": 440,
+      "rows": 13,
+      "drawn": false
+     },
+     {
+      "id": "txn:42753",
+      "label": "Bos",
+      "form": "bovids",
+      "own": false,
+      "tier": "region",
+      "km": 440,
+      "rows": 39,
+      "drawn": false
+     },
+     {
+      "id": "txn:41066",
+      "label": "Panthera",
+      "form": "cats",
+      "own": false,
+      "tier": "region",
+      "km": 530,
+      "rows": 18,
+      "drawn": false
+     },
+     {
+      "id": "life/taxa/equus",
+      "label": "Equus",
+      "form": "horses, asses and zebras",
+      "own": true,
+      "tier": "region",
+      "km": 440,
+      "rows": 50,
+      "drawn": false
+     },
+     {
+      "id": "txn:42176",
+      "label": "Lepus",
+      "form": "rabbits, hares and pikas",
+      "own": false,
+      "tier": "region",
+      "km": 440,
+      "rows": 56,
+      "drawn": false
+     },
+     {
+      "id": "txn:38044",
+      "label": "Varanus",
+      "form": "monitor lizards",
+      "own": false,
+      "tier": "region",
+      "km": 440,
+      "rows": 20,
+      "drawn": true
+     },
+     {
+      "id": "txn:99148",
+      "label": "Numida",
+      "form": "fowls",
+      "own": false,
+      "tier": "region",
+      "km": 440,
+      "rows": 10,
+      "drawn": false
+     },
+     {
+      "id": "life/taxa/testudo",
+      "label": "Testudo",
+      "form": "tortoises",
+      "own": false,
+      "tier": "region",
+      "km": 530,
+      "rows": 8,
+      "drawn": false
+     },
+     {
+      "id": "life/pbdb/txn-37682",
+      "label": "Trionyx",
+      "form": "softshell turtles",
+      "own": false,
+      "tier": "region",
+      "km": 530,
+      "rows": 4,
+      "drawn": false
+     },
+     {
+      "id": "txn:41898",
+      "label": "Arvicanthis",
+      "form": "mammals",
+      "own": false,
+      "tier": "region",
+      "km": 440,
+      "rows": 5,
+      "drawn": false
+     },
+     {
+      "id": "txn:134894",
+      "label": "Pila",
+      "form": "snails and slugs",
+      "own": false,
+      "tier": "region",
+      "km": 440,
+      "rows": 7,
+      "drawn": true
+     },
+     {
+      "id": "txn:382560",
+      "label": "Spathopsis",
+      "form": "freshwater mussels",
+      "own": false,
+      "tier": "region",
+      "km": 530,
+      "rows": 4,
+      "drawn": false
+     },
+     {
+      "id": "txn:380471",
+      "label": "Mutela",
+      "form": "freshwater mussels",
+      "own": false,
+      "tier": "region",
+      "km": 530,
+      "rows": 5,
+      "drawn": false
+     },
+     {
+      "id": "txn:17504",
+      "label": "Corbicula",
+      "form": "Autobranchia",
+      "own": false,
+      "tier": "region",
+      "km": 530,
+      "rows": 4,
+      "drawn": false
+     },
+     {
+      "id": "life/taxa/asterales",
+      "label": "daisies and their relatives",
+      "form": "daisies and their relatives",
+      "own": true,
+      "tier": "standin",
+      "km": 220,
+      "rows": 0,
+      "drawn": false
+     },
+     {
+      "id": "txn:131415",
+      "label": "Clarias",
+      "form": "catfishes",
+      "own": false,
+      "tier": "region",
+      "km": 530,
+      "rows": 10,
+      "drawn": false
+     },
+     {
+      "id": "txn:131417",
+      "label": "Lates",
+      "form": "bony fishes",
+      "own": false,
+      "tier": "region",
+      "km": 530,
+      "rows": 6,
+      "drawn": false
+     },
+     {
+      "id": "txn:131425",
+      "label": "Synodontis",
+      "form": "catfishes",
+      "own": false,
+      "tier": "region",
+      "km": 530,
+      "rows": 5,
+      "drawn": false
+     },
+     {
+      "id": "txn:131420",
+      "label": "Polypterus",
+      "form": "bony fishes",
+      "own": false,
+      "tier": "region",
+      "km": 530,
+      "rows": 3,
+      "drawn": false
+     }
+    ],
+    "instances": 7,
+    "triangles": 2106,
+    "meshes": 3,
+    "groundMs": 1918.5,
+    "stage": "Holocene",
+    "climate": "desert",
+    "climateField": "field:earth/climate-late-quaternary",
+    "month": 7,
+    "snow": null,
+    "focus": [
+     11059,
+     18379
+    ],
+    "toRiver": [
+     0.516,
+     0.857
+    ],
+    "origin": {
+     "lat": 20.15,
+     "lon": 33.98639
+    },
+    "water": {
+     "tier": "model",
+     "rivers": [
+      {
+       "key": "rivers/recent/network.lwt#22754",
+       "from": "model"
+      },
+      {
+       "key": "rivers/recent/network.lwt#23413",
+       "from": "model"
+      },
+      {
+       "key": "rivers/recent/network.lwt#24491",
+       "from": "model"
+      }
+     ]
+    },
+    "sea": false,
+    "list": "land",
+    "eye": {
+     "z": 701.7998778500121,
+     "floor": 403.6697279847753
+    },
+    "people": {
+     "asked": true,
+     "houses": 188,
+     "drawn": 940,
+     "expected": 1025,
+     "settlements": 45,
+     "pattern": "herders",
+     "tier": "evidence",
+     "forms": [
+      "A herder's tent"
+     ]
+    }
+   },
+   "settlements": [
+    {
+     "pattern": "herders",
+     "houses": 8,
+     "x": 1372.8993446496738,
+     "y": 3.7919870787117356
+    },
+    {
+     "pattern": "herders",
+     "houses": 8,
+     "x": 1460.3051086114338,
+     "y": 10.341813073855375
+    },
+    {
+     "pattern": "herders",
+     "houses": 4,
+     "x": 1368.9623121345783,
+     "y": 19.281881207467656
+    },
+    {
+     "pattern": "herders",
+     "houses": 4,
+     "x": 1477.3723809147903,
+     "y": 31.718790451676384
+    },
+    {
+     "pattern": "herders",
+     "houses": 4,
+     "x": 1378.8732653066097,
+     "y": 58.8405380327286
+    },
+    {
+     "pattern": "herders",
+     "houses": 4,
+     "x": 1008.8310551468808,
+     "y": 10.393598423855751
+    },
+    {
+     "pattern": "herders",
+     "houses": 4,
+     "x": 1010.4677130820849,
+     "y": 18.536016445785073
+    },
+    {
+     "pattern": "herders",
+     "houses": 2,
+     "x": 1127.9293639204514,
+     "y": 146.5332899068826
+    },
+    {
+     "pattern": "herders",
+     "houses": 2,
+     "x": 643.8287405233312,
+     "y": 67.63266135504944
+    },
+    {
+     "pattern": "herders",
+     "houses": 2,
+     "x": 286.3784554002824,
+     "y": 30.938103064812537
+    }
+   ],
+   "text": [
+    "1 recorded here, 31 nearby, 3 stand-ins · Herders' camps, 188 houses"
+   ],
+   "settled": [],
+   "errors": [],
+   "seconds": 16
+  },
+  "p12": {
+   "tiers": {
+    "planet": {
+     "layer": "planet",
+     "tier": "evidence",
+     "value": "Oceans",
+     "why": "The planet's state at this time, from its records."
+    },
+    "geography": {
+     "layer": "geography",
+     "tier": "model",
+     "value": "elevation",
+     "why": "Today's relief, through the glacial cycles covers this time."
+    },
+    "climate": {
+     "layer": "climate",
+     "tier": "model",
+     "value": "climate field",
+     "why": "A climate model's run covers this time."
+    },
+    "ice": {
+     "layer": "ice",
+     "tier": "model",
+     "value": "ice-sheet field",
+     "why": "A reconstruction of the ice sheets covers this time."
+    },
+    "water": {
+     "layer": "water",
+     "tier": "model",
+     "value": "drainage",
+     "why": "The water of the climate, routed over the ground of the time, says where rivers ran and how much they carried."
+    },
+    "life": {
+     "layer": "life",
+     "tier": "unknown",
+     "value": null,
+     "why": "The atlases of who lived where reach only the Phanerozoic."
+    },
+    "people": {
+     "layer": "people",
+     "tier": "evidence",
+     "value": "hamlets",
+     "why": "The region's archaeologists say this way of life was there then; HYDE says where and how many."
+    },
+    "polity": {
+     "layer": "polity",
+     "tier": "evidence",
+     "value": "Ottoman Empire",
+     "why": "A row of a dataset of states, or a record, draws one here."
+    }
+   },
+   "biome": {
+    "climate": "desert",
+    "cover": {
+     "crust": 1,
+     "plants": 1,
+     "forests": 1,
+     "grasses": 1,
+     "reefs": 1
+    }
+   },
+   "climate": {
+    "hot": 30.534593254901964,
+    "cold": 21.960784313725497,
+    "aridity": 0.1679309231636826,
+    "margin": -55.88235294117648
+   },
+   "climateField": "field:earth/climate-late-quaternary",
+   "ground": 127.9375,
+   "ice": {
+    "drawn": false,
+    "marginKm": -1020,
+    "thickness": 0
+   },
+   "scene": {
+    "site": "up4oq",
+    "plan": {
+     "expected": null,
+     "actual": {
+      "ground.0": {
+       "n": 1640961,
+       "mean": 1631.6242000876316,
+       "sd": 374.01624068429027,
+       "min": 1000,
+       "max": 2570,
+       "hist": [
+        192168,
+        323765,
+        312724,
+        329624,
+        140943,
+        148745,
+        133158,
+        59834
+       ]
+      },
+      "ground.1": {
+       "n": 1640961,
+       "mean": 2417.9411101177907,
+       "sd": 2454.8511915172558,
+       "min": -309,
+       "max": 11000,
+       "hist": [
+        704737,
+        345226,
+        228147,
+        137554,
+        88903,
+        64466,
+        52070,
+        19858
+       ]
+      },
+      "ground.2": {
+       "n": 1442401,
+       "mean": 4815.244226813486,
+       "sd": 10349.28390324991,
+       "min": -24657,
+       "max": 32000,
+       "hist": [
+        46343,
+        82964,
+        100813,
+        422386,
+        423556,
+        205091,
+        127856,
+        33392
+       ]
+      },
+      "cell.place": {
+       "n": 972,
+       "mean": -46.09584376635365,
+       "sd": 3936.4518899171117,
+       "min": -7190.9853515625,
+       "max": 6798.2841796875,
+       "hist": [
+        162,
+        0,
+        0,
+        0,
+        648,
+        0,
+        0,
+        162
+       ]
+      },
+      "cell.taxon": {
+       "n": 162,
+       "hash": "ab6175ad"
+      },
+      "cell.pose": {
+       "n": 162,
+       "hash": "97785a92"
+      },
+      "cell.shade": {
+       "n": 162,
+       "mean": 116.98765432098766,
+       "sd": 70.94172427172842,
+       "min": 0,
+       "max": 255,
+       "hist": [
+        19,
+        28,
+        24,
+        22,
+        20,
+        17,
+        16,
+        16
+       ]
+      },
+      "cell.phase": {
+       "n": 162,
+       "mean": 126.45061728395062,
+       "sd": 78.17352117692539,
+       "min": 0,
+       "max": 254,
+       "hist": [
+        22,
+        21,
+        23,
+        14,
+        15,
+        22,
+        24,
+        21
+       ]
+      },
+      "cell.rank": {
+       "n": 162,
+       "hash": "6b861548"
+      },
+      "mesh.position": {
+       "n": 2172,
+       "mean": 0.06183945082544935,
+       "sd": 0.11288584298667002,
+       "min": -0.25791752338409424,
+       "max": 0.2949144244194031,
+       "hist": [
+        55,
+        29,
+        72,
+        861,
+        310,
+        436,
+        133,
+        276
+       ]
+      },
+      "mesh.uv": {
+       "n": 1448,
+       "mean": 2.9162046718668417,
+       "sd": 4.026838056461255,
+       "min": 0,
+       "max": 15,
+       "hist": [
+        826,
+        172,
+        138,
+        100,
+        68,
+        48,
+        48,
+        48
+       ]
+      },
+      "mesh.shade": {
+       "n": 2896,
+       "mean": 160.93370165745856,
+       "sd": 83.50456795722664,
+       "min": 1,
+       "max": 255,
+       "hist": [
+        277,
+        221,
+        112,
+        370,
+        541,
+        142,
+        204,
+        1029
+       ]
+      },
+      "mesh.material": {
+       "n": 2172,
+       "hash": "7fcd4f99"
+      },
+      "mesh.indices": {
+       "n": 3336,
+       "hash": "d93da6cb"
+      }
+     },
+     "problems": []
+    },
+    "taxa": [
+     {
+      "id": "life/taxa/corvus",
+      "label": "Corvus",
+      "form": "crows and jays",
+      "own": false,
+      "tier": "region",
+      "km": 1730,
+      "rows": 67,
+      "drawn": true
+     },
+     {
+      "id": "txn:39673",
+      "label": "Pelecanus",
+      "form": "birds",
+      "own": false,
+      "tier": "region",
+      "km": 1730,
+      "rows": 32,
+      "drawn": true
+     },
+     {
+      "id": "txn:158293",
+      "label": "Streptopelia",
+      "form": "pigeons and doves",
+      "own": false,
+      "tier": "region",
+      "km": 1730,
+      "rows": 9,
+      "drawn": true
+     },
+     {
+      "id": "txn:43265",
+      "label": "Loxodonta",
+      "form": "proboscideans",
+      "own": false,
+      "tier": "region",
+      "km": 1470,
+      "rows": 15,
+      "drawn": false
+     },
+     {
+      "id": "life/taxa/giraffa",
+      "label": "Giraffa",
+      "form": "giraffes",
+      "own": true,
+      "tier": "region",
+      "km": 1730,
+      "rows": 10,
+      "drawn": false
+     },
+     {
+      "id": "txn:43200",
+      "label": "Diceros",
+      "form": "rhinoceroses",
+      "own": false,
+      "tier": "region",
+      "km": 1950,
+      "rows": 2,
+      "drawn": false
+     },
+     {
+      "id": "txn:43195",
+      "label": "Ceratotherium",
+      "form": "rhinoceroses",
+      "own": false,
+      "tier": "region",
+      "km": 1950,
+      "rows": 1,
+      "drawn": false
+     },
+     {
+      "id": "life/pbdb/txn-466628",
+      "label": "flowering plants",
+      "form": "flowering plants",
+      "own": true,
+      "tier": "standin",
+      "km": 1470,
+      "rows": 0,
+      "drawn": false
+     },
+     {
+      "id": "life/pbdb/txn-307412",
+      "label": "flowering plants",
+      "form": "flowering plants",
+      "own": true,
+      "tier": "standin",
+      "km": 1470,
+      "rows": 0,
+      "drawn": false
+     },
+     {
+      "id": "txn:42404",
+      "label": "Phacochoerus",
+      "form": "pigs and peccaries",
+      "own": false,
+      "tier": "region",
+      "km": 1730,
+      "rows": 23,
+      "drawn": false
+     },
+     {
+      "id": "life/taxa/equus",
+      "label": "Equus",
+      "form": "horses, asses and zebras",
+      "own": true,
+      "tier": "region",
+      "km": 1730,
+      "rows": 50,
+      "drawn": false
+     },
+     {
+      "id": "txn:42885",
+      "label": "Tragelaphus",
+      "form": "bovids",
+      "own": false,
+      "tier": "region",
+      "km": 1730,
+      "rows": 26,
+      "drawn": false
+     },
+     {
+      "id": "txn:42010",
+      "label": "Hystrix",
+      "form": "cavies, porcupines and their kin",
+      "own": false,
+      "tier": "region",
+      "km": 1730,
+      "rows": 21,
+      "drawn": true
+     },
+     {
+      "id": "txn:42753",
+      "label": "Bos",
+      "form": "bovids",
+      "own": false,
+      "tier": "region",
+      "km": 1730,
+      "rows": 39,
+      "drawn": false
+     },
+     {
+      "id": "txn:149581",
+      "label": "Ourebia",
+      "form": "bovids",
+      "own": false,
+      "tier": "region",
+      "km": 1730,
+      "rows": 13,
+      "drawn": false
+     },
+     {
+      "id": "txn:41198",
+      "label": "Canis",
+      "form": "dogs and foxes",
+      "own": false,
+      "tier": "region",
+      "km": 1730,
+      "rows": 61,
+      "drawn": true
+     },
+     {
+      "id": "txn:42788",
+      "label": "Kobus",
+      "form": "bovids",
+      "own": false,
+      "tier": "region",
+      "km": 1950,
+      "rows": 12,
+      "drawn": false
+     },
+     {
+      "id": "txn:365333",
+      "label": "Eudorcas",
+      "form": "bovids",
+      "own": false,
+      "tier": "region",
+      "km": 1730,
+      "rows": 11,
+      "drawn": false
+     },
+     {
+      "id": "txn:42744",
+      "label": "Alcelaphus",
+      "form": "bovids",
+      "own": false,
+      "tier": "region",
+      "km": 1730,
+      "rows": 21,
+      "drawn": false
+     },
+     {
+      "id": "txn:42176",
+      "label": "Lepus",
+      "form": "rabbits, hares and pikas",
+      "own": false,
+      "tier": "region",
+      "km": 1730,
+      "rows": 56,
+      "drawn": false
+     },
+     {
+      "id": "txn:38044",
+      "label": "Varanus",
+      "form": "monitor lizards",
+      "own": false,
+      "tier": "region",
+      "km": 1730,
+      "rows": 20,
+      "drawn": true
+     },
+     {
+      "id": "txn:99148",
+      "label": "Numida",
+      "form": "fowls",
+      "own": false,
+      "tier": "region",
+      "km": 1730,
+      "rows": 10,
+      "drawn": false
+     },
+     {
+      "id": "txn:41898",
+      "label": "Arvicanthis",
+      "form": "mammals",
+      "own": false,
+      "tier": "region",
+      "km": 1730,
+      "rows": 5,
+      "drawn": false
+     },
+     {
+      "id": "txn:37740",
+      "label": "Geochelone",
+      "form": "tortoises",
+      "own": false,
+      "tier": "region",
+      "km": 1730,
+      "rows": 9,
+      "drawn": false
+     },
+     {
+      "id": "txn:41132",
+      "label": "Mellivora",
+      "form": "weasels, otters and badgers",
+      "own": false,
+      "tier": "region",
+      "km": 1730,
+      "rows": 4,
+      "drawn": true
+     },
+     {
+      "id": "txn:134894",
+      "label": "Pila",
+      "form": "snails and slugs",
+      "own": false,
+      "tier": "region",
+      "km": 1730,
+      "rows": 7,
+      "drawn": true
+     },
+     {
+      "id": "txn:382560",
+      "label": "Spathopsis",
+      "form": "freshwater mussels",
+      "own": false,
+      "tier": "region",
+      "km": 1950,
+      "rows": 4,
+      "drawn": false
+     },
+     {
+      "id": "txn:17504",
+      "label": "Corbicula",
+      "form": "Autobranchia",
+      "own": false,
+      "tier": "region",
+      "km": 1950,
+      "rows": 4,
+      "drawn": false
+     },
+     {
+      "id": "txn:324103",
+      "label": "Limicolaria",
+      "form": "land snails and slugs",
+      "own": false,
+      "tier": "region",
+      "km": 1950,
+      "rows": 3,
+      "drawn": false
+     },
+     {
+      "id": "life/taxa/asterales",
+      "label": "daisies and their relatives",
+      "form": "daisies and their relatives",
+      "own": true,
+      "tier": "standin",
+      "km": 1470,
+      "rows": 0,
+      "drawn": false
+     },
+     {
+      "id": "txn:131415",
+      "label": "Clarias",
+      "form": "catfishes",
+      "own": false,
+      "tier": "region",
+      "km": 1950,
+      "rows": 10,
+      "drawn": false
+     },
+     {
+      "id": "txn:131425",
+      "label": "Synodontis",
+      "form": "catfishes",
+      "own": false,
+      "tier": "region",
+      "km": 1950,
+      "rows": 5,
+      "drawn": false
+     },
+     {
+      "id": "txn:93513",
+      "label": "Darwinula",
+      "form": "ostracods",
+      "own": false,
+      "tier": "region",
+      "km": 2000,
+      "rows": 3,
+      "drawn": false
+     },
+     {
+      "id": "txn:131417",
+      "label": "Lates",
+      "form": "bony fishes",
+      "own": false,
+      "tier": "region",
+      "km": 1950,
+      "rows": 6,
+      "drawn": false
+     }
+    ],
+    "instances": 67,
+    "triangles": 5068,
+    "meshes": 14,
+    "groundMs": 1742.3999998569489,
+    "stage": "Holocene",
+    "climate": "desert",
+    "climateField": "field:earth/climate-late-quaternary",
+    "month": 7,
+    "snow": null,
+    "focus": [
+     -6903,
+     6605
+    ],
+    "toRiver": [
+     -0.723,
+     0.691
+    ],
+    "origin": {
+     "lat": 14.15,
+     "lon": 43.37536
+    },
+    "water": {
+     "tier": "model",
+     "rivers": [
+      {
+       "key": "rivers/recent/network.lwt#24903",
+       "from": "model"
+      },
+      {
+       "key": "rivers/recent/network.lwt#30875",
+       "from": "model"
+      }
+     ]
+    },
+    "sea": false,
+    "list": "land",
+    "eye": {
+     "z": 118.60286924178958,
+     "floor": 116.90286924178957
+    },
+    "people": {
+     "asked": true,
+     "houses": 5222,
+     "drawn": 26175,
+     "expected": 26839,
+     "settlements": 753,
+     "pattern": "hamlets",
+     "tier": "evidence",
+     "forms": [
+      "A farmer's house",
+      "A herder's tent"
+     ]
+    }
+   },
+   "settlements": [
+    {
+     "pattern": "hamlets",
+     "houses": 12,
+     "x": 34.363967887902014,
+     "y": 316.82379938475725
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 12,
+     "x": 79.62623161978222,
+     "y": 315.5469323308213
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 12,
+     "x": 186.58918800403052,
+     "y": 311.9546974885
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 12,
+     "x": 35.42330347071258,
+     "y": 312.37634390523306
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 12,
+     "x": 140.02965048006973,
+     "y": 311.86699173776407
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 12,
+     "x": 175.7720356247403,
+     "y": 311.7407459409382
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 12,
+     "x": 211.82975384608946,
+     "y": 311.7673333785429
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 12,
+     "x": 75.04459376888617,
+     "y": 312.1986281847508
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 12,
+     "x": 134.04928320801605,
+     "y": 311.7348972029195
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 254.71699688126205,
+     "y": 310.9793151349028
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 275.77920406065556,
+     "y": 309.8648420691108
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 268.91138037050837,
+     "y": 311.22194957375893
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 311.1611189776294,
+     "y": 309.0964835984882
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 6,
+     "x": 333.1211942768289,
+     "y": 308.57093893661755
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 331.1670513066999,
+     "y": 310.04671578126937
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 338.77068082090227,
+     "y": 309.42811654042
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 340.42825195655064,
+     "y": 310.2411785548905
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 383.8440755582538,
+     "y": 308.60541856805065
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 31.75648679117753,
+     "y": 313.066037391091
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 20.12988522325232,
+     "y": 313.30705522935773
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 68.15645531042405,
+     "y": 313.90190951843147
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 155.6388293474585,
+     "y": 312.807608752275
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 15.425747246113986,
+     "y": 314.45288182692053
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 85.53711074689457,
+     "y": 314.3630340737244
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 254.7322487746845,
+     "y": 312.73019488821126
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 105.0796673007481,
+     "y": 314.299756865498
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 176.7438568751218,
+     "y": 313.83161080699244
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 261.1720058517908,
+     "y": 312.49239787615727
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 11,
+     "x": 39.742043352482085,
+     "y": 312.3784185202786
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 11,
+     "x": 131.76167178990985,
+     "y": 312.01214657943945
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 11,
+     "x": 228.66338169860958,
+     "y": 311.20356342996274
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 11,
+     "x": 253.07888085883982,
+     "y": 311.2757858000613
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 11,
+     "x": 329.5875128272189,
+     "y": 310.5194602426105
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 11,
+     "x": 371.96247781151175,
+     "y": 310.15906769398566
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 11,
+     "x": 58.721665214515454,
+     "y": 312.7929601578226
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 11,
+     "x": 154.59252678611114,
+     "y": 311.9595699399277
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 11,
+     "x": 210.75098615113185,
+     "y": 311.56389546415085
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 11,
+     "x": 273.7759268291536,
+     "y": 311.30796876970277
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 11,
+     "x": 310.77888771534515,
+     "y": 310.7835852646741
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 11,
+     "x": 362.6879712510097,
+     "y": 310.2898086651453
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 11,
+     "x": 395.1945492829128,
+     "y": 310.1976967999171
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 11,
+     "x": 124.49722793623278,
+     "y": 312.1263005445481
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 11,
+     "x": 234.93241873263207,
+     "y": 311.6913872803346
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 11,
+     "x": 304.1390553653353,
+     "y": 311.06527997271303
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 11,
+     "x": 328.6505320829565,
+     "y": 310.7912915282777
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 11,
+     "x": 353.9855810393451,
+     "y": 310.53660011037175
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 11,
+     "x": 390.71793515243974,
+     "y": 310.2301408372917
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 11,
+     "x": 423.3373267805616,
+     "y": 309.9913274592044
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 11,
+     "x": 175.40481787435428,
+     "y": 312.0568856754718
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 11,
+     "x": 251.11082445610452,
+     "y": 311.7032572735911
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 11,
+     "x": 344.3655971711182,
+     "y": 310.5741558905625
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 11,
+     "x": 378.26955411676033,
+     "y": 310.33122631411436
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 11,
+     "x": 411.31966866556036,
+     "y": 310.0340792443883
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 11,
+     "x": 448.8188144995688,
+     "y": 309.9807569017573
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 11,
+     "x": 486.1324710657682,
+     "y": 309.84368469043227
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 11,
+     "x": 252.78200559196637,
+     "y": 312.03790511164834
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 11,
+     "x": 351.09976390238637,
+     "y": 310.84251855359867
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 11,
+     "x": 360.5337569406438,
+     "y": 310.4843423269983
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 11,
+     "x": 401.8978720206869,
+     "y": 310.4015936842549
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 11,
+     "x": 482.25735211594287,
+     "y": 309.75700899581716
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 11,
+     "x": 499.3364661679943,
+     "y": 309.5135987614524
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 11,
+     "x": 514.8031049952674,
+     "y": 309.6808123616041
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 11,
+     "x": 309.7936712542829,
+     "y": 312.29438633843324
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 11,
+     "x": 412.39106792601063,
+     "y": 311.03849459417575
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 11,
+     "x": 472.87319428867806,
+     "y": 310.55920975177617
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 11,
+     "x": 496.38376439611136,
+     "y": 310.11066770318996
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 11,
+     "x": 534.5907613968533,
+     "y": 309.9659505226089
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 11,
+     "x": 542.4776340545554,
+     "y": 309.6827104418765
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 11,
+     "x": 571.7309524211466,
+     "y": 309.7621469742391
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 11,
+     "x": 394.94017415925987,
+     "y": 312.007732531958
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 375.8965779398843,
+     "y": 310.0038839270676
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 384.77968507115463,
+     "y": 309.4301508468561
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 411.3169706691907,
+     "y": 308.48204691239425
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 408.4372609748794,
+     "y": 309.5484751081772
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 422.5833755749992,
+     "y": 308.65688826531624
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 449.8509611845367,
+     "y": 307.8662420854737
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 423.4166838108646,
+     "y": 309.6378655885758
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 448.29745492537523,
+     "y": 308.3497555168545
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 471.9829909252093,
+     "y": 307.7168764430198
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 453.0088964242226,
+     "y": 309.59453112132826
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 470.02033734587985,
+     "y": 308.5493334909587
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 507.79988394268054,
+     "y": 307.52327538055835
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 486.74662589465424,
+     "y": 309.5732028171958
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 508.59213947645577,
+     "y": 307.9505916182104
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 523.871830379953,
+     "y": 307.5605801660117
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 536.171930673842,
+     "y": 308.6470071586024
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 533.0273492434534,
+     "y": 308.2347724870552
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 558.3736694658858,
+     "y": 307.2852304801805
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 563.3887416909819,
+     "y": 309.28686496904214
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 567.5904479238818,
+     "y": 308.1774891850193
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 587.8333837526656,
+     "y": 307.0141978076356
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 596.7225665249716,
+     "y": 309.1693169863295
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 609.7391001115449,
+     "y": 308.35451078653244
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 605.9988344513731,
+     "y": 307.5631476214733
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 622.6200048498971,
+     "y": 309.2135519939865
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 620.593908030145,
+     "y": 308.5747738349157
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 645.471028962704,
+     "y": 307.7492306181992
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 665.887973321127,
+     "y": 309.0515525904724
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 662.1719882125009,
+     "y": 308.5360494561069
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 677.8533949448966,
+     "y": 307.6177618884374
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 25.383124915784716,
+     "y": 313.805805592525
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 239.75922880275215,
+     "y": 313.5064133952392
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 339.0339404863827,
+     "y": 314.03565884820557
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 383.3553350864153,
+     "y": 313.85517681877684
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 453.57061013391126,
+     "y": 312.98499804719364
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 180.609017839687,
+     "y": 313.41862539361654
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 307.2241296984629,
+     "y": 313.68853490611826
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 430.67506955813724,
+     "y": 313.9869962804729
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 499.42452987869126,
+     "y": 313.2416300583759
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 515.5155001479781,
+     "y": 313.0481045419129
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 126.29755044220533,
+     "y": 313.8073609353427
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 285.54023674933876,
+     "y": 313.62239714110046
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 444.75829490977856,
+     "y": 312.79517320708345
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 485.4703367106276,
+     "y": 313.8266715512559
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 530.3299296764231,
+     "y": 313.56916450656485
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 569.3365607845456,
+     "y": 312.10790418982504
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 191.6764997672475,
+     "y": 312.5935576649574
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 245.6456294446758,
+     "y": 313.9057048727395
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 368.6610528461709,
+     "y": 313.38079256113986
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 551.6407257866061,
+     "y": 313.63385743163263
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 577.145425607909,
+     "y": 312.79355484589223
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 595.6978489145084,
+     "y": 313.48373150344815
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 638.4309490985074,
+     "y": 312.85446225829185
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 153.8777489173781,
+     "y": 310.42482597626514
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 377.30241948447053,
+     "y": 312.17991095325425
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 528.2638462544099,
+     "y": 314.0404951266404
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 552.9389091839369,
+     "y": 312.7650035720158
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 622.4789450803553,
+     "y": 313.36600468634845
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 672.1552205450635,
+     "y": 313.0932001055779
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 710.0295545213829,
+     "y": 313.5777616674047
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 734.485650258473,
+     "y": 312.427548725603
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 227.07507126615693,
+     "y": 311.1213449057759
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 711.9075738393335,
+     "y": 313.3127574389915
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 751.512074486058,
+     "y": 312.70945651986483
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 734.3212434981183,
+     "y": 313.7702372224215
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 807.3876966773117,
+     "y": 313.44824293136685
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 777.7895030231128,
+     "y": 312.8854914781152
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 812.3956101308769,
+     "y": 312.33238675328363
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 853.7161954955151,
+     "y": 311.8699688025829
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 852.4414247068304,
+     "y": 314.5210466283346
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 836.7716549891286,
+     "y": 313.699852833662
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 890.7245556023724,
+     "y": 312.63593326528496
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 900.9331080899683,
+     "y": 314.15463063856936
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 890.8242246151212,
+     "y": 312.77705430984713
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 948.4370226562289,
+     "y": 313.08330014529923
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 910.3999861199084,
+     "y": 313.3929850810981
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 912.3009930971451,
+     "y": 312.2079837805178
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 1434.8014057364617,
+     "y": 314.4957985774114
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 1357.6257676927446,
+     "y": 314.4613436224056
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 7,
+     "x": 1154.527480293305,
+     "y": 311.85506598190244
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 482.97823036483925,
+     "y": 311.5252229118443
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 496.0718377668458,
+     "y": 311.90263906626774
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 545.1621295977598,
+     "y": 310.94089683327996
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 606.3787829239162,
+     "y": 310.81395812554973
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 606.166878225086,
+     "y": 310.10237221831056
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 652.2220174186108,
+     "y": 310.03735825847224
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 673.908689727885,
+     "y": 310.0624000737924
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 682.3125720860459,
+     "y": 309.90308816440177
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 584.7378994748832,
+     "y": 311.83237174568796
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 599.7628269387753,
+     "y": 311.557855346422
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 630.0693430035428,
+     "y": 310.85113860059187
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 637.4927892973811,
+     "y": 310.74477288706726
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 683.1660704691978,
+     "y": 310.1566401533066
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 688.9079218340312,
+     "y": 310.25305905090056
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 706.4892634098485,
+     "y": 310.14578159026433
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 733.6209781344954,
+     "y": 309.9139162474372
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 675.0542325249924,
+     "y": 312.17146417546644
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 676.645140965027,
+     "y": 311.74436965687323
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 673.2924320742584,
+     "y": 311.0874134392699
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 697.8691330272555,
+     "y": 310.75924650183117
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 707.2861213139346,
+     "y": 310.26620602832276
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 727.44041787632,
+     "y": 310.2026421011549
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 757.5368720356545,
+     "y": 310.2255473137061
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 776.5347684353419,
+     "y": 310.0083618967792
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 715.6102560548665,
+     "y": 312.20219905466575
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 737.5844475095523,
+     "y": 311.7818013583424
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 743.9932280448108,
+     "y": 311.1689043716211
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 780.4652643519586,
+     "y": 311.0419149734401
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 772.4189230504853,
+     "y": 310.4715723364294
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 801.3088995665505,
+     "y": 310.2596511611159
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 788.4366738851751,
+     "y": 310.3086433068465
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 797.4909067631513,
+     "y": 310.11426367732355
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 826.9657376548827,
+     "y": 311.88549747509734
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 819.4814959288041,
+     "y": 311.0977191074463
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 808.3353525204798,
+     "y": 311.0988383442261
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 821.4302284259602,
+     "y": 310.80951656481733
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 845.7769182310354,
+     "y": 310.51262348563046
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 865.7945030558586,
+     "y": 310.3247708762552
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 851.5562989822314,
+     "y": 310.03477910549316
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 865.7582250869986,
+     "y": 309.9224285136739
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 886.5427476649064,
+     "y": 311.8796406046671
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 874.4284917357018,
+     "y": 310.8348067937269
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 894.6009148543615,
+     "y": 310.7722072121776
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 896.6119994432802,
+     "y": 310.8558778964496
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 894.6928187557864,
+     "y": 310.142828263191
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 904.1546075376746,
+     "y": 309.9565760188129
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 898.5455548864823,
+     "y": 310.289788246274
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 923.8993141666139,
+     "y": 310.0930012048676
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 1005.694122384501,
+     "y": 311.48351356178466
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 982.342971699126,
+     "y": 310.8610211396235
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 986.6758449681132,
+     "y": 310.6895756825927
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 963.1053203029207,
+     "y": 310.8004277230768
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 962.5530905092676,
+     "y": 310.5775761058926
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 980.6725992505698,
+     "y": 310.29950182473806
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 970.2281994697096,
+     "y": 310.04495513310025
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 958.182932152736,
+     "y": 310.2223388288011
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 1066.4754161850399,
+     "y": 312.2364421624584
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 8,
+     "x": 1053.5906147928993,
+     "y": 311.2378995106499
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 9,
+     "x": 687.2940717138069,
+     "y": 309.0666640885769
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 9,
+     "x": 685.7617728919192,
+     "y": 308.3230902707324
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 9,
+     "x": 745.3949098673105,
+     "y": 309.4755085812473
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 9,
+     "x": 743.8432834863158,
+     "y": 308.506728929895
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 9,
+     "x": 791.6355590467687,
+     "y": 308.88478594231515
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 9,
+     "x": 787.5999715165404,
+     "y": 308.930287781896
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 9,
+     "x": 814.7064457750346,
+     "y": 309.204714756901
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 9,
+     "x": 823.1805278664119,
+     "y": 309.2062319422235
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 9,
+     "x": 875.1582846730805,
+     "y": 309.8438166427982
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 9,
+     "x": 868.708406699881,
+     "y": 309.4682054418608
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 9,
+     "x": 906.2550978524529,
+     "y": 309.9640675252094
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 9,
+     "x": 897.8289603678245,
+     "y": 309.4276651435368
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 6,
+     "x": 908.5309357284731,
+     "y": 309.3038271280138
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 9,
+     "x": 967.0001437201837,
+     "y": 310.09229388953963
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 9,
+     "x": 955.8767578780169,
+     "y": 309.9480588936525
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 1555.690524362386,
+     "y": 314.75101202033426
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 1442.6673686324011,
+     "y": 313.9146879140182
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 1363.247141164823,
+     "y": 314.0082254129237
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 1311.494610742604,
+     "y": 313.96959266179005
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 1276.0857271649716,
+     "y": 313.95098254243715
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 1204.559761242565,
+     "y": 312.6140755118381
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 1512.0716395023392,
+     "y": 314.8445926392238
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 1417.9060173164569,
+     "y": 314.0008397380448
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 1309.3106334444124,
+     "y": 313.6954067373343
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 1290.9713625192367,
+     "y": 312.832002012965
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 1586.2445147890874,
+     "y": 314.8584341822074
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 1595.2097708239808,
+     "y": 314.32968378679533
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 1424.5025029692315,
+     "y": 313.67165065298514
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 1387.169852050446,
+     "y": 312.72197106622735
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 1539.2531978567881,
+     "y": 313.8655485637084
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 1504.8154346854692,
+     "y": 312.9759655661022
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 14,
+     "x": 1181.2566019944131,
+     "y": 312.32177568677844
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 14,
+     "x": 1120.7281007575552,
+     "y": 310.87396687910166
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 14,
+     "x": 1104.4547515030395,
+     "y": 311.1961430572059
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 14,
+     "x": 1119.664030722108,
+     "y": 310.7003259447134
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 14,
+     "x": 1074.2424367413166,
+     "y": 310.80795126505393
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 14,
+     "x": 1080.1160190791263,
+     "y": 310.5292664904404
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 14,
+     "x": 1349.08079226291,
+     "y": 311.77955437068357
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 14,
+     "x": 1299.4569174127703,
+     "y": 311.6754718608375
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 14,
+     "x": 1266.0923687001848,
+     "y": 310.99084460873644
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 14,
+     "x": 1196.560143708651,
+     "y": 311.032086011664
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 14,
+     "x": 1162.8408905373628,
+     "y": 310.82536365479353
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 14,
+     "x": 1115.8205670605241,
+     "y": 310.5768181492476
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 14,
+     "x": 1549.2409491629307,
+     "y": 312.9419220718506
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 14,
+     "x": 1392.080229790511,
+     "y": 311.45083035492297
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 14,
+     "x": 1331.4265941072272,
+     "y": 311.5020163153816
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 14,
+     "x": 1296.7597003614428,
+     "y": 311.29944689545243
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 14,
+     "x": 1265.7757426862097,
+     "y": 310.42998967357613
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 14,
+     "x": 1225.1950489955805,
+     "y": 310.78541196871
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 14,
+     "x": 1581.8711057813487,
+     "y": 312.93198611216076
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 14,
+     "x": 1527.112038829718,
+     "y": 312.18685558812086
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 14,
+     "x": 1409.21161062085,
+     "y": 311.752456083074
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 14,
+     "x": 1350.8545630604387,
+     "y": 311.1532581267296
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 14,
+     "x": 1363.5518282910805,
+     "y": 311.3185690886181
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 14,
+     "x": 1310.38475286869,
+     "y": 310.78888617863413
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 14,
+     "x": 1513.9962616554815,
+     "y": 311.56226220298936
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 14,
+     "x": 1524.6916599178564,
+     "y": 311.5351636451291
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 14,
+     "x": 1399.4598242860175,
+     "y": 311.10026236060673
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 14,
+     "x": 1371.5787314883507,
+     "y": 310.73764520397646
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 1044.910624757211,
+     "y": 310.34763464803393
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 1030.0022836088795,
+     "y": 310.2697441263275
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 1028.6422516752473,
+     "y": 309.5159723840053
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 1086.8123811153043,
+     "y": 310.2627395166164
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 1065.971306288964,
+     "y": 310.05492480868196
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 1084.917918207589,
+     "y": 309.93989253926776
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 1114.7341125237788,
+     "y": 310.2832753679029
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 1106.358101071242,
+     "y": 310.11316101538273
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 1117.946605595015,
+     "y": 309.97590366089776
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 1160.3405728183998,
+     "y": 310.19199643694185
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 1152.8138374093332,
+     "y": 310.39634191221677
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 1158.3340109975945,
+     "y": 309.9551214710852
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 1215.5542190239337,
+     "y": 310.6868839856624
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 1183.770071538679,
+     "y": 309.9901668230082
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 1186.83920529801,
+     "y": 309.72448030290747
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 1259.868056282895,
+     "y": 310.5270087619768
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 1240.9323997219856,
+     "y": 310.131679335259
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 1221.1714620655212,
+     "y": 309.87572469011894
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 1314.7135241463382,
+     "y": 310.779953056355
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 1282.6582027352908,
+     "y": 310.40651217922647
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 1258.449452846415,
+     "y": 309.6107548279186
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 1352.1713271253748,
+     "y": 310.5160348332346
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 1336.384502729748,
+     "y": 310.45236532806075
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 1303.6764572865952,
+     "y": 310.07702701631774
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 1385.8206761241515,
+     "y": 310.5075561204401
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 1354.0174199484306,
+     "y": 310.5265016527371
+    },
+    {
+     "pattern": "hamlets",
+     "houses": 5,
+     "x": 1345.4620816494917,
+     "y": 310.06378905694726
+    }
+   ],
+   "text": [
+    "0 recorded here, 31 nearby, 3 stand-ins · Farming hamlets, 5,222 houses"
+   ],
+   "settled": [],
+   "errors": [],
+   "seconds": 16
+  }
+ }
+}

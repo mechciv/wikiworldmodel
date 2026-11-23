@@ -1,0 +1,244 @@
+view: t=1090.478&lat=48.54&lon=4.64&d=2.6&hour=15&mo=12&clock=0
+when: 1090 CE
+place: The whole disc of the Earth from orbit, centred over Champagne in France, with Europe, North Africa, the North Atlantic and western Asia in view.
+author: machine:claude-code
+expects:
+  - id: cover-europe-forest
+    layer: cover
+    what: >-
+      Europe is a patchwork and not one forest. The north-west (Britain and its neighbours) is mostly open field
+      and pasture, with woods on about 15% of England's surveyed land; north central Europe still carries broad
+      dark forest, which is being cut into in these centuries.
+    reach: place
+    source:
+      cite: "Roberts, N., Fyfe, R.M., Woodbridge, J., et al. (2018). Europe's lost forests: a pollen-based synthesis for the last 11,000 years. Scientific Reports 8, 716."
+      url: https://www.nature.com/articles/s41598-017-18646-7
+      text: roberts-2018-lost-forests.txt
+      loc: "Discussion, the paragraph on the forest loss index (Fig. 4)"
+      quote: "north central Europe, where the majority of forests remained intact until Mediaeval times, and north western Europe where most forests had already been cleared in Bronze and Iron Age times. … The early date for forest clearance in England is in accord with the Domesday record, which showed only 15% of the surveyed lands as still wooded in 1086 CE"
+    note: >-
+      The Domesday figure is of 1086, four years before. For north central Europe the paper gives about 60% forest
+      in 550 to 750 CE and 45% after 1750, and no value for the eleventh century; it says the needle-leaf forests of
+      the north were touched least. It reconstructs nothing for Mediterranean Europe, nor east of 32° E.
+  - id: cover-sahara-desert
+    layer: cover
+    what: >-
+      The Sahara is bare, hyperarid desert, with no grassland, lakes or rivers across it. Its green phase had ended
+      some four thousand years before.
+    reach: region
+    source:
+      cite: "Tierney, J.E., Pausata, F.S.R. & deMenocal, P.B. (2017). Rainfall regimes of the Green Sahara. Science Advances 3(1), e1601503."
+      url: https://pmc.ncbi.nlm.nih.gov/articles/PMC5242556/
+      text: tierney-2017-green-sahara.txt
+      loc: "Introduction, first paragraph"
+      quote: "the hyperarid Sahara was transformed into a mesic landscape, with widespread grasslands, variable tree cover, large permanent lakes, and extensive river drainage networks. … some sedimentary records suggest that the Green Sahara terminated within centuries around 5000 yr B.P."
+    note: >-
+      Said of the whole span since about 5000 years before the present, from cores off the West African margin, and
+      not of the eleventh century itself. The same paper gives 35 to 100 mm of rain a year for the western Sahara today.
+  - id: cover-pontic-steppe
+    layer: cover
+    what: >-
+      North of the Sea of Azov the land is open and empty from horizon to horizon, nothing in sight but sky and
+      earth: the country of the Comans (Polovtsy), marked only by their tombs.
+    reach: region
+    source:
+      cite: "William of Rubruck (1253-55). The journey of William of Rubruck to the eastern parts of the world, tr. W.W. Rockhill. London, Hakluyt Society, 1900."
+      url: https://depts.washington.edu/silkroad/texts/rubruck.html
+      text: rubruck.txt
+      loc: "section 'Rubruck resumes his travel narrative', the paragraph after leaving the province of Gazaria"
+      quote: "We traveled eastward, seeing nothing but the sky and the earth, only now and then to our right the sea which is called Sea of Tanais, and tombs of Comans visible two leagues off"
+    note: >-
+      A traveller of the summer of 1253, 163 years later, after the Tartars had come and the Comans had fled (he
+      says so); the open plain is carried back to 1090, when the Comans lived in it. He does not name what grew
+      there in this passage. Read on a university's page of Rockhill's translation.
+  - id: weather-cloud-bands
+    layer: weather
+    what: >-
+      Cloud covers much of the disc. Frontal cloud lies in abundance over the middle latitudes, the North Atlantic
+      and Europe, while the sky over the desert belt of the Sahara and Arabia is mostly clear.
+    reach: region
+    source:
+      cite: "NASA Earth Observatory (2015). Cloudy Earth. Image of the Day for May 8, 2015 (Aqua MODIS, July 2002 to April 2015)."
+      url: https://earthobservatory.nasa.gov/images/85843/cloudy-earth
+      text: nasa-cloudy-earth.txt
+      loc: "third paragraph"
+      quote: "Clouds also tend to form in abundance in the middle latitudes 60 degrees north and south of the equator. … Since air descends between about 15 and 30 degrees north and south of the equator, clouds are rare and deserts are common at this latitude."
+    note: >-
+      A mean of satellite years 2002 to 2015, for the whole year and not for December; carried to 1090 as the
+      pattern of the circulation. The page also says about 67 percent of the Earth's surface is typically under cloud.
+  - id: ice-snow-december
+    layer: ice
+    what: >-
+      The northern lands in view are white with seasonal snow. In the satellite record the snow on the land of the
+      Northern Hemisphere in December averages 43.68 million square kilometres, between 37.44 and 46.85 from year to year.
+    reach: region
+    source:
+      cite: "Estilow, T.W., Young, A.H. & Robinson, D.A. (2015). A long-term Northern Hemisphere snow cover extent data record for climate studies and monitoring. Earth System Science Data 7, 137-142."
+      url: https://essd.copernicus.org/articles/7/137/2015/essd-7-137-2015.pdf
+      text: estilow-2015-snow.txt
+      loc: "Table 2, row Dec (mean, max, min and SD, in millions of square kilometres), p. 140"
+      quote: "Dec 43.68 46.85 (2012) 37.44 (1980) 1.93"
+    note: >-
+      Of the years 1966 to 2014 and of the whole hemisphere, North America and eastern Asia with it; the table does
+      not say where the snow lies. Carried back nine centuries. Where the edge of the snow ran in Europe in
+      December 1090 is among the unknowns.
+  - id: ice-snow-thrace-1090
+    layer: ice
+    what: >-
+      Deep snow reaches far south that winter. Around Constantinople the snow lies so heavy that the roads are
+      blocked and house doors cannot be opened, a heavier fall than anyone there had seen.
+    reach: place
+    source:
+      cite: "Anna Comnena. The Alexiad, tr. Elizabeth A.S. Dawes. London, Routledge, Kegan Paul, 1928. Book VIII."
+      url: https://sourcebooks.fordham.edu/basis/AnnaComnena-Alexiad08.asp
+      text: alexiad-book-8.txt
+      loc: "Book VIII, ch. III (pp. 198-199 of the translation)"
+      quote: "an exceptionally severe winter was blocking up all the roads to such a degree that even the doors of houses could not be opened, because of the weight of snow lying against them"
+    note: >-
+      The winter of 1090 to 1091. The book is headed with the year 1091, and sets this snow after the fight at
+      Choerobacchi and before the spring campaign that ended at Levunium on 29 April 1091: so the fall she
+      describes is of the first months of 1091, not of December 1090 itself. One place, in the south-east of the disc.
+  - id: ice-greenland-inland-ice
+    layer: ice
+    what: >-
+      Greenland, at the north-west of the disc, is white inland ice over mountains and valleys alike, with only a
+      thin strip of bare land along the water's edge.
+    reach: region
+    source:
+      cite: "The King's Mirror (Speculum regale, Konungs skuggsjá), tr. L.M. Larson. New York, The American-Scandinavian Foundation, 1917."
+      url: https://gutenberg.pglaf.org/6/1/2/6/61264/61264-0.txt
+      text: kings-mirror.txt
+      loc: "ch. XVII, The animal life of Greenland and the character of the land in those regions"
+      quote: "only a small part of the land thaws out, while all the rest remains under the ice"
+    note: >-
+      A Norwegian text that its translator places close to 1247, some 160 years later. Its ch. XVI also has ice
+      fields in the sea off Greenland, four or five ells thick, more to the north-east and north of the land than
+      to the south and west, from the accounts of men caught in them.
+  - id: ice-sea-ice-iceland
+    layer: ice
+    what: >-
+      The sea north of Iceland is mostly open water, with little sea ice, in these centuries.
+    reach: place
+    source:
+      cite: "Massé, G., Rowland, S.J., Sicre, M.-A., Jacob, J., Jansen, E. & Belt, S.T. (2008). Abrupt climate changes for Iceland during the last millennium: evidence from high resolution sea ice reconstructions. Earth and Planetary Science Letters 269, 565-569."
+      url: https://archimer.ifremer.fr/doc/00237/34839/33273.pdf
+      text: masse-2008-archimer-pdf.txt
+      loc: "1. Introduction, last paragraph, p. 565"
+      quote: "the Icelandic climate was relatively mild, and that little sea ice occurred in the region from 800 to 1300 AD"
+    note: >-
+      A biomarker (IP25) in one sediment core (MD99-2275) from the North Icelandic Shelf, as a mean over five
+      centuries: it says nothing of one December. The paper notes more of the marker in a few years of reported
+      severe weather.
+  - id: polity-france-england-normandy
+    layer: polity
+    what: >-
+      Under the eye is the kingdom of the Franks (France) of King Philip, with Normandy under Robert, who calls
+      Philip his lord; across the Channel the kingdom of England of King William, whose men hold castles in
+      Normandy that year.
+    reach: place
+    source:
+      cite: "The Anglo-Saxon Chronicle, in the English text of the Avalon Project (Yale Law School), eleventh century."
+      url: https://avalon.law.yale.edu/medieval/ang11.asp
+      text: anglo-saxon-chronicle.txt
+      loc: "annal for A.D. 1090"
+      quote: "then sent he to his lord, Philip, king of the Franks; and he came to Normandy with a large army, and the king and the earl with an immense force beset the castle about, wherein were the men of the King of England."
+    note: The annal of the year itself. It names no frontier. The page does not name its translator.
+  - id: polity-western-empire
+    layer: polity
+    what: >-
+      East and south-east of Champagne lies the Empire, one realm on a map of the year, made of the German kingdom
+      with the kingdoms of Italy and Burgundy.
+    reach: place
+    source:
+      cite: "Freeman, E.A. (1881). The Historical Geography of Europe. London, Longmans, Green, and Co."
+      url: https://archive.org/download/historicalgeog01free/historicalgeog01free_djvu.txt
+      text: freeman-historical-geography.txt
+      loc: "ch. VI, the summary at its end, p. 163"
+      quote: "The Imperial dignity and the two royal crowns … of Italy and Burgundy were now attached to the … German kingdom."
+    note: >-
+      Said of the end of the eleventh century. The two gaps in the quote stand over marginal headings that the scan
+      ran into the sentence. A nineteenth-century synthesis, read as the archive's scan; the same summary has the
+      French kingdom centred on Paris with a supremacy little more than nominal over a large part of Gaul. The
+      emperor is not named there: Bryce's Holy Roman Empire, also read, dates Henry IV 1056 to 1106.
+  - id: polity-byzantium
+    layer: polity
+    what: >-
+      The Eastern Roman (Byzantine) Empire of Alexius holds Constantinople, but that winter the Scythians
+      (Patzinaks) range over its European provinces up to the villages by the capital, and Tzachas with a fleet
+      sacks its coast towns and holds islands he has taken.
+    reach: place
+    source:
+      cite: "Anna Comnena. The Alexiad, tr. Elizabeth A.S. Dawes. London, Routledge, Kegan Paul, 1928. Book VIII."
+      url: https://sourcebooks.fordham.edu/basis/AnnaComnena-Alexiad08.asp
+      text: alexiad-book-8.txt
+      loc: "Book VIII, ch. III (pp. 198-199 of the translation)"
+      quote: "And indeed the Scythians, who were innumerable and dispersed all over the West, continued to ravage all the provinces … Tzachas had acquired another fleet and was sacking the coast towns"
+    note: >-
+      Of the winter of 1090 to 1091 (the book is headed 1091), by the emperor's daughter, partly from what those
+      present told her. 'The West' is the empire's European side. How much of Asia Minor the empire still held is
+      not said here.
+  - id: polity-seljuk-and-fatimid
+    layer: polity
+    what: >-
+      Western Asia from Asia Minor and the Mediterranean eastward past the edge of the disc is one empire, the
+      Seljuks' under Malik Shah. It borders the Greek Empire in Asia Minor and the Fatimid Caliphate of Egypt.
+    reach: place
+    source:
+      cite: "Lane-Poole, S. (1894). The Mohammadan Dynasties: chronological and genealogical tables with historical introductions. Westminster, Archibald Constable and Company."
+      url: https://archive.org/download/mohammadandynast00lane/mohammadandynast00lane_djvu.txt
+      text: lane-poole-mohammadan-dynasties.txt
+      loc: "60. The Seljuks, p. 151"
+      quote: "the whole of western Asia, from the borders of Afghanistan to the frontier of the Greek Empire in Asia Minor and of the … Caliphate of Egypt, became united under the rule of the Seljuks before 1077 … Tughril Beg, Alp-Arslan, and Malik Shah held supreme sway over the whole of this vast Empire"
+    note: >-
+      The first gap stands over one word the scan garbles (Fatimid); the second over a Hijra year. A reference work
+      of tables, of 1894. Malik Shah's son succeeded him in 1092 (the 1911 Britannica's article on the Seljuks, also
+      read), so 1090 falls in his reign. The same book says the Fatimids' power in Egypt and Syria long continued,
+      while the Britannica has Syria a fief of Malik Shah's brother at Damascus; where that line ran in 1090 I did
+      not read.
+  - id: polity-almoravids-and-spain
+    layer: polity
+    what: >-
+      Morocco and part of Algeria are the Almoravids' under Yusuf ibn Tashfin, who crosses again into Spain in 1090
+      and takes over its Moorish kingdoms. Toledo stays with the Christians of the north, and Zaragoza with the
+      Hudids.
+    reach: place
+    source:
+      cite: "Lane-Poole, S. (1894). The Mohammadan Dynasties: chronological and genealogical tables with historical introductions. Westminster, Archibald Constable and Company."
+      url: https://archive.org/download/mohammadandynast00lane/mohammadandynast00lane_djvu.txt
+      text: lane-poole-mohammadan-dynasties.txt
+      loc: "19. Almoravides, pp. 42-43"
+      quote: "But in 1090 the King of Seville again prayed him to come and help him against the Christians, and this time Yusuf annexed the whole of Moorish Spain, with the exception of … Toledo, which remained in the possession of the Christians, and Zaragosa, where the Hudids were suffered to subsist."
+    note: >-
+      The gap is a page break. The sentence puts the whole annexation under 1090; how much of it was done by
+      December is among the unknowns. The same pages name Alfonso VI and Sancho of Aragon as the Christian kings,
+      and leave the Hammadids and Zayrids most of Algeria, Tunis and Tripoli.
+  - id: polity-rus-and-polovtsy
+    layer: polity
+    what: >-
+      In the north-east of the disc, along the Dnieper, is the land of Rus' under Prince Vsevolod at Kiev; in the
+      open country beside it the Polovtsy (Comans), who raid villages on both banks of the river.
+    reach: place
+    source:
+      cite: "The Russian Primary Chronicle: Laurentian Text, tr. and ed. S.H. Cross & O.P. Sherbowitz-Wetzor. Cambridge, Mass., The Mediaeval Academy of America, 1953."
+      url: https://www.mgh-bibliothek.de/dokumente/a/a011458.pdf
+      text: russian-primary-chronicle.txt
+      loc: "annals 6597 (1089), p. 169, and 6600 (1092), p. 174"
+      quote: "in the reign of the noble Prince Vsevolod, ruler of the land of Rus' … incursions of the Polovcians were reported from all quarters … ravaged many villages on both banks of the Dnieper"
+    note: >-
+      The text as read has no annal headed 1090: these are of the year before and of two years after. The annal for
+      1093 has Vsevolod die that April, having ruled in Kiev and given domains to his nephews.
+unknown:
+  - Where the edge of the snow ran across Europe and western Asia in December 1090. The only account of that winter I read is from Constantinople, and is of its later months.
+  - How far the Arctic pack reached in the Greenland, Barents and Kara seas in 1090. I read one core from north of Iceland, a mean over five centuries, and a Norwegian text of 160 years later.
+  - How large the glaciers of the Alps, Scandinavia, Iceland and the Caucasus were. The paper on the Alpine glaciers I looked for (Holzhauser and others, 2005) is closed and was not read.
+  - What share of each part of Europe was forest in 1090. The model that gives it (Kaplan and others, 2009) could not be reached, and the pollen synthesis gives no eleventh-century value and nothing for the Mediterranean lands or east of 32° E.
+  - The cover of the Maghrib's coast and mountains, Anatolia, Syria, Iraq and Iran, and how far north the Sahel's grass reached; the levels of Lake Chad, the Caspian and the Aral Sea.
+  - Coasts that differed from today's, such as those of the Low Countries and the fronts of the great deltas. Nothing was read on them.
+  - The kingdoms a map of 1090 names that I read no source of the time for, among them Hungary, Poland, Bohemia, Denmark, Norway, Sweden, Scotland, the Norman lands of southern Italy and Sicily, Georgia, the Volga Bulgars and Ghana; and where any frontier in view ran, the one between France and the Empire beside Champagne first.
+  - Which Moorish kingdoms of Spain still stood in December 1090, and how much of Asia Minor was the Turks' and how much still the emperor's.
+  - The cloud of the day, and the weather of December 1090 in western Europe. The Anglo-Saxon Chronicle's annal for the year says nothing of it.
+  - Whether anything showed on the night side of the disc. No source read speaks of fires or towns seen at such a distance.
+pictures:
+  - { url: "https://earthobservatory.nasa.gov/images/52248/seeing-equinoxes-and-solstices-from-space", what: "Meteosat-9's views of the Earth from geosynchronous orbit at the solstices and equinoxes, one of 21 December 2010, showing how the line between night and day lies in December (a modern photograph, for the light of the month)." }
+  - { url: "https://earthobservatory.nasa.gov/images/85843/cloudy-earth", what: "A map of where cloud lies on average, from Aqua MODIS, 2002 to 2015." }
+effort: { fetched: 27, cited: 12, failed: 7, note: "27 addresses tried; 17 source texts read, 12 of them cited. Failed: gutenberg.org (three addresses refused; its mirror and the Avalon Project served instead), core.ac.uk and HAL for Massé 2008 (read from Archimer), and two addresses for Kaplan and others 2009, which was not read. Not tried because closed: Holzhauser and others 2005. Longest: finding readable sources for the states of 1090; the scans of Lane-Poole and Freeman are rough, so their quotes skip garbled words and page furniture with an ellipsis. No item is given for the light: at 15:00 in December the sun is low in the south-west at the centre of the disc and its north-east is in night, which is geometry from the view link and not from a source." }

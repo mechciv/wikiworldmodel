@@ -1,0 +1,271 @@
+view: t=23.276749Ma&lat=-36.99535&lon=134.25952&d=1.0000023544&h=250&v=84&hour=12&mo=8&clock=0
+when: 23.28 Ma
+place: >-
+  Far western Queensland, Australia, on the ground of today's Mount Whelan 1:250,000 sheet (about 23.57°S, 138.73°E),
+  between the Mulligan and Georgina Rivers at the edge of the Simpson Desert, in the Lake Eyre Basin; in the latest
+  Oligocene it lay near 37° to 41°S.
+author: machine:claude-code
+expects:
+  - id: sky-low-northern-sun
+    layer: sky
+    what: >-
+      A mid-latitude winter noon. The ground lay near 40°S, so the August sun stands in the north, well under halfway
+      up the sky, to the right of and behind a camera that faces west-south-west; shadows fall to the south.
+    reach: region
+    source:
+      cite: "Yates, A.M. (2017). The biochronology and palaeobiogeography of Baru (Crocodylia: Mekosuchinae) based on new specimens from the Northern Territory and Queensland, Australia. PeerJ 5:e3458. doi:10.7717/peerj.3458"
+      url: https://pmc.ncbi.nlm.nih.gov/articles/PMC5482264/
+      text: yates-2017-baru.txt
+      loc: "Discussion, caption of Figure 22"
+      quote: "The north/south division of B. wickeni and A. clarkae is marked by the 26°S line of latitude (approximately 43° S palaeolatitude in the late Oligocene)."
+    note: >-
+      The source gives only the palaeolatitude (about 17° south of today's, which puts this ground near 41°S; the build
+      has it at 37°S). The sun's height, about 35° to 39° at noon in mid August, is geometry from that latitude, not
+      something the source says.
+  - id: relief-peneplain
+    layer: relief
+    what: >-
+      A plain of very low relief to the horizon, with no hills of any size in view and no cut valleys: an old
+      land surface worn nearly flat, with sluggish or no organised drainage.
+    reach: place
+    source:
+      cite: "Reynolds, M.A. (compiler) (1964). Explanatory notes on the Mount Whelan geological sheet. Bureau of Mineral Resources, Geology and Geophysics, Record 1964/138."
+      url: https://d28rz98at9flks.cloudfront.net/11394/Rec1964_138.pdf
+      text: mount-whelan-notes-1964.txt
+      loc: "Geological history, items (4) and (5), p. 20 (PDF page 29)"
+      quote: "Peneplanation in the early Tertiary, accompanied by sheet flooding and deposition of the Marion Formation, was followed by lateritization … The whole area was by this time part of a vast peneplain with practically no drainage"
+    note: >-
+      Said of this sheet area, but the dating is loose: 'early Tertiary' and 'late in the Tertiary' bracket the scene,
+      and the 1964 notes had no ages in years. Whether the strike ridges of the Toko Range, 60 to 100 km to the
+      north-west, stood above the plain then is not said.
+  - id: substrate-quartz-sand-and-grit
+    layer: substrate
+    what: >-
+      Underfoot, pale quartz sand, fine to very coarse, with fine quartz gravel: the fill of a broad, shallow
+      north-south valley of an old river system that ran from the north, like the Georgina's today.
+    reach: place
+    source:
+      cite: "Paten, R.J. (1964). The Tertiary geology of the Boulia region, western Queensland. Bureau of Mineral Resources, Geology and Geophysics, Report 77."
+      url: https://d28rz98at9flks.cloudfront.net/14989/Rep_077.pdf
+      text: paten-1964-boulia-tertiary.txt
+      loc: "Marion Basin and Marion Formation, pp. 11-12 (PDF pages 17-18)"
+      quote: "suggests that the formation was deposited in the erosion valleys of a Tertiary drainage system analogous to that of the present Georgina River/Eyre Creek System. … The formation consists of quartz sandstone, ranging in grain-size from fine to very coarse, and fine quartz conglomerate."
+    note: >-
+      Paten puts the Marion Formation's southern outcrop between the Mulligan and Georgina Rivers and the basin at about
+      40 miles wide at latitude 24°S, which takes in this ground or its eastern edge. Its age is not known in years:
+      it lies on the laterite and under the silcrete, and may be older than the scene, so the sand may already have
+      been an old valley floor. Today it is silicified to 'billy'; the sources do not say when.
+  - id: substrate-lateritic-weathering
+    layer: substrate
+    what: >-
+      Where the sand is thin or absent, deeply weathered ground: iron-stained lateritic soil over mottled, leached
+      clay, the product of long warm, wet weathering, with little fresh rock at the surface.
+    reach: region
+    source:
+      cite: "Martin, H.A. (1998). Tertiary climatic evolution and the development of aridity in Australia. Proceedings of the Linnean Society of New South Wales 119, 115-136."
+      url: https://archive.org/download/biostor-68287/biostor-68287.pdf
+      text: martin-1998-aridity.txt
+      loc: "p. 131 (PDF page 17)"
+      quote: "Palaeomagnetic dating suggests that the dominant period of laterite weathering over a large part of Australia was late Oligocene to early Miocene"
+    note: >-
+      Continental in reach. Locally, Paten (1964, p. 12) has the Marion Formation resting on the eroded mottled zone of
+      a laterite profile on Lower Cretaceous rocks, so a laterite was here; its local age limits are, in his words,
+      not established. The colours of the profile here are not given.
+  - id: water-seasonal-lakes
+    layer: water
+    what: >-
+      In the low parts of the basin, wide shallow freshwater lakes whose margins dry out and shrink back each
+      summer; in August, the cool wet season, they would be near their fullest.
+    reach: region
+    source:
+      cite: "Mather, E.K., Lee, M.S.Y., Camens, A.B. & Worthy, T.H. (2021). An exceptional partial skeleton of a new basal raptor (Aves: Accipitridae) from the late Oligocene Namba Formation, South Australia. Historical Biology. doi:10.1080/08912963.2021.1966777"
+      url: https://newsroom.taylorandfrancisgroup.com/wp-content/uploads/2021/09/basal-raptor.pdf
+      text: mather-2021-archaehierax.txt
+      loc: "Introduction, 'The Namba Formation', p. 3"
+      quote: "revealing the presence of a permanent lake in the basin during this time period. The dolomitic layers at the site suggest periods of time when sections of the lake would seasonally dry out"
+    note: >-
+      Said of Lake Pinpa (Namba Formation, 26-24 Ma), about 800 km to the south-south-east. No lake or river deposit of
+      this age is described on this ground: the lake limestones of the Mulligan and Georgina country are put in the
+      Miocene (Shergold 1985, notes on the Hay River-Mount Whelan sheet, BMR Report 251, p. 22, read but not quoted
+      here). So water in this view is not established.
+  - id: cover-sclerophyll-with-rainforest-patches
+    layer: cover
+    what: >-
+      Evergreen woody cover over the whole view: hard-leaved (sclerophyll) forest or woodland on the drier ground, with
+      darker patches of rainforest in the wetter hollows and swamp plants wherever water stands. Not desert, and not
+      open plain.
+    reach: region
+    source:
+      cite: "Martin, H.A. (1998). Tertiary climatic evolution and the development of aridity in Australia. Proceedings of the Linnean Society of New South Wales 119, 115-136."
+      url: https://archive.org/download/biostor-68287/biostor-68287.pdf
+      text: martin-1998-aridity.txt
+      loc: "Central Australia, summary point 2, p. 124 (PDF page 10)"
+      quote: "Late Oligocene-mid Miocene: Sclerophyllous vegetation was well represented but rainforest was still present in the landscape, though much less than in southeast Australia where it was predominant. Swamp taxa were common."
+    note: >-
+      A summary for Central Australia from very few pollen sites (Lake Frome, Lake Hydra, the Ti Tree Basin), none
+      within 450 km of this ground. Martin says palaeobotanical material younger than the late Eocene is rare there.
+  - id: cover-forest-round-sedge-lined-water
+    layer: cover
+    what: >-
+      Near any water, closed forest, a mix of rainforest and temperate forest trees, coming down to a fringe of sedges
+      and rush-like restiads at the water's edge.
+    reach: region
+    source:
+      cite: "Mather, E.K., Lee, M.S.Y., Camens, A.B. & Worthy, T.H. (2021). An exceptional partial skeleton of a new basal raptor (Aves: Accipitridae) from the late Oligocene Namba Formation, South Australia. Historical Biology. doi:10.1080/08912963.2021.1966777"
+      url: https://newsroom.taylorandfrancisgroup.com/wp-content/uploads/2021/09/basal-raptor.pdf
+      text: mather-2021-archaehierax.txt
+      loc: "Introduction, 'The Namba Formation', p. 3"
+      quote: "the depositional environment was dominated by a mix of rainforest and temperate forest surrounding sedge-lined lakes in the late Oligocene to early Miocene"
+    note: Reporting Martin's (1990) pollen from the Wooltana-1 bore at Lake Frome, about 800 km to the south.
+  - id: cover-no-grassland
+    layer: cover
+    what: >-
+      No grassland and no grassy ground layer: grasses are rare. Open wet ground carries sedges and restiads, not
+      a sward.
+    reach: region
+    source:
+      cite: "Martin, H.A. (1998). Tertiary climatic evolution and the development of aridity in Australia. Proceedings of the Linnean Society of New South Wales 119, 115-136."
+      url: https://archive.org/download/biostor-68287/biostor-68287.pdf
+      text: martin-1998-aridity.txt
+      loc: "p. 127 (PDF page 13)"
+      quote: "Re-examination of the original slides however, has shown that the abundant grass pollen is, in fact, Restionaceae, a swamp plant (Martin 1990b) and grass pollen is rare."
+    note: >-
+      Of the Lake Frome assemblage, late Oligocene to early Miocene. The build's stand-ins here are 'flowering plants'
+      and 'plants'; if they are drawn as grass, this is against it.
+  - id: cover-conifers-among-the-trees
+    layer: cover
+    what: >-
+      Conifers among the trees: podocarps, and a cypress-family tree like the Tasmanian Athrotaxis, with trunks
+      large enough to leave big pieces of wood in the valley sands.
+    reach: region
+    source:
+      cite: "Paten, R.J. (1964). The Tertiary geology of the Boulia region, western Queensland. Bureau of Mineral Resources, Geology and Geophysics, Report 77."
+      url: https://d28rz98at9flks.cloudfront.net/14989/Rep_077.pdf
+      text: paten-1964-boulia-tertiary.txt
+      loc: "Palaeontology, Marion Formation, p. 18 (PDF page 24)"
+      quote: "The only fossil collected from the Marion Formation is rare though widespread silicified wood. … Mesembrioxylon - Podocarp or possibly non-resinous Cupressinoxylon"
+    note: >-
+      The wood is from near Boulia, about 140 km to the north-east, in the same formation as this ground's sands, but
+      the formation's age is not fixed and may be well before 23 Ma: it shows what grew along this valley in the
+      Tertiary, not certainly at this time. Martin (1998, p. 124) also has rainforest gymnosperms in the late
+      Oligocene to early Miocene pollen of Lake Frome.
+  - id: weather-cool-moist-winter
+    layer: weather
+    what: >-
+      August falls in the cool, moist half of a strongly seasonal year: mild to cool air, damp ground, cloud and rain
+      likely; the hot, dry, evaporating season is the summer.
+    reach: region
+    source:
+      cite: "Thorn, K.M., Hutchinson, M.N., Lee, M.S.Y., Brown, N.J., Camens, A.B. & Worthy, T.H. (2021). A new species of Proegernia from the Namba Formation in South Australia and the early evolution and environment of Australian egerniine skinks. Royal Society Open Science 8(2):201686. doi:10.1098/rsos.201686"
+      url: https://pmc.ncbi.nlm.nih.gov/articles/PMC8074667/
+      text: thorn-2021-proegernia.txt
+      loc: "7.1. Namba environment, second paragraph"
+      quote: "a modern analogue might be where cool moist winters and hot dry summers result in a moderate seasonal rainfall and high evaporation rates"
+    note: >-
+      An inference from the dolomite and clay minerals of palaeolake Namba, about 800 km to the south, offered as an
+      analogue, not a measurement. It does not contradict the build's seasonal temperate climate (warmest month 32 °C,
+      coldest 4 °C), but no source read gives temperatures to check those against.
+  - id: life-large-marsupial-browsers
+    layer: life
+    what: >-
+      The big animals on the ground are four-footed marsupial plant-eaters, from dog-sized (about 16-20 kg) through
+      the diprotodontoid Ngapakaldia (about 120 kg) to the bulky Ilaria (about 215 kg): pig- to small-cow-sized, not
+      rhinoceroses.
+    reach: region
+    source:
+      cite: "Beck, R.M.D., Louys, J., Brewer, P., Archer, M., Black, K.H. & Tedford, R.H. (2020). A new family of diprotodontian marsupials from the latest Oligocene of Australia and the evolution of wombats, koalas, and their relatives (Vombatiformes). Scientific Reports 10:9741. doi:10.1038/s41598-020-66425-8"
+      url: https://pmc.ncbi.nlm.nih.gov/articles/PMC7316786/
+      text: beck-2020-mukupirna.txt
+      loc: "Estimated size of Mukupirna nambensis and body mass evolution within Vombatiformes, second paragraph"
+      quote: "Mukupirna is much larger than the wynyardiid Muramura williamsi (16–20 kg), slightly larger than the diprototodontid Ngapakaldia bonythoni (~119 kg), but somewhat smaller than the ilariid Ilaria illumidens (~215 kg)"
+    note: >-
+      Masses of late Oligocene taxa of the Namba and Etadunna Formations, 500 to 800 km to the south; the build lists
+      Ngapakaldia, Muramura and Ilaria here or in the region. The build stands in 'rhinoceroses' twice: no source
+      read puts a rhinoceros, or any placental of that kind, in Australia, and the same paper keeps 'rhino-sized' for
+      Diprotodon of the Pleistocene.
+  - id: life-waterbirds-turtles-crocodiles-at-water
+    layer: life
+    what: >-
+      At any lake or river edge: flamingos and rails wading, waterfowl on the water, turtles and crocodiles, and
+      lungfish and other fish in the shallows.
+    reach: region
+    source:
+      cite: "Thorn, K.M., Hutchinson, M.N., Lee, M.S.Y., Brown, N.J., Camens, A.B. & Worthy, T.H. (2021). A new species of Proegernia from the Namba Formation in South Australia and the early evolution and environment of Australian egerniine skinks. Royal Society Open Science 8(2):201686. doi:10.1098/rsos.201686"
+      url: https://pmc.ncbi.nlm.nih.gov/articles/PMC8074667/
+      text: thorn-2021-proegernia.txt
+      loc: "4. Results, first paragraph"
+      quote: "a possible current-concentrated, lake-edge accumulation with bony fish abundant and lungfish, dolphins, flamingos, rails, turtles, crocodiles and the platypus Obdurodon represented"
+    note: >-
+      The Pinpa Local Fauna's Fish Lens, Lake Pinpa and Billeroo Creek, about 800 km to the south. Seen only if there
+      is water in view, which is not established here (see water-seasonal-lakes).
+  - id: life-koalas-possums-and-a-forest-eagle
+    layer: life
+    what: >-
+      In the trees, koalas and several kinds of possum; over or among them a short-winged forest eagle, larger than a
+      black-breasted buzzard and slighter than a wedge-tailed eagle.
+    reach: region
+    source:
+      cite: "Mather, E.K., Lee, M.S.Y., Camens, A.B. & Worthy, T.H. (2021). An exceptional partial skeleton of a new basal raptor (Aves: Accipitridae) from the late Oligocene Namba Formation, South Australia. Historical Biology. doi:10.1080/08912963.2021.1966777"
+      url: https://newsroom.taylorandfrancisgroup.com/wp-content/uploads/2021/09/basal-raptor.pdf
+      text: mather-2021-archaehierax.txt
+      loc: "Abstract, p. 1, and Palaeobiology, p. 30"
+      quote: "represents a raptor that was larger than the black-breasted buzzard Hamirostra melanosternon but smaller and more gracile than the wedge-tailed eagle Aquila audax … many arboreal taxa such as koalas (phascolarctids), and members of four families of possums and kin (phalangeriforms)"
+    note: >-
+      Archaehierax sylvestris and the Pinpa Local Fauna, Lake Pinpa, about 800 km to the south; the build lists
+      Archaehierax, Litokoala and Perikoala.
+  - id: life-baru-in-the-rivers
+    layer: life
+    what: >-
+      In any river or deep pool, a large, heavy-headed crocodile, Baru: a deep, broad snout, very large teeth, and
+      an adult skull more than half a metre long.
+    reach: region
+    source:
+      cite: "Yates, A.M. (2017). The biochronology and palaeobiogeography of Baru (Crocodylia: Mekosuchinae) based on new specimens from the Northern Territory and Queensland, Australia. PeerJ 5:e3458. doi:10.7717/peerj.3458"
+      url: https://pmc.ncbi.nlm.nih.gov/articles/PMC5482264/
+      text: yates-2017-baru.txt
+      loc: "Introduction, first paragraph"
+      quote: "Species of Baru are characterised by their large size (adult skull lengths of more than 500 mm), very large, non-ziphodont teeth and exceptionally robust, broad and altirostral (deep) snouts which suggests that they were aquatic predators specialising on large vertebrate prey"
+    note: >-
+      Baru wickeni is known in the late Oligocene from Riversleigh, about 500 km to the north, and from Pwerte Marnte
+      Marnte, about 500 km to the west; the same paper says it is not found south of 25°S, where Australosuchus takes
+      its place. This ground, at 23.6°S today, is on Baru's side of that line, which agrees with the build's listing.
+unknown:
+  - >-
+    Whether any water was in view: no channel, floodplain or lake deposit dated to the late Oligocene is described
+    within 100 km. The valley sands (Marion Formation) and the nearby river gravels of the Toko Syncline (Poodyea
+    Formation) are undated Tertiary, and the local lake limestones are put in the Miocene.
+  - >-
+    What grew on this ground: there is no pollen or leaf flora of this age nearer than Lake Frome, about 800 km
+    away. How tall and how dense the trees were, how much of the view was forest and how much swamp or open
+    woodland, and what was in leaf or flower in August, no source read says.
+  - >-
+    Whether the ground was still loose sand and lateritic soil or already a hard silcrete ('billy') crust with stony
+    lag: the sources date the silicification only as late Tertiary and after the laterite.
+  - >-
+    Which animals actually lived here: no vertebrate fossil of this age is known within about 450 km. Every animal in
+    the brief is carried from Lake Pinpa, the Etadunna Formation, Pwerte Marnte Marnte or Riversleigh, and how common
+    any of them was, in herds or alone, is not said.
+  - >-
+    What the marsupials looked like in life (fur, colour, posture) beyond their body masses.
+  - >-
+    The sky's cloud and the day's temperature in August: only the character of the season is inferred. The one
+    numerical climate estimate for central Australia at this time that was found (Megirian and others 2004, Kangaroo
+    Well) could not be fetched, so the build's 32 °C and 4 °C months and its aridity index are unchecked.
+  - >-
+    The far horizon to the west-south-west: whether anything stood above the plain, and how high this ground was above
+    the sea (the build says 229 m), no source read says.
+pictures:
+  - { url: "https://news.flinders.edu.au/blog/2021/09/29/ancient-eagle-ruled-the-roost/", what: "Flinders University news page with Jacob Blokland's illustration of Archaehierax sylvestris, the forest eagle of Lake Pinpa (about 800 km south of this ground, 26-24 Ma)." }
+effort:
+  fetched: 19
+  cited: 7
+  failed: 7
+  note: >-
+    Not reached: Megirian and others 2004 (Kangaroo Well: the only temperature and rainfall estimate for central
+    Australia at this time; publisher refused on two hosts), Myers 2017 on the White Hunter Local Fauna (PeerJ refused),
+    Travouillon and others 2009 on Riversleigh's palaeohabitats (HAL gave a stub), Callen and Tedford 1976 (a scan with
+    no text layer), the Lake Palankarinna heritage assessment, the 2026 Obdurodon paper and a Bioregional Assessment
+    stratigraphy page. Alley 1998 and Martin 1990, the primary accounts of the basin's Oligocene-Miocene environments
+    and pollen, are behind paywalls and are cited here only through Mather 2021 and Martin 1998. Longest: finding
+    anything said of this ground itself; the two 1964 BMR reports are the only local sources, and they date nothing
+    in years.

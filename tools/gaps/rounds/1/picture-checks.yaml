@@ -1,0 +1,93 @@
+# The first round's check of each expected picture against its brief (docs/plans/VISUAL-GAPS.md, section 3.3): one
+# reader looking at dist/gaps/1/expected/pNN.png beside pNN.yaml and prompts.yaml. An item the prompt asked for is
+# taken as shown unless it is listed here as `absent` (asked for, not in the picture) or `against` (the picture
+# shows otherwise). `adds` is what the model put in that no item of the brief says: mostly its answers to the
+# brief's `unknown`. These are a machine's judgements of pictures: proposed, and for a person to overrule.
+# The pictures are illustrations, never evidence, and no verdict in verdicts.yaml rests on one.
+author: machine:claude-code
+checked: "2026-11-19"
+points:
+  p01:
+    note: Take 2. The first take coloured wide tracts of land rust-red, where the brief has red only in delta sands at this date.
+    absent:
+      water-shelf-sea-with-deltas: Shelf seas are tinted along some coasts; no delta or plume of mud can be made out.
+    adds:
+      - the Moon with the face it has today, which the brief leaves unknown
+      - a clear blue limb and air, where the brief leaves the colour of the air unknown
+      - outlines of continents, which nothing read gives for this date
+  p02:
+    adds:
+      - small pale lumps strewn on the foreground sand, which read as pebbles or as shells; the brief has no shells
+      - dark patches at the water's edge that could be read as stranded weed as well as microbial crust
+      - a thin high overcast and a calm sea, where the brief leaves the weather unknown
+  p03:
+    absent:
+      cover-open-woodland: The trees are single and far apart, a few to the square kilometre; the brief has an open woodland of the order of a hundred to the hectare.
+    adds:
+      - a low green ground cover round the trees, where the brief leaves the ground between them unknown
+      - a pale green sea, and the sea to the right of the view
+  p04:
+    adds:
+      - shrubs that look like the saltbush and sagebrush of today, which are flowering plants; the brief has few of those
+      - the conifers as a row of columnar trees like planted cypresses, a habit no source gives
+      - fish with the look of living kinds
+      - a far shore and low hills beyond it
+  p05:
+    note: Take 2. The first take set the forest on a hill behind the lake, against the brief's plain with no hills.
+    against:
+      cover-conifers-among-the-trees: The conifers are drawn as the spruces and firs of the north, though the prompt forbade them twice over; podocarps and Athrotaxis do not look so. A second take did not cure it.
+    adds:
+      - the marsupials as large wombats, and the crocodile as a living alligator; the brief gives only their sizes and the crocodile's snout
+      - a fringe at the water that reads as dry grass as much as sedge
+      - a lake at this spot, where the brief does not know that any water was in view
+  p06:
+    note: Take 2. The first take drew the shovel-tuskers as living elephants.
+    against:
+      life-platybelodon: The flat tusks are drawn as a shovel hanging from the end of the trunk, not as the lower jaw.
+    adds:
+      - elms and birches in yellow autumn leaf, where the brief has no colours for October
+      - a river at this spot, where the brief does not know that one crossed it
+      - grass between the shrubs, where the brief does not know how much grass there was
+  p07:
+    note: Take 2. The first take ran a smooth plain to the foot of a mountain wall, against the brief's belt of flat-topped foothills.
+    adds:
+      - a range bare of trees, and foothills with the look of the badlands of the American West; the brief says nothing of what covered the range
+      - horses with the build and colour of living wild horses
+      - no snow, where the brief does not say whether any lay in January
+  p08:
+    adds:
+      - the oak cover drawn open, with bare slopes between the trees, where the brief has forest
+      - many ravens, where the brief has a few
+      - the shape of the range's crest
+  p09:
+    against:
+      people-veiled-javelin-men: Each rider carries one long lance; the brief has several javelins to a man, and says the single spear is of the older engravings.
+    absent:
+      substrate-varnished-rock: The outcrops are there, but grey and rough, not coated black and shiny.
+    adds:
+      - gazelles with the look of dorcas gazelles rather than the white-bodied dama
+      - the dress of the riders, which the engravings do not give
+  p10:
+    absent:
+      cover-europe-forest: Europe is one dull olive under the cloud; no patchwork of forest and field can be made out.
+      cover-pontic-steppe: Under snow and cloud, and not to be told from the land round it.
+    adds:
+      - coastlines bent out of shape, Iberia, the Black Sea and the Caspian above all
+      - a disc cut off at the top and the bottom of the frame
+      - the pattern of the cloud, of which the brief says only where it is thick and where clear
+  p11:
+    absent:
+      people-camel-herders: The camels are there in a line by the tents; the sheep the prompt asked for are not to be seen.
+    adds:
+      - pale tracks across the plain that read as paths
+      - mirage drawn as broad sheets that look like real water
+      - white on the hills that reads as snow as much as quartz veins
+  p12:
+    against:
+      people-peasants-straw-hats-armed: The men wear the straw hats and are cutting a bank, but carry hoes; none has a sword or a lance.
+    absent:
+      life-abdims-stork-on-roofs: Storks stand on the roofs, but white ones; Abdim's stork is mostly black.
+    adds:
+      - a crop that reads as maize as much as sorghum or millet
+      - the men's dress, which the brief does not describe beyond the hats
+      - walls of mud under the conical roofs, where the brief says only conical huts

@@ -1,0 +1,297 @@
+{
+ "seed": "gaps-round-1",
+ "build": "46369419beeb44e6",
+ "mix": {
+  "people": 0.45,
+  "records": 0.2,
+  "fossils": 0.2,
+  "floor": 0.15
+ },
+ "cameras": {
+  "eye": {
+   "range": 15,
+   "tilt": 84
+  },
+  "air": {
+   "range": 600,
+   "tilt": 60
+  },
+  "orbit": {
+   "d": 2.6
+  }
+ },
+ "points": [
+  {
+   "name": "p01",
+   "t": -2258285256.3972282,
+   "when": "2258.3 Ma",
+   "stretch": [
+    "4900 Ma",
+    "1714 Ma"
+   ],
+   "lat": 45.79435,
+   "lon": -4.19787,
+   "camera": "orbit",
+   "heading": 290,
+   "hour": 11,
+   "month": 11,
+   "drawnBy": "floor",
+   "why": "floor: anywhere on the globe, evenly by area",
+   "available": [
+    "floor"
+   ],
+   "link": "t=2258.287206Ma&lat=45.79&lon=-4.20&d=2.6&hour=11&mo=11&clock=0"
+  },
+  {
+   "name": "p02",
+   "t": -484805213.3020868,
+   "when": "484.8 Ma",
+   "stretch": [
+    "1714 Ma",
+    "465.9 Ma"
+   ],
+   "lat": -55.87578,
+   "lon": 122.37675,
+   "camera": "eye",
+   "heading": 310,
+   "hour": 15,
+   "month": 5,
+   "drawnBy": "floor",
+   "why": "floor: anywhere on the globe, evenly by area",
+   "available": [
+    "floor"
+   ],
+   "link": "t=484.807163Ma&lat=-55.87578&lon=122.37675&d=1.0000023544&h=310&v=84&hour=15&mo=5&clock=0"
+  },
+  {
+   "name": "p03",
+   "t": -291072375.7145104,
+   "when": "291.1 Ma",
+   "stretch": [
+    "465.9 Ma",
+    "217 Ma"
+   ],
+   "lat": -0.61494,
+   "lon": -25.56311,
+   "camera": "air",
+   "heading": 340,
+   "hour": 11,
+   "month": 12,
+   "drawnBy": "fossils",
+   "why": "fossils: 7 taxa recorded in this patch of the atlas in the Sakmarian",
+   "available": [
+    "fossils",
+    "floor"
+   ],
+   "link": "t=291.074326Ma&lat=-0.61494&lon=-25.56311&d=1.0000941767&h=340&v=60&hour=11&mo=12&clock=0"
+  },
+  {
+   "name": "p04",
+   "t": -123677639.09399116,
+   "when": "123.7 Ma",
+   "stretch": [
+    "217 Ma",
+    "87.5 Ma"
+   ],
+   "lat": -3.48924,
+   "lon": -10.72343,
+   "camera": "eye",
+   "heading": 350,
+   "hour": 12,
+   "month": 7,
+   "drawnBy": "fossils",
+   "why": "fossils: 21 taxa recorded in this patch of the atlas in the Aptian, part 1 of 2",
+   "available": [
+    "fossils",
+    "floor"
+   ],
+   "link": "t=123.679589Ma&lat=-3.48924&lon=-10.72343&d=1.0000023544&h=350&v=84&hour=12&mo=7&clock=0"
+  },
+  {
+   "name": "p05",
+   "t": -23274799.21745698,
+   "when": "23.28 Ma",
+   "stretch": [
+    "87.5 Ma",
+    "21.22 Ma"
+   ],
+   "lat": -36.99535,
+   "lon": 134.25952,
+   "camera": "eye",
+   "heading": 250,
+   "hour": 12,
+   "month": 8,
+   "drawnBy": "fossils",
+   "why": "fossils: 13 taxa recorded in this patch of the atlas in the Chattian",
+   "available": [
+    "fossils",
+    "floor"
+   ],
+   "link": "t=23.276749Ma&lat=-36.99535&lon=134.25952&d=1.0000023544&h=250&v=84&hour=12&mo=8&clock=0"
+  },
+  {
+   "name": "p06",
+   "t": -13069456.62762717,
+   "when": "13.07 Ma",
+   "stretch": [
+    "21.22 Ma",
+    "1.93 Ma"
+   ],
+   "lat": 35.18308,
+   "lon": 105.24821,
+   "camera": "eye",
+   "heading": 190,
+   "hour": 16,
+   "month": 10,
+   "drawnBy": "fossils",
+   "why": "fossils: 15 taxa recorded in this patch of the atlas in the Serravallian",
+   "available": [
+    "fossils",
+    "floor"
+   ],
+   "link": "t=13.071407Ma&lat=35.18308&lon=105.24821&d=1.0000023544&h=190&v=84&hour=16&mo=10&clock=0"
+  },
+  {
+   "name": "p07",
+   "t": -1828073.4970754206,
+   "when": "1.83 Ma",
+   "stretch": [
+    "1.93 Ma",
+    "5735 BCE"
+   ],
+   "lat": 35.85822,
+   "lon": 113.7445,
+   "camera": "eye",
+   "heading": 280,
+   "hour": 13,
+   "month": 1,
+   "drawnBy": "fossils",
+   "why": "fossils: 1 taxa recorded in this patch of the atlas in the Gelasian",
+   "available": [
+    "fossils",
+    "floor"
+   ],
+   "link": "t=1.830023Ma&lat=35.85822&lon=113.74450&d=1.0000023544&h=280&v=84&hour=13&mo=1&clock=0"
+  },
+  {
+   "name": "p08",
+   "t": -4532.549510663985,
+   "when": "4534 BCE",
+   "stretch": [
+    "5735 BCE",
+    "803 BCE"
+   ],
+   "lat": 34.30255,
+   "lon": 69.87607,
+   "camera": "eye",
+   "heading": 170,
+   "hour": 15,
+   "month": 3,
+   "drawnBy": "people",
+   "why": "people: HYDE has 9,262 in this 1° cell at its step -5000",
+   "available": [
+    "people",
+    "records",
+    "fossils",
+    "floor"
+   ],
+   "link": "t=-4532.55&lat=34.30255&lon=69.87607&d=1.0000023544&h=170&v=84&hour=15&mo=3&clock=0"
+  },
+  {
+   "name": "p09",
+   "t": 475.0017188360521,
+   "when": "475 CE",
+   "stretch": [
+    "803 BCE",
+    "546 CE"
+   ],
+   "lat": 18.79153,
+   "lon": 2.90111,
+   "camera": "eye",
+   "heading": 130,
+   "hour": 11,
+   "month": 8,
+   "drawnBy": "people",
+   "why": "people: HYDE has 6,383 in this 1° cell at its step 400",
+   "available": [
+    "people",
+    "records",
+    "fossils",
+    "floor"
+   ],
+   "link": "t=475.002&lat=18.79153&lon=2.90111&d=1.0000023544&h=130&v=84&hour=11&mo=8&clock=0"
+  },
+  {
+   "name": "p10",
+   "t": 1090.4779684201162,
+   "when": "1090 CE",
+   "stretch": [
+    "546 CE",
+    "1302 CE"
+   ],
+   "lat": 48.54458,
+   "lon": 4.64322,
+   "camera": "orbit",
+   "heading": 210,
+   "hour": 15,
+   "month": 12,
+   "drawnBy": "people",
+   "why": "people: HYDE has 66,975 in this 1° cell at its step 1000",
+   "available": [
+    "people",
+    "records",
+    "fossils",
+    "floor"
+   ],
+   "link": "t=1090.478&lat=48.54&lon=4.64&d=2.6&hour=15&mo=12&clock=0"
+  },
+  {
+   "name": "p11",
+   "t": 1482.0424023579465,
+   "when": "1482 CE",
+   "stretch": [
+    "1302 CE",
+    "1796 CE"
+   ],
+   "lat": 20.15893,
+   "lon": 34.0232,
+   "camera": "air",
+   "heading": 230,
+   "hour": 14,
+   "month": 7,
+   "drawnBy": "fossils",
+   "why": "fossils: 1 taxa recorded in this patch of the atlas in the Holocene",
+   "available": [
+    "people",
+    "records",
+    "fossils",
+    "floor"
+   ],
+   "link": "t=1482.042&lat=20.15893&lon=34.02320&d=1.0000941767&h=230&v=60&hour=14&mo=7&clock=0"
+  },
+  {
+   "name": "p12",
+   "t": 1887.8239769590118,
+   "when": "1887 CE",
+   "stretch": [
+    "1796 CE",
+    "1950 CE"
+   ],
+   "lat": 14.10542,
+   "lon": 43.33523,
+   "camera": "eye",
+   "heading": 80,
+   "hour": 14,
+   "month": 7,
+   "drawnBy": "people",
+   "why": "people: HYDE has 291,380 in this 1° cell at its step 1880",
+   "available": [
+    "people",
+    "records",
+    "fossils",
+    "floor"
+   ],
+   "link": "t=1887.824&lat=14.10542&lon=43.33523&d=1.0000023544&h=80&v=84&hour=14&mo=7&clock=0"
+  }
+ ]
+}

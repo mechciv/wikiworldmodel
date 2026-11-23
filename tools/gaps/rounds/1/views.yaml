@@ -1,0 +1,43 @@
+# The first round of visual gaps (docs/plans/VISUAL-GAPS.md): 12 points, drawn by sample.ts beside this file with the seed
+# "gaps-round-1" from build 46369419beeb44e6. Each is a link without its build, as the look book's views are, and is shot by
+# `npx tsx tools/look/look.ts shoot <dir> --views tools/gaps/rounds/1/views.yaml`. Before the Holocene a place is where
+# the viewer has it at that time, not where it is today.
+reference: Apple M1
+
+views:
+  - name: p01
+    what: "2258.3 Ma, at 45.79435, -4.19787, from orbit. Drawn by floor: anywhere on the globe, evenly by area."
+    link: t=2258.287206Ma&lat=45.79&lon=-4.20&d=2.6&hour=11&mo=11&clock=0
+  - name: p02
+    what: "484.8 Ma, at -55.87578, 122.37675, at eye level. Drawn by floor: anywhere on the globe, evenly by area."
+    link: t=484.807163Ma&lat=-55.87578&lon=122.37675&d=1.0000023544&h=310&v=84&hour=15&mo=5&clock=0
+  - name: p03
+    what: "291.1 Ma, at -0.61494, -25.56311, from 300 m up. Drawn by fossils: 7 taxa recorded in this patch of the atlas in the Sakmarian."
+    link: t=291.074326Ma&lat=-0.61494&lon=-25.56311&d=1.0000941767&h=340&v=60&hour=11&mo=12&clock=0
+  - name: p04
+    what: "123.7 Ma, at -3.48924, -10.72343, at eye level. Drawn by fossils: 21 taxa recorded in this patch of the atlas in the Aptian, part 1 of 2."
+    link: t=123.679589Ma&lat=-3.48924&lon=-10.72343&d=1.0000023544&h=350&v=84&hour=12&mo=7&clock=0
+  - name: p05
+    what: "23.28 Ma, at -36.99535, 134.25952, at eye level. Drawn by fossils: 13 taxa recorded in this patch of the atlas in the Chattian."
+    link: t=23.276749Ma&lat=-36.99535&lon=134.25952&d=1.0000023544&h=250&v=84&hour=12&mo=8&clock=0
+  - name: p06
+    what: "13.07 Ma, at 35.18308, 105.24821, at eye level. Drawn by fossils: 15 taxa recorded in this patch of the atlas in the Serravallian."
+    link: t=13.071407Ma&lat=35.18308&lon=105.24821&d=1.0000023544&h=190&v=84&hour=16&mo=10&clock=0
+  - name: p07
+    what: "1.83 Ma, at 35.85822, 113.7445, at eye level. Drawn by fossils: 1 taxa recorded in this patch of the atlas in the Gelasian."
+    link: t=1.830023Ma&lat=35.85822&lon=113.74450&d=1.0000023544&h=280&v=84&hour=13&mo=1&clock=0
+  - name: p08
+    what: "4534 BCE, at 34.30255, 69.87607, at eye level. Drawn by people: HYDE has 9,262 in this 1° cell at its step -5000."
+    link: t=-4532.55&lat=34.30255&lon=69.87607&d=1.0000023544&h=170&v=84&hour=15&mo=3&clock=0
+  - name: p09
+    what: "475 CE, at 18.79153, 2.90111, at eye level. Drawn by people: HYDE has 6,383 in this 1° cell at its step 400."
+    link: t=475.002&lat=18.79153&lon=2.90111&d=1.0000023544&h=130&v=84&hour=11&mo=8&clock=0
+  - name: p10
+    what: "1090 CE, at 48.54458, 4.64322, from orbit. Drawn by people: HYDE has 66,975 in this 1° cell at its step 1000."
+    link: t=1090.478&lat=48.54&lon=4.64&d=2.6&hour=15&mo=12&clock=0
+  - name: p11
+    what: "1482 CE, at 20.15893, 34.0232, from 300 m up. Drawn by fossils: 1 taxa recorded in this patch of the atlas in the Holocene."
+    link: t=1482.042&lat=20.15893&lon=34.02320&d=1.0000941767&h=230&v=60&hour=14&mo=7&clock=0
+  - name: p12
+    what: "1887 CE, at 14.10542, 43.33523, at eye level. Drawn by people: HYDE has 291,380 in this 1° cell at its step 1880."
+    link: t=1887.824&lat=14.10542&lon=43.33523&d=1.0000023544&h=80&v=84&hour=14&mo=7&clock=0
