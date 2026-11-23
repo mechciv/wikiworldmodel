@@ -66,3 +66,26 @@ describe('a field of lines', () => {
     expect([undated.from, undated.to, undated.w]).toEqual([-299, 300, 0.55]);
   });
 });
+
+describe('a field of areas', () => {
+  it('keeps an island smaller than one hundredth of a degree in a dated lake polygon', () => {
+    // Synthetic geometry. The small ring falls entirely inside one cell of the line layer's encoding.
+    const shore = [[0, 0], [0.04, 0], [0.04, 0.04], [0, 0.04], [0, 0]];
+    const island = [[0.011, 0.011], [0.011, 0.014], [0.014, 0.014], [0.014, 0.011], [0.011, 0.011]];
+    const field: Field = {
+      id: 'field:test/lake',
+      title: 'Lake',
+      file: 'fields/lake.yaml',
+      data: { from: 'src:test/lake' },
+      rows: { kind: 'lake', key: '{#}', claims: {} },
+      kind: 'areas',
+      time: { lo: '1519 CE', hi: '1520 CE' },
+      layer: { color: { value: '#4078aa' }, describe: 'Lake' },
+    };
+    const { rows } = layerRows(field, [{ [GEOMETRY]: { type: 'Polygon', coordinates: [shore, island] } }], ['0'], new Map());
+    expect(rows).toHaveLength(1);
+    expect([rows[0].from, rows[0].to]).toEqual([1519, 1520]);
+    // The viewer reads both rings in hundredths of a degree and fills them with the even-odd rule.
+    expect(rows[0].lines).toEqual([shore, island].map((ring) => ring.flat().map((degree) => degree * 100)));
+  });
+});

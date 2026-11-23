@@ -15,12 +15,14 @@ import { sourceRecord } from './records.ts';
 /** How many rows a file holds at most: a time loads the files that cover it. */
 export const BIN_ROWS = 4000;
 
-const hundredths = (x: number) => Math.round(x * 100);
-
 /** A row's geometry as flat lines of hundredths of a degree: a line's points, or an area's rings. */
 export function geometryLines(geometry: unknown, crs: LayerStyle['crs'], tolerance = 0): number[][] {
   const g = geometry as { type?: string; coordinates?: unknown } | null;
   if (!g?.type) return [];
+  // Lines keep their compact integer encoding. An area can contain an island or channel narrower
+  // than that grid, so keep its fractional hundredths until any thinning requested by the field.
+  const area = g.type === 'Polygon' || g.type === 'MultiPolygon';
+  const hundredths = (degree: number) => area ? degree * 100 : Math.round(degree * 100);
   const lists: number[][][] =
     g.type === 'LineString' ? [g.coordinates as number[][]] : g.type === 'MultiLineString' || g.type === 'Polygon' ? (g.coordinates as number[][][]) : g.type === 'MultiPolygon' ? (g.coordinates as number[][][][]).flat() : [];
   const out: number[][] = [];
