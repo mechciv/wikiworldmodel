@@ -395,6 +395,17 @@ plants, the bodies, the people and what they build, and raised each by the means
   names no crop.
 - **A robed figure stands on feet.** Under a robe no legs were drawn, and a robe that reached the ground seemed to
   hover over it. Close by its hem stops at the ankle, over an ankle and a foot each side, on the ground.
+
+  These three were judged on the look book's `hamlet-house`, `hamlet` and `village-house`, the last a hamlet of
+  England in 1300 in the house its tradition's records describe. What they cost, at 1600 × 900 on an Apple M3 Max,
+  which is not the reference GPU: a frame's total was as unsteady from load to load as it has been on this machine,
+  before and after (22.7 and 24.5 ms, 22.2 and 32.2 ms, 36.3 and 31.5 ms, the passes the change does not touch moving
+  as much as those it does), and all three views were over the budget by that measure before the change as after it.
+  What holds within a load is one pass against another: the meshes against the resolve went from 1.04 to 1.20 on
+  `hamlet-house`, from 1.11 to 1.15 on `hamlet`, and from 1.48 to 1.39 on `village-house`, where rows of a crop took
+  the place of the wild cover's clumps. The triangles drawn went from 12 to 144 thousand, from 8 to 72 thousand, and
+  from 1.63 to 1.43 million. Nothing was thinned: the crop is drawn within the cover's own budget of clumps, and a
+  house's relief only at its finest detail. The lighter way draws none of the three.
 - **Shadows close to.** The nearest cascade is as wide as the view is far, down to 24 m, so that close by a shadow is
   fine enough to meet the foot that casts it.
 - **Clouds without streaks.** A march of 24 steps through the cloud layer hit or missed the edges of its heaps so
