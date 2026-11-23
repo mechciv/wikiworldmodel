@@ -173,6 +173,22 @@ test.describe('names', () => {
     await idle(page);
     expect(await labelled(page, 'rome/colosseum')).toBe(true);
   });
+
+  test('the wheel still zooms when the pointer is over a city label', async ({ page }) => {
+    await page.goto(`/?b=${latestBuild()}&${over(41.8902, 12.4922, 400)}&${FAST}`);
+    await idle(page);
+    const label = page.locator('.city-label[data-entity="rome/colosseum"]');
+    await expect(label).toBeVisible();
+    const before = (await page.evaluate(() => window.__wikiworldmodel!.state())).cam;
+    await label.hover();
+    await page.mouse.wheel(0, -400);
+    await idle(page);
+    const after = (await page.evaluate(() => window.__wikiworldmodel!.state())).cam;
+    expect(after.dist).toBeLessThan(before.dist);
+    // Zooming over a label uses canvas coordinates, not the button's own offset, so the view stays over the Colosseum.
+    expect(Math.abs(after.lat - before.lat)).toBeLessThan(0.0005);
+    expect(Math.abs(after.lon - before.lon)).toBeLessThan(0.0005);
+  });
 });
 
 test.describe('on a touch screen', () => {
