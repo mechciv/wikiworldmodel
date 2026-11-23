@@ -33,8 +33,8 @@ views:
     what: A red mud of the Rhaetian that its rock says dried into cracks, from a few metres up.
     link: t=204.9Ma&lat=27.04&lon=100.20&d=1.0000004&h=30&v=70&hour=12&mo=7&clock=0
   - name: ground-salt
-    what: A crust of salt of the Tortonian, in the south-east of Spain, heaved into plates.
-    link: t=9.44Ma&lat=38.45&lon=-1.61&d=1.0000012&h=30&v=50&hour=12&mo=7&clock=0
+    what: A crust of salt of the Tortonian, in the south-east of Spain, heaved into plates, from a few metres up.
+    link: t=9.44Ma&lat=38.35&lon=-1.71&d=1.0000012&h=30&v=50&hour=12&mo=7&clock=0
   - name: ground-unit-sand
     what: Wyoming in the Early Jurassic, far from any fossil collection, where its column of rock has the Nugget Sandstone being laid down, all sand.
     link: t=188.05Ma&lat=27.42&lon=-44.39&d=1.0000012&h=30&v=50&hour=12&mo=7&clock=0
@@ -82,6 +82,9 @@ views:
   - name: forest-giant
     what: "A tyrannosaur among the Hell Creek's trees, from eighteen metres: a body under a canopy, in its shade."
     link: t=-66498050&lat=54.21206&lon=-81.229759&d=1.0000028&h=60&v=82&clock=0
+  - name: forest-floor
+    what: "The floor of the Hell Creek's forest, from eye height: a fallen trunk in its tree's own bark, and the branches the canopy shed about it."
+    link: t=-66498050&lat=54.2132376&lon=-81.2297641&d=1.0000006&h=200&v=80&clock=0
   - name: hamlet-house
     what: A house of a hamlet in the Tihama in 1887, from before its door, with someone by it.
     link: t=1887.824&lat=14.159387&lon=43.371896&d=1.0000026&h=300.9&v=80&hour=14&mo=7&clock=0

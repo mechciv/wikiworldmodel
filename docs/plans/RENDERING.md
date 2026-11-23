@@ -437,8 +437,42 @@ plants, the bodies, the people and what they build, and raised each by the means
   drawn went from 12 to 144 thousand, from 8 to 72 thousand, and from 1.63 to 1.43 million. Nothing was thinned: the
   crop is drawn within the cover's own budget of clumps, and a house's relief only at its finest detail. The lighter
   way draws none of the three.
+- **Stones stand on stony ground.** Where a scene's substrate has gravel ([core/substrate.ts](../../core/substrate.ts)),
+  stones stand on its ground close by, as meshes: eight shapes of a rounded cobble, an angular block, a slab and a
+  pointed stone ([strewn.ts](../../world/generators/life/strewn.ts)), each a ball swollen, cut by planes and squashed,
+  part of it under the ground, sized and turned where it is sown. They are sown through the ground's cover, on its
+  three grids and within its budget: the small on the grid nearest the eye and the big on the one that reaches
+  furthest, a stone twice as wide a fifth as common. How stony a ground is, is its substrate's to say: its share of
+  gravel, and how coarse its sources name its grain; how many stones that comes to is the generator's choice
+  (`strewn.stones` in [scene.yaml](../../world/generators/life/scene.yaml)). A stone stands where the terrain draws
+  the ground's own stones, since both read one field: where each material of a ground lies was the renderer's noise,
+  and is now the generator's ([sorting.ts](../../world/generators/life/sorting.ts)), which the shader is written from.
+  A sheet of gravel has stones all over it, and a topsoil's stones thicken on its rises. A stone is coloured as the
+  terrain colours the ground's stones, by the two tones of its gravel, which are the rock's under the place where the
+  world says what rock that is, each stone a shade of its own; its grain is the scanned rock's, read on its own
+  faces; and the ground's bare colour lies banked at its foot and dusted on its top.
+- **Fallen wood lies under trees.** Where at least three tenths of the ground is under canopy, lengths of fallen
+  trunk, some broken in two, stumps, fallen branches and boughs lie on it, of the kind of tree that stands over the
+  place, chosen as the trees are: in that tree's own bark, of its form's own thickness and a share of its height.
+  A trunk lies where there is room between the standing trunks, turned the way the ground is most level under it,
+  and not at all where the ground falls too much along it, since a mesh drawn many times can be turned but not
+  tilted. Its bark is its tree's, greyed by how long it has lain, with what grows low on its upper side and the wood
+  pale where it broke; it does not sway. A click on it finds its taxon. How much wood lies to the hectare is the
+  generator's choice (`strewn.wood`): nobody counted it. A palm, a tree fern and a calamite shed a trunk and no
+  branches. The look book's `forest-floor` is a view of it.
+- **Bare ground is bare.** A ground bears what its climate grows only as far as what it is made of lets it: a crust of
+  salt a thirtieth of it, and a mud or a lime mud its sources say dried into cracks a tenth (`cover.bears`, the
+  generator's choice). Bare ground takes the rest, so that fewer trees and fewer low plants stand there, from afar
+  by the mean of the scene's ground and close by where each material lies: tufts stand on the sand beside a crust,
+  and next to none on it. `gen:life/scene` is version 13: a scene whose ground bears all its climate grows has every
+  tree and animal where version 12 put it. The look book's `ground-salt` was moved some ten kilometres, onto land with
+  the same ground: the world's relief below a scene's grid (version 10) had put its place under water.
 - **Shadows close to.** The nearest cascade is as wide as the view is far, down to 24 m, so that close by a shadow is
-  fine enough to meet the foot that casts it.
+  fine enough to meet the foot that casts it. How far behind what shades it a point must be, along the sun's way, was
+  one number for all three cascades, which in the nearest came to more than half a metre: nothing lower than that
+  cast a shadow on the ground beside it. It is now three texels of each cascade's own map, a hand's breadth in the
+  nearest, so that a stone a foot high, a tuft and a foot cast one. A stone lower than two texels, some 6 cm at the
+  nearest, still casts none: the map is no finer.
 - **Clouds without streaks.** A march of 24 steps through the cloud layer hit or missed the edges of its heaps so
   much at random that eight frames' average kept the pattern of the marches' starts, as fine streaks along the rows of
   the screen. The march has 48 steps; each frame of a view at rest starts an even eighth of a step on from the last,
@@ -446,11 +480,22 @@ plants, the bodies, the people and what they build, and raised each by the means
   horizon, is left out; and the light that has come a long way through the cloud is reckoned by its broad shape alone,
   which pays for some of the steps.
 
-*Not done:* stones and logs as things standing on the ground; parallax in the ground's grain; impostors; a house's
-yard where no tradition says what stood in it, which stays empty. Nothing yet says that a crust of salt or a mud that
-dries to cracks grows less than its climate's share of low plants: the cover is the climate's, whatever the ground is
-made of. The lighter way draws none of this: its plants are the plain shapes they were, its houses' doors lie on their
-walls, and its fields are colours on the ground.
+*What the stones, the wood and the bare ground cost,* on the look book's views at 1600 × 900: the stones add 0.3 to
+0.4 million triangles to a stony desert's frame, of a budget of 9 million, and some 3,000 to the 90,000 the ground's
+cover may draw; fallen wood adds some 50,000 triangles to a forest's; and a crust of salt or a cracked mud draws a
+tenth or less of what it drew, since little grows on it. On the machine at hand, an Apple M3 Max with other work
+running on it, the meshes' pass took 2.3 ms before and 3.6 ms after on `ground-stones`, 2.9 and 3.1 ms on `desert`,
+and 4.9 and 5.4 ms on `forest-floor`. Whole frames were too unsteady to say more of than that they ran from 18 to 28
+ms before and after alike: over the 16 ms target either way, on a machine that is not the reference GPU, on which
+none of this has been measured.
+
+*Not done:* parallax in the ground's grain; impostors; a house's yard where no tradition says what stood in it, which
+stays empty. Stones stand only where a substrate says the ground has gravel: the gravel the renderer lays on a
+climate's bare slopes and on the bars of a dry bed, and the rock of a steep face, have no stones standing on them, and
+there is no scree. Fallen wood lies level, and has no fungi, no hollow and no root plate; a fallen frond is not drawn.
+Neither stones nor wood are in the scene's fingerprint, which proves its ground, a cell and a mesh. The lighter way
+draws none of this: its plants are the plain shapes they were, it has no stones and no fallen wood, though what its
+ground bears is the same, its houses' doors lie on their walls, and its fields are colours on the ground.
 
 *Not done, of houses:* a house walked into under its gable or a hood, one with a rounded end, a ring of rooms round a
 court, a front cut in the earth and every tent keep their openings on the face of their walls. A wall has no inside:
@@ -511,6 +556,9 @@ against the sky. Each kind of thing is held to its own test, on the look book's 
   in the thickness of its wall, and nothing stands by it that its records do not say stood there.
 - **A field** under a crop is plants close by and the colour of those plants from afar; what the crop was is not said
   where no record says.
+- **What lies on the ground** lies in it: a stone's foot is banked with the ground's own colour and a log's underside
+  is dark where it meets the earth. A stone is of what the ground's own stones are drawn of, and no two beside each
+  other are alike; fallen wood is of a tree that stands over it.
 - **Nothing is a photograph of a living thing,** and nothing drawn says more than its record: a finer picture of a
   taxon with no form of its own is a finer picture of its nearest node's.
 

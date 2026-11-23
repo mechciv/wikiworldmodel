@@ -8,9 +8,10 @@ import { defaultLeaf, LEAF_KINDS, type LeafKindName } from '../../../core/leaves
 import { lookup, type Scenario } from '../../../core/scenario.ts';
 import type { LivingTaxon, SceneSpec } from '../../../core/scene.ts';
 import { GroundSampler } from '../../../world/generators/city/ground.ts';
-import { Heights, placeLook, type LivingParams } from '../../../world/generators/life/scene/v12.ts';
+import { Heights, placeLook, type LivingParams } from '../../../world/generators/life/scene/v13.ts';
 import { snowOf } from '../../../world/generators/life/climate.ts';
 import { declination, MID_DAY } from '../../../core/water.ts';
+import { meanBears } from '../../../world/generators/life/sorting.ts';
 import { protoParts, type NamedGroup } from '../../../world/generators/life/stream.ts';
 import { ROUTE, wayAt } from '../../../world/generators/life/routines.ts';
 import { CityRenderer, SHARE_STEPS, type CellGPU, type CityFrame } from '../gl/city.ts';
@@ -75,7 +76,7 @@ function groundCover(spec: SceneSpec): [number, boolean, { first: LeafKindName; 
  * the world gives the climate at a height: the shares of forest, low plants and bare ground of each height's own
  * climate, as the generator has them (Heights), for the ground beyond the plan's map.
  */
-function sharesByHeight(spec: SceneSpec, far: { z: Int16Array; unit?: number; base?: number }): { from: number; step: number; band: number; shares: Float32Array } | undefined {
+function sharesByHeight(spec: SceneSpec, far: { z: Int16Array; unit?: number; base?: number }, bears = 1): { from: number; step: number; band: number; shares: Float32Array } | undefined {
   const params = spec.generator.params as unknown as LivingParams;
   if (!spec.climate || !params.climate) return undefined;
   let lo = Infinity;
@@ -93,9 +94,10 @@ function sharesByHeight(spec: SceneSpec, far: { z: Int16Array; unit?: number; ba
   const shares = new Float32Array(SHARE_STEPS * 3);
   for (let k = 0; k < SHARE_STEPS; k++) {
     const g = heights.at(from + k * step);
-    shares[k * 3] = g.forest;
-    shares[k * 3 + 1] = g.herb;
-    shares[k * 3 + 2] = g.bare;
+    // As far as what the scene's ground is made of bears them (`bears`): bare ground has the rest.
+    shares[k * 3] = g.forest * bears;
+    shares[k * 3 + 1] = g.herb * bears;
+    shares[k * 3 + 2] = 1 - (1 - g.bare) * bears;
   }
   return { from, step, band: heights.band, shares };
 }
@@ -243,14 +245,18 @@ export class LifeScene {
     // afar. And the rock under it: what its outcrops and its stones are drawn of.
     const rock = rockLook(this.spec.bedrock);
     const ground = groundLook(this.spec.substrate, rock);
-    r.setLand(Float32Array.from(groundTones(['soil', 'herb', 'bare', 'canopy', 'distant'].flatMap((k) => tones[k]), ground)), [Math.min(clim?.forest ?? 0, cover.forests), Math.min(clim?.herb ?? 0, cover.plants), 1 - cover.plants * (1 - (clim?.bare ?? 1))], snowOf(this.spec), sharesByHeight(this.spec, g.levels[g.levels.length - 1]));
+    // The land's shares are its climate's, as far as what its ground is made of bears them: bare ground has the rest
+    // (world/generators/life/scene/v13.ts, LandCover).
+    const bears = meanBears(this.spec.substrate, params.cover.bears);
+    r.setLand(Float32Array.from(groundTones(['soil', 'herb', 'bare', 'canopy', 'distant'].flatMap((k) => tones[k]), ground)), [Math.min(clim?.forest ?? 0, cover.forests) * bears, Math.min(clim?.herb ?? 0, cover.plants) * bears, 1 - cover.plants * (1 - (clim?.bare ?? 1)) * bears], snowOf(this.spec), sharesByHeight(this.spec, g.levels[g.levels.length - 1], bears));
     r.setSubstrate(ground);
     r.setRock(rock);
     r.setGroundCover(...groundCover(this.spec));
     // Each taxon is an entity, and after them each kind of house and each kind of piece of a town's works, which stand
     // for as long as the scene does: generated.
-    // And one more for the paths between its settlements, if it has any, and one for the crop of its fields.
-    const houseKinds = (this.people?.forms.length ?? 0) + (this.people?.works.length ?? 0) + (this.people?.kept ?? 0) + 2;
+    // And one more for the paths between its settlements, if it has any; one for the crop of its fields; and one for
+    // the stones that stand on its ground, which are no taxon's (world/generators/life/stream.ts, strewnEntity).
+    const houseKinds = (this.people?.forms.length ?? 0) + (this.people?.works.length ?? 0) + (this.people?.kept ?? 0) + 3;
     // The paths are one mesh of the scene's own, put on the GPU the first time it is shown.
     if (g.paths && !this.pathsGpu) this.pathsGpu = r.upload(g.paths.vertices, g.paths.indices);
     const out = new Float32Array((this.spec.taxa.length + 1 + houseKinds) * 4);
@@ -403,6 +409,8 @@ export class LifeScene {
     const forms = this.people?.forms.length ?? 0;
     const works = this.people?.works.length ?? 0;
     const kept = this.people?.kept ?? 0;
+    // A stone is the ground's own: a click on one is a click on the ground.
+    if (made > forms + works + kept + 1) return {};
     if (made > forms + works + kept) return { crop: true };
     if (made >= forms + works + kept) return { path: true };
     if (made >= forms + works) return { kept: this.spec.people?.kept?.[made - forms - works] };

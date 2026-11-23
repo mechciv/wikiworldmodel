@@ -4,6 +4,11 @@
 // material, a tint for each colour a source names, and a tone for each kind of rock, in linear light as the land's own
 // tones are (world/generators/life/scene.yaml).
 import { GROUND_MATERIALS, type GroundMaterial, type RockKind, type SceneBedrock, type SceneSubstrate } from '../../../core/substrate.ts';
+import { sortingBands } from '../../../world/generators/life/sorting.ts';
+
+// Where each material lies across a ground is the generator's field (world/generators/life/sorting.ts): the renderer
+// sorts them by it, and the generator sows by it what stands on the ground.
+export { sortingBands };
 
 type V3 = [number, number, number];
 
@@ -70,69 +75,6 @@ const SOIL_SHARE = 0.5;
  * its climate gives it: each fraction pulls the shade its way by its share, sand paler and clay darker.
  */
 const SOIL_SHADE: Partial<Record<GroundMaterial, number>> = { sand: 1.14, silt: 1, mud: 0.78 };
-
-/**
- * The order the materials lie in across a ground, from its rises to its hollows: the coarsest first, and last what a
- * drying pool leaves.
- */
-const SORTED: GroundMaterial[] = ['gravel', 'sand', 'ash', 'silt', 'mud', 'lime', 'organic', 'evaporite'];
-
-/**
- * The renderer sorts a ground's materials across it by one field of noise (cityShaders.ts, `sorting`): six tenths of
- * one noise and four tenths of another, each read between four of its values. These are that field's quantiles, a
- * thousand of them, found once by drawing it many times: with them a material is given the stretch of the field that
- * covers its share of the ground.
- */
-let quantiles: Float32Array | null = null;
-function sortingQuantile(share: number): number {
-  if (!quantiles) {
-    // A small generator of its own, so that every browser draws the same numbers.
-    let seed = 0x9e3779b9;
-    const random = () => {
-      seed = (seed + 0x6d2b79f5) | 0;
-      let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
-      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-    };
-    // A noise read between four of its values, each as likely to be anything from 0 to 1, with the step between them
-    // eased as the shader eases it.
-    const ease = (f: number) => f * f * (3 - 2 * f);
-    const bilinear = () => {
-      const [fx, fy, a, b, c, d] = [ease(random()), ease(random()), random(), random(), random(), random()];
-      return (a + (b - a) * fx) * (1 - fy) + (c + (d - c) * fx) * fy;
-    };
-    const n = 200_000;
-    const drawn = new Float32Array(n);
-    for (let i = 0; i < n; i++) drawn[i] = 0.6 * bilinear() + 0.4 * bilinear();
-    drawn.sort();
-    quantiles = new Float32Array(1001);
-    for (let k = 0; k <= 1000; k++) quantiles[k] = drawn[Math.min(n - 1, Math.round((k / 1000) * (n - 1)))];
-  }
-  const x = Math.max(0, Math.min(1, share)) * 1000;
-  const k = Math.min(999, Math.floor(x));
-  return quantiles[k] + (quantiles[k + 1] - quantiles[k]) * (x - k);
-}
-
-/**
- * Each material's stretch of the sorting field, by its share, in the order of GROUND_MATERIALS: two numbers each. The
- * first to lie has no lower edge and the last no upper one.
- */
-export function sortingBands(shares: ArrayLike<number>): Float32Array {
-  const bands = new Float32Array(GROUND_MATERIALS.length * 2);
-  const total = Array.from(shares).reduce((a, b) => a + b, 0) || 1;
-  let below = 0;
-  let first = true;
-  for (const m of SORTED) {
-    const i = GROUND_MATERIALS.indexOf(m);
-    const share = shares[i] / total;
-    if (share <= 0) continue;
-    bands[i * 2] = first ? -1 : sortingQuantile(below);
-    below += share;
-    bands[i * 2 + 1] = below >= 1 - 1e-6 ? 2 : sortingQuantile(below);
-    first = false;
-  }
-  return bands;
-}
 
 const luma = (c: V3) => 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
 const mix = (a: V3, b: V3, t: number): V3 => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];

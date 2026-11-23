@@ -9,8 +9,10 @@ import { canonicalForm, type Form } from '../../../../core/form.ts';
 import type { LivingTaxon, ReliefPatch, ReliefShape, SceneCover, SceneSpec } from '../../../../core/scene.ts';
 import type { FeatureTime } from '../../../../core/tileset.ts';
 import { cubeRoot, latticeOf, sizeWithin } from '../spec.ts';
-import { FAST_BUDGET, FULL_BUDGET, INSTANCE_STRIDE, protoParts, SceneStream, type LifeView } from '../stream.ts';
-import { CELL, cellParts, densityOf, EXTENT, GENERATOR, placeLook, VERSION, watersFor, type CellRows, type LivingParams } from './v12.ts';
+import type { SceneSubstrate } from '../../../../core/substrate.ts';
+import { CLUMP, FALLEN, FAST_BUDGET, FULL_BUDGET, INSTANCE_STRIDE, protoParts, SceneStream, STREWN, type LifeView, type Selection } from '../stream.ts';
+import { shedsWood } from '../strewn.ts';
+import { CELL, cellParts, densityOf, EXTENT, GENERATOR, LandCover, placeLook, VERSION, watersFor, type CellRows, type LivingParams } from './v13.ts';
 import type { ChannelLaws } from '../../../../core/scene.ts';
 import { snowOf } from '../climate.ts';
 import { POSE } from '../forms.ts';
@@ -87,11 +89,12 @@ const shapeOf = (at: (x: number, y: number) => number, share = 1): ReliefShape =
   return { field: 'field:test', held: true, at: { lat: 40, lon: 0 }, turn: 0, share, patch: { lat0, lon0, step, nx, ny, z } };
 };
 
-function specOf(opts: { climate?: SceneSpec['biome']['climate']; cover?: SceneCover; relief?: ReliefPatch; seed?: string; taxa?: LivingTaxon[]; atHeight?: SceneSpec['climate']; shape?: ReliefShape } = {}): SceneSpec {
+function specOf(opts: { climate?: SceneSpec['biome']['climate']; cover?: SceneCover; relief?: ReliefPatch; seed?: string; taxa?: LivingTaxon[]; atHeight?: SceneSpec['climate']; shape?: ReliefShape; substrate?: SceneSubstrate } = {}): SceneSpec {
   const taxa = opts.taxa ?? TAXA;
   return {
     ...(opts.atHeight ? { climate: opts.atHeight } : {}),
     ...(opts.shape ? { shape: opts.shape } : {}),
+    ...(opts.substrate ? { substrate: opts.substrate } : {}),
     format: 'lightworld-scene@2',
     site: { id: 'test', label: 'a test', origin: { lat: 40, lon: 0 }, span: [-1e6, 1e6], slice: 0 },
     relief: opts.relief ?? flat(300),
@@ -929,6 +932,154 @@ describe('kinds, and where each grows', () => {
     // Only the one set by the arrival, so that every kind is near it.
     expect(count(1, 'sorrel')).toBeLessThanOrEqual(1);
     expect(count(2, 'sorrel')).toBeGreaterThan(50);
+  });
+});
+
+// Made-up grounds for made-up places: what a rock record or a map of topsoil might say of one.
+const groundOf = (materials: SceneSubstrate['materials'], from: SceneSubstrate['from'] = 'rocks', marks: SceneSubstrate['marks'] = []): SceneSubstrate => ({ tier: from === 'rocks' ? 'evidence' : 'model', from, weight: 1, materials, colours: [], marks, source: 'src:test', rows: [], sites: 1, km: 0 });
+
+describe('what stands and lies on the ground', () => {
+  /** What a view of a scene draws on its ground: its stones, its fallen wood by taxon, and its clumps of low plants. */
+  const strewnIn = (s: SceneStream, view: LifeView): { stones: number; clumps: number; wood: Map<number, number>; selection: Selection } => {
+    const sent = new Set<number>();
+    let selection = s.select(view, sent);
+    for (let k = 0; k < 40 && selection.pending; k++) selection = s.select(view, sent);
+    const out = { stones: 0, clumps: 0, wood: new Map<number, number>(), selection };
+    for (const b of selection.batches) {
+      const p = protoParts(b.proto);
+      if (p.taxon >= STREWN) out.stones += b.count;
+      else if ((p.detail as number) === CLUMP && p.variant >= FALLEN) out.wood.set(p.taxon, (out.wood.get(p.taxon) ?? 0) + b.count);
+      else if ((p.detail as number) === CLUMP) out.clumps += b.count;
+    }
+    return out;
+  };
+  /** A view from eye height at the place a scene is arrived at. */
+  const arrived = (s: SceneStream): LifeView => viewAt(s.plan.focus[0], s.plan.focus[1], 1.7, s);
+  const soil = (gravel: number) => groundOf([['sand', 0.8 - gravel], ['gravel', gravel], ['mud', 0.2]], 'soil');
+  const desert = (substrate: SceneSubstrate, budget = FULL_BUDGET) => new SceneStream(specOf({ climate: 'desert', seed: 'life/stones', substrate }), budget);
+  const steppe = (substrate?: SceneSubstrate): SceneSpec => specOf({ climate: 'steppe', seed: 'life/bare', ...(substrate ? { substrate } : {}) });
+  // A stony desert and a less stony one; and a steppe nothing is said of, and one half of whose ground is a crust of salt.
+  let stony: SceneStream;
+  let less: SceneStream;
+  let plain: SceneStream;
+  let half: SceneStream;
+  beforeAll(() => {
+    stony = desert(soil(0.2));
+    less = desert(soil(0.05));
+    plain = new SceneStream(steppe());
+    half = new SceneStream(steppe(groundOf([['sand', 0.5], ['evaporite', 0.5]])));
+  });
+
+  it('stands stones on a ground whose substrate has gravel, the more the more of it, and none on one that has none', () => {
+    const many = strewnIn(stony, arrived(stony));
+    const few = strewnIn(less, arrived(less));
+    expect(many.stones).toBeGreaterThan(300);
+    expect(few.stones).toBeGreaterThan(30);
+    // Four times the gravel is about four times the stones.
+    expect(many.stones / few.stones).toBeGreaterThan(2.5);
+    expect(many.stones / few.stones).toBeLessThan(6);
+    // Where nothing says what the ground is made of, nothing says it has stones; nor has a ground of sand and salt any.
+    expect(strewnIn(plain, arrived(plain)).stones).toBe(0);
+    expect(strewnIn(half, arrived(half)).stones).toBe(0);
+    // A stone is the ground's own, and no taxon's: its entity comes after every other of the scene.
+    const stone = many.selection.batches.find((b) => protoParts(b.proto).taxon >= STREWN)!;
+    expect(new Uint16Array(stone.data)[12]).toBe(stony.strewnEntity());
+    expect(stony.strewnEntity()).toBeGreaterThan(stony.spec.taxa.length);
+    // Within the budgets, and the lighter way draws none of them.
+    expect(many.selection.clumps).toBeLessThanOrEqual(PARAMS.plants.clumps!.most);
+    expect(many.selection.triangles).toBeLessThanOrEqual(FULL_BUDGET.triangles);
+    const fast = desert(soil(0.2), FAST_BUDGET);
+    expect(strewnIn(fast, arrived(fast)).stones).toBe(0);
+  });
+
+  it('lays fallen wood under trees, of kinds that stand there, and none on open ground', () => {
+    const forest = stream;
+    // Under trees: the nearest place to the arrival that the canopy closes over.
+    const [fx, fy] = forest.plan.focus;
+    let at: [number, number] | undefined;
+    for (let r = 200; r < 1500 && !at; r += 50) {
+      for (let k = 0; k < 16 && !at; k++) {
+        const x = fx + r * Math.cos((k * Math.PI) / 8);
+        const y = fy + r * Math.sin((k * Math.PI) / 8);
+        // Canopy there, and for as far ahead as the wood is sown.
+        if ([0, 40, 80, 120].every((d) => forest.cover.at(x, y + d).canopy > 0.8)) at = [x, y];
+      }
+    }
+    expect(at).toBeDefined();
+    const under = strewnIn(forest, viewAt(at![0], at![1], 1.7, forest));
+    const pieces = [...under.wood.values()].reduce((a, b) => a + b, 0);
+    expect(pieces).toBeGreaterThan(20);
+    // Each piece is of a tree of the scene's canopy that has a trunk to shed.
+    for (const k of under.wood.keys()) {
+      const t = forest.spec.taxa[k];
+      const form = forest.spec.forms[t.form];
+      expect(form.kind).toBe('plant');
+      expect(form.behave?.layer ?? 'canopy').toBe('canopy');
+      expect(shedsWood(form).trunks).toBe(true);
+    }
+    // A fern of the understory sheds none, nor an animal.
+    expect([...under.wood.keys()].map((k) => forest.spec.taxa[k].label)).not.toContain('fern');
+    // On open ground, none: a desert has no forest, and a steppe's few trees stand apart.
+    expect(strewnIn(stony, arrived(stony)).wood.size).toBe(0);
+  });
+
+  it('grows next to nothing on a crust of salt or a mud dried to cracks, and its climate\'s cover on a ground of sand', () => {
+    // How much of the same land is low plants, under trees and bare, by what its ground is made of: over a square
+    // kilometre and a half about the arrival.
+    const [fx, fy] = plain.plan.focus;
+    const grown = (substrate?: SceneSubstrate) => {
+      const cover = substrate ? new LandCover(steppe(substrate), plain.ground, plain.look.water, plain.plan.focus) : plain.cover;
+      let low = 0;
+      let canopy = 0;
+      let bare = 0;
+      let n = 0;
+      for (let y = fy - 600; y <= fy + 600; y += 40) {
+        for (let x = fx - 600; x <= fx + 600; x += 40) {
+          const c = cover.at(x, y);
+          if (c.water) continue;
+          low += c.low;
+          canopy += c.canopy;
+          bare += c.bare;
+          n++;
+        }
+      }
+      return { low: low / n, canopy: canopy / n, bare: bare / n };
+    };
+    const climate = grown();
+    expect(climate.low).toBeGreaterThan(0.3);
+    // A ground of sand and silt bears all its climate grows, and so does a mud nobody says dried.
+    expect(grown(groundOf([['sand', 0.6], ['silt', 0.4]])).low).toBeCloseTo(climate.low, 9);
+    expect(grown(groundOf([['mud', 1]])).low).toBeCloseTo(climate.low, 9);
+    // A crust of salt, and a mud its sources say dried into cracks: next to nothing, and bare ground in its place.
+    const bears = PARAMS.cover.bears!;
+    const salt = grown(groundOf([['evaporite', 1]]));
+    expect(salt.low).toBeLessThan(climate.low * (bears.evaporite! + 0.05));
+    expect(salt.canopy).toBeLessThanOrEqual(climate.canopy);
+    expect(salt.bare).toBeGreaterThan(0.9);
+    const cracked = grown(groundOf([['mud', 1]], 'rocks', [['cracks', 1]]));
+    expect(cracked.low).toBeLessThan(climate.low * (bears.cracked! + 0.08));
+    expect(cracked.bare).toBeGreaterThan(0.85);
+    // Half salt and half sand: the land bears about half in the mean, and fewer clumps stand on it close by.
+    const mixed = grown(groundOf([['sand', 0.5], ['evaporite', 0.5]]));
+    expect(mixed.low).toBeGreaterThan(climate.low * 0.35);
+    expect(mixed.low).toBeLessThan(climate.low * 0.65);
+    const all = strewnIn(plain, arrived(plain)).clumps;
+    const some = strewnIn(half, arrived(half)).clumps;
+    expect(all).toBeGreaterThan(1000);
+    expect(some).toBeLessThan(all * 0.75);
+    expect(some).toBeGreaterThan(all * 0.2);
+    // And those stand on the sand, where the ground bears them, next to none on the crust beside it.
+    const [hx, hy] = half.plan.focus;
+    let onSalt = 0;
+    let onSand = 0;
+    for (let y = hy - 30; y <= hy + 30; y += 1.5) {
+      for (let x = hx - 30; x <= hx + 30; x += 1.5) {
+        const b = half.sort.bearsAt(x, y);
+        if (b < 0.2) onSalt += half.cover.at(x, y, b).low;
+        else if (b > 0.8) onSand += half.cover.at(x, y, b).low;
+      }
+    }
+    expect(onSand).toBeGreaterThan(onSalt * 10);
   });
 });
 

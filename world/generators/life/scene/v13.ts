@@ -1,4 +1,4 @@
-// A living scene, version 11: any place at any moment, on land or in the sea, from a spec. Nothing is laid out until it is looked at:
+// A living scene, version 13: any place at any moment, on land or in the sea, from a spec. Nothing is laid out until it is looked at:
 // each 400 m cell makes what stands in it from hashes of where it is, so the scene has no edge to speak of, and what a
 // far view shows is the top of the same list a near view shows in full. The records say which taxa could be here and how
 // big they grew; this says where each stands, how many there are, what it is doing and what colour it is, all invented
@@ -31,8 +31,14 @@
 // scene's ground is new. Since version 11 an animal has something to do (../routines.ts): a routine its body plan
 // names, and a way it goes by it, to a place or two near where it stands and back, or round a circle in the air or the
 // water, which the renderer moves it along by the visit's clock. A leg's points say how far they go with its stride
-// (../forms.ts, BONE). Where each stands as the clock starts, and what grows where, is what version 10 made. The build
-// and every browser are held to agree within the tolerance of core/fingerprint.ts.
+// (../forms.ts, BONE). Where each stands as the clock starts, and what grows where, is what version 10 made. Since
+// version 12 (docs/plans/RENDERING.md, the fidelity pass) every plant is drawn afresh, a skeleton of limbs in bark with
+// its leaves from an atlas (../plants.ts). Since version 13 a ground bears what its climate grows only as far as what
+// it is made of lets it (../sorting.ts): bare ground takes the rest of a crust of salt or of a mud dried to cracks, so
+// that fewer trees and low plants stand there; and stones stand on a ground whose substrate has gravel, and fallen wood
+// lies under trees (../strewn.ts, ../stream.ts). A scene whose ground bears all its climate grows has every tree and
+// animal where version 12 put it. The build and every browser are held to agree within the tolerance of
+// core/fingerprint.ts.
 import type { Part } from '../../../../core/fingerprint.ts';
 import type { Form, Pose, Routine } from '../../../../core/form.ts';
 import { routineOf, wayBeside, wayFor, type RoutineParams } from '../routines.ts';
@@ -47,9 +53,10 @@ import { arrival, distanceField, fbm, noise, plainGrid, watersOf, type GridSpec,
 import { LakeMap, lakeSheets } from '../lakes.ts';
 import { EARTH, Invented, Tracer, WorldGround, type InventChoices, type TraceChoices } from '../relief.ts';
 import { drawRiver, meet, type Oxbow, type RiverChoices, type RiverPath } from '../rivers.ts';
+import { meanBears, type Bears } from '../sorting.ts';
 
 export const GENERATOR = 'gen:life/scene';
-export const VERSION = 12;
+export const VERSION = 13;
 
 /** The side of a cell of the ground, in metres. */
 export const CELL = 400;
@@ -118,6 +125,27 @@ export interface LivingParams {
     liking?: { hot_c: number; cold_c: number };
     /** what colours each kind of land has: the generator's choice, and nobody's record */
     tones: Record<string, Record<string, number[]>>;
+    /**
+     * How much of what its climate would grow a ground bears, by what its substrate says it is made of
+     * (core/substrate.ts), for each material that bears less than all, and for a mud that dried into cracks: bare
+     * ground takes the rest. The generator's choice, and nobody's record.
+     */
+    bears?: Bears;
+  };
+  /**
+   * What lies strewn on the ground close by, as things that stand on it (../strewn.ts, ../stream.ts). Stones, where the
+   * scene's substrate has gravel: how much of a ground that is all gravel the stones drawn cover (`cover`); how wide
+   * they are, in metres, from the least to the most (`across`); how many times rarer a stone is than one half as wide,
+   * as a power of two (`rarer`); how many times wider the widest is where every source names the ground's grain
+   * coarse, and narrower where every one names it fine (`coarse`); and how many of its own widths off a stone is still
+   * drawn (`seen`), by which it is sown on the grid of the ground's cover that reaches that far. Wood, under trees:
+   * lengths of fallen trunk, stumps and fallen branches to the hectare under a closed canopy, where there is room for
+   * them between the trees that stand; none where less of the ground than `canopy` is under trees. All of it the
+   * generator's choice, and nobody's record.
+   */
+  strewn?: {
+    stones?: { cover: number; across: [number, number]; rarer: number; coarse: number; seen: number };
+    wood?: { logs: number; stumps: number; branches: number; canopy: number };
   };
   plants: {
     /** the sowing grid, in metres; trees to the hectare under full canopy */
@@ -880,6 +908,11 @@ export class LandCover {
   private fx: number;
   private fy: number;
   private seed: number;
+  /**
+   * how much of what its climate grows the scene's ground bears, by what it is made of, 0–1: the mean over its
+   * materials (../sorting.ts)
+   */
+  readonly bears: number;
   /** what grows at each height, where the world gives the climate at a height; the one class everywhere if not */
   private heights?: Heights;
   /**
@@ -901,11 +934,16 @@ export class LandCover {
     this.seed = hashString(spec.generator.seed);
     this.fx = focus[0];
     this.fy = focus[1];
+    this.bears = meanBears(spec.substrate, p.cover.bears);
   }
   get forestShare(): number {
     return this.forest;
   }
-  at(x: number, y: number): this {
+  /**
+   * What covers a place. `bears`: how much of what its climate grows the ground there bears: the mean of the scene's
+   * ground unless it is given, as it is close by, where each of the ground's materials lies in its own place.
+   */
+  at(x: number, y: number, bears: number = this.bears): this {
     const z = this.ground.at(x, y);
     const above = z - (this.levelAt ? this.levelAt(x, y) : this.level);
     this.above = above;
@@ -961,6 +999,8 @@ export class LandCover {
     // Bare ground in patches, as much as the climate leaves; all of it where nothing grows yet; and less of it by water.
     const dry = baren >= 1 ? 1 : smooth(1 - baren - 0.12, 1 - baren + 0.12, 0.5 * patchy + 0.5 * noise(x / 260, y / 260, this.seed + 33));
     this.bare = (shore > dry ? shore : dry) * (1 - beside * 0.8);
+    // What the ground is made of bears only so much of that: bare ground takes the rest, less of it by water.
+    if (bears < 1) this.bare = 1 - (1 - this.bare) * (bears + (1 - bears) * beside * 0.8);
     let canopy = smooth(c.glade - 0.05, c.glade + 0.07, patchy);
     const dx = x - this.fx;
     const dy = y - this.fy;
@@ -1087,6 +1127,13 @@ export interface LivingPlan {
    * sown: its index among the taxa, −1 where the scene has none, and −2 where none of it suits the ground.
    */
   underAt(x: number, y: number, cover: LandCover, u: number): number;
+  /**
+   * Which of the canopy's kinds stands over a place whose cover has just been read, chosen by `u` (0–1) as its trees
+   * are: its index among the taxa, or −1 where the scene has no trees. What lies fallen under trees is theirs.
+   */
+  canopyAt(x: number, y: number, cover: LandCover, u: number): number;
+  /** Whether no tree's trunk stands within `r` metres of a place. */
+  clearOfTrees(x: number, y: number, r: number): boolean;
 }
 
 /** An integer power, by multiplication alone: the same on every machine. */
@@ -1542,7 +1589,8 @@ export function makePlan(spec: SceneSpec, ground: GroundSampler, look: PlaceLook
     };
   };
   const underAt = (x: number, y: number, cover: LandCover, u: number): number => (under.length ? choose(under, cover.wet, u, x, y, cover.hot, cover.cold, false)?.index ?? -2 : -1);
-  return { look, focus, toRiver, cell, underAt };
+  const canopyAt = (x: number, y: number, cover: LandCover, u: number): number => (canopy.length ? choose(canopy, cover.wet, u, x, y, cover.hot, cover.cold)?.index ?? -1 : -1);
+  return { look, focus, toRiver, cell, underAt, canopyAt, clearOfTrees };
 }
 
 /** A cell's rows as bytes: what the build and the browser hash. */

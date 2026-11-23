@@ -108,13 +108,13 @@ function card(m: Mesh, tile: number, px: number, py: number, pz: number, ax: num
  * The barks the renderer can draw (viewer/src/gl/cityShaders.ts, BARK): which a part's limbs have follows from its
  * type, and is no claim about any plant.
  */
-const BARK = { furrowed: 0, smooth: 1, scaly: 2, cushioned: 3, ringed: 4, jointed: 5 } as const;
+export const BARK = { furrowed: 0, smooth: 1, scaly: 2, cushioned: 3, ringed: 4, jointed: 5 } as const;
 
 /**
  * A length of trunk or limb through points, each [x, y, z, radius]: round, its sides smooth. Its uv is for bark: u
  * counts ridges round it, a whole number of them; v is metres along it, and its thousands say which bark it is.
  */
-function tube(m: Mesh, pts: number[][], n: number, bark: number = BARK.furrowed): void {
+export function tube(m: Mesh, pts: number[][], n: number, bark: number = BARK.furrowed): void {
   const count = pts.length;
   if (count < 2) return;
   let mean = 0;
@@ -1176,6 +1176,34 @@ function shrub(m: Mesh, p: Part, h: number, seed: number, detail: Detail, tint: 
       rosette(m, kind, (kx + ex) / 2, (ky + ey) / 2, (kz + ez) / 2, ex - kx, ey - ky, ez - kz, 3, size, crown, seed + q * 31 + i * 7 + 3, 1.4);
     }
   }
+}
+
+/**
+ * A tree's trunk, as its form's first part with one gives it: how thick it is at breast height, as a share of the
+ * tree's height, and which bark its limbs have, as its part's type draws it standing. Undefined for a plant with no
+ * trunk. What a tree sheds lies under it in this bark (strewn.ts).
+ */
+export function trunkOf(form: Form): { r: number; bark: number } | undefined {
+  for (const name of Object.keys(form.parts)) {
+    const p = form.parts[name];
+    if (!p) continue;
+    switch (p.type) {
+      case 'conifer':
+      case 'broadleaf':
+        return { r: num(p, 'trunk', 0.022), bark: BARK.furrowed };
+      case 'palm':
+        return { r: num(p, 'trunk', 0.03), bark: BARK.ringed };
+      case 'fern':
+        // A fern has a trunk only where it stands on a stem.
+        if (num(p, 'on_stem', 0) > 0) return { r: num(p, 'stem', 0.04), bark: BARK.scaly };
+        break;
+      case 'whorled':
+        return { r: num(p, 'trunk', 0.018), bark: BARK.jointed };
+      case 'scale-tree':
+        return { r: num(p, 'trunk', 0.025), bark: BARK.cushioned };
+    }
+  }
+  return undefined;
 }
 
 /**

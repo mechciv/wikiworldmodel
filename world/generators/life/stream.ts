@@ -9,9 +9,11 @@ import { MAT, Mesh, meshParts } from '../city/kit.ts';
 import { hash2, hashString, TAU } from '../city/math.ts';
 import { clumpWidth, drawAnimal, drawClump, drawPlant, POSE, STRIDE_HIPS, type Detail, type Stance } from './forms.ts';
 import { ROUTE, WAY } from './routines.ts';
-import { banksOf, CELL, CELLS, cellParts, cellKey, coverMask, EXTENT, groundGrids, LandCover, makePlan, placeLook, waterLevels, waterRibbons, waterSheet, watersFor, worldGround, type CellRows, type LivingParams, type LivingPlan, type PlaceLook } from './scene/v12.ts';
+import { banksOf, CELL, CELLS, cellParts, cellKey, coverMask, EXTENT, groundGrids, LandCover, makePlan, placeLook, waterLevels, waterRibbons, waterSheet, watersFor, worldGround, type CellRows, type LivingParams, type LivingPlan, type PlaceLook } from './scene/v13.ts';
 import type { WorldGround } from './relief.ts';
 import { freshOf, noise, type Waters } from './land.ts';
+import { GroundSort } from './sorting.ts';
+import { drawStone, drawWood, shedsWood, STONE_FINE, STONE_VARIANTS, WOOD, WOOD_SEEDS, woodLength } from './strewn.ts';
 import { drawDwelling, HOUSE_VARIANTS, houseSize, type HouseDetail } from '../people/dwellings.ts';
 import { LandUseMap, landUseMask, makeSettlement, type LandUse, type SettlementParams, type SettlementPlan } from '../people/settlement/v6.ts';
 import { drawCrop, sow, type CropParams } from '../people/crops.ts';
@@ -27,6 +29,8 @@ export const WORK = 0x6000;
 export const KEPT = 0x7000;
 /** The crop of the fields, above the kept animals: one kind, which nobody names (world/generators/people/crops.ts). */
 export const CROP = 0x7800;
+/** Where what lies strewn on the ground starts, above the fields' crop: a stone, in each of its shapes (strewn.ts). */
+export const STREWN = 0x7c00;
 
 export const INSTANCE_STRIDE = 28;
 
@@ -129,7 +133,7 @@ export interface Selection {
   triangles: number;
   /** how much is still to come for this view: cells to be made, and one more where its far share has yet to hold */
   pending: number;
-  /** how many clumps of low plants cover the ground close by, apart from the instances */
+  /** how much stands or lies on the ground close by, apart from the instances: clumps of low plants, stones and fallen wood */
   clumps: number;
   /** the nearest groups, to name */
   groups: NamedGroup[];
@@ -151,6 +155,19 @@ export interface NamedGroup {
 export const protoOf = (taxon: number, variant: number, detail: Detail | typeof CLUMP) => (taxon << 8) | (variant << 2) | detail;
 /** A mesh's detail that is a clump of a low plant, as the ground's cover close by is drawn. */
 export const CLUMP = 3;
+/**
+ * With that detail, a taxon's variants from here on are the wood it sheds, which lies under its trees as its clumps
+ * stand: which piece (strewn.ts, WOOD), and which of its seeds.
+ */
+export const FALLEN = 8;
+/** The seed a piece of fallen wood is drawn from. */
+const woodSeed = (which: number): number => (which + 1) * 0x51f3;
+/**
+ * How wide a stone must be, in metres, to have a finer mesh at all, and how wide on the screen, in pixels, for that one
+ * to be drawn: wide enough to be looked at. How it is drawn, and no fact.
+ */
+const STONE_FINE_FROM = 0.2;
+const STONE_FINE_PX = 44;
 export const protoParts = (p: number): { taxon: number; variant: number; detail: Detail } => ({ taxon: p >> 8, variant: (p >> 2) & 63, detail: (p & 3) as Detail });
 
 const WALKING = new Set<number>([POSE.walk, POSE.fly]);
@@ -171,14 +188,80 @@ const COVER_TROD = [0.45, 1.5];
  * cover a sward goes from patchy to closed. All the generator's choices, and nobody's record.
  */
 const COVER_PATCH = { across: 4.2, own: 0.78, open: 0.14, edge: 0.4, sward: [0.5, 0.9] };
+/**
+ * How much the ground may fall along a piece of fallen wood, as a share of its length: it lies level, part of it in
+ * the ground, and where the ground falls more than this from one of its ends to the other it is not laid.
+ */
+const WOOD_LEVEL = 0.05;
+/** How far from a standing trunk's middle fallen wood keeps, in metres, at each place along it that is tried. */
+const WOOD_ROOM = 0.7;
 
-/** The clumps of one tile of a grid of the ground's cover: each one's place, size, facing and place in the thinning; its mesh; its tint. */
+/** How many numbers a thing of a tile has: its place, size, facing, its place in the thinning, and how far it reaches from its middle. */
+const COVER_ROW = 8;
+
+/**
+ * What stands or lies in one tile of a grid of the ground's cover, clumps of low plants, stones and fallen wood: each
+ * one's place, size, facing, place in the thinning and reach; its mesh; its tint.
+ */
 interface CoverTile {
   f: Float32Array;
   proto: Uint32Array;
   tint: Uint16Array;
   count: number;
   used: number;
+}
+
+/** One of the grids the ground's cover is sown on: how far apart its nodes are, how far from the eye it reaches, and how much larger its clumps are. */
+interface CoverGrid {
+  step: number;
+  reach: number;
+  size: number;
+  /** the stones it is sown with: how wide, from the least to the most, and how many to the square metre of ground that is all stones */
+  stones?: { lo: number; hi: number; per: number };
+  /** whether fallen trunks and stumps lie on it, and whether fallen branches do */
+  trunks: boolean;
+  branches: boolean;
+}
+
+/** A tile's rows as they are made: they grow as they are added to. */
+class TileRows {
+  f = new Float32Array(256 * COVER_ROW);
+  proto = new Uint32Array(256);
+  tint = new Uint16Array(256);
+  count = 0;
+  /** A thing turned by `turn` radians about the vertical. */
+  add(x: number, y: number, z: number, scale: number, turn: number, keep: number, reach: number, proto: number, tint: number): void {
+    this.put(x, y, z, scale, Math.sin(turn), Math.cos(turn), keep, reach, proto, tint);
+  }
+  /** A thing whose own +y goes to (fx, fy): not a unit's length for a crop, whose mesh is stretched along its row by it. */
+  put(x: number, y: number, z: number, scale: number, fx: number, fy: number, keep: number, reach: number, proto: number, tint: number): void {
+    if (this.count === this.proto.length) {
+      const f = new Float32Array(this.f.length * 2);
+      f.set(this.f);
+      this.f = f;
+      const p = new Uint32Array(this.proto.length * 2);
+      p.set(this.proto);
+      this.proto = p;
+      const t = new Uint16Array(this.tint.length * 2);
+      t.set(this.tint);
+      this.tint = t;
+    }
+    const o = this.count * COVER_ROW;
+    this.f[o] = x;
+    this.f[o + 1] = y;
+    this.f[o + 2] = z;
+    this.f[o + 3] = scale;
+    this.f[o + 4] = fx;
+    this.f[o + 5] = fy;
+    this.f[o + 6] = keep;
+    this.f[o + 7] = reach;
+    this.proto[this.count] = proto;
+    this.tint[this.count] = tint;
+    this.count++;
+  }
+  tile(): CoverTile {
+    return { f: this.f.slice(0, this.count * COVER_ROW), proto: this.proto.slice(0, this.count), tint: this.tint.slice(0, this.count), count: this.count, used: 0 };
+  }
 }
 
 /** Between which shares of field in the land's use a crop goes from none standing to all of it: the generator's choice. */
@@ -221,11 +304,17 @@ export class SceneStream {
   /** each cell's pieces of its towns' works, by their place in the plan */
   private workCells = new Map<number, number[]>();
   private workTops: number[] = [];
-  /** the ground's cover, made a tile at a time and kept; a count of the views it was made for; and whether the scene has none */
+  /** the ground's cover, made a tile at a time and kept; a count of the views it was made for; and whether the scene has no low plants */
   private coverTiles = new Map<string, CoverTile>();
   private coverClock = 0;
-  private bare = false;
+  private noUnder = false;
   private clumpWides: number[] = [];
+  /** the grids the cover is sown on, with what besides low plants each is sown with */
+  private grids: CoverGrid[] = [];
+  /** the scene's ground as its substrate sorts it: where it is stony, and what it bears */
+  readonly sort: GroundSort;
+  /** what each taxon sheds, as wood: nothing for one that is no tree */
+  private sheds: { trunks: boolean; branches: boolean }[] = [];
   /** each cell's kept animals, by their place in the plan; and each kind's tone */
   private keptCells = new Map<number, number[]>();
   private keptTones: number[] = [];
@@ -245,7 +334,7 @@ export class SceneStream {
     const levelAt = waters.paths ? waterLevels(waters) : undefined;
     // The people, where the scene has any: their houses and fields, on this ground and away from this water. Where they
     // cleared the land no tree stands. A scene of the sea has them too, on whatever ground stands above its water: a place
-    // a few metres above the sea, a delta or a lower plain, is a scene of the sea (scene/v12.ts, sea_below), and among the
+    // a few metres above the sea, a delta or a lower plain, is a scene of the sea (scene/v13.ts, sea_below), and among the
     // most crowded land there was.
     let clearing: ((x: number, y: number) => number) | undefined;
     if (spec.people) {
@@ -297,6 +386,9 @@ export class SceneStream {
     const banks = banksOf(spec, waters);
     this.plan = makePlan(spec, this.ground, this.look, waters, levelAt, treeless, banks);
     this.cover = new LandCover(spec, this.ground, this.look.water, this.plan.focus, levelAt, treeless, banks);
+    this.sort = new GroundSort(spec.substrate, this.params.cover.bears);
+    this.sheds = spec.taxa.map((t) => (spec.forms[t.form].kind === 'plant' && t.height !== undefined && (spec.forms[t.form].behave?.layer ?? 'canopy') === 'canopy' ? shedsWood(spec.forms[t.form]) : { trunks: false, branches: false }));
+    this.grids = this.coverGrids();
     this.tones = spec.taxa.map((t) => hashString(t.id) & 255);
     this.fullReach = this.params.reach.full;
     this.nearReach = this.params.reach.near;
@@ -402,6 +494,15 @@ export class SceneStream {
   /** A mesh of one kind of body or plant, or of a house: the same everywhere, within the tolerance. */
   mesh(proto: number): ProtoMesh {
     const { taxon, variant, detail } = protoParts(proto);
+    if (taxon >= STREWN) {
+      // A stone: one metre across, sized where it is sown. It is the ground's own, and the same in every scene.
+      const m = new Mesh(variant & STONE_FINE ? 1024 : 256);
+      m.entity = this.strewnEntity();
+      drawStone(m, variant);
+      const { vertices, indices } = m.arrays();
+      this.meshes.set(proto, { tris: indices.length / 3 });
+      return { proto, vertices, indices };
+    }
     if (taxon >= CROP) {
       // The crop of the fields: a clump of it, or a length of a row, the same wherever it stands.
       const m = new Mesh(64);
@@ -450,7 +551,9 @@ export class SceneStream {
     const m = new Mesh(detail >= 2 ? 4096 : 512);
     m.entity = taxon + 1;
     if ((detail as number) === CLUMP) {
-      drawClump(m, form, t.height ?? 1, (variant + 1) * 0x9e37, this.tones[taxon]);
+      // A clump of a low plant; or, of a tree, a piece of the wood it sheds.
+      if (variant >= FALLEN) drawWood(m, form, t.height ?? 1, Math.floor((variant - FALLEN) / WOOD_SEEDS), woodSeed((variant - FALLEN) % WOOD_SEEDS), this.tones[taxon]);
+      else drawClump(m, form, t.height ?? 1, (variant + 1) * 0x9e37, this.tones[taxon]);
       const { vertices, indices } = m.arrays();
       this.meshes.set(proto, { tris: indices.length / 3 });
       return { proto, vertices, indices };
@@ -469,6 +572,11 @@ export class SceneStream {
     const { vertices, indices } = m.arrays();
     this.meshes.set(proto, { tris: indices.length / 3 });
     return { proto, vertices, indices };
+  }
+
+  /** The entity of what lies strewn on the ground and is no taxon's, its stones: after the fields' crop. */
+  strewnEntity(): number {
+    return this.cropEntity() + 1;
   }
 
   /** The entity of the first kind of kept animal: after the taxa, the houses' forms and the works' pieces. */
@@ -818,6 +926,41 @@ export class SceneStream {
   }
 
   /**
+   * The grids the ground's cover is sown on (docs/plans/RENDERING.md, step 2): the scene's own, a finer one close to the
+   * eye and a wider one that carries the cover on into the distance; and what each is sown with besides low plants. A
+   * stone is sown on the grid that reaches as far as it is still drawn: the small on the one nearest the eye, the big
+   * on the one that reaches furthest. A scene's stones are the more the more of its ground is gravel, and the wider the
+   * coarser its sources name its grain (core/substrate.ts): how many stones a share of gravel comes to is the
+   * generator's choice (scene.yaml, strewn.stones). Fallen trunks and stumps lie on the widest grid, and fallen
+   * branches on the scene's own.
+   */
+  private coverGrids(): CoverGrid[] {
+    const c = this.params.plants.clumps;
+    if (!c) return [];
+    const wood = !!this.params.strewn?.wood && this.sheds.some((s) => s.trunks);
+    const grids: CoverGrid[] = [{ step: c.step, reach: c.reach, size: 1, trunks: wood && !c.far, branches: wood }];
+    if (c.fine) grids.push({ step: c.fine.step, reach: c.fine.reach, size: 1, trunks: false, branches: false });
+    if (c.far) grids.push({ step: c.far.step, reach: c.far.reach, size: c.far.size, trunks: wood, branches: false });
+    const P = this.params.strewn?.stones;
+    if (P && this.sort.stones && P.cover > 0) {
+      const least = P.across[0];
+      const most = Math.max(least, P.across[1] * Math.pow(P.coarse, this.sort.grain));
+      const k = P.rarer;
+      // Stones wider than d, to the square metre of ground that is all stones: C / d^k, with C such that those between
+      // the least and the most cover their share of it, each about six tenths of the square of its width.
+      const span = Math.abs(k - 2) < 1e-6 ? Math.log(most / least) : (Math.pow(most, 2 - k) - Math.pow(least, 2 - k)) / (2 - k);
+      const C = span > 0 ? P.cover / (0.6 * k * span) : 0;
+      let lo = least;
+      [...grids].sort((g, h) => g.reach - h.reach).forEach((g, i, near) => {
+        const hi = i === near.length - 1 ? most : Math.min(most, Math.max(lo, g.reach / P.seen));
+        if (hi > lo && C > 0) g.stones = { lo, hi, per: C * (Math.pow(lo, -k) - Math.pow(hi, -k)) };
+        lo = hi;
+      });
+    }
+    return grids;
+  }
+
+  /**
    * The ground's cover close by (docs/plans/RENDERING.md, step 2): where the cover's share of low plants says, a clump of
    * one of the understory the atlas has here, on grids that stay put as the eye moves, each clump's place shaken by a
    * hash. There are up to three grids, one laid over another: the scene's own, a finer one close to the eye, where a
@@ -825,22 +968,26 @@ export class SceneStream {
    * the last third of its reach, until the ground's own colour for low plants is all there is; and there are no more
    * clumps in a view than their budget. A scene whose atlas has no understory has none.
    *
+   * On the same grids, and within the same budget, stand the ground's stones, where its substrate has gravel, and under
+   * trees lies the wood they shed (coverGrids).
+   *
    * A grid's clumps are made a tile at a time and kept, the least lately used let go, so that a view that moves pays
    * only for the ground it comes to.
    */
   private groundCover(v: LifeView, buckets: Map<number, Bucket>, spendMs: () => boolean): { clumps: number; pending: number } {
     const c = this.params.plants.clumps;
-    // A scene with no low plants has no cover but its fields' crop, where it has fields.
+    const rings = this.grids;
+    // Nothing to sow: no low plants in the scene, no crop in its fields, no stones in its ground and no wood under its
+    // trees.
     const sows = !!this.crops && !!this.landUse;
-    if (!c || (this.bare && !sows)) return { clumps: 0, pending: 0 };
+    if (!c || (this.noUnder && !sows && !rings.some((g) => g.stones || g.trunks || g.branches))) return { clumps: 0, pending: 0 };
     const cropEntity = this.cropEntity();
     const [ex, ey, ez] = v.eye;
     const gz = this.ground.at(ex, ey);
     const t = Math.tan(v.fov / 2);
     const side = t * v.aspect;
-    const rings: { step: number; reach: number; size: number }[] = [{ step: c.step, reach: c.reach, size: 1 }];
-    if (c.fine) rings.push({ step: c.fine.step, reach: c.fine.reach, size: 1 });
-    if (c.far) rings.push({ step: c.far.step, reach: c.far.reach, size: c.far.size });
+    const strewn = this.strewnEntity();
+    const K = v.height / (2 * t);
     let n = 0;
     let pending = 0;
     this.coverClock++;
@@ -879,40 +1026,50 @@ export class SceneStream {
               continue;
             }
             made = this.coverTile(ring, rings[ring], ti, tj);
-            if (this.bare && !sows) return { clumps: 0, pending: 0 };
             this.coverTiles.set(key, made);
           }
           made.used = this.coverClock;
           const { f, proto, tint, count } = made;
           for (let q = 0; q < count && n < c.most; q++) {
-            const o7 = q * 7;
-            const x = f[o7];
-            const y = f[o7 + 1];
+            const o8 = q * COVER_ROW;
+            const x = f[o8];
+            const y = f[o8 + 1];
             const dx = x - ex;
             const dy = y - ey;
             const d = Math.sqrt(dx * dx + dy * dy);
             if (d > R) continue;
-            // Where the eye stands the ground is trodden: none within half a pace of it, and small ones just beyond.
-            const trodden = d < COVER_TROD[1] ? (d - COVER_TROD[0]) / (COVER_TROD[1] - COVER_TROD[0]) : 1;
-            if (trodden <= 0) continue;
-            // Fewer over the last third of the way out: each clump has its own place in that thinning.
+            const kind = proto[q] >> 8;
+            let size = f[o8 + 3];
+            let mesh = proto[q];
+            if (kind >= STREWN) {
+              // The eye does not stand inside a stone; and a big one has its finer mesh only where it is big on the screen.
+              if (d < size) continue;
+              if (mesh & (STONE_FINE << 2) && size * K < STONE_FINE_PX * Math.sqrt(d * d + (f[o8 + 2] - ez) * (f[o8 + 2] - ez))) mesh &= ~(STONE_FINE << 2);
+            } else if (kind >= CROP || ((proto[q] >> 2) & 63) < FALLEN) {
+              // Where the eye stands the ground is trodden: no clump within half a pace of it, and small ones just beyond.
+              const trodden = d < COVER_TROD[1] ? (d - COVER_TROD[0]) / (COVER_TROD[1] - COVER_TROD[0]) : 1;
+              if (trodden <= 0) continue;
+              size *= trodden;
+            }
+            // Fewer over the last third of the way out: each has its own place in that thinning.
             const keep = d < R * 0.66 ? 1 : 1 - (d - R * 0.66) / (R * 0.34);
-            if (f[o7 + 6] >= keep) continue;
+            if (f[o8 + 6] >= keep) continue;
             // A length of a crop's row stands where the plants of the scene's own grid do not: beyond them, and among
             // them as they thin.
-            const crop = proto[q] >> 8 >= CROP;
-            if (crop && ring > 0 && ownOn && d < R0 && f[o7 + 6] < (d < R0 * 0.66 ? 1 : 1 - (d - R0 * 0.66) / (R0 * 0.34))) continue;
-            const dz = f[o7 + 2] - ez;
+            const crop = kind >= CROP && kind < STREWN;
+            if (crop && ring > 0 && ownOn && d < R0 && f[o8 + 6] < (d < R0 * 0.66 ? 1 : 1 - (d - R0 * 0.66) / (R0 * 0.34))) continue;
+            const reach = f[o8 + 7];
+            const dz = f[o8 + 2] - ez;
             const fwd = dx * v.forward[0] + dy * v.forward[1] + dz * v.forward[2];
-            if (fwd < -2) continue;
+            if (fwd < -reach) continue;
             const rgt = dx * v.right[0] + dy * v.right[1] + dz * v.right[2];
             const upw = dx * v.up[0] + dy * v.up[1] + dz * v.up[2];
-            if (Math.abs(rgt) > fwd * side + 2 || Math.abs(upw) > fwd * t + 2) continue;
-            let b = buckets.get(proto[q]);
+            if (Math.abs(rgt) > fwd * side + reach || Math.abs(upw) > fwd * t + reach) continue;
+            let b = buckets.get(mesh);
             if (!b) {
               const buf = new ArrayBuffer(INSTANCE_STRIDE * 256);
               b = { f: new Float32Array(buf), s: new Uint16Array(buf), n: 0 };
-              buckets.set(proto[q], b);
+              buckets.set(mesh, b);
             }
             if ((b.n + 1) * INSTANCE_STRIDE > b.f.byteLength) {
               const buf = new ArrayBuffer(b.f.byteLength * 2);
@@ -923,11 +1080,12 @@ export class SceneStream {
             const o = b.n * 7;
             b.f[o] = x;
             b.f[o + 1] = y;
-            b.f[o + 2] = f[o7 + 2];
-            b.f[o + 3] = f[o7 + 3] * trodden;
-            b.f[o + 4] = f[o7 + 4];
-            b.f[o + 5] = f[o7 + 5];
-            b.s[b.n * 14 + 12] = crop ? cropEntity : (proto[q] >> 8) + 1;
+            b.f[o + 2] = f[o8 + 2];
+            b.f[o + 3] = size;
+            b.f[o + 4] = f[o8 + 4];
+            b.f[o + 5] = f[o8 + 5];
+            // A stone is the ground's own, and a crop the fields'; a clump, and the wood a tree shed, its taxon's.
+            b.s[b.n * 14 + 12] = kind >= STREWN ? strewn : crop ? cropEntity : kind + 1;
             b.s[b.n * 14 + 13] = tint[q];
             b.n++;
             n++;
@@ -992,27 +1150,122 @@ export class SceneStream {
   }
 
   /**
-   * One tile of a grid of the ground's cover: every clump that stands in it, wherever the eye is. Where the scene's
-   * people have fields, a plot under a crop or the plough has none of what grows wild, and the crop itself in rows
-   * (world/generators/people/crops.ts): a plant at a time on the scene's own grid, a length of row at a time on the wider
-   * one, and none on the finest, which is there to close a sward.
+   * A stone at a node of a grid, if one lies there: as likely as the grid's share of the ground's stones and how stony
+   * the ground is at its place say, and as wide as its number says, the small far commoner than the big.
    */
-  private coverTile(ring: number, grid: { step: number; size: number }, ti: number, tj: number): CoverTile {
+  private sowStone(rows: TileRows, stones: NonNullable<CoverGrid['stones']>, i: number, j: number, seed: number, step: number): void {
+    const u = hash2(i, j, seed + 90);
+    const most = stones.per * step * step;
+    if (u >= most) return;
+    const x = (i + hash2(i, j, seed + 91)) * step;
+    const y = (j + hash2(i, j, seed + 92)) * step;
+    if (u >= most * this.sort.stonyAt(x, y)) return;
+    // People clear the stones from their fields and their yards.
+    if (this.landUse) {
+      const use = this.landUse.at(x, y);
+      if (hash2(i, j, seed + 93) < Math.max(use.crop, use.yard)) return;
+    }
+    const k = this.params.strewn!.stones!.rarer;
+    const a = Math.pow(stones.lo, -k);
+    const wide = Math.pow(a - hash2(i, j, seed + 94) * (a - Math.pow(stones.hi, -k)), -1 / k);
+    const variant = Math.floor(hash2(i, j, seed + 95) * STONE_VARIANTS) | (wide >= STONE_FINE_FROM ? STONE_FINE : 0);
+    rows.add(x, y, this.ground.at(x, y), wide, hash2(i, j, seed + 96) * TAU, hash2(i, j, seed + 97), 2, protoOf(STREWN, variant, 2), (hash2(i, j, seed + 98) * 256) | 0);
+  }
+
+  /**
+   * A piece of fallen wood at a node of a grid, if one lies there: under trees, as many to the hectare as the rule says
+   * where the canopy is closed, of the kind of tree that stands over the place, where there is room for it between the
+   * trunks that stand, and turned the way the ground is most level under its two ends.
+   */
+  private sowWood(rows: TileRows, grid: CoverGrid, cover: LandCover, x: number, y: number, i: number, j: number, seed: number): void {
+    const wood = this.params.strewn!.wood!;
+    const share = ((grid.step * grid.step) / 10000) * cover.canopy;
+    let shape = -1;
+    if (grid.trunks) {
+      const u = hash2(i, j, seed + 100);
+      if (u < wood.logs * share) shape = hash2(i, j, seed + 101) < 0.4 ? WOOD.broken : WOOD.log;
+      else if (u < (wood.logs + wood.stumps) * share) shape = WOOD.stump;
+    }
+    if (shape < 0 && grid.branches && hash2(i, j, seed + 102) < wood.branches * share) shape = hash2(i, j, seed + 103) < 0.22 ? WOOD.bough : WOOD.branch;
+    if (shape < 0) return;
+    const k = this.plan.canopyAt(x, y, cover, hash2(i, j, seed + 104));
+    if (k < 0) return;
+    const trunk = shape === WOOD.log || shape === WOOD.broken || shape === WOOD.stump;
+    if (trunk ? !this.sheds[k].trunks : !this.sheds[k].branches) return;
+    const t = this.spec.taxa[k];
+    const which = hash2(i, j, seed + 105) < 0.5 ? 0 : 1;
+    const scale = 0.7 + 0.45 * hash2(i, j, seed + 106);
+    const half = (woodLength(this.spec.forms[t.form], t.height ?? 1, shape, woodSeed(which)) * scale) / 2;
+    // A stump stands clear of the trees that stand; a branch lies anywhere; and a trunk or a bough is tried below, each
+    // way it might lie.
+    // People take the wood from their fields and their yards, and burn it.
+    if (this.landUse) {
+      const use = this.landUse.at(x, y);
+      if (hash2(i, j, seed + 110) < Math.max(use.crop, use.yard, use.pasture * 0.5)) return;
+    }
+    let turn = hash2(i, j, seed + 107) * TAU;
+    let z = this.ground.at(x, y);
+    if (shape === WOOD.stump) {
+      if (!this.plan.clearOfTrees(x, y, WOOD_ROOM * 2)) return;
+    } else {
+      // Of four ways it might lie, an eighth of a turn apart, the one whose two ends are nearest level; and nowhere
+      // that the ground falls too much along it, since it lies level whatever the ground does.
+      const first = turn;
+      let least = Infinity;
+      for (let q = 0; q < 4; q++) {
+        const a = first + (q * Math.PI) / 4;
+        const dx = Math.sin(a) * half;
+        const dy = Math.cos(a) * half;
+        // No way that would lay it through a standing trunk: at its middle, its ends and half way to each.
+        if (shape !== WOOD.branch) {
+          let room = true;
+          for (let e = -2; e <= 2 && room; e++) room = this.plan.clearOfTrees(x + (dx * e) / 2, y + (dy * e) / 2, WOOD_ROOM);
+          if (!room) continue;
+        }
+        const za = this.ground.at(x + dx, y + dy);
+        const zb = this.ground.at(x - dx, y - dy);
+        const d = Math.abs(za - zb);
+        if (d < least) {
+          least = d;
+          turn = a;
+          z = (za + zb) / 2;
+        }
+      }
+      if (least > WOOD_LEVEL * half * 2 + 0.05) return;
+    }
+    rows.add(x, y, z, scale, turn, hash2(i, j, seed + 108), half + 1, protoOf(k, FALLEN + shape * WOOD_SEEDS + which, CLUMP), (hash2(i, j, seed + 109) * 256) | 0);
+  }
+
+  /**
+   * One tile of a grid of the ground's cover: every clump that stands in it, and every stone and piece of fallen wood
+   * that lies in it, wherever the eye is. Where the scene's people have fields, a plot under a crop or the plough has
+   * none of what grows wild, and the crop itself in rows (world/generators/people/crops.ts): a plant at a time on the
+   * scene's own grid, a length of row at a time on the wider one, and none on the finest, which is there to close a
+   * sward.
+   */
+  private coverTile(ring: number, grid: CoverGrid, ti: number, tj: number): CoverTile {
     const { step, size } = grid;
     // Each grid has its own hashes, so that no two sow the same places.
     const seed = this.look.seed + ring * 97;
-    const f: number[] = [];
-    const proto: number[] = [];
-    const tint: number[] = [];
+    const rows = new TileRows();
+    const sort = this.sort;
     const fields = this.crops && this.plots && this.landUse ? { crop: this.crops, plots: this.plots, use: this.landUse } : undefined;
     const use: LandUse = { crop: 0, pasture: 0, yard: 0, paddy: 0 };
-    wild: for (let j = tj * COVER_TILE; j < (tj + 1) * COVER_TILE && !this.bare; j++) {
+    const wood = grid.trunks || grid.branches ? this.params.strewn?.wood : undefined;
+    for (let j = tj * COVER_TILE; j < (tj + 1) * COVER_TILE; j++) {
       for (let i = ti * COVER_TILE; i < (ti + 1) * COVER_TILE; i++) {
         const x = (i + hash2(i, j, seed + 71)) * step;
         const y = (j + hash2(i, j, seed + 72)) * step;
         const u = hash2(i, j, seed + 73);
-        const cover = this.cover.at(x, y);
-        if (cover.water || u >= cover.low) continue;
+        // Close by, each of the ground's materials lies in its own place, and bears there what it bears: next to
+        // nothing on a crust of salt, and the climate's all on the sand beside it.
+        const cover = sort.barren ? this.cover.at(x, y, sort.bearsAt(x, y)) : this.cover.at(x, y);
+        if (cover.water) continue;
+        // A stone, where the ground is stony: none in the bed of a dry river, whose ground is what its floods left.
+        if (grid.stones && !cover.bed) this.sowStone(rows, grid.stones, i, j, seed, step);
+        // Wood, where the land's cover says forest.
+        if (wood && cover.canopy >= wood.canopy) this.sowWood(rows, grid, cover, x, y, i, j, seed);
+        if (this.noUnder || u >= cover.low) continue;
         // A clump covers more ground than its own share of a grid, so where low plants are few there are fewer still:
         // a thin cover stays thin when the grids are fine, and a full one still closes.
         const share = cover.low * (COVER_THIN + (1 - COVER_THIN) * cover.low);
@@ -1038,9 +1291,8 @@ export class SceneStream {
         const k = this.plan.underAt(x, y, cover, own ? patch.kind : hash2(i, j, seed + 74));
         // None at all in the scene: the ground's own colour for low plants is all there is, here and everywhere.
         if (k === -1) {
-          this.bare = true;
-          f.length = proto.length = tint.length = 0;
-          break wild;
+          this.noUnder = true;
+          continue;
         }
         // None that suits this ground.
         if (k < 0) continue;
@@ -1051,11 +1303,8 @@ export class SceneStream {
         if (hash2(i, j, seed + 79) * wide * wide * COVER_CROWD > step * step) continue;
         // Its shade is half its own and half its patch's: a patch is a little greener or yellower than the next.
         const shade = Math.min(255, ((hash2(i, j, seed + 75) * 0.55 + (own ? patch.tone : hash2(i, j, seed + 81)) * 0.45) * 256) | 0);
-        const a = hash2(i, j, seed + 76) * TAU;
-        // The last is where it stands in the thinning at its grid's edge: kept while this is under what is kept there.
-        f.push(x, y, this.ground.at(x, y), scale, Math.sin(a), Math.cos(a), u / low);
-        proto.push(protoOf(k, shade & 3, CLUMP));
-        tint.push(shade >> 2);
+        // Where it stands in the thinning at its grid's edge: kept while this is under what is kept there.
+        rows.add(x, y, this.ground.at(x, y), scale, hash2(i, j, seed + 76) * TAU, u / low, 2, protoOf(k, shade & 3, CLUMP), shade >> 2);
       }
     }
     // The fields' crop: wherever it stands, the same from every grid's tiles; as tall as its plot's stand, its mesh's
@@ -1069,12 +1318,10 @@ export class SceneStream {
         // little of it is field, none stands.
         const share = (use.crop - CROP_FROM[0]) / (CROP_FROM[1] - CROP_FROM[0]);
         if (!(share > 0) || s.u >= share) return;
-        f.push(s.x, s.y, this.ground.at(s.x, s.y), s.tall, s.dx / s.tall, s.dy / s.tall, s.u / Math.min(1, share));
-        proto.push(protoOf(CROP, s.variant, CLUMP));
-        tint.push(s.tint);
+        rows.put(s.x, s.y, this.ground.at(s.x, s.y), s.tall, s.dx / s.tall, s.dy / s.tall, s.u / Math.min(1, share), 2, protoOf(CROP, s.variant, CLUMP), s.tint);
       });
     }
-    return { f: Float32Array.from(f), proto: Uint32Array.from(proto), tint: Uint16Array.from(tint), count: proto.length, used: 0 };
+    return rows.tile();
   }
 
   /**
