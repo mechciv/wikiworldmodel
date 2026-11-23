@@ -685,7 +685,16 @@ function broadleaf(m: Mesh, p: Part, h: number, seed: number, detail: Detail, ti
         const e = ends[i];
         m.mat = MAT.bark;
         m.light = 0.65;
-        limb(m, knot[0], knot[1], knot[2], e[0], e[1], e[2], Math.max(rb * 0.4, 0.008), 0.004, 3);
+        // The twig to its end: as thick at its foot as its length asks, never thicker than the branch it leaves, and
+        // bowed, out from the crown's middle and up or down a little: a long straight one is a wire against the sky.
+        const tl = Math.sqrt((e[0] - knot[0]) * (e[0] - knot[0]) + (e[1] - knot[1]) * (e[1] - knot[1]) + (e[2] - knot[2]) * (e[2] - knot[2]));
+        const rt = Math.min(rb * 0.8, Math.max(rb * 0.4, 0.008, tl * 0.011));
+        const bow = tl * (0.05 + 0.09 * hash2(i, 21, seed));
+        const side = (hash2(i, 22, seed) - 0.5) * 2 * bow;
+        const lift = (hash2(i, 23, seed) - 0.35) * 1.5 * bow;
+        const ol = Math.sqrt((e[0] - cx) * (e[0] - cx) + (e[1] - cy) * (e[1] - cy)) || 1;
+        const bend = [(knot[0] + e[0]) / 2 - ((e[1] - cy) / ol) * side, (knot[1] + e[1]) / 2 + ((e[0] - cx) / ol) * side, (knot[2] + e[2]) / 2 + lift];
+        tube(m, bowed(knot, bend, e, rt, 0.004, tl > 1.2 ? 3 : 2), 3);
         m.mat = cardMat;
         // Sprays round the twig's end, and a pair along it: more of them at the crown's edge, where the light is.
         const n = e[3] > 0.78 ? 8 : 5;
@@ -693,7 +702,9 @@ function broadleaf(m: Mesh, p: Part, h: number, seed: number, detail: Detail, ti
         const ty = e[1] - knot[1];
         const tz = e[2] - knot[2];
         rosette(m, kind, e[0], e[1], e[2], tx + (e[0] - cx) * 0.5, ty + (e[1] - cy) * 0.5, tz + (e[2] - cz) * 0.5, n, size, crown, seed + i * 17);
-        rosette(m, kind, knot[0] + tx * 0.55, knot[1] + ty * 0.55, knot[2] + tz * 0.55, tx, ty, tz, 3, size, crown, seed + i * 17 + 5, 1.3);
+        // And a few part of the way along it, on the bow it has.
+        const on = (c: number) => 0.2025 * knot[c] + 0.495 * bend[c] + 0.3025 * e[c];
+        rosette(m, kind, on(0), on(1), on(2), tx, ty, tz, 3, size, crown, seed + i * 17 + 5, 1.3);
       }
     }
   });
