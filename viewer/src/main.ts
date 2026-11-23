@@ -43,6 +43,7 @@ import { anthromeOf, classAtStep, kmBetween, nearestStep, PATTERN_LABEL, USE_LAB
 import { lifewayText, outbuildingsText, specText, townText, prevalenceOf, traditionsFor } from '../../core/dwelling.ts';
 import { CityScene } from './city/scene.ts';
 import { autoTilt, EYE_HEIGHT, groundHit, localView, lookThrough, projectLocal, rayOf, sunAt, underSea, type LocalView } from './city/view.ts';
+import { CityRenderer } from './gl/city.ts';
 import { SEA } from './gl/cityShaders.ts';
 import { CityLabels } from './ui/citylabels.ts';
 import { FeatureTiles } from './features.ts';
@@ -139,12 +140,11 @@ export interface WikiWorldModelHandle {
   driftClouds(d: CloudDrift | null): void;
 }
 
-/** Below this the city's scene is drawn, fading in over the globe; and below the lower height the globe is gone. */
+/** How far out to start preparing named and generated scenes, before either is drawn. */
 const CITY_TOP = 1.1e6;
-const CITY_SOLID = 4.5e5;
-/** The same for a scene of any place: it is made as it is needed, so it starts nearer the ground. */
 const LIFE_TOP = 3.2e5;
-const LIFE_SOLID = 1.2e5;
+// Blend into local terrain only over the last part of the descent from the satellite view.
+const LOCAL_TOP = 8e4;
 const GLOBE_GONE = 4.5e4;
 /**
  * How far round a city with a scene of its own the ground is that city's, and round a place with one: nearer than this
@@ -736,6 +736,9 @@ async function start(root: HTMLElement): Promise<void> {
   /** when the visit's clock started, and whether the last frame drew a scene whose clock runs */
   const clockStart = performance.now();
   let moving = false;
+  let lastDraw = -Infinity;
+  let cameraRestAt = 0;
+  let reducedResolution = false;
   /** whether the last frame drew a scene whose frames, the view held still, are still being averaged */
   let refining = false;
   /** whether the last frame of a scene was drawn with the ground's scanned materials */
@@ -807,6 +810,10 @@ async function start(root: HTMLElement): Promise<void> {
     atSite(next.t, next.cam);
     // A time the site is not drawn for takes the camera back up to the globe.
     if (next.cam.dist < MIN_DIST && !siteOpen(next.t) && !canDrawLife(next.t, next.cam)) next.cam = { lat: next.cam.lat, lon: next.cam.lon, dist: MIN_DIST };
+    if (p.cam && (next.cam.lat !== state.cam.lat || next.cam.lon !== state.cam.lon || next.cam.dist !== state.cam.dist ||
+        next.cam.heading !== state.cam.heading || next.cam.tilt !== state.cam.tilt)) {
+      cameraRestAt = performance.now() + 220;
+    }
     const selChanged = next.sel !== state.sel;
     const altsChanged = JSON.stringify([next.alt, next.picks]) !== JSON.stringify([state.alt, state.picks]);
     state = next;
@@ -1119,11 +1126,15 @@ async function start(root: HTMLElement): Promise<void> {
   let peopleDrawn = false;
 
 
-  function render(): void {
+  function render(now: number): void {
     moving = false;
     refining = false;
     cityDrawn = false;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    // Only the WebGL drawing buffer changes. Labels, controls and camera coordinates stay in CSS pixels.
+    const native = Math.min(window.devicePixelRatio || 1, 2);
+    const pixels = Math.max(1, stage.clientWidth * stage.clientHeight);
+    const dpr = now < cameraRestAt ? Math.min(native, 1, Math.sqrt(1_440_000 / pixels)) : native;
+    reducedResolution = dpr < native;
     const w = Math.max(1, Math.round(stage.clientWidth * dpr));
     const h = Math.max(1, Math.round(stage.clientHeight * dpr));
     if (canvas.width !== w || canvas.height !== h) {
@@ -1136,12 +1147,10 @@ async function start(root: HTMLElement): Promise<void> {
     arriveIfReady();
     lookIfDown();
     const made = site === lifeSite && !!lifeSite;
-    const top = made ? LIFE_TOP : CITY_TOP;
-    const solidAt = made ? LIFE_SOLID : CITY_SOLID;
-    const wantsCity = !!site && siteOpen(state.t) && range < top * 1.4 && siteDistance(state.cam.lat, state.cam.lon) < 1.6e6 && !awayFromSite();
+    const wantsCity = !!site && siteOpen(state.t) && range < LOCAL_TOP && siteDistance(state.cam.lat, state.cam.lon) < 1.6e6 && !awayFromSite();
     // Loaded before it is needed: as soon as the way down is on offer.
     if (site && !made && siteOpen(state.t) && state.cam.dist < 2.2 && siteDistance(state.cam.lat, state.cam.lon) < 2e6 && !city && !loadingScenes.has(site.id)) void loadScene(site);
-    const inCity = wantsCity && !!city?.ready && range < top;
+    const inCity = wantsCity && !!city?.ground;
     const globeHidden = inCity && range < GLOBE_GONE;
     // A projection holds the field's youngest keyframe, and the plates where they are then.
     const fi = fieldAt(state.t);
@@ -1195,7 +1204,8 @@ async function start(root: HTMLElement): Promise<void> {
     frameLook = look;
     // A scene of the atlas at a time read as a year says that its list is its stage's, and how thin the record near it is.
     const lifeWhy = inCity && city instanceof LifeScene ? noticeWords(city.spec, standingAt(city.spec, state.t, scenario()), state.t) : '';
-    const why = (site && failedScenes.get(site.id)) || (!look.formed ? beforeWhy() : fi ? lifeWhy : unknownWhy(state.t));
+    const preview = inCity && !city!.ready;
+    const why = (site && failedScenes.get(site.id)) || (preview ? 'Loading local detail…' : '') || (!look.formed ? beforeWhy() : fi ? lifeWhy : unknownWhy(state.t));
     if (notice.textContent !== why) notice.textContent = why;
     notice.hidden = !why;
 
@@ -1245,19 +1255,15 @@ async function start(root: HTMLElement): Promise<void> {
       v.width = stage.clientWidth;
       v.height = stage.clientHeight;
       frameView = v;
-      const t0 = 1 - Math.max(0, Math.min(1, (range - solidAt) / (top - solidAt)));
+      const t0 = 1 - Math.max(0, Math.min(1, (range - GLOBE_GONE) / (LOCAL_TOP - GLOBE_GONE)));
       const alpha = t0 * t0 * (3 - 2 * t0);
       city!.select(state.sel);
-      // What moves in the scene moves by the visit's clock: fixed where the link says, running otherwise, and then drawn
-      // again every frame.
-      moving = state.clock === undefined;
-      // Frames are averaged once the scene has what it was waiting for: until then each mesh that comes starts them again,
-      // and a frame drawn to no purpose takes from the workers making the rest, as it does in software.
-      refining = city!.renderer.refining && city!.settled;
       cityDrawn = true;
-      // The scene's clouds are the globe's over its place, or none where the clouds are turned off.
       city!.renderer.setCloudCover(state.clouds ? cloudCoverAt(site!.origin.lat, site!.origin.lon) : 0);
-      city!.render(v, sunAt(state.hour, site!.origin.lat, city instanceof LifeScene ? city.declination : undefined), state.t, state.evidence, alpha, globeHidden, w, h, state.clock ?? (performance.now() - clockStart) / 1000);
+      moving = state.clock === undefined && !state.still && !preview && city!.renderer.ambientMotion(v.clearance, city instanceof LifeScene && city.movingInstances);
+      const clock = state.clock ?? (moving ? (now - clockStart) / 1000 : 0);
+      city!.render(v, sunAt(state.hour, site!.origin.lat, city instanceof LifeScene ? city.declination : undefined), state.t, state.evidence, alpha, true, w, h, clock);
+      refining = !moving && !reducedResolution && city!.settled && city!.renderer.refining;
       const labelKey = `${site!.id}|${city instanceof LifeScene ? city.labelSerial : 0}`;
       if (labelledSite !== labelKey) {
         labels.setStructures(city!.named, city!.tops, site!.label, (s) => s.label);
@@ -1270,7 +1276,7 @@ async function start(root: HTMLElement): Promise<void> {
     labels.el.hidden = !inCity || range > 2.2e4;
     planet.el.hidden = inCity && range < 6e4;
     credits.classList.toggle('in-city', inCity && range < 6e4);
-    cityBar.hidden = !inCity || range > CITY_SOLID;
+    cityBar.hidden = !inCity;
     people.el.hidden = !state.people || !people.file || !cityBar.hidden;
     if (state.people) people.legend(state.t);
     canvas.classList.toggle('in-city', inCity);
@@ -1288,7 +1294,7 @@ async function start(root: HTMLElement): Promise<void> {
     const showHere = inCity && city instanceof LifeScene;
     const standing = showHere ? standingAt((city as LifeScene).spec, state.t, scenario()) : [];
     lifeHere.hidden = !showHere;
-    lifeGo.hidden = !showHere || !standing.length;
+    lifeGo.hidden = !showHere || preview || !standing.length;
     if (showHere) {
       const life = barWords(standing, (city as LifeScene).sea);
       // And who lived here, where the scene has people.
@@ -1383,7 +1389,8 @@ async function start(root: HTMLElement): Promise<void> {
     if (walking.size && frameView) walk((now - lastFrame) / 1000);
     lastFrame = now;
     // A still (step 8): at once where the link asks for one, or once a visitor has rested the view a while.
-    if (cityDrawn && city && !city.renderer.still && !city.renderer.refining && (state.still || (touched && city.renderer.steadyMs > 1500))) {
+    if (cityDrawn && city?.settled && !reducedResolution && !city.renderer.still && !city.renderer.refining &&
+        (state.still || (touched && state.clock !== undefined && city.renderer.steadyMs > 1500))) {
       city.renderer.still = true;
       dirty = true;
     }
@@ -1394,9 +1401,12 @@ async function start(root: HTMLElement): Promise<void> {
       dirty = true;
     }
     // A scene whose clock runs, or whose frames are still being averaged, is drawn again; that is not waiting on anything.
-    if (!dirty && !moving && !refining) return;
+    if (reducedResolution && now >= cameraRestAt) dirty = true;
+    // Camera and data updates draw immediately. A parked view only pays for visible animation, up to 30 Hz.
+    if (!dirty && !refining && !(moving && now - lastDraw >= 1000 / 30 - 1)) return;
     dirty = false;
-    render();
+    lastDraw = now;
+    render(now);
     // Tiles may still be arriving; keep rendering until they have.
     if (tiles.busy || features.busy) dirty = true;
   }
@@ -1650,11 +1660,11 @@ async function start(root: HTMLElement): Promise<void> {
     if (s && s !== lifeSite && t >= s.span[0] && t <= s.span[1] && isOver(s, to)) {
       if (failedScenes.has(s.id)) return false;
       if (!scenes.get(s.id) && !loadingScenes.has(s.id)) void loadScene(s);
-      return !scenes.get(s.id)?.ready;
+      return !scenes.get(s.id)?.ground;
     }
     if (!canDrawLife(t, to)) return false;
     const key = lifeKeyAt(t, to);
-    return !lifeEmpty.has(key) && !(lifeSite?.id === key && scenes.get(key)?.ready);
+    return !lifeEmpty.has(key) && !(lifeSite?.id === key && scenes.get(key)?.ground);
   }
 
   function stepFlight(now: number): void {
@@ -1710,8 +1720,8 @@ async function start(root: HTMLElement): Promise<void> {
       const scene = s.kind === 'life' ? await (async () => {
         const f = await getJSON<SceneFileV2>(build.base + s.file);
         if (f.format !== 'lightworld-scene-file@2') throw new Error(`its file is in a format this viewer does not read (${f.format ?? 'none'}): the build is older than the viewer`);
-        return new LifeScene(gl!, f.spec, f.print, { fast });
-      })() : new CityScene(gl!, build, s.file, { fast });
+        return LifeScene.create(gl!, f.spec, f.print, { fast });
+      })() : new CityScene(await CityRenderer.create(gl!, { fast }), build, s.file, { fast });
       scene.onChange = () => (dirty = true);
       await scene.load();
       scenes.set(s.id, scene);
@@ -1783,19 +1793,30 @@ async function start(root: HTMLElement): Promise<void> {
         });
         if (p) spec.people = p;
       }
-      const scene = new LifeScene(gl!, spec, null, { fast: state.quality === 'fast' });
+      const scene = await LifeScene.create(gl!, spec, null, { fast: state.quality === 'fast' });
       scene.onChange = () => (dirty = true);
-      await scene.load();
       const previous = lifeSite;
-      lifeSiteShore = shoreKey(t, { lat, lon });
-      lifeSite = { kind: 'life', id: key, label: spec.site.stage ?? 'this place', file: '', origin: spec.site.origin, span: spec.site.span, slice: spec.site.slice, near: spec.site.span, window: spec.site.span, view: { x: scene.focus[0], y: scene.focus[1], range: 74, heading: 0, tilt: 81 } };
-      scenes.set(key, scene);
-      if (previous) {
-        const old = scenes.get(previous.id);
-        scenes.delete(previous.id);
-        if (old instanceof LifeScene) old.dispose();
+      const next: SiteInfo = { kind: 'life', id: key, label: spec.site.stage ?? 'this place', file: '', origin: spec.site.origin, span: spec.site.span, slice: spec.site.slice, near: spec.site.span, window: spec.site.span, view: { x: 0, y: 0, range: 74, heading: 0, tilt: 81 } };
+      try {
+        await scene.load(() => {
+          lifeSite = next;
+          lifeSiteShore = shoreKey(t, { lat, lon });
+          scenes.set(key, scene);
+          if (previous && previous.id !== key) {
+            const old = scenes.get(previous.id);
+            scenes.delete(previous.id);
+            if (old instanceof LifeScene) old.dispose();
+          }
+          atSite(state.t, state.cam);
+        });
+      } catch (err) {
+        scene.dispose();
+        scenes.delete(key);
+        if (lifeSite === next) lifeSite = null;
+        atSite(state.t, state.cam);
+        throw err;
       }
-      atSite(state.t, state.cam);
+      [next.view.x, next.view.y] = scene.focus;
       scene.setScenario(scenario());
     } catch (err) {
       console.error(`the scene of ${key}: ${err instanceof Error ? err.message : String(err)}`.slice(0, 900));
@@ -2610,7 +2631,7 @@ async function start(root: HTMLElement): Promise<void> {
   /** What the view is still waiting on before it is idle, by name: nothing, once it is. */
   const waiting = (): string[] => {
     const w: [string, boolean][] = [
-      ['tiles', tiles.busy], ['features', features.busy], ['frame', dirty], ['layers', !layersReady],
+      ['tiles', tiles.busy], ['features', features.busy], ['frame', dirty || reducedResolution], ['layers', !layersReady],
       ['polities', !politiesReady && !!politiesLoading], ['field layers', fieldLayers.some((fl) => fl.busy)], ['rivers', !!rivers?.busy],
       ['people', !!state.people && !people.file && !!ts.files.people], ['clouds', !cloudsReady], ['surface', !surfaceReady],
       ['biome texture', !biomeTexReady], ['generic land', !genericReady], ['climate', !climateReady || climates.busy], ['ice', !iceReady],
@@ -2701,7 +2722,7 @@ async function start(root: HTMLElement): Promise<void> {
     lifePrint: async (lat, lon, t) => {
       const spec = await lifeAtlas?.spec(lat, lon, t, {});
       if (!spec) return null;
-      const scene = new LifeScene(gl!, spec, null, { fast: true });
+      const scene = await LifeScene.create(gl!, spec, null, { fast: true });
       await scene.load();
       while (!scene.plan.actual) await new Promise((r) => setTimeout(r, 20));
       scene.dispose();
@@ -2732,7 +2753,7 @@ async function start(root: HTMLElement): Promise<void> {
     },
     set: (s) => setState(s),
     profile: async (frames = 20) => {
-      const timer = city?.renderer.timer;
+      const timer = cityDrawn ? city?.renderer.timer : undefined;
       if (!timer) return null;
       timer.start();
       // Each frame drawn again, as if the view had changed; timer queries answer a few frames late.

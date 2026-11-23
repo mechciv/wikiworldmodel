@@ -642,6 +642,7 @@ uniform highp sampler2D uMask;
 uniform vec4 uMaskBox;
 uniform highp sampler2D uAO;
 uniform vec2 uAOSize;
+uniform float uUseAO;
 uniform float uEvidence;
 // 1: the edges of leaves on cards are blended by how much of a pixel they cover; 0: they are cut at half
 uniform float uCoverage;
@@ -1749,7 +1750,7 @@ void main() {
   } else {
     vec3 w = gl_FrontFacing ? bumped : -bumped;
     float sh = shadowAt(vPos, gl_FrontFacing ? n : -n, pixel) * cloudShade(vPos);
-    float ao = texture(uAO, gl_FragCoord.xy / uAOSize).r;
+    float ao = uUseAO > 0.5 ? texture(uAO, gl_FragCoord.xy / uAOSize).r : 1.0;
     // Under a body, and about its legs, less of the sky is seen than on its back.
     if (skin) ao *= 0.62 + 0.38 * smoothstep(-0.7, 0.35, n.z);
     float occl = ao * (vLight * 0.5 + 0.5) * under;

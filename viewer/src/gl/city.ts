@@ -3,12 +3,13 @@
 // nothing jitters however close the camera is. A depth prepass feeds ambient occlusion; then the
 // sky, the distant land, the near land and the city are lit by one sun, in floating point, with
 // cascaded shadows, and finished with bloom and a filmic curve.
+import { groundNormals } from './groundNormals.ts';
 import type { GroundLevel } from '../../../core/city.ts';
 import { LEAF_KINDS, litterTile, type LeafKindName } from '../../../core/leaves.ts';
 import { GROUND_LAYERS } from '../../../core/materials.ts';
 import { NOISE_SIZE, noiseByte } from '../../../world/generators/life/sorting.ts';
 import { invert, multiply, type Mat4, type V3 } from '../mat.ts';
-import { program, setUniforms, texture2D, type GL, type Program } from './context.ts';
+import { linkProgram, setUniforms, texture2D, type GL, type Program } from './context.ts';
 import type { LeafAtlas } from './leafatlas.ts';
 import { GroundMaterialSet } from './materials.ts';
 import { FrameTimer } from './timer.ts';
@@ -34,6 +35,8 @@ const MAT_WRAP = 4096;
 const WATER_MAP = { size: 512, span: 2048, snap: 512 } as const;
 
 const SHADOW_SIZE = 2048;
+// Above this clearance, motion on the ground and contact shadows are smaller than a display pixel.
+const DISTANT_GROUND = 16000;
 
 /**
  * The wind the plants lean in (docs/plans/RENDERING.md, step 5): a gentle breeze from one quarter, the renderer's own,
@@ -270,6 +273,39 @@ function ringMesh(n: number, hole: number): { positions: Float32Array; indices: 
   return { positions, indices: Uint32Array.from([...ring, ...middle]), ringCount: ring.length };
 }
 
+/** Link the local passes together so the globe can keep drawing while the driver compiles them. */
+function localPrograms(gl: GL) {
+  return {
+    meshP: linkProgram(gl, 'city mesh', MESH_VS, MESH_FS),
+    depthP: linkProgram(gl, 'city depth', MESH_VS, DEPTH_FS),
+    idP: linkProgram(gl, 'city id', MESH_VS, ID_FS),
+    terrainP: linkProgram(gl, 'city terrain', TERRAIN_VS, TERRAIN_FS),
+    terrainDepthP: linkProgram(gl, 'city terrain depth', TERRAIN_VS, `#version 300 es
+precision highp float;
+in vec3 vPos;
+uniform vec4 uInner;
+out vec4 o;
+void main() {
+  if (vPos.x > uInner.x && vPos.y > uInner.y && vPos.x < uInner.z && vPos.y < uInner.w) discard;
+  o = vec4(0.0);
+}`),
+    waterP: linkProgram(gl, 'city water', WATER_VS, WATER_FS),
+    seaP: linkProgram(gl, 'city sea', SEA_VS, SEA_FS),
+    skyP: linkProgram(gl, 'city sky', FULLSCREEN_VS, SKY_FS),
+    lutP: linkProgram(gl, 'city sky table', FULLSCREEN_VS, SKY_LUT_FS),
+    aoP: linkProgram(gl, 'city ao', FULLSCREEN_VS, AO_FS),
+    blurP: linkProgram(gl, 'city blur', FULLSCREEN_VS, BLUR_FS),
+    brightP: linkProgram(gl, 'city bright', FULLSCREEN_VS, BRIGHT_FS),
+    postP: linkProgram(gl, 'city post', FULLSCREEN_VS, POST_FS),
+    taaP: linkProgram(gl, 'city antialiasing', FULLSCREEN_VS, TAA_FS),
+    lumP: linkProgram(gl, 'city meter', FULLSCREEN_VS, LUM_FS),
+    shaftsP: linkProgram(gl, 'city light in the air', FULLSCREEN_VS, SHAFTS_FS),
+    shaftsAddP: linkProgram(gl, 'city light in the air, added', FULLSCREEN_VS, SHAFTS_ADD_FS),
+    waterMapP: linkProgram(gl, 'city water map', WATERMAP_VS, WATERMAP_FS),
+    waterBlurP: linkProgram(gl, 'city water blur', FULLSCREEN_VS, WATERBLUR_FS),
+  };
+}
+
 export class CityRenderer {
   private meshP: Program;
   private depthP: Program;
@@ -457,7 +493,25 @@ export class CityRenderer {
    */
   private fast: boolean;
 
-  constructor(private gl: GL, opts: { fast?: boolean } = {}) {
+  /** A distant parked view holds one sample of the scene's clock. Close by, only its animated layers need another. */
+  ambientMotion(clearance: number, movingInstances: boolean): boolean {
+    return clearance < DISTANT_GROUND && (movingInstances || this.waterCount > 0 || (!this.fast && this.cloudCover > 0));
+  }
+
+  static async create(gl: GL, opts: { fast?: boolean }): Promise<CityRenderer> {
+    const parallel = gl.getExtension('KHR_parallel_shader_compile');
+    const programs = localPrograms(gl);
+    gl.flush();
+    if (parallel) {
+      const linked = Object.values(programs);
+      while (!gl.isContextLost() && linked.some(p => !gl.getProgramParameter(p.program, parallel.COMPLETION_STATUS_KHR))) {
+        await new Promise(resolve => setTimeout(resolve, 16));
+      }
+    }
+    return new CityRenderer(gl, opts, programs);
+  }
+
+  private constructor(private gl: GL, opts: { fast?: boolean }, programs: ReturnType<typeof localPrograms>) {
     this.fast = !!opts.fast;
     this.timer = new FrameTimer(gl);
     this.materials = new GroundMaterialSet(gl);
@@ -490,33 +544,25 @@ export class CityRenderer {
     const ext = gl.getExtension('EXT_color_buffer_float');
     if (!ext) throw new Error('This view of the city needs floating-point render targets (EXT_color_buffer_float).');
     gl.getExtension('OES_texture_float_linear');
-    this.meshP = program(gl, 'city mesh', MESH_VS, MESH_FS);
-    this.depthP = program(gl, 'city depth', MESH_VS, DEPTH_FS);
-    this.idP = program(gl, 'city id', MESH_VS, ID_FS);
-    this.terrainP = program(gl, 'city terrain', TERRAIN_VS, TERRAIN_FS);
-    this.terrainDepthP = program(gl, 'city terrain depth', TERRAIN_VS, `#version 300 es
-precision highp float;
-in vec3 vPos;
-uniform vec4 uInner;
-out vec4 o;
-void main() {
-  if (vPos.x > uInner.x && vPos.y > uInner.y && vPos.x < uInner.z && vPos.y < uInner.w) discard;
-  o = vec4(0.0);
-}`);
-    this.waterP = program(gl, 'city water', WATER_VS, WATER_FS);
-    this.seaP = program(gl, 'city sea', SEA_VS, SEA_FS);
-    this.skyP = program(gl, 'city sky', FULLSCREEN_VS, SKY_FS);
-    this.lutP = program(gl, 'city sky table', FULLSCREEN_VS, SKY_LUT_FS);
-    this.aoP = program(gl, 'city ao', FULLSCREEN_VS, AO_FS);
-    this.blurP = program(gl, 'city blur', FULLSCREEN_VS, BLUR_FS);
-    this.brightP = program(gl, 'city bright', FULLSCREEN_VS, BRIGHT_FS);
-    this.postP = program(gl, 'city post', FULLSCREEN_VS, POST_FS);
-    this.taaP = program(gl, 'city antialiasing', FULLSCREEN_VS, TAA_FS);
-    this.lumP = program(gl, 'city meter', FULLSCREEN_VS, LUM_FS);
-    this.shaftsP = program(gl, 'city light in the air', FULLSCREEN_VS, SHAFTS_FS);
-    this.shaftsAddP = program(gl, 'city light in the air, added', FULLSCREEN_VS, SHAFTS_ADD_FS);
-    this.waterMapP = program(gl, 'city water map', WATERMAP_VS, WATERMAP_FS);
-    this.waterBlurP = program(gl, 'city water blur', FULLSCREEN_VS, WATERBLUR_FS);
+    this.meshP = programs.meshP.finish();
+    this.depthP = programs.depthP.finish();
+    this.idP = programs.idP.finish();
+    this.terrainP = programs.terrainP.finish();
+    this.terrainDepthP = programs.terrainDepthP.finish();
+    this.waterP = programs.waterP.finish();
+    this.seaP = programs.seaP.finish();
+    this.skyP = programs.skyP.finish();
+    this.lutP = programs.lutP.finish();
+    this.aoP = programs.aoP.finish();
+    this.blurP = programs.blurP.finish();
+    this.brightP = programs.brightP.finish();
+    this.postP = programs.postP.finish();
+    this.taaP = programs.taaP.finish();
+    this.lumP = programs.lumP.finish();
+    this.shaftsP = programs.shaftsP.finish();
+    this.shaftsAddP = programs.shaftsAddP.finish();
+    this.waterMapP = programs.waterMapP.finish();
+    this.waterBlurP = programs.waterBlurP.finish();
 
     // Noise, tiling, in four independent channels: everything's roughness and grain comes from it.
     // Its values are the generator's (world/generators/life/sorting.ts), which reads the same noise where it sows what
@@ -687,7 +733,7 @@ void main() {
   }
 
   /** The ground's grids: heights to sample in the vertex shader, and normals to filter. */
-  setGround(levels: GroundLevel[], heights: Int16Array[]): void {
+  setGround(levels: GroundLevel[], heights: Int16Array[], normals?: Uint8Array[]): void {
     const gl = this.gl;
     this.grids = levels;
     levels.forEach((g, k) => {
@@ -702,28 +748,7 @@ void main() {
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
       this.groundTex.push(t);
-      const n = new Uint8Array(g.nx * g.ny * 4);
-      // Its heights are whole steps of its unit above its base: decimetres above nought, where it does not say.
-      const unit = g.unit ?? 0.1;
-      const base = g.base ?? 0;
-      const scale = unit / (2 * g.cell);
-      for (let j = 0; j < g.ny; j++) {
-        for (let i = 0; i < g.nx; i++) {
-          const l = z[j * g.nx + Math.max(0, i - 1)];
-          const r = z[j * g.nx + Math.min(g.nx - 1, i + 1)];
-          const d = z[Math.max(0, j - 1) * g.nx + i];
-          const u = z[Math.min(g.ny - 1, j + 1) * g.nx + i];
-          const nx = (l - r) * scale;
-          const ny = (d - u) * scale;
-          const q = 1 / Math.sqrt(nx * nx + ny * ny + 1);
-          const at = (j * g.nx + i) * 4;
-          n[at] = Math.round((nx * q * 0.5 + 0.5) * 255);
-          n[at + 1] = Math.round((ny * q * 0.5 + 0.5) * 255);
-          // How far above the sea, finely near the shore: the coast is drawn where this crosses a half.
-          n[at + 2] = Math.max(0, Math.min(255, Math.floor(127 + (z[j * g.nx + i] * unit + base) * 0.4)));
-          n[at + 3] = 255;
-        }
-      }
+      const n = normals?.[k] ?? groundNormals(g, z);
       gl.activeTexture(gl.TEXTURE0 + UNIT.normal + k);
       const nt = gl.createTexture()!;
       gl.bindTexture(gl.TEXTURE_2D, nt);
@@ -1319,7 +1344,7 @@ void main() {
       uWild: this.wild ? 1 : 0,
       uSeaSurface: this.seaSurface,
       uSea: this.sea ? 1 : 0,
-      uBanks: this.waterMapKey && !this.fast && this.wild && !this.sea ? 1 : 0,
+      uBanks: f.clearance < DISTANT_GROUND && this.waterMapKey && !this.fast && this.wild && !this.sea ? 1 : 0,
       uWaterBox: this.waterBox,
       uLitter: this.litter,
       uClumps: this.clumps,
@@ -1603,6 +1628,7 @@ void main() {
     const { finest, split, last } = this.ringsFor(f);
     const eyeSea = aboveSea(f.eye);
     const under = this.sea && eyeSea < 0;
+    const nearEffects = !this.fast && f.clearance < DISTANT_GROUND;
     // The light on the sea, as the shaders' water has it.
     const s = Math.max(f.sun[2], 0) * 0.8;
     this.exposure = this.sea ? underExposure(eyeSea, [this.sunColor[0] * s + this.skyTop[0] * 0.6, this.sunColor[1] * s + this.skyTop[1] * 0.6, this.sunColor[2] * s + this.skyTop[2] * 0.6]) : 1;
@@ -1632,7 +1658,7 @@ void main() {
       gl.bindTexture(gl.TEXTURE_2D, t);
     });
     time.pass('water map');
-    this.updateWaterMap(f);
+    if (nearEffects) this.updateWaterMap(f);
     gl.activeTexture(gl.TEXTURE0 + UNIT.waterMap);
     gl.bindTexture(gl.TEXTURE_2D, this.waterMapTex[0] ?? null);
     this.normalTex.forEach((t, k) => {
@@ -1682,7 +1708,7 @@ void main() {
 
     // The near scene's depth, for its occlusion. The fast way has none, and its lit pass writes
     // the depth itself.
-    if (!this.fast) {
+    if (nearEffects) {
       time.pass('depth');
       gl.colorMask(false, false, false, false);
       gl.useProgram(this.terrainDepthP.program);
@@ -1712,13 +1738,13 @@ void main() {
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.msFb);
     gl.viewport(0, 0, this.w, this.h);
     gl.enable(gl.DEPTH_TEST);
-    gl.depthFunc(this.fast ? gl.LESS : gl.LEQUAL);
-    gl.depthMask(this.fast);
+    gl.depthFunc(nearEffects ? gl.LEQUAL : gl.LESS);
+    gl.depthMask(!nearEffects);
     gl.enable(gl.CULL_FACE);
     gl.activeTexture(gl.TEXTURE0 + UNIT.ao);
     gl.bindTexture(gl.TEXTURE_2D, this.aoTex[1]);
     this.useLit(this.terrainP, f, vp);
-    setUniforms(gl, this.terrainP, { uUseAO: 1, uMaskBox: [this.maskBox[0], this.maskBox[1], this.maskBox[2] - this.maskBox[0], this.maskBox[3] - this.maskBox[1]], uWater: this.waterLevel });
+    setUniforms(gl, this.terrainP, { uUseAO: nearEffects ? 1 : 0, uMaskBox: [this.maskBox[0], this.maskBox[1], this.maskBox[2] - this.maskBox[0], this.maskBox[3] - this.maskBox[1]], uWater: this.waterLevel });
     this.setGrids(this.terrainP);
     this.drawRings(this.terrainP, f.eye, finest, Math.min(split, last), finest);
     time.pass('meshes');
@@ -1727,7 +1753,7 @@ void main() {
     // Leaves on cards are blended at their edges by coverage where there are samples to blend, and write their own
     // depth: the depth drawn before left them out.
     const coverage = this.samples > 1;
-    setUniforms(gl, this.meshP, { uCoverage: coverage ? 1 : 0 });
+    setUniforms(gl, this.meshP, { uCoverage: coverage ? 1 : 0, uUseAO: nearEffects ? 1 : 0 });
     gl.depthMask(true);
     if (coverage) gl.enable(gl.SAMPLE_ALPHA_TO_COVERAGE);
     for (const c of cells) {
@@ -1741,7 +1767,7 @@ void main() {
       time.pass('water');
       // On the fuller way, what is drawn so far, resolved as the frame will be, for the water to be seen through and to
       // reflect (docs/plans/RENDERING.md, step 3).
-      const screen = !this.fast;
+      const screen = nearEffects;
       if (screen) {
         gl.bindFramebuffer(gl.READ_FRAMEBUFFER, this.msFb);
         gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, this.resolveFb);
@@ -1778,7 +1804,7 @@ void main() {
     let shown = this.colorTex;
     if (!this.fast) {
       time.pass('light in the air');
-      this.shafts(f, vp);
+      if (nearEffects) this.shafts(f, vp);
       time.pass('antialiasing');
       shown = this.antialias(frame, still);
     }

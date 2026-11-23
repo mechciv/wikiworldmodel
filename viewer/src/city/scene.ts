@@ -5,7 +5,7 @@ import { lookup, type Scenario } from '../../../core/scenario.ts';
 import { cellBox, structureEntity } from '../../../world/generators/city/cells.ts';
 import { GroundSampler } from '../../../world/generators/city/ground.ts';
 import { getBytes, getJSON, type Build } from '../data.ts';
-import type { GL } from '../gl/context.ts';
+import type { CityRenderer } from '../gl/city.ts';
 import { settlePrint } from '../../../core/fingerprint.ts';
 import { CellScene } from './cellscene.ts';
 import { Skyline } from './skyline.ts';
@@ -21,8 +21,8 @@ export class CityScene extends CellScene {
   lotType: Uint8Array = new Uint8Array(0);
   private selected = 0;
 
-  constructor(gl: GL, private build: Build, private path: string, opts: { fast?: boolean } = {}) {
-    super(gl, opts);
+  constructor(renderer: CityRenderer, private build: Build, private path: string, opts: { fast?: boolean } = {}) {
+    super(renderer, opts);
   }
 
   /** What the labels name. */

@@ -6,8 +6,7 @@ import type { CityStructure } from '../../../core/city.ts';
 import type { Scenario } from '../../../core/scenario.ts';
 import { CELL } from '../../../world/generators/city/cells.ts';
 import type { GroundSampler } from '../../../world/generators/city/ground.ts';
-import { CityRenderer, type CellGPU, type CityFrame } from '../gl/city.ts';
-import type { GL } from '../gl/context.ts';
+import type { CityRenderer, CellGPU, CityFrame } from '../gl/city.ts';
 import type { V3 } from '../mat.ts';
 import { Skyline } from './skyline.ts';
 import type { LocalView } from './view.ts';
@@ -40,7 +39,6 @@ export interface CellMessage {
 }
 
 export abstract class CellScene {
-  readonly renderer: CityRenderer;
   ground!: GroundSampler;
   ready = false;
   /** the plan's hash here and in the build, which must agree */
@@ -68,9 +66,8 @@ export abstract class CellScene {
   /** the lighter way to draw: coarse meshes only, and the renderer's cheap passes */
   protected fast: boolean;
 
-  constructor(gl: GL, opts: { fast?: boolean } = {}) {
+  constructor(readonly renderer: CityRenderer, opts: { fast?: boolean } = {}) {
     this.fast = !!opts.fast;
-    this.renderer = new CityRenderer(gl, { fast: this.fast });
     this.renderer.shadowCells = (focus, radius) => this.near(focus, radius);
   }
 
