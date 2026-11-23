@@ -11,19 +11,22 @@ what a scene holds; this says how it is drawn.
 
 ## The aim
 
-Every scene, at every place and time, drawn as well as a visitor's GPU allows, at no cost that grows with the
-Earth's area or the span of time. The picture gets better through the renderer's code and the generators' meshes,
-which every scene shares, and never by storing pictures of places.
+Every scene, at every place and time, drawn as close to modern video game quality as a visitor's GPU
+allows—filling in unknown details with our best informed guesses so places look inhabited,
+grounded and alive rather than sparse or schematic. Broad improvements come from shared rendering
+technology, PBR material libraries, modular architectural kits, rigged creature and human templates
+and procedural generators that lift every scene at once, complemented where warranted by bespoke
+per-place or per-time assets (such as hero landmarks, famous buildings or curated site models).
 
-What it will not do:
+What stays out of scope for the live renderer:
 
-- **Paint the view with a learned model.** Diffusion or other neural rendering of frames is not an aim of the
-  project (decided November 2026). Such a picture cannot say what any animal stands on, and the same view would
-  not give the same picture twice.
-- **Make the world more accurate.** A better picture of the Hell Creek shows the same taxa, forms, ground and
-  climate. What lived there, and what it looked like, comes from records and forms, and is improved there.
-- **Use assets made by a model.** Meshes or textures generated from a form were considered, and left for later.
-- **Trace paths in real time.** WebGL 2 cannot afford it. The still (step 8) comes closest.
+- **Frame-by-frame neural repainting.** Running a diffusion model over rendered frames is not an aim
+  of the live viewer: it breaks 3D temporal consistency, picking and provenance. (Using sculpted,
+  scanned or model-generated 3D meshes, rigs and textures as assets inside the 3D scene is welcome
+  where licensing and quality fit.)
+- **Real-time path tracing on WebGL 2.** Full real-time path tracing is beyond WebGL 2 budgets; the
+  still mode (step 8) and modern real-time techniques (GI, IBL, SSR, contact shadows, WebGPU) bridge
+  the gap.
 
 ## Where it stands
 
@@ -59,25 +62,30 @@ not the light but what it falls on:
 
 ## Rules the work keeps
 
-- **No facts in the renderer.** It decides how a material looks, never which material a thing has. Whether a taxon
-  had feathers, needles or fronds, and how tall it grew, comes from its form and its claims. Colours and patterns
-  stay the generator's, and are marked as such, as now.
+- **Guided by records, filled in by best guesses.** When records specify something (a taxon's size
+  or body plan, a building's wall material, a biome or era), the renderer and generators honour it.
+  Where records are silent, code, shaders and assets are encouraged to fill in plausible visual,
+  architectural, material, behavioural and environmental details using domain knowledge and best
+  guesses—marking generated elements clearly in inspection and evidence mode rather than leaving
+  scenes bare.
 - **The same build, time and camera give the same picture**, within the tolerance the golden images allow.
   Anything that moves takes a clock that a link and a test can fix.
 - **Picking and evidence mode work for everything drawn.** A leaf a click passes through to the ground behind it,
   or that evidence mode does not tint, is a bug.
 - **The fast way stays.** It draws no more than it does now, so the browser tests in software and slow machines
-  keep working. New work is for the full way, and may add a higher one for stills.
+  keep working. New work is for the full way, and may add higher tiers (such as desktop GPU or stills).
 - **Budgets, not hopes.** Each step says what it costs in frame time on the reference views, and the instance and
   triangle budgets stay tests.
 - **A generator's new mesh is a new version.** The scene's fingerprint includes its meshes (`meshParts` in
-  [kit.ts](../../world/generators/city/kit.ts)), so a step that changes what forms.ts makes is version 6 of
-  `gen:life/scene`, with its witnesses recorded again. A step that changes only shaders changes golden images, not
-  versions.
-- **Procedural first.** A material made by a shader or a worker costs no download and no licence. Where a scanned
-  material is worth it (soil, sand, mud, rock), it is CC0, listed in [ATTRIBUTION.md](../../ATTRIBUTION.md) with its
-  source, fetched once and cached, and the same for every place and time. Nothing that shows a particular living
-  thing, such as a leaf or a skin, is a photograph of a living one.
+  [kit.ts](../../world/generators/city/kit.ts)), so a step that changes what forms.ts makes bumps the
+  generator's version with its witnesses recorded again. A step that changes only shaders or visual assets
+  changes golden images, not versions.
+- **Best-fit assets and materials.** Use whichever combination of scanned PBR textures, sculpted or
+  model-generated 3D meshes and rigs (glTF), modular architectural kits and procedural shaders gives
+  the best visual quality within download, VRAM and frame-time budgets. Any third-party asset or
+  scan (for ground, architecture, wood, cloth, bark, foliage, creatures or landmarks) must use a
+  compatible open licence (CC0, CC BY or public domain), be listed in [ATTRIBUTION.md](../../ATTRIBUTION.md),
+  and prefer GPU-compressed formats (such as KTX2) when scaling up.
 
 ## The steps
 
@@ -217,8 +225,10 @@ fast way stays on WebGL 2.
 
 ## What it costs
 
-- **Nothing for each place or time.** Every step is code that every scene shares. The only new downloads are a few
-  CC0 material sets, a few megabytes in all, fetched once.
+- **Shared baseline, optional bespoke detail.** Core rendering upgrades, PBR material packs, modular
+  kits and base rigs are shared across all scenes so baseline visual quality improves everywhere
+  without growing with Earth's area or time. Bespoke per-place or per-time assets (such as hero
+  landmarks or curated city models) are streamed on demand only when visiting those places and times.
 - **Frame time,** spent against the budget on the reference views, with each step saying what it took. The full
   way aims at 60 frames a second on a laptop's GPU; the still has no such limit.
 - **The goldens.** Most steps change them. Each pull request regenerates them, shows every diff on its sheet, and
@@ -553,22 +563,23 @@ against the sky. Each kind of thing is held to its own test, on the look book's 
 - **An animal** reads as its group from its side at any distance, by its back line, its neck, its head and its legs:
   its sheet (`form-sheet`) is looked at against a skeletal reconstruction whenever its plan is touched.
 - **A person and a house** stand on the ground, and cast a shadow that meets them. A house's door and windows are set
-  in the thickness of its wall, and nothing stands by it that its records do not say stood there.
-- **A field** under a crop is plants close by and the colour of those plants from afar; what the crop was is not said
-  where no record says.
+  in the thickness of its wall, and where records are silent, plausible best-guess architectural trim, surface wear
+  and environmental dressing (curbs, pottery, carts, stalls, yards and street clutter) fill the gaps so places feel
+  lived in, marked as generated.
+- **A field** under a crop is plants close by and the colour of those plants from afar; where no record names the
+  crop, a plausible best-guess stand for the region and era is drawn and marked as generated.
 - **What lies on the ground** lies in it: a stone's foot is banked with the ground's own colour and a log's underside
   is dark where it meets the earth. A stone is of what the ground's own stones are drawn of, and no two beside each
   other are alike; fallen wood is of a tree that stands over it.
-- **Nothing is a photograph of a living thing,** and nothing drawn says more than its record: a finer picture of a
-  taxon with no form of its own is a finer picture of its nearest node's.
+- **Open assets and best guesses are welcome.** Openly licensed scanned PBR materials, foliage atlases, modular
+  architectural kits and sculpted/rigged base meshes are welcome alongside procedural work. Everything honours the
+  claims on record and fills in unknown details with our best informed guesses, honestly labelled in evidence mode.
 
 A change is shown on the look book's sheet, before and after, with its frame times; where a view's frame goes over the
 budget on the reference GPU, the change says what it thins to come back under it.
 
 ## Open questions
 
-- Is bark, like a leaf, too particular to a kind of tree for a scanned material, or can one stand in for all? (The
-  fidelity pass draws it, in six kinds.)
 - Where should the wind's direction come from: a field of the climate's winds, once there is one, or the renderer?
 - Is a third quality level, between fast and full, wanted for phones?
 - Animals now move from place to place, each by its body plan's routine, with nothing carried from frame to frame
