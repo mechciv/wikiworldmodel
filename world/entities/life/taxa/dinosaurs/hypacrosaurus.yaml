@@ -16,18 +16,21 @@ claims:
       parts:
         body-on-four:
           rings:
-            - [-0.54, 0.62, 0.58, 0.006]
-            - [-0.44, 0.84, 0.56, 0.018]
-            - [-0.34, 1.04, 0.54, 0.036]
-            - [-0.24, 1.2, 0.52, 0.058]
-            - [-0.14, 1.32, 0.46, 0.085]
-            - [-0.05, 1.32, 0.38, 0.108]
-            - [0.05, 1.2, 0.36, 0.112]
-            - [0.13, 1.06, 0.42, 0.092]
-            - [0.19, 0.93, 0.5, 0.064]
+            - [-0.54, 0.84, 0.8, 0.004]
+            - [-0.44, 0.97, 0.75, 0.011]
+            - [-0.34, 1.08, 0.69, 0.02]
+            - [-0.24, 1.17, 0.61, 0.031]
+            - [-0.15, 1.25, 0.52, 0.046]
+            - [-0.07, 1.27, 0.42, 0.062]
+            - [0.01, 1.2, 0.36, 0.07]
+            - [0.08, 1.08, 0.36, 0.068]
+            - [0.14, 0.97, 0.4, 0.058]
+            - [0.19, 0.89, 0.5, 0.042]
     unsourced: >-
-      A machine's reconstruction: a higher back than the plan, from H. altispinus in the silhouette
-      "Hypacrosaurus Size.svg" on Wikimedia Commons.
+      A machine's reconstruction: a higher back than the plan, first drawn from H. altispinus in the
+      silhouette "Hypacrosaurus Size.svg" on Wikimedia Commons. It is written again, without
+      looking at it again, as the plan's trunk as that was redrawn narrower, with its back raised
+      by as much as it was raised before.
   length-holtz-2012:
     prop: body_length
     value: 10

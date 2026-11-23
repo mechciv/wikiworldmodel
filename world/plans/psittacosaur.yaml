@@ -20,7 +20,7 @@ parts:
       - [0.17, 0.96, 0.46, 0.066]
       - [0.22, 0.96, 0.64, 0.044]
     neck: { r: 0.036, steps: [3, 1] }
-  legs: { type: digitigrade, y: -0.03, x: 0.05, top: 0.78, knee: 0.5, ankle: 0.22, r: 0.046, swing: 0.1 }
+  legs: { type: digitigrade, y: -0.03, x: 0.04, top: 0.78, knee: 0.5, ankle: 0.22, r: 0.038, swing: 0.1 }
   arms: { type: chain, mirror: true, sides: [6, 4], points: [[0.06, 0.18, 0.66, 0.018], [0.066, 0.2, 0.46, 0.014], [0.06, 0.25, 0.36, 0.01], [0.056, 0.27, 0.32, 0.006]] }
   head:
     type: head
@@ -38,4 +38,5 @@ parts:
       - [0.14, -0.024, 0.016, 0.024]
   beak: { type: tube, on: head, mat: horn, tint: 90, sides: [8, 4], thin: false, rings: [[0.135, -0.024, 0.016, 0.024], [0.165, -0.044, 0.008, 0.012], [0.178, -0.066, 0.002, 0.002]] }
   jaw: { type: tube, on: head, near: true, sides: [6, 4], rings: [[0.04, -0.044, 0.03, 0.012], [0.1, -0.052, 0.02, 0.012], [0.14, -0.06, 0.008, 0.008]] }
+  cheek-horns: { type: spike, on: head, near: true, mirror: true, mat: horn, tint: 90, from: [0.04, 0.058, -0.018], to: [0.07, 0.05, -0.04], r: 0.01, sides: [6, 4] }
   eyes: { type: eyes, on: head, near: true, at: [0.04, 0.05, 0.02], r: 0.009 }

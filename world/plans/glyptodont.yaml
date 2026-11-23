@@ -10,8 +10,8 @@ parts:
   belly: { type: lump, mat: hide, zl: true, sides: [10, 5], bands: [4, 2], at: [0, 0, 0.12], r: [0.2, 0.28, 0.07] }
   tail: { type: chain, mat: shell, zl: true, sides: [8, 4], points: [[0, -0.3, 0.12, 0.054], [0, -0.38, 0.1, 0.046], [0, -0.45, 0.075, 0.034], [0, -0.5, 0.055, 0.02]] }
   neck: { type: chain, mat: hide, zl: true, sides: [6, 4], points: [[0, 0.24, 0.13, 0.05], [0, 0.29, 0.14, 0.04]] }
-  hind: { type: pillar, y: -0.15, x: 0.13, top: 0.8, r: 0.058, swing: 0.03 }
-  fore: { type: pillar, y: 0.15, x: 0.12, top: 0.8, r: 0.046, swing: 0.03, phase: 1 }
+  hind: { type: pillar, y: -0.15, x: 0.105, top: 0.55, r: 0.058, swing: 0.03 }
+  fore: { type: pillar, y: 0.15, x: 0.1, top: 0.55, r: 0.048, swing: 0.03, phase: 1 }
   head:
     type: head
     at:

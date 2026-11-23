@@ -19,7 +19,7 @@ claims:
       mass_length: 8
     unsourced: >-
       Only the bulk the generator assumes where no mass is claimed: the volume of the plan's own
-      body, at the density of water.
+      body as it was drawn before the plan was redrawn, at the density of water.
   length:
     prop: body_length
     value: { lo: 0.6, hi: 7 }

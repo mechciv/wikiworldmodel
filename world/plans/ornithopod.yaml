@@ -1,5 +1,6 @@
 description: >-
-  A small two-legged plant-eating dinosaur.
+  A small two-legged plant-eating dinosaur: a deep narrow body carried level over long hind legs, a long stiff tail,
+  short arms, and a small beaked head on a short neck.
 kind: animal
 hip: 0.3
 behave: { group: [1, 4], habitat: any, poses: [stand, walk, graze, alert] }
@@ -8,26 +9,29 @@ parts:
     type: trunk
     sides: [10, 5]
     rings:
-      - [-0.56, 0.92, 0.9, 0.003]
-      - [-0.44, 0.98, 0.92, 0.009]
-      - [-0.32, 1.03, 0.93, 0.016]
-      - [-0.2, 1.1, 0.88, 0.028]
-      - [-0.09, 1.19, 0.74, 0.054]
-      - [0.02, 1.22, 0.64, 0.06]
-      - [0.09, 1.22, 0.72, 0.048]
-    neck: { r: 0.018, steps: [4, 1] }
-  legs: { type: digitigrade, y: -0.03, x: 0.03, top: 1.0, knee: 0.62, ankle: 0.26, r: 0.04, swing: 0.1 }
-  arms: { type: chain, near: true, mirror: true, sides: [5, 4], points: [[0.03, 0.08, 1.06, 0.012], [0.05, 0.05, 0.84, 0.009], [0.042, 0.11, 0.72, 0.006]] }
+      - [-0.62, 0.9, 0.87, 0.003]
+      - [-0.5, 0.95, 0.87, 0.009]
+      - [-0.38, 1.0, 0.85, 0.017]
+      - [-0.26, 1.05, 0.81, 0.027]
+      - [-0.14, 1.11, 0.74, 0.04]
+      - [-0.04, 1.17, 0.61, 0.056]
+      - [0.05, 1.17, 0.54, 0.062]
+      - [0.12, 1.14, 0.58, 0.056]
+      - [0.18, 1.11, 0.7, 0.04]
+    neck: { r: 0.02, steps: [4, 1] }
+  legs: { type: digitigrade, y: -0.03, x: 0.036, top: 1.0, knee: 0.6, ankle: 0.25, r: 0.036, swing: 0.1 }
+  arms: { type: chain, near: true, mirror: true, sides: [5, 4], points: [[0.046, 0.15, 0.78, 0.012], [0.054, 0.12, 0.62, 0.009], [0.05, 0.17, 0.5, 0.006]] }
   head:
     type: head
     sides: [10, 5]
-    thin: false
     at:
-      stand: { y: 0.17, z: 1.34, pitch: 0.12 }
-      low: { y: 0.24, reach: 0.088, clear: 0.06, pitch: 0.8 }
+      stand: { y: 0.28, z: 1.26, pitch: 0.2 }
+      alert: { y: 0.25, z: 1.5, pitch: 0.05 }
+      low: { y: 0.3, reach: 0.105, clear: 0.06, pitch: 0.8 }
     rings:
-      - [-0.008, 0, 0.0216, 0.0216]
-      - [0.024, 0.0016, 0.024, 0.024]
-      - [0.06, -0.0048, 0.0132, 0.012]
-      - [0.08, -0.008, 0.00384, 0.00384]
-  eyes: { type: eyes, on: head, near: true, at: [0.0204, 0.024, 0.0084], r: 0.00432 }
+      - [-0.006, 0.002, 0.02, 0.02]
+      - [0.022, 0.003, 0.024, 0.024]
+      - [0.055, -0.004, 0.017, 0.018]
+      - [0.082, -0.01, 0.011, 0.012]
+  beak: { type: tube, on: head, near: true, mat: horn, tint: 100, sides: [6, 4], thin: false, rings: [[0.078, -0.0095, 0.0115, 0.0125], [0.098, -0.017, 0.004, 0.005]] }
+  eyes: { type: eyes, on: head, near: true, at: [0.0225, 0.028, 0.008], r: 0.0045 }

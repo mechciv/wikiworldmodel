@@ -17,25 +17,12 @@ claims:
       mass_length: 25
       parts:
         body:
-          rings:
-            - [-0.5, 0.7, 0.66, 0.005]
-            - [-0.48, 0.84, 0.8, 0.008]
-            - [-0.455, 0.95, 0.88, 0.012]
-            - [-0.42, 1.0, 0.76, 0.034]
-            - [-0.37, 1.03, 0.64, 0.07]
-            - [-0.27, 1.06, 0.58, 0.09]
-            - [-0.14, 1.06, 0.54, 0.098]
-            - [-0.02, 1.06, 0.56, 0.094]
-            - [0.07, 1.08, 0.62, 0.074]
-            - [0.13, 1.08, 0.74, 0.05]
           neck: { r: 0.026, steps: [6, 2] }
-        hind: { y: -0.31, x: 0.054, top: 0.84, knee: 0.58, ankle: 0.36, r: 0.05 }
-        fore: { y: 0.06, x: 0.056, top: 0.74, r: 0.024 }
         head:
           at:
-            stand: { y: 0.335, z: 1.58, pitch: 0.28 }
-            alert: { y: 0.335, z: 1.68, pitch: 0.12 }
-            low: { y: 0.42, reach: 0.13, pitch: 1.05 }
+            stand: { y: 0.35, z: 1.58, pitch: 0.28 }
+            alert: { y: 0.35, z: 1.68, pitch: 0.12 }
+            low: { y: 0.44, reach: 0.13, pitch: 1.05 }
           rings:
             - [-0.012, 0.006, 0.022, 0.026]
             - [0.03, 0.008, 0.024, 0.03]
@@ -46,7 +33,8 @@ claims:
     unsourced: >-
       A machine's reconstruction, from the photograph of the mount at the American Museum of
       Natural History on Wikipedia's page for the genus (Macrauchenia_patachonica_AMNH.jpg). A
-      short trunk is the traditional reading of its nostrils, and is disputed.
+      short trunk is the traditional reading of its nostrils, and is disputed. Only the long neck held upright,
+      the small head and the trunk are drawn here; the body and legs are the plan's own.
   length:
     prop: body_length
     value: 3

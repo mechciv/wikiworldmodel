@@ -4,4 +4,4 @@ description: >-
 kind: plant
 behave: { layer: under, weight: 1.2, wet: 3 }
 parts:
-  plant: { type: tuft, blades: 28, spread: 0.16, wide: 0.012 }
+  plant: { type: tuft, blades: 28, spread: 0.16, wide: 0.012, leaf: blade-reed }

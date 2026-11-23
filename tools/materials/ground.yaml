@@ -1,0 +1,166 @@
+# The scanned materials of the ground (docs/plans/RENDERING.md, "Procedural first"): what earth, sand, pebbles, rock, mud
+# and snow look like from a metre or two, as photogrammetric scans, each a square that repeats without a seam. They say
+# nothing of any place: which material a ground has, how much of each, and what colour it is are the world's
+# (core/substrate.ts) and the scene's (world/generators/life/scene.yaml); a scan gives only a material's grain, in the
+# place's own tone. None shows a living thing: what lies under trees is drawn, not photographed.
+#
+# All are from Poly Haven (https://polyhaven.com), whose assets are dedicated to the public domain under CC0 1.0. Each
+# map is pinned by its address and its md5 as Poly Haven's API gave them in November 2026.
+#
+#   npx tsx tools/materials/pack.ts        # needs ImageMagick 7 (magick) and libwebp (cwebp)
+#
+# fetches the maps into .cache/materials, and writes each layer as two images under viewer/public/materials/ground,
+# `size` pixels square: its colour; and beside one another its normal's two parts, its height and its roughness. It
+# writes viewer/public/materials/ground.json, which the viewer reads, and from which ATTRIBUTION.md credits them.
+license: CC0-1.0
+source: Poly Haven
+url: https://polyhaven.com
+size: 768
+# A layer's place in the list is its number in the renderer (viewer/src/gl/materials.ts): add to the end.
+# `metres` is how much ground one repeat covers, as its scan's own dimensions say. `chroma` is how much of a scan's own
+# changes of hue are kept, from 0, only its light and dark, to 1: pebbles are of many rocks, snow of none.
+layers:
+  - key: soil
+    title: "Dry, crumbly earth with small stones"
+    from: brown_mud_dry
+    name: Brown Mud Dry
+    authors: [Rob Tuytel]
+    metres: 1.3
+    chroma: 0.45
+    maps:
+      colour: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/brown_mud_dry/brown_mud_dry_diff_1k.jpg", md5: 0c0ad82fec60f091690c69c23657cb74, bytes: 920456 }
+      normal: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/brown_mud_dry/brown_mud_dry_nor_gl_1k.png", md5: 9db228ea7ef6cd633a848250aab38676, bytes: 2602244 }
+      roughness: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/brown_mud_dry/brown_mud_dry_rough_1k.jpg", md5: 4e047a601af768eded6468faab4ec615, bytes: 390385 }
+      height: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/brown_mud_dry/brown_mud_dry_disp_1k.png", md5: f9d2c16e26632b87dc8d79408d5e25d8, bytes: 2046817 }
+  - key: earth
+    title: "Fine, smooth earth: silt, a trodden yard, the floor of a dried pool"
+    from: dirt
+    name: Dirt
+    authors: [Charlotte Baglioni]
+    metres: 2.0
+    chroma: 0.3
+    maps:
+      colour: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/dirt/dirt_diff_1k.jpg", md5: cb37e24797597b1dd1ae3819fa80f076, bytes: 730425 }
+      normal: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/dirt/dirt_nor_gl_1k.png", md5: e1d855d9d6b1c9b39681ee4f4097303b, bytes: 5904305 }
+      roughness: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/dirt/dirt_rough_1k.jpg", md5: d936d6760ce0f899b131d30626d52ce9, bytes: 253549 }
+      height: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/dirt/dirt_disp_1k.png", md5: cdaa280f3413729636a764581dd00062, bytes: 1716048 }
+  - key: sand
+    title: "Fine sand, faintly rippled"
+    from: sand_03
+    name: Sand 03
+    authors: [Charlotte Baglioni]
+    metres: 2.0
+    chroma: 0.25
+    maps:
+      colour: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/sand_03/sand_03_diff_1k.jpg", md5: 84bde2b8bea6351805f67a15682b36b2, bytes: 703132 }
+      normal: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/sand_03/sand_03_nor_gl_1k.png", md5: 30f0f06ea1c2d1522b49ecd6cd0ae0c2, bytes: 5571260 }
+      roughness: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/sand_03/sand_03_rough_1k.jpg", md5: b09beddb9981ec5fb402c12f04751c15, bytes: 291218 }
+      height: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/sand_03/sand_03_disp_1k.png", md5: a9d505b87ae1c99a695609d47900145b, bytes: 1642809 }
+  - key: grit
+    title: "Coarse sand with grit: a desert's floor"
+    from: gravelly_sand
+    name: Gravelly Sand
+    authors: [Dario Barresi]
+    metres: 2.48
+    chroma: 0.4
+    maps:
+      colour: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/gravelly_sand/gravelly_sand_diff_1k.jpg", md5: 16b7593a26ce1bd43f1d95e61dc25f05, bytes: 1062525 }
+      normal: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/gravelly_sand/gravelly_sand_nor_gl_1k.png", md5: b1c8547758adb7265b9f7a8c0a4921e4, bytes: 6086837 }
+      roughness: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/gravelly_sand/gravelly_sand_rough_1k.jpg", md5: 1152ab34b85ec42a5d4d6c8ed2c1100b, bytes: 419895 }
+      height: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/gravelly_sand/gravelly_sand_disp_1k.png", md5: 592e4c98c6d4ccc821547f5fb9e1e11b, bytes: 1694619 }
+  - key: pebbles
+    title: "Rounded pebbles of a river's bed, of many rocks"
+    from: ganges_river_pebbles
+    name: Ganges River Pebbles
+    authors: [Amal Kumar]
+    metres: 2.16
+    chroma: 0.85
+    maps:
+      colour: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/ganges_river_pebbles/ganges_river_pebbles_diff_1k.jpg", md5: 0dabfef242e8801c333a60d610dfa396, bytes: 868952 }
+      normal: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/ganges_river_pebbles/ganges_river_pebbles_nor_gl_1k.png", md5: d934d8d2b84a72d01181e60b0a908b01, bytes: 6758248 }
+      roughness: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/ganges_river_pebbles/ganges_river_pebbles_rough_1k.jpg", md5: 3ce5d468c2e6094c7898c94958fe57ab, bytes: 495688 }
+      height: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/ganges_river_pebbles/ganges_river_pebbles_disp_1k.png", md5: 704703b5df92446055872fe8df9e2137, bytes: 1700350 }
+  - key: stones
+    title: "Angular stones and rubble over earth"
+    from: rocks_ground_01
+    name: Rocks Ground 01
+    authors: [Rob Tuytel]
+    metres: 2.0
+    chroma: 0.6
+    maps:
+      colour: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rocks_ground_01/rocks_ground_01_diff_1k.jpg", md5: fa718717506e347adab8ec489be201ae, bytes: 748640 }
+      normal: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/rocks_ground_01/rocks_ground_01_nor_gl_1k.png", md5: 7f2710ed936c0bdf17e587d97a54caa7, bytes: 2443458 }
+      roughness: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rocks_ground_01/rocks_ground_01_rough_1k.jpg", md5: cab409c0c89d25ff4216b1ce07b2faa8, bytes: 437367 }
+      height: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/rocks_ground_01/rocks_ground_01_disp_1k.png", md5: 5f95867a89fb612e163378e44038cc28, bytes: 1984893 }
+  - key: rock
+    title: "Bare rock, weathered and pitted"
+    from: rock_08
+    name: Rock 08
+    authors: [Rob Tuytel]
+    metres: 1.5
+    chroma: 0.45
+    maps:
+      colour: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rock_08/rock_08_diff_1k.jpg", md5: 2025c204133481612c74211135d7b371, bytes: 660234 }
+      normal: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/rock_08/rock_08_nor_gl_1k.png", md5: 8ef54310ddc82a12cb0a8863f6311745, bytes: 2055182 }
+      roughness: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rock_08/rock_08_rough_1k.jpg", md5: e17c503e12d075623849c663bea20eb8, bytes: 291013 }
+      height: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/rock_08/rock_08_disp_1k.png", md5: bb1cf5b03a5f0b75fc39aa976df5d74f, bytes: 2036609 }
+  - key: strata
+    title: "Rock in beds, broken along them: a cliff or a cut bank"
+    from: cliff_side
+    name: Cliff Side
+    authors: [Dario Barresi, James Ray Cock, Jenelle van Heerden]
+    metres: 1.83
+    chroma: 0.5
+    maps:
+      colour: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/cliff_side/cliff_side_diff_1k.jpg", md5: a64986e5f858e4f8df30f0394ededd78, bytes: 859756 }
+      normal: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/cliff_side/cliff_side_nor_gl_1k.png", md5: f25f9ba54ba35d00a83367b79e03b7ca, bytes: 5658685 }
+      roughness: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/cliff_side/cliff_side_rough_1k.jpg", md5: 337e2fa00b23743f6686c7345cc9b227, bytes: 422579 }
+      height: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/cliff_side/cliff_side_disp_1k.png", md5: ecdbafe9ac0a18d08217385236f70470, bytes: 1486936 }
+  - key: mud
+    title: "Wet mud, churned and lumpy"
+    from: brown_mud_03
+    name: Brown Mud 03
+    authors: [Rob Tuytel]
+    metres: 1.3
+    chroma: 0.35
+    maps:
+      colour: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/brown_mud_03/brown_mud_03_diff_1k.jpg", md5: b99d14c26debf660457b9497f2facec6, bytes: 526262 }
+      normal: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/brown_mud_03/brown_mud_03_nor_gl_1k.png", md5: 601906db68fed2c1cad72bc11be4a927, bytes: 2364901 }
+      roughness: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/brown_mud_03/brown_mud_03_rough_1k.jpg", md5: 856d543a9dc18df23cf1239a54025411, bytes: 287221 }
+      height: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/brown_mud_03/brown_mud_03_disp_1k.png", md5: 4ef9dba74889c947dc77894d4138e2c0, bytes: 2261996 }
+  - key: cracked
+    title: "Mud dried into polygons, their edges curled"
+    from: mud_cracked_dry_03
+    name: Mud Cracked Dry 03
+    authors: [Dario Barresi, Dimitrios Savva]
+    metres: 1.5
+    chroma: 0.4
+    maps:
+      colour: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/mud_cracked_dry_03/mud_cracked_dry_03_diff_1k.jpg", md5: 6a86cfde5a73073397fcd13a5b6fed94, bytes: 974865 }
+      normal: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/mud_cracked_dry_03/mud_cracked_dry_03_nor_gl_1k.png", md5: d259f9d8e467f091da4b66464da7cff9, bytes: 5937441 }
+      roughness: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/mud_cracked_dry_03/mud_cracked_dry_03_rough_1k.jpg", md5: 2378d869a389df51d155da2ca0fbeaf2, bytes: 446706 }
+      height: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/mud_cracked_dry_03/mud_cracked_dry_03_disp_1k.png", md5: 6236f1711d8d7bf40caec08734ef384e, bytes: 1744127 }
+  - key: crust
+    title: "A hard pale crust, finely cracked: a playa, a salt pan"
+    from: dry_ground_01
+    name: Dry Ground 01
+    authors: [Rob Tuytel]
+    metres: 4.0
+    chroma: 0.25
+    maps:
+      colour: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/dry_ground_01/dry_ground_01_diff_1k.jpg", md5: f928726e24cf06765877ae77b9a04b4a, bytes: 604799 }
+      normal: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/dry_ground_01/dry_ground_01_nor_gl_1k.png", md5: 7e4c669499d644da62d81dc12e73f14e, bytes: 6438800 }
+      roughness: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/dry_ground_01/dry_ground_01_rough_1k.jpg", md5: 63b583296c606971ce605e5b160a21bc, bytes: 336234 }
+      height: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/dry_ground_01/dry_ground_01_disp_1k.png", md5: e97d5cd992010ec14740da19722ec83a, bytes: 1903039 }
+  - key: snow
+    title: "Snow, a little wind-packed"
+    from: snow_02
+    name: Snow 02
+    authors: [Rob Tuytel]
+    metres: 2.0
+    chroma: 0.0
+    maps:
+      colour: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/snow_02/snow_02_diff_1k.jpg", md5: fc54766c6b36ff298699115a619d440b, bytes: 325497 }
+      normal: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/snow_02/snow_02_nor_gl_1k.png", md5: 57d7f4e2501db746c862c6efee9fb38f, bytes: 2118417 }
+      roughness: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/snow_02/snow_02_rough_1k.jpg", md5: 1dbae0269e53dbf80d4fd1c4335f25a2, bytes: 146089 }
+      height: { url: "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/snow_02/snow_02_disp_1k.png", md5: ac190f15723eb0850917e8812b7a6808, bytes: 1889438 }

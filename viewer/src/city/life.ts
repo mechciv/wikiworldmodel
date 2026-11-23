@@ -4,10 +4,11 @@
 // not reach is not drawn; and the ground, one cell and one mesh are hashed here, to match the build's where it has one.
 import type { CityStructure } from '../../../core/city.ts';
 import { printCheck, settlePrint, type Fingerprint, type PrintCheck } from '../../../core/fingerprint.ts';
+import { defaultLeaf, LEAF_KINDS, type LeafKindName } from '../../../core/leaves.ts';
 import { lookup, type Scenario } from '../../../core/scenario.ts';
 import type { LivingTaxon, SceneSpec } from '../../../core/scene.ts';
 import { GroundSampler } from '../../../world/generators/city/ground.ts';
-import { Heights, placeLook, type LivingParams } from '../../../world/generators/life/scene/v11.ts';
+import { Heights, placeLook, type LivingParams } from '../../../world/generators/life/scene/v12.ts';
 import { snowOf } from '../../../world/generators/life/climate.ts';
 import { declination, MID_DAY } from '../../../core/water.ts';
 import { protoParts, type NamedGroup } from '../../../world/generators/life/stream.ts';
@@ -41,12 +42,14 @@ const LEAVES_OF: Record<string, string> = { conifer: 'needle', whorled: 'needle'
 
 /**
  * What covers the ground close by, from the scene's taxa: the share of its canopy, by weight, whose leaves are needles,
- * for what lies under its trees; and whether it has any low plants, whose clumps then cover the ground near the eye.
+ * for the colour of what lies under its trees; whether it has any low plants, whose clumps then cover the ground near
+ * the eye; and its canopy's two commonest kinds of leaf, by weight, which are what lies fallen under it.
  */
-function groundCover(spec: SceneSpec): [number, boolean] {
+function groundCover(spec: SceneSpec): [number, boolean, { first: LeafKindName; next: LeafKindName; share: number } | undefined] {
   let needles = 0;
   let all = 0;
   let under = false;
+  const kinds = new Map<LeafKindName, number>();
   for (const t of spec.taxa) {
     const form = spec.forms[t.form];
     if (form?.kind !== 'plant' || t.height === undefined) continue;
@@ -56,9 +59,15 @@ function groundCover(spec: SceneSpec): [number, boolean] {
     const w = 0.1 + t.weight;
     all += w;
     const part = Object.values(form.parts).find((p) => p && LEAVES_OF[p.type]);
-    if (part && ((part.mat as string | undefined) ?? LEAVES_OF[part.type]) === 'needle') needles += w;
+    if (!part) continue;
+    if (((part.mat as string | undefined) ?? LEAVES_OF[part.type]) === 'needle') needles += w;
+    const said = part.leaf as string | undefined;
+    const kind = said && said in LEAF_KINDS ? (said as LeafKindName) : defaultLeaf(part.type, part.mat as string | undefined);
+    kinds.set(kind, (kinds.get(kind) ?? 0) + w);
   }
-  return [all > 0 ? needles / all : 0, under];
+  const most = [...kinds.entries()].sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1));
+  const fallen = most.length ? { first: most[0][0], next: (most[1] ?? most[0])[0], share: most[1] ? most[1][1] / (most[0][1] + most[1][1]) : 0 } : undefined;
+  return [all > 0 ? needles / all : 0, under, fallen];
 }
 
 /**

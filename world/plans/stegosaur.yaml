@@ -20,13 +20,13 @@ parts:
       - [0.35, 1.02, 0.54, 0.07]
       - [0.42, 1.0, 0.47, 0.085]
       - [0.49, 0.96, 0.45, 0.095]
-      - [0.56, 0.88, 0.45, 0.095]
-      - [0.62, 0.78, 0.5, 0.08]
-      - [0.67, 0.72, 0.56, 0.05]
+      - [0.56, 0.88, 0.43, 0.095]
+      - [0.62, 0.79, 0.44, 0.082]
+      - [0.67, 0.72, 0.52, 0.052]
       - [0.71, 0.68, 0.58, 0.03]
     neck: { r: 0.022, steps: [3, 1] }
-  hind: { type: pillar, y: 0.42, x: 0.062, top: 0.76, r: 0.047, swing: 0.05 }
-  fore: { type: pillar, y: 0.62, x: 0.066, top: 0.6, r: 0.033, swing: 0.05, phase: 1 }
+  hind: { type: pillar, y: 0.42, x: 0.05, top: 0.72, r: 0.04, swing: 0.05 }
+  fore: { type: pillar, y: 0.61, x: 0.054, top: 0.6, r: 0.028, swing: 0.05, phase: 1 }
   head:
     type: head
     sides: [10, 5]
@@ -43,23 +43,24 @@ parts:
       - [0.08, -0.011, 0.006, 0.005]
   beak: { type: tube, on: head, near: true, mat: horn, tint: 90, sides: [6, 4], rings: [[0.068, -0.01, 0.009, 0.007], [0.086, -0.013, 0.003, 0.003]] }
   eyes: { type: eyes, on: head, near: true, at: [0.018, 0.018, 0.008], r: 0.0035 }
+  # Each plate stands on a straight line under the arch of the back, so the middle ones are written taller than they show.
   plates-left:
     type: row
     tint_add: 30
     n: 9
-    from: [-0.008, 0.06, 0.8]
-    to: [-0.008, 0.70, 0.66]
+    from: [-0.01, 0.06, 0.8]
+    to: [-0.01, 0.70, 0.66]
     item: plate
-    r: [0, 0.075, 0.13]
-    size: [0.22, 0.5, 0.85, 1.1, 1.15, 1.02, 0.72, 0.42, 0.22]
+    r: [0, 0.048, 0.13]
+    size: [0.45, 0.89, 1.29, 1.54, 1.62, 1.46, 1.12, 0.68, 0.31]
   plates-right:
     type: row
     tint_add: 30
     n: 8
-    from: [0.008, 0.1, 0.84]
-    to: [0.008, 0.665, 0.70]
+    from: [0.01, 0.1, 0.84]
+    to: [0.01, 0.665, 0.70]
     item: plate
-    r: [0, 0.075, 0.13]
-    size: [0.35, 0.72, 1.02, 1.18, 1.1, 0.88, 0.56, 0.3]
+    r: [0, 0.048, 0.13]
+    size: [0.55, 1.03, 1.35, 1.51, 1.47, 1.23, 0.79, 0.34]
   spikes-back: { type: spike, mirror: true, tint: 170, from: [0.006, -0.11, 0.72], to: [0.052, -0.2, 0.86], r: 0.0075, sides: [6, 4] }
   spikes-front: { type: spike, mirror: true, tint: 170, from: [0.007, -0.055, 0.76], to: [0.056, -0.14, 0.93], r: 0.0075, sides: [6, 4] }

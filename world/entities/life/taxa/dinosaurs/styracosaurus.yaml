@@ -13,13 +13,15 @@ claims:
     prop: body_form
     value:
       parts:
-        nose: { from: [0, 0.178, 0.016], to: [0, 0.25, 0.205], r: 0.019 }
-        spikes-a: { type: spike, on: head, mirror: true, tint: 60, from: [0.04, -0.108, 0.188], to: [0.075, -0.19, 0.31], r: 0.013, sides: [6, 3] }
-        spikes-b: { type: spike, on: head, mirror: true, tint: 60, from: [0.075, -0.09, 0.165], to: [0.14, -0.165, 0.28], r: 0.012, sides: [6, 3] }
-        spikes-c: { type: spike, on: head, mirror: true, tint: 60, from: [0.105, -0.067, 0.135], to: [0.185, -0.115, 0.2], r: 0.01, sides: [6, 3] }
+        nose: { from: [0, 0.185, 0.012], to: [0, 0.225, 0.14], r: 0.013 }
+        spikes-a: { type: spike, on: head, mirror: true, tint: 60, from: [0.024, -0.017, 0.09], to: [0.047, -0.102, 0.139], r: 0.009, sides: [6, 3] }
+        spikes-b: { type: spike, on: head, mirror: true, tint: 60, from: [0.044, -0.007, 0.084], to: [0.088, -0.087, 0.13], r: 0.0085, sides: [6, 3] }
+        spikes-c: { type: spike, on: head, mirror: true, tint: 60, from: [0.062, 0.011, 0.074], to: [0.115, -0.036, 0.101], r: 0.007, sides: [6, 3] }
     unsourced: >-
-      A machine's reconstruction: a tall nose horn and three pairs of frill spikes, from the
-      silhouette "Styracosaurus Scale.svg" on Wikimedia Commons.
+      A machine's reconstruction: a tall nose horn and three pairs of frill spikes, first drawn from
+      the silhouette "Styracosaurus Scale.svg" on Wikimedia Commons and since scaled, without
+      looking at it again, to the plan's smaller head and set on the rim of the frill where it now
+      stands.
   length-holtz-2012:
     prop: body_length
     value: 5.5

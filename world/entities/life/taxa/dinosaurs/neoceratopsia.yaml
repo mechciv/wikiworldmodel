@@ -21,16 +21,20 @@ claims:
       parts:
         brow: null
         nose: null
-        frill: { r: 0.16, dir: [-0.8, 0.6], across: 0.78, scallop: 0.01 }
+        frill: { r: 0.08, dir: [-0.9, 0.44], across: 0.85, scallop: 0.01 }
+        frill-sides: { points: [[0.058, 0.098, 0.03], [0.061, 0.03, 0.059], [0.054, -0.009, 0.077], [0.1, 0.005, 0.042], [0.095, 0.07, -0.006]] }
         head:
           at:
             stand: { y: 0.26, z: 0.72, pitch: 0.14 }
             alert: { y: 0.25, z: 0.86, pitch: -0.05 }
-            low: { y: 0.28, reach: 0.27, pitch: 0.62 }
+            low: { y: 0.28, reach: 0.35, pitch: 0.62 }
         beak: { rings: [[0.23, -0.034, 0.019, 0.03], [0.255, -0.06, 0.01, 0.018], [0.27, -0.08, 0.002, 0.003]] }
     unsourced: >-
-      A machine's reconstruction: no horns, a smaller frill and a deep hooked beak, from the
-      silhouette "Protoceratops scale.png" on Wikimedia Commons.
+      A machine's reconstruction: no horns, a smaller frill and a deep hooked beak, first drawn from
+      the silhouette "Protoceratops scale.png" on Wikimedia Commons. The frill and its side panels
+      are since scaled, without looking at it again, to the plan's head and frill as they were
+      redrawn smaller, and the head is let down further when it feeds, so that the hooked beak
+      meets the ground and does not go into it.
   posture:
     prop: posture
     value: quadruped

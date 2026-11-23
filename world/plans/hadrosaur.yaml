@@ -1,53 +1,59 @@
 description: >-
-  A duck-billed plant-eating dinosaur, standing on two legs or four.
+  A duck-billed plant-eating dinosaur, standing on two legs or four: a deep narrow body highest at the hips, a deep
+  tail held out level, slender fore legs, and a long low head with a broad flat bill on a curved neck.
 kind: animal
 hip: 0.3
 behave: { group: [4, 14], habitat: open, poses: [graze, graze, walk, stand, alert] }
 parts:
+  # Tail tip to shoulder. The tail is deep and narrow; the back falls from the hips to the shoulders when it is on four.
   body-on-four:
     type: trunk
     stance: four
     rings:
-      - [-0.54, 0.62, 0.58, 0.006]
-      - [-0.44, 0.78, 0.56, 0.018]
-      - [-0.34, 0.94, 0.54, 0.036]
-      - [-0.24, 1.08, 0.52, 0.058]
-      - [-0.14, 1.18, 0.46, 0.085]
-      - [-0.05, 1.2, 0.38, 0.108]
-      - [0.05, 1.12, 0.36, 0.112]
-      - [0.13, 1.02, 0.42, 0.092]
-      - [0.19, 0.93, 0.5, 0.064]
-    neck: { r: 0.036, steps: [4, 1] }
+      - [-0.54, 0.84, 0.8, 0.004]
+      - [-0.44, 0.91, 0.75, 0.011]
+      - [-0.34, 0.98, 0.69, 0.02]
+      - [-0.24, 1.05, 0.61, 0.031]
+      - [-0.15, 1.11, 0.52, 0.046]
+      - [-0.07, 1.14, 0.42, 0.062]
+      - [0.01, 1.11, 0.36, 0.07]
+      - [0.08, 1.03, 0.36, 0.068]
+      - [0.14, 0.95, 0.4, 0.058]
+      - [0.19, 0.89, 0.5, 0.042]
+    neck: { r: 0.026, steps: [5, 1] }
   body-on-two:
     type: trunk
     stance: upright
     rings:
-      - [-0.54, 0.62, 0.58, 0.006]
-      - [-0.44, 0.78, 0.56, 0.018]
-      - [-0.34, 0.94, 0.54, 0.036]
-      - [-0.24, 1.08, 0.52, 0.058]
-      - [-0.14, 1.18, 0.46, 0.085]
-      - [-0.05, 1.2, 0.38, 0.108]
-      - [0.05, 1.22, 0.5, 0.112]
-      - [0.13, 1.28, 0.64, 0.092]
-      - [0.19, 1.36, 0.84, 0.064]
-    neck: { r: 0.036, steps: [4, 1] }
-  hind: { type: digitigrade, y: -0.1, x: 0.082, top: 0.92, knee: 0.55, ankle: 0.2, r: 0.066, swing: 0.065 }
-  fore: { type: pillar, stance: four, y: 0.13, x: 0.082, top: 0.74, r: 0.032, swing: 0.052, phase: 1 }
-  arms: { type: chain, stance: upright, mirror: true, sides: [6, 4], points: [[0.09, 0.15, 0.98, 0.022], [0.098, 0.17, 0.72, 0.016], [0.09, 0.2, 0.52, 0.011]] }
+      - [-0.54, 0.84, 0.8, 0.004]
+      - [-0.44, 0.91, 0.75, 0.011]
+      - [-0.34, 0.98, 0.69, 0.02]
+      - [-0.24, 1.05, 0.61, 0.031]
+      - [-0.15, 1.11, 0.52, 0.046]
+      - [-0.07, 1.14, 0.42, 0.062]
+      - [0.01, 1.15, 0.4, 0.07]
+      - [0.08, 1.16, 0.48, 0.068]
+      - [0.14, 1.18, 0.6, 0.058]
+      - [0.19, 1.2, 0.76, 0.042]
+    neck: { r: 0.026, steps: [5, 1] }
+  hind: { type: digitigrade, y: -0.08, x: 0.046, top: 0.94, knee: 0.56, ankle: 0.2, r: 0.042, swing: 0.065 }
+  fore: { type: pillar, stance: four, y: 0.15, x: 0.046, top: 0.62, r: 0.022, swing: 0.052, phase: 1 }
+  arms: { type: chain, stance: upright, mirror: true, sides: [6, 4], points: [[0.05, 0.16, 0.9, 0.018], [0.056, 0.18, 0.68, 0.013], [0.05, 0.215, 0.5, 0.01]] }
+  # The skull keeps its back and its roof where a crest written for it stands; the snout is shorter than it was.
   head:
     type: head
     at:
-      stand: { y: 0.26, z: 0.84, pitch: 0.16 }
-      alert: { y: 0.25, z: 0.96, pitch: -0.1 }
-      low: { y: 0.28, reach: 0.21, pitch: 1.0 }
-      upright: { y: 0.24, z: 1.5, pitch: 0.2 }
+      stand: { y: 0.31, z: 0.86, pitch: 0.3 }
+      alert: { y: 0.29, z: 1.08, pitch: 0.05 }
+      low: { y: 0.3, reach: 0.15, pitch: 0.9 }
+      upright: { y: 0.3, z: 1.36, pitch: 0.25 }
     rings:
-      - [-0.01, 0, 0.034, 0.04]
-      - [0.045, 0.005, 0.038, 0.05]
-      - [0.1, -0.005, 0.032, 0.036]
-      - [0.15, -0.015, 0.036, 0.02]
-      - [0.185, -0.02, 0.04, 0.012]
-      - [0.2, -0.021, 0.026, 0.006]
-  beak: { type: tube, on: head, near: true, mat: horn, tint: 100, sides: [8, 4], rings: [[0.17, -0.02, 0.038, 0.011], [0.204, -0.022, 0.028, 0.005]] }
-  eyes: { type: eyes, on: head, near: true, at: [0.036, 0.052, 0.024], r: 0.0065 }
+      - [-0.006, 0.004, 0.022, 0.026]
+      - [0.03, 0.004, 0.026, 0.03]
+      - [0.065, -0.001, 0.022, 0.026]
+      - [0.1, -0.006, 0.02, 0.022]
+      - [0.124, -0.012, 0.021, 0.013]
+      - [0.138, -0.015, 0.023, 0.008]
+  beak: { type: tube, on: head, mat: horn, tint: 100, sides: [8, 4], thin: false, rings: [[0.132, -0.0145, 0.0225, 0.009], [0.146, -0.017, 0.021, 0.005]] }
+  mouth: { type: tube, on: head, near: true, mat: dark, sides: [8, 4], rings: [[0.04, -0.012, 0.0245, 0.0022], [0.075, -0.014, 0.0205, 0.0022], [0.105, -0.016, 0.0205, 0.0022], [0.135, -0.019, 0.0225, 0.002]] }
+  eyes: { type: eyes, on: head, near: true, at: [0.0235, 0.036, 0.015], r: 0.005 }

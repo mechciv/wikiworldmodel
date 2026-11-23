@@ -4,7 +4,7 @@
 // the origin and faces +y.
 import { dome, figure, limb, MAT, type Mesh } from '../city/kit.ts';
 import { PI } from '../city/math.ts';
-import { bone, BONE, STRIDE_HIPS } from '../life/forms.ts';
+import { bone, BONE, loft, STRIDE_HIPS } from '../life/forms.ts';
 import { enter, leave, turn } from './parts.ts';
 
 /** How many ways a person is drawn. */
@@ -116,20 +116,23 @@ export function drawPerson(m: Mesh, height: number, variant: number, detail: 0 |
     if (detail === 0) limb(m, foot[0], foot[1] - 0.02 * H, foot[2] - 0.012 * H, foot[0], foot[1] + 0.075 * H, foot[2] - 0.016 * H, 0.026 * H, 0.02 * H, 4, strides ? [code(first, 1), code(first, 1)] : undefined);
   }
   // The body: the hips, the chest, the shoulders.
-  const chest: P = [0, hip[1] + (neck[1] - hip[1]) * 0.62, hip[2] + (neck[2] - hip[2]) * 0.62];
   if (p.dress === 'wrap') skinTone();
   else clothed();
-  limb(m, hip[0], hip[1], hip[2], chest[0], chest[1], chest[2], 0.085 * H, 0.098 * H, n + 2);
-  limb(m, chest[0], chest[1], chest[2], neck[0], neck[1], neck[2] - 0.02 * H, 0.098 * H, 0.06 * H, n + 2);
-  limb(m, -0.1 * H, neck[1], neck[2] - 0.035 * H, 0.1 * H, neck[1], neck[2] - 0.035 * H, 0.047 * H, 0.047 * H, n);
+  // Wider than it is deep, as a body is: hips, a waist, a chest, shoulders, and in to the neck.
+  const up = (f: number, w: number, d: number) => ({ x: 0, y: hip[1] + (neck[1] - hip[1]) * f, z: hip[2] + (neck[2] - hip[2]) * f, w: w * H, h: d * H });
+  loft(m, [up(-0.06, 0.082, 0.062), up(0.1, 0.092, 0.066), up(0.36, 0.08, 0.058), up(0.62, 0.1, 0.066), up(0.84, 0.118, 0.06), up(0.95, 0.085, 0.05), up(1.02, 0.034, 0.034)], n + 4);
   // What is worn below the waist: a cloth at the hips, a tunic to the knee, a robe to the ankle.
   clothed();
   const standing = p.hip[1] > 0.4;
   if (standing) {
-    const hem = p.dress === 'robe' ? 0.06 : p.dress === 'tunic' ? 0.3 : 0.36;
-    const spread = p.dress === 'robe' ? 0.135 : 0.115;
+    // A robe falls to the ground and hides the feet; a tunic to the knee; a wrap covers the hips.
+    const hem = p.dress === 'robe' ? -0.015 : p.dress === 'tunic' ? 0.3 : 0.36;
+    const spread = p.dress === 'robe' ? 0.14 : 0.115;
     const stride = p.foot2 ? (p.foot[1] + p.foot2[1]) * 0.5 * H : 0;
-    limb(m, hip[0], hip[1], hip[2] + 0.03 * H, 0, hip[1] + stride * 0.5, hem * H, 0.092 * H, spread * H, n + 2);
+    const top = hip[2] + 0.03 * H;
+    const fall = (f: number, w: number, d: number) => ({ x: 0, y: hip[1] + stride * 0.5 * f, z: top + (hem * H - top) * f, w: w * H, h: d * H });
+    // It hangs from the hips, a little fuller at its hem, and deeper where a stride pulls it.
+    loft(m, [fall(0, 0.094, 0.068), fall(0.3, 0.1, 0.076), fall(0.7, 0.094 + (spread - 0.094) * 0.7, 0.08 + Math.abs(stride / H) * 0.3), fall(1, spread, 0.09 + Math.abs(stride / H) * 0.5)], n + 4, true);
   } else limb(m, hip[0], hip[1] - 0.02 * H, hip[2] + 0.005 * H, 0, hip[1] + 0.07 * H, hip[2] + 0.05 * H, 0.1 * H, 0.09 * H, n + 2);
   // The arms.
   for (const side of [1, -1]) {
@@ -151,9 +154,20 @@ export function drawPerson(m: Mesh, height: number, variant: number, detail: 0 |
   skinTone();
   limb(m, neck[0], neck[1], neck[2] - 0.02 * H, neck[0], neck[1] + 0.005 * H, neck[2] + 0.04 * H, 0.03 * H, 0.028 * H, n);
   const hz = neck[2] + 0.095 * H;
-  dome(m, 0, neck[1] + 0.008 * H, 0.064 * H, hz, detail === 0 ? 8 : 6, detail === 0 ? 4 : 3, -PI / 2, PI / 2);
-  m.mat = MAT.dark;
-  dome(m, 0, neck[1] + 0.001 * H, 0.068 * H, hz, detail === 0 ? 8 : 6, 2, 0.3, PI / 2);
+  if (detail === 0) {
+    // A head longer than it is wide, narrowing to its chin, with a nose to say which way it faces.
+    const hy = neck[1] + 0.008 * H;
+    const at = (dz: number, w: number, d: number, fwd = 0) => ({ x: 0, y: hy + fwd * H, z: hz + dz * H, w: w * H, h: d * H });
+    loft(m, [at(-0.07, 0.03, 0.034, 0.006), at(-0.045, 0.045, 0.05, 0.008), at(-0.01, 0.056, 0.064, 0.004), at(0.03, 0.058, 0.066), at(0.06, 0.04, 0.046)], 9);
+    limb(m, 0, hy + 0.058 * H, hz - 0.012 * H, 0, hy + 0.078 * H, hz - 0.03 * H, 0.011 * H, 0.008 * H, 4);
+    // Its hair: over the crown and down the back of the head, clear of the face.
+    m.mat = MAT.dark;
+    loft(m, [at(-0.03, 0.05, 0.05, -0.022), at(0.0, 0.06, 0.062, -0.014), at(0.035, 0.062, 0.066, -0.008), at(0.066, 0.044, 0.05, -0.004)], 9);
+  } else {
+    dome(m, 0, neck[1] + 0.008 * H, 0.064 * H, hz, 6, 3, -PI / 2, PI / 2);
+    m.mat = MAT.dark;
+    dome(m, 0, neck[1] + 0.001 * H, 0.068 * H, hz, 6, 2, 0.3, PI / 2);
+  }
   // What it carries, or works at.
   if (p.load === 'head') {
     m.mat = MAT.mud;

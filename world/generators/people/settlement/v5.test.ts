@@ -12,7 +12,7 @@ import { houseSize, HOUSE_VARIANTS } from '../dwellings.ts';
 import { ROUTE, roundOf, wayAt, type RoutineParams } from '../../life/routines.ts';
 import { personGoes } from '../figures.ts';
 import { WORK_VARIANTS } from '../works.ts';
-import { LandUseMap, makeSettlement, toLocal, type Ground } from './v4.ts';
+import { LandUseMap, makeSettlement, toLocal, type Ground } from './v5.ts';
 
 const ROOT = join(import.meta.dirname, '../../../..');
 // How the living scene's animals go about: the settlement's kept ones go by the same parameters.

@@ -28,8 +28,7 @@ claims:
             - [0.1, 1.34, 0.62, 0.072]
             - [0.18, 1.38, 0.76, 0.058]
           neck: { r: 0.05, steps: [3, 1] }
-        hind: { y: -0.27, x: 0.046, top: 0.78, knee: 0.54, ankle: 0.26, r: 0.046 }
-        fore: { y: 0.12, x: 0.05, top: 0.92, r: 0.03 }
+        hind: { y: -0.27 }
         head:
           at:
             stand: { y: 0.27, z: 1.34, pitch: 0.2 }
@@ -46,6 +45,7 @@ claims:
     unsourced: >-
       A machine's reconstruction, from the family's account on the Animal Diversity Web: a
       large head and forequarters larger than the hindquarters. Only compared with its sheet.
+      The legs are the plan's own, set where this body needs them.
   length:
     prop: body_length
     value: { lo: 0.95, hi: 1.5 }

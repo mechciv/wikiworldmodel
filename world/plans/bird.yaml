@@ -11,8 +11,8 @@ parts:
     mat: feather
     sides: [10, 5]
     rings:
-      - [-0.5, 1.06, 1.0, 0.03]
-      - [-0.38, 1.14, 1.07, 0.036]
+      - [-0.5, 1.05, 1.01, 0.042]
+      - [-0.38, 1.13, 1.08, 0.04]
       - [-0.26, 1.24, 1.14, 0.036]
       - [-0.18, 1.36, 1.14, 0.042]
       - [-0.11, 1.54, 1.0, 0.072]
@@ -21,7 +21,7 @@ parts:
       - [0.12, 2.14, 0.8, 0.104]
       - [0.18, 2.22, 1.2, 0.07]
     neck: { r: 0.042, steps: [3, 1] }
-  legs: { type: digitigrade, mat: hide, y: -0.02, x: 0.05, top: 1.05, knee: 0.74, ankle: 0.42, r: 0.03, swing: 0.07, not: [fly] }
+  legs: { type: digitigrade, mat: hide, y: -0.02, x: 0.05, top: 1.05, knee: 0.74, ankle: 0.42, r: 0.021, swing: 0.07, not: [fly] }
   wings: { type: wing, shoulder: [0.09, 0.14, 1.9], span: 0.8, chord: 0.24, sweep: 0.2, beat: 0.28, arm: 0.018, folded: 0.46, drop: 0.72 }
   head:
     type: head

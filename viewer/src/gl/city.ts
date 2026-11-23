@@ -4,9 +4,13 @@
 // sky, the distant land, the near land and the city are lit by one sun, in floating point, with
 // cascaded shadows, and finished with bloom and a filmic curve.
 import type { GroundLevel } from '../../../core/city.ts';
+import { LEAF_KINDS, litterTile, type LeafKindName } from '../../../core/leaves.ts';
+import { GROUND_LAYERS } from '../../../core/materials.ts';
 import { hash3 } from '../../../world/generators/city/math.ts';
 import { invert, multiply, type Mat4, type V3 } from '../mat.ts';
 import { program, setUniforms, texture2D, type GL, type Program } from './context.ts';
+import type { LeafAtlas } from './leafatlas.ts';
+import { GroundMaterialSet } from './materials.ts';
 import { FrameTimer } from './timer.ts';
 import { AO_FS, BLUR_FS, BRIGHT_FS, DEPTH_FS, FULLSCREEN_VS, ID_FS, LUM_FS, MESH_FS, MESH_VS, POST_FS, SHAFTS_ADD_FS, SHAFTS_FS, TAA_FS, SEA, SEA_FS, SEA_VS, SKY_FS, SKY_LUT_FS, TERRAIN_FS, TERRAIN_VS, WATER_FS, WATER_VS, WATERBLUR_FS, WATERMAP_FS, WATERMAP_VS } from './cityShaders.ts';
 
@@ -14,7 +18,17 @@ import { AO_FS, BLUR_FS, BRIGHT_FS, DEPTH_FS, FULLSCREEN_VS, ID_FS, LUM_FS, MESH
 export const SHARE_STEPS = 32;
 
 /** Texture units, the same for every program; 12 to 16 are the passes' own, for their targets. */
-const UNIT = { noise: 0, sky: 1, shadow: 2, ao: 3, entities: 4, ground: 5, normal: 8, mask: 11, fields: 17, waterMap: 18, scene: 19, sceneDepth: 20 } as const;
+const UNIT = { noise: 0, sky: 1, shadow: 2, ao: 3, entities: 4, ground: 5, normal: 8, mask: 11, fields: 17, waterMap: 18, scene: 19, sceneDepth: 20, matColour: 21, matNormal: 22, leaves: 23, litter: 24 } as const;
+
+/**
+ * The leaves that lie fallen under trees, for the shader: the atlas's tile of the litter a kind of leaf falls as, and
+ * of a second kind's. Until a scene says what its canopy's leaves are, plain broad ones and flat needles.
+ */
+const litterTiles = (first: LeafKindName, next: LeafKindName): number[] => [litterTile(LEAF_KINDS[first].falls), litterTile(LEAF_KINDS[next].falls)];
+
+/** The grid of hexagons a scanned material is read among (cityShaders.ts, MATERIALS): tiles to a repeat, and where their numbers repeat. */
+const MAT_TILES = 3;
+const MAT_WRAP = 4096;
 
 /** The water's map from above: texels a side, and metres it covers; it is drawn again when the eye leaves its middle. */
 const WATER_MAP = { size: 512, span: 2048, snap: 512 } as const;
@@ -325,6 +339,8 @@ export class CityRenderer {
   private cloudCover = 0.35;
   /** what lies under the trees, 0 broad leaves to 1 needles; and whether clumps of low plants cover the ground close by */
   private litter = 0;
+  private litterTiles = litterTiles('broad-oval', 'needle-flat');
+  private litterNext = 0;
   private clumps = 0;
   /** the ground is land nobody has farmed: what the mask says of it is a wild place's */
   wild = false;
@@ -353,6 +369,22 @@ export class CityRenderer {
   private shareSpan: V3 = [0, 0, 0];
   /** everything drawn by instancing, by what mesh it is */
   private instanced = new Map<number, InstancedGPU>();
+  /**
+   * The ground's scanned materials (materials.ts): fetched once, at full quality only, and drawn with once they have
+   * come. Until then, and on the lighter way, the two arrays are a texel each and the ground is drawn without them.
+   */
+  readonly materials: GroundMaterialSet;
+  private noMaterial: WebGLTexture[] = [];
+  /**
+   * The atlas of leaves a plant's cards show (leafatlas.ts): drawn once, off the page, at full quality only, where
+   * plants have cards. Until it has come a card shows nothing.
+   */
+  private leaves: WebGLTexture;
+  leavesReady = false;
+  /** How the ground reads the atlas, for what lies fallen (its tiles of litter): repeating, where a card's tile does not. */
+  private litterSampler: WebGLSampler;
+  private matAt = new Float32Array(48);
+  private matCell = new Float32Array(24);
 
   // Render targets, remade when the size changes.
   private w = 0;
@@ -426,6 +458,33 @@ export class CityRenderer {
   constructor(private gl: GL, opts: { fast?: boolean } = {}) {
     this.fast = !!opts.fast;
     this.timer = new FrameTimer(gl);
+    this.materials = new GroundMaterialSet(gl);
+    for (const [unit, internal] of [[UNIT.matColour, gl.SRGB8_ALPHA8], [UNIT.matNormal, gl.RGBA8]] as const) {
+      gl.activeTexture(gl.TEXTURE0 + unit);
+      const t = gl.createTexture()!;
+      gl.bindTexture(gl.TEXTURE_2D_ARRAY, t);
+      gl.texStorage3D(gl.TEXTURE_2D_ARRAY, 1, internal, 1, 1, 1);
+      gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+      gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+      this.noMaterial.push(t);
+    }
+    gl.activeTexture(gl.TEXTURE0 + UNIT.leaves);
+    this.leaves = gl.createTexture()!;
+    gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.leaves);
+    gl.texStorage3D(gl.TEXTURE_2D_ARRAY, 1, gl.RGBA8, 1, 1, 1);
+    gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    this.litterSampler = gl.createSampler()!;
+    gl.samplerParameteri(this.litterSampler, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+    gl.samplerParameteri(this.litterSampler, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.samplerParameteri(this.litterSampler, gl.TEXTURE_WRAP_S, gl.REPEAT);
+    gl.samplerParameteri(this.litterSampler, gl.TEXTURE_WRAP_T, gl.REPEAT);
+    const litterAniso = gl.getExtension('EXT_texture_filter_anisotropic');
+    if (litterAniso) gl.samplerParameterf(this.litterSampler, litterAniso.TEXTURE_MAX_ANISOTROPY_EXT, Math.min(4, gl.getParameter(litterAniso.MAX_TEXTURE_MAX_ANISOTROPY_EXT) as number));
+    this.bindLitter();
+    if (!this.fast && typeof Worker !== 'undefined') this.drawLeaves();
+    // Where the viewer is served from: its materials lie beside its page.
+    if (!this.fast && typeof document !== 'undefined') this.materials.load(new URL('.', document.baseURI).href, () => this.meshSerial++);
     const ext = gl.getExtension('EXT_color_buffer_float');
     if (!ext) throw new Error('This view of the city needs floating-point render targets (EXT_color_buffer_float).');
     gl.getExtension('OES_texture_float_linear');
@@ -549,6 +608,49 @@ void main() {
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   }
 
+  /** Have the atlas of leaves drawn, off the page, and take it as an array of textures when it comes. */
+  private drawLeaves(): void {
+    const gl = this.gl;
+    const worker = new Worker(new URL('./leafworker.ts', import.meta.url), { type: 'module' });
+    worker.onmessage = (e: MessageEvent<LeafAtlas>) => {
+      const a = e.data;
+      worker.terminate();
+      gl.activeTexture(gl.TEXTURE0 + UNIT.leaves);
+      gl.deleteTexture(this.leaves);
+      this.leaves = gl.createTexture()!;
+      gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.leaves);
+      gl.texStorage3D(gl.TEXTURE_2D_ARRAY, a.levels.length, gl.RGBA8, a.width, a.height, a.layers);
+      gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+      gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+      a.levels.forEach((texels, level) => gl.texSubImage3D(gl.TEXTURE_2D_ARRAY, level, 0, 0, 0, Math.max(1, a.width >> level), Math.max(1, a.height >> level), a.layers, gl.RGBA, gl.UNSIGNED_BYTE, texels));
+      gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      const aniso = gl.getExtension('EXT_texture_filter_anisotropic');
+      if (aniso) gl.texParameterf(gl.TEXTURE_2D_ARRAY, aniso.TEXTURE_MAX_ANISOTROPY_EXT, Math.min(4, gl.getParameter(aniso.MAX_TEXTURE_MAX_ANISOTROPY_EXT) as number));
+      this.bindLitter();
+      gl.activeTexture(gl.TEXTURE0);
+      this.leavesReady = true;
+      this.meshSerial++;
+    };
+    worker.postMessage(0);
+  }
+
+  /** The atlas of leaves on the ground's own unit, read through the sampler that repeats. */
+  private bindLitter(): void {
+    const gl = this.gl;
+    gl.activeTexture(gl.TEXTURE0 + UNIT.litter);
+    gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.leaves);
+    gl.bindSampler(UNIT.litter, this.litterSampler);
+  }
+
+  /** Whether a scene still waits for the atlas of leaves: wanted, and not yet come. */
+  get leavesLoading(): boolean {
+    return !this.fast && typeof Worker !== 'undefined' && !this.leavesReady;
+  }
+
   private bindSamplers(): void {
     const gl = this.gl;
     const ints = (p: Program, names: Record<string, number>) => {
@@ -560,10 +662,11 @@ void main() {
     };
     const lit = { uNoise: UNIT.noise, uSkyLut: UNIT.sky, uShadow: UNIT.shadow, uAO: UNIT.ao, uEntities: UNIT.entities };
     const ground = { uGround0: UNIT.ground, uGround1: UNIT.ground + 1, uGround2: UNIT.ground + 2, uNormal0: UNIT.normal, uNormal1: UNIT.normal + 1, uNormal2: UNIT.normal + 2, uMask: UNIT.mask, uFields: UNIT.fields };
-    ints(this.meshP, { ...lit, uMask: UNIT.mask });
-    ints(this.depthP, { uEntities: UNIT.entities });
-    ints(this.idP, { uEntities: UNIT.entities });
-    ints(this.terrainP, { ...lit, ...ground, uWaterMap: UNIT.waterMap });
+    ints(this.meshP, { ...lit, uMask: UNIT.mask, uLeaves: UNIT.leaves, uMatColour: UNIT.matColour, uMatNormal: UNIT.matNormal });
+    ints(this.depthP, { uEntities: UNIT.entities, uLeaves: UNIT.leaves });
+    ints(this.idP, { uEntities: UNIT.entities, uLeaves: UNIT.leaves });
+    // The ground reads the atlas of leaves for what lies fallen, through a sampler of its own that repeats its tiles.
+    ints(this.terrainP, { ...lit, ...ground, uWaterMap: UNIT.waterMap, uMatColour: UNIT.matColour, uMatNormal: UNIT.matNormal, uLeaves: UNIT.litter });
     ints(this.waterBlurP, { uTex: UNIT.waterMap });
     ints(this.terrainDepthP, ground);
     ints(this.waterP, { ...lit, uScene: UNIT.scene, uSceneDepth: UNIT.sceneDepth });
@@ -646,12 +749,16 @@ void main() {
   }
 
   /**
-   * What covers the ground close by, as a scene's taxa say: the share of its canopy whose leaves are needles, for what
-   * lies under the trees; and whether it has low plants to cover the ground with clumps.
+   * What covers the ground close by, as a scene's taxa say: the share of its canopy whose leaves are needles, for the
+   * colour of what lies under the trees; whether it has low plants to cover the ground with clumps; and the canopy's
+   * two commonest kinds of leaf, which are the leaves that lie fallen under it, with the second's share of the two.
    */
-  setGroundCover(litter: number, clumps: boolean): void {
+  setGroundCover(litter: number, clumps: boolean, fallen?: { first: LeafKindName; next: LeafKindName; share: number }): void {
     this.litter = Math.max(0, Math.min(1, litter));
     this.clumps = clumps ? 1 : 0;
+    // The fallen leaves are of the canopy's two commonest kinds, the second as often as its share of the two.
+    this.litterTiles = fallen ? litterTiles(fallen.first, fallen.next) : litterTiles('broad-oval', 'needle-flat');
+    this.litterNext = fallen ? Math.max(0, Math.min(1, fallen.share)) : this.litter;
   }
 
   /** How much of the sky the clouds cover over the scene, 0–1: from the globe's clouds, so the way down keeps its weather. */
@@ -1211,7 +1318,39 @@ void main() {
       uWaterBox: this.waterBox,
       uLitter: this.litter,
       uClumps: this.clumps,
+      uMaterials: this.materials.ready ? 1 : 0,
+      uLitterTile: this.litterTiles,
+      uLitterNext: this.litterNext,
     });
+    const matMean = p.uniforms.get('uMatMean');
+    if (matMean && this.materials.ready) {
+      // Where the eye is in each material's repeat and in its grid of tiles, in doubles: the shader counts from the eye.
+      const m = this.materials;
+      const n = m.mean.length / 4;
+      for (let k = 0; k < n; k++) {
+        const metres = m.mean[k * 4 + 3];
+        const x = f.eye[0] / metres;
+        const y = f.eye[1] / metres;
+        const sx = x * MAT_TILES;
+        const sy = (-0.57735027 * x + 1.15470054 * y) * MAT_TILES;
+        this.matAt.set([x - Math.floor(x), y - Math.floor(y), sx - Math.floor(sx), sy - Math.floor(sy)], k * 4);
+        this.matCell.set([((Math.floor(sx) % MAT_WRAP) + MAT_WRAP) % MAT_WRAP, ((Math.floor(sy) % MAT_WRAP) + MAT_WRAP) % MAT_WRAP], k * 2);
+      }
+      gl.uniform4fv(matMean, m.mean);
+      const look = p.uniforms.get('uMatLook');
+      if (look) gl.uniform4fv(look, m.look);
+      // Only the ground reads a material among its tiles, from the eye: what is built reads it by its own face.
+      const at = p.uniforms.get('uMatAt');
+      if (at) gl.uniform4fv(at, this.matAt);
+      const cell = p.uniforms.get('uMatCell');
+      if (cell) gl.uniform2fv(cell, this.matCell);
+      const up = p.uniforms.get('uMatUp');
+      // The one read from the side, a face of rock in beds: where the eye's height is in its repeat.
+      if (up) {
+        const z = f.eye[2] / m.mean[GROUND_LAYERS.indexOf('strata') * 4 + 3];
+        gl.uniform1f(up, z - Math.floor(z));
+      }
+    }
     const tone = p.uniforms.get('uTone');
     if (tone) gl.uniform3fv(tone, this.tones);
     const share = p.uniforms.get('uShare');
@@ -1314,7 +1453,9 @@ void main() {
     const sun = f.sun;
     if (sun[2] <= 0) return;
     const range = Math.max(30, Math.hypot(f.eye[0] - f.focus[0], f.eye[1] - f.focus[1], f.eye[2] - f.focus[2]));
-    const r0 = Math.min(Math.max(70, range * 1.0), 1400);
+    // The nearest cascade is as wide as the view is far, and no narrower than a clearing: close to, a shadow is fine
+    // enough to meet the foot that casts it.
+    const r0 = Math.min(Math.max(24, range * 1.0), 1400);
     const r1 = Math.min(r0 * 5, 7000);
     const r2 = Math.max(r1 * 2.5, 9000);
     this.shadowRadii = [r0, r1, r2];
@@ -1473,6 +1614,13 @@ void main() {
     gl.bindTexture(gl.TEXTURE_2D, this.mask);
     gl.activeTexture(gl.TEXTURE0 + UNIT.fields);
     gl.bindTexture(gl.TEXTURE_2D, this.fields);
+    gl.activeTexture(gl.TEXTURE0 + UNIT.leaves);
+    gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.leaves);
+    this.bindLitter();
+    gl.activeTexture(gl.TEXTURE0 + UNIT.matColour);
+    gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.materials.colour ?? this.noMaterial[0]);
+    gl.activeTexture(gl.TEXTURE0 + UNIT.matNormal);
+    gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.materials.normal ?? this.noMaterial[1]);
     this.groundTex.forEach((t, k) => {
       gl.activeTexture(gl.TEXTURE0 + UNIT.ground + k);
       gl.bindTexture(gl.TEXTURE_2D, t);
@@ -1499,7 +1647,7 @@ void main() {
 
     // The sky; under the sea, the water.
     gl.useProgram(this.skyP.program);
-    setUniforms(gl, this.skyP, { uInvViewProj: invert(farVp), uSun: f.sun, uSunColor: this.sunColor, uHeight: f.eye[2], uAlpha: f.solid || under ? 1 : 0, uSea: this.sea ? 1 : 0, uEyeSea: eyeSea, uSkyTop: this.skyTop, uCloudCover: this.cloudCover, uClockSky: f.clock ?? 0, uCloudVolume: this.fast ? 0 : 1, uFrameNoise: this.sample });
+    setUniforms(gl, this.skyP, { uInvViewProj: invert(farVp), uSun: f.sun, uSunColor: this.sunColor, uHeight: f.eye[2], uAlpha: f.solid || under ? 1 : 0, uSea: this.sea ? 1 : 0, uEyeSea: eyeSea, uSkyTop: this.skyTop, uCloudCover: this.cloudCover, uClockSky: f.clock ?? 0, uCloudVolume: this.fast ? 0 : 1, uFrameNoise: halton(Math.max(0, this.sample - 1), 2) });
     gl.activeTexture(gl.TEXTURE0 + UNIT.ao);
     gl.bindTexture(gl.TEXTURE_2D, null);
     gl.bindVertexArray(this.emptyVao);

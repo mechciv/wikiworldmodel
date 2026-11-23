@@ -13,33 +13,11 @@ claims:
     prop: body_form
     value:
       hip: 0.33
-      parts:
-        body:
-          rings:
-            - [-0.5, 0.6, 0.58, 0.004]
-            - [-0.42, 0.7, 0.64, 0.014]
-            - [-0.34, 0.8, 0.67, 0.026]
-            - [-0.26, 0.9, 0.7, 0.04]
-            - [-0.17, 1.0, 0.72, 0.056]
-            - [-0.08, 1.07, 0.68, 0.07]
-            - [0.02, 1.09, 0.58, 0.08]
-            - [0.1, 1.08, 0.6, 0.072]
-            - [0.16, 1.08, 0.7, 0.054]
-        head:
-          at:
-            stand: { y: 0.27, z: 1.1, pitch: 0.12 }
-            alert: { y: 0.26, z: 1.22, pitch: 0.1 }
-            low: { y: 0.3, z: 0.6, pitch: 0.5 }
-          rings:
-            - [-0.01, 0.0, 0.04, 0.05]
-            - [0.05, 0.004, 0.05, 0.064]
-            - [0.11, -0.006, 0.044, 0.056]
-            - [0.17, -0.016, 0.032, 0.04]
-            - [0.215, -0.024, 0.022, 0.026]
-            - [0.238, -0.026, 0.01, 0.013]
     unsourced: >-
-      A machine's reconstruction: a slimmer body and head on longer legs than the plan, from the
-      silhouette "Gorgosaurusscale.svg" on Wikimedia Commons.
+      A machine's reconstruction: longer legs than the plan, from the silhouette
+      "Gorgosaurusscale.svg" on Wikimedia Commons. The slimmer body and head once written here were
+      changes to the plan's trunk and head as they were then drawn, and are left to the plan as it
+      is redrawn.
   length-holtz-2012:
     prop: body_length
     value: 8.6

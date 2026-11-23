@@ -40,7 +40,7 @@ claims:
         hind: { y: 0.0 }
         fore: { y: 0.25, top: 0.66 }
         arms: { points: [[0.076, 0.17, 1.1, 0.022], [0.084, 0.19, 0.82, 0.016], [0.078, 0.22, 0.6, 0.011]] }
-        thumbs-four: { from: [0.066, 0.265, 0.1], to: [0.03, 0.3, 0.2] }
+        thumbs-four: { from: [0.05, 0.265, 0.1], to: [0.018, 0.3, 0.2] }
         thumbs-up: { from: [0.074, 0.22, 0.6], to: [0.05, 0.26, 0.7] }
         head:
           at:
@@ -57,7 +57,8 @@ claims:
     unsourced: >-
       A machine's reconstruction, its outline measured from the silhouette "Ouranosaurus Scale.svg"
       on Wikimedia Commons: a tall hump from shoulder to tail and a long flat snout on lower hips
-      than the plan.
+      than the plan. Its thumb spikes on four legs are moved in with the plan's fore legs, which are
+      now drawn nearer the middle.
   length-holtz-2012:
     prop: body_length
     value: 6

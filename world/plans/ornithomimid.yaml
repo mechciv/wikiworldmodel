@@ -21,7 +21,7 @@ parts:
       - [0.09, 1.03, 0.62, 0.04]
       - [0.13, 1.06, 0.76, 0.026]
     neck: { r: 0.0095, steps: [6, 2] }
-  legs: { type: digitigrade, mat: fur, y: -0.015, x: 0.035, top: 0.85, knee: 0.56, ankle: 0.3, r: 0.034, swing: 0.11 }
+  legs: { type: digitigrade, mat: fur, y: -0.015, x: 0.028, top: 0.85, knee: 0.56, ankle: 0.3, r: 0.028, swing: 0.11 }
   arms:
     type: chain
     mat: fur

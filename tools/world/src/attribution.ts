@@ -2,8 +2,9 @@
 // databases its records cite. The build credits them in the viewer (`credits` in tileset.json) and
 // writes them out as ATTRIBUTION.md in each build; `npm run world -- attribution` writes the
 // repository's copy, which a unit test keeps current.
-import { existsSync, readdirSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import type { GroundMaterials } from '../../../core/materials.ts';
 import type { Tileset } from '../../../core/tileset.ts';
 import { REPO } from './paths.ts';
 import type { World } from './world.ts';
@@ -13,7 +14,16 @@ export function credits(world: World): Tileset['credits'] {
   const out: Tileset['credits'] = [];
   // Tiles of one dataset share a credit.
   for (const d of Object.values(world.manifest.datasets)) if (!out.some((c) => c.label === d.credit)) out.push({ label: d.credit!, license: d.license! });
-  return [...out, ...citedDatabases(world).map(({ label, licenses }) => ({ label, license: licenses.join(' and ') }))];
+  const ground = groundMaterials();
+  return [...out, ...citedDatabases(world).map(({ label, licenses }) => ({ label, license: licenses.join(' and ') })), ...(ground ? [{ label: `The ground's materials, scanned by ${ground.source}`, license: ground.license }] : [])];
+}
+
+/**
+ * The scanned materials the viewer draws the ground with (core/materials.ts), as the list that goes out with them says;
+ * nothing where the viewer has none.
+ */
+export function groundMaterials(file = join(REPO, 'viewer/public/materials/ground.json')): GroundMaterials | null {
+  return existsSync(file) ? (JSON.parse(readFileSync(file, 'utf8')) as GroundMaterials) : null;
 }
 
 /** The databases whose entries the records cite, each with every licence it was read under. */
@@ -43,7 +53,7 @@ export function siteFonts(dir = join(REPO, 'site/fonts')): string[] {
 const oneLine = (s: string) => s.replace(/\s+/g, ' ').trim();
 
 /** ATTRIBUTION.md: every dataset with its citation, licence and credit; the cited databases; the fonts. */
-export function attributionMarkdown(world: World, fonts: string[] = siteFonts(), viewerFonts: string[] = siteFonts(join(REPO, 'viewer/public/fonts'))): string {
+export function attributionMarkdown(world: World, fonts: string[] = siteFonts(), viewerFonts: string[] = siteFonts(join(REPO, 'viewer/public/fonts')), ground: GroundMaterials | null = groundMaterials()): string {
   const lines = [
     '# Attribution',
     '',
@@ -97,6 +107,21 @@ export function attributionMarkdown(world: World, fonts: string[] = siteFonts(),
       );
     }
     lines.push('');
+  }
+  if (ground?.layers.length) {
+    lines.push(
+      '## Materials',
+      '',
+      `The viewer draws the ground with scans of earth, sand, stones, rock, mud and snow from [${ground.source}](${ground.url}),`,
+      `each dedicated to the public domain under ${ground.license}, packed into [viewer/public/materials/](viewer/public/materials/)`,
+      'by `tools/materials/pack.ts` from the files [tools/materials/ground.yaml](tools/materials/ground.yaml) pins. A scan gives a',
+      'material its grain and says nothing of any place: which material a ground has, and its colour, are the world\'s.',
+      '',
+      '| Material | Scan | By |',
+      '|---|---|---|',
+      ...ground.layers.map((l) => `| ${l.title} | [${l.name}](${l.from}) | ${l.authors.join(', ')} |`),
+      '',
+    );
   }
   lines.push(
     '## Code',

@@ -32,8 +32,8 @@ claims:
             - [0.11, 1.02, 0.48, 0.096]
             - [0.16, 0.98, 0.56, 0.08]
           neck: { r: 0.066, steps: [2, 1] }
-        hind: { y: -0.22, x: 0.082, top: 0.8, r: 0.046 }
-        fore: { y: 0.08, x: 0.086, top: 0.76, r: 0.044 }
+        hind: { y: -0.22, x: 0.056, top: 0.88, r: 0.056 }
+        fore: { y: 0.08, x: 0.052, top: 0.82, r: 0.05 }
         head:
           at:
             stand: { y: 0.21, z: 0.9, pitch: 0.2 }
@@ -51,6 +51,8 @@ claims:
       A machine's reconstruction, from the photograph of Osborn's Coryphodon mount on
       Wikipedia's page for the genus (Hutchinson_coryphodon.jpg): a big head on a short neck,
       a back higher at the hips than the shoulders, thick legs, a thin tail.
+      The legs are set under the body with their tops inside it, and thickened to the plan's shaped legs: a choice
+      of the drawing.
   length:
     prop: body_length
     value: 2.5

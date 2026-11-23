@@ -37,13 +37,14 @@ claims:
             - [0.075, 0.004, 0.052, 0.046]
             - [0.115, -0.012, 0.036, 0.028]
             - [0.14, -0.018, 0.028, 0.018]
-        hind: { y: -0.17, x: 0.05, top: 0.86, knee: 0.56, ankle: 0.18, r: 0.05 }
-        fore: { y: 0.09, x: 0.054, top: 0.8, r: 0.032 }
+        hind: { y: -0.17, ankle: 0.18 }
+        fore: { y: 0.09 }
         ears: { from: [0.038, 0.01, 0.046], to: [0.046, -0.002, 0.07], r: 0.014 }
         eyes: { at: [0.04, 0.074, 0.03] }
     unsourced: >-
       A machine's reconstruction, from the skeletal drawing of Oxyaena lupina on Wikipedia's
       page for the genus: a low long body, a short broad head and a long tail.
+      The legs are the plan's own, set where this body needs them.
   mass:
     prop: body_mass
     value: { lo: 18.3, hi: 800 }

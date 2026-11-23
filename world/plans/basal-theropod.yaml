@@ -20,7 +20,7 @@ parts:
       - [0.13, 1.0, 0.58, 0.032]
       - [0.18, 1.06, 0.76, 0.02]
     neck: { r: 0.011, steps: [5, 2] }
-  legs: { type: digitigrade, y: 0.0, x: 0.032, top: 0.84, knee: 0.52, ankle: 0.26, r: 0.03, swing: 0.11 }
+  legs: { type: digitigrade, y: 0.0, x: 0.025, top: 0.84, knee: 0.52, ankle: 0.26, r: 0.026, swing: 0.11 }
   arms:
     type: chain
     mirror: true

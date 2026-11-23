@@ -11,8 +11,8 @@ claims:
     unsourced: "The classification's own name; the English an editorial gloss."
   body-plan:
     prop: body_plan
-    value: broadleaf
-    unsourced: "Which plan draws it and everything below it: neither a conifer nor a flowering tree, but broad leaves make this the nearest plan. An editorial classification."
+    value: ginkgo
+    unsourced: "Which plan draws it and everything below it: neither a conifer nor a flowering tree, but a broad-leaved tree whose leaves are fans on long stalks. An editorial classification."
   form:
     prop: body_form
     value:

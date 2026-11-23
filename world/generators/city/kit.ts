@@ -87,6 +87,8 @@ export const MAT = {
   // A tuft's own blades close by, thin leaves lit as the leaves on cards are: whose colour they take, a frond's, a
   // needle's or a broad leaf's, is in their uv, as on a card of blades (world/generators/life/forms.ts, tuft).
   blade: 71,
+  // An animal's eye: dark and wet, so that it catches the light.
+  eye: 72,
 } as const;
 
 export type Material = (typeof MAT)[keyof typeof MAT];

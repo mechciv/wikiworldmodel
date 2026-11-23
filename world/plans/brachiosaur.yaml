@@ -1,4 +1,4 @@
-# Measured from the silhouette "Brachiosaurus scale 1.svg" on Wikimedia Commons.
+# Measured from the silhouette "Brachiosaurus scale 1.svg" on Wikimedia Commons; the neck raised more steeply than there.
 description: >-
   A sauropod built like a giraffe: long arms, high shoulders, a neck reaching up and a short tail.
 kind: animal
@@ -20,22 +20,22 @@ parts:
       - [-0.022, 1.264, 0.455, 0.065]
       - [0.033, 1.365, 0.59, 0.06]
       - [0.089, 1.393, 0.831, 0.045]
-      - [0.133, 1.433, 1.056, 0.03]
-      - [0.2, 1.534, 1.169, 0.024]
-      - [0.267, 1.663, 1.337, 0.019]
-      - [0.344, 1.815, 1.6, 0.015]
-      - [0.392, 1.89, 1.7, 0.0135]
-      - [0.422, 1.93, 1.76, 0.0125]
+      - [0.125, 1.4, 1.02, 0.032]
+      - [0.18, 1.6, 1.25, 0.025]
+      - [0.23, 1.89, 1.59, 0.02]
+      - [0.278, 2.175, 1.945, 0.016]
+      - [0.318, 2.385, 2.195, 0.014]
+      - [0.342, 2.465, 2.295, 0.0125]
     neck: { r: 0.012, steps: [1, 1] }
-  hind: { type: pillar, y: -0.128, x: 0.042, top: 0.85, r: 0.028, swing: 0.03 }
-  fore: { type: pillar, y: 0.056, x: 0.038, top: 1.05, r: 0.026, swing: 0.03, phase: 1 }
+  hind: { type: pillar, y: -0.128, x: 0.036, top: 0.86, r: 0.025, swing: 0.03 }
+  fore: { type: pillar, y: 0.056, x: 0.036, top: 1.12, r: 0.023, swing: 0.03, phase: 1 }
   head:
     type: head
     thin: false
     sides: [10, 5]
     at:
-      stand: { y: 0.44, z: 1.88, pitch: 0.36 }
-      alert: { y: 0.442, z: 1.94, pitch: 0.08 }
+      stand: { y: 0.357, z: 2.42, pitch: 0.4 }
+      alert: { y: 0.352, z: 2.48, pitch: 0.15 }
     rings:
       - [-0.002, 0, 0.011, 0.012]
       - [0.012, 0.004, 0.012, 0.016]

@@ -14,10 +14,11 @@ claims:
     prop: body_form
     value:
       parts:
-        crest: { type: spike, on: head, tint_add: 18, from: [0, 0.05, 0.03], to: [0, -0.07, 0.12], r: 0.014, sides: [6, 3] }
+        crest: { type: spike, on: head, tint_add: 18, from: [0, 0.045, 0.028], to: [0, -0.03, 0.085], r: 0.011, sides: [6, 3] }
     unsourced: >-
-      A machine's reconstruction: a solid crest as a spike over the back of the skull, from
-      "Saurolophus-sp-Scale-Chart-SVG-Steveoc86.svg" on Wikimedia Commons.
+      A machine's reconstruction: a solid crest as a spike over the back of the skull, first drawn
+      from "Saurolophus-sp-Scale-Chart-SVG-Steveoc86.svg" on Wikimedia Commons and since scaled,
+      without looking at it again, to the plan's head as it was redrawn shorter and lower.
   length-holtz-2012:
     prop: body_length
     value: 12

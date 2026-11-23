@@ -13,10 +13,12 @@ claims:
     prop: body_form
     value:
       parts:
-        nose-arch: { type: lump, on: head, at: [0, 0.095, 0.022], r: [0.022, 0.05, 0.024], sides: [8, 4], bands: [5, 3] }
+        nose-arch: { type: tube, on: head, sides: [8, 4], rings: [[0.045, 0.03, 0.01, 0.006], [0.07, 0.03, 0.015, 0.012], [0.095, 0.02, 0.015, 0.012], [0.122, 0.004, 0.01, 0.006]] }
     unsourced: >-
-      A machine's reconstruction: an arched snout, from the silhouette "Gryposaurus Scale.svg" on
-      Wikimedia Commons.
+      A machine's reconstruction: an arched snout, first drawn from the silhouette "Gryposaurus
+      Scale.svg" on Wikimedia Commons and since scaled, without looking at it again, to the plan's
+      snout as it was redrawn shorter and lower. It is drawn as a tube along the snout, so that it
+      turns with the head.
   length:
     prop: body_length
     value: { lo: 8.5, hi: 9 }

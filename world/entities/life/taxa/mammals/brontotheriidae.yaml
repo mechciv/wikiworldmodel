@@ -33,8 +33,8 @@ claims:
             - [0.14, 1.46, 0.48, 0.1]
             - [0.19, 1.34, 0.6, 0.08]
           neck: { r: 0.066, steps: [2, 1] }
-        hind: { y: -0.28, x: 0.08, top: 0.76, r: 0.046 }
-        fore: { y: 0.11, x: 0.082, top: 0.86, r: 0.048 }
+        hind: { y: -0.28, x: 0.055, top: 0.86, r: 0.058 }
+        fore: { y: 0.11, x: 0.05, top: 1.0, r: 0.058 }
         head:
           at:
             stand: { y: 0.24, z: 0.98, pitch: 0.3 }
@@ -53,6 +53,8 @@ claims:
       A machine's reconstruction, from the photograph of the Brontops mount on Wikipedia's
       page for Megacerops (Titanothere_brontops_(Thunderbeast).jpg): very high shoulders and a
       forked bony horn on the nose. Early members had none.
+      The legs are set under the body with their tops inside it, and thickened to the plan's shaped legs: a choice
+      of the drawing.
   length:
     prop: body_length
     value: 5

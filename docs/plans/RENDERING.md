@@ -1,7 +1,9 @@
 # Rendering: a better picture of every scene
 
-Status: steps 0 to 8 built, November 2026; step 9 waits until it is needed. What each step built, and where it differs
-from what was planned, is under [What was built](#what-was-built). It plans how the local scene renderer
+Status: steps 0 to 8 built, November 2026, and then a pass over all of them for fidelity, under
+[The fidelity pass](#the-fidelity-pass); step 9 waits until it is needed. What each step built, and where it differs
+from what was planned, is under [What was built](#what-was-built). What a picture is held to is under
+[The standard](#the-standard). It plans how the local scene renderer
 ([city.ts](../../viewer/src/gl/city.ts) and [cityShaders.ts](../../viewer/src/gl/cityShaders.ts)) and the meshes
 the generators make of forms ([forms.ts](../../world/generators/life/forms.ts)) get from a clean diorama to the
 picture of a good game, everywhere at once. [LIVING-WORLD.md](../LIVING-WORLD.md) and [SCENES.md](../SCENES.md) say
@@ -328,9 +330,120 @@ above, it says so here.
   where a link says `still=1`, or once a visitor has used the page and held the view still for 1.5 s; any change ends it.
   `Save picture` keeps the canvas as a PNG with its link written into it.
 
+## The fidelity pass
+
+The eight steps left a clean diorama: the light was right, and what it fell on was plain. The parity rounds, which
+hold the viewer's picture to researched briefs of what a visitor would have seen, showed it on every card: a ground
+of one smooth surface, trees as balls of stamped leaves on sticks, a tuft every metre on bare earth, bodies as tubes. This pass went over the ground, the
+plants, the bodies, the people and what they build, and raised each by the means the rules above allow.
+
+- **The ground's materials are scanned.** Twelve of them: earth, fine earth, sand, grit, pebbles, stones, rock, rock in
+  beds, mud, cracked mud, a crust and snow ([core/materials.ts](../../core/materials.ts)), all CC0 scans from Poly
+  Haven, pinned and packed by [tools/materials/pack.ts](../../tools/materials/pack.ts) into
+  `viewer/public/materials` (5.4 MB, fetched once, at full quality only) and credited in ATTRIBUTION.md. A scan gives
+  a material its grain: its colour divided by its own mean, to multiply the tone the scene or the substrate gives the
+  ground; its normal; its roughness about its mean; its height, by which two materials meet, the higher showing. Which
+  material lies where, in what share and what colour, is untouched: the shader that coloured the ground says, as it
+  colours it, how much of each material is there, and the grain of the two there is most of is read. Each is read
+  three times among the tiles of a grid of hexagons, so that no repeat shows from above, and from the eye, where a
+  float keeps its small places. A face too steep to read from above is read from its sides, its beds level. None of
+  the twelve shows a living thing: what lies under trees is drawn (below).
+- **Leaves come from an atlas.** A card of leaves shows a tile of an array of textures
+  ([core/leaves.ts](../../core/leaves.ts), [leafatlas.ts](../../viewer/src/gl/leafatlas.ts)): for each of twenty-two
+  kinds of leaf, two to four sprays of it on their twig, and for a tree's kinds a bough clothed in such sprays. Flat
+  ranks of needles, brushes of long needles, scale-leaved sprays, shoots like bottle brushes; fronds of a fern, a
+  cycad, a feather palm, a fan palm, a seed fern; oval, lobed, fan-shaped, tongue-shaped, strap-shaped, small and
+  compound broad leaves; grass, reeds, rushes, a horsetail's whorls, a herb, a cushion of moss. Each is drawn in code,
+  leaf by leaf, by a small rasterizer in a worker, in a second or two, the same in every browser: how light each point
+  of a leaf is, how much of it is twig, how its face leans across its card, and how much of it is leaf. Its smaller
+  levels keep as much of a tile leaf as its first, so that a spray far off keeps its mass. Which kind a part has is
+  its form's (`leaf`), or follows from its type and material; nothing in the atlas is a photograph.
+- **Plants grow skeletons.** [plants.ts](../../world/generators/life/plants.ts) draws every plant part type afresh: a
+  conifer's branches in whorls that rise, sag and turn up, with sprays either side of them or all round; a
+  broad-leaved tree's twig ends spread over a lopsided crown and gathered, by nearness, to limbs and their branches,
+  with a rosette of sprays at each end and boughs behind them for the crown's mass; a palm's and a fern's fronds as
+  troughed strips that arch and hang; a scale tree's forks ending in bottle brushes; a shrub's stems. A plant is drawn
+  four ways from one seed, so that it keeps its shape as it nears: to its twigs close by, with boughs for its sprays a
+  little way off, as a trunk, a mass and boughs laid like shingles from a way off, and as a plain shape far off.
+  Limbs carry bark laid along them, of six kinds by part type: furrowed, smooth, in scales, in diamond cushions,
+  ringed, ribbed and jointed. `gen:life/scene` is version 12: version 10 gave a scene the world's relief below its grid, and version 11 set its animals walking.
+- **The ground's cover closes, in patches.** Three grids of clumps lie over one another: the scene's own, a finer one
+  near the eye, and a wider one of larger clumps out to 170 m; a wide plant is sown further from its neighbours than a
+  narrow one. Each grid is made a tile at a time and kept. A tuft's own blades are finer and bent over. Low plants
+  grow in patches a few metres across, the same on every grid: most of a patch is of one kind, ranker or shorter and a
+  little greener or yellower than the next, thinner at its edge, and one patch in seven is an opening. Where low
+  plants have most of the ground, as on a grassland, the sward closes over patch and opening alike; where they have
+  little, there are fewer clumps than their share of a grid, since a clump covers more than its own node. None stands
+  where the eye does.
+- **What lies fallen under trees is the canopy's own leaves.** The atlas has eight tiles more, each a patch of ground
+  0.7 m by 1.4 m strewn with one kind of litter, which repeats without a seam: needles and shed shoots, lengths of
+  scale-leaved shoot, oval, lobed and fan-shaped leaves, tongues and straps, small leaves, fronds and their loose
+  leaflets, with bits of twig among them. Every kind of leaf falls as one of them, and a scene's litter is of its
+  canopy's two commonest kinds, by weight. The ground under trees reads two sheets of it, one turned and a little
+  larger than the other, within 34 m of the eye. Each leaf of a tile keeps its place in the order they fell in, the
+  last on top, so that where less has fallen only the last lie there, whole; and they lie in drifts. A leaf is a
+  brown of its own, and the earth's grain does not show through it. Nothing here is a photograph either.
+- **What grows takes its place's colour.** A leaf takes most of its hue from the tones its place's climate gives its
+  low plants or its canopy, as the ground under it does: a plant and the ground from afar are of one colour. Each
+  plant is a shade of its own, and what grows low is dark at its foot.
+- **Bodies.** A leg has a profile: a thigh or a shoulder deep fore and aft, a knee, a slender shank, a foot that
+  spreads, and the muscle where it leaves the body. A trunk has one more ring between each two close by. Skins are
+  laid in the body's own frame, a hide creased round the body, a coat lit at its edge; an eye is dark and wet. The
+  plans themselves, which decide whether a horse is a horse, were gone over on their sheets, side, front and above:
+  forty-six of them redrawn or mended, and one written for horses, which had been drawn as the plain ungulate and
+  looked like llamas. A taxon's own form changes its plan part by part, so the eighty-two records whose forms
+  restated the old proportions were refitted with them: what only repeated the old plan was dropped, and what makes
+  the taxon itself was set on the new body.
+- **People and what they build.** A figure's body is wider than it is deep, its head longer than wide, with a nose
+  and hair; a robe falls to the ground; cloth hangs in folds. What houses are built of stands in relief, each
+  material by a height of its own, and what is of earth or stone takes the scans' grain. `gen:people/settlement` is
+  version 5: version 4 set its people walking.
+- **Shadows close to.** The nearest cascade is as wide as the view is far, down to 24 m, so that close by a shadow is
+  fine enough to meet the foot that casts it.
+- **Clouds without streaks.** A march of 24 steps through the cloud layer hit or missed the edges of its heaps so
+  much at random that eight frames' average kept the pattern of the marches' starts, as fine streaks along the rows of
+  the screen. The march has 48 steps; each frame of a view at rest starts an even eighth of a step on from the last,
+  in the order that halves the gaps; what is finer than the ground a pixel takes in of the layer, towards the
+  horizon, is left out; and the light that has come a long way through the cloud is reckoned by its broad shape alone,
+  which pays for some of the steps.
+
+*Not done:* stones and logs as things standing on the ground; parallax in the ground's grain; impostors; a house's
+yard where no tradition says what stood in it; crops as plants; a house's own shape, which is still a plain box.
+Nothing yet says that a crust of salt or a mud that dries to cracks grows less than its climate's share of low
+plants: the cover is the climate's, whatever the ground is made of. The lighter way draws none of this: its plants
+are the plain shapes they were.
+
+*What the plans could not say,* as those who redrew them found: a section that is not an ellipse (a flat belly, a
+pear-shaped body); a leg narrower across than fore and aft, which a thigh is; a part that hangs on another part's end,
+so that a turtle's head has eyes and a crocodile a line to its jaw; a row of plates that follows a back's curve; a
+frill with thickness at its rim; a crest that turns with the head it stands on; one ring of a body changed without
+writing them all. Forms with a source of their own were left as they were, among them most birds, whose thighs still
+hang under their bellies.
+
+## The standard
+
+A picture is judged where a visitor looks: from eye height, at what is within twenty metres, and at what stands out
+against the sky. Each kind of thing is held to its own test, on the look book's views and on the sheets:
+
+- **The ground** reads as a material from two metres: earth has crumbs and stones, sand grains, mud a sheen. No
+  repeat shows from the air. Its colour from afar is its colour close by.
+- **A plant** reads as its kind by its outline at fifty metres and by its leaf at three. Its crown has gaps the sky
+  shows through and no surface that is only a shape. A stand of one kind has no two alike.
+- **A sward** closes: where low plants cover the ground, bare earth shows between them only as the cover's share
+  leaves it.
+- **An animal** reads as its group from its side at any distance, by its back line, its neck, its head and its legs:
+  its sheet (`form-sheet`) is looked at against a skeletal reconstruction whenever its plan is touched.
+- **A person and a house** stand on the ground, and cast a shadow that meets them.
+- **Nothing is a photograph of a living thing,** and nothing drawn says more than its record: a finer picture of a
+  taxon with no form of its own is a finer picture of its nearest node's.
+
+A change is shown on the look book's sheet, before and after, with its frame times; where a view's frame goes over the
+budget on the reference GPU, the change says what it thins to come back under it.
+
 ## Open questions
 
-- Is bark, like a leaf, too particular to a kind of tree for a scanned material, or can one stand in for all?
+- Is bark, like a leaf, too particular to a kind of tree for a scanned material, or can one stand in for all? (The
+  fidelity pass draws it, in six kinds.)
 - Where should the wind's direction come from: a field of the climate's winds, once there is one, or the renderer?
 - Is a third quality level, between fast and full, wanted for phones?
 - Animals now move from place to place, each by its body plan's routine, with nothing carried from frame to frame

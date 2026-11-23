@@ -14,11 +14,14 @@ claims:
     prop: body_form
     value:
       parts:
-        frill: { r: 0.22, dir: [-0.72, 0.68], across: 0.72, scallop: 0.025 }
+        frill: { r: 0.138, across: 0.62, scallop: 0.025 }
+        frill-sides: { points: [[0.058, 0.098, 0.03], [0.077, 0.004, 0.078], [0.068, -0.062, 0.114], [0.13, -0.038, 0.052], [0.105, 0.07, -0.006]] }
     unsourced: >-
       A machine's reconstruction: a longer frill than the plan, whose horns are already those of
       Triceratops, from the words on chasmosaurines in Holtz (2012, pp. 51-52): "typically large
-      brow horns and shallow, long snouts".
+      brow horns and shallow, long snouts". The frill is made as much longer than the plan's as it
+      was before the plan's head and frill were redrawn smaller, and lies at the plan's slope; its
+      side panels are the plan's, drawn out to this frill's rim.
   length:
     prop: body_length
     value: { lo: 5, hi: 9 }

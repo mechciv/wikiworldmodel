@@ -13,11 +13,13 @@ claims:
     prop: body_form
     value:
       parts:
-        legs: { top: 0.84, knee: 0.56, ankle: 0.24, r: 0.042 }
+        legs: { top: 0.84, knee: 0.56, ankle: 0.24, r: 0.038 }
         horns: { type: spike, on: head, mirror: true, tint_add: 18, from: [0.022, 0.024, 0.042], to: [0.058, 0.026, 0.078], r: 0.012, sides: [6, 3] }
     unsourced: >-
       A machine's reconstruction: the abelisaur form with longer legs and horns over the eyes, from
-      "Carnotaurus Size Chart.png" on Wikimedia Commons.
+      "Carnotaurus Size Chart.png" on Wikimedia Commons. Its legs are written a little thinner than
+      at first, with the family's, since a leg is now drawn deep at the thigh with its muscle on the
+      flank.
   length-holtz-2012:
     prop: body_length
     value: 8

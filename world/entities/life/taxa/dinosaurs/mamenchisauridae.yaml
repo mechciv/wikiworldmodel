@@ -32,8 +32,8 @@ claims:
             - [0.475, 2.77, 2.65, 0.0095]
           neck: { r: 0.0085, steps: [1, 1] }
         body-low: null
-        hind: { y: 0.0, x: 0.046, top: 0.8, r: 0.034 }
-        fore: { y: 0.165, x: 0.048, top: 0.94, r: 0.028 }
+        hind: { y: 0.0, x: 0.038, top: 0.8, r: 0.026 }
+        fore: { y: 0.165, x: 0.042, top: 0.94, r: 0.022 }
         head:
           at:
             stand: { y: 0.489, z: 2.76, pitch: 0.25 }
@@ -48,6 +48,9 @@ claims:
     unsourced: >-
       A machine's reconstruction: a neck near half the length of the body and a short tail, from M.
       youngi in the silhouette "Mamenchisaurus Species Scale Steveoc86.svg" on Wikimedia Commons.
+      Its legs are written thinner and nearer the middle than at first, by eye on its sheet: a leg
+      is now drawn deep at the thigh with its muscle on the flank, and the first figures made them
+      stand out of the body.
   length:
     prop: body_length
     value: { lo: 12, hi: 26 }

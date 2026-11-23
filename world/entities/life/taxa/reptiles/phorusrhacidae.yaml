@@ -24,10 +24,10 @@ claims:
           rings:
             - [-0.36, 1.12, 0.92, 0.02]
             - [-0.31, 1.24, 0.86, 0.06]
-            - [-0.23, 1.38, 0.78, 0.1]
-            - [-0.13, 1.5, 0.72, 0.125]
-            - [-0.03, 1.56, 0.74, 0.125]
-            - [0.05, 1.6, 0.88, 0.1]
+            - [-0.23, 1.38, 0.76, 0.1]
+            - [-0.13, 1.5, 0.64, 0.125]
+            - [-0.03, 1.56, 0.62, 0.125]
+            - [0.05, 1.6, 0.8, 0.1]
             - [0.1, 1.7, 1.1, 0.07]
           neck: { r: 0.05, steps: [5, 2] }
         legs: { r: 0.06, knee: 0.74, ankle: 0.4 }
@@ -45,7 +45,7 @@ claims:
             - [0.18, -0.012, 0.022, 0.046]
         bill: { rings: [[0.165, -0.012, 0.024, 0.052], [0.21, -0.016, 0.018, 0.042], [0.24, -0.034, 0.009, 0.022], [0.248, -0.06, 0.003, 0.007]] }
         eyes: { at: [0.036, 0.05, 0.036], r: 0.012 }
-    unsourced: "A machine's reconstruction, from the restorations in Fig. 1 of Alvarenga & Höfling (2003): a huge deep hooked head on a thick neck, a deep body low at the rear, stout legs and small wings."
+    unsourced: "A machine's reconstruction, from the restorations in Fig. 1 of Alvarenga & Höfling (2003): a huge deep hooked head on a thick neck, a deep body low at the rear, stout legs and small wings. The belly is drawn deep enough to cover the thighs: a choice of the drawing."
   length:
     prop: body_length
     value: { lo: 0.8, hi: 2.8 }

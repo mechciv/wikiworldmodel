@@ -97,14 +97,15 @@ claims:
             stand: { y: 0.26, z: 0.8, pitch: 0.55 }
             alert: { y: 0.26, z: 0.96, pitch: 0.34 }
             low: { y: 0.28, reach: 0.235, pitch: 1.0 }
-        hind: { mat: fur }
-        fore: { mat: fur }
+        hind: { mat: fur, x: 0.06 }
+        fore: { mat: fur, x: 0.058 }
         nasal: { type: spike, on: head, mat: horn, tint: 70, sides: [8, 4], from: [0, 0.19, 0.022], to: [0, 0.27, 0.27], r: 0.034 }
         frontal: { type: spike, on: head, mat: horn, tint: 70, sides: [7, 4], from: [0, 0.1, 0.05], to: [0, 0.11, 0.14], r: 0.026 }
     unsourced: >-
       A machine's reconstruction: the form written for Rhinocerotidae, with the long front
       horn, the hump over the shoulders, the head carried low and the shaggy coat usually
-      shown for the woolly rhinoceros; only compared with its sheet.
+      shown for the woolly rhinoceros; only compared with its sheet. Its legs are set in a little
+      from the plan's, under its narrower body.
   mass-mammal-forms:
     prop: body_mass
     value: 2692.55

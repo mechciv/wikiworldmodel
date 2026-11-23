@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { parse } from 'yaml';
 import { describe, expect, it } from 'vitest';
 import { applyChange, canonicalForm, formSource, resolveForm, type Form, type TreeStep } from '../../../core/form.ts';
+import { defaultLeaf, LEAF_CARD_TILES, tileKind } from '../../../core/leaves.ts';
 import { MAT, Mesh, STRIDE } from '../city/kit.ts';
 import { BONE, checkForm, drawAnimal, drawPlant, meshBounds, POSE, unitStance } from './forms.ts';
 
@@ -117,32 +118,67 @@ describe('the plans', () => {
     }
   });
 
-  it('hold a plant\'s leaves on cards close by, and on fewer, larger cards from a way off, and never on the lighter way', () => {
-    // The materials of leaves on cards, and of the mass inside a crown (world/generators/city/kit.ts).
+  it('hold a plant\'s leaves on cards close by, on fewer from a little way off and fewer still from a way off, and never on the lighter way', () => {
+    // The materials of leaves on cards (world/generators/city/kit.ts).
     const onCards = new Set<number>([MAT.needleCard, MAT.frondCard, MAT.broadCard, MAT.fanCard]);
     const cards = (m: Mesh) => {
       const { vertices } = m.arrays();
       const b = new Uint8Array(vertices);
       let n = 0;
       for (let i = 0; i < m.verts; i++) if (onCards.has(b[i * STRIDE + 24])) n++;
-      return n / 4;
+      return n;
     };
     for (const n of names) {
       const f = canonicalForm(plans[n]);
       if (f.kind !== 'plant') continue;
-      const draw = (d: 0 | 1 | 2, withCards: boolean) => {
+      const draw = (d: 0 | 1 | 2, withCards: boolean, coarse = false) => {
         const m = new Mesh(4096);
-        drawPlant(m, f, 12, 7, d, 90, withCards);
+        drawPlant(m, f, 12, 7, d, 90, withCards, coarse);
         return m;
       };
-      // Tufts are blades, and a mat floats: neither has leaves on cards.
+      // A tuft's blades are its own close by, and a mat floats: neither has leaves on cards there.
       const leafy = Object.values(f.parts).some((p) => p && p.type !== 'tuft' && p.type !== 'mat');
-      if (leafy) expect(cards(draw(2, true)), n).toBeGreaterThan(0);
-      expect(cards(draw(1, true)), n).toBeLessThanOrEqual(cards(draw(2, true)));
+      if (leafy) {
+        expect(cards(draw(2, true)), n).toBeGreaterThan(0);
+        // The same plant a little way off, with boughs for its sprays: no more of it, and still in leaf.
+        expect(cards(draw(2, true, true)), n).toBeGreaterThan(0);
+        expect(draw(2, true, true).verts, n).toBeLessThanOrEqual(draw(2, true).verts);
+        expect(cards(draw(1, true)), n).toBeLessThanOrEqual(cards(draw(2, true, true)));
+      }
       expect(cards(draw(1, false)), n).toBe(0);
       expect(cards(draw(0, true)), n).toBe(0);
-      // The lighter way draws what it always did: a plant from a way off is no more than it was.
-      expect(draw(1, false).verts, n).toBeLessThanOrEqual(draw(1, true).verts);
+    }
+  });
+
+  it('show a tile of the atlas of leaves on every card: one of its part\'s kind, from the twig\'s foot to its tip', () => {
+    const onCards = new Set<number>([MAT.needleCard, MAT.frondCard, MAT.broadCard, MAT.fanCard]);
+    for (const n of names) {
+      const f = canonicalForm(plans[n]);
+      if (f.kind !== 'plant') continue;
+      const kinds = new Set(Object.values(f.parts).flatMap((p) => (p ? [(p.leaf as string | undefined) ?? defaultLeaf(p.type, p.mat as string | undefined)] : [])));
+      for (const coarse of [false, true]) {
+        const m = new Mesh(4096);
+        drawPlant(m, f, 12, 7, 2, 90, true, coarse);
+        const { vertices } = m.arrays();
+        const b = new Uint8Array(vertices);
+        const fl = new Float32Array(vertices);
+        for (let i = 0; i < m.verts; i++) {
+          if (!onCards.has(b[i * STRIDE + 24])) continue;
+          const u = fl[i * 7 + 4];
+          const v = fl[i * 7 + 5];
+          const tile = Math.floor(u);
+          expect(tile, n).toBeGreaterThanOrEqual(0);
+          expect(tile, n).toBeLessThan(LEAF_CARD_TILES);
+          // Within its tile, clear of the next; and along it from 0 to 1.
+          expect(u - tile, n).toBeGreaterThan(0.005);
+          expect(u - tile, n).toBeLessThan(0.995);
+          expect(v, n).toBeGreaterThanOrEqual(0);
+          expect(v, n).toBeLessThanOrEqual(1);
+          // A horsetail's own tile stands for the whole plant; a tree of it has leafy branches, as bottle brushes.
+          const kind = tileKind(tile).kind;
+          expect(kinds.has(kind) || (kinds.has('whorl') && kind === 'needle-awl'), `${n}: a card of ${kind}`).toBe(true);
+        }
+      }
     }
   });
 
@@ -154,6 +190,8 @@ describe('the plans', () => {
       const f = canonicalForm(plans[n]);
       const parts = Object.values(f.parts).filter((p) => !!p);
       if (!parts.length || !parts.every((p) => p!.type === 'tuft')) continue;
+      // Only blades are drawn one by one: a tuft of soft leaves, or of leafy stems, is cards of them.
+      if (!parts.every((p) => ((p!.leaf as string | undefined) ?? defaultLeaf('tuft', p!.mat as string | undefined)).startsWith('blade'))) continue;
       tufts++;
       const m = new Mesh(4096);
       drawPlant(m, f, 1, 7, 2, 90);

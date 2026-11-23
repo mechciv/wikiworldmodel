@@ -448,6 +448,28 @@ OFL file beside it: IBM Plex Mono, IBM Plex Sans, Newsreader.
 The viewer's come from Fontsource's packages, under the same licence, whose text goes out with the viewer from
 [viewer/public/fonts/](viewer/public/fonts/): Geist, Geist Mono.
 
+## Materials
+
+The viewer draws the ground with scans of earth, sand, stones, rock, mud and snow from [Poly Haven](https://polyhaven.com),
+each dedicated to the public domain under CC0-1.0, packed into [viewer/public/materials/](viewer/public/materials/)
+by `tools/materials/pack.ts` from the files [tools/materials/ground.yaml](tools/materials/ground.yaml) pins. A scan gives a
+material its grain and says nothing of any place: which material a ground has, and its colour, are the world's.
+
+| Material | Scan | By |
+|---|---|---|
+| Dry, crumbly earth with small stones | [Brown Mud Dry](https://polyhaven.com/a/brown_mud_dry) | Rob Tuytel |
+| Fine, smooth earth: silt, a trodden yard, the floor of a dried pool | [Dirt](https://polyhaven.com/a/dirt) | Charlotte Baglioni |
+| Fine sand, faintly rippled | [Sand 03](https://polyhaven.com/a/sand_03) | Charlotte Baglioni |
+| Coarse sand with grit: a desert's floor | [Gravelly Sand](https://polyhaven.com/a/gravelly_sand) | Dario Barresi |
+| Rounded pebbles of a river's bed, of many rocks | [Ganges River Pebbles](https://polyhaven.com/a/ganges_river_pebbles) | Amal Kumar |
+| Angular stones and rubble over earth | [Rocks Ground 01](https://polyhaven.com/a/rocks_ground_01) | Rob Tuytel |
+| Bare rock, weathered and pitted | [Rock 08](https://polyhaven.com/a/rock_08) | Rob Tuytel |
+| Rock in beds, broken along them: a cliff or a cut bank | [Cliff Side](https://polyhaven.com/a/cliff_side) | Dario Barresi, James Ray Cock, Jenelle van Heerden |
+| Wet mud, churned and lumpy | [Brown Mud 03](https://polyhaven.com/a/brown_mud_03) | Rob Tuytel |
+| Mud dried into polygons, their edges curled | [Mud Cracked Dry 03](https://polyhaven.com/a/mud_cracked_dry_03) | Dario Barresi, Dimitrios Savva |
+| A hard pale crust, finely cracked: a playa, a salt pan | [Dry Ground 01](https://polyhaven.com/a/dry_ground_01) | Rob Tuytel |
+| Snow, a little wind-packed | [Snow 02](https://polyhaven.com/a/snow_02) | Rob Tuytel |
+
 ## Code
 
 The libraries the code depends on keep their own licences, listed in `package-lock.json` and

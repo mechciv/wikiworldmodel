@@ -47,8 +47,8 @@ claims:
             - [0.123, 0.93, 0.324, 0.062]
             - [0.171, 0.862, 0.483, 0.04]
           neck: { r: 0.0115, steps: [8, 2] }
-        hind: { y: -0.02, x: 0.05, top: 0.72, r: 0.04 }
-        fore: { y: 0.096, x: 0.05, top: 0.74, r: 0.03 }
+        hind: { y: -0.02, x: 0.03, top: 0.72, r: 0.03 }
+        fore: { y: 0.096, x: 0.043, top: 0.74, r: 0.023 }
         head:
           at:
             stand: { y: 0.335, z: 0.83, pitch: 0.35 }
@@ -57,7 +57,9 @@ claims:
     unsourced: >-
       A machine's reconstruction, its outline measured from CM 563 in the silhouette "Apatosaurus
       scale mmartyniuk wiki.png" on Wikimedia Commons: taller hips, a far deeper body and a thick,
-      level neck than the plan.
+      level neck than the plan. Its legs are written thinner and nearer the middle than at first, by
+      eye on its sheet: a leg is now drawn deep at the thigh with its muscle on the flank, and the
+      first figures made them stand out of the body.
   length:
     prop: body_length
     value: { lo: 21, hi: 26 }

@@ -32,8 +32,8 @@ claims:
             - [0.09, 1.02, 0.4, 0.098]
             - [0.17, 1.04, 0.47, 0.084]
           neck: { r: 0.056, steps: [3, 1] }
-        hind: { y: -0.3, x: 0.046, top: 0.8, knee: 0.56, ankle: 0.3, r: 0.048, swing: 0.07 }
-        fore: { y: 0.11, x: 0.054, top: 0.6, r: 0.031, swing: 0.07 }
+        hind: { y: -0.3 }
+        fore: { y: 0.11 }
         head:
           sides: [12, 6]
           at:
@@ -51,7 +51,7 @@ claims:
         eyes: { at: [0.032, 0.062, 0.022], r: 0.006 }
     unsourced: >-
       A machine's reconstruction of a village dog of middling size, as such dogs are generally known: a deep chest and
-      a tucked belly, a wedge of a head with pricked ears, and the tail carried up in a sickle. Its proportions are a
+      a tucked belly, a wedge of a head with pricked ears, and the tail carried up in a sickle; the legs are the plan's own, set under its longer body. Its proportions are a
       drawing's, and no measurements of any animal. Only compared with its sheet.
   mass:
     prop: body_mass

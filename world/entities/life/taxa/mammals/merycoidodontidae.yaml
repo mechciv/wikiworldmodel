@@ -28,8 +28,8 @@ claims:
             - [0.09, 1.08, 0.54, 0.086]
             - [0.16, 1.1, 0.64, 0.066]
           neck: { r: 0.046, steps: [3, 1] }
-        hind: { y: -0.22, x: 0.056, top: 0.84, knee: 0.56, ankle: 0.26, r: 0.05 }
-        fore: { y: 0.08, x: 0.058, top: 0.76, r: 0.026 }
+        hind: { y: -0.22 }
+        fore: { y: 0.08 }
         head:
           at:
             stand: { y: 0.24, z: 1.12, pitch: 0.2 }
@@ -46,7 +46,8 @@ claims:
     unsourced: >-
       A machine's reconstruction, from the photograph of the Merycoidodon mount at the
       American Museum of Natural History on Wikipedia's page for the genus: a heavy head, a
-      short neck, short legs and a long tail.
+      short neck, short legs and a long tail. The legs are the plan's own, set under its body and left short by its
+      low hips.
   length:
     prop: body_length
     value: 1.4

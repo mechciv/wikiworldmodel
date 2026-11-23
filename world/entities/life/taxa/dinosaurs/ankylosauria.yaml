@@ -19,10 +19,10 @@ claims:
     value:
       parts:
         club: null
-        armour: { fall: 9, top: [0.94, 0.21] }
     unsourced: >-
       A machine's editorial choice: the plan with its tail club taken away, as the club belongs only
-      to the ankylosaurids, and its bands of armour drawn in so that they sit on the back.
+      to the ankylosaurids. The bands of armour once drawn in here, so that they sat on the back,
+      are left to the plan, whose back they now fit from end to end.
   posture:
     prop: posture
     value: quadruped

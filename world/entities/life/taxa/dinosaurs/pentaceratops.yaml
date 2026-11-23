@@ -13,10 +13,13 @@ claims:
     prop: body_form
     value:
       parts:
-        frill: { r: 0.29, dir: [-0.5, 0.86], across: 0.5, tall: 0.95, scallop: 0.03 }
+        frill: { r: 0.19, dir: [-0.78, 0.63], across: 0.5, tall: 0.95, scallop: 0.03 }
+        frill-sides: { points: [[0.058, 0.098, 0.03], [0.086, -0.014, 0.108], [0.076, -0.098, 0.173], [0.144, -0.063, 0.085], [0.105, 0.07, -0.006]] }
     unsourced: >-
-      A machine's reconstruction: a very long, steep frill, from P. sternbergii in the silhouette
-      "Ceratopsidae Scale V2.svg" on Wikimedia Commons.
+      A machine's reconstruction: a very long, steep frill, first drawn from P. sternbergii in the
+      silhouette "Ceratopsidae Scale V2.svg" on Wikimedia Commons and since scaled, without looking
+      at it again, to the plan's head and frill as they were redrawn smaller, with the plan's side
+      panels drawn out to this frill's rim.
   length-holtz-2012:
     prop: body_length
     value: 8

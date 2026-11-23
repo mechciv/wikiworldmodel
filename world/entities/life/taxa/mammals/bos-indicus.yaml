@@ -23,7 +23,7 @@ claims:
         hump: { type: lump, mat: fur, sides: [10, 6], bands: [5, 3], at: [0, 0.1, 0.9], r: [0.08, 0.11, 0.2] }
         dewlap: { points: [[0, 0.2, 0.7], [0, 0.34, 0.76], [0, 0.34, 0.56], [0, 0.3, 0.42], [0, 0.23, 0.33], [0, 0.15, 0.36], [0, 0.11, 0.5]] }
         horns: { points: [[0.04, -0.005, 0.045, 0.014], [0.07, -0.03, 0.085, 0.012], [0.085, -0.07, 0.135, 0.008], [0.07, -0.11, 0.185, 0.003]] }
-        ears: { at: [0.085, 0.03, -0.015], r: [0.022, 0.018, 0.05] }
+        ears: { at: [0.072, 0.03, -0.015], r: [0.022, 0.018, 0.05] }
     unsourced: >-
       A machine's reconstruction of a zebu: the ox it starts from, with the hump over the shoulders and the deep
       hanging dewlap that zebu are generally known for, and, from Wikipedia's article on the Gir, long pendulous ears

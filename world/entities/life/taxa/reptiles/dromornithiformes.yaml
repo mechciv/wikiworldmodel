@@ -25,10 +25,10 @@ claims:
           rings:
             - [-0.33, 1.14, 0.92, 0.02]
             - [-0.28, 1.26, 0.84, 0.066]
-            - [-0.2, 1.4, 0.74, 0.115]
-            - [-0.1, 1.5, 0.68, 0.14]
-            - [0.0, 1.56, 0.72, 0.138]
-            - [0.07, 1.62, 0.9, 0.11]
+            - [-0.2, 1.4, 0.7, 0.115]
+            - [-0.1, 1.5, 0.58, 0.14]
+            - [0.0, 1.56, 0.58, 0.138]
+            - [0.07, 1.62, 0.8, 0.11]
             - [0.11, 1.7, 1.12, 0.08]
           neck: { r: 0.06, steps: [5, 2] }
         head:
@@ -43,7 +43,7 @@ claims:
             - [0.14, 0.0, 0.036, 0.086]
         bill: { rings: [[0.13, -0.002, 0.036, 0.08], [0.18, -0.012, 0.028, 0.066], [0.22, -0.026, 0.016, 0.04], [0.235, -0.038, 0.005, 0.014]] }
         eyes: { at: [0.042, 0.05, 0.04], r: 0.012 }
-    unsourced: "A machine's reconstruction from what is known of the group in general: the plan's big flightless bird with a massive beak. No skeletal figure was looked at."
+    unsourced: "A machine's reconstruction from what is known of the group in general: the plan's big flightless bird with a massive beak. No skeletal figure was looked at. The belly is drawn deep enough to cover the thighs: a choice of the drawing."
   length:
     prop: body_length
     value: { lo: 1.5, hi: 3 }
