@@ -1587,7 +1587,7 @@ void main() {
 
     // The sky; under the sea, the water.
     gl.useProgram(this.skyP.program);
-    setUniforms(gl, this.skyP, { uInvViewProj: invert(farVp), uSun: f.sun, uSunColor: this.sunColor, uHeight: f.eye[2], uAlpha: f.solid || under ? 1 : 0, uSea: this.sea ? 1 : 0, uEyeSea: eyeSea, uSkyTop: this.skyTop, uCloudCover: this.cloudCover, uClockSky: f.clock ?? 0, uCloudVolume: this.fast ? 0 : 1, uFrameNoise: this.sample });
+    setUniforms(gl, this.skyP, { uInvViewProj: invert(farVp), uSun: f.sun, uSunColor: this.sunColor, uHeight: f.eye[2], uAlpha: f.solid || under ? 1 : 0, uSea: this.sea ? 1 : 0, uEyeSea: eyeSea, uSkyTop: this.skyTop, uCloudCover: this.cloudCover, uClockSky: f.clock ?? 0, uCloudVolume: this.fast ? 0 : 1, uFrameNoise: halton(Math.max(0, this.sample - 1), 2) });
     gl.activeTexture(gl.TEXTURE0 + UNIT.ao);
     gl.bindTexture(gl.TEXTURE_2D, null);
     gl.bindVertexArray(this.emptyVao);

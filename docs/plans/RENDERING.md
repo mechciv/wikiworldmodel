@@ -368,6 +368,12 @@ plants, the bodies, the people and what they build, and raised each by the means
   version 4.
 - **Shadows close to.** The nearest cascade is as wide as the view is far, down to 24 m, so that close by a shadow is
   fine enough to meet the foot that casts it.
+- **Clouds without streaks.** A march of 24 steps through the cloud layer hit or missed the edges of its heaps so
+  much at random that eight frames' average kept the pattern of the marches' starts, as fine streaks along the rows of
+  the screen. The march has 48 steps; each frame of a view at rest starts an even eighth of a step on from the last,
+  in the order that halves the gaps; what is finer than the ground a pixel takes in of the layer, towards the
+  horizon, is left out; and the light that has come a long way through the cloud is reckoned by its broad shape alone,
+  which pays for some of the steps.
 
 *Not done:* stones and logs as things standing on the ground; parallax in the ground's grain; impostors; a house's
 yard where no tradition says what stood in it; crops as plants. Nothing yet says that a crust of salt or a mud that

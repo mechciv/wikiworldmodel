@@ -287,15 +287,21 @@ const CLOUDS = /* glsl */ `
 uniform float uCloudCover;
 uniform float uClockSky;
 uniform float uCloudVolume;
-// A different start for each frame's march, for the frames' average to smooth.
+// Where in its first step each frame's march starts, 0 to 1: the frames of a view at rest take the eighths of a step
+// one after another, in the order that halves the gaps, so that their average is a march eight times as fine.
 uniform float uFrameNoise;
 const float CLOUD_BASE = 1400.0;
 const float CLOUD_TOP = 2400.0;
-float cloudDensity(vec3 p) {
+// How dense the cloud is at a point. foot is how much of the layer a pixel takes in there, m: towards the horizon a
+// row of pixels is hundreds of metres of cloud further off than the row under it, and what is finer than that would
+// show as streaks along the rows, so it is left out as it becomes so.
+float cloudDensityAt(vec3 p, float foot) {
   float h = (p.z - CLOUD_BASE) / (CLOUD_TOP - CLOUD_BASE);
   if (h <= 0.0 || h >= 1.0) return 0.0;
   vec3 q = p + vec3(uClockSky * 6.0, uClockSky * 3.4, 0.0);
-  float shape = texture(uNoise, q / (64.0 * 900.0)).r * 0.62 + texture(uNoise, q / (64.0 * 320.0) + 0.37).g * 0.38;
+  // Its finer shape is not asked for where it would not be seen.
+  float finer = foot < 1300.0 ? mix(texture(uNoise, q / (64.0 * 320.0) + 0.37).g, 0.5, smoothstep(320.0, 1300.0, foot)) : 0.5;
+  float shape = texture(uNoise, q / (64.0 * 900.0)).r * 0.62 + finer * 0.38;
   // Flat at the base and round at the top, as a heap of cloud is. The noise lies mostly within a tenth of a half, so the
   // share of the sky above a threshold is about its normal distribution's: the threshold that leaves the cover.
   float profile = smoothstep(0.0, 0.08, h) * (1.0 - smoothstep(0.35, 1.0, h));
@@ -304,9 +310,10 @@ float cloudDensity(vec3 p) {
   float d = (shape - threshold - 0.06 * (1.0 - profile)) * 7.0 * profile;
   if (d <= 0.0) return 0.0;
   // Its edges eaten away, finely.
-  d -= (texture(uNoise, q / (64.0 * 90.0) + 0.71).b - 0.5) * 0.35;
+  if (foot < 360.0) d -= (texture(uNoise, q / (64.0 * 90.0) + 0.71).b - 0.5) * 0.35 * (1.0 - smoothstep(90.0, 360.0, foot));
   return clamp(d, 0.0, 1.0);
 }
+float cloudDensity(vec3 p) { return cloudDensityAt(p, 0.0); }
 // How much sunlight comes through the clouds to a point below them, along the sun.
 float cloudShadow(vec3 p, vec3 sun) {
   if (sun.z < 0.05 || uCloudCover <= 0.0) return 1.0;
@@ -1876,7 +1883,8 @@ vec2 fallenLeaves(vec3 p, vec2 dx, vec2 dy, float amount) {
     // How many texels across a pixel is: the more, the less any one leaf's place in the order can be told.
     float lod = max(0.0, 0.5 * log2(max(dot(gx, gx) * ${(LEAF_TILE.across * LEAF_TILE.across).toFixed(1)}, dot(gy, gy) * ${(LEAF_TILE.along * LEAF_TILE.along).toFixed(1)})));
     float soft = clamp(0.05 + 0.22 * lod, 0.05, 1.0);
-    float there = t.a * smoothstep(t.g - soft, t.g + soft, some);
+    // With all of them fallen, the first to fall lie here too.
+    float there = t.a * smoothstep(t.g - soft, t.g + soft, some * (1.0 + soft));
     if (there > cover) { cover = there; light = t.r; }
   }
   return vec2(cover, light);
@@ -2902,13 +2910,16 @@ void main() {
     }
   } else if (d.z > 0.012 && uCloudCover > 0.0 && uHeight < CLOUD_BASE) {
     float t0 = (CLOUD_BASE - uHeight) / d.z;
-    // Steps of 250 m at most, low towards the horizon, where the layer is crossed a long way: fewer, longer ones hit or
-    // missed its heaps too much at random for a few frames' average to smooth.
+    // Steps of 125 m at most, low towards the horizon, where the layer is crossed a long way: fewer, longer ones hit or
+    // missed its heaps' edges too much at random for a few frames' average to smooth, and left the pattern of their
+    // starts in the picture.
     float t1 = min((CLOUD_TOP - uHeight) / d.z, t0 + 6000.0);
-    const int STEPS = 24;
+    const int STEPS = 48;
     float dt = (t1 - t0) / float(STEPS);
-    // The pattern moves across the screen from frame to frame, so that the frames' average takes it out.
-    float start = fract(52.9829189 * fract(dot(gl_FragCoord.xy + 5.588238 * uFrameNoise, vec2(0.06711056, 0.00583715))));
+    // Each pixel starts its march at a point of its own, and each frame at the next of the step's even shares
+    // (uFrameNoise), so that the frames' average covers a step evenly: a pattern that only moved across the screen from
+    // frame to frame left its streaks in the average.
+    float start = fract(fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715)))) + uFrameNoise);
     float mu = dot(d, uSun);
     float g1 = 0.6;
     float forward = (1.0 - g1 * g1) / (12.566 * pow(1.0 + g1 * g1 - 2.0 * g1 * mu, 1.5));
@@ -2916,13 +2927,17 @@ void main() {
     vec3 eye = vec3(0.0, 0.0, uHeight);
     vec3 glow = vec3(0.0);
     float through = 1.0;
+    // How much of the layer one pixel takes in where its ray enters it: as far as the ray has come, by the angle a
+    // pixel is, over the slant it crosses the layer at.
+    float foot = t0 * length(fwidth(d)) / d.z;
     for (int i = 0; i < STEPS; i++) {
       vec3 p = eye + d * (t0 + (float(i) + start) * dt);
-      float rho = cloudDensity(p);
+      float rho = cloudDensityAt(p, foot);
       if (rho <= 0.0) continue;
       // Towards the sun, how much cloud the light comes through: near by, and far along the layer, where a low sun's light
       // crosses other heaps before it reaches this one (with the sun high, those points are above the layer).
-      float toward = cloudDensity(p + uSun * 110.0) + cloudDensity(p + uSun * 300.0) * 1.5 + cloudDensity(p + uSun * 900.0) * 3.0 + cloudDensity(p + uSun * 2200.0) * 5.0;
+      // What is far along it counts by its broad shape alone.
+      float toward = cloudDensity(p + uSun * 110.0) + cloudDensity(p + uSun * 300.0) * 1.5 + cloudDensityAt(p + uSun * 900.0, 2000.0) * 3.0 + cloudDensityAt(p + uSun * 2200.0, 2000.0) * 5.0;
       // Light comes through the cloud towards the sun, and a heap's edges, thin, catch less of it (the powder of
       // Schneider and Vos 2015).
       float sunlit = exp(-toward * 0.8) * (1.0 - exp(-rho * 4.0));
