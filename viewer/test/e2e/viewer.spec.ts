@@ -38,6 +38,30 @@ test('a shared link reproduces the same view', async ({ page, context }) => {
   await expect(other.locator('.inspect h2')).toHaveText('Deccan Traps');
 });
 
+test('drifting and toggling orbital clouds restores the clear and cloudy views exactly', async ({ page }) => {
+  await page.goto(`/?b=${latestBuild()}&t=66.03Ma&lat=14&lon=-66&d=2.6&cl=0`);
+  await idle(page);
+  const clear = await canvasPng(page);
+  await page.evaluate(() => window.__wikiworldmodel!.set({ clouds: true }));
+  await idle(page);
+  const cloudy = await canvasPng(page);
+  expect(cloudy.equals(clear)).toBe(false);
+
+  await page.evaluate(() => window.__wikiworldmodel!.driftClouds({ tropics: 23, beyond: -14, between: [12, 32] }));
+  await idle(page);
+  expect((await canvasPng(page)).equals(cloudy)).toBe(false);
+  await page.evaluate(() => window.__wikiworldmodel!.set({ clouds: false }));
+  await idle(page);
+  expect((await canvasPng(page)).equals(clear)).toBe(true);
+
+  await page.evaluate(() => {
+    window.__wikiworldmodel!.driftClouds(null);
+    window.__wikiworldmodel!.set({ clouds: true });
+  });
+  await idle(page);
+  expect((await canvasPng(page)).equals(cloudy)).toBe(true);
+});
+
 test('scrubbing inside a tile span fetches nothing', async ({ page }) => {
   await page.goto(`/?b=${latestBuild()}&t=70Ma&lat=10&lon=-30&d=3.3`);
   await idle(page);
