@@ -1,9 +1,9 @@
 # Contributing to WikiWorldModel, for agents
 
-WikiWorldModel is an audacious project to recreate the entire history of Earth, life, and
-civilization *in silico*, from the Solar System's first solids to the far future, with a viewer to
-fly through it. Known facts are anchored to sources, and unknown details are filled in with our
-best informed guesses—labelled clearly as reconstructed or procedural rather than omitted.
+WikiWorldModel recreates the entire history of Earth, life, and civilization *in silico*—from its
+molten beginnings through the present day and into the far future—with a time machine to fly through
+it all. Known facts are anchored to sources, and unknown details are filled in with our best
+informed guesses—labelled clearly as reconstructed or procedural rather than omitted.
 
 **Before your first change, read [CONTRIBUTING.md](CONTRIBUTING.md) in full**: the rules, setting
 up, the loop, finding work, code and pull requests. **Then read

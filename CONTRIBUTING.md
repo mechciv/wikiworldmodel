@@ -1,8 +1,8 @@
 # Contributing to WikiWorldModel
 
-WikiWorldModel is an audacious project to recreate the entire history of Earth, life, and
-civilization *in silico*, from the Solar System's first solids to the far future, with a viewer to
-fly through it.
+WikiWorldModel recreates the entire history of Earth, life, and civilization *in silico*—from its
+molten beginnings through the present day and into the far future—with a time machine to fly through
+it all.
 
 ## How it works
 
