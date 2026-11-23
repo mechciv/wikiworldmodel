@@ -395,6 +395,15 @@ describe('what a plan can say of a shape', () => {
     expect(thinnest(0.5)).toBeGreaterThan(thinnest(0));
     expect(thinnest(0.5)).toBeLessThan(thinnest(1));
     expect(bytes(draw(plain({ leg: { type: 'pillar', y: 0, x: 0.2, top: 0.5, r: 0.04, column: 0 } })))).toBe(bytes(draw(plain({ leg: { type: 'pillar', y: 0, x: 0.2, top: 0.5, r: 0.04 } }))));
+    // A bent leg thins from its knee to its hock, and as a column does not.
+    const hock = (column: number) => {
+      const f = plain({ leg: { type: 'digitigrade', mat: 'horn', y: 0, x: 0.2, top: 0.5, knee: 0.3, ankle: 0.12, r: 0.04, muscle: 0, toes: false, column } });
+      const leg = points(draw(f), MAT.horn).filter((q) => q[0] > 0 && q[2] > 0.05 && q[2] < 0.07);
+      return span(leg, 0)[1] - span(leg, 0)[0];
+    };
+    expect(hock(0)).toBeCloseTo(0.08 * 0.27, 2);
+    expect(hock(1)).toBeCloseTo(0.08, 2);
+    expect(bytes(draw(plain({ leg: { type: 'digitigrade', y: 0, x: 0.2, top: 0.5, knee: 0.3, ankle: 0.12, r: 0.04, column: 0 } })))).toBe(bytes(draw(plain({ leg: { type: 'digitigrade', y: 0, x: 0.2, top: 0.5, knee: 0.3, ankle: 0.12, r: 0.04 } }))));
   });
 
   it('hangs a part on another part\'s end, so that it goes where the end goes, on each side of the body', () => {
@@ -472,6 +481,55 @@ describe('what a plan can say of a shape', () => {
     expect(at(rider(0, 0.9))[1]).toBeCloseTo(0.4, 4);
   });
 
+  it('sets what rides a chain, a tube or a head on its skin by the share of its length, wherever a child puts it', () => {
+    // A neck that runs level and forward, then one twice as long that rises: eyes ride it four fifths of the way along.
+    const necked = (joints: number[][]) =>
+      plain({
+        neck: { type: 'chain', zl: true, points: joints },
+        eyes: { type: 'eyes', ride: 'neck', at: [1, 0.8, 0], r: 0.004 },
+      });
+    const short = points(draw(necked([[0, 0.4, 0.4, 0.03], [0, 0.5, 0.4, 0.03], [0, 0.6, 0.4, 0.03]])), MAT.eye);
+    expect(middle(short)[1]).toBeCloseTo(0.56, 4);
+    expect(middle(short)[2]).toBeCloseTo(0.4, 4);
+    // One on each flank, at the neck's own radius.
+    expect(span(short, 0)[0]).toBeCloseTo(-0.03 - 0.004 * 0.7, 4);
+    expect(span(short, 0)[1]).toBeCloseTo(0.03 + 0.004 * 0.7, 4);
+    const long = points(draw(necked([[0, 0.4, 0.4, 0.03], [0, 0.6, 0.6, 0.02], [0, 0.8, 0.8, 0.01]])), MAT.eye);
+    expect(middle(long)[1]).toBeCloseTo(0.72, 4);
+    expect(middle(long)[2]).toBeCloseTo(0.72, 4);
+    // Thinner there, and the eyes closer in for it: still on the skin.
+    expect(span(long, 0)[1]).toBeLessThan(0.02);
+    expect(span(long, 0)[1]).toBeGreaterThan(0.014);
+    // On a mirrored chain, each side's rider is on that side's chain; and it moves with what the chain moves with.
+    const arms = plain({
+      arm: { type: 'chain', mirror: true, zl: true, points: [[0.1, 0.3, 0.4, 0.02], [0.3, 0.3, 0.4, 0.02]] },
+      cuff: { type: 'lump', mat: 'horn', mirror: true, ride: 'arm', at: [0, 0.5, 0], r: [0.005, 0.005, 0.005] },
+    });
+    const m = draw(arms);
+    const cuffs = points(m, MAT.horn);
+    for (const side of [-1, 1]) {
+      const cuff = middle(cuffs.filter((q) => q[0] * side > 0));
+      expect(cuff[0]).toBeCloseTo(side * 0.2, 4);
+      expect(cuff[2]).toBeCloseTo(0.42, 4);
+    }
+    expect([...bones(m, MAT.horn)]).toEqual([bone(BONE.none)]);
+    // The way round is counted level whichever way a part runs: 0 is on top and 1 on the body's right, on a tail that runs back too.
+    const tail = (round: number) => plain({ tail: { type: 'chain', zl: true, points: [[0, -0.4, 0.4, 0.02], [0, -0.6, 0.4, 0.02]] }, stud: { type: 'lump', mat: 'horn', ride: 'tail', at: [round, 0.5, 0], r: [0.004, 0.004, 0.004] } });
+    expect(middle(points(draw(tail(0)), MAT.horn))[2]).toBeCloseTo(0.42, 4);
+    expect(middle(points(draw(tail(1)), MAT.horn))[0]).toBeCloseTo(0.02, 4);
+    expect(middle(points(draw(tail(-1)), MAT.horn))[0]).toBeCloseTo(-0.02, 4);
+    expect(middle(points(draw(tail(2)), MAT.horn))[2]).toBeCloseTo(0.38, 4);
+    // A head's skin, as it is drawn: half way along it, on its top.
+    const headed = plain({
+      head: { type: 'head', at: { stand: { y: 0.5, z: 0.8, pitch: 0 } }, thin: false, rings: [[0, 0, 0.03, 0.03], [0.1, 0, 0.03, 0.03], [0.2, 0, 0.03, 0.03]] },
+      stud: { type: 'lump', mat: 'horn', ride: 'head', at: [0, 0.5, 0], r: [0.004, 0.004, 0.004] },
+    });
+    const h = draw(headed);
+    expect(middle(points(h, MAT.horn))[1]).toBeCloseTo(0.6, 4);
+    expect(middle(points(h, MAT.horn))[2]).toBeCloseTo(0.4 + 0.03, 4);
+    expect([...bones(h, MAT.horn)]).toEqual([bone(BONE.head)]);
+  });
+
   it('runs a row along a back\'s curve, and leans its plates out from the body\'s middle', () => {
     const f = (more: Record<string, unknown>) => {
       const g = applyChange(canonicalForm(plain()), { parts: { body: { rings: { 2: [0, 1.4, 0.6, 0.1] } } } });
@@ -514,6 +572,16 @@ describe('what a plan can say of a shape', () => {
     expect(thick(rimmed)).toBeCloseTo(0.04, 2);
     expect(rimmed.length).toBeGreaterThan(bare.length);
     expect(bytes(draw(f({ rim: 0 })))).toBe(bytes(draw(f({}))));
+    // A sheet has one along its free edge: from its second point round to its last, not along the two edges at its first.
+    const sail = (more: Record<string, unknown>) => plain({ sail: { type: 'sheet', mat: 'horn', zl: true, gap: 0.001, points: [[0, 0, 0.5], [0, 0, 0.8], [0, 0.2, 0.8], [0, 0.2, 0.5]], ...more } });
+    const wide = (pts: number[][]) => span(pts, 0)[1] - span(pts, 0)[0];
+    const edged = points(draw(sail({ rim: 0.02 })), MAT.horn);
+    expect(wide(points(draw(sail({})), MAT.horn))).toBeLessThan(0.004);
+    expect(wide(edged)).toBeCloseTo(0.04, 2);
+    // The roll is at the top and the front, and the foot of the sail, between its last point and its first, has none.
+    expect(wide(edged.filter((q) => q[2] > 0.75))).toBeCloseTo(0.04, 2);
+    expect(wide(edged.filter((q) => q[1] > 0.05 && q[1] < 0.15 && q[2] < 0.6))).toBeLessThan(0.004);
+    expect(bytes(draw(sail({ rim: 0 })))).toBe(bytes(draw(sail({}))));
   });
 
   it('turns a lump with the head it is on if it says so, and leaves it level if not', () => {
@@ -582,15 +650,21 @@ describe('the validator', () => {
     expect(checkForm(f).join()).toContain('has no end to hang on');
     f.parts.a = { type: 'spike', on: 'b', from: [0, 0, 0], to: [0, 0.1, 0] };
     f.parts.b = { type: 'spike', on: 'a', from: [0, 0, 0], to: [0, 0.1, 0] };
-    expect(checkForm(f).join()).toContain('hangs on it');
+    expect(checkForm(f).join()).toContain('hangs on or rides it in turn');
     f.parts.a = { type: 'pillar', on: 'body', y: 0, x: 0.1, top: 0.5, r: 0.03 };
     delete f.parts.b;
     expect(checkForm(f).join()).toContain("cannot hang on another part's end");
-    f.parts.a = { type: 'lump', ride: 'head', at: [0, 0, 0], r: [0.01, 0.01, 0.01] };
-    expect(checkForm(f).join()).toContain('is no trunk of this body');
+    f.parts.a = { type: 'lump', ride: 'cheeks', at: [0, 0, 0], r: [0.01, 0.01, 0.01] };
+    expect(checkForm(f).join()).toContain('with a skin to ride');
     f.parts.a = { type: 'lump', ride: 'body', on: 'body', at: [0, 0, 0], r: [0.01, 0.01, 0.01] };
     expect(checkForm(f).join()).toContain('a part has one frame');
+    f.parts.a = { type: 'lump', ride: 'b', at: [0, 0, 0], r: [0.01, 0.01, 0.01] };
+    f.parts.b = { type: 'chain', on: 'a', points: [[0, 0, 0, 0.01], [0, 0.1, 0, 0.01]] };
+    expect(checkForm(f).join()).toContain('hangs on or rides it in turn');
+    delete f.parts.b;
     f.parts.a = { type: 'lump', ride: 'body', at: [0, 0, 0], r: [0.01, 0.01, 0.01] };
+    expect(checkForm(f)).toEqual([]);
+    f.parts.a = { type: 'lump', ride: 'head', at: [0, 0.5, 0], r: [0.01, 0.01, 0.01] };
     expect(checkForm(f)).toEqual([]);
   });
 

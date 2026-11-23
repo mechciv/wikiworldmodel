@@ -466,18 +466,21 @@ function digitigrade(m: Mesh, side: number, s: Stance, p: Part, swing: number): 
   const fz = 0.022 * H + lift;
   const x = x0 * side;
   const r = r0 * L;
-  // A thigh deep fore and aft, a knee, a shank with its calf behind it, a narrow hock, a foot that spreads on the ground.
+  // A thigh deep fore and aft, a knee, a shank with its calf behind it, a narrow hock, a foot that spreads on the ground:
+  // or, by as much as `column` says, as thick all the way down as it is at its top.
+  const column = num(p, 'column', 0);
+  const thin = (k: number) => k + (1 - k) * column;
   const pts = [
     [x, y0, top * H, r * 0.9, 1.5],
     [x * 1.04, y0 + (ky - y0) * 0.45, (top * H + kz) * 0.5, r * 1.02, 1.45],
-    [x * 1.07, y0 + (ky - y0) * 0.86, kz + (top * H - kz) * 0.14, r * 0.72, 1.2],
-    [x * 1.08, ky, kz, r * 0.56, 1.05],
-    [x * 1.08, ky + (ay - ky) * 0.3, kz + (az - kz) * 0.3, r * 0.5, 1.25],
-    [x * 1.07, ky + (ay - ky) * 0.72, kz + (az - kz) * 0.72, r * 0.36, 1.1],
-    [x * 1.04, ay, az, r * 0.27, 1],
-    [x * 1.02, ay + (fy - ay) * 0.6, az + (fz - az) * 0.6, r * 0.22, 1],
-    [x, fy, fz + r * 0.2, r * 0.25, 1.1],
-    [x, fy + r * 0.12, fz * 0.3, r * 0.34, 1.3],
+    [x * 1.07, y0 + (ky - y0) * 0.86, kz + (top * H - kz) * 0.14, r * thin(0.72), 1.2],
+    [x * 1.08, ky, kz, r * thin(0.56), 1.05],
+    [x * 1.08, ky + (ay - ky) * 0.3, kz + (az - kz) * 0.3, r * thin(0.5), 1.25],
+    [x * 1.07, ky + (ay - ky) * 0.72, kz + (az - kz) * 0.72, r * thin(0.36), 1.1],
+    [x * 1.04, ay, az, r * thin(0.27), 1],
+    [x * 1.02, ay + (fy - ay) * 0.6, az + (fz - az) * 0.6, r * thin(0.22), 1],
+    [x, fy, fz + r * 0.2, r * thin(0.25), 1.1],
+    [x, fy + r * 0.12, fz * 0.3, r * thin(0.34), 1.3],
   ];
   const across = acrossOf(p);
   leg(m, pts, n, across);
@@ -578,6 +581,12 @@ interface Frame {
   hung: boolean;
 }
 
+/** A part's skin, for what rides it: its rings as they are drawn, and for all but a trunk the share of its length each is at. */
+interface Skin {
+  rings: Ring[];
+  share: number[] | null;
+}
+
 /** One body as it is drawn: its form and stance, where its head is and its tail ends, and the skins its parts ride. */
 interface Body {
   form: Form;
@@ -585,7 +594,7 @@ interface Body {
   head: HeadPlace;
   tailEnd: number;
   upright: boolean;
-  skins: Map<string, Ring[] | null>;
+  skins: Map<string, Skin | null>;
 }
 
 const LEVEL: [V3, V3, V3] = [
@@ -598,15 +607,34 @@ const unit = (x: number, y: number, z: number, or: V3): V3 => {
   return l > 1e-12 ? [x / l, y / l, z / l] : or;
 };
 
+const cross = (a: V3, b: V3): V3 => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+
+/**
+ * Across and up for a part that runs the way `t` does, each square to it: up is z made square to its run, or y, its
+ * front, where it runs straight up or down; across is square to both, towards the body's right where it can be. So what
+ * is written on a part of the body's left is the mirror of what is written on its right.
+ */
+function level(t: V3): [V3, V3] {
+  const up = Math.abs(t[2]) < 0.9987 ? unit(-t[0] * t[2], -t[1] * t[2], 1 - t[2] * t[2], [0, 0, 1]) : unit(-t[0] * t[1], 1 - t[1] * t[1], -t[1] * t[2], [0, 1, 0]);
+  const a = cross(t, up);
+  return [a[0] < -1e-9 ? [-a[0], -a[1], -a[2]] : a, up];
+}
+
 /** The part another hangs on the end of, if it names one: `on: head` is the head's frame, and no part. */
 const hangsOn = (form: Form, p: Part): Part | undefined => (typeof p.on === 'string' && p.on !== 'head' ? (form.parts[p.on] ?? undefined) : undefined);
+/** The part whose skin another rides, if it names one. */
+const rides = (form: Form, p: Part): Part | undefined => (typeof p.ride === 'string' ? (form.parts[p.ride] ?? undefined) : undefined);
+/** The part that bears another: the one it hangs on the end of, or rides. */
+const bearer = (form: Form, p: Part): Part | undefined => hangsOn(form, p) ?? rides(form, p);
 
 /**
  * What a part moves with, as the renderer idles it: a head, or what is on it, with the head; legs with nothing; what
- * hangs on another part's end with that part; the rest with the trunk, or with the tail where it lies behind the hips.
+ * hangs on another part's end, or rides a part that is no trunk, with that part; the rest with the trunk, or with the
+ * tail where it lies behind the hips, as what rides a trunk does by its place along it.
  */
 function boneOf(b: Body, p: Part, depth = 0): number {
-  const on = depth < 8 ? hangsOn(b.form, p) : undefined;
+  const ridden = rides(b.form, p);
+  const on = depth < 8 ? (hangsOn(b.form, p) ?? (ridden && ridden.type !== 'trunk' ? ridden : undefined)) : undefined;
   if (on) return boneOf(b, on, depth + 1);
   const { tailEnd } = b;
   const at = (p.at as number[] | undefined) ?? (p.from as number[] | undefined);
@@ -631,15 +659,13 @@ function frameOf(b: Body, p: Part, side: number, depth = 0): Frame {
   const on = depth < 8 ? hangsOn(b.form, p) : undefined;
   const end = on ? endOf(b, on, on.mirror ? side : 1, depth + 1) : undefined;
   if (end) {
-    // Along is the way the part runs at its end; across is x made square to it, as a tube's section is; up is square to both.
+    // Along is the way the part runs at its end; across and up are level and square to it.
     const { o, t } = end;
-    const flat = unit(1 - t[0] * t[0], -t[0] * t[1], -t[0] * t[2], [0, 0, 0]);
-    const r = Math.abs(t[0]) < 0.999 ? flat : unit(-t[1] * t[0], 1 - t[1] * t[1], -t[1] * t[2], [0, 1, 0]);
-    const u: V3 = [r[1] * t[2] - r[2] * t[1], r[2] * t[0] - r[0] * t[2], r[0] * t[1] - r[1] * t[0]];
+    const [r, u] = level(t);
     const axes: [V3, V3, V3] = [r, t, u];
     return { pt: (x, y, z) => [o[0] + (r[0] * x + t[0] * y + u[0] * z) * L, o[1] + (r[1] * x + t[1] * y + u[1] * z) * L, o[2] + (r[2] * x + t[2] * y + u[2] * z) * L], axes: () => axes, hung: true };
   }
-  const skin = typeof p.ride === 'string' ? skinOf(b, p.ride) : undefined;
+  const skin = typeof p.ride === 'string' && depth < 8 ? skinOf(b, p.ride, side, depth + 1) : undefined;
   if (skin) return { pt: (x, y, z) => onSkin(skin, L, x, y, z)[0], axes: (x, y, z) => onSkin(skin, L, x, y, z)[1], hung: true };
   const zk = p.zl ? L : H;
   /** How far a tail has swung at a place along the body: whatever is on it goes with it. */
@@ -707,31 +733,62 @@ function tubeRings(b: Body, p: Part, depth = 0): Ring[] {
   });
 }
 
-/** The skin of a trunk, for what rides it: its rings as they are drawn close by, or as they are written from further off. */
-function skinOf(b: Body, name: string): Ring[] | undefined {
-  if (!b.skins.has(name)) {
-    const t = b.form.parts[name];
-    const rings = t?.type === 'trunk' && Array.isArray(t.rings) ? trunkRings(b.s, table(t, 'rings'), t) : null;
-    b.skins.set(name, rings && b.s.detail >= 2 ? finer(rings) : rings);
+/**
+ * The skin of a part, for what rides it: a trunk's rings as they are drawn close by, or as they are written from
+ * further off; a chain's joints, on the side asked for if it is mirrored; a tube's or a head's rings.
+ */
+function skinOf(b: Body, name: string, side: number, depth: number): Skin | undefined {
+  const t = b.form.parts[name];
+  const key = `${name}:${t?.mirror ? side : 1}`;
+  if (!b.skins.has(key)) {
+    let skin: Skin | null = null;
+    if (t?.type === 'trunk' && Array.isArray(t.rings)) {
+      const rings = trunkRings(b.s, table(t, 'rings'), t);
+      skin = { rings: b.s.detail >= 2 ? finer(rings) : rings, share: null };
+    } else if ((t?.type === 'chain' && Array.isArray(t.points)) || ((t?.type === 'tube' || t?.type === 'head') && Array.isArray(t.rings))) {
+      const rings: Ring[] = t.type === 'chain' ? chainPoints(b, t, t.mirror ? side : 1, depth).map(([x, y, z, r]) => ({ x, y, z, w: r, h: r })) : tubeRings(b, t, depth);
+      const drawnAs = t.type !== 'chain' && t.thin !== false && b.s.detail >= 2 ? finer(rings) : rings;
+      // How far along it each ring is, as a share of its whole length.
+      const far = [0];
+      for (let i = 1; i < drawnAs.length; i++) {
+        const p = drawnAs[i - 1];
+        const q = drawnAs[i];
+        const dx = (q.x ?? 0) - (p.x ?? 0);
+        far.push(far[i - 1] + Math.sqrt(dx * dx + (q.y - p.y) * (q.y - p.y) + (q.z - p.z) * (q.z - p.z)));
+      }
+      const whole = far[far.length - 1] || 1;
+      if (drawnAs.length > 1) skin = { rings: drawnAs, share: far.map((d) => d / whole) };
+    }
+    b.skins.set(key, skin);
   }
-  return b.skins.get(name) ?? undefined;
+  return b.skins.get(key) ?? undefined;
 }
 
 /**
- * A point on a body's skin, and the axes there. `round` is the way round its section: 0 on the middle of its back, 1 on
- * its flank where it is widest, 2 under the middle of its belly, and the same below zero on its other side; `y` is the
- * place along it, as its rings have it, held to its ends; `off` is how far it stands off the skin, as a share of L.
- * Up is the way the skin faces, along the way the body runs there, and across round the section.
+ * A point on a part's skin, and the axes there. `round` is the way round its section: 0 on the middle of its back, 1 on
+ * its flank where it is widest, 2 under the middle of its belly, and the same below zero on its other side. `y` is the
+ * place along it: on a trunk as its rings have it, held to its ends; on a chain, a tube or a head the share of its
+ * length, from 0 at its first joint or ring to 1 at its last. `off` is how far it stands off the skin, as a share of L.
+ * Up is the way the skin faces, along the way the part runs there, and across round the section.
  */
-function onSkin(rings: Ring[], L: number, round: number, y: number, off: number): [V3, [V3, V3, V3]] {
-  const yy = y * L;
-  // The two rings it lies between, looked for from the shoulder back: a tail folded on itself is found last.
+function onSkin(skin: Skin, L: number, round: number, y: number, off: number): [V3, [V3, V3, V3]] {
+  const { rings, share } = skin;
+  // The two rings it lies between. On a trunk they are looked for from the shoulder back: a tail folded on itself is found last.
   let i = rings.length - 2;
-  while (i > 0 && rings[i].y > yy) i--;
+  let f: number;
+  if (share) {
+    const at = between(y, 0, 1);
+    while (i > 0 && share[i] > at) i--;
+    const d = share[i + 1] - share[i];
+    f = d > 1e-9 ? between((at - share[i]) / d, 0, 1) : 1;
+  } else {
+    const yy = y * L;
+    while (i > 0 && rings[i].y > yy) i--;
+    const d = rings[Math.min(rings.length - 1, i + 1)].y - rings[Math.max(0, i)].y;
+    f = d > 1e-9 ? between((yy - rings[Math.max(0, i)].y) / d, 0, 1) : 1;
+  }
   const a = rings[Math.max(0, i)];
   const e = rings[Math.min(rings.length - 1, i + 1)];
-  const d = e.y - a.y;
-  const f = d > 1e-9 ? between((yy - a.y) / d, 0, 1) : 1;
   const mix = (p: number | undefined, q: number | undefined) => (p ?? 0) + ((q ?? 0) - (p ?? 0)) * f;
   const c: Ring = { x: mix(a.x, e.x), y: mix(a.y, e.y), z: mix(a.z, e.z), w: mix(a.w, e.w), h: mix(a.h, e.h), widest: mix(a.widest, e.widest), under: mix(a.under, e.under), over: mix(a.over, e.over) };
   // The section is square to the body's run there, as the skin is drawn: at each ring the line through its neighbours.
@@ -743,16 +800,26 @@ function onSkin(rings: Ring[], L: number, round: number, y: number, off: number)
   const t0 = run(Math.max(0, i));
   const t1 = run(Math.min(rings.length - 1, i + 1));
   const t = unit(t0[0] + (t1[0] - t0[0]) * f, t0[1] + (t1[1] - t0[1]) * f, t0[2] + (t1[2] - t0[2]) * f, [0, 1, 0]);
-  const r = unit(1 - t[0] * t[0], -t[0] * t[1], -t[0] * t[2], [1, 0, 0]);
-  const u: V3 = [r[1] * t[2] - r[2] * t[1], r[2] * t[0] - r[0] * t[2], r[0] * t[1] - r[1] * t[0]];
+  // The section as the skin is drawn: across is x made square to the run, or y where it runs along x, and up square to both.
+  const r = Math.abs(t[0]) < 0.9987 ? unit(1 - t[0] * t[0], -t[0] * t[1], -t[0] * t[2], [1, 0, 0]) : unit(-t[1] * t[0], 1 - t[1] * t[1], -t[1] * t[2], [0, 1, 0]);
+  const u = cross(r, t);
+  // The way round it is counted level: from the side that faces up, towards the body's right. Which turn of the drawn
+  // section that is depends on the way the part runs, which may be backward, sideways or down.
+  const [right, top] = level(t);
   const far = round < 0 ? -1 : 1;
   const turn = (PI / 2) * (1 - between(round * far, 0, 2));
-  const [sa, sb, na, nb] = sectionAt(c, dcos(turn), dsin(turn));
-  const up: V3 = [r[0] * na * far + u[0] * nb, r[1] * na * far + u[1] * nb, r[2] * na * far + u[2] * nb];
-  const at: V3 = [(c.x ?? 0) + r[0] * sa * far + u[0] * sb + up[0] * off * L, c.y + r[1] * sa * far + u[1] * sb + up[1] * off * L, c.z + r[2] * sa * far + u[2] * sb + up[2] * off * L];
+  const co = dcos(turn) * far;
+  const si = dsin(turn);
+  const d: V3 = [right[0] * co + top[0] * si, right[1] * co + top[1] * si, right[2] * co + top[2] * si];
+  const [sa, sb, na, nb] = sectionAt(c, d[0] * r[0] + d[1] * r[1] + d[2] * r[2], d[0] * u[0] + d[1] * u[1] + d[2] * u[2]);
+  const up: V3 = [r[0] * na + u[0] * nb, r[1] * na + u[1] * nb, r[2] * na + u[2] * nb];
+  const at: V3 = [(c.x ?? 0) + r[0] * sa + u[0] * sb + up[0] * off * L, c.y + r[1] * sa + u[1] * sb + up[1] * off * L, c.z + r[2] * sa + u[2] * sb + up[2] * off * L];
   const dot = t[0] * up[0] + t[1] * up[1] + t[2] * up[2];
   const alongIt = unit(t[0] - up[0] * dot, t[1] - up[1] * dot, t[2] - up[2] * dot, t);
-  const across: V3 = [alongIt[1] * up[2] - alongIt[2] * up[1], alongIt[2] * up[0] - alongIt[0] * up[2], alongIt[0] * up[1] - alongIt[1] * up[0]];
+  // Across is round the section the way the count rises: towards the right on its top, down its right flank, up its left.
+  const rise: V3 = [right[0] * si - top[0] * co, right[1] * si - top[1] * co, right[2] * si - top[2] * co];
+  const ac = cross(alongIt, up);
+  const across: V3 = ac[0] * rise[0] + ac[1] * rise[1] + ac[2] * rise[2] < 0 ? [-ac[0], -ac[1], -ac[2]] : ac;
   return [at, [across, alongIt, up]];
 }
 
@@ -1080,10 +1147,14 @@ function drawPart(m: Mesh, b: Body, p: Part): void {
     }
     case 'sheet': {
       dress(m, p, s, 'membrane');
+      // A roll along its free edge, as thick as `rim` says: from its second point round to its last, which leaves
+      // out the two edges that meet at its first, where it is held.
+      const roll = num(p, 'rim', 0) * L;
       mirrored((side) => {
         const f = frame(side);
         const pts = table(p, 'points').map(([x, y, z]) => f.pt(x * side, y, z));
         sheet(m, pts, num(p, 'gap', 0.003) * L);
+        if (roll > 0 && detail >= 1 && pts.length > 2) loft(m, pts.slice(1).map(([x, y, z]) => ({ x, y, z, w: roll, h: roll })), detail >= 2 ? 6 : 4);
       });
       return;
     }
@@ -1121,10 +1192,8 @@ export function drawAnimal(m: Mesh, form: Form, s: Stance): Joints {
   // What hangs on another part's end, or rides a body's skin, is drawn only where that is.
   const shown = (p: Part, depth = 0): boolean => {
     if (!drawn(p, s, upright)) return false;
-    const on = depth < 8 ? hangsOn(form, p) : undefined;
-    if (on && !shown(on, depth + 1)) return false;
-    const ridden = typeof p.ride === 'string' ? form.parts[p.ride] : undefined;
-    return !ridden || drawn(ridden, s, upright);
+    const on = depth < 8 ? bearer(form, p) : undefined;
+    return !on || shown(on, depth + 1);
   };
   for (const name of Object.keys(form.parts)) {
     const p = form.parts[name];
@@ -1152,6 +1221,8 @@ const SECTION = ['widest', 'under', 'over'];
 const FRAMED = new Set(['tube', 'chain', 'lump', 'spike', 'eyes', 'row', 'sheet']);
 /** The parts that have an end for another to hang on. */
 const ENDED = new Set(['trunk', 'head', 'tube', 'chain', 'spike']);
+/** The parts that have a skin for another to ride. */
+const SKINNED = new Set(['trunk', 'chain', 'tube', 'head']);
 /** What any part of a plant may say besides: the kind of leaf it has (core/leaves.ts). */
 const PLANT_COMMON = new Set(['leaf']);
 
@@ -1164,14 +1235,14 @@ export const PART_TYPES: Record<string, { kind: 'animal' | 'plant'; fields: stri
   lump: { kind: 'animal', fields: ['at', 'r', 'bands', 'sway', 'turn'], needs: ['at', 'r'] },
   spike: { kind: 'animal', fields: ['from', 'to', 'r', 'sway'], needs: ['from', 'to'] },
   pillar: { kind: 'animal', fields: ['y', 'x', 'top', 'r', 'swing', 'phase', 'muscle', 'across', 'column'], needs: ['y', 'x', 'top', 'r'] },
-  digitigrade: { kind: 'animal', fields: ['y', 'x', 'top', 'knee', 'ankle', 'r', 'swing', 'phase', 'toes', 'muscle', 'across'], needs: ['y', 'x', 'top', 'r'] },
+  digitigrade: { kind: 'animal', fields: ['y', 'x', 'top', 'knee', 'ankle', 'r', 'swing', 'phase', 'toes', 'muscle', 'across', 'column'], needs: ['y', 'x', 'top', 'r'] },
   fan: { kind: 'animal', fields: ['at', 'dir', 'r', 'across', 'tall', 'raise', 'scallop', 'scallops', 'arc', 'gap', 'rim'], needs: ['at', 'dir', 'r'] },
   eyes: { kind: 'animal', fields: ['at', 'r'], needs: ['at', 'r'] },
   bands: { kind: 'animal', fields: ['rows', 'y', 'step', 'middle', 'fall', 'wide', 'top', 'low', 'out', 'spike', 'scute'], needs: [] },
   row: { kind: 'animal', fields: ['n', 'from', 'to', 'size', 'item', 'r', 'thick', 'bands', 'lean', 'turn'], needs: ['n', 'from', 'to', 'r'] },
   knobs: { kind: 'animal', fields: ['n', 'at', 'r', 'length', 'thick'], needs: ['at', 'r'] },
   shell: { kind: 'animal', fields: ['r', 'lift', 'bands'], needs: ['r'] },
-  sheet: { kind: 'animal', fields: ['points', 'gap'], needs: ['points'] },
+  sheet: { kind: 'animal', fields: ['points', 'gap', 'rim'], needs: ['points'] },
   wing: { kind: 'animal', fields: ['shoulder', 'span', 'chord', 'sweep', 'beat', 'arm', 'folded', 'drop'], needs: ['shoulder'] },
   conifer: { kind: 'plant', fields: ['reach', 'trunk', 'flare', 'tiers', 'start', 'drop'], needs: [] },
   broadleaf: { kind: 'plant', fields: ['crown', 'fork', 'trunk', 'limbs', 'flare'], needs: [] },
@@ -1215,22 +1286,20 @@ export function checkForm(f: Form): string[] {
       if (!FRAMED.has(p.type)) out.push(`part "${name}": a ${p.type} cannot hang on another part's end; a ${[...FRAMED].join(', ')} can`);
       else if (!on) out.push(`part "${name}": it is on "${String(p.on)}", and there is no such part; it may be on the head, or on the end of a part by its name`);
       else if (!ENDED.has(on.type)) out.push(`part "${name}": it is on "${String(p.on)}", a ${on.type}, which has no end to hang on; a ${[...ENDED].join(', ')} has`);
-      else {
-        const seen = new Set([name]);
-        for (let x: Part | undefined = on, at = String(p.on); x; at = String(x.on), x = hangsOn(f, x)) {
-          if (seen.has(at)) {
-            out.push(`part "${name}": it hangs on "${String(p.on)}", which by way of "${at}" hangs on it`);
-            break;
-          }
-          seen.add(at);
-        }
-      }
     }
     if (p.ride !== undefined) {
       const ridden = typeof p.ride === 'string' ? f.parts[p.ride] : undefined;
-      if (!FRAMED.has(p.type)) out.push(`part "${name}": a ${p.type} cannot ride a body's skin; a ${[...FRAMED].join(', ')} can`);
-      else if (ridden?.type !== 'trunk') out.push(`part "${name}": it rides "${String(p.ride)}", which is no trunk of this body`);
+      if (!FRAMED.has(p.type)) out.push(`part "${name}": a ${p.type} cannot ride another part's skin; a ${[...FRAMED].join(', ')} can`);
+      else if (!ridden || !SKINNED.has(ridden.type)) out.push(`part "${name}": it rides "${String(p.ride)}", which is no part of this body with a skin to ride; a ${[...SKINNED].join(', ')} has one`);
       if (p.on !== undefined) out.push(`part "${name}": it is on "${String(p.on)}" and rides "${String(p.ride)}"; a part has one frame`);
+    }
+    const seen = new Set<Part>([p]);
+    for (let x = bearer(f, p); x; x = bearer(f, x)) {
+      if (seen.has(x)) {
+        out.push(`part "${name}": what it hangs on or rides hangs on or rides it in turn`);
+        break;
+      }
+      seen.add(x);
     }
   }
   if (out.length) return out;

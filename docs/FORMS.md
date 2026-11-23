@@ -124,13 +124,22 @@ which a point is `[across, along, up]`:
 |---|---|---|
 | nothing | the body's | what is fixed to the trunk |
 | `on: head` | the head's, which pitches with the pose | horns, a beak, a frill, eyes |
-| `on: <part>` | the end of that part: the last point of a `chain`, the last ring of a `tube`, a `head` or a `trunk`, the tip of a `spike`. Along is the way the part runs there, across is level and square to it, and up is square to both | eyes on a head that is the end of a neck's chain; a claw on a foot; a tuft on a tail. It goes where the end goes when a child changes the part, on each side if the part is mirrored |
-| `ride: <trunk>` | that trunk's skin. Across is the way round the body's section: 0 on the middle of the back, 1 on the flank where it is widest, 2 under the belly, and the same below zero on the other side. Along is the place along the body, as its rings have it. Up is how far it stands off the skin, the way the skin faces | plates and scutes that follow a back's curve and a body's width; a line along a jaw. It stays on the skin when a child changes the rings |
+| `on: <part>` | the end of that part: the last point of a `chain`, the last ring of a `tube`, a `head` or a `trunk`, the tip of a `spike`. Along is the way the part runs there; up is square to it, the side that faces up (its front, where it runs straight up or down); across is square to both, towards the body's right | a claw on a foot; a tuft on a tail; a knob on a horn. It goes where the end goes when a child changes the part |
+| `ride: <part>` | the skin of a `trunk`, a `chain`, a `tube` or a `head`. Across is the way round its section: 0 on the middle of its top, 1 on its flank on the body's right, 2 underneath, and the same below zero round its other side. Along is the place along it: on a trunk its `y`, as its rings have it; on a chain, a tube or a head the share of its length, from 0 at its first joint or ring to 1 at its last. Up is how far it stands off the skin, the way the skin faces there | plates and scutes that follow a back's curve and a body's width; the line of a jaw; eyes on a head that is the end of a neck's chain. It stays on the skin when a child changes the rings or the joints, however thick or thin they make it |
 
-In the last two every length is a share of L. A part that hangs or rides is drawn only where what it hangs on is
-drawn, and moves with it. Past a trunk's ends, what rides it stays on its last ring. A `lump`, and the lumps of a
-`row`, lie level in every frame; `turn: true` turns one with its frame, so that a crest pitches with the head it is
-on and a scute lies flat on a flank.
+In the last two every length is a share of L. A part that hangs or rides is drawn only where what bears it is drawn,
+and moves with it. What is written for a mirrored part's right side is mirrored on its left, as everywhere. Past a
+trunk's ends, what rides it stays on its last ring: so a line written a little past a snout's tip reaches the tip of
+a longer snout below. A `lump`, and the lumps of a `row`, lie level in every frame; `turn: true` turns one with its
+frame, so that a crest pitches with the head it is on and a scute lies flat on a flank.
+
+A `tube` that rides is a line on the skin: its rings are `[round, along, off, half-width, half-height]`, and it may
+pass from one side to the other inside the part's end, as the line of a mouth does round a snout:
+
+```yaml
+  eyes: { type: eyes, ride: neck, near: true, at: [0.55, 0.84, -0.003], r: 0.008 }
+  mouth: { type: tube, ride: neck, near: true, mat: dark, thin: false, rings: [[1.22, 0.74, 0, 0.0018, 0.0018], [1.22, 1.0, 0, 0.0018, 0.0018], [-1.22, 1.0, 0, 0.0018, 0.0018], [-1.22, 0.74, 0, 0.0018, 0.0018]] }
+```
 
 **Animals**
 
@@ -143,14 +152,14 @@ on and a scute lies flat on a flank.
 | `lump` | `at`, `r: [rx, ry, rz]`, `turn`: a body, a dome, a club |
 | `spike` | `from`, `to`, `r`: a horn, a claw, a thumb, a tail spike |
 | `pillar` | `y`, `x`, `top`, `r`, `swing`, `phase` (0 or 1), `muscle`, `across`, `column`: a pair of straight legs |
-| `digitigrade` | `y`, `x`, `top`, `knee`, `ankle`, `r`, `swing`, `phase`, `toes`, `muscle`, `across`: a pair of bent legs |
+| `digitigrade` | `y`, `x`, `top`, `knee`, `ankle`, `r`, `swing`, `phase`, `toes`, `muscle`, `across`, `column`: a pair of bent legs |
 | `fan` | `on: head`, `at: [along, up]`, `dir: [along, up]`, `r`, `across`, `tall`, `raise`, `scallop`, `scallops`, `arc`, `gap`, `rim`: a frill or a crest |
 | `eyes` | `at: [across, along, up]`, `r` |
 | `bands` | `rows`, `y`, `step`, `wide`, `top`, `low`, `out`, `spike`, `scute`: armour bands |
 | `row` | `n`, `from`, `to`, `item` (lump, spike or plate), `r: [x, y, z]`, `size` (a list, along the row), `thick`, `bands`, `lean`, `turn`: plates, osteoderms, a stegosaur's back |
 | `knobs` | `on: head`, `n`, `at`, `r`, `length`, `thick`: a ring of small knobs |
 | `shell` | `r: [rx, ry, rz]`, `lift` |
-| `sheet` | `points` of `[x, y, z]`, a fan from the first; `gap`: a sail, a fin, a membrane |
+| `sheet` | `points` of `[x, y, z]`, a fan from the first; `gap`, `rim`: a sail, a fin, a membrane |
 | `wing` | `shoulder: [x, y, z]`, `span`, `chord`, `sweep`, `beat`, `arm`, `folded`, `drop`, `mat`: spread when flying, folded along the flank otherwise. Give flyers `not: [fly]` on their legs if they should tuck them |
 
 A leg has the muscle of its haunch or shoulder where it leaves the body, drawn close by: `muscle` says how much of it,
@@ -173,17 +182,20 @@ belly and leaves the tail and the shoulders round. Along a neck a section rounds
 **A leg's width.** A leg is as wide across as its `r` and deeper fore and aft, most at its top. `across` is how wide
 it is across as a share of that: one number for the whole leg, or `[top, foot]`. A thigh is narrower across than fore
 and aft (`across: [0.6, 1]`), and a leg so narrowed at its top stays inside the body's flank, where the body tapers
-past it. A `pillar` thins to a slender cannon above its foot, as a hoofed leg does; `column` says how much of a column
-it is instead, from 0 to 1, as thick all the way down as at its top: an elephant's leg, a sauropod's.
+past it. A leg thins towards its foot, a `pillar` to a slender cannon and a `digitigrade` from its knee to a narrow
+hock, as a hoofed leg does; `column` says how much of a column it is instead, from 0 to 1, as thick all the way down
+as at its top: an elephant's leg, a sauropod's, the short stout leg of a pig.
 
-**A frill's edge.** A `fan` is two sheets a hair apart, which from its side is a line. `rim` is the radius of a roll
-along its edge, as a share of L, so that it has a thickness there; it follows the scallops.
+**A frill's edge.** A `fan` or a `sheet` is two faces a hair apart, which from its side is a line. `rim` is the
+radius of a roll along its edge, as a share of L, so that it has a thickness there. A fan's follows its scallops; a
+sheet's runs along its free edge, from its second point round to its last, and leaves out the two edges that meet at
+its first, where it is held.
 
-**Plates and scutes.** A `row` runs straight from `from` to `to` in its frame. With `ride: <trunk>` it runs along
-the body's skin instead: `from` and `to` are then `[round, along, off]`, and each item sits on the skin at its place
+**Plates and scutes.** A `row` runs straight from `from` to `to` in its frame. With `ride: <part>` it runs along
+that part's skin instead: `from` and `to` are then `[round, along, off]`, and each item sits on the skin at its place
 and stands off it the way the skin faces, so that two rows either side of a back lean apart as the back's curve has
-them. `lean` leans a plate further out from the body's middle line, by that share of its height, in any frame;
-`turn: true` lays a row's lumps flat on the skin.
+them, and a spike's `r` is `[out, along, off]`. `lean` leans a plate further out from the body's middle line, by
+that share of its height, in any frame; `turn: true` lays a row's lumps flat on the skin.
 
 **Plants.** Everything is a share of the plant's height. A plant's part grows a skeleton by its type's own rule, and
 holds its leaves on cards that show a spray of one kind of leaf (`leaf`), or from further off a bough of them: say
@@ -237,7 +249,8 @@ And for any form, `behave` says how the generator lays it out, which is no claim
 cubic metre of its length, for what a mass claim gives or needs.
 
 Anything on a tail swings with it. A tube's section can flip where the tube runs along x, so a tall shell should lean a little
-along y. A neck takes its curve from its two ends: to arch it more, draw it as a `tube` with rings of your own.
+along y; what rides a part is counted round it level all the same, from the side that faces up. A neck takes its curve
+from its two ends: to arch it more, draw it as a `tube` with rings of your own.
 
 ## Checks
 
