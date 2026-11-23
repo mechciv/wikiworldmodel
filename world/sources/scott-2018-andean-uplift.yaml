@@ -1,0 +1,29 @@
+id: src:scott-2018-andean-uplift
+type: publication
+kind: measurement
+citation: >-
+  Scott, E.M., Allen, M.B., Macpherson, C.G., McCaffrey, K.J.W., Davidson, J.P., Saville, C. &
+  Ducea, M.N. (2018). Andean surface uplift constrained by radiogenic isotopes of arc lavas. Nature
+  Communications 9, 969.
+authors:
+  - "Scott, E.M."
+  - "Allen, M.B."
+  - "Macpherson, C.G."
+  - "McCaffrey, K.J.W."
+  - "Davidson, J.P."
+  - "Saville, C."
+  - "Ducea, M.N."
+published: 2018
+title: Andean surface uplift constrained by radiogenic isotopes of arc lavas
+container: Nature Communications 9, 969
+doi: 10.1038/s41467-018-03173-4
+license: CC-BY-4.0
+verified:
+  by: machine:claude-code
+  how: >-
+    Abstract and full text read on 22 November 2026 in the article's XML from Europe PMC's
+    full-text service (PMC5840411), turned to plain text by script; citation from Crossref. The
+    figures and the supplementary data were not looked at, so what is said of its Fig. 6 rests on
+    the text's account of it. The article has no page numbers, so locators name the section. The
+    isotope data are a compilation from 41 earlier studies; the calibration to height is the
+    authors' own.

@@ -2,11 +2,30 @@ id: earth/orogens/himalaya
 kind: landform/mountain-range
 summary: The mountain range raised as India pushed into Asia.
 author: machine:claude-code
+# Phases tile the lifetime: the range rises from the start of its growth, and then stands at about the height it has
+# today. Where its sources show it standing so, today's relief is carried back for it (model:earth/relief-carried).
+phases:
+  - id: rising
+    label: Rising
+  - id: standing
+    label: At about its present height
 claims:
   name:
     prop: name
     value: { en: Himalaya }
     unsourced: An editorial label.
+  extent:
+    prop: extent
+    value:
+      type: Polygon
+      frame: frame:earth/present-day
+      coordinates:
+        - [[73.5, 35.8], [76.5, 34.6], [79.5, 32.2], [82.0, 30.6], [85.0, 29.6], [88.0, 29.3], [91.0, 29.4], [94.0, 29.5], [95.6, 29.9], [96.0, 28.9], [95.0, 27.6], [92.0, 26.8], [89.0, 26.7], [86.0, 26.9], [83.0, 27.6], [80.5, 28.7], [78.0, 30.0], [76.0, 31.6], [74.5, 33.0], [73.0, 34.0], [73.5, 35.8]]
+    unsourced: >-
+      An outline drawn loosely round the range on today's relief, from the plains at its foot to the valleys of the
+      Indus and the Tsangpo behind it, to say which ground its record speaks for. The range has no agreed edge.
+    method: editorial
+    basis: reconstruction
   location:
     prop: location
     value: { lat: 27.988, lon: 86.925, frame: frame:earth/present-day }
@@ -19,6 +38,75 @@ claims:
     source: { ref: src:paleomap-plate-model, loc: PALEOMAP_PlatePolygons.gpml }
     method: plate-polygon
     basis: reconstruction
+  # When the range came to stand at about its present height. The start is the window the fossil leaves leave for it;
+  # the two bounds beside it are heights like today's at dated times, which hold whatever the start is taken to be.
+  standing-start-ding-2017:
+    prop: start
+    subject: "@standing"
+    value: { lo: 21 Ma, hi: 15 Ma }
+    source:
+      ref: src:ding-2017-himalaya-rise
+      loc: abstract
+      quote: >-
+        The proto-Himalaya grew slowly against a high (∼4 km) proto–Tibetan Plateau from ∼1 km in the late Paleocene
+        to ∼2.3 km at the beginning of the Miocene, and achieved at least ∼5.5 km by ca. 15 Ma.
+    method: paleoaltimetry
+    note: >-
+      Heights read from the shapes of fossil leaves, in two floras of southern Tibet dated by zircons and four of
+      the foreland: the Qiabulin flora, of 21 to 19 Ma, grew at about 2.3 km, and by about 15 Ma the range stood
+      at 5.5 km or more, which the abstract does not set beside today's height. So the range came to about its
+      present height between the two, and the window is written from the older end of the Qiabulin flora's age to
+      the abstract's 15 Ma. The abstract gives no uncertainty for either height. Read only in the abstract.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in ding-2017-himalaya-rise.txt (sha256 2ec83ef89a294ba6), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-23" }
+  standing-start-before-gebelin-2013:
+    prop: start_before
+    subject: "@standing"
+    value: { ref: ics/burdigalian, edge: end }
+    source:
+      ref: src:gebelin-2013-everest
+      loc: abstract
+      quote: >-
+        hydrous minerals that were deformed in the South Tibetan detachment shear zone during the late Early Miocene
+        … the difference in δ18Owater is consistent with mean elevations of ≥5000 m for the Mount Everest area. Mean
+        elevations similar to modern
+    method: paleoaltimetry
+    rank: preferred
+    note: >-
+      Hydrogen isotopes of minerals that grew in the South Tibetan detachment near Mount Everest while it moved,
+      in water that had fallen as rain or snow high up, set against soils of the same age near sea level in the
+      foreland: a mean height of 5000 m or more, like today's. The abstract dates the minerals only to the late
+      Early Miocene, so the bound is written as the end of the Burdigalian, the stage that ends the Early Miocene.
+      It and the bound from the Thakkhola graben agree, and only one bound of a kind binds at a time: this one is
+      preferred as the earlier of the two, measured at the range's crest. Read only in the abstract.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in gebelin-2013-everest.txt (sha256 ea5418503607853c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-23" }
+  standing-start-before-garzione-2000:
+    prop: start_before
+    subject: "@standing"
+    value: { lo: 11 Ma, hi: 10 Ma }
+    source:
+      - ref: src:garzione-2000-thakkhola
+        loc: abstract
+        quote: >-
+          suggest that the southern Tibetan Plateau attained its current elevation prior to east-west extension.
+          Initiation of Thakkhola graben extension is constrained between 10 and 11 Ma, based on magnetostratigraphy
+          of the older Tetang Formation.
+      - ref: src:wang-2008-tibet-early-uplift
+        loc: "Discussion, first paragraph"
+        quote: >-
+          Oxygen isotope-based paleoaltimetry studies from the Thakkhola graben and Gyirong basin suggest that the
+          Tethyan Himalaya were at or near modern elevation by the mid-Miocene
+    method: paleoaltimetry
+    note: >-
+      Oxygen isotopes of the river and lake carbonates of the Thakkhola graben in Nepal, which give waters like
+      today's from the graben's oldest beds on: the ground there already stood at its present height when the
+      graben began to open, between 11 and 10 Ma by the magnetic reversals in those beds. The graben lies
+      north of the range's crest, inside this record's outline; its authors speak of the southern Tibetan Plateau,
+      and Wang et al. (2008) read the same results as the height of the Tethyan Himalaya. A later bound than the
+      one from Mount Everest, with which it agrees. Garzione et al. read only in the abstract.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in garzione-2000-thakkhola.txt (sha256 cbaa3fada970c569) and wang-2008-tibet-early-uplift.txt (sha256 c64d0640176a9ddc), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-23" }
 relations:
   raised-by:
     rel: caused-by

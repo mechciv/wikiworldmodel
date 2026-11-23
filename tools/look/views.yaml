@@ -44,6 +44,26 @@ views:
   - name: mountain-winter
     what: Above the treeline on Mount Rainier in January 1950, snow over the slopes.
     link: t=1950&lat=46.845&lon=-121.735&d=1.0001&h=270&v=78&mo=1&hour=12&clock=0
+  - name: skyline-safed-koh
+    what: >-
+      A valley of eastern Afghanistan in March 4534 BCE, looking south from eye level: the Safed Koh thirty
+      kilometres off, its crest as the survey's cells have it, with its treeline and its snow (the first round's p08).
+    link: t=-4532.55&lat=34.30255&lon=69.87607&d=1.0000023544&h=170&v=84&hour=15&mo=3&clock=0
+  - name: skyline-taihang
+    what: >-
+      The foot of the Taihang at 1.83 Ma, looking west from eye level: today's range carried back on its plate over
+      the elevation of the time, closing the view (the first round's p07).
+    link: t=1.830023Ma&lat=35.85822&lon=113.74450&d=1.0000023544&h=280&v=84&hour=13&mo=1&clock=0
+  - name: skyline-himalaya-12ma
+    what: >-
+      The foothills of the Himalaya at 12 Ma, looking north: the range's own crests, carried back as far as its
+      record has it standing, over the elevation of that time.
+    link: t=12Ma&lat=22.92432&lon=84.10332&d=1.0003689&h=355&v=84&hour=9&mo=10&clock=0
+  - name: valley-alps-15ma
+    what: >-
+      The valley of the Arve below Mont Blanc at 15 Ma, looking south: today's valley and massif on land the
+      elevation of that time has far lower, the valley's floor held above its coast.
+    link: t=15Ma&lat=45.44437&lon=6.41757&d=1.00004&h=160&v=84&hour=10&mo=7&clock=0
   - name: sea-floor
     what: The floor of a shelf sea of the Thanetian, near Paris, a few metres over it.
     link: t=-57598050&lat=48&lon=2&d=1.0000004&h=30&v=80&hour=12&clock=0

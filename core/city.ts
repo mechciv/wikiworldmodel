@@ -111,6 +111,9 @@ export interface GroundLevel {
   x0: number;
   y0: number;
   cell: number;
+  /** what its whole numbers of height stand for: steps of `unit` metres above `base`; decimetres above nought where they are not said */
+  unit?: number;
+  base?: number;
 }
 
 export interface CityStructure {

@@ -1,0 +1,20 @@
+id: src:rowley-currie-2006-lunpola
+type: publication
+kind: measurement
+citation: >-
+  Rowley, D.B. & Currie, B.S. (2006). Palaeo-altimetry of the late Eocene to Miocene Lunpola basin,
+  central Tibet. Nature 439(7077), 677–681.
+authors:
+  - "Rowley, D.B."
+  - "Currie, B.S."
+published: 2006
+title: Palaeo-altimetry of the late Eocene to Miocene Lunpola basin, central Tibet
+container: Nature 439(7077), 677–681
+doi: 10.1038/nature04506
+verified:
+  by: machine:claude-code
+  how: >-
+    Abstract only, read on 22 November 2026 from the Europe PMC record (PMID 16467830); citation
+    from Crossref. The article itself was not read: Nature's site is closed to automated readers.
+    So the heights reckoned for the single beds, and the ages the authors gave those beds, are
+    known here only as later papers report them.

@@ -1,0 +1,30 @@
+id: src:fang-2020-lunpola-chronology
+type: publication
+kind: measurement
+citation: >-
+  Fang, X., Dupont-Nivet, G., Wang, C., Song, C., Meng, Q., Zhang, W., Nie, J., Zhang, T., Mao, Z. &
+  Chen, Y. (2020). Revised chronology of central Tibet uplift (Lunpola Basin). Science Advances
+  6(50), eaba7298.
+authors:
+  - "Fang, X."
+  - "Dupont-Nivet, G."
+  - "Wang, C."
+  - "Song, C."
+  - "Meng, Q."
+  - "Zhang, W."
+  - "Nie, J."
+  - "Zhang, T."
+  - "Mao, Z."
+  - "Chen, Y."
+published: 2020
+title: Revised chronology of central Tibet uplift (Lunpola Basin)
+container: Science Advances 6(50), eaba7298
+doi: 10.1126/sciadv.aba7298
+license: CC-BY-NC-4.0
+verified:
+  by: machine:claude-code
+  how: >-
+    Abstract and full text read on 22 November 2026 in the article's XML from Europe PMC's
+    full-text service (PMC7725450), turned to plain text by script, and before that on its page at
+    PubMed Central; citation from Crossref. The supplementary materials were not read. The article
+    has no page numbers, so locators name the section.

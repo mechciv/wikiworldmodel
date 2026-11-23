@@ -50,8 +50,8 @@ As for the other slices (see the [README](../../README.md)); it needs no dataset
 
 ## Pass criteria
 
-The generator's tests named here as `v2.test.ts` are in `v3.test.ts` since the [seventeenth slice](SEVENTEENTH-SLICE.md)
-made its version 3; their names are as they were.
+The generator's tests named here as `v2.test.ts` are in `v4.test.ts`: the [seventeenth slice](SEVENTEENTH-SLICE.md)
+made its version 3, and version 4 gave its people and their animals somewhere to go; their names are as they were.
 
 | Criterion | Where it is checked |
 |---|---|

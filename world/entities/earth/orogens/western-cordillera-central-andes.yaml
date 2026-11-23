@@ -1,0 +1,106 @@
+id: earth/orogens/western-cordillera-central-andes
+kind: landform/mountain-range
+summary: The range of volcanoes along the western edge of the high plateau of the Central Andes.
+author: machine:claude-code
+# Phases tile the lifetime: the range rises from the start of its growth, and then stands at about the height it has
+# today. Where its sources show it standing so, today's relief is carried back for it (model:earth/relief-carried).
+phases:
+  - id: rising
+    label: Rising
+  - id: standing
+    label: At about its present height
+claims:
+  name:
+    prop: name
+    value: { en: Western Cordillera of the Central Andes }
+    unsourced: An editorial label.
+  extent:
+    prop: extent
+    value:
+      type: Polygon
+      frame: frame:earth/present-day
+      coordinates:
+        - [[-72.4, -15.6], [-71.6, -16.6], [-70.6, -17.4], [-69.8, -18.2], [-69.3, -19.5], [-68.9, -21.0], [-68.7, -22.5], [-68.9, -24.0], [-68.9, -26.0], [-68.0, -26.0], [-67.9, -24.0], [-67.5, -22.8], [-67.8, -22.3], [-68.1, -21.0], [-68.4, -20.0], [-68.6, -19.0], [-68.7, -18.0], [-69.4, -17.2], [-70.1, -16.4], [-70.9, -15.3], [-71.6, -15.0], [-72.4, -15.6]]
+    unsourced: >-
+      An outline drawn loosely round the line of volcanoes on today's relief, from southern Peru at about 15°S to
+      26°S, between the slope down to the coast and the edge of the Altiplano, whose outline it meets and does not
+      cross, to say which ground its record speaks for: the span of latitude is the one the preferred source
+      speaks for. The range has no agreed edge.
+    method: editorial
+    basis: reconstruction
+  location:
+    prop: location
+    value: { lat: -18.1, lon: -68.88, frame: frame:earth/present-day }
+    unsourced: >-
+      A representative point by Nevado Sajama, one of the range's volcanoes, chosen to place the marker; the range
+      has no single location.
+    method: editorial
+    basis: reconstruction
+  frame:
+    prop: frame
+    value: frame:paleomap/plate-201
+    source: { ref: src:paleomap-plate-model, loc: PALEOMAP_PlatePolygons.gpml }
+    method: plate-polygon
+    basis: reconstruction
+  # When the range began to grow.
+  start:
+    prop: start
+    value: { lo: 70 Ma, hi: 60 Ma }
+    source:
+      ref: src:boschman-2021-andes-paleoelevation
+      loc: "Table 1, Western Cordillera – C, the row for 70–60 Ma, p. 12"
+      quote: "Onset of accalaration of accumulation of sediments in foreland basins east of WC: onset of uplift in WC"
+    method: stratigraphic
+    note: >-
+      The review's table, after Horton (2018), which was not read: the basins east of the range began to fill
+      faster then, which is read as the range's first rise. The quote's spelling is the table's. The review's text
+      has the range begin to rise around the end of the Mesozoic, as the ground east of it left the sea, and its
+      abstract puts its main phase of uplift in the Late Cretaceous to Paleocene.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in boschman-2021-andes-paleoelevation.txt (sha256 524752a53caf88cc), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-23" }
+  # When the range came to stand at about its present height: what its sources dispute.
+  standing-start-scott-2018:
+    prop: start
+    subject: "@standing"
+    value: { hi: 23 Ma }
+    source:
+      ref: src:scott-2018-andean-uplift
+      loc: "Discussion, last paragraph"
+      quote: We suggest that between 16 and 26°S the Western Cordillera attained current elevations (4200 ± 516 m) by 23 Ma.
+    method: paleoaltimetry
+    rank: preferred
+    note: >-
+      Strontium and neodymium isotopes of the range's lavas, which among today's lavas of the Andean arc go with
+      the height of the ground the volcanoes stand on, by way of the thickness of the crust the melts pass
+      through: from 23 Ma on the lavas between 16 and 26°S bear the mark of today's plateau, and those of the
+      Paleogene do not. The lavas are taken in broad groups of ages, the Paleogene as one, so the 23 Ma is where
+      the Miocene group begins and not a moment measured more closely. The 4200 ± 516 m is today's mean height
+      with twice its spread, not a measured height of the past, and the authors allow that the range may have
+      stood at the low end of it at 23 Ma and risen since. Written
+      with only its later end, since the source gives a time by which the range stood so. Preferred as the reading
+      that speaks for the whole length of the outline and does not rest on a past climate; the review cited below
+      also builds its history of the range on high ground in the early to middle Miocene.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in scott-2018-andean-uplift.txt (sha256 5cd6f3ce9d1281ff), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-23" }
+  standing-start-boschman-2021:
+    prop: start
+    subject: "@standing"
+    value: { lo: 22 Ma, hi: 10 Ma }
+    source:
+      ref: src:boschman-2021-andes-paleoelevation
+      loc: "section 6.2, p. 33"
+      quote: >-
+        Sundell et al. (2019) demonstrated along-strike variability in the timing of uplift in the WC, with the
+        northwestern sector uplifting earlier (at modern elevations around 22 Ma) compared to the southeastern
+        sector (1–2 km during the middle Miocene, at modern elevations around 10 Ma).
+    method: paleoaltimetry
+    note: >-
+      Hydrogen isotopes of volcanic glass in southern Peru, as the review reports Sundell et al. (2019), which
+      was not read: by its table the ground at 14 to 15°S was at or above its modern height at 22 Ma, and that at
+      15.5 to 17°S, the north end of this record's outline, about 2 km high at 20 to 15 Ma and at its modern
+      height only at 10 Ma. So the range came to its height at different times along its length, and the window
+      runs from the one to the other. The review names this the worst mismatch in its compilation: other
+      estimates have the range no higher than 1 to 2 km in the middle Miocene, and others at least 3 km high
+      since the late Eocene.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in boschman-2021-andes-paleoelevation.txt (sha256 524752a53caf88cc), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-23" }

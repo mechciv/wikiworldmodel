@@ -1,0 +1,25 @@
+id: src:cassel-2009-sierra-nevada
+type: publication
+kind: measurement
+citation: >-
+  Cassel, E.J., Graham, S.A. & Chamberlain, C.P. (2009). Cenozoic tectonic and topographic evolution
+  of the northern Sierra Nevada, California, through stable isotope paleoaltimetry in volcanic
+  glass. Geology 37(6), 547–550.
+authors:
+  - "Cassel, E.J."
+  - "Graham, S.A."
+  - "Chamberlain, C.P."
+published: 2009
+title: >-
+  Cenozoic tectonic and topographic evolution of the northern Sierra Nevada, California, through
+  stable isotope paleoaltimetry in volcanic glass
+container: Geology 37(6), 547–550
+doi: 10.1130/G25572A.1
+verified:
+  by: machine:claude-code
+  how: >-
+    Abstract only, read on 22 November 2026 as OpenAlex's record of the article carries it (work
+    W2105448129; OpenAlex keeps an abstract as its words with their places, and a script set them
+    back in order); citation from Crossref. The article itself was not read: the publisher's site
+    (GeoScienceWorld) answers with a bot check. So the heights the authors reckon, which the
+    abstract gives only as similar to the present, are not given here.

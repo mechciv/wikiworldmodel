@@ -9,14 +9,15 @@ import { decodeTile } from '../../../core/container.ts';
 import { decodeNode, type ClimateHeader, type ClimateRule } from '../../../core/climate.ts';
 import type { Form } from '../../../core/form.ts';
 import type { PlanetFile } from '../../../core/planet.ts';
+import { between, carriedNear, fineTilesNear, presentRead, sceneShape, type ReliefFineHeader, type ReliefInfo } from '../../../core/relief.ts';
 import { coverAt } from '../../../core/planet.ts';
 import { conj, rotate, toLatLon, unitVector } from '../../../core/quat.ts';
 import type { RotationModel } from '../../../core/rotation-model.ts';
 import type { Scenario } from '../../../core/scenario.ts';
 import type { SceneSpec } from '../../../core/scene.ts';
-import { toMa } from '../../../core/time.ts';
+import { fromMa, toMa } from '../../../core/time.ts';
 import type { FieldInfo, TileHeader, TileRef } from '../../../core/tileset.ts';
-import { latticeOf, placeSpec, reliefBox, type PlaceWorld } from '../../../world/generators/life/spec.ts';
+import { latticeOf, placeSpec, platesNear, plateUnder, reliefBox, type PlaceWorld } from '../../../world/generators/life/spec.ts';
 import { getBytes, getJSON, type Build } from '../data.ts';
 import { Rivers } from '../rivers.ts';
 import { MonthTiles } from '../months.ts';
@@ -25,6 +26,8 @@ import type { SceneWater } from '../../../core/scene.ts';
 import { sceneWater } from '../../../world/generators/life/water.ts';
 
 interface LoadedField {
+  /** the field its tile carries */
+  id: string;
   grid: { lon0: number; lat0: number; step: number; nx: number; ny: number };
   bbox: [number, number, number, number];
   elev: Int16Array;
@@ -43,7 +46,16 @@ interface StrataGrid {
   runs: Uint16Array;
 }
 
+/** A stream of deflated bytes, inflated: a tile of the relief's finer level is kept so (core/relief.ts). */
+async function inflate(bytes: Uint8Array): Promise<Uint8Array> {
+  const stream = new Blob([bytes as BlobPart]).stream().pipeThrough(new DecompressionStream('deflate'));
+  return new Uint8Array(await new Response(stream).arrayBuffer());
+}
+
 export class LifeAtlas {
+  /** the ground below the relief's grid: its index, as it is sent for and once it has come; and its tiles' cells, by key */
+  private reliefSent: Promise<ReliefInfo | undefined> | null = null;
+  private fineSent = new Map<string, Promise<Int8Array | undefined>>();
   private bins = new Map<string, Promise<AtlasBin>>();
   private loadedBins = new Map<string, AtlasBin>();
   private forms: Promise<Record<string, Form>> | null = null;
@@ -138,11 +150,145 @@ export class LifeAtlas {
       p = getBytes(this.build.base + ref.url).then((buf) => {
         const { header, arrays } = decodeTile<TileHeader>(buf);
         const k = header.field?.keyframes.find((x) => x.ageMa === ageMa);
-        return k ? { grid: header.field!.grid, bbox: ref.bbox, elev: arrays[k.elev] as Int16Array, plate: arrays[k.plate] as Uint16Array } : undefined;
+        return k ? { id: header.field!.id, grid: header.field!.grid, bbox: ref.bbox, elev: arrays[k.elev] as Int16Array, plate: arrays[k.plate] as Uint16Array } : undefined;
       });
       this.fields.set(key, p);
     }
     return p;
+  }
+
+  /**
+   * What the build says of the ground below the relief's grid (core/relief.ts), where it has it. One file, sent for
+   * once: a scene without it stands on the relief's grid alone, as before there was any, so a file that does not come
+   * is no error.
+   */
+  private reliefIndex(): Promise<ReliefInfo | undefined> {
+    const file = this.build.tileset.files.relief;
+    if (!file) return Promise.resolve(undefined);
+    return (this.reliefSent ??= getJSON<ReliefInfo>(this.build.base + file).catch(() => undefined));
+  }
+
+  /** The cells of the finer level's tiles around a place of today's Earth, by key, once they have come. */
+  private async fineTiles(info: ReliefInfo, lat: number, lon: number): Promise<Map<string, Int8Array>> {
+    const keys = fineTilesNear(info.fine, lat, lon);
+    const got = await Promise.all(
+      keys.map((key) => {
+        let p = this.fineSent.get(key);
+        if (!p) {
+          p = getBytes(`${this.build.base}${info.fine.dir}/${key}.lwt`)
+            .then(async (buf) => {
+              const { header, arrays } = decodeTile<ReliefFineHeader>(buf);
+              const raw = arrays[header.codes] as Uint8Array;
+              const bytes = header.packed === 'deflate' ? await inflate(raw) : raw;
+              return new Int8Array(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+            })
+            .catch(() => undefined);
+          this.fineSent.set(key, p);
+        }
+        return p;
+      }),
+    );
+    const out = new Map<string, Int8Array>();
+    keys.forEach((key, i) => {
+      const t = got[i];
+      if (t) out.set(key, t);
+    });
+    return out;
+  }
+
+  /**
+   * Today's relief on its own grid around a place of today's Earth, above today's sea, with the plate under each node:
+   * what today's shape is carried back from (model:earth/relief-carried). Undefined where the build has no such grid.
+   */
+  private async todayRelief(info: ReliefInfo, lat: number, lon: number): Promise<{ step: number; elevation: (lat: number, lon: number) => number; plate: (lat: number, lon: number) => number } | undefined> {
+    const field = this.build.tileset.fields.find((f) => f.id === info.field);
+    const step = field?.res_deg;
+    if (!field || !step || step >= 1) return undefined;
+    const now = fromMa(0);
+    const refs = this.build.tileset.tiles.filter((r) => r.lod === 3 && r.time[0] <= now && now <= r.time[1]);
+    // As far as the shape reaches, and the nodes about its edge.
+    const dLat = info.fine.reach_deg + 0.5;
+    const dLon = Math.min(6, info.fine.reach_deg / Math.max(0.05, Math.cos((lat * Math.PI) / 180))) + 0.5;
+    const wanted = new Set<TileRef>();
+    for (let la = Math.max(-90, lat - dLat); ; la = Math.min(90, la + 2)) {
+      for (let lo = lon - dLon; ; lo = Math.min(lon + dLon, lo + 2)) {
+        const q = ((lo + 540) % 360) - 180;
+        for (const r of refs) if (la >= r.bbox[1] && la <= r.bbox[3] && q >= r.bbox[0] && q <= r.bbox[2]) wanted.add(r);
+        if (lo >= lon + dLon) break;
+      }
+      if (la >= Math.min(90, lat + dLat)) break;
+    }
+    const fields = (await Promise.all([...wanted].map((r) => this.fieldOf(r, 0)))).filter((f): f is LoadedField => !!f);
+    if (!fields.length) return undefined;
+    const snap = (v: number) => Math.round(Math.round(v / step) * step * 1e6) / 1e6;
+    const read = (arr: 'elev' | 'plate', la: number, lo: number): number | undefined => {
+      const r = Math.max(-90, Math.min(90, snap(la)));
+      const q = ((snap(lo) + 540) % 360) - 180;
+      const f = fields.find((x) => r >= x.bbox[1] && r <= x.bbox[3] && q >= x.bbox[0] && q <= x.bbox[2]);
+      if (!f) return undefined;
+      return f[arr][Math.round((f.grid.lat0 - r) / f.grid.step) * f.grid.nx + Math.round((q - f.grid.lon0) / f.grid.step)];
+    };
+    return { step, elevation: (la, lo) => read('elev', la, lo) ?? 0, plate: (la, lo) => this.build.frames.plateIndex[read('plate', la, lo) ?? 0] ?? 0 };
+  }
+
+  /**
+   * Today's plates on the relief's own grid, finer than a keyframe of the deep past has them, about where each plate
+   * near a place would have that place stand today: what a scene finds the plate under its place by
+   * (world/generators/life/spec.ts, plateUnder). Undefined where the build has no such grid, or its tiles do not come.
+   */
+  private async platesNow(pw: PlaceWorld, lat: number, lon: number, ageMa: number): Promise<PlaceWorld['plateNow']> {
+    const now = fromMa(0);
+    const refs = this.build.tileset.tiles.filter((r) => r.lod === 3 && r.time[0] <= now && now <= r.time[1]);
+    if (!refs.length) return undefined;
+    const wanted = new Set<TileRef>();
+    for (const p of platesNear(pw, lat, lon)) {
+      if (!p) continue;
+      const [la, lo] = pw.carry(p, lat, lon, ageMa, 0);
+      for (const r of refs) if (la >= r.bbox[1] && la <= r.bbox[3] && lo >= r.bbox[0] && lo <= r.bbox[2]) wanted.add(r);
+    }
+    const fields = (await Promise.all([...wanted].map((r) => this.fieldOf(r, 0).catch(() => undefined)))).filter((f): f is LoadedField => !!f);
+    if (!fields.length) return undefined;
+    return (la, lo) => {
+      const f = fields.find((x) => la >= x.bbox[1] && la <= x.bbox[3] && lo >= x.bbox[0] && lo <= x.bbox[2]);
+      if (!f) return 0;
+      const j = Math.round((f.grid.lat0 - la) / f.grid.step);
+      const i = Math.round((lo - f.grid.lon0) / f.grid.step);
+      return this.build.frames.plateIndex[f.plate[j * f.grid.nx + i]] ?? 0;
+    };
+  }
+
+  /**
+   * What the elevation a scene stands on makes of today, around a place of today's Earth: its keyframe of the present
+   * above its coast, from the tiles of the latest time a scene reads it, read straight between its nodes. Today's shape
+   * is carried back as what today's ground stands above this by (model:earth/relief-carried). Undefined where the field
+   * has no such keyframe, or its tiles do not come.
+   */
+  private async presentOf(field: FieldInfo, ahead: FieldInfo[], info: ReliefInfo, lat: number, lon: number): Promise<((lat: number, lon: number) => number) | undefined> {
+    const last = presentRead(field, ahead);
+    if (last === undefined) return undefined;
+    const refs = this.build.tileset.tiles.filter((r) => r.lod === 1 && r.time[0] <= last && last <= r.time[1]);
+    // As far as the shape reaches, and the nodes of whole degrees about its edge.
+    const dLat = info.fine.reach_deg + 1.5;
+    const dLon = Math.min(6, info.fine.reach_deg / Math.max(0.05, Math.cos((lat * Math.PI) / 180))) + 1.5;
+    const wanted = new Set<TileRef>();
+    for (let la = Math.max(-90, lat - dLat); ; la = Math.min(90, la + 2)) {
+      for (let lo = lon - dLon; ; lo = Math.min(lon + dLon, lo + 2)) {
+        const q = ((lo + 540) % 360) - 180;
+        for (const r of refs) if (la >= r.bbox[1] && la <= r.bbox[3] && q >= r.bbox[0] && q <= r.bbox[2]) wanted.add(r);
+        if (lo >= lon + dLon) break;
+      }
+      if (la >= Math.min(90, lat + dLat)) break;
+    }
+    const fields = (await Promise.all([...wanted].map((r) => this.fieldOf(r, 0)))).filter((f): f is LoadedField => !!f && f.id === field.id);
+    if (!fields.length) return undefined;
+    const coast = this.coastAt(field, last);
+    const node = (la: number, lo: number): number => {
+      const r = Math.max(-90, Math.min(90, Math.round(la)));
+      const q = ((Math.round(lo) + 540) % 360) - 180;
+      const f = fields.find((x) => r >= x.bbox[1] && r <= x.bbox[3] && q >= x.bbox[0] && q <= x.bbox[2]);
+      return (f ? f.elev[Math.round((f.grid.lat0 - r) / f.grid.step) * f.grid.nx + Math.round((q - f.grid.lon0) / f.grid.step)] : -4000) - coast;
+    };
+    return between(node, 1);
   }
 
   /**
@@ -391,6 +537,30 @@ export class LifeAtlas {
       isoline: this.coastAt(field, when),
       generator: this.generator,
     };
+    // Before the times today's relief is held for, the plate under the place is found by today's plates, which are
+    // finer than a keyframe's: their tiles are sent for first.
+    if (!finest) {
+      const plateNow = await this.platesNow(pw, origin.lat, origin.lon, ageMa);
+      if (plateNow) pw.plateNow = plateNow;
+    }
+    // The shape of the ground within the relief's cells, where the build has it: the survey's own where today's relief
+    // is held for the time, and today's carried back where the model reaches it. Its tiles are sent for first.
+    const relief = await this.reliefIndex();
+    if (relief) {
+      const plate = plateUnder(pw, origin.lat, origin.lon, ageMa);
+      const [tl, to] = plate ? pw.carry(plate, origin.lat, origin.lon, ageMa, 0) : [origin.lat, origin.lon];
+      if (finest && field.id === relief.field) {
+        const cells = await this.fineTiles(relief, tl, to);
+        pw.held = true;
+        pw.shape = (today) => sceneShape({ info: relief, tile: (key) => cells.get(key), at: today });
+      } else if (!finest && relief.carried && ageMa >= 0 && carriedNear(relief.carried, tl, to, ageMa, relief.fine.reach_deg)) {
+        const [cells, today, base] = await Promise.all([this.fineTiles(relief, tl, to), this.todayRelief(relief, tl, to), this.presentOf(field, elevations.slice(0, elevations.indexOf(field)), relief, tl, to)]);
+        if (today && base) {
+          pw.held = false;
+          pw.shape = (at, back) => (back ? sceneShape({ info: relief, tile: (key) => cells.get(key), at, carried: { ...back, today, base, grain: 1 } }) : undefined);
+        }
+      }
+    }
     // What the ground is made of, from the rock record of the stage, where the build has it.
     const rocks = this.build.rocks;
     const rule = this.build.substrate?.rule;
@@ -403,7 +573,7 @@ export class LifeAtlas {
     // And from the units of the column of rock the place lies in where it stands today, at the time shown: its
     // column is sent for first, so that the spec has its ground from the start.
     if (rule?.strata && this.build.substrate?.strata) {
-      const plate = pw.plate(origin.lat, origin.lon);
+      const plate = plateUnder(pw, origin.lat, origin.lon, ageMa);
       const [tl, to] = plate ? pw.carry(plate, origin.lat, origin.lon, ageMa, 0) : [origin.lat, origin.lon];
       await this.columnFor(tl, to);
       pw.strata = (la, lo) => this.unitsAt(la, lo, ageMa);

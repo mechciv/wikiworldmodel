@@ -10,7 +10,7 @@ import { MonthsTile, PartsTile, partsFile, tilesNear, type Months, type MonthsTi
 import { conj, rotate, toLatLon, unitVector } from '../../../core/quat.ts';
 import { RotationModel } from '../../../core/rotation-model.ts';
 import type { SceneParts } from '../../../core/scene.ts';
-import { formatTime, toMa } from '../../../core/time.ts';
+import { formatTime, fromMa, toMa } from '../../../core/time.ts';
 import type { FramesFile, TileHeader, Tileset } from '../../../core/tileset.ts';
 import { monthsPlace, placeMonths } from '../../../world/generators/life/climate.ts';
 
@@ -57,15 +57,40 @@ export function monthsAt(dir: string, lat: number, lon: number, t: number): Mont
   const inTime = ts.tiles.filter((r) => r.lod === lod && r.time[0] <= t && t <= r.time[1]);
   const snap = (v: number) => Math.round(Math.round(v / step) * step * 1e6) / 1e6;
   const model = new RotationModel(frames.rotations);
+  const present = fromMa(0);
+  const nowRefs = ts.tiles.filter((r) => r.lod === 3 && r.time[0] <= present && present <= r.time[1]);
+  // A tile is read once: by a plate's edge the plates of the ground round about are asked for too.
+  const read = new Map<string, ReturnType<typeof decodeTile<TileHeader>>>();
+  const tileOf = (url: string) => {
+    let t = read.get(url);
+    if (!t) read.set(url, (t = decodeTile<TileHeader>(bytes(join(dir, url)))));
+    return t;
+  };
   const where = monthsPlace(
     info,
     {
+      keyAge,
+      step,
+      // Today's plates on the relief's grid, where the time is before those the relief is held for: finer than a keyframe's.
+      ...(finest || !nowRefs.length
+        ? {}
+        : {
+            plateNow: (la: number, lo: number) => {
+              const ref = nowRefs.find((x) => la >= x.bbox[1] && la <= x.bbox[3] && lo >= x.bbox[0] && lo <= x.bbox[2]);
+              if (!ref) return 0;
+              const { header, arrays } = tileOf(ref.url);
+              const k = header.field?.keyframes.find((x) => x.ageMa === 0);
+              if (!k) return 0;
+              const g = header.field!.grid;
+              return frames.plateIndex[arrays[k.plate][Math.round((g.lat0 - la) / g.step) * g.nx + Math.round((lo - g.lon0) / g.step)]] ?? 0;
+            },
+          }),
       plate: (la, lo) => {
         const r = snap(la);
         const q = ((snap(lo) + 540) % 360) - 180;
         const ref = inTime.find((x) => r >= x.bbox[1] && r <= x.bbox[3] && q >= x.bbox[0] && q <= x.bbox[2]);
         if (!ref) return 0;
-        const { header, arrays } = decodeTile<TileHeader>(bytes(join(dir, ref.url)));
+        const { header, arrays } = tileOf(ref.url);
         const k = header.field?.keyframes.find((x) => x.ageMa === keyAge);
         if (!k) return 0;
         const g = header.field!.grid;

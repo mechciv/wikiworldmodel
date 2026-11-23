@@ -1,0 +1,72 @@
+id: earth/orogens/front-range
+kind: landform/mountain-range
+summary: The range of the Southern Rocky Mountains in Colorado that rises from the Great Plains.
+author: machine:claude-code
+# Phases tile the lifetime: the range rises from the start of its growth, and then stands at about the height it has
+# today. Where its sources show it standing so, today's relief is carried back for it (model:earth/relief-carried).
+phases:
+  - id: rising
+    label: Rising
+  - id: standing
+    label: At about its present height
+claims:
+  name:
+    prop: name
+    value: { en: Front Range }
+    unsourced: An editorial label.
+  extent:
+    prop: extent
+    value:
+      type: Polygon
+      frame: frame:earth/present-day
+      coordinates:
+        - [[-105.9, 41.0], [-105.25, 41.0], [-105.15, 40.3], [-105.2, 39.7], [-105.0, 39.2], [-104.85, 38.75], [-105.05, 38.5], [-105.6, 38.5], [-105.75, 39.0], [-105.95, 39.5], [-106.0, 40.0], [-106.0, 40.6], [-105.9, 41.0]]
+    unsourced: >-
+      An outline drawn loosely round the range on today's relief, from the Wyoming border south to the Pikes Peak
+      massif, between the edge of the Great Plains and the high basins of North, Middle and South Park, to say
+      which ground its record speaks for. The range has no agreed edge.
+    method: editorial
+    basis: reconstruction
+  location:
+    prop: location
+    value: { lat: 38.91, lon: -105.29, frame: frame:earth/present-day }
+    unsourced: >-
+      A representative point at Florissant, where the fossil leaves its record rests on were found, chosen to
+      place the marker; the range has no single location.
+    method: editorial
+    basis: reconstruction
+  frame:
+    prop: frame
+    value: frame:paleomap/plate-101
+    source: { ref: src:paleomap-plate-model, loc: PALEOMAP_PlatePolygons.gpml }
+    method: plate-polygon
+    basis: reconstruction
+  # When the range came to stand at about its present height: a bound. No source read dates when it began to grow.
+  standing-start-before-gregory-chase-1992:
+    prop: start_before
+    subject: "@standing"
+    value: 35 Ma
+    source:
+      - ref: src:gregory-chase-1992-florissant
+        loc: abstract
+        quote: >-
+          by examining the overlying 35 Ma Florissant flora … implies a late Eocene paleoelevation of 2.4-2.7 km.
+          Pliocene uplift is thus not required to explain the present elevation of 2.5 km.
+      - ref: src:gregory-chase-1994-front-range
+        loc: abstract
+        quote: >-
+          New paleobotanical data suggest that in the late Eocene the erosion surface which capped the Front Range,
+          Colorado was 2.2–3.3 km in elevation, which is similar to the 2.5‐km present elevation of surface
+          remnants.
+    method: paleoaltimetry
+    note: >-
+      The shapes of the fossil leaves of the Florissant lake beds, 35 Ma old, which lie on the surface of low
+      relief that erosion had cut across the range by the end of the Eocene: they give the warmth of the air, and
+      with the fall of temperature with height a ground 2.4 to 2.7 km high, 2.2 to 3.3 km by the authors' later
+      reckoning, like the 2.5 km of what is left of that surface today. A bound: the authors say it is unclear
+      when the range came to this height. It is the height of the surface that caps the range, not of its peaks.
+      The authors set it against the common belief of their time, that the canyons cut into the surface show a
+      rise in the Neogene; no source for that belief was read, so it is not written as a claim here. The
+      abstracts give no uncertainty for the flora's age. Both read only in their abstracts.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in gregory-chase-1992-florissant.txt (sha256 f32ecbc89361576f) and gregory-chase-1994-front-range.txt (sha256 440354f0856500ba), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-23" }

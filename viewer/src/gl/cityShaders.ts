@@ -2,6 +2,7 @@
 // physically based sky, so that the same light falls on everything the records raise.
 import { LEAF_TILE, LITTER_SPAN } from '../../../core/leaves.ts';
 import { GROUND_LAYERS } from '../../../core/materials.ts';
+import { DUTY } from '../../../world/generators/life/forms.ts';
 import { DRIED_BY, SOIL_STONES, SORT_EDGE, SORTING } from '../../../world/generators/life/sorting.ts';
 
 /** A number as GLSL writes a float. */
@@ -130,6 +131,13 @@ layout(location = 4) in uint aEntity;
 layout(location = 5) in vec4 iPlace;
 layout(location = 6) in vec2 iFace;
 layout(location = 7) in uvec2 iMeta;
+// One that goes a way of its own (world/generators/life/routines.ts, ROUTE): the first place it goes to, from where it
+// stands, and how long it stays before it sets out; the second, and its stay at the first; then how fast it goes, its
+// stay at the second, how long it takes to get going, and its kind with where in a stride it sets out. All noughts,
+// as they are for a mesh that has no ways, for one that stays where it stands.
+layout(location = 8) in vec4 iWayA;
+layout(location = 9) in vec4 iWayB;
+layout(location = 10) in vec4 iWayC;
 uniform mat4 uViewProj;
 uniform vec3 uEye;
 uniform float uInstanced;
@@ -151,6 +159,109 @@ vec3 turnYZ(vec3 p, vec3 o, float a) {
 vec3 turnXY(vec3 p, vec3 o, float a) {
   vec3 r = p - o;
   return o + vec3(r.x * cos(a) - r.y * sin(a), r.x * sin(a) + r.y * cos(a), r.z);
+}
+// What a body on its way is doing at this second of the visit: the sums of wayAt (world/generators/life/routines.ts),
+// which the tests hold these to. Nothing is kept from one frame to the next.
+// How far along a leg of len metres it is, s seconds into it, at speed v, getting going and stopping over a seconds;
+// and how much it is going, 0 to 1.
+vec2 wayAlong(float s, float len, float v, float a) {
+  if (len < 1e-3 || a <= 0.0) return vec2(0.0);
+  float t = len / v + a;
+  if (s < a) return vec2(0.5 * v * s * s / a, s / a);
+  if (s > t - a) {
+    float r = max(0.0, t - s);
+    return vec2(len - 0.5 * v * r * r / a, r / a);
+  }
+  return vec2(v * (s - 0.5 * a), 1.0);
+}
+// A heading, (sin, cos), turned from one way to another, u of the way, by the shorter turn.
+vec2 wayTurned(vec2 from, vec2 to, float u) {
+  float k = clamp(u, 0.0, 1.0);
+  k = k * k * (3.0 - 2.0 * k);
+  float a = atan(from.x, from.y);
+  float d = mod(atan(to.x, to.y) - a + 3.14159265, 6.2831853) - 3.14159265;
+  float h = a + d * k;
+  return vec2(sin(h), cos(h));
+}
+// Where it is from where it stands, the way it faces, how much it is going, and how far it has walked this round.
+void wayOf(out vec3 off, out vec2 face, out float going, out float walked) {
+  off = vec3(0.0);
+  face = iFace;
+  going = 0.0;
+  walked = 0.0;
+  float v = iWayC.x;
+  int kind = int(iWayC.w);
+  if (kind == 2) {
+    // Round a circle whose middle lies square to the way it was put, so that it sets out that way.
+    float r = max(length(iWayA.xy), 1e-3);
+    float dir = iFace.x * iWayA.y - iFace.y * iWayA.x < 0.0 ? -1.0 : 1.0;
+    float th = dir * v * uClock / r;
+    vec2 n0 = -iWayA.xy / r;
+    vec2 n = vec2(n0.x * cos(th) - n0.y * sin(th), n0.x * sin(th) + n0.y * cos(th));
+    off.xy = iWayA.xy + r * n;
+    face = dir * vec2(-n.y, n.x);
+    walked = v * uClock;
+    return;
+  }
+  vec3 A = iWayA.xyz;
+  vec3 B = iWayB.xyz;
+  float l0 = length(A.xy);
+  float l1 = length(B.xy - A.xy);
+  float l2 = length(B.xy);
+  float a0 = min(iWayC.z, l0 / v);
+  float a1 = min(iWayC.z, l1 / v);
+  float a2 = min(iWayC.z, l2 / v);
+  float t0 = l0 / v + a0;
+  float t1 = l1 / v + a1;
+  float t2 = l2 / v + a2;
+  float d0 = max(iWayA.w, 0.0);
+  float d1 = iWayB.w;
+  float d2 = iWayC.y;
+  vec2 D0 = l0 > 1e-3 ? A.xy / l0 : iFace;
+  vec2 D1 = l1 > 1e-3 ? (B.xy - A.xy) / l1 : D0;
+  vec2 D2 = l2 > 1e-3 ? -B.xy / l2 : D1;
+  // One put walking is a first step on its way as the clock starts.
+  float s = mod(uClock + (iWayA.w < 0.0 ? a0 : 0.0), max(d0 + t0 + d1 + t1 + d2 + t2, 1e-3));
+  if (s < d0) return;
+  s -= d0;
+  if (s < t0) {
+    vec2 q = wayAlong(s, l0, v, a0);
+    off = vec3(D0 * q.x, l0 > 1e-3 ? A.z * q.x / l0 : 0.0);
+    going = q.y;
+    walked = q.x;
+    face = wayTurned(iFace, D0, s / max(a0, 1e-3));
+    return;
+  }
+  s -= t0;
+  walked = l0;
+  if (s < d1) {
+    off = A;
+    face = D0;
+    return;
+  }
+  s -= d1;
+  if (s < t1) {
+    vec2 q = wayAlong(s, l1, v, a1);
+    off = A + vec3(D1 * q.x, l1 > 1e-3 ? (B.z - A.z) * q.x / l1 : 0.0);
+    going = q.y;
+    walked += q.x;
+    face = wayTurned(D0, D1, s / max(a1, 1e-3));
+    return;
+  }
+  s -= t1;
+  walked += l1;
+  if (s < d2) {
+    off = B;
+    face = D1;
+    return;
+  }
+  s -= d2;
+  vec2 q = wayAlong(s, l2, v, a2);
+  off = B + vec3(D2 * q.x, l2 > 1e-3 ? -B.z * q.x / l2 : 0.0);
+  going = q.y;
+  walked += q.x;
+  // It turns for home as it sets out, and into the way it was put as it comes in.
+  face = wayTurned(wayTurned(D1, D2, s / max(a2, 1e-3)), iFace, (s - (t2 - a2)) / max(a2, 1e-3));
 }
 out vec3 vPos;
 // the point from the eye: across a pixel its differences are fine, where the world's position, kilometres from the
@@ -184,6 +295,13 @@ void main() {
   float tint = float(aMat.y) / 255.0;
   // Each one its own time in its loops, from where it stands.
   float own = many ? fract(sin(dot(iPlace.xy, vec2(12.9898, 78.233))) * 43758.5453) : 0.0;
+  // One that goes a way of its own: where it is on it, the way it faces there, how much it is going and how far it has
+  // walked. One that stays is where it stands, as it was put.
+  vec3 wayOff = vec3(0.0);
+  vec2 face = iFace;
+  float going = 0.0;
+  float walked = 0.0;
+  if (many && iWayC.x > 0.0) wayOf(wayOff, face, going, walked);
   if (many && uIdling > 0.5) {
     // An animal idles: its vertex says what it moves with (world/generators/life/forms.ts, BONE), and how far.
     int code = int(aEntity);
@@ -191,9 +309,10 @@ void main() {
     float w = float(code >> 4) / 255.0;
     float t = uClock * uIdle[3].z + own * 6.2831853;
     if (bone == 1 || bone == 2) {
-      // The head, and the neck as far as it goes with it, up or down about the neck's root, now and then.
+      // The head, and the neck as far as it goes with it, up or down about the neck's root, now and then. On its way a
+      // head that was low to feed is held up, and one held up does not dip.
       float c = 0.5 - 0.5 * cos(t * 0.31);
-      float a = (bone == 1 ? 1.0 : w) * uIdle[3].x * c * c * c;
+      float a = (bone == 1 ? 1.0 : w) * uIdle[3].x * mix(c * c * c, uIdle[3].x > 0.0 ? 1.0 : 0.0, going);
       p = turnYZ(p, uIdle[0].xyz, a);
       n = turnYZ(n, vec3(0.0), a);
     } else if (bone == 3) {
@@ -203,6 +322,16 @@ void main() {
     } else if (bone == 4) {
       float b = 1.0 + 0.012 * w * sin(t * 1.7);
       p = uIdle[2].xyz + (p - uIdle[2].xyz) * vec3(b, 1.0, b);
+    } else if ((bone == 5 || bone == 6) && going > 0.0) {
+      // A leg strides as its body goes (forms.ts, gait): on the ground it goes back as fast as the body goes forward,
+      // so that a foot stays where it was put down; then it is lifted and swung forward. The legs of the other bone
+      // are half a stride behind. A point goes with its leg as far as it is down it.
+      float len = uIdle[3].w;
+      float at = fract(walked / max(len * iPlace.w, 1e-4) + fract(iWayC.w) + (bone == 6 ? 0.5 : 0.0));
+      float u = (at - ${DUTY.toFixed(3)}) / ${(1 - DUTY).toFixed(3)};
+      vec2 g = at < ${DUTY.toFixed(3)} ? vec2(1.0 - 2.0 * at / ${DUTY.toFixed(3)}, 0.0) : vec2(-cos(3.14159265 * u), sin(3.14159265 * u));
+      p.y += w * going * ${(DUTY / 2).toFixed(3)} * len * g.x;
+      p.z += w * w * going * 0.07 * len * g.y;
     }
   }
   vLocal = many ? p * iPlace.w : aPos;
@@ -210,8 +339,8 @@ void main() {
   if (many) {
     // +y of the mesh goes to (fx, fy), and +x to (fy, −fx). A horn, an eye or a trunk's bark stays its colour.
     vec3 q = p;
-    p = iPlace.xyz + vec3(q.x * iFace.y + q.y * iFace.x, -q.x * iFace.x + q.y * iFace.y, q.z) * iPlace.w;
-    n = vec3(n.x * iFace.y + n.y * iFace.x, -n.x * iFace.x + n.y * iFace.y, n.z);
+    p = iPlace.xyz + wayOff + vec3(q.x * face.y + q.y * face.x, -q.x * face.x + q.y * face.y, q.z) * iPlace.w;
+    n = vec3(n.x * face.y + n.y * face.x, -n.x * face.x + n.y * face.y, n.z);
     if (aMat.x != 32u && aMat.x != 10u && aMat.x != 37u && aMat.x != 72u) tint = fract(tint + float(iMeta.y) / 255.0);
   }
   // A plant drawn by instancing leans with the wind, the more the higher, in gusts that cross the ground; its leaves on
@@ -1776,9 +1905,10 @@ const GROUND = /* glsl */ `
 uniform highp isampler2D uGround0;
 uniform highp isampler2D uGround1;
 uniform highp isampler2D uGround2;
-// Each grid: x0, y0, cell, ease distance; and its size in cells.
+// Each grid: x0, y0, cell, ease distance; its size in cells; and what its whole numbers stand for: a step in metres, above a base.
 uniform vec4 uGrid[3];
 uniform vec2 uGridSize[3];
+uniform vec2 uGridUnit[3];
 float readGrid(highp isampler2D t, int k, vec2 p) {
   vec2 f = clamp((p - uGrid[k].xy) / uGrid[k].z, vec2(0.0), uGridSize[k] - 1.001);
   ivec2 i = ivec2(floor(f));
@@ -1787,7 +1917,7 @@ float readGrid(highp isampler2D t, int k, vec2 p) {
   float b = float(texelFetch(t, i + ivec2(1, 0), 0).r);
   float c = float(texelFetch(t, i + ivec2(0, 1), 0).r);
   float d = float(texelFetch(t, i + ivec2(1, 1), 0).r);
-  return mix(mix(a, b, u.x), mix(c, d, u.x), u.y) * 0.1;
+  return mix(mix(a, b, u.x), mix(c, d, u.x), u.y) * uGridUnit[k].x + uGridUnit[k].y;
 }
 float gridWeight(int k, vec2 p) {
   vec2 lo = p - uGrid[k].xy;
@@ -1864,6 +1994,10 @@ uniform float uWater;
 uniform float uWild;
 uniform vec3 uTone[10];
 uniform vec3 uShare;
+// The same shares at each of 32 heights, where the world gives the climate at a height: the first height, the step
+// between them and the height their edges wander over. A step of nought says there are none, and the place's hold.
+uniform vec3 uShareAt[32];
+uniform vec3 uShareSpan;
 // What the ground is made of, where the world says (core/substrate.ts): how much of the ground that decides, and how
 // much of what its sources say names cracks, ripples and a grain (fine below zero, coarse above); the share of each
 // material (sand, gravel, silt, mud, lime mud, a crust of salt, peat, ash); and each one's two tones.
@@ -2338,16 +2472,23 @@ vec3 wilderness(vec3 p, vec3 n, float dist, out float water, out float rough, ou
   // Beyond the plan's map, forest and glade by noise of about the same size, growing with distance so
   // that it never shows as a repeating grain from high up.
   float away = smoothstep(30000.0, 400000.0, dist);
-  float patchy = smoothstep(0.42, 0.54, mix(fbmM(p, 110.0), fbmM(p, 5000.0), away)) * uShare.x;
+  // What its own height bears, where the world gives the climate at a height: a far range has its treeline.
+  vec3 share = uShare;
+  if (uShareSpan.y > 0.0) {
+    float f = clamp((p.z + (fbmM(p, 900.0) - 0.5) * 2.0 * uShareSpan.z - uShareSpan.x) / uShareSpan.y, 0.0, 31.0);
+    int k = int(floor(f));
+    share = mix(uShareAt[k], uShareAt[min(k + 1, 31)], f - float(k));
+  }
+  float patchy = smoothstep(0.42, 0.54, mix(fbmM(p, 110.0), fbmM(p, 5000.0), away)) * share.x;
   // And from high up it melts into one tone.
   float melt = smoothstep(60000.0, 500000.0, dist);
-  vec4 beyond = mix(vec4(patchy, (1.0 - patchy) * (1.0 - uShare.z), uShare.z, 0.0), vec4(0.6 * uShare.x, (1.0 - 0.6 * uShare.x) * (1.0 - uShare.z), uShare.z, 0.0), melt);
+  vec4 beyond = mix(vec4(patchy, (1.0 - patchy) * (1.0 - share.z), share.z, 0.0), vec4(0.6 * share.x, (1.0 - 0.6 * share.x) * (1.0 - share.z), share.z, 0.0), melt);
   vec4 mask = beyond;
   if (inside > 0.5) {
     vec2 e = min(muv, 1.0 - muv);
     mask = mix(beyond, texture(uMask, muv), smoothstep(0.0, 0.1, min(e.x, e.y)));
   }
-  // Water where the plan's A is full; a dry bed where it is half (scene/v12.ts, coverMask), which is no water.
+  // Water where the plan's A is full; a dry bed where it is half (scene/v13.ts, coverMask), which is no water.
   water = smoothstep(0.6, 0.95, mask.a) * smoothstep(450.0, 1000.0, dist);
   float wash = smoothstep(0.3, 0.45, mask.a) * (1.0 - smoothstep(0.55, 0.7, mask.a));
   shaded = mask.r;
@@ -2363,7 +2504,7 @@ vec3 wilderness(vec3 p, vec3 n, float dist, out float water, out float rough, ou
   herb = mix(herb, soil, thin * 0.8);
   vec3 bare = mix(uTone[4], uTone[5], fbmM(p, 3.0));
   bare = mix(bare, bare * grain(0.8 + 0.4 * noiseM(p, 0.06)), nearby);
-  vec3 under = mix(soil, herb, (0.35 + 0.65 * smoothstep(0.34, 0.6, fbmM(p, 9.0))) * uShare.y);
+  vec3 under = mix(soil, herb, (0.35 + 0.65 * smoothstep(0.34, 0.6, fbmM(p, 9.0))) * mix(uShare.y, share.y, 1.0 - inside));
   vec3 c = mix(under, herb, mask.g);
   c = mix(c, bare, mask.b);
   // The sand of a dry bed, paler than the ground around it: what a flood sorted and left loose.
@@ -2625,7 +2766,7 @@ vec4 reflected(vec3 p, vec3 r) {
   return vec4(0.0);
 }
 void main() {
-  // The bed of a river dry in the month: its ribbon says where it is, and it holds no water (scene/v12.ts, DRY_BED).
+  // The bed of a river dry in the month: its ribbon says where it is, and it holds no water (scene/v13.ts, DRY_BED).
   if (vFlow.z < -0.5) discard;
   vec3 p = vPos;
   float dist = distance(p, uEye);

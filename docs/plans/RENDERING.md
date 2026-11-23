@@ -171,7 +171,8 @@ forest views while the camera moves slowly.
 - **Idle movement.** A body's parts become bones: each vertex keeps the part it belongs to and that part's joint,
   and the vertex shader turns it. The poses already written (stand, walk, graze, drink, alert, rest, fly) become
   the ends of loops: a head lowered to graze and raised again, a tail's swing, breathing, at a pace set by the
-  body's size. Animals moving from place to place come later.
+  body's size. Animals moving from place to place come later (they came with `gen:life/scene` version 11: see what
+  was built, below).
 
 Pass: with the clock fixed, two loads of a link give the same picture; with it running, the forest moves and the
 animals do not stand frozen; the frame time holds.
@@ -289,6 +290,33 @@ above, it says so here.
   clouds and the animals: each vertex of an animal says whether it moves with the head, the neck, the tail or the
   breathing trunk, and the shader turns it about its joint, at a pace set by the body's length. The wind's direction is
   the renderer's, as no field gives it.
+
+  **Animals and people go from place to place** (`gen:life/scene` version 11, `gen:people/settlement` version 4): what
+  is drawn has something to do, and does it for as long as it is drawn. A body plan's `behave` names a routine, `feed`,
+  `wander`, `patrol`, `stalk` or `circle`, or its habitat and poses suggest one ([FORMS.md](../FORMS.md)); the generator
+  gives each animal a way by it ([routines.ts](../../world/generators/life/routines.ts)): a place or two near where it
+  stands, how long it stays at each and how fast it goes between them, or a circle it flies or swims round. A group
+  keeps together: the first of it that goes anywhere leads, and the rest go its way beside it, each from where it
+  stands, a little after. One that stalks goes slowly up to the nearest group of something that is no hunter, holds
+  off it and watches. A name goes with the first of its group. A settlement's
+  people who stand, walk or carry make for the door of another house or for a well, an oven or a threshing floor, and
+  keep clear of every house and enclosed yard; those who sit or kneel at work stay; the animals they kept feed and
+  move on as the wild ones do, the herds out from among the houses. A way is twelve numbers kept with the body, and
+  the shader works out from them and the clock where the body is, which way it faces and how far it has walked, each
+  frame, with nothing carried from one frame to the next: what is not drawn costs nothing, and what comes back into
+  view is where it would have been. A leg's points say how far they go with its stride, and the shader strides them
+  by how far the body has walked, so that a foot on the ground stays where it was put down; a head held low to feed
+  is held up on the way. As the clock starts everything is where the scene put it, or a first step on if it was put
+  walking, so that a link with `clock=0` shows what it showed before, but for the legs of what walks. The sums are
+  written twice, in the shader and in `wayAt`, and the tests hold the second.
+
+  *Not built:* anything one animal does because of another. Nothing eats, is caught, flees or answers; a stalker's
+  group takes no notice of it. A body is carried along straight lines, over ground that may lie a tenth of its hips'
+  height off them, and stays put where the ground is rougher; it does not lean with a slope, its legs do not bend at
+  the knee, and a small animal whose legs are spikes glides. Wings do not beat. People do not use the paths between
+  settlements, go to the fields or the water, carry anything from place to place, or go indoors. Rome's crowd still
+  stands. The hour and the season change nothing: a routine is the same at noon and at dusk. A way comes round every
+  few minutes, so an hour's watching shows the same round many times.
 - **6. Bodies.** A body's trunk, head and tubes have half as many sides again close by, and a head's or a tube's rings one
   more between each two. Hide, fur, feathers, chitin and wings have a grain in the body's own frame, and a body a pattern
   by its taxon's tint: stripes, spots, mottling or none. *Not built:* normals smoothed across the joints of parts.
@@ -338,7 +366,7 @@ plants, the bodies, the people and what they build, and raised each by the means
   four ways from one seed, so that it keeps its shape as it nears: to its twigs close by, with boughs for its sprays a
   little way off, as a trunk, a mass and boughs laid like shingles from a way off, and as a plain shape far off.
   Limbs carry bark laid along them, of six kinds by part type: furrowed, smooth, in scales, in diamond cushions,
-  ringed, ribbed and jointed. `gen:life/scene` is version 10.
+  ringed, ribbed and jointed. `gen:life/scene` is version 12: version 10 gave a scene the world's relief below its grid, and version 11 set its animals walking.
 - **The ground's cover closes, in patches.** Three grids of clumps lie over one another: the scene's own, a finer one
   near the eye, and a wider one of larger clumps out to 170 m; a wide plant is sown further from its neighbours than a
   narrow one. Each grid is made a tile at a time and kept. A tuft's own blades are finer and bent over. Low plants
@@ -369,7 +397,7 @@ plants, the bodies, the people and what they build, and raised each by the means
 - **People and what they build.** A figure's body is wider than it is deep, its head longer than wide, with a nose
   and hair; a robe falls to the ground; cloth hangs in folds. What houses are built of stands in relief, each
   material by a height of its own, and what is of earth or stone takes the scans' grain. `gen:people/settlement` is
-  version 4.
+  version 5: version 4 set its people walking.
 - **Stones stand on stony ground.** Where a scene's substrate has gravel ([core/substrate.ts](../../core/substrate.ts)),
   stones stand on its ground close by, as meshes: eight shapes of a rounded cobble, an angular block, a slab and a
   pointed stone ([strewn.ts](../../world/generators/life/strewn.ts)), each a ball swollen, cut by planes and squashed,
@@ -397,8 +425,8 @@ plants, the bodies, the people and what they build, and raised each by the means
   salt a thirtieth of it, and a mud or a lime mud its sources say dried into cracks a tenth (`cover.bears`, the
   generator's choice). Bare ground takes the rest, so that fewer trees and fewer low plants stand there, from afar
   by the mean of the scene's ground and close by where each material lies: tufts stand on the sand beside a crust,
-  and next to none on it. `gen:life/scene` is version 11: a scene whose ground bears all its climate grows has every
-  tree and animal where version 10 put it.
+  and next to none on it. `gen:life/scene` is version 13: a scene whose ground bears all its climate grows has every
+  tree and animal where version 12 put it.
 - **Shadows close to.** The nearest cascade is as wide as the view is far, down to 24 m, so that close by a shadow is
   fine enough to meet the foot that casts it. How far behind what shades it a point must be, along the sun's way, was
   one number for all three cascades, which in the nearest came to more than half a metre: nothing lower than that
@@ -456,4 +484,8 @@ budget on the reference GPU, the change says what it thins to come back under it
   fidelity pass draws it, in six kinds.)
 - Where should the wind's direction come from: a field of the climate's winds, once there is one, or the renderer?
 - Is a third quality level, between fast and full, wanted for phones?
-- Should animals move from place to place, and if so, by what rule?
+- Animals now move from place to place, each by its body plan's routine, with nothing carried from frame to frame
+  (step 5, what was built). What should a routine rest on? Its name is the generator's own today. A taxon's diet, how
+  far it ranged and how it kept company could be claims on its record, falling back up the tree as its form does.
+- Should one animal answer another: a herd that looks up, or moves off, when a stalker comes? That needs either a
+  rule that both can work out from the clock alone, or state kept for what is in view and given up when it is not.

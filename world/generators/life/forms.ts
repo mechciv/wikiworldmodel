@@ -4,7 +4,7 @@
 // frame everything is a share of L. Written with only + − × ÷, square roots and integers; the build and the
 // browser are held to agree within the tolerance of core/fingerprint.ts. Which parts there are, and the numbers in them,
 // are data: what a taxon looks like is never in this file.
-import type { Form, Part, Pose } from '../../../core/form.ts';
+import { ROUTINES, type Form, type Part, type Pose } from '../../../core/form.ts';
 import { LEAF_KINDS } from '../../../core/leaves.ts';
 import { MAT, Mesh, limb } from '../city/kit.ts';
 import { dcos, dsin, PI, TAU } from '../city/math.ts';
@@ -147,13 +147,14 @@ function horn(m: Mesh, ax: number, ay: number, az: number, bx: number, by: numbe
   limb(m, ax, ay, az, bx, by, bz, r, r * 0.06, n);
 }
 
-/** A chain of joints, thick and thin: a leg or an arm. */
-function chain(m: Mesh, pts: number[][], n: number, flatEnd = false): void {
+/** A chain of joints, thick and thin: a leg or an arm. `codes`, if given, is what each joint moves with (see `bone`). */
+function chain(m: Mesh, pts: number[][], n: number, flatEnd = false, codes?: number[]): void {
   loft(
     m,
     pts.map(([x, y, z, r]) => ({ x, y, z, w: r, h: r })),
     n,
     flatEnd,
+    codes,
   );
 }
 
@@ -161,12 +162,13 @@ function chain(m: Mesh, pts: number[][], n: number, flatEnd = false): void {
  * A leg through joints, each [x, y, z, radius, depth]: `depth` is how much deeper it is fore and aft than it is wide,
  * as a thigh is and a shank is not. It stands on its last joint.
  */
-function leg(m: Mesh, pts: number[][], n: number): void {
+function leg(m: Mesh, pts: number[][], n: number, codes?: number[]): void {
   loft(
     m,
     pts.map(([x, y, z, r, deep]) => ({ x, y, z, w: r, h: r * (deep ?? 1) })),
     n,
     true,
+    codes,
   );
 }
 
@@ -208,11 +210,28 @@ export const POSE = { stand: 0, walk: 1, graze: 2, drink: 3, alert: 4, rest: 5, 
 
 /**
  * What a point of an animal moves with, as the renderer idles it (docs/plans/RENDERING.md, step 5): nothing, its head,
- * its neck, its tail, or the trunk that breathes. A mesh drawn many times keeps it in each vertex's entity, which such a
- * mesh does not otherwise use: the bone in the low four bits, and how far the point goes with it, 0–255, above them.
+ * its neck, its tail, or the trunk that breathes; and, as it walks a way of its own (routines.ts), a leg that strides, or
+ * one that strides against it, half a stride apart. A mesh drawn many times keeps it in each vertex's entity, which such
+ * a mesh does not otherwise use: the bone in the low four bits, and how far the point goes with it, 0–255, above them. A
+ * point of a leg goes with its stride as far as it is down the leg: not at all at the hip, wholly at the foot.
  */
-export const BONE = { none: 0, head: 1, neck: 2, tail: 3, body: 4 } as const;
+export const BONE = { none: 0, head: 1, neck: 2, tail: 3, body: 4, stride: 5, counter: 6 } as const;
 export const bone = (b: number, weight = 1): number => b | (Math.max(0, Math.min(255, Math.round(weight * 255))) << 4);
+
+/**
+ * How a leg walks, for the renderer and for whoever checks it: where in its stride a foot is, `at` 0–1, as how far
+ * forward of its hip it stands, −1 to 1, and how far it is lifted, 0–1. For `DUTY` of a stride the foot is on the ground
+ * and goes back as fast as the body goes forward, so that it stays where it was put down; for the rest it is lifted and
+ * swung forward again. A stride is `STRIDE_HIPS` hip heights long. The generator's look, and no claim about any animal.
+ */
+export const DUTY = 0.6;
+export const STRIDE_HIPS = 1.3;
+export function gait(at: number): [number, number] {
+  const ph = at - Math.floor(at);
+  if (ph < DUTY) return [1 - (2 * ph) / DUTY, 0];
+  const u = (ph - DUTY) / (1 - DUTY);
+  return [-dcos(PI * u), dsin(PI * u)];
+}
 
 /** The joints an animal idles about, in its own frame: where its neck leaves its shoulders, its hips, and its middle. */
 export interface Joints {
@@ -366,8 +385,28 @@ const swings = (s: Stance, amp: number): [number, number] => {
   return [a * amp, -a * amp];
 };
 
-/** A hind leg that bends at the knee and runs up on its toes. */
-function digitigrade(m: Mesh, side: number, s: Stance, p: Part, swing: number): void {
+/** What each joint of a leg moves with: the stride `code` (BONE.stride or BONE.counter), the further down the leg the more. */
+const legCodes = (code: number, pts: number[][]): number[] => {
+  const top = pts[0][2];
+  const foot = pts[pts.length - 1][2];
+  return pts.map(([, , z]) => bone(code, top > foot ? (top - z) / (top - foot) : 0));
+};
+
+/**
+ * The muscle where a leg leaves the body, as a lump about a point of the leg. It goes with the leg's stride as far as
+ * the leg does at its own height, so that a leg that strides does not leave it behind.
+ */
+function muscled(m: Mesh, code: number, pts: number[][], x: number, y: number, z: number, rx: number, ry: number, rz: number): void {
+  const top = pts[0][2];
+  const foot = pts[pts.length - 1][2];
+  const keep = m.entity;
+  m.entity = bone(code, top > foot ? (top - z) / (top - foot) : 0);
+  lump(m, x, y, z, rx, ry, rz, 9, 5);
+  m.entity = keep;
+}
+
+/** A hind leg that bends at the knee and runs up on its toes. It strides with `code`. */
+function digitigrade(m: Mesh, side: number, s: Stance, p: Part, swing: number, code: number): void {
   const { L, H, detail } = s;
   const y0 = num(p, 'y', 0) * L;
   const x0 = num(p, 'x', 0) * L;
@@ -398,24 +437,28 @@ function digitigrade(m: Mesh, side: number, s: Stance, p: Part, swing: number): 
     [x, fy, fz + r * 0.2, r * 0.25, 1.1],
     [x, fy + r * 0.12, fz * 0.3, r * 0.34, 1.3],
   ];
-  leg(m, pts, n);
+  leg(m, pts, n, legCodes(code, pts));
   // Where it leaves the body, the muscle of the haunch: as much of it as `muscle` says, none at 0.
   const muscle = num(p, 'muscle', 1);
   if (detail >= 2 && muscle > 0) {
     // No higher than the hip itself: it rounds the flank, and stands out of the back nowhere.
     const rz = Math.min(r * 1.9, top * H * 0.3) * muscle;
-    lump(m, x, y0 + (ky - y0) * 0.14, top * H - rz * 0.9, r * 0.78 * Math.min(1, muscle), r * 1.5 * muscle, rz, 9, 5);
+    muscled(m, code, pts, x, y0 + (ky - y0) * 0.14, top * H - rz * 0.9, r * 0.78 * Math.min(1, muscle), r * 1.5 * muscle, rz);
   }
   if (p.toes !== false && detail >= 2) {
+    // Its toes go with its foot.
+    const keep = m.entity;
+    m.entity = bone(code, 1);
     for (const k of [-1, 0, 1]) {
       const tx = x + k * r0 * L * 0.42;
       horn(m, x, fy, fz, tx + k * r0 * L * 0.5, fy + r0 * L * (1.5 - Math.abs(k) * 0.3), fz * 0.4 - lift * 0.3, r0 * L * 0.2, 4);
     }
+    m.entity = keep;
   }
 }
 
-/** A leg held straight under the body. */
-function pillar(m: Mesh, side: number, s: Stance, p: Part, swing: number): void {
+/** A leg held straight under the body. It strides with `code`. */
+function pillar(m: Mesh, side: number, s: Stance, p: Part, swing: number, code: number): void {
   const { L, H, detail } = s;
   const n = sides(p, [8, 4], detail);
   const y0 = num(p, 'y', 0) * L;
@@ -436,14 +479,14 @@ function pillar(m: Mesh, side: number, s: Stance, p: Part, swing: number): void 
     [x * 1.05, fy, lift + r * 0.5, r * 0.7, 1.1],
     [x * 1.05, fy + r * 0.1, lift, r * 0.82, 1.2],
   ];
-  leg(m, pts, n);
+  leg(m, pts, n, legCodes(code, pts));
   // Where it leaves the body, the muscle of the shoulder or the hip: no deeper fore and aft than the leg's own top, and
   // short, so that under a high belly it rounds the joint and does not stand out of the leg as a pad. `muscle` is how
   // much of it there is, none at 0.
   const muscle = num(p, 'muscle', 1);
   if (detail >= 2 && muscle > 0) {
     const rz = Math.min(r * 1.5, top * H * 0.22) * muscle;
-    lump(m, x, y0, top * H - rz * 0.9, r * 0.8 * Math.min(1, muscle), r * 1.2 * muscle, rz, 9, 5);
+    muscled(m, code, pts, x, y0, top * H - rz * 0.9, r * 0.8 * Math.min(1, muscle), r * 1.2 * muscle, rz);
   }
 }
 
@@ -543,13 +586,20 @@ function drawPart(m: Mesh, p: Part, s: Stance, head: HeadPlace, tailEnd: number)
       const list0 = table(p, 'points');
       mirrored((side) => {
         const [a, b] = swings(s, amp);
-        const stride = (side < 0) === !!p.phase ? a : b;
+        const first = (side < 0) === !!p.phase;
+        const stride = first ? a : b;
         const pts = list0.map(([x, y, z, r], k) => {
           const f = list0.length > 1 ? k / (list0.length - 1) : 0;
           const q = pt(x * side, y + stride * f, z);
           return [q[0], q[1], q[2] + (stride > 0.02 ? stride * f * (1 - f) * 2 * L : 0), r * L];
         });
-        chain(m, pts, sides(p, [6, 4], detail), !!p.flat);
+        // One that swings is a leg, and so is one of a pair that comes down from the body to the ground, as a lizard's
+        // or a beetle's does: it strides, the further down it the more. Of legs that say nothing of their stride, the
+        // fore of one side goes with the hind of the other.
+        const end = list0[list0.length - 1];
+        const leg = !onHead && list0.length > 1 && (amp > 0 || (!!p.mirror && end[2] <= 0.15 && list0[0][2] - end[2] > 0.2));
+        const with1 = amp > 0 ? first : (side < 0) === list0[0][1] >= 0;
+        chain(m, pts, sides(p, [6, 4], detail), !!p.flat, leg ? legCodes(with1 ? BONE.stride : BONE.counter, pts) : undefined);
       });
       return;
     }
@@ -585,8 +635,10 @@ function drawPart(m: Mesh, p: Part, s: Stance, head: HeadPlace, tailEnd: number)
         const left = side < 0 ? a : b;
         const right = side < 0 ? b : a;
         const swing = p.phase ? right : left;
-        if (p.type === 'pillar') pillar(m, side, s, p, swing);
-        else digitigrade(m, side, s, p, swing);
+        // The legs that swing forward together stride together, and the others against them.
+        const code = (side < 0) !== !!p.phase ? BONE.stride : BONE.counter;
+        if (p.type === 'pillar') pillar(m, side, s, p, swing, code);
+        else digitigrade(m, side, s, p, swing, code);
       }
       return;
     }
@@ -851,6 +903,7 @@ export function checkForm(f: Form): string[] {
   const out: string[] = [];
   if (f.kind !== 'animal' && f.kind !== 'plant') return [`a form's kind is animal or plant, not "${String(f.kind)}"`];
   if (!f.parts || typeof f.parts !== 'object') return ['a form has parts'];
+  if (f.behave?.routine !== undefined && !ROUTINES.includes(f.behave.routine)) out.push(`no routine "${String(f.behave.routine)}"; the routines are ${ROUTINES.join(', ')}`);
   for (const [name, p] of Object.entries(f.parts)) {
     if (!p) continue;
     const def = PART_TYPES[p.type];
