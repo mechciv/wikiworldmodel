@@ -4,7 +4,7 @@ description: >-
 kind: animal
 mass_length: 5.3
 hip: 0.175
-behave: { group: [2, 6], habitat: open, poses: [stand, stand, walk, walk, alert] }
+behave: { routine: feed, group: [2, 6], habitat: open, poses: [stand, stand, walk, walk, alert] }
 parts:
   body:
     type: trunk

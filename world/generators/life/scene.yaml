@@ -1,8 +1,8 @@
 id: gen:life/scene
 type: generator
 title: A living scene of any place, on land or in the sea
-version: 10
-code: generators/life/scene/v10.ts
+version: 11
+code: generators/life/scene/v11.ts
 runs_in: [build, client]
 outputs: { basis: procedural }
 # What it reads from the world: who may stand where and how big each grew, the ground and the climate
@@ -33,13 +33,13 @@ inputs:
   - { ref: life/hell-creek/ecosystem, note: "the Hell Creek slot: where it was, and on which plate" }
 # What it makes, held in aggregate to what it samples (docs/STRUCTURE.md section 3.4).
 checks:
-  - { test: world/generators/life/scene/v10.test.ts, holds: "is only the taxa it is given, each near the arrival at least once" }
-  - { test: world/generators/life/scene/v10.test.ts, holds: "draws each taxon as often as the atlas's weight and the density rule say, in aggregate, below a cell's cap" }
-  - { test: world/generators/life/scene/v10.test.ts, holds: "has no forest before forests, only the few set by the arrival" }
-  - { test: world/generators/life/scene/v10.test.ts, holds: "has bare ground and no low plants at all before land plants" }
-  - { test: world/generators/life/scene/v10.test.ts, holds: "has a desert mostly bare, with no forest" }
-  - { test: world/generators/life/scene/v10.test.ts, holds: "grows what the climate of each height bears: forest below the treeline, none above it" }
-  - { test: world/generators/life/scene/v10.test.ts, holds: "lays snow down to where the month holds it: low in winter, high or not at all in summer" }
+  - { test: world/generators/life/scene/v11.test.ts, holds: "is only the taxa it is given, each near the arrival at least once" }
+  - { test: world/generators/life/scene/v11.test.ts, holds: "draws each taxon as often as the atlas's weight and the density rule say, in aggregate, below a cell's cap" }
+  - { test: world/generators/life/scene/v11.test.ts, holds: "has no forest before forests, only the few set by the arrival" }
+  - { test: world/generators/life/scene/v11.test.ts, holds: "has bare ground and no low plants at all before land plants" }
+  - { test: world/generators/life/scene/v11.test.ts, holds: "has a desert mostly bare, with no forest" }
+  - { test: world/generators/life/scene/v11.test.ts, holds: "grows what the climate of each height bears: forest below the treeline, none above it" }
+  - { test: world/generators/life/scene/v11.test.ts, holds: "lays snow down to where the month holds it: low in winter, high or not at all in summer" }
   - { test: world/generators/life/meander.test.ts, holds: "winds as a meandering river does, its bends of many sizes, and never comes within a neck of itself" }
   - { test: world/generators/life/meander.test.ts, holds: "cuts off loops where a neck closes, and keeps where it lay" }
   - { test: world/generators/life/meander.test.ts, holds: "is the same river from the same seed, to the last bit, and another river from another" }
@@ -47,19 +47,19 @@ checks:
   - { test: world/generators/life/meander.test.ts, holds: "brings a visitor to dry ground inside a bend, off its other limb and off the old bends" }
   - { test: world/generators/life/rivers.test.ts, holds: "winds by the sine-generated curve, as long as its sinuosity says" }
   - { test: world/generators/life/rivers.test.ts, holds: "draws its channel by the laws, and braids, winds or runs straight as its slope and flow say" }
-  - { test: world/generators/life/scene/v10.test.ts, holds: "runs its rivers where the world says, with the water falling downstream" }
-  - { test: world/generators/life/scene/v10.test.ts, holds: "draws a river dry in a month its bed holds no water: no water in its bed, its bed bare, and its ribbon marked dry" }
-  - { test: world/generators/life/scene/v10.test.ts, holds: "holds a lake where the world gives one: its bed under its level, its shore above it, and its water drawn" }
-  - { test: world/generators/life/scene/v10.test.ts, holds: "lines water with trees, flowing or dry, and stands the kinds that like it wet by it" }
-  - { test: world/generators/life/scene/v10.test.ts, holds: "stands its kinds in stands: each is commonest in patches of its own" }
-  - { test: world/generators/life/scene/v10.test.ts, holds: "grows each kind where its height's climate is like its rows': what grows changes up a slope" }
-  - { test: world/generators/life/scene/v10.test.ts, holds: "sows the understory as tall as a person as far as the big animals, and the lower only close by" }
-  - { test: world/generators/life/scene/v10.test.ts, holds: "puts what lives on the sea floor on it, and what swims in the water over it, never on land" }
+  - { test: world/generators/life/scene/v11.test.ts, holds: "runs its rivers where the world says, with the water falling downstream" }
+  - { test: world/generators/life/scene/v11.test.ts, holds: "draws a river dry in a month its bed holds no water: no water in its bed, its bed bare, and its ribbon marked dry" }
+  - { test: world/generators/life/scene/v11.test.ts, holds: "holds a lake where the world gives one: its bed under its level, its shore above it, and its water drawn" }
+  - { test: world/generators/life/scene/v11.test.ts, holds: "lines water with trees, flowing or dry, and stands the kinds that like it wet by it" }
+  - { test: world/generators/life/scene/v11.test.ts, holds: "stands its kinds in stands: each is commonest in patches of its own" }
+  - { test: world/generators/life/scene/v11.test.ts, holds: "grows each kind where its height's climate is like its rows': what grows changes up a slope" }
+  - { test: world/generators/life/scene/v11.test.ts, holds: "sows the understory as tall as a person as far as the big animals, and the lower only close by" }
+  - { test: world/generators/life/scene/v11.test.ts, holds: "puts what lives on the sea floor on it, and what swims in the water over it, never on land" }
   - { test: world/generators/life/rivers.test.ts, holds: "brings a river that runs into another to the other's water, and draws it only to the other's bank" }
-  - { test: world/generators/life/scene/v10.test.ts, holds: "stands on the shape the world gives within its relief's cells, as far as the eye reaches: a crest the field's grid has not is there" }
-  - { test: world/generators/life/scene/v10.test.ts, holds: "keeps a summit above 3,200 m and a floor below it: heights are held as finely as their range allows" }
-  - { test: world/generators/life/scene/v10.test.ts, holds: "invents no hills on a plain the survey shows level, and rough ground below a rough survey" }
-  - { test: world/generators/life/scene/v10.test.ts, holds: "draws a river the drainage routes in the valley the shape shows between the nodes of its grid" }
+  - { test: world/generators/life/scene/v11.test.ts, holds: "stands on the shape the world gives within its relief's cells, as far as the eye reaches: a crest the field's grid has not is there" }
+  - { test: world/generators/life/scene/v11.test.ts, holds: "keeps a summit above 3,200 m and a floor below it: heights are held as finely as their range allows" }
+  - { test: world/generators/life/scene/v11.test.ts, holds: "invents no hills on a plain the survey shows level, and rough ground below a rough survey" }
+  - { test: world/generators/life/scene/v11.test.ts, holds: "draws a river the drainage routes in the valley the shape shows between the nodes of its grid" }
   - { test: world/generators/life/relief.test.ts, holds: "invents nothing on ground the world shows level, and more the rougher the world's ground is at its grain" }
   - { test: world/generators/life/relief.test.ts, holds: "invents only below the grain of the world's ground: under a degree's field wide hills, under the survey's cells none wider than a cell" }
   - { test: world/generators/life/relief.test.ts, holds: "adds nothing to the mean of a cell of the world's ground" }
@@ -71,6 +71,14 @@ checks:
   - { test: world/generators/life/relief.test.ts, holds: "runs a river the drainage routes down the valley between the nodes of its grid, its water at the ground's height" }
   - { test: world/generators/life/erosion.test.ts, holds: "cuts valleys that lead to what drains them, deepest where most water gathers, and leaves no hollow" }
   - { test: tools/world/test/build.test.ts, holds: "gives a node of the relief its mean back: the survey's cells about it, laid over the grid, come to the node's own height" }
+  - { test: world/generators/life/scene/v11.test.ts, holds: "gives them somewhere to go: most that could go do, a plant never, and one that rests or has no routine stays" }
+  - { test: world/generators/life/scene/v11.test.ts, holds: "keeps every way on ground the animal could have been put on, out of the water, on lines the ground lies near" }
+  - { test: world/generators/life/scene/v11.test.ts, holds: "gives an animal the same way however near its cell is made" }
+  - { test: world/generators/life/routines.test.ts, holds: "starts where the body was put, facing as it was put; and one put walking is a first step on, the way it faced" }
+  - { test: world/generators/life/routines.test.ts, holds: "moves without a jump, no faster than its speed, and faces the way it goes once it is going" }
+  - { test: world/generators/life/routines.test.ts, holds: "goes slowly up to the group, holds off it, goes a way round it and comes back" }
+  - { test: world/generators/life/routines.test.ts, holds: "goes its leader's way from where it stands itself: the same legs, speed and round, a little after, so that the group keeps together" }
+  - { test: world/generators/life/routines.test.ts, holds: "keeps a foot where it was put down for as long as it is on the ground, then lifts it and swings it forward" }
 limits:
   - with: field:earth/relief
     note: >-
@@ -103,6 +111,19 @@ limits:
       valley's floor where the survey's cells show a valley, and may cut a corner the river does not. Before the
       glacial cycles the drainage's nodes are a degree apart, and a node is moved no further than 6 km to low ground:
       a river then may still cross a ridge of today's shape, in a cut the scene makes for it.
+  - with: field:life/community
+    note: >-
+      What an animal does is no reading of the atlas or of any record: its routine is its body plan's, the generator's
+      own, and a taxon the atlas lists as eating other animals is only kept from being stalked. One that stalks comes
+      no nearer than it holds off, and nothing it stalks takes any notice: no animal answers another, none eats, and
+      none is caught. An animal goes one way round and round, by the visit's clock, so that an hour's watching shows
+      the same round many times.
+  - with: field:earth/elevation
+    note: >-
+      An animal on its way is carried along the straight line between two places, and the ground may lie up to a
+      tenth of its hips' height off that line: where the ground is rougher than that between any two places near it,
+      it stays where it stands. Flying and swimming animals keep the height they were put at, and fly through the
+      crowns of trees.
   - with: field:life/community
     note: >-
       Small animals reach the most a cell holds (params.animals.most_in_cell), and past it the atlas's weight no
@@ -315,6 +336,30 @@ params:
     small_m: 0.6
     mass_length: 20
     defaults: { group: [1, 3], habitat: any, poses: [stand, walk, alert] }
+    # What an animal does once it is drawn (routines.ts): a routine its body plan names, or the one its poses and its
+    # habitat suggest, and a way it goes by it, which the renderer moves it along by the visit's clock. None of this is
+    # a claim about any animal: how fast, how far and how long are this generator's own. A walk is as fast as the root
+    # of 0.08 times g times the height of the hips (a Froude number of 0.08, a slow walk); a body takes 0.4 s to get
+    # going, and 0.45 s more for each root of a metre of its length; the ground along a leg of its way lies no more
+    # than a tenth of its hips' height, and at least 5 cm, off the straight line it is carried along; and six places
+    # are tried before it stays where it is.
+    routines:
+      froude: 0.08
+      go: [0.4, 0.45]
+      sag: [0.1, 0.05]
+      tries: 6
+      # One that feeds stays 20 to 80 s, then moves on two to six of its lengths at half a walk. One that wanders goes
+      # four to twelve lengths and stops 4 to 20 s. One that patrols goes ten to twenty-four and does not stop.
+      feed: { range: [2, 6], stay: [20, 80], pace: 0.5 }
+      wander: { range: [4, 12], stay: [4, 20], pace: 0.9 }
+      patrol: { range: [10, 24], stay: [0, 0], pace: 1 }
+      # One that stalks goes at a third of a walk up to the nearest group of something else within 300 m, holds off two
+      # to four of its own lengths clear of it and watches for one to three minutes, goes 0.9 rad round it, watches
+      # again, and goes back; with no group near, it goes six to fourteen lengths and watches from there.
+      stalk: { range: [6, 14], stay: [60, 180], pace: 0.35, reach: 300, hold: [2, 4], round: 0.9 }
+      # A circle is six to eighteen lengths in radius and at least 12 m, flown at 2.5 times the root of g times the
+      # body's length, and swum at a quarter of that root.
+      circle: { radius: [6, 18], least: 12, fly: 2.5, swim: 0.25 }
   # How the climate is brought to a scene's heights (field:earth/climate-at-height), where the world gives one: what
   # grows at a height is what its class bears, the edge between two classes wandering over the height that 1.5 °C of
   # cooling makes; snow is drawn where at least 10 mm of water lies as snow in a month colder than the water balance's

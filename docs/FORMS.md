@@ -141,6 +141,14 @@ And for any form, `behave` says how the generator lays it out, which is no claim
 - `group: [least, most]`, `habitat` (open, any, edge, forest, air, canopy, wet, water, floor), `poses: [...]` (stand, walk, graze, drink, alert, rest, fly), `flies: [low, high]` in metres.
   In a scene of the sea, `water` swims above the floor and `floor` rests on it, as do `any` and `edge` under water; only
   a body whose plan says one of these, or `air`, is drawn in the sea.
+- `routine`: what it does once it is drawn, which the renderer moves it by: `feed` (it stays and feeds, then moves on a
+  little way), `wander` (it walks from place to place and stops a while at each), `patrol` (it walks a round without
+  stopping), `stalk` (it goes slowly up to the nearest group of something else, watches it and comes back), `circle`
+  (it flies or swims round), `none` (it stays where it is). Unsaid, it is what the plan's habitat and poses suggest:
+  `circle` for what flies or swims, `feed` for what grazes, `wander` for what walks, `none` otherwise. One drawn
+  resting stays where it lies. How far, how fast and how long are the generator's parameters
+  (`gen:life/scene`, `animals.routines`), and none of it is a claim about any animal. A leg strides if it is a `pillar`,
+  a `digitigrade`, or a `chain` of a pair that comes down from the body to the ground.
 - For a plant: `layer` (canopy, under, float), `weight`, `wet`. `wet` is its liking for wet ground, by water's level or
   within a few tens of metres of a bank, flowing, still or dry: its weight is multiplied by 1 + `wet` × (how wet − ½),
   and never by less than nothing, so a willow at 1.6 is nine times as likely by water as away from it, and a reed at 3

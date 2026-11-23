@@ -1,4 +1,4 @@
-// A living scene, version 10: any place at any moment, on land or in the sea, from a spec. Nothing is laid out until it is looked at:
+// A living scene, version 11: any place at any moment, on land or in the sea, from a spec. Nothing is laid out until it is looked at:
 // each 400 m cell makes what stands in it from hashes of where it is, so the scene has no edge to speak of, and what a
 // far view shows is the top of the same list a near view shows in full. The records say which taxa could be here and how
 // big they grew; this says where each stands, how many there are, what it is doing and what colour it is, all invented
@@ -28,9 +28,14 @@
 // roughness the world's ground shows, and is cut by water run over it, so that its valleys lead to the rivers and lakes
 // the world gives (../relief.ts, ../erosion.ts); a river the drainage routes is run down the finer ground between the
 // nodes of its grid; and heights are kept as finely as their range allows, so that no range is cut off at 3,200 m. Every
-// scene's ground is new. The build and every browser are held to agree within the tolerance of core/fingerprint.ts.
+// scene's ground is new. Since version 11 an animal has something to do (../routines.ts): a routine its body plan
+// names, and a way it goes by it, to a place or two near where it stands and back, or round a circle in the air or the
+// water, which the renderer moves it along by the visit's clock. A leg's points say how far they go with its stride
+// (../forms.ts, BONE). Where each stands as the clock starts, and what grows where, is what version 10 made. The build
+// and every browser are held to agree within the tolerance of core/fingerprint.ts.
 import type { Part } from '../../../../core/fingerprint.ts';
-import type { Form, Pose } from '../../../../core/form.ts';
+import type { Form, Pose, Routine } from '../../../../core/form.ts';
+import { routineOf, wayBeside, wayFor, type RoutineParams } from '../routines.ts';
 import type { LivingTaxon, SceneCover, SceneSpec } from '../../../../core/scene.ts';
 import { climateClass } from '../../../../core/climate.ts';
 import { nodeAtHeight } from '../../../../core/months.ts';
@@ -44,7 +49,7 @@ import { EARTH, Invented, Tracer, WorldGround, type InventChoices, type TraceCho
 import { drawRiver, meet, type Oxbow, type RiverChoices, type RiverPath } from '../rivers.ts';
 
 export const GENERATOR = 'gen:life/scene';
-export const VERSION = 10;
+export const VERSION = 11;
 
 /** The side of a cell of the ground, in metres. */
 export const CELL = 400;
@@ -160,6 +165,8 @@ export interface LivingParams {
     small_m: number;
     mass_length: number;
     defaults: { group: [number, number]; habitat: string; poses: Pose[] };
+    /** what animals do once they are drawn, and how far, how fast and how long (../routines.ts): unsaid, they stay put */
+    routines?: RoutineParams;
   };
   /** how the climate is brought to the scene's heights, where the world gives the climate at a height */
   climate: ClimateChoices;
@@ -1014,6 +1021,20 @@ export interface CellRows {
   rank: Uint8Array;
   /** where names go: x, y, z of each group's first, and its taxon */
   groups: number[];
+  /** which row each group's first is, in step with `groups`: a name goes with it as it goes its way */
+  leaders: Uint32Array;
+  /** the animals that go a way of their own: which rows they are, in order; and each one's way, ROUTE numbers (../routines.ts) */
+  movers: Uint32Array;
+  ways: Float32Array;
+}
+
+/** An animal of a cell, kept until the cell is whole: then each is given its way, among the groups that stand there. */
+interface Placed {
+  row: number;
+  a: TaxonLayout;
+  /** which group of the cell's it is of, and what its way is seeded by */
+  group: number;
+  salt: number;
 }
 
 class Rows {
@@ -1023,6 +1044,10 @@ class Rows {
   shade: number[] = [];
   phase: number[] = [];
   rank: number[] = [];
+  animals: Placed[] = [];
+  leaders: number[] = [];
+  /** each group of animals: its middle, how far it reaches, and its taxon */
+  herds: { x: number; y: number; r: number; a: TaxonLayout }[] = [];
   add(x: number, y: number, z: number, fx: number, fy: number, size: number, taxon: number, pose: number, shade: number, phase: number, rank: number): void {
     this.place.push(x, y, z, size, fx, fy);
     this.taxon.push(taxon);
@@ -1046,6 +1071,9 @@ interface TaxonLayout {
   flies?: [number, number];
   /** its length or height */
   size: number;
+  /** what it does once it is drawn (../routines.ts), and whether it eats other animals */
+  routine: Routine;
+  hunts: boolean;
 }
 
 export interface LivingPlan {
@@ -1079,6 +1107,9 @@ export function liking(t: LivingTaxon, hot: number, cold: number, least: { hot_c
   return 1 / (1 + dh * dh + dc * dc);
 }
 
+/** What its list says a taxon eats, where that is other animals: such a one is drawn scarcer, and is no one's prey. */
+const HUNTS = /carnivor|insectiv|piscivor/;
+
 /** How many to the km² a taxon is drawn at, by Damuth's rule and how common it is on its list. */
 export function densityOf(t: LivingTaxon, form: Form, a: LivingParams['animals'], productivity: number): number {
   const L = t.length ?? 1;
@@ -1087,7 +1118,7 @@ export function densityOf(t: LivingTaxon, form: Form, a: LivingParams['animals']
   // Mass to the −¾, by square roots.
   const root = Math.sqrt(Math.sqrt(m));
   const rule = a.density / (root * root * root);
-  const prey = /carnivor|insectiv|piscivor/.test(t.diet ?? '') ? a.predators : 1;
+  const prey = HUNTS.test(t.diet ?? '') ? a.predators : 1;
   return rule * prey * a.show * (0.25 + 1.5 * t.weight) * productivity;
 }
 
@@ -1113,7 +1144,9 @@ export function makePlan(spec: SceneSpec, ground: GroundSampler, look: PlaceLook
     const mean = (group[0] + group[1]) / 2;
     const perKm2 = plant ? 0 : densityOf(t, form, A, productivity);
     const perCell = plant ? 0 : Math.min(A.most_in_cell, (perKm2 * (CELL * CELL)) / 1e6 / mean);
-    return { index, t, form, plant, perCell, habitat: b.habitat ?? A.defaults.habitat, poses: (b.poses ?? A.defaults.poses).map((p) => POSE[p]), group, ...(b.flies ? { flies: b.flies } : {}), size: plant ? t.height ?? 1 : t.length ?? 1 };
+    const habitat = b.habitat ?? A.defaults.habitat;
+    const poses = b.poses ?? A.defaults.poses;
+    return { index, t, form, plant, perCell, habitat, poses: poses.map((p) => POSE[p]), group, ...(b.flies ? { flies: b.flies } : {}), size: plant ? t.height ?? 1 : t.length ?? 1, routine: plant ? 'none' : routineOf({ ...b, habitat: habitat as NonNullable<typeof b.habitat>, poses }), hunts: HUNTS.test(t.diet ?? '') };
   });
   const canopy = layouts.filter((x) => x.plant && (x.form.behave?.layer ?? 'canopy') === 'canopy' && x.t.height !== undefined);
   const under = layouts.filter((x) => x.plant && x.form.behave?.layer === 'under' && x.t.height !== undefined);
@@ -1244,6 +1277,7 @@ export function makePlan(spec: SceneSpec, ground: GroundSampler, look: PlaceLook
     const L = a.size;
     const turn = rng.next() * TAU;
     const spread = L * (0.9 + 0.5 * Math.sqrt(k));
+    const herd = rows.herds.length;
     let drawn = 0;
     for (let q = 0; q < k * 6 && drawn < k; q++) {
       const b = rng.next() * TAU;
@@ -1278,10 +1312,68 @@ export function makePlan(spec: SceneSpec, ground: GroundSampler, look: PlaceLook
         pose = POSE.fly;
         z = gz + a.flies[0] + (a.flies[1] - a.flies[0]) * rng.next();
       } else if (land.above < 1.2 && land.above > -0.2 && (pose === POSE.graze || pose === POSE.stand)) pose = POSE.drink;
+      // Which of its group it is seeds its way: the same whatever else the cell holds by the time it is made.
+      rows.animals.push({ row: rows.taxon.length, a, group: herd, salt: (Math.imul(salt, 0x9e3779b1) ^ Math.imul(drawn + 1, 0x85ebca6b)) >>> 0 });
       rows.add(x, y, z, dsin(h), dcos(h), scale, a.index, pose, rng.int(0, 255), rng.int(0, 255), rank);
-      if (drawn === 0) groups.push(x, y, z, a.index);
+      if (drawn === 0) {
+        groups.push(x, y, z, a.index);
+        rows.leaders.push(rows.taxon.length - 1);
+      }
       drawn++;
     }
+    if (drawn) rows.herds.push({ x: cx, y: cy, r: spread, a });
+  };
+  /**
+   * The ways a cell's animals go (../routines.ts), once all of them stand: each by its body plan's routine, over ground
+   * it could have been put on and clear of the trees; one that stalks, up to the nearest group of something that is not
+   * a hunter itself and is big enough to be made from a way off, so that its way is the same however near the cell is.
+   */
+  const waysOf = (rows: Rows): { movers: number[]; ways: number[] } => {
+    const movers: number[] = [];
+    const ways: number[] = [];
+    const R = A.routines;
+    if (!R) return { movers, ways };
+    /** the way each group's leader goes, by the group */
+    const leads = new Map<number, number[]>();
+    for (const an of rows.animals) {
+      const a = an.a;
+      const pose = rows.pose[an.row];
+      // One that lies resting stays where it lies.
+      if (a.routine === 'none' || pose === POSE.rest) continue;
+      const q = an.row * 6;
+      const x = rows.place[q];
+      const y = rows.place[q + 1];
+      const scale = rows.place[q + 3];
+      const L = a.size * scale;
+      const H = (a.t.hip ?? a.size * (a.form.hip ?? 0.3)) * scale;
+      const girth = L * (L < 0.6 ? 0.5 : 0.34);
+      const free = (px: number, py: number) => accept(a.habitat, px, py, false) && (a.habitat === 'air' || clearOfTrees(px, py, girth));
+      let prey: { x: number; y: number; r: number } | undefined;
+      if (a.routine === 'stalk') {
+        let best = R.stalk.reach;
+        for (let h = 0; h < rows.herds.length; h++) {
+          const o = rows.herds[h];
+          if (h === an.group || o.a === a || o.a.hunts || o.a.flies || o.a.size < A.small_m) continue;
+          const d = Math.sqrt((o.x - x) * (o.x - x) + (o.y - y) * (o.y - y));
+          if (d < best) {
+            best = d;
+            prey = { x: o.x, y: o.y, r: o.r };
+          }
+        }
+      }
+      const body = { x, y, z: rows.place[q + 2], fx: rows.place[q + 4], fy: rows.place[q + 5], L, H, going: pose === POSE.walk };
+      const around = { ground: (px: number, py: number) => ground.at(px, py), free, ...(prey ? { prey } : {}) };
+      const rng = new Rng((seed ^ an.salt) >>> 0);
+      // A group keeps together: the first of it that goes anywhere leads, and the rest go its way beside it, each from
+      // where it stands; one that cannot, for the ground, goes a way of its own.
+      const lead = leads.get(an.group);
+      const way = (lead && wayBeside(lead, body, around, R, rng, !!a.flies)) ?? wayFor(a.routine, body, around, R, rng, !!a.flies);
+      if (!way) continue;
+      if (!lead) leads.set(an.group, way);
+      movers.push(an.row);
+      ways.push(...way);
+    }
+    return { movers, ways };
   };
   // Something of each near the arrival, wherever it might otherwise have fallen: every taxon is there to be seen.
   const staged = new Map<number, ((rows: Rows, groups: number[]) => void)[]>();
@@ -1431,6 +1523,7 @@ export function makePlan(spec: SceneSpec, ground: GroundSampler, look: PlaceLook
     // All of the understory, tall and low, as thick as version 7 sowed it where it is nearly underfoot.
     if (tier >= 2 && under.length) sowUnder(rows, i, j, under, P.under_step, P.under, 51);
     if (tier >= 1) for (const draw of staged.get(cellKey(i, j)) ?? []) draw(rows, groups);
+    const { movers, ways } = waysOf(rows);
     return {
       key: cellKey(i, j),
       tier,
@@ -1442,6 +1535,9 @@ export function makePlan(spec: SceneSpec, ground: GroundSampler, look: PlaceLook
       phase: Uint8Array.from(rows.phase),
       rank: Uint8Array.from(rows.rank),
       groups,
+      leaders: Uint32Array.from(rows.leaders),
+      movers: Uint32Array.from(movers),
+      ways: Float32Array.from(ways),
     };
   };
   const underAt = (x: number, y: number, cover: LandCover, u: number): number => (under.length ? choose(under, cover.wet, u, x, y, cover.hot, cover.cold, false)?.index ?? -2 : -1);
@@ -1458,6 +1554,8 @@ export function cellParts(c: CellRows, prefix = 'cell'): Part[] {
     { name: `${prefix}.shade`, values: c.shade },
     { name: `${prefix}.phase`, values: c.phase },
     { name: `${prefix}.rank`, values: c.rank, identity: true },
+    { name: `${prefix}.movers`, values: c.movers, identity: true },
+    { name: `${prefix}.ways`, values: c.ways },
   ];
 }
 
