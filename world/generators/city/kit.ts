@@ -863,8 +863,12 @@ export function figure(m: Mesh, x: number, y: number, z: number, h: number, deta
 }
 
 /** Someone in the street: a robe, shoulders and a head. */
-/** A round limb from one point to another, its radius r0 at the first and r1 at the second. */
-export function limb(m: Mesh, ax: number, ay: number, az: number, bx: number, by: number, bz: number, r0: number, r1: number, n: number): void {
+/**
+ * A round limb from one point to another, its radius r0 at the first and r1 at the second. `codes`, if given, is what
+ * each of its ends moves with, where a mesh drawn many times keeps that in its vertices' entity (life/forms.ts, bone).
+ */
+export function limb(m: Mesh, ax: number, ay: number, az: number, bx: number, by: number, bz: number, r0: number, r1: number, n: number, codes?: [number, number]): void {
+  const keep = m.entity;
   const dx = bx - ax;
   const dy = by - ay;
   const dz = bz - az;
@@ -887,9 +891,12 @@ export function limb(m: Mesh, ax: number, ay: number, az: number, bx: number, by
     const nx = px * c + qx * s;
     const ny = py * c + qy * s;
     const nz = qz * s;
+    if (codes) m.entity = codes[0];
     m.v(ax + nx * r0, ay + ny * r0, az + nz * r0, nx, ny, nz, i, 0);
+    if (codes) m.entity = codes[1];
     m.v(bx + nx * r1, by + ny * r1, bz + nz * r1, nx, ny, nz, i, l);
   }
+  m.entity = keep;
   for (let i = 0; i < n; i++) {
     const a = base + i * 2;
     m.quad(a, a + 2, a + 3, a + 1);

@@ -75,6 +75,25 @@ test.describe('the Hell Creek', () => {
     expect((await canvasPng(page)).equals(before)).toBe(false);
   });
 
+  test('its animals go from place to place by the visit\'s clock: a second of it is the same picture again, and another has them elsewhere', async ({ page, context }) => {
+    const s = site();
+    const at = (clock: number) => `/?b=${latestBuild()}&${arrival(s)}&quality=fast&clock=${clock}`;
+    await page.goto(at(0));
+    await idle(page);
+    // Some of those drawn go a way of their own (world/generators/life/routines.ts).
+    expect((await page.evaluate(() => window.__wikiworldmodel!.scene()))!.going).toBeGreaterThan(3);
+    const start = await canvasPng(page);
+    await page.goto(at(40));
+    await idle(page);
+    const later = await canvasPng(page);
+    expect(later.equals(start)).toBe(false);
+    // Where each is follows from the clock alone: the same second, loaded afresh, is the same picture.
+    const other = await context.newPage();
+    await other.goto(at(40));
+    await idle(other);
+    expect((await canvasPng(other)).equals(later)).toBe(true);
+  });
+
   test('the way down: offered when near at the time it is drawn for, flying there, and ready when it arrives', async ({ page }) => {
     const s = site();
     await page.goto(`/?b=${latestBuild()}&t=${s.slice}&lat=${s.origin.lat}&lon=${s.origin.lon}&d=1.6&${FAST}`);

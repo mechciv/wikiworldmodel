@@ -7,10 +7,11 @@ import { printCheck, settlePrint, type Fingerprint, type PrintCheck } from '../.
 import { lookup, type Scenario } from '../../../core/scenario.ts';
 import type { LivingTaxon, SceneSpec } from '../../../core/scene.ts';
 import { GroundSampler } from '../../../world/generators/city/ground.ts';
-import { placeLook, type LivingParams } from '../../../world/generators/life/scene/v9.ts';
+import { placeLook, type LivingParams } from '../../../world/generators/life/scene/v10.ts';
 import { snowOf } from '../../../world/generators/life/climate.ts';
 import { declination, MID_DAY } from '../../../core/water.ts';
-import { protoParts } from '../../../world/generators/life/stream.ts';
+import { protoParts, type NamedGroup } from '../../../world/generators/life/stream.ts';
+import { ROUTE, wayAt } from '../../../world/generators/life/routines.ts';
 import { CityRenderer, type CellGPU, type CityFrame } from '../gl/city.ts';
 import type { GL } from '../gl/context.ts';
 import type { V3 } from '../mat.ts';
@@ -91,8 +92,8 @@ export class LifeScene {
   people?: PeopleSummary;
   waterLevel = 0;
   onChange: () => void = () => {};
-  /** what the last view drew */
-  last = { instances: 0, triangles: 0, meshes: 0, pending: 0, ms: 0 };
+  /** what the last view drew; and how many of them go a way of their own, by the visit's clock (world/generators/life/routines.ts) */
+  last = { instances: 0, triangles: 0, meshes: 0, pending: 0, ms: 0, going: 0 };
   /** how long the ground took, in ms */
   groundMs = 0;
   private worker: Worker | null = null;
@@ -237,7 +238,14 @@ export class LifeScene {
 
   private selection(m: Extract<FromLifeWorker, { type: 'selection' }>): void {
     this.waiting = false;
-    this.last = { instances: m.instances, triangles: m.triangles, meshes: m.batches.length, pending: m.pending, ms: m.ms };
+    // Those among them that go somewhere: a way's ninth number is how fast.
+    let going = 0;
+    for (const b of m.batches) {
+      if (!b.ways) continue;
+      const w = new Float32Array(b.ways);
+      for (let i = 8; i < w.length; i += ROUTE) if (w[i] > 0) going++;
+    }
+    this.last = { instances: m.instances, triangles: m.triangles, meshes: m.batches.length, pending: m.pending, ms: m.ms, going };
     if (this.active) this.apply(m);
     else this.held = [m];
     const taxa = this.spec.taxa;
@@ -246,9 +254,30 @@ export class LifeScene {
       return { id: t.id, label: t.label, kind: 'taxon', form: { type: 'generic' }, rings: [], at: g.at, base: g.base, time: t.time, basis: 'procedural', curated: true, rank: (t.length ?? 0) >= 2 ? 2 : 3 } as CityStructure;
     });
     this.tops = Float32Array.from(m.groups, (g) => g.top);
+    this.homes = m.groups;
+    this.follow(this.clock);
     this.labelSerial++;
     this.onChange();
     this.send();
+  }
+
+  /** the groups named, as the scene put them: where each one's first stands, and the way it goes, if it goes one */
+  private homes: NamedGroup[] = [];
+  /** the second of the visit's clock the last frame was drawn at */
+  private clock = 0;
+
+  /** Each name goes with the first of its group as that one goes its way, by the visit's clock (world/generators/life/routines.ts). */
+  private follow(clock: number): void {
+    this.clock = clock;
+    for (let i = 0; i < this.homes.length && i < this.names.length; i++) {
+      const g = this.homes[i];
+      if (!g.way || !g.face) continue;
+      const at = wayAt(g.way, 0, g.face[0], g.face[1], clock);
+      const name = this.names[i];
+      name.at = [g.at[0] + at.x, g.at[1] + at.y];
+      name.base = g.base + at.z;
+      this.tops[i] = g.top + at.z;
+    }
   }
 
   private apply(m: Extract<FromLifeWorker, { type: 'selection' }>): void {
@@ -309,6 +338,7 @@ export class LifeScene {
       width: outW,
       height: outH,
     };
+    this.follow(clock);
     this.renderer.render(f, this.pathsGpu ? [this.pathsGpu] : [], outW, outH);
   }
 

@@ -9,9 +9,14 @@ import type { Form } from '../../../../core/form.ts';
 import { lifewayOf, type AnthromeClass, type Assessment } from '../../../../core/landscape.ts';
 import type { LivingTaxon, SceneSpec, ScenePeople } from '../../../../core/scene.ts';
 import { houseSize, HOUSE_VARIANTS } from '../dwellings.ts';
-import { LandUseMap, makeSettlement, toLocal, type Ground } from './v3.ts';
+import { ROUTE, roundOf, wayAt, type RoutineParams } from '../../life/routines.ts';
+import { personGoes } from '../figures.ts';
+import { WORK_VARIANTS } from '../works.ts';
+import { LandUseMap, makeSettlement, toLocal, type Ground } from './v4.ts';
 
 const ROOT = join(import.meta.dirname, '../../../..');
+// How the living scene's animals go about: the settlement's kept ones go by the same parameters.
+const beasts = (parse(readFileSync(join(ROOT, 'world/generators/life/scene.yaml'), 'utf8')) as { params: { animals: { routines: RoutineParams } } }).params.animals.routines;
 const classes = (parse(readFileSync(join(ROOT, 'world/fields/people/anthromes.yaml'), 'utf8')) as { params: { classes: AnthromeClass[] } }).params.classes;
 const gen = parse(readFileSync(join(ROOT, 'world/generators/people/settlement.yaml'), 'utf8')) as { id: string; version: number; params: Record<string, unknown> };
 const number = (code: number) => classes.findIndex((c) => c.code === code) + 1;
@@ -223,6 +228,37 @@ describe('the settlement generator', () => {
       // Cattle graze, mostly; hens do not.
       expect(of(0).some((a) => a.pose === 2)).toBe(true);
       expect(of(1).every((a) => a.pose !== 2)).toBe(true);
+    });
+
+    it('feed and move on once they are drawn: a herd keeps out from among the houses, and what is kept by them stays among them', () => {
+      const still = plan(42, 3, assess(1, 0, 0, 3));
+      const p = makeSettlement(spec(world(() => ({ code: 42, density: 3, region: 1 }), [{ id: 1, a: assess(1, 0, 0, 3) }], { husbandry, kept, keptForms })), flat, dry, EXTENT, beasts);
+      // Without the living scene's parameters they stay where they stand; with them each starts from the same place.
+      expect(still.animals.every((a) => a.way === undefined)).toBe(true);
+      expect(p.animals.map((a) => [a.x, a.y, a.face])).toEqual(still.animals.map((a) => [a.x, a.y, a.face]));
+      expect(p.ways.length % ROUTE).toBe(0);
+      const goers = p.animals.filter((a) => a.way !== undefined);
+      expect(goers.length / p.animals.length).toBeGreaterThan(0.5);
+      // How far each settlement's houses reach from its middle.
+      const reach = p.settlements.map(() => 0);
+      for (const h of p.houses) reach[h.settlement] = Math.max(reach[h.settlement], Math.hypot(h.x - p.settlements[h.settlement].x, h.y - p.settlements[h.settlement].y));
+      for (const a of goers.slice(0, 400)) {
+        const s = p.settlements[a.settlement];
+        const T = roundOf(p.ways, a.way!);
+        expect(T).toBeGreaterThan(1);
+        for (let k = 0; k < 16; k++) {
+          const at = wayAt(p.ways, a.way!, Math.sin(a.face), Math.cos(a.face), (T * k) / 16);
+          const d = Math.hypot(a.x + at.x - s.x, a.y + at.y - s.y);
+          // The cattle stay out on the pasture; the hens stay among the tents.
+          if (a.kind === 0) expect(d).toBeGreaterThan(reach[a.settlement]);
+          else expect(d).toBeLessThan(reach[a.settlement] + 8.01);
+        }
+      }
+      // Cattle feed, and stay a while where they do; hens wander, and stop only briefly.
+      const stay = (kind: number) => goers.filter((a) => a.kind === kind).map((a) => p.ways[a.way! + 7]);
+      // One that goes beside its leader sets out a little after it, and stays that much less at the first place.
+      expect(Math.min(...stay(0))).toBeGreaterThanOrEqual(beasts.feed.stay[0] * 0.6);
+      expect(Math.max(...stay(1))).toBeLessThanOrEqual(beasts.wander.stay[1]);
     });
 
     it('are not drawn for people whose way of life no husbandry names, nor where the world gives none', () => {
@@ -472,6 +508,52 @@ describe('the settlement generator', () => {
       expect(folk.length).toBeGreaterThan(100);
       // A few in a hundred may stand where a street narrows to a neighbour's wall.
       expect(standing(town, folk).inside / folk.length).toBeLessThan(0.03);
+    });
+
+    it('sends those who stand, walk or carry about, between places clear of every house; those who sit or kneel stay', () => {
+      const plan = makeSettlement(spec(villages()), flat, dry, EXTENT);
+      const people = plan.works.map((w, wi) => ({ w, wi })).filter(({ w }) => plan.workForms[w.form].spec.kind === 'person');
+      expect(plan.ways.length % ROUTE).toBe(0);
+      const goers = people.filter(({ w }) => w.way !== undefined);
+      expect(goers.length / people.length).toBeGreaterThan(0.4);
+      for (const { w, wi } of people) if (personGoes(wi % WORK_VARIANTS) === 'stays') expect(w.way).toBeUndefined();
+      // Wherever one is on the way, at any moment of the round: outside the walls of every house of the settlement,
+      // and no further from its houses than an errand goes.
+      const byPlace = new Map<number, (typeof plan.houses)[number][]>();
+      for (const h of plan.houses) (byPlace.get(h.settlement) ?? byPlace.set(h.settlement, []).get(h.settlement)!).push(h);
+      let inside = 0;
+      let far = 0;
+      let checked = 0;
+      let underWay = 0;
+      for (const { w, wi } of goers.slice(0, 300)) {
+        const T = roundOf(plan.ways, w.way!);
+        expect(T).toBeGreaterThan(5);
+        // One drawn walking or carrying is on the way as the clock starts.
+        if (personGoes(wi % WORK_VARIANTS) === 'going' && wayAt(plan.ways, w.way!, Math.sin(w.face), Math.cos(w.face), 0).going > 0.9) underWay++;
+        for (let k = 0; k < 20; k++) {
+          const at = wayAt(plan.ways, w.way!, Math.sin(w.face), Math.cos(w.face), (T * k) / 20);
+          const x = w.x + at.x;
+          const y = w.y + at.y;
+          expect(at.z).toBe(0);
+          checked++;
+          let near = Infinity;
+          for (const h of byPlace.get(w.settlement)!) {
+            const f = plan.forms[h.form];
+            const sz = houseSize(f.spec, h.variant, f.grow ?? 1);
+            const along = (x - h.x) * Math.sin(h.face) + (y - h.y) * Math.cos(h.face);
+            const across = (x - h.x) * Math.cos(h.face) - (y - h.y) * Math.sin(h.face);
+            if (Math.abs(along) < sz.l / 2 && Math.abs(across) < sz.w / 2) inside++;
+            near = Math.min(near, Math.hypot(x - h.x, y - h.y));
+          }
+          if (near > 60) far++;
+        }
+      }
+      expect(checked).toBeGreaterThan(2000);
+      expect(inside).toBe(0);
+      expect(far).toBe(0);
+      expect(underWay).toBeGreaterThan(10);
+      // The same people, from the same places: version 3's, with somewhere to go.
+      expect(people.every(({ w }) => Number.isFinite(w.x) && Number.isFinite(w.face))).toBe(true);
     });
 
     it('floats boats only on water deep enough, beside a settlement, and none on dry land', () => {

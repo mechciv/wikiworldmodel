@@ -3,8 +3,8 @@
 // within the tolerance of core/fingerprint.ts.
 import type { Fingerprint } from '../../../core/fingerprint.ts';
 import type { SceneSpec } from '../../../core/scene.ts';
-import { FAST_BUDGET, FULL_BUDGET, SceneStream, type Batch, type LifeView, type ProtoMesh } from '../../../world/generators/life/stream.ts';
-import type { PlanForm, Settlement, SettlementPlan, WorkForm } from '../../../world/generators/people/settlement/v3.ts';
+import { FAST_BUDGET, FULL_BUDGET, SceneStream, type Batch, type LifeView, type NamedGroup, type ProtoMesh } from '../../../world/generators/life/stream.ts';
+import type { PlanForm, Settlement, SettlementPlan, WorkForm } from '../../../world/generators/people/settlement/v4.ts';
 
 /** What a scene's people are, for its panel: the plan without its houses. */
 export interface PeopleSummary {
@@ -38,7 +38,7 @@ export type ToLifeWorker = { type: 'init'; spec: SceneSpec; fast: boolean } | { 
 export type FromLifeWorker =
   | { type: 'ground'; levels: { nx: number; ny: number; x0: number; y0: number; cell: number; z: Int16Array }[]; focus: [number, number]; toRiver: [number, number]; water: { vertices: Float32Array; indices: Uint32Array; flow: Float32Array }; waterLevel: number; mask: Uint8Array; maskSize: number; maskBox: [number, number, number, number]; print: Fingerprint; ms: number; people?: PeopleSummary; fields?: Uint8Array; paths?: { vertices: ArrayBuffer; indices: Uint32Array } }
   | { type: 'mask'; mask: Uint8Array; maskSize: number; maskBox: [number, number, number, number]; fields?: Uint8Array }
-  | { type: 'selection'; serial: number; batches: Batch[]; protos: ProtoMesh[]; instances: number; triangles: number; pending: number; groups: { taxon: number; at: [number, number]; base: number; top: number }[]; ms: number };
+  | { type: 'selection'; serial: number; batches: Batch[]; protos: ProtoMesh[]; instances: number; triangles: number; pending: number; groups: NamedGroup[]; ms: number };
 
 let stream: SceneStream | null = null;
 const sent = new Set<number>();
@@ -102,6 +102,6 @@ self.onmessage = (e: MessageEvent<ToLifeWorker>) => {
   if (!stream) return;
   const t0 = performance.now();
   const s = stream.select(m.view, sent, () => performance.now() - t0 < 28);
-  const buffers: ArrayBuffer[] = [...s.batches.map((b) => b.data), ...s.protos.flatMap((p) => [p.vertices, p.indices.buffer as ArrayBuffer])];
+  const buffers: ArrayBuffer[] = [...s.batches.flatMap((b) => (b.ways ? [b.data, b.ways] : [b.data])), ...s.protos.flatMap((p) => [p.vertices, p.indices.buffer as ArrayBuffer])];
   post({ type: 'selection', serial: m.serial, batches: s.batches, protos: s.protos, instances: s.instances, triangles: s.triangles, pending: s.pending, groups: s.groups, ms: performance.now() - t0 }, buffers);
 };

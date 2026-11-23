@@ -4,7 +4,7 @@ description: >-
 kind: animal
 mass_length: 5.4
 hip: 0.3
-behave: { group: [1, 2], habitat: any, poses: [walk, walk, stand, alert] }
+behave: { routine: patrol, group: [1, 2], habitat: any, poses: [walk, walk, stand, alert] }
 parts:
   body:
     type: trunk

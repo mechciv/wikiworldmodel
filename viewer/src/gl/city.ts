@@ -97,6 +97,14 @@ export interface InstancedGPU {
   casts: boolean;
   /** how an animal's mesh idles: its joints, then its swings and pace (world/generators/life/stream.ts, ProtoMesh) */
   idle: Float32Array | null;
+  /**
+   * The ways of those drawn with it, where any goes one (world/generators/life/routines.ts): a buffer in step with
+   * the instances, the bytes it holds, and whether the mesh is reading it now. A mesh that reads none has every way
+   * all noughts, and everyone drawn with it stays where they stand.
+   */
+  ways: WebGLBuffer | null;
+  waysCapacity: number;
+  waysOn: boolean;
 }
 
 export interface CityFrame {
@@ -702,11 +710,15 @@ void main() {
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
     gl.bindVertexArray(null);
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
-    this.instanced.set(id, { vao, vbo, ibo, instances, capacity: 28 * 16, indexCount: indices.length, count: 0, casts, idle: idle && idle.length >= 16 ? Float32Array.from(idle.slice(0, 16)) : null });
+    this.instanced.set(id, { vao, vbo, ibo, instances, capacity: 28 * 16, indexCount: indices.length, count: 0, casts, idle: idle && idle.length >= 16 ? Float32Array.from(idle.slice(0, 16)) : null, ways: null, waysCapacity: 0, waysOn: false });
   }
 
-  /** Who is drawn with each mesh this frame. Meshes not named draw nobody. */
-  setInstances(batches: { proto: number; count: number; data: ArrayBuffer }[]): void {
+  /**
+   * Who is drawn with each mesh this frame. Meshes not named draw nobody. `ways`, where a batch has them, are the ways
+   * its bodies go, 48 bytes each in step with `data` (world/generators/life/routines.ts): the shader moves each along
+   * its own by the frame's clock.
+   */
+  setInstances(batches: { proto: number; count: number; data: ArrayBuffer; ways?: ArrayBuffer }[]): void {
     const gl = this.gl;
     for (const g of this.instanced.values()) g.count = 0;
     for (const b of batches) {
@@ -719,6 +731,31 @@ void main() {
       }
       gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Uint8Array(b.data));
       g.count = b.count;
+      if (b.ways) {
+        if (!g.ways) g.ways = gl.createBuffer()!;
+        gl.bindBuffer(gl.ARRAY_BUFFER, g.ways);
+        if (b.ways.byteLength > g.waysCapacity) {
+          g.waysCapacity = b.ways.byteLength * 2;
+          gl.bufferData(gl.ARRAY_BUFFER, g.waysCapacity, gl.DYNAMIC_DRAW);
+        }
+        gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Uint8Array(b.ways));
+        if (!g.waysOn) {
+          gl.bindVertexArray(g.vao);
+          for (let k = 0; k < 3; k++) {
+            gl.enableVertexAttribArray(8 + k);
+            gl.vertexAttribPointer(8 + k, 4, gl.FLOAT, false, 48, k * 16);
+            gl.vertexAttribDivisor(8 + k, 1);
+          }
+          gl.bindVertexArray(null);
+          g.waysOn = true;
+        }
+      } else if (g.waysOn) {
+        // No one drawn with it goes anywhere now: its ways read as noughts again.
+        gl.bindVertexArray(g.vao);
+        for (let k = 0; k < 3; k++) gl.disableVertexAttribArray(8 + k);
+        gl.bindVertexArray(null);
+        g.waysOn = false;
+      }
     }
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
     this.meshSerial++;
@@ -732,6 +769,7 @@ void main() {
       gl.deleteBuffer(g.vbo);
       gl.deleteBuffer(g.ibo);
       gl.deleteBuffer(g.instances);
+      if (g.ways) gl.deleteBuffer(g.ways);
     }
     this.instanced.clear();
     this.meshSerial++;
@@ -1278,9 +1316,10 @@ void main() {
       const cU = dt(f.focus, up);
       const sR = Math.round(cR / texel) * texel;
       const sU = Math.round(cU / texel) * texel;
-      // What moves in the wind or idles moves its shadow: the nearest cascade is drawn again ten times a second of the
-      // visit's clock, the middle once a second.
-      const moved = k === 0 ? Math.round((f.clock ?? 0) * 10) : k === 1 ? Math.round(f.clock ?? 0) : 0;
+      // What moves in the wind, idles or goes from place to place moves its shadow: the nearest cascade is drawn again
+      // ten times a second of the visit's clock, and the middle four times, in which a walking animal goes less than one
+      // of its texels.
+      const moved = k === 0 ? Math.round((f.clock ?? 0) * 10) : k === 1 ? Math.round((f.clock ?? 0) * 4) : 0;
       const key = `${sR.toFixed(1)},${sU.toFixed(1)},${r.toFixed(1)},${sun.join()},${k === 2 ? Math.round(f.time / 4) : f.time},${this.entitySerial},${this.meshSerial},${moved}`;
       const depthRange = Math.max(r * 4, 2500);
       const zc = dt(f.focus, sun);

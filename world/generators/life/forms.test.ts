@@ -5,7 +5,7 @@ import { parse } from 'yaml';
 import { describe, expect, it } from 'vitest';
 import { applyChange, canonicalForm, formSource, resolveForm, type Form, type TreeStep } from '../../../core/form.ts';
 import { MAT, Mesh, STRIDE } from '../city/kit.ts';
-import { checkForm, drawAnimal, drawPlant, meshBounds, POSE, unitStance } from './forms.ts';
+import { BONE, checkForm, drawAnimal, drawPlant, meshBounds, POSE, unitStance } from './forms.ts';
 
 const PLANS = join(import.meta.dirname, '../../plans');
 const plans: Record<string, Form> = Object.fromEntries(readdirSync(PLANS).filter((f) => f.endsWith('.yaml')).map((f) => [f.replace('.yaml', ''), parse(readFileSync(join(PLANS, f), 'utf8')) as Form]));
@@ -185,10 +185,64 @@ describe('the plans', () => {
       expect(high, n).toBeGreaterThan(0);
     }
   });
+
+  it('say how far each point of a leg goes with its stride: not at all at the hip, wholly at the foot, half its legs against the other half', () => {
+    // What each vertex moves with, and how far, with where it is: its side, how far along the body, and how high.
+    const legs = (n: string, pose: number = POSE.stand) => {
+      const f = canonicalForm(plans[n]);
+      const m = new Mesh(4096);
+      drawAnimal(m, f, unitStance(f, pose, 2));
+      const { vertices } = m.arrays();
+      const at = new Float32Array(vertices);
+      const code = new Uint16Array(vertices);
+      const out: { bone: number; w: number; x: number; y: number; z: number }[] = [];
+      for (let i = 0; i < m.verts; i++) {
+        const c = code[i * 14 + 13];
+        if ((c & 15) === BONE.stride || (c & 15) === BONE.counter) out.push({ bone: c & 15, w: (c >> 4) / 255, x: at[i * 7], y: at[i * 7 + 1], z: at[i * 7 + 2] });
+      }
+      return out;
+    };
+    for (const n of ['ceratopsian', 'tyrannosaur', 'hadrosaur', 'lizard', 'ox']) {
+      const pts = legs(n);
+      expect(pts.length, n).toBeGreaterThan(50);
+      // The further down, the more: what goes least with a stride is high on the body, what goes wholly is on the ground.
+      const top = Math.max(...pts.map((p) => p.z));
+      expect(Math.max(...pts.filter((p) => p.w < 0.1).map((p) => p.z)), n).toBeGreaterThan(top * 0.7);
+      for (const p of pts.filter((q) => q.w > 0.98)) expect(p.z, n).toBeLessThan(top * 0.2);
+      // The left and the right of each pair of legs stride against each other: of the feet that stand side by side,
+      // those on one side go with one stride and those on the other with the other.
+      const feet = pts.filter((p) => p.w > 0.98);
+      const pairs = new Map<number, { left: Set<number>; right: Set<number> }>();
+      for (const p of feet) {
+        const k = Math.round(p.y / 0.1);
+        const pair = pairs.get(k) ?? pairs.set(k, { left: new Set(), right: new Set() }).get(k)!;
+        (p.x < 0 ? pair.left : pair.right).add(p.bone);
+      }
+      let both = 0;
+      for (const { left, right } of pairs.values()) {
+        if (!left.size || !right.size) continue;
+        both++;
+        expect([left.size, right.size], n).toEqual([1, 1]);
+        expect([...left][0], n).not.toBe([...right][0]);
+      }
+      expect(both, n).toBeGreaterThan(0);
+    }
+    // What has no legs strides with nothing; and a head, a trunk and a tail still move with what they did.
+    expect(legs('fish')).toEqual([]);
+    expect(legs('snake')).toEqual([]);
+  });
 });
 
 describe('the validator', () => {
   const good = () => canonicalForm(plans.ceratopsian);
+
+  it('refuses a routine there is not', () => {
+    const f = good();
+    (f.behave as Record<string, unknown>).routine = 'dance';
+    expect(checkForm(f).join()).toContain('no routine "dance"');
+    f.behave!.routine = 'stalk';
+    expect(checkForm(f)).toEqual([]);
+  });
 
   it('refuses a part it does not know', () => {
     const f = good();

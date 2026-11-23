@@ -2,7 +2,7 @@ description: >-
   A two-legged predator with a great head and tiny arms.
 kind: animal
 hip: 0.3
-behave: { group: [1, 2], habitat: any, poses: [walk, stand, alert] }
+behave: { routine: stalk, group: [1, 2], habitat: any, poses: [walk, stand, alert] }
 parts:
   body:
     type: trunk
