@@ -361,7 +361,11 @@ plants, the bodies, the people and what they build, and raised each by the means
 - **Bodies.** A leg has a profile: a thigh or a shoulder deep fore and aft, a knee, a slender shank, a foot that
   spreads, and the muscle where it leaves the body. A trunk has one more ring between each two close by. Skins are
   laid in the body's own frame, a hide creased round the body, a coat lit at its edge; an eye is dark and wet. The
-  plans themselves, which decide whether a horse is a horse, were gone over on their sheets.
+  plans themselves, which decide whether a horse is a horse, were gone over on their sheets, side, front and above:
+  forty-six of them redrawn or mended, and one written for horses, which had been drawn as the plain ungulate and
+  looked like llamas. A taxon's own form changes its plan part by part, so the eighty-two records whose forms
+  restated the old proportions were refitted with them: what only repeated the old plan was dropped, and what makes
+  the taxon itself was set on the new body.
 - **People and what they build.** A figure's body is wider than it is deep, its head longer than wide, with a nose
   and hair; a robe falls to the ground; cloth hangs in folds. What houses are built of stands in relief, each
   material by a height of its own, and what is of earth or stone takes the scans' grain. `gen:people/settlement` is
@@ -376,9 +380,17 @@ plants, the bodies, the people and what they build, and raised each by the means
   which pays for some of the steps.
 
 *Not done:* stones and logs as things standing on the ground; parallax in the ground's grain; impostors; a house's
-yard where no tradition says what stood in it; crops as plants. Nothing yet says that a crust of salt or a mud that
-dries to cracks grows less than its climate's share of low plants: the cover is the climate's, whatever the ground is
-made of. The lighter way draws none of this: its plants are the plain shapes they were.
+yard where no tradition says what stood in it; crops as plants; a house's own shape, which is still a plain box.
+Nothing yet says that a crust of salt or a mud that dries to cracks grows less than its climate's share of low
+plants: the cover is the climate's, whatever the ground is made of. The lighter way draws none of this: its plants
+are the plain shapes they were.
+
+*What the plans could not say,* as those who redrew them found: a section that is not an ellipse (a flat belly, a
+pear-shaped body); a leg narrower across than fore and aft, which a thigh is; a part that hangs on another part's end,
+so that a turtle's head has eyes and a crocodile a line to its jaw; a row of plates that follows a back's curve; a
+frill with thickness at its rim; a crest that turns with the head it stands on; one ring of a body changed without
+writing them all. Forms with a source of their own were left as they were, among them most birds, whose thighs still
+hang under their bellies.
 
 ## The standard
 
