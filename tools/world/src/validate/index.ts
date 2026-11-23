@@ -16,9 +16,9 @@ import { dwellingProblems, fieldProblems, lifewayProblems, outbuildingProblems, 
 import { ladderCounts, LEVELS, STEPS } from '../../../../core/ladder.ts';
 import { MONTHS_PARTS } from '../../../../core/months.ts';
 import { parseRef, RefError, splitRef } from '../../../../core/refs.ts';
-import { conflictChanged, conflictIn, type Constraint, type Conflict, type Solution } from '../../../../core/stn.ts';
+import { conflictChanged, conflictIn, conflictSplice, type Constraint, type Conflict, type Solution } from '../../../../core/stn.ts';
 import { CYCLES, DAY_COUNTS, dayNumberAt, dayOnAxis, formatTime, formatTimeValue, historical, namesSign, parseCycle, parseLag, parseTime, TimeError, toMa } from '../../../../core/time.ts';
-import { anchorPlace, anchorsOf, available, buildNetwork, chosen, countDays, cycleAnchor, epochsOf, pictureNetwork, claimGroup, claimGroups, conflictInScenario, inTurn, pictures, pointOf, resolveCycle, scenariosOf, solveScenario, spanOf, spanRefs, zeroDayClaim, type Scenario } from '../chronology.ts';
+import { anchorPlace, anchorsOf, available, buildNetwork, chosen, countDays, cycleAnchor, epochsOf, pictureNetwork, pickedSplice, pieces, claimGroup, claimGroups, conflictInScenario, inTurn, pictures, pointOf, resolveCycle, scenariosOf, solveScenario, spanOf, spanRefs, zeroDayClaim, type Scenario } from '../chronology.ts';
 import { resolvePoints } from '../importer.ts';
 import { lineageLoop } from '../lineage.ts';
 import { REPO, WORLD } from '../paths.ts';
@@ -917,9 +917,14 @@ function checkChronology(world: World, issues: Issue[]): void {
       conflict = conflictIn(net.points, net.constraints);
       picture = { ...net, holds: !conflict, broken: conflict && sourcesOf(conflict) };
     } else {
-      const net = buildNetwork(world, scenario);
-      const quick = picture?.holds ? conflictChanged(picture, net.points, net.constraints) : 'whole';
-      conflict = quick === 'whole' ? conflictIn(net.points, net.constraints) : quick;
+      // Made in place where it can be, without making its network whole.
+      const spliced = picture?.holds ? pickedSplice(world, scenario) : undefined;
+      if (spliced && spliced.base.constraints === picture!.constraints) conflict = conflictSplice(picture!, spliced.splice, pieces(world));
+      else {
+        const net = buildNetwork(world, scenario);
+        const quick = picture?.holds ? conflictChanged(picture, net.points, net.constraints, pieces(world)) : 'whole';
+        conflict = quick === 'whole' ? conflictIn(net.points, net.constraints) : quick;
+      }
       // A picture that does not hold fails under every pick that leaves its fault alone: said once, of the picture.
       if (conflict && picture?.broken === sourcesOf(conflict)) continue;
     }

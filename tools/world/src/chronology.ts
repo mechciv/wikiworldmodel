@@ -1,9 +1,10 @@
 // Turn the world's dated claims and relations into a simple temporal network, solve it, and
 // derive every entity's and phase's interval from the evidence (section 5), for each
 // scenario (core/scenario.ts): the default picture, plus alternatives and picked claims.
+import { createHash } from 'node:crypto';
 import { parseRef, splitRef } from '../../../core/refs.ts';
 import { scenarioKey, type Scenario } from '../../../core/scenario.ts';
-import { conflictIn, ORIGIN, solve, solveChanged, type Bounds, type Conflict, type Constraint, type Solution } from '../../../core/stn.ts';
+import { conflictIn, ORIGIN, Pieces, solve, solveChanged, solveSplice, type Bounds, type Conflict, type Constraint, type Solution, type Splice } from '../../../core/stn.ts';
 import { bounds, centre, CYCLES, cycleDays, dayNumberAt, dayOnAxis, isCount, isCycle, parseCycle, parseLag, parsePoint, parseTime, type CycleAnchor, type CycleDate, type TimeValue } from '../../../core/time.ts';
 import { isMoment, kindIs, type Claim, type Relation, type World } from './world.ts';
 
@@ -297,18 +298,51 @@ export interface CycleResolution {
 /** The solutions of each scenario's network without its dates in cycles: the window each such date is read in. */
 const restSolutions = new WeakMap<World, Map<string, Solution>>();
 
-export function resolveCycle(world: World, c: Claim, s: Scenario = {}): CycleResolution | undefined {
-  const v = cycleOf(c.value);
-  if (!v) return undefined;
+/**
+ * A scenario's network without its dates in cycles, solved: the window each such date is read in. A pick's is
+ * solved again only in the pieces where it differs from its picture's (core/stn.ts, solveChanged).
+ */
+function restSolution(world: World, s: Scenario, net?: { points: string[]; constraints: Constraint[] }): Solution {
   let known = restSolutions.get(world);
   if (!known) restSolutions.set(world, (known = new Map()));
   const key = scenarioKey(s);
   let rest = known.get(key);
-  if (!rest) {
-    const net = restNetwork(world, s, false);
-    rest = solve(net.points, net.constraints);
-    known.set(key, rest);
+  if (rest) return rest;
+  const plain = net ?? restNetwork(world, s, false);
+  if (s.picks?.length) {
+    const picture: Scenario = s.alts?.length ? { alts: s.alts } : {};
+    const base = pictureRest(world, picture);
+    const sol = restSolution(world, picture, base);
+    if (sol.ok) {
+      const quick = solveChanged({ ...base, bounds: sol.bounds }, plain.points, plain.constraints, pieces(world));
+      if (quick?.ok) {
+        const bounds = new BoundsOver(sol.bounds);
+        for (const [point, b] of quick.changed) bounds.set(point, b);
+        rest = { ok: true, bounds };
+      } else if (quick) rest = quick;
+    }
   }
+  rest ??= solve(plain.points, plain.constraints);
+  known.set(key, rest);
+  return rest;
+}
+
+const pictureRests = new WeakMap<World, Map<string, { points: string[]; constraints: Constraint[] }>>();
+
+/** A picture's network without its dates in cycles, made once per world: its picks' are compared with it. */
+function pictureRest(world: World, picture: Scenario): { points: string[]; constraints: Constraint[] } {
+  let known = pictureRests.get(world);
+  if (!known) pictureRests.set(world, (known = new Map()));
+  const key = scenarioKey(picture);
+  let net = known.get(key);
+  if (!net) known.set(key, (net = restNetwork(world, picture, false)));
+  return net;
+}
+
+export function resolveCycle(world: World, c: Claim, s: Scenario = {}): CycleResolution | undefined {
+  const v = cycleOf(c.value);
+  if (!v) return undefined;
+  const rest = restSolution(world, s);
   return rest.ok ? resolveIn(world, v, rest.bounds.get(claimPoint(world, c)), s) : undefined;
 }
 
@@ -379,9 +413,37 @@ export function pictureNetwork(world: World, picture: Scenario, centres = false)
   return base;
 }
 
+const piecesOf = new WeakMap<World, Pieces>();
+
+/**
+ * The parts of networks a world's picks have been solved in, kept by what they hold (core/stn.ts, Pieces): the
+ * same pick in most pictures changes a part they share, and is worked out once.
+ */
+export function pieces(world: World): Pieces {
+  let known = piecesOf.get(world);
+  if (!known) {
+    known = new Pieces((data) => createHash('sha256').update(data).digest('base64'));
+    piecesOf.set(world, known);
+  }
+  return known;
+}
+
 /** A picture's network, with one group's constraints changed for the claim picked; undefined if that cannot be done in place. */
 function pickedNetwork(world: World, s: Scenario, centres: boolean): { points: string[]; constraints: Constraint[] } | undefined {
-  const pick = s.picks![0];
+  const picked = pickedSplice(world, s, centres);
+  if (!picked) return undefined;
+  const { base, splice } = picked;
+  return { points: base.points, constraints: [...base.constraints.slice(0, splice.at), ...splice.constraints, ...base.constraints.slice(splice.at + splice.count)] };
+}
+
+/**
+ * A scenario of one pick, as the change it makes to its picture's network in place (core/stn.ts, Splice): the
+ * picture's network, and the picked claim's constraints put where the chosen claim's stood. Undefined if that cannot
+ * be done in place: then the scenario's network is made whole (buildNetwork).
+ */
+export function pickedSplice(world: World, s: Scenario, centres = false): { base: { points: string[]; constraints: Constraint[] }; splice: Splice } | undefined {
+  if (s.picks?.length !== 1) return undefined;
+  const pick = s.picks[0];
   const { record, part } = splitRef(pick);
   const claim = world.entity.get(record)?.claims.find((c) => c.key === part);
   const g = claim && claimGroup(world, claim.subject, claim.prop);
@@ -393,12 +455,27 @@ function pickedNetwork(world: World, s: Scenario, centres: boolean): { points: s
   const before = chosen(g, picture);
   if (!before) return undefined;
   const base = pictureNetwork(world, picture, centres);
-  const at = base.constraints.findIndex((c) => c.source === before.ref);
-  if (at < 0) return undefined;
+  const where = sourcesIn(base.constraints).get(before.ref);
+  if (!where) return undefined;
   // In place, so that the order of the constraints, on which ties in the solver turn, is the same as if made whole.
-  const count = base.constraints.filter((c) => c.source === before.ref).length;
-  const mine = claimConstraints(world, g.prop, claim, centres, s);
-  return { points: base.points, constraints: [...base.constraints.slice(0, at), ...mine, ...base.constraints.slice(at + count)] };
+  return { base, splice: { at: where.at, count: where.count, constraints: dated(world, g.prop, claim, centres, s) } };
+}
+
+const sourcesOf = new WeakMap<Constraint[], Map<string, { at: number; count: number }>>();
+
+/** Where each source's constraints first stand in a network, and how many it has there. */
+function sourcesIn(constraints: Constraint[]): Map<string, { at: number; count: number }> {
+  let known = sourcesOf.get(constraints);
+  if (!known) {
+    known = new Map();
+    for (let i = 0; i < constraints.length; i++) {
+      const x = known.get(constraints[i].source);
+      if (x) x.count++;
+      else known.set(constraints[i].source, { at: i, count: 1 });
+    }
+    sourcesOf.set(constraints, known);
+  }
+  return known;
 }
 
 /** What one dated claim says, as constraints, in a scenario: a date in a count of days follows the scenario's zero day. */
@@ -598,24 +675,43 @@ function wholeNetwork(world: World, s: Scenario, centres: boolean): { points: st
 function networkOf(world: World, s: Scenario, centres: boolean, cycles: boolean): { points: string[]; constraints: Constraint[] } {
   const net = restNetwork(world, s, centres);
   if (!cycles) return net;
-  const alts = new Set(s.alts ?? []);
-  const beside = claimGroups(world).flatMap((g) => g.beside.filter((c) => c.rank !== 'deprecated' && (!c.alt || alts.has(c.alt)) && subjectExists(world, c.subject)));
+  const beside = besideIn(world, s);
   if (!beside.length) return net;
-  let known = restSolutions.get(world);
-  if (!known) restSolutions.set(world, (known = new Map()));
-  const key = scenarioKey(s);
-  let rest = known.get(key);
-  if (!rest) {
-    const plain = centres ? restNetwork(world, s, false) : net;
-    rest = solve(plain.points, plain.constraints);
-    known.set(key, rest);
-  }
+  const rest = restSolution(world, s, centres ? undefined : net);
   if (!rest.ok) return net; // the rest does not hold: the validator says why, and a date in cycles has no window to be read in
   const bounds = rest.bounds;
   return { points: net.points, constraints: [...net.constraints, ...beside.flatMap((c) => cycleConstraints(world, c, bounds.get(claimPoint(world, c)), s))] };
 }
 
-function restNetwork(world: World, s: Scenario, centres: boolean): { points: string[]; constraints: Constraint[] } {
+const besides = new WeakMap<World, Map<string, Claim[]>>();
+
+/** The dates in cycles a scenario's picture holds, which hold beside the others. */
+function besideIn(world: World, s: Scenario): Claim[] {
+  let known = besides.get(world);
+  if (!known) besides.set(world, (known = new Map()));
+  const key = scenarioKey({ alts: s.alts });
+  let list = known.get(key);
+  if (!list) {
+    const alts = new Set(s.alts ?? []);
+    list = claimGroups(world).flatMap((g) => g.beside.filter((c) => c.rank !== 'deprecated' && (!c.alt || alts.has(c.alt)) && subjectExists(world, c.subject)));
+    known.set(key, list);
+  }
+  return list;
+}
+
+/*
+ * A network is made of parts that most scenarios share: each entity's lifetime and phases, the constraints of a dated
+ * claim, those of a relation. Each part that does not turn on the scenario is worked out once per world, and its
+ * constraints are the same objects in every network that has it. A network is put together from them in the same
+ * order as ever.
+ */
+
+const structures = new WeakMap<World, { points: string[]; constraints: Constraint[] }>();
+
+/** What every network of a world holds alike: each entity's points, and what its lifetime and its phases say. */
+function structureOf(world: World): { points: string[]; constraints: Constraint[] } {
+  let known = structures.get(world);
+  if (known) return known;
   const points = new Set<string>();
   const constraints: Constraint[] = [];
   const add = (c: Constraint) => constraints.push(c);
@@ -637,60 +733,171 @@ function restNetwork(world: World, s: Scenario, centres: boolean): { points: str
     }
     if (e.phases.length) add({ source: e.id, from: prev, to: end, lo: 0, hi: 0, note: 'the last phase ends with the entity' });
   }
-  for (const g of claimGroups(world)) {
-    const prop = world.vocab.properties[g.prop];
-    if (!prop?.moment) continue;
-    const c = chosen(g, s);
-    if (c) constraints.push(...claimConstraints(world, g.prop, c, centres, s));
+  known = { points: [...points], constraints };
+  structures.set(world, known);
+  return known;
+}
+
+/** The moment groups of a world, in key order, and for each claim of theirs, the groups it is in. */
+const momentGroupsOf = new WeakMap<World, { list: ClaimGroup[]; byRef: Map<string, ClaimGroup[]> }>();
+
+function momentGroups(world: World): { list: ClaimGroup[]; byRef: Map<string, ClaimGroup[]> } {
+  let known = momentGroupsOf.get(world);
+  if (!known) {
+    const list = claimGroups(world).filter((g) => world.vocab.properties[g.prop]?.moment);
+    const byRef = new Map<string, ClaimGroup[]>();
+    for (const g of list) for (const c of g.claims) byRef.set(c.ref, [...(byRef.get(c.ref) ?? []), g]);
+    known = { list, byRef };
+    momentGroupsOf.set(world, known);
   }
-  for (const r of relationsIn(world, s)) {
-    const type = world.vocab.relations[r.rel];
-    if (!type || !subjectExists(world, r.subject) || !subjectExists(world, r.to)) continue;
-    // A relation that holds over a span, and says which: the span lies within both lifetimes. A bound written in a
-    // count of days is the days it comes to in this scenario.
-    const span = type.span && r.valid !== undefined ? spanOf(r.valid, (x) => boundIn(world, x, s)) : undefined;
-    if (span) {
-      const start = `${r.ref}|start`;
-      const end = `${r.ref}|end`;
-      points.add(start).add(end);
-      const pin = (p: SpanPoint): [number, number] => (centres ? [p.t + p.whole / 2, p.t + p.whole / 2] : [p.t, p.t + p.whole]);
-      // A bound is a date, or the edge of another record, which it then shares: "until his death".
-      const bind = (b: SpanBound | undefined, point: string, note: string) => {
-        if (!b) return;
-        if (!('ref' in b)) return add({ source: r.ref, from: ORIGIN, to: point, lo: pin(b)[0], hi: pin(b)[1], note });
-        const target = edgeSubject(b.ref, r.entity);
-        if (target && subjectExists(world, target)) add({ source: r.ref, from: pointOf(world, target, b.edge), to: point, lo: 0, hi: 0, note });
-      };
-      bind(span.lo, start, 'it held from then');
-      bind(span.hi, end, 'it held until then');
-      if (span.at) {
-        add({ source: r.ref, from: ORIGIN, to: start, lo: -Infinity, hi: span.at.t + span.at.whole, note: 'it held by then' });
-        add({ source: r.ref, from: ORIGIN, to: end, lo: span.at.t, hi: Infinity, note: 'it still held then' });
-      }
-      add({ source: r.ref, from: start, to: end, lo: 0, hi: Infinity, note: 'it holds from its start to its end' });
-      for (const who of [r.subject, r.to]) {
-        add({ source: r.ref, from: pointOf(world, who, 'start'), to: start, lo: 0, hi: Infinity, note: 'both were there while it held' });
-        add({ source: r.ref, from: end, to: pointOf(world, who, 'end'), lo: 0, hi: Infinity, note: 'both were there while it held' });
-      }
-      continue;
-    }
-    if (!type.time) continue;
-    let lag: [number, number] = [0, Infinity];
-    try {
-      lag = parseLag(r.lag);
-    } catch {
-      continue; // the validator reports it
-    }
-    const at = (x: string) => {
-      const [who, edge] = x.split('.') as ['self' | 'other', 'start' | 'end'];
-      return pointOf(world, who === 'self' ? r.subject : r.to, edge);
-    };
-    for (const t of type.time) {
-      const [lo, hi] = t.lag ? lag : [0, Infinity];
-      add({ source: r.ref, from: at(t.from), to: at(t.to), lo, hi });
-    }
+  return known;
+}
+
+const chosenOf = new WeakMap<World, Map<string, Array<Claim | undefined>>>();
+
+/**
+ * The claim a scenario uses for each moment group, in key order (see chosen). A picture's are worked out once; a pick
+ * changes only the groups of the claims it picks.
+ */
+function chosenClaims(world: World, s: Scenario): Array<Claim | undefined> {
+  const groups = momentGroups(world);
+  let known = chosenOf.get(world);
+  if (!known) chosenOf.set(world, (known = new Map()));
+  const picture: Scenario = s.alts?.length ? { alts: s.alts } : {};
+  const key = scenarioKey(picture);
+  let list = known.get(key);
+  if (!list) {
+    list = groups.list.map((g) => chosen(g, picture));
+    known.set(key, list);
+  }
+  const picked = new Set((s.picks ?? []).flatMap((p) => groups.byRef.get(p) ?? []));
+  return picked.size ? groups.list.map((g, i) => (picked.has(g) ? chosen(g, s) : list[i])) : list;
+}
+
+const relationsOfPicture = new WeakMap<World, Map<string, { list: Relation[]; contested: Set<string> }>>();
+
+/**
+ * The relations that hold in a scenario (see relationsIn). A picture's are worked out once; a pick changes them only
+ * where it picks a rival.
+ */
+function relationsFor(world: World, s: Scenario): Relation[] {
+  let known = relationsOfPicture.get(world);
+  if (!known) relationsOfPicture.set(world, (known = new Map()));
+  const picture: Scenario = s.alts?.length ? { alts: s.alts } : {};
+  const key = scenarioKey(picture);
+  let mine = known.get(key);
+  if (!mine) {
+    const all = relationsOf(world, picture);
+    const keys = new Set(all.filter((r) => r.rank === 'preferred').map(rivalKey));
+    mine = { list: relationsIn(world, picture), contested: new Set(all.filter((r) => keys.has(rivalKey(r))).map((r) => r.ref)) };
+    known.set(key, mine);
+  }
+  return s.picks?.some((p) => mine.contested.has(p)) ? relationsIn(world, s) : mine.list;
+}
+
+const claimParts = new WeakMap<Claim, Array<Constraint[] | undefined>>();
+
+/** What one dated claim says, as constraints (claimConstraints), worked out once where the scenario does not change it. */
+function dated(world: World, prop: string, c: Claim, centres: boolean, s: Scenario): Constraint[] {
+  if (prop !== c.prop) return claimConstraints(world, prop, c, centres, s);
+  const v = timeOrUndefined(c.value);
+  const bound = prop === 'earlier_than' || prop === 'end_before' || prop === 'later_than';
+  // A day in a count follows the scenario's zero day, and a lag in days the day its record is dated to there.
+  if (v?.kind === 'count' || (v?.kind === 'ref' && v.lagDays && v.edge && !bound)) return claimConstraints(world, prop, c, centres, s);
+  let known = claimParts.get(c);
+  if (!known) claimParts.set(c, (known = []));
+  return (known[+centres] ??= claimConstraints(world, prop, c, centres, s));
+}
+
+const relationParts = new WeakMap<Relation, Array<{ points: string[]; constraints: Constraint[] } | undefined>>();
+
+/** What one relation says, as points and constraints (relationPart), worked out once where the scenario does not change it. */
+function related(world: World, r: Relation, centres: boolean, s: Scenario): { points: string[]; constraints: Constraint[] } {
+  let known = relationParts.get(r);
+  const ready = known?.[+centres];
+  if (ready) return ready;
+  // A bound of a span written in a count of days is the days it comes to in the scenario.
+  let counts = false;
+  if (r.valid !== undefined)
+    spanOf(r.valid, (x) => {
+      if (isCount(x)) counts = true;
+      return undefined;
+    });
+  if (counts) return relationPart(world, r, centres, s);
+  if (!known) relationParts.set(r, (known = []));
+  return (known[+centres] = relationPart(world, r, centres, s));
+}
+
+function restNetwork(world: World, s: Scenario, centres: boolean): { points: string[]; constraints: Constraint[] } {
+  const structure = structureOf(world);
+  const points = new Set<string>(structure.points);
+  const constraints: Constraint[] = structure.constraints.slice();
+  const groups = momentGroups(world).list;
+  const claims = chosenClaims(world, s);
+  for (let i = 0; i < groups.length; i++) {
+    const c = claims[i];
+    if (c) for (const x of dated(world, groups[i].prop, c, centres, s)) constraints.push(x);
+  }
+  for (const r of relationsFor(world, s)) {
+    const part = related(world, r, centres, s);
+    for (const p of part.points) points.add(p);
+    for (const x of part.constraints) constraints.push(x);
   }
   return { points: [...points], constraints };
+}
+
+/** What one relation says in a scenario's network: the points of its span, if it holds over one, and its constraints. */
+function relationPart(world: World, r: Relation, centres: boolean, s: Scenario): { points: string[]; constraints: Constraint[] } {
+  const points: string[] = [];
+  const constraints: Constraint[] = [];
+  const add = (c: Constraint) => constraints.push(c);
+  const out = { points, constraints };
+  const type = world.vocab.relations[r.rel];
+  if (!type || !subjectExists(world, r.subject) || !subjectExists(world, r.to)) return out;
+  // A relation that holds over a span, and says which: the span lies within both lifetimes. A bound written in a
+  // count of days is the days it comes to in this scenario.
+  const span = type.span && r.valid !== undefined ? spanOf(r.valid, (x) => boundIn(world, x, s)) : undefined;
+  if (span) {
+    const start = `${r.ref}|start`;
+    const end = `${r.ref}|end`;
+    points.push(start, end);
+    const pin = (p: SpanPoint): [number, number] => (centres ? [p.t + p.whole / 2, p.t + p.whole / 2] : [p.t, p.t + p.whole]);
+    // A bound is a date, or the edge of another record, which it then shares: "until his death".
+    const bind = (b: SpanBound | undefined, point: string, note: string) => {
+      if (!b) return;
+      if (!('ref' in b)) return add({ source: r.ref, from: ORIGIN, to: point, lo: pin(b)[0], hi: pin(b)[1], note });
+      const target = edgeSubject(b.ref, r.entity);
+      if (target && subjectExists(world, target)) add({ source: r.ref, from: pointOf(world, target, b.edge), to: point, lo: 0, hi: 0, note });
+    };
+    bind(span.lo, start, 'it held from then');
+    bind(span.hi, end, 'it held until then');
+    if (span.at) {
+      add({ source: r.ref, from: ORIGIN, to: start, lo: -Infinity, hi: span.at.t + span.at.whole, note: 'it held by then' });
+      add({ source: r.ref, from: ORIGIN, to: end, lo: span.at.t, hi: Infinity, note: 'it still held then' });
+    }
+    add({ source: r.ref, from: start, to: end, lo: 0, hi: Infinity, note: 'it holds from its start to its end' });
+    for (const who of [r.subject, r.to]) {
+      add({ source: r.ref, from: pointOf(world, who, 'start'), to: start, lo: 0, hi: Infinity, note: 'both were there while it held' });
+      add({ source: r.ref, from: end, to: pointOf(world, who, 'end'), lo: 0, hi: Infinity, note: 'both were there while it held' });
+    }
+    return out;
+  }
+  if (!type.time) return out;
+  let lag: [number, number] = [0, Infinity];
+  try {
+    lag = parseLag(r.lag);
+  } catch {
+    return out; // the validator reports it
+  }
+  const at = (x: string) => {
+    const [who, edge] = x.split('.') as ['self' | 'other', 'start' | 'end'];
+    return pointOf(world, who === 'self' ? r.subject : r.to, edge);
+  };
+  for (const t of type.time) {
+    const [lo, hi] = t.lag ? lag : [0, Infinity];
+    add({ source: r.ref, from: at(t.from), to: at(t.to), lo, hi });
+  }
+  return out;
 }
 
 /** Whether a scenario holds, and if not why, without working out its dates. */
@@ -777,9 +984,15 @@ export function solveVariants(world: World, alternatives?: string[]): Variant[] 
   let nets: { sol: Network; centres: Network } | undefined;
   // A pick, solved again only in the pieces of the network its claim is in (solveChanged).
   const picked = (net: Network, base: Bounds | undefined, s: Scenario, centres: boolean): Solution => {
-    const mine = buildNetwork(world, s, centres);
-    const quick = base && solveChanged({ ...net, bounds: base }, mine.points, mine.constraints);
-    if (!quick) return overBase(solve(mine.points, mine.constraints), base);
+    // Made in place where it can be, without making its network whole.
+    const spliced = base && pickedSplice(world, s, centres);
+    let quick: ReturnType<typeof solveSplice> | undefined;
+    if (spliced && spliced.base.constraints === net.constraints) quick = solveSplice({ ...net, bounds: base! }, spliced.splice, pieces(world));
+    else {
+      const mine = buildNetwork(world, s, centres);
+      quick = base && solveChanged({ ...net, bounds: base }, mine.points, mine.constraints, pieces(world));
+      if (!quick) return overBase(solve(mine.points, mine.constraints), base);
+    }
     if (!quick.ok) return quick;
     const bounds = new BoundsOver(base!);
     for (const [point, b] of quick.changed) bounds.set(point, b);
