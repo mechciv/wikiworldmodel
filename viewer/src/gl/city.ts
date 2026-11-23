@@ -1,8 +1,9 @@
 // The local scene renderer (section 3.3): below some altitude it takes over from the globe. It
 // draws in metres on the site's grid, with the eye at the origin of what the GPU sees, so
-// nothing jitters however close the camera is. A depth prepass feeds ambient occlusion; then the
-// sky, the distant land, the near land and the city are lit by one sun, in floating point, with
-// cascaded shadows, and finished with bloom and a filmic curve.
+// nothing jitters however close the camera is. A depth prepass feeds ambient occlusion; then
+// far land, near land, meshes and octahedral tree impostors are lit in single-sample floating
+// point with cascaded shadows, half-resolution occlusion-culled volumetric clouds, stencil-masked
+// sky, TAA, bloom and a filmic curve.
 import { groundNormals } from './groundNormals.ts';
 import type { GroundLevel } from '../../../core/city.ts';
 import { LEAF_KINDS, litterTile, type LeafKindName } from '../../../core/leaves.ts';
@@ -10,10 +11,15 @@ import { GROUND_LAYERS } from '../../../core/materials.ts';
 import { NOISE_SIZE, noiseByte } from '../../../world/generators/life/sorting.ts';
 import { invert, multiply, type Mat4, type V3 } from '../mat.ts';
 import { linkProgram, setUniforms, texture2D, type GL, type Program } from './context.ts';
+import { batchOverlapsCascade, computeBatchBounds, computeProtoBounds, halfSize, type BatchBounds, type CascadeBox, type ProtoBounds } from './culling.ts';
+import { ImpostorAtlas } from './impostors.ts';
 import type { LeafAtlas } from './leafatlas.ts';
 import { GroundMaterialSet } from './materials.ts';
+import type { CityFrame, InstancedBatch, InstancedMeta, LocalRenderer, MeshHandle } from './renderer.ts';
 import { FrameTimer } from './timer.ts';
-import { AO_FS, BLUR_FS, BRIGHT_FS, DEPTH_FS, FULLSCREEN_VS, ID_FS, LUM_FS, MESH_FS, MESH_VS, POST_FS, SHAFTS_ADD_FS, SHAFTS_FS, TAA_FS, SEA, SEA_FS, SEA_VS, SKY_FS, SKY_LUT_FS, TERRAIN_FS, TERRAIN_VS, WATER_FS, WATER_VS, WATERBLUR_FS, WATERMAP_FS, WATERMAP_VS } from './cityShaders.ts';
+import { AO_FS, BLUR_FS, BRIGHT_FS, CLOUDS_FS, DEPTH_FS, FULLSCREEN_VS, ID_FS, IMP_BAKE_FS, IMP_BAKE_VS, IMPOSTOR_DEPTH_FS, IMPOSTOR_FS, IMPOSTOR_ID_FS, IMPOSTOR_VS, LUM_FS, MESH_FS, MESH_VS, POST_FS, SHAFTS_ADD_FS, SHAFTS_FS, TAA_FS, SEA, SEA_FS, SEA_VS, SKY_FS, SKY_LUT_FS, TERRAIN_FS, TERRAIN_VS, WATER_FS, WATER_VS, WATERBLUR_FS, WATERMAP_FS, WATERMAP_VS } from './cityShaders.ts';
+
+export type { CityFrame, InstancedBatch, InstancedMeta, LocalRenderer, MeshHandle };
 
 /** How many heights the land's shares are given at, beyond the plan's map (setLand). */
 export const SHARE_STEPS = 32;
@@ -95,12 +101,10 @@ function jittered(p: Mat4, dx: number, dy: number): Mat4 {
 }
 
 /** A mesh of the city on the GPU. */
-export interface CellGPU {
+export interface CellGPU extends MeshHandle {
   vao: WebGLVertexArrayObject;
   vbo: WebGLBuffer;
   ibo: WebGLBuffer;
-  count: number;
-  bytes: number;
 }
 
 /** One kind of mesh drawn many times, with a buffer of everyone drawn with it. */
@@ -125,35 +129,16 @@ export interface InstancedGPU {
   ways: WebGLBuffer | null;
   waysCapacity: number;
   waysOn: boolean;
-}
-
-export interface CityFrame {
-  /** the eye, in local metres above sea level, with the Earth's curve already taken off */
-  eye: V3;
-  /** the ground under the eye and the point the camera looks at, for shadows */
-  focus: V3;
-  /** camera-relative: view rotation, then projection */
-  view: Mat4;
-  proj: Mat4;
-  farProj: Mat4;
-  fov: number;
-  aspect: number;
-  near: number;
-  far: number;
-  /** direction to the sun */
-  sun: V3;
-  time: number;
-  evidence: boolean;
-  /** how much of the frame shows: below 1, the globe shows through */
-  alpha: number;
-  /** the sky is drawn opaque: nothing of space shows */
-  solid: boolean;
-  /** height of the eye above the ground, in metres */
-  clearance: number;
-  /** seconds of the visit, by which what moves moves: apart from the world's time, and fixed by a link where it says */
-  clock?: number;
-  width: number;
-  height: number;
+  /** local bounding geometry and material flags for shadow culling and impostors */
+  bounds: ProtoBounds;
+  /** conservative world AABB of the current instance batch */
+  batchBounds: BatchBounds | null;
+  /** canopy tree family key when eligible for octahedral impostors, else null */
+  treeKey: number | null;
+  /** level of detail (0 far, 1 mid, 2 close, 3 clump) */
+  detail: number;
+  /** lazily built billboard VAO sharing `instances` when drawn via octahedral impostors */
+  impVao: WebGLVertexArrayObject | null;
 }
 
 const LOOKAT_UP: V3 = [0, 0, 1];
@@ -291,6 +276,7 @@ void main() {
 }`),
     waterP: linkProgram(gl, 'city water', WATER_VS, WATER_FS),
     seaP: linkProgram(gl, 'city sea', SEA_VS, SEA_FS),
+    cloudsP: linkProgram(gl, 'city clouds', FULLSCREEN_VS, CLOUDS_FS),
     skyP: linkProgram(gl, 'city sky', FULLSCREEN_VS, SKY_FS),
     lutP: linkProgram(gl, 'city sky table', FULLSCREEN_VS, SKY_LUT_FS),
     aoP: linkProgram(gl, 'city ao', FULLSCREEN_VS, AO_FS),
@@ -303,10 +289,14 @@ void main() {
     shaftsAddP: linkProgram(gl, 'city light in the air, added', FULLSCREEN_VS, SHAFTS_ADD_FS),
     waterMapP: linkProgram(gl, 'city water map', WATERMAP_VS, WATERMAP_FS),
     waterBlurP: linkProgram(gl, 'city water blur', FULLSCREEN_VS, WATERBLUR_FS),
+    impBakeP: linkProgram(gl, 'city impostor bake', IMP_BAKE_VS, IMP_BAKE_FS),
+    impostorP: linkProgram(gl, 'city impostor', IMPOSTOR_VS, IMPOSTOR_FS),
+    impostorDepthP: linkProgram(gl, 'city impostor depth', IMPOSTOR_VS, IMPOSTOR_DEPTH_FS),
+    impostorIdP: linkProgram(gl, 'city impostor id', IMPOSTOR_VS, IMPOSTOR_ID_FS),
   };
 }
 
-export class CityRenderer {
+export class CityRenderer implements LocalRenderer<CellGPU> {
   private meshP: Program;
   private depthP: Program;
   private idP: Program;
@@ -314,6 +304,7 @@ export class CityRenderer {
   private terrainDepthP: Program;
   private waterP: Program;
   private seaP: Program;
+  private cloudsP: Program;
   private skyP: Program;
   private lutP: Program;
   private aoP: Program;
@@ -326,6 +317,11 @@ export class CityRenderer {
   private shaftsAddP: Program;
   private waterMapP: Program;
   private waterBlurP: Program;
+  private impBakeP: Program;
+  private impostorP: Program;
+  private impostorDepthP: Program;
+  private impostorIdP: Program;
+  private impostors: ImpostorAtlas;
 
   private noise: WebGLTexture;
   private lut: WebGLTexture;
@@ -430,15 +426,25 @@ export class CityRenderer {
   /** the frame's own size, which the scene is drawn at, or twice it for a still */
   private outW = 0;
   private outH = 0;
-  private samples = 4;
-  private msFb!: WebGLFramebuffer;
-  private msColor!: WebGLRenderbuffer;
-  private msDepth!: WebGLRenderbuffer;
-  private resolveFb!: WebGLFramebuffer;
+  /** Single-sample floating-point scene target (RGBA16F + DEPTH24_STENCIL8); TAA + hashed alpha replaces 4x MSAA. */
+  private sceneFb!: WebGLFramebuffer;
   private colorTex!: WebGLTexture;
-  /** the resolved colour alone, to add to while its depth is read */
+  /** the scene colour alone, to add shafts to while its depth is read */
   private colorFb: WebGLFramebuffer | null = null;
   private depthTex!: WebGLTexture;
+  /** Lazily allocated 1x copy target used only when water reads the opaque scene + depth for SSR/refraction. */
+  private waterCopyFb: WebGLFramebuffer | null = null;
+  private waterSceneTex: WebGLTexture | null = null;
+  private waterDepthTex: WebGLTexture | null = null;
+  /** Half-resolution ping-pong volumetric cloud targets (RGBA16F: premultiplied radiance + transmittance, -1 if occluded). */
+  private cloudTex: WebGLTexture[] = [];
+  private cloudFb: WebGLFramebuffer[] = [];
+  private cloudAt = 0;
+  private cloudW = 1;
+  private cloudH = 1;
+  private cloudValid = false;
+  private lastFarVp: Mat4 | null = null;
+  private lastCloudEye: V3 = [0, 0, 0];
   private aoFb: WebGLFramebuffer[] = [];
   private aoTex: WebGLTexture[] = [];
   private bloomFb: WebGLFramebuffer[] = [];
@@ -551,6 +557,7 @@ export class CityRenderer {
     this.terrainDepthP = programs.terrainDepthP.finish();
     this.waterP = programs.waterP.finish();
     this.seaP = programs.seaP.finish();
+    this.cloudsP = programs.cloudsP.finish();
     this.skyP = programs.skyP.finish();
     this.lutP = programs.lutP.finish();
     this.aoP = programs.aoP.finish();
@@ -563,6 +570,11 @@ export class CityRenderer {
     this.shaftsAddP = programs.shaftsAddP.finish();
     this.waterMapP = programs.waterMapP.finish();
     this.waterBlurP = programs.waterBlurP.finish();
+    this.impBakeP = programs.impBakeP.finish();
+    this.impostorP = programs.impostorP.finish();
+    this.impostorDepthP = programs.impostorDepthP.finish();
+    this.impostorIdP = programs.impostorIdP.finish();
+    this.impostors = new ImpostorAtlas(gl, this.impBakeP);
 
     // Noise, tiling, in four independent channels: everything's roughness and grain comes from it.
     // Its values are the generator's (world/generators/life/sorting.ts), which reads the same noise where it sows what
@@ -721,7 +733,8 @@ export class CityRenderer {
     ints(this.terrainDepthP, ground);
     ints(this.waterP, { ...lit, uScene: UNIT.scene, uSceneDepth: UNIT.sceneDepth });
     ints(this.seaP, { ...lit, ...ground });
-    ints(this.skyP, { uNoise: UNIT.noise, uSkyLut: UNIT.sky });
+    ints(this.cloudsP, { uNoise: UNIT.noise, uScene: 12, uCloudHistory: 13 });
+    ints(this.skyP, { uNoise: UNIT.noise, uSkyLut: UNIT.sky, uClouds: 13 });
     ints(this.aoP, { uDepth: 12 });
     ints(this.blurP, { uTex: 13, uDepth: 12 });
     ints(this.brightP, { uTex: 13 });
@@ -730,6 +743,10 @@ export class CityRenderer {
     ints(this.lumP, { uTex: 13 });
     ints(this.shaftsP, lit);
     ints(this.shaftsAddP, { uTex: 13, uSceneDepth: UNIT.sceneDepth });
+    ints(this.impBakeP, { uNoise: UNIT.noise, uLeaves: UNIT.leaves });
+    ints(this.impostorP, { ...lit, uMask: UNIT.mask, uImpAlbedo: 15, uImpNormal: 16 });
+    ints(this.impostorDepthP, { uEntities: UNIT.entities, uImpAlbedo: 15 });
+    ints(this.impostorIdP, { uEntities: UNIT.entities, uImpAlbedo: 15 });
   }
 
   /** The ground's grids: heights to sample in the vertex shader, and normals to filter. */
@@ -771,6 +788,8 @@ export class CityRenderer {
     this.groundTex = [];
     this.normalTex = [];
     this.grids = [];
+    this.cloudValid = false;
+    this.lastFarVp = null;
     this.meshSerial++;
     // A new ground is the climate's until its scene says what it is made of, and its rock the renderer's own.
     this.setSubstrate(null);
@@ -806,6 +825,7 @@ export class CityRenderer {
     this.snow = snow && Number.isFinite(snow.line) ? [snow.line, snow.band, snow.slope] : [1e6, 1, 1];
     this.sharesAt = byHeight && byHeight.shares.length === SHARE_STEPS * 3 ? byHeight.shares : new Float32Array(SHARE_STEPS * 3);
     this.shareSpan = byHeight && byHeight.shares.length === SHARE_STEPS * 3 ? [byHeight.from, byHeight.step, byHeight.band] : [0, 0, 0];
+    this.impostors.invalidateTones();
   }
 
   /**
@@ -826,8 +846,9 @@ export class CityRenderer {
   }
 
   /** A mesh that will be drawn by instancing. */
-  addInstanced(id: number, vertices: ArrayBuffer, indices: Uint32Array, casts: boolean, idle?: number[]): void {
+  addInstanced(id: number, vertices: ArrayBuffer, indices: Uint32Array, casts: boolean, idle?: number[], meta?: InstancedMeta): void {
     const gl = this.gl;
+    const bounds = computeProtoBounds(vertices);
     const vao = gl.createVertexArray()!;
     gl.bindVertexArray(vao);
     const vbo = gl.createBuffer()!;
@@ -861,7 +882,30 @@ export class CityRenderer {
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
     gl.bindVertexArray(null);
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
-    this.instanced.set(id, { vao, vbo, ibo, instances, capacity: 28 * 16, indexCount: indices.length, count: 0, casts, idle: idle && idle.length >= 16 ? Float32Array.from(idle.slice(0, 16)) : null, ways: null, waysCapacity: 0, waysOn: false });
+    const treeKey = meta?.treeKey !== undefined ? meta.treeKey : null;
+    const detail = meta?.detail ?? 2;
+    this.instanced.set(id, {
+      vao,
+      vbo,
+      ibo,
+      instances,
+      capacity: 28 * 16,
+      indexCount: indices.length,
+      count: 0,
+      casts,
+      idle: idle && idle.length >= 16 ? Float32Array.from(idle.slice(0, 16)) : null,
+      ways: null,
+      waysCapacity: 0,
+      waysOn: false,
+      bounds,
+      batchBounds: null,
+      treeKey,
+      detail,
+      impVao: null,
+    });
+    if (!this.fast && treeKey !== null && detail >= 1) {
+      this.impostors.registerSource(treeKey, vao, indices.length, bounds, detail);
+    }
   }
 
   /**
@@ -869,9 +913,12 @@ export class CityRenderer {
    * its bodies go, 48 bytes each in step with `data` (world/generators/life/routines.ts): the shader moves each along
    * its own by the frame's clock.
    */
-  setInstances(batches: { proto: number; count: number; data: ArrayBuffer; ways?: ArrayBuffer }[]): void {
+  setInstances(batches: InstancedBatch[]): void {
     const gl = this.gl;
-    for (const g of this.instanced.values()) g.count = 0;
+    for (const g of this.instanced.values()) {
+      g.count = 0;
+      g.batchBounds = null;
+    }
     for (const b of batches) {
       const g = this.instanced.get(b.proto);
       if (!g) continue;
@@ -882,6 +929,7 @@ export class CityRenderer {
       }
       gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Uint8Array(b.data));
       g.count = b.count;
+      g.batchBounds = b.count > 0 ? computeBatchBounds(b.data, b.count, g.bounds, b.ways) : null;
       if (b.ways) {
         if (!g.ways) g.ways = gl.createBuffer()!;
         gl.bindBuffer(gl.ARRAY_BUFFER, g.ways);
@@ -921,34 +969,54 @@ export class CityRenderer {
       gl.deleteBuffer(g.ibo);
       gl.deleteBuffer(g.instances);
       if (g.ways) gl.deleteBuffer(g.ways);
+      if (g.impVao) gl.deleteVertexArray(g.impVao);
     }
     this.instanced.clear();
+    this.impostors.clear();
     this.meshSerial++;
   }
 
-  /** How many are drawn by instancing, and the triangles that makes. */
-  instancedStats(): { meshes: number; instances: number; triangles: number } {
+  /** Whether an instanced batch is currently drawn via its GPU-baked octahedral tree impostor. */
+  private impostorFor(g: InstancedGPU) {
+    if (this.fast || !this.leavesReady || g.treeKey === null || g.detail > 1) return null;
+    return this.impostors.get(g.treeKey);
+  }
+
+  /** How many are drawn by instancing, and the triangles that makes (2 tris per octahedral impostor). */
+  instancedStats(): { meshes: number; instances: number; triangles: number; impostorInstances: number } {
     let instances = 0;
     let triangles = 0;
     let meshes = 0;
+    let impostorInstances = 0;
     for (const g of this.instanced.values()) {
       if (!g.count) continue;
       meshes++;
       instances += g.count;
-      triangles += (g.count * g.indexCount) / 3;
+      if (this.impostorFor(g)) {
+        impostorInstances += g.count;
+        triangles += g.count * 2;
+      } else {
+        triangles += (g.count * g.indexCount) / 3;
+      }
     }
-    return { meshes, instances, triangles };
+    return { meshes, instances, triangles, impostorInstances };
   }
 
-  private drawInstanced(p: Program, shadow: boolean): void {
+  private drawInstanced(p: Program, shadow: boolean, cascade?: CascadeBox): void {
     if (!this.instanced.size) return;
     const gl = this.gl;
     const loc = p.uniforms.get('uInstanced');
     const idle = p.uniforms.get('uIdle');
     const idling = p.uniforms.get('uIdling');
+    const shadowPad = p.uniforms.get('uShadowPad');
+    const shadowInvR = p.uniforms.get('uShadowInvR');
     if (loc) gl.uniform1f(loc, 1);
+    if (shadowInvR) gl.uniform1f(shadowInvR, shadow && cascade ? 1 / cascade.radius : 0);
     for (const g of this.instanced.values()) {
       if (!g.count || (shadow && !g.casts)) continue;
+      if (this.impostorFor(g)) continue;
+      if (shadow && cascade && g.batchBounds && !batchOverlapsCascade(g.batchBounds, cascade)) continue;
+      if (shadowPad) gl.uniform1f(shadowPad, shadow && cascade ? (g.bounds.originRadius * 1.15) / cascade.radius : -1);
       if (idling) gl.uniform1f(idling, g.idle ? 1 : 0);
       if (idle && g.idle) gl.uniform4fv(idle, g.idle);
       gl.bindVertexArray(g.vao);
@@ -956,7 +1024,56 @@ export class CityRenderer {
     }
     if (loc) gl.uniform1f(loc, 0);
     if (idling) gl.uniform1f(idling, 0);
+    if (shadowPad) gl.uniform1f(shadowPad, -1);
+    if (shadowInvR) gl.uniform1f(shadowInvR, 0);
     gl.bindVertexArray(null);
+  }
+
+  /** Draw mid/far canopy trees as 2-triangle instanced hemi-octahedral billboards. */
+  private drawImpostors(p: Program, f: CityFrame, vp: Mat4, camRight: V3, camUp: V3, orthoDir: V3, cascade?: CascadeBox): void {
+    if (this.fast || !this.leavesReady || !this.impostors.albedoTex || !this.impostors.normalTex || !this.instanced.size) return;
+    const gl = this.gl;
+    let bound = false;
+    const layerLoc = p.uniforms.get('uImpLayer');
+    const midLoc = p.uniforms.get('uImpMidZ');
+    const radLoc = p.uniforms.get('uImpRadius');
+    const padLoc = p.uniforms.get('uShadowPad');
+    for (const g of this.instanced.values()) {
+      if (!g.count || (cascade && !g.casts)) continue;
+      const slot = this.impostorFor(g);
+      if (!slot) continue;
+      if (cascade && g.batchBounds && !batchOverlapsCascade(g.batchBounds, cascade)) continue;
+      if (!bound) {
+        bound = true;
+        if (p === this.impostorP) {
+          this.useLit(p, f, vp);
+        } else {
+          gl.useProgram(p.program);
+          setUniforms(gl, p, { uViewProj: vp, uEye: cascade ? [0, 0, 0] : f.eye, uTime: f.time, uClock: f.clock ?? 0, uWind: WIND });
+        }
+        setUniforms(gl, p, { uCamRight: camRight, uCamUp: camUp, uOrthoDir: orthoDir });
+        gl.activeTexture(gl.TEXTURE15);
+        gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.impostors.albedoTex);
+        gl.activeTexture(gl.TEXTURE16);
+        gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.impostors.normalTex);
+      }
+      if (!g.impVao) g.impVao = this.impostors.createBatchVao(g.instances);
+      if (layerLoc) gl.uniform1f(layerLoc, slot.layer);
+      if (midLoc) gl.uniform1f(midLoc, slot.midZ);
+      if (radLoc) gl.uniform1f(radLoc, slot.radius);
+      if (padLoc) gl.uniform1f(padLoc, cascade ? (slot.radius * 1.15) / cascade.radius : -1);
+      gl.bindVertexArray(g.impVao);
+      gl.drawElementsInstanced(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0, g.count);
+    }
+    if (bound) {
+      if (padLoc) gl.uniform1f(padLoc, -1);
+      gl.bindVertexArray(null);
+      gl.activeTexture(gl.TEXTURE15);
+      gl.bindTexture(gl.TEXTURE_2D_ARRAY, null);
+      gl.activeTexture(gl.TEXTURE16);
+      gl.bindTexture(gl.TEXTURE_2D_ARRAY, null);
+      gl.activeTexture(gl.TEXTURE0);
+    }
   }
 
   /** What the plan says the ground is: R built-up, G garden. */
@@ -1166,48 +1283,45 @@ export class CityRenderer {
     const gl = this.gl;
     this.w = w;
     this.h = h;
-    const maxS = (gl.getInternalformatParameter(gl.RENDERBUFFER, gl.RGBA16F, gl.SAMPLES) as Int32Array | null)?.[0] ?? 0;
-    this.samples = this.fast ? 0 : Math.min(4, maxS);
-    if (!this.msFb) {
-      this.msFb = gl.createFramebuffer()!;
-      this.msColor = gl.createRenderbuffer()!;
-      this.msDepth = gl.createRenderbuffer()!;
-      this.resolveFb = gl.createFramebuffer()!;
-    }
-    gl.bindRenderbuffer(gl.RENDERBUFFER, this.msColor);
-    gl.renderbufferStorageMultisample(gl.RENDERBUFFER, this.samples, gl.RGBA16F, w, h);
-    gl.bindRenderbuffer(gl.RENDERBUFFER, this.msDepth);
-    gl.renderbufferStorageMultisample(gl.RENDERBUFFER, this.samples, gl.DEPTH_COMPONENT24, w, h);
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.msFb);
-    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.RENDERBUFFER, this.msColor);
-    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, this.msDepth);
-    if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) throw new Error('the city needs a multisampled floating-point target');
+    if (!this.sceneFb) this.sceneFb = gl.createFramebuffer()!;
     gl.activeTexture(gl.TEXTURE12);
     if (this.colorTex) gl.deleteTexture(this.colorTex);
     if (this.depthTex) gl.deleteTexture(this.depthTex);
     this.colorTex = texture2D(gl, { width: w, height: h, internal: gl.RGBA16F, format: gl.RGBA, type: gl.HALF_FLOAT, data: null, filter: gl.LINEAR });
     this.depthTex = gl.createTexture()!;
     gl.bindTexture(gl.TEXTURE_2D, this.depthTex);
-    gl.texStorage2D(gl.TEXTURE_2D, 1, gl.DEPTH_COMPONENT24, w, h);
+    gl.texStorage2D(gl.TEXTURE_2D, 1, gl.DEPTH24_STENCIL8, w, h);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.resolveFb);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.sceneFb);
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.colorTex, 0);
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, this.depthTex, 0);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT, gl.TEXTURE_2D, this.depthTex, 0);
+    if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) throw new Error('the city needs a floating-point depth-stencil target');
     if (!this.colorFb) this.colorFb = gl.createFramebuffer()!;
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.colorFb);
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.colorTex, 0);
-    // Half-size occlusion, and the bloom's chain.
-    for (const t of [...this.aoTex, ...this.bloomTex]) gl.deleteTexture(t);
-    for (const f of [...this.aoFb, ...this.bloomFb]) gl.deleteFramebuffer(f);
+    // Drop lazy water copy target on resize; reallocated only when a scene actually draws screen-space water.
+    if (this.waterSceneTex) gl.deleteTexture(this.waterSceneTex);
+    if (this.waterDepthTex) gl.deleteTexture(this.waterDepthTex);
+    if (this.waterCopyFb) gl.deleteFramebuffer(this.waterCopyFb);
+    this.waterSceneTex = null;
+    this.waterDepthTex = null;
+    this.waterCopyFb = null;
+    // Half-size occlusion, half-size temporal clouds, and the bloom's chain.
+    for (const t of [...this.aoTex, ...this.bloomTex, ...this.cloudTex]) gl.deleteTexture(t);
+    for (const f of [...this.aoFb, ...this.bloomFb, ...this.cloudFb]) gl.deleteFramebuffer(f);
     this.aoTex = [];
     this.aoFb = [];
     this.bloomTex = [];
     this.bloomFb = [];
-    const target = (tw: number, th: number, internal: number, format: number, type: number, list: WebGLTexture[], fbs: WebGLFramebuffer[]) => {
-      const t = texture2D(gl, { width: tw, height: th, internal, format, type, data: null, filter: gl.LINEAR });
+    this.cloudTex = [];
+    this.cloudFb = [];
+    this.cloudValid = false;
+    this.lastFarVp = null;
+    const target = (tw: number, th: number, internal: number, format: number, type: number, list: WebGLTexture[], fbs: WebGLFramebuffer[], filter: number = gl.LINEAR) => {
+      const t = texture2D(gl, { width: tw, height: th, internal, format, type, data: null, filter });
       const f = gl.createFramebuffer()!;
       gl.bindFramebuffer(gl.FRAMEBUFFER, f);
       gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, t, 0);
@@ -1219,7 +1333,7 @@ export class CityRenderer {
     target(aw, ah, gl.R8, gl.RED, gl.UNSIGNED_BYTE, this.aoTex, this.aoFb);
     target(aw, ah, gl.R8, gl.RED, gl.UNSIGNED_BYTE, this.aoTex, this.aoFb);
     for (let k = 0; k < 3; k++) target(Math.max(1, w >> (k + 1)), Math.max(1, h >> (k + 1)), gl.RGBA16F, gl.RGBA, gl.HALF_FLOAT, this.bloomTex, this.bloomFb);
-    // What is kept from frame to frame, and the meter; the fast way has neither.
+    // What is kept from frame to frame, half-res volumetric clouds, and the meter; the fast way has none.
     for (const t of this.historyTex) gl.deleteTexture(t);
     for (const f of this.historyFb) gl.deleteFramebuffer(f);
     this.historyTex = [];
@@ -1231,6 +1345,13 @@ export class CityRenderer {
     this.shaftsTex = null;
     this.shaftsFb = null;
     if (!this.fast) {
+      [this.cloudW, this.cloudH] = halfSize(w, h);
+      for (let k = 0; k < 2; k++) {
+        target(this.cloudW, this.cloudH, gl.RGBA16F, gl.RGBA, gl.HALF_FLOAT, this.cloudTex, this.cloudFb, gl.NEAREST);
+        gl.clearColor(0, 0, 0, -1);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+      }
+      gl.clearColor(0, 0, 0, 0);
       const air: WebGLTexture[] = [];
       const airFb: WebGLFramebuffer[] = [];
       target(Math.max(1, w >> 2), Math.max(1, h >> 2), gl.RGBA16F, gl.RGBA, gl.HALF_FLOAT, air, airFb);
@@ -1263,6 +1384,28 @@ export class CityRenderer {
     }
     gl.activeTexture(gl.TEXTURE0);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  }
+
+  /** Allocate the 1x opaque scene+depth copy target lazily, only for frames that draw screen-space water. */
+  private ensureWaterCopy(): void {
+    if (this.waterCopyFb) return;
+    const gl = this.gl;
+    gl.activeTexture(gl.TEXTURE12);
+    this.waterSceneTex = texture2D(gl, { width: this.w, height: this.h, internal: gl.RGBA16F, format: gl.RGBA, type: gl.HALF_FLOAT, data: null, filter: gl.LINEAR });
+    this.waterDepthTex = gl.createTexture()!;
+    gl.bindTexture(gl.TEXTURE_2D, this.waterDepthTex);
+    gl.texStorage2D(gl.TEXTURE_2D, 1, gl.DEPTH24_STENCIL8, this.w, this.h);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    this.waterCopyFb = gl.createFramebuffer()!;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.waterCopyFb);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.waterSceneTex, 0);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT, gl.TEXTURE_2D, this.waterDepthTex, 0);
+    gl.bindTexture(gl.TEXTURE_2D, null);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.activeTexture(gl.TEXTURE0);
   }
 
   /** The sky table and the light of this sun, seen from this height. */
@@ -1338,6 +1481,9 @@ export class CityRenderer {
       uClockSky: f.clock ?? 0,
       uCloudCover: this.cloudCover,
       uCloudVolume: this.fast ? 0 : 1,
+      uFrameNoise: halton(Math.max(0, this.sample - 1), 2),
+      uShadowPad: -1,
+      uShadowInvR: 0,
       uWind: WIND,
       uAOSize: [this.w, this.h],
       uEvidence: f.evidence ? 1 : 0,
@@ -1492,7 +1638,15 @@ export class CityRenderer {
     this.shadowRadii = [r0, r1, r2];
     const right = nrm(crs(LOOKAT_UP, sun));
     const up = crs(sun, right);
+    let animatedCasters = false;
+    for (const g of this.instanced.values()) {
+      if (g.count > 0 && g.casts && (g.bounds.isPlant || !!g.idle || !!g.batchBounds?.hasMovers)) {
+        animatedCasters = true;
+        break;
+      }
+    }
     gl.colorMask(false, false, false, false);
+    gl.disable(gl.STENCIL_TEST);
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LESS);
     gl.depthMask(true);
@@ -1510,9 +1664,9 @@ export class CityRenderer {
       const sR = Math.round(cR / texel) * texel;
       const sU = Math.round(cU / texel) * texel;
       // What moves in the wind, idles or goes from place to place moves its shadow: the nearest cascade is drawn again
-      // ten times a second of the visit's clock, and the middle four times, in which a walking animal goes less than one
-      // of its texels.
-      const moved = k === 0 ? Math.round((f.clock ?? 0) * 10) : k === 1 ? Math.round((f.clock ?? 0) * 4) : 0;
+      // ten times a second of the visit's clock, and the middle four times. Static scenes (cities, barren rock) reuse
+      // cached cascades without redrawing on clock ticks.
+      const moved = !animatedCasters ? 0 : k === 0 ? Math.round((f.clock ?? 0) * 10) : k === 1 ? Math.round((f.clock ?? 0) * 4) : 0;
       const key = `${sR.toFixed(1)},${sU.toFixed(1)},${r.toFixed(1)},${sun.join()},${k === 2 ? Math.round(f.time / 4) : f.time},${this.entitySerial},${this.meshSerial},${moved}`;
       const depthRange = Math.max(r * 4, 2500);
       const zc = dt(f.focus, sun);
@@ -1526,16 +1680,18 @@ export class CityRenderer {
       gl.clear(gl.DEPTH_BUFFER_BIT);
       // The fast way casts no shadows: a cleared map lights everything.
       if (this.fast) continue;
+      const cascade: CascadeBox = { right, up, sun, sR, sU, radius: r, texel, cascadeIndex: k };
       // Everything's position already has the eye taken off for the camera; here it is absolute.
       gl.useProgram(this.depthP.program);
-      setUniforms(gl, this.depthP, { uViewProj: m, uEye: [0, 0, 0], uTime: f.time, uCards: 1, uClock: f.clock ?? 0, uWind: WIND });
+      setUniforms(gl, this.depthP, { uViewProj: m, uEye: [0, 0, 0], uTime: f.time, uCards: 1, uClock: f.clock ?? 0, uWind: WIND, uShadowPad: -1, uShadowInvR: 0 });
       // Both sides of a face: many of a building's are shells, seen from either side.
       gl.disable(gl.CULL_FACE);
       for (const c of this.shadowCells(f.focus, r * 1.45)) {
         gl.bindVertexArray(c.vao);
         gl.drawElements(gl.TRIANGLES, c.count, gl.UNSIGNED_INT, 0);
       }
-      this.drawInstanced(this.depthP, true);
+      this.drawInstanced(this.depthP, true, cascade);
+      this.drawImpostors(this.impostorDepthP, f, m, right, up, sun, cascade);
       gl.enable(gl.CULL_FACE);
       // The hills cast shadows too.
       gl.useProgram(this.terrainDepthP.program);
@@ -1565,9 +1721,9 @@ export class CityRenderer {
   /** when the view last changed, in ms of the page's clock */
   private changedAt = performance.now();
 
-  /** Whether the view holds still and its frames are still being averaged: the viewer draws again until they are done. */
+  /** Whether the view holds still and its frames are still being averaged, or tree impostors are still baking. */
   get refining(): boolean {
-    return !this.fast && (this.steady < STEADY_FRAMES || (this.still && (this.scale < STILL_SCALE || this.steady < STILL_FRAMES)));
+    return !this.fast && ((this.leavesReady && this.impostors.hasPending) || this.steady < STEADY_FRAMES || (this.still && (this.scale < STILL_SCALE || this.steady < STILL_FRAMES)));
   }
 
   /** How long, in ms, the view has held still. */
@@ -1588,6 +1744,16 @@ export class CityRenderer {
     this.outH = outH;
     this.lastFrame = frame;
     this.lastDraw = cells;
+
+    // Bake up to 4 queued canopy tree impostors per frame once the leaf atlas has arrived.
+    if (!this.fast && this.leavesReady && this.impostors.hasPending) {
+      gl.activeTexture(gl.TEXTURE0 + UNIT.noise);
+      gl.bindTexture(gl.TEXTURE_3D, this.noise);
+      gl.activeTexture(gl.TEXTURE0 + UNIT.leaves);
+      gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.leaves);
+      if (this.impostors.bakePending(4, this.wild, this.tones) > 0) this.meshSerial++;
+    }
+
     // Whether the view is the last one again: then its frames are averaged, each jittered by its own fraction of a pixel,
     // and once enough are, the picture is done and only shown again.
     const key = [frame.eye, frame.view, frame.proj, frame.sun, frame.time, frame.evidence, frame.alpha, frame.solid, frame.clock ?? 0, this.meshSerial, this.entitySerial, this.flagSerial, this.waterSerial, outW, outH].map(String).join('|');
@@ -1597,7 +1763,7 @@ export class CityRenderer {
     this.viewKey = key;
     this.frames++;
     const enough = this.still ? STILL_FRAMES : STEADY_FRAMES;
-    if (!this.fast && still && this.steady > enough) {
+    if (!this.fast && still && this.steady > enough && !(this.leavesReady && this.impostors.hasPending)) {
       this.finish(frame, this.historyTex[this.historyAt]);
       return;
     }
@@ -1625,6 +1791,8 @@ export class CityRenderer {
 
     const vp = multiply(f.proj, f.view);
     const farVp = multiply(f.farProj, f.view);
+    const camRight: V3 = [f.view[0], f.view[4], f.view[8]];
+    const camUp: V3 = [f.view[1], f.view[5], f.view[9]];
     const { finest, split, last } = this.ringsFor(f);
     const eyeSea = aboveSea(f.eye);
     const under = this.sea && eyeSea < 0;
@@ -1668,32 +1836,29 @@ export class CityRenderer {
     time.pass('shadows');
     this.updateShadows(shadowSun === f.sun ? f : { ...f, sun: shadowSun });
 
-    time.pass('sky');
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.msFb);
+    // Opaque geometry first into 1x RGBA16F + DEPTH24_STENCIL8, marking covered pixels in stencil = 1
+    // so half-res volumetric clouds and full-res sky skip every pixel hidden behind land, buildings, or trees.
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.sceneFb);
     gl.viewport(0, 0, this.w, this.h);
+    gl.colorMask(true, true, true, true);
+    gl.depthMask(true);
+    gl.stencilMask(0xff);
     gl.clearColor(0, 0, 0, 0);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.clearDepth(1);
+    gl.clearStencil(0);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
     gl.disable(gl.BLEND);
-    gl.disable(gl.CULL_FACE);
-    gl.disable(gl.DEPTH_TEST);
-
-    // The sky; under the sea, the water.
-    gl.useProgram(this.skyP.program);
-    setUniforms(gl, this.skyP, { uInvViewProj: invert(farVp), uSun: f.sun, uSunColor: this.sunColor, uHeight: f.eye[2], uAlpha: f.solid || under ? 1 : 0, uSea: this.sea ? 1 : 0, uEyeSea: eyeSea, uSkyTop: this.skyTop, uCloudCover: this.cloudCover, uClockSky: f.clock ?? 0, uCloudVolume: this.fast ? 0 : 1, uFrameNoise: halton(Math.max(0, this.sample - 1), 2) });
-    gl.activeTexture(gl.TEXTURE0 + UNIT.ao);
-    gl.bindTexture(gl.TEXTURE_2D, null);
-    gl.bindVertexArray(this.emptyVao);
-    gl.drawArrays(gl.TRIANGLES, 0, 3);
-    gl.bindVertexArray(null);
-
-    // The distant land, in its own depth range.
-    time.pass('far land');
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LESS);
-    gl.depthMask(true);
+    gl.enable(gl.STENCIL_TEST);
+    gl.stencilFunc(gl.ALWAYS, 1, 0xff);
+    gl.stencilOp(gl.KEEP, gl.KEEP, gl.REPLACE);
     gl.enable(gl.CULL_FACE);
     gl.cullFace(gl.BACK);
     gl.frontFace(gl.CCW);
+
+    // The distant land, in its own depth range (stencil = 1 marks far land pixels across the depth clear).
+    time.pass('far land');
     if (split <= last) {
       gl.activeTexture(gl.TEXTURE0 + UNIT.ao);
       gl.bindTexture(gl.TEXTURE_2D, this.aoTex[1] ?? null);
@@ -1706,17 +1871,17 @@ export class CityRenderer {
     }
     gl.clear(gl.DEPTH_BUFFER_BIT);
 
-    // The near scene's depth, for its occlusion. The fast way has none, and its lit pass writes
-    // the depth itself.
+    // The near scene's depth, written directly to depthTex for GTAO (zero depth resolve blit).
     if (nearEffects) {
       time.pass('depth');
       gl.colorMask(false, false, false, false);
+      gl.stencilMask(0x00);
       gl.useProgram(this.terrainDepthP.program);
       setUniforms(gl, this.terrainDepthP, { uViewProj: vp, uEye: f.eye, uSeaSurface: this.seaSurface });
       this.setGrids(this.terrainDepthP);
       this.drawRings(this.terrainDepthP, f.eye, finest, Math.min(split, last), finest);
       gl.useProgram(this.depthP.program);
-      setUniforms(gl, this.depthP, { uViewProj: vp, uEye: f.eye, uTime: f.time, uCards: 0, uClock: f.clock ?? 0, uWind: WIND });
+      setUniforms(gl, this.depthP, { uViewProj: vp, uEye: f.eye, uTime: f.time, uCards: 0, uClock: f.clock ?? 0, uWind: WIND, uShadowPad: -1, uShadowInvR: 0 });
       // Both sides, as the lit pass draws them.
       gl.disable(gl.CULL_FACE);
       for (const c of cells) {
@@ -1726,20 +1891,22 @@ export class CityRenderer {
       this.drawInstanced(this.depthP, false);
       gl.bindVertexArray(null);
       gl.colorMask(true, true, true, true);
-      gl.bindFramebuffer(gl.READ_FRAMEBUFFER, this.msFb);
-      gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, this.resolveFb);
-      gl.blitFramebuffer(0, 0, this.w, this.h, 0, 0, this.w, this.h, gl.DEPTH_BUFFER_BIT, gl.NEAREST);
+      gl.stencilMask(0xff);
       time.pass('occlusion');
       this.occlusion(f);
     }
 
-    // The near scene, lit.
+    // The near scene, lit, marking every surviving opaque/foliage/impostor pixel with stencil = 1.
     time.pass('terrain');
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.msFb);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.sceneFb);
     gl.viewport(0, 0, this.w, this.h);
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(nearEffects ? gl.LEQUAL : gl.LESS);
     gl.depthMask(!nearEffects);
+    gl.enable(gl.STENCIL_TEST);
+    gl.stencilMask(0xff);
+    gl.stencilFunc(gl.ALWAYS, 1, 0xff);
+    gl.stencilOp(gl.KEEP, gl.KEEP, gl.REPLACE);
     gl.enable(gl.CULL_FACE);
     gl.activeTexture(gl.TEXTURE0 + UNIT.ao);
     gl.bindTexture(gl.TEXTURE_2D, this.aoTex[1]);
@@ -1747,36 +1914,133 @@ export class CityRenderer {
     setUniforms(gl, this.terrainP, { uUseAO: nearEffects ? 1 : 0, uMaskBox: [this.maskBox[0], this.maskBox[1], this.maskBox[2] - this.maskBox[0], this.maskBox[3] - this.maskBox[1]], uWater: this.waterLevel });
     this.setGrids(this.terrainP);
     this.drawRings(this.terrainP, f.eye, finest, Math.min(split, last), finest);
+
     time.pass('meshes');
     gl.disable(gl.CULL_FACE);
     this.useLit(this.meshP, f, vp);
-    // Leaves on cards are blended at their edges by coverage where there are samples to blend, and write their own
-    // depth: the depth drawn before left them out.
-    const coverage = this.samples > 1;
-    setUniforms(gl, this.meshP, { uCoverage: coverage ? 1 : 0, uUseAO: nearEffects ? 1 : 0 });
+    // At full quality, leaf cards use temporally stratified hashed alpha smoothed by TAA (no 4x MSAA).
+    setUniforms(gl, this.meshP, { uCoverage: this.fast ? 0 : 1, uUseAO: nearEffects ? 1 : 0 });
     gl.depthMask(true);
-    if (coverage) gl.enable(gl.SAMPLE_ALPHA_TO_COVERAGE);
     for (const c of cells) {
       gl.bindVertexArray(c.vao);
       gl.drawElements(gl.TRIANGLES, c.count, gl.UNSIGNED_INT, 0);
     }
     this.drawInstanced(this.meshP, false);
-    gl.disable(gl.SAMPLE_ALPHA_TO_COVERAGE);
     gl.depthFunc(gl.LESS);
+    this.drawImpostors(this.impostorP, f, vp, camRight, camUp, [0, 0, 0]);
+    gl.disable(gl.STENCIL_TEST);
+
+    // Half-resolution volumetric clouds, skipping every 2x2 block occluded by opaque terrain/meshes.
+    const invFarVp = invert(farVp);
+    const frameNoise = halton(Math.max(0, this.sample - 1), 2);
+    const drawVolClouds = !this.fast && !under && this.cloudCover > 0 && f.eye[2] < 1400 && this.cloudFb.length === 2;
+    if (drawVolClouds) {
+      time.pass('clouds');
+      const from = this.cloudAt;
+      const to = 1 - from;
+      let cloudReproj: Mat4 = new Float32Array(16);
+      let cloudBlend = 1;
+      if (!still && this.cloudValid && this.lastFarVp) {
+        const d: V3 = [frame.eye[0] - this.lastCloudEye[0], frame.eye[1] - this.lastCloudEye[1], frame.eye[2] - this.lastCloudEye[2]];
+        const move = new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, d[0], d[1], d[2], 1]);
+        cloudReproj = multiply(this.lastFarVp, move);
+        cloudBlend = 0.25;
+      }
+      gl.bindFramebuffer(gl.FRAMEBUFFER, this.cloudFb[to]);
+      gl.viewport(0, 0, this.cloudW, this.cloudH);
+      gl.disable(gl.DEPTH_TEST);
+      gl.disable(gl.CULL_FACE);
+      gl.disable(gl.BLEND);
+      gl.useProgram(this.cloudsP.program);
+      setUniforms(gl, this.cloudsP, {
+        uInvViewProj: invFarVp,
+        uCloudReproject: cloudReproj,
+        uSun: f.sun,
+        uSunColor: this.sunColor,
+        uSkyTop: this.skyTop,
+        uSceneSize: [this.w, this.h],
+        uCloudSize: [this.cloudW, this.cloudH],
+        uHeight: f.eye[2],
+        uCloudCover: this.cloudCover,
+        uClockSky: f.clock ?? 0,
+        uCloudVolume: 1,
+        uFrameNoise: frameNoise,
+        uCloudBlend: cloudBlend,
+      });
+      gl.activeTexture(gl.TEXTURE12);
+      gl.bindTexture(gl.TEXTURE_2D, this.colorTex);
+      gl.activeTexture(gl.TEXTURE13);
+      gl.bindTexture(gl.TEXTURE_2D, this.cloudTex[from]);
+      gl.bindVertexArray(this.emptyVao);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      gl.bindVertexArray(null);
+      gl.activeTexture(gl.TEXTURE12);
+      gl.bindTexture(gl.TEXTURE_2D, null);
+      gl.activeTexture(gl.TEXTURE13);
+      gl.bindTexture(gl.TEXTURE_2D, null);
+      this.cloudAt = to;
+      this.cloudValid = true;
+    } else {
+      this.cloudValid = false;
+    }
+
+    // Stencil-masked sky + silhouette-safe cloud upsample: runs only where stencil == 0 (unobstructed sky).
+    time.pass('sky');
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.sceneFb);
+    gl.viewport(0, 0, this.w, this.h);
+    gl.disable(gl.DEPTH_TEST);
+    gl.depthMask(false);
+    gl.disable(gl.CULL_FACE);
+    gl.disable(gl.BLEND);
+    gl.enable(gl.STENCIL_TEST);
+    gl.stencilMask(0x00);
+    gl.stencilFunc(gl.EQUAL, 0, 0xff);
+    gl.stencilOp(gl.KEEP, gl.KEEP, gl.KEEP);
+    gl.useProgram(this.skyP.program);
+    setUniforms(gl, this.skyP, {
+      uInvViewProj: invFarVp,
+      uSun: f.sun,
+      uSunColor: this.sunColor,
+      uHeight: f.eye[2],
+      uAlpha: f.solid || under ? 1 : 0,
+      uSea: this.sea ? 1 : 0,
+      uEyeSea: eyeSea,
+      uSkyTop: this.skyTop,
+      uCloudCover: this.cloudCover,
+      uClockSky: f.clock ?? 0,
+      uCloudVolume: this.fast ? 0 : 1,
+      uCloudSize: [this.cloudW, this.cloudH],
+      uFrameNoise: frameNoise,
+    });
+    gl.activeTexture(gl.TEXTURE13);
+    gl.bindTexture(gl.TEXTURE_2D, drawVolClouds ? this.cloudTex[this.cloudAt] : this.mask);
+    gl.bindVertexArray(this.emptyVao);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    gl.bindVertexArray(null);
+    gl.activeTexture(gl.TEXTURE13);
+    gl.bindTexture(gl.TEXTURE_2D, null);
+    gl.disable(gl.STENCIL_TEST);
+    gl.stencilMask(0xff);
+    gl.depthMask(true);
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthFunc(gl.LESS);
+    this.lastFarVp = multiply(frame.farProj, frame.view);
+    this.lastCloudEye = [frame.eye[0], frame.eye[1], frame.eye[2]];
+
     if (this.waterVao && this.waterCount) {
       time.pass('water');
-      // On the fuller way, what is drawn so far, resolved as the frame will be, for the water to be seen through and to
-      // reflect (docs/plans/RENDERING.md, step 3).
+      // On the fuller way, copy the 1x opaque+sky frame once so water can refract the bed and reflect banks & sky.
       const screen = nearEffects;
       if (screen) {
-        gl.bindFramebuffer(gl.READ_FRAMEBUFFER, this.msFb);
-        gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, this.resolveFb);
+        this.ensureWaterCopy();
+        gl.bindFramebuffer(gl.READ_FRAMEBUFFER, this.sceneFb);
+        gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, this.waterCopyFb);
         gl.blitFramebuffer(0, 0, this.w, this.h, 0, 0, this.w, this.h, gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT, gl.NEAREST);
-        gl.bindFramebuffer(gl.FRAMEBUFFER, this.msFb);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this.sceneFb);
         gl.activeTexture(gl.TEXTURE0 + UNIT.scene);
-        gl.bindTexture(gl.TEXTURE_2D, this.colorTex);
+        gl.bindTexture(gl.TEXTURE_2D, this.waterSceneTex);
         gl.activeTexture(gl.TEXTURE0 + UNIT.sceneDepth);
-        gl.bindTexture(gl.TEXTURE_2D, this.depthTex);
+        gl.bindTexture(gl.TEXTURE_2D, this.waterDepthTex);
       }
       this.useLit(this.waterP, f, vp);
       setUniforms(gl, this.waterP, { uWaterTone: this.waterTone ?? [0, 0, 0, 0, 0, 0], uToned: this.waterTone ? 1 : 0, uWaterBias: this.waterBias, uScreen: screen ? 1 : 0, uNearFar: [f.near, f.far], uViewport: [this.w, this.h] });
@@ -1796,11 +2060,7 @@ export class CityRenderer {
       this.drawSea(f, vp, finest, Math.min(split, last), finest, () => -1e9);
     }
 
-    // Resolve, fold into what was kept, then finish.
-    time.pass('resolve');
-    gl.bindFramebuffer(gl.READ_FRAMEBUFFER, this.msFb);
-    gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, this.resolveFb);
-    gl.blitFramebuffer(0, 0, this.w, this.h, 0, 0, this.w, this.h, gl.COLOR_BUFFER_BIT | (this.fast ? 0 : gl.DEPTH_BUFFER_BIT), gl.NEAREST);
+    // Scene is already in single-sample colorTex/depthTex (zero post-water resolve blit).
     let shown = this.colorTex;
     if (!this.fast) {
       time.pass('light in the air');
@@ -1820,6 +2080,7 @@ export class CityRenderer {
     if (!this.shaftsFb || f.sun[2] <= -0.02 || this.sea) return;
     const gl = this.gl;
     gl.disable(gl.DEPTH_TEST);
+    gl.disable(gl.STENCIL_TEST);
     gl.disable(gl.CULL_FACE);
     gl.disable(gl.BLEND);
     gl.bindVertexArray(this.emptyVao);
@@ -1871,6 +2132,7 @@ export class CityRenderer {
     this.lastVp = vp;
     this.lastEye = [f.eye[0], f.eye[1], f.eye[2]];
     gl.disable(gl.DEPTH_TEST);
+    gl.disable(gl.STENCIL_TEST);
     gl.disable(gl.CULL_FACE);
     gl.disable(gl.BLEND);
     gl.bindVertexArray(this.emptyVao);
@@ -1906,8 +2168,8 @@ export class CityRenderer {
     const at = this.seaP.uniforms.get('uFrom');
     const culled = gl.isEnabled(gl.CULL_FACE);
     gl.enable(gl.BLEND);
-    // Its colour is premultiplied; what is drawn keeps its own share of the frame.
-    gl.blendFuncSeparate(gl.ONE, gl.ONE_MINUS_SRC_ALPHA, gl.ZERO, gl.ONE);
+    // Its colour is premultiplied; accumulate alpha via standard Porter-Duff over so far sea / Snell's window marks coverage cleanly.
+    gl.blendFuncSeparate(gl.ONE, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
     gl.depthMask(false);
     // Seen from above and from below.
     gl.disable(gl.CULL_FACE);
@@ -1921,6 +2183,7 @@ export class CityRenderer {
   private occlusion(f: CityFrame): void {
     const gl = this.gl;
     gl.disable(gl.DEPTH_TEST);
+    gl.disable(gl.STENCIL_TEST);
     gl.disable(gl.CULL_FACE);
     gl.depthMask(false);
     const aw = Math.max(1, this.w >> 1);
@@ -1960,6 +2223,7 @@ export class CityRenderer {
   private finish(f: CityFrame, scene: WebGLTexture): void {
     const gl = this.gl;
     gl.disable(gl.DEPTH_TEST);
+    gl.disable(gl.STENCIL_TEST);
     gl.disable(gl.CULL_FACE);
     gl.depthMask(true);
     gl.bindVertexArray(this.emptyVao);
@@ -2062,13 +2326,18 @@ export class CityRenderer {
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.enable(gl.DEPTH_TEST);
+    gl.disable(gl.STENCIL_TEST);
     gl.depthFunc(gl.LESS);
     gl.depthMask(true);
     gl.disable(gl.BLEND);
     gl.disable(gl.CULL_FACE);
     gl.activeTexture(gl.TEXTURE0 + UNIT.entities);
     gl.bindTexture(gl.TEXTURE_2D, this.entityTex);
+    gl.activeTexture(gl.TEXTURE0 + UNIT.leaves);
+    gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.leaves);
     const vp = multiply(f.proj, f.view);
+    const camRight: V3 = [f.view[0], f.view[4], f.view[8]];
+    const camUp: V3 = [f.view[1], f.view[5], f.view[9]];
     // The ground first, so it hides what lies behind a hill.
     gl.colorMask(false, false, false, false);
     gl.useProgram(this.terrainDepthP.program);
@@ -2078,12 +2347,13 @@ export class CityRenderer {
     this.drawRings(this.terrainDepthP, f.eye, finest, Math.min(split, last), finest);
     gl.colorMask(true, true, true, true);
     gl.useProgram(this.idP.program);
-    setUniforms(gl, this.idP, { uViewProj: vp, uEye: f.eye, uTime: f.time, uClock: f.clock ?? 0, uWind: WIND });
+    setUniforms(gl, this.idP, { uViewProj: vp, uEye: f.eye, uTime: f.time, uClock: f.clock ?? 0, uWind: WIND, uShadowPad: -1, uShadowInvR: 0 });
     for (const c of this.lastDraw) {
       gl.bindVertexArray(c.vao);
       gl.drawElements(gl.TRIANGLES, c.count, gl.UNSIGNED_INT, 0);
     }
     this.drawInstanced(this.idP, false);
+    this.drawImpostors(this.impostorIdP, f, vp, camRight, camUp, [0, 0, 0]);
     gl.bindVertexArray(null);
     const px = new Uint8Array(4);
     gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px);

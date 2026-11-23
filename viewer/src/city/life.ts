@@ -14,7 +14,7 @@ import { declination, MID_DAY } from '../../../core/water.ts';
 import { meanBears } from '../../../world/generators/life/sorting.ts';
 import { CROP, HOUSE, KEPT, protoParts, type NamedGroup } from '../../../world/generators/life/stream.ts';
 import { ROUTE, wayAt } from '../../../world/generators/life/routines.ts';
-import { CityRenderer, SHARE_STEPS, type CellGPU, type CityFrame } from '../gl/city.ts';
+import { CityRenderer, SHARE_STEPS, type CityFrame, type LocalRenderer, type MeshHandle } from '../gl/city.ts';
 import type { GL } from '../gl/context.ts';
 import type { V3 } from '../mat.ts';
 import { groundLook, groundTones, rockLook } from './groundlook.ts';
@@ -25,9 +25,9 @@ import type { LocalView } from './view.ts';
 const TIMELESS = 2e7;
 
 /** One renderer for all of a viewer's living scenes: a new place should not compile its shaders again. */
-const renderers = new WeakMap<GL, Promise<CityRenderer>>();
+const renderers = new WeakMap<GL, Promise<LocalRenderer>>();
 /** Which scene has the renderer now. */
-const owners = new WeakMap<CityRenderer, LifeScene>();
+const owners = new WeakMap<LocalRenderer, LifeScene>();
 
 /** The leaves a plant's part holds when its form does not say: as the part types draw them (world/generators/life/forms.ts). */
 const LEAVES_OF: Record<string, string> = { conifer: 'needle', whorled: 'needle', 'scale-tree': 'needle', broadleaf: 'broad', shrub: 'broad', palm: 'frond', fern: 'frond', tuft: 'frond', mat: 'frond' };
@@ -158,7 +158,7 @@ export class LifeScene {
     return new LifeScene(await renderer, source, expected, opts);
   }
 
-  private constructor(readonly renderer: CityRenderer, source: SceneSpec, expected: Fingerprint | null, private opts: { fast?: boolean }) {
+  private constructor(readonly renderer: LocalRenderer, source: SceneSpec, expected: Fingerprint | null, private opts: { fast?: boolean }) {
     this.spec = source;
     this.plan.expected = expected;
     this.renderer.wild = true;
@@ -215,7 +215,7 @@ export class LifeScene {
   private groundData: Extract<FromLifeWorker, { type: 'ground' | 'preview' }> | null = null;
   private maskData: Extract<FromLifeWorker, { type: 'mask' }> | null = null;
   /** the paths between the scene's settlements, on the GPU once the scene has been shown */
-  private pathsGpu: CellGPU | null = null;
+  private pathsGpu: MeshHandle | null = null;
   private held: Extract<FromLifeWorker, { type: 'selection' }>[] = [];
 
   /** This scene takes over the renderer: its ground, its colours and whatever has been made for it. */
@@ -343,7 +343,18 @@ export class LifeScene {
   }
 
   private apply(m: Extract<FromLifeWorker, { type: 'selection' }>): void {
-    for (const p of m.protos) this.renderer.addInstanced(p.proto, p.vertices, p.indices, protoParts(p.proto).detail >= 1, p.idle);
+    for (const p of m.protos) {
+      const { taxon, variant, detail } = protoParts(p.proto);
+      let treeKey: number | undefined;
+      if (taxon < HOUSE && detail <= 2) {
+        const t = this.spec.taxa[taxon];
+        const form = t ? this.spec.forms[t.form] : undefined;
+        if (form?.kind === 'plant' && (form.behave?.layer ?? 'canopy') === 'canopy') {
+          treeKey = (taxon << 2) | (variant & 3);
+        }
+      }
+      this.renderer.addInstanced(p.proto, p.vertices, p.indices, detail >= 1, p.idle, treeKey !== undefined ? { treeKey, detail } : { detail });
+    }
     this.renderer.setInstances(m.batches);
   }
 

@@ -150,6 +150,10 @@ uniform vec2 uWind;
 // its head swings up and its tail across, and its pace. uIdling is 1 for a mesh that has them.
 uniform vec4 uIdle[4];
 uniform float uIdling;
+// Conservative per-instance shadow cascade culling: >= 0 only during shadow passes (protoOriginRadius / cascadeRadius)
+// and 1 / cascadeRadius for moving route margins.
+uniform float uShadowPad;
+uniform float uShadowInvR;
 ${DROP}
 ${ENTITY}
 // Turn a point about a pivot, in the plane of two of its axes.
@@ -283,6 +287,17 @@ flat out float vFlags;
 flat out int vEntity;
 void main() {
   bool many = uInstanced > 0.5;
+  if (many && uShadowPad >= 0.0) {
+    vec3 ctr = iPlace.xyz;
+    ctr.z -= drop(ctr.xy);
+    vec4 sc = uViewProj * vec4(ctr, 1.0);
+    float wayPad = iWayC.x > 0.0 ? (length(iWayA.xy) * 2.0 + length(iWayB.xy)) * uShadowInvR : 0.0;
+    float pad = uShadowPad * abs(iPlace.w) + wayPad;
+    if (abs(sc.x) > 1.0 + pad || abs(sc.y) > 1.0 + pad) {
+      gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
+      return;
+    }
+  }
   vLow = many ? aPos.z * iPlace.w : 1e4;
   int entity = many ? int(iMeta.x) : int(aEntity);
   vec4 e = entityOf(entity);
@@ -1659,8 +1674,11 @@ void main() {
     if (uCoverage < 0.5) {
       if (t.a < LEAF_CUT) discard;
     } else {
-      alpha = leafShare(t.a);
-      if (alpha < 0.01) discard;
+      float share = leafShare(t.a);
+      // Temporally stratified hashed alpha (IGN + Halton frame offset): resolved to smooth
+      // anti-aliased leaf edges by TAA and steady-frame averaging without 4x MSAA overhead.
+      float dither = fract(fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715)))) + uFrameNoise);
+      if (share <= 0.01 || share < 0.01 + 0.98 * dither) discard;
     }
   } else if (blade) {
     vec2 b = bladeLook(vUv);
@@ -3097,6 +3115,111 @@ void main() {
   o = vec4(c, 1.0);
 }`;
 
+/**
+ * Volumetric clouds marched at half resolution after opaque geometry: any 2x2 full-res block
+ * fully covered by terrain or meshes exits before a single density tap, storing alpha = -1 as an
+ * occluded sentinel so silhouettes never bleed dark halos into adjacent sky pixels. While the
+ * camera moves, valid texels reproject temporally from the previous frame; while still, each frame
+ * marches a fresh Halton-stratified offset for TAA to average evenly.
+ */
+export const CLOUDS_FS = /* glsl */ `#version 300 es
+precision highp float;
+precision highp sampler3D;
+in vec2 vUv;
+uniform mat4 uInvViewProj;
+uniform mat4 uCloudReproject;
+uniform vec3 uSun;
+uniform vec3 uSunColor;
+uniform vec3 uSkyTop;
+uniform highp sampler3D uNoise;
+uniform highp sampler2D uScene;
+uniform highp sampler2D uCloudHistory;
+uniform vec2 uSceneSize;
+uniform vec2 uCloudSize;
+uniform float uHeight;
+uniform float uCloudBlend;
+${CLOUDS}
+out vec4 o;
+void main() {
+  vec4 a = uInvViewProj * vec4(vUv * 2.0 - 1.0, -1.0, 1.0);
+  vec4 b = uInvViewProj * vec4(vUv * 2.0 - 1.0, 1.0, 1.0);
+  vec3 d = normalize(b.xyz / b.w - a.xyz / a.w);
+  // Compute derivative before any early return so screen-space footprint stays well-defined across 2x2 quads.
+  float footScale = length(fwidth(d));
+  ivec2 base = ivec2(gl_FragCoord.xy) * 2;
+  ivec2 lim = ivec2(uSceneSize) - 1;
+  float a00 = texelFetch(uScene, min(base, lim), 0).a;
+  float a10 = texelFetch(uScene, min(base + ivec2(1, 0), lim), 0).a;
+  float a01 = texelFetch(uScene, min(base + ivec2(0, 1), lim), 0).a;
+  float a11 = texelFetch(uScene, min(base + ivec2(1, 1), lim), 0).a;
+  if (min(min(a00, a10), min(a01, a11)) > 0.5) {
+    o = vec4(0.0, 0.0, 0.0, -1.0);
+    return;
+  }
+  if (d.z <= 0.012 || uCloudCover <= 0.0 || uHeight >= CLOUD_BASE) {
+    o = vec4(0.0, 0.0, 0.0, 1.0);
+    return;
+  }
+  float t0 = (CLOUD_BASE - uHeight) / d.z;
+  float t1 = min((CLOUD_TOP - uHeight) / d.z, t0 + 6000.0);
+  const int STEPS = 32;
+  float dt = (t1 - t0) / float(STEPS);
+  float start = fract(fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715)))) + uFrameNoise);
+  float mu = dot(d, uSun);
+  float g1 = 0.6;
+  float forward = (1.0 - g1 * g1) / (12.566 * pow(1.0 + g1 * g1 - 2.0 * g1 * mu, 1.5));
+  float phase = mix(0.08, forward, 0.5) * 12.566;
+  vec3 eye = vec3(0.0, 0.0, uHeight);
+  vec3 glow = vec3(0.0);
+  float through = 1.0;
+  float foot = t0 * footScale / d.z;
+  for (int i = 0; i < STEPS; i++) {
+    vec3 p = eye + d * (t0 + (float(i) + start) * dt);
+    float rho = cloudDensityAt(p, foot);
+    if (rho <= 0.0) continue;
+    float toward = cloudDensity(p + uSun * 110.0) + cloudDensity(p + uSun * 300.0) * 1.5 + cloudDensityAt(p + uSun * 900.0, 2000.0) * 3.0 + cloudDensityAt(p + uSun * 2200.0, 2000.0) * 5.0;
+    float sunlit = exp(-toward * 0.8) * (1.0 - exp(-rho * 4.0));
+    float height = (p.z - CLOUD_BASE) / (CLOUD_TOP - CLOUD_BASE);
+    vec3 light = uSunColor * sunlit * phase * 2.4 + uSkyTop * (0.7 + 0.7 * height);
+    float k = rho * dt * 0.0035;
+    float lost = exp(-k);
+    glow += through * light * (1.0 - lost);
+    through *= lost;
+    if (through < 0.02) break;
+  }
+  float far = 1.0 - smoothstep(0.012, 0.09, d.z);
+  through = mix(through, 1.0, far * 0.85);
+  glow *= 1.0 - far * 0.85;
+  vec4 cur = vec4(glow, through);
+  if (uCloudBlend < 0.99) {
+    float tMid = 0.5 * (t0 + t1);
+    vec4 prev = uCloudReproject * vec4(d * tMid, 1.0);
+    if (prev.w > 0.0) {
+      vec2 puv = prev.xy / prev.w * 0.5 + 0.5;
+      if (puv.x > 0.0 && puv.y > 0.0 && puv.x < 1.0 && puv.y < 1.0) {
+        vec2 hp = puv * uCloudSize - 0.5;
+        ivec2 hi0 = ivec2(floor(hp));
+        vec2 hf = hp - vec2(hi0);
+        ivec2 hlim = ivec2(uCloudSize) - 1;
+        vec4 hacc = vec4(0.0);
+        float hw = 0.0;
+        for (int j = 0; j <= 1; j++) {
+          for (int i = 0; i <= 1; i++) {
+            vec4 hs = texelFetch(uCloudHistory, clamp(hi0 + ivec2(i, j), ivec2(0), hlim), 0);
+            if (hs.a >= 0.0) {
+              float w = (i == 0 ? 1.0 - hf.x : hf.x) * (j == 0 ? 1.0 - hf.y : hf.y);
+              hacc += hs * w;
+              hw += w;
+            }
+          }
+        }
+        if (hw > 0.05) cur = mix(hacc / hw, cur, uCloudBlend);
+      }
+    }
+  }
+  o = cur;
+}`;
+
 export const SKY_FS = /* glsl */ `#version 300 es
 precision highp float;
 precision highp sampler3D;
@@ -3106,6 +3229,8 @@ uniform vec3 uSun;
 uniform vec3 uSunColor;
 uniform highp sampler2D uSkyLut;
 uniform highp sampler3D uNoise;
+uniform highp sampler2D uClouds;
+uniform vec2 uCloudSize;
 uniform float uHeight;
 uniform float uAlpha;
 // In a scene of the sea, the eye's height above it; and the light the water's colour is made from.
@@ -3140,8 +3265,8 @@ void main() {
   float sd = dot(d, uSun);
   c += uSunColor * smoothstep(0.99985, 0.99995, sd) * 18.0;
   c += uSunColor * pow(max(sd, 0.0), 300.0) * 0.28;
-  // Clouds with depth (step 7): marched through their layer, each step lit by the sun as far as the cloud towards it lets
-  // it through, and by the sky above; far off they thin into the haze.
+  // Clouds: flat on the lighter way; at full quality, upsampled from the half-res CLOUDS_FS target
+  // with valid-texel weights so occluded terrain/canopy silhouettes never bleed into sky pixels.
   if (uCloudVolume < 0.5) {
     if (d.z > 0.012) {
       vec2 p = d.xy / (d.z + 0.1) * 0.11;
@@ -3153,50 +3278,26 @@ void main() {
       }
     }
   } else if (d.z > 0.012 && uCloudCover > 0.0 && uHeight < CLOUD_BASE) {
-    float t0 = (CLOUD_BASE - uHeight) / d.z;
-    // Steps of 125 m at most, low towards the horizon, where the layer is crossed a long way: fewer, longer ones hit or
-    // missed its heaps' edges too much at random for a few frames' average to smooth, and left the pattern of their
-    // starts in the picture.
-    float t1 = min((CLOUD_TOP - uHeight) / d.z, t0 + 6000.0);
-    const int STEPS = 48;
-    float dt = (t1 - t0) / float(STEPS);
-    // Each pixel starts its march at a point of its own, and each frame at the next of the step's even shares
-    // (uFrameNoise), so that the frames' average covers a step evenly: a pattern that only moved across the screen from
-    // frame to frame left its streaks in the average.
-    float start = fract(fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715)))) + uFrameNoise);
-    float mu = dot(d, uSun);
-    float g1 = 0.6;
-    float forward = (1.0 - g1 * g1) / (12.566 * pow(1.0 + g1 * g1 - 2.0 * g1 * mu, 1.5));
-    float phase = mix(0.08, forward, 0.5) * 12.566;
-    vec3 eye = vec3(0.0, 0.0, uHeight);
-    vec3 glow = vec3(0.0);
-    float through = 1.0;
-    // How much of the layer one pixel takes in where its ray enters it: as far as the ray has come, by the angle a
-    // pixel is, over the slant it crosses the layer at.
-    float foot = t0 * length(fwidth(d)) / d.z;
-    for (int i = 0; i < STEPS; i++) {
-      vec3 p = eye + d * (t0 + (float(i) + start) * dt);
-      float rho = cloudDensityAt(p, foot);
-      if (rho <= 0.0) continue;
-      // Towards the sun, how much cloud the light comes through: near by, and far along the layer, where a low sun's light
-      // crosses other heaps before it reaches this one (with the sun high, those points are above the layer).
-      // What is far along it counts by its broad shape alone.
-      float toward = cloudDensity(p + uSun * 110.0) + cloudDensity(p + uSun * 300.0) * 1.5 + cloudDensityAt(p + uSun * 900.0, 2000.0) * 3.0 + cloudDensityAt(p + uSun * 2200.0, 2000.0) * 5.0;
-      // Light comes through the cloud towards the sun, and a heap's edges, thin, catch less of it (the powder of
-      // Schneider and Vos 2015).
-      float sunlit = exp(-toward * 0.8) * (1.0 - exp(-rho * 4.0));
-      float height = (p.z - CLOUD_BASE) / (CLOUD_TOP - CLOUD_BASE);
-      vec3 light = uSunColor * sunlit * phase * 2.4 + uSkyTop * (0.7 + 0.7 * height);
-      float k = rho * dt * 0.0035;
-      float lost = exp(-k);
-      glow += through * light * (1.0 - lost);
-      through *= lost;
-      if (through < 0.02) break;
+    vec2 p = vUv * uCloudSize - 0.5;
+    ivec2 i0 = ivec2(floor(p));
+    vec2 f = p - vec2(i0);
+    ivec2 lim = ivec2(uCloudSize) - 1;
+    vec4 acc = vec4(0.0);
+    float wsum = 0.0;
+    for (int j = 0; j <= 1; j++) {
+      for (int i = 0; i <= 1; i++) {
+        vec4 s = texelFetch(uClouds, clamp(i0 + ivec2(i, j), ivec2(0), lim), 0);
+        if (s.a >= 0.0) {
+          float w = (i == 0 ? 1.0 - f.x : f.x) * (j == 0 ? 1.0 - f.y : f.y);
+          acc += s * w;
+          wsum += w;
+        }
+      }
     }
-    float far = 1.0 - smoothstep(0.012, 0.09, d.z);
-    through = mix(through, 1.0, far * 0.85);
-    glow *= 1.0 - far * 0.85;
-    c = c * through + glow;
+    if (wsum > 1e-4) {
+      vec4 cl = acc / wsum;
+      c = c * cl.a + cl.rgb;
+    }
   }
   o = vec4(c, uAlpha);
 }`;
@@ -3556,4 +3657,372 @@ void main() {
   c *= 1.0 - dot(q, q) * 0.28;
   float a = uAlpha * (uSolid > 0.5 ? 1.0 : s.a);
   o = vec4(c * a, a);
+}`;
+
+// ——— Octahedral tree impostors (8x8 upper-hemisphere atlas baked on GPU) ———
+
+const IMP_OCT_COMMON = /* glsl */ `
+const float IMP_GRID = 8.0;
+const float IMP_PAD = 0.5 / 64.0;
+// Sample one 64x64 cell of an 8x8 octahedral atlas layer with explicit mip gradients and border clamp.
+vec4 impTap(highp sampler2DArray tex, vec2 cell, vec2 uv, vec2 dx, vec2 dy, float layer) {
+  if (uv.x < 0.0 || uv.y < 0.0 || uv.x > 1.0 || uv.y > 1.0) return vec4(0.0);
+  vec2 clamped = clamp(uv, vec2(IMP_PAD), vec2(1.0 - IMP_PAD));
+  return textureGrad(tex, vec3((cell + clamped) / IMP_GRID, layer), dx, dy);
+}
+`;
+
+export const IMP_BAKE_VS = /* glsl */ `#version 300 es
+precision highp float;
+precision highp int;
+layout(location = 0) in vec3 aPos;
+layout(location = 1) in vec4 aNormal;
+layout(location = 2) in vec2 aUv;
+layout(location = 3) in uvec2 aMat;
+uniform vec3 uCenter;
+uniform float uInvR;
+uniform vec3 uRx;
+uniform vec3 uRy;
+uniform vec3 uDir;
+out vec3 vPos;
+out vec3 vN;
+out vec2 vUv;
+out float vLight;
+flat out int vMaterial;
+flat out float vTint;
+void main() {
+  vec3 q = aPos - uCenter;
+  gl_Position = vec4(dot(q, uRx) * uInvR, dot(q, uRy) * uInvR, -dot(q, uDir) * uInvR, 1.0);
+  vPos = aPos;
+  vN = aNormal.xyz * 2.0 - 1.0;
+  vUv = aUv;
+  vLight = aNormal.w;
+  vMaterial = int(aMat.x);
+  vTint = float(aMat.y) / 255.0;
+}`;
+
+export const IMP_BAKE_FS = /* glsl */ `#version 300 es
+precision highp float;
+precision highp int;
+precision highp sampler3D;
+precision highp sampler2DArray;
+in vec3 vPos;
+in vec3 vN;
+in vec2 vUv;
+in float vLight;
+flat in int vMaterial;
+flat in float vTint;
+uniform highp sampler3D uNoise;
+uniform float uWild;
+uniform vec3 uTone[10];
+${LEAVES}
+layout(location = 0) out vec4 oAlbedo;
+layout(location = 1) out vec4 oNormal;
+float impNoise(vec3 p, float size) { return texture(uNoise, p / (64.0 * size)).r; }
+float impFbm(vec3 p, float size) {
+  vec3 q = p / (64.0 * size);
+  return texture(uNoise, q).r * 0.5 + texture(uNoise, q * 2.03 + 0.37).g * 0.3 + texture(uNoise, q * 4.1 + 0.71).b * 0.2;
+}
+void main() {
+  const int NEEDLE = 35, FROND = 36, BARK = 37, BROAD = 38, LEAF = 16, TRUNK = 17;
+  bool card = onCard(vMaterial);
+  float leafLight = 0.58;
+  float leafWood = 0.0;
+  vec3 albedo = vec3(0.18, 0.14, 0.10);
+  bool leafy = card || vMaterial == LEAF_MASS || vMaterial == NEEDLE || vMaterial == FROND || vMaterial == BROAD || vMaterial == LEAF;
+  if (card) {
+    vec4 t = leafTexel(vUv);
+    if (t.a < LEAF_CUT) discard;
+    leafLight = t.r;
+    leafWood = t.g;
+    vec3 dark = mix(vec3(0.028, 0.06, 0.024), vec3(0.052, 0.078, 0.022), vTint);
+    vec3 lite = mix(vec3(0.085, 0.14, 0.04), vec3(0.16, 0.185, 0.05), vTint);
+    if (vMaterial == NEEDLE_CARD) {
+      dark = mix(vec3(0.03, 0.064, 0.032), vec3(0.05, 0.085, 0.036), vTint);
+      lite = mix(vec3(0.075, 0.135, 0.05), vec3(0.135, 0.185, 0.06), vTint);
+    } else if (vMaterial == FROND_CARD || vMaterial == FAN_CARD) {
+      dark = mix(vec3(0.05, 0.11, 0.035), vec3(0.075, 0.13, 0.04), vTint);
+      lite = mix(vec3(0.16, 0.25, 0.07), vec3(0.25, 0.30, 0.085), vTint);
+    }
+    vec3 leaf = mix(dark, lite, clamp(0.3 * impFbm(vPos, 2.5) + leafLight * 0.95 - 0.08, 0.0, 1.0));
+    vec3 twig = mix(vec3(0.17, 0.13, 0.095), vec3(0.31, 0.22, 0.14), 0.4) * (0.5 + 0.9 * leafLight);
+    albedo = mix(leaf, twig, leafWood);
+  } else if (vMaterial == LEAF_MASS) {
+    float fleck = impNoise(vPos, 0.11) * 0.55 + impNoise(vPos + 5.0, 0.3) * 0.45;
+    albedo = mix(vec3(0.03, 0.06, 0.026), vec3(0.05, 0.08, 0.03), vTint) * (0.45 + 0.9 * smoothstep(0.3, 0.75, fleck)) * (0.8 + 0.4 * impFbm(vPos, 1.5));
+  } else if (vMaterial == NEEDLE || vMaterial == BROAD || vMaterial == FROND || vMaterial == LEAF) {
+    vec3 dark = vMaterial == FROND ? mix(vec3(0.05, 0.11, 0.035), vec3(0.075, 0.13, 0.04), vTint) : mix(vec3(0.028, 0.06, 0.024), vec3(0.052, 0.078, 0.022), vTint);
+    vec3 lite = vMaterial == FROND ? mix(vec3(0.16, 0.25, 0.07), vec3(0.25, 0.30, 0.085), vTint) : mix(vec3(0.085, 0.14, 0.04), vec3(0.16, 0.185, 0.05), vTint);
+    float fleck = impNoise(vPos, 0.18) * 0.6 + impNoise(vPos + 5.0, 0.35) * 0.4;
+    albedo = mix(dark, lite, smoothstep(0.3, 0.72, fleck)) * (0.82 + 0.38 * impFbm(vPos, 3.0));
+  } else if (vMaterial == BARK || vMaterial == TRUNK) {
+    vec3 base = mix(vec3(0.17, 0.13, 0.095), vec3(0.31, 0.22, 0.14), vTint);
+    base = mix(base, vec3(dot(base, vec3(0.333))) * vec3(1.03, 1.0, 0.95), 0.4 * fract(vTint * 7.3));
+    albedo = base * (0.76 + 0.42 * impFbm(vPos, 1.2));
+  }
+  if (leafy && uWild > 0.5) {
+    const vec3 LUMA = vec3(0.2126, 0.7152, 0.0722);
+    vec3 place = mix(uTone[6], uTone[7], leafLight);
+    float lum = dot(albedo, LUMA);
+    float plum = max(dot(place, LUMA), 1e-3);
+    albedo = mix(albedo, place * (lum / plum), 0.62 * (1.0 - leafWood));
+  }
+  oAlbedo = vec4(clamp(albedo, 0.0, 1.0), 1.0);
+  oNormal = vec4(normalize(vN) * 0.5 + 0.5, clamp(vLight, 0.0, 1.0));
+}`;
+
+export const IMPOSTOR_VS = /* glsl */ `#version 300 es
+precision highp float;
+precision highp int;
+layout(location = 0) in vec2 aQuad;
+layout(location = 5) in vec4 iPlace;
+layout(location = 6) in vec2 iFace;
+layout(location = 7) in uvec2 iMeta;
+uniform mat4 uViewProj;
+uniform vec3 uEye;
+uniform vec3 uCamRight;
+uniform vec3 uCamUp;
+// Nonzero only in orthographic shadow passes: unit direction toward the sun.
+uniform vec3 uOrthoDir;
+uniform float uClock;
+uniform vec2 uWind;
+uniform float uImpMidZ;
+uniform float uImpRadius;
+// >= 0 during shadow passes for conservative per-instance cascade frustum culling.
+uniform float uShadowPad;
+${DROP}
+${ENTITY}
+vec3 toTreeLocal(vec3 w, vec2 face) {
+  return vec3(w.x * face.y - w.y * face.x, w.x * face.x + w.y * face.y, w.z);
+}
+vec2 hemiOctEncode(vec3 d) {
+  float cz = max(d.z, 0.0);
+  vec2 p = d.xy / max(abs(d.x) + abs(d.y) + cz, 1e-5);
+  return vec2(0.5 * (p.x + p.y) + 0.5, 0.5 * (p.x - p.y) + 0.5);
+}
+vec2 octProject(vec3 qQuad, vec3 vDir, vec2 cell) {
+  vec2 uv = cell / 7.0;
+  vec2 s = uv * 2.0 - 1.0;
+  vec2 p = vec2(0.5 * (s.x + s.y), 0.5 * (s.x - s.y));
+  vec3 d = normalize(vec3(p, max(0.0, 1.0 - abs(p.x) - abs(p.y))));
+  vec3 rx = vec3(-d.y, d.x, 0.0);
+  float rl = length(rx.xy);
+  rx = rl < 1e-4 ? vec3(1.0, 0.0, 0.0) : rx / rl;
+  vec3 ry = cross(d, rx);
+  vec3 q = qQuad - vDir * (dot(qQuad, d) / max(dot(vDir, d), 0.35));
+  return vec2(dot(q, rx), dot(q, ry)) * 0.5 + 0.5;
+}
+out vec3 vPos;
+out vec2 vUv0;
+out vec2 vUv1;
+out vec2 vUv2;
+flat out vec2 vCell0;
+flat out vec2 vCell1;
+flat out vec2 vCell2;
+flat out vec3 vWeights;
+flat out vec2 vFace;
+flat out float vTint;
+flat out float vFlags;
+flat out int vEntity;
+flat out float vLow;
+void main() {
+  float sc = abs(iPlace.w);
+  if (uShadowPad >= 0.0) {
+    vec3 ctr = iPlace.xyz + vec3(0.0, 0.0, uImpMidZ * sc);
+    ctr.z -= drop(ctr.xy);
+    vec4 cs = uViewProj * vec4(ctr, 1.0);
+    float pad = uShadowPad * sc;
+    if (abs(cs.x) > 1.0 + pad || abs(cs.y) > 1.0 + pad) {
+      gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
+      return;
+    }
+  }
+  int entity = int(iMeta.x);
+  vec4 e = entityOf(entity);
+  float up = standing(e);
+  if (up <= 0.0) {
+    gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
+    return;
+  }
+  vec3 center = iPlace.xyz + vec3(0.0, 0.0, uImpMidZ * sc);
+  if (dot(uWind, uWind) > 0.0) {
+    float own = fract(sin(dot(iPlace.xy, vec2(12.9898, 78.233))) * 43758.5453);
+    float h = max(uImpMidZ * sc, 0.5);
+    float speed = length(uWind);
+    vec2 dir = uWind / speed;
+    float gust = 0.55 + 0.45 * sin(uClock * 0.6 - dot(iPlace.xy, dir) * 0.035) * sin(uClock * 0.21 + own * 6.2831853);
+    float lean = gust * speed * 0.05 * h / (1.0 + h * 0.15) * (0.8 + 0.2 * sin(uClock * 1.7 + own * 19.0));
+    center += vec3(dir * lean * (0.5 + 0.5 * aQuad.y), 0.0);
+  }
+  float R = uImpRadius * sc;
+  vec3 p = center + (uCamRight * aQuad.x + uCamUp * aQuad.y) * R;
+  if (up < 1.0) p.z = e.w + (p.z - e.w) * up;
+  vPos = p;
+  vec3 pCurved = p;
+  pCurved.z -= drop(pCurved.xy);
+  gl_Position = uViewProj * vec4(pCurved - uEye, 1.0);
+
+  vec3 viewWorld = length(uOrthoDir) > 0.5 ? uOrthoDir : normalize(uEye - center);
+  vec3 vLocRaw = toTreeLocal(viewWorld, iFace);
+  vec3 vDir = normalize(vec3(vLocRaw.xy, max(vLocRaw.z, 0.0)));
+  vec3 rLoc = toTreeLocal(uCamRight, iFace);
+  vec3 uLoc = toTreeLocal(uCamUp, iFace);
+  vec3 qQuad = aQuad.x * rLoc + aQuad.y * uLoc;
+
+  vec2 oct = hemiOctEncode(vDir) * 7.0;
+  vec2 i0 = min(floor(oct), vec2(6.0));
+  vec2 f = clamp(oct - i0, vec2(0.0), vec2(1.0));
+  vCell0 = i0;
+  vCell1 = i0 + (f.x >= f.y ? vec2(1.0, 0.0) : vec2(0.0, 1.0));
+  vCell2 = i0 + vec2(1.0, 1.0);
+  vWeights = vec3(1.0 - max(f.x, f.y), abs(f.x - f.y), min(f.x, f.y));
+  vUv0 = octProject(qQuad, vDir, vCell0);
+  vUv1 = octProject(qQuad, vDir, vCell1);
+  vUv2 = octProject(qQuad, vDir, vCell2);
+  vFace = iFace;
+  vTint = float(iMeta.y) / 255.0;
+  vFlags = e.z;
+  vEntity = entity;
+  vLow = uImpMidZ * sc;
+}`;
+
+export const IMPOSTOR_FS = /* glsl */ `#version 300 es
+precision highp float;
+precision highp int;
+precision highp sampler3D;
+precision highp sampler2DArray;
+precision highp sampler2DArrayShadow;
+in vec3 vPos;
+in vec2 vUv0;
+in vec2 vUv1;
+in vec2 vUv2;
+flat in vec2 vCell0;
+flat in vec2 vCell1;
+flat in vec2 vCell2;
+flat in vec3 vWeights;
+flat in vec2 vFace;
+flat in float vTint;
+flat in float vFlags;
+flat in int vEntity;
+flat in float vLow;
+uniform vec3 uEye;
+uniform float uWild;
+uniform highp sampler2D uMask;
+uniform vec4 uMaskBox;
+uniform float uEvidence;
+uniform highp sampler2DArray uImpAlbedo;
+uniform highp sampler2DArray uImpNormal;
+uniform float uImpLayer;
+out vec4 o;
+${LIGHTING}
+${IMP_OCT_COMMON}
+void main() {
+  // Compute derivatives before any discard so mip selection stays uniform across 2x2 pixel quads.
+  vec2 dx0 = dFdx(vUv0) / IMP_GRID, dy0 = dFdy(vUv0) / IMP_GRID;
+  vec2 dx1 = dFdx(vUv1) / IMP_GRID, dy1 = dFdy(vUv1) / IMP_GRID;
+  vec2 dx2 = dFdx(vUv2) / IMP_GRID, dy2 = dFdy(vUv2) / IMP_GRID;
+  vec4 a0 = impTap(uImpAlbedo, vCell0, vUv0, dx0, dy0, uImpLayer);
+  vec4 a1 = impTap(uImpAlbedo, vCell1, vUv1, dx1, dy1, uImpLayer);
+  vec4 a2 = impTap(uImpAlbedo, vCell2, vUv2, dx2, dy2, uImpLayer);
+  vec4 aMix = a0 * vWeights.x + a1 * vWeights.y + a2 * vWeights.z;
+  float alpha = aMix.a;
+  float dither = fract(fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715)))) + uFrameNoise);
+  if (alpha <= 0.06 || alpha < 0.06 + 0.88 * dither) discard;
+
+  vec4 n0 = impTap(uImpNormal, vCell0, vUv0, dx0, dy0, uImpLayer);
+  vec4 n1 = impTap(uImpNormal, vCell1, vUv1, dx1, dy1, uImpLayer);
+  vec4 n2 = impTap(uImpNormal, vCell2, vUv2, dx2, dy2, uImpLayer);
+  float nw = max(a0.a * vWeights.x + a1.a * vWeights.y + a2.a * vWeights.z, 1e-4);
+  vec4 nMix = (n0 * (a0.a * vWeights.x) + n1 * (a1.a * vWeights.y) + n2 * (a2.a * vWeights.z)) / nw;
+
+  vec3 albedo = clamp(aMix.rgb / max(alpha, 0.06), 0.0, 1.0);
+  // Per-instance tone shift matching MESH_FS so adjacent trees vary naturally.
+  if (uWild > 0.5) albedo *= 0.82 + 0.36 * fract(vTint * 5.3);
+
+  vec3 nl = normalize(nMix.rgb * 2.0 - 1.0);
+  vec3 n = normalize(vec3(nl.x * vFace.y + nl.y * vFace.x, -nl.x * vFace.x + nl.y * vFace.y, nl.z));
+  float skyOcc = nMix.a;
+  vec3 toEye = uEye - vPos;
+  float pixel = length(toEye) * 0.002;
+  float sh = shadowAt(vPos, n, pixel) * cloudShade(vPos);
+  vec3 v = normalize(toEye);
+  float wrap = clamp((dot(n, uSun) + 0.3) / 1.3, 0.0, 1.0);
+  float up = n.z * 0.5 + 0.5;
+  vec3 skyC = skyLight(n);
+  float grey = dot(skyC, vec3(0.3, 0.5, 0.2));
+  skyC = mix(vec3(grey), skyC, 0.5) + uBounce * 0.45;
+  vec3 bounce = uBounce * (1.0 - up) * (0.4 + 0.6 * sh);
+  vec3 c = albedo * (uSunColor * wrap * sh + (skyC + bounce) * skyOcc);
+  float behind = pow(max(dot(-v, uSun), 0.0), 4.0);
+  c += albedo * vec3(1.1, 1.3, 0.5) * uSunColor * sh * (0.28 * behind);
+  if (uSea > 0.5 && vPos.z < 0.0) c *= seaLight(vPos.z);
+  c = seen(c, vPos, uEye);
+
+  int flags = int(vFlags);
+  int basis = flags & 7;
+  if (uEvidence > 0.5) {
+    float hatch = step(0.62, fract((gl_FragCoord.x + gl_FragCoord.y) / 9.0));
+    vec3 tint2 = basis >= 3 ? vec3(0.92, 0.25, 0.75) : basis >= 1 ? vec3(0.95, 0.65, 0.18) : vec3(0.3, 0.85, 0.5);
+    c = mix(c, tint2 * 1.2, 0.18 + 0.28 * hatch);
+  }
+  if ((flags & 8) != 0) {
+    float e = pow(1.0 - abs(dot(v, n)), 2.0);
+    c += vec3(1.0, 0.82, 0.42) * (0.1 + 0.55 * e);
+  } else if ((flags & 16) != 0) {
+    c += vec3(0.9, 0.8, 0.6) * 0.06;
+  }
+  o = vec4(c, 1.0);
+}`;
+
+export const IMPOSTOR_DEPTH_FS = /* glsl */ `#version 300 es
+precision highp float;
+precision highp int;
+precision highp sampler2DArray;
+in vec2 vUv0;
+in vec2 vUv1;
+in vec2 vUv2;
+flat in vec2 vCell0;
+flat in vec2 vCell1;
+flat in vec2 vCell2;
+flat in vec3 vWeights;
+uniform highp sampler2DArray uImpAlbedo;
+uniform float uImpLayer;
+out vec4 o;
+${IMP_OCT_COMMON}
+void main() {
+  vec2 dx0 = dFdx(vUv0) / IMP_GRID, dy0 = dFdy(vUv0) / IMP_GRID;
+  vec2 dx1 = dFdx(vUv1) / IMP_GRID, dy1 = dFdy(vUv1) / IMP_GRID;
+  vec2 dx2 = dFdx(vUv2) / IMP_GRID, dy2 = dFdy(vUv2) / IMP_GRID;
+  float alpha = impTap(uImpAlbedo, vCell0, vUv0, dx0, dy0, uImpLayer).a * vWeights.x
+              + impTap(uImpAlbedo, vCell1, vUv1, dx1, dy1, uImpLayer).a * vWeights.y
+              + impTap(uImpAlbedo, vCell2, vUv2, dx2, dy2, uImpLayer).a * vWeights.z;
+  if (alpha < 0.36) discard;
+  o = vec4(0.0);
+}`;
+
+export const IMPOSTOR_ID_FS = /* glsl */ `#version 300 es
+precision highp float;
+precision highp int;
+precision highp sampler2DArray;
+in vec2 vUv0;
+in vec2 vUv1;
+in vec2 vUv2;
+flat in vec2 vCell0;
+flat in vec2 vCell1;
+flat in vec2 vCell2;
+flat in vec3 vWeights;
+flat in int vEntity;
+uniform highp sampler2DArray uImpAlbedo;
+uniform float uImpLayer;
+out vec4 o;
+${IMP_OCT_COMMON}
+void main() {
+  vec2 dx0 = dFdx(vUv0) / IMP_GRID, dy0 = dFdy(vUv0) / IMP_GRID;
+  vec2 dx1 = dFdx(vUv1) / IMP_GRID, dy1 = dFdy(vUv1) / IMP_GRID;
+  vec2 dx2 = dFdx(vUv2) / IMP_GRID, dy2 = dFdy(vUv2) / IMP_GRID;
+  float alpha = impTap(uImpAlbedo, vCell0, vUv0, dx0, dy0, uImpLayer).a * vWeights.x
+              + impTap(uImpAlbedo, vCell1, vUv1, dx1, dy1, uImpLayer).a * vWeights.y
+              + impTap(uImpAlbedo, vCell2, vUv2, dx2, dy2, uImpLayer).a * vWeights.z;
+  if (alpha < 0.36) discard;
+  o = vec4(float(vEntity & 255), float((vEntity >> 8) & 255), 0.0, 255.0) / 255.0;
 }`;

@@ -6,7 +6,7 @@ import type { CityStructure } from '../../../core/city.ts';
 import type { Scenario } from '../../../core/scenario.ts';
 import { CELL } from '../../../world/generators/city/cells.ts';
 import type { GroundSampler } from '../../../world/generators/city/ground.ts';
-import type { CityRenderer, CellGPU, CityFrame } from '../gl/city.ts';
+import type { CityFrame, LocalRenderer, MeshHandle } from '../gl/renderer.ts';
 import type { V3 } from '../mat.ts';
 import { Skyline } from './skyline.ts';
 import type { LocalView } from './view.ts';
@@ -21,8 +21,8 @@ const EYE_STEP = 50;
 export interface Cell {
   key: number;
   box: [number, number, number, number];
-  coarse?: CellGPU;
-  fine?: CellGPU;
+  coarse?: MeshHandle;
+  fine?: MeshHandle;
   /** a request is out for this detail */
   asked: [boolean, boolean];
   usedAt: number;
@@ -66,7 +66,7 @@ export abstract class CellScene {
   /** the lighter way to draw: coarse meshes only, and the renderer's cheap passes */
   protected fast: boolean;
 
-  constructor(readonly renderer: CityRenderer, opts: { fast?: boolean } = {}) {
+  constructor(readonly renderer: LocalRenderer, opts: { fast?: boolean } = {}) {
     this.fast = !!opts.fast;
     this.renderer.shadowCells = (focus, radius) => this.near(focus, radius);
   }
@@ -148,8 +148,8 @@ export abstract class CellScene {
   }
 
   /** The meshes within a radius of a point, for a shadow cascade: fine where it is ready. */
-  private near(focus: V3, radius: number): CellGPU[] {
-    const out: CellGPU[] = [];
+  private near(focus: V3, radius: number): MeshHandle[] {
+    const out: MeshHandle[] = [];
     const r = radius + CELL;
     for (const c of this.cells.values()) {
       const cx = (c.box[0] + c.box[2]) / 2;
@@ -162,8 +162,8 @@ export abstract class CellScene {
   }
 
   /** The meshes in view: fine near the eye, coarse beyond. */
-  visible(v: LocalView): CellGPU[] {
-    const out: CellGPU[] = [];
+  visible(v: LocalView): MeshHandle[] {
+    const out: MeshHandle[] = [];
     const t = Math.tan(v.fov / 2);
     const side = t * v.aspect;
     for (const c of this.cells.values()) {
