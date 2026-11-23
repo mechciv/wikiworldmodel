@@ -6,6 +6,7 @@
 import { GROUND_FORMAT, GROUND_LAYERS, type GroundMaterials } from '../../../core/materials.ts';
 import { program, type GL, type Program } from './context.ts';
 import { FULLSCREEN_VS } from './cityShaders.ts';
+import { detectCompressedFormats, parseKTX2, type CompressedFormatName } from './ktx2.ts';
 
 /** Takes a layer's two images apart into the two arrays' layers. */
 const UNPACK_FS = /* glsl */ `#version 300 es
@@ -42,6 +43,8 @@ export class GroundMaterialSet {
   /** for each layer, its mean colour and the metres a repeat covers; then how much of its hue it keeps, its mean roughness and height */
   readonly mean = new Float32Array(GROUND_LAYERS.length * 4);
   readonly look = new Float32Array(GROUND_LAYERS.length * 4);
+  /** GPU texture format active once loaded ('astc' | 'bc7' | 'etc2' | 'bc3' | 'rgba8'). */
+  format: Exclude<CompressedFormatName, 'none'> | 'rgba8' = 'rgba8';
   ready = false;
   /** why it could not be loaded, if it could not: the ground is then drawn as it is without them */
   failed: string | null = null;
@@ -65,6 +68,90 @@ export class GroundMaterialSet {
     });
   }
 
+  /** Try loading pre-packed GPU block-compressed KTX2 arrays when both hardware and manifest support a matching family. */
+  private async tryLoadKTX2(base: string, layers: GroundMaterials['layers']): Promise<boolean> {
+    const gl = this.gl;
+    const caps = detectCompressedFormats(gl);
+    const family = caps.supported.find((f) => layers.every((l) => l.ktx2?.[f]?.colour && l.ktx2?.[f]?.normal));
+    if (!family) return false;
+
+    const glFormats = (() => {
+      if (family === 'astc') {
+        const ext = gl.getExtension('WEBGL_compressed_texture_astc') as { COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR: number; COMPRESSED_RGBA_ASTC_4x4_KHR: number } | null;
+        return ext ? { srgb: ext.COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR, linear: ext.COMPRESSED_RGBA_ASTC_4x4_KHR } : null;
+      }
+      if (family === 'bc7') {
+        const ext = gl.getExtension('EXT_texture_compression_bptc') as { COMPRESSED_SRGB_ALPHA_BPTC_UNORM_EXT: number; COMPRESSED_RGBA_BPTC_UNORM_EXT: number } | null;
+        return ext ? { srgb: ext.COMPRESSED_SRGB_ALPHA_BPTC_UNORM_EXT, linear: ext.COMPRESSED_RGBA_BPTC_UNORM_EXT } : null;
+      }
+      if (family === 'etc2') {
+        const ext = gl.getExtension('WEBGL_compressed_texture_etc') as { COMPRESSED_SRGB8_ALPHA8_ETC2_EAC: number; COMPRESSED_RGBA8_ETC2_EAC: number } | null;
+        return ext ? { srgb: ext.COMPRESSED_SRGB8_ALPHA8_ETC2_EAC, linear: ext.COMPRESSED_RGBA8_ETC2_EAC } : null;
+      }
+      const s3tc = gl.getExtension('WEBGL_compressed_texture_s3tc') as { COMPRESSED_RGBA_S3TC_DXT5_EXT: number } | null;
+      const srgb = gl.getExtension('WEBGL_compressed_texture_s3tc_srgb') as { COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT: number } | null;
+      return s3tc && srgb ? { srgb: srgb.COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT, linear: s3tc.COMPRESSED_RGBA_S3TC_DXT5_EXT } : null;
+    })();
+    if (!glFormats) return false;
+
+    const fetchKtx = async (path: string) => {
+      const r = await fetch(base + path);
+      if (!r.ok) throw new Error(`${path}: HTTP ${r.status}`);
+      return parseKTX2(await r.arrayBuffer());
+    };
+    const packed = await Promise.all(
+      layers.map(async (l) => {
+        const entry = l.ktx2![family]!;
+        const [colour, normal] = await Promise.all([fetchKtx(entry.colour), fetchKtx(entry.normal)]);
+        return { colour, normal };
+      }),
+    );
+
+    const width = packed[0].colour.width;
+    const height = packed[0].colour.height;
+    const levels = packed[0].colour.levelCount;
+    const n = layers.length;
+    for (const p of packed) {
+      if (p.colour.width !== width || p.colour.height !== height || p.colour.levelCount !== levels || p.normal.width !== width || p.normal.height !== height || p.normal.levelCount !== levels) {
+        return false;
+      }
+    }
+
+    const unit = gl.TEXTURE0 + 14;
+    gl.activeTexture(unit);
+    const makeArray = (internal: number, mostAniso: number): WebGLTexture => {
+      const t = gl.createTexture()!;
+      gl.bindTexture(gl.TEXTURE_2D_ARRAY, t);
+      gl.texStorage3D(gl.TEXTURE_2D_ARRAY, levels, internal, width, height, n);
+      gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, levels > 1 ? gl.LINEAR_MIPMAP_LINEAR : gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.REPEAT);
+      gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.REPEAT);
+      const aniso = gl.getExtension('EXT_texture_filter_anisotropic');
+      if (aniso) gl.texParameterf(gl.TEXTURE_2D_ARRAY, aniso.TEXTURE_MAX_ANISOTROPY_EXT, Math.min(mostAniso, gl.getParameter(aniso.MAX_TEXTURE_MAX_ANISOTROPY_EXT) as number));
+      return t;
+    };
+
+    const colour = makeArray(glFormats.srgb, 8);
+    packed.forEach((p, k) => {
+      p.colour.levels.forEach((lvl, m) => gl.compressedTexSubImage3D(gl.TEXTURE_2D_ARRAY, m, 0, 0, k, lvl.width, lvl.height, 1, glFormats.srgb, lvl.data));
+    });
+    const normal = makeArray(glFormats.linear, 4);
+    packed.forEach((p, k) => {
+      p.normal.levels.forEach((lvl, m) => gl.compressedTexSubImage3D(gl.TEXTURE_2D_ARRAY, m, 0, 0, k, lvl.width, lvl.height, 1, glFormats.linear, lvl.data));
+      const l = layers[k];
+      this.mean.set([l.mean[0], l.mean[1], l.mean[2], l.metres], k * 4);
+      this.look.set([l.chroma, l.rough, l.lift, 1], k * 4);
+    });
+    gl.bindTexture(gl.TEXTURE_2D_ARRAY, null);
+    gl.activeTexture(gl.TEXTURE0);
+    this.colour = colour;
+    this.normal = normal;
+    this.format = family;
+    this.ready = true;
+    return true;
+  }
+
   private async fetch(root: string): Promise<void> {
     const gl = this.gl;
     const base = new URL('materials/', root).href;
@@ -78,6 +165,7 @@ export class GroundMaterialSet {
       if (!l) throw new Error(`ground.json has no layer "${key}"`);
       return l;
     });
+    if (await this.tryLoadKTX2(base, layers).catch(() => false)) return;
     const image = async (path: string): Promise<ImageBitmap> => {
       const r = await fetch(base + path);
       if (!r.ok) throw new Error(`${path}: HTTP ${r.status}`);

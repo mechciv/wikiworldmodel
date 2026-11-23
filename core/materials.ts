@@ -29,6 +29,8 @@ export interface GroundMaterialLayer {
   /** its colour's image; and the image of its normal's two parts, its height and its roughness, side by side */
   colour: string;
   data: string;
+  /** optional pre-packed GPU block-compressed KTX2 mipmapped textures (colour+height and normal+roughness+sky), by hardware format */
+  ktx2?: Partial<Record<'astc' | 'bc7' | 'etc2' | 'bc3', { colour: string; normal: string }>>;
   /** the scan's name and who made it, and its page */
   name: string;
   authors: string[];
