@@ -5,7 +5,7 @@
 // every plant of the kind, at every place and time. What a card shows of it: how light each point of a leaf is, from 0
 // to 1, which the shader turns into the plant's own greens; how much of the point is twig; how the leaf's face leans
 // across its card, so that the two sides of its fold catch the light apart; and how much of the point is leaf at all.
-import { boughTile, LEAF_KINDS, LEAF_KIND_NAMES, LEAF_TILE, LEAF_TILES, sprayTile, type LeafKind, type LeafKindName } from '../../../core/leaves.ts';
+import { boughTile, LEAF_KINDS, LEAF_KIND_NAMES, LEAF_TILE, LEAF_TILES, LITTER_NAMES, LITTER_SPAN, litterTile, sprayTile, type LeafKind, type LeafKindName, type LitterName } from '../../../core/leaves.ts';
 
 const W = LEAF_TILE.across;
 const H = LEAF_TILE.along;
@@ -772,6 +772,227 @@ function bough(kind: LeafKindName, sprays: Tile[], smalls: ReturnType<Tile['smal
   return t;
 }
 
+// ——— What lies fallen ———
+
+/**
+ * A tile of litter is strewn, not grown: `n` things lie every way, one over another, and whatever crosses an edge of
+ * the tile comes in again at the edge across from it, so that the tile repeats without a seam. What is laid down last
+ * lies on top. Each thing has its place in the order they fell in, from 1 for the first, at the bottom, to next to 0
+ * for the last, kept where a spray keeps how much of a point is twig: where fewer have fallen the renderer draws only
+ * the last of them, and those are whole, since nothing lies over them. `thing` makes one, drawing nothing, and gives
+ * how to lay it down, moved by a whole tile either way.
+ */
+function strew(t: Tile, n: number, thing: (rank: number) => (ox: number, oy: number) => void): void {
+  for (let i = 0; i < n; i++) {
+    const lay = thing(1 - (i + 0.5) / n);
+    for (const ox of [-t.wide, 0, t.wide]) for (const oy of [-t.len, 0, t.len]) lay(ox, oy);
+  }
+}
+
+/** How light a dead leaf is: most of them a middling brown, a few pale; and what fell last has had less time to darken. */
+const dead = (r: () => number, rank: number): number => {
+  const u = r();
+  return (0.14 + 0.72 * u * (0.5 + 0.5 * u)) * (1.12 - 0.34 * rank);
+};
+
+/** A bit of twig, lying. */
+function stick(t: Tile, r: () => number, rank: number, most = 0.24): (ox: number, oy: number) => void {
+  const x = (r() - 0.5) * t.wide;
+  const y = r() * t.len;
+  const a = r() * TAU;
+  const l = 0.05 + (most - 0.05) * r() * r();
+  const bend = (r() - 0.5) * 0.5;
+  const light = 0.16 + 0.22 * r();
+  const thick = 0.0016 + 0.0022 * r();
+  const mx = x + Math.sin(a + bend) * l * 0.5;
+  const my = y + Math.cos(a + bend) * l * 0.5;
+  const ex = mx + Math.sin(a - bend) * l * 0.5;
+  const ey = my + Math.cos(a - bend) * l * 0.5;
+  return (ox, oy) => {
+    t.stem(x + ox, y + oy, mx + ox, my + oy, thick, thick * 0.8, light, rank, 0, 0.3);
+    t.stem(mx + ox, my + oy, ex + ox, ey + oy, thick * 0.8, thick * 0.55, light, rank, 0, 0);
+  };
+}
+
+/** A leaf, lying: flatter than on its twig, darkening what it lies on along its edge. */
+function lying(t: Tile, r: () => number, rank: number, len: number, wid: number, outline: (x: number) => number, paint: Partial<Paint> = {}): (ox: number, oy: number) => void {
+  const x = (r() - 0.5) * t.wide;
+  const y = r() * t.len;
+  const a = r() * TAU;
+  const p: Paint = { light: dead(r, rank), fold: 0.12, roll: (r() - 0.5) * 0.2, rib: 0.13, vein: 0.045, shadow: 0.45, wood: rank, ...paint };
+  return (ox, oy) => t.leaf(x + ox, y + oy, a, len, wid, outline, p);
+}
+
+const LITTER: Record<LitterName, Draw> = {
+  needles: (t, r) => {
+    // Needles every way, thick on the ground; among them the short shoots that a redwood or a swamp cypress sheds
+    // whole, needles and all; and bits of twig.
+    strew(t, 5200, (rank) => {
+      const kind = r();
+      if (kind < 0.012) return stick(t, r, rank, 0.2);
+      const x = (r() - 0.5) * t.wide;
+      const y = r() * t.len;
+      const a = r() * TAU;
+      const light = dead(r, rank);
+      if (kind < 0.03) {
+        const l = 0.04 + 0.05 * r();
+        const n = Math.round(l / 0.004);
+        const size = 0.009 + 0.006 * r();
+        const lean = 1.0 + 0.3 * r();
+        return (ox, oy) => {
+          t.stem(x + ox, y + oy, x + ox + Math.sin(a) * l, y + oy + Math.cos(a) * l, 0.0009, 0.0006, light * 0.8, rank, 0, 0.25);
+          for (let k = 0; k < n; k++) {
+            const f = (k + 0.5) / n;
+            const s = size * (0.6 + 0.4 * Math.sin(Math.PI * f));
+            for (const side of [-1, 1]) {
+              const bx = x + ox + Math.sin(a) * l * f;
+              const by = y + oy + Math.cos(a) * l * f;
+              t.stem(bx, by, bx + Math.sin(a + side * lean) * s, by + Math.cos(a + side * lean) * s, 0.0007, 0.0004, light, rank, 0, 0);
+            }
+          }
+        };
+      }
+      const l = 0.022 + 0.04 * r();
+      return (ox, oy) => t.stem(x + ox, y + oy, x + ox + Math.sin(a) * l, y + oy + Math.cos(a) * l, 0.0008, 0.0005, light, rank, 0, 0.22);
+    });
+  },
+  scales: (t, r) => {
+    // Lengths of shoot still clothed in their small leaves, some forked; and thin bare stems.
+    strew(t, 520, (rank) => {
+      if (r() < 0.16) return stick(t, r, rank, 0.3);
+      const x = (r() - 0.5) * t.wide;
+      const y = r() * t.len;
+      const a = r() * TAU;
+      const l = 0.035 + 0.11 * r();
+      const thick = 0.0022 + 0.0018 * r();
+      const light = dead(r, rank);
+      const fork = r() < 0.4 ? { f: 0.3 + 0.4 * r(), a: a + (r() < 0.5 ? -1 : 1) * (0.5 + 0.4 * r()), l: l * (0.35 + 0.3 * r()) } : undefined;
+      const awl = 0.005 + 0.004 * r();
+      const shoot = (bx: number, by: number, ang: number, len: number, shadow: number) => {
+        t.stem(bx, by, bx + Math.sin(ang) * len, by + Math.cos(ang) * len, thick, thick * 0.6, light, rank, 0, shadow);
+        const n = Math.max(3, Math.round(len / 0.0055));
+        for (let k = 0; k < n; k++) {
+          const f = (k + 0.5) / n;
+          for (const side of [-1, 1]) {
+            const px = bx + Math.sin(ang) * len * f;
+            const py = by + Math.cos(ang) * len * f;
+            t.stem(px, py, px + Math.sin(ang + side * 0.7) * (thick + awl), py + Math.cos(ang + side * 0.7) * (thick + awl), 0.0009, 0.0004, light * 1.12, rank, 0, 0);
+          }
+        }
+      };
+      return (ox, oy) => {
+        shoot(x + ox, y + oy, a, l, 0.3);
+        if (fork) shoot(x + ox + Math.sin(a) * l * fork.f, y + oy + Math.cos(a) * l * fork.f, fork.a, fork.l, 0);
+      };
+    });
+  },
+  oval: (t, r) => {
+    strew(t, 640, (rank) => {
+      if (r() < 0.06) return stick(t, r, rank);
+      const len = 0.055 + 0.06 * r();
+      return lying(t, r, rank, len, len * (0.42 + 0.2 * r()), oval);
+    });
+  },
+  lobed: (t, r) => {
+    // Each of five lobes spread like a hand, on its long stalk.
+    strew(t, 420, (rank) => {
+      if (r() < 0.07) return stick(t, r, rank);
+      const x = (r() - 0.5) * t.wide;
+      const y = r() * t.len;
+      const a = r() * TAU;
+      const size = 0.065 + 0.055 * r();
+      const stalk = size * (0.3 + 0.3 * r());
+      const light = dead(r, rank);
+      const roll = (r() - 0.5) * 0.2;
+      const hx = x + Math.sin(a) * stalk;
+      const hy = y + Math.cos(a) * stalk;
+      return (ox, oy) => {
+        t.stem(x + ox, y + oy, hx + ox, hy + oy, 0.0011, 0.0009, light * 0.85, rank, 0, 0.2);
+        [[-1.25, 0.56], [1.25, 0.56], [-0.62, 0.84], [0.62, 0.84], [0, 1]].forEach(([da, l], q) => t.leaf(hx + ox, hy + oy, a + da, size * l, size * l * 0.52, (v) => Math.min(1, v * 3.2 + 0.25) * oval(clamp(v * 0.9 + 0.1)), { light, fold: 0.1, roll: roll + da * 0.06, rib: 0.12, vein: 0.04, shadow: q === 0 ? 0.45 : 0, wood: rank }));
+      };
+    });
+  },
+  fan: (t, r) => {
+    // Wedges opening from their stalks to a rounded edge, cut at its middle.
+    strew(t, 560, (rank) => {
+      if (r() < 0.05) return stick(t, r, rank);
+      const x = (r() - 0.5) * t.wide;
+      const y = r() * t.len;
+      const a = r() * TAU;
+      const size = 0.045 + 0.035 * r();
+      const stalk = 0.025 + 0.03 * r();
+      const light = dead(r, rank);
+      const roll = (r() - 0.5) * 0.2;
+      const hx = x + Math.sin(a) * stalk;
+      const hy = y + Math.cos(a) * stalk;
+      return (ox, oy) => {
+        t.stem(x + ox, y + oy, hx + ox, hy + oy, 0.0009, 0.0008, light * 0.9, rank, 0, 0.2);
+        t.leaf(hx + ox, hy + oy, a, size, size * 1.15, (v) => (v < 0.74 ? 0.06 + v * 1.27 : Math.sqrt(Math.max(0, 1 - Math.pow((v - 0.74) / 0.26, 2))) * (0.94 + 0.06 * Math.cos(v * 60))), { light, fold: 0.1, roll, rib: 0, vein: 0.035, veins: 0.01, shadow: 0.45, wood: rank });
+      };
+    });
+  },
+  long: (t, r) => {
+    // Tongues and straps with a strong midrib, some bent where they dried.
+    strew(t, 330, (rank) => {
+      if (r() < 0.06) return stick(t, r, rank, 0.3);
+      const len = 0.12 + 0.2 * r();
+      const strap = r() < 0.5;
+      return lying(t, r, rank, len, len * (strap ? 0.09 + 0.06 * r() : 0.2 + 0.12 * r()), strap ? lance : tongue, { rib: 0.18, veins: 12, vein: 0.03 });
+    });
+  },
+  small: (t, r) => {
+    // Small leaves and leaflets, thick on the ground, and the thin stalks they grew on.
+    strew(t, 1900, (rank) => {
+      if (r() < 0.05) return stick(t, r, rank, 0.16);
+      const len = 0.016 + 0.024 * r();
+      return lying(t, r, rank, len, len * (0.5 + 0.3 * r()), r() < 0.5 ? round : oval, { rib: 0.08, vein: 0, shadow: 0.35 });
+    });
+  },
+  frond: (t, r) => {
+    // Pieces of frond, their leaflets still either side of their stalks, among leaflets that have come away.
+    strew(t, 330, (rank) => {
+      const kind = r();
+      if (kind < 0.05) return stick(t, r, rank, 0.3);
+      if (kind < 0.8) {
+        const len = 0.025 + 0.04 * r();
+        return lying(t, r, rank, len, len * (0.26 + 0.14 * r()), cut(5), { rib: 0.1, vein: 0, shadow: 0.38 });
+      }
+      const x = (r() - 0.5) * t.wide;
+      const y = r() * t.len;
+      const a = r() * TAU;
+      const l = 0.14 + 0.36 * r();
+      const bend = (r() - 0.5) * 0.5;
+      const light = dead(r, rank);
+      const reach = 0.03 + 0.035 * r();
+      const lean = 1.0 + 0.3 * r();
+      const n = Math.max(5, Math.round(l / 0.014));
+      // Each leaflet's own length and shade, and whether it is still there.
+      const each = Array.from({ length: n * 2 }, () => ({ l: 0.75 + 0.5 * r(), s: 0.85 + 0.3 * r(), there: r() < 0.86 }));
+      return (ox, oy) => {
+        const at2 = (f: number): [number, number, number] => {
+          const ang = a + bend * (f - 0.5);
+          return [x + ox + Math.sin(a + bend * (f * 0.5 - 0.25)) * l * f, y + oy + Math.cos(a + bend * (f * 0.5 - 0.25)) * l * f, ang];
+        };
+        for (let k = 0; k < 6; k++) {
+          const [x0, y0] = at2(k / 6);
+          const [x1, y1] = at2((k + 1) / 6);
+          t.stem(x0, y0, x1, y1, 0.0022 * (1 - 0.1 * k), 0.0022 * (1 - 0.1 * (k + 1)), light * 0.8, rank, 0, k === 0 ? 0.3 : 0);
+        }
+        for (let k = 0; k < n; k++) {
+          const f = (k + 0.5) / n;
+          const [px, py, ang] = at2(f);
+          const size = reach * (0.45 + 0.55 * Math.sin(Math.PI * Math.pow(f, 0.6)));
+          for (const side of [0, 1]) {
+            const e = each[k * 2 + side];
+            if (!e.there) continue;
+            t.leaf(px, py, ang + (side ? 1 : -1) * lean, size * e.l, size * e.l * 0.3, lance, { light: clamp(light * e.s), fold: 0.1, rib: 0.08, vein: 0, shadow: 0.3, wood: rank });
+          }
+        }
+      };
+    });
+  },
+};
+
 export interface LeafAtlas {
   width: number;
   height: number;
@@ -911,6 +1132,12 @@ export function makeLeafAtlas(): LeafAtlas {
       const smalls = sprays.map((s) => s.small());
       for (let q = 0; q < k.boughs; q++) levels0[boughTile(kind, q)] = bytes(bough(kind, sprays, smalls, random(0xb0a9 + ki * 613 + q * 71)));
     }
+  });
+  // What lies fallen: one tile of each kind of litter, as much ground as LITTER_SPAN says.
+  LITTER_NAMES.forEach((name, li) => {
+    const t = new Tile(LITTER_SPAN[1], LITTER_SPAN[0]);
+    LITTER[name](t, random(0x117e + li * 409));
+    levels0[litterTile(name)] = bytes(t);
   });
   // Level by level, every tile's texels one after another, as an array of textures is filled.
   const chains = levels0.map((l) => [l, ...shrink(l)]);

@@ -1,7 +1,7 @@
 // The kinds of leaves a plant's cards show (core/leaves.ts): every kind has its tiles in the atlas, one after
 // another, and a card's coordinates never run from one tile into the next.
 import { describe, expect, it } from 'vitest';
-import { boughTile, defaultLeaf, LEAF_KIND_NAMES, LEAF_KINDS, LEAF_TILES, sprayTile, tileKind, tileU, type LeafKind } from './leaves.ts';
+import { boughTile, defaultLeaf, LEAF_CARD_TILES, LEAF_KIND_NAMES, LEAF_KINDS, LEAF_TILES, LITTER_KINDS, LITTER_NAMES, LITTER_SPAN, litterTile, sprayTile, tileKind, tileLitter, tileU, type LeafKind } from './leaves.ts';
 
 describe('the atlas of leaves', () => {
   it('has a tile for every spray and bough of every kind, each once', () => {
@@ -26,8 +26,26 @@ describe('the atlas of leaves', () => {
         expect(k.bough[0], name).toBeGreaterThan(k.spray[0]);
       }
     }
-    expect(seen.size).toBe(LEAF_TILES);
-    expect(Math.max(...seen)).toBe(LEAF_TILES - 1);
+    expect(seen.size).toBe(LEAF_CARD_TILES);
+    expect(Math.max(...seen)).toBe(LEAF_CARD_TILES - 1);
+  });
+
+  it('has a tile of litter for every kind of it, after the sprays and boughs, and every kind of leaf falls as one', () => {
+    const seen = new Set<number>();
+    for (const name of LITTER_NAMES) {
+      const t = litterTile(name);
+      expect(t, name).toBeGreaterThanOrEqual(LEAF_CARD_TILES);
+      expect(t, name).toBeLessThan(LEAF_TILES);
+      expect(seen.has(t), name).toBe(false);
+      seen.add(t);
+      expect(tileLitter(t)).toBe(name);
+      expect(() => tileKind(t), name).toThrow();
+    }
+    expect(seen.size).toBe(LEAF_TILES - LEAF_CARD_TILES);
+    for (let t = 0; t < LEAF_CARD_TILES; t++) expect(tileLitter(t)).toBeUndefined();
+    for (const name of LEAF_KIND_NAMES) expect(LITTER_KINDS[LEAF_KINDS[name].falls], name).toBeDefined();
+    // A tile of litter is as much ground as a tile is texels: the same number of them to a metre each way.
+    expect(LITTER_SPAN[1] / LITTER_SPAN[0]).toBeCloseTo(2, 6);
   });
 
   it('picks one of a kind\'s tiles by any whole number, and a spray where a kind has no bough', () => {

@@ -7,7 +7,32 @@
 /** A tile's size in the atlas, in texels: across its twig, and along it. */
 export const LEAF_TILE = { across: 256, along: 512 } as const;
 
+/**
+ * What lies fallen under trees (docs/plans/RENDERING.md, "The fidelity pass"): for each kind of litter the atlas has one
+ * tile more, a patch of ground strewn with such leaves, which repeats without a seam. Several kinds of leaf fall as one
+ * kind of litter. As with the sprays, how a kind looks is drawn by the viewer and is nobody's record.
+ */
+export const LITTER_KINDS = {
+  needles: 'needles lying every way, and the short shoots some trees shed whole',
+  scales: 'lengths of shoot clothed in scale or awl leaves, and thin jointed stems',
+  oval: 'plain oval leaves, and bits of twig',
+  lobed: 'leaves cut into lobes',
+  fan: 'fan-shaped leaves on their long stalks',
+  long: 'tongue and strap-shaped leaves',
+  small: 'small leaves and leaflets',
+  frond: 'fronds and pieces of them, and loose leaflets',
+} as const;
+
+export type LitterName = keyof typeof LITTER_KINDS;
+
+export const LITTER_NAMES = Object.keys(LITTER_KINDS) as LitterName[];
+
+/** How much ground a tile of litter covers, in metres: across, and along. A tile repeats at this. */
+export const LITTER_SPAN = [0.7, 1.4] as const;
+
 export interface LeafKind {
+  /** which kind of litter it falls as */
+  falls: LitterName;
   /** how many different sprays of it the atlas has */
   sprays: number;
   /** a spray's length along its twig and its width across, in metres: a card of it is drawn so big */
@@ -25,31 +50,31 @@ export interface LeafKind {
  */
 export const LEAF_KINDS = {
   // Needles and scales.
-  'needle-flat': { sprays: 3, spray: [0.42, 0.26], boughs: 1, bough: [1.7, 1.2], what: 'needles in two flat ranks along feathery shoots: a redwood, a swamp cypress, a yew, a fir' },
-  'needle-tuft': { sprays: 3, spray: [0.44, 0.36], boughs: 1, bough: [1.7, 1.3], what: 'long needles in bundles, brushes of them at the ends of twigs: a pine' },
-  'needle-scale': { sprays: 3, spray: [0.42, 0.3], boughs: 1, bough: [1.7, 1.2], what: 'shoots clothed in small scale leaves, in flattened branching sprays: a cypress, a cheirolepid, a walchian' },
-  'needle-awl': { sprays: 3, spray: [0.4, 0.18], boughs: 1, bough: [1.6, 1.0], what: 'short stiff leaves all round a shoot, like a bottle brush: a spruce, a monkey puzzle, a scale tree' },
+  'needle-flat': { falls: 'needles', sprays: 3, spray: [0.42, 0.26], boughs: 1, bough: [1.7, 1.2], what: 'needles in two flat ranks along feathery shoots: a redwood, a swamp cypress, a yew, a fir' },
+  'needle-tuft': { falls: 'needles', sprays: 3, spray: [0.44, 0.36], boughs: 1, bough: [1.7, 1.3], what: 'long needles in bundles, brushes of them at the ends of twigs: a pine' },
+  'needle-scale': { falls: 'scales', sprays: 3, spray: [0.42, 0.3], boughs: 1, bough: [1.7, 1.2], what: 'shoots clothed in small scale leaves, in flattened branching sprays: a cypress, a cheirolepid, a walchian' },
+  'needle-awl': { falls: 'scales', sprays: 3, spray: [0.4, 0.18], boughs: 1, bough: [1.6, 1.0], what: 'short stiff leaves all round a shoot, like a bottle brush: a spruce, a monkey puzzle, a scale tree' },
   // Fronds: a card of one is a whole leaf.
-  'frond-fern': { sprays: 3, spray: [1.0, 0.36], boughs: 0, bough: [0, 0], what: "a fern's frond: leaflets either side of its stalk, each cut again" },
-  'frond-cycad': { sprays: 2, spray: [1.0, 0.3], boughs: 0, bough: [0, 0], what: 'a stiff frond of narrow leaflets, close together: a cycad, a bennettite' },
-  'frond-feather': { sprays: 2, spray: [1.0, 0.5], boughs: 0, bough: [0, 0], what: 'a long frond of drooping leaflets: a feather palm' },
-  'frond-fan': { sprays: 2, spray: [1.0, 1.0], boughs: 0, bough: [0, 0], what: 'a pleated fan on a stalk, its segments parted towards their tips: a fan palm' },
-  'frond-seed': { sprays: 2, spray: [1.0, 0.6], boughs: 0, bough: [0, 0], what: 'a great frond twice divided, its leaflets small and rounded: a seed fern, a tree fern' },
+  'frond-fern': { falls: 'frond', sprays: 3, spray: [1.0, 0.36], boughs: 0, bough: [0, 0], what: "a fern's frond: leaflets either side of its stalk, each cut again" },
+  'frond-cycad': { falls: 'frond', sprays: 2, spray: [1.0, 0.3], boughs: 0, bough: [0, 0], what: 'a stiff frond of narrow leaflets, close together: a cycad, a bennettite' },
+  'frond-feather': { falls: 'frond', sprays: 2, spray: [1.0, 0.5], boughs: 0, bough: [0, 0], what: 'a long frond of drooping leaflets: a feather palm' },
+  'frond-fan': { falls: 'frond', sprays: 2, spray: [1.0, 1.0], boughs: 0, bough: [0, 0], what: 'a pleated fan on a stalk, its segments parted towards their tips: a fan palm' },
+  'frond-seed': { falls: 'frond', sprays: 2, spray: [1.0, 0.6], boughs: 0, bough: [0, 0], what: 'a great frond twice divided, its leaflets small and rounded: a seed fern, a tree fern' },
   // Broad leaves.
-  'broad-oval': { sprays: 3, spray: [0.46, 0.38], boughs: 1, bough: [1.7, 1.4], what: 'plain oval leaves, alternate along a twig: most broad-leaved trees' },
-  'broad-lobed': { sprays: 2, spray: [0.5, 0.46], boughs: 1, bough: [1.7, 1.4], what: 'leaves cut into lobes, as a plane tree or a maple' },
-  'broad-fan': { sprays: 2, spray: [0.4, 0.34], boughs: 1, bough: [1.6, 1.3], what: 'fan-shaped leaves in clusters on short shoots: a ginkgo' },
-  'broad-tongue': { sprays: 2, spray: [0.55, 0.46], boughs: 1, bough: [1.7, 1.4], what: 'tongue-shaped leaves with a strong midrib, in tufts: a glossopterid' },
-  'broad-strap': { sprays: 2, spray: [0.85, 0.55], boughs: 1, bough: [2.0, 1.6], what: 'long strap-shaped leaves at the ends of twigs: a cordaite' },
-  'broad-small': { sprays: 2, spray: [0.34, 0.26], boughs: 1, bough: [1.3, 1.0], what: 'small leaves on wiry twigs: a shrub of dry ground' },
-  'broad-compound': { sprays: 2, spray: [0.46, 0.4], boughs: 1, bough: [1.7, 1.4], what: 'leaves of many small leaflets either side of a stalk: an acacia, a legume' },
+  'broad-oval': { falls: 'oval', sprays: 3, spray: [0.46, 0.38], boughs: 1, bough: [1.7, 1.4], what: 'plain oval leaves, alternate along a twig: most broad-leaved trees' },
+  'broad-lobed': { falls: 'lobed', sprays: 2, spray: [0.5, 0.46], boughs: 1, bough: [1.7, 1.4], what: 'leaves cut into lobes, as a plane tree or a maple' },
+  'broad-fan': { falls: 'fan', sprays: 2, spray: [0.4, 0.34], boughs: 1, bough: [1.6, 1.3], what: 'fan-shaped leaves in clusters on short shoots: a ginkgo' },
+  'broad-tongue': { falls: 'long', sprays: 2, spray: [0.55, 0.46], boughs: 1, bough: [1.7, 1.4], what: 'tongue-shaped leaves with a strong midrib, in tufts: a glossopterid' },
+  'broad-strap': { falls: 'long', sprays: 2, spray: [0.85, 0.55], boughs: 1, bough: [2.0, 1.6], what: 'long strap-shaped leaves at the ends of twigs: a cordaite' },
+  'broad-small': { falls: 'small', sprays: 2, spray: [0.34, 0.26], boughs: 1, bough: [1.3, 1.0], what: 'small leaves on wiry twigs: a shrub of dry ground' },
+  'broad-compound': { falls: 'small', sprays: 2, spray: [0.46, 0.4], boughs: 1, bough: [1.7, 1.4], what: 'leaves of many small leaflets either side of a stalk: an acacia, a legume' },
   // What grows low.
-  'blade-grass': { sprays: 4, spray: [1.0, 1.0], boughs: 0, bough: [0, 0], what: 'a tuft of narrow blades, some bent over' },
-  'blade-reed': { sprays: 2, spray: [1.0, 0.5], boughs: 0, bough: [0, 0], what: 'a few tall strap leaves and stems, upright' },
-  'blade-rush': { sprays: 2, spray: [1.0, 0.7], boughs: 0, bough: [0, 0], what: 'thin bare stems, upright and a little spread: a rush, a joint fir, an early land plant' },
-  whorl: { sprays: 2, spray: [1.0, 0.36], boughs: 0, bough: [0, 0], what: 'a jointed stem with a ring of thin branches at each joint: a horsetail' },
-  herb: { sprays: 3, spray: [1.0, 1.0], boughs: 0, bough: [0, 0], what: 'a low leafy plant: soft leaves on short stems from the ground' },
-  moss: { sprays: 2, spray: [1.0, 1.0], boughs: 0, bough: [0, 0], what: 'a cushion of tiny leaves' },
+  'blade-grass': { falls: 'long', sprays: 4, spray: [1.0, 1.0], boughs: 0, bough: [0, 0], what: 'a tuft of narrow blades, some bent over' },
+  'blade-reed': { falls: 'long', sprays: 2, spray: [1.0, 0.5], boughs: 0, bough: [0, 0], what: 'a few tall strap leaves and stems, upright' },
+  'blade-rush': { falls: 'scales', sprays: 2, spray: [1.0, 0.7], boughs: 0, bough: [0, 0], what: 'thin bare stems, upright and a little spread: a rush, a joint fir, an early land plant' },
+  whorl: { falls: 'scales', sprays: 2, spray: [1.0, 0.36], boughs: 0, bough: [0, 0], what: 'a jointed stem with a ring of thin branches at each joint: a horsetail' },
+  herb: { falls: 'oval', sprays: 3, spray: [1.0, 1.0], boughs: 0, bough: [0, 0], what: 'a low leafy plant: soft leaves on short stems from the ground' },
+  moss: { falls: 'small', sprays: 2, spray: [1.0, 1.0], boughs: 0, bough: [0, 0], what: 'a cushion of tiny leaves' },
 } as const satisfies Record<string, LeafKind>;
 
 export type LeafKindName = keyof typeof LEAF_KINDS;
@@ -65,8 +90,18 @@ for (const name of LEAF_KIND_NAMES) {
   count += k.sprays + k.boughs;
 }
 
+/** How many tiles are sprays and boughs, which a plant's cards show: the tiles of litter come after them. */
+export const LEAF_CARD_TILES = count;
+const LITTER_FIRST = count;
+
 /** How many tiles the atlas has. */
-export const LEAF_TILES = count;
+export const LEAF_TILES = count + LITTER_NAMES.length;
+
+/** The tile of a kind of litter. */
+export const litterTile = (name: LitterName): number => LITTER_FIRST + LITTER_NAMES.indexOf(name);
+
+/** Which kind of litter a tile is of, if it is one. */
+export const tileLitter = (tile: number): LitterName | undefined => (tile >= LITTER_FIRST ? LITTER_NAMES[tile - LITTER_FIRST] : undefined);
 
 /** The tile of a kind's spray: one of its sprays, by any whole number. */
 export function sprayTile(kind: LeafKindName, pick: number): number {
@@ -80,7 +115,7 @@ export function boughTile(kind: LeafKindName, pick: number): number {
   return n ? FIRST[kind].bough + ((((pick | 0) % n) + n) % n) : sprayTile(kind, pick);
 }
 
-/** Which kind a tile is of, and whether it is a bough. */
+/** Which kind a tile of sprays or of a bough is of, and whether it is a bough. A tile of litter is of no kind of leaf. */
 export function tileKind(tile: number): { kind: LeafKindName; bough: boolean; nth: number } {
   for (const name of LEAF_KIND_NAMES) {
     const k: LeafKind = LEAF_KINDS[name];

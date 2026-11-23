@@ -1,9 +1,11 @@
 // A sheet of the atlas of leaves (core/leaves.ts, viewer/src/gl/leafatlas.ts): every tile, in greens something like the
 // renderer's, over a pale ground, so that whoever changes how a kind of leaf is drawn can look at it. No browser or GPU.
 //
-//   npx tsx tools/look/leaves.ts <out.png> [--only broad-oval,needle-flat] [--scale 1] [--level 0]
+//   npx tsx tools/look/leaves.ts <out.png> [--only broad-oval,needle-flat,oval] [--scale 1] [--level 0]
+//
+// `--only` takes kinds of leaf and kinds of litter (core/leaves.ts); a tile of litter is drawn in browns, over earth.
 import { writeFileSync } from 'node:fs';
-import { LEAF_KIND_NAMES, LEAF_KINDS, LEAF_TILES, tileKind } from '../../core/leaves.ts';
+import { LEAF_KIND_NAMES, LEAF_KINDS, LEAF_TILES, LITTER_NAMES, tileKind, tileLitter } from '../../core/leaves.ts';
 import { makeLeafAtlas } from '../../viewer/src/gl/leafatlas.ts';
 import { png } from '../world/src/formsheet.ts';
 
@@ -24,7 +26,9 @@ const ms = performance.now() - t0;
 const w = Math.max(1, atlas.width >> level);
 const h = Math.max(1, atlas.height >> level);
 const scale = Number(option('scale') ?? 0.5) * 2 ** level;
-const tiles = Array.from({ length: LEAF_TILES }, (_, i) => i).filter((i) => !only || only.includes(tileKind(i).kind));
+// A tile is named by its kind of leaf, or by its kind of litter.
+const nameOf = (i: number): string => tileLitter(i) ?? tileKind(i).kind;
+const tiles = Array.from({ length: LEAF_TILES }, (_, i) => i).filter((i) => !only || only.includes(nameOf(i)));
 const tw = Math.round(w * scale);
 const th = Math.round(h * scale);
 const cols = Math.min(tiles.length, Math.max(1, Math.floor(2400 / (tw + 4))));
@@ -52,10 +56,14 @@ tiles.forEach((tile, n) => {
       const twig = [70 + 80 * light, 52 + 60 * light, 36 + 40 * light];
       const at = ((y0 + j) * W + x0 + i) * 3;
       const sky = [226, 232, 238];
-      for (let c = 0; c < 3; c++) rgb[at + c] = Math.round(Math.max(0, Math.min(255, (leaf[c] * (1 - wood) + twig[c] * wood) * a + sky[c] * (1 - a))));
+      // What lies fallen is brown, over earth: its second part is each leaf's place in the order they fell, not twig.
+      const litter = tileLitter(tile) !== undefined;
+      const dead = [30 + 150 * light, 20 + 112 * light, 10 + 56 * light];
+      const earth = [96, 76, 54];
+      for (let c = 0; c < 3; c++) rgb[at + c] = Math.round(Math.max(0, Math.min(255, litter ? dead[c] * a + earth[c] * (1 - a) : (leaf[c] * (1 - wood) + twig[c] * wood) * a + sky[c] * (1 - a))));
     }
   }
 });
 writeFileSync(out, png(rgb, W, H));
-const named = LEAF_KIND_NAMES.filter((k) => !only || only.includes(k)).map((k) => `${k} ${LEAF_KINDS[k].sprays}+${LEAF_KINDS[k].boughs}`);
+const named = [...LEAF_KIND_NAMES.filter((k) => !only || only.includes(k)).map((k) => `${k} ${LEAF_KINDS[k].sprays}+${LEAF_KINDS[k].boughs}`), ...LITTER_NAMES.filter((k) => !only || only.includes(k)).map((k) => `${k} litter`)];
 console.log(`${out}: ${tiles.length} of ${LEAF_TILES} tiles at level ${level}, ${cols} to a row, drawn in ${ms.toFixed(0)} ms: ${named.join(', ')}`);

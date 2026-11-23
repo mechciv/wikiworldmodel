@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { parse } from 'yaml';
 import { describe, expect, it } from 'vitest';
 import { applyChange, canonicalForm, formSource, resolveForm, type Form, type TreeStep } from '../../../core/form.ts';
-import { defaultLeaf, LEAF_TILES, tileKind } from '../../../core/leaves.ts';
+import { defaultLeaf, LEAF_CARD_TILES, tileKind } from '../../../core/leaves.ts';
 import { MAT, Mesh, STRIDE } from '../city/kit.ts';
 import { checkForm, drawAnimal, drawPlant, meshBounds, POSE, unitStance } from './forms.ts';
 
@@ -168,7 +168,7 @@ describe('the plans', () => {
           const v = fl[i * 7 + 5];
           const tile = Math.floor(u);
           expect(tile, n).toBeGreaterThanOrEqual(0);
-          expect(tile, n).toBeLessThan(LEAF_TILES);
+          expect(tile, n).toBeLessThan(LEAF_CARD_TILES);
           // Within its tile, clear of the next; and along it from 0 to 1.
           expect(u - tile, n).toBeGreaterThan(0.005);
           expect(u - tile, n).toBeLessThan(0.995);

@@ -319,7 +319,7 @@ plants, the bodies, the people and what they build, and raised each by the means
   colours it, how much of each material is there, and the grain of the two there is most of is read. Each is read
   three times among the tiles of a grid of hexagons, so that no repeat shows from above, and from the eye, where a
   float keeps its small places. A face too steep to read from above is read from its sides, its beds level. None of
-  the twelve shows a living thing: what lies under trees is still drawn.
+  the twelve shows a living thing: what lies under trees is drawn (below).
 - **Leaves come from an atlas.** A card of leaves shows a tile of an array of textures
   ([core/leaves.ts](../../core/leaves.ts), [leafatlas.ts](../../viewer/src/gl/leafatlas.ts)): for each of twenty-two
   kinds of leaf, two to four sprays of it on their twig, and for a tree's kinds a bough clothed in such sprays. Flat
@@ -339,9 +339,22 @@ plants, the bodies, the people and what they build, and raised each by the means
   little way off, as a trunk, a mass and boughs laid like shingles from a way off, and as a plain shape far off.
   Limbs carry bark laid along them, of six kinds by part type: furrowed, smooth, in scales, in diamond cushions,
   ringed, ribbed and jointed. `gen:life/scene` is version 10.
-- **The ground's cover closes.** Three grids of clumps lie over one another: the scene's own, a finer one near the
-  eye, and a wider one of larger clumps out to 170 m; a wide plant is sown further from its neighbours than a narrow
-  one. Each grid is made a tile at a time and kept. A tuft's own blades are finer and bent over.
+- **The ground's cover closes, in patches.** Three grids of clumps lie over one another: the scene's own, a finer one
+  near the eye, and a wider one of larger clumps out to 170 m; a wide plant is sown further from its neighbours than a
+  narrow one. Each grid is made a tile at a time and kept. A tuft's own blades are finer and bent over. Low plants
+  grow in patches a few metres across, the same on every grid: most of a patch is of one kind, ranker or shorter and a
+  little greener or yellower than the next, thinner at its edge, and one patch in seven is an opening. Where low
+  plants have most of the ground, as on a grassland, the sward closes over patch and opening alike; where they have
+  little, there are fewer clumps than their share of a grid, since a clump covers more than its own node. None stands
+  where the eye does.
+- **What lies fallen under trees is the canopy's own leaves.** The atlas has eight tiles more, each a patch of ground
+  0.7 m by 1.4 m strewn with one kind of litter, which repeats without a seam: needles and shed shoots, lengths of
+  scale-leaved shoot, oval, lobed and fan-shaped leaves, tongues and straps, small leaves, fronds and their loose
+  leaflets, with bits of twig among them. Every kind of leaf falls as one of them, and a scene's litter is of its
+  canopy's two commonest kinds, by weight. The ground under trees reads two sheets of it, one turned and a little
+  larger than the other, within 34 m of the eye. Each leaf of a tile keeps its place in the order they fell in, the
+  last on top, so that where less has fallen only the last lie there, whole; and they lie in drifts. A leaf is a
+  brown of its own, and the earth's grain does not show through it. Nothing here is a photograph either.
 - **What grows takes its place's colour.** A leaf takes most of its hue from the tones its place's climate gives its
   low plants or its canopy, as the ground under it does: a plant and the ground from afar are of one colour. Each
   plant is a shade of its own, and what grows low is dark at its foot.
@@ -356,9 +369,10 @@ plants, the bodies, the people and what they build, and raised each by the means
 - **Shadows close to.** The nearest cascade is as wide as the view is far, down to 24 m, so that close by a shadow is
   fine enough to meet the foot that casts it.
 
-*Not done:* stones, logs and litter as things standing on the ground; a material of its own for what lies under
-trees; parallax in the ground's grain; impostors; a house's yard where no tradition says what stood in it; crops as
-plants. The lighter way draws none of this: its plants are the plain shapes they were.
+*Not done:* stones and logs as things standing on the ground; parallax in the ground's grain; impostors; a house's
+yard where no tradition says what stood in it; crops as plants. Nothing yet says that a crust of salt or a mud that
+dries to cracks grows less than its climate's share of low plants: the cover is the climate's, whatever the ground is
+made of. The lighter way draws none of this: its plants are the plain shapes they were.
 
 ## The standard
 

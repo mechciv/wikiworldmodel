@@ -1,5 +1,6 @@
 // The city's shaders. Nothing here is a fact about Rome: materials are procedural, seen through a
 // physically based sky, so that the same light falls on everything the records raise.
+import { LEAF_TILE, LITTER_SPAN } from '../../../core/leaves.ts';
 import { GROUND_LAYERS } from '../../../core/materials.ts';
 
 /** Structures rise over the years up to their start, and fall over the years after their end. */
@@ -1822,6 +1823,8 @@ float grain(float v) { return mix(v, 1.0, uMaterials); }
 // How much of the ground a substrate decides is each scanned material, and how wet the ground is, as groundClose finds.
 float gSub[M_COUNT];
 float gWet;
+// How much of the point a fallen leaf covers, as groundClose finds: the grain of the earth does not show through one.
+float gLeaf = 0.0;
 float gridWeight(int k, vec2 p) {
   vec2 lo = p - uGrid[k].xy;
   vec2 hi = uGrid[k].xy + (uGridSize[k] - 1.0) * uGrid[k].z - p;
@@ -1846,28 +1849,35 @@ float hash(vec2 p) {
   q += dot(q, q.yzx + 33.33);
   return fract((q.x + q.y) * q.z);
 }
-// What lies under trees, close by: fallen sprays of the canopy's own leaves, from the atlas of leaves a plant's cards
-// show (leafatlas.ts), each lying where it fell, turned its own way. uLitterTile is the first tile of the broad leaves'
-// sprays and of the needles'. Gives how much of a point is fallen leaf, and how light that leaf is.
+// What lies under trees, close by: the canopy's own leaves, fallen, from the tiles of litter in the atlas of leaves
+// (leafatlas.ts), each a patch of ground strewn with one kind of leaf that repeats without a seam. Two sheets of them
+// lie one over the other, the second turned and a little larger, so that neither's repeat shows; uLitterTile is the
+// tile of the canopy's commonest kind of leaf and of its next, and uLitterNext how much of what falls is the second.
+// Each leaf of a tile has its place in the order they fell in (the tile's green): where less has fallen, an amount
+// under 1, only the last of them lie here, whole. From far enough off that a texel holds many leaves, there is as much
+// leaf as the amount says. Gives how much of a point is fallen leaf, and how light that leaf is.
 uniform highp sampler2DArray uLeaves;
 uniform vec2 uLitterTile;
-vec2 fallenLeaves(vec3 p, vec2 dx, vec2 dy, float needles) {
+uniform float uLitterNext;
+vec2 fallenLeaves(vec3 p, vec2 dx, vec2 dy, float amount) {
   float cover = 0.0;
   float light = 0.5;
-  for (int k = 0; k < 3; k++) {
-    float size = k == 0 ? 0.52 : k == 1 ? 0.36 : 0.27;
-    vec2 q = p.xy / size + float(k) * 17.3;
-    vec2 id = floor(q);
-    vec2 f = q - id - 0.5;
-    float h = hash(id + float(k) * 7.7);
-    float a = h * 6.2831853;
-    vec2 ca = vec2(cos(a), sin(a)) * 1.3;
-    vec2 r = vec2(ca.x * f.x - ca.y * f.y, ca.y * f.x + ca.x * f.y) + 0.5;
-    if (r.x <= 0.01 || r.x >= 0.99 || r.y <= 0.01 || r.y >= 0.99) continue;
-    // One of its kind's three sprays; needles or broad leaves by how much of the canopy is each.
-    float tile = (fract(h * 13.7) < needles ? uLitterTile.y : uLitterTile.x) + floor(fract(h * 5.3) * 2.999);
-    vec4 t = textureGrad(uLeaves, vec3(r, tile), dx * 1.3 / size, dy * 1.3 / size);
-    if (t.a > cover) { cover = t.a; light = t.r * (0.7 + 0.6 * fract(h * 3.1)); }
+  for (int k = 0; k < 2; k++) {
+    float turn = k == 0 ? 0.47 : 2.21;
+    vec2 ct = vec2(cos(turn), sin(turn));
+    mat2 m = mat2(ct.x, ct.y, -ct.y, ct.x);
+    vec2 span = vec2(${LITTER_SPAN[0].toFixed(3)}, ${LITTER_SPAN[1].toFixed(3)}) * (k == 0 ? 1.0 : 1.31);
+    vec2 uv = (m * p.xy) / span + float(k) * 0.37;
+    vec2 gx = (m * dx) / span;
+    vec2 gy = (m * dy) / span;
+    bool next = k == 1 && uLitterNext > 0.0;
+    float some = amount * (uLitterNext > 0.0 ? min(1.0, 2.0 * (k == 1 ? uLitterNext : 1.0 - uLitterNext)) : 1.0);
+    vec4 t = textureGrad(uLeaves, vec3(uv, next ? uLitterTile.y : uLitterTile.x), gx, gy);
+    // How many texels across a pixel is: the more, the less any one leaf's place in the order can be told.
+    float lod = max(0.0, 0.5 * log2(max(dot(gx, gx) * ${(LEAF_TILE.across * LEAF_TILE.across).toFixed(1)}, dot(gy, gy) * ${(LEAF_TILE.along * LEAF_TILE.along).toFixed(1)})));
+    float soft = clamp(0.05 + 0.22 * lod, 0.05, 1.0);
+    float there = t.a * smoothstep(t.g - soft, t.g + soft, some);
+    if (there > cover) { cover = there; light = t.r; }
   }
   return vec2(cover, light);
 }
@@ -2193,10 +2203,20 @@ vec3 groundClose(vec3 c, vec3 p, vec3 n, float dist, vec4 mask, float slope, out
   // browner or paler than the next: more of them the more canopy there is over the place.
   float litterNear = uMaterials * (1.0 - smoothstep(14.0, 34.0, dist));
   if (litterNear > 0.0 && b1 > 0.0) {
-    vec2 leaf = fallenLeaves(p, dFdx(p.xy), dFdy(p.xy), uLitter);
-    vec3 dead = mix(vec3(0.16, 0.1, 0.05), vec3(0.42, 0.3, 0.14), leaf.y) * mix(vec3(1.0), vec3(0.8, 0.9, 0.8), fract(leaf.y * 7.0) * 0.4);
-    litter = mix(litter, mix(litter * 0.62, dead, smoothstep(0.3, 0.55, leaf.x)), litterNear);
-    hLitter = mix(hLitter, hLitter * 0.5 + 0.5 * leaf.x, litterNear);
+    // In drifts: thick where the last wind left them, a few between.
+    float drift = clamp(0.18 + 1.25 * smoothstep(0.3, 0.72, fbmM(p + 31.0, 1.3)), 0.0, 1.0);
+    vec2 leaf = fallenLeaves(p, dFdx(p.xy), dFdy(p.xy), drift);
+    // Browns from nearly black to straw: a russet one here, a yellow or a grey one there, by a number each leaf's
+    // own lightness gives it.
+    float kind = fract(leaf.y * 17.0);
+    vec3 hue = kind < 0.25 ? vec3(1.22, 0.84, 0.6) : kind < 0.5 ? vec3(1.05, 1.0, 0.74) : kind < 0.85 ? vec3(1.0) : vec3(0.85, 0.9, 0.95);
+    vec3 dead = mix(vec3(0.05, 0.032, 0.018), vec3(0.5, 0.36, 0.17), smoothstep(0.1, 0.9, leaf.y)) * hue;
+    float lies = smoothstep(0.25, 0.6, leaf.x);
+    // The earth is in shadow along a leaf's edge.
+    float edge = smoothstep(0.02, 0.22, leaf.x) * (1.0 - lies);
+    litter = mix(litter, mix(litter * (0.74 - 0.3 * edge), dead, lies), litterNear);
+    hLitter = mix(hLitter, hLitter * 0.5 + 0.5 * lies, litterNear);
+    gLeaf = lies * litterNear * b1 / sum;
   }
   vec3 g = (soil * b0 + litter * b1 + mud * b2 + sand * b3 + gravel * b4 + rock * b5) / sum;
   float h = (hSoil * b0 + hLitter * b1 + hMud * b2 * 0.3 + hSand * b3 * 0.5 + hGravel * b4 + hRock * b5) / sum;
@@ -2427,11 +2447,13 @@ void main() {
     vec3 detail;
     float rougher;
     float sky;
-    nd = groundGrain(vRel, relDx, relDy, nd, grainy, detail, rougher, sky);
-    c *= detail;
+    vec3 grained = groundGrain(vRel, relDx, relDy, nd, grainy, detail, rougher, sky);
+    // A fallen leaf lies over the earth's grain: smoother than it, and its own colour.
+    nd = normalize(mix(grained, nd, 0.7 * gLeaf));
+    c *= mix(detail, vec3(1.0), 0.85 * gLeaf);
     // Wet ground keeps its sheen whatever its grain.
     rough = clamp(rough + rougher * (1.0 - 0.7 * gWet), 0.12, 1.0);
-    ao *= sky;
+    ao *= mix(sky, 1.0, 0.6 * gLeaf);
   }
   vec3 lit = shade(c, rough, 0.0, nd, p, uEye, ao * floorShade, sh);
   if (river > 0.0) lit = mix(lit, shade(vec3(0.145, 0.15, 0.085), 0.14, 0.0, vec3(0.0, 0.0, 1.0), p, uEye, 1.0, sh), river);

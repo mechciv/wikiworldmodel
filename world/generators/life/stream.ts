@@ -9,7 +9,7 @@ import { MAT, Mesh, meshParts } from '../city/kit.ts';
 import { hash2, hashString, TAU } from '../city/math.ts';
 import { clumpWidth, drawAnimal, drawClump, drawPlant, POSE, type Detail, type Stance } from './forms.ts';
 import { banksOf, CELL, CELLS, cellParts, cellKey, coverMask, EXTENT, groundGrids, LandCover, makePlan, placeLook, waterLevels, waterRibbons, waterSheet, watersFor, type CellRows, type LivingParams, type LivingPlan, type PlaceLook } from './scene/v10.ts';
-import { freshOf, type Waters } from './land.ts';
+import { freshOf, noise, type Waters } from './land.ts';
 import { drawDwelling, HOUSE_VARIANTS, houseSize, type HouseDetail } from '../people/dwellings.ts';
 import { LandUseMap, landUseMask, makeSettlement, type SettlementPlan } from '../people/settlement/v4.ts';
 import { drawWork, smallWork, WORK_VARIANTS, workTop } from '../people/works.ts';
@@ -112,6 +112,17 @@ const COVER_TILE = 24;
 const COVER_KEPT = 900;
 /** How much of its own width, squared, a clump keeps clear of its neighbours: under it a grid sows fewer of them. */
 const COVER_CROWD = 0.4;
+/** How many of the clumps their share of the cover would sow are sown where that share is next to nothing; all of them where it is the whole. */
+const COVER_THIN = 0.25;
+/** How near the eye a clump of the ground's cover may stand, m: none nearer than the first, and full grown from the second. */
+const COVER_TROD = [0.45, 1.5];
+/**
+ * Low plants grow in patches, one kind spreading where it took hold: how far across a patch is, m; how many of a
+ * patch's clumps are of its own kind, the rest any of the understory; how many of the patches are openings, where
+ * little grows; how much of its cover a patch keeps at its edge; and between which shares of low plants in the land's
+ * cover a sward goes from patchy to closed. All the generator's choices, and nobody's record.
+ */
+const COVER_PATCH = { across: 4.2, own: 0.78, open: 0.14, edge: 0.4, sward: [0.5, 0.9] };
 
 /** The clumps of one tile of a grid of the ground's cover: each one's place, size, facing and place in the thinning; its mesh; its tint. */
 interface CoverTile {
@@ -764,6 +775,9 @@ export class SceneStream {
             const dy = y - ey;
             const d = Math.sqrt(dx * dx + dy * dy);
             if (d > R) continue;
+            // Where the eye stands the ground is trodden: none within half a pace of it, and small ones just beyond.
+            const trodden = d < COVER_TROD[1] ? (d - COVER_TROD[0]) / (COVER_TROD[1] - COVER_TROD[0]) : 1;
+            if (trodden <= 0) continue;
             // Fewer over the last third of the way out: each clump has its own place in that thinning.
             const keep = d < R * 0.66 ? 1 : 1 - (d - R * 0.66) / (R * 0.34);
             if (f[o7 + 6] >= keep) continue;
@@ -789,7 +803,7 @@ export class SceneStream {
             b.f[o] = x;
             b.f[o + 1] = y;
             b.f[o + 2] = f[o7 + 2];
-            b.f[o + 3] = f[o7 + 3];
+            b.f[o + 3] = f[o7 + 3] * trodden;
             b.f[o + 4] = f[o7 + 4];
             b.f[o + 5] = f[o7 + 5];
             b.s[b.n * 14 + 12] = (proto[q] >> 8) + 1;
@@ -819,6 +833,43 @@ export class SceneStream {
     return w;
   }
 
+  /**
+   * The patch of low plants a place is in. Patches are the cells nearest to points scattered a patch apart, their edges
+   * shaken so that none runs straight; every grid of the cover reads the same ones. A patch has a number that picks its
+   * kind among the understory, how rank it grows, its tone, and how thick it stands here: thinner towards its edge,
+   * and thin throughout where it is an opening.
+   */
+  private patch(x: number, y: number): { kind: number; grown: number; tone: number; thick: number; open: boolean } {
+    const seed = this.look.seed + 311;
+    const P = COVER_PATCH.across;
+    const qx = (x + (noise(x / 1.9, y / 1.9, seed) - 0.5) * 0.6 * P) / P;
+    const qy = (y + (noise(x / 1.9, y / 1.9, seed + 1) - 0.5) * 0.6 * P) / P;
+    const i0 = Math.floor(qx);
+    const j0 = Math.floor(qy);
+    let d1 = Infinity;
+    let d2 = Infinity;
+    let pi = 0;
+    let pj = 0;
+    for (let j = j0 - 1; j <= j0 + 1; j++) {
+      for (let i = i0 - 1; i <= i0 + 1; i++) {
+        const dx = i + hash2(i, j, seed + 2) - qx;
+        const dy = j + hash2(i, j, seed + 3) - qy;
+        const d = dx * dx + dy * dy;
+        if (d < d1) {
+          d2 = d1;
+          d1 = d;
+          pi = i;
+          pj = j;
+        } else if (d < d2) d2 = d;
+      }
+    }
+    // How far inside its patch the place is: nothing at the edge, where the next patch's point is as near.
+    const inside = Math.min(1, (Math.sqrt(d2) - Math.sqrt(d1)) / 0.45);
+    const open = hash2(pi, pj, seed + 4) < COVER_PATCH.open;
+    const thick = open ? 0.12 + 0.2 * (1 - inside) : COVER_PATCH.edge + (1 - COVER_PATCH.edge) * inside * (2 - inside);
+    return { kind: hash2(pi, pj, seed + 5), grown: hash2(pi, pj, seed + 6), tone: hash2(pi, pj, seed + 7), thick, open };
+  }
+
   /** One tile of a grid of the ground's cover: every clump that stands in it, wherever the eye is. */
   private coverTile(ring: number, grid: { step: number; size: number }, ti: number, tj: number): CoverTile {
     const { step, size } = grid;
@@ -836,9 +887,21 @@ export class SceneStream {
         const u = hash2(i, j, seed + 73);
         const cover = this.cover.at(x, y);
         if (cover.water || u >= cover.low) continue;
+        // A clump covers more ground than its own share of a grid, so where low plants are few there are fewer still:
+        // a thin cover stays thin when the grids are fine, and a full one still closes.
+        const share = cover.low * (COVER_THIN + (1 - COVER_THIN) * cover.low);
+        // The patch it stands in: thick in its middle and thinner at its edge, or an opening. Where low plants have
+        // most of the ground, as on a grassland, the sward closes: a patch thins little, and an opening is only thinner.
+        const patch = this.patch(x, y);
+        const closed = (cover.low - COVER_PATCH.sward[0]) / (COVER_PATCH.sward[1] - COVER_PATCH.sward[0]);
+        const sward = closed < 0 ? 0 : closed > 1 ? 1 : closed;
+        const low = share * (patch.thick + (1 - patch.thick) * sward * (patch.open ? 0.5 : 0.85));
+        if (u >= low) continue;
         // Among the houses the ground is trodden: little grows where feet go.
         if (this.landUse && hash2(i, j, seed + 78) < this.landUse.at(x, y).yard * 0.9) continue;
-        const k = this.plan.underAt(x, y, cover, hash2(i, j, seed + 74));
+        // Most of a patch is of its own kind, the same on every grid, and the rest whatever else grows here.
+        const own = hash2(i, j, seed + 80) < COVER_PATCH.own;
+        const k = this.plan.underAt(x, y, cover, own ? patch.kind : hash2(i, j, seed + 74));
         // None at all in the scene: the ground's own colour for low plants is all there is, here and everywhere.
         if (k === -1) {
           this.bare = true;
@@ -847,10 +910,12 @@ export class SceneStream {
         // None that suits this ground.
         if (k < 0) continue;
         // A wide plant stands further from its neighbours than a grid finer than itself would sow it.
-        const scale = (0.45 + 0.55 * hash2(i, j, seed + 77)) * size;
+        // Each its own size, and a patch's own growth on top: ranker here, shorter there.
+        const scale = (0.45 + 0.55 * hash2(i, j, seed + 77)) * size * (own ? 0.78 + 0.44 * patch.grown : 1);
         const wide = this.clumpWide(k) * scale;
         if (hash2(i, j, seed + 79) * wide * wide * COVER_CROWD > step * step) continue;
-        const shade = (hash2(i, j, seed + 75) * 256) | 0;
+        // Its shade is half its own and half its patch's: a patch is a little greener or yellower than the next.
+        const shade = Math.min(255, ((hash2(i, j, seed + 75) * 0.55 + (own ? patch.tone : hash2(i, j, seed + 81)) * 0.45) * 256) | 0);
         const a = hash2(i, j, seed + 76) * TAU;
         const o = count * 7;
         f[o] = x;
@@ -860,7 +925,7 @@ export class SceneStream {
         f[o + 4] = Math.sin(a);
         f[o + 5] = Math.cos(a);
         // Where it stands in the thinning at its grid's edge: kept while this is under what is kept there.
-        f[o + 6] = u / cover.low;
+        f[o + 6] = u / low;
         proto[count] = protoOf(k, shade & 3, CLUMP);
         tint[count] = shade >> 2;
         count++;
