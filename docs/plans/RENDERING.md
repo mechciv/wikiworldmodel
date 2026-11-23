@@ -441,6 +441,15 @@ plants, the bodies, the people and what they build, and raised each by the means
   horizon, is left out; and the light that has come a long way through the cloud is reckoned by its broad shape alone,
   which pays for some of the steps.
 
+*What the stones, the wood and the bare ground cost,* on the look book's views at 1600 × 900: the stones add 0.3 to
+0.4 million triangles to a stony desert's frame, of a budget of 9 million, and some 3,000 to the 90,000 the ground's
+cover may draw; fallen wood adds some 50,000 triangles to a forest's; and a crust of salt or a cracked mud draws a
+tenth or less of what it drew, since little grows on it. On the machine at hand, an Apple M3 Max with other work
+running on it, the meshes' pass took 2.3 ms before and 3.6 ms after on `ground-stones`, 2.9 and 3.1 ms on `desert`,
+and 4.9 and 5.4 ms on `forest-floor`. Whole frames were too unsteady to say more of than that they ran from 18 to 28
+ms before and after alike: over the 16 ms target either way, on a machine that is not the reference GPU, on which
+none of this has been measured.
+
 *Not done:* parallax in the ground's grain; impostors; a house's yard where no tradition says what stood in it;
 crops as plants; a house's own shape, which is still a plain box. Stones stand only where a substrate says the ground
 has gravel: the gravel the renderer lays on a climate's bare slopes and on the bars of a dry bed, and the rock of a
