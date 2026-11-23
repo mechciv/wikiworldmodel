@@ -257,12 +257,20 @@ export function hollowsOf(z: ArrayLike<number>, g: NodeGrid, r: Routing): Hollow
       if (d >= 0 && of[d] !== id && (outlet[id] < 0 || rank[d] < rank[outlet[id]])) outlet[id] = d;
     }
   }
+  const sets = lists.map((l) => Int32Array.from(l.sort((a, b) => z[a] - z[b])));
+  return { sets, of, outlet, atOutlet: atOutletOf(outlet) };
+}
+
+/** The hollows that drain out by each node, from each hollow's outlet: in the order of the hollows. */
+export function atOutletOf(outlet: Int32Array): Map<number, number[]> {
   const atOutlet = new Map<number, number[]>();
   outlet.forEach((o, id) => {
-    if (o >= 0) atOutlet.set(o, [...(atOutlet.get(o) ?? []), id]);
+    if (o < 0) return;
+    const list = atOutlet.get(o);
+    if (list) list.push(id);
+    else atOutlet.set(o, [id]);
   });
-  const sets = lists.map((l) => Int32Array.from(l.sort((a, b) => z[a] - z[b])));
-  return { sets, of, outlet, atOutlet };
+  return atOutlet;
 }
 
 export interface Flow {
@@ -404,10 +412,7 @@ export interface SlowWater {
  * basin's ground water runs out.
  */
 export function wetMonthsAt(g: NodeGrid, r: Routing, f: Flow, h: Hollows, chains: OutletChains, w: SlowWater, share: number, at: ArrayLike<number>, perennialMm = Infinity): Uint16Array {
-  const n = g.nx * g.ny;
   const areas = rowAreas(g);
-  const qm = new Float64Array(n);
-  const pool = new Float64Array(h.sets.length);
   const out = new Uint16Array(at.length);
   // A basin wet enough runs all year: the mm a year the ground a node drains gives it.
   for (let j = 0; j < at.length; j++) {
@@ -419,28 +424,68 @@ export function wetMonthsAt(g: NodeGrid, r: Routing, f: Flow, h: Hollows, chains
   const { order, down } = r;
   const { sea, passes } = f;
   const of = h.of;
-  for (let m = 0; m < 12; m++) {
-    qm.fill(0);
-    pool.fill(0);
-    const base = m * w.nodes;
-    for (let i = order.length - 1; i >= 0; i--) {
-      const k = order[i];
-      if (sea[k]) continue;
-      let v = qm[k] + w.slow[base + w.near[k]] * areas[(k / g.nx) | 0];
-      for (let id = chains.first[k]; id >= 0; id = chains.next[id]) v += pool[id] * passes[id];
-      qm[k] = v;
-      const d = down[k];
-      if (d < 0 || sea[d]) continue;
-      const from = of[k];
-      if (from >= 0 && of[d] !== from) pool[from] += v;
-      else qm[d] += v;
+  const { first, next } = chains;
+  const { slow, near, nodes } = w;
+  // The twelve months are routed in one pass down the flood's order, each summed just as it would be alone: a node's
+  // months lie side by side, kept by its place in the order. A node off the order that water reaches (under the routed
+  // sea, where the flow's sea is lower) takes a place after them.
+  let place = placesOf(r);
+  let places = order.length;
+  for (let i = 0; i < order.length; i++) {
+    const k = order[i];
+    if (sea[k]) continue;
+    const d = down[k];
+    if (d < 0 || sea[d] || place[d] >= 0) continue;
+    if (places === order.length) place = place.slice();
+    place[d] = places++;
+  }
+  const qm = new Float64Array(places * MONTHS);
+  const pool = new Float64Array(h.sets.length * MONTHS);
+  for (let i = order.length - 1; i >= 0; i--) {
+    const k = order[i];
+    if (sea[k]) continue;
+    const area = areas[(k / g.nx) | 0];
+    const s = near[k];
+    const at0 = i * MONTHS;
+    const held = first[k];
+    for (let m = 0; m < MONTHS; m++) {
+      let v = qm[at0 + m] + slow[m * nodes + s] * area;
+      for (let id = held; id >= 0; id = next[id]) v += pool[id * MONTHS + m] * passes[id];
+      qm[at0 + m] = v;
     }
-    for (let j = 0; j < at.length; j++) {
-      const k = at[j];
-      if (k >= 0 && f.q[k] > 0 && qm[k] * toFlow >= share * f.q[k]) out[j] |= 1 << m;
+    const d = down[k];
+    if (d < 0 || sea[d]) continue;
+    const from = of[k];
+    if (from >= 0 && of[d] !== from) {
+      const to = from * MONTHS;
+      for (let m = 0; m < MONTHS; m++) pool[to + m] += qm[at0 + m];
+    } else {
+      const to = place[d] * MONTHS;
+      for (let m = 0; m < MONTHS; m++) qm[to + m] += qm[at0 + m];
     }
   }
+  for (let j = 0; j < at.length; j++) {
+    const k = at[j];
+    if (k < 0 || !(f.q[k] > 0)) continue;
+    // A node no water reaches has none in any month.
+    const p = place[k];
+    for (let m = 0; m < MONTHS; m++) if ((p < 0 ? 0 : qm[p * MONTHS + m]) * toFlow >= share * f.q[k]) out[j] |= 1 << m;
+  }
   return out;
+}
+
+const MONTHS = 12;
+
+/** Each node's place in a routing's flood order, or -1: made once for each routing (wetMonthsAt). */
+const placesKept = new WeakMap<Int32Array, Int32Array>();
+function placesOf(r: Routing): Int32Array {
+  let place = placesKept.get(r.order);
+  if (!place) {
+    place = new Int32Array(r.down.length).fill(-1);
+    for (let i = 0; i < r.order.length; i++) place[r.order[i]] = i;
+    placesKept.set(r.order, place);
+  }
+  return place;
 }
 
 export interface Reach {
