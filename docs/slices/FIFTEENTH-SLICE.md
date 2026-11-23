@@ -367,7 +367,7 @@ The original GeoJSON is pinned in the manifest. Its companion dictionary identif
 the feature's ID and name. Island, canal and neighborhood names cannot be read from those attributes.
 The city record supplies a separate check on the map: its Templo Mayor point falls on land enclosed by water.
 
-The globe draws the shoreline as an area layer during 1519. Version 13 of the living scene reads the
+The globe draws the shoreline as an area layer during 1519. Version 14 of the living scene reads the
 same rings into its 100 m water grid. Interior rings leave land for settlements, and the mapped
 banks receive no procedural displacement. The scene estimates a water level from the median modern
 relief at the shoreline vertices. This gives the water and the generated ground a common height.
@@ -377,3 +377,5 @@ smaller than the ground grid, and the city generator still lays out individual s
 The landscape build test checks the dated row, the city point inside its island, and open water to
 its east. It also checks the time and place limits. The landscape browser test checks that a visit
 to the city in 1519 receives both its canal street plan and the mapped lake.
+
+![Before and after the 1519 shoreline import, showing the positions of generated houses and the mapped lake at the same scale](tenochtitlan-1519.png)
