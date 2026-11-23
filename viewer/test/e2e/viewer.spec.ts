@@ -518,3 +518,16 @@ test('opening a record of the last few thousand years fits the time control to i
   expect(s.cam.lon).toBeGreaterThan(-10);
   expect(s.cam.lon).toBeLessThan(25);
 });
+
+test('the wheel still zooms when the pointer is over a marker or its label', async ({ page }) => {
+  await page.goto(`/?b=${latestBuild()}&t=300&lat=41&lon=29&d=2&w=-800~2000`);
+  await idle(page);
+  const marker = page.locator('.marker[data-entity="places/constantinople"]');
+  for (const part of [marker.locator('.label'), marker.locator('.dot')]) {
+    const before = (await page.evaluate(() => window.__wikiworldmodel!.state())).cam.dist;
+    await part.hover();
+    await page.mouse.wheel(0, -400);
+    const after = (await page.evaluate(() => window.__wikiworldmodel!.state())).cam.dist;
+    expect(after).toBeLessThan(before);
+  }
+});

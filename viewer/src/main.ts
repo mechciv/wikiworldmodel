@@ -1553,11 +1553,14 @@ async function start(root: HTMLElement): Promise<void> {
   canvas.addEventListener('pointerup', lift);
   canvas.addEventListener('pointercancel', lift);
   canvas.addEventListener('lostpointercapture', lift);
-  canvas.addEventListener('wheel', (e) => {
+  // Markers and city labels sit over the canvas to take clicks, so wheel events over them bubble to their layers instead.
+  const onWheel = (e: WheelEvent) => {
     e.preventDefault();
     stopFlight();
-    zoomBy(e.deltaY, e.offsetX, e.offsetY);
-  }, { passive: false });
+    const box = canvas.getBoundingClientRect();
+    zoomBy(e.deltaY, e.clientX - box.left, e.clientY - box.top);
+  };
+  for (const el of [canvas, markers.el, labels.el]) el.addEventListener('wheel', onWheel, { passive: false });
 
   // Walking: W, A, S and D move the camera over the ground, at a pace that suits its height.
   const walking = new Set<string>();
