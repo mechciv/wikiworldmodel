@@ -1,5 +1,6 @@
 // The city's shaders. Nothing here is a fact about Rome: materials are procedural, seen through a
 // physically based sky, so that the same light falls on everything the records raise.
+import { GROUND_LAYERS } from '../../../core/materials.ts';
 
 /** Structures rise over the years up to their start, and fall over the years after their end. */
 export const RISE_YEARS = 7;
@@ -1457,6 +1458,148 @@ void main() {
 
 // ——— Terrain ———
 
+/**
+ * The ground's scanned materials (core/materials.ts; docs/plans/RENDERING.md, "Procedural first"): what earth, sand,
+ * pebbles, rock, mud and snow look like from a metre or two. A scan gives a material its grain: its colour divided by its
+ * own mean, to multiply the place's tone by; its normal; its roughness about its own mean; how much of the sky a point of
+ * it sees; and its height, by which two materials meet, the higher showing. Which material lies where, and in what
+ * colour, is never a scan's to say.
+ *
+ * A scan repeats every metre or two, which from a way off shows as a grid. So a material is read three times, among the
+ * tiles of a grid of hexagons, each tile's reading set off by its own two numbers, and the three are blended across the
+ * tiles' edges (after Heitz and Neyret 2018, and Mikkelsen 2022): no repeat is left to see. Places are counted from the
+ * eye, where a float still has its small places, with the eye's own place in each material's repeat and in its grid of
+ * tiles worked out apart, in doubles (city.ts).
+ */
+const MATERIALS = /* glsl */ `
+const int ${GROUND_LAYERS.map((k, i) => `M_${k.toUpperCase()} = ${i}`).join(', ')};
+const int M_COUNT = ${GROUND_LAYERS.length};
+uniform highp sampler2DArray uMatColour;
+uniform highp sampler2DArray uMatNormal;
+// Each material's mean colour and the metres one repeat covers; how much of its own hue it keeps, its mean roughness and
+// its mean height; where the eye is in its repeat (xy) and in its grid of tiles (zw); the tile the eye is in; and where
+// the eye's height is in the repeat of the one that is read from the side.
+uniform vec4 uMatMean[M_COUNT];
+uniform vec4 uMatLook[M_COUNT];
+uniform vec4 uMatAt[M_COUNT];
+uniform vec2 uMatCell[M_COUNT];
+uniform float uMatUp;
+// 1 where the materials are loaded and this way of drawing uses them: 0 draws the ground as it was drawn without them.
+uniform float uMaterials;
+// How many tiles of the grid of hexagons cross one repeat of a material; and after how many tiles their numbers repeat.
+const float MAT_TILES = 3.0;
+const float MAT_WRAP = 4096.0;
+
+// What a material is at a point: its grain as a multiplier of colour, its height, how its normal leans, its roughness
+// beside its own mean, and how much of the sky it sees.
+struct Mat { vec3 detail; float height; vec3 lean; float rough; float sky; };
+
+vec2 matHash(vec2 p) {
+  vec3 q = fract(vec3(p.xyx) * vec3(0.1031, 0.1030, 0.0973));
+  q += dot(q, q.yzx + 33.33);
+  return fract((q.xx + q.yz) * q.zy);
+}
+// One reading of a material; its lean is across and along its own image.
+Mat matTap(int layer, vec2 uv, vec2 dx, vec2 dy) {
+  vec3 at = vec3(uv, float(layer));
+  vec4 c = textureGrad(uMatColour, at, dx, dy);
+  vec4 n = textureGrad(uMatNormal, at, dx, dy);
+  vec3 mean = uMatMean[layer].rgb;
+  const vec3 LUMA = vec3(0.2126, 0.7152, 0.0722);
+  float light = dot(c.rgb, LUMA) / max(dot(mean, LUMA), 1e-4);
+  vec3 detail = mix(vec3(light), c.rgb / max(mean, vec3(1e-4)), uMatLook[layer].x);
+  return Mat(clamp(detail, 0.12, 3.0), c.a, vec3(n.rg * 2.0 - 1.0, 0.0), n.b - uMatLook[layer].y, n.a);
+}
+Mat matMix(Mat a, Mat b, float t) {
+  return Mat(mix(a.detail, b.detail, t), mix(a.height, b.height, t), mix(a.lean, b.lean, t), mix(a.rough, b.rough, t), mix(a.sky, b.sky, t));
+}
+// A material lying on the ground, where a point is \`rel\` metres from the eye; \`dx\` and \`dy\` are how \`rel\` changes
+// across a pixel. Its lean is across the ground eastwards and northwards.
+Mat matFlat(int layer, vec2 rel, vec2 dx, vec2 dy) {
+  float metres = uMatMean[layer].w;
+  vec2 st = rel / metres;
+  vec2 uv = st + uMatAt[layer].xy;
+  dx /= metres;
+  dy /= metres;
+  // The grid of hexagons, as a grid of triangles skewed square: the three tiles whose corners the point lies among.
+  vec2 sk = vec2(st.x, -0.57735027 * st.x + 1.15470054 * st.y) * MAT_TILES + uMatAt[layer].zw;
+  vec2 i = floor(sk);
+  vec3 t = vec3(sk - i, 0.0);
+  t.z = 1.0 - t.x - t.y;
+  float s = step(0.0, -t.z);
+  float s2 = 2.0 * s - 1.0;
+  vec3 w = vec3(-t.z * s2, s - t.y * s2, s - t.x * s2);
+  vec2 base = uMatCell[layer] + i;
+  Mat a = matTap(layer, uv + matHash(mod(base + vec2(s, s), MAT_WRAP)), dx, dy);
+  Mat b = matTap(layer, uv + matHash(mod(base + vec2(s, 1.0 - s), MAT_WRAP)), dx, dy);
+  Mat c = matTap(layer, uv + matHash(mod(base + vec2(1.0 - s, s), MAT_WRAP)), dx, dy);
+  // Each tile's reading counts by how near its corner is, sharply, and the more the higher it stands there: at a tile's
+  // edge the stone that stands proud shows whole, and two are not laid through one another.
+  w = w * w * w * (0.35 + vec3(a.height, b.height, c.height));
+  w = w * w;
+  w /= w.x + w.y + w.z;
+  return Mat(a.detail * w.x + b.detail * w.y + c.detail * w.z, a.height * w.x + b.height * w.y + c.height * w.z, a.lean * w.x + b.lean * w.y + c.lean * w.z, a.rough * w.x + b.rough * w.y + c.rough * w.z, a.sky * w.x + b.sky * w.y + c.sky * w.z);
+}
+// A material on a face too steep to be read from above: read from its two sides, each as far as the face is turned to
+// it, its beds level. Its lean is in the world's own directions.
+Mat matSteep(int layer, vec3 rel, vec3 dx, vec3 dy, vec3 n) {
+  float metres = uMatMean[layer].w;
+  float up = rel.z / metres + uMatUp;
+  vec2 w = n.xy * n.xy;
+  w /= max(w.x + w.y, 1e-4);
+  Mat a = matTap(layer, vec2(rel.x / metres + uMatAt[layer].x, -up), vec2(dx.x, -dx.z) / metres, vec2(dy.x, -dy.z) / metres);
+  Mat b = matTap(layer, vec2(rel.y / metres + uMatAt[layer].y, -up), vec2(dx.y, -dx.z) / metres, vec2(dy.y, -dy.z) / metres);
+  a.lean = vec3(a.lean.x, 0.0, -a.lean.y);
+  b.lean = vec3(0.0, b.lean.x, -b.lean.y);
+  return matMix(a, b, w.x);
+}
+// How much of the ground at a point is each material, as whoever colours the ground says while colouring it.
+float gMat[M_COUNT];
+void matNone() { for (int i = 0; i < M_COUNT; i++) gMat[i] = 0.0; }
+void matKeep(float k) { for (int i = 0; i < M_COUNT; i++) gMat[i] *= k; }
+Mat matOf(int layer, vec3 rel, vec3 dx, vec3 dy, vec3 n) {
+  if (layer == M_STRATA) return matSteep(layer, rel, dx, dy, n);
+  Mat m = matFlat(layer, rel.xy, dx.xy, dy.xy);
+  m.lean = normalize(vec3(n.z, 0.0, -n.x)) * m.lean.x + normalize(vec3(0.0, n.z, -n.y)) * m.lean.y;
+  return m;
+}
+// The grain of the ground at a point, from the two materials there is most of: each over as much of the ground as it has
+// more of than the third, so that nothing jumps where the third becomes the second; and the two meet by their heights.
+// \`rel\` is the point's place from the eye, and \`dx\`, \`dy\` how that changes across a pixel; \`n\` is the ground's own
+// normal. Gives the normal with the grain in it; \`detail\` multiplies the ground's colour, \`rough\` is added to its
+// roughness, \`sky\` multiplies what it sees of the sky.
+vec3 groundGrain(vec3 rel, vec3 dx, vec3 dy, vec3 n, float amount, out vec3 detail, out float rough, out float sky) {
+  int a = 0;
+  int b = 0;
+  float wa = -1.0;
+  float wb = -1.0;
+  float wc = 0.0;
+  float total = 1e-4;
+  for (int i = 0; i < M_COUNT; i++) {
+    float w = gMat[i];
+    total += w;
+    if (w > wa) { wc = wb; wb = wa; b = a; wa = w; a = i; }
+    else if (w > wb) { wc = wb; wb = w; b = i; }
+    else if (w > wc) wc = w;
+  }
+  wc = max(wc, 0.0);
+  float fa = max(wa - wc, 0.0) / total;
+  float fb = max(wb - wc, 0.0) / total;
+  Mat m = matOf(a, rel, dx, dy, n);
+  if (fb > 0.004) {
+    Mat o = matOf(b, rel, dx, dy, n);
+    float t = fb / (fa + fb);
+    m = matMix(m, o, clamp((o.height - m.height + (2.0 * t - 1.0) * 1.1) / 0.2 + 0.5, 0.0, 1.0));
+  }
+  float k = (fa + fb) * amount;
+  detail = mix(vec3(1.0), m.detail, k);
+  rough = m.rough * k * 0.7;
+  sky = mix(1.0, m.sky, k);
+  vec3 lean = m.lean * k;
+  return normalize(n * sqrt(max(0.05, 1.0 - dot(lean, lean))) + lean);
+}
+`;
+
 const GROUND = /* glsl */ `
 uniform highp isampler2D uGround0;
 uniform highp isampler2D uGround1;
@@ -1502,6 +1645,8 @@ uniform float uSeaSurface;
 ${DROP}
 ${GROUND}
 out vec3 vPos;
+// the point from the eye: the ground's grain is laid by it, where the world's position has lost its small places
+out vec3 vRel;
 invariant gl_Position;
 void main() {
   // Toward its outer edge a ring's vertices slide onto the next ring's grid, so they meet without gaps.
@@ -1512,6 +1657,7 @@ void main() {
   vec2 p = uCenter + g * uCell;
   float z = groundAt(p);
   vPos = vec3(p, z);
+  vRel = vec3(p, z) - uEye;
   // Where the sea is what is seen, it is drawn at its surface; the depth under it only colours it.
   float shown = uSeaSurface > 0.5 ? max(z, 0.0) : z;
   gl_Position = uViewProj * vec4(vec3(p, shown - drop(p)) - uEye, 1.0);
@@ -1523,6 +1669,7 @@ precision highp int;
 precision highp sampler3D;
 precision highp sampler2DArrayShadow;
 in vec3 vPos;
+in vec3 vRel;
 uniform vec3 uEye;
 // The wind across the ground, as the renderer has it: sand's ripples lie across it.
 uniform vec2 uWind;
@@ -1569,6 +1716,12 @@ uniform vec4 uGrid[3];
 uniform vec2 uGridSize[3];
 out vec4 o;
 ${LIGHTING}
+${MATERIALS}
+// A fine grain drawn by noise, where no scanned material gives the ground its grain: with them it is left out.
+float grain(float v) { return mix(v, 1.0, uMaterials); }
+// How much of the ground a substrate decides is each scanned material, and how wet the ground is, as groundClose finds.
+float gSub[M_COUNT];
+float gWet;
 float gridWeight(int k, vec2 p) {
   vec2 lo = p - uGrid[k].xy;
   vec2 hi = uGrid[k].xy + (uGridSize[k] - 1.0) * uGrid[k].z - p;
@@ -1664,7 +1817,8 @@ float peopledShare(vec3 p) {
   vec4 f = texture(uFields, fuv);
   return max(f.r, max(f.g * 0.75, f.b));
 }
-vec3 peopled(vec3 c, vec3 p, float dist) {
+vec3 peopled(vec3 c, vec3 p, float dist, out float yard) {
+  yard = 0.0;
   if (uFieldStyle.w < 0.5) return c;
   vec2 fuv = (p.xy - uFieldsBox.xy) / uFieldsBox.zw;
   if (fuv.x <= 0.0 || fuv.y <= 0.0 || fuv.x >= 1.0 || fuv.y >= 1.0) return c;
@@ -1679,7 +1833,8 @@ vec3 peopled(vec3 c, vec3 p, float dist) {
   // Among the houses the ground is trodden bare in patches, where feet and hooves go; between them it keeps what grew.
   vec3 trodden = mix(vec3(0.36, 0.30, 0.22), vec3(0.46, 0.40, 0.30), noiseM(p, 6.0));
   float worn = smoothstep(0.36, 0.6, noiseM(p, 11.0) * 0.55 + noiseM(p + 7.0, 3.0) * 0.45);
-  return mix(c, trodden, f.b * (0.4 + 0.5 * worn));
+  yard = f.b * (0.4 + 0.5 * worn);
+  return mix(c, trodden, yard);
 }
 // Bump by a height, from its derivatives across the screen (Mikkelsen 2010): a detail normal with no texture of its own.
 vec3 bumped(vec3 n, vec3 p, float h, float strength) {
@@ -1748,7 +1903,9 @@ const float SUB_EDGE = 0.02;
 // looks, is the renderer's, and nobody's record. Gives its colour, its height for the grain, and how rough it is.
 // under is the ground the climate gives the place, with its own height and roughness.
 vec3 substrateGround(vec3 p, float dist, float ripple, vec3 under, float hUnder, float rUnder, out float h, out float rough) {
-  float near = 1.0 - smoothstep(5.0, 26.0, dist);
+  // Its stones, cracks and crusts are drawn here only where no scanned material draws them.
+  float near = (1.0 - smoothstep(5.0, 26.0, dist)) * (1.0 - uMaterials);
+  for (int i = 0; i < M_COUNT; i++) gSub[i] = 0.0;
   // Cells of three sizes: pebbles, the cracks of dried mud, and the polygons of a crust.
   vec2 pebble = near > 0.0 && uSubShare[1] > 0.0 ? cellsOf(p.xy / 0.06) : vec2(0.2, 0.5);
   if (uSubSoil.y > 0.0) {
@@ -1758,6 +1915,8 @@ vec3 substrateGround(vec3 p, float dist, float ripple, vec3 under, float hUnder,
     vec3 earth = under * uSubSoil.y;
     vec3 stoneTone = mix(uSubTone[2], uSubTone[3], noiseM(p + 3.0, 0.6));
     float thick = min(1.0, uSubShare[1] * 2.0 * (1.0 - smoothstep(0.38, 0.62, sorting(p))));
+    gSub[M_STONES] = thick;
+    gSub[M_SOIL] = 1.0 - thick;
     // Close by each stone is there or not by a number of its own; from afar they are a share of the ground's colour.
     float there = near > 0.0 ? step(pebble.y, thick) : 0.0;
     vec3 stone = mix(earth * 0.8, stoneTone * (0.6 + 0.75 * fract(pebble.y * 37.0)), smoothstep(0.0, 0.2, pebble.x));
@@ -1773,7 +1932,10 @@ vec3 substrateGround(vec3 p, float dist, float ripple, vec3 under, float hUnder,
   float n2 = cracks || uSubShare[5] > 0.0 ? noiseM(p, 0.4) : 0.5;
   float fine = uSubShare[0] + uSubShare[2] + uSubShare[5] > 0.0 ? noiseM(p, 0.03) : 0.5;
   vec2 crack = cracks ? cellsOf(p.xy / 0.3 + n2 * 0.6) : vec2(0.2, 0.5);
-  vec2 crust = uSubShare[5] > 0.0 ? cellsOf(p.xy / 1.6 + n2 * 0.8) : vec2(0.2, 0.5);
+  vec2 crust = uSubShare[5] > 0.0 && uMaterials < 0.5 ? cellsOf(p.xy / 1.6 + n2 * 0.8) : vec2(0.2, 0.5);
+  // How much of a mud is drawn cracked, where its sources say it dried; and how coarse a sand is.
+  float dried = min(1.0, uSub.y * 3.0);
+  float coarse = clamp(uSub.w, 0.0, 1.0);
   float cracked = (1.0 - smoothstep(0.015, 0.07, crack.x)) * near * min(1.0, uSub.y * 3.0);
   // The ground's own gentle height: the coarse stands a little proud of the fine.
   float lie = 1.0 - u;
@@ -1791,36 +1953,45 @@ vec3 substrateGround(vec3 p, float dist, float ripple, vec3 under, float hUnder,
     float ri = 0.9;
     if (i == 0) {
       // Sand: a fine grain, and its ripples, plainer where the sources name them.
-      tone *= 0.9 + 0.2 * fine + 0.06 * ripple * (0.6 + uSub.z);
+      tone *= grain(0.9 + 0.2 * fine) + 0.06 * ripple * (0.6 + uSub.z);
       hi = hi * 0.8 + ripple * 0.12;
+      gSub[M_SAND] += b * (1.0 - coarse);
+      gSub[M_GRIT] += b * coarse;
     } else if (i == 1) {
       // Gravel: mottled from a way off; close by, stones each of its own shade, with the finer ground between them.
       vec3 between = mix(uTone[4], uTone[5], 0.5) * 0.7;
       vec3 stones = mix(between, tone * (0.6 + 0.75 * pebble.y), smoothstep(0.0, 0.2, pebble.x));
-      tone = mix(tone * (0.6 + 0.7 * noiseM(p + 2.0, 0.025)), stones, near);
+      tone = mix(tone * grain(0.6 + 0.7 * noiseM(p + 2.0, 0.025)), stones, near);
       hi = mix(hi, 0.4 + 0.6 * smoothstep(0.0, 0.35, pebble.x), near);
       ri = 0.85;
+      gSub[M_PEBBLES] += b;
     } else if (i == 2) {
-      tone *= 0.92 + 0.14 * fine;
+      tone *= grain(0.92 + 0.14 * fine);
       hi *= 0.5;
+      gSub[M_EARTH] += b;
     } else if (i == 3 || i == 4) {
       // Mud and lime mud: smooth, and split by cracks where they dried.
       tone *= (0.9 + 0.2 * noiseM(p, 0.5)) * (1.0 - 0.6 * cracked);
       hi = hi * 0.4 - cracked * 0.5;
       ri = i == 3 ? 0.6 : 0.7;
+      gSub[M_CRACKED] += b * dried;
+      gSub[M_EARTH] += b * (1.0 - dried);
     } else if (i == 5) {
       // A crust of salt: pale and smooth, with the ridges of its polygons standing a little proud.
       float ridge = 1.0 - smoothstep(0.0, 0.1, crust.x);
-      tone *= (0.9 + 0.16 * fine) * (1.0 + 0.1 * ridge) * (0.94 + 0.1 * crust.y);
+      tone *= grain(0.9 + 0.16 * fine) * (1.0 + 0.1 * ridge) * (0.94 + 0.1 * crust.y);
       hi = hi * 0.3 + ridge * 0.6;
       ri = 0.5;
+      gSub[M_CRUST] += b;
     } else if (i == 6) {
-      tone *= 0.8 + 0.4 * noiseM(p, 0.2);
+      tone *= grain(0.8 + 0.4 * noiseM(p, 0.2));
       ri = 0.95;
+      gSub[M_SOIL] += b;
     } else {
       tone *= 0.9 + 0.2 * fbmM(p, 0.7);
       hi *= 0.6;
       ri = 0.95;
+      gSub[M_GRIT] += b;
     }
     c += tone * b;
     h += hi * b;
@@ -1829,6 +2000,7 @@ vec3 substrateGround(vec3 p, float dist, float ripple, vec3 under, float hUnder,
   }
   h /= sum;
   rough /= sum;
+  for (int i = 0; i < M_COUNT; i++) gSub[i] /= sum;
   return c / sum;
 }
 // The ground close by (docs/plans/RENDERING.md, step 2): soil, litter, mud, sand, gravel and rock, each its own colour,
@@ -1838,6 +2010,7 @@ vec3 substrateGround(vec3 p, float dist, float ripple, vec3 under, float hUnder,
 vec3 groundClose(vec3 c, vec3 p, vec3 n, float dist, vec4 mask, float slope, out float rough, out vec3 nd) {
   rough = 0.92;
   nd = n;
+  gWet = 0.0;
   float close = 1.0 - smoothstep(70.0, 260.0, dist);
   float aboveWater;
   float dryBed;
@@ -1847,19 +2020,20 @@ vec3 groundClose(vec3 c, vec3 p, vec3 n, float dist, vec4 mask, float slope, out
   // Wet within the water's rise of its level; the bars of its channel where the bank is gentle. A dry bed is not wet.
   float wet = water * smoothstep(1.3, 0.1, aboveWater) * (1.0 - wash);
   float bar = water * smoothstep(0.16, 0.04, slope) * smoothstep(2.2, 0.2, aboveWater);
+  gWet = wet;
   if (close <= 0.0) return mix(c, c * 0.62, wet * 0.8);
-  vec3 soil = mix(uTone[0], uTone[1], fbmM(p, 2.4)) * (0.75 + 0.5 * noiseM(p, 0.2));
-  vec3 needles = mix(vec3(0.20, 0.11, 0.05), vec3(0.29, 0.17, 0.08), noiseM(p, 0.05));
-  vec3 fallen = mix(vec3(0.17, 0.12, 0.06), vec3(0.30, 0.22, 0.10), noiseM(p, 0.09));
-  vec3 litter = mix(fallen, needles, uLitter) * (0.7 + 0.5 * noiseM(p + 7.0, 0.03));
+  vec3 soil = mix(uTone[0], uTone[1], fbmM(p, 2.4)) * grain(0.75 + 0.5 * noiseM(p, 0.2));
+  vec3 needles = mix(vec3(0.20, 0.11, 0.05), vec3(0.29, 0.17, 0.08), mix(noiseM(p, 0.05), 0.5, uMaterials));
+  vec3 fallen = mix(vec3(0.17, 0.12, 0.06), vec3(0.30, 0.22, 0.10), mix(noiseM(p, 0.09), 0.5, uMaterials));
+  vec3 litter = mix(fallen, needles, uLitter) * grain(0.7 + 0.5 * noiseM(p + 7.0, 0.03));
   vec3 mud = mix(uTone[0], uTone[1], 0.3) * vec3(0.62, 0.6, 0.58);
   // Sand: mottled, with a fine grain; and close by its ripples, crests across the wind a hand's breadth apart, wavering,
   // gone before a pixel is too coarse to hold them.
   vec2 wind = normalize(uWind + vec2(1e-4, 0.0));
   float ripple = (abs(fract(dot(p.xy, wind) / 0.25 + fbmM(p, 0.6) * 3.0) - 0.5) * 4.0 - 1.0) * (1.0 - smoothstep(3.0, 9.0, dist));
-  vec3 sand = mix(uTone[4], uTone[5], noiseM(p, 0.5)) * (0.88 + 0.2 * noiseM(p, 0.04) + 0.05 * ripple);
+  vec3 sand = mix(uTone[4], uTone[5], noiseM(p, 0.5)) * (grain(0.88 + 0.2 * noiseM(p, 0.04)) + 0.05 * ripple);
   // Rock and its stones are the colour of the rock under the place, where the world says what it is (uRock).
-  vec3 gravel = mix(uRock[1], mix(uTone[4], uTone[5], 0.5), noiseM(p, 0.04)) * (0.6 + 0.7 * noiseM(p + 2.0, 0.025));
+  vec3 gravel = mix(uRock[1], mix(uTone[4], uTone[5], 0.5), mix(noiseM(p, 0.04), 0.5, uMaterials)) * grain(0.6 + 0.7 * noiseM(p + 2.0, 0.025));
   vec3 rock = uRock[0] * (0.72 + 0.5 * fbmM(p, 0.6));
   // Each one's height, and how much of it there is here.
   float hSoil = fbmM(p, 0.3);
@@ -1897,7 +2071,17 @@ vec3 groundClose(vec3 c, vec3 p, vec3 n, float dist, vec4 mask, float slope, out
   // sand and gravel, and as much of the earth under plants as takes its parent material's colour (uSubSoil.x; the rest
   // is its own dark earth). Litter, the wet of a bank and steep rock stay as they are.
   // A dry bed keeps most of its own loose sand: what a flood brought and sorted, not the ground of the plain around it.
-  float k = uSub.x * (b0 * uSubSoil.x + b3 + b4) / sum * (1.0 - 0.7 * wash);
+  float ks = uSub.x * (1.0 - 0.7 * wash);
+  float k = ks * (b0 * uSubSoil.x + b3 + b4) / sum;
+  // Which scanned material gives each its grain: what lies under trees takes the earth's until it has one of its own.
+  matNone();
+  gMat[M_SOIL] = (b0 * (1.0 - ks * uSubSoil.x) + b1) / sum;
+  gMat[M_MUD] = b2 / sum;
+  gMat[M_SAND] = b3 * (1.0 - ks) / sum;
+  gMat[M_PEBBLES] = b4 * (1.0 - ks) / sum;
+  gMat[M_ROCK] = b5 / sum;
+  // How much of the ground is sand in all: its ripples are laid over that much of it.
+  float sandy = b3 * (1.0 - ks) / sum;
   if (k > 0.004) {
     float sh;
     float sr;
@@ -1905,15 +2089,18 @@ vec3 groundClose(vec3 c, vec3 p, vec3 n, float dist, vec4 mask, float slope, out
     g = mix(g, sc, k);
     h = mix(h, sh, k);
     r = mix(r, sr, k);
-  }
+    for (int i = 0; i < M_COUNT; i++) gMat[i] += k * gSub[i];
+    sandy += k * gSub[M_SAND];
+  } else gMat[M_SOIL] += k;
   // Low plants: where clumps of them stand close by, the ground between them shows; further off, their colour.
   float herb = mask.g * (1.0 - uClumps * 0.3 * (1.0 - smoothstep(40.0, 72.0, dist)));
   vec3 near = mix(g, c, herb * 0.92);
   // Wet ground is darker and smoother.
   near *= 1.0 - 0.38 * wet;
   rough = mix(r, 0.35, wet * 0.8);
-  // Grain: the height bumps the light, while it can be seen.
-  nd = bumped(n, p, h, 0.05 * (1.0 - smoothstep(8.0, 60.0, dist)));
+  // Grain: the height bumps the light, while it can be seen. With scanned materials only the sand's ripples are left
+  // to it, which lie across the wind as no scan's do.
+  nd = bumped(n, p, mix(h, ripple * 0.12 * sandy, uMaterials), 0.05 * (1.0 - smoothstep(8.0, 60.0, dist)));
   return mix(mix(c, c * 0.62, wet * 0.8), near, close);
 }
 // Land nobody has farmed. The mask says what covers it: R canopy, G low plants, B bare sediment, A water.
@@ -1941,14 +2128,14 @@ vec3 wilderness(vec3 p, vec3 n, float dist, out float water, out float rough, ou
   float nearby = 1.0 - smoothstep(40.0, 600.0, dist);
   // Leaf litter under the trees, and earth.
   vec3 soil = mix(uTone[0], uTone[1], fbmM(p, 2.4));
-  soil = mix(soil, soil * (0.68 + 0.64 * noiseM(p, 0.16)), nearby);
+  soil = mix(soil, soil * grain(0.68 + 0.64 * noiseM(p, 0.16)), nearby);
   // Low plants in patches with bare earth between. What they are is not said: no grass, until grass has spread.
   vec3 herb = mix(uTone[2], uTone[3], fbmM(p, 1.1));
-  herb = mix(herb, herb * (0.5 + 1.0 * noiseM(p, 0.09)), nearby);
+  herb = mix(herb, herb * (0.5 + 1.0 * noiseM(p, 0.09)), nearby * (1.0 - 0.6 * uMaterials));
   float thin = smoothstep(0.42, 0.62, fbmM(p, 2.6) * 0.6 + noiseM(p, 0.6) * 0.4);
   herb = mix(herb, soil, thin * 0.8);
   vec3 bare = mix(uTone[4], uTone[5], fbmM(p, 3.0));
-  bare = mix(bare, bare * (0.8 + 0.4 * noiseM(p, 0.06)), nearby);
+  bare = mix(bare, bare * grain(0.8 + 0.4 * noiseM(p, 0.06)), nearby);
   vec3 under = mix(soil, herb, (0.35 + 0.65 * smoothstep(0.34, 0.6, fbmM(p, 9.0))) * uShare.y);
   vec3 c = mix(under, herb, mask.g);
   c = mix(c, bare, mask.b);
@@ -1963,18 +2150,30 @@ vec3 wilderness(vec3 p, vec3 n, float dist, out float water, out float rough, ou
   vec3 distantHerb = mix(uTone[8], uTone[9], mix(0.5, fbmM(p, 90.0), grain));
   c = mix(c, distantHerb, mask.g * smoothstep(900.0, 5000.0, dist));
   // Close by, what the ground is made of, and its banks.
+  matNone();
+  gMat[M_SOIL] = 1.0;
   c = groundClose(c, p, n, dist, mask, slope, rough, nd);
-  // What people made of it, where the scene has people.
-  c = peopled(c, p, dist);
-  // Rock on the steep slopes, and snow where the month's climate lays it, off the steepest.
-  c = mix(c, uRock[0], smoothstep(0.28, 0.5, slope));
+  // What people made of it, where the scene has people: a yard is trodden earth.
+  float yard;
+  c = peopled(c, p, dist, yard);
+  matKeep(1.0 - yard);
+  gMat[M_EARTH] += yard;
+  // Rock on the steep slopes, in beds where it is a face, and snow where the month's climate lays it, off the steepest.
+  float steep = smoothstep(0.28, 0.5, slope);
+  float face = smoothstep(0.5, 0.72, slope);
+  c = mix(c, uRock[0], steep);
+  matKeep(1.0 - steep);
+  gMat[M_ROCK] += steep * (1.0 - face);
+  gMat[M_STRATA] += steep * face;
   float snow = smoothstep(uSnow.x, uSnow.x + uSnow.y, p.z + (fbmM(p, 400.0) - 0.5) * uSnow.y) * (1.0 - smoothstep(uSnow.z - 0.1, uSnow.z + 0.1, slope));
   c = mix(c, vec3(0.86, 0.88, 0.9), snow);
+  matKeep(1.0 - snow);
+  gMat[M_SNOW] += snow;
   return c;
 }
 // The floor of a sea: sand in the shallows and on the beach, mud further down, the grey ooze of the deep, and rock where
 // it is steep. Its colours are the renderer's, and nobody's record.
-vec3 seabed(vec3 p, vec3 n, float dist) {
+vec3 seabed(vec3 p, vec3 n, float dist, out vec3 made) {
   float depth = max(-p.z, 0.0);
   float nearby = 1.0 - smoothstep(25.0, 400.0, dist);
   vec3 sand = mix(vec3(0.50, 0.45, 0.34), vec3(0.66, 0.60, 0.47), fbmM(p, 2.2));
@@ -1987,9 +2186,15 @@ vec3 seabed(vec3 p, vec3 n, float dist) {
   vec3 c = mix(mix(sand, mud, muddy), ooze, smoothstep(300.0, 2500.0, depth));
   // Shell and gravel in patches, and stones close by.
   c *= 0.9 + 0.2 * (fbmM(p, 14.0) - 0.5) + 0.22 * (noiseM(p, 0.3) - 0.5) * nearby;
-  return mix(c, vec3(0.27, 0.26, 0.24) * (0.8 + 0.4 * fbmM(p, 4.0)), smoothstep(0.25, 0.5, 1.0 - n.z));
+  // Sand, the finer mud and ooze, and rock: how much of each.
+  float rocky = smoothstep(0.25, 0.5, 1.0 - n.z);
+  made = vec3((1.0 - muddy) * (1.0 - rocky), muddy * (1.0 - rocky), rocky);
+  return mix(c, vec3(0.27, 0.26, 0.24) * (0.8 + 0.4 * fbmM(p, 4.0)), rocky);
 }
 void main() {
+  // How the point's place from the eye changes across a pixel, before anything is left out.
+  vec3 relDx = dFdx(vRel);
+  vec3 relDy = dFdy(vRel);
   if (vPos.x > uInner.x && vPos.y > uInner.y && vPos.x < uInner.z && vPos.y < uInner.w) discard;
   vec3 p = vPos;
   vec3 n = normalAt(p.xy);
@@ -2012,6 +2217,9 @@ void main() {
   float rough = 0.92;
   vec3 nd = n;
   float canopy = 0.0;
+  matNone();
+  gMat[M_SOIL] = 1.0;
+  gWet = 0.0;
   vec3 c = uWild > 0.5 ? wilderness(p, n, dist, river, rough, nd, canopy) : countryside(p, n, dist);
   // Inside the city's map: what the plan says this ground is.
   vec2 muv = (p.xy - uMaskBox.xy) / uMaskBox.zw;
@@ -2044,6 +2252,8 @@ void main() {
       urban = mix(urban, mix(urban * 0.62, stone, smoothstep(0.03, 0.16, sqrt(d2) - sqrt(d1))), cobbled);
     }
     c = mix(c, urban, mask.r);
+    matKeep(1.0 - mask.r);
+    gMat[M_EARTH] += mask.r;
     // Paved precincts around the monuments: travertine slabs, worn and stained.
     if (mask.b > 0.01) {
       vec2 sl = p.xy / vec2(1.8, 1.05);
@@ -2054,6 +2264,8 @@ void main() {
       vec3 slab = mix(vec3(0.46, 0.43, 0.37), vec3(0.58, 0.55, 0.48), hash(cell)) * (0.84 + 0.3 * fbmM(p, 6.0));
       slab *= mix(1.0, 0.68 + 0.32 * smoothstep(0.0, 0.025, min(min(f.x, 1.0 - f.x) * 1.8, min(f.y, 1.0 - f.y) * 1.05)), jv);
       c = mix(c, slab, smoothstep(0.35, 0.65, mask.b));
+      // A slab has its own joints, and none of the earth's grain.
+      matKeep(1.0 - smoothstep(0.35, 0.65, mask.b));
     }
     vec3 garden = mix(vec3(0.12, 0.19, 0.06), vec3(0.24, 0.28, 0.10), fbmM(p, 4.0)) * (0.82 + 0.36 * noiseM(p, 0.4));
     c = mix(c, garden, mask.g);
@@ -2064,12 +2276,29 @@ void main() {
   // In a scene of the sea, its floor under the water, and a beach at the water's edge; no river is painted on it.
   if (uSea > 0.5) {
     float sunk = smoothstep(1.4, -0.4, p.z);
-    c = mix(c, seabed(p, n, dist), sunk);
+    vec3 made;
+    c = mix(c, seabed(p, n, dist, made), sunk);
+    matKeep(1.0 - sunk);
+    gMat[M_SAND] += sunk * made.x;
+    gMat[M_EARTH] += sunk * made.y;
+    gMat[M_ROCK] += sunk * made.z;
     river *= 1.0 - sunk;
   }
   // Under the canopy, the crowns take most of the sky's light, as their shadows take the sun's: a forest floor is dim, and a
   // glade bright (docs/plans/RENDERING.md, step 4). From far off the canopy is all that is seen of it.
   float floorShade = 1.0 - 0.72 * canopy * (1.0 - smoothstep(500.0, 2400.0, dist));
+  // The grain of the ground's materials, close by: gone before a repeat of one is only a few pixels across.
+  float grainy = uMaterials * (1.0 - smoothstep(60.0, 170.0, dist));
+  if (grainy > 0.0) {
+    vec3 detail;
+    float rougher;
+    float sky;
+    nd = groundGrain(vRel, relDx, relDy, nd, grainy, detail, rougher, sky);
+    c *= detail;
+    // Wet ground keeps its sheen whatever its grain.
+    rough = clamp(rough + rougher * (1.0 - 0.7 * gWet), 0.12, 1.0);
+    ao *= sky;
+  }
   vec3 lit = shade(c, rough, 0.0, nd, p, uEye, ao * floorShade, sh);
   if (river > 0.0) lit = mix(lit, shade(vec3(0.145, 0.15, 0.085), 0.14, 0.0, vec3(0.0, 0.0, 1.0), p, uEye, 1.0, sh), river);
   lit = seen(lit, p, uEye);

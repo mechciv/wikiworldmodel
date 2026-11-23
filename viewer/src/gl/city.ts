@@ -4,14 +4,20 @@
 // sky, the distant land, the near land and the city are lit by one sun, in floating point, with
 // cascaded shadows, and finished with bloom and a filmic curve.
 import type { GroundLevel } from '../../../core/city.ts';
+import { GROUND_LAYERS } from '../../../core/materials.ts';
 import { hash3 } from '../../../world/generators/city/math.ts';
 import { invert, multiply, type Mat4, type V3 } from '../mat.ts';
 import { program, setUniforms, texture2D, type GL, type Program } from './context.ts';
+import { GroundMaterialSet } from './materials.ts';
 import { FrameTimer } from './timer.ts';
 import { AO_FS, BLUR_FS, BRIGHT_FS, DEPTH_FS, FULLSCREEN_VS, ID_FS, LUM_FS, MESH_FS, MESH_VS, POST_FS, SHAFTS_ADD_FS, SHAFTS_FS, TAA_FS, SEA, SEA_FS, SEA_VS, SKY_FS, SKY_LUT_FS, TERRAIN_FS, TERRAIN_VS, WATER_FS, WATER_VS, WATERBLUR_FS, WATERMAP_FS, WATERMAP_VS } from './cityShaders.ts';
 
 /** Texture units, the same for every program; 12 to 16 are the passes' own, for their targets. */
-const UNIT = { noise: 0, sky: 1, shadow: 2, ao: 3, entities: 4, ground: 5, normal: 8, mask: 11, fields: 17, waterMap: 18, scene: 19, sceneDepth: 20 } as const;
+const UNIT = { noise: 0, sky: 1, shadow: 2, ao: 3, entities: 4, ground: 5, normal: 8, mask: 11, fields: 17, waterMap: 18, scene: 19, sceneDepth: 20, matColour: 21, matNormal: 22 } as const;
+
+/** The grid of hexagons a scanned material is read among (cityShaders.ts, MATERIALS): tiles to a repeat, and where their numbers repeat. */
+const MAT_TILES = 3;
+const MAT_WRAP = 4096;
 
 /** The water's map from above: texels a side, and metres it covers; it is drawn again when the eye leaves its middle. */
 const WATER_MAP = { size: 512, span: 2048, snap: 512 } as const;
@@ -339,6 +345,14 @@ export class CityRenderer {
   private snow: V3 = [1e6, 1, 1];
   /** everything drawn by instancing, by what mesh it is */
   private instanced = new Map<number, InstancedGPU>();
+  /**
+   * The ground's scanned materials (materials.ts): fetched once, at full quality only, and drawn with once they have
+   * come. Until then, and on the lighter way, the two arrays are a texel each and the ground is drawn without them.
+   */
+  readonly materials: GroundMaterialSet;
+  private noMaterial: WebGLTexture[] = [];
+  private matAt = new Float32Array(48);
+  private matCell = new Float32Array(24);
 
   // Render targets, remade when the size changes.
   private w = 0;
@@ -412,6 +426,18 @@ export class CityRenderer {
   constructor(private gl: GL, opts: { fast?: boolean } = {}) {
     this.fast = !!opts.fast;
     this.timer = new FrameTimer(gl);
+    this.materials = new GroundMaterialSet(gl);
+    for (const [unit, internal] of [[UNIT.matColour, gl.SRGB8_ALPHA8], [UNIT.matNormal, gl.RGBA8]] as const) {
+      gl.activeTexture(gl.TEXTURE0 + unit);
+      const t = gl.createTexture()!;
+      gl.bindTexture(gl.TEXTURE_2D_ARRAY, t);
+      gl.texStorage3D(gl.TEXTURE_2D_ARRAY, 1, internal, 1, 1, 1);
+      gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+      gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+      this.noMaterial.push(t);
+    }
+    // Where the viewer is served from: its materials lie beside its page.
+    if (!this.fast && typeof document !== 'undefined') this.materials.load(new URL('.', document.baseURI).href, () => this.meshSerial++);
     const ext = gl.getExtension('EXT_color_buffer_float');
     if (!ext) throw new Error('This view of the city needs floating-point render targets (EXT_color_buffer_float).');
     gl.getExtension('OES_texture_float_linear');
@@ -549,7 +575,7 @@ void main() {
     ints(this.meshP, { ...lit, uMask: UNIT.mask });
     ints(this.depthP, { uEntities: UNIT.entities });
     ints(this.idP, { uEntities: UNIT.entities });
-    ints(this.terrainP, { ...lit, ...ground, uWaterMap: UNIT.waterMap });
+    ints(this.terrainP, { ...lit, ...ground, uWaterMap: UNIT.waterMap, uMatColour: UNIT.matColour, uMatNormal: UNIT.matNormal });
     ints(this.waterBlurP, { uTex: UNIT.waterMap });
     ints(this.terrainDepthP, ground);
     ints(this.waterP, { ...lit, uScene: UNIT.scene, uSceneDepth: UNIT.sceneDepth });
@@ -1158,7 +1184,33 @@ void main() {
       uWaterBox: this.waterBox,
       uLitter: this.litter,
       uClumps: this.clumps,
+      uMaterials: this.materials.ready ? 1 : 0,
     });
+    const matMean = p.uniforms.get('uMatMean');
+    if (matMean && this.materials.ready) {
+      // Where the eye is in each material's repeat and in its grid of tiles, in doubles: the shader counts from the eye.
+      const m = this.materials;
+      const n = m.mean.length / 4;
+      for (let k = 0; k < n; k++) {
+        const metres = m.mean[k * 4 + 3];
+        const x = f.eye[0] / metres;
+        const y = f.eye[1] / metres;
+        const sx = x * MAT_TILES;
+        const sy = (-0.57735027 * x + 1.15470054 * y) * MAT_TILES;
+        this.matAt.set([x - Math.floor(x), y - Math.floor(y), sx - Math.floor(sx), sy - Math.floor(sy)], k * 4);
+        this.matCell.set([((Math.floor(sx) % MAT_WRAP) + MAT_WRAP) % MAT_WRAP, ((Math.floor(sy) % MAT_WRAP) + MAT_WRAP) % MAT_WRAP], k * 2);
+      }
+      gl.uniform4fv(matMean, m.mean);
+      gl.uniform4fv(p.uniforms.get('uMatLook')!, m.look);
+      gl.uniform4fv(p.uniforms.get('uMatAt')!, this.matAt);
+      gl.uniform2fv(p.uniforms.get('uMatCell')!, this.matCell);
+      const up = p.uniforms.get('uMatUp');
+      // The one read from the side, a face of rock in beds: where the eye's height is in its repeat.
+      if (up) {
+        const z = f.eye[2] / m.mean[GROUND_LAYERS.indexOf('strata') * 4 + 3];
+        gl.uniform1f(up, z - Math.floor(z));
+      }
+    }
     const tone = p.uniforms.get('uTone');
     if (tone) gl.uniform3fv(tone, this.tones);
     const share = p.uniforms.get('uShare');
@@ -1413,6 +1465,10 @@ void main() {
     gl.bindTexture(gl.TEXTURE_2D, this.mask);
     gl.activeTexture(gl.TEXTURE0 + UNIT.fields);
     gl.bindTexture(gl.TEXTURE_2D, this.fields);
+    gl.activeTexture(gl.TEXTURE0 + UNIT.matColour);
+    gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.materials.colour ?? this.noMaterial[0]);
+    gl.activeTexture(gl.TEXTURE0 + UNIT.matNormal);
+    gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.materials.normal ?? this.noMaterial[1]);
     this.groundTex.forEach((t, k) => {
       gl.activeTexture(gl.TEXTURE0 + UNIT.ground + k);
       gl.bindTexture(gl.TEXTURE_2D, t);

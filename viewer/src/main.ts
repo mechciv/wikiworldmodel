@@ -733,6 +733,8 @@ async function start(root: HTMLElement): Promise<void> {
   let moving = false;
   /** whether the last frame drew a scene whose frames, the view held still, are still being averaged */
   let refining = false;
+  /** whether the last frame of a scene was drawn with the ground's scanned materials */
+  let materialsDrawn = false;
   /** whether the last frame drew a scene; and whether a visitor has used the page, so a still may start of itself */
   let cityDrawn = false;
   let touched = false;
@@ -1376,6 +1378,11 @@ async function start(root: HTMLElement): Promise<void> {
     // A still (step 8): at once where the link asks for one, or once a visitor has rested the view a while.
     if (cityDrawn && city && !city.renderer.still && !city.renderer.refining && (state.still || (touched && city.renderer.steadyMs > 1500))) {
       city.renderer.still = true;
+      dirty = true;
+    }
+    // The ground's scanned materials are fetched once, and a scene is drawn again when they have come.
+    if (city && city.renderer.materials.ready !== materialsDrawn) {
+      materialsDrawn = city.renderer.materials.ready;
       dirty = true;
     }
     // A scene whose clock runs, or whose frames are still being averaged, is drawn again; that is not waiting on anything.
@@ -2590,6 +2597,8 @@ async function start(root: HTMLElement): Promise<void> {
       // A view held still is averaged over a few frames, each a fraction of a pixel off the last: a test takes its frame
       // once they are done (docs/plans/RENDERING.md, step 4).
       ['refining', refining],
+      // The ground's scanned materials, fetched once: a scene drawn before they came is drawn again with them.
+      ['materials', !!city && cityDrawn && city.renderer.materials.loading],
       ['landscape', landscapeOn() && (!landscape!.index || (landscapeLoading && !landscape!.globe))],
     ];
     return w.filter(([, x]) => x).map(([n]) => n);
