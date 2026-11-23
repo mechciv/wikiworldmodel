@@ -404,7 +404,13 @@ function valueText(s: Solved, c: Claim, labelOf: (ref: string) => string): strin
     case 'outbuildings':
       return outbuildingsText(v as OutbuildingSpec[]);
     case 'geometry': {
-      const g = v as { from: string; names?: string[]; elements?: string[] };
+      const g = v as { from: string; names?: string[]; elements?: string[]; type?: string; coordinates?: unknown };
+      // An outline written in the claim itself: how much of one, as it has no rows to name.
+      if (g.type === 'Polygon' || g.type === 'MultiPolygon') {
+        const polys = (g.type === 'Polygon' ? [g.coordinates] : g.coordinates) as number[][][][];
+        const points = polys.reduce((n, poly) => n + poly.reduce((m, ring) => m + ring.length - 1, 0), 0);
+        return `An outline written in the claim: ${polys.length === 1 ? 'one area' : `${polys.length} areas`}, of ${points} points`;
+      }
       if (g.elements) return `Traced on the map: ${g.elements.join(', ')}`;
       const names = g.names!.map((n) => `“${n}”`);
       const list = names.length > 1 ? `${names.slice(0, -1).join(', ')} and ${names.at(-1)}` : names[0];

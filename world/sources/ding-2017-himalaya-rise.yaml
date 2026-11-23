@@ -1,0 +1,34 @@
+id: src:ding-2017-himalaya-rise
+type: publication
+kind: measurement
+citation: >-
+  Ding, L., Spicer, R.A., Yang, J., Xu, Q., Cai, F., Li, S., Lai, Q., Wang, H., Spicer, T.E.V.,
+  Yue, Y., Shukla, A., Srivastava, G., Khan, M.A., Bera, S. & Mehrotra, R. (2017). Quantifying the
+  rise of the Himalaya orogen and implications for the South Asian monsoon. Geology 45(3), 215–218.
+authors:
+  - "Ding, L."
+  - "Spicer, R.A."
+  - "Yang, J."
+  - "Xu, Q."
+  - "Cai, F."
+  - "Li, S."
+  - "Lai, Q."
+  - "Wang, H."
+  - "Spicer, T.E.V."
+  - "Yue, Y."
+  - "Shukla, A."
+  - "Srivastava, G."
+  - "Khan, M.A."
+  - "Bera, S."
+  - "Mehrotra, R."
+published: 2017
+title: Quantifying the rise of the Himalaya orogen and implications for the South Asian monsoon
+container: Geology 45(3), 215–218
+doi: 10.1130/G38583.1
+verified:
+  by: machine:claude-code
+  how: >-
+    Abstract only, read on 22 November 2026 as Crossref's record of the article carries it; citation
+    from Crossref. The article itself was not read: the publisher's site (GeoScienceWorld) answered
+    with a bot check. So the heights of the single floras and their uncertainties, which the
+    abstract rounds, are not given here.

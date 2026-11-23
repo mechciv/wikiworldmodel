@@ -408,8 +408,8 @@ function claimConstraints(world: World, prop: string, c: Claim, centres: boolean
   if (!subjectExists(world, c.subject)) return out;
   let v = timeOrUndefined(c.value);
   if (!v) return out;
-  // A bound says only that the point lies before a time, or after one: of a moment, or of a lasting thing's end.
-  const before = prop === 'earlier_than' || prop === 'end_before';
+  // A bound says only that the point lies before a time, or after one: of a moment, or of a lasting thing's start or end.
+  const before = prop === 'earlier_than' || prop === 'end_before' || prop === 'start_before';
   const after = prop === 'later_than';
   const point = prop === 'end' || prop === 'end_before' ? pointOf(world, c.subject, 'end') : pointOf(world, c.subject, 'start');
   const source = c.ref;

@@ -24,6 +24,9 @@ import { GENERATOR, generateClouds, type CloudParams } from '../../../world/gene
 import { GENERATOR as SURFACE, generateSurface, type SurfaceParams } from '../../../world/generators/earth/surface/v1.ts';
 import { GENERATOR as GENERIC_LAND, generateGenericLand, type GenericLandParams } from '../../../world/generators/earth/generic-land/v1.ts';
 import { globeLook } from '../../../viewer/src/gl/globe.ts';
+import { conj, rotate, toLatLon, unitVector } from '../../../core/quat.ts';
+import { fineHas, fineTile, type ReliefInfo } from '../../../core/relief.ts';
+import { crestNear, reliefAt } from '../src/reliefat.ts';
 import { apart, drawn } from './drawn.ts';
 import { latestBuild } from './helpers.ts';
 
@@ -905,3 +908,220 @@ describe('the conquest of Tenochtitlan, as the build carries it (docs/slices/FIF
     for (const r of rows) expect(r.claimedBy).toContain('people/polities/triple-alliance');
   });
 });
+
+describe('relief', () => {
+  // The first round's views that looked at a skyline (docs/plans/PARITY.md, item 6): a valley of eastern Afghanistan in
+  // 4534 BCE, with the Safed Koh thirty kilometres south of it; and the foot of the Taihang at 1.83 Ma.
+  const SAFED_KOH = { lat: 34.30255, lon: 69.87607, t: -4532.55 };
+  const TAIHANG = { lat: 35.85822, lon: 113.7445, t: fromMa(1.830023) };
+
+  it("keeps the survey's cells below the relief's grid, in tiles a scene reads: a crest stands as high as the survey has it", () => {
+    const dir = latestBuild();
+    const ts = JSON.parse(readFileSync(join(dir, 'tileset.json'), 'utf8')) as Tileset;
+    const info = JSON.parse(readFileSync(join(dir, ts.files.relief!), 'utf8')) as ReliefInfo;
+    expect(info.field).toBe('field:earth/relief');
+    expect(info.fine.step).toBeCloseTo(1 / 60, 9);
+    // Tiles where there is ground the grid does not give: the land, and not the open ocean.
+    let tiles = 0;
+    for (let ty = 0; ty < 90; ty++) for (let tx = 0; tx < 180; tx++) if (fineHas(info.fine, tx, ty)) tiles++;
+    expect(tiles).toBeGreaterThan(4000);
+    expect(tiles).toBeLessThan(10000);
+    expect(fineHas(info.fine, ...tileAt(info, 34.3, 69.9))).toBe(true);
+    expect(fineHas(info.fine, ...tileAt(info, -40, -120))).toBe(false);
+    const a = reliefAt(dir, SAFED_KOH.lat, SAFED_KOH.lon, SAFED_KOH.t)!;
+    expect(a.field).toBe('field:earth/relief');
+    expect(a.held).toBe(true);
+    expect(a.shape!.field).toBe('field:earth/relief');
+    expect(a.shape!.share).toBe(1);
+    // South of the place the range's crest: the grid of a tenth of a degree has it under 3,900 m, and the survey's
+    // cells over 4,300 m, half a kilometre higher.
+    const crest = crestNear(a, 60);
+    expect(crest.field.m).toBeLessThan(3900);
+    expect(crest.ground.m).toBeGreaterThan(4300);
+    expect(crest.ground.m - crest.field.m).toBeGreaterThan(400);
+    expect(crest.ground.y).toBeLessThan(-15000);
+  });
+
+  it("gives a node of the relief its mean back: the survey's cells about it, laid over the grid, come to the node's own height", () => {
+    const a = reliefAt(latestBuild(), SAFED_KOH.lat, SAFED_KOH.lon, SAFED_KOH.t)!;
+    // A node of the relief's grid is the mean of the survey's cells nearest it, six by six. Over those cells the scene's
+    // ground, the grid read between its nodes and the survey's cells over it, comes to the node's own height again: in
+    // the range, where a cell stands hundreds of metres from the grid, as on the plain before it.
+    const kLat = (6371000 * Math.PI) / 180;
+    const kLon = kLat * Math.cos((a.at.lat * Math.PI) / 180);
+    let rough = 0;
+    for (const [lat, lon] of [[34.0, 70.0], [34.1, 69.8], [33.9, 70.3], [34.5, 69.9], [34.4, 69.6]]) {
+      let sum = 0;
+      let size = 0;
+      for (let j = 0; j < 6; j++) {
+        for (let i = 0; i < 6; i++) {
+          const x = (lon + (i - 2.5) / 60 - a.at.lon) * kLon;
+          const y = (lat + (j - 2.5) / 60 - a.at.lat) * kLat;
+          sum += a.ground.at(x, y);
+          size += Math.abs(a.ground.shape(x, y));
+        }
+      }
+      const node = a.ground.field((lon - a.at.lon) * kLon, (lat - a.at.lat) * kLat);
+      expect(Math.abs(sum / 36 - node)).toBeLessThan(6);
+      rough = Math.max(rough, size / 36);
+    }
+    expect(rough).toBeGreaterThan(150);
+  });
+
+  it("carries today's ranges back into the early Pleistocene: a scene there has its range's crest, on the elevation of its time", () => {
+    const dir = latestBuild();
+    const ts = JSON.parse(readFileSync(join(dir, 'tileset.json'), 'utf8')) as Tileset;
+    const info = JSON.parse(readFileSync(join(dir, ts.files.relief!), 'utf8')) as ReliefInfo;
+    // The rule follows the records: whole through the Quaternary, gone before the Pliocene.
+    expect(info.carried!.field).toBe('field:earth/relief-carried');
+    expect(info.carried!.fullMa).toBeCloseTo(2.58, 2);
+    expect(info.carried!.goneMa).toBeCloseTo(5.333, 2);
+    const a = reliefAt(dir, TAIHANG.lat, TAIHANG.lon, TAIHANG.t)!;
+    // Its relief is the elevation of its time, a degree's; and over it all of today's shape.
+    expect(a.field).toBe('field:earth/elevation');
+    expect(a.held).toBe(false);
+    expect(a.step).toBe(1);
+    expect(a.shape!.field).toBe('field:earth/relief-carried');
+    expect(a.shape!.share).toBe(1);
+    // West of the place the range stands over the plain: by the degree's field alone a gentle rise, and with today's
+    // shape a wall more than a kilometre above the place within fifty kilometres.
+    const here = a.ground.at(0, 0);
+    let fieldTop = -Infinity;
+    let top = -Infinity;
+    for (let x = -50000; x <= 0; x += 500) {
+      for (let y = -15000; y <= 15000; y += 500) {
+        fieldTop = Math.max(fieldTop, a.ground.field(x, y));
+        top = Math.max(top, a.ground.at(x, y));
+      }
+    }
+    expect(top - here).toBeGreaterThan(1000);
+    expect(top - fieldTop).toBeGreaterThan(400);
+    // And the ground it makes is today's. The elevation of this time is its own picture of today, which is what
+    // today's ground is taken above: so the two together are the survey's ground, each above its own coast, as a
+    // scene of today has it, plain and range alike, and none of the plain has sunk under the sea.
+    const now = reliefAt(dir, a.today.lat, a.today.lon, fromMa(0))!;
+    expect(a.keyMa).toBe(0);
+    let off = 0;
+    let worst = 0;
+    let sunk = 0;
+    let n = 0;
+    for (let x = -100000; x <= 100000; x += 4000) {
+      for (let y = -100000; y <= 100000; y += 4000) {
+        const d = Math.abs(a.ground.at(x, y) - now.ground.at(x, y));
+        off += d;
+        worst = Math.max(worst, d);
+        if (a.ground.at(x, y) < 0 && now.ground.at(x, y) > 0) sunk++;
+        n++;
+      }
+    }
+    expect(off / n).toBeLessThan(0.5);
+    expect(worst).toBeLessThan(5);
+    expect(sunk).toBe(0);
+    // Before the Pliocene none of it is carried, where no range's record says it stood.
+    expect(reliefAt(dir, TAIHANG.lat, TAIHANG.lon, fromMa(9))?.shape).toBeUndefined();
+  });
+
+  it("carries a range that stood back as far as its record says: the Himalaya's crests in the Miocene, and none of them before the range began", () => {
+    const dir = latestBuild();
+    const ts = JSON.parse(readFileSync(join(dir, 'tileset.json'), 'utf8')) as Tileset;
+    const info = JSON.parse(readFileSync(join(dir, ts.files.relief!), 'utf8')) as ReliefInfo;
+    const frames = JSON.parse(readFileSync(join(dir, 'frames.json'), 'utf8')) as FramesFile;
+    // The record says by when the range stood, and what raised it; the build reads both.
+    const range = info.carried!.ranges.find((r) => r.id === 'earth/orogens/himalaya')!;
+    expect(range.label).toBe('Himalaya');
+    expect(range.standingMa).toBeGreaterThan(10);
+    expect(range.standingMa).toBeLessThan(21);
+    expect(range.startMa!).toBeGreaterThan(50);
+    // A place in the range today, near its highest ground, carried on its plate to where it stood at an age.
+    const model = new RotationModel(frames.rotations);
+    const stoodAt = (ageMa: number): [number, number] => toLatLon(rotate(model.total(501, ageMa), rotate(conj(model.total(501, 0)), unitVector(27.99, 86.93)))) as [number, number];
+    // At 12 Ma, after the range stood: all of today's shape, by its record, on the elevation of that time, with crests
+    // that elevation's grid of a degree has not.
+    const [la, lo] = stoodAt(12);
+    const then = reliefAt(dir, la, lo, fromMa(12))!;
+    expect(then.field).toBe('field:earth/elevation');
+    expect(Math.abs(then.today.lat - 27.99)).toBeLessThan(0.3);
+    expect(Math.abs(then.today.lon - 86.93)).toBeLessThan(0.3);
+    expect(then.shape!.share).toBe(1);
+    expect(then.shape!.range).toEqual({ id: 'earth/orogens/himalaya', label: 'Himalaya' });
+    const crest = crestNear(then, 60);
+    expect(crest.ground.m - crest.field.m).toBeGreaterThan(1000);
+    // A place at the range's northern edge keeps its shape at a time between two keyframes, when its plate's edge
+    // lay where the keyframe has no plate yet: it is still found on its own plate, and stands today where it does.
+    const [el, eo] = toLatLon(rotate(model.total(501, 14), rotate(conj(model.total(501, 0)), unitVector(28.85, 83.8)))) as [number, number];
+    const edge = reliefAt(dir, el, eo, fromMa(14))!;
+    expect(Math.abs(edge.today.lat - 28.85)).toBeLessThan(0.3);
+    expect(Math.abs(edge.today.lon - 83.8)).toBeLessThan(0.3);
+    expect(edge.shape!.range).toEqual({ id: 'earth/orogens/himalaya', label: 'Himalaya' });
+    expect(edge.shape!.share).toBe(1);
+    // Midway through its rise, part of it; and before the range began, none.
+    const rising = (range.standingMa + range.startMa!) / 2;
+    const [ra, ro] = stoodAt(rising);
+    const half = reliefAt(dir, ra, ro, fromMa(rising))!.shape!;
+    expect(half.share).toBeGreaterThan(0.3);
+    expect(half.share).toBeLessThan(0.7);
+    const [ba, bo] = stoodAt(range.startMa! + 6);
+    expect(reliefAt(dir, ba, bo, fromMa(range.startMa! + 6))?.shape).toBeUndefined();
+    // At 12 Ma on the plain south of the range, outside its outline, none of today's shape stood: only the range's
+    // own, within sight to the north.
+    const plain = toLatLon(rotate(model.total(501, 12), rotate(conj(model.total(501, 0)), unitVector(26.3, 86.9)))) as [number, number];
+    const south = reliefAt(dir, plain[0], plain[1], fromMa(12))!.shape;
+    expect(south?.share ?? 0).toBe(0);
+  });
+
+  it("keeps today's valleys out of the sea where the elevation of the time has the land lower than today: the Alps in the Miocene", () => {
+    const dir = latestBuild();
+    const frames = JSON.parse(readFileSync(join(dir, 'frames.json'), 'utf8')) as FramesFile;
+    const model = new RotationModel(frames.rotations);
+    // The valley of the Arve below Mont Blanc, where it stood at 15 Ma on its plate: at the very edge of that plate,
+    // where the elevation's own grid of plates has none. It is found by today's plates, and the range's record has
+    // it standing.
+    const [la, lo] = toLatLon(rotate(model.total(307, 15), rotate(conj(model.total(307, 0)), unitVector(45.95, 6.8)))) as [number, number];
+    const a = reliefAt(dir, la, lo, fromMa(15))!;
+    expect(Math.abs(a.today.lat - 45.95)).toBeLessThan(0.05);
+    expect(Math.abs(a.today.lon - 6.8)).toBeLessThan(0.05);
+    expect(a.shape!.range).toEqual({ id: 'earth/orogens/alps', label: 'Alps' });
+    expect(a.shape!.share).toBe(1);
+    // The massif stands over the valley, as the elevation's grid of a degree alone does not have it.
+    const crest = crestNear(a, 30);
+    expect(crest.ground.m - a.ground.at(0, 0)).toBeGreaterThan(1500);
+    expect(crest.ground.m - crest.field.m).toBeGreaterThan(800);
+    // The elevation of that time has the land here far lower than its picture of today, and laid over it as they are
+    // today's valley floors would lie under its coast. They do not: every place that is dry today, where that elevation
+    // has land, is above the coast, and the lowest of them are held at their floor.
+    const now = reliefAt(dir, a.today.lat, a.today.lon, fromMa(0))!;
+    const turn = a.shape!.turn;
+    let sunk = 0;
+    let held = 0;
+    let n = 0;
+    for (let y = -60000; y <= 60000; y += 1500) {
+      for (let x = -60000; x <= 60000; x += 1500) {
+        const cx = x * Math.cos(turn) - y * Math.sin(turn);
+        const cy = y * Math.cos(turn) + x * Math.sin(turn);
+        const f = a.ground.field(cx, cy);
+        if (!(f > 0) || !(now.ground.at(x, y) > 0)) continue;
+        n++;
+        const g = a.ground.at(cx, cy);
+        if (g <= 0) sunk++;
+        if (g < f * a.shape!.floor! + 1) held++;
+      }
+    }
+    expect(n).toBeGreaterThan(5000);
+    expect(sunk).toBe(0);
+    expect(held).toBeGreaterThan(20);
+  });
+
+  it('holds a browser to a scene with today\'s shape carried back: a witness in the early Pleistocene', () => {
+    const dir = latestBuild();
+    const seen = JSON.parse(readFileSync(join(dir, 'life/witness.json'), 'utf8')) as { lat: number; lon: number; t: number }[];
+    const carried = seen.filter((w) => toMa(w.t) < 2.58 && toMa(w.t) > 0.8);
+    expect(carried.length).toBe(1);
+    expect(reliefAt(dir, carried[0].lat, carried[0].lon, carried[0].t)?.shape?.share).toBe(1);
+  });
+});
+
+/** The tile of the relief's finer level that holds a place: its column and row. */
+function tileAt(info: ReliefInfo, lat: number, lon: number): [number, number] {
+  const t = fineTile(info.fine, lat, lon);
+  return [t.tx, t.ty];
+}

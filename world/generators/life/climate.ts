@@ -2,7 +2,7 @@
 // light and paint a scene without loading the generator: where snow lies (field:earth/climate-at-height).
 import { monthsKeyframe, nearestNode, nearestParts, snowLine, type CellVegetation, type MonthsInfo, type MonthsSet, type MonthsTile, type NodeParts, type PartsSet, type PartsTile } from '../../../core/months.ts';
 import type { SceneParts, SceneSpec, SceneVegetation } from '../../../core/scene.ts';
-import { latticeOf, type PlaceWorld } from './spec.ts';
+import { latticeOf, plateUnder, type PlaceWorld } from './spec.ts';
 
 /** How the climate is brought to a scene's heights: the generator's choices. */
 export interface ClimateChoices {
@@ -31,7 +31,13 @@ export function snowOf(spec: SceneSpec): { line: number; band: number; slope: nu
     if (z < lo) lo = z;
     if (z > hi) hi = z;
   }
-  // The hills a scene adds stand above the field's heights: look a kilometre higher.
+  // The shape of the ground within the field's cells stands above the field's heights, where the scene has one.
+  if (spec.shape) {
+    let top = 0;
+    for (const z of spec.shape.patch.z) if (z > top) top = z;
+    hi += top;
+  }
+  // The hills a scene adds stand above those: look a kilometre higher.
   const line = snowLine(c.months, c.month, c.lat, c.coast + c.height, c.water, c.lapse, p.snow_mm, Math.max(0, lo) - c.height, hi + 1000 - c.height, p.step_m * 2.5);
   return { line: line === Infinity ? Infinity : Math.round(line + c.height), band: p.snow_band_m, slope: p.snow_slope };
 }
@@ -46,12 +52,12 @@ export interface MonthsPlace {
 }
 
 /** Which months a place at a time reads, and where it stood in their coordinates: one answer for a browser and the build. */
-export function monthsPlace(info: MonthsInfo, w: Pick<PlaceWorld, 'plate' | 'carry'>, lat: number, lon: number, ageMa: number): MonthsPlace | undefined {
+export function monthsPlace(info: MonthsInfo, w: Pick<PlaceWorld, 'plate' | 'carry' | 'keyAge' | 'step' | 'plateNow'>, lat: number, lon: number, ageMa: number): MonthsPlace | undefined {
   const mk = monthsKeyframe(info, ageMa);
   if (!mk) return undefined;
   const frameMa = mk.set.frameMa ?? mk.ageMa;
   const origin = latticeOf(lat, lon);
-  const plate = w.plate(origin.lat, origin.lon);
+  const plate = plateUnder(w, origin.lat, origin.lon, ageMa);
   const [ml, mo] = plate ? w.carry(plate, origin.lat, origin.lon, ageMa, frameMa) : [origin.lat, origin.lon];
   return { set: mk.set, ageMa: mk.ageMa, frameMa, lat: ml, lon: mo };
 }

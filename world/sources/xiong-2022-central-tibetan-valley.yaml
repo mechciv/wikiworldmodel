@@ -1,0 +1,36 @@
+id: src:xiong-2022-central-tibetan-valley
+type: publication
+kind: measurement
+citation: >-
+  Xiong, Z., Liu, X., Ding, L., Farnsworth, A., Spicer, R.A., Xu, Q., Valdes, P., He, S., Zeng, D.,
+  Wang, C., Li, Z., Guo, X., Su, T., Zhao, C., Wang, H. & Yue, Y. (2022). The rise and demise of the
+  Paleogene Central Tibetan Valley. Science Advances 8(6), eabj0944.
+authors:
+  - "Xiong, Z."
+  - "Liu, X."
+  - "Ding, L."
+  - "Farnsworth, A."
+  - "Spicer, R.A."
+  - "Xu, Q."
+  - "Valdes, P."
+  - "He, S."
+  - "Zeng, D."
+  - "Wang, C."
+  - "Li, Z."
+  - "Guo, X."
+  - "Su, T."
+  - "Zhao, C."
+  - "Wang, H."
+  - "Yue, Y."
+published: 2022
+title: The rise and demise of the Paleogene Central Tibetan Valley
+container: Science Advances 8(6), eabj0944
+doi: 10.1126/sciadv.abj0944
+license: CC-BY-4.0
+verified:
+  by: machine:claude-code
+  how: >-
+    Abstract and full text read on 22 November 2026 in the article's XML from the National Library
+    of Medicine's E-utilities (PMC8827648), turned to plain text by script, and before that on its
+    page at PubMed Central; citation from Crossref. The supplementary materials were not read. The
+    article has no page numbers, so locators name the section.

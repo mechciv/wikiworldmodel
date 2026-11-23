@@ -1,0 +1,23 @@
+id: src:boschman-2021-andes-paleoelevation
+type: publication
+kind: review
+citation: >-
+  Boschman, L.M. (2021). Andean mountain building since the Late Cretaceous: A paleoelevation
+  reconstruction. Earth-Science Reviews 220, 103640.
+authors:
+  - "Boschman, L.M."
+published: 2021
+title: "Andean mountain building since the Late Cretaceous: A paleoelevation reconstruction"
+container: Earth-Science Reviews 220, 103640
+doi: 10.1016/j.earscirev.2021.103640
+license: CC-BY-NC-ND-4.0
+verified:
+  by: machine:claude-code
+  how: >-
+    Abstract, Table 1 for the Altiplano and the Western Cordillera, and sections 5.2 and 6 read on
+    22 November 2026 in the published PDF (Elsevier's typesetting, 41 pages) that ETH Zurich's
+    Research Collection holds (doi:10.3929/ethz-b-000484833), fetched through that repository's own
+    interface and turned to text with PyMuPDF; citation from Crossref. The rest of the review was
+    not read through. The works it compiles (Garzione et al. 2006, 2008 and the others in its table)
+    were not read, except where they have source records of their own. Page numbers in locators are
+    the article's own, 1 to 41.

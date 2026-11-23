@@ -1461,9 +1461,10 @@ const GROUND = /* glsl */ `
 uniform highp isampler2D uGround0;
 uniform highp isampler2D uGround1;
 uniform highp isampler2D uGround2;
-// Each grid: x0, y0, cell, ease distance; and its size in cells.
+// Each grid: x0, y0, cell, ease distance; its size in cells; and what its whole numbers stand for: a step in metres, above a base.
 uniform vec4 uGrid[3];
 uniform vec2 uGridSize[3];
+uniform vec2 uGridUnit[3];
 float readGrid(highp isampler2D t, int k, vec2 p) {
   vec2 f = clamp((p - uGrid[k].xy) / uGrid[k].z, vec2(0.0), uGridSize[k] - 1.001);
   ivec2 i = ivec2(floor(f));
@@ -1472,7 +1473,7 @@ float readGrid(highp isampler2D t, int k, vec2 p) {
   float b = float(texelFetch(t, i + ivec2(1, 0), 0).r);
   float c = float(texelFetch(t, i + ivec2(0, 1), 0).r);
   float d = float(texelFetch(t, i + ivec2(1, 1), 0).r);
-  return mix(mix(a, b, u.x), mix(c, d, u.x), u.y) * 0.1;
+  return mix(mix(a, b, u.x), mix(c, d, u.x), u.y) * uGridUnit[k].x + uGridUnit[k].y;
 }
 float gridWeight(int k, vec2 p) {
   vec2 lo = p - uGrid[k].xy;
@@ -1545,6 +1546,10 @@ uniform float uWater;
 uniform float uWild;
 uniform vec3 uTone[10];
 uniform vec3 uShare;
+// The same shares at each of 32 heights, where the world gives the climate at a height: the first height, the step
+// between them and the height their edges wander over. A step of nought says there are none, and the place's hold.
+uniform vec3 uShareAt[32];
+uniform vec3 uShareSpan;
 // What the ground is made of, where the world says (core/substrate.ts): how much of the ground that decides, and how
 // much of what its sources say names cracks, ripples and a grain (fine below zero, coarse above); the share of each
 // material (sand, gravel, silt, mud, lime mud, a crust of salt, peat, ash); and each one's two tones.
@@ -1924,16 +1929,23 @@ vec3 wilderness(vec3 p, vec3 n, float dist, out float water, out float rough, ou
   // Beyond the plan's map, forest and glade by noise of about the same size, growing with distance so
   // that it never shows as a repeating grain from high up.
   float away = smoothstep(30000.0, 400000.0, dist);
-  float patchy = smoothstep(0.42, 0.54, mix(fbmM(p, 110.0), fbmM(p, 5000.0), away)) * uShare.x;
+  // What its own height bears, where the world gives the climate at a height: a far range has its treeline.
+  vec3 share = uShare;
+  if (uShareSpan.y > 0.0) {
+    float f = clamp((p.z + (fbmM(p, 900.0) - 0.5) * 2.0 * uShareSpan.z - uShareSpan.x) / uShareSpan.y, 0.0, 31.0);
+    int k = int(floor(f));
+    share = mix(uShareAt[k], uShareAt[min(k + 1, 31)], f - float(k));
+  }
+  float patchy = smoothstep(0.42, 0.54, mix(fbmM(p, 110.0), fbmM(p, 5000.0), away)) * share.x;
   // And from high up it melts into one tone.
   float melt = smoothstep(60000.0, 500000.0, dist);
-  vec4 beyond = mix(vec4(patchy, (1.0 - patchy) * (1.0 - uShare.z), uShare.z, 0.0), vec4(0.6 * uShare.x, (1.0 - 0.6 * uShare.x) * (1.0 - uShare.z), uShare.z, 0.0), melt);
+  vec4 beyond = mix(vec4(patchy, (1.0 - patchy) * (1.0 - share.z), share.z, 0.0), vec4(0.6 * share.x, (1.0 - 0.6 * share.x) * (1.0 - share.z), share.z, 0.0), melt);
   vec4 mask = beyond;
   if (inside > 0.5) {
     vec2 e = min(muv, 1.0 - muv);
     mask = mix(beyond, texture(uMask, muv), smoothstep(0.0, 0.1, min(e.x, e.y)));
   }
-  // Water where the plan's A is full; a dry bed where it is half (scene/v9.ts, coverMask), which is no water.
+  // Water where the plan's A is full; a dry bed where it is half (scene/v10.ts, coverMask), which is no water.
   water = smoothstep(0.6, 0.95, mask.a) * smoothstep(450.0, 1000.0, dist);
   float wash = smoothstep(0.3, 0.45, mask.a) * (1.0 - smoothstep(0.55, 0.7, mask.a));
   shaded = mask.r;
@@ -1949,7 +1961,7 @@ vec3 wilderness(vec3 p, vec3 n, float dist, out float water, out float rough, ou
   herb = mix(herb, soil, thin * 0.8);
   vec3 bare = mix(uTone[4], uTone[5], fbmM(p, 3.0));
   bare = mix(bare, bare * (0.8 + 0.4 * noiseM(p, 0.06)), nearby);
-  vec3 under = mix(soil, herb, (0.35 + 0.65 * smoothstep(0.34, 0.6, fbmM(p, 9.0))) * uShare.y);
+  vec3 under = mix(soil, herb, (0.35 + 0.65 * smoothstep(0.34, 0.6, fbmM(p, 9.0))) * mix(uShare.y, share.y, 1.0 - inside));
   vec3 c = mix(under, herb, mask.g);
   c = mix(c, bare, mask.b);
   // The sand of a dry bed, paler than the ground around it: what a flood sorted and left loose.
@@ -2167,7 +2179,7 @@ vec4 reflected(vec3 p, vec3 r) {
   return vec4(0.0);
 }
 void main() {
-  // The bed of a river dry in the month: its ribbon says where it is, and it holds no water (scene/v9.ts, DRY_BED).
+  // The bed of a river dry in the month: its ribbon says where it is, and it holds no water (scene/v10.ts, DRY_BED).
   if (vFlow.z < -0.5) discard;
   vec3 p = vPos;
   float dist = distance(p, uEye);

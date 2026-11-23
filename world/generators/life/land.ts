@@ -69,7 +69,7 @@ export const NEVER = 1e9;
 /** How long a valley an invented river is migrated down, m: past the edge of the plain it is drawn on, either way. */
 const VALLEY = 76000;
 
-/** The grids the swept ground is worked out on: the ground's own fine and middle grids (scene/v9.ts). */
+/** The grids the swept ground is worked out on: the ground's own fine and middle grids (scene/v10.ts). */
 const SWEPT_GRIDS: GridSpec[] = [
   { nx: 1281, ny: 1281, x0: -6400, y0: -6400, cell: 10 },
   { nx: 1281, ny: 1281, x0: -32000, y0: -32000, cell: 50 },

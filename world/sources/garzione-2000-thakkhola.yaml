@@ -1,0 +1,25 @@
+id: src:garzione-2000-thakkhola
+type: publication
+kind: measurement
+citation: >-
+  Garzione, C.N., Dettman, D.L., Quade, J., DeCelles, P.G. & Butler, R.F. (2000). High times on the
+  Tibetan Plateau: Paleoelevation of the Thakkhola graben, Nepal. Geology 28(4), 339–342.
+authors:
+  - "Garzione, C.N."
+  - "Dettman, D.L."
+  - "Quade, J."
+  - "DeCelles, P.G."
+  - "Butler, R.F."
+published: 2000
+title: "High times on the Tibetan Plateau: Paleoelevation of the Thakkhola graben, Nepal"
+container: Geology 28(4), 339–342
+doi: "10.1130/0091-7613(2000)28<339:HTOTTP>2.0.CO;2"
+verified:
+  by: machine:claude-code
+  how: >-
+    Abstract only, read on 22 November 2026 as OpenAlex's record of the article carries it (work
+    W2033736722; OpenAlex keeps an abstract as its words with their places, and a script set them
+    back in order); citation from Crossref, whose two records of the article give its first page
+    and its page range. The article itself was not read: the publisher's site (GeoScienceWorld)
+    answered with a bot check. So the heights the authors reckon from the carbonates, which the
+    abstract does not give, are not given here.

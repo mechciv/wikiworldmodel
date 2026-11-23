@@ -132,6 +132,18 @@ export async function readTiff(path: string): Promise<Raster> {
 }
 
 /**
+ * A raster's rows, a block at a time, so that one too large to hold decoded is never held whole: `ready` is given its
+ * layout before the first row, and `each` every row of every block with where it lies.
+ */
+export async function rasterRows(path: string, each: (y: number, x: number, values: Float32Array) => void, ready?: (r: Omit<Raster, 'data'>) => void): Promise<Omit<Raster, 'data'>> {
+  const d = decoder(await readFile(path), path);
+  const layout = { width: d.width, height: d.height, x0: d.x0, y0: d.y0, dx: d.dx, dy: d.dy, nodata: d.nodata };
+  ready?.(layout);
+  d.rows(each);
+  return layout;
+}
+
+/**
  * A global raster averaged onto a grid of nodes `step` degrees apart, from 90°N and 180°W, wrapping east: each node the
  * mean of the pixels whose centres are nearer to it than to any other node, and their lowest. Read a block at a time, so
  * a raster too large to hold decoded is never held whole. Pixels of no data are left out, and a node with none is NaN.
