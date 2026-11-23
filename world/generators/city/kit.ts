@@ -89,6 +89,9 @@ export const MAT = {
   blade: 71,
   // An animal's eye: dark and wet, so that it catches the light.
   eye: 72,
+  // A card of the blades of a crop nobody names (world/generators/people/crops.ts): coloured by the plot it stands in,
+  // ripe or green, and not by the wild land's tones.
+  cropCard: 73,
 } as const;
 
 export type Material = (typeof MAT)[keyof typeof MAT];

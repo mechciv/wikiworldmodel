@@ -139,6 +139,86 @@ describe('a house, from its dwelling', () => {
   });
 });
 
+describe('a house close by, in relief', () => {
+  const EARTH: DwellingSpec = { plan: 'rectangular', width: 5, length: 8, walls: 'mudbrick', roof: 'flat', roof_material: 'earth', entrance: 'end' };
+  const dark = (d: Drawn) => d.v.filter((p) => p[3] === MAT.dark);
+
+  it('cuts a door through a wall that is built up, as deep as the wall is thick, and leaves it on the face from a way off and in a covering on a frame', () => {
+    for (const variant of [0, 2, 5]) {
+      const front = houseSize(EARTH, variant).l / 2;
+      // Close by: the dark of its door, and of a window by it, is set back by the thickness of a wall of mudbrick or more.
+      const near = dark(drawn(EARTH, 0, variant));
+      expect(near.length).toBeGreaterThan(3);
+      for (const p of near) expect(p[1]).toBeLessThanOrEqual(front - 0.45 + 1e-3);
+      // From a way off it lies on the wall's face, as it did.
+      const off = dark(drawn(EARTH, 1, variant));
+      expect(off.length).toBeGreaterThan(3);
+      for (const p of off) expect(p[1]).toBeGreaterThan(front);
+      // A wall that is thatch on poles has no thickness to cut: its door stays on its face, close by too.
+      const soft: DwellingSpec = { ...EARTH, walls: 'pole-and-thatch', roof: 'gable', roof_material: 'thatch' };
+      for (const p of dark(drawn(soft, 0, variant))) expect(p[1]).toBeGreaterThan(houseSize(soft, variant).l / 2);
+      // Its threshold and its lintel are of timber, in the doorway.
+      const wood = drawn(EARTH, 0, variant).v.filter((p) => p[3] === MAT.wood && p[1] > front - 0.5 && p[1] < front + 0.2);
+      expect(wood.some((p) => p[2] < 0.1)).toBe(true);
+      expect(wood.some((p) => p[2] > 1.5)).toBe(true);
+    }
+    // A round house's door is cut through a flat piece of its wall, as deep.
+    const round: DwellingSpec = { plan: 'round', diameter: 5, walls: 'wattle-and-daub', roof: 'conical', roof_material: 'thatch' };
+    const r = houseSize(round).l / 2;
+    for (const p of dark(drawn(round, 0))) expect(p[1]).toBeLessThan(r - 0.15);
+    for (const p of dark(drawn(round, 1))) expect(p[1]).toBeGreaterThan(r - 0.1);
+    // A court's gate, and the doors from its court into its ranges, too: none stands proud of a wall.
+    const court: DwellingSpec = { plan: 'courtyard', width: 12, length: 12, walls: 'mudbrick', roof: 'flat', roof_material: 'earth' };
+    const half = houseSize(court).l / 2;
+    const gates = dark(drawn(court, 0));
+    expect(gates.length).toBeGreaterThan(8);
+    for (const p of gates) expect(Math.max(Math.abs(p[0]), Math.abs(p[1]))).toBeLessThanOrEqual(half - 0.45 + 1e-3);
+  });
+
+  it('leans a wall of earth in as it rises, close by, and stands one of brick or timber upright', () => {
+    const wide = (d: DwellingSpec, detail: HouseDetail, mat: number, low: boolean) => {
+      const size = houseSize(d);
+      const v = drawn(d, detail).v.filter((p) => p[3] === mat && (low ? p[2] < 0 : p[2] > size.eaves - 0.01 && p[2] < size.eaves + 0.01));
+      return Math.max(...v.map((p) => Math.abs(p[0]))) - size.w / 2;
+    };
+    const gabled: DwellingSpec = { ...EARTH, roof: 'gable', roof_material: 'thatch' };
+    // Its foot stands out by its batter for each metre to its eaves; its top is where its claims put it.
+    expect(wide(gabled, 0, MAT.adobe, true)).toBeGreaterThan(0.07);
+    expect(wide(gabled, 0, MAT.adobe, true)).toBeLessThan(0.2);
+    expect(wide(gabled, 0, MAT.adobe, false)).toBeCloseTo(0, 3);
+    // From a way off it is upright, as it was; and a wall of brick is upright close by.
+    expect(wide(gabled, 1, MAT.adobe, true)).toBeCloseTo(0, 3);
+    expect(wide({ ...gabled, walls: 'fired-brick' }, 0, MAT.brick, true)).toBeCloseTo(0, 3);
+    expect(wide({ ...gabled, walls: 'timber-frame' }, 0, MAT.halftimber, true)).toBeCloseTo(0, 3);
+  });
+
+  it("raises a flat roof's walls past its deck as its parapet, close by, under a coping, with the ends of its beams through them", () => {
+    const size = houseSize(EARTH);
+    const near = drawn(EARTH, 0);
+    const walls = near.v.filter((p) => p[3] === MAT.adobe);
+    // The walls go up past the eaves by the deck and the parapet, and the deck lies within them, lower.
+    const top = Math.max(...walls.map((p) => p[2]));
+    expect(top).toBeCloseTo(size.eaves + 0.58, 2);
+    const deck = near.v.filter((p) => p[3] === MAT.earthroof);
+    expect(deck.length).toBeGreaterThan(3);
+    for (const p of deck) {
+      expect(p[2]).toBeCloseTo(size.eaves + 0.26, 3);
+      expect(Math.abs(p[0])).toBeLessThan(size.w / 2 - 0.2);
+    }
+    // A coping of mud on the parapet's top, a little proud of it; and beams' ends below the deck, out past the walls.
+    const coping = near.v.filter((p) => p[3] === MAT.mud && p[2] > top - 0.05);
+    expect(coping.length).toBeGreaterThan(8);
+    expect(Math.max(...coping.map((p) => Math.abs(p[0])))).toBeGreaterThan(size.w / 2);
+    const beams = near.v.filter((p) => p[3] === MAT.wood && Math.abs(p[0]) > size.w / 2 + 0.25 && p[2] < size.eaves && p[2] > size.eaves - 0.3);
+    expect(beams.length).toBeGreaterThan(8);
+    // It is no taller than from a way off, where the parapet is drawn on the roof's slab.
+    expect(Math.max(...near.v.map((p) => p[2]))).toBeLessThanOrEqual(Math.max(...drawn(EARTH, 1).v.map((p) => p[2])) + 0.07);
+    // A house of planks has no parapet, and its roof stands out as eaves, as it did.
+    const planks = drawn({ ...EARTH, walls: 'plank' }, 0);
+    expect(Math.max(...planks.v.filter((p) => p[3] === MAT.earthroof).map((p) => Math.abs(p[0])))).toBeGreaterThan(size.w / 2 + 0.1);
+  });
+});
+
 describe('a house in its yard', () => {
   const params: OutbuildingParams = { share: 0.6, generic: { granary: { plan: 'round', diameter: 2.2, wall_height: 1.5, roof: 'conical', floor: 'raised' }, well: { diameter: 1.6 }, pen: { diameter: 5 } } };
   const out: OutbuildingSpec[] = [

@@ -1,6 +1,7 @@
 // The pieces of a town's works (works.ts): each is drawn, at every detail, the size its spec says.
 import { describe, expect, it } from 'vitest';
-import { Mesh, STRIDE } from '../city/kit.ts';
+import { MAT, Mesh, STRIDE } from '../city/kit.ts';
+import { BONE } from '../life/forms.ts';
 import { PERSON_VARIANTS } from './figures.ts';
 import { drawWork, PIECE, smallWork, towered, towerSide, WORK_VARIANTS, workTop, type WallWord, type WorkKind, type WorkSpec } from './works.ts';
 import { ENCLOSURE_SIZE } from './yard.ts';
@@ -124,6 +125,52 @@ describe("a town's works", () => {
         // On the ground, and no wider than a person with what it carries.
         expect(Math.min(...v.map((p) => p[2]))).toBeGreaterThanOrEqual(-0.05);
         expect(Math.max(...v.map((p) => Math.hypot(p[0], p[1])))).toBeLessThan(1.1);
+      }
+    }
+  });
+
+  it('stands a figure in a robe on feet, close by: under its hem, on the ground', () => {
+    const s: WorkSpec = { kind: 'person', height: 1.62, thickness: 0.5 };
+    // Each vertex with its material: skin below the ankle is a foot.
+    const skin = (detail: 0 | 1, k: number): [number, number, number][] => {
+      const m = new Mesh(256);
+      drawWork(m, s, detail, k);
+      const { vertices } = m.arrays();
+      const f = new Float32Array(vertices);
+      const b = new Uint8Array(vertices);
+      const out: [number, number, number][] = [];
+      for (let i = 0; i < vertices.byteLength / STRIDE; i++) if (b[i * STRIDE + 24] === MAT.skin) out.push([f[i * 7], f[i * 7 + 1], f[i * 7 + 2]]);
+      return out;
+    };
+    // The two drawn in a robe: with a staff, and holding a basket.
+    for (const k of [1, 7]) {
+      const feet = skin(0, k).filter((p) => p[2] < 0.1 * 1.62);
+      expect(feet.length, `variant ${k}`).toBeGreaterThan(20);
+      // Both of them, either side of its middle, down to the ground and no more than a finger under it.
+      expect(feet.some((p) => p[0] > 0.05)).toBe(true);
+      expect(feet.some((p) => p[0] < -0.05)).toBe(true);
+      expect(Math.min(...feet.map((p) => p[2]))).toBeLessThan(0.01);
+      expect(Math.min(...feet.map((p) => p[2]))).toBeGreaterThan(-0.03);
+      // From a way off it has none, and its robe reaches the ground, as before.
+      expect(skin(1, k).filter((p) => p[2] < 0.3 * 1.62)).toEqual([]);
+      // Drawn to walk, its feet stride as legs' feet do: one with the stride and one against it, each foot wholly, its
+      // ankle a little less; and nothing of them stands still.
+      const m = new Mesh(256);
+      drawWork(m, s, 0, k, true);
+      const { vertices } = m.arrays();
+      const f = new Float32Array(vertices);
+      const b = new Uint8Array(vertices);
+      const e = new Uint16Array(vertices);
+      const codes = new Map<number, number[]>();
+      for (let i = 0; i < vertices.byteLength / STRIDE; i++) {
+        if (b[i * STRIDE + 24] !== MAT.skin || f[i * 7 + 2] >= 0.1 * 1.62) continue;
+        const code = e[i * 14 + 13];
+        codes.set(code & 15, [...(codes.get(code & 15) ?? []), code >> 4]);
+      }
+      expect([...codes.keys()].sort()).toEqual([BONE.stride, BONE.counter]);
+      for (const weights of codes.values()) {
+        expect(Math.max(...weights)).toBe(255);
+        expect(Math.min(...weights)).toBeGreaterThan(200);
       }
     }
   });

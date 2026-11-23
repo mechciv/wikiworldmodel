@@ -13,7 +13,7 @@ import type { FeatureTime } from '../../../core/tileset.ts';
 import { STRIDE } from '../city/kit.ts';
 import { houseSize } from './dwellings.ts';
 import { GENERATOR, VERSION, type LivingParams } from '../life/scene/v12.ts';
-import { HOUSE, INSTANCE_STRIDE, KEPT, protoParts, SceneStream, WORK, type LifeView } from '../life/stream.ts';
+import { CROP, HOUSE, INSTANCE_STRIDE, KEPT, protoParts, SceneStream, WORK, type LifeView } from '../life/stream.ts';
 
 const ROOT = join(import.meta.dirname, '../..');
 const yaml = <T>(path: string): T => parse(readFileSync(join(ROOT, path), 'utf8')) as T;
@@ -78,7 +78,7 @@ describe('the people of a scene, drawn', () => {
     expect(plan.paths.length).toBeGreaterThan(20);
   });
 
-  it('hands a view each kind as its own entity: taxa, then houses, then works, then kept animals', () => {
+  it("hands a view each kind as its own entity: taxa, then houses, then works, then kept animals, then the fields' crop", () => {
     const T = spec.taxa.length;
     const H = plan.forms.length;
     const W = plan.workForms.length;
@@ -89,13 +89,18 @@ describe('the people of a scene, drawn', () => {
       // Until nothing is left to make for the view.
       let sel = stream.select(view, sent);
       for (let i = 0; i < 40 && sel.pending; i++) sel = stream.select(view, sent);
-      const seen = { taxa: 0, houses: 0, works: 0, kept: 0 };
+      const seen = { taxa: 0, houses: 0, works: 0, kept: 0, crops: 0 };
       for (const b of sel.batches) {
         const { taxon } = protoParts(b.proto);
         const entities = new Uint16Array(b.data);
         for (let i = 0; i < b.count; i++) {
           const e = entities[(i * INSTANCE_STRIDE) / 2 + 12];
-          if (taxon >= KEPT) {
+          if (taxon >= CROP) {
+            // One entity for the crop of every field, after the kept animals and the paths.
+            expect(e).toBe(T + 1 + H + W + (spec.people!.kept?.length ?? 0) + 1);
+            expect(e).toBe(stream.cropEntity());
+            seen.crops++;
+          } else if (taxon >= KEPT) {
             expect(e).toBe(T + 1 + H + W + (taxon - KEPT));
             seen.kept++;
           } else if (taxon >= WORK) {
@@ -119,14 +124,20 @@ describe('the people of a scene, drawn', () => {
     // From just south of a herd, low down: the cattle.
     const cow = plan.animals[0];
     expect(look(cow.x, cow.y - 60, 25).kept).toBeGreaterThan(0);
+    // From the edge of a village's houses, low down, looking over its fields: their crop, standing as plants.
+    const farm = plan.settlements.find((s) => !s.city && s.fields === 'rainfed' && s.houses > 3)!;
+    expect(look(farm.x, farm.y + farm.r * 1.2, 6).crops).toBeGreaterThan(200);
     // A kept animal's mesh is an animal's: it idles, as the wild ones do, and has a stride to walk with; so has a
-    // person's, who goes about; a wall's and a house's have neither.
+    // person's, who goes about; a wall's, a house's and a crop's have neither.
     const kinds = new Set<string>();
     for (const proto of sent) {
       const m = stream.mesh(proto);
       const { taxon } = protoParts(proto);
       expect(m.indices.length, String(proto)).toBeGreaterThan(0);
-      if (taxon >= KEPT) {
+      if (taxon >= CROP) {
+        expect(m.idle).toBeUndefined();
+        kinds.add('crop');
+      } else if (taxon >= KEPT) {
         expect(m.idle).toHaveLength(16);
         expect(m.idle![15]).toBeGreaterThan(0);
         kinds.add('kept');
@@ -139,7 +150,7 @@ describe('the people of a scene, drawn', () => {
         kinds.add(taxon >= WORK ? 'work' : 'house');
       }
     }
-    expect(kinds).toEqual(new Set(['house', 'work', 'kept']));
+    expect(kinds).toEqual(new Set(['house', 'work', 'kept', 'crop']));
   });
 
   it("keeps a town's low houses in sight from far off, where each is wider than a pixel though not as tall as one", () => {

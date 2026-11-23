@@ -1244,6 +1244,32 @@ export function drawClump(m: Mesh, form: Form, h: number, seed: number, tint: nu
 }
 
 /**
+ * A stand of a crop nobody names (world/generators/people/crops.ts), a metre tall: cards of upright blades, as a field
+ * of almost any grain is from a few steps off. One clump of it, `wide` across, its cards crossing at its foot; or, for
+ * `long` metres of a row along y, cards end to end along the row with one across at each. Its cards are of a material
+ * of their own, coloured by the plot it stands in. Nothing of it is a claim about any crop.
+ */
+export function drawCropStand(m: Mesh, wide: number, long: number, seed: number): void {
+  m.mat = MAT.cropCard;
+  m.tint = 0;
+  m.light = 1;
+  if (!(long > 0)) {
+    crossed(m, 'blade-reed', 1, wide, 3, seed, 0.07);
+    return;
+  }
+  const n = Math.max(2, Math.round(long / 0.6));
+  for (let i = 0; i < n; i++) {
+    const y = -long / 2 + ((i + 0.5) * long) / n;
+    const off = (hash2(i, 11, seed) - 0.5) * wide * 0.3;
+    const tall = 0.86 + 0.14 * hash2(i, 13, seed);
+    // Along the row, a little off its line and turned a little from it; and one across it, so that the row has body
+    // seen from its end.
+    standing(m, sprayTile(i % 2 ? 'blade-grass' : 'blade-reed', seed + i), off, y, 0.25 + (hash2(i, 12, seed) - 0.5) * 0.06, (long / n) * 1.3, tall, 0.07 * (i % 2 ? 1 : -1), hash2(i, 14, seed) < 0.5);
+    standing(m, sprayTile('blade-reed', seed + i + 7), off, y + (hash2(i, 15, seed) - 0.5) * 0.2, (hash2(i, 16, seed) - 0.5) * 0.12, wide, tall * 0.95, 0.06, hash2(i, 17, seed) < 0.5);
+  }
+}
+
+/**
  * Draw a plant `h` metres tall, in the mesh's current frame. `cards`: from a way off, its leaves are on cards over the
  * mass of them, as close by; without, the plain shapes the lighter way to draw has always drawn. `coarse`: close by, but
  * a little way off: its limbs, with boughs in place of its twigs and their sprays.
