@@ -527,6 +527,7 @@ test('the wheel still zooms when the pointer is over a marker or its label', asy
     const before = (await page.evaluate(() => window.__wikiworldmodel!.state())).cam.dist;
     await part.hover();
     await page.mouse.wheel(0, -400);
+    await idle(page);
     const after = (await page.evaluate(() => window.__wikiworldmodel!.state())).cam.dist;
     expect(after).toBeLessThan(before);
   }

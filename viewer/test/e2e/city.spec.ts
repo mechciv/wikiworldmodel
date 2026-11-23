@@ -182,6 +182,7 @@ test.describe('names', () => {
     const before = (await page.evaluate(() => window.__wikiworldmodel!.state())).cam;
     await label.hover();
     await page.mouse.wheel(0, -400);
+    await idle(page);
     const after = (await page.evaluate(() => window.__wikiworldmodel!.state())).cam;
     expect(after.dist).toBeLessThan(before.dist);
     // Zooming over a label uses canvas coordinates, not the button's own offset, so the view stays over the Colosseum.
