@@ -10,9 +10,11 @@ import type { LivingTaxon, ReliefPatch, ReliefShape, SceneCover, SceneSpec } fro
 import type { FeatureTime } from '../../../../core/tileset.ts';
 import { cubeRoot, latticeOf, sizeWithin } from '../spec.ts';
 import { FAST_BUDGET, FULL_BUDGET, INSTANCE_STRIDE, protoParts, SceneStream, type LifeView } from '../stream.ts';
-import { CELL, cellParts, densityOf, EXTENT, GENERATOR, placeLook, VERSION, watersFor, type CellRows, type LivingParams } from './v11.ts';
+import { CELL, cellParts, densityOf, EXTENT, GENERATOR, placeLook, VERSION, watersFor, type CellRows, type LivingParams } from './v12.ts';
 import type { ChannelLaws } from '../../../../core/scene.ts';
 import { snowOf } from '../climate.ts';
+import { POSE } from '../forms.ts';
+import { ROUTE, roundOf, routineOf, WAY, wayAt } from '../routines.ts';
 
 const ROOT = join(import.meta.dirname, '../../..');
 const record = parse(readFileSync(join(ROOT, 'generators/life/scene.yaml'), 'utf8'));
@@ -464,6 +466,108 @@ describe('what a view draws', () => {
       const f = new Float32Array(b.data);
       for (let i = 0; i < b.count; i++) expect(Math.abs(f[i * 7 + 1])).toBeLessThanOrEqual(EXTENT + 200);
     }
+  });
+});
+
+describe('what its animals do', () => {
+  const R = PARAMS.animals.routines!;
+  const formOf = (k: number) => plans[TAXA[k].form];
+  /** Each animal of some cells that goes a way: its cell, its row and where its way starts among the cell's. */
+  const goers = (cells: CellRows[]) => cells.flatMap((c) => Array.from(c.movers, (row, m) => ({ c, row, o: m * ROUTE })));
+
+  it('gives them somewhere to go: most that could go do, a plant never, and one that rests or has no routine stays', () => {
+    let could = 0;
+    let go = 0;
+    for (const c of cellsOf(stream, 2)) {
+      expect(c.ways.length).toBe(c.movers.length * ROUTE);
+      const moving = new Set(c.movers);
+      for (let q = 0; q < c.count; q++) {
+        const form = formOf(c.taxon[q]);
+        if (form.kind === 'plant' || c.pose[q] === POSE.rest || routineOf(form.behave) === 'none') {
+          expect(moving.has(q), TAXA[c.taxon[q]].label).toBe(false);
+          continue;
+        }
+        could++;
+        if (moving.has(q)) go++;
+      }
+    }
+    expect(could).toBeGreaterThan(100);
+    expect(go / could).toBeGreaterThan(0.6);
+  });
+
+  it('keeps every way on ground the animal could have been put on, out of the water, on lines the ground lies near', () => {
+    const all = goers(cellsOf(stream, 2));
+    expect(all.length).toBeGreaterThan(60);
+    for (const { c, row, o } of all) {
+      const t = TAXA[c.taxon[row]];
+      const form = formOf(c.taxon[row]);
+      const q = row * 6;
+      const [x, y, z, size, fx, fy] = c.place.subarray(q, q + 6);
+      const H = (t.hip ?? t.length! * (form.hip ?? 0.3)) * size;
+      const sag = Math.max(R.sag[1], R.sag[0] * H);
+      const T = roundOf(c.ways, o);
+      expect(T, t.label).toBeGreaterThan(1);
+      for (let k = 0; k < 24; k++) {
+        const at = wayAt(c.ways, o, fx, fy, (T * k) / 24);
+        const px = x + at.x;
+        const py = y + at.y;
+        // What walks is on the ground, give or take what the generator allows; and only what lives at the water's edge is in it.
+        expect(Math.abs(z + at.z - stream.ground.at(px, py)), t.label).toBeLessThan(sag + 0.03);
+        if (form.behave?.habitat !== 'edge' && form.behave?.habitat !== 'wet') expect(stream.cover.at(px, py).water, t.label).toBeFalsy();
+      }
+      // As the clock starts it is where the scene put it, or a first step from there if it was put walking.
+      const start = wayAt(c.ways, o, fx, fy, 0);
+      // One whose group is already on the move is a step on with it, however it was put itself.
+      expect(Math.hypot(start.x, start.y), t.label).toBeLessThan(c.ways[o + 3] < 0 ? t.length! * size * 0.3 + 0.2 : 1e-9);
+      if (c.pose[row] === POSE.walk && c.ways[o + 3] < 0) expect(start.going, t.label).toBeGreaterThan(0.9);
+    }
+  });
+
+  it('gives an animal the same way however near its cell is made', () => {
+    const fresh = new SceneStream(specOf());
+    const [fx, fy] = fresh.plan.focus;
+    let same = 0;
+    for (const [di, dj] of [[0, 0], [1, 0], [0, 1], [-1, -1], [2, 1]]) {
+      const i = Math.floor(fx / CELL) + di;
+      const j = Math.floor(fy / CELL) + dj;
+      const far = fresh.plan.cell(i, j, 1);
+      const near = fresh.plan.cell(i, j, 2);
+      const way = (c: CellRows) => new Map(goers([c]).map(({ row, o }) => [`${c.place[row * 6]},${c.place[row * 6 + 1]},${c.taxon[row]}`, Array.from(c.ways.subarray(o, o + ROUTE))]));
+      const a = way(far);
+      const b = way(near);
+      // The big ones, made from a way off, go the ways they go close by; the small ones are only made close by.
+      expect(b.size).toBeGreaterThanOrEqual(a.size);
+      for (const [k, w] of a) {
+        expect(b.get(k), k).toEqual(w);
+        same++;
+      }
+    }
+    expect(same).toBeGreaterThan(5);
+  });
+
+  it('hands a view the ways of those it draws, in step with them, and draws one that walks its way standing', () => {
+    const s = stream.select(viewAt(stream.plan.focus[0], stream.plan.focus[1] - 60, 6, stream), new Set());
+    const going = s.batches.filter((b) => b.ways);
+    expect(going.length).toBeGreaterThan(0);
+    let walkers = 0;
+    for (const b of s.batches) {
+      const { taxon, variant, detail } = protoParts(b.proto);
+      // A plant goes nowhere: its batch has no ways at all.
+      if (formOf(taxon).kind === 'plant') expect(b.ways).toBeUndefined();
+      if (!b.ways) continue;
+      expect(b.ways.byteLength).toBe(b.count * ROUTE * 4);
+      const w = new Float32Array(b.ways);
+      for (let i = 0; i < b.count; i++) {
+        if (Math.floor(w[i * ROUTE + 11]) !== WAY.walk) continue;
+        walkers++;
+        // The renderer strides its legs: it is not drawn caught in a stride of the mesh's own.
+        if (detail > 0) expect(variant >> 3, TAXA[taxon].label).not.toBe(POSE.walk);
+      }
+    }
+    expect(walkers).toBeGreaterThan(3);
+    // Its mesh says how long its stride is, for the renderer to walk it by.
+    const moved = going.find((b) => formOf(protoParts(b.proto).taxon).parts && protoParts(b.proto).detail > 0)!;
+    expect(stream.mesh(moved.proto).idle![15]).toBeGreaterThan(0);
   });
 });
 

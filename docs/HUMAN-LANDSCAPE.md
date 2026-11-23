@@ -136,6 +136,14 @@ walking, carrying, sitting, at work, a child among them; a boat floats on water 
 joins each settlement of people who stayed put to its nearest neighbours, so that a scene has its scale and its ways.
 The same few figures are drawn everywhere, in plain cloth, and a click says they are the generator's.
 
+**They go about, and their animals feed and move on.** Those who stand, walk or carry each have a way of their own
+(`gen:people/settlement` version 4): to the door of another house of the settlement, or to a well, an oven or a
+threshing floor it had, and back, clear of every house and of every enclosed yard but their own; those who sit or
+kneel at work stay. The kept animals go as the wild ones of their body plan do, a herd out on its pasture and what
+is kept about the houses among them. The renderer moves each along its way by the visit's clock, with nothing kept
+from one frame to the next ([plans/RENDERING.md](plans/RENDERING.md), step 5). Who goes, where to, how fast and how
+long they stay is the generator's, and no record's.
+
 ## 4. How is it drawn?
 
 - **In the living scene.** The settlement generator runs in the scene's worker, after its ground and before its trees:
@@ -180,7 +188,9 @@ The same few figures are drawn everywhere, in plain cloth, and a click says they
   without continuous fields shifting cultivators, region by region, so a tradition written for farmers reaches only
   those the model calls farmers, or shifting cultivators through the stand-in. Where the model has foragers and the
   excavators have farming villages, as in the American Southwest before 1750, the villages are not drawn.
-- How many animals, people and boats there were is nobody's claim. The roads people built, the Roman roads among them,
+- How many animals, people and boats there were is nobody's claim, nor is anything they do: a person goes to a door
+  or a well and back by straight lines, round and round, the same at every hour and in every season, and never along
+  a path to the next settlement, to the fields or indoors. The roads people built, the Roman roads among them,
   are not drawn in a scene yet, nor are boundaries, or the seasons of the fields.
 - The world after 1850 and before 10,000 BCE is left as it was: a tradition with no end runs to the present, and no
   model says where people were before the anthromes begin.

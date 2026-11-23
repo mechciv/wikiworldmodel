@@ -4,7 +4,7 @@ kind: animal
 hip: 0.36
 # Its mesh, head and all, at the density of water, for its length.
 mass_length: 11
-behave: { group: [1, 3], habitat: any, poses: [walk, walk, stand, alert] }
+behave: { routine: stalk, group: [1, 3], habitat: any, poses: [walk, walk, stand, alert] }
 parts:
   body:
     type: trunk

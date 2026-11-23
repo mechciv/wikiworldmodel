@@ -7,13 +7,15 @@ import { GroundSampler, type GroundGridData } from '../city/ground.ts';
 import { fingerprint, type Fingerprint, type Part } from '../../../core/fingerprint.ts';
 import { MAT, Mesh, meshParts } from '../city/kit.ts';
 import { hash2, hashString, TAU } from '../city/math.ts';
-import { clumpWidth, drawAnimal, drawClump, drawPlant, POSE, type Detail, type Stance } from './forms.ts';
-import { banksOf, CELL, CELLS, cellParts, cellKey, coverMask, EXTENT, groundGrids, LandCover, makePlan, placeLook, waterLevels, waterRibbons, waterSheet, watersFor, worldGround, type CellRows, type LivingParams, type LivingPlan, type PlaceLook } from './scene/v11.ts';
+import { clumpWidth, drawAnimal, drawClump, drawPlant, POSE, STRIDE_HIPS, type Detail, type Stance } from './forms.ts';
+import { ROUTE, WAY } from './routines.ts';
+import { banksOf, CELL, CELLS, cellParts, cellKey, coverMask, EXTENT, groundGrids, LandCover, makePlan, placeLook, waterLevels, waterRibbons, waterSheet, watersFor, worldGround, type CellRows, type LivingParams, type LivingPlan, type PlaceLook } from './scene/v12.ts';
 import type { WorldGround } from './relief.ts';
 import { freshOf, noise, type Waters } from './land.ts';
 import { drawDwelling, HOUSE_VARIANTS, houseSize, type HouseDetail } from '../people/dwellings.ts';
-import { LandUseMap, landUseMask, makeSettlement, type SettlementPlan } from '../people/settlement/v4.ts';
+import { LandUseMap, landUseMask, makeSettlement, type SettlementPlan } from '../people/settlement/v5.ts';
 import { drawWork, smallWork, WORK_VARIANTS, workTop } from '../people/works.ts';
+import { personStride } from '../people/figures.ts';
 
 /** Where houses start among a scene's kinds of mesh: a taxon's number is below it, a house's dwelling above. */
 export const HOUSE = 0x4000;
@@ -60,6 +62,11 @@ export interface Batch {
   count: number;
   /** INSTANCE_STRIDE bytes each: x, y, z, scale, fx, fy as floats, then entity and tint as shorts */
   data: ArrayBuffer;
+  /**
+   * Where any of them goes a way of its own (routines.ts): each one's way, ROUTE floats, in step with `data`; all
+   * noughts for one that stays where it is. The renderer moves each along its way by the visit's clock.
+   */
+  ways?: ArrayBuffer;
 }
 
 export interface ProtoMesh {
@@ -69,10 +76,33 @@ export interface ProtoMesh {
   /**
    * How an animal's mesh idles (docs/plans/RENDERING.md, step 5): where its neck leaves its shoulders, its hips and its
    * middle, in its own frame, each followed by 0; then how far its head swings up or down from its pose and its tail from
-   * side to side, in radians, and how fast it idles, in radians a second. Its vertices say what moves with what.
+   * side to side, in radians, how fast it idles, in radians a second, and how long a stride of its legs is as it walks,
+   * in its own metres. Its vertices say what moves with what. A person's mesh has only the last two.
    */
   idle?: number[];
 }
+
+/** Everyone drawn with one mesh this frame, as they are gathered: their places, and their ways where any has one. */
+interface Bucket {
+  f: Float32Array;
+  s: Uint16Array;
+  n: number;
+  w?: Float32Array;
+}
+
+/** Keep a way with the body about to be put in a bucket: its ROUTE numbers, in step with the bucket's bodies. */
+function keepWay(b: Bucket, ways: ArrayLike<number>, o: number): void {
+  const room = (b.f.byteLength / INSTANCE_STRIDE) * ROUTE;
+  if (!b.w || b.w.length < room) {
+    const w = new Float32Array(room);
+    if (b.w) w.set(b.w);
+    b.w = w;
+  }
+  for (let k = 0; k < ROUTE; k++) b.w[b.n * ROUTE + k] = ways[o + k];
+}
+
+/** Whether a way is walked: then its body is drawn standing, and the renderer strides its legs. */
+const walked = (ways: ArrayLike<number>, o: number): boolean => Math.floor(ways[o + 11]) === WAY.walk;
 
 /**
  * How an animal idles, from how it stands: a head lowered to graze is raised now and then and lowered again, a head held
@@ -98,7 +128,20 @@ export interface Selection {
   /** how many clumps of low plants cover the ground close by, apart from the instances */
   clumps: number;
   /** the nearest groups, to name */
-  groups: { taxon: number; at: [number, number]; base: number; top: number }[];
+  groups: NamedGroup[];
+}
+
+/**
+ * A group to name: its taxon, where its first stands and how high its name goes; and, where that one goes a way of its
+ * own (routines.ts), its way and the way it was put, so that the name goes with it.
+ */
+export interface NamedGroup {
+  taxon: number;
+  at: [number, number];
+  base: number;
+  top: number;
+  way?: number[];
+  face?: [number, number];
 }
 
 export const protoOf = (taxon: number, variant: number, detail: Detail | typeof CLUMP) => (taxon << 8) | (variant << 2) | detail;
@@ -192,13 +235,13 @@ export class SceneStream {
     const levelAt = waters.paths ? waterLevels(waters) : undefined;
     // The people, where the scene has any: their houses and fields, on this ground and away from this water. Where they
     // cleared the land no tree stands. A scene of the sea has them too, on whatever ground stands above its water: a place
-    // a few metres above the sea, a delta or a lower plain, is a scene of the sea (scene/v11.ts, sea_below), and among the
+    // a few metres above the sea, a delta or a lower plain, is a scene of the sea (scene/v12.ts, sea_below), and among the
     // most crowded land there was.
     let clearing: ((x: number, y: number) => number) | undefined;
     if (spec.people) {
       // People keep their houses and fields out of a river's bed, dry in the month or not: its floods come down it.
       const water = (waters.paths?.some((p) => p.dry) ? waterLevels(waters, true) : levelAt) ?? (() => this.look.water);
-      this.people = makeSettlement(spec, this.ground, water, EXTENT);
+      this.people = makeSettlement(spec, this.ground, water, EXTENT, this.params.animals.routines);
       const use = new LandUseMap(this.people, this.ground, water, this.look.seed);
       this.landUse = use;
       clearing = (x, y) => {
@@ -352,16 +395,18 @@ export class SceneStream {
       const j = drawAnimal(m, form, stance);
       const { vertices, indices } = m.arrays();
       this.meshes.set(proto, { tris: indices.length / 3 });
-      return { proto, vertices, indices, idle: [...j.neck, 0, ...j.hip, 0, ...j.middle, 0, ...idling(stance.pose, stance.L), 0] };
+      return { proto, vertices, indices, idle: [...j.neck, 0, ...j.hip, 0, ...j.middle, 0, ...idling(stance.pose, stance.L), STRIDE_HIPS * stance.H] };
     }
     if (taxon >= WORK) {
       const f = this.people!.workForms[taxon - WORK];
       const m = new Mesh(detail >= 2 ? 1024 : 256);
       m.entity = this.spec.taxa.length + 1 + this.people!.forms.length + (taxon - WORK);
-      drawWork(m, f.spec, (2 - detail) as HouseDetail, variant);
+      // A person's limbs say how far they go with a stride, as an animal's legs do: one who walks is walked by the renderer.
+      const person = f.spec.kind === 'person';
+      drawWork(m, f.spec, (2 - detail) as HouseDetail, variant, person);
       const { vertices, indices } = m.arrays();
       this.meshes.set(proto, { tris: indices.length / 3 });
-      return { proto, vertices, indices };
+      return { proto, vertices, indices, ...(person ? { idle: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, personStride(f.spec.height, variant)] } : {}) };
     }
     if (taxon >= HOUSE) {
       const f = this.people!.forms[taxon - HOUSE];
@@ -393,7 +438,7 @@ export class SceneStream {
       const j = drawAnimal(m, form, stance);
       const { vertices, indices } = m.arrays();
       this.meshes.set(proto, { tris: indices.length / 3 });
-      return { proto, vertices, indices, idle: [...j.neck, 0, ...j.hip, 0, ...j.middle, 0, ...idling(stance.pose, stance.L), 0] };
+      return { proto, vertices, indices, idle: [...j.neck, 0, ...j.hip, 0, ...j.middle, 0, ...idling(stance.pose, stance.L), STRIDE_HIPS * stance.H] };
     }
     const { vertices, indices } = m.arrays();
     this.meshes.set(proto, { tris: indices.length / 3 });
@@ -411,12 +456,17 @@ export class SceneStream {
     return { L: t.length ?? 1, H: t.hip ?? (t.length ?? 1) * (form.hip ?? 0.3), pose, phase: (stride + 0.5) / 4, sway: (stride - 1.5) * 0.07, detail, tint, biped: (variant & 1) === 1 };
   }
 
-  /** Which mesh an individual is drawn with. `coarse`: a plant close by, but not so close that its twigs show. */
-  private variantOf(t: LivingTaxon, form: Form, pose: number, phase: number, shade: number, detail: Detail, coarse = false): number {
+  /**
+   * Which mesh an individual is drawn with. One that walks a way of its own (`walks`) and was put walking is drawn
+   * standing: the renderer strides its legs as it goes, where a body that stays put is caught in a stride. `coarse`:
+   * a plant close by, but not so close that its twigs show.
+   */
+  private variantOf(t: LivingTaxon, form: Form, pose: number, phase: number, shade: number, detail: Detail, walks = false, coarse = false): number {
     if (form.kind === 'plant') return (shade & 3) | (coarse ? COARSE : 0);
     const biped = t.biped || (t.posture === 'facultative-quadruped' && pose !== POSE.graze && pose !== POSE.drink && (shade & 1) === 1);
     // From afar only how it stands shows; the far shape has only one.
     if (detail === 0) return (POSE.stand << 3) | (biped ? 1 : 0);
+    if (walks && pose === POSE.walk) return (POSE.stand << 3) | (biped ? 1 : 0);
     const stride = WALKING.has(pose) ? phase >> 6 : 0;
     return (pose << 3) | (stride << 1) | (biped ? 1 : 0);
   }
@@ -431,7 +481,7 @@ export class SceneStream {
     const [fx, fy, fz] = v.forward;
     const groundZ = this.ground.at(ex, ey);
     const heights = taxa.map((x) => (x.height ?? x.length ?? 1));
-    const buckets = new Map<number, { f: Float32Array; s: Uint16Array; n: number }>();
+    const buckets = new Map<number, Bucket>();
     let pending = 0;
     let instances = 0;
     const rich = !!v.rich && !this.budget.fast;
@@ -479,9 +529,13 @@ export class SceneStream {
         else pending++;
       }
       if (!c) continue;
-      const { place, taxon, pose, shade, phase, rank, count } = c;
+      const { place, taxon, pose, shade, phase, rank, count, movers, ways } = c;
+      // The cell's animals that go a way of their own, in the order of its rows.
+      let mv = 0;
       for (let q = 0; q < count; q++) {
         if (instances >= cap) break;
+        while (mv < movers.length && movers[mv] < q) mv++;
+        const goes = mv < movers.length && movers[mv] === q;
         const a = q * 6;
         const px = place[a];
         const py = place[a + 1];
@@ -506,7 +560,7 @@ export class SceneStream {
         if (form.kind === 'plant' && form.behave?.layer === 'under' && detail < (heights[k] >= this.shrubFrom ? 1 : 2)) continue;
         // A plant's twigs and their sprays are drawn only where they can be told apart: within some tens of metres.
         const coarse = form.kind === 'plant' && detail === 2 && pxs < (rich ? TWIGS_FROM / 2 : TWIGS_FROM);
-        const proto = protoOf(k, this.variantOf(t0, form, pose[q], phase[q], shade[q], detail, coarse), detail);
+        const proto = protoOf(k, this.variantOf(t0, form, pose[q], phase[q], shade[q], detail, goes && walked(ways, mv * ROUTE), coarse), detail);
         let b = buckets.get(proto);
         if (!b) {
           const buf = new ArrayBuffer(INSTANCE_STRIDE * 64);
@@ -528,6 +582,7 @@ export class SceneStream {
         b.f[o + 5] = place[a + 5];
         b.s[b.n * 14 + 12] = k + 1;
         b.s[b.n * 14 + 13] = form.kind === 'plant' ? shade[q] >> 2 : shade[q] >> 3;
+        if (goes) keepWay(b, ways, mv * ROUTE);
         b.n++;
         instances++;
       }
@@ -616,6 +671,8 @@ export class SceneStream {
           b.f[o + 5] = Math.cos(w.face);
           b.s[b.n * 14 + 12] = this.spec.taxa.length + 1 + this.people.forms.length + w.form;
           b.s[b.n * 14 + 13] = (wi * 37) & 31;
+          // A person who goes about goes a way of their own.
+          if (w.way !== undefined) keepWay(b, this.people.ways, w.way);
           b.n++;
           instances++;
         }
@@ -640,7 +697,7 @@ export class SceneStream {
           if (dd > R0 && a.rank * dd > 256 * R0) continue;
           const pxs = Math.sqrt(pxs2);
           const detail: Detail = this.budget.fast ? (pxs >= 26 ? 1 : 0) : pxs >= (rich ? 36 : 70) ? 2 : pxs >= (rich ? 4 : 9) ? 1 : 0;
-          const proto = protoOf(KEPT + a.kind, this.variantOf(t0, form, a.pose, a.phase, a.shade, detail), detail);
+          const proto = protoOf(KEPT + a.kind, this.variantOf(t0, form, a.pose, a.phase, a.shade, detail, a.way !== undefined && walked(this.people.ways, a.way)), detail);
           let b = buckets.get(proto);
           if (!b) {
             const buf = new ArrayBuffer(INSTANCE_STRIDE * 64);
@@ -662,6 +719,7 @@ export class SceneStream {
           b.f[o + 5] = Math.cos(a.face);
           b.s[b.n * 14 + 12] = base + a.kind;
           b.s[b.n * 14 + 13] = a.shade >> 3;
+          if (a.way !== undefined) keepWay(b, this.people.ways, a.way);
           b.n++;
           instances++;
         }
@@ -671,7 +729,22 @@ export class SceneStream {
         for (let g = 0; g + 3 < c.groups.length; g += 4) {
           const k = c.groups[g + 3];
           const hip = taxa[k].hip ?? (taxa[k].length ?? 1) * 0.3;
-          groups.push({ taxon: k, at: [c.groups[g], c.groups[g + 1]], base: c.groups[g + 2], top: c.groups[g + 2] + hip * 1.5 });
+          const named: NamedGroup = { taxon: k, at: [c.groups[g], c.groups[g + 1]], base: c.groups[g + 2], top: c.groups[g + 2] + hip * 1.5 };
+          // Its first one's way, if it goes one: found among the cell's movers, which are in the order of its rows.
+          const row = c.leaders[g >> 2];
+          let lo = 0;
+          let hi: number = c.movers.length - 1;
+          while (lo <= hi) {
+            const mid = (lo + hi) >> 1;
+            if (c.movers[mid] === row) {
+              named.way = Array.from(c.ways.subarray(mid * ROUTE, (mid + 1) * ROUTE));
+              named.face = [c.place[row * 6 + 4], c.place[row * 6 + 5]];
+              break;
+            }
+            if (c.movers[mid] < row) lo = mid + 1;
+            else hi = mid - 1;
+          }
+          groups.push(named);
         }
       }
     }
@@ -692,7 +765,14 @@ export class SceneStream {
         sent.add(proto);
       } else if (!this.meshes.has(proto)) this.mesh(proto);
       triangles += b.n * this.meshes.get(proto)!.tris;
-      batches.push({ proto, count: b.n, data: b.f.buffer.slice(0, b.n * INSTANCE_STRIDE) as ArrayBuffer });
+      const batch: Batch = { proto, count: b.n, data: b.f.buffer.slice(0, b.n * INSTANCE_STRIDE) as ArrayBuffer };
+      if (b.w) {
+        // As many ways as bodies: one put in after the last way was kept has none, and stays put.
+        const w = new Float32Array(b.n * ROUTE);
+        w.set(b.w.subarray(0, Math.min(b.w.length, w.length)));
+        batch.ways = w.buffer as ArrayBuffer;
+      }
+      batches.push(batch);
     }
     // A still's richer frame says nothing of what the live one can afford.
     if (!rich) {
@@ -722,7 +802,7 @@ export class SceneStream {
    * A grid's clumps are made a tile at a time and kept, the least lately used let go, so that a view that moves pays
    * only for the ground it comes to.
    */
-  private groundCover(v: LifeView, buckets: Map<number, { f: Float32Array; s: Uint16Array; n: number }>, spendMs: () => boolean): { clumps: number; pending: number } {
+  private groundCover(v: LifeView, buckets: Map<number, Bucket>, spendMs: () => boolean): { clumps: number; pending: number } {
     const c = this.params.plants.clumps;
     if (!c || this.bare) return { clumps: 0, pending: 0 };
     const [ex, ey, ez] = v.eye;
