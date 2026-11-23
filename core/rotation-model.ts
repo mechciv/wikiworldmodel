@@ -116,6 +116,9 @@ function interpolate(s: BakedSequence, age: number): Quat {
   return slerp(s.q[lo], s.q[hi], (age - a0) / (a1 - a0));
 }
 
+/** How many ages' trees a model keeps (RotationModel.use). */
+const TREES_KEPT = 4;
+
 /**
  * Total rotations (anchor → plate) at one age, built the way GPlates builds its
  * reconstruction tree: depth-first from the anchor, visiting each fixed plate's sequences in
@@ -128,6 +131,8 @@ export class RotationModel {
   private outgoing = new Map<number, BakedSequence[]>();
   private treeAge = Number.NaN;
   private tree = new Map<number, Quat>();
+  /** The trees of the last few ages asked, the latest last: carrying a place from one age to another asks two in turn. */
+  private trees = new Map<number, Map<number, Quat>>();
 
   constructor(baked: BakedRotationModel) {
     this.baked = baked;
@@ -148,17 +153,30 @@ export class RotationModel {
 
   /** Total rotation of `plate` at `ageMa` (millions of years before present). */
   total(plate: number, ageMa: number): Quat {
-    if (ageMa !== this.treeAge) this.build(ageMa);
+    if (ageMa !== this.treeAge) this.use(ageMa);
     return this.tree.get(plate) ?? IDENTITY;
   }
 
   /** Does the model say where `plate` was at `ageMa`? Where it doesn't, `total` is the identity. */
   reaches(plate: number, ageMa: number): boolean {
-    if (ageMa !== this.treeAge) this.build(ageMa);
+    if (ageMa !== this.treeAge) this.use(ageMa);
     return plate === this.baked.anchor || this.tree.has(plate);
   }
 
-  private build(age: number): void {
+  /** Make an age's tree the current one: kept from before if it is one of the last few asked, else built. */
+  private use(age: number): void {
+    let tree = this.trees.get(age);
+    if (tree) this.trees.delete(age);
+    else {
+      tree = this.build(age);
+      if (this.trees.size >= TREES_KEPT) this.trees.delete(this.trees.keys().next().value!);
+    }
+    this.trees.set(age, tree);
+    this.tree = tree;
+    this.treeAge = age;
+  }
+
+  private build(age: number): Map<number, Quat> {
     const tree = new Map<number, Quat>();
     const anchor = this.baked.anchor;
     const stack: Array<{ plate: number; q: Quat; i: number }> = [{ plate: anchor, q: IDENTITY, i: 0 }];
@@ -177,8 +195,7 @@ export class RotationModel {
       tree.set(s.moving, q);
       stack.push({ plate: s.moving, q, i: 0 });
     }
-    this.tree = tree;
-    this.treeAge = age;
+    return tree;
   }
 }
 

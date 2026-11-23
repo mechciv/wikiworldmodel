@@ -7,13 +7,15 @@
 // What is written is a network and its keyframes: the reaches once, as nodes of the grid, with the area each node drains,
 // its height and its plate; then for each keyframe the sea level, each reach's flow and the lakes. A viewer draws a
 // reach up to the sea of its keyframe, and a scene reads the reaches near a place.
+import { availableParallelism, totalmem } from 'node:os';
+import { Worker } from 'node:worker_threads';
 import { encodeTile } from '../../../../core/container.ts';
 import type { RiversKeyframe, RiversKeysHeader, RiversNetworkHeader, RiversSet } from '../../../../core/rivers.ts';
 import { seaLevelAt, type SeaLevelRows } from '../../../../core/sealevel.ts';
 import { fromMa } from '../../../../core/time.ts';
 import { stableStringify } from '../util.ts';
 import { SLOW_STEP_MM } from './climate.ts';
-import { flow, hollowsOf, nearestNodes, outletChains, reaches, route, seaAt, wetMonthsAt, type Flow, type Hollows, type Lake, type NodeGrid, type OutletChains, type Reach, type Routing } from './drainage.ts';
+import { atOutletOf, flow, hollowsOf, nearestNodes, outletChains, reaches, route, seaAt, wetMonthsAt, type Flow, type Hollows, type Lake, type NodeGrid, type OutletChains, type Reach, type Routing } from './drainage.ts';
 
 /** How the drainage model draws its rivers and lakes: the model's choices, from its record. */
 export interface DrainageParams {
@@ -44,21 +46,33 @@ export interface Water {
 /** A climate grid's values at each node of another grid: straight between its four nodes, wrapping east. */
 export function regrid(src: Float32Array, sg: Water['grid'], g: NodeGrid): Float32Array {
   const out = new Float32Array(g.nx * g.ny);
+  // A column's place between the climate's nodes is the same in every row.
+  const west = new Int32Array(g.nx);
+  const east = new Int32Array(g.nx);
+  const across = new Float64Array(g.nx);
+  for (let c = 0; c < g.nx; c++) {
+    const lon = -180 + c * g.step;
+    const fx = (((lon - sg.lon0) / sg.step) % sg.nx + sg.nx) % sg.nx;
+    const i = Math.floor(fx);
+    west[c] = i;
+    east[c] = (i + 1) % sg.nx;
+    across[c] = fx - i;
+  }
   for (let r = 0; r < g.ny; r++) {
     const lat = 90 - r * g.step;
     const fy = Math.min(sg.ny - 1.0001, Math.max(0, (sg.lat0 - lat) / sg.step));
     const j = Math.floor(fy);
     const v = fy - j;
+    const north = j * sg.nx;
+    const south = (j + 1) * sg.nx;
     for (let c = 0; c < g.nx; c++) {
-      const lon = -180 + c * g.step;
-      const fx = (((lon - sg.lon0) / sg.step) % sg.nx + sg.nx) % sg.nx;
-      const i = Math.floor(fx);
-      const u = fx - i;
-      const i1 = (i + 1) % sg.nx;
-      const a = src[j * sg.nx + i];
-      const b = src[j * sg.nx + i1];
-      const d = src[(j + 1) * sg.nx + i];
-      const e = src[(j + 1) * sg.nx + i1];
+      const i = west[c];
+      const i1 = east[c];
+      const u = across[c];
+      const a = src[north + i];
+      const b = src[north + i1];
+      const d = src[south + i];
+      const e = src[south + i1];
       out[r * g.nx + c] = (a * (1 - u) + b * u) * (1 - v) + (d * (1 - u) + e * u) * v;
     }
   }
@@ -105,7 +119,7 @@ interface Season {
 }
 
 /** What a keyframe keeps of a flow over the whole grid (see `drawn` and `lastDry`). */
-function keyframeOf(reaches: Reach[], today: Uint8Array | undefined, ageMa: number, seaLevel: number, f: Flow, p: DrainageParams, season?: Season): RiverKeyframe {
+function keyframeOf(reaches: { nodes: ArrayLike<number> }[], today: Uint8Array | undefined, ageMa: number, seaLevel: number, f: Flow, p: DrainageParams, season?: Season): RiverKeyframe {
   const lakes = drawn(today, f, p);
   const under = new Set<number>();
   for (const l of lakes) for (const k of l.nodes) under.add(k);
@@ -136,31 +150,210 @@ function networkOf(z: ArrayLike<number>, g: NodeGrid, r: Routing, h: Hollows, mi
   return { reaches: reaches(r, dry, minKm2), km2: dry.km2 };
 }
 
+/** Today's ground, routed, as every keyframe of the glacial cycles reads it: in a worker, from memory the build shares with it. */
+export interface RecentGround {
+  g: NodeGrid;
+  z: Float32Array;
+  /** today's ocean, from which the sea of each time floods */
+  ocean: Uint8Array;
+  r: Routing;
+  h: Hollows;
+  /** each reach's nodes, upstream to downstream */
+  reaches: { nodes: ArrayLike<number> }[];
+  today?: Uint8Array;
+  p: DrainageParams;
+  /** what every keyframe on the ground shares, made once: the outlets' chains, and the node of a climate's grid each node reads */
+  chains: () => OutletChains;
+  near: (grid: Water['grid']) => Int32Array;
+}
+
+export function recentGround(c: Omit<RecentGround, 'chains' | 'near'>): RecentGround {
+  // The keyframes' climates share one grid, so the node each routed node reads is found once for them all.
+  const nears = new Map<string, Int32Array>();
+  return {
+    ...c,
+    chains: once(() => outletChains(c.h, c.g.nx * c.g.ny)),
+    near: (grid) => {
+      const key = `${grid.step},${grid.lon0},${grid.lat0}`;
+      let v = nears.get(key);
+      if (!v) nears.set(key, (v = nearestNodes(grid, c.g)));
+      return v;
+    },
+  };
+}
+
+/** Some times that share one climate's water, which is read onto the routed grid once for them all. */
+export interface RecentRun {
+  water: Water;
+  times: { i: number; ageMa: number; seaLevel: number }[];
+}
+
+/** The keyframes of a run of times: each with the sea of its time and the water of the run. */
+export function recentKeyframes(c: RecentGround, run: RecentRun): RiverKeyframe[] {
+  const { g, z, r, h, p } = c;
+  const w = run.water;
+  const runoff = regrid(w.runoff, w.grid, g);
+  const loss = regrid(w.loss, w.grid, g);
+  const season = seasonOf(g, r, h, w, p, () => c.near(w.grid), c.chains);
+  return run.times.map(({ ageMa, seaLevel }) => keyframeOf(c.reaches, c.today, ageMa, seaLevel, flow(z, g, r, h, runoff, loss, seaAt(z, g, c.ocean, seaLevel)), p, season));
+}
+
+/** How many times a run holds at most: each worker takes a run at a time, and a short one keeps them evenly busy. */
+const RUN = 4;
+
+/**
+ * The times that share a climate's water, in runs: before the climate's own span, a time takes the water of the climate's
+ * keyframe whose sea stood nearest, so many share one.
+ */
+function runsOf(stack: SeaLevelRows, times: { ageMa: number; water: Water }[]): RecentRun[] {
+  const groups: RecentRun[] = [];
+  const same = (a: Water, b: Water) => a.runoff === b.runoff && a.loss === b.loss && a.slow === b.slow && a.grid.step === b.grid.step && a.grid.lon0 === b.grid.lon0 && a.grid.lat0 === b.grid.lat0 && a.grid.nx === b.grid.nx && a.grid.ny === b.grid.ny;
+  times.forEach(({ ageMa, water }, i) => {
+    let group = groups.find((x) => same(x.water, water));
+    if (!group) groups.push((group = { water, times: [] }));
+    group.times.push({ i, ageMa, seaLevel: seaLevelAt(stack, fromMa(ageMa)) });
+  });
+  return groups.flatMap((x) => Array.from({ length: Math.ceil(x.times.length / RUN) }, (_, k) => ({ water: x.water, times: x.times.slice(k * RUN, (k + 1) * RUN) })));
+}
+
+/**
+ * How many threads the keyframes are made in: one fewer than the machine's cores, at most eight, and one for each 8 GB
+ * of its memory, as each holds a whole grid's flow at a time; `WIKIWORLDMODEL_WORKERS` sets it. Under two, the build's
+ * own thread makes them.
+ */
+export function riverWorkers(): number {
+  const set = process.env.WIKIWORLDMODEL_WORKERS;
+  const n = set !== undefined && set !== '' ? Number(set) : Math.min(8, availableParallelism() - 1, Math.floor(totalmem() / 8e9));
+  return Number.isFinite(n) ? Math.max(0, Math.floor(n)) : 0;
+}
+
 /**
  * The glacial cycles: today's ground routed down to the lowest sea of the stack, and a keyframe at each time given,
- * with the sea of that time and its water. `ocean` is today's ocean, from which the sea of each time floods.
+ * with the sea of that time and its water. `ocean` is today's ocean, from which the sea of each time floods. The
+ * keyframes are made in `workers` threads (riverWorkers) when there are two or more, each the same as made here.
  */
-export function recentRivers(z: Float32Array, ocean: Uint8Array, g: NodeGrid, stack: SeaLevelRows, times: { ageMa: number; water: Water }[], p: DrainageParams, plate: (k: number) => number, today?: Uint8Array): RiverNetwork {
+export async function recentRivers(z: Float32Array, ocean: Uint8Array, g: NodeGrid, stack: SeaLevelRows, times: { ageMa: number; water: Water }[], p: DrainageParams, plate: (k: number) => number, today?: Uint8Array, workers = riverWorkers()): Promise<RiverNetwork> {
   const lowest = Math.min(...stack.map((row) => row[1]));
   const r = route(z, g, seaAt(z, g, ocean, lowest));
   const h = hollowsOf(z, g, r);
   const { reaches: rs, km2 } = networkOf(z, g, r, h, p.min_km2);
-  const chains = once(() => outletChains(h, g.nx * g.ny));
-  // The keyframes' climates share one grid, so the node each routed node reads is found once for them all.
-  const nears = new Map<string, Int32Array>();
-  const nearOf = (w: Water) => () => {
-    const key = `${w.grid.step},${w.grid.lon0},${w.grid.lat0}`;
-    let v = nears.get(key);
-    if (!v) nears.set(key, (v = nearestNodes(w.grid, g)));
-    return v;
-  };
-  const keyframes = times.map(({ ageMa, water }) => {
-    const seaLevel = seaLevelAt(stack, fromMa(ageMa));
-    const sea = seaAt(z, g, ocean, seaLevel);
-    const f = flow(z, g, r, h, regrid(water.runoff, water.grid, g), regrid(water.loss, water.grid, g), sea);
-    return keyframeOf(rs, today, ageMa, seaLevel, f, p, seasonOf(g, r, h, water, p, nearOf(water), chains));
-  });
+  const runs = runsOf(stack, times);
+  const keyframes = new Array<RiverKeyframe>(times.length);
+  const keep = (run: RecentRun, made: RiverKeyframe[]) => made.forEach((kf, j) => (keyframes[run.times[j].i] = kf));
+  const threads = Math.min(workers, runs.length);
+  if (threads < 2) {
+    const c = recentGround({ g, z, ocean, r, h, reaches: rs, today, p });
+    for (const run of runs) keep(run, recentKeyframes(c, run));
+  } else await inWorkers(sharedGround({ g, z, ocean, r, h, reaches: rs, today, p }), runs, threads, keep);
   return { grid: g, frameMa: 0, reaches: rs, km2, z, plate, today, keyframes };
+}
+
+/** Today's routed ground as a worker is given it: its arrays in shared memory, and the hollows and reaches laid end to end. */
+export interface SharedGround {
+  g: NodeGrid;
+  z: Float32Array;
+  ocean: Uint8Array;
+  down: Int32Array;
+  order: Int32Array;
+  fill: Float32Array;
+  routed: Uint8Array;
+  of: Int32Array;
+  outlet: Int32Array;
+  hollowNodes: Int32Array;
+  hollowStart: Uint32Array;
+  reachNodes: Int32Array;
+  reachStart: Uint32Array;
+  today?: Uint8Array;
+  p: DrainageParams;
+}
+
+function sharedGround(c: Omit<RecentGround, 'chains' | 'near'>): SharedGround {
+  const share = <T extends Int32Array | Uint32Array | Float32Array | Uint8Array>(a: T): T => {
+    const out = new (a.constructor as new (b: SharedArrayBuffer) => T)(new SharedArrayBuffer(a.byteLength));
+    out.set(a);
+    return out;
+  };
+  const flat = (lists: ArrayLike<number>[]) => {
+    const start = new Uint32Array(new SharedArrayBuffer(4 * (lists.length + 1)));
+    lists.forEach((x, i) => (start[i + 1] = start[i] + x.length));
+    const nodes = new Int32Array(new SharedArrayBuffer(4 * start[lists.length]));
+    lists.forEach((x, i) => nodes.set(x, start[i]));
+    return { nodes, start };
+  };
+  const hollows = flat(c.h.sets);
+  const reaches = flat(c.reaches.map((x) => x.nodes));
+  return {
+    g: c.g,
+    z: share(c.z),
+    ocean: share(c.ocean),
+    down: share(c.r.down),
+    order: share(c.r.order),
+    fill: share(c.r.fill),
+    routed: share(c.r.sea),
+    of: share(c.h.of),
+    outlet: share(c.h.outlet),
+    hollowNodes: hollows.nodes,
+    hollowStart: hollows.start,
+    reachNodes: reaches.nodes,
+    reachStart: reaches.start,
+    ...(c.today ? { today: share(c.today) } : {}),
+    p: c.p,
+  };
+}
+
+/** Today's routed ground from what a worker was given (riverworker.ts). */
+export function groundOfShared(s: SharedGround): RecentGround {
+  const lists = (nodes: Int32Array, start: Uint32Array) => Array.from({ length: start.length - 1 }, (_, i) => nodes.subarray(start[i], start[i + 1]));
+  const h: Hollows = { sets: lists(s.hollowNodes, s.hollowStart), of: s.of, outlet: s.outlet, atOutlet: atOutletOf(s.outlet) };
+  return recentGround({ g: s.g, z: s.z, ocean: s.ocean, r: { down: s.down, order: s.order, fill: s.fill, sea: s.routed }, h, reaches: lists(s.reachNodes, s.reachStart).map((nodes) => ({ nodes })), today: s.today, p: s.p });
+}
+
+/** The way into a worker thread of the build (tools/world/src/worker.mjs), and the module it runs for the rivers. */
+const WORKER = new URL('../worker.mjs', import.meta.url);
+const RIVER_WORKER = new URL('./riverworker.ts', import.meta.url).href;
+
+/** Make the runs' keyframes in worker threads, a run at a time each, handing each run's to `keep` as it comes. */
+function inWorkers(ground: SharedGround, runs: RecentRun[], threads: number, keep: (run: RecentRun, made: RiverKeyframe[]) => void): Promise<void> {
+  return new Promise((resolve, reject) => {
+    let next = 0;
+    let busy = 0;
+    let failed = false;
+    const pool: Worker[] = [];
+    // The workers stopped here, once nothing was left to give them: any other that stops has failed.
+    const finished = new Set<Worker>();
+    const fail = (e: unknown) => {
+      if (failed) return;
+      failed = true;
+      for (const w of pool) void w.terminate();
+      reject(e instanceof Error ? e : new Error(String(e)));
+    };
+    const give = (w: Worker) => {
+      if (failed) return;
+      if (next >= runs.length) {
+        finished.add(w);
+        void w.terminate();
+        if (busy === 0) resolve();
+        return;
+      }
+      const id = next++;
+      busy++;
+      w.postMessage({ id, run: runs[id] });
+    };
+    for (let i = 0; i < threads; i++) {
+      const w = new Worker(WORKER, { execArgv: [], workerData: { module: RIVER_WORKER, data: ground } });
+      pool.push(w);
+      w.on('message', (m: { id: number; keyframes: RiverKeyframe[] }) => {
+        busy--;
+        keep(runs[m.id], m.keyframes);
+        give(w);
+      });
+      w.on('error', fail);
+      w.on('exit', (code) => {
+        if (!finished.has(w)) fail(new Error(`rivers: a worker stopped with code ${code} before its runs were done`));
+      });
+      give(w);
+    }
+  });
 }
 
 /** A time of the deep past: its own ground, routed to its own sea, with the water of its climate. */
@@ -194,7 +387,7 @@ function drawn(today: Uint8Array | undefined, f: Flow, p: DrainageParams): Lake[
 }
 
 /** Where a reach's water is when it ends: its last node that neither the sea nor a lake drawn covers. */
-function lastDry(reach: Reach, f: Flow, under: Set<number>): number {
+function lastDry(reach: { nodes: ArrayLike<number> }, f: Flow, under: Set<number>): number {
   for (let i = reach.nodes.length - 1; i >= 0; i--) {
     const k = reach.nodes[i];
     if (!f.sea[k] && !under.has(k)) return k;

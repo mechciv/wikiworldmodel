@@ -19,8 +19,7 @@ import { GENERATOR as CLOUDS, VERSION as CLOUDS_VERSION, generateClouds, type Cl
 import { GENERATOR as SURFACE, VERSION as SURFACE_VERSION, generateSurface, type SurfaceParams } from '../../../../world/generators/earth/surface/v1.ts';
 import { GENERATOR as GENERIC_LAND, VERSION as GENERIC_LAND_VERSION, generateGenericLand, genericLandAt, type GenericLandParams } from '../../../../world/generators/earth/generic-land/v1.ts';
 import { claimGroups, solveScenario, solveVariants } from '../chronology.ts';
-import { fieldAgesMa, fieldSource, importBlocks, importElevation, importMonths, importReliefPlates, PLATE_MODEL, tiledField, type MonthsMore } from '../importer.ts';
-import { meanGrid } from '../tiff.ts';
+import { fieldAgesMa, fieldSource, importBlocks, importElevation, importMeanGrid, importMonths, importReliefPlates, PLATE_MODEL, tiledField, type MonthsMore } from '../importer.ts';
 import { between, carriedReach, sceneShape, type ReliefInfo } from '../../../../core/relief.ts';
 import { fillFromOcean, WATER, waterMask, type Areas } from './relief.ts';
 import { carriedInfo, encodeFineTile, fineLevel, type FineParams } from './shape.ts';
@@ -437,7 +436,7 @@ export async function runBuild(args: string[]): Promise<number> {
       const d = world.manifest.datasets[f.data!.from];
       const res = (f.grid as { res_deg: number }).res_deg;
       const started = Date.now();
-      const relief = await meanGrid(datasetFile(d.id, d), res);
+      const relief = await importMeanGrid(datasetFile(d.id, d), d.fetch.sha256, res, log);
       // Hollows today's ocean does not reach are held at the pass they would spill over, so that only the ocean floods.
       const water = f.data!.water;
       const areas = async (id: string) => JSON.parse(await readFile(datasetFile(id, world.manifest.datasets[id]), 'utf8')) as Areas;
@@ -804,7 +803,7 @@ export async function runBuild(args: string[]): Promise<number> {
       }
       const snap = relief.snapshots[0];
       const g = { nx: snap.src!.width, ny: snap.src!.height, step: relief.res };
-      const net = recentRivers(relief.drain!.z, relief.drain!.ocean, g, stack, times, p, (k) => snap.plate[k], relief.drain!.lakes);
+      const net = await recentRivers(relief.drain!.z, relief.drain!.ocean, g, stack, times, p, (k) => snap.plate[k], relief.drain!.lakes);
       recentFrom = fromMa(relief.coverMa[0]);
       const out = riverFiles(net, 'rivers/recent', [recentFrom, fromMa(relief.coverMa[1])], true);
       for (const [path, bytes] of out.files) putRiver(path, bytes);

@@ -76,7 +76,9 @@ npm run build:viewer && npx playwright test --project=globe   # browser tests (a
 npm run dev            # the viewer, at http://localhost:5173/
 ```
 
-Node 22.19+ or 24+, Python 3.12+.
+Node 22.19+ or 24+, Python 3.12+. The build makes the rivers of the glacial cycles in worker threads, one fewer than
+the machine's cores, at most eight, and one for each 8 GB of memory; `WIKIWORLDMODEL_WORKERS` sets how many, and under
+two the build's own thread makes them.
 
 **Sandboxes with limited network access.** Datasets come from several hosts: GitHub, Zenodo,
 Figshare, PANGAEA, CEDA, publishers' sites, NOAA, OpenTopography, INGV. If some are blocked where you run:
