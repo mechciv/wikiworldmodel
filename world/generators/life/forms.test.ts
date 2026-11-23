@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 import { applyChange, canonicalForm, formSource, resolveForm, type Form, type TreeStep } from '../../../core/form.ts';
 import { defaultLeaf, LEAF_CARD_TILES, tileKind } from '../../../core/leaves.ts';
 import { MAT, Mesh, STRIDE } from '../city/kit.ts';
-import { checkForm, drawAnimal, drawPlant, meshBounds, POSE, unitStance } from './forms.ts';
+import { BONE, bone, checkForm, drawAnimal, drawPlant, meshBounds, POSE, unitStance, type Stance } from './forms.ts';
 
 const PLANS = join(import.meta.dirname, '../../plans');
 const plans: Record<string, Form> = Object.fromEntries(readdirSync(PLANS).filter((f) => f.endsWith('.yaml')).map((f) => [f.replace('.yaml', ''), parse(readFileSync(join(PLANS, f), 'utf8')) as Form]));
@@ -38,6 +38,34 @@ describe('a child form', () => {
   it('replaces a list whole', () => {
     const child = applyChange(base, { parts: { brow: { to: [0.1, 0.2, 0.3] } } });
     expect(child.parts.brow!.to).toEqual([0.1, 0.2, 0.3]);
+  });
+
+  it('changes one row of a list by its number, and leaves the others as they were', () => {
+    const rings = base.parts.body!.rings as number[][];
+    const child = applyChange(base, { parts: { body: { rings: { 6: [-0.02, 1.2, 0.3, 0.122] } } } });
+    const now = child.parts.body!.rings as number[][];
+    expect(now).toHaveLength(rings.length);
+    expect(now[6]).toEqual([-0.02, 1.2, 0.3, 0.122]);
+    expect(now.filter((_, i) => i !== 6)).toEqual(rings.filter((_, i) => i !== 6));
+    // And one number of one row, by the same rule a level down.
+    const one = applyChange(base, { parts: { body: { rings: { 6: { 1: 1.2 } } } } });
+    expect((one.parts.body!.rings as number[][])[6]).toEqual([rings[6][0], 1.2, rings[6][2], rings[6][3]]);
+  });
+
+  it('takes a row away with null, and adds one between two rows or past the last', () => {
+    const rings = base.parts.body!.rings as number[][];
+    const child = applyChange(base, { parts: { body: { rings: { 0: null, 5.5: [-0.06, 1.1, 0.31, 0.12], [rings.length]: [0.29, 0.7, 0.45, 0.04] } } } });
+    const now = child.parts.body!.rings as number[][];
+    expect(now).toHaveLength(rings.length + 1);
+    expect(now[0]).toEqual(rings[1]);
+    expect(now[5]).toEqual([-0.06, 1.1, 0.31, 0.12]);
+    expect(now[4]).toEqual(rings[5]);
+    expect(now[6]).toEqual(rings[6]);
+    expect(now[now.length - 1]).toEqual([0.29, 0.7, 0.45, 0.04]);
+    // A whole list still replaces a whole list, and what a later child changes is the list as it then is.
+    const twice = applyChange(child, { parts: { body: { rings: { 0: [-0.5, 0.4, 0.3, 0.01] } } } });
+    expect((twice.parts.body!.rings as number[][])[0]).toEqual([-0.5, 0.4, 0.3, 0.01]);
+    expect((twice.parts.body!.rings as number[][]).slice(1)).toEqual(now.slice(1));
   });
 
   it('comes out the same whichever way its keys were written', () => {
@@ -225,6 +253,288 @@ describe('the plans', () => {
   });
 });
 
+// What the vertices of one material are, so that a test can look at one part of a body: [x, y, z] each.
+const points = (m: Mesh, mat: number): number[][] => {
+  const { vertices } = m.arrays();
+  const f = new Float32Array(vertices);
+  const b = new Uint8Array(vertices);
+  const out: number[][] = [];
+  for (let i = 0; i < m.verts; i++) if (b[i * STRIDE + 24] === mat) out.push([f[i * 7], f[i * 7 + 1], f[i * 7 + 2]]);
+  return out;
+};
+const span = (pts: number[][], axis: number): [number, number] => [Math.min(...pts.map((q) => q[axis])), Math.max(...pts.map((q) => q[axis]))];
+const middle = (pts: number[][]): number[] => [0, 1, 2].map((a) => (span(pts, a)[0] + span(pts, a)[1]) / 2);
+/** What each vertex of one material moves with. */
+const bones = (m: Mesh, mat: number): Set<number> => {
+  const { vertices } = m.arrays();
+  const b = new Uint8Array(vertices);
+  const e = new Uint16Array(vertices);
+  const out = new Set<number>();
+  for (let i = 0; i < m.verts; i++) if (b[i * STRIDE + 24] === mat) out.add(e[i * 14 + 13]);
+  return out;
+};
+
+describe('what a plan can say of a shape', () => {
+  // A plain body to try each field on: a level tube of a trunk, a metre long with its hips half a metre up.
+  const plain = (parts: Form['parts'] = {}): Form => ({
+    kind: 'animal',
+    hip: 0.5,
+    parts: {
+      body: { type: 'trunk', sides: [16, 8], rings: [[-0.4, 1, 0.6, 0.02], [-0.3, 1, 0.6, 0.1], [0, 1, 0.6, 0.1], [0.3, 1, 0.6, 0.1], [0.4, 1, 0.6, 0.02]] },
+      ...parts,
+    },
+  });
+  const stance = (f: Form, pose: number = POSE.stand, more: Partial<Stance> = {}): Stance => ({ ...unitStance(f, pose, 2), ...more });
+  const draw = (f: Form, pose: number = POSE.stand, more: Partial<Stance> = {}): Mesh => {
+    expect(checkForm(canonicalForm(f))).toEqual([]);
+    const m = new Mesh(4096);
+    drawAnimal(m, f, stance(f, pose, more));
+    return m;
+  };
+  const withBody = (over: Record<string, unknown>): Form => {
+    const f = plain();
+    f.parts.body = { ...f.parts.body!, ...over };
+    return f;
+  };
+  /** The body's vertices about its middle ring, where its section is its own. */
+  const section = (f: Form) => points(draw(f), MAT.hide).filter((q) => Math.abs(q[1]) < 0.001);
+
+  it('draws a section that says nothing of its shape as the ellipse it was, to the byte', () => {
+    expect(bytes(draw(withBody({ widest: 0, under: 0, over: 0 })))).toBe(bytes(draw(plain())));
+    expect(bytes(draw(withBody({ widest: [[-0.4, 0], [0.4, 0]] })))).toBe(bytes(draw(plain())));
+  });
+
+  it('puts a section\'s widest line where the part says, between its bottom and its top, which stay where they were', () => {
+    const widestAt = (f: Form) => {
+      const ring = section(f);
+      const w = Math.max(...ring.map((q) => q[0]));
+      return { z: ring.find((q) => q[0] === w)![2], w, z0: span(ring, 2)[0], z1: span(ring, 2)[1] };
+    };
+    const even = widestAt(plain());
+    const low = widestAt(withBody({ widest: -0.5 }));
+    const high = widestAt(withBody({ widest: 0.5 }));
+    expect(even.z).toBeCloseTo(0.4, 5);
+    // The section is 0.2 tall, from 0.3 to 0.5: half way down its lower half is at 0.35, and up its upper at 0.45.
+    expect(low.z).toBeCloseTo(0.35, 5);
+    expect(high.z).toBeCloseTo(0.45, 5);
+    for (const s of [low, high]) {
+      expect(s.w).toBeCloseTo(even.w, 5);
+      expect(s.z0).toBeCloseTo(even.z0, 5);
+      expect(s.z1).toBeCloseTo(even.z1, 5);
+    }
+  });
+
+  it('squares a section\'s underside or its top, and leaves the other half round', () => {
+    // How far out the skin is a little under the top and a little over the bottom: a square's corner is further out.
+    const corners = (f: Form) => {
+      const ring = section(f);
+      const at = (z: number) => Math.max(...ring.filter((q) => Math.abs(q[2] - z) < 0.012).map((q) => q[0]));
+      return { top: at(0.48), bottom: at(0.32) };
+    };
+    const round = corners(plain());
+    const flat = corners(withBody({ under: 1 }));
+    const boxed = corners(withBody({ over: 1 }));
+    expect(flat.bottom).toBeGreaterThan(round.bottom * 1.25);
+    expect(flat.top).toBeCloseTo(round.top, 5);
+    expect(boxed.top).toBeGreaterThan(round.top * 1.25);
+    expect(boxed.bottom).toBeCloseTo(round.bottom, 5);
+    // It is no wider and no deeper for it.
+    expect(span(section(withBody({ under: 1, over: 1 })), 0)[1]).toBeCloseTo(0.1, 5);
+    expect(span(section(withBody({ under: 1, over: 1 })), 2)).toEqual(span(section(plain()), 2));
+  });
+
+  it('shapes a section by where it is along the part, and rounds it off along a neck', () => {
+    const f = withBody({ under: [[-0.3, 0], [0, 1], [0.3, 0]] });
+    const at = (y: number) => {
+      const ring = points(draw(f), MAT.hide).filter((q) => Math.abs(q[1] - y) < 0.001);
+      return Math.max(...ring.filter((q) => Math.abs(q[2] - 0.32) < 0.012).map((q) => q[0]));
+    };
+    const round = Math.max(...section(plain()).filter((q) => Math.abs(q[2] - 0.32) < 0.012).map((q) => q[0]));
+    expect(at(0)).toBeGreaterThan(round * 1.25);
+    expect(at(0.3)).toBeCloseTo(round, 5);
+    expect(at(-0.3)).toBeCloseTo(round, 5);
+    // A head's or a tube's sections take the same fields, by the place along it that its rings are written at.
+    const tube = plain({ pipe: { type: 'tube', mat: 'horn', zl: true, thin: false, sides: [16, 8], rings: [[0.5, 0.3, 0.05, 0.05], [0.6, 0.3, 0.05, 0.05], [0.7, 0.3, 0.05, 0.05]], widest: -0.5 } });
+    const ring = points(draw(tube), MAT.horn).filter((q) => Math.abs(q[1] - 0.6) < 0.001);
+    const w = Math.max(...ring.map((q) => q[0]));
+    expect(ring.find((q) => q[0] === w)![2]).toBeCloseTo(0.275, 5);
+  });
+
+  it('makes a leg narrower across than its radius, as its top and its foot say, and no thinner fore and aft', () => {
+    const legs = (over: Record<string, unknown>, type = 'pillar') => {
+      const f = plain({ leg: { type, mat: 'horn', y: 0, x: 0.2, top: 0.5, r: 0.04, muscle: 0, ...(type === 'digitigrade' ? { knee: 0.3, ankle: 0.12, toes: false } : {}), ...over } });
+      return points(draw(f), MAT.horn).filter((q) => q[0] > 0);
+    };
+    for (const type of ['pillar', 'digitigrade']) {
+      const whole = legs({}, type);
+      const narrow = legs({ across: 0.5 }, type);
+      const thigh = legs({ across: [0.5, 1] }, type);
+      const wide = (pts: number[][], z0: number, z1: number) => { const part = pts.filter((q) => q[2] >= z0 && q[2] <= z1); return span(part, 0)[1] - span(part, 0)[0]; };
+      const deep = (pts: number[][]) => span(pts, 1)[1] - span(pts, 1)[0];
+      // Its top joint, and its foot.
+      expect(wide(narrow, 0.24, 0.26), type).toBeCloseTo(wide(whole, 0.24, 0.26) / 2, 4);
+      expect(wide(narrow, 0, 0.015), type).toBeCloseTo(wide(whole, 0, 0.015) / 2, 4);
+      expect(deep(narrow), type).toBeCloseTo(deep(whole), 6);
+      // Narrow at the top only: the foot is as wide as it was.
+      expect(wide(thigh, 0.24, 0.26), type).toBeCloseTo(wide(whole, 0.24, 0.26) / 2, 4);
+      expect(wide(thigh, 0, 0.015), type).toBeCloseTo(wide(whole, 0, 0.015), 4);
+      expect(bytes(draw(plain({ leg: { type, y: 0, x: 0.2, top: 0.5, r: 0.04, across: 1 } }))), type).toBe(bytes(draw(plain({ leg: { type, y: 0, x: 0.2, top: 0.5, r: 0.04 } }))));
+    }
+  });
+
+  it('keeps a straight leg as thick all the way down as a column, by as much as it says', () => {
+    const thinnest = (column: number) => {
+      const f = plain({ leg: { type: 'pillar', mat: 'horn', y: 0, x: 0.2, top: 0.5, r: 0.04, muscle: 0, column } });
+      const leg = points(draw(f), MAT.horn).filter((q) => q[0] > 0);
+      // How wide it is across at its cannon, the joint three quarters of the way down, where it is thinnest.
+      const cannon = leg.filter((q) => q[2] > 0.05 && q[2] < 0.08);
+      return span(cannon, 0)[1] - span(cannon, 0)[0];
+    };
+    expect(thinnest(0)).toBeCloseTo(0.08 * 0.6, 2);
+    expect(thinnest(1)).toBeCloseTo(0.08, 2);
+    expect(thinnest(0.5)).toBeGreaterThan(thinnest(0));
+    expect(thinnest(0.5)).toBeLessThan(thinnest(1));
+    expect(bytes(draw(plain({ leg: { type: 'pillar', y: 0, x: 0.2, top: 0.5, r: 0.04, column: 0 } })))).toBe(bytes(draw(plain({ leg: { type: 'pillar', y: 0, x: 0.2, top: 0.5, r: 0.04 } }))));
+  });
+
+  it('hangs a part on another part\'s end, so that it goes where the end goes, on each side of the body', () => {
+    const f = (reach: number) =>
+      plain({
+        arm: { type: 'chain', mirror: true, zl: true, points: [[0.1, 0.3, 0.4, 0.02], [0.2, 0.4, 0.4, 0.02], [0.2 + reach, 0.4 + reach, 0.4, 0.02]] },
+        hand: { type: 'lump', mat: 'horn', mirror: true, on: 'arm', at: [0, 0.05, 0], r: [0.01, 0.01, 0.01] },
+      });
+    for (const reach of [0.1, 0.3]) {
+      const hands = points(draw(f(reach)), MAT.horn);
+      for (const side of [-1, 1]) {
+        const hand = middle(hands.filter((q) => q[0] * side > 0));
+        // 0.05 on along the arm's run from its end, which runs out and forward at half a right angle.
+        expect(hand[0]).toBeCloseTo(side * (0.2 + reach + 0.05 * Math.SQRT1_2), 5);
+        expect(hand[1]).toBeCloseTo(0.4 + reach + 0.05 * Math.SQRT1_2, 5);
+        expect(hand[2]).toBeCloseTo(0.4, 5);
+      }
+    }
+    // Across and up are square to the run: a point up from a tube's end that runs up and forward leans back.
+    const g = plain({
+      stalk: { type: 'tube', zl: true, thin: false, rings: [[0.4, 0.4, 0.02, 0.02], [0.5, 0.5, 0.02, 0.02]] },
+      knob: { type: 'lump', mat: 'horn', on: 'stalk', at: [0.03, 0, 0.1], r: [0.01, 0.01, 0.01] },
+    });
+    const knob = middle(points(draw(g), MAT.horn));
+    expect(knob[0]).toBeCloseTo(0.03, 5);
+    expect(knob[1]).toBeCloseTo(0.5 - 0.1 * Math.SQRT1_2, 5);
+    expect(knob[2]).toBeCloseTo(0.5 + 0.1 * Math.SQRT1_2, 5);
+  });
+
+  it('hangs a part on a part that itself hangs, moves it with what that moves with, and draws it only where that is drawn', () => {
+    const f = plain({
+      arm: { type: 'chain', zl: true, poses: ['stand'], points: [[0, 0.4, 0.4, 0.02], [0, 0.5, 0.4, 0.02]] },
+      wrist: { type: 'spike', mat: 'shell', on: 'arm', from: [0, 0, 0], to: [0, 0.1, 0], r: 0.01 },
+      eyes: { type: 'eyes', on: 'wrist', at: [0.02, 0.05, 0], r: 0.01 },
+      tip: { type: 'lump', mat: 'horn', on: 'body', at: [0, 0.02, 0], r: [0.01, 0.01, 0.01] },
+    });
+    const m = draw(f);
+    const eyes = points(m, MAT.eye);
+    expect(middle(eyes)[1]).toBeCloseTo(0.5 + 0.1 + 0.05, 5);
+    expect(span(eyes, 0)[0]).toBeLessThan(-0.01);
+    expect(span(eyes, 0)[1]).toBeGreaterThan(0.01);
+    // A chain moves with nothing, and so does what hangs on it, eyes and all; what hangs on a trunk breathes with it.
+    expect([...bones(m, MAT.eye)]).toEqual([bone(BONE.none)]);
+    expect([...bones(m, MAT.shell)]).toEqual([bone(BONE.none)]);
+    expect([...bones(m, MAT.horn)]).toEqual([bone(BONE.body)]);
+    // On the trunk's end: its last ring, the way it runs there.
+    expect(middle(points(m, MAT.horn))[1]).toBeCloseTo(0.42, 5);
+    const walking = draw(f, POSE.walk);
+    expect(points(walking, MAT.eye)).toHaveLength(0);
+    expect(points(walking, MAT.shell)).toHaveLength(0);
+    expect(points(walking, MAT.horn).length).toBeGreaterThan(0);
+  });
+
+  it('sets what rides a body on its skin: on its back, round its flank and under it, wherever its rings put them', () => {
+    const rider = (round: number, y: number, off = 0) => plain({ stud: { type: 'lump', mat: 'horn', ride: 'body', at: [round, y, off], r: [0.004, 0.004, 0.004] } });
+    const at = (f: Form) => middle(points(draw(f), MAT.horn));
+    // The level trunk is 0.1 wide each way and 0.1 deep each way about 0.4.
+    for (const [round, x, z] of [[0, 0, 0.5], [1, 0.1, 0.4], [-1, -0.1, 0.4], [2, 0, 0.3], [0.5, 0.1 * Math.SQRT1_2, 0.4 + 0.1 * Math.SQRT1_2]]) {
+      const q = at(rider(round, 0.1));
+      expect(q[0], `round ${round}`).toBeCloseTo(x, 4);
+      expect(q[1], `round ${round}`).toBeCloseTo(0.1, 4);
+      expect(q[2], `round ${round}`).toBeCloseTo(z, 4);
+    }
+    // Off the skin is the way the skin faces: up on the back, out on the flank.
+    expect(at(rider(0, 0.1, 0.05))[2]).toBeCloseTo(0.55, 4);
+    expect(at(rider(1, 0.1, 0.05))[0]).toBeCloseTo(0.15, 4);
+    // A back that is arched carries it up, and a section that is not an ellipse carries it out.
+    const arched = rider(0, 0);
+    arched.parts.body = { ...arched.parts.body!, rings: { 2: [0, 1.4, 0.6, 0.1] } } as never;
+    expect(at(applyChange(canonicalForm(plain()), { parts: { stud: arched.parts.stud, body: { rings: { 2: [0, 1.4, 0.6, 0.1] } } } }))[2]).toBeCloseTo(0.7, 4);
+    const boxed = rider(0.5, 0.1);
+    boxed.parts.body = { ...boxed.parts.body!, over: 1 };
+    expect(at(boxed)[0]).toBeGreaterThan(0.1 * Math.SQRT1_2 * 1.15);
+    // Past the trunk's ends it stays on its last ring.
+    expect(at(rider(0, 0.9))[1]).toBeCloseTo(0.4, 4);
+  });
+
+  it('runs a row along a back\'s curve, and leans its plates out from the body\'s middle', () => {
+    const f = (more: Record<string, unknown>) => {
+      const g = applyChange(canonicalForm(plain()), { parts: { body: { rings: { 2: [0, 1.4, 0.6, 0.1] } } } });
+      g.parts.plates = { type: 'row', mat: 'horn', n: 7, item: 'plate', from: [0.2, -0.3, 0], to: [0.2, 0.3, 0], r: [0, 0.02, 0.05], ...more };
+      return g;
+    };
+    // A plate is five points, drawn on each of its two faces: the seven of the row, in turn.
+    const plate = (pts: number[][], k: number) => pts.slice(k * 10, k * 10 + 10);
+    const plates = points(draw(f({ ride: 'body' })), MAT.horn);
+    expect(plates).toHaveLength(70);
+    // Each plate's foot is on the skin: the middle one high on the arch, the end ones low on the level back.
+    const foot = (k: number) => span(plate(plates, k), 2)[0];
+    expect(foot(3)).toBeGreaterThan(foot(0) + 0.15);
+    expect(foot(6)).toBeCloseTo(foot(0), 2);
+    expect(foot(3)).toBeCloseTo(0.5 + 0.2 * Math.sin(0.4 * Math.PI), 2);
+    // Riding to one side of the back, a plate stands off the skin as it faces, a little outward; leaning, further out.
+    const tip = (pts: number[][]) => { const z = span(pts, 2)[1]; return pts.find((q) => q[2] === z)![0]; };
+    const upright = tip(plate(plates, 3));
+    const leaning = tip(plate(points(draw(f({ ride: 'body', lean: 0.5 })), MAT.horn), 3));
+    expect(upright).toBeGreaterThan(span(plate(plates, 3), 0)[0] + 0.005);
+    expect(leaning).toBeGreaterThan(upright + 0.015);
+    // In the body's own frame a plate stands straight up, and leans out by its share of its height: on the left, to the left.
+    const level = points(draw(f({ zl: true, from: [-0.05, -0.3, 0.6], to: [-0.05, 0.3, 0.6], lean: 0.4 })), MAT.horn);
+    expect(tip(level)).toBeCloseTo(-0.05 - 0.4 * 0.05, 2);
+    const straight = points(draw(f({ zl: true, from: [-0.05, -0.3, 0.6], to: [-0.05, 0.3, 0.6] })), MAT.horn);
+    expect(span(straight, 0)[1] - span(straight, 0)[0]).toBeLessThan(0.02);
+  });
+
+  it('gives a frill an edge as thick as its rim says, and none where it says nothing', () => {
+    const f = (more: Record<string, unknown>) =>
+      plain({
+        head: { type: 'head', at: { stand: { y: 0.5, z: 0.8, pitch: 0 } }, rings: [[0, 0, 0.03, 0.03], [0.1, 0, 0.03, 0.03]] },
+        frill: { type: 'fan', mat: 'horn', on: 'head', at: [0, 0], dir: [0, 1], r: 0.2, gap: 0.001, ...more },
+      });
+    const bare = points(draw(f({})), MAT.horn);
+    const rimmed = points(draw(f({ rim: 0.02 })), MAT.horn);
+    // The fan stands across the body: its thickness is along it.
+    const thick = (pts: number[][]) => span(pts, 1)[1] - span(pts, 1)[0];
+    expect(thick(bare)).toBeLessThan(0.004);
+    expect(thick(rimmed)).toBeCloseTo(0.04, 2);
+    expect(rimmed.length).toBeGreaterThan(bare.length);
+    expect(bytes(draw(f({ rim: 0 })))).toBe(bytes(draw(f({}))));
+  });
+
+  it('turns a lump with the head it is on if it says so, and leaves it level if not', () => {
+    const f = (turn: boolean) =>
+      plain({
+        head: { type: 'head', at: { stand: { y: 0.5, z: 0.8, pitch: 0 }, low: { y: 0.5, z: 0.8, pitch: 1.2 } }, rings: [[0, 0, 0.03, 0.03], [0.1, 0, 0.03, 0.03]] },
+        crest: { type: 'lump', mat: 'horn', sides: [12, 6], on: 'head', at: [0, 0.05, 0.05], r: [0.01, 0.08, 0.01], ...(turn ? { turn: true } : {}) },
+      });
+    const long = (m: Mesh) => { const c = points(m, MAT.horn); return { along: span(c, 1)[1] - span(c, 1)[0], up: span(c, 2)[1] - span(c, 2)[0] }; };
+    // Level, both draw the same crest: long fore and aft.
+    expect(long(draw(f(true))).along).toBeCloseTo(0.16, 3);
+    expect(long(draw(f(true))).up).toBeCloseTo(0.02, 3);
+    // With the head pitched down to graze, the one that turns is long down the face, and the other still fore and aft.
+    const turned = long(draw(f(true), POSE.graze));
+    const still = long(draw(f(false), POSE.graze));
+    expect(turned.up).toBeGreaterThan(turned.along * 2);
+    expect(still.along).toBeCloseTo(0.16, 3);
+    expect(still.up).toBeCloseTo(0.02, 3);
+  });
+});
+
 describe('the validator', () => {
   const good = () => canonicalForm(plans.ceratopsian);
 
@@ -262,6 +572,31 @@ describe('the validator', () => {
     const f = good();
     f.parts.anchor = { type: 'lump', at: [0, 0, -2], r: [0.1, 0.1, 0.1] };
     expect(checkForm(f).join()).toContain('below the ground');
+  });
+
+  it('refuses a part that hangs on nothing, on a part with no end, on itself by any way round, or on two frames', () => {
+    const f = good();
+    f.parts.a = { type: 'lump', on: 'nothing', at: [0, 0, 0], r: [0.01, 0.01, 0.01] };
+    expect(checkForm(f).join()).toContain('there is no such part');
+    f.parts.a = { type: 'lump', on: 'cheeks', at: [0, 0, 0], r: [0.01, 0.01, 0.01] };
+    expect(checkForm(f).join()).toContain('has no end to hang on');
+    f.parts.a = { type: 'spike', on: 'b', from: [0, 0, 0], to: [0, 0.1, 0] };
+    f.parts.b = { type: 'spike', on: 'a', from: [0, 0, 0], to: [0, 0.1, 0] };
+    expect(checkForm(f).join()).toContain('hangs on it');
+    f.parts.a = { type: 'pillar', on: 'body', y: 0, x: 0.1, top: 0.5, r: 0.03 };
+    delete f.parts.b;
+    expect(checkForm(f).join()).toContain("cannot hang on another part's end");
+    f.parts.a = { type: 'lump', ride: 'head', at: [0, 0, 0], r: [0.01, 0.01, 0.01] };
+    expect(checkForm(f).join()).toContain('is no trunk of this body');
+    f.parts.a = { type: 'lump', ride: 'body', on: 'body', at: [0, 0, 0], r: [0.01, 0.01, 0.01] };
+    expect(checkForm(f).join()).toContain('a part has one frame');
+    f.parts.a = { type: 'lump', ride: 'body', at: [0, 0, 0], r: [0.01, 0.01, 0.01] };
+    expect(checkForm(f)).toEqual([]);
+  });
+
+  it('refuses rows changed by number where no list above was there to change', () => {
+    const f = applyChange(good(), { parts: { crest: { type: 'tube', rings: { 1: [0, 0, 0.01, 0.01] } } } });
+    expect(checkForm(f).join()).toContain('changes rows by their numbers');
   });
 
   it('refuses a body past its budget', () => {
