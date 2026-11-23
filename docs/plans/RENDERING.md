@@ -420,13 +420,14 @@ plants, the bodies, the people and what they build, and raised each by the means
   tilted. Its bark is its tree's, greyed by how long it has lain, with what grows low on its upper side and the wood
   pale where it broke; it does not sway. A click on it finds its taxon. How much wood lies to the hectare is the
   generator's choice (`strewn.wood`): nobody counted it. A palm, a tree fern and a calamite shed a trunk and no
-  branches.
+  branches. The look book's `forest-floor` is a view of it.
 - **Bare ground is bare.** A ground bears what its climate grows only as far as what it is made of lets it: a crust of
   salt a thirtieth of it, and a mud or a lime mud its sources say dried into cracks a tenth (`cover.bears`, the
   generator's choice). Bare ground takes the rest, so that fewer trees and fewer low plants stand there, from afar
   by the mean of the scene's ground and close by where each material lies: tufts stand on the sand beside a crust,
   and next to none on it. `gen:life/scene` is version 13: a scene whose ground bears all its climate grows has every
-  tree and animal where version 12 put it.
+  tree and animal where version 12 put it. The look book's `ground-salt` was moved some ten kilometres, onto land with
+  the same ground: the world's relief below a scene's grid (version 10) had put its place under water.
 - **Shadows close to.** The nearest cascade is as wide as the view is far, down to 24 m, so that close by a shadow is
   fine enough to meet the foot that casts it. How far behind what shades it a point must be, along the sun's way, was
   one number for all three cascades, which in the nearest came to more than half a metre: nothing lower than that
