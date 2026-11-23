@@ -226,9 +226,10 @@ params:
     under: 420
     mat_step: 14
     mats: 42
-    # The ground's cover close by: clumps of the understory a metre apart where the cover's share of low plants says, out
-    # to 70 m from the eye, and no more than 40,000 in a view.
-    clumps: { step: 1, reach: 70, most: 40000 }
+    # The ground's cover close by: clumps of the understory 0.6 m apart where the cover's share of low plants says, out
+    # to 64 m from the eye; over it a finer grid, 0.3 m apart, within 24 m of the eye, where a sward must close; and a
+    # wider one, 1.6 m apart, of clumps twice as large, which carries the cover on to 170 m. No more than 90,000 in a view.
+    clumps: { step: 0.6, reach: 64, most: 90000, fine: { step: 0.3, reach: 24 }, far: { step: 1.6, reach: 170, size: 2 } }
     # The understory 0.9 m tall and more, a shrub or a fern: sown on a grid of 4 m, 140 to the hectare where the cover
     # allows, as far as the big animals are, and drawn as far as it shows; beside it, all of the understory, tall and
     # low, is sown close by as before.

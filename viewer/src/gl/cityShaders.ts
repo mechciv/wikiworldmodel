@@ -75,140 +75,41 @@ float standing(vec4 e) {
 `;
 
 /**
- * Leaves held on cards (docs/plans/RENDERING.md, step 1): a card's outline is cut here from its uv, as its material says:
- * needles, the leaflets of a frond, broad leaves, or a frond held as a fan. The same cut is made in every pass, so that
- * what casts a shadow and what a click finds are the leaves that are seen. How a leaf looks is the renderer's; whether a
- * plant has needles, fronds or broad leaves is its form's.
+ * Leaves held on cards (docs/plans/RENDERING.md, step 1): a card shows a tile of the atlas of leaves (core/leaves.ts,
+ * leafatlas.ts), a spray of leaves on its twig or a bough of such sprays, and what of the card is leaf is read from it,
+ * the same in every pass, so that what casts a shadow and what a click finds are the leaves that are seen. How a kind of
+ * leaf looks is the atlas's; which kind a plant has is its form's.
  */
 const LEAVES = /* glsl */ `
 const int NEEDLE_CARD = 44, FROND_CARD = 45, BROAD_CARD = 46, FAN_CARD = 47, LEAF_MASS = 48, BLADE_CARD = 49, BLADE = 71;
 bool onCard(int m) { return (m >= NEEDLE_CARD && m <= FAN_CARD) || m == BLADE_CARD; }
+uniform highp sampler2DArray uLeaves;
+// How much of a texel must be leaf for it to be leaf where the answer is yes or no: under a half, so that a needle
+// thinner than a texel is kept.
+const float LEAF_CUT = 0.36;
 float leafHash(vec2 p) {
   vec3 q = fract(vec3(p.xyx) * 0.1031);
   q += dot(q, q.yzx + 33.33);
   return fract((q.x + q.y) * q.z);
 }
-// A leaf's signed distance, <0 inside, and its shade, from distances along and across it in its own halves.
-vec2 leafShape(float x, float y, float len, float wid, float shade) {
-  float w = sqrt(max(0.0, 1.0 - x * x)) * (1.0 - 0.28 * x);
-  float d = max((abs(y) - w) * wid * 0.5, (abs(x) - 1.0) * len * 0.5);
-  // The midrib, a little paler.
-  return vec2(d, shade + 0.12 * (1.0 - smoothstep(0.0, 0.14, abs(y))));
+// A card's texel of the atlas: its tile is the whole part of u, across the tile its fraction, and v along it from the
+// twig's foot. Read by how the card's own uv changes across a pixel: the tile's number, taken off, changes it at a
+// card's edge, where a pixel's neighbour lies off the card. Red is how light the leaf is, green how much is twig, blue
+// how the leaf's face leans across the card, alpha how much is leaf.
+vec4 leafTexel(vec2 uv) {
+  float tile = floor(uv.x);
+  vec2 k = vec2(1.0 / 0.98, 1.0);
+  return textureGrad(uLeaves, vec3((uv.x - tile - 0.01) / 0.98, uv.y, tile), dFdx(uv) * k, dFdy(uv) * k);
 }
-// Broad leaves along a twig, alternating, with one at its tip. p: across from the twig and along from the base, in
-// shares of the card's length; wide: how far the card reaches either side of its twig, in the same.
-vec2 broadLeaves(vec2 p, float wide, float seed) {
-  float best = p.y > 0.0 && p.y < 0.86 ? abs(p.x) - 0.009 : 1.0;
-  float shade = 0.6;
-  float scale = min(1.0, wide * 2.6 + 0.2);
-  for (int i = 0; i < 7; i++) {
-    float fi = float(i);
-    bool tip = i == 6;
-    float side = mod(fi, 2.0) < 0.5 ? -1.0 : 1.0;
-    float r = leafHash(vec2(fi + 1.0, seed + 3.0));
-    float t0 = tip ? 0.82 : 0.1 + fi * 0.125;
-    float ang = tip ? (r - 0.5) * 0.3 : side * (0.62 + 0.4 * r);
-    vec2 dir = vec2(sin(ang), cos(ang));
-    float len = (tip ? 0.3 : 0.25 + 0.09 * r) * scale;
-    float wid = len * 0.44;
-    vec2 q = p - vec2(0.0, t0) - dir * len * 0.56;
-    vec2 l = leafShape(dot(q, dir) / (len * 0.5), dot(q, vec2(dir.y, -dir.x)) / (wid * 0.5), len, wid, 0.72 + 0.5 * r);
-    if (l.x < best) { best = l.x; shade = l.y; }
-  }
-  return vec2(best, shade);
+// The same where no pixel has neighbours to measure by: the shadows' and the pick's passes read the tile as it is.
+bool leafThere(vec2 uv) {
+  float tile = floor(uv.x);
+  return texture(uLeaves, vec3((uv.x - tile - 0.01) / 0.98, uv.y, tile)).a >= LEAF_CUT;
 }
-// Needles in two ranks along a twig, flat, as on a spray of a swamp cypress or a fir; shorter towards its tip.
-vec2 needles(vec2 p, float wide, float seed) {
-  float best = p.y > 0.0 && p.y < 0.96 ? abs(p.x) - 0.007 : 1.0;
-  float shade = 0.6;
-  float side = p.x < 0.0 ? -1.0 : 1.0;
-  const float SN = 0.8134, CS = 0.5817;
-  float r = abs(p.x) / SN;
-  float t0 = p.y - r * CS;
-  float s = 0.026;
-  float idx = floor(t0 / s + 0.5);
-  float tt = idx * s;
-  float h = leafHash(vec2(idx + side * 37.0, seed + 11.0));
-  float len = min(wide * 0.95 / SN, 0.3) * (1.0 - 0.5 * tt * tt) * (0.8 + 0.35 * h);
-  float d = max(abs(t0 - tt) * SN - 0.0088 * (1.0 - 0.45 * r / max(len, 1e-3)), r - len);
-  if (tt > 0.015 && tt < 0.95 && d < best) { best = d; shade = 0.7 + 0.55 * h; }
-  return vec2(best, shade);
-}
-// A frond: leaflets either side of its stalk, alternating, widest a third of the way out and gone at either end.
-vec2 frondLeaves(vec2 p, float wide, float seed) {
-  float best = p.y > 0.0 && p.y < 0.99 ? abs(p.x) - 0.006 : 1.0;
-  float shade = 0.62;
-  float side = p.x < 0.0 ? -1.0 : 1.0;
-  const float SN = 0.9128, CS = 0.4085;
-  float r = abs(p.x) / SN;
-  float t0 = p.y - r * CS;
-  float s = 0.05;
-  float off = side > 0.0 ? 0.0 : 0.5;
-  float idx = floor(t0 / s - off + 0.5);
-  float tt = (idx + off) * s;
-  float env = sqrt(max(0.0, 4.0 * tt * (1.0 - tt))) * (1.0 - 0.2 * tt) * (0.75 + 0.25 * smoothstep(0.0, 0.3, tt));
-  float len = wide * 0.97 / SN * env;
-  float x = r / max(len, 1e-4);
-  float w = s * 0.4 * sqrt(max(0.0, 1.0 - x * x)) * (1.0 - 0.35 * x);
-  float h = leafHash(vec2(idx + side * 53.0, seed + 5.0));
-  float d = max(abs(t0 - tt) * SN - w * SN, (r - len) * 0.5);
-  if (tt > 0.0 && tt < 0.99 && len > 0.003 && d < best) { best = d; shade = 0.72 + 0.4 * h + 0.1 * (1.0 - x); }
-  return vec2(best, shade);
-}
-// A tuft's blades from its foot, fanning out and curving a little, each narrowing to its tip. p: across from −1 to 1, and
-// up from 0 to 1.
-vec2 blades(vec2 p, float seed) {
-  float best = 1.0;
-  float shade = 0.7;
-  for (int i = 0; i < 9; i++) {
-    float fi = float(i);
-    float h = leafHash(vec2(fi + 2.0, seed + 19.0));
-    float top = 0.55 + 0.45 * h;
-    float f = p.y / top;
-    if (f > 1.0 || f < 0.0) continue;
-    float x0 = (fi / 8.0 - 0.5) * 0.5;
-    float x1 = (fi / 8.0 - 0.5) * 1.6 + (h - 0.5) * 0.3;
-    float x = mix(x0, x1, f * f * 0.8 + f * 0.2);
-    float d = abs(p.x - x) - (0.075 * (1.0 - f) + 0.004);
-    if (d < best) { best = d; shade = 0.72 + 0.4 * h + 0.2 * f; }
-  }
-  return vec2(best, shade);
-}
-// How much of a point of a card is leaf, 0 to 1, smoothed over a pixel; the leaf's shade there; and, on a card of blades,
-// whose colour it takes: 1 a frond's, 2 a needle's, 3 a broad leaf's. From far enough off that its leaves are finer than
-// a pixel or two, it is as much leaf as the pattern is on average, so nothing shimmers.
-vec3 leafCover(int m, vec2 uv) {
-  if (m == BLADE_CARD) {
-    float k = floor(uv.y);
-    vec2 p = vec2(uv.x, uv.y - k);
-    vec2 l = blades(p, mod(k, 8.0));
-    float aa = max(fwidth(p.x), 1e-4);
-    float a = clamp(0.5 - l.x / aa, 0.0, 1.0);
-    return vec3(mix(a, 0.4, smoothstep(0.08, 0.3, aa)), l.y, floor(k / 8.0 + 0.001));
-  }
-  if (m == FAN_CARD) {
-    // A fan: u across it, v out from its hub. Its leaflets part towards their tips, each pointed.
-    float x = uv.x * 22.0;
-    float seg = fract(x) - 0.5;
-    float r = uv.y;
-    float halfw = 0.5 - 0.44 * smoothstep(0.42, 1.0, r);
-    float fx = max(fwidth(x), 1e-4);
-    float fr = max(fwidth(r), 1e-4);
-    float d = max((abs(seg) - halfw) / fx, (r - (1.0 - 0.2 * abs(seg) * 2.0)) / fr);
-    float a = clamp(0.5 - d, 0.0, 1.0);
-    a = mix(a, 0.78, smoothstep(0.35, 1.2, fx));
-    return vec3(a, 0.7 + 0.45 * (1.0 - abs(seg) * 2.0), 0.0);
-  }
-  float k = floor(uv.y);
-  float seed = mod(k, 8.0);
-  float wide = floor(k / 8.0 + 0.001) / 40.0;
-  vec2 p = vec2(uv.x * wide, uv.y - k);
-  vec2 l = m == NEEDLE_CARD ? needles(p, wide, seed) : m == FROND_CARD ? frondLeaves(p, wide, seed) : broadLeaves(p, wide, seed);
-  float aa = max(length(fwidth(p)), 1e-5);
-  // Once its leaves are finer than a pixel or so, each grows by part of one: a spray closes, within its own outline, into
-  // the mass that a real one, leaves over leaves, shows from as far, rather than letting the sky through it.
-  float grow = aa * 0.6 * smoothstep(0.01, 0.04, aa);
-  return vec3(clamp(0.5 - (l.x - grow) / aa, 0.0, 1.0), l.y, 0.0);
+// How much of a pixel of a card is leaf, from what the atlas says of the texels about it: drawn larger than its tile, an
+// edge is sharpened to a pixel; drawn smaller, it is the share of the texels that are leaf.
+float leafShare(float a) {
+  return clamp((a - LEAF_CUT) / max(fwidth(a), 0.03) + 0.5, 0.0, 1.0);
 }
 `;
 
@@ -354,7 +255,7 @@ uniform float uCards;
 ${LEAVES}
 out vec4 o;
 void main() {
-  if (onCard(vMaterial) && (uCards < 0.5 || leafCover(vMaterial, vUv).x < 0.5)) discard;
+  if (onCard(vMaterial) && (uCards < 0.5 || !leafThere(vUv))) discard;
   o = vec4(0.0);
 }`;
 
@@ -368,7 +269,7 @@ ${LEAVES}
 out vec4 o;
 void main() {
   // A click between the leaves goes on to what is behind them.
-  if (onCard(vMaterial) && leafCover(vMaterial, vUv).x < 0.5) discard;
+  if (onCard(vMaterial) && !leafThere(vUv)) discard;
   o = vec4(float(vEntity & 255), float((vEntity >> 8) & 255), 0.0, 255.0) / 255.0;
 }`;
 
@@ -598,6 +499,9 @@ uniform vec2 uAOSize;
 uniform float uEvidence;
 // 1: the edges of leaves on cards are blended by how much of a pixel they cover; 0: they are cut at half
 uniform float uCoverage;
+// The tones of the land, as the place's climate gives them (world/generators/life/scene.yaml): soil, low plants, bare
+// ground, canopy and low plants from afar, each from one tone to another. What grows takes its hue from them.
+uniform vec3 uTone[10];
 out vec4 o;
 ${LIGHTING}
 ${LEAVES}
@@ -933,10 +837,60 @@ Surface surface(int m, vec3 p, vec2 uv, float tint, vec3 n, float fw, out vec3 b
     vec3 wob = vec3(texture(uNoise, q).r, texture(uNoise, q).g, texture(uNoise, q).b) - 0.5;
     bumpN = normalize(n + wob * 2.2);
   } else if (m == BARK) {
+    // Bark, laid along a limb (world/generators/life/plants.ts, tube): u counts ridges round it, a whole number of
+    // them; v is metres along it, and its thousands say which bark: 0 furrowed, 1 smooth, 2 in scales, 3 in diamond
+    // cushions, 4 ringed, 5 ribbed and jointed. Which a plant has follows from its part's type; how each looks is
+    // this, and nobody's record. Its unevenness is read in the world, so that it runs round a limb with no seam.
+    float kind = floor(uv.y / 1000.0 + 0.001);
+    float v = uv.y - kind * 1000.0;
     vec3 base = mix(vec3(0.17, 0.13, 0.095), vec3(0.31, 0.22, 0.14), tint);
-    float ridges = noiseS(p, vec3(0.05, 0.05, 0.7));
-    s.albedo = base * (0.58 + 0.84 * ridges);
-    s.rough = 0.9;
+    base = mix(base, vec3(dot(base, vec3(0.333))) * vec3(1.03, 1.0, 0.95), 0.4 * fract(tint * 7.3));
+    float near = 1.0 - smoothstep(20.0, 80.0, length(uEye - p));
+    float fine = noiseS(p, vec3(0.012, 0.012, 0.3));
+    float h = 0.6;
+    if (near > 0.0) {
+      float wander = (noiseM(p, 0.22) - 0.5) * 1.3 + (noiseS(p, vec3(0.05, 0.05, 0.6)) - 0.5) * 0.5;
+      if (kind < 0.5) {
+        // Ridges along the limb, wandering, parting and joining; broken across into plates.
+        float ph = uv.x + wander;
+        float furrow = smoothstep(0.45, 0.95, abs(fract(ph) - 0.5) * 2.0);
+        float cv = v / 0.17 + hash(vec2(floor(ph), 3.0)) * 9.0;
+        float crack = 1.0 - smoothstep(0.02, 0.1, abs(fract(cv) - 0.5));
+        h = (1.0 - furrow) * (1.0 - 0.55 * crack) * (0.72 + 0.28 * fine);
+      } else if (kind < 1.5) {
+        // Smooth, with short marks across it.
+        float lv = v / 0.03;
+        float mark = step(0.72, hash(vec2(floor(uv.x * 1.5 + wander * 0.3), floor(lv)))) * (1.0 - smoothstep(0.1, 0.3, abs(fract(lv) - 0.5)));
+        h = 0.85 - 0.5 * mark + 0.15 * (noiseM(p, 0.08) - 0.5);
+      } else if (kind < 2.5) {
+        // Scales, each lapping the one above: the bases of old leaves, or plates of bark.
+        float row = floor(v / 0.07);
+        vec2 f = vec2(fract(uv.x * 1.3 + mod(row, 2.0) * 0.5 + wander * 0.15), fract(v / 0.07));
+        float edge = max(abs(f.x - 0.5) * 2.0, 1.0 - f.y);
+        h = (1.0 - smoothstep(0.7, 1.0, edge)) * (0.45 + 0.55 * f.y);
+      } else if (kind < 3.5) {
+        // Cushions in two crossing spirals, each a diamond with a scar at its middle.
+        vec2 d = vec2(uv.x * 1.6 + v / 0.05, uv.x * 1.6 - v / 0.05);
+        vec2 f = abs(fract(d) - 0.5) * 2.0;
+        float edge = max(f.x, f.y);
+        h = (1.0 - smoothstep(0.72, 0.98, edge)) * (0.6 + 0.4 * (1.0 - edge)) - 0.35 * (1.0 - smoothstep(0.1, 0.22, edge));
+      } else if (kind < 4.5) {
+        // Rings where leaves were shed, close together, and fibres along the stem between them.
+        float ring = abs(fract(v / 0.085 + wander * 0.12) - 0.5) * 2.0;
+        h = 0.35 + 0.65 * smoothstep(0.0, 0.5, ring) * (0.7 + 0.3 * fine);
+      } else {
+        // Fine ribs along the stem, and a joint across it at every few hands.
+        float rib = abs(fract(uv.x * 2.5) - 0.5) * 2.0;
+        float joint = 1.0 - smoothstep(0.0, 0.06, abs(fract(v / 0.42) - 0.5));
+        h = (0.5 + 0.5 * rib) * (1.0 - 0.7 * joint);
+      }
+    }
+    h = mix(0.6, h, near);
+    s.albedo = base * (0.4 + 0.85 * h) * (0.82 + 0.36 * fine) * (0.86 + 0.28 * fbmM(p, 1.3));
+    // Lichen and damp, in patches, the more the paler the bark.
+    s.albedo = mix(s.albedo, vec3(0.2, 0.22, 0.15) * (0.6 + 0.6 * h), 0.3 * smoothstep(0.55, 0.78, fbmM(p + 3.7, 0.9)));
+    s.rough = 0.92;
+    if (near > 0.0) bumpN = bumpBy(n, vRel, h, 0.014 * near);
   } else if (m == DARK) {
     s.albedo = vec3(0.012, 0.011, 0.01);
     s.rough = 0.9;
@@ -1287,15 +1241,17 @@ Surface built(int m, vec3 q, vec3 p, vec2 uv, float tint, vec3 n, float fw, out 
   return s;
 }
 
-// Leaves, on cards and in the mass inside a crown: patches across the crown as sun and age colour it, and each leaf its
-// own shade. Their colours are the renderer's, and nobody's record.
-Surface leaves(int m, vec3 p, float tint, float shade, float family) {
+// Leaves, on cards and in the mass inside a crown: patches across the crown as sun and age colour it, and each leaf as
+// light as the atlas has it (0 to 1), with its twig in bark. Their colours are the renderer's, and nobody's record.
+Surface leaves(int m, vec3 p, float tint, float light, float wood, float family) {
   Surface s;
   s.metal = 0.0;
   s.bump = 0.0;
   s.rough = 0.6;
   if (m == LEAF_MASS) {
-    s.albedo = mix(vec3(0.036, 0.07, 0.03), vec3(0.056, 0.088, 0.032), tint) * (0.8 + 0.4 * fbmM(p, 1.5));
+    // The leaves behind the ones seen: dark, and flecked as leaves in shade are, so that it is no smooth lump.
+    float fleck = noiseM(p, 0.11) * 0.55 + noiseM(p + 5.0, 0.3) * 0.45;
+    s.albedo = mix(vec3(0.03, 0.06, 0.026), vec3(0.05, 0.08, 0.03), tint) * (0.45 + 0.9 * smoothstep(0.3, 0.75, fleck)) * (0.8 + 0.4 * fbmM(p, 1.5));
     s.rough = 0.9;
     return s;
   }
@@ -1311,15 +1267,21 @@ Surface leaves(int m, vec3 p, float tint, float shade, float family) {
     lite = mix(vec3(0.16, 0.25, 0.07), vec3(0.25, 0.30, 0.085), tint);
     s.rough = 0.5;
   }
-  s.albedo = mix(dark, lite, clamp(0.2 + 0.55 * fbmM(p, 2.5) + (shade - 0.9) * 0.8, 0.0, 1.0));
+  vec3 leaf = mix(dark, lite, clamp(0.3 * fbmM(p, 2.5) + light * 0.95 - 0.08, 0.0, 1.0));
+  vec3 twig = mix(vec3(0.17, 0.13, 0.095), vec3(0.31, 0.22, 0.14), 0.4) * (0.5 + 0.9 * light);
+  s.albedo = mix(leaf, twig, wood);
+  s.rough = mix(s.rough, 0.9, wood);
   return s;
 }
 
-// A tuft's own blade close by (world/generators/life/forms.ts, tuft), as leafCover says of a card: all of it leaf; its
-// shade, from its number and paler towards its tip, as a card's blades have it; and whose colour it takes.
-vec3 bladeCover(vec2 uv) {
+// A tuft's own blade close by (world/generators/life/plants.ts, tuft): how light it is, from its own number, darker at
+// its foot and along its midrib; and whose colour it takes. Its uv is across the blade from −1 to 1, and in v's whole
+// part its family by eight and its number, with the way up it in the fraction.
+vec2 bladeLook(vec2 uv) {
   float k = floor(uv.y);
-  return vec3(1.0, 0.72 + 0.4 * leafHash(vec2(mod(k, 8.0) + 2.0, 19.0)) + 0.2 * (uv.y - k), floor(k / 8.0 + 0.001));
+  float up = uv.y - k;
+  float light = 0.18 + 0.4 * leafHash(vec2(mod(k, 8.0) + 2.0, 19.0)) + 0.34 * up - 0.1 * (1.0 - smoothstep(0.0, 0.3, abs(uv.x)));
+  return vec2(light, floor(k / 8.0 + 0.001));
 }
 
 // Leaves are lit as the mass they make, by a normal bent out from their crown's middle, softly round the side away from
@@ -1387,17 +1349,50 @@ void main() {
   bool blade = vMaterial == BLADE;
   bool leafy = card || blade || vMaterial == LEAF_MASS;
   float alpha = 1.0;
-  vec3 cover = vec3(1.0, 0.9, 0.0);
+  // How light a leaf is, how much of it is twig, how its face leans across its card, and whose colour a blade takes.
+  float leafLight = 0.6;
+  float leafWood = 0.0;
+  float leafLean = 0.0;
+  float family = 0.0;
   if (card) {
-    cover = leafCover(vMaterial, vUv);
-    alpha = cover.x;
+    vec4 t = leafTexel(vUv);
+    leafLight = t.r;
+    leafWood = t.g;
+    leafLean = t.b * 2.0 - 1.0;
     if (uCoverage < 0.5) {
-      if (alpha < 0.5) discard;
-      alpha = 1.0;
-    } else if (alpha < 0.01) discard;
-  } else if (blade) cover = bladeCover(vUv);
+      if (t.a < LEAF_CUT) discard;
+    } else {
+      alpha = leafShare(t.a);
+      if (alpha < 0.01) discard;
+    }
+  } else if (blade) {
+    vec2 b = bladeLook(vUv);
+    leafLight = b.x;
+    family = b.y;
+    leafLean = vUv.x * 0.5;
+  }
   Surface s;
-  if (leafy) s = leaves(vMaterial, vPos, vTint, cover.y, cover.z);
+  if (leafy) {
+    s = leaves(vMaterial, vPos, vTint, leafLight, leafWood, family);
+    // On wild land a leaf takes most of its hue from its place's own tones, as the ground under it does: what grows low
+    // from its low plants' tone, a crown from its canopy's. So a steppe's tufts are the straw of its ground and a
+    // rainforest's ferns its dark green, and a plant and the ground from afar are of one colour. How light a leaf is
+    // stays its own.
+    if (uWild > 0.5) {
+      const vec3 LUMA = vec3(0.2126, 0.7152, 0.0722);
+      float low = 1.0 - smoothstep(1.5, 4.5, vLow);
+      vec3 place = mix(mix(uTone[6], uTone[7], leafLight), mix(uTone[2], uTone[3], leafLight), low);
+      // As light as the leaf is, part of the way to as light as the place's tone, which is the mean of a whole stand.
+      float lum = dot(s.albedo, LUMA);
+      float plum = max(dot(place, LUMA), 1e-3);
+      vec3 toned = place * (mix(lum, plum * 1.5, 0.45 * low) / plum);
+      s.albedo = mix(s.albedo, toned, 0.62 * (1.0 - leafWood));
+      // Each plant a shade of its own, and what grows low a little yellower or greener than its neighbour.
+      float own = fract(vTint * 5.3);
+      s.albedo *= 0.78 + 0.44 * own;
+      s.albedo = mix(s.albedo, s.albedo * vec3(1.14, 1.0, 0.7), 0.55 * fract(vTint * 9.7) * low * (1.0 - leafWood));
+    }
+  }
   else if (vMaterial == FACADE) s = facade(vPos, vUv, vTint, fw, n, glass);
   else if (isBuilt(vMaterial)) s = built(vMaterial, vLocal, vPos, vUv, vTint, n, fw, bumped);
   else s = surface(vMaterial, vPos, vUv, vTint, n, fw, bumped);
@@ -1428,9 +1423,27 @@ void main() {
   if (leafy) {
     // A leaf's normal is its crown's, whichever side of it is seen; and what it sees of the sky is the crown's to say.
     float sh = shadowAt(vPos, n, pixel) * cloudShade(vPos);
+    // Close to the ground a plant stands in its neighbours' shade: the foot of a tuft is dark, and its tips are lit.
+    float foot = vLow < 100.0 ? 0.42 + 0.58 * smoothstep(0.0, 0.55, vLow) : 1.0;
     // Its own face, from the point's place from the eye: from the world's, far from the scene's middle, it would speckle.
-    vec3 g = normalize(cross(dFdx(vRel), dFdy(vRel)));
-    c = foliage(s.albedo, s.rough, n, g, vPos, vLight * under, sh, card || blade);
+    vec3 dpx = dFdx(vRel);
+    vec3 dpy = dFdy(vRel);
+    vec3 g = normalize(cross(dpx, dpy));
+    vec3 lit = n;
+    if (card || blade) {
+      // Each leaf leans its own way across its card, the two halves of its fold apart: the card's own direction across,
+      // from how its uv and its place change over a pixel.
+      vec2 dux = dFdx(vUv);
+      vec2 duy = dFdy(vUv);
+      vec3 across = dpx * duy.y - dpy * dux.y;
+      float l = length(across);
+      if (l > 1e-9) {
+        across *= sign(dux.x * duy.y - duy.x * dux.y) / l;
+        g = normalize(g + across * leafLean * 0.9);
+        lit = normalize(n + across * leafLean * 0.45);
+      }
+    }
+    c = foliage(s.albedo, s.rough, lit, g, vPos, vLight * under * foot, sh * mix(1.0, foot, 0.5), card || blade);
   } else {
     vec3 w = gl_FrontFacing ? bumped : -bumped;
     float sh = shadowAt(vPos, gl_FrontFacing ? n : -n, pixel) * cloudShade(vPos);

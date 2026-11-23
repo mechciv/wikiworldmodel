@@ -7,7 +7,7 @@ import { GroundSampler, type GroundGridData } from '../city/ground.ts';
 import { fingerprint, type Fingerprint, type Part } from '../../../core/fingerprint.ts';
 import { MAT, Mesh, meshParts } from '../city/kit.ts';
 import { hash2, hashString, TAU } from '../city/math.ts';
-import { drawAnimal, drawClump, drawPlant, POSE, type Detail, type Stance } from './forms.ts';
+import { clumpWidth, drawAnimal, drawClump, drawPlant, POSE, type Detail, type Stance } from './forms.ts';
 import { banksOf, CELL, CELLS, cellParts, cellKey, coverMask, EXTENT, groundGrids, LandCover, makePlan, placeLook, waterLevels, waterRibbons, waterSheet, watersFor, type CellRows, type LivingParams, type LivingPlan, type PlaceLook } from './scene/v9.ts';
 import { freshOf, type Waters } from './land.ts';
 import { drawDwelling, HOUSE_VARIANTS, houseSize, type HouseDetail } from '../people/dwellings.ts';
@@ -107,6 +107,26 @@ export const protoParts = (p: number): { taxon: number; variant: number; detail:
 
 const WALKING = new Set<number>([POSE.walk, POSE.fly]);
 
+/** How many clumps across a tile of the ground's cover is, and how many tiles are kept before the least lately used are let go. */
+const COVER_TILE = 24;
+const COVER_KEPT = 900;
+/** How much of its own width, squared, a clump keeps clear of its neighbours: under it a grid sows fewer of them. */
+const COVER_CROWD = 0.4;
+
+/** The clumps of one tile of a grid of the ground's cover: each one's place, size, facing and place in the thinning; its mesh; its tint. */
+interface CoverTile {
+  f: Float32Array;
+  proto: Uint32Array;
+  tint: Uint16Array;
+  count: number;
+  used: number;
+}
+
+/** The bit of a plant's variant that says it is drawn a little way off (plants.ts, `coarse`). */
+const COARSE = 4;
+/** How tall on the screen, in pixels, a plant must stand for its twigs and their sprays to be drawn. */
+const TWIGS_FROM = 300;
+
 export class SceneStream {
   readonly look: PlaceLook;
   private waters: Waters;
@@ -137,6 +157,11 @@ export class SceneStream {
   /** each cell's pieces of its towns' works, by their place in the plan */
   private workCells = new Map<number, number[]>();
   private workTops: number[] = [];
+  /** the ground's cover, made a tile at a time and kept; a count of the views it was made for; and whether the scene has none */
+  private coverTiles = new Map<string, CoverTile>();
+  private coverClock = 0;
+  private bare = false;
+  private clumpWides: number[] = [];
   /** each cell's kept animals, by their place in the plan; and each kind's tone */
   private keptCells = new Map<number, number[]>();
   private keptTones: number[] = [];
@@ -345,7 +370,9 @@ export class SceneStream {
       return { proto, vertices, indices };
     }
     // On the lighter way, a plant from a way off is the plain shapes it always was; otherwise its leaves are on cards.
-    if (form.kind === 'plant') drawPlant(m, form, t.height ?? 1, (variant + 1) * 0x9e37, detail, this.tones[taxon], !this.budget.fast);
+    // A plant's variant is which of four it is and, above that, whether it is drawn a little way off: the same plant,
+    // from the same seed, with boughs in place of its twigs and their sprays.
+    if (form.kind === 'plant') drawPlant(m, form, t.height ?? 1, ((variant & 3) + 1) * 0x9e37, detail, this.tones[taxon], !this.budget.fast, (variant & COARSE) !== 0);
     else {
       const stance = this.stance(t, form, variant, detail, this.tones[taxon]);
       const j = drawAnimal(m, form, stance);
@@ -369,9 +396,9 @@ export class SceneStream {
     return { L: t.length ?? 1, H: t.hip ?? (t.length ?? 1) * (form.hip ?? 0.3), pose, phase: (stride + 0.5) / 4, sway: (stride - 1.5) * 0.07, detail, tint, biped: (variant & 1) === 1 };
   }
 
-  /** Which mesh an individual is drawn with. */
-  private variantOf(t: LivingTaxon, form: Form, pose: number, phase: number, shade: number, detail: Detail): number {
-    if (form.kind === 'plant') return shade & 3;
+  /** Which mesh an individual is drawn with. `coarse`: a plant close by, but not so close that its twigs show. */
+  private variantOf(t: LivingTaxon, form: Form, pose: number, phase: number, shade: number, detail: Detail, coarse = false): number {
+    if (form.kind === 'plant') return (shade & 3) | (coarse ? COARSE : 0);
     const biped = t.biped || (t.posture === 'facultative-quadruped' && pose !== POSE.graze && pose !== POSE.drink && (shade & 1) === 1);
     // From afar only how it stands shows; the far shape has only one.
     if (detail === 0) return (POSE.stand << 3) | (biped ? 1 : 0);
@@ -462,7 +489,9 @@ export class SceneStream {
         const form = this.spec.forms[t0.form];
         // A low plant is a mesh only close by; one as tall as a person or more, a shrub or a fern, from a way off too.
         if (form.kind === 'plant' && form.behave?.layer === 'under' && detail < (heights[k] >= this.shrubFrom ? 1 : 2)) continue;
-        const proto = protoOf(k, this.variantOf(t0, form, pose[q], phase[q], shade[q], detail), detail);
+        // A plant's twigs and their sprays are drawn only where they can be told apart: within some tens of metres.
+        const coarse = form.kind === 'plant' && detail === 2 && pxs < (rich ? TWIGS_FROM / 2 : TWIGS_FROM);
+        const proto = protoOf(k, this.variantOf(t0, form, pose[q], phase[q], shade[q], detail, coarse), detail);
         let b = buckets.get(proto);
         if (!b) {
           const buf = new ArrayBuffer(INSTANCE_STRIDE * 64);
@@ -631,7 +660,12 @@ export class SceneStream {
         }
       }
     }
-    const clumps = this.cover && !this.budget.fast ? this.groundCover(v, buckets) : 0;
+    let clumps = 0;
+    if (this.cover && !this.budget.fast) {
+      const cover = this.groundCover(v, buckets, spendMs);
+      clumps = cover.clumps;
+      pending += cover.pending;
+    }
     // Pay for meshes, and keep within the budget of triangles: the far share thins next time if it did not.
     const batches: Batch[] = [];
     const protos: ProtoMesh[] = [];
@@ -664,81 +698,175 @@ export class SceneStream {
 
   /**
    * The ground's cover close by (docs/plans/RENDERING.md, step 2): where the cover's share of low plants says, a clump of
-   * one of the understory the atlas has here, on a grid that stays put as the eye moves, its place shaken by a hash; fewer
-   * over the last third of the way out, until the ground's own colour for low plants is all there is; and no more than
-   * the clumps' own budget. A scene whose atlas has no understory has none.
+   * one of the understory the atlas has here, on grids that stay put as the eye moves, each clump's place shaken by a
+   * hash. There are up to three grids, one laid over another: the scene's own, a finer one close to the eye, where a
+   * sward must close, and a coarser one of larger clumps that carries the cover on into the distance. Each thins over
+   * the last third of its reach, until the ground's own colour for low plants is all there is; and there are no more
+   * clumps in a view than their budget. A scene whose atlas has no understory has none.
+   *
+   * A grid's clumps are made a tile at a time and kept, the least lately used let go, so that a view that moves pays
+   * only for the ground it comes to.
    */
-  private groundCover(v: LifeView, buckets: Map<number, { f: Float32Array; s: Uint16Array; n: number }>): number {
+  private groundCover(v: LifeView, buckets: Map<number, { f: Float32Array; s: Uint16Array; n: number }>, spendMs: () => boolean): { clumps: number; pending: number } {
     const c = this.params.plants.clumps;
-    if (!c) return 0;
+    if (!c || this.bare) return { clumps: 0, pending: 0 };
     const [ex, ey, ez] = v.eye;
     const gz = this.ground.at(ex, ey);
-    // From high enough up the clumps would be too small to see.
-    if (ez - gz > c.reach * 0.6) return 0;
-    const R = c.reach;
-    const step = c.step;
     const t = Math.tan(v.fov / 2);
     const side = t * v.aspect;
-    const seed = this.look.seed;
-    const i0 = Math.floor((ex - R) / step);
-    const i1 = Math.ceil((ex + R) / step);
-    const j0 = Math.floor((ey - R) / step);
-    const j1 = Math.ceil((ey + R) / step);
+    const rings: { step: number; reach: number; size: number }[] = [{ step: c.step, reach: c.reach, size: 1 }];
+    if (c.fine) rings.push({ step: c.fine.step, reach: c.fine.reach, size: 1 });
+    if (c.far) rings.push({ step: c.far.step, reach: c.far.reach, size: c.far.size });
     let n = 0;
-    for (let j = j0; j <= j1 && n < c.most; j++) {
-      for (let i = i0; i <= i1 && n < c.most; i++) {
+    let pending = 0;
+    this.coverClock++;
+    for (let ring = 0; ring < rings.length && n < c.most; ring++) {
+      const { step, reach: R } = rings[ring];
+      // From high enough up the clumps would be too small to see.
+      if (ez - gz > R * 0.6) continue;
+      const tile = step * COVER_TILE;
+      const reachOut = R + tile * 0.71;
+      const i0 = Math.floor((ex - R) / tile);
+      const i1 = Math.floor((ex + R) / tile);
+      const j0 = Math.floor((ey - R) / tile);
+      const j1 = Math.floor((ey + R) / tile);
+      for (let tj = j0; tj <= j1 && n < c.most; tj++) {
+        for (let ti = i0; ti <= i1 && n < c.most; ti++) {
+          // The tile: in reach, and in view with its own half-width to spare.
+          const cx = (ti + 0.5) * tile - ex;
+          const cy = (tj + 0.5) * tile - ey;
+          if (cx * cx + cy * cy > reachOut * reachOut) continue;
+          const cz = gz - ez;
+          const spare = tile * 0.71 + 2;
+          const fw = cx * v.forward[0] + cy * v.forward[1] + cz * v.forward[2];
+          if (fw < -spare) continue;
+          const rt = cx * v.right[0] + cy * v.right[1] + cz * v.right[2];
+          const up = cx * v.up[0] + cy * v.up[1] + cz * v.up[2];
+          if (Math.abs(rt) > fw * side + spare * Math.sqrt(1 + side * side) || Math.abs(up) > fw * t + spare * Math.sqrt(1 + t * t)) continue;
+          const key = `${ring}:${ti}:${tj}`;
+          let made = this.coverTiles.get(key);
+          if (!made) {
+            if (!spendMs()) {
+              pending = 1;
+              continue;
+            }
+            made = this.coverTile(ring, rings[ring], ti, tj);
+            if (this.bare) return { clumps: 0, pending: 0 };
+            this.coverTiles.set(key, made);
+          }
+          made.used = this.coverClock;
+          const { f, proto, tint, count } = made;
+          for (let q = 0; q < count && n < c.most; q++) {
+            const o7 = q * 7;
+            const x = f[o7];
+            const y = f[o7 + 1];
+            const dx = x - ex;
+            const dy = y - ey;
+            const d = Math.sqrt(dx * dx + dy * dy);
+            if (d > R) continue;
+            // Fewer over the last third of the way out: each clump has its own place in that thinning.
+            const keep = d < R * 0.66 ? 1 : 1 - (d - R * 0.66) / (R * 0.34);
+            if (f[o7 + 6] >= keep) continue;
+            const dz = f[o7 + 2] - ez;
+            const fwd = dx * v.forward[0] + dy * v.forward[1] + dz * v.forward[2];
+            if (fwd < -2) continue;
+            const rgt = dx * v.right[0] + dy * v.right[1] + dz * v.right[2];
+            const upw = dx * v.up[0] + dy * v.up[1] + dz * v.up[2];
+            if (Math.abs(rgt) > fwd * side + 2 || Math.abs(upw) > fwd * t + 2) continue;
+            let b = buckets.get(proto[q]);
+            if (!b) {
+              const buf = new ArrayBuffer(INSTANCE_STRIDE * 256);
+              b = { f: new Float32Array(buf), s: new Uint16Array(buf), n: 0 };
+              buckets.set(proto[q], b);
+            }
+            if ((b.n + 1) * INSTANCE_STRIDE > b.f.byteLength) {
+              const buf = new ArrayBuffer(b.f.byteLength * 2);
+              new Uint8Array(buf).set(new Uint8Array(b.f.buffer));
+              b.f = new Float32Array(buf);
+              b.s = new Uint16Array(buf);
+            }
+            const o = b.n * 7;
+            b.f[o] = x;
+            b.f[o + 1] = y;
+            b.f[o + 2] = f[o7 + 2];
+            b.f[o + 3] = f[o7 + 3];
+            b.f[o + 4] = f[o7 + 4];
+            b.f[o + 5] = f[o7 + 5];
+            b.s[b.n * 14 + 12] = (proto[q] >> 8) + 1;
+            b.s[b.n * 14 + 13] = tint[q];
+            b.n++;
+            n++;
+          }
+        }
+      }
+    }
+    // The tiles least lately used are let go.
+    if (this.coverTiles.size > COVER_KEPT) {
+      const old = [...this.coverTiles.entries()].sort((a, b) => a[1].used - b[1].used);
+      for (let q = 0; q < old.length - COVER_KEPT * 0.75; q++) this.coverTiles.delete(old[q][0]);
+    }
+    return { clumps: n, pending };
+  }
+
+  /** How wide a clump of a taxon stands at its full size (plants.ts, clumpWidth). */
+  private clumpWide(k: number): number {
+    let w = this.clumpWides[k];
+    if (w === undefined) {
+      const t = this.spec.taxa[k];
+      w = clumpWidth(this.spec.forms[t.form], t.height ?? 1);
+      this.clumpWides[k] = w;
+    }
+    return w;
+  }
+
+  /** One tile of a grid of the ground's cover: every clump that stands in it, wherever the eye is. */
+  private coverTile(ring: number, grid: { step: number; size: number }, ti: number, tj: number): CoverTile {
+    const { step, size } = grid;
+    // Each grid has its own hashes, so that no two sow the same places.
+    const seed = this.look.seed + ring * 97;
+    const most = COVER_TILE * COVER_TILE;
+    const f = new Float32Array(most * 7);
+    const proto = new Uint32Array(most);
+    const tint = new Uint16Array(most);
+    let count = 0;
+    for (let j = tj * COVER_TILE; j < (tj + 1) * COVER_TILE; j++) {
+      for (let i = ti * COVER_TILE; i < (ti + 1) * COVER_TILE; i++) {
         const x = (i + hash2(i, j, seed + 71)) * step;
         const y = (j + hash2(i, j, seed + 72)) * step;
-        const dx = x - ex;
-        const dy = y - ey;
-        const d = Math.sqrt(dx * dx + dy * dy);
-        if (d > R) continue;
-        // In view, with a clump's width to spare.
-        const dz = gz - ez;
-        const fw = dx * v.forward[0] + dy * v.forward[1] + dz * v.forward[2];
-        if (fw < -2) continue;
-        const rt = dx * v.right[0] + dy * v.right[1] + dz * v.right[2];
-        const up = dx * v.up[0] + dy * v.up[1] + dz * v.up[2];
-        if (Math.abs(rt) > fw * side + 2 || Math.abs(up) > fw * t + 2) continue;
-        const keep = d < R * 0.66 ? 1 : 1 - (d - R * 0.66) / (R * 0.34);
         const u = hash2(i, j, seed + 73);
         const cover = this.cover.at(x, y);
-        if (cover.water || u >= cover.low * keep) continue;
+        if (cover.water || u >= cover.low) continue;
         // Among the houses the ground is trodden: little grows where feet go.
         if (this.landUse && hash2(i, j, seed + 78) < this.landUse.at(x, y).yard * 0.9) continue;
         const k = this.plan.underAt(x, y, cover, hash2(i, j, seed + 74));
-        // None at all in the scene, or none that suits this ground: the ground's own colour for low plants is all there is.
-        if (k === -1) return 0;
+        // None at all in the scene: the ground's own colour for low plants is all there is, here and everywhere.
+        if (k === -1) {
+          this.bare = true;
+          return { f, proto, tint, count: 0, used: 0 };
+        }
+        // None that suits this ground.
         if (k < 0) continue;
+        // A wide plant stands further from its neighbours than a grid finer than itself would sow it.
+        const scale = (0.45 + 0.55 * hash2(i, j, seed + 77)) * size;
+        const wide = this.clumpWide(k) * scale;
+        if (hash2(i, j, seed + 79) * wide * wide * COVER_CROWD > step * step) continue;
         const shade = (hash2(i, j, seed + 75) * 256) | 0;
-        const proto = protoOf(k, shade & 3, CLUMP);
-        let b = buckets.get(proto);
-        if (!b) {
-          const buf = new ArrayBuffer(INSTANCE_STRIDE * 256);
-          b = { f: new Float32Array(buf), s: new Uint16Array(buf), n: 0 };
-          buckets.set(proto, b);
-        }
-        if ((b.n + 1) * INSTANCE_STRIDE > b.f.byteLength) {
-          const buf = new ArrayBuffer(b.f.byteLength * 2);
-          new Uint8Array(buf).set(new Uint8Array(b.f.buffer));
-          b.f = new Float32Array(buf);
-          b.s = new Uint16Array(buf);
-        }
         const a = hash2(i, j, seed + 76) * TAU;
-        const o = b.n * 7;
-        b.f[o] = x;
-        b.f[o + 1] = y;
-        b.f[o + 2] = this.ground.at(x, y);
-        b.f[o + 3] = 0.45 + 0.55 * hash2(i, j, seed + 77);
-        b.f[o + 4] = Math.sin(a);
-        b.f[o + 5] = Math.cos(a);
-        b.s[b.n * 14 + 12] = k + 1;
-        b.s[b.n * 14 + 13] = shade >> 2;
-        b.n++;
-        n++;
+        const o = count * 7;
+        f[o] = x;
+        f[o + 1] = y;
+        f[o + 2] = this.ground.at(x, y);
+        f[o + 3] = scale;
+        f[o + 4] = Math.sin(a);
+        f[o + 5] = Math.cos(a);
+        // Where it stands in the thinning at its grid's edge: kept while this is under what is kept there.
+        f[o + 6] = u / cover.low;
+        proto[count] = protoOf(k, shade & 3, CLUMP);
+        tint[count] = shade >> 2;
+        count++;
       }
     }
-    return n;
+    return { f: f.slice(0, count * 7), proto: proto.slice(0, count), tint: tint.slice(0, count), count, used: 0 };
   }
 
   /**

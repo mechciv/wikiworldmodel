@@ -115,9 +115,10 @@ export interface LivingParams {
     /**
      * The ground's cover close by (docs/plans/RENDERING.md, step 2): clumps of the understory on a grid this many metres
      * apart, where the cover's share of low plants says, out to `reach` metres from the eye, thinning over its last
-     * third, and at most `most` of them in a view.
+     * third, and at most `most` of them in a view. Over it, `fine`: a closer grid near the eye, where a sward must
+     * close; and `far`: a wider one of clumps `size` times as large, which carries the cover on into the distance.
      */
-    clumps?: { step: number; reach: number; most: number };
+    clumps?: { step: number; reach: number; most: number; fine?: { step: number; reach: number }; far?: { step: number; reach: number; size: number } };
     /**
      * The understory that stands as tall as a person or more, a shrub or a fern, sown on a grid this many metres apart
      * as far as the big animals are, and drawn as far as it shows: what is lower than `least_m` is sown only close by.

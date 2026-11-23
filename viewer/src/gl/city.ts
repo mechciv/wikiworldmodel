@@ -8,12 +8,13 @@ import { GROUND_LAYERS } from '../../../core/materials.ts';
 import { hash3 } from '../../../world/generators/city/math.ts';
 import { invert, multiply, type Mat4, type V3 } from '../mat.ts';
 import { program, setUniforms, texture2D, type GL, type Program } from './context.ts';
+import type { LeafAtlas } from './leafatlas.ts';
 import { GroundMaterialSet } from './materials.ts';
 import { FrameTimer } from './timer.ts';
 import { AO_FS, BLUR_FS, BRIGHT_FS, DEPTH_FS, FULLSCREEN_VS, ID_FS, LUM_FS, MESH_FS, MESH_VS, POST_FS, SHAFTS_ADD_FS, SHAFTS_FS, TAA_FS, SEA, SEA_FS, SEA_VS, SKY_FS, SKY_LUT_FS, TERRAIN_FS, TERRAIN_VS, WATER_FS, WATER_VS, WATERBLUR_FS, WATERMAP_FS, WATERMAP_VS } from './cityShaders.ts';
 
 /** Texture units, the same for every program; 12 to 16 are the passes' own, for their targets. */
-const UNIT = { noise: 0, sky: 1, shadow: 2, ao: 3, entities: 4, ground: 5, normal: 8, mask: 11, fields: 17, waterMap: 18, scene: 19, sceneDepth: 20, matColour: 21, matNormal: 22 } as const;
+const UNIT = { noise: 0, sky: 1, shadow: 2, ao: 3, entities: 4, ground: 5, normal: 8, mask: 11, fields: 17, waterMap: 18, scene: 19, sceneDepth: 20, matColour: 21, matNormal: 22, leaves: 23 } as const;
 
 /** The grid of hexagons a scanned material is read among (cityShaders.ts, MATERIALS): tiles to a repeat, and where their numbers repeat. */
 const MAT_TILES = 3;
@@ -351,6 +352,12 @@ export class CityRenderer {
    */
   readonly materials: GroundMaterialSet;
   private noMaterial: WebGLTexture[] = [];
+  /**
+   * The atlas of leaves a plant's cards show (leafatlas.ts): drawn once, off the page, at full quality only, where
+   * plants have cards. Until it has come a card shows nothing.
+   */
+  private leaves: WebGLTexture;
+  leavesReady = false;
   private matAt = new Float32Array(48);
   private matCell = new Float32Array(24);
 
@@ -436,6 +443,13 @@ export class CityRenderer {
       gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
       this.noMaterial.push(t);
     }
+    gl.activeTexture(gl.TEXTURE0 + UNIT.leaves);
+    this.leaves = gl.createTexture()!;
+    gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.leaves);
+    gl.texStorage3D(gl.TEXTURE_2D_ARRAY, 1, gl.RGBA8, 1, 1, 1);
+    gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    if (!this.fast && typeof Worker !== 'undefined') this.drawLeaves();
     // Where the viewer is served from: its materials lie beside its page.
     if (!this.fast && typeof document !== 'undefined') this.materials.load(new URL('.', document.baseURI).href, () => this.meshSerial++);
     const ext = gl.getExtension('EXT_color_buffer_float');
@@ -561,6 +575,40 @@ void main() {
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   }
 
+  /** Have the atlas of leaves drawn, off the page, and take it as an array of textures when it comes. */
+  private drawLeaves(): void {
+    const gl = this.gl;
+    const worker = new Worker(new URL('./leafworker.ts', import.meta.url), { type: 'module' });
+    worker.onmessage = (e: MessageEvent<LeafAtlas>) => {
+      const a = e.data;
+      worker.terminate();
+      gl.activeTexture(gl.TEXTURE0 + UNIT.leaves);
+      gl.deleteTexture(this.leaves);
+      this.leaves = gl.createTexture()!;
+      gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.leaves);
+      gl.texStorage3D(gl.TEXTURE_2D_ARRAY, a.levels.length, gl.RGBA8, a.width, a.height, a.layers);
+      gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+      gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+      a.levels.forEach((texels, level) => gl.texSubImage3D(gl.TEXTURE_2D_ARRAY, level, 0, 0, 0, Math.max(1, a.width >> level), Math.max(1, a.height >> level), a.layers, gl.RGBA, gl.UNSIGNED_BYTE, texels));
+      gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      const aniso = gl.getExtension('EXT_texture_filter_anisotropic');
+      if (aniso) gl.texParameterf(gl.TEXTURE_2D_ARRAY, aniso.TEXTURE_MAX_ANISOTROPY_EXT, Math.min(4, gl.getParameter(aniso.MAX_TEXTURE_MAX_ANISOTROPY_EXT) as number));
+      gl.activeTexture(gl.TEXTURE0);
+      this.leavesReady = true;
+      this.meshSerial++;
+    };
+    worker.postMessage(0);
+  }
+
+  /** Whether a scene still waits for the atlas of leaves: wanted, and not yet come. */
+  get leavesLoading(): boolean {
+    return !this.fast && typeof Worker !== 'undefined' && !this.leavesReady;
+  }
+
   private bindSamplers(): void {
     const gl = this.gl;
     const ints = (p: Program, names: Record<string, number>) => {
@@ -572,9 +620,9 @@ void main() {
     };
     const lit = { uNoise: UNIT.noise, uSkyLut: UNIT.sky, uShadow: UNIT.shadow, uAO: UNIT.ao, uEntities: UNIT.entities };
     const ground = { uGround0: UNIT.ground, uGround1: UNIT.ground + 1, uGround2: UNIT.ground + 2, uNormal0: UNIT.normal, uNormal1: UNIT.normal + 1, uNormal2: UNIT.normal + 2, uMask: UNIT.mask, uFields: UNIT.fields };
-    ints(this.meshP, { ...lit, uMask: UNIT.mask });
-    ints(this.depthP, { uEntities: UNIT.entities });
-    ints(this.idP, { uEntities: UNIT.entities });
+    ints(this.meshP, { ...lit, uMask: UNIT.mask, uLeaves: UNIT.leaves });
+    ints(this.depthP, { uEntities: UNIT.entities, uLeaves: UNIT.leaves });
+    ints(this.idP, { uEntities: UNIT.entities, uLeaves: UNIT.leaves });
     ints(this.terrainP, { ...lit, ...ground, uWaterMap: UNIT.waterMap, uMatColour: UNIT.matColour, uMatNormal: UNIT.matNormal });
     ints(this.waterBlurP, { uTex: UNIT.waterMap });
     ints(this.terrainDepthP, ground);
@@ -1465,6 +1513,8 @@ void main() {
     gl.bindTexture(gl.TEXTURE_2D, this.mask);
     gl.activeTexture(gl.TEXTURE0 + UNIT.fields);
     gl.bindTexture(gl.TEXTURE_2D, this.fields);
+    gl.activeTexture(gl.TEXTURE0 + UNIT.leaves);
+    gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.leaves);
     gl.activeTexture(gl.TEXTURE0 + UNIT.matColour);
     gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.materials.colour ?? this.noMaterial[0]);
     gl.activeTexture(gl.TEXTURE0 + UNIT.matNormal);

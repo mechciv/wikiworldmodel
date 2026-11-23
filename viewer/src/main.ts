@@ -735,6 +735,8 @@ async function start(root: HTMLElement): Promise<void> {
   let refining = false;
   /** whether the last frame of a scene was drawn with the ground's scanned materials */
   let materialsDrawn = false;
+  /** and with the atlas of leaves its plants' cards show */
+  let leavesDrawn = false;
   /** whether the last frame drew a scene; and whether a visitor has used the page, so a still may start of itself */
   let cityDrawn = false;
   let touched = false;
@@ -1381,8 +1383,9 @@ async function start(root: HTMLElement): Promise<void> {
       dirty = true;
     }
     // The ground's scanned materials are fetched once, and a scene is drawn again when they have come.
-    if (city && city.renderer.materials.ready !== materialsDrawn) {
+    if (city && (city.renderer.materials.ready !== materialsDrawn || city.renderer.leavesReady !== leavesDrawn)) {
       materialsDrawn = city.renderer.materials.ready;
+      leavesDrawn = city.renderer.leavesReady;
       dirty = true;
     }
     // A scene whose clock runs, or whose frames are still being averaged, is drawn again; that is not waiting on anything.
@@ -2598,7 +2601,7 @@ async function start(root: HTMLElement): Promise<void> {
       // once they are done (docs/plans/RENDERING.md, step 4).
       ['refining', refining],
       // The ground's scanned materials, fetched once: a scene drawn before they came is drawn again with them.
-      ['materials', !!city && cityDrawn && city.renderer.materials.loading],
+      ['materials', !!city && cityDrawn && (city.renderer.materials.loading || city.renderer.leavesLoading)],
       ['landscape', landscapeOn() && (!landscape!.index || (landscapeLoading && !landscape!.globe))],
     ];
     return w.filter(([, x]) => x).map(([n]) => n);
