@@ -145,8 +145,44 @@ function latestBest(s: Solved, subject: string, b: Bounds, centres: Bounds | und
   return null;
 }
 
+/** Are two times the same as written to a file? As JSON has it, every number that is not finite is null. */
 function sameTime(a: FeatureTime, b: FeatureTime): boolean {
-  return JSON.stringify(a) === JSON.stringify(b);
+  const num = (x: number | null) => (x !== null && Number.isFinite(x) ? x : null);
+  const same = (x: Estimate, y: Estimate) => num(x.best) === num(y.best) && num(x.lo) === num(y.lo) && num(x.hi) === num(y.hi) && x.derived === y.derived;
+  return a.instant === b.instant && a.endUnknown === b.endUnknown && same(a.start, b.start) && same(a.end, b.end);
+}
+
+/**
+ * The points of the network a subject's time is read from (timeOf): its start and end, and where its start is taken from
+ * the members or forebears that limit it (latestBest), theirs, as the bounds given say which limit it. While a pick moves
+ * none of these from its picture's bounds, the subject's time in it is its picture's.
+ */
+function pointsRead(s: Solved, subject: string, b: Bounds, centres: Bounds | undefined): string[] {
+  const w = s.world;
+  const out = new Set<string>();
+  // The subjects whose limits have been followed: one reached first as a member, and not followed, may be reached again
+  // as a forebear, and must be followed then.
+  const followed = new Set<string>();
+  const walk = (x: string, follow: boolean) => {
+    const start = pointOf(w, x, 'start');
+    out.add(start);
+    out.add(pointOf(w, x, 'end'));
+    const { record, phase } = splitRef(x);
+    // What is limited by a member reads that member's time, whose start may be limited in turn; a forebear's start is
+    // read whatever its kind.
+    if (!follow && (phase || w.vocab.kinds[w.entity.get(record)?.kind ?? '']?.start !== 'latest')) return;
+    if (followed.has(x)) return;
+    followed.add(x);
+    for (const src of (centres ?? b).get(start)?.hiBy ?? []) {
+      const { record: from, part } = splitRef(src);
+      const r = part ? w.entity.get(from)?.relations.find((y) => y.key === part) : undefined;
+      if (!r || splitRef(r.to).record !== x) continue;
+      if (r.rel === 'member-of') walk(r.subject, false);
+      else if (r.rel === 'descends-from') walk(r.subject, true);
+    }
+  };
+  walk(subject, false);
+  return [...out];
 }
 
 /** Names in the default picture, and the one in use today. */
@@ -291,20 +327,31 @@ function variantTimes(s: Solved, subject: string, base: FeatureTime): Record<str
   if (ready) return ready;
   const out: Record<string, FeatureTime> = {};
   const pictureTime = new Map<string, FeatureTime>();
+  // Each picture's points the subject's time is read from, worked out when a pick of it is first asked.
+  const pictureReads = new Map<string, string[]>();
   for (const v of s.variants) {
     if (v.scenario.picks?.length || !v.solution.ok) continue;
     pictureTime.set(v.key, timeOf(s, subject, v.solution.bounds, boundsOf(v.centres)));
   }
-  // What takes its start from its members may change with them; anything else only with its own two points.
-  const { record } = splitRef(subject);
-  const own = s.world.vocab.kinds[s.world.entity.get(record)?.kind ?? '']?.start !== 'latest';
-  const points = [pointOf(s.world, subject, 'start'), pointOf(s.world, subject, 'end')];
-  const moved = (b: Bounds | undefined) => !(b instanceof Map) || !('keptOver' in b) || points.some((p) => Map.prototype.has.call(b, p));
+  const pictures = new Map(s.variants.filter((v) => !v.scenario.picks?.length).map((v) => [v.key, v]));
+  const readsOf = (key: string): string[] | undefined => {
+    if (!pictureReads.has(key)) {
+      const p = pictures.get(key);
+      if (p?.solution.ok) pictureReads.set(key, pointsRead(s, subject, p.solution.bounds, boundsOf(p.centres)));
+    }
+    return pictureReads.get(key);
+  };
+  // A pick's bounds are kept as what differs from its picture's (solveVariants): one that differs at none of these points.
+  const moved = (b: Bounds | undefined, points: string[]) => !(b instanceof Map) || !('keptOver' in b) || points.some((p) => Map.prototype.has.call(b, p));
   for (const v of s.variants) {
     if (!v.key || !v.solution.ok) continue;
-    const fallback = v.scenario.picks?.length ? (pictureTime.get(scenarioKey({ alts: v.scenario.alts })) ?? base) : base;
-    // A pick that keeps both points as its picture has them changes nothing here.
-    if (own && v.scenario.picks?.length && !moved(v.solution.bounds) && !moved(boundsOf(v.centres))) continue;
+    const pictureKey = scenarioKey({ alts: v.scenario.alts });
+    const fallback = v.scenario.picks?.length ? (pictureTime.get(pictureKey) ?? base) : base;
+    // A pick that keeps every point the subject's time is read from as its picture has them changes nothing here.
+    if (v.scenario.picks?.length) {
+      const points = readsOf(pictureKey);
+      if (points && !moved(v.solution.bounds, points) && !moved(boundsOf(v.centres), points)) continue;
+    }
     const t = timeOf(s, subject, v.solution.bounds, boundsOf(v.centres));
     if (!sameTime(t, fallback)) out[v.key] = t;
   }
@@ -584,7 +631,9 @@ export function records(s: Solved): EntityRecord[] {
   const inverse = new Map<string, InverseRecord[]>();
   const addInverse = (target: string, x: InverseRecord) => {
     const id = splitRef(target).record;
-    inverse.set(id, [...(inverse.get(id) ?? []), x]);
+    const list = inverse.get(id);
+    if (list) list.push(x);
+    else inverse.set(id, [x]);
   };
   // Rival readings, in the default picture or in any alternative's: marked, so that neither end takes one for held.
   const rivals = new Set([{}, ...w.alternatives.filter((a) => a.type === 'alternative').map((a) => ({ alts: [a.id] }))].flatMap((p) => rivalsIn(w, p).map((r) => r.ref)));

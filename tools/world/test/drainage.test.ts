@@ -1,7 +1,10 @@
 // The drainage model's routing, on made-up continents of a 1° grid: every node of land reaches the sea, water is
 // neither made nor lost, a hollow holds a lake that spills only when the climate fills it, and the rivers join up.
 import { describe, expect, it } from 'vitest';
-import { flow as flowOf, hollowsOf, latOf, lonOf, nearestNodes, outletChains, reaches, route, rowAreas, seaAt, wetMonthsAt, type NodeGrid, type Routing, type SlowWater } from '../src/build/drainage.ts';
+import { fromMa } from '../../../core/time.ts';
+import type { SeaLevelRows } from '../../../core/sealevel.ts';
+import { flow as flowOf, hollowsOf, latOf, lonOf, nearestNodes, outletChains, reaches, route, rowAreas, seaAt, wetMonthsAt, type Flow, type Hollows, type NodeGrid, type OutletChains, type Routing, type SlowWater } from '../src/build/drainage.ts';
+import { recentRivers, type DrainageParams, type Water } from '../src/build/rivers.ts';
 
 const g: NodeGrid = { nx: 360, ny: 181, step: 1 };
 const YEAR = 365.25 * 86400;
@@ -173,4 +176,83 @@ describe('the drainage model', () => {
     expect(wetMonthsAt(g, r, dry, h, outletChains(h, z.length), fromCrater, 0.15, [outlet])[0]).toBe(0);
     expect(wetMonthsAt(g, r, wet, h, outletChains(h, z.length), fromCrater, 0.15, [outlet])[0]).toBe(0xfff);
   });
+
+  it('routes the twelve months together just as it would route each alone, under seas higher and lower than the routed one', () => {
+    const z = valleyAndCrater();
+    const r = route(z, g, seaAt(z, g, oceanOf(z), 0));
+    const h = hollowsOf(z, g, r);
+    const chains = outletChains(h, z.length);
+    const slow = slowWater(z.length, (m, k) => ((k * 7919 + m * 104729) % 97) / 9);
+    const at = Int32Array.from({ length: z.length }, (_, k) => k);
+    // Under no sea at all, water reaches the routed sea's nodes, which the flood's order does not hold.
+    for (const level of [0, 120, -5000]) {
+      const f = flowOf(z, g, r, h, new Float32Array(z.length).fill(200), new Float32Array(z.length).fill(300), seaAt(z, g, oceanOf(z), level));
+      expect(wetMonthsAt(g, r, f, h, chains, slow, 0.15, at, 400)).toEqual(wetMonthsOneByOne(g, r, f, h, chains, slow, 0.15, at, 400));
+    }
+  });
 });
+
+describe('the rivers of the glacial cycles', () => {
+  it('makes the same keyframes in worker threads as in the build’s own thread', async () => {
+    const z = valleyAndCrater();
+    const climate = { lon0: -180, lat0: 90, step: 2, nx: 180, ny: 91 };
+    const n = climate.nx * climate.ny;
+    const water = (runoff: number, loss: number, slowMm: number): Water => {
+      const slow = new Uint16Array(n * 12);
+      for (let m = 0; m < 12; m++) slow.fill(Math.round((m < 6 ? slowMm : slowMm / 4) / 0.1), m * n, (m + 1) * n);
+      return { ageMa: 0, grid: climate, runoff: new Float32Array(n).fill(runoff), loss: new Float32Array(n).fill(loss), slow };
+    };
+    // A wet climate whose crater spills, a dry one whose crater keeps its water, and one between.
+    const [wet, dry, mid] = [water(800, 0, 20), water(50, 2000, 1), water(300, 100, 8)];
+    const times = [wet, dry, mid, wet, dry, wet, mid, wet, wet, dry].map((w, i) => ({ ageMa: i * 0.02, water: w }));
+    // The sea of some times stands over the valley's mouth.
+    const stack: SeaLevelRows = [[fromMa(0.2), -120], [fromMa(0.12), 90], [fromMa(0.06), -60], [fromMa(0.02), 70], [fromMa(0), 0]];
+    const p: DrainageParams = { min_km2: 20000, deep_min_km2: 20000, min_lake_km2: 0, spill_overlap: 0.5, older_step_yr: 10000, wet_share: 0.15, perennial_mm: 400 };
+    const here = await recentRivers(z, oceanOf(z), g, stack, times, p, () => 0, undefined, 0);
+    const there = await recentRivers(z, oceanOf(z), g, stack, times, p, () => 0, undefined, 2);
+    expect(here.keyframes.length).toBe(times.length);
+    expect(here.keyframes.some((k) => k.lakes.length)).toBe(true);
+    expect(there.keyframes).toEqual(here.keyframes);
+  });
+});
+
+/** The valley, and the crater a quarter of the way round the globe from it. */
+function valleyAndCrater(): Float32Array {
+  const a = valley();
+  const b = crater();
+  return Float32Array.from(a, (v, k) => Math.max(v, b[Math.floor(k / g.nx) * g.nx + ((k % g.nx) - 90 + g.nx) % g.nx]));
+}
+
+/** wetMonthsAt as it was first written, a month at a time: what routing the months together must give. */
+function wetMonthsOneByOne(g: NodeGrid, r: Routing, f: Flow, h: Hollows, chains: OutletChains, w: SlowWater, share: number, at: ArrayLike<number>, perennialMm: number): Uint16Array {
+  const areas = rowAreas(g);
+  const qm = new Float64Array(g.nx * g.ny);
+  const pool = new Float64Array(h.sets.length);
+  const out = new Uint16Array(at.length);
+  for (let j = 0; j < at.length; j++) {
+    const k = at[j];
+    if (k >= 0 && f.q[k] > 0 && (f.q[k] * YEAR) / (f.km2[k] * 1000) >= perennialMm) out[j] = 0xfff;
+  }
+  const toFlow = w.step / 1000 / (YEAR / 12);
+  for (let m = 0; m < 12; m++) {
+    qm.fill(0);
+    pool.fill(0);
+    for (let i = r.order.length - 1; i >= 0; i--) {
+      const k = r.order[i];
+      if (f.sea[k]) continue;
+      let v = qm[k] + w.slow[m * w.nodes + w.near[k]] * areas[(k / g.nx) | 0];
+      for (let id = chains.first[k]; id >= 0; id = chains.next[id]) v += pool[id] * f.passes[id];
+      qm[k] = v;
+      const d = r.down[k];
+      if (d < 0 || f.sea[d]) continue;
+      const from = h.of[k];
+      if (from >= 0 && h.of[d] !== from) pool[from] += v;
+      else qm[d] += v;
+    }
+    for (let j = 0; j < at.length; j++) {
+      const k = at[j];
+      if (k >= 0 && f.q[k] > 0 && qm[k] * toFlow >= share * f.q[k]) out[j] |= 1 << m;
+    }
+  }
+  return out;
+}

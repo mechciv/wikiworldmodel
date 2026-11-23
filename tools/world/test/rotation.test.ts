@@ -57,4 +57,17 @@ describe('PALEOMAP rotation model', async () => {
     expect(golden.cases.length).toBeGreaterThan(2000);
     expect(worst).toBeLessThan(1e-7);
   });
+
+  it('gives the same rotations when ages are asked in turn as when each is asked alone', () => {
+    // A place carried from today to a time asks two ages by turns, and a run of times asks more than the model keeps.
+    const plates = model.plateIds();
+    const ages = [0, 66, 0, 250, 66, 410.5, 0, 66, 600, 250, 1, 2, 3, 4, 5, 0];
+    for (const age of ages) {
+      const alone = new RotationModel(model.baked);
+      for (const p of plates) {
+        expect(model.reaches(p, age)).toBe(alone.reaches(p, age));
+        expect(model.total(p, age)).toEqual(alone.total(p, age));
+      }
+    }
+  });
 });

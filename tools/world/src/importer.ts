@@ -2,10 +2,11 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { basename, join } from 'node:path';
 import { parseDuration, parsePoint, toMa, type TimePointInput } from '../../../core/time.ts';
 import { datasetFile, loadManifest } from './manifest.ts';
 import { CACHE, REPO } from './paths.ts';
+import { meanGrid } from './tiff.ts';
 import { sha256, stableStringify } from './util.ts';
 import type { Field } from './world.ts';
 
@@ -111,6 +112,32 @@ export async function importBlocks(field: Field, log: (s: string) => void = cons
 }
 
 /** Per-node plate ids at the present, on the finer grid of a field of today's relief. */
+/**
+ * A global raster averaged onto a field's grid (tiff.ts meanGrid), kept as it was made: decoding a fine relief takes
+ * seconds every build, and the same file on the same grid by the same code gives the same nodes. Keyed by the file's
+ * checksum, the grid and the reader's code.
+ */
+export async function importMeanGrid(path: string, checksum: string, step: number, log: (s: string) => void = console.log): Promise<Awaited<ReturnType<typeof meanGrid>>> {
+  const code = await readFile(new URL('./tiff.ts', import.meta.url), 'utf8');
+  const key = sha256(stableStringify({ code: sha256(code), checksum, file: basename(path), step })).slice(0, 16);
+  const file = join(CACHE, 'import', `mean-grid@${key}.bin`);
+  if (existsSync(file)) {
+    const b = await readFile(file);
+    const [nx, ny] = new Uint32Array(b.buffer.slice(b.byteOffset, b.byteOffset + 8));
+    const n = nx * ny;
+    const at = b.byteOffset + 8;
+    log(`mean-grid: cached (${key})`);
+    return { nx, ny, step, data: new Float32Array(b.buffer.slice(at, at + 4 * n)), low: new Float32Array(b.buffer.slice(at + 4 * n, at + 8 * n)) };
+  }
+  const g = await meanGrid(path, step);
+  await mkdir(join(CACHE, 'import'), { recursive: true });
+  // Written aside and moved into place, so that a reader at the same moment never sees half a file.
+  const part = `${file}.${process.pid}.part`;
+  await writeFile(part, Buffer.concat([Buffer.from(Uint32Array.of(g.nx, g.ny).buffer), Buffer.from(g.data.buffer, g.data.byteOffset, g.data.byteLength), Buffer.from(g.low.buffer, g.low.byteOffset, g.low.byteLength)]));
+  await rename(part, file);
+  return g;
+}
+
 export async function importReliefPlates(field: Field, log: (s: string) => void = console.log): Promise<string> {
   const pm = await plateModel(field.moves_with);
   const step = (field.grid as { res_deg: number }).res_deg;

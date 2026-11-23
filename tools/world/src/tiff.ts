@@ -2,7 +2,7 @@
 // 16-bit integers or 32-bit floats, in strips or tiles, raw or deflated, with the horizontal
 // and floating-point predictors.
 import { readFile } from 'node:fs/promises';
-import { unzlibSync } from 'fflate';
+import { inflateSync } from 'node:zlib';
 
 export interface Raster {
   width: number;
@@ -82,7 +82,7 @@ function decoder(buf: Buffer, path: string): Decoder {
   const rows = (each: (y: number, x: number, values: Float32Array) => void) => {
     offsets.forEach((off, b) => {
       const raw = buf.subarray(off, off + counts[b]);
-      const block = compression === 1 ? new Uint8Array(raw) : unzlibSync(new Uint8Array(raw));
+      const block = compression === 1 ? new Uint8Array(raw) : inflateSync(raw);
       const bx = tiled ? (b % across) * blockW : 0;
       const by = tiled ? Math.floor(b / across) * blockH : b * blockH;
       const nrows = tiled ? blockH : Math.min(blockH, height - by);
