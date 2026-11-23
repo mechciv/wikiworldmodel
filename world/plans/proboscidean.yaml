@@ -21,9 +21,15 @@ parts:
       - [0.09, 1.2, 0.52, 0.122]
       - [0.155, 1.18, 0.58, 0.104]
       - [0.2, 1.12, 0.68, 0.084]
+    # The barrel is widest below its middle and a little flat beneath, from the hips to the girth: the tail and the
+    # shoulders are round.
+    widest: [[-0.41, 0], [-0.35, -0.3], [0.09, -0.3], [0.2, -0.1]]
+    under: [[-0.41, 0], [-0.35, 0.25], [0.09, 0.25], [0.2, 0]]
     neck: { r: 0.08, steps: [2, 1] }
-  hind: { type: pillar, y: -0.25, x: 0.06, top: 0.82, r: 0.062, swing: 0.045 }
-  fore: { type: pillar, y: 0.12, x: 0.057, top: 0.86, r: 0.058, swing: 0.045, phase: 1 }
+  # Columns: hardly thinner above the foot than at the top, and narrower across at the top than fore and aft, so that
+  # where the body tapers past them they stay inside its flank.
+  hind: { type: pillar, y: -0.25, x: 0.06, top: 0.82, r: 0.062, swing: 0.045, across: [0.62, 1], column: 0.7 }
+  fore: { type: pillar, y: 0.12, x: 0.057, top: 0.86, r: 0.058, swing: 0.045, phase: 1, across: [0.62, 1], column: 0.7 }
   head:
     type: head
     at:

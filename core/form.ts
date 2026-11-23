@@ -51,7 +51,7 @@ export interface Form {
   /** what a claimed mass gives: kilograms per cubic metre of length */
   mass_length?: number;
   behave?: Behave;
-  /** the parts, by name: a child replaces or adds to them by name, field by field, and null takes one away */
+  /** the parts, by name: a child replaces or adds to them by name, field by field, and null takes one away; a list is replaced whole, or row by row where the child names rows by their numbers */
   parts: Record<string, Part | null>;
 }
 
@@ -66,8 +66,35 @@ export interface FormChange {
 
 const isObject = (x: unknown): x is Record<string, unknown> => typeof x === 'object' && x !== null && !Array.isArray(x);
 
-/** A child's values over a parent's: objects merge by key, lists replace whole, and null takes a key away. */
+/** Whether an object names rows of a list by their numbers, as `{ 6: [...] }` does: every key a number, and at least one. */
+export const namesRows = (x: unknown): x is Record<string, unknown> => isObject(x) && Object.keys(x).length > 0 && Object.keys(x).every((k) => /^\d+(\.\d+)?$/.test(k));
+
+/**
+ * A list with some of its rows changed, each named by its number from 0: a whole number is that row, changed as any
+ * value is, and null takes it away; a number between two rows, as 6.5, or past the last, is a new row there.
+ */
+function rows(base: unknown[], over: Record<string, unknown>): unknown[] {
+  const out: { at: number; value: unknown }[] = base.map((value, at) => ({ at, value }));
+  const gone = new Set<number>();
+  for (const [k, v] of Object.entries(over)) {
+    const at = Number(k);
+    if (Number.isInteger(at) && at < base.length) {
+      if (v === null) gone.add(at);
+      else out[at].value = merged(base[at], v);
+    } else if (v !== null) out.push({ at, value: v });
+  }
+  return out
+    .filter((r) => !gone.has(r.at))
+    .sort((a, b) => a.at - b.at)
+    .map((r) => r.value);
+}
+
+/**
+ * A child's values over a parent's: objects merge by key, lists replace whole, and null takes a key away. Over a
+ * list, an object that names rows by number changes only those rows.
+ */
 function merged(base: unknown, over: unknown): unknown {
+  if (Array.isArray(base) && namesRows(over)) return rows(base, over);
   if (!isObject(over) || !isObject(base)) return over;
   const out: Record<string, unknown> = { ...base };
   for (const [k, v] of Object.entries(over)) {

@@ -14,7 +14,7 @@ claims:
     prop: body_form
     value:
       parts:
-        brow-ridge: { type: lump, on: head, at: [0, 0.065, 0.028], r: [0.016, 0.022, 0.012], sides: [8, 4], bands: [5, 3] }
+        brow-ridge: { type: lump, on: head, turn: true, at: [0, 0.065, 0.028], r: [0.016, 0.022, 0.012], sides: [8, 4], bands: [5, 3] }
     unsourced: >-
       A machine's reconstruction: a small solid crest before the eyes, from the silhouette
       "Maiasaura Scale.svg" on Wikimedia Commons.

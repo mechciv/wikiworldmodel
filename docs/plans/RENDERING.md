@@ -420,6 +420,29 @@ frill with thickness at its rim; a crest that turns with the head it stands on; 
 writing them all. Forms with a source of their own were left as they were, among them most birds, whose thighs still
 hang under their bellies.
 
+*What they can say now* ([FORMS.md](../FORMS.md)), each a field that changes nothing where it is not written: a
+section's shape (`widest`, `under`, `over`); a leg's width across and how much of a column it is (`across`,
+`column`); a part on another part's end (`on: <part>`) or on its skin (`ride: <part>`), which goes where a child's
+rings or joints put it; plates that lean and items that stand off a skin as it faces (`lean`); an edge to a frill
+or a sheet (`rim`); a lump that turns with its frame (`turn`); and rows of a list changed by their numbers. They
+were used where the sheets were worst. The elephants', the mammoth's and the heavy hoofed plan's legs are columns
+narrow across at the top, under barrels widest below their middles, so that no leg's top stands out of a flank. The
+sheep, the pig, the yak and the bison stand on stouter legs set as far apart as their bodies' sides, the sheep's
+fleece and the yak's skirt of hair widest low. A turtle's eyes and the line of its mouth ride its neck, and a
+crocodile's jaw line its snout, each on whatever head a family below has, sourced or not. The horned dinosaurs'
+shield has a roll along its edge, and the duck-bills' crests turn with their heads.
+
+*What is left.* The birds' thigh is the muscle a leg is given where it leaves the body, which hangs under a belly
+higher than the plan's: `muscle: 0` on the `bird` plan's legs takes it away on every bird below that does not say
+otherwise, the sourced ones among them, with no claim touched, and leaves a drumstick that is still the colour of
+the leg and should be feathered. It was tried on a sheet and not written, since it changes every bird. The ox, the
+water buffalo, the goat and the plain pigs and peccaries still have the pad of a haunch standing out of a narrow
+flank, as the bison had. The stegosaur's plates still stand on a straight line under its back's arch, and the
+crocodile's scutes on straight lines over its back: a row that rides would follow them, but the four records below
+the crocodile that restate its neck's row and its eyes in the body's frame each cite a source, and would have to be
+written again with it. The gharial's and the long-snouted kin's eyes and neck scutes float over their lower skulls
+for the same reason. Domes, brows and head shields on other plans still lie level when a head pitches.
+
 ## The standard
 
 A picture is judged where a visitor looks: from eye height, at what is within twenty metres, and at what stands out

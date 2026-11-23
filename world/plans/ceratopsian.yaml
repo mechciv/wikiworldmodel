@@ -42,8 +42,9 @@ parts:
   mouth: { type: tube, on: head, near: true, mat: dark, sides: [8, 4], rings: [[0.11, -0.03, 0.06, 0.003], [0.14, -0.032, 0.0475, 0.003], [0.185, -0.036, 0.033, 0.003], [0.228, -0.042, 0.021, 0.003]] }
   beak: { type: tube, on: head, mat: horn, tint: 90, sides: [8, 4], thin: false, rings: [[0.225, -0.03, 0.02, 0.028], [0.248, -0.046, 0.011, 0.018], [0.262, -0.066, 0.002, 0.004]] }
   # The shield: a fan for its middle and its rim, and a wing on each side of it that slopes down over the neck to the cheek.
-  frill: { type: fan, on: head, tint_add: 40, at: [0.07, 0.04], dir: [-0.87, 0.5], r: 0.105, across: 0.72, scallop: 0.04, scallops: 14 }
-  frill-sides: { type: sheet, on: head, mirror: true, mat: hide, tint_add: 40, points: [[0.058, 0.098, 0.03], [0.068, 0.02, 0.07], [0.06, -0.03, 0.096], [0.115, -0.012, 0.05], [0.105, 0.07, -0.006]] }
+  # Each has a roll along its free edge, so that the shield has a thickness there and is more than a line from its side.
+  frill: { type: fan, on: head, tint_add: 40, at: [0.07, 0.04], dir: [-0.87, 0.5], r: 0.105, across: 0.72, scallop: 0.04, scallops: 14, gap: 0.004, rim: 0.006 }
+  frill-sides: { type: sheet, on: head, mirror: true, mat: hide, tint_add: 40, rim: 0.005, points: [[0.058, 0.098, 0.03], [0.068, 0.02, 0.07], [0.06, -0.03, 0.096], [0.115, -0.012, 0.05], [0.105, 0.07, -0.006]] }
   brow: { type: spike, on: head, mirror: true, tint: 60, from: [0.04, 0.125, 0.04], to: [0.055, 0.215, 0.135], r: 0.016, sides: [7, 4] }
   nose: { type: spike, on: head, tint: 60, from: [0, 0.19, 0.012], to: [0, 0.207, 0.056], r: 0.013, sides: [7, 4] }
   cheeks: { type: lump, on: head, mirror: true, at: [0.06, 0.106, -0.03], r: [0.013, 0.022, 0.024], sides: [10, 5], bands: [6, 3] }
