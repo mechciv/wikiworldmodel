@@ -1,0 +1,255 @@
+view: t=13.071407Ma&lat=35.18308&lon=105.24821&d=1.0000023544&h=190&v=84&hour=16&mo=10&clock=0
+when: 13.07 Ma
+place: >-
+  The south-western Ordos block, east of where the Liupan Shan now stands: today the loess tableland of Jingchuan
+  in eastern Gansu, China (35.31°N, 107.36°E), in the Middle Miocene (Serravallian; Tunggurian).
+author: machine:claude-code
+expects:
+  - id: relief-planation-surface
+    layer: relief
+    what: >-
+      A wide, gently sloping erosion surface with low relief to the horizon. None of today's landforms are there:
+      no flat-topped loess tablelands, no deep gullies cut into yellow earth.
+    reach: place
+    source:
+      cite: "Nie, J., Song, Y. & King, J.W. (2016). A review of recent advances in red-clay environmental magnetism and paleoclimate history on the Chinese Loess Plateau. Frontiers in Earth Science 4:27."
+      url: https://www.frontiersin.org/journals/earth-science/articles/10.3389/feart.2016.00027/pdf
+      text: frontiers-2016-redclay-review.txt
+      loc: "p. 2, Geological setting of the Chinese Loess Plateau"
+      quote: "The Ordos block was lack of tectonic activities and experienced widespread erosion during the Late Cretaceous and early Cenozoic, resulting in the formation of a gently-sloped planation surface (Song et al., 2001)."
+    note: >-
+      Said of the whole Ordos block, on which the point stands; the review's own sections, Chaona and Lingtai,
+      are about 35 km away. How high the surface stood at 13 Ma, and how much relief it had, the source does not say.
+  - id: relief-no-liupan-range
+    layer: relief
+    what: >-
+      No mountain front to the west: the Liupan Shan had not yet risen, and the planation surface was still
+      forming. The skyline that way is as low as the rest.
+    reach: place
+    source:
+      cite: "Song, Y.G., Fang, X.M., Torii, M. & Ishikawa, N. (2006). Magnetostratigraphic and rock magnetic evidences for Neogene paleoclimate variation and air-circulation rearrangement related to the Tibet uplift. Geophysical Research Abstracts 8, 01022 (EGU General Assembly 2006)."
+      url: https://meetings.copernicus.org/www.cosis.net/abstracts/EGU06/01022/EGU06-J-01022-1.pdf
+      text: egu06-01022.txt
+      loc: "p. 2, second paragraph"
+      quote: "The occurrence of red clay suggests the occurrence of the ca. 8.1 Ma tectonic event, which in one side terminated the development of the Ordos planation surface and on the other side led to the uplift of Liupan Shan."
+    note: >-
+      A conference abstract, used because the paper it summarizes (Song et al. 2001, Science in China D) could not
+      be reached. The event it dates is 5 million years after this scene, which is the point: before it, no range.
+      The camera faces 190°, so the Liupan's site is off to the right of the frame.
+  - id: substrate-no-wind-blown-mantle
+    layer: substrate
+    what: >-
+      The ground is not loess and not red clay. The wind-blown red clay that now lies 125 m thick under the loess
+      of this district had not begun to settle; it starts about 5 million years after this scene.
+    reach: place
+    source:
+      cite: "Song, Y. (2018). Magnetic record of Mio-Pliocene red clay and Quaternary loess-paleosol sequence in the Chinese Loess Plateau. Data in Brief 16, 411–417."
+      url: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5723265/
+      text: pmc5723265.txt
+      loc: "Abstract"
+      quote: "Detailed magnetostratigraphy shows that the aeolian red clay began to accumulate at ca. 8.1 Ma."
+    note: >-
+      The Chaona section (35°02'N, 107°13'E), about 35 km south-west of the point. That nothing older is kept
+      there does not prove no dust fell at 13 Ma: older dust may have settled and been stripped from the surface.
+  - id: substrate-sandstone-bedrock
+    layer: substrate
+    what: >-
+      Bedrock sandstone at or near the surface, with whatever soil had formed on it: the rock that the red clay
+      was later laid on.
+    reach: place
+    source:
+      cite: "Gong, H., Nie, J., Wang, Z., Peng, W., Zhang, R. & Zhang, Y. (2016). A comparison of zircon U-Pb age results of the Red Clay sequence on the central Chinese Loess Plateau. Scientific Reports 6, 29642."
+      url: https://www.nature.com/articles/srep29642
+      text: nie-2016-srep29642.txt
+      loc: "Materials and Method, second paragraph"
+      quote: "Four Red Clay samples and one underlying sandstone sample were obtained from the Lingtai section."
+    note: >-
+      The Lingtai section, which the source puts within about 50 km of Chaona. The text read does not give the
+      sandstone's age or colour, and says nothing of the soil on it in the Miocene.
+  - id: substrate-dust-soils-to-the-west
+    layer: substrate
+    what: >-
+      On the highlands about 160 km to the west, the ground is wind-blown silt with soils formed in it, layer on
+      layer: a fine, stoneless earth, not river gravel.
+    reach: region
+    source:
+      cite: "Guo, Z.T., Sun, B., Zhang, Z.S., Peng, S.Z., Xiao, G.Q., Ge, J.Y., Hao, Q.Z., Qiao, Y.S., Liang, M.Y., et al. (2008). A major reorganization of Asian climate by the early Miocene. Climate of the Past 4, 153–174."
+      url: https://cp.copernicus.org/articles/4/153/2008/cp-4-153-2008.pdf
+      text: guo-2008-reorganization.txt
+      loc: "p. 160, section 3.1"
+      quote: "Spatial investigations showed that the Miocene eolian deposits mantle the highlands across a broad region of the western Loess Plateau (Yuan et al., 2007)."
+    note: >-
+      The Qin'an sections (22 to 6.2 Ma), west of the Liupan Shan. The same paper says the eolian Red-Earth of the
+      eastern plateau, where this point is, covers only 8.0 to 2.6 Ma. Carried here as what the uplands of the
+      region looked like, not as what lay on this ground.
+  - id: substrate-maroon-floodplain-muds
+    layer: substrate
+    what: >-
+      Where rivers laid sediment in the basins of the region, the floodplains are maroon mud with limy layers.
+    reach: region
+    source:
+      cite: "Li, X., Peng, T., Han, C., Liu, Z., Ma, Z., Li, M. & Song, C. (2023). Changes in n-alkane distribution of the Tianshui Basin and its links to the Tibetan plateau uplift and global climate change. Frontiers in Earth Science 11:1229346."
+      url: https://www.frontiersin.org/journals/earth-science/articles/10.3389/feart.2023.1229346/pdf
+      text: frontiers-2023-1229346.txt
+      loc: "p. 2, section 3, Materials and methods"
+      quote: "For the Ganquan Fm, we focus on the interval of 12.4–11.7 Ma, which consists of maroon mudstone and interbedded calcareous mudstone with the deepening of horizontal bedding and belongs to flood plain facies."
+    note: >-
+      The Yaodian section of the Tianshui Basin (105°55'E, 34°38'N), about 150 km to the west-south-west, and 0.7
+      million years after this scene at its nearest. The colour is the rock's today.
+  - id: water-rivers-and-lakes-east-of-liupan
+    layer: water
+    what: >-
+      Rivers and shallow lakes in the low ground of the region: at Guyuan, roughly 130 km to the north-west and on
+      this same side of the Liupan Shan's site, river and lake beds were being laid down through this time.
+    reach: region
+    source:
+      cite: "Jiang, H. & Ding, Z. (2008). A 20 Ma pollen record of East-Asian summer monsoon evolution from Guyuan, Ningxia, China. Palaeogeography, Palaeoclimatology, Palaeoecology 265, 30–38."
+      url: https://manuscript.isc.ac/Inventory/10/2293192.htm
+      text: jiang-ding-2008-isc.txt
+      loc: "Abstract, first sentence"
+      quote: "Pollen analysis was conducted on the fluviolacustrine sediments from the east side of the Liupan Mountains, a relatively monsoon-sensitive region"
+    note: >-
+      Only the abstract was read, from a library index's copy of it; the publisher's full text could not be
+      reached. The build answers no rivers here. On the erosion surface of the point itself no deposit of the time
+      is kept, so whether a river crossed this spot is not known (see unknown).
+  - id: cover-steppe-sagebrush-saltbush
+    layer: cover
+    what: >-
+      Open steppe, not forest: low grey-green sagebrush (Artemisia) giving way to salt-tolerant goosefoots
+      (Chenopodiaceae), with hop (Humulus) and the desert shrubs Nitraria and Ephedra.
+    reach: region
+    source:
+      cite: "Jiang, H. & Ding, Z. (2008). A 20 Ma pollen record of East-Asian summer monsoon evolution from Guyuan, Ningxia, China. Palaeogeography, Palaeoclimatology, Palaeoecology 265, 30–38."
+      url: https://manuscript.isc.ac/Inventory/10/2293192.htm
+      text: jiang-ding-2008-isc.txt
+      loc: "Abstract"
+      quote: "The interval from 14.25 to 11.35 Ma was marked by a significant decline in the East-Asian summer monsoon, as indicated by Artemisia gradually replaced by Humulus and halophytic Chenopodiaceae. Nitraria and Ephedra also reached high values in this period."
+    note: >-
+      The Sikouzi section at Guyuan, roughly 130 km north-west (the distance is to the town; the section's place
+      was not in the text read): the nearest record of plants of this time, and the only one found on this side of
+      the Liupan Shan's site. Abstract only. The same abstract speaks of a "general dominance of steppe throughout
+      the Neogene". Grey-green is the colour of living sagebrush, not the source's word. The build's plants here (Mallotus, Podocarpium, Castanea, bamboos, the water chestnut Trapa)
+      are a humid forest-and-lake flora recorded within 2,200 km, and disagree with this.
+  - id: cover-elm-and-birch-stands
+    layer: cover
+    what: >-
+      Stands of elm (Ulmus) and birch (Betula) among the sagebrush, as in the basin to the west-south-west: a
+      forest or forest-steppe.
+    reach: region
+    source:
+      cite: "Hui, Z., Li, J., Xu, Q., Song, C., Zhang, J., Wu, F. & Zhao, Z. (2011). Miocene vegetation and climatic changes reconstructed from a sporopollen record of the Tianshui Basin, NE Tibetan Plateau. Palaeogeography, Palaeoclimatology, Palaeoecology 308, 373–382."
+      url: https://manuscript.isc.ac/Inventory/10/2295189.htm
+      text: hui-2011-isc.txt
+      loc: "Abstract"
+      quote: "temperate, warm-temperate broad-leaved forest of Quercus, Ulmus and Betula dominated the Tianshui region between 17.1 and 14.7 Ma, which was replaced by forest or forest-steppe of Ulmus, Artemisia and Betula between 14.7 and 11.7 Ma."
+    note: >-
+      The northern Tianshui Basin, roughly 150 to 170 km to the west-south-west and west of the Liupan Shan's site.
+      Abstract only, from a library index's copy. It has more trees than the Guyuan record for the same years
+      (cover-steppe-sagebrush-saltbush); which of the two this ground was like is not known.
+  - id: life-platybelodon
+    layer: life
+    what: >-
+      Shovel-tusked gomphotheres (Platybelodon), elephant-like, with a long flat lower jaw ending in two broad
+      flat tusks, by rivers and marshy ground.
+    reach: region
+    source:
+      cite: "Wang, S., He, W. & Chen, S. (2013). The gomphotheriid mammal Platybelodon from the Middle Miocene of Linxia Basin, Gansu, China. Acta Palaeontologica Polonica 58(2), 221–240."
+      url: https://app.pan.pl/archive/published/app58/app20110009.pdf
+      text: wang-2013-platybelodon-linxia.txt
+      loc: "p. 238, Functional adaptations"
+      quote: "suggesting that Platybelodon might have lived near rivers or swamps, as earlier suggested by Borissiak (1929)."
+    note: >-
+      Argued from the river-laid beds of the Linxia Basin, about 360 km west, of 12.6 and 12.3 Ma there. The same
+      paper figures Platybelodon from Tongxin, Ningxia, about 225 km north-north-west of this point, which is
+      likely the atlas's record 'here'. No fossil of it is known from this ground.
+  - id: life-kubanochoerus
+    layer: life
+    what: >-
+      A giant pig, Kubanochoerus, the male with one large horn on the forehead above the eyes; the largest
+      species near a tonne. An animal of woodland clearings.
+    reach: region
+    source:
+      cite: "Deng, T. (2016). Records and characteristics of the mammalian faunas of Northern China in the Middle Miocene Climatic Optimum [in Chinese, with English abstract]. Quaternary Sciences 36(4), 810–819."
+      url: https://html.rhhz.net/DSJYJ/20160403.htm
+      text: dsjyj-2016.txt
+      loc: "section 3.7, Kubanochoerus"
+      quote: "库班猪的体型巨大，其体重可以达到近1000kg(K. gigas)[43]。 … 库班猪最显著的特征就是在雄性的眼眶上方存在一个巨大的角"
+    note: >-
+      The same passage lists it from Tongxin (K. lantienensis) and from Koujiacun at Lantian (K. lantienensis and
+      K. gigas), the two fossil districts nearest this point, each more than 200 km off. The weight is that of
+      K. gigas. The clearings are the source's comparison with the living giant forest hog.
+  - id: life-platybelodon-fauna
+    layer: life
+    what: >-
+      With them: short-legged, three-toed browsing horses (Anchitherium), rhinoceroses, other proboscideans, and
+      the deer Stephanocemas with its crown-shaped antlers. All are known from river and lake beds, river sands
+      above all.
+    reach: region
+    source:
+      cite: "Deng, T. (2016). Records and characteristics of the mammalian faunas of Northern China in the Middle Miocene Climatic Optimum [in Chinese, with English abstract]. Quaternary Sciences 36(4), 810–819."
+      url: https://html.rhhz.net/DSJYJ/20160403.htm
+      text: dsjyj-2016.txt
+      loc: "section 1, second paragraph; and the English abstract"
+      quote: "主要由古仓鼠类、安琪马(Anchitherium)、犀类、长鼻类、库班猪(Kubanochoerus)和皇冠鹿(Stephanocemas)等组成了“铲齿象动物群”。 … almost all of the Chinese Middle Miocene mammalian faunas are preserved in fluvial and lacustrine deposits, especially fluvial sandstones"
+    note: >-
+      Said of the Middle Miocene of northern China as a whole. The source reads this fauna as one of a "relatively
+      warm and wet climate and environment"; the build's climate here is classed cold, with a coldest month of
+      −8.2 °C, which sits badly with it, though no source read gives a temperature for this place and time. The
+      antlers' shape is from the deer's Chinese name in the quote (皇冠鹿, crown deer).
+  - id: life-pliopithecus-in-trees
+    layer: life
+    what: >-
+      Where trees stand along water, a gibbon-sized ape with long thin limbs and a short tail (Pliopithecus) in
+      the branches. It needs woodland, so not on the open steppe.
+    reach: region
+    source:
+      cite: "Deng, T. (2016). Records and characteristics of the mammalian faunas of Northern China in the Middle Miocene Climatic Optimum [in Chinese, with English abstract]. Quaternary Sciences 36(4), 810–819."
+      url: https://html.rhhz.net/DSJYJ/20160403.htm
+      text: dsjyj-2016.txt
+      loc: "section 3.2, Pliopithecus"
+      quote: "产自宁夏同心丁家二沟动物群的占祥上猿(Pliopithecus zhanxiangi)，其时代为中中新世晚期 … 上猿的体型中等，四肢细长，其大小和形态与现代的长臂猿相似"
+    note: >-
+      Tongxin, Ningxia, about 225 km north-north-west, in the late Middle Miocene. The same section says its
+      tooth wear shows a diet of soft twigs and young leaves, a forest animal. That an ape lived there, in the
+      years the Guyuan pollen calls steppe, says the region had woods as well; where they stood is not known.
+  - id: weather-dry-season-northerlies
+    layer: weather
+    what: >-
+      A climate of two seasons: rain with the summer heat, then a dry season of winds from the north that carry
+      desert dust, in winter and early spring. October lies between the two.
+    reach: region
+    source:
+      cite: "Guo, Z.T., Sun, B., Zhang, Z.S., Peng, S.Z., Xiao, G.Q., Ge, J.Y., Hao, Q.Z., Qiao, Y.S., Liang, M.Y., et al. (2008). A major reorganization of Asian climate by the early Miocene. Climate of the Past 4, 153–174."
+      url: https://cp.copernicus.org/articles/4/153/2008/cp-4-153-2008.pdf
+      text: guo-2008-reorganization.txt
+      loc: "p. 163, sections 3.3 and 3.4"
+      quote: "The grain-size gradients indicate that the source areas lie to the north of the Loess Plateau, and thus in the inland deserts. … In summer, the monsoonal rainfall associated with the high temperature favors pedogenesis, but eolian dust continues to be added to the soil surface in winter and early spring"
+    note: >-
+      The first sentence is from dust of 15.4 to 11.1 Ma at two sections near Qin'an, about 160 km west; the second
+      describes soils formed under a monsoon climate in general, the Miocene's among them. Where October fell in
+      that year the source does not say.
+unknown:
+  - What grew on this very ground. No pollen, leaf, wood or fossil soil of 13 Ma is known within 100 km; the two nearest pollen records, 130 and 160 km off, disagree on how many trees there were.
+  - How tall and how dense the plant cover was, how much of it was grass, and its colours in October. The pollen records name families and genera and give no heights, no ground cover and no season.
+  - Whether a river crossed this spot, where it ran and how wide it was. The surface here was being worn down, and kept no channel or floodplain bed of the time; the build draws no river, and no source read says there was or was not one.
+  - What the surface of the ground was, to look at. Sandstone lies under the later red clay, but the soil on it at 13 Ma, its colour, and whether a thin cover of dust lay on it and was later stripped, are not recorded.
+  - Which animals lived on this upland. Every Middle Miocene mammal the atlas lists as 'here' comes from river and lake beds 200 km or more away (Tongxin, Lantian); none is known from east of the Liupan Shan's site near this point.
+  - How high the ground stood (the build says 1,356 m) and what stood on the southern skyline, the way the camera faces. No source read gives the height of this surface, or of the Qinling to the south, at 13 Ma.
+  - The sky in October. Whether it was clear, hazed with dust or clouded; no source read speaks of the autumn. The dust season the loess studies describe is winter and early spring.
+  - Temperatures. No proxy for this place and time was read that gives a number, so the build's coldest month of −8.2 °C could be weighed only against the warm-loving animals of the region, not against a measurement.
+  - Birds, reptiles, insects and the small mammals in sight. The atlas's hawks and eagles are a stand-in, and no source read names a bird of the Middle Miocene here.
+pictures:
+  - { url: "https://html.rhhz.net/DSJYJ/20160403.htm", what: "Deng (2016), Fig. 2: a painted reconstruction of the Middle Miocene Platybelodon fauna and its setting at Tunggur, Inner Mongolia, far to the north-north-east; the same fauna as the region's, by water." }
+  - { url: "https://app.pan.pl/archive/published/app58/app20110009.pdf", what: "Wang, He & Chen (2013), Fig. 11: photographs of Platybelodon skulls and shovel-tusked lower jaws from Tongxin, Ningxia." }
+effort:
+  fetched: 14
+  cited: 10
+  failed: 11
+  note: >-
+    Not reached: the full texts of Jiang & Ding (2008) and Hui et al. (2011), the two pollen records that matter
+    most (abstracts read from a library index instead); Ding et al. (2001) on the Jingchuan red clay section, which
+    stands on this very spot; Qiang et al. (2011) on the Zhuanglang core; Kaakinen's thesis on Lantian; the Lexicon
+    of Chinese strata's pages for the Lengshuigou and Koujiacun formations; an MDPI paper on the Ordos red clay;
+    PMC's copy of a Zhuanglang clay-mineral paper. Longest: finding anything that speaks of this ground itself at
+    13 Ma. It is a gap in the rock record, an erosion surface between Cretaceous-to-early-Cenozoic planation and
+    red clay that starts at 8.1 Ma, so nearly the whole scene is carried from basins 130 to 370 km away.

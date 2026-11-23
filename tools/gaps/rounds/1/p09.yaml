@@ -1,0 +1,269 @@
+view: t=475.002&lat=18.79153&lon=2.90111&d=1.0000023544&h=130&v=84&hour=11&mo=8&clock=0
+when: 475 CE
+place: North-eastern Mali, on the plain at the eastern foot of the Adrar des Ifoghas (Kidal about 160 km west), towards the Tamesna, in the southern Sahara.
+author: machine:claude-code
+expects:
+  - id: sky-dust-haze
+    layer: sky
+    what: >-
+      The sky of the rainy season is often not a clear blue but a dry haze of fine clay dust, raised by the storms
+      and hanging until rain washes it out. On a bad day the sun is a white disc like a full moon; on a light day the
+      haze is thin in the morning and gone by noon.
+    reach: region
+    source:
+      cite: "Chudeau, R. (1909). Missions au Sahara, tome II: Sahara soudanais. Paris: Armand Colin. (Project Gutenberg eBook 74093.)"
+      url: https://gutenberg.pglaf.org/7/4/0/9/74093/74093-0.txt
+      text: chudeau-1909-sahara-soudanais.txt
+      loc: "ch. III Météorologie, II. La Brume"
+      quote: "elle atténue considérablement l’éclat du soleil qui prend une couleur blanche et ressemble à la pleine lune"
+    note: >-
+      Seen by Chudeau in June to August 1905 between Timissao and In Ouzel and in the Ahaggar, 250 km and more to the
+      north and north-west, and said by him of the southern Sahara in the season of the tropical rains. 1,430 years
+      after the scene. How often it was so is not said; the height of the sun (near the zenith at this latitude in
+      August) is geometry and was not sourced.
+
+  - id: weather-afternoon-storms
+    layer: weather
+    what: >-
+      August is in the short season of storms: three or four great squalls a year over any one district, with
+      thunder and a wall of yellowish or reddish dust ahead of them. They come late in the day. At 11:00 the sky has
+      usually not yet begun to cloud over; cloud builds from about four or five in the afternoon, often from the
+      south-east, which is the way this camera faces.
+    reach: region
+    source:
+      cite: "Chudeau, R. (1909). Missions au Sahara, tome II: Sahara soudanais. Paris: Armand Colin. (Project Gutenberg eBook 74093.)"
+      url: https://gutenberg.pglaf.org/7/4/0/9/74093/74093-0.txt
+      text: chudeau-1909-sahara-soudanais.txt
+      loc: "ch. III Météorologie, I. Le Climat"
+      quote: "chaque région de l’Adr’ar’ reçoit trois ou quatre grandes tornades chaque année, habituellement dans la soirée : c’est vers quatre ou cinq heures de l’après-midi que le ciel commence à se couvrir ; les nuages apparaissent souvent au sud-est."
+    note: Observations of 1905 to 1907 in the Adrar des Ifoghas, mostly its north and west, 150 to 300 km away; carried back 1,430 years.
+
+  - id: weather-august-rain-heat
+    layer: weather
+    what: >-
+      August is the wettest month and still very hot: at Kidal about 46 mm of rain in about seven rainy days, of some
+      128 mm in the year, with afternoons near 38 °C and nights near 26 °C. Most August days are dry.
+    reach: region
+    source:
+      cite: "Wikipedia, 'Kidal', table 'Climate data for Kidal (1950–2000)' (after NOAA climate normals)."
+      url: https://en.wikipedia.org/wiki/Kidal
+      text: wp-kidal.txt
+      loc: "section Climate, table 'Climate data for Kidal (1950–2000)', columns Jul and Aug"
+      quote: "Mean daily maximum °C (°F) … 39.9 (103.8) 38.4 (101.1) … Average rainfall mm (inches) … 36.8 (1.45) 45.9 (1.81)"
+    note: >-
+      An encyclopedia's table of a modern station 160 km west, cited because no climatology of the place could be
+      fetched; the years are 1950 to 2000, not 475. It agrees with the build's climate field (a desert, warmest month
+      about 34 °C in the mean).
+
+  - id: relief-plain-no-break
+    layer: relief
+    what: >-
+      Nearly level ground to a far horizon. The plateau of the Adrar passes eastward into the plain with no scarp or
+      break of slope; its rounded granite hills and domes are massed on the western side of the massif and stand far
+      apart on this one.
+    reach: place
+    source:
+      cite: "Chudeau, R. (1909). Missions au Sahara, tome II: Sahara soudanais. Paris: Armand Colin. (Project Gutenberg eBook 74093.)"
+      url: https://gutenberg.pglaf.org/7/4/0/9/74093/74093-0.txt
+      text: chudeau-1909-sahara-soudanais.txt
+      loc: "ch. I, II. Les régions, 'L’Adr’ar’ des Ifor’as', Orographie"
+      quote: "tandis que par ses trois faces nord, est et sud, l’Adr’ar’ se relie sans rupture de pente aux pays voisins"
+    note: >-
+      Said of the eastern face of the massif, which is this place, but in 1909 and largely from other officers'
+      surveys (Chudeau himself saw only the north-east); the lie of the land has not changed since 475. He puts the
+      plateau near 800 m; the build has 495 m here, and Wikipedia's page for Kidal, 160 km west, gives 463 m.
+
+  - id: substrate-varnished-rock
+    layer: substrate
+    what: >-
+      Where bedrock shows, it is granite, porphyry and gneiss, bare of soil, coated black and shiny with desert
+      varnish.
+    reach: region
+    source:
+      cite: "Chudeau, R. (1909). Missions au Sahara, tome II: Sahara soudanais. Paris: Armand Colin. (Project Gutenberg eBook 74093.)"
+      url: https://gutenberg.pglaf.org/7/4/0/9/74093/74093-0.txt
+      text: chudeau-1909-sahara-soudanais.txt
+      loc: "ch. I, II. Les régions, 'L’Adr’ar’ des Ifor’as', Hydrographie"
+      quote: "granite, porphyres et gneiss sont couverts d’un vernis noir et luisant qui est la marque des climats secs"
+    note: Said of the rocky masses of the Adrar des Ifoghas, 1909. Whether any outcrop stands in this view is not known.
+
+  - id: substrate-reg-and-silt
+    layer: substrate
+    what: >-
+      Between outcrops the ground is one of two things. On the open desert plain (reg) it is coarse sand and
+      pebbles, the wind having carried off everything finer. In the floors of the wadis that come down from the
+      Adrar it is fine clayey silt, smooth and flat, with no pebbles.
+    reach: region
+    source:
+      cite: "Chudeau, R. (1909). Missions au Sahara, tome II: Sahara soudanais. Paris: Armand Colin. (Project Gutenberg eBook 74093.)"
+      url: https://gutenberg.pglaf.org/7/4/0/9/74093/74093-0.txt
+      text: chudeau-1909-sahara-soudanais.txt
+      loc: "ch. III Météorologie, II. La Brume"
+      quote: "il ne reste plus dans les vallées, sur les regs, que du sable grossier et des cailloux … Dans l’Ad’rar’ des Ifor’as, dans l’Ahaggar, dans l’Aïr, les alluvions sont restées argileuses"
+    note: >-
+      A general statement of 1909 about the desert and the three massifs. Chudeau puts a sterile plain of crystalline
+      rock ("tanezrouft") east and south-east of the Adrar; which ground lies at this very spot was not found.
+
+  - id: water-rain-pools
+    layer: water
+    what: >-
+      No river with banks. A wadi here is a wide, flat alluvial plain, hundreds of metres to more than a kilometre
+      across, dry for nine months. In the rainy season its flats are dotted with shallow puddles a few square metres
+      in size; after a storm a film of water may creep over it for a day or two and sink in.
+    reach: region
+    source:
+      cite: "Chudeau, R. (1909). Missions au Sahara, tome II: Sahara soudanais. Paris: Armand Colin. (Project Gutenberg eBook 74093.)"
+      url: https://gutenberg.pglaf.org/7/4/0/9/74093/74093-0.txt
+      text: chudeau-1909-sahara-soudanais.txt
+      loc: "ch. I, II. Les régions, 'L’Adr’ar’ des Ifor’as', Hydrographie"
+      quote: "Pendant la saison des pluies, toutes les plaines d’alluvion sont semées d’eau stagnante : ce sont le plus souvent de simples flaques de quelques mètres carrés de superficie"
+    note: >-
+      Of the plateau of the Adrar des Ifoghas in 1905 (Gautier crossed the oued Etambar in flood on 23 July; it was
+      dry two days later). The build draws two modelled rivers at this point; the same passage says the wadis have no
+      banks and that the network as a whole never flows.
+
+  - id: water-arid-no-rivers
+    layer: water
+    what: >-
+      No lake, marsh or flowing river in view. By this time the Sahara had long been a desert, swept most of the
+      year by dry north-easterly winds.
+    reach: region
+    source:
+      cite: "Nash, D.J., De Cort, G., Chase, B.M., Verschuren, D., Nicholson, S.E., Shanahan, T.M., Asrat, A., Lézine, A.-M. & Grab, S.W. (2016). African hydroclimatic variability during the last 2000 years. Quaternary Science Reviews 154, 1–22."
+      url: https://courses.seas.harvard.edu/climate/eli/Courses/global-change-debates/Sources/Sahel-droughts/more/Nash_QSR2016.pdf
+      text: nash-2016-qsr.txt
+      loc: "p. 6, section 4.1 The first millennium of the Common Era"
+      quote: "Two thousand years ago, the Sahara of North Africa was already an arid desert subject almost year-round to dry north-northeasterly trade winds."
+    note: >-
+      Said of the whole Sahara; the review's nearest records are Lake Yoa in Chad and tree rings in the Tassili
+      n'Ajjer, each of which it reads as drying from about 460 to 500 CE. It goes against the build's atlas, which
+      lists here (from fossils recorded within 2,200 km) animals of standing water: Hippopotamus, Crocodylus, Kobus,
+      Redunca, Thryonomys, three turtles, two freshwater mussels, and the fishes Lates, Clarias, Polypterus and
+      Heterotis. Gallay's review (cited below) puts the water-bound game of the engravings in phases that ended
+      before this one.
+
+  - id: cover-rainy-season-grass
+    layer: cover
+    what: >-
+      In August the wide alluvial flats are green: a continuous short turf of annual grass that came up a few weeks
+      after the first storms, dotted with a few trees. It is the only green; by the dry season it is a pale stubble
+      20 to 30 cm high.
+    reach: region
+    source:
+      cite: "Chudeau, R. (1909). Missions au Sahara, tome II: Sahara soudanais. Paris: Armand Colin. (Project Gutenberg eBook 74093.)"
+      url: https://gutenberg.pglaf.org/7/4/0/9/74093/74093-0.txt
+      text: chudeau-1909-sahara-soudanais.txt
+      loc: "ch. IV Chorologie, I. Géographie botanique, Zone sahélienne"
+      quote: "elles peuvent atteindre plusieurs kilomètres et forment à la saison des pluies de véritables prairies couvertes d’un gazon continu, parsemé de quelques arbres."
+    note: >-
+      Of the valleys of the Adrar des Ifoghas in 1905 to 1909. Whether this camera stands in such a valley or on the
+      bare plain between them is not known, and no pollen or charcoal record of the fifth century was found for the
+      region.
+
+  - id: cover-bare-sparse-acacia
+    layer: cover
+    what: >-
+      Away from the wadis the plain is almost bare: no ground cover, and only here and there, far apart, a low
+      thorn acacia (Acacia tortilis, 2 to 3 m) or some stunted herbs in a wadi bed. No woodland, and no
+      conifers.
+    reach: region
+    source:
+      cite: "Chudeau, R. (1909). Missions au Sahara, tome II: Sahara soudanais. Paris: Armand Colin. (Project Gutenberg eBook 74093.)"
+      url: https://gutenberg.pglaf.org/7/4/0/9/74093/74093-0.txt
+      text: chudeau-1909-sahara-soudanais.txt
+      loc: "ch. IV Chorologie, I. Géographie botanique, Zone saharienne"
+      quote: "Quant aux tanezrouft, leur caractère propre est la stérilité ; on n’y trouve rien, si ce n’est, de loin en loin, quelques talah et quelques herbes rabougries dans le lit d’un oued."
+    note: >-
+      Chudeau's word for the sterile plains that he says bound the Adrar on the north and east; "talah" is his name
+      for Acacia tortilis, whose height he gives elsewhere (fig. 63, of the Aïr). 1909. The build's atlas offers
+      "pines, firs and spruces" as a stand-in here, which nothing read supports.
+
+  - id: life-game-engraved
+    layer: life
+    what: >-
+      The large animals of the country were dama and dorcas gazelles, scimitar-horned oryx, giraffe and ostrich:
+      these, and few others, are the game engraved on the rocks of the Adrar des Ifoghas in the phase dated to the
+      fifth to eleventh centuries.
+    reach: region
+    source:
+      cite: "Gallay, A. (1994). Histoire des peuplements africains et gravures rupestres sahariennes: à propos des travaux de Christian Dupuy. Bulletin du Centre genevois d'anthropologie 4, 86–93."
+      url: https://access.archive-ouverte.unige.ch/access/metadata/1aaaf797-fa2e-4346-ad2b-891c77c0ea67/download
+      text: gallay-1994-review-dupuy.txt
+      loc: "p. 88, 'Phase récente : gravures stylisées récentes', Sujets représentés"
+      quote: "La faune sauvage comprend des gazelles (Gazella dama et dorcas), des antilope oryx (Oryx dammah), des girafes et des autruches, mais l'éventail des espèces est nettement plus limité que dans la phase précédente."
+    note: >-
+      A review of Dupuy's study of the engravings (his own papers, on HAL, could not be fetched). The engravings are
+      in the massif, most of them 100 km and more west of this point, and the phase is dated by argument, not by
+      measurement; 475 falls at its very start. The build's atlas agrees on Gazella and Struthio, and adds Loxodonta,
+      which the review places in the earlier phases only.
+
+  - id: life-rainy-season-herds
+    layer: life
+    what: >-
+      August is when the game is here in numbers. Dama gazelles move north out of the Sahel into the desert with
+      the rains, in the past in gatherings of up to several hundred; in the dry season they are farther south,
+      singly or in groups of ten to fifteen.
+    reach: region
+    source:
+      cite: "Devillers, P., Devillers-Terschuren, J. & Beudels-Jamar, R.C. (2005). Gazella dama. In Beudels, R.C. et al. (eds), Sahelo-Saharan Antelopes: Status and Perspectives, 2nd edition. CMS Technical Series Publication 11. Bonn: UNEP/CMS Secretariat."
+      url: https://www.cms.int/sites/default/files/publication/ss-antelopes-tech11-uk-part3.pdf
+      text: cms-2006-antelopes-part3.txt
+      loc: "p. 61 (page 23 of the file), section 2.1.3 Social behaviour"
+      quote: "With the onset of the rainy season, they migrate into the desert, where, in the past, aggregations including males and females could include several hundred individuals."
+    note: >-
+      Behaviour recorded in the twentieth century, mostly in Chad and Niger, carried back to 475. The same chapter
+      (p. 64) puts the species' range in Mali up to 20° N around the Adrar des Ifoghas, and found about 250 still
+      living in the south of the Tamesna in 2005. Chudeau (ch. IV, Mammifères) describes the adult as largely white
+      with only the back fawn.
+
+  - id: people-horse-camel-herders
+    layer: people
+    what: >-
+      Any people in sight are mobile herders and riders with horses of a slender, greyhound-like build and ridden
+      dromedaries. Cattle, which fill the older engravings, are no longer shown.
+    reach: region
+    source:
+      cite: "Gallay, A. (1994). Histoire des peuplements africains et gravures rupestres sahariennes: à propos des travaux de Christian Dupuy. Bulletin du Centre genevois d'anthropologie 4, 86–93."
+      url: https://access.archive-ouverte.unige.ch/access/metadata/1aaaf797-fa2e-4346-ad2b-891c77c0ea67/download
+      text: gallay-1994-review-dupuy.txt
+      loc: "p. 88, 'Phase récente : gravures stylisées récentes', Sujets représentés"
+      quote: "Les bovidés domestiques disparaissent et font place à de nombreuses représentations de chevaux à silhouette levrettée et de dromadaires montés."
+    note: >-
+      Read from engravings in the Adrar des Ifoghas dated by argument to the fifth to eleventh centuries; the review
+      itself gives the ridden dromedary in North Africa only from the fourth or fifth century, so camels may have
+      been new here in 475, or not yet come. An engraving shows what its makers chose to show: sheep, goats and
+      cattle may still have been kept. The build lists Bos here and houses the people in six settlements; the source
+      shows riders and no cattle, and says nothing of settlements.
+
+  - id: people-veiled-javelin-men
+    layer: people
+    what: >-
+      The men carry several javelins each (the older engravings show one spear, or a bow). Their heads are drawn ringed by a thick line
+      and their faces without a mouth, which may mean a veil over the lower face. They hunt ostrich, giraffe and
+      antelope from horseback.
+    reach: region
+    source:
+      cite: "Gallay, A. (1994). Histoire des peuplements africains et gravures rupestres sahariennes: à propos des travaux de Christian Dupuy. Bulletin du Centre genevois d'anthropologie 4, 86–93."
+      url: https://access.archive-ouverte.unige.ch/access/metadata/1aaaf797-fa2e-4346-ad2b-891c77c0ea67/download
+      text: gallay-1994-review-dupuy.txt
+      loc: "p. 88, 'Phase récente : gravures stylisées récentes', Sujets représentés"
+      quote: "ce qui pourrait indiquer le port du voile. Les guerriers sont armés de plusieurs javelots"
+    note: >-
+      The veil is the reviewer's reading of a drawing convention, and he notes that written sources mention it in the
+      Sahara only in the eleventh century. Same engravings, same dating and distance as the item above.
+unknown:
+  - What these herders lived in. No camp of the fifth century has been dug or described in anything that could be read, so whether the build's "herder's tent" (and of what: skins, mats) is right for 475 is not known.
+  - Whether anyone was at this spot at all. Nothing read gives a number of people for the region then; HYDE's 6,383 for the cell and the build's six settlements could be neither supported nor refuted, and the sources read show riders and herds, not villages.
+  - What the ground is at this exact point (bare reg of pebbles, a sand sheet, or the silt floor of a wadi) and its colour. The surveys of the Tamesna and the Azawagh are in the IRD's Horizon library, which was closed to outside readers.
+  - How much wetter or drier 475 CE was here than 1905 or 1950 to 2000, on which every item about weather, water and cover rests. The nearest records read are in Chad and south-eastern Algeria.
+  - Which grasses and herbs made the August pasture then, how tall, and how much of the plain they covered; Chudeau's main grass ("alemouz") was unidentified even in 1909.
+  - Whether stone tombs (tumuli) stood within sight. Wikipedia's page for the Azawagh, after a survey that could not be fetched, says Berbers who built tumuli lived in that basin from about 1500 BCE.
+  - The birds, reptiles and insects of the season, locusts among them.
+  - Whether sheep, goats or cattle were still herded here in 475; the engravings of the time do not show them and no bones from a dated site were read.
+pictures:
+  - { url: "https://upload.wikimedia.org/wikipedia/commons/0/05/Une_guelta%2C_pr%C3%A8s_d%27Oubankort_dans_l%27Adrar_des_Ifoghas.jpg", what: "Photograph: a rock pool (guelta) near Oubankort in the Adrar des Ifoghas, in the massif west of this point." }
+  - { url: "https://commons.wikimedia.org/wiki/Category:Adrar_des_Ifoghas", what: "Wikimedia Commons' photographs of the Adrar des Ifoghas today." }
+  - { url: "https://www.cms.int/sites/default/files/publication/ss-antelopes-tech11-uk-part3.pdf", what: "Photographs of 2005 from the south of the Tamesna in Mali (a small valley with Leptadenia bushes; dama gazelle habitat), pp. 57 and 60." }
+  - { url: "https://access.archive-ouverte.unige.ch/access/metadata/1aaaf797-fa2e-4346-ad2b-891c77c0ea67/download", what: "Fig. 2 (after Dupuy 1991): the men and riders of the recent engravings of the Adrar des Ifoghas, with their javelins." }
+  - { url: "https://www.gutenberg.org/ebooks/74093", what: "Chudeau's plates of 1905 to 1907: plate V, 'Un oued de l'Adr'ar' des Ifor'as', and plate XXIII, a group of talah (Acacia tortilis) in Mauritania." }
+effort: { fetched: 14, cited: 5, failed: 17, note: "Fetched counts text files kept and read (11 works; the CMS report is four files). Could not reach: HAL and OpenEdition (a bot check, not worked around: all of Dupuy's papers on the engravings and the Encyclopédie berbère), the IRD's Horizon library (access suspended: Bernus on the Tamesna, Paris on the Azawagh), Wiley, CORE, the British Museum's rock art pages (certificate error), WWF, an Egyptian journal, and gutenberg.org itself (Chudeau was read from its mirror). Cambridge gave a summary only and USGS a different page. Finding any readable account of the fifth century here took longest; most of the scene rests on one traveller of 1905 to 1909." }

@@ -1,0 +1,193 @@
+# The whole Earth from orbit at about 2.26 Ga. The viewer has no plate reconstruction this far back, so the brief
+# is of the globe, and `reach` is read so: `place` is said of the Earth at this date, within a few million years,
+# at a spot that can be found (here always the Kaapvaal craton, southern Africa, whose rocks are dated 2256 ± 6
+# and 2266 ± 4 Ma); `region` is said of the early Paleoproterozoic or a wider span and carried to this date.
+# Whether the Kaapvaal craton is on the side of the globe the camera sees cannot be said.
+view: t=2258.287206Ma&lat=45.79&lon=-4.20&d=2.6&hour=11&mo=11&clock=0
+when: 2258.3 Ma
+place: The whole disc of the Earth from orbit in the early Paleoproterozoic (Rhyacian), late in the Great Oxidation Event; the camera is over 45.79, -4.20 of a globe whose land is generic.
+author: machine:claude-code
+expects:
+  - id: sky-sun-fainter
+    layer: sky
+    what: The disc is lit by a Sun fainter than today's, part of the way up from a young Sun about 30% dimmer to the present one; the day side is less bright than a modern photograph of the Earth.
+    reach: region
+    source:
+      cite: "Feulner, G. (2012). The faint young Sun problem. arXiv:1204.4449 (preprint of the review for Reviews of Geophysics)."
+      url: https://arxiv.org/pdf/1204.4449
+      text: feulner-2012-faint-young-sun.txt
+      loc: "p. 2, section 1 (Introduction), the sentences around equation (1), and Figure 1"
+      quote: "the bolometric luminosity of the Sun (the solar luminosity integrated over all wavelengths) was about 30% lower as compared to the present epoch … The long-term evolution of the bolometric solar luminosity L(t) as a function of time t can be approximated by a simple formula [Gough, 1981]"
+    note: The source gives the curve, not a value for this date. Its equation (1), worked for 2.26 Ga by this brief's author, gives about 0.83 to 0.84 of today's luminosity; that arithmetic is not in the source.
+
+  - id: sky-moon-nearer
+    layer: sky
+    what: The Moon is nearer than now, so its disc is larger in the sky and it crosses the view faster. The nearest dated measure, 200 million years earlier, puts it about 322,000 km away, against about 384,000 km today.
+    reach: region
+    source:
+      cite: "Lantink, M. L. et al. (2022). Milankovitch cycles in banded iron formations constrain the Earth–Moon system 2.46 billion years ago. Proceedings of the National Academy of Sciences 119(40), e2117146119."
+      url: https://pmc.ncbi.nlm.nih.gov/articles/PMC9546617/
+      text: lantink-2022-earth-moon.txt
+      loc: "Abstract"
+      quote: "corresponding to an Earth–Moon distance of 321,800 ± 6,500 km and a daylength of 16.9 ± 0.2 h at 2.46 Ga"
+    note: Of 2.46 Ga, from the Joffre Member of Western Australia; the Moon had receded somewhat by 2.26 Ga. Today's distance is from Farhat et al. (2022), Table D.1 (383598 km).
+
+  - id: sky-day-shorter
+    layer: sky
+    what: The globe turns faster than today, once in roughly 17 to 19 hours, between the day lengths read from rocks 200 million years older and 860 million years younger. Day and night bands of cloud pass more quickly, and "11:00 sun time" is of a shorter day.
+    reach: region
+    source:
+      cite: "Farhat, M., Auclair-Desrotour, P., Boué, G. & Laskar, J. (2022). The resonant tidal evolution of the Earth-Moon distance. Astronomy & Astrophysics (letter); arXiv:2207.00438."
+      url: https://arxiv.org/pdf/2207.00438
+      text: farhat-2022-earth-moon.txt
+      loc: "Table D.1 (cyclostratigraphic data), rows Xiamaling (1.400 Ga) and Joffre (2.460 Ga); the last column is the length of day in hours"
+      quote: "Xiamaling Meyers & Malinverno (2018) 1.400 85.79 ± 2.72 53.27 ± 0.41 339777 ± 2600 18.70 ± 0.25 Joffre Lantink et al. (2021) 2.460 108.91 ± 8.28 50.24 ± 0.96 320452 ± 6100 16.98 ± 0.50"
+    note: No measurement is of this date; the two rows bracket it, and the paper's model curve runs between them. The range in `what` is the bracket, not a value the source states for 2.26 Ga.
+
+  - id: geography-large-emerged-land
+    layer: geography
+    what: Land and sea both show. Large continents stand above the sea, with high ground, in about the proportion of land to ocean of later times, not a water world with scattered islands.
+    reach: region
+    source:
+      cite: "Bindeman, I. N. et al. (2018). Rapid emergence of subaerial landmasses and onset of a modern hydrologic cycle 2.5 billion years ago. Nature 557, 545–548."
+      url: https://par.nsf.gov/servlets/purl/10539194
+      text: bindeman-2018-landmasses.txt
+      loc: "p. 545, abstract (PDF page 1)"
+      quote: "We propose that this shift may have coincided with the onset of a modern hydrological cycle owing to the rapid emergence of continental crust with near-modern average elevation and aerial extent roughly 2.5 billion years ago."
+    note: An inference from oxygen isotopes of shales, for the span 2.5 to 2.2 Gyr ago; it gives an extent, not outlines. The paper's Figure 3b is a conceptual picture of the Earth "after the occurrence of the GOE".
+
+  - id: geography-low-latitude-cratons
+    layer: geography
+    what: Several of the old continental blocks (Superior, Wyoming, Hearne, Karelia-Kola, Kaapvaal) lay as large landmasses in low latitudes earlier in the era; some of the land in view may be near the equator.
+    reach: region
+    source:
+      cite: "Gumsley, A. P. et al. (2017). Timing and tempo of the Great Oxidation Event. Proceedings of the National Academy of Sciences 114(8), 1811–1816."
+      url: https://pmc.ncbi.nlm.nih.gov/articles/PMC5338422/
+      text: gumsley-2017-goe-timing.txt
+      loc: "section 'Linking Snowball Earth and the GOE', second paragraph; and the caption of Fig. 3B"
+      quote: "Our results add to the growing evidence for large low-latitude continental landmasses in the early Paleoproterozoic, including the Kaapvaal Craton (6) and the clan of cratons that defines supercraton Superia (5, 36, 37): Superior, Wyoming, Hearne, and Karelia–Kola."
+    note: The evidence is of about 2.51 to 2.43 Ga, 170 to 250 million years before this date, and continents move; by this date Kaapvaal itself is placed at mid-to-high latitude (the next item). A weak lead for where land lay.
+
+  - id: geography-kaapvaal-mid-high-latitude
+    layer: geography
+    what: The Kaapvaal craton (today's southern Africa), with its shallow sea, lies at middle to high latitude at about this time, not in the tropics.
+    reach: place
+    source:
+      cite: "Poulton, S. W., Bekker, A., Cumming, V. M. et al. (2021). A 200-million-year delay in permanent atmospheric oxygenation. Nature 592, 232–236. Accepted manuscript, White Rose Research Online."
+      url: https://eprints.whiterose.ac.uk/171586/60/Poulton%20Nature%20third%20resubmission%20final.pdf
+      text: poulton-2021-delay-oxygenation.txt
+      loc: "manuscript lines 228–230"
+      quote: "the latest paleogeographic reconstructions place the Transvaal Basin at mid-to-high latitudes during … emplacement of the Hekpoort Formation"
+    note: Poulton reports another paper's reconstruction (their reference 40), which could not be fetched. The Hekpoort lavas lie just above the rocks dated 2256 ± 6 Ma, so the statement is of a few million years after this date.
+
+  - id: ice-glaciers-reach-the-sea
+    layer: ice
+    what: Ice is on the Earth at about this time. Glaciers reach the sea on the Kaapvaal craton at middle to high latitude, dropping scratched and faceted stones into the mud of its shelf; this last ice age of the era is known from southern Africa only, so the globe is not expected to be white from pole to pole.
+    reach: place
+    source:
+      cite: "Poulton, S. W., Bekker, A., Cumming, V. M. et al. (2021). A 200-million-year delay in permanent atmospheric oxygenation. Nature 592, 232–236. Accepted manuscript, White Rose Research Online."
+      url: https://eprints.whiterose.ac.uk/171586/60/Poulton%20Nature%20third%20resubmission%20final.pdf
+      text: poulton-2021-delay-oxygenation.txt
+      loc: "Methods, Geological setting, manuscript lines 411–414; the dates at lines 430–432; 'not known in other key successions' at line 228"
+      quote: "In outcrop, faceted and bull-nosed glacially striated pebbles … have been observed, leading to its interpretation as a glacial deposit"
+    note: The glacial bed (the Rietfontein diamictite, spelled Reitfontein in the source) caps the sequence whose tuffs are dated 2256 ± 6 and 2266 ± 4 Ma, and lies below lavas Gumsley et al. (2017) give as younger than about 2250–2240 Ma. So at 2258.3 Ma the ice was either a few million years off or already there; the dates cannot tell which. The three older ice ages of the era, at low latitude and perhaps global, were over (the first about 2.43 Ga).
+
+  - id: weather-cooling-climate
+    layer: weather
+    what: A cooling world on the way into an ice age; rock on land is weathering less intensely than in the warm spell some 50 million years before.
+    reach: place
+    source:
+      cite: "Poulton, S. W., Bekker, A., Cumming, V. M. et al. (2021). A 200-million-year delay in permanent atmospheric oxygenation. Nature 592, 232–236. Accepted manuscript, White Rose Research Online."
+      url: https://eprints.whiterose.ac.uk/171586/60/Poulton%20Nature%20third%20resubmission%20final.pdf
+      text: poulton-2021-delay-oxygenation.txt
+      loc: "manuscript lines 204–207"
+      quote: "atmospheric oxygenation (Fig. 3), which is consistent with a cooling climate initiated by oxidation of … atmospheric methane"
+    note: Read from a weathering index in the upper Timeball Hill Formation, the unit that holds the tuffs of 2256 ± 6 and 2266 ± 4 Ma. A trend at one basin, not a temperature.
+
+  - id: water-shelf-sea-with-deltas
+    layer: water
+    what: A shallow muddy sea lies on the Kaapvaal craton, fed by deltas and open to the ocean on one side; dark mud and silt settle off the delta fronts, and ash from eruptions falls into it.
+    reach: place
+    source:
+      cite: "Poulton, S. W., Bekker, A., Cumming, V. M. et al. (2021). A 200-million-year delay in permanent atmospheric oxygenation. Nature 592, 232–236. Accepted manuscript, White Rose Research Online."
+      url: https://eprints.whiterose.ac.uk/171586/60/Poulton%20Nature%20third%20resubmission%20final.pdf
+      text: poulton-2021-delay-oxygenation.txt
+      loc: "Methods, Geological setting, manuscript lines 394–396; the tuff ages at lines 430–432"
+      quote: "of the upper Rooihoogte and Timeball Hill formations were deposited in a prodelta basin setting, … which is generally thought to have had open connection to the ocean to the southwest"
+    note: The southwest is in today's coordinates. The tuff beds in the upper Timeball Hill Formation are dated 2256 ± 6 and 2266 ± 4 Ma, which is this date within their errors. This is the one spot of the Earth's surface the sources read date to it.
+
+  - id: water-iron-rich-shallows
+    layer: water
+    what: The shallow water of that sea is without oxygen and rich in dissolved iron up to near the surface, unlike any open shelf sea today.
+    reach: place
+    source:
+      cite: "Poulton, S. W., Bekker, A., Cumming, V. M. et al. (2021). A 200-million-year delay in permanent atmospheric oxygenation. Nature 592, 232–236. Accepted manuscript, White Rose Research Online."
+      url: https://eprints.whiterose.ac.uk/171586/60/Poulton%20Nature%20third%20resubmission%20final.pdf
+      text: poulton-2021-delay-oxygenation.txt
+      loc: "manuscript lines 174–176"
+      quote: "shallow-water ferruginous anoxia and a reducing atmosphere towards the top of the upper Timeball"
+    note: The authors caution that local marine data are not the global ocean. The source says nothing of the water's colour; the next item is the lead for that.
+
+  - id: water-green-tint
+    layer: water
+    what: Where iron-rich water meets oxygen, fine iron hydroxide particles may tint the sea green rather than blue, as they do today in the sea off Iwo Island in Japan; some seas in view may be greenish.
+    reach: region
+    source:
+      cite: "Matsuo, T. et al. (2025). Archaean green-light environments drove the evolution of cyanobacteria's light-harvesting system. Nature Ecology & Evolution 9(4), 599–612."
+      url: https://pmc.ncbi.nlm.nih.gov/articles/PMC11976284/
+      text: matsuo-2025-green-ocean.txt
+      loc: "section 'Transition of light window through the history of Earth', last paragraph; Fig. 5a caption"
+      quote: "This narrative envisions a pre-GOE Earth as a ‘pale green dot’"
+    note: A hypothesis from simulations and culture experiments, said of the Archaean before the Great Oxidation Event, and of the light under water more than of the colour seen from above. This date is late in that event, when iron-rich shallow water is still recorded (the item before), so it is carried here with doubt. The source puts clear, "white-light" water after the oxidation events.
+
+  - id: substrate-red-iron-at-the-shore
+    layer: substrate
+    what: Rust-red iron oxide is already forming at the surface, as small red grains (ooliths) in the sands of river deltas on Kaapvaal; whole red sandstones and red soils come only after this date, above the lavas.
+    reach: region
+    source:
+      cite: "Gumsley, A. P. et al. (2017). Timing and tempo of the Great Oxidation Event. Proceedings of the National Academy of Sciences 114(8), 1811–1816."
+      url: https://pmc.ncbi.nlm.nih.gov/articles/PMC5338422/
+      text: gumsley-2017-goe-timing.txt
+      loc: "SI Methods, Stratigraphic Synthesis, the paragraph beginning 'We display the stratigraphy of the Transvaal subbasin'"
+      quote: "Well-developed hematitic ooliths and pisoliths in fluviodeltaic deposits of the middle Timeball Hill Formation (68) constrain a significant rise in atmospheric oxygen level to have occurred well before extrusion of the Hekpoort Formation basalts and development of its overlying paleosol (12)."
+    note: The middle Timeball Hill Formation is some tens of millions of years older than this date (its lower part is about 2.31 Ga). The sources disagree on the soil that formed soon after on the Hekpoort lavas. Gumsley et al. call it oxic, under red beds; Rye and Holland (2000, p. 85) read it as having lost its iron from the top, under air poor in oxygen. So whether bare land was red, grey or black at this date is not settled.
+
+  - id: relief-lava-plains-soon-after
+    layer: relief
+    what: Within a few million years of this date, dark basaltic andesite lava floods the land surface of Kaapvaal, flow on flow, over at least 100,000 square kilometres; fresh lava fields of that kind, with ash, are in keeping with the volcanic ash beds of this date.
+    reach: region
+    source:
+      cite: "Rye, R. & Holland, H. D. (2000). Geology and geochemistry of paleosols developed on the Hekpoort Basalt, Pretoria Group, South Africa. American Journal of Science 300(2), 85–141."
+      url: https://ajsonline.org/api/v1/articles/61342-geology-and-geochemistry-of-paleosols-developed-on-the-hekpoort-basalt-pretoria-group-south-africa.pdf
+      text: rye-holland-2000-hekpoort-paleosols.txt
+      loc: "pp. 86–87, Geological setting (PDF pages 2 and 4)"
+      quote: "The Hekpoort Formation is primarily a series of basaltic andesite lava flows. … preserved over the entire 100,000 km2 extent of the unconformity at the top of the … The host volcanic rocks erupted subaerially"
+    note: The lavas are later than this date. Rye and Holland give an Rb-Sr age of 2.224 ± 0.021 Ga; Gumsley et al. (2017) give them as younger than about 2250–2240 Ma and above the tuff of 2256 ± 6 Ma. Rye and Holland's statement that the lavas are coeval with the Ongeluk lava has since been overturned (Gumsley et al.). The colour "dark" is this brief's reading of basaltic andesite, not the source's word.
+
+  - id: cover-no-plants
+    layer: cover
+    what: No green of plants anywhere on land; there are no forests, grass or tundra, and the continents show as bare rock, sediment and soil. At most, thin microbial mats grow on wet rock, not known to be wide enough to colour the land from orbit.
+    reach: region
+    source:
+      cite: "Finke, N. et al. (2019). Mesophilic microorganisms build terrestrial mats analogous to Precambrian microbial jungles. Nature Communications 10, 4323."
+      url: https://pmc.ncbi.nlm.nih.gov/articles/PMC6754388/
+      text: finke-2019-terrestrial-mats.txt
+      loc: "Introduction, first paragraph"
+      quote: "when microbial mats developed on land hundreds of millions or even billions of years before the evolution of plants"
+    note: Said of the Precambrian as a whole. The same paragraph puts the emergence of land plants some 400 million years ago; the paper says the mats would matter globally only "if" they were widespread, which it does not claim.
+unknown:
+  - Where the continents lay and what their outlines were at 2.26 Ga. No source read gives a map for this date; the only positions are Kaapvaal at mid-to-high latitude about now and several cratons near the equator some 200 million years earlier. What land or sea lies under the camera at 45.79, -4.20 cannot be said.
+  - How far the ice reached at this date, whether there were polar caps or sea ice, and whether the last glaciation had begun by 2258.3 Ma or came a few million years later. The glacial bed lies above tuffs of 2256 ± 6 and 2266 ± 4 Ma and is known from southern Africa only.
+  - The colour of the air and of the limb. Whether a methane-made hydrocarbon haze tinted the sky orange, as is argued for parts of the Archean (Arney et al. 2016, read), at a date when oxygen was still swinging across a very low threshold and methane is thought to have been important (Poulton et al. 2021). No source read says for this date.
+  - How much cloud there was and in what pattern. Feulner (2012, section 7.1) reports model studies that disagree on whether a faster spin gives less cloud; nothing read is of this date.
+  - The colour of the open ocean away from iron-rich shelves, blue or green, at this stage of the oxidation.
+  - The colour of bare land between the rivers, rust-red or grey to black, and whether microbial mats covered enough ground to tint it. The two readings of the Hekpoort soil disagree.
+  - Sea level, and how much of the continents was flooded by shelf seas, beyond the one basin on Kaapvaal.
+  - Whether any volcano was in eruption or any ash plume in sight at this date, beyond the ash beds in the Kaapvaal sea.
+  - The temperature of the sea and the land, and where the snow line stood.
+  - The face of the Moon then, its craters and dark plains, and its phase and place in the sky at this hour. Not researched; no source read.
+pictures:
+  - { url: "https://par.nsf.gov/servlets/purl/10539194", what: "Bindeman et al. (2018), Fig. 3b: a conceptual globe of the early to mid Paleoproterozoic after the Great Oxidation Event, with emerged continents and mountain belts (a concept, not a map)." }
+  - { url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC5338422/", what: "Gumsley et al. (2017), Fig. 3B: the cratons of supercraton Superia with Kaapvaal and Pilbara at about 2.51 to 2.43 Ga, with their paleolatitude (older than this date)." }
+  - { url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC11976284/", what: "Matsuo et al. (2025), Extended Data Fig. 5: photographs of the sea made green by iron hydroxide around Iwo Island, Japan, the modern likeness of an iron-rich sea; and Fig. 5, the blue, green and white 'light windows' through Earth history." }
+effort: { fetched: 17, cited: 9, failed: 5, note: "Read and not cited: Holland 2006, Kopp et al. 2005, Millikin et al. 2024, Bekker et al. 2001, Evans et al. 2002, Arney et al. 2016, O'Malley-James & Kaltenegger 2018, Rugheimer & Kaltenegger 2018. Not reached: Humbert et al. 2017 on the Hekpoort paleomagnetism (HAL answered with a bot check, core.ac.uk with an error), Beraldi-Campesi 2013 (SpringerOpen client challenge), Lenton & Daines 2017 (Wiley refused), a Hekpoort paleosol PDF at msu.edu (certificate error). Rasmussen et al. 2013, the first publication of the 2256 ± 6 Ma tuff age, is behind a paywall and is cited only through Poulton and Gumsley. What took longest: finding anything dated to this stretch at all; nearly every statement of this date comes from one basin in South Africa." }

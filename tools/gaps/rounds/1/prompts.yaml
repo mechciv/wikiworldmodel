@@ -1,0 +1,213 @@
+# The first round's prompts for the expected pictures (docs/plans/VISUAL-GAPS.md, section 3.3). Each is written from
+# its brief (pNN.yaml): the items a single frame can hold, the camera, the hour and the month, and what must not
+# appear. A picture is one moment, so an item that is of another moment, or that no photograph could show, is left
+# out and listed with the reason. Where the brief says `unknown`, the model will fill the gap with what it has seen
+# most: the picture is an illustration of the brief, never evidence, and no verdict rests on it.
+author: machine:claude-code
+written: "2026-11-19"
+# What every prompt ends with.
+style: >-
+  Photorealistic, like a documentary photograph taken in natural light, 16:9, sharp and plainly lit, no dramatic
+  colour grading. No text, no labels, no captions, no borders, no watermark.
+cameras:
+  eye: "Seen from the eye height of a person standing on the ground, looking level at the horizon, wide angle."
+  air: "Seen from about 300 metres above the ground, looking obliquely down and ahead, the horizon near the top of the frame."
+  orbit: "The whole disc of the planet seen from space, about ten thousand kilometres above the surface, against black."
+points:
+  p01:
+    prompt: >-
+      The early Earth 2.26 billion years ago. Unfamiliar continents, none with the outline of any continent of
+      today: several large landmasses standing above a wide ocean, in about today's proportion of land to sea. The
+      land is entirely bare of plants: grey and brown rock and sediment, and dark fields of fresh basalt lava. It is grey, brown and black, not red: only a few small
+      rust-red patches show, right at the mouths of rivers. No green anywhere on land. One landmass at middle to high latitude
+      carries an ice sheet whose glaciers reach its coast; the rest of the globe is not frozen. Shallow shelf seas
+      along some coasts are tinted murky green, with brown plumes of mud off river deltas. Bands of white cloud.
+      The sunlit side is a little dimmer than in a modern photograph of the Earth. The Moon in the black sky beside
+      the planet, slightly larger than it looks today. No city lights, no vegetation, no modern coastlines.
+    leaves_out:
+      sky-day-shorter: A still cannot show the length of the day.
+      weather-cooling-climate: A trend over millions of years.
+      water-iron-rich-shallows: The water's chemistry; its colour is in the prompt.
+      geography-low-latitude-cratons: Said of an earlier time; the prompt only says several large landmasses.
+      relief-lava-plains-soon-after: A few million years later; the prompt keeps only dark lava fields, which the ash beds of this date allow.
+  p02:
+    prompt: >-
+      A coastal plain at the edge of a great continent 485 million years ago, at high southern latitude, on a
+      late-autumn afternoon with the sun low in the sky. Low, gently undulating ground with no hills or mountains.
+      The ground is loose, coarse, pale quartz sand with pebbly patches, completely bare. A wide, shallow, braided
+      river of many sandy channels with no banks crosses it toward a low sandy shore: tidal flats of wet silt, sand
+      bars, and a calm shallow sea to the horizon. Wind-rippled sand beside the river. On damp ground, thin dark
+      films of microbial crust, flat on the surface. At the water's edge the wet sand is pocked with small burrow
+      holes and crossed by narrow furrowed trails. No plants of any kind: no grass, no moss, no shrubs, no trees,
+      no seaweed heaps. No animals on the land, no birds, no footprints. No ice and no snow.
+    leaves_out:
+      geography-passive-margin: A tectonic setting, not a sight.
+      geography-pole-under-north-africa: The continent lies behind the camera.
+      sky-short-day-and-nearer-moon: A still cannot show the length of the day; the Moon is not placed.
+  p03:
+    prompt: >-
+      An equatorial coastal plain 291 million years ago, in the Early Permian, in late morning under a high
+      tropical sun. Utterly flat land a metre or two above a shallow sea, which lies along one side of the view
+      behind pale flats of lime mud cracked into polygons. No rivers, no valleys, no hills. Shallow rain ponds
+      about a hundred metres long lie in hollows; some are full, others have dried to cracked mud. The soil
+      between plants is reddish-brown silty clay dotted with pale lime nodules. Open woodland in patches: stands of
+      walchian conifers, small trees with stiff whorled branches like a Norfolk Island pine, the trees standing
+      well apart; and separate patches of low, tough-leaved seed ferns. Here and there a patch of burnt ground with
+      charred trunks. No grass, no flowers, no broad-leaved trees, no palms, no mountains, no people, no buildings.
+    leaves_out:
+      geography-shelf-flooded-and-bared: The sea came and went many times; the picture shows one state, the sea out.
+      geography-lowland-to-the-east: Beyond the view.
+      water-ponds-and-burrowers: The ponds are in; the animals in them are too small to see from 300 m.
+      cover-bisaccate-pollen: Pollen is not seen; the plants that shed it are in.
+      weather-seasonal-wet-and-dry: Which season December was is unknown; ponds both full and dried are shown.
+  p04:
+    prompt: >-
+      The shore of a shallow salt lake in an arid land 124 million years ago, in the Early Cretaceous, at noon
+      under a hot, hard sun. Low, level ground. The lake is still, shallow and without surf, and has shrunk back
+      from its margin, leaving wide flats of dark, organic mud split by mudcracks, crusted in places with white
+      gypsum and salt. In the shallows, low rounded domes of stromatolite and sheets of microbial mat. A scatter of
+      dead fish, dozens together, lies stranded at the water's edge. The ground is open and in full sun, with very
+      few plants: sparse low shrubs and herbs near the water, small water plants with kidney-shaped leaves floating
+      at the very edge, and, in the middle distance, a thin line of conifers along a stream that feeds the lake,
+      trees with cypress-like scale leaves on stout shoots. Heat shimmer over the flats. No forest, no rainforest,
+      no grass, no palms, no flowering trees, no dinosaurs, no birds, no people.
+    leaves_out:
+      water-braided-river-phase: Another stage of the same ground; the picture shows the lake.
+      substrate-gypsum-sabkha: The lake's driest stage; gypsum crusts on the dried margin stand for it.
+      cover-dry-country-plants-by-pollen: Pollen counts; the plants are in.
+      life-later-dinosaurs-of-the-river-plain: Later than this moment.
+  p05:
+    prompt: >-
+      A lowland in southern Australia 23 million years ago, at noon in winter, the sun low in the northern sky
+      behind the camera, the air cool and damp under broken cloud. A dead-flat plain to the horizon, with no hill or rise anywhere: the forest canopy
+      makes one level line across the view. Evergreen forest and woodland cover the whole view: hard-leaved trees on the drier ground, darker
+      patches of rainforest in the hollows, with conifers among them, broad-crowned podocarps and a few
+      tall cypress-like trees, no spruces or firs. In
+      front, a wide, shallow freshwater lake, its edge fringed with sedges and rush-like plants, with forest coming
+      down to the fringe. The bare ground in the foreground is pale quartz sand and fine gravel. Flamingos wade in
+      the shallows and ducks float on the water; a large crocodile with a deep, broad snout lies at the water's
+      edge. At the forest edge, two heavy four-footed marsupial browsers the size of a large pig, like giant
+      wombats with longer legs. No grass and no grassland, no desert, no open plain, no people, no buildings.
+    leaves_out:
+      substrate-lateritic-weathering: Under the forest; not in sight.
+      life-koalas-possums-and-a-forest-eagle: Small animals in the canopy, too small for this frame.
+      life-waterbirds-turtles-crocodiles-at-water: Flamingos, waterfowl and a crocodile are in; turtles, rails and fish are too small to ask for.
+  p06:
+    prompt: >-
+      An upland in northern China 13 million years ago, in the Middle Miocene, on an October afternoon with the sun
+      in the west, to the right. A wide, gently sloping plain of low relief to the horizon in every direction, with
+      no mountains on the skyline. Bedrock sandstone shows at the surface in low ledges, with thin stony soil
+      between. Open steppe: low grey-green sagebrush and salt-tolerant shrubs, with jointed leafless Ephedra
+      bushes, and here and there a small stand of elm and birch trees. In the middle distance a shallow river
+      crosses the plain; beside it, a few shovel-tuskers (Platybelodon): elephant relatives that do not look like modern
+      elephants, each with a short trunk lying on a very long, flat lower jaw that juts forward like a shovel and
+      ends in two broad flat tusks side by side; a small herd of short-legged, pony-sized three-toed horses, and one hornless
+      rhinoceros. No loess cliffs, no yellow earth, no deep gullies, no terraces, no fields, no people, no
+      buildings.
+    leaves_out:
+      substrate-no-wind-blown-mantle: An absence; the prompt forbids loess and yellow earth.
+      substrate-dust-soils-to-the-west: 160 km away.
+      substrate-maroon-floodplain-muds: Of the basins, not this upland.
+      life-kubanochoerus: An animal of woodland clearings; left out of an open view rather than crowd it.
+      life-pliopithecus-in-trees: Too small to see, and needs woodland.
+      weather-dry-season-northerlies: October lies between the seasons; nothing is said of its sky.
+  p07:
+    prompt: >-
+      The foot of a mountain range in northern China 1.8 million years ago, in the Early Pleistocene, at one
+      o'clock on a cold, dry January day, with dust in the air from a wind blowing toward the camera. A long, old
+      mountain range closes the whole horizon ahead. Between the viewer and the range stands a belt of low flat-topped
+      hills and benches, a few hundred metres high, so the plain does not run smooth to the foot of the mountains. The ground in front is a gently sloping surface of reddish loam, cut by steep-sided gullies whose
+      walls show soft, bedded clays, silts and sands. Open country with trees: thin, scattered stands of pine and
+      spruce, with dry winter steppe of wormwood and low shrubs between them. Along a stream in one gully, leafless
+      poplars, willows and elms. A herd of large, stocky wild horses grazes in the middle distance, with a few early bison, heavy dark humped cattle, and some gazelles near them, and one two-horned rhinoceros far off. No people, no fields, no houses,
+      no paths, no smoke, no terraces, no yellow loess cliffs.
+    leaves_out:
+      water-no-lake-rivers-east: Behind the camera.
+      life-elephants-rare: Rare; left out.
+      life-rhinoceros-not-elasmotherium: The rhinoceros shown is two-horned, as the brief's Dicerorhinus; what it replaced is not a sight.
+      people-no-works: An absence; the prompt forbids works.
+  p08:
+    prompt: >-
+      Hill country in eastern Afghanistan about 6,500 years ago, at three in the afternoon in March at the end of a
+      hard winter, under broken storm cloud. Straight ahead a very high mountain range runs across the whole
+      horizon, ridge behind ridge, its entire crest white with snow; below the snow its lower ranges are dark,
+      almost black, with conifer forest. In front, low rounded hills of crumbling sandstone capped with
+      conglomerate, cut by ravines; the ground between them is sandy and strewn with rounded stones and boulders.
+      The hills carry evergreen oak forest, trees up to fifteen metres tall in full dark leaf, with undergrowth
+      and with wild almond and pistachio trees among them. In a ravine, a river runs reddish with silt in a narrow
+      bed, joined by a small clear stream; reeds, tall plume grass and willows crowd the wet places. A few
+      partridges on the stony ground, ravens and one large vulture overhead, and three wild asses on a far slope.
+      No buildings, no fields, no roads, no terraces, no people.
+    leaves_out:
+      cover-forest-before-clearing: A comparison with today; the forest is in.
+      cover-green-by-late-march: Said of sown grain at Gandamak in the nineteenth century; no field is shown here.
+      people-neolithic-toolkit: The brief says only what people would carry if any were in sight; none are placed.
+      people-early-village-across-the-range: Across the range, out of sight.
+  p09:
+    prompt: >-
+      The southern Sahara in the fifth century, at eleven in the morning in August, the short rainy season, very
+      hot. Nearly level ground to a far, flat horizon, with no scarp and no dunes. The sky is not clear blue: a
+      thin pale haze of fine dust whitens it. In front lies the floor of a wadi, a flat alluvial plain a kilometre
+      wide with no banks, covered with a continuous short green turf of young annual grass, dotted with a few low
+      thorn acacias two to three metres tall and with small shallow rain puddles on smooth silt. Beyond it the
+      open desert plain is bare coarse sand and pebbles with almost no plants. Far apart on the plain stand a few
+      low outcrops of granite, coated black and shiny with desert varnish. A herd of pale dama gazelles grazes on
+      the green flat, with a few scimitar-horned oryx and one ostrich. In the distance, two riders on slender
+      horses, their heads and lower faces veiled, each carrying several javelins, and one man riding a dromedary.
+      No river, no lake, no cattle, no buildings, no tents, no roads, no woodland.
+    leaves_out:
+      weather-afternoon-storms: Late in the day; at eleven the sky has not begun to cloud.
+      weather-august-rain-heat: Monthly figures; the heat and the puddles stand for them.
+      life-game-engraved: Gazelles, oryx and an ostrich are in; giraffe is left out of this frame.
+      water-arid-no-rivers: An absence; the prompt forbids river and lake.
+  p10:
+    prompt: >-
+      The Earth in December of the year 1090, centred on northern France: Europe in the middle of the disc, North
+      Africa below it, the North Atlantic to the left, western Asia to the right, Greenland at the upper left. It
+      is mid-afternoon over France, so the sun lights the disc from the south-west and night is falling over Asia
+      at the right-hand limb. Seasonal snow whitens the northern lands, Scandinavia, Russia and eastern Europe,
+      and reaches unusually far south, to the Balkans and the land round the Bosphorus. Greenland is white inland
+      ice with only a thin bare strip along its coast. The sea north of Iceland is open dark water with little sea
+      ice. Thick bands of frontal cloud lie over the North Atlantic and Europe; the sky over the Sahara and Arabia
+      is clear. The Sahara is bare tan and ochre desert with no green. Where cloud and snow leave it open, central
+      Europe is dark with broad forest and western Europe a lighter patchwork of field and pasture; the steppe
+      north of the Black Sea is open and treeless. No city lights, no borders, no place names, no aircraft trails.
+    leaves_out:
+      polity-france-england-normandy: A state is not seen from orbit, and the model is not asked for labels.
+      polity-western-empire: As above.
+      polity-byzantium: As above.
+      polity-seljuk-and-fatimid: As above.
+      polity-almoravids-and-spain: As above.
+      polity-rus-and-polovtsy: As above.
+  p11:
+    prompt: >-
+      The Nubian Desert in the fifteenth century, at two in the afternoon in July, the hottest time of the year. A
+      wide, nearly level plain: a patchwork of dark gravel sheets and pale sand, with no plants on it. Isolated
+      ranges of dark granite hills, jagged in outline and no more than three hundred metres high, stand on the
+      plain; white quartz veins show against the dark rock, and in one place a dark raised ring of rock encloses a
+      circular hollow. Two or three shallow dry watercourses cross the plain, each marked only by a thin, broken
+      line of sparse, thin-crowned acacia trees. Beside one of them, a small camp of four low tents of dark woven
+      hair, with a dozen camels and a few sheep. On one hillside, the ruins of a cluster of small round dry-stone
+      huts beside shallow trenches. The horizon is bleached white by heat and blurs into the plain, and toward it
+      lie mirages like sheets of blue water. No real water, no river, no village, no fields, no roads, no vehicles.
+    leaves_out:
+      weather-july-heat: Monthly figures; the bleached sky and mirage stand for them.
+      relief-sandy-flat-far-mountains: The high mountains are behind the camera.
+      life-few-animals-crows: Crows are too small to see from 300 m.
+  p12:
+    prompt: >-
+      The Tihama, the coastal plain of Yemen, in July 1887 at two in the afternoon: fierce heat, and a hot wind
+      driving sand through the air so that the far distance is veiled in a dun haze and no mountains can be seen.
+      The sky is clouding over, with cumulus building. The view is at the edge of an irrigated inland delta. To the
+      left, fields flooded with brown water held between narrow earth banks; beyond them, pearl millet and sorghum
+      standing nearly three metres tall like a green wall, with a few date palms above the crop, and a field of low
+      cotton bushes in yellow flower. To the right, a loose sandy plain dotted with tamarisk, low acacia bushes and
+      the broad grey-green leaves of Calotropis, with patches of coarse grass. Where sand meets field, a small
+      hamlet of round huts with conical thatched roofs, small black-and-white storks standing on the roofs. On the
+      field banks, a few Yemeni peasant men in conical straw hats, each with a sword at his side and a short lance,
+      cutting an opening in a bank to let the water through. A hare runs from under an acacia in the foreground.
+      No river, no tents, no stone buildings, no roads, no telegraph poles, no vehicles.
+    leaves_out:
+      relief-mountains-east-veiled: An absence; the haze that hides the mountains is in.
+      water-spate-only: An absence; the prompt forbids a river.
+      people-herders-mat-huts-not-tents: Mat huts of herders are left out of a crowded frame; tents are forbidden.

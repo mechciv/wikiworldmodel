@@ -1,0 +1,312 @@
+# The first round's verdicts (docs/plans/VISUAL-GAPS.md, section 3.5): each item of each brief, held to the viewer's
+# picture of the same view (dist/gaps/1/drawn/) and to what the viewer said of it (drawn.json). They are a machine's
+# judgements of pictures, made once and by one reader: proposed, and for a person to overrule.
+#
+#   drawn             the viewer shows it
+#   wrong             it is there, or the world answers it, and not as the source says
+#   missing-held      the world holds the evidence and the scene does not draw it
+#   missing-not-held  the evidence exists and the world does not hold it
+#   no-layer          nothing in the world could say it yet
+#   untested          said of the region or of another moment: this one frame cannot show whether the viewer has it
+#
+# `owner` is what would have to change: a generator, a model, a field or a dataset by its id, or, where there is no
+# layer, the layer that is missing, in words.
+#
+# Corrected 2026-11-20, after the code behind each gap was read (docs/plans/PARITY.md, section 6): one verdict (p01's
+# ice), one owner (p11's olive ground) and six reasons. Where a reason now rests on a rebuild of the scene, it says so.
+author: machine:claude-code
+judged: "2026-11-19"
+points:
+  p03:
+    summary: >-
+      The viewer gets the lie of the land right: a level plain with no river and an open stand of conifers under a high
+      sun. What it lacks is everything the Kansas rocks say stood on that plain: ponds in the hollows, red soil with
+      lime nodules, and plants in patches of one kind.
+    items:
+      geography-shelf-flooded-and-bared: { verdict: drawn, owner: "field:earth/elevation", why: "Level land to the horizon; the shelf's flooding and baring within the stage is finer than the keyframes." }
+      geography-lowland-to-the-east: { verdict: drawn, owner: "field:earth/elevation", why: "No mountains in sight." }
+      relief-flat-coastal-plain: { verdict: drawn, owner: "field:earth/elevation", why: "Flat, with low swells; the build has it 130 m above the sea where the rocks say a metre or two, which the frame does not show." }
+      water-no-river-channels: { verdict: drawn, owner: "model:earth/drainage", why: "The drainage model has no river here, as the rocks say." }
+      water-ponds-and-burrowers: { verdict: no-layer, owner: "standing water from the rock record (no layer)", why: "No pond anywhere; the atlas lists the pond's animals (Brachydectes, lungfishes) with no water to put them in." }
+      substrate-red-soils-caliche: { verdict: no-layer, owner: "substrate (no layer)", why: "The ground is one khaki surface, coloured by the climate class; nothing says what it is made of." }
+      substrate-evaporite-flats: { verdict: no-layer, owner: "substrate (no layer)", why: "No pale flats or cracked mud." }
+      cover-rooted-vegetation: { verdict: drawn, owner: "gen:life/scene", why: "Plants cover a good part of the plain." }
+      cover-bisaccate-pollen: { verdict: drawn, owner: "gen:life/scene", why: "The trees are conifers." }
+      cover-conifers-and-peltasperms: { verdict: wrong, owner: "gen:life/scene", why: "Conifers and peltasperms are mixed stem by stem over the whole plain, not patches each of one kind; the peltasperms are drawn (a fifth of the stems, by a rebuild of the scene) and cannot be told from the conifers in the frame." }
+      cover-open-woodland: { verdict: drawn, owner: "gen:life/scene", why: "Trees stand apart, of the order of a hundred to the hectare." }
+      cover-fire-charcoal: { verdict: no-layer, owner: "disturbance: fire (no layer)", why: "No burnt ground." }
+      weather-seasonal-wet-and-dry: { verdict: untested, owner: "weather and season (no layer)", why: "No source says which months were wet, so December cannot be held to it." }
+      sky-high-tropical-sun: { verdict: drawn, owner: "renderer", why: "Short shadows under a high sun." }
+  p04:
+    summary: >-
+      The largest gap of the round. The viewer draws a rainforest of tall conifers on ground 632 m up. The rocks 15 km
+      away say a salt lake in a low basin under an arid sky, with scarce low plants and conifers only along the
+      streams. The climate field is the root: its wet tropics put a forest where the gypsum says desert.
+    items:
+      relief-lake-basin-reached-by-sea: { verdict: wrong, owner: "field:earth/elevation", why: "Level in the frame, but the build has it 632 m up where the sea at times came into the lake." }
+      water-shallow-salt-lake: { verdict: no-layer, owner: "standing water from the rock record (no layer)", why: "No lake: water is only what the drainage model routes, and it routes nothing here." }
+      water-braided-river-phase: { verdict: untested, owner: "model:earth/drainage", why: "A stage of the same ground at another moment." }
+      substrate-dark-mud-gypsum: { verdict: no-layer, owner: "substrate (no layer)", why: "The ground is bare tan soil; no mud, cracks or gypsum." }
+      substrate-gypsum-sabkha: { verdict: no-layer, owner: "substrate (no layer)", why: "No salt flat." }
+      substrate-stromatolite-domes: { verdict: no-layer, owner: "standing water from the rock record (no layer)", why: "No shallows to hold them." }
+      weather-arid-little-rain: { verdict: wrong, owner: "field:earth/climate", why: "The climate field answers rainforest (aridity index 3.4) where clay minerals give under 250 mm of rain." }
+      weather-hot-strong-evaporation: { verdict: untested, owner: "field:earth/climate", why: "The field's 27 to 31 °C is hot, as the source says; nothing in a frame shows evaporation." }
+      cover-dry-country-plants-by-pollen: { verdict: wrong, owner: "gen:life/scene", why: "A moist forest of conifers and tree ferns; the joint firs on the atlas's list are not drawn, and cheirolepid conifers are not on it." }
+      cover-open-low-growth-conifers-on-banks: { verdict: wrong, owner: "model:earth/biome-from-climate", why: "Tall trees everywhere, where the fossils say open ground in full sun with conifers only along stream banks." }
+      cover-scale-leaved-conifers: { verdict: wrong, owner: "forms: conifers", why: "The conifers are tiered, spruce-like bodies, not scale-leaved shoots like a cypress's." }
+      cover-small-water-plants: { verdict: missing-held, owner: "gen:life/scene", why: "Nymphaeites is on the atlas's list here and is not drawn: there is no water for it." }
+      life-fish-and-die-offs: { verdict: no-layer, owner: "standing water from the rock record (no layer)", why: "No lake, so no fish." }
+      life-later-dinosaurs-of-the-river-plain: { verdict: untested, owner: "model:life/atlas", why: "Of a later stage; the atlas lists Amazonsaurus here already, which the source puts on the later river plain." }
+  p06:
+    summary: >-
+      The low, unbroken skyline is right. The cover is the question: the viewer draws a broadleaf woodland over grass,
+      close to one of the two nearest pollen records and far from the other, which says sagebrush steppe. None of the
+      large animals the atlas lists here is in sight.
+    items:
+      relief-planation-surface: { verdict: drawn, owner: "field:earth/elevation", why: "Low relief to the horizon, with no tablelands or gullies." }
+      relief-no-liupan-range: { verdict: drawn, owner: "field:earth/elevation", why: "No mountain front on the skyline." }
+      substrate-no-wind-blown-mantle: { verdict: no-layer, owner: "substrate (no layer)", why: "A brown soil of no stated kind." }
+      substrate-sandstone-bedrock: { verdict: no-layer, owner: "substrate (no layer)", why: "No rock shows." }
+      substrate-dust-soils-to-the-west: { verdict: untested, owner: "substrate (no layer)", why: "Of ground 160 km away." }
+      substrate-maroon-floodplain-muds: { verdict: untested, owner: "substrate (no layer)", why: "Of basins 150 km away." }
+      water-rivers-and-lakes-east-of-liupan: { verdict: untested, owner: "model:earth/drainage", why: "Of low ground 130 km away; no source says a river crossed this spot, and the model has none." }
+      cover-steppe-sagebrush-saltbush: { verdict: wrong, owner: "model:life/atlas", why: "A woodland, not open steppe; the atlas's plants are a humid forest flora from basins 200 km off, with no sagebrush, goosefoot, Nitraria or Ephedra." }
+      cover-elm-and-birch-stands: { verdict: drawn, owner: "gen:life/scene", why: "Broadleaf stands over grass, drawn with the generic flowering-plant body." }
+      life-platybelodon: { verdict: missing-held, owner: "gen:life/scene", why: "Ten are in the frame, by a rebuild of the scene, the nearest 582 m off: a few pixels each, and not to be seen." }
+      life-kubanochoerus: { verdict: missing-held, owner: "gen:life/scene", why: "In the scene somewhere, with the generic pig's body and no horn; none in sight." }
+      life-platybelodon-fauna: { verdict: missing-held, owner: "gen:life/scene", why: "Rhinoceroses and Stephanocemas are on the list and not drawn; no animal is in sight." }
+      life-pliopithecus-in-trees: { verdict: missing-held, owner: "gen:life/scene", why: "Listed and placed, but nothing is in the trees." }
+      weather-dry-season-northerlies: { verdict: no-layer, owner: "weather and season (no layer)", why: "A clear sky with made-up cloud; nothing of wind, dust or the season." }
+  p07:
+    summary: >-
+      A flat green plain where the sources put a gullied piedmont under a mountain front. Before 800,000 years ago the
+      viewer falls back from today's ground to a 1° relief, and the Taihang goes with it. The plain is green in January,
+      and the horses and bison the atlas lists are nowhere in sight.
+    items:
+      relief-taihang-range: { verdict: missing-held, owner: "field:earth/elevation", why: "A level horizon: today's ground, which has the Taihang, is not carried back to 1.83 Ma, where a 1° relief answers." }
+      relief-foothill-surfaces: { verdict: missing-held, owner: "field:earth/elevation", why: "No hills or benches between the eye and the horizon." }
+      relief-gullied-piedmont: { verdict: no-layer, owner: "landforms below the relief's grid (no layer)", why: "No gullies or trenches; the plain is one smooth surface." }
+      substrate-uplifted-lake-beds: { verdict: no-layer, owner: "substrate (no layer)", why: "A grey-brown mud of no stated kind." }
+      water-no-lake-rivers-east: { verdict: wrong, owner: "model:earth/drainage", why: "No lake, as the source says, but no river either, where rivers left the range across this piedmont." }
+      substrate-red-loam: { verdict: no-layer, owner: "substrate (no layer)", why: "No reddish loam." }
+      cover-open-conifer-steppe: { verdict: drawn, owner: "gen:life/scene", why: "Open ground with stands of conifers at a distance; the low cover is lush green, where the source says steppe under a cold, dry climate." }
+      cover-riverside-trees: { verdict: missing-held, owner: "gen:life/scene", why: "Willow, poplar and elm are on the atlas's list and not drawn; there is no river to line." }
+      life-horses: { verdict: missing-held, owner: "gen:life/scene", why: "Twenty-three horses are in the frame, by a rebuild of the scene, 334 to 500 m off and five pixels long; nothing stands within 100 m, so no animal is to be seen on an open plain." }
+      life-bison-gazelle-sheep: { verdict: missing-held, owner: "gen:life/scene", why: "Bison and gazelle are listed and placed; none in sight." }
+      life-rhinoceros-not-elasmotherium: { verdict: wrong, owner: "model:life/atlas", why: "Elasmotherium is listed as recorded here, from a row dated only 2.58 to 0.129 Ma; the dated sequence has it gone before this moment." }
+      life-elephants-rare: { verdict: untested, owner: "model:life/atlas", why: "Rare, so its absence from one frame says nothing." }
+      people-no-works: { verdict: drawn, owner: "model:people/lifeways", why: "Nothing built or planted." }
+      weather-winter-monsoon: { verdict: no-layer, owner: "weather and season (no layer)", why: "Fair-weather cloud in a blue sky and green growth in January; nothing of the cold, the wind or the dust." }
+  p01:
+    summary: >-
+      Little of this brief can be tested from orbit: the sources give no outlines, so most of what they say (a nearer
+      Moon, a shorter day, a shelf sea on one craton) is not in a still frame. What can be tested: the land is rightly
+      bare of green, there is less of it than the isotopes imply, and no ice shows though the world holds a glaciation
+      close to this date.
+    items:
+      sky-sun-fainter: { verdict: missing-held, owner: "renderer: the globe's light", why: "The disc is as bright as today's; the world holds the Sun's brightening (model:sun/gough-1981) and the picture does not follow it." }
+      sky-moon-nearer: { verdict: untested, owner: "the Moon (no layer)", why: "No Moon is in the frame, and the viewer draws none." }
+      sky-day-shorter: { verdict: untested, owner: "earth/day-length", why: "The world holds the day-length records; a still cannot show them." }
+      geography-large-emerged-land: { verdict: wrong, owner: "gen:earth/generic-land", why: "A water world with a few pale islands, where the isotopes imply land in about the later proportion." }
+      geography-low-latitude-cratons: { verdict: untested, owner: "gen:earth/generic-land", why: "Of 170 to 250 million years earlier." }
+      geography-kaapvaal-mid-high-latitude: { verdict: missing-not-held, owner: "records: where the cratons lay before the plate model reaches", why: "No craton is placed; the land is generic and says so." }
+      ice-glaciers-reach-the-sea: { verdict: missing-not-held, owner: "records: the Paleoproterozoic glaciations after the Makganyene", why: "No ice shows. The world's one glaciation of the era (earth/events/makganyene-glaciation) ends, by its preferred dates, before 2,425 Ma and is rightly not drawn at 2,258 Ma; the brief's ice is a later one, which the world does not hold." }
+      weather-cooling-climate: { verdict: untested, owner: "model:earth/energy-balance", why: "Not a thing a frame shows." }
+      water-shelf-sea-with-deltas: { verdict: untested, owner: "gen:earth/generic-land", why: "Of one basin on a craton the globe does not place." }
+      water-iron-rich-shallows: { verdict: untested, owner: "ocean colour (no layer)", why: "The source gives no colour." }
+      water-green-tint: { verdict: no-layer, owner: "ocean colour (no layer)", why: "The sea is today's deep blue at every age; nothing ties its colour to its chemistry." }
+      substrate-red-iron-at-the-shore: { verdict: untested, owner: "substrate (no layer)", why: "Too fine to see from orbit." }
+      relief-lava-plains-soon-after: { verdict: untested, owner: "gen:earth/generic-land", why: "Later than this date." }
+      cover-no-plants: { verdict: drawn, owner: "gen:earth/generic-land", why: "The land is pale grey, with no green." }
+  p02:
+    summary: >-
+      Bare ground, no plants, no animals, no ice: the viewer's empty Ordovician land agrees with every source. The one
+      disagreement is underneath it: the nearest rocks of this age are shallow-marine, so this was more likely sea.
+    items:
+      geography-passive-margin: { verdict: untested, owner: "field:earth/elevation", why: "A setting, not a sight." }
+      geography-pole-under-north-africa: { verdict: untested, owner: "field:earth/elevation", why: "Not in an eye-level frame." }
+      relief-low-undulating-platform: { verdict: drawn, owner: "field:earth/elevation", why: "Level ground with no mountains." }
+      substrate-quartz-sand: { verdict: no-layer, owner: "substrate (no layer)", why: "Bare brown ground of no stated kind; it could be sand or soil." }
+      water-rivers-wide-sand-beds: { verdict: untested, owner: "model:earth/drainage", why: "The model's one river is not in the frame." }
+      water-sandy-coast-deltas-tidal-flats: { verdict: untested, owner: "field:earth/elevation", why: "No coast in view." }
+      water-shallow-sea-over-the-platform: { verdict: wrong, owner: "field:earth/elevation", why: "The build has land 230 m up; the nearest Tremadocian rocks, farther inland, are marine. An inference, not said of the place." }
+      life-burrows-and-trails-in-shore-sand: { verdict: untested, owner: "model:life/sea-atlas", why: "At the water's edge, which is not in view." }
+      cover-microbial-mats-and-crusts: { verdict: untested, owner: "model:earth/biome-from-climate", why: "The biome answers crust here; whether a crust would show is not known, and the ground is drawn bare." }
+      cover-no-land-plants: { verdict: drawn, owner: "model:life/atlas", why: "Nothing grows." }
+      life-no-land-animals: { verdict: drawn, owner: "model:life/atlas", why: "Nothing recorded, nothing drawn." }
+      ice-none-in-view: { verdict: drawn, owner: "field:earth/ice", why: "No ice." }
+      sky-short-day-and-nearer-moon: { verdict: untested, owner: "the Moon (no layer)", why: "A still shows neither the day's length nor a Moon." }
+  p05:
+    summary: >-
+      A level plain under evergreen woodland with no grass: the frame's structure matches the pollen. The trees are all
+      one broadleaf shape with nothing under them, no conifers stand among them, and the marsupials, koalas and eagle
+      the atlas places here are not to be seen.
+    items:
+      sky-low-northern-sun: { verdict: drawn, owner: "renderer", why: "Shadows of a sun well under halfway up." }
+      relief-peneplain: { verdict: drawn, owner: "field:earth/elevation", why: "A plain of very low relief." }
+      substrate-quartz-sand-and-grit: { verdict: no-layer, owner: "substrate (no layer)", why: "Bare tan ground of no stated kind, without sand or gravel." }
+      substrate-lateritic-weathering: { verdict: no-layer, owner: "substrate (no layer)", why: "No iron-stained soil." }
+      water-seasonal-lakes: { verdict: untested, owner: "standing water from the rock record (no layer)", why: "Of lakes 800 km away; no source puts water in this view." }
+      cover-sclerophyll-with-rainforest-patches: { verdict: drawn, owner: "gen:life/scene", why: "Evergreen woodland over the whole view; no darker patches in hollows." }
+      cover-forest-round-sedge-lined-water: { verdict: untested, owner: "gen:life/scene", why: "There is no water in view." }
+      cover-no-grassland: { verdict: drawn, owner: "gen:life/scene", why: "No grass; the ground under the trees is wholly bare." }
+      cover-conifers-among-the-trees: { verdict: missing-not-held, owner: "model:life/atlas", why: "Every tree is a broadleaf; the atlas has only stand-in plants here, and the fossil wood near Boulia is not in it." }
+      weather-cool-moist-winter: { verdict: no-layer, owner: "weather and season (no layer)", why: "A fair sky over dry ground in the wet season." }
+      life-large-marsupial-browsers: { verdict: missing-held, owner: "gen:life/scene", why: "Ngapakaldia and Ilaria are listed and placed; none is in sight. The list also has rhinoceroses as stand-ins on a continent of marsupials." }
+      life-waterbirds-turtles-crocodiles-at-water: { verdict: untested, owner: "gen:life/scene", why: "There is no water in view." }
+      life-koalas-possums-and-a-forest-eagle: { verdict: missing-held, owner: "gen:life/scene", why: "Litokoala and Archaehierax are listed and placed; nothing is in the trees or the air." }
+      life-baru-in-the-rivers: { verdict: missing-held, owner: "gen:life/scene", why: "Baru is listed as recorded here and not drawn: there is no water for it." }
+  p08:
+    summary: >-
+      The viewer draws a flat park of scattered trees where a traveller on this road saw crumbling sandstone hills cut
+      by ravines, a red river, and the wall of the Safed Koh white with snow thirty kilometres south. Today's ground
+      holds all of that relief, and the scene does not show it.
+    items:
+      relief-safed-koh-wall: { verdict: missing-held, owner: "field:earth/elevation", why: "A low wooded ridge on the skyline where a 4,700 m range should close the view; the ground of today is held and the scene flattens it." }
+      substrate-sandstone-conglomerate: { verdict: no-layer, owner: "substrate (no layer)", why: "Smooth brown ground, without hills of soft rock, stones or boulders." }
+      water-red-river-clear-streams: { verdict: missing-not-held, owner: "src:grwl-summary-v01.02", why: "The scene's only river is 22 km behind the camera: the rivers dataset holds wide rivers only, and the Surkhab is not one." }
+      ice-snow-on-the-range: { verdict: missing-held, owner: "field:earth/elevation", why: "No snow: nothing in view rises to the snow line the scene works out." }
+      weather-end-of-a-hard-winter: { verdict: no-layer, owner: "weather and season (no layer)", why: "A cloudless sky in the season of rain and storms." }
+      cover-evergreen-oak-forest: { verdict: wrong, owner: "gen:life/scene", why: "Scattered trees over grass tufts, with tall conifers on the valley floor; the belt at this height is oak with undergrowth, and the conifers belong higher." }
+      cover-conifers-on-the-range: { verdict: missing-held, owner: "gen:life/scene", why: "The trees do not change with height; there is no range for a dark conifer belt to stand on." }
+      cover-forest-before-clearing: { verdict: drawn, owner: "gen:life/scene", why: "Trees to the horizon, uncleared." }
+      cover-reeds-in-the-ravines: { verdict: missing-held, owner: "gen:life/scene", why: "Typha is on the atlas's list and not drawn; there is no ravine or water." }
+      cover-green-by-late-march: { verdict: drawn, owner: "gen:life/scene", why: "Green growth on the ground." }
+      life-partridges-ravens-vultures: { verdict: missing-held, owner: "gen:life/scene", why: "Alectoris is listed and placed; no bird or animal is in sight." }
+      life-wild-ass: { verdict: missing-not-held, owner: "model:life/atlas", why: "No wild ass on the list; a bison stands in, and the list has petrels, shearwaters and a river dolphin for a mountain valley." }
+      people-neolithic-toolkit: { verdict: untested, owner: "gen:people/settlement", why: "No one is in sight." }
+      people-early-village-across-the-range: { verdict: untested, owner: "model:people/lifeways", why: "Of a village across the range. The viewer has foragers' shelters here, 470 of them, none in the frame; no source read says who lived in this valley." }
+  p09:
+    summary: >-
+      Empty sand under a clear sky, which is nearly right for a late-morning in the desert. It is too empty: no pebbles,
+      no acacia, no gazelle, and of the herders only tents as specks on the horizon. The atlas's list for the place is
+      the green Sahara's, hippopotamus and crocodile, six thousand years out of date.
+    items:
+      sky-dust-haze: { verdict: no-layer, owner: "weather and season (no layer)", why: "A clear deep blue; no dust haze." }
+      weather-afternoon-storms: { verdict: drawn, owner: "gen:earth/clouds", why: "A sky not yet clouded at 11:00." }
+      weather-august-rain-heat: { verdict: untested, owner: "field:earth/climate-late-quaternary", why: "The field's months agree with Kidal's; a frame does not show them." }
+      relief-plain-no-break: { verdict: drawn, owner: "field:earth/elevation", why: "Level to a far horizon." }
+      substrate-varnished-rock: { verdict: untested, owner: "substrate (no layer)", why: "Whether an outcrop stands in this view is not known." }
+      substrate-reg-and-silt: { verdict: no-layer, owner: "substrate (no layer)", why: "One smooth pale surface, with no pebbles and no silt flats." }
+      water-rain-pools: { verdict: untested, owner: "model:earth/drainage", why: "The model's two rivers are not in the frame; whether the camera stands in a wadi is not known." }
+      water-arid-no-rivers: { verdict: drawn, owner: "model:earth/drainage", why: "No water in view." }
+      cover-rainy-season-grass: { verdict: untested, owner: "gen:life/scene", why: "The green is of the wadi flats, and the camera may not stand in one." }
+      cover-bare-sparse-acacia: { verdict: drawn, owner: "gen:life/scene", why: "Bare ground; not one acacia, and the list's stand-in trees are conifers." }
+      life-game-engraved: { verdict: wrong, owner: "model:life/atlas", why: "The list is one for the whole Holocene: hippopotamus, crocodile, kob and Nile fishes of the green Sahara stand beside the gazelle and ostrich of 475." }
+      life-rainy-season-herds: { verdict: missing-held, owner: "gen:life/scene", why: "Gazella is on the list and none is placed: the generator keeps animals of open ground off ground barer than 0.7, and a desert's is 0.92." }
+      people-horse-camel-herders: { verdict: no-layer, owner: "people and their animals (no layer)", why: "The specks on the horizon are not tents, which stood 15 km off and more: by a rebuild of the scene they are the fossil list's Homo sapiens, placed as wild animals. The herders the people layer holds, their horses and their camels are not drawn." }
+      people-veiled-javelin-men: { verdict: no-layer, owner: "people and their animals (no layer)", why: "No person is drawn." }
+  p10:
+    summary: >-
+      The globe's best showing. Every state the chronicles of 1090 name is drawn and labelled, Greenland's ice and the
+      desert are right, and the cloud lies where cloud lies. What is missing is the land under the states' colours:
+      Europe's fields and forests, and December's snow.
+    items:
+      cover-europe-forest: { verdict: missing-held, owner: "field:people/anthromes", why: "Europe is one dull green under the states' fills; the land use the world holds is not in the globe's own picture." }
+      cover-sahara-desert: { verdict: drawn, owner: "model:earth/biome-from-climate", why: "Bare desert." }
+      cover-pontic-steppe: { verdict: untested, owner: "model:earth/biome-from-climate", why: "Under a state's fill and cloud." }
+      weather-cloud-bands: { verdict: drawn, owner: "gen:earth/clouds", why: "Cloud over the North Atlantic and Europe, clear over the Sahara." }
+      ice-snow-december: { verdict: missing-held, owner: "renderer: the globe's seasonal snow", why: "No snow on the northern lands in December; the months' climate is held, and the globe draws ice sheets and sea ice only." }
+      ice-snow-thrace-1090: { verdict: no-layer, owner: "weather of a year (no layer)", why: "Nothing holds the weather of one winter." }
+      ice-greenland-inland-ice: { verdict: drawn, owner: "field:earth/ice", why: "White inland ice with a bare coastal strip." }
+      ice-sea-ice-iceland: { verdict: drawn, owner: "field:earth/ice", why: "Open water north of Iceland." }
+      polity-france-england-normandy: { verdict: drawn, owner: "src:cliopatria-0.2.1", why: "France and England are each drawn; Normandy is not apart from France." }
+      polity-western-empire: { verdict: drawn, owner: "src:cliopatria-0.2.1", why: "The Holy Roman Empire, named, with Italy." }
+      polity-byzantium: { verdict: drawn, owner: "src:cliopatria-0.2.1", why: "Drawn and named; the Patzinaks and Tzachas of that winter are finer than its steps." }
+      polity-seljuk-and-fatimid: { verdict: drawn, owner: "src:cliopatria-0.2.1", why: "The Great Seljuk Empire and the Fatimid Caliphate, named." }
+      polity-almoravids-and-spain: { verdict: drawn, owner: "src:cliopatria-0.2.1", why: "The Almoravid Dynasty, named, and Spain in several pieces." }
+      polity-rus-and-polovtsy: { verdict: drawn, owner: "src:cliopatria-0.2.1", why: "Kievan Rus', named, with the Kipchaks on the steppe." }
+  p11:
+    summary: >-
+      Two flat tints with nothing on them. Burckhardt crossed this desert past granite hills, gravel sheets and lines
+      of acacia along dry wadis; the viewer shows none of them, tints most of the bare ground as if plants covered it,
+      and its list for 1482 has elephant, giraffe and rhinoceros.
+    items:
+      sky-heat-whitened-horizon: { verdict: untested, owner: "renderer", why: "The camera looks down; almost no sky is in the frame." }
+      sky-mirage-lakes: { verdict: no-layer, owner: "heat and haze (no layer)", why: "No mirage." }
+      weather-july-heat: { verdict: untested, owner: "field:earth/climate-late-quaternary", why: "The field's warmest month is some 3 °C under Abu Hamed's; a frame does not show it." }
+      relief-sandy-flat-far-mountains: { verdict: drawn, owner: "field:earth/elevation", why: "A level plain." }
+      relief-granite-hills: { verdict: missing-held, owner: "field:earth/elevation", why: "No hill breaks the plain, where ranges stand 250 to 300 m above it; today's ground is held and the scene shows none of it." }
+      substrate-gravel-sand-low-jebels: { verdict: no-layer, owner: "substrate (no layer)", why: "Two smooth tints, with no gravel, rock or quartz." }
+      substrate-dark-rock-through-sand: { verdict: no-layer, owner: "substrate (no layer)", why: "No bedrock shows." }
+      water-dry-wadis-rain-strips: { verdict: missing-held, owner: "gen:life/scene", why: "The drainage model has three rivers in this scene; nothing marks one as a dry bed with its line of trees." }
+      cover-bare-plain-trees-in-wadis: { verdict: wrong, owner: "gen:people/settlement", why: "Bare of plants, rightly, but most of the ground is tinted olive: the herders' pasture, painted one green in any climate. No acacia stands along a wadi." }
+      life-few-animals-crows: { verdict: wrong, owner: "model:life/atlas", why: "Nothing is in sight, rightly; but the one Holocene list has elephant, giraffe and rhinoceros here in 1482, and the scene places elephants." }
+      people-beja-tents-no-villages: { verdict: drawn, owner: "gen:people/settlement", why: "Herders' tents only, no village or field; none falls in this frame." }
+      people-camel-herders: { verdict: no-layer, owner: "people and their animals (no layer)", why: "No camel, herd or person is drawn." }
+      people-summer-camps-at-wells: { verdict: missing-not-held, owner: "gen:people/settlement", why: "Camps are spread evenly; the wells and wadis they kept to are not held." }
+      people-old-gold-workings: { verdict: missing-not-held, owner: "records: medieval mining sites of the Nubian Desert", why: "No ruin is drawn, and no record of the workings is held." }
+  p12:
+    summary: >-
+      The best-documented point of the round: a botanist rode past it in August 1887 and wrote down what he saw. The
+      viewer has the plain and one flat green field. It has none of the rest: millet three metres tall, date palms,
+      flooded fields behind earth banks, conical huts, acacia scrub, a sky clouding for the afternoon storm.
+    items:
+      sky-afternoon-clouding: { verdict: no-layer, owner: "weather and season (no layer)", why: "A cloudless sky at 14:00 in the summer rains." }
+      relief-mountains-east-veiled: { verdict: drawn, owner: "field:earth/elevation", why: "No mountains show to the east; the horizon is sharp, though, with no haze to hide them." }
+      substrate-sandy-delta-edge: { verdict: no-layer, owner: "substrate (no layer)", why: "A smooth tan surface of no stated kind." }
+      cover-khabt-scrub: { verdict: missing-not-held, owner: "model:life/atlas", why: "Not one bush: the atlas is of fossils, and has only stand-in plants for a place whose living flora is described." }
+      cover-millet-walls: { verdict: wrong, owner: "gen:people/settlement", why: "A field is a flat green tint on the ground, with no crop standing on it and no palms." }
+      cover-cotton-july: { verdict: missing-not-held, owner: "building traditions: fields and crops", why: "Nothing says what was grown here." }
+      water-flooded-bunded-fields: { verdict: missing-not-held, owner: "building traditions: fields and crops", why: "No banks and no water on the fields: nothing holds how this land was watered." }
+      water-spate-only: { verdict: untested, owner: "model:earth/drainage", why: "The model's two rivers are not clearly in the frame." }
+      weather-july-hot-sand-wind: { verdict: no-layer, owner: "weather and season (no layer)", why: "Still, clear air." }
+      life-hares-in-acacia: { verdict: missing-held, owner: "gen:life/scene", why: "Lepus is on the atlas's list and none is placed: the rule that keeps animals of open ground off a desert's bare ground." }
+      life-abdims-stork-on-roofs: { verdict: missing-not-held, owner: "model:life/atlas", why: "No living bird of the place is held, and no roof is in sight to nest on." }
+      people-conical-huts: { verdict: missing-held, owner: "gen:people/settlement", why: "The scene has 5,222 houses in 753 hamlets and not one is in this frame; their form is a generic farmer's house." }
+      people-herders-mat-huts-not-tents: { verdict: wrong, owner: "building traditions: dwellings", why: "The herders' form is a felt tent; the Tihama's herders lived in mat huts, and no tradition is written for the place." }
+      people-peasants-straw-hats-armed: { verdict: no-layer, owner: "people and their animals (no layer)", why: "No person is drawn." }
+findings:
+  - title: No animal is in sight in any frame
+    text: >-
+      Twelve of the 20 gaps owed by the scene generator are animals the atlas lists and the scene says it placed,
+      with none visible in any eye-level view: horses and bison on an open plain, marsupials, koalas,
+      partridges. Animals of water (crocodiles, water plants, pond amphibians) are listed where the scene has no water
+      to put them in. The code says why: one group of each kind is set near a scene's arrival point, the round's
+      cameras stood 4 to 24 km from it, and elsewhere a herd is a knot a few hundred metres off, a few pixels wide.
+  - title: Nothing says what the ground is made of
+    text: >-
+      Every eye-level and aerial card has substrate items, 21 in all, and not one could be drawn: red soil with lime
+      nodules, quartz sand, gravel plains, gypsum flats, sandstone with boulders. The ground is one smooth surface
+      coloured by the climate class. It is the commonest gap after the scene generator's, and it has no layer.
+  - title: The far relief is lost in a scene
+    text: >-
+      Where today's ground is held, the scene still shows a flat plain: the Safed Koh thirty kilometres off, granite
+      hills in the Nubian Desert. Before 800,000 years ago the relief falls back to a 1° grid, and the Taihang front
+      goes missing at 1.83 Ma. In deep time the heights themselves disagree with the rocks: a salt lake the sea
+      entered is drawn 632 m up.
+  - title: The atlas's lists are too wide in time and space
+    text: >-
+      One list serves the whole Holocene, so the green Sahara's hippopotamus and crocodile are listed in 475 CE and
+      elephants are placed in the Nubian Desert of 1482. A row dated only to the whole Pleistocene puts Elasmotherium
+      where the dated sequence has it gone. Lists carried 2,200 km give a mountain valley petrels and a river dolphin.
+  - title: One climate field decided the worst card
+    text: >-
+      At the Aptian point the climate model's wet tropics make a rainforest; clay minerals 15 km away give under
+      250 mm of rain, a salt lake and a gypsum flat. The rock record near a point is evidence the scene does not read.
+  - title: The states are the layer that held
+    text: >-
+      All six items on the states of 1090 were drawn and named. The globe's own gaps were under them: no seasonal
+      snow, no land use in the default picture, and before any plate model, too little land and no ice.
+  - title: A third of the items could not be tested
+    text: >-
+      36 of 167 items were said of the region or of another moment, and one frame could not show whether the viewer
+      has them. The briefs were two-thirds regional (116 items to 51 said of the place) and left 108 things unknown,
+      nine a brief. A brief should ask for what is in this frame, and say plainly when nothing is known of it.
+  - title: What a brief cost
+    text: >-
+      Each took a researcher eight to thirteen minutes and about 200,000 tokens: some eighteen texts fetched and kept,
+      eight cited, and as many fetches refused (publishers, repositories and Gutenberg turned the script away). Every
+      quote of the 167 was found by script in the text it was read in.
+  - title: The sample
+    text: >-
+      Fossil weights put the deep-time points on real fossil districts. They also run through the Holocene, so a
+      point of 1482 was drawn by a fossil patch. The people's weight, a square root over 1° cells, chose three empty
+      landscapes and no town. The sampler named one place wrongly from its coordinates; the researcher corrected it.
+  - title: The expected pictures came after
+    text: >-
+      The verdicts were given against the briefs' lists, and the pictures were made afterwards by an image model
+      from prompts written from the briefs. The prompts asked for 117 of the 167 items; the pictures show 106 of
+      those, lack 7 and go against 4. What a picture adds is the larger matter: it answers the brief's unknowns
+      with the present, so extinct plants and animals come out as their living kin. Each card says what its
+      picture adds.

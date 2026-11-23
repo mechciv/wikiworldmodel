@@ -1,0 +1,253 @@
+view: t=1.830023Ma&lat=35.85822&lon=113.74450&d=1.0000023544&h=280&v=84&hour=13&mo=1&clock=0
+when: 1.83 Ma
+place: >-
+  The eastern foot of the Taihang mountains in what is now northern Henan, China (today about 35.91°N, 114.06°E,
+  between Linzhou and Hebi/Tangyin), on the piedmont at the western edge of the North China Plain; Early
+  Pleistocene (Gelasian), inside the Olduvai subchron. The camera looks west-north-west, toward the mountains.
+author: machine:claude-code
+expects:
+  - id: relief-taihang-range
+    layer: relief
+    what: >-
+      A mountain range closes the western horizon, the way the camera faces. The Taihang was already an old,
+      much-uplifted range by this time, not a young one still to rise.
+    reach: region
+    source:
+      cite: "Wu, L., Wang, F., Yang, J., Wang, Y., Zhang, W., Yang, L. & Shi, W. (published online 2019). Meso-Cenozoic uplift of the Taihang Mountains, North China: evidence from zircon and apatite thermochronology. Geological Magazine 157(7)."
+      url: https://www.cambridge.org/core/journals/geological-magazine/article/mesocenozoic-uplift-of-the-taihang-mountains-north-china-evidence-from-zircon-and-apatite-thermochronology/58123A0880BBF1C0C4375DDC1C5ED529
+      text: taihang-thermochron.txt
+      loc: "Abstract"
+      quote: "we suggest that the uplift of the Taihang Mountain Belt initiated during the Jurassic and experienced multiphase rapid uplift from the Cretaceous to the Cenozoic"
+    note: >-
+      Only the abstract could be read (the article is behind a login). Its samples are from the northern part of
+      the range, some hundreds of kilometres from this spot; its last rapid cooling phase is at 27 Ma. It says
+      nothing of how high the front stood at 1.83 Ma.
+  - id: relief-foothill-surfaces
+    layer: relief
+    what: >-
+      Between the viewer and the range, low flat-topped hills and benches: an old erosion surface cut across the
+      bedrock at the mountain front, a few hundred metres high at most, not a smooth plain running to the foot of a
+      wall.
+    reach: region
+    source:
+      cite: "Xiong, J., Li, Y., Zheng, W., Zhang, P., et al. (2018). Climatically driven formation of the Tangxian planation surface in North China: An example from northwestern Zhongtiao Shan of the Shanxi Graben System. Lithosphere 10(4), 530–544."
+      url: https://eprints.gla.ac.uk/290599/1/290599.pdf
+      text: tangxian-surface.txt
+      loc: "p. 531 (PDF page 2), Geologic Setting: Tectonic and Geomorphic Setting"
+      quote: "hill surfaces are distributed over mountain-front areas of the Taihang Shan and Yan Shan with an elevation of 50–600 m"
+    note: >-
+      The elevations are today's. The paper dates the surface's final formation to about 3.1 Ma, so it was
+      already there, and already being cut into, at 1.83 Ma. Said of the Taihang's mountain front as a whole, not
+      of this stretch.
+  - id: relief-gullied-piedmont
+    layer: relief
+    what: >-
+      Streams run in trenches and gullies cut down into the piedmont surface, rather than spreading gravel fans
+      over it; between them the surface is being mantled by wind-laid silt.
+    reach: region
+    source:
+      cite: "Xiong, J., Li, Y., Zheng, W., Zhang, P., et al. (2018). Climatically driven formation of the Tangxian planation surface in North China: An example from northwestern Zhongtiao Shan of the Shanxi Graben System. Lithosphere 10(4), 530–544."
+      url: https://eprints.gla.ac.uk/290599/1/290599.pdf
+      text: tangxian-surface.txt
+      loc: "p. 539 (PDF page 10), the paragraph before Discussion"
+      quote: "Only the loess-paleosol sequence has deposited since ca. 1.9 Ma, indicating that streams kept trenching with no more gravels and sands depositing"
+    note: >-
+      Said of one dated piedmont section on the north-western Zhongtiao Shan, about 270 km west-south-west, at
+      the foot of a comparable fault-bounded range. Carried here as the nearest dated piedmont of the period that
+      could be read.
+  - id: substrate-uplifted-lake-beds
+    layer: substrate
+    what: >-
+      The ground underfoot in this piedmont belt is soft, bedded lake and river-lake sediment of the Pliocene
+      (clays, silts, sands), raised as a high terrace above the lowland to the east and exposed wherever a stream
+      cuts into it.
+    reach: place
+    source:
+      cite: "Han Mu-kang, Zhu Shi-long, Zhao Jing-zhen & Zhang Xian-rong (1983). Geomorphic expressions of Quaternary tectonic stress field in the southern section of the Eastern Piedmont Fault Zone of Taihangshan Mountain. Acta Geographica Sinica 38(4), 348–357."
+      url: https://www.geog.com.cn/EN/abstract/article/0375-5444/20346
+      text: tangyin-graben.txt
+      loc: "Abstract (English)"
+      quote: "the Pliocene lacustrine and fluvial-lacustrine deposits in the piedmont zone west of the Tangyin graben uplifted as a high terrace"
+    note: >-
+      By today's map the Tangyin graben lies a few tens of kilometres east of the point, which is in the piedmont
+      zone west of it. Only the English abstract could be read. It dates the uplift to "since the Quaternary time" and no
+      closer, so how far the beds had risen by 1.83 Ma is not known; the grain of the beds (clay, silt, sand) is
+      my gloss of "lacustrine and fluvial-lacustrine", not the abstract's words.
+  - id: water-no-lake-rivers-east
+    layer: water
+    what: >-
+      No great lake. The lake that had filled the lowland along the mountain front in the Tertiary was gone, and
+      the low ground to the east (behind the camera) was being filled by river alluvium, so rivers left the
+      mountains and crossed the piedmont here.
+    reach: place
+    source:
+      cite: "Han Mu-kang, Zhu Shi-long, Zhao Jing-zhen & Zhang Xian-rong (1983). Geomorphic expressions of Quaternary tectonic stress field in the southern section of the Eastern Piedmont Fault Zone of Taihangshan Mountain. Acta Geographica Sinica 38(4), 348–357."
+      url: https://www.geog.com.cn/EN/abstract/article/0375-5444/20346
+      text: tangyin-graben.txt
+      loc: "Abstract (English)"
+      quote: "the Tertiary vast ancient lake … disappeared … the downwarps are filled with the Quaternary alluvium"
+    note: >-
+      The build answers "rivers: []" here; the abstract's Quaternary alluvium needs rivers, though it does not
+      say where they ran at 1.83 Ma or how early in the Quaternary the lake went.
+  - id: substrate-red-loam
+    layer: substrate
+    what: >-
+      Where wind-laid dust covers the ground it is a reddish loam ("Old Red Loam"), not the pale yellow loess of
+      later times, with a pebble bed at its base in places.
+    reach: region
+    source:
+      cite: "Sun, B. & Deng, T. (2019). The Equus Datum and the Early Radiation of Equus in China. Frontiers in Ecology and Evolution 7:429."
+      url: https://www.frontiersin.org/articles/10.3389/fevo.2019.00429/full
+      text: sun-deng-equus.txt
+      loc: "section 'Other Sections', first paragraph"
+      quote: "According to paleomagnetic studies (Shi, 1994; Shi et al., 1994), the Old Red Loam was deposited 2.5–1.5 Ma"
+    note: >-
+      Said of south-eastern Shanxi (the eastern Yushe Basin), about 160 km north-west, on the other side of the
+      Taihang and higher. A review reporting others' dating. Whether the same loam was laid on the Henan piedmont
+      is not said.
+  - id: cover-open-conifer-steppe
+    layer: cover
+    what: >-
+      Open country with trees: stands of pine and spruce thinned out, with wormwood (Artemisia) and goosefoot
+      (Chenopodiaceae) steppe between them, under a cold, dry climate. Not closed broad-leaved forest.
+    reach: region
+    source:
+      cite: "Ding, G., Li, Y., Zhang, Z., Zhang, W., Wang, Y., Chi, Z., Shen, G. & Fan, B. (2020). Vegetation succession and climate change during the early Pleistocene (2.2-1.8 Ma) in the Nihewan Basin, northern China. Palaeogeography, Palaeoclimatology, Palaeoecology 537, 109375."
+      url: https://api.semanticscholar.org/graph/v1/paper/DOI:10.1016/j.palaeo.2019.109375?fields=title,abstract,year,venue,authors
+      text: ding-2020-abstract.txt
+      loc: "Abstract, the sentences on 1.92-1.78 Ma"
+      quote: "The percentages of Picea (>20%), Artemisia and Chenopodiaceae increased, indicating that spruce forests expanded, the openness of the forested areas increased and the climate became cold and dry."
+    note: >-
+      The right time (the abstract's interval is 1.92-1.78 Ma, the Olduvai subchron) but not the place: a core in
+      the Nihewan Basin, about 480 km north, an intermontane basin higher and colder than this piedmont. Only the
+      abstract was read, as an index carries it; the paper is paywalled. Agrees with the build's climate class
+      (cold). How much spruce stood this low and this far south is not known.
+  - id: cover-riverside-trees
+    layer: cover
+    what: >-
+      Along rivers, poplars, willows and elms, with sedges at the water's edge.
+    reach: region
+    source:
+      cite: "The Paleobiology Database, occurrences 1585509-1585722 (collections 224036 and 224037, Sanmen Formation; reference 78641), downloaded 19 November 2026."
+      url: https://paleobiodb.org/data1.2/occs/list.txt?lngmin=110&lngmax=118&latmin=33&latmax=39&interval=Gelasian,Calabrian&show=coords,loc,strat,geo
+      text: pbdb-occurrences.txt
+      loc: "rows for occurrences 1585509, 1585537, 1585634 and 1585672"
+      quote: "Populus norinii … Early Pleistocene … Sanmen … fluvial indet. … Salix teilhardii … Ulmus shansiensis … Cyperacites sp."
+    note: >-
+      Leaf fossils from river beds of the Sanmen Formation about 275 km west-south-west, dated by the database
+      only to the Early Pleistocene (2.58-0.774 Ma). A curated database, not the publication behind it, which was
+      not read. These are the build's own Salix, Populus, Ulmus and Cyperacites rows. The leaves are a growing
+      season's; no source read says what these trees looked like in January.
+  - id: life-horses
+    layer: life
+    what: >-
+      Herds of large one-toed horses (Equus sanmeniensis and its kin), the commonest big animal of the open
+      ground; the three-toed Hipparion all but gone.
+    reach: region
+    source:
+      cite: "Farjand, A., Zhang, Z., Gibbard, P.L. & Bi, S. (2023). First results of the biostratigraphy and geochronology of the classic Nihewan Fauna, China. Frontiers in Earth Science 11:1276816."
+      url: https://www.frontiersin.org/articles/10.3389/feart.2023.1276816/full
+      text: nihewan-classic-fauna.txt
+      loc: "section 4.2, the paragraph on Xiashagou fossil Horizon 6"
+      quote: "Of the 86 known specimens of Equidae, only three belong to Hipparion (Proboscidipparion) sinensis (only 3.5%), while E. sanmeniensis remains are abundant."
+    note: >-
+      Horizon 6 is the top of the classic Nihewan Fauna, which the paper dates to the end of the Olduvai subchron
+      (about 1.8 Ma); Nihewan is about 480 km north. Nearer, Sun & Deng (2019, sun-deng-equus.txt) report teeth
+      of Equus sp. from the base of the Old Red Loam of south-eastern Shanxi (about 160 km) and Equus
+      huanghoensis from Pinglu, Shanxi (some 250 km west-south-west). "Herds" is mine: the source counts bones, not animals together.
+  - id: life-bison-gazelle-sheep
+    layer: life
+    what: >-
+      Bovids on the open ground with the horses: an early bison (Bison palaeosinensis), gazelles and wild sheep.
+    reach: region
+    source:
+      cite: "Farjand, A., Zhang, Z., Gibbard, P.L. & Bi, S. (2023). First results of the biostratigraphy and geochronology of the classic Nihewan Fauna, China. Frontiers in Earth Science 11:1276816."
+      url: https://www.frontiersin.org/articles/10.3389/feart.2023.1276816/full
+      text: nihewan-classic-fauna.txt
+      loc: "section 4.2, the paragraph on Xiashagou fossil horizon 5"
+      quote: "Bovidae, such as Bison palaeosinensis, Gazella sp., Ovis sp., are also present"
+    note: >-
+      Nihewan Basin, about 480 km north; horizon 5 is the one below the topmost, so a little before 1.8 Ma. The
+      build's Bison and Gazella agree with it.
+  - id: life-rhinoceros-not-elasmotherium
+    layer: life
+    what: >-
+      Rhinoceroses still, but not the giant Elasmotherium: in the nearest dated sequence it has given way to
+      Dicerorhinus by the start of the Olduvai subchron, before this moment.
+    reach: region
+    source:
+      cite: "Farjand, A., Zhang, Z., Gibbard, P.L. & Bi, S. (2023). First results of the biostratigraphy and geochronology of the classic Nihewan Fauna, China. Frontiers in Earth Science 11:1276816."
+      url: https://www.frontiersin.org/articles/10.3389/feart.2023.1276816/full
+      text: nihewan-classic-fauna.txt
+      loc: "section 4.3, the paragraph on Rhinocerotidae"
+      quote: "The most noticeable aspect of the presence of Rhinocerotidae is the replacement of Elasmotherium sp. By Dicerorhinus sp. on the onset of Olduvai Subchron."
+    note: >-
+      Against the build: its atlas lists Elasmotherium as recorded "here". The row behind that
+      (pbdb-occurrences.txt, occurrence 151045, Elasmotherium peii, Pinglu, Shanxi) is dated only "Pleistocene"
+      to "Middle Pleistocene", 2.58-0.129 Ma, with coordinates "based on political unit"; it does not place the
+      animal at 1.83 Ma, and at Nihewan (480 km north) the genus is last seen before the Olduvai, which a pollen
+      paper puts at 1.92-1.78 Ma. The paper's list of the fauna has Coelodonta nihowanensis, where the build
+      draws Coelodonta antiquitatis.
+  - id: life-elephants-rare
+    layer: life
+    what: >-
+      An elephant now and then, far rarer than horses or bovids; in the north of the region it is the steppe
+      mammoth (Mammuthus trogontherii).
+    reach: region
+    source:
+      cite: "Farjand, A., Zhang, Z., Gibbard, P.L. & Bi, S. (2023). First results of the biostratigraphy and geochronology of the classic Nihewan Fauna, China. Frontiers in Earth Science 11:1276816."
+      url: https://www.frontiersin.org/articles/10.3389/feart.2023.1276816/full
+      text: nihewan-classic-fauna.txt
+      loc: "section 4.3, first paragraph"
+      quote: "They are followed by Artiodactyla, Carnivora and Proboscidea which comprised 43.2%, 7.3%, and 0.2%, respectively"
+    note: >-
+      Shares of 1,048 museum specimens from the Nihewan Basin (about 480 km north), all horizons from 2.4 to
+      1.8 Ma together. The build lists Stegodon, Sinomastodon, Elephas and Sinomammut for the region; the paper's
+      list for the north has only Mammuthus trogontherii. Which proboscidean, if any, lived on this piedmont is
+      not known.
+  - id: people-no-works
+    layer: people
+    what: >-
+      Nothing built or planted: no fields, houses, paths or smoke of settlements. People of a kind were in north
+      China (small bands of early hominins striking simple stone flakes), but the oldest well-dated site of the
+      north is later than this moment and far away, and nothing is recorded here.
+    reach: region
+    source:
+      cite: "Yang, S.-X., Deng, C.-L., Zhu, R.-X. & Petraglia, M.D. (2020). The Paleolithic in the Nihewan Basin, China: Evolutionary history of an Early to Late Pleistocene record in Eastern Asia. Evolutionary Anthropology. doi:10.1002/evan.21813"
+      url: https://research-repository.griffith.edu.au/server/api/core/bitstreams/3bbd13c7-703e-43e7-b2cf-a418162d3059/content
+      text: nihewan-paleolithic-review.txt
+      loc: "PDF page 3 (the article's second page), Introduction"
+      quote: "Dating to ~1.66 Ma, the Majuangou-III site of the Nihewan Basin is so far the oldest well-dated site in northern China."
+    note: >-
+      The same paragraph goes on to the Shangchen site of the southern Loess Plateau, at about 2.1 Ma, as the
+      earliest evidence of hominins in China (the words run together in the saved text, so they are not quoted).
+      The review notes that no Early Pleistocene hominin bones have been found at Nihewan. The build's "people:
+      unknown" is right for this spot.
+  - id: weather-winter-monsoon
+    layer: weather
+    what: >-
+      January is the season of the winter monsoon: cold, dry air driven from the north-west, off the interior of
+      Asia, almost straight into the face of a viewer looking this way, and carrying dust.
+    reach: region
+    source:
+      cite: "Ao, H., Liebrand, D., Dekkers, M.J., et al. (2024). Orbital- and millennial-scale Asian winter monsoon variability across the Pliocene–Pleistocene glacial intensification. Nature Communications 15, 3364."
+      url: https://www.nature.com/articles/s41467-024-47274-9
+      text: winter-monsoon-chongxin.txt
+      loc: "Introduction, second paragraph"
+      quote: "During boreal winters, cold air from the Siberian High pressure cell over the mid- to high-latitude Asian continental interior induces northwesterly Asian winter monsoon (AWM) advection"
+    note: >-
+      The sentence describes the monsoon as a system; the paper's own record (grain size of dust, Chongxin, about
+      630 km west) shows it at work from 3.6 to 1.9 Ma, ending just before this moment. The same text says the
+      dust was "transported primarily by the near-surface northwesterly AWM". How windy or dusty one January
+      afternoon was cannot be said.
+unknown:
+  - The sun's height and the look of the sky at 13:00 in January (clear, hazed with dust, or clouded); no source read gives the light of a winter day here at 1.83 Ma.
+  - Whether snow lay on the ground or on the Taihang's upper slopes in January, and whether streams were frozen; nothing read speaks of snow or ice here then.
+  - What actually grew on this piedmont. No pollen or plant record of the Gelasian from northern Henan, the Taihang foot or the adjoining plain could be read; the nearest of the right age is in the Nihewan Basin, 480 km north and higher.
+  - The colour and state of the cover in mid-winter (dry grass, bare or evergreen trees, bare soil); the sources give taxa and openness, not a season's look.
+  - How high and how steep the Taihang front stood above the piedmont at 1.83 Ma, how far off it was from this spot, and whether the Linzhou basin already lay as a lowland in front of it; no dated study of this stretch of the range could be read.
+  - Where the rivers ran (the forerunners of the Zhang, the Anyang and the Qi), how wide they were and whether they held water in January; the build gives no rivers and no source read maps channels of this age.
+  - Whether wind-laid loess or red loam of this age mantled the ground at this spot, and how thick; no dated section on the Henan piedmont could be read.
+  - Which animals lived at this spot. No fossil locality of the Gelasian within about 150 km could be read, and the Paleobiology Database has no row of that stage near; every animal in this brief is carried from 160 to 480 km away.
+  - Whether any hominin ever stood here at this time; no site of this age is reported from northern Henan in anything read.
+effort: { fetched: 25, cited: 9, failed: 11, note: "25 fetches tried, 14 texts read, 9 cited. Not reached: the Yushe Basin monograph (Springer, needs a browser), the Chinese lexicon of formations (chinalex.geolex.org, 403), the Haojiatai pollen paper (OUP, 403), the Beijing pollen record (abstract withheld), a paper on basalt and uplift in the middle Taihang (404), two repository PDFs (403), a Chinese paper of geomorphic indices of the Taihang (empty page). Longest: looking for anything dated to the Early Pleistocene on the Henan piedmont itself; only a 1983 abstract on the Tangyin graben speaks of the place." }

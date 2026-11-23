@@ -1,0 +1,256 @@
+view: t=123.679589Ma&lat=-3.48924&lon=-10.72343&d=1.0000023544&h=350&v=84&hour=12&mo=7&clock=0
+when: 123.7 Ma
+place: >-
+  Eastern Maranhão, north-east Brazil (today about 4.04°S, 43.18°W), beside the Parnaíba river in the Parnaíba
+  Basin: ground that in the late Aptian was the floor and shore of the salt lake of the Codó Formation.
+author: machine:claude-code
+expects:
+  - id: relief-lake-basin-reached-by-sea
+    layer: relief
+    what: >-
+      Low, level ground: the floor and margin of a wide lake basin, low enough that the sea at times came into the
+      lake. No hills or valleys are recorded.
+    reach: place
+    source:
+      cite: "Salgado-Campos, V.M.J., Carvalho, I.S., Bertolino, L.C., Borghi, L., Rios-Netto, A.M., Araújo, B.C., Souza, D.C., Ferreira, L.O. & Bobco, F.E.R. (2022). Unraveling an alkaline lake and a climate change in Northeastern Brazil during the Late Aptian. Sedimentary Geology 442, 106290."
+      url: https://igeo.ufrj.br/inc/isc/3/03_118-Salgado%20Campos%20et%20al%20Cod%C3%B3%20paleoenvirn%20paleoclimate.pdf
+      text: salgado-campos-codo.txt
+      loc: "section 6, Conclusions, p. 16"
+      quote: "At the top of the alkaline lake succession, a sudden salinity-increasing event was noted and interpreted as the first relevant marine ingression episode in the Codó Formation."
+    note: >-
+      The core studied (1-UN-32-PI, 4°4′55″S 43°3′15″W) is about 15 km east of the point. The Codó Formation is
+      upper Aptian, some millions of years after the view's 123.7 Ma. The build has this ground 632 m above the sea
+      of the time, which a lake the sea could enter contradicts. That the land was level is read from the lake
+      deposits, not said by the source in those words.
+  - id: water-shallow-salt-lake
+    layer: water
+    what: >-
+      A shallow, very salty, alkaline lake, still and without surf, whose level rose and fell so that stretches of
+      its bed were at times left dry.
+    reach: place
+    source:
+      cite: "Salgado-Campos, V.M.J., Carvalho, I.S., Bertolino, L.C., Borghi, L., Rios-Netto, A.M., Araújo, B.C., Souza, D.C., Ferreira, L.O. & Bobco, F.E.R. (2022). Unraveling an alkaline lake and a climate change in Northeastern Brazil during the Late Aptian. Sedimentary Geology 442, 106290."
+      url: https://igeo.ufrj.br/inc/isc/3/03_118-Salgado%20Campos%20et%20al%20Cod%C3%B3%20paleoenvirn%20paleoclimate.pdf
+      text: salgado-campos-codo.txt
+      loc: "section 6, Conclusions, p. 16"
+      quote: "allowed the identification of a magnesium-sulfate-rich shallow alkaline hypersaline lake with episodes of subaerial exposure"
+    note: >-
+      Lower Codó Formation in the core 15 km east of the point; upper Aptian, later than the view's time. The build
+      has no water body here. Neither the lake's depth in metres nor how far its shores were is given.
+  - id: water-braided-river-phase
+    layer: water
+    what: >-
+      At another stage, sandy braided river channels crossed the dried lake floor, before a lagoon the sea reached
+      took its place.
+    reach: place
+    source:
+      cite: "Salgado-Campos, V.M.J., Carvalho, I.S., Bertolino, L.C., Borghi, L., Rios-Netto, A.M., Araújo, B.C., Souza, D.C., Ferreira, L.O. & Bobco, F.E.R. (2022). Unraveling an alkaline lake and a climate change in Northeastern Brazil during the Late Aptian. Sedimentary Geology 442, 106290."
+      url: https://igeo.ufrj.br/inc/isc/3/03_118-Salgado%20Campos%20et%20al%20Cod%C3%B3%20paleoenvirn%20paleoclimate.pdf
+      text: salgado-campos-codo.txt
+      loc: "section 2, Geological settings, p. 4 (reporting Mendes 2007)"
+      quote: "The sandstone lithofacies comprises a fining-upward bed of fine to medium-grained sandstone with wavy or flaser bedding (Sa). … a braided fluvial followed by a marine-influenced lacustrine depositional system (lagoon) was interpreted in the upper Codó Formation."
+    note: >-
+      One sandstone bed about 5 m thick in the same core: a stage of the same ground, not the same moment as the
+      lake. The build has no rivers at the point. The source reports Mendes (2007), a thesis that was not read.
+  - id: substrate-dark-mud-gypsum
+    layer: substrate
+    what: >-
+      The ground is dark, organic-rich lake mud, split by mudcracks where it had dried, with thin layers and beds of
+      gypsum and of limestone in it.
+    reach: place
+    source:
+      cite: "Salgado-Campos, V.M.J., Carvalho, I.S., Bertolino, L.C., Borghi, L., Rios-Netto, A.M., Araújo, B.C., Souza, D.C., Ferreira, L.O. & Bobco, F.E.R. (2022). Unraveling an alkaline lake and a climate change in Northeastern Brazil during the Late Aptian. Sedimentary Geology 442, 106290."
+      url: https://igeo.ufrj.br/inc/isc/3/03_118-Salgado%20Campos%20et%20al%20Cod%C3%B3%20paleoenvirn%20paleoclimate.pdf
+      text: salgado-campos-codo.txt
+      loc: "section 2, Geological settings, p. 4 (reporting Mendes 2007)"
+      quote: "The two lutite lithofacies comprise bituminous lutites with mudcracks interlaminated with gypsum and calcite (Ab) … Finally, the two chemical lithofacies include limestone (Ls) and gypsum bedsets (Gy)."
+    note: >-
+      The rocks of the core 15 km east of the point. "Dark" is read from "bituminous"; the colour of the fresh mud
+      and of the salt at the surface is not given.
+  - id: substrate-gypsum-sabkha
+    layer: substrate
+    what: >-
+      At the lake's driest stage, a sabkha: a salt flat where a bed of gypsum formed, wetted at times by the sea.
+    reach: place
+    source:
+      cite: "Salgado-Campos, V.M.J., Carvalho, I.S., Bertolino, L.C., Borghi, L., Rios-Netto, A.M., Araújo, B.C., Souza, D.C., Ferreira, L.O. & Bobco, F.E.R. (2022). Unraveling an alkaline lake and a climate change in Northeastern Brazil during the Late Aptian. Sedimentary Geology 442, 106290."
+      url: https://igeo.ufrj.br/inc/isc/3/03_118-Salgado%20Campos%20et%20al%20Cod%C3%B3%20paleoenvirn%20paleoclimate.pdf
+      text: salgado-campos-codo.txt
+      loc: "section 5.5, p. 16"
+      quote: "This facies succession was reinterpreted as a marine-influenced sulfate-rich acid sabkha due to the occurrence of the gypsum bed"
+    note: The interval above the alkaline lake in the same core; a stage of the same ground.
+  - id: substrate-stromatolite-domes
+    layer: substrate
+    what: >-
+      In the shallows, domes of stromatolite and sheets of microbial mat on the lake bed.
+    reach: region
+    source:
+      cite: "Machado, L.L., Barros, C.L., Rios-Netto, A.M., Sames, B., Silva, S.C., Mendonça Filho, J.G., Mendonça, J.O. & Marques-Lima, D. (2025). Biostratigraphy and paleoenvironmental characterization of the Lower Cretaceous Codó and Itapecuru formations (Aptian–Albian, Parnaíba Basin, Brazil). Anuário do Instituto de Geociências 48, e67620."
+      url: https://www.revistas.ufrj.br/index.php/aigeo/article/download/67620/44140/223172
+      text: aigeo-2025-codo.txt
+      loc: "section 5.2 Paleoenvironments, interval PI-3, p. 17"
+      quote: "Bobco et al. (2023) registered domal stromatolites and microbial mats at this interval, inferring perennial, restrictive and alkaline conditions"
+    note: >-
+      From the borehole 2-CO-1-MA near Coroatá, about 120 km west of the point, in the same formation. The source
+      reports Bobco et al. (2023), which was not read. The size of the domes is not given.
+  - id: weather-arid-little-rain
+    layer: weather
+    what: >-
+      An arid climate: rainfall reckoned at under 250 mm while the salt flat formed, rising to about 400 mm in the
+      lagoon stage that followed. Dry ground, not rainforest.
+    reach: place
+    source:
+      cite: "Salgado-Campos, V.M.J., Carvalho, I.S., Bertolino, L.C., Borghi, L., Rios-Netto, A.M., Araújo, B.C., Souza, D.C., Ferreira, L.O. & Bobco, F.E.R. (2022). Unraveling an alkaline lake and a climate change in Northeastern Brazil during the Late Aptian. Sedimentary Geology 442, 106290."
+      url: https://igeo.ufrj.br/inc/isc/3/03_118-Salgado%20Campos%20et%20al%20Cod%C3%B3%20paleoenvirn%20paleoclimate.pdf
+      text: salgado-campos-codo.txt
+      loc: "section 5.4, p. 12"
+      quote: "Detrital clay mineral assemblage 2 has indicated low paleoprecipitation values (<250 mm), which can be related to arid climate conditions, while detrital clay mineral assemblage 3 has indicated higher paleoprecipitation values"
+    note: >-
+      From the clay minerals of the core 15 km east of the point. The build classes the point as rainforest, with an
+      aridity index of 3.41: the source contradicts it. The source gives the figures in mm without naming the
+      period they are for, and says nothing of which months were wet.
+  - id: weather-hot-strong-evaporation
+    layer: weather
+    what: >-
+      Heat and strong evaporation: the lake's shallow water was warm, about 37 °C where its carbonate formed.
+    reach: region
+    source:
+      cite: "Bahniuk, A., McKenzie, J.A., Anjos, S., Barros, A. & Vasconcelos, C. (2013). Characterization of lacustrine carbonate microbialite facies associations of the Lower Cretaceous Codó Formation (Northeast Brazil). AAPG Search and Discovery Article #90163, AAPG Annual Convention and Exhibition, Pittsburgh (abstract)."
+      url: https://www.searchanddiscovery.com/abstracts/html/2013/90163ace/abstracts/bahni.htm
+      text: bahniuk-2013-aapg.txt
+      loc: "abstract"
+      quote: "Clumped isotope measurements of selected fabrics yield precipitation paleo-temperatures with an average value of 37.5°C. … Our evaluation confirms previous studies that the Codó Formation was deposited under warm and arid paleoclimate conditions with high evaporation."
+    note: >-
+      A conference abstract, which does not say where in the formation the samples were taken; the full paper
+      could not be read. The temperature is of the lake water, not of the air: the build's warmest month is 31.3 °C.
+  - id: cover-dry-country-plants-by-pollen
+    layer: cover
+    what: >-
+      The plants of the country around were mostly of dry ground: cheirolepid conifers and joint-fir relatives
+      (Gnetales) gave nearly two thirds of the pollen, and flowering plants little.
+    reach: region
+    source:
+      cite: "Cardoso da Silva Giannerini, M., Carvalho, M.A., Lana, C.C., Santiago, G., Sá, N.P. & Correia, G.C. (2023). Late Aptian paleoclimate reconstruction of the Brazilian equatorial margin: inferences from palynology. Climate of the Past 19, 1715–1742."
+      url: https://cp.copernicus.org/articles/19/1715/2023/cp-19-1715-2023.pdf
+      text: carvalho-2023-climate-past.txt
+      loc: "section 5.6, CI-1 well, p. 1722 (PDF p. 8); Table 4"
+      quote: "The palynological assemblage of this section was dominated by the xerophytic bioclimatic group, with a high average of 63.6 %, largely because of the abundance of Classopollis and Equisetosporites."
+    note: >-
+      The CI-1 well is in the same formation about 270 km north-west of the point. Pollen shares are not shares of
+      the ground covered. Table 4 gives the well's other groups: upland flora 15.9 %, hygrophytes 11.4 %, tropical
+      lowland flora (the flowering plants) 6.0 %. The atlas's Araucariacites, Gnetaceaepollenites, Equisetosporites
+      and Afropollis are in this paper's lists; it puts Araucariacites in an upland flora, of the highlands.
+  - id: cover-open-low-growth-conifers-on-banks
+    layer: cover
+    what: >-
+      Open ground in full sun with scarce plants: low herbs and shrubs by the water, and conifers only along the
+      banks of the streams that fed the lake. No closed forest.
+    reach: place
+    source:
+      cite: "Lindoso, R.M., Dutra, T.L., Carvalho, I.S. & Medeiros, M.A. (2018). New plant fossils from the Lower Cretaceous of the Parnaíba Basin, Northeastern Brazil: Southern Laurasia links. Brazilian Journal of Geology 48(1)."
+      url: https://scielo.br/j/bjgeo/a/4jgbXcfbF5W9tsxpyXq5ZJf/?lang=en
+      text: lindoso-2018-brejo-flora.txt
+      loc: "Conclusion, first paragraph"
+      quote: "Some other similar plants in the fossil record indicate a vegetation composed of aquatic and herbaceous/shrubby habits, growing in fluvial/deltaic, lacustrine, and coastal open areas, which were probably fed by river systems whose banks sheltered and allowed for the growing of conifers."
+    note: >-
+      Plant fossils from two quarries at Brejo, about 55 km north-east of the point, in the upper Codó Formation
+      (upper Aptian to perhaps Albian). The same conclusion likens the scene to today's coast of Maranhão, "with
+      scarce vegetation". The heights of the plants are not given. The build's rainforest class contradicts it.
+  - id: cover-scale-leaved-conifers
+    layer: cover
+    what: >-
+      The conifers bear small scale leaves pressed close to stout branching shoots, like a cypress's, not needles
+      or broad leaves.
+    reach: region
+    source:
+      cite: "Batista, M.E.P., Silva, D.C., Sales, M.A.F., Sá, A.A., Saraiva, A.A.F. & Loiola, M.I.B. (2017). New data on the stem and leaf anatomy of two conifers from the Lower Cretaceous of the Araripe Basin, northeastern Brazil, and their taxonomic and paleoecological implications. PLoS ONE 12(3), e0173090."
+      url: https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0173090
+      text: batista-2017-conifers.txt
+      loc: "Discussion, Paleoecological significance"
+      quote: "In Brachyphyllum obesum, the small, imbricate, and appressed leaves were likely responses to the intense solar radiation and water scarcity"
+    note: >-
+      Said of specimens from the Crato Formation of the Araripe Basin, some 450 km south-east; Lindoso et al. (2018)
+      record cf. Brachyphyllum and Cupressinocladus shoots at Brejo, 55 km from the point. The atlas draws its
+      conifer pollen here as monkey puzzles; this paper too places B. obesum in the Araucariaceae, but the foliage
+      it describes is of small scales. How tall these trees stood is not said.
+  - id: cover-small-water-plants
+    layer: cover
+    what: >-
+      Water plants at the lake's edge, with small kidney-shaped leaves 3 to 4 cm across on slender stalks.
+    reach: place
+    source:
+      cite: "Lindoso, R.M., Dutra, T.L., Carvalho, I.S. & Medeiros, M.A. (2018). New plant fossils from the Lower Cretaceous of the Parnaíba Basin, Northeastern Brazil: Southern Laurasia links. Brazilian Journal of Geology 48(1)."
+      url: https://scielo.br/j/bjgeo/a/4jgbXcfbF5W9tsxpyXq5ZJf/?lang=en
+      text: lindoso-2018-brejo-flora.txt
+      loc: "Systematic paleobotany, CF2 morphotype, Description and Remarks"
+      quote: "Impression (replica) of an eccentrically reniform-wide peltate leaf (3 cm long, 3.8 cm wide) … Duarte and Santos (1993) have suggested that N. choffati had an aquatic habitat"
+    note: >-
+      The Brejo quarries, 55 km from the point. This is the atlas's Nymphaeites, which it draws with the body of
+      water lilies: the leaves are far smaller than a water lily's pads, and the paper leaves open whether the
+      plant was a water lily, a monocot or an early eudicot.
+  - id: life-fish-and-die-offs
+    layer: life
+    what: >-
+      Fish in number in the lake, of eleven kinds, and at times shoals of dead fish, some fifty together, killed
+      when the water's salt, oxygen or warmth changed or algae bloomed.
+    reach: place
+    source:
+      cite: "Lindoso, R., Maisey, J. & Carvalho, I. (2013). The paleoichthyofauna from the Codó Formation (Aptian of the Parnaíba Basin) northeastern Brazil. Journal of Vertebrate Paleontology, Program and Abstracts, October 2013 (abstract)."
+      url: https://igeo.ufrj.br/inc/isc/7/7_41.pdf
+      text: igeo-7-41.txt
+      loc: "abstract, Poster Session I"
+      quote: "One specimen, UFRJ-DG 870P, includes about fifty individuals of Santanichthys diasii preserved in preferred orientation, on the same bedding plane, consistent with a mass mortality event."
+    note: >-
+      A conference abstract; its fishes are from Brejo, Codó, Timbiras and Barra do Corda, the first two within
+      about 100 km of the point. It lists the atlas's Dastilbe. The full paper (Lindoso, Maisey & Carvalho 2016)
+      could not be read, and the size of the fish is not given.
+  - id: life-later-dinosaurs-of-the-river-plain
+    layer: life
+    what: >-
+      Later, when a river plain had replaced the lake, sauropods (Amazonsaurus among them) and the theropods
+      Carcharodontosaurus and Spinosaurus lived on it.
+    reach: region
+    source:
+      cite: "Medeiros, M.A., Dal'Bó, P.F., Ferreira, N.N. & Carvalho, I.S. (2014). Os fósseis da Formação Itapecuru e sua aplicação na interpretação paleoambiental. Anais do 47º Congresso Brasileiro de Geologia, Salvador, p. 1248 (abstract)."
+      url: https://igeo.ufrj.br/inc/isc/8/8.240.pdf
+      text: igeo-8-240.txt
+      loc: "resumo, p. 1248"
+      quote: "os dinossauros terópodes Carcharodontosaurus sp., Spinosaurus sp. e saurópodes, com registro de material relacionado aos grupos Titanosauria e Diplodocoidea, incluindo a espécie Amazonsaurus maranhensis"
+    note: >-
+      A conference abstract on the Itapecuru Formation, which overlies the Codó and which it dates from the late
+      Aptian to the late Albian: younger than the lake, and younger still than the view's 123.7 Ma. The PBDB rows
+      fetched place its dinosaur sites 110 to 150 km west and north-west of the point. The same abstract lists
+      crocodiles, the turtle Araripemys and the coelacanth Mawsonia, all in the atlas. So the atlas's Amazonsaurus
+      is of a later landscape, a river plain, than the one the rocks give for this ground; no land animal was found
+      reported from the lake beds themselves.
+unknown:
+  - >-
+    What stood here at 123.7 Ma itself. Every text read is of the Codó Formation, which is upper Aptian; Machado et
+    al. (2025) say it lies unconformably on the Corda Formation and that the Cretaceous beds rest on Barremian
+    igneous rocks of the Sardinha Formation, so no deposit of the view's own moment was found for this ground. The
+    PBDB rows fetched give the Aptian as 121.4 to 113.2 Ma, which would put 123.7 Ma before it.
+  - The sky at noon in July, and whether July fell in a wet or a dry season. The sources say the climate was arid and seasonally dry, and name no months.
+  - The colour of the lake water and of the salt and mud at the surface, and how far away the far shore was.
+  - How tall the conifers and shrubs grew and how far apart they stood. Only shoots, leaves and pollen are described.
+  - >-
+    Whether pterosaurs were in the air. The atlas lists Tupandactylus, Arthurdactylus, Ludodactylus and Lacusovagus
+    as recorded here, but none is in any text read on the Codó Formation, nor in the PBDB rows fetched for
+    2.5–6°S, 41.5–45.5°W (Barremian to Albian).
+  - >-
+    Whether insects were to be seen. The atlas lists crickets, a crane fly and a dragonfly here; a conference
+    abstract by Lindoso and Carvalho on the Brejo quarries says isopods are common and insects absent there, and
+    the PBDB rows fetched have only two bugs (Hemiptera) from the Codó, about 260 km to the south-west.
+  - What land animals, if any, came to the lake shore in Codó time. No bones or tracks of them are reported in what was read.
+  - The relief beyond the basin. Pollen of upland conifers reached the lake, but no source read says where the high ground was or whether it could be seen from here.
+effort:
+  fetched: 18
+  cited: 8
+  failed: 2
+  note: >-
+    Not reached: the first description of Amazonsaurus (Carvalho, Avilla & Salgado 2003; doc.rero.ch refused), and
+    its Portuguese abstract came with too little clean text to cite. Lindoso, Maisey & Carvalho (2016) on the
+    fishes, Bobco et al. (2023) on the Coroatá core's facies and Mendes (2007) were found only as others report
+    them. Read and not cited: Eneas et al. (2022), Rossetti et al. (2004) and Paz & Rossetti (2006) on the Codó
+    farther west, Brito et al. (2016) on a gar, Lindoso et al. on the new Brejo sites, Rabelo & Nogueira (2015) on
+    the Corda desert (Jurassic, 400 km off), Wikipedia on Amazonsaurus, and the PBDB occurrence list. What took
+    longest was finding that the nearest core is 15 km from the point, and that the rocks are younger than the view.

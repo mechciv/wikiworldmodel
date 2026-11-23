@@ -1,0 +1,265 @@
+view: t=1887.824&lat=14.10542&lon=43.33523&d=1.0000023544&h=80&v=84&hour=14&mo=7&clock=0
+when: 1887 CE
+place: >-
+  The Tihama, Yemen's Red Sea coastal plain, about 10 km south of Zabid at the southern margin of the Wadi Zabid's
+  inland delta, looking east towards the foothills; in the Ottoman vilayet of Yemen, whose kaimakam sat at Zabid.
+author: machine:claude-code
+expects:
+  - id: sky-afternoon-clouding
+    layer: sky
+    what: >-
+      In the summer rains the sky begins to cloud over soon after one o'clock; by about three a squall from the
+      north-east raises whirls of sand, and a thunderstorm with torrential rain follows. At 14:00 the cloud is
+      gathering, not yet breaking.
+    reach: place
+    source:
+      cite: "Deflers, A. (1889). Voyage au Yemen: journal d'une excursion botanique faite en 1887 dans les montagnes de l'Arabie heureuse. Paris: Klincksieck."
+      url: https://archive.org/download/voyageauyemenjou00defluoft/voyageauyemenjou00defluoft_djvu.txt
+      text: deflers-1889-voyage-au-yemen.txt
+      loc: "p. 103 (21 August 1887, at el-Husseini)"
+      quote: "Peu après 1 heure, le ciel commence à se couvrir. Vers 3 heures un coup de vent du N.E. soulève des tourbillons de sable. Bientôt éclate un orage accompagné d’une pluie torrentielle."
+    note: >-
+      Seen at el-Husseini, some 25 km north of the point, on 21 August 1887: the same summer, a month after July.
+      Not every afternoon: two days before, on the road into Zabid from the south, the same writer had a clear sky
+      at sunset (p. 101). The sun itself, near the zenith, he calls vertical fire on the 22nd (p. 106).
+  - id: relief-mountains-east-veiled
+    layer: relief
+    what: >-
+      Eastward the plain ends at mountains, but by two in the afternoon they are usually out of sight: cloud sits on
+      them in the morning, and afterwards the air over the plain is thick with wind-raised sand.
+    reach: region
+    source:
+      cite: "Deflers, A. (1889). Voyage au Yemen: journal d'une excursion botanique faite en 1887 dans les montagnes de l'Arabie heureuse. Paris: Klincksieck."
+      url: https://archive.org/download/voyageauyemenjou00defluoft/voyageauyemenjou00defluoft_djvu.txt
+      text: deflers-1889-voyage-au-yemen.txt
+      loc: "Première partie, the account of Passama's journey of 1842, about p. 12"
+      quote: "Les montagnes des environs sont généralement couvertes de nuages jusqu’à 11 heures ou midi et cessent d'être visibles vers 2 heures du soir, l'atmosphère étant alors obscurcie par les tourbillons de sable que les vents du S. soulèvent à une grande hauteur sur les plaines du Tchâma."
+    note: >-
+      Deflers reporting Passama's weather observations at Hès (Hays), about 25 km south-east of the point, in January
+      and February 1842: near in place, but another season and 45 years earlier, so carried here as the region's
+      habit. Nothing read says whether the mountains showed on a July afternoon.
+  - id: substrate-sandy-delta-edge
+    layer: substrate
+    what: >-
+      Loose sand underfoot. The watered, cultivated inland delta of the Wadi Zabid ends about here, some 7 miles
+      south of the town by the road; beyond it the ground is arid and very sandy, dotted with scrub and patches of
+      coarse grass.
+    reach: place
+    source:
+      cite: "Admiralty War Staff, Intelligence Division (1917). A Handbook of Arabia, vol. II: Routes (C.B. 405). London."
+      url: https://archive.org/download/handbkarabiavol2/HandbkArabiaVol2_djvu.txt
+      text: admiralty-1917-handbook-arabia-2.txt
+      loc: "Route 57, Hodeidah-Beit el-Faqih-Zebid-Mocha, p. 253 (from Zebid: 2 m. Turku, then 5 m. Gabahrah)"
+      quote: "the whole country is arid and very sandy, dotted here and there with scrub, and covered in places with coarse grass … The fertile inland delta, watered by the Zebid river and its branches, ends here."
+    note: >-
+      A road-book of 1917 compiled from Niebuhr (1762-3) and the Indian Road Book, so the delta's edge is not dated
+      to 1887. Its road runs south by east from Zabid and the point lies due south, so whether this very spot was
+      bunded field or sandy scrub is not known (see unknown). The build classes the place as desert: right for the
+      plain, but half of this view may be irrigated fields.
+  - id: cover-khabt-scrub
+    layer: cover
+    what: >-
+      Off the fields, a sandy plain with the scrub of the Tihama's dry belt (the Khabt): tamarisk, bushes of Acacia
+      ehrenbergiana and Calotropis procera among them.
+    reach: place
+    source:
+      cite: "Deflers, A. (1889). Voyage au Yemen: journal d'une excursion botanique faite en 1887 dans les montagnes de l'Arabie heureuse. Paris: Klincksieck."
+      url: https://archive.org/download/voyageauyemenjou00defluoft/voyageauyemenjou00defluoft_djvu.txt
+      text: deflers-1889-voyage-au-yemen.txt
+      loc: "p. 101 (19 August 1887, leaving Hès for Zebid)"
+      quote: "Au sortir de Hès, nous entrons dans une plaine sablonneuse où nous retrouvons la végétation bien connue du Khabt: Tamarix articulata … Acacia Ehrenbergiana Hayne, Calotropis procera"
+    note: >-
+      A botanist's list made on the road from Hès to Zebid, which runs north-north-west into Zabid and so passes
+      near this point, in August 1887. The list names species and says nothing of their look. Of the same Khabt
+      north of Beyt el-Fakih three days later he writes of a sea of dull, dusty green, grasses at one level with
+      thin bushes of acacia, Salvadora and Leptadenia rising far apart (p. 105).
+  - id: cover-millet-walls
+    layer: cover
+    what: >-
+      Where there are fields: pearl millet (duchn) and sorghum (dourrah) standing nearly 3 m tall, a wall of green
+      on either side of a sunken path, with date palms here and there over the crop.
+    reach: place
+    source:
+      cite: "Deflers, A. (1889). Voyage au Yemen: journal d'une excursion botanique faite en 1887 dans les montagnes de l'Arabie heureuse. Paris: Klincksieck."
+      url: https://archive.org/download/voyageauyemenjou00defluoft/voyageauyemenjou00defluoft_djvu.txt
+      text: deflers-1889-voyage-au-yemen.txt
+      loc: "pp. 99-100 (18 August 1887, the valley of the Suera above Hès)"
+      quote: "entre des champs de duchn qui forment de chaque côté une muraille de verdure de près de … 3 m. de hauteur … une plaine fertile, couverte de champs de dourrah, de duchn et de sorgho, qu'ombragent de beaux dattiers"
+    note: >-
+      Seen roughly 35 km south-east, where the Suera leaves the hills, in mid-August 1887. How tall the crop stood
+      on the Wadi Zabid's fields a month earlier is not said; Bury (1915, p. 108) has Tihama millet ten feet high in
+      June and ready to cut in July, but of land sown on the spring rains. Close around Zabid itself Deflers found
+      the country almost bare, with a few doum palms and rare date palms (p. 102).
+  - id: cover-cotton-july
+    layer: cover
+    what: >-
+      Fields of cotton between the desert and Zabid in early July: perennial bushes, in yellow flower, with small
+      bolls.
+    reach: place
+    source:
+      cite: "Manzoni, R. (1884). El Yèmen: tre anni nell'Arabia Felice. Escursioni fatte dal settembre 1877 al marzo 1880. Roma: Tipografia Eredi Botta."
+      url: https://archive.org/download/elymentreannine01manzgoog/elymentreannine01manzgoog_djvu.txt
+      text: manzoni-1884-el-yemen.txt
+      loc: "p. 354 (Saturday 6 July [1878], from Magràss to Zebid)"
+      quote: "in campi coltivati a cotone, la cui pianta è duratura, e dà un fiore giallo e un frutto abbastanza piccolo"
+    note: >-
+      Nine years before, in the right month, on the approach to Zabid from the south-west (he entered by the
+      south-west gate). The cotton is on the town's side of the desert; how far south of the wadi it reached is not
+      said.
+  - id: water-flooded-bunded-fields
+    layer: water
+    what: >-
+      In the flood season the fields south of Zabid lie under water held in by earth banks (bunds), narrow and
+      slippery enough to be the only paths; a small village of huts stands where the sandy plain meets the flooded
+      land.
+    reach: place
+    source:
+      cite: "Deflers, A. (1889). Voyage au Yemen: journal d'une excursion botanique faite en 1887 dans les montagnes de l'Arabie heureuse. Paris: Klincksieck."
+      url: https://archive.org/download/voyageauyemenjou00defluoft/voyageauyemenjou00defluoft_djvu.txt
+      text: deflers-1889-voyage-au-yemen.txt
+      loc: "p. 101 (evening of 19 August 1887, the last hours before Zebid)"
+      quote: "nous atteignons un petit village de huttes, et, obliquant au N. O., nous nous engageons dans une campagne inondée, en suivant les digues de retenue des eaux."
+    note: >-
+      The nearest thing to an eyewitness of this spot: the approach to Zabid from the south, in the same summer. He
+      took about five hours of the night over these banks, so the flooded land reached well south of the town. It
+      was 19 August; whether the floods had come by July 1887 is not known.
+  - id: water-spate-only
+    layer: water
+    what: >-
+      No river runs here: the Wadi Zabid carries water to the sea only in spate, and between floods its bed is dry.
+    reach: place
+    source:
+      cite: "Bury, G. W. (1915). Arabia Infelix, or the Turks in Yamen. London: Macmillan."
+      url: https://archive.org/download/arabiainfelixort00buryuoft/arabiainfelixort00buryuoft_djvu.txt
+      text: bury-1915-arabia-infelix.txt
+      loc: "p. 21 (of the Sardid, the Siham and Wadi Zabid)"
+      quote: "None of these can be called rivers, for they only flow into the sea when in spate."
+    note: >-
+      Bury travelled in 1912-13. The build draws two modelled rivers at this point; the sources have a seasonal
+      flood spread over fields, not a stream. Niebuhr (Travels, 1792 translation, vol. 1, p. 425) found the channel
+      near the town quite dry on a 3 August of his journey of 1762-3, the water having been turned onto the diked
+      fields; his text was read but its scan is too broken to quote.
+  - id: weather-july-hot-sand-wind
+    layer: weather
+    what: >-
+      Fierce heat, 39 °C in the shade, and a violent hot wind from the south-west that fills the air with driven
+      sand through the middle of the day.
+    reach: place
+    source:
+      cite: "Manzoni, R. (1884). El Yèmen: tre anni nell'Arabia Felice. Escursioni fatte dal settembre 1877 al marzo 1880. Roma: Tipografia Eredi Botta."
+      url: https://archive.org/download/elymentreannine01manzgoog/elymentreannine01manzgoog_djvu.txt
+      text: manzoni-1884-el-yemen.txt
+      loc: "p. 353 (Friday 5 July [1878], in the desert between Katàba and Magràss, a march south-west of Zebid)"
+      quote: "all'ombra trentanove centigradi … si alzò un vento violentissimo e caldo da S. O. , che ci riempi gli occhi, il naso, la bocca e gli orecchi, di sabbia"
+    note: >-
+      The right month, nine years earlier, a day's march from Zabid; the year is 1878 by his weekdays. The shade
+      reading was at half past nine and the wind dropped at a quarter past three. He read 47 and then 51 °C during
+      the wind, which a thermometer in blown sand may overstate. On 19 August 1887 Deflers met a north wind on the
+      Hès-Zebid road itself whose sand hid everything beyond 30 m for part of the afternoon (p. 101), and read
+      37 °C at Hès at half past noon (p. 100). The build's warmest-month mean of 30.5 °C is not contradicted by
+      afternoon readings of 34-39 °C.
+  - id: life-hares-in-acacia
+    layer: life
+    what: Hares, many of them, started from under the acacia bushes of the sandy plain as one walks.
+    reach: place
+    source:
+      cite: "Deflers, A. (1889). Voyage au Yemen: journal d'une excursion botanique faite en 1887 dans les montagnes de l'Arabie heureuse. Paris: Klincksieck."
+      url: https://archive.org/download/voyageauyemenjou00defluoft/voyageauyemenjou00defluoft_djvu.txt
+      text: deflers-1889-voyage-au-yemen.txt
+      loc: "p. 100 (18 August 1887, entering the Tihama plain before Hès)"
+      quote: "Nous cheminons au milieu des buissons d’acacias en faisant lever sous nos pas de nombreux lièvres"
+    note: >-
+      Roughly 30 km south-east, towards evening. The only wild mammal that any traveller read names on this plain. The
+      atlas's list for the point (elephant, giraffe, rhinoceros, warthog, kob, hartebeest) is of African fossils and
+      matches nothing in these accounts; Bury (1915, p. 83) says four-footed game had almost ceased to exist in
+      Yemen but for gazelle on the plains.
+  - id: life-abdims-stork-on-roofs
+    layer: life
+    what: >-
+      Abdim's storks, small black-and-white storks, nesting on the roofs of village houses through the summer.
+    reach: region
+    source:
+      cite: "Cornwallis, L. & Porter, R. F. (1982). Spring observations on the birds of North Yemen. Sandgrouse 4. Ornithological Society of the Middle East."
+      url: https://archive.org/download/sandgrouse04orni/sandgrouse04orni_djvu.txt
+      text: sandgrouse-4-1982.txt
+      loc: "systematic list, s.v. Ciconia abdimii Abdim's Stork"
+      quote: "Five occupied nests on houses in Tihama village of Al Mighlaf on 16 April 1979 where the villagers said the birds had returned to breed about one month previously."
+    note: >-
+      A survey of 1979 and 1982, ninety years later, at a village of the northern Tihama; one bird was also seen in
+      Wadi Rima, next north of Wadi Zabid. Carried back on the assumption that a summer visitor's habit is old. The
+      same list has cattle egrets common throughout the Tihama. No account of the 1880s read names a bird here.
+  - id: people-conical-huts
+    layer: people
+    what: >-
+      Hamlets of conical huts, standing empty by day in the farming season because everyone is out in the fields.
+    reach: place
+    source:
+      cite: "Deflers, A. (1889). Voyage au Yemen: journal d'une excursion botanique faite en 1887 dans les montagnes de l'Arabie heureuse. Paris: Klincksieck."
+      url: https://archive.org/download/voyageauyemenjou00defluoft/voyageauyemenjou00defluoft_djvu.txt
+      text: deflers-1889-voyage-au-yemen.txt
+      loc: "p. 100 (18 August 1887, below the Suera crossing, before Hès)"
+      quote: "un second hameau de huttes coniques, en ce moment désert, toute la population étant occupée aux travaux des champs"
+    note: >-
+      Roughly 35 km south-east; the hamlet before it had about ten conical huts of branches and two or three small
+      stone houses (p. 99). The village of huts he passed at the edge of the flooded land south of Zabid (p. 101)
+      is not described. Near Hodeidah he describes the other Tihama form, a rectangular shed of poles thickly
+      covered with brushwood and thatch, several in a fenced compound with the cattle and pack animals (pp. 25-26).
+      The build's "farmer's house" should be one of these huts, not a walled house.
+  - id: people-herders-mat-huts-not-tents
+    layer: people
+    what: >-
+      Herders on the open plain live in clusters of small mat huts, matting over a few poles, among the scrub. Black
+      goat-hair tents are not a Tihama sight.
+    reach: region
+    source:
+      cite: "Bury, G. W. (1915). Arabia Infelix, or the Turks in Yamen. London: Macmillan."
+      url: https://archive.org/download/arabiainfelixort00buryuoft/arabiainfelixort00buryuoft_djvu.txt
+      text: bury-1915-arabia-infelix.txt
+      loc: "p. 139"
+      quote: "They build huts among the scanty bush — wigwam-like structures of matting on a few poles — the black goat-hair tents of the inland desert-dwellers being seldom seen in the Tihama."
+    note: >-
+      Said of the Tihama at large, from travels of 1912-13, a generation later. The build draws "a herder's tent"
+      here, which this contradicts.
+  - id: people-peasants-straw-hats-armed
+    layer: people
+    what: >-
+      Men at work on the field banks in conical straw hats, each carrying a sword and a short lance, cutting openings
+      in the bunds to let floodwater through.
+    reach: place
+    source:
+      cite: "Deflers, A. (1889). Voyage au Yemen: journal d'une excursion botanique faite en 1887 dans les montagnes de l'Arabie heureuse. Paris: Klincksieck."
+      url: https://archive.org/download/voyageauyemenjou00defluoft/voyageauyemenjou00defluoft_djvu.txt
+      text: deflers-1889-voyage-au-yemen.txt
+      loc: "p. 103 (21 August 1887, the fields of the Wadi Rima north of el-Husseini)"
+      quote: "De nombreux paysans coiffés d’un bonnet de paille conique, armés du sabre et de la courte lance (djerid) sont occupés à pratiquer en toute hâte des coupures dans les digues de retenue élevées autour de leurs champs"
+    note: >-
+      The next wadi north, roughly 30 km away, after a storm in the same summer. The rest of their dress is not in the
+      passage; the Admiralty's Handbook of Arabia (vol. I, 1920, p. 152) gives Tihama men a coloured cotton kilt and
+      women a long navy-blue cotton slip, from Bury's time.
+unknown:
+  - Whether this very spot was bunded field or sandy scrub in 1887. The delta's southern edge lay about here; no map or account read fixes it to the kilometre.
+  - Whether the summer floods had reached the Wadi Zabid's fields by July 1887, and so whether the fields were dry stubble, standing crop or sheets of water that month. Every flood seen by a traveller read was in August.
+  - What stage the sorghum and millet of the Wadi Zabid were at in July (ripe, being cut, or newly sown on flood water). Bury's calendar is for rain-sown land near Bajil.
+  - Whether the foothills 20 to 30 km east could be seen at 14:00 on a July day, and the colour of the sky (clear, dust-white or clouded). The only statement of the hour is for January and February 1842.
+  - The cattle, camels, donkeys and goats one would expect in sight, their kinds and numbers. Deflers names pack animals in compounds near Hodeidah, and Bury flocks and herds of the Zaranik; nothing read describes the herds of Zabid.
+  - Wild animals and birds in July. No traveller of the 1880s names a bird on this plain; gazelle and bustard are known only from later and wider sources.
+  - The wells of the plain and their lifting gear, and the look of the canals and their offtakes from the wadi in the 1880s.
+  - The telegraph line. Manzoni (1884, p. 341) says the Taiz-Hodeidah wire ran by Hès and Zebid in 1878, so it crossed this view somewhere to the east, but nothing read says how near, or what its poles looked like.
+  - How many people and hamlets were in sight. The build's 26,000 people in 753 hamlets cannot be checked; the only figures read are guesses for the town (Deflers under 7,000, Manzoni 15,000).
+  - Signs of Ottoman rule outside the town. Deflers names a Turkish kaimakam at Zabid and a camp of some forty tents at el-Husseini in 1887; whether soldiers or posts were to be seen south of the town is not said.
+pictures:
+  - { url: "https://archive.org/details/arabiainfelixort00buryuoft", what: "Bury (1915): photographs of 1912-13, among them 'A Tihama Dance' (facing p. 133) and 'A Dheranik Tribesman' (facing p. 28), for the people and their dress." }
+  - { url: "https://archive.org/details/sandgrouse04orni", what: "Sandgrouse 4 (1982), Plates 1 and 2: the Tihama with small dunes anchored by low bushes, and acacia on the Tihama (photographs by L. Cornwallis, 1979-82)." }
+  - { url: "https://dome.mit.edu/handle/1721.3/49672", what: "MIT Aga Khan Visual Archive: 'Tihama House in Joruba', a reed hut photographed in 1984. Not fetched (the page refused the script); title from a search result only." }
+effort:
+  fetched: 11
+  cited: 5
+  failed: 4
+  note: >-
+    Read and kept: Deflers 1889, Manzoni 1884, Bury 1915, Harris 1893, Niebuhr (1792 translation, vol. 1), the
+    Admiralty's Handbook of Arabia vols. I and II, Sandgrouse 4, two papers on spate irrigation and one on recent
+    farming in the wadis Zabid and Rima. Not reached: an MDPI paper on the Wadi Zabid's water (refused), the 1946
+    Naval Intelligence handbook Western Arabia and the Red Sea (refused), a Durham thesis on Yemeni houses (timed
+    out) and the MIT photograph record (refused). No station climate for Zabid was found in a citable form.
+    Harris's and Niebuhr's scans were too broken to quote. Longest: finding that Deflers rode from Hès to Zebid
+    past this point in August 1887, and reading his French and Manzoni's Italian for the passages.

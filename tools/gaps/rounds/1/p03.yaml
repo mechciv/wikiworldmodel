@@ -1,0 +1,254 @@
+view: t=291.074326Ma&lat=-0.61494&lon=-25.56311&d=1.0000941767&h=340&v=60&hour=11&mo=12&clock=0
+when: 291.1 Ma
+place: >-
+  Equatorial western Pangaea in the Early Permian (Sakmarian; Wolfcampian of North America): ground that is now
+  western Missouri near the Kansas line (38.145°N, 94.223°W), at the eastern edge of the midcontinent shelf. No rock
+  of that age is left here; the nearest record is the upper Council Grove and lower Chase Groups of eastern Kansas,
+  about 190 to 240 km to the west-northwest.
+author: machine:claude-code
+expects:
+  - id: geography-shelf-flooded-and-bared
+    layer: geography
+    what: >-
+      A very wide, nearly level shelf that a shallow sea covered and left again and again. With the sea out, most of
+      the shelf lay bare as land to the horizon; with it in, shallow water (workers put it at under 20 m) stood over
+      the same ground.
+    reach: region
+    source:
+      cite: "Wardlaw, B.R., Boardman, D.R., II, & Nestell, M.K. (2009). Part A, General sequence stratigraphy and conodont biostratigraphy (including new species) of the uppermost Carboniferous (upper Gzhelian) to Lower Permian (lower Artinskian) from the North American Midcontinent. In Boardman, Wardlaw & Nestell, Stratigraphy and conodont biostratigraphy of the uppermost Carboniferous and Lower Permian from the North American Midcontinent. Kansas Geological Survey Bulletin 255."
+      url: https://www.kgs.ku.edu/Publications/Bulletins/255/B255partA.pdf
+      text: boardman-2009-b255a.txt
+      loc: "Part A, p. 8 (page 18 of the PDF), on the Council Grove and lower Chase strata"
+      quote: "During the time interval in which these rocks were deposited, progressively more arid conditions predominated, and sea-level fall resulted in subaerial exposure of the majority of the shelf"
+    note: >-
+      Said of the Kansas, Oklahoma and Nebraska outcrop and subsurface, 190 km and more to the west. The same bulletin
+      says the three stage-defining conodonts occur in Kansas, which is how these beds are tied to the Sakmarian. The
+      depth of the sea is from Bulletin 257 (cited below), not from this page. One cycle of flooding and exposure took
+      far less time than the date can resolve.
+  - id: geography-lowland-to-the-east
+    layer: geography
+    what: >-
+      No mountains in sight. Eastward the land stayed low and broad for a very long way; the highlands that fed the
+      shelf its mud lay far off to the south and west.
+    reach: region
+    source:
+      cite: "The Permian System in Kansas. Kansas Geological Survey Bulletin 257, web edition. (The pages read do not name its authors or year; search results give West, R.R., Miller, K.B., & Watney, W.L., 2010.)"
+      url: https://www.kgs.ku.edu/Publications/Bulletins/257/05_subd.html
+      text: kgs-b257-subd.txt
+      loc: "Depositional Environments and Source Areas of the Wolfcampian, paragraph beginning 'Assembly of the Pangean supercontinent'"
+      quote: "East of the midcontinent was a broad low-lying landmass extending to the now (Permian) eroding Appalachian orogen."
+    note: >-
+      This is the only statement read that covers the ground east of the Kansas outcrop, where the point lies. It is
+      a reconstruction: no Permian rock is left in western Missouri to test it.
+  - id: relief-flat-coastal-plain
+    layer: relief
+    what: >-
+      Flat ground with almost no relief: a coastal plain standing a metre or two above the water, with no valleys cut
+      into it and no hills.
+    reach: region
+    source:
+      cite: "Miller, K.B., & West, R.R. (1993). Reevaluation of Wolfcampian cyclothems in northeastern Kansas: significance of subaerial exposure and flooding surfaces. Kansas Geological Survey Bulletin 235 (Current Research on Kansas Geology), 1–26."
+      url: https://journals.ku.edu/cres/article/download/11848/11179
+      text: miller-west-1993.txt
+      loc: "p. 20"
+      quote: "The paleosols were probably developed on low-relief coastal plains never more than a meter or two above the water table (or above sea level)."
+    note: >-
+      Measured near Manhattan, Riley County, Kansas, about 235 km to the west-northwest. The build has this ground 130 m
+      above the sea of the time. Nothing read says how high the land stood this far east, but 130 m is two orders above
+      what the nearest rocks record, and the soils show a water table close under the surface.
+  - id: water-no-river-channels
+    layer: water
+    what: >-
+      No rivers and no river valleys crossing the plain: water stood in hollows or ran off in sheets, and did not
+      gather into channels.
+    reach: region
+    source:
+      cite: "The Permian System in Kansas. Kansas Geological Survey Bulletin 257, web edition. (The pages read do not name its authors or year; search results give West, R.R., Miller, K.B., & Watney, W.L., 2010.)"
+      url: https://www.kgs.ku.edu/Publications/Bulletins/257/05_subd.html
+      text: kgs-b257-subd.txt
+      loc: "Wolfcampian lithofacies trends, paragraph beginning 'Several important temporal lithofacies trends'"
+      quote: "In contrast with the Virgilian, the lower Wolfcampian (Council Grove Group) has little coarse clastic input and virtually no alluvial or channel sandstones (Mudge, 1967)."
+    note: >-
+      Agrees with the build, whose river model has none here. Miller and West (1993, p. 20) say the same of the
+      paleosol intervals: "a striking absence of erosional fluvial channels".
+  - id: water-ponds-and-burrowers
+    layer: water
+    what: >-
+      Shallow rain-fed ponds lying in hollows of the soil, of the order of 100 m long, holding fish, small amphibians and
+      reptiles. In droughts they dried to cracked mud, and the eel-like amphibian Brachydectes burrowed into the floor
+      in clusters, up to twenty burrows to the square metre.
+    reach: region
+    source:
+      cite: "Hembree, D.I., Hasiotis, S.T., & Martin, L.D. (2005). Torridorefugium eskridgensis (new ichnogenus and ichnospecies): amphibian aestivation burrows from the Lower Permian Speiser Shale of Kansas. Journal of Paleontology 79(3), 583–593."
+      url: https://www.cambridge.org/core/services/aop-cambridge-core/content/view/S0022336000045455
+      text: hembree-2005-jpaleo.txt
+      loc: "Abstract, second paragraph"
+      quote: "fills a 100–m-long paleodepression within a well-developed paleosol. … This succession suggests that lysorophids burrowed in response to episodic, perhaps seasonal, droughts on the Permian midcontinental coastal plain."
+    note: >-
+      Only the abstract could be read. The pond is in the Speiser Shale near Eskridge, Kansas, about 190 km to the
+      west-northwest, and is of the stage. The Paleobiology Database's rows for the Sakmarian show that the atlas's
+      Brachydectes, Acroplous and Ductilodon ("here") all come from this one unit, at Eskridge and at Keats.
+  - id: substrate-red-soils-caliche
+    layer: substrate
+    what: >-
+      Where the ground showed between plants it was reddish-brown silty clay soil, studded with pale lime nodules and
+      lime-coated roots; in wetter stretches a greenish-grey clay that swelled and cracked with the seasons.
+    reach: region
+    source:
+      cite: "The Permian System in Kansas. Kansas Geological Survey Bulletin 257, web edition. (The pages read do not name its authors or year; search results give West, R.R., Miller, K.B., & Watney, W.L., 2010.)"
+      url: https://www.kgs.ku.edu/Publications/Bulletins/257/06_hist.html
+      text: kgs-b257-hist.txt
+      loc: "Inferred History of the Permian Period, paragraph beginning 'A persistent pattern has been recognized'"
+      quote: "Paleosols from the lower part of these units have reddish-brown calcic profiles with carbonate nodules and rhizocretions indicative of semi-arid to subhumid conditions."
+    note: >-
+      Said of the Roca, Eskridge, Blue Rapids, Speiser and Matfield shales of Kansas. The colours are those of the
+      buried soils as they are now; red is read as a soil that drained and stayed above the water table. The same
+      bulletin says the silt and very fine sand of the Chase Group's mudrocks is "probably eolian": dust was blowing in.
+  - id: substrate-evaporite-flats
+    layer: substrate
+    what: >-
+      In the driest spells, along the retreating sea, pale flats of lime mud with gypsum growing in them, cracked by
+      drying into polygons.
+    reach: region
+    source:
+      cite: "Miller, K.B., & West, R.R. (1993). Reevaluation of Wolfcampian cyclothems in northeastern Kansas: significance of subaerial exposure and flooding surfaces. Kansas Geological Survey Bulletin 235 (Current Research on Kansas Geology), 1–26."
+      url: https://journals.ku.edu/cres/article/download/11848/11179
+      text: miller-west-1993.txt
+      loc: "p. 21, Discussion (climate at the scale of the cyclothems)"
+      quote: "Gypsum crystal molds and silica pseudomorphs after gypsum are common in limestones and associated mudstones"
+    note: >-
+      Riley County, Kansas. The quote shows the gypsum; the same paper describes desiccation cracks in the thin-bedded
+      carbonates (p. 10). This belongs to the dry, sea-in phase of each cycle and the soils and plants to the wetter,
+      sea-out phase: the two were not in view together over the whole plain.
+  - id: cover-rooted-vegetation
+    layer: cover
+    what: >-
+      The exposed plain was not bare: plants covered a good part of it, rooted densely in the soil, some with roots as
+      thick as 3 cm, and their litter and charcoal lay in the mud.
+    reach: region
+    source:
+      cite: "Miller, K.B., & West, R.R. (1993). Reevaluation of Wolfcampian cyclothems in northeastern Kansas: significance of subaerial exposure and flooding surfaces. Kansas Geological Survey Bulletin 235 (Current Research on Kansas Geology), 1–26."
+      url: https://journals.ku.edu/cres/article/download/11848/11179
+      text: miller-west-1993.txt
+      loc: "pp. 21–22 (the sentence runs over the page); the root size is on p. 13, Funston cyclothem"
+      quote: "the extensive rooting and presence … of plant debris and charcoal fragments that characterize many mudstone units indicate significant vegetation cover and at least seasonally wet climates"
+    note: >-
+      The ellipsis is the page break. The build's life layer answers "unknown" here; the nearest rocks say there was
+      plant cover, without saying how tall or how dense.
+  - id: cover-bisaccate-pollen
+    layer: cover
+    what: >-
+      The plants whose pollen reached the muds were seed plants with winged (bisaccate) pollen, the kind conifers and
+      seed ferns shed: Alisporites, Platysaccus, Striatites and Vesicaspora.
+    reach: region
+    source:
+      cite: "Paleobiology Database, occurrences of Alisporites, Platysaccus, Striatites and Vesicaspora overlapping the Sakmarian in the midcontinent (collections 24202–24292, entered from Jizba, K.M.M. 1962, Journal of Paleontology 36(5), 871–887). Downloaded 19 November 2026."
+      url: "https://paleobiodb.org/data1.2/occs/list.txt?base_name=Alisporites,Platysaccus,Striatites,Vesicaspora&lngmin=-100&lngmax=-88&latmin=33&latmax=43&interval=Sakmarian&timerule=overlap&show=coll,loc,coords,strat,lith,env,ref"
+      text: pbdb-pollen-overlap.txt
+      loc: "occurrence 247577, collection 24202 (Blue Springs Shale Member, Matfield Shale, Geary County, Kansas)"
+      quote: "Alisporites zapfei … Blue Springs member Geary Kansas 155 … Late Paleozoic bissacate pollen from the United States midcontinent area"
+    note: >-
+      A database's rows, not the paper: Jizba (1962) could not be read. These rows are where the atlas's four pollen
+      genera ("here") come from; they are in Geary, Riley, Wabaunsee and Pottawatomie Counties, Kansas, 190 to 240 km
+      away, dated only as Wolfcampian to Sakmarian. They are pollen grains: the bodies the build draws for them
+      (gymnosperms, podocarps, "plants") are stand-ins, and that the parents were conifers and seed ferns is the usual
+      reading of such pollen, not something these rows say.
+  - id: cover-conifers-and-peltasperms
+    layer: cover
+    what: >-
+      Few kinds of plant, in patches: stands of walchian conifers and stands of peltasperm seed ferns, each patch
+      nearly all of one kind, tough-leaved and built for drought, on red ground with lime crusts and mud cracks.
+    reach: region
+    source:
+      cite: "DiMichele, W.A., Chaney, D., Nelson, W., Lucas, S.G., Looy, C., Quick, K., & Jun, W. (2007). A low diversity, seasonal tropical landscape dominated by conifers and peltasperms: Early Permian Abo Formation, New Mexico. Review of Palaeobotany and Palynology 145(3–4), 249–273. (Authors as the USGS record lists them.)"
+      url: https://pubs.usgs.gov/publication/70030081
+      text: dimichele-2007-abo-usgs.txt
+      loc: "Abstract (as given on the USGS Publications Warehouse record)"
+      quote: "Landscapes could have consisted of a small-scale vegetational patchwork dominated almost monospecifically in any one patch"
+    note: >-
+      Only the abstract could be read. The Abo Formation is in central New Mexico, roughly 1,000 km to the west along
+      the same equatorial belt, Early Permian but not dated to the stage in the abstract; a coastal plain with
+      unchannelled flow, as in Kansas. Carried here as the nearest described vegetation of this kind. The abstract
+      offers the patchwork as one of two readings; the other is that conifers and peltasperms grew at different times.
+  - id: cover-open-woodland
+    layer: cover
+    what: >-
+      Where trees stood on the coastal flats they stood apart: an open-canopy woodland of conifer-like trees of mixed
+      ages, of the order of a hundred to the hectare, leafless for part of the year.
+    reach: region
+    source:
+      cite: "Falcon-Lang, H.J., Jud, N., John, N.W., DiMichele, W.A., Chaney, D., & Lucas, S.G. (2011). Pennsylvanian coniferopsid forests in sabkha facies reveal the nature of seasonal tropical biome. Geology 39(4), 371–374. (Authors as the USGS record lists them.)"
+      url: https://pubs.usgs.gov/publication/70035055
+      text: falcon-lang-2011-sabkha-usgs.txt
+      loc: "Abstract (as given on the USGS Publications Warehouse record)"
+      quote: "this was a deciduous, mixed-age, coniferopsid woodland (∼100 trees per hectare) with an open canopy"
+    note: >-
+      A weak carry, used because it is the only count of trees read for seasonally dry tropical Pangaea. It is Late
+      Pennsylvanian (early Kasimovian), a period earlier, and in New Mexico; only the abstract could be read. It shows
+      what such a woodland was like on a coastal sabkha, not that one stood here.
+  - id: cover-fire-charcoal
+    layer: cover
+    what: >-
+      Burnt ground and charred wood in places: the vegetation burned often enough for charcoal to be common in the soils.
+    reach: region
+    source:
+      cite: "The Permian System in Kansas. Kansas Geological Survey Bulletin 257, web edition. (The pages read do not name its authors or year; search results give West, R.R., Miller, K.B., & Watney, W.L., 2010.)"
+      url: https://www.kgs.ku.edu/Publications/Bulletins/257/05_subd.html
+      text: kgs-b257-subd.txt
+      loc: "Depositional Environments and Source Areas of the Wolfcampian, paragraph beginning 'Elias (1937) divided the variegated mudrocks'"
+      quote: "The paleosols themselves often contain charcoal fragments suggesting forest fires, an observation consistent with a seasonal wet-dry climate regime."
+    note: Said of the greenish-grey paleosols of the Council Grove Group in Kansas. The authors' word is "forest".
+  - id: weather-seasonal-wet-and-dry
+    layer: weather
+    what: >-
+      A climate of sharp wet and dry seasons, between semi-arid and monsoonal: in the rains, standing water and green
+      growth on swelling clay; in the dry months, cracked ground and shrinking ponds.
+    reach: region
+    source:
+      cite: "The Permian System in Kansas. Kansas Geological Survey Bulletin 257, web edition. (The pages read do not name its authors or year; search results give West, R.R., Miller, K.B., & Watney, W.L., 2010.)"
+      url: https://www.kgs.ku.edu/Publications/Bulletins/257/06_hist.html
+      text: kgs-b257-hist.txt
+      loc: "Inferred History of the Permian Period, paragraph beginning 'A persistent pattern has been recognized'"
+      quote: "The consistent vertical pattern of these climatically sensitive sedimentary features within Wolfcampian cycles indicates that climate changed from arid to progressively wetter and more seasonal conditions during the formation of each cyclothem"
+    note: >-
+      Broadly agrees with the build's class here (savanna). No source read says which months were wet, so whether
+      December was in the rains or the drought is not known.
+  - id: sky-high-tropical-sun
+    layer: sky
+    what: >-
+      A tropical sun standing high in the late morning: the place lay within a few degrees of the equator.
+    reach: region
+    source:
+      cite: "The Permian System in Kansas. Kansas Geological Survey Bulletin 257, web edition. (The pages read do not name its authors or year; search results give West, R.R., Miller, K.B., & Watney, W.L., 2010.)"
+      url: https://www.kgs.ku.edu/Publications/Bulletins/257/06_hist.html
+      text: kgs-b257-hist.txt
+      loc: "Climate Models, paragraph beginning 'Using a zonal model of global circulation'"
+      quote: "more recent paleogeographic reconstructions (Witzke, 1990; Scotese and McKerrow, 1990; Scotese and Golonka, 1992) do not place the midcontinent above 10 degrees north by Wolfcampian time"
+    note: >-
+      The source gives the latitude only, as between the equator and 10° north, where the viewer has 0.6° south. How
+      high the sun stands at 11:00 in December, and on which side, follows from the latitude and is not in the source.
+unknown:
+  - Whether this ground was under the shallow sea or dry land at this moment. The Kansas beds record many floodings and exposures within the stage, each far shorter than the date can resolve, and no Permian rock is left in western Missouri to say what happened here.
+  - How high the land stood here. The Kansas plain was a metre or two above the sea; the land to the east is called only "low-lying"; the build's 130 m rests on nothing that could be read.
+  - What the plants looked like in Kansas itself, how tall, how close together, what colour in December. The plant bed nearest in place, the Mill Creek flora of the Roca Shale in Wabaunsee County (Warren, 1969), is named in Bulletin 257 but could not be found to read, and Jizba's (1962) pollen paper is behind a paywall. Whether the atlas's Walchia, Callipteris, Cordaites and the rest ("region") grew on this plain is not said by anything read.
+  - What covered the ground between the trees, or whether it was bare soil.
+  - Which months were wet, and so whether in December the ponds were full and the plants in leaf; and the cloud of either season.
+  - Which large land animals were in sight. The texts read name only fish, amphibians, "reptiles" and "tetrapods" from the Speiser Shale; Cunningham's 1989 thesis (KGS Open-file Report 89-20) lists sphenacodont remains there, but its scanned text is too garbled to quote. No source read puts the atlas's Dimetrodon, Edaphosaurus, Eryops or Diadectes ("region", from far to the south) on this plain at this time.
+  - Whether giant griffinflies flew here. The only Kansas record read (the Elmo beds of Dickinson County, where Meganeuropsis has a wingspan of 29 inches) is on a page of the Kansas Geological Survey that does not date the beds within the Permian; a search result, not a text read, puts them in the younger Wellington Formation.
+  - Which way the sea lay from this camera. Kansas sources put the open water to the west and southwest in today's frame; how that turns into the viewer's frame of the time, facing 340°, was not worked out from any source.
+  - The colour and clearness of the sea and its tidal flats when it was in.
+pictures:
+  - { url: "https://www.kgs.ku.edu/Publications/Bulletins/257/05_subd.html", what: "Kansas Geological Survey Bulletin 257: fig. 50, the paleogeography of Kansas in the late Wolfcampian; fig. 27, the red and green stacked soils of the Speiser Shale as they crop out now." }
+  - { url: "https://www.kgs.ku.edu/Publications/OFR/1994/OFR94_23/page3.html", what: "Kansas Geological Survey Open-file Report 94-23: figs. 5 and 6, drawings of how the soils formed as the sea fell and of the monsoon in glacial and interglacial times." }
+effort:
+  fetched: 21
+  cited: 8
+  failed: 8
+  note: >-
+    Twenty-one fetches; thirteen gave a text that could be read, eight of them cited. Refused: the Smithsonian
+    repository (three papers by DiMichele and others on Early Permian floras), core.ac.uk (three, among them Counts's
+    thesis on the Council Grove soils and Falcon-Lang's 2015 paper on a seasonally dry Permian coast) and sepm.org (a
+    certificate error); the Sedimentary Record's page gave only a cookie notice. Read but not cited: Kansas Geological
+    Survey Open-file Reports 94-23 and 89-20, the 2002 abstract on the Speiser pond, the Paleobiology Database's
+    Sakmarian occurrences for the area, and the Survey's page on fossil insects. The longest part was the vegetation:
+    nothing on the plants of the Kansas beds themselves could be read, so the plant cover rests on abstracts from New Mexico.

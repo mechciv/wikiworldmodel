@@ -1,0 +1,271 @@
+view: t=-4532.55&lat=34.30255&lon=69.87607&d=1.0000023544&h=170&v=84&hour=15&mo=3&clock=0
+when: 4534 BCE
+place: >-
+  Hill country south of the Kabul River between Kabul and Jalalabad, Afghanistan, in the drainage of the Surkhab
+  (Surkh Rud) at the north foot of the Safed Koh (Spin Ghar), between Jagdalak and Gandamak; about 1,670 m up,
+  looking south to the range.
+author: machine:claude-code
+expects:
+  - id: relief-safed-koh-wall
+    layer: relief
+    what: >-
+      Straight ahead to the south the Safed Koh closes the view: one long, very high range running east and west,
+      with ridge behind ridge, the highest of them the peaks at the back.
+    reach: place
+    source:
+      cite: "Griffith, W. (1847). Journals of Travels in Assam, Burma, Bhootan, Afghanistan and the Neighbouring Countries. Arranged by J. M'Clelland. Project Gutenberg eBook 15171, from the 1847 edition."
+      url: https://web.archive.org/web/2022id_/https://www.gutenberg.org/files/15171/15171.txt
+      text: griffith-1847.txt
+      loc: "Chapter XVII, entry for the 13th (October 1839), Jugdulluck to Soorkhab"
+      quote: "The beautiful Himalaya looking range Sofaid-Koh, runs east and west; it is very high, in the back ranges with very heavy snow on both ridges, and peaks."
+    note: >-
+      Seen in October 1839 from the old road between Jagdalak and Gandamak, a few kilometres north of the point; the
+      relief is the same 6,370 years earlier, which is why this is given as of the place. By Wikipedia's coordinates
+      (saved as wiki-sikaram.txt and wiki-gandamak.txt) the highest summit, Sikaram, is about 29 km from the point on
+      a bearing of about 175°, almost where the camera looks, and Gandamak about 15 km east. The 1911 Britannica
+      (eb1911-afghanistan.txt) gives Sikaram 15,600 ft, some 3,000 m above the viewer.
+  - id: substrate-sandstone-conglomerate
+    layer: substrate
+    what: >-
+      Low rounded hills of weak, crumbling sandstone capped with conglomerate, cut by ravines; the ground between is
+      sandy and strewn with rounded stones and boulders.
+    reach: place
+    source:
+      cite: "Griffith, W. (1847). Journals of Travels in Assam, Burma, Bhootan, Afghanistan and the Neighbouring Countries. Arranged by J. M'Clelland. Project Gutenberg eBook 15171, from the 1847 edition."
+      url: https://web.archive.org/web/2022id_/https://www.gutenberg.org/files/15171/15171.txt
+      text: griffith-1847.txt
+      loc: "Chapter XVII, entry for the 15th (October 1839), halt near Gundamuck"
+      quote: "All the low hills here, and indeed between us and the boundary ranges of the valley, are of sandstone, generally very slightly held together … The upper surface of these hills is remarkably stony, all the stones being more or less rounded."
+    note: >-
+      Written of the hills between Gandamak and the Safed Koh, about 15 km east of the point, in 1839; the rock is far
+      older than the scene. Griffith calls the hills west of there, towards Jagdalak, the same ("either sandy, easily
+      friable, or conglomerate"); of the mountains further west again, towards Tezin, he says that where no strata
+      crop out they are rounded and brown.
+  - id: water-red-river-clear-streams
+    layer: water
+    what: >-
+      The Surkhab, a river running reddish with silt in a narrow bed, and small clear streams coming down to it from
+      the Safed Koh.
+    reach: place
+    source:
+      cite: "Griffith, W. (1847). Journals of Travels in Assam, Burma, Bhootan, Afghanistan and the Neighbouring Countries. Arranged by J. M'Clelland. Project Gutenberg eBook 15171, from the 1847 edition."
+      url: https://web.archive.org/web/2022id_/https://www.gutenberg.org/files/15171/15171.txt
+      text: griffith-1847.txt
+      loc: "Chapter XVII, entries for the 15th and 19th (October 1839)"
+      quote: "many rivulets descend near us from the Sofaid-Koh; and the water in these is beautifully clear … The Soorkhab river is not seen after leaving the place of the same name; after it crosses the road, it runs due north through the mountains, in a narrow, almost inaccessible bed; its waters are of a reddish colour."
+    note: >-
+      Seen in October 1839, at low water; what the river carried in a March of the fifth millennium BCE is not known.
+      Whether the river itself is in sight from the point is not known either: Griffith crossed it where the old road
+      does, which by his distances (nine and a quarter miles by road from there to near Gandamak) cannot be many
+      kilometres from the point; on which side of it the text does not say. The one river the build lists (at
+      34.4994 N, 69.8916 E) is about 22 km north, behind the camera, so the build may have no water in this view.
+  - id: ice-snow-on-the-range
+    layer: ice
+    what: >-
+      Snow on the Safed Koh, white along the whole crest in March; the snow stops well above the valley floors at
+      the foot of the range.
+    reach: region
+    source:
+      cite: "Babur, trans. A. S. Beveridge (1922). The Bābur-nāma in English (Memoirs of Bābur). Project Gutenberg eBook 44608."
+      url: https://web.archive.org/web/2022id_/https://www.gutenberg.org/files/44608/44608-0.txt
+      text: baburnama.txt
+      loc: "Fol. 132b, description of Kābul, Nīngnahār"
+      quote: "The Safed-koh runs along the south of Nīngnahār … because its snow never lessens; none falls in the lower parts of its valleys, a half-day's journey from the snow-line."
+    note: >-
+      Of this range, written in the early sixteenth century CE, six thousand years after the scene. Griffith saw "very heavy snow" on it
+      in October 1839. How low the snow lay in a March of 4534 BCE no source read says.
+  - id: weather-end-of-a-hard-winter
+    layer: weather
+    what: >-
+      The end of a hard winter: the point is on the cold, Kabul side of the step down to Gandamak, and March is in
+      the season of rain and of cold north-west storms.
+    reach: region
+    source:
+      cite: "Afghanistan. Encyclopædia Britannica, 11th edition (1911), volume 1. Wikisource transcription."
+      url: https://en.wikisource.org/wiki/1911_Encyclop%C3%A6dia_Britannica/Afghanistan
+      text: eb1911-afghanistan.txt
+      loc: "section Climate"
+      quote: "At Kabul, and over all the northern part of the country to the descent at Gandamak, winter is rigorous … The north-west blizzards which occur in winter and spring are the most noticeable feature"
+    note: >-
+      The climate of about 1900 CE, carried back. It agrees with the build's climate here (coldest month -5.4 °C,
+      classed as cold). The same article says the spring rain matters more to crops than the winter's, and that the
+      sun shines for three-fourths of the year; neither says what a given March afternoon looked like.
+  - id: cover-evergreen-oak-forest
+    layer: cover
+    what: >-
+      Evergreen oak forest (Quercus baloot) on the hills, up to 15 m tall and in leaf in March as in every month,
+      with a rich undergrowth and with wild almond and pistachio trees among the oaks.
+    reach: region
+    source:
+      cite: "Breckle, S.-W. (2007). Flora and vegetation of Afghanistan. Basic and Applied Dryland Research 1(2), 155–194. doi:10.1127/badr/1/2007/155"
+      url: https://www.schweizerbart.de/content/papers/download/79384
+      text: breckle-2007.txt
+      loc: "p. 173, Himalayan type Evergreen Forests in East Afghanistan (6)"
+      quote: "Between 1200 and 2200 m the oak Quercus baloot (6) dominates a forest which is up to 15 m high (Photo 18); it has a rich undergrowth and several tree species including almonds Amygdalus kuramica and Pistacia khinjuk"
+    note: >-
+      The potential natural vegetation of eastern Afghanistan today, for the belt the point lies in (1,666 m); it is
+      not evidence of the fifth millennium BCE. Breckle calls the oak evergreen, says large parts of this forest
+      have been destroyed for fuel, and has remnants formerly at the Latahband pass, some 25 km east of Kabul. In
+      October 1839 Griffith found these hills "frightfully barren", with "a sprinkling of holly-looking bushes", and
+      was told that oak (baloot) was abundant though he did not see it; that bareness should not be carried back.
+      The build's atlas lists Quercus, which fits.
+  - id: cover-conifers-on-the-range
+    layer: cover
+    what: >-
+      Above the oak, the lower ranges of the Safed Koh dark, in places black, with conifer forest below the snow.
+    reach: region
+    source:
+      cite: "Griffith, W. (1847). Journals of Travels in Assam, Burma, Bhootan, Afghanistan and the Neighbouring Countries. Arranged by J. M'Clelland. Project Gutenberg eBook 15171, from the 1847 edition."
+      url: https://web.archive.org/web/2022id_/https://www.gutenberg.org/files/15171/15171.txt
+      text: griffith-1847.txt
+      loc: "Chapter XVII, entries for the 13th and 14th (October 1839)"
+      quote: "From this a fine view of Sofaid-Koh is obtained, the lower ranges in some places being black with firs … oaks are seen in abundance on the mountain to the south"
+    note: >-
+      The same view, in 1839. Breckle (2007, p. 173) gives the belts for eastern Afghanistan: Pinus gerardiana
+      woodland 5 to 12 m high from 2,200 to 2,500 m, then Cedrus deodara forest, dense and up to 30 m high, from 2,500
+      to 3,100 m, and in humid parts spruce and fir, 20 to 25 m high, up to 3,300 m. The build's atlas lists Pinus
+      and Abies, which fit.
+  - id: cover-forest-before-clearing
+    layer: cover
+    what: >-
+      More forest than now: slopes of the Hindu Kush that are open thorn-cushion scrub today still carried pine
+      forest at this date.
+    reach: region
+    source:
+      cite: "Miehe, G., Miehe, S. & Schlütz, F. (2009). Early human impact in the forest ecotone of southern High Asia (Hindu Kush, Himalaya). Quaternary Research 71, 255–265."
+      url: https://web.archive.org/web/2020id_/https://www.uni-marburg.de/de/fb19/disciplines/physisch/biogeographie/vergleichende-hochgebirgesforschung/dokumente/2009-4.pdf
+      text: miehe-2009.txt
+      loc: "abstract, p. 255, and Results, The eastern Hindu Kush, Shukan, p. 260"
+      quote: "We postulate that today's open dwarf shrublands replace woodlands and forests. … proving the local existence of a forest habitat until around 5700 cal yr BP"
+    note: >-
+      A pollen profile at Shukan (36°23' N, 73°07' E, 3,360 m) in northern Pakistan, about 370 km north-east of the
+      point and 1,700 m higher: the nearest dated pollen record that could be read. Its forest ends about 5700 cal BP
+      (about 3750 BCE), some 800 years after the scene; its authors think people, more than climate, ended it. It
+      says nothing of the oak belt itself.
+  - id: cover-reeds-in-the-ravines
+    layer: cover
+    what: >-
+      Wherever a ravine holds water it is crowded with bulrush (Typha) and tall Saccharum grass, with willows in the
+      stream beds.
+    reach: region
+    source:
+      cite: "Griffith, W. (1847). Journals of Travels in Assam, Burma, Bhootan, Afghanistan and the Neighbouring Countries. Arranged by J. M'Clelland. Project Gutenberg eBook 15171, from the 1847 edition."
+      url: https://web.archive.org/web/2022id_/https://www.gutenberg.org/files/15171/15171.txt
+      text: griffith-1847.txt
+      loc: "Chapter XVII, entry for the 14th (October 1839), Soorkhab to Gundamuck"
+      quote: "In the bed of the stream, willows occur … The ravines wherever there is water, crowded with Typha, and Saccharum"
+    note: >-
+      Of this ground, between the Surkhab crossing and Gandamak, in October 1839. In March the stands would be last
+      year's; what colour and height they were then the source does not say. The build's atlas lists Typha, Artemisia
+      and Ephedra, all of which Griffith names on this road.
+  - id: cover-green-by-late-march
+    layer: cover
+    what: >-
+      The season's new growth has begun: by the end of March, a short way east at Gandamak, young grain stands green
+      and tall enough to feed horses.
+    reach: region
+    source:
+      cite: "Babur, trans. A. S. Beveridge (1922). The Bābur-nāma in English (Memoirs of Bābur). Project Gutenberg eBook 44608."
+      url: https://web.archive.org/web/2022id_/https://www.gutenberg.org/files/44608/44608-0.txt
+      text: baburnama.txt
+      loc: "925 AH, entry for March 29th (1519 AD), Fol. 233-233b"
+      quote: "close to the Evening Prayer forded the Siyāh-āb at Gandamak, satisfied our horses' hunger in a field of green corn"
+    note: >-
+      A sown field at Gandamak, about 15 km east of the point, on 29 March 1519 (Julian). It is used only
+      for the state of the season; no field is known here in 4534 BCE. What the wild ground looked like in March no
+      source read says for this place. For Afghanistan at large the Encyclopaedia Iranica (iranica-flora.txt) has
+      bulbs such as tulips and Eremurus coming up with the spring rain.
+  - id: life-partridges-ravens-vultures
+    layer: life
+    what: >-
+      Small partridges in numbers on the stony ground, chukar on the slopes, ravens and a large vulture overhead; a
+      fox.
+    reach: region
+    source:
+      cite: "Griffith, W. (1847). Journals of Travels in Assam, Burma, Bhootan, Afghanistan and the Neighbouring Countries. Arranged by J. M'Clelland. Project Gutenberg eBook 15171, from the 1847 edition."
+      url: https://web.archive.org/web/2022id_/https://www.gutenberg.org/files/15171/15171.txt
+      text: griffith-1847.txt
+      loc: "Chapter XVII, entries for the 11th and 14th (October 1839), Jugdulluck and Soorkhab to Gundamuck"
+      quote: "Chakor, large vulture, ravens … Small partridge very abundant. A fox observed."
+    note: >-
+      What a naturalist saw on this road in October 1839, carried back. The build's atlas lists Alectoris (the chukar)
+      and Coturnix (Griffith saw quails by the Surkhab lower down), which fit. No source read puts the atlas's
+      Pterodroma and Puffinus (petrels and shearwaters, birds of the open sea), Platanista (a river dolphin),
+      Malaclemys, Lagopus or bison anywhere near this valley.
+  - id: life-wild-ass
+    layer: life
+    what: Wild asses in the country towards the Khurd Kabul and the Surkhab.
+    reach: region
+    source:
+      cite: "Babur, trans. A. S. Beveridge (1922). The Bābur-nāma in English (Memoirs of Bābur). Project Gutenberg eBook 44608."
+      url: https://web.archive.org/web/2022id_/https://www.gutenberg.org/files/44608/44608-0.txt
+      text: baburnama.txt
+      loc: "Fol. 142, description of Kābul, Fauna of Kābul"
+      quote: "Towards Khūrd-kābul and the Sūrkh-rūd there is wild-ass"
+    note: >-
+      Of this very stretch of country, in the early sixteenth century CE. The wild ass is an animal of open ground
+      (my own knowledge, not a source read), so it may speak for the cleared hills of Babur's day more than for the
+      fifth millennium BCE; whether it was here when the oak stood is not known. The same passage says wild goats, wild sheep and deer were scarce on the mountains round Kabul and
+      names a wild sheep that crossed them between its summer and winter grounds. The build's atlas has no wild ass,
+      sheep or goat.
+  - id: people-neolithic-toolkit
+    layer: people
+    what: >-
+      If people are in sight, they are people of the Neolithic of the Hindu Kush: flint sickle blades and bone tools,
+      pecked stone hoes, querns and pounders, and crude, soft pottery.
+    reach: region
+    source:
+      cite: "Dupree, N. H. (1983, updated 2011). Afghanistan viii. Archeology. Encyclopaedia Iranica, online edition."
+      url: https://web.archive.org/web/2023/https://www.iranicaonline.org/articles/afghanistan-viii-archeo
+      text: iranica-archaeology.txt
+      loc: "list of sites, Neolithic, ca. 8,000-2,000 B.C., Āq Koprūk"
+      quote: "Non-ceramic Neolithic finds included sickle blades and other flint and bone implements, pecked stone hoes, celts, querns, and pounders, plus two types of pottery"
+    note: >-
+      Āq Koprūk is in Balkh, north of the Hindu Kush and more than 300 km from the point; the article dates these
+      finds only as between 8,000 and 3,000 B.C. Every Neolithic site it lists is in the north of the country, and
+      none is in the Kabul River valley east of Kabul. Sickles, hoes and querns are the tools of people who reaped and
+      ground grain (an inference, not the article's words), which sits badly with the build's "foragers"; the build's
+      470 houses in 140 settlements rest on HYDE's count and on no site.
+  - id: people-early-village-across-the-range
+    layer: people
+    what: >-
+      The nearest village of about this time known from excavation, across the Safed Koh in the Bannu basin: a few
+      hundred people in mud-walled houses, some on stone footings, with flat roofs of wattle and daub.
+    reach: region
+    source:
+      cite: "Sheri Khan Tarakai. Wikipedia, the free encyclopedia (read 19 November 2026), summarizing Petrie, C. A. (ed.) (2010), Sheri Khan Tarakai and Early Village Life in the Borderlands of North-West Pakistan, Oxbow."
+      url: https://en.wikipedia.org/wiki/Sheri_Khan_Tarakai
+      text: wiki-skt.txt
+      loc: "lead, second paragraph, and section Sheri Khan Tarakai in context"
+      quote: "a small village, populated at any one time by perhaps a few hundred people who lived in mud-walled houses, some of which had stone foundations and flat roofs made of wattle and daub. … The available dating evidence indicates that Sheri Khan Tarakai was occupied from the late fifth until the early third millennium BC."
+    note: >-
+      An encyclopedia, cited because the excavation monograph it summarizes and two articles of the Bannu project
+      could not be fetched. The site is about 170 km south-south-east of the point (by the page's coordinates),
+      beyond the range, in a hot, arid to semi-arid basin, and by this account begins in the late fifth millennium BCE, at or just after the scene's date; the
+      project's own report on Lewan (Morris & Thomas 2002, saved as pia-bannu.txt) gives the phase as c. 4500-3000
+      BC, and the same page's first sentence says about 5000 BC. The page has its people growing barley and wheat and
+      keeping sheep, goats and cattle. Nothing shows such a village in this valley.
+unknown:
+  - What grew at this spot in 4534 BCE. No pollen, charcoal or other plant record of the period could be read for the Kabul River valley or the Safed Koh; the oak forest is today's potential vegetation carried back, and the nearest dated pollen record read is about 370 km away and 1,700 m higher.
+  - Whether anyone lived in or crossed this valley then, and what a shelter or house of theirs looked like. No excavated site of the fifth millennium BCE in the Kabul valley east of Kabul or in Nangarhar appears in any source read.
+  - Whether the people of the valley, if there were any, hunted and gathered only, or already kept sheep and goats or sowed grain, and so whether a herd, a field or a cleared patch would be in sight.
+  - Which large animals were here then. No bone assemblage of the period could be read; the wild sheep, wild goats, deer, leopard, wolf and bear of the modern and medieval lists are not dated to the scene.
+  - How low the snow lay on the Safed Koh in a March of the mid-Holocene, and whether snow still lay on the ground at 1,670 m.
+  - The sky of a March afternoon here, cloud, haze or dust, and how full and how red the Surkhab ran in the spring rains and snowmelt.
+  - The ground at the camera itself, whether valley floor, terrace or spur, and so whether the river or only its side ravines are in sight; no description of the spot itself was found, only of the old road a few kilometres north and east.
+  - What the oak wood looked like in March beyond being evergreen, whether the almonds and Judas-trees were in flower and what covered the ground beneath them.
+pictures:
+  - { url: "https://www.schweizerbart.de/content/papers/download/79384", what: "Breckle (2007): Photo 18, Quercus baloot forest in the Pech valley at 1,500 m; Photo 20, cut-over oaks at the Latahband pass east of Kabul in winter; Photo 22, deodar forest on the southern slopes of the Safed Koh." }
+effort:
+  fetched: 18
+  cited: 7
+  failed: 15
+  note: >-
+    Thirteen texts are kept (seven cited; Wikipedia's Gandamak, Sikaram and Hisarak pages for coordinates, the Bannu
+    report and the Iranica flora and fauna articles are used only in notes or not at all); five more that were read
+    gave nothing of use (two wrong papers, a review of later millennia, a landing page, a Wikipedia climate page
+    that copies the Britannica) and were removed. Fifteen attempts failed: iranicaonline.org and gutenberg.org
+    directly (both then read through the Wayback Machine), ecoregions.worldwildlife.org, uni-marburg.de directly,
+    mdpi.com, core.ac.uk, journals.ed.ac.uk and journals.uclpress.co.uk (a bot wall; the Bannu project's articles),
+    and one Cambridge address I guessed wrongly. The longest search, without result, was for any dated evidence of the
+    fifth millennium BCE, of plants or of people, within 100 km of the point.

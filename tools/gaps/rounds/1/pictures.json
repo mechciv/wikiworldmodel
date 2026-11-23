@@ -1,0 +1,110 @@
+{
+ "p04": {
+  "model": "grok-imagine-image-2.0",
+  "quality": "medium",
+  "made": "2026-11-19",
+  "prompt": "The shore of a shallow salt lake in an arid land 124 million years ago, in the Early Cretaceous, at noon under a hot, hard sun. Low, level ground. The lake is still, shallow and without surf, and has shrunk back from its margin, leaving wide flats of dark, organic mud split by mudcracks, crusted in places with white gypsum and salt. In the shallows, low rounded domes of stromatolite and sheets of microbial mat. A scatter of dead fish, dozens together, lies stranded at the water's edge. The ground is open and in full sun, with very few plants: sparse low shrubs and herbs near the water, small water plants with kidney-shaped leaves floating at the very edge, and, in the middle distance, a thin line of conifers along a stream that feeds the lake, trees with cypress-like scale leaves on stout shoots. Heat shimmer over the flats. No forest, no rainforest, no grass, no palms, no flowering trees, no dinosaurs, no birds, no people. Seen from the eye height of a person standing on the ground, looking level at the horizon, wide angle. Photorealistic, like a documentary photograph taken in natural light, 16:9, sharp and plainly lit, no dramatic colour grading. No text, no labels, no captions, no borders, no watermark.",
+  "mime": "image/jpeg",
+  "usd": 0.06,
+  "takes": 1
+ },
+ "p01": {
+  "model": "grok-imagine-image-2.0",
+  "quality": "medium",
+  "made": "2026-11-19",
+  "prompt": "The early Earth 2.26 billion years ago. Unfamiliar continents, none with the outline of any continent of today: several large landmasses standing above a wide ocean, in about today's proportion of land to sea. The land is entirely bare of plants: grey and brown rock and sediment, and dark fields of fresh basalt lava. It is grey, brown and black, not red: only a few small rust-red patches show, right at the mouths of rivers. No green anywhere on land. One landmass at middle to high latitude carries an ice sheet whose glaciers reach its coast; the rest of the globe is not frozen. Shallow shelf seas along some coasts are tinted murky green, with brown plumes of mud off river deltas. Bands of white cloud. The sunlit side is a little dimmer than in a modern photograph of the Earth. The Moon in the black sky beside the planet, slightly larger than it looks today. No city lights, no vegetation, no modern coastlines. The whole disc of the planet seen from space, about ten thousand kilometres above the surface, against black. Photorealistic, like a documentary photograph taken in natural light, 16:9, sharp and plainly lit, no dramatic colour grading. No text, no labels, no captions, no borders, no watermark.",
+  "mime": "image/jpeg",
+  "usd": 0.06,
+  "takes": 2
+ },
+ "p02": {
+  "model": "grok-imagine-image-2.0",
+  "quality": "medium",
+  "made": "2026-11-19",
+  "prompt": "A coastal plain at the edge of a great continent 485 million years ago, at high southern latitude, on a late-autumn afternoon with the sun low in the sky. Low, gently undulating ground with no hills or mountains. The ground is loose, coarse, pale quartz sand with pebbly patches, completely bare. A wide, shallow, braided river of many sandy channels with no banks crosses it toward a low sandy shore: tidal flats of wet silt, sand bars, and a calm shallow sea to the horizon. Wind-rippled sand beside the river. On damp ground, thin dark films of microbial crust, flat on the surface. At the water's edge the wet sand is pocked with small burrow holes and crossed by narrow furrowed trails. No plants of any kind: no grass, no moss, no shrubs, no trees, no seaweed heaps. No animals on the land, no birds, no footprints. No ice and no snow. Seen from the eye height of a person standing on the ground, looking level at the horizon, wide angle. Photorealistic, like a documentary photograph taken in natural light, 16:9, sharp and plainly lit, no dramatic colour grading. No text, no labels, no captions, no borders, no watermark.",
+  "mime": "image/jpeg",
+  "usd": 0.06,
+  "takes": 1
+ },
+ "p03": {
+  "model": "grok-imagine-image-2.0",
+  "quality": "medium",
+  "made": "2026-11-19",
+  "prompt": "An equatorial coastal plain 291 million years ago, in the Early Permian, in late morning under a high tropical sun. Utterly flat land a metre or two above a shallow sea, which lies along one side of the view behind pale flats of lime mud cracked into polygons. No rivers, no valleys, no hills. Shallow rain ponds about a hundred metres long lie in hollows; some are full, others have dried to cracked mud. The soil between plants is reddish-brown silty clay dotted with pale lime nodules. Open woodland in patches: stands of walchian conifers, small trees with stiff whorled branches like a Norfolk Island pine, the trees standing well apart; and separate patches of low, tough-leaved seed ferns. Here and there a patch of burnt ground with charred trunks. No grass, no flowers, no broad-leaved trees, no palms, no mountains, no people, no buildings. Seen from about 300 metres above the ground, looking obliquely down and ahead, the horizon near the top of the frame. Photorealistic, like a documentary photograph taken in natural light, 16:9, sharp and plainly lit, no dramatic colour grading. No text, no labels, no captions, no borders, no watermark.",
+  "mime": "image/jpeg",
+  "usd": 0.06,
+  "takes": 1
+ },
+ "p05": {
+  "model": "grok-imagine-image-2.0",
+  "quality": "medium",
+  "made": "2026-11-19",
+  "prompt": "A lowland in southern Australia 23 million years ago, at noon in winter, the sun low in the northern sky behind the camera, the air cool and damp under broken cloud. A dead-flat plain to the horizon, with no hill or rise anywhere: the forest canopy makes one level line across the view. Evergreen forest and woodland cover the whole view: hard-leaved trees on the drier ground, darker patches of rainforest in the hollows, with conifers among them, broad-crowned podocarps and a few tall cypress-like trees, no spruces or firs. In front, a wide, shallow freshwater lake, its edge fringed with sedges and rush-like plants, with forest coming down to the fringe. The bare ground in the foreground is pale quartz sand and fine gravel. Flamingos wade in the shallows and ducks float on the water; a large crocodile with a deep, broad snout lies at the water's edge. At the forest edge, two heavy four-footed marsupial browsers the size of a large pig, like giant wombats with longer legs. No grass and no grassland, no desert, no open plain, no people, no buildings. Seen from the eye height of a person standing on the ground, looking level at the horizon, wide angle. Photorealistic, like a documentary photograph taken in natural light, 16:9, sharp and plainly lit, no dramatic colour grading. No text, no labels, no captions, no borders, no watermark.",
+  "mime": "image/jpeg",
+  "usd": 0.06,
+  "takes": 2
+ },
+ "p06": {
+  "model": "grok-imagine-image-2.0",
+  "quality": "medium",
+  "made": "2026-11-19",
+  "prompt": "An upland in northern China 13 million years ago, in the Middle Miocene, on an October afternoon with the sun in the west, to the right. A wide, gently sloping plain of low relief to the horizon in every direction, with no mountains on the skyline. Bedrock sandstone shows at the surface in low ledges, with thin stony soil between. Open steppe: low grey-green sagebrush and salt-tolerant shrubs, with jointed leafless Ephedra bushes, and here and there a small stand of elm and birch trees. In the middle distance a shallow river crosses the plain; beside it, a few shovel-tuskers (Platybelodon): elephant relatives that do not look like modern elephants, each with a short trunk lying on a very long, flat lower jaw that juts forward like a shovel and ends in two broad flat tusks side by side; a small herd of short-legged, pony-sized three-toed horses, and one hornless rhinoceros. No loess cliffs, no yellow earth, no deep gullies, no terraces, no fields, no people, no buildings. Seen from the eye height of a person standing on the ground, looking level at the horizon, wide angle. Photorealistic, like a documentary photograph taken in natural light, 16:9, sharp and plainly lit, no dramatic colour grading. No text, no labels, no captions, no borders, no watermark.",
+  "mime": "image/jpeg",
+  "usd": 0.06,
+  "takes": 2
+ },
+ "p07": {
+  "model": "grok-imagine-image-2.0",
+  "quality": "medium",
+  "made": "2026-11-19",
+  "prompt": "The foot of a mountain range in northern China 1.8 million years ago, in the Early Pleistocene, at one o'clock on a cold, dry January day, with dust in the air from a wind blowing toward the camera. A long, old mountain range closes the whole horizon ahead. Between the viewer and the range stands a belt of low flat-topped hills and benches, a few hundred metres high, so the plain does not run smooth to the foot of the mountains. The ground in front is a gently sloping surface of reddish loam, cut by steep-sided gullies whose walls show soft, bedded clays, silts and sands. Open country with trees: thin, scattered stands of pine and spruce, with dry winter steppe of wormwood and low shrubs between them. Along a stream in one gully, leafless poplars, willows and elms. A herd of large, stocky wild horses grazes in the middle distance, with a few early bison, heavy dark humped cattle, and some gazelles near them, and one two-horned rhinoceros far off. No people, no fields, no houses, no paths, no smoke, no terraces, no yellow loess cliffs. Seen from the eye height of a person standing on the ground, looking level at the horizon, wide angle. Photorealistic, like a documentary photograph taken in natural light, 16:9, sharp and plainly lit, no dramatic colour grading. No text, no labels, no captions, no borders, no watermark.",
+  "mime": "image/jpeg",
+  "usd": 0.06,
+  "takes": 2
+ },
+ "p08": {
+  "model": "grok-imagine-image-2.0",
+  "quality": "medium",
+  "made": "2026-11-19",
+  "prompt": "Hill country in eastern Afghanistan about 6,500 years ago, at three in the afternoon in March at the end of a hard winter, under broken storm cloud. Straight ahead a very high mountain range runs across the whole horizon, ridge behind ridge, its entire crest white with snow; below the snow its lower ranges are dark, almost black, with conifer forest. In front, low rounded hills of crumbling sandstone capped with conglomerate, cut by ravines; the ground between them is sandy and strewn with rounded stones and boulders. The hills carry evergreen oak forest, trees up to fifteen metres tall in full dark leaf, with undergrowth and with wild almond and pistachio trees among them. In a ravine, a river runs reddish with silt in a narrow bed, joined by a small clear stream; reeds, tall plume grass and willows crowd the wet places. A few partridges on the stony ground, ravens and one large vulture overhead, and three wild asses on a far slope. No buildings, no fields, no roads, no terraces, no people. Seen from the eye height of a person standing on the ground, looking level at the horizon, wide angle. Photorealistic, like a documentary photograph taken in natural light, 16:9, sharp and plainly lit, no dramatic colour grading. No text, no labels, no captions, no borders, no watermark.",
+  "mime": "image/jpeg",
+  "usd": 0.06,
+  "takes": 1
+ },
+ "p09": {
+  "model": "grok-imagine-image-2.0",
+  "quality": "medium",
+  "made": "2026-11-19",
+  "prompt": "The southern Sahara in the fifth century, at eleven in the morning in August, the short rainy season, very hot. Nearly level ground to a far, flat horizon, with no scarp and no dunes. The sky is not clear blue: a thin pale haze of fine dust whitens it. In front lies the floor of a wadi, a flat alluvial plain a kilometre wide with no banks, covered with a continuous short green turf of young annual grass, dotted with a few low thorn acacias two to three metres tall and with small shallow rain puddles on smooth silt. Beyond it the open desert plain is bare coarse sand and pebbles with almost no plants. Far apart on the plain stand a few low outcrops of granite, coated black and shiny with desert varnish. A herd of pale dama gazelles grazes on the green flat, with a few scimitar-horned oryx and one ostrich. In the distance, two riders on slender horses, their heads and lower faces veiled, each carrying several javelins, and one man riding a dromedary. No river, no lake, no cattle, no buildings, no tents, no roads, no woodland. Seen from the eye height of a person standing on the ground, looking level at the horizon, wide angle. Photorealistic, like a documentary photograph taken in natural light, 16:9, sharp and plainly lit, no dramatic colour grading. No text, no labels, no captions, no borders, no watermark.",
+  "mime": "image/jpeg",
+  "usd": 0.06,
+  "takes": 1
+ },
+ "p10": {
+  "model": "grok-imagine-image-2.0",
+  "quality": "medium",
+  "made": "2026-11-19",
+  "prompt": "The Earth in December of the year 1090, centred on northern France: Europe in the middle of the disc, North Africa below it, the North Atlantic to the left, western Asia to the right, Greenland at the upper left. It is mid-afternoon over France, so the sun lights the disc from the south-west and night is falling over Asia at the right-hand limb. Seasonal snow whitens the northern lands, Scandinavia, Russia and eastern Europe, and reaches unusually far south, to the Balkans and the land round the Bosphorus. Greenland is white inland ice with only a thin bare strip along its coast. The sea north of Iceland is open dark water with little sea ice. Thick bands of frontal cloud lie over the North Atlantic and Europe; the sky over the Sahara and Arabia is clear. The Sahara is bare tan and ochre desert with no green. Where cloud and snow leave it open, central Europe is dark with broad forest and western Europe a lighter patchwork of field and pasture; the steppe north of the Black Sea is open and treeless. No city lights, no borders, no place names, no aircraft trails. The whole disc of the planet seen from space, about ten thousand kilometres above the surface, against black. Photorealistic, like a documentary photograph taken in natural light, 16:9, sharp and plainly lit, no dramatic colour grading. No text, no labels, no captions, no borders, no watermark.",
+  "mime": "image/jpeg",
+  "usd": 0.06,
+  "takes": 1
+ },
+ "p11": {
+  "model": "grok-imagine-image-2.0",
+  "quality": "medium",
+  "made": "2026-11-19",
+  "prompt": "The Nubian Desert in the fifteenth century, at two in the afternoon in July, the hottest time of the year. A wide, nearly level plain: a patchwork of dark gravel sheets and pale sand, with no plants on it. Isolated ranges of dark granite hills, jagged in outline and no more than three hundred metres high, stand on the plain; white quartz veins show against the dark rock, and in one place a dark raised ring of rock encloses a circular hollow. Two or three shallow dry watercourses cross the plain, each marked only by a thin, broken line of sparse, thin-crowned acacia trees. Beside one of them, a small camp of four low tents of dark woven hair, with a dozen camels and a few sheep. On one hillside, the ruins of a cluster of small round dry-stone huts beside shallow trenches. The horizon is bleached white by heat and blurs into the plain, and toward it lie mirages like sheets of blue water. No real water, no river, no village, no fields, no roads, no vehicles. Seen from about 300 metres above the ground, looking obliquely down and ahead, the horizon near the top of the frame. Photorealistic, like a documentary photograph taken in natural light, 16:9, sharp and plainly lit, no dramatic colour grading. No text, no labels, no captions, no borders, no watermark.",
+  "mime": "image/jpeg",
+  "usd": 0.06,
+  "takes": 1
+ },
+ "p12": {
+  "model": "grok-imagine-image-2.0",
+  "quality": "medium",
+  "made": "2026-11-19",
+  "prompt": "The Tihama, the coastal plain of Yemen, in July 1887 at two in the afternoon: fierce heat, and a hot wind driving sand through the air so that the far distance is veiled in a dun haze and no mountains can be seen. The sky is clouding over, with cumulus building. The view is at the edge of an irrigated inland delta. To the left, fields flooded with brown water held between narrow earth banks; beyond them, pearl millet and sorghum standing nearly three metres tall like a green wall, with a few date palms above the crop, and a field of low cotton bushes in yellow flower. To the right, a loose sandy plain dotted with tamarisk, low acacia bushes and the broad grey-green leaves of Calotropis, with patches of coarse grass. Where sand meets field, a small hamlet of round huts with conical thatched roofs, small black-and-white storks standing on the roofs. On the field banks, a few Yemeni peasant men in conical straw hats, each with a sword at his side and a short lance, cutting an opening in a bank to let the water through. A hare runs from under an acacia in the foreground. No river, no tents, no stone buildings, no roads, no telegraph poles, no vehicles. Seen from the eye height of a person standing on the ground, looking level at the horizon, wide angle. Photorealistic, like a documentary photograph taken in natural light, 16:9, sharp and plainly lit, no dramatic colour grading. No text, no labels, no captions, no borders, no watermark.",
+  "mime": "image/jpeg",
+  "usd": 0.06,
+  "takes": 1
+ }
+}
