@@ -1949,6 +1949,7 @@ async function start(root: HTMLElement): Promise<void> {
           const span = (x: CityStructure): [number, number] => [x.time.start.best ?? -Infinity, x.time.end.best ?? Infinity];
           c.life.walls = f.structures.filter((x) => x.kind === 'works/wall').flatMap((x) => (x.lines ?? []).filter(round).map((l) => ({ ring: move(gap(l) < 1 ? l.slice(0, -2) : l), from: span(x)[0], to: span(x)[1] })));
           c.life.roads = f.structures.filter((x) => x.kind === 'works/road').flatMap((x) => (x.lines ?? []).filter((l) => l.length >= 4).map(move));
+          if (f.districts?.length) c.life.districts = f.districts.map((d) => ({ at: [d.at[0] + ox, d.at[1] + oy] as [number, number], buildings: d.buildings }));
         }
       }
       const scene = await LifeScene.create(gl!, spec, null, { fast: state.quality === 'fast', ...(bundle ? { structures: bundle } : {}) });

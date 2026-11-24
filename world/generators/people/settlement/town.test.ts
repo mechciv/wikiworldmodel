@@ -108,6 +108,17 @@ describe('a town through its life', () => {
     expect(at.plots.filter((q) => !inside(q.x, q.y)).length / at.plots.length).toBeLessThan(0.05);
   });
 
+  it('is as dense in each district as its record counts: one with four times the buildings has smaller plots', () => {
+    const plan = planTown(input({ districts: [{ at: [-300, 0], buildings: 4000 }, { at: [300, 0], buildings: 1000 }] }));
+    const at = townAt(plan, 300);
+    const mean = (ps: { area: number }[]) => ps.reduce((s, q) => s + q.area, 0) / ps.length;
+    const west = at.plots.filter((q) => q.x < -100 && Math.abs(q.y) < 400);
+    const east = at.plots.filter((q) => q.x > 100 && q.x < 370 && Math.abs(q.y) < 400);
+    expect(west.length).toBeGreaterThan(20);
+    expect(east.length).toBeGreaterThan(5);
+    expect(mean(west)).toBeLessThan(mean(east) / 1.5);
+  });
+
   it('lays a planned town on a grid turned as its record says', () => {
     const plan = planTown(input({ streets: 'grid', angle: 0.26 }));
     const { lanes } = townAt(plan, 300);

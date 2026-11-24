@@ -426,6 +426,8 @@ export interface CityLife {
    */
   walls?: { ring: number[]; from: number; to: number }[];
   roads?: number[][];
+  /** its districts' label points, in its own metres, and how many buildings a record counts in each */
+  districts?: { at: [number, number]; buildings: number }[];
 }
 
 /** How far the places a city dealt with are looked for, km, and how many of them its routes lead to at most. */

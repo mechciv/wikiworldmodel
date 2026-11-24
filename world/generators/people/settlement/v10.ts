@@ -2380,7 +2380,8 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
       sizes,
       main,
       ...(wallWord ? { wall: { from: years[0], to: years[1], thickness } } : {}),
-      // The walls and roads a map of the city gives, where one does: they take the place of a generated wall.
+      // The walls, roads and districts a map of the city gives, where one does: the walls take the place of a generated one.
+      ...(life.districts?.length ? { districts: life.districts } : {}),
       ...(life.walls?.length || life.roads?.length ? { recorded: { ...(life.walls ? { walls: life.walls } : {}), ...(life.roads ? { roads: life.roads } : {}) } } : {}),
       params: tp,
     });

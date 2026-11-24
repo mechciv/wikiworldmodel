@@ -59,6 +59,8 @@ export interface TownInput {
    * the growth model's epochs, and the roads stand in its frame and are routes beside the generated ones
    */
   recorded?: { walls?: { ring: number[]; from: number; to: number }[]; roads?: number[][] };
+  /** its districts' label points, in its own metres, and how many buildings a record counts in each */
+  districts?: { at: [number, number]; buildings: number }[];
   params?: Partial<TownParams>;
   growth?: Partial<GrowthParams>;
 }
@@ -493,10 +495,41 @@ export function planTown(input: TownInput): TownPlan {
   const n = Math.floor(cutAt(growth, peak, 0));
   const e = epochAt(growth, peak);
   const edge = e && n > 0 ? densityAt(growth, ...cellCentre(growth, e.order[Math.min(n, e.order.length) - 1]), peak, 0) : growth.params.density.least;
+  // Its districts, where a record counts their buildings: each cell built at the city's height goes to the nearest
+  // district's label, and a district's plots are as much smaller as it was denser than the city on the whole, by its
+  // count over the ground it covered then, within three times either way.
+  const districts = (input.districts ?? []).filter((d) => d.buildings > 0);
+  let denser: ((x: number, y: number) => number) | undefined;
+  if (districts.length >= 2 && e && n > 0) {
+    const nearest = (x: number, y: number) => {
+      let best = 0;
+      let bd = Infinity;
+      districts.forEach((d, i) => {
+        const q = (x - d.at[0]) ** 2 + (y - d.at[1]) ** 2;
+        if (q < bd) {
+          bd = q;
+          best = i;
+        }
+      });
+      return best;
+    };
+    const cells = new Array<number>(districts.length).fill(0);
+    for (let k = 0; k < Math.min(n, e.order.length); k++) cells[nearest(...cellCentre(growth, e.order[k]))]++;
+    let buildings = 0;
+    let ground = 0;
+    districts.forEach((d, i) => {
+      if (!cells[i]) return;
+      buildings += d.buildings;
+      ground += cells[i];
+    });
+    const mean = buildings / Math.max(1, ground);
+    const factor = districts.map((d, i) => (cells[i] && mean > 0 ? Math.min(3, Math.max(1 / 3, d.buildings / cells[i] / mean)) : 1));
+    denser = (x, y) => factor[nearest(x, y)];
+  }
   const plot = (x: number, y: number) => {
     const d = densityAt(growth, x, y, peak, 0) || edge;
     // Of the ground, a quarter goes to lanes and to what is no household's.
-    return (household / Math.max(1, d)) * 1e4 * 0.75;
+    return ((household / Math.max(1, d)) * 1e4 * 0.75) / (denser?.(x, y) ?? 1);
   };
   return { key: input.key, growth, routes, ...(wall ? { wall } : {}), frame, faceOf, divided: new Map(), ...(grid ? { grid } : {}), sizes: input.sizes, main: input.main, plot };
 }

@@ -174,6 +174,18 @@ async function buildCity(s: Solved, site: MapSite, snap: OhmSnapshot, log: (m: s
   const sampler = new GroundSampler(ground.map((g) => ({ ...g, z: new Int16Array(blobs.get(g.url)!.buffer) })));
   for (const st of structures) if (st.base === 0) st.base = Math.round(sampler.at(st.at[0], st.at[1]) * 100) / 100;
 
+  // Its districts that a record counts the buildings of, within its reach: Rome's regions, by the Regionary Catalogues'
+  // insulae and domus.
+  const districts = w.entities
+    .filter((e) => e.kind === 'open/region' || e.kind === 'open/district')
+    .flatMap((e) => {
+      const loc = claimOf(s, e.id, 'location')?.value as { lat: number; lon: number } | undefined;
+      const count = ['insulae', 'domus', 'houses'].reduce((n, prop) => n + ((claimOf(s, e.id, prop)?.value as number | undefined) ?? 0), 0);
+      if (!loc || !(count > 0)) return [];
+      const [x, y] = toLocal(origin, loc.lat, loc.lon);
+      return Math.abs(x) > HALF || Math.abs(y) > HALF ? [] : [{ id: e.id, label: labelOf(e.id), at: [Math.round(x), Math.round(y)] as [number, number], buildings: count }];
+    })
+    .sort((a, b) => (a.id < b.id ? -1 : 1));
   const file: CityFile = {
     format: 'lightworld-city@2',
     site: { id: site.id, label: site.label, settlement: site.settlement, origin, span: site.span, water_level: site.water_level },
@@ -181,6 +193,7 @@ async function buildCity(s: Solved, site: MapSite, snap: OhmSnapshot, log: (m: s
     structures,
     water,
     islands,
+    ...(districts.length ? { districts } : {}),
   };
   log(`city    ${site.id}: ${structures.length} structures, ${structures.filter((x) => x.curated).length} written by hand`);
   return { file, blobs };

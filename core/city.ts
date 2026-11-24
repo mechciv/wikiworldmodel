@@ -167,6 +167,12 @@ export interface CityFile {
   /** the river, as rings */
   water: number[][];
   islands: number[][];
+  /**
+   * Its districts with a count of their buildings, where records give one (Rome's regions, by the Regionary Catalogues):
+   * each one's label point and how many buildings it had. The settlement generator draws a district's plots as much
+   * smaller as it was denser than the city on the whole (docs/plans/CITIES.md, The evidence a city can have).
+   */
+  districts?: { id: string; label: string; at: [number, number]; buildings: number }[];
 }
 
 /** Local metres from latitude and longitude: an equirectangular grid, flat across a site. */
