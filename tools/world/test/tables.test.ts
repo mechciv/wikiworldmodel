@@ -1,8 +1,13 @@
 // Rows are claims (docs/STRUCTURE.md section 3.1): a dataset's columns read as properties by its field's mapping,
 // each row keyed from its own columns, and an overlay's corrections written back into the columns the build reads.
 import { describe, expect, it } from 'vitest';
+import { randomUUID } from 'node:crypto';
+import { mkdir, rm, writeFile } from 'node:fs/promises';
+import { ClaimIndex } from '../src/claimindex.ts';
+import { datasetDir, datasetFile, type Dataset } from '../src/manifest.ts';
 import type { LandSnapshot } from '../src/pbdb.ts';
-import { correctLand, correctRows, fromValue, landRows, rowClaims, rowKey, toValue, type ColumnMap, type RowsSpec, type Table } from '../src/tables.ts';
+import type { Field, World } from '../src/world.ts';
+import { correctFossils, correctRows, fromValue, landRows, rowClaims, rowKey, toValue, type ColumnMap, type RowsSpec, type Table } from '../src/tables.ts';
 
 const POLITIES: RowsSpec = {
   kind: 'polity',
@@ -15,6 +20,7 @@ describe('a row', () => {
     expect(rowKey('{Name}@{FromYear}', { Name: 'Roman Empire', FromYear: -27 }, 5)).toBe('Roman Empire@-27');
     expect(rowKey('{#}', {}, 5)).toBe('5');
     expect(rowKey('occ:{occurrence}', { occurrence: 820351 }, 0)).toBe('occ:820351');
+    expect(() => rowKey('occ:{occurrence}', {}, 1)).toThrow('missing key column occurrence');
   });
 
   it('reads each column as its property says, and a correction writes back what it reads', () => {
@@ -39,6 +45,28 @@ describe('a row', () => {
   it('gives no claim where the dataset gives no value', () => {
     expect(toValue({ column: 'Lower_Date', as: 'year', none: [9999] }, { Lower_Date: 9999 })).toBeUndefined();
     expect(toValue({ column: 'Name', as: 'text' }, { Name: '' })).toBeUndefined();
+  });
+
+  it('converts time units and BCE years to the units the dataset stores', () => {
+    const age: ColumnMap = { column: 'age', as: 'ma' };
+    const columns = {};
+    fromValue(age, '1.2 Ga', columns);
+    expect(toValue(age, columns)).toBe('1200 Ma');
+    fromValue(POLITIES.claims.start, '44 BCE', columns);
+    expect(columns).toMatchObject({ FromYear: -44 });
+    expect(toValue(POLITIES.claims.start, columns)).toBe(-43);
+    fromValue(POLITIES.claims.end, '1 CE', columns);
+    expect(columns).toMatchObject({ ToYear: -1 });
+    expect(toValue(POLITIES.claims.end, columns)).toBe(1);
+  });
+
+  it('rejects an unrepresentable range before changing either column', () => {
+    const map: ColumnMap = { column: ['max', 'min'], as: 'ma-range' };
+    const columns = { max: 68, min: 66 };
+    for (const v of [{ lo: '120 ka' }, { lo: '80 ka', hi: '120 ka' }, { mean: '120 ka', sd: '1 kyr' }, 'unknown']) {
+      expect(() => fromValue(map, v, columns)).toThrow();
+      expect(columns).toEqual({ max: 68, min: 66 });
+    }
   });
 
   it('makes claims that cite the dataset at the row', () => {
@@ -76,14 +104,47 @@ describe('corrections', () => {
       sites: [[100, 47, -106, 68, 66, 0]],
       rows: [[11, 0, 1], [12, 0, 1]],
     };
-    const spec: RowsSpec = { kind: 'occurrence', key: 'occ:{occurrence}', claims: { identified_as: { column: 'taxon_name' }, date: { column: ['max_ma', 'min_ma'], as: 'ma-range' } } };
+    const spec: RowsSpec = { kind: 'occurrence', key: 'occ:{occurrence}', claims: { identified_as: { column: 'taxon_name' }, date: { column: ['max_ma', 'min_ma'], as: 'ma-range' }, formation: { column: 'formation' } } };
     expect(landRows(snap)[0]).toMatchObject({ occurrence: 11, lat: 47, max_ma: 68, taxon: 'txn:1', taxon_name: 'Triceratops', formation: 'Hell Creek' });
-    const fixes = new Map([['occ:12', [{ prop: 'date', value: { lo: '67 Ma', hi: '66 Ma' } }, { prop: 'identified_as', value: 'Torosaurus' }]]]);
-    const { snap: out, unapplied } = correctLand(snap, spec, fixes);
+    const fixes = new Map([['occ:12', [{ prop: 'date', value: { lo: '120 ka', hi: '80000 BP' } }, { prop: 'identified_as', value: 'Torosaurus' }, { prop: 'formation', value: 'Corrected formation' }]]]);
+    const { snap: out, unapplied } = correctFossils(snap, spec, fixes);
     expect(unapplied).toEqual([]);
     expect(out.rows).toEqual([[11, 0, 1], [12, 1, 2]]);
-    expect(out.sites[1]).toEqual([100, 47, -106, 67, 66, 0]);
+    expect(out.sites[1]).toEqual([100, 47, -106, 0.12, 0.08, 1]);
+    expect(out.words).toEqual(['Hell Creek', 'Corrected formation']);
+    expect(snap.words).toEqual(['Hell Creek']);
     expect(snap.sites).toHaveLength(1);
-    expect(correctLand(snap, spec, new Map([['occ:11', [{ prop: 'identified_as', value: 'Nobody' }]]])).unapplied).toEqual(['occ:11: the snapshot has no taxon named Nobody']);
+    expect(correctFossils(snap, spec, new Map([['occ:11', [{ prop: 'identified_as', value: 'Nobody' }]]])).unapplied).toEqual(['occ:11: the snapshot has no taxon named Nobody']);
   });
+});
+
+it('indexes marine snapshot tuples by occurrence and refuses ambiguous row addresses', async () => {
+  const id = `src:test-sea-${randomUUID()}`;
+  const d: Dataset = { id, type: 'dataset', kind: 'compilation', file: '', citation: '', fetch: { url: 'snapshot.json', format: 'json', sha256: 'test', bytes: 0 } };
+  const field: Field = {
+    id: 'field:test/sea', file: '', title: 'Sea', data: { from: id, as: 'community-sea' },
+    rows: {
+      kind: 'occurrence', key: 'occ:{occurrence}',
+      claims: { identified_as: { column: 'taxon_name' }, date: { column: ['max_ma', 'min_ma'], as: 'ma-range' } },
+    },
+  };
+  const world = { fields: [field], overlays: [], manifest: { datasets: { [id]: d } } } as unknown as World;
+  const snap = { words: ['Shelf'], taxa: [[90, 'A'], [80, 'B']], sites: [[17, 30, 40, 68, 66, 0]], rows: [[1, 0, 90], [209, 0, 80]] };
+  const dir = datasetDir(id, d);
+  await mkdir(dir, { recursive: true });
+  try {
+    const file = datasetFile(id, d);
+    await writeFile(file, JSON.stringify(snap));
+    const index = await ClaimIndex.of(world);
+    expect([...index.tables.get(id)!.rows.keys()]).toEqual(['occ:1', 'occ:209']);
+    expect(index.of(`${id}#occ:209`)).toMatchObject([
+      { value: 'B', sources: [{ ref: id, loc: 'row occ:209' }] },
+      { value: { lo: '68 Ma', hi: '66 Ma' } },
+    ]);
+    snap.rows.push([1, 0, 80]);
+    await writeFile(file, JSON.stringify(snap));
+    await expect(ClaimIndex.of(world)).rejects.toThrow('duplicate row key "occ:1"');
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
 });

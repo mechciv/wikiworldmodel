@@ -9,6 +9,7 @@
 // Storage is unchanged: the pinned files are read as they are, and only the meaning is shared.
 import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
+import { parsePoint, parseTime, toMa, type TimeInput } from '../../../core/time.ts';
 import type { Basis } from '../../../core/tileset.ts';
 export { rowRef } from '../../../core/refs.ts';
 import { parseTable } from './build/series.ts';
@@ -58,7 +59,11 @@ export interface RowClaim {
 
 /** A row's key from its columns by the template, e.g. "{Name}@{FromYear}" or "occ:{occurrence}". */
 export function rowKey(template: string, columns: Record<string, unknown>, index: number): string {
-  return template.replace(/\{([^}]+)\}/g, (_, c: string) => (c === '#' ? String(index) : String(columns[c] ?? '')));
+  return template.replace(/\{([^}]+)\}/g, (_, c: string) => {
+    if (c === '#') return String(index);
+    if (missing(columns[c])) throw new Error(`row ${index}: missing key column ${c} in ${template}`);
+    return String(columns[c]);
+  });
 }
 
 const missing = (v: unknown, none?: (string | number)[]) => v === undefined || v === null || v === '' || (none ?? []).includes(v as string | number);
@@ -99,6 +104,14 @@ export function toValue(map: ColumnMap, columns: Record<string, unknown>): unkno
   }
 }
 
+/** A scalar time column stores a point on the world's axis. */
+function pointYear(value: unknown): number {
+  if (typeof value !== 'string' && typeof value !== 'number') throw new Error(`expected a single date, got ${JSON.stringify(value)}`);
+  const { t } = parsePoint(value);
+  if (!Number.isFinite(t)) throw new Error(`date is outside the finite time axis: ${value}`);
+  return t;
+}
+
 /** A claim's value written back into the columns it comes from: how a correction reaches the build. */
 export function fromValue(map: ColumnMap, value: unknown, columns: Record<string, unknown>): void {
   const as = map.as ?? 'string';
@@ -111,9 +124,13 @@ export function fromValue(map: ColumnMap, value: unknown, columns: Record<string
   }
   if (as === 'ma-range') {
     const [older, younger] = map.column as [string, string];
-    const r = typeof value === 'object' && value !== null ? (value as { lo: string; hi: string }) : { lo: String(value), hi: String(value) };
-    columns[older] = parseFloat(r.lo);
-    columns[younger] = parseFloat(r.hi);
+    const t = parseTime(value as TimeInput);
+    if (t.kind !== 'instant' && t.kind !== 'interval') throw new Error(`a fossil age needs a date or closed range, got ${JSON.stringify(value)}`);
+    const lo = t.kind === 'instant' ? t.t : t.lo;
+    const hi = t.kind === 'instant' ? t.t : t.hi;
+    if (!Number.isFinite(lo) || !Number.isFinite(hi)) throw new Error('a fossil age needs finite bounds');
+    columns[older] = toMa(lo);
+    columns[younger] = toMa(hi);
     return;
   }
   const c = map.column as string;
@@ -129,12 +146,13 @@ export function fromValue(map: ColumnMap, value: unknown, columns: Record<string
       return;
     case 'year':
     case 'year-end': {
-      const y = Number(value) - (as === 'year-end' ? 1 : 0);
+      const y = pointYear(value) - (as === 'year-end' ? 1 : 0);
+      if (!Number.isInteger(y)) throw new Error(`a year column needs a whole year, got ${value}`);
       columns[c] = y <= 0 ? y - 1 : y;
       return;
     }
     case 'ma':
-      columns[c] = parseFloat(String(value));
+      columns[c] = toMa(pointYear(value));
       return;
   }
 }
@@ -161,7 +179,7 @@ export async function rawRows(world: World, field: Field): Promise<Record<string
   if (!d) return undefined;
   if (field.data!.as === 'community') {
     const snap = world.landFossils.get(id);
-    return snap ? landRows(snap) : undefined;
+    return snap ? fossilRows(snap) : undefined;
   }
   if (field.data!.as === 'rock-record') {
     const path = datasetFile(id, d, field.data!.file ?? (d.fetch.files ? Object.keys(d.fetch.files)[0] : undefined));
@@ -176,19 +194,24 @@ export async function rawRows(world: World, field: Field): Promise<Record<string
   if (!existsSync(path)) return undefined;
   const text = await readFile(path, 'utf8');
   if (d.fetch.format === 'csv' || d.fetch.format === 'tsv') return parseTable(text);
+  if (field.data!.as === 'community-sea') return fossilRows(JSON.parse(text) as LandSnapshot);
   const doc = JSON.parse(text) as { features?: { properties: Record<string, unknown>; geometry?: unknown }[]; rows?: Record<string, unknown>[] };
   // A feature's geometry rides along as a column of its own, for what draws it; no property reads it.
   if (doc.features) return doc.features.map((f) => ({ ...f.properties, [GEOMETRY]: f.geometry ?? null }));
   return doc.rows;
 }
 
-/** The land's fossils as one row per occurrence: its collection's place and ages joined in, and its taxon's number and name. */
-export function landRows(snap: LandSnapshot): Record<string, unknown>[] {
+/** Read an occurrence from a compact land or marine snapshot, joined to its collection and taxon. */
+function occurrenceReader(snap: LandSnapshot) {
   const names = new Map(snap.taxa.map((t) => [t[0], t[1]]));
-  return snap.rows.map(([occurrence, site, taxon]) => {
+  return ([occurrence, site, taxon]: LandSnapshot['rows'][number]): Record<string, unknown> => {
     const s = snap.sites[site];
     return { occurrence, collection: s[0], lat: s[1], lng: s[2], max_ma: s[3], min_ma: s[4], formation: snap.words[s[5]] ?? '', taxon: `txn:${taxon}`, taxon_name: names.get(taxon) ?? '' };
-  });
+  };
+}
+
+export function fossilRows(snap: LandSnapshot): Record<string, unknown>[] {
+  return snap.rows.map(occurrenceReader(snap));
 }
 
 /** A field's dataset as a table of rows by key, if the field says how its rows are keyed and the dataset is here. */
@@ -199,7 +222,8 @@ export async function readTable(world: World, field: Field): Promise<Table | und
   const rows = new Map<string, Record<string, unknown>>();
   raw.forEach((columns, i) => {
     const key = rowKey(field.rows!.key, columns, i);
-    if (!rows.has(key)) rows.set(key, columns);
+    if (rows.has(key)) throw new Error(`${field.id}: duplicate row key "${key}" at row ${i}`);
+    rows.set(key, columns);
   });
   return { dataset: field.data.from, field: field.id, spec: field.rows, rows };
 }
@@ -218,10 +242,14 @@ export async function readTables(world: World): Promise<Map<string, Table>> {
 export function correctedColumns(table: Table, key: string, corrections: { prop: string; value: unknown }[]): { columns: Record<string, unknown>; changed: string[] } | undefined {
   const base = table.rows.get(key);
   if (!base) return undefined;
+  return applyCorrections(table.spec, base, corrections);
+}
+
+function applyCorrections<T extends Record<string, unknown>>(spec: RowsSpec, base: T, corrections: Fix[]): { columns: T; changed: string[] } {
   const columns = { ...base };
   const changed: string[] = [];
   for (const c of corrections) {
-    const map = table.spec.claims[c.prop];
+    const map = spec.claims[c.prop];
     if (!map) continue;
     fromValue(map, c.value, columns);
     changed.push(c.prop);
@@ -243,16 +271,9 @@ export function correctRows<T extends Record<string, unknown>>(spec: RowsSpec, r
     keys.push(key);
     const fix = fixes.get(key);
     if (!fix?.length) return columns;
-    const copy = { ...columns } as T;
-    const props: string[] = [];
-    for (const f of fix) {
-      const map = spec.claims[f.prop];
-      if (!map) continue;
-      fromValue(map, f.value, copy as Record<string, unknown>);
-      props.push(f.prop);
-    }
-    if (props.length) changed.set(i, props);
-    return copy;
+    const updated = applyCorrections(spec, columns, fix);
+    if (updated.changed.length) changed.set(i, updated.changed);
+    return updated.columns;
   });
   return { keys, rows: out, changed };
 }
@@ -339,35 +360,46 @@ export function correctUnits(snap: ColumnsSnapshot, spec: RowsSpec, fixes: Map<s
 }
 
 /**
- * The land's fossils with corrections applied: a corrected place or age gives the occurrence a site of its own,
+ * Land or marine fossils with corrections applied: a corrected place, formation or age gives the occurrence a site of its own,
  * and a corrected name the taxon the snapshot has by that name, if it has one. Returns the corrected snapshot and
  * what could not be applied.
  */
-export function correctLand(snap: LandSnapshot, spec: RowsSpec, fixes: Map<string, Fix[]>): { snap: LandSnapshot; unapplied: string[] } {
+export function correctFossils(snap: LandSnapshot, spec: RowsSpec, fixes: Map<string, Fix[]>): { snap: LandSnapshot; unapplied: string[] } {
   if (!fixes.size) return { snap, unapplied: [] };
-  const raw = landRows(snap);
-  const { rows, changed } = correctRows(spec, raw, fixes);
+  const read = occurrenceReader(snap);
   const sites = [...snap.sites];
   const out = [...snap.rows];
+  const words = [...snap.words];
   const byName = new Map<string, number>();
   for (const t of snap.taxa) if (!byName.has(t[1])) byName.set(t[1], t[0]);
   const unapplied: string[] = [];
-  for (const [i, props] of changed) {
-    const r = rows[i];
-    const [occ, site, taxon] = out[i];
+  for (const [i, row] of snap.rows.entries()) {
+    const columns = read(row);
+    const fix = fixes.get(rowKey(spec.key, columns, i));
+    if (!fix?.length) continue;
+    const { columns: r } = applyCorrections(spec, columns, fix);
+    const [occ, site, taxon] = row;
     let s = site;
     let x = taxon;
-    if (props.some((p) => spec.claims[p] && ['lat', 'lng', 'max_ma', 'min_ma'].some((c) => [spec.claims[p].column].flat().includes(c)))) {
+    if (['lat', 'lng', 'max_ma', 'min_ma', 'formation'].some((c) => r[c] !== columns[c])) {
       const old = snap.sites[site];
-      sites.push([old[0], Number(r.lat), Number(r.lng), Number(r.max_ma), Number(r.min_ma), old[5]]);
+      let formation = old[5];
+      if (r.formation !== columns.formation) {
+        formation = words.indexOf(String(r.formation));
+        if (formation === -1) formation = words.push(String(r.formation)) - 1;
+      }
+      sites.push([old[0], Number(r.lat), Number(r.lng), Number(r.max_ma), Number(r.min_ma), formation]);
       s = sites.length - 1;
     }
-    if (props.includes('identified_as')) {
+    if (r.taxon_name !== columns.taxon_name) {
       const no = byName.get(String(r.taxon_name));
       if (no === undefined) unapplied.push(`occ:${occ}: the snapshot has no taxon named ${String(r.taxon_name)}`);
       else x = no;
     }
     out[i] = [occ, s, x];
   }
-  return { snap: { ...snap, sites, rows: out }, unapplied };
+  return { snap: { ...snap, sites, rows: out, words }, unapplied };
 }
+
+// Keep the original land snapshot entry points for callers of the world tools.
+export { fossilRows as landRows, correctFossils as correctLand };

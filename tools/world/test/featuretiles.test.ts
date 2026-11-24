@@ -7,6 +7,7 @@ import type { Quat } from '../../../core/quat.ts';
 import { PRESENT_YEAR } from '../../../core/time.ts';
 import type { Feature, FeatureTime } from '../../../core/tileset.ts';
 import { kindScore, prominenceOf, tileFeatures } from '../src/build/featuretiles.ts';
+import { worldSpan } from '../src/build/index.ts';
 import type { ProminenceRule } from '../src/world.ts';
 import { mostProminent } from '../../../viewer/src/ui/markers.ts';
 
@@ -210,8 +211,13 @@ describe('feature tiles', () => {
     expect(mostProminent(placed, 2, (id) => id === 'a').map((m) => m.f.id)).toEqual(['a', 'd']);
   });
 
-  it('from afar, needs few tiles and few features, however many the world has', () => {
-    const big = tileFeatures(world(100_000), { ...rule, budget: 32 }, (f) => prominenceBy(f.id));
+  it('builds the timeline for 100,000 features and needs few of their tiles from afar', () => {
+    const features = world(100_000);
+    const entities = features.map(({ id, label, kind, time }) => ({ id, label, kind, time, located: true }));
+    const oldest = entities.reduce((year, e) => Math.min(year, e.time.start.best!), PRESENT_YEAR);
+    const latest = entities.reduce((year, e) => Math.max(year, e.time.end.best ?? year), PRESENT_YEAR);
+    expect(worldSpan([], { entities }, [], [])).toEqual([oldest, latest]);
+    const big = tileFeatures(features, { ...rule, budget: 32 }, (f) => prominenceBy(f.id));
     const largest = Math.max(...[...big.files].filter(([k]) => !k.endsWith('index.json') && !k.endsWith('variants.json')).map(([, v]) => v.length));
     expect(largest).toBeLessThan(25 * 1024 * 1024);
     const tiles = tilesFor(big.index, view(40, 10, PRESENT_YEAR - 1900, 3.3));

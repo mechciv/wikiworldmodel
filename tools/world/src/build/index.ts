@@ -36,7 +36,7 @@ import { formatIssue, validateWorld } from '../validate/index.ts';
 import { loadWorld, type Field, type World } from '../world.ts';
 import { attributionMarkdown, credits } from '../attribution.ts';
 import { ClaimIndex } from '../claimindex.ts';
-import { correctLand, correctRocks, correctUnits } from '../tables.ts';
+import { correctFossils, correctRocks, correctUnits } from '../tables.ts';
 import { gridPlaces, lifeTierOf, seaTierOf, tierCounts, TIER_SPANS, type ResolveWorld } from '../../../../core/resolve.ts';
 import { coverageMatrix, type CoverageSource } from '../../../../core/coverage.ts';
 import { glance, landShares } from '../../../../core/glance.ts';
@@ -111,13 +111,32 @@ function shownAlternatives(world: World): Tileset['alternatives'] {
  * The span of the world, in astronomical years: from the oldest time any record, period,
  * field or series reaches to the furthest projection, and at least to the present.
  */
-function worldSpan(periods: PeriodRecord[], found: SearchFile, grids: GridField[], series: SeriesFile['series']): [number, number] {
-  const times: number[] = [PRESENT_YEAR];
-  for (const p of periods) times.push(p.start, ...(Number.isFinite(p.end) ? [p.end] : []));
-  for (const e of found.entities) for (const x of [e.time.start.best, e.time.end.best]) if (x !== null && Number.isFinite(x)) times.push(x);
-  for (const g of grids) times.push(fromMa(g.coverMa[0]), fromMa(g.coverMa[1]));
-  for (const s of series) times.push(s.points[0][0], s.points.at(-1)![0]);
-  return [Math.min(...times), Math.max(...times)];
+export function worldSpan(periods: PeriodRecord[], found: SearchFile, grids: GridField[], series: SeriesFile['series']): [number, number] {
+  let first = PRESENT_YEAR;
+  let last = PRESENT_YEAR;
+  const include = (year: number | null) => {
+    if (year === null || !Number.isFinite(year)) return;
+    first = Math.min(first, year);
+    last = Math.max(last, year);
+  };
+  for (const p of periods) {
+    include(p.start);
+    include(p.end);
+  }
+  for (const e of found.entities) {
+    include(e.time.start.best);
+    include(e.time.end.best);
+  }
+  for (const g of grids) {
+    include(fromMa(g.coverMa[0]));
+    include(fromMa(g.coverMa[1]));
+  }
+  for (const s of series) {
+    if (!s.points.length) continue;
+    include(s.points[0][0]);
+    include(s.points.at(-1)![0]);
+  }
+  return [first, last];
 }
 
 /** How many keyframes a file of a climate finer in time holds: each file shares its last with the next file's first. */
@@ -400,7 +419,7 @@ export async function runBuild(args: string[]): Promise<number> {
   for (const f of world.fields.filter((x) => x.data?.as === 'community' && x.rows)) {
     const snap = world.landFossils.get(f.data!.from);
     if (!snap) continue;
-    const { snap: corrected, unapplied } = correctLand(snap, f.rows!, claims.corrections(f.data!.from));
+    const { snap: corrected, unapplied } = correctFossils(snap, f.rows!, claims.corrections(f.data!.from));
     world.landFossils.set(f.data!.from, corrected);
     for (const u of unapplied) log(`warning rows        ${f.data!.from} ${u}`);
   }
@@ -1076,7 +1095,9 @@ export async function runBuild(args: string[]): Promise<number> {
     if (seaField) {
       const id = seaField.data!.from;
       const d = world.manifest.datasets[id];
-      const snap = JSON.parse(await readFile(datasetFile(id, d, seaField.data!.file), 'utf8')) as LandSnapshot;
+      const raw = JSON.parse(await readFile(datasetFile(id, d, seaField.data!.file), 'utf8')) as LandSnapshot;
+      const { snap, unapplied } = seaField.rows ? correctFossils(raw, seaField.rows, claims.corrections(id)) : { snap: raw, unapplied: [] };
+      for (const u of unapplied) log(`warning rows        ${id} ${u}`);
       const isoline = world.fields.find((f) => f.id === 'field:earth/coastline')?.isoline_m ?? 20;
       const started = Date.now();
       seaAtlas = buildSeaAtlas(solved, periodList, elevation.snapshots, snap, id, seaField.params as unknown as SeaParams, isoline, log);

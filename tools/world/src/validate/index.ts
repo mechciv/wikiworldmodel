@@ -22,7 +22,7 @@ import { anchorPlace, anchorsOf, available, buildNetwork, chosen, countDays, cyc
 import { resolvePoints } from '../importer.ts';
 import { lineageLoop } from '../lineage.ts';
 import { REPO, WORLD } from '../paths.ts';
-import { readTable, rowClaims, type Table } from '../tables.ts';
+import { fromValue, readTable, rowClaims, toValue, type Table } from '../tables.ts';
 import { kindIs, loadWorld, schemaDir, type Claim, type Entity, type Field, type Input, type Model, type Relation, type World } from '../world.ts';
 
 export interface Issue {
@@ -651,8 +651,26 @@ function checkOverlays(world: World, refs: RefChecker, tables: Map<string, Table
       if (c.method && !world.vocab.methods[c.method]) issues.push({ level: 'error', check: 'vocab', file: o.file, where: `${c.where}.method`, message: `unknown method "${c.method}"` });
       if (world.vocab.properties[c.prop]) checkValue(world, refs, c, issues);
       const row = given.find((x) => x.prop === c.prop);
+      let agrees = JSON.stringify(row?.value) === JSON.stringify(c.value);
+      if (map.as && ['year', 'year-end', 'ma', 'ma-range'].includes(map.as)) {
+        try {
+          const columns = {};
+          fromValue(map, c.value, columns);
+          if (toValue(map, columns) === undefined) throw new Error('the dataset reserves that value for missing dates');
+          if (row && !agrees) {
+            const original = {};
+            fromValue(map, row.value, original);
+            agrees = JSON.stringify(original) === JSON.stringify(columns);
+          }
+        } catch (err) {
+          // Only the chosen correction must fit the source columns. An alternative can retain its own precision.
+          if (c.rank === 'preferred' && !c.alt) {
+            issues.push({ level: 'error', check: 'rows', file: o.file, where: `${c.where}.value`, message: `cannot encode ${c.prop} as ${map.as}: ${(err as Error).message}` });
+            continue;
+          }
+        }
+      }
       if (!row) continue;
-      const agrees = JSON.stringify(row.value) === JSON.stringify(c.value);
       if (agrees && c.sources.every((s) => s.ref === o.dataset)) issues.push({ level: 'warning', check: 'rows', file: o.file, where: c.where, message: `restates the row's ${c.prop}; to corroborate it, cite another source` });
       if (!agrees && (c.rank !== 'preferred' || !c.note)) issues.push({ level: 'error', check: 'rows', file: o.file, where: c.where, message: `differs from the row's ${c.prop} (${JSON.stringify(row.value)}): a correction is ranked preferred, with a note saying why the row is wrong` });
     }

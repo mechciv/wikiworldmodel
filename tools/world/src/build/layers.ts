@@ -223,7 +223,7 @@ export async function polityLayer(w: World, claimed: ReadonlyMap<string, string[
   const d = w.manifest.datasets[id];
   const tolerance = (f.params as { tolerance_deg: number }).tolerance_deg;
   // The overlays' corrections are part of what is cached: a new one makes the rows again.
-  const key = sha256(stableStringify({ dataset: d.fetch.sha256, tolerance, rows: f.rows ?? null, fixes: [...fixes].sort(([a], [b]) => (a < b ? -1 : 1)), reader: 2 })).slice(0, 16);
+  const key = sha256(stableStringify({ dataset: d.fetch.sha256, tolerance, rows: f.rows ?? null, fixes: [...fixes].sort(([a], [b]) => (a < b ? -1 : 1)), reader: 3 })).slice(0, 16);
   const cached = join(CACHE, 'import', `polities@${key}.json`);
   let rows: PolityRow[];
   if (existsSync(cached)) rows = JSON.parse(await readFile(cached, 'utf8'));

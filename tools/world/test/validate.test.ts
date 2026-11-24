@@ -323,6 +323,13 @@ rows:
     expect(rows(issues)).toEqual(["warning: restates the row's end; to corroborate it, cite another source"]);
   });
 
+  it('compares equivalent calendar spellings and reports dates a year column cannot store', async () => {
+    const same = await checkRows({ 'overlays/carthage.yaml': overlay(`claims:\n  end: { prop: end, value: 145 BCE, source: { ref: src:test/states, loc: row } }\n`) });
+    expect(rows(same)).toContain("warning: restates the row's end; to corroborate it, cite another source");
+    const range = await checkRows({ 'overlays/carthage.yaml': overlay(`claims:\n  end: { prop: end, value: { lo: 150 BCE, hi: 140 BCE }, rank: preferred, note: a range, ${cite} }\n`) });
+    expect(rows(range)).toContainEqual(expect.stringContaining('cannot encode end as year-end'));
+  });
+
   it('refuse a row the dataset does not have, a property its rows do not give, and two files for one row', async () => {
     const missing = await checkRows({ 'overlays/rome.yaml': overlay(`same_as: test/rome\n`, 'src:test/states#Rome@-27') });
     expect(rows(missing)).toEqual(['error: src:test/states has no row "Rome@-27"']);
