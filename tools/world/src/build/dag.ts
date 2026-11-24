@@ -2,14 +2,16 @@
 // streams its output files directly into a content-addressed blob directory on disk
 // (`.cache/build/blobs/<sha256>`), and records a small JSON stage manifest.
 // Nothing is held in an all-in-RAM file map, and unchanged stages hit cache in milliseconds.
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, statSync } from 'node:fs';
 import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
+import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
 import { blobPath, hasBlob, linkOrCopy, putBlob, putBlobFile } from '../blobs.ts';
 import { BUILD_CACHE, REPO } from '../paths.ts';
 import { sha256, stableStringify } from '../util.ts';
 
 const DAG_VERSION = 1;
+const REL_IMPORT_RE = /(?:(?:from|import)\s+['"](\.[^'"]+)['"]|import\(\s*['"](\.[^'"]+)['"]\s*\))/g;
+const cmpStr = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
 
 export interface FileRef {
   sha256: string;
@@ -117,7 +119,7 @@ export class DagRunner {
   readonly files = new Map<string, FileRef>();
   readonly stats: StageStat[] = [];
   private readonly log?: (line: string) => void;
-  private readonly codeHashCache = new Map<string, string>();
+  private readonly codeFileCache = new Map<string, { hash: string; deps: string[] }>();
 
   constructor(opts: DagOptions = {}) {
     this.cacheDir = opts.cacheDir ?? BUILD_CACHE;
@@ -128,19 +130,68 @@ export class DagRunner {
     this.log = opts.log;
   }
 
-  /** Hash a set of source files relative to `codeRoot`, memoized per file path. */
-  async codeHash(relPaths: string[]): Promise<string> {
-    const unique = [...new Set(relPaths)].sort();
-    const parts: string[] = [];
-    for (const rel of unique) {
-      let h = this.codeHashCache.get(rel);
-      if (!h) {
-        const full = join(this.codeRoot, rel);
-        h = existsSync(full) ? sha256(await readFile(full)) : 'missing';
-        this.codeHashCache.set(rel, h);
+  private resolveLocalImport(fromFull: string, spec: string): string | undefined {
+    const base = resolve(dirname(fromFull), spec);
+    const candidates = [base, `${base}.ts`, `${base}.js`, join(base, 'index.ts'), join(base, 'index.js')];
+    for (const cand of candidates) {
+      if (!existsSync(cand)) continue;
+      try {
+        if (!statSync(cand).isFile()) continue;
+      } catch {
+        continue;
       }
-      parts.push(`${rel} ${h}`);
+      const rel = relative(this.codeRoot, cand);
+      if (!rel || rel.startsWith('..') || isAbsolute(rel)) continue;
+      return rel.replace(/\\/g, '/');
     }
+    return undefined;
+  }
+
+  private async inspectCodeFile(rel: string): Promise<{ hash: string; deps: string[] }> {
+    const cached = this.codeFileCache.get(rel);
+    if (cached) return cached;
+    const full = join(this.codeRoot, rel);
+    if (!existsSync(full)) {
+      const entry = { hash: 'missing', deps: [] };
+      this.codeFileCache.set(rel, entry);
+      return entry;
+    }
+    const raw = await readFile(full);
+    const hash = sha256(raw);
+    const deps: string[] = [];
+    if (/\.(?:[cm]?ts|[cm]?js)$/.test(rel)) {
+      const text = raw.toString('utf8');
+      REL_IMPORT_RE.lastIndex = 0;
+      let m: RegExpExecArray | null;
+      while ((m = REL_IMPORT_RE.exec(text))) {
+        const spec = m[1] ?? m[2];
+        if (!spec) continue;
+        const resolved = this.resolveLocalImport(full, spec);
+        if (resolved) deps.push(resolved);
+      }
+    }
+    const entry = { hash, deps };
+    this.codeFileCache.set(rel, entry);
+    return entry;
+  }
+
+  /**
+   * Hash a set of source files relative to `codeRoot` together with their full transitive
+   * relative import closure, memoized per file path.
+   */
+  async codeHash(relPaths: string[]): Promise<string> {
+    const visited = new Map<string, string>();
+    const queue = relPaths.map((p) => p.replace(/\\/g, '/'));
+    while (queue.length) {
+      const rel = queue.pop()!;
+      if (visited.has(rel)) continue;
+      const { hash, deps } = await this.inspectCodeFile(rel);
+      visited.set(rel, hash);
+      for (const dep of deps) if (!visited.has(dep)) queue.push(dep);
+    }
+    const parts = [...visited.entries()]
+      .sort(([a], [b]) => cmpStr(a, b))
+      .map(([rel, h]) => `${rel} ${h}`);
     return sha256(parts.join('\n'));
   }
 
@@ -193,7 +244,7 @@ export class DagRunner {
     const sink = new ArtifactSink(this.blobDir);
     const meta = await compute(sink);
 
-    const sortedEntries = [...sink.files.entries()].sort(([a], [b]) => (a < b ? -1 : 1));
+    const sortedEntries = [...sink.files.entries()].sort(([a], [b]) => cmpStr(a, b));
     const filesObj: Record<string, FileRef> = {};
     let bytes = 0;
     for (const [relPath, ref] of sortedEntries) {
@@ -281,7 +332,7 @@ export class DagRunner {
    */
   contentHash(extra = ''): string {
     const listing = [...this.files.entries()]
-      .sort(([a], [b]) => (a < b ? -1 : 1))
+      .sort(([a], [b]) => cmpStr(a, b))
       .map(([p, ref]) => `${p} ${ref.sha256}`)
       .join('\n');
     return sha256(listing + extra);
@@ -290,7 +341,7 @@ export class DagRunner {
   /** Sorted logical-path → sha256 mapping for `manifest.json`. */
   manifestFiles(exclude?: Set<string>): Record<string, string> {
     const out: Record<string, string> = {};
-    for (const [p, ref] of [...this.files.entries()].sort(([a], [b]) => (a < b ? -1 : 1))) {
+    for (const [p, ref] of [...this.files.entries()].sort(([a], [b]) => cmpStr(a, b))) {
       if (exclude?.has(p)) continue;
       out[p] = ref.sha256;
     }

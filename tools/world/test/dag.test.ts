@@ -155,7 +155,8 @@ describe('content-addressed streaming DAG engine', () => {
     expect(readFileSync(join(dest, 'records/b.json'), 'utf8')).toBe('{"id":"a"}');
     expect(readFileSync(join(dest, 'periods.json'), 'utf8')).toBe('{"periods":[]}');
 
-    // Both logical files and the shared blob share the exact same underlying inode (hard-linked).
+    // Both logical files and the shared blob share the exact same underlying inode (hard-linked)
+    // and are read-only (0o444) so accidental writes cannot corrupt the content-addressed cache.
     const shaA = sha256('{"id":"a"}');
     const stA = statSync(join(dest, 'records/a.json'));
     const stB = statSync(join(dest, 'records/b.json'));
@@ -163,6 +164,53 @@ describe('content-addressed streaming DAG engine', () => {
     expect(stA.ino).toBe(stB.ino);
     expect(stA.ino).toBe(stShared.ino);
     expect(stShared.nlink).toBeGreaterThanOrEqual(3);
+    expect(stShared.mode & 0o222).toBe(0);
+  });
+
+  it('invalidates cached stages when a transitively imported local module changes', async () => {
+    const cacheDir = makeTmp('dag-trans-cache-');
+    const codeRoot = makeTmp('dag-trans-code-');
+    writeFileSync(join(codeRoot, 'leaf.ts'), 'export const FACTOR = 1;\n');
+    writeFileSync(join(codeRoot, 'mid.ts'), "import { FACTOR } from './leaf.ts';\nexport const scale = (n: number) => n * FACTOR;\n");
+    writeFileSync(join(codeRoot, 'entry.ts'), "import { scale } from './mid.ts';\nexport const run = () => scale(2);\n");
+
+    let runs = 0;
+    const dag1 = new DagRunner({ cacheDir, codeRoot });
+    const r1 = await dag1.runStage(
+      'derived',
+      { x: 1 },
+      async (sink) => {
+        runs++;
+        await sink.put('out.json', '{"v":1}');
+        return { v: 1 };
+      },
+      { codeFiles: ['entry.ts'] },
+    );
+    expect(r1.hit).toBe(false);
+    expect(runs).toBe(1);
+
+    // Repeat with unchanged transitive graph hits cache.
+    const dag2 = new DagRunner({ cacheDir, codeRoot });
+    const r2 = await dag2.runStage('derived', { x: 1 }, async () => { runs++; return { v: 99 }; }, { codeFiles: ['entry.ts'] });
+    expect(r2.hit).toBe(true);
+    expect(runs).toBe(1);
+
+    // Editing leaf.ts (not listed directly in codeFiles) must change the stage key and recompute.
+    writeFileSync(join(codeRoot, 'leaf.ts'), 'export const FACTOR = 2;\n');
+    const dag3 = new DagRunner({ cacheDir, codeRoot });
+    const r3 = await dag3.runStage(
+      'derived',
+      { x: 1 },
+      async (sink) => {
+        runs++;
+        await sink.put('out.json', '{"v":2}');
+        return { v: 2 };
+      },
+      { codeFiles: ['entry.ts'] },
+    );
+    expect(r3.hit).toBe(false);
+    expect(r3.key).not.toBe(r1.key);
+    expect(runs).toBe(2);
   });
 
   it('eliminates duplicate STN solves: validateWorld chronology feeds solveVariants with identical results', async () => {

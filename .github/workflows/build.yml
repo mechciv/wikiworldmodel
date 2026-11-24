@@ -75,11 +75,16 @@ jobs:
       # The set is saved again, under the new key, when the job passes.
       - uses: actions/cache@v6
         with:
-          path: |
-            .cache/datasets
-            .cache/blobs
+          path: .cache/datasets
           key: datasets-${{ hashFiles('world/manifest.yaml') }}
           restore-keys: datasets-
+
+      # Content-addressed raw snapshot blobs referenced as `blob:<sha256>` in world/manifest.yaml.
+      - uses: actions/cache@v6
+        with:
+          path: .cache/blobs
+          key: blobs-${{ hashFiles('world/manifest.yaml') }}
+          restore-keys: blobs-
 
       # What the importers make of the datasets, keyed by everything that could change it. No
       # partial restores: a change to the code imports afresh.
@@ -93,9 +98,7 @@ jobs:
         with:
           path: .cache/build
           key: build-dag-${{ hashFiles('world/manifest.yaml', 'tools/world/src/**', 'core/**', 'world/generators/**') }}-${{ github.run_id }}
-          restore-keys: |
-            build-dag-${{ hashFiles('world/manifest.yaml', 'tools/world/src/**', 'core/**', 'world/generators/**') }}-
-            build-dag-
+          restore-keys: build-dag-${{ hashFiles('world/manifest.yaml', 'tools/world/src/**', 'core/**', 'world/generators/**') }}-
 
       - name: Fetch the datasets
         run: npm run fetch

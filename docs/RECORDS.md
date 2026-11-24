@@ -557,9 +557,10 @@ its title, citation, license and a `fetch:` block with the URL, `sha256` and siz
 importer turns it into what the build needs, in [tools/world/](../tools/world/), with tests. Don't
 convert a large dataset into thousands of YAML records: records are for researched facts, and
 datasets are referenced, not copied (section 12 of the design). A database that changes every
-day, such as OpenHistoricalMap or the PBDB, is kept as a dated snapshot in
-[world/snapshots/](../world/snapshots/) or a pinned archive, with the query that made it
-(`npm run world -- ohm-snapshot`, `npm run world -- pbdb-snapshot "Hell Creek"`). A taxon written by
+day, such as OpenHistoricalMap or the PBDB, is kept as a dated snapshot in the content-addressed
+blob store (referenced as `blob:<sha256>` in [world/manifest.yaml](../world/manifest.yaml)) or a
+pinned archive, with the query that made it (`npm run world -- ohm-snapshot`, `npm run world --
+pbdb-snapshot "Hell Creek"`). A taxon written by
 hand adopts the database's by its number: `same_as: { pbdb: "txn:38862" }`.
 
 A dataset of points, lines or areas over the globe needs no code in the viewer: its field says

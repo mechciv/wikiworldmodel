@@ -1,16 +1,18 @@
-import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { createServer, type RequestListener, type Server } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { brotliCompressSync, gzipSync } from 'node:zlib';
 import { afterEach, describe, expect, it } from 'vitest';
-import { blobPath, blobRemoteUrl, hasBlob, isBlobUrl, parseBlobHash, putBlob, readBlob, stageBlobsFromGit } from '../src/blobs.ts';
+import { blobPath, blobRemoteUrl, hasBlob, isBlobUrl, parseBlobHash, putBlob, readBlob, snapshotDatasets, stageBlobsFromGit } from '../src/blobs.ts';
 import { download, type Net } from '../src/fetch.ts';
 import { loadManifest } from '../src/manifest.ts';
 import { sha256 } from '../src/util.ts';
 import { validateWorld } from '../src/validate/index.ts';
-import { loadWorld } from '../src/world.ts';
+import { loadWorld, type Manifest } from '../src/world.ts';
 
+const TEST_STORE_ORIGIN = 'https://builds.example.org/';
 const tempDirs: string[] = [];
 const servers: Server[] = [];
 
@@ -20,13 +22,26 @@ function makeTmp(prefix: string): string {
   return dir;
 }
 
-async function startServer(handler: RequestListener): Promise<{ url: string; server: Server }> {
+/**
+ * Start a local HTTP test server and expose it through a `Net` adapter under a public HTTPS origin
+ * so `fetch.ts`'s HTTPS/SSRF URL checks stay strict while still exercising real HTTP + brotli/gzip.
+ */
+async function startServer(handler: RequestListener): Promise<{ url: string; net: Net; server: Server }> {
   const server = createServer(handler);
   servers.push(server);
   await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
   const addr = server.address();
   if (!addr || typeof addr === 'string') throw new Error('unexpected server address');
-  return { url: `http://127.0.0.1:${addr.port}/`, server };
+  const localOrigin = `http://127.0.0.1:${addr.port}/`;
+  const net: Net = {
+    fetch: (input, init) => {
+      const raw = String(input);
+      const mapped = raw.startsWith(TEST_STORE_ORIGIN) ? localOrigin + raw.slice(TEST_STORE_ORIGIN.length) : raw;
+      return fetch(mapped, init);
+    },
+    pause: async () => {},
+  };
+  return { url: TEST_STORE_ORIGIN, net, server };
 }
 
 afterEach(async () => {
@@ -36,11 +51,6 @@ afterEach(async () => {
   }
   while (tempDirs.length) rmSync(tempDirs.pop()!, { recursive: true, force: true });
 });
-
-const fastNet: Net = {
-  fetch: (input, init) => fetch(input, init),
-  pause: async () => {},
-};
 
 describe('content-addressed snapshot blobs', () => {
   it('parses blob:<sha256> URLs and round-trips putBlob / readBlob', async () => {
@@ -68,7 +78,7 @@ describe('content-addressed snapshot blobs', () => {
     const hashGz = sha256(rawGz);
 
     let hits = 0;
-    const { url } = await startServer((req, res) => {
+    const { url, net } = await startServer((req, res) => {
       hits++;
       if (req.url === `/blobs/${hashBr}`) {
         res.writeHead(200, { 'Content-Type': 'application/json', 'Content-Encoding': 'br' });
@@ -85,20 +95,20 @@ describe('content-addressed snapshot blobs', () => {
     });
 
     const destBr = join(outDir, 'snap.json');
-    await download('src:test-br', `blob:${hashBr}`, destBr, () => {}, fastNet, { blobs: { url, prefix: 'blobs/' }, blobDir });
+    await download('src:test-br', `blob:${hashBr}`, destBr, () => {}, net, { blobs: { url, prefix: 'blobs/' }, blobDir });
     expect(readFileSync(destBr)).toEqual(rawBr);
     expect(existsSync(blobPath(hashBr, blobDir))).toBe(true);
     expect(hits).toBe(1);
 
     // Second fetch hits local `.cache/blobs/<sha256>` with zero HTTP requests.
     const destBr2 = join(outDir, 'snap2.json');
-    await download('src:test-br', `blob:${hashBr}`, destBr2, () => {}, fastNet, { blobs: { url, prefix: 'blobs/' }, blobDir });
+    await download('src:test-br', `blob:${hashBr}`, destBr2, () => {}, net, { blobs: { url, prefix: 'blobs/' }, blobDir });
     expect(readFileSync(destBr2)).toEqual(rawBr);
     expect(hits).toBe(1);
 
     // Gzip-encoded remote blob also transparently decompresses and passes sha256 verification.
     const destGz = join(outDir, 'snap.csv');
-    await download('src:test-gz', `blob:${hashGz}`, destGz, () => {}, fastNet, { blobs: { url, prefix: 'blobs/' }, blobDir });
+    await download('src:test-gz', `blob:${hashGz}`, destGz, () => {}, net, { blobs: { url, prefix: 'blobs/' }, blobDir });
     expect(readFileSync(destGz)).toEqual(rawGz);
     expect(hits).toBe(2);
   });
@@ -108,13 +118,13 @@ describe('content-addressed snapshot blobs', () => {
     const outDir = makeTmp('blobs-corrupt-out-');
     const expected = sha256('legitimate snapshot');
 
-    const { url } = await startServer((_req, res) => {
+    const { url, net } = await startServer((_req, res) => {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end('tampered payload');
     });
 
     await expect(
-      download('src:corrupt', `blob:${expected}`, join(outDir, 'bad.json'), () => {}, fastNet, { blobs: { url, prefix: 'blobs/' }, blobDir }),
+      download('src:corrupt', `blob:${expected}`, join(outDir, 'bad.json'), () => {}, net, { blobs: { url, prefix: 'blobs/' }, blobDir }),
     ).rejects.toThrow(/checksum mismatch/);
     expect(existsSync(blobPath(expected, blobDir))).toBe(false);
   });
@@ -138,17 +148,76 @@ describe('content-addressed snapshot blobs', () => {
     expect(report.issues.some((i) => i.level === 'error' && i.check === 'manifest' && i.where === snapId && /does not match/.test(i.message))).toBe(true);
   }, 60_000);
 
-  it('extracts all 17 manifest snapshot blobs cleanly from origin/master git history', async () => {
-    const blobDir = makeTmp('blobs-git-stage-');
+  it('references all 17 snapshot datasets as content-addressed blob:<sha256> entries in manifest.yaml', async () => {
     const manifest = await loadManifest();
-    const res = await stageBlobsFromGit(manifest, 'origin/master', { blobDir, log: () => {} });
-    expect(res.missing).toEqual([]);
-    expect(res.staged).toBe(17);
-    expect(res.alreadyPresent).toBe(0);
-    // Running again reports all 17 already present.
-    const res2 = await stageBlobsFromGit(manifest, 'origin/master', { blobDir, log: () => {} });
-    expect(res2.missing).toEqual([]);
-    expect(res2.staged).toBe(0);
-    expect(res2.alreadyPresent).toBe(17);
+    const snaps = snapshotDatasets(manifest);
+    expect(snaps.length).toBe(17);
+    for (const [, d] of snaps) {
+      expect(d.fetch.url).toBe(`blob:${d.fetch.sha256}`);
+      expect(d.fetch.filename).toBeTruthy();
+    }
+  });
+
+  it('extracts and verifies snapshot blobs cleanly from a git revision history', async () => {
+    const repoDir = makeTmp('blobs-git-repo-');
+    const blobDir = makeTmp('blobs-git-stage-');
+    const git = (args: string[]) =>
+      execFileSync('git', args, {
+        cwd: repoDir,
+        env: {
+          ...process.env,
+          GIT_AUTHOR_NAME: 'Test',
+          GIT_AUTHOR_EMAIL: 'test@example.com',
+          GIT_COMMITTER_NAME: 'Test',
+          GIT_COMMITTER_EMAIL: 'test@example.com',
+        },
+        stdio: 'pipe',
+      });
+
+    git(['init']);
+    mkdirSync(join(repoDir, 'world', 'snapshots'), { recursive: true });
+    const aBytes = Buffer.from('{"id":"alpha","rows":[1,2,3]}\n');
+    const bBytes = Buffer.from('lat,lon\n0,0\n');
+    writeFileSync(join(repoDir, 'world', 'snapshots', 'alpha.json'), aBytes);
+    writeFileSync(join(repoDir, 'world', 'snapshots', 'beta.csv'), bBytes);
+    git(['add', 'world/snapshots']);
+    git(['commit', '-m', 'seed legacy snapshots']);
+    // Delete snapshots in a follow-up commit, mirroring the post-migration repo state.
+    git(['rm', '-r', 'world/snapshots']);
+    git(['commit', '-m', 'move snapshots to blob store']);
+
+    const mockManifest = {
+      version: 1,
+      publish: { licenses: ['CC0-1.0'] },
+      datasets: {
+        'src:alpha': {
+          id: 'src:alpha',
+          file: 'manifest.yaml',
+          kind: 'dataset',
+          title: 'Alpha',
+          license: 'CC0-1.0',
+          credit: 'Test',
+          fetch: { url: `blob:${sha256(aBytes)}`, sha256: sha256(aBytes), bytes: aBytes.byteLength, format: 'json', filename: 'alpha.json' },
+        },
+        'src:beta': {
+          id: 'src:beta',
+          file: 'manifest.yaml',
+          kind: 'dataset',
+          title: 'Beta',
+          license: 'CC0-1.0',
+          credit: 'Test',
+          fetch: { url: `blob:${sha256(bBytes)}`, sha256: sha256(bBytes), bytes: bBytes.byteLength, format: 'csv', filename: 'beta.csv' },
+        },
+      },
+    } as unknown as Manifest;
+
+    const res = await stageBlobsFromGit(mockManifest, 'HEAD~1', { repo: repoDir, blobDir, log: () => {} });
+    expect(res).toEqual({ staged: 2, alreadyPresent: 0, missing: [] });
+    expect(await readBlob(sha256(aBytes), blobDir)).toEqual(new Uint8Array(aBytes));
+    expect(await readBlob(sha256(bBytes), blobDir)).toEqual(new Uint8Array(bBytes));
+
+    // Running again reports all blobs already present without re-staging.
+    const res2 = await stageBlobsFromGit(mockManifest, 'HEAD~1', { repo: repoDir, blobDir, log: () => {} });
+    expect(res2).toEqual({ staged: 0, alreadyPresent: 2, missing: [] });
   });
 });

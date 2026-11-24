@@ -3,7 +3,7 @@
 // sha256 in world/manifest.yaml; build artifacts also stream directly to content-addressed blobs.
 import { execFile } from 'node:child_process';
 import { existsSync } from 'node:fs';
-import { copyFile, link, mkdir, readFile, rename, rm, stat, writeFile } from 'node:fs/promises';
+import { chmod, copyFile, link, mkdir, readFile, rename, rm, stat, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { promisify } from 'node:util';
 import { BLOBS, REPO } from './paths.ts';
@@ -49,6 +49,7 @@ export async function putBlob(content: Uint8Array | string, dir: string = BLOBS)
   const tmp = `${path}.${process.pid}.${Math.random().toString(36).slice(2, 8)}.part`;
   try {
     await writeFile(tmp, buf);
+    await chmod(tmp, 0o444);
     await rename(tmp, path);
   } catch (err) {
     await rm(tmp, { force: true }).catch(() => {});
@@ -67,7 +68,8 @@ export async function putBlobFile(srcPath: string, dir: string = BLOBS): Promise
   await mkdir(dir, { recursive: true });
   const tmp = `${dest}.${process.pid}.${Math.random().toString(36).slice(2, 8)}.part`;
   try {
-    await linkOrCopy(srcPath, tmp);
+    await copyFile(srcPath, tmp);
+    await chmod(tmp, 0o444);
     await rename(tmp, dest);
   } catch (err) {
     await rm(tmp, { force: true }).catch(() => {});

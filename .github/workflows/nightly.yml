@@ -68,11 +68,15 @@ jobs:
       # the fetch downloads only what that lacks.
       - uses: actions/cache@v6
         with:
-          path: |
-            .cache/datasets
-            .cache/blobs
+          path: .cache/datasets
           key: datasets-${{ hashFiles('world/manifest.yaml') }}
           restore-keys: datasets-
+
+      - uses: actions/cache@v6
+        with:
+          path: .cache/blobs
+          key: blobs-${{ hashFiles('world/manifest.yaml') }}
+          restore-keys: blobs-
 
       - uses: actions/cache@v6
         with:
@@ -157,11 +161,15 @@ jobs:
       # The datasets the world job fetched and saved, or else, as there, the newest set kept before.
       - uses: actions/cache@v6
         with:
-          path: |
-            .cache/datasets
-            .cache/blobs
+          path: .cache/datasets
           key: datasets-${{ hashFiles('world/manifest.yaml') }}
           restore-keys: datasets-
+
+      - uses: actions/cache@v6
+        with:
+          path: .cache/blobs
+          key: blobs-${{ hashFiles('world/manifest.yaml') }}
+          restore-keys: blobs-
 
       - uses: actions/cache@v6
         with:

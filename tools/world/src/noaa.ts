@@ -1,5 +1,5 @@
 // NOAA's hazard databases as a dated snapshot: significant eruptions, earthquakes and tsunamis, read
-// through the Hazard Event service and kept in world/snapshots, with the query that made them.
+// through the Hazard Event service and stored as a content-addressed blob, with the query that made them.
 import type { HazardKind } from '../../../core/layers.ts';
 
 const SERVICE = 'https://www.ngdc.noaa.gov/hazel/hazard-service/api/v1';

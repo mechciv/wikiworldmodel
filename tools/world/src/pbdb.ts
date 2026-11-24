@@ -143,7 +143,7 @@ export async function exportSnapshot(formation: string, date: string): Promise<P
  * The fossils of the land, for the atlas of who lived where: every regular occurrence named to a genus or
  * better from a terrestrial environment, over the Phanerozoic. It has far too many taxa to make records of,
  * so rows stay rows and taxa stay rows too. Only a taxon a record adopts by its number becomes part of the
- * world's tree. It is kept as tables with few repeated strings, as it is the largest thing in world/snapshots.
+ * world's tree. It is kept as tables with few repeated strings, as it is the largest snapshot blob.
  */
 export interface LandSnapshot {
   format: 'lightworld-pbdb-land@1';
