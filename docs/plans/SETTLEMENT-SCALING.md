@@ -1,0 +1,46 @@
+# Cities and settlements across millennia
+
+This proposal describes how to visit thousands of settlements at different dates, from a seasonal camp known by a few finds to a city with surveyed streets. A visit should show what was recorded there, which details the model supplied, and what changes when the visitor moves the clock. A contributor should be able to add a village, a dated quay, or a competing street plan through records and datasets. The shared generator already provides much of the ground, housing, and activity. [Human landscape](../HUMAN-LANDSCAPE.md) · [Building traditions](../DWELLINGS.md)
+
+## What the viewer can do today
+
+| Place | How the scene is made | Limit that matters for the next settlement |
+|---|---|---|
+| Rome | The city builder combines dated structures, mapped footprints, local relief, and the Tiber. The housing plan uses counts of apartment blocks and houses in fourteen regions, with 315 CE as its reference. | Buildings can appear and disappear at their own dates. The generated neighborhoods share one plan across the generator’s validity interval, roughly 300 BCE to 600 CE. [City builder](../../tools/world/src/build/city.ts) · [Rome’s housing generator](../../world/generators/rome/fabric.yaml) |
+| Tenochtitlan | The shared settlement generator can draw canals from the city’s pre-conquest layout claim. A dated field supplies the reconstructed Lake Texcoco shoreline for 1519. Individual house plots and street canals are procedural. | The compiled settlement record carries one selected town layout and its validity interval. It cannot supply a sequence of separately evidenced layouts for the same settlement. [City record](../../world/entities/people/cities/tenochtitlan.yaml) · [Shoreline field](../../world/fields/earth/texcoco-1519.yaml) · [Landscape build](../../tools/world/src/build/landscape.ts) |
+| Other towns and villages | Chandler and Modelski’s city lists supply positions and population observations. Local records can supply population, housing, area, or town form. Elsewhere the landscape model places settlements using regional land use, population, and building traditions. | The viewer loads the city catalog together, scans for nearby entries, and can associate a record with the nearest catalog city within 12 km. Two neighboring settlements can meet that distance test. [Landscape reader](../../viewer/src/city/landscape.ts) · [City matching](../../core/landscape.ts) |
+
+The build also registers Hell Creek, a fossil ecosystem with its own reference scene at 66.5 Ma. Its named location and shared life renderer illustrate how a place can receive more evidence within a common rendering system. Featured trips such as Angkor are navigation entries. [Site registration](../../tools/world/src/build/index.ts) · [Hell Creek configuration](../../world/generators/life/scene.yaml) · [Trip list](../../viewer/src/ui/timemachine.ts)
+
+## Give every feature an address
+
+Use the existing settlement entity ID as the address for a known settlement. Keep names, occupied places, and extents dated. Allow several occupation intervals, an uncertain point in place of a surveyed boundary, and distinct records for neighboring or successive settlements. A seasonal camp can have a period of attested use while the season of any individual visit remains unknown. An unnamed hamlet generated from regional evidence keeps a procedural slot ID. If someone researches it, link that slot or catalog row to the new record so saved links still resolve. [Record identity and promotion](../STRUCTURE.md)
+
+Build a registry that resolves a settlement ID, date, and selected alternative to its local frame, occupied extent, source layers, and members. A dated membership claim can place a monument in a city. A spatial intersection can nominate candidates for an unassigned feature. Keep ambiguous matches inspectable and keep an unassigned, located feature reachable from the globe. A road may cross several settlements while retaining one feature ID. Likewise, allow a catalog row to remain separate until there is evidence to identify it with a particular town.
+
+This is the first implementation step because Rome’s builder selects structures by kind across the whole world, the globe tiler skips those kinds, and navigation sends a building lookup to the first city scene. Xuanquan Postal Station in China satisfies the same building-kind test as a Roman civic building. The builder, globe, and search should consult the same registry. An exact record selection should take the visitor to that record’s location even when it has no dedicated scene. [Structure selection](../../tools/world/src/build/city.ts) · [Globe tiler](../../tools/world/src/build/featuretiles.ts) · [Viewer routing](../../viewer/src/main.ts) · [Xuanquan record](../../world/entities/people/trade/xuanquan-postal-station.yaml)
+
+## Compile changes through time
+
+A phase is an interval during which the selected claims relevant to a feature hold. Derive phase boundaries from construction, abandonment, a change in footprint, a new layout, or a change in a constraining field. Store the shared geometry once and reference it across unchanged intervals. Keep the original bounds and alternatives available for inspection. Interpolate quantities such as population only across gaps the source or model supports. Date uncertainty should remain visible when a visitor asks what stood there during a transition.
+
+Resolve evidence per feature. A surveyed wall constrains the wall. A city’s housing count constrains the aggregate. A regional building tradition constrains the kinds of houses the worker generates. Show the basis for each when clicked. Account for a named town’s people when allocating the surrounding cell’s population to smaller settlements, and report disagreements between a local estimate and a regional model. A dated camp or village can participate with sparse evidence and a regional fallback.
+
+Keep a generated street or parcel’s identity tied to its settlement and stable slot. Use the selected claims and generator version to decide when to regenerate its geometry. A newly surveyed building can then occupy its parcel without moving every house on the street. In Tenochtitlan, the 1519 shoreline has its own bounds and the canal-layout claim ends at the event referenced in the record. Crossing either boundary should change only the constraints that expire. A later gap in street evidence can use a labelled regional reconstruction. [Seeded identities and fingerprints](../STRUCTURE.md) · [Tenochtitlan’s dated claims](../../world/entities/people/cities/tenochtitlan.yaml)
+
+## Bound the cost of a visit
+
+Publish a spatial and temporal index of settlement summaries alongside the existing feature tiles. A globe view requests summaries at its level of detail. Descending into a settlement requests the cells intersecting the camera, the active phases, and their input geometry. Generate fine meshes in the existing worker. Keep a separate ID lookup for search and saved links, including features shared across cells. A visitor who changes the year within a phase can reuse the same geometry. [Feature tiles](../FEATURE-TILES.md) · [City mesh worker](../../viewer/src/city/worker.ts)
+
+Key cached output by cell, active claims and alternatives, source revisions, and generator version. Track those dependencies during the build. A correction to one harbor should invalidate its affected cells, dates, and summaries. An edit to a regional building tradition should invalidate all the settlements that use it. Keep the previous complete index available until the new index and all referenced files are ready.
+
+## Migration and acceptance tests
+
+| Step | What demonstrates it works |
+|---|---|
+| 1. Route Rome through the registry | An existing Roman monument link opens the same structure. Xuanquan opens at its own recorded location. A road crossing two cells has one selectable identity. |
+| 2. Put dated layouts and source layers through the shared path | Visit Tenochtitlan in 1519, cross the fall in 1521, and return. Check the shoreline and canal claim independently against their bounds. Returning reproduces the same parcels. Neighboring Tlatelolco keeps its own identity. |
+| 3. Exercise different amounts of evidence | Render Teotihuacan’s recorded grid and a fixture for a small settlement with only a location and occupation interval. Inspect a surveyed feature and a generated house. Each identifies the evidence or assumptions that produced it. [Teotihuacan](../../world/entities/people/first-cities/teotihuacan.yaml) |
+| 4. Measure a many-city world | Run identical cold and warm visits against synthetic catalogs of 1,000 and 10,000 settlements spanning several millennia. Hold local density, visible geometry, hardware, and camera path fixed. Record bytes fetched, cells loaded, time to first usable scene, and peak worker memory. Adding distant settlements should add zero detailed cell fetches to that visit. A single-parcel edit should preserve unrelated tile hashes. |
+
+The first two steps give contributors a complete path from a settlement record to a visitable place. The benchmark then shows whether adding distant history increases the cost of exploring one neighborhood.
