@@ -3,16 +3,20 @@
 import { describe, expect, it } from 'vitest';
 import {
   batchOverlapsCascade,
+  cloudLayerFor,
   computeBatchBounds,
   computeProtoBounds,
   halfSize,
   hemiOctDecode,
   hemiOctEncode,
   INSTANCE_STRIDE,
+  localEffectWeights,
   octFrame,
   octGridWeights,
   PLANET_RADIUS,
   reprojectMatrix,
+  scaledRenderSize,
+  smoothDown,
   VERTEX_STRIDE,
   WAY_STRIDE,
   type CascadeBox,
@@ -418,5 +422,100 @@ describe('WebGPU capability probe & backend selection', () => {
     expect(selectRenderBackend({ preferWebGPU: true }, ready)).toBe('webgpu');
     expect(selectRenderBackend({ preferWebGPU: true }, underLimit)).toBe('webgl2-full');
     expect(selectRenderBackend({ preferWebGPU: true }, missing)).toBe('webgl2-full');
+  });
+});
+
+describe('render scaling, continuous altitude effects, and terrain-relative clouds', () => {
+  it('computes safe internal render sizes clamped to positive integers within [0.25, 1.0]', () => {
+    expect(scaledRenderSize(1280, 760, 1)).toEqual([1280, 760]);
+    expect(scaledRenderSize(1280, 760, 0.5)).toEqual([640, 380]);
+    expect(scaledRenderSize(1280, 760, 0.1)).toEqual([320, 190]);
+    expect(scaledRenderSize(1280, 760, 2.5)).toEqual([1280, 760]);
+    expect(scaledRenderSize(1280, 760, Number.NaN)).toEqual([1280, 760]);
+    expect(scaledRenderSize(1, 1, 0.25)).toEqual([1, 1]);
+  });
+
+  it('decays local effect weights smoothly and monotonically with altitude and respects fast mode', () => {
+    expect(smoothDown(1000, 1500, 4000)).toBe(1);
+    expect(smoothDown(4500, 1500, 4000)).toBe(0);
+    expect(smoothDown(2750, 1500, 4000)).toBeCloseTo(0.5, 6);
+
+    const low = localEffectWeights(200, false);
+    expect(low.ao).toBe(1);
+    expect(low.banks).toBe(1);
+    expect(low.waterScreen).toBe(1);
+    expect(low.shafts).toBe(1);
+    expect(low.smoke).toBe(1);
+    expect(low.ambient).toBe(true);
+
+    const mid = localEffectWeights(3000, false);
+    expect(mid.ao).toBe(1);
+    expect(mid.banks).toBeGreaterThan(0);
+    expect(mid.banks).toBeLessThan(1);
+    expect(mid.shafts).toBeGreaterThan(0);
+    expect(mid.shafts).toBeLessThan(1);
+    expect(mid.smoke).toBe(0);
+
+    const high = localEffectWeights(12_000, false);
+    expect(high.ao).toBe(0);
+    expect(high.banks).toBe(0);
+    expect(high.waterScreen).toBe(0);
+    expect(high.shafts).toBe(0);
+    expect(high.smoke).toBe(0);
+    expect(high.ambient).toBe(false);
+
+    // Monotonic decay across altitude with no discontinuous jump.
+    let prev = localEffectWeights(0, false);
+    for (let alt = 100; alt <= 12_000; alt += 100) {
+      const cur = localEffectWeights(alt, false);
+      for (const k of ['ao', 'banks', 'waterScreen', 'shafts', 'smoke'] as const) {
+        expect(cur[k]).toBeLessThanOrEqual(prev[k] + 1e-9);
+        expect(prev[k] - cur[k]).toBeLessThan(0.25);
+      }
+      prev = cur;
+    }
+
+    // Fast mode disables post effects and water-map bank blurring while keeping ambient gating.
+    const fastLow = localEffectWeights(200, true);
+    expect(fastLow.ao).toBe(0);
+    expect(fastLow.banks).toBe(0);
+    expect(fastLow.waterScreen).toBe(0);
+    expect(fastLow.shafts).toBe(0);
+    expect(fastLow.smoke).toBe(0);
+    expect(fastLow.ambient).toBe(true);
+  });
+
+  it('places clouds relative to local terrain elevation and fades cleanly across the cloud base', () => {
+    // Sea-level terrain (groundZ = 0): base 1400 m, top 2400 m.
+    const seaLow = cloudLayerFor(200, 200);
+    expect(seaLow.base).toBe(1400);
+    expect(seaLow.top).toBe(2400);
+    expect(seaLow.alpha).toBe(1);
+
+    // Approaching sea-level cloud base (1000..1400 m): fades smoothly from 1 to 0.
+    const seaMid = cloudLayerFor(1200, 1200);
+    expect(seaMid.alpha).toBeCloseTo(0.5, 6);
+    const seaAbove = cloudLayerFor(1450, 1450);
+    expect(seaAbove.alpha).toBe(0);
+
+    // High plateau (e.g., 2200 m ground, eye 300 m above ground -> eyeSea = 2500 m):
+    // clouds sit at 3600..4600 m above sea level, still visible above the viewer!
+    const plateau = cloudLayerFor(2500, 300);
+    expect(plateau.base).toBe(3600);
+    expect(plateau.top).toBe(4600);
+    expect(plateau.alpha).toBe(1);
+
+    // Ascending above the plateau toward 3600 m fades smoothly over 3200..3600 m.
+    const plateauNear = cloudLayerFor(3400, 1200);
+    expect(plateauNear.base).toBe(3600);
+    expect(plateauNear.alpha).toBeCloseTo(0.5, 6);
+    const plateauOver = cloudLayerFor(3700, 1500);
+    expect(plateauOver.alpha).toBe(0);
+
+    // Underwater / below-sea-level floor clamps groundZ to 0 (never puts clouds underwater).
+    const seaFloor = cloudLayerFor(-20, 5);
+    expect(seaFloor.base).toBe(1400);
+    expect(seaFloor.top).toBe(2400);
+    expect(seaFloor.alpha).toBe(1);
   });
 });
