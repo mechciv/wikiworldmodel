@@ -57,6 +57,10 @@ export interface CityFrame {
   clock?: number;
   width: number;
   height: number;
+  /** internal render target scale in (0, 1] for interactive resolution scaling without resizing the canvas */
+  renderScale?: number;
+  /** viewport height in CSS pixels, matching SceneStream screen-size culling */
+  cssHeight?: number;
 }
 
 export interface MaterialSetStatus {
@@ -76,6 +80,10 @@ export interface LocalRenderer<TMesh extends MeshHandle = MeshHandle> {
   readonly refining: boolean;
   readonly steadyMs: number;
   readonly stillDone: boolean;
+  /** current internal render target dimensions [w, h] */
+  readonly renderSize: [number, number];
+  /** total number of internal render-target sets allocated since creation (for diagnostics) */
+  readonly targetAllocations: number;
   shadowCells: (focus: V3, radius: number) => TMesh[];
 
   ambientMotion(clearance: number, movingInstances: boolean): boolean;

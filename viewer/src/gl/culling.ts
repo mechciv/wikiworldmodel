@@ -331,6 +331,71 @@ export function halfSize(w: number, h: number): [number, number] {
   return [Math.max(1, Math.ceil(w / 2)), Math.max(1, Math.ceil(h / 2))];
 }
 
+/** Compute scaled internal render dimensions clamped to [0.25, 1.0] scale and at least 1 x 1 pixels. */
+export function scaledRenderSize(outW: number, outH: number, scale: number): [number, number] {
+  const s = Number.isFinite(scale) && scale > 0 ? Math.max(0.25, Math.min(1, scale)) : 1;
+  return [Math.max(1, Math.round(outW * s)), Math.max(1, Math.round(outH * s))];
+}
+
+/** Smooth cubic Hermite falloff from 1 at `x <= from` to 0 at `x >= to`. */
+export function smoothDown(x: number, from: number, to: number): number {
+  if (to <= from) return x <= from ? 1 : 0;
+  const t = Math.max(0, Math.min(1, (x - from) / (to - from)));
+  return 1 - t * t * (3 - 2 * t);
+}
+
+/** Staged continuous weights [0..1] for near-ground effects, replacing a single altitude cliff. */
+export interface LocalEffectWeights {
+  ao: number;
+  banks: number;
+  waterScreen: number;
+  shafts: number;
+  smoke: number;
+  ambient: boolean;
+}
+
+/**
+ * Continuous altitude weights for local rendering passes. Each effect fades smoothly to zero over
+ * its own band before its GPU pass is skipped, eliminating hard visual pops during vertical zoom.
+ */
+export function localEffectWeights(clearance: number, fast: boolean): LocalEffectWeights {
+  const c = Math.max(0, clearance);
+  if (fast) {
+    return { ao: 0, banks: 0, waterScreen: 0, shafts: 0, smoke: 0, ambient: c < 10000 };
+  }
+  return {
+    ao: smoothDown(c, 4000, 10000),
+    banks: smoothDown(c, 2000, 6000),
+    waterScreen: smoothDown(c, 3000, 8000),
+    shafts: smoothDown(c, 1500, 4000),
+    smoke: smoothDown(c, 1100, 1800),
+    ambient: c < 10000,
+  };
+}
+
+/** Terrain-relative volumetric cloud layer [base, top] (metres ASL) and smooth altitude fade alpha. */
+export interface CloudLayer {
+  base: number;
+  top: number;
+  alpha: number;
+}
+
+/**
+ * Place fair-weather volumetric clouds 1400–2400 m above local ground elevation (or sea level over
+ * ocean/lowlands), smoothly fading out over the 400 m approach to the cloud base so high plateaus
+ * still have clouds and ascending through the layer never pops.
+ */
+export function cloudLayerFor(eyeSea: number, clearance: number): CloudLayer {
+  const groundZ = Math.max(0, eyeSea - Math.max(0, clearance));
+  const base = groundZ + 1400;
+  const top = base + 1000;
+  return {
+    base,
+    top,
+    alpha: smoothDown(eyeSea, base - 400, base),
+  };
+}
+
 /** Build a matrix reprojecting current clip space into a previous frame's clip space given eye motion. */
 export function reprojectMatrix(currentVp: Mat4, lastVp: Mat4, eye: V3, lastEye: V3): Mat4 {
   const dx = eye[0] - lastEye[0];

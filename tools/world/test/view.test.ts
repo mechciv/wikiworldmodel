@@ -3,7 +3,7 @@
 import { describe, expect, it } from 'vitest';
 import { EARTH_RADIUS, fromLocal } from '../../../core/city.ts';
 import { GroundSampler } from '../../../world/generators/city/ground.ts';
-import { localView, lookThrough, underSea } from '../../../viewer/src/city/view.ts';
+import { localView, lookThrough, shadowFocusFor, underSea } from '../../../viewer/src/city/view.ts';
 
 /** A flat ground at a height, over 20 km. */
 const flat = (z: number) => new GroundSampler([{ nx: 201, ny: 201, x0: -10000, y0: -10000, cell: 100, z: new Float32Array(201 * 201).fill(z) }]);
@@ -59,5 +59,39 @@ describe('the eye in a scene of the sea', () => {
     const s = { ...ORIGIN, dist: 1 + 150 / EARTH_RADIUS, heading: 30, tilt: 82 };
     const a = localView(s, ORIGIN, ground, 960, 560);
     expect(a.near).toBeCloseTo(Math.max(0.2, Math.min(a.clearance * 0.4, a.range * 0.3, 40000)), 12);
+  });
+});
+
+describe('shadowFocusFor', () => {
+  it('blends smoothly from forward near-eye focus to target across 1500..4500 m clearance with no cliff at 3000 m', () => {
+    const ground = flat(20);
+    const atRange = (range: number) =>
+      localView({ ...ORIGIN, dist: 1 + range / EARTH_RADIUS, heading: 0, tilt: 60 }, ORIGIN, ground, 960, 560);
+
+    // Below 1500 m clearance: uses near focus (700 m ahead of eye along forward).
+    const low = atRange(500);
+    expect(low.clearance).toBeLessThan(1500);
+    const lowFocus = shadowFocusFor(low);
+    const ahead = Math.min(low.range, 700);
+    expect(lowFocus[0]).toBeCloseTo(low.eye[0] + low.forward[0] * ahead, 5);
+    expect(lowFocus[1]).toBeCloseTo(low.eye[1] + low.forward[1] * ahead, 5);
+    expect(lowFocus[2]).toBeCloseTo(Math.min(low.target[2], low.eye[2]), 5);
+
+    // Above 4500 m clearance: equals target directly.
+    const high = atRange(12_000);
+    expect(high.clearance).toBeGreaterThan(4500);
+    const highFocus = shadowFocusFor(high);
+    expect(highFocus[0]).toBeCloseTo(high.target[0], 5);
+    expect(highFocus[1]).toBeCloseTo(high.target[1], 5);
+    expect(highFocus[2]).toBeCloseTo(high.target[2], 5);
+
+    // Continuous across the old 3000 m cutoff: adjacent clearance steps move only slightly.
+    let prev = shadowFocusFor(atRange(2_000));
+    for (let range = 2_200; range <= 10_000; range += 200) {
+      const cur = shadowFocusFor(atRange(range));
+      const jump = Math.hypot(cur[0] - prev[0], cur[1] - prev[1], cur[2] - prev[2]);
+      expect(jump).toBeLessThan(200);
+      prev = cur;
+    }
   });
 });

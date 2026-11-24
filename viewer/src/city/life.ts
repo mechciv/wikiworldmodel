@@ -13,7 +13,7 @@ import { snowOf } from '../../../world/generators/life/climate.ts';
 import { declination, MID_DAY } from '../../../core/water.ts';
 import { FIELD_SLOTS } from '../../../core/plots.ts';
 import { meanBears } from '../../../world/generators/life/sorting.ts';
-import { HOUSE, KEPT, protoParts, STREWN, type NamedGroup } from '../../../world/generators/life/stream.ts';
+import { HOUSE, KEPT, protoParts, STREWN, type NamedGroup, type ProtoMesh } from '../../../world/generators/life/stream.ts';
 import { ROUTE, wayAt } from '../../../world/generators/life/routines.ts';
 import { CityRenderer, SHARE_STEPS, type CityFrame, type LocalRenderer, type MeshHandle } from '../gl/city.ts';
 import type { GL } from '../gl/context.ts';
@@ -21,7 +21,7 @@ import type { V3 } from '../mat.ts';
 import { groundLook, groundTones, rockLook } from './groundlook.ts';
 import { fieldStyle, type FromLifeWorker, type PeopleSummary, type ToLifeWorker } from './lifeworker.ts';
 import { Skyline } from './skyline.ts';
-import type { LocalView } from './view.ts';
+import { shadowFocusFor, type LocalView } from './view.ts';
 
 const TIMELESS = 2e7;
 
@@ -134,11 +134,14 @@ export class LifeScene {
   private waiting = false;
   private lastSent: LocalView | null = null;
   private serial = 0;
+  private validSerial = 0;
   private want: LocalView | null = null;
   /** whether the last view sent asked for a still's richer frame */
   private sentRich = false;
   private active = false;
-  private wasActive = false;
+  private needsReset = false;
+  private hasComplete = false;
+  private partialSince = 0;
   private scenario: Scenario = {};
 
   /**
@@ -219,23 +222,75 @@ export class LifeScene {
   private pathsGpu: MeshHandle | null = null;
   private wallsGpu: MeshHandle | null = null;
   private fieldworksGpu: MeshHandle | null = null;
-  private held: Extract<FromLifeWorker, { type: 'selection' }>[] = [];
+  private heldProtos: ProtoMesh[] = [];
+  private held: Extract<FromLifeWorker, { type: 'selection' }> | null = null;
+  private warmWaiters: (() => void)[] = [];
+
+  /**
+   * Pre-populate an inactive scene's worker selection (protos + instance batches) for `v` before
+   * swapping it onto the renderer, so the first activated frame already has its trees and settlements.
+   */
+  warm(v: LocalView, timeoutMs = 350): Promise<void> {
+    if (!this.ready || !this.worker || this.active) return Promise.resolve();
+    if (this.needsReset) {
+      const reset: ToLifeWorker = { type: 'reset' };
+      this.worker.postMessage(reset);
+      this.validSerial = this.serial;
+      this.needsReset = false;
+      this.heldProtos = [];
+      this.held = null;
+      this.lastSent = null;
+    }
+    this.want = v;
+    this.send();
+    if (!this.waiting && this.held && this.last.pending === 0) return Promise.resolve();
+    return new Promise<void>((resolve) => {
+      let done = false;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        clearTimeout(timer);
+        const idx = this.warmWaiters.indexOf(finish);
+        if (idx >= 0) this.warmWaiters.splice(idx, 1);
+        resolve();
+      };
+      const timer = setTimeout(finish, timeoutMs);
+      this.warmWaiters.push(finish);
+    });
+  }
+
+  private flushWarmWaiters(): void {
+    if (!this.warmWaiters.length) return;
+    const list = this.warmWaiters.slice();
+    for (const fn of list) fn();
+  }
 
   /** This scene takes over the renderer: its ground, its colours and whatever has been made for it. */
   activate(): void {
     if (this.active || !this.groundData) return;
     const r = this.renderer;
     const before = owners.get(r);
-    if (before && before !== this) before.active = false;
+    if (before && before !== this) {
+      before.active = false;
+      before.needsReset = true;
+      before.hasComplete = false;
+      before.partialSince = 0;
+    }
     owners.set(r, this);
-    // Whatever meshes it handed over before have gone with the last scene: it must hand them over again.
-    if (this.wasActive && before !== this) {
+    // Whatever meshes it handed over before have gone with the last scene: it must hand them over again
+    // unless `warm()` already reset the worker and buffered fresh protos.
+    if (this.needsReset) {
       const reset: ToLifeWorker = { type: 'reset' };
       this.worker?.postMessage(reset);
+      this.validSerial = this.serial;
+      this.needsReset = false;
       this.lastSent = null;
+      this.heldProtos = [];
+      this.held = null;
     }
-    this.wasActive = true;
     this.active = true;
+    this.hasComplete = false;
+    this.partialSince = 0;
     const g = this.groundData;
     r.sea = this.sea;
     r.clearGround();
@@ -301,12 +356,35 @@ export class LifeScene {
     });
     r.setEntities(out);
     this.selected = 0;
-    for (const s of this.held) this.apply(s);
-    this.held = [];
+    if (this.heldProtos.length) {
+      this.uploadProtos(this.heldProtos);
+      this.heldProtos = [];
+    }
+    if (this.held) {
+      r.setInstances(this.held.batches);
+      this.hasComplete = this.held.pending === 0;
+      this.held = null;
+    }
+  }
+
+  private updateNames(groups: NamedGroup[]): void {
+    const taxa = this.spec.taxa;
+    this.names = groups.map((g) => {
+      const t = taxa[g.taxon];
+      return { id: t.id, label: t.label, kind: 'taxon', form: { type: 'generic' }, rings: [], at: g.at, base: g.base, time: t.time, basis: 'procedural', curated: true, rank: (t.length ?? 0) >= 2 ? 2 : 3 } as CityStructure;
+    });
+    this.tops = Float32Array.from(groups, (g) => g.top);
+    this.homes = groups;
+    this.follow(this.clock);
+    this.labelSerial++;
   }
 
   private selection(m: Extract<FromLifeWorker, { type: 'selection' }>): void {
     this.waiting = false;
+    if (m.serial <= this.validSerial) {
+      if (this.active || this.warmWaiters.length > 0) this.send();
+      return;
+    }
     // Those among them that go somewhere: a way's ninth number is how fast.
     let going = 0;
     for (const b of m.batches) {
@@ -319,19 +397,39 @@ export class LifeScene {
       return b.count > 0 && (taxon < HOUSE || (taxon >= KEPT && taxon < STREWN) || !!b.ways);
     });
     this.last = { instances: m.instances, triangles: m.triangles, meshes: m.batches.length, pending: m.pending, ms: m.ms, going };
-    if (this.active) this.apply(m);
-    else this.held = [m];
-    const taxa = this.spec.taxa;
-    this.names = m.groups.map((g) => {
-      const t = taxa[g.taxon];
-      return { id: t.id, label: t.label, kind: 'taxon', form: { type: 'generic' }, rings: [], at: g.at, base: g.base, time: t.time, basis: 'procedural', curated: true, rank: (t.length ?? 0) >= 2 ? 2 : 3 } as CityStructure;
-    });
-    this.tops = Float32Array.from(m.groups, (g) => g.top);
-    this.homes = m.groups;
-    this.follow(this.clock);
-    this.labelSerial++;
-    this.onChange();
-    this.send();
+    if (this.active) {
+      // Always upload new prototype meshes immediately so impostor baking can begin right away.
+      if (m.protos.length) this.uploadProtos(m.protos);
+      // When a complete selection is already on the GPU, hold off wiping batches during brief
+      // time-sliced intermediate passes (`pending > 0`) so distant cells do not flash out.
+      const now = performance.now();
+      const defer = m.pending > 0 && this.hasComplete && (this.partialSince === 0 || now - this.partialSince < 160);
+      if (defer) {
+        if (this.partialSince === 0) this.partialSince = now;
+      } else {
+        this.renderer.setInstances(m.batches);
+        if (m.pending === 0) {
+          this.hasComplete = true;
+          this.partialSince = 0;
+        } else {
+          this.partialSince = now;
+        }
+        this.updateNames(m.groups);
+      }
+      this.onChange();
+      this.send();
+    } else {
+      // Always retain prototypes and the latest selection while inactive (even after warm() times
+      // out or while parked in lifeCache), because the worker marks sent prototypes as already
+      // delivered and a never-activated scene will not be reset before its first activate().
+      if (m.protos.length) this.heldProtos.push(...m.protos);
+      this.held = m;
+      this.updateNames(m.groups);
+      if (this.warmWaiters.length > 0) {
+        if (m.pending === 0) this.flushWarmWaiters();
+        else this.send();
+      }
+    }
   }
 
   /** the groups named, as the scene put them: where each one's first stands, and the way it goes, if it goes one */
@@ -353,8 +451,8 @@ export class LifeScene {
     }
   }
 
-  private apply(m: Extract<FromLifeWorker, { type: 'selection' }>): void {
-    for (const p of m.protos) {
+  private uploadProtos(protos: ProtoMesh[]): void {
+    for (const p of protos) {
       const { taxon, variant, detail } = protoParts(p.proto);
       let treeKey: number | undefined;
       if (taxon < HOUSE && detail <= 2) {
@@ -366,7 +464,6 @@ export class LifeScene {
       }
       this.renderer.addInstanced(p.proto, p.vertices, p.indices, detail >= 1, p.idle, treeKey !== undefined ? { treeKey, detail } : { detail });
     }
-    this.renderer.setInstances(m.batches);
   }
 
   /** Whether the view has moved enough since the last was sent to need another. */
@@ -397,14 +494,14 @@ export class LifeScene {
   }
 
   /** Draw a frame. */
-  render(v: LocalView, sun: V3, time: number, evidence: boolean, alpha: number, solid: boolean, outW: number, outH: number, clock = 0): void {
+  render(v: LocalView, sun: V3, time: number, evidence: boolean, alpha: number, solid: boolean, outW: number, outH: number, clock = 0, renderScale = 1): void {
     if (!this.groundData) return;
     this.activate();
     this.want = v;
     this.send();
     const f: CityFrame = {
       eye: v.gpuEye,
-      focus: v.clearance > 3000 ? [v.target[0], v.target[1], v.target[2]] : [v.eye[0] + v.forward[0] * Math.min(v.range, 700), v.eye[1] + v.forward[1] * Math.min(v.range, 700), Math.min(v.target[2], v.eye[2])],
+      focus: shadowFocusFor(v),
       view: v.view,
       proj: v.proj,
       farProj: v.farProj,
@@ -421,6 +518,8 @@ export class LifeScene {
       clock,
       width: outW,
       height: outH,
+      renderScale,
+      cssHeight: v.height,
     };
     this.follow(clock);
     const staticMeshes: MeshHandle[] = [];
@@ -500,20 +599,25 @@ export class LifeScene {
     return this.spec.taxa.find((t) => t.id === id);
   }
 
-  stats(): { cells: number; coarse: number; fine: number; megabytes: number; instances: number; triangles: number; meshes: number } {
+  stats(): { cells: number; coarse: number; fine: number; megabytes: number; instances: number; triangles: number; meshes: number; renderWidth: number; renderHeight: number; targetAllocations: number } {
     const s = this.renderer.instancedStats();
-    return { cells: 0, coarse: s.meshes, fine: 0, megabytes: 0, instances: s.instances, triangles: s.triangles, meshes: s.meshes };
+    const [renderWidth, renderHeight] = this.renderer.renderSize;
+    return { cells: 0, coarse: s.meshes, fine: 0, megabytes: 0, instances: s.instances, triangles: s.triangles, meshes: s.meshes, renderWidth, renderHeight, targetAllocations: this.renderer.targetAllocations };
   }
 
   /** The scene is no longer wanted. */
   dispose(): void {
+    this.flushWarmWaiters();
     this.worker?.terminate();
     this.worker = null;
+    this.heldProtos = [];
+    this.held = null;
     if (owners.get(this.renderer) === this) {
       this.renderer.setSmokes(null);
       this.renderer.shadowCells = () => [];
     }
     this.active = false;
+    this.hasComplete = false;
     if (this.pathsGpu) this.renderer.remove(this.pathsGpu);
     if (this.wallsGpu) this.renderer.remove(this.wallsGpu);
     if (this.fieldworksGpu) this.renderer.remove(this.fieldworksGpu);

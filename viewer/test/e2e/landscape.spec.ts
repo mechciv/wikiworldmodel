@@ -205,19 +205,42 @@ test.describe('the human landscape', () => {
         const canvas = document.querySelector<HTMLCanvasElement>('canvas.globe')!;
         const bar = document.querySelector<HTMLElement>('.citybar')!;
         const native = canvas.width;
+        let canvasResized = false;
         let smallest = native;
         let preview = false;
         api.set({ cam: { ...api.state().cam, dist: 1 + 2800 / 6371000 } });
         do {
           await new Promise(requestAnimationFrame);
-          smallest = Math.min(smallest, canvas.width);
+          if (canvas.width !== native) canvasResized = true;
+          const stats = api.cityStats();
+          if (stats && stats.renderWidth > 0) smallest = Math.min(smallest, stats.renderWidth);
           if (!bar.hidden && api.scene()?.plan.actual === null) preview = true;
         } while (!api.scene()?.plan.actual || !api.idle());
-        return { native, smallest, preview, final: canvas.width, houses: api.scene()?.people?.houses ?? 0 };
+        // Nudge the camera once inside the loaded local scene so interactive render scaling is
+        // exercised even if initial scene loading took longer than the interactive settle window.
+        api.set({ cam: { ...api.state().cam, dist: 1 + 2500 / 6371000 } });
+        do {
+          await new Promise(requestAnimationFrame);
+          if (canvas.width !== native) canvasResized = true;
+          const stats = api.cityStats();
+          if (stats && stats.renderWidth > 0) smallest = Math.min(smallest, stats.renderWidth);
+        } while (!api.idle());
+        const stats = api.cityStats();
+        return {
+          native,
+          smallest,
+          preview,
+          canvasResized,
+          final: stats?.renderWidth ?? 0,
+          targetAllocations: stats?.targetAllocations ?? 0,
+          houses: api.scene()?.people?.houses ?? 0,
+        };
       });
       expect(result.preview).toBe(true);
+      expect(result.canvasResized).toBe(false);
       expect(result.smallest).toBeLessThan(result.native);
       expect(result.final).toBe(result.native);
+      expect(result.targetAllocations).toBeLessThanOrEqual(2);
       expect(result.houses).toBeGreaterThan(0);
     });
   });

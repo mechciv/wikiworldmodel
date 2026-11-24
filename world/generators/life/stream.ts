@@ -156,6 +156,69 @@ export interface NamedGroup {
 }
 
 export const protoOf = (taxon: number, variant: number, detail: Detail | typeof CLUMP) => (taxon << 8) | (variant << 2) | detail;
+
+/** Budget-controller state for `SceneStream`'s far-distance retention factor. */
+export interface KeepBudgetState {
+  keep: number;
+  belowStreak: number;
+  unsettled: number;
+}
+
+/**
+ * Damped deadband controller for `SceneStream`'s far-distance retention factor `keep`.
+ * - Never changes `keep` during an incomplete time-sliced pass (`incomplete === true`), so missing
+ *   cells never trick the controller into relaxing and then overshooting.
+ * - Tightens gently (`* 0.90`, floor `0.2`) above 95% of either instance or triangle budget.
+ * - Relaxes gently (`* 1.06`, cap `1.0`) only after 3 consecutive settled passes below 55% of both
+ *   budgets, eliminating limit-cycle blinking at steady views.
+ */
+export function stepKeepBudget(
+  state: KeepBudgetState,
+  instances: number,
+  triangles: number,
+  capInstances: number,
+  capTriangles: number,
+  incomplete: boolean,
+): { keep: number; belowStreak: number; unsettled: number; needsPass: boolean } {
+  if (incomplete) {
+    return { keep: state.keep, belowStreak: 0, unsettled: state.unsettled, needsPass: false };
+  }
+  const over = instances >= capInstances || triangles > capTriangles;
+  const nearOver = instances >= capInstances * 0.95 || triangles > capTriangles * 0.95;
+  const wellUnder = instances < capInstances * 0.55 && triangles < capTriangles * 0.55;
+  let keep = state.keep;
+  let belowStreak = state.belowStreak;
+  if (over || nearOver) {
+    belowStreak = 0;
+    keep = Math.max(0.2, Math.round(state.keep * 0.9 * 1000) / 1000);
+  } else if (wellUnder && state.keep < 1) {
+    belowStreak = state.belowStreak + 1;
+    if (belowStreak >= 3) {
+      keep = Math.min(1, Math.round(state.keep * 1.06 * 1000) / 1000);
+      belowStreak = 0;
+    }
+  } else {
+    belowStreak = 0;
+  }
+  const changed = keep !== state.keep;
+  if (changed && state.unsettled < 16) {
+    return { keep, belowStreak, unsettled: state.unsettled + 1, needsPass: true };
+  }
+  return { keep, belowStreak, unsettled: changed ? state.unsettled : 0, needsPass: false };
+}
+
+/**
+ * Choose mesh detail tier (0 far, 1 mid, 2 close) from apparent screen height `pxs`, staggered
+ * deterministically across a ±15% band by per-instance `jitter01` in [0, 1] so dense forests and
+ * towns transition gradually instead of flipping in a single hard concentric ring.
+ */
+export function lodDetail(pxs: number, jitter01: number, fast: boolean, rich: boolean, high = 70, mid = 9, fastMid = 26): Detail {
+  const spread = 0.85 + 0.3 * Math.max(0, Math.min(1, jitter01));
+  if (fast) return pxs >= fastMid * spread ? 1 : 0;
+  const hi = (rich ? high * (36 / 70) : high) * spread;
+  const lo = (rich ? mid * (4 / 9) : mid) * spread;
+  return pxs >= hi ? 2 : pxs >= lo ? 1 : 0;
+}
 /** A mesh's detail that is a clump of a low plant, as the ground's cover close by is drawn. */
 export const CLUMP = 3;
 /**
@@ -290,6 +353,8 @@ export class SceneStream {
   private meshes = new Map<number, { tris: number }>();
   private tones: number[];
   private keep = 1;
+  /** how many consecutive completed passes stayed well below budget before relaxing `keep` */
+  private belowStreak = 0;
   /** how many selections running the far share has been changed after */
   private unsettled = 0;
   private fullReach: number;
@@ -955,7 +1020,7 @@ export class SceneStream {
         // The same individuals at every distance: further off, only the lowest ranks.
         if (dd > R0 && rank[q] * dd > 256 * R0) continue;
         const pxs = Math.sqrt(pxs2);
-        const detail: Detail = this.budget.fast ? (pxs >= 26 ? 1 : 0) : pxs >= (rich ? 36 : 70) ? 2 : pxs >= (rich ? 4 : 9) ? 1 : 0;
+        const detail: Detail = lodDetail(pxs, rank[q] / 255, this.budget.fast, rich);
         const t0 = taxa[k];
         const form = this.spec.forms[t0.form];
         // A low plant is a mesh only close by; one as tall as a person or more, a shrub or a fern, from a way off too.
@@ -1007,7 +1072,7 @@ export class SceneStream {
           if (pxs2 < 1 && (wide * wide * K * K) / dd < 1) continue;
           if (dd > R0 * 4 && h.rank * dd > 1024 * R0) continue;
           const pxs = Math.sqrt(pxs2);
-          const detail: Detail = this.budget.fast ? (pxs >= 30 ? 1 : 0) : pxs >= 80 ? 2 : pxs >= 10 ? 1 : 0;
+          const detail: Detail = lodDetail(pxs, h.rank / 255, this.budget.fast, false, 80, 10, 30);
           const proto = protoOf(HOUSE + h.form, h.variant, detail);
           let b = buckets.get(proto);
           if (!b) {
@@ -1050,7 +1115,7 @@ export class SceneStream {
           const small = smallWork(this.people.workForms[w.form].spec.kind);
           if (pxs2 < (small ? 3.24 : 1)) continue;
           const pxs = Math.sqrt(pxs2);
-          const detail: Detail = this.budget.fast ? (pxs >= 30 ? 1 : 0) : pxs >= 80 ? 2 : pxs >= 10 ? 1 : 0;
+          const detail: Detail = lodDetail(pxs, ((wi * 37) & 255) / 255, this.budget.fast, false, 80, 10, 30);
           const variant = w.variant ?? wi % WORK_VARIANTS;
           const proto = protoOf(WORK + w.form, variant, detail);
           let b = buckets.get(proto);
@@ -1099,7 +1164,7 @@ export class SceneStream {
           if (pxs2 < 2.25) continue;
           if (dd > R0 && a.rank * dd > 256 * R0) continue;
           const pxs = Math.sqrt(pxs2);
-          const detail: Detail = this.budget.fast ? (pxs >= 26 ? 1 : 0) : pxs >= (rich ? 36 : 70) ? 2 : pxs >= (rich ? 4 : 9) ? 1 : 0;
+          const detail: Detail = lodDetail(pxs, a.rank / 255, this.budget.fast, rich);
           const proto = protoOf(KEPT + a.kind, this.variantOf(t0, form, a.pose, a.phase, a.shade, detail, a.way !== undefined && walked(this.people.ways, a.way)), detail);
           let b = buckets.get(proto);
           if (!b) {
@@ -1171,7 +1236,7 @@ export class SceneStream {
         const fw = dx * fx + dy * fy + dz * fz;
         if (fw < -tall) continue;
         const pxs = Math.sqrt(pxs2);
-        const detail: Detail = this.budget.fast ? (pxs >= 26 ? 1 : 0) : pxs >= (rich ? 36 : 70) ? 2 : pxs >= (rich ? 4 : 9) ? 1 : 0;
+        const detail: Detail = lodDetail(pxs, ft.u, this.budget.fast, rich);
         const coarse = detail === 2 && pxs < (rich ? TWIGS_FROM / 2 : TWIGS_FROM);
         const shade = Math.floor(ft.u * 255);
         const proto = protoOf(k, this.variantOf(t0, form, 0, 0, shade, detail, false, coarse), detail);
@@ -1229,16 +1294,11 @@ export class SceneStream {
     }
     // A still's richer frame says nothing of what the live one can afford.
     if (!rich) {
-      const kept = this.keep;
-      if (instances >= cap || triangles > this.budget.triangles) this.keep = Math.max(0.2, this.keep * 0.8);
-      else if (instances < cap * 0.6 && triangles < this.budget.triangles * 0.6) this.keep = Math.min(1, this.keep * 1.1);
-      // A view the far share was changed for is not yet what it comes to rest at: the next selection of the same view
-      // would draw another. It is left pending, so that a view at rest is asked for again until the share holds, and
-      // what is drawn at rest does not depend on how often it was asked for. Not for ever, should the share never hold.
-      if (this.keep !== kept && this.unsettled < 16) {
-        this.unsettled++;
-        pending++;
-      } else if (this.keep === kept) this.unsettled = 0;
+      const next = stepKeepBudget({ keep: this.keep, belowStreak: this.belowStreak, unsettled: this.unsettled }, instances, triangles, cap, this.budget.triangles, pending > 0);
+      this.keep = next.keep;
+      this.belowStreak = next.belowStreak;
+      this.unsettled = next.unsettled;
+      if (next.needsPass) pending++;
     }
     groups.sort((a, b) => Math.hypot(a.at[0] - ex, a.at[1] - ey) - Math.hypot(b.at[0] - ex, b.at[1] - ey));
     return { batches, protos, instances, triangles, pending, clumps, groups: groups.slice(0, 64) };
