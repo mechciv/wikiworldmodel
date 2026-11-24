@@ -129,6 +129,12 @@ limits:
       has no `siting` or `growth`, and takes the record's. A link into such a build finds its settlements and fields
       where version 9 puts them, not where that build first drew them. Whether to keep each version's placement for its
       own builds is a maintainer's decision, still open.
+  - with: field:people/anthromes
+    note: >-
+      The far land beyond a scene is scaled to agree with the land its own settlements work, in the cells it holds whole
+      that no city's ground or fields reach. A city's fields grow over the land, and a large one's may reach every such
+      cell, as a city of some 800,000 does in a living scene: then there is nothing to weigh, and the far land is drawn as
+      the cells say, unscaled. Version 8, whose cities' fields were discs, still weighed the cells such a city left.
   - with: gen:life/scene
     note: >-
       The ground and the water a settlement is weighed by are the scene's, and two scenes that overlap draw them a little

@@ -1152,6 +1152,15 @@ describe('the land worked beyond the scene', () => {
       const plan = makeSettlement(spec(p, origin), flat, dry, EXTENT);
       return { scale: farScale(farLand(spec(p, origin))!, plan, new LandUseMap(plan, flat, dry, 7), origin, EXTENT), plan };
     };
+    // A city so large that its fields reach every cell the scene holds whole leaves none to weigh, and the far land is not
+    // scaled at all (the record's limits say so).
+    {
+      const huge = { ...without, cities: [{ ...cities[0], people: 800000 }] };
+      const o = { lat: 0, lon: 0 };
+      const plan = makeSettlement(spec(huge, o), flat, dry, EXTENT);
+      expect(farCellsWeighed(farLand(spec(huge, o))!, plan, o, EXTENT)).toEqual([]);
+      expect(farScale(farLand(spec(huge, o))!, plan, new LandUseMap(plan, flat, dry, 7), o, EXTENT)).toBe(1);
+    }
     // Scenes in a few places about the city, each holding it.
     const origins = [{ lat: 0, lon: 0 }, { lat: 0.02, lon: -0.01 }, { lat: -0.015, lon: 0.02 }, { lat: 0.03, lon: 0.035 }];
     const plains = origins.map((o) => scaleOf(without, o));

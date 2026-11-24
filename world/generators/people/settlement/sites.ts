@@ -231,7 +231,8 @@ export function sizesOf(houses: number, range: { lo: number; hi: number }, skew:
   let total = 0;
   const lo = Math.max(1, range.lo);
   const hi = Math.max(lo, range.hi);
-  for (let k = 0; total < houses && k < 200000; k++) {
+  // Each draw is a house at least, so the cell's houses are all held, however many: no cap to cut them short.
+  for (let k = 0; total < houses; k++) {
     const size = Math.max(1, Math.round(lo * Math.pow(hi / lo, Math.pow(hash2(k, 0x5153, seed), skew))));
     if (total + size > houses && hash2(k, 0x5154, seed) >= (houses - total) / size) break;
     out.push(size);
