@@ -15,7 +15,7 @@ import { freshOf, noise, type Waters } from './land.ts';
 import { GroundSort } from './sorting.ts';
 import { drawStone, drawWood, shedsWood, STONE_FINE, STONE_VARIANTS, WOOD, WOOD_SEEDS, woodLength } from './strewn.ts';
 import { drawDwelling, HOUSE_VARIANTS, houseSize, type HouseDetail } from '../people/dwellings.ts';
-import { LandUseMap, landUseMask, makeSettlement, type LandUse, type SettlementParams, type SettlementPlan } from '../people/settlement/v6.ts';
+import { LandUseMap, landUseMask, makeSettlement, type LandUse, type SettlementParams, type SettlementPlan } from '../people/settlement/v7.ts';
 import { drawCrop, sow, type CropParams } from '../people/crops.ts';
 import { PLOT, PLOT_LOOK, plotAt, plotStyle, type PlotStyle } from '../../../core/plots.ts';
 import { drawWork, smallWork, WORK_VARIANTS, workTop } from '../people/works.ts';
@@ -412,10 +412,9 @@ export class SceneStream {
    */
   paths(): { vertices: ArrayBuffer; indices: Uint32Array } | undefined {
     const plan = this.people;
-    if (!plan?.paths.length || !(plan.pathWidth > 0)) return undefined;
+    if (!plan || (!plan.paths.length && !plan.lanes.length)) return undefined;
     const levelAt = this.waters.paths ? waterLevels(this.waters) : undefined;
     const water = levelAt ?? (() => this.look.water);
-    const half = plan.pathWidth / 2;
     const step = 4;
     const lift = 0.12;
     const m = new Mesh(4096);
@@ -423,7 +422,9 @@ export class SceneStream {
     // Beaten pale, and of a material the renderer lays on the ground at any distance.
     m.mat = MAT.sand;
     m.tint = 118;
-    for (const line of plan.paths) {
+    const routes = [...plan.paths.map(line => ({ line, width: plan.pathWidth })), ...plan.lanes];
+    for (const { line, width } of routes) {
+      const half = width / 2;
       // Its points every few metres, then a strip between each pair that stands on dry ground.
       let last: [number, number] | undefined;
       let along = 0;

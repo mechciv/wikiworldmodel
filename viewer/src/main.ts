@@ -2086,8 +2086,8 @@ async function start(root: HTMLElement): Promise<void> {
           setState({ sel: null });
           shownRecord = null;
           const gen = city.spec.people.generator;
-          const text = `A path between two settlements of the scene, one of ${city.people.paths.toLocaleString('en-US')} it draws. No record says where any path ran: each settlement of people who stayed in one place is joined to the nearest few within reach by a line that wanders a little, to say that neighbours went to and fro, and it is broken where it would cross water.`;
-          const why = `${gen.generator}, version ${gen.version}: nobody surveyed this path. Which settlements it joins follows where the generator put them; its line is invented.`;
+          const text = `One of the ${city.people.paths.toLocaleString('en-US')} paths drawn in this scene. Routes link neighbouring settlements. In farming settlements with a lane layout, tracks also lead from the fields to household entrances.`;
+          const why = `${gen.generator}, version ${gen.version}. The generator chooses the route and its width from the layout and the ground. Its exact course is procedural.`;
           return inspect.showGenerated('A path', 'Generated path', text, why);
         }
         // The crop of a field: that the land was farmed is the world's; which crop, and every plant, is the generator's.
