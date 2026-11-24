@@ -15,7 +15,7 @@ import { freshOf, noise, type Waters } from './land.ts';
 import { GroundSort } from './sorting.ts';
 import { drawStone, drawWood, shedsWood, STONE_FINE, STONE_VARIANTS, WOOD, WOOD_SEEDS, woodLength } from './strewn.ts';
 import { drawDwelling, HOUSE_VARIANTS, houseSize, type HouseDetail } from '../people/dwellings.ts';
-import { farLand, farLandMask, LandUseMap, landUseMask, makeSettlement, toLocal, type LandUse, type SettlementParams, type SettlementPlan } from '../people/settlement/v8.ts';
+import { farLand, farLandMask, farScale, LandUseMap, landUseMask, makeSettlement, type LandUse, type SettlementParams, type SettlementPlan } from '../people/settlement/v8.ts';
 import { LaneGround } from '../people/settlement/lanes.ts';
 import { drawCrop, slotArchetype, sow, type CropParams } from '../people/crops.ts';
 import { buildFieldworks, type FieldTreeSpot } from '../people/fieldworks.ts';
@@ -437,35 +437,9 @@ export class SceneStream {
    */
   farFields(size: number, half: number): { data: Uint8Array; box: [number, number, number, number]; scale: number } | undefined {
     const far = this.spec.people && farLand(this.spec);
-    if (!far || !this.landUse) return undefined;
+    if (!far || !this.landUse || !this.people) return undefined;
     const origin = this.spec.site.origin;
-    let made = 0;
-    let said = 0;
-    const u: LandUse = { crop: 0, pasture: 0, yard: 0, paddy: 0 };
-    const N = 12;
-    for (let row = 0; row < far.ny; row++) {
-      for (let col = 0; col < far.nx; col++) {
-        const i = row * far.nx + col;
-        const want = far.crop[i] + far.pasture[i];
-        const north = far.north - row * far.res;
-        const west = far.west + col * far.res;
-        const [x0, y1] = toLocal(origin, north, west);
-        const [x1, y0] = toLocal(origin, north - far.res, west + far.res);
-        // Only the cells the scene holds whole, away from its edge, where its settlements are all laid out.
-        const inner = EXTENT - 600;
-        if (x0 < -inner || x1 > inner || y0 < -inner || y1 > inner) continue;
-        let got = 0;
-        for (let a = 0; a < N; a++) {
-          for (let b = 0; b < N; b++) {
-            this.landUse.at(x0 + ((a + 0.5) / N) * (x1 - x0), y0 + ((b + 0.5) / N) * (y1 - y0), u);
-            got += u.crop + u.pasture;
-          }
-        }
-        made += got / (N * N);
-        said += want;
-      }
-    }
-    const scale = said > 0.05 && made > 0 ? Math.max(0.4, Math.min(1.6, made / said)) : 1;
+    const scale = farScale(far, this.people, this.landUse, origin, EXTENT);
     return { data: farLandMask(far, origin, size, half, scale), box: [-half, -half, half, half], scale };
   }
 

@@ -2532,6 +2532,15 @@ export interface LandUse {
   paddy: number;
 }
 
+/**
+ * What the far land (farLand) takes on the average for what LandUseMap works out at each place from the ground there: the
+ * share of a shifting cultivator's fields cleared at a time, which LandUseMap draws where a noise passes a threshold; and
+ * the share of a rice or irrigated field flooded as a paddy, which it draws on low, gentle ground near the water (all of
+ * it for rice, half for irrigated land). The first is held to LandUseMap's by a test (settlement/v8.test.ts); the second
+ * hangs on how much of a cell lies low by its water, which no far cell says, and is the generator's guess.
+ */
+export const FAR_AVERAGE = { swiddenCleared: 0.4, paddy: { rice: 0.6, irrigated: 0.25 } };
+
 /** A plan's settlements by where they are, so that the ground can ask which are near. */
 export class LandUseMap {
   private buckets = new Map<number, number[]>();
@@ -2732,7 +2741,8 @@ export function landUseMask(map: LandUseMap, size: number, half: number): Uint8A
  * would lay out if the scene reached it, on the average and with none of them placed: each the fields of its pattern
  * (PatternParams.fields) where the cell has a settlement, and the houses' own ground. Drawn beyond the scene's own
  * settlements and across a band at their edge, so that the worked land does not stop where the scene does. Cities are
- * left out: they are few, and drawn where the scene reaches them.
+ * left out: they are few, and drawn where the scene reaches them. What LandUseMap works out from the ground at a place,
+ * the far land takes on the average (FAR_AVERAGE).
  */
 export interface FarLand {
   north: number;
@@ -2774,12 +2784,56 @@ export function farLand(spec: SceneSpec): FarLand | undefined {
       if (life.fields === 'pasture') out.pasture[i] = share;
       else {
         // Shifting cultivators have only some of their plots cleared at a time (LandUseMap).
-        out.crop[i] = life.fields === 'swidden' ? share * 0.4 : share;
-        out.paddy[i] = life.fields === 'rice' ? out.crop[i] * 0.6 : life.fields === 'irrigated' ? out.crop[i] * 0.25 : 0;
+        out.crop[i] = life.fields === 'swidden' ? share * FAR_AVERAGE.swiddenCleared : share;
+        out.paddy[i] = life.fields === 'rice' || life.fields === 'irrigated' ? out.crop[i] * FAR_AVERAGE.paddy[life.fields] : 0;
       }
     }
   }
   return out;
+}
+
+/**
+ * How far what a plan works is from what farLand says of the same cells: the plan's worked share over farLand's, in the
+ * cells the plan holds whole (within `extent` metres of its middle each way, less `margin`, where all of their settlements
+ * are laid out) and that no city's ground reaches, as farLand leaves cities out. 1 where no cell counts or nothing is
+ * worked in them; at most 1.6 and at least 0.4 otherwise. The far land is scaled by it (farLandMask), so that the plan's
+ * worked land and the far land agree on the average where they meet.
+ */
+export function farScale(far: FarLand, plan: SettlementPlan, use: LandUseMap, origin: { lat: number; lon: number }, extent: number, margin = 600): number {
+  const cities = plan.settlements.filter((s) => s.city);
+  const u: LandUse = { crop: 0, pasture: 0, yard: 0, paddy: 0 };
+  const N = 12;
+  const inner = extent - margin;
+  let made = 0;
+  let said = 0;
+  for (let row = 0; row < far.ny; row++) {
+    for (let col = 0; col < far.nx; col++) {
+      const i = row * far.nx + col;
+      const north = far.north - row * far.res;
+      const west = far.west + col * far.res;
+      const [x0, y1] = toLocal(origin, north, west);
+      const [x1, y0] = toLocal(origin, north - far.res, west + far.res);
+      if (x0 < -inner || x1 > inner || y0 < -inner || y1 > inner) continue;
+      // A city's fields reach as far as the larger of its ground and its fields.
+      const near = (c: Settlement) => {
+        const r = Math.max(c.r, c.fieldR);
+        const dx = Math.max(x0 - c.x, 0, c.x - x1);
+        const dy = Math.max(y0 - c.y, 0, c.y - y1);
+        return dx * dx + dy * dy < r * r;
+      };
+      if (cities.some(near)) continue;
+      let got = 0;
+      for (let a = 0; a < N; a++) {
+        for (let b = 0; b < N; b++) {
+          use.at(x0 + ((a + 0.5) / N) * (x1 - x0), y0 + ((b + 0.5) / N) * (y1 - y0), u);
+          got += u.crop + u.pasture;
+        }
+      }
+      made += got / (N * N);
+      said += far.crop[i] + far.pasture[i];
+    }
+  }
+  return said > 0.05 && made > 0 ? Math.max(0.4, Math.min(1.6, made / said)) : 1;
 }
 
 /**

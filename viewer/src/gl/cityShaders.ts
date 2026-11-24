@@ -2297,17 +2297,21 @@ vec3 plots(vec3 wild, vec3 p, vec3 n, float dist, float paddy, out float tilled,
   tilled *= 1.0 - wet * smoothstep(0.5, 0.9, wet);
   return c;
 }
-// The land worked beyond the plan's own map, from the far cells' shares: crops and pasture in patches of a kilometre or
-// two with ragged edges, as much of the ground as the shares say, and from far enough off only their tone. No
-// settlement stands behind any patch: where they lie is the renderer's, and how much there is the cells'. R crops,
-// G pasture, B none, A paddies, as the plan's map has them.
-vec4 farFieldsAt(vec3 p, float dist) {
+// The far cells' shares of worked land at a point (settlement/v8.ts, farLand): R crops, G pasture, A paddies; none
+// beyond the cells, fading toward the edge of what they cover.
+vec4 farShares(vec3 p) {
   if (uFarBox.z <= 0.0) return vec4(0.0);
   vec2 uv = (p.xy - uFarBox.xy) / uFarBox.zw;
   vec2 e = min(uv, 1.0 - uv);
   float inBox = smoothstep(0.0, 0.06, min(e.x, e.y));
   if (inBox <= 0.0) return vec4(0.0);
-  vec4 s = texture(uFarFields, uv);
+  return texture(uFarFields, uv) * inBox;
+}
+// Land worked as much as the shares s say, laid out without a plan: crops and pasture in patches of a kilometre or two with
+// ragged edges, as much of the ground as the shares say, and from far enough off only their tone. No settlement stands
+// behind any patch: where they lie is the renderer's, and how much there is the cells'. R crops, G pasture, B none,
+// A paddies, as the plan's map has them.
+vec4 farPatches(vec3 p, float dist, vec4 s) {
   // Read flat, from one level, so that the patches do not climb the hills' contours; and warped, so that they are no blobs.
   vec3 q = vec3(p.xy, 0.0);
   q.xy += (vec2(noiseM(q, 1300.0), noiseM(q + 311.0, 1300.0)) - 0.5) * 2600.0;
@@ -2322,22 +2326,41 @@ vec4 farFieldsAt(vec3 p, float dist) {
   crop = mix(crop, s.r, melt);
   pasture = mix(pasture, s.g, melt);
   float paddy = crop * clamp(s.a / max(s.r, 0.004), 0.0, 1.0);
-  return vec4(crop, pasture, 0.0, paddy) * inBox;
+  return vec4(crop, pasture, 0.0, paddy);
 }
 // What people made of the ground at a point: R crops, G pasture, B yards and lanes, A flooded paddies. Within the plan's
-// map, the map; beyond it, the far land; and across a band inside its edge, the one giving way to the other along a line
-// that wanders, so that the scene's square never shows.
-const float FIELDS_BAND = 3200.0;
+// map, the map; beyond it, the far land. The plan's own fields are kept whole, where its lanes, banks and crops stand,
+// but for a strip at the map's edge, FIELDS_EDGE wide, where the edge cuts them and they give way. Across a band inside
+// the edge, FIELDS_BAND wide, far patches fill the ground the plan leaves unworked, as far as the plan, read over a
+// kilometre or two, falls short of the far cells' share: its settlements beyond the edge are not drawn, and its map
+// thins toward it. Both lines wander, so that the scene's square never shows.
+const float FIELDS_EDGE = 700.0;
+const float FIELDS_BAND = 2400.0;
 vec4 fieldsAt(vec3 p, float dist) {
   vec2 fuv = (p.xy - uFieldsBox.xy) / uFieldsBox.zw;
   vec2 e = min(fuv, 1.0 - fuv) * uFieldsBox.zw;
   float inward = min(e.x, e.y);
   vec4 near = inward > 0.0 ? texture(uFields, fuv) : vec4(0.0);
-  if (uFarBox.z <= 0.0) return near;
-  float t = inward / FIELDS_BAND + (fbmM(vec3(p.xy, 0.0) + 91.0, 700.0) - 0.5) * 2.0;
-  float w = inward > 0.0 ? 1.0 - smoothstep(0.3, 0.7, t) : 1.0;
-  if (w <= 0.0) return near;
-  return mix(near, farFieldsAt(p, dist), w);
+  // The noise below lies in [0, 1], so further in than this neither line reaches.
+  if (uFarBox.z <= 0.0 || inward > 1.7 * FIELDS_BAND) return near;
+  float wander = (fbmM(vec3(p.xy, 0.0) + 91.0, 700.0) - 0.5) * 2.0;
+  float keep = inward > 0.0 ? smoothstep(0.3, 0.7, inward / FIELDS_EDGE + wander) : 0.0;
+  float fill = inward > 0.0 ? 1.0 - smoothstep(0.3, 0.7, inward / FIELDS_BAND + wander) : 1.0;
+  vec4 kept = near * keep;
+  vec4 s = farShares(p);
+  float worked = s.r + s.g;
+  if (fill <= 0.0 || worked <= 0.0) return kept;
+  // What the plan keeps here, read over a kilometre and a half.
+  vec4 around = vec4(0.0);
+  if (inward > 0.0) {
+    vec2 size = vec2(textureSize(uFields, 0));
+    around = textureLod(uFields, fuv, log2(max(1.0, 1500.0 * size.x / uFieldsBox.z))) * keep;
+  }
+  float had = around.r + around.g;
+  float more = clamp((worked - had) / max(1.0 - had, 0.05), 0.0, 1.0) * fill;
+  vec4 add = farPatches(p, dist, s * (more / worked));
+  // Laid over what is kept, as one cover over another: as much of the rest as the patches take.
+  return vec4(1.0) - (vec4(1.0) - kept) * (vec4(1.0) - add);
 }
 // How much of the ground at a point people made: fields, pasture and yards, all generated.
 float peopledShare(vec3 p) {

@@ -12,7 +12,7 @@ import { houseSize, HOUSE_VARIANTS } from '../dwellings.ts';
 import { ROUTE, roundOf, wayAt, type RoutineParams } from '../../life/routines.ts';
 import { personGoes } from '../figures.ts';
 import { WORK_VARIANTS } from '../works.ts';
-import { farLand, farLandMask, LandUseMap, makeSettlement, toLocal, type Ground } from './v8.ts';
+import { farLand, farLandMask, farScale, LandUseMap, makeSettlement, toLocal, type Ground } from './v8.ts';
 
 const ROOT = join(import.meta.dirname, '../../../..');
 // How the living scene's animals go about: the settlement's kept ones go by the same parameters.
@@ -904,8 +904,9 @@ describe('the land worked beyond the scene', () => {
   };
 
   it('works as much of a cell as its settlements would, on the average', () => {
-    for (const [code, density] of [[32, 40], [23, 260], [31, 120]] as [number, number][]) {
-      const p = farWorld(code, density, assess(1, 1, 3, 2));
+    // The last are shifting cultivators, of whose fields only some are cleared at a time (FAR_AVERAGE.swiddenCleared).
+    for (const [code, density, a] of [[32, 40, assess(1, 1, 3, 2)], [23, 260, assess(1, 1, 3, 2)], [31, 120, assess(1, 1, 3, 2)], [32, 40, assess(1, 3, 1, 1)]] as [number, number, Assessment][]) {
+      const p = farWorld(code, density, a);
       const far = farLand(spec(p))!;
       const plan = makeSettlement(spec(p), flat, dry, EXTENT);
       const use = new LandUseMap(plan, flat, dry, 7);
@@ -923,6 +924,27 @@ describe('the land worked beyond the scene', () => {
       expect(made / n / said, `class ${code} at ${density} to the km²`).toBeGreaterThan(0.8);
       expect(made / n / said, `class ${code} at ${density} to the km²`).toBeLessThan(1.25);
     }
+  });
+
+  it("scales the far land to the plan's by its own settlements, and not by a city's fields", () => {
+    const a = assess(1, 1, 3, 2);
+    const without = farWorld(32, 40, a);
+    // A city in the middle of one of the cells the scene holds whole, whose fields take most of that cell and no other.
+    const cities = [{ name: 'Testopolis', country: 'Nowhere', lat: 0.042, lon: 0.042, people: 800000, field: 'field:people/cities-ancient', source: 'src:test', from: 'list' as const }];
+    const withCity = { ...without, cities };
+    const scaleOf = (p: ScenePeople) => {
+      const plan = makeSettlement(spec(p), flat, dry, EXTENT);
+      return { scale: farScale(farLand(spec(p))!, plan, new LandUseMap(plan, flat, dry, 7), { lat: 0, lon: 0 }, EXTENT), plan };
+    };
+    const plain = scaleOf(without);
+    const city = scaleOf(withCity);
+    expect(city.plan.settlements.some((s) => s.city === 'Testopolis')).toBe(true);
+    // Where no tradition changes the settlements, the plan and the estimate agree, and the scale is about 1.
+    expect(plain.scale).toBeGreaterThan(0.8);
+    expect(plain.scale).toBeLessThan(1.25);
+    // The cell the city's fields reach is left out, so the city moves the scale little. Counted, it would raise it by
+    // about a fifth.
+    expect(Math.abs(city.scale - plain.scale) / plain.scale).toBeLessThan(0.05);
   });
 
   it('works fields where people farmed, pasture where they herded, and nothing for foragers', () => {
