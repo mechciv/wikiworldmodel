@@ -1937,9 +1937,17 @@ async function start(root: HTMLElement): Promise<void> {
           if (!c.life || c.record !== f.site.settlement) continue;
           const [ox, oy] = surveyOffset({ lat: c.lat, lon: c.lon }, f.site.origin);
           const move = (l: number[]) => l.map((v, i) => v + (i % 2 ? oy : ox));
-          const closed = (l: number[]) => l.length >= 8 && Math.hypot(l[0] - l[l.length - 2], l[1] - l[l.length - 1]) < 1;
+          // A wall that goes round the city: its line's ends within a twentieth of its length, as the Aurelian wall's are,
+          // which left the river to close it; its ring closes them.
+          const gap = (l: number[]) => Math.hypot(l[0] - l[l.length - 2], l[1] - l[l.length - 1]);
+          const length = (l: number[]) => {
+            let d = 0;
+            for (let i = 2; i < l.length; i += 2) d += Math.hypot(l[i] - l[i - 2], l[i + 1] - l[i - 1]);
+            return d;
+          };
+          const round = (l: number[]) => l.length >= 8 && gap(l) < length(l) / 20;
           const span = (x: CityStructure): [number, number] => [x.time.start.best ?? -Infinity, x.time.end.best ?? Infinity];
-          c.life.walls = f.structures.filter((x) => x.kind === 'works/wall').flatMap((x) => (x.lines ?? []).filter(closed).map((l) => ({ ring: move(l.slice(0, -2)), from: span(x)[0], to: span(x)[1] })));
+          c.life.walls = f.structures.filter((x) => x.kind === 'works/wall').flatMap((x) => (x.lines ?? []).filter(round).map((l) => ({ ring: move(gap(l) < 1 ? l.slice(0, -2) : l), from: span(x)[0], to: span(x)[1] })));
           c.life.roads = f.structures.filter((x) => x.kind === 'works/road').flatMap((x) => (x.lines ?? []).filter((l) => l.length >= 4).map(move));
         }
       }
