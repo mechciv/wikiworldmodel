@@ -32,9 +32,12 @@ test.describe('in the city', () => {
     await idle(page);
     const scene = (await page.evaluate(() => window.__wikiworldmodel!.scene()))!;
     expect(scene).not.toBeNull();
-    // Rome among its houses, laid out by the settlement generator, and its records named over them.
+    // Rome among its houses, laid out by the settlement generator, and its records named over them: which of them
+    // depends on the view, as a nearer name is placed first and none is drawn over another (the Colosseum's, here,
+    // would lie on the Temple of Claudius's).
     expect(scene.people!.cities.map((c) => c.name)).toContain('Rome');
-    expect(await labelled(page, 'rome/colosseum')).toBe(true);
+    const named = await page.locator('.city-label').evaluateAll((els) => els.filter((e) => (e as HTMLElement).style.display !== 'none').map((e) => (e as HTMLElement).dataset.entity ?? ''));
+    expect(named.filter((id) => id.startsWith('rome/')).length).toBeGreaterThanOrEqual(3);
     // A step on the ground, an hour later: all of it stays in the link.
     await page.evaluate(() => window.__wikiworldmodel!.set({ hour: 11 }));
     await idle(page);
