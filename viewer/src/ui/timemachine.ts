@@ -251,7 +251,7 @@ export class TimeMachine {
         label: e.label,
         detail: scene !== undefined ? `${this.host.kindLabel(e.kind)}, to walk in` : this.host.kindLabel(e.kind),
         when: at === undefined ? '' : formatTime(at),
-        run: () => this.done(() => this.host.go(e.id, scene)),
+        run: () => this.done(() => this.host.go(e.id, at)),
       };
     });
     this.active = -1;

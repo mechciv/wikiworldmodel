@@ -1642,7 +1642,8 @@ async function start(root: HTMLElement): Promise<void> {
   interface Flight {
     from: ViewState['cam'];
     to: ViewState['cam'];
-    t0: number;
+    last: number;
+    elapsed: number;
     ms: number;
     /** the share of its time in which the globe is turned to the place, before the camera comes down over it: 0 where it is flown in one move */
     turn: number;
@@ -1670,7 +1671,7 @@ async function start(root: HTMLElement): Promise<void> {
     // From as high as a long way is flown, the camera would come down beside the place and slide to it near the
     // ground: the globe is turned first, for longer the further round it is.
     const turn = Number.isFinite(top) && Math.log(from.dist - 1) >= top ? Math.min(4000, 600 + 1700 * reach) : 0;
-    flight = { from, to: { ...to, heading: to.heading ?? 0, tilt: to.tilt ?? 0 }, t0: performance.now(), ms: ms + turn, turn: turn / (ms + turn) };
+    flight = { from, to: { ...to, heading: to.heading ?? 0, tilt: to.tilt ?? 0 }, last: performance.now(), elapsed: 0, ms: ms + turn, turn: turn / (ms + turn) };
     dirty = true;
   }
 
@@ -1699,12 +1700,16 @@ async function start(root: HTMLElement): Promise<void> {
 
   function stepFlight(now: number): void {
     const f = flight!;
-    let u = Math.min(1, (now - f.t0) / f.ms);
-    // A flight into a scene waits above it until the scene is ready: over the place, where the globe is turned to it first.
+    // Loading a scene can stall a frame. Resume the turn where it was visible before the stall.
+    const dt = Math.max(0, now - f.last);
+    f.elapsed += f.elapsed < f.turn * f.ms ? Math.min(100, dt) : dt;
+    f.last = now;
+    let u = Math.min(1, f.elapsed / f.ms);
+    // Wait above the place only if the destination is close enough to draw its local scene.
     const above = f.turn || 0.3;
-    if (u > above && f.to.dist < MIN_DIST && sceneComing(f.to)) {
+    if (u > above && (f.to.dist - 1) * EARTH_RADIUS < LOCAL_TOP && sceneComing(f.to)) {
       u = above;
-      f.t0 = now - u * f.ms;
+      f.elapsed = u * f.ms;
     }
     const smooth = (x: number) => {
       const c = Math.max(0, Math.min(1, x));
@@ -2488,6 +2493,12 @@ async function start(root: HTMLElement): Promise<void> {
     return clampWindow([a - pad, b + pad], limits);
   }
 
+  /** Show the destination's date and record as the camera starts its approach. */
+  function showDestination(view: Pick<ViewState, 't' | 'window' | 'sel'>, cam: ViewState['cam'] | undefined, fly: boolean): void {
+    setState(cam && !fly ? { ...view, cam } : view);
+    if (cam && fly) flyTo(cam);
+  }
+
   /** Open an entity, and move to its time and place if it is not in view: to the time given, if one is. */
   function goTo(id: string, at?: number, request = ++navigation): void {
     if (request !== navigation) return;
@@ -2529,25 +2540,22 @@ async function start(root: HTMLElement): Promise<void> {
       // A polity is where its land was drawn then: its own territory, or the rows of a dataset that are rows of it.
       const p = placeIn(entry.places, t);
       const c = territory.centre(id, t, scenario()) ?? (p ? [p[2], p[3]] : undefined);
-      const cam = c ? { lat: c[1], lon: c[0], dist: Math.min(state.cam.dist, p ? distFor(p[4]) : 2.6) } : state.cam;
-      return setState({ t, sel: id, window, cam });
+      const cam = c ? { lat: c[1], lon: c[0], dist: Math.min(state.cam.dist, p ? distFor(p[4]) : 2.6) } : undefined;
+      return showDestination({ t, sel: id, window }, cam, at !== undefined);
     }
     const ageAt = toMa(t);
     const spot = f ? placeAt(f, t, (m) => lookup(m.variants, scenario(), m.time)) : undefined;
     const loc = spot?.location;
-    let cam = state.cam;
+    let cam: ViewState['cam'] | undefined;
     if (loc && spot?.plate) {
       const q = build.model.total(spot.plate, ageAt);
       const v = [Math.cos((loc.lat * Math.PI) / 180) * Math.cos((loc.lon * Math.PI) / 180), Math.cos((loc.lat * Math.PI) / 180) * Math.sin((loc.lon * Math.PI) / 180), Math.sin((loc.lat * Math.PI) / 180)] as V3;
       const u = q.slice(1) as V3;
       const c = cross(u, v);
       const p = add(v, scale(add(scale(c, q[0]), cross(u, c)), 2));
-      cam = { lat: (Math.asin(Math.max(-1, Math.min(1, p[2]))) * 180) / Math.PI, lon: (Math.atan2(p[1], p[0]) * 180) / Math.PI, dist: Math.min(state.cam.dist, 2.4) };
+      cam = { lat: (Math.asin(Math.max(-1, Math.min(1, p[2]))) * 180) / Math.PI, lon: (Math.atan2(p[1], p[0]) * 180) / Math.PI, dist: Math.min(state.cam.dist, at === undefined ? 2.4 : 1.24) };
     }
-    if (at !== undefined && loc && spot?.plate) {
-      setState({ t, sel: id, window });
-      flyTo({ ...cam, dist: Math.min(cam.dist, 1.24) });
-    } else setState({ t, cam, sel: id, window });
+    showDestination({ t, sel: id, window }, cam, at !== undefined);
   }
 
   /** How far out to see a land of so many km² whole: a small state from nearer, a large one from as far as a polity is seen. */
@@ -2567,8 +2575,8 @@ async function start(root: HTMLElement): Promise<void> {
     let t = at ?? (state.t >= a && state.t < b ? state.t : a);
     t = Math.max(dataRange[0], Math.min(dataRange[1], t));
     const p = placeIn(entry.places, t);
-    const cam = p ? { lat: p[3], lon: p[2], dist: Math.min(state.cam.dist, distFor(p[4])) } : state.cam;
-    setState({ t, cam, sel: null, window: windowAround(t) });
+    const cam = p ? { lat: p[3], lon: p[2], dist: Math.min(state.cam.dist, distFor(p[4])) } : undefined;
+    showDestination({ t, sel: null, window: windowAround(t) }, cam, at !== undefined);
     shownRecord = null;
     wantPolities();
     const asked = t;

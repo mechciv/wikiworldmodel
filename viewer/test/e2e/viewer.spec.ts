@@ -1,9 +1,54 @@
 import { expect, test } from '@playwright/test';
 import type { PlanetFile } from '../../../core/planet.ts';
+import { formatTime } from '../../../core/time.ts';
 import { xOf } from '../../src/ui/timebar.ts';
 import { buildFile, canvasGrid, canvasPatch, canvasPng, gridsApart, idle, latestBuild, markerPositions, openLayers, openPlanet, settledUrl } from './helpers.ts';
 
 const year = (ma: number) => Math.round(1950 - ma * 1e6);
+
+for (const trip of [
+  { name: 'Angkor', from: 2020, card: true },
+  { name: 'Abbasid Caliphate 900 CE', from: 1, card: false },
+  { name: 'Mongol Empire 1250 CE', from: 2020, card: false },
+]) {
+  test(`the time machine turns the globe before descending to ${trip.name}`, async ({ page }) => {
+    await page.setViewportSize({ width: 800, height: 600 });
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await page.clock.install();
+    await page.goto(`/?b=${latestBuild()}&t=${trip.from}&lat=12&lon=-28&d=3.3&cl=0`);
+    await idle(page);
+    await page.locator('.when-to').click();
+    if (!trip.card) await page.locator('.tm-input').fill(trip.name);
+    const choice = trip.card ? page.locator('.tm-trip').filter({ hasText: trip.name }) : page.getByRole('option').first();
+    const when = await choice.locator('.tm-when').innerText();
+    const state = () => page.evaluate(() => window.__wikiworldmodel!.state());
+    const start = await state();
+    await page.clock.pauseAt(await page.evaluate(() => Date.now() + 60_000));
+    await choice.dispatchEvent('click');
+    await page.clock.fastForward(800);
+    const sweeping = await state();
+    expect(sweeping.cam).toEqual(start.cam);
+    expect(sweeping.t).not.toBe(start.t);
+
+    await page.clock.fastForward(10_000);
+    const at = await state();
+    expect(when).toContain(formatTime(at.t));
+    expect(sweeping.t).toBeGreaterThan(Math.min(start.t, at.t));
+    expect(sweeping.t).toBeLessThan(Math.max(start.t, at.t));
+    await expect.poll(() => page.evaluate(() => window.__wikiworldmodel!.waiting().includes('flight'))).toBe(true);
+    // A delayed first frame after arrival must still show the globe turning at orbital height.
+    await page.clock.fastForward(8000);
+    const turning = await state();
+    expect(turning.cam.lon).toBeGreaterThan(start.cam.lon);
+    expect(turning.cam.dist).toBe(start.cam.dist);
+    await page.clock.resume();
+    await idle(page);
+    const landed = await state();
+    expect(landed.cam.lon).toBeGreaterThan(turning.cam.lon);
+    expect(landed.cam.dist).toBeLessThan(turning.cam.dist);
+    expect(landed.t).toBe(at.t);
+  });
+}
 
 test('a shared link reproduces the same view', async ({ page, context }) => {
   await page.goto(`/?b=${latestBuild()}`);
