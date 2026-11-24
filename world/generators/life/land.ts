@@ -202,6 +202,12 @@ export function distanceField(nx: number, ny: number, x0: number, y0: number, ce
       }
     }
   }
+  chamfer(d, nx, ny, cell);
+  return d;
+}
+
+/** Two sweeps that carry each node's distance on to its neighbours, across and along and on the diagonals. In place. */
+export function chamfer(d: Float32Array, nx: number, ny: number, cell: number): void {
   const diag = cell * Math.SQRT2;
   for (let j = 0; j < ny; j++) {
     for (let i = 0; i < nx; i++) {
@@ -229,7 +235,6 @@ export function distanceField(nx: number, ny: number, x0: number, y0: number, ce
       d[at] = v;
     }
   }
-  return d;
 }
 
 /**

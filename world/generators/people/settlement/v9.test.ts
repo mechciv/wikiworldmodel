@@ -12,7 +12,8 @@ import { houseSize, HOUSE_VARIANTS } from '../dwellings.ts';
 import { ROUTE, roundOf, wayAt, type RoutineParams } from '../../life/routines.ts';
 import { personGoes } from '../figures.ts';
 import { WORK_VARIANTS } from '../works.ts';
-import { LandUseMap, makeSettlement, toLocal, type Ground } from './v8.ts';
+import { farCellsWeighed, farLand, farLandMask, farScale, LandUseMap, makeSettlement, peopleReach, toLocal, type Ground } from './v9.ts';
+import { FIELD_USE, growFields, GROWTH, SITING, type WaterNear } from './sites.ts';
 
 const ROOT = join(import.meta.dirname, '../../../..');
 // How the living scene's animals go about: the settlement's kept ones go by the same parameters.
@@ -66,7 +67,9 @@ const EXTENT = 16000;
 
 describe('the settlement generator', () => {
   it('holds as many people as the world puts in the land it draws', () => {
-    for (const [code, density] of [[32, 40], [23, 260], [33, 4], [42, 3]] as [number, number][]) {
+    // The last, farmsteads far more crowded than their class says (it says 1–10 to the km²), whose cells take more
+    // settlements than the most places a cell weighs.
+    for (const [code, density] of [[32, 40], [23, 260], [33, 4], [42, 3], [33, 300]] as [number, number][]) {
       const p = world(() => ({ code, density, region: 1 }), [{ id: 1, a: assess(1, 1, 3, 2) }]);
       const plan = makeSettlement(spec(p), flat, dry, EXTENT);
       expect(plan.expected).toBeGreaterThan(0);
@@ -628,20 +631,235 @@ describe('the settlement generator', () => {
   it('puts a settlement in the same place from two scenes that overlap', () => {
     const p = world((r, c) => ({ code: (r + c) % 3 ? 32 : 23, density: (r + c) % 3 ? 40 : 260, region: 1 }), [{ id: 1, a: assess(1, 1, 3, 2) }]);
     const a = { lat: 0, lon: 0 };
-    const b = { lat: 0.06, lon: 0.05 };
     const pa = makeSettlement(spec(p, a), flat, dry, EXTENT);
-    const pb = makeSettlement(spec(p, b), flat, dry, EXTENT);
     // Back to degrees, each from its own scene's origin.
     const deg = (o: { lat: number; lon: number }, x: number, y: number) => [o.lat + y / 111194.93, o.lon + x / (111194.93 * Math.cos((o.lat * Math.PI) / 180))];
-    const [bx, by] = toLocal(a, b.lat, b.lon);
-    const shared = pa.settlements.filter((s) => Math.abs(s.x - bx) < EXTENT - 2000 && Math.abs(s.y - by) < EXTENT - 2000 && Math.abs(s.x) < EXTENT - 2000 && Math.abs(s.y) < EXTENT - 2000);
-    expect(shared.length).toBeGreaterThan(50);
-    const others = pb.settlements.map((s) => deg(b, s.x, s.y));
-    for (const s of shared) {
-      const [la, lo] = deg(a, s.x, s.y);
-      const best = Math.min(...others.map(([lb, ob]) => Math.hypot((la - lb) * 111194.93, (lo - ob) * 111194.93)));
-      expect(best).toBeLessThan(2);
+    // A scene two thirds of a cell away, and scenes a whole cell away each way: the settlements both draw, up to a few
+    // hundred metres from either's edge, where the cells weighed only about a scene differ most from the other's.
+    for (const b of [{ lat: 0.06, lon: 0.05 }, { lat: 1 / 12, lon: 0 }, { lat: 0, lon: 1 / 12 }]) {
+      const pb = makeSettlement(spec(p, b), flat, dry, EXTENT);
+      const [bx, by] = toLocal(a, b.lat, b.lon);
+      const shared = pa.settlements.filter((s) => Math.abs(s.x - bx) < EXTENT - 300 && Math.abs(s.y - by) < EXTENT - 300 && Math.abs(s.x) < EXTENT - 300 && Math.abs(s.y) < EXTENT - 300);
+      expect(shared.length).toBeGreaterThan(50);
+      const others = pb.settlements.map((s) => deg(b, s.x, s.y));
+      for (const s of shared) {
+        const [la, lo] = deg(a, s.x, s.y);
+        const d = others.map(([lb, ob]) => Math.hypot((la - lb) * 111194.93, (lo - ob) * 111194.93));
+        const best = Math.min(...d);
+        expect(best).toBeLessThan(2);
+        // And it is the same settlement: seeded alike, as large.
+        const o = pb.settlements[d.indexOf(best)];
+        expect(o.seed).toBe(s.seed);
+        expect(o.people).toBe(s.people);
+      }
     }
+  });
+});
+
+describe('where settlements stand, and what they farm (sites.ts)', () => {
+  // A river along the meridian, its water at 0 m, in a plain that rises gently from it; and steep hills east of 9 km,
+  // rising 1 in 2, where neither a house nor a field can be.
+  const plain: Ground = { at: (x) => (Math.abs(x) < 60 ? -2 : 3 + Math.abs(x) * 0.002 + (x > 9000 ? (x - 9000) * 0.5 : 0)) };
+  const near: WaterNear = { at: (x) => Math.abs(x) };
+  const p = world(() => ({ code: 32, density: 40, region: 1 }), [{ id: 1, a: assess(1, 1, 3, 2) }]);
+  const plan = makeSettlement(spec(p), plain, dry, EXTENT, undefined, near);
+  const drawn = plan.settlements.filter((s) => s.houses > 0);
+  // The 5′ cells' edges, in the scene's metres: the world's grid starts at 1°N 1°W, and the scene's middle is on an edge.
+  const CELL = 111194.93 / 12;
+  const toEdge = (v: number) => Math.min(((v % CELL) + CELL) % CELL, CELL - (((v % CELL) + CELL) % CELL));
+
+  it('puts a settlement in the same place from two overlapping scenes of a plain with a river and hills', () => {
+    // The same ground and water as above, drawn by a second scene two thirds of a cell to the north-east: the places
+    // are weighed by them, and by grids laid on each scene's own metres, so the two need not agree exactly.
+    const b = { lat: 0.06, lon: 0.05 };
+    const [bx, by] = toLocal({ lat: 0, lon: 0 }, b.lat, b.lon);
+    const other = makeSettlement(spec(p, b), { at: (x, y) => plain.at(x + bx, y + by) }, dry, EXTENT, undefined, { at: (x) => Math.abs(x + bx) });
+    const shared = drawn.filter((s) => Math.abs(s.x - bx) < EXTENT - 2000 && Math.abs(s.y - by) < EXTENT - 2000 && Math.abs(s.x) < EXTENT - 2000 && Math.abs(s.y) < EXTENT - 2000);
+    expect(shared.length).toBeGreaterThan(50);
+    // The same settlement where it stands: seeded alike, whatever order the two scenes' grounds took their places in.
+    const same = shared.filter((s) => other.settlements.some((o) => Math.hypot(o.x + bx - s.x, o.y + by - s.y) < 2 && o.seed === s.seed)).length;
+    // When this was written all of them did: 398 of 398.
+    expect(same / shared.length).toBeGreaterThan(0.98);
+  });
+
+  it('grows the fields of a house that stands where nothing is farmed from the land about it', () => {
+    // A strip of wet ground 60 m wide along the meridian, too low to farm, and good land either side of it; one house in it.
+    const wet: Ground = { at: (x) => (Math.abs(x) < 30 ? 0.3 : 5) };
+    const g = growFields([{ starts: [[0, 0]], r: 10, x: 0, y: 0, area: 200000, use: 'rainfed', settlement: 0 }], wet, dry, undefined, (x, y) => [x, y, 0], GROWTH, 3000, 7);
+    let farmed = 0;
+    for (let k = 0; k < g.owner.length; k++) if (g.owner[k] === 0) farmed++;
+    expect(farmed * g.cell * g.cell).toBeGreaterThan(0.8 * 200000);
+  });
+
+  it("keeps two settlements' grounds apart where a cell has little room for them", () => {
+    // Crowded farmland on a strip 800 m wide between slopes too steep for a house: the cells reach their fallbacks, and
+    // run out of room. The ground a settlement's houses take, a disc as large as their lots, keeps its gap from every
+    // other's, and a cell with no room left leaves its last settlements out.
+    const strip: Ground = { at: (x) => (Math.abs(x) < 400 ? 40 : 40 + (Math.abs(x) - 400)) };
+    const dense = world(() => ({ code: 23, density: 260, region: 1 }), [{ id: 1, a: assess(1, 1, 3, 2) }]);
+    const cramped = makeSettlement(spec(dense), strip, dry, 6000);
+    const s = cramped.settlements.filter((x) => !x.city);
+    expect(s.length).toBeGreaterThan(20);
+    const P = gen.params as { household: number; site: { above_water: number }; siting: { gap: number }; patterns: Record<string, { lot: number }> };
+    const ground = (x: (typeof s)[number]) => Math.sqrt(((x.people / P.household) * P.patterns[x.pattern].lot) / Math.PI);
+    let worst = Infinity;
+    for (let i = 0; i < s.length; i++) for (let j = i + 1; j < s.length; j++) worst = Math.min(worst, Math.hypot(s[i].x - s[j].x, s[i].y - s[j].y) - ground(s[i]) - ground(s[j]));
+    expect(worst).toBeGreaterThan(P.siting.gap - 0.5);
+  });
+
+  it("keeps two settlements' grounds apart across the edge of a cell of farmsteads and a cell of large villages", () => {
+    // Columns of cells of crowded farmsteads and of crowded villages in turn: across their edges the nearer of the two
+    // cells' spacings is the farmsteads', which a village's ground is wider than.
+    const mixed = world((_r, c) => (c % 2 ? { code: 23, density: 260, region: 1 } : { code: 33, density: 120, region: 1 }), [{ id: 1, a: assess(1, 1, 3, 2) }]);
+    const plan = makeSettlement(spec(mixed), flat, dry, EXTENT);
+    const s = plan.settlements.filter((x) => !x.city);
+    expect(new Set(s.map((x) => x.pattern)).size).toBeGreaterThan(1);
+    const P = gen.params as { household: number; siting: { gap: number }; patterns: Record<string, { lot: number }> };
+    const ground = (x: (typeof s)[number]) => Math.sqrt(((x.people / P.household) * P.patterns[x.pattern].lot) / Math.PI);
+    const B = 1000;
+    const at = new Map<string, number[]>();
+    s.forEach((x, i) => {
+      const key = `${Math.floor(x.x / B)},${Math.floor(x.y / B)}`;
+      (at.get(key) ?? at.set(key, []).get(key)!).push(i);
+    });
+    let worst = Infinity;
+    s.forEach((a, i) => {
+      for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) {
+        for (const j of at.get(`${Math.floor(a.x / B) + dx},${Math.floor(a.y / B) + dy}`) ?? []) {
+          if (j <= i) continue;
+          worst = Math.min(worst, Math.hypot(a.x - s[j].x, a.y - s[j].y) - ground(a) - ground(s[j]));
+        }
+      }
+    });
+    expect(worst).toBeGreaterThan(P.siting.gap - 0.5);
+  });
+
+  it('puts a settlement in the same place from two scenes when a river lies past where one of them knows water', () => {
+    // A scene knows the water only within 34 km of its middle (scene/v14.ts, REACH), and weighs cells a little further.
+    // Rivers at 0 and 36 km east of the first scene's middle: the second, 16.7 km east, sees both; the first, only one.
+    const rivers = [0, 36000];
+    const b = { lat: 0, lon: 0.15 };
+    const [bx, by] = toLocal({ lat: 0, lon: 0 }, b.lat, b.lon);
+    const knows = (ox: number): WaterNear => ({ at: (x, y) => (Math.abs(x) > 34000 || Math.abs(y) > 34000 ? 1e6 : Math.min(...rivers.map((r) => Math.abs(x + ox - r)))) });
+    const pa = makeSettlement(spec(p), flat, dry, EXTENT, undefined, knows(0));
+    const pb = makeSettlement(spec(p, b), flat, dry, EXTENT, undefined, knows(bx));
+    // Every settlement both draw, up to 300 m from either's edge, is the same.
+    const shared = pa.settlements.filter((s) => Math.abs(s.x - bx) < EXTENT - 300 && Math.abs(s.y - by) < EXTENT - 300 && Math.abs(s.x) < EXTENT - 300 && Math.abs(s.y) < EXTENT - 300);
+    expect(shared.length).toBeGreaterThan(100);
+    for (const s of shared) expect(pb.settlements.some((o) => Math.hypot(o.x + bx - s.x, o.y + by - s.y) < 2 && o.seed === s.seed)).toBe(true);
+  });
+
+  it('asks the world for its people as far as the cells it weighs reach, and a cell beyond', () => {
+    // The ring of cells weighed about a scene reaches its extent, the growth's margin and two cells more (its outermost
+    // begin a cell past the margin); they read their neighbours' crowding, a cell further again.
+    const cell = 111194.93 / 12;
+    for (const extent of [EXTENT, 20000]) {
+      expect(peopleReach(gen.params, extent)).toBeGreaterThanOrEqual((extent + GROWTH.margin + 2 * cell) / 111194.93 + 1 / 12);
+    }
+  });
+
+  it("takes the record's siting and growth where a build has none", () => {
+    // Version 9's weights, frozen: held to the record while it is at version 9, and left be by any later one.
+    if (gen.version === 9) {
+      expect(gen.params.siting).toEqual(SITING);
+      expect(gen.params.growth).toEqual(GROWTH);
+    }
+    const { siting: _s, growth: _g, ...older } = gen.params;
+    const old = makeSettlement(spec({ ...p, generator: { ...p.generator, version: 8, params: older } }), plain, dry, EXTENT, undefined, near);
+    // The same settlements, each where it stood, as many people and seeded alike; and the same fields.
+    const each = (pl: typeof plan) => pl.settlements.map((s) => [s.x, s.y, s.people, s.seed, s.houses]);
+    expect(each(old)).toEqual(each(plan));
+    expect(old.houses.map((h) => [h.x, h.y])).toEqual(plan.houses.map((h) => [h.x, h.y]));
+    expect(Array.from(old.fields.owner)).toEqual(Array.from(plan.fields.owner));
+    expect(Array.from(old.fields.use)).toEqual(Array.from(plan.fields.use));
+  });
+
+  it('stands its settlements near water and on level ground, more than the land there would', () => {
+    // The ground a house may stand on, and how much of it is within 2 km of the river.
+    let land = 0;
+    let landNear = 0;
+    for (let x = -EXTENT; x < EXTENT; x += 100) {
+      const z = plain.at(x, 0);
+      const steep = Math.abs(plain.at(x + 12, 0) - plain.at(x - 12, 0)) / 24;
+      if (z > 1.5 && steep < 0.25) {
+        land++;
+        if (Math.abs(x) < 2000) landNear++;
+      }
+    }
+    expect(drawn.length).toBeGreaterThan(200);
+    const share = drawn.filter((s) => Math.abs(s.x) < 2000).length / drawn.length;
+    expect(share).toBeGreaterThan((1.5 * landNear) / land);
+    // And none on the steep hills.
+    expect(drawn.every((s) => s.x < 9000)).toBe(true);
+  });
+
+  it('draws its settlements in many sizes within their range, the larger on the better ground', () => {
+    const range = gen.params.patterns as Record<string, { houses: [number, number] }>;
+    const sizes = new Set(drawn.map((s) => Math.round(s.people / 5)));
+    expect(sizes.size).toBeGreaterThan(4);
+    const [lo, hi] = range[drawn[0].pattern].houses;
+    for (const s of drawn) {
+      expect(s.people / 5).toBeGreaterThanOrEqual(lo - 0.01);
+      expect(s.people / 5).toBeLessThanOrEqual(hi + 0.01);
+    }
+    // In the two cells either side of the river, the larger half stand nearer it than the smaller.
+    const by = drawn.filter((s) => Math.abs(s.x) < CELL).sort((a, b) => b.people - a.people);
+    const mean = (l: typeof by) => l.reduce((a, s) => a + Math.abs(s.x), 0) / l.length;
+    expect(mean(by.slice(0, by.length >> 1))).toBeLessThan(mean(by.slice(by.length >> 1)));
+  });
+
+  it("shows no step at a cell's edge, and stands no two settlements nearer than its spacing allows where the ground has room", () => {
+    const flatPlan = makeSettlement(spec(p), flat, dry, EXTENT);
+    const s = flatPlan.settlements.filter((x) => x.houses > 0 && Math.abs(x.x) < EXTENT - 500 && Math.abs(x.y) < EXTENT - 500);
+    // As many stand within 500 m of a cell's edge as the ground there would hold, give or take what chance and
+    // their gathering allow: a cell's edge is no line on the land.
+    const band = 1 - ((CELL - 1000) / CELL) ** 2;
+    const edge = s.filter((x) => Math.min(toEdge(x.x), toEdge(x.y)) < 500).length / s.length;
+    expect(edge / band).toBeGreaterThan(0.7);
+    expect(edge / band).toBeLessThan(1.3);
+    // No two nearer than a share of how far apart they stand on average, across a cell's edge as within it.
+    const apart = Math.sqrt(((2 * EXTENT) * (2 * EXTENT)) / flatPlan.settlements.length);
+    let nearest = Infinity;
+    for (let i = 0; i < s.length; i++) for (let j = i + 1; j < s.length; j++) nearest = Math.min(nearest, Math.hypot(s[i].x - s[j].x, s[i].y - s[j].y));
+    expect(nearest).toBeGreaterThan(0.3 * apart);
+  });
+
+  it("grows each settlement's fields over the land, not in the water or on the steep, until they are as large as its people farmed, up to its neighbours'", () => {
+    const f = plan.fields;
+    let neighbours = 0;
+    const own = new Map<number, number[]>();
+    for (let j = 0; j < f.ny; j++) {
+      for (let i = 0; i < f.nx; i++) {
+        const k = j * f.nx + i;
+        if (!f.use[k]) continue;
+        const x = f.x0 + i * f.cell;
+        // Not in the river, nor on the hills.
+        expect(Math.abs(x) >= 60 && x < 9000 + f.cell).toBe(true);
+        expect(f.use[k]).toBe(FIELD_USE.rainfed);
+        if (f.owner[k] >= 0) (own.get(f.owner[k]) ?? own.set(f.owner[k], []).get(f.owner[k])!).push(k);
+        if (i + 1 < f.nx && f.use[k + 1] && f.owner[k + 1] !== f.owner[k]) neighbours++;
+      }
+    }
+    // Two settlements' fields meet in many places.
+    expect(neighbours).toBeGreaterThan(100);
+    // Each has about as much as its people farmed, where the land and its neighbours leave it room; and its fields are
+    // not a disc about it: some lie further from it than a disc as large would reach.
+    const ratio: number[] = [];
+    const outside: number[] = [];
+    plan.settlements.forEach((s, si) => {
+      const nodes = own.get(si);
+      if (!nodes || s.x > 6000 || Math.abs(s.x) < 3000) return;
+      // Its fields and its houses' own ground, as the far land counts them.
+      const area = Math.PI * s.fieldR * s.fieldR;
+      ratio.push((nodes.length * f.cell * f.cell) / area);
+      const disc = Math.sqrt((nodes.length * f.cell * f.cell) / Math.PI + s.r * s.r);
+      outside.push(nodes.filter((k) => Math.hypot(f.x0 + (k % f.nx) * f.cell - s.x, f.y0 + Math.floor(k / f.nx) * f.cell - s.y) > disc).length / nodes.length);
+    });
+    const median = (a: number[]) => a.sort((x, y) => x - y)[a.length >> 1];
+    expect(ratio.length).toBeGreaterThan(50);
+    expect(median(ratio)).toBeGreaterThan(0.6);
+    expect(median(ratio)).toBeLessThan(1.05);
+    expect(median(outside)).toBeGreaterThan(0.1);
   });
 });
 
@@ -893,6 +1111,139 @@ describe('how a tradition sets its houses out', () => {
     expect(form.grow).toBeGreaterThan(1);
     expect(houseSize(form.spec, 0, form.grow).w).toBeCloseTo(houseSize(form.spec, 0).w * form.grow!, 6);
     expect(plan.houses.filter((h) => h.settlement === city).every((h) => h.size === 1)).toBe(true);
+  });
+});
+
+describe('the land worked beyond the scene', () => {
+  /** A world whose far cells are its own cells, told of as the scene's spec tells of them (ScenePeople, far). */
+  const farWorld = (code: number, density: number, a: Assessment) => {
+    const p = world(() => ({ code, density, region: 1 }), [{ id: 1, a }]);
+    return { ...p, far: { ...p.grid, assessments: [{ id: 1, assessment: a }] } };
+  };
+
+  it('works as much of a cell as its settlements would, on the average', () => {
+    // The last are shifting cultivators, of whose fields only some are cleared at a time (FAR_AVERAGE.swiddenCleared).
+    for (const [code, density, a] of [[32, 40, assess(1, 1, 3, 2)], [23, 260, assess(1, 1, 3, 2)], [31, 120, assess(1, 1, 3, 2)], [32, 40, assess(1, 3, 1, 1)]] as [number, number, Assessment][]) {
+      const p = farWorld(code, density, a);
+      const far = farLand(spec(p))!;
+      const plan = makeSettlement(spec(p), flat, dry, EXTENT);
+      const use = new LandUseMap(plan, flat, dry, 7);
+      // What the plan lays out over the middle of the scene, where every settlement whose fields reach it is drawn.
+      let made = 0;
+      let n = 0;
+      for (let x = -9000; x <= 9000; x += 150) for (let y = -9000; y <= 9000; y += 150) {
+        made += use.at(x, y).crop;
+        n++;
+      }
+      const said = far.crop[12 * far.nx + 12];
+      expect(said, `class ${code}`).toBeGreaterThan(0);
+      // Where no tradition changes the settlements, the estimate is the plan's to a fifth; SceneStream.farFields scales
+      // it to the plan's of the scene where one does.
+      expect(made / n / said, `class ${code} at ${density} to the km²`).toBeGreaterThan(0.8);
+      expect(made / n / said, `class ${code} at ${density} to the km²`).toBeLessThan(1.25);
+    }
+  });
+
+  it("scales the far land to the plan's by its own settlements, and not by a city's fields", () => {
+    const a = assess(1, 1, 3, 2);
+    const without = farWorld(32, 40, a);
+    // A city in the middle of one of the cells the scene holds whole, whose fields take that cell and some about it, and
+    // leave the scene some to weigh: since version 9 a city's fields grow over the land, and one of 800,000 took them all.
+    const cities = [{ name: 'Testopolis', country: 'Nowhere', lat: 0.042, lon: 0.042, people: 400000, field: 'field:people/cities-ancient', source: 'src:test', from: 'list' as const }];
+    const withCity = { ...without, cities };
+    const scaleOf = (p: ScenePeople, origin: { lat: number; lon: number }) => {
+      const plan = makeSettlement(spec(p, origin), flat, dry, EXTENT);
+      return { scale: farScale(farLand(spec(p, origin))!, plan, new LandUseMap(plan, flat, dry, 7), origin, EXTENT), plan };
+    };
+    // A city so large that its fields reach every cell the scene holds whole leaves none of them whole to weigh: the scale
+    // is then weighed in what the city leaves of them, and stays near the scene's without it.
+    {
+      const huge = { ...without, cities: [{ ...cities[0], people: 800000 }] };
+      const o = { lat: 0, lon: 0 };
+      const plan = makeSettlement(spec(huge, o), flat, dry, EXTENT);
+      expect(farCellsWeighed(farLand(spec(huge, o))!, plan, o, EXTENT)).toEqual([]);
+      const scale = farScale(farLand(spec(huge, o))!, plan, new LandUseMap(plan, flat, dry, 7), o, EXTENT);
+      const alone = scaleOf(without, o).scale;
+      expect(scale).not.toBe(1);
+      expect(Math.abs(scale - alone) / alone).toBeLessThan(0.1);
+    }
+    // Scenes in a few places about the city, each holding it.
+    const origins = [{ lat: 0, lon: 0 }, { lat: 0.02, lon: -0.01 }, { lat: -0.015, lon: 0.02 }, { lat: 0.03, lon: 0.035 }];
+    const plains = origins.map((o) => scaleOf(without, o));
+    const cityScenes = origins.map((o) => scaleOf(withCity, o));
+    for (const c of cityScenes) expect(c.plan.settlements.some((s) => s.city === 'Testopolis')).toBe(true);
+    const mean = (l: { scale: number }[]) => l.reduce((a, x) => a + x.scale, 0) / l.length;
+    // Where no tradition changes the settlements, the plan and the estimate agree, and the scale is about 1.
+    for (const p of plains) {
+      expect(p.scale).toBeGreaterThan(0.8);
+      expect(p.scale).toBeLessThan(1.25);
+    }
+    // The cells the city's fields reach are left out, so the city moves each scene's scale little, under a twentieth (it
+    // moved them by at most 3% when this was written). Counted, it would raise them by about a tenth (below).
+    origins.forEach((_, k) => expect(Math.abs(cityScenes[k].scale - plains[k].scale) / plains[k].scale).toBeLessThan(0.05));
+    // And the cause, held directly: in every scene, no cell weighed holds a node of the city's fields or its ground.
+    origins.forEach((o, k) => {
+      const { plan } = cityScenes[k];
+      const far = farLand(spec(withCity, o))!;
+      const f = plan.fields;
+      const city = plan.settlements.findIndex((s) => s.city === 'Testopolis');
+      const weighed = new Set(farCellsWeighed(far, plan, o, EXTENT));
+      // The city leaves some of the scene's whole cells to weigh: else the scale is 1 whatever it does.
+      expect(weighed.size).toBeGreaterThan(0);
+      for (let n = 0; n < f.owner.length; n++) {
+        if (f.owner[n] !== city) continue;
+        const [lat, lon] = [o.lat + (f.y0 + Math.floor(n / f.nx) * f.cell) / 111194.93, o.lon + (f.x0 + (n % f.nx) * f.cell) / (111194.93 * Math.cos((o.lat * Math.PI) / 180))];
+        const cell = Math.floor((far.north - lat) / far.res) * far.nx + Math.floor((lon - far.west) / far.res);
+        expect(weighed.has(cell)).toBe(false);
+      }
+    });
+    // And the bound tells a leak apart: with the city not known as one, its ground and fields are counted, and the scales
+    // move past it, on the mean by about a tenth when this was written.
+    const leaked = origins.map((o, k) => {
+      const plan = { ...cityScenes[k].plan, settlements: cityScenes[k].plan.settlements.map((s) => ({ ...s, city: undefined })) };
+      return { scale: farScale(farLand(spec(withCity, o))!, plan, new LandUseMap(cityScenes[k].plan, flat, dry, 7), o, EXTENT) };
+    });
+    expect(Math.abs(mean(leaked) - mean(plains)) / mean(plains)).toBeGreaterThan(0.075);
+  });
+
+  it('works fields where people farmed, pasture where they herded, and nothing for foragers, and builds where towns stood', () => {
+    const farmers = farLand(spec(farWorld(23, 260, assess(1, 1, 3, 2))))!;
+    expect(Math.max(...farmers.crop)).toBeGreaterThan(0.2);
+    expect(Math.max(...farmers.pasture)).toBe(0);
+    const herders = farLand(spec(farWorld(42, 3, assess(1, 0, 0, 3))))!;
+    expect(Math.max(...herders.pasture)).toBeGreaterThan(0);
+    expect(Math.max(...herders.crop)).toBe(0);
+    const foragers = farLand(spec(farWorld(53, 0.5, assess(3, 0, 0, 0))))!;
+    expect(Math.max(...foragers.crop, ...foragers.pasture)).toBe(0);
+    // A city's cell is its houses' built ground, unworked, as the plan lays it out; a cell of towns among fields has both.
+    const city = farLand(spec(farWorld(11, 5000, assess(1, 1, 3, 2, 1))))!;
+    expect(Math.max(...city.built)).toBeGreaterThan(0.05);
+    expect(Math.max(...city.crop, ...city.pasture)).toBe(0);
+    const towns = farLand(spec(farWorld(12, 600, assess(1, 1, 3, 2))))!;
+    expect(Math.max(...towns.built)).toBeGreaterThan(0);
+    expect(Math.max(...towns.crop)).toBeGreaterThan(0.2);
+    expect(Math.max(...farmers.built)).toBe(0);
+    // Without far cells in its spec, a scene is told of nothing beyond its own.
+    expect(farLand(spec(world(() => ({ code: 23, density: 260, region: 1 }), [{ id: 1, a: assess(1, 1, 3, 2) }])))).toBeUndefined();
+  });
+
+  it('draws the far land with no step at a cell\'s edge, and none beyond the cells it is told of', () => {
+    // Every other column of cells farmed, so that a step at their edges would show.
+    const a = assess(1, 1, 3, 2);
+    const p = world((_r, c) => ({ code: c % 2 ? 23 : 62, density: c % 2 ? 260 : 0, region: 1 }), [{ id: 1, a }]);
+    const far = farLand(spec({ ...p, far: { ...p.grid, assessments: [{ id: 1, assessment: a }] } }))!;
+    const size = 256;
+    const half = 150000;
+    const mask = farLandMask(far, { lat: 0, lon: 0 }, size, half);
+    const crop = (i: number, j: number) => mask[(j * size + i) * 4];
+    let most = 0;
+    for (let i = 1; i < size; i++) most = Math.max(most, Math.abs(crop(i, size / 2) - crop(i - 1, size / 2)));
+    // A texel is about 1.2 km, a cell about 9 km: read between the cells' middles, no neighbours differ by a quarter.
+    expect(Math.max(...Array.from({ length: size }, (_, i) => crop(i, size / 2)))).toBeGreaterThan(100);
+    expect(most).toBeLessThan(64);
+    // The cells reach a degree each way, about 111 km: past them, nothing is worked.
+    expect(crop(2, size / 2)).toBe(0);
+    expect(crop(size / 2, size - 2)).toBe(0);
   });
 });
 

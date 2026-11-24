@@ -16,7 +16,8 @@ import { decodeTile, encodeTile } from '../../../../core/container.ts';
 import { compileAgriculture, compileHusbandry, compileTraditions, prevalenceOf, traditionAt, traditionsFor, type Agriculture, type AgricultureInput, type CropEntry, type PrevalenceWord, type DwellingSpec, type FieldSpec, type Husbandry, type HusbandryInput, type LifewayWord, type OutbuildingSpec, type SettlementSpec, type TownSpec, type Tradition, type TraditionInput } from '../../../../core/dwelling.ts';
 import { canonicalForm, type Form } from '../../../../core/form.ts';
 import type { LivingTaxon } from '../../../../core/scene.ts';
-import { GENERATOR as SETTLEMENT, VERSION as SETTLEMENT_VERSION } from '../../../../world/generators/people/settlement/v8.ts';
+import { GENERATOR as SETTLEMENT, peopleReach, VERSION as SETTLEMENT_VERSION } from '../../../../world/generators/people/settlement/v9.ts';
+import { EXTENT } from '../../../../world/generators/life/scene/current.ts';
 import { FormTree } from '../forms.ts';
 import type { LandscapeIndex, TraditionsFile } from '../../../../core/landscape.ts';
 export type { LandscapeIndex, TraditionsFile };
@@ -799,7 +800,8 @@ export async function buildLandscape(s: Solved, log: (s: string) => void): Promi
     cities: 'people/cities.json',
     fields: { anthromes: af.id, assessment: lf.id, lifeways: lifeways?.id ?? 'field:people/lifeways', population: w.fields.find((f) => f.data?.as === 'people')?.id ?? 'field:earth/population' },
     ...(gen ? { generator: { generator: gen.id, version: gen.version, params: gen.params as Record<string, unknown> } } : {}),
-    reach_deg: 0.25,
+    // As far as the settlement generator weighs cells about a scene (peopleReach).
+    reach_deg: peopleReach(gen?.params as Record<string, unknown> | undefined, EXTENT),
     reach_km: (gen?.params as { cities?: { reach_km?: number } } | undefined)?.cities?.reach_km ?? 30,
   };
   files.set('people/landscape.json', stableStringify(index));

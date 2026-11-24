@@ -106,3 +106,11 @@ views:
       roofed gatehouses and branch to courtyard entrances, surrounded by domain-oriented millet and winter-wheat
       parcels, terraced slopes, and everyday settlement activity.
     link: t=147.974&lat=36.5681082&lon=114.1017057&d=1.0002019725&w=4906.666667Ma%7E-8096Ma&h=240&v=60&hour=15&mo=6&clock=0
+  - name: huai-farmland
+    what: >-
+      Hamlets on the Huai plain in 202 BCE from 1.5 km up: where they stand by the rivers and gather, and their fields
+      spread over the land between them, meeting their neighbours' (gen:people/settlement version 9).
+    link: t=-201.5&lat=33.575&lon=117.70&d=1.00024&h=40&v=66&hour=15&mo=6&clock=0
+  - name: huai-farmland-above
+    what: The same plain from 10 km up, over the whole of a few 5′ cells, whose edges should not show.
+    link: t=-201.5&lat=33.58&lon=117.71&d=1.00157&h=0&v=0&hour=12&mo=6&clock=0

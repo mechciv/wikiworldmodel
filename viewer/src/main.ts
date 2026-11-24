@@ -52,10 +52,11 @@ import { builds, fetchLog, getBytes, getJSON, loadBuild, loadRecord, type Build 
 import { FieldRenderer, type FieldTileGPU } from './gl/field.ts';
 import { cloudDriftAt, globeLook, GlobeRenderer, type CloudDrift } from './gl/globe.ts';
 import type { FrameProfile } from './gl/timer.ts';
-import { savePicture } from './picture.ts';
+import { capturePicture, savePicture } from './picture.ts';
 import { add, cross, norm, scale, type V3 } from './mat.ts';
 import { buildOf, DEFAULT_HOUR, fromSearch, HOURS, quantize, toSearch, type ViewState } from './state.ts';
 import { TileManager, type LoadedTile } from './tiles.ts';
+import { FeedbackDialog } from './ui/feedback.ts';
 import { InspectPanel, stepName, type BiomeHere, type IceHere, type LandscapeHere, type OrganismHere, type PlanetStateInfo, type RowInfo, type TerrainInfo, type TerritoryHere } from './ui/inspect.ts';
 import { barWords, noticeWords, standingAt } from './ui/lifewords.ts';
 import { Markers, timeFor, visibility } from './ui/markers.ts';
@@ -667,9 +668,15 @@ async function start(root: HTMLElement): Promise<void> {
   whenTo.className = 'when-to';
   whenTo.textContent = 'Go to…';
   whenTo.title = 'Go to a place and a time';
+  const improveBtn = document.createElement('button');
+  improveBtn.className = 'improve-scene';
+  improveBtn.title = 'Improve this scene: capture a screenshot and view parameters with your feedback';
+  improveBtn.setAttribute('aria-label', 'Improve this scene');
+  improveBtn.innerHTML =
+    '<svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path d="M2.5 3.5h11a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H6.5l-3 2.5v-2.5h-1a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1zM8 5.75v3.5M6.25 7.5h3.5"/></svg><span class="improve-label">Improve this scene</span>';
   const tools = document.createElement('div');
   tools.className = 'tools';
-  tools.append(whenTo, search.el, toolbar.know, menu, toolbar.el);
+  tools.append(whenTo, search.el, toolbar.know, improveBtn, menu, toolbar.el);
   top.append(brand, tools);
   root.appendChild(top);
   // A press anywhere else folds the menu away.
@@ -2729,6 +2736,45 @@ async function start(root: HTMLElement): Promise<void> {
   whenTo.onclick = () => timeMachine.open();
   if (fresh) timeMachine.open();
 
+  const feedbackDialog = new FeedbackDialog({
+    capture: async () => {
+      const search = toSearch(build.id, state);
+      const url = new URL(search, location.href).href;
+      const overlays = [...stage.querySelectorAll<HTMLCanvasElement>(':scope > canvas')].filter((c) => c !== canvas);
+      const screenshot = await capturePicture(canvas, url, overlays);
+      if (!screenshot) return null;
+      const inScene = canvas.classList.contains('in-city');
+      const mode = !inScene ? 'globe' : city instanceof LifeScene ? 'life' : 'city';
+      return {
+        build: build.id,
+        url,
+        search,
+        state: {
+          ...state,
+          cam: { ...state.cam },
+          window: [state.window[0], state.window[1]],
+          alt: [...state.alt],
+          picks: [...state.picks],
+          ...(state.layers ? { layers: [...state.layers] } : {}),
+          timeLabel: formatTime(state.t),
+        },
+        context: {
+          mode,
+          ...(inScene && site ? { siteId: site.id, siteName: site.label } : {}),
+          viewport: { width: window.innerWidth, height: window.innerHeight, dpr: window.devicePixelRatio || 1 },
+          canvas: { width: canvas.width, height: canvas.height },
+          userAgent: navigator.userAgent,
+        },
+        screenshot,
+      };
+    },
+  });
+  root.appendChild(feedbackDialog.el);
+  improveBtn.onclick = () => {
+    openMenu(false);
+    void feedbackDialog.open();
+  };
+
   /**
    * What is dated near a record within a stretch of its time, to mark along it: moments of the
    * world's records on its plate, within a few hundred kilometres of where it stands.
@@ -2751,8 +2797,9 @@ async function start(root: HTMLElement): Promise<void> {
   }
 
   window.addEventListener('keydown', (e) => {
-    if ((e.target as HTMLElement).tagName === 'INPUT') return;
-    if (timeMachine.isOpen) return;
+    const tag = (e.target as HTMLElement).tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+    if (timeMachine.isOpen || feedbackDialog.isOpen) return;
     if (frameView && 'wasd'.includes(e.key.toLowerCase()) && e.key.length === 1) {
       walking.add(e.key.toLowerCase());
       stopFlight();

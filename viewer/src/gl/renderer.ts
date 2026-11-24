@@ -105,6 +105,8 @@ export interface LocalRenderer<TMesh extends MeshHandle = MeshHandle> {
     box: [number, number, number, number],
     style: { plot: number; aspect: number; kind: number; sown?: number; palette?: { slotColor: Float32Array; slotColor2: Float32Array; slotMeta: Float32Array } },
   ): void;
+  /** How much of the land was worked beyond the plan's own map, coarsely: R crops, G pasture, A paddies, as shares. */
+  setFarFields(data: Uint8Array | null, size: number, box: [number, number, number, number]): void;
   setSmokes(data: Float32Array | null): void;
   setWater(vertices: Float32Array, indices: Uint32Array, level: number, flow?: Float32Array, tone?: number[]): void;
   setEntities(data: Float32Array): void;
