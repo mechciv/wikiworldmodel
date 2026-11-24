@@ -115,7 +115,7 @@ import type { FieldBoundKind } from '../fieldworks.ts';
 import type { GateOpening, PerimeterSpec } from '../walls.ts';
 import { farmLanes, LaneGround, type FarmLayout, type Lane, type LaneWidths, type Point } from './lanes.ts';
 import { planTown, townAt, type TownParams as TownPlanParams } from './town.ts';
-import { cutAt } from '../../../../core/growth.ts';
+import { cutAt, epochAt } from '../../../../core/growth.ts';
 import { earthOf, FIELD_USE, growFields, GROWTH, nodeOf, siteCells, SITING, SiteWorth, sizesOf, USE_OF, type FieldGrid, type FieldSource, type GrowthParams, type SiteCell, type SitingParams, type WaterNear } from './sites.ts';
 import { MAT } from '../../city/kit.ts';
 
@@ -445,6 +445,8 @@ export interface SettlementPlan {
   workForms: WorkForm[];
   /** continuous terrain-conforming walls, village enclosures, corner watchtowers, gatehouses and moats */
   perimeters: PlanPerimeter[];
+  /** the ground the cities laid out through their lives had built at the scene's time: x, y and the half side of each square */
+  urban?: number[];
   /** internal settlement streets, lanes and plaza approaches */
   streets: Street[];
   /** hearth and kiln smoke plume emitters */
@@ -641,6 +643,8 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
   const farms = new Map<Settlement, Pick<FarmLayout, 'lanes' | 'boundary' | 'exits'>>();
   const lanes: Lane[] = [];
   const houses: House[] = [];
+  /** the built ground of the cities laid out through their lives, at the scene's time (SettlementPlan.urban) */
+  const urban: number[] = [];
   const perimeters: PlanPerimeter[] = [];
   const streets: Street[] = [];
   const smokes: SmokeSource[] = [];
@@ -1999,6 +2003,7 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
     works,
     workForms,
     perimeters,
+    ...(urban.length ? { urban } : {}),
     streets,
     lanes,
     smokes,
@@ -2451,7 +2456,18 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
       });
       gatesOf.set(si, gates);
     }
-    const cellArea = plan.growth.grid.cell * plan.growth.grid.cell;
+    // Its built ground at the scene's time, for the land's use: trodden, and no tree on it.
+    const g = plan.growth.grid;
+    const ep = epochAt(plan.growth, P.t);
+    const cut = Math.floor(cutAt(plan.growth, P.t, 0));
+    if (ep)
+      for (let k = 0; k < Math.min(cut, ep.order.length); k++) {
+        const c = ep.order[k];
+        const x = cx + g.x0 + ((c % g.nx) + 0.5) * g.cell;
+        const y = cy + g.y0 + (Math.floor(c / g.nx) + 0.5) * g.cell;
+        if (inScene(x, y) && fitCity(x, y)) urban.push(x, y, g.cell / 2);
+      }
+    const cellArea = g.cell * g.cell;
     return Math.sqrt((Math.max(1, cutAt(plan.growth, P.t, 0)) * cellArea) / PI);
   }
 
@@ -2904,6 +2920,16 @@ export class LandUseMap {
       const f = plan.forms[h.form];
       const r = Math.max(5.5, Math.min(12.5, (f.home?.lot ?? 12) * 0.42));
       stampDisc(h.x, h.y, r * 0.45, r * 1.05, 0.85);
+    }
+    // A city's built ground, as its growth has it at the scene's time: trodden between its houses, and no field or tree.
+    const urban = plan.urban ?? [];
+    for (let k = 0; k + 2 < urban.length; k += 3) {
+      const [x, y, h] = [urban[k], urban[k + 1], urban[k + 2]];
+      const i0 = Math.max(0, Math.floor((x - h + half) / this.step));
+      const i1 = Math.min(this.across - 1, Math.floor((x + h + half) / this.step));
+      const j0 = Math.max(0, Math.floor((y - h + half) / this.step));
+      const j1 = Math.min(this.across - 1, Math.floor((y + h + half) / this.step));
+      for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) this.yards[j * this.across + i] = Math.max(this.yards[j * this.across + i], 170);
     }
     // Internal town/planned streets, central plazas, and inter-settlement paths.
     for (const st of plan.streets) stampLine(st.line, st.width, st.paved ? 0.96 : 0.84);
