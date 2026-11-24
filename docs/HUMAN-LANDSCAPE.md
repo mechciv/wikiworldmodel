@@ -159,6 +159,17 @@ long they stay is the generator's, and no record's.
   where people cleared fields, pastures and yards, no tree stands.
 - **Keyed by the world.** Settlements are seeded by the world's 5′ cells and the anthromes' step, so two scenes that
   overlap put them in the same places.
+- **Where in its cell** (version 9, [settlement/sites.ts](../world/generators/people/settlement/sites.ts)): a cell's
+  settlements stand where people looked for a place to live, near fresh water and above its floods, on level ground a
+  little up from the bottom of a valley, on the better soil and near a town, by chance in proportion to how good the
+  place is; no two nearer than the cell's spacing allows, across a cell's edge as within it; and gathered loosely round
+  a few of them. They are of many sizes within their range, the larger in the better places. A cell's people still
+  live in the cell, as the world says; only where in it is the generator's, and a crowded cell's lean toward its
+  crowded neighbours, so that a cell's edge is no line on the land.
+- **Fields grow over the land** from each settlement's houses, through the ground least effort to reach and farm, until
+  they are as large as its people farmed or the walk too long: level, dry and better ground first, along the contours
+  of a slope, along the water and along the land's grain elsewhere, and never in the water or on ground too steep. Two
+  settlements' fields meet where walking to either is as far; settlements just beyond the scene's edge grow theirs too.
 - **Houses as instances**, one mesh for each dwelling, shape and detail, as the bodies of the living scene are, ranked
   so that a far view draws the top of the list a near view draws in full, and within the frame's budget. A house's
   yard is part of its mesh, so that a village of homesteads costs no more instances than a village of houses; from
@@ -187,7 +198,9 @@ long they stay is the generator's, and no record's.
 
 - A house, a village, a field: none of them was there. Only their numbers, their way of life and their type rest on
   anything, and a click says which. That one house of a tradition differs from the next, where a thing stands in its
-  yard, where a fence runs and where its ways in are: all invented.
+  yard, where a fence runs and where its ways in are: all invented. So is where in its 5′ cell a settlement stands and
+  where its fields end: the water and the ground are the scene's, but the soil they weigh is a noise, and nothing
+  records which places people chose.
 - What a tradition says of its house is drawn for every house of it. A porch that some houses had, a byre that the
   poor shared with their cattle and the rich did not, a village wall that was "often" there, are drawn for all or left
   in a note, until a record can say how many.

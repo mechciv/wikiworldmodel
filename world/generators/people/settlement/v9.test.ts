@@ -12,7 +12,8 @@ import { houseSize, HOUSE_VARIANTS } from '../dwellings.ts';
 import { ROUTE, roundOf, wayAt, type RoutineParams } from '../../life/routines.ts';
 import { personGoes } from '../figures.ts';
 import { WORK_VARIANTS } from '../works.ts';
-import { LandUseMap, makeSettlement, toLocal, type Ground } from './v8.ts';
+import { LandUseMap, makeSettlement, toLocal, type Ground } from './v9.ts';
+import { FIELD_USE, GROWTH, SITING, type WaterNear } from './sites.ts';
 
 const ROOT = join(import.meta.dirname, '../../../..');
 // How the living scene's animals go about: the settlement's kept ones go by the same parameters.
@@ -642,6 +643,114 @@ describe('the settlement generator', () => {
       const best = Math.min(...others.map(([lb, ob]) => Math.hypot((la - lb) * 111194.93, (lo - ob) * 111194.93)));
       expect(best).toBeLessThan(2);
     }
+  });
+});
+
+describe('where settlements stand, and what they farm (sites.ts)', () => {
+  // A river along the meridian, its water at 0 m, in a plain that rises gently from it; and steep hills east of 9 km,
+  // rising 1 in 2, where neither a house nor a field can be.
+  const plain: Ground = { at: (x) => (Math.abs(x) < 60 ? -2 : 3 + Math.abs(x) * 0.002 + (x > 9000 ? (x - 9000) * 0.5 : 0)) };
+  const near: WaterNear = { at: (x) => Math.abs(x) };
+  const p = world(() => ({ code: 32, density: 40, region: 1 }), [{ id: 1, a: assess(1, 1, 3, 2) }]);
+  const plan = makeSettlement(spec(p), plain, dry, EXTENT, undefined, near);
+  const drawn = plan.settlements.filter((s) => s.houses > 0);
+  // The 5′ cells' edges, in the scene's metres: the world's grid starts at 1°N 1°W, and the scene's middle is on an edge.
+  const CELL = 111194.93 / 12;
+  const toEdge = (v: number) => Math.min(((v % CELL) + CELL) % CELL, CELL - (((v % CELL) + CELL) % CELL));
+
+  it('draws the scenes of a build made before it had its siting as a build made now would', () => {
+    expect(gen.params.siting).toEqual(SITING);
+    expect(gen.params.growth).toEqual(GROWTH);
+    const { siting: _s, growth: _g, ...older } = gen.params;
+    const old = makeSettlement(spec({ ...p, generator: { ...p.generator, version: 8, params: older } }), plain, dry, EXTENT, undefined, near);
+    expect(old.settlements.map((s) => [s.x, s.y])).toEqual(plan.settlements.map((s) => [s.x, s.y]));
+  });
+
+  it('stands its settlements near water and on level ground, more than the land there would', () => {
+    // The ground a house may stand on, and how much of it is within 2 km of the river.
+    let land = 0;
+    let landNear = 0;
+    for (let x = -EXTENT; x < EXTENT; x += 100) {
+      const z = plain.at(x, 0);
+      const steep = Math.abs(plain.at(x + 12, 0) - plain.at(x - 12, 0)) / 24;
+      if (z > 1.5 && steep < 0.25) {
+        land++;
+        if (Math.abs(x) < 2000) landNear++;
+      }
+    }
+    expect(drawn.length).toBeGreaterThan(200);
+    const share = drawn.filter((s) => Math.abs(s.x) < 2000).length / drawn.length;
+    expect(share).toBeGreaterThan((1.5 * landNear) / land);
+    // And none on the steep hills.
+    expect(drawn.every((s) => s.x < 9000)).toBe(true);
+  });
+
+  it('draws its settlements in many sizes within their range, the larger on the better ground', () => {
+    const range = gen.params.patterns as Record<string, { houses: [number, number] }>;
+    const sizes = new Set(drawn.map((s) => Math.round(s.people / 5)));
+    expect(sizes.size).toBeGreaterThan(4);
+    const [lo, hi] = range[drawn[0].pattern].houses;
+    for (const s of drawn) {
+      expect(s.people / 5).toBeGreaterThanOrEqual(lo - 0.01);
+      expect(s.people / 5).toBeLessThanOrEqual(hi + 0.01);
+    }
+    // In the two cells either side of the river, the larger half stand nearer it than the smaller.
+    const by = drawn.filter((s) => Math.abs(s.x) < CELL).sort((a, b) => b.people - a.people);
+    const mean = (l: typeof by) => l.reduce((a, s) => a + Math.abs(s.x), 0) / l.length;
+    expect(mean(by.slice(0, by.length >> 1))).toBeLessThan(mean(by.slice(by.length >> 1)));
+  });
+
+  it("shows no step at a cell's edge, and stands no two settlements nearer than its spacing allows", () => {
+    const flatPlan = makeSettlement(spec(p), flat, dry, EXTENT);
+    const s = flatPlan.settlements.filter((x) => x.houses > 0 && Math.abs(x.x) < EXTENT - 500 && Math.abs(x.y) < EXTENT - 500);
+    // As many stand within 500 m of a cell's edge as the ground there would hold, give or take what chance and
+    // their gathering allow: a cell's edge is no line on the land.
+    const band = 1 - ((CELL - 1000) / CELL) ** 2;
+    const edge = s.filter((x) => Math.min(toEdge(x.x), toEdge(x.y)) < 500).length / s.length;
+    expect(edge / band).toBeGreaterThan(0.7);
+    expect(edge / band).toBeLessThan(1.3);
+    // No two nearer than a share of how far apart they stand on average, across a cell's edge as within it.
+    const apart = Math.sqrt(((2 * EXTENT) * (2 * EXTENT)) / flatPlan.settlements.length);
+    let nearest = Infinity;
+    for (let i = 0; i < s.length; i++) for (let j = i + 1; j < s.length; j++) nearest = Math.min(nearest, Math.hypot(s[i].x - s[j].x, s[i].y - s[j].y));
+    expect(nearest).toBeGreaterThan(0.3 * apart);
+  });
+
+  it("grows each settlement's fields over the land, not in the water or on the steep, until they are as large as its people farmed, up to its neighbours'", () => {
+    const f = plan.fields;
+    let neighbours = 0;
+    const own = new Map<number, number[]>();
+    for (let j = 0; j < f.ny; j++) {
+      for (let i = 0; i < f.nx; i++) {
+        const k = j * f.nx + i;
+        if (!f.use[k]) continue;
+        const x = f.x0 + i * f.cell;
+        // Not in the river, nor on the hills.
+        expect(Math.abs(x) >= 60 && x < 9000 + f.cell).toBe(true);
+        expect(f.use[k]).toBe(FIELD_USE.rainfed);
+        if (f.owner[k] >= 0) (own.get(f.owner[k]) ?? own.set(f.owner[k], []).get(f.owner[k])!).push(k);
+        if (i + 1 < f.nx && f.use[k + 1] && f.owner[k + 1] !== f.owner[k]) neighbours++;
+      }
+    }
+    // Two settlements' fields meet in many places.
+    expect(neighbours).toBeGreaterThan(100);
+    // Each has about as much as its people farmed, where the land and its neighbours leave it room; and its fields are
+    // not a disc about it: some lie further from it than a disc as large would reach.
+    const ratio: number[] = [];
+    const outside: number[] = [];
+    plan.settlements.forEach((s, si) => {
+      const nodes = own.get(si);
+      if (!nodes || s.x > 6000 || Math.abs(s.x) < 3000) return;
+      const area = Math.PI * (s.fieldR * s.fieldR - s.r * s.r);
+      ratio.push((nodes.length * f.cell * f.cell) / area);
+      const disc = Math.sqrt((nodes.length * f.cell * f.cell) / Math.PI + s.r * s.r);
+      outside.push(nodes.filter((k) => Math.hypot(f.x0 + (k % f.nx) * f.cell - s.x, f.y0 + Math.floor(k / f.nx) * f.cell - s.y) > disc).length / nodes.length);
+    });
+    const median = (a: number[]) => a.sort((x, y) => x - y)[a.length >> 1];
+    expect(ratio.length).toBeGreaterThan(50);
+    expect(median(ratio)).toBeGreaterThan(0.6);
+    expect(median(ratio)).toBeLessThan(1.05);
+    expect(median(outside)).toBeGreaterThan(0.1);
   });
 });
 

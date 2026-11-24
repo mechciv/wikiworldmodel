@@ -1,4 +1,4 @@
-// The settlement generator, version 6 (docs/HUMAN-LANDSCAPE.md): the anonymous human landscape of a scene. From the
+// The settlement generator, version 9 (docs/HUMAN-LANDSCAPE.md): the anonymous human landscape of a scene. From the
 // people part of a scene's spec it lays out where people lived, how many houses, of what kind, and the fields and
 // pastures around them, in the scene's local metres. Nobody recorded any of these houses: how many there are follows
 // HYDE's people through the anthromes, and the cities of the lists and of the world's records where they name one; what
@@ -58,6 +58,19 @@
 // Version 7 gives settled farmers connected lanes, compact or dispersed lots, field entrances and enclosures
 // following the occupied parcels. Earlier builds carry no lane widths and retain their original layout.
 //
+// Version 9 (sites.ts):
+//   - A cell's settlements stand where people looked for a place to live, and no longer on a grid over the cell: near
+//     fresh water and above its floods, on level ground a little up from the bottom of its valley, on the better soil
+//     and near a town, by chance in proportion to how good the place is, gathered loosely round a few of them, and no
+//     two nearer than the cell's spacing allows, across a cell's edge as within it. A cell's settlements lean toward its
+//     more crowded neighbours, so that a cell's edge does not show as a step.
+//   - A cell's settlements are of many sizes within the range its tradition or pattern gives, the smaller oftener, and
+//     the larger take the better places; version 8 drew every settlement of a cell the same size.
+//   - Fields are no longer a disc about each settlement: they spread from its houses over the land nearest it by the
+//     effort of walking there, through level, dry and better ground first and along the land's grain, and stop at the
+//     water, at ground too steep, at a neighbour's fields and at the most its people farmed. Settlements just beyond
+//     the scene's edge grow theirs too, so that fields reach into the scene from beyond it.
+//
 // Version 8 (docs/plans/HUMAN-LANDSCAPE-REALISM.md):
 //   - Continuous terrain-conforming perimeter walls, enclosures, watchtowers and roofed gatehouses (walls.ts),
 //     following each farming settlement's occupied boundary polygon (with gatehouses where its through-lane exits)
@@ -88,10 +101,13 @@ import type { CropParams } from '../crops.ts';
 import type { FieldBoundKind } from '../fieldworks.ts';
 import type { GateOpening, PerimeterSpec } from '../walls.ts';
 import { farmLanes, LaneGround, type FarmLayout, type Lane, type LaneWidths, type Point } from './lanes.ts';
+import { earthOf, FIELD_USE, growFields, GROWTH, nodeOf, siteCells, SITING, SiteWorth, sizesOf, USE_OF, type FieldGrid, type FieldSource, type GrowthParams, type SiteCell, type SitingParams, type WaterNear } from './sites.ts';
 import { MAT } from '../../city/kit.ts';
 
+export { waterNear, type WaterNear } from './sites.ts';
+
 export const GENERATOR = 'gen:people/settlement';
-export const VERSION = 8;
+export const VERSION = 9;
 
 const EARTH = 6371000;
 const DEG = PI / 180;
@@ -173,11 +189,13 @@ export interface SettlementParams {
     steep: number;
     /** how far above the water a house stands at least, in metres */
     above_water: number;
-    /** how many places near its spot a settlement tries before it is left out */
-    tries: number;
     /** how far above the water a house of a city of a list or a record stands at least, in metres */
     city_above_water: number;
   };
+  /** where in its cell a settlement stands (sites.ts) */
+  siting?: SitingParams;
+  /** how its fields spread over the land about it (sites.ts) */
+  growth?: GrowthParams;
   cities: {
     /** how far from the scene's middle a city is looked for, km */
     reach_km: number;
@@ -429,6 +447,8 @@ export interface SettlementPlan {
   agriculture: SettlementAgriculture;
   /** the lifeway at the place */
   lifeway: Lifeway;
+  /** what each node of a grid over the scene is farmed as, and by which settlement (sites.ts) */
+  fields: FieldGrid;
 }
 
 /** Local metres of a place, on the scene's grid. */
@@ -473,9 +493,11 @@ interface TownOf {
  * The plan of a scene's people. `ground` gives the height at a place and `water` the level of the water there, so that no
  * house stands in a river or on a cliff. The climate class picks the generic house where no tradition holds. `beasts` is
  * how the animals its people kept go about once they are drawn: the living scene's own parameters for its wild ones
- * (gen:life/scene, animals.routines), handed over by whoever draws both. Without it they stay where they stand.
+ * (gen:life/scene, animals.routines), handed over by whoever draws both. Without it they stay where they stand. `near` is
+ * how far a place is from fresh water (sites.ts, waterNear), which people settled by; without it no place is nearer than
+ * another.
  */
-export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: number, y: number) => number, extent: number, beasts?: RoutineParams): SettlementPlan {
+export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: number, y: number) => number, extent: number, beasts?: RoutineParams, near?: WaterNear): SettlementPlan {
   const P = spec.people!;
   const p = P.generator.params as unknown as SettlementParams;
   const origin = spec.site.origin;
@@ -675,9 +697,40 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
     layOut(settlements[s], s, n, lot, citySeed, t, townOf(t, c.town, c.record), (g) => formOf(pattern, t, found?.kin, g));
     housesOf[s] = [first, houses.length];
   }
-  // Then each 5′ cell the scene reaches, as its anthrome and region say.
+  // Then each 5′ cell the scene reaches, as its anthrome and region say (sites.ts): the cells within the scene, whose
+  // settlements are drawn; those within `growth.margin` of its edge, whose settlements are not drawn but whose fields
+  // reach into it; and a ring of cells about them all, whose settlements are only weighed, so that a place near the
+  // edge of those comes out as it would in a scene centred on it.
   const g = P.grid;
   const side = g.res * EARTH * DEG;
+  // A build made before version 9 has neither: its scenes take the record's, as a build made now would.
+  const S = p.siting ?? SITING;
+  const G = p.growth ?? GROWTH;
+  const margin = extent + G.margin;
+  // What a cell holds: its way of life and tradition, its people, and the sizes of its settlements, largest first.
+  interface CellPeople {
+    k: number;
+    region: number;
+    life: Lifeway & { pattern: Exclude<Pattern, 'none'> };
+    gr: number;
+    gc: number;
+    seed: number;
+    found: ReturnType<typeof traditionOf>;
+    pp: PatternParams;
+    household: number;
+    area: number;
+    houses: number;
+    lot: number;
+    site: SiteCell;
+    /** how far outside the scene it lies, m, each way: 0 within it */
+    out: number;
+  }
+  const crowdOf = (row: number, col: number): number => {
+    if (row < 0 || col < 0 || row >= g.ny || col >= g.nx) return -1;
+    const i = row * g.nx + col;
+    return g.anthrome[i] && g.density[i] > 0 ? g.density[i] : 0;
+  };
+  const cellsOf: CellPeople[] = [];
   for (let row = 0; row < g.ny; row++) {
     for (let col = 0; col < g.nx; col++) {
       const i = row * g.nx + col;
@@ -688,7 +741,8 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
       const west = g.west + col * g.res;
       const [x0, y1] = toLocal(origin, north, west);
       const [x1, y0] = toLocal(origin, north - g.res, west + g.res);
-      if (x1 < -extent || x0 > extent || y1 < -extent || y0 > extent) continue;
+      const out = Math.max(0, x0 - extent, -extent - x1, y0 - extent, -extent - y1);
+      if (out > G.margin + Math.max(x1 - x0, y1 - y0)) continue;
       const region = g.region[i];
       const a = regionOf(region)?.assessment;
       const life = lifewayOf(P.classes, k, d, a);
@@ -703,56 +757,89 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
       const pp = p.patterns[life.pattern];
       const household = mid(t?.settlement.household, p.household);
       const area = side * side * dcos(((north - g.res / 2) * PI) / 180) * 1e-6;
-      // The part of the cell inside the scene, for what the world expects of it.
-      const inside = (Math.max(0, Math.min(x1, extent) - Math.max(x0, -extent)) * Math.max(0, Math.min(y1, extent) - Math.max(y0, -extent))) / ((x1 - x0) * (y1 - y0));
-      expected += d * area * inside;
-      const people = d * area;
-      const perSettlement = Math.max(1, Math.round(within(t?.settlement.houses ?? { lo: pp.houses[0], hi: pp.houses[1] }, pp.houses[0], hash2(gr, gc, seed))));
-      const housesInCell = people / household;
-      const count = Math.floor(housesInCell / perSettlement + hash2(gc, gr, seed ^ 0x3a));
-      if (!count) continue;
-      const lot = lotOf(life.pattern, t);
-      const catchment = (area * 1e6) / count;
-      const grid = Math.ceil(Math.sqrt(count));
-      const town = life.pattern === 'city' || life.pattern === 'towns' ? townOf(t) : undefined;
-      // A house stands in its yard where it is not on the lots of a town's streets.
-      const form = formOf(life.pattern, t, found?.kin, 1, town && lot <= p.towns.open_lot ? undefined : lot);
-      for (let n = 0; n < count; n++) {
-        // A jittered grid over the whole cell, preferring the gentlest slope among valid tries (deterministic across scenes).
-        const gx = n % grid;
-        const gy = Math.floor(n / grid);
-        let bestX = 0;
-        let bestY = 0;
-        let bestScore = Infinity;
-        for (let tr = 0; tr < p.site.tries; tr++) {
-          const u = (gx + 0.15 + 0.7 * hash3(n, tr, 1, seed)) / grid;
-          const v = (gy + 0.15 + 0.7 * hash3(n, tr, 2, seed)) / grid;
-          const x = x0 + (x1 - x0) * u;
-          const y = y1 - (y1 - y0) * v;
-          if (!ok(x, y)) continue;
-          const sc = slope(x, y);
-          if (sc + 1e-4 < bestScore) {
-            bestScore = sc;
-            bestX = x;
-            bestY = y;
-            if (sc < 0.025) break;
-          }
-        }
-        if (!Number.isFinite(bestScore)) continue;
-        const x = bestX;
-        const y = bestY;
-        // A settlement beyond the scene, or in a city's ground, is not drawn here; it has its spot all the same.
-        if (!inScene(x, y) || cityHere.some((c) => (x - c.x) ** 2 + (y - c.y) ** 2 < c.r * c.r)) continue;
-        const r = Math.sqrt((perSettlement * lot) / PI);
-        const fieldR = Math.sqrt(r * r + (pp.fields * catchment) / PI);
-        const own = seedOf(hash3(n, gr, gc, seed));
-        const s = settlements.push({ x, y, r, fieldR, pattern: life.pattern, fields: life.fields, houses: 0, people: perSettlement * household, anthrome: k, region, form, tier: life.tier, seed: own }) - 1;
-        const first = houses.length;
-        layOut(settlements[s], s, perSettlement, lot, own, t, town, (g) => formOf(life.pattern, t, found?.kin, g));
-        housesOf[s] = [first, houses.length];
+      if (out === 0) {
+        // The part of the cell inside the scene, for what the world expects of it.
+        const inside = (Math.max(0, Math.min(x1, extent) - Math.max(x0, -extent)) * Math.max(0, Math.min(y1, extent) - Math.max(y0, -extent))) / ((x1 - x0) * (y1 - y0));
+        expected += d * area * inside;
       }
+      const houses = (d * area) / household;
+      const range = t?.settlement.houses ?? { lo: pp.houses[0], hi: pp.houses[1] };
+      const span = typeof range === 'number' ? { lo: range, hi: range } : range;
+      const sizes = sizesOf(houses, span, S.sizes, seed);
+      const lot = lotOf(life.pattern, t);
+      // How near two of its settlements may stand: a share of their mean spacing, and no nearer than its largest two
+      // would need to keep their houses apart.
+      const widest = Math.sqrt(((sizes[0] ?? 1) * lot) / PI);
+      const spacing = Math.max(S.spacing * Math.sqrt((area * 1e6) / Math.max(1, sizes.length)), 2 * widest + S.gap);
+      // Its people to the km² at a place, as the cells about it share theirs, over its own: where its neighbours are more
+      // crowded its settlements stand oftener toward them, so that a cell's edge shows no step.
+      const crowd = (x: number, y: number): number => {
+        const cx = col + (x - x0) / (x1 - x0) - 0.5;
+        const cy = row + (y1 - y) / (y1 - y0) - 0.5;
+        const c0 = Math.floor(cx);
+        const r0 = Math.floor(cy);
+        const fx = cx - c0;
+        const fy = cy - r0;
+        let sum = 0;
+        let wsum = 0;
+        for (const [dr, dc, w] of [[0, 0, (1 - fx) * (1 - fy)], [0, 1, fx * (1 - fy)], [1, 0, (1 - fx) * fy], [1, 1, fx * fy]] as [number, number, number][]) {
+          const v = crowdOf(r0 + dr, c0 + dc);
+          if (v < 0) continue;
+          sum += v * w;
+          wsum += w;
+        }
+        return Math.max(0.5, Math.min(2, (wsum > 0 ? sum / wsum : d) / d));
+      };
+      cellsOf.push({ k, region, life: life as CellPeople['life'], gr, gc, seed, found, pp, household, area, houses, lot, out, site: { x0, x1, y0, y1, north, west, res: g.res, seed, sizes, spacing, crowd } });
     }
   }
+  const earth = earthOf(origin);
+  const worth = new SiteWorth(S, ground, near, ok, cityHere, seedOf(hash2(0x50, 0x11, 0x5017)), margin + side * 1.5);
+  const places = siteCells(cellsOf.map((c) => c.site), worth, S);
+  // The fields of settlements beyond the scene's edge that reach into it, and of those drawn: grown together, below.
+  const sources: FieldSource[] = [];
+  cellsOf.forEach((c, ci) => {
+    if (c.out > G.margin) return;
+    const t = c.found?.tradition;
+    const town = c.life.pattern === 'city' || c.life.pattern === 'towns' ? townOf(t) : undefined;
+    const perHouse = (c.area * 1e6) / Math.max(1, c.houses);
+    places[ci].forEach(([x, y], n) => {
+      const size = c.site.sizes[n];
+      const r = Math.sqrt((size * c.lot) / PI);
+      // Its fields: its houses' share of the cell's, the less where its neighbours crowd it.
+      const fieldR = Math.sqrt(r * r + (c.pp.fields * size * perHouse) / c.site.crowd(x, y) / PI);
+      // A settlement beyond the scene, or in a city's ground, is not drawn here; it has its spot all the same, and one
+      // beyond the scene its fields.
+      if (cityHere.some((h) => (x - h.x) ** 2 + (y - h.y) ** 2 < h.r * h.r)) return;
+      if (!inScene(x, y)) {
+        if (c.life.fields !== 'none') sources.push({ starts: [[x, y]], r, x, y, area: PI * (fieldR * fieldR - r * r), use: c.life.fields, settlement: -1 });
+        return;
+      }
+      // A house stands in its yard where it is not on the lots of a town's streets.
+      const form = formOf(c.life.pattern, t, c.found?.kin, 1, town && c.lot <= p.towns.open_lot ? undefined : c.lot);
+      const own = seedOf(hash3(n, c.gr, c.gc, c.seed));
+      const s = settlements.push({ x, y, r, fieldR, pattern: c.life.pattern, fields: c.life.fields, houses: 0, people: size * c.household, anthrome: c.k, region: c.region, form, tier: c.life.tier, seed: own }) - 1;
+      const first = houses.length;
+      layOut(settlements[s], s, size, c.lot, own, t, town, (gw) => formOf(c.life.pattern, t, c.found?.kin, gw));
+      housesOf[s] = [first, houses.length];
+    });
+  });
+  // The fields of every settlement drawn, a city's among them, grown from its houses; then those beyond the edge.
+  const drawnSources: FieldSource[] = [];
+  settlements.forEach((s, si) => {
+    if (s.fields === 'none') return;
+    const [h0, h1] = housesOf[si] ?? [0, 0];
+    const starts: [number, number][] = [];
+    for (let h = h0; h < h1; h++) starts.push([houses[h].x, houses[h].y]);
+    if (!starts.length) starts.push([s.x, s.y]);
+    drawnSources.push({ starts, r: s.r, x: s.x, y: s.y, area: PI * Math.max(0, s.fieldR * s.fieldR - s.r * s.r), use: s.fields, settlement: si });
+  });
+  const fieldGrid = growFields([...drawnSources, ...sources], ground, water, near, earth, G, margin, seedOf(hash2(0x50, 0x12, 0x5017)));
+  // Which settlement farms a place, if any: its place in the plan, -1 nobody, -2 one beyond the scene.
+  const farmedBy = (x: number, y: number): number => {
+    const k = nodeOf(fieldGrid, x, y);
+    return k < 0 ? -1 : fieldGrid.owner[k];
+  };
   // A spot before a house: `out` metres clear of its front wall, and `across` of its width (and `more` metres) to one
   // side of its door. A house's front faces the way it is turned, and its length runs that way (dwellings.ts).
   const sizes = new Map<number, HouseDims>();
@@ -1652,6 +1739,8 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
           const x = s.x + Math.sin(a) * rr;
           const y = s.y + Math.cos(a) * rr;
           if (!fit(x, y) || !clearOfHouses(x, y, -1, 4) || laneAvoid?.near(x, y, 2.5)) continue;
+          // Work goes on in the settlement's own fields, where they spread.
+          if (farmedBy(x, y) !== si) continue;
           const at = plotAt(x, y, pStyle);
           if (at.edge < 3.5) continue;
           const slot = palette.slots[plotSlotIndex(at.pick, palette)];
@@ -1841,6 +1930,7 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
     style,
     agriculture,
     lifeway: P.lifeway,
+    fields: fieldGrid,
   };
 
   /**
@@ -2534,8 +2624,15 @@ export interface LandUse {
 
 /** A plan's settlements by where they are, so that the ground can ask which are near. */
 export class LandUseMap {
-  private buckets = new Map<number, number[]>();
-  private size = 2000;
+  /** whether anything of people's is within each square of `OCC` m: where nothing is, nothing need be looked up */
+  private occupied: Uint8Array;
+  private occN: number;
+  private occX0: number;
+  private static OCC = 400;
+  /** what the nodes about a place are farmed as, weighed; and the weights of each axis: reused, to make no garbage */
+  private share = new Float64Array(USE_OF.length);
+  private bu = new Float64Array(4);
+  private bv = new Float64Array(4);
   private lanes: LaneGround;
   /** how trodden the ground is along streets, plazas, occupied boundaries, and house yards, 0–255 */
   private yards: Uint8Array;
@@ -2628,19 +2725,33 @@ export class LandUseMap {
         }
       }
     }
-    plan.settlements.forEach((s, i) => {
-      const sReach = Math.max(s.fieldR, s.r);
-      const b0 = Math.floor((s.x - sReach) / this.size);
-      const b1 = Math.floor((s.x + sReach) / this.size);
-      const c0 = Math.floor((s.y - sReach) / this.size);
-      const c1 = Math.floor((s.y + sReach) / this.size);
-      for (let b = b0; b <= b1; b++) for (let c = c0; c <= c1; c++) {
-        const k = b * 65536 + c;
-        let list = this.buckets.get(k);
-        if (!list) this.buckets.set(k, (list = []));
-        list.push(i);
+    // Where there is anything to look up: the fields, the trodden ground and the lanes, each square and those about it.
+    const O = LandUseMap.OCC;
+    const f = plan.fields;
+    this.occX0 = Math.min(f.x0, -half);
+    this.occN = Math.ceil((Math.max(f.x0 + f.nx * f.cell, half) - this.occX0) / O) + 1;
+    const occ = new Uint8Array(this.occN * this.occN);
+    const mark = (x: number, y: number) => {
+      const i = Math.floor((x - this.occX0) / O);
+      const j = Math.floor((y - this.occX0) / O);
+      if (i >= 0 && j >= 0 && i < this.occN && j < this.occN) occ[j * this.occN + i] = 1;
+    };
+    for (let j = 0; j < f.ny; j++) for (let i = 0; i < f.nx; i++) if (f.use[j * f.nx + i]) mark(f.x0 + i * f.cell, f.y0 + j * f.cell);
+    for (let j = 0; j < this.across; j++) for (let i = 0; i < this.across; i++) if (this.yards[j * this.across + i]) mark((i + 0.5) * this.step - half, (j + 0.5) * this.step - half);
+    for (const l of plan.lanes) for (let q = 0; q + 1 < l.line.length; q += 2) mark(l.line[q], l.line[q + 1]);
+    this.occupied = new Uint8Array(occ.length);
+    for (let j = 0; j < this.occN; j++) {
+      for (let i = 0; i < this.occN; i++) {
+        if (!occ[j * this.occN + i]) continue;
+        for (let b = Math.max(0, j - 1); b <= Math.min(this.occN - 1, j + 1); b++) for (let a = Math.max(0, i - 1); a <= Math.min(this.occN - 1, i + 1); a++) this.occupied[b * this.occN + a] = 1;
       }
-    });
+    }
+  }
+  /** Whether anything of people's may be at a place. */
+  private near(x: number, y: number): boolean {
+    const i = Math.floor((x - this.occX0) / LandUseMap.OCC);
+    const j = Math.floor((y - this.occX0) / LandUseMap.OCC);
+    return i >= 0 && j >= 0 && i < this.occN && j < this.occN && this.occupied[j * this.occN + i] === 1;
   }
   /** How trodden the ground is along streets, plazas and house yards near a place, 0 to 1. */
   private yardAt(x: number, y: number): number {
@@ -2658,8 +2769,7 @@ export class LandUseMap {
   /** What covers the ground at a place, gated by terrain slope, lanes, and natural riparian margins. */
   at(x: number, y: number, out: LandUse = { crop: 0, pasture: 0, yard: 0, paddy: 0 }): LandUse {
     out.crop = out.pasture = out.yard = out.paddy = 0;
-    const list = this.buckets.get(Math.floor(x / this.size) * 65536 + Math.floor(y / this.size));
-    if (!list) return out;
+    if (!this.near(x, y)) return out;
     const z = this.ground.at(x, y);
     const above = z - this.water(x, y);
     if (above < 0.5) return out;
@@ -2674,29 +2784,44 @@ export class LandUseMap {
     const g2 = gx * gx + gy * gy;
     const sl = Math.sqrt(g2 / (1 + g2));
     const slopeCrop = 1 - smooth(FIELD_SLOPE.cropFadeLo, FIELD_SLOPE.cropFadeHi, sl);
-    const riparianDry = smooth(0.5, 1.8, above);
+    // How near the water the fields come the growth has said (sites.ts), node by node: here only what is at the water's
+    // own level is left unsown.
+    const riparianDry = smooth(0.5, 0.8, above);
 
-    // Irregular edges, the same wherever they are asked for.
-    const wob = fbm(x / 420, y / 420, this.seed + 401) - 0.5;
-    for (const i of list) {
-      const s = this.plan.settlements[i];
-      const d = Math.sqrt((x - s.x) ** 2 + (y - s.y) ** 2);
-      // No giant uniform beige disc: trodden ground comes from actual houses, streets, lanes, and occupied boundaries.
-      if (s.fields === 'none') continue;
-      const edge = s.fieldR * (1 + wob * 0.45);
-      const inField = 1 - smooth(edge * 0.92, edge * 1.05, d);
-      if (inField <= 0) continue;
-      if (s.fields === 'pasture') out.pasture = Math.max(out.pasture, inField);
-      else if (s.fields === 'swidden') {
-        const plot = noise(x / 160, y / 160, this.seed + 403);
-        out.crop = Math.max(out.crop, inField * smooth(0.55, 0.62, plot) * slopeCrop * riparianDry);
-      } else {
-        const wetCrop = s.fields === 'rice' || s.fields === 'irrigated';
-        const cShare = inField * slopeCrop * (wetCrop ? 1 : riparianDry);
-        out.crop = Math.max(out.crop, cShare);
-        // Steep margins around arable valleys shift naturally into hillside grazing pasture.
-        if (sl > 0.18 && sl < 0.42) out.pasture = Math.max(out.pasture, inField * smooth(0.18, 0.28, sl) * (1 - smooth(0.35, 0.44, sl)) * 0.7);
-        if (wetCrop) out.paddy = Math.max(out.paddy, inField * (s.fields === 'rice' ? 1 : 0.5) * (1 - smooth(4, 14, above)) * (1 - smooth(0.08, 0.16, sl)));
+    // The fields as they grew (sites.ts): each node of the grid is in one settlement's fields or in nobody's. A place is in
+    // them as far as the nodes about it are, weighed smoothly over four nodes each way so that an edge runs as a curve and
+    // not as a row of the grid's steps; and moved a little this way and that, so that it is not too smooth either.
+    const f = this.plan.fields;
+    const wx = (noise(x / 70, y / 70, this.seed + 405) - 0.5) * f.cell;
+    const wy = (noise(x / 70, y / 70, this.seed + 406) - 0.5) * f.cell;
+    const fx = (x + wx - f.x0) / f.cell;
+    const fy = (y + wy - f.y0) / f.cell;
+    const i = Math.floor(fx);
+    const j = Math.floor(fy);
+    if (i >= 1 && j >= 1 && i < f.nx - 2 && j < f.ny - 2) {
+      const share = this.share;
+      share.fill(0);
+      const bu = spline(fx - i, this.bu);
+      const bv = spline(fy - j, this.bv);
+      for (let b = 0; b < 4; b++) {
+        const row = (j - 1 + b) * f.nx + i - 1;
+        for (let a = 0; a < 4; a++) share[f.use[row + a]] += bu[a] * bv[b];
+      }
+      // Crisper than the weighing's ramp: a field ends at a bank or a ditch, not over a hundred metres.
+      const edge = (s: number) => smooth(0.38, 0.62, s);
+      const rainfed = edge(share[FIELD_USE.rainfed]);
+      const wet = edge(share[FIELD_USE.rice] + share[FIELD_USE.irrigated]);
+      const swidden = edge(share[FIELD_USE.swidden]);
+      out.pasture = edge(share[FIELD_USE.pasture]);
+      // Of a swidden's ground only some plots are cleared at a time: the rest is growing back.
+      const cleared = swidden > 0 ? swidden * smooth(0.55, 0.62, noise(x / 160, y / 160, this.seed + 403)) : 0;
+      out.crop = Math.max((rainfed + cleared) * riparianDry, wet) * slopeCrop;
+      // Steep margins round the fields of a valley are grazed.
+      const arable = Math.max(rainfed, wet, swidden);
+      if (arable > 0 && sl > 0.18 && sl < 0.42) out.pasture = Math.max(out.pasture, arable * smooth(0.18, 0.28, sl) * (1 - smooth(0.35, 0.44, sl)) * 0.7);
+      if (wet > 0) {
+        const rice = share[FIELD_USE.rice] / Math.max(1e-6, share[FIELD_USE.rice] + share[FIELD_USE.irrigated]);
+        out.paddy = wet * (0.5 + 0.5 * rice) * (1 - smooth(4, 14, above)) * (1 - smooth(0.08, 0.16, sl));
       }
     }
     const own = this.yardAt(x, y);
@@ -2704,6 +2829,18 @@ export class LandUseMap {
     out.crop *= 1 - out.yard * 0.85;
     return out;
   }
+}
+
+/** The weights of the four nodes about a place along one axis, at `t` past the second of them: a cubic B-spline's. */
+function spline(t: number, out: Float64Array): Float64Array {
+  const s = 1 - t;
+  const t2 = t * t;
+  const t3 = t2 * t;
+  out[0] = (s * s * s) / 6;
+  out[1] = (3 * t3 - 6 * t2 + 4) / 6;
+  out[2] = (-3 * t3 + 3 * t2 + 3 * t + 1) / 6;
+  out[3] = t3 / 6;
+  return out;
 }
 
 /** The plan's land use as an image: R crops, G pasture, B yards and lanes, A flooded paddies. */

@@ -9,13 +9,13 @@ import { MAT, Mesh, meshParts } from '../city/kit.ts';
 import { hash2, hashString, TAU } from '../city/math.ts';
 import { clumpWidth, drawAnimal, drawClump, drawPlant, POSE, STRIDE_HIPS, type Detail, type Stance } from './forms.ts';
 import { ROUTE, WAY } from './routines.ts';
-import { banksOf, CELL, CELLS, cellParts, cellKey, coverMask, EXTENT, groundGrids, LandCover, makePlan, placeLook, waterLevels, waterRibbons, waterSheet, watersFor, worldGround, type CellRows, type LivingParams, type LivingPlan, type PlaceLook } from './scene/v14.ts';
+import { banksOf, CELL, CELLS, cellParts, cellKey, coverMask, EXTENT, groundGrids, LandCover, makePlan, placeLook, REACH, waterLevels, waterRibbons, waterSheet, watersFor, worldGround, type CellRows, type LivingParams, type LivingPlan, type PlaceLook } from './scene/v14.ts';
 import type { WorldGround } from './relief.ts';
 import { freshOf, noise, type Waters } from './land.ts';
 import { GroundSort } from './sorting.ts';
 import { drawStone, drawWood, shedsWood, STONE_FINE, STONE_VARIANTS, WOOD, WOOD_SEEDS, woodLength } from './strewn.ts';
 import { drawDwelling, HOUSE_VARIANTS, houseSize, type HouseDetail } from '../people/dwellings.ts';
-import { LandUseMap, landUseMask, makeSettlement, type LandUse, type SettlementParams, type SettlementPlan } from '../people/settlement/v8.ts';
+import { LandUseMap, landUseMask, makeSettlement, waterNear, type LandUse, type SettlementParams, type SettlementPlan } from '../people/settlement/v9.ts';
 import { LaneGround } from '../people/settlement/lanes.ts';
 import { drawCrop, slotArchetype, sow, type CropParams } from '../people/crops.ts';
 import { buildFieldworks, type FieldTreeSpot } from '../people/fieldworks.ts';
@@ -347,7 +347,8 @@ export class SceneStream {
     if (spec.people) {
       // People keep their houses and fields out of a river's bed, dry in the month or not: its floods come down it.
       const water = (waters.paths?.some((p) => p.dry) ? waterLevels(waters, true) : levelAt) ?? (() => this.look.water);
-      this.people = makeSettlement(spec, this.ground, water, EXTENT, this.params.animals.routines);
+      // And they settled by fresh water, wet in the month or not: a river that ran some months was still where wells were dug.
+      this.people = makeSettlement(spec, this.ground, water, EXTENT, this.params.animals.routines, waterNear(waters, REACH));
       const use = new LandUseMap(this.people, this.ground, water, this.look.seed);
       this.landUse = use;
       this.crops = (spec.people.generator.params as unknown as SettlementParams).crops;
