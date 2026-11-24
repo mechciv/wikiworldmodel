@@ -137,16 +137,59 @@ export const politiesAt = (file: PolitiesFile, t: number): PolityRow[] => file.r
  */
 export const statesAt = (file: PolitiesFile, t: number, holding: ReadonlySet<string>): PolityRow[] => politiesAt(file, t).filter((r) => !r.claimedBy?.some((id) => holding.has(id)));
 
-/** Is a point inside a row's rings, by the even-odd rule? Degrees. */
+/** Is a point inside a row's rings, by the even-odd rule? Degrees, handling antimeridian crossings. */
 export function insideRow(r: PolityRow, lon: number, lat: number): boolean {
-  const x = lon * 100;
+  const nlon = ((((lon + 180) % 360) + 360) % 360) - 180;
+  const x0 = nlon * 100;
   const y = lat * 100;
+  const wrap = 36000;
+  const half = 18000;
   let inside = false;
   for (const ring of r.rings) {
+    if (ring.length < 6) continue;
+    let crosses = false;
     for (let i = 0, j = ring.length - 2; i < ring.length; j = i, i += 2) {
-      const yi = ring[i + 1];
-      const yj = ring[j + 1];
-      if (yi > y !== yj > y && x < ((ring[j] - ring[i]) * (y - yi)) / (yj - yi) + ring[i]) inside = !inside;
+      if (Math.abs(ring[i] - ring[j]) > half) {
+        crosses = true;
+        break;
+      }
+    }
+    if (!crosses) {
+      for (let i = 0, j = ring.length - 2; i < ring.length; j = i, i += 2) {
+        const yi = ring[i + 1];
+        const yj = ring[j + 1];
+        if (yi > y !== yj > y && x0 < ((ring[j] - ring[i]) * (y - yi)) / (yj - yi) + ring[i]) inside = !inside;
+      }
+      continue;
+    }
+    const n = ring.length >> 1;
+    const ux = new Float64Array(n);
+    ux[0] = ring[0];
+    let minX = ux[0];
+    let maxX = ux[0];
+    for (let k = 1; k < n; k++) {
+      let d = ring[k * 2] - ux[k - 1];
+      d -= wrap * Math.round(d / wrap);
+      ux[k] = ux[k - 1] + d;
+      if (ux[k] < minX) minX = ux[k];
+      if (ux[k] > maxX) maxX = ux[k];
+    }
+    if (Math.abs(ux[n - 1] - ux[0]) > half) {
+      for (let i = 0, j = ring.length - 2; i < ring.length; j = i, i += 2) {
+        const yi = ring[i + 1];
+        const yj = ring[j + 1];
+        if (yi > y !== yj > y && x0 < ((ring[j] - ring[i]) * (y - yi)) / (yj - yi) + ring[i]) inside = !inside;
+      }
+      continue;
+    }
+    for (const shift of [-wrap, 0, wrap]) {
+      const x = x0 + shift;
+      if (x < minX || x > maxX) continue;
+      for (let k = 0, p = n - 1; k < n; p = k++) {
+        const yi = ring[k * 2 + 1];
+        const yj = ring[p * 2 + 1];
+        if (yi > y !== yj > y && x < ((ux[p] - ux[k]) * (y - yi)) / (yj - yi) + ux[k]) inside = !inside;
+      }
     }
   }
   return inside;
@@ -213,7 +256,8 @@ export const gridSize = (res: number) => ({ nx: Math.round(360 / res), ny: Math.
 /** Where a point falls in the grid: its row, its column, and which of the file's cells that is, or −1. */
 export function cellAt(f: Pick<PeopleFile, 'res' | 'cell'>, lon: number, lat: number): { row: number; col: number; index: number } {
   const { nx, ny } = gridSize(f.res);
-  const col = Math.max(0, Math.min(nx - 1, Math.floor((lon + 180) / f.res)));
+  const nlon = ((((lon + 180) % 360) + 360) % 360);
+  const col = Math.min(nx - 1, Math.floor(nlon / f.res));
   const row = Math.max(0, Math.min(ny - 1, Math.floor((90 - lat) / f.res)));
   const place = row * nx + col;
   let lo = 0;
@@ -235,7 +279,7 @@ export function rangeAt(points: [number, number][], t: number): number | undefin
     const [t1, p1] = points[i];
     if (t <= t1) {
       const [t0, p0] = points[i - 1];
-      return p0 + ((p1 - p0) * (t - t0)) / (t1 - t0);
+      return t1 === t0 ? p1 : p0 + ((p1 - p0) * (t - t0)) / (t1 - t0);
     }
   }
   return points[points.length - 1][1];
@@ -243,6 +287,6 @@ export function rangeAt(points: [number, number][], t: number): number | undefin
 
 /** Where a density falls on the viewer's scale, from 0 to 1, in its logarithm: nothing below the scale. */
 export function levelOf(density: number, scale: PeopleHeader['scale']): number {
-  if (!(density > scale.lo)) return 0;
+  if (!(scale.lo > 0) || !(scale.hi > scale.lo) || !(density > scale.lo)) return 0;
   return Math.min(1, Math.log(density / scale.lo) / Math.log(scale.hi / scale.lo));
 }

@@ -129,6 +129,7 @@ export class EnergyBalance {
 
   /** What CO₂ at a partial pressure, bar, adds to the energy kept, W m⁻²: the same for each doubling. */
   forcing(co2: number): number {
+    if (!(co2 > 0) || !Number.isFinite(co2)) throw new RangeError(`CO₂ partial pressure must be finite and positive, got ${co2}`);
     return this.p.co2_per_doubling * Math.log2(co2 / this.p.co2_ref);
   }
 
@@ -191,13 +192,25 @@ export class EnergyBalance {
     const n = this.p.bands;
     let first = -1;
     let last = -1;
+    let warmCount = 0;
     for (let i = 0; i < n; i++)
       if (t[i] > this.p.ice_below) {
         if (first < 0) first = i;
         last = i;
+        warmCount++;
       }
     if (first < 0) return 0;
-    return (Math.abs(this.bounds[first]) + Math.abs(this.bounds[last + 1])) / 2;
+    if (warmCount === n) return 90;
+    // Polar caps (contiguous warm low-latitude band): report exact boundary latitude matching climlab.
+    if (warmCount === last - first + 1) return (Math.abs(this.bounds[first]) + Math.abs(this.bounds[last + 1])) / 2;
+    // Non-polar / equatorial ice belt (e.g. high obliquity): equivalent ice-free area latitude so frozen tropics never report 90°.
+    let warmW = 0;
+    let totalW = 0;
+    for (let i = 0; i < n; i++) {
+      totalW += this.weight[i];
+      if (t[i] > this.p.ice_below) warmW += this.weight[i];
+    }
+    return (Math.asin(Math.min(1, Math.max(0, warmW / totalW))) * 180) / Math.PI;
   }
 
   /** The mean over the globe, each band weighted by its area. */
@@ -226,7 +239,12 @@ export class EnergyBalance {
 
   /** Bisects, in the logarithm of CO₂, between a pressure that leaves the Earth frozen and one that does not. */
   private threshold(luminosity: number, [lo, hi]: [number, number], from: 'warm' | 'frozen', frozen: (b: Balance) => boolean): number {
-    const isFrozen = (co2: number) => frozen(this.balance(luminosity, this.forcing(co2), from));
+    const isFrozen = (co2: number) => {
+      const f = this.forcing(co2);
+      let b = this.balance(luminosity, f, from);
+      if (!b.settled) b = this.balance(luminosity, f, b.temp, 16000);
+      return frozen(b);
+    };
     if (!isFrozen(lo)) return 0;
     if (isFrozen(hi)) return Infinity;
     let a = Math.log(lo);

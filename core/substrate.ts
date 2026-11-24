@@ -185,9 +185,11 @@ const round = (x: number) => Math.round(x * 1000) / 1000;
 const isMaterial = (m: string): m is GroundMaterial => (GROUND_MATERIALS as readonly string[]).includes(m);
 const isMark = (m: string): m is GroundMark => (GROUND_MARKS as readonly string[]).includes(m);
 
+const ownGet = <T>(rec: Record<string, T> | undefined, key: string): T | undefined => (rec && Object.hasOwn(rec, key) ? rec[key] : undefined);
+
 /** What a lithology was laid down as, by the rule: by its own name, or its type's; undefined where neither says. */
 export function laidDownAs(lithology: string, type: string | undefined, rule: Pick<SubstrateRule, 'lithologies' | 'types'>): MaterialShares | undefined {
-  return rule.lithologies[lithology] ?? (type ? rule.types[type] : undefined);
+  return ownGet(rule.lithologies, lithology) ?? (type ? ownGet(rule.types, type) : undefined);
 }
 
 /**
@@ -209,7 +211,7 @@ function groundTally(rule: Pick<SubstrateRule, 'adjectives'>) {
       const told = new Set<string>();
       const once = (k: string) => !told.has(k) && !!told.add(k);
       for (const a of adjectives) {
-        const r = rule.adjectives[a];
+        const r = ownGet(rule.adjectives, a);
         if (!r) continue;
         if (r.colour && once(`colour ${r.colour}`)) add(colour, r.colour, w);
         if (r.mark && isMark(r.mark) && once(`mark ${r.mark}`)) add(mark, r.mark, w);
@@ -227,7 +229,7 @@ function groundTally(rule: Pick<SubstrateRule, 'adjectives'>) {
     made(): Pick<SceneSubstrate, 'materials' | 'colours' | 'marks'> | undefined {
       const total = [...material.values()].reduce((a, b) => a + b, 0);
       if (!total || !said) return undefined;
-      const sorted = <K extends string>(m: Map<K, number>, of: number): [K, number][] => [...m].map(([k, w]): [K, number] => [k, round(w / of)]).filter(([, w]) => w > 0).sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1));
+      const sorted = <K extends string>(m: Map<K, number>, of: number): [K, number][] => [...m].map(([k, w]): [K, number] => [k, round(w / of)]).filter(([, w]) => w > 0).sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
       return { materials: sorted(material, total), colours: sorted(colour, said), marks: sorted(mark, said) };
     },
   };
@@ -241,30 +243,38 @@ function groundTally(rule: Pick<SubstrateRule, 'adjectives'>) {
 export function substrateOfSites(sites: (RockSite & { km: number })[], index: Pick<RocksIndex, 'here_km' | 'lithologies' | 'source'>, rule: SubstrateRule): SceneSubstrate | undefined {
   const land = sites.filter((s) => s.classes.includes(rule.land_class));
   const here = land.filter((s) => s.km <= index.here_km);
-  const used = here.length ? here : land;
-  const tally = groundTally(rule);
-  const telling: (RockSite & { km: number })[] = [];
-  for (const s of used) {
-    let any = false;
-    for (const l of s.lithologies) {
-      const base = laidDownAs(l.name, index.lithologies[l.name], rule);
-      if (!base) continue;
-      any = true;
-      tally.add(base, l.adjectives, s.share / s.lithologies.length);
+  const run = (used: (RockSite & { km: number })[]) => {
+    const tally = groundTally(rule);
+    const telling: (RockSite & { km: number })[] = [];
+    for (const s of used) {
+      let any = false;
+      for (const l of s.lithologies) {
+        const base = laidDownAs(l.name, ownGet(index.lithologies, l.name), rule);
+        if (!base) continue;
+        any = true;
+        tally.add(base, l.adjectives, s.share / s.lithologies.length);
+      }
+      if (any) telling.push(s);
     }
-    if (any) telling.push(s);
+    return { made: tally.made(), telling };
+  };
+  let isHere = here.length > 0;
+  let { made, telling } = run(isHere ? here : land);
+  if (!made && isHere && land.length > here.length) {
+    isHere = false;
+    ({ made, telling } = run(land));
   }
-  const made = tally.made();
-  if (!made) return undefined;
+  if (!made || !telling.length) return undefined;
+  const km = isHere ? Math.max(...telling.map((s) => s.km)) : Math.min(...telling.map((s) => s.km));
   return {
-    tier: here.length ? 'evidence' : 'model',
+    tier: isHere ? 'evidence' : 'model',
     from: 'rocks',
-    weight: here.length ? 1 : rule.near_weight,
+    weight: isHere ? 1 : rule.near_weight,
     ...made,
     source: index.source,
     rows: telling.slice(0, 6).map((s) => `${index.source}#coll:${s.collection}`),
     sites: telling.length,
-    km: Math.round(telling[0].km),
+    km: Math.round(km),
   };
 }
 
@@ -289,7 +299,7 @@ export function soilAt(maps: GroundMaps, lat: number, lon: number): Record<SoilP
   if (!g || !maps.soil) return undefined;
   const k = cellOf(g, lat, lon) * 4;
   const [sand, silt, clay, coarse] = [maps.soil[k] / 2, maps.soil[k + 1] / 2, maps.soil[k + 2] / 2, maps.soil[k + 3] / 2];
-  return sand + silt + clay > 0 ? { sand, silt, clay, coarse } : undefined;
+  return sand + silt + clay + coarse > 0 ? { sand, silt, clay, coarse } : undefined;
 }
 
 /**
@@ -303,16 +313,16 @@ export function substrateOfSoil(maps: GroundMaps, rule: SubstrateRule, lat: numb
   const parts = rule.soil && soilAt(maps, lat, lon);
   if (!g || !parts || !rule.soil) return undefined;
   const fine = parts.sand + parts.silt + parts.clay;
-  const stones = Math.min(1, parts.coarse / 100);
+  const stones = fine > 0 ? Math.min(1, parts.coarse / 100) : 1;
   const material = new Map<GroundMaterial, number>();
   const add = (m: GroundMaterial, w: number) => material.set(m, (material.get(m) ?? 0) + w);
   add(rule.soil.coarse, stones);
-  for (const p of ['sand', 'silt', 'clay'] as const) add(rule.soil[p], ((1 - stones) * parts[p]) / fine);
+  if (fine > 0) for (const p of ['sand', 'silt', 'clay'] as const) add(rule.soil[p], ((1 - stones) * parts[p]) / fine);
   return {
     tier: 'model',
     from: 'soil',
     weight: 1,
-    materials: [...material].map(([m, w]): [GroundMaterial, number] => [m, round(w)]).filter(([, w]) => w > 0).sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1)),
+    materials: [...material].map(([m, w]): [GroundMaterial, number] => [m, round(w)]).filter(([, w]) => w > 0).sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0)),
     colours: [],
     marks: [],
     source: g.source,
@@ -328,8 +338,8 @@ export function substrateOfSoil(maps: GroundMaps, rule: SubstrateRule, lat: numb
 export function bedrockAt(maps: GroundMaps, rule: SubstrateRule, lat: number, lon: number): SceneBedrock | undefined {
   const g = maps.header.bedrock;
   if (!g || !maps.bedrock || !rule.bedrock) return undefined;
-  const c = g.classes[String(maps.bedrock[cellOf(g, lat, lon)])];
-  const read = c && rule.bedrock[c.code];
+  const c = ownGet(g.classes, String(maps.bedrock[cellOf(g, lat, lon)]));
+  const read = c && ownGet(rule.bedrock, c.code);
   if (!c || !read) return undefined;
   return { tier: 'model', from: 'map', code: c.code, label: c.label, ...(read.rock ? { rock: read.rock } : {}), field: g.field, source: g.source, ...(g.credit ? { credit: g.credit } : {}), ...(g.held ? { held: g.held } : {}) };
 }
@@ -347,15 +357,15 @@ export interface StrataOf {
  * says so only by its name: an ash was laid down as ash, and a lava, a granite or a schist as no loose ground.
  */
 export function unitLaidDownAs(lithology: string, said: { type: string; group: string; cls: string } | undefined, rule: SubstrateRule): MaterialShares | undefined {
-  const own = rule.lithologies[lithology];
+  const own = ownGet(rule.lithologies, lithology);
   if (own) return own;
   if (!said || !rule.strata || said.cls !== rule.strata.laid_class) return undefined;
-  return rule.groups?.[said.group] ?? rule.types[said.type];
+  return ownGet(rule.groups, said.group) ?? ownGet(rule.types, said.type);
 }
 
 /** The kind of rock a lithology of a unit is: by its name, by its type and group together, by its type, by its class. */
 export function unitRock(lithology: string, said: { type: string; group: string; cls: string } | undefined, rule: StrataRule): RockRead | undefined {
-  return rule.rocks.lithologies[lithology] ?? (said ? rule.rocks.groups[`${said.type} ${said.group}`] ?? rule.rocks.types[said.type] ?? rule.rocks.classes[said.cls] : undefined);
+  return ownGet(rule.rocks.lithologies, lithology) ?? (said ? ownGet(rule.rocks.groups, `${said.type} ${said.group}`) ?? ownGet(rule.rocks.types, said.type) ?? ownGet(rule.rocks.classes, said.cls) : undefined);
 }
 
 const whole = (u: StrataUnit) => u.lithologies.reduce((n, l) => n + l.share, 0);
@@ -419,9 +429,9 @@ export function groundOfStrata(column: StrataColumn, ageMa: number, of: StrataOf
       }
     }
     if (!kinds.size) return undefined;
-    const [kind, most] = [...kinds].sort((a, b) => b[1].share - a[1].share || (a[0] < b[0] ? -1 : 1))[0];
+    const [kind, most] = [...kinds].sort((a, b) => b[1].share - a[1].share || (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0))[0];
     const label = [...most.names]
-      .sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1))
+      .sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0))
       .filter(([, w], i) => i === 0 || w >= most.share / 4)
       .slice(0, 2)
       .map(([n]) => n)

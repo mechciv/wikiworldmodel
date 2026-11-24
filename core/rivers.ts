@@ -98,7 +98,13 @@ export interface ObservedRivers {
 }
 
 /** The key of the tile of `step` degrees a point falls in. */
-export const tileKey = (lon: number, lat: number, step: number) => `${Math.floor((Math.min(179.999, lon) + 180) / step)}_${Math.floor((90 - Math.max(-89.999, lat)) / step)}`;
+export const tileKey = (lon: number, lat: number, step: number) => {
+  const nlon = ((((lon + 180) % 360) + 360) % 360);
+  const i = Math.min(Math.ceil(360 / step) - 1, Math.floor(nlon / step));
+  const clat = Math.max(-90, Math.min(90, lat));
+  const j = Math.max(0, Math.min(Math.ceil(180 / step) - 1, Math.floor((90 - clat) / step)));
+  return `${i}_${j}`;
+};
 
 /** The rivers and lakes, as the tile set lists them. */
 export interface RiversInfo {
@@ -129,7 +135,10 @@ export interface RiverKey {
 }
 
 /** Whether a reach's bed holds water in a month, 1–12: always, where the keyframe does not say. */
-export const wetIn = (key: RiverKey, reach: number, month: number): boolean => !key.wet || ((key.wet[reach] >> (month - 1)) & 1) === 1;
+export const wetIn = (key: RiverKey, reach: number, month: number): boolean => {
+  if (!Number.isInteger(month) || month < 1 || month > 12) return false;
+  return !key.wet || ((key.wet[reach] >> (month - 1)) & 1) === 1;
+};
 
 /** A file of keyframes, read. */
 export function riverKeys(h: RiversKeysHeader, a: ArrayLike<unknown>[]): RiverKey[] {
@@ -158,6 +167,7 @@ export class RiverNet {
   readonly into: Int32Array;
   readonly plate?: Uint32Array;
   private lakeOf = new WeakMap<RiverKey, Map<number, number>>();
+  private lastWetOf = new WeakMap<RiverKey, Int32Array>();
 
   constructor(h: RiversNetworkHeader, a: ArrayLike<unknown>[]) {
     this.grid = h.grid;
@@ -200,9 +210,21 @@ export class RiverNet {
    */
   q(i: number, j: number, key: RiverKey): number {
     const end = key.q[i];
-    if (!end) return 0;
-    let last = this.start[i + 1] - 1;
-    while (last > j && !this.wet(last, key)) last--;
+    if (!end || !this.wet(j, key)) return 0;
+    let cache = this.lastWetOf.get(key);
+    if (!cache) {
+      cache = new Int32Array(this.count).fill(-2);
+      this.lastWetOf.set(key, cache);
+    }
+    let last = cache[i];
+    if (last === -2) {
+      const a = this.start[i];
+      last = this.start[i + 1] - 1;
+      while (last >= a && !this.wet(last, key)) last--;
+      cache[i] = last < a ? -1 : last;
+      last = cache[i];
+    }
+    if (last < 0) return 0;
     return (end * this.km2[j]) / Math.max(1e-6, this.km2[last]);
   }
 }

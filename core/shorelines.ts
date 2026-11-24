@@ -18,14 +18,20 @@ const METRES_PER_DEGREE = 6371000 * Math.PI / 180;
 export function shoresNear(shores: MappedShore[], t: number, at: { lat: number; lon: number }, reach: number): MappedShore[] {
   const dy = reach / METRES_PER_DEGREE;
   const dx = dy / Math.max(0.001, Math.cos(at.lat * Math.PI / 180));
-  return shores.filter(({ span, box }) => t >= span[0] && t < span[1] && at.lat >= box[1] - dy && at.lat <= box[3] + dy &&
-    [at.lon, at.lon - 360, at.lon + 360].some(lon => lon >= box[0] - dx && lon <= box[2] + dx));
+  const nlon = ((((at.lon + 180) % 360) + 360) % 360) - 180;
+  return shores.filter(({ span, box }) => {
+    if (!(t >= span[0] && t < span[1] && at.lat >= box[1] - dy && at.lat <= box[3] + dy)) return false;
+    if (dx >= 180) return true;
+    const b0 = box[0];
+    const b2 = box[2] < box[0] ? box[2] + 360 : box[2];
+    return [nlon, nlon - 360, nlon + 360].some((lon) => lon >= b0 - dx && lon <= b2 + dx);
+  });
 }
 
 export function mappedLake(shore: MappedShore, row: LayerRow, at: { lat: number; lon: number }, isoline: number): SceneLake {
   const east = METRES_PER_DEGREE * Math.cos(at.lat * Math.PI / 180);
   const rings = row.lines!.map(ring => ring.map((coord, i) => i % 2
     ? (coord / 100 - at.lat) * METRES_PER_DEGREE
-    : (((coord / 100 - at.lon + 540) % 360) - 180) * east));
+    : (((((coord / 100 - at.lon + 180) % 360) + 360) % 360) - 180) * east));
   return { key: shore.row, field: shore.field, level: shore.level - isoline, rings };
 }

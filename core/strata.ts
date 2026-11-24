@@ -194,8 +194,10 @@ export function strataColumns(file: StrataFile): StrataColumns {
         name: w(unitName),
         older,
         younger,
-        environments: environments.map((e) => environment[e]),
-        lithologies: lithologies.map(([l, share, ...attributes]): StrataLithology => ({ ...lithology[l], share: share / 1000, attributes: attributes.map(w) })),
+        environments: environments.flatMap((e) => (e >= 0 && e < environment.length ? [environment[e]] : [])),
+        lithologies: lithologies.flatMap(([l, share, ...attributes]): StrataLithology[] =>
+          l >= 0 && l < lithology.length ? [{ ...lithology[l], share: share / 1000, attributes: attributes.map(w) }] : [],
+        ),
       })),
     })),
   };

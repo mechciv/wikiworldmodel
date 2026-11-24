@@ -180,15 +180,56 @@ export function rangeShare(ageMa: number, r: Pick<ReliefRange, 'standingMa' | 's
   return clamp01((startMa - ageMa) / (startMa - r.standingMa));
 }
 
-/** Whether a point lies inside polygons of rings of [lon, lat], by the even-odd rule over every ring. */
+/** Whether a point lies inside polygons of rings of [lon, lat], by the even-odd rule over every ring, handling antimeridian crossings. */
 export function insideOutline(outline: number[][][][], lon: number, lat: number): boolean {
+  const nlon = ((((lon + 180) % 360) + 360) % 360) - 180;
   let inside = false;
   for (const poly of outline) {
     for (const ring of poly) {
+      if (ring.length < 3) continue;
+      let crosses = false;
       for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
-        const [xi, yi] = ring[i];
-        const [xj, yj] = ring[j];
-        if (yi > lat !== yj > lat && lon < ((xj - xi) * (lat - yi)) / (yj - yi) + xi) inside = !inside;
+        if (Math.abs(ring[i][0] - ring[j][0]) > 180) {
+          crosses = true;
+          break;
+        }
+      }
+      if (!crosses) {
+        for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+          const [xi, yi] = ring[i];
+          const [xj, yj] = ring[j];
+          if (yi > lat !== yj > lat && nlon < ((xj - xi) * (lat - yi)) / (yj - yi) + xi) inside = !inside;
+        }
+        continue;
+      }
+      const n = ring.length;
+      const ux = new Float64Array(n);
+      ux[0] = ring[0][0];
+      let minX = ux[0];
+      let maxX = ux[0];
+      for (let k = 1; k < n; k++) {
+        let d = ring[k][0] - ux[k - 1];
+        d -= 360 * Math.round(d / 360);
+        ux[k] = ux[k - 1] + d;
+        if (ux[k] < minX) minX = ux[k];
+        if (ux[k] > maxX) maxX = ux[k];
+      }
+      if (Math.abs(ux[n - 1] - ux[0]) > 180) {
+        for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+          const [xi, yi] = ring[i];
+          const [xj, yj] = ring[j];
+          if (yi > lat !== yj > lat && nlon < ((xj - xi) * (lat - yi)) / (yj - yi) + xi) inside = !inside;
+        }
+        continue;
+      }
+      for (const shift of [-360, 0, 360]) {
+        const x = nlon + shift;
+        if (x < minX || x > maxX) continue;
+        for (let i = 0, j = n - 1; i < n; j = i++) {
+          const yi = ring[i][1];
+          const yj = ring[j][1];
+          if (yi > lat !== yj > lat && x < ((ux[j] - ux[i]) * (lat - yi)) / (yj - yi) + ux[i]) inside = !inside;
+        }
       }
     }
   }
@@ -225,21 +266,29 @@ export function carriedReach(c: NonNullable<ReliefInfo['carried']>): number {
 export function carriedNear(c: NonNullable<ReliefInfo['carried']>, lat: number, lon: number, ageMa: number, reach: number): boolean {
   if (heldShare(ageMa, c) > 0) return true;
   const dLon = reachLon(reach, lat);
+  const nlon = ((((lon + 180) % 360) + 360) % 360) - 180;
   for (const r of c.ranges) {
     if (!(rangeShare(ageMa, r, c) > 0)) continue;
-    let west = Infinity;
-    let east = -Infinity;
-    let south = Infinity;
-    let north = -Infinity;
     for (const poly of r.outline) {
-      for (const [x, y] of poly[0] ?? []) {
-        if (x < west) west = x;
-        if (x > east) east = x;
+      const ring = poly[0] ?? [];
+      if (!ring.length) continue;
+      let south = Infinity;
+      let north = -Infinity;
+      let west = ring[0][0];
+      let east = ring[0][0];
+      let prevX = ring[0][0];
+      for (const [x, y] of ring) {
+        let dx = x - prevX;
+        dx -= 360 * Math.round(dx / 360);
+        const ux = prevX + dx;
+        prevX = ux;
+        if (ux < west) west = ux;
+        if (ux > east) east = ux;
         if (y < south) south = y;
         if (y > north) north = y;
       }
+      if (lat >= south - reach && lat <= north + reach && (dLon >= 180 || [nlon, nlon - 360, nlon + 360].some((x) => x >= west - dLon && x <= east + dLon))) return true;
     }
-    if (lat >= south - reach && lat <= north + reach && lon >= west - dLon && lon <= east + dLon) return true;
   }
   return false;
 }
@@ -294,7 +343,8 @@ export function turnOf(carry: (lat: number, lon: number) => [number, number], la
   const [la0, lo0] = carry(lat, lon);
   const [la1, lo1] = carry(lat + d, lon);
   const dy = (la1 - la0) * Math.sign(d);
-  const dx = ((((lo1 - lo0 + 540) % 360) - 180) * Math.cos((la0 * Math.PI) / 180)) * Math.sign(d);
+  const dlo = ((((lo1 - lo0 + 180) % 360) + 360) % 360) - 180;
+  const dx = dlo * Math.cos((la0 * Math.PI) / 180) * Math.sign(d);
   return Math.atan2(dx, dy);
 }
 
@@ -536,7 +586,7 @@ export class ShapeReader {
     this.lat = shape.at.lat;
     this.lon = shape.at.lon;
     this.ky = 1 / (earth * deg);
-    this.kx = 1 / (earth * cos(shape.at.lat * deg) * deg);
+    this.kx = 1 / (earth * Math.max(1e-6, cos(shape.at.lat * deg)) * deg);
     this.sin = sin(shape.turn);
     this.cos = cos(shape.turn);
   }

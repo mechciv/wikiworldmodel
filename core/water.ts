@@ -70,50 +70,64 @@ export function hamon(t: number, days: number, D: number, w: Pick<WaterParams, '
  */
 export function waterYear(t: ArrayLike<number>, p: ArrayLike<number>, latDeg: number, elevation: number, w: WaterParams, years = 5, snowOut?: number[], slowOut?: number[]): WaterYear {
   const tSnow = elevation > w.high_m ? w.t_snow_high : w.t_snow;
+  const tSpan = w.t_rain - tSnow;
   const D = MID.map((d) => daylight(latDeg, d, w));
-  let soil = w.soil_mm;
+  const maxYears = Math.max(years, 25);
+  let soil = Math.max(0, w.soil_mm);
   let snow = 0;
   let surplus = 0;
   let out: WaterYear = { precip: 0, pet: 0, aet: 0, runoff: 0 };
-  for (let y = 0; y < years; y++) {
+  const snowBuf = snowOut ? new Array<number>(12).fill(0) : undefined;
+  const slowBuf = slowOut ? new Array<number>(12).fill(0) : undefined;
+  for (let y = 0; y < maxYears; y++) {
+    const prevSoil = soil;
+    const prevSnow = snow;
+    const prevSurplus = surplus;
+    let yearSnowFall = 0;
     const year: WaterYear = { precip: 0, pet: 0, aet: 0, runoff: 0 };
     for (let m = 0; m < 12; m++) {
       const T = t[m];
       const P = Math.max(0, p[m]);
       // Snow below its threshold, rain above the rain's, and a share of each between them that falls as the temperature rises.
-      const snowShare = T <= tSnow ? 1 : T >= w.t_rain ? 0 : (w.t_rain - T) / (w.t_rain - tSnow);
+      const snowShare = T <= tSnow ? 1 : T >= w.t_rain || tSpan <= 0 ? 0 : (w.t_rain - T) / tSpan;
       const pSnow = P * snowShare;
       const pRain = P - pSnow;
       const direct = pRain * w.direct;
       snow += pSnow;
-      const melted = snow * (T <= tSnow ? 0 : Math.min(w.melt_max, ((T - tSnow) / (w.t_rain - tSnow)) * w.melt_max));
+      yearSnowFall += pSnow;
+      const meltFrac = T <= tSnow ? 0 : tSpan <= 0 ? w.melt_max : Math.min(w.melt_max, ((T - tSnow) / tSpan) * w.melt_max);
+      const melted = snow * meltFrac;
       snow -= melted;
-      if (snowOut && y === years - 1) snowOut[m] = snow;
+      if (snowBuf) snowBuf[m] = snow;
       const total = pRain - direct + melted;
       const pet = hamon(T, DAYS[m], D[m], w);
       let aet: number;
       if (total < pet) {
         // The soil gives up less as it dries.
-        const drawn = Math.min(soil, ((pet - total) * soil) / w.soil_mm);
+        const drawn = w.soil_mm > 0 ? Math.min(soil, ((pet - total) * soil) / w.soil_mm) : 0;
         soil -= drawn;
         aet = total + drawn;
       } else {
         aet = pet;
         soil += total - pet;
         if (soil > w.soil_mm) {
-          surplus += soil - w.soil_mm;
-          soil = w.soil_mm;
+          surplus += soil - Math.max(0, w.soil_mm);
+          soil = Math.max(0, w.soil_mm);
         }
       }
       const ran = surplus * w.rfactor;
       surplus -= ran;
-      if (slowOut && y === years - 1) slowOut[m] = ran;
+      if (slowBuf) slowBuf[m] = ran;
       year.precip += P;
       year.pet += pet;
       year.aet += aet;
       year.runoff += ran + direct;
     }
     out = year;
+    const snowSettled = Math.abs(snow - prevSnow) < 1e-4 || (yearSnowFall > 0 && Math.abs(snow - prevSnow - yearSnowFall) < 1e-6);
+    if (y + 1 >= years && Math.abs(soil - prevSoil) < 1e-4 && Math.abs(surplus - prevSurplus) < 1e-4 && snowSettled) break;
   }
+  if (snowOut && snowBuf) for (let m = 0; m < 12; m++) snowOut[m] = snowBuf[m];
+  if (slowOut && slowBuf) for (let m = 0; m < 12; m++) slowOut[m] = slowBuf[m];
   return out;
 }
