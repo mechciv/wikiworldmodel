@@ -40,10 +40,10 @@ export interface SitingParams {
   /**
    * fresh water: within `best` m of it a place lacks nothing; beyond, its worth falls off over `falloff` m, to `floor`,
    * where people dug wells or carried water; and on the banks of any water, a river's course, an old bend, a pond or a
-   * lake's shore, it keeps only 0.3 of that within `bank[0]` m and climbs back to the full by `bank[1]` m, for a river's
+   * lake's shore, it keeps only `bank[2]` of that within `bank[0]` m and climbs back to the full by `bank[1]` m, for a river's
    * floods and a still water's wet ground
    */
-  water: { best: number; falloff: number; floor: number; bank: [number, number] };
+  water: { best: number; falloff: number; floor: number; bank: [number, number, number] };
   /** level ground: the slope, as rise over run across `over` m, at which a place keeps `floor` of its worth */
   level: { over: number; steep: number; floor: number };
   /**
@@ -98,7 +98,7 @@ export const SITING: SitingParams = {
   spacing: 0.4,
   gap: 30,
   sharpness: 2,
-  water: { best: 900, falloff: 1500, floor: 0.3, bank: [60, 220] },
+  water: { best: 900, falloff: 1500, floor: 0.3, bank: [60, 220, 0.3] },
   level: { over: 60, steep: 0.12, floor: 0.25 },
   relief: { reach: 1000, best: 2, spread: 25, floor: 0.55 },
   soil: { scales: [5200, 1600], weight: 0.75 },
@@ -344,7 +344,7 @@ export class SiteWorth {
     if (this.near) {
       const d = this.near.at(x, y);
       const W = p.water;
-      water = (d <= W.best ? 1 : W.floor + (1 - W.floor) * Math.exp(-(d - W.best) / W.falloff)) * (0.3 + 0.7 * smooth(W.bank[0], W.bank[1], d));
+      water = (d <= W.best ? 1 : W.floor + (1 - W.floor) * Math.exp(-(d - W.best) / W.falloff)) * (W.bank[2] + (1 - W.bank[2]) * smooth(W.bank[0], W.bank[1], d));
     }
     let town = 1;
     for (const c of this.cities) {

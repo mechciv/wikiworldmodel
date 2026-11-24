@@ -261,22 +261,22 @@ params:
   # Where in its 5′ cell a settlement stands (settlement/sites.ts). Nobody recorded where; these say how the generator
   # weighs a place by what people looked for in one, none of it a claim about any place. Fresh water: within `best` m a
   # place lacks nothing, and its worth falls off past it over `falloff` m, to `floor` where people dug wells or carried
-  # water; the banks of any water, a river's flooded in a high year and a pond's or a lake's wet, are worth less, down
-  # to 0.3 of their worth within the first of `bank` m and back to the full by the second. Level ground keeps `floor` of
-  # its worth at a slope of `steep` across `over` m. A place a little up from the bottom of the ground about it, `best`
-  # m above the mean within `reach` m, is better than a crest or a wet bottom. The soil is a noise over the Earth at two
-  # scales, m. A town or a city draws settlements about it. A cell weighs `candidates` places for each of its
-  # settlements (the fewest and the most a cell weighs), takes them by worth raised to `sharpness` against chance, keeps
-  # them `spacing` of their mean spacing apart (and their houses `gap` m), and draws its settlements' sizes from its
-  # range, the smaller oftener by `sizes`. Settlements gather: one place in `per` of a cell's is one the others gather
-  # round, and a place's worth falls off with its distance from the nearest such, over `reach` of their mean spacing, to
-  # `floor`.
+  # water; the banks of any water, a river's flooded in a high year and a pond's or a lake's wet, keep only the third of
+  # `bank`'s numbers of their worth within the first of its m, and are back to the full by the second. Level ground
+  # keeps `floor` of its worth at a slope of `steep` across `over` m. A place a little up from the bottom of the ground
+  # about it, `best` m above the mean within `reach` m, is better than a crest or a wet bottom. The soil is a noise over
+  # the Earth at two scales, m. A town or a city draws settlements about it. A cell weighs `candidates` places for each
+  # of its settlements (the fewest and the most a cell weighs), takes them by worth raised to `sharpness` against
+  # chance, keeps them `spacing` of their mean spacing apart (and their houses `gap` m), and draws its settlements'
+  # sizes from its range, the smaller oftener by `sizes`. Settlements gather: one place in `per` of a cell's is one the
+  # others gather round, and a place's worth falls off with its distance from the nearest such, over `reach` of their
+  # mean spacing, to `floor`.
   siting:
     candidates: [10, 48, 6000]
     spacing: 0.4
     gap: 30
     sharpness: 2
-    water: { best: 900, falloff: 1500, floor: 0.3, bank: [60, 220] }
+    water: { best: 900, falloff: 1500, floor: 0.3, bank: [60, 220, 0.3] }
     level: { over: 60, steep: 0.12, floor: 0.25 }
     relief: { reach: 1000, best: 2, spread: 25, floor: 0.55 }
     soil: { scales: [5200, 1600], weight: 0.75 }
@@ -284,14 +284,17 @@ params:
     sizes: 1.2
     gather: { per: 8, reach: 0.5, floor: 0.05 }
   # How a settlement's fields spread over the land about it (settlement/sites.ts): over a grid of `cell` m, from its
-  # houses, through the ground least effort to reach and farm, until they are as large as its people farmed (the share of
-  # its cell's land its pattern gives), or until the walk to them passes `reach` times the radius of a disc as large as
-  # its fields and its houses' ground together; the walk starts at the houses' edge. Settlements within
-  # `margin` m beyond the scene's edge grow theirs too. The soil at the fields' own scale, m, moves the effort by `weight`,
-  # and `rough` varies it from node to node, so that a field's edge is ragged. A field spreads across the land's grain at
+  # houses, through the ground least effort to reach and farm, until they are as large as its people farmed (the share
+  # of its cell's land its pattern gives), or until the walk to them passes `reach` times the radius of a disc as large
+  # as its fields and its houses' ground together; the walk starts at the houses' edge. Settlements within `margin` m
+  # beyond the scene's edge grow theirs too. The soil at the fields' own scale, m, moves the effort by `weight`, and
+  # `rough` varies it from node to node, so that a field's edge is ragged. A field spreads across the land's grain at
   # `across` more effort than along it: the grain runs along the contours where the ground slopes more than `slope`,
-  # along the water within about `water` m of it, and elsewhere as a noise over the Earth at `scale` m turns it. Nobody
-  # recorded where any field ended.
+  # along the water within about `water` m of it, and elsewhere as a noise over the Earth at `scale` m turns it. By the
+  # water, the growth leaves unfarmed what lies within 15 m of it or less than 0.6 m above it, and farms with less ease
+  # what lies under 2.5 m above it (from 0.45 of the ease at 0.8 m); a paddy's ease rises toward the water instead, and
+  # pasture takes ground from 0.5 m up. These are the generator's, set in the code. Nobody recorded where any field
+  # ended.
   growth: { cell: 50, margin: 2500, reach: 2.4, soil: { scale: 900, weight: 0.85 }, rough: 0.35, grain: { across: 0.8, slope: 0.06, water: 900, scale: 9000 } }
   cities: { reach_km: 30, lot: 160, town_lot: 300, household: 6, city_from: 10000, most_houses: 12000, record_hold: 50, record_gap: 600 }
   # A town where nothing says how it was laid out: lanes that wander, and no wall. Where a tradition or a record says a
