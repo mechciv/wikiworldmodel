@@ -642,8 +642,13 @@ describe('the settlement generator', () => {
       const others = pb.settlements.map((s) => deg(b, s.x, s.y));
       for (const s of shared) {
         const [la, lo] = deg(a, s.x, s.y);
-        const best = Math.min(...others.map(([lb, ob]) => Math.hypot((la - lb) * 111194.93, (lo - ob) * 111194.93)));
+        const d = others.map(([lb, ob]) => Math.hypot((la - lb) * 111194.93, (lo - ob) * 111194.93));
+        const best = Math.min(...d);
         expect(best).toBeLessThan(2);
+        // And it is the same settlement: seeded alike, as large.
+        const o = pb.settlements[d.indexOf(best)];
+        expect(o.seed).toBe(s.seed);
+        expect(o.people).toBe(s.people);
       }
     }
   });
@@ -669,7 +674,8 @@ describe('where settlements stand, and what they farm (sites.ts)', () => {
     const other = makeSettlement(spec(p, b), { at: (x, y) => plain.at(x + bx, y + by) }, dry, EXTENT, undefined, { at: (x) => Math.abs(x + bx) });
     const shared = drawn.filter((s) => Math.abs(s.x - bx) < EXTENT - 2000 && Math.abs(s.y - by) < EXTENT - 2000 && Math.abs(s.x) < EXTENT - 2000 && Math.abs(s.y) < EXTENT - 2000);
     expect(shared.length).toBeGreaterThan(50);
-    const same = shared.filter((s) => other.settlements.some((o) => Math.hypot(o.x + bx - s.x, o.y + by - s.y) < 2)).length;
+    // The same settlement where it stands: seeded alike, whatever order the two scenes' grounds took their places in.
+    const same = shared.filter((s) => other.settlements.some((o) => Math.hypot(o.x + bx - s.x, o.y + by - s.y) < 2 && o.seed === s.seed)).length;
     // When this was written all of them did: 398 of 398.
     expect(same / shared.length).toBeGreaterThan(0.98);
   });
@@ -1113,6 +1119,8 @@ describe('the land worked beyond the scene', () => {
     // about a fifth.
     expect(Math.abs(mean(cityScenes) - mean(plains)) / mean(plains)).toBeLessThan(0.05);
     // And no one scene by much: a placement that let a city's fields in would move its own by a fifth.
+    // Each scene within 12%: this only keeps one scene from going far astray. A leak moves each by about 10%, which it
+    // would let through; the mean's bound above is what tells a leak apart.
     origins.forEach((_, k) => expect(Math.abs(cityScenes[k].scale - plains[k].scale) / plains[k].scale).toBeLessThan(0.12));
     // And the mean's bound tells a leak apart: with the city not known as one, its ground and fields are counted, and the
     // mean moves past it, by about a tenth when this was written. (Each scene moves about as much, within its own looser

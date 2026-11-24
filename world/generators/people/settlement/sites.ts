@@ -263,6 +263,8 @@ interface Candidate {
   y: number;
   key: number;
   cell: number;
+  /** its number among the places its cell weighs, fixed by the cell's seed: what a settlement standing there is seeded by */
+  k: number;
 }
 
 /**
@@ -366,7 +368,7 @@ export class SiteWorth {
  * a cell's edge shows no band. Were a full cell to stop keeping others away, its neighbours' places would crowd its
  * edge while its own did not.
  */
-export function siteCells(cells: SiteCell[], worth: SiteWorth, p: SitingParams): [number, number][][] {
+export function siteCells(cells: SiteCell[], worth: SiteWorth, p: SitingParams): [number, number, number][][] {
   // Each cell's places, weighed by their ground and by how crowded the cell is about them.
   const weighed: { x: number; y: number; w: number; k: number }[][] = cells.map((c) => {
     const out: { x: number; y: number; w: number; k: number }[] = [];
@@ -435,7 +437,7 @@ export function siteCells(cells: SiteCell[], worth: SiteWorth, p: SitingParams):
     for (const q of weighed[ci]) {
       const w = q.w * gathered(q.x, q.y);
       const draw = Math.max(1e-12, hash3(q.k, 3, 0x51e, c.seed));
-      cands.push({ x: q.x, y: q.y, key: Math.log(draw) / Math.pow(w, p.sharpness), cell: ci });
+      cands.push({ x: q.x, y: q.y, key: Math.log(draw) / Math.pow(w, p.sharpness), cell: ci, k: q.k });
     }
   });
   cands.sort((a, b) => b.key - a.key || a.cell - b.cell || a.x - b.x || a.y - b.y);
@@ -449,25 +451,29 @@ export function siteCells(cells: SiteCell[], worth: SiteWorth, p: SitingParams):
     });
   };
   const taken = new PointGrid(x0, y0, x1, y1, 256);
+  const takenK: number[] = [];
   const rest: Candidate[] = [];
   for (const c of cands) {
     if (blocked(taken, c, 1)) rest.push(c);
-    else taken.add(c.x, c.y, c.cell);
+    else {
+      takenK[taken.n] = c.k;
+      taken.add(c.x, c.y, c.cell);
+    }
   }
-  const out: [number, number][][] = cells.map(() => []);
+  const out: [number, number, number][][] = cells.map(() => []);
   const chosen = new PointGrid(x0, y0, x1, y1, 256);
   // How far each chosen settlement's houses spread: its size is the next of its cell's, as they are taken in turn.
   const reach: number[] = [];
-  const choose = (x: number, y: number, ci: number) => {
+  const choose = (x: number, y: number, ci: number, k: number) => {
     const c = cells[ci];
     reach[chosen.n] = Math.sqrt((c.sizes[out[ci].length] * c.lot) / Math.PI);
     chosen.add(x, y, ci);
-    out[ci].push([x, y]);
+    out[ci].push([x, y, k]);
   };
   for (let i = 0; i < taken.n; i++) {
     const ci = taken.tag[i];
     if (out[ci].length >= cells[ci].sizes.length) continue;
-    choose(taken.xs[i], taken.ys[i], ci);
+    choose(taken.xs[i], taken.ys[i], ci, takenK[i]);
   }
   // Whether a settlement of a cell's next size would keep its ground, a disc as large as its houses' lots, its gap from
   // every other settlement's there. A layout may spread its houses a little past that disc (layOut), and no further check
@@ -496,14 +502,14 @@ export function siteCells(cells: SiteCell[], worth: SiteWorth, p: SitingParams):
         left.push(c);
         continue;
       }
-      choose(c.x, c.y, c.cell);
+      choose(c.x, c.y, c.cell, c.k);
       widest = Math.max(widest, own);
     }
     for (const c of left) {
       if (!short(c.cell)) continue;
       const own = room(c);
       if (own < 0) continue;
-      choose(c.x, c.y, c.cell);
+      choose(c.x, c.y, c.cell, c.k);
       widest = Math.max(widest, own);
     }
   }

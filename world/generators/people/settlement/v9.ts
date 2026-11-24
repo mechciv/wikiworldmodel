@@ -817,7 +817,7 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
       weighed += c.site.sizes[n] / c.site.crowd(x, y);
     });
     const even = weighed > 0 ? held / weighed : 1;
-    places[ci].forEach(([x, y], n) => {
+    places[ci].forEach(([x, y, k], n) => {
       const size = c.site.sizes[n];
       const r = Math.sqrt((size * c.lot) / PI);
       const fieldR = Math.sqrt(r * r + (c.pp.fields * size * perHouse * even) / c.site.crowd(x, y) / PI);
@@ -830,7 +830,9 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
       }
       // A house stands in its yard where it is not on the lots of a town's streets.
       const form = formOf(c.life.pattern, t, c.found?.kin, 1, town && c.lot <= p.towns.open_lot ? undefined : c.lot);
-      const own = seedOf(hash3(n, c.gr, c.gc, c.seed));
+      // Seeded by its place, which its cell's seed fixes, not by its rank among the places taken, which their worth decides
+      // and two scenes' grounds may order a little differently.
+      const own = seedOf(hash3(k, c.gr, c.gc, c.seed ^ 0x51d));
       const s = settlements.push({ x, y, r, fieldR, pattern: c.life.pattern, fields: c.life.fields, houses: 0, people: size * c.household, anthrome: c.k, region: c.region, form, tier: c.life.tier, seed: own }) - 1;
       const first = houses.length;
       layOut(settlements[s], s, size, c.lot, own, t, town, (gw) => formOf(c.life.pattern, t, c.found?.kin, gw));

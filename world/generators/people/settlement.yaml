@@ -118,6 +118,14 @@ limits:
       would place them, is weighed as if it had no water near.
       A cell whose ground has no room for all its settlements' houses, as a narrow valley between steep slopes may not,
       leaves its last and smallest settlements out: their people are not drawn.
+      A settlement is seeded by its place, fixed by its cell, but its size by the rank of its place's worth among the
+      cell's: where two places are worth all but the same, two scenes whose ground differs a little may give them each
+      other's sizes.
+  - note: >-
+      Every build is drawn with this version's siting and fields, whatever version made it: a build made before version 9
+      has no `siting` or `growth`, and takes the record's. A link into such a build finds its settlements and fields
+      where version 9 puts them, not where that build first drew them. Whether to keep each version's placement for its
+      own builds is a maintainer's decision, still open.
   - with: gen:life/scene
     note: >-
       The ground and the water a settlement is weighed by are the scene's, and two scenes that overlap draw them a little
