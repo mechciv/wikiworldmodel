@@ -69,7 +69,10 @@ export interface GrowthParams {
   /** the side of the grid the fields grow over, m; and how far past the scene's edge settlements are weighed for theirs */
   cell: number;
   margin: number;
-  /** the longest walk to a field, as a share of the radius of a disc as big as the settlement's fields and houses */
+  /**
+   * the longest walk to a field, in effort, as a share of the radius of a disc as big as the settlement's fields and houses
+   * with its houses' own ground added again: the walk starts at the edge of its houses, not at its middle
+   */
   reach: number;
   /** the better and the worse soils at the fields' own scale, m, and how far that moves the effort of farming a place */
   soil: { scale: number; weight: number };

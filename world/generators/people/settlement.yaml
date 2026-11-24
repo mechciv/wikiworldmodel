@@ -261,7 +261,7 @@ params:
     gather: { per: 8, reach: 0.5, floor: 0.05 }
   # How a settlement's fields spread over the land about it (settlement/sites.ts): over a grid of `cell` m, from its
   # houses, through the ground least effort to reach and farm, until they are as large as its people farmed (the share of
-  # its cell's land its pattern gives) or `reach` times the radius of a disc that large is walked. Settlements within
+  # its cell's land its pattern gives) or `reach` times the radius of a disc that large, and its houses' ground again (the walk starts at their edge), is walked. Settlements within
   # `margin` m beyond the scene's edge grow theirs too. The soil at the fields' own scale, m, moves the effort by `weight`,
   # and `rough` varies it from node to node, so that a field's edge is ragged. A field spreads across the land's grain at
   # `across` more effort than along it: the grain runs along the contours where the ground slopes more than `slope`,

@@ -847,10 +847,16 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
     drawnSources.push({ starts, r: s.r, x: s.x, y: s.y, area: PI * s.fieldR * s.fieldR, use: s.fields, settlement: si });
   });
   const fieldGrid = growFields([...drawnSources, ...sources], ground, water, near, earth, G, margin, seedOf(hash2(0x50, 0x12, 0x5017)));
-  // Which settlement farms a place, if any: its place in the plan, -1 nobody, -2 one beyond the scene.
-  const farmedBy = (x: number, y: number): number => {
+  // Whether a place is well inside a settlement's own fields: the node nearest it and those about it all its own, so
+  // that the fields are drawn there whole (LandUseMap reads the nodes about a place, its edge a little moved).
+  const inOwnFields = (x: number, y: number, si: number): boolean => {
     const k = nodeOf(fieldGrid, x, y);
-    return k < 0 ? -1 : fieldGrid.owner[k];
+    if (k < 0) return false;
+    const n = fieldGrid.nx;
+    const i = k % n;
+    if (i < 1 || i >= n - 1 || k < n || k >= fieldGrid.owner.length - n) return false;
+    for (let dj = -n; dj <= n; dj += n) for (let di = -1; di <= 1; di++) if (fieldGrid.owner[k + dj + di] !== si) return false;
+    return true;
   };
   // A spot before a house: `out` metres clear of its front wall, and `across` of its width (and `more` metres) to one
   // side of its door. A house's front faces the way it is turned, and its length runs that way (dwellings.ts).
@@ -1751,8 +1757,8 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
           const x = s.x + Math.sin(a) * rr;
           const y = s.y + Math.cos(a) * rr;
           if (!fit(x, y) || !clearOfHouses(x, y, -1, 4) || laneAvoid?.near(x, y, 2.5)) continue;
-          // Work goes on in the settlement's own fields, where they spread.
-          if (farmedBy(x, y) !== si) continue;
+          // Work goes on well inside the settlement's own fields, where they are drawn whole, and not at their ragged edge.
+          if (!inOwnFields(x, y, si)) continue;
           const at = plotAt(x, y, pStyle);
           if (at.edge < 3.5) continue;
           const slot = palette.slots[plotSlotIndex(at.pick, palette)];
