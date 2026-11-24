@@ -45,7 +45,7 @@ import { insideRow, politiesAt, type PeopleFile, type PolitiesFile } from '../..
 import type { HousingCount } from '../../../../core/landscape.ts';
 import type { AtlasBin } from '../../../../core/atlas.ts';
 import { fieldFor, fieldLods, loadBlocks, loadRelief, loadSnapshots, paleoElevation, sliceField, SRC_H, SRC_W, tileGrid, timeBins, type GridField } from './fields.ts';
-import { buildCity } from './city.ts';
+import { buildCities } from './city.ts';
 import { climateGrid, climateKeyframes, encodeClimate, forestChecks, heightOn, monthsFiles, monthsKeyframes, partClasses, partsFiles, waterParamsOf, type ClimateKeyframe, type PartRead, type WaterOptions } from './climate.ts';
 import { MONTHS_PARTS, MonthsTile, PARTS, PartsTile, partsFile, tilesNear, type MonthsInfo, type MonthsPart, type MonthsSet, type MonthsTileHeader, type PartInfo, type PartsTileHeader } from '../../../../core/months.ts';
 import { monthsPlace, placeMonths } from '../../../../world/generators/life/climate.ts';
@@ -898,10 +898,11 @@ export async function runBuild(args: string[]): Promise<number> {
     ice = await buildIce(world, iceField, present, plateIndex, log);
     put('ice.lwt', ice.bytes);
   }
-  const city = await buildCity(solved, log);
-  if (city) {
-    for (const [path, bytes] of city.blobs) put(path, bytes);
-    put(`city/${city.file.site.id}.json`, stableStringify(city.file));
+  // Every city a map of the world is of: its records, building by building, which a living scene near it draws.
+  const cities = await buildCities(solved, log);
+  for (const c of cities) {
+    for (const [path, bytes] of c.blobs) put(path, bytes);
+    put(`city/${c.file.site.id}.json`, stableStringify(c.file));
   }
   // The outline's check of the biomes, and how much of the world rests on what.
   const coverageFile = coverage(world, wanted, allFeatures, tiles);
@@ -1054,9 +1055,11 @@ export async function runBuild(args: string[]): Promise<number> {
   let atlasFile: string | undefined;
   let lifeAtlas: ReturnType<typeof buildAtlas> = undefined;
   let seaAtlas: SeaOut | undefined;
-  if (city) {
-    const v = (world.generators.find((g) => g.id === 'gen:rome/fabric')!.params as unknown as { site: Pick<SiteInfo, 'near' | 'window' | 'view'> }).site;
-    sites.push({ kind: 'city', id: city.file.site.id, label: city.file.site.label, file: `city/${city.file.site.id}.json`, place: 'places/rome', origin: city.file.site.origin, span: city.file.site.span, slice: city.file.site.slice, near: v.near, window: v.window, view: v.view });
+  for (const c of cities) {
+    // A map's way in, from its dataset's site: where a link to the city lands.
+    const site = Object.values(world.manifest.datasets).find((d) => d.import?.site?.id === c.file.site.id)!.import!.site!;
+    const f = c.file.site;
+    sites.push({ kind: 'city', id: f.id, label: f.label, file: `city/${f.id}.json`, place: f.settlement, origin: f.origin, span: f.span, slice: (f.span[0] + f.span[1]) / 2, near: site.near ?? f.span, window: site.window ?? f.span, view: site.view ?? { x: 0, y: 0, range: 1500, heading: 0, tilt: 60 } });
   }
   if (climateKeys.length && biomeField) {
     const elevation = paleoElevation(grids)!;
@@ -1227,7 +1230,7 @@ export async function runBuild(args: string[]): Promise<number> {
     timeRange: span,
     lods: lods.map((l) => ({ lod: l.lod, step: l.step, cell: [l.cells[0][2] - l.cells[0][0], l.cells[0][3] - l.cells[0][1]], binsMa: l.binsMa })),
     tiles,
-    files: { frames: 'frames.json', periods: 'periods.json', search: 'search.json', records: 'records/', coverage: 'coverage.json', series: 'series.json', planet: 'planet.json', territory: 'territory.json', city: city ? `city/${city.file.site.id}.json` : undefined, climate: climateKeys.length ? 'climate.lwt' : undefined, ice: ice ? 'ice.lwt' : undefined, tree: 'tree.json', ...(present ? { present: 'present.json' } : {}), ...(hazards ? { hazards: 'hazards.json' } : {}), ...(polities ? { polities: 'polities.json' } : {}), ...(overlays ? { overlays: 'overlays.json' } : {}), ...(people ? { people: 'people.lwt' } : {}), ...(atlasFile ? { atlas: atlasFile } : {}), ...(seaAtlas ? { sea: 'life/sea.json' } : {}), ...(rocks ? { rocks: 'rocks/index.json' } : {}), ...(substrateRule ? { substrate: 'substrate.json' } : {}), ...(ground ? { ground: 'ground.lwt' } : {}), ...(strata ? { strata: 'strata.lwt' } : {}), ...(landscape ? { landscape: 'people/landscape.json' } : {}), ...(reliefInfo ? { relief: 'relief/index.json' } : {}), features: FEATURE_INDEX },
+    files: { frames: 'frames.json', periods: 'periods.json', search: 'search.json', records: 'records/', coverage: 'coverage.json', series: 'series.json', planet: 'planet.json', territory: 'territory.json', city: cities[0] ? `city/${cities[0].file.site.id}.json` : undefined, climate: climateKeys.length ? 'climate.lwt' : undefined, ice: ice ? 'ice.lwt' : undefined, tree: 'tree.json', ...(present ? { present: 'present.json' } : {}), ...(hazards ? { hazards: 'hazards.json' } : {}), ...(polities ? { polities: 'polities.json' } : {}), ...(overlays ? { overlays: 'overlays.json' } : {}), ...(people ? { people: 'people.lwt' } : {}), ...(atlasFile ? { atlas: atlasFile } : {}), ...(seaAtlas ? { sea: 'life/sea.json' } : {}), ...(rocks ? { rocks: 'rocks/index.json' } : {}), ...(substrateRule ? { substrate: 'substrate.json' } : {}), ...(ground ? { ground: 'ground.lwt' } : {}), ...(strata ? { strata: 'strata.lwt' } : {}), ...(landscape ? { landscape: 'people/landscape.json' } : {}), ...(reliefInfo ? { relief: 'relief/index.json' } : {}), features: FEATURE_INDEX },
     rivers: riversInfo,
     months: monthsInfo,
     climates: recentClimates.length

@@ -9,9 +9,19 @@ import type { CityFile, CityStructure } from '../../../core/city.ts';
 import { cellBox, CELL } from '../../../world/generators/city/cells.ts';
 import type { LocalRenderer, MeshHandle } from '../gl/renderer.ts';
 import type { V3 } from '../mat.ts';
-import type { Cell, CellMessage } from './cellscene.ts';
 import type { LocalView } from './view.ts';
 import type { FromWorker, ToWorker } from './worker.ts';
+
+/** A cell of the city's grid, with its meshes at the details made so far. */
+interface Cell {
+  key: number;
+  box: [number, number, number, number];
+  coarse?: MeshHandle;
+  fine?: MeshHandle;
+  /** a request is out for this detail */
+  asked: [boolean, boolean];
+  usedAt: number;
+}
 
 /** Within this distance of the eye a cell is drawn finely. */
 const FINE_DISTANCE = 620;
@@ -112,7 +122,7 @@ export class StructureLayer {
     return i >= 0 ? this.first + i : undefined;
   }
 
-  private received(m: Extract<FromWorker, { type: 'cell' }> | CellMessage): void {
+  private received(m: Extract<FromWorker, { type: 'cell' }>): void {
     this.inflight--;
     const c = this.cells.get(m.key);
     if (c) {

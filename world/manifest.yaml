@@ -787,7 +787,28 @@ datasets:
       how: >-
         Licence read on openhistoricalmap.org/copyright. Exported from
         overpass-api.openhistoricalmap.org with the query in the snapshot's own `query` field.
-    import: { as: ohm-site, frame: "frame:paleomap/plate-307" }
+    import:
+      as: ohm-site
+      frame: "frame:paleomap/plate-307"
+      # The city this map is of: a living scene near it draws its records building by building, among the settlement
+      # generator's houses, on its surveyed ground (docs/plans/CITIES.md, decisions 1 and 10).
+      site:
+        id: rome
+        label: Rome
+        settlement: places/rome
+        # Near the Forum: the point the city's metres are laid out about.
+        origin: { lat: 41.8925, lon: 12.4853 }
+        # TINITALY in UTM zone 32 for the city, SRTM for the hills about it, ETOPO for the region.
+        ground: { city: src:tinitaly-1.1-w46075, utm_zone: 32, hills: [src:srtm-gl1-n41e012, src:srtm-gl1-n42e012], region: [src:etopo-2022-n45e000, src:etopo-2022-n45e015] }
+        # The Tiber's surface at low water, today's value, in metres above sea level: a choice.
+        water_level: 7
+        # When a scene draws its records: from the first settlement to the present.
+        span: [-1000, 1950]
+        # A visit in these years keeps the time shown; the window it opens on; and the way in, from the south-east,
+        # over the Colosseum towards the Forum.
+        near: [-200, 700]
+        window: [-800, 1200]
+        view: { x: 240, y: -60, range: 1500, heading: 302, tilt: 66 }
     fetch:
       url: repo:world/snapshots/ohm-rome-2026-11-01.json
       sha256: 1b9fb1ba677e88a09035aeee16062f8d69c16da23925a56d66cfe5cce9e20131

@@ -43,9 +43,7 @@ import type { PeopleSummary } from './city/lifeworker.ts';
 import { LandscapeAtlas } from './city/landscape.ts';
 import { anthromeOf, classAtStep, kmBetween, nearestStep, PATTERN_LABEL, USE_LABEL, USES, LEVEL_WORDS, type Pattern } from '../../core/landscape.ts';
 import { lifewayText, outbuildingsText, specText, townText, prevalenceOf, traditionsFor } from '../../core/dwelling.ts';
-import { CityScene } from './city/scene.ts';
 import { autoTilt, EYE_HEIGHT, groundHit, localView, lookThrough, projectLocal, rayOf, sunAt, underSea, type LocalView } from './city/view.ts';
-import { CityRenderer } from './gl/city.ts';
 import { SEA } from './gl/cityShaders.ts';
 import { CityLabels } from './ui/citylabels.ts';
 import { FeatureTiles } from './features.ts';
@@ -150,12 +148,10 @@ const LIFE_TOP = 3.2e5;
 const LOCAL_TOP = 8e4;
 const GLOBE_GONE = 4.5e4;
 /**
- * How far round a city with a scene of its own the ground is that city's, and round a place with one: nearer than this
- * the view comes down into its scene, and past it into the scene of wherever the camera is. A city's reach is past that
- * of the lists' cities a scene of anywhere draws (the settlement generator's cities.reach_km), so that no scene draws a
- * city in generic houses beside the one drawn building by building.
+ * How far round a place with a scene of its own the ground is that place's: nearer than this the view comes down into
+ * its scene, and past it into the scene of wherever the camera is. A city has no scene of its own: the scene of where
+ * the camera is draws its records (docs/plans/CITIES.md, decision 1).
  */
-const CITY_REACH = 6e4;
 const PLACE_REACH = 15e3;
 /**
  * How far from a city's point a living scene draws its records: a scene reaches 16 km from its own point
@@ -560,12 +556,12 @@ async function start(root: HTMLElement): Promise<void> {
   /** The city whose records a scene about a place and time draws: within its reach and its span. */
   const bundleNear = (at: { lat: number; lon: number }, t: number): SiteInfo | undefined =>
     bundles.find((b) => t >= b.span[0] && t <= b.span[1] && distanceFrom(b, at.lat, at.lon) < BUNDLE_REACH);
-  const scenes = new Map<string, CityScene | LifeScene>();
+  const scenes = new Map<string, LifeScene>();
   const loadingScenes = new Map<string, Promise<void>>();
   /** Scenes that could not be made, and why, said while the camera is at them. */
   const failedScenes = new Map<string, string>();
   let site: SiteInfo | undefined;
-  let city: CityScene | LifeScene | null = null;
+  let city: LifeScene | null = null;
   let labelledSite: string | null = null;
   // Anywhere else on land, at any time the atlas covers: a scene the browser makes as it is wanted.
   const lifeAtlas = build.atlas ? new LifeAtlas(build, build.atlas, () => (climateData && climateRule ? { data: climateData, rule: climateRule } : null), build.atlas.generator, build.planet, build.model, coastOf) : null;
@@ -801,7 +797,7 @@ async function start(root: HTMLElement): Promise<void> {
   }
   const siteDistance = (lat: number, lon: number) => (site ? distanceFrom(site, lat, lon) : Infinity);
   /** Is a view over a place that has its own scene: within the ground that is the place's? */
-  const isOver = (s: SiteInfo, at: { lat: number; lon: number }) => distanceFrom(s, at.lat, at.lon) < (s.kind === 'city' ? CITY_REACH : PLACE_REACH);
+  const isOver = (s: SiteInfo, at: { lat: number; lon: number }) => distanceFrom(s, at.lat, at.lon) < PLACE_REACH;
   /** The site a view is at. */
   function siteFor(t: number, cam: ViewState['cam']): SiteInfo | undefined {
     const within = (list: SiteInfo[], reach: number) => list.map((s) => ({ s, d: distanceFrom(s, cam.lat, cam.lon) })).filter((x) => x.d < reach).sort((a, b) => a.d - b.d)[0]?.s;
@@ -819,10 +815,9 @@ async function start(root: HTMLElement): Promise<void> {
     site = siteFor(t, cam);
     city = site ? scenes.get(site.id) ?? null : null;
   }
-  /** Is this somewhere a scene can be made? Not over a city that has a scene of its own, and its own way down. */
+  /** Is this somewhere a scene can be made? Anywhere the atlas reaches: a city with records is drawn in it too. */
   function canDrawLife(t: number, cam: ViewState['cam']): boolean {
     if (!lifeAtlas) return false;
-    if (sites.some((s) => s.kind === 'city' && t >= s.span[0] && t <= s.span[1] && isOver(s, cam))) return false;
     return lifeAtlas.canDraw(t, cam.lat, cam.lon);
   }
   /**
@@ -1355,13 +1350,6 @@ async function start(root: HTMLElement): Promise<void> {
     const enter = !!site && !made && !inCity && !flight && state.cam.dist < 2.2 && siteDistance(state.cam.lat, state.cam.lon) < 1.5e6 && !awayFromSite();
     cityEnter.hidden = !enter;
     if (enter) cityEnter.textContent = `Fly down into ${site!.label}, ${formatTime(site!.slice)}`;
-    if (inCity && site!.kind === 'city') {
-      const slice = site!.slice;
-      const why = state.t < -200 || state.t > 700 ? `${site!.label}'s ordinary housing is generated for ${formatTime(slice)}; what stands here at this date is only what the records and the map date to it.` : '';
-      if (why && notice.textContent !== why) notice.textContent = why;
-      notice.hidden = !why;
-    }
-
     lightGroup();
     treePanel.update({ t: state.t, window: state.window, scenario: scenario(), selected: state.sel });
     const nowTotals = new Map<number, Quat>();
@@ -1797,11 +1785,9 @@ async function start(root: HTMLElement): Promise<void> {
   async function makeScene(s: SiteInfo): Promise<void> {
     try {
       const fast = state.quality === 'fast';
-      const scene = s.kind === 'life' ? await (async () => {
-        const f = await getJSON<SceneFileV2>(build.base + s.file);
-        if (f.format !== 'lightworld-scene-file@2') throw new Error(`its file is in a format this viewer does not read (${f.format ?? 'none'}): the build is older than the viewer`);
-        return LifeScene.create(gl!, f.spec, f.print, { fast });
-      })() : new CityScene(await CityRenderer.create(gl!, { fast }), build, s.file, { fast });
+      const f = await getJSON<SceneFileV2>(build.base + s.file);
+      if (f.format !== 'lightworld-scene-file@2') throw new Error(`its file is in a format this viewer does not read (${f.format ?? 'none'}): the build is older than the viewer`);
+      const scene = await LifeScene.create(gl!, f.spec, f.print, { fast });
       scene.onChange = () => (dirty = true);
       await scene.load();
       scenes.set(s.id, scene);
@@ -2351,20 +2337,6 @@ async function start(root: HTMLElement): Promise<void> {
         const where = city.spec.site.place ? `drawn where ${site!.label} stood` : 'drawn for this place and time';
         return inspect.showGenerated(city.spec.site.place ? 'The floodplain' : 'The land here', 'Generated ground', `A land ${where}. Its rivers, ponds and glades are invented, so that what lived here has somewhere to stand. Where the climate field reads the land at ${b.ageMa} Ma, it is ${b.label.toLowerCase()}, and the transitions allow forest over ${Math.round(b.cover.forests * 100)}% of it and grass over ${Math.round(b.cover.grasses * 100)}%.`, `${made}: no bend of this river was recorded. Only the land it lies in comes from the world, from the elevation field beyond its edge.`);
       }
-      const found = city!.pick(px, py);
-      if (found.structure) return setState({ sel: found.structure.id });
-      setState({ sel: null });
-      shownRecord = null;
-      if (found.lot !== undefined) {
-        const reg = city.file.fabric.regions[city.lotRegion[found.lot]];
-        const kind = city.lotType[found.lot];
-        const words = kind === 0 ? 'A block of apartments and shops' : kind === 1 ? 'A town house' : 'A house outside the walls';
-        return inspect.showGenerated(words, 'Generated building', `In ${reg?.label ?? 'the city'}. Nothing is known of this building: the generator placed it here so that the city stands around its monuments.`, `${city.file.fabric.generator}, version ${city.file.fabric.version}, seed "${city.file.fabric.seed}": its streets and lots are invented, and only how densely it builds each region comes from the world, from what the Regionary Catalogues count there.`);
-      }
-      if (found.tree) return inspect.showGenerated('A tree', 'Generated', 'Trees are placed by the generator in the mapped gardens and across the open country. No one recorded this one.', `${city.file.fabric.generator}, version ${city.file.fabric.version}.`);
-      if (found.crowd) return inspect.showGenerated('A passer-by', 'Generated', 'Figures to give the streets and squares their scale. Nobody in particular.', `${city.file.fabric.generator}, version ${city.file.fabric.version}.`);
-      inspect.hide();
-      return;
     }
     const row = hazards.pick(x, y);
     if (row) {

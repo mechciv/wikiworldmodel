@@ -44,7 +44,34 @@
             "type": "object",
             "description": "A snapshot of a database whose elements become records",
             "required": ["as"],
-            "properties": { "as": { "enum": ["ohm-site", "pbdb-formation", "pbdb-land"] }, "frame": { "type": "string" } },
+            "properties": {
+              "as": { "enum": ["ohm-site", "pbdb-formation", "pbdb-land"] },
+              "frame": { "type": "string" },
+              "site": {
+                "type": "object",
+                "description": "For a map of a city (ohm-site): the settlement it maps, whose records a living scene draws building by building on the city's surveyed ground (docs/plans/CITIES.md, decisions 1 and 10); the point its metres are laid out about; the surveys of its ground, finest first; the level of its mapped water; the years a scene draws it for; and the way in to it",
+                "required": ["id", "label", "settlement", "origin", "ground", "water_level", "span"],
+                "properties": {
+                  "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+                  "label": { "type": "string" },
+                  "settlement": { "type": "string" },
+                  "origin": { "type": "object", "required": ["lat", "lon"], "properties": { "lat": { "type": "number" }, "lon": { "type": "number" } }, "additionalProperties": false },
+                  "ground": {
+                    "type": "object",
+                    "description": "The datasets of each grid: the city's (a survey in UTM, with its zone), the hills' and the region's",
+                    "required": ["city", "utm_zone", "hills", "region"],
+                    "properties": { "city": { "type": "string" }, "utm_zone": { "type": "integer" }, "hills": { "type": "array", "items": { "type": "string" } }, "region": { "type": "array", "items": { "type": "string" } } },
+                    "additionalProperties": false
+                  },
+                  "water_level": { "type": "number", "description": "The level of its mapped water, m: a choice, which says what it is" },
+                  "span": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 },
+                  "near": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 },
+                  "window": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 },
+                  "view": { "type": "object", "required": ["x", "y", "range", "heading", "tilt"], "properties": { "x": { "type": "number" }, "y": { "type": "number" }, "range": { "type": "number" }, "heading": { "type": "number" }, "tilt": { "type": "number" } }, "additionalProperties": false }
+                },
+                "additionalProperties": false
+              }
+            },
             "additionalProperties": false
           },
           "fetch": {

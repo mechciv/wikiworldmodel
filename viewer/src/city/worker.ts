@@ -1,23 +1,18 @@
-// The city's generators, off the main thread: the plan once, then a cell's mesh at a time. They
-// are the same code as the build's, so what they make agrees with it within the tolerance of core/fingerprint.ts.
-// A living scene asks for a city's records alone (`structures`): no generated fabric, its first structure at an entity
-// of the scene's choosing, and every cell's mesh moved from the city's metres into the scene's.
+// A city's records, raised off the main thread a cell at a time (world/generators/city/cells.ts), for a living scene
+// that draws them among its own houses (structures.ts): their first entity follows the scene's own, and every cell's
+// mesh is moved from the city's metres into the scene's.
 import type { CityFile, GroundLevel } from '../../../core/city.ts';
 import { cellBox, CityBuilder } from '../../../world/generators/city/cells.ts';
 import { STRIDE } from '../../../world/generators/city/kit.ts';
-import type { Fingerprint } from '../../../core/fingerprint.ts';
-import { planPrint } from '../../../world/generators/rome/fabric/v1.ts';
 
 export type ToWorker =
-  | { type: 'init'; city: CityFile; levels: GroundLevel[]; heights: Int16Array[] }
-  /** a city's records alone, for a living scene: their first entity, and where the city's point lies in the scene's metres */
+  /** a city's records: their first entity, and where the city's point lies in the scene's metres */
   | { type: 'structures'; city: CityFile; levels: GroundLevel[]; heights: Int16Array[]; entityBase: number; offset: [number, number] }
   | { type: 'cell'; key: number; detail: number; serial: number }
   /** where the eye is, on the city's grid: the nearest cells asked for are made first */
   | { type: 'eye'; at: [number, number] };
 
 export type FromWorker =
-  | { type: 'plan'; print: Fingerprint; cells: number[]; entities: Float32Array; mask: Uint8Array; maskSize: number; maskBox: [number, number, number, number]; water: { vertices: Float32Array; indices: Uint32Array }; lots: number; lotEntity: number; treeEntity: number; crowdEntity: number; lotRegion: Uint8Array; lotType: Uint8Array; lotOffset: Int32Array; lotPoints: Float32Array; lotTop: Float32Array; tops: Float32Array }
   | { type: 'structures'; cells: number[]; tops: Float32Array }
   | { type: 'cell'; key: number; detail: number; serial: number; vertices: ArrayBuffer; indices: Uint32Array; ms: number };
 
@@ -28,27 +23,8 @@ const post = (m: FromWorker, transfer: Transferable[]) => (self as unknown as { 
 
 self.onmessage = (e: MessageEvent<ToWorker>) => {
   const m = e.data;
-  if (m.type === 'init') {
-    builder = new CityBuilder(m.city, m.levels.map((g, i) => ({ ...g, z: m.heights[i] })));
-    const entities = builder.entities();
-    const { data, box } = builder.mask(2048);
-    const water = builder.water();
-    const print = planPrint(builder.plan);
-    const copy = (a: Uint8Array) => a.slice();
-    const lotRegion = copy(builder.plan.region);
-    const lotType = copy(builder.plan.type);
-    const lotOffset = builder.plan.offset.slice();
-    const lotPoints = builder.plan.points.slice();
-    const lotTop = builder.plan.top.slice();
-    const tops = builder.tops();
-    post(
-      { type: 'plan', print, cells: builder.cells(), entities, mask: data, maskSize: 2048, maskBox: box, water, lots: builder.plan.lots, lotEntity: builder.lotEntity, treeEntity: builder.treeEntity, crowdEntity: builder.crowdEntity, lotRegion, lotType, lotOffset, lotPoints, lotTop, tops },
-      [entities.buffer as ArrayBuffer, data.buffer as ArrayBuffer, water.vertices.buffer as ArrayBuffer, water.indices.buffer as ArrayBuffer, lotRegion.buffer as ArrayBuffer, lotType.buffer as ArrayBuffer, lotOffset.buffer as ArrayBuffer, lotPoints.buffer as ArrayBuffer, lotTop.buffer as ArrayBuffer, tops.buffer as ArrayBuffer],
-    );
-    return;
-  }
   if (m.type === 'structures') {
-    builder = new CityBuilder(m.city, m.levels.map((g, i) => ({ ...g, z: m.heights[i] })), undefined, { fabric: false, entityBase: m.entityBase });
+    builder = new CityBuilder(m.city, m.levels.map((g, i) => ({ ...g, z: m.heights[i] })), { entityBase: m.entityBase });
     offset = m.offset;
     const tops = builder.tops();
     post({ type: 'structures', cells: builder.cells(), tops }, [tops.buffer as ArrayBuffer]);
@@ -95,7 +71,7 @@ function makeNext(): void {
   const t0 = performance.now();
   const mesh = builder.build(m.key, m.detail);
   const { vertices, indices } = mesh.arrays();
-  // Into the scene's metres, where a scene draws the city: its position is the first three floats of each vertex.
+  // Into the scene's metres: a vertex's position is its first three floats.
   if (offset[0] !== 0 || offset[1] !== 0) {
     const f = new Float32Array(vertices);
     const step = STRIDE / 4;

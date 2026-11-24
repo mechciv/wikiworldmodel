@@ -1,7 +1,6 @@
 // A city as the build writes it and the viewer draws it: its site, its ground, and every
 // structure with the footprint, height and form its records give. Positions are metres on a
 // local grid: x east and y north of the site's origin, z above sea level.
-import type { Fingerprint } from './fingerprint.ts';
 import type { Basis, FeatureTime } from './tileset.ts';
 
 /** What can be said of a building's architecture, and so what its form claim may hold. Unknown parts are the generator's guess. */
@@ -144,16 +143,22 @@ export interface CityStructure {
   look?: Record<string, string>;
 }
 
+/**
+ * A city's records as a living scene draws them, building by building (docs/plans/CITIES.md, decisions 1 and 10): every
+ * structure on the map of the city, in metres about its point, on its surveyed ground. Its houses are the settlement
+ * generator's, as every town's are.
+ */
 export interface CityFile {
-  format: 'lightworld-city@1';
+  format: 'lightworld-city@2';
   site: {
     id: string;
     label: string;
+    /** the settlement's record */
+    settlement: string;
     /** the local grid's origin, in present-day coordinates */
     origin: { lat: number; lon: number };
-    /** the times its buildings are drawn for, and the slice its generated housing describes */
+    /** the times a scene draws its records for */
     span: [number, number];
-    slice: number;
     water_level: number;
   };
   /** finest first; a place uses the finest level that covers it */
@@ -162,16 +167,6 @@ export interface CityFile {
   /** the river, as rings */
   water: number[][];
   islands: number[][];
-  /** the generated housing's constraints and the fingerprint of its plan */
-  fabric: {
-    generator: string;
-    version: number;
-    seed: string;
-    basis: 'procedural';
-    params: Record<string, unknown>;
-    regions: { id: string; label: string; at: [number, number]; insulae?: number; domus?: number; source?: string }[];
-    output: Fingerprint;
-  };
 }
 
 /** Local metres from latitude and longitude: an equirectangular grid, flat across a site. */
