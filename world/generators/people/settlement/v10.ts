@@ -2382,7 +2382,13 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
       ...(wallWord ? { wall: { from: years[0], to: years[1], thickness } } : {}),
       params: tp,
     });
-    const within = (x: number, y: number) => fitCity(cx + x, cy + y) && !onAnothers(cx + x, cy + y, s);
+    // An open square at its middle, where its form says one lay there: a share of the ground it covered at its height,
+    // square to its grid, and kept for its whole life.
+    const most = Math.max(0, ...plan.growth.cut[0].cells);
+    const sq = form.square ? Math.sqrt(T.square * most) * plan.growth.grid.cell * 0.5 : 0;
+    const ang = plan.grid?.angle ?? 0;
+    const inSquare = (x: number, y: number) => sq > 0 && Math.abs(x * Math.cos(ang) + y * Math.sin(ang)) < sq && Math.abs(-x * Math.sin(ang) + y * Math.cos(ang)) < sq;
+    const within = (x: number, y: number) => fitCity(cx + x, cy + y) && !onAnothers(cx + x, cy + y, s) && !inSquare(x, y);
     const gradient = (x: number, y: number): [number, number] => [(height(x + 15, y) - height(x - 15, y)) / 30, (height(x, y + 15) - height(x, y - 15)) / 30];
     const now = townAt(plan, P.t, 0, { within, gradient });
     // A house to each plot: as much of it as the density there asks, as far as the plot allows; a plot too small for a

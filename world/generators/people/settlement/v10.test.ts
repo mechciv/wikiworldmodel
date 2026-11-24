@@ -357,6 +357,11 @@ describe('the settlement generator', () => {
       expect(reach(late.mine)).toBeLessThan(reach(peak.mine));
     });
 
+    it('leaves open the square its form says lay at its middle, the same at every time', () => {
+      for (const t of [0, 500]) expect(at(t, { town: { square: true } }).mine.filter((h) => Math.hypot(h.x, h.y) < 40).length).toBe(0);
+      expect(at(500).mine.filter((h) => Math.hypot(h.x, h.y) < 40).length).toBeGreaterThan(0);
+    });
+
     it('has no most of houses: a great city has a house to each plot it built', () => {
       const big = { ...life, members: [{ t: [-500, 0, 1500], people: [2000, 150000, 150000] }] };
       const { mine } = at(500, { people: 150000, life: big });
