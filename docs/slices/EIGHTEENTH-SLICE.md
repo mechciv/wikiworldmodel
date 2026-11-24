@@ -68,7 +68,7 @@ As for the other slices (see the [README](../../README.md)). In the viewer:
 | A town keeps its streets and plots where they are as it grows, gives up its outer plots first as it shrinks, builds nothing in its river, is the same town every time, and has a gate on each route through its wall | `world/generators/people/settlement/town.test.ts` |
 | In a scene, a city's houses and streets of one time stand where they stood at another; it shrinks to its oldest ground; a great city has no most of houses; its wall stands only while its claim says; a plot holds as many people as its tradition says lived to a house; its plots stay where they are when its tradition changes; its plots are built in each tradition's house in the parts the traditions say | `v10.test.ts`: *a city laid out through its life* |
 | Each city of a scene carries its whole life, the same at every time | `tools/world/test/landscape.test.ts`: *gives each city its whole life…* |
-| A survey's ground is laid over the scene's, its water is the scene's there, the scene's own river is taken out of it, and houses keep off its water, its structures and its gardens | `world/generators/life/survey.test.ts` |
+| A survey's ground is laid over the scene's, its water is the scene's there, the scene's own river is taken out of it, and houses keep off its water, its structures and its gardens, and a street's width from each structure's convex hull | `world/generators/life/survey.test.ts` |
 | A city's records are cut into cells, each structure's entity after the scene's own | `tools/world/test/city.test.ts`: *a city's records, cell by cell* |
 | In the browser, Rome is drawn by the living scene, its records named among its houses; a click on a house says the generator placed it; what stands depends on the time | `viewer/test/e2e/city.spec.ts`, `life.spec.ts` |
 
@@ -123,8 +123,9 @@ A map dataset of a city (`import: { as: ohm-site, site: … }`) says which settl
 laid out about, the surveys of its ground (Rome's TINITALY at 10 m, SRTM and ETOPO), the level of its water and its span.
 The build makes a file of the city's records within 6.8 km of its point, and its ground as before. A living scene within
 23 km of such a city takes its survey, laid over its own ground and eased in over 3 km; its mapped water, as the scene's
-there; the ground its structures take at the scene's time, where no house stands and nothing grows; and its gardens,
-where no house stands. The structures are raised by the forms of world/generators/city/forms.ts in the city's own worker,
+there; the ground its structures take at the scene's time, where no house stands and nothing grows; its gardens, where
+no house stands; and a street's width, 5 m, all round each structure's convex hull, where no house stands either, as
+`gen:rome/fabric` kept its blocks, so that a monument stands clear and its courts are not built in. The structures are raised by the forms of world/generators/city/forms.ts in the city's own worker,
 a cell of 400 m at a time, moved into the scene's metres, their entities after the scene's own, dated by their records:
 picked, named and lit as in the city's own scene before.
 

@@ -301,6 +301,8 @@ export interface SceneSurvey {
    */
   built?: number[][];
   gardens?: number[][];
+  /** outlines of the structures that houses keep a street's width from, all round their convex hulls */
+  clear?: number[][];
 }
 
 export interface SceneSpec {

@@ -58,6 +58,20 @@ describe("a settlement's survey in a scene", () => {
     for (let i = 2; i < mesh.vertices.length; i += 3) expect(mesh.vertices[i]).toBe(7);
   });
 
+  it('keeps houses a street from a structure all round its convex hull, its courts and recesses with it', () => {
+    // A temple's precinct in the shape of a U, open to the north.
+    const precinct = [0, 0, 120, 0, 120, 100, 90, 100, 90, 30, 30, 30, 30, 100, 0, 100];
+    const p = placeSurvey(site, survey({ built: [precinct], clear: [precinct] }));
+    // Its ground is built on, and the court within its arms is kept clear of houses, though not built on.
+    expect(p.built(10, 50)).toBe(true);
+    expect(p.built(60, 70)).toBe(false);
+    expect(p.reserved(60, 70)).toBe(true);
+    // A street's width beyond it is kept clear; further out, a house may stand.
+    expect(p.reserved(60, -3)).toBe(true);
+    expect(p.reserved(60, -12)).toBe(false);
+    expect(p.reserved(132, 50)).toBe(false);
+  });
+
   it('takes the scene’s own river out where the survey has its water, and keeps it beyond', () => {
     const n = 200;
     const path: RiverPath = {

@@ -1928,6 +1928,9 @@ async function start(root: HTMLElement): Promise<void> {
           // The ground its structures take at the time: no house stands there, and nothing grows but in its gardens.
           built: f.structures.filter((x) => standsAt(x, t) && !/^(works\/road|open\/(garden|district|region|water|island))/.test(x.kind)).flatMap((x) => x.rings.filter((r) => r.length >= 6)),
           gardens: f.structures.filter((x) => standsAt(x, t) && x.kind === 'open/garden').flatMap((x) => x.rings.filter((r) => r.length >= 6)),
+          // What houses keep a street's width from: every structure that stands then, but its roads, walls and aqueducts,
+          // whose hulls would be a city, and its districts and water.
+          clear: f.structures.filter((x) => standsAt(x, t) && !/^(works\/(road|wall|aqueduct)|open\/(district|region|water|island))/.test(x.kind)).flatMap((x) => x.rings.filter((r) => r.length >= 6)),
         };
       }
       // The city's recorded walls and roads, for the settlement generator's plan of it: in the city's own metres.

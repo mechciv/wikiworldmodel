@@ -8,7 +8,7 @@
 // Nothing here is a claim: the survey is a dataset, read as the build read it, and how it is eased into the scene's
 // ground is a choice of this code.
 
-import { ccw, triangulate } from '../city/math.ts';
+import { ccw, convexHull, triangulate } from '../city/math.ts';
 import { GroundSampler, type GroundGridData } from '../city/ground.ts';
 import type { SceneSurvey } from '../../../core/scene.ts';
 import type { Waters } from './land.ts';
@@ -31,7 +31,7 @@ export interface PlacedSurvey {
   wet(x: number, y: number): boolean;
   /** whether a point lies on ground a recorded structure takes at the scene's time, where nothing grows */
   built(x: number, y: number): boolean;
-  /** whether a point lies where no house stands: in water, on a structure's ground or in a garden */
+  /** whether a point lies where no house stands: in water, on or within a street of a structure's ground, or in a garden */
   reserved(x: number, y: number): boolean;
 }
 
@@ -39,6 +39,18 @@ export interface PlacedSurvey {
 const EASE = 3000;
 /** How fine the map of the survey's water is, m. */
 const WET_CELL = 5;
+/**
+ * How far a house keeps from a recorded structure, m: a street's width all round its convex hull, as Rome's own
+ * generator kept its blocks, so that a monument stands clear of the houses and its courts and recesses are not built in.
+ */
+const CLEAR = 5;
+
+/** A ring's convex hull grown by `m` all round: the hull of its corners each set about with an octagon. */
+function hullAround(r: number[], m: number): number[] {
+  const pts: number[] = [];
+  for (let i = 0; i + 1 < r.length; i += 2) for (let k = 0; k < 8; k++) pts.push(r[i] + m * Math.cos((k * Math.PI) / 4), r[i + 1] + m * Math.sin((k * Math.PI) / 4));
+  return convexHull(pts);
+}
 
 const EARTH = 6371000;
 
@@ -60,11 +72,12 @@ export function placeSurvey(site: { lat: number; lon: number }, s: SceneSurvey):
   const islands = (s.water?.islands ?? []).map((r) => r.map((v, i) => v + (i % 2 ? oy : ox)));
   const built = (s.built ?? []).map((r) => r.map((v, i) => v + (i % 2 ? oy : ox)));
   const gardens = (s.gardens ?? []).map((r) => r.map((v, i) => v + (i % 2 ? oy : ox)));
+  const clear = (s.clear ?? []).map((r) => hullAround(r.map((v, i) => v + (i % 2 ? oy : ox)), CLEAR));
   // The water, the structures' ground and the gardens as one map on the finest grid's ground, a bit each, filled by
   // scanlines over each outline's own rows: an island crossed leaves its ground dry.
   const nx = Math.ceil((fine[2] - fine[0]) / WET_CELL);
   const ny = Math.ceil((fine[3] - fine[1]) / WET_CELL);
-  const any = rings.length || built.length || gardens.length;
+  const any = rings.length || built.length || gardens.length || clear.length;
   const map = new Uint8Array(any ? nx * ny : 0);
   const fill = (r: number[], bit: number, on: boolean) => {
     let ylo = Infinity;
@@ -96,6 +109,7 @@ export function placeSurvey(site: { lat: number; lon: number }, s: SceneSurvey):
   for (const r of islands) fill(r, 1, false);
   for (const r of built) fill(r, 2, true);
   for (const r of gardens) fill(r, 4, true);
+  for (const r of clear) fill(r, 8, true);
   const bits = (x: number, y: number) => {
     if (!map.length) return 0;
     const i = Math.floor((x - fine[0]) / WET_CELL);
