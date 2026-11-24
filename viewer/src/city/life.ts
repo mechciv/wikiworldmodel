@@ -418,12 +418,17 @@ export class LifeScene {
       }
       this.onChange();
       this.send();
-    } else if (this.warmWaiters.length > 0) {
+    } else {
+      // Always retain prototypes and the latest selection while inactive (even after warm() times
+      // out or while parked in lifeCache), because the worker marks sent prototypes as already
+      // delivered and a never-activated scene will not be reset before its first activate().
       if (m.protos.length) this.heldProtos.push(...m.protos);
       this.held = m;
       this.updateNames(m.groups);
-      if (m.pending === 0) this.flushWarmWaiters();
-      else this.send();
+      if (this.warmWaiters.length > 0) {
+        if (m.pending === 0) this.flushWarmWaiters();
+        else this.send();
+      }
     }
   }
 

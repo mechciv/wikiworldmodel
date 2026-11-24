@@ -2189,7 +2189,7 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
         gl.bindVertexArray(c.vao);
         gl.drawElements(gl.TRIANGLES, c.count, gl.UNSIGNED_INT, 0);
       }
-      this.drawInstanced(this.depthP, false);
+      this.drawInstanced(this.depthP, false, undefined, fadeK);
       gl.bindVertexArray(null);
       gl.colorMask(true, true, true, true);
       gl.stencilMask(0xff);

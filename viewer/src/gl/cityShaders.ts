@@ -405,20 +405,22 @@ void main() {
 
 /**
  * Depth only: for the shadows, and for the depth the lit pass and the occlusion are drawn over. Leaves on cards are cut
- * to their outline for the shadows; the depth before the lit pass leaves them out, as the lit pass blends their edges
- * by coverage and writes their depth itself.
+ * to their outline for the shadows; the depth before the lit pass leaves out cards and screen-size fading instances, as
+ * the lit pass dithers them and writes their surviving depth itself without punching holes in terrain or polluting GTAO.
  */
 export const DEPTH_FS = /* glsl */ `#version 300 es
 precision highp float;
 precision highp int;
 in vec2 vUv;
 flat in int vMaterial;
-// 1: leaves on cards are cut to their outline; 0: they are left out
+flat in float vInstFade;
+// 1: leaves on cards are cut to their outline; 0: cards and fading instances are left out of the prepass
 uniform float uCards;
 ${LEAVES}
 out vec4 o;
 void main() {
   if (onCard(vMaterial) && (uCards < 0.5 || !leafThere(vUv))) discard;
+  if (uCards < 0.5 && vInstFade < 0.995) discard;
   o = vec4(0.0);
 }`;
 
