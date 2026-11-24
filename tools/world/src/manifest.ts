@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { CACHE, safeJoin, safeUrlBasename, WORLD } from './paths.ts';
 import { readYaml } from './util.ts';
@@ -16,7 +17,16 @@ export function datasetDir(id: string, d: Dataset): string {
 }
 
 export function datasetPath(id: string, d: Dataset): string {
-  return safeJoin(datasetDir(id, d), safeUrlBasename(d.fetch.url), `${id} download filename`);
+  const dir = datasetDir(id, d);
+  const clean = safeJoin(dir, safeUrlBasename(d.fetch.url), `${id} download filename`);
+  if (existsSync(clean)) return clean;
+  // Preserve hits against caches populated before query strings (e.g. PANGAEA ?format=textfile) were stripped.
+  const legacyName = d.fetch.url.split('/').pop();
+  if (legacyName && legacyName !== '.' && legacyName !== '..' && !legacyName.includes('\0') && !legacyName.includes('\\')) {
+    const legacy = safeJoin(dir, legacyName, `${id} download filename`);
+    if (existsSync(legacy)) return legacy;
+  }
+  return clean;
 }
 
 /** Path of a named file inside a dataset: the archive member if it has `files`, else the download. */

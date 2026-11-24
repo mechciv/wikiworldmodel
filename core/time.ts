@@ -199,12 +199,16 @@ function gcd(a: number, b: number): number {
 }
 const lcm = (a: number, b: number) => (a / gcd(a, b)) * b;
 
+// Nahuatl numerals 1–13 (in colonial orthographies) and digits that sources sometimes fuse directly to a sign (e.g. "cecoatl", "3Calli").
+const NAHUATL_NUM =
+  '(?:matlactli(?:o(?:m(?:eyi|ey|ei|ome|e)|c?ce|nce|çe))?|matlactl|chi(?:uc|co|c)na(?:hu|u)i|chi(?:c(?:u|o)?|qu)(?:acen?|ome|u?e[iy]|uiey)|macuil(?:li)?|na(?:hu|u)i|y?e[iy]|ome|[cç]e|\\d+)';
+
 /** Does a text name a sign, in any of the spellings the sources use? */
 export function namesSign(text: string, sign: string): boolean {
   const t = text.toLowerCase();
   return (SIGN_SPELLINGS[sign] ?? [sign.toLowerCase()]).some((s) => {
     const escaped = s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    return new RegExp(`(?<![\\p{L}\\p{N}])${escaped}(?![\\p{L}\\p{N}])`, 'u').test(t);
+    return new RegExp(`(?<![\\p{L}\\p{N}])(?:${NAHUATL_NUM})?${escaped}(?:e?s)?(?![\\p{L}\\p{N}])`, 'u').test(t);
   });
 }
 

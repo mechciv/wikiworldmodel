@@ -31,4 +31,16 @@ describe('rows of datasets (docs/STRUCTURE.md section 3.1)', () => {
     expect(encodeRowKey('a#b%c')).toBe('a%23b%25c');
     expect(() => parseRef('src:x#%E0%A4%A')).toThrow(/malformed row key/);
   });
+
+  it('splits dataset row refs on # before @ so row keys containing @ are not misread as phases', async () => {
+    const { splitRef } = await import('../../../core/refs.ts');
+    expect(splitRef('src:cliopatria-0.2.1#Qin%20Dynasty@-210')).toEqual({
+      record: 'src:cliopatria-0.2.1',
+      part: 'Qin%20Dynasty@-210',
+    });
+    expect(splitRef('earth/lips/deccan-traps@main')).toEqual({
+      record: 'earth/lips/deccan-traps',
+      phase: 'main',
+    });
+  });
 });

@@ -100,4 +100,53 @@ describe('a network changed in a few constraints', () => {
     expect(held).toBeGreaterThan(0);
     expect(pieces.hits).toBeGreaterThan(0);
   });
+
+  it('detects tight sub-day conflicts while keeping near-equal real-world rounding cycles consistent', async () => {
+    const { dayNumberAt, dayOnAxis, parsePoint } = await import('../../../core/time.ts');
+    // Sub-day contradiction (~53 minutes) must be reported rather than forgiven.
+    const clash = solve(
+      [ORIGIN, 'a', 'b'],
+      [
+        c('c1', ORIGIN, 'a', 100, 100),
+        c('c2', ORIGIN, 'b', 100.0001, 100.0001),
+        c('c3', 'a', 'b', -Infinity, -0.0002),
+      ],
+    );
+    expect(clash.ok).toBe(false);
+    if (!clash.ok) {
+      const srcs = clash.conflict.constraints.map((x) => x.source);
+      expect(srcs).toContain('c1');
+      expect(srcs).toContain('c3');
+    }
+
+    // A cycle of exact-day calendar dates across leap and non-leap years accumulates float64 rounding
+    // across 1/365 and 1/366 fractions, and must still hold as consistent.
+    const d0 = parsePoint('28 February 1520 CE');
+    const jdn0 = dayNumberAt(d0.t)!;
+    const days = Array.from({ length: 12 }, (_, k) => dayOnAxis(jdn0 + k * 31));
+    const dayPoints = days.map((_, k) => `d${k}`);
+    const dayConstraints: Constraint[] = [c('anchor', ORIGIN, 'd0', days[0].t, days[0].t)];
+    for (let k = 0; k < days.length - 1; k++) {
+      const step = days[k + 1].t - days[k].t;
+      dayConstraints.push(c(`step-${k}`, `d${k}`, `d${k + 1}`, step, step));
+    }
+    const close = days[days.length - 1].t - days[0].t;
+    dayConstraints.push(c('close', 'd0', `d${days.length - 1}`, close, close));
+    expect(solve(dayPoints, dayConstraints).ok).toBe(true);
+
+    // Same for a near-equal cycle at deep-time Gyr scale where float64 ULP is ~1e-6 yr.
+    const t0 = -4.567e9;
+    const step = 1e5 / 3;
+    const deep = solve(
+      ['g0', 'g1', 'g2', 'g3'],
+      [
+        c('g0', ORIGIN, 'g0', t0, t0),
+        c('g01', 'g0', 'g1', step, step),
+        c('g12', 'g1', 'g2', step, step),
+        c('g23', 'g2', 'g3', step, step),
+        c('g30', 'g0', 'g3', 1e5, 1e5),
+      ],
+    );
+    expect(deep.ok).toBe(true);
+  });
 });

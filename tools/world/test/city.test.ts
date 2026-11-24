@@ -795,4 +795,88 @@ describe('the camera near the ground', () => {
     expect(link).not.toContain('v=');
     expect(link).not.toContain('hour=');
   });
+
+  it('wraps local tangent projections across the antimeridian', () => {
+    const [x, y] = toLocal({ lat: 0, lon: 179.9 }, 0, -179.9);
+    expect(x).toBeGreaterThan(20_000);
+    expect(x).toBeLessThan(25_000);
+    expect(Math.abs(y)).toBeLessThan(1);
+    const [lat, lon] = fromLocal({ lat: 0, lon: 179.9 }, x, y);
+    expect(lat).toBeCloseTo(0, 4);
+    expect(lon).toBeCloseTo(-179.9, 3);
+  });
+
+  it('normalizes and clamps non-unit normals in Mesh.v without wrapping 256 to 0', () => {
+    const m = new Mesh();
+    const idx = m.v(0, 0, 0, 0, 0, 1.5, 0, 0);
+    const { vertices } = m.arrays();
+    const b = new Uint8Array(vertices);
+    expect(b[idx * STRIDE + 14]).toBe(255);
+  });
+
+  it('bridges holes past reflex vertices in concave polygons without inverting triangles', () => {
+    const concaveOuter = [0, 0, 10, 0, 10, 4, 6, 5, 10, 6, 10, 10, 0, 10];
+    const hole = [2, 3, 2, 7, 4, 7, 4, 3];
+    const { points, tris } = triangulate(concaveOuter, [hole]);
+    let totalArea = 0;
+    for (let i = 0; i < tris.length; i += 3) {
+      const a = tris[i] * 2;
+      const b = tris[i + 1] * 2;
+      const c = tris[i + 2] * 2;
+      const triArea = 0.5 * ((points[b] - points[a]) * (points[c + 1] - points[a + 1]) - (points[b + 1] - points[a + 1]) * (points[c] - points[a]));
+      expect(triArea).toBeGreaterThan(-1e-6);
+      totalArea += triArea;
+    }
+    expect(totalArea).toBeCloseTo(area(concaveOuter) - area(hole), 3);
+  });
+
+  it('builds east and west courtyard roofs on a domus far from the origin', async () => {
+    const { MAT } = await import('../../../world/generators/city/kit.ts');
+    const { LOT_DOMUS, raiseLot } = await import('../../../world/generators/rome/fabric/v1.ts');
+    const cx = 100;
+    const cy = 100;
+    const h = 10;
+    const plan = {
+      lots: 1,
+      offset: new Int32Array([0, 8]),
+      points: new Float32Array([cx - h, cy - h, cx + h, cy - h, cx + h, cy + h, cx - h, cy + h]),
+      base: new Float32Array([0]),
+      top: new Float32Array([8]),
+      type: new Uint8Array([LOT_DOMUS]),
+      region: new Uint8Array([1]),
+      style: new Uint8Array([1]),
+      treeCount: 0,
+      trees: new Float32Array(0),
+      treeType: new Uint8Array(0),
+      regionLots: [],
+      domain: [],
+    };
+    const m = new Mesh();
+    raiseLot(m, plan, 0, 0);
+    const { vertices, indices } = m.arrays();
+    const f = new Float32Array(vertices);
+    const b = new Uint8Array(vertices);
+    let eastRoof = 0;
+    let westRoof = 0;
+    let northRoof = 0;
+    let southRoof = 0;
+    for (let t = 0; t < indices.length; t += 3) {
+      const i0 = indices[t];
+      if (b[i0 * STRIDE + 24] !== MAT.tile) continue;
+      const mx = (f[i0 * 7] + f[indices[t + 1] * 7] + f[indices[t + 2] * 7]) / 3;
+      const my = (f[i0 * 7 + 1] + f[indices[t + 1] * 7 + 1] + f[indices[t + 2] * 7 + 1]) / 3;
+      if (Math.abs(my - cy) < 4) {
+        if (mx > cx + 4) eastRoof++;
+        if (mx < cx - 4) westRoof++;
+      }
+      if (Math.abs(mx - cx) < 4) {
+        if (my > cy + 4) northRoof++;
+        if (my < cy - 4) southRoof++;
+      }
+    }
+    expect(northRoof).toBeGreaterThan(0);
+    expect(southRoof).toBeGreaterThan(0);
+    expect(eastRoof).toBeGreaterThan(0);
+    expect(westRoof).toBeGreaterThan(0);
+  });
 });

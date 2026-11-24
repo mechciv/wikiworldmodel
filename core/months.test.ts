@@ -244,4 +244,11 @@ describe('the parts kept beside the months', () => {
     expect(scene.fields).toMatchObject({ cloud: 'field:test/cloud', u: 'field:test/u', npp: 'field:test/npp' });
     expect(scene.cloud).toEqual(first.parts.cloud);
   });
+
+  it('covers all intermediate longitude tiles at high latitude and the full ring at the pole', () => {
+    const near88 = tilesNear(88, 0, { step: 0.5, tile_deg: 10 });
+    expect(near88.length).toBeGreaterThanOrEqual(8);
+    const pole = tilesNear(89.5, 0, { step: 0.5, tile_deg: 10 });
+    expect(pole.length).toBe(36);
+  });
 });

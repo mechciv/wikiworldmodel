@@ -28,8 +28,10 @@ export type Bounds = Map<string, { lo: number; hi: number; loBy: string[]; hiBy:
 
 export type Solution = { ok: true; bounds: Bounds } | { ok: false; conflict: Conflict };
 
-const EPS_ABS = 1e-12; // years (~31 microseconds)
-const EPS_REL = 1e-13; // ~400x float64 ULP, preventing rounding oscillation at Gyr scales
+// Tolerance: 1e-8 yr (~0.3 s) is 270,000x finer than a day yet ~20,000x above float64 ULP at historical years,
+// and 1e-12 relative keeps long cycles of near-equal constraints from failing on float64 rounding up to Gyr scales.
+const EPS_ABS = 1e-8;
+const EPS_REL = 1e-12;
 
 /**
  * A network's distance graph, in arrays: edge e runs from u[e] to v[e] with weight w[e], and comes from constraint
