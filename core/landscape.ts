@@ -418,6 +418,8 @@ export interface CityLife {
   areas: { t: number; ha: number }[];
   /** radians from east, the most important first */
   toward: number[];
+  /** how its record says it was laid out (its `town_form`), whatever the time, and the years that held */
+  town?: TownSpec;
   townSpan?: [number, number];
   /**
    * Its recorded walls and roads, where a map of the city gives them (a dataset's `import.site`), in the city's own metres
@@ -484,6 +486,7 @@ function lifeOf(f: CitiesFile, lat: number, lon: number, rows: City[], r: CityRe
     members: pop.members,
     areas: (r?.areas ?? []).map(([t, ha]) => ({ t, ha })),
     toward: towardOf(f, lat, lon),
+    ...(r?.town ? { town: r.town } : {}),
     ...(r?.townSpan ? { townSpan: r.townSpan } : {}),
   };
 }

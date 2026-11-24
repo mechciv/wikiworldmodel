@@ -35,6 +35,11 @@ It adds:
   living scene was drawn are gone. A map's dataset says which city it is of (`import.site` in the manifest).
 - **What most wants records** (`npm run world -- cities-wanted`): every city, its tier of what is known of it, and the
   people who lived in it summed over its years, the most first.
+- **The houses of Imperial Rome,** two building traditions of its townspeople: the insula, the block of flats most of
+  them lived in, forty to a block, of three or four storeys of brick-faced concrete; and the domus of the rich, round
+  its atrium and peristyle. Rome is drawn in the first.
+- **The plans' skeletons of two cities,** the tests of what a recorded plan does: Teotihuacan's grid turned 15.5° east
+  of north, and Chang'an of the Sui and Tang, a new record, on its north-south axis.
 - **Two terms:** a town form's `orientation`, the bearing of its grid or main street; and a settlement's `extent`, its
   outline at a time.
 
@@ -61,7 +66,7 @@ As for the other slices (see the [README](../../README.md)). In the viewer:
 | A recorded wall takes the place of a generated one and bounds the town while it stands; a recorded road stands in its frame; a district counted four times the buildings has smaller plots | `town.test.ts` |
 | Dividing only what is wanted divides it as dividing all of it would | `division.test.ts`: *divides only what is wanted…* |
 | A town keeps its streets and plots where they are as it grows, gives up its outer plots first as it shrinks, builds nothing in its river, is the same town every time, and has a gate on each route through its wall | `world/generators/people/settlement/town.test.ts` |
-| In a scene, a city's houses and streets of one time stand where they stood at another; it shrinks to its oldest ground; a great city has no most of houses; its wall stands only while its claim says; a plot holds as many people as its tradition says lived to a house | `v10.test.ts`: *a city laid out through its life* |
+| In a scene, a city's houses and streets of one time stand where they stood at another; it shrinks to its oldest ground; a great city has no most of houses; its wall stands only while its claim says; a plot holds as many people as its tradition says lived to a house; its plots stay where they are when its tradition changes; its plots are built in each tradition's house in the parts the traditions say | `v10.test.ts`: *a city laid out through its life* |
 | Each city of a scene carries its whole life, the same at every time | `tools/world/test/landscape.test.ts`: *gives each city its whole life…* |
 | A survey's ground is laid over the scene's, its water is the scene's there, the scene's own river is taken out of it, and houses keep off its water, its structures and its gardens | `world/generators/life/survey.test.ts` |
 | A city's records are cut into cells, each structure's entity after the scene's own | `tools/world/test/city.test.ts`: *a city's records, cell by cell* |
@@ -92,6 +97,13 @@ are divided only where something is built at the time asked; a lane is drawn alo
 built ground; and a plot is a household's share of the ground where it lies at the city's height, so the core's plots
 are small and the edge's large. A household is as many people as the city's tradition says lived to a house, where it
 says: forty to a block of flats in Imperial Rome, ten to twenty in a town of the Ganges; six where nothing says.
+
+The plan reads the tradition most of the city's people lived in at its height, the year it had the most people up to
+1900, for its town form, its house and its household, so that it is the same plan at every time. What stands on a plot
+is the scene's time's: each tradition of the city's people then takes its part of the plots, by a number of each plot's
+own, as its `prevalence` says (most, some or a few), and the rest have the generic house. Rome from Augustus to 368 is
+three quarters insulae, with a domus here and there; before Augustus its few domus stand among generic houses on the
+insulae's plots; after 368, generic houses.
 
 Where a map of the world is of the city, its walls that go round it and its roads go into the plan in the city's own
 metres: a recorded wall takes the place of a generated one, its years making the growth model's epochs, so Rome grows
@@ -132,9 +144,11 @@ picked, named and lit as in the city's own scene before.
 
 ## Limitations
 
-- **Rome's houses are generic.** No building tradition houses the townspeople of Roman Italy, so Rome is drawn in the
-  generic town house, small and of one storey, round its monuments. A tradition of the insula and the domus is being
-  researched.
+- **Rome's houses are of one size of household.** Its plots are the insulae's, forty people each, at every time, so
+  the domus and the generic houses stand on plots made for blocks of flats. The insula and the domus are drawn over the
+  whole of ArchaeoGLOBE's Southern Europe, Greece and the Balkans with it, though their sources speak of Rome and Italy,
+  and a fifth of Rome's plots have the generic house, as the generator reads `most`. No excavation report of an
+  insula could be read.
 - **Rome's medieval town is not in the bend of the Tiber.** The growth model reads no aqueducts, so nothing makes the
   river's banks the better ground once they failed; the town of 1200 stands round the record's point, east of the
   Colosseum. An epoch at the aqueducts' end, reading the distance to the survey's water, would move it.

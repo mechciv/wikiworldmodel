@@ -91,15 +91,18 @@
 //     one century has the streets of the next, and grows out along its roads and shrinks back from its edges.
 //   - A city's plan is made in its own metres from the city and the world's ground, never from the scene drawing it.
 //     The scene leaves out the plots its own ground cannot take, in its river or on its cliffs.
+//   - A city's plan reads the tradition most of its people lived in at its height: its town form, its house and how many
+//     people lived to a house, which a plot is the share of. What stands on each plot is the scene's time's: the
+//     traditions of the city's people then each take their part of its plots, as their `prevalence` says, and the rest
+//     have the generic house. A village is still of one tradition, by a number of its own.
 //   - A house is as big as its plot allows and its density asks, and no city has a most of houses: a great city has
-//     more, larger houses on more plots. A plot is the share of as many people as the city's tradition says lived to a
-//     house, where it says. Builds made before version 10 carry no `town` parameters, and lay their towns out as version
-//     9 did.
+//     more, larger houses on more plots. Builds made before version 10 carry no `town` parameters, and lay their towns
+//     out as version 9 did.
 //
 // Everything is seeded by the world's 5′ cells and the anthromes' step, not by the scene, so two scenes that overlap put
 // their settlements in the same places: only the ground they stand on, which is the scene's, can move one a little.
 import { fillDwelling, homesteadOf, houseSize, HOUSE_VARIANTS, outbuildingSpec, type Homestead, type HouseDims, type OutbuildingParams } from '../dwellings.ts';
-import { agricultureAt, genericCropsFor, husbandryAt, mid, OUTBUILDING_LABEL, OUTBUILDING_ROOFED, outbuildingText, prevalenceOf, townText, traditionFor, within, type CropEntry, type DwellingSpec, type EnclosureWord, type FieldSpec, type LifewayWord, type OutbuildingUse, type TownSpec, type Tradition } from '../../../../core/dwelling.ts';
+import { agricultureAt, genericCropsFor, husbandryAt, mid, OUTBUILDING_LABEL, OUTBUILDING_ROOFED, outbuildingText, prevalenceOf, townText, traditionFor, traditionsFor, within, type CropEntry, type DwellingSpec, type EnclosureWord, type FieldSpec, type Housed, type LifewayWord, type OutbuildingUse, type TownSpec, type Tradition } from '../../../../core/dwelling.ts';
 import { anthromeOf, lifewayOf, LIFEWAY_OF, type CityNear, type FieldUse, type Lifeway, type Pattern } from '../../../../core/landscape.ts';
 import { buildFieldPalette, FIELD_SLOPE, PLOT, plotAt, plotSlotIndex, plotStyle, type FieldPalette } from '../../../../core/plots.ts';
 import type { ClimateClass } from '../../../../core/climate.ts';
@@ -116,7 +119,7 @@ import type { FieldBoundKind } from '../fieldworks.ts';
 import type { GateOpening, PerimeterSpec } from '../walls.ts';
 import { farmLanes, LaneGround, type FarmLayout, type Lane, type LaneWidths, type Point } from './lanes.ts';
 import { planTown, townAt, type TownParams as TownPlanParams } from './town.ts';
-import { cutAt, epochAt } from '../../../../core/growth.ts';
+import { cutAt, epochAt, HORIZON } from '../../../../core/growth.ts';
 import { earthOf, FIELD_USE, growFields, GROWTH, nodeOf, siteCells, SITING, SiteWorth, sizesOf, USE_OF, type FieldGrid, type FieldSource, type GrowthParams, type SiteCell, type SitingParams, type WaterNear } from './sites.ts';
 import { MAT } from '../../city/kit.ts';
 
@@ -534,6 +537,24 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
   // most of them lived in.
   const parts = prevalenceOf(P.generator.params);
   const traditionOf = (region: number, pattern: Exclude<Pattern, 'none'>, u?: number) => traditionFor(P.traditions, region, P.t, LIFEWAY_OF[pattern], parts, u);
+  // Of the traditions that share a city's people, the one most of them lived in; none where more lived in houses no
+  // tradition describes than in any one of them.
+  const mostOf = (housed: Housed[]): Housed | undefined => {
+    const best = housed.reduce<Housed | undefined>((b, x) => (!b || x.share > b.share ? x : b), undefined);
+    return best && best.share >= 1 - housed.reduce((a, x) => a + x.share, 0) ? best : undefined;
+  };
+  // A city's height: the year it had the most people, as its central reading has them, up to the growth model's horizon.
+  const heightOf = (life: NonNullable<CityNear['life']>): number => {
+    const m = life.members[0];
+    let at = m.t[0] ?? life.span[0];
+    let most = -1;
+    for (let i = 0; i < m.t.length; i++)
+      if (m.t[i] <= HORIZON && m.people[i] > most) {
+        most = m.people[i];
+        at = m.t[i];
+      }
+    return Math.min(Math.max(at, life.span[0]), life.span[1]);
+  };
   // The side of the ground one house has to itself: what a tradition says of how far apart its houses stood, as the
   // distance from one to the next where that is more than a house, and as the gap between them where it is less.
   const lotOf = (pattern: Exclude<Pattern, 'none'>, t: Tradition | undefined): number => {
@@ -609,11 +630,12 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
     return k;
   };
   // A town's layout: what its own record says, over what the tradition of its townspeople says, over the generic town.
-  const townOf = (t: Tradition | undefined, own?: TownSpec, record?: string): TownOf => {
+  const townOf = (t: Tradition | undefined, own?: TownSpec, record?: string, always = false): TownOf => {
     const out: Record<string, unknown> = { ...p.towns.generic };
     const from: Record<string, string> = Object.fromEntries(Object.keys(out).map((k) => [k, 'generic']));
-    // A tradition's town form holds for the time its claim says, where it says one.
-    const held = t && (!t.townSpan || (P.t >= t.townSpan[0] && P.t <= t.townSpan[1])) ? t.town : {};
+    // A tradition's town form holds for the time its claim says, where it says one; or, for the plan of a town laid out
+    // through its whole life, at every time, its plan saying when what it holds stood.
+    const held = t && (always || !t.townSpan || (P.t >= t.townSpan[0] && P.t <= t.townSpan[1])) ? t.town : {};
     for (const [k, v] of Object.entries(held)) {
       out[k] = v;
       from[k] = t!.from[`town.${k}`] ?? t!.id;
@@ -719,10 +741,14 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
     const form = formOf(pattern, t, found?.kin, grow);
     const citySeed = seedOf(hash2(Math.round(lat * 1000), Math.round(lon * 1000), 0x51c1));
     if (p.town && c.life) {
-      // Laid out through its whole life (town.ts): the form of its own houses, sized to each plot, comes after.
-      const s = settlements.push({ x: cx, y: cy, r: 0, fieldR: 0, pattern, fields: 'rainfed', houses: 0, people: c.people, city: c.name, ...(c.record ? { record: c.record } : {}), from: c.from, anthrome: cell >= 0 ? P.grid.anthrome[cell] : 0, region, form: formOf(pattern, t, found?.kin), tier: 'evidence', seed: citySeed }) - 1;
+      // Laid out through its whole life (town.ts), by the tradition most of its people lived in at its height, and the
+      // same at every time; its houses then are of the traditions of its people at the scene's time, plot by plot.
+      const way = LIFEWAY_OF[pattern];
+      const housed = traditionsFor(P.traditions, region, P.t, way, parts);
+      const most = mostOf(housed);
+      const s = settlements.push({ x: cx, y: cy, r: 0, fieldR: 0, pattern, fields: 'rainfed', houses: 0, people: c.people, city: c.name, ...(c.record ? { record: c.record } : {}), from: c.from, anthrome: cell >= 0 ? P.grid.anthrome[cell] : 0, region, form: formOf(pattern, most?.tradition, most?.kin), tier: 'evidence', seed: citySeed }) - 1;
       const first = houses.length;
-      const r2 = layOutPlanned(settlements[s], s, c, cx, cy, townOf(t, c.town, c.record), t, pattern, found?.kin);
+      const r2 = layOutPlanned(settlements[s], s, c, cx, cy, mostOf(traditionsFor(P.traditions, region, heightOf(c.life), way, parts)), housed, pattern);
       settlements[s].r = r2;
       settlements[s].fieldR = r2 * 1.6;
       cityHere.push({ x: cx, y: cy, r: r2 * 1.15 });
@@ -2345,15 +2371,22 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
    * as big as its plot allows and its density asks, the lanes they are reached by, its routes, and its wall while it
    * stood. What the scene's own ground cannot take, a plot in its river or on its cliff, is left out here and not in the
    * plan. Returns how far the ground built then reaches, as the radius of a disc of its area.
+   *
+   * The plan is the same at every time, so it reads nothing of the scene's time: `planned` is the tradition most of its
+   * people lived in at its height, whose town form, house and people to a house it is laid out by, with its record's own
+   * town form over that. What stands on each plot is the scene's time's: `housed` are the traditions of its people then,
+   * each taking its share of the plots, the rest the generic house.
    */
-  function layOutPlanned(s: Settlement, si: number, c: Pick<CityNear, "life" | "record">, cx: number, cy: number, town: TownOf, t: Tradition | undefined, pattern: Pattern, kin?: LifewayWord): number {
+  function layOutPlanned(s: Settlement, si: number, c: Pick<CityNear, "life" | "record">, cx: number, cy: number, planned: Housed | undefined, housed: Housed[], pattern: Pattern): number {
     const T = p.towns;
     const tp = p.town!;
     const life = c.life!;
+    const t = planned?.tradition;
+    const town = townOf(t, life.town, c.record, true);
     const form = town.spec;
     const streetKind = form.streets ?? 'lanes';
-    const planned = streetKind !== 'lanes';
-    const base = houseSize(forms[s.form].spec, 0, 1);
+    const gridded = streetKind !== 'lanes';
+    const base = houseSize(forms[formOf(pattern, t, planned?.kin)].spec, 0, 1);
     const lane = mid(form.street, T.street);
     const main = Math.max(lane, mid(form.main_street, T.main_street));
     const sizes = { block: mid(form.block, T.block), lane, front: [base.w + 1.5, base.w + 5] as [number, number], depth: [base.l + 4, base.l + 14] as [number, number] };
@@ -2398,17 +2431,27 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
     const within = (x: number, y: number) => fitCity(cx + x, cy + y) && !onAnothers(cx + x, cy + y, s) && !inSquare(x, y);
     const gradient = (x: number, y: number): [number, number] => [(height(x + 15, y) - height(x - 15, y)) / 30, (height(x, y + 15) - height(x, y - 15)) / 30];
     const now = townAt(plan, P.t, 0, { within, gradient });
-    // A house to each plot: as much of it as the density there asks, as far as the plot allows; a plot too small for a
-    // house is a yard or a garden.
-    const forGrow = new Map<number, number>();
+    // A house to each plot: of the tradition its plot falls to, by a number of the plot's own; as much of it as the
+    // density there asks, as far as the plot allows; a plot too small for a house is a yard or a garden.
+    const baseOf = new Map<string, HouseDims>();
+    const forGrow = new Map<string, number>();
     for (const q of now.plots) {
+      const u = (hashString(`${q.id}/house`) >>> 0) / 4294967296;
+      let mine: Housed | undefined;
+      for (let i = 0, upTo = 0; i < housed.length; i++) if (u < (upTo += housed[i].share)) {
+        mine = housed[i];
+        break;
+      }
+      const who = mine?.tradition.id ?? '';
+      let b = baseOf.get(who);
+      if (!b) baseOf.set(who, (b = houseSize(forms[formOf(pattern, mine?.tradition, mine?.kin)].spec, 0, 1)));
       const cover = tp.coverage[0] + (tp.coverage[1] - tp.coverage[0]) * Math.min(1, q.density / 300);
-      const want = Math.sqrt((cover * q.area) / (base.w * base.l));
-      const fits = Math.min((q.front - 1) / base.w, (q.depth - 1) / base.l);
+      const want = Math.sqrt((cover * q.area) / (b.w * b.l));
+      const fits = Math.min((q.front - 1) / b.w, (q.depth - 1) / b.l);
       if (fits < 0.5) continue;
       const g = Math.max(0.5, Math.floor(Math.min(2.5, want, fits) * 4) / 4);
-      let f = forGrow.get(g);
-      if (f === undefined) forGrow.set(g, (f = formOf(pattern, t, kin, g)));
+      let f = forGrow.get(`${who}|${g}`);
+      if (f === undefined) forGrow.set(`${who}|${g}`, (f = formOf(pattern, mine?.tradition, mine?.kin, g)));
       const size = houseSize(forms[f].spec, 0, forms[f].grow ?? 1);
       const forward = Math.max(0, q.depth / 2 - size.l / 2 - 0.7);
       const x = cx + q.x + Math.cos(q.facing) * forward;
@@ -2419,7 +2462,11 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
       s.houses++;
     }
     // Its lanes where the scene's ground takes them, water in some of a town of canals, and its routes out of it.
-    const canal = streetKind === 'canals' ? workOf({ kind: 'canal', height: 0, thickness: T.canal }, 'A canal', town.from.streets ?? 'generic') : -1;
+    // Water runs in its canals while the form that made them held, its record's or its tradition's, as its claim says;
+    // before and after, they are its streets.
+    const spanOf = (from: string | undefined) => (c.record !== undefined && from === c.record ? life.townSpan : from && from !== 'generic' ? t?.townSpan : undefined);
+    const flows = (sp?: [number, number]) => !sp || (P.t >= sp[0] && P.t <= sp[1]);
+    const canal = streetKind === 'canals' && flows(spanOf(town.from.streets)) ? workOf({ kind: 'canal', height: 0, thickness: T.canal }, 'A canal', town.from.streets ?? 'generic') : -1;
     for (const l of now.lanes) {
       const [ax, ay, bx, by] = l.line;
       if (!fitCity(cx + (ax + bx) / 2, cy + (ay + by) / 2)) continue;
@@ -2437,9 +2484,9 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
         }
         continue;
       }
-      streets.push({ line: [cx + ax, cy + ay, cx + bx, cy + by], width: Math.max(2.4, l.width * 0.9), paved: planned && s.pattern === 'city', settlement: si });
+      streets.push({ line: [cx + ax, cy + ay, cx + bx, cy + by], width: Math.max(2.4, l.width * 0.9), paved: gridded && s.pattern === 'city', settlement: si });
     }
-    for (const r of plan.routes) streets.push({ line: r.line.map((v, i) => v + (i % 2 ? cy : cx)), width: Math.max(4, main * 0.85), paved: planned && s.pattern === 'city', settlement: si });
+    for (const r of plan.routes) streets.push({ line: r.line.map((v, i) => v + (i % 2 ? cy : cx)), width: Math.max(4, main * 0.85), paved: gridded && s.pattern === 'city', settlement: si });
     // In words, as layOutTown says it.
     const { wall: _generic, ...walled } = form;
     const stated = (town.from.wall ?? 'generic') !== 'generic' || !said;
