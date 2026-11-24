@@ -14,7 +14,7 @@
 import { makeFrame, type Frame, type FrameFace, type FrameLine } from '../../../../core/frame.ts';
 import { builtSpans, cutAt, densityAt, epochAt, growSettlement, growthGrid, peopleAt, type Growth, type GrowthGround, type GrowthParams, type GrowthWall, type PeopleSeries } from '../../../../core/growth.ts';
 import { hashString, Rng } from '../../city/math.ts';
-import { divideFace, type Division, type DivisionGrid, type DivisionSizes } from './division.ts';
+import { divideFace, type DivisionGrid, type DivisionSizes } from './division.ts';
 
 export interface TownParams {
   /** how many routes reach a settlement of 1,000 people, and one of 1,000,000 */
@@ -87,8 +87,6 @@ export interface TownPlan {
   frame: Frame;
   /** for each cell of the growth model's grid, the face it lies in, or -1 */
   faceOf: Int32Array;
-  /** faces divided so far, by index into frame.faces */
-  divided: Map<number, Division>;
   grid?: DivisionGrid;
   sizes: DivisionSizes;
   main: number;
@@ -531,7 +529,7 @@ export function planTown(input: TownInput): TownPlan {
     // Of the ground, a quarter goes to lanes and to what is no household's.
     return ((household / Math.max(1, d)) * 1e4 * 0.75) / (denser?.(x, y) ?? 1);
   };
-  return { key: input.key, growth, routes, ...(wall ? { wall } : {}), frame, faceOf, divided: new Map(), ...(grid ? { grid } : {}), sizes: input.sizes, main: input.main, plot };
+  return { key: input.key, growth, routes, ...(wall ? { wall } : {}), frame, faceOf, ...(grid ? { grid } : {}), sizes: input.sizes, main: input.main, plot };
 }
 
 /** The centre of a cell of a growth model's grid. */
@@ -544,7 +542,7 @@ const openSides = (f: FrameFace) => f.plainSides.map((s) => s.split('+').some((i
 
 /**
  * What stood at a time, for a member of the people: the plots built then, and the lanes they were reached by. Faces with
- * nothing built are not divided, and those that are, are kept for the next time asked.
+ * nothing built are not divided; a face divided at another time is divided the same way.
  */
 export function townAt(plan: TownPlan, t: number, member = 0, opts: { gradient?: (x: number, y: number) => [number, number]; within?: (x: number, y: number) => boolean } = {}): { plots: TownPlot[]; lanes: TownLane[] } {
   const g = plan.growth;
@@ -596,7 +594,6 @@ export function townAt(plan: TownPlan, t: number, member = 0, opts: { gradient?:
       ...(opts.gradient ? { gradient: opts.gradient } : {}),
       need: any,
     });
-    plan.divided.set(fi, d);
     // A lane is drawn along the stretches of it that run by built ground: a grid's street does not run on across fields.
     for (const l of d.lanes) {
       const [ax, ay, bx, by] = l.line;
