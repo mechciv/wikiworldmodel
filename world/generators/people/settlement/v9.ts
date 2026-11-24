@@ -3017,7 +3017,8 @@ export function farCellsWeighed(far: FarLand, plan: SettlementPlan, origin: { la
 
 /**
  * How far what a plan works is from what farLand says of the same cells: the plan's worked share over farLand's, in the
- * cells farCellsWeighed gives. 1 where no cell counts or nothing is worked in them; at most 1.6 and at least 0.4
+ * cells farCellsWeighed gives, or where it gives none, in what the cities leave of the cells the plan holds whole.
+ * 1 where nothing is worked in them; at most 1.6 and at least 0.4
  * otherwise. The far land is scaled by it (farLandMask), so that the plan's worked land and the far land agree on the
  * average where they meet.
  */
@@ -3026,11 +3027,16 @@ export function farScale(far: FarLand, plan: SettlementPlan, use: LandUseMap, or
   const N = 12;
   let made = 0;
   let said = 0;
-  for (const i of farCellsWeighed(far, plan, origin, extent, margin)) {
+  const box = (i: number) => {
     const row = Math.floor(i / far.nx);
     const col = i - row * far.nx;
     const [x0, y1] = toLocal(origin, far.north - row * far.res, far.west + col * far.res);
     const [x1, y0] = toLocal(origin, far.north - (row + 1) * far.res, far.west + (col + 1) * far.res);
+    return { x0, x1, y0, y1 };
+  };
+  const weighed = farCellsWeighed(far, plan, origin, extent, margin);
+  for (const i of weighed) {
+    const { x0, x1, y0, y1 } = box(i);
     let got = 0;
     for (let a = 0; a < N; a++) {
       for (let b = 0; b < N; b++) {
@@ -3040,6 +3046,38 @@ export function farScale(far: FarLand, plan: SettlementPlan, use: LandUseMap, or
     }
     made += got / (N * N);
     said += far.crop[i] + far.pasture[i];
+  }
+  // Where a city's fields reach every cell the plan holds whole, as a city of near a million's do, weigh what of those
+  // cells the cities leave: each place of a cell that is no city's ground or field, against that share of what the cell
+  // says.
+  if (!weighed.length) {
+    const cities = plan.settlements.filter((x) => x.city);
+    const isCity = new Set(plan.settlements.flatMap((x, si) => (x.city ? [si] : [])));
+    const f = plan.fields;
+    const cityHas = (x: number, y: number): boolean => {
+      if (cities.some((c) => (x - c.x) ** 2 + (y - c.y) ** 2 < (c.r * 1.15) ** 2)) return true;
+      const k = nodeOf(f, x, y);
+      return k >= 0 && isCity.has(f.owner[k]);
+    };
+    const inner = extent - margin;
+    for (let i = 0; i < far.nx * far.ny; i++) {
+      const { x0, x1, y0, y1 } = box(i);
+      if (x0 < -inner || x1 > inner || y0 < -inner || y1 > inner) continue;
+      let got = 0;
+      let kept = 0;
+      for (let a = 0; a < N; a++) {
+        for (let b = 0; b < N; b++) {
+          const x = x0 + ((a + 0.5) / N) * (x1 - x0);
+          const y = y0 + ((b + 0.5) / N) * (y1 - y0);
+          if (cityHas(x, y)) continue;
+          use.at(x, y, u);
+          got += u.crop + u.pasture;
+          kept++;
+        }
+      }
+      made += got / (N * N);
+      said += ((far.crop[i] + far.pasture[i]) * kept) / (N * N);
+    }
   }
   return said > 0.05 && made > 0 ? Math.max(0.4, Math.min(1.6, made / said)) : 1;
 }

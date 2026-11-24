@@ -147,7 +147,8 @@ export class LandscapeAtlas {
 
   /**
    * How far about a scene its people's cells are read, degrees: what the build says, or as far as the settlement generator
-   * weighs cells where that is further, as it is in a build made before version 9 (sites.ts, peopleReach).
+   * weighs cells where that is further, as it is in a build made before version 9 (sites.ts, peopleReach). A build made
+   * since writes peopleReach itself, so the larger only matters for those older builds: keep it for them.
    */
   private reach(): number {
     return Math.max(this.index.reach_deg, peopleReach(this.index.generator?.params, EXTENT));
