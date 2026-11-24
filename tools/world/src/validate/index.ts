@@ -22,8 +22,11 @@ import { anchorPlace, anchorsOf, available, buildNetwork, chosen, countDays, cyc
 import { resolvePoints } from '../importer.ts';
 import { lineageLoop } from '../lineage.ts';
 import { REPO, WORLD } from '../paths.ts';
-import { fromValue, readTable, rowClaims, toValue, type Table } from '../tables.ts';
+import { fromValue, readTable, rowClaims, RowKeyError, toValue, type Table } from '../tables.ts';
 import { kindIs, loadWorld, schemaDir, type Claim, type Entity, type Field, type Input, type Model, type Relation, type World } from '../world.ts';
+
+// A null entry marks a fetched dataset whose row addresses failed validation.
+type CheckedTables = ReadonlyMap<string, Table | null>;
 
 export interface Issue {
   level: 'error' | 'warning' | 'info';
@@ -105,7 +108,7 @@ class RefChecker {
     private ids: Map<string, { type: string; file: string }>,
     private issues: Issue[],
     /** the datasets read as tables of rows, for references to their rows */
-    private tables: Map<string, Table> = new Map(),
+    private tables: CheckedTables = new Map(),
   ) {}
 
   /**
@@ -399,7 +402,7 @@ function checkLadder(c: Claim | Relation, issues: Issue[]): void {
   }
 }
 
-function checkRecords(world: World, issues: Issue[], tables: Map<string, Table> = new Map()): Wanted[] {
+function checkRecords(world: World, issues: Issue[], tables: CheckedTables = new Map()): Wanted[] {
   const ids = registry(world, issues);
   const refs = new RefChecker(world, ids, issues, tables);
   for (const e of world.entities) {
@@ -626,7 +629,7 @@ function checkRowSpecs(world: World, issues: Issue[]): void {
  * row it has. Each claim is a claim, of a property the rows give. A claim that differs from the row is a
  * correction, ranked preferred with a note saying why; one that agrees corroborates it, from another source.
  */
-function checkOverlays(world: World, refs: RefChecker, tables: Map<string, Table>, issues: Issue[]): void {
+function checkOverlays(world: World, refs: RefChecker, tables: CheckedTables, issues: Issue[]): void {
   const seen = new Map<string, string>();
   for (const o of world.overlays) {
     if (seen.has(o.row)) issues.push({ level: 'error', check: 'ids', file: o.file, where: 'row', message: `${o.row} has an overlay already, in ${seen.get(o.row)}: one file per row` });
@@ -639,7 +642,7 @@ function checkOverlays(world: World, refs: RefChecker, tables: Map<string, Table
     refs.check(o.row, o.file, 'row');
     if (o.same_as) refs.check(o.same_as, o.file, 'same_as', { types: ['entity'] });
     const table = tables.get(o.dataset);
-    if (!table) issues.push({ level: 'info', check: 'rows', file: o.file, where: 'row', message: `${o.dataset} is not fetched here, so its row could not be checked` });
+    if (!tables.has(o.dataset)) issues.push({ level: 'info', check: 'rows', file: o.file, where: 'row', message: `${o.dataset} is not fetched here, so its row could not be checked` });
     const given = table ? rowClaims(table, o.key) : [];
     for (const c of o.claims) {
       checkClaimCommon(world, refs, c, issues);
@@ -678,12 +681,19 @@ function checkOverlays(world: World, refs: RefChecker, tables: Map<string, Table
 }
 
 /** The tables the overlays need, read where their datasets are here. */
-export async function overlayTables(world: World): Promise<Map<string, Table>> {
-  const out = new Map<string, Table>();
+export async function overlayTables(world: World, issues: Issue[]): Promise<CheckedTables> {
+  const out = new Map<string, Table | null>();
   for (const id of new Set(world.overlays.map((o) => o.dataset))) {
     const field = world.fields.find((f) => f.rows && f.data?.from === id);
-    const t = field ? await readTable(world, field) : undefined;
-    if (t) out.set(id, t);
+    if (!field) continue;
+    try {
+      const table = await readTable(world, field);
+      if (table) out.set(id, table);
+    } catch (err) {
+      if (!(err instanceof RowKeyError)) throw err;
+      issues.push({ level: 'error', check: 'rows', file: field.file, where: 'rows.key', message: `${id}: ${err.message}` });
+      out.set(id, null);
+    }
   }
   return out;
 }
@@ -1163,7 +1173,7 @@ function checkTraditions(world: World, issues: Issue[]): void {
 export async function validateWorld(world: World, opts: { frames?: boolean; tables?: Map<string, Table> } = {}): Promise<Report> {
   const issues: Issue[] = world.loadIssues.map((e) => ({ level: 'error', check: 'load', file: e.file, where: e.where, message: e.message }));
   checkSchemas(world, issues);
-  const wanted = checkRecords(world, issues, opts.tables ?? (await overlayTables(world)));
+  const wanted = checkRecords(world, issues, opts.tables ?? (await overlayTables(world, issues)));
   checkRanks(world, issues);
   checkLineage(world, issues);
   checkProminence(world, issues);

@@ -57,11 +57,13 @@ export interface RowClaim {
   basis: Basis;
 }
 
+export class RowKeyError extends Error {}
+
 /** A row's key from its columns by the template, e.g. "{Name}@{FromYear}" or "occ:{occurrence}". */
 export function rowKey(template: string, columns: Record<string, unknown>, index: number): string {
   return template.replace(/\{([^}]+)\}/g, (_, c: string) => {
     if (c === '#') return String(index);
-    if (missing(columns[c])) throw new Error(`row ${index}: missing key column ${c} in ${template}`);
+    if (missing(columns[c])) throw new RowKeyError(`row ${index}: missing key column ${c} in ${template}`);
     return String(columns[c]);
   });
 }
@@ -125,6 +127,7 @@ export function fromValue(map: ColumnMap, value: unknown, columns: Record<string
   if (as === 'ma-range') {
     const [older, younger] = map.column as [string, string];
     const t = parseTime(value as TimeInput);
+    if (t.kind === 'ref') throw new Error(`write the referenced date ${t.ref} as explicit Ma bounds for a fossil correction (lo is older, hi is younger)`);
     if (t.kind !== 'instant' && t.kind !== 'interval') throw new Error(`a fossil age needs a date or closed range, got ${JSON.stringify(value)}`);
     const lo = t.kind === 'instant' ? t.t : t.lo;
     const hi = t.kind === 'instant' ? t.t : t.hi;
@@ -222,7 +225,7 @@ export async function readTable(world: World, field: Field): Promise<Table | und
   const rows = new Map<string, Record<string, unknown>>();
   raw.forEach((columns, i) => {
     const key = rowKey(field.rows!.key, columns, i);
-    if (rows.has(key)) throw new Error(`${field.id}: duplicate row key "${key}" at row ${i}`);
+    if (rows.has(key)) throw new RowKeyError(`${field.id}: duplicate row key "${key}" at row ${i}`);
     rows.set(key, columns);
   });
   return { dataset: field.data.from, field: field.id, spec: field.rows, rows };
@@ -400,6 +403,3 @@ export function correctFossils(snap: LandSnapshot, spec: RowsSpec, fixes: Map<st
   }
   return { snap: { ...snap, sites, rows: out, words }, unapplied };
 }
-
-// Keep the original land snapshot entry points for callers of the world tools.
-export { fossilRows as landRows, correctFossils as correctLand };

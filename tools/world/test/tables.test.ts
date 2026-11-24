@@ -1,13 +1,15 @@
 // Rows are claims (docs/STRUCTURE.md section 3.1): a dataset's columns read as properties by its field's mapping,
 // each row keyed from its own columns, and an overlay's corrections written back into the columns the build reads.
-import { describe, expect, it } from 'vitest';
-import { randomUUID } from 'node:crypto';
-import { mkdir, rm, writeFile } from 'node:fs/promises';
+import { describe, expect, it, vi } from 'vitest';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { ClaimIndex } from '../src/claimindex.ts';
-import { datasetDir, datasetFile, type Dataset } from '../src/manifest.ts';
+import * as manifest from '../src/manifest.ts';
+import { overlayTables, type Issue } from '../src/validate/index.ts';
 import type { LandSnapshot } from '../src/pbdb.ts';
 import type { Field, World } from '../src/world.ts';
-import { correctFossils, correctRows, fromValue, landRows, rowClaims, rowKey, toValue, type ColumnMap, type RowsSpec, type Table } from '../src/tables.ts';
+import { correctFossils, correctRows, fromValue, fossilRows, rowClaims, rowKey, toValue, type ColumnMap, type RowsSpec, type Table } from '../src/tables.ts';
 
 const POLITIES: RowsSpec = {
   kind: 'polity',
@@ -63,6 +65,7 @@ describe('a row', () => {
   it('rejects an unrepresentable range before changing either column', () => {
     const map: ColumnMap = { column: ['max', 'min'], as: 'ma-range' };
     const columns = { max: 68, min: 66 };
+    expect(() => fromValue(map, { ref: 'ics/maastrichtian' }, columns)).toThrow('explicit Ma bounds');
     for (const v of [{ lo: '120 ka' }, { lo: '80 ka', hi: '120 ka' }, { mean: '120 ka', sd: '1 kyr' }, 'unknown']) {
       expect(() => fromValue(map, v, columns)).toThrow();
       expect(columns).toEqual({ max: 68, min: 66 });
@@ -105,7 +108,7 @@ describe('corrections', () => {
       rows: [[11, 0, 1], [12, 0, 1]],
     };
     const spec: RowsSpec = { kind: 'occurrence', key: 'occ:{occurrence}', claims: { identified_as: { column: 'taxon_name' }, date: { column: ['max_ma', 'min_ma'], as: 'ma-range' }, formation: { column: 'formation' } } };
-    expect(landRows(snap)[0]).toMatchObject({ occurrence: 11, lat: 47, max_ma: 68, taxon: 'txn:1', taxon_name: 'Triceratops', formation: 'Hell Creek' });
+    expect(fossilRows(snap)[0]).toMatchObject({ occurrence: 11, lat: 47, max_ma: 68, taxon: 'txn:1', taxon_name: 'Triceratops', formation: 'Hell Creek' });
     const fixes = new Map([['occ:12', [{ prop: 'date', value: { lo: '120 ka', hi: '80000 BP' } }, { prop: 'identified_as', value: 'Torosaurus' }, { prop: 'formation', value: 'Corrected formation' }]]]);
     const { snap: out, unapplied } = correctFossils(snap, spec, fixes);
     expect(unapplied).toEqual([]);
@@ -118,33 +121,44 @@ describe('corrections', () => {
   });
 });
 
-it('indexes marine snapshot tuples by occurrence and refuses ambiguous row addresses', async () => {
-  const id = `src:test-sea-${randomUUID()}`;
-  const d: Dataset = { id, type: 'dataset', kind: 'compilation', file: '', citation: '', fetch: { url: 'snapshot.json', format: 'json', sha256: 'test', bytes: 0 } };
-  const field: Field = {
-    id: 'field:test/sea', file: '', title: 'Sea', data: { from: id, as: 'community-sea' },
-    rows: {
-      kind: 'occurrence', key: 'occ:{occurrence}',
-      claims: { identified_as: { column: 'taxon_name' }, date: { column: ['max_ma', 'min_ma'], as: 'ma-range' } },
-    },
-  };
-  const world = { fields: [field], overlays: [], manifest: { datasets: { [id]: d } } } as unknown as World;
-  const snap = { words: ['Shelf'], taxa: [[90, 'A'], [80, 'B']], sites: [[17, 30, 40, 68, 66, 0]], rows: [[1, 0, 90], [209, 0, 80]] };
-  const dir = datasetDir(id, d);
-  await mkdir(dir, { recursive: true });
-  try {
-    const file = datasetFile(id, d);
-    await writeFile(file, JSON.stringify(snap));
-    const index = await ClaimIndex.of(world);
-    expect([...index.tables.get(id)!.rows.keys()]).toEqual(['occ:1', 'occ:209']);
-    expect(index.of(`${id}#occ:209`)).toMatchObject([
-      { value: 'B', sources: [{ ref: id, loc: 'row occ:209' }] },
-      { value: { lo: '68 Ma', hi: '66 Ma' } },
-    ]);
-    snap.rows.push([1, 0, 80]);
-    await writeFile(file, JSON.stringify(snap));
-    await expect(ClaimIndex.of(world)).rejects.toThrow('duplicate row key "occ:1"');
-  } finally {
-    await rm(dir, { recursive: true, force: true });
-  }
+describe('marine occurrence tables', () => {
+  it('indexes marine snapshot tuples by occurrence and refuses ambiguous row addresses', async () => {
+    const id = 'src:test-sea';
+    const d: manifest.Dataset = { id, type: 'dataset', kind: 'compilation', file: '', citation: '', fetch: { url: 'snapshot.json', format: 'json', sha256: 'test', bytes: 0 } };
+    const field: Field = {
+      id: 'field:test/sea', file: '', title: 'Sea', data: { from: id, as: 'community-sea' },
+      rows: {
+        kind: 'occurrence', key: 'occ:{occurrence}',
+        claims: { identified_as: { column: 'taxon_name' }, date: { column: ['max_ma', 'min_ma'], as: 'ma-range' } },
+      },
+    };
+    const world = { fields: [field], overlays: [], manifest: { datasets: { [id]: d } } } as unknown as World;
+    const snap = { words: ['Shelf'], taxa: [[90, 'A'], [80, 'B']], sites: [[17, 30, 40, 68, 66, 0]], rows: [[1, 0, 90], [209, 0, 80]] };
+    const dir = await mkdtemp(join(tmpdir(), 'world-sea-'));
+    const file = join(dir, 'snapshot.json');
+    const path = vi.spyOn(manifest, 'datasetFile').mockReturnValue(file);
+    try {
+      await writeFile(file, JSON.stringify(snap));
+      const index = await ClaimIndex.of(world);
+      expect([...index.tables.get(id)!.rows.keys()]).toEqual(['occ:1', 'occ:209']);
+      expect(index.of(`${id}#occ:209`)).toMatchObject([
+        { value: 'B', sources: [{ ref: id, loc: 'row occ:209' }] },
+        { value: { lo: '68 Ma', hi: '66 Ma' } },
+      ]);
+      snap.rows.push([1, 0, 80]);
+      await writeFile(file, JSON.stringify(snap));
+      await expect(ClaimIndex.of(world)).rejects.toThrow('duplicate row key "occ:1"');
+      const overlays = [{ dataset: id }] as World['overlays'];
+      for (const [key, problem] of [['occ:{occurrence}', 'duplicate row key'], ['occ:{absent}', 'missing key column absent']]) {
+        const issues: Issue[] = [];
+        const fields = [{ ...field, rows: { ...field.rows!, key } }];
+        const tables = await overlayTables({ ...world, overlays, fields }, issues);
+        expect(tables.get(id)).toBeNull();
+        expect(issues).toMatchObject([{ level: 'error', check: 'rows', where: 'rows.key', message: expect.stringContaining(problem) }]);
+      }
+    } finally {
+      path.mockRestore();
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
 });
