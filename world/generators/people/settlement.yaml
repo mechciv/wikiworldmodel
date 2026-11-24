@@ -55,6 +55,7 @@ checks:
   - { test: world/generators/people/settlement/v10.test.ts, holds: "shrinks back to its oldest ground as its people fall" }
   - { test: world/generators/people/settlement/v10.test.ts, holds: "has no most of houses: a great city has a house to each plot it built" }
   - { test: world/generators/people/settlement/v10.test.ts, holds: "leads its routes out towards the places it dealt with, and has its wall while the wall stood, with a gate on each route" }
+  - { test: world/generators/people/settlement/v10.test.ts, holds: "gives a plot to as many people as its tradition says lived to a house: forty to a block of flats is a sixth as many houses" }
   - { test: world/generators/people/settlement/town.test.ts, holds: "builds nothing in its river" }
   - { test: world/generators/people/settlement/division.test.ts, holds: "cuts the face into blocks near its size, and plots that each have a front" }
   - { test: world/generators/people/settlement/division.test.ts, holds: "runs a planned grid on across faces, street for street" }

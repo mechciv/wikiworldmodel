@@ -379,6 +379,15 @@ describe('the settlement generator', () => {
       expect(wall!.gates.length).toBeGreaterThanOrEqual(3);
       expect(at(1200, {}, traditions).plan.perimeters.filter((p) => p.settlement === during.si)).toEqual([]);
     });
+
+    it('gives a plot to as many people as its tradition says lived to a house: forty to a block of flats is a sixth as many houses', () => {
+      const of = (household?: number) => compileTraditions([{ id: 'test/town-house', label: 'A town house', regions: [1], span: [-500, 1500], lifeways: ['townspeople'], dwelling: { plan: 'courtyard', storeys: 4 }, ...(household ? { settlement: { household } } : {}) }]);
+      const houses = at(500, {}, of()).mine.length;
+      const blocks = at(500, {}, of(40)).mine.length;
+      expect(houses).toBeGreaterThan(1000);
+      expect(blocks / houses).toBeGreaterThan(0.08);
+      expect(blocks / houses).toBeLessThan(0.3);
+    });
   });
 
   describe('a town', () => {

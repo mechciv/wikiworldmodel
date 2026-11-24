@@ -92,8 +92,9 @@
 //   - A city's plan is made in its own metres from the city and the world's ground, never from the scene drawing it.
 //     The scene leaves out the plots its own ground cannot take, in its river or on its cliffs.
 //   - A house is as big as its plot allows and its density asks, and no city has a most of houses: a great city has
-//     more, larger houses on more plots. Builds made before version 10 carry no `town` parameters, and lay their towns
-//     out as version 9 did.
+//     more, larger houses on more plots. A plot is the share of as many people as the city's tradition says lived to a
+//     house, where it says. Builds made before version 10 carry no `town` parameters, and lay their towns out as version
+//     9 did.
 //
 // Everything is seeded by the world's 5′ cells and the anthromes' step, not by the scene, so two scenes that overlap put
 // their settlements in the same places: only the ground they stand on, which is the scene's, can move one a little.
@@ -2379,6 +2380,9 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
       ...(form.orientation !== undefined ? { angle: ((90 - mid(form.orientation, 0)) * PI) / 180 } : {}),
       sizes,
       main,
+      // A plot is a household's share of the ground: as many people as its tradition says lived to a house, where it
+      // says, as forty to a block of flats in Imperial Rome; else a city's household.
+      household: mid(t?.settlement.household, p.cities.household),
       ...(wallWord ? { wall: { from: years[0], to: years[1], thickness } } : {}),
       // The walls, roads and districts a map of the city gives, where one does: the walls take the place of a generated one.
       ...(life.districts?.length ? { districts: life.districts } : {}),
