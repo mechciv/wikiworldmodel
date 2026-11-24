@@ -39,8 +39,9 @@ export interface SitingParams {
   sharpness: number;
   /**
    * fresh water: within `best` m of it a place lacks nothing; beyond, its worth falls off over `falloff` m, to `floor`,
-   * where people dug wells or carried water; and between `bank[0]` and `bank[1]` m of a river's course it climbs back from
-   * the floods' reach to the full
+   * where people dug wells or carried water; and on the banks of any water, a river's course, an old bend, a pond or a
+   * lake's shore, it keeps only 0.3 of that within `bank[0]` m and climbs back to the full by `bank[1]` m, for a river's
+   * floods and a still water's wet ground
    */
   water: { best: number; falloff: number; floor: number; bank: [number, number] };
   /** level ground: the slope, as rise over run across `over` m, at which a place keeps `floor` of its worth */

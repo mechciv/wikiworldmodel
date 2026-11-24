@@ -252,8 +252,8 @@ params:
   # Where in its 5′ cell a settlement stands (settlement/sites.ts). Nobody recorded where; these say how the generator
   # weighs a place by what people looked for in one, none of it a claim about any place. Fresh water: within `best` m a
   # place lacks nothing, and its worth falls off past it over `falloff` m, to `floor` where people dug wells or carried
-  # water; the banks of any water, a river's flooded in a high year and a pond's or a lake's wet, are worth less within
-  # `bank` m of it. Level ground keeps `floor` of its worth at a slope of `steep` across `over` m. A place a little up
+  # water; the banks of any water, a river's flooded in a high year and a pond's or a lake's wet, are worth less, down
+  # to 0.3 of their worth within the first of `bank` m and back to the full by the second. Level ground keeps `floor` of its worth at a slope of `steep` across `over` m. A place a little up
   # from the bottom of the ground about it, `best` m above the mean within `reach` m, is better than a crest or a wet
   # bottom. The soil is a noise over the
   # Earth at two scales, m. A town or a city draws settlements about it. A cell weighs `candidates` places for each of its
