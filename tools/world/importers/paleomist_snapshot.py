@@ -51,9 +51,21 @@ def central_directory():
     """Every member of the archive: its method, CRC, sizes and offset."""
     head = subprocess.run(["curl", "-sSI", "-L", "-A", USER_AGENT, "--max-time", "60", ARCHIVE], capture_output=True, check=True, text=True).stdout
     size = int([x for x in head.splitlines() if x.lower().startswith("content-length")][-1].split(":")[1])
-    tail = get_range(size - 70000, size - 1)
+    tail_start = max(0, size - 70000)
+    tail = get_range(tail_start, size - 1)
     at = tail.rfind(b"PK\x05\x06")
+    if at == -1:
+        raise RuntimeError("ZIP end-of-central-directory record not found")
     length, offset = struct.unpack("<II", tail[at + 12 : at + 20])
+    if length == 0xFFFFFFFF or offset == 0xFFFFFFFF:
+        loc = tail.rfind(b"PK\x06\x07", 0, at)
+        if loc == -1:
+            raise RuntimeError("ZIP64 end-of-central-directory locator not found")
+        z64_off = struct.unpack("<Q", tail[loc + 8 : loc + 16])[0]
+        z64 = get_range(z64_off, z64_off + 55)
+        if z64[:4] != b"PK\x06\x06":
+            raise RuntimeError("ZIP64 end-of-central-directory record invalid")
+        length, offset = struct.unpack("<QQ", z64[40:56])
     cd = get_range(offset, offset + length - 1)
     members = {}
     p = 0
@@ -61,6 +73,23 @@ def central_directory():
         method, crc, csize, usize = struct.unpack("<HxxxxIII", cd[p + 10 : p + 28])
         nl, el, cl = struct.unpack("<HHH", cd[p + 28 : p + 34])
         off = struct.unpack("<I", cd[p + 42 : p + 46])[0]
+        extra = cd[p + 46 + nl : p + 46 + nl + el]
+        if csize == 0xFFFFFFFF or usize == 0xFFFFFFFF or off == 0xFFFFFFFF:
+            ep = 0
+            while ep + 4 <= len(extra):
+                hdr, sz = struct.unpack("<HH", extra[ep : ep + 4])
+                if hdr == 0x0001:
+                    fp = ep + 4
+                    if usize == 0xFFFFFFFF:
+                        usize = struct.unpack("<Q", extra[fp : fp + 8])[0]
+                        fp += 8
+                    if csize == 0xFFFFFFFF:
+                        csize = struct.unpack("<Q", extra[fp : fp + 8])[0]
+                        fp += 8
+                    if off == 0xFFFFFFFF:
+                        off = struct.unpack("<Q", extra[fp : fp + 8])[0]
+                    break
+                ep += 4 + sz
         members[cd[p + 46 : p + 46 + nl].decode()] = {"method": method, "crc": crc, "csize": csize, "usize": usize, "offset": off}
         p += 46 + nl + el + cl
     return size, members

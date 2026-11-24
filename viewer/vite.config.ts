@@ -1,5 +1,5 @@
 import { createReadStream, existsSync, statSync } from 'node:fs';
-import { extname, join, resolve } from 'node:path';
+import { extname, join, resolve, sep } from 'node:path';
 import { createBrotliCompress, createGzip, constants as zlibConstants } from 'node:zlib';
 import { defineConfig, type Plugin } from 'vite';
 import { createFeedbackMiddleware } from '../tools/world/src/feedbackStore.ts';
@@ -12,8 +12,8 @@ const FEEDBACK = process.env.WIKIWORLDMODEL_FEEDBACK_DIR ? resolve(process.env.W
 const TYPES: Record<string, string> = { '.json': 'application/json', '.lwt': 'application/octet-stream', '.md': 'text/markdown; charset=utf-8' };
 
 function resolveBuildAsset(rel: string): { path: string; isBlob: boolean } | undefined {
-  const direct = join(BUILDS, rel);
-  if (direct.startsWith(BUILDS) && existsSync(direct) && statSync(direct).isFile()) {
+  const direct = resolve(BUILDS, rel);
+  if (direct.startsWith(BUILDS + sep) && existsSync(direct) && statSync(direct).isFile()) {
     return { path: direct, isBlob: rel.startsWith('blobs/') };
   }
   const m = /^blobs\/([0-9a-f]{64})$/.exec(rel);
@@ -31,7 +31,14 @@ function builds(): Plugin {
   const serve = (req: { url?: string; headers?: Record<string, string | string[] | undefined> }, res: import('node:http').ServerResponse, next: () => void) => {
     const url = (req.url ?? '').split('?')[0];
     if (!url.startsWith('/builds/')) return next();
-    const rel = decodeURIComponent(url.slice('/builds/'.length));
+    let rel: string;
+    try {
+      rel = decodeURIComponent(url.slice('/builds/'.length));
+    } catch {
+      res.statusCode = 400;
+      res.end();
+      return;
+    }
     const found = resolveBuildAsset(rel);
     if (!found) {
       res.statusCode = 404;

@@ -75,7 +75,11 @@ def load_snapshot(pf, index, rg):
         nb = [el[ii, jj % WIDTH] for ii in (i - 1, i, i + 1) for jj in (j - 1, j, j + 1)
               if 0 < ii < rows - 1 and (ii, jj % WIDTH) != (i, j) and el[ii, jj % WIDTH] <= MAX_ELEVATION]
         old = float(el[i, j])
-        el[i, j] = float(np.median(nb))
+        if nb:
+            el[i, j] = float(np.median(nb))
+        else:
+            valid_row = el[i][el[i] <= MAX_ELEVATION]
+            el[i, j] = float(np.median(valid_row)) if valid_row.size else MAX_ELEVATION
         notes.append({'fix': 'spike-replaced', 'lat': int(90 - i), 'lon': int(j - 180), 'source_m': old, 'value_m': float(el[i, j])})
     if h == 180:
         el = np.vstack([el, el[-1:, :]])
@@ -123,6 +127,8 @@ def fields(req):
             continue
         elev, notes = load_snapshot(pf, index, rg)
         plates = partition(polygons, rotations, age)
+        if plates.size and int(plates.max()) > 65535:
+            raise ValueError(f'{age} Ma: plate id {int(plates.max())} exceeds uint16')
         land = elev > 0
         deep = elev < -3000
         inside = plates > 0
@@ -137,7 +143,7 @@ def fields(req):
         snapshots.append({'ageMa': age, 'sourceFile': rg['sourceFile'], 'sourceGrid': [rg['width'], rg['height']],
                           'min_m': int(elev.min()), 'max_m': int(elev.max()), 'corrections': notes,
                           'alignment': diag, 'plates': sorted(int(p) for p in np.unique(plates) if p)})
-        print(f'  {age:3d} Ma: {len(notes)} corrections, land inside plate polygons {diag["land_inside_polygons"]:.3f}', flush=True)
+        print(f'  {age:g} Ma: {len(notes)} corrections, land inside plate polygons {diag["land_inside_polygons"]:.3f}', flush=True)
     doc = {
         'format': 'lightworld-field-import@1',
         'grid': {'width': WIDTH, 'height': HEIGHT, 'lon0': -180, 'lat0': 90, 'step': 1,
@@ -166,7 +172,7 @@ def blocks(req):
         plates.astype('<u4').tofile(os.path.join(out, 'plate', f'{age}.u32'))
         snapshots.append({'ageMa': age, 'polygons': len(placed), 'polygons_without_rotation': len(alive) - len(placed),
                           'nodes_on_plates': round(float(inside.mean()), 6), 'plates': sorted(int(p) for p in np.unique(plates) if p)})
-        print(f'  {age:4d} Ma: {len(placed)} polygons ({len(alive) - len(placed)} without a rotation), nodes on plates {inside.mean():.3f}', flush=True)
+        print(f'  {age:g} Ma: {len(placed)} polygons ({len(alive) - len(placed)} without a rotation), nodes on plates {inside.mean():.3f}', flush=True)
     doc = {
         'format': 'lightworld-blocks-import@2',
         'grid': {'width': WIDTH, 'height': HEIGHT, 'lon0': -180, 'lat0': 90, 'step': 1,
@@ -195,23 +201,28 @@ def plates(req):
     coarse = partition(polygons, rotations, age)
     part = pygplates.PlatePartitioner(polygons, rotations, float(age))
     nx, ny = WIDTH * n, (HEIGHT - 1) * n + 1
-    fine = np.zeros((ny, nx), dtype=np.uint16)
-    refined = 0
+    fine = np.zeros((ny, nx), dtype=np.uint32)
+    mixed = []
+    # Fill uniform cells first (without clobbering south neighbours' refined boundary rows), then refine mixed cells.
     for i in range(HEIGHT - 1):
         for j in range(WIDTH):
             jj = (j + 1) % WIDTH
             corners = {int(coarse[i, j]), int(coarse[i, jj]), int(coarse[i + 1, j]), int(coarse[i + 1, jj])}
             if len(corners) == 1:
-                fine[i * n:(i + 1) * n + 1, j * n:(j + 1) * n] = corners.pop()
-                continue
-            refined += 1
-            for r in range(i * n, (i + 1) * n + 1):
-                lat = 90.0 - r / n
-                for c in range(j * n, (j + 1) * n):
-                    hit = part.partition_point(pygplates.PointOnSphere(lat, c / n - 180.0))
-                    fine[r, c] = hit.get_feature().get_reconstruction_plate_id() if hit is not None else 0
+                fine[i * n:(i + 1) * n, j * n:(j + 1) * n] = corners.pop()
+            else:
+                mixed.append((i, j))
+    for i, j in mixed:
+        for r in range(i * n, (i + 1) * n + 1):
+            lat = 90.0 - r / n
+            for c in range(j * n, (j + 1) * n):
+                hit = part.partition_point(pygplates.PointOnSphere(lat, c / n - 180.0))
+                fine[r, c] = hit.get_feature().get_reconstruction_plate_id() if hit is not None else 0
     fine[0, :] = coarse[0, 0]
     fine[-1, :] = coarse[-1, 0]
+    if fine.size and int(fine.max()) > 65535:
+        raise ValueError(f'{age} Ma: plate id {int(fine.max())} exceeds uint16')
+    refined = len(mixed)
     fine.astype('<u2').tofile(os.path.join(out, 'plate', f'{age}.u16'))
     doc = {
         'format': 'lightworld-plates-import@1',
@@ -226,7 +237,7 @@ def plates(req):
     with open(os.path.join(out, 'meta.json'), 'w') as f:
         json.dump(doc, f, indent=1, sort_keys=True)
         f.write('\n')
-    print(f'  {age} Ma: {refined} one-degree cells refined to {req["step"]} degrees', flush=True)
+    print(f'  {age:g} Ma: {refined} one-degree cells refined to {req["step"]} degrees', flush=True)
 
 
 def points(req):

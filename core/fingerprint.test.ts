@@ -52,4 +52,11 @@ describe('fingerprints', () => {
     expect(check.actual).not.toBeNull();
     expect(settlePrint(check, fingerprint([{ name: 'xy', values: positions(9) }]))).toEqual(['xy: 9 values, not 10']);
   });
+
+  it('rejects non-finite values (NaN and Infinity) instead of passing silently', () => {
+    const good = fingerprint([{ name: 'x', values: [1, 2, 3, 4] }]);
+    const bad = fingerprint([{ name: 'x', values: [1, Number.NaN, 3, 4] }]);
+    expect(fingerprintProblems(good, bad).length).toBeGreaterThan(0);
+    expect(fingerprintProblems(bad, bad).length).toBeGreaterThan(0);
+  });
 });

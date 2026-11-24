@@ -55,16 +55,34 @@ export function searchRows(found: SearchFile, polities: PolitiesFile | undefined
   const byId = new Map(found.entities.map((e) => [e.id, e]));
   const adopt = new Map<string, PolityRow[]>();
   const loose = new Map<string, PolityRow[]>();
+  const push = (m: Map<string, PolityRow[]>, k: string, r: PolityRow) => {
+    let list = m.get(k);
+    if (!list) {
+      list = [];
+      m.set(k, list);
+    }
+    list.push(r);
+  };
   for (const r of polities?.rows ?? []) {
     const owner = r.row ? adopted.get(r.row) : undefined;
-    if (owner && byId.has(owner)) adopt.set(owner, [...(adopt.get(owner) ?? []), r]);
+    if (owner && byId.has(owner)) push(adopt, owner, r);
     // A row a record draws as its territory is that record's: found by the record, named by its territory.
     else if (r.claimedBy?.some((c) => byId.has(splitRef(c).record))) continue;
-    else if (!r.name.startsWith('(')) loose.set(r.name, [...(loose.get(r.name) ?? []), r]);
+    else if (!r.name.startsWith('(')) push(loose, r.name, r);
+  }
+  const drawnById = new Map<string, TerritoryFile['territories'][number]['claims'][number]['rows']>();
+  for (const t of territory.territories) {
+    const rec = splitRef(t.subject).record;
+    let list = drawnById.get(rec);
+    if (!list) {
+      list = [];
+      drawnById.set(rec, list);
+    }
+    for (const c of t.claims) for (const r of c.rows) list.push(r);
   }
   const entities = found.entities.map((e) => {
     const own = adopt.get(e.id) ?? [];
-    const drawn = territory.territories.filter((t) => splitRef(t.subject).record === e.id).flatMap((t) => t.claims.flatMap((c) => c.rows));
+    const drawn = drawnById.get(e.id) ?? [];
     if (!own.length && !drawn.length) return e;
     const names = withNames(e, namesFrom([...own, ...drawn]));
     return { ...e, ...(names ? { names } : {}), ...(own.length ? { places: own.sort((a, b) => a.from - b.from).map(placeOf) } : {}) };
@@ -73,11 +91,13 @@ export function searchRows(found: SearchFile, polities: PolitiesFile | undefined
   for (const [name, all] of [...loose].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))) {
     for (const run of runsOf(all, gap)) {
       if (!run[0].row) continue;
+      let maxTo = -Infinity;
+      for (const r of run) if (r.to > maxTo) maxTo = r.to;
       rows.push({
         id: run[0].row,
         label: name,
         kind,
-        time: span(run[0].from, Math.max(...run.map((r) => r.to))),
+        time: span(run[0].from, maxTo),
         located: false,
         places: run.map(placeOf),
         dataset: polities!.source,

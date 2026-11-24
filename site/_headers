@@ -3,7 +3,9 @@
 # headers (tools/world/publish-build.sh); the index naming the latest build is here, and changes.
 /*
   X-Content-Type-Options: nosniff
+  X-Frame-Options: SAMEORIGIN
   Referrer-Policy: strict-origin-when-cross-origin
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; worker-src 'self' blob:; connect-src 'self' https:; frame-ancestors 'self'; object-src 'none'; base-uri 'self'
 
 /world/builds/index.json
   Cache-Control: no-cache

@@ -67,8 +67,21 @@ export function listFeedback(root: string): StoredFeedback[] {
 function sendJson(res: ServerResponse, status: number, body: unknown): void {
   res.statusCode = status;
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('Cache-Control', 'no-store');
   res.end(JSON.stringify(body));
+}
+
+function isSameOriginPost(req: IncomingMessage): boolean {
+  const origin = req.headers.origin;
+  if (!origin) return true;
+  const host = req.headers.host;
+  if (!host) return false;
+  try {
+    return new URL(origin).host === host;
+  } catch {
+    return false;
+  }
 }
 
 function readBody(req: IncomingMessage, maxBytes: number): Promise<string> {
@@ -83,7 +96,7 @@ function readBody(req: IncomingMessage, maxBytes: number): Promise<string> {
       if (total > maxBytes) {
         done = true;
         rejectBody(Object.assign(new Error('Request body too large.'), { statusCode: 413 }));
-        req.resume();
+        req.destroy();
         return;
       }
       chunks.push(buf);
@@ -123,6 +136,15 @@ export function createFeedbackMiddleware(rootDir: string, displayBase?: string) 
         sendJson(res, 405, { error: 'Method not allowed.' });
         return;
       }
+      if (!isSameOriginPost(req)) {
+        sendJson(res, 403, { error: 'Cross-origin feedback submission rejected.' });
+        return;
+      }
+      const contentType = String(req.headers['content-type'] ?? '').split(';')[0].trim().toLowerCase();
+      if (contentType && contentType !== 'application/json') {
+        sendJson(res, 415, { error: 'Content-Type must be application/json.' });
+        return;
+      }
       void readBody(req, MAX_FEEDBACK_BODY_BYTES)
         .then((text) => {
           let raw: unknown;
@@ -153,7 +175,13 @@ export function createFeedbackMiddleware(rootDir: string, displayBase?: string) 
 
     const match = /^\/api\/feedback\/([^/]+)\/screenshot\.png$/.exec(pathname);
     if (match && req.method === 'GET') {
-      const id = decodeURIComponent(match[1]);
+      let id: string;
+      try {
+        id = decodeURIComponent(match[1]);
+      } catch {
+        sendJson(res, 400, { error: 'Invalid feedback id.' });
+        return;
+      }
       if (!isSafeFeedbackId(id)) {
         sendJson(res, 400, { error: 'Invalid feedback id.' });
         return;
@@ -165,6 +193,7 @@ export function createFeedbackMiddleware(rootDir: string, displayBase?: string) 
       }
       res.statusCode = 200;
       res.setHeader('Content-Type', 'image/png');
+      res.setHeader('X-Content-Type-Options', 'nosniff');
       res.setHeader('Cache-Control', 'no-store');
       createReadStream(file).pipe(res);
       return;

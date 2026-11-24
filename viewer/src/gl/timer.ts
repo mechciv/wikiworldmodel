@@ -33,7 +33,7 @@ export class FrameTimer {
   private on = false;
   private frame = 0;
   /** a pixel to read back, which waits for the GPU to finish what it was given */
-  private sync: { fb: WebGLFramebuffer; px: Uint8Array } | null = null;
+  private sync: { fb: WebGLFramebuffer; tex: WebGLTexture; px: Uint8Array } | null = null;
   /** the pass being measured, and when it started where the GPU is waited for */
   private open: { name: string; query: WebGLQuery | null; t0: number } | null = null;
   /** queries asked of the GPU and not yet answered */
@@ -135,7 +135,7 @@ export class FrameTimer {
       gl.bindFramebuffer(gl.READ_FRAMEBUFFER, fb);
       gl.framebufferTexture2D(gl.READ_FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, t, 0);
       gl.bindFramebuffer(gl.READ_FRAMEBUFFER, read);
-      this.sync = { fb, px: new Uint8Array(4) };
+      this.sync = { fb, tex: t, px: new Uint8Array(4) };
     }
     const read = gl.getParameter(gl.READ_FRAMEBUFFER_BINDING) as WebGLFramebuffer | null;
     gl.bindFramebuffer(gl.READ_FRAMEBUFFER, this.sync.fb);
@@ -181,5 +181,14 @@ export class FrameTimer {
     this.order = [];
     this.frame = 0;
     this.on = false;
+  }
+
+  dispose(): void {
+    this.drop();
+    if (this.sync) {
+      this.gl.deleteFramebuffer(this.sync.fb);
+      this.gl.deleteTexture(this.sync.tex);
+      this.sync = null;
+    }
   }
 }

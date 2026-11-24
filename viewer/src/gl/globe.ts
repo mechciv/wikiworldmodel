@@ -170,8 +170,10 @@ vec3 snow(vec4 stone, float land) {
 float graticule(vec3 n) {
   float lat = degrees(asin(clamp(n.z, -1.0, 1.0)));
   float lon = degrees(atan(n.y, n.x));
+  float lonShift = mod(lon + 360.0, 360.0);
+  float dlon = min(fwidth(lon), fwidth(lonShift));
   float glat = 1.0 - smoothstep(0.0, 1.5 * fwidth(lat), abs(mod(lat + 15.0, 30.0) - 15.0));
-  float glon = 1.0 - smoothstep(0.0, 1.5 * fwidth(lon), abs(mod(lon + 15.0, 30.0) - 15.0));
+  float glon = 1.0 - smoothstep(0.0, 1.5 * dlon, abs(mod(lon + 15.0, 30.0) - 15.0));
   return max(glat, glon);
 }
 
@@ -205,13 +207,16 @@ vec4 coverTex(vec3 n, float scale) {
 // What covers the land here: the climate says what could grow, and the world's transitions what had
 // come to exist by now. With no land plants yet, only rock, sand, frost and a film of microbes are drawn.
 vec3 biome(vec3 n, float e, float reach, vec4 stone, float rugged) {
-  vec4 k = mix(texture(uClimate0, n), texture(uClimate1, n), uClimateMix);
+  vec4 k0 = texture(uClimate0, n);
+  vec4 k1 = texture(uClimate1, n);
+  vec4 k = mix(k0, k1, uClimateMix);
   vec4 wide = coverTex(n, 5.0);
   vec4 near = coverTex(n, 37.0);
   float rag = 0.55 * (wide.b - 0.5) + 0.25 * (near.b - 0.5) + 0.65 * (stone.y - 0.5);
   float hot = k.r * 110.0 - 60.0 + rag * 6.0;
   float cold = k.g * 110.0 - 60.0 + rag * 6.0;
-  float wetness = k.b * k.b * 4.0 * (1.0 + rag * 0.8);
+  float aridity = mix(k0.b * k0.b, k1.b * k1.b, uClimateMix);
+  float wetness = aridity * 4.0 * (1.0 + rag * 0.8);
   float margin = k.a * 300.0 - 150.0 + rag * 50.0;
   float polar = 1.0 - smoothstep(uRule.x - 2.0, uRule.x + 2.0, hot);
   float frost = 1.0 - smoothstep(uRule.y - 1.5, uRule.y + 1.5, hot);
@@ -799,6 +804,8 @@ export class GlobeRenderer {
   private cloudMap: Program;
   private cloudDetail: WebGLTexture | null = null;
   private vao: WebGLVertexArrayObject;
+  private vbo: WebGLBuffer;
+  private ibo: WebGLBuffer;
   private count: number;
   private cloudTex: WebGLTexture | null = null;
   private patternTex: WebGLTexture;
@@ -825,16 +832,16 @@ export class GlobeRenderer {
     const { pos, idx } = sphere(256, 128);
     this.vao = gl.createVertexArray()!;
     gl.bindVertexArray(this.vao);
-    const vb = gl.createBuffer()!;
-    gl.bindBuffer(gl.ARRAY_BUFFER, vb);
+    this.vbo = gl.createBuffer()!;
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo);
     gl.bufferData(gl.ARRAY_BUFFER, pos, gl.STATIC_DRAW);
     for (const p of [this.surface, this.clouds]) {
       const loc = gl.getAttribLocation(p.program, 'aPos');
       gl.enableVertexAttribArray(loc);
       gl.vertexAttribPointer(loc, 3, gl.FLOAT, false, 0, 0);
     }
-    const ib = gl.createBuffer()!;
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ib);
+    this.ibo = gl.createBuffer()!;
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ibo);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, idx, gl.STATIC_DRAW);
     this.count = idx.length;
     gl.bindVertexArray(null);
@@ -1062,5 +1069,27 @@ export class GlobeRenderer {
     }
     gl.disable(gl.CULL_FACE);
     gl.bindVertexArray(null);
+  }
+
+  dispose(): void {
+    const gl = this.gl;
+    gl.deleteProgram(this.surface.program);
+    gl.deleteProgram(this.clouds.program);
+    gl.deleteProgram(this.sky.program);
+    gl.deleteProgram(this.cloudMap.program);
+    gl.deleteVertexArray(this.vao);
+    gl.deleteVertexArray(this.emptyVao);
+    gl.deleteBuffer(this.vbo);
+    gl.deleteBuffer(this.ibo);
+    if (this.cloudDetail) gl.deleteTexture(this.cloudDetail);
+    if (this.cloudTex) gl.deleteTexture(this.cloudTex);
+    gl.deleteTexture(this.patternTex);
+    gl.deleteTexture(this.territoryTex);
+    gl.deleteTexture(this.biomeTex);
+    gl.deleteTexture(this.genericLandTex);
+    gl.deleteTexture(this.peopleTex);
+    gl.deleteTexture(this.anthromeTex);
+    this.cloudDetail = null;
+    this.cloudTex = null;
   }
 }

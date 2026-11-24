@@ -94,4 +94,42 @@ describe('shadowFocusFor', () => {
       prev = cur;
     }
   });
+
+  it('escapes HTML markup, blocks unsafe href schemes, and validates build IDs', async () => {
+    const { esc, isSafeBuildId, safeHref } = await import('../../../viewer/src/ui/html.ts');
+    expect(esc(`<img src=x onerror="alert('1')">&`)).toBe('&lt;img src=x onerror=&quot;alert(&#39;1&#39;)&quot;&gt;&amp;');
+    expect(safeHref('https://example.org/doc')).toBe('https://example.org/doc');
+    expect(safeHref('http://localhost:5173/test')).toBe('http://localhost:5173/test');
+    expect(safeHref('javascript:alert(1)')).toBeUndefined();
+    expect(safeHref('data:text/html,<script>alert(1)</script>')).toBeUndefined();
+    expect(safeHref('vbscript:msgbox(1)')).toBeUndefined();
+    expect(isSafeBuildId('0123456789abcdef')).toBe(true);
+    expect(isSafeBuildId('build_v1.2-test')).toBe(true);
+    expect(isSafeBuildId('../evil')).toBe(false);
+    expect(isSafeBuildId('"><script>')).toBe(false);
+  });
+
+  it('rejects behind-camera points in Camera.project, sky rays in Camera.pick, and dist <= 1 in quantize', async () => {
+    const { Camera } = await import('../../../viewer/src/camera.ts');
+    const { quantize } = await import('../../../viewer/src/state.ts');
+    const cam = new Camera();
+    cam.update({ lat: 0, lon: 0, dist: 2.5, heading: 0, tilt: 75 }, 800, 600);
+    expect(cam.project([-1, 0, 0]).visible).toBe(false);
+    expect(cam.pick(400, 1)).toBeUndefined();
+
+    const base = {
+      t: 315,
+      cam: { lat: 41.9, lon: 12.5, dist: 0.5 },
+      window: [-1000, 1950] as [number, number],
+      evidence: false,
+      clouds: true,
+      alt: [],
+      picks: [],
+      sel: null,
+      hour: 17.4,
+    };
+    expect(quantize(base).cam.dist).toBeGreaterThan(1);
+    const street = quantize({ ...base, cam: { lat: 41.9, lon: 12.5, dist: 1 + 2.5 / EARTH_RADIUS } });
+    expect((street.cam.dist - 1) * EARTH_RADIUS).toBeCloseTo(2.5, 1);
+  });
 });

@@ -93,8 +93,14 @@ export function columnCells(columns: ColumnRow[], res: number): { nx: number; ny
       if (lat >= b.south && lat <= b.north) row.push(k);
     });
     if (!row.length) continue;
-    const from = Math.max(0, Math.floor((Math.min(...row.map((k) => boxes[k].west)) + 180) / res));
-    const to = Math.min(nx - 1, Math.floor((Math.max(...row.map((k) => boxes[k].east)) + 180) / res));
+    let minWest = Infinity;
+    let maxEast = -Infinity;
+    for (const k of row) {
+      if (boxes[k].west < minWest) minWest = boxes[k].west;
+      if (boxes[k].east > maxEast) maxEast = boxes[k].east;
+    }
+    const from = Math.max(0, Math.floor((minWest + 180) / res));
+    const to = Math.min(nx - 1, Math.floor((maxEast + 180) / res));
     for (let i = from; i <= to; i++) {
       const lng = -180 + (i + 0.5) * res;
       let best = -1;
@@ -206,8 +212,12 @@ export function buildStrata(s: Solved | undefined, snap: ColumnsSnapshot, datase
     from = k + 1;
     held = 0;
   });
-  const older = Math.max(...snap.units.map((u) => u[5]));
-  const younger = Math.min(...snap.units.map((u) => u[6]));
+  let older = -Infinity;
+  let younger = Infinity;
+  for (const u of snap.units) {
+    if (u[5] > older) older = u[5];
+    if (u[6] < younger) younger = u[6];
+  }
   const header: StrataHeader = {
     format: 'lightworld-strata@1',
     field: field.id,

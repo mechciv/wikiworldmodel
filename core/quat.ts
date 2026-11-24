@@ -47,6 +47,7 @@ export function conj(q: Quat): Quat {
 
 export function normalize(q: Quat): Quat {
   const n = Math.hypot(q[0], q[1], q[2], q[3]);
+  if (n === 0) return [1, 0, 0, 0];
   return [q[0] / n, q[1] / n, q[2] / n, q[3] / n];
 }
 

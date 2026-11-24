@@ -68,4 +68,11 @@ describe('the tree', () => {
     expect(shut.length).toBeLessThan(40);
     expect(ix.size[0]).toBe(49999);
   });
+
+  it('terminates safely on cyclic parent references', () => {
+    const cyclic: TreeNode[] = [node('a', 1, -100), node('b', 0, -90)];
+    const idx = indexTree(cyclic);
+    expect(subtree(idx, 0).length).toBeLessThanOrEqual(2);
+    expect(ancestors(cyclic, 0).length).toBeLessThanOrEqual(2);
+  });
 });

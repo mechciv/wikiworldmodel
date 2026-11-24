@@ -21,7 +21,7 @@
     "title": { "type": "string" },
     "container": { "type": "string", "description": "Journal, book or database" },
     "doi": { "type": "string", "pattern": "^10\\.[0-9]{4,9}/\\S+$" },
-    "url": { "type": "string", "format": "uri" },
+    "url": { "type": "string", "format": "uri", "pattern": "^https?://" },
     "license": { "type": "string" },
     "license_note": { "type": "string" },
     "via": { "type": "string", "description": "How this source reached us, if not directly" },

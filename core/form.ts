@@ -73,6 +73,16 @@ export const namesRows = (x: unknown): x is Record<string, unknown> => isObject(
  * A list with some of its rows changed, each named by its number from 0: a whole number is that row, changed as any
  * value is, and null takes it away; a number between two rows, as 6.5, or past the last, is a new row there.
  */
+function stripNulls(x: unknown): unknown {
+  if (Array.isArray(x)) return x.map(stripNulls);
+  if (!isObject(x)) return x;
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(x)) {
+    if (v !== null) out[k] = stripNulls(v);
+  }
+  return out;
+}
+
 function rows(base: unknown[], over: Record<string, unknown>): unknown[] {
   const out: { at: number; value: unknown }[] = base.map((value, at) => ({ at, value }));
   const gone = new Set<number>();
@@ -81,7 +91,7 @@ function rows(base: unknown[], over: Record<string, unknown>): unknown[] {
     if (Number.isInteger(at) && at < base.length) {
       if (v === null) gone.add(at);
       else out[at].value = merged(base[at], v);
-    } else if (v !== null) out.push({ at, value: v });
+    } else if (v !== null) out.push({ at, value: stripNulls(v) });
   }
   return out
     .filter((r) => !gone.has(r.at))
@@ -95,7 +105,10 @@ function rows(base: unknown[], over: Record<string, unknown>): unknown[] {
  */
 function merged(base: unknown, over: unknown): unknown {
   if (Array.isArray(base) && namesRows(over)) return rows(base, over);
-  if (!isObject(over) || !isObject(base)) return over;
+  if (!isObject(over)) return over;
+  if (!isObject(base) || (typeof base.type === 'string' && typeof over.type === 'string' && base.type !== over.type)) {
+    return stripNulls(over);
+  }
   const out: Record<string, unknown> = { ...base };
   for (const [k, v] of Object.entries(over)) {
     if (v === null) delete out[k];
@@ -118,7 +131,7 @@ function sorted(x: unknown): unknown {
 }
 
 /** A form's own canonical form: keys sorted, and parts taken away gone. */
-export const canonicalForm = (f: Form): Form => sorted(merged({}, f)) as Form;
+export const canonicalForm = (f: Form): Form => sorted(stripNulls(f)) as Form;
 
 /**
  * Where a taxon's form comes from: the path from its nearest body plan down to it. `plan` is the name
@@ -160,7 +173,7 @@ export function formSource(path: TreeStep[]): FormSource | undefined {
 
 /** A form from its plan and the changes on the way down to the taxon. */
 export function resolveForm(plans: Record<string, Form>, source: FormSource): Form {
-  const plan = plans[source.plan];
+  const plan = Object.hasOwn(plans, source.plan) ? plans[source.plan] : undefined;
   if (!plan) throw new Error(`no body plan "${source.plan}"`);
   let f = canonicalForm(plan);
   for (const { change } of source.changes) f = applyChange(f, change);

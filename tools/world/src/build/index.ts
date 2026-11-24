@@ -125,6 +125,16 @@ function shownAlternatives(world: World): Tileset['alternatives'] {
     }));
 }
 
+function minMax(values: Iterable<number>): [number, number] {
+  let lo = Infinity;
+  let hi = -Infinity;
+  for (const v of values) {
+    if (v < lo) lo = v;
+    if (v > hi) hi = v;
+  }
+  return [lo, hi];
+}
+
 /**
  * The span of the world, in astronomical years: from the oldest time any record, period,
  * field or series reaches to the furthest projection, and at least to the present.
@@ -135,7 +145,7 @@ function worldSpan(periods: PeriodRecord[], found: SearchFile, grids: GridField[
   for (const e of found.entities) for (const x of [e.time.start.best, e.time.end.best]) if (x !== null && Number.isFinite(x)) times.push(x);
   for (const g of grids) times.push(fromMa(g.coverMa[0]), fromMa(g.coverMa[1]));
   for (const s of series) times.push(s.points[0][0], s.points.at(-1)![0]);
-  return [Math.min(...times), Math.max(...times)];
+  return minMax(times);
 }
 
 /** How many keyframes a file of a climate finer in time holds: each file shares its last with the next file's first. */
@@ -363,6 +373,15 @@ export function resolveWorldOf(
   const mask = land ? generateGenericLand(land.slots.globe.seed, landParams!) : undefined;
   const bins = new Map<number, AtlasBin>();
   const ages = climateKeys.map((k) => k.ageMa);
+  const [minAge, maxAge] = ages.length ? minMax(ages) : [0, 0];
+  let polLo = Infinity;
+  let polHi = -Infinity;
+  if (polities?.rows.length) {
+    for (const r of polities.rows) {
+      if (r.from < polLo) polLo = r.from;
+      if (r.to > polHi) polHi = r.to;
+    }
+  }
   // The states of the last time asked: a grid of places is asked at one time after another.
   let rowsT = NaN;
   let rows: ReturnType<typeof politiesAt> = [];
@@ -376,11 +395,11 @@ export function resolveWorldOf(
   return {
     planet: planetFile ?? buildPlanet(solved),
     geography: grids.map((g) => ({ title: g.field.title, mode: g.mode, coverage: [fromMa(g.coverMa[0]), fromMa(g.coverMa[1])] })),
-    climate: ages.length ? [fromMa(Math.max(...ages)), fromMa(Math.min(...ages))] : undefined,
+    climate: ages.length ? [fromMa(maxAge), fromMa(minAge)] : undefined,
     climateModel: energyBalanceOf(world, series),
     ice: ice?.coverage,
     people: people ? [people.header.steps[0], people.header.steps.at(-1)!] : undefined,
-    polities: polities?.rows.length ? [Math.min(...polities.rows.map((r) => r.from)), Math.max(...polities.rows.map((r) => r.to))] : undefined,
+    polities: polities?.rows.length ? [polLo, polHi] : undefined,
     polity: polities ? (lat, lon, t) => rowsAt(t).find((r) => insideRow(r, lon, lat))?.name : undefined,
     life: atlas
       ? (lat, lon, t) => {
@@ -419,7 +438,9 @@ export function energyBalanceOf(world: World, series: SeriesFile['series']): Res
 }
 
 /** The 1° cell of a grid of where rivers were seen that a place falls in. */
-const seenCell = (lat: number, lon: number) => Math.min(179, Math.floor(90 - lat)) * 360 + Math.min(359, Math.floor(lon + 180));
+const seenCell = (lat: number, lon: number) =>
+  Math.max(0, Math.min(179, Math.floor(90 - lat))) * 360 +
+  Math.max(0, Math.min(359, Math.floor((((lon + 180) % 360) + 360) % 360)));
 
 /**
  * What answers each layer, and when (core/coverage.ts): the same things resolveWorldOf hands to resolve, each with its
@@ -508,8 +529,13 @@ export function coverageSources(
     out.push({ layer: 'people', id: field?.id ?? people.header.source, title: people.header.title, tier: 'model', span: [people.header.steps[0], people.header.steps.at(-1)!], res_deg: people.header.res });
   }
   if (polities?.file.rows.length) {
-    const rows = polities.file.rows;
-    out.push({ layer: 'polity', id: polities.field.id, title: polities.field.title, tier: 'evidence', span: [Math.min(...rows.map((r) => r.from)), Math.max(...rows.map((r) => r.to))] });
+    let lo = Infinity;
+    let hi = -Infinity;
+    for (const r of polities.file.rows) {
+      if (r.from < lo) lo = r.from;
+      if (r.to > hi) hi = r.to;
+    }
+    out.push({ layer: 'polity', id: polities.field.id, title: polities.field.title, tier: 'evidence', span: [lo, hi] });
   }
   return out.map((s) => ({ ...s, span: clip(s.span) })).filter((s) => s.span[1] > s.span[0]);
 }
@@ -518,7 +544,7 @@ export function coverageSources(
 function overlayFile(world: World, index: ClaimIndex): OverlaysFile | undefined {
   if (!world.overlays.length) return undefined;
   const rows: OverlaysFile['rows'] = {};
-  for (const o of [...world.overlays].sort((a, b) => (a.row < b.row ? -1 : 1))) {
+  for (const o of [...world.overlays].sort((a, b) => (a.row < b.row ? -1 : a.row > b.row ? 1 : 0))) {
     rows[o.row] = {
       dataset: o.dataset,
       key: o.key,
@@ -555,7 +581,7 @@ function coverage(world: World, wanted: { ref: string; from: { file: string; whe
       const counts: Partial<Record<Basis, number>> = {};
       for (const f of feats) {
         const [w, s, e, n] = t.bbox;
-        const inside = f.location.lon >= w && f.location.lon < e && f.location.lat >= s && f.location.lat <= n;
+        const inside = f.location.lon >= w && (e >= 180 ? f.location.lon <= e : f.location.lon < e) && f.location.lat >= s && f.location.lat <= n;
         if (!visible(f, t.time) || (t.lod > 0 && !inside)) continue;
         counts[f.basis.place] = (counts[f.basis.place] ?? 0) + 1;
       }
@@ -999,7 +1025,7 @@ export async function runBuild(args: string[]): Promise<number> {
             const bytes = encodeTile(header as unknown as Record<string, unknown>, arrays, stableStringify);
             const url = `tiles/${lod.lod}/${x}-${y}/b${bi}.lwt`;
             const ref = await sink.put(url, bytes);
-            tiles.push({ id, lod: lod.lod, bbox: cell, time, url, bytes: ref.bytes, sha256: ref.sha256, parent: lod.lod === 0 ? null : `0/0-0/b${parentBin}` });
+            tiles.push({ id, lod: lod.lod, bbox: cell, time, url, bytes: ref.bytes, sha256: ref.sha256, parent: lod.lod === 0 || parentBin < 0 ? null : `0/0-0/b${parentBin}` });
           }
         }
       }
@@ -1318,7 +1344,7 @@ export async function runBuild(args: string[]): Promise<number> {
   if (biomeField && paleo) {
     for (const f of world.fields.filter((x) => fieldSource(x) === 'climate' && x.data?.variables)) {
       const reads = cellHeight ? partReads(f) : [];
-      const more: MonthsMore = Object.fromEntries(reads.map((r) => [r.part, PARTS[r.part].per === 12 ? { variable: r.variable, per: 'month' as const, scale: PART_IMPORT_SCALE } : { variable: r.variable, per: 'year' as const, scale: 1 }]));
+      const more: MonthsMore = Object.fromEntries(reads.map((r) => [r.part, PARTS[r.part].per === 12 ? { variable: r.variable, per: 'month' as const, scale: PART_IMPORT_SCALE, ...(r.part === 'u' || r.part === 'v' ? { signed: true } : {}) } : { variable: r.variable, per: 'year' as const, scale: 1 }]));
       const dir = await importMonths(f, f.data!.variables!, log, more);
       imports[f.id] = dir.split('/').pop()!;
       const slug = f.id.replace(/^field:/, '').replace(/\//g, '-');
@@ -1442,7 +1468,7 @@ export async function runBuild(args: string[]): Promise<number> {
           seenBlobSha = (await sink.putInternal(seen)).sha256;
           const step = 10;
           const byTile: Record<string, string> = {};
-          for (const [key, part] of [...segmentTiles(segs, step)].sort(([a], [b]) => a.localeCompare(b))) {
+          for (const [key, part] of [...segmentTiles(segs, step)].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))) {
             const [i, j] = key.split('_').map(Number);
             const file = `rivers/observed/${key}.lwt`;
             await sink.put(file, encodeSegments(part, [-180 + i * step, 90 - (j + 1) * step, -180 + (i + 1) * step, 90 - j * step]));
@@ -1473,7 +1499,7 @@ export async function runBuild(args: string[]): Promise<number> {
   const waterAt = riversInfo
     ? (t: number, ageMa: number, at: { lat: number; lon: number }, isoline: number): SceneWater | undefined => {
         const info = riversInfo!;
-        const set = info.sets.find((x) => x.span[0] <= t && t < x.span[1]);
+        const set = info.sets.find((x) => x.span[0] <= t && t <= x.span[1]);
         const kf = set && keyFile(set, ageMa);
         if (!set || !kf) return undefined;
         if (!nets.has(set.network)) {
@@ -1597,11 +1623,18 @@ export async function runBuild(args: string[]): Promise<number> {
     );
     hasHazards = hazardsStage.meta.present;
   }
-
   // Stage: polities.json
+  // The rows each record draws as its territory, by row: the viewer leaves a row to its records while one holds.
   const claimedRows = new Map<string, string[]>();
   for (const t of territoryFile.territories) {
-    for (const key of new Set(t.claims.flatMap((c) => c.rows.map((r) => stateRowKey(r.name, r.from))))) claimedRows.set(key, [...(claimedRows.get(key) ?? []), t.subject]);
+    for (const key of new Set(t.claims.flatMap((c) => c.rows.map((r) => stateRowKey(r.name, r.from))))) {
+      let list = claimedRows.get(key);
+      if (!list) {
+        list = [];
+        claimedRows.set(key, list);
+      }
+      list.push(t.subject);
+    }
   }
   const statesField = world.fields.find((x) => x.data?.as === 'polities');
   let hasPolities = false;
@@ -1753,7 +1786,7 @@ export async function runBuild(args: string[]): Promise<number> {
         const citySpans: Record<string, [number, number]> = {};
         for (const f of world.fields.filter((x) => x.data?.as === 'cities')) {
           const own = landscape.cities.cities.filter((c) => c.field === f.id).flatMap((c) => c.pops.map((p) => p[0]));
-          if (own.length) citySpans[f.id] = [Math.min(...own), Math.max(...own)];
+          if (own.length) citySpans[f.id] = minMax(own);
         }
         return {
           present: true,
@@ -1800,9 +1833,15 @@ export async function runBuild(args: string[]): Promise<number> {
           const built = buildRocks(solved, periodList, rockLand.snapshots, spec ? correctRocks(snap, spec, claims.corrections(id)) : snap, id, rockField, rockField.params as unknown as RocksParams, none, coastIsoline, log);
           for (const [p, c] of built.files) await sink.put(p, c);
           const bins = built.index.bins;
+          let stageLo = Infinity;
+          let stageHi = -Infinity;
+          for (const b of bins) {
+            if (b.from < stageLo) stageLo = b.from;
+            if (b.to > stageHi) stageHi = b.to;
+          }
           const stats: CoverageFile['rocks'] = { collections: snap.collections.length, sites: bins.reduce((n, b) => n + b.sites, 0), stages: bins.length, agreement: built.index.agreement, measured: built.index.measured };
           log(`rocks   built in ${((Date.now() - started) / 1000).toFixed(1)} s`);
-          return { present: true, stats, source: built.index.source, stagesSpan: [Math.min(...bins.map((b) => b.from)), Math.max(...bins.map((b) => b.to))] as [number, number] };
+          return { present: true, stats, source: built.index.source, stagesSpan: [stageLo, stageHi] as [number, number] };
         },
         { codeFiles: ['tools/world/src/build/rocks.ts', 'core/rocks.ts', 'tools/world/src/tables.ts'] },
       );
@@ -1866,7 +1905,12 @@ export async function runBuild(args: string[]): Promise<number> {
           const { snap, unapplied } = strataField.rows ? correctUnits(given, strataField.rows, claims.corrections(id)) : { snap: given, unapplied: [] };
           for (const u of unapplied) log(`warning rows        ${id} ${u}`);
           const [lo, hi] = [toMa(parsePoint(strataField.time!.lo as TimePointInput).t), toMa(parsePoint(strataField.time!.hi as TimePointInput).t)];
-          const [older, younger] = [Math.max(...snap.units.map((u) => u[5])), Math.min(...snap.units.map((u) => u[6]))];
+          let older = -Infinity;
+          let younger = Infinity;
+          for (const u of snap.units) {
+            if (u[5] > older) older = u[5];
+            if (u[6] < younger) younger = u[6];
+          }
           if (Math.abs(lo - older) > 1e-6 || Math.abs(hi - younger) > 1e-6) throw new Error(`${strataField.id}: its time runs from ${lo} to ${hi} Ma, and its units from ${older} to ${younger} Ma`);
           const rule = substrateField?.params as unknown as SubstrateRule | undefined;
           const built = buildStrata(solved, snap, id, strataField, strataField.params as unknown as StrataParams, world.manifest.datasets[id]?.credit, log, rockLand && rule ? { periods: periodList, elevation: rockLand.snapshots, isoline: coastIsoline, rule } : undefined);
@@ -2300,11 +2344,11 @@ export async function runBuild(args: string[]): Promise<number> {
     },
     { codeFiles: ['core/resolve.ts', 'core/coverage.ts', 'core/glance.ts', 'tools/world/src/build/energybalance.ts', 'tools/world/src/build/climate.ts'] },
   );
-
   if (coverageAnalytics.meta.energyBalance) coverageFile.energyBalance = coverageAnalytics.meta.energyBalance;
   if (coverageAnalytics.meta.forests) coverageFile.forests = coverageAnalytics.meta.forests;
   coverageFile.tiers = coverageAnalytics.meta.tiers;
   coverageFile.matrix = coverageAnalytics.meta.matrix;
+  // How much is known, at a glance, from the same counts: the landing page's bars.
   const now = fromMa(0);
   coverageFile.glance = glance({
     matrix: coverageFile.matrix,
@@ -2356,17 +2400,20 @@ export async function runBuild(args: string[]): Promise<number> {
     rivers: riversInfo,
     months: monthsInfo,
     climates: recentClimates.length
-      ? recentClimates.map(({ field: f, ages, chunks }) => ({
-          field: f.id,
-          title: f.title,
-          description: f.description,
-          source: f.data!.from,
-          sourceRecord: sourceRecord(world.source.get(f.data!.from)!),
-          spread: f.spread,
-          res_deg: (f.grid as { res_deg: number }).res_deg,
-          coverage: [fromMa(Math.max(...ages)), fromMa(Math.min(...ages))] as [number, number],
-          chunks,
-        }))
+      ? recentClimates.map(({ field: f, ages, chunks }) => {
+          const [minK, maxK] = minMax(ages);
+          return {
+            field: f.id,
+            title: f.title,
+            description: f.description,
+            source: f.data!.from,
+            sourceRecord: sourceRecord(world.source.get(f.data!.from)!),
+            spread: f.spread,
+            res_deg: (f.grid as { res_deg: number }).res_deg,
+            coverage: [fromMa(maxK), fromMa(minK)] as [number, number],
+            chunks,
+          };
+        })
       : undefined,
     climate:
       climateField && biomeField && deepClimateMeta?.ages.length

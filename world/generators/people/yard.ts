@@ -118,7 +118,7 @@ export function drawWell(m: Mesh, detail: Detail): void {
   const n = detail === 0 ? 12 : 8;
   m.mat = MAT.rubble;
   turn(m, [[0.78, -0.2], [0.78, 0.75]], n);
-  turn(m, [[0.55, 0.75], [0.78, 0.75]], n);
+  turn(m, [[0.78, 0.75], [0.55, 0.75]], n);
   if (detail === 2) return;
   const keep = m.light;
   m.light = keep * 0.5;

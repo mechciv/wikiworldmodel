@@ -124,6 +124,43 @@ describe('a download', () => {
     expect(pauses).toEqual([]);
     expect(existsSync(dest)).toBe(false);
   });
+
+  it('blocks path traversal in safeJoin/safeUrlBasename and preserves existing legacy query-string cache paths', async () => {
+    const { safeJoin, safeUrlBasename } = await import('../src/paths.ts');
+    const { datasetDir, datasetPath } = await import('../src/manifest.ts');
+    const root = '/tmp/wwm-safe-root';
+    expect(safeJoin(root, 'sub/file.json')).toBe('/tmp/wwm-safe-root/sub/file.json');
+    for (const bad of ['../etc/passwd', '/etc/passwd', 'a/../../outside', 'a\0b', 'C:\\evil', '.', '']) {
+      expect(() => safeJoin(root, bad)).toThrow();
+    }
+    expect(() => safeUrlBasename('https://example.com/a/..')).toThrow();
+    expect(() => safeUrlBasename('https://example.com/a/b\\c')).toThrow();
+    expect(safeUrlBasename('https://example.com/data/file.zip?v=1#frag')).toBe('file.zip');
+
+    // A dataset whose URL carries a query string (like PANGAEA ?format=textfile) uses the clean basename
+    // for fresh downloads, and still hits a cache entry written under the legacy basename.
+    const fake = {
+      id: 'src:test-pangaea-cache-compat',
+      file: 'manifest.yaml',
+      fetch: {
+        url: 'https://doi.pangaea.de/10.1594/PANGAEA.683655?format=textfile',
+        sha256: 'deadbeefcafebabe000000000000000000000000000000000000000000000000',
+        bytes: 10,
+        format: 'tsv',
+      },
+    } as unknown as import('../src/manifest.ts').Dataset;
+    const ddir = datasetDir(fake.id, fake);
+    rmSync(ddir, { recursive: true, force: true });
+    try {
+      expect(datasetPath(fake.id, fake)).toBe(join(ddir, 'PANGAEA.683655'));
+      mkdirSync(ddir, { recursive: true });
+      const legacy = join(ddir, 'PANGAEA.683655?format=textfile');
+      writeFileSync(legacy, 'cached');
+      expect(datasetPath(fake.id, fake)).toBe(legacy);
+    } finally {
+      rmSync(ddir, { recursive: true, force: true });
+    }
+  });
 });
 
 describe('a dataset already in the cache with its checksum', () => {

@@ -70,8 +70,9 @@ jobs:
           head=$(git rev-parse refs/remotes/pr/head)
           while IFS=$'\t' read -r status path _; do
             [ "$status" = removed ] && continue
+            case "$path" in ''|/*|..|../*|*/..|*/../*) continue ;; esac
             # Only plain files: not a symbolic link, nor a submodule.
-            mode=$(git ls-tree refs/remotes/pr/head -- "$path" | cut -d' ' -f1)
+            mode=$(git ls-tree refs/remotes/pr/head -- ":(literal)$path" | cut -d' ' -f1)
             case "$mode" in 100644|100755) ;; *) continue ;; esac
             out="$pr/head/$path"
             case "/$path" in

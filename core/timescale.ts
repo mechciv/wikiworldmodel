@@ -65,6 +65,7 @@ function eraOf(list: number[], x: number): number {
 
 /** A time's position along the whole strip. Beyond the first and last stops the scale runs on straight. */
 export function positionOf(t: number): number {
+  if (!Number.isFinite(t)) return t;
   const v = toLog(t);
   const last = vs.length - 1;
   if (v <= vs[0]) return ps[0] + (v - vs[0]) * ms[0];
@@ -75,6 +76,7 @@ export function positionOf(t: number): number {
 
 /** The time at a position along the whole strip. */
 export function timeAt(p: number): number {
+  if (!Number.isFinite(p)) return p;
   const last = ps.length - 1;
   if (p <= ps[0]) return fromLog(vs[0] + (p - ps[0]) / ms[0]);
   if (p >= ps[last]) return fromLog(vs[last] + (p - ps[last]) / ms[last]);

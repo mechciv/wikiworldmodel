@@ -68,6 +68,7 @@ function measure(values: ArrayLike<number>): PartPrint {
   let max = -Infinity;
   for (let i = 0; i < n; i++) {
     const v = values[i];
+    if (!Number.isFinite(v)) return { n, mean: Number.NaN, sd: Number.NaN, min: Number.NaN, max: Number.NaN, hist: new Array<number>(BINS).fill(0) };
     sum += v;
     if (v < min) min = v;
     if (v > max) max = v;
@@ -111,10 +112,12 @@ export function fingerprintProblems(expected: Fingerprint, actual: Fingerprint, 
     for (const k of ['mean', 'sd', 'min', 'max'] as const) {
       const x = a[k]!;
       const y = b[k]!;
-      if (Math.abs(x - y) > tol.abs + tol.rel * Math.max(Math.abs(x), Math.abs(y), range)) out.push(`${name}: ${k} ${y} for ${x}`);
+      if (!Number.isFinite(x) || !Number.isFinite(y) || !(Math.abs(x - y) <= tol.abs + tol.rel * Math.max(Math.abs(x), Math.abs(y), range))) {
+        out.push(`${name}: ${k} ${y} for ${x}`);
+      }
     }
     const moved = (a.hist ?? []).reduce((s, c, i) => s + Math.abs(c - (b.hist?.[i] ?? 0)), 0) / 2;
-    if (moved > Math.max(1, tol.hist * a.n)) out.push(`${name}: ${moved} of ${a.n} values in other eighths of the range`);
+    if (!Number.isFinite(moved) || moved > Math.max(1, tol.hist * a.n)) out.push(`${name}: ${moved} of ${a.n} values in other eighths of the range`);
   }
   return out;
 }

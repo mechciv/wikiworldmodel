@@ -351,6 +351,45 @@ function bridge(outer: Poly, hole: Poly): Poly {
     }
   }
   if (best < 0) return outer;
+  // Eberly visibility test: if any reflex outer vertex lies inside triangle (M, I, P),
+  // pick the one at minimum angle from the +x ray (closest on ties) so the bridge never crosses outer.
+  const px = outer[best * 2];
+  const py = outer[best * 2 + 1];
+  if (Math.abs(px - bestX) > 1e-9 || Math.abs(py - hy) > 1e-9) {
+    // Orient triangle (M, I, P) counter-clockwise for point-in-triangle tests.
+    const triSign = (bestX - hx) * (py - hy);
+    const s = triSign >= 0 ? 1 : -1;
+    let vis = best;
+    let bestCos = -2;
+    let bestDist2 = Infinity;
+    for (let k = 0; k < n; k++) {
+      if (k === best) continue;
+      const rx = outer[k * 2];
+      const ry = outer[k * 2 + 1];
+      if (rx < hx - 1e-9) continue;
+      // Reflex vertex check on CCW outer polygon: cross(prev -> k -> next) <= 0.
+      const prev = (k + n - 1) % n;
+      const next = (k + 1) % n;
+      const turn = (rx - outer[prev * 2]) * (outer[next * 2 + 1] - ry) - (ry - outer[prev * 2 + 1]) * (outer[next * 2] - rx);
+      if (turn > 1e-9) continue;
+      // Inside or on edges of triangle (M, I, P).
+      const c1 = ((bestX - hx) * (ry - hy) - 0) * s;
+      const c2 = ((px - bestX) * (ry - hy) - (py - hy) * (rx - bestX)) * s;
+      const c3 = ((hx - px) * (ry - py) - (hy - py) * (rx - px)) * s;
+      if (c1 < -1e-9 || c2 < -1e-9 || c3 < -1e-9) continue;
+      const dx = rx - hx;
+      const dy = ry - hy;
+      const d2 = dx * dx + dy * dy;
+      if (d2 < 1e-18) continue;
+      const cosA = dx / Math.sqrt(d2);
+      if (cosA > bestCos + 1e-9 || (Math.abs(cosA - bestCos) <= 1e-9 && d2 < bestDist2)) {
+        bestCos = cosA;
+        bestDist2 = d2;
+        vis = k;
+      }
+    }
+    best = vis;
+  }
   const out: Poly = [];
   for (let i = 0; i <= best; i++) out.push(outer[i * 2], outer[i * 2 + 1]);
   const m = h.length / 2;

@@ -560,7 +560,7 @@ export function raiseLot(m: Mesh, plan: FabricPlan, i: number, detail: number): 
     // Four wings around the court, each its own roof.
     const north = proj(p, b.uy, -b.ux, -(vc + cw));
     const south = proj(p, -b.uy, b.ux, vc - cw);
-    const middle = proj(proj(p, -b.uy, b.ux, -(vc - cw)), b.uy, -b.ux, vc + cw);
+    const middle = proj(proj(p, -b.uy, b.ux, vc + cw), b.uy, -b.ux, -(vc - cw));
     const east = proj(middle, -b.ux, -b.uy, -(uc + cl));
     const west = proj(middle, b.ux, b.uy, uc - cl);
     for (const w of [north, south, east, west]) if (w.length >= 6 && area(w) > 6) hip(m, ccw(w), zt, pitch, 0.35);

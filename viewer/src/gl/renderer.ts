@@ -117,4 +117,5 @@ export interface LocalRenderer<TMesh extends MeshHandle = MeshHandle> {
   restart(): void;
   render(frame: CityFrame, cells: TMesh[], outW: number, outH: number): void;
   pick(atX: number, atY: number): number;
+  dispose(): void;
 }

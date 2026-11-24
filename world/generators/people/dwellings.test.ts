@@ -266,4 +266,79 @@ describe('a house in its yard', () => {
     // A household with no room for a yard has none.
     expect(drawn(HOUSE, 0, 0, 1, { ...home, lot: 9 }).v.filter((p) => p[3] === MAT.wattle)).toEqual([]);
   });
+
+  it('keeps upper-storey windows open when stacked directly above ground-floor openings', () => {
+    const m = new Mesh(1024);
+    drawDwelling(
+      m,
+      { plan: 'rectangular', width: 8, length: 10, storeys: 2, walls: 'fired-brick', roof: 'gable', roof_material: 'tile', windows: 'small', entrance: 'end' },
+      0,
+      0,
+    );
+    const { vertices, indices } = m.arrays();
+    const f = new Float32Array(vertices);
+    const b = new Uint8Array(vertices);
+    const upperFrontWindows: { x: number; y: number; z: number }[] = [];
+    for (let t = 0; t < indices.length; t += 3) {
+      const i0 = indices[t];
+      const i1 = indices[t + 1];
+      const i2 = indices[t + 2];
+      if (b[i0 * STRIDE + 24] !== MAT.dark) continue;
+      const mx = (f[i0 * 7] + f[i1 * 7] + f[i2 * 7]) / 3;
+      const my = (f[i0 * 7 + 1] + f[i1 * 7 + 1] + f[i2 * 7 + 1]) / 3;
+      const mz = (f[i0 * 7 + 2] + f[i1 * 7 + 2] + f[i2 * 7 + 2]) / 3;
+      if (my > 4.0 && mz > 2.8) upperFrontWindows.push({ x: mx, y: my, z: mz });
+    }
+    expect(upperFrontWindows.length).toBeGreaterThan(0);
+    for (const w of upperFrontWindows) {
+      let occluded = false;
+      for (let t = 0; t < indices.length; t += 3) {
+        const i0 = indices[t];
+        const i1 = indices[t + 1];
+        const i2 = indices[t + 2];
+        if (b[i0 * STRIDE + 24] !== MAT.brick) continue;
+        const ny = (b[i0 * STRIDE + 13] - 128) / 127;
+        if (ny < 0.8) continue;
+        if (f[i0 * 7 + 1] < w.y) continue;
+        const xs = [f[i0 * 7], f[i1 * 7], f[i2 * 7]];
+        const zs = [f[i0 * 7 + 2], f[i1 * 7 + 2], f[i2 * 7 + 2]];
+        if (w.x > Math.min(...xs) + 1e-3 && w.x < Math.max(...xs) - 1e-3 && w.z > Math.min(...zs) + 1e-3 && w.z < Math.max(...zs) - 1e-3) {
+          occluded = true;
+          break;
+        }
+      }
+      expect(occluded).toBe(false);
+    }
+  });
+
+  it('orients well top rim normals upward (+Z) and guards parts.leave against stack underflow', async () => {
+    const { drawWell } = await import('./yard.ts');
+    const { enter, leave, reset } = await import('./parts.ts');
+    const m = new Mesh();
+    drawWell(m, 0);
+    const { vertices } = m.arrays();
+    const f = new Float32Array(vertices);
+    const b = new Uint8Array(vertices);
+    let rimUp = 0;
+    let rimDown = 0;
+    for (let i = 0; i < m.verts; i++) {
+      const z = f[i * 7 + 2];
+      const nz = (b[i * STRIDE + 14] - 128) / 127;
+      if (Math.abs(z - 0.75) < 1e-3 && Math.abs(nz) > 0.8) {
+        if (nz > 0) rimUp++;
+        else rimDown++;
+      }
+    }
+    expect(rimUp).toBeGreaterThan(0);
+    expect(rimDown).toBe(0);
+
+    const frameMesh = new Mesh();
+    reset(frameMesh);
+    expect(() => {
+      leave(frameMesh);
+      leave(frameMesh);
+      enter(frameMesh, 1, 2, 3, 0, 1);
+      leave(frameMesh);
+    }).not.toThrow();
+  });
 });

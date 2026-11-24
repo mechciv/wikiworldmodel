@@ -39,7 +39,7 @@
           "version": { "type": "string" },
           "container": { "type": "string" },
           "doi": { "type": "string", "pattern": "^10\\.[0-9]{4,9}/\\S+$" },
-          "url": { "type": "string", "format": "uri" },
+          "url": { "type": "string", "format": "uri", "pattern": "^https?://" },
           "credit": { "type": "string", "description": "The short attribution shown wherever the data is displayed" },
           "license": { "type": "string" },
           "license_note": { "type": "string" },
@@ -72,14 +72,17 @@
                 "additionalProperties": {
                   "type": "object",
                   "required": ["path", "sha256"],
-                  "properties": { "path": { "type": "string" }, "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" } },
+                  "properties": {
+                    "path": { "type": "string", "minLength": 1, "pattern": "^(?!/)(?!\\\\)(?!.*(?:^|[\\\\/])\\.\\.(?:[\\\\/]|$)).+" },
+                    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+                  },
                   "additionalProperties": false
                 }
               },
               "upstream": {
                 "type": "object",
                 "required": ["url", "sha256"],
-                "properties": { "url": { "type": "string", "format": "uri" }, "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" } },
+                "properties": { "url": { "type": "string", "format": "uri", "pattern": "^https?://" }, "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" } },
                 "additionalProperties": false
               },
               "via": { "type": "string" }

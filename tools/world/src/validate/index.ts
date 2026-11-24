@@ -22,8 +22,9 @@ import { isBlobUrl, parseBlobHash } from '../blobs.ts';
 import { anchorPlace, anchorsOf, available, buildNetwork, chosen, countDays, cycleAnchor, epochsOf, pictureNetwork, pickedSplice, pieces, claimGroup, claimGroups, inTurn, pictures, pointOf, resolveCycle, scenarioKey, scenariosOf, solveScenario, spanOf, spanRefs, zeroDayClaim, type Scenario, type SolvedPictures } from '../chronology.ts';
 import { resolvePoints } from '../importer.ts';
 import { lineageLoop } from '../lineage.ts';
-import { REPO, WORLD } from '../paths.ts';
+import { REPO, safeJoin, WORLD } from '../paths.ts';
 import { readTable, rowClaims, type Table } from '../tables.ts';
+import { stableStringify } from '../util.ts';
 import { kindIs, loadWorld, schemaDir, type Claim, type Entity, type Field, type Input, type Model, type Relation, type World } from '../world.ts';
 
 export interface Issue {
@@ -216,15 +217,18 @@ function checkValue(world: World, refs: RefChecker, c: Claim, issues: Issue[]): 
       break;
     case 'point': {
       const p = v as { lat?: unknown; lon?: unknown; frame?: unknown };
-      if (!p || typeof p.lat !== 'number' || typeof p.lon !== 'number') bad('a point needs lat and lon');
-      else refs.check(p.frame, c.file, `${c.where}.value.frame`, { types: ['frame'] });
+      if (!p || typeof p.lat !== 'number' || typeof p.lon !== 'number' || !Number.isFinite(p.lat) || !Number.isFinite(p.lon) || p.lat < -90 || p.lat > 90 || p.lon < -180 || p.lon > 180) {
+        bad('a point needs finite lat in [-90, 90] and lon in [-180, 180]');
+      } else {
+        refs.check(p.frame, c.file, `${c.where}.value.frame`, { types: ['frame'] });
+      }
       break;
     }
     case 'ref':
       refs.check(v, c.file, `${c.where}.value`, { self: c.entity, types: prop.ref_types });
       break;
     case 'text':
-      if (!v || typeof v !== 'object' || Array.isArray(v) || !Object.values(v).every((x) => typeof x === 'string' && x)) bad('text needs its language, e.g. { en: … }');
+      if (!v || typeof v !== 'object' || Array.isArray(v) || !Object.keys(v).length || !Object.values(v).every((x) => typeof x === 'string' && x)) bad('text needs its language, e.g. { en: … }');
       break;
     case 'string':
       if (typeof v !== 'string' || !v) bad(`not a string`);
@@ -242,8 +246,8 @@ function checkValue(world: World, refs: RefChecker, c: Claim, issues: Issue[]): 
       // A number, or a number with its uncertainty as the source gives it.
       const q = v as { mean?: unknown; sd?: unknown; lo?: unknown; hi?: unknown } | null;
       const num = (x: unknown) => typeof x === 'number' && Number.isFinite(x);
-      const band = !!q && typeof q === 'object' && ((num(q.mean) && num(q.sd) && Object.keys(q).length === 2) || (num(q.lo) && num(q.hi) && Object.keys(q).length === 2 && (q.lo as number) <= (q.hi as number)));
-      if (!num(v) && !band) bad(`a quantity is a number, in ${prop.unit}, or { mean, sd } or { lo, hi } of numbers`);
+      const band = !!q && typeof q === 'object' && ((num(q.mean) && num(q.sd) && (q.sd as number) >= 0 && Object.keys(q).length === 2) || (num(q.lo) && num(q.hi) && Object.keys(q).length === 2 && (q.lo as number) <= (q.hi as number)));
+      if (!num(v) && !band) bad(`a quantity is a number, in ${prop.unit}, or { mean, sd } (sd >= 0) or { lo, hi } of numbers`);
       break;
     }
     case 'color':
@@ -260,12 +264,17 @@ function checkValue(world: World, refs: RefChecker, c: Claim, issues: Issue[]): 
         refs.check((v as { frame?: unknown }).frame, c.file, `${c.where}.value.frame`, { types: ['frame'] });
         break;
       }
-      const g = v as { from?: unknown; names?: unknown; elements?: unknown };
+      const g = v as { from?: unknown; file?: unknown; names?: unknown; elements?: unknown };
       const list = g?.names ?? g?.elements;
-      const snap = typeof g?.from === 'string' ? world.snapshots.get(g.from) : undefined;
-      if (snap && g.elements) for (const k of g.elements as string[]) if (!snap.elements.some((x) => `${x.type}/${x.id}` === k)) bad(`no element ${k} in ${g.from}`);
-      if (!g || typeof g.from !== 'string' || !Array.isArray(list) || !list.length || !list.every((n) => typeof n === 'string' && n)) bad('a geometry names its dataset and rows or elements: { from: src:…, names: [...] } or { from: src:…, elements: [...] }');
-      else checkDataset(world, refs, g.from, c.file, `${c.where}.value.from`, undefined, issues);
+      if (!g || typeof g.from !== 'string' || !Array.isArray(list) || !list.length || !list.every((n) => typeof n === 'string' && n)) {
+        bad('a geometry names its dataset and rows or elements: { from: src:…, names: [...] } or { from: src:…, elements: [...] }');
+        break;
+      }
+      const snap = world.snapshots.get(g.from);
+      if (snap && Array.isArray(g.elements)) {
+        for (const k of g.elements as string[]) if (!snap.elements.some((x) => `${x.type}/${x.id}` === k)) bad(`no element ${k} in ${g.from}`);
+      }
+      checkDataset(world, refs, g.from, c.file, `${c.where}.value.from`, typeof g.file === 'string' ? g.file : undefined, issues);
       break;
     }
     case 'form': {
@@ -339,7 +348,7 @@ export function areaProblems(v: unknown): string[] {
     poly.forEach((ring: unknown, j: number) => {
       const r = ring as number[][];
       if (!Array.isArray(r) || r.length < 4) return out.push(`ring ${j} of polygon ${i} has fewer than four points`);
-      if (!r.every((p) => Array.isArray(p) && p.length >= 2 && Math.abs(p[0]) <= 180 && Math.abs(p[1]) <= 90)) return out.push(`ring ${j} of polygon ${i} has a point that is not [lon, lat] on the globe`);
+      if (!r.every((p) => Array.isArray(p) && p.length >= 2 && typeof p[0] === 'number' && typeof p[1] === 'number' && Number.isFinite(p[0]) && Number.isFinite(p[1]) && Math.abs(p[0]) <= 180 && Math.abs(p[1]) <= 90)) return out.push(`ring ${j} of polygon ${i} has a point that is not [lon, lat] on the globe`);
       if (r[0][0] !== r.at(-1)![0] || r[0][1] !== r.at(-1)![1]) out.push(`ring ${j} of polygon ${i} does not close: its last point is not its first`);
     });
   });
@@ -501,11 +510,12 @@ function checkRecords(world: World, issues: Issue[], tables: Map<string, Table> 
     const file = s.file;
     if (!world.vocab.sourceTypes[s.type]) issues.push({ level: 'error', check: 'vocab', file, where: 'type', message: `unknown source type "${s.type}"` });
     if (!world.vocab.sourceKinds[s.kind]) issues.push({ level: 'error', check: 'vocab', file, where: 'kind', message: `unknown source kind "${s.kind}"` });
+    if (s.url !== undefined && !/^https?:\/\//i.test(s.url)) issues.push({ level: 'error', check: 'values', file, where: 'url', message: `source url must use http:// or https://: "${s.url}"` });
     if (s.via?.startsWith('src:')) refs.check(s.via, file, 'via', { types: ['src'] });
     if (s.written !== undefined) {
       try {
         const w = parseTime(s.written as never);
-        if (w.kind === 'ref' || w.kind === 'unknown') throw new TimeError('when a text was written is a time or a range');
+        if (w.kind === 'ref' || w.kind === 'unknown' || w.kind === 'count' || w.kind === 'cycle') throw new TimeError('when a text was written is a time or a range');
       } catch (e) {
         issues.push({ level: 'error', check: 'values', file, where: 'written', message: (e as TimeError).message });
       }
@@ -524,6 +534,8 @@ function checkRecords(world: World, issues: Issue[], tables: Map<string, Table> 
     // A series of the world's own measurements names the work that frames them, not a dataset to fetch.
     if (f.data?.prop) refs.check(f.data.from, f.file, 'data.from', { types: ['src'] });
     else if (f.data) checkDataset(world, refs, f.data.from, f.file, 'data.from', f.data.file, issues);
+    if (f.data?.places) checkDataset(world, refs, f.data.places, f.file, 'data.places', undefined, issues);
+    if (f.data?.regions) checkDataset(world, refs, f.data.regions, f.file, 'data.regions', undefined, issues);
     if (f.moves_with) checkDataset(world, refs, f.moves_with, f.file, 'moves_with', undefined, issues);
     for (const k of ['ocean', 'lakes'] as const) if (f.data?.water) checkDataset(world, refs, f.data.water[k], f.file, `data.water.${k}`, undefined, issues);
     if (f.source) refs.check(f.source.ref, f.file, 'source.ref', { types: ['src'] });
@@ -542,8 +554,14 @@ function checkRecords(world: World, issues: Issue[], tables: Map<string, Table> 
   for (const g of world.generators) {
     for (const [i, x] of (g.inputs ?? []).entries()) checkInput(world, refs, x, g.file, `inputs[${i}]`, issues);
     checkTests(g.checks, g.file, 'generators', issues);
-    if (!existsSync(join(world.root === WORLD ? WORLD : world.root, g.code)) && !existsSync(join(WORLD, g.code))) {
-      issues.push({ level: 'error', check: 'refs', file: g.file, where: 'code', message: `no code at ${g.code}` });
+    try {
+      const p1 = safeJoin(world.root === WORLD ? WORLD : world.root, g.code, `${g.file} code`);
+      const p2 = safeJoin(WORLD, g.code, `${g.file} code`);
+      if (!existsSync(p1) && !existsSync(p2)) {
+        issues.push({ level: 'error', check: 'refs', file: g.file, where: 'code', message: `no code at ${g.code}` });
+      }
+    } catch (e) {
+      issues.push({ level: 'error', check: 'refs', file: g.file, where: 'code', message: (e as Error).message });
     }
   }
   for (const a of world.alternatives) {
@@ -563,7 +581,7 @@ function checkRecords(world: World, issues: Issue[], tables: Map<string, Table> 
   checkRowSpecs(world, issues);
   checkMonthsParts(world, issues);
   checkOverlays(world, refs, tables, issues);
-  return [...refs.wanted.values()].sort((a, b) => (a.ref < b.ref ? -1 : 1));
+  return [...refs.wanted.values()].sort((a, b) => (a.ref < b.ref ? -1 : a.ref > b.ref ? 1 : 0));
 }
 
 /**
@@ -584,7 +602,12 @@ function checkMonthsParts(world: World, issues: Issue[]): void {
     else if ((climate.grid as { res_deg?: number } | undefined)?.res_deg !== (f.grid as { res_deg?: number } | undefined)?.res_deg || climate.frame !== f.frame) {
       issues.push({ level: 'error', check: 'refs', file: f.file, where: 'grid', message: `it is kept at the nodes of ${climate.id}: give it that field's grid and frame` });
     }
-    for (const part of parts) read.set(f.data.from, [...(read.get(f.data.from) ?? []), { field: f, part }]);
+    let list = read.get(f.data.from);
+    if (!list) {
+      list = [];
+      read.set(f.data.from, list);
+    }
+    for (const part of parts) list.push({ field: f, part });
   }
   for (const [from, list] of read) {
     const has = (p: string) => list.some((x) => x.part === p);
@@ -655,7 +678,7 @@ function checkOverlays(world: World, refs: RefChecker, tables: Map<string, Table
       if (world.vocab.properties[c.prop]) checkValue(world, refs, c, issues);
       const row = given.find((x) => x.prop === c.prop);
       if (!row) continue;
-      const agrees = JSON.stringify(row.value) === JSON.stringify(c.value);
+      const agrees = stableStringify(row.value) === stableStringify(c.value);
       if (agrees && c.sources.every((s) => s.ref === o.dataset)) issues.push({ level: 'warning', check: 'rows', file: o.file, where: c.where, message: `restates the row's ${c.prop}; to corroborate it, cite another source` });
       if (!agrees && (c.rank !== 'preferred' || !c.note)) issues.push({ level: 'error', check: 'rows', file: o.file, where: c.where, message: `differs from the row's ${c.prop} (${JSON.stringify(row.value)}): a correction is ranked preferred, with a note saying why the row is wrong` });
     }
@@ -676,7 +699,13 @@ export async function overlayTables(world: World): Promise<Map<string, Table>> {
 /** Checks named by a model or a generator: each a test file that exists, with a test of that name in it. */
 function checkTests(checks: { test: string; holds: string }[] | undefined, file: string, check: string, issues: Issue[]): void {
   for (const [i, c] of (checks ?? []).entries()) {
-    const path = join(REPO, c.test);
+    let path: string;
+    try {
+      path = safeJoin(REPO, c.test, `${file} checks[${i}].test`);
+    } catch (e) {
+      issues.push({ level: 'error', check, file, where: `checks[${i}].test`, message: (e as Error).message });
+      continue;
+    }
     if (!existsSync(path)) issues.push({ level: 'error', check, file, where: `checks[${i}].test`, message: `no test file ${c.test}` });
     else if (!readFileSync(path, 'utf8').replace(/\\'/g, "'").includes(c.holds)) issues.push({ level: 'error', check, file, where: `checks[${i}].holds`, message: `no test in ${c.test} is named "${c.holds}"` });
   }
@@ -722,7 +751,12 @@ function checkModels(world: World, issues: Issue[]): void {
   const field = new Map(world.fields.map((f) => [f.id, f]));
   const madeBy = new Map<string, Model>();
   for (const m of world.models) {
-    if (!existsSync(join(REPO, m.code))) issues.push({ level: 'error', check: 'models', file: m.file, where: 'code', message: `no code at ${m.code}` });
+    try {
+      const codePath = safeJoin(REPO, m.code, `${m.file} code`);
+      if (!existsSync(codePath)) issues.push({ level: 'error', check: 'models', file: m.file, where: 'code', message: `no code at ${m.code}` });
+    } catch (e) {
+      issues.push({ level: 'error', check: 'models', file: m.file, where: 'code', message: (e as Error).message });
+    }
     for (const out of m.outputs ?? []) {
       const prev = madeBy.get(out);
       if (prev) issues.push({ level: 'error', check: 'models', file: m.file, where: 'outputs', message: `${out} is made by ${prev.id} already` });
@@ -755,26 +789,57 @@ function checkModels(world: World, issues: Issue[]): void {
 
   // Does any evidence of the world reach it? The world's records and claims are evidence, and so are
   // works that are not models; a field rests on what makes it.
-  const seen = new Map<string, boolean>();
+  const memo = new Map<string, boolean>();
+  const visiting = new Set<string>();
   const sourceIsEvidence = (id: string) => world.source.get(id)?.kind !== 'model';
-  const fieldRests = (f: Field): boolean => {
-    if (seen.has(f.id)) return seen.get(f.id)!;
-    seen.set(f.id, false);
+  const fieldRests = (f: Field): { ok: boolean; cyclic: boolean } => {
+    if (memo.has(f.id)) return { ok: memo.get(f.id)!, cyclic: false };
+    if (visiting.has(f.id)) return { ok: false, cyclic: true };
+    visiting.add(f.id);
     const m = madeBy.get(f.id);
-    const r = m ? modelRests(m) : f.data ? !!f.data.prop || sourceIsEvidence(f.data.from) : (f.from ?? []).some((x) => !!field.get(x) && fieldRests(field.get(x)!));
-    seen.set(f.id, r);
-    return r;
+    let res: { ok: boolean; cyclic: boolean };
+    if (m) res = modelRestsEval(m);
+    else if (f.data) res = { ok: !!f.data.prop || sourceIsEvidence(f.data.from), cyclic: false };
+    else {
+      let ok = false;
+      let cyclic = false;
+      for (const x of f.from ?? []) {
+        const sub = field.get(x);
+        if (!sub) continue;
+        const r = fieldRests(sub);
+        if (r.ok) {
+          ok = true;
+          break;
+        }
+        if (r.cyclic) cyclic = true;
+      }
+      res = { ok, cyclic };
+    }
+    visiting.delete(f.id);
+    if (res.ok || !res.cyclic) memo.set(f.id, res.ok);
+    return res;
   };
-  const inputRests = (x: Input): boolean => {
-    if (typeof x !== 'string' && !('ref' in x)) return true;
+  const inputRests = (x: Input): { ok: boolean; cyclic: boolean } => {
+    if (typeof x !== 'string' && !('ref' in x)) return { ok: true, cyclic: false };
     const ref = typeof x === 'string' ? x : x.ref;
-    if (ref.startsWith('field:')) return !!field.get(ref) && fieldRests(field.get(ref)!);
-    if (ref.startsWith('src:')) return sourceIsEvidence(ref);
-    return !ref.includes(':');
+    if (ref.startsWith('field:')) {
+      const sub = field.get(ref);
+      return sub ? fieldRests(sub) : { ok: false, cyclic: false };
+    }
+    if (ref.startsWith('src:')) return { ok: sourceIsEvidence(ref), cyclic: false };
+    return { ok: !ref.includes(':'), cyclic: false };
   };
-  const modelRests = (m: Model): boolean => m.inputs.some(inputRests);
+  const modelRestsEval = (m: Model): { ok: boolean; cyclic: boolean } => {
+    let cyclic = false;
+    for (const x of m.inputs) {
+      const r = inputRests(x);
+      if (r.ok) return { ok: true, cyclic: false };
+      if (r.cyclic) cyclic = true;
+    }
+    return { ok: false, cyclic };
+  };
   for (const m of world.models) {
-    if (!modelRests(m)) issues.push({ level: 'info', check: 'models', file: m.file, message: `${m.id} rests on no evidence of the world: only on models run elsewhere` });
+    if (!modelRestsEval(m).ok) issues.push({ level: 'info', check: 'models', file: m.file, message: `${m.id} rests on no evidence of the world: only on models run elsewhere` });
   }
   for (const f of world.fields) {
     if (madeBy.has(f.id) || !f.data || f.data.prop || sourceIsEvidence(f.data.from)) continue;
@@ -805,6 +870,32 @@ function checkRanks(world: World, issues: Issue[]): void {
         where: avail.map((c) => c.where).join(', '),
         message: `competing "${g.prop}" claims need exactly one rank: preferred${p.alts ? ` (in ${p.alts.join(', ')})` : ''}; found ${n}`,
       });
+    }
+    const alts = new Set(p.alts ?? []);
+    for (const o of world.overlays) {
+      const byProp = new Map<string, Claim[]>();
+      for (const c of o.claims) {
+        if (c.rank === 'deprecated' || (c.alt && !alts.has(c.alt))) continue;
+        let list = byProp.get(c.prop);
+        if (!list) {
+          list = [];
+          byProp.set(c.prop, list);
+        }
+        list.push(c);
+      }
+      for (const [prop, avail] of byProp) {
+        if (avail.length < 2 || inTurn(avail)) continue;
+        const n = avail.filter((c) => c.rank === 'preferred').length;
+        if (n !== 1) {
+          issues.push({
+            level: 'error',
+            check: 'ranks',
+            file: o.file,
+            where: avail.map((c) => c.where).join(', '),
+            message: `competing "${prop}" overlay claims need exactly one rank: preferred${p.alts ? ` (in ${p.alts.join(', ')})` : ''}; found ${n}`,
+          });
+        }
+      }
     }
   }
 }
@@ -848,7 +939,7 @@ function checkDuplicates(world: World, issues: Issue[]): void {
   for (const g of claimGroups(world)) {
     const seen = new Map<string, Claim>();
     for (const c of g.claims) {
-      const k = `${c.alt ?? ''} ${JSON.stringify(c.value)} ${JSON.stringify(c.valid ?? null)}`;
+      const k = `${c.alt ?? ''} ${stableStringify(c.value)} ${stableStringify(c.valid ?? null)}`;
       const prev = seen.get(k);
       if (prev) issues.push({ level: 'warning', check: 'duplicates', file: c.file, where: c.where, message: `restates ${prev.where}; add its source to that claim instead, as corroboration` });
       else seen.set(k, c);
@@ -1032,50 +1123,78 @@ export function claimOf(world: World, subject: string, prop: string, s: Scenario
  * polygon while the entity exists, in every picture.
  */
 async function checkFrames(world: World, issues: Issue[], preSolved?: Map<string, Solution>): Promise<void> {
-  const sols = pictures(world)
-    .map((p) => preSolved?.get(scenarioKey(p)) ?? solveScenario(world, p))
-    .filter((s): s is Solution & { ok: true } => s.ok);
-  if (!sols.length) return;
-  const queries = [];
-  const expect = new Map<string, number>();
+  const solved = pictures(world)
+    .map((pic) => ({ pic, sol: preSolved?.get(scenarioKey(pic)) ?? solveScenario(world, pic) }))
+    .filter((x): x is { pic: Scenario; sol: Solution & { ok: true } } => x.sol.ok);
+  if (!solved.length) return;
+  const queries: { id: string; lat: number; lon: number; agesMa: number[] }[] = [];
+  const meta = new Map<string, { file: string; where: string; plate: number }>();
+  const seenIssue = new Set<string>();
+  const seenQuery = new Map<string, { ages: Set<number>; query: { id: string; lat: number; lon: number; agesMa: number[] } }>();
   const subjects = world.entities.flatMap((e) => [{ e, subject: e.id }, ...e.phases.map((p) => ({ e, subject: `${e.id}@${p.id}` }))]);
-  const frameClaim = (e: World['entities'][number], subject: string) => claimOf(world, subject, 'frame') ?? claimOf(world, e.id, 'frame');
-  for (const { e, subject } of subjects) {
-    const loc = claimOf(world, subject, 'location');
-    const fr = frameClaim(e, subject);
-    if (!loc) continue;
-    if (!fr) {
-      issues.push({ level: 'error', check: 'frames', file: e.file, where: loc.where, message: 'a location needs a frame claim: the frame it moves with' });
-      continue;
+  const frameClaim = (e: World['entities'][number], subject: string, pic: Scenario) => claimOf(world, subject, 'frame', pic) ?? claimOf(world, e.id, 'frame', pic);
+  for (const { pic, sol } of solved) {
+    for (const { e, subject } of subjects) {
+      const loc = claimOf(world, subject, 'location', pic);
+      const fr = frameClaim(e, subject, pic);
+      if (!loc) continue;
+      if (!fr) {
+        const key = `nofr:${e.file}:${loc.where}`;
+        if (!seenIssue.has(key)) {
+          seenIssue.add(key);
+          issues.push({ level: 'error', check: 'frames', file: e.file, where: loc.where, message: 'a location needs a frame claim: the frame it moves with' });
+        }
+        continue;
+      }
+      const p = loc.value as { lat: number; lon: number; frame: string };
+      const frame = world.frame.get(fr.value as string);
+      if (!frame) continue; // wanted
+      // A placeholder holds the coordinates measured in its parent as they are: nothing to carry, nothing to check.
+      if (frame.kind === 'placeholder' && p.frame === frame.parent) continue;
+      if (frame.kind === 'deforming') {
+        const key = `def:${e.file}:${fr.where}:${frame.id}`;
+        if (!seenIssue.has(key)) {
+          seenIssue.add(key);
+          issues.push({ level: 'error', check: 'frames', file: e.file, where: fr.where, message: `the build cannot yet carry coordinates through a deforming frame (${frame.id})` });
+        }
+        continue;
+      }
+      if (p.frame !== 'frame:earth/present-day' || frame.kind !== 'plate' || !frame.extent) {
+        if (p.frame !== frame.id) {
+          const key = `carry:${e.file}:${loc.where}:${p.frame}:${frame.id}`;
+          if (!seenIssue.has(key)) {
+            seenIssue.add(key);
+            issues.push({ level: 'error', check: 'frames', file: e.file, where: loc.where, message: `the build cannot yet carry coordinates from ${p.frame} into ${frame.id}` });
+          }
+        }
+        continue;
+      }
+      const earliest = sol.bounds.get(pointOf(world, subject, 'start'))?.lo;
+      const age = earliest !== undefined && Number.isFinite(earliest) ? Math.max(0, Math.round(toMa(earliest) * 1000) / 1000) : 0;
+      const qid = `${subject}|${loc.key}|${fr.key}`;
+      let entry = seenQuery.get(qid);
+      if (!entry) {
+        const query = { id: qid, lat: p.lat, lon: p.lon, agesMa: [0] };
+        entry = { ages: new Set([0]), query };
+        seenQuery.set(qid, entry);
+        queries.push(query);
+        meta.set(qid, { file: e.file, where: fr.where, plate: frame.extent.plate });
+      }
+      if (!entry.ages.has(age)) {
+        entry.ages.add(age);
+        entry.query.agesMa.push(age);
+      }
     }
-    const p = loc.value as { lat: number; lon: number; frame: string };
-    const frame = world.frame.get(fr.value as string);
-    if (!frame) continue; // wanted
-    // A placeholder holds the coordinates measured in its parent as they are: nothing to carry, nothing to check.
-    if (frame.kind === 'placeholder' && p.frame === frame.parent) continue;
-    if (frame.kind === 'deforming') {
-      issues.push({ level: 'error', check: 'frames', file: e.file, where: fr.where, message: `the build cannot yet carry coordinates through a deforming frame (${frame.id})` });
-      continue;
-    }
-    if (p.frame !== 'frame:earth/present-day' || frame.kind !== 'plate' || !frame.extent) {
-      if (p.frame !== frame.id) issues.push({ level: 'error', check: 'frames', file: e.file, where: loc.where, message: `the build cannot yet carry coordinates from ${p.frame} into ${frame.id}` });
-      continue;
-    }
-    const earliest = Math.min(...sols.map((s) => s.bounds.get(pointOf(world, subject, 'start'))!.lo));
-    const ages = Number.isFinite(earliest) ? [0, Math.round(toMa(earliest) * 1000) / 1000] : [0];
-    queries.push({ id: subject, lat: p.lat, lon: p.lon, agesMa: ages });
-    expect.set(subject, frame.extent.plate);
   }
   if (!queries.length) return;
   for (const r of await resolvePoints(queries)) {
-    const e = world.entity.get(r.id.split('@')[0])!;
-    const where = frameClaim(e, r.id)!.where;
-    if (r.plate !== expect.get(r.id)) {
-      issues.push({ level: 'error', check: 'frames', file: e.file, where, message: r.plate === null ? 'the location is outside every plate polygon of the plate model' : `the location is in plate ${r.plate}'s polygon, not plate ${expect.get(r.id)}'s` });
+    const m = meta.get(r.id)!;
+    if (r.plate !== m.plate) {
+      issues.push({ level: 'error', check: 'frames', file: m.file, where: m.where, message: r.plate === null ? 'the location is outside every plate polygon of the plate model' : `the location is in plate ${r.plate}'s polygon, not plate ${m.plate}'s` });
       continue;
     }
     for (const [age, exists] of Object.entries(r.existsAt ?? {})) {
-      if (!exists) issues.push({ level: 'error', check: 'frames', file: e.file, where, message: `plate ${r.plate}'s polygon at this location does not exist at ${age} Ma, within the entity's lifetime` });
+      if (!exists) issues.push({ level: 'error', check: 'frames', file: m.file, where: m.where, message: `plate ${r.plate}'s polygon at this location does not exist at ${age} Ma, within the entity's lifetime` });
     }
   }
 }
@@ -1130,12 +1249,13 @@ function checkForms(world: World, issues: Issue[]): void {
   for (const snap of world.landFossils.values()) for (const t of snap.taxa) landNames.set(t[0], t[1]);
   for (const e of world.entities) {
     if (e.kind !== 'taxon') continue;
-    const change = e.claims.find((c) => c.prop === 'body_form');
-    if (!change && !e.claims.some((c) => c.prop === 'body_plan')) continue;
-    const c = change ?? e.claims.find((x) => x.prop === 'body_plan')!;
+    const active = e.claims.filter((c) => c.rank !== 'deprecated' && c.status !== 'deprecated');
+    const change = active.find((c) => c.prop === 'body_form');
+    if (!change && !active.some((c) => c.prop === 'body_plan')) continue;
+    const c = change ?? active.find((x) => x.prop === 'body_plan')!;
     const no = /^txn:(\d+)$/.exec(String(e.same_as?.pbdb ?? ''))?.[1];
     const dbName = no ? landNames.get(Number(no)) : undefined;
-    const names = Object.values((e.claims.find((x) => x.prop === 'name')?.value ?? {}) as Record<string, string>).map((n) => String(n).toLowerCase());
+    const names = Object.values((active.find((x) => x.prop === 'name')?.value ?? {}) as Record<string, string>).map((n) => String(n).toLowerCase());
     if (dbName && !names.includes(dbName.toLowerCase())) issues.push({ level: 'info', check: 'forms', file: c.file, where: 'same_as', message: `${e.id} adopts txn:${no}, which the land's snapshot calls ${dbName}` });
     const source = tree.source(e.id);
     if (!source) {
@@ -1158,8 +1278,8 @@ function checkTraditions(world: World, issues: Issue[]): void {
       const seen = new Set<string>();
       for (let at: Entity | undefined = e; at && !seen.has(at.id); ) {
         seen.add(at.id);
-        if (at.claims.some((c) => c.prop === prop)) return true;
-        const up: string | undefined = at.relations.find((r) => r.rel === 'member-of')?.to;
+        if (at.claims.some((c) => c.prop === prop && c.rank !== 'deprecated' && c.status !== 'deprecated')) return true;
+        const up: string | undefined = at.relations.find((r) => r.rel === 'member-of' && r.rank !== 'deprecated' && r.status !== 'deprecated')?.to;
         at = up ? byId.get(up) : undefined;
       }
       return false;

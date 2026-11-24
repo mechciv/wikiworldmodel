@@ -358,7 +358,7 @@ export function buildFieldworks(m: Mesh, spec: FieldworksSpec, g: GroundHeight, 
             if (stepIdx % 5 === 0 && (effBounds === 'hedges' || effBounds === 'banks' || effBounds === 'walls')) {
               const hLine = plotNumber(ci * 17 + stepIdx, dom.salt, 83);
               if (hLine < (effBounds === 'hedges' ? 0.28 : 0.14)) {
-                const key = `${Math.round(wx / 18)},${Math.round(wy / 18)}`;
+                const key = `${Math.round(wx / 16)},${Math.round(wy / 16)}`;
                 if (!seenTree.has(key)) {
                   seenTree.add(key);
                   trees.push({ x: wx, y: wy, scale: 0.65 + 0.55 * plotNumber(ci, stepIdx, 89), u: plotNumber(ci, stepIdx, 97) });
@@ -382,7 +382,9 @@ export function buildFieldworks(m: Mesh, spec: FieldworksSpec, g: GroundHeight, 
           const along = cj * sy - shift;
           if (along < ly0 - warp || along > ly1 + warp) continue;
           const keep = effBounds === 'walls' || effBounds === 'hedges' || effBounds === 'dikes' ? 0.85 : 0.62;
-          if (plotNumber(ci + dom.di * 131, cj + dom.dj * 137, 59) > keep) continue;
+          const pi = (ci ^ Math.imul(dom.di | 0, 0x9e3779b1)) | 0;
+          const pj = (cj ^ Math.imul(dom.dj | 0, 0x85ebca6b)) | 0;
+          if (plotNumber(pi, pj, 59) > keep) continue;
           const run: [number, number][] = [];
           for (let q = 0; q <= subSteps; q++) {
             const across = a0 + ((a1 - a0) * q) / subSteps;
@@ -391,7 +393,7 @@ export function buildFieldworks(m: Mesh, spec: FieldworksSpec, g: GroundHeight, 
               run.push([wx, wy]);
               // Boundary corner trees & shrubs framing parcel intersections.
               if (q === 0 && (effBounds === 'hedges' || effBounds === 'banks' || effBounds === 'walls')) {
-                const hTree = plotNumber(ci + dom.di * 131, cj + dom.dj * 137, 67);
+                const hTree = plotNumber(pi, pj, 67);
                 const treeProb = effBounds === 'hedges' ? 0.52 : effBounds === 'banks' ? 0.38 : 0.28;
                 if (hTree < treeProb) {
                   const key = `${Math.round(wx / 16)},${Math.round(wy / 16)}`;

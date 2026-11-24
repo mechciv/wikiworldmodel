@@ -82,8 +82,8 @@ export class LifeAtlas {
   /** the climate's months at a height, for the place a scene is of */
   private months: MonthTiles;
 
-  constructor(private build: Build, readonly index: AtlasIndex, private climate: () => { data: ClimateData; rule: ClimateRule } | null, private generator: { id: string; version: number; params: Record<string, unknown> }, private planet: PlanetFile, private model: RotationModel, private coastAt: (field: FieldInfo, t: number) => number) {
-    this.rivers = new Rivers(build);
+  constructor(private build: Build, readonly index: AtlasIndex, private climate: () => { data: ClimateData; rule: ClimateRule } | null, private generator: { id: string; version: number; params: Record<string, unknown> }, private planet: PlanetFile, private model: RotationModel, private coastAt: (field: FieldInfo, t: number) => number, rivers?: Rivers) {
+    this.rivers = rivers ?? new Rivers(build);
     this.months = new MonthTiles(build);
   }
 

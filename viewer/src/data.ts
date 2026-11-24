@@ -10,6 +10,7 @@ import type { FeatureIndex } from '../../core/featuretiles.ts';
 import type { RocksIndex } from '../../core/rocks.ts';
 import type { SubstrateFile } from '../../core/substrate.ts';
 import type { FramesFile, Tileset } from '../../core/tileset.ts';
+import { isSafeBuildId } from './ui/html.ts';
 
 /** Resolve and fetch logical build files through a content-addressed manifest when present. */
 export interface BuildFetch {
@@ -44,16 +45,21 @@ export interface Build extends BuildFetch {
 
 /** Every logical URL the viewer fetched, in order; tests read it to check what scrubbing loads. */
 export const fetchLog: string[] = [];
+const MAX_FETCH_LOG = 5000;
+function logFetch(url: string): void {
+  fetchLog.push(url);
+  if (fetchLog.length > MAX_FETCH_LOG) fetchLog.splice(0, fetchLog.length - MAX_FETCH_LOG);
+}
 
 export async function getJSON<T>(url: string, logUrl: string = url): Promise<T> {
-  fetchLog.push(logUrl);
+  logFetch(logUrl);
   const res = await fetch(url);
   if (!res.ok) throw new Error(`${url}: HTTP ${res.status}`);
   return (await res.json()) as T;
 }
 
 export async function getBytes(url: string, logUrl: string = url): Promise<ArrayBuffer> {
-  fetchLog.push(logUrl);
+  logFetch(logUrl);
   const res = await fetch(url);
   if (!res.ok) throw new Error(`${url}: HTTP ${res.status}`);
   return res.arrayBuffer();
@@ -88,6 +94,7 @@ export async function builds(root: string): Promise<{ latest: string; store: str
 
 /** A build from `store`, the directory the builds are in. */
 export async function loadBuild(store: string, id: string): Promise<Build> {
+  if (!isSafeBuildId(id)) throw new Error(`Invalid build id: ${JSON.stringify(id)}`);
   const base = `${store}${id}/`;
   const manifest = await loadBuildManifest(base);
   const io = createBuildFetch(base, manifest);
@@ -117,10 +124,14 @@ export async function loadBuild(store: string, id: string): Promise<Build> {
 const records = new Map<string, Promise<EntityRecord>>();
 
 export function loadRecord(build: Build, id: string): Promise<EntityRecord> {
-  let p = records.get(id);
+  const key = `${build.id}:${id}`;
+  let p = records.get(key);
   if (!p) {
-    p = build.getJSON<EntityRecord>(`${build.tileset.files.records}${id}.json`);
-    records.set(id, p);
+    p = build.getJSON<EntityRecord>(`${build.tileset.files.records}${id}.json`).catch((err) => {
+      records.delete(key);
+      throw err;
+    });
+    records.set(key, p);
   }
   return p;
 }

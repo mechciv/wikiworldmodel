@@ -47,7 +47,7 @@ export class Toolbar {
         ${toggles.map((t) => `<button class="tg-${esc(t.key)} tg-layer" data-layer="${esc(t.key)}" aria-pressed="false" title="${esc(t.title)}">${esc(t.label)}</button>`).join('')}
         <button class="tg-people" aria-pressed="false" title="People (P): where people lived, for the times HYDE reconstructs it; a reconstruction on today's land, not a count">People</button>
         ${groups.length ? '<button class="tg-alts" aria-pressed="false" aria-expanded="false" title="Other whole pictures of the world: hypotheses, readings and scenarios, each its own consistent world">Alternatives</button>' : ''}
-        <div class="build" title="Data version: the build this view shows">build ${buildId}</div>
+        <div class="build" title="Data version: the build this view shows">build ${esc(buildId)}</div>
         <div class="alts" hidden>
           <p>Each is a whole picture of the world, checked to be consistent in itself.</p>
           ${selects}

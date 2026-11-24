@@ -102,10 +102,18 @@ export function encodeRuns(codes: string[]): string {
   return out;
 }
 
+const MAX_RUN_CELLS = 1_000_000;
+
 /** The tier at each place of a cell's map. */
 export function decodeRuns(map: string): Tier[] {
   const out: Tier[] = [];
-  for (const [, code, count] of map.matchAll(/([a-z])(\d+)/g)) for (let k = 0; k < Number(count); k++) out.push(CODE_TIER[code]);
+  for (const [, code, count] of map.matchAll(/([a-z])(\d+)/g)) {
+    if (!Object.hasOwn(CODE_TIER, code)) throw new Error(`unknown coverage tier code "${code}"`);
+    const n = Number(count);
+    if (!Number.isSafeInteger(n) || n < 0 || out.length + n > MAX_RUN_CELLS) throw new Error(`invalid coverage run length ${count}`);
+    const tier = CODE_TIER[code];
+    for (let k = 0; k < n; k++) out.push(tier);
+  }
   return out;
 }
 

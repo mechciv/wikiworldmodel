@@ -5,7 +5,7 @@ import { dirname, join } from 'node:path';
 import { putBlob, stageBlobsFromGit } from './blobs.ts';
 import type { CompressionEncoding } from './compress.ts';
 import { fetchAll } from './fetch.ts';
-import { fieldSource, importBlocks, importElevation, tiledField } from './importer.ts';
+import { fieldSource, importBlocks, importElevation, importReliefPlates, tiledField } from './importer.ts';
 import { loadManifest, resolveDatasetFile } from './manifest.ts';
 import { exportSnapshot, type OhmSnapshot } from './ohm.ts';
 import { REPO } from './paths.ts';
@@ -29,7 +29,8 @@ const commands: Record<string, (args: string[]) => Promise<number | void>> = {
     await fetchAll();
     const world = await loadWorld();
     for (const f of world.fields.filter(tiledField)) {
-      await (fieldSource(f) === 'elevation' ? importElevation(f) : importBlocks(f));
+      const kind = fieldSource(f);
+      await (kind === 'elevation' ? importElevation(f) : kind === 'relief' ? importReliefPlates(f) : importBlocks(f));
     }
   },
   // A fresh extract of the map over the box of an existing OHM dataset in world/manifest.yaml, stored in the local blob store.

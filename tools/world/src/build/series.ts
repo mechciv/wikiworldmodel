@@ -207,5 +207,5 @@ export async function series(world: World): Promise<SeriesRecord[]> {
       rule: f.derived ? { name: f.rule!, params: Object.fromEntries(Object.entries(f.params ?? {}).filter(([k]) => k !== 'band')) } : undefined,
     });
   }
-  return out.sort((a, b) => a.title.localeCompare(b.title, 'en'));
+  return out.sort((a, b) => (a.title < b.title ? -1 : a.title > b.title ? 1 : 0));
 }
