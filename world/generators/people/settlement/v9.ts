@@ -825,7 +825,8 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
       // beyond the scene its fields.
       if (cityHere.some((h) => (x - h.x) ** 2 + (y - h.y) ** 2 < h.r * h.r)) return;
       if (!inScene(x, y)) {
-        if (c.life.fields !== 'none') sources.push({ starts: [[x, y]], r, x, y, area: PI * fieldR * fieldR, use: c.life.fields, settlement: -1 });
+        // Only those whose place lies within the field grid, `margin` m past the scene's edge, grow fields into it.
+        if (c.life.fields !== 'none' && Math.abs(x) <= margin && Math.abs(y) <= margin) sources.push({ starts: [[x, y]], r, x, y, area: PI * fieldR * fieldR, use: c.life.fields, settlement: -1 });
         return;
       }
       // A house stands in its yard where it is not on the lots of a town's streets.
