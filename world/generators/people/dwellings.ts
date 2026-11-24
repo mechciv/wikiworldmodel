@@ -1054,7 +1054,7 @@ function standing(m: Mesh, b: Body, hw: number, hl: number): void {
   if (floor === 'raised' || floor === 'platform') {
     const out = floor === 'platform' ? 1 : 0.35;
     m.mat = floor === 'platform' || stone ? MAT.rubble : MAT.mud;
-    box(m, -hw - out, -hl - out, -0.6, hw + out, hl + out, b.base, true);
+    box(m, -hw - out, -hl - out, -2.0, hw + out, hl + out, b.base, true);
   } else if (floor === 'stilts') {
     m.mat = MAT.wood;
     m.tint = 104;
@@ -1067,7 +1067,7 @@ function standing(m: Mesh, b: Body, hw: number, hl: number): void {
       for (let j = 0; j < ny; j++) {
         // From a way off, only the posts round its edge.
         if (b.detail === 1 && i > 0 && i < nx - 1 && j > 0 && j < ny - 1) continue;
-        post(m, -hw + r + ((2 * hw - 2 * r) * i) / (nx - 1), -hl + r + ((2 * hl - 2 * r) * j) / (ny - 1), -0.5, b.base, r);
+        post(m, -hw + r + ((2 * hw - 2 * r) * i) / (nx - 1), -hl + r + ((2 * hl - 2 * r) * j) / (ny - 1), -1.6, b.base, r);
       }
     }
     m.light = keep;
@@ -1085,6 +1085,16 @@ function standing(m: Mesh, b: Body, hw: number, hl: number): void {
     quad(m, [hw + o, hl + o, -0.1], [-hw - o, hl + o, -0.1], [-hw, hl, h], [hw, hl, h]);
     quad(m, [-hw - o, -hl - o, -0.1], [hw + o, -hl - o, -0.1], [hw, -hl, h], [-hw, -hl, h]);
     m.light = keep;
+  } else if (floor === 'ground' && !b.open && !tentLike(b.d) && b.d.walls !== 'none' && b.detail < 2) {
+    // Slope-terraced foundation plinth skirt tucked below grade so buildings on foothills never expose floating undersides.
+    const keep = m.light;
+    m.light = keep * 0.72;
+    m.mat = stone ? MAT.rubble : MAT.earth;
+    m.tint = 112;
+    const o = 0.08;
+    box(m, -hw - o, -hl - o, -1.8, hw + o, hl + o, 0.04, false);
+    m.light = keep;
+    m.tint = b.tint;
   }
 }
 
@@ -1523,18 +1533,86 @@ function drawCourt(m: Mesh, b: Body): void {
       box(m, hw - p, -hl + p, b.eaves + DECK, hw, hl - p, h, true);
     }
   } else {
-    // A roof to each range, its ridge along the range.
+    // Composite multi-wing courtyard roofline: taller principal rear hall, flanking side wings, and raised entry gatehouse
+    // roof over the front portal, so compounds read as hierarchical architecture both close up and from the air.
     const rise = Math.max(0.4, Math.tan((b.skin.pitch * PI) / 180) * (depth / 2));
     const ends: RoofEnd = b.roof === 'hip' || b.roof === 'hip-and-gable' ? { a: 0, b: 1 } : { a: 1, b: 1 };
     const o = { gableMat: b.wallMat, gabletMat: MAT.planks, fine: b.detail < 2 };
     const skin = b.detail === 2 ? { ...b.skin, over: 0.1 } : b.skin;
-    for (const [x, y, gx, gy, half] of [[0, hl - depth / 2, 1, 0, hw], [0, -hl + depth / 2, 1, 0, hw], [hw - depth / 2, 0, 0, 1, hl], [-hw + depth / 2, 0, 0, 1, hl]] as const) {
-      enter(m, x, y, 0, gx, gy);
-      ridgeRoof(m, depth / 2, half, b.eaves, rise, skin, ends, ends, o);
+    const hallLift = 0.45;
+    // Principal rear hall (y = -hl + depth/2): slightly taller wall band & higher grand roof.
+    if (b.detail < 2) {
+      m.mat = b.wallMat;
+      box(m, -hw, -hl, b.eaves - 0.05, hw, -hl + depth, b.eaves + hallLift, false);
+    }
+    enter(m, 0, -hl + depth / 2, 0, 1, 0);
+    ridgeRoof(m, depth / 2, hw, b.eaves + hallLift, rise * 1.12, skin, ends, ends, o);
+    leave(m);
+    // Flanking side wings (east & west) tucked cleanly between front & rear ranges.
+    const wingHalf = Math.max(1, hl - depth * 0.55);
+    for (const sx of [hw - depth / 2, -hw + depth / 2]) {
+      enter(m, sx, 0, 0, 0, 1);
+      ridgeRoof(m, depth / 2 * 0.94, wingHalf, b.eaves, rise * 0.92, skin, ends, ends, o);
+      leave(m);
+    }
+    // Front street range (slightly lower eaves) + raised pavilion roof crowning the front gate!
+    enter(m, 0, hl - depth / 2, 0, 1, 0);
+    ridgeRoof(m, depth / 2 * 0.9, hw, b.eaves - 0.1, rise * 0.82, skin, ends, ends, o);
+    leave(m);
+    if (b.detail < 2 && gateCuts.length) {
+      const g0 = gateCuts[0];
+      enter(m, g0.x, hl - depth * 0.42, 0, 1, 0);
+      ridgeRoof(m, depth * 0.56, Math.min(hw * 0.45, Math.max(1.8, g0.half * 2.4)), b.eaves + 0.25, rise * 0.95, skin, ends, ends, o);
       leave(m);
     }
   }
   if (b.detail === 2) return;
+  // Interior courtyard life: packed earth/stone paving, walkway to principal hall, shade tree & corner firewood/jars.
+  if (ix > 1.8 && iy > 1.8) {
+    const cz = b.base + 0.02;
+    m.mat = MAT.earth;
+    m.tint = 132;
+    quad(m, [-ix, -iy, cz], [ix, -iy, cz], [ix, iy, cz], [-ix, iy, cz]);
+    // Flagstone path from front gate to rear principal hall.
+    m.mat = MAT.paving;
+    m.tint = 128;
+    const pw = Math.min(1.1, ix * 0.32);
+    quad(m, [-pw, -iy, cz + 0.02], [pw, -iy, cz + 0.02], [pw, iy, cz + 0.02], [-pw, iy, cz + 0.02]);
+    // Pruned courtyard shade tree in ~55% of compounds (adds lush living greenery inside tight village/town blocks!).
+    if (b.u(31) < 0.55 && ix > 2.4 && iy > 2.4) {
+      const tx = (b.u(32) < 0.5 ? -1 : 1) * (ix * 0.52);
+      const ty = (b.u(33) - 0.5) * (iy * 0.45);
+      const th = Math.min(b.eaves + 1.4, 3.2 + b.u(34) * 1.4);
+      const cr = Math.min(ix * 0.44, 1.35 + b.u(35) * 0.6);
+      m.mat = MAT.bark;
+      m.tint = 108;
+      limb(m, tx, ty, cz, tx + 0.1, ty - 0.06, cz + th * 0.58, 0.14, 0.09, 5);
+      m.mat = MAT.broad;
+      m.tint = 92 + Math.floor(b.u(36) * 40);
+      // Two overlapping crown lobes for organic shade-tree volume.
+      const cx1 = tx + 0.12;
+      const cy1 = ty - 0.08;
+      const cz1 = cz + th * 0.68;
+      const segs = b.detail === 0 ? 8 : 6;
+      enter(m, cx1, cy1, cz1, 0, 1);
+      turn(m, [[0.15, -cr * 0.45], [cr * 0.85, -cr * 0.25], [cr, 0.05], [cr * 0.72, cr * 0.45], [0.1, cr * 0.62]], segs);
+      leave(m);
+      if (b.detail === 0) {
+        enter(m, cx1 - cr * 0.42, cy1 + cr * 0.3, cz1 - cr * 0.1, 0, 1);
+        turn(m, [[0.12, -cr * 0.32], [cr * 0.62, -cr * 0.1], [cr * 0.55, cr * 0.32], [0.08, cr * 0.46]], 6);
+        leave(m);
+      }
+      // Firewood / water jar in the opposite corner.
+      if (b.detail === 0) {
+        m.mat = MAT.logs;
+        m.tint = 100;
+        const fx = -tx;
+        const fy = -iy * 0.65;
+        box(m, fx - 0.55, fy - 0.28, cz, fx + 0.55, fy + 0.28, cz + 0.58, true);
+      }
+    }
+    m.tint = b.tint;
+  }
   // The gate in the front, and windows only where its claims say there were: such a house turns its back on the street.
   onWall(m, b, 'front', hw, hl, b.base, () => {
     // One gate; or, where it stands for several houses, a gate to each along its front.

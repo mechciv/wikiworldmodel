@@ -8,18 +8,18 @@ import { bone, BONE, loft, STRIDE_HIPS } from '../life/forms.ts';
 import { enter, leave, turn } from './parts.ts';
 
 /** How many ways a person is drawn. */
-export const PERSON_VARIANTS = 8;
+export const PERSON_VARIANTS = 12;
 
 /** How high a standing person's hips are, as a share of their height. */
 export const PERSON_HIP = 0.52;
 
 /**
  * Whether a person drawn in a way goes about (life/routines.ts): one drawn walking or carrying is on their way as the
- * clock starts; one who stands may set out; one who sits or kneels at work stays.
+ * clock starts; one who stands may set out; one who sits, kneels, hoes or reaps at work stays.
  */
 export function personGoes(variant: number): 'going' | 'may' | 'stays' {
   const v = ((variant % PERSON_VARIANTS) + PERSON_VARIANTS) % PERSON_VARIANTS;
-  return v === 2 || v === 3 ? 'going' : v === 4 || v === 5 ? 'stays' : 'may';
+  return v === 2 || v === 3 || v === 10 ? 'going' : v === 4 || v === 5 || v === 8 || v === 9 ? 'stays' : 'may';
 }
 
 /** How long a stride of a person so tall is, in metres, drawn in a way: a child's is shorter. */
@@ -42,7 +42,7 @@ interface Pose {
   hand2?: P;
   /** a wrap to the knee, a robe to the ankle, or a cloth at the hips only */
   dress: 'tunic' | 'robe' | 'wrap';
-  load?: 'head' | 'staff' | 'basket' | 'quern';
+  load?: 'head' | 'staff' | 'basket' | 'quern' | 'hoe' | 'sickle' | 'pole';
 }
 
 const STAND: Pose = { hip: [0, 0.52], neck: [0, 0.83], knee: [0.055, 0.01, 0.28], foot: [0.06, 0.02, 0.03], elbow: [0.15, -0.01, 0.62], hand: [0.155, 0.03, 0.45], dress: 'tunic' };
@@ -62,6 +62,14 @@ const POSES: Pose[] = [
   STAND,
   // Standing with a basket held before it.
   { ...STAND, dress: 'robe', elbow: [0.15, 0.08, 0.6], hand: [0.09, 0.2, 0.55], load: 'basket' },
+  // 8: Hoeing the soil — leaning forward gripping a long-handled hoe.
+  { hip: [-0.04, 0.5], neck: [0.14, 0.76], knee: [0.065, 0.08, 0.28], foot: [0.07, 0.12, 0.03], knee2: [0.065, -0.05, 0.27], foot2: [0.07, -0.1, 0.03], elbow: [0.13, 0.18, 0.58], hand: [0.04, 0.28, 0.48], elbow2: [0.14, 0.14, 0.6], hand2: [0.02, 0.22, 0.56], dress: 'tunic', load: 'hoe' },
+  // 9: Reaping grain — stooped low gathering a sheaf with a sickle.
+  { hip: [-0.06, 0.47], neck: [0.2, 0.68], knee: [0.07, 0.08, 0.26], foot: [0.075, 0.1, 0.03], knee2: [0.07, -0.04, 0.26], foot2: [0.075, -0.08, 0.03], elbow: [0.14, 0.24, 0.48], hand: [0.08, 0.32, 0.34], elbow2: [0.16, 0.2, 0.5], hand2: [0.06, 0.3, 0.32], dress: 'tunic', load: 'sickle' },
+  // 10: Shoulder-pole porter walking with twin slung baskets.
+  { ...STAND, knee: [0.055, 0.09, 0.29], foot: [0.06, 0.15, 0.03], knee2: [0.055, -0.04, 0.27], foot2: [0.06, -0.13, 0.05], elbow: [0.16, 0.06, 0.72], hand: [0.12, 0.14, 0.8], elbow2: [0.15, 0.04, 0.62], hand2: [0.14, 0.08, 0.48], dress: 'tunic', load: 'pole' },
+  // 11: Conversing / gesturing in a plaza or market.
+  { ...STAND, dress: 'robe', elbow: [0.16, 0.06, 0.65], hand: [0.12, 0.22, 0.7], elbow2: [0.15, 0.02, 0.62], hand2: [0.14, 0.08, 0.48] },
 ];
 
 /**
@@ -199,6 +207,37 @@ export function drawPerson(m: Mesh, height: number, variant: number, detail: 0 |
     m.mat = MAT.rubble;
     m.tint = 128;
     turnAt(m, 0, 0.44 * H, 0, [[0.16, 0], [0.15, 0.08], [0.02, 0.085]].map(([r, z]) => [r * H, z * H]), detail === 0 ? 8 : 5, 0.7);
+  } else if (p.load === 'hoe') {
+    m.mat = MAT.wood;
+    m.tint = 104;
+    limb(m, 0.02 * H, 0.14 * H, 0.68 * H, 0.02 * H, 0.46 * H, 0.04 * H, 0.014 * H, 0.013 * H, 4);
+    m.mat = MAT.dark;
+    limb(m, 0.02 * H, 0.46 * H, 0.04 * H, 0.02 * H, 0.36 * H, 0.01 * H, 0.036 * H, 0.042 * H, 4);
+  } else if (p.load === 'sickle') {
+    // Golden grain sheaf cradled in left hand + curved reaping sickle in right.
+    m.mat = MAT.thatch;
+    m.tint = 148;
+    limb(m, 0.08 * H, 0.34 * H, 0.12 * H, 0.1 * H, 0.36 * H, 0.56 * H, 0.065 * H, 0.085 * H, 5);
+    m.mat = MAT.wood;
+    m.tint = 96;
+    limb(m, -0.06 * H, 0.28 * H, 0.32 * H, -0.02 * H, 0.42 * H, 0.24 * H, 0.014 * H, 0.01 * H, 4);
+  } else if (p.load === 'pole') {
+    // Carrying pole balanced along the shoulder (fore-and-aft within 0.55 H so width stays compact) with twin hanging baskets.
+    m.mat = MAT.wood;
+    m.tint = 112;
+    const pz = 0.81 * H;
+    const px = 0.12 * H;
+    limb(m, px, -0.44 * H, pz - 0.04 * H, px, 0.44 * H, pz - 0.04 * H, 0.016 * H, 0.016 * H, 5);
+    if (detail === 0) {
+      m.mat = MAT.rope;
+      limb(m, px, -0.4 * H, pz - 0.04 * H, px, -0.4 * H, 0.48 * H, 0.008 * H, 0.008 * H, 4);
+      limb(m, px, 0.4 * H, pz - 0.04 * H, px, 0.4 * H, 0.48 * H, 0.008 * H, 0.008 * H, 4);
+    }
+    m.mat = MAT.matting;
+    m.tint = 132;
+    const basket = [[0.06, 0], [0.1, 0.09], [0.105, 0.11]].map(([r, z]) => [r * H, z * H]);
+    turnAt(m, px, -0.4 * H, 0.37 * H, basket, detail === 0 ? 7 : 5);
+    turnAt(m, px, 0.4 * H, 0.37 * H, basket, detail === 0 ? 7 : 5);
   }
   m.entity = keep;
 }

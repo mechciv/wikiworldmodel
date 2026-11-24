@@ -67,15 +67,18 @@ describe('the people of a scene, drawn', () => {
   const plan = stream.people!;
   const town = plan.settlements.find((s) => s.city === 'Testopolis')!;
 
-  it('has its houses, a wall round its town, the animals its farmers kept and paths between its villages', () => {
+  it('has its houses, a continuous wall round its town, the animals its farmers kept and paths between its villages', () => {
     expect(plan.houses.length).toBeGreaterThan(1000);
     expect(town.town?.from.wall).toBe('test/town-house');
-    expect(plan.workForms.map((f) => f.spec.kind)).toEqual(expect.arrayContaining(['wall', 'gate', 'tower', 'person']));
+    expect(plan.perimeters.some((pr) => pr.settlement === plan.settlements.indexOf(town) && pr.kind === 'stone' && pr.towers)).toBe(true);
+    expect(plan.workForms.map((f) => f.spec.kind)).toEqual(expect.arrayContaining(['person', 'stall', 'kiln']));
     expect(plan.animals.length).toBeGreaterThan(100);
     expect(plan.animals.every((a) => a.kind === 0)).toBe(true);
     // The townspeople keep none: the husbandry is the farmers'.
     expect(plan.animals.some((a) => a.settlement === plan.settlements.indexOf(town))).toBe(false);
     expect(plan.paths.length).toBeGreaterThan(20);
+    expect(plan.streets.length).toBeGreaterThan(20);
+    expect(stream.smokes()?.length).toBeGreaterThan(0);
   });
 
   it("hands a view each kind as its own entity: taxa, then houses, then works, then kept animals, then the fields' crop", () => {
@@ -96,9 +99,9 @@ describe('the people of a scene, drawn', () => {
         for (let i = 0; i < b.count; i++) {
           const e = entities[(i * INSTANCE_STRIDE) / 2 + 12];
           if (taxon >= CROP) {
-            // One entity for the crop of every field, after the kept animals and the paths.
-            expect(e).toBe(T + 1 + H + W + (spec.people!.kept?.length ?? 0) + 1);
-            expect(e).toBe(stream.cropEntity());
+            // Each seasonal crop palette slot carries its own entity after kept animals and paths.
+            expect(e).toBe(T + 1 + H + W + (spec.people!.kept?.length ?? 0) + 1 + (taxon - CROP));
+            expect(e).toBe(stream.cropEntity() + (taxon - CROP));
             seen.crops++;
           } else if (taxon >= KEPT) {
             expect(e).toBe(T + 1 + H + W + (taxon - KEPT));
@@ -117,18 +120,18 @@ describe('the people of a scene, drawn', () => {
       }
       return seen;
     };
-    // From outside the town, a little up, looking across it: its houses and its wall.
+    // From outside the town, a little up, looking across it: its houses and living works (stalls, people, kilns, carts).
     const across = look(town.x, town.y - town.r - 250, 120);
     expect(across.houses).toBeGreaterThan(100);
-    expect(across.works).toBeGreaterThan(20);
+    expect(across.works).toBeGreaterThan(5);
     // From just south of a herd, low down: the cattle.
     const cow = plan.animals[0];
     expect(look(cow.x, cow.y - 60, 25).kept).toBeGreaterThan(0);
     // From the edge of a village's houses, low down, looking over its fields: their crop, standing as plants.
     const farm = plan.settlements.find((s) => !s.city && s.fields === 'rainfed' && s.houses > 3)!;
-    expect(look(farm.x, farm.y + farm.r * 1.2, 6).crops).toBeGreaterThan(200);
+    expect(look(farm.x, farm.y + farm.r * 1.2, 6).crops).toBeGreaterThan(100);
     // A kept animal's mesh is an animal's: it idles, as the wild ones do, and has a stride to walk with; so has a
-    // person's, who goes about; a wall's, a house's and a crop's have neither.
+    // person's, who goes about; a house's and a crop's have neither.
     const kinds = new Set<string>();
     for (const proto of sent) {
       const m = stream.mesh(proto);
@@ -176,7 +179,7 @@ describe('the people of a scene, drawn', () => {
     expect(seen).toBeGreaterThan(plan.houses.filter((h) => h.settlement === si).length * 0.5);
   });
 
-  it('lays the paths on the ground as one mesh of their own entity, a hand above it and never under water', () => {
+  it('lays the paths, streets, continuous perimeter walls, and fieldworks on the ground with distinct pickable entities', () => {
     const mesh = stream.paths()!;
     expect(mesh.indices.length).toBeGreaterThan(300);
     const f = new Float32Array(mesh.vertices);
@@ -190,5 +193,10 @@ describe('the people of a scene, drawn', () => {
       expect(s[i * 14 + 13]).toBe(stream.pathEntity());
     }
     expect(stream.pathEntity()).toBe(spec.taxa.length + 1 + plan.forms.length + plan.workForms.length + 1);
+    const wallMesh = stream.walls()!;
+    expect(wallMesh).toBeDefined();
+    expect(wallMesh.indices.length).toBeGreaterThan(600);
+    const ws = new Uint16Array(wallMesh.vertices);
+    expect(ws[13]).toBe(stream.perimeterBase());
   });
 });

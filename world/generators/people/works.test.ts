@@ -174,4 +174,25 @@ describe("a town's works", () => {
       }
     }
   });
+
+  it('draws agricultural, economic and cultural activity works cleanly at every detail level', () => {
+    const specs: WorkSpec[] = [
+      { kind: 'stook', height: 1.5, thickness: 1.4 },
+      { kind: 'cart', height: 1.6, thickness: 2.2, opening: 1.25 },
+      { kind: 'barrow', height: 1.1, thickness: 1.4 },
+      { kind: 'plough', height: 1.1, thickness: 2.4 },
+      { kind: 'stall', height: 2.5, thickness: 3.4, opening: 2.2 },
+      { kind: 'kiln', height: 2.6, thickness: 3.2 },
+      { kind: 'jetty', height: 1.2, thickness: 7.0, opening: 2.6 },
+      { kind: 'altar', height: 1.8, thickness: 5.2 },
+    ];
+    for (const s of specs) {
+      for (const detail of [0, 1, 2] as const) {
+        const pts = drawn(s, detail, 0);
+        expect(pts.length, `${s.kind} d=${detail}`).toBeGreaterThan(8);
+        expect(Math.max(...pts.map((p) => p[2])), `${s.kind} top`).toBeGreaterThan(0.5);
+      }
+      if (s.kind !== 'barrow') expect(smallWork(s.kind), s.kind).toBe(false);
+    }
+  });
 });

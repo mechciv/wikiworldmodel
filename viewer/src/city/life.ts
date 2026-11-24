@@ -11,8 +11,9 @@ import { GroundSampler } from '../../../world/generators/city/ground.ts';
 import { Heights, placeLook, type LivingParams } from '../../../world/generators/life/scene/v14.ts';
 import { snowOf } from '../../../world/generators/life/climate.ts';
 import { declination, MID_DAY } from '../../../core/water.ts';
+import { FIELD_SLOTS } from '../../../core/plots.ts';
 import { meanBears } from '../../../world/generators/life/sorting.ts';
-import { CROP, HOUSE, KEPT, protoParts, type NamedGroup } from '../../../world/generators/life/stream.ts';
+import { HOUSE, KEPT, protoParts, STREWN, type NamedGroup } from '../../../world/generators/life/stream.ts';
 import { ROUTE, wayAt } from '../../../world/generators/life/routines.ts';
 import { CityRenderer, SHARE_STEPS, type CityFrame, type LocalRenderer, type MeshHandle } from '../gl/city.ts';
 import type { GL } from '../gl/context.ts';
@@ -214,8 +215,10 @@ export class LifeScene {
 
   private groundData: Extract<FromLifeWorker, { type: 'ground' | 'preview' }> | null = null;
   private maskData: Extract<FromLifeWorker, { type: 'mask' }> | null = null;
-  /** the paths between the scene's settlements, on the GPU once the scene has been shown */
+  /** static terrain-draped meshes on the GPU: paths/streets, continuous perimeter walls, and 3D fieldworks */
   private pathsGpu: MeshHandle | null = null;
+  private wallsGpu: MeshHandle | null = null;
+  private fieldworksGpu: MeshHandle | null = null;
   private held: Extract<FromLifeWorker, { type: 'selection' }>[] = [];
 
   /** This scene takes over the renderer: its ground, its colours and whatever has been made for it. */
@@ -246,6 +249,7 @@ export class LifeScene {
     // What people made of the ground, or nothing where there are no people.
     const fields = mask?.fields;
     r.setFields(fields && this.people ? fields : null, mask?.maskSize ?? 1, box, this.fieldLook());
+    r.setSmokes(detail?.smokes ?? null);
     const params = this.spec.generator.params as unknown as LivingParams;
     const clim = params.cover.climates[this.spec.biome.climate];
     const cover = this.spec.biome.cover;
@@ -264,13 +268,19 @@ export class LifeScene {
     r.setSubstrate(ground);
     r.setRock(rock);
     r.setGroundCover(...groundCover(this.spec));
-    // Each taxon is an entity, and after them each kind of house and each kind of piece of a town's works, which stand
-    // for as long as the scene does: generated.
-    // And one more for the paths between its settlements, if it has any; one for the crop of its fields; and one for
-    // the stones that stand on its ground, which are no taxon's (world/generators/life/stream.ts, strewnEntity).
-    const houseKinds = (this.people?.forms.length ?? 0) + (this.people?.works.length ?? 0) + (this.people?.kept ?? 0) + 3;
-    // The paths are one mesh of the scene's own, put on the GPU the first time it is shown.
+    // Entities: taxa, houses, works, kept animals, paths/streets (1), crop palette slots (FIELD_SLOTS),
+    // continuous perimeters (P), 3D fieldworks (1), and strewn stones (1).
+    const houseKinds = (this.people?.forms.length ?? 0) + (this.people?.works.length ?? 0) + (this.people?.kept ?? 0) + 1 + FIELD_SLOTS + (this.people?.perimeters.length ?? 0) + 2;
     if (detail?.paths && !this.pathsGpu) this.pathsGpu = r.upload(detail.paths.vertices, detail.paths.indices);
+    if (detail?.walls && !this.wallsGpu) this.wallsGpu = r.upload(detail.walls.vertices, detail.walls.indices);
+    if (detail?.fieldworks && !this.fieldworksGpu) this.fieldworksGpu = r.upload(detail.fieldworks.vertices, detail.fieldworks.indices);
+    // Continuous walls, watchtowers, gatehouses, terraces, and field walls cast crisp shadows into the shadow cascades.
+    r.shadowCells = () => {
+      const casters: MeshHandle[] = [];
+      if (this.wallsGpu) casters.push(this.wallsGpu);
+      if (this.fieldworksGpu) casters.push(this.fieldworksGpu);
+      return casters;
+    };
     const out = new Float32Array((this.spec.taxa.length + 1 + houseKinds) * 4);
     for (let f = 0; f < houseKinds; f++) {
       const k = (this.spec.taxa.length + 1 + f) * 4;
@@ -305,7 +315,7 @@ export class LifeScene {
     }
     this.movingInstances = m.batches.some(b => {
       const { taxon } = protoParts(b.proto);
-      return b.count > 0 && (taxon < HOUSE || (taxon >= KEPT && taxon <= CROP) || !!b.ways);
+      return b.count > 0 && (taxon < HOUSE || (taxon >= KEPT && taxon < STREWN) || !!b.ways);
     });
     this.last = { instances: m.instances, triangles: m.triangles, meshes: m.batches.length, pending: m.pending, ms: m.ms, going };
     if (this.active) this.apply(m);
@@ -412,7 +422,11 @@ export class LifeScene {
       height: outH,
     };
     this.follow(clock);
-    this.renderer.render(f, this.pathsGpu ? [this.pathsGpu] : [], outW, outH);
+    const staticMeshes: MeshHandle[] = [];
+    if (this.pathsGpu) staticMeshes.push(this.pathsGpu);
+    if (this.wallsGpu) staticMeshes.push(this.wallsGpu);
+    if (this.fieldworksGpu) staticMeshes.push(this.fieldworksGpu);
+    this.renderer.render(f, staticMeshes, outW, outH);
   }
 
   /**
@@ -420,27 +434,35 @@ export class LifeScene {
    * as far as the cover's own grid reaches, where the settlement generator says how a crop is drawn. Within that the
    * ground between a crop's rows is earth; beyond it, under the lengths of row the wider grid draws, the crop's colour.
    */
-  private fieldLook(): { plot: number; aspect: number; kind: number; sown?: number } {
+  private fieldLook(): { plot: number; aspect: number; kind: number; sown?: number; palette?: { slotColor: Float32Array; slotColor2: Float32Array; slotMeta: Float32Array } } {
     if (!this.people) return { plot: 0, aspect: 1, kind: 0 };
     const clumps = (this.spec.generator.params as unknown as LivingParams).plants.clumps;
-    return { ...fieldStyle(this.people.style), sown: this.people.crops && clumps ? clumps.reach : 0 };
+    const pal = this.people.agriculture.palette;
+    return { ...fieldStyle(this.people.style), sown: this.people.crops && clumps ? clumps.reach : 0, palette: { slotColor: pal.slotColor, slotColor2: pal.slotColor2, slotMeta: pal.slotMeta } };
   }
 
   /**
-   * What is at a screen position: a taxon, a kind of house or of a piece of a town's works the generator drew, an animal
-   * the scene's people kept, or nothing.
+   * What is at a screen position: a taxon, a kind of house or work, a kept animal, a road/street, a regional crop slot,
+   * a continuous perimeter wall/gatehouse, 3D fieldworks, or nothing.
    */
-  pick(x: number, y: number): { taxon?: LivingTaxon; house?: number; work?: number; kept?: LivingTaxon; path?: boolean; crop?: boolean } {
+  pick(x: number, y: number): { taxon?: LivingTaxon; house?: number; work?: number; kept?: LivingTaxon; path?: boolean; crop?: boolean; cropSlot?: number; perimeter?: number; fieldworks?: boolean } {
     const e = this.renderer.pick(x, y);
     if (!e) return {};
     const made = e - this.spec.taxa.length - 1;
     const forms = this.people?.forms.length ?? 0;
     const works = this.people?.works.length ?? 0;
     const kept = this.people?.kept ?? 0;
+    const perims = this.people?.perimeters.length ?? 0;
+    const pathId = forms + works + kept;
+    const cropBase = pathId + 1;
+    const perimBase = cropBase + FIELD_SLOTS;
+    const fwId = perimBase + perims;
     // A stone is the ground's own: a click on one is a click on the ground.
-    if (made > forms + works + kept + 1) return {};
-    if (made > forms + works + kept) return { crop: true };
-    if (made >= forms + works + kept) return { path: true };
+    if (made > fwId) return {};
+    if (made === fwId) return { fieldworks: true };
+    if (made >= perimBase) return { perimeter: made - perimBase };
+    if (made >= cropBase) return { crop: true, cropSlot: made - cropBase };
+    if (made === pathId) return { path: true };
     if (made >= forms + works) return { kept: this.spec.people?.kept?.[made - forms - works] };
     if (made >= forms) return { work: made - forms };
     if (made >= 0) return { house: made };
@@ -486,8 +508,16 @@ export class LifeScene {
   dispose(): void {
     this.worker?.terminate();
     this.worker = null;
+    if (owners.get(this.renderer) === this) {
+      this.renderer.setSmokes(null);
+      this.renderer.shadowCells = () => [];
+    }
     this.active = false;
     if (this.pathsGpu) this.renderer.remove(this.pathsGpu);
+    if (this.wallsGpu) this.renderer.remove(this.wallsGpu);
+    if (this.fieldworksGpu) this.renderer.remove(this.fieldworksGpu);
     this.pathsGpu = null;
+    this.wallsGpu = null;
+    this.fieldworksGpu = null;
   }
 }

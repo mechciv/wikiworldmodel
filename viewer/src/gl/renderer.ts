@@ -91,7 +91,13 @@ export interface LocalRenderer<TMesh extends MeshHandle = MeshHandle> {
   clearInstanced(): void;
   instancedStats(): { meshes: number; instances: number; triangles: number; impostorInstances: number };
   setMask(data: Uint8Array, size: number, box: [number, number, number, number]): void;
-  setFields(data: Uint8Array | null, size: number, box: [number, number, number, number], style: { plot: number; aspect: number; kind: number; sown?: number }): void;
+  setFields(
+    data: Uint8Array | null,
+    size: number,
+    box: [number, number, number, number],
+    style: { plot: number; aspect: number; kind: number; sown?: number; palette?: { slotColor: Float32Array; slotColor2: Float32Array; slotMeta: Float32Array } },
+  ): void;
+  setSmokes(data: Float32Array | null): void;
   setWater(vertices: Float32Array, indices: Uint32Array, level: number, flow?: Float32Array, tone?: number[]): void;
   setEntities(data: Float32Array): void;
   setEntityTime(index: number, start: number, end: number): void;

@@ -136,6 +136,7 @@ const places: [string, number, number, number, number | 'city'][] = [
   ['bengal-village', 1800, 24.5, 88.5, 0],
   ['hindustan-village', 1600, 26.8, 80.9, 0],
   ['north-china-village', 1850, 36.6, 115.5, 0],
+  ['eastern-han-hebei', 147.974, 36.5681082, 114.1017057, 0],
   ['yangshao-village', -4000, 34.4, 109.0, 0],
   ['edo-village', 1750, 35.6, 138.6, 0],
   ['maasai-kraal', 1885, -2.6, 36.6, 0],

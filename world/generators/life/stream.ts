@@ -15,9 +15,11 @@ import { freshOf, noise, type Waters } from './land.ts';
 import { GroundSort } from './sorting.ts';
 import { drawStone, drawWood, shedsWood, STONE_FINE, STONE_VARIANTS, WOOD, WOOD_SEEDS, woodLength } from './strewn.ts';
 import { drawDwelling, HOUSE_VARIANTS, houseSize, type HouseDetail } from '../people/dwellings.ts';
-import { LandUseMap, landUseMask, makeSettlement, type LandUse, type SettlementParams, type SettlementPlan } from '../people/settlement/v6.ts';
-import { drawCrop, sow, type CropParams } from '../people/crops.ts';
-import { PLOT, PLOT_LOOK, plotAt, plotStyle, type PlotStyle } from '../../../core/plots.ts';
+import { LandUseMap, landUseMask, makeSettlement, type LandUse, type SettlementParams, type SettlementPlan } from '../people/settlement/v7.ts';
+import { drawCrop, slotArchetype, sow, type CropParams } from '../people/crops.ts';
+import { buildFieldworks, type FieldTreeSpot } from '../people/fieldworks.ts';
+import { buildPerimeterMesh } from '../people/walls.ts';
+import { FIELD_SLOTS, PLOT, PLOT_LOOK, plotAt, plotSlotIndex, plotStyle, type PlotStyle } from '../../../core/plots.ts';
 import { drawWork, smallWork, WORK_VARIANTS, workTop } from '../people/works.ts';
 import { personStride } from '../people/figures.ts';
 
@@ -321,6 +323,10 @@ export class SceneStream {
   /** how the fields' crop is drawn, where the scene's people have fields and their generator says how; and their plots */
   readonly crops?: CropParams;
   private plots?: PlotStyle;
+  /** native broadleaf canopy taxon index used for field-margin & headland trees, or -1 if none in the scene */
+  private fieldTreeTaxon = -1;
+  /** field-corner and headland tree placements emitted by buildFieldworks() */
+  private fieldTrees: FieldTreeSpot[] = [];
 
   constructor(readonly spec: SceneSpec, private budget: Budget = FULL_BUDGET) {
     this.params = spec.generator.params as unknown as LivingParams;
@@ -393,6 +399,22 @@ export class SceneStream {
     this.fullReach = this.params.reach.full;
     this.nearReach = this.params.reach.near;
     this.shrubFrom = this.params.plants.shrubs?.least_m ?? Infinity;
+    // Pick a native canopy tree (preferring broadleaf) for field corners & hedgerows when people farm here.
+    let bestTree = -1;
+    let bestScore = -1;
+    spec.taxa.forEach((t, idx) => {
+      const form = spec.forms[t.form];
+      if (!form || form.kind !== 'plant' || (form.behave?.layer ?? 'canopy') !== 'canopy') return;
+      const h = t.height ?? 10;
+      if (h < 3 || h > 35) return;
+      const broad = Object.values(form.parts).some((pt) => pt && (pt.type === 'broadleaf' || pt.type === 'shrub')) ? 2 : 1;
+      const score = broad * (0.5 + t.weight);
+      if (score > bestScore) {
+        bestScore = score;
+        bestTree = idx;
+      }
+    });
+    this.fieldTreeTaxon = bestTree;
   }
 
   /** What the ground is, as an image: as fine as asked for. */
@@ -406,25 +428,20 @@ export class SceneStream {
   }
 
   /**
-   * The paths between the people's settlements, as one mesh laid on the ground: a ribbon along each, a hand above the
-   * ground at every few metres of its way, broken where it would cross water. Undefined where the scene has none. Its
-   * entity comes after the kept animals' (pathEntity).
+   * Country paths between settlements, internal village/town streets (paved avenues and dirt lanes), and central market
+   * plazas, as one terrain-draped mesh laid slightly above the ground, broken where it would cross water.
    */
   paths(): { vertices: ArrayBuffer; indices: Uint32Array } | undefined {
     const plan = this.people;
-    if (!plan?.paths.length || !(plan.pathWidth > 0)) return undefined;
+    if (!plan || (!plan.paths.length && !plan.streets.length)) return undefined;
     const levelAt = this.waters.paths ? waterLevels(this.waters) : undefined;
     const water = levelAt ?? (() => this.look.water);
-    const half = plan.pathWidth / 2;
-    const step = 4;
-    const lift = 0.12;
-    const m = new Mesh(4096);
+    const m = new Mesh(8192);
     m.entity = this.pathEntity();
-    // Beaten pale, and of a material the renderer lays on the ground at any distance.
-    m.mat = MAT.sand;
-    m.tint = 118;
-    for (const line of plan.paths) {
-      // Its points every few metres, then a strip between each pair that stands on dry ground.
+    const ribbon = (line: number[], width: number, lift: number, step: number, mat: number, tint: number): void => {
+      const half = width * 0.5;
+      m.mat = mat;
+      m.tint = tint;
       let last: [number, number] | undefined;
       let along = 0;
       for (let q = 0; q + 3 < line.length; q += 2) {
@@ -459,19 +476,240 @@ export class SceneStream {
         }
         along += d;
       }
+    };
+    // 1. Inter-settlement country roads: warm compacted earth/loess.
+    if (plan.pathWidth > 0) {
+      for (const line of plan.paths) ribbon(line, plan.pathWidth, 0.12, 4, MAT.sand, 92);
+    }
+    // 2. Internal village & town streets: weathered stone avenues and compacted earth lanes within 4 km of scene centre.
+    let streetCount = 0;
+    for (const st of plan.streets) {
+      if (st.line.length < 4 || streetCount >= 1200) continue;
+      if (Math.hypot(st.line[0], st.line[1]) > 4200 && plan.streets.length > 600) continue;
+      ribbon(st.line, st.width, st.paved ? 0.11 : 0.1, 3.5, st.paved ? MAT.paving : MAT.sand, st.paved ? 92 : 76);
+      streetCount++;
+    }
+    // 3. Paved central market/civic square pads in nearby nucleated villages and towns.
+    m.mat = MAT.paving;
+    m.tint = 86;
+    for (const s of plan.settlements) {
+      if (s.houses < 8 || s.pattern === 'foragers' || s.pattern === 'herders' || Math.hypot(s.x, s.y) > 2400) continue;
+      const cz = this.ground.at(s.x, s.y);
+      if (cz - water(s.x, s.y) <= 0.35) continue;
+      const rad = Math.min(9.5, 5.5 + Math.sqrt(s.houses) * 0.35);
+      const sides = 8;
+      const lift = 0.095;
+      let allDry = true;
+      const pts: [number, number, number][] = [];
+      for (let i = 0; i < sides; i++) {
+        const a = (TAU * i) / sides;
+        const px = s.x + Math.cos(a) * rad;
+        const py = s.y + Math.sin(a) * rad;
+        const pz = this.ground.at(px, py);
+        if (Math.abs(px) >= EXTENT || Math.abs(py) >= EXTENT || pz - water(px, py) <= 0.25) {
+          allDry = false;
+          break;
+        }
+        pts.push([px, py, pz]);
+      }
+      if (!allDry) continue;
+      const cIdx = m.v(s.x, s.y, cz + lift, 0, 0, 1, 0, 0);
+      const ring = pts.map(([px, py, pz]) => m.v(px, py, pz + lift, 0, 0, 1, px - s.x, py - s.y));
+      for (let i = 0; i < sides; i++) m.tri(cIdx, ring[i], ring[(i + 1) % sides]);
     }
     const { vertices, indices } = m.arrays();
     return indices.length ? { vertices, indices } : undefined;
   }
 
-  /** The entity of the paths: after the taxa, the houses' forms, the works' pieces and the kept animals. */
+  /**
+   * Continuous terrain-conforming perimeter walls, battlements, watchtowers, roofed gatehouses, and moats for all
+   * walled/enclosed villages and towns in the scene. Each perimeter carries its own entity ID for provenance picking.
+   */
+  walls(): { vertices: ArrayBuffer; indices: Uint32Array } | undefined {
+    const plan = this.people;
+    if (!plan?.perimeters.length) return undefined;
+    const m = new Mesh(8192);
+    const base = this.perimeterBase();
+    plan.perimeters.forEach((pr, pi) => {
+      buildPerimeterMesh(m, { ...pr, entity: base + pi }, this.ground);
+    });
+    const { vertices, indices } = m.arrays();
+    return indices.length ? { vertices, indices } : undefined;
+  }
+
+  /**
+   * Physical 3D fieldworks draped on terrain around the scene focus: earthen bunds, stone walls, hedges, dikes,
+   * irrigation ditches, and contour-following hillside terrace retaining risers, plus field-edge & village shade trees.
+   */
+  fieldworks(radius = 800): { vertices: ArrayBuffer; indices: Uint32Array } | undefined {
+    const plan = this.people;
+    if (!plan || !this.landUse || !this.plots || plan.lifeway.fields === 'none' || plan.lifeway.fields === 'pasture') return undefined;
+    const levelAt = this.waters.paths ? waterLevels(this.waters) : undefined;
+    const water = levelAt ?? (() => this.look.water);
+    // Centre around the nearest farming settlement to the scene origin (0, 0) within 1600 m, else (0, 0).
+    let cx = 0;
+    let cy = 0;
+    let bestD = 1600;
+    for (const s of plan.settlements) {
+      if (s.fields === 'none' || s.fields === 'pasture' || s.houses <= 0) continue;
+      const d = Math.hypot(s.x, s.y);
+      if (d < bestD) {
+        bestD = d;
+        cx = s.x;
+        cy = s.y;
+      }
+    }
+    // Avoid placing 3D fieldworks inside settlement built cores, on paved roads/paths, or in water.
+    const nearSett = plan.settlements.filter((s) => Math.hypot(s.x - cx, s.y - cy) < radius + s.r + 30);
+    const nearLines = plan.paths.filter((ln) => ln.length >= 4 && Math.hypot(ln[0] - cx, ln[1] - cy) < radius + 1200);
+    const avoid = (x: number, y: number): boolean => {
+      if (this.ground.at(x, y) - water(x, y) < 0.4) return true;
+      for (const s of nearSett) {
+        const rr = s.r + 6;
+        if ((x - s.x) * (x - s.x) + (y - s.y) * (y - s.y) < rr * rr) return true;
+      }
+      for (const ln of nearLines) {
+        for (let q = 0; q + 3 < ln.length; q += 2) {
+          const ax = ln[q];
+          const ay = ln[q + 1];
+          const bx = ln[q + 2];
+          const by = ln[q + 3];
+          const dx = bx - ax;
+          const dy = by - ay;
+          const l2 = dx * dx + dy * dy;
+          if (l2 < 1e-4) continue;
+          const t = Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / l2));
+          const px = ax + dx * t - x;
+          const py = ay + dy * t - y;
+          if (px * px + py * py < 16) return true;
+        }
+      }
+      return false;
+    };
+    const m = new Mesh(8192);
+    m.entity = this.fieldworksEntity();
+    const res = buildFieldworks(
+      m,
+      {
+        style: this.plots,
+        bounds: plan.agriculture.bounds,
+        radius,
+        cx,
+        cy,
+        seed: this.look.seed + 509,
+        avoid,
+      },
+      this.ground,
+      this.landUse,
+    );
+    // Keep field-margin trees on dry ground clear of houses and roads, then add village shade trees across the nearby valley!
+    const allTrees: FieldTreeSpot[] = res.trees.filter((t) => !avoid(t.x, t.y));
+    const houseClear = (x: number, y: number, si: number, pad: number): boolean => {
+      for (const h of plan.houses) {
+        if (h.settlement !== si) continue;
+        const sz = houseSize(plan.forms[h.form].spec, h.variant, plan.forms[h.form].grow ?? 1);
+        const r = Math.max(sz.w, sz.l) * 0.55 + pad;
+        if ((x - h.x) * (x - h.x) + (y - h.y) * (y - h.y) < r * r) return false;
+      }
+      return true;
+    };
+    const streetClear = (x: number, y: number, si: number, pad: number): boolean => {
+      for (const st of plan.streets) {
+        if (st.settlement !== si) continue;
+        const ln = st.line;
+        const thr = st.width * 0.5 + pad;
+        const thr2 = thr * thr;
+        for (let q = 0; q + 3 < ln.length; q += 2) {
+          const ax = ln[q];
+          const ay = ln[q + 1];
+          const dx = ln[q + 2] - ax;
+          const dy = ln[q + 3] - ay;
+          const l2 = dx * dx + dy * dy;
+          if (l2 < 1e-4) continue;
+          const t = Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / l2));
+          const px = ax + dx * t - x;
+          const py = ay + dy * t - y;
+          if (px * px + py * py < thr2) return false;
+        }
+      }
+      return true;
+    };
+    const tryVillageTree = (x: number, y: number, si: number, scale: number, u: number) => {
+      if (this.ground.at(x, y) - water(x, y) < 0.5) return;
+      if (!houseClear(x, y, si, 2.8) || !streetClear(x, y, si, 1.8)) return;
+      allTrees.push({ x, y, scale, u });
+    };
+    plan.settlements.forEach((s, si) => {
+      if (s.houses < 6 || s.pattern === 'foragers' || s.pattern === 'herders') return;
+      if (Math.hypot(s.x, s.y) > 3000) return;
+      // 4 mature shade trees framing the central plaza / civic altar corners.
+      for (let k = 0; k < 4; k++) {
+        const a = (k + 0.5) * (TAU / 4) + hash2(si, k, 711) * 0.25;
+        const pr = 9.5 + hash2(si, k, 719) * 3.5;
+        tryVillageTree(s.x + Math.cos(a) * pr, s.y + Math.sin(a) * pr, si, 0.72 + 0.3 * hash2(si, k, 727), hash2(si, k, 733));
+      }
+      // Scattered shade trees in open lane edges & inside/outside the village wall.
+      const ringCount = Math.min(18, 6 + Math.floor(s.houses / 7));
+      for (let k = 0; k < ringCount; k++) {
+        const a = (TAU * (k + 0.3 * hash2(si, k, 743))) / ringCount;
+        const inside = k % 3 === 0;
+        const rr = inside ? s.r * (0.45 + 0.42 * hash2(si, k, 751)) : s.r + 12 + 22 * hash2(si, k, 757);
+        tryVillageTree(s.x + Math.cos(a) * rr, s.y + Math.sin(a) * rr, si, 0.65 + 0.5 * hash2(si, k, 761), hash2(si, k, 769));
+      }
+      // Flanking guardian trees just outside settlement gates.
+      const pr = plan.perimeters.find((p) => p.settlement === si);
+      if (pr) {
+        pr.gates.forEach((gt, gi) => {
+          const tx = -gt.dy;
+          const ty = gt.dx;
+          for (const side of [-1, 1]) {
+            const gx = gt.x + gt.dx * 8.5 + tx * side * 6.5;
+            const gy = gt.y + gt.dy * 8.5 + ty * side * 6.5;
+            tryVillageTree(gx, gy, si, 0.78 + 0.35 * hash2(si, gi * 2 + (side > 0 ? 1 : 0), 773), hash2(si, gi, 787));
+          }
+        });
+      }
+    });
+    this.fieldTrees = allTrees;
+    const { vertices, indices } = m.arrays();
+    return indices.length ? { vertices, indices } : undefined;
+  }
+
+  /** Packed hearth & kiln smoke plume emitters: 5 floats each [x, y, z, strength, seed]. */
+  smokes(): Float32Array | undefined {
+    const list = this.people?.smokes;
+    if (!list?.length) return undefined;
+    const out = new Float32Array(list.length * 5);
+    for (let i = 0; i < list.length; i++) {
+      const s = list[i];
+      const o = i * 5;
+      out[o] = s.x;
+      out[o + 1] = s.y;
+      out[o + 2] = s.z;
+      out[o + 3] = s.strength;
+      out[o + 4] = (s.seed & 0xffff) / 65536;
+    }
+    return out;
+  }
+
+  /** The entity of the paths and streets: after the taxa, the houses' forms, the works' pieces and the kept animals. */
   pathEntity(): number {
     return this.keptBase() + (this.spec.people?.kept?.length ?? 0);
   }
 
-  /** The entity of the fields' crop: after the paths. */
+  /** The first entity of the fields' crop palette (FIELD_SLOTS consecutive IDs: cropEntity() + slotIdx). */
   cropEntity(): number {
     return this.pathEntity() + 1;
+  }
+
+  /** The first entity of the scene's continuous settlement perimeters (walls, enclosures, gatehouses). */
+  perimeterBase(): number {
+    return this.cropEntity() + FIELD_SLOTS;
+  }
+
+  /** The entity of physical 3D fieldworks (terraces, bunds, field walls, hedges, ditches). */
+  fieldworksEntity(): number {
+    return this.perimeterBase() + (this.people?.perimeters.length ?? 0);
   }
 
   /** The water: ribbons along the world's rivers, or the place's one sheet; with each vertex's flow and depth. */
@@ -504,10 +742,13 @@ export class SceneStream {
       return { proto, vertices, indices };
     }
     if (taxon >= CROP) {
-      // The crop of the fields: a clump of it, or a length of a row, the same wherever it stands.
-      const m = new Mesh(64);
-      m.entity = this.cropEntity();
-      drawCrop(m, this.crops!, variant);
+      // One botanical archetype of the scene's seasonal crop palette, normalized to 1 m tall.
+      const slotIdx = Math.min(FIELD_SLOTS - 1, Math.max(0, taxon - CROP));
+      const slot = this.people?.agriculture.palette.slots[slotIdx];
+      const arch = slot ? slotArchetype(slot) ?? 'cereal' : 'cereal';
+      const m = new Mesh(arch === 'orchard' ? 192 : 96);
+      m.entity = this.cropEntity() + slotIdx;
+      drawCrop(m, this.crops!, variant, arch);
       const { vertices, indices } = m.arrays();
       this.meshes.set(proto, { tris: indices.length / 3 });
       return { proto, vertices, indices };
@@ -574,9 +815,9 @@ export class SceneStream {
     return { proto, vertices, indices };
   }
 
-  /** The entity of what lies strewn on the ground and is no taxon's, its stones: after the fields' crop. */
+  /** The entity of what lies strewn on the ground and is no taxon's, its stones: after the fieldworks. */
   strewnEntity(): number {
-    return this.cropEntity() + 1;
+    return this.fieldworksEntity() + 1;
   }
 
   /** The entity of the first kind of kept animal: after the taxa, the houses' forms and the works' pieces. */
@@ -778,12 +1019,13 @@ export class SceneStream {
           const dd = dx * dx + dy * dy + dz * dz;
           const tall = this.workTops[w.form];
           const pxs2 = (tall * tall * K * K) / dd;
-          // A wall is drawn as far as it can be made out; a person or a boat only once it is a few pixels tall.
+          // A landmark or activity prop is kept as far as it makes out a readable silhouette (~1.8 px for people/boats).
           const small = smallWork(this.people.workForms[w.form].spec.kind);
-          if (pxs2 < (small ? 16 : 1)) continue;
+          if (pxs2 < (small ? 3.24 : 1)) continue;
           const pxs = Math.sqrt(pxs2);
           const detail: Detail = this.budget.fast ? (pxs >= 30 ? 1 : 0) : pxs >= 80 ? 2 : pxs >= 10 ? 1 : 0;
-          const proto = protoOf(WORK + w.form, wi % WORK_VARIANTS, detail);
+          const variant = w.variant ?? wi % WORK_VARIANTS;
+          const proto = protoOf(WORK + w.form, variant, detail);
           let b = buckets.get(proto);
           if (!b) {
             const buf = new ArrayBuffer(INSTANCE_STRIDE * 64);
@@ -880,6 +1122,56 @@ export class SceneStream {
           }
           groups.push(named);
         }
+      }
+    }
+    // Field-corner and hedgerow trees: scattered native canopy trees framing farmed parcel boundaries.
+    if (this.fieldTreeTaxon >= 0 && this.fieldTrees.length) {
+      const k = this.fieldTreeTaxon;
+      const t0 = taxa[k];
+      const form = this.spec.forms[t0.form];
+      const baseH = heights[k];
+      for (let ti = 0; ti < this.fieldTrees.length && instances < cap; ti++) {
+        const ft = this.fieldTrees[ti];
+        const pz = this.ground.at(ft.x, ft.y);
+        const dx = ft.x - ex;
+        const dy = ft.y - ey;
+        const dz = pz - ez;
+        const dd = dx * dx + dy * dy + dz * dz;
+        const size = ft.scale * (0.55 + 0.3 * ft.u);
+        const tall = baseH * size;
+        const pxs2 = (tall * tall * K * K) / dd;
+        if (pxs2 < 2.25) continue;
+        const fw = dx * fx + dy * fy + dz * fz;
+        if (fw < -tall) continue;
+        const pxs = Math.sqrt(pxs2);
+        const detail: Detail = this.budget.fast ? (pxs >= 26 ? 1 : 0) : pxs >= (rich ? 36 : 70) ? 2 : pxs >= (rich ? 4 : 9) ? 1 : 0;
+        const coarse = detail === 2 && pxs < (rich ? TWIGS_FROM / 2 : TWIGS_FROM);
+        const shade = Math.floor(ft.u * 255);
+        const proto = protoOf(k, this.variantOf(t0, form, 0, 0, shade, detail, false, coarse), detail);
+        let b = buckets.get(proto);
+        if (!b) {
+          const buf = new ArrayBuffer(INSTANCE_STRIDE * 64);
+          b = { f: new Float32Array(buf), s: new Uint16Array(buf), n: 0 };
+          buckets.set(proto, b);
+        }
+        if ((b.n + 1) * INSTANCE_STRIDE > b.f.byteLength) {
+          const buf = new ArrayBuffer(b.f.byteLength * 2);
+          new Uint8Array(buf).set(new Uint8Array(b.f.buffer));
+          b.f = new Float32Array(buf);
+          b.s = new Uint16Array(buf);
+        }
+        const o = b.n * 7;
+        const ang = ft.u * TAU;
+        b.f[o] = ft.x;
+        b.f[o + 1] = ft.y;
+        b.f[o + 2] = pz;
+        b.f[o + 3] = size;
+        b.f[o + 4] = Math.sin(ang);
+        b.f[o + 5] = Math.cos(ang);
+        b.s[b.n * 14 + 12] = k + 1;
+        b.s[b.n * 14 + 13] = shade >> 2;
+        b.n++;
+        instances++;
       }
     }
     let clumps = 0;
@@ -1084,8 +1376,8 @@ export class SceneStream {
             b.f[o + 3] = size;
             b.f[o + 4] = f[o8 + 4];
             b.f[o + 5] = f[o8 + 5];
-            // A stone is the ground's own, and a crop the fields'; a clump, and the wood a tree shed, its taxon's.
-            b.s[b.n * 14 + 12] = kind >= STREWN ? strewn : crop ? cropEntity : kind + 1;
+            // A stone is the ground's own, and a crop belongs to its palette slot; a clump, and fallen wood, its taxon's.
+            b.s[b.n * 14 + 12] = kind >= STREWN ? strewn : crop ? cropEntity + (kind - CROP) : kind + 1;
             b.s[b.n * 14 + 13] = tint[q];
             b.n++;
             n++;
@@ -1249,7 +1541,7 @@ export class SceneStream {
     const seed = this.look.seed + ring * 97;
     const rows = new TileRows();
     const sort = this.sort;
-    const fields = this.crops && this.plots && this.landUse ? { crop: this.crops, plots: this.plots, use: this.landUse } : undefined;
+    const fields = this.crops && this.plots && this.landUse && this.people ? { crop: this.crops, plots: this.plots, use: this.landUse, palette: this.people.agriculture.palette } : undefined;
     const use: LandUse = { crop: 0, pasture: 0, yard: 0, paddy: 0 };
     const wood = grid.trunks || grid.branches ? this.params.strewn?.wood : undefined;
     for (let j = tj * COVER_TILE; j < (tj + 1) * COVER_TILE; j++) {
@@ -1283,7 +1575,8 @@ export class SceneStream {
           // In a plot under a crop or the plough what grows wild is weeded out: it keeps the balks and the fallow.
           if (fields && hash2(i, j, seed + 82) < (use.crop - CROP_FROM[0]) / (CROP_FROM[1] - CROP_FROM[0])) {
             const plot = plotAt(x, y, fields.plots);
-            if (plot.state !== PLOT.fallow && plot.edge > PLOT_LOOK.balk * 0.5) continue;
+            const slot = fields.palette.slots[plotSlotIndex(plot.pick, fields.palette)];
+            if (slot.state !== PLOT.fallow && plot.edge > PLOT_LOOK.balk * 0.5) continue;
           }
         }
         // Most of a patch is of its own kind, the same on every grid, and the rest whatever else grows here.
@@ -1307,19 +1600,29 @@ export class SceneStream {
         rows.add(x, y, this.ground.at(x, y), scale, hash2(i, j, seed + 76) * TAU, u / low, 2, protoOf(k, shade & 3, CLUMP), shade >> 2);
       }
     }
-    // The fields' crop: wherever it stands, the same from every grid's tiles; as tall as its plot's stand, its mesh's
-    // own length along its row, and as wide whatever its height.
+    // The fields' crop: regional seasonal species & archetypes following each macro-domain's angled parcel rows.
     const far = size > 1;
     if (fields && (ring === 0 || far)) {
       const tile = step * COVER_TILE;
-      sow(ti * tile, tj * tile, (ti + 1) * tile, (tj + 1) * tile, fields.plots, fields.crop, far, this.look.seed + 131, (s) => {
-        fields.use.at(s.x, s.y, use);
-        // The crop thins out where the fields do, at their edge; among the houses, where the ground is trodden and
-        // little of it is field, none stands.
-        const share = (use.crop - CROP_FROM[0]) / (CROP_FROM[1] - CROP_FROM[0]);
-        if (!(share > 0) || s.u >= share) return;
-        rows.put(s.x, s.y, this.ground.at(s.x, s.y), s.tall, s.dx / s.tall, s.dy / s.tall, s.u / Math.min(1, share), 2, protoOf(CROP, s.variant, CLUMP), s.tint);
-      });
+      sow(
+        ti * tile,
+        tj * tile,
+        (ti + 1) * tile,
+        (tj + 1) * tile,
+        fields.plots,
+        fields.crop,
+        far,
+        this.look.seed + 131,
+        (s) => {
+          fields.use.at(s.x, s.y, use);
+          // The crop thins out where the fields do, at their edge; among the houses, where the ground is trodden and
+          // little of it is field, none stands.
+          const share = (use.crop - CROP_FROM[0]) / (CROP_FROM[1] - CROP_FROM[0]);
+          if (!(share > 0) || s.u >= share) return;
+          rows.put(s.x, s.y, this.ground.at(s.x, s.y), s.tall, s.dx / s.tall, s.dy / s.tall, s.u / Math.min(1, share), 2, protoOf(CROP + s.slot, s.variant, CLUMP), s.tint);
+        },
+        fields.palette,
+      );
     }
     return rows.tile();
   }
