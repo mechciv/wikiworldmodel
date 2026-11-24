@@ -732,6 +732,21 @@ describe('where settlements stand, and what they farm (sites.ts)', () => {
     expect(worst).toBeGreaterThan(P.siting.gap - 0.5);
   });
 
+  it('puts a settlement in the same place from two scenes when a river lies past where one of them knows water', () => {
+    // A scene knows the water only within 34 km of its middle (scene/v14.ts, REACH), and weighs cells a little further.
+    // Rivers at 0 and 36 km east of the first scene's middle: the second, 16.7 km east, sees both; the first, only one.
+    const rivers = [0, 36000];
+    const b = { lat: 0, lon: 0.15 };
+    const [bx, by] = toLocal({ lat: 0, lon: 0 }, b.lat, b.lon);
+    const knows = (ox: number): WaterNear => ({ at: (x, y) => (Math.abs(x) > 34000 || Math.abs(y) > 34000 ? 1e6 : Math.min(...rivers.map((r) => Math.abs(x + ox - r)))) });
+    const pa = makeSettlement(spec(p), flat, dry, EXTENT, undefined, knows(0));
+    const pb = makeSettlement(spec(p, b), flat, dry, EXTENT, undefined, knows(bx));
+    // Every settlement both draw, up to 300 m from either's edge, is the same.
+    const shared = pa.settlements.filter((s) => Math.abs(s.x - bx) < EXTENT - 300 && Math.abs(s.y - by) < EXTENT - 300 && Math.abs(s.x) < EXTENT - 300 && Math.abs(s.y) < EXTENT - 300);
+    expect(shared.length).toBeGreaterThan(100);
+    for (const s of shared) expect(pb.settlements.some((o) => Math.hypot(o.x + bx - s.x, o.y + by - s.y) < 2 && o.seed === s.seed)).toBe(true);
+  });
+
   it('asks the world for its people as far as the cells it weighs reach, and a cell beyond', () => {
     // The ring of cells weighed about a scene reaches its extent, the growth's margin and two cells more (its outermost
     // begin a cell past the margin); they read their neighbours' crowding, a cell further again.

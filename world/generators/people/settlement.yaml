@@ -69,6 +69,7 @@ checks:
   - { test: world/generators/people/settlement/v9.test.ts, holds: "takes the record's siting and growth where a build has none" }
   - { test: world/generators/people/settlement/v9.test.ts, holds: "asks the world for its people as far as the cells it weighs reach, and a cell beyond" }
   - { test: world/generators/people/settlement/v9.test.ts, holds: "keeps two settlements' grounds apart where a cell has little room for them" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "puts a settlement in the same place from two scenes when a river lies past where one of them knows water" }
   - { test: world/generators/people/settlement/v9.test.ts, holds: "keeps two settlements' grounds apart across the edge of a cell of farmsteads and a cell of large villages" }
   - { test: world/generators/people/settlement/v9.test.ts, holds: "grows the fields of a house that stands where nothing is farmed from the land about it" }
   - { test: world/generators/people/settlement/v9.test.ts, holds: "puts a settlement in the same place from two overlapping scenes of a plain with a river and hills" }
@@ -116,7 +117,8 @@ limits:
       the cell beside it. A stream too small for the world's rivers is not known, and does not draw them either; nor
       does the sea's coast, which people who fished settled by. The scene draws its rivers to 34 km from its middle: the
       ring of cells weighed past that, only so that those near the scene's edge are placed as a scene centred on them
-      would place them, is weighed as if it had no water near.
+      would place them, is weighed as if it had no water near. Where a river lies past one scene's water and within the
+      other's, the settlements both draw still agree, up to 300 m from either's edge, in the test of it.
       A cell whose ground has no room for all its settlements' houses, as a narrow valley between steep slopes may not,
       leaves its last and smallest settlements out: their people are not drawn.
       A settlement is seeded by its place, fixed by its cell, but its size by the rank of its place's worth among the
