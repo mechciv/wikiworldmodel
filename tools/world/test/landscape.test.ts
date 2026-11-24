@@ -632,6 +632,28 @@ describe('the cities a scene draws', () => {
     expect(nameAt(file.records![0], 0)).toBe('Listed');
   });
 
+  it('gives each city its whole life, the same whatever the time: its people from its lists and its record, and where its routes lead', () => {
+    const early = at(-480)[0].life!;
+    const late = at(0)[0].life!;
+    // Named by its record, standing for the record's years, its people the record's where it has them.
+    expect(early).toEqual(late);
+    expect(early.key).toBe('people/cities/listed');
+    expect(early.span).toEqual([-800, 400]);
+    expect(early.areas).toEqual([{ t: -600, ha: 150 }, { t: -300, ha: 150 }]);
+    const central = early.members[0];
+    expect(central.people[central.t.indexOf(-480)]).toBe(35000);
+    // The list's own reading is a member of its own.
+    expect(early.members.length).toBeGreaterThan(3);
+    // The town no list has, about 24 km north-north-east, is a place its routes lead to.
+    expect(early.toward.length).toBe(1);
+    expect(early.toward[0]).toBeGreaterThan(1);
+    expect(early.toward[0]).toBeLessThan(1.5);
+    // A list's city with no record is named by its row.
+    const lone = citiesAround({ ...file, records: [] }, 10, 20, 0, 40, guess)[0].life!;
+    expect(lone.key).toBe('src:list#Listed@10.000,20.000');
+    expect(lone.span).toEqual([-550, 50]);
+  });
+
   it('reads a figure straight between the times its claims are for, and holds it before and after', () => {
     const points: [number, number][] = [[-600, 100], [-400, 300]];
     expect(figureAt(points, -700)).toBe(100);

@@ -2081,7 +2081,7 @@ uniform vec4 uMaskBox;
 uniform highp sampler2D uFields;
 uniform vec4 uFieldsBox;
 uniform vec4 uFieldStyle;
-// How much of the land was worked beyond the plan's own map, coarsely (settlement/v9.ts, farLand): R crops, G pasture,
+// How much of the land was worked beyond the plan's own map, coarsely (settlement/v10.ts, farLand): R crops, G pasture,
 // A paddies, as shares of the ground, over a box of the scene's metres; a box of no size where there is none.
 uniform highp sampler2D uFarFields;
 uniform vec4 uFarBox;
@@ -2323,7 +2323,7 @@ vec3 plots(vec3 wild, vec3 p, vec3 n, float dist, float paddy, out float tilled,
   tilled *= 1.0 - wet * smoothstep(0.5, 0.9, wet);
   return c;
 }
-// The far cells' shares of worked land at a point (settlement/v9.ts, farLand): R crops, G pasture, B built ground,
+// The far cells' shares of worked land at a point (settlement/v10.ts, farLand): R crops, G pasture, B built ground,
 // A paddies; none
 // beyond the cells, fading toward the edge of what they cover.
 vec4 farShares(vec3 p) {

@@ -16,7 +16,7 @@ import { decodeTile, encodeTile } from '../../../../core/container.ts';
 import { compileAgriculture, compileHusbandry, compileTraditions, prevalenceOf, traditionAt, traditionsFor, type Agriculture, type AgricultureInput, type CropEntry, type PrevalenceWord, type DwellingSpec, type FieldSpec, type Husbandry, type HusbandryInput, type LifewayWord, type OutbuildingSpec, type SettlementSpec, type TownSpec, type Tradition, type TraditionInput } from '../../../../core/dwelling.ts';
 import { canonicalForm, type Form } from '../../../../core/form.ts';
 import type { LivingTaxon } from '../../../../core/scene.ts';
-import { GENERATOR as SETTLEMENT, peopleReach, VERSION as SETTLEMENT_VERSION } from '../../../../world/generators/people/settlement/v9.ts';
+import { GENERATOR as SETTLEMENT, peopleReach, VERSION as SETTLEMENT_VERSION } from '../../../../world/generators/people/settlement/v10.ts';
 import { EXTENT } from '../../../../world/generators/life/scene/current.ts';
 import { FormTree } from '../forms.ts';
 import type { LandscapeIndex, TraditionsFile } from '../../../../core/landscape.ts';

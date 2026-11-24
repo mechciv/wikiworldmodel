@@ -48,6 +48,8 @@ export interface DivisionInput {
   sizes: DivisionSizes;
   /** a planned grid, where the settlement's plan has one for this face */
   grid?: DivisionGrid;
+  /** how much ground a plot takes where it lies, m²; without it, a front and a depth of the sizes' middling */
+  plot?: (x: number, y: number) => number;
   /** the ground's gradient at a place, where the ground is known: lanes follow the contours where it is steep */
   gradient?: (x: number, y: number) => [number, number];
   /** a slope above which lanes are laid along the contours */
@@ -338,13 +340,17 @@ export function divideFace(input: DivisionInput): Division {
     const bi = blocks.length;
     blocks.push({ id: `${input.seed}/${path}`, ring: q.p, open: q.open, area: area(q.p) });
     if (!isOpen(q) || !wanted(q.p)) return;
-    // Plots: cut each piece in two, keeping both halves open to a lane, until a plot is its tradition's size.
-    const plotArea = ((sizes.front[0] + sizes.front[1]) / 2) * ((sizes.depth[0] + sizes.depth[1]) / 2);
+    // Plots: cut each piece in two, keeping both halves open to a lane, until a plot is the size it should be there, and
+    // never narrower at its front than a house.
+    const middling = ((sizes.front[0] + sizes.front[1]) / 2) * ((sizes.depth[0] + sizes.depth[1]) / 2);
+    const least = sizes.front[0] * sizes.depth[0];
     const stack: { q: Piece; path: string; depth: number }[] = [{ q, path: 'p', depth: 0 }];
     while (stack.length) {
       const { q: r, path: pp, depth } = stack.pop()!;
       const rng = new Rng(seedOf(`${path}/${pp}`));
       const a = area(r.p);
+      const [px, py] = centroid(r.p);
+      const plotArea = Math.max(least, input.plot ? input.plot(px, py) : middling);
       let done = a <= plotArea * rng.range(0.75, 1.35) || depth > 20;
       if (!done) {
         const box = minBox(r.p);

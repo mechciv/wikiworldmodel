@@ -12,7 +12,7 @@
 // lane and plot are invented, and say so. The people, the areas, the town's form and the wall's years are the records'.
 
 import { makeFrame, type Frame, type FrameFace, type FrameLine } from '../../../../core/frame.ts';
-import { builtSpans, cutAt, densityAt, epochAt, growSettlement, peopleAt, type Growth, type GrowthGround, type GrowthParams, type GrowthWall, type PeopleSeries } from '../../../../core/growth.ts';
+import { builtSpans, cutAt, densityAt, epochAt, growSettlement, growthGrid, peopleAt, type Growth, type GrowthGround, type GrowthParams, type GrowthWall, type PeopleSeries } from '../../../../core/growth.ts';
 import { hashString, Rng } from '../../city/math.ts';
 import { divideFace, type Division, type DivisionGrid, type DivisionSizes } from './division.ts';
 
@@ -52,6 +52,8 @@ export interface TownInput {
   main: number;
   /** its wall: the years it stood, and how thick it was, m */
   wall?: { from: number; to: number; thickness: number };
+  /** people to a household: a plot is as big as a household's share of the ground at the town's height */
+  household?: number;
   params?: Partial<TownParams>;
   growth?: Partial<GrowthParams>;
 }
@@ -83,6 +85,8 @@ export interface TownPlan {
   grid?: DivisionGrid;
   sizes: DivisionSizes;
   main: number;
+  /** how much ground a plot takes where it lies, m²: a household's share of the ground at the town's height, there */
+  plot: (x: number, y: number) => number;
 }
 
 export interface TownPlot {
@@ -390,9 +394,10 @@ function fillRing(ring: number[], g: Growth['grid'], into: Int32Array, value: nu
 export function planTown(input: TownInput): TownPlan {
   const p = merge(input.params);
   const areas = input.areas;
-  // The growth model once without a wall, to find the ground the wall was laid round.
-  const bare = growSettlement({ cores: [{ x: 0, y: 0 }], routes: [], walls: [], ground: input.ground, people: input.members, span: input.span, ...(areas ? { areas } : {}), ...(input.growth ? { params: input.growth } : {}) });
+  // The ground the model works on, which the routes are laid across first.
+  const bare = growthGrid({ people: input.members, ...(areas ? { areas } : {}), ...(input.growth ? { params: input.growth } : {}) });
   const reach = (bare.grid.nx * bare.grid.cell) / 2;
+  const cell0 = bare.grid.cell;
   const routes = routesOf(input, reach, p);
   const planned = input.streets !== 'lanes';
   const angle = input.angle ?? new Rng(hashString(`${input.key}/grid`)).next() * Math.PI;
@@ -415,7 +420,7 @@ export function planTown(input: TownInput): TownPlan {
           break;
         }
       }
-      const withRoutes = growSettlement({ cores: [{ x: 0, y: 0 }], routes: routes.map((r) => r.line), walls: [], ground: input.ground, people: input.members, span: input.span, ...(areas ? { areas } : {}), ...(input.growth ? { params: input.growth } : {}), cell: bare.grid.cell });
+      const withRoutes = growSettlement({ cores: [{ x: 0, y: 0 }], routes: routes.map((r) => r.line), walls: [], ground: input.ground, people: input.members, span: input.span, ...(areas ? { areas } : {}), ...(input.growth ? { params: input.growth } : {}), cell: cell0 });
       const ring = ringRound(withRoutes, when, p.wall_margin + input.wall.thickness / 2 + input.sizes.lane, grid);
       if (ring) {
         const gates = routes.flatMap((r) => crossings(r.line, ring));
@@ -424,7 +429,7 @@ export function planTown(input: TownInput): TownPlan {
       }
     }
   }
-  const growth = growSettlement({ cores: [{ x: 0, y: 0 }], routes: routes.map((r) => r.line), walls, ground: input.ground, people: input.members, span: input.span, ...(areas ? { areas } : {}), ...(input.growth ? { params: input.growth } : {}), cell: bare.grid.cell });
+  const growth = growSettlement({ cores: [{ x: 0, y: 0 }], routes: routes.map((r) => r.line), walls, ground: input.ground, people: input.members, span: input.span, ...(areas ? { areas } : {}), ...(input.growth ? { params: input.growth } : {}), cell: cell0 });
   // The frame: the routes, the wall, and the edge of the ground the plan covers.
   const { x0, y0, cell, nx, ny } = growth.grid;
   const lines: FrameLine[] = [
@@ -437,7 +442,27 @@ export function planTown(input: TownInput): TownPlan {
   const faceOf = new Int32Array(nx * ny).fill(-1);
   const bySize = frame.faces.map((_, i) => i).sort((a, b) => frame.faces[b].area - frame.faces[a].area || a - b);
   for (const i of bySize) fillRing(frame.faces[i].outer, growth.grid, faceOf, i);
-  return { key: input.key, growth, routes, ...(wall ? { wall } : {}), frame, faceOf, divided: new Map(), ...(grid ? { grid } : {}), sizes: input.sizes, main: input.main };
+  // A plot is a household's share of the ground where it lies, when the town had the most people it ever had: the land
+  // is divided once, and a plot of the crowded core is small, one of the edge large, with its garden. Ground the town
+  // never reached is divided as its last-built ground was.
+  const m0 = input.members[0];
+  let peak = m0.t[0] ?? input.span[0];
+  for (let i = 0; i < m0.t.length; i++) if (m0.people[i] > peopleAt(m0, peak)) peak = m0.t[i];
+  const household = input.household ?? 6;
+  const n = Math.floor(cutAt(growth, peak, 0));
+  const e = epochAt(growth, peak);
+  const edge = e && n > 0 ? densityAt(growth, ...cellCentre(growth, e.order[Math.min(n, e.order.length) - 1]), peak, 0) : growth.params.density.least;
+  const plot = (x: number, y: number) => {
+    const d = densityAt(growth, x, y, peak, 0) || edge;
+    // Of the ground, a quarter goes to lanes and to what is no household's.
+    return (household / Math.max(1, d)) * 1e4 * 0.75;
+  };
+  return { key: input.key, growth, routes, ...(wall ? { wall } : {}), frame, faceOf, divided: new Map(), ...(grid ? { grid } : {}), sizes: input.sizes, main: input.main, plot };
+}
+
+/** The centre of a cell of a growth model's grid. */
+function cellCentre(g: Growth, c: number): [number, number] {
+  return [g.grid.x0 + ((c % g.grid.nx) + 0.5) * g.grid.cell, g.grid.y0 + (Math.floor(c / g.grid.nx) + 0.5) * g.grid.cell];
 }
 
 /** Which sides of a face people reach it across: routes, streets and the plan's own edge, not a wall. */
@@ -492,6 +517,7 @@ export function townAt(plan: TownPlan, t: number, member = 0, opts: { gradient?:
       open: openSides(f),
       seed: f.id,
       sizes: plan.sizes,
+      plot: plan.plot,
       ...(plan.grid ? { grid: plan.grid } : {}),
       ...(opts.gradient ? { gradient: opts.gradient } : {}),
       need: any,

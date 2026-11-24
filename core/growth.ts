@@ -348,19 +348,27 @@ function rankGround(input: GrowthInput, g: GrowthGrid, p: GrowthParams, walls: G
   return { order, rank };
 }
 
-/** The model: the ranking of each epoch, and each member's cut through time. */
-export function growSettlement(input: GrowthInput): Growth {
+/**
+ * The grid a settlement's model is worked out on, and the density it is set to: wide enough for the most ground it
+ * ever took in any member, three times the radius of a disc of that area, for growth along routes and round water
+ * and hills. Known before anything is ranked, so the routes that the ranking reads can be laid over the same ground.
+ */
+export function growthGrid(input: Pick<GrowthInput, 'people' | 'areas' | 'params' | 'cell'>): { grid: GrowthGrid; at10k: number; params: GrowthParams } {
   const p = merge(input.params);
   const at10k = densityScale(input.people[0] ?? { t: [], people: [] }, input.areas, p.density);
-  // The most ground it ever took, over every member, sets the grid.
   let maxHa = 0;
   for (const s of input.people) for (const P of s.people) maxHa = Math.max(maxHa, areaFor(P, at10k, p.density));
   const cell = input.cell ?? cellFor(maxHa);
   const radius = Math.sqrt((maxHa * 1e4) / Math.PI);
-  // Room for growth along routes and round water and hills: three times the radius of a disc of that area.
   const reach = Math.max(radius * 3, cell * 8);
   const nx = Math.max(8, Math.ceil((reach * 2) / cell));
-  const grid: GrowthGrid = { x0: -(nx * cell) / 2, y0: -(nx * cell) / 2, cell, nx, ny: nx };
+  return { grid: { x0: -(nx * cell) / 2, y0: -(nx * cell) / 2, cell, nx, ny: nx }, at10k, params: p };
+}
+
+/** The model: the ranking of each epoch, and each member's cut through time. */
+export function growSettlement(input: GrowthInput): Growth {
+  const { grid, at10k, params: p } = growthGrid(input);
+  const cell = grid.cell;
   // Epochs: wherever a wall begins or ends to stand within the span.
   const [t0, t1] = input.span;
   const bounds = new Set<number>([t0, t1]);

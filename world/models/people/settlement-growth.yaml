@@ -1,0 +1,53 @@
+# A model run here (section 4.10 of the design). It makes no field: what it derives is which of a settlement's ground
+# was built on at every time (docs/plans/CITIES.md, decision 3).
+id: model:people/settlement-growth
+type: model
+title: Where a settlement was built, through time
+description: >-
+  Ranks a settlement's ground once, by how soon it would be built on, and cuts that ranking at each time where the built
+  ground reaches the area the settlement's people needed then. The ranking is the cost of reaching each place from the
+  settlement's core along its routes or across the ground, raised for steep ground, ground that floods, ground far from
+  water people could draw, and ground outside its walls while they stood. A settlement grows and shrinks by the one cut
+  moving along the one ranking, so the ground it built first it left last; an epoch begins where a wall was built or
+  pulled down, and the ranking is made again from then. Nothing is stepped forward: whether a place was built at a time
+  is worked out from the ranking and the people then, directly. The area the people needed is their number over a
+  density, which grows a little with the settlement's size; where a record gives the settlement's area at a time, the
+  density is set to meet it. The model knows where no one lived within a city only by the ground: quarters, gardens
+  and fields inside the walls that a record names are not in it yet.
+author: machine:claude-code
+code: core/growth.ts
+inputs:
+  - { ref: model:people/city-population, note: "the settlement's people through time, as members" }
+  - { prop: settlement_area, kind: settlement, note: "areas its record gives, which the density is set to meet" }
+  - { prop: town_form, kind: settlement, note: "whether it had a wall, and when, from its record or its tradition" }
+  - { ref: field:earth/relief, note: "the ground's height, for its slope and for what floods" }
+derives: Which of a settlement's ground was built on at every time, and how densely, for each member of its people.
+params:
+  route:
+    choice: A step along a route costs 0.4 of a step across open ground.
+  slope:
+    choice: >-
+      A slope of 0.1 doubles what a step costs, and on ground steeper than 0.4 nobody built. A choice, held to no
+      measured town yet.
+  flood:
+    choice: Ground less than 1.5 m above the water that floods it ranks as if three times as far.
+  outside:
+    choice: Ground outside a wall while it stands ranks as if 1.8 times as far.
+  water:
+    choice: Beyond 400 m from water people could draw, each metre more counts half a metre of travel.
+  density:
+    choice: >-
+      A hundred people to the hectare of built ground at 10,000 people, growing as the people to the power 0.2, within
+      15 and 600; four times as dense where it was built first as at its edge. The power follows the finding that
+      larger settlements are denser, which studies of settlement scaling report; it is not yet read from one of them,
+      and a record's area at a time takes the place of the hundred.
+uncertainty:
+  kind: ensemble
+  note: >-
+    Each member of the people cuts the one ranking at its own place, so the doubt in the people is a band of ground at
+    the settlement's edge. The ranking itself carries no doubt: where a city first grew is the model's, and none of it
+    is drawn as uncertain.
+checks:
+  - { test: core/growth.test.ts, holds: "meets the area a record gives at its time" }
+  - { test: core/growth.test.ts, holds: "leaves first the ground it built last" }
+  - { test: core/growth.test.ts, holds: "never builds in the water, and builds the low bank after higher ground as near" }

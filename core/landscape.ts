@@ -14,6 +14,8 @@
 import type { Agriculture, Husbandry, LifewayWord, TownSpec, Tradition } from './dwelling.ts';
 import type { Form } from './form.ts';
 import type { LivingTaxon, ScenePeople } from './scene.ts';
+import { cityPopulation, type PopulationSource } from './citypop.ts';
+import type { PeopleSeries } from './growth.ts';
 
 /** A class of Anthromes 12K: its code in the grids, its name and broader level, the legend's colour, and what it means. */
 export interface AnthromeClass {
@@ -400,6 +402,81 @@ export interface CityNear {
   houses?: number;
   area?: number;
   town?: TownSpec;
+  /** what the settlement generator lays the city out from through the whole of its life (docs/plans/CITIES.md) */
+  life?: CityLife;
+}
+
+/**
+ * A city through the whole of its life, as the settlement generator lays it out (world/generators/people/settlement/
+ * town.ts): a stable name to seed it by, when it stood, its people as members of a band (core/citypop.ts), the areas its
+ * record gives, the directions of the places it dealt with, and when its own record's town form held.
+ */
+export interface CityLife {
+  key: string;
+  span: [number, number];
+  members: PeopleSeries[];
+  areas: { t: number; ha: number }[];
+  /** radians from east, the most important first */
+  toward: number[];
+  townSpan?: [number, number];
+}
+
+/** How far the places a city dealt with are looked for, km, and how many of them its routes lead to at most. */
+export const TOWARD = { km: 90, most: 6, merge: 5 };
+
+/** The bearing from one place to another, radians from east, on a plane about the first. */
+function bearing(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const dx = (lon2 - lon1) * Math.cos((lat1 * Math.PI) / 180);
+  const dy = lat2 - lat1;
+  return Math.atan2(dy, dx);
+}
+
+/**
+ * The directions of the places a city dealt with: the other cities of the lists and the records within reach of it,
+ * the largest and nearest first, by the most people each ever had over how far off it is. They are the same whatever
+ * the time, so a city's routes are the same through its life.
+ */
+export function towardOf(f: Pick<CitiesFile, 'cities' | 'records'>, lat: number, lon: number): number[] {
+  const found: { b: number; score: number }[] = [];
+  const dLat = TOWARD.km / 111;
+  const consider = (la: number, lo: number, pops: [number, number][]) => {
+    if (Math.abs(la - lat) > dLat) return;
+    const d = kmBetween(lat, lon, la, lo);
+    if (d > TOWARD.km || d < TOWARD.merge) return;
+    const most = Math.max(0, ...pops.map(([, p]) => p));
+    if (!(most > 0)) return;
+    found.push({ b: bearing(lat, lon, la, lo), score: most / d });
+  };
+  for (const c of f.cities) consider(c.lat, c.lon, c.pops);
+  // A record with no people of its own counts by its houses, at six to a house, or its ground, at a hundred to the hectare.
+  for (const r of f.records ?? []) consider(r.lat, r.lon, r.pops.length ? r.pops : r.houses.length ? r.houses.map(([t, h]) => [t, h * 6]) : r.areas.map(([t, ha]) => [t, ha * 100]));
+  found.sort((a, b) => b.score - a.score || a.b - b.b);
+  return found.slice(0, TOWARD.most).map((x) => x.b);
+}
+
+/** A city's life from its lists' rows and its record. */
+function lifeOf(f: CitiesFile, lat: number, lon: number, rows: City[], r: CityRecord | undefined, guess: { perHouse: number; lot: number; hold: number }): CityLife {
+  const list = new Map(f.lists.map((l) => [l.source, l]));
+  const sources: PopulationSource[] = rows.map((c) => ({ source: c.source, pops: c.pops, hold: list.get(c.source)?.hold ?? guess.hold }));
+  if (r) {
+    // A record with no people of its own is read from its houses or its ground, as citiesAround guesses them.
+    const pops: [number, number][] = r.pops.length
+      ? r.pops
+      : r.houses.length
+        ? r.houses.map(([t, h]) => [t, h * guess.perHouse])
+        : r.areas.map(([t, ha]) => [t, ((ha * 1e4) / guess.lot) * guess.perHouse]);
+    if (pops.length) sources.push({ source: r.id, pops, hold: guess.hold, record: true });
+  }
+  const pop = cityPopulation(sources, r?.span);
+  const row = rows[0];
+  return {
+    key: r ? r.id : `${row.source}#${row.name}@${row.lat.toFixed(3)},${row.lon.toFixed(3)}`,
+    span: pop.span,
+    members: pop.members,
+    areas: (r?.areas ?? []).map(([t, ha]) => ({ t, ha })),
+    toward: towardOf(f, lat, lon),
+    ...(r?.townSpan ? { townSpan: r.townSpan } : {}),
+  };
 }
 
 
@@ -464,7 +541,11 @@ export function citiesNear(f: Pick<CitiesFile, 'lists' | 'cities'>, lat: number,
  * its people from (`perHouse` people to a house, `lot` square metres to a house); one that says none of these is left out.
  */
 export function citiesAround(f: CitiesFile, lat: number, lon: number, t: number, km: number, guess: { perHouse: number; lot: number; hold: number; gap: number }, recordKm = 12): CityNear[] {
-  const out: CityNear[] = citiesNear(f, lat, lon, t, km).map(({ city, people, km: d, also }) => ({ name: city.name, country: city.country, lat: city.lat, lon: city.lon, people, km: d, field: city.field, source: city.source, also: also.map((a) => ({ people: a.people, field: a.city.field, source: a.city.source })), from: 'list' as const }));
+  const near = citiesNear(f, lat, lon, t, km);
+  const out: CityNear[] = near.map(({ city, people, km: d, also }) => ({ name: city.name, country: city.country, lat: city.lat, lon: city.lon, people, km: d, field: city.field, source: city.source, also: also.map((a) => ({ people: a.people, field: a.city.field, source: a.city.source })), from: 'list' as const }));
+  // Each entry's rows of the lists and its record, for its life.
+  const rowsOf = new Map<CityNear, City[]>(out.map((c, i) => [c, [near[i].city, ...near[i].also.map((a) => a.city)]]));
+  const recordOf = new Map<CityNear, CityRecord>();
   const dLat = km / 111;
   for (const r of f.records ?? []) {
     if (t < r.span[0] || t > r.span[1] || Math.abs(r.lat - lat) > dLat) continue;
@@ -493,13 +574,23 @@ export function citiesAround(f: CitiesFile, lat: number, lon: number, t: number,
         delete out[best].field;
         delete out[best].source;
       }
+      rowsOf.set(out[best], rowsOf.get(c) ?? []);
+      recordOf.set(out[best], r);
       continue;
     }
     // No list has it then: its own nearest figure, whenever that is for, or a guess from its houses or its ground.
     const own2 = people ?? figureAt(r.pops, t);
     const guessed = own2 ?? (houses !== undefined ? houses * guess.perHouse : area !== undefined ? ((area * 1e4) / guess.lot) * guess.perHouse : undefined);
     if (guessed === undefined || !(guessed > 0)) continue;
-    out.push({ name: nameAt(r, t), country: '', lat: r.lat, lon: r.lon, people: Math.round(guessed), km: Math.round(d * 10) / 10, also: [], from: own2 !== undefined ? 'record' : 'guess', ...own });
+    const entry: CityNear = { name: nameAt(r, t), country: '', lat: r.lat, lon: r.lon, people: Math.round(guessed), km: Math.round(d * 10) / 10, also: [], from: own2 !== undefined ? 'record' : 'guess', ...own };
+    out.push(entry);
+    rowsOf.set(entry, []);
+    recordOf.set(entry, r);
+  }
+  for (const c of out) {
+    const rows = rowsOf.get(c) ?? [];
+    const r = recordOf.get(c);
+    if (rows.length || r) c.life = lifeOf(f, c.lat, c.lon, rows, r, guess);
   }
   return out.sort((a, b) => a.km - b.km || b.people - a.people);
 }
