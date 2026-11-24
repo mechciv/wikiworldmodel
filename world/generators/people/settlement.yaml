@@ -9,12 +9,14 @@
 # has streets and a wall as the tradition of its townspeople or its own record says; the animals people kept are those
 # a husbandry tradition names; people, boats and paths rest on no record. Close by, a house has the relief its claims
 # support, its walls as thick as their kind where a door or a window is cut through them; and a field under a crop has
-# the crop standing on it in rows, one plain stand that names no crop. Everything it makes is marked as generated.
+# the crop standing on it in rows, one plain stand that names no crop. Where in its 5′ cell a settlement stands is
+# weighed by the water, the ground and an invented soil, and its fields grow from its houses over the land nearest it:
+# nobody recorded either. Everything it makes is marked as generated.
 id: gen:people/settlement
 type: generator
 title: Houses, villages and fields of any place since 10,000 BCE
-version: 8
-code: generators/people/settlement/v8.ts
+version: 9
+code: generators/people/settlement/v9.ts
 runs_in: [build, client]
 outputs: { basis: procedural }
 inputs:
@@ -47,35 +49,46 @@ inputs:
   - { prop: settlement_area, kind: settlement, note: "the ground a recorded city covered" }
   - { ref: gen:life/scene, note: "the ground and the water of the scene the houses stand in; and how its wild animals go about, by which the kept ones do" }
 checks:
-  - { test: world/generators/people/settlement/v8.test.ts, holds: "holds as many people as the world puts in the land it draws" }
-  - { test: world/generators/people/settlement/v8.test.ts, holds: "stands no house in the water or on a cliff" }
-  - { test: world/generators/people/settlement/v8.test.ts, holds: "draws fields where people farmed, pasture where they herded, and neither for foragers" }
-  - { test: world/generators/people/settlement/v8.test.ts, holds: "works as much of a cell as its settlements would, on the average" }
-  - { test: world/generators/people/settlement/v8.test.ts, holds: "works fields where people farmed, pasture where they herded, and nothing for foragers, and builds where towns stood" }
-  - { test: world/generators/people/settlement/v8.test.ts, holds: "scales the far land to the plan's by its own settlements, and not by a city's fields" }
-  - { test: world/generators/people/settlement/v8.test.ts, holds: "draws the far land with no step at a cell's edge, and none beyond the cells it is told of" }
-  - { test: world/generators/people/settlement/v8.test.ts, holds: "draws a tradition's house where it holds, and the generic one where none does" }
-  - { test: world/generators/people/settlement/v8.test.ts, holds: "draws a camp's shelter from the tradition that housed its way of life, and no farmer's house from a herder's tent" }
-  - { test: world/generators/people/settlement/v8.test.ts, holds: "draws shifting cultivators in the house of their region's farmers where none is written for them, and says it stands in" }
-  - { test: world/generators/people/settlement/v8.test.ts, holds: "draws a house that some lived in for that part of the cells of its region, each cell all of one house, and alike from two scenes" }
-  - { test: world/generators/people/settlement/v8.test.ts, holds: "are drawn where a husbandry tradition names them for that way of life: herds on the pasture, the rest about the houses" }
-  - { test: world/generators/people/settlement/v8.test.ts, holds: "joins neighbouring farming settlements at the ends of their through lanes" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "holds as many people as the world puts in the land it draws" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "stands no house in the water or on a cliff" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "draws fields where people farmed, pasture where they herded, and neither for foragers" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "works as much of a cell as its settlements would, on the average" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "works fields where people farmed, pasture where they herded, and nothing for foragers, and builds where towns stood" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "scales the far land to the plan's by its own settlements, and not by a city's fields" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "draws the far land with no step at a cell's edge, and none beyond the cells it is told of" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "draws a tradition's house where it holds, and the generic one where none does" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "draws a camp's shelter from the tradition that housed its way of life, and no farmer's house from a herder's tent" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "draws shifting cultivators in the house of their region's farmers where none is written for them, and says it stands in" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "draws a house that some lived in for that part of the cells of its region, each cell all of one house, and alike from two scenes" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "are drawn where a husbandry tradition names them for that way of life: herds on the pasture, the rest about the houses" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "joins neighbouring farming settlements at the ends of their through lanes" }
   - { test: world/generators/people/scene.test.ts, holds: "hands a view each kind as its own entity: taxa, then houses, then works, then kept animals, then the fields' crop" }
-  - { test: world/generators/people/settlement/v8.test.ts, holds: "draws a city of the lists where the anthromes have none" }
-  - { test: world/generators/people/settlement/v8.test.ts, holds: "puts a settlement in the same place from two scenes that overlap" }
-  - { test: world/generators/people/settlement/v8.test.ts, holds: "seeds each cell and each settlement apart, and each alike from two scenes" }
-  - { test: world/generators/people/settlement/v8.test.ts, holds: "has the wall its tradition says, round its houses, with gates where its main streets leave it, and towers" }
-  - { test: world/generators/people/settlement/v8.test.ts, holds: "of a record is drawn from the record's own people, houses, ground and layout" }
-  - { test: world/generators/people/settlement/v8.test.ts, holds: "draws each house in one of its shapes, and no bigger than its claims say" }
-  - { test: world/generators/people/settlement/v8.test.ts, holds: "sets houses in a ring round open ground, their doors to the middle, where its tradition says so" }
-  - { test: world/generators/people/settlement/v8.test.ts, holds: "sets houses in rows, and turns every house the way its tradition says they all faced" }
-  - { test: world/generators/people/settlement/v8.test.ts, holds: "draws round a settlement what its tradition says enclosed it, and the generator's plain wall where it says only that one did" }
-  - { test: world/generators/people/settlement/v8.test.ts, holds: "lays out connected farming lanes, seasonal regional agriculture, living activity, and slope-gated land use" }
-  - { test: world/generators/people/settlement/v8.test.ts, holds: "draws what a settlement had of its own among its houses, and a household's things with its house" }
-  - { test: world/generators/people/settlement/v8.test.ts, holds: "draws a house that stands for several households wider and longer, and not as a bigger copy of itself" }
-  - { test: world/generators/people/settlement/v8.test.ts, holds: "draws a town's house no wider than the ground its town gives it, so that none stands in its neighbour" }
-  - { test: world/generators/people/settlement/v8.test.ts, holds: "lets no house of a town of winding lanes stand in its neighbour, and still houses the town" }
-  - { test: world/generators/people/settlement/v8.test.ts, holds: "keeps a city's houses off the ground of a city that adjoins it" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "draws a city of the lists where the anthromes have none" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "puts a settlement in the same place from two scenes that overlap" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "stands its settlements near water and on level ground, more than the land there would" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "takes the record's siting and growth where a build has none" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "asks the world for its people as far as the cells it weighs reach, and a cell beyond" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "keeps two settlements' grounds apart where a cell has little room for them" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "puts a settlement in the same place from two scenes when a river lies past where one of them knows water" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "keeps two settlements' grounds apart across the edge of a cell of farmsteads and a cell of large villages" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "grows the fields of a house that stands where nothing is farmed from the land about it" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "puts a settlement in the same place from two overlapping scenes of a plain with a river and hills" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "draws its settlements in many sizes within their range, the larger on the better ground" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "shows no step at a cell's edge, and stands no two settlements nearer than its spacing allows where the ground has room" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "grows each settlement's fields over the land, not in the water or on the steep, until they are as large as its people farmed, up to its neighbours'" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "seeds each cell and each settlement apart, and each alike from two scenes" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "has the wall its tradition says, round its houses, with gates where its main streets leave it, and towers" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "of a record is drawn from the record's own people, houses, ground and layout" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "draws each house in one of its shapes, and no bigger than its claims say" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "sets houses in a ring round open ground, their doors to the middle, where its tradition says so" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "sets houses in rows, and turns every house the way its tradition says they all faced" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "draws round a settlement what its tradition says enclosed it, and the generator's plain wall where it says only that one did" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "lays out connected farming lanes, seasonal regional agriculture, living activity, and slope-gated land use" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "draws what a settlement had of its own among its houses, and a household's things with its house" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "draws a house that stands for several households wider and longer, and not as a bigger copy of itself" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "draws a town's house no wider than the ground its town gives it, so that none stands in its neighbour" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "lets no house of a town of winding lanes stand in its neighbour, and still houses the town" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "keeps a city's houses off the ground of a city that adjoins it" }
   - { test: world/generators/people/dwellings.test.ts, holds: "draws every word a claim may use, at every detail, about as big as it says" }
   - { test: world/generators/people/dwellings.test.ts, holds: "draws a dwelling in several shapes, each within the ranges its claims give, and each the same every time" }
   - { test: world/generators/people/dwellings.test.ts, holds: "takes from the generator's house only what fits what a tradition says" }
@@ -92,9 +105,49 @@ checks:
   - { test: world/generators/people/walls.test.ts, holds: "extrudes a continuous rammed-earth perimeter with deep skirts, watchtowers, and roofed gatehouses on sloping hills" }
   - { test: world/generators/people/works.test.ts, holds: "stands a figure in a robe on feet, close by: under its hem, on the ground" }
   - { test: tools/world/test/landscape.test.ts, holds: "draws a list's city that has a record where the record puts it, with the record's own people about the time they are for" }
-  - { test: world/generators/people/settlement/v8.test.ts, holds: "sends those who stand, walk or carry about, between places clear of every house; those who sit or kneel stay" }
-  - { test: world/generators/people/settlement/v8.test.ts, holds: "feed and move on once they are drawn: a herd keeps out from among the houses, and what is kept by them stays among them" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "sends those who stand, walk or carry about, between places clear of every house; those who sit or kneel stay" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "feed and move on once they are drawn: a herd keeps out from among the houses, and what is kept by them stays among them" }
 limits:
+  - with: field:earth/population
+    note: >-
+      A 5′ cell's people live in the cell, as the world shares them; where in it is the generator's. It weighs a place by
+      the scene's water and ground and by a soil that is a noise over the Earth, not by any map of soils or of where
+      people lived. It leans a cell's settlements toward its more crowded neighbours, so that a cell's edge is no line on
+      the land, but cannot move people from one cell to the next: a river through one cell does not draw the people of
+      the cell beside it. A stream too small for the world's rivers is not known, and does not draw them either; nor
+      does the sea's coast, which people who fished settled by. The scene draws its rivers to 34 km from its middle: the
+      ring of cells weighed past that, only so that those near the scene's edge are placed as a scene centred on them
+      would place them, is weighed as if it had no water near. Where a river lies past one scene's water and within the
+      other's, the settlements both draw still agree, up to 300 m from either's edge, in the test of it.
+      A cell whose ground has no room for all its settlements' houses, as a narrow valley between steep slopes may not,
+      leaves its last and smallest settlements out: their people are not drawn.
+      A settlement is seeded by its place, fixed by its cell, but its size by the rank of its place's worth among the
+      cell's: where two places are worth all but the same, two scenes whose ground differs a little may give them each
+      other's sizes.
+  - note: >-
+      Every build is drawn with this version's siting and fields, whatever version made it: a build made before version 9
+      has no `siting` or `growth`, and takes the record's. A link into such a build finds its settlements and fields
+      where version 9 puts them, not where that build first drew them. Whether to keep each version's placement for its
+      own builds is a maintainer's decision, still open.
+  - note: >-
+      A cell weighs at least four places for each of its settlements, beyond `candidates`' most, so that a crowded cell
+      can place them all, up to four times that most (24,000 places): past it, its last settlements may find no place and
+      are left out, as where there is no room. The cost grows with it: in a test world of farmsteads (1–3 houses), a
+      scene's plan took about 1.5 s at 120 people to the km², 3 s at 300 and 6 s at 600, against about 0.4 s for hamlets at
+      40. The anthromes' classes of farmsteads say 1–10 people to the km², far below these; a cell near a large city is of
+      a class of villages or towns, whose settlements are fewer and larger.
+  - with: field:people/anthromes
+    note: >-
+      The far land beyond a scene is scaled to agree with the land its own settlements work, in the cells it holds whole
+      that no city's ground or fields reach. A city's fields grow over the land, and a large one's may reach every such
+      cell, as a city of some 800,000 does in a living scene: then the scale is weighed in what the cities leave of those
+      cells, place by place, which is less sure than whole cells (within a tenth of the scene's without the city, in the
+      test of it).
+  - with: gen:life/scene
+    note: >-
+      The ground and the water a settlement is weighed by are the scene's, and two scenes that overlap draw them a little
+      differently, from their own grids: where the scenes' ground disagrees, a settlement may take another of its places,
+      and its fields end a little differently.
   - with: gen:life/scene
     note: >-
       Who goes about, where to, how fast and how long they stay rests on no record. A person goes to a door or a well
@@ -212,7 +265,45 @@ params:
   # 0.75 m tall and a ripe one 0.7 to 1.1 m, each plot its own; from a way off, 1.7 m of a row is drawn as one thing.
   # That fields were sown in rows at all is the generator's look: most grain was sown broadcast.
   crops: { row: 0.7, apart: 0.42, wide: 0.5, green: [0.35, 0.75], ripe: [0.7, 1.1], length: 1.7 }
-  site: { steep: 0.25, above_water: 1.5, tries: 6, city_above_water: 0.3 }
+  site: { steep: 0.25, above_water: 1.5, city_above_water: 0.3 }
+  # Where in its 5′ cell a settlement stands (settlement/sites.ts). Nobody recorded where; these say how the generator
+  # weighs a place by what people looked for in one, none of it a claim about any place. Fresh water: within `best` m a
+  # place lacks nothing, and its worth falls off past it over `falloff` m, to `floor` where people dug wells or carried
+  # water; the banks of any water, a river's flooded in a high year and a pond's or a lake's wet, keep only the third of
+  # `bank`'s numbers of their worth within the first of its m, and are back to the full by the second. Level ground
+  # keeps `floor` of its worth at a slope of `steep` across `over` m. A place a little up from the bottom of the ground
+  # about it, `best` m above the mean within `reach` m, is better than a crest or a wet bottom. The soil is a noise over
+  # the Earth at two scales, m. A town or a city draws settlements about it. A cell weighs `candidates` places for each
+  # of its settlements (the fewest and the most a cell weighs), takes them by worth raised to `sharpness` against
+  # chance, keeps them `spacing` of their mean spacing apart (and their houses `gap` m), and draws its settlements'
+  # sizes from its range, the smaller oftener by `sizes`. Settlements gather: one place in `per` of a cell's is one the
+  # others gather round, and a place's worth falls off with its distance from the nearest such, over `reach` of their
+  # mean spacing, to `floor`.
+  siting:
+    candidates: [10, 48, 6000]
+    spacing: 0.4
+    gap: 30
+    sharpness: 2
+    water: { best: 900, falloff: 1500, floor: 0.3, bank: [60, 220, 0.3] }
+    level: { over: 60, steep: 0.12, floor: 0.25 }
+    relief: { reach: 1000, best: 2, spread: 25, floor: 0.55 }
+    soil: { scales: [5200, 1600], weight: 0.75 }
+    city: { weight: 1.5, reach: 3000 }
+    sizes: 1.2
+    gather: { per: 8, reach: 0.5, floor: 0.05 }
+  # How a settlement's fields spread over the land about it (settlement/sites.ts): over a grid of `cell` m, from its
+  # houses, through the ground least effort to reach and farm, until they are as large as its people farmed (the share
+  # of its cell's land its pattern gives), or until the walk to them passes `reach` times the radius of a disc as large
+  # as its fields and its houses' ground together; the walk starts at the houses' edge. Settlements within `margin` m
+  # beyond the scene's edge grow theirs too. The soil at the fields' own scale, m, moves the effort by `weight`, and
+  # `rough` varies it from node to node, so that a field's edge is ragged. A field spreads across the land's grain at
+  # `across` more effort than along it: the grain runs along the contours where the ground slopes more than `slope`,
+  # along the water within about `water` m of it, and elsewhere as a noise over the Earth at `scale` m turns it. By the
+  # water, the growth leaves unfarmed what lies within 15 m of it or less than 0.6 m above it, and farms with less ease
+  # what lies under 2.5 m above it (from 0.45 of the ease at 0.8 m); a paddy's ease rises toward the water instead, and
+  # pasture takes ground from 0.5 m up. These are the generator's, set in the code. Nobody recorded where any field
+  # ended.
+  growth: { cell: 50, margin: 2500, reach: 2.4, soil: { scale: 900, weight: 0.85 }, rough: 0.35, grain: { across: 0.8, slope: 0.06, water: 900, scale: 9000 } }
   cities: { reach_km: 30, lot: 160, town_lot: 300, household: 6, city_from: 10000, most_houses: 12000, record_hold: 50, record_gap: 600 }
   # A town where nothing says how it was laid out: lanes that wander, and no wall. Where a tradition or a record says a
   # town had a wall and not how high or how thick, or streets and not how wide, these stand in, and the panel says so.

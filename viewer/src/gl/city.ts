@@ -349,7 +349,7 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
   /** What people made of the ground, where a scene has people: R crops, G pasture, B yards, A paddies; and how its plots are drawn */
   private fields: WebGLTexture;
   private fieldsBox: [number, number, number, number] = [0, 0, 1, 1];
-  /** How much of the land was worked beyond the plan's own map, coarsely (settlement/v8.ts, farLand): R crops, G pasture, A paddies */
+  /** How much of the land was worked beyond the plan's own map, coarsely (settlement/v9.ts, farLand): R crops, G pasture, A paddies */
   private farFields: WebGLTexture;
   private farBox: [number, number, number, number] = [0, 0, 0, 0];
   private fieldStyle: [number, number, number, number] = [0, 1, 0, 0];
@@ -1141,7 +1141,7 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
   }
 
   /**
-   * How much of the land was worked beyond the plan's own map, coarsely, as shares (settlement/v8.ts, farLand): R crops,
+   * How much of the land was worked beyond the plan's own map, coarsely, as shares (settlement/v9.ts, farLand): R crops,
    * G pasture, A paddies, over a box in the scene's metres. The ground lays it out in patches beyond the plan's map and
    * across a band at its edge, so that the fields do not stop where the plan does. Without it, the fields stop there.
    */
