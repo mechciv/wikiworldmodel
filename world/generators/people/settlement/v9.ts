@@ -2973,9 +2973,25 @@ export function farLand(spec: SceneSpec): FarLand | undefined {
 export function farCellsWeighed(far: FarLand, plan: SettlementPlan, origin: { lat: number; lon: number }, extent: number, margin = 600): number[] {
   const cities = plan.settlements.filter((s) => s.city);
   const f = plan.fields;
-  const cityNodes: [number, number][] = [];
+  // The far cells a city's fields touch, its nodes a node either way: marked in one pass over the grid.
   const isCity = new Set(plan.settlements.flatMap((s, si) => (s.city ? [si] : [])));
-  if (isCity.size) for (let k = 0; k < f.owner.length; k++) if (isCity.has(f.owner[k])) cityNodes.push([f.x0 + (k % f.nx) * f.cell, f.y0 + Math.floor(k / f.nx) * f.cell]);
+  const touched = new Set<number>();
+  if (isCity.size) {
+    const kLat = 1 / (EARTH * DEG);
+    const kLon = 1 / (EARTH * DEG * dcos(origin.lat * DEG));
+    for (let k = 0; k < f.owner.length; k++) {
+      if (!isCity.has(f.owner[k])) continue;
+      const x = f.x0 + (k % f.nx) * f.cell;
+      const y = f.y0 + Math.floor(k / f.nx) * f.cell;
+      for (const [dx, dy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+        const lat = origin.lat + (y + dy * f.cell) * kLat;
+        const lon = origin.lon + (x + dx * f.cell) * kLon;
+        const row = Math.floor((far.north - lat) / far.res);
+        const col = Math.floor((lon - far.west) / far.res);
+        if (row >= 0 && col >= 0 && row < far.ny && col < far.nx) touched.add(row * far.nx + col);
+      }
+    }
+  }
   const inner = extent - margin;
   const out: number[] = [];
   for (let row = 0; row < far.ny; row++) {
@@ -2992,7 +3008,7 @@ export function farCellsWeighed(far: FarLand, plan: SettlementPlan, origin: { la
         const dy = Math.max(y0 - c.y, 0, c.y - y1);
         return dx * dx + dy * dy < r * r;
       };
-      if (cities.some(near) || cityNodes.some(([x, y]) => x >= x0 - f.cell && x <= x1 + f.cell && y >= y0 - f.cell && y <= y1 + f.cell)) continue;
+      if (cities.some(near) || touched.has(row * far.nx + col)) continue;
       out.push(row * far.nx + col);
     }
   }
