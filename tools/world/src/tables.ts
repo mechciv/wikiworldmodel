@@ -9,10 +9,11 @@
 // Storage is unchanged: the pinned files are read as they are, and only the meaning is shared.
 import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
-import { parsePoint, parseTime, toMa, type TimeInput } from '../../../core/time.ts';
+import { bounds, parsePoint, parseTime, toMa, type TimeInput } from '../../../core/time.ts';
 import type { Basis } from '../../../core/tileset.ts';
 export { rowRef } from '../../../core/refs.ts';
 import { parseTable } from './build/series.ts';
+import { pointOf, solveScenario } from './chronology.ts';
 import { datasetFile } from './manifest.ts';
 import type { Citation, Field, World } from './world.ts';
 import { rockRows, type LandSnapshot, type RockRow, type RocksSnapshot } from './pbdb.ts';
@@ -107,11 +108,30 @@ export function toValue(map: ColumnMap, columns: Record<string, unknown>): unkno
 }
 
 /** A scalar time column stores a point on the world's axis. */
-function pointYear(value: unknown): number {
+function scalarDate(value: unknown) {
   if (typeof value !== 'string' && typeof value !== 'number') throw new Error(`expected a single date, got ${JSON.stringify(value)}`);
-  const { t } = parsePoint(value);
-  if (!Number.isFinite(t)) throw new Error(`date is outside the finite time axis: ${value}`);
-  return t;
+  const point = parsePoint(value);
+  if (!Number.isFinite(point.t)) throw new Error(`date is outside the finite time axis: ${value}`);
+  return point;
+}
+
+/** Project referenced fossil ages in the default picture. Only the build's row copy gets the bounds. */
+export function rowValueProjector(world: World) {
+  let solution: ReturnType<typeof solveScenario> | undefined;
+  return (map: ColumnMap | undefined, value: unknown): unknown => {
+    if (map?.as !== 'ma-range' || !value || typeof value !== 'object' || !('ref' in value)) return value;
+    const date = parseTime(value as TimeInput);
+    if (date.kind !== 'ref' || date.lagDays) return undefined;
+    solution ??= solveScenario(world);
+    if (!solution.ok) return undefined;
+    const start = solution.bounds.get(pointOf(world, date.ref, date.edge ?? 'start'));
+    const end = solution.bounds.get(pointOf(world, date.ref, date.edge ?? 'end'));
+    if (!start || !end) return undefined;
+    const lo = start.lo + date.lag[0];
+    const hi = end.hi + date.lag[1];
+    if (!Number.isFinite(lo) || !Number.isFinite(hi)) return undefined;
+    return { lo: `${toMa(lo)} Ma`, hi: `${toMa(hi)} Ma` };
+  };
 }
 
 /** A claim's value written back into the columns it comes from: how a correction reaches the build. */
@@ -127,10 +147,7 @@ export function fromValue(map: ColumnMap, value: unknown, columns: Record<string
   if (as === 'ma-range') {
     const [older, younger] = map.column as [string, string];
     const t = parseTime(value as TimeInput);
-    if (t.kind === 'ref') throw new Error(`write the referenced date ${t.ref} as explicit Ma bounds for a fossil correction (lo is older, hi is younger)`);
-    if (t.kind !== 'instant' && t.kind !== 'interval') throw new Error(`a fossil age needs a date or closed range, got ${JSON.stringify(value)}`);
-    const lo = t.kind === 'instant' ? t.t : t.lo;
-    const hi = t.kind === 'instant' ? t.t : t.hi;
+    const [lo, hi] = bounds(t);
     if (!Number.isFinite(lo) || !Number.isFinite(hi)) throw new Error('a fossil age needs finite bounds');
     columns[older] = toMa(lo);
     columns[younger] = toMa(hi);
@@ -149,13 +166,15 @@ export function fromValue(map: ColumnMap, value: unknown, columns: Record<string
       return;
     case 'year':
     case 'year-end': {
-      const y = pointYear(value) - (as === 'year-end' ? 1 : 0);
-      if (!Number.isInteger(y)) throw new Error(`a year column needs a whole year, got ${value}`);
+      const { t, whole } = scalarDate(value);
+      // A named calendar year, month or day belongs to its containing year.
+      // A numeric end is an exclusive axis boundary, including at the BCE/CE transition.
+      const y = as === 'year-end' && !(typeof value === 'string' && whole > 0) ? Math.ceil(t) - 1 : Math.floor(t);
       columns[c] = y <= 0 ? y - 1 : y;
       return;
     }
     case 'ma':
-      columns[c] = toMa(pointYear(value));
+      columns[c] = toMa(scalarDate(value).t);
       return;
   }
 }

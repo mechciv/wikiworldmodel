@@ -324,8 +324,10 @@ rows:
   });
 
   it('compares equivalent calendar spellings and reports dates a year column cannot store', async () => {
-    const same = await checkRows({ 'overlays/carthage.yaml': overlay(`claims:\n  end: { prop: end, value: 145 BCE, source: { ref: src:test/states, loc: row } }\n`) });
+    const same = await checkRows({ 'overlays/carthage.yaml': overlay(`claims:\n  end: { prop: end, value: 146 BCE, source: { ref: src:test/states, loc: row } }\n`) });
     expect(rows(same)).toContain("warning: restates the row's end; to corroborate it, cite another source");
+    const later = await checkRows({ 'overlays/carthage.yaml': overlay(`claims:\n  end: { prop: end, value: 145 BCE, ${cite} }\n`) });
+    expect(rows(later)).toContainEqual(expect.stringContaining("differs from the row's end"));
     const range = await checkRows({ 'overlays/carthage.yaml': overlay(`claims:\n  end: { prop: end, value: { lo: 150 BCE, hi: 140 BCE }, rank: preferred, note: a range, ${cite} }\n`) });
     expect(rows(range)).toContainEqual(expect.stringContaining('cannot encode end as year-end'));
   });

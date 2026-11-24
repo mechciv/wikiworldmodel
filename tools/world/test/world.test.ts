@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
 import { dayOnAxis, formatTime, formatTimeValue, toMa } from '../../../core/time.ts';
 import { available, claimGroup, pointOf, resolveCycle, solveScenario } from '../src/chronology.ts';
+import { ClaimIndex } from '../src/claimindex.ts';
 import { WORLD } from '../src/paths.ts';
 import { validateWorld } from '../src/validate/index.ts';
 import { loadWorld } from '../src/world.ts';
@@ -54,6 +55,21 @@ describe('the world', async () => {
     expect(at(sol.bounds, 'earth/lips/deccan-traps', 'start')).toEqual([66.413, 66.413]);
     expect(at(sol.bounds, 'earth/lips/deccan-traps@after', 'start')).toEqual([65.422, 65.422]);
     expect(sol.bounds.get(pointOf(world, 'earth/lips/deccan-traps', 'end'))!.hi).toBe(Infinity);
+  });
+
+  it('projects a fossil correction through the stage chronology and preserves the cited reference', () => {
+    const field = world.fields.find((f) => f.data?.as === 'community-sea')!;
+    const dataset = field.data!.from;
+    const key = 'occ:1';
+    const row = `${dataset}#${key}`;
+    const value = { ref: 'ics/maastrichtian' };
+    const stage = world.entity.get(value.ref)!;
+    const claim = { ...stage.claims.find((c) => c.prop === 'start')!, prop: 'date', subject: row, rank: 'preferred' as const, value };
+    const overlay = { row, dataset, key, file: 'overlays/test.yaml', claims: [claim] };
+    const table = { dataset, field: field.id, spec: field.rows!, rows: new Map() };
+    const index = ClaimIndex.from({ ...world, overlays: [overlay] }, new Map([[dataset, table]]));
+    expect(index.corrections(dataset).get(key)).toEqual([{ prop: 'date', value: { lo: '72.1 Ma', hi: '66 Ma' } }]);
+    expect(index.chosen(row, 'date')?.value).toEqual(value);
   });
 
   it('dates the Mesosaurus records by the stage they cite, under either time scale', () => {

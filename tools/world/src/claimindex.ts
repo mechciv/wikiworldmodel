@@ -3,7 +3,7 @@
 // index by subject, an entity or a row, and never the storage beneath it.
 import { levelOf, type CheckStep, type Level } from '../../../core/ladder.ts';
 import type { Basis } from '../../../core/tileset.ts';
-import { readTable, rowClaims, rowRef, type Table } from './tables.ts';
+import { readTable, rowClaims, rowRef, rowValueProjector, type Table } from './tables.ts';
 import type { Citation, Overlay, Rank, Status, World } from './world.ts';
 
 export type Origin = 'record' | 'row' | 'overlay';
@@ -93,9 +93,15 @@ export class ClaimIndex {
   /** The corrections of a dataset's rows in the default picture, by row key: what the build applies to them. */
   corrections(dataset: string): Map<string, { prop: string; value: unknown }[]> {
     const out = new Map<string, { prop: string; value: unknown }[]>();
+    const project = rowValueProjector(this.world);
+    const spec = this.tables.get(dataset)?.spec;
     for (const o of this.overlays.values()) {
       if (o.dataset !== dataset) continue;
-      const fix = o.claims.filter((c) => c.rank === 'preferred' && !c.alt).map((c) => ({ prop: c.prop, value: c.value }));
+      const fix = o.claims.flatMap((c) => {
+        if (c.rank !== 'preferred' || c.alt) return [];
+        const value = project(spec?.claims[c.prop], c.value);
+        return value === undefined ? [] : [{ prop: c.prop, value }];
+      });
       if (fix.length) out.set(o.key, fix);
     }
     return out;

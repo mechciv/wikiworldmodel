@@ -58,15 +58,25 @@ describe('a row', () => {
     expect(columns).toMatchObject({ FromYear: -44 });
     expect(toValue(POLITIES.claims.start, columns)).toBe(-43);
     fromValue(POLITIES.claims.end, '1 CE', columns);
-    expect(columns).toMatchObject({ ToYear: -1 });
-    expect(toValue(POLITIES.claims.end, columns)).toBe(1);
+    expect(columns).toMatchObject({ ToYear: 1 });
+    expect(toValue(POLITIES.claims.end, columns)).toBe(2);
+    for (const date of ['146 BCE', 'March 146 BCE', '1 January 146 BCE', '31 December 146 BCE']) {
+      fromValue(POLITIES.claims.start, date, columns);
+      fromValue(POLITIES.claims.end, date, columns);
+      expect(columns).toMatchObject({ FromYear: -146, ToYear: -146 });
+    }
+  });
+
+  it('projects a radiometric age using the chronology’s two-sigma bounds', () => {
+    const columns = {};
+    fromValue({ column: ['max', 'min'], as: 'ma-range' }, { mean: '120 ka', sd: '1 kyr' }, columns);
+    expect(columns).toEqual({ max: 0.122, min: 0.118 });
   });
 
   it('rejects an unrepresentable range before changing either column', () => {
     const map: ColumnMap = { column: ['max', 'min'], as: 'ma-range' };
     const columns = { max: 68, min: 66 };
-    expect(() => fromValue(map, { ref: 'ics/maastrichtian' }, columns)).toThrow('explicit Ma bounds');
-    for (const v of [{ lo: '120 ka' }, { lo: '80 ka', hi: '120 ka' }, { mean: '120 ka', sd: '1 kyr' }, 'unknown']) {
+    for (const v of [{ lo: '120 ka' }, { lo: '80 ka', hi: '120 ka' }, 'unknown']) {
       expect(() => fromValue(map, v, columns)).toThrow();
       expect(columns).toEqual({ max: 68, min: 66 });
     }

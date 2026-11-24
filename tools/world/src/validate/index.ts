@@ -22,7 +22,7 @@ import { anchorPlace, anchorsOf, available, buildNetwork, chosen, countDays, cyc
 import { resolvePoints } from '../importer.ts';
 import { lineageLoop } from '../lineage.ts';
 import { REPO, WORLD } from '../paths.ts';
-import { fromValue, readTable, rowClaims, RowKeyError, toValue, type Table } from '../tables.ts';
+import { fromValue, readTable, rowClaims, RowKeyError, rowValueProjector, toValue, type Table } from '../tables.ts';
 import { kindIs, loadWorld, schemaDir, type Claim, type Entity, type Field, type Input, type Model, type Relation, type World } from '../world.ts';
 
 // A null entry marks a fetched dataset whose row addresses failed validation.
@@ -630,6 +630,7 @@ function checkRowSpecs(world: World, issues: Issue[]): void {
  * correction, ranked preferred with a note saying why; one that agrees corroborates it, from another source.
  */
 function checkOverlays(world: World, refs: RefChecker, tables: CheckedTables, issues: Issue[]): void {
+  const project = rowValueProjector(world);
   const seen = new Map<string, string>();
   for (const o of world.overlays) {
     if (seen.has(o.row)) issues.push({ level: 'error', check: 'ids', file: o.file, where: 'row', message: `${o.row} has an overlay already, in ${seen.get(o.row)}: one file per row` });
@@ -658,12 +659,17 @@ function checkOverlays(world: World, refs: RefChecker, tables: CheckedTables, is
       if (map.as && ['year', 'year-end', 'ma', 'ma-range'].includes(map.as)) {
         try {
           const columns = {};
-          fromValue(map, c.value, columns);
-          if (toValue(map, columns) === undefined) throw new Error('the dataset reserves that value for missing dates');
-          if (row && !agrees) {
-            const original = {};
-            fromValue(map, row.value, original);
-            agrees = JSON.stringify(original) === JSON.stringify(columns);
+          const value = project(map, c.value);
+          if (value === undefined) {
+            if (c.rank === 'preferred' && !c.alt) issues.push({ level: 'warning', check: 'rows', file: o.file, where: c.where, message: 'referenced fossil age could not be projected onto finite Ma bounds; the correction is not applied to the dataset' });
+          } else {
+            fromValue(map, value, columns);
+            if (toValue(map, columns) === undefined) throw new Error('the dataset reserves that value for missing dates');
+            if (row && !agrees) {
+              const original = {};
+              fromValue(map, row.value, original);
+              agrees = JSON.stringify(original) === JSON.stringify(columns);
+            }
           }
         } catch (err) {
           // Only the chosen correction must fit the source columns. An alternative can retain its own precision.
