@@ -157,6 +157,6 @@ Pataliputra, Mohenjo-daro and Rome at 315 and 1200 on the GPU. What the browser 
 
 ## Next
 
-The rest of [plans/CITIES.md](../plans/CITIES.md): districts and recorded walls and roads in the frame; institutions
-from traditions; the ground of occupation and a survey within every city; built ground on the globe; villages with
-lifetimes; and the skeletons of the cities `cities-wanted` ranks first.
+The rest of [plans/CITIES.md](../plans/CITIES.md): institutions from traditions; the ground of occupation and a survey
+within every city; built ground on the globe; the fields round a city as the division's parcels; villages with
+lifetimes; an epoch at the end of Rome's aqueducts; and the skeletons of the cities `cities-wanted` ranks first.
