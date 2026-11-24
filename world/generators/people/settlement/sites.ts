@@ -120,7 +120,13 @@ export function waterNear(w: Waters, half: number, cell = 100): WaterNear | unde
   for (const p of w.paths ?? []) if (p.xy.length >= 4) lines.push(Array.from(p.xy));
   if (w.river.length >= 4) lines.push(w.river);
   for (const o of w.oxbows) if (o.length >= 4) lines.push(o);
-  for (let k = 0; k + 3 < w.ponds.length; k += 4) lines.push([w.ponds[k], w.ponds[k + 1], w.ponds[k] + 1, w.ponds[k + 1]]);
+  // A pond by its shore: a ring as wide as the mean of its two radii.
+  for (let k = 0; k + 3 < w.ponds.length; k += 4) {
+    const r = (w.ponds[k + 2] + w.ponds[k + 3]) / 2;
+    const ring: number[] = [];
+    for (let a = 0; a <= 12; a++) ring.push(w.ponds[k] + r * Math.cos((a * Math.PI) / 6), w.ponds[k + 1] + r * Math.sin((a * Math.PI) / 6));
+    lines.push(ring);
+  }
   const lakes = w.lakes && !w.lakes.empty ? w.lakes : undefined;
   if (!lines.length && !lakes) return undefined;
   const n = Math.ceil((2 * half) / cell) + 1;

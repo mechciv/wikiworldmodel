@@ -700,7 +700,7 @@ describe('where settlements stand, and what they farm (sites.ts)', () => {
     expect(mean(by.slice(0, by.length >> 1))).toBeLessThan(mean(by.slice(by.length >> 1)));
   });
 
-  it("shows no step at a cell's edge, and stands no two settlements nearer than its spacing allows", () => {
+  it("shows no step at a cell's edge, and stands no two settlements nearer than its spacing allows where the ground has room", () => {
     const flatPlan = makeSettlement(spec(p), flat, dry, EXTENT);
     const s = flatPlan.settlements.filter((x) => x.houses > 0 && Math.abs(x.x) < EXTENT - 500 && Math.abs(x.y) < EXTENT - 500);
     // As many stand within 500 m of a cell's edge as the ground there would hold, give or take what chance and
@@ -1062,6 +1062,8 @@ describe('the land worked beyond the scene', () => {
     // The cell the city's fields reach is left out, so the city moves the scale little. Counted, it would raise it by
     // about a fifth.
     expect(Math.abs(mean(cityScenes) - mean(plains)) / mean(plains)).toBeLessThan(0.05);
+    // And no one scene by much: a placement that let a city's fields in would move its own by a fifth.
+    origins.forEach((_, k) => expect(Math.abs(cityScenes[k].scale - plains[k].scale) / plains[k].scale).toBeLessThan(0.12));
   });
 
   it('works fields where people farmed, pasture where they herded, and nothing for foragers, and builds where towns stood', () => {

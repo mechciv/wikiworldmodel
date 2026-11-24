@@ -68,7 +68,7 @@ checks:
   - { test: world/generators/people/settlement/v9.test.ts, holds: "stands its settlements near water and on level ground, more than the land there would" }
   - { test: world/generators/people/settlement/v9.test.ts, holds: "draws the scenes of a build made before it had its siting as a build made now would" }
   - { test: world/generators/people/settlement/v9.test.ts, holds: "draws its settlements in many sizes within their range, the larger on the better ground" }
-  - { test: world/generators/people/settlement/v9.test.ts, holds: "shows no step at a cell's edge, and stands no two settlements nearer than its spacing allows" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "shows no step at a cell's edge, and stands no two settlements nearer than its spacing allows where the ground has room" }
   - { test: world/generators/people/settlement/v9.test.ts, holds: "grows each settlement's fields over the land, not in the water or on the steep, until they are as large as its people farmed, up to its neighbours'" }
   - { test: world/generators/people/settlement/v9.test.ts, holds: "seeds each cell and each settlement apart, and each alike from two scenes" }
   - { test: world/generators/people/settlement/v9.test.ts, holds: "has the wall its tradition says, round its houses, with gates where its main streets leave it, and towers" }
@@ -238,9 +238,10 @@ params:
   # Where in its 5′ cell a settlement stands (settlement/sites.ts). Nobody recorded where; these say how the generator
   # weighs a place by what people looked for in one, none of it a claim about any place. Fresh water: within `best` m a
   # place lacks nothing, and its worth falls off past it over `falloff` m, to `floor` where people dug wells or carried
-  # water; the banks of a river, flooded in a high year, are worth less within `bank` m of its course. Level ground keeps
-  # `floor` of its worth at a slope of `steep` across `over` m. A place a little up from the bottom of the ground about
-  # it, `best` m above the mean within `reach` m, is better than a crest or a wet bottom. The soil is a noise over the
+  # water; the banks of any water, a river's flooded in a high year and a pond's or a lake's wet, are worth less within
+  # `bank` m of it. Level ground keeps `floor` of its worth at a slope of `steep` across `over` m. A place a little up
+  # from the bottom of the ground about it, `best` m above the mean within `reach` m, is better than a crest or a wet
+  # bottom. The soil is a noise over the
   # Earth at two scales, m. A town or a city draws settlements about it. A cell weighs `candidates` places for each of its
   # settlements (the fewest and the most a cell weighs), takes them by worth raised to `sharpness` against chance, keeps
   # them `spacing` of their mean spacing apart (and their houses `gap` m), and draws its settlements' sizes from its
