@@ -38,6 +38,7 @@ import { LifeAtlas, type ClimateData } from './city/lifeatlas.ts';
 import { Climates, type ClimateAt } from './climates.ts';
 import { LifeScene } from './city/life.ts';
 import type { StructureBundle } from './city/structures.ts';
+import { surveyOffset } from '../../world/generators/life/survey.ts';
 import { lifeKeepRadius, sameLifeContext, SceneCache } from './city/lifecycle.ts';
 import type { PeopleSummary } from './city/lifeworker.ts';
 import { LandscapeAtlas } from './city/landscape.ts';
@@ -1928,6 +1929,19 @@ async function start(root: HTMLElement): Promise<void> {
           built: f.structures.filter((x) => standsAt(x, t) && !/^(works\/road|open\/(garden|district|region|water|island))/.test(x.kind)).flatMap((x) => x.rings.filter((r) => r.length >= 6)),
           gardens: f.structures.filter((x) => standsAt(x, t) && x.kind === 'open/garden').flatMap((x) => x.rings.filter((r) => r.length >= 6)),
         };
+      }
+      // The city's recorded walls and roads, for the settlement generator's plan of it: in the city's own metres.
+      if (bundle && spec.people) {
+        const f = bundle.file;
+        for (const c of spec.people.cities) {
+          if (!c.life || c.record !== f.site.settlement) continue;
+          const [ox, oy] = surveyOffset({ lat: c.lat, lon: c.lon }, f.site.origin);
+          const move = (l: number[]) => l.map((v, i) => v + (i % 2 ? oy : ox));
+          const closed = (l: number[]) => l.length >= 8 && Math.hypot(l[0] - l[l.length - 2], l[1] - l[l.length - 1]) < 1;
+          const span = (x: CityStructure): [number, number] => [x.time.start.best ?? -Infinity, x.time.end.best ?? Infinity];
+          c.life.walls = f.structures.filter((x) => x.kind === 'works/wall').flatMap((x) => (x.lines ?? []).filter(closed).map((l) => ({ ring: move(l.slice(0, -2)), from: span(x)[0], to: span(x)[1] })));
+          c.life.roads = f.structures.filter((x) => x.kind === 'works/road').flatMap((x) => (x.lines ?? []).filter((l) => l.length >= 4).map(move));
+        }
       }
       const scene = await LifeScene.create(gl!, spec, null, { fast: state.quality === 'fast', ...(bundle ? { structures: bundle } : {}) });
       scene.onChange = () => (dirty = true);

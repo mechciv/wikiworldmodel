@@ -54,6 +54,11 @@ export interface TownInput {
   wall?: { from: number; to: number; thickness: number };
   /** people to a household: a plot is as big as a household's share of the ground at the town's height */
   household?: number;
+  /**
+   * Its recorded walls and roads, in its own metres: they take the place of a generated wall, the walls' years making
+   * the growth model's epochs, and the roads stand in its frame and are routes beside the generated ones
+   */
+  recorded?: { walls?: { ring: number[]; from: number; to: number }[]; roads?: number[][] };
   params?: Partial<TownParams>;
   growth?: Partial<GrowthParams>;
 }
@@ -433,7 +438,12 @@ export function planTown(input: TownInput): TownPlan {
   const grid: DivisionGrid | undefined = planned ? { angle, ox: 0, oy: 0, block: [input.sizes.block, input.sizes.block * 0.75], street: input.sizes.lane } : undefined;
   let wall: TownWall | undefined;
   const walls: GrowthWall[] = [];
-  if (input.wall) {
+  // Its recorded walls, where a map of the city gives them, stand in its frame and make its epochs; a generated wall
+  // stands only where none is recorded.
+  const recordedWalls = (input.recorded?.walls ?? []).filter((w) => w.ring.length >= 6 && Math.min(w.to, input.span[1]) > Math.max(w.from, input.span[0]));
+  for (const w of recordedWalls) walls.push({ ring: w.ring, from: Math.max(w.from, input.span[0]), to: Math.min(w.to, input.span[1]) });
+  const roads = (input.recorded?.roads ?? []).filter((l) => l.length >= 4);
+  if (input.wall && !recordedWalls.length) {
     const from = Math.max(input.wall.from, input.span[0]);
     const to = Math.min(input.wall.to, input.span[1]);
     if (to > from) {
@@ -458,13 +468,15 @@ export function planTown(input: TownInput): TownPlan {
       }
     }
   }
-  const growth = growSettlement({ cores: [{ x: 0, y: 0 }], routes: routes.map((r) => r.line), walls, ground: input.ground, people: input.members, span: input.span, ...(areas ? { areas } : {}), ...(input.growth ? { params: input.growth } : {}), cell: cell0 });
-  // The frame: the routes, the wall, and the edge of the ground the plan covers.
+  const growth = growSettlement({ cores: [{ x: 0, y: 0 }], routes: [...routes.map((r) => r.line), ...roads], walls, ground: input.ground, people: input.members, span: input.span, ...(areas ? { areas } : {}), ...(input.growth ? { params: input.growth } : {}), cell: cell0 });
+  // The frame: the routes, the walls and roads a map gives, the wall laid round it, and the edge of the ground it covers.
   const { x0, y0, cell, nx, ny } = growth.grid;
   const lines: FrameLine[] = [
     { id: `${input.key}/edge`, kind: 'edge', points: [x0, y0, x0 + nx * cell, y0, x0 + nx * cell, y0 + ny * cell, x0, y0 + ny * cell], closed: true },
     ...routes.map((r): FrameLine => ({ id: r.id, kind: 'route', points: r.line })),
     ...(wall ? [{ id: `${input.key}/wall`, kind: 'wall' as const, points: wall.ring, closed: true }] : []),
+    ...recordedWalls.map((w, k): FrameLine => ({ id: `${input.key}/wall:${k}`, kind: 'wall', points: w.ring, closed: true })),
+    ...roads.map((l, k): FrameLine => ({ id: `${input.key}/road:${k}`, kind: 'street', points: l })),
   ];
   const frame = makeFrame(lines);
   // Each cell's face: the largest filled first, so a face that lies in another's hole takes its own cells.
@@ -495,7 +507,7 @@ function cellCentre(g: Growth, c: number): [number, number] {
 }
 
 /** Which sides of a face people reach it across: routes, streets and the plan's own edge, not a wall. */
-const openSides = (f: FrameFace) => f.plainSides.map((s) => s.split('+').some((id) => !id.endsWith('/wall')));
+const openSides = (f: FrameFace) => f.plainSides.map((s) => s.split('+').some((id) => !/\/wall(:\d+)?$/.test(id)));
 
 /**
  * What stood at a time, for a member of the people: the plots built then, and the lanes they were reached by. Faces with

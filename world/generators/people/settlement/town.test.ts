@@ -97,6 +97,17 @@ describe('a town through its life', () => {
     expect(out / at.plots.length).toBeLessThan(0.05);
   });
 
+  it('takes the walls and roads a map gives in place of a generated wall, and grows within them while they stand', () => {
+    const ring = [-700, -700, 700, -700, 700, 700, -700, 700];
+    const plan = planTown(input({ wall: { from: 100, to: 800, thickness: 4 }, recorded: { walls: [{ ring, from: 100, to: 800 }], roads: [[-1500, 40, 1500, 40]] } }));
+    expect(plan.wall).toBeUndefined();
+    expect(plan.growth.epochs.map((e) => [e.from, e.to])).toEqual([[-200, 100], [100, 800]]);
+    expect(plan.frame.edges.some((e) => e.lines.some((l) => l.endsWith('/road:0')))).toBe(true);
+    const inside = (x: number, y: number) => Math.abs(x) < 700 && Math.abs(y) < 700;
+    const at = townAt(plan, 150);
+    expect(at.plots.filter((q) => !inside(q.x, q.y)).length / at.plots.length).toBeLessThan(0.05);
+  });
+
   it('lays a planned town on a grid turned as its record says', () => {
     const plan = planTown(input({ streets: 'grid', angle: 0.26 }));
     const { lanes } = townAt(plan, 300);

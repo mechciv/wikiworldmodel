@@ -419,6 +419,13 @@ export interface CityLife {
   /** radians from east, the most important first */
   toward: number[];
   townSpan?: [number, number];
+  /**
+   * Its recorded walls and roads, where a map of the city gives them (a dataset's `import.site`), in the city's own metres
+   * about its point: a wall's ring and the years it stood, a road's line. They take the place of a generated wall and
+   * stand beside the generated routes in its frame.
+   */
+  walls?: { ring: number[]; from: number; to: number }[];
+  roads?: number[][];
 }
 
 /** How far the places a city dealt with are looked for, km, and how many of them its routes lead to at most. */

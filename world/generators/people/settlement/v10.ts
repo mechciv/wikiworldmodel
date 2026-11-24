@@ -2380,6 +2380,8 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
       sizes,
       main,
       ...(wallWord ? { wall: { from: years[0], to: years[1], thickness } } : {}),
+      // The walls and roads a map of the city gives, where one does: they take the place of a generated wall.
+      ...(life.walls?.length || life.roads?.length ? { recorded: { ...(life.walls ? { walls: life.walls } : {}), ...(life.roads ? { roads: life.roads } : {}) } } : {}),
       params: tp,
     });
     // An open square at its middle, where its form says one lay there: a share of the ground it covered at its height,
