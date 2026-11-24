@@ -12,6 +12,7 @@
 //   from a way off (detail 1):     its trunk, the mass of its crown, and a few boughs for its ragged edge;
 //   far off (detail 0):            a plain shape.
 // On the lighter way to draw (`cards` false) a plant from a way off is the plain shapes it always was.
+import type { CropArchetype } from '../../../core/dwelling.ts';
 import type { Form, Part } from '../../../core/form.ts';
 import { boughTile, defaultLeaf, LEAF_KINDS, sprayTile, tileU, type LeafKind, type LeafKindName } from '../../../core/leaves.ts';
 import { MAT, Mesh, limb } from '../city/kit.ts';
@@ -1271,29 +1272,75 @@ export function drawClump(m: Mesh, form: Form, h: number, seed: number, tint: nu
   }
 }
 
+const CROP_LEAF_OF: Record<Exclude<CropArchetype, 'orchard'> | 'stubble', LeafKindName> = {
+  millet: 'crop-millet',
+  cereal: 'crop-cereal',
+  cane: 'crop-cane',
+  paddy: 'crop-paddy',
+  broadleaf: 'crop-broadleaf',
+  vine: 'crop-vine',
+  stubble: 'crop-stubble',
+};
+
 /**
- * A stand of a crop nobody names (world/generators/people/crops.ts), a metre tall: cards of upright blades, as a field
- * of almost any grain is from a few steps off. One clump of it, `wide` across, its cards crossing at its foot; or, for
- * `long` metres of a row along y, cards end to end along the row with one across at each. Its cards are of a material
- * of their own, coloured by the plot it stands in. Nothing of it is a claim about any crop.
+ * Draw a stand of a field crop, normalised to 1 m tall: either one clump (`long <= 0`) or a length of row along y
+ * (`long > 0`), using the botanical leaf tile and structure of its archetype (millet, cereal, cane, paddy, broadleaf,
+ * vine, orchard, or harvested stubble).
  */
-export function drawCropStand(m: Mesh, wide: number, long: number, seed: number): void {
-  m.mat = MAT.cropCard;
+export function drawCropStand(m: Mesh, wide: number, long: number, seed: number, archetype: CropArchetype | 'stubble' = 'cereal'): void {
   m.tint = 0;
   m.light = 1;
-  if (!(long > 0)) {
-    crossed(m, 'blade-reed', 1, wide, 3, seed, 0.07);
+  if (archetype === 'orchard') {
+    // A pruned orchard tree (mulberry, olive, fruit): gnarled short trunk, ascending branches, and leafy crown cards.
+    const r = Math.max(0.28, wide * 0.28);
+    m.mat = MAT.bark;
+    m.tint = 110;
+    limb(m, 0, 0, 0, 0, 0, 0.42, 0.055, 0.04, 6);
+    for (let i = 0; i < 4; i++) {
+      const a = (i / 4) * TAU + (hash2(i, 3, seed) - 0.5) * 0.45;
+      const reach = r * (0.45 + 0.25 * hash2(i, 4, seed));
+      const top = 0.62 + 0.16 * hash2(i, 5, seed);
+      limb(m, 0, 0, 0.36, dcos(a) * reach, dsin(a) * reach, top, 0.03, 0.014, 5);
+    }
+    m.mat = MAT.cropCard;
+    m.tint = 0;
+    const crown: Crown = { x: 0, y: 0, z: 0.66, r };
+    rosette(m, 'broad-oval', 0, 0, 0.68, 0, 0, 1, 7, r * 1.15, crown, seed, 1.5);
     return;
   }
-  const n = Math.max(2, Math.round(long / 0.6));
+
+  const leafKind = CROP_LEAF_OF[archetype];
+  const lean = archetype === 'millet' ? 0.11 : archetype === 'cane' ? 0.05 : archetype === 'broadleaf' ? 0.09 : archetype === 'stubble' ? 0.03 : 0.07;
+
+  if (archetype === 'vine') {
+    // Trellised vine row: woody stake(s) and horizontal wire/rail clad in vine foliage cards.
+    const span = long > 0 ? long : wide;
+    m.mat = MAT.wood;
+    m.tint = 120;
+    if (long > 0) {
+      limb(m, 0, -span * 0.42, 0, 0, -span * 0.42, 0.92, 0.032, 0.026, 5);
+      limb(m, 0, span * 0.42, 0, 0, span * 0.42, 0.92, 0.032, 0.026, 5);
+      limb(m, 0, -span * 0.45, 0.58, 0, span * 0.45, 0.58, 0.018, 0.018, 4);
+    } else {
+      limb(m, 0, 0, 0, 0, 0, 0.92, 0.03, 0.025, 5);
+    }
+  }
+
+  m.mat = MAT.cropCard;
+  m.tint = 0;
+  if (!(long > 0)) {
+    const cards = archetype === 'stubble' ? 2 : 3;
+    crossed(m, leafKind, 1, wide, cards, seed, lean);
+    return;
+  }
+  const spacing = archetype === 'cane' ? 0.72 : archetype === 'broadleaf' ? 0.75 : archetype === 'vine' ? 0.85 : 0.62;
+  const n = Math.max(2, Math.min(4, Math.round(long / spacing)));
   for (let i = 0; i < n; i++) {
     const y = -long / 2 + ((i + 0.5) * long) / n;
-    const off = (hash2(i, 11, seed) - 0.5) * wide * 0.3;
+    const off = (hash2(i, 11, seed) - 0.5) * wide * 0.28;
     const tall = 0.86 + 0.14 * hash2(i, 13, seed);
-    // Along the row, a little off its line and turned a little from it; and one across it, so that the row has body
-    // seen from its end.
-    standing(m, sprayTile(i % 2 ? 'blade-grass' : 'blade-reed', seed + i), off, y, 0.25 + (hash2(i, 12, seed) - 0.5) * 0.06, (long / n) * 1.3, tall, 0.07 * (i % 2 ? 1 : -1), hash2(i, 14, seed) < 0.5);
-    standing(m, sprayTile('blade-reed', seed + i + 7), off, y + (hash2(i, 15, seed) - 0.5) * 0.2, (hash2(i, 16, seed) - 0.5) * 0.12, wide, tall * 0.95, 0.06, hash2(i, 17, seed) < 0.5);
+    standing(m, sprayTile(leafKind, seed + i), off, y, 0.25 + (hash2(i, 12, seed) - 0.5) * 0.06, (long / n) * 1.32, tall, lean * (i % 2 ? 1 : -1), hash2(i, 14, seed) < 0.5);
+    standing(m, sprayTile(leafKind, seed + i + 7), off, y + (hash2(i, 15, seed) - 0.5) * 0.2, (hash2(i, 16, seed) - 0.5) * 0.12, wide, tall * 0.94, lean * 0.8, hash2(i, 17, seed) < 0.5);
   }
 }
 

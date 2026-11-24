@@ -731,6 +731,202 @@ const SPRAYS: Record<LeafKindName, Draw> = {
       t.leaf(s.x, s.y, a, t.len * (0.05 + 0.04 * r()), t.wide * 0.02, lance, { light: 0.22 + 0.5 * r() + 0.2 * (s.y / t.len), fold: 0.25, rib: 0, vein: 0, shadow: 0.16 });
     }
   },
+  'crop-millet': (t, r) => {
+    // Slender arching millet blades along the lower two-thirds, and upright culms topped by heavy nodding foxtail panicles.
+    const blades = 26 + Math.floor(r() * 8);
+    for (let k = 0; k < blades; k++) {
+      const x = (r() - 0.5) * t.wide * 0.42;
+      const a = (r() - 0.5) * 1.1;
+      const l = t.len * (0.38 + 0.44 * r());
+      const over = Math.sign(a || (r() < 0.5 ? 1 : -1)) * (0.45 + 0.45 * r());
+      const ex = clamp(x + Math.sin(a + over) * l, -t.wide * 0.48, t.wide * 0.48);
+      const ey = Math.max(t.len * 0.14, Math.min(t.len * 0.88, Math.cos(a + over) * l));
+      t.curve(x, 0, x + Math.sin(a) * l * 0.58, Math.cos(a) * l * 0.62, ex, ey, t.wide * 0.015, t.wide * 0.002, 0.24 + 0.36 * r(), 0, 0.35, 0.2, 10);
+    }
+    // 8–10 stout stalks bending over at the top under heavy cylindrical bristly seed heads.
+    const heads = 8 + Math.floor(r() * 3);
+    for (let k = 0; k < heads; k++) {
+      const x = ((k + 0.5) / heads - 0.5) * t.wide * 0.64 + (r() - 0.5) * t.wide * 0.06;
+      const lean = (r() - 0.5) * 0.28;
+      const h = t.len * (0.72 + 0.2 * r());
+      const tx = clamp(x + Math.sin(lean) * h * 0.6, -t.wide * 0.38, t.wide * 0.38);
+      const ty = h;
+      t.curve(x, 0, x + Math.sin(lean) * h * 0.25, h * 0.55, tx, ty, t.wide * 0.009, t.wide * 0.0055, 0.46 + 0.14 * r(), 0.25, 0, 0.14, 9);
+      // Nodding panicle drooping sideways and slightly down from the culm tip.
+      const dir = lean >= 0 ? 1 : -1;
+      const plen = t.len * (0.17 + 0.07 * r());
+      const droop = dir * (0.85 + 0.55 * r());
+      const mx = clamp(tx + Math.sin(droop * 0.6) * plen * 0.55, -t.wide * 0.46, t.wide * 0.46);
+      const my = Math.min(t.len * 0.98, ty + Math.cos(droop * 0.6) * plen * 0.45);
+      const ex = clamp(tx + Math.sin(droop) * plen, -t.wide * 0.48, t.wide * 0.48);
+      const ey = Math.max(t.len * 0.4, Math.min(t.len * 0.96, ty + Math.cos(droop) * plen * 0.65 - plen * 0.25));
+      t.curve(tx, ty, mx, my, ex, ey, t.wide * 0.032, t.wide * 0.02, 0.66 + 0.18 * r(), 0.55, 0.25, 0.25, 8);
+      // Fine millet bristles along the drooping head.
+      for (let q = 0; q < 14; q++) {
+        const u = (q + 0.5) / 14;
+        const px = (1 - u) * (1 - u) * tx + 2 * (1 - u) * u * mx + u * u * ex;
+        const py = (1 - u) * (1 - u) * ty + 2 * (1 - u) * u * my + u * u * ey;
+        t.leaf(px, py, droop + (q % 2 ? 1 : -1) * (0.5 + 0.35 * r()), t.len * 0.038, t.wide * 0.011, needle, { light: 0.72 + 0.18 * r(), wood: 0.6, fold: 0, rib: 0, vein: 0, shadow: 0.08 });
+      }
+    }
+  },
+  'crop-cereal': (t, r) => {
+    // Dense upright wheat / barley culms with narrow flag leaves and bearded vertical ears with fine awns.
+    const stalks = 20 + Math.floor(r() * 6);
+    for (let k = 0; k < stalks; k++) {
+      const x = ((k + 0.5) / stalks - 0.5) * t.wide * 0.78 + (r() - 0.5) * t.wide * 0.04;
+      const a = (r() - 0.5) * 0.24;
+      const h = t.len * (0.68 + 0.26 * r());
+      const tx = clamp(x + Math.sin(a) * h, -t.wide * 0.46, t.wide * 0.46);
+      const ty = Math.min(t.len * 0.9, Math.cos(a) * h);
+      t.curve(x, 0, x + Math.sin(a) * h * 0.45, h * 0.5, tx, ty, t.wide * 0.008, t.wide * 0.005, 0.38 + 0.2 * r(), 0.2, 0, 0.12, 8);
+      // Narrow flag leaf peeling off midway up the culm.
+      const fx = x + Math.sin(a) * h * 0.52;
+      const fy = h * 0.52;
+      const side = k % 2 ? 1 : -1;
+      t.curve(fx, fy, fx + side * t.wide * 0.07, fy + t.len * 0.09, clamp(fx + side * t.wide * 0.15, -t.wide * 0.48, t.wide * 0.48), fy + t.len * 0.03, t.wide * 0.012, t.wide * 0.002, 0.3 + 0.25 * r(), 0, 0.3, 0.12, 6);
+      // Upright grain spike (ear) made of overlapping plump spikelets + crisp vertical awns.
+      const earLen = t.len * (0.14 + 0.05 * r());
+      const earTopY = Math.min(t.len * 0.96, ty + Math.cos(a * 1.1) * earLen);
+      const earTopX = clamp(tx + Math.sin(a * 1.1) * earLen, -t.wide * 0.47, t.wide * 0.47);
+      t.stem(tx, ty - earLen * 0.2, earTopX, earTopY, t.wide * 0.02, t.wide * 0.012, 0.65 + 0.18 * r(), 0.55, 0.15, 0.2);
+      for (let q = 0; q < 7; q++) {
+        const u = q / 7;
+        const sx = tx + (earTopX - tx) * u;
+        const sy = ty - earLen * 0.15 + (earTopY - ty + earLen * 0.15) * u;
+        const sd = q % 2 ? 1 : -1;
+        t.leaf(sx, sy, a + sd * 0.35, t.len * 0.036, t.wide * 0.015, oval, { light: 0.68 + 0.2 * r(), wood: 0.55, fold: 0.15, rib: 0, vein: 0, shadow: 0.1 });
+      }
+      // Fine awns (whiskers) shooting upward from the ear tip.
+      for (let q = 0; q < 3; q++) {
+        const awA = a + (q - 1) * 0.14 + (r() - 0.5) * 0.08;
+        const awL = t.len * (0.07 + 0.04 * r());
+        t.stem(earTopX, earTopY - earLen * 0.2, clamp(earTopX + Math.sin(awA) * awL, -t.wide * 0.49, t.wide * 0.49), Math.min(t.len * 0.99, earTopY + Math.cos(awA) * awL), t.wide * 0.0025, t.wide * 0.001, 0.78, 0.6, 0, 0);
+      }
+    }
+  },
+  'crop-cane': (t, r) => {
+    // Tall jointed stalks (maize, sorghum, hemp, sugarcane) with broad arching opposite ribbon leaves & top tassels.
+    const canes = 4 + Math.floor(r() * 3);
+    for (let k = 0; k < canes; k++) {
+      const x = ((k + 0.5) / canes - 0.5) * t.wide * 0.56 + (r() - 0.5) * t.wide * 0.08;
+      const lean = (r() - 0.5) * 0.14;
+      const h = t.len * (0.78 + 0.16 * r());
+      const joints = 6;
+      let px = x;
+      let py = 0;
+      for (let j = 1; j <= joints; j++) {
+        const f = j / joints;
+        const nx = x + Math.sin(lean) * h * f;
+        const ny = h * f;
+        t.stem(px, py, nx, ny, t.wide * (0.022 - 0.01 * f), t.wide * (0.02 - 0.01 * f), 0.36 + 0.15 * r(), 0.2, 0.25, 0.22);
+        // Broad arching ribbon leaves alternating left and right from each node.
+        if (j >= 2) {
+          for (const side of [-1, 1]) {
+            if (j === joints && side === -1) continue;
+            const ll = t.wide * (0.34 + 0.22 * r()) * (1.15 - 0.35 * f);
+            const up = t.len * (0.12 + 0.06 * r());
+            const mx = clamp(nx + side * ll * 0.55, -t.wide * 0.47, t.wide * 0.47);
+            const my = Math.min(t.len * 0.94, ny + up);
+            const ex = clamp(nx + side * ll, -t.wide * 0.49, t.wide * 0.49);
+            const ey = Math.max(t.len * 0.08, ny + up * 0.15 - ll * 0.35);
+            t.curve(nx, ny, mx, my, ex, ey, t.wide * 0.044, t.wide * 0.005, 0.26 + 0.36 * r(), 0, 0.45, 0.26, 12);
+          }
+        }
+        px = nx;
+        py = ny;
+      }
+      // Terminal tassel / panicle at the top of the stalk.
+      for (let q = 0; q < 5; q++) {
+        const ta = lean + (q - 2) * 0.26;
+        const tl = t.len * (0.1 + 0.05 * r());
+        t.stem(px, py, clamp(px + Math.sin(ta) * tl, -t.wide * 0.48, t.wide * 0.48), Math.min(t.len * 0.99, py + Math.cos(ta) * tl), t.wide * 0.007, t.wide * 0.002, 0.68 + 0.15 * r(), 0.55, 0, 0.08);
+      }
+    }
+  },
+  'crop-paddy': (t, r) => {
+    // Tightly tufted flooded-paddy rice clump: dense slender arching green blades from a narrow crown + fine nodding heads.
+    const n = 42 + Math.floor(r() * 14);
+    for (let k = 0; k < n; k++) {
+      const x = (r() - 0.5) * t.wide * 0.22;
+      const a = (r() - 0.5) * 1.15 * (0.3 + 0.7 * r());
+      const l = t.len * (0.52 + 0.44 * r());
+      const bend = Math.sign(a || 1) * (0.35 + 0.5 * r());
+      const ex = clamp(x + Math.sin(a + bend) * l, -t.wide * 0.48, t.wide * 0.48);
+      const ey = Math.max(t.len * 0.18, Math.min(t.len * 0.96, Math.cos(a + bend) * l));
+      t.curve(x, 0, x + Math.sin(a) * l * 0.58, Math.cos(a) * l * 0.62, ex, ey, t.wide * 0.011, t.wide * 0.0015, 0.3 + 0.38 * r(), 0, 0.35, 0.18, 10);
+    }
+    const panicles = 7 + Math.floor(r() * 4);
+    for (let k = 0; k < panicles; k++) {
+      const x = (r() - 0.5) * t.wide * 0.18;
+      const a = (r() - 0.5) * 0.6;
+      const l = t.len * (0.76 + 0.18 * r());
+      const tx = clamp(x + Math.sin(a) * l * 0.65, -t.wide * 0.36, t.wide * 0.36);
+      const ty = Math.min(t.len * 0.92, Math.cos(a) * l);
+      t.curve(x, 0, x + Math.sin(a) * l * 0.35, l * 0.55, tx, ty, t.wide * 0.006, t.wide * 0.003, 0.48, 0.2, 0, 0.1, 8);
+      const dir = a >= 0 ? 1 : -1;
+      const ex = clamp(tx + dir * t.wide * 0.16, -t.wide * 0.48, t.wide * 0.48);
+      const ey = ty - t.len * 0.08;
+      t.curve(tx, ty, (tx + ex) * 0.5, ty + t.len * 0.04, ex, ey, t.wide * 0.012, t.wide * 0.006, 0.72 + 0.16 * r(), 0.5, 0.1, 0.12, 6);
+    }
+  },
+  'crop-broadleaf': (t, r) => {
+    // Bushy low soybean / legume / cotton row: branching woody-herbaceous stems covered in dense broad oval leaves.
+    const stems = 9 + Math.floor(r() * 4);
+    const order = Array.from({ length: stems }, (_, i) => i).sort(() => r() - 0.5);
+    for (const i of order) {
+      const bx = ((i + 0.5) / stems - 0.5) * t.wide * 0.5;
+      const a = ((i + 0.5) / stems - 0.5) * 1.45 + (r() - 0.5) * 0.24;
+      const l = t.len * (0.62 + 0.32 * r()) * (1 - 0.2 * Math.abs(a));
+      const pts: { x: number; y: number; ang: number }[] = [];
+      for (let k = 0; k <= 7; k++) {
+        const f = k / 7;
+        const bend = a * (0.45 + 0.55 * f);
+        pts.push({ x: clamp(bx + Math.sin(bend) * l * f, -t.wide * 0.44, t.wide * 0.44), y: Math.cos(bend) * l * f, ang: bend });
+      }
+      for (let k = 0; k < 7; k++) t.stem(pts[k].x, pts[k].y, pts[k + 1].x, pts[k + 1].y, 0.008, 0.005, 0.34, 0.35, 0, 0.18);
+      alternate(t, r, pts, 11, t.len * 0.16, 0.68, oval, 0.16, { rib: 0.14, vein: 0.05, shadow: 0.36 });
+    }
+  },
+  'crop-vine': (t, r) => {
+    // Trellised grapevine / cucurbit row: stout woody trunk & horizontal arms draped with broad vine foliage.
+    t.stem(0, 0, (r() - 0.5) * t.wide * 0.06, t.len * 0.52, t.wide * 0.036, t.wide * 0.024, 0.26, 1, 0.2, 0.24);
+    for (const side of [-1, 1]) {
+      const yArm = t.len * (0.46 + 0.08 * r());
+      t.stem(0, yArm, side * t.wide * 0.44, yArm + (r() - 0.5) * t.len * 0.06, t.wide * 0.02, t.wide * 0.012, 0.28, 1, 0.15, 0.2);
+      // Leafy shoots rising and spilling from the cordon.
+      for (let s = 0; s < 4; s++) {
+        const sx = side * t.wide * (0.08 + 0.1 * s + 0.03 * r());
+        const sh = t.len * (0.36 + 0.14 * r());
+        const sa = side * (0.15 + 0.25 * r());
+        const pts: { x: number; y: number; ang: number }[] = [];
+        for (let k = 0; k <= 6; k++) {
+          const f = k / 6;
+          pts.push({ x: clamp(sx + Math.sin(sa) * sh * f, -t.wide * 0.45, t.wide * 0.45), y: Math.min(t.len * 0.94, yArm + Math.cos(sa) * sh * f), ang: sa });
+        }
+        for (let k = 0; k < 6; k++) t.stem(pts[k].x, pts[k].y, pts[k + 1].x, pts[k + 1].y, 0.007, 0.004, 0.34, 0.5, 0, 0.16);
+        alternate(t, r, pts, 7, t.len * 0.17, 0.85, cut(3), 0.1, { rib: 0.15, vein: 0.06, shadow: 0.38 });
+      }
+    }
+  },
+  'crop-stubble': (t, r) => {
+    // Freshly reaped grain stubble: dense short cut upright straw stalks with a few bent broken straws.
+    const n = 34 + Math.floor(r() * 12);
+    for (let k = 0; k < n; k++) {
+      const x = ((k + 0.5) / n - 0.5) * t.wide * 0.86 + (r() - 0.5) * t.wide * 0.04;
+      const a = (r() - 0.5) * 0.36;
+      const h = t.len * (0.36 + 0.48 * r());
+      const ex = clamp(x + Math.sin(a) * h, -t.wide * 0.48, t.wide * 0.48);
+      const ey = Math.min(t.len * 0.92, Math.cos(a) * h);
+      t.stem(x, 0, ex, ey, t.wide * 0.012, t.wide * 0.01, 0.46 + 0.32 * r(), 0.65, 0.1, 0.16);
+      if (r() < 0.22) {
+        // Broken top bent over at a sharp angle.
+        const ba = a + (r() < 0.5 ? 1 : -1) * (0.9 + 0.6 * r());
+        const bl = t.len * (0.14 + 0.12 * r());
+        t.stem(ex, ey, clamp(ex + Math.sin(ba) * bl, -t.wide * 0.49, t.wide * 0.49), Math.max(t.len * 0.08, ey + Math.cos(ba) * bl), t.wide * 0.009, t.wide * 0.007, 0.55 + 0.25 * r(), 0.7, 0, 0.1);
+      }
+    }
+  },
 };
 
 /** A bough: a branch with side branches, clothed in sprays of its kind, as a tree's are seen from a way off. */
