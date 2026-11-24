@@ -115,7 +115,8 @@ export const GROWTH: GrowthParams = { cell: 50, margin: 2500, reach: 2.4, soil: 
 export function peopleReach(params: Record<string, unknown> | undefined, extent: number): number {
   const G = (params as { growth?: GrowthParams } | undefined)?.growth ?? GROWTH;
   const cell = M_PER_DEG / 12;
-  return Math.ceil(((extent + G.margin + 2 * cell) / M_PER_DEG) * 100) / 100;
+  // The ring's outermost cells begin a cell past the margin and end a cell further; their neighbours lie a cell beyond.
+  return Math.ceil(((extent + G.margin + 3 * cell) / M_PER_DEG) * 100) / 100;
 }
 
 /** How far a place is from fresh water, m: a river's course, an old bend that holds water, a pond or a lake's shore. */

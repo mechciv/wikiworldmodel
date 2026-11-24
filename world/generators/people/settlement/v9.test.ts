@@ -706,11 +706,11 @@ describe('where settlements stand, and what they farm (sites.ts)', () => {
   });
 
   it('asks the world for its people as far as the cells it weighs reach, and a cell beyond', () => {
-    // The ring of cells weighed about a scene reaches its extent, the growth's margin and a cell more; the outermost of
-    // them read their neighbours' crowding, a cell further again.
+    // The ring of cells weighed about a scene reaches its extent, the growth's margin and two cells more (its outermost
+    // begin a cell past the margin); they read their neighbours' crowding, a cell further again.
     const cell = 111194.93 / 12;
     for (const extent of [EXTENT, 20000]) {
-      expect(peopleReach(gen.params, extent)).toBeGreaterThanOrEqual((extent + GROWTH.margin + cell) / 111194.93 + 1 / 12);
+      expect(peopleReach(gen.params, extent)).toBeGreaterThanOrEqual((extent + GROWTH.margin + 2 * cell) / 111194.93 + 1 / 12);
     }
   });
 
