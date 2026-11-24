@@ -357,7 +357,8 @@ void main() {
     vec3 q = p;
     p = iPlace.xyz + wayOff + vec3(q.x * face.y + q.y * face.x, -q.x * face.x + q.y * face.y, q.z) * iPlace.w;
     n = vec3(n.x * face.y + n.y * face.x, -n.x * face.x + n.y * face.y, n.z);
-    if (aMat.x != 32u && aMat.x != 10u && aMat.x != 37u && aMat.x != 72u) tint = fract(tint + float(iMeta.y) / 255.0);
+    if (aMat.x == 73u) tint = float(iMeta.y) / 255.0;
+    else if (aMat.x != 32u && aMat.x != 10u && aMat.x != 37u && aMat.x != 72u) tint = fract(tint + float(iMeta.y) / 255.0);
   }
   // A plant drawn by instancing leans with the wind, the more the higher, in gusts that cross the ground; its leaves on
   // cards flutter.
@@ -677,6 +678,11 @@ const int ${GROUND_LAYERS.map((k, i) => `M_${k.toUpperCase()} = ${i}`).join(', '
 // itself and its stones, for a ground nothing is said of. A stone that stands on the ground is of the same.
 uniform vec3 uSubTone[16];
 uniform vec3 uRock[2];
+// The scene's seasonal 8-slot crop palette (core/plots.ts, FieldPalette), shared with TERRAIN_FS so close crop stands
+// match the ground's parcel colours and seasonal states seamlessly.
+uniform vec4 uSlotColor[8];
+uniform vec4 uSlotColor2[8];
+uniform vec4 uSlotMeta[8];
 out vec4 o;
 ${LIGHTING}
 ${LEAVES}
@@ -964,13 +970,20 @@ Surface surface(int m, vec3 p, vec2 uv, float tint, vec3 n, float fw, out vec3 b
     s.albedo = base * mix(0.5, 1.0, seam * visible(0.06, fw) + 1.0 - visible(0.06, fw)) * (0.8 + 0.4 * noiseM(p, 0.04));
     s.rough = 0.42;
   } else if (m == FUR) {
-    float k = fract(tint * 3.0);
-    vec3 base = tint < 0.34 ? mix(vec3(0.20, 0.145, 0.09), vec3(0.34, 0.25, 0.14), k) : tint < 0.67 ? mix(vec3(0.27, 0.20, 0.11), vec3(0.16, 0.14, 0.11), k) : mix(vec3(0.42, 0.34, 0.20), vec3(0.22, 0.17, 0.12), k);
+    float k = fract(tint * 4.0);
+    // Natural mammal coats ranging from dark bay/brown and warm dun to creamy wool fleece.
+    vec3 base = tint < 0.25
+      ? mix(vec3(0.20, 0.145, 0.09), vec3(0.36, 0.25, 0.14), k)
+      : tint < 0.50
+        ? mix(vec3(0.28, 0.20, 0.11), vec3(0.16, 0.14, 0.11), k)
+        : tint < 0.75
+          ? mix(vec3(0.45, 0.36, 0.22), vec3(0.26, 0.19, 0.13), k)
+          : mix(vec3(0.68, 0.63, 0.54), vec3(0.56, 0.50, 0.40), k);
     float back = smoothstep(0.2, 0.9, n.z);
     float belly = smoothstep(-0.1, -0.8, n.z);
     // Its hair lies along its body, in strokes; and catches the light at its edge, as a coat does.
-    s.albedo = mix(mix(base, base * 0.6, back), vec3(0.56, 0.50, 0.40), belly * 0.7) * (0.74 + 0.5 * noiseS(vLocal, vec3(0.012, 0.14, 0.012))) * (0.9 + 0.2 * noiseM(vLocal, 0.2));
-    s.albedo *= 1.0 + 0.5 * pow(1.0 - abs(dot(n, normalize(uEye - p))), 3.0);
+    s.albedo = mix(mix(base, base * (tint >= 0.75 ? 0.85 : 0.65), back), vec3(0.62, 0.56, 0.46), belly * 0.65) * (0.76 + 0.46 * noiseS(vLocal, vec3(0.012, 0.14, 0.012))) * (0.9 + 0.2 * noiseM(vLocal, 0.2));
+    s.albedo *= 1.0 + 0.45 * pow(1.0 - abs(dot(n, normalize(uEye - p))), 3.0);
     s.rough = 0.95;
   } else if (m == FEATHER) {
     // Vanes in long strokes, darker on the back and paler beneath. Their colours are nobody's record: the generator's.
@@ -1152,13 +1165,15 @@ Surface surface(int m, vec3 p, vec2 uv, float tint, vec3 n, float fw, out vec3 b
     s.rough = 0.1;
   } else if (m == PAVING) {
     vec2 c = courses(uv, vec2(1.8, 1.05));
-    vec3 base = mix(vec3(0.62, 0.58, 0.50), vec3(0.76, 0.74, 0.68), tint);
+    vec3 rome = mix(vec3(0.62, 0.58, 0.50), vec3(0.76, 0.74, 0.68), tint);
+    vec3 village = mix(vec3(0.28, 0.25, 0.20), vec3(0.46, 0.42, 0.35), tint);
+    vec3 base = mix(rome, village, uWild);
     base *= 0.82 + 0.26 * c.y;
     base *= mix(1.0, 0.6 + 0.4 * smoothstep(0.012, 0.04, c.x), visible(0.4, fw));
     base *= mix(0.76, 1.0, smoothstep(0.26, 0.6, fbmM(p, 6.0)));
     base *= 0.94 + 0.12 * noiseM(p, 0.06) * visible(0.06, fw);
     s.albedo = base;
-    s.rough = 0.7;
+    s.rough = mix(0.7, 0.88, uWild);
   } else if (m == BASALT) {
     // Polygonal stones, in the manner of the Roman road.
     vec2 cell = floor(uv * 1.5);
@@ -1184,7 +1199,8 @@ Surface surface(int m, vec3 p, vec2 uv, float tint, vec3 n, float fw, out vec3 b
     s.albedo = base;
     s.rough = 0.55;
   } else if (m == SAND) {
-    s.albedo = vec3(0.74, 0.64, 0.47) * (0.8 + 0.4 * fbmM(p, 1.6));
+    vec3 col = mix(vec3(0.74, 0.64, 0.47), mix(vec3(0.28, 0.22, 0.14), vec3(0.46, 0.38, 0.26), tint), uWild);
+    s.albedo = col * (0.8 + 0.4 * fbmM(p, 1.6));
     s.rough = 0.95;
   } else if (m == CONCRETE) {
     s.albedo = vec3(0.58, 0.54, 0.47) * (0.72 + 0.5 * fbmM(p, 0.5));
@@ -1333,10 +1349,13 @@ Surface built(int m, vec3 q, vec3 p, vec2 uv, float tint, vec3 n, float fw, out 
     // earth: a dado, or stripes.
     vec3 base = mix(vec3(0.80, 0.78, 0.71), vec3(0.87, 0.85, 0.79), shade);
     if (m == PAINTED) {
-      vec3 red = vec3(0.47, 0.19, 0.11) * (0.85 + 0.3 * noiseM(p, 0.4));
-      float stripes = step(0.5, fract(uv.x / 0.9));
-      float dado = 1.0 - smoothstep(0.86, 0.9, q.z);
-      base = mix(base, red, mix(dado, stripes, step(0.5, age)));
+      // Mineral-earth painted plaster: warm cream/buff limewash with an ochre or terracotta dado band and subtle frieze trim.
+      vec3 wash = mix(vec3(0.76, 0.71, 0.62), vec3(0.68, 0.58, 0.45), smoothstep(0.35, 0.85, age));
+      base = mix(base, wash, 0.55);
+      vec3 pigment = mix(vec3(0.45, 0.19, 0.11), vec3(0.50, 0.32, 0.16), smoothstep(0.45, 0.85, shade)) * (0.86 + 0.28 * noiseM(p, 0.5));
+      float dado = 1.0 - smoothstep(0.68, 0.74, q.z);
+      float frieze = smoothstep(2.55, 2.60, q.z) * (1.0 - smoothstep(2.74, 2.79, q.z));
+      base = mix(base, pigment, clamp(dado * 0.82 + frieze * 0.55 * step(0.45, age), 0.0, 1.0));
     }
     base *= 0.86 + 0.2 * fbmM(p, 1.6);
     float worn = smoothstep(0.64, 0.76, fbmM(p + 3.1, 0.9));
@@ -1552,17 +1571,18 @@ Surface leaves(int m, vec3 p, float tint, float light, float wood, float family)
     return s;
   }
   if (m == CROP_CARD) {
-    // A crop nobody names (world/generators/people/crops.ts): a stand of blades the colour of the plot it stands in,
-    // ripe or green and of the plot's own tone, as the ground is coloured from afar (core/plots.ts); each clump a
-    // shade of its own. Its tint says which: ripe from 128, the plot's tone in sixteenths, and its own shade in the rest.
+    // A regional seasonal crop stand (world/generators/people/crops.ts): tint packs
+    // (slot << 5) | (plotTone3 << 2) | ownShade2 into 0..255 so every botanical crop card matches its plot's palette slot.
     float v = floor(tint * 255.0 + 0.5);
-    bool ripe = v >= 128.0;
-    float tone = floor(mod(v, 128.0) / 8.0) / 15.0;
-    float own = mod(v, 8.0) / 7.0;
-    vec3 stand = ripe ? mix(PLOT_RIPE0, PLOT_RIPE1, tone) : mix(PLOT_GREEN0, PLOT_GREEN1, tone);
-    // A blade in the light is lighter than its stand seen from afar, which is half its own shade.
-    s.albedo = mix(stand * (0.5 + 1.0 * light) * (0.86 + 0.28 * own), stand * 0.7, wood);
-    s.rough = ripe ? 0.75 : 0.5;
+    int slot = clamp(int(floor(v / 32.0)), 0, FIELD_SLOTS - 1);
+    float tone = floor(mod(v, 32.0) / 4.0) / 7.0;
+    float own = mod(v, 4.0) / 3.0;
+    vec3 stand = mix(uSlotColor[slot].rgb, uSlotColor2[slot].rgb, tone);
+    float state = uSlotMeta[slot].x;
+    bool dry = state < 0.5 || (state > 2.5 && state < 3.5);
+    // Sunlit panicles and leaf blades brighten relative to the shaded interior of the stand.
+    s.albedo = mix(stand * (0.54 + 0.96 * light) * (0.86 + 0.28 * own), stand * 0.68, wood);
+    s.rough = dry ? 0.78 : 0.48;
     return s;
   }
   vec3 dark = mix(vec3(0.028, 0.06, 0.024), vec3(0.052, 0.078, 0.022), tint);
@@ -1722,7 +1742,8 @@ void main() {
     // Close by, the grain of its skin, while a pixel is small enough to show it; and its pattern, at any distance.
     float near = 1.0 - smoothstep(4.0, 30.0, length(uEye - vPos));
     if (near > 0.0) bumped = bumpBy(bumped, vPos, skinGrain(vMaterial, vLocal), (vMaterial == FUR ? 0.0025 : 0.004) * near);
-    if (vMaterial != MEMBRANE && vMaterial != CHITIN) s.albedo *= 1.0 - 0.38 * skinPattern(vLocal, vKind);
+    float patStr = vMaterial == FUR && vTint >= 0.75 ? 0.14 : 0.38;
+    if (vMaterial != MEMBRANE && vMaterial != CHITIN) s.albedo *= 1.0 - patStr * skinPattern(vLocal, vKind);
   }
   // The eye's side of a face.
   vec3 toEye = uEye - vPos;
@@ -1773,6 +1794,18 @@ void main() {
     if (skin) ao *= 0.62 + 0.38 * smoothstep(-0.7, 0.35, n.z);
     float occl = ao * (vLight * 0.5 + 0.5) * under;
     c = shade(s.albedo, s.rough, s.metal, w, vPos, uEye, occl, sh * mix(1.0, ao, 0.35));
+    // Warm hearthlight glow inside building doorways/windows at dusk/dawn, and glowing embers in kiln mouths.
+    float dusk = 1.0 - smoothstep(-0.04, 0.24, uSun.z);
+    if (vMaterial == DARK && dusk > 0.01 && vLow < 80.0 && abs(n.z) < 0.4) {
+      float litCell = hash(floor(vPos.xy * 0.45));
+      if (litCell > 0.32) {
+        float flick = 0.85 + 0.15 * sin(uClockSky * 4.3 + litCell * 57.0);
+        c += vec3(1.15, 0.54, 0.15) * dusk * flick * (0.45 + 0.55 * litCell);
+      }
+    } else if (vMaterial == GILT && vLow < 3.5 && uWild > 0.5) {
+      float flick = 0.8 + 0.2 * sin(uClockSky * 6.5 + vPos.x * 2.1);
+      c += vec3(1.5, 0.45, 0.08) * (0.35 + 0.9 * dusk) * flick;
+    }
   }
   c = seen(c, vPos, uEye);
   // Evidence mode: what rests on a reconstruction is amber, what was generated magenta.
@@ -2022,6 +2055,10 @@ uniform vec4 uMaskBox;
 uniform highp sampler2D uFields;
 uniform vec4 uFieldsBox;
 uniform vec4 uFieldStyle;
+// The scene's seasonal 8-slot crop palette (core/plots.ts, FieldPalette): rgb tones, cumulative shares, states, row spacing.
+uniform vec4 uSlotColor[8];
+uniform vec4 uSlotColor2[8];
+uniform vec4 uSlotMeta[8];
 // How far from the eye a field's crop is drawn plant by plant, in rows (world/generators/people/crops.ts), m: 0 where
 // it is not, and the ground is the crop's colour everywhere.
 uniform float uCrops;
@@ -2164,41 +2201,96 @@ vec3 countryside(vec3 p, vec3 n, float dist) {
 // Where a plot's crop stands as plants close by, the ground between its rows is the earth they stand in, and tilled
 // says how much of the ground here is that. The colours are the renderer's, and nobody's record.
 ${PLOTS_GLSL}
-vec3 plots(vec3 wild, vec3 p, float dist, float paddy, out float tilled) {
+vec3 plots(vec3 wild, vec3 p, vec3 n, float dist, float paddy, out float tilled, out float paddyWet, out float fieldBump) {
   float kind = uFieldStyle.z;
   vec2 size;
   float across;
-  vec4 at = plotAt(p.xy, uFieldStyle, size, across);
-  ivec2 cell = ivec2(at.xy);
+  float domainEdge;
+  highp ivec2 cell;
+  vec4 at = plotAt(p.xy, uFieldStyle, size, across, domainEdge, cell);
   vec2 f = at.zw;
   float h = plotNumber(cell, 0);
   float tone = plotNumber(cell, 3);
-  vec3 ripe = mix(PLOT_RIPE0, PLOT_RIPE1, tone);
-  vec3 green = mix(PLOT_GREEN0, PLOT_GREEN1, tone);
-  vec3 ploughed = mix(vec3(0.33, 0.25, 0.17), vec3(0.28, 0.21, 0.15), plotNumber(cell, 9));
-  vec3 fallow = vec3(0.32, 0.32, 0.19);
-  bool swidden = kind > 6.5 && kind < 7.5;
-  bool cropped = swidden ? h >= ${PLOT_LOOK.shares.cleared.toFixed(4)} : h < ${PLOT_LOOK.shares.green.toFixed(4)};
-  vec3 c = h < ${PLOT_LOOK.shares.ripe.toFixed(4)} ? ripe : h < ${PLOT_LOOK.shares.green.toFixed(4)} ? green : h < ${PLOT_LOOK.shares.ploughed.toFixed(4)} ? ploughed : fallow;
-  if (swidden) c = cropped ? green : mix(ploughed, vec3(0.12, 0.10, 0.08), 0.4);
-  float vis = 1.0 - smoothstep(800.0, 9000.0, dist);
-  float edge = min(min(f.x, 1.0 - f.x) * size.x, min(f.y, 1.0 - f.y) * size.y);
-  // Its crop as plants close by: between their rows the earth shows; and the balk round the plot, which is bare of
-  // them, is the ground as it was, a little worn.
+  int slot = FIELD_SLOTS - 1;
+  for (int i = 0; i < FIELD_SLOTS - 1; i++) {
+    if (h < uSlotColor[i].a) {
+      slot = i;
+      break;
+    }
+  }
+  vec3 col0 = uSlotColor[slot].rgb;
+  vec3 col1 = uSlotColor2[slot].rgb;
+  float cover = uSlotColor2[slot].a;
+  float state = uSlotMeta[slot].x;
+  float rowPitch = max(0.55, uSlotMeta[slot].y);
+  float slotPaddy = uSlotMeta[slot].w;
+
+  // Parcel base tone modulated by multi-octave crop vigor and soil moisture variation so no parcel is a flat rectangle.
+  float vigor = fbmM(p, 26.0) * 0.65 + noiseM(p + 17.0, 9.0) * 0.35;
+  float soilVar = fbmM(p + 53.0, 48.0);
+  vec3 ploughed = mix(vec3(0.31, 0.24, 0.16), vec3(0.24, 0.18, 0.12), plotNumber(cell, 9) * 0.6 + soilVar * 0.4);
+  vec3 c = mix(col0, col1, tone) * (0.84 + 0.32 * vigor);
+
+  // Active harvest: ~30% of ripe grain parcels show a crisp freshly reaped stubble swath along one end.
+  bool ripe = state < 0.5;
+  bool cropped = state < 3.5 || state > 5.5;
+  float harvestCut = 0.0;
+  if (ripe && plotNumber(cell, 11) < 0.32) {
+    float cutLine = 0.22 + 0.48 * plotNumber(cell, 13);
+    harvestCut = 1.0 - smoothstep(cutLine - 0.015, cutLine + 0.015, f.y);
+    vec3 stubble = vec3(0.45, 0.38, 0.22) * (0.88 + 0.24 * vigor);
+    c = mix(c, stubble, harvestCut);
+  }
+
+  float vis = 1.0 - smoothstep(1400.0, 11000.0, dist);
+  float plotEdge = min(min(f.x, 1.0 - f.x) * size.x, min(f.y, 1.0 - f.y) * size.y);
+  float edge = min(plotEdge, domainEdge);
+
+  // Close by, real standing crop rows take over; between rows tilled earth shows, while balks keep weathered turf.
   float rows = cropped && uCrops > 0.0 ? 1.0 - smoothstep(uCrops * 0.45, uCrops * 1.05, dist) : 0.0;
   float within = smoothstep(${(PLOT_LOOK.balk * 0.6).toFixed(3)}, ${(PLOT_LOOK.balk * 1.4).toFixed(3)}, edge);
-  tilled = rows * within;
-  c = mix(c, mix(wild, ploughed, 0.3), rows * (1.0 - within));
-  c = mix(c, ploughed * 1.06, tilled * 0.86);
-  // A balk or a bank between plots, darker, seen until the plots melt together.
-  c *= mix(1.0, 0.78 + 0.22 * smoothstep(0.4, 1.6, edge), vis);
-  float fur = (1.0 - smoothstep(60.0, 420.0, dist)) * smoothstep(3.0, 24.0, dist);
-  c *= 1.0 - 0.07 * fur * smoothstep(0.25, 0.75, abs(fract(across / ${PLOT_LOOK.furrow.toFixed(3)}) - 0.5) * 2.0);
-  // Water stands in a paddy within its banks, and shows the sky; among a crop's rows close by, the earth of a field
-  // that is only watered is wet and dark.
-  float wet = paddy * smoothstep(0.4, 1.4, edge);
-  c = mix(c, mix(vec3(0.16, 0.22, 0.24), c * 0.66, tilled * (1.0 - smoothstep(0.55, 0.9, paddy))), wet * 0.75);
-  tilled *= 1.0 - wet * smoothstep(0.55, 0.9, paddy);
+  tilled = rows * within * (1.0 - harvestCut * 0.45);
+  c = mix(c, mix(wild, ploughed, 0.32), rows * (1.0 - within));
+  c = mix(c, ploughed * 1.04, tilled * (0.88 - 0.12 * cover));
+
+  // Parcel headlands & balks, plus wider compacted farm tracks along macro-domain boundaries.
+  float balk = 1.0 - smoothstep(0.4, 1.85, plotEdge);
+  float track = 1.0 - smoothstep(0.6, 2.7, domainEdge);
+  vec3 balkCol = mix(wild * 0.78, ploughed * 0.88, 0.45);
+  vec3 trackCol = mix(ploughed * 1.18, wild * 0.85, 0.38);
+  c = mix(c, balkCol, balk * 0.48 * vis);
+  c = mix(c, trackCol, track * 0.68 * vis);
+
+  // Contour-aligned hillside terracing on moderate slopes (aligned with 3D fieldworks TERRACE_STEP).
+  float slope = sqrt(max(0.0, 1.0 - n.z * n.z));
+  float terraced = smoothstep(FIELD_SLOPE_TERRACE_LO, FIELD_SLOPE_TERRACE_HI, slope) * (1.0 - smoothstep(FIELD_SLOPE_CROP_LO, FIELD_SLOPE_CROP_HI, slope));
+  float terraceBump = 0.0;
+  if (terraced > 0.01) {
+    float tPhase = fract((p.z + (fbmM(p, 24.0) - 0.5) * 0.42) / TERRACE_STEP);
+    float riser = smoothstep(0.0, 0.13, tPhase) * (1.0 - smoothstep(0.14, 0.29, tPhase));
+    float lip = smoothstep(0.22, 0.34, tPhase) * (1.0 - smoothstep(0.34, 0.54, tPhase));
+    vec3 riserCol = mix(ploughed * 0.72, wild * 0.74, 0.52);
+    c = mix(c, riserCol, riser * terraced * 0.65 * vis);
+    c *= 1.0 + 0.08 * lip * terraced * vis;
+    terraceBump = (smoothstep(0.04, 0.24, tPhase) - 0.5) * terraced * 1.6;
+  }
+
+  // Long-range anisotropic furrow stripes and micro-relief (visible from 240 m out to 1400 m without aliasing).
+  float furFine = smoothstep(2.5, 16.0, dist) * (1.0 - smoothstep(140.0, 620.0, dist));
+  float furBroad = smoothstep(45.0, 140.0, dist) * (1.0 - smoothstep(450.0, 1450.0, dist));
+  float isFallow = state > 4.5 && state < 5.5 ? 1.0 : 0.0;
+  float furAmp = (1.0 - isFallow * 0.75) * smoothstep(0.6, 2.2, edge);
+  float fineWave = sin(across * 6.2831853 / rowPitch);
+  float broadWave = sin(across * 6.2831853 / (rowPitch * 4.5));
+  float furShade = (0.075 * furFine * fineWave + 0.048 * furBroad * broadWave) * furAmp;
+  c *= 1.0 - furShade;
+  fieldBump = (0.35 * furFine * fineWave + 0.22 * furBroad * broadWave) * furAmp + terraceBump;
+
+  // Flooded rice paddies and irrigated basins: darkened soil and glossy sky-reflecting water sheet inside banks.
+  float wet = max(paddy, slotPaddy * (state > 5.5 ? 0.92 : 0.25)) * smoothstep(0.45, 1.5, edge);
+  paddyWet = wet;
+  c = mix(c, mix(vec3(0.14, 0.21, 0.23), c * 0.64, tilled * (1.0 - smoothstep(0.5, 0.9, wet))), wet * 0.72);
+  tilled *= 1.0 - wet * smoothstep(0.5, 0.9, wet);
   return c;
 }
 // How much of the ground at a point people made: fields, pasture and yards, all generated.
@@ -2209,9 +2301,11 @@ float peopledShare(vec3 p) {
   vec4 f = texture(uFields, fuv);
   return max(f.r, max(f.g * 0.75, f.b));
 }
-vec3 peopled(vec3 c, vec3 p, float dist, out float yard, out float tilled) {
+vec3 peopled(vec3 c, vec3 p, vec3 n, float dist, out float yard, out float tilled, out float paddyWet, out float fieldBump) {
   yard = 0.0;
   tilled = 0.0;
+  paddyWet = 0.0;
+  fieldBump = 0.0;
   if (uFieldStyle.w < 0.5) return c;
   vec2 fuv = (p.xy - uFieldsBox.xy) / uFieldsBox.zw;
   if (fuv.x <= 0.0 || fuv.y <= 0.0 || fuv.x >= 1.0 || fuv.y >= 1.0) return c;
@@ -2222,12 +2316,19 @@ vec3 peopled(vec3 c, vec3 p, float dist, out float yard, out float tilled) {
   vec3 bareTone = mix(uTone[4], uTone[5], noiseM(p + 5.0, 24.0));
   vec3 grazed = mix(herbTone, bareTone, 0.3 + 0.6 * uShare.z) * 0.94;
   c = mix(c, grazed, f.g * 0.75);
-  c = mix(c, plots(c, p, dist, f.a, tilled), f.r);
-  tilled *= f.r;
-  // Among the houses the ground is trodden bare in patches, where feet and hooves go; between them it keeps what grew.
-  vec3 trodden = mix(vec3(0.36, 0.30, 0.22), vec3(0.46, 0.40, 0.30), noiseM(p, 6.0));
-  float worn = smoothstep(0.36, 0.6, noiseM(p, 11.0) * 0.55 + noiseM(p + 7.0, 3.0) * 0.45);
-  yard = f.b * (0.4 + 0.5 * worn);
+  // Cropland fades gracefully off steep cliffs and rocky ridges into hillside pasture/wilderness.
+  float slope = sqrt(max(0.0, 1.0 - n.z * n.z));
+  float cropShare = f.r * (1.0 - smoothstep(FIELD_SLOPE_CROP_LO, FIELD_SLOPE_CROP_HI, slope));
+  if (cropShare > 0.004) {
+    c = mix(c, plots(c, p, n, dist, f.a, tilled, paddyWet, fieldBump), cropShare);
+    tilled *= cropShare;
+    paddyWet *= cropShare;
+    fieldBump *= cropShare;
+  }
+  // Among the houses and along lanes the ground is trodden packed earth; green turf peeks through quiet corners.
+  vec3 trodden = mix(vec3(0.35, 0.29, 0.21), vec3(0.45, 0.39, 0.29), noiseM(p, 6.0));
+  float worn = smoothstep(0.32, 0.62, noiseM(p, 9.0) * 0.55 + noiseM(p + 7.0, 2.5) * 0.45);
+  yard = f.b * (0.45 + 0.48 * worn);
   return mix(c, trodden, yard);
 }
 // Bump by a height, from its derivatives across the screen (Mikkelsen 2010): a detail normal with no texture of its own.
@@ -2574,10 +2675,14 @@ vec3 wilderness(vec3 p, vec3 n, float dist, out float water, out float rough, ou
   matNone();
   gMat[M_SOIL] = 1.0;
   c = groundClose(c, p, n, dist, mask, slope, rough, nd);
-  // What people made of it, where the scene has people: a yard is trodden earth.
+  // What people made of it, where the scene has people: a yard is trodden earth; paddies gleam; terraces & furrows catch the light.
   float yard;
   float tilled;
-  c = peopled(c, p, dist, yard, tilled);
+  float paddyWet;
+  float fieldBump;
+  c = peopled(c, p, n, dist, yard, tilled, paddyWet, fieldBump);
+  if (paddyWet > 0.01) rough = mix(rough, 0.14, paddyWet);
+  if (abs(fieldBump) > 1e-4) nd = bumped(nd, p, fieldBump, 0.028 * (1.0 - smoothstep(220.0, 1400.0, dist)));
   // Between a crop's rows the ground is tilled earth, as a yard's is trodden.
   float bared = max(yard, tilled * 0.8 * (1.0 - yard));
   matKeep(1.0 - bared);
@@ -4026,3 +4131,86 @@ void main() {
   if (alpha < 0.36) discard;
   o = vec4(float(vEntity & 255), float((vEntity >> 8) & 255), 0.0, 255.0) / 255.0;
 }`;
+
+// ——— Hearth & kiln smoke plumes ———
+
+export const SMOKE_VS = /* glsl */ `#version 300 es
+precision highp float;
+// Quad corner (-1..1) and puff slot index (0..7)
+layout(location = 0) in vec2 aCorner;
+layout(location = 1) in float aPuff;
+// Per-emitter: (x, y, z, strength) and seed (0..1)
+layout(location = 2) in vec4 iSmoke;
+layout(location = 3) in float iSeed;
+uniform mat4 uViewProj;
+uniform vec3 uEye;
+uniform vec3 uCamRight;
+uniform vec3 uCamUp;
+uniform vec2 uWind;
+uniform float uClock;
+${DROP}
+out vec2 vLocal;
+out float vAge;
+out float vStrength;
+out float vSeed;
+out vec3 vPos;
+void main() {
+  float strength = iSmoke.w;
+  float speed = 0.055 + 0.025 * strength;
+  float age = fract(uClock * speed + aPuff / 8.0 + iSeed);
+  // Gently rising plume that bends downwind as it expands and dissipates naturally.
+  float rise = pow(age, 0.82) * (7.0 + 8.0 * strength);
+  vec2 drift = uWind * (age * (6.2 + 5.0 * age));
+  float curl = sin(age * 5.2 + iSeed * 19.0 + uClock * 0.35) * (0.45 + 1.8 * age);
+  vec3 center = iSmoke.xyz + vec3(drift.x + curl, drift.y - curl * 0.65, rise);
+  float radius = mix(0.75, 5.2 * (0.72 + 0.45 * strength), pow(age, 0.74));
+  vec3 world = center + (uCamRight * aCorner.x + uCamUp * aCorner.y) * radius;
+  vLocal = aCorner;
+  vAge = age;
+  vStrength = strength;
+  vSeed = iSeed + aPuff * 0.137;
+  vPos = world;
+  world.z -= drop(world.xy);
+  gl_Position = uViewProj * vec4(world - uEye, 1.0);
+}`;
+
+export const SMOKE_FS = /* glsl */ `#version 300 es
+precision highp float;
+precision highp sampler3D;
+in vec2 vLocal;
+in float vAge;
+in float vStrength;
+in float vSeed;
+in vec3 vPos;
+uniform vec3 uEye;
+uniform vec3 uSun;
+uniform vec3 uSunColor;
+uniform vec3 uSkyTop;
+uniform vec3 uSkyLow;
+uniform float uHazeK;
+uniform highp sampler3D uNoise;
+out vec4 o;
+void main() {
+  float r2 = dot(vLocal, vLocal);
+  if (r2 > 1.0) discard;
+  float radial = (1.0 - r2);
+  radial *= radial;
+  float wisp = texture(uNoise, vec3(vLocal * 0.32 + vec2(vSeed, vAge * 0.6), vSeed * 0.7 + vAge * 0.4)).r;
+  float detail = texture(uNoise, vec3(vLocal * 0.62 - vec2(vAge * 0.3, vSeed), vSeed * 1.3)).g;
+  float puff = radial * smoothstep(0.28, 0.80, wisp * 0.66 + detail * 0.34);
+  float life = smoothstep(0.0, 0.16, vAge) * (1.0 - smoothstep(0.35, 1.0, vAge));
+  // Cooking smoke is richest in morning/evening and soft pale wisps at midday; kilns stay vigorous.
+  float diurnal = mix(0.52, 1.0, 1.0 - smoothstep(0.08, 0.52, uSun.z));
+  float kilnBoost = smoothstep(0.85, 1.1, vStrength);
+  float dist = length(vPos - uEye);
+  float farFade = 1.0 - smoothstep(650.0, 2100.0, dist);
+  float alpha = puff * life * (0.14 + 0.14 * vStrength) * max(diurnal, 0.88 * kilnBoost) * farFade;
+  if (alpha < 0.004) discard;
+  // Soft sunlit smoke grey-blue-warm tint with gentle haze match.
+  vec3 lit = mix(uSkyLow * 0.72, uSunColor * 0.90 + uSkyTop * 0.35, 0.45 + 0.35 * clamp(vLocal.y * 0.5 + 0.5, 0.0, 1.0));
+  vec3 col = mix(lit * vec3(0.88, 0.89, 0.92), lit * vec3(0.75, 0.72, 0.68), kilnBoost * 0.45);
+  float ext = exp(-uHazeK * dist * 0.85);
+  col = mix(uSkyLow * 0.85, col, ext);
+  o = vec4(col, clamp(alpha, 0.0, 0.42));
+}`;
+

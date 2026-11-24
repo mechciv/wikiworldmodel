@@ -1,0 +1,25 @@
+id: src:deng-2015-baligang-rice-millet
+type: publication
+kind: measurement
+citation: >-
+  Deng, Z., Qin, L., Gao, Y., Weisskopf, A.R., Zhang, C. & Fuller, D.Q. (2015). From Early
+  Domesticated Rice of the Middle Yangtze Basin to Millet, Rice and Wheat Agriculture:
+  Archaeobotanical Macro-Remains from Baligang, Nanyang Basin, Central China (6700–500 BC).
+  PLOS ONE 10(10), e0139885.
+authors:
+  - "Deng, Z."
+  - "Qin, L."
+  - "Gao, Y."
+  - "Weisskopf, A.R."
+  - "Zhang, C."
+  - "Fuller, D.Q."
+published: 2015
+title: "From Early Domesticated Rice of the Middle Yangtze Basin to Millet, Rice and Wheat Agriculture: Archaeobotanical Macro-Remains from Baligang, Nanyang Basin, Central China (6700–500 BC)"
+container: "PLOS ONE 10(10), e0139885"
+doi: 10.1371/journal.pone.0139885
+url: https://pmc.ncbi.nlm.nih.gov/articles/PMC4604147/
+license: CC-BY-4.0
+license_note: Open-access article under CC BY; short quotes with credit.
+verified:
+  by: machine:antigravity
+  how: Full text fetched from PubMed Central (PMC4604147) and read; quotes verified by npm run world -- quote-check.

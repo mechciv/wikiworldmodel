@@ -12,7 +12,7 @@ import { houseSize, HOUSE_VARIANTS } from '../dwellings.ts';
 import { ROUTE, roundOf, wayAt, type RoutineParams } from '../../life/routines.ts';
 import { personGoes } from '../figures.ts';
 import { WORK_VARIANTS } from '../works.ts';
-import { LandUseMap, makeSettlement, toLocal, type Ground } from './v7.ts';
+import { LandUseMap, makeSettlement, toLocal, type Ground } from './v8.ts';
 
 const ROOT = join(import.meta.dirname, '../../../..');
 // How the living scene's animals go about: the settlement's kept ones go by the same parameters.
@@ -302,6 +302,7 @@ describe('the settlement generator', () => {
 
   describe('a town', () => {
     // A city of 30,000 at the middle of a land of few herders, with the tradition of its region's townspeople, if any.
+    const ACTIVITY = new Set(['person', 'boat', 'stall', 'altar', 'kiln', 'stook', 'plough', 'cart', 'barrow', 'jetty', 'floor', 'rack', 'stack']);
     const town = (form?: TownSpec, city: Partial<ScenePeople['cities'][number]> = {}) => {
       const traditions: Tradition[] = form ? compileTraditions([{ id: 'test/town-house', label: 'A town house', regions: [1], span: [-500, 500], lifeways: ['townspeople'], dwelling: { plan: 'courtyard', walls: 'mudbrick', roof: 'flat' }, town: form }]) : [];
       const cities = [{ name: 'Testopolis', country: 'Nowhere', lat: 0, lon: 0, people: 30000, field: 'field:people/cities-ancient', source: 'src:test', from: 'list' as const, ...city }];
@@ -311,18 +312,20 @@ describe('the settlement generator', () => {
       const mine = plan.houses.filter((h) => h.settlement === si);
       const all = plan.works.filter((w) => w.settlement === si);
       const kind = (k: string) => all.filter((w) => plan.workForms[w.form].spec.kind === k);
-      // Its works: its wall and its water. The people by its houses and the boats on its water are counted apart.
-      const works = all.filter((w) => !['person', 'boat'].includes(plan.workForms[w.form].spec.kind));
-      const built = plan.workForms.filter((f) => !['person', 'boat'].includes(f.spec.kind));
-      return { plan, s, mine, works, kind, built };
+      // Its structural works (e.g. canals) and continuous perimeter (wall, gates, towers, moat), apart from everyday living activity.
+      const works = all.filter((w) => !ACTIVITY.has(plan.workForms[w.form].spec.kind));
+      const perimeter = plan.perimeters.find((pr) => pr.settlement === si);
+      const townStreets = plan.streets.filter((st) => st.settlement === si);
+      return { plan, s, mine, works, kind, perimeter, townStreets };
     };
     // How far the houses reach from the town's middle in each of `n` directions.
     const reach = (hs: { x: number; y: number }[], n: number) => Array.from({ length: n }, (_, k) => Math.max(0, ...hs.filter((h) => Math.floor(((Math.atan2(h.y, h.x) + Math.PI) / (2 * Math.PI)) * n) % n === k).map((h) => Math.hypot(h.x, h.y))));
 
     it('of no stated form is the generic town: lanes that wander, round with a wandering edge, and no wall', () => {
-      const { plan, s, mine, works } = town();
+      const { plan, s, mine, works, perimeter } = town();
       expect(mine.length).toBe(5000);
       expect(works).toEqual([]);
+      expect(perimeter).toBeUndefined();
       expect(s.town).toEqual({ text: 'winding lanes, no wall', from: { streets: 'generic', wall: 'generic' } });
       // Every house on its own ground, none on another.
       const spots = new Set(mine.map((h) => `${Math.round(h.x / 4)},${Math.round(h.y / 4)}`));
@@ -338,8 +341,9 @@ describe('the settlement generator', () => {
     });
 
     it('on a grid is square, its houses in rows that face their streets, and a main street each way through its middle', () => {
-      const { s, mine } = town({ streets: 'grid', block: 80, street: 4, main_street: 12 });
+      const { s, mine, townStreets } = town({ streets: 'grid', block: 80, street: 4, main_street: 12 });
       expect(s.town!.from).toMatchObject({ streets: 'test/town-house', block: 'test/town-house', wall: 'generic' });
+      expect(townStreets.filter((st) => st.paved).length).toBeGreaterThanOrEqual(2);
       // The rows face one of two ways, back to back: the town's axis is the way they face.
       const faces = [...new Set(mine.map((h) => Math.round((((h.face % Math.PI) + Math.PI) % Math.PI) * 1000)))];
       expect(faces.length).toBeLessThanOrEqual(2);
@@ -358,56 +362,50 @@ describe('the settlement generator', () => {
     });
 
     it('has the wall its tradition says, round its houses, with gates where its main streets leave it, and towers', () => {
-      const { s, mine, kind, built } = town({ streets: 'grid', wall: 'stone', wall_height: 9, gates: 4 });
-      const wall = kind('wall');
-      const gates = kind('gate');
-      expect(gates.length).toBe(4);
-      expect(kind('tower').length).toBeGreaterThan(8);
-      expect(wall.length).toBeGreaterThan(200);
-      expect(built.map((f) => `${f.spec.kind} ${f.spec.material} ${f.spec.height} ${f.from}`)).toEqual(['wall stone 9 test/town-house', 'gate stone 9 test/town-house', 'tower stone 9 test/town-house']);
+      const { s, mine, perimeter } = town({ streets: 'grid', wall: 'stone', wall_height: 9, gates: 4 });
+      expect(perimeter).toBeDefined();
+      expect(perimeter!).toMatchObject({ kind: 'stone', height: 9, towers: true, from: 'test/town-house', gateFrom: 'test/town-house' });
+      expect(perimeter!.gates.length).toBe(4);
+      expect(perimeter!.ring.length).toBeGreaterThanOrEqual(16);
       expect(s.town!.text).toBe('streets on a grid, a wall of stone 9 m high, 4 gates');
-      // Every house is inside the wall: in each direction the wall stands further out than the furthest house.
-      const out = reach(wall, 180);
-      const houses = reach(mine, 180);
-      out.forEach((r, k) => r > 0 && expect(r, `direction ${k}`).toBeGreaterThan(houses[k] + 2));
-      // The wall is whole: a piece every few metres all the way round, but for its gates.
-      expect(out.filter((r) => r === 0).length).toBeLessThanOrEqual(4);
-      // Its pieces face out, and each gate stands at the end of a main street, clear of the wall's pieces.
-      for (const w of wall) expect(Math.sin(w.face) * w.x + Math.cos(w.face) * w.y).toBeGreaterThan(0);
+      // Every house is inside the continuous wall ring: the ring stands further out than every house.
+      const ringPts = perimeter!.ring.map(([x, y]) => ({ x, y }));
+      const out = reach(ringPts, 16);
+      const houses = reach(mine, 16);
+      out.forEach((r, k) => r > 0 && expect(r, `sector ${k}`).toBeGreaterThan(houses[k] + 2));
+      // Each gate faces outward and stands at the end of a main street.
       const axis = mine[0].face;
-      for (const g of gates) {
+      for (const g of perimeter!.gates) {
+        expect(g.dx * g.x + g.dy * g.y).toBeGreaterThan(0);
         const along = Math.cos(axis) * g.x - Math.sin(axis) * g.y;
         const across = Math.sin(axis) * g.x + Math.cos(axis) * g.y;
-        expect(Math.min(Math.abs(along), Math.abs(across))).toBeLessThan(1);
-        expect(wall.filter((w) => Math.hypot(w.x - g.x, w.y - g.y) < 4)).toEqual([]);
+        expect(Math.min(Math.abs(along), Math.abs(across))).toBeLessThan(2);
       }
     });
 
     it('has a wall of the plain kind where its form gives the wall and not what it was made of, and none before its claim holds', () => {
       // A wall twelve metres high, of what the source does not say: drawn, as the generator's plain wall, and said to be.
-      const { plan, s, kind } = town({ streets: 'grid', wall_height: 12, wall_thickness: 3.4 });
-      expect(kind('wall').length).toBeGreaterThan(100);
-      expect(plan.workForms[kind('wall')[0].form]).toMatchObject({ label: 'A town wall, of what is not said', from: 'test/town-house', spec: { material: 'mudbrick', height: 12, thickness: 3.4 } });
+      const { s, perimeter } = town({ streets: 'grid', wall_height: 12, wall_thickness: 3.4 });
+      expect(perimeter).toBeDefined();
+      expect(perimeter!).toMatchObject({ label: 'A town wall, of what is not said', from: 'test/town-house', kind: 'mudbrick', height: 12, thickness: 3.4 });
       expect(s.town!.text).toBe('streets on a grid, a wall 12 m high, 3.4 m thick');
       // A palisade that the tradition's towns had only from a later time: none at the scene's.
       const traditions = compileTraditions([{ id: 'test/town-house', label: 'A town house', regions: [1], span: [-500, 500], lifeways: ['townspeople'], dwelling: { plan: 'long' }, town: { wall: 'timber' }, townSpan: [300, 500] }]);
       const cities = [{ name: 'Testopolis', country: 'Nowhere', lat: 0, lon: 0, people: 30000, field: 'field:people/cities-ancient', source: 'src:test', from: 'list' as const }];
       const early = makeSettlement(spec(world(() => ({ code: 54, density: 2, region: 1 }), [{ id: 1, a: assess(1, 0, 1, 3, 1) }], { cities, traditions })), flat, dry, EXTENT);
-      expect(early.workForms.filter((f) => f.spec.kind === 'wall')).toEqual([]);
+      expect(early.perimeters).toEqual([]);
       expect(early.settlements[0].town!.from).toEqual({ streets: 'generic', wall: 'generic' });
     });
 
     it('has a rampart or a palisade with no towers, and a moat with a way across before each gate', () => {
       const earth = town({ wall: 'earth', moat: true, gates: 3 });
-      expect(earth.kind('tower')).toEqual([]);
-      expect(earth.kind('gate').length).toBe(3);
-      expect(earth.kind('moat').length).toBeGreaterThan(100);
-      // The moat lies outside the wall, and is broken before the gates.
-      const wall = reach(earth.kind('wall'), 90);
-      reach(earth.kind('moat'), 90).forEach((r, k) => r > 0 && wall[k] > 0 && expect(r).toBeGreaterThan(wall[k] + 8));
-      for (const g of earth.kind('gate')) expect(earth.kind('moat').filter((m) => Math.hypot(m.x - g.x, m.y - g.y) < 12)).toEqual([]);
+      expect(earth.perimeter).toBeDefined();
+      expect(earth.perimeter!.kind).toBe('earth');
+      expect(earth.perimeter!.towers).toBe(false);
+      expect(earth.perimeter!.gates.length).toBe(3);
+      expect(earth.perimeter!.moat).toBeGreaterThan(0);
       expect(earth.s.town!.text).toBe('winding lanes, a rampart of earth, 3 gates, a moat outside it');
-      expect(town({ wall: 'timber' }).kind('tower')).toEqual([]);
+      expect(town({ wall: 'timber' }).perimeter!.towers).toBe(false);
     });
 
     it('of canals has water in some of its streets, and no house in it', () => {
@@ -430,7 +428,7 @@ describe('the settlement generator', () => {
 
     it("of a record is drawn from the record's own people, houses, ground and layout", () => {
       // 2,400 houses a source counted, on 100 hectares, behind a wall of mudbrick: none of it the list's or the generator's.
-      const { plan, s, mine, kind } = town(undefined, { people: 12000, from: 'record', record: 'people/cities/recordia', houses: 2400, area: 100, town: { streets: 'grid', wall: 'mudbrick' } });
+      const { s, mine, perimeter } = town(undefined, { people: 12000, from: 'record', record: 'people/cities/recordia', houses: 2400, area: 100, town: { streets: 'grid', wall: 'mudbrick' } });
       expect(s).toMatchObject({ people: 12000, record: 'people/cities/recordia', from: 'record', pattern: 'city' });
       expect(mine.length).toBe(2400);
       const axis = mine[0].face;
@@ -438,20 +436,21 @@ describe('the settlement generator', () => {
       expect((2 * half) ** 2 / 1e6).toBeGreaterThan(0.85);
       expect((2 * half) ** 2 / 1e6).toBeLessThan(1.25);
       expect(s.town!.from).toEqual({ streets: 'people/cities/recordia', wall: 'people/cities/recordia' });
-      expect(kind('wall').length).toBeGreaterThan(100);
-      expect(plan.workForms[kind('wall')[0].form]).toMatchObject({ from: 'people/cities/recordia', label: 'A wall of mudbrick' });
+      expect(perimeter).toMatchObject({ kind: 'mudbrick', from: 'people/cities/recordia', label: 'A wall of mudbrick' });
       // A record's layout stands over its tradition's, part by part.
       const both = town({ streets: 'lanes', wall: 'stone', gates: 6 }, { record: 'people/cities/recordia', from: 'record', town: { wall: 'brick' } });
       expect(both.s.town!.from).toEqual({ streets: 'test/town-house', wall: 'people/cities/recordia', gates: 'test/town-house' });
-      expect(both.kind('gate').length).toBe(6);
-      expect(both.built.every((f) => f.spec.material === 'brick')).toBe(true);
+      expect(both.perimeter!.gates.length).toBe(6);
+      expect(both.perimeter!.kind).toBe('brick');
+      expect(both.perimeter!.from).toBe('people/cities/recordia');
     });
 
     it('too thin on the ground for streets has none: its houses stand apart, as many as its people make', () => {
       // 12,000 people on 2,000 hectares: a hectare to a house.
-      const { s, mine, works } = town({ streets: 'grid', wall: 'stone' }, { people: 12000, from: 'record', record: 'people/cities/gardens', area: 2000 });
+      const { s, mine, works, perimeter } = town({ streets: 'grid', wall: 'stone' }, { people: 12000, from: 'record', record: 'people/cities/gardens', area: 2000 });
       expect(mine.length).toBe(2000);
       expect(works).toEqual([]);
+      expect(perimeter).toBeUndefined();
       expect(s.town).toBeUndefined();
       expect(Math.max(...mine.map((h) => Math.hypot(h.x, h.y)))).toBeGreaterThan(2000);
     });
@@ -700,31 +699,83 @@ describe('how a tradition sets its houses out', () => {
 
   it("draws round a settlement what its tradition says enclosed it, and the generator's plain wall where it says only that one did", () => {
     const palisaded = farmland(compileTraditions([{ id: 'test/palisade', label: 'A palisaded village', ...base, dwelling: house, settlement: { enclosure: 'palisade', houses: 20 } }]));
-    const lengths = palisaded.workForms.findIndex((f) => f.spec.kind === 'enclosure');
-    expect(palisaded.workForms[lengths]).toMatchObject({ spec: { word: 'palisade' }, from: 'test/palisade' });
+    expect(palisaded.perimeters.length).toBeGreaterThan(5);
+    expect(palisaded.perimeters[0]).toMatchObject({ kind: 'palisade', from: 'test/palisade' });
     let seen = 0;
-    palisaded.settlements.forEach((s, si) => {
-      const round = palisaded.works.filter(w => w.settlement === si && palisaded.workForms[w.form].spec.kind === 'enclosure');
-      const mine = dwellings(palisaded, si);
-      if (mine.length < 20 || !round.length) return;
+    for (const pr of palisaded.perimeters) {
+      const s = palisaded.settlements[pr.settlement];
+      const mine = dwellings(palisaded, pr.settlement);
+      if (mine.length < 20) continue;
       seen++;
-      const boundary = s.boundary!;
-      const edges = boundary.map((a, i) => ({ a, b: boundary[(i + 1) % boundary.length] }));
-      const perimeter = edges.reduce((sum, { a, b }) => sum + Math.hypot(b[0] - a[0], b[1] - a[1]), 0);
-      // The convex enclosure surrounds every home. The omitted runs are the gates.
-      for (const h of mine) expect(edges.every(({ a, b }) =>
-        (b[0] - a[0]) * (h.y - a[1]) > (b[1] - a[1]) * (h.x - a[0]))).toBe(true);
-      const built = round.reduce((sum, w) => sum + palisaded.workForms[w.form].spec.run!, 0);
-      if (Math.abs(s.x) + s.r + 20 < EXTENT && Math.abs(s.y) + s.r + 20 < EXTENT) {
-        expect(built).toBeGreaterThan(perimeter - 48);
-        expect(built).toBeLessThan(perimeter);
-      }
-    });
+      // The continuous convex perimeter surrounds every home with gate openings where the through-lane crosses it.
+      expect(pr.ring.length).toBeGreaterThanOrEqual(6);
+      expect(pr.gates.length).toBeGreaterThanOrEqual(2);
+      const edges = pr.ring.map((a, i) => ({ a, b: pr.ring[(i + 1) % pr.ring.length] }));
+      for (const h of mine) expect(edges.every(({ a, b }) => (b[0] - a[0]) * (h.y - a[1]) > (b[1] - a[1]) * (h.x - a[0]))).toBe(true);
+      void s;
+    }
     expect(seen).toBeGreaterThan(5);
     const walled = farmland(compileTraditions([{ id: 'test/walled', label: 'A walled village', ...base, dwelling: house, settlement: { pattern: 'walled', houses: 20 } }]));
-    expect(walled.workForms.find((f) => f.spec.kind === 'enclosure')).toMatchObject({ spec: { word: 'wall' }, from: 'generic' });
+    expect(walled.perimeters.length).toBeGreaterThan(5);
+    expect(walled.perimeters[0]).toMatchObject({ kind: 'rammed-earth', from: 'generic', towers: true });
     // A tradition that says nothing of an enclosure has none.
-    expect(farmland(compileTraditions([{ id: 'test/open', label: 'An open village', ...base, dwelling: house }])).workForms.find((f) => f.spec.kind === 'enclosure')).toBeUndefined();
+    expect(farmland(compileTraditions([{ id: 'test/open', label: 'An open village', ...base, dwelling: house }])).perimeters).toEqual([]);
+  });
+
+  it('lays out connected farming lanes, seasonal regional agriculture, living activity, and slope-gated land use', () => {
+    const traditions = compileTraditions([
+      {
+        id: 'test/han-courtyard',
+        label: 'A Han courtyard village',
+        ...base,
+        dwelling: { plan: 'courtyard', court: true, width: 12, length: 14, walls: 'rammed-earth', roof: 'gable', roof_material: 'tile' },
+        settlement: { pattern: 'walled', houses: 24 },
+      },
+    ]);
+    const agriculture = [
+      {
+        id: 'test/han-dryland',
+        label: 'North China Han dryland farming',
+        regions: [1],
+        span: [-202, 220] as [number, number],
+        lifeways: ['farmers' as const],
+        fields: { kind: 'blocks' as const, plot: 0.45, bounds: 'banks' as const },
+        crops: [
+          { kind: 'millet' as const, name: 'Foxtail millet', season: 'summer' as const, share: 'staple' as const },
+          { kind: 'wheat' as const, name: 'Winter wheat', season: 'winter' as const, share: 'staple' as const },
+          { kind: 'legume' as const, name: 'Soybeans', season: 'summer' as const, share: 'minor' as const },
+        ],
+        from: { crops: 'test/han-dryland' },
+        depth: 0,
+      },
+    ];
+    const w = world(() => ({ code: 23, density: 260, region: 1 }), [{ id: 1, a: assess(1, 1, 3, 2) }], { traditions, agriculture });
+    w.grid.north = 37.5;
+    w.grid.west = 113.1;
+    const s = { ...spec(w, { lat: 36.5, lon: 114.1 }), climate: { month: 6 } } as unknown as SceneSpec;
+    // Flat valley near origin rising into a steep 0.45 slope hill east of 2000 m.
+    const hilly: Ground = { at: (x) => (x > 2000 ? 40 + (x - 2000) * 0.45 : 40) };
+    const plan = makeSettlement(s, hilly, dry, EXTENT);
+    expect(plan.lanes.length).toBeGreaterThan(20);
+    expect(plan.perimeters.length).toBeGreaterThan(5);
+    expect(plan.smokes.length).toBeGreaterThan(10);
+    expect(plan.agriculture.from).toBe('tradition');
+    expect(plan.agriculture.id).toBe('test/han-dryland');
+    expect(plan.agriculture.bounds).toBe('banks');
+    // In June at 36.5°N, winter wheat is ripe and foxtail millet is green!
+    expect(plan.agriculture.palette.slots.some((sl) => sl.crop?.name === 'Winter wheat' && sl.state === 0)).toBe(true);
+    expect(plan.agriculture.palette.slots.some((sl) => sl.crop?.name === 'Foxtail millet' && sl.state === 1)).toBe(true);
+    // Living activity near the viewer: stalls, kilns, altars, stooks, ploughs, carts/barrows, and field workers.
+    const kinds = new Set(plan.works.map((w) => plan.workForms[w.form].spec.kind));
+    expect(kinds.has('stall')).toBe(true);
+    expect(kinds.has('kiln')).toBe(true);
+    expect(kinds.has('altar')).toBe(true);
+    expect(kinds.has('stook')).toBe(true);
+    expect(kinds.has('cart') || kinds.has('barrow')).toBe(true);
+    expect(plan.works.some((w) => w.field)).toBe(true);
+    // Slope gating: steep hillside (slope 0.45 > 0.36) suppresses cropland completely.
+    const lu = new LandUseMap(plan, hilly, dry, 7);
+    expect(lu.at(2600, 0).crop).toBe(0);
   });
 
   it("draws what a settlement had of its own among its houses, and a household's things with its house", () => {

@@ -7,9 +7,9 @@
 #               names: […] } names the rows that belong to the subject, { from: src:…,
 #               elements: […] } the elements of a snapshot; a form says how a generator should
 #               raise a structure: { type: temple, order: corinthian, … }, core/city.ts)
-#               | dwelling | settlement-form | field-system | town-form | lifeway | outbuildings (a building
-#               tradition's house, how its houses stood together, its fields, its towns, whom it housed, and what
-#               stood by its houses: core/dwelling.ts)
+#               | dwelling | settlement-form | field-system | town-form | lifeway | outbuildings | crops (a building
+#               or agricultural tradition's house, how its houses stood together, its fields, its towns, whom it housed,
+#               what stood by its houses, and which crops it grew: core/dwelling.ts)
 #               | taxa (a list of taxon records, as the animals a husbandry tradition kept)
 #   unit        for quantities: values are written in this unit
 #   values      for strings: the values allowed, each with what it means
@@ -486,10 +486,10 @@ properties:
   field_system:
     type: field-system
     interp: step
-    applies_to: [tradition/building]
+    applies_to: [tradition/building, tradition/agriculture]
     description: >-
-      The fields around a building tradition's settlements: their kind (strips, terraces, paddies, swidden plots…),
-      the size of a plot in hectares, and what divided them (core/dwelling.ts).
+      The fields around a building or agricultural tradition's settlements: their kind (strips, terraces, paddies,
+      swidden plots…), the size of a plot in hectares, and what divided them (core/dwelling.ts).
   town_form:
     type: town-form
     interp: step
@@ -508,8 +508,9 @@ properties:
       Whose a tradition was: one or more of the ways of life the model of how people lived tells apart
       (core/dwelling.ts): foragers, herders, shifting-cultivators, farmers, townspeople. A building tradition's
       house is drawn only for those: a herder's tent for the camps of herders, not for the farmers of the same
-      region; and a husbandry tradition's animals only among them. A tradition that does not say takes the answer of
-      the one it is a member of; one that has none is drawn for no one, and the validator says so.
+      region; a husbandry tradition's animals and an agricultural tradition's crops only among them. A tradition
+      that does not say takes the answer of the one it is a member of; one that has none is drawn for no one,
+      and the validator says so.
   prevalence:
     type: string
     interp: step
@@ -534,6 +535,16 @@ properties:
       The animals a husbandry tradition's people kept, as a list of taxon records: domestic cattle, sheep, horses.
       The settlement generator draws them, each with its taxon's body and size, in the pastures and about the yards
       of the tradition's people. How many there were is not read from it: that is the generator's, and says so.
+  crops:
+    type: crops
+    interp: step
+    applies_to: [tradition/agriculture]
+    description: >-
+      The crops an agricultural tradition's people grew, as a list of crop entries (core/dwelling.ts): each naming
+      its crop kind (`kind`: millet, wheat, barley, rice, sorghum, maize, soybean, legume, hemp, orchard…), an
+      optional name, an optional `taxon` record, its growing `season` (summer, winter, perennial, year-round) and
+      its relative `share` (staple, secondary, minor). Which plot holds which crop and its growth in a month are
+      the generator's, and say so.
   extent:
     type: geometry
     interp: step

@@ -1,0 +1,64 @@
+id: people/agriculture/mesoamerican-milpa
+kind: tradition/agriculture
+summary: >-
+  The Mesoamerican milpa intercropping system of maize, common beans, and squash, complete once domesticated beans joined maize and squash in the first millennium BCE.
+author: machine:antigravity
+claims:
+  name:
+    prop: name
+    value: { en: "Mesoamerican milpa (maize, beans, and squash)" }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: { lo: 2390 BP, hi: 2210 BP }
+    source:
+      - ref: src:kennett-2023-el-gigante
+        loc: "Introduction"
+        quote: "Common beans (Phaseolus vulgaris) from Coxcatlán Cave (Tehuacán) date between 2,390–2,210 cal BP"
+      - ref: src:kennett-2023-el-gigante
+        loc: "Abstract"
+        quote: "Tree fruits and squash appeared early in the occupational sequence (~11,000 cal BP) with most other field crops appearing later in time (e.g., maize at ~4,400 cal BP; beans at ~2,200 cal BP)."
+    method: excavation
+    note: >-
+      Dated to the appearance of domesticated common beans completing the classic maize–bean–squash milpa triad; squash and maize were cultivated far earlier on their own.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in kennett-2023-el-gigante.txt (sha256 c1feae5e9e9128d3), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["23", "24"] }
+    source:
+      - ref: src:lopez-ridaura-2021-milpa
+        loc: "Introduction"
+        quote: "In Mesoamerica, its center of origin and diversity2,3 farmers have traditionally intercropped maize with several other species in what is known as the “milpa” or “three sisters” system4,5."
+    method: editorial
+    note: >-
+      Editorial mapping of Mesoamerica onto ArchaeoGLOBE regions 23 (Central Mexico, holding Tehuacán) and 24 (Southern Mexico, Belize, Guatemala and El Salvador, bordering El Gigante in western Honduras).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in lopez-ridaura-2021-milpa.txt (sha256 77baf42322d9a299), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
+  lifeway:
+    prop: lifeway
+    value: [farmers, shifting-cultivators]
+    source:
+      - ref: src:lopez-ridaura-2021-milpa
+        loc: "Introduction"
+        quote: "Archaeological and historical evidence identifies the milpa as the backbone of agriculture in pre-Columbian times"
+    method: editorial
+    note: >-
+      Both permanent and rotational milpa farmers across Mesoamerica.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in lopez-ridaura-2021-milpa.txt (sha256 77baf42322d9a299), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
+  crops:
+    prop: crops
+    value:
+      - { kind: maize, name: "Maize", season: summer, share: staple }
+      - { kind: legume, name: "Common beans", season: summer, share: secondary }
+      - { kind: squash, name: "Squash", season: summer, share: minor }
+    source:
+      - ref: src:lopez-ridaura-2021-milpa
+        loc: "Introduction"
+        quote: "The milpa typically comprises maize intercropped with common beans (Phaseolus spp.) and squashes (Cucurbita spp.)"
+    method: compilation
+    note: >-
+      Maize as the main crop intercropped with common beans and squash. Because the renderer currently assigns one primary crop stand per parcel, the three milpa crops are weighted across neighbouring parcels as an editorial approximation.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in lopez-ridaura-2021-milpa.txt (sha256 77baf42322d9a299), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }

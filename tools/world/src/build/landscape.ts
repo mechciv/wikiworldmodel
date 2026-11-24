@@ -13,10 +13,10 @@ import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { unzipSync } from 'fflate';
 import { decodeTile, encodeTile } from '../../../../core/container.ts';
-import { compileHusbandry, compileTraditions, prevalenceOf, traditionAt, traditionsFor, type PrevalenceWord, type DwellingSpec, type FieldSpec, type Husbandry, type HusbandryInput, type LifewayWord, type OutbuildingSpec, type SettlementSpec, type TownSpec, type Tradition, type TraditionInput } from '../../../../core/dwelling.ts';
+import { compileAgriculture, compileHusbandry, compileTraditions, prevalenceOf, traditionAt, traditionsFor, type Agriculture, type AgricultureInput, type CropEntry, type PrevalenceWord, type DwellingSpec, type FieldSpec, type Husbandry, type HusbandryInput, type LifewayWord, type OutbuildingSpec, type SettlementSpec, type TownSpec, type Tradition, type TraditionInput } from '../../../../core/dwelling.ts';
 import { canonicalForm, type Form } from '../../../../core/form.ts';
 import type { LivingTaxon } from '../../../../core/scene.ts';
-import { GENERATOR as SETTLEMENT, VERSION as SETTLEMENT_VERSION } from '../../../../world/generators/people/settlement/v7.ts';
+import { GENERATOR as SETTLEMENT, VERSION as SETTLEMENT_VERSION } from '../../../../world/generators/people/settlement/v8.ts';
 import { FormTree } from '../forms.ts';
 import type { LandscapeIndex, TraditionsFile } from '../../../../core/landscape.ts';
 export type { LandscapeIndex, TraditionsFile };
@@ -484,6 +484,36 @@ export function husbandryInputs(s: Solved, regionsSource: string): HusbandryInpu
   return out;
 }
 
+// ——— Agriculture ———
+
+/** Each agricultural tradition the world records, with its own claims, before inheritance. */
+export function agricultureInputs(s: Solved, regionsSource: string): AgricultureInput[] {
+  const out: AgricultureInput[] = [];
+  for (const e of s.world.entities) {
+    if (e.kind !== 'tradition/agriculture') continue;
+    const value = <T>(prop: string): T | undefined => claimOf(s, e.id, prop)?.value as T | undefined;
+    const extent = value<{ from: string; names: string[] }>('extent');
+    const regions = extent && extent.from === regionsSource ? extent.names.map(Number).filter((n) => Number.isInteger(n) && n > 0) : [];
+    const { time } = subjectTime(s, e.id);
+    const best = (x: { best: number | null; lo: number; hi: number }, or: number) => (x.best !== null && Number.isFinite(x.best) ? x.best : Number.isFinite(or) ? or : NaN);
+    const start = best(time.start, time.start.lo);
+    const end = time.endUnknown ? best(time.end, time.end.hi) : best(time.end, Infinity);
+    const name = value<Record<string, string>>('name');
+    const parent = e.relations.find((r) => r.rel === 'member-of')?.to;
+    out.push({
+      id: e.id,
+      label: name?.en ?? Object.values(name ?? {})[0] ?? e.id,
+      ...(parent ? { parent } : {}),
+      regions,
+      span: [Number.isFinite(start) ? start : -1e9, Number.isFinite(end) ? end : 1e9],
+      ...(value<LifewayWord[]>('lifeway') ? { lifeways: value<LifewayWord[]>('lifeway') } : {}),
+      ...(value<CropEntry[]>('crops') ? { crops: value<CropEntry[]>('crops') } : {}),
+      ...(value<FieldSpec>('field_system') ? { fields: value<FieldSpec>('field_system') } : {}),
+    });
+  }
+  return out;
+}
+
 /** To three figures, as the atlas rounds a size. */
 const figures3 = (x: number): number => {
   let k = 1;
@@ -630,6 +660,7 @@ export interface LandscapeBuilt {
   assessments: AssessmentsFile;
   traditions: Tradition[];
   husbandry: Husbandry[];
+  agriculture: Agriculture[];
   cities: CitiesFile;
   /** the span the anthromes hold, and the assessments' */
   span: [number, number];
@@ -744,7 +775,9 @@ export async function buildLandscape(s: Solved, log: (s: string) => void): Promi
   // The animals people kept: the husbandry traditions, and each animal they name with its body and size.
   const husbandry = compileHusbandry(husbandryInputs(s, regionsId));
   const animals = keptAnimals(w, husbandry.flatMap((h) => h.animals), log);
-  files.set('people/traditions.json', stableStringify({ format: 'lightworld-traditions@1', regions: regionsId, traditions, ...(husbandry.length ? { husbandry, kept: animals.kept, forms: animals.forms } : {}) } satisfies TraditionsFile));
+  // The crops people grew: the agricultural traditions.
+  const agriculture = compileAgriculture(agricultureInputs(s, regionsId));
+  files.set('people/traditions.json', stableStringify({ format: 'lightworld-traditions@1', regions: regionsId, traditions, ...(husbandry.length ? { husbandry, kept: animals.kept, forms: animals.forms } : {}), ...(agriculture.length ? { agriculture } : {}) } satisfies TraditionsFile));
   const globe = decodeTile<AnthromeTileHeader>(toBuffer(files.get('people/anthromes/globe.lwt') as Uint8Array));
   const steps = globe.header.steps;
   const tiles = [...files.keys()].filter((k) => /^people\/anthromes\/-?\d+_-?\d+\.lwt$/.test(k)).map((k) => k.slice('people/anthromes/'.length, -4)).sort();
@@ -770,7 +803,7 @@ export async function buildLandscape(s: Solved, log: (s: string) => void): Promi
     reach_km: (gen?.params as { cities?: { reach_km?: number } } | undefined)?.cities?.reach_km ?? 30,
   };
   files.set('people/landscape.json', stableStringify(index));
-  log(`landscape  ${tiles.length} tiles of 5′ cells over ${steps.length} steps, ${assessments.regions.length} regions assessed at ${assessments.slices.length} times, ${cities.cities.length} cities of the lists and ${cities.records.length} with records, ${traditions.length} building traditions, ${husbandry.length} husbandry traditions keeping ${animals.kept.length} kinds of animal`);
+  log(`landscape  ${tiles.length} tiles of 5′ cells over ${steps.length} steps, ${assessments.regions.length} regions assessed at ${assessments.slices.length} times, ${cities.cities.length} cities of the lists and ${cities.records.length} with records, ${traditions.length} building traditions, ${husbandry.length} husbandry traditions keeping ${animals.kept.length} kinds of animal, ${agriculture.length} agricultural traditions`);
   // Lookups at a place and time, from the tiles as the viewer reads them.
   const decoded = new Map<string, AnthromeTile>();
   const tileOf = (name: string): AnthromeTile | undefined => {
@@ -793,7 +826,7 @@ export async function buildLandscape(s: Solved, log: (s: string) => void): Promi
   };
   const span: [number, number] = [steps[0], steps.at(-1)!];
   const assessed: [number, number] = [assessments.slices[0].year, assessments.slices.at(-1)!.year];
-  return { files, index, assessments, traditions, husbandry, cities, span, assessed, at, tile: tileOf, classes };
+  return { files, index, assessments, traditions, husbandry, agriculture, cities, span, assessed, at, tile: tileOf, classes };
 }
 
 const toBuffer = (u: Uint8Array): ArrayBuffer => u.buffer.slice(u.byteOffset, u.byteOffset + u.byteLength) as ArrayBuffer;

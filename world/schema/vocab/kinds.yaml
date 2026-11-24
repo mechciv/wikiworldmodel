@@ -223,6 +223,12 @@ kinds:
           A way of keeping animals, recognized across a region over a span of time: which animals its people kept
           (`livestock`), whose way it was (`lifeway`), and where and when it held. The settlement generator draws
           those animals in the pastures and about the yards of the people it names (docs/DWELLINGS.md).
+      agriculture:
+        label: Agricultural tradition
+        description: >-
+          A way of farming crops, recognized across a region over a span of time: which crops its people grew
+          (`crops`), how their fields were laid out (`field_system`), whose way it was (`lifeway`), and where
+          and when it held. The settlement generator draws those crops in the fields of the people it names.
   artefact:
     label: Artefact
     description: >-

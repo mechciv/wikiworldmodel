@@ -8,6 +8,7 @@ import { groundNormals } from './groundNormals.ts';
 import type { GroundLevel } from '../../../core/city.ts';
 import { LEAF_KINDS, litterTile, type LeafKindName } from '../../../core/leaves.ts';
 import { GROUND_LAYERS } from '../../../core/materials.ts';
+import { DEFAULT_FIELD_PALETTE } from '../../../core/plots.ts';
 import { NOISE_SIZE, noiseByte } from '../../../world/generators/life/sorting.ts';
 import { invert, multiply, type Mat4, type V3 } from '../mat.ts';
 import { linkProgram, setUniforms, texture2D, type GL, type Program } from './context.ts';
@@ -17,7 +18,7 @@ import type { LeafAtlas } from './leafatlas.ts';
 import { GroundMaterialSet } from './materials.ts';
 import type { CityFrame, InstancedBatch, InstancedMeta, LocalRenderer, MeshHandle } from './renderer.ts';
 import { FrameTimer } from './timer.ts';
-import { AO_FS, BLUR_FS, BRIGHT_FS, CLOUDS_FS, DEPTH_FS, FULLSCREEN_VS, ID_FS, IMP_BAKE_FS, IMP_BAKE_VS, IMPOSTOR_DEPTH_FS, IMPOSTOR_FS, IMPOSTOR_ID_FS, IMPOSTOR_VS, LUM_FS, MESH_FS, MESH_VS, POST_FS, SHAFTS_ADD_FS, SHAFTS_FS, TAA_FS, SEA, SEA_FS, SEA_VS, SKY_FS, SKY_LUT_FS, TERRAIN_FS, TERRAIN_VS, WATER_FS, WATER_VS, WATERBLUR_FS, WATERMAP_FS, WATERMAP_VS } from './cityShaders.ts';
+import { AO_FS, BLUR_FS, BRIGHT_FS, CLOUDS_FS, DEPTH_FS, FULLSCREEN_VS, ID_FS, IMP_BAKE_FS, IMP_BAKE_VS, IMPOSTOR_DEPTH_FS, IMPOSTOR_FS, IMPOSTOR_ID_FS, IMPOSTOR_VS, LUM_FS, MESH_FS, MESH_VS, POST_FS, SHAFTS_ADD_FS, SHAFTS_FS, SMOKE_FS, SMOKE_VS, TAA_FS, SEA, SEA_FS, SEA_VS, SKY_FS, SKY_LUT_FS, TERRAIN_FS, TERRAIN_VS, WATER_FS, WATER_VS, WATERBLUR_FS, WATERMAP_FS, WATERMAP_VS } from './cityShaders.ts';
 
 export type { CityFrame, InstancedBatch, InstancedMeta, LocalRenderer, MeshHandle };
 
@@ -293,6 +294,7 @@ void main() {
     impostorP: linkProgram(gl, 'city impostor', IMPOSTOR_VS, IMPOSTOR_FS),
     impostorDepthP: linkProgram(gl, 'city impostor depth', IMPOSTOR_VS, IMPOSTOR_DEPTH_FS),
     impostorIdP: linkProgram(gl, 'city impostor id', IMPOSTOR_VS, IMPOSTOR_ID_FS),
+    smokeP: linkProgram(gl, 'city smoke', SMOKE_VS, SMOKE_FS),
   };
 }
 
@@ -321,6 +323,7 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
   private impostorP: Program;
   private impostorDepthP: Program;
   private impostorIdP: Program;
+  private smokeP: Program;
   private impostors: ImpostorAtlas;
 
   private noise: WebGLTexture;
@@ -347,8 +350,16 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
   private fields: WebGLTexture;
   private fieldsBox: [number, number, number, number] = [0, 0, 1, 1];
   private fieldStyle: [number, number, number, number] = [0, 1, 0, 0];
+  private slotColor: Float32Array = DEFAULT_FIELD_PALETTE.slotColor;
+  private slotColor2: Float32Array = DEFAULT_FIELD_PALETTE.slotColor2;
+  private slotMeta: Float32Array = DEFAULT_FIELD_PALETTE.slotMeta;
   /** how far from the eye a field's crop is drawn plant by plant, in rows, m: 0 where it is not */
   private sown = 0;
+  /** Animated hearth & kiln smoke plume emitters (instanced billboarded rising puffs). */
+  private smokeVao: WebGLVertexArrayObject | null = null;
+  private smokeQuadBuf: WebGLBuffer | null = null;
+  private smokeInstBuf: WebGLBuffer | null = null;
+  private smokeCount = 0;
   private ringVao: WebGLVertexArrayObject;
   private ringCount = 0;
   private fullCount = 0;
@@ -501,7 +512,7 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
 
   /** A distant parked view holds one sample of the scene's clock. Close by, only its animated layers need another. */
   ambientMotion(clearance: number, movingInstances: boolean): boolean {
-    return clearance < DISTANT_GROUND && (movingInstances || this.waterCount > 0 || (!this.fast && this.cloudCover > 0));
+    return clearance < DISTANT_GROUND && (movingInstances || this.waterCount > 0 || (!this.fast && (this.cloudCover > 0 || this.smokeCount > 0)));
   }
 
   static async create(gl: GL, opts: { fast?: boolean }): Promise<CityRenderer> {
@@ -574,6 +585,7 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     this.impostorP = programs.impostorP.finish();
     this.impostorDepthP = programs.impostorDepthP.finish();
     this.impostorIdP = programs.impostorIdP.finish();
+    this.smokeP = programs.smokeP.finish();
     this.impostors = new ImpostorAtlas(gl, this.impBakeP);
 
     // Noise, tiling, in four independent channels: everything's roughness and grain comes from it.
@@ -747,6 +759,7 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     ints(this.impostorP, { ...lit, uMask: UNIT.mask, uImpAlbedo: 15, uImpNormal: 16 });
     ints(this.impostorDepthP, { uEntities: UNIT.entities, uImpAlbedo: 15 });
     ints(this.impostorIdP, { uEntities: UNIT.entities, uImpAlbedo: 15 });
+    ints(this.smokeP, { uNoise: UNIT.noise });
   }
 
   /** The ground's grids: heights to sample in the vertex shader, and normals to filter. */
@@ -1094,7 +1107,12 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
    * What people made of the ground (gen:people/settlement): R crops, G pasture, B yards and lanes, A flooded paddies; and how
    * the plots of its fields are drawn: their size in m, how much longer than wide, and their kind. Without it, none.
    */
-  setFields(data: Uint8Array | null, size: number, box: [number, number, number, number], style: { plot: number; aspect: number; kind: number; sown?: number }): void {
+  setFields(
+    data: Uint8Array | null,
+    size: number,
+    box: [number, number, number, number],
+    style: { plot: number; aspect: number; kind: number; sown?: number; palette?: { slotColor: Float32Array; slotColor2: Float32Array; slotMeta: Float32Array } },
+  ): void {
     const gl = this.gl;
     gl.activeTexture(gl.TEXTURE0 + UNIT.fields);
     gl.bindTexture(gl.TEXTURE_2D, this.fields);
@@ -1109,6 +1127,57 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     this.fieldsBox = box;
     this.fieldStyle = [style.plot, style.aspect, style.kind, data ? 1 : 0];
     this.sown = data ? style.sown ?? 0 : 0;
+    const pal = style.palette ?? DEFAULT_FIELD_PALETTE;
+    this.slotColor = pal.slotColor;
+    this.slotColor2 = pal.slotColor2;
+    this.slotMeta = pal.slotMeta;
+  }
+
+  /** Upload hearth & kiln smoke plume emitters: 5 floats each [x, y, z, strength, seed]. */
+  setSmokes(data: Float32Array | null): void {
+    const gl = this.gl;
+    this.smokeCount = data ? Math.floor(data.length / 5) : 0;
+    if (!this.smokeCount || !data) return;
+    if (!this.smokeVao) {
+      // 8 staggered puffs per emitter × 6 vertices per billboard quad = 48 vertices (3 floats each: cx, cy, puffIdx).
+      const quad = new Float32Array(8 * 6 * 3);
+      const corners: [number, number][] = [
+        [-1, -1],
+        [1, -1],
+        [1, 1],
+        [-1, -1],
+        [1, 1],
+        [-1, 1],
+      ];
+      let k = 0;
+      for (let puff = 0; puff < 8; puff++) {
+        for (const [cx, cy] of corners) {
+          quad[k++] = cx;
+          quad[k++] = cy;
+          quad[k++] = puff;
+        }
+      }
+      this.smokeVao = gl.createVertexArray()!;
+      gl.bindVertexArray(this.smokeVao);
+      this.smokeQuadBuf = gl.createBuffer()!;
+      gl.bindBuffer(gl.ARRAY_BUFFER, this.smokeQuadBuf);
+      gl.bufferData(gl.ARRAY_BUFFER, quad, gl.STATIC_DRAW);
+      gl.enableVertexAttribArray(0);
+      gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 12, 0);
+      gl.enableVertexAttribArray(1);
+      gl.vertexAttribPointer(1, 1, gl.FLOAT, false, 12, 8);
+      this.smokeInstBuf = gl.createBuffer()!;
+      gl.bindBuffer(gl.ARRAY_BUFFER, this.smokeInstBuf);
+      gl.enableVertexAttribArray(2);
+      gl.vertexAttribPointer(2, 4, gl.FLOAT, false, 20, 0);
+      gl.vertexAttribDivisor(2, 1);
+      gl.enableVertexAttribArray(3);
+      gl.vertexAttribPointer(3, 1, gl.FLOAT, false, 20, 16);
+      gl.vertexAttribDivisor(3, 1);
+      gl.bindVertexArray(null);
+    }
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.smokeInstBuf);
+    gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
   }
 
   /**
@@ -1554,6 +1623,12 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     if (fb) gl.uniform4f(fb, this.fieldsBox[0], this.fieldsBox[1], this.fieldsBox[2] - this.fieldsBox[0], this.fieldsBox[3] - this.fieldsBox[1]);
     const fs = p.uniforms.get('uFieldStyle');
     if (fs) gl.uniform4fv(fs, this.fieldStyle);
+    const sc = p.uniforms.get('uSlotColor');
+    if (sc) gl.uniform4fv(sc, this.slotColor);
+    const sc2 = p.uniforms.get('uSlotColor2');
+    if (sc2) gl.uniform4fv(sc2, this.slotColor2);
+    const sm = p.uniforms.get('uSlotMeta');
+    if (sm) gl.uniform4fv(sm, this.slotMeta);
     const mb = p.uniforms.get('uMaskBox');
     if (mb) gl.uniform4f(mb, this.maskBox[0], this.maskBox[1], this.maskBox[2] - this.maskBox[0], this.maskBox[3] - this.maskBox[1]);
     const sh = p.uniforms.get('uSH');
@@ -2058,6 +2133,34 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     if (this.sea) {
       time.pass('sea');
       this.drawSea(f, vp, finest, Math.min(split, last), finest, () => -1e9);
+    }
+
+    // Hearth & kiln smoke plumes: soft alpha-blended billboards rising downwind over settlements.
+    if (!this.fast && this.smokeVao && this.smokeCount > 0 && f.clearance < 1600) {
+      gl.enable(gl.BLEND);
+      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+      gl.enable(gl.DEPTH_TEST);
+      gl.depthMask(false);
+      gl.disable(gl.CULL_FACE);
+      gl.useProgram(this.smokeP.program);
+      setUniforms(gl, this.smokeP, {
+        uViewProj: vp,
+        uEye: f.eye,
+        uCamRight: camRight,
+        uCamUp: camUp,
+        uWind: WIND,
+        uClock: f.clock ?? 0,
+        uSun: f.sun,
+        uSunColor: this.sunColor,
+        uSkyTop: this.skyTop,
+        uSkyLow: this.skyLow,
+        uHazeK: 2.0e-5,
+      });
+      gl.bindVertexArray(this.smokeVao);
+      gl.drawArraysInstanced(gl.TRIANGLES, 0, 48, this.smokeCount);
+      gl.bindVertexArray(null);
+      gl.depthMask(true);
+      gl.disable(gl.BLEND);
     }
 
     // Scene is already in single-sample colorTex/depthTex (zero post-water resolve blit).

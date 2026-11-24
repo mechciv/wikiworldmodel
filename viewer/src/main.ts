@@ -2081,35 +2081,92 @@ async function start(root: HTMLElement): Promise<void> {
           const why = `${gen.generator}, version ${gen.version}: which animals people kept follows the husbandry tradition recorded for their way of life, region and time; the generator draws a few to each house, those that graze in herds on the pasture or at the edge of the fields, the rest about the houses.`;
           return inspect.showGenerated(a.label, 'Kept animal', text, why);
         }
-        // A path between two settlements: no record gives it.
+        // A road, village street, or path between settlements: no record gives its line.
         if (found.path && city.people && city.spec.people) {
           setState({ sel: null });
           shownRecord = null;
           const gen = city.spec.people.generator;
-          const text = `One of the ${city.people.paths.toLocaleString('en-US')} paths drawn in this scene. Routes link neighbouring settlements. In farming settlements with a lane layout, tracks also lead from the fields to household entrances.`;
-          const why = `${gen.generator}, version ${gen.version}. The generator chooses the route and its width from the layout and the ground. Its exact course is procedural.`;
-          return inspect.showGenerated('A path', 'Generated path', text, why);
+          const text = `A street, farming lane, or country path of the scene (${city.people.paths.toLocaleString('en-US')} routes between settlements and ${city.people.streets.toLocaleString('en-US')} internal lanes and streets). Routes link neighbouring settlements; in farming settlements and towns, lanes and tracks also lead from the fields through enclosure gates to household entrances.`;
+          const why = `${gen.generator}, version ${gen.version}. Nobody surveyed this road: the generator chooses the route and its width from the layout and the ground. Its exact course and paving are procedural.`;
+          return inspect.showGenerated('A street or path', 'Generated road', text, why);
         }
-        // The crop of a field: that the land was farmed is the world's; which crop, and every plant, is the generator's.
+        // A continuous perimeter wall, palisade, rampart, or gatehouse round a town or village.
+        if (found.perimeter !== undefined && city.people && city.spec.people) {
+          setState({ sel: null });
+          shownRecord = null;
+          const pr = city.people.perimeters[found.perimeter];
+          const gen = city.spec.people.generator;
+          if (pr) {
+            const sett = city.people.settlements[pr.settlement];
+            const tradition = city.spec.people.traditions.find((x) => x.id === pr.from);
+            const said = tradition
+              ? `The world's records of the building tradition ${tradition.label} say what enclosed its settlements.`
+              : pr.from === 'generic'
+                ? 'Its tradition says its settlements were walled without naming the construction, so the generator drew this plain perimeter.'
+                : `The record of ${sett?.city ?? pr.from} says what enclosed this town.`;
+            const extra = [
+              `${pr.height.toFixed(1)} m high and ${pr.thickness.toFixed(1)} m thick`,
+              pr.gates ? `${pr.gates} gate${pr.gates === 1 ? '' : 's'}` : undefined,
+              pr.towers ? 'watchtowers along its circuit' : undefined,
+              pr.moat ? `a ${pr.moat} m outer moat` : undefined,
+            ]
+              .filter(Boolean)
+              .join(', ');
+            const text = `${pr.label} (${extra}). ${said} Where the circuit runs on the terrain, every tower, and every gatehouse roof are procedurally generated round the houses the scene draws.`;
+            const why = `${gen.generator}, version ${gen.version}: nobody surveyed this circuit. Its kind and dimensions follow the tradition or city record where stated; its exact trace is invented.`;
+            return inspect.showGenerated(pr.label, 'Generated enclosure', text, why);
+          }
+        }
+        // Physical 3D fieldworks: contour hillside terraces, earthen bunds, stone walls, hedges, or ditches.
+        if (found.fieldworks && city.people && city.spec.people) {
+          setState({ sel: null });
+          shownRecord = null;
+          const gen = city.spec.people.generator;
+          const ag = city.people.agriculture;
+          const boundText = ag.bounds && ag.bounds !== 'none' ? `field boundaries (${ag.bounds})` : 'parcel headlands';
+          const src = ag.from === 'tradition' ? `The regional agricultural tradition ${ag.label} names its field layout and ${boundText}.` : `No agricultural tradition record specifies the field boundaries here; these ${boundText} are generic stand-ins.`;
+          const text = `Physical 3D field boundaries and contour-following hillside terraces draped on the terrain around the farmed parcels. ${src} Individual terrace risers, bunds, and parcel corners are procedurally generated from the local slope and field grid.`;
+          const why = `${gen.generator}, version ${gen.version}: nobody surveyed individual field walls or terrace benches; their positions are procedural.`;
+          return inspect.showGenerated('Field boundaries & terraces', 'Generated fieldworks', text, why);
+        }
+        // The crop of a field: regional crops come from tradition/agriculture where recorded, or climate-aware generic stand-ins.
         if (found.crop && city.people && city.spec.people) {
           setState({ sel: null });
           shownRecord = null;
           const sp = city.spec.people;
           const gen = sp.generator;
           const style = city.people.style;
-          const tradition = style.from === 'tradition' ? sp.traditions.find((t) => t.id === style.tradition) : undefined;
-          const plots = tradition ? `Its plots are drawn as the world's records of ${tradition.label} say its fields were laid out (${style.kind})` : `No record says how the fields here were laid out: its plots are the generator's plain ones for this use of the land (${style.kind})`;
-          const text = `A crop standing in a field, as the scene draws every field that is under one. No record says which crop grew here, and the generator names none: this is one plain stand of upright blades, the same in every field of every place and time, coloured ripe or green by its plot, and no plant of the world's records. That people farmed this land follows the anthromes and the way of life recorded for the place and time. ${plots}; where one plot ends and the next begins, which plots are under a crop, ploughed or fallow, that the crop stands in rows, and how tall it is, are all invented.`;
-          const why = `${gen.generator}, version ${gen.version}: nobody recorded this field or what grew in it. A generic stand is drawn so that a field close by is plants and not a colour on the ground; it says nothing of what was sown.`;
-          return inspect.showGenerated('A crop, not named', 'Generated crop', text, why);
+          const ag = city.people.agriculture;
+          const slot = ag.palette.slots[found.cropSlot ?? 0];
+          const stateWords = ['ripe for harvest', 'growing green', 'young sprouting', 'freshly harvested stubble', 'ploughed soil', 'resting fallow', 'flooded paddy'];
+          const stage = slot ? stateWords[slot.state] ?? 'growing' : 'growing';
+          const cropName = slot?.crop?.name ?? (slot?.crop?.kind ? slot.crop.kind[0].toUpperCase() + slot.crop.kind.slice(1) : 'A crop');
+          const tradition = style.from === 'tradition' ? sp.traditions.find((t) => t.id === style.tradition) ?? sp.agriculture?.find((t) => t.id === style.tradition) : undefined;
+          const plots = tradition ? `Its plots follow the field system of ${tradition.label} (${style.kind})` : `Its plots use the generator's plain ${style.kind} layout`;
+          const what =
+            ag.from === 'tradition'
+              ? `${cropName} (${stage}), drawn from the regional agricultural tradition ${ag.label} for this region, era, and month. ${plots}; where individual parcel boundaries fall, which parcel holds which crop of the rotation, and every individual plant row are procedurally generated.`
+              : `${cropName} (${stage}), a climate-appropriate generic stand-in: no agricultural tradition record covers this region and time yet. That people farmed this land follows the anthromes and regional archaeology. ${plots}; crop choice, parcel lines, and individual plants are procedurally generated.`;
+          const why = `${gen.generator}, version ${gen.version}: ${ag.from === 'tradition' ? `the crop mix follows ${ag.label};` : 'no regional crop record was found;'} exact parcel locations and individual plants are procedural.`;
+          return inspect.showGenerated(ag.from === 'tradition' ? cropName : `${cropName} (generic)`, ag.from === 'tradition' ? 'Regional crop' : 'Generated crop', what, why);
         }
-        // A piece of a town's works: its wall, a gate, a tower, the water of a canal or a moat.
+        // A piece of a town's works or everyday living activity (stalls, kilns, carts, stooks, ploughs, figures, boats).
         if (found.work !== undefined && city.people && city.spec.people) {
           setState({ sel: null });
           shownRecord = null;
           const pp = city.people;
           const f = pp.works[found.work];
           const gen = city.spec.people.generator;
+          // Everyday living activity props & people: strictly procedural, labelled clearly as generic.
+          if (['person', 'boat', 'stall', 'altar', 'kiln', 'stook', 'plough', 'cart', 'barrow', 'jetty'].includes(f.spec.kind)) {
+            const what =
+              f.spec.kind === 'person'
+                ? `A person, one of the figures the scene puts in the streets, market squares, and surrounding fields: standing, walking, carrying, hoeing, reaping, or conversing. No record says who lived here or what they were doing: these procedural figures give settlements and fields human life and scale.`
+                : f.spec.kind === 'boat'
+                  ? `A boat, one of the plain hulls the scene floats on water beside its settlements, ${f.spec.thickness} m long. No record says what boats these people had, or that they had any here: it is procedural.`
+                  : `${f.label}, placed procedurally to show everyday agricultural, craft, and market activity in and around the settlement. No record places this individual object here.`;
+            return inspect.showGenerated(f.label, f.spec.kind === 'person' ? 'Generated person' : 'Generated activity', what, `${gen.generator}, version ${gen.version}: nobody recorded this. It is procedural and generic, and where it stands is invented.`);
+          }
           // What stood round a settlement or in it: its tradition's records say it had one; where is invented.
           if (['enclosure', 'pen', 'well', 'oven', 'rack', 'stack', 'floor', 'pond', 'pole'].includes(f.spec.kind)) {
             const tradition = city.spec.people.traditions.find((x) => x.id === f.from);
@@ -2118,9 +2175,11 @@ async function start(root: HTMLElement): Promise<void> {
               ? round
                 ? `The world's records of the building tradition ${tradition.label} say how its houses stood together: ${specText(tradition.settlement)}.`
                 : `The world's records of the building tradition ${tradition.label} say what its settlements had besides their houses: ${outbuildingsText(tradition.outbuildings ?? [])}.`
-              : 'Its tradition calls its settlements walled and says no more of what enclosed them: this plain wall is the generator\'s, and says so.';
+              : f.from === 'generic'
+                ? 'This is a generic farmyard/village structure placed procedurally by the settlement generator.'
+                : 'Its tradition calls its settlements walled and says no more of what enclosed them: this plain wall is the generator\'s, and says so.';
             const rest = round ? 'How high it stood, where its ways in were and where each length of it runs are invented: it is drawn round the outermost houses the scene draws.' : 'What it looked like is the generator\'s plain one of its kind; how many a settlement had where no source counts them, and where it stands, are invented.';
-            return inspect.showGenerated(f.label, round ? 'Generated enclosure' : 'Generated outbuilding', `${f.label}. ${said} ${rest}`, `${gen.generator}, version ${gen.version}: nobody surveyed this. That settlements of its tradition had one follows the tradition's records; every place is invented.`);
+            return inspect.showGenerated(f.label, round ? 'Generated enclosure' : 'Generated outbuilding', `${f.label}. ${said} ${rest}`, `${gen.generator}, version ${gen.version}: nobody surveyed this. Every place is invented.`);
           }
           // The towns of the scene that have it, and what says so: a tradition, a town's own record, or nothing.
           const part = f.spec.kind === 'canal' ? 'streets' : f.spec.kind === 'moat' ? 'moat' : 'wall';
@@ -2133,11 +2192,6 @@ async function start(root: HTMLElement): Promise<void> {
               : `The record of ${towns.find((x) => x.record === f.from)?.city ?? 'this city'} says how it was laid out: ${towns.find((x) => x.record === f.from)?.town?.text ?? 'see its record'}.`;
           const named = towns.filter((x) => x.city).map((x) => x.city);
           const where = named.length ? ` It stands round ${named.join(', ')}.` : towns.length ? ` ${towns.length.toLocaleString('en-US')} towns of the scene have it.` : '';
-          // A person or a boat rests on nothing at all: it is there for the scene's scale.
-          if (f.spec.kind === 'person' || f.spec.kind === 'boat') {
-            const what = f.spec.kind === 'person' ? `A person, one of the figures the scene puts by the houses of its settlements: standing, walking, carrying, sitting, at work, a child among them. No record says who lived in any of these houses, how they looked, what they wore or what they were doing: the same few figures are drawn everywhere, a grown one ${f.spec.height} m tall, so that the houses have their scale and a settlement looks lived in.` : `A boat, one of the plain hulls the scene floats on water beside its settlements, ${f.spec.thickness} m long. No record says what boats these people had, or that they had any here: it is the same everywhere.`;
-            return inspect.showGenerated(f.label, f.spec.kind === 'person' ? 'Generated person' : 'Generated boat', what, `${gen.generator}, version ${gen.version}: nobody recorded this. It is generic, and where it stands is invented.`);
-          }
           const size = f.spec.kind === 'canal' || f.spec.kind === 'moat' ? `${f.spec.thickness} m wide` : `${f.spec.height} m high and ${f.spec.thickness} m thick`;
           const text = `${f.label}, drawn ${size}.${where} ${said} What they do not say (how high, how thick, how many towers) is the generator's, as is where its line runs: round the houses the scene draws, a street clear of them.`;
           const why = `${gen.generator}, version ${gen.version}: nobody surveyed this. A town's streets and what enclosed it follow the tradition of its townspeople or its own record where one says, and the generator's generic town where none does; every piece's place is invented.`;
@@ -2781,7 +2835,19 @@ async function start(root: HTMLElement): Promise<void> {
       // As a click picks (pickAt), in the canvas's pixels.
       const dpr = canvas.width / stage.clientWidth;
       const found = city.pick(Math.round(x * dpr), canvas.height - 1 - Math.round(y * dpr));
-      if (found.taxon || found.kept || found.path || found.crop || found.house !== undefined || found.work !== undefined) return { taxon: found.taxon?.id, kept: found.kept?.id, house: found.house, work: found.work, ...(found.path ? { path: true } : {}), ...(found.crop ? { crop: true } : {}), ground: false };
+      if (found.taxon || found.kept || found.path || found.crop || found.fieldworks || found.house !== undefined || found.work !== undefined || found.perimeter !== undefined) {
+        return {
+          taxon: found.taxon?.id,
+          kept: found.kept?.id,
+          house: found.house,
+          work: found.work,
+          perimeter: found.perimeter,
+          ...(found.path ? { path: true } : {}),
+          ...(found.crop ? { crop: true, cropSlot: found.cropSlot } : {}),
+          ...(found.fieldworks ? { fieldworks: true } : {}),
+          ground: false,
+        };
+      }
       return { ground: !!groundHit(frameView, rayOf(frameView, x, y), city.ground) };
     },
     set: (s) => setState(s),

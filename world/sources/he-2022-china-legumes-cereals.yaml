@@ -1,0 +1,21 @@
+id: src:he-2022-china-legumes-cereals
+type: publication
+kind: review
+citation: >-
+  He, K., Yu, X., Shen, C. & Lu, H. (2022). Coupled and decoupled legumes and cereals in
+  prehistoric northern and southern China. Frontiers in Plant Science 13, 1013480.
+authors:
+  - "He, K."
+  - "Yu, X."
+  - "Shen, C."
+  - "Lu, H."
+published: 2022
+title: "Coupled and decoupled legumes and cereals in prehistoric northern and southern China"
+container: "Frontiers in Plant Science 13, 1013480"
+doi: 10.3389/fpls.2022.1013480
+url: https://pmc.ncbi.nlm.nih.gov/articles/PMC9585268/
+license: CC-BY-4.0
+license_note: Open-access article under CC BY; short quotes with credit.
+verified:
+  by: machine:antigravity
+  how: Full text fetched from PubMed Central (PMC9585268) and read; quotes verified by npm run world -- quote-check.

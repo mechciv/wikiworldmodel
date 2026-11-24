@@ -1,0 +1,62 @@
+id: people/agriculture/yangtze-wet-rice
+kind: tradition/agriculture
+summary: >-
+  The wet-rice farming tradition of the Middle and Lower Yangtze basin and southern China from the middle Neolithic onward.
+author: machine:antigravity
+claims:
+  name:
+    prop: name
+    value: { en: "Yangtze and southern China wet-rice farming" }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 4500 BCE
+    source:
+      - ref: src:deng-2015-baligang-rice-millet
+        loc: "Introduction"
+        quote: "While South China has continuously been a rice farming area at least after the middle Neolithic age, since ca. 4500 BC"
+    method: compilation
+    note: >-
+      Continuous rice-farming tradition across southern China from ca. 4500 BCE onward (earlier domesticated rice occurs locally, e.g. at Baligang by 6700–6300 BCE).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in deng-2015-baligang-rice-millet.txt (sha256 15f8a3c220fbffc7), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["121", "122", "123"] }
+    source:
+      - ref: src:deng-2015-baligang-rice-millet
+        loc: "Introduction"
+        quote: "southern tradition in the Middle and Lower Yangtze basin focused on rice (Oryza sativa) cultivation"
+    method: editorial
+    note: >-
+      Editorial mapping of the Middle and Lower Yangtze basin and South China onto ArchaeoGLOBE regions 121 (South Central China), 122 (Southeastern China), and 123 (Eastern China).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in deng-2015-baligang-rice-millet.txt (sha256 15f8a3c220fbffc7), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      - ref: src:deng-2015-baligang-rice-millet
+        loc: "Introduction"
+        quote: "While South China has continuously been a rice farming area at least after the middle Neolithic age, since ca. 4500 BC"
+    method: editorial
+    note: >-
+      Sedentary rice farmers of the Yangtze basin and southern China.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in deng-2015-baligang-rice-millet.txt (sha256 15f8a3c220fbffc7), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
+  crops:
+    prop: crops
+    value:
+      - { kind: rice, name: "Wet rice", season: summer, share: staple }
+    source:
+      - ref: src:deng-2015-baligang-rice-millet
+        loc: "Introduction"
+        quote: "It is well established that early farming in China can be divided into a group of northern traditions based on the cultivation of millets (Setaria italica and Panicum miliaceum) and southern tradition in the Middle and Lower Yangtze basin focused on rice (Oryza sativa) cultivation"
+      - ref: src:he-2022-china-legumes-cereals
+        loc: "Abstract"
+        quote: "an antipodal pattern of millet-soybeans and rice-fish agricultural systems may have been established in northern and southern China since the late Yangshao period (6000–5000 cal BP) respectively"
+    method: compilation
+    note: >-
+      Focused on wet rice (Oryza sativa); soybeans were rarely grown in southern China during early periods per He et al. (2022).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in deng-2015-baligang-rice-millet.txt (sha256 15f8a3c220fbffc7) and he-2022-china-legumes-cereals.txt (sha256 72097b629cced040), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }

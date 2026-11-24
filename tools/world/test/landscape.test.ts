@@ -6,7 +6,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { parse } from 'yaml';
-import { compileHusbandry, compileTraditions, husbandryAt, dwellingProblems, fieldProblems, lifewayProblems, lifewayText, OUTBUILDING_LABEL, OUTBUILDING_ROOFED, OUTBUILDING_WORDS, outbuildingProblems, outbuildingsText, prevalenceOf, PREVALENCE_WORDS, settlementProblems, specText, traditionAt, traditionFor, traditionsFor, type LifewayWord, type Prevalence, type Tradition } from '../../../core/dwelling.ts';
+import { agricultureAt, compileAgriculture, compileHusbandry, compileTraditions, cropProblems, cropsText, genericCropsFor, husbandryAt, dwellingProblems, fieldProblems, lifewayProblems, lifewayText, OUTBUILDING_LABEL, OUTBUILDING_ROOFED, OUTBUILDING_WORDS, outbuildingProblems, outbuildingsText, prevalenceOf, PREVALENCE_WORDS, settlementProblems, specText, traditionAt, traditionFor, traditionsFor, type LifewayWord, type Prevalence, type Tradition } from '../../../core/dwelling.ts';
 import { anthromeTile, assessmentAt, cityPeople, citiesAround, citiesNear, classAtStep, figureAt, nameAt, LIFEWAY_OF, lifewayOf, nearestStep, shareDensity, tileKey, cellOf, type AnthromeClass, type Assessment, type CitiesFile, type City } from '../../../core/landscape.ts';
 import type { PeopleFile } from '../../../core/layers.ts';
 import { assessmentsFile, cityYear, citiesOf, eckert4Inverse, housing, housingCounts, parseClassGrid, rasterizeRegions, stepOfName, type LandscapeBuilt } from '../src/build/landscape.ts';
@@ -332,6 +332,50 @@ describe('building traditions', () => {
     expect(husbandryAt(list, 1, 500, 'shifting-cultivators')).toBeUndefined();
     expect(husbandryAt(list, 1, 500, 'foragers')).toBeUndefined();
     expect(husbandryAt(list, 3, 500, 'farmers')).toBeUndefined();
+  });
+
+  it('checks crop lists, compiles agricultural traditions with inheritance, and selects crops by region, time and lifeway', () => {
+    expect(cropProblems([{ kind: 'millet', name: 'Foxtail millet', season: 'summer', share: 'staple' }, { kind: 'wheat', season: 'winter', share: 'secondary' }])).toEqual([]);
+    expect(cropProblems([])).toEqual([expect.stringMatching(/one or more entries/)]);
+    expect(cropProblems([{ kind: 'turnip' }])).toEqual([expect.stringMatching(/not one of/)]);
+    expect(cropProblems([{ kind: 'millet', season: 'spring' }])).toEqual([expect.stringMatching(/season "spring"/)]);
+    expect(cropProblems([{ kind: 'millet', share: 'half' }])).toEqual([expect.stringMatching(/share "half"/)]);
+    expect(cropProblems([{ kind: 'millet', extra: 1 }])).toEqual([expect.stringMatching(/unknown crop parameter/)]);
+    expect(cropsText([{ kind: 'millet', name: 'Foxtail millet', season: 'summer' }, { kind: 'wheat', season: 'summer' }])).toBe('Foxtail millet, Wheat (summer)');
+
+    const list = compileAgriculture([
+      {
+        id: 'broad',
+        label: 'Northern China dryland',
+        regions: [119, 120],
+        span: [-4000, 1e9],
+        lifeways: ['farmers'],
+        crops: [{ kind: 'millet', name: 'Foxtail millet', season: 'summer', share: 'staple' }, { kind: 'soybean', season: 'summer', share: 'secondary' }],
+        fields: { kind: 'blocks', bounds: 'banks' },
+      },
+      {
+        id: 'han',
+        label: 'Han dryland',
+        parent: 'broad',
+        regions: [],
+        span: [-202, 220],
+        crops: [{ kind: 'millet', name: 'Foxtail millet', season: 'summer', share: 'staple' }, { kind: 'wheat', name: 'Winter wheat', season: 'winter', share: 'secondary' }],
+      },
+    ]);
+    const han = list.find((x) => x.id === 'han')!;
+    expect(han).toMatchObject({ depth: 1, regions: [119, 120], lifeways: ['farmers'], fields: { kind: 'blocks', bounds: 'banks' }, from: { lifeway: 'broad', crops: 'han', 'fields.kind': 'broad' } });
+    // Han overrides broad inside its span, and applies to townspeople's surrounding fields as well as farmers.
+    expect(agricultureAt(list, 120, 147, 'farmers')!.id).toBe('han');
+    expect(agricultureAt(list, 120, 147, 'townspeople')!.id).toBe('han');
+    expect(agricultureAt(list, 120, -1000, 'farmers')!.id).toBe('broad');
+    expect(agricultureAt(list, 120, 147, 'herders')).toBeUndefined();
+    expect(agricultureAt(list, 999, 147, 'farmers')).toBeUndefined();
+
+    // Generic fallback picks rice for wetland rice, roots for swidden/rainforest, millet for steppe, wheat/barley for temperate.
+    expect(genericCropsFor('rice', 'temperate')[0].kind).toBe('rice');
+    expect(genericCropsFor('swidden', 'temperate')[0].kind).toBe('root');
+    expect(genericCropsFor('rainfed', 'steppe')[0].kind).toBe('millet');
+    expect(genericCropsFor('rainfed', 'temperate')[0].kind).toBe('wheat');
   });
 
   it('checks whom a tradition housed word by word', () => {

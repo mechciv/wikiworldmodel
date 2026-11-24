@@ -9,7 +9,7 @@ import type { WaterParams } from './water.ts';
 import type { Fingerprint } from './fingerprint.ts';
 import type { Form } from './form.ts';
 import type { FeatureTime } from './tileset.ts';
-import type { Husbandry, Tradition } from './dwelling.ts';
+import type { Agriculture, Husbandry, Tradition } from './dwelling.ts';
 import type { AnthromeClass, Assessment, CityNear, Lifeway } from './landscape.ts';
 import type { SceneBedrock, SceneSubstrate } from './substrate.ts';
 
@@ -272,6 +272,8 @@ export interface ScenePeople {
   husbandry?: Husbandry[];
   kept?: LivingTaxon[];
   keptForms?: Record<string, Form>;
+  /** the agricultural traditions that hold there then: which crops people grew and how their fields were laid out */
+  agriculture?: Agriculture[];
   /** what it rests on: the fields read */
   fields: { anthromes: string; assessment: string; population: string; lifeways: string };
   /** the generator that draws it, and its parameters */

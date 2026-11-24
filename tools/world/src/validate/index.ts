@@ -12,7 +12,7 @@ import { join, resolve } from 'node:path';
 import { Ajv2020 } from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 import { formProblem } from '../../../../core/city.ts';
-import { dwellingProblems, fieldProblems, lifewayProblems, outbuildingProblems, settlementProblems, townProblems } from '../../../../core/dwelling.ts';
+import { cropProblems, dwellingProblems, fieldProblems, lifewayProblems, outbuildingProblems, settlementProblems, townProblems } from '../../../../core/dwelling.ts';
 import { ladderCounts, LEVELS, STEPS } from '../../../../core/ladder.ts';
 import { MONTHS_PARTS } from '../../../../core/months.ts';
 import { parseRef, RefError, splitRef } from '../../../../core/refs.ts';
@@ -294,6 +294,18 @@ function checkValue(world: World, refs: RefChecker, c: Claim, issues: Issue[]): 
       break;
     case 'outbuildings':
       for (const problem of outbuildingProblems(v)) bad(problem);
+      break;
+    case 'crops':
+      for (const problem of cropProblems(v)) bad(problem);
+      if (Array.isArray(v)) {
+        v.forEach((x, i) => {
+          const taxon = (x as { taxon?: unknown } | null)?.taxon;
+          if (typeof taxon === 'string' && taxon) {
+            const e = refs.check(taxon, c.file, `${c.where}.value[${i}].taxon`, { self: c.entity, types: ['entity'] });
+            if (e && e.kind !== 'taxon') bad(`${taxon} is not a taxon record`);
+          }
+        });
+      }
       break;
     case 'taxa': {
       // A list of taxon records, each once.
@@ -1109,7 +1121,7 @@ function checkForms(world: World, issues: Issue[]): void {
  * A house or a herd is drawn only for those ways of life (core/dwelling.ts), so one that does not say is drawn for no one.
  */
 function checkTraditions(world: World, issues: Issue[]): void {
-  for (const kind of ['tradition/building', 'tradition/husbandry']) {
+  for (const kind of ['tradition/building', 'tradition/husbandry', 'tradition/agriculture']) {
     const byId = new Map(world.entities.filter((e) => e.kind === kind).map((e) => [e.id, e]));
     const says = (e: Entity, prop: string): boolean => {
       const seen = new Set<string>();
@@ -1122,9 +1134,10 @@ function checkTraditions(world: World, issues: Issue[]): void {
       return false;
     };
     for (const e of byId.values()) {
-      const what = kind === 'tradition/building' ? ['whom it housed', 'its house'] : ['whose animals it kept', 'its animals'];
+      const what = kind === 'tradition/building' ? ['whom it housed', 'its house'] : kind === 'tradition/husbandry' ? ['whose animals it kept', 'its animals'] : ['whose fields it farmed', 'its crops'];
       if (!says(e, 'lifeway')) issues.push({ level: 'warning', check: 'traditions', file: e.file, where: 'claims', message: `${e.id} does not say ${what[0]}: give it a \`lifeway\` claim (docs/DWELLINGS.md), or ${what[1]} are drawn for no one`.replace('its house are', 'its house is') });
       if (kind === 'tradition/husbandry' && !says(e, 'livestock')) issues.push({ level: 'warning', check: 'traditions', file: e.file, where: 'claims', message: `${e.id} does not say which animals its people kept: give it a \`livestock\` claim (docs/DWELLINGS.md)` });
+      if (kind === 'tradition/agriculture' && !says(e, 'crops')) issues.push({ level: 'warning', check: 'traditions', file: e.file, where: 'claims', message: `${e.id} does not say which crops its people grew: give it a \`crops\` claim` });
     }
   }
 }

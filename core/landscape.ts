@@ -11,7 +11,7 @@
 // model:people/lifeways joins them into what a scene draws: a pattern of settlement (camps, hamlets, villages,
 // towns), how many people, what they did on the land, and how sure each part is. Nothing here is a fact about any
 // place: the classes' thresholds are the classification's own, quoted in the field's record.
-import type { Husbandry, LifewayWord, TownSpec, Tradition } from './dwelling.ts';
+import type { Agriculture, Husbandry, LifewayWord, TownSpec, Tradition } from './dwelling.ts';
 import type { Form } from './form.ts';
 import type { LivingTaxon, ScenePeople } from './scene.ts';
 
@@ -527,6 +527,8 @@ export interface LandscapeData {
   husbandry?: Husbandry[];
   kept?: LivingTaxon[];
   keptForms?: Record<string, Form>;
+  /** the agricultural traditions, where the world has any */
+  agriculture?: Agriculture[];
   cities: CitiesFile;
   /** HYDE's people in the 1° cell that holds a place, at a time; undefined where it has none */
   people: (lat: number, lon: number, t: number) => number | undefined;
@@ -620,6 +622,7 @@ export function scenePeople(d: LandscapeData, lat: number, lon: number, t: numbe
   const named = new Set(husbandry.flatMap((x) => x.animals));
   const kept = (d.kept ?? []).filter((x) => named.has(x.id));
   const keptForms = Object.fromEntries(kept.map((x) => [x.form, d.keptForms?.[x.form]]).filter((x): x is [string, Form] => !!x[1]));
+  const agriculture = (d.agriculture ?? []).filter((x) => t >= x.span[0] && t <= x.span[1] && x.regions.some((g) => ids.includes(g)));
   return {
     t,
     step: d.steps[step],
@@ -630,6 +633,7 @@ export function scenePeople(d: LandscapeData, lat: number, lon: number, t: numbe
     cities,
     traditions,
     ...(kept.length ? { husbandry, kept, keptForms } : {}),
+    ...(agriculture.length ? { agriculture } : {}),
     fields: d.fields,
     generator: d.generator,
   };
@@ -656,7 +660,7 @@ export interface LandscapeIndex {
   fields: { anthromes: string; assessment: string; lifeways: string; population: string };
   /** the settlement generator a scene draws its people with */
   generator?: { generator: string; version: number; params: Record<string, unknown> };
-  /** how far around a place a scene's cells and cities reach, in degrees of latitude and km */
+  /** how far around a place the scene's cells and cities reach, in degrees of latitude and km */
   reach_deg: number;
   reach_km: number;
 }
@@ -670,5 +674,7 @@ export interface TraditionsFile {
   husbandry?: Husbandry[];
   kept?: LivingTaxon[];
   forms?: Record<string, Form>;
+  /** the agricultural traditions compiled for the build */
+  agriculture?: Agriculture[];
 }
 

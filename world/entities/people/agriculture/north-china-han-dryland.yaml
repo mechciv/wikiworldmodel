@@ -1,0 +1,86 @@
+id: people/agriculture/north-china-han-dryland
+kind: tradition/agriculture
+summary: >-
+  Han-dynasty millet-based multi-crop dryland farming in northern China, where foxtail millet remained dominant alongside winter wheat, broomcorn millet, soybeans, and hemp.
+author: machine:antigravity
+claims:
+  name:
+    prop: name
+    value: { en: "Han northern China millet and winter wheat farming" }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 202 BCE
+    source:
+      - ref: src:liao-2022-han-millet
+        loc: "Abstract"
+        quote: "Previous studies have suggested that wheat cultivation likely became widespread prior to or during the Han Dynasty (202 BC–AD 220)."
+    method: expert-estimate
+    note: >-
+      Start of the Western Han Dynasty, as given by the source.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in liao-2022-han-millet.txt (sha256 b53e51a0ddb3126c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
+  end:
+    prop: end
+    value: 220 CE
+    source:
+      - ref: src:liao-2022-han-millet
+        loc: "Abstract"
+        quote: "Previous studies have suggested that wheat cultivation likely became widespread prior to or during the Han Dynasty (202 BC–AD 220)."
+    method: expert-estimate
+    note: >-
+      End of the Eastern Han Dynasty, as given by the source.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in liao-2022-han-millet.txt (sha256 b53e51a0ddb3126c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["119", "120"] }
+    source:
+      - ref: src:liao-2022-han-millet
+        loc: "Introduction"
+        quote: "existing textual records in Chinese suggest that wheat cultivation in the core area of the Western Han Dynasty (202 BC–AD 8), the Guanzhong Basin, was relatively lagging compared to the Central Plains"
+    method: editorial
+    note: >-
+      Editorial mapping of the Han northern heartland (Central Plains and Guanzhong / Shanxi) onto ArchaeoGLOBE regions 119 (North Central China) and 120 (Northern China).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in liao-2022-han-millet.txt (sha256 b53e51a0ddb3126c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      - ref: src:liao-2022-han-millet
+        loc: "Abstract"
+        quote: "we argue that millet-based multi-crop farming dominated the regional agricultural system during the Western Han Dynasty"
+    method: editorial
+    note: >-
+      Dryland farmers (and the fields surrounding Han towns) of northern China.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in liao-2022-han-millet.txt (sha256 b53e51a0ddb3126c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
+  crops:
+    prop: crops
+    value:
+      - { kind: millet, name: "Foxtail millet", season: summer, share: staple }
+      - { kind: wheat, name: "Winter wheat", season: winter, share: secondary }
+      - { kind: millet, name: "Broomcorn millet", season: summer, share: secondary }
+      - { kind: soybean, name: "Soybeans", season: summer, share: minor }
+      - { kind: hemp, name: "Hemp", season: summer, share: minor }
+    source:
+      - ref: src:liao-2022-han-millet
+        loc: "Introduction"
+        quote: "it is certain that foxtail millet (Setaria italica), common millet (Panicum miliaceum), rice (Oryza sativa), wheat (Triticum aestivum), soybean (Glycine max), and hemp (Cannabis sativa) were already consumed in the Han Dynasty"
+      - ref: src:liao-2022-han-millet
+        loc: "Introduction"
+        quote: "other studies argue that rotation of summer millet and winter wheat may have been implemented in the Central Plains by the late Western Han"
+      - ref: src:liao-2022-han-millet
+        loc: "Discussion"
+        quote: "foxtail millet still occupied a dominant position in regional agricultural production"
+    method: excavation
+    note: >-
+      Foxtail millet as the dominant summer staple, paired with winter wheat in Central Plains rotation, broomcorn (common) millet, soybeans, and hemp. Rice was also consumed in small quantities in the Han heartland (e.g. 4% of Xi'an model granaries cited in the paper), but is omitted from this dryland field list; relative plot shares are an editorial rendering approximation.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in liao-2022-han-millet.txt (sha256 b53e51a0ddb3126c), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
+relations:
+  member-of:
+    rel: member-of
+    to: people/agriculture/north-china-dryland-agriculture
+    unsourced: An editorial grouping.

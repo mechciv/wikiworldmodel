@@ -120,7 +120,10 @@ them, and where each stands, is the generator's.
 from a through lane, with small groups of compounds sharing the approach to their doors. Where a tradition encloses
 the settlement, its boundary follows the occupied lots and opens where the field tracks cross it. Dispersed holdings
 leave cultivated ground between yards. A stated facing or layout takes precedence. The lanes, entrances and plot
-access are procedural. [Farming layouts](../world/generators/people/settlement/lanes.ts)
+access are procedural. [Farming layouts](../world/generators/people/settlement/lanes.ts) In version 8, enclosures
+and town walls are extruded as continuous terrain-conforming curtains with roofed gatehouses where lanes and streets
+pass through, fields follow domain-oriented seasonal parcels (`tradition/agriculture`) with 3D fieldworks and hillside
+terraces, and settlements carry procedural everyday activity (stalls, altars, kilns, smoke plumes, carts, and field work).
 
 **A town has streets.** Its houses stand on lots, back to back in blocks: on a grid with a main street each way
 through the middle, along lanes that wander, or with water in some of its streets; a square may lie at its middle; and

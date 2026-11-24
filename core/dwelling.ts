@@ -660,6 +660,264 @@ export function husbandryAt(list: Husbandry[], region: number | undefined, t: nu
   return best;
 }
 
+// ——— Agriculture ———
+
+/** The words an agricultural tradition's `crops` entries may take, each with what it means. */
+export const CROP_WORDS = {
+  kind: {
+    millet: 'Foxtail, broomcorn or pearl millet: narrow arching blades topped with heavy nodding seed panicles.',
+    wheat: 'Wheat (emmer, einkorn, bread or durum): dense upright culms with bearded ears.',
+    barley: 'Barley: dense upright culms with long-awned spikes.',
+    oat: 'Oats: upright culms with loose nodding panicles.',
+    rye: 'Rye: tall slender small-grain cereal.',
+    rice: 'Wet or upland rice: bright green tufted stalks grown in flooded paddies or rainfed plots.',
+    sorghum: 'Sorghum: tall cane-like stalks with broad ribbon leaves and heavy terminal panicles.',
+    maize: 'Maize: tall jointed stalks with broad arching leaves, tassels and ears.',
+    sugarcane: 'Sugarcane: tall dense jointed cane stalks.',
+    hemp: 'Hemp: tall upright bast-fibre stalks with palmate foliage.',
+    soybean: 'Soybean: low bushy rows of trifoliate leaves.',
+    legume: 'Pulses and legumes (beans, peas, lentils, chickpeas, cowpeas): leafy low rows.',
+    flax: 'Flax: slender upright stems grown for fibre or linseed.',
+    cotton: 'Cotton: woody bushy rows with broad leaves and pale bolls.',
+    root: 'Root and tuber crops (potato, yam, taro, cassava, turnip): mounded leafy rows.',
+    squash: 'Cucurbits (squash, pumpkin, gourd, melon): broad trailing vines over mounds.',
+    vine: 'Grapevines and trellised climbers, trained in ordered rows.',
+    mulberry: 'Mulberry groves, pruned small trees in ordered rows for sericulture or fruit.',
+    olive: 'Olive groves, silvery-green orchard trees spaced over bare or grassy earth.',
+    palm: 'Date or coconut palm groves in ordered rows.',
+    orchard: 'Fruit, nut or tea orchards: ordered rows of small trees.',
+  },
+  season: {
+    summer: 'Sown in spring, growing through summer and harvested in late summer or autumn.',
+    winter: 'Sown in autumn, overwintering green and ripening for late-spring or early-summer harvest.',
+    perennial: 'Standing year-round as trees, vines or perennial canes.',
+    'year-round': 'Cropped across most of the year in warm tropical or irrigated climates.',
+  },
+  share: {
+    staple: 'A main staple occupying the largest share of plots.',
+    secondary: 'An important field crop grown beside the staple.',
+    minor: 'A specialist or subsidiary crop taking a smaller share of plots.',
+  },
+} as const;
+
+export type CropKind = keyof typeof CROP_WORDS.kind;
+export type CropSeason = keyof typeof CROP_WORDS.season;
+export type CropShare = keyof typeof CROP_WORDS.share;
+
+/** The seven botanical growth archetypes the renderer and crop generator draw. */
+export type CropArchetype = 'millet' | 'cereal' | 'cane' | 'paddy' | 'broadleaf' | 'vine' | 'orchard';
+
+/** One crop named in an agricultural tradition's `crops` claim. */
+export interface CropEntry {
+  kind: CropKind;
+  /** optional display name, e.g. "Foxtail millet" or "Winter wheat" */
+  name?: string;
+  /** optional taxon record id (`life/taxa/…`) */
+  taxon?: string;
+  season?: CropSeason;
+  share?: CropShare;
+}
+
+/** Which botanical archetype draws each crop kind. */
+export const CROP_ARCHETYPE_OF: Record<CropKind, CropArchetype> = {
+  millet: 'millet',
+  wheat: 'cereal',
+  barley: 'cereal',
+  oat: 'cereal',
+  rye: 'cereal',
+  rice: 'paddy',
+  sorghum: 'cane',
+  maize: 'cane',
+  sugarcane: 'cane',
+  hemp: 'cane',
+  soybean: 'broadleaf',
+  legume: 'broadleaf',
+  flax: 'broadleaf',
+  cotton: 'broadleaf',
+  root: 'broadleaf',
+  squash: 'vine',
+  vine: 'vine',
+  mulberry: 'orchard',
+  olive: 'orchard',
+  palm: 'orchard',
+  orchard: 'orchard',
+};
+
+/** Default display label for each crop kind when an entry gives no custom name. */
+export const CROP_LABEL: Record<CropKind, string> = {
+  millet: 'Millet',
+  wheat: 'Wheat',
+  barley: 'Barley',
+  oat: 'Oats',
+  rye: 'Rye',
+  rice: 'Rice',
+  sorghum: 'Sorghum',
+  maize: 'Maize',
+  sugarcane: 'Sugarcane',
+  hemp: 'Hemp',
+  soybean: 'Soybeans',
+  legume: 'Legumes',
+  flax: 'Flax',
+  cotton: 'Cotton',
+  root: 'Root crops',
+  squash: 'Squash and gourds',
+  vine: 'Grapevines',
+  mulberry: 'Mulberry grove',
+  olive: 'Olive grove',
+  palm: 'Palm grove',
+  orchard: 'Orchard',
+};
+
+/** Default botanical profile of each archetype: mature height range (m), row spacing, step along row, card width, and linear RGB tones [green, ripe]. */
+export const CROP_PROFILE: Record<CropArchetype, { greenH: [number, number]; ripeH: [number, number]; row: number; apart: number; wide: number; green: [[number, number, number], [number, number, number]]; ripe: [[number, number, number], [number, number, number]]; defaultSeason: CropSeason }> = {
+  millet: { greenH: [0.55, 1.05], ripeH: [1.05, 1.5], row: 0.65, apart: 0.42, wide: 0.56, green: [[0.11, 0.16, 0.045], [0.16, 0.20, 0.06]], ripe: [[0.38, 0.28, 0.10], [0.30, 0.22, 0.08]], defaultSeason: 'summer' },
+  cereal: { greenH: [0.42, 0.85], ripeH: [0.8, 1.2], row: 0.55, apart: 0.38, wide: 0.54, green: [[0.09, 0.15, 0.04], [0.14, 0.19, 0.055]], ripe: [[0.42, 0.32, 0.12], [0.33, 0.25, 0.10]], defaultSeason: 'winter' },
+  cane: { greenH: [1.15, 2.05], ripeH: [1.85, 2.7], row: 0.9, apart: 0.55, wide: 0.72, green: [[0.07, 0.14, 0.035], [0.11, 0.18, 0.048]], ripe: [[0.32, 0.26, 0.11], [0.25, 0.20, 0.09]], defaultSeason: 'summer' },
+  paddy: { greenH: [0.45, 0.8], ripeH: [0.75, 1.05], row: 0.5, apart: 0.36, wide: 0.48, green: [[0.09, 0.20, 0.04], [0.14, 0.24, 0.055]], ripe: [[0.37, 0.30, 0.10], [0.29, 0.24, 0.08]], defaultSeason: 'summer' },
+  broadleaf: { greenH: [0.35, 0.68], ripeH: [0.55, 0.85], row: 0.75, apart: 0.48, wide: 0.58, green: [[0.08, 0.14, 0.038], [0.13, 0.18, 0.052]], ripe: [[0.26, 0.21, 0.09], [0.20, 0.16, 0.075]], defaultSeason: 'summer' },
+  vine: { greenH: [0.65, 1.2], ripeH: [0.85, 1.45], row: 1.5, apart: 0.85, wide: 0.8, green: [[0.085, 0.14, 0.04], [0.13, 0.17, 0.052]], ripe: [[0.24, 0.19, 0.075], [0.18, 0.14, 0.06]], defaultSeason: 'perennial' },
+  orchard: { greenH: [2.2, 3.8], ripeH: [2.4, 4.0], row: 4.5, apart: 4.5, wide: 2.2, green: [[0.08, 0.13, 0.042], [0.12, 0.16, 0.055]], ripe: [[0.16, 0.16, 0.065], [0.20, 0.15, 0.07]], defaultSeason: 'perennial' },
+};
+
+/** Relative plot-selection weight of a crop's share word. */
+export const CROP_SHARE_WEIGHT: Record<CropShare, number> = { staple: 3, secondary: 1.5, minor: 0.7 };
+
+/** What is wrong with a `crops` claim's value: a non-empty list of crop entries. */
+export function cropProblems(v: unknown): string[] {
+  if (!Array.isArray(v) || !v.length) return ['crops are a list of one or more entries, each naming at least a crop kind'];
+  const out: string[] = [];
+  const allowedKeys = new Set(['kind', 'name', 'taxon', 'season', 'share']);
+  v.forEach((x, i) => {
+    const at = `crop ${i + 1}`;
+    if (!x || typeof x !== 'object' || Array.isArray(x)) {
+      out.push(`${at}: a crop entry is a mapping of named parameters`);
+      return;
+    }
+    const r = x as Record<string, unknown>;
+    for (const k of Object.keys(r)) if (!allowedKeys.has(k)) out.push(`${at}: unknown crop parameter "${k}"`);
+    if (r.kind === undefined) out.push(`${at}: it says its kind, one of ${Object.keys(CROP_WORDS.kind).join(', ')}`);
+    else if (typeof r.kind !== 'string' || !(r.kind in CROP_WORDS.kind)) out.push(`${at}: kind "${String(r.kind)}" is not one of ${Object.keys(CROP_WORDS.kind).join(', ')}`);
+    if (r.season !== undefined && (typeof r.season !== 'string' || !(r.season in CROP_WORDS.season))) out.push(`${at}: season "${String(r.season)}" is not one of ${Object.keys(CROP_WORDS.season).join(', ')}`);
+    if (r.share !== undefined && (typeof r.share !== 'string' || !(r.share in CROP_WORDS.share))) out.push(`${at}: share "${String(r.share)}" is not one of ${Object.keys(CROP_WORDS.share).join(', ')}`);
+    if (r.name !== undefined && (typeof r.name !== 'string' || !r.name.trim())) out.push(`${at}: name must be a non-empty string`);
+    if (r.taxon !== undefined && (typeof r.taxon !== 'string' || !r.taxon.trim())) out.push(`${at}: taxon must be a taxon record id`);
+  });
+  return out;
+}
+
+/** A crop list in words, for a panel. */
+export const cropsText = (v: CropEntry[]): string =>
+  v.map((c) => `${c.name ?? CROP_LABEL[c.kind]}${c.season && c.season !== CROP_PROFILE[CROP_ARCHETYPE_OF[c.kind]].defaultSeason ? ` (${c.season})` : ''}`).join(', ');
+
+/**
+ * A way of farming crops (a `tradition/agriculture` record), as the build compiles it: whose way it was, where and
+ * when it held, which crops its people grew, and optionally how their fields were laid out.
+ */
+export interface Agriculture {
+  id: string;
+  label: string;
+  parent?: string;
+  depth: number;
+  regions: number[];
+  span: [number, number];
+  lifeways: LifewayWord[];
+  crops: CropEntry[];
+  fields: FieldSpec;
+  from: From;
+}
+
+export interface AgricultureInput {
+  id: string;
+  label: string;
+  parent?: string;
+  regions: number[];
+  span: [number, number];
+  lifeways?: LifewayWord[];
+  crops?: CropEntry[];
+  fields?: FieldSpec;
+}
+
+/** Each agricultural tradition with what it inherits: regions, lifeways, crops (whole), and field system (merged). */
+export function compileAgriculture(inputs: AgricultureInput[]): Agriculture[] {
+  const byId = new Map(inputs.map((t) => [t.id, t]));
+  const done = new Map<string, Agriculture>();
+  const visit = (t: AgricultureInput, seen: Set<string>): Agriculture => {
+    const have = done.get(t.id);
+    if (have) return have;
+    const up = t.parent && byId.has(t.parent) && !seen.has(t.parent) ? visit(byId.get(t.parent)!, new Set([...seen, t.id])) : undefined;
+    const from: From = { ...(up?.from ?? {}) };
+    if (t.lifeways?.length) from.lifeway = t.id;
+    if (t.crops?.length) from.crops = t.id;
+    const fields = { ...(up?.fields ?? {}) } as Record<string, unknown>;
+    for (const [k, v] of Object.entries(t.fields ?? {})) {
+      fields[k] = v;
+      from[`fields.${k}`] = t.id;
+    }
+    const out: Agriculture = {
+      id: t.id,
+      label: t.label,
+      ...(up ? { parent: up.id } : {}),
+      depth: up ? up.depth + 1 : 0,
+      regions: t.regions.length ? [...t.regions].sort((a, b) => a - b) : up?.regions ?? [],
+      span: t.span,
+      lifeways: t.lifeways?.length ? [...t.lifeways] : up?.lifeways ?? [],
+      crops: t.crops?.length ? t.crops.map((c) => ({ ...c })) : up?.crops ?? [],
+      fields: fields as FieldSpec,
+      from,
+    };
+    done.set(t.id, out);
+    return out;
+  };
+  return inputs.map((t) => visit(t, new Set())).sort((a, b) => (a.id < b.id ? -1 : 1));
+}
+
+/**
+ * The agricultural tradition of a way of life at a region and time: the most particular tradition that names the
+ * region, holds then, and was that way of life's (falling back to kin lifeways, e.g. farmers ↔ shifting-cultivators,
+ * or farmers for townspeople's surrounding fields).
+ */
+export function agricultureAt(list: Agriculture[], region: number | undefined, t: number, lifeway: LifewayWord): Agriculture | undefined {
+  if (region === undefined) return undefined;
+  const tries: LifewayWord[] = lifeway === 'townspeople' ? ['townspeople', 'farmers'] : [lifeway, ...(LIFEWAY_KIN[lifeway] ?? [])];
+  for (const way of tries) {
+    let best: Agriculture | undefined;
+    for (const x of list) {
+      if (t < x.span[0] || t > x.span[1] || !x.regions.includes(region) || !x.lifeways.includes(way) || !x.crops.length) continue;
+      if (!best) {
+        best = x;
+        continue;
+      }
+      const better =
+        x.depth !== best.depth ? x.depth > best.depth : x.regions.length !== best.regions.length ? x.regions.length < best.regions.length : x.span[0] !== best.span[0] ? x.span[0] > best.span[0] : x.id < best.id;
+      if (better) best = x;
+    }
+    if (best) return best;
+  }
+  return undefined;
+}
+
+/**
+ * Climate- and land-use-aware generic crops drawn where no agricultural tradition record holds: plainly marked generic
+ * in inspection. Never attributed to any historical record.
+ */
+export function genericCropsFor(use: string, climate: string): CropEntry[] {
+  if (use === 'rice') return [{ kind: 'rice', name: 'Wetland rice', season: 'summer', share: 'staple' }, { kind: 'legume', name: 'Field legumes', season: 'summer', share: 'minor' }];
+  if (use === 'swidden') return [{ kind: 'root', name: 'Swidden roots', season: 'year-round', share: 'staple' }, { kind: 'millet', name: 'Dryland grain', season: 'summer', share: 'secondary' }];
+  if (climate === 'rainforest') return [{ kind: 'root', name: 'Tropical tubers', season: 'year-round', share: 'staple' }, { kind: 'rice', name: 'Upland grain', season: 'year-round', share: 'secondary' }];
+  if (climate === 'savanna' || climate === 'desert' || climate === 'steppe') {
+    return [
+      { kind: 'millet', name: 'Dryland millet', season: 'summer', share: 'staple' },
+      { kind: 'wheat', name: 'Winter grain', season: 'winter', share: 'secondary' },
+      { kind: 'legume', name: 'Dryland pulses', season: 'summer', share: 'minor' },
+    ];
+  }
+  return [
+    { kind: 'wheat', name: 'Small-grain cereal', season: 'winter', share: 'staple' },
+    { kind: 'barley', name: 'Spring grain', season: 'summer', share: 'secondary' },
+    { kind: 'legume', name: 'Field legumes', season: 'summer', share: 'minor' },
+  ];
+}
+
 /** A tradition that draws houses of a way of life at a region and a time: whose it was written for, where that is a way of life kin to theirs, and the part of their settlements it draws. */
 export interface Housed {
   tradition: Tradition;

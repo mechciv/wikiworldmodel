@@ -1,6 +1,6 @@
 // Entity records for the inspect panel, features for tiles, periods, and the search index.
 import { footprintText, type Footprint } from '../../../../core/footprint.ts';
-import { lifewayText, outbuildingsText, specText, townText, type DwellingSpec, type LifewayWord, type OutbuildingSpec, type TownSpec } from '../../../../core/dwelling.ts';
+import { cropsText, lifewayText, outbuildingsText, specText, townText, type CropEntry, type DwellingSpec, type LifewayWord, type OutbuildingSpec, type TownSpec } from '../../../../core/dwelling.ts';
 import { levelOf } from '../../../../core/ladder.ts';
 import type { FormSpec } from '../../../../core/city.ts';
 import type { CitationRecord, ClaimRecord, EntityRecord, InverseRecord, PeriodRecord, RelationRecord, SearchFile, SourceRecord, VariantRecord } from '../../../../core/records.ts';
@@ -450,6 +450,8 @@ function valueText(s: Solved, c: Claim, labelOf: (ref: string) => string): strin
       return lifewayText(v as LifewayWord[]);
     case 'outbuildings':
       return outbuildingsText(v as OutbuildingSpec[]);
+    case 'crops':
+      return cropsText(v as CropEntry[]);
     case 'geometry': {
       const g = v as { from: string; names?: string[]; elements?: string[]; type?: string; coordinates?: unknown };
       // An outline written in the claim itself: how much of one, as it has no rows to name.

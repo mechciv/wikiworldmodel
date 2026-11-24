@@ -2,7 +2,7 @@
 // passable ground. A household takes a frontage on a side lane and keeps an entrance to it. All distances
 // and lines here are procedural. The regional people, house dimensions and any stated facing come from the caller.
 import { hash2, PI, TAU } from '../../city/math.ts';
-import { plotAt, plotPlace, type PlotStyle } from '../../../../core/plots.ts';
+import { plotAt, plotDomainAt, plotNumber, plotPlaceInDomain, type PlotStyle } from '../../../../core/plots.ts';
 
 export type Point = [number, number];
 export interface Lane { line: number[]; width: number }
@@ -38,17 +38,20 @@ function walkable(a: Point, b: Point, width: number, fits: (x: number, y: number
   return true;
 }
 
-/** Extend a field entrance to the nearest reachable balk of the same plot that the ground shader draws. */
+/** Extend a field entrance to the nearest reachable balk of the same domain parcel that the ground shader draws. */
 function fieldEdge(tip: Point, style: PlotStyle, fits: (x: number, y: number) => boolean, width: number): Point {
-  const p = plotAt(...tip, style);
-  const side = Math.max(8, style.plot), aspect = Math.sqrt(Math.max(1, style.aspect));
-  const w = side / aspect, l = side * aspect;
-  const candidates = [
-    plotPlace(p.i * w, p.along, style), plotPlace((p.i + 1) * w, p.along, style),
-    plotPlace(p.across, p.j * l, style), plotPlace(p.across, (p.j + 1) * l, style),
+  const { domain } = plotDomainAt(tip[0], tip[1], style);
+  const p = plotAt(tip[0], tip[1], style);
+  const stagger = style.kind === 1 ? 0.15 : 0.65;
+  const shift = plotNumber(p.ci, domain.salt, 41) * p.sy * stagger;
+  const candidates: Point[] = [
+    plotPlaceInDomain(p.ci * p.sx, p.along, domain, style),
+    plotPlaceInDomain((p.ci + 1) * p.sx, p.along, domain, style),
+    plotPlaceInDomain(p.across, p.cj * p.sy - shift, domain, style),
+    plotPlaceInDomain(p.across, (p.cj + 1) * p.sy - shift, domain, style),
   ];
-  const distance = (p: Point) => Math.hypot(p[0] - tip[0], p[1] - tip[1]);
-  return candidates.sort((a, b) => distance(a) - distance(b)).find(p => distance(p) <= 45 && walkable(tip, p, width, fits)) ?? tip;
+  const distance = (pt: Point) => Math.hypot(pt[0] - tip[0], pt[1] - tip[1]);
+  return candidates.sort((a, b) => distance(a) - distance(b)).find(pt => distance(pt) <= 45 && walkable(tip, pt, width, fits)) ?? tip;
 }
 
 export function farmLanes(origin: Point, count: number, seed: number, lotSide: number, footprints: Footprint[],

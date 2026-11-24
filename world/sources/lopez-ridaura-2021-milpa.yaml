@@ -1,0 +1,24 @@
+id: src:lopez-ridaura-2021-milpa
+type: publication
+kind: review
+citation: >-
+  Lopez-Ridaura, S., Barba-Escoto, L., Reyna-Ramirez, C.A., Sum, C., Palacios-Rojas, N. &
+  Gerard, B. (2021). Maize intercropping in the milpa system. Diversity, extent and importance for
+  nutritional security in the Western Highlands of Guatemala. Scientific Reports 11, 3696.
+authors:
+  - "Lopez-Ridaura, S."
+  - "Barba-Escoto, L."
+  - "Reyna-Ramirez, C.A."
+  - "Sum, C."
+  - "Palacios-Rojas, N."
+  - "Gerard, B."
+published: 2021
+title: "Maize intercropping in the milpa system. Diversity, extent and importance for nutritional security in the Western Highlands of Guatemala"
+container: "Scientific Reports 11, 3696"
+doi: 10.1038/s41598-021-82784-2
+url: https://pmc.ncbi.nlm.nih.gov/articles/PMC7881131/
+license: CC-BY-4.0
+license_note: Open-access article under CC BY 4.0; short quotes with credit.
+verified:
+  by: machine:antigravity
+  how: Full text fetched from PubMed Central (PMC7881131) and read; quotes verified by npm run world -- quote-check.

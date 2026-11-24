@@ -75,6 +75,14 @@ export const LEAF_KINDS = {
   whorl: { falls: 'scales', sprays: 2, spray: [1.0, 0.36], boughs: 0, bough: [0, 0], what: 'a jointed stem with a ring of thin branches at each joint: a horsetail' },
   herb: { falls: 'oval', sprays: 3, spray: [1.0, 1.0], boughs: 0, bough: [0, 0], what: 'a low leafy plant: soft leaves on short stems from the ground' },
   moss: { falls: 'small', sprays: 2, spray: [1.0, 1.0], boughs: 0, bough: [0, 0], what: 'a cushion of tiny leaves' },
+  // Crops: botanical stands of real field crops (core/dwelling.ts, world/generators/people/crops.ts).
+  'crop-millet': { falls: 'long', sprays: 2, spray: [1.0, 0.72], boughs: 0, bough: [0, 0], what: 'foxtail or broomcorn millet: slender arching blades and heavy nodding cylindrical seed panicles' },
+  'crop-cereal': { falls: 'long', sprays: 2, spray: [1.0, 0.62], boughs: 0, bough: [0, 0], what: 'small-grain cereal (wheat, barley, rye, oats): dense upright culms topped with bearded ears' },
+  'crop-cane': { falls: 'long', sprays: 2, spray: [1.0, 0.68], boughs: 0, bough: [0, 0], what: 'tall jointed stalks (maize, sorghum, hemp, sugarcane) with broad arching leaves and terminal tassels' },
+  'crop-paddy': { falls: 'long', sprays: 2, spray: [1.0, 0.65], boughs: 0, bough: [0, 0], what: 'wetland paddy rice clump: slender arching tufted stalks with fine drooping grain panicles' },
+  'crop-broadleaf': { falls: 'oval', sprays: 2, spray: [1.0, 0.9], boughs: 0, bough: [0, 0], what: 'bushy broadleaf row crop (soybeans, pulses, cotton, tubers): dense leafy stems along the row' },
+  'crop-vine': { falls: 'lobed', sprays: 2, spray: [1.0, 0.92], boughs: 0, bough: [0, 0], what: 'trellised grapevine or cucurbit row: broad lobed leaves and hanging fruit clusters over woody stems' },
+  'crop-stubble': { falls: 'long', sprays: 2, spray: [1.0, 0.75], boughs: 0, bough: [0, 0], what: 'freshly reaped grain stubble: short cut straw stalks standing in rows' },
 } as const satisfies Record<string, LeafKind>;
 
 export type LeafKindName = keyof typeof LEAF_KINDS;
