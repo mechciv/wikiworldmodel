@@ -61,7 +61,7 @@ export class CityScene extends CellScene {
           this.ready = true;
           resolve();
           this.onChange();
-        } else this.received(m);
+        } else if (m.type === 'cell') this.received(m);
       };
       const msg: ToWorker = { type: 'init', city: this.file, levels: this.file.ground, heights };
       this.worker.postMessage(msg);

@@ -35,6 +35,23 @@ export interface WaterMesh {
   indices: Uint32Array;
 }
 
+/** No generated fabric: what a living scene draws a city's records with, its houses being the settlement generator's. */
+export const NO_FABRIC: FabricPlan = {
+  lots: 0,
+  offset: new Int32Array(1),
+  points: new Float32Array(0),
+  base: new Float32Array(0),
+  top: new Float32Array(0),
+  type: new Uint8Array(0),
+  region: new Uint8Array(0),
+  style: new Uint8Array(0),
+  treeCount: 0,
+  trees: new Float32Array(0),
+  treeType: new Uint8Array(0),
+  regionLots: [],
+  domain: [],
+};
+
 export class CityBuilder {
   readonly ground: GroundSampler;
   readonly plan: FabricPlan;
@@ -46,10 +63,20 @@ export class CityBuilder {
   readonly lotEntity: number;
   readonly treeEntity: number;
   readonly crowdEntity: number;
+  /** the entity of the first structure: the rest follow it in the file's order */
+  readonly first: number;
+  /** whether it draws the generated fabric: its lots, trees and crowd */
+  readonly fabric: boolean;
 
-  constructor(readonly city: CityFile, grounds: GroundGridData[], plan?: FabricPlan) {
+  /**
+   * `opts.fabric` false draws a city's records alone, as a living scene does (docs/plans/CITIES.md, decision 1);
+   * `opts.entityBase` is the entity of its first structure, where they follow a scene's own.
+   */
+  constructor(readonly city: CityFile, grounds: GroundGridData[], plan?: FabricPlan, opts: { fabric?: boolean; entityBase?: number } = {}) {
     this.ground = new GroundSampler(grounds);
-    this.plan = plan ?? fabricPlan(city, this.ground);
+    this.fabric = opts.fabric !== false;
+    this.plan = this.fabric ? (plan ?? fabricPlan(city, this.ground)) : NO_FABRIC;
+    this.first = opts.entityBase ?? structureEntity(0);
     this.lotEntity = city.structures.length + 1;
     this.treeEntity = this.lotEntity + this.plan.lots;
     this.crowdEntity = this.treeEntity + 1;
@@ -171,13 +198,13 @@ export class CityBuilder {
     const ctx: FormContext = { ...this.ctx, detail };
     for (const i of this.cellStructures.get(key) ?? []) {
       const s = c.structures[i];
-      m.entity = structureEntity(i);
+      m.entity = this.first + i;
       raise(m, s, { ...ctx, clip: undefined });
     }
     const clip = cellBox(key);
     for (const i of this.cellLines.get(key) ?? []) {
       const s = c.structures[i];
-      m.entity = structureEntity(i);
+      m.entity = this.first + i;
       raise(m, s, { ...ctx, clip });
     }
     for (const i of this.cellLots.get(key) ?? []) {
@@ -191,7 +218,7 @@ export class CityBuilder {
       const p = this.plan.trees;
       tree(m, p[i * 4], p[i * 4 + 1], p[i * 4 + 2], this.plan.treeType[i], p[i * 4 + 3], detail, 40 + ((i * 53) & 191));
     }
-    if (detail) this.crowd(m, key, clip);
+    if (detail && this.fabric) this.crowd(m, key, clip);
     return m;
   }
 

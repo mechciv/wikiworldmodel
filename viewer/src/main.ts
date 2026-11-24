@@ -27,7 +27,7 @@ import { GENERATOR as SURFACE, type SurfaceParams } from '../../world/generators
 import { GENERATOR as GENERIC_LAND, genericLandAt, type GenericLandParams } from '../../world/generators/earth/generic-land/v1.ts';
 import { resolve as resolveLayer, type Answer, type LayerId, type ResolveWorld } from '../../core/resolve.ts';
 import type { FromGlobeWorker, ToGlobeWorker } from './gl/globeworker.ts';
-import { EARTH_RADIUS, fromLocal, toLocal, type CityStructure } from '../../core/city.ts';
+import { EARTH_RADIUS, fromLocal, toLocal, type CityFile, type CityStructure } from '../../core/city.ts';
 import type { AtlasWhere } from '../../core/atlas.ts';
 import type { SceneFileV2 } from '../../core/scene.ts';
 import { bedrockShort, groundAnswer, substrateShort } from '../../core/substrate.ts';
@@ -37,6 +37,7 @@ import { Camera, MAX_DIST, MIN_DIST } from './camera.ts';
 import { LifeAtlas, type ClimateData } from './city/lifeatlas.ts';
 import { Climates, type ClimateAt } from './climates.ts';
 import { LifeScene } from './city/life.ts';
+import type { StructureBundle } from './city/structures.ts';
 import { lifeKeepRadius, sameLifeContext, SceneCache } from './city/lifecycle.ts';
 import type { PeopleSummary } from './city/lifeworker.ts';
 import { LandscapeAtlas } from './city/landscape.ts';
@@ -156,6 +157,11 @@ const GLOBE_GONE = 4.5e4;
  */
 const CITY_REACH = 6e4;
 const PLACE_REACH = 15e3;
+/**
+ * How far from a city's point a living scene draws its records: a scene reaches 16 km from its own point
+ * (world/generators/life/scene/v14.ts, EXTENT), and a city's records some 7 km from its.
+ */
+const BUNDLE_REACH = 2.3e4;
 /** How far one sees through the sea's water, as it is drawn: until its green light falls to a twentieth. */
 const SEEN_THROUGH_WATER = Math.log(20) / SEA.extinction[1];
 const RAD = Math.PI / 180;
@@ -530,7 +536,30 @@ async function start(root: HTMLElement): Promise<void> {
   // The sites: each one's scene loads as the camera comes near it, or at once if a link starts there.
   // The site is the one the view is at: of those drawn for the time shown, the one the camera is near;
   // otherwise whichever it is nearest.
-  const sites: SiteInfo[] = ts.sites ?? [];
+  // A city's records drawn building by building (a `city` site of the build: Rome's) are no scene of their own: a living
+  // scene near the city draws them among its own houses, on the city's surveyed ground (docs/plans/CITIES.md, decision 1).
+  const bundles: SiteInfo[] = (ts.sites ?? []).filter((s) => s.kind === 'city');
+  const sites: SiteInfo[] = (ts.sites ?? []).filter((s) => s.kind !== 'city');
+  /** Each city's file and ground, fetched once. */
+  const bundleFiles = new Map<string, Promise<StructureBundle>>();
+  const bundleOf = (s: SiteInfo): Promise<StructureBundle> => {
+    let p = bundleFiles.get(s.id);
+    if (!p) {
+      p = (async () => {
+        const file = await getJSON<CityFile>(build.base + s.file);
+        const heights = await Promise.all(file.ground.map(async (g) => new Int16Array(await getBytes(build.base + g.url))));
+        return { file, heights };
+      })();
+      p.catch(() => bundleFiles.delete(s.id));
+      bundleFiles.set(s.id, p);
+    }
+    return p;
+  };
+  /** Whether a structure stands at a time, by its record's dates as the default picture has them. */
+  const standsAt = (s: CityStructure, t: number) => (s.time.start.best ?? -Infinity) <= t && t <= (s.time.end.best ?? Infinity);
+  /** The city whose records a scene about a place and time draws: within its reach and its span. */
+  const bundleNear = (at: { lat: number; lon: number }, t: number): SiteInfo | undefined =>
+    bundles.find((b) => t >= b.span[0] && t <= b.span[1] && distanceFrom(b, at.lat, at.lon) < BUNDLE_REACH);
   const scenes = new Map<string, CityScene | LifeScene>();
   const loadingScenes = new Map<string, Promise<void>>();
   /** Scenes that could not be made, and why, said while the camera is at them. */
@@ -1896,7 +1925,25 @@ async function start(root: HTMLElement): Promise<void> {
         });
         if (p) spec.people = p;
       }
-      const scene = await LifeScene.create(gl!, spec, null, { fast: state.quality === 'fast' });
+      // A city's records and its surveyed ground, where the scene reaches a city that has them.
+      const near = bundleNear(spec.site.origin, t);
+      const bundle = near ? await bundleOf(near).catch((err) => {
+        console.error(`${near.id}: ${err instanceof Error ? err.message : String(err)}`);
+        return undefined;
+      }) : undefined;
+      if (bundle) {
+        const f = bundle.file;
+        spec.survey = {
+          of: near!.place ?? f.site.id,
+          origin: f.site.origin,
+          levels: f.ground.map((g, i) => ({ nx: g.nx, ny: g.ny, x0: g.x0, y0: g.y0, cell: g.cell, z: bundle.heights[i], ...(g.unit !== undefined ? { unit: g.unit } : {}), ...(g.base !== undefined ? { base: g.base } : {}) })),
+          water: { rings: f.water, islands: f.islands, level: f.site.water_level },
+          // The ground its structures take at the time: no house stands there, and nothing grows but in its gardens.
+          built: f.structures.filter((x) => standsAt(x, t) && !/^(works\/road|open\/(garden|district|region|water|island))/.test(x.kind)).flatMap((x) => x.rings.filter((r) => r.length >= 6)),
+          gardens: f.structures.filter((x) => standsAt(x, t) && x.kind === 'open/garden').flatMap((x) => x.rings.filter((r) => r.length >= 6)),
+        };
+      }
+      const scene = await LifeScene.create(gl!, spec, null, { fast: state.quality === 'fast', ...(bundle ? { structures: bundle } : {}) });
       scene.onChange = () => (dirty = true);
       const previous = lifeSite;
       const prevShore = lifeSiteShore;
@@ -2103,6 +2150,8 @@ async function start(root: HTMLElement): Promise<void> {
       here = null;
       if (city instanceof LifeScene) {
         const found = city.pick(px, py);
+        // A city's structure opens its record.
+        if (found.structure) return setState({ sel: found.structure.id });
         if (found.taxon) {
           const t = found.taxon;
           // A taxon with a record opens it; one that is only a row of the database says what the row says.
@@ -2591,17 +2640,18 @@ async function start(root: HTMLElement): Promise<void> {
     const entry = entryOf(id)!;
     // Rows of a dataset found by their name: no record to open, but where and when they were drawn.
     if (entry?.dataset) return goToRows(entry, at);
-    const home = sites.find((s) => s.kind === 'city');
-    if (entry && cityKind(entry.kind) && home && (at === undefined || (at >= home.span[0] && at <= home.span[1]))) {
-      const open = () => {
-        if (request !== navigation) return;
-        const c = scenes.get(home.id) as CityScene | undefined;
-        const s = c?.file.structures.find((x) => x.id === id);
-        if (s) flyToStructure(home, s, at);
-        else setState({ sel: id, ...(at === undefined ? {} : { t: at }) });
-      };
-      if (scenes.has(home.id)) open();
-      else void loadScene(home).then(open);
+    // A structure of a city with records: fly to it, where the living scene there draws it.
+    const homes = entry && cityKind(entry.kind) ? bundles.filter((b) => at === undefined || (at >= b.span[0] && at <= b.span[1])) : [];
+    if (homes.length) {
+      void (async () => {
+        for (const home of homes) {
+          const b = await bundleOf(home).catch(() => undefined);
+          const s = b?.file.structures.find((x) => x.id === id);
+          if (request !== navigation) return;
+          if (s) return flyToStructure(home, s, at);
+        }
+        setState({ sel: id, ...(at === undefined ? {} : { t: at }) });
+      })();
       return;
     }
     const placed = sites.find((s) => s.place === id);

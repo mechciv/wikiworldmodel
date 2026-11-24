@@ -21,6 +21,8 @@ import type { V3 } from '../mat.ts';
 import { groundLook, groundTones, rockLook } from './groundlook.ts';
 import { fieldStyle, type FromLifeWorker, type PeopleSummary, type ToLifeWorker } from './lifeworker.ts';
 import { Skyline } from './skyline.ts';
+import { StructureLayer, type StructureBundle } from './structures.ts';
+import { surveyOffset } from '../../../world/generators/life/survey.ts';
 import { shadowFocusFor, type LocalView } from './view.ts';
 
 const TIMELESS = 2e7;
@@ -110,6 +112,9 @@ export class LifeScene {
   skyline = new Skyline();
   tops: Float32Array = new Float32Array(0);
   private names: CityStructure[] = [];
+  /** a settlement's recorded structures, where the scene has a city's (structures.ts) */
+  structures?: StructureLayer;
+  private bundle?: StructureBundle;
   /** which names are new: labels are remade only when they change */
   labelSerial = 0;
   spec!: SceneSpec;
@@ -150,7 +155,7 @@ export class LifeScene {
    */
   readonly sea: boolean;
 
-  static async create(gl: GL, source: SceneSpec, expected: Fingerprint | null, opts: { fast?: boolean } = {}): Promise<LifeScene> {
+  static async create(gl: GL, source: SceneSpec, expected: Fingerprint | null, opts: { fast?: boolean; structures?: StructureBundle } = {}): Promise<LifeScene> {
     let renderer = renderers.get(gl);
     if (!renderer) {
       renderer = CityRenderer.create(gl, opts).catch(err => {
@@ -159,7 +164,9 @@ export class LifeScene {
       });
       renderers.set(gl, renderer);
     }
-    return new LifeScene(await renderer, source, expected, opts);
+    const scene = new LifeScene(await renderer, source, expected, opts);
+    scene.bundle = opts.structures;
+    return scene;
   }
 
   private constructor(readonly renderer: LocalRenderer, source: SceneSpec, expected: Fingerprint | null, private opts: { fast?: boolean }) {
@@ -174,7 +181,7 @@ export class LifeScene {
   }
 
   get settled(): boolean {
-    return this.ready && !this.waiting && this.last.pending === 0 && !this.moved();
+    return this.ready && !this.waiting && this.last.pending === 0 && !this.moved() && (!this.bundle || !!this.structures?.settled);
   }
 
   /** Make the ground, and be ready to take over the renderer. */
@@ -199,6 +206,7 @@ export class LifeScene {
             const problems = settlePrint(this.plan, m.print);
             if (problems.length) console.error(`the scene's generator made something different from the build: ${problems.join('; ')}`);
             this.ready = true;
+            this.startStructures();
             resolve();
           }
           this.onChange();
@@ -326,18 +334,23 @@ export class LifeScene {
     r.setGroundCover(...groundCover(this.spec));
     // Entities: taxa, houses, works, kept animals, paths/streets (1), crop palette slots (FIELD_SLOTS),
     // continuous perimeters (P), 3D fieldworks (1), and strewn stones (1).
-    const houseKinds = (this.people?.forms.length ?? 0) + (this.people?.works.length ?? 0) + (this.people?.kept ?? 0) + 1 + FIELD_SLOTS + (this.people?.perimeters.length ?? 0) + 2;
+    const houseKinds = this.entityBase() - this.spec.taxa.length - 1;
     if (detail?.paths && !this.pathsGpu) this.pathsGpu = r.upload(detail.paths.vertices, detail.paths.indices);
     if (detail?.walls && !this.wallsGpu) this.wallsGpu = r.upload(detail.walls.vertices, detail.walls.indices);
     if (detail?.fieldworks && !this.fieldworksGpu) this.fieldworksGpu = r.upload(detail.fieldworks.vertices, detail.fieldworks.indices);
-    // Continuous walls, watchtowers, gatehouses, terraces, and field walls cast crisp shadows into the shadow cascades.
-    r.shadowCells = () => {
+    // Continuous walls, watchtowers, gatehouses, terraces, field walls and a city's recorded structures cast crisp
+    // shadows into the shadow cascades.
+    r.shadowCells = (focus, radius) => {
       const casters: MeshHandle[] = [];
       if (this.wallsGpu) casters.push(this.wallsGpu);
       if (this.fieldworksGpu) casters.push(this.fieldworksGpu);
+      if (this.structures?.ready) casters.push(...this.structures.near(focus, radius));
       return casters;
     };
-    const out = new Float32Array((this.spec.taxa.length + 1 + houseKinds) * 4);
+    // A city's structures follow the scene's own entities, each dated by its record.
+    const extra = this.bundle?.file.structures.length ?? 0;
+    const out = new Float32Array((this.spec.taxa.length + 1 + houseKinds + extra) * 4);
+    if (this.bundle) out.set(structureRows(this.bundle, this.spec.site.slice), this.entityBase() * 4);
     for (let f = 0; f < houseKinds; f++) {
       const k = (this.spec.taxa.length + 1 + f) * 4;
       out[k] = -TIMELESS;
@@ -374,9 +387,40 @@ export class LifeScene {
       return { id: t.id, label: t.label, kind: 'taxon', form: { type: 'generic' }, rings: [], at: g.at, base: g.base, time: t.time, basis: 'procedural', curated: true, rank: (t.length ?? 0) >= 2 ? 2 : 3 } as CityStructure;
     });
     this.tops = Float32Array.from(groups, (g) => g.top);
+    // And a city's structures, after the groups: a name follows its group by its place in the list.
+    const s = this.structures;
+    if (s?.ready) {
+      this.names.push(...s.named);
+      const tops = new Float32Array(this.tops.length + s.tops.length);
+      tops.set(this.tops);
+      tops.set(s.tops, this.tops.length);
+      this.tops = tops;
+    }
     this.homes = groups;
     this.follow(this.clock);
     this.labelSerial++;
+  }
+
+  /** The first entity after the scene's own: its taxa, its kinds of house and work, and the rest. */
+  private entityBase(): number {
+    const houseKinds = (this.people?.forms.length ?? 0) + (this.people?.works.length ?? 0) + (this.people?.kept ?? 0) + 1 + FIELD_SLOTS + (this.people?.perimeters.length ?? 0) + 2;
+    return this.spec.taxa.length + 1 + houseKinds;
+  }
+
+  /** A city's recorded structures, once the scene's people are known: they are drawn among them. */
+  private startStructures(): void {
+    if (!this.bundle || this.structures) return;
+    const layer = new StructureLayer(this.renderer, this.bundle, surveyOffset(this.spec.site.origin, this.bundle.file.site.origin), this.entityBase(), !!this.opts.fast);
+    this.structures = layer;
+    layer.onChange = () => this.onChange();
+    layer
+      .load()
+      .then(() => {
+        this.skyline = Skyline.of(layer.named, layer.tops, { offset: new Int32Array(1), points: new Float32Array(0), top: new Float32Array(0), valid: [0, 0] });
+        this.updateNames(this.homes);
+        this.onChange();
+      })
+      .catch((err) => console.error(`a city's structures: ${err instanceof Error ? err.message : String(err)}`));
   }
 
   private selection(m: Extract<FromLifeWorker, { type: 'selection' }>): void {
@@ -526,6 +570,7 @@ export class LifeScene {
     if (this.pathsGpu) staticMeshes.push(this.pathsGpu);
     if (this.wallsGpu) staticMeshes.push(this.wallsGpu);
     if (this.fieldworksGpu) staticMeshes.push(this.fieldworksGpu);
+    if (this.structures?.ready) staticMeshes.push(...this.structures.visible(v, (x, y) => this.ground.at(x, y)));
     this.renderer.render(f, staticMeshes, outW, outH);
   }
 
@@ -545,9 +590,11 @@ export class LifeScene {
    * What is at a screen position: a taxon, a kind of house or work, a kept animal, a road/street, a regional crop slot,
    * a continuous perimeter wall/gatehouse, 3D fieldworks, or nothing.
    */
-  pick(x: number, y: number): { taxon?: LivingTaxon; house?: number; work?: number; kept?: LivingTaxon; path?: boolean; crop?: boolean; cropSlot?: number; perimeter?: number; fieldworks?: boolean } {
+  pick(x: number, y: number): { taxon?: LivingTaxon; house?: number; work?: number; kept?: LivingTaxon; path?: boolean; crop?: boolean; cropSlot?: number; perimeter?: number; fieldworks?: boolean; structure?: CityStructure } {
     const e = this.renderer.pick(x, y);
     if (!e) return {};
+    const structure = this.structures?.structureOf(e);
+    if (structure) return { structure };
     const made = e - this.spec.taxa.length - 1;
     const forms = this.people?.forms.length ?? 0;
     const works = this.people?.works.length ?? 0;
@@ -579,20 +626,40 @@ export class LifeScene {
       const v = lookup(t.variants, s, t.time);
       this.renderer.setEntityTime(i + 1, clamp(v.start.best, -TIMELESS), clamp(v.end.best, TIMELESS));
     });
+    // A competing claim for a structure's date moves it, as it did in a city's own scene.
+    const layer = this.structures;
+    if (layer)
+      layer.bundle.file.structures.forEach((st, i) => {
+        if (!st.variants) return;
+        const v = lookup(st.variants, s, st.time);
+        this.renderer.setEntityTime(layer.first + i, clamp(v.start.best, -TIMELESS), clamp(v.end.best, TIMELESS));
+      });
   }
 
   /** Light up every one of the taxon whose record is open. */
   select(id: string | null): void {
     if (!this.active) return;
-    if (this.selected) this.renderer.setEntityFlags(this.selected, 3);
+    if (this.selected) this.renderer.setEntityFlags(this.selected, this.selectedFlags);
     this.selected = 0;
     if (!id) return;
     const i = this.spec.taxa.findIndex((t) => t.id === id);
     if (i >= 0) {
       this.selected = i + 1;
+      this.selectedFlags = 3;
       this.renderer.setEntityFlags(this.selected, 3 + 8);
+      return;
+    }
+    // A city's structure: its basis, lit.
+    const e = this.structures?.entityOf(id);
+    if (e !== undefined) {
+      const st = this.structures!.structureOf(e)!;
+      this.selected = e;
+      this.selectedFlags = ({ evidence: 0, reconstruction: 1, projection: 2, procedural: 3 } as Record<string, number>)[st.basis] ?? 1;
+      this.renderer.setEntityFlags(e, this.selectedFlags + 8);
     }
   }
+  /** what the selected entity's flags were before it was lit */
+  private selectedFlags = 3;
 
   /** The scene's taxon of a record, if it is drawn here. */
   taxonOf(id: string): LivingTaxon | undefined {
@@ -624,5 +691,22 @@ export class LifeScene {
     this.pathsGpu = null;
     this.wallsGpu = null;
     this.fieldworksGpu = null;
+    this.structures?.dispose();
+    this.structures = undefined;
   }
+}
+
+/** When each of a city's structures stood, from the scene's moment, and what it rests on: rows of the entity texture. */
+function structureRows(b: StructureBundle, slice: number): Float32Array {
+  const T = 1e5;
+  const basis: Record<string, number> = { evidence: 0, reconstruction: 1, projection: 2, procedural: 3 };
+  const out = new Float32Array(b.file.structures.length * 4);
+  const clamp = (x: number | null, d: number) => (x === null || !Number.isFinite(x) ? d : Math.max(-T, Math.min(T, x - slice)));
+  b.file.structures.forEach((s, i) => {
+    out[i * 4] = clamp(s.time.start.best, -T);
+    out[i * 4 + 1] = clamp(s.time.end.best, T);
+    out[i * 4 + 2] = basis[s.basis] ?? 1;
+    out[i * 4 + 3] = s.base;
+  });
+  return out;
 }

@@ -402,4 +402,7 @@ params:
   figures: { per_house: 0.5, most_in_settlement: 300, most: 20000, height: 1.62, walk: { speed: 1.1, go: 0.7, range: [6, 40], stay: [8, 70], sag: 0.08, tries: 8 } }
   boats: { length: 5, beam: 0.9, side: 0.45, reach: 250, depth: 0.6, most_in_settlement: 3 }
   paths: { width: 1.8, reach: 2500, each: 2, most_km: 300, wander: 0.05, patterns: [shifting, farmsteads, hamlets, villages, towns, city] }
-  most_houses: 60000
+  # The most houses a scene keeps: past it, each stands for more people. A city of a million is drawn with a house to each
+  # of its plots (docs/plans/CITIES.md, decision 6), and the renderer keeps what is far by rank and distance, so this is
+  # a bound on what a worker holds, not on what is drawn.
+  most_houses: 400000

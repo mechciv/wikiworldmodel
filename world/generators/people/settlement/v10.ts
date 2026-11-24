@@ -519,7 +519,7 @@ interface TownOf {
  * how far a place is from fresh water (sites.ts, waterNear), which people settled by; without it no place is nearer than
  * another.
  */
-export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: number, y: number) => number, extent: number, beasts?: RoutineParams, near?: WaterNear, world?: (x: number, y: number) => number): SettlementPlan {
+export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: number, y: number) => number, extent: number, beasts?: RoutineParams, near?: WaterNear, world?: (x: number, y: number) => number, reserved?: (x: number, y: number) => boolean): SettlementPlan {
   const P = spec.people!;
   const p = P.generator.params as unknown as SettlementParams;
   const origin = spec.site.origin;
@@ -631,7 +631,8 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
   // Whether the ground takes a house: above the water and not too steep. Where the scene ends is a separate question, so
   // that which spot a settlement takes does not depend on which scene is drawing it.
   const ok = (x: number, y: number) => ground.at(x, y) - water(x, y) > p.site.above_water && slope(x, y) < p.site.steep;
-  const inScene = (x: number, y: number) => Math.abs(x) < extent && Math.abs(y) < extent;
+  // Within the scene, and off the ground a settlement's recorded structures, its gardens and its mapped water take.
+  const inScene = (x: number, y: number) => Math.abs(x) < extent && Math.abs(y) < extent && !reserved?.(x, y);
   const fit = (x: number, y: number) => inScene(x, y) && ok(x, y);
   // A city a list or a record puts at a place stood there, on whatever of its ground is dry: a village keeps well above
   // the water, but the level of a scene's river is the scene's, and a city on a river's plain is no less a city for it.

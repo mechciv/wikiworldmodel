@@ -286,6 +286,23 @@ export interface ScenePeople {
 }
 
 /** Everything a scene is made from: nothing else about the world goes in, and the same spec makes the same scene. */
+/** A surveyed ground: grids laid out in metres about its own point, finest first, and the water it gives. */
+export interface SceneSurvey {
+  /** what it is of: a settlement's record */
+  of: string;
+  origin: { lat: number; lon: number };
+  /** heights in whole steps of `unit` metres (a tenth where not said) above `base` */
+  levels: { nx: number; ny: number; x0: number; y0: number; cell: number; z: Int16Array; unit?: number; base?: number }[];
+  /** outlines of its water in its metres, the islands in them, and the water's level, m */
+  water?: { rings: number[][]; islands: number[][]; level: number };
+  /**
+   * The ground the settlement's recorded structures take at the scene's time, in its metres: `built`, where no house
+   * stands and nothing grows, and `gardens`, where no house stands and trees may
+   */
+  built?: number[][];
+  gardens?: number[][];
+}
+
 export interface SceneSpec {
   format: 'lightworld-scene@2';
   site: {
@@ -313,6 +330,11 @@ export interface SceneSpec {
   climate?: SceneClimate;
   /** the people of the place and time, where the human landscape reaches it */
   people?: ScenePeople;
+  /**
+   * A settlement's own survey of its ground, finer than the world's, and its water, laid over the scene's where they
+   * reach (world/generators/life/survey.ts; docs/plans/CITIES.md, The models)
+   */
+  survey?: SceneSurvey;
   /** what its ground is made of, where the world says (core/substrate.ts); without it the climate's class decides, generically */
   substrate?: SceneSubstrate;
   /** the rock under its ground, where a map of today's bedrock is held for its time: what its outcrops and stones are drawn of */

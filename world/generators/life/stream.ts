@@ -15,6 +15,7 @@ import { freshOf, noise, type Waters } from './land.ts';
 import { GroundSort } from './sorting.ts';
 import { drawStone, drawWood, shedsWood, STONE_FINE, STONE_VARIANTS, WOOD, WOOD_SEEDS, woodLength } from './strewn.ts';
 import { drawDwelling, HOUSE_VARIANTS, houseSize, type HouseDetail } from '../people/dwellings.ts';
+import { clipWaters, joinWater, overlaySurvey, placeSurvey, surveyWaterMesh, withSurveyWater, type PlacedSurvey } from './survey.ts';
 import { farLand, farLandMask, farScale, LandUseMap, landUseMask, makeSettlement, waterNear, type LandUse, type SettlementParams, type SettlementPlan } from '../people/settlement/v10.ts';
 import { LaneGround } from '../people/settlement/lanes.ts';
 import { drawCrop, slotArchetype, sow, type CropParams } from '../people/crops.ts';
@@ -345,6 +346,8 @@ export class SceneStream {
   readonly ground: GroundSampler;
   /** the world's ground under the scene: the field's and the shape within its cells, before anything is invented or cut */
   readonly worldGround: WorldGround;
+  /** a settlement's own survey, where the scene has one: its ground and water (survey.ts) */
+  readonly survey?: PlacedSurvey;
   readonly plan: LivingPlan;
   readonly params: LivingParams;
   readonly cover: LandCover;
@@ -397,13 +400,20 @@ export class SceneStream {
   constructor(readonly spec: SceneSpec, private budget: Budget = FULL_BUDGET) {
     this.params = spec.generator.params as unknown as LivingParams;
     this.look = placeLook(spec);
-    const waters = watersFor(spec, this.look);
+    // A settlement's own survey, where the scene has one (survey.ts): its ground and its water stand in for the scene's
+    // where they reach, and the river the scene would run from the world's drainage is not drawn over its own.
+    const survey = spec.survey ? placeSurvey(spec.site.origin, spec.survey) : undefined;
+    this.survey = survey;
+    const made = watersFor(spec, this.look);
+    const waters = survey ? clipWaters(made, survey) : made;
     this.waters = waters;
     this.levels = groundGrids(spec, this.look, waters);
+    if (survey) overlaySurvey(this.levels, survey);
     this.ground = new GroundSampler(this.levels);
     this.worldGround = worldGround(spec);
     // Where the world gives the rivers, the water's level varies over the scene; otherwise it is the place's one level.
-    const levelAt = waters.paths ? waterLevels(waters) : undefined;
+    const ownLevel = waters.paths ? waterLevels(waters) : undefined;
+    const levelAt = survey?.rings.length ? withSurveyWater(ownLevel ?? (() => this.look.water), survey) : ownLevel;
     // The people, where the scene has any: their houses and fields, on this ground and away from this water. Where they
     // cleared the land no tree stands. A scene of the sea has them too, on whatever ground stands above its water: a place
     // a few metres above the sea, a delta or a lower plain, is a scene of the sea (scene/v14.ts, sea_below), and among the
@@ -411,9 +421,10 @@ export class SceneStream {
     let clearing: ((x: number, y: number) => number) | undefined;
     if (spec.people) {
       // People keep their houses and fields out of a river's bed, dry in the month or not: its floods come down it.
-      const water = (waters.paths?.some((p) => p.dry) ? waterLevels(waters, true) : levelAt) ?? (() => this.look.water);
+      const settled = (waters.paths?.some((p) => p.dry) ? waterLevels(waters, true) : ownLevel) ?? (() => this.look.water);
+      const water = survey?.rings.length ? withSurveyWater(settled, survey) : settled;
       // And they settled by fresh water, wet in the month or not: a river that ran some months was still where wells were dug.
-      this.people = makeSettlement(spec, this.ground, water, EXTENT, this.params.animals.routines, waterNear(waters, REACH), (x, y) => this.worldGround.at(x, y));
+      this.people = makeSettlement(spec, this.ground, water, EXTENT, this.params.animals.routines, waterNear(waters, REACH), (x, y) => this.worldGround.at(x, y), survey?.reserved);
       const use = new LandUseMap(this.people, this.ground, water, this.look.seed);
       this.landUse = use;
       this.crops = (spec.people.generator.params as unknown as SettlementParams).crops;
@@ -454,7 +465,9 @@ export class SceneStream {
     }
     // Nor does a tree stand yet on the bars an invented river has lately left.
     const fresh = freshOf(waters, this.params.ground.migration);
-    const treeless = clearing && fresh ? (x: number, y: number) => Math.max(clearing(x, y), fresh(x, y)) : (clearing ?? fresh);
+    const loose = clearing && fresh ? (x: number, y: number) => Math.max(clearing(x, y), fresh(x, y)) : (clearing ?? fresh);
+    // Nothing grows on the ground a city's recorded structures take.
+    const treeless = survey ? (x: number, y: number) => (survey.built(x, y) ? 1 : (loose?.(x, y) ?? 0)) : loose;
     // How far each point is from the banks of the water the world gives, flowing, still or dry: what grows by water.
     const banks = banksOf(spec, waters);
     this.plan = makePlan(spec, this.ground, this.look, waters, levelAt, treeless, banks);
@@ -570,11 +583,12 @@ export class SceneStream {
       const isSide = !isMain && lane.width >= 2.2;
       ribbon(lane.line, lane.width, isMain ? 0.115 : isSide ? 0.108 : 0.1, isMain ? 3.5 : 2.8, MAT.sand, isMain ? 92 : isSide ? 82 : 74);
     }
-    // 3. Internal town & planned streets: weathered stone avenues and compacted earth lanes within 4 km of scene centre.
+    // 3. Internal town & planned streets: weathered stone avenues and compacted earth lanes within 9 km of scene centre,
+    //    as many as a great city has.
     let streetCount = 0;
     for (const st of plan.streets) {
-      if (st.line.length < 4 || streetCount >= 1200) continue;
-      if (Math.hypot(st.line[0], st.line[1]) > 4200 && plan.streets.length > 600) continue;
+      if (st.line.length < 4 || streetCount >= 30000) continue;
+      if (Math.hypot(st.line[0], st.line[1]) > 9000 && plan.streets.length > 600) continue;
       ribbon(st.line, st.width, st.paved ? 0.11 : 0.1, 3.5, st.paved ? MAT.paving : MAT.sand, st.paved ? 92 : 76);
       streetCount++;
     }
@@ -806,9 +820,13 @@ export class SceneStream {
 
   /** The water: ribbons along the world's rivers, or the place's one sheet; with each vertex's flow and depth. */
   water(): { vertices: Float32Array; indices: Uint32Array; flow: Float32Array } {
-    if (this.waters.paths) return waterRibbons(this.waters);
-    const sheet = waterSheet(this.spec, this.look);
-    return { ...sheet, flow: new Float32Array((sheet.vertices.length / 3) * 3) };
+    const own = (() => {
+      if (this.waters.paths) return waterRibbons(this.waters);
+      const sheet = waterSheet(this.spec, this.look);
+      return { ...sheet, flow: new Float32Array((sheet.vertices.length / 3) * 3) };
+    })();
+    // A survey's own water, the mapped river of a settlement, is drawn with the scene's.
+    return this.survey?.rings.length ? joinWater(own, surveyWaterMesh(this.survey)) : own;
   }
 
   /** A cell's rows, made at least to this tier. */
