@@ -13,7 +13,7 @@ import { ROUTE, roundOf, wayAt, type RoutineParams } from '../../life/routines.t
 import { personGoes } from '../figures.ts';
 import { WORK_VARIANTS } from '../works.ts';
 import { farLand, farLandMask, farScale, LandUseMap, makeSettlement, toLocal, type Ground } from './v9.ts';
-import { FIELD_USE, GROWTH, SITING, type WaterNear } from './sites.ts';
+import { FIELD_USE, growFields, GROWTH, SITING, type WaterNear } from './sites.ts';
 
 const ROOT = join(import.meta.dirname, '../../../..');
 // How the living scene's animals go about: the settlement's kept ones go by the same parameters.
@@ -672,6 +672,15 @@ describe('where settlements stand, and what they farm (sites.ts)', () => {
     const same = shared.filter((s) => other.settlements.some((o) => Math.hypot(o.x + bx - s.x, o.y + by - s.y) < 2)).length;
     // When this was written all of them did: 398 of 398.
     expect(same / shared.length).toBeGreaterThan(0.98);
+  });
+
+  it('grows the fields of a house that stands where nothing is farmed from the land about it', () => {
+    // A strip of wet ground 60 m wide along the meridian, too low to farm, and good land either side of it; one house in it.
+    const wet: Ground = { at: (x) => (Math.abs(x) < 30 ? 0.3 : 5) };
+    const g = growFields([{ starts: [[0, 0]], r: 10, x: 0, y: 0, area: 200000, use: 'rainfed', settlement: 0 }], wet, dry, undefined, (x, y) => [x, y], GROWTH, 3000, 7);
+    let farmed = 0;
+    for (let k = 0; k < g.owner.length; k++) if (g.owner[k] === 0) farmed++;
+    expect(farmed * g.cell * g.cell).toBeGreaterThan(0.8 * 200000);
   });
 
   it("takes the record's siting and growth where a build has none", () => {

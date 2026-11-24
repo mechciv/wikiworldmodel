@@ -747,10 +747,14 @@ export function growFields(
     if (owner[k] !== -1 || left[si] <= 0) continue;
     if (!ready[k]) prepare(k);
     const e = ease[si];
-    if (!(e[k] > 0.02)) continue;
-    owner[k] = sources[si].settlement >= 0 ? sources[si].settlement : -2;
-    use[k] = FIELD_USE[sources[si].use];
-    left[si]--;
+    // A house by a river or on a slope may stand where nothing is farmed: its fields start from the nodes about it.
+    const farmed = e[k] > 0.02;
+    if (!farmed && c > 0) continue;
+    if (farmed) {
+      owner[k] = sources[si].settlement >= 0 ? sources[si].settlement : -2;
+      use[k] = FIELD_USE[sources[si].use];
+      left[si]--;
+    }
     const i = k % n;
     const j = (k - i) / n;
     for (let q = 0; q < 16; q += 2) {
@@ -764,7 +768,7 @@ export function growFields(
       const len = q < 8 ? cell : cell * Math.SQRT2;
       // Across the grain is more effort than along it.
       const across = 0.5 * (1 - (TWICE[q] * grainC[k] + TWICE[q + 1] * grainS[k]));
-      const next = c + len * (1 + GR.across * across) * 0.5 * (1 / e[k] + 1 / e[m]);
+      const next = c + len * (1 + GR.across * across) * 0.5 * ((farmed ? 1 / e[k] : 1 / e[m]) + 1 / e[m]);
       if (next > most[si]) continue;
       if (bestBy[m] === si && next >= best[m]) continue;
       if (next < best[m]) {
