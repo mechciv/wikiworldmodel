@@ -57,6 +57,7 @@ Proposals for running the project in public, and for the viewer. Not built, exce
 | [plans/VISUAL-GAPS.md](plans/VISUAL-GAPS.md) | a sample of places and times, each researched and pictured from the evidence, beside what the viewer draws: the gaps by layer, model and generator |
 | [plans/PARITY.md](plans/PARITY.md) | what would close those gaps, ranked by how much of a picture each changes: the defects found, the ground, the sky and season, the rocks' setting, plants, animals, relief, water, people and the globe |
 | [plans/HUMAN-LANDSCAPE-REALISM.md](plans/HUMAN-LANDSCAPE-REALISM.md) | moving settlements, walls, roads, fields, crops and daily activity from schematic placeholders to cohesive, living historical landscapes |
+| [plans/CITIES.md](plans/CITIES.md) | every settlement at any time from one system, graded by what is known of it: a city in layers that last differently long, one ranking of the ground that makes it grow and shrink, the land divided once, buildings in generations on plots that last, work that goes somewhere, and Rome moved over to it |
 
 ## Archive
 

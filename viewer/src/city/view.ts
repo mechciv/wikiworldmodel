@@ -108,6 +108,20 @@ export function localView(s: CameraState, origin: { lat: number; lon: number }, 
   };
 }
 
+/**
+ * Shadow-cascade focus point: ahead of the eye when near the ground (keeping cascade 0 tight on
+ * nearby geometry) and smoothly blending to the look-at target between 1500 m and 4500 m clearance
+ * so shadow cascades never jump during vertical zoom.
+ */
+export function shadowFocusFor(v: LocalView): V3 {
+  const ahead = Math.min(v.range, 700);
+  const nx = v.eye[0] + v.forward[0] * ahead;
+  const ny = v.eye[1] + v.forward[1] * ahead;
+  const nz = Math.min(v.target[2], v.eye[2]);
+  const w = smooth(1500, 4500, v.clearance);
+  return [nx + (v.target[0] - nx) * w, ny + (v.target[1] - ny) * w, nz + (v.target[2] - nz) * w];
+}
+
 /** How much of the straight way from one point to another, in metres, lies under a sea's surface at a height. */
 export function underSea(a: V3, b: V3, sea = 0): number {
   const d = Math.hypot(b[0] - a[0], b[1] - a[1], b[2] - a[2]);

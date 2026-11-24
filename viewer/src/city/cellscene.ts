@@ -9,7 +9,7 @@ import type { GroundSampler } from '../../../world/generators/city/ground.ts';
 import type { CityFrame, LocalRenderer, MeshHandle } from '../gl/renderer.ts';
 import type { V3 } from '../mat.ts';
 import { Skyline } from './skyline.ts';
-import type { LocalView } from './view.ts';
+import { shadowFocusFor, type LocalView } from './view.ts';
 
 /** Within this distance of the eye a cell is drawn finely. */
 const FINE_DISTANCE = 620;
@@ -212,12 +212,12 @@ export abstract class CellScene {
   }
 
   /** Draw a frame. */
-  render(v: LocalView, sun: V3, time: number, evidence: boolean, alpha: number, solid: boolean, outW: number, outH: number, clock = 0): void {
+  render(v: LocalView, sun: V3, time: number, evidence: boolean, alpha: number, solid: boolean, outW: number, outH: number, clock = 0, renderScale = 1): void {
     if (!this.ready) return;
     this.update(v);
     const f: CityFrame = {
       eye: v.gpuEye,
-      focus: v.clearance > 3000 ? [v.target[0], v.target[1], v.target[2]] : [v.eye[0] + v.forward[0] * Math.min(v.range, 700), v.eye[1] + v.forward[1] * Math.min(v.range, 700), Math.min(v.target[2], v.eye[2])],
+      focus: shadowFocusFor(v),
       view: v.view,
       proj: v.proj,
       farProj: v.farProj,
@@ -234,12 +234,14 @@ export abstract class CellScene {
       clock,
       width: outW,
       height: outH,
+      renderScale,
+      cssHeight: v.height,
     };
     this.renderer.render(f, this.visible(v), outW, outH);
   }
 
   /** How much of the city is on the GPU, and at what detail. */
-  stats(): { cells: number; coarse: number; fine: number; megabytes: number } {
+  stats(): { cells: number; coarse: number; fine: number; megabytes: number; renderWidth: number; renderHeight: number; targetAllocations: number } {
     let coarse = 0;
     let fine = 0;
     let bytes = 0;
@@ -253,7 +255,8 @@ export abstract class CellScene {
         bytes += c.fine.bytes;
       }
     }
-    return { cells: this.cells.size, coarse, fine, megabytes: Math.round(bytes / 1e6) };
+    const [renderWidth, renderHeight] = this.renderer.renderSize;
+    return { cells: this.cells.size, coarse, fine, megabytes: Math.round(bytes / 1e6), renderWidth, renderHeight, targetAllocations: this.renderer.targetAllocations };
   }
 
 }

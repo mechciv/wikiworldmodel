@@ -37,6 +37,7 @@ import { Camera, MAX_DIST, MIN_DIST } from './camera.ts';
 import { LifeAtlas, type ClimateData } from './city/lifeatlas.ts';
 import { Climates, type ClimateAt } from './climates.ts';
 import { LifeScene } from './city/life.ts';
+import { lifeKeepRadius, sameLifeContext, SceneCache } from './city/lifecycle.ts';
 import type { PeopleSummary } from './city/lifeworker.ts';
 import { LandscapeAtlas } from './city/landscape.ts';
 import { anthromeOf, classAtStep, kmBetween, nearestStep, PATTERN_LABEL, USE_LABEL, USES, LEVEL_WORDS, type Pattern } from '../../core/landscape.ts';
@@ -114,7 +115,7 @@ export interface WikiWorldModelHandle {
   /** the plan of the city's generated fabric, here and in the build */
   fabric(): PrintCheck | null;
   /** how much of the city is on the GPU */
-  cityStats(): { cells: number; coarse: number; fine: number; megabytes: number } | null;
+  cityStats(): { cells: number; coarse: number; fine: number; megabytes: number; renderWidth: number; renderHeight: number; targetAllocations: number } | null;
   /** where a structure's label would be on the screen, for tests */
   structureAt(id: string): { x: number; y: number } | undefined;
   /** where the settlements of the scene drawn stand on the screen, those in view: the lists' cities by name */
@@ -551,6 +552,8 @@ async function start(root: HTMLElement): Promise<void> {
   /** the scene of the place the camera is over, and the one being made to take its place */
   let lifeSite: SiteInfo | null = null;
   let lifeSiteShore = '';
+  type CachedLife = { site: SiteInfo; shore: string; scene: LifeScene };
+  const lifeCache = new SceneCache<CachedLife>(4, (old) => old.scene.dispose());
   const shoreKey = (t: number, at: { lat: number; lon: number }) =>
     shoresNear(ts.rivers?.mappedShores ?? [], t, latticeOf(at.lat, at.lon), WATER_REACH).map(s => s.row).join(',');
   let lifeLoading: string | null = null;
@@ -829,7 +832,7 @@ async function start(root: HTMLElement): Promise<void> {
     if (next.cam.dist < MIN_DIST && !siteOpen(next.t) && !canDrawLife(next.t, next.cam)) next.cam = { lat: next.cam.lat, lon: next.cam.lon, dist: MIN_DIST };
     if (p.cam && (next.cam.lat !== state.cam.lat || next.cam.lon !== state.cam.lon || next.cam.dist !== state.cam.dist ||
         next.cam.heading !== state.cam.heading || next.cam.tilt !== state.cam.tilt)) {
-      cameraRestAt = performance.now() + 220;
+      cameraRestAt = performance.now() + 320;
     }
     const selChanged = next.sel !== state.sel;
     const altsChanged = JSON.stringify([next.alt, next.picks]) !== JSON.stringify([state.alt, state.picks]);
@@ -838,6 +841,7 @@ async function start(root: HTMLElement): Promise<void> {
       timebar.setScenario(scenario());
       timebar.setStates(stateBands(scenario()));
       for (const scene of scenes.values()) scene.setScenario(scenario());
+      for (const cached of lifeCache.values()) cached.scene.setScenario(scenario());
     }
     dirty = true;
     clearTimeout(urlTimer);
@@ -1159,13 +1163,13 @@ async function start(root: HTMLElement): Promise<void> {
     moving = false;
     refining = false;
     cityDrawn = false;
-    // Only the WebGL drawing buffer changes. Labels, controls and camera coordinates stay in CSS pixels.
+    // Keep the WebGL drawing buffer at native DPR so moving the camera never resizes the canvas or
+    // reallocates GPU targets. During camera motion inside a local scene, CityRenderer renders into
+    // a persistent interactive FBO pool at `renderScale` and blits cleanly to the full-size canvas.
     const native = Math.min(window.devicePixelRatio || 1, 2);
     const pixels = Math.max(1, stage.clientWidth * stage.clientHeight);
-    const dpr = now < cameraRestAt ? Math.min(native, 1, Math.sqrt(1_440_000 / pixels)) : native;
-    reducedResolution = dpr < native;
-    const w = Math.max(1, Math.round(stage.clientWidth * dpr));
-    const h = Math.max(1, Math.round(stage.clientHeight * dpr));
+    const w = Math.max(1, Math.round(stage.clientWidth * native));
+    const h = Math.max(1, Math.round(stage.clientHeight * native));
     if (canvas.width !== w || canvas.height !== h) {
       canvas.width = w;
       canvas.height = h;
@@ -1180,6 +1184,10 @@ async function start(root: HTMLElement): Promise<void> {
     // Loaded before it is needed: as soon as the way down is on offer.
     if (site && !made && siteOpen(state.t) && state.cam.dist < 2.2 && siteDistance(state.cam.lat, state.cam.lon) < 2e6 && !city && !loadingScenes.has(site.id)) void loadScene(site);
     const inCity = wantsCity && !!city?.ground;
+    const interactiveDpr = Math.min(native, 1, Math.sqrt(1_440_000 / pixels));
+    const wantReduced = now < cameraRestAt && interactiveDpr < native;
+    reducedResolution = inCity && wantReduced;
+    const renderScale = reducedResolution ? interactiveDpr / native : 1;
     const globeHidden = inCity && range < GLOBE_GONE;
     // A projection holds the field's youngest keyframe, and the plates where they are then.
     const fi = fieldAt(state.t);
@@ -1291,7 +1299,7 @@ async function start(root: HTMLElement): Promise<void> {
       city!.renderer.setCloudCover(state.clouds ? cloudCoverAt(site!.origin.lat, site!.origin.lon) : 0);
       moving = state.clock === undefined && !state.still && !preview && city!.renderer.ambientMotion(v.clearance, city instanceof LifeScene && city.movingInstances);
       const clock = state.clock ?? (moving ? (now - clockStart) / 1000 : 0);
-      city!.render(v, sunAt(state.hour, site!.origin.lat, city instanceof LifeScene ? city.declination : undefined), state.t, state.evidence, alpha, true, w, h, clock);
+      city!.render(v, sunAt(state.hour, site!.origin.lat, city instanceof LifeScene ? city.declination : undefined), state.t, state.evidence, alpha, true, w, h, clock, renderScale);
       refining = !moving && !reducedResolution && city!.settled && city!.renderer.refining;
       const labelKey = `${site!.id}|${city instanceof LifeScene ? city.labelSerial : 0}`;
       if (labelledSite !== labelKey) {
@@ -1809,6 +1817,23 @@ async function start(root: HTMLElement): Promise<void> {
     return `${lifeAtlas?.binAt(t)?.from}|${lat.toFixed(2)}|${lon.toFixed(2)}|${state.month ?? ''}|${landscape?.stepAt(t) ?? ''}|${shoreKey(t, at)}`;
   };
 
+  const parkLife = (previous: SiteInfo | null, prevShore: string, nextKey: string): void => {
+    if (!previous || previous.id === nextKey) return;
+    const old = scenes.get(previous.id);
+    scenes.delete(previous.id);
+    if (old instanceof LifeScene) {
+      if (old.ready) lifeCache.set(previous.id, { site: previous, shore: prevShore, scene: old });
+      else old.dispose();
+    }
+  };
+
+  const warmViewFor = (origin: { lat: number; lon: number }, scene: LifeScene): LocalView => {
+    const v = localView(state.cam, origin, scene.ground, stage.clientWidth, stage.clientHeight, scene.sea ? 0 : undefined);
+    v.width = stage.clientWidth;
+    v.height = stage.clientHeight;
+    return v;
+  };
+
   /** The scene of wherever the camera is, or is flying down to: made once it has come to rest over a new place, and shown once it is ready. */
   function maintainLife(): void {
     if (!lifeAtlas || !gl) return;
@@ -1834,19 +1859,55 @@ async function start(root: HTMLElement): Promise<void> {
       lifeRest = now;
       if (lifeLoading && lifeLoading !== key) lifeGen++;
     }
+    const sameContext = !!lifeSite && sameLifeContext(lifeSite.id, key);
     const inSpan = !!lifeSite && lifeSiteShore === shoreKey(state.t, cam) && state.t >= lifeSite.span[0] && state.t <= lifeSite.span[1];
-    // Near the ground, the scene is always this place's; higher up, it can be some way off.
+    // Continuous spatial hysteresis: always retain the active scene past a 0.1° lattice border (> 5.55 km),
+    // scaling smoothly with altitude, while immediately switching on time/month/anthrome/shore changes.
     const off = lifeSite ? distanceFrom(lifeSite, cam.lat, cam.lon) : Infinity;
-    const close = inSpan && (lifeSite!.id === key || (range > 3e4 && off < Math.max(9e3, range * 0.5)));
+    const close = inSpan && (lifeSite!.id === key || (sameContext && off < lifeKeepRadius(range)));
     if (close || lifeLoading === key) return;
     if (lifeLoading) return;
     if (now - lifeRest < (lifeSite ? 260 : 0)) {
       dirty = true;
       return;
     }
+    if (lifeCache.has(key)) {
+      lifeLoading = key;
+      const gen = ++lifeGen;
+      void promoteCachedLife(key, gen);
+      return;
+    }
     lifeLoading = key;
     const gen = ++lifeGen;
     void makeLife(key, cam.lat, cam.lon, state.t, gen);
+  }
+
+  async function promoteCachedLife(key: string, gen: number): Promise<void> {
+    try {
+      const cached = lifeCache.take(key);
+      if (!cached) return;
+      const { site: next, shore, scene } = cached;
+      const previous = lifeSite;
+      const prevShore = lifeSiteShore;
+      const prevScene = previous ? scenes.get(previous.id) : undefined;
+      const keepLive = !!previous && prevScene instanceof LifeScene && prevScene.ready && distanceFrom(previous, state.cam.lat, state.cam.lon) < 28e3;
+      if (keepLive) {
+        await scene.warm(warmViewFor(next.origin, scene));
+      }
+      if (gen !== lifeGen || (lifeKeyAt(state.t, state.cam) !== key && (!flight || lifeKeyAt(state.t, flight.to) !== key))) {
+        lifeCache.set(key, cached);
+        return;
+      }
+      parkLife(previous, prevShore, key);
+      lifeSite = next;
+      lifeSiteShore = shore;
+      scenes.set(key, scene);
+      scene.setScenario(scenario());
+      atSite(state.t, state.cam);
+    } finally {
+      if (lifeLoading === key) lifeLoading = null;
+      dirty = true;
+    }
   }
 
   async function makeLife(key: string, lat: number, lon: number, t: number, gen: number): Promise<void> {
@@ -1874,20 +1935,57 @@ async function start(root: HTMLElement): Promise<void> {
       }
       scene.onChange = () => (dirty = true);
       const previous = lifeSite;
+      const prevShore = lifeSiteShore;
+      const nextShore = shoreKey(t, { lat, lon });
       const next: SiteInfo = { kind: 'life', id: key, label: spec.site.stage ?? 'this place', file: '', origin: spec.site.origin, span: spec.site.span, slice: spec.site.slice, near: spec.site.span, window: spec.site.span, view: { x: 0, y: 0, range: 74, heading: 0, tilt: 81 } };
+      const prevScene = previous ? scenes.get(previous.id) : undefined;
+      // When a ready scene already covers the camera in the same context, build and warm the neighboring
+      // cell off-screen so there is no preview flash or blank frame on handoff.
+      const keepLive = !!previous && prevScene instanceof LifeScene && prevScene.ready && sameLifeContext(previous.id, key) && distanceFrom(previous, state.cam.lat, state.cam.lon) < 28e3;
       try {
-        await scene.load(() => {
-          if (gen !== lifeGen) return;
-          lifeSite = next;
-          lifeSiteShore = shoreKey(t, { lat, lon });
-          scenes.set(key, scene);
-          if (previous && previous.id !== key) {
-            const old = scenes.get(previous.id);
-            scenes.delete(previous.id);
-            if (old instanceof LifeScene) old.dispose();
+        if (keepLive) {
+          await scene.load();
+          [next.view.x, next.view.y] = scene.focus;
+          scene.setScenario(scenario());
+          const backInPrev = () => !!previous && lifeKeyAt(state.t, state.cam) === previous.id && (!flight || lifeKeyAt(state.t, flight.to) === previous.id);
+          if (gen !== lifeGen) {
+            if (backInPrev()) lifeCache.set(key, { site: next, shore: nextShore, scene });
+            else scene.dispose();
+            return;
           }
+          await scene.warm(warmViewFor(next.origin, scene));
+          // If the camera moved back inside the still-active scene while loading, park the newly warmed cell.
+          if (backInPrev()) {
+            lifeCache.set(key, { site: next, shore: nextShore, scene });
+            return;
+          }
+          if (gen !== lifeGen) {
+            scene.dispose();
+            return;
+          }
+          parkLife(previous, prevShore, key);
+          lifeSite = next;
+          lifeSiteShore = nextShore;
+          scenes.set(key, scene);
           atSite(state.t, state.cam);
-        });
+        } else {
+          await scene.load(() => {
+            if (gen !== lifeGen) return;
+            parkLife(previous, prevShore, key);
+            lifeSite = next;
+            lifeSiteShore = nextShore;
+            scenes.set(key, scene);
+            atSite(state.t, state.cam);
+          });
+          if (gen !== lifeGen) {
+            scene.dispose();
+            if (scenes.get(key) === scene) scenes.delete(key);
+            if (lifeSite === next) lifeSite = null;
+            return;
+          }
+          [next.view.x, next.view.y] = scene.focus;
+          scene.setScenario(scenario());
+        }
       } catch (err) {
         scene.dispose();
         scenes.delete(key);
@@ -1895,13 +1993,6 @@ async function start(root: HTMLElement): Promise<void> {
         atSite(state.t, state.cam);
         throw err;
       }
-      if (gen !== lifeGen) {
-        scene.dispose();
-        if (scenes.get(key) === scene) scenes.delete(key);
-        return;
-      }
-      [next.view.x, next.view.y] = scene.focus;
-      scene.setScenario(scenario());
     } catch (err) {
       // Transient fetch/worker failures are logged without permanently blacklisting the place in lifeEmpty.
       console.error(`the scene of ${key}: ${err instanceof Error ? err.message : String(err)}`.slice(0, 900));

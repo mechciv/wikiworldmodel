@@ -157,6 +157,9 @@ uniform float uIdling;
 // and 1 / cascadeRadius for moving route margins.
 uniform float uShadowPad;
 uniform float uShadowInvR;
+// Screen-size fade-in for instanced geometry (uFadeK = cssHeight / (2 * tan(fov/2)), 0 in shadow/depth/pick passes).
+uniform float uFadeK;
+uniform float uProtoExtent;
 ${DROP}
 ${ENTITY}
 // Turn a point about a pivot, in the plane of two of its axes.
@@ -288,6 +291,7 @@ flat out float vTint;
 flat out float vKind;
 flat out float vFlags;
 flat out int vEntity;
+flat out float vInstFade;
 void main() {
   bool many = uInstanced > 0.5;
   if (many && uShadowPad >= 0.0) {
@@ -389,6 +393,14 @@ void main() {
   vTint = tint;
   vFlags = e.z;
   vEntity = entity;
+  if (many && uFadeK > 0.0) {
+    vec3 ctr = vec3(iPlace.xy, iPlace.z - drop(iPlace.xy));
+    float instDist = max(length(ctr - uEye), 1.0);
+    float pxs = (uProtoExtent * abs(iPlace.w) * uFadeK) / instDist;
+    vInstFade = smoothstep(1.2, 3.8, pxs);
+  } else {
+    vInstFade = 1.0;
+  }
   gl_Position = uViewProj * vec4(p - uEye, 1.0);
   // Paving, roads and sand lie on the ground: they win over it at any distance.
   if (aMat.x == 11u || aMat.x == 12u || aMat.x == 13u || aMat.x == 18u) gl_Position.z -= 1.4e-4 * gl_Position.w;
@@ -396,20 +408,22 @@ void main() {
 
 /**
  * Depth only: for the shadows, and for the depth the lit pass and the occlusion are drawn over. Leaves on cards are cut
- * to their outline for the shadows; the depth before the lit pass leaves them out, as the lit pass blends their edges
- * by coverage and writes their depth itself.
+ * to their outline for the shadows; the depth before the lit pass leaves out cards and screen-size fading instances, as
+ * the lit pass dithers them and writes their surviving depth itself without punching holes in terrain or polluting GTAO.
  */
 export const DEPTH_FS = /* glsl */ `#version 300 es
 precision highp float;
 precision highp int;
 in vec2 vUv;
 flat in int vMaterial;
-// 1: leaves on cards are cut to their outline; 0: they are left out
+flat in float vInstFade;
+// 1: leaves on cards are cut to their outline; 0: cards and fading instances are left out of the prepass
 uniform float uCards;
 ${LEAVES}
 out vec4 o;
 void main() {
   if (onCard(vMaterial) && (uCards < 0.5 || !leafThere(vUv))) discard;
+  if (uCards < 0.5 && vInstFade < 0.995) discard;
   o = vec4(0.0);
 }`;
 
@@ -443,13 +457,16 @@ uniform float uCloudVolume;
 // Where in its first step each frame's march starts, 0 to 1: the frames of a view at rest take the eighths of a step
 // one after another, in the order that halves the gaps, so that their average is a march eight times as fine.
 uniform float uFrameNoise;
-const float CLOUD_BASE = 1400.0;
-const float CLOUD_TOP = 2400.0;
+// Terrain-relative cloud layer heights (metres ASL) and smooth fade alpha as the camera approaches the base.
+uniform float uCloudBase;
+uniform float uCloudTop;
+uniform float uCloudAlpha;
 // How dense the cloud is at a point. foot is how much of the layer a pixel takes in there, m: towards the horizon a
 // row of pixels is hundreds of metres of cloud further off than the row under it, and what is finer than that would
 // show as streaks along the rows, so it is left out as it becomes so.
 float cloudDensityAt(vec3 p, float foot) {
-  float h = (p.z - CLOUD_BASE) / (CLOUD_TOP - CLOUD_BASE);
+  float span = max(uCloudTop - uCloudBase, 1.0);
+  float h = (p.z - uCloudBase) / span;
   if (h <= 0.0 || h >= 1.0) return 0.0;
   vec3 q = p + vec3(uClockSky * 6.0, uClockSky * 3.4, 0.0);
   // Its finer shape is not asked for where it would not be seen.
@@ -470,9 +487,11 @@ float cloudDensity(vec3 p) { return cloudDensityAt(p, 0.0); }
 // How much sunlight comes through the clouds to a point below them, along the sun.
 float cloudShadow(vec3 p, vec3 sun) {
   if (sun.z < 0.05 || uCloudCover <= 0.0) return 1.0;
+  float span = max(uCloudTop - uCloudBase, 1.0);
   float sum = 0.0;
   for (int i = 0; i < 4; i++) {
-    float z = CLOUD_BASE + (CLOUD_TOP - CLOUD_BASE) * (float(i) + 0.5) / 4.0;
+    float z = uCloudBase + span * (float(i) + 0.5) / 4.0;
+    if (z <= p.z) continue;
     vec3 q = p + sun * ((z - p.z) / sun.z);
     sum += cloudDensity(q);
   }
@@ -658,6 +677,7 @@ flat in int vMaterial;
 flat in float vTint;
 flat in float vKind;
 flat in float vFlags;
+flat in float vInstFade;
 uniform vec3 uEye;
 // On wild land, what covers the ground (R canopy): what stands low under the canopy is in its shade.
 uniform float uWild;
@@ -1707,17 +1727,23 @@ void main() {
     if (uCoverage < 0.5) {
       if (t.a < LEAF_CUT) discard;
     } else {
-      float share = leafShare(t.a);
+      float share = leafShare(t.a) * vInstFade;
       // Temporally stratified hashed alpha (IGN + Halton frame offset): resolved to smooth
-      // anti-aliased leaf edges by TAA and steady-frame averaging without 4x MSAA overhead.
+      // anti-aliased leaf edges and screen-size fade-in by TAA without 4x MSAA overhead.
       float dither = fract(fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715)))) + uFrameNoise);
       if (share <= 0.01 || share < 0.01 + 0.98 * dither) discard;
     }
-  } else if (blade) {
-    vec2 b = bladeLook(vUv);
-    leafLight = b.x;
-    family = b.y;
-    leafLean = vUv.x * 0.5;
+  } else {
+    if (uCoverage > 0.5 && vInstFade < 0.995) {
+      float dither = fract(fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715)))) + uFrameNoise);
+      if (vInstFade <= 0.01 || vInstFade < dither) discard;
+    }
+    if (blade) {
+      vec2 b = bladeLook(vUv);
+      leafLight = b.x;
+      family = b.y;
+      leafLean = vUv.x * 0.5;
+    }
   }
   Surface s;
   if (leafy) {
@@ -1804,7 +1830,7 @@ void main() {
   } else {
     vec3 w = gl_FrontFacing ? bumped : -bumped;
     float sh = shadowAt(vPos, gl_FrontFacing ? n : -n, pixel) * cloudShade(vPos);
-    float ao = uUseAO > 0.5 ? texture(uAO, gl_FragCoord.xy / uAOSize).r : 1.0;
+    float ao = uUseAO > 0.005 ? mix(1.0, texture(uAO, gl_FragCoord.xy / uAOSize).r, uUseAO) : 1.0;
     // Under a body, and about its legs, less of the sky is seen than on its back.
     if (skin) ao *= 0.62 + 0.38 * smoothstep(-0.7, 0.35, n.z);
     float occl = ao * (vLight * 0.5 + 0.5) * under;
@@ -2445,16 +2471,16 @@ vec3 bumped(vec3 n, vec3 p, float h, float strength) {
 float nearWater(vec3 p, out float above, out float dryBed) {
   above = 1e4;
   dryBed = 0.0;
-  if (uBanks < 0.5) return 0.0;
+  if (uBanks <= 0.005) return 0.0;
   vec2 wuv = (p.xy - uWaterBox.xy) / uWaterBox.zw;
   if (wuv.x <= 0.0 || wuv.y <= 0.0 || wuv.x >= 1.0 || wuv.y >= 1.0) return 0.0;
   vec3 w = texture(uWaterMap, wuv).rgb;
   vec2 e = min(wuv, 1.0 - wuv);
   float inBox = smoothstep(0.0, 0.05, min(e.x, e.y));
-  dryBed = smoothstep(0.25, 0.6, w.b) * inBox;
+  dryBed = smoothstep(0.25, 0.6, w.b) * inBox * uBanks;
   if (w.g < 0.002) return 0.0;
   above = p.z - w.r / w.g;
-  return smoothstep(0.002, 0.05, w.g) * inBox;
+  return smoothstep(0.002, 0.05, w.g) * inBox * uBanks;
 }
 // The edges of a tiling of uneven cells, one to a unit: how far a point is from the nearest edge, in cell widths, and a
 // number for the cell it is in. Mud dries into such cells, a crust of salt heaves into them, and pebbles lie as them.
@@ -2832,7 +2858,7 @@ void main() {
   float fw = dist * 0.0016;
   // Far off, the shadow map is too coarse to trust: the hills' own shading does the work.
   float sh = mix(shadowAt(p, n, fw), 1.0, smoothstep(9000.0, 22000.0, dist)) * cloudShade(p);
-  float ao = uUseAO > 0.5 ? texture(uAO, gl_FragCoord.xy / uAOSize).r : 1.0;
+  float ao = uUseAO > 0.005 ? mix(1.0, texture(uAO, gl_FragCoord.xy / uAOSize).r, uUseAO) : 1.0;
   // The sea: anywhere the ground lies under its surface. A scene of the sea draws its floor instead, and its surface apart.
   if (uSea < 0.5 && shoreHeight <= 0.0) {
     float deep = smoothstep(-5.0, -120.0, p.z);
@@ -2901,7 +2927,7 @@ void main() {
     c = mix(c, garden, mask.g);
   }
   // Wet, darker ground at the river's edge; where the water is mapped from above, its banks are the close ground's.
-  if (uWild > 0.5 && uBanks < 0.5) c = mix(c, vec3(0.15, 0.125, 0.085), smoothstep(uWater + 0.7, uWater + 0.05, p.z) * smoothstep(uWater - 9.0, uWater - 5.0, p.z) * (1.0 - smoothstep(16000.0, 18000.0, length(p.xy))) * 0.9);
+  if (uWild > 0.5 && uBanks < 0.995) c = mix(c, vec3(0.15, 0.125, 0.085), smoothstep(uWater + 0.7, uWater + 0.05, p.z) * smoothstep(uWater - 9.0, uWater - 5.0, p.z) * (1.0 - smoothstep(16000.0, 18000.0, length(p.xy))) * 0.9 * (1.0 - uBanks));
   else if (uWild < 0.5) c = mix(c, vec3(0.28, 0.25, 0.18), smoothstep(uWater + 4.0, uWater + 1.0, p.z) * 0.8);
   // In a scene of the sea, its floor under the water, and a beach at the water's edge; no river is painted on it.
   if (uSea > 0.5) {
@@ -3070,8 +3096,9 @@ void main() {
   vec3 lit = body * (uSunColor * max(uSun.z, 0.0) * sh * 0.8 + uSkyTop * 0.6);
   vec3 glint = uSunColor * pow(max(dot(r, uSun), 0.0), 360.0) * 1.4 * sh;
   vec3 sky = skyColor(normalize(vec3(r.xy, abs(r.z))));
-  if (uScreen < 0.5) {
-    o = vec4(aerial(mix(lit, sky, fres * 0.8) + glint, p, uEye), 1.0);
+  vec3 cheap = aerial(mix(lit, sky, fres * 0.8) + glint, p, uEye);
+  if (uScreen <= 0.005) {
+    o = vec4(cheap, 1.0);
     return;
   }
   // Through the water: its bed, bent a little by the ripples, as far as the water lets it be seen. How much water the
@@ -3096,7 +3123,8 @@ void main() {
   vec3 mirror = mix(aerial(sky, p, uEye), bank.rgb, bank.a);
   vec3 c = mix(under, mirror, fres * 0.9) + aerial(glint, p, uEye);
   // At its edge the water thins to nothing, and the ground under it is all that shows.
-  o = vec4(mix(bed, c, smoothstep(0.0, 0.3, through)), 1.0);
+  vec3 full = mix(bed, c, smoothstep(0.0, 0.3, through));
+  o = vec4(mix(cheap, full, clamp(uScreen, 0.0, 1.0)), 1.0);
 }`;
 
 // ——— The water seen from above, for its banks (docs/plans/RENDERING.md, step 2) ———
@@ -3342,6 +3370,7 @@ uniform highp sampler2D uScene;
 uniform highp sampler2D uCloudHistory;
 uniform vec2 uSceneSize;
 uniform vec2 uCloudSize;
+uniform vec2 uCloudHistorySize;
 uniform float uHeight;
 uniform float uCloudBlend;
 ${CLOUDS}
@@ -3362,12 +3391,13 @@ void main() {
     o = vec4(0.0, 0.0, 0.0, -1.0);
     return;
   }
-  if (d.z <= 0.012 || uCloudCover <= 0.0 || uHeight >= CLOUD_BASE) {
+  if (d.z <= 0.012 || uCloudCover <= 0.0 || uCloudAlpha <= 0.001 || uHeight >= uCloudBase) {
     o = vec4(0.0, 0.0, 0.0, 1.0);
     return;
   }
-  float t0 = (CLOUD_BASE - uHeight) / d.z;
-  float t1 = min((CLOUD_TOP - uHeight) / d.z, t0 + 6000.0);
+  float span = max(uCloudTop - uCloudBase, 1.0);
+  float t0 = (uCloudBase - uHeight) / d.z;
+  float t1 = min((uCloudTop - uHeight) / d.z, t0 + 6000.0);
   const int STEPS = 32;
   float dt = (t1 - t0) / float(STEPS);
   float start = fract(fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715)))) + uFrameNoise);
@@ -3385,7 +3415,7 @@ void main() {
     if (rho <= 0.0) continue;
     float toward = cloudDensity(p + uSun * 110.0) + cloudDensity(p + uSun * 300.0) * 1.5 + cloudDensityAt(p + uSun * 900.0, 2000.0) * 3.0 + cloudDensityAt(p + uSun * 2200.0, 2000.0) * 5.0;
     float sunlit = exp(-toward * 0.8) * (1.0 - exp(-rho * 4.0));
-    float height = (p.z - CLOUD_BASE) / (CLOUD_TOP - CLOUD_BASE);
+    float height = (p.z - uCloudBase) / span;
     vec3 light = uSunColor * sunlit * phase * 2.4 + uSkyTop * (0.7 + 0.7 * height);
     float k = rho * dt * 0.0035;
     float lost = exp(-k);
@@ -3403,10 +3433,10 @@ void main() {
     if (prev.w > 0.0) {
       vec2 puv = prev.xy / prev.w * 0.5 + 0.5;
       if (puv.x > 0.0 && puv.y > 0.0 && puv.x < 1.0 && puv.y < 1.0) {
-        vec2 hp = puv * uCloudSize - 0.5;
+        vec2 hp = puv * uCloudHistorySize - 0.5;
         ivec2 hi0 = ivec2(floor(hp));
         vec2 hf = hp - vec2(hi0);
-        ivec2 hlim = ivec2(uCloudSize) - 1;
+        ivec2 hlim = ivec2(uCloudHistorySize) - 1;
         vec4 hacc = vec4(0.0);
         float hw = 0.0;
         for (int j = 0; j <= 1; j++) {
@@ -3483,7 +3513,7 @@ void main() {
         c = mix(c, lit, m * 0.78 * smoothstep(0.012, 0.16, d.z));
       }
     }
-  } else if (d.z > 0.012 && uCloudCover > 0.0 && uHeight < CLOUD_BASE) {
+  } else if (d.z > 0.012 && uCloudCover > 0.0 && uCloudAlpha > 0.001 && uHeight < uCloudBase) {
     vec2 p = vUv * uCloudSize - 0.5;
     ivec2 i0 = ivec2(floor(p));
     vec2 f = p - vec2(i0);
@@ -3502,7 +3532,7 @@ void main() {
     }
     if (wsum > 1e-4) {
       vec4 cl = acc / wsum;
-      c = c * cl.a + cl.rgb;
+      c = mix(c, c * cl.a + cl.rgb, uCloudAlpha);
     }
   }
   o = vec4(c, uAlpha);
@@ -4008,6 +4038,9 @@ uniform float uImpMidZ;
 uniform float uImpRadius;
 // >= 0 during shadow passes for conservative per-instance cascade frustum culling.
 uniform float uShadowPad;
+// Screen-size fade-in for canopy tree impostors (0 in shadow/depth/pick passes).
+uniform float uFadeK;
+uniform float uProtoExtent;
 ${DROP}
 ${ENTITY}
 vec3 toTreeLocal(vec3 w, vec2 face) {
@@ -4043,6 +4076,7 @@ flat out float vTint;
 flat out float vFlags;
 flat out int vEntity;
 flat out float vLow;
+flat out float vInstFade;
 void main() {
   float sc = abs(iPlace.w);
   if (uShadowPad >= 0.0) {
@@ -4102,6 +4136,14 @@ void main() {
   vFlags = e.z;
   vEntity = entity;
   vLow = uImpMidZ * sc;
+  if (uFadeK > 0.0) {
+    vec3 ctr = vec3(center.xy, center.z - drop(center.xy));
+    float instDist = max(length(ctr - uEye), 1.0);
+    float pxs = (uProtoExtent * sc * uFadeK) / instDist;
+    vInstFade = smoothstep(1.2, 3.8, pxs);
+  } else {
+    vInstFade = 1.0;
+  }
 }`;
 
 export const IMPOSTOR_FS = /* glsl */ `#version 300 es
@@ -4123,6 +4165,7 @@ flat in float vTint;
 flat in float vFlags;
 flat in int vEntity;
 flat in float vLow;
+flat in float vInstFade;
 uniform vec3 uEye;
 uniform float uWild;
 uniform highp sampler2D uMask;
@@ -4144,8 +4187,9 @@ void main() {
   vec4 a2 = impTap(uImpAlbedo, vCell2, vUv2, dx2, dy2, uImpLayer);
   vec4 aMix = a0 * vWeights.x + a1 * vWeights.y + a2 * vWeights.z;
   float alpha = aMix.a;
+  float effAlpha = alpha * vInstFade;
   float dither = fract(fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715)))) + uFrameNoise);
-  if (alpha <= 0.06 || alpha < 0.06 + 0.88 * dither) discard;
+  if (effAlpha <= 0.06 || effAlpha < 0.06 + 0.88 * dither) discard;
 
   vec4 n0 = impTap(uImpNormal, vCell0, vUv0, dx0, dy0, uImpLayer);
   vec4 n1 = impTap(uImpNormal, vCell1, vUv1, dx1, dy1, uImpLayer);
@@ -4306,6 +4350,7 @@ uniform vec3 uSunColor;
 uniform vec3 uSkyTop;
 uniform vec3 uSkyLow;
 uniform float uHazeK;
+uniform float uSmokeFade;
 uniform highp sampler3D uNoise;
 out vec4 o;
 void main() {
@@ -4322,7 +4367,7 @@ void main() {
   float kilnBoost = smoothstep(0.85, 1.1, vStrength);
   float dist = length(vPos - uEye);
   float farFade = 1.0 - smoothstep(650.0, 2100.0, dist);
-  float alpha = puff * life * (0.14 + 0.14 * vStrength) * max(diurnal, 0.88 * kilnBoost) * farFade;
+  float alpha = puff * life * (0.14 + 0.14 * vStrength) * max(diurnal, 0.88 * kilnBoost) * farFade * uSmokeFade;
   if (alpha < 0.004) discard;
   // Soft sunlit smoke grey-blue-warm tint with gentle haze match.
   vec3 lit = mix(uSkyLow * 0.72, uSunColor * 0.90 + uSkyTop * 0.35, 0.45 + 0.35 * clamp(vLocal.y * 0.5 + 0.5, 0.0, 1.0));
