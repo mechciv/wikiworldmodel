@@ -24,9 +24,6 @@ import { FIELD_SLOTS, PLOT, PLOT_LOOK, plotAt, plotSlotIndex, plotStyle, type Pl
 import { drawWork, smallWork, WORK_VARIANTS, workTop } from '../people/works.ts';
 import { personStride } from '../people/figures.ts';
 
-/** How far from its middle a scene is made, m, each way: the scene generator's own, as the scenes it streams are made. */
-export const SCENE_EXTENT = EXTENT;
-
 /** Where houses start among a scene's kinds of mesh: a taxon's number is below it, a house's dwelling above. */
 export const HOUSE = 0x4000;
 /** Where the pieces of a town's works start, above the houses: a length of wall, a tower, a gate, a length of water. */

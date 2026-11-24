@@ -8,7 +8,7 @@ import { anthromeTile, classAtStep, FAR_REACH_DEG, nearestStep, sceneTiles, scen
 import { cellAt, stepsAround, type PeopleFile } from '../../../core/layers.ts';
 import type { ResolveWorld } from '../../../core/resolve.ts';
 import type { LivingTaxon, ScenePeople } from '../../../core/scene.ts';
-import { EXTENT } from '../../../world/generators/life/scene/v14.ts';
+import { EXTENT } from '../../../world/generators/life/scene/current.ts';
 import { peopleReach } from '../../../world/generators/people/settlement/sites.ts';
 
 async function getJSON<T>(url: string): Promise<T> {
