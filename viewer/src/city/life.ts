@@ -249,6 +249,7 @@ export class LifeScene {
     // What people made of the ground, or nothing where there are no people.
     const fields = mask?.fields;
     r.setFields(fields && this.people ? fields : null, mask?.maskSize ?? 1, box, this.fieldLook());
+    r.setFarFields(detail?.far && this.people ? detail.far.data : null, detail?.far?.size ?? 1, detail?.far?.box ?? [0, 0, 0, 0]);
     r.setSmokes(detail?.smokes ?? null);
     const params = this.spec.generator.params as unknown as LivingParams;
     const clim = params.cover.climates[this.spec.biome.climate];

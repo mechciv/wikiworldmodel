@@ -4,7 +4,7 @@
 import { decodeTile } from '../../../core/container.ts';
 import { prevalenceOf, traditionFor, type Agriculture, type Husbandry, type LifewayWord, type Tradition } from '../../../core/dwelling.ts';
 import type { Form } from '../../../core/form.ts';
-import { anthromeTile, classAtStep, nearestStep, sceneTiles, scenePeople, assessmentAt, lifewayOf, LIFEWAY_OF, citiesAround, cityGuess, cellOf, tileKey, type AnthromeTile, type AnthromeTileHeader, type AssessmentsFile, type CitiesFile, type CityNear, type LandscapeData, type LandscapeIndex, type Lifeway, type TraditionsFile } from '../../../core/landscape.ts';
+import { anthromeTile, classAtStep, FAR_REACH_DEG, nearestStep, sceneTiles, scenePeople, assessmentAt, lifewayOf, LIFEWAY_OF, citiesAround, cityGuess, cellOf, tileKey, type AnthromeTile, type AnthromeTileHeader, type AssessmentsFile, type CitiesFile, type CityNear, type LandscapeData, type LandscapeIndex, type Lifeway, type TraditionsFile } from '../../../core/landscape.ts';
 import { cellAt, stepsAround, type PeopleFile } from '../../../core/layers.ts';
 import type { ResolveWorld } from '../../../core/resolve.ts';
 import type { LivingTaxon, ScenePeople } from '../../../core/scene.ts';
@@ -148,8 +148,9 @@ export class LandscapeAtlas {
     await this.load();
     if (!this.index.generator || nearestStep(this.index.steps, t) < 0) return undefined;
     const [people] = await Promise.all([this.people(), ...sceneTiles({ tileDeg: this.index.tile_deg, reach_deg: this.index.reach_deg }, lat, lon).map((k) => this.tile(k))]);
-    // The 1° cells around the scene's 5′ cells may reach a tile further: fetch those too.
-    const extra = sceneTiles({ tileDeg: this.index.tile_deg, reach_deg: this.index.reach_deg + 1 }, lat, lon);
+    // The 1° cells around the scene's 5′ cells may reach a tile further, and so may the cells told only how their land
+    // was used (FAR_REACH_DEG): fetch those too.
+    const extra = sceneTiles({ tileDeg: this.index.tile_deg, reach_deg: Math.max(this.index.reach_deg, FAR_REACH_DEG) + 1 }, lat, lon);
     await Promise.all(extra.map((k) => this.tile(k)));
     return scenePeople(this.data(people), lat, lon, t);
   }
