@@ -8,6 +8,8 @@ import { anthromeTile, classAtStep, FAR_REACH_DEG, nearestStep, sceneTiles, scen
 import { cellAt, stepsAround, type PeopleFile } from '../../../core/layers.ts';
 import type { ResolveWorld } from '../../../core/resolve.ts';
 import type { LivingTaxon, ScenePeople } from '../../../core/scene.ts';
+import { EXTENT } from '../../../world/generators/life/scene/v14.ts';
+import { peopleReach } from '../../../world/generators/people/settlement/sites.ts';
 
 async function getJSON<T>(url: string): Promise<T> {
   const r = await fetch(url);
@@ -138,19 +140,27 @@ export class LandscapeAtlas {
       },
       fields: { anthromes: ix.fields.anthromes, assessment: ix.fields.assessment, population: ix.fields.population, lifeways: ix.fields.lifeways },
       generator: ix.generator!,
-      reach_deg: ix.reach_deg,
+      reach_deg: this.reach(),
       reach_km: ix.reach_km,
     };
+  }
+
+  /**
+   * How far about a scene its people's cells are read, degrees: what the build says, or as far as the settlement generator
+   * weighs cells where that is further, as it is in a build made before version 9 (sites.ts, peopleReach).
+   */
+  private reach(): number {
+    return Math.max(this.index.reach_deg, peopleReach(this.index.generator?.params, EXTENT));
   }
 
   /** The people of a scene at a place and time, or undefined where the human landscape does not reach it. */
   async peopleFor(lat: number, lon: number, t: number): Promise<ScenePeople | undefined> {
     await this.load();
     if (!this.index.generator || nearestStep(this.index.steps, t) < 0) return undefined;
-    const [people] = await Promise.all([this.people(), ...sceneTiles({ tileDeg: this.index.tile_deg, reach_deg: this.index.reach_deg }, lat, lon).map((k) => this.tile(k))]);
+    const [people] = await Promise.all([this.people(), ...sceneTiles({ tileDeg: this.index.tile_deg, reach_deg: this.reach() }, lat, lon).map((k) => this.tile(k))]);
     // The 1° cells around the scene's 5′ cells may reach a tile further, and so may the cells told only how their land
     // was used (FAR_REACH_DEG): fetch those too.
-    const extra = sceneTiles({ tileDeg: this.index.tile_deg, reach_deg: Math.max(this.index.reach_deg, FAR_REACH_DEG) + 1 }, lat, lon);
+    const extra = sceneTiles({ tileDeg: this.index.tile_deg, reach_deg: Math.max(this.reach(), FAR_REACH_DEG) + 1 }, lat, lon);
     await Promise.all(extra.map((k) => this.tile(k)));
     return scenePeople(this.data(people), lat, lon, t);
   }

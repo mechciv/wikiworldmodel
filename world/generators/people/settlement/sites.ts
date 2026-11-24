@@ -105,6 +105,18 @@ export const SITING: SitingParams = {
 };
 export const GROWTH: GrowthParams = { cell: 50, margin: 2500, reach: 2.4, soil: { scale: 900, weight: 0.85 }, rough: 0.35, grain: { across: 0.8, slope: 0.06, water: 900, scale: 9000 } };
 
+/**
+ * How far from a scene's middle, in degrees of latitude, the world must give it the 5′ cells of its people: as far as the
+ * cells its settlements are weighed in reach (the scene's `extent`, the growth's margin and a ring of cells beyond, see
+ * makeSettlement in v9.ts), and a cell further, which the outermost cells' crowding reads. The build asks for this much
+ * (people/landscape.json, `reach_deg`), so that the ring is never cut short by a reach set apart from it.
+ */
+export function peopleReach(params: Record<string, unknown> | undefined, extent: number): number {
+  const G = (params as { growth?: GrowthParams } | undefined)?.growth ?? GROWTH;
+  const cell = M_PER_DEG / 12;
+  return Math.ceil(((extent + G.margin + 2 * cell) / M_PER_DEG) * 100) / 100;
+}
+
 /** How far a place is from fresh water, m: a river's course, an old bend that holds water, a pond or a lake's shore. */
 export interface WaterNear {
   at(x: number, y: number): number;

@@ -105,7 +105,7 @@ import { farmLanes, LaneGround, type FarmLayout, type Lane, type LaneWidths, typ
 import { earthOf, FIELD_USE, growFields, GROWTH, nodeOf, siteCells, SITING, SiteWorth, sizesOf, USE_OF, type FieldGrid, type FieldSource, type GrowthParams, type SiteCell, type SitingParams, type WaterNear } from './sites.ts';
 import { MAT } from '../../city/kit.ts';
 
-export { waterNear, type WaterNear } from './sites.ts';
+export { peopleReach, waterNear, type WaterNear } from './sites.ts';
 
 export const GENERATOR = 'gen:people/settlement';
 export const VERSION = 9;
@@ -3048,18 +3048,6 @@ export function farLandMask(far: FarLand, origin: { lat: number; lon: number }, 
     }
   }
   return data;
-}
-
-/**
- * How far from a scene's middle, in degrees of latitude, the world must give it the 5′ cells of its people: as far as the
- * cells its settlements are weighed in reach (the scene's `extent`, the growth's margin and a ring of cells beyond, see
- * makeSettlement), and a cell further, which the outermost cells' crowding reads. The build asks for this much
- * (people/landscape.json, `reach_deg`), so that the ring is never cut short by a reach set apart from it.
- */
-export function peopleReach(params: Record<string, unknown> | undefined, extent: number): number {
-  const G = (params as unknown as SettlementParams | undefined)?.growth ?? GROWTH;
-  const cell = (EARTH * DEG) / 12;
-  return Math.ceil(((extent + G.margin + 2 * cell) / (EARTH * DEG)) * 100) / 100;
 }
 
 /** The anthrome classes a plan draws on, for a panel: its own name for what is there. */
