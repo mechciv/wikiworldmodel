@@ -1,5 +1,5 @@
 import { join } from 'node:path';
-import { CACHE, WORLD } from './paths.ts';
+import { CACHE, safeJoin, safeUrlBasename, WORLD } from './paths.ts';
 import { readYaml } from './util.ts';
 import type { Dataset, Manifest } from './world.ts';
 
@@ -16,7 +16,7 @@ export function datasetDir(id: string, d: Dataset): string {
 }
 
 export function datasetPath(id: string, d: Dataset): string {
-  return join(datasetDir(id, d), d.fetch.url.split('/').pop()!);
+  return safeJoin(datasetDir(id, d), safeUrlBasename(d.fetch.url), `${id} download filename`);
 }
 
 /** Path of a named file inside a dataset: the archive member if it has `files`, else the download. */
@@ -24,5 +24,5 @@ export function datasetFile(id: string, d: Dataset, name?: string): string {
   if (!name) return datasetPath(id, d);
   const f = d.fetch.files?.[name];
   if (!f) throw new Error(`dataset ${id} has no file "${name}"`);
-  return join(datasetDir(id, d), f.path);
+  return safeJoin(datasetDir(id, d), f.path, `${id} file "${name}"`);
 }

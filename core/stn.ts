@@ -28,7 +28,8 @@ export type Bounds = Map<string, { lo: number; hi: number; loBy: string[]; hiBy:
 
 export type Solution = { ok: true; bounds: Bounds } | { ok: false; conflict: Conflict };
 
-const EPS = 1e-3; // years
+const EPS_ABS = 1e-12; // years (~31 microseconds)
+const EPS_REL = 1e-13; // ~400x float64 ULP, preventing rounding oscillation at Gyr scales
 
 /**
  * A network's distance graph, in arrays: edge e runs from u[e] to v[e] with weight w[e], and comes from constraint
@@ -115,6 +116,26 @@ function cycleIn(n: number, pred: Int32Array, src: Int32Array): number[] | undef
   return undefined;
 }
 
+/** Recompute exact depths in an acyclic predecessor forest when stale descendant depths hit `n`. */
+function refreshDepths(n: number, pred: Int32Array, src: Int32Array, len: Int32Array): void {
+  len.fill(-1);
+  const stack: number[] = [];
+  for (let i = 0; i < n; i++) {
+    if (len[i] !== -1) continue;
+    stack.length = 0;
+    let x = i;
+    while (x !== -1 && len[x] === -1) {
+      stack.push(x);
+      x = pred[x] === -1 ? -1 : src[pred[x]];
+    }
+    let d = x === -1 ? -1 : len[x];
+    for (let k = stack.length - 1; k >= 0; k--) {
+      d++;
+      len[stack[k]] = d;
+    }
+  }
+}
+
 /**
  * Shortest distances by a queue (SPFA): a point is looked at again only when its distance falls, so
  * a network settles in a few passes over its edges, where Bellman–Ford makes one pass per point.
@@ -148,14 +169,18 @@ function settle(n: number, out: Adjacency, src: Int32Array, dst: Int32Array, w: 
     for (let k = at[x], end = at[x + 1]; k < end; k++) {
       const e = list[k];
       const y = dst[e];
-      if (dx + w[e] < dist[y] - EPS) {
-        dist[y] = dx + w[e];
+      const next = dx + w[e];
+      const tol = Math.max(EPS_ABS, Math.max(Math.abs(dx), Math.abs(w[e]), Number.isFinite(dist[y]) ? Math.abs(dist[y]) : 0) * EPS_REL);
+      if (next < dist[y] - tol) {
+        dist[y] = next;
         pred[y] = e;
         len[y] = len[x] + 1;
         if (len[y] >= n || ++relaxed % n === 0) {
           const cycle = cycleIn(n, pred, src);
           if (cycle) return { pred, cycle };
-          if (len[y] >= n) throw new Error('negative cycle detected but not found (inconsistent tolerance?)');
+          // Stale descendant `len` values after an ancestor re-parenting can reach `n` in an acyclic forest;
+          // refresh exact tree depths instead of aborting.
+          if (len[y] >= n) refreshDepths(n, pred, src, len);
         }
         if (!queued[y]) {
           queued[y] = 1;
@@ -237,7 +262,7 @@ function findNegativeCycle(n: number, es: Edges, out: Adjacency): number[] | und
 
 /** Whether a network holds, without working out its bounds: the conflict, if it does not. */
 export function conflictIn(points: string[], constraints: Constraint[]): Conflict | undefined {
-  const names = [ORIGIN, ...new Set(points)];
+  const names = [ORIGIN, ...[...new Set(points)].filter((p) => p !== ORIGIN).sort()];
   const index = new Map(names.map((p, i) => [p, i]));
   const { from, to } = endsOf(index, constraints);
   return conflictAt(names.length, constraints, from, to);
@@ -273,12 +298,14 @@ function solveAt(names: string[], constraints: Constraint[], from: Int32Array, t
   if (cycle) return { ok: false, conflict: conflictOf(cycle, es, constraints) };
   const fwd = new Float64Array(n).fill(Infinity);
   fwd[0] = 0;
-  const fwdPred = settle(n, fwdOut, es.u, es.v, es.w, fwd, false).pred;
+  const fwdRes = settle(n, fwdOut, es.u, es.v, es.w, fwd, false);
+  if (fwdRes.cycle) return { ok: false, conflict: conflictOf(fwdRes.cycle, es, constraints) };
   const bwd = new Float64Array(n).fill(Infinity);
   bwd[0] = 0;
-  const bwdPred = settle(n, adjacency(n, es.m, es.v), es.v, es.u, es.w, bwd, false).pred;
-  const loBy = pathSources(bwdPred, es.v, es.c, constraints, 0);
-  const hiBy = pathSources(fwdPred, es.u, es.c, constraints, 0);
+  const bwdRes = settle(n, adjacency(n, es.m, es.v), es.v, es.u, es.w, bwd, false);
+  if (bwdRes.cycle) return { ok: false, conflict: conflictOf([...bwdRes.cycle].reverse(), es, constraints) };
+  const loBy = pathSources(bwdRes.pred, es.v, es.c, constraints, 0);
+  const hiBy = pathSources(fwdRes.pred, es.u, es.c, constraints, 0);
   return {
     ok: true,
     bound: (i) => ({ lo: -bwd[i], hi: fwd[i], loBy: loBy[i], hiBy: hiBy[i] }),

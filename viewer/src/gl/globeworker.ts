@@ -1,6 +1,7 @@
-// The globe's generators, off the page, as every generator in the viewer runs (docs/STRUCTURE.md section
-// 3.5): a generator is code a contributor wrote, and a worker keeps it apart from the page and its state.
-// What it makes is checked against the build's fingerprint on the page, within the tolerance.
+// The globe's generators, off the main thread (docs/STRUCTURE.md section 3.5): running in a
+// dedicated worker keeps heavy generation off the UI thread and decoupled from DOM state (note
+// that same-origin workers are not a security sandbox). What it makes is checked against the
+// build's fingerprint on the page, within the tolerance.
 import { GENERATOR as BIOME_TEXTURE, generateBiomeTexture, type BiomeTextureParams } from '../../../world/generators/earth/biome/v1.ts';
 import { GENERATOR as CLOUDS, generateClouds, type CloudParams } from '../../../world/generators/earth/clouds/v1.ts';
 import { GENERATOR as SURFACE, generateSurface, type SurfaceParams } from '../../../world/generators/earth/surface/v1.ts';

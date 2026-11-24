@@ -191,15 +191,27 @@ export const SIGN_SPELLINGS: Record<string, string[]> = {
   Xochitl: ['xochitl', 'suchitl', 'flor'],
 };
 
+function gcd(a: number, b: number): number {
+  let x = Math.abs(a);
+  let y = Math.abs(b);
+  while (y !== 0) [x, y] = [y, x % y];
+  return x || 1;
+}
+const lcm = (a: number, b: number) => (a / gcd(a, b)) * b;
+
 /** Does a text name a sign, in any of the spellings the sources use? */
 export function namesSign(text: string, sign: string): boolean {
   const t = text.toLowerCase();
-  return (SIGN_SPELLINGS[sign] ?? [sign.toLowerCase()]).some((s) => t.includes(s));
+  return (SIGN_SPELLINGS[sign] ?? [sign.toLowerCase()]).some((s) => {
+    const escaped = s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return new RegExp(`(?<![\\p{L}\\p{N}])${escaped}(?![\\p{L}\\p{N}])`, 'u').test(t);
+  });
 }
 
 /** The place of a name in its cycle: the number and the sign that both advance one step a step, as one count from 0. */
 function placeIn(number: number, sign: number, numbers: number, signs: number): number {
-  for (let p = sign; p < numbers * signs; p += signs) if (p % numbers === number - 1) return p;
+  const period = lcm(numbers, signs);
+  for (let p = sign; p < period; p += signs) if (p % numbers === number - 1) return p;
   throw new TimeError(`${number} and sign ${sign} name no place in a cycle of ${numbers} by ${signs}`);
 }
 
@@ -263,7 +275,7 @@ export function cycleDays(v: CycleDate, anchors: { day?: CycleAnchor; year?: Cyc
   if (v.year) {
     const c = CYCLES[v.year.cycle];
     const length = c.length!;
-    const turn = c.numbers * c.signs.length;
+    const turn = lcm(c.numbers, c.signs.length);
     const a = anchors.year!;
     // Year k after the anchor's begins on day a.jdn + k·length and takes the place a.place + k. The first of the
     // window's years is the one that holds its first day; the first named so is that, or comes after it.
@@ -278,7 +290,7 @@ export function cycleDays(v: CycleDate, anchors: { day?: CycleAnchor; year?: Cyc
   }
   // The days of that name, within the window or within the years named.
   const c = CYCLES[v.day!.cycle];
-  const turn = c.numbers * c.signs.length;
+  const turn = lcm(c.numbers, c.signs.length);
   const a = anchors.day!;
   const out: [number, number][] = [];
   for (const [lo, hi] of years ?? [[first, last]]) {
@@ -296,17 +308,23 @@ const DATE = new RegExp(`^\\s*(?:(\\d{1,2})\\s+)?(${MONTHS.join('|')})\\s+(\\d+)
 function parseDate(input: string): { t: number; whole: number } | undefined {
   const m = DATE.exec(input);
   if (!m) return undefined;
+  const yearNum = Number(m[3]);
+  if (yearNum < 1) throw new TimeError(`"${input}": calendar years start at 1 (there is no year 0 ${m[4]})`);
   const month = MONTHS.indexOf(m[2]) + 1;
-  const y = m[4] === 'BCE' ? 1 - Number(m[3]) : Number(m[3]);
+  const y = m[4] === 'BCE' ? 1 - yearNum : yearNum;
   const day = m[1] === undefined ? 1 : Number(m[1]);
   if (y < FIRST_DATED_YEAR) throw new TimeError(`"${input}": dates are read from 4713 BCE on; write a year instead`);
+  if (!m[5] && m[1] !== undefined && y === 1582 && month === 10 && day >= 5 && day <= 14) {
+    throw new TimeError(`"${input}" fell in the 1582 Gregorian reform gap (specify Julian or Gregorian if intended)`);
+  }
   const gregorian = m[5] ? m[5] === 'Gregorian' : y > 1582 || (y === 1582 && (month > 10 || (month === 10 && day >= 15)));
   const j = dayNumber(y, month, day, gregorian);
   const back = dateOf(j, gregorian);
   if (back.y !== y || back.m !== month || back.d !== day) throw new TimeError(`"${input}" is not a date in the ${gregorian ? 'Gregorian' : 'Julian'} calendar`);
   const t = axisOf(j);
   if (m[1] !== undefined) return { t, whole: axisOf(j + 1) - t };
-  const next = month === 12 ? dayNumber(y + 1, 1, 1, gregorian) : dayNumber(y, month + 1, 1, gregorian);
+  const nextGregorian = m[5] ? gregorian : y > 1582 || (y === 1582 && month >= 10);
+  const next = month === 12 ? dayNumber(y + 1, 1, 1, nextGregorian) : dayNumber(y, month + 1, 1, nextGregorian);
   return { t, whole: axisOf(next) - t };
 }
 
@@ -366,8 +384,15 @@ export function parsePoint(input: TimePointInput): { t: number; whole: number } 
   if (!m) throw new TimeError(`not a time: "${input}" (write a year, a date such as 15 March 44 BCE, a day number such as JDN 584283, or a number with CE, BCE, BP, ka, Ma, Ga, or kyr/Myr/Gyr from now)`);
   const x = Number(m[1]);
   const unit = m[2];
-  if (unit === 'CE') return { t: x, whole: Number.isInteger(x) ? 1 : 0 };
-  if (unit === 'BCE') return { t: 1 - x, whole: Number.isInteger(x) ? 1 : 0 };
+  if (unit === 'CE') {
+    if (x < 1) throw new TimeError(`"${input}": CE years must be >= 1`);
+    return { t: x, whole: Number.isInteger(x) ? 1 : 0 };
+  }
+  if (unit === 'BCE') {
+    if (x < 1 || !Number.isInteger(x)) throw new TimeError(`"${input}": BCE years must be positive whole numbers`);
+    return { t: 1 - x, whole: 1 };
+  }
+  if (x < 0) throw new TimeError(`"${input}": ${unit} must be non-negative`);
   if (unit in AGE_UNITS) return { t: PRESENT_YEAR - x * AGE_UNITS[unit], whole: 0 };
   return { t: PRESENT_YEAR + x * FUTURE_UNITS[unit.split(' ')[0]], whole: 0 };
 }
@@ -538,6 +563,7 @@ function formatWhole(lo: number, hi: number): string | undefined {
 /** A label for a duration in years, e.g. "40 days", "22 kyr" or "1.3 Myr". */
 export function formatDuration(years: number): string {
   const a = Math.abs(years);
+  if (a >= 1e9) return `${trimNumber(a / 1e9, a >= 1e10 ? 0 : 1)} Gyr`;
   if (a >= 1e6) return `${trimNumber(a / 1e6, a >= 1e7 ? 0 : 1)} Myr`;
   if (a >= 1e3) return `${trimNumber(a / 1e3, a >= 1e4 ? 0 : 1)} kyr`;
   if (a < 1) return `${Math.round(a * 365.25)} days`;
@@ -574,8 +600,9 @@ export function formatTimeValue(v: TimeValue, refLabel: (ref: string) => string 
   const lo = v.loUnknown ? 'unknown' : Number.isFinite(v.lo) ? at(v.lo) : null;
   const hi = v.hiUnknown ? 'unknown' : Number.isFinite(v.hi) ? end(v.hi) : null;
   if (lo && hi) return `${lo} – ${hi}`;
-  if (hi) return `no later than ${hi}`;
-  return `no earlier than ${lo}`;
+  if (hi) return hi === 'unknown' ? 'unknown' : `no later than ${hi}`;
+  if (lo) return lo === 'unknown' ? 'unknown' : `no earlier than ${lo}`;
+  return 'unknown';
 }
 
 /** Whether a time is close enough to the present for the calendar: within 10 kyr of 1950. */

@@ -1,16 +1,49 @@
 // Download every dataset in world/manifest.yaml into .cache/, verifying checksums.
 import { createWriteStream, existsSync } from 'node:fs';
 import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
-import { Readable } from 'node:stream';
+import { isIP } from 'node:net';
+import { dirname } from 'node:path';
+import { Readable, Transform } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { unzipSync } from 'fflate';
 import { datasetDir, datasetPath, loadManifest, type Dataset } from './manifest.ts';
-import { REPO } from './paths.ts';
+import { REPO, safeJoin } from './paths.ts';
 import { sha256, sha256File } from './util.ts';
 
 /** A failure that asking again will not mend. */
 class Final extends Error {}
+
+const MAX_REDIRECTS = 10;
+const FETCH_TIMEOUT_MS = 5 * 60_000;
+
+function isPrivateHost(hostname: string): boolean {
+  const host = hostname.toLowerCase().replace(/^\[|\]$/g, '');
+  if (!host || host === 'localhost' || host.endsWith('.localhost') || host.endsWith('.local') || host.endsWith('.internal')) return true;
+  const v = isIP(host);
+  if (v === 4) {
+    const [a, b] = host.split('.').map(Number);
+    return a === 0 || a === 10 || a === 127 || (a === 169 && b === 254) || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) || (a === 100 && b >= 64 && b <= 127);
+  }
+  if (v === 6) {
+    const norm = host.toLowerCase();
+    if (norm === '::' || norm === '::1' || norm.startsWith('fc') || norm.startsWith('fd') || /^fe[89ab]/.test(norm)) return true;
+    const mapped = /^::ffff:(\d+\.\d+\.\d+\.\d+)$/.exec(norm);
+    if (mapped) return isPrivateHost(mapped[1]);
+  }
+  return false;
+}
+
+function assertSafeDownloadUrl(raw: string): URL {
+  let u: URL;
+  try {
+    u = new URL(raw);
+  } catch {
+    throw new Final(`invalid URL: ${raw}`);
+  }
+  if (u.protocol !== 'https:') throw new Final(`refusing non-HTTPS URL: ${u.protocol}`);
+  if (isPrivateHost(u.hostname)) throw new Final(`refusing private or local host: ${u.hostname}`);
+  return u;
+}
 
 // The undici the tools pin takes the place of the one inside Node in two cases, and is loaded only
 // for them, since it needs a newer Node (zstd in zlib) than the tools otherwise do.
@@ -63,34 +96,78 @@ function reason(err: unknown): string {
 }
 
 /** One try at a URL: what the host answers, written to `tmp` as it comes. */
-async function get(url: string, tmp: string, net: Net): Promise<void> {
-  // Some hosts refuse a client with no name of its own.
-  const res = await net.fetch(url, { headers: { 'User-Agent': 'wikiworldmodel-world-tools' } });
-  if (!res.ok || !res.body) {
-    await res.body?.cancel();
+async function get(url: string, tmp: string, net: Net, maxBytes?: number): Promise<void> {
+  let current = assertSafeDownloadUrl(url).href;
+  let res: Response | undefined;
+  for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
+    // Some hosts refuse a client with no name of its own.
+    res = await net.fetch(current, {
+      headers: { 'User-Agent': 'wikiworldmodel-world-tools' },
+      redirect: 'manual',
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+    });
+    if (res.status >= 300 && res.status < 400) {
+      const loc = res.headers.get('location');
+      await res.body?.cancel();
+      if (!loc) throw new Final(`HTTP ${res.status} without Location header`);
+      if (hop === MAX_REDIRECTS) throw new Final(`too many redirects (>${MAX_REDIRECTS})`);
+      current = assertSafeDownloadUrl(new URL(loc, current).href).href;
+      continue;
+    }
+    break;
+  }
+  if (!res || !res.ok || !res.body) {
+    await res?.body?.cancel();
     // A host that is busy or broken may answer in a moment. One that says the file is not there,
     // or not to be had, will say so again.
-    if (res.status >= 500 || res.status === 408 || res.status === 429) throw new Error(`HTTP ${res.status}`);
-    throw new Final(`HTTP ${res.status}`);
+    if (res && (res.status >= 500 || res.status === 408 || res.status === 429)) throw new Error(`HTTP ${res.status}`);
+    throw new Final(`HTTP ${res?.status ?? 'error'}`);
   }
+  if (maxBytes !== undefined) {
+    const contentLength = Number(res.headers.get('content-length'));
+    if (Number.isFinite(contentLength) && contentLength > maxBytes) {
+      await res.body.cancel();
+      throw new Final(`response Content-Length ${contentLength} exceeds declared ${maxBytes} bytes`);
+    }
+  }
+  let seen = 0;
+  const limit = new Transform({
+    transform(chunk: Buffer, _enc, cb) {
+      seen += chunk.length;
+      if (maxBytes !== undefined && seen > maxBytes) {
+        cb(new Final(`download exceeded declared ${maxBytes} bytes`));
+        return;
+      }
+      cb(null, chunk);
+    },
+  });
   // Written as it comes, since some datasets are larger than is wise to hold in memory.
-  await pipeline(Readable.fromWeb(res.body as import('node:stream/web').ReadableStream), createWriteStream(tmp));
+  await pipeline(Readable.fromWeb(res.body as import('node:stream/web').ReadableStream), limit, createWriteStream(tmp));
+}
+
+export interface DownloadOptions {
+  /** Maximum permitted download size in bytes; enforced while streaming. */
+  maxBytes?: number;
+  /** Expected SHA-256 hex digest, verified on the temporary file before moving it into place. */
+  sha256?: string;
 }
 
 /**
  * Download a dataset's file to `dest`. A try that fails is made again after a pause, a few times,
  * and a download given up says which dataset, which host and why.
  */
-export async function download(id: string, url: string, dest: string, log: (s: string) => void, net: Net = NET): Promise<void> {
+export async function download(id: string, url: string, dest: string, log: (s: string) => void, net: Net = NET, opts: DownloadOptions = {}): Promise<void> {
   await mkdir(dirname(dest), { recursive: true });
   const tmp = `${dest}.part`;
   // A snapshot of a changing database is kept in the repository until there is a blob store.
-  if (url.startsWith('repo:')) await writeFile(tmp, new Uint8Array(await readFile(join(REPO, url.slice('repo:'.length)))));
-  else {
-    const { host } = new URL(url);
+  if (url.startsWith('repo:')) {
+    const src = safeJoin(REPO, url.slice('repo:'.length), `${id} repo path`);
+    await writeFile(tmp, new Uint8Array(await readFile(src)));
+  } else {
+    const { host } = assertSafeDownloadUrl(url);
     for (let tries = 1; ; tries++) {
       try {
-        await get(url, tmp, net);
+        await get(url, tmp, net, opts.maxBytes);
         break;
       } catch (err) {
         // Asking again mends neither a host's no nor a failure of this machine's own, as of a full
@@ -107,6 +184,13 @@ export async function download(id: string, url: string, dest: string, log: (s: s
       }
     }
   }
+  if (opts.sha256) {
+    const got = await sha256File(tmp);
+    if (got !== opts.sha256) {
+      await rm(tmp, { force: true }).catch(() => {});
+      throw new Error(`${id}: checksum mismatch\n  expected ${opts.sha256}\n  got      ${got}`);
+    }
+  }
   await rename(tmp, dest);
 }
 
@@ -116,20 +200,15 @@ async function verified(path: string, expected: string): Promise<boolean> {
 
 async function fetchDataset(id: string, d: Dataset, log: (s: string) => void, net: Net): Promise<void> {
   const path = datasetPath(id, d);
-  const { url, sha256: expected, format, files } = d.fetch;
+  const { url, sha256: expected, bytes, format, files } = d.fetch;
   if (!(await verified(path, expected))) {
     log(`${id}: downloading ${url}`);
-    await download(id, url, path, log, net);
-    const got = await sha256File(path);
-    if (got !== expected) {
-      await rm(path);
-      throw new Error(`${id}: checksum mismatch\n  expected ${expected}\n  got      ${got}`);
-    }
+    await download(id, url, path, log, net, { maxBytes: bytes, sha256: expected });
   }
   if (format === 'zip' && files) {
     let entries: Record<string, Uint8Array> | undefined;
     for (const [name, f] of Object.entries(files)) {
-      const out = join(datasetDir(id, d), f.path);
+      const out = safeJoin(datasetDir(id, d), f.path, `${id} archive member "${name}"`);
       if (await verified(out, f.sha256)) continue;
       entries ??= unzipSync(new Uint8Array(await readFile(path)));
       const data = entries[f.path];

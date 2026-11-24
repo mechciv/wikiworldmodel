@@ -1,6 +1,7 @@
 // Search entities and named periods; choosing a result flies there.
 import type { PeriodRecord, SearchFile } from '../../../core/records.ts';
 import { nameFound } from '../../../core/timemachine.ts';
+import { esc } from './html.ts';
 
 export type SearchHit =
   | { type: 'entity'; id: string; label: string; detail: string; located: boolean }
@@ -60,7 +61,7 @@ export class Search {
 
   private render(): void {
     this.list.innerHTML = this.hits
-      .map((h, i) => `<li role="option" data-i="${i}" class="${i === this.active ? 'active' : ''}"><span>${h.label.replace(/</g, '&lt;')}</span><small>${h.detail.replace(/</g, '&lt;')}</small></li>`)
+      .map((h, i) => `<li role="option" data-i="${i}" class="${i === this.active ? 'active' : ''}"><span>${esc(h.label)}</span><small>${esc(h.detail)}</small></li>`)
       .join('');
     this.list.hidden = this.hits.length === 0;
     for (const li of this.list.querySelectorAll('li')) li.onmousedown = () => this.choose(this.hits[Number(li.dataset.i)]);

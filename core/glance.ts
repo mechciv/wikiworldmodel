@@ -48,9 +48,9 @@ export function layerShare(m: CoverageMatrix, layer: LayerId, until: number): { 
     if (here <= 0) return;
     from ??= col[0];
     drawn += here;
-    known += s[E] + s[M];
+    known += Math.min(here, s[E] + s[M]);
   });
-  return from === undefined || drawn === 0 ? null : { share: round(known / drawn), from };
+  return from === undefined || drawn === 0 ? null : { share: round(Math.min(1, known / drawn)), from };
 }
 
 /**
@@ -117,8 +117,9 @@ export function glance({ matrix, until, land, forms, housing, ladder, formatTime
     return { id, label, share: s?.share ?? null, of: s ? `${what} since ${formatTime(s.from)}` : 'not drawn yet' };
   };
   // Each time counts the same, however many lived then: the first farmers' houses weigh as much as the last century's.
-  const counted = (housing ?? []).filter((h) => h.people > 0);
+  const counted = (housing ?? []).filter((h) => h.people > 0 && h.t <= until);
   const housed = counted.length ? round(counted.reduce((s, h) => s + h.housed / h.people, 0) / counted.length) : null;
+  const earliestHousing = counted.reduce((min, h) => (h.t < min ? h.t : min), Infinity);
   const claims = Object.values(ladder).reduce((a, b) => a + b, 0);
   const checked = claims - (ladder.unchecked ?? 0);
   return {
@@ -143,7 +144,7 @@ export function glance({ matrix, until, land, forms, housing, ladder, formatTime
         rows: [
           { id: 'lifeways', label: 'Ways of life', share: land?.lifeways ?? null, of: land ? `of inhabited land since ${formatTime(land.from)}` : 'not drawn yet' },
           { id: 'states', label: 'States drawn', share: land?.states ?? null, of: land?.statesFrom !== undefined ? `of inhabited land since ${formatTime(land.statesFrom)}` : 'not drawn yet' },
-          { id: 'houses', label: 'Houses of a tradition', share: housed, of: counted.length ? `of people, at ${counted.length} times since ${formatTime(counted[0].t)}` : 'not counted in this build' },
+          { id: 'houses', label: 'Houses of a tradition', share: housed, of: counted.length ? `of people, at ${counted.length} times since ${formatTime(earliestHousing)}` : 'not counted in this build' },
         ],
       },
       {

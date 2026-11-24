@@ -1,5 +1,5 @@
 import { createReadStream, existsSync, statSync } from 'node:fs';
-import { extname, join, resolve } from 'node:path';
+import { extname, resolve, sep } from 'node:path';
 import { defineConfig, type Plugin } from 'vite';
 import { createFeedbackMiddleware } from '../tools/world/src/feedbackStore.ts';
 
@@ -14,8 +14,16 @@ function builds(): Plugin {
   const serve = (req: { url?: string }, res: import('node:http').ServerResponse, next: () => void) => {
     const url = (req.url ?? '').split('?')[0];
     if (!url.startsWith('/builds/')) return next();
-    const path = join(BUILDS, decodeURIComponent(url.slice('/builds/'.length)));
-    if (!path.startsWith(BUILDS) || !existsSync(path) || !statSync(path).isFile()) {
+    let rel: string;
+    try {
+      rel = decodeURIComponent(url.slice('/builds/'.length));
+    } catch {
+      res.statusCode = 400;
+      res.end();
+      return;
+    }
+    const path = resolve(BUILDS, rel);
+    if (!path.startsWith(BUILDS + sep) || !existsSync(path) || !statSync(path).isFile()) {
       res.statusCode = 404;
       res.end();
       return;

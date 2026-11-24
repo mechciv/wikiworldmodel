@@ -51,6 +51,11 @@ export function siteFonts(dir = join(REPO, 'site/fonts')): string[] {
 }
 
 const oneLine = (s: string) => s.replace(/\s+/g, ' ').trim();
+const safeMdUrl = (raw: string): string => {
+  const s = oneLine(raw);
+  if (!/^https?:\/\//i.test(s)) throw new Error(`unsafe attribution URL: ${JSON.stringify(raw)}`);
+  return s.replace(/[\s()<>]/g, (c) => encodeURIComponent(c));
+};
 
 /** ATTRIBUTION.md: every dataset with its citation, licence and credit; the cited databases; the fonts. */
 export function attributionMarkdown(world: World, fonts: string[] = siteFonts(), viewerFonts: string[] = siteFonts(join(REPO, 'viewer/public/fonts')), ground: GroundMaterials | null = groundMaterials()): string {
@@ -74,8 +79,8 @@ export function attributionMarkdown(world: World, fonts: string[] = siteFonts(),
     lines.push(`### ${oneLine(d.title ?? d.credit ?? id)}`, '', oneLine(d.citation), '');
     lines.push(`- Licence: ${d.license ?? 'none stated'}${d.license_note ? `. ${oneLine(d.license_note)}` : ''}`);
     if (d.credit) lines.push(`- Credit: ${oneLine(d.credit)}`);
-    if (d.doi) lines.push(`- DOI: [${d.doi}](https://doi.org/${d.doi})`);
-    if (d.url) lines.push(`- From: <${d.url}>`);
+    if (d.doi) lines.push(`- DOI: [${oneLine(d.doi)}](${safeMdUrl(`https://doi.org/${oneLine(d.doi)}`)})`);
+    if (d.url) lines.push(`- From: <${safeMdUrl(d.url)}>`);
     lines.push(`- Source id: \`${id}\``, '');
   }
   const databases = citedDatabases(world);
@@ -112,14 +117,14 @@ export function attributionMarkdown(world: World, fonts: string[] = siteFonts(),
     lines.push(
       '## Materials',
       '',
-      `The viewer draws the ground with scans of earth, sand, stones, rock, mud and snow from [${ground.source}](${ground.url}),`,
+      `The viewer draws the ground with scans of earth, sand, stones, rock, mud and snow from [${oneLine(ground.source)}](${safeMdUrl(ground.url)}),`,
       `each dedicated to the public domain under ${ground.license}, packed into [viewer/public/materials/](viewer/public/materials/)`,
       'by `tools/materials/pack.ts` from the files [tools/materials/ground.yaml](tools/materials/ground.yaml) pins. A scan gives a',
       'material its grain and says nothing of any place: which material a ground has, and its colour, are the world\'s.',
       '',
       '| Material | Scan | By |',
       '|---|---|---|',
-      ...ground.layers.map((l) => `| ${l.title} | [${l.name}](${l.from}) | ${l.authors.join(', ')} |`),
+      ...ground.layers.map((l) => `| ${l.title} | [${oneLine(l.name)}](${safeMdUrl(l.from)}) | ${l.authors.join(', ')} |`),
       '',
     );
   }

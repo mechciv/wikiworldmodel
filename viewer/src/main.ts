@@ -56,6 +56,7 @@ import { add, cross, norm, scale, type V3 } from './mat.ts';
 import { buildOf, DEFAULT_HOUR, fromSearch, HOURS, quantize, toSearch, type ViewState } from './state.ts';
 import { TileManager, type LoadedTile } from './tiles.ts';
 import { FeedbackDialog } from './ui/feedback.ts';
+import { esc } from './ui/html.ts';
 import { InspectPanel, stepName, type BiomeHere, type IceHere, type LandscapeHere, type OrganismHere, type PlanetStateInfo, type RowInfo, type TerrainInfo, type TerritoryHere } from './ui/inspect.ts';
 import { barWords, noticeWords, standingAt } from './ui/lifewords.ts';
 import { Markers, timeFor, visibility } from './ui/markers.ts';
@@ -228,7 +229,7 @@ const STATE_COLORS: Record<string, string> = {
 const reachText = (deg: number) => (deg <= 0 ? 'the equator' : `${deg}°`);
 
 function fail(root: HTMLElement, message: string): void {
-  root.innerHTML = `<div class="fatal"><h1>WikiWorldModel</h1><p>${message.replace(/</g, '&lt;')}</p></div>`;
+  root.innerHTML = `<div class="fatal"><h1>WikiWorldModel</h1><p>${esc(message)}</p></div>`;
 }
 
 async function start(root: HTMLElement): Promise<void> {
@@ -452,8 +453,8 @@ async function start(root: HTMLElement): Promise<void> {
       landscapeStep = i;
       // The legend: the classes present, by their level.
       const present = new Set(map);
-      landscapeLegend.innerHTML = `<div class="pl-title"><span>${landscape.index.title}, ${stepName(landscape.index.steps[i])}</span> <span class="badge basis-reconstruction">reconstruction</span></div><div class="ll-items">${landscape.index.classes
-        .map((k, n) => (present.has(n + 1) && k.code !== 70 ? `<span class="ll-item"><i style="background:rgb(${k.rgb.join(',')})"></i>${k.label}</span>` : ''))
+      landscapeLegend.innerHTML = `<div class="pl-title"><span>${esc(landscape.index.title)}, ${esc(stepName(landscape.index.steps[i]))}</span> <span class="badge basis-reconstruction">reconstruction</span></div><div class="ll-items">${landscape.index.classes
+        .map((k, n) => (present.has(n + 1) && k.code !== 70 ? `<span class="ll-item"><i style="background:rgb(${k.rgb.map(Number).join(',')})"></i>${esc(k.label)}</span>` : ''))
         .join('')}</div>`;
     }
     return true;
@@ -610,7 +611,7 @@ async function start(root: HTMLElement): Promise<void> {
   const named = (t: number) => ['period', 'era', 'eon'].map((rank) => build.periods.periods.find((p) => p.rank === rank && p.start <= t && t <= p.end)).find(Boolean);
   const until = dataRange[1] > PRESENT_YEAR ? formatTime(dataRange[1]) : 'today';
   // The name, with the site's logo, leads back to the site's front page, beside the viewer's folder.
-  brand.innerHTML = `<a class="home" href="../" title="WikiWorldModel: about the project"><img src="${logoUrl}" width="18" height="18" alt="" /><strong>WikiWorldModel</strong></a><span>${named(dataRange[0])?.name ?? formatTime(dataRange[0])} to ${until}</span><a class="coverage-link" title="How much of the world each layer knows, across time and the globe">How much is known →</a>`;
+  brand.innerHTML = `<a class="home" href="../" title="WikiWorldModel: about the project"><img src="${esc(logoUrl)}" width="18" height="18" alt="" /><strong>WikiWorldModel</strong></a><span>${esc(named(dataRange[0])?.name ?? formatTime(dataRange[0]))} to ${esc(until)}</span><a class="coverage-link" title="How much of the world each layer knows, across time and the globe">How much is known →</a>`;
   brand.querySelector<HTMLAnchorElement>('.coverage-link')!.href = `./coverage.html?b=${encodeURIComponent(build.id)}`;
   const search = new Search(build.search, build.periods.periods, kindLabel);
   const toolbar = new Toolbar(build.id, ts.alternatives, ts.layers ?? []);

@@ -21,8 +21,7 @@ import type { PlaceLandscape } from '../city/landscape.ts';
 
 const PATTERN_WORDS: Record<string, string> = PATTERN_LABEL;
 
-const esc = (s: unknown) =>
-  String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
+import { esc, safeHref } from './html.ts';
 
 export function short(s: SourceRecord | undefined, ref: string): string {
   if (!s) return ref;
@@ -526,7 +525,10 @@ export class InspectPanel {
       .map((x) => `<li><strong>${esc(REL_LABEL[x.rel] ?? x.rel.replace(/-/g, ' '))}</strong> ${this.link(x.from, x.fromLabel)}${held(x)} <span class="muted">(stated by that record)</span></li>`)
       .join('');
     const sources = Object.values(r.sources)
-      .map((s) => `<li id="src-${esc(s.id)}"><p>${esc(s.citation)}</p>${s.doi ? `<a href="https://doi.org/${encodeURI(s.doi)}" target="_blank" rel="noopener">doi:${esc(s.doi)}</a>` : s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.url)}</a>` : ''} <span class="badge">${esc(s.kind)}</span>${s.license ? ` <span class="badge">${esc(s.license)}</span>` : ''}${s.written ? `<p class="written">Written ${esc(s.written)}.</p>` : ''}${s.type === 'text' && s.reliability ? `<p class="note">${esc(s.reliability)}</p>` : ''}${s.verified ? `<p class="verified">Checked: ${esc(s.verified.how)}</p>` : ''}</li>`)
+      .map((s) => {
+        const href = safeHref(s.url);
+        return `<li id="src-${esc(s.id)}"><p>${esc(s.citation)}</p>${s.doi ? `<a href="https://doi.org/${esc(encodeURI(s.doi))}" target="_blank" rel="noopener">doi:${esc(s.doi)}</a>` : href ? `<a href="${esc(href)}" target="_blank" rel="noopener">${esc(s.url)}</a>` : s.url ? `<span>${esc(s.url)}</span>` : ''} <span class="badge">${esc(s.kind)}</span>${s.license ? ` <span class="badge">${esc(s.license)}</span>` : ''}${s.written ? `<p class="written">Written ${esc(s.written)}.</p>` : ''}${s.type === 'text' && s.reliability ? `<p class="note">${esc(s.reliability)}</p>` : ''}${s.verified ? `<p class="verified">Checked: ${esc(s.verified.how)}</p>` : ''}</li>`;
+      })
       .join('');
     const f = r.frame;
     const where = !f
