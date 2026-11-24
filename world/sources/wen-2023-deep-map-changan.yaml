@@ -1,0 +1,21 @@
+id: src:wen-2023-deep-map-changan
+type: publication
+kind: review
+citation: >-
+  Wen, X. (2023). Toward a Deep Map of Chang'an: Some Reflections of a (Beginning) Practitioner. Startwords 4
+  (Palimpsests).
+authors: ["Wen, X."]
+published: 2023
+title: "Toward a Deep Map of Chang'an: Some Reflections of a (Beginning) Practitioner"
+container: Startwords
+doi: 10.5281/zenodo.8380878
+url: https://startwords.cdh.princeton.edu/issues/4/toward-deep-map
+license: CC-BY-4.0
+reliability: >-
+  An essay by a historian of medieval China on how the city has been mapped, not a study of its size: it gives the
+  walled city's area in passing, without a source.
+verified:
+  by: machine:claude-code
+  how: >-
+    The PDF from Zenodo (record 8380878; its md5 as the record gives it) read on 2026-11-24, its text extracted with
+    PyMuPDF. Quotes checked by script against it, after normalizing whitespace.

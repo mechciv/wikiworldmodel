@@ -1,0 +1,17 @@
+id: src:wikidata-tang-changan
+type: database-record
+kind: compilation
+snapshot: "2026-11-24"
+citation: >-
+  Wikidata, item Q10923028 (Chang'an, Tang Empire), property P625 (coordinate location).
+container: Wikidata
+url: https://www.wikidata.org/wiki/Q10923028
+license: CC0-1.0
+reliability: >-
+  A crowd-edited gazetteer entry for the city of the Sui and Tang, "capital of the Tang Empire" (one of its English
+  aliases is "Sui Capital of Daxing and Tang Capital of Chang'an"). A point for the walled city, given to the minute of
+  arc, with no reference.
+verified:
+  by: machine:claude-code
+  how: >-
+    Coordinates (34.266667, 108.9) read from the item's JSON (Special:EntityData/Q10923028.json) on 24 November 2026.

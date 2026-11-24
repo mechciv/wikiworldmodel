@@ -36,6 +36,8 @@ claims:
       loc: Introduction
       quote: Starting around 100 AD, it rapidly grew into the largest city of Mesoamerica of the first millennium.
     method: expert-estimate
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in froese-2014-teotihuacan-government.txt (sha256 8bcf542d8b045d08), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
   end-collapse:
     prop: end
     value: 550 CE
@@ -49,6 +51,8 @@ claims:
     method: expert-estimate
     rank: preferred
     note: The collapse of the city as a metropolis, not the last of its people. Preferred because it rests on a high-resolution chronology of the centre, as Froese et al. say.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in sugiyama-2021-teotihuacan-lidar.txt (sha256 3e9be83faa1387e7) and froese-2014-teotihuacan-government.txt (sha256 8bcf542d8b045d08), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
   end-unesco:
     prop: end
     value: 650 CE
@@ -84,6 +88,8 @@ claims:
     method: survey
     rank: preferred
     note: 20 km². Preferred because two recent papers agree on it. The moment is the city's apogee, as Sugiyama et al. date it.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in sugiyama-2021-teotihuacan-lidar.txt (sha256 3e9be83faa1387e7) and froese-2014-teotihuacan-government.txt (sha256 8bcf542d8b045d08), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
   area-unesco:
     prop: settlement_area
     value: 3600
@@ -128,6 +134,8 @@ claims:
       loc: Introduction
       quote: a conservative estimate is that by 150 AD the city’s population had reached a plateau of between 80,000 and 100,000 inhabitants
     method: expert-estimate
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in froese-2014-teotihuacan-government.txt (sha256 8bcf542d8b045d08), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
   population-unesco:
     prop: population
     value: 25000
@@ -157,3 +165,30 @@ claims:
       named, nor the width of the avenue.
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in sugiyama-2021-teotihuacan-lidar.txt (sha256 d302c963c8281730) and unesco-whc-414-teotihuacan.txt (sha256 c2e0a866010c07a2), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-20" }
+  town-form-orientation:
+    prop: town_form
+    value: { streets: grid, orientation: 15.5 }
+    source:
+      - ref: src:sugiyama-2021-teotihuacan-lidar
+        loc: section "Teotihuacan"
+        quote: The configuration of scale, density, and orthogonal cityscape at Teotihuacan
+      - ref: src:sugiyama-2021-teotihuacan-lidar
+        loc: section "Teotihuacan"
+        quote: Every aspect of urban design—from structure orientation (15.5° east of astronomical north)
+      - ref: src:froese-2014-teotihuacan-government
+        loc: Introduction
+        quote: divided into quadrants by its north-south (“Street of the Dead”) and east-west axes
+      - ref: src:froese-2014-teotihuacan-government
+        loc: section "Evidence for Centralized Government"
+        quote: This construction of the city’s extensive ceremonial center, as well as of all other quarters of Teotihuacan, were realized in alignment with a specific orientation, namely around 15° east of true north.
+    method: survey
+    rank: preferred
+    note: >-
+      The grid of the claim above, with the way it ran. The city's north-south axis, the Street of the Dead, and all its
+      quarters were built on one orientation: 15.5° east of astronomical north as Sugiyama et al. give it, around 15° east
+      of true north as Froese et al. do. Preferred over the claim above, which it agrees with, because it says which way
+      the grid ran. No span of time is given: Froese et al. say that building went first to the monuments along the
+      Street of the Dead, and that the more than 2,000 apartment compounds that filled the grid were built from about
+      200 CE, all of it on the one orientation, which so held from the city's beginning.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in sugiyama-2021-teotihuacan-lidar.txt (sha256 3e9be83faa1387e7) and froese-2014-teotihuacan-government.txt (sha256 8bcf542d8b045d08), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
