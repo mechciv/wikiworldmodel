@@ -467,7 +467,13 @@ export function siteCells(cells: SiteCell[], worth: SiteWorth, p: SitingParams):
       chosen.add(c.x, c.y, c.cell);
       out[c.cell].push([c.x, c.y]);
     }
-    for (const c of left) if (short(c.cell)) out[c.cell].push([c.x, c.y]);
+    // Last, any place still free by the houses' own gap, so that no two settlements' houses stand in each other.
+    for (const c of left) {
+      if (!short(c.cell)) continue;
+      if (chosen.within(c.x, c.y, p.gap, (i) => (chosen.xs[i] - c.x) ** 2 + (chosen.ys[i] - c.y) ** 2 < p.gap * p.gap)) continue;
+      chosen.add(c.x, c.y, c.cell);
+      out[c.cell].push([c.x, c.y]);
+    }
   }
   return out;
 }

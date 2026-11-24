@@ -629,19 +629,22 @@ describe('the settlement generator', () => {
   it('puts a settlement in the same place from two scenes that overlap', () => {
     const p = world((r, c) => ({ code: (r + c) % 3 ? 32 : 23, density: (r + c) % 3 ? 40 : 260, region: 1 }), [{ id: 1, a: assess(1, 1, 3, 2) }]);
     const a = { lat: 0, lon: 0 };
-    const b = { lat: 0.06, lon: 0.05 };
     const pa = makeSettlement(spec(p, a), flat, dry, EXTENT);
-    const pb = makeSettlement(spec(p, b), flat, dry, EXTENT);
     // Back to degrees, each from its own scene's origin.
     const deg = (o: { lat: number; lon: number }, x: number, y: number) => [o.lat + y / 111194.93, o.lon + x / (111194.93 * Math.cos((o.lat * Math.PI) / 180))];
-    const [bx, by] = toLocal(a, b.lat, b.lon);
-    const shared = pa.settlements.filter((s) => Math.abs(s.x - bx) < EXTENT - 2000 && Math.abs(s.y - by) < EXTENT - 2000 && Math.abs(s.x) < EXTENT - 2000 && Math.abs(s.y) < EXTENT - 2000);
-    expect(shared.length).toBeGreaterThan(50);
-    const others = pb.settlements.map((s) => deg(b, s.x, s.y));
-    for (const s of shared) {
-      const [la, lo] = deg(a, s.x, s.y);
-      const best = Math.min(...others.map(([lb, ob]) => Math.hypot((la - lb) * 111194.93, (lo - ob) * 111194.93)));
-      expect(best).toBeLessThan(2);
+    // A scene two thirds of a cell away, and scenes a whole cell away each way: the settlements both draw, up to a few
+    // hundred metres from either's edge, where the cells weighed only about a scene differ most from the other's.
+    for (const b of [{ lat: 0.06, lon: 0.05 }, { lat: 1 / 12, lon: 0 }, { lat: 0, lon: 1 / 12 }]) {
+      const pb = makeSettlement(spec(p, b), flat, dry, EXTENT);
+      const [bx, by] = toLocal(a, b.lat, b.lon);
+      const shared = pa.settlements.filter((s) => Math.abs(s.x - bx) < EXTENT - 300 && Math.abs(s.y - by) < EXTENT - 300 && Math.abs(s.x) < EXTENT - 300 && Math.abs(s.y) < EXTENT - 300);
+      expect(shared.length).toBeGreaterThan(50);
+      const others = pb.settlements.map((s) => deg(b, s.x, s.y));
+      for (const s of shared) {
+        const [la, lo] = deg(a, s.x, s.y);
+        const best = Math.min(...others.map(([lb, ob]) => Math.hypot((la - lb) * 111194.93, (lo - ob) * 111194.93)));
+        expect(best).toBeLessThan(2);
+      }
     }
   });
 });
@@ -658,7 +661,7 @@ describe('where settlements stand, and what they farm (sites.ts)', () => {
   const CELL = 111194.93 / 12;
   const toEdge = (v: number) => Math.min(((v % CELL) + CELL) % CELL, CELL - (((v % CELL) + CELL) % CELL));
 
-  it('draws the scenes of a build made before it had its siting as a build made now would', () => {
+  it("takes the record's siting and growth where a build has none", () => {
     expect(gen.params.siting).toEqual(SITING);
     expect(gen.params.growth).toEqual(GROWTH);
     const { siting: _s, growth: _g, ...older } = gen.params;

@@ -201,6 +201,9 @@ long they stay is the generator's, and no record's.
   yard, where a fence runs and where its ways in are: all invented. So is where in its 5′ cell a settlement stands and
   where its fields end: the water and the ground are the scene's, but the soil they weigh is a noise, and nothing
   records which places people chose.
+- A build made before version 9 is drawn with version 9's siting and fields, since the generator keeps no earlier
+  placement: a link into such a build finds its settlements and fields where version 9 puts them, not where that build
+  first drew them. Whether to keep each version's placement for the builds made with it is open.
 - What a tradition says of its house is drawn for every house of it. A porch that some houses had, a byre that the
   poor shared with their cattle and the rich did not, a village wall that was "often" there, are drawn for all or left
   in a note, until a record can say how many.
