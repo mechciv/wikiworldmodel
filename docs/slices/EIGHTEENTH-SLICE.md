@@ -162,6 +162,9 @@ picked, named and lit as in the city's own scene before.
 - **Rome's medieval town is not in the bend of the Tiber.** The growth model reads no aqueducts, so nothing makes the
   river's banks the better ground once they failed; the town of 1200 stands round the record's point, east of the
   Colosseum. An epoch at the aqueducts' end, reading the distance to the survey's water, would move it.
+- **Rome's squares and streets are empty.** `CityScene` drew crowds in them; the living scene draws people going
+  about a village's houses, and none yet in a city's streets, so the Pantheon's square, the Colosseum's and the
+  Forum's have nobody in them.
 - **A city's institutions are not read.** No town has a temple or a market of its own unless a record draws one; a town
   form's open square is kept at its middle. A district's count of its buildings (Rome's regions, by the Regionary
   Catalogues) sizes its plots, but it does not move where the city grew.
