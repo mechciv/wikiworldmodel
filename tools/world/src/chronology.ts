@@ -1025,10 +1025,21 @@ function overBase(sol: Solution, base: Bounds | undefined): Solution {
 }
 
 /**
+ * Picture-level STN solutions already computed (for example during validation), keyed by `scenarioKey(picture)`.
+ * Passing this into `solveVariants` avoids re-solving the default picture, its centres, and every alternative picture.
+ */
+export interface SolvedPictures {
+  defaultSol: Solution;
+  defaultCentres?: Solution;
+  pictures: Map<string, Solution>;
+  pictureCentres: Map<string, Solution>;
+}
+
+/**
  * Solve each picture, and each picture with one competing dated claim picked over the default.
  * Each is kept only as it differs from its picture, and each picture as it differs from the default.
  */
-export function solveVariants(world: World, alternatives?: string[]): Variant[] {
+export function solveVariants(world: World, alternatives?: string[], preSolved?: SolvedPictures): Variant[] {
   const out: Variant[] = [];
   const boundsOf = (s: Solution) => (s.ok ? s.bounds : undefined);
   let rootSol: Bounds | undefined;
@@ -1055,10 +1066,11 @@ export function solveVariants(world: World, alternatives?: string[]): Variant[] 
   for (const scenario of scenariosOf(world, alternatives)) {
     let v: Variant;
     if (!scenario.picks?.length) {
+      const key = scenarioKey(scenario);
       nets = { sol: pictureNetwork(world, scenario), centres: pictureNetwork(world, scenario, true) };
-      const sol = solve(nets.sol.points, nets.sol.constraints);
-      const centres = solve(nets.centres.points, nets.centres.constraints);
-      v = { key: scenarioKey(scenario), scenario, solution: overBase(sol, rootSol), centres: overBase(centres, rootCentres) };
+      const sol = preSolved?.pictures.get(key) ?? solve(nets.sol.points, nets.sol.constraints);
+      const centres = preSolved?.pictureCentres.get(key) ?? solve(nets.centres.points, nets.centres.constraints);
+      v = { key, scenario, solution: overBase(sol, rootSol), centres: overBase(centres, rootCentres) };
       picture = v;
       if (!rootSol) {
         rootSol = boundsOf(v.solution);

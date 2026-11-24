@@ -74,8 +74,14 @@ jobs:
 
       - uses: actions/cache@v6
         with:
+          path: .cache/blobs
+          key: blobs-${{ hashFiles('world/manifest.yaml') }}
+          restore-keys: blobs-
+
+      - uses: actions/cache@v6
+        with:
           path: .cache/import
-          key: import-${{ hashFiles('world/manifest.yaml', 'world/snapshots/**', 'tools/world/importers/**', 'tools/world/src/**', 'world/generators/**') }}
+          key: import-${{ hashFiles('world/manifest.yaml', 'tools/world/importers/**', 'tools/world/src/**', 'world/generators/**') }}
 
       - name: Fetch, build the world and the viewer
         run: |
@@ -161,8 +167,14 @@ jobs:
 
       - uses: actions/cache@v6
         with:
+          path: .cache/blobs
+          key: blobs-${{ hashFiles('world/manifest.yaml') }}
+          restore-keys: blobs-
+
+      - uses: actions/cache@v6
+        with:
           path: .cache/import
-          key: import-${{ hashFiles('world/manifest.yaml', 'world/snapshots/**', 'tools/world/importers/**', 'tools/world/src/**', 'world/generators/**') }}
+          key: import-${{ hashFiles('world/manifest.yaml', 'tools/world/importers/**', 'tools/world/src/**', 'world/generators/**') }}
 
       # The build the render jobs drew, made on another machine: building it again here and
       # comparing checks it does not depend on where it was made.

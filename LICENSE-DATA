@@ -14,8 +14,9 @@ What it does not cover, which keeps its own terms:
 
 - the quotes inside records, which are short quotations from the works they cite, used as
   evidence;
-- the datasets and database snapshots the build reads, including those kept in world/snapshots/,
-  each under the license its entry in world/manifest.yaml states (see ATTRIBUTION.md);
+- the datasets and database snapshots the build reads (including snapshots stored as
+  content-addressed blobs referenced from world/manifest.yaml), each under the license its entry in
+  world/manifest.yaml states (see ATTRIBUTION.md);
 - renders of the world, such as the images in site/img/ and viewer/test/golden/, which draw
   those datasets and must credit them as ATTRIBUTION.md says;
 - the fonts in site/fonts/, under the SIL Open Font License (the OFL-*.txt files beside them);

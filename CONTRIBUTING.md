@@ -90,29 +90,35 @@ These are not style preferences. A pull request that breaks one is closed.
 ```sh
 npm install
 python3 -m venv .venv && .venv/bin/pip install -r tools/world/importers/requirements.txt
-npm run fetch          # the pinned datasets → .cache/datasets (about 3 GB)
+npm run fetch          # the pinned datasets and snapshots → .cache/datasets & .cache/blobs (about 3 GB)
 npm run validate       # schema, references, vocabularies, review, chronology, plate frames
-npm test               # unit tests (they need only the plate model)
-npm run build:world    # → dist/builds/<id>/
+npm test               # unit tests (need only the plate model and snapshots)
+npm run build:world    # incremental DAG build → .cache/build + dist/builds/<id>/ (--no-cache forces full rebuild)
 npm run test:build     # checks on that build
 npm run build:viewer && npx playwright test --project=globe   # browser tests (also: city, city-views)
 npm run dev            # the viewer, at http://localhost:5173/
 ```
 
-Node 22.19+ or 24+, Python 3.12+. The build makes the rivers of the glacial cycles in worker threads, one fewer than
-the machine's cores, at most eight, and one for each 8 GB of memory; `WIKIWORLDMODEL_WORKERS` sets how many, and under
-two the build's own thread makes them.
+Node 22.19+ or 24+, Python 3.12+. The build runs as content-addressed DAG stages streaming directly
+to `.cache/build/blobs/<sha256>` and hard-linked into `dist/builds/<id>/`, so unchanged stages hit
+cache across edits. The build makes the rivers of the glacial cycles in worker threads, one fewer
+than the machine's cores, at most eight, and one for each 8 GB of memory; `WIKIWORLDMODEL_WORKERS`
+sets how many, and under two the build's own thread makes them.
 
 **Sandboxes with limited network access.** Datasets come from several hosts: GitHub, Zenodo,
-Figshare, PANGAEA, CEDA, publishers' sites, NOAA, OpenTopography, INGV. If some are blocked where you run:
+Figshare, PANGAEA, CEDA, publishers' sites, NOAA, OpenTopography, INGV, and the project's blob store
+(`builds.wikiworldmodel.org`). If some are blocked where you run:
 
-- `npm run validate` and `npm test` need only the plate model, on GitHub:
-  `npm run fetch -- src:paleomap-plate-model`. Records can be written and checked with no other
-  dataset, and these are the checks CI runs on every pull request.
+- `npm run validate` and `npm test` need only the plate model (on GitHub) and the pinned raw
+  snapshots (in the blob store): `npm run fetch -- src:paleomap-plate-model --snapshots`. Records
+  can be written and checked with no other dataset, and these are the checks CI runs on every pull
+  request.
 - `npm run build:world` needs them all. Say in your pull request that you could not build, and
   CI will.
 - Never work around a blocked download with a file from somewhere else: datasets are pinned by
-  sha256, and a different file is a different dataset.
+  sha256, and a different file is a different dataset. When refreshing a snapshot, stage it in
+  `.cache/blobs/<sha256>` (the `*-snapshot` CLI commands do this automatically) and upload it with
+  `tools/world/publish-snapshots.sh`.
 
 ## The loop
 

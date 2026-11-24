@@ -3,7 +3,7 @@
 // nodes, a span of keyframes at a time.
 import { decodeTile } from '../../core/container.ts';
 import { MonthsTile, PartsTile, partsFile, tilesNear, type MonthsSet, type MonthsTileHeader, type PartsTileHeader } from '../../core/months.ts';
-import { getBytes, type Build } from './data.ts';
+import type { Build } from './data.ts';
 
 export class MonthTiles {
   private tiles = new Map<string, Promise<MonthsTile | null>>();
@@ -31,7 +31,8 @@ export class MonthTiles {
     if (!file) return Promise.resolve(null);
     let p = this.partTiles.get(file);
     if (!p) {
-      p = getBytes(this.build.base + file)
+      p = this.build
+        .getBytes(file)
         .then((data) => {
           const { header, arrays } = decodeTile<PartsTileHeader>(data);
           return new PartsTile(header, arrays as unknown as ArrayLike<number>[]);
@@ -49,7 +50,8 @@ export class MonthTiles {
     if (!file) return Promise.resolve(null);
     let p = this.tiles.get(file);
     if (!p) {
-      p = getBytes(this.build.base + file)
+      p = this.build
+        .getBytes(file)
         .then((data) => {
           const { header, arrays } = decodeTile<MonthsTileHeader>(data);
           return new MonthsTile(header, arrays as unknown as ArrayLike<number>[]);

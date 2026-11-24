@@ -48,7 +48,7 @@ import { CityRenderer } from './gl/city.ts';
 import { SEA } from './gl/cityShaders.ts';
 import { CityLabels } from './ui/citylabels.ts';
 import { FeatureTiles } from './features.ts';
-import { builds, fetchLog, getBytes, getJSON, loadBuild, loadRecord, type Build } from './data.ts';
+import { builds, fetchLog, loadBuild, loadRecord, type Build } from './data.ts';
 import { FieldRenderer, type FieldTileGPU } from './gl/field.ts';
 import { cloudDriftAt, globeLook, GlobeRenderer, type CloudDrift } from './gl/globe.ts';
 import type { FrameProfile } from './gl/timer.ts';
@@ -351,7 +351,7 @@ async function start(root: HTMLElement): Promise<void> {
     dirty = true;
   });
   if (ts.files.climate) {
-    void getBytes(build.base + ts.files.climate).then((data) => {
+    void build.getBytes(ts.files.climate).then((data) => {
       const { header, arrays } = decodeTile<ClimateHeader>(data);
       climateData = { header, arrays };
       climates.setDeep(ts.climate?.field ?? 'field:earth/climate', ts.climate?.title ?? 'Climate', header, arrays);
@@ -369,7 +369,7 @@ async function start(root: HTMLElement): Promise<void> {
   let iceReady = !ts.files.ice;
   let iceKey = '';
   if (ts.files.ice) {
-    void getBytes(build.base + ts.files.ice).then((data) => {
+    void build.getBytes(ts.files.ice).then((data) => {
       const { header, arrays } = decodeTile<IceHeader>(data);
       field.setIce(header.grid, arrays[header.plate] as Uint16Array, header.scenarios.flatMap((s) => s.keyframes.map((k) => ({ key: k.margin, margin: arrays[k.margin] as Uint8Array, thickness: arrays[k.thickness] as Uint8Array }))));
       globe.iceCube = field.iceCube!.texture;
@@ -385,7 +385,7 @@ async function start(root: HTMLElement): Promise<void> {
   stage.appendChild(territory.el);
   let territoryReady = !ts.files.territory;
   if (ts.files.territory) {
-    void getJSON<TerritoryFile>(build.base + ts.files.territory).then((f) => {
+    void build.getJSON<TerritoryFile>(ts.files.territory).then((f) => {
       territory.setFile(f);
       territoryReady = true;
       dirty = true;
@@ -402,7 +402,7 @@ async function start(root: HTMLElement): Promise<void> {
   const hazards = new HazardLayer();
   const polities = new PolityLayer();
   // Fields of points, lines and areas: one renderer for all, as their records say (docs/STRUCTURE.md section 3.6).
-  const fieldLayers = (ts.layers ?? []).map((info) => new FieldLayer(info, build.base));
+  const fieldLayers = (ts.layers ?? []).map((info) => new FieldLayer(info, build));
   for (const fl of fieldLayers) fl.onLoad = () => (dirty = true);
   const fieldOn = (fl: FieldLayer) => !fl.info.style.toggle || !!state.layers?.includes(fl.info.style.toggle.key);
   const fieldLayer = (id: string) => fieldLayers.find((fl) => fl.info.field === id);
@@ -418,7 +418,7 @@ async function start(root: HTMLElement): Promise<void> {
   let peopleFileP: Promise<PeopleFile | null> | null = null;
   const peopleFile = () =>
     (peopleFileP ??= ts.files.people
-      ? getBytes(build.base + ts.files.people).then((data) => {
+      ? build.getBytes(ts.files.people).then((data) => {
           const { header, arrays } = decodeTile<PeopleHeader>(data);
           return { ...header, cell: arrays[0] as Uint32Array, land: arrays[1] as Uint32Array, people: arrays[2] as Uint32Array } as PeopleFile;
         })
@@ -433,7 +433,7 @@ async function start(root: HTMLElement): Promise<void> {
   };
   // The anonymous human landscape (docs/HUMAN-LANDSCAPE.md): what kind of place any land was, what people a scene draws,
   // and the globe's picture of it, which its toggle draws.
-  const landscape = ts.files.landscape ? new LandscapeAtlas(build.base, ts.files.landscape, peopleFile) : null;
+  const landscape = ts.files.landscape ? new LandscapeAtlas(build, ts.files.landscape, peopleFile) : null;
   const LANDSCAPE_TOGGLE = { key: 'landscape', label: 'Settlement', title: 'How people lived: the anthromes of HYDE, from wildlands to cities' };
   const landscapeOn = () => !!landscape && !!state.layers?.includes(LANDSCAPE_TOGGLE.key);
   if (landscape) void landscape.loadIndex().then(() => (dirty = true));
@@ -473,7 +473,7 @@ async function start(root: HTMLElement): Promise<void> {
   let politiesReady = !ts.files.polities;
   const wantPolities = () => {
     if (politiesLoading || !ts.files.polities) return;
-    politiesLoading = getJSON<PolitiesFile>(build.base + ts.files.polities).then((f) => {
+    politiesLoading = build.getJSON<PolitiesFile>(ts.files.polities).then((f) => {
       polities.file = f;
       politiesReady = true;
       dirty = true;
@@ -482,12 +482,12 @@ async function start(root: HTMLElement): Promise<void> {
   let layersReady = !ts.files.present && !ts.files.hazards;
   // What overlays say of rows of datasets, for the panel of a row that is clicked.
   let overlays: OverlaysFile | null = null;
-  if (ts.files.overlays) void getJSON<OverlaysFile>(build.base + ts.files.overlays).then((f) => (overlays = f));
+  if (ts.files.overlays) void build.getJSON<OverlaysFile>(ts.files.overlays).then((f) => (overlays = f));
   const rowInfo = (row: { row?: string; corrected?: string[] }, dataset?: string, key?: string): RowInfo | undefined => {
     const ref = row.row ?? (dataset && key ? `${dataset}#${encodeRowKey(key)}` : undefined);
     return ref ? { ref, corrected: row.corrected, overlay: overlays?.rows[ref] } : undefined;
   };
-  void Promise.all([ts.files.present ? getJSON<PresentFile>(build.base + ts.files.present) : null, ts.files.hazards ? getJSON<HazardFile>(build.base + ts.files.hazards) : null]).then(([p, h]) => {
+  void Promise.all([ts.files.present ? build.getJSON<PresentFile>(ts.files.present) : null, ts.files.hazards ? build.getJSON<HazardFile>(ts.files.hazards) : null]).then(([p, h]) => {
     present.file = p;
     hazards.file = h;
     layersReady = true;
@@ -505,7 +505,7 @@ async function start(root: HTMLElement): Promise<void> {
   function wantTree(): void {
     if (treeFile || treeLoading || !ts.files.tree) return;
     treeLoading = true;
-    void getJSON<TreeFile>(build.base + ts.files.tree).then((f) => {
+    void build.getJSON<TreeFile>(ts.files.tree).then((f) => {
       treeFile = f;
       treePanel.setFile(f);
       treeLoading = false;
@@ -871,7 +871,8 @@ async function start(root: HTMLElement): Promise<void> {
   let whereLoading: Promise<void> | null = null;
   function wantWhere(): Promise<void> | undefined {
     if (!build.atlas || lifeWhere) return undefined;
-    whereLoading ??= getJSON<Record<string, AtlasWhere>>(build.base + build.atlas.where)
+    whereLoading ??= build
+      .getJSON<Record<string, AtlasWhere>>(build.atlas.where)
       .then((w) => {
         lifeWhere = w;
       })
@@ -1792,7 +1793,7 @@ async function start(root: HTMLElement): Promise<void> {
     try {
       const fast = state.quality === 'fast';
       const scene = s.kind === 'life' ? await (async () => {
-        const f = await getJSON<SceneFileV2>(build.base + s.file);
+        const f = await build.getJSON<SceneFileV2>(s.file);
         if (f.format !== 'lightworld-scene-file@2') throw new Error(`its file is in a format this viewer does not read (${f.format ?? 'none'}): the build is older than the viewer`);
         return LifeScene.create(gl!, f.spec, f.print, { fast });
       })() : new CityScene(await CityRenderer.create(gl!, { fast }), build, s.file, { fast });

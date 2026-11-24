@@ -10,6 +10,12 @@
 publish:
   licenses: [CC-BY-4.0, CC-BY-3.0, CC0-1.0, public-domain]
 
+# Content-addressed R2/S3 blob store for snapshots and mirrored datasets: <url><prefix><sha256>.
+# Override with WIKIWORLDMODEL_BLOB_STORE (or SNAPSHOT_STORE) for local/staging/CI mirrors.
+blobs:
+  url: https://builds.wikiworldmodel.org/
+  prefix: blobs/
+
 datasets:
   src:paleomap-plate-model:
     type: dataset
@@ -405,7 +411,8 @@ datasets:
       how: Exported from the data service with the queries in the snapshot, by `npm run world -- pbdb-snapshot`.
     import: { as: pbdb-formation, frame: "frame:paleomap/plate-101" }
     fetch:
-      url: repo:world/snapshots/pbdb-hell-creek-2026-11-04.json
+      url: blob:64c84fb4a83b276d1730f913b1ce0bb02d3bc7f8317bcb35383b7dffc2f00af7
+      filename: pbdb-hell-creek-2026-11-04.json
       sha256: 64c84fb4a83b276d1730f913b1ce0bb02d3bc7f8317bcb35383b7dffc2f00af7
       bytes: 961866
       format: json
@@ -438,7 +445,8 @@ datasets:
       how: Exported from the data service with the queries in the snapshot, by `npm run world -- pbdb-land`.
     import: { as: pbdb-land }
     fetch:
-      url: repo:world/snapshots/pbdb-land-2026-11-05.json
+      url: blob:3369bbcac3693211763ca953907dd9d891c5bf413d523b0b15ae000237d8a8a1
+      filename: pbdb-land-2026-11-05.json
       sha256: 3369bbcac3693211763ca953907dd9d891c5bf413d523b0b15ae000237d8a8a1
       bytes: 15393592
       format: json
@@ -472,7 +480,8 @@ datasets:
       by: machine:claude-code
       how: Exported from the data service with the queries in the snapshot, by `npm run world -- pbdb-sea`.
     fetch:
-      url: repo:world/snapshots/pbdb-sea-2026-11-06.zip
+      url: blob:3718d5c6b0c1987a24ad38cba6632ddd506eb17d0faeeb7736ae3190c9158259
+      filename: pbdb-sea-2026-11-06.zip
       sha256: 3718d5c6b0c1987a24ad38cba6632ddd506eb17d0faeeb7736ae3190c9158259
       bytes: 14271624
       format: zip
@@ -516,7 +525,8 @@ datasets:
       by: machine:claude-code
       how: Exported from the data service with the queries in the snapshot, by `npm run world -- pbdb-rocks`.
     fetch:
-      url: repo:world/snapshots/pbdb-rocks-2026-11-20.zip
+      url: blob:36c4b28d8ff22e4bcdb59cf885ade3a415a8e062f4072b96a236c6dcf7dc66ed
+      filename: pbdb-rocks-2026-11-20.zip
       sha256: 36c4b28d8ff22e4bcdb59cf885ade3a415a8e062f4072b96a236c6dcf7dc66ed
       bytes: 3662904
       format: zip
@@ -582,7 +592,8 @@ datasets:
         projection checked by a test that sets the cells against the land of the lithological map, which they fit better
         than when shifted a cell any way (tools/world/test/ground.test.ts). The article itself was not read.
     fetch:
-      url: repo:world/snapshots/soilgrids-2.0-topsoil-0.5deg.csv
+      url: blob:220f9fcdbe7980211d43fd877b10a5906dec0b26ca3dfd58887b9f0768c97739
+      filename: soilgrids-2.0-topsoil-0.5deg.csv
       sha256: 220f9fcdbe7980211d43fd877b10a5906dec0b26ca3dfd58887b9f0768c97739
       bytes: 1959722
       format: csv
@@ -746,7 +757,8 @@ datasets:
         quotes here checked by script against those texts as kept. The counts are of the snapshot. The map sources'
         licences tallied from nine pages of https://macrostrat.org/api/v3/sources; the tenth answered HTTP 500.
     fetch:
-      url: repo:world/snapshots/macrostrat-columns-2026-11-21.zip
+      url: blob:347682a7fe191e17c952c8883f355b65d4678abfe2865c1fb9b81faa299daf6b
+      filename: macrostrat-columns-2026-11-21.zip
       sha256: 347682a7fe191e17c952c8883f355b65d4678abfe2865c1fb9b81faa299daf6b
       bytes: 1261513
       format: zip
@@ -789,7 +801,8 @@ datasets:
         overpass-api.openhistoricalmap.org with the query in the snapshot's own `query` field.
     import: { as: ohm-site, frame: "frame:paleomap/plate-307" }
     fetch:
-      url: repo:world/snapshots/ohm-rome-2026-11-01.json
+      url: blob:1b9fb1ba677e88a09035aeee16062f8d69c16da23925a56d66cfe5cce9e20131
+      filename: ohm-rome-2026-11-01.json
       sha256: 1b9fb1ba677e88a09035aeee16062f8d69c16da23925a56d66cfe5cce9e20131
       bytes: 379736
       format: json
@@ -981,7 +994,8 @@ datasets:
         Query, licence and access time from the answer's own header, kept in the file. What each
         column means from the service's documentation page, named above.
     fetch:
-      url: repo:world/snapshots/pbdb-diversity-2026-11-04.csv
+      url: blob:61036dce59908c7619a9547bb7481733d6edea5e51074afc80d305fa28bae6a7
+      filename: pbdb-diversity-2026-11-04.csv
       sha256: 61036dce59908c7619a9547bb7481733d6edea5e51074afc80d305fa28bae6a7
       bytes: 8598
       format: csv
@@ -1014,7 +1028,8 @@ datasets:
         Titles, publisher and DOIs read from DataCite's API. Rows from the service, by world/snapshots'
         tool, npm run world -- noaa-snapshot. No row was checked against its reports.
     fetch:
-      url: repo:world/snapshots/noaa-hazards-2026-11-04.json
+      url: blob:16f7424a16b6fb65f74f47a4acf3f07f907508830964b1895f3d4a3d9d888b0e
+      filename: noaa-hazards-2026-11-04.json
       sha256: 16f7424a16b6fb65f74f47a4acf3f07f907508830964b1895f3d4a3d9d888b0e
       bytes: 1177358
       format: json
@@ -1422,7 +1437,8 @@ datasets:
         and Table 6. Quotes checked by script against those texts. The 5.3 GB archive itself was not downloaded, so its SHA-1
         was not checked.
     fetch:
-      url: repo:world/snapshots/hyde-3.2.1-world-population.csv
+      url: blob:544bfbae84881edcc3247c93fc6f49dc616fe6e110f12e2ad63d31b3dbdcb326
+      filename: hyde-3.2.1-world-population.csv
       sha256: 544bfbae84881edcc3247c93fc6f49dc616fe6e110f12e2ad63d31b3dbdcb326
       bytes: 2372
       format: csv
@@ -1494,7 +1510,8 @@ datasets:
         sections 2.1, 2.2, 3.1, 4.1 and 5 read in Copernicus's XML, and the quotes here checked by script against those two texts.
         The snapshot was made twice, to the same bytes.
     fetch:
-      url: repo:world/snapshots/hyde-3.2.1-population-1deg.csv
+      url: blob:a23df5e6a9cb7513e1e10d6192c830bcfe2fbff617f8353efabfbbe91e5b2560
+      filename: hyde-3.2.1-population-1deg.csv
       sha256: a23df5e6a9cb7513e1e10d6192c830bcfe2fbff617f8353efabfbbe91e5b2560
       bytes: 5514091
       format: csv
@@ -1568,7 +1585,8 @@ datasets:
         and 7. Quotes checked by script against those texts. The 5.3 GB archive itself was not downloaded, so its SHA-1 was
         not checked.
     fetch:
-      url: repo:world/snapshots/hyde-3.2.1-world-land-use.csv
+      url: blob:d5fcae4329ff2f9906139ada4425f9c99c2b1ede01fba5b489a206411486f889
+      filename: hyde-3.2.1-world-land-use.csv
       sha256: d5fcae4329ff2f9906139ada4425f9c99c2b1ede01fba5b489a206411486f889
       bytes: 3421
       format: csv
@@ -1663,7 +1681,8 @@ datasets:
         Licence, versions, files and MD5 from the Dataverse record's API. README.pdf and ARCHAEOGLOBE_SURVEY.pdf read in full;
         each summary table read and checked against its MD5 by the snapshot tool.
     fetch:
-      url: repo:world/snapshots/archaeoglobe-2019-assessments.csv
+      url: blob:8e193a3d79563868f643ae41d8fa4db246646c7aad20dc8073bcff30021f41ea
+      filename: archaeoglobe-2019-assessments.csv
       sha256: 8e193a3d79563868f643ae41d8fa4db246646c7aad20dc8073bcff30021f41ea
       bytes: 260107
       format: csv
@@ -1748,7 +1767,8 @@ datasets:
         The file read from the record's version 2 as figshare's download service gives it, its header and rows read, and the
         rows of Uruk, Ur, Memphis, Teotihuacan and Tikal compared with what the world's records cite of them.
     fetch:
-      url: repo:world/snapshots/reba-2016-modelski-ancient-v2.csv
+      url: blob:71beafaacbdeb8d8fc156951521e9a14e20d6704b0d77be5528511c52fad3e1d
+      filename: reba-2016-modelski-ancient-v2.csv
       sha256: 71beafaacbdeb8d8fc156951521e9a14e20d6704b0d77be5528511c52fad3e1d
       bytes: 16764
       format: csv
@@ -1790,7 +1810,8 @@ datasets:
         The file read from the record's version 3 as figshare's download service gives it, its header and rows read, and the
         rows of Uruk, Ur, Memphis, Teotihuacan, Tikal and Cahokia looked at.
     fetch:
-      url: repo:world/snapshots/reba-2016-chandler-v2.csv
+      url: blob:5b8df64e46988b216988eef18b46ebc2cba57ecc1adc8a5c2e1e6d5b78068031
+      filename: reba-2016-chandler-v2.csv
       sha256: 5b8df64e46988b216988eef18b46ebc2cba57ecc1adc8a5c2e1e6d5b78068031
       bytes: 1416656
       format: csv
@@ -1857,7 +1878,8 @@ datasets:
         BY 3.0), downloaded for the purpose and not imported, by tools/world/importers/paleomist_check.py; the figures are in
         docs/RECORD-SETS.md. Quotes checked by script against the texts retrieved.
     fetch:
-      url: repo:world/snapshots/paleomist-1.0-ice-thickness.zip
+      url: blob:97dd37124512457ca8c6472067095219c74091a4480c7804b8b2808b967dc4a4
+      filename: paleomist-1.0-ice-thickness.zip
       sha256: 97dd37124512457ca8c6472067095219c74091a4480c7804b8b2808b967dc4a4
       bytes: 1121070
       format: zip
@@ -1888,7 +1910,8 @@ datasets:
       by: machine:codex
       how: Read the supplied GeoJSON and companion data dictionary. The CRS84 multipolygon has three components. The city's recorded point lies inside an interior ring of the largest.
     fetch:
-      url: repo:world/snapshots/ipdp-texcoco-1519.geojson
+      url: blob:098b663f97a1eaaa7780dcce479ddc8576455c4aefdfd6e25e5890fa17845b1a
+      filename: ipdp-texcoco-1519.geojson
       sha256: 098b663f97a1eaaa7780dcce479ddc8576455c4aefdfd6e25e5890fa17845b1a
       bytes: 1994074
       format: json

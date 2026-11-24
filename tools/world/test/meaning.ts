@@ -10,7 +10,7 @@ import { bytesPrint, fingerprint, fingerprintProblems, type Fingerprint } from '
 export type Meaning = { kind: 'json'; value: unknown } | { kind: 'tile'; header: unknown; arrays: Fingerprint } | { kind: 'bytes'; print: Fingerprint };
 
 /** What changes from one build of a commit to the next without changing what it means: its id, and the hashes and sizes of files. */
-const VOLATILE: Record<string, string[]> = { 'tileset.json': ['build', 'sha256', 'bytes'], 'build.json': ['id'] };
+const VOLATILE: Record<string, string[]> = { 'tileset.json': ['build', 'sha256', 'bytes'], 'build.json': ['id'], 'manifest.json': ['build', 'files'] };
 
 function walk(dir: string, out: string[] = []): string[] {
   for (const name of readdirSync(dir).sort()) {
@@ -80,8 +80,14 @@ export function meaningProblems(a: Map<string, Meaning>, b: Map<string, Meaning>
     const skip = VOLATILE[path] ?? [];
     const here: string[] = [];
     if (x.kind !== y.kind) here.push(`a ${y.kind}, not a ${x.kind}`);
-    else if (x.kind === 'json') compare(x.value, (y as typeof x).value, '', skip, here);
-    else if (x.kind === 'tile') {
+    else if (x.kind === 'json') {
+      compare(x.value, (y as typeof x).value, '', skip, here);
+      if (path === 'manifest.json') {
+        const ax = Object.keys((x.value as { files?: Record<string, string> }).files ?? {}).sort();
+        const ay = Object.keys(((y as typeof x).value as { files?: Record<string, string> }).files ?? {}).sort();
+        compare(ax, ay, '.files(keys)', [], here);
+      }
+    } else if (x.kind === 'tile') {
       compare(x.header, (y as typeof x).header, '', skip, here);
       here.push(...fingerprintProblems(x.arrays, (y as typeof x).arrays));
     } else here.push(...fingerprintProblems(x.print, (y as typeof x).print));

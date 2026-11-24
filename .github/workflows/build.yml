@@ -79,12 +79,26 @@ jobs:
           key: datasets-${{ hashFiles('world/manifest.yaml') }}
           restore-keys: datasets-
 
+      # Content-addressed raw snapshot blobs referenced as `blob:<sha256>` in world/manifest.yaml.
+      - uses: actions/cache@v6
+        with:
+          path: .cache/blobs
+          key: blobs-${{ hashFiles('world/manifest.yaml') }}
+          restore-keys: blobs-
+
       # What the importers make of the datasets, keyed by everything that could change it. No
       # partial restores: a change to the code imports afresh.
       - uses: actions/cache@v6
         with:
           path: .cache/import
-          key: import-${{ hashFiles('world/manifest.yaml', 'world/snapshots/**', 'tools/world/importers/**', 'tools/world/src/**', 'world/generators/**') }}
+          key: import-${{ hashFiles('world/manifest.yaml', 'tools/world/importers/**', 'tools/world/src/**', 'world/generators/**') }}
+
+      # Content-addressed DAG build stages and blobs: unchanged stages hit cache across builds.
+      - uses: actions/cache@v6
+        with:
+          path: .cache/build
+          key: build-dag-${{ hashFiles('world/manifest.yaml', 'tools/world/src/**', 'core/**', 'world/generators/**') }}-${{ github.run_id }}
+          restore-keys: build-dag-${{ hashFiles('world/manifest.yaml', 'tools/world/src/**', 'core/**', 'world/generators/**') }}-
 
       - name: Fetch the datasets
         run: npm run fetch

@@ -12,7 +12,7 @@ import type { PeopleFile } from '../../../core/layers.ts';
 import { assessmentsFile, cityYear, citiesOf, eckert4Inverse, housing, housingCounts, parseClassGrid, rasterizeRegions, stepOfName, type LandscapeBuilt } from '../src/build/landscape.ts';
 import { wantedRows, wantedText, wantedTotals } from '../src/dwellingsWanted.ts';
 import { readTable, snapshotText, SLICES } from '../src/archaeoglobe.ts';
-import { loadManifest } from '../src/manifest.ts';
+import { loadManifest, resolveDatasetFile } from '../src/manifest.ts';
 import { REPO } from '../src/paths.ts';
 
 const classes = (parse(readFileSync(join(REPO, 'world/fields/people/anthromes.yaml'), 'utf8')) as { params: { classes: AnthromeClass[] } }).params.classes;
@@ -98,8 +98,10 @@ describe('the regions, read', () => {
   });
 });
 
+const manifest = await loadManifest();
+
 describe('ArchaeoGLOBE\'s snapshot', () => {
-  const text = readFileSync(join(REPO, 'world/snapshots/archaeoglobe-2019-assessments.csv'), 'utf8');
+  const text = readFileSync(resolveDatasetFile('src:archaeoglobe-2019-assessments', manifest.datasets['src:archaeoglobe-2019-assessments']), 'utf8');
 
   it('is the file the manifest pins', async () => {
     const d = (await loadManifest()).datasets['src:archaeoglobe-2019-assessments'];
@@ -153,8 +155,8 @@ describe('ArchaeoGLOBE\'s snapshot', () => {
 });
 
 describe('the lists of cities', () => {
-  const read = (file: string, field: string, leftOut: { city: string; columns: string[] }[] = []) =>
-    citiesOf(new TextDecoder('latin1').decode(readFileSync(join(REPO, 'world/snapshots', file))), 'src:x', field, leftOut);
+  const read = (datasetId: string, field: string, leftOut: { city: string; columns: string[] }[] = []) =>
+    citiesOf(new TextDecoder('latin1').decode(readFileSync(resolveDatasetFile(datasetId, manifest.datasets[datasetId]))), 'src:x', field, leftOut);
 
   it('reads a column as the axis does: BC_3000 is −2999 and AD_100 is 100', () => {
     expect(cityYear('BC_3000')).toBe(-2999);
@@ -164,7 +166,7 @@ describe('the lists of cities', () => {
 
   it('reads Modelski\'s Uruk, and leaves out the cells its field says to', () => {
     const left = (parse(readFileSync(join(REPO, 'world/fields/people/cities-ancient.yaml'), 'utf8')) as { params: { left_out: { city: string; columns: string[] }[] } }).params.left_out;
-    const cities = read('reba-2016-modelski-ancient-v2.csv', 'field:people/cities-ancient', left);
+    const cities = read('src:reba-2016-modelski-ancient-v2', 'field:people/cities-ancient', left);
     const uruk = cities.find((c) => c.name === 'Uruk')!;
     expect(uruk.pops[0]).toEqual([-3499, 14000]);
     expect(uruk.pops).toContainEqual([-3299, 40000]);

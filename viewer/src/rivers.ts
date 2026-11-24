@@ -5,7 +5,7 @@ import { decodeTile } from '../../core/container.ts';
 import { RiverNet, riverKeys, riverWidths, tileKey, type RiverKey, type RiversKeysHeader, type RiversNetworkHeader, type RiversSet, type RiverWidths, type RiverWidthsHeader } from '../../core/rivers.ts';
 import { mappedLake, shoresNear } from '../../core/shorelines.ts';
 import type { LayerBin } from '../../core/fieldlayers.ts';
-import { getJSON, getBytes, type Build } from './data.ts';
+import type { Build } from './data.ts';
 import { keyFile, observedFiles, WATER_REACH } from '../../world/generators/life/water.ts';
 
 export class Rivers {
@@ -33,7 +33,8 @@ export class Rivers {
     if (!p) {
       const failedAt = this.failed.get(file);
       if (failedAt !== undefined && Date.now() - failedAt < Rivers.RETRY_MS) return Promise.resolve();
-      p = getBytes(this.build.base + file)
+      p = this.build
+        .getBytes(file)
         .then((data) => {
           this.failed.delete(file);
           read(data);
@@ -84,7 +85,7 @@ export class Rivers {
     return Promise.all(refs.map(async ref => {
       let bin = this.shoreBins.get(ref.file);
       if (!bin) {
-        bin = getJSON<LayerBin>(this.build.base + ref.file).catch(err => {
+        bin = this.build.getJSON<LayerBin>(ref.file).catch(err => {
           this.shoreBins.delete(ref.file);
           throw err;
         });

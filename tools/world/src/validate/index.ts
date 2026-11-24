@@ -16,9 +16,10 @@ import { cropProblems, dwellingProblems, fieldProblems, lifewayProblems, outbuil
 import { ladderCounts, LEVELS, STEPS } from '../../../../core/ladder.ts';
 import { MONTHS_PARTS } from '../../../../core/months.ts';
 import { parseRef, RefError, splitRef } from '../../../../core/refs.ts';
-import { conflictChanged, conflictIn, conflictSplice, type Constraint, type Conflict, type Solution } from '../../../../core/stn.ts';
+import { conflictChanged, conflictIn, conflictSplice, solve, type Constraint, type Conflict, type Solution } from '../../../../core/stn.ts';
 import { CYCLES, DAY_COUNTS, dayNumberAt, dayOnAxis, formatTime, formatTimeValue, historical, namesSign, parseCycle, parseLag, parseTime, TimeError, toMa } from '../../../../core/time.ts';
-import { anchorPlace, anchorsOf, available, buildNetwork, chosen, countDays, cycleAnchor, epochsOf, pictureNetwork, pickedSplice, pieces, claimGroup, claimGroups, conflictInScenario, inTurn, pictures, pointOf, resolveCycle, scenariosOf, solveScenario, spanOf, spanRefs, zeroDayClaim, type Scenario } from '../chronology.ts';
+import { isBlobUrl, parseBlobHash } from '../blobs.ts';
+import { anchorPlace, anchorsOf, available, buildNetwork, chosen, countDays, cycleAnchor, epochsOf, pictureNetwork, pickedSplice, pieces, claimGroup, claimGroups, inTurn, pictures, pointOf, resolveCycle, scenarioKey, scenariosOf, solveScenario, spanOf, spanRefs, zeroDayClaim, type Scenario, type SolvedPictures } from '../chronology.ts';
 import { resolvePoints } from '../importer.ts';
 import { lineageLoop } from '../lineage.ts';
 import { REPO, safeJoin, WORLD } from '../paths.ts';
@@ -45,6 +46,8 @@ export interface Report {
   wanted: Wanted[];
   /** the checks that were not run because an earlier one found errors: a clean report of them means nothing */
   skipped: string[];
+  /** picture-level STN solutions computed during chronology validation, reusable by callers such as the build */
+  chronology?: SolvedPictures;
 }
 
 const SCHEMA = 'https://wikiworldmodel.invalid/schema/';
@@ -918,8 +921,8 @@ function checkLineage(world: World, issues: Issue[]): void {
  * something lay between them that is not written, a link of the lineage for someone to find. A script made
  * from a dead one is such a case too, and is no fault.
  */
-function checkLineageGaps(world: World, issues: Issue[]): void {
-  const sol = solveScenario(world, {});
+function checkLineageGaps(world: World, issues: Issue[], defaultSol?: Solution): void {
+  const sol = defaultSol ?? solveScenario(world, {});
   if (!sol.ok) return;
   for (const r of world.entities.flatMap((e) => e.relations)) {
     if (!['arose-from', 'succeeds'].includes(r.rel) || r.alt || r.rank === 'deprecated' || r.status === 'deprecated') continue;
@@ -1001,24 +1004,42 @@ function pictureName(s: Scenario): string {
   return s.alts?.length ? `with ${s.alts.join(' and ')}` : 'in the default picture';
 }
 
-function checkChronology(world: World, issues: Issue[]): void {
-  // Best dates come from pinning each dated claim to its centre: if that does not hold, every best
-  // date in the build falls back to the middle of its bounds, so it must hold, in the default picture.
-  const centred = conflictInScenario(world, {}) ? undefined : conflictInScenario(world, {}, true);
-  if (centred) issues.push({ level: 'error', check: 'chronology', message: `with each dated claim at the middle of its range, ${describeConflict(world, centred)}` });
-  // One at a time, with nothing kept but what is wrong: there are thousands of them. A pick is
-  // checked only in the pieces of its picture's network that it changes (conflictChanged).
+function checkChronology(world: World, issues: Issue[]): SolvedPictures | undefined {
+  // One at a time, with nothing kept but what is wrong for picks: there are thousands of them. A pick is
+  // checked only in the pieces of its picture's network that it changes (conflictSplice / conflictChanged).
+  // Each picture itself (the default and each alternative) is solved once and returned so downstream checks
+  // (lineage gaps, plate frames) and the build reuse the solved bounds instead of re-solving the network.
   let picture: { points: string[]; constraints: Constraint[]; holds: boolean; broken?: string } | undefined;
   const sourcesOf = (c: Conflict) => c.constraints.map((x) => x.source).sort().join(' ');
   // The same fault shows in every picture that leaves it alone, and under every pick that does: said once, where it
   // is first met, which is the default picture if it is there.
   const told = new Set<string>();
+  const solvedPictures = new Map<string, Solution>();
+  const solvedCentres = new Map<string, Solution>();
+  let defaultSol: Solution | undefined;
+  let defaultCentres: Solution | undefined;
   for (const scenario of scenariosOf(world)) {
     let conflict: Conflict | undefined;
     if (!scenario.picks?.length) {
+      const key = scenarioKey(scenario);
       const net = pictureNetwork(world, scenario);
-      conflict = conflictIn(net.points, net.constraints);
-      picture = { ...net, holds: !conflict, broken: conflict && sourcesOf(conflict) };
+      const sol = solve(net.points, net.constraints);
+      solvedPictures.set(key, sol);
+      conflict = sol.ok ? undefined : sol.conflict;
+      picture = { ...net, holds: sol.ok, broken: conflict && sourcesOf(conflict) };
+      if (key === '') {
+        defaultSol = sol;
+        // Best dates come from pinning each dated claim to its centre: if that does not hold, every best
+        // date in the build falls back to the middle of its bounds, so it must hold, in the default picture.
+        if (sol.ok) {
+          const cnet = pictureNetwork(world, scenario, true);
+          defaultCentres = solve(cnet.points, cnet.constraints);
+          solvedCentres.set(key, defaultCentres);
+          if (!defaultCentres.ok) {
+            issues.push({ level: 'error', check: 'chronology', message: `with each dated claim at the middle of its range, ${describeConflict(world, defaultCentres.conflict)}` });
+          }
+        }
+      }
     } else {
       // Made in place where it can be, without making its network whole.
       const spliced = picture?.holds ? pickedSplice(world, scenario) : undefined;
@@ -1054,6 +1075,7 @@ function checkChronology(world: World, issues: Issue[]): void {
       message: `this ${c ? `competing "${c.prop}" claim` : `rival "${r!.rel}" relation`} (rank ${x.rank}) contradicts the rest of the world ${pictureName(v.scenario)}: ${describeConflict(world, v.solution.conflict)}`,
     });
   }
+  return defaultSol ? { defaultSol, defaultCentres, pictures: solvedPictures, pictureCentres: solvedCentres } : undefined;
 }
 
 /**
@@ -1100,9 +1122,9 @@ export function claimOf(world: World, subject: string, prop: string, s: Scenario
  * able to carry the location there, and a plate frame must hold the location in its
  * polygon while the entity exists, in every picture.
  */
-async function checkFrames(world: World, issues: Issue[]): Promise<void> {
+async function checkFrames(world: World, issues: Issue[], preSolved?: Map<string, Solution>): Promise<void> {
   const solved = pictures(world)
-    .map((pic) => ({ pic, sol: solveScenario(world, pic) }))
+    .map((pic) => ({ pic, sol: preSolved?.get(scenarioKey(pic)) ?? solveScenario(world, pic) }))
     .filter((x): x is { pic: Scenario; sol: Solution & { ok: true } } => x.sol.ok);
   if (!solved.length) return;
   const queries: { id: string; lat: number; lon: number; agesMa: number[] }[] = [];
@@ -1180,12 +1202,19 @@ async function checkFrames(world: World, issues: Issue[]): Promise<void> {
 /**
  * The license filter: what a published build may include (section 13). It applies to the
  * datasets, whose content the build copies into tiles; publications and database records
- * contribute single facts and short quotes, with credit.
+ * contribute single facts and short quotes, with credit. Also verifies that content-addressed
+ * `blob:<sha256>` dataset URLs match their pinned `fetch.sha256`.
  */
 function checkLicenses(world: World, issues: Issue[]): void {
   const allowed = new Set(world.manifest.publish.licenses);
   for (const [id, d] of Object.entries(world.manifest.datasets)) {
     if (!allowed.has(d.license ?? 'unknown')) issues.push({ level: 'error', check: 'licenses', file: 'manifest.yaml', where: id, message: `license "${d.license ?? 'none'}" is not one a published build may include (${[...allowed].join(', ')})` });
+    if (isBlobUrl(d.fetch.url)) {
+      const hash = parseBlobHash(d.fetch.url);
+      if (!hash || hash !== d.fetch.sha256) {
+        issues.push({ level: 'error', check: 'manifest', file: 'manifest.yaml', where: id, message: `blob URL hash (${hash ?? d.fetch.url}) does not match fetch.sha256 (${d.fetch.sha256})` });
+      }
+    }
   }
 }
 
@@ -1282,16 +1311,17 @@ export async function validateWorld(world: World, opts: { frames?: boolean; tabl
   }
   const ok = () => !issues.some((i) => i.level === 'error');
   const skipped: string[] = [];
+  let chronology: SolvedPictures | undefined;
   if (ok()) {
-    checkChronology(world, issues);
-    if (ok()) checkLineageGaps(world, issues);
+    chronology = checkChronology(world, issues);
+    if (ok()) checkLineageGaps(world, issues, chronology?.defaultSol);
     if (ok()) checkCycles(world, issues);
   } else skipped.push('the chronology');
   if (opts.frames !== false) {
-    if (ok()) await checkFrames(world, issues);
+    if (ok()) await checkFrames(world, issues, chronology?.pictures);
     else skipped.push('the plate frames');
   }
-  return { issues, wanted, skipped };
+  return { issues, wanted, skipped, chronology };
 }
 
 export function formatIssue(i: Issue): string {

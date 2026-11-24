@@ -5,7 +5,7 @@
 import { binsAt, byValue, hueOf, type LayerBin, type LayerInfo, type LayerRow } from '../../../core/fieldlayers.ts';
 import { unitVector } from '../../../core/quat.ts';
 import type { Camera } from '../camera.ts';
-import { getJSON } from '../data.ts';
+import { createBuildFetch, type BuildFetch } from '../data.ts';
 import type { V3 } from '../mat.ts';
 
 const PICK = 9;
@@ -39,12 +39,14 @@ export class FieldLayer {
   private loaded = new Map<string, LayerRow[]>();
   private loading = new Set<string>();
   private shown: { r: LayerRow; x: number; y: number; pts?: number[] }[] = [];
+  private io: BuildFetch;
   onLoad: () => void = () => {};
 
   constructor(
     readonly info: LayerInfo,
-    private base: string,
+    source: BuildFetch | string,
   ) {
+    this.io = typeof source === 'string' ? createBuildFetch(source) : source;
     this.el = document.createElement('canvas');
     this.el.className = 'row-layer';
     this.el.hidden = true;
@@ -73,7 +75,7 @@ export class FieldLayer {
       if (rows) out.push(...rows);
       else if (!this.loading.has(b.file)) {
         this.loading.add(b.file);
-        void getJSON<LayerBin>(this.base + b.file).then((f) => {
+        void this.io.getJSON<LayerBin>(b.file).then((f) => {
           this.loaded.set(b.file, f.rows);
           this.onLoad();
         });

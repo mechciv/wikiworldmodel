@@ -8,6 +8,8 @@
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
+import type { BuildManifest } from '../../../core/records.ts';
+
 export const PAGES_MAX_FILE = 25 * 1024 * 1024;
 export const PAGES_MAX_FILES = 20_000;
 
@@ -30,6 +32,32 @@ export interface SiteOptions {
   store?: string;
 }
 
+function copyLocalBuild(buildsDir: string, build: string, destBuilds: string): void {
+  const srcBuild = join(buildsDir, build);
+  const manifestPath = join(srcBuild, 'manifest.json');
+  if (!existsSync(manifestPath)) {
+    cpSync(srcBuild, join(destBuilds, build), { recursive: true });
+    return;
+  }
+  const manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as BuildManifest;
+  const destBuild = join(destBuilds, build);
+  const destBlobs = join(destBuilds, 'blobs');
+  mkdirSync(destBuild, { recursive: true });
+  mkdirSync(destBlobs, { recursive: true });
+  cpSync(manifestPath, join(destBuild, 'manifest.json'));
+  const tilesetPath = join(srcBuild, 'tileset.json');
+  if (existsSync(tilesetPath)) cpSync(tilesetPath, join(destBuild, 'tileset.json'));
+  const copied = new Set<string>();
+  for (const [relPath, sha] of Object.entries(manifest.files)) {
+    if (copied.has(sha)) continue;
+    copied.add(sha);
+    const sharedBlob = join(buildsDir, 'blobs', sha);
+    const src = existsSync(sharedBlob) ? sharedBlob : join(srcBuild, relPath);
+    if (!existsSync(src)) throw new Error(`build ${build} is missing blob ${sha} (${relPath})`);
+    cpSync(src, join(destBlobs, sha));
+  }
+}
+
 export function assembleSite({ landing, viewer, builds, out, store }: SiteOptions): { build: string; files: number; bytes: number } {
   const index = JSON.parse(readFileSync(join(builds, 'index.json'), 'utf8')) as BuildIndex;
   const build = index.latest;
@@ -42,7 +70,7 @@ export function assembleSite({ landing, viewer, builds, out, store }: SiteOption
   if (store) {
     if (!/^https:\/\/.+\/$/.test(store)) throw new Error(`a store is an https URL ending in a slash, not ${store}`);
     mkdirSync(join(out, 'world/builds'), { recursive: true });
-  } else cpSync(join(builds, build), join(out, 'world/builds', build), { recursive: true });
+  } else copyLocalBuild(builds, build, join(out, 'world/builds'));
   // The site shows the build's data, so it carries the build's credits.
   const attribution = join(builds, build, 'ATTRIBUTION.md');
   if (!existsSync(attribution)) throw new Error(`build ${build} has no ATTRIBUTION.md: build the world again`);

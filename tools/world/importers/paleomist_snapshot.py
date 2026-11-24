@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
-"""Make world/snapshots/paleomist-1.0-ice-thickness.zip from the PaleoMIST 1.0 archive on PANGAEA.
+"""Make paleomist-1.0-ice-thickness.zip from the PaleoMIST 1.0 archive on PANGAEA.
 
 The archive is 3.7 GB and the world needs one variable of two of its files, so each file is read
 out of the zip by range requests and checked against the CRC the zip gives for it. Those files are
 NetCDF-4, which the build's reader does not read; what is kept is their `ice_thickness`, to the
 metre, in a classic NetCDF file that the build reads and any NetCDF tool can open.
 
-The build does not run this: it reads the snapshot, pinned by checksum in world/manifest.yaml. To
-make it again, with numpy and h5py, which the build does not need:
+The build does not run this: it fetches the snapshot from the blob store, pinned by checksum in
+world/manifest.yaml. To make it again, with numpy and h5py, which the build does not need:
 
-    python -I tools/world/importers/paleomist_snapshot.py world/snapshots/paleomist-1.0-ice-thickness.zip
+    python -I tools/world/importers/paleomist_snapshot.py /tmp/paleomist-1.0-ice-thickness.zip
 
+Then store the output in `.cache/blobs/<sha256>` and publish it with `tools/world/publish-snapshots.sh`.
 It prints what the manifest records.
 """
 import hashlib

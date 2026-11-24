@@ -43,14 +43,20 @@ before it was renamed) when the workflow is
 run on it by hand (Actions → Build → Run workflow). The build's `ATTRIBUTION.md`, crediting
 every dataset it reads, is served at `/ATTRIBUTION.md`.
 
-The builds are not in the Pages deployment: each is put into the R2 bucket `wikiworldmodel-builds`
-under its id (`tools/world/publish-build.sh`), and served from it at
-`https://builds.wikiworldmodel.org/<id>/`. A build's id is its content, so it is put once, never
-changed and never deleted, and a link that names a build keeps working after the next is
-published. Its files are cached for a year. The site's `/world/builds/index.json` names the latest
-build and the store (`store` in the index); it is not cached. A build in R2 has no limit of 25 MiB a
-file or 20,000 files a deployment, which Pages has. Before it publishes the site, the workflow checks
-that the store serves the build, so the site never points at a build that is not there.
+The builds are not in the Pages deployment: each build's files are uploaded into the R2 bucket
+`wikiworldmodel-builds` as content-addressed, immutable blobs under `blobs/<sha256>` (pre-compressed
+with Brotli or gzip and served with `Content-Encoding` and 1-year immutable caching), followed last
+by a small `<id>/manifest.json` that maps logical build paths to blob hashes
+(`tools/world/publish-build.sh`). Only blobs not already in the bucket are uploaded, so incremental
+builds upload only changed files and storage grows only with genuinely new content. A build's id is
+its content, so its manifest and blobs never change and a link that names an older build keeps
+working after the next is published. Raw dataset snapshots referenced as `blob:<sha256>` in
+`world/manifest.yaml` live in the same `blobs/<sha256>` store and are uploaded with
+`tools/world/publish-snapshots.sh`. The site's `/world/builds/index.json` names the latest build and
+the store (`store` in the index); it is not cached. A build in R2 has no limit of 25 MiB a file or
+20,000 files a deployment, which Pages has. Before it publishes the site, the workflow checks that
+the store serves both the manifest and its blobs with CORS, so the site never points at a build that
+is not there.
 
 Setting it up, once, in Cloudflare and GitHub:
 

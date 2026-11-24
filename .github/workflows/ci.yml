@@ -40,8 +40,11 @@ jobs:
 
       - uses: actions/cache@v6
         with:
-          path: .cache/datasets
-          key: plate-model-${{ hashFiles('world/manifest.yaml') }}
+          path: |
+            .cache/datasets
+            .cache/blobs
+          key: plate-model-blobs-${{ hashFiles('world/manifest.yaml') }}
+          restore-keys: plate-model-blobs-
 
       # Where each located record falls on the plate model. Each answer is kept on its own, so
       # a run asks pyGPlates only about locations it has not seen; the newest run's set is
@@ -52,8 +55,8 @@ jobs:
           key: points-${{ hashFiles('world/manifest.yaml', 'tools/world/importers/**') }}-${{ github.run_id }}
           restore-keys: points-${{ hashFiles('world/manifest.yaml', 'tools/world/importers/**') }}-
 
-      - name: Fetch the plate model
-        run: npm run fetch -- src:paleomap-plate-model
+      - name: Fetch the plate model and snapshots
+        run: npm run fetch -- src:paleomap-plate-model --snapshots
 
       - name: Typecheck
         run: npm run typecheck

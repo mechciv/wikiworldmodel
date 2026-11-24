@@ -21,7 +21,7 @@ export const TABLES = {
   expertise: { id: 3332503, name: 'ARCHAEOGLOBE_EXPERTISE_AVERAGE.tab' },
   excavations: { id: 3332502, name: 'ARCHAEOGLOBE_PUBLISHED_EXCAVATIONS_MEDIAN_ASSESSMENT.tab' },
 } as const;
-export const SNAPSHOT = 'world/snapshots/archaeoglobe-2019-assessments.csv';
+export const SNAPSHOT = 'archaeoglobe-2019-assessments.csv';
 
 /** The ten times of the survey: how its columns name them, and the year on the world's axis. 2,000 BP is "0 CE" in the survey, the axis's year 0. */
 export const SLICES: { key: string; label: string; year: number }[] = [
