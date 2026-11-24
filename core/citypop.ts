@@ -10,6 +10,7 @@
 // figures are the sources', and the rest is the model's, said so in its record.
 
 import type { PeopleSeries } from './growth.ts';
+import { PRESENT_YEAR } from './time.ts';
 
 /** One source's figures for a settlement. */
 export interface PopulationSource {
@@ -87,8 +88,8 @@ export function cityPopulation(sources: PopulationSource[], recordSpan?: [number
   const hi = all.length ? Math.max(...all.map((k) => k.t + k.hold)) : 0;
   const open = (v: number) => !Number.isFinite(v) || Math.abs(v) >= p.open;
   const start = recordSpan && !open(recordSpan[0]) ? recordSpan[0] : lo;
-  const endOpen = !!recordSpan && open(recordSpan[1]) && !all.length;
-  const end = recordSpan && !open(recordSpan[1]) ? recordSpan[1] : hi;
+  // A record with no end stands to the present, on the axis's present (core/time.ts), and holds its last figure.
+  const end = recordSpan ? (open(recordSpan[1]) ? Math.max(hi, PRESENT_YEAR) : recordSpan[1]) : hi;
   const span: [number, number] = [Math.min(start, end), Math.max(start, end)];
   // The central reading: each source's figures, a preferred one's taking the place of others' within `near` years.
   const central: [number, number][] = [];
@@ -112,6 +113,5 @@ export function cityPopulation(sources: PopulationSource[], recordSpan?: [number
     members.push(series(own, span, p, runsOn));
     from.push(s.source);
   }
-  void endOpen;
   return { span, members, from };
 }

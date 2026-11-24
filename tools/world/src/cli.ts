@@ -171,6 +171,23 @@ const commands: Record<string, (args: string[]) => Promise<number | void>> = {
     console.log(`${text.split('\n').filter((l) => l && !l.startsWith('#')).length - 1} rows → ${SNAPSHOT}`);
     console.log(`In world/manifest.yaml the dataset is repo:${SNAPSHOT}, sha256 ${createHash('sha256').update(text).digest('hex')}, ${Buffer.byteLength(text)} bytes.`);
   },
+  // What most wants a city's records (docs/plans/CITIES.md, step 7), by the latest build's cities: `npm run world --
+  // cities-wanted [--n 40] [--below 2]`. Each city's tier of what is known of it, and the most people-years first.
+  async 'cities-wanted'(args) {
+    const { citiesWanted, citiesWantedText } = await import('./citiesWanted.ts');
+    const opt = (name: string) => {
+      const i = args.indexOf(name);
+      return i >= 0 ? args[i + 1] : undefined;
+    };
+    const index = join(REPO, 'dist/builds/index.json');
+    if (!existsSync(index)) throw new Error('no build: run npm run build:world first');
+    const dir = join(REPO, 'dist/builds', JSON.parse(readFileSync(index, 'utf8')).latest);
+    const f = JSON.parse(readFileSync(join(dir, 'people/cities.json'), 'utf8'));
+    // The settlements whose fabric a map of the world gives: the build's sites of cities.
+    const ts = JSON.parse(readFileSync(join(dir, 'tileset.json'), 'utf8')) as { sites?: { kind: string; place?: string }[] };
+    const mapped = new Set((ts.sites ?? []).filter((s) => s.kind === 'city' && s.place).map((s) => s.place!));
+    console.log(citiesWantedText(citiesWanted(f, mapped), Number(opt('--n') ?? 40), Number(opt('--below') ?? 2)));
+  },
   // What most wants a building tradition: `npm run world -- dwellings-wanted [--n 40] [--region 59] [--lifeway herders]`;
   // `--totals` for each time's people by way of life and how many a tradition houses; `--regions` for the regions' numbers.
   async 'dwellings-wanted'(args) {
