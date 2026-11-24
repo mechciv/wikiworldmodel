@@ -129,6 +129,11 @@ limits:
       has no `siting` or `growth`, and takes the record's. A link into such a build finds its settlements and fields
       where version 9 puts them, not where that build first drew them. Whether to keep each version's placement for its
       own builds is a maintainer's decision, still open.
+  - note: >-
+      A cell weighs at least four places for each of its settlements, beyond `candidates`' most, so that a crowded cell
+      can place them all. The cost grows with it: in a test world of farmsteads (1–3 houses), a scene's plan took about
+      1.5 s at 120 people to the km², 3 s at 300 and 6 s at 600, against about 0.4 s for hamlets at 40. The anthromes'
+      classes of farmsteads say 1–10 people to the km², far below these.
   - with: field:people/anthromes
     note: >-
       The far land beyond a scene is scaled to agree with the land its own settlements work, in the cells it holds whole
