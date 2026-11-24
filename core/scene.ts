@@ -252,6 +252,11 @@ export interface ScenePeople {
   step: number;
   /** the 5′ cells around the place, rows from the north: the build's class numbers, people to the km² and regions */
   grid: { north: number; west: number; nx: number; ny: number; res: number; anthrome: number[]; density: number[]; region: number[] };
+  /**
+   * the same 5′ cells further out (core/landscape.ts, FAR_REACH_DEG), and their regions' assessments: how much of the land
+   * beyond the scene's own settlements was worked, drawn coarsely so that the fields do not stop at the scene's edge
+   */
+  far?: { north: number; west: number; nx: number; ny: number; res: number; anthrome: number[]; density: number[]; region: number[]; assessments: { id: number; assessment: Assessment }[] };
   /** the anthromes' classes, as their field lists them */
   classes: AnthromeClass[];
   /** each region of the grid: its name, and what its archaeologists said at the survey's time nearest */

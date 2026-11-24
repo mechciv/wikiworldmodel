@@ -322,6 +322,8 @@ export class SiteWorth {
     }
     let town = 1;
     for (const c of this.cities) {
+      // A city's own ground is its houses': nobody else's settlement stands on it.
+      if (Math.hypot(x - c.x, y - c.y) < c.r) return 0;
       const d = Math.max(0, Math.hypot(x - c.x, y - c.y) - c.r);
       town = Math.max(town, 1 + p.city.weight * Math.exp(-d / p.city.reach));
     }

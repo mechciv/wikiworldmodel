@@ -8,3 +8,4 @@ viewer/test/e2e/__diff__/
 *.log
 .DS_Store
 __pycache__/
+.feedback/

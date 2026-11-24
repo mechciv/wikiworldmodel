@@ -15,7 +15,7 @@ import { freshOf, noise, type Waters } from './land.ts';
 import { GroundSort } from './sorting.ts';
 import { drawStone, drawWood, shedsWood, STONE_FINE, STONE_VARIANTS, WOOD, WOOD_SEEDS, woodLength } from './strewn.ts';
 import { drawDwelling, HOUSE_VARIANTS, houseSize, type HouseDetail } from '../people/dwellings.ts';
-import { LandUseMap, landUseMask, makeSettlement, waterNear, type LandUse, type SettlementParams, type SettlementPlan } from '../people/settlement/v9.ts';
+import { farLand, farLandMask, farScale, LandUseMap, landUseMask, makeSettlement, waterNear, type LandUse, type SettlementParams, type SettlementPlan } from '../people/settlement/v9.ts';
 import { LaneGround } from '../people/settlement/lanes.ts';
 import { drawCrop, slotArchetype, sow, type CropParams } from '../people/crops.ts';
 import { buildFieldworks, type FieldTreeSpot } from '../people/fieldworks.ts';
@@ -427,6 +427,21 @@ export class SceneStream {
   /** What people made of the ground, as an image: R crops, G pasture, B yards, A paddies. Undefined where there are no people. */
   fields(size: number): { data: Uint8Array; box: [number, number, number, number] } | undefined {
     return this.landUse ? { data: landUseMask(this.landUse, size, EXTENT), box: [-EXTENT, -EXTENT, EXTENT, EXTENT] } : undefined;
+  }
+
+  /**
+   * How much of the land was worked beyond the scene's own settlements, coarsely, as an image `half` metres each way about
+   * its middle: R crops, G pasture, A paddies, as shares (settlement/v9.ts, farLand). The shader lays it out in patches
+   * beyond the plan's own map and across a band at its edge. Its shares are scaled to agree, on the average, with what the
+   * plan lays out in the cells the scene holds whole, so that the two meet without a step in how much is worked.
+   * Undefined where the scene has no people, or its spec no far cells.
+   */
+  farFields(size: number, half: number): { data: Uint8Array; box: [number, number, number, number]; scale: number } | undefined {
+    const far = this.spec.people && farLand(this.spec);
+    if (!far || !this.landUse || !this.people) return undefined;
+    const origin = this.spec.site.origin;
+    const scale = farScale(far, this.people, this.landUse, origin, EXTENT);
+    return { data: farLandMask(far, origin, size, half, scale), box: [-half, -half, half, half], scale };
   }
 
   /**

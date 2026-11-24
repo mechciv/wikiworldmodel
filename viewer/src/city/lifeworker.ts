@@ -62,6 +62,8 @@ export type FromLifeWorker =
       ms: number;
       people?: PeopleSummary;
       fields?: Uint8Array;
+      /** how much of the land was worked beyond the plan's own map, coarsely (SceneStream, farFields) */
+      far?: { data: Uint8Array; size: number; box: [number, number, number, number] };
       paths?: { vertices: ArrayBuffer; indices: Uint32Array };
       walls?: { vertices: ArrayBuffer; indices: Uint32Array };
       fieldworks?: { vertices: ArrayBuffer; indices: Uint32Array };
@@ -69,6 +71,13 @@ export type FromLifeWorker =
     }
   | { type: 'mask'; mask: Uint8Array; maskSize: number; maskBox: [number, number, number, number]; fields?: Uint8Array }
   | { type: 'selection'; serial: number; batches: Batch[]; protos: ProtoMesh[]; instances: number; triangles: number; pending: number; groups: NamedGroup[]; ms: number };
+
+/**
+ * The far land's image (SceneStream, farFields): its side in texels, and how far it reaches each way from the scene's
+ * middle, in metres: the cells the spec tells of (core/landscape.ts, FAR_REACH_DEG), at a few texels to a 5′ cell.
+ */
+const FAR_SIZE = 256;
+const FAR_HALF = 112000;
 
 let stream: SceneStream | null = null;
 const sent = new Set<number>();
@@ -101,6 +110,8 @@ self.onmessage = (e: MessageEvent<ToLifeWorker>) => {
     const levels = stream.levels.map((l) => ({ nx: l.nx, ny: l.ny, x0: l.x0, y0: l.y0, cell: l.cell, z: (l.z as Int16Array).slice(), ...(l.unit !== undefined ? { unit: l.unit } : {}), ...(l.base !== undefined ? { base: l.base } : {}) }));
     const normals = levels.map(g => groundNormals(g, g.z));
     const fields = stream.fields(512)?.data;
+    const farMade = stream.farFields(FAR_SIZE, FAR_HALF);
+    const far = farMade && { data: farMade.data, size: FAR_SIZE, box: farMade.box };
     const paths = stream.paths();
     const walls = stream.walls();
     const fieldworks = m.fast ? undefined : stream.fieldworks();
@@ -145,6 +156,7 @@ self.onmessage = (e: MessageEvent<ToLifeWorker>) => {
       ...levels.map((l) => l.z.buffer as ArrayBuffer),
       ...normals.map((n) => n.buffer),
       ...(fields ? [fields.buffer as ArrayBuffer] : []),
+      ...(far ? [far.data.buffer as ArrayBuffer] : []),
       ...(paths ? [paths.vertices, paths.indices.buffer as ArrayBuffer] : []),
       ...(walls ? [walls.vertices, walls.indices.buffer as ArrayBuffer] : []),
       ...(fieldworks ? [fieldworks.vertices, fieldworks.indices.buffer as ArrayBuffer] : []),
@@ -166,6 +178,7 @@ self.onmessage = (e: MessageEvent<ToLifeWorker>) => {
         ms: performance.now() - t0,
         ...(people ? { people } : {}),
         ...(fields ? { fields } : {}),
+        ...(far ? { far } : {}),
         ...(paths ? { paths } : {}),
         ...(walls ? { walls } : {}),
         ...(fieldworks ? { fieldworks } : {}),

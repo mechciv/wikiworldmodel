@@ -12,7 +12,7 @@ import { houseSize, HOUSE_VARIANTS } from '../dwellings.ts';
 import { ROUTE, roundOf, wayAt, type RoutineParams } from '../../life/routines.ts';
 import { personGoes } from '../figures.ts';
 import { WORK_VARIANTS } from '../works.ts';
-import { LandUseMap, makeSettlement, toLocal, type Ground } from './v9.ts';
+import { farLand, farLandMask, farScale, LandUseMap, makeSettlement, toLocal, type Ground } from './v9.ts';
 import { FIELD_USE, GROWTH, SITING, type WaterNear } from './sites.ts';
 
 const ROOT = join(import.meta.dirname, '../../../..');
@@ -741,7 +741,8 @@ describe('where settlements stand, and what they farm (sites.ts)', () => {
     plan.settlements.forEach((s, si) => {
       const nodes = own.get(si);
       if (!nodes || s.x > 6000 || Math.abs(s.x) < 3000) return;
-      const area = Math.PI * (s.fieldR * s.fieldR - s.r * s.r);
+      // Its fields and its houses' own ground, as the far land counts them.
+      const area = Math.PI * s.fieldR * s.fieldR;
       ratio.push((nodes.length * f.cell * f.cell) / area);
       const disc = Math.sqrt((nodes.length * f.cell * f.cell) / Math.PI + s.r * s.r);
       outside.push(nodes.filter((k) => Math.hypot(f.x0 + (k % f.nx) * f.cell - s.x, f.y0 + Math.floor(k / f.nx) * f.cell - s.y) > disc).length / nodes.length);
@@ -1002,6 +1003,99 @@ describe('how a tradition sets its houses out', () => {
     expect(form.grow).toBeGreaterThan(1);
     expect(houseSize(form.spec, 0, form.grow).w).toBeCloseTo(houseSize(form.spec, 0).w * form.grow!, 6);
     expect(plan.houses.filter((h) => h.settlement === city).every((h) => h.size === 1)).toBe(true);
+  });
+});
+
+describe('the land worked beyond the scene', () => {
+  /** A world whose far cells are its own cells, told of as the scene's spec tells of them (ScenePeople, far). */
+  const farWorld = (code: number, density: number, a: Assessment) => {
+    const p = world(() => ({ code, density, region: 1 }), [{ id: 1, a }]);
+    return { ...p, far: { ...p.grid, assessments: [{ id: 1, assessment: a }] } };
+  };
+
+  it('works as much of a cell as its settlements would, on the average', () => {
+    // The last are shifting cultivators, of whose fields only some are cleared at a time (FAR_AVERAGE.swiddenCleared).
+    for (const [code, density, a] of [[32, 40, assess(1, 1, 3, 2)], [23, 260, assess(1, 1, 3, 2)], [31, 120, assess(1, 1, 3, 2)], [32, 40, assess(1, 3, 1, 1)]] as [number, number, Assessment][]) {
+      const p = farWorld(code, density, a);
+      const far = farLand(spec(p))!;
+      const plan = makeSettlement(spec(p), flat, dry, EXTENT);
+      const use = new LandUseMap(plan, flat, dry, 7);
+      // What the plan lays out over the middle of the scene, where every settlement whose fields reach it is drawn.
+      let made = 0;
+      let n = 0;
+      for (let x = -9000; x <= 9000; x += 150) for (let y = -9000; y <= 9000; y += 150) {
+        made += use.at(x, y).crop;
+        n++;
+      }
+      const said = far.crop[12 * far.nx + 12];
+      expect(said, `class ${code}`).toBeGreaterThan(0);
+      // Where no tradition changes the settlements, the estimate is the plan's to a fifth; SceneStream.farFields scales
+      // it to the plan's of the scene where one does.
+      expect(made / n / said, `class ${code} at ${density} to the km²`).toBeGreaterThan(0.8);
+      expect(made / n / said, `class ${code} at ${density} to the km²`).toBeLessThan(1.25);
+    }
+  });
+
+  it("scales the far land to the plan's by its own settlements, and not by a city's fields", () => {
+    const a = assess(1, 1, 3, 2);
+    const without = farWorld(32, 40, a);
+    // A city in the middle of one of the cells the scene holds whole, whose fields take most of that cell and no other.
+    const cities = [{ name: 'Testopolis', country: 'Nowhere', lat: 0.042, lon: 0.042, people: 800000, field: 'field:people/cities-ancient', source: 'src:test', from: 'list' as const }];
+    const withCity = { ...without, cities };
+    const scaleOf = (p: ScenePeople) => {
+      const plan = makeSettlement(spec(p), flat, dry, EXTENT);
+      return { scale: farScale(farLand(spec(p))!, plan, new LandUseMap(plan, flat, dry, 7), { lat: 0, lon: 0 }, EXTENT), plan };
+    };
+    const plain = scaleOf(without);
+    const city = scaleOf(withCity);
+    expect(city.plan.settlements.some((s) => s.city === 'Testopolis')).toBe(true);
+    // Where no tradition changes the settlements, the plan and the estimate agree, and the scale is about 1.
+    expect(plain.scale).toBeGreaterThan(0.8);
+    expect(plain.scale).toBeLessThan(1.25);
+    // The cell the city's fields reach is left out, so the city moves the scale little. Counted, it would raise it by
+    // about a fifth. Since version 9 a cell's settlements are not spread evenly over it (sites.ts), so leaving one cell
+    // out of the few the scene holds whole moves the average a little of itself: within a twelfth.
+    expect(Math.abs(city.scale - plain.scale) / plain.scale).toBeLessThan(1 / 12);
+  });
+
+  it('works fields where people farmed, pasture where they herded, and nothing for foragers, and builds where towns stood', () => {
+    const farmers = farLand(spec(farWorld(23, 260, assess(1, 1, 3, 2))))!;
+    expect(Math.max(...farmers.crop)).toBeGreaterThan(0.2);
+    expect(Math.max(...farmers.pasture)).toBe(0);
+    const herders = farLand(spec(farWorld(42, 3, assess(1, 0, 0, 3))))!;
+    expect(Math.max(...herders.pasture)).toBeGreaterThan(0);
+    expect(Math.max(...herders.crop)).toBe(0);
+    const foragers = farLand(spec(farWorld(53, 0.5, assess(3, 0, 0, 0))))!;
+    expect(Math.max(...foragers.crop, ...foragers.pasture)).toBe(0);
+    // A city's cell is its houses' built ground, unworked, as the plan lays it out; a cell of towns among fields has both.
+    const city = farLand(spec(farWorld(11, 5000, assess(1, 1, 3, 2, 1))))!;
+    expect(Math.max(...city.built)).toBeGreaterThan(0.05);
+    expect(Math.max(...city.crop, ...city.pasture)).toBe(0);
+    const towns = farLand(spec(farWorld(12, 600, assess(1, 1, 3, 2))))!;
+    expect(Math.max(...towns.built)).toBeGreaterThan(0);
+    expect(Math.max(...towns.crop)).toBeGreaterThan(0.2);
+    expect(Math.max(...farmers.built)).toBe(0);
+    // Without far cells in its spec, a scene is told of nothing beyond its own.
+    expect(farLand(spec(world(() => ({ code: 23, density: 260, region: 1 }), [{ id: 1, a: assess(1, 1, 3, 2) }])))).toBeUndefined();
+  });
+
+  it('draws the far land with no step at a cell\'s edge, and none beyond the cells it is told of', () => {
+    // Every other column of cells farmed, so that a step at their edges would show.
+    const a = assess(1, 1, 3, 2);
+    const p = world((_r, c) => ({ code: c % 2 ? 23 : 62, density: c % 2 ? 260 : 0, region: 1 }), [{ id: 1, a }]);
+    const far = farLand(spec({ ...p, far: { ...p.grid, assessments: [{ id: 1, assessment: a }] } }))!;
+    const size = 256;
+    const half = 150000;
+    const mask = farLandMask(far, { lat: 0, lon: 0 }, size, half);
+    const crop = (i: number, j: number) => mask[(j * size + i) * 4];
+    let most = 0;
+    for (let i = 1; i < size; i++) most = Math.max(most, Math.abs(crop(i, size / 2) - crop(i - 1, size / 2)));
+    // A texel is about 1.2 km, a cell about 9 km: read between the cells' middles, no neighbours differ by a quarter.
+    expect(Math.max(...Array.from({ length: size }, (_, i) => crop(i, size / 2)))).toBeGreaterThan(100);
+    expect(most).toBeLessThan(64);
+    // The cells reach a degree each way, about 111 km: past them, nothing is worked.
+    expect(crop(2, size / 2)).toBe(0);
+    expect(crop(size / 2, size - 2)).toBe(0);
   });
 });
 
