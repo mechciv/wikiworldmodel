@@ -58,6 +58,7 @@ As for the other slices (see the [README](../../README.md)). In the viewer:
 | Each member of the people cuts the one ranking at its own place; a record's area at its time is met | `core/growth.test.ts`: *cuts the same ranking…*, *meets the area a record gives…* |
 | A city's people are read from its record before its lists, rise from a founding size, and run on to the present where its record has no end | `core/citypop.test.ts`, `tools/world/test/citiesWanted.test.ts` |
 | A face is divided into blocks near their size and plots that each have a front, none over another; a grid runs on across faces street for street; lanes follow the contours where the ground is steep; a footprint keeps its ground | `world/generators/people/settlement/division.test.ts` |
+| A recorded wall takes the place of a generated one and bounds the town while it stands; a recorded road stands in its frame; a district counted four times the buildings has smaller plots | `town.test.ts` |
 | Dividing only what is wanted divides it as dividing all of it would | `division.test.ts`: *divides only what is wanted…* |
 | A town keeps its streets and plots where they are as it grows, gives up its outer plots first as it shrinks, builds nothing in its river, is the same town every time, and has a gate on each route through its wall | `world/generators/people/settlement/town.test.ts` |
 | In a scene, a city's houses and streets of one time stand where they stood at another; it shrinks to its oldest ground; a great city has no most of houses; its wall stands only while its claim says | `v10.test.ts`: *a city laid out through its life* |
@@ -115,8 +116,9 @@ picked, named and lit as in the city's own scene before.
 ## Decisions
 
 1. **One system for every city.** Rome differs from a town of the lists only in how much is known of it. Its regions'
-   counts, which `gen:rome/fabric` weighted its housing by, are not yet read: the growth model's density is a city's
-   whole, and a district's count is a constraint still to be built.
+   counts, which `gen:rome/fabric` weighted its housing by, are a city's districts now, read for any city whose records
+   count a district's buildings: each built cell at the city's height goes to its nearest district's label, and a
+   district's plots are as much smaller as it was denser than the city on the whole.
 2. **A city's plan reads the world's ground, not the scene's.** A scene builds its ground about its own point, and the
    same place is a little different from two scenes; a city's streets must not move as a visitor goes from one to the
    next. The scene's water and steepness decide only what is drawn.
@@ -135,8 +137,9 @@ picked, named and lit as in the city's own scene before.
 - **Rome's medieval town is not in the bend of the Tiber.** The growth model reads no aqueducts, so nothing makes the
   river's banks the better ground once they failed; the town of 1200 stands round the record's point, east of the
   Colosseum. An epoch at the aqueducts' end, reading the distance to the survey's water, would move it.
-- **A city's districts and institutions are not read.** Rome's regions' counts do not weight its density, and no town
-  has a temple or a market of its own unless a record draws one. A town form's open square is kept at its middle.
+- **A city's institutions are not read.** No town has a temple or a market of its own unless a record draws one; a town
+  form's open square is kept at its middle. A district's count of its buildings (Rome's regions, by the Regionary
+  Catalogues) sizes its plots, but it does not move where the city grew.
 - **A recorded wall bounds a city's growth only where its line goes round it.** The Servian and Aurelian walls do,
   their ends within a twentieth of their length (the Aurelian's 484 m apart where it left the Tiber to close it); a wall
   mapped in pieces does not.
