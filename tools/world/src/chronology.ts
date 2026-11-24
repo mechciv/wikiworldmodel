@@ -791,7 +791,16 @@ function momentGroups(world: World): { list: ClaimGroup[]; byRef: Map<string, Cl
   if (!known) {
     const list = claimGroups(world).filter((g) => world.vocab.properties[g.prop]?.moment);
     const byRef = new Map<string, ClaimGroup[]>();
-    for (const g of list) for (const c of g.claims) byRef.set(c.ref, [...(byRef.get(c.ref) ?? []), g]);
+    for (const g of list) {
+      for (const c of g.claims) {
+        let bucket = byRef.get(c.ref);
+        if (!bucket) {
+          bucket = [];
+          byRef.set(c.ref, bucket);
+        }
+        bucket.push(g);
+      }
+    }
     known = { list, byRef };
     momentGroupsOf.set(world, known);
   }

@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fetchAll } from './fetch.ts';
-import { fieldSource, importBlocks, importElevation, tiledField } from './importer.ts';
+import { fieldSource, importBlocks, importElevation, importReliefPlates, tiledField } from './importer.ts';
 import { exportSnapshot, type OhmSnapshot } from './ohm.ts';
 import { REPO } from './paths.ts';
 import { loadWorld } from './world.ts';
@@ -17,7 +17,8 @@ const commands: Record<string, (args: string[]) => Promise<number | void>> = {
     await fetchAll();
     const world = await loadWorld();
     for (const f of world.fields.filter(tiledField)) {
-      await (fieldSource(f) === 'elevation' ? importElevation(f) : importBlocks(f));
+      const kind = fieldSource(f);
+      await (kind === 'elevation' ? importElevation(f) : kind === 'relief' ? importReliefPlates(f) : importBlocks(f));
     }
   },
   // A fresh extract of the map over the box of a snapshot kept in world/snapshots. The old file stays
