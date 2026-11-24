@@ -1,6 +1,8 @@
 // A picture of the view to keep (docs/plans/RENDERING.md, step 8): the canvas as a PNG, with the view's link written into
 // it, so that the picture can always be made again from the same build, time and camera.
 
+import { encodePngDataUrl } from '../../core/feedback.ts';
+
 const CRC = (() => {
   const t = new Uint32Array(256);
   for (let n = 0; n < 256; n++) {
@@ -36,12 +38,56 @@ export function pngWithText(png: Uint8Array, keyword: string, text: string): Uin
   return out;
 }
 
+export interface CapturedPicture {
+  png: Uint8Array;
+  dataUrl: string;
+  width: number;
+  height: number;
+}
+
+/**
+ * Capture the view as a PNG with its reproducible link in a `Source` text chunk.
+ * Visible overlay canvases (rivers, fossils, hazards, fields) are composited on top in DOM order.
+ */
+export async function capturePicture(
+  canvas: HTMLCanvasElement,
+  link: string,
+  overlays: HTMLCanvasElement[] = [],
+): Promise<CapturedPicture | null> {
+  const width = canvas.width;
+  const height = canvas.height;
+  if (width <= 0 || height <= 0) return null;
+
+  const visibleOverlays = overlays.filter((layer) => {
+    if (layer === canvas || layer.hidden || layer.width <= 0 || layer.height <= 0) return false;
+    const style = getComputedStyle(layer);
+    return style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
+  });
+
+  let source: HTMLCanvasElement = canvas;
+  if (visibleOverlays.length > 0) {
+    const composite = document.createElement('canvas');
+    composite.width = width;
+    composite.height = height;
+    const ctx = composite.getContext('2d');
+    if (ctx) {
+      ctx.drawImage(canvas, 0, 0, width, height);
+      for (const layer of visibleOverlays) ctx.drawImage(layer, 0, 0, width, height);
+      source = composite;
+    }
+  }
+
+  const blob = await new Promise<Blob | null>((done) => source.toBlob(done, 'image/png'));
+  if (!blob) return null;
+  const png = pngWithText(new Uint8Array(await blob.arrayBuffer()), 'Source', link);
+  return { png, dataUrl: encodePngDataUrl(png), width, height };
+}
+
 /** Save the canvas as a PNG named for the place and time, its link inside it. */
 export async function savePicture(canvas: HTMLCanvasElement, link: string, name: string): Promise<void> {
-  const blob = await new Promise<Blob | null>((done) => canvas.toBlob(done, 'image/png'));
-  if (!blob) return;
-  const png = pngWithText(new Uint8Array(await blob.arrayBuffer()), 'Source', link);
-  const url = URL.createObjectURL(new Blob([png as BlobPart], { type: 'image/png' }));
+  const captured = await capturePicture(canvas, link);
+  if (!captured) return;
+  const url = URL.createObjectURL(new Blob([captured.png as BlobPart], { type: 'image/png' }));
   const a = document.createElement('a');
   a.href = url;
   a.download = `${name}.png`;

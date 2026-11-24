@@ -1,8 +1,11 @@
 import { createReadStream, existsSync, statSync } from 'node:fs';
 import { extname, join, resolve } from 'node:path';
 import { defineConfig, type Plugin } from 'vite';
+import { createFeedbackMiddleware } from '../tools/world/src/feedbackStore.ts';
 
-const BUILDS = resolve(__dirname, '../dist/builds');
+const REPO = resolve(__dirname, '..');
+const BUILDS = resolve(REPO, 'dist/builds');
+const FEEDBACK = process.env.WIKIWORLDMODEL_FEEDBACK_DIR ? resolve(process.env.WIKIWORLDMODEL_FEEDBACK_DIR) : resolve(REPO, '.feedback');
 
 const TYPES: Record<string, string> = { '.json': 'application/json', '.lwt': 'application/octet-stream' };
 
@@ -28,11 +31,21 @@ function builds(): Plugin {
   };
 }
 
+/** Store and serve local scene feedback (.feedback/) at /api/feedback during development and preview. */
+function feedback(): Plugin {
+  const handle = createFeedbackMiddleware(FEEDBACK, REPO);
+  return {
+    name: 'wikiworldmodel-feedback',
+    configureServer: (s) => void s.middlewares.use(handle),
+    configurePreviewServer: (s) => void s.middlewares.use(handle),
+  };
+}
+
 export default defineConfig({
   root: __dirname,
   base: './',
-  plugins: [builds()],
-  server: { fs: { allow: [resolve(__dirname, '..')] } },
+  plugins: [builds(), feedback()],
+  server: { fs: { allow: [REPO] } },
   build: {
     outDir: resolve(__dirname, '../dist/site'),
     emptyOutDir: true,
