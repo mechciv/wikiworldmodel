@@ -12,7 +12,7 @@
 import type { FieldUse } from '../../../../core/landscape.ts';
 import { FIELD_SLOPE } from '../../../../core/plots.ts';
 import { hash2, hash3 } from '../../city/math.ts';
-import { chamfer, distanceField, fbm, type Waters } from '../../life/land.ts';
+import { chamfer, distanceField, type Waters } from '../../life/land.ts';
 
 /** A metre on the ground, as a degree of latitude. */
 const M_PER_DEG = 111194.93;
@@ -158,22 +158,49 @@ export function waterNear(w: Waters, half: number, cell = 100): WaterNear | unde
   };
 }
 
-/** Where a place in the scene's metres is on the Earth, as metres east and north on a sheet that is the same for every scene. */
-export function earthOf(origin: { lat: number; lon: number }): (x: number, y: number) => [number, number] {
+/** A place on the Earth, as a point of a sphere as large as it, in metres: the same for every scene, and even every way. */
+export type Earth = [number, number, number];
+
+/** A place given in degrees, on the Earth. */
+export const earthAt = (lat: number, lon: number): Earth => {
+  const R = M_PER_DEG / DEG;
+  const c = Math.cos(lat * DEG);
+  return [R * c * Math.cos(lon * DEG), R * c * Math.sin(lon * DEG), R * Math.sin(lat * DEG)];
+};
+
+/** Where a place in the scene's metres is on the Earth. */
+export function earthOf(origin: { lat: number; lon: number }): (x: number, y: number) => Earth {
   const east = M_PER_DEG * Math.cos(origin.lat * DEG);
-  return (x, y) => {
-    const lat = origin.lat + y / M_PER_DEG;
-    const lon = origin.lon + x / east;
-    return [lon * M_PER_DEG * Math.cos(lat * DEG), lat * M_PER_DEG];
-  };
+  return (x, y) => earthAt(origin.lat + y / M_PER_DEG, origin.lon + x / east);
 }
 
-/** The same, for a place given in degrees. */
-export const earthAt = (lat: number, lon: number): [number, number] => [lon * M_PER_DEG * Math.cos(lat * DEG), lat * M_PER_DEG];
+/** Noise in three dimensions, 0–1: the corners of a unit lattice, hashed, read smoothly between. */
+function noise3(x: number, y: number, z: number, seed: number): number {
+  const i = Math.floor(x);
+  const j = Math.floor(y);
+  const k = Math.floor(z);
+  const u = x - i;
+  const v = y - j;
+  const w = z - k;
+  const su = u * u * (3 - 2 * u);
+  const sv = v * v * (3 - 2 * v);
+  const sw = w * w * (3 - 2 * w);
+  const at = (a: number, b: number, c: number) => hash3(i + a, j + b, k + c, seed);
+  const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+  return lerp(lerp(lerp(at(0, 0, 0), at(1, 0, 0), su), lerp(at(0, 1, 0), at(1, 1, 0), su), sv), lerp(lerp(at(0, 0, 1), at(1, 0, 1), su), lerp(at(0, 1, 1), at(1, 1, 1), su), sv), sw);
+}
 
-/** How good the soil is at a place on the Earth's sheet, about 1, by two scales of noise. */
-export function soilAt(ex: number, ey: number, scales: [number, number], weight: number, seed: number): number {
-  const n = 0.65 * fbm(ex / scales[0], ey / scales[0], seed) + 0.35 * fbm(ex / scales[1], ey / scales[1], seed + 17);
+/** Noise in three octaves over the Earth, 0–1, at a scale of `scale` metres. */
+export function fbmEarth(e: Earth, scale: number, seed: number): number {
+  const x = e[0] / scale;
+  const y = e[1] / scale;
+  const z = e[2] / scale;
+  return (noise3(x, y, z, seed) * 4 + noise3(x * 2.03, y * 2.03, z * 2.03, seed + 1) * 2 + noise3(x * 4.1, y * 4.1, z * 4.1, seed + 2)) / 7;
+}
+
+/** How good the soil is at a place on the Earth, about 1, by two scales of noise. */
+export function soilAt(e: Earth, scales: [number, number], weight: number, seed: number): number {
+  const n = 0.65 * fbmEarth(e, scales[0], seed) + 0.35 * fbmEarth(e, scales[1], seed + 17);
   // fbm's three octaves rarely reach their ends: stretch the middle of its range over the whole.
   return clamp(1 + weight * (2 * smooth(0.25, 0.75, n) - 1), 0.1, 3);
 }
@@ -282,7 +309,7 @@ export class SiteWorth {
     return (a[k] * (1 - u) + a[k + 1] * u) * (1 - v) + (a[k + m.n] * (1 - u) + a[k + m.n + 1] * u) * v;
   }
   /** What a place is worth for a settlement, about 1 where it is as good as most; `ex`, `ey` its place on the Earth's sheet. */
-  at(x: number, y: number, ex: number, ey: number): number {
+  at(x: number, y: number, e: Earth): number {
     if (!this.ok(x, y)) return 0;
     const p = this.p;
     const z = this.ground.at(x, y);
@@ -305,7 +332,7 @@ export class SiteWorth {
       const d = Math.max(0, Math.hypot(x - c.x, y - c.y) - c.r);
       town = Math.max(town, 1 + p.city.weight * Math.exp(-d / p.city.reach));
     }
-    return level * relief * water * town * soilAt(ex, ey, p.soil.scales, p.soil.weight, this.seed);
+    return level * relief * water * town * soilAt(e, p.soil.scales, p.soil.weight, this.seed);
   }
 }
 
@@ -339,8 +366,7 @@ export function siteCells(cells: SiteCell[], worth: SiteWorth, p: SitingParams):
       const v = clamp((Math.floor(k / side) + hash3(k, 2, 0x51e, c.seed)) / side, inset, 1 - inset);
       const x = c.x0 + (c.x1 - c.x0) * u;
       const y = c.y1 - (c.y1 - c.y0) * v;
-      const [ex, ey] = earthAt(c.north - v * c.res, c.west + u * c.res);
-      const w = worth.at(x, y, ex, ey) * c.crowd(x, y);
+      const w = worth.at(x, y, earthAt(c.north - v * c.res, c.west + u * c.res)) * c.crowd(x, y);
       if (w > 0) out.push({ x, y, w, k });
     }
     return out;
@@ -598,7 +624,7 @@ export function growFields(
   ground: { at(x: number, y: number): number },
   water: (x: number, y: number) => number,
   near: WaterNear | undefined,
-  earth: (x: number, y: number) => [number, number],
+  earth: (x: number, y: number) => Earth,
   p: GrowthParams,
   half: number,
   seed: number,
@@ -627,9 +653,9 @@ export function growFields(
   const lattice = (a: number, b: number): number => {
     const k = b * nl + a;
     if (latSoil[k] !== latSoil[k]) {
-      const [ex, ey] = earth(x0 + a * LAT * cell, x0 + b * LAT * cell);
-      latSoil[k] = soilAt(ex, ey, [p.soil.scale, p.soil.scale * 0.37], p.soil.weight, seed + 29);
-      const turn = 4 * Math.PI * fbm(ex / GR.scale, ey / GR.scale, seed + 37);
+      const e = earth(x0 + a * LAT * cell, x0 + b * LAT * cell);
+      latSoil[k] = soilAt(e, [p.soil.scale, p.soil.scale * 0.37], p.soil.weight, seed + 29);
+      const turn = 4 * Math.PI * fbmEarth(e, GR.scale, seed + 37);
       latC[k] = Math.cos(turn);
       latS[k] = Math.sin(turn);
     }
@@ -681,7 +707,7 @@ export function growFields(
     let c2 = latC[k00] * w00 + latC[k10] * w10 + latC[k01] * w01 + latC[k11] * w11;
     let s2 = latS[k00] * w00 + latS[k10] * w10 + latS[k01] * w01 + latS[k11] * w11;
     {
-      const [ex, ey] = earth(x, y);
+      const e = earth(x, y);
       if (near && dw < GR.water * 3) {
         const wx = near.at(x + cell, y) - near.at(x - cell, y);
         const wy = near.at(x, y + cell) - near.at(x, y - cell);
@@ -702,7 +728,7 @@ export function growFields(
       const l2 = Math.hypot(c2, s2) || 1;
       grainC[k] = c2 / l2;
       grainS[k] = s2 / l2;
-      const rough = 1 + p.rough * (hash2(Math.round(ex / cell), Math.round(ey / cell), seed + 31) - 0.5) * 2;
+      const rough = 1 + p.rough * (hash3(Math.round(e[0] / cell), Math.round(e[1] / cell), Math.round(e[2] / cell), seed + 31) - 0.5) * 2;
       const base = soil * rough;
       // A field on a river's plain is farmed where it lies a little above the river, at the risk of a flood.
       crop[k] = above < 0.6 ? 0 : base * (1 - smooth(FIELD_SLOPE.cropFadeLo, FIELD_SLOPE.cropFadeHi, sin)) * (0.45 + 0.55 * smooth(0.8, 2.5, above));

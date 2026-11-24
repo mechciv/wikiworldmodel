@@ -677,7 +677,7 @@ describe('where settlements stand, and what they farm (sites.ts)', () => {
   it('grows the fields of a house that stands where nothing is farmed from the land about it', () => {
     // A strip of wet ground 60 m wide along the meridian, too low to farm, and good land either side of it; one house in it.
     const wet: Ground = { at: (x) => (Math.abs(x) < 30 ? 0.3 : 5) };
-    const g = growFields([{ starts: [[0, 0]], r: 10, x: 0, y: 0, area: 200000, use: 'rainfed', settlement: 0 }], wet, dry, undefined, (x, y) => [x, y], GROWTH, 3000, 7);
+    const g = growFields([{ starts: [[0, 0]], r: 10, x: 0, y: 0, area: 200000, use: 'rainfed', settlement: 0 }], wet, dry, undefined, (x, y) => [x, y, 0], GROWTH, 3000, 7);
     let farmed = 0;
     for (let k = 0; k < g.owner.length; k++) if (g.owner[k] === 0) farmed++;
     expect(farmed * g.cell * g.cell).toBeGreaterThan(0.8 * 200000);
@@ -1089,6 +1089,14 @@ describe('the land worked beyond the scene', () => {
     expect(Math.abs(mean(cityScenes) - mean(plains)) / mean(plains)).toBeLessThan(0.05);
     // And no one scene by much: a placement that let a city's fields in would move its own by a fifth.
     origins.forEach((_, k) => expect(Math.abs(cityScenes[k].scale - plains[k].scale) / plains[k].scale).toBeLessThan(0.12));
+    // And the mean's bound tells a leak apart: with the city not known as one, its ground and fields are counted, and the
+    // mean moves past it, by about a tenth when this was written. (Each scene moves about as much, within its own looser
+    // bound: that one only holds no one scene goes far astray.)
+    const leaked = origins.map((o, k) => {
+      const plan = { ...cityScenes[k].plan, settlements: cityScenes[k].plan.settlements.map((s) => ({ ...s, city: undefined })) };
+      return { scale: farScale(farLand(spec(withCity, o))!, plan, new LandUseMap(cityScenes[k].plan, flat, dry, 7), o, EXTENT) };
+    });
+    expect(Math.abs(mean(leaked) - mean(plains)) / mean(plains)).toBeGreaterThan(0.075);
   });
 
   it('works fields where people farmed, pasture where they herded, and nothing for foragers, and builds where towns stood', () => {
