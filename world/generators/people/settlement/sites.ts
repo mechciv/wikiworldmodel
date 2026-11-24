@@ -349,6 +349,12 @@ export class SiteWorth {
  * cell's edge as within it, where two cells' spacings differ the nearer: so a cell's places depend on its neighbours'.
  * Every cell's places are weighed, and the cells the scene draws should have a ring of cells about them in the list,
  * so that those near the edge of the scene come out as a scene centred on them would have them.
+ *
+ * The places taken first are many more than a cell needs, and a cell then keeps the best of its own. Those it does not
+ * keep still kept others from standing near them, its neighbours' among them. That is meant: what is taken is then the
+ * same kind of spread on both sides of a cell's edge, and which of a cell's places it keeps is its own business, so that
+ * a cell's edge shows no band. Were a full cell to stop keeping others away, its neighbours' places would crowd its
+ * edge while its own did not.
  */
 export function siteCells(cells: SiteCell[], worth: SiteWorth, p: SitingParams): [number, number][][] {
   // Each cell's places, weighed by their ground and by how crowded the cell is about them.
