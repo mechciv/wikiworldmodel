@@ -158,7 +158,7 @@ long they stay is the generator's, and no record's.
 - **In the living scene.** The settlement generator runs in the scene's worker, after its ground and before its trees:
   where people cleared fields, pastures and yards, no tree stands.
 - **Keyed by the world.** Settlements are seeded by the world's 5′ cells and the anthromes' step, so two scenes that
-  overlap put them in the same places.
+  overlap put them in the same places, as far as the ground they draw agrees.
 - **Where in its cell** (version 9, [settlement/sites.ts](../world/generators/people/settlement/sites.ts)): a cell's
   settlements stand where people looked for a place to live, near fresh water and above its floods, on level ground a
   little up from the bottom of a valley, on the better soil and near a town, by chance in proportion to how good the

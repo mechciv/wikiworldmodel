@@ -56,7 +56,8 @@
 //   Where every house, work, animal and path stands, and every way that is walked, is what version 5 made.
 //
 // Version 7 gives settled farmers connected lanes, compact or dispersed lots, field entrances and enclosures
-// following the occupied parcels. Earlier builds carry no lane widths and retain their original layout.
+// following the occupied parcels. Builds made before it carry no lane widths and are drawn without lanes. Since
+// version 9 every build is drawn with version 9's siting and fields, whatever its own version.
 //
 // Version 9 (sites.ts):
 //   - A cell's settlements stand where people looked for a place to live, and no longer on a grid over the cell: near
