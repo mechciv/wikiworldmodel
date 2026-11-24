@@ -15,11 +15,11 @@ canvas.globe:active { cursor: grabbing; }
 .scrim { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 560px 420px at 0 0, rgba(3, 4, 11, 0.86), rgba(3, 4, 11, 0.5) 55%, rgba(3, 4, 11, 0) 100%), linear-gradient(0deg, rgba(3, 4, 11, 0.7), rgba(3, 4, 11, 0) 72px); }
 
 /* A control over the view: a hairline edge on dark glass. */
-.when-to, .tg-evidence, .menu-toggle, .search-box, .planet-toggle, .tb-play {
+.when-to, .tg-evidence, .improve-scene, .menu-toggle, .search-box, .planet-toggle, .tb-play {
   border: 1px solid var(--line); background: rgba(8, 11, 17, 0.72); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); color: var(--text);
 }
-:is(.when-to, .tg-evidence, .menu-toggle, .planet-toggle, .tb-play):hover { border-color: rgba(233, 236, 242, 0.34); }
-:is(button, a, input, select):focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+:is(.when-to, .tg-evidence, .improve-scene, .menu-toggle, .planet-toggle, .tb-play):hover { border-color: rgba(233, 236, 242, 0.34); }
+:is(button, a, input, select, textarea):focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 .topbar { position: fixed; top: 0; left: 0; right: 0; display: flex; gap: 12px; align-items: center; padding: 20px 24px 0; pointer-events: none; }
 .topbar > * { pointer-events: auto; }
@@ -33,8 +33,10 @@ canvas.globe:active { cursor: grabbing; }
 .brand a:hover { color: var(--accent); }
 .tools { position: relative; display: flex; align-items: center; gap: 8px; min-width: 0; margin-left: auto; }
 
-.when-to, .tg-evidence, .menu-toggle { flex: none; display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 14px; border-radius: 10px; font-size: 13px; white-space: nowrap; cursor: pointer; }
+.when-to, .tg-evidence, .improve-scene, .menu-toggle { flex: none; display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 14px; border-radius: 10px; font-size: 13px; white-space: nowrap; cursor: pointer; }
 .when-to { font-weight: 600; }
+.improve-scene svg { flex: none; }
+.improve-scene svg path { fill: none; stroke: currentColor; stroke-width: 1.3; stroke-linejoin: round; stroke-linecap: round; }
 .tg-evidence .dots { display: inline-flex; gap: 3px; }
 .dots i { width: 6px; height: 6px; border-radius: 50%; }
 .dots .e { background: var(--evidence); }
@@ -46,7 +48,7 @@ canvas.globe:active { cursor: grabbing; }
 .menu-toggle svg path { fill: none; stroke: currentColor; stroke-width: 1.3; stroke-linejoin: round; stroke-linecap: round; }
 .menu-toggle .menu-icon { display: none; }
 
-.search { position: relative; width: clamp(200px, 25vw, 340px); min-width: 0; }
+.search { position: relative; width: clamp(180px, 22vw, 320px); min-width: 0; }
 .search-box { display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; border-radius: 10px; color: var(--muted); cursor: text; }
 .search-box:focus-within { border-color: rgba(244, 184, 96, 0.75); }
 .search input { flex: 1; min-width: 0; height: 100%; padding: 0; border: 0; background: none; color: var(--text); font: inherit; font-size: 13.5px; outline: none; }
@@ -370,16 +372,59 @@ body.evidence .inspect { top: calc(84px + var(--legend-h, 0px)); }
   .tm-dialog footer span { display: none; }
 }
 
+/* Scene feedback dialog: "Improve this scene", over the dimmed world (ui/feedback.ts). */
+.feedback-modal { position: fixed; inset: 0; z-index: 25; display: grid; place-items: start center; padding: max(16px, 6vh) 16px 16px; background: radial-gradient(ellipse at center, rgba(3, 4, 11, 0.42), rgba(3, 4, 11, 0.84)); backdrop-filter: blur(2px); }
+.fb-dialog { width: min(620px, 100%); max-height: calc(100dvh - max(32px, 6vh + 16px)); display: flex; flex-direction: column; gap: 12px; padding: 20px 22px 16px; border: 1px solid var(--panel-border); border-radius: 16px; background: rgba(10, 13, 20, 0.96); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6); }
+.fb-dialog header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.fb-dialog h1 { margin: 0; font-size: 22px; font-weight: 500; letter-spacing: -0.02em; color: var(--text); }
+.fb-close { width: 34px; height: 34px; border: 0; border-radius: 8px; background: none; color: var(--muted); font-size: 22px; cursor: pointer; }
+.fb-close:hover { color: var(--text); background: rgba(233, 236, 242, 0.06); }
+.fb-body { display: flex; flex-direction: column; gap: 12px; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.fb-shot { position: relative; margin: 0; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--bg); }
+.fb-preview { display: block; width: 100%; max-height: 240px; object-fit: contain; background: var(--bg); }
+.fb-size { position: absolute; right: 8px; bottom: 8px; padding: 2px 7px; border-radius: 6px; background: rgba(3, 4, 11, 0.78); border: 1px solid var(--line); color: var(--muted); font: 11px var(--mono); }
+.fb-summary { display: flex; flex-wrap: wrap; gap: 6px; }
+.fb-pill { padding: 3px 8px; border: 1px solid var(--hair); border-radius: 999px; background: rgba(233, 236, 242, 0.04); color: var(--text-2); font: 11.5px var(--mono); }
+.fb-details { border: 1px solid var(--hair); border-radius: 10px; padding: 6px 10px; background: rgba(0, 0, 0, 0.22); }
+.fb-details summary { color: var(--muted); font-size: 12px; cursor: pointer; user-select: none; }
+.fb-details summary:hover { color: var(--text); }
+.fb-params { margin: 8px 0 2px; max-height: 150px; overflow: auto; font: 11px/1.45 var(--mono); color: var(--text-2); white-space: pre-wrap; word-break: break-word; }
+.fb-form { display: flex; flex-direction: column; gap: 8px; }
+.fb-label { font-size: 12.5px; color: var(--text-2); font-weight: 500; }
+.fb-input { width: 100%; min-height: 92px; max-height: 220px; resize: vertical; padding: 11px 13px; border-radius: 10px; border: 1px solid var(--line); background: rgba(0, 0, 0, 0.34); color: var(--text); font: inherit; font-size: 14px; line-height: 1.45; }
+.fb-input::placeholder { color: #8a93a3; }
+.fb-input:focus { outline: none; border-color: rgba(244, 184, 96, 0.75); }
+.fb-status { margin: 0; min-height: 1.35em; font-size: 12.5px; color: var(--muted); }
+.fb-status:empty { display: none; }
+.fb-status-ok { color: #9fe3b0; }
+.fb-status-err { color: #f6a3a3; }
+.fb-dialog footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 10px; border-top: 1px solid var(--hair); }
+.fb-hint { color: var(--faint); font-size: 12px; }
+.fb-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.fb-cancel, .fb-download { padding: 8px 13px; border: 1px solid var(--line); border-radius: 8px; background: none; color: var(--text); font-size: 13px; cursor: pointer; }
+.fb-cancel:hover, .fb-download:hover { border-color: rgba(233, 236, 242, 0.4); }
+.fb-submit { padding: 8px 15px; border: 0; border-radius: 8px; background: var(--accent); color: var(--on-accent); font-size: 13px; font-weight: 600; cursor: pointer; }
+.fb-submit:hover:not(:disabled) { background: var(--accent-text); }
+.fb-submit:disabled { opacity: 0.45; cursor: not-allowed; }
+@media (max-width: 640px) {
+  .feedback-modal { place-items: start stretch; padding: max(12px, env(safe-area-inset-top)) 12px 12px; }
+  .fb-dialog { padding: 14px 14px 12px; }
+  .fb-preview { max-height: 160px; }
+  .fb-input { font-size: 16px; }
+  .fb-hint { display: none; }
+}
+
 /* Narrower screens: the parts of the topbar give way, the least needed first. */
-@media (max-width: 1240px) { .brand span { display: none; } }
-@media (max-width: 1080px) {
+@media (max-width: 1420px) { .brand span { display: none; } }
+@media (max-width: 1120px) {
   .menu-toggle .menu-on { display: none; }
   .search kbd { display: none; }
+  .improve-scene .improve-label { display: none; }
 }
 @media (max-width: 900px) {
   .brand .coverage-link { display: none; }
   .tg-evidence .know { display: none; }
-  .when-to, .tg-evidence, .menu-toggle { padding: 0 12px; }
+  .when-to, .tg-evidence, .improve-scene, .menu-toggle { padding: 0 12px; }
 }
 
 /* Phones. What is above lays the viewer out for a wide screen; what follows, for a narrow one or a short one. The brand
@@ -401,8 +446,8 @@ html { touch-action: manipulation; overscroll-behavior-y: none; }
   .search ul { max-height: 42vh; }
   .search li { padding: 9px 10px; }
   .when-to { height: 42px; padding: 0 10px; }
-  .tg-evidence, .menu-toggle { justify-content: center; width: 42px; height: 42px; padding: 0; }
-  .tg-evidence .know, .menu-toggle :is(.menu-label, .menu-on, .layers-icon) { display: none; }
+  .tg-evidence, .improve-scene, .menu-toggle { justify-content: center; width: 42px; height: 42px; padding: 0; }
+  .tg-evidence .know, .improve-scene .improve-label, .menu-toggle :is(.menu-label, .menu-on, .layers-icon) { display: none; }
   .tg-evidence .dots { flex-direction: column; gap: 2px; }
   .tg-evidence .dots i { width: 5px; height: 5px; }
   .menu-toggle { position: relative; }
