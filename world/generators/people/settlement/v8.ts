@@ -2726,6 +2726,98 @@ export function landUseMask(map: LandUseMap, size: number, half: number): Uint8A
   return data;
 }
 
+/**
+ * How much of the land in each of the 5′ cells around a scene was worked, as its spec's far cells give it (ScenePeople,
+ * far): the shares of a cell in crops, in pasture, and in crops flooded as paddies. It is what the settlements of the cell
+ * would lay out if the scene reached it, on the average and with none of them placed: each the fields of its pattern
+ * (PatternParams.fields) where the cell has a settlement, and the houses' own ground. Drawn beyond the scene's own
+ * settlements and across a band at their edge, so that the worked land does not stop where the scene does. Cities are
+ * left out: they are few, and drawn where the scene reaches them.
+ */
+export interface FarLand {
+  north: number;
+  west: number;
+  nx: number;
+  ny: number;
+  res: number;
+  crop: Float32Array;
+  pasture: Float32Array;
+  paddy: Float32Array;
+}
+
+export function farLand(spec: SceneSpec): FarLand | undefined {
+  const P = spec.people;
+  const g = P?.far;
+  if (!P || !g) return undefined;
+  const p = P.generator.params as unknown as SettlementParams;
+  const assessed = new Map(g.assessments.map((x) => [x.id, x.assessment]));
+  const n = g.nx * g.ny;
+  const out: FarLand = { north: g.north, west: g.west, nx: g.nx, ny: g.ny, res: g.res, crop: new Float32Array(n), pasture: new Float32Array(n), paddy: new Float32Array(n) };
+  const side = g.res * EARTH * DEG;
+  for (let row = 0; row < g.ny; row++) {
+    const north = g.north - row * g.res;
+    const m2 = side * side * dcos(((north - g.res / 2) * PI) / 180);
+    for (let col = 0; col < g.nx; col++) {
+      const i = row * g.nx + col;
+      const k = g.anthrome[i];
+      const d = g.density[i];
+      if (!k || d <= 0) continue;
+      const life = lifewayOf(P.classes, k, d, assessed.get(g.region[i]));
+      if (life.pattern === 'none' || life.fields === 'none' || life.pattern === 'city') continue;
+      const pp = p.patterns[life.pattern];
+      // A settlement's houses, by their middle on the scale its range is drawn on (`within`), and how many settlements the
+      // cell's people make: the cell has one at least as often as it has a share of one.
+      const per = Math.sqrt(pp.houses[0] * pp.houses[1]);
+      const houses = (d * m2 * 1e-6) / p.household;
+      const settlements = houses / per;
+      const share = Math.min(1, Math.min(1, settlements) * pp.fields + (houses * pp.lot) / m2);
+      if (life.fields === 'pasture') out.pasture[i] = share;
+      else {
+        // Shifting cultivators have only some of their plots cleared at a time (LandUseMap).
+        out.crop[i] = life.fields === 'swidden' ? share * 0.4 : share;
+        out.paddy[i] = life.fields === 'rice' ? out.crop[i] * 0.6 : life.fields === 'irrigated' ? out.crop[i] * 0.25 : 0;
+      }
+    }
+  }
+  return out;
+}
+
+/**
+ * The far land as an image about the scene's middle, `half` metres each way: R crops, G pasture, A paddies, as shares of the
+ * ground, read between the cells' middles so that no cell's edge shows. `scale` is how far the shares of this scene's own
+ * settlements are from what the cells say of them, which the far land is made to agree with (SceneStream, farFields).
+ */
+export function farLandMask(far: FarLand, origin: { lat: number; lon: number }, size: number, half: number, scale = 1): Uint8Array {
+  const data = new Uint8Array(size * size * 4);
+  const step = (half * 2) / size;
+  const at = (a: Float32Array, r: number, c: number) => (r < 0 || c < 0 || r >= far.ny || c >= far.nx ? 0 : a[r * far.nx + c]);
+  const read = (a: Float32Array, u: number, v: number) => {
+    const r = Math.floor(v);
+    const c = Math.floor(u);
+    const fr = v - r;
+    const fc = u - c;
+    return (at(a, r, c) * (1 - fc) + at(a, r, c + 1) * fc) * (1 - fr) + (at(a, r + 1, c) * (1 - fc) + at(a, r + 1, c + 1) * fc) * fr;
+  };
+  const cosLat = dcos(origin.lat * DEG);
+  for (let j = 0; j < size; j++) {
+    const lat = origin.lat + (-half + (j + 0.5) * step) / (EARTH * DEG);
+    // The cells' rows from the north, between their middles.
+    const v = (far.north - lat) / far.res - 0.5;
+    for (let i = 0; i < size; i++) {
+      const lon = origin.lon + (-half + (i + 0.5) * step) / (EARTH * DEG * cosLat);
+      let dl = lon - far.west;
+      dl -= 360 * Math.floor(dl / 360);
+      const u = dl / far.res - 0.5;
+      const o = (j * size + i) * 4;
+      const crop = clamp01(read(far.crop, u, v) * scale);
+      data[o] = Math.round(crop * 255);
+      data[o + 1] = Math.round(clamp01(read(far.pasture, u, v) * scale) * 255);
+      data[o + 3] = Math.round(clamp01(read(far.paddy, u, v) * scale) * 255);
+    }
+  }
+  return data;
+}
+
 /** The anthrome classes a plan draws on, for a panel: its own name for what is there. */
 export function anthromeLabel(spec: SceneSpec, k: number): string | undefined {
   return spec.people ? anthromeOf(spec.people.classes, k)?.label : undefined;

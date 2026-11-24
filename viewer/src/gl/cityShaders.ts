@@ -2055,6 +2055,10 @@ uniform vec4 uMaskBox;
 uniform highp sampler2D uFields;
 uniform vec4 uFieldsBox;
 uniform vec4 uFieldStyle;
+// How much of the land was worked beyond the plan's own map, coarsely (settlement/v8.ts, farLand): R crops, G pasture,
+// A paddies, as shares of the ground, over a box of the scene's metres; a box of no size where there is none.
+uniform highp sampler2D uFarFields;
+uniform vec4 uFarBox;
 // The scene's seasonal 8-slot crop palette (core/plots.ts, FieldPalette): rgb tones, cumulative shares, states, row spacing.
 uniform vec4 uSlotColor[8];
 uniform vec4 uSlotColor2[8];
@@ -2293,12 +2297,52 @@ vec3 plots(vec3 wild, vec3 p, vec3 n, float dist, float paddy, out float tilled,
   tilled *= 1.0 - wet * smoothstep(0.5, 0.9, wet);
   return c;
 }
+// The land worked beyond the plan's own map, from the far cells' shares: crops and pasture in patches of a kilometre or
+// two with ragged edges, as much of the ground as the shares say, and from far enough off only their tone. No
+// settlement stands behind any patch: where they lie is the renderer's, and how much there is the cells'. R crops,
+// G pasture, B none, A paddies, as the plan's map has them.
+vec4 farFieldsAt(vec3 p, float dist) {
+  if (uFarBox.z <= 0.0) return vec4(0.0);
+  vec2 uv = (p.xy - uFarBox.xy) / uFarBox.zw;
+  vec2 e = min(uv, 1.0 - uv);
+  float inBox = smoothstep(0.0, 0.06, min(e.x, e.y));
+  if (inBox <= 0.0) return vec4(0.0);
+  vec4 s = texture(uFarFields, uv);
+  // Read flat, from one level, so that the patches do not climb the hills' contours; and warped, so that they are no blobs.
+  vec3 q = vec3(p.xy, 0.0);
+  q.xy += (vec2(noiseM(q, 1300.0), noiseM(q + 311.0, 1300.0)) - 0.5) * 2600.0;
+  float n = fbmM(q, 760.0) * 0.82 + noiseM(q + 57.0, 170.0) * 0.18;
+  // Spread toward even, so that a share of the ground below a value is about that value.
+  float u = smoothstep(0.32, 0.68, n);
+  float soft = 0.04 + 0.1 * smoothstep(8000.0, 60000.0, dist);
+  float crop = 1.0 - smoothstep(s.r - soft, s.r + soft, u);
+  float pasture = (1.0 - smoothstep(s.r + s.g - soft, s.r + s.g + soft, u)) * (1.0 - crop);
+  // From high up, how much is worked, and no patches.
+  float melt = smoothstep(30000.0, 120000.0, dist);
+  crop = mix(crop, s.r, melt);
+  pasture = mix(pasture, s.g, melt);
+  float paddy = crop * clamp(s.a / max(s.r, 0.004), 0.0, 1.0);
+  return vec4(crop, pasture, 0.0, paddy) * inBox;
+}
+// What people made of the ground at a point: R crops, G pasture, B yards and lanes, A flooded paddies. Within the plan's
+// map, the map; beyond it, the far land; and across a band inside its edge, the one giving way to the other along a line
+// that wanders, so that the scene's square never shows.
+const float FIELDS_BAND = 3200.0;
+vec4 fieldsAt(vec3 p, float dist) {
+  vec2 fuv = (p.xy - uFieldsBox.xy) / uFieldsBox.zw;
+  vec2 e = min(fuv, 1.0 - fuv) * uFieldsBox.zw;
+  float inward = min(e.x, e.y);
+  vec4 near = inward > 0.0 ? texture(uFields, fuv) : vec4(0.0);
+  if (uFarBox.z <= 0.0) return near;
+  float t = inward / FIELDS_BAND + (fbmM(vec3(p.xy, 0.0) + 91.0, 700.0) - 0.5) * 2.0;
+  float w = inward > 0.0 ? 1.0 - smoothstep(0.3, 0.7, t) : 1.0;
+  if (w <= 0.0) return near;
+  return mix(near, farFieldsAt(p, dist), w);
+}
 // How much of the ground at a point people made: fields, pasture and yards, all generated.
 float peopledShare(vec3 p) {
   if (uFieldStyle.w < 0.5) return 0.0;
-  vec2 fuv = (p.xy - uFieldsBox.xy) / uFieldsBox.zw;
-  if (fuv.x <= 0.0 || fuv.y <= 0.0 || fuv.x >= 1.0 || fuv.y >= 1.0) return 0.0;
-  vec4 f = texture(uFields, fuv);
+  vec4 f = fieldsAt(p, length(p - uEye));
   return max(f.r, max(f.g * 0.75, f.b));
 }
 vec3 peopled(vec3 c, vec3 p, vec3 n, float dist, out float yard, out float tilled, out float paddyWet, out float fieldBump) {
@@ -2307,9 +2351,8 @@ vec3 peopled(vec3 c, vec3 p, vec3 n, float dist, out float yard, out float tille
   paddyWet = 0.0;
   fieldBump = 0.0;
   if (uFieldStyle.w < 0.5) return c;
-  vec2 fuv = (p.xy - uFieldsBox.xy) / uFieldsBox.zw;
-  if (fuv.x <= 0.0 || fuv.y <= 0.0 || fuv.x >= 1.0 || fuv.y >= 1.0) return c;
-  vec4 f = texture(uFields, fuv);
+  vec4 f = fieldsAt(p, dist);
+  if (f.r + f.g + f.b <= 0.0) return c;
   // Pasture: the place's own low plants, grazed short and worn toward its bare ground, the more so the barer its climate
   // leaves it: green where the climate is green, and in a desert hardly to be told from the ground around it.
   vec3 herbTone = mix(uTone[2], uTone[3], noiseM(p, 30.0));

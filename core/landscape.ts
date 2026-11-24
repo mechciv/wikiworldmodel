@@ -539,6 +539,12 @@ export interface LandscapeData {
   reach_km: number;
 }
 
+/**
+ * How far around a place, in degrees of latitude, a scene is told how its land was used, coarsely, beyond the reach of
+ * its own settlements: far enough that from the highest a scene is looked at, the worked land runs on past what is seen.
+ */
+export const FAR_REACH_DEG = 1;
+
 /** The tiles a scene of a place reads: the keys of those under its reach. */
 export function sceneTiles(d: Pick<LandscapeData, 'tileDeg' | 'reach_deg'>, lat: number, lon: number): string[] {
   const out = new Set<string>();
@@ -568,17 +574,6 @@ export function scenePeople(d: LandscapeData, lat: number, lon: number, t: numbe
   const gr = Math.floor((90 - lat) / res);
   const gc = Math.floor((lon + 180) / res);
   if (!classAt(gr, gc).k) return undefined;
-  const span = Math.ceil(d.reach_deg / res);
-  const spanLon = Math.ceil(d.reach_deg / Math.max(0.1, Math.cos((lat * Math.PI) / 180)) / res);
-  const r0 = Math.max(0, gr - span);
-  const r1 = Math.min(180 * per - 1, gr + span);
-  const c0 = gc - spanLon;
-  const c1 = gc + spanLon;
-  const nx = c1 - c0 + 1;
-  const ny = r1 - r0 + 1;
-  const anthrome: number[] = [];
-  const density: number[] = [];
-  const region: number[] = [];
   // Each 1° cell's people, shared over its 5′ cells by their classes, once per 1° cell.
   const shared = new Map<string, number[]>();
   const shareOf = (R: number, C: number): number[] => {
@@ -597,16 +592,30 @@ export function scenePeople(d: LandscapeData, lat: number, lon: number, t: numbe
     shared.set(key, s);
     return s;
   };
-  for (let r = r0; r <= r1; r++) {
-    for (let c = c0; c <= c1; c++) {
-      const { k, region: g } = classAt(r, c);
-      anthrome.push(k);
-      region.push(g);
-      const R = Math.floor(r / per);
-      const C = Math.floor(c / per);
-      density.push(k ? Math.round(shareOf(R, C)[(r - R * per) * per + (c - C * per)] * 1000) / 1000 : 0);
+  // The 5′ cells within a reach of the place, in degrees of latitude, rows from the north.
+  const cellsWithin = (reach: number) => {
+    const span = Math.ceil(reach / res);
+    const spanLon = Math.ceil(reach / Math.max(0.1, Math.cos((lat * Math.PI) / 180)) / res);
+    const r0 = Math.max(0, gr - span);
+    const r1 = Math.min(180 * per - 1, gr + span);
+    const c0 = gc - spanLon;
+    const c1 = gc + spanLon;
+    const anthrome: number[] = [];
+    const density: number[] = [];
+    const region: number[] = [];
+    for (let r = r0; r <= r1; r++) {
+      for (let c = c0; c <= c1; c++) {
+        const { k, region: g } = classAt(r, c);
+        anthrome.push(k);
+        region.push(g);
+        const R = Math.floor(r / per);
+        const C = Math.floor(c / per);
+        density.push(k ? Math.round(shareOf(R, C)[(r - R * per) * per + (c - C * per)] * 1000) / 1000 : 0);
+      }
     }
-  }
+    return { r0, c0, nx: c1 - c0 + 1, ny: r1 - r0 + 1, anthrome, density, region };
+  };
+  const { r0, c0, nx, anthrome, density, region, ny } = cellsWithin(d.reach_deg);
   const ids = [...new Set(region.filter((x) => x > 0))].sort((a, b) => a - b);
   const regions = ids.flatMap((id) => {
     const at = assessmentAt(d.assessments, id, t);
@@ -614,6 +623,23 @@ export function scenePeople(d: LandscapeData, lat: number, lon: number, t: numbe
     return at ? [{ id, label, slice: d.assessments.slices[at.slice].label, assessment: at.a }] : [];
   });
   const centre = (gr - r0) * nx + (gc - c0);
+  // The same cells further out, for how much of the land beyond the scene's own was worked (gen:people/settlement, farLand).
+  const wide = cellsWithin(Math.max(d.reach_deg, FAR_REACH_DEG));
+  const farIds = [...new Set(wide.region.filter((x) => x > 0))].sort((a, b) => a - b);
+  const far: NonNullable<ScenePeople['far']> = {
+    north: 90 - wide.r0 * res,
+    west: -180 + wide.c0 * res,
+    nx: wide.nx,
+    ny: wide.ny,
+    res,
+    anthrome: wide.anthrome,
+    density: wide.density,
+    region: wide.region,
+    assessments: farIds.flatMap((id) => {
+      const at = assessmentAt(d.assessments, id, t);
+      return at ? [{ id, assessment: at.a }] : [];
+    }),
+  };
   const lifeway = lifewayOf(d.classes, anthrome[centre], density[centre], regions.find((x) => x.id === region[centre])?.assessment);
   const cities = citiesAround(d.cities, lat, lon, t, d.reach_km, cityGuess(d.generator.params)).map(({ km: _km, also, ...c }) => ({ ...c, ...(also.length ? { also } : {}) }));
   const traditions = d.traditions.filter((x) => t >= x.span[0] && t <= x.span[1] && x.regions.some((g) => ids.includes(g)));
@@ -627,6 +653,7 @@ export function scenePeople(d: LandscapeData, lat: number, lon: number, t: numbe
     t,
     step: d.steps[step],
     grid: { north: 90 - r0 * res, west: -180 + c0 * res, nx, ny, res, anthrome, density, region },
+    far,
     classes: d.classes,
     regions,
     lifeway,

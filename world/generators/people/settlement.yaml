@@ -50,6 +50,8 @@ checks:
   - { test: world/generators/people/settlement/v8.test.ts, holds: "holds as many people as the world puts in the land it draws" }
   - { test: world/generators/people/settlement/v8.test.ts, holds: "stands no house in the water or on a cliff" }
   - { test: world/generators/people/settlement/v8.test.ts, holds: "draws fields where people farmed, pasture where they herded, and neither for foragers" }
+  - { test: world/generators/people/settlement/v8.test.ts, holds: "works as much of a cell as its settlements would, on the average" }
+  - { test: world/generators/people/settlement/v8.test.ts, holds: "works fields where people farmed, pasture where they herded, and nothing for foragers" }
   - { test: world/generators/people/settlement/v8.test.ts, holds: "draws a tradition's house where it holds, and the generic one where none does" }
   - { test: world/generators/people/settlement/v8.test.ts, holds: "draws a camp's shelter from the tradition that housed its way of life, and no farmer's house from a herder's tent" }
   - { test: world/generators/people/settlement/v8.test.ts, holds: "draws shifting cultivators in the house of their region's farmers where none is written for them, and says it stands in" }
@@ -107,6 +109,12 @@ limits:
       A class is a band of density, and the people of a 1° cell are shared over its 5′ cells by the middle of each band, so a
       5′ cell's people can be out by the factor its band spans; only the 1° total holds. Houses past the most a scene draws
       stand for more people each, and the panel says how many.
+  - with: field:people/anthromes
+    note: >-
+      Beyond the settlements a scene lays out, and across a band at their edge, the land is drawn worked as much as each
+      5′ cell's settlements would work it on the average (farLand), scaled to agree with what the scene's own settlements
+      work, a degree of latitude each way. No settlement stands behind it: where its fields lie, in patches of a kilometre
+      or two, is the renderer's, and they follow neither the ground nor the water. Cities are left out of it.
   - with: field:people/cities
     note: >-
       A city of the lists is drawn as houses on the lots of streets, around the list's point: on a grid or along lanes,

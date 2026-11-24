@@ -12,7 +12,7 @@ import { houseSize, HOUSE_VARIANTS } from '../dwellings.ts';
 import { ROUTE, roundOf, wayAt, type RoutineParams } from '../../life/routines.ts';
 import { personGoes } from '../figures.ts';
 import { WORK_VARIANTS } from '../works.ts';
-import { LandUseMap, makeSettlement, toLocal, type Ground } from './v8.ts';
+import { farLand, farLandMask, LandUseMap, makeSettlement, toLocal, type Ground } from './v8.ts';
 
 const ROOT = join(import.meta.dirname, '../../../..');
 // How the living scene's animals go about: the settlement's kept ones go by the same parameters.
@@ -893,6 +893,68 @@ describe('how a tradition sets its houses out', () => {
     expect(form.grow).toBeGreaterThan(1);
     expect(houseSize(form.spec, 0, form.grow).w).toBeCloseTo(houseSize(form.spec, 0).w * form.grow!, 6);
     expect(plan.houses.filter((h) => h.settlement === city).every((h) => h.size === 1)).toBe(true);
+  });
+});
+
+describe('the land worked beyond the scene', () => {
+  /** A world whose far cells are its own cells, told of as the scene's spec tells of them (ScenePeople, far). */
+  const farWorld = (code: number, density: number, a: Assessment) => {
+    const p = world(() => ({ code, density, region: 1 }), [{ id: 1, a }]);
+    return { ...p, far: { ...p.grid, assessments: [{ id: 1, assessment: a }] } };
+  };
+
+  it('works as much of a cell as its settlements would, on the average', () => {
+    for (const [code, density] of [[32, 40], [23, 260], [31, 120]] as [number, number][]) {
+      const p = farWorld(code, density, assess(1, 1, 3, 2));
+      const far = farLand(spec(p))!;
+      const plan = makeSettlement(spec(p), flat, dry, EXTENT);
+      const use = new LandUseMap(plan, flat, dry, 7);
+      // What the plan lays out over the middle of the scene, where every settlement whose fields reach it is drawn.
+      let made = 0;
+      let n = 0;
+      for (let x = -9000; x <= 9000; x += 150) for (let y = -9000; y <= 9000; y += 150) {
+        made += use.at(x, y).crop;
+        n++;
+      }
+      const said = far.crop[12 * far.nx + 12];
+      expect(said, `class ${code}`).toBeGreaterThan(0);
+      // Where no tradition changes the settlements, the estimate is the plan's to a fifth; SceneStream.farFields scales
+      // it to the plan's of the scene where one does.
+      expect(made / n / said, `class ${code} at ${density} to the km²`).toBeGreaterThan(0.8);
+      expect(made / n / said, `class ${code} at ${density} to the km²`).toBeLessThan(1.25);
+    }
+  });
+
+  it('works fields where people farmed, pasture where they herded, and nothing for foragers', () => {
+    const farmers = farLand(spec(farWorld(23, 260, assess(1, 1, 3, 2))))!;
+    expect(Math.max(...farmers.crop)).toBeGreaterThan(0.2);
+    expect(Math.max(...farmers.pasture)).toBe(0);
+    const herders = farLand(spec(farWorld(42, 3, assess(1, 0, 0, 3))))!;
+    expect(Math.max(...herders.pasture)).toBeGreaterThan(0);
+    expect(Math.max(...herders.crop)).toBe(0);
+    const foragers = farLand(spec(farWorld(53, 0.5, assess(3, 0, 0, 0))))!;
+    expect(Math.max(...foragers.crop, ...foragers.pasture)).toBe(0);
+    // Without far cells in its spec, a scene is told of nothing beyond its own.
+    expect(farLand(spec(world(() => ({ code: 23, density: 260, region: 1 }), [{ id: 1, a: assess(1, 1, 3, 2) }])))).toBeUndefined();
+  });
+
+  it('draws the far land with no step at a cell\'s edge, and none beyond the cells it is told of', () => {
+    // Every other column of cells farmed, so that a step at their edges would show.
+    const a = assess(1, 1, 3, 2);
+    const p = world((_r, c) => ({ code: c % 2 ? 23 : 62, density: c % 2 ? 260 : 0, region: 1 }), [{ id: 1, a }]);
+    const far = farLand(spec({ ...p, far: { ...p.grid, assessments: [{ id: 1, assessment: a }] } }))!;
+    const size = 256;
+    const half = 150000;
+    const mask = farLandMask(far, { lat: 0, lon: 0 }, size, half);
+    const crop = (i: number, j: number) => mask[(j * size + i) * 4];
+    let most = 0;
+    for (let i = 1; i < size; i++) most = Math.max(most, Math.abs(crop(i, size / 2) - crop(i - 1, size / 2)));
+    // A texel is about 1.2 km, a cell about 9 km: read between the cells' middles, no neighbours differ by a quarter.
+    expect(Math.max(...Array.from({ length: size }, (_, i) => crop(i, size / 2)))).toBeGreaterThan(100);
+    expect(most).toBeLessThan(64);
+    // The cells reach a degree each way, about 111 km: past them, nothing is worked.
+    expect(crop(2, size / 2)).toBe(0);
+    expect(crop(size / 2, size - 2)).toBe(0);
   });
 });
 

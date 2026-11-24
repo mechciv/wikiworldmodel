@@ -26,7 +26,7 @@ export type { CityFrame, InstancedBatch, InstancedMeta, LocalRenderer, MeshHandl
 export const SHARE_STEPS = 32;
 
 /** Texture units, the same for every program; 12 to 16 are the passes' own, for their targets. */
-const UNIT = { noise: 0, sky: 1, shadow: 2, ao: 3, entities: 4, ground: 5, normal: 8, mask: 11, fields: 17, waterMap: 18, scene: 19, sceneDepth: 20, matColour: 21, matNormal: 22, leaves: 23, litter: 24 } as const;
+const UNIT = { noise: 0, sky: 1, shadow: 2, ao: 3, entities: 4, ground: 5, normal: 8, mask: 11, fields: 17, waterMap: 18, scene: 19, sceneDepth: 20, matColour: 21, matNormal: 22, leaves: 23, litter: 24, farFields: 25 } as const;
 
 /**
  * The leaves that lie fallen under trees, for the shader: the atlas's tile of the litter a kind of leaf falls as, and
@@ -349,6 +349,9 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
   /** What people made of the ground, where a scene has people: R crops, G pasture, B yards, A paddies; and how its plots are drawn */
   private fields: WebGLTexture;
   private fieldsBox: [number, number, number, number] = [0, 0, 1, 1];
+  /** How much of the land was worked beyond the plan's own map, coarsely (settlement/v8.ts, farLand): R crops, G pasture, A paddies */
+  private farFields: WebGLTexture;
+  private farBox: [number, number, number, number] = [0, 0, 0, 0];
   private fieldStyle: [number, number, number, number] = [0, 1, 0, 0];
   private slotColor: Float32Array = DEFAULT_FIELD_PALETTE.slotColor;
   private slotColor2: Float32Array = DEFAULT_FIELD_PALETTE.slotColor2;
@@ -641,6 +644,8 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     this.mask = texture2D(gl, { width: 1, height: 1, internal: gl.RGBA8, format: gl.RGBA, type: gl.UNSIGNED_BYTE, data: new Uint8Array([0, 0, 0, 0]), filter: gl.LINEAR });
     gl.activeTexture(gl.TEXTURE0 + UNIT.fields);
     this.fields = texture2D(gl, { width: 1, height: 1, internal: gl.RGBA8, format: gl.RGBA, type: gl.UNSIGNED_BYTE, data: new Uint8Array([0, 0, 0, 0]), filter: gl.LINEAR });
+    gl.activeTexture(gl.TEXTURE0 + UNIT.farFields);
+    this.farFields = texture2D(gl, { width: 1, height: 1, internal: gl.RGBA8, format: gl.RGBA, type: gl.UNSIGNED_BYTE, data: new Uint8Array([0, 0, 0, 0]), filter: gl.LINEAR });
     // The water's map: in floats, as a level needs, with a dry bed's mark beside it; filtered where the browser can filter floats. The fast way has none.
     if (!this.fast) {
       gl.activeTexture(gl.TEXTURE0 + UNIT.waterMap);
@@ -735,7 +740,7 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
       }
     };
     const lit = { uNoise: UNIT.noise, uSkyLut: UNIT.sky, uShadow: UNIT.shadow, uAO: UNIT.ao, uEntities: UNIT.entities };
-    const ground = { uGround0: UNIT.ground, uGround1: UNIT.ground + 1, uGround2: UNIT.ground + 2, uNormal0: UNIT.normal, uNormal1: UNIT.normal + 1, uNormal2: UNIT.normal + 2, uMask: UNIT.mask, uFields: UNIT.fields };
+    const ground = { uGround0: UNIT.ground, uGround1: UNIT.ground + 1, uGround2: UNIT.ground + 2, uNormal0: UNIT.normal, uNormal1: UNIT.normal + 1, uNormal2: UNIT.normal + 2, uMask: UNIT.mask, uFields: UNIT.fields, uFarFields: UNIT.farFields };
     ints(this.meshP, { ...lit, uMask: UNIT.mask, uLeaves: UNIT.leaves, uMatColour: UNIT.matColour, uMatNormal: UNIT.matNormal });
     ints(this.depthP, { uEntities: UNIT.entities, uLeaves: UNIT.leaves });
     ints(this.idP, { uEntities: UNIT.entities, uLeaves: UNIT.leaves });
@@ -804,6 +809,8 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     this.cloudValid = false;
     this.lastFarVp = null;
     this.meshSerial++;
+    // Nor is any land beyond it worked until its scene says so.
+    this.farBox = [0, 0, 0, 0];
     // A new ground is the climate's until its scene says what it is made of, and its rock the renderer's own.
     this.setSubstrate(null);
     this.setRock(null);
@@ -1131,6 +1138,27 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     this.slotColor = pal.slotColor;
     this.slotColor2 = pal.slotColor2;
     this.slotMeta = pal.slotMeta;
+  }
+
+  /**
+   * How much of the land was worked beyond the plan's own map, coarsely, as shares (settlement/v8.ts, farLand): R crops,
+   * G pasture, A paddies, over a box in the scene's metres. The ground lays it out in patches beyond the plan's map and
+   * across a band at its edge, so that the fields do not stop where the plan does. Without it, the fields stop there.
+   */
+  setFarFields(data: Uint8Array | null, size: number, box: [number, number, number, number]): void {
+    const gl = this.gl;
+    gl.activeTexture(gl.TEXTURE0 + UNIT.farFields);
+    gl.bindTexture(gl.TEXTURE_2D, this.farFields);
+    gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+    if (data) {
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, size, size, 0, gl.RGBA, gl.UNSIGNED_BYTE, data);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    } else gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(4));
+    gl.activeTexture(gl.TEXTURE0);
+    this.farBox = data ? box : [0, 0, 0, 0];
   }
 
   /** Upload hearth & kiln smoke plume emitters: 5 floats each [x, y, z, strength, seed]. */
@@ -1621,6 +1649,8 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     if (snow) gl.uniform3fv(snow, this.snow);
     const fb = p.uniforms.get('uFieldsBox');
     if (fb) gl.uniform4f(fb, this.fieldsBox[0], this.fieldsBox[1], this.fieldsBox[2] - this.fieldsBox[0], this.fieldsBox[3] - this.fieldsBox[1]);
+    const far = p.uniforms.get('uFarBox');
+    if (far) gl.uniform4f(far, this.farBox[0], this.farBox[1], this.farBox[2] - this.farBox[0], this.farBox[3] - this.farBox[1]);
     const fs = p.uniforms.get('uFieldStyle');
     if (fs) gl.uniform4fv(fs, this.fieldStyle);
     const sc = p.uniforms.get('uSlotColor');
@@ -1889,6 +1919,8 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     gl.bindTexture(gl.TEXTURE_2D, this.mask);
     gl.activeTexture(gl.TEXTURE0 + UNIT.fields);
     gl.bindTexture(gl.TEXTURE_2D, this.fields);
+    gl.activeTexture(gl.TEXTURE0 + UNIT.farFields);
+    gl.bindTexture(gl.TEXTURE_2D, this.farFields);
     gl.activeTexture(gl.TEXTURE0 + UNIT.leaves);
     gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.leaves);
     this.bindLitter();
