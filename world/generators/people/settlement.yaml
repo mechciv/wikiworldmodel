@@ -54,7 +54,7 @@ checks:
   - { test: world/generators/people/settlement/v9.test.ts, holds: "draws fields where people farmed, pasture where they herded, and neither for foragers" }
   - { test: world/generators/people/settlement/v9.test.ts, holds: "works as much of a cell as its settlements would, on the average" }
   - { test: world/generators/people/settlement/v9.test.ts, holds: "works fields where people farmed, pasture where they herded, and nothing for foragers, and builds where towns stood" }
-  - { test: world/generators/people/settlement/v9.test.ts, holds: "scales the far land to the plan's by its own settlements, and not by a city's fields" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "scales the far land to the plan's by its own settlements, and not by a city's fields, on the mean of scenes about it" }
   - { test: world/generators/people/settlement/v9.test.ts, holds: "draws the far land with no step at a cell's edge, and none beyond the cells it is told of" }
   - { test: world/generators/people/settlement/v9.test.ts, holds: "draws a tradition's house where it holds, and the generic one where none does" }
   - { test: world/generators/people/settlement/v9.test.ts, holds: "draws a camp's shelter from the tradition that housed its way of life, and no farmer's house from a herder's tent" }
@@ -67,6 +67,7 @@ checks:
   - { test: world/generators/people/settlement/v9.test.ts, holds: "puts a settlement in the same place from two scenes that overlap" }
   - { test: world/generators/people/settlement/v9.test.ts, holds: "stands its settlements near water and on level ground, more than the land there would" }
   - { test: world/generators/people/settlement/v9.test.ts, holds: "takes the record's siting and growth where a build has none" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "keeps two settlements' grounds apart where a cell has little room for them" }
   - { test: world/generators/people/settlement/v9.test.ts, holds: "grows the fields of a house that stands where nothing is farmed from the land about it" }
   - { test: world/generators/people/settlement/v9.test.ts, holds: "puts a settlement in the same place from two overlapping scenes of a plain with a river and hills" }
   - { test: world/generators/people/settlement/v9.test.ts, holds: "draws its settlements in many sizes within their range, the larger on the better ground" }
@@ -114,6 +115,8 @@ limits:
       does the sea's coast, which people who fished settled by. The scene draws its rivers to 34 km from its middle: the
       ring of cells weighed past that, only so that those near the scene's edge are placed as a scene centred on them
       would place them, is weighed as if it had no water near.
+      A cell whose ground has no room for all its settlements' houses, as a narrow valley between steep slopes may not,
+      leaves its last and smallest settlements out: their people are not drawn.
   - with: gen:life/scene
     note: >-
       The ground and the water a settlement is weighed by are the scene's, and two scenes that overlap draw them a little

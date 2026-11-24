@@ -683,6 +683,22 @@ describe('where settlements stand, and what they farm (sites.ts)', () => {
     expect(farmed * g.cell * g.cell).toBeGreaterThan(0.8 * 200000);
   });
 
+  it("keeps two settlements' grounds apart where a cell has little room for them", () => {
+    // Crowded farmland on a strip 800 m wide between slopes too steep for a house: the cells reach their fallbacks, and
+    // run out of room. The ground a settlement's houses take, a disc as large as their lots, keeps its gap from every
+    // other's, and a cell with no room left leaves its last settlements out.
+    const strip: Ground = { at: (x) => (Math.abs(x) < 400 ? 40 : 40 + (Math.abs(x) - 400)) };
+    const dense = world(() => ({ code: 23, density: 260, region: 1 }), [{ id: 1, a: assess(1, 1, 3, 2) }]);
+    const cramped = makeSettlement(spec(dense), strip, dry, 6000);
+    const s = cramped.settlements.filter((x) => !x.city);
+    expect(s.length).toBeGreaterThan(20);
+    const P = gen.params as { household: number; site: { above_water: number }; siting: { gap: number }; patterns: Record<string, { lot: number }> };
+    const ground = (x: (typeof s)[number]) => Math.sqrt(((x.people / P.household) * P.patterns[x.pattern].lot) / Math.PI);
+    let worst = Infinity;
+    for (let i = 0; i < s.length; i++) for (let j = i + 1; j < s.length; j++) worst = Math.min(worst, Math.hypot(s[i].x - s[j].x, s[i].y - s[j].y) - ground(s[i]) - ground(s[j]));
+    expect(worst).toBeGreaterThan(P.siting.gap - 0.5);
+  });
+
   it("takes the record's siting and growth where a build has none", () => {
     expect(gen.params.siting).toEqual(SITING);
     expect(gen.params.growth).toEqual(GROWTH);
@@ -1061,7 +1077,7 @@ describe('the land worked beyond the scene', () => {
     }
   });
 
-  it("scales the far land to the plan's by its own settlements, and not by a city's fields", () => {
+  it("scales the far land to the plan's by its own settlements, and not by a city's fields, on the mean of scenes about it", () => {
     const a = assess(1, 1, 3, 2);
     const without = farWorld(32, 40, a);
     // A city in the middle of one of the cells the scene holds whole, whose fields take most of that cell and no other.

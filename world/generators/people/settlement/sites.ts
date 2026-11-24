@@ -239,6 +239,8 @@ export interface SiteCell {
   /** its settlements' sizes in houses, largest first; and how near two of them may stand, m */
   sizes: number[];
   spacing: number;
+  /** m² of ground one house takes: a settlement's houses spread over a disc as large as its houses' ground */
+  lot: number;
   /** how a place in it is weighed besides by the ground: its people to the km² near the place, over its own; about 1 */
   crowd: (x: number, y: number) => number;
 }
@@ -442,32 +444,55 @@ export function siteCells(cells: SiteCell[], worth: SiteWorth, p: SitingParams):
   }
   const out: [number, number][][] = cells.map(() => []);
   const chosen = new PointGrid(x0, y0, x1, y1, 256);
+  // How far each chosen settlement's houses spread: its size is the next of its cell's, as they are taken in turn.
+  const reach: number[] = [];
+  const choose = (x: number, y: number, ci: number) => {
+    const c = cells[ci];
+    reach[chosen.n] = Math.sqrt((c.sizes[out[ci].length] * c.lot) / Math.PI);
+    chosen.add(x, y, ci);
+    out[ci].push([x, y]);
+  };
   for (let i = 0; i < taken.n; i++) {
     const ci = taken.tag[i];
     if (out[ci].length >= cells[ci].sizes.length) continue;
-    out[ci].push([taken.xs[i], taken.ys[i]]);
-    chosen.add(taken.xs[i], taken.ys[i], ci);
+    choose(taken.xs[i], taken.ys[i], ci);
   }
+  // Whether a settlement of a cell's next size would keep its ground, a disc as large as its houses' lots, its gap from
+  // every other settlement's there. A layout may spread its houses a little past that disc (layOut), and no further check
+  // is made of it here.
+  let widest = 0;
+  for (const r of reach) widest = Math.max(widest, r);
+  const room = (c: Candidate): number => {
+    const cell = cells[c.cell];
+    const own = Math.sqrt((cell.sizes[out[c.cell].length] * cell.lot) / Math.PI);
+    const crowded = chosen.within(c.x, c.y, own + widest + p.gap, (i) => {
+      const d = own + reach[i] + p.gap;
+      return (chosen.xs[i] - c.x) ** 2 + (chosen.ys[i] - c.y) ** 2 < d * d;
+    });
+    return crowded ? -1 : own;
+  };
   // A cell whose ground had too few places for its settlements at its spacing takes more at half of it, from those passed
-  // over, and then any where a house may stand: its people lived somewhere in it.
+  // over, and then any where its houses keep their gap from every other settlement's. Where even those run out, the cell
+  // has no more room for houses, and its last settlements are not drawn.
   const short = (ci: number) => out[ci].length < cells[ci].sizes.length;
   if (cells.some((_, ci) => short(ci))) {
     const left: Candidate[] = [];
     for (const c of rest) {
       if (!short(c.cell)) continue;
-      if (blocked(chosen, c, 0.5)) {
+      const own = blocked(chosen, c, 0.5) ? -1 : room(c);
+      if (own < 0) {
         left.push(c);
         continue;
       }
-      chosen.add(c.x, c.y, c.cell);
-      out[c.cell].push([c.x, c.y]);
+      choose(c.x, c.y, c.cell);
+      widest = Math.max(widest, own);
     }
-    // Last, any place still free by the houses' own gap, so that no two settlements' houses stand in each other.
     for (const c of left) {
       if (!short(c.cell)) continue;
-      if (chosen.within(c.x, c.y, p.gap, (i) => (chosen.xs[i] - c.x) ** 2 + (chosen.ys[i] - c.y) ** 2 < p.gap * p.gap)) continue;
-      chosen.add(c.x, c.y, c.cell);
-      out[c.cell].push([c.x, c.y]);
+      const own = room(c);
+      if (own < 0) continue;
+      choose(c.x, c.y, c.cell);
+      widest = Math.max(widest, own);
     }
   }
   return out;

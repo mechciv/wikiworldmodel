@@ -794,7 +794,7 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
         }
         return Math.max(0.5, Math.min(2, (wsum > 0 ? sum / wsum : d) / d));
       };
-      cellsOf.push({ k, region, life: life as CellPeople['life'], gr, gc, seed, found, pp, household, area, houses, lot, out, site: { x0, x1, y0, y1, north, west, res: g.res, seed, sizes, spacing, crowd } });
+      cellsOf.push({ k, region, life: life as CellPeople['life'], gr, gc, seed, found, pp, household, area, houses, lot, out, site: { x0, x1, y0, y1, north, west, res: g.res, seed, sizes, spacing, lot, crowd } });
     }
   }
   const earth = earthOf(origin);
