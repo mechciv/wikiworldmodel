@@ -54,7 +54,7 @@ checks:
   - { test: world/generators/people/settlement/v9.test.ts, holds: "draws fields where people farmed, pasture where they herded, and neither for foragers" }
   - { test: world/generators/people/settlement/v9.test.ts, holds: "works as much of a cell as its settlements would, on the average" }
   - { test: world/generators/people/settlement/v9.test.ts, holds: "works fields where people farmed, pasture where they herded, and nothing for foragers, and builds where towns stood" }
-  - { test: world/generators/people/settlement/v9.test.ts, holds: "scales the far land to the plan's by its own settlements, and not by a city's fields, on the mean of scenes about it" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "scales the far land to the plan's by its own settlements, and not by a city's fields" }
   - { test: world/generators/people/settlement/v9.test.ts, holds: "draws the far land with no step at a cell's edge, and none beyond the cells it is told of" }
   - { test: world/generators/people/settlement/v9.test.ts, holds: "draws a tradition's house where it holds, and the generic one where none does" }
   - { test: world/generators/people/settlement/v9.test.ts, holds: "draws a camp's shelter from the tradition that housed its way of life, and no farmer's house from a herder's tent" }
@@ -129,11 +129,6 @@ limits:
       has no `siting` or `growth`, and takes the record's. A link into such a build finds its settlements and fields
       where version 9 puts them, not where that build first drew them. Whether to keep each version's placement for its
       own builds is a maintainer's decision, still open.
-  - with: field:people/anthromes
-    note: >-
-      The check that the far land's scale is not moved by a city's fields is statistical since version 9: one scene's
-      scale moves by about 6% of itself as a cell is left out, so it holds the mean of four scenes about a city within
-      5%, against about 10% for a city whose fields leak in, and each scene only within 12%.
   - with: gen:life/scene
     note: >-
       The ground and the water a settlement is weighed by are the scene's, and two scenes that overlap draw them a little

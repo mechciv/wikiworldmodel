@@ -2966,33 +2966,26 @@ export function farLand(spec: SceneSpec): FarLand | undefined {
 }
 
 /**
- * How far what a plan works is from what farLand says of the same cells: the plan's worked share over farLand's, in the
- * cells the plan holds whole (within `extent` metres of its middle each way, less `margin`, where all of their settlements
- * are laid out) and that no city's ground reaches, as farLand leaves the cities of the lists and of records out. 1 where no cell counts or nothing is
- * worked in them; at most 1.6 and at least 0.4 otherwise. The far land is scaled by it (farLandMask), so that the plan's
- * worked land and the far land agree on the average where they meet.
+ * The far cells farScale weighs, by their place in `far`: those the plan holds whole (within `extent` metres of its middle
+ * each way, less `margin`), less any a city's ground or fields reach. A city's fields grow over the land (sites.ts), past
+ * its field radius where the land leads them: the nodes they hold say where.
  */
-export function farScale(far: FarLand, plan: SettlementPlan, use: LandUseMap, origin: { lat: number; lon: number }, extent: number, margin = 600): number {
+export function farCellsWeighed(far: FarLand, plan: SettlementPlan, origin: { lat: number; lon: number }, extent: number, margin = 600): number[] {
   const cities = plan.settlements.filter((s) => s.city);
-  // A city's fields grow over the land (sites.ts) and may reach past its field radius: the nodes they hold say where.
   const f = plan.fields;
   const cityNodes: [number, number][] = [];
   const isCity = new Set(plan.settlements.flatMap((s, si) => (s.city ? [si] : [])));
   if (isCity.size) for (let k = 0; k < f.owner.length; k++) if (isCity.has(f.owner[k])) cityNodes.push([f.x0 + (k % f.nx) * f.cell, f.y0 + Math.floor(k / f.nx) * f.cell]);
-  const u: LandUse = { crop: 0, pasture: 0, yard: 0, paddy: 0 };
-  const N = 12;
   const inner = extent - margin;
-  let made = 0;
-  let said = 0;
+  const out: number[] = [];
   for (let row = 0; row < far.ny; row++) {
     for (let col = 0; col < far.nx; col++) {
-      const i = row * far.nx + col;
       const north = far.north - row * far.res;
       const west = far.west + col * far.res;
       const [x0, y1] = toLocal(origin, north, west);
       const [x1, y0] = toLocal(origin, north - far.res, west + far.res);
       if (x0 < -inner || x1 > inner || y0 < -inner || y1 > inner) continue;
-      // A city's fields reach as far as the larger of its ground and its fields.
+      // A city's ground reaches as far as the larger of its ground and its fields' radius; its fields, where they grew.
       const near = (c: Settlement) => {
         const r = Math.max(c.r, c.fieldR);
         const dx = Math.max(x0 - c.x, 0, c.x - x1);
@@ -3000,16 +2993,37 @@ export function farScale(far: FarLand, plan: SettlementPlan, use: LandUseMap, or
         return dx * dx + dy * dy < r * r;
       };
       if (cities.some(near) || cityNodes.some(([x, y]) => x >= x0 - f.cell && x <= x1 + f.cell && y >= y0 - f.cell && y <= y1 + f.cell)) continue;
-      let got = 0;
-      for (let a = 0; a < N; a++) {
-        for (let b = 0; b < N; b++) {
-          use.at(x0 + ((a + 0.5) / N) * (x1 - x0), y0 + ((b + 0.5) / N) * (y1 - y0), u);
-          got += u.crop + u.pasture;
-        }
-      }
-      made += got / (N * N);
-      said += far.crop[i] + far.pasture[i];
+      out.push(row * far.nx + col);
     }
+  }
+  return out;
+}
+
+/**
+ * How far what a plan works is from what farLand says of the same cells: the plan's worked share over farLand's, in the
+ * cells farCellsWeighed gives. 1 where no cell counts or nothing is worked in them; at most 1.6 and at least 0.4
+ * otherwise. The far land is scaled by it (farLandMask), so that the plan's worked land and the far land agree on the
+ * average where they meet.
+ */
+export function farScale(far: FarLand, plan: SettlementPlan, use: LandUseMap, origin: { lat: number; lon: number }, extent: number, margin = 600): number {
+  const u: LandUse = { crop: 0, pasture: 0, yard: 0, paddy: 0 };
+  const N = 12;
+  let made = 0;
+  let said = 0;
+  for (const i of farCellsWeighed(far, plan, origin, extent, margin)) {
+    const row = Math.floor(i / far.nx);
+    const col = i - row * far.nx;
+    const [x0, y1] = toLocal(origin, far.north - row * far.res, far.west + col * far.res);
+    const [x1, y0] = toLocal(origin, far.north - (row + 1) * far.res, far.west + (col + 1) * far.res);
+    let got = 0;
+    for (let a = 0; a < N; a++) {
+      for (let b = 0; b < N; b++) {
+        use.at(x0 + ((a + 0.5) / N) * (x1 - x0), y0 + ((b + 0.5) / N) * (y1 - y0), u);
+        got += u.crop + u.pasture;
+      }
+    }
+    made += got / (N * N);
+    said += far.crop[i] + far.pasture[i];
   }
   return said > 0.05 && made > 0 ? Math.max(0.4, Math.min(1.6, made / said)) : 1;
 }

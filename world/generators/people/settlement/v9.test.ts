@@ -12,7 +12,7 @@ import { houseSize, HOUSE_VARIANTS } from '../dwellings.ts';
 import { ROUTE, roundOf, wayAt, type RoutineParams } from '../../life/routines.ts';
 import { personGoes } from '../figures.ts';
 import { WORK_VARIANTS } from '../works.ts';
-import { farLand, farLandMask, farScale, LandUseMap, makeSettlement, peopleReach, toLocal, type Ground } from './v9.ts';
+import { farCellsWeighed, farLand, farLandMask, farScale, LandUseMap, makeSettlement, peopleReach, toLocal, type Ground } from './v9.ts';
 import { FIELD_USE, growFields, GROWTH, SITING, type WaterNear } from './sites.ts';
 
 const ROOT = join(import.meta.dirname, '../../../..');
@@ -1139,19 +1139,18 @@ describe('the land worked beyond the scene', () => {
     }
   });
 
-  it("scales the far land to the plan's by its own settlements, and not by a city's fields, on the mean of scenes about it", () => {
+  it("scales the far land to the plan's by its own settlements, and not by a city's fields", () => {
     const a = assess(1, 1, 3, 2);
     const without = farWorld(32, 40, a);
-    // A city in the middle of one of the cells the scene holds whole, whose fields take most of that cell and no other.
-    const cities = [{ name: 'Testopolis', country: 'Nowhere', lat: 0.042, lon: 0.042, people: 800000, field: 'field:people/cities-ancient', source: 'src:test', from: 'list' as const }];
+    // A city in the middle of one of the cells the scene holds whole, whose fields take that cell and some about it, and
+    // leave the scene some to weigh: since version 9 a city's fields grow over the land, and one of 800,000 took them all.
+    const cities = [{ name: 'Testopolis', country: 'Nowhere', lat: 0.042, lon: 0.042, people: 400000, field: 'field:people/cities-ancient', source: 'src:test', from: 'list' as const }];
     const withCity = { ...without, cities };
     const scaleOf = (p: ScenePeople, origin: { lat: number; lon: number }) => {
       const plan = makeSettlement(spec(p, origin), flat, dry, EXTENT);
       return { scale: farScale(farLand(spec(p, origin))!, plan, new LandUseMap(plan, flat, dry, 7), origin, EXTENT), plan };
     };
-    // Since version 9 a cell's settlements are not spread evenly over it (sites.ts), so leaving one cell out of the few a
-    // scene holds whole moves the scale a little of itself: the scales are averaged over scenes in a few places about the
-    // city, each holding it.
+    // Scenes in a few places about the city, each holding it.
     const origins = [{ lat: 0, lon: 0 }, { lat: 0.02, lon: -0.01 }, { lat: -0.015, lon: 0.02 }, { lat: 0.03, lon: 0.035 }];
     const plains = origins.map((o) => scaleOf(without, o));
     const cityScenes = origins.map((o) => scaleOf(withCity, o));
@@ -1162,15 +1161,27 @@ describe('the land worked beyond the scene', () => {
       expect(p.scale).toBeGreaterThan(0.8);
       expect(p.scale).toBeLessThan(1.25);
     }
-    // The cell the city's fields reach is left out, so the city moves the scale little. Counted, it would raise it by
-    // about a tenth (below).
-    expect(Math.abs(mean(cityScenes) - mean(plains)) / mean(plains)).toBeLessThan(0.05);
-    // Each scene within 12%: this only keeps one scene from going far astray. A leak moves each by about 10%, which it
-    // would let through; the mean's bound above is what tells a leak apart.
-    origins.forEach((_, k) => expect(Math.abs(cityScenes[k].scale - plains[k].scale) / plains[k].scale).toBeLessThan(0.12));
-    // And the mean's bound tells a leak apart: with the city not known as one, its ground and fields are counted, and the
-    // mean moves past it, by about a tenth when this was written. (Each scene moves about as much, within its own looser
-    // bound: that one only holds no one scene goes far astray.)
+    // The cells the city's fields reach are left out, so the city moves each scene's scale little, under a twentieth (it
+    // moved them by at most 3% when this was written). Counted, it would raise them by about a tenth (below).
+    origins.forEach((_, k) => expect(Math.abs(cityScenes[k].scale - plains[k].scale) / plains[k].scale).toBeLessThan(0.05));
+    // And the cause, held directly: in every scene, no cell weighed holds a node of the city's fields or its ground.
+    origins.forEach((o, k) => {
+      const { plan } = cityScenes[k];
+      const far = farLand(spec(withCity, o))!;
+      const f = plan.fields;
+      const city = plan.settlements.findIndex((s) => s.city === 'Testopolis');
+      const weighed = new Set(farCellsWeighed(far, plan, o, EXTENT));
+      // The city leaves some of the scene's whole cells to weigh: else the scale is 1 whatever it does.
+      expect(weighed.size).toBeGreaterThan(0);
+      for (let n = 0; n < f.owner.length; n++) {
+        if (f.owner[n] !== city) continue;
+        const [lat, lon] = [o.lat + (f.y0 + Math.floor(n / f.nx) * f.cell) / 111194.93, o.lon + (f.x0 + (n % f.nx) * f.cell) / (111194.93 * Math.cos((o.lat * Math.PI) / 180))];
+        const cell = Math.floor((far.north - lat) / far.res) * far.nx + Math.floor((lon - far.west) / far.res);
+        expect(weighed.has(cell)).toBe(false);
+      }
+    });
+    // And the bound tells a leak apart: with the city not known as one, its ground and fields are counted, and the scales
+    // move past it, on the mean by about a tenth when this was written.
     const leaked = origins.map((o, k) => {
       const plan = { ...cityScenes[k].plan, settlements: cityScenes[k].plan.settlements.map((s) => ({ ...s, city: undefined })) };
       return { scale: farScale(farLand(spec(withCity, o))!, plan, new LandUseMap(cityScenes[k].plan, flat, dry, 7), o, EXTENT) };
