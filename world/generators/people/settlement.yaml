@@ -57,6 +57,7 @@ checks:
   - { test: world/generators/people/settlement/v10.test.ts, holds: "leads its routes out towards the places it dealt with, and has its wall while the wall stood, with a gate on each route" }
   - { test: world/generators/people/settlement/v10.test.ts, holds: "gives a plot to as many people as its tradition says lived to a house: forty to a block of flats is a sixth as many houses" }
   - { test: world/generators/people/settlement/v10.test.ts, holds: "keeps its plots where they are when the house its people lived in changes: its plan is its height's" }
+  - { test: world/generators/people/settlement/v10.test.ts, holds: "is planned by what is known of its houses before the generic house: a tradition that ended before its height still sizes its plots" }
   - { test: world/generators/people/settlement/v10.test.ts, holds: "builds each plot in the house of the tradition it falls to, in the parts the traditions say their people were" }
   - { test: world/generators/people/settlement/town.test.ts, holds: "builds nothing in its river" }
   - { test: world/generators/people/settlement/division.test.ts, holds: "cuts the face into blocks near its size, and plots that each have a front" }

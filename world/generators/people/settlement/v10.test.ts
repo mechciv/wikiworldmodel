@@ -395,6 +395,14 @@ describe('the settlement generator', () => {
       expect(after.mine.some((h) => after.plan.forms[h.form].tradition === 'test/flats')).toBe(true);
     });
 
+    it('is planned by what is known of its houses before the generic house: a tradition that ended before its height still sizes its plots', () => {
+      // Its people lived in blocks of flats until 300, and in houses nothing describes at its height, in 500.
+      const traditions = compileTraditions([{ id: 'test/flats', label: 'A block of flats', regions: [1], span: [-500, 300], lifeways: ['townspeople'], dwelling: { plan: 'courtyard', storeys: 4 }, settlement: { household: 40 } }]);
+      const after = at(500, {}, traditions);
+      expect(after.mine.every((h) => !after.plan.forms[h.form].tradition)).toBe(true);
+      expect(after.mine.length / at(500).mine.length).toBeLessThan(0.3);
+    });
+
     it('builds each plot in the house of the tradition it falls to, in the parts the traditions say their people were', () => {
       const traditions = compileTraditions([
         { id: 'test/flats', label: 'A block of flats', regions: [1], span: [-500, 1500], lifeways: ['townspeople'], prevalence: 'most', dwelling: { plan: 'courtyard', storeys: 4 } },

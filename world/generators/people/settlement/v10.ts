@@ -91,8 +91,8 @@
 //     one century has the streets of the next, and grows out along its roads and shrinks back from its edges.
 //   - A city's plan is made in its own metres from the city and the world's ground, never from the scene drawing it.
 //     The scene leaves out the plots its own ground cannot take, in its river or on its cliffs.
-//   - A city's plan reads the tradition most of its people lived in at its height: its town form, its house and how many
-//     people lived to a house, which a plot is the share of. What stands on each plot is the scene's time's: the
+//   - A city's plan reads the tradition most of its people lived in at its height, of the times a tradition holds for
+//     them: its town form, its house and how many people lived to a house, which a plot is the share of. What stands on each plot is the scene's time's: the
 //     traditions of the city's people then each take their part of its plots, as their `prevalence` says, and the rest
 //     have the generic house. A village is still of one tradition, by a number of its own.
 //   - A house is as big as its plot allows and its density asks, and no city has a most of houses: a great city has
@@ -119,7 +119,7 @@ import type { FieldBoundKind } from '../fieldworks.ts';
 import type { GateOpening, PerimeterSpec } from '../walls.ts';
 import { farmLanes, LaneGround, type FarmLayout, type Lane, type LaneWidths, type Point } from './lanes.ts';
 import { planTown, townAt, type TownParams as TownPlanParams } from './town.ts';
-import { cutAt, epochAt, HORIZON } from '../../../../core/growth.ts';
+import { cutAt, epochAt, HORIZON, peopleAt } from '../../../../core/growth.ts';
 import { earthOf, FIELD_USE, growFields, GROWTH, nodeOf, siteCells, SITING, SiteWorth, sizesOf, USE_OF, type FieldGrid, type FieldSource, type GrowthParams, type SiteCell, type SitingParams, type WaterNear } from './sites.ts';
 import { MAT } from '../../city/kit.ts';
 
@@ -543,17 +543,33 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
     const best = housed.reduce<Housed | undefined>((b, x) => (!b || x.share > b.share ? x : b), undefined);
     return best && best.share >= 1 - housed.reduce((a, x) => a + x.share, 0) ? best : undefined;
   };
-  // A city's height: the year it had the most people, as its central reading has them, up to the growth model's horizon.
-  const heightOf = (life: NonNullable<CityNear['life']>): number => {
+  // The tradition a city laid out through its whole life is planned by: what most of its people lived in at the time it
+  // had the most people, as its central reading has them, up to the growth model's horizon, of the times a tradition
+  // holds for its people; the generic house only where none ever does. What is known of how its people lived sizes its
+  // plots before the generic house does: Tenochtitlan is planned by its house plots of 1519, not by Mexico City's
+  // generic houses of 1900, when it had more people.
+  const plannedBy = (life: NonNullable<CityNear['life']>, region: number, way: LifewayWord): Housed | undefined => {
     const m = life.members[0];
-    let at = m.t[0] ?? life.span[0];
-    let most = -1;
-    for (let i = 0; i < m.t.length; i++)
-      if (m.t[i] <= HORIZON && m.people[i] > most) {
-        most = m.people[i];
-        at = m.t[i];
+    const [a, b] = [life.span[0], Math.min(life.span[1], HORIZON)];
+    // Its figures' years, and the start, middle and end of each tradition's years within its own.
+    const times = m.t.filter((t) => t >= a && t <= b);
+    for (const x of P.traditions)
+      if (x.regions.includes(region) && x.span[0] <= b && x.span[1] >= a) {
+        const lo = Math.max(a, x.span[0]);
+        const hi = Math.min(b, x.span[1]);
+        times.push(lo, (lo + hi) / 2, hi);
       }
-    return Math.min(Math.max(at, life.span[0]), life.span[1]);
+    let best: Housed | undefined;
+    let most = -1;
+    for (const t of times) {
+      const people = peopleAt(m, t);
+      if (people <= most) continue;
+      const found = mostOf(traditionsFor(P.traditions, region, t, way, parts));
+      if (!found) continue;
+      best = found;
+      most = people;
+    }
+    return best;
   };
   // The side of the ground one house has to itself: what a tradition says of how far apart its houses stood, as the
   // distance from one to the next where that is more than a house, and as the gap between them where it is less.
@@ -748,7 +764,7 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
       const most = mostOf(housed);
       const s = settlements.push({ x: cx, y: cy, r: 0, fieldR: 0, pattern, fields: 'rainfed', houses: 0, people: c.people, city: c.name, ...(c.record ? { record: c.record } : {}), from: c.from, anthrome: cell >= 0 ? P.grid.anthrome[cell] : 0, region, form: formOf(pattern, most?.tradition, most?.kin), tier: 'evidence', seed: citySeed }) - 1;
       const first = houses.length;
-      const r2 = layOutPlanned(settlements[s], s, c, cx, cy, mostOf(traditionsFor(P.traditions, region, heightOf(c.life), way, parts)), housed, pattern);
+      const r2 = layOutPlanned(settlements[s], s, c, cx, cy, plannedBy(c.life, region, way), housed, pattern);
       settlements[s].r = r2;
       settlements[s].fieldR = r2 * 1.6;
       cityHere.push({ x: cx, y: cy, r: r2 * 1.15 });

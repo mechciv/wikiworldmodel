@@ -99,7 +99,9 @@ are small and the edge's large. A household is as many people as the city's trad
 says: forty to a block of flats in Imperial Rome, ten to twenty in a town of the Ganges; six where nothing says.
 
 The plan reads the tradition most of the city's people lived in at its height, the year it had the most people up to
-1900, for its town form, its house and its household, so that it is the same plan at every time. What stands on a plot
+1900, of the times a tradition holds for them, for its town form, its house and its household, so that it is the same
+plan at every time: Tenochtitlan is planned by its house plots of 1519, not by Mexico City's generic houses of 1900, when
+it had more people. What stands on a plot
 is the scene's time's: each tradition of the city's people then takes its part of the plots, by a number of each plot's
 own, as its `prevalence` says (most, some or a few), and the rest have the generic house. Rome from Augustus to 368 is
 three quarters insulae, with a domus here and there; before Augustus its few domus stand among generic houses on the
