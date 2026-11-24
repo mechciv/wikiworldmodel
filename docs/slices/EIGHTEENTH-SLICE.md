@@ -144,6 +144,13 @@ picked, named and lit as in the city's own scene before.
    a scene reused across a few years keeps what it was made for.
 5. **No most of houses in a city.** The cap of 12,000 a city had, and the scene's 60,000, made a city of a million a
    scatter of houses each standing for a dozen households. The renderer's culling by distance and rank is the budget.
+6. **A city's plan is made once, by what is known of it; what stands on a plot is the time's.** Read at the scene's
+   time, the plan moved whenever a city's tradition changed: Rome's plots at Augustus and again in 368. It reads the
+   tradition of the most populous time any tradition holds for the city's people, because what is known of how they
+   lived should size the plots before the generic house does.
+7. **A tradition's `prevalence` in a city is a share of its plots, not a lottery between cities.** Drawn as one
+   tradition a city, a few of Rome's people in domus made a few whole towns of domus, and Republican Rome fell to them
+   entirely. A village is still of one tradition, as its households were.
 
 ## Limitations
 
