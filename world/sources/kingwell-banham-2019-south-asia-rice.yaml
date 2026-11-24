@@ -1,0 +1,19 @@
+id: src:kingwell-banham-2019-south-asia-rice
+type: publication
+kind: review
+citation: >-
+  Kingwell-Banham, E. (2019). Dry, rainfed or irrigated? Reevaluating the role and development of
+  rice agriculture in Iron Age-Early Historic South India using archaeobotanical approaches.
+  Archaeological and Anthropological Sciences 11(12), 6485–6500.
+authors:
+  - "Kingwell-Banham, E."
+published: 2019
+title: "Dry, rainfed or irrigated? Reevaluating the role and development of rice agriculture in Iron Age-Early Historic South India using archaeobotanical approaches"
+container: "Archaeological and Anthropological Sciences 11(12), 6485–6500"
+doi: 10.1007/s12520-019-00795-7
+url: https://pmc.ncbi.nlm.nih.gov/articles/PMC6890616/
+license: CC-BY-4.0
+license_note: Open-access article under CC BY 4.0; short quotes with credit.
+verified:
+  by: machine:antigravity
+  how: Full text fetched from PubMed Central (PMC6890616) and read; quotes verified by npm run world -- quote-check.

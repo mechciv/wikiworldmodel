@@ -2,7 +2,7 @@
 // and put together into what a scene's people are and what the globe paints. The same core code as the build's, so what
 // a scene draws rests on the same anthromes, assessments, cities and traditions.
 import { decodeTile } from '../../../core/container.ts';
-import { prevalenceOf, traditionFor, type Husbandry, type LifewayWord, type Tradition } from '../../../core/dwelling.ts';
+import { prevalenceOf, traditionFor, type Agriculture, type Husbandry, type LifewayWord, type Tradition } from '../../../core/dwelling.ts';
 import type { Form } from '../../../core/form.ts';
 import { anthromeTile, classAtStep, nearestStep, sceneTiles, scenePeople, assessmentAt, lifewayOf, LIFEWAY_OF, citiesAround, cityGuess, cellOf, tileKey, type AnthromeTile, type AnthromeTileHeader, type AssessmentsFile, type CitiesFile, type CityNear, type LandscapeData, type LandscapeIndex, type Lifeway, type TraditionsFile } from '../../../core/landscape.ts';
 import { cellAt, stepsAround, type PeopleFile } from '../../../core/layers.ts';
@@ -45,6 +45,8 @@ export class LandscapeAtlas {
   husbandry: Husbandry[] = [];
   kept: LivingTaxon[] = [];
   keptForms: Record<string, Form> = {};
+  /** the agricultural traditions: regional crop mixes and field layouts */
+  agriculture: Agriculture[] = [];
   cities!: CitiesFile;
   globe?: AnthromeTile;
   private indexed: Promise<void> | null = null;
@@ -73,6 +75,7 @@ export class LandscapeAtlas {
       this.husbandry = tr.husbandry ?? [];
       this.kept = tr.kept ?? [];
       this.keptForms = tr.forms ?? {};
+      this.agriculture = tr.agriculture ?? [];
       this.cities = c;
     })();
     return this.ready;
@@ -123,6 +126,7 @@ export class LandscapeAtlas {
       husbandry: this.husbandry,
       kept: this.kept,
       keptForms: this.keptForms,
+      agriculture: this.agriculture,
       cities: this.cities,
       people: (lat, lon, t) => {
         if (!people) return undefined;

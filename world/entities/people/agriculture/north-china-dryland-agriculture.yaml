@@ -1,0 +1,67 @@
+id: people/agriculture/north-china-dryland-agriculture
+kind: tradition/agriculture
+summary: >-
+  The dryland millet-and-soybean farming tradition of northern China from the late Yangshao period onward, built on foxtail and broomcorn millets with soybean as a companion legume.
+author: machine:antigravity
+claims:
+  name:
+    prop: name
+    value: { en: "Northern China dryland millet and soybean farming" }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: { lo: 6000 BP, hi: 5000 BP }
+    source:
+      - ref: src:he-2022-china-legumes-cereals
+        loc: "Abstract"
+        quote: "an antipodal pattern of millet-soybeans and rice-fish agricultural systems may have been established in northern and southern China since the late Yangshao period (6000–5000 cal BP) respectively"
+    method: compilation
+    note: >-
+      The millet-soybean dryland farming pattern as established by the late Yangshao period. Foxtail and broomcorn millets were already domesticated earlier in northern China, but the coupled millet-soybean system is dated here to 6000–5000 cal BP.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in he-2022-china-legumes-cereals.txt (sha256 72097b629cced040), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["119", "120"] }
+    source:
+      - ref: src:he-2022-china-legumes-cereals
+        loc: "Abstract"
+        quote: "soybeans was mostly confined to northern China and rarely found in southern China, serving as a companion to millet"
+      - ref: src:deng-2015-baligang-rice-millet
+        loc: "Introduction"
+        quote: "In general, North China is accepted as a dry-land farming area based on foxtail millet (Setaria italica) and broomcorn millet (Panicum milliaceum) in the Neolithic period."
+    method: editorial
+    note: >-
+      Editorial mapping of northern China / the Yellow River dryland zone onto ArchaeoGLOBE regions 119 (North Central China) and 120 (Northern China).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in he-2022-china-legumes-cereals.txt (sha256 72097b629cced040) and deng-2015-baligang-rice-millet.txt (sha256 15f8a3c220fbffc7), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      - ref: src:deng-2015-baligang-rice-millet
+        loc: "Introduction"
+        quote: "It is well established that early farming in China can be divided into a group of northern traditions based on the cultivation of millets (Setaria italica and Panicum miliaceum)"
+    method: editorial
+    note: >-
+      Sedentary dryland farmers of northern China.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in deng-2015-baligang-rice-millet.txt (sha256 15f8a3c220fbffc7), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
+  crops:
+    prop: crops
+    value:
+      - { kind: millet, name: "Foxtail millet", season: summer, share: staple }
+      - { kind: millet, name: "Broomcorn millet", season: summer, share: secondary }
+      - { kind: soybean, name: "Soybeans", season: summer, share: secondary }
+    source:
+      - ref: src:deng-2015-baligang-rice-millet
+        loc: "Introduction"
+        quote: "In general, North China is accepted as a dry-land farming area based on foxtail millet (Setaria italica) and broomcorn millet (Panicum milliaceum) in the Neolithic period."
+      - ref: src:he-2022-china-legumes-cereals
+        loc: "Abstract"
+        quote: "During the Neolithic and Bronze Ages, soybeans was mostly confined to northern China and rarely found in southern China, serving as a companion to millet."
+    method: compilation
+    note: >-
+      Foxtail millet as the primary summer staple alongside broomcorn millet and companion soybeans. Relative shares (staple vs secondary) are an editorial rendering choice; wheat and hemp are added in the Han child tradition.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in deng-2015-baligang-rice-millet.txt (sha256 15f8a3c220fbffc7) and he-2022-china-legumes-cereals.txt (sha256 72097b629cced040), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }

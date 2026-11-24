@@ -1,0 +1,63 @@
+id: people/agriculture/south-asia-monsoon-farming
+kind: tradition/agriculture
+summary: >-
+  South Asian dual-season monsoon agriculture combining summer kharif rice, millets, and pulses with winter rabi wheat, barley, and peas across the subcontinent from c. 500 BCE onward.
+author: machine:antigravity
+claims:
+  name:
+    prop: name
+    value: { en: "South Asian monsoon kharif and rabi farming" }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: { lo: 600 BCE, hi: 400 BCE }
+    source:
+      - ref: src:kingwell-banham-2019-south-asia-rice
+        loc: "Abstract"
+        quote: "Domestic rice agriculture had spread across the mainland Indian subcontinent by c.500 BC."
+    method: compilation
+    note: >-
+      Around 500 BCE (±100 years editorially), by which time domestic rice had spread across the mainland Indian subcontinent alongside existing dryland and rabi cereals.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in kingwell-banham-2019-south-asia-rice.txt (sha256 bd2cef9294ac02ee), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["105", "107", "108", "110", "111"] }
+    source:
+      - ref: src:kingwell-banham-2019-south-asia-rice
+        loc: "Abstract"
+        quote: "Domestic rice agriculture had spread across the mainland Indian subcontinent by c.500 BC."
+    method: editorial
+    note: >-
+      Editorial mapping of the mainland Indian subcontinent onto ArchaeoGLOBE regions 105 (Pakistan), 107 (Northern India), 108 (Southwestern India), 110 (Southern India), and 111 (Eastern India and Bangladesh). Local dominance between kharif rice, millets, and rabi wheat varies strongly with rainfall and irrigation.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in kingwell-banham-2019-south-asia-rice.txt (sha256 bd2cef9294ac02ee), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      - ref: src:kingwell-banham-2019-south-asia-rice
+        loc: "Rice, rain and reservoirs"
+        quote: "In India, there are two growing seasons: kharif (coinciding with the summer monsoon) and rabi (coinciding with the northeast monsoon)."
+    method: editorial
+    note: >-
+      Settled monsoon-season and irrigated farmers across South Asia.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in kingwell-banham-2019-south-asia-rice.txt (sha256 bd2cef9294ac02ee), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
+  crops:
+    prop: crops
+    value:
+      - { kind: rice, name: "Monsoon rice", season: summer, share: staple }
+      - { kind: millet, name: "Millets", season: summer, share: secondary }
+      - { kind: wheat, name: "Rabi wheat", season: winter, share: secondary }
+      - { kind: barley, name: "Rabi barley", season: winter, share: minor }
+      - { kind: legume, name: "Pulses and peas", season: summer, share: minor }
+    source:
+      - ref: src:kingwell-banham-2019-south-asia-rice
+        loc: "Rice, rain and reservoirs"
+        quote: "Traditionally, across most of India, the kharif crop is characterised by rice, millets and Vigna pulses, whereas wheats, barley and peas are grown as the rabi crop."
+    method: compilation
+    note: >-
+      Dual-season monsoon cropping: kharif rice, millets, and Vigna pulses paired with rabi wheat, barley, and peas. Relative plot shares are an editorial rendering approximation across the subcontinent.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in kingwell-banham-2019-south-asia-rice.txt (sha256 bd2cef9294ac02ee), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }

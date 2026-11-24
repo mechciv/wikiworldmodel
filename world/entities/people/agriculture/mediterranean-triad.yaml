@@ -1,0 +1,68 @@
+id: people/agriculture/mediterranean-triad
+kind: tradition/agriculture
+summary: >-
+  The classical Mediterranean triad of cereals (wheat and barley), grapevines, and olive groves from the Iron Age through antiquity across Mediterranean Europe.
+author: machine:antigravity
+claims:
+  name:
+    prop: name
+    value: { en: "Mediterranean triad (cereals, vines, and olives)" }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: { lo: 600 BCE, hi: 100 BCE }
+    source:
+      - ref: src:bernigaud-2024-mediterranean-triad
+        loc: "Introduction"
+        quote: "between the Iron Age and late antiquity (6th century BCE - 7th century CE) on the potential profitability of farms in Southern Gaul"
+      - ref: src:bernigaud-2024-mediterranean-triad
+        loc: "Introduction"
+        quote: "vines, olives, and cereals (wheat/barley), which were the most cultivated crops as of the Roman period"
+    method: compilation
+    note: >-
+      Span from the Iron Age (6th century BCE) into the Roman period, when the triad of cereals, vines, and olives was fully established across the Roman Mediterranean.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in bernigaud-2024-mediterranean-triad.txt (sha256 082028677be4aa78), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["41", "42", "44"] }
+    source:
+      - ref: src:bernigaud-2024-mediterranean-triad
+        loc: "Introduction"
+        quote: "This \"Mediterranean triad\" was indeed the foundation of agriculture and food in most of the Roman Empire, and therefore its primary source of wealth."
+    method: editorial
+    note: >-
+      Editorial mapping of Mediterranean Roman Europe (including the paper's Southern Gaul study area) onto ArchaeoGLOBE regions 41 (Spain and Portugal), 42 (France), and 44 (Southern Europe). Northern parts of region 42 lie outside the olive zone, an approximation of the coarse ArchaeoGLOBE region polygons.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in bernigaud-2024-mediterranean-triad.txt (sha256 082028677be4aa78), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      - ref: src:bernigaud-2024-mediterranean-triad
+        loc: "Abstract"
+        quote: "the profitability of vineyards, olive groves, and grain farms in Southern Gaul, which were the main source of wealth in the roman period"
+    method: editorial
+    note: >-
+      Settled arable, vineyard, and olive farmers of the Mediterranean world.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in bernigaud-2024-mediterranean-triad.txt (sha256 082028677be4aa78), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
+  crops:
+    prop: crops
+    value:
+      - { kind: wheat, name: "Naked wheat", season: winter, share: staple }
+      - { kind: barley, name: "Barley", season: winter, share: secondary }
+      - { kind: vine, name: "Grapevines", season: perennial, share: secondary }
+      - { kind: olive, name: "Olive grove", season: perennial, share: secondary }
+    source:
+      - ref: src:bernigaud-2024-mediterranean-triad
+        loc: "Introduction"
+        quote: "vines, olives, and cereals (wheat/barley), which were the most cultivated crops as of the Roman period."
+      - ref: src:bernigaud-2024-mediterranean-triad
+        loc: "Grain cultivation"
+        quote: "highlight among the various cereals cultivated, the preponderance of barley and naked wheat, already cultivated before the Roman conquest"
+    method: compilation
+    note: >-
+      Cereals (naked wheat and barley), grapevines, and olive trees. Relative plot shares are an editorial approximation for the composite triad landscape.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in bernigaud-2024-mediterranean-triad.txt (sha256 082028677be4aa78), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }

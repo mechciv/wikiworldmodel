@@ -1,0 +1,67 @@
+id: people/agriculture/britain-ireland-mixed-farming
+kind: tradition/agriculture
+summary: >-
+  Cereal farming in Britain and Ireland from the Early Neolithic onward, anchored by wheat and barley, with oats entering in consequential amounts from the Roman period.
+author: machine:antigravity
+claims:
+  name:
+    prop: name
+    value: { en: "British and Irish cereal farming" }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: { lo: 4100 BCE, hi: 3900 BCE }
+    source:
+      - ref: src:bevan-2017-britain-ireland-crops
+        loc: "Results and Discussion"
+        quote: "Hazelnuts (Corylus avellana), a key comestible for Mesolithic communities before the arrival of agriculture, dominate the starchy plant data up to ∼4000 BCE, decline in relative popularity with the earliest Neolithic"
+    method: compilation
+    note: >-
+      Arrival of Neolithic cereal farming in Britain and Ireland around 4000 BCE, bracketed editorially by ±100 years.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in bevan-2017-britain-ireland-crops.txt (sha256 7e99f43eac7d2b75), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["38"] }
+    source:
+      - ref: src:bevan-2017-britain-ireland-crops
+        loc: "Results and Discussion"
+        quote: "wheat (Triticum sp.) is a high-value cereal that first appears and increases sharply at the very start of the British and Irish Neolithic"
+    method: editorial
+    note: >-
+      ArchaeoGLOBE region 38 (United Kingdom and Ireland).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in bevan-2017-britain-ireland-crops.txt (sha256 7e99f43eac7d2b75), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
+  lifeway:
+    prop: lifeway
+    value: [farmers]
+    source:
+      - ref: src:bevan-2017-britain-ireland-crops
+        loc: "Results and Discussion"
+        quote: "Barley (Hordeum sp.) is a hardier cereal species which also arrives as part of the earliest farming activity and is present throughout later periods."
+    method: editorial
+    note: >-
+      Arable farmers of Britain and Ireland.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in bevan-2017-britain-ireland-crops.txt (sha256 7e99f43eac7d2b75), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
+  crops:
+    prop: crops
+    value:
+      - { kind: barley, name: "Barley", season: summer, share: staple }
+      - { kind: wheat, name: "Wheat", season: winter, share: secondary }
+      - { kind: oat, name: "Oats", season: summer, share: minor }
+    source:
+      - ref: src:bevan-2017-britain-ireland-crops
+        loc: "Results and Discussion"
+        quote: "wheat (Triticum sp.) is a high-value cereal that first appears and increases sharply at the very start of the British and Irish Neolithic"
+      - ref: src:bevan-2017-britain-ireland-crops
+        loc: "Results and Discussion"
+        quote: "Barley (Hordeum sp.) is a hardier cereal species which also arrives as part of the earliest farming activity and is present throughout later periods."
+      - ref: src:bevan-2017-britain-ireland-crops
+        loc: "Results and Discussion"
+        quote: "Oats (Avena sp.) appear in consequential amounts in Britain and Ireland only from the Roman period but become increasingly popular in the later Medieval period"
+    method: compilation
+    note: >-
+      Barley and wheat arrived with the earliest Neolithic; oats became consequential only from the Roman period onward (included here as a minor crop in the broad record until a Roman/medieval child record splits them). Relative shares and seasons are editorial rendering choices.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in bevan-2017-britain-ireland-crops.txt (sha256 7e99f43eac7d2b75), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }

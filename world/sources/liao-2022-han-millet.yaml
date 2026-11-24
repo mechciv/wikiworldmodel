@@ -1,0 +1,23 @@
+id: src:liao-2022-han-millet
+type: publication
+kind: measurement
+citation: >-
+  Liao, J., Li, M., Allen, E., Luo, W. & Sheng, P. (2022). The Millet of the Matter:
+  Archeobotanical Evidence for Farming Strategies of Western Han Dynasty Core Area Inhabitants.
+  Frontiers in Plant Science 13, 929047.
+authors:
+  - "Liao, J."
+  - "Li, M."
+  - "Allen, E."
+  - "Luo, W."
+  - "Sheng, P."
+published: 2022
+title: "The Millet of the Matter: Archeobotanical Evidence for Farming Strategies of Western Han Dynasty Core Area Inhabitants"
+container: "Frontiers in Plant Science 13, 929047"
+doi: 10.3389/fpls.2022.929047
+url: https://pmc.ncbi.nlm.nih.gov/articles/PMC9280989/
+license: CC-BY-4.0
+license_note: Open-access article under CC BY; short quotes with credit.
+verified:
+  by: machine:antigravity
+  how: Full text fetched from PubMed Central (PMC9280989) and read; quotes verified by npm run world -- quote-check.

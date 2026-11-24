@@ -1,0 +1,25 @@
+id: src:bevan-2017-britain-ireland-crops
+type: publication
+kind: review
+citation: >-
+  Bevan, A., Colledge, S., Fuller, D., Fyfe, R., Shennan, S. & Stevens, C. (2017). Holocene
+  fluctuations in human population demonstrate repeated links to food production and climate.
+  Proceedings of the National Academy of Sciences of the United States of America 114(49),
+  E10524–E10531.
+authors:
+  - "Bevan, A."
+  - "Colledge, S."
+  - "Fuller, D."
+  - "Fyfe, R."
+  - "Shennan, S."
+  - "Stevens, C."
+published: 2017
+title: "Holocene fluctuations in human population demonstrate repeated links to food production and climate"
+container: "Proceedings of the National Academy of Sciences of the United States of America 114(49), E10524–E10531"
+doi: 10.1073/pnas.1709190114
+url: https://pmc.ncbi.nlm.nih.gov/articles/PMC5724262/
+license: open access
+license_note: Open-access article under the PNAS license; short quotes with credit.
+verified:
+  by: machine:antigravity
+  how: Full text fetched from PubMed Central (PMC5724262) and read; quotes verified by npm run world -- quote-check.

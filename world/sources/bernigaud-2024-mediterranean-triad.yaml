@@ -1,0 +1,27 @@
+id: src:bernigaud-2024-mediterranean-triad
+type: publication
+kind: review
+citation: >-
+  Bernigaud, N., Bondeau, A., Guiot, J., Bertoncello, F., Ouriachi, M.-J., Bouby, L., Leveau, P.,
+  Bernard, L. & Isoardi, D. (2024). The impact of climate change on the agriculture and the economy
+  of Southern Gaul: New perspectives of agent-based modelling. PLOS ONE 19(3), e0298895.
+authors:
+  - "Bernigaud, N."
+  - "Bondeau, A."
+  - "Guiot, J."
+  - "Bertoncello, F."
+  - "Ouriachi, M.-J."
+  - "Bouby, L."
+  - "Leveau, P."
+  - "Bernard, L."
+  - "Isoardi, D."
+published: 2024
+title: "The impact of climate change on the agriculture and the economy of Southern Gaul: New perspectives of agent-based modelling"
+container: "PLOS ONE 19(3), e0298895"
+doi: 10.1371/journal.pone.0298895
+url: https://pmc.ncbi.nlm.nih.gov/articles/PMC10971770/
+license: CC-BY-4.0
+license_note: Open-access article under CC BY; short quotes with credit.
+verified:
+  by: machine:antigravity
+  how: Full text fetched from PubMed Central (PMC10971770) and read; quotes verified by npm run world -- quote-check.
