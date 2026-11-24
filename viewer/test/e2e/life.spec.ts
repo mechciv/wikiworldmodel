@@ -210,14 +210,13 @@ test.describe('the Hell Creek', () => {
     await page.goto(`/?b=${latestBuild()}&${arrival(s)}&${FAST}`);
     await idle(page);
     expect((await page.evaluate(() => window.__wikiworldmodel!.scene()))!.site).toBe(s.id);
-    // Off to Rome, in its own time.
-    await page.goto(`/?b=${latestBuild()}&t=315&lat=41.9&lon=12.49&d=1.4&${FAST}`);
+    // Off to Rome, in its own time: the living scene there draws it, its records among its houses.
+    await page.goto(`/?b=${latestBuild()}&t=315.5&lat=41.8915&lon=12.49&d=1.000235&h=302&v=66&${FAST}`);
     await idle(page);
-    await expect(page.locator('.city-enter')).toHaveText('Fly down into Rome, 315 CE');
-    expect(await page.evaluate(() => window.__wikiworldmodel!.scene())).toBeNull();
-    const fabric = await page.evaluate(() => window.__wikiworldmodel!.fabric());
-    expect(fabric!.actual).not.toBeNull();
-    expect(fabric!.problems).toEqual([]);
+    const rome = (await page.evaluate(() => window.__wikiworldmodel!.scene()))!;
+    expect(rome).not.toBeNull();
+    expect(rome.site).not.toBe(s.id);
+    expect(rome.people!.cities.map((c) => c.name)).toContain('Rome');
   });
 });
 

@@ -1,8 +1,8 @@
-// Pass criteria for the city: a link lands in it and the browser's generated fabric matches the
-// build's within the tolerance of core/fingerprint.ts; the wheel comes down from the globe without a seam; what stands depends on
-// the time shown; a click opens a monument's record, or says a house is the generator's; and deep
-// time lifts the camera off a ground that isn't there yet; and on a touch screen, two fingers turn, tilt and come nearer.
-// The views it is drawn in are checked in city-views.spec.ts.
+// Pass criteria for the city: Rome is drawn by the living scene of where the camera is, its records among the
+// settlement generator's houses (docs/plans/CITIES.md, decisions 1 and 10); a link lands in it and holds its view; the wheel
+// comes down from the globe without a seam; what stands depends on the time shown; a click opens a monument's record, or
+// says a house is the generator's; deep time lifts the camera off a ground that isn't there yet; and on a touch screen,
+// two fingers turn, tilt and come nearer. The views it is drawn in are checked in city-views.spec.ts.
 import { expect, test } from '@playwright/test';
 import { canvasPng, idle, latestBuild, line, settledUrl, touch } from './helpers.ts';
 
@@ -27,15 +27,14 @@ const labelled = (page: import('@playwright/test').Page, id: string) => page.eva
 test.describe('in the city', () => {
   test.use(small);
 
-  test('a link lands in the city, and the browser makes the fabric the build recorded, within the tolerance', async ({ page, context }) => {
+  test('a link lands in Rome, drawn by the living scene with its records among its houses', async ({ page, context }) => {
     await page.goto(`/?b=${latestBuild()}&${OVERVIEW}&${FAST}`);
     await idle(page);
-    const fabric = await page.evaluate(() => window.__wikiworldmodel!.fabric());
-    expect(fabric!.actual).not.toBeNull();
-    expect(fabric!.problems).toEqual([]);
-    const stats = await page.evaluate(() => window.__wikiworldmodel!.cityStats());
-    expect(stats!.cells).toBeGreaterThan(100);
-    expect(stats!.coarse).toBeGreaterThan(50);
+    const scene = (await page.evaluate(() => window.__wikiworldmodel!.scene()))!;
+    expect(scene).not.toBeNull();
+    // Rome among its houses, laid out by the settlement generator, and its records named over them.
+    expect(scene.people!.cities.map((c) => c.name)).toContain('Rome');
+    expect(await labelled(page, 'rome/colosseum')).toBe(true);
     // A step on the ground, an hour later: all of it stays in the link.
     await page.evaluate(() => window.__wikiworldmodel!.set({ hour: 11 }));
     await idle(page);
@@ -56,7 +55,6 @@ test.describe('in the city', () => {
   test('the wheel comes down from the globe into the city, and back', async ({ page }) => {
     await page.goto(`/?b=${latestBuild()}&t=315&lat=41.9&lon=12.49&d=1.4&${FAST}`);
     await idle(page);
-    await expect(page.locator('.city-enter')).toHaveText('Fly down into Rome, 315 CE');
     const height = async () => ((await page.evaluate(() => window.__wikiworldmodel!.state())).cam.dist - 1) * 6371;
     await page.mouse.move(320, 190);
     const heights: number[] = [await height()];
@@ -69,24 +67,12 @@ test.describe('in the city', () => {
     const low = heights[heights.length - 1];
     expect(low).toBeLessThan(600);
     await idle(page);
-    expect(await page.evaluate(() => window.__wikiworldmodel!.cityStats()))!.not.toBeNull();
+    expect(await page.evaluate(() => window.__wikiworldmodel!.scene())).not.toBeNull();
     for (let i = 0; i < 14; i++) {
       await page.mouse.wheel(0, 1000);
       await page.waitForTimeout(60);
     }
     expect(await height()).toBeGreaterThan(low);
-  });
-
-  test('the button flies down, and the city is ready when it arrives', async ({ page }) => {
-    await page.goto(`/?b=${latestBuild()}&t=315&lat=41.9&lon=12.49&d=1.4&${FAST}`);
-    await idle(page);
-    await page.locator('.city-enter').click();
-    await idle(page);
-    const state = await page.evaluate(() => window.__wikiworldmodel!.state());
-    expect((state.cam.dist - 1) * 6371000).toBeLessThan(3000);
-    const stats = await page.evaluate(() => window.__wikiworldmodel!.cityStats());
-    expect(stats!.coarse).toBeGreaterThan(50);
-    await expect(page.locator('.city-enter')).toBeHidden();
   });
 
   test('what stands depends on the time: Constantine’s arch is not there before it was built', async ({ page }) => {
@@ -119,14 +105,14 @@ test.describe('in the city', () => {
     for (const [x, y] of [[320, 190], [260, 150], [380, 230], [260, 230], [380, 150], [320, 110], [320, 270], [200, 190], [440, 190]]) {
       await page.mouse.click(x, y);
       await idle(page);
-      if ((await panel.isVisible()) && /building/i.test((await panel.locator('.kind').textContent()) ?? '')) {
+      if ((await panel.isVisible()) && /house/i.test((await panel.locator('.kind').textContent()) ?? '')) {
         found = true;
         break;
       }
     }
     expect(found).toBe(true);
     await expect(panel.locator('.badge.basis-procedural')).toBeVisible();
-    await expect(panel).toContainText('Nothing is known of this building');
+    await expect(panel).toContainText('nobody recorded this house');
     expect((await page.evaluate(() => window.__wikiworldmodel!.state())).sel).toBe(null);
   });
 

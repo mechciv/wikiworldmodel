@@ -6,7 +6,7 @@ import type { RiverPath } from './rivers.ts';
 import { clipWaters, overlaySurvey, placeSurvey, surveyOffset, surveyWaterMesh, surveyWeight, withSurveyWater } from './survey.ts';
 
 /** A level grid of `z` metres, in decimetres. */
-const level = (x0: number, n: number, cell: number, z: number): GroundGridData => ({ nx: n, ny: n, x0, y0: x0, cell, z: new Int16Array(n * n).fill(z * 10) });
+const level = (x0: number, n: number, cell: number, z: number): GroundGridData & { z: Int16Array } => ({ nx: n, ny: n, x0, y0: x0, cell, z: new Int16Array(n * n).fill(z * 10) });
 
 /** A survey at the scene's own point: 50 m everywhere, a city grid of 1 km and a wider one of 20 km. */
 const survey = (over: Partial<SceneSurvey> = {}): SceneSurvey => ({
