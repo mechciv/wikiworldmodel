@@ -12,7 +12,7 @@ import { houseSize, HOUSE_VARIANTS } from '../dwellings.ts';
 import { ROUTE, roundOf, wayAt, type RoutineParams } from '../../life/routines.ts';
 import { personGoes } from '../figures.ts';
 import { WORK_VARIANTS } from '../works.ts';
-import { LandUseMap, makeSettlement, toLocal, type Ground } from './v6.ts';
+import { LandUseMap, makeSettlement, toLocal, type Ground } from './v7.ts';
 
 const ROOT = join(import.meta.dirname, '../../../..');
 // How the living scene's animals go about: the settlement's kept ones go by the same parameters.
@@ -572,17 +572,19 @@ describe('the settlement generator', () => {
       }
     });
 
-    it('joins each settlement to its nearest neighbours by a path that ends at the edge of their houses', () => {
+    it('joins neighbouring farming settlements at the ends of their through lanes', () => {
       const plan = makeSettlement(spec(villages()), flat, dry, EXTENT);
       expect(plan.pathWidth).toBeGreaterThan(1);
       expect(plan.paths.length).toBeGreaterThan(50);
-      const near = (x: number, y: number) => plan.settlements.reduce((best, s) => Math.min(best, Math.hypot(x - s.x, y - s.y) - s.r), Infinity);
+      const ends = plan.lanes.filter(l => l.width === (gen.params.lanes as { main: number }).main)
+        .flatMap(l => [l.line.slice(0, 2), l.line.slice(-2)]);
+      const meets = (x: number, y: number) => ends.some(([ex, ey]) => Math.hypot(x - ex, y - ey) < 1e-6);
       let length = 0;
       for (const line of plan.paths) {
         expect(line.length).toBeGreaterThanOrEqual(6);
-        // Each end at the edge of a settlement's houses; no step of it long enough to cut a corner of the ground.
-        expect(near(line[0], line[1])).toBeLessThan(1);
-        expect(near(line.at(-2)!, line.at(-1)!)).toBeLessThan(1);
+        // Each end meets the through lane in the fields; no step of it long enough to cut a corner of the ground.
+        expect(meets(line[0], line[1])).toBe(true);
+        expect(meets(line.at(-2)!, line.at(-1)!)).toBe(true);
         for (let q = 2; q < line.length; q += 2) {
           const d = Math.hypot(line[q] - line[q - 2], line[q + 1] - line[q - 1]);
           expect(d).toBeLessThan(40);
@@ -702,17 +704,21 @@ describe('how a tradition sets its houses out', () => {
     expect(palisaded.workForms[lengths]).toMatchObject({ spec: { word: 'palisade' }, from: 'test/palisade' });
     let seen = 0;
     palisaded.settlements.forEach((s, si) => {
-      const round = palisaded.works.filter((w) => w.settlement === si && w.form === lengths);
+      const round = palisaded.works.filter(w => w.settlement === si && palisaded.workForms[w.form].spec.kind === 'enclosure');
       const mine = dwellings(palisaded, si);
       if (mine.length < 20 || !round.length) return;
       seen++;
-      // It stands outside every house, all the way round but for its ways in.
-      const reach = Math.max(...mine.map((h) => Math.hypot(h.x - s.x, h.y - s.y)));
-      const far = round.map((w) => Math.hypot(w.x - s.x, w.y - s.y));
-      expect(Math.min(...far)).toBeGreaterThan(reach + 2);
-      const run = palisaded.workForms[lengths].spec.run!;
-      expect(round.length).toBeGreaterThanOrEqual(Math.floor((TAU * Math.min(...far)) / run) - 3);
-      expect(round.length).toBeLessThan((TAU * Math.max(...far)) / run);
+      const boundary = s.boundary!;
+      const edges = boundary.map((a, i) => ({ a, b: boundary[(i + 1) % boundary.length] }));
+      const perimeter = edges.reduce((sum, { a, b }) => sum + Math.hypot(b[0] - a[0], b[1] - a[1]), 0);
+      // The convex enclosure surrounds every home. The omitted runs are the gates.
+      for (const h of mine) expect(edges.every(({ a, b }) =>
+        (b[0] - a[0]) * (h.y - a[1]) > (b[1] - a[1]) * (h.x - a[0]))).toBe(true);
+      const built = round.reduce((sum, w) => sum + palisaded.workForms[w.form].spec.run!, 0);
+      if (Math.abs(s.x) + s.r + 20 < EXTENT && Math.abs(s.y) + s.r + 20 < EXTENT) {
+        expect(built).toBeGreaterThan(perimeter - 48);
+        expect(built).toBeLessThan(perimeter);
+      }
     });
     expect(seen).toBeGreaterThan(5);
     const walled = farmland(compileTraditions([{ id: 'test/walled', label: 'A walled village', ...base, dwelling: house, settlement: { pattern: 'walled', houses: 20 } }]));

@@ -132,7 +132,7 @@ house its five metres of width.
 ### The generator
 
 `gen:people/settlement` is **version 3**
-([world/generators/people/settlement/v3.ts](../../world/generators/people/settlement/v6.ts), now `v5.ts`): what it makes of a
+([world/generators/people/settlement/v3.ts](../../world/generators/people/settlement/v7.ts), now `v7.ts`): what it makes of a
 scene changed beyond the tolerance, so it is a new version and not an edit.
 
 - **A house's shape** is one of eight, by a hash of its place in its settlement; its size is no longer a share of its
@@ -170,7 +170,7 @@ scene changed beyond the tolerance, so it is a new version and not an edit.
   one gate.
 - **A cluster with no stated layout** is thrown: places at random on the ground its houses would take, none nearer
   another than a house and its yard need, none on the open ground at its middle.
-- **The ground is trodden round each house** ([LandUseMap](../../world/generators/people/settlement/v6.ts)), on a grid
+- **The ground is trodden round each house** ([LandUseMap](../../world/generators/people/settlement/v7.ts)), on a grid
   of 16 m, and among houses that stand together; houses that stand apart leave the ground between them as it was. No
   tree stands there, and little grass.
 

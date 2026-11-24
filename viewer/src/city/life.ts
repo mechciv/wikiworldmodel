@@ -214,7 +214,7 @@ export class LifeScene {
 
   private groundData: Extract<FromLifeWorker, { type: 'ground' | 'preview' }> | null = null;
   private maskData: Extract<FromLifeWorker, { type: 'mask' }> | null = null;
-  /** the paths between the scene's settlements, on the GPU once the scene has been shown */
+  /** the farming lanes and paths between settlements, on the GPU once the scene has been shown */
   private pathsGpu: MeshHandle | null = null;
   private held: Extract<FromLifeWorker, { type: 'selection' }>[] = [];
 
