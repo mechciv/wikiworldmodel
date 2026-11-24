@@ -794,7 +794,8 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
     }
   }
   const earth = earthOf(origin);
-  const worth = new SiteWorth(S, ground, near, ok, cityHere, seedOf(hash2(0x50, 0x11, 0x5017)), margin + side * 1.5);
+  // The mean height about a place is kept as far as the ring of weighed cells reaches: a cell's width past the margin's.
+  const worth = new SiteWorth(S, ground, near, ok, cityHere, seedOf(hash2(0x50, 0x11, 0x5017)), margin + side * 2.2);
   const places = siteCells(cellsOf.map((c) => c.site), worth, S);
   // The fields of settlements beyond the scene's edge that reach into it, and of those drawn: grown together, below.
   const sources: FieldSource[] = [];
@@ -803,11 +804,19 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
     const t = c.found?.tradition;
     const town = c.life.pattern === 'city' || c.life.pattern === 'towns' ? townOf(t) : undefined;
     const perHouse = (c.area * 1e6) / Math.max(1, c.houses);
+    // Its settlements' fields: each its houses' share of the cell's, the less where its neighbours crowd it, and all of
+    // them together the share of the cell its pattern gives, whatever the crowding where they happened to stand.
+    let held = 0;
+    let weighed = 0;
+    places[ci].forEach(([x, y], n) => {
+      held += c.site.sizes[n];
+      weighed += c.site.sizes[n] / c.site.crowd(x, y);
+    });
+    const even = weighed > 0 ? held / weighed : 1;
     places[ci].forEach(([x, y], n) => {
       const size = c.site.sizes[n];
       const r = Math.sqrt((size * c.lot) / PI);
-      // Its fields: its houses' share of the cell's, the less where its neighbours crowd it.
-      const fieldR = Math.sqrt(r * r + (c.pp.fields * size * perHouse) / c.site.crowd(x, y) / PI);
+      const fieldR = Math.sqrt(r * r + (c.pp.fields * size * perHouse * even) / c.site.crowd(x, y) / PI);
       // A settlement beyond the scene, or in a city's ground, is not drawn here; it has its spot all the same, and one
       // beyond the scene its fields.
       if (cityHere.some((h) => (x - h.x) ** 2 + (y - h.y) ** 2 < h.r * h.r)) return;

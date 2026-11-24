@@ -109,7 +109,9 @@ limits:
       people lived. It leans a cell's settlements toward its more crowded neighbours, so that a cell's edge is no line on
       the land, but cannot move people from one cell to the next: a river through one cell does not draw the people of
       the cell beside it. A stream too small for the world's rivers is not known, and does not draw them either; nor
-      does the sea's coast, which people who fished settled by.
+      does the sea's coast, which people who fished settled by. The scene draws its rivers to 34 km from its middle: the
+      ring of cells weighed past that, only so that those near the scene's edge are placed as a scene centred on them
+      would place them, is weighed as if it had no water near.
   - with: gen:life/scene
     note: >-
       The ground and the water a settlement is weighed by are the scene's, and two scenes that overlap draw them a little
