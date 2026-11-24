@@ -705,6 +705,33 @@ describe('where settlements stand, and what they farm (sites.ts)', () => {
     expect(worst).toBeGreaterThan(P.siting.gap - 0.5);
   });
 
+  it("keeps two settlements' grounds apart across the edge of a cell of farmsteads and a cell of large villages", () => {
+    // Columns of cells of crowded farmsteads and of crowded villages in turn: across their edges the nearer of the two
+    // cells' spacings is the farmsteads', which a village's ground is wider than.
+    const mixed = world((_r, c) => (c % 2 ? { code: 23, density: 260, region: 1 } : { code: 33, density: 120, region: 1 }), [{ id: 1, a: assess(1, 1, 3, 2) }]);
+    const plan = makeSettlement(spec(mixed), flat, dry, EXTENT);
+    const s = plan.settlements.filter((x) => !x.city);
+    expect(new Set(s.map((x) => x.pattern)).size).toBeGreaterThan(1);
+    const P = gen.params as { household: number; siting: { gap: number }; patterns: Record<string, { lot: number }> };
+    const ground = (x: (typeof s)[number]) => Math.sqrt(((x.people / P.household) * P.patterns[x.pattern].lot) / Math.PI);
+    const B = 1000;
+    const at = new Map<string, number[]>();
+    s.forEach((x, i) => {
+      const key = `${Math.floor(x.x / B)},${Math.floor(x.y / B)}`;
+      (at.get(key) ?? at.set(key, []).get(key)!).push(i);
+    });
+    let worst = Infinity;
+    s.forEach((a, i) => {
+      for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) {
+        for (const j of at.get(`${Math.floor(a.x / B) + dx},${Math.floor(a.y / B) + dy}`) ?? []) {
+          if (j <= i) continue;
+          worst = Math.min(worst, Math.hypot(a.x - s[j].x, a.y - s[j].y) - ground(a) - ground(s[j]));
+        }
+      }
+    });
+    expect(worst).toBeGreaterThan(P.siting.gap - 0.5);
+  });
+
   it('asks the world for its people as far as the cells it weighs reach, and a cell beyond', () => {
     // The ring of cells weighed about a scene reaches its extent, the growth's margin and two cells more (its outermost
     // begin a cell past the margin); they read their neighbours' crowding, a cell further again.

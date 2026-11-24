@@ -69,6 +69,7 @@ checks:
   - { test: world/generators/people/settlement/v9.test.ts, holds: "takes the record's siting and growth where a build has none" }
   - { test: world/generators/people/settlement/v9.test.ts, holds: "asks the world for its people as far as the cells it weighs reach, and a cell beyond" }
   - { test: world/generators/people/settlement/v9.test.ts, holds: "keeps two settlements' grounds apart where a cell has little room for them" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "keeps two settlements' grounds apart across the edge of a cell of farmsteads and a cell of large villages" }
   - { test: world/generators/people/settlement/v9.test.ts, holds: "grows the fields of a house that stands where nothing is farmed from the land about it" }
   - { test: world/generators/people/settlement/v9.test.ts, holds: "puts a settlement in the same place from two overlapping scenes of a plain with a river and hills" }
   - { test: world/generators/people/settlement/v9.test.ts, holds: "draws its settlements in many sizes within their range, the larger on the better ground" }

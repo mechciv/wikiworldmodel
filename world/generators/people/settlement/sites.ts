@@ -472,16 +472,10 @@ export function siteCells(cells: SiteCell[], worth: SiteWorth, p: SitingParams):
     chosen.add(x, y, ci);
     out[ci].push([x, y, k]);
   };
-  for (let i = 0; i < taken.n; i++) {
-    const ci = taken.tag[i];
-    if (out[ci].length >= cells[ci].sizes.length) continue;
-    choose(taken.xs[i], taken.ys[i], ci, takenK[i]);
-  }
   // Whether a settlement of a cell's next size would keep its ground, a disc as large as its houses' lots, its gap from
   // every other settlement's there. A layout may spread its houses a little past that disc (layOut), and no further check
   // is made of it here.
   let widest = 0;
-  for (const r of reach) widest = Math.max(widest, r);
   const room = (c: Candidate): number => {
     const cell = cells[c.cell];
     const own = Math.sqrt((cell.sizes[out[c.cell].length] * cell.lot) / Math.PI);
@@ -491,6 +485,21 @@ export function siteCells(cells: SiteCell[], worth: SiteWorth, p: SitingParams):
     });
     return crowded ? -1 : own;
   };
+  // The places taken first, in turn, each where its ground keeps clear of those chosen before it. Within a cell their
+  // spacing sees to that; across a cell's edge the nearer of two cells' spacings does not, where a cell of hamlets meets
+  // one of towns. A place passed over so is weighed again with the rest.
+  for (let i = 0; i < taken.n; i++) {
+    const ci = taken.tag[i];
+    if (out[ci].length >= cells[ci].sizes.length) continue;
+    const c: Candidate = { x: taken.xs[i], y: taken.ys[i], key: 0, cell: ci, k: takenK[i] };
+    const own = room(c);
+    if (own < 0) {
+      rest.push(c);
+      continue;
+    }
+    choose(c.x, c.y, ci, c.k);
+    widest = Math.max(widest, own);
+  }
   // A cell whose ground had too few places for its settlements at its spacing takes more at half of it, from those passed
   // over, and then any where its houses keep their gap from every other settlement's. Where even those run out, the cell
   // has no more room for houses, and its last settlements are not drawn.
