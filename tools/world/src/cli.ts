@@ -2,14 +2,26 @@
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
+import { putBlob, stageBlobsFromGit } from './blobs.ts';
+import type { CompressionEncoding } from './compress.ts';
 import { fetchAll } from './fetch.ts';
 import { fieldSource, importBlocks, importElevation, tiledField } from './importer.ts';
+import { loadManifest, resolveDatasetFile } from './manifest.ts';
 import { exportSnapshot, type OhmSnapshot } from './ohm.ts';
 import { REPO } from './paths.ts';
 import { loadWorld } from './world.ts';
 
+async function saveSnapshotBlob(content: string | Uint8Array, filename: string, extra = ''): Promise<void> {
+  const { sha256: hash, bytes, path } = await putBlob(content);
+  console.log(`stored blob → ${path}`);
+  console.log(
+    `In world/manifest.yaml point the dataset at:\n  url: blob:${hash}\n  filename: ${filename}\n  sha256: ${hash}\n  bytes: ${bytes}${extra ? `\n${extra}` : ''}\nThen upload with \`tools/world/publish-snapshots.sh\`.`,
+  );
+}
+
 const commands: Record<string, (args: string[]) => Promise<number | void>> = {
-  // Every dataset, or only those named: `npm run fetch -- src:paleomap-plate-model`.
+  // Every dataset, or only those named (plus `--snapshots` for all `blob:` snapshots):
+  // `npm run fetch -- src:paleomap-plate-model --snapshots`.
   async fetch(ids) {
     await fetchAll(console.log, ids);
   },
@@ -20,53 +32,47 @@ const commands: Record<string, (args: string[]) => Promise<number | void>> = {
       await (fieldSource(f) === 'elevation' ? importElevation(f) : importBlocks(f));
     }
   },
-  // A fresh extract of the map over the box of a snapshot kept in world/snapshots. The old file stays
-  // until the manifest is changed to the new one, as this prints.
-  async 'ohm-snapshot'([name = 'ohm-rome-2026-11-01']) {
-    const old = JSON.parse(readFileSync(join(REPO, 'world/snapshots', `${name}.json`), 'utf8')) as OhmSnapshot;
+  // A fresh extract of the map over the box of an existing OHM dataset in world/manifest.yaml, stored in the local blob store.
+  async 'ohm-snapshot'([datasetId = 'src:ohm-rome-2026-11-01']) {
+    const manifest = await loadManifest();
+    const d = manifest.datasets[datasetId] ?? Object.values(manifest.datasets).find((x) => x.fetch.filename === `${datasetId}.json`);
+    if (!d) throw new Error(`no OHM dataset "${datasetId}" in world/manifest.yaml`);
+    const old = JSON.parse(readFileSync(resolveDatasetFile(d.id, d), 'utf8')) as OhmSnapshot;
     const date = new Date().toISOString().slice(0, 10);
-    const file = `world/snapshots/${name.replace(/\d{4}-\d{2}-\d{2}$/, date)}.json`;
-    if (existsSync(join(REPO, file))) throw new Error(`${file} exists: one snapshot a day`);
+    const base = (d.fetch.filename ?? `${d.id.replace(/^src:/, '')}.json`).replace(/\.json$/, '');
+    const filename = `${base.replace(/\d{4}-\d{2}-\d{2}$/, date)}.json`;
     const snap = await exportSnapshot(old.bbox, date);
     const text = JSON.stringify(snap);
-    writeFileSync(join(REPO, file), text);
-    console.log(`${snap.elements.length} elements (${old.elements.length} before) → ${file}`);
-    console.log(`In world/manifest.yaml point the dataset at repo:${file}, sha256 ${createHash('sha256').update(text).digest('hex')}, ${Buffer.byteLength(text)} bytes.`);
+    console.log(`${snap.elements.length} elements (${old.elements.length} before) → ${filename}`);
+    await saveSnapshotBlob(text, filename);
   },
-  // A fresh extract of a formation from the Paleobiology Database, kept in world/snapshots. As with
-  // the map's, the old file stays until the manifest is changed to the new one.
+  // A fresh extract of a formation from the Paleobiology Database, stored in the local content-addressed blob store.
   async 'pbdb-snapshot'([formation = 'Hell Creek']) {
     const { exportSnapshot: exportPbdb } = await import('./pbdb.ts');
     const date = new Date().toISOString().slice(0, 10);
-    const file = `world/snapshots/pbdb-${formation.toLowerCase().replace(/[^a-z]+/g, '-')}-${date}.json`;
-    if (existsSync(join(REPO, file))) throw new Error(`${file} exists: one snapshot a day`);
+    const filename = `pbdb-${formation.toLowerCase().replace(/[^a-z]+/g, '-')}-${date}.json`;
     const snap = await exportPbdb(formation, date);
     const text = JSON.stringify(snap);
-    writeFileSync(join(REPO, file), text);
-    console.log(`${snap.occurrences.length} occurrences, ${snap.collections.length} collections, ${snap.taxa.length} taxa → ${file}`);
-    console.log(`In world/manifest.yaml point the dataset at repo:${file}, sha256 ${createHash('sha256').update(text).digest('hex')}, ${Buffer.byteLength(text)} bytes.`);
+    console.log(`${snap.occurrences.length} occurrences, ${snap.collections.length} collections, ${snap.taxa.length} taxa → ${filename}`);
+    await saveSnapshotBlob(text, filename);
   },
-  // The land's fossils from the Paleobiology Database, for the atlas of who lived where, kept in world/snapshots.
+  // The land's fossils from the Paleobiology Database, for the atlas of who lived where, stored in the local blob store.
   async 'pbdb-land'() {
     const { exportLand } = await import('./pbdb.ts');
     const date = new Date().toISOString().slice(0, 10);
-    const file = `world/snapshots/pbdb-land-${date}.json`;
-    if (existsSync(join(REPO, file))) throw new Error(`${file} exists: one snapshot a day`);
+    const filename = `pbdb-land-${date}.json`;
     const snap = await exportLand(date, console.log);
     const text = JSON.stringify(snap);
-    writeFileSync(join(REPO, file), text);
-    console.log(`${snap.rows.length} occurrences at ${snap.sites.length} sites, ${snap.taxa.length} taxa → ${file}`);
-    console.log(`In world/manifest.yaml point the dataset at repo:${file}, sha256 ${createHash('sha256').update(text).digest('hex')}, ${Buffer.byteLength(text)} bytes.`);
+    console.log(`${snap.rows.length} occurrences at ${snap.sites.length} sites, ${snap.taxa.length} taxa → ${filename}`);
+    await saveSnapshotBlob(text, filename);
   },
-  // The sea's fossils from the Paleobiology Database, for the atlas of who lived in the sea: too many to ask for at once,
-  // so a period at a time, and zipped in world/snapshots.
+  // The sea's fossils from the Paleobiology Database, zipped and stored in the local blob store.
   async 'pbdb-sea'() {
     const { exportFossils } = await import('./pbdb.ts');
     const { zipSync, strToU8 } = await import('fflate');
     const date = new Date().toISOString().slice(0, 10);
     const name = `pbdb-sea-${date}`;
-    const file = `world/snapshots/${name}.zip`;
-    if (existsSync(join(REPO, file))) throw new Error(`${file} exists: one snapshot a day`);
+    const filename = `${name}.zip`;
     // Spans to ask for one at a time, about a period long each, over the same 541 Myr as the land's: where they fall does
     // not matter, as an occurrence the service gives for two of them is kept once.
     const edges = [541, 485, 444, 419, 359, 299, 252, 201, 145, 66, 23, 0];
@@ -75,45 +81,38 @@ const commands: Record<string, (args: string[]) => Promise<number | void>> = {
     const member = `${name}.json`;
     // A fixed time on the member, so that the same rows make the same bytes.
     const zip = zipSync({ [member]: [json, { level: 9, mtime: new Date('2000-01-01T00:00:00Z') }] });
-    writeFileSync(join(REPO, file), zip);
-    console.log(`${snap.rows.length} occurrences at ${snap.sites.length} sites, ${snap.taxa.length} taxa → ${file}`);
-    console.log(`In world/manifest.yaml point the dataset at repo:${file}, sha256 ${createHash('sha256').update(zip).digest('hex')}, ${zip.length} bytes; its member ${member}, sha256 ${createHash('sha256').update(json).digest('hex')}.`);
+    console.log(`${snap.rows.length} occurrences at ${snap.sites.length} sites, ${snap.taxa.length} taxa → ${filename}`);
+    await saveSnapshotBlob(zip, filename, `  member ${member}, sha256 ${createHash('sha256').update(json).digest('hex')}`);
   },
-  // The rocks the Paleobiology Database's fossils lie in: every collection's lithologies, environment and measured ages,
-  // zipped in world/snapshots. Apart from the snapshots of occurrences, which name their collections by the same numbers.
+  // The rocks the Paleobiology Database's fossils lie in, zipped and stored in the local blob store.
   async 'pbdb-rocks'() {
     const { exportRocks } = await import('./pbdb.ts');
     const { zipSync, strToU8 } = await import('fflate');
     const date = new Date().toISOString().slice(0, 10);
     const name = `pbdb-rocks-${date}`;
-    const file = `world/snapshots/${name}.zip`;
-    if (existsSync(join(REPO, file))) throw new Error(`${file} exists: one snapshot a day`);
+    const filename = `${name}.zip`;
     const snap = await exportRocks(date, console.log);
     const json = strToU8(JSON.stringify(snap));
     const member = `${name}.json`;
     // A fixed time on the member, so that the same rows make the same bytes.
     const zip = zipSync({ [member]: [json, { level: 9, mtime: new Date('2000-01-01T00:00:00Z') }] });
-    writeFileSync(join(REPO, file), zip);
-    console.log(`${snap.collections.length} collections, ${snap.ages.length} measured ages → ${file}`);
-    console.log(`In world/manifest.yaml point the dataset at repo:${file}, sha256 ${createHash('sha256').update(zip).digest('hex')}, ${zip.length} bytes; its member ${member}, sha256 ${createHash('sha256').update(json).digest('hex')}.`);
+    console.log(`${snap.collections.length} collections, ${snap.ages.length} measured ages → ${filename}`);
+    await saveSnapshotBlob(zip, filename, `  member ${member}, sha256 ${createHash('sha256').update(json).digest('hex')}`);
   },
-  // Macrostrat's columns and their units, with their footprints and the references they name, zipped in world/snapshots:
-  // rock with ages, which a place's ground can be read from at any time (field:earth/strata).
+  // Macrostrat's columns and their units, zipped and stored in the local blob store.
   async 'macrostrat-snapshot'() {
     const { exportColumns } = await import('./macrostrat.ts');
     const { zipSync, strToU8 } = await import('fflate');
     const date = new Date().toISOString().slice(0, 10);
     const name = `macrostrat-columns-${date}`;
-    const file = `world/snapshots/${name}.zip`;
-    if (existsSync(join(REPO, file))) throw new Error(`${file} exists: one snapshot a day`);
+    const filename = `${name}.zip`;
     const snap = await exportColumns(date, console.log);
     const json = strToU8(JSON.stringify(snap));
     const member = `${name}.json`;
     // A fixed time on the member, so that the same rows make the same bytes.
     const zip = zipSync({ [member]: [json, { level: 9, mtime: new Date('2000-01-01T00:00:00Z') }] });
-    writeFileSync(join(REPO, file), zip);
-    console.log(`${snap.columns.length} columns, ${snap.units.length} units → ${file}`);
-    console.log(`In world/manifest.yaml point the dataset at repo:${file}, sha256 ${createHash('sha256').update(zip).digest('hex')}, ${zip.length} bytes; its member ${member}, sha256 ${createHash('sha256').update(json).digest('hex')}.`);
+    console.log(`${snap.columns.length} columns, ${snap.units.length} units → ${filename}`);
+    await saveSnapshotBlob(zip, filename, `  member ${member}, sha256 ${createHash('sha256').update(json).digest('hex')}`);
   },
   // What the rocks of a stage say near a place, by the latest build: `npm run world -- rocks -4.04 -43.18 123.7 Ma`.
   // The place is as it is today; the time is written as a record writes one.
@@ -132,44 +131,89 @@ const commands: Record<string, (args: string[]) => Promise<number | void>> = {
     }
     console.log(rocksText(found));
   },
-  // A fresh extract of NOAA's hazard databases, kept in world/snapshots.
+  // A fresh extract of NOAA's hazard databases, stored in the local blob store.
   async 'noaa-snapshot'() {
     const { exportHazards } = await import('./noaa.ts');
     const date = new Date().toISOString().slice(0, 10);
-    const file = `world/snapshots/noaa-hazards-${date}.json`;
-    if (existsSync(join(REPO, file))) throw new Error(`${file} exists: one snapshot a day`);
+    const filename = `noaa-hazards-${date}.json`;
     const snap = await exportHazards(date);
     const text = JSON.stringify(snap);
-    writeFileSync(join(REPO, file), text);
-    console.log(`${snap.rows.length} rows → ${file}`);
-    console.log(`In world/manifest.yaml point the dataset at repo:${file}, sha256 ${createHash('sha256').update(text).digest('hex')}, ${Buffer.byteLength(text)} bytes.`);
+    console.log(`${snap.rows.length} rows → ${filename}`);
+    await saveSnapshotBlob(text, filename);
   },
-  // HYDE 3.2.1's population grids, added up to a grid small enough to keep in world/snapshots. They are a
-  // fixed release, so this makes the same bytes every time, and has no date in its name.
+  // HYDE 3.2.1's population grids, coarsened and stored in the local blob store.
   async 'hyde-snapshot'() {
     const { exportPopulationGrid, SNAPSHOT } = await import('./hyde.ts');
     const text = await exportPopulationGrid();
-    writeFileSync(join(REPO, SNAPSHOT), text);
     console.log(`${text.split('\n').filter((l) => l && !l.startsWith('#')).length - 1} cells → ${SNAPSHOT}`);
-    console.log(`In world/manifest.yaml the dataset is repo:${SNAPSHOT}, sha256 ${createHash('sha256').update(text).digest('hex')}, ${Buffer.byteLength(text)} bytes.`);
+    await saveSnapshotBlob(text, SNAPSHOT);
   },
-  // SoilGrids 2.0's topsoil, averaged over half degrees and kept in world/snapshots. A fixed release, so this makes the
-  // same bytes every time, and has no date in its name.
+  // SoilGrids 2.0's topsoil, averaged over half degrees and stored in the local blob store.
   async 'soilgrids-snapshot'() {
     const { exportTopsoil, SNAPSHOT } = await import('./soilgrids.ts');
     const text = await exportTopsoil();
-    writeFileSync(join(REPO, SNAPSHOT), text);
     console.log(`${text.split('\n').filter((l) => l && !l.startsWith('#')).length - 1} cells → ${SNAPSHOT}`);
-    console.log(`In world/manifest.yaml the dataset is repo:${SNAPSHOT}, sha256 ${createHash('sha256').update(text).digest('hex')}, ${Buffer.byteLength(text)} bytes.`);
+    await saveSnapshotBlob(text, SNAPSHOT);
   },
-  // ArchaeoGLOBE's summary tables, joined into one table kept in world/snapshots. A fixed record version, so this makes the
-  // same bytes every time; it refuses a newer version until someone has read what changed.
+  // ArchaeoGLOBE's summary tables, joined into one table stored in the local blob store.
   async 'archaeoglobe-snapshot'() {
     const { exportAssessments, SNAPSHOT } = await import('./archaeoglobe.ts');
     const text = await exportAssessments();
-    writeFileSync(join(REPO, SNAPSHOT), text);
     console.log(`${text.split('\n').filter((l) => l && !l.startsWith('#')).length - 1} rows → ${SNAPSHOT}`);
-    console.log(`In world/manifest.yaml the dataset is repo:${SNAPSHOT}, sha256 ${createHash('sha256').update(text).digest('hex')}, ${Buffer.byteLength(text)} bytes.`);
+    await saveSnapshotBlob(text, SNAPSHOT);
+  },
+  // Stage missing snapshot blobs into .cache/blobs/<sha256> from a historical git revision.
+  async 'stage-blobs'(args) {
+    const i = args.indexOf('--from-git');
+    const rev = i >= 0 ? args[i + 1] : args[0] ?? 'HEAD~1';
+    const manifest = await loadManifest();
+    const r = await stageBlobsFromGit(manifest, rev, { log: console.log });
+    console.log(`stage-blobs: ${r.staged} staged, ${r.alreadyPresent} already present, ${r.missing.length} missing`);
+    if (r.missing.length) {
+      console.error(`missing snapshots: ${r.missing.join(', ')}`);
+      return 1;
+    }
+  },
+  // Upload the latest (or --id <buildId>) world build to the content-addressed R2/S3 blob store.
+  async 'publish-build'(args) {
+    const opt = (flag: string) => {
+      const idx = args.indexOf(flag);
+      return idx >= 0 ? args[idx + 1] : undefined;
+    };
+    const bucket = opt('--bucket') ?? process.env.BUILD_BUCKET;
+    if (!bucket) throw new Error('missing bucket: pass --bucket <name> or set BUILD_BUCKET');
+    const encoding = (opt('--encoding') ?? process.env.BLOB_ENCODING ?? 'br') as CompressionEncoding;
+    const { resolveS3Config, S3Client } = await import('./s3.ts');
+    const { publishBuild } = await import('./publish.ts');
+    const s3 = new S3Client(await resolveS3Config(bucket));
+    const r = await publishBuild({
+      buildId: opt('--id'),
+      s3,
+      encoding,
+      brotliQuality: opt('--quality') ? Number(opt('--quality')) : process.env.BLOB_BROTLI_QUALITY ? Number(process.env.BLOB_BROTLI_QUALITY) : undefined,
+      concurrency: opt('--concurrency') ? Number(opt('--concurrency')) : undefined,
+    });
+    if (args.includes('--print-json')) console.log(JSON.stringify(r));
+  },
+  // Upload every `blob:<sha256>` snapshot dataset in world/manifest.yaml to R2/S3 `blobs/<sha256>`.
+  async 'publish-snapshots'(args) {
+    const opt = (flag: string) => {
+      const idx = args.indexOf(flag);
+      return idx >= 0 ? args[idx + 1] : undefined;
+    };
+    const bucket = opt('--bucket') ?? process.env.SNAPSHOT_BUCKET ?? process.env.BUILD_BUCKET;
+    if (!bucket) throw new Error('missing bucket: pass --bucket <name> or set SNAPSHOT_BUCKET / BUILD_BUCKET');
+    const encoding = (opt('--encoding') ?? process.env.BLOB_ENCODING ?? 'br') as CompressionEncoding;
+    const { resolveS3Config, S3Client } = await import('./s3.ts');
+    const { publishSnapshots } = await import('./publish.ts');
+    const s3 = new S3Client(await resolveS3Config(bucket));
+    await publishSnapshots({
+      manifest: await loadManifest(),
+      s3,
+      encoding,
+      fromGit: opt('--from-git'),
+      concurrency: opt('--concurrency') ? Number(opt('--concurrency')) : undefined,
+    });
   },
   // What most wants a building tradition: `npm run world -- dwellings-wanted [--n 40] [--region 59] [--lifeway herders]`;
   // `--totals` for each time's people by way of life and how many a tradition houses; `--regions` for the regions' numbers.

@@ -12,7 +12,7 @@ import { readFile } from 'node:fs/promises';
 import type { Basis } from '../../../core/tileset.ts';
 export { rowRef } from '../../../core/refs.ts';
 import { parseTable } from './build/series.ts';
-import { datasetFile } from './manifest.ts';
+import { resolveDatasetFile } from './manifest.ts';
 import type { Citation, Field, World } from './world.ts';
 import { rockRows, type LandSnapshot, type RockRow, type RocksSnapshot } from './pbdb.ts';
 import { unitRows, type ColumnsSnapshot, type UnitRow } from './macrostrat.ts';
@@ -164,15 +164,15 @@ export async function rawRows(world: World, field: Field): Promise<Record<string
     return snap ? landRows(snap) : undefined;
   }
   if (field.data!.as === 'rock-record') {
-    const path = datasetFile(id, d, field.data!.file ?? (d.fetch.files ? Object.keys(d.fetch.files)[0] : undefined));
+    const path = resolveDatasetFile(id, d, field.data!.file ?? (d.fetch.files ? Object.keys(d.fetch.files)[0] : undefined));
     return existsSync(path) ? rockRows(JSON.parse(await readFile(path, 'utf8')) as RocksSnapshot) : undefined;
   }
   if (field.data!.as === 'strata') {
-    const path = datasetFile(id, d, field.data!.file ?? (d.fetch.files ? Object.keys(d.fetch.files)[0] : undefined));
+    const path = resolveDatasetFile(id, d, field.data!.file ?? (d.fetch.files ? Object.keys(d.fetch.files)[0] : undefined));
     return existsSync(path) ? unitRows(JSON.parse(await readFile(path, 'utf8')) as ColumnsSnapshot) : undefined;
   }
   const member = field.data!.file ?? (d.fetch.files ? Object.keys(d.fetch.files)[0] : undefined);
-  const path = datasetFile(id, d, member);
+  const path = resolveDatasetFile(id, d, member);
   if (!existsSync(path)) return undefined;
   const text = await readFile(path, 'utf8');
   if (d.fetch.format === 'csv' || d.fetch.format === 'tsv') return parseTable(text);

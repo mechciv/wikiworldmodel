@@ -1,28 +1,64 @@
 import { createReadStream, existsSync, statSync } from 'node:fs';
 import { extname, join, resolve } from 'node:path';
+import { createBrotliCompress, createGzip, constants as zlibConstants } from 'node:zlib';
 import { defineConfig, type Plugin } from 'vite';
 import { createFeedbackMiddleware } from '../tools/world/src/feedbackStore.ts';
 
-const REPO = resolve(__dirname, '..');
+const REPO = resolve(import.meta.dirname, '..');
 const BUILDS = resolve(REPO, 'dist/builds');
+const BUILD_BLOBS = resolve(REPO, '.cache/build/blobs');
 const FEEDBACK = process.env.WIKIWORLDMODEL_FEEDBACK_DIR ? resolve(process.env.WIKIWORLDMODEL_FEEDBACK_DIR) : resolve(REPO, '.feedback');
 
-const TYPES: Record<string, string> = { '.json': 'application/json', '.lwt': 'application/octet-stream' };
+const TYPES: Record<string, string> = { '.json': 'application/json', '.lwt': 'application/octet-stream', '.md': 'text/markdown; charset=utf-8' };
 
-/** Serve world builds (dist/builds) at /builds/ during development and preview. */
+function resolveBuildAsset(rel: string): { path: string; isBlob: boolean } | undefined {
+  const direct = join(BUILDS, rel);
+  if (direct.startsWith(BUILDS) && existsSync(direct) && statSync(direct).isFile()) {
+    return { path: direct, isBlob: rel.startsWith('blobs/') };
+  }
+  const m = /^blobs\/([0-9a-f]{64})$/.exec(rel);
+  if (m) {
+    const cached = join(BUILD_BLOBS, m[1]);
+    if (existsSync(cached) && statSync(cached).isFile()) {
+      return { path: cached, isBlob: true };
+    }
+  }
+  return undefined;
+}
+
+/** Serve world builds (dist/builds and content-addressed blobs/) at /builds/ during development and preview. */
 function builds(): Plugin {
-  const serve = (req: { url?: string }, res: import('node:http').ServerResponse, next: () => void) => {
+  const serve = (req: { url?: string; headers?: Record<string, string | string[] | undefined> }, res: import('node:http').ServerResponse, next: () => void) => {
     const url = (req.url ?? '').split('?')[0];
     if (!url.startsWith('/builds/')) return next();
-    const path = join(BUILDS, decodeURIComponent(url.slice('/builds/'.length)));
-    if (!path.startsWith(BUILDS) || !existsSync(path) || !statSync(path).isFile()) {
+    const rel = decodeURIComponent(url.slice('/builds/'.length));
+    const found = resolveBuildAsset(rel);
+    if (!found) {
       res.statusCode = 404;
       res.end();
       return;
     }
-    res.setHeader('Content-Type', TYPES[extname(path)] ?? 'application/octet-stream');
+    const ext = extname(found.path);
+    const stat = statSync(found.path);
+    res.setHeader('Content-Type', found.isBlob ? 'application/octet-stream' : (TYPES[ext] ?? 'application/octet-stream'));
     res.setHeader('Cache-Control', url.endsWith('index.json') ? 'no-cache' : 'public, max-age=31536000, immutable');
-    createReadStream(path).pipe(res);
+    const accept = String(req.headers?.['accept-encoding'] ?? '');
+    const compressible = stat.size >= 256 && (found.isBlob || ext === '.json' || ext === '.lwt' || ext === '.md' || ext === '.bin');
+    if (compressible && /\bbr\b/.test(accept)) {
+      res.setHeader('Content-Encoding', 'br');
+      res.setHeader('Vary', 'Accept-Encoding');
+      createReadStream(found.path)
+        .pipe(createBrotliCompress({ params: { [zlibConstants.BROTLI_PARAM_QUALITY]: 4 } }))
+        .pipe(res);
+      return;
+    }
+    if (compressible && /\bgzip\b/.test(accept)) {
+      res.setHeader('Content-Encoding', 'gzip');
+      res.setHeader('Vary', 'Accept-Encoding');
+      createReadStream(found.path).pipe(createGzip({ level: 4 })).pipe(res);
+      return;
+    }
+    createReadStream(found.path).pipe(res);
   };
   return {
     name: 'wikiworldmodel-builds',
@@ -42,15 +78,15 @@ function feedback(): Plugin {
 }
 
 export default defineConfig({
-  root: __dirname,
+  root: import.meta.dirname,
   base: './',
   plugins: [builds(), feedback()],
   server: { fs: { allow: [REPO] } },
   build: {
-    outDir: resolve(__dirname, '../dist/site'),
+    outDir: resolve(import.meta.dirname, '../dist/site'),
     emptyOutDir: true,
     target: 'es2022',
     // Two pages: the globe, and the coverage of the world (viewer/src/coverage).
-    rollupOptions: { input: { main: resolve(__dirname, 'index.html'), coverage: resolve(__dirname, 'coverage.html') } },
+    rollupOptions: { input: { main: resolve(import.meta.dirname, 'index.html'), coverage: resolve(import.meta.dirname, 'coverage.html') } },
   },
 });

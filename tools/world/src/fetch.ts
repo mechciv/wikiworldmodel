@@ -1,12 +1,16 @@
 // Download every dataset in world/manifest.yaml into .cache/, verifying checksums.
+// Snapshot datasets referenced as `blob:<sha256>` are fetched from the local content-addressed
+// blob cache (.cache/blobs/<sha256>) or the remote R2/S3 blob store (<store>/blobs/<sha256>).
 import { createWriteStream, existsSync } from 'node:fs';
 import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
+import { fileURLToPath } from 'node:url';
 import { unzipSync } from 'fflate';
-import { datasetDir, datasetPath, loadManifest, type Dataset } from './manifest.ts';
-import { REPO } from './paths.ts';
+import { blobPath, blobRemoteUrl, blobStoreUrls, DEFAULT_BLOB_PREFIX, isBlobUrl, linkOrCopy, parseBlobHash, snapshotDatasets } from './blobs.ts';
+import { datasetDir, datasetPath, loadManifest, type BlobStoreConfig, type Dataset } from './manifest.ts';
+import { BLOBS, REPO } from './paths.ts';
 import { sha256, sha256File } from './util.ts';
 
 /** A failure that asking again will not mend. */
@@ -77,49 +81,118 @@ async function get(url: string, tmp: string, net: Net): Promise<void> {
   await pipeline(Readable.fromWeb(res.body as import('node:stream/web').ReadableStream), createWriteStream(tmp));
 }
 
+export interface DownloadBlobOptions {
+  blobs?: BlobStoreConfig;
+  blobDir?: string;
+}
+
 /**
  * Download a dataset's file to `dest`. A try that fails is made again after a pause, a few times,
  * and a download given up says which dataset, which host and why.
+ *
+ * A `blob:<sha256>` URL is resolved from the local blob cache first, then from each configured
+ * R2/S3 blob store URL (`<store>/blobs/<sha256>`), verifying the hash and caching locally.
  */
-export async function download(id: string, url: string, dest: string, log: (s: string) => void, net: Net = NET): Promise<void> {
+export async function download(
+  id: string,
+  url: string,
+  dest: string,
+  log: (s: string) => void,
+  net: Net = NET,
+  blobOpts: DownloadBlobOptions = {},
+): Promise<void> {
   await mkdir(dirname(dest), { recursive: true });
   const tmp = `${dest}.part`;
-  // A snapshot of a changing database is kept in the repository until there is a blob store.
-  if (url.startsWith('repo:')) await writeFile(tmp, new Uint8Array(await readFile(join(REPO, url.slice('repo:'.length)))));
-  else {
-    const { host } = new URL(url);
-    for (let tries = 1; ; tries++) {
-      try {
-        await get(url, tmp, net);
-        break;
-      } catch (err) {
-        // Asking again mends neither a host's no nor a failure of this machine's own, as of a full
-        // disk. Node marks such a failure with the system call that failed; what the network failed
-        // at comes wrapped in fetch's own error, and is tried again.
-        const final = err instanceof Final || typeof (err as NodeJS.ErrnoException).syscall === 'string';
-        const pause = final ? undefined : PAUSES_S[tries - 1];
-        if (pause === undefined) {
-          await rm(tmp, { force: true }).catch(() => {});
-          throw new Error(`${id}: not downloaded from ${host}${tries > 1 ? ` in ${tries} tries` : ''}: ${reason(err)}`, { cause: err });
+  if (url.startsWith('repo:')) {
+    await writeFile(tmp, new Uint8Array(await readFile(join(REPO, url.slice('repo:'.length)))));
+    await rename(tmp, dest);
+    return;
+  }
+  if (isBlobUrl(url)) {
+    const hash = parseBlobHash(url);
+    if (!hash) throw new Error(`${id}: malformed blob URL "${url}" (expected blob:<64-hex-sha256>)`);
+    const blobDir = blobOpts.blobDir ?? BLOBS;
+    const localBlob = blobPath(hash, blobDir);
+    if (existsSync(localBlob) && (await sha256File(localBlob)) === hash) {
+      await linkOrCopy(localBlob, dest);
+      return;
+    }
+    const stores = blobStoreUrls(blobOpts.blobs);
+    const prefix = blobOpts.blobs?.prefix ?? DEFAULT_BLOB_PREFIX;
+    const errors: string[] = [];
+    for (const store of stores) {
+      const remote = blobRemoteUrl(store, hash, prefix);
+      if (remote.startsWith('file://')) {
+        const src = fileURLToPath(remote);
+        if (existsSync(src) && (await sha256File(src)) === hash) {
+          await linkOrCopy(src, localBlob);
+          await linkOrCopy(localBlob, dest);
+          return;
         }
-        log(`${id}: try ${tries} at ${host} failed, trying again in ${pause} s: ${reason(err)}`);
-        await net.pause(pause * 1000);
+        errors.push(`${remote}: not found or checksum mismatch`);
+        continue;
+      }
+      try {
+        await downloadHttp(id, remote, tmp, log, net);
+        const got = await sha256File(tmp);
+        if (got !== hash) {
+          await rm(tmp, { force: true }).catch(() => {});
+          throw new Error(`${id}: checksum mismatch from ${remote}\n  expected ${hash}\n  got      ${got}`);
+        }
+        await mkdir(blobDir, { recursive: true });
+        await rename(tmp, localBlob);
+        await linkOrCopy(localBlob, dest);
+        return;
+      } catch (err) {
+        await rm(tmp, { force: true }).catch(() => {});
+        errors.push(err instanceof Error ? err.message : String(err));
       }
     }
+    throw new Error(`${id}: blob ${hash} not available in ${blobDir} or remote stores (${errors.join('; ')})`);
   }
+  await downloadHttp(id, url, tmp, log, net);
   await rename(tmp, dest);
+}
+
+async function downloadHttp(id: string, url: string, tmp: string, log: (s: string) => void, net: Net): Promise<void> {
+  const { host } = new URL(url);
+  for (let tries = 1; ; tries++) {
+    try {
+      await get(url, tmp, net);
+      return;
+    } catch (err) {
+      // Asking again mends neither a host's no nor a failure of this machine's own, as of a full
+      // disk. Node marks such a failure with the system call that failed; what the network failed
+      // at comes wrapped in fetch's own error, and is tried again.
+      const final = err instanceof Final || typeof (err as NodeJS.ErrnoException).syscall === 'string';
+      const pause = final ? undefined : PAUSES_S[tries - 1];
+      if (pause === undefined) {
+        await rm(tmp, { force: true }).catch(() => {});
+        throw new Error(`${id}: not downloaded from ${host}${tries > 1 ? ` in ${tries} tries` : ''}: ${reason(err)}`, { cause: err });
+      }
+      log(`${id}: try ${tries} at ${host} failed, trying again in ${pause} s: ${reason(err)}`);
+      await net.pause(pause * 1000);
+    }
+  }
 }
 
 async function verified(path: string, expected: string): Promise<boolean> {
   return existsSync(path) && (await sha256File(path)) === expected;
 }
 
-async function fetchDataset(id: string, d: Dataset, log: (s: string) => void, net: Net): Promise<void> {
+async function fetchDataset(
+  id: string,
+  d: Dataset,
+  log: (s: string) => void,
+  net: Net,
+  blobs?: BlobStoreConfig,
+  blobDir: string = BLOBS,
+): Promise<void> {
   const path = datasetPath(id, d);
   const { url, sha256: expected, format, files } = d.fetch;
   if (!(await verified(path, expected))) {
     log(`${id}: downloading ${url}`);
-    await download(id, url, path, log, net);
+    await download(id, url, path, log, net, { blobs, blobDir });
     const got = await sha256File(path);
     if (got !== expected) {
       await rm(path);
@@ -143,11 +216,25 @@ async function fetchDataset(id: string, d: Dataset, log: (s: string) => void, ne
 }
 
 /**
- * Fetch every dataset in the manifest, or only those named. One already here with its checksum is
- * not downloaded again.
+ * Fetch every dataset in the manifest, or only those named (plus `--snapshots` for all
+ * content-addressed `blob:` snapshot datasets). One already here with its checksum is not
+ * downloaded again.
  */
-export async function fetchAll(log: (s: string) => void = console.log, only: string[] = [], net: Net = NET): Promise<void> {
+export async function fetchAll(
+  log: (s: string) => void = console.log,
+  only: string[] = [],
+  net: Net = NET,
+  opts: { blobDir?: string } = {},
+): Promise<void> {
   const manifest = await loadManifest();
-  for (const id of only) if (!manifest.datasets[id]) throw new Error(`${id} is not a dataset in the manifest`);
-  for (const [id, d] of Object.entries(manifest.datasets)) if (!only.length || only.includes(id)) await fetchDataset(id, d, log, net);
+  const wantSnapshots = only.includes('--snapshots');
+  const named = only.filter((x) => x !== '--snapshots');
+  for (const id of named) if (!manifest.datasets[id]) throw new Error(`${id} is not a dataset in the manifest`);
+  const selected = new Set<string>(named);
+  if (wantSnapshots) for (const [id] of snapshotDatasets(manifest)) selected.add(id);
+  const all = selected.size === 0 && !wantSnapshots;
+  for (const [id, d] of Object.entries(manifest.datasets)) {
+    if (all || selected.has(id)) await fetchDataset(id, d, log, net, manifest.blobs, opts.blobDir);
+  }
 }
+

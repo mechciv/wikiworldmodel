@@ -18,7 +18,7 @@ import type { SceneSpec } from '../../../core/scene.ts';
 import { fromMa, toMa } from '../../../core/time.ts';
 import type { FieldInfo, TileHeader, TileRef } from '../../../core/tileset.ts';
 import { latticeOf, placeSpec, platesNear, plateUnder, reliefBox, type PlaceWorld } from '../../../world/generators/life/spec.ts';
-import { getBytes, getJSON, type Build } from '../data.ts';
+import type { Build } from '../data.ts';
 import { Rivers } from '../rivers.ts';
 import { MonthTiles } from '../months.ts';
 import { monthsPlace, placeMonths } from '../../../world/generators/life/climate.ts';
@@ -95,7 +95,7 @@ export class LifeAtlas {
   private load(file: string): Promise<AtlasBin> {
     let p = this.bins.get(file);
     if (!p) {
-      p = getJSON<AtlasBin>(this.build.base + file).then((b) => {
+      p = this.build.getJSON<AtlasBin>(file).then((b) => {
         this.loadedBins.set(file, b);
         return b;
       });
@@ -112,7 +112,7 @@ export class LifeAtlas {
   private loadSea(file: string): Promise<SeaBin> {
     let p = this.seaBins.get(file);
     if (!p) {
-      p = getJSON<SeaBin>(this.build.base + file).then((b) => {
+      p = this.build.getJSON<SeaBin>(file).then((b) => {
         this.loadedSea.set(file, b);
         return b;
       });
@@ -147,7 +147,7 @@ export class LifeAtlas {
     const key = `${ref.id}|${ageMa}`;
     let p = this.fields.get(key);
     if (!p) {
-      p = getBytes(this.build.base + ref.url).then((buf) => {
+      p = this.build.getBytes(ref.url).then((buf) => {
         const { header, arrays } = decodeTile<TileHeader>(buf);
         const k = header.field?.keyframes.find((x) => x.ageMa === ageMa);
         return k ? { id: header.field!.id, grid: header.field!.grid, bbox: ref.bbox, elev: arrays[k.elev] as Int16Array, plate: arrays[k.plate] as Uint16Array } : undefined;
@@ -165,7 +165,7 @@ export class LifeAtlas {
   private reliefIndex(): Promise<ReliefInfo | undefined> {
     const file = this.build.tileset.files.relief;
     if (!file) return Promise.resolve(undefined);
-    return (this.reliefSent ??= getJSON<ReliefInfo>(this.build.base + file).catch(() => undefined));
+    return (this.reliefSent ??= this.build.getJSON<ReliefInfo>(file).catch(() => undefined));
   }
 
   /** The cells of the finer level's tiles around a place of today's Earth, by key, once they have come. */
@@ -175,7 +175,8 @@ export class LifeAtlas {
       keys.map((key) => {
         let p = this.fineSent.get(key);
         if (!p) {
-          p = getBytes(`${this.build.base}${info.fine.dir}/${key}.lwt`)
+          p = this.build
+            .getBytes(`${info.fine.dir}/${key}.lwt`)
             .then(async (buf) => {
               const { header, arrays } = decodeTile<ReliefFineHeader>(buf);
               const raw = arrays[header.codes] as Uint8Array;
@@ -300,7 +301,8 @@ export class LifeAtlas {
     if (!ref) return Promise.resolve(undefined);
     let p = this.rockBins.get(ref.file);
     if (!p) {
-      p = getJSON<RocksBin>(this.build.base + ref.file)
+      p = this.build
+        .getJSON<RocksBin>(ref.file)
         .then((bin) => {
           this.loadedRocks.set(ref.file, { bin, boxes: rockBoxes(bin) });
           return bin;
@@ -320,7 +322,8 @@ export class LifeAtlas {
     const file = this.build.substrate?.ground;
     const held = this.build.substrate?.held;
     if (!file || (held && !held.some(([older, younger]) => t >= older && t <= younger))) return Promise.resolve(undefined);
-    return (this.groundSent ??= getBytes(this.build.base + file)
+    return (this.groundSent ??= this.build
+      .getBytes(file)
       .then((buf) => {
         const { header, arrays } = decodeTile<GroundHeader>(buf);
         this.ground = { header, soil: header.soil ? (arrays[header.soil.array] as Uint8Array) : undefined, bedrock: header.bedrock ? (arrays[header.bedrock.array] as Uint8Array) : undefined };
@@ -337,7 +340,8 @@ export class LifeAtlas {
   private strataGrid(): Promise<StrataGrid | undefined> {
     const file = this.build.substrate?.strata;
     if (!file || !this.build.substrate?.rule.strata) return Promise.resolve(undefined);
-    return (this.strataSent ??= getBytes(this.build.base + file)
+    return (this.strataSent ??= this.build
+      .getBytes(file)
       .then((buf) => {
         const { header, arrays } = decodeTile<StrataHeader>(buf);
         this.strata = { header, rows: arrays[header.grid.rows] as Uint32Array, runs: arrays[header.grid.runs] as Uint16Array };
@@ -350,7 +354,8 @@ export class LifeAtlas {
   private strataFile(file: string): Promise<StrataColumns | undefined> {
     let p = this.strataFiles.get(file);
     if (!p) {
-      p = getJSON<StrataFile>(this.build.base + file)
+      p = this.build
+        .getJSON<StrataFile>(file)
         .then((f) => {
           const columns = strataColumns(f);
           this.loadedStrata.set(file, columns);
@@ -446,9 +451,9 @@ export class LifeAtlas {
     const sea = this.build.sea;
     const [bin, landForms, seaBin, seaForms, rockBin, ground] = await Promise.all([
       this.load(ref.file),
-      (this.forms ??= getJSON<Record<string, Form>>(this.build.base + this.index.forms)),
+      (this.forms ??= this.build.getJSON<Record<string, Form>>(this.index.forms)),
       seaRef && sea ? this.loadSea(seaRef.file) : Promise.resolve(undefined),
-      sea?.forms ? (this.seaForms ??= getJSON<Record<string, Form>>(this.build.base + sea.forms)) : Promise.resolve({} as Record<string, Form>),
+      sea?.forms ? (this.seaForms ??= this.build.getJSON<Record<string, Form>>(sea.forms)) : Promise.resolve({} as Record<string, Form>),
       this.rocksOf(ref),
       this.groundMaps(t),
       // The grid of the columns of rock comes with the rest; the place's own column is sent for below, once its place is known.

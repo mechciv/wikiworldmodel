@@ -68,14 +68,16 @@ jobs:
       # the fetch downloads only what that lacks.
       - uses: actions/cache@v6
         with:
-          path: .cache/datasets
+          path: |
+            .cache/datasets
+            .cache/blobs
           key: datasets-${{ hashFiles('world/manifest.yaml') }}
           restore-keys: datasets-
 
       - uses: actions/cache@v6
         with:
           path: .cache/import
-          key: import-${{ hashFiles('world/manifest.yaml', 'world/snapshots/**', 'tools/world/importers/**', 'tools/world/src/**', 'world/generators/**') }}
+          key: import-${{ hashFiles('world/manifest.yaml', 'tools/world/importers/**', 'tools/world/src/**', 'world/generators/**') }}
 
       - name: Fetch, build the world and the viewer
         run: |
@@ -155,14 +157,16 @@ jobs:
       # The datasets the world job fetched and saved, or else, as there, the newest set kept before.
       - uses: actions/cache@v6
         with:
-          path: .cache/datasets
+          path: |
+            .cache/datasets
+            .cache/blobs
           key: datasets-${{ hashFiles('world/manifest.yaml') }}
           restore-keys: datasets-
 
       - uses: actions/cache@v6
         with:
           path: .cache/import
-          key: import-${{ hashFiles('world/manifest.yaml', 'world/snapshots/**', 'tools/world/importers/**', 'tools/world/src/**', 'world/generators/**') }}
+          key: import-${{ hashFiles('world/manifest.yaml', 'tools/world/importers/**', 'tools/world/src/**', 'world/generators/**') }}
 
       # The build the render jobs drew, made on another machine: building it again here and
       # comparing checks it does not depend on where it was made.

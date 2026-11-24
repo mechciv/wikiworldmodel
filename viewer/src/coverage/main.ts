@@ -12,7 +12,7 @@ import { LAYERS, TIERS, type LayerId, type Tier } from '../../../core/resolve.ts
 import { formatDuration, formatTime, PRESENT_YEAR, timeToParam } from '../../../core/time.ts';
 import { positionOf, timeAt } from '../../../core/timescale.ts';
 import type { Tileset } from '../../../core/tileset.ts';
-import { builds, getJSON } from '../data.ts';
+import { builds, createBuildFetch, loadBuildManifest } from '../data.ts';
 import { rulerTicks } from '../ui/timebar.ts';
 import './coverage.css';
 
@@ -54,13 +54,14 @@ async function main() {
   const { latest, store } = await builds(ROOT);
   const id = params.get('b') ?? latest;
   const base = `${store}${id}/`;
-  const ts = await getJSON<Tileset>(`${base}tileset.json`);
+  const io = createBuildFetch(base, await loadBuildManifest(base));
+  const ts = await io.getJSON<Tileset>('tileset.json');
   const [cov, search, periods, series, info] = await Promise.all([
-    getJSON<CoverageFile>(base + ts.files.coverage),
-    getJSON<SearchFile>(base + ts.files.search),
-    getJSON<PeriodsFile>(base + ts.files.periods),
-    getJSON<SeriesFile>(base + ts.files.series),
-    getJSON<{ data?: { commit: string; dirty: boolean } }>(`${base}build.json`).catch(() => undefined),
+    io.getJSON<CoverageFile>(ts.files.coverage),
+    io.getJSON<SearchFile>(ts.files.search),
+    io.getJSON<PeriodsFile>(ts.files.periods),
+    io.getJSON<SeriesFile>(ts.files.series),
+    io.getJSON<{ data?: { commit: string; dirty: boolean } }>('build.json').catch(() => undefined),
   ]);
   const m = cov.matrix;
   if (!m) throw new Error(`Build ${id} has no coverage matrix: it was made before the coverage chart. Build the world again.`);

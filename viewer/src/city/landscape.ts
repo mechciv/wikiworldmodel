@@ -11,17 +11,7 @@ import type { LivingTaxon, ScenePeople } from '../../../core/scene.ts';
 import { EXTENT } from '../../../world/generators/life/scene/current.ts';
 import { peopleReach } from '../../../world/generators/people/settlement/sites.ts';
 
-async function getJSON<T>(url: string): Promise<T> {
-  const r = await fetch(url);
-  if (!r.ok) throw new Error(`${url}: HTTP ${r.status}`);
-  return (await r.json()) as T;
-}
-
-async function getBytes(url: string): Promise<ArrayBuffer> {
-  const r = await fetch(url);
-  if (!r.ok) throw new Error(`${url}: HTTP ${r.status}`);
-  return r.arrayBuffer();
-}
+import { createBuildFetch, type BuildFetch } from '../data.ts';
 
 /** What a place was, for a panel: its anthrome, the people HYDE gives it, how they lived, the region's word and the cities near. */
 export interface PlaceLandscape {
@@ -51,17 +41,20 @@ export class LandscapeAtlas {
   agriculture: Agriculture[] = [];
   cities!: CitiesFile;
   globe?: AnthromeTile;
+  private io: BuildFetch;
   private indexed: Promise<void> | null = null;
   private ready: Promise<void> | null = null;
   private tiles = new Map<string, Promise<AnthromeTile | undefined>>();
   private loaded = new Map<string, AnthromeTile | undefined>();
 
   /** `people` is HYDE's grid of people, once it has come; it is fetched for the scenes if no one has asked for it yet. */
-  constructor(private base: string, private file: string, private people: () => Promise<PeopleFile | null>) {}
+  constructor(source: BuildFetch | string, private file: string, private people: () => Promise<PeopleFile | null>) {
+    this.io = typeof source === 'string' ? createBuildFetch(source) : source;
+  }
 
   /** The index alone: what a scene is keyed by. A few kilobytes, fetched when the viewer starts. */
   loadIndex(): Promise<void> {
-    this.indexed ??= getJSON<LandscapeIndex>(this.base + this.file).then((ix) => {
+    this.indexed ??= this.io.getJSON<LandscapeIndex>(this.file).then((ix) => {
       this.index = ix;
     });
     return this.indexed;
@@ -71,7 +64,7 @@ export class LandscapeAtlas {
   load(): Promise<void> {
     this.ready ??= (async () => {
       await this.loadIndex();
-      const [a, tr, c] = await Promise.all([getJSON<AssessmentsFile>(this.base + this.index.assessments), getJSON<TraditionsFile>(this.base + this.index.traditions), getJSON<CitiesFile>(this.base + this.index.cities)]);
+      const [a, tr, c] = await Promise.all([this.io.getJSON<AssessmentsFile>(this.index.assessments), this.io.getJSON<TraditionsFile>(this.index.traditions), this.io.getJSON<CitiesFile>(this.index.cities)]);
       this.assessments = a;
       this.traditions = tr.traditions;
       this.husbandry = tr.husbandry ?? [];
@@ -87,7 +80,7 @@ export class LandscapeAtlas {
   async loadGlobe(): Promise<AnthromeTile> {
     await this.load();
     if (this.globe) return this.globe;
-    const { header, arrays } = decodeTile<AnthromeTileHeader>(await getBytes(this.base + this.index.globe.file));
+    const { header, arrays } = decodeTile<AnthromeTileHeader>(await this.io.getBytes(this.index.globe.file));
     this.globe = anthromeTile(header, arrays[0] as Uint8Array, arrays[1] as Uint8Array, arrays[2] as Uint8Array);
     return this.globe;
   }
@@ -103,7 +96,7 @@ export class LandscapeAtlas {
     let p = this.tiles.get(key);
     if (!p) {
       p = this.index.tiles.includes(key)
-        ? getBytes(`${this.base}people/anthromes/${key}.lwt`).then((data) => {
+        ? this.io.getBytes(`people/anthromes/${key}.lwt`).then((data) => {
             const { header, arrays } = decodeTile<AnthromeTileHeader>(data);
             const t = anthromeTile(header, arrays[0] as Uint8Array, arrays[1] as Uint8Array, arrays[2] as Uint8Array);
             this.loaded.set(key, t);

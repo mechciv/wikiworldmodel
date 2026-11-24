@@ -4,7 +4,7 @@ import { type CityFile, type CityStructure } from '../../../core/city.ts';
 import { lookup, type Scenario } from '../../../core/scenario.ts';
 import { cellBox, structureEntity } from '../../../world/generators/city/cells.ts';
 import { GroundSampler } from '../../../world/generators/city/ground.ts';
-import { getBytes, getJSON, type Build } from '../data.ts';
+import type { Build } from '../data.ts';
 import type { LocalRenderer } from '../gl/renderer.ts';
 import { settlePrint } from '../../../core/fingerprint.ts';
 import { CellScene } from './cellscene.ts';
@@ -32,9 +32,9 @@ export class CityScene extends CellScene {
 
   async load(): Promise<void> {
     const b = this.build;
-    this.file = await getJSON<CityFile>(b.base + this.path);
+    this.file = await b.getJSON<CityFile>(this.path);
     this.plan.expected = this.file.fabric.output;
-    const heights = await Promise.all(this.file.ground.map(async (g) => new Int16Array(await getBytes(b.base + g.url))));
+    const heights = await Promise.all(this.file.ground.map(async (g) => new Int16Array(await b.getBytes(g.url))));
     this.ground = new GroundSampler(this.file.ground.map((g, i) => ({ ...g, z: heights[i] })));
     this.renderer.setGround(this.file.ground, heights);
     await new Promise<void>((resolve, reject) => {

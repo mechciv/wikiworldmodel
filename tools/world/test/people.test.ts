@@ -8,10 +8,10 @@ import { describe, expect, it } from 'vitest';
 import { cellAt, gridSize, levelOf, peopleAt, rangeAt, stepsAround, type PeopleFile } from '../../../core/layers.ts';
 import { peopleTable } from '../src/build/layers.ts';
 import { centralDirectory, coarsen, inflate64, parseAsciiGrid, snapshotText, stepOf, type Member } from '../src/hyde.ts';
-import { loadManifest } from '../src/manifest.ts';
-import { REPO } from '../src/paths.ts';
+import { loadManifest, resolveDatasetFile } from '../src/manifest.ts';
 
 const fixture = new Uint8Array(readFileSync(join(import.meta.dirname, 'fixtures/deflate64.zip')));
+const manifest = await loadManifest();
 
 describe('reading HYDE’s archive', () => {
   it('finds a zip’s members from its tail', () => {
@@ -128,12 +128,12 @@ describe('reading HYDE’s archive', () => {
 });
 
 describe('the snapshot of HYDE’s grids', () => {
-  const path = 'world/snapshots/hyde-3.2.1-population-1deg.csv';
-  const text = readFileSync(join(REPO, path), 'utf8');
+  const filename = 'hyde-3.2.1-population-1deg.csv';
+  const text = readFileSync(resolveDatasetFile('src:hyde-3.2.1-population-grid', manifest.datasets['src:hyde-3.2.1-population-grid']), 'utf8');
   const t = peopleTable(text, 1);
   const n = t.cell.length;
   const series = new Map(
-    readFileSync(join(REPO, 'world/snapshots/hyde-3.2.1-world-population.csv'), 'utf8')
+    readFileSync(resolveDatasetFile('src:hyde-3.2.1-world-population', manifest.datasets['src:hyde-3.2.1-world-population']), 'utf8')
       .split('\n')
       .filter((l) => /^-?\d/.test(l))
       .map((l) => l.split(',').map(Number) as [number, number]),
@@ -146,7 +146,8 @@ describe('the snapshot of HYDE’s grids', () => {
 
   it('is the file the manifest pins', async () => {
     const d = (await loadManifest()).datasets['src:hyde-3.2.1-population-grid'];
-    expect(d.fetch.url).toBe(`repo:${path}`);
+    expect(d.fetch.url).toBe(`blob:${d.fetch.sha256}`);
+    expect(d.fetch.filename).toBe(filename);
     expect(createHash('sha256').update(text).digest('hex')).toBe(d.fetch.sha256);
     expect(Buffer.byteLength(text)).toBe(d.fetch.bytes);
     expect((await loadManifest()).publish.licenses).toContain(d.license);

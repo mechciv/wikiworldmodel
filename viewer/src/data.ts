@@ -1,8 +1,8 @@
-// Loading a build: its index files, and records on demand. Every URL is under the build's
-// own directory, so a link that names a build keeps showing that build. The builds' directories
-// are where the index of builds says: beside it, or in the object storage the public site uses.
+// Loading a build: its index files, and records on demand. Every build with a `manifest.json`
+// resolves logical paths to immutable content-addressed blobs (`blobs/<sha256>`), while legacy
+// builds without `manifest.json` fall back transparently to direct URLs under the build directory.
 import type { PlanetFile } from '../../core/planet.ts';
-import { buildStore, type BuildIndex, type EntityRecord, type PeriodsFile, type SearchFile, type SeriesFile } from '../../core/records.ts';
+import { buildFileUrl, buildStore, type BuildIndex, type BuildManifest, type EntityRecord, type PeriodsFile, type SearchFile, type SeriesFile } from '../../core/records.ts';
 import { PlateModels, RotationModel } from '../../core/rotation-model.ts';
 import { PRESENT_YEAR } from '../../core/time.ts';
 import type { AtlasIndex, SeaIndex } from '../../core/atlas.ts';
@@ -11,9 +11,17 @@ import type { RocksIndex } from '../../core/rocks.ts';
 import type { SubstrateFile } from '../../core/substrate.ts';
 import type { FramesFile, Tileset } from '../../core/tileset.ts';
 
-export interface Build {
-  id: string;
+/** Resolve and fetch logical build files through a content-addressed manifest when present. */
+export interface BuildFetch {
   base: string;
+  manifest?: BuildManifest;
+  url(path: string): string;
+  getJSON<T>(path: string): Promise<T>;
+  getBytes(path: string): Promise<ArrayBuffer>;
+}
+
+export interface Build extends BuildFetch {
+  id: string;
   tileset: Tileset;
   frames: FramesFile;
   /** the plate model the records' frames move with */
@@ -34,21 +42,41 @@ export interface Build {
   substrate?: SubstrateFile;
 }
 
-/** Every URL the viewer fetched, in order; tests read it to check what scrubbing loads. */
+/** Every logical URL the viewer fetched, in order; tests read it to check what scrubbing loads. */
 export const fetchLog: string[] = [];
 
-export async function getJSON<T>(url: string): Promise<T> {
-  fetchLog.push(url);
+export async function getJSON<T>(url: string, logUrl: string = url): Promise<T> {
+  fetchLog.push(logUrl);
   const res = await fetch(url);
   if (!res.ok) throw new Error(`${url}: HTTP ${res.status}`);
   return (await res.json()) as T;
 }
 
-export async function getBytes(url: string): Promise<ArrayBuffer> {
-  fetchLog.push(url);
+export async function getBytes(url: string, logUrl: string = url): Promise<ArrayBuffer> {
+  fetchLog.push(logUrl);
   const res = await fetch(url);
   if (!res.ok) throw new Error(`${url}: HTTP ${res.status}`);
   return res.arrayBuffer();
+}
+
+/** Fetch `<base>manifest.json` if present, returning `undefined` on 404 for legacy builds. */
+export async function loadBuildManifest(base: string): Promise<BuildManifest | undefined> {
+  const res = await fetch(`${base}manifest.json`);
+  if (res.status === 404) return undefined;
+  if (!res.ok) throw new Error(`${base}manifest.json: HTTP ${res.status}`);
+  return (await res.json()) as BuildManifest;
+}
+
+/** Build-scoped fetcher that hits immutable content-addressed blobs while logging logical URLs. */
+export function createBuildFetch(base: string, manifest?: BuildManifest): BuildFetch {
+  const url = (path: string) => buildFileUrl(base, path, manifest);
+  return {
+    base,
+    ...(manifest ? { manifest } : {}),
+    url,
+    getJSON: <T>(path: string) => getJSON<T>(url(path), base + path),
+    getBytes: (path: string) => getBytes(url(path), base + path),
+  };
 }
 
 /** The builds of a viewer at `root` (an absolute URL ending in a slash): the latest's id, and the directory they are in. */
@@ -61,18 +89,20 @@ export async function builds(root: string): Promise<{ latest: string; store: str
 /** A build from `store`, the directory the builds are in. */
 export async function loadBuild(store: string, id: string): Promise<Build> {
   const base = `${store}${id}/`;
-  const tileset = await getJSON<Tileset>(`${base}tileset.json`);
+  const manifest = await loadBuildManifest(base);
+  const io = createBuildFetch(base, manifest);
+  const tileset = await io.getJSON<Tileset>('tileset.json');
   const [frames, periods, search, series, planet, features, atlas, sea, rocks, substrate] = await Promise.all([
-    getJSON<FramesFile>(base + tileset.files.frames),
-    getJSON<PeriodsFile>(base + tileset.files.periods),
-    getJSON<SearchFile>(base + tileset.files.search),
-    getJSON<SeriesFile>(base + tileset.files.series),
-    getJSON<PlanetFile>(base + tileset.files.planet),
-    getJSON<FeatureIndex>(base + tileset.files.features),
-    tileset.files.atlas ? getJSON<AtlasIndex>(base + tileset.files.atlas) : Promise.resolve(undefined),
-    tileset.files.sea ? getJSON<SeaIndex>(base + tileset.files.sea) : Promise.resolve(undefined),
-    tileset.files.rocks ? getJSON<RocksIndex>(base + tileset.files.rocks) : Promise.resolve(undefined),
-    tileset.files.substrate ? getJSON<SubstrateFile>(base + tileset.files.substrate) : Promise.resolve(undefined),
+    io.getJSON<FramesFile>(tileset.files.frames),
+    io.getJSON<PeriodsFile>(tileset.files.periods),
+    io.getJSON<SearchFile>(tileset.files.search),
+    io.getJSON<SeriesFile>(tileset.files.series),
+    io.getJSON<PlanetFile>(tileset.files.planet),
+    io.getJSON<FeatureIndex>(tileset.files.features),
+    tileset.files.atlas ? io.getJSON<AtlasIndex>(tileset.files.atlas) : Promise.resolve(undefined),
+    tileset.files.sea ? io.getJSON<SeaIndex>(tileset.files.sea) : Promise.resolve(undefined),
+    tileset.files.rocks ? io.getJSON<RocksIndex>(tileset.files.rocks) : Promise.resolve(undefined),
+    tileset.files.substrate ? io.getJSON<SubstrateFile>(tileset.files.substrate) : Promise.resolve(undefined),
   ]);
   // A period that still holds has no end; on the time axis it runs to the present.
   for (const p of periods.periods) {
@@ -81,7 +111,7 @@ export async function loadBuild(store: string, id: string): Promise<Build> {
   }
   const model = new RotationModel(frames.rotations);
   const plates = new PlateModels(model, (frames.models ?? []).map((m) => ({ source: m.source, offset: m.offset, model: new RotationModel(m.rotations) })));
-  return { id, base, tileset, frames, model, plates, periods, search, series, planet, features, atlas, sea, rocks, substrate };
+  return { id, ...io, tileset, frames, model, plates, periods, search, series, planet, features, atlas, sea, rocks, substrate };
 }
 
 const records = new Map<string, Promise<EntityRecord>>();
@@ -89,7 +119,7 @@ const records = new Map<string, Promise<EntityRecord>>();
 export function loadRecord(build: Build, id: string): Promise<EntityRecord> {
   let p = records.get(id);
   if (!p) {
-    p = getJSON<EntityRecord>(`${build.base}${build.tileset.files.records}${id}.json`);
+    p = build.getJSON<EntityRecord>(`${build.tileset.files.records}${id}.json`);
     records.set(id, p);
   }
   return p;

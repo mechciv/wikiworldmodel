@@ -338,3 +338,28 @@ export function buildStore(index: Pick<BuildIndex, 'store'>, indexUrl: string): 
   const store = new URL(index.store ?? './', indexUrl).href;
   return store.endsWith('/') ? store : `${store}/`;
 }
+
+/**
+ * Per-build manifest mapping each logical file path in the build to its content-addressed SHA-256
+ * blob in the shared immutable store (`blobs/<sha256>`). Published builds upload only new blobs
+ * plus this small manifest per `buildId`, deduplicating unchanged tiles and records across builds.
+ */
+export interface BuildManifest {
+  format: 'lightworld-manifest@1';
+  build: string;
+  /** URL of the content-addressed blob directory, absolute or relative to the build directory (e.g. "../blobs/"). */
+  blobs: string;
+  /** Logical build path (e.g. "tiles/0/0-0/b0.lwt") → lowercase hex SHA-256 content hash. */
+  files: Record<string, string>;
+}
+
+/** Resolve a logical path inside a build to its fetch URL, using the content-addressed blob store when a manifest maps it. */
+export function buildFileUrl(base: string, path: string, manifest?: Pick<BuildManifest, 'blobs' | 'files'>): string {
+  const hash = manifest?.files[path];
+  if (hash) {
+    const blobs = new URL(manifest.blobs, base).href;
+    return `${blobs.endsWith('/') ? blobs : `${blobs}/`}${hash}`;
+  }
+  return base + path;
+}
+

@@ -67,7 +67,9 @@ jobs:
       # The set is saved again, under the new key, when the job passes.
       - uses: actions/cache@v6
         with:
-          path: .cache/datasets
+          path: |
+            .cache/datasets
+            .cache/blobs
           key: datasets-${{ hashFiles('world/manifest.yaml') }}
           restore-keys: datasets-
 
@@ -76,7 +78,16 @@ jobs:
       - uses: actions/cache@v6
         with:
           path: .cache/import
-          key: import-${{ hashFiles('world/manifest.yaml', 'world/snapshots/**', 'tools/world/importers/**', 'tools/world/src/**', 'world/generators/**') }}
+          key: import-${{ hashFiles('world/manifest.yaml', 'tools/world/importers/**', 'tools/world/src/**', 'world/generators/**') }}
+
+      # Content-addressed DAG build stages and blobs: unchanged stages hit cache across builds.
+      - uses: actions/cache@v6
+        with:
+          path: .cache/build
+          key: build-dag-${{ hashFiles('world/manifest.yaml', 'tools/world/src/**', 'core/**', 'world/generators/**') }}-${{ github.run_id }}
+          restore-keys: |
+            build-dag-${{ hashFiles('world/manifest.yaml', 'tools/world/src/**', 'core/**', 'world/generators/**') }}-
+            build-dag-
 
       - name: Fetch the datasets
         run: npm run fetch

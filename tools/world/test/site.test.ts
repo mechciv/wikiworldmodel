@@ -83,4 +83,35 @@ describe('the public site', () => {
     put('builds/b-new/tiles/huge.lwt', 'x'.repeat(25 * 1024 * 1024 + 1));
     expect(() => assembleSite(opts)).toThrow(/huge\.lwt/);
   });
+
+  it('deduplicates content-addressed builds into world/builds/blobs/<sha256> when manifest.json is present', () => {
+    const { root, opts, put } = fixture();
+    const sharedHash = 'a'.repeat(64);
+    const tilesetHash = 'b'.repeat(64);
+    put(`builds/blobs/${sharedHash}`, 'identical-tile-bytes');
+    put(`builds/blobs/${tilesetHash}`, '{"format":"lightworld-tileset@4","build":"b-new"}');
+    put('builds/b-new/tileset.json', '{"format":"lightworld-tileset@4","build":"b-new"}');
+    put(
+      'builds/b-new/manifest.json',
+      JSON.stringify({
+        format: 'lightworld-manifest@1',
+        build: 'b-new',
+        blobs: '../blobs/',
+        files: {
+          'tileset.json': tilesetHash,
+          'tiles/0.lwt': sharedHash,
+          'tiles/1.lwt': sharedHash,
+        },
+      }),
+    );
+    assembleSite(opts);
+    const out = join(root, 'out');
+    expect(existsSync(join(out, 'world/builds/b-new/manifest.json'))).toBe(true);
+    expect(existsSync(join(out, 'world/builds/b-new/tileset.json'))).toBe(true);
+    expect(readFileSync(join(out, `world/builds/blobs/${sharedHash}`), 'utf8')).toBe('identical-tile-bytes');
+    expect(existsSync(join(out, `world/builds/blobs/${tilesetHash}`))).toBe(true);
+    // Individual duplicate logical paths are not duplicated under b-new/ when served via blobs/.
+    expect(existsSync(join(out, 'world/builds/b-new/tiles/0.lwt'))).toBe(false);
+    expect(existsSync(join(out, 'world/builds/b-new/tiles/1.lwt'))).toBe(false);
+  });
 });
