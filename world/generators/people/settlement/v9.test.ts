@@ -1042,20 +1042,26 @@ describe('the land worked beyond the scene', () => {
     // A city in the middle of one of the cells the scene holds whole, whose fields take most of that cell and no other.
     const cities = [{ name: 'Testopolis', country: 'Nowhere', lat: 0.042, lon: 0.042, people: 800000, field: 'field:people/cities-ancient', source: 'src:test', from: 'list' as const }];
     const withCity = { ...without, cities };
-    const scaleOf = (p: ScenePeople) => {
-      const plan = makeSettlement(spec(p), flat, dry, EXTENT);
-      return { scale: farScale(farLand(spec(p))!, plan, new LandUseMap(plan, flat, dry, 7), { lat: 0, lon: 0 }, EXTENT), plan };
+    const scaleOf = (p: ScenePeople, origin: { lat: number; lon: number }) => {
+      const plan = makeSettlement(spec(p, origin), flat, dry, EXTENT);
+      return { scale: farScale(farLand(spec(p, origin))!, plan, new LandUseMap(plan, flat, dry, 7), origin, EXTENT), plan };
     };
-    const plain = scaleOf(without);
-    const city = scaleOf(withCity);
-    expect(city.plan.settlements.some((s) => s.city === 'Testopolis')).toBe(true);
+    // Since version 9 a cell's settlements are not spread evenly over it (sites.ts), so leaving one cell out of the few a
+    // scene holds whole moves the scale a little of itself: the scales are averaged over scenes in a few places about the
+    // city, each holding it.
+    const origins = [{ lat: 0, lon: 0 }, { lat: 0.02, lon: -0.01 }, { lat: -0.015, lon: 0.02 }, { lat: 0.03, lon: 0.035 }];
+    const plains = origins.map((o) => scaleOf(without, o));
+    const cityScenes = origins.map((o) => scaleOf(withCity, o));
+    for (const c of cityScenes) expect(c.plan.settlements.some((s) => s.city === 'Testopolis')).toBe(true);
+    const mean = (l: { scale: number }[]) => l.reduce((a, x) => a + x.scale, 0) / l.length;
     // Where no tradition changes the settlements, the plan and the estimate agree, and the scale is about 1.
-    expect(plain.scale).toBeGreaterThan(0.8);
-    expect(plain.scale).toBeLessThan(1.25);
+    for (const p of plains) {
+      expect(p.scale).toBeGreaterThan(0.8);
+      expect(p.scale).toBeLessThan(1.25);
+    }
     // The cell the city's fields reach is left out, so the city moves the scale little. Counted, it would raise it by
-    // about a fifth. Since version 9 a cell's settlements are not spread evenly over it (sites.ts), so leaving one cell
-    // out of the few the scene holds whole moves the average a little of itself: within a twelfth.
-    expect(Math.abs(city.scale - plain.scale) / plain.scale).toBeLessThan(1 / 12);
+    // about a fifth.
+    expect(Math.abs(mean(cityScenes) - mean(plains)) / mean(plains)).toBeLessThan(0.05);
   });
 
   it('works fields where people farmed, pasture where they herded, and nothing for foragers, and builds where towns stood', () => {

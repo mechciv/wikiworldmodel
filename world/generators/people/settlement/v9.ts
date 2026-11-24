@@ -728,7 +728,10 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
   const crowdOf = (row: number, col: number): number => {
     if (row < 0 || col < 0 || row >= g.ny || col >= g.nx) return -1;
     const i = row * g.nx + col;
-    return g.anthrome[i] && g.density[i] > 0 ? g.density[i] : 0;
+    // A cell with no class is the sea or no land the world knows of: it says nothing of crowding, and is left out, so
+    // that a coast does not push settlements off it. Land of a class with no people is empty, and counts so.
+    if (!g.anthrome[i]) return -1;
+    return g.density[i] > 0 ? g.density[i] : 0;
   };
   const cellsOf: CellPeople[] = [];
   for (let row = 0; row < g.ny; row++) {
@@ -2756,7 +2759,14 @@ export class LandUseMap {
     };
     for (let j = 0; j < f.ny; j++) for (let i = 0; i < f.nx; i++) if (f.use[j * f.nx + i]) mark(f.x0 + i * f.cell, f.y0 + j * f.cell);
     for (let j = 0; j < this.across; j++) for (let i = 0; i < this.across; i++) if (this.yards[j * this.across + i]) mark((i + 0.5) * this.step - half, (j + 0.5) * this.step - half);
-    for (const l of plan.lanes) for (let q = 0; q + 1 < l.line.length; q += 2) mark(l.line[q], l.line[q + 1]);
+    // Along each lane, not at its corners only: a straight one may run far between them.
+    for (const l of plan.lanes) {
+      for (let q = 0; q + 3 < l.line.length; q += 2) {
+        const steps = Math.max(1, Math.ceil(Math.hypot(l.line[q + 2] - l.line[q], l.line[q + 3] - l.line[q + 1]) / (O / 2)));
+        for (let s = 0; s <= steps; s++) mark(l.line[q] + ((l.line[q + 2] - l.line[q]) * s) / steps, l.line[q + 1] + ((l.line[q + 3] - l.line[q + 1]) * s) / steps);
+      }
+      if (l.line.length === 2) mark(l.line[0], l.line[1]);
+    }
     this.occupied = new Uint8Array(occ.length);
     for (let j = 0; j < this.occN; j++) {
       for (let i = 0; i < this.occN; i++) {
