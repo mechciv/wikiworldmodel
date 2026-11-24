@@ -1,0 +1,225 @@
+id: people/traditions/roman-insula
+kind: tradition/building
+summary: >-
+  The apartment block (insula) of Rome under the Empire, the house of its lower and middle classes: a building of
+  several storeys standing clear of its neighbours, with one or more courts, its ground floor let as shops (tabernae)
+  and its upper floors as flats and rooms to different families. From Augustus's reign it stood on stone piers with
+  walls of concrete faced with burnt brick, and the law limited its height on the streets to seventy feet, under Trajan
+  to sixty. The fourth-century catalogue of the city counted some 44,000 to 46,600 insulae against about 1,790 houses of
+  the rich (people/traditions/roman-domus). Known here from Vitruvius, Strabo and Juvenal and from two reference works,
+  Smith's dictionary and Platner and Ashby; no excavation report of an insula, at Rome or Ostia, was read.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Apartment block (insula) of Imperial Rome }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: { ref: people/rulers/augustus@reign, edge: start }
+    source:
+      - ref: src:smith-1890-dictionary-of-antiquities
+        loc: 's.v. "Domus", III. Roman, p. 666 b'
+        quote: in the reign of Augustus the height of new houses in streets was limited to seventy feet
+      - ref: src:smith-1890-dictionary-of-antiquities
+        loc: 's.v. "Domus", III. Roman, p. 666 b'
+        quote: >-
+          gives some of the provisions of this Act … that houses, if several stories high, were to be built … on stone
+          piers, with walls of concrete and burnt brick … not of sun-dried clay, as had been the usual custom
+      - ref: src:smith-1890-dictionary-of-antiquities
+        loc: 's.v. "Domus", III. Roman, p. 664 b'
+        quote: No examples of fired bricks are known in Roman buildings till the time of Julius Caesar
+      - ref: src:strabo-geography
+        loc: "5.3.7 (C235), Loeb vol. 2, p. 403"
+        quote: Now Augustus Caesar concerned himself about such impairments of the city
+      - ref: src:strabo-geography
+        loc: "5.3.7 (C235), Loeb vol. 2, p. 405"
+        quote: >-
+          reducing the heights of the new buildings and forbidding that any structure on the public streets should rise
+          as high as seventy feet
+    method: expert-estimate
+    note: >-
+      The start of Augustus's reign. The house this record describes, of several storeys on stone piers with walls of
+      concrete and burnt brick, is in the dictionary's reading the house of Augustus's building law, whose provisions it
+      finds in Vitruvius (2.8.17); Strabo, a contemporary, gives the law's limit on height but no year; and fired brick
+      is not known in Rome before Caesar's time. The law came some time in the reign, and the record takes its start.
+      Insulae are older: the dictionary has them first mentioned in 456 BCE, citing Dionysius and Niebuhr, and a house of
+      three storeys in 218 BCE (Livy 21.62.3), and has the high houses built of sun-dried clay before the law. Those
+      earlier houses are not this record's, and are left to the generator.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in smith-1890-dictionary-of-antiquities-vol1.txt (sha256 6870cebc90dd52e4) and strabo-geography.txt (sha256 bfb8da583c6328bb), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
+  end:
+    prop: end
+    value: 368 CE
+    source:
+      ref: src:smith-1890-dictionary-of-antiquities
+      loc: 's.v. "Domus", III. Roman, p. 665 b'
+      quote: Projecting stories were forbidden in … 368 to be erected in Rome
+    method: expert-estimate
+    note: >-
+      An end of the evidence and not of the house. In A.D. 368 (Ammianus 27.9.8) storeys projecting over the street were
+      forbidden in Rome, so insulae were still being built; the dictionary adds that the ban was renewed by the emperors
+      Honorius and Theodosius, in the next century, without a year. When the insulae ceased to be built or lived in,
+      nothing read says. The quote leaves out the OCR's misreading of "A.D." by an ellipsis.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in smith-1890-dictionary-of-antiquities-vol1.txt (sha256 6870cebc90dd52e4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["44"] }
+    source:
+      - ref: src:vitruvius-de-architectura
+        loc: "2.8.17 (Gwilt's translation)"
+        quote: The Roman people by thus multiplying the number of stories in their houses are commodiously lodged.
+      - ref: src:smith-1890-dictionary-of-antiquities
+        loc: 's.v. "Domus", III. Roman, p. 665 a'
+        quote: >-
+          The number of insulae at Rome naturally exceeded that of the domus … which was compiled between A.D. 334 and
+          357, that there were at Rome 44,171 insulae and 1782 domus
+    method: editorial
+    note: >-
+      Region 44 (Southern Europe), which holds Rome, by its coordinates against the region outlines. The sources read
+      speak of Rome alone, and describe the insulae of no other town, Ostia's among them. The house is not claimed for
+      the rest of the region: the other towns of Italy, whose houses Mau found low (people/traditions/roman-domus), and
+      Greece and the Balkans.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in vitruvius-de-architectura.txt (sha256 aba7d4ceca3132c5) and smith-1890-dictionary-of-antiquities-vol1.txt (sha256 6870cebc90dd52e4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
+  lifeway:
+    prop: lifeway
+    value: [townspeople]
+    source:
+      - ref: src:smith-1890-dictionary-of-antiquities
+        loc: 's.v. "Domus", III. Roman, p. 665 a'
+        quote: >-
+          The insula, in which the lower and middle classes lived, was a building of several stories, let out in floors or
+          separate rooms to different families or persons.
+      - ref: src:vitruvius-de-architectura
+        loc: "2.8.17 (Gwilt's translation)"
+        quote: so that from the great population of the city innumerable houses would be required
+    method: editorial
+    note: >-
+      The house of the city's lower and middle classes, who rented its floors and rooms; Vitruvius has the houses raised
+      in height because the city's people were too many for its ground. It is not claimed for the countryside.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in smith-1890-dictionary-of-antiquities-vol1.txt (sha256 6870cebc90dd52e4) and vitruvius-de-architectura.txt (sha256 aba7d4ceca3132c5), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
+  prevalence:
+    prop: prevalence
+    value: most
+    source:
+      - ref: src:smith-1890-dictionary-of-antiquities
+        loc: 's.v. "Domus", III. Roman, p. 665 a'
+        quote: >-
+          The insula, in which the lower and middle classes lived, was a building of several stories, let out in floors or
+          separate rooms to different families or persons.
+      - ref: src:smith-1890-dictionary-of-antiquities
+        loc: 's.v. "Domus", III. Roman, p. 665 a'
+        quote: >-
+          The number of insulae at Rome naturally exceeded that of the domus … which was compiled between A.D. 334 and
+          357, that there were at Rome 44,171 insulae and 1782 domus
+      - ref: src:platner-ashby-1929
+        loc: "s.v. Insula, p. 281"
+        quote: Assigning to one-third of the 44,300 … insulae enumerated in Reg. (Brev. gives 46,602)
+      - ref: src:platner-ashby-1929
+        loc: "s.v. Insula, p. 281"
+        quote: adding 500 square metres for each of the 1790 domus
+      - ref: src:mau-1902-pompeii
+        loc: "chap. XXXIII, p. 245"
+        quote: >-
+          The ancient houses were relatively low, in most cases, if we except the crowded tenements of imperial Rome, not
+          exceeding two stories.
+    method: editorial
+    note: >-
+      Most of the people of Rome itself: the insula housed its lower and middle classes, and the fourth-century catalogue
+      of the city counted 44,171 insulae against 1,782 domus in Marquardt's figures as the dictionary gives them, or
+      44,300 by its regions and 46,602 in its summary against 1,790 domus in Platner and Ashby's. The word is the
+      record's reading for Rome. Mau has the ancient houses low, not over two storeys, but for the crowded tenements of
+      imperial Rome, and the region holds besides Italy's other towns Greece and the Balkans, where the house is not
+      claimed; the generator draws the word over all of it, and the house of the rich is the domus's
+      (people/traditions/roman-domus), with a word of its own. A count of buildings is not a count of people.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in smith-1890-dictionary-of-antiquities-vol1.txt (sha256 6870cebc90dd52e4), platner-ashby-1929-insulae.txt (sha256 c983672daa1c821a) and mau-1902-pompeii.txt (sha256 35b30b5906cc32ba), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
+  dwelling:
+    prop: dwelling
+    value: { plan: courtyard, court: true, storeys: { lo: 3, hi: 4 }, walls: fired-brick, roof_material: tile }
+    source:
+      - ref: src:platner-ashby-1929
+        loc: "s.v. Insula, p. 281"
+        quote: a house containing a number of apartments
+      - ref: src:smith-1890-dictionary-of-antiquities
+        loc: 's.v. "Domus", III. Roman, p. 665 a'
+        quote: >-
+          very much like one of the large hotels in modern cities, with one or more courts, and bounded on all sides by
+          streets
+      - ref: src:smith-1890-dictionary-of-antiquities
+        loc: 's.v. "Domus", III. Roman, p. 665 a'
+        quote: ground-floor was usually … in shops (tabernae), and the upper stories in flats or separate rooms
+      - ref: src:smith-1890-dictionary-of-antiquities
+        loc: 's.v. "Domus", III. Roman, p. 666 a'
+        quote: We find mention of a house three stories high
+      - ref: src:smith-1890-dictionary-of-antiquities
+        loc: 's.v. "Domus", III. Roman, p. 666 a'
+        quote: We have no express mention of any houses more than four stories high.
+      - ref: src:smith-1890-dictionary-of-antiquities
+        loc: 's.v. "Domus", III. Roman, p. 666 a'
+        quote: Augustus limited the height of houses to 70 feet, which implies that they had been built still higher
+      - ref: src:smith-1890-dictionary-of-antiquities
+        loc: 's.v. "Domus", III. Roman, p. 666 b'
+        quote: In Trajan's reign the limit of height for street houses was fixed at sixty feet
+      - ref: src:smith-1890-dictionary-of-antiquities
+        loc: 's.v. "Domus", III. Roman, p. 666 b'
+        quote: on stone piers, with walls of concrete and burnt brick … not of sun-dried clay, as had been the usual custom
+      - ref: src:smith-1890-dictionary-of-antiquities
+        loc: 's.v. "Caementum", p. 328 a'
+        quote: >-
+          faced with burnt brick, the earliest dated examples of which are to be found in the … This structure was largely
+          used in many of the most substantial buildings of Rome
+      - ref: src:vitruvius-de-architectura
+        loc: "2.8.17 (Gwilt's translation)"
+        quote: >-
+          Thus by means of stone piers or walls of burnt bricks or unsquared stones, which were tied together by the
+          timbers of the several floors, they obtained in the upper story excellent dining rooms.
+      - ref: src:strabo-geography
+        loc: "5.3.7 (C235), Loeb vol. 2, p. 405"
+        quote: >-
+          reducing the heights of the new buildings and forbidding that any structure on the public streets should rise
+          as high as seventy feet
+      - ref: src:juvenal-satires
+        loc: "3.190–202 (Ramsay's translation, p. 47)"
+        quote: smoke is pouring out of your third-floor attic above
+      - ref: src:juvenal-satires
+        loc: "3.190–202 (Ramsay's translation, p. 47)"
+        quote: >-
+          the last man to burn will be he who has nothing to shelter him from the rain but the tiles, where the gentle
+          doves lay their eggs
+    method: documentary
+    note: >-
+      A house of many apartments standing clear of its neighbours, likened by the dictionary to a large hotel with one or
+      more courts: so a courtyard plan. Its ground floor let as shops and its upper floors as flats or single rooms,
+      which the vocabulary has no words for, are said here and not drawn. Three to four storeys are those the sources
+      expressly mention, in the dictionary's account: a house of three storeys in 218 BCE, Martial's third storey and
+      Juvenal's poor in the fourth, under the roofs, which is Ramsay's third-floor attic over the ground floor. The
+      dictionary infers from Augustus's limit of seventy feet, which Strabo gives for the public streets, that some were
+      higher, and Trajan set the limit at sixty; no source read turns those into storeys, and none gives an insula's
+      size. The walls stood on stone piers and were of concrete faced with burnt brick, as the dictionary reads
+      Vitruvius (who names stone piers, walls of burnt brick and walls of unsquared stone) and as many of Rome's most
+      substantial buildings were built; fired brick, the face of the wall, is the vocabulary's nearest word. The
+      dictionary also has the upper storeys of the houses let for hire built of wood, and Nero's law requiring a hard
+      volcanic stone for the outer walls: neither is drawn. The roof was tiled, as Juvenal has the lodger at the top of a
+      burning house with nothing but the tiles over him; its shape is not described, nor the windows on the street in a
+      way the vocabulary can take. Platner and Ashby's 100 to 400 square metres an insula are their assumption for a
+      reckoning, not a measure, and are not written.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in platner-ashby-1929-insulae.txt (sha256 c983672daa1c821a), smith-1890-dictionary-of-antiquities-vol1.txt (sha256 6870cebc90dd52e4), vitruvius-de-architectura.txt (sha256 aba7d4ceca3132c5), strabo-geography.txt (sha256 bfb8da583c6328bb) and juvenal-satires.txt (sha256 deb861116f972168), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
+  settlement:
+    prop: settlement_form
+    value: { household: 40 }
+    source:
+      ref: src:platner-ashby-1929
+      loc: "s.v. Insula, p. 281"
+      quote: Calza computes the approximate population of Rome at the time of Constantine at 40 per insula, or roughly 1,800,000.
+    method: expert-estimate
+    note: >-
+      Forty people to an insula, Calza's reckoning for Rome under Constantine as Platner and Ashby report it, which gives
+      the city about 1,800,000 people. A reckoning and not a count, made for the capital; the whole block, with its shops
+      and flats, is the house here.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in platner-ashby-1929-insulae.txt (sha256 c983672daa1c821a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }

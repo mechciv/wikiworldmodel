@@ -1,0 +1,36 @@
+id: src:smith-1890-dictionary-of-antiquities
+type: publication
+kind: review
+citation: >-
+  Smith, W., Wayte, W. & Marindin, G.E. (eds) (1890). A Dictionary of Greek and Roman Antiquities, 3rd edition,
+  revised and enlarged, vol. 1. London: John Murray. The article "Domus" (pp. 654–687) is signed J. H. M. and W. S.,
+  J. H. Middleton (Slade Professor at Cambridge) and William Smith in the list of writers; "Caementum" (pp. 327–328)
+  is signed J. H. F.
+authors:
+  - "Smith, W."
+  - "Wayte, W."
+  - "Marindin, G.E."
+published: 1890
+title: A Dictionary of Greek and Roman Antiquities, vol. 1
+url: https://archive.org/details/dictionaryofgree0001will
+license: public domain
+via: >-
+  The Internet Archive's scan of the new impression of 1901 (John Murray; identifier dictionaryofgree0001will), read in
+  its OCR text, with the pages quoted looked at on its page images.
+reliability: >-
+  The standard English reference of its day, revised for this edition by its contributors. Its account of the Roman
+  house rests on the ancient writers, read through Becker, Marquardt and Friedländer, and on Pompeii as dug by the
+  1880s: what it says of the insulae, their height and the building laws of Augustus, Nero and Trajan are its readings
+  of Vitruvius, Strabo, Tacitus, Martial, Juvenal and Livy, and later work has refined them. Its figures from the
+  fourth-century catalogue of the city (44,171 insulae, 1,782 domus) are Marquardt's, and differ from other editions'.
+verified:
+  by: machine:claude-code
+  how: >-
+    Read on 24 November 2026 in the OCR text of the Internet Archive's scan of the 1901 impression: the Roman part of
+    the article "Domus" from its start to the domus of the republic (pp. 664 b–667), its later pages where they speak
+    of the atrium's light, the upper storeys and the shops of Pompeii (pp. 670 and 679), and the article "Caementum"
+    (pp. 327–328). Pages 328, 664, 665, 666 and 667, and the list of writers (pp. iv–v), were looked at on the
+    scan's page images, to confirm the words quoted, their pages and their columns, and the signatures. The OCR
+    misreads a few words (it has "A.D," for A.D. on p. 665 and "Mostra" for Rostra on p. 328), and the quotes leave
+    them out by an ellipsis. The quotes were checked by script against the OCR text. Google's scan of the 1890 printing
+    (adictionarygree00marigoog) has the same text on pp. 665–666, as far as its poorer OCR shows.

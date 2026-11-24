@@ -1,0 +1,28 @@
+id: src:mau-1902-pompeii
+type: publication
+kind: review
+citation: >-
+  Mau, A. (1902). Pompeii: Its Life and Art. Translated by F.W. Kelsey. New edition, revised and corrected. New York:
+  The Macmillan Company.
+authors:
+  - "Mau, A."
+published: 1902
+title: "Pompeii: Its Life and Art"
+url: https://www.gutenberg.org/ebooks/42715
+license: public domain
+via: >-
+  Project Gutenberg's e-text of the 1902 edition (EBook #42715, released 2013), read in the copy of its HTML file that
+  the Internet Archive keeps (pompeiiitslifean42715gut), as Project Gutenberg's own site was down for maintenance when
+  it was fetched. The e-text marks the printed book's pages, which the locators give.
+reliability: >-
+  An account of the town and its buildings for a wide readership by a scholar of the German Archaeological Institute in
+  Rome, who had studied Pompeii for twenty-five years, from the excavations as they stood about 1900 and from
+  Vitruvius. Its periods of building, the Tufa Period of about 200 to 90 BCE among them, and its account of how the
+  Italic house grew are its own reading; much has been dug and dated since.
+verified:
+  by: machine:claude-code
+  how: >-
+    Read on 24 November 2026 in the e-text, converted from its HTML with the printed page numbers kept: chapter VI on
+    building materials, masonry and the first four periods (pp. 35–40), and chapter XXXIII, the Pompeian house
+    (pp. 245–279), with its sections on the atrium, the rooms about it, the peristyle, the upper storeys, the shops, and
+    the walls and windows read closely. The quotes were checked by script against that text.
