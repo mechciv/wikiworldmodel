@@ -2935,7 +2935,7 @@ export class LandUseMap {
       const i1 = Math.min(this.across - 1, Math.floor((x + h + half) / this.step));
       const j0 = Math.max(0, Math.floor((y - h + half) / this.step));
       const j1 = Math.min(this.across - 1, Math.floor((y + h + half) / this.step));
-      for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) this.yards[j * this.across + i] = Math.max(this.yards[j * this.across + i], 170);
+      for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) this.yards[j * this.across + i] = Math.max(this.yards[j * this.across + i], 235);
     }
     // Internal town/planned streets, central plazas, and inter-settlement paths.
     for (const st of plan.streets) stampLine(st.line, st.width, st.paved ? 0.96 : 0.84);
