@@ -33,8 +33,26 @@ describe('a town through its life', () => {
       expect(q!.x).toBe(p.x);
       expect(q!.y).toBe(p.y);
     }
-    const lanes = new Map(b.lanes.map((l) => [l.id, l.line.join()]));
-    for (const l of a.lanes) expect(lanes.get(l.id)).toBe(l.line.join());
+    // Every stretch of lane drawn then lies within a stretch of the same lane drawn later: a lane runs on as the town
+    // reaches further along it, and never moves.
+    const laneLater = new Map<string, number[][]>();
+    for (const l of b.lanes) {
+      const base = l.id.split('#')[0];
+      (laneLater.get(base) ?? laneLater.set(base, []).get(base)!).push(l.line);
+    }
+    const within = (s: number[], t: number[]) => {
+      const [ax, ay, bx, by] = t;
+      const len = Math.hypot(bx - ax, by - ay);
+      const ux = (bx - ax) / len;
+      const uy = (by - ay) / len;
+      return [0, 2].every((k) => {
+        const px = s[k] - ax;
+        const py = s[k + 1] - ay;
+        const along = px * ux + py * uy;
+        return Math.abs(px * uy - py * ux) < 1e-6 && along > -1e-6 && along < len + 1e-6;
+      });
+    };
+    for (const l of a.lanes) expect(laneLater.get(l.id.split('#')[0])?.some((t) => within(l.line, t))).toBe(true);
   });
 
   it('gives up its outer plots first as its people fall', () => {

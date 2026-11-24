@@ -293,15 +293,44 @@ function ringRound(g: Growth, t: number, margin: number, grid?: DivisionGrid): n
   if (!e) return undefined;
   const n = Math.floor(cutAt(g, t, 0));
   if (n < 4) return undefined;
-  const { x0, y0, cell, nx } = g.grid;
+  const { x0, y0, cell, nx, ny } = g.grid;
+  // The town's body: what was built then, less the ribbons along its roads, which a wall left outside. An opening (an
+  // erosion and a dilation by the same number of cells) takes off whatever is narrower than some 120 m.
+  let mask = new Uint8Array(nx * ny);
+  for (let k = 0; k < n && k < e.order.length; k++) mask[e.order[k]] = 1;
+  const steps = Math.max(1, Math.round(60 / cell));
+  const grow = (m: Uint8Array, keep: 0 | 1) => {
+    const out = new Uint8Array(m.length);
+    for (let j = 0; j < ny; j++)
+      for (let i = 0; i < nx; i++) {
+        let v = keep;
+        for (let dj = -1; dj <= 1 && v === keep; dj++)
+          for (let di = -1; di <= 1; di++) {
+            const ii = i + di;
+            const jj = j + dj;
+            const w = ii < 0 || jj < 0 || ii >= nx || jj >= ny ? 0 : m[jj * nx + ii];
+            if (w !== keep) {
+              v = w as 0 | 1;
+              break;
+            }
+          }
+        out[j * nx + i] = v;
+      }
+    return out;
+  };
+  const before = mask;
+  for (let s = 0; s < steps; s++) mask = grow(mask, 1);
+  for (let s = 0; s < steps; s++) mask = grow(mask, 0);
+  // A town so small or so strung out that nothing is left of it keeps all it built.
+  if (!mask.some((v) => v)) mask = before;
   const B = 72;
   const far = new Float64Array(B);
   let ulo = Infinity;
   let uhi = -Infinity;
   let vlo = Infinity;
   let vhi = -Infinity;
-  for (let k = 0; k < n && k < e.order.length; k++) {
-    const c = e.order[k];
+  for (let c = 0; c < mask.length; c++) {
+    if (!mask[c]) continue;
     const x = x0 + ((c % nx) + 0.5) * cell;
     const y = y0 + (Math.floor(c / nx) + 0.5) * cell;
     const a = Math.atan2(y, x);
@@ -421,7 +450,7 @@ export function planTown(input: TownInput): TownPlan {
         }
       }
       const withRoutes = growSettlement({ cores: [{ x: 0, y: 0 }], routes: routes.map((r) => r.line), walls: [], ground: input.ground, people: input.members, span: input.span, ...(areas ? { areas } : {}), ...(input.growth ? { params: input.growth } : {}), cell: cell0 });
-      const ring = ringRound(withRoutes, when, p.wall_margin + input.wall.thickness / 2 + input.sizes.lane, grid);
+      const ring = ringRound(withRoutes, when, p.wall_margin + input.wall.thickness / 2 + input.sizes.lane, input.streets === 'grid' ? grid : undefined);
       if (ring) {
         const gates = routes.flatMap((r) => crossings(r.line, ring));
         wall = { ring, from, to, gates };
@@ -523,9 +552,28 @@ export function townAt(plan: TownPlan, t: number, member = 0, opts: { gradient?:
       need: any,
     });
     plan.divided.set(fi, d);
+    // A lane is drawn along the stretches of it that run by built ground: a grid's street does not run on across fields.
     for (const l of d.lanes) {
       const [ax, ay, bx, by] = l.line;
-      if (any(Math.min(ax, bx), Math.min(ay, by), Math.max(ax, bx), Math.max(ay, by))) lanes.push({ id: l.id, line: l.line, width: l.width });
+      if (!any(Math.min(ax, bx), Math.min(ay, by), Math.max(ax, bx), Math.max(ay, by))) continue;
+      const len = Math.hypot(bx - ax, by - ay);
+      const steps = Math.max(1, Math.ceil(len / (cell / 2)));
+      let from = -1;
+      let piece = 0;
+      for (let s = 0; s <= steps; s++) {
+        const u = s / steps;
+        const x = ax + (bx - ax) * u;
+        const y = ay + (by - ay) * u;
+        // Built within a cell of the lane, on either side.
+        const on = s < steps && any(x - cell, y - cell, x + cell, y + cell);
+        if (on && from < 0) from = s;
+        if (!on && from >= 0) {
+          const u0 = Math.max(0, (from - 0.5) / steps);
+          const u1 = Math.min(1, (s - 0.5) / steps);
+          if (u1 > u0) lanes.push({ id: `${l.id}#${piece++}`, line: [ax + (bx - ax) * u0, ay + (by - ay) * u0, ax + (bx - ax) * u1, ay + (by - ay) * u1], width: l.width });
+          from = -1;
+        }
+      }
     }
     for (const q of d.plots) {
       const c = Math.floor((q.y - y0) / cell) * nx + Math.floor((q.x - x0) / cell);

@@ -53,6 +53,13 @@ export interface GrowthParams {
   density: { at10k: number; beta: number; gradient: number; least: number; most: number };
 }
 
+/**
+ * The last year the model sizes its ground for (docs/plans/CITIES.md: the world after 1850 wants evidence of another
+ * kind), and the farthest its grid reaches from a settlement's point, m.
+ */
+export const HORIZON = 1900;
+export const REACH_MOST = 20000;
+
 export const GROWTH_DEFAULTS: GrowthParams = {
   route: 0.4,
   slope: { soft: 0.1, max: 0.4 },
@@ -356,11 +363,16 @@ function rankGround(input: GrowthInput, g: GrowthGrid, p: GrowthParams, walls: G
 export function growthGrid(input: Pick<GrowthInput, 'people' | 'areas' | 'params' | 'cell'>): { grid: GrowthGrid; at10k: number; params: GrowthParams } {
   const p = merge(input.params);
   const at10k = densityScale(input.people[0] ?? { t: [], people: [] }, input.areas, p.density);
+  // The most people it had up to the horizon this model draws to: a city of millions in the twentieth century is drawn
+  // by none of this, and its ground beyond the grid ranks after all that is in it, so its old core ranks the same.
   let maxHa = 0;
-  for (const s of input.people) for (const P of s.people) maxHa = Math.max(maxHa, areaFor(P, at10k, p.density));
+  for (const s of input.people) {
+    for (let i = 0; i < s.t.length; i++) if (s.t[i] <= HORIZON) maxHa = Math.max(maxHa, areaFor(s.people[i], at10k, p.density));
+    if (s.t.length && s.t[0] < HORIZON) maxHa = Math.max(maxHa, areaFor(peopleAt(s, HORIZON), at10k, p.density));
+  }
   const cell = input.cell ?? cellFor(maxHa);
   const radius = Math.sqrt((maxHa * 1e4) / Math.PI);
-  const reach = Math.max(radius * 3, cell * 8);
+  const reach = Math.min(REACH_MOST, Math.max(radius * 3, cell * 8));
   const nx = Math.max(8, Math.ceil((reach * 2) / cell));
   return { grid: { x0: -(nx * cell) / 2, y0: -(nx * cell) / 2, cell, nx, ny: nx }, at10k, params: p };
 }

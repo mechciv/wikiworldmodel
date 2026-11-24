@@ -332,8 +332,21 @@ describe('the settlement generator', () => {
         return false;
       };
       expect(a.mine.filter(near).length / a.mine.length).toBeGreaterThan(0.97);
-      const later = new Set(b.streets.map((s) => s.line.join()));
-      expect(a.streets.filter((s) => later.has(s.line.join())).length / a.streets.length).toBeGreaterThan(0.97);
+      // Each street of the earlier time runs within one of the later: streets run on as the city reaches along them.
+      const within = (s: number[], t: number[]) => {
+        if (s.length !== 4 || t.length !== 4) return s.join() === t.join();
+        const [ax, ay, bx, by] = t;
+        const len = Math.hypot(bx - ax, by - ay) || 1;
+        const ux = (bx - ax) / len;
+        const uy = (by - ay) / len;
+        return [0, 2].every((k) => {
+          const px = s[k] - ax;
+          const py = s[k + 1] - ay;
+          const along = px * ux + py * uy;
+          return Math.abs(px * uy - py * ux) < 1e-6 && along > -1e-6 && along < len + 1e-6;
+        });
+      };
+      expect(a.streets.filter((s) => b.streets.some((t) => within(s.line, t.line))).length / a.streets.length).toBeGreaterThan(0.97);
     });
 
     it('shrinks back to its oldest ground as its people fall', () => {
