@@ -254,10 +254,10 @@ params:
   # weighs a place by what people looked for in one, none of it a claim about any place. Fresh water: within `best` m a
   # place lacks nothing, and its worth falls off past it over `falloff` m, to `floor` where people dug wells or carried
   # water; the banks of any water, a river's flooded in a high year and a pond's or a lake's wet, are worth less, down
-  # to 0.3 of their worth within the first of `bank` m and back to the full by the second. Level ground keeps `floor` of its worth at a slope of `steep` across `over` m. A place a little up
-  # from the bottom of the ground about it, `best` m above the mean within `reach` m, is better than a crest or a wet
-  # bottom. The soil is a noise over the
-  # Earth at two scales, m. A town or a city draws settlements about it. A cell weighs `candidates` places for each of its
+  # to 0.3 of their worth within the first of `bank` m and back to the full by the second. Level ground keeps `floor` of
+  # its worth at a slope of `steep` across `over` m. A place a little up from the bottom of the ground about it, `best`
+  # m above the mean within `reach` m, is better than a crest or a wet bottom. The soil is a noise over the Earth at two
+  # scales, m. A town or a city draws settlements about it. A cell weighs `candidates` places for each of its
   # settlements (the fewest and the most a cell weighs), takes them by worth raised to `sharpness` against chance, keeps
   # them `spacing` of their mean spacing apart (and their houses `gap` m), and draws its settlements' sizes from its
   # range, the smaller oftener by `sizes`. Settlements gather: one place in `per` of a cell's is one the others gather

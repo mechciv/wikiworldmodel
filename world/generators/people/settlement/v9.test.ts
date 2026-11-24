@@ -746,7 +746,12 @@ describe('where settlements stand, and what they farm (sites.ts)', () => {
     expect(gen.params.growth).toEqual(GROWTH);
     const { siting: _s, growth: _g, ...older } = gen.params;
     const old = makeSettlement(spec({ ...p, generator: { ...p.generator, version: 8, params: older } }), plain, dry, EXTENT, undefined, near);
-    expect(old.settlements.map((s) => [s.x, s.y])).toEqual(plan.settlements.map((s) => [s.x, s.y]));
+    // The same settlements, each where it stood, as many people and seeded alike; and the same fields.
+    const each = (pl: typeof plan) => pl.settlements.map((s) => [s.x, s.y, s.people, s.seed, s.houses]);
+    expect(each(old)).toEqual(each(plan));
+    expect(old.houses.map((h) => [h.x, h.y])).toEqual(plan.houses.map((h) => [h.x, h.y]));
+    expect(Array.from(old.fields.owner)).toEqual(Array.from(plan.fields.owner));
+    expect(Array.from(old.fields.use)).toEqual(Array.from(plan.fields.use));
   });
 
   it('stands its settlements near water and on level ground, more than the land there would', () => {
