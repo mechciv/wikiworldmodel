@@ -12,7 +12,7 @@ import { houseSize, HOUSE_VARIANTS } from '../dwellings.ts';
 import { ROUTE, roundOf, wayAt, type RoutineParams } from '../../life/routines.ts';
 import { personGoes } from '../figures.ts';
 import { WORK_VARIANTS } from '../works.ts';
-import { farLand, farLandMask, farScale, LandUseMap, makeSettlement, toLocal, type Ground } from './v9.ts';
+import { farLand, farLandMask, farScale, LandUseMap, makeSettlement, peopleReach, toLocal, type Ground } from './v9.ts';
 import { FIELD_USE, growFields, GROWTH, SITING, type WaterNear } from './sites.ts';
 
 const ROOT = join(import.meta.dirname, '../../../..');
@@ -697,6 +697,15 @@ describe('where settlements stand, and what they farm (sites.ts)', () => {
     let worst = Infinity;
     for (let i = 0; i < s.length; i++) for (let j = i + 1; j < s.length; j++) worst = Math.min(worst, Math.hypot(s[i].x - s[j].x, s[i].y - s[j].y) - ground(s[i]) - ground(s[j]));
     expect(worst).toBeGreaterThan(P.siting.gap - 0.5);
+  });
+
+  it('asks the world for its people as far as the cells it weighs reach, and a cell beyond', () => {
+    // The ring of cells weighed about a scene reaches its extent, the growth's margin and a cell more; the outermost of
+    // them read their neighbours' crowding, a cell further again.
+    const cell = 111194.93 / 12;
+    for (const extent of [EXTENT, 20000]) {
+      expect(peopleReach(gen.params, extent)).toBeGreaterThanOrEqual((extent + GROWTH.margin + cell) / 111194.93 + 1 / 12);
+    }
   });
 
   it("takes the record's siting and growth where a build has none", () => {

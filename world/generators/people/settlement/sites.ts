@@ -310,7 +310,7 @@ export class SiteWorth {
     const a = m.z;
     return (a[k] * (1 - u) + a[k + 1] * u) * (1 - v) + (a[k + m.n] * (1 - u) + a[k + m.n + 1] * u) * v;
   }
-  /** What a place is worth for a settlement, about 1 where it is as good as most; `ex`, `ey` its place on the Earth's sheet. */
+  /** What a place is worth for a settlement, about 1 where it is as good as most; `e` its place on the Earth. */
   at(x: number, y: number, e: Earth): number {
     if (!this.ok(x, y)) return 0;
     const p = this.p;

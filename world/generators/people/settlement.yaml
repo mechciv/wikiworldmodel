@@ -67,6 +67,7 @@ checks:
   - { test: world/generators/people/settlement/v9.test.ts, holds: "puts a settlement in the same place from two scenes that overlap" }
   - { test: world/generators/people/settlement/v9.test.ts, holds: "stands its settlements near water and on level ground, more than the land there would" }
   - { test: world/generators/people/settlement/v9.test.ts, holds: "takes the record's siting and growth where a build has none" }
+  - { test: world/generators/people/settlement/v9.test.ts, holds: "asks the world for its people as far as the cells it weighs reach, and a cell beyond" }
   - { test: world/generators/people/settlement/v9.test.ts, holds: "keeps two settlements' grounds apart where a cell has little room for them" }
   - { test: world/generators/people/settlement/v9.test.ts, holds: "grows the fields of a house that stands where nothing is farmed from the land about it" }
   - { test: world/generators/people/settlement/v9.test.ts, holds: "puts a settlement in the same place from two overlapping scenes of a plain with a river and hills" }
