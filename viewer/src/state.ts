@@ -58,7 +58,7 @@ const q = (x: number, digits: number) => Number(x.toFixed(digits));
 
 export function quantize(s: ViewState): ViewState {
   const lon = ((((s.cam.lon + 180) % 360) + 360) % 360) - 180;
-  const dist = Number.isFinite(s.cam.dist) ? Math.max(1.000001, s.cam.dist) : 2.5;
+  const dist = Number.isFinite(s.cam.dist) ? Math.max(1 + 1e-8, s.cam.dist) : 2.5;
   // Near the ground a view needs its place to the centimetre.
   const fine = dist < 1.05;
   const place = fine ? 7 : 3;

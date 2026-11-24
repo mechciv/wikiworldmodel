@@ -364,6 +364,8 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
   private smokeInstBuf: WebGLBuffer | null = null;
   private smokeCount = 0;
   private ringVao: WebGLVertexArrayObject;
+  private ringVbo!: WebGLBuffer;
+  private ringIbo!: WebGLBuffer;
   private ringCount = 0;
   private fullCount = 0;
   private emptyVao: WebGLVertexArrayObject;
@@ -466,6 +468,10 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
   private pickFb: WebGLFramebuffer | null = null;
   private pickTex: WebGLTexture | null = null;
   private pickDepth: WebGLRenderbuffer | null = null;
+  private pickW = 0;
+  private pickH = 0;
+  private leafWorker: Worker | null = null;
+  private disposed = false;
   /** what the last frame used, for picking */
   private lastFrame: CityFrame | null = null;
   /**
@@ -670,13 +676,13 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     const ring = ringMesh(64, 30);
     this.ringVao = gl.createVertexArray()!;
     gl.bindVertexArray(this.ringVao);
-    const vb = gl.createBuffer()!;
-    gl.bindBuffer(gl.ARRAY_BUFFER, vb);
+    this.ringVbo = gl.createBuffer()!;
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.ringVbo);
     gl.bufferData(gl.ARRAY_BUFFER, ring.positions, gl.STATIC_DRAW);
     gl.enableVertexAttribArray(0);
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
-    const ib = gl.createBuffer()!;
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ib);
+    this.ringIbo = gl.createBuffer()!;
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ringIbo);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, ring.indices, gl.STATIC_DRAW);
     gl.bindVertexArray(null);
     this.ringCount = ring.ringCount;
@@ -691,9 +697,12 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
   private drawLeaves(): void {
     const gl = this.gl;
     const worker = new Worker(new URL('./leafworker.ts', import.meta.url), { type: 'module' });
+    this.leafWorker = worker;
     worker.onmessage = (e: MessageEvent<LeafAtlas>) => {
       const a = e.data;
       worker.terminate();
+      if (this.leafWorker === worker) this.leafWorker = null;
+      if (this.disposed) return;
       gl.activeTexture(gl.TEXTURE0 + UNIT.leaves);
       gl.deleteTexture(this.leaves);
       this.leaves = gl.createTexture()!;
@@ -770,6 +779,9 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
   /** The ground's grids: heights to sample in the vertex shader, and normals to filter. */
   setGround(levels: GroundLevel[], heights: Int16Array[], normals?: Uint8Array[]): void {
     const gl = this.gl;
+    for (const t of [...this.groundTex, ...this.normalTex]) gl.deleteTexture(t);
+    this.groundTex = [];
+    this.normalTex = [];
     this.grids = levels;
     levels.forEach((g, k) => {
       const z = heights[k];
@@ -1821,14 +1833,15 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
    * at twice the size and casting the shadows from all over the sun's disc, until the view is the best it can draw.
    */
   still = false;
-  /** how many times larger than the frame the scene is drawn: 2 while a still is made */
+  /** how many times larger than the frame the scene is drawn: up to 2 while a still is made */
   private scale = 1;
+  private wantScale = STILL_SCALE;
   /** when the view last changed, in ms of the page's clock */
   private changedAt = performance.now();
 
   /** Whether the view holds still and its frames are still being averaged, or tree impostors are still baking. */
   get refining(): boolean {
-    return !this.fast && ((this.leavesReady && this.impostors.hasPending) || this.steady < STEADY_FRAMES || (this.still && (this.scale < STILL_SCALE || this.steady < STILL_FRAMES)));
+    return !this.fast && ((this.leavesReady && this.impostors.hasPending) || this.steady < STEADY_FRAMES || (this.still && (this.scale < this.wantScale || this.steady < STILL_FRAMES)));
   }
 
   /** How long, in ms, the view has held still. */
@@ -1838,13 +1851,16 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
 
   /** Whether the frame shown is a finished still. */
   get stillDone(): boolean {
-    return this.still && this.scale === STILL_SCALE && this.steady >= STILL_FRAMES;
+    return this.still && this.scale === this.wantScale && this.steady >= STILL_FRAMES;
   }
 
   render(frame: CityFrame, cells: CellGPU[], outW: number, outH: number): void {
     const gl = this.gl;
-    this.scale = this.still && !this.fast ? STILL_SCALE : 1;
-    this.resize(outW * this.scale, outH * this.scale);
+    const maxTex = (gl.getParameter(gl.MAX_TEXTURE_SIZE) as number) || 4096;
+    const maxScale = Math.min(maxTex / Math.max(1, outW), maxTex / Math.max(1, outH));
+    this.wantScale = Math.min(STILL_SCALE, Math.max(1, Math.floor(maxScale)));
+    this.scale = this.still && !this.fast ? this.wantScale : 1;
+    this.resize(Math.min(maxTex, Math.max(1, Math.round(outW * this.scale))), Math.min(maxTex, Math.max(1, Math.round(outH * this.scale))));
     this.outW = outW;
     this.outH = outH;
     this.lastFrame = frame;
@@ -2447,14 +2463,20 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
       this.pickTex = gl.createTexture()!;
       this.pickDepth = gl.createRenderbuffer()!;
     }
-    gl.activeTexture(gl.TEXTURE12);
-    gl.bindTexture(gl.TEXTURE_2D, this.pickTex);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, this.w, this.h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-    gl.bindRenderbuffer(gl.RENDERBUFFER, this.pickDepth);
-    gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT24, this.w, this.h);
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.pickFb);
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.pickTex, 0);
-    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, this.pickDepth);
+    if (this.pickW !== this.w || this.pickH !== this.h) {
+      gl.activeTexture(gl.TEXTURE12);
+      gl.bindTexture(gl.TEXTURE_2D, this.pickTex);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, this.w, this.h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+      gl.bindRenderbuffer(gl.RENDERBUFFER, this.pickDepth);
+      gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT24, this.w, this.h);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, this.pickFb);
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.pickTex, 0);
+      gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, this.pickDepth);
+      this.pickW = this.w;
+      this.pickH = this.h;
+    } else {
+      gl.bindFramebuffer(gl.FRAMEBUFFER, this.pickFb);
+    }
     gl.viewport(0, 0, this.w, this.h);
     gl.enable(gl.SCISSOR_TEST);
     gl.scissor(x, y, 1, 1);
@@ -2470,6 +2492,10 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     gl.bindTexture(gl.TEXTURE_2D, this.entityTex);
     gl.activeTexture(gl.TEXTURE0 + UNIT.leaves);
     gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.leaves);
+    this.groundTex.forEach((t, k) => {
+      gl.activeTexture(gl.TEXTURE0 + UNIT.ground + k);
+      gl.bindTexture(gl.TEXTURE_2D, t);
+    });
     const vp = multiply(f.proj, f.view);
     const camRight: V3 = [f.view[0], f.view[4], f.view[8]];
     const camUp: V3 = [f.view[1], f.view[5], f.view[9]];
@@ -2498,5 +2524,64 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     gl.bindTexture(gl.TEXTURE_2D, null);
     gl.activeTexture(gl.TEXTURE0);
     return px[0] + px[1] * 256;
+  }
+
+  /** Free all GPU resources owned by this renderer. */
+  dispose(): void {
+    if (this.disposed) return;
+    this.disposed = true;
+    this.leafWorker?.terminate();
+    this.leafWorker = null;
+    const gl = this.gl;
+    this.clearInstanced();
+    this.clearGround();
+    this.impostors.dispose();
+    this.materials.dispose();
+    this.timer.dispose();
+    const programs = [
+      this.meshP, this.depthP, this.idP, this.terrainP, this.terrainDepthP, this.waterP, this.seaP,
+      this.cloudsP, this.skyP, this.lutP, this.aoP, this.blurP, this.brightP, this.postP, this.taaP,
+      this.lumP, this.shaftsP, this.shaftsAddP, this.waterMapP, this.waterBlurP, this.impBakeP,
+      this.impostorP, this.impostorDepthP, this.impostorIdP, this.smokeP,
+    ];
+    for (const p of programs) gl.deleteProgram(p.program);
+    const textures = [
+      this.noise, this.lut, this.shadow, this.entityTex, this.mask, this.fields, this.farFields,
+      this.leaves, this.colorTex, this.depthTex, this.waterSceneTex, this.waterDepthTex, this.pickTex,
+      this.lumTex, this.shaftsTex, ...this.noMaterial, ...this.waterMapTex, ...this.cloudTex,
+      ...this.aoTex, ...this.bloomTex, ...this.historyTex,
+    ];
+    for (const t of textures) if (t) gl.deleteTexture(t);
+    const framebuffers = [
+      this.lutFb, this.sceneFb, this.colorFb, this.waterCopyFb, this.pickFb, this.lumFb, this.shaftsFb,
+      ...this.shadowFb, ...this.waterMapFb, ...this.cloudFb, ...this.aoFb, ...this.bloomFb, ...this.historyFb,
+    ];
+    for (const fb of framebuffers) if (fb) gl.deleteFramebuffer(fb);
+    if (this.pickDepth) gl.deleteRenderbuffer(this.pickDepth);
+    gl.deleteSampler(this.litterSampler);
+    gl.deleteVertexArray(this.ringVao);
+    gl.deleteBuffer(this.ringVbo);
+    gl.deleteBuffer(this.ringIbo);
+    gl.deleteVertexArray(this.emptyVao);
+    if (this.waterVao) gl.deleteVertexArray(this.waterVao);
+    for (const b of this.waterBuffers) gl.deleteBuffer(b);
+    if (this.smokeVao) gl.deleteVertexArray(this.smokeVao);
+    if (this.smokeQuadBuf) gl.deleteBuffer(this.smokeQuadBuf);
+    if (this.smokeInstBuf) gl.deleteBuffer(this.smokeInstBuf);
+    this.waterBuffers = [];
+    this.noMaterial = [];
+    this.waterMapTex = [];
+    this.waterMapFb = [];
+    this.cloudTex = [];
+    this.cloudFb = [];
+    this.aoTex = [];
+    this.aoFb = [];
+    this.bloomTex = [];
+    this.bloomFb = [];
+    this.historyTex = [];
+    this.historyFb = [];
+    this.shadowFb = [];
+    this.lastDraw = [];
+    this.lastFrame = null;
   }
 }

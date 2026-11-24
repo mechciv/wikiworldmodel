@@ -283,6 +283,14 @@ async function start(root: HTMLElement): Promise<void> {
   root.appendChild(stage);
   const gl = canvas.getContext('webgl2', { antialias: true, preserveDrawingBuffer: true, powerPreference: 'high-performance' });
   if (!gl) return fail(root, 'This viewer needs WebGL2.');
+  let contextLost = false;
+  canvas.addEventListener('webglcontextlost', (e) => {
+    e.preventDefault();
+    contextLost = true;
+  });
+  canvas.addEventListener('webglcontextrestored', () => {
+    location.reload();
+  });
 
   // A cube fine enough for the finest level of the tiles: twice the texels where a field is finer than 1°.
   const field = new FieldRenderer(gl, build.frames.plateIndex.length, ts.lods.some((l) => l.step < 1) ? 1024 : 512);
@@ -539,13 +547,14 @@ async function start(root: HTMLElement): Promise<void> {
   let city: CityScene | LifeScene | null = null;
   let labelledSite: string | null = null;
   // Anywhere else on land, at any time the atlas covers: a scene the browser makes as it is wanted.
-  const lifeAtlas = build.atlas ? new LifeAtlas(build, build.atlas, () => (climateData && climateRule ? { data: climateData, rule: climateRule } : null), build.atlas.generator, build.planet, build.model, coastOf) : null;
+  const lifeAtlas = build.atlas ? new LifeAtlas(build, build.atlas, () => (climateData && climateRule ? { data: climateData, rule: climateRule } : null), build.atlas.generator, build.planet, build.model, coastOf, rivers ?? undefined) : null;
   /** the scene of the place the camera is over, and the one being made to take its place */
   let lifeSite: SiteInfo | null = null;
   let lifeSiteShore = '';
   const shoreKey = (t: number, at: { lat: number; lon: number }) =>
     shoresNear(ts.rivers?.mappedShores ?? [], t, latticeOf(at.lat, at.lon), WATER_REACH).map(s => s.row).join(',');
   let lifeLoading: string | null = null;
+  let lifeGen = 0;
   let lifeRest = 0;
   let lifeKey = '';
   /** a place with no land under it, or nothing to draw: not asked again until the view moves */
@@ -1102,15 +1111,23 @@ async function start(root: HTMLElement): Promise<void> {
     return out;
   }
 
-  // Rotations: totals per keyframe are cached; deltas move each keyframe to the current time.
+  // Rotations: totals per keyframe are cached (LRU-bounded so continuous scrubbing does not leak); deltas move each keyframe to the current time.
   const plateIds = build.frames.plateIndex;
+  const MAX_KEY_TOTALS = 128;
   const keyTotals = new Map<number, Quat[]>();
   const totalsAt = (ageMa: number): Quat[] => {
     let q = keyTotals.get(ageMa);
-    if (!q) {
-      q = plateIds.map((id) => (id === 0 ? ([1, 0, 0, 0] as Quat) : build.plates.total(id, ageMa)));
+    if (q) {
+      keyTotals.delete(ageMa);
       keyTotals.set(ageMa, q);
+      return q;
     }
+    q = plateIds.map((id) => (id === 0 ? ([1, 0, 0, 0] as Quat) : build.plates.total(id, ageMa)));
+    if (keyTotals.size >= MAX_KEY_TOTALS) {
+      const oldest = keyTotals.keys().next().value;
+      if (oldest !== undefined) keyTotals.delete(oldest);
+    }
+    keyTotals.set(ageMa, q);
     return q;
   };
   const deltas = (now: Quat[], key: Quat[]): Float32Array => {
@@ -1384,6 +1401,7 @@ async function start(root: HTMLElement): Promise<void> {
 
   function frame(now: number): void {
     requestAnimationFrame(frame);
+    if (contextLost) return;
     if (travel) stepTravel(now);
     if (playing) {
       // Play at an even pace along the time control, whatever its warp: a 24th of it a second.
@@ -1797,7 +1815,10 @@ async function start(root: HTMLElement): Promise<void> {
     }
     const cam = flight && flight.to.dist < MIN_DIST ? flight.to : state.cam;
     const range = (cam.dist - 1) * EARTH_RADIUS;
-    if (range > LIFE_TOP * 1.4 || !canDrawLife(state.t, cam)) return;
+    if (range > LIFE_TOP * 1.4 || !canDrawLife(state.t, cam)) {
+      if (lifeLoading) lifeGen++;
+      return;
+    }
     // A place that has its own scene, and the camera right over it, is that place.
     const there = cam === state.cam ? site : siteFor(state.t, cam);
     if (there && there !== lifeSite && there.kind === 'life' && isOver(there, cam)) return;
@@ -1807,6 +1828,7 @@ async function start(root: HTMLElement): Promise<void> {
     if (key !== lifeKey) {
       lifeKey = key;
       lifeRest = now;
+      if (lifeLoading && lifeLoading !== key) lifeGen++;
     }
     const inSpan = !!lifeSite && lifeSiteShore === shoreKey(state.t, cam) && state.t >= lifeSite.span[0] && state.t <= lifeSite.span[1];
     // Near the ground, the scene is always this place's; higher up, it can be some way off.
@@ -1819,13 +1841,16 @@ async function start(root: HTMLElement): Promise<void> {
       return;
     }
     lifeLoading = key;
-    void makeLife(key, cam.lat, cam.lon, state.t);
+    const gen = ++lifeGen;
+    void makeLife(key, cam.lat, cam.lon, state.t, gen);
   }
 
-  async function makeLife(key: string, lat: number, lon: number, t: number): Promise<void> {
+  async function makeLife(key: string, lat: number, lon: number, t: number, gen: number): Promise<void> {
     try {
       const spec = await lifeAtlas!.spec(lat, lon, t, scenario(), state.month);
+      if (gen !== lifeGen) return;
       if (!spec) {
+        if (lifeEmpty.size > 2000) lifeEmpty.clear();
         lifeEmpty.add(key);
         return;
       }
@@ -1835,14 +1860,20 @@ async function start(root: HTMLElement): Promise<void> {
           console.error(`the people of ${key}: ${err instanceof Error ? err.message : String(err)}`);
           return undefined;
         });
+        if (gen !== lifeGen) return;
         if (p) spec.people = p;
       }
       const scene = await LifeScene.create(gl!, spec, null, { fast: state.quality === 'fast' });
+      if (gen !== lifeGen) {
+        scene.dispose();
+        return;
+      }
       scene.onChange = () => (dirty = true);
       const previous = lifeSite;
       const next: SiteInfo = { kind: 'life', id: key, label: spec.site.stage ?? 'this place', file: '', origin: spec.site.origin, span: spec.site.span, slice: spec.site.slice, near: spec.site.span, window: spec.site.span, view: { x: 0, y: 0, range: 74, heading: 0, tilt: 81 } };
       try {
         await scene.load(() => {
+          if (gen !== lifeGen) return;
           lifeSite = next;
           lifeSiteShore = shoreKey(t, { lat, lon });
           scenes.set(key, scene);
@@ -1860,13 +1891,18 @@ async function start(root: HTMLElement): Promise<void> {
         atSite(state.t, state.cam);
         throw err;
       }
+      if (gen !== lifeGen) {
+        scene.dispose();
+        if (scenes.get(key) === scene) scenes.delete(key);
+        return;
+      }
       [next.view.x, next.view.y] = scene.focus;
       scene.setScenario(scenario());
     } catch (err) {
+      // Transient fetch/worker failures are logged without permanently blacklisting the place in lifeEmpty.
       console.error(`the scene of ${key}: ${err instanceof Error ? err.message : String(err)}`.slice(0, 900));
-      lifeEmpty.add(key);
     } finally {
-      lifeLoading = null;
+      if (lifeLoading === key) lifeLoading = null;
       dirty = true;
     }
   }

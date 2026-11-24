@@ -102,5 +102,10 @@ export class CityScene extends CellScene {
       this.renderer.setEntityFlags(this.selected, flagsOf(i) + 8);
     }
   }
+
+  override dispose(): void {
+    super.dispose();
+    this.renderer.dispose();
+  }
 }
 

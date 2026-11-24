@@ -49,9 +49,11 @@ export class FossilLayer {
     this.el.hidden = !this.places.length;
     if (!this.places.length) return;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    if (this.el.width !== width * dpr || this.el.height !== height * dpr) {
-      this.el.width = width * dpr;
-      this.el.height = height * dpr;
+    const pw = Math.max(1, Math.round(width * dpr));
+    const ph = Math.max(1, Math.round(height * dpr));
+    if (this.el.width !== pw || this.el.height !== ph) {
+      this.el.width = pw;
+      this.el.height = ph;
     }
     const g = this.el.getContext('2d')!;
     g.setTransform(dpr, 0, 0, dpr, 0, 0);

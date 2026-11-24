@@ -340,7 +340,8 @@ export function dateLine(claims: { ref: string; value: unknown }[], shown: strin
   // Ticks at round steps, in the unit the times are read in: three to five of them.
   const deep = !historical(a) || !historical(b);
   const span = deep ? (b - a) / 1e6 : b - a;
-  const step = [1, 2, 5].flatMap((m) => [-4, -3, -2, -1, 0, 1, 2, 3].map((e) => m * 10 ** e)).sort((p, q) => p - q).find((st) => span / st <= 5)!;
+  const mag = 10 ** Math.floor(Math.log10(Math.max(span, 1e-6)));
+  const step = [0.2, 0.5, 1, 2, 5].map((m) => m * mag).find((st) => span / st <= 5) ?? 5 * mag;
   const ticks: number[] = [];
   if (deep) for (let ma = Math.ceil((PRESENT_YEAR - b) / 1e6 / step) * step; ma <= (PRESENT_YEAR - a) / 1e6 + 1e-9; ma += step) ticks.push(PRESENT_YEAR - ma * 1e6);
   else for (let y = Math.ceil(a / step) * step; y <= b; y += step) ticks.push(y);
@@ -448,12 +449,16 @@ export class InspectPanel {
   seeIt: ((id: string, local: boolean) => { label: string; go: () => void } | undefined) | null = null;
 
   showEntity(r: EntityRecord, scenario: Scenario, time: FeatureTime, here?: TerritoryHere, organism?: OrganismHere): void {
-    const status = r.claims.every((c) => c.status === 'accepted') ? 'accepted' : r.claims.some((c) => c.status === 'disputed') ? 'disputed' : 'proposed';
+    const status = r.claims.length > 0 && r.claims.every((c) => c.status === 'accepted') ? 'accepted' : r.claims.some((c) => c.status === 'disputed') ? 'disputed' : 'proposed';
     const machine = r.claims.some((c) => c.author.startsWith('machine:'));
     const alts = new Set(scenario.alts ?? []);
     const picks = new Set(scenario.picks ?? []);
     const groups = new Map<string, ClaimRecord[]>();
-    for (const c of r.claims) groups.set(c.group, [...(groups.get(c.group) ?? []), c]);
+    for (const c of r.claims) {
+      let list = groups.get(c.group);
+      if (!list) { list = []; groups.set(c.group, list); }
+      list.push(c);
+    }
     const variant = (pick: string) => r.variants.find((v) => v.key === scenarioKey({ alts: scenario.alts, picks: [pick] }));
     const derivation = (refs: string[]) =>
       refs
