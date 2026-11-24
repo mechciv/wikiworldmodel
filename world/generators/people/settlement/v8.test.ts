@@ -947,7 +947,7 @@ describe('the land worked beyond the scene', () => {
     expect(Math.abs(city.scale - plain.scale) / plain.scale).toBeLessThan(0.05);
   });
 
-  it('works fields where people farmed, pasture where they herded, and nothing for foragers', () => {
+  it('works fields where people farmed, pasture where they herded, and nothing for foragers, and builds where towns stood', () => {
     const farmers = farLand(spec(farWorld(23, 260, assess(1, 1, 3, 2))))!;
     expect(Math.max(...farmers.crop)).toBeGreaterThan(0.2);
     expect(Math.max(...farmers.pasture)).toBe(0);
@@ -956,6 +956,14 @@ describe('the land worked beyond the scene', () => {
     expect(Math.max(...herders.crop)).toBe(0);
     const foragers = farLand(spec(farWorld(53, 0.5, assess(3, 0, 0, 0))))!;
     expect(Math.max(...foragers.crop, ...foragers.pasture)).toBe(0);
+    // A city's cell is its houses' built ground, unworked, as the plan lays it out; a cell of towns among fields has both.
+    const city = farLand(spec(farWorld(11, 5000, assess(1, 1, 3, 2, 1))))!;
+    expect(Math.max(...city.built)).toBeGreaterThan(0.05);
+    expect(Math.max(...city.crop, ...city.pasture)).toBe(0);
+    const towns = farLand(spec(farWorld(12, 600, assess(1, 1, 3, 2))))!;
+    expect(Math.max(...towns.built)).toBeGreaterThan(0);
+    expect(Math.max(...towns.crop)).toBeGreaterThan(0.2);
+    expect(Math.max(...farmers.built)).toBe(0);
     // Without far cells in its spec, a scene is told of nothing beyond its own.
     expect(farLand(spec(world(() => ({ code: 23, density: 260, region: 1 }), [{ id: 1, a: assess(1, 1, 3, 2) }])))).toBeUndefined();
   });
