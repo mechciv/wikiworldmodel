@@ -89,7 +89,9 @@ export interface GrowthParams {
 
 /**
  * The record's siting and growth (world/generators/people/settlement.yaml), for a build made before it had them: its
- * scenes are still drawn, and as a build made now would draw them. A test holds these to the record.
+ * scenes are still drawn, and as a build made now would draw them. A test holds these to the record. They are only a
+ * fallback: a change to the record's weights changes both, and is a new version of the generator, since it moves where
+ * settlements stand well beyond the fingerprint's tolerance.
  */
 export const SITING: SitingParams = {
   candidates: [10, 48, 6000],

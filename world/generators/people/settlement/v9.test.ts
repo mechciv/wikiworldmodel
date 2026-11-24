@@ -1148,9 +1148,8 @@ describe('the land worked beyond the scene', () => {
       expect(p.scale).toBeLessThan(1.25);
     }
     // The cell the city's fields reach is left out, so the city moves the scale little. Counted, it would raise it by
-    // about a fifth.
+    // about a tenth (below).
     expect(Math.abs(mean(cityScenes) - mean(plains)) / mean(plains)).toBeLessThan(0.05);
-    // And no one scene by much: a placement that let a city's fields in would move its own by a fifth.
     // Each scene within 12%: this only keeps one scene from going far astray. A leak moves each by about 10%, which it
     // would let through; the mean's bound above is what tells a leak apart.
     origins.forEach((_, k) => expect(Math.abs(cityScenes[k].scale - plains[k].scale) / plains[k].scale).toBeLessThan(0.12));
