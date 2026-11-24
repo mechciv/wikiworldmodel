@@ -328,6 +328,8 @@ export class SceneStream {
   private fieldTreeTaxon = -1;
   /** field-corner and headland tree placements emitted by buildFieldworks() */
   private fieldTrees: FieldTreeSpot[] = [];
+  /** cached water level lookup for wet paths, built once per SceneStream */
+  private levelAt?: (x: number, y: number) => number;
 
   constructor(readonly spec: SceneSpec, private budget: Budget = FULL_BUDGET) {
     this.params = spec.generator.params as unknown as LivingParams;
@@ -339,6 +341,7 @@ export class SceneStream {
     this.worldGround = worldGround(spec);
     // Where the world gives the rivers, the water's level varies over the scene; otherwise it is the place's one level.
     const levelAt = waters.paths ? waterLevels(waters) : undefined;
+    this.levelAt = levelAt;
     // The people, where the scene has any: their houses and fields, on this ground and away from this water. Where they
     // cleared the land no tree stands. A scene of the sea has them too, on whatever ground stands above its water: a place
     // a few metres above the sea, a delta or a lower plain, is a scene of the sea (scene/v14.ts, sea_below), and among the
@@ -451,8 +454,7 @@ export class SceneStream {
   paths(): { vertices: ArrayBuffer; indices: Uint32Array } | undefined {
     const plan = this.people;
     if (!plan || (!plan.paths.length && !plan.streets.length && !plan.lanes.length)) return undefined;
-    const levelAt = this.waters.paths ? waterLevels(this.waters) : undefined;
-    const water = levelAt ?? (() => this.look.water);
+    const water = this.levelAt ?? (() => this.look.water);
     const m = new Mesh(8192);
     m.entity = this.pathEntity();
     const ribbon = (line: number[], width: number, lift: number, step: number, mat: number, tint: number): void => {
@@ -568,8 +570,7 @@ export class SceneStream {
   fieldworks(radius = 800): { vertices: ArrayBuffer; indices: Uint32Array } | undefined {
     const plan = this.people;
     if (!plan || !this.landUse || !this.plots || plan.lifeway.fields === 'none' || plan.lifeway.fields === 'pasture') return undefined;
-    const levelAt = this.waters.paths ? waterLevels(this.waters) : undefined;
-    const water = levelAt ?? (() => this.look.water);
+    const water = this.levelAt ?? (() => this.look.water);
     // Centre around the nearest farming settlement to the scene origin (0, 0) within 1600 m, else (0, 0).
     let cx = 0;
     let cy = 0;
@@ -630,11 +631,21 @@ export class SceneStream {
     );
     // Keep field-margin trees on dry ground clear of houses and roads, then add village shade trees across the nearby valley!
     const allTrees: FieldTreeSpot[] = res.trees.filter((t) => !avoid(t.x, t.y));
+    const housesBySett = new Map<number, typeof plan.houses>();
+    for (const h of plan.houses) {
+      let list = housesBySett.get(h.settlement);
+      if (!list) {
+        list = [];
+        housesBySett.set(h.settlement, list);
+      }
+      list.push(h);
+    }
     const houseClear = (x: number, y: number, si: number, pad: number): boolean => {
-      for (const h of plan.houses) {
-        if (h.settlement !== si) continue;
-        const sz = houseSize(plan.forms[h.form].spec, h.variant, plan.forms[h.form].grow ?? 1);
-        const r = Math.max(sz.w, sz.l) * 0.55 + pad;
+      const list = housesBySett.get(si);
+      if (!list) return true;
+      for (const h of list) {
+        const wide = this.houseWide[h.form * HOUSE_VARIANTS + h.variant] ?? 0;
+        const r = wide * 0.55 + pad;
         if ((x - h.x) * (x - h.x) + (y - h.y) * (y - h.y) < r * r) return false;
       }
       return true;

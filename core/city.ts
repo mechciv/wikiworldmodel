@@ -185,5 +185,8 @@ export function toLocal(origin: { lat: number; lon: number }, lat: number, lon: 
 
 export function fromLocal(origin: { lat: number; lon: number }, x: number, y: number): [lat: number, lon: number] {
   const cosLat = Math.max(1e-6, Math.cos(origin.lat * RAD));
-  return [origin.lat + y / EARTH_RADIUS / RAD, origin.lon + x / (EARTH_RADIUS * cosLat) / RAD];
+  const lat = Math.max(-90, Math.min(90, origin.lat + y / EARTH_RADIUS / RAD));
+  const rawLon = origin.lon + x / (EARTH_RADIUS * cosLat) / RAD;
+  const lon = ((((rawLon + 180) % 360) + 360) % 360) - 180;
+  return [lat, lon];
 }

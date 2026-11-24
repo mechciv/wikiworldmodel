@@ -867,9 +867,13 @@ async function start(root: HTMLElement): Promise<void> {
   let whereLoading: Promise<void> | null = null;
   function wantWhere(): Promise<void> | undefined {
     if (!build.atlas || lifeWhere) return undefined;
-    whereLoading ??= getJSON<Record<string, AtlasWhere>>(build.base + build.atlas.where).then((w) => {
-      lifeWhere = w;
-    });
+    whereLoading ??= getJSON<Record<string, AtlasWhere>>(build.base + build.atlas.where)
+      .then((w) => {
+        lifeWhere = w;
+      })
+      .catch(() => {
+        whereLoading = null;
+      });
     return whereLoading;
   }
   /** A taxon to show when the scene of where it lived has come. */

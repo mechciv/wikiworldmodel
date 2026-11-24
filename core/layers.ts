@@ -256,8 +256,8 @@ export const gridSize = (res: number) => ({ nx: Math.round(360 / res), ny: Math.
 /** Where a point falls in the grid: its row, its column, and which of the file's cells that is, or −1. */
 export function cellAt(f: Pick<PeopleFile, 'res' | 'cell'>, lon: number, lat: number): { row: number; col: number; index: number } {
   const { nx, ny } = gridSize(f.res);
-  const nlon = ((((lon + 180) % 360) + 360) % 360);
-  const col = Math.min(nx - 1, Math.floor(nlon / f.res));
+  const nlon = lon >= -180 && lon <= 180 ? lon + 180 : (((lon + 180) % 360) + 360) % 360;
+  const col = Math.max(0, Math.min(nx - 1, Math.floor(nlon / f.res)));
   const row = Math.max(0, Math.min(ny - 1, Math.floor((90 - lat) / f.res)));
   const place = row * nx + col;
   let lo = 0;

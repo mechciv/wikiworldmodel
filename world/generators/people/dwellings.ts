@@ -863,11 +863,15 @@ function facade(m: Mesh, x0: number, x1: number, zb: number, top: number | ((x: 
     const xb = xs[i + 1];
     if (xb - xa < 1e-6) continue;
     const mid = (xa + xb) / 2;
-    const c = cuts.find((q) => Math.abs(mid - q.x) < q.half);
-    if (!c) piece(xa, xb, zb, topAt(xa), zb, topAt(xb));
+    const hits = cuts.filter((q) => Math.abs(mid - q.x) < q.half).sort((a, b) => a.z0 - b.z0);
+    if (!hits.length) piece(xa, xb, zb, topAt(xa), zb, topAt(xb));
     else {
-      piece(xa, xb, zb, c.z0, zb, c.z0);
-      piece(xa, xb, c.z1, topAt(xa), c.z1, topAt(xb));
+      let cur = zb;
+      for (const c of hits) {
+        if (c.z0 > cur) piece(xa, xb, cur, c.z0, cur, c.z0);
+        if (c.z1 > cur) cur = c.z1;
+      }
+      piece(xa, xb, cur, topAt(xa), cur, topAt(xb));
     }
   }
   // The wall's thickness round each opening.
@@ -1996,7 +2000,7 @@ function drawHalf(m: Mesh, b: Body): void {
     // The wall, round the back and the sides.
     m.mat = b.wallMat;
     turn(m, [[r, -0.2], [r, wall]], n, 1, 1, PI, TAU);
-    turn(m, [[r - 0.35, wall], [r, wall]], n, 1, 1, PI, TAU);
+    turn(m, [[r, wall], [r - 0.35, wall]], n, 1, 1, PI, TAU);
     const keep = m.light;
     m.light = keep * 0.7;
     turn(m, [[r - 0.35, -0.2], [r - 0.35, wall]], n, 1, 1, PI, TAU, true);
