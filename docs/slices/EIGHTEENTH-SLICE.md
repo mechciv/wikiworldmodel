@@ -91,8 +91,14 @@ are divided only where something is built at the time asked; a lane is drawn alo
 built ground; and a plot is a household's share of the ground where it lies at the city's height, so the core's plots
 are small and the edge's large.
 
+Where a map of the world is of the city, its walls that go round it and its roads go into the plan in the city's own
+metres: a recorded wall takes the place of a generated one, its years making the growth model's epochs, so Rome grows
+within the Servian and then the Aurelian walls while they stand; and its roads stand in the frame and are routes beside
+the generated ones. An open square its town form names is kept at its middle, square to its grid.
+
 The scene leaves out what its own ground cannot take: a plot in its river, on its cliff, on a structure's ground. A house
-is as big as its plot allows and the density there asks. A scene keeps up to 400,000 houses and 30,000 streets, so a
+is as big as its plot allows and the density there asks. A city's built ground at the scene's time is trodden as a
+street is, and nothing grows on it but in its gardens. A scene keeps up to 400,000 houses and 30,000 streets, so a
 city of a million is drawn with a house to each plot it built, and the renderer culls what is far by distance and rank.
 
 ### A city's records in the living scene
@@ -129,11 +135,11 @@ picked, named and lit as in the city's own scene before.
 - **Rome's medieval town is not in the bend of the Tiber.** The growth model reads no aqueducts, so nothing makes the
   river's banks the better ground once they failed; the town of 1200 stands round the record's point, east of the
   Colosseum. An epoch at the aqueducts' end, reading the distance to the survey's water, would move it.
-- **A city's districts, institutions and recorded walls and roads are not read.** Rome's walls are drawn as records but
-  do not bound its growth; its regions' counts do not weight its density; no town has a temple or a market of its own
-  unless a record draws one.
-- **Plants still grow between Rome's monuments,** where nothing marks the ground as built: the living scene clears it
-  round houses and under structures only.
+- **A city's districts and institutions are not read.** Rome's regions' counts do not weight its density, and no town
+  has a temple or a market of its own unless a record draws one. A town form's open square is kept at its middle.
+- **A recorded wall bounds a city's growth only where its line goes round it.** The Servian and Aurelian walls do,
+  their ends within a twentieth of their length (the Aurelian's 484 m apart where it left the Tiber to close it); a wall
+  mapped in pieces does not.
 - **The fields round a city are still the old field system's,** not the division's parcels: the land is divided once
   for the town, and the fields beyond it are laid out as before.
 - **The globe does not draw a city's built ground through time,** nor do villages keep their places across the
