@@ -8,7 +8,7 @@
 // plate relative to the anchor is R(anchor→fixed) · R(fixed→moving), interpolated by slerp
 // between the bracketing lines of the sequence that contains the requested age.
 
-import { IDENTITY, fromPole, mul, slerp, type Quat } from './quat.ts';
+import { IDENTITY, fromPole, mul, normalize, slerp, type Quat } from './quat.ts';
 
 export interface RotLine {
   moving: number;
@@ -45,16 +45,16 @@ export function parseRot(text: string): RotLine[] {
   const lines = text.split(/\r?\n/);
   for (let n = 0; n < lines.length; n++) {
     const raw = lines[n];
-    if (!raw.trim()) continue;
     const bang = raw.indexOf('!');
-    const data = bang >= 0 ? raw.slice(0, bang) : raw;
+    const data = (bang >= 0 ? raw.slice(0, bang) : raw).trim();
+    if (!data) continue;
     const comment = bang >= 0 ? raw.slice(bang + 1).trim() : '';
-    const f = data.trim().split(/\s+/);
+    const f = data.split(/\s+/);
     if (f.length < 6) throw new Error(`rotation file line ${n + 1}: expected 6 fields, got ${f.length}`);
     const nums = f.slice(0, 6).map(Number);
     if (nums.some((x) => !Number.isFinite(x))) throw new Error(`rotation file line ${n + 1}: non-numeric field`);
     const [moving, age, lat, lon, angle, fixed] = nums;
-    if (moving === COMMENT_PLATE) continue;
+    if (moving === COMMENT_PLATE || fixed === COMMENT_PLATE) continue;
     out.push({ moving, age, lat, lon, angle, fixed, comment });
   }
   return out;
@@ -191,7 +191,7 @@ export class RotationModel {
       const n = s.ages.length;
       if (age < s.ages[0] || age > s.ages[n - 1]) continue;
       if (s.moving === anchor || tree.has(s.moving)) continue;
-      const q = top.plate === anchor ? interpolate(s, age) : mul(top.q, interpolate(s, age));
+      const q = top.plate === anchor ? interpolate(s, age) : normalize(mul(top.q, interpolate(s, age)));
       tree.set(s.moving, q);
       stack.push({ plate: s.moving, q, i: 0 });
     }

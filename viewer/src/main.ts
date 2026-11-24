@@ -57,6 +57,7 @@ import { add, cross, norm, scale, type V3 } from './mat.ts';
 import { buildOf, DEFAULT_HOUR, fromSearch, HOURS, quantize, toSearch, type ViewState } from './state.ts';
 import { TileManager, type LoadedTile } from './tiles.ts';
 import { FeedbackDialog } from './ui/feedback.ts';
+import { esc } from './ui/html.ts';
 import { InspectPanel, stepName, type BiomeHere, type IceHere, type LandscapeHere, type OrganismHere, type PlanetStateInfo, type RowInfo, type TerrainInfo, type TerritoryHere } from './ui/inspect.ts';
 import { barWords, noticeWords, standingAt } from './ui/lifewords.ts';
 import { Markers, timeFor, visibility } from './ui/markers.ts';
@@ -229,7 +230,7 @@ const STATE_COLORS: Record<string, string> = {
 const reachText = (deg: number) => (deg <= 0 ? 'the equator' : `${deg}°`);
 
 function fail(root: HTMLElement, message: string): void {
-  root.innerHTML = `<div class="fatal"><h1>WikiWorldModel</h1><p>${message.replace(/</g, '&lt;')}</p></div>`;
+  root.innerHTML = `<div class="fatal"><h1>WikiWorldModel</h1><p>${esc(message)}</p></div>`;
 }
 
 async function start(root: HTMLElement): Promise<void> {
@@ -283,6 +284,14 @@ async function start(root: HTMLElement): Promise<void> {
   root.appendChild(stage);
   const gl = canvas.getContext('webgl2', { antialias: true, preserveDrawingBuffer: true, powerPreference: 'high-performance' });
   if (!gl) return fail(root, 'This viewer needs WebGL2.');
+  let contextLost = false;
+  canvas.addEventListener('webglcontextlost', (e) => {
+    e.preventDefault();
+    contextLost = true;
+  });
+  canvas.addEventListener('webglcontextrestored', () => {
+    location.reload();
+  });
 
   // A cube fine enough for the finest level of the tiles: twice the texels where a field is finer than 1°.
   const field = new FieldRenderer(gl, build.frames.plateIndex.length, ts.lods.some((l) => l.step < 1) ? 1024 : 512);
@@ -453,8 +462,8 @@ async function start(root: HTMLElement): Promise<void> {
       landscapeStep = i;
       // The legend: the classes present, by their level.
       const present = new Set(map);
-      landscapeLegend.innerHTML = `<div class="pl-title"><span>${landscape.index.title}, ${stepName(landscape.index.steps[i])}</span> <span class="badge basis-reconstruction">reconstruction</span></div><div class="ll-items">${landscape.index.classes
-        .map((k, n) => (present.has(n + 1) && k.code !== 70 ? `<span class="ll-item"><i style="background:rgb(${k.rgb.join(',')})"></i>${k.label}</span>` : ''))
+      landscapeLegend.innerHTML = `<div class="pl-title"><span>${esc(landscape.index.title)}, ${esc(stepName(landscape.index.steps[i]))}</span> <span class="badge basis-reconstruction">reconstruction</span></div><div class="ll-items">${landscape.index.classes
+        .map((k, n) => (present.has(n + 1) && k.code !== 70 ? `<span class="ll-item"><i style="background:rgb(${k.rgb.map(Number).join(',')})"></i>${esc(k.label)}</span>` : ''))
         .join('')}</div>`;
     }
     return true;
@@ -539,7 +548,7 @@ async function start(root: HTMLElement): Promise<void> {
   let city: CityScene | LifeScene | null = null;
   let labelledSite: string | null = null;
   // Anywhere else on land, at any time the atlas covers: a scene the browser makes as it is wanted.
-  const lifeAtlas = build.atlas ? new LifeAtlas(build, build.atlas, () => (climateData && climateRule ? { data: climateData, rule: climateRule } : null), build.atlas.generator, build.planet, build.model, coastOf) : null;
+  const lifeAtlas = build.atlas ? new LifeAtlas(build, build.atlas, () => (climateData && climateRule ? { data: climateData, rule: climateRule } : null), build.atlas.generator, build.planet, build.model, coastOf, rivers ?? undefined) : null;
   /** the scene of the place the camera is over, and the one being made to take its place */
   let lifeSite: SiteInfo | null = null;
   let lifeSiteShore = '';
@@ -548,6 +557,7 @@ async function start(root: HTMLElement): Promise<void> {
   const shoreKey = (t: number, at: { lat: number; lon: number }) =>
     shoresNear(ts.rivers?.mappedShores ?? [], t, latticeOf(at.lat, at.lon), WATER_REACH).map(s => s.row).join(',');
   let lifeLoading: string | null = null;
+  let lifeGen = 0;
   let lifeRest = 0;
   let lifeKey = '';
   /** a place with no land under it, or nothing to draw: not asked again until the view moves */
@@ -613,7 +623,7 @@ async function start(root: HTMLElement): Promise<void> {
   const named = (t: number) => ['period', 'era', 'eon'].map((rank) => build.periods.periods.find((p) => p.rank === rank && p.start <= t && t <= p.end)).find(Boolean);
   const until = dataRange[1] > PRESENT_YEAR ? formatTime(dataRange[1]) : 'today';
   // The name, with the site's logo, leads back to the site's front page, beside the viewer's folder.
-  brand.innerHTML = `<a class="home" href="../" title="WikiWorldModel: about the project"><img src="${logoUrl}" width="18" height="18" alt="" /><strong>WikiWorldModel</strong></a><span>${named(dataRange[0])?.name ?? formatTime(dataRange[0])} to ${until}</span><a class="coverage-link" title="How much of the world each layer knows, across time and the globe">How much is known →</a>`;
+  brand.innerHTML = `<a class="home" href="../" title="WikiWorldModel: about the project"><img src="${esc(logoUrl)}" width="18" height="18" alt="" /><strong>WikiWorldModel</strong></a><span>${esc(named(dataRange[0])?.name ?? formatTime(dataRange[0]))} to ${esc(until)}</span><a class="coverage-link" title="How much of the world each layer knows, across time and the globe">How much is known →</a>`;
   brand.querySelector<HTMLAnchorElement>('.coverage-link')!.href = `./coverage.html?b=${encodeURIComponent(build.id)}`;
   const search = new Search(build.search, build.periods.periods, kindLabel);
   const toolbar = new Toolbar(build.id, ts.alternatives, ts.layers ?? []);
@@ -861,9 +871,13 @@ async function start(root: HTMLElement): Promise<void> {
   let whereLoading: Promise<void> | null = null;
   function wantWhere(): Promise<void> | undefined {
     if (!build.atlas || lifeWhere) return undefined;
-    whereLoading ??= getJSON<Record<string, AtlasWhere>>(build.base + build.atlas.where).then((w) => {
-      lifeWhere = w;
-    });
+    whereLoading ??= getJSON<Record<string, AtlasWhere>>(build.base + build.atlas.where)
+      .then((w) => {
+        lifeWhere = w;
+      })
+      .catch(() => {
+        whereLoading = null;
+      });
     return whereLoading;
   }
   /** A taxon to show when the scene of where it lived has come. */
@@ -1105,15 +1119,23 @@ async function start(root: HTMLElement): Promise<void> {
     return out;
   }
 
-  // Rotations: totals per keyframe are cached; deltas move each keyframe to the current time.
+  // Rotations: totals per keyframe are cached (LRU-bounded so continuous scrubbing does not leak); deltas move each keyframe to the current time.
   const plateIds = build.frames.plateIndex;
+  const MAX_KEY_TOTALS = 128;
   const keyTotals = new Map<number, Quat[]>();
   const totalsAt = (ageMa: number): Quat[] => {
     let q = keyTotals.get(ageMa);
-    if (!q) {
-      q = plateIds.map((id) => (id === 0 ? ([1, 0, 0, 0] as Quat) : build.plates.total(id, ageMa)));
+    if (q) {
+      keyTotals.delete(ageMa);
       keyTotals.set(ageMa, q);
+      return q;
     }
+    q = plateIds.map((id) => (id === 0 ? ([1, 0, 0, 0] as Quat) : build.plates.total(id, ageMa)));
+    if (keyTotals.size >= MAX_KEY_TOTALS) {
+      const oldest = keyTotals.keys().next().value;
+      if (oldest !== undefined) keyTotals.delete(oldest);
+    }
+    keyTotals.set(ageMa, q);
     return q;
   };
   const deltas = (now: Quat[], key: Quat[]): Float32Array => {
@@ -1391,6 +1413,7 @@ async function start(root: HTMLElement): Promise<void> {
 
   function frame(now: number): void {
     requestAnimationFrame(frame);
+    if (contextLost) return;
     if (travel) stepTravel(now);
     if (playing) {
       // Play at an even pace along the time control, whatever its warp: a 24th of it a second.
@@ -1821,7 +1844,10 @@ async function start(root: HTMLElement): Promise<void> {
     }
     const cam = flight && flight.to.dist < MIN_DIST ? flight.to : state.cam;
     const range = (cam.dist - 1) * EARTH_RADIUS;
-    if (range > LIFE_TOP * 1.4 || !canDrawLife(state.t, cam)) return;
+    if (range > LIFE_TOP * 1.4 || !canDrawLife(state.t, cam)) {
+      if (lifeLoading) lifeGen++;
+      return;
+    }
     // A place that has its own scene, and the camera right over it, is that place.
     const there = cam === state.cam ? site : siteFor(state.t, cam);
     if (there && there !== lifeSite && there.kind === 'life' && isOver(there, cam)) return;
@@ -1831,6 +1857,7 @@ async function start(root: HTMLElement): Promise<void> {
     if (key !== lifeKey) {
       lifeKey = key;
       lifeRest = now;
+      if (lifeLoading && lifeLoading !== key) lifeGen++;
     }
     const sameContext = !!lifeSite && sameLifeContext(lifeSite.id, key);
     const inSpan = !!lifeSite && lifeSiteShore === shoreKey(state.t, cam) && state.t >= lifeSite.span[0] && state.t <= lifeSite.span[1];
@@ -1846,14 +1873,16 @@ async function start(root: HTMLElement): Promise<void> {
     }
     if (lifeCache.has(key)) {
       lifeLoading = key;
-      void promoteCachedLife(key);
+      const gen = ++lifeGen;
+      void promoteCachedLife(key, gen);
       return;
     }
     lifeLoading = key;
-    void makeLife(key, cam.lat, cam.lon, state.t);
+    const gen = ++lifeGen;
+    void makeLife(key, cam.lat, cam.lon, state.t, gen);
   }
 
-  async function promoteCachedLife(key: string): Promise<void> {
+  async function promoteCachedLife(key: string, gen: number): Promise<void> {
     try {
       const cached = lifeCache.take(key);
       if (!cached) return;
@@ -1865,7 +1894,7 @@ async function start(root: HTMLElement): Promise<void> {
       if (keepLive) {
         await scene.warm(warmViewFor(next.origin, scene));
       }
-      if (lifeKeyAt(state.t, state.cam) !== key && (!flight || lifeKeyAt(state.t, flight.to) !== key)) {
+      if (gen !== lifeGen || (lifeKeyAt(state.t, state.cam) !== key && (!flight || lifeKeyAt(state.t, flight.to) !== key))) {
         lifeCache.set(key, cached);
         return;
       }
@@ -1876,15 +1905,17 @@ async function start(root: HTMLElement): Promise<void> {
       scene.setScenario(scenario());
       atSite(state.t, state.cam);
     } finally {
-      lifeLoading = null;
+      if (lifeLoading === key) lifeLoading = null;
       dirty = true;
     }
   }
 
-  async function makeLife(key: string, lat: number, lon: number, t: number): Promise<void> {
+  async function makeLife(key: string, lat: number, lon: number, t: number, gen: number): Promise<void> {
     try {
       const spec = await lifeAtlas!.spec(lat, lon, t, scenario(), state.month);
+      if (gen !== lifeGen) return;
       if (!spec) {
+        if (lifeEmpty.size > 2000) lifeEmpty.clear();
         lifeEmpty.add(key);
         return;
       }
@@ -1894,9 +1925,14 @@ async function start(root: HTMLElement): Promise<void> {
           console.error(`the people of ${key}: ${err instanceof Error ? err.message : String(err)}`);
           return undefined;
         });
+        if (gen !== lifeGen) return;
         if (p) spec.people = p;
       }
       const scene = await LifeScene.create(gl!, spec, null, { fast: state.quality === 'fast' });
+      if (gen !== lifeGen) {
+        scene.dispose();
+        return;
+      }
       scene.onChange = () => (dirty = true);
       const previous = lifeSite;
       const prevShore = lifeSiteShore;
@@ -1911,10 +1947,20 @@ async function start(root: HTMLElement): Promise<void> {
           await scene.load();
           [next.view.x, next.view.y] = scene.focus;
           scene.setScenario(scenario());
+          const backInPrev = () => !!previous && lifeKeyAt(state.t, state.cam) === previous.id && (!flight || lifeKeyAt(state.t, flight.to) === previous.id);
+          if (gen !== lifeGen) {
+            if (backInPrev()) lifeCache.set(key, { site: next, shore: nextShore, scene });
+            else scene.dispose();
+            return;
+          }
           await scene.warm(warmViewFor(next.origin, scene));
           // If the camera moved back inside the still-active scene while loading, park the newly warmed cell.
-          if (previous && lifeKeyAt(state.t, state.cam) === previous.id && (!flight || lifeKeyAt(state.t, flight.to) === previous.id)) {
+          if (backInPrev()) {
             lifeCache.set(key, { site: next, shore: nextShore, scene });
+            return;
+          }
+          if (gen !== lifeGen) {
+            scene.dispose();
             return;
           }
           parkLife(previous, prevShore, key);
@@ -1924,12 +1970,19 @@ async function start(root: HTMLElement): Promise<void> {
           atSite(state.t, state.cam);
         } else {
           await scene.load(() => {
+            if (gen !== lifeGen) return;
             parkLife(previous, prevShore, key);
             lifeSite = next;
             lifeSiteShore = nextShore;
             scenes.set(key, scene);
             atSite(state.t, state.cam);
           });
+          if (gen !== lifeGen) {
+            scene.dispose();
+            if (scenes.get(key) === scene) scenes.delete(key);
+            if (lifeSite === next) lifeSite = null;
+            return;
+          }
           [next.view.x, next.view.y] = scene.focus;
           scene.setScenario(scenario());
         }
@@ -1941,10 +1994,10 @@ async function start(root: HTMLElement): Promise<void> {
         throw err;
       }
     } catch (err) {
+      // Transient fetch/worker failures are logged without permanently blacklisting the place in lifeEmpty.
       console.error(`the scene of ${key}: ${err instanceof Error ? err.message : String(err)}`.slice(0, 900));
-      lifeEmpty.add(key);
     } finally {
-      lifeLoading = null;
+      if (lifeLoading === key) lifeLoading = null;
       dirty = true;
     }
   }

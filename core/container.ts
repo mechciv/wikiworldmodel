@@ -34,14 +34,15 @@ function typeOf(a: TypedArray): ArrayType {
 }
 
 const MAGIC = [0x4c, 0x57, 0x54, 0x31]; // "LWT1"
-const pad8 = (n: number) => (n + 7) & ~7;
+const pad8 = (n: number) => Math.ceil(n / 8) * 8;
+const IS_LITTLE_ENDIAN = new Uint8Array(new Uint16Array([1]).buffer)[0] === 1;
 
 /**
  * Encode a header and arrays. `stringify` must be deterministic (sorted keys) for builds to
  * be reproducible; the header gets a `buffers` field listing the arrays in order.
  */
 export function encodeTile(header: Record<string, unknown>, arrays: TypedArray[], stringify: (v: unknown) => string): Uint8Array {
-  if (new Uint8Array(new Uint16Array([1]).buffer)[0] !== 1) throw new Error('big-endian hosts are not supported');
+  if (!IS_LITTLE_ENDIAN) throw new Error('big-endian hosts are not supported');
   const buffers: BufferRef[] = [];
   let offset = 0;
   for (const a of arrays) {
@@ -66,11 +67,27 @@ export interface DecodedTile<H> {
 }
 
 export function decodeTile<H>(data: ArrayBuffer): DecodedTile<H> {
+  if (!IS_LITTLE_ENDIAN) throw new Error('big-endian hosts are not supported');
+  if (data.byteLength < 8) throw new Error('not an LWT1 tile');
   const bytes = new Uint8Array(data);
   if (MAGIC.some((b, i) => bytes[i] !== b)) throw new Error('not an LWT1 tile');
   const headerLen = new DataView(data).getUint32(4, true);
+  if (headerLen % 8 !== 0 || headerLen > data.byteLength - 8) throw new Error('invalid LWT1 header length');
   const header = JSON.parse(new TextDecoder().decode(bytes.subarray(8, 8 + headerLen))) as H & { buffers: BufferRef[] };
+  if (!header || typeof header !== 'object' || !Array.isArray(header.buffers)) throw new Error('invalid LWT1 header buffers');
   const base = 8 + headerLen;
-  const arrays = header.buffers.map((b) => new CTORS[b.type](data, base + b.offset, b.length) as TypedArray);
+  const arrays = header.buffers.map((b) => {
+    if (!b || typeof b !== 'object' || !Object.hasOwn(CTORS, b.type)) throw new Error(`unsupported LWT1 buffer type: ${String(b?.type)}`);
+    const Ctor = CTORS[b.type];
+    if (!Number.isInteger(b.offset) || b.offset < 0 || !Number.isInteger(b.length) || b.length < 0) {
+      throw new Error('invalid LWT1 buffer bounds');
+    }
+    const start = base + b.offset;
+    const end = start + b.length * Ctor.BYTES_PER_ELEMENT;
+    if (start % Ctor.BYTES_PER_ELEMENT !== 0 || end > data.byteLength) {
+      throw new Error('LWT1 buffer exceeds tile bounds or alignment');
+    }
+    return new Ctor(data, start, b.length) as TypedArray;
+  });
   return { header, arrays };
 }

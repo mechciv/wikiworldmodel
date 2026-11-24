@@ -27,7 +27,7 @@ export function enter(m: Mesh, x: number, y: number, z: number, gx: number, gy: 
 }
 
 export function leave(m: Mesh): void {
-  frames.pop();
+  if (frames.length > 1) frames.pop();
   const f = frames[frames.length - 1];
   m.place(f[0], f[1], f[2], f[3], f[4]);
 }

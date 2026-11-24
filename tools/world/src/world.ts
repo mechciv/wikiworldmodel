@@ -18,7 +18,7 @@ import { parseRef, RefError, rowRef, splitRef, type Ref } from '../../../core/re
 import type { LagInput, TimeInput } from '../../../core/time.ts';
 import { elementKey, ohmEntities, type OhmSnapshot } from './ohm.ts';
 import { pbdbEntities, placeInLand, type LandSnapshot, type PbdbSnapshot } from './pbdb.ts';
-import { REPO, WORLD } from './paths.ts';
+import { REPO, safeJoin, WORLD } from './paths.ts';
 
 export type Status = 'proposed' | 'accepted' | 'disputed' | 'deprecated';
 export type Rank = 'preferred' | 'normal' | 'deprecated';
@@ -484,6 +484,14 @@ export function refString(r: Ref): string {
 function normalizeEntity(file: string, d: Record<string, unknown>, issues: LoadIssue[]): Entity {
   const id = String(d.id);
   const fileAuthor = typeof d.author === 'string' ? d.author : undefined;
+  const resolveLocalRef = (v: unknown, where: string): unknown => {
+    if (!v || typeof v !== 'object' || Array.isArray(v)) return v;
+    const obj = v as Record<string, unknown>;
+    if (typeof obj.ref === 'string' && (obj.ref.startsWith('@') || obj.ref.startsWith('#'))) {
+      return { ...obj, ref: resolve(obj.ref, id, issues, file, `${where}.ref`) };
+    }
+    return v;
+  };
   const base = (key: string, c: Record<string, unknown>, section: 'claims' | 'relations'): ClaimBase => {
     const where = `${section}.${key}`;
     const author = typeof c.author === 'string' ? c.author : fileAuthor ?? '';
@@ -494,7 +502,7 @@ function normalizeEntity(file: string, d: Record<string, unknown>, issues: LoadI
       entity: id,
       ref: `${id}#${key}`,
       subject,
-      valid: c.valid as TimeInput | undefined,
+      valid: resolveLocalRef(c.valid, `${where}.valid`) as TimeInput | undefined,
       sources: citations(c.source).map((s, i) => ({ ...s, ref: resolve(s?.ref, id, issues, file, `${where}.source${Array.isArray(c.source) ? `[${i}]` : ''}.ref`) })),
       against: citations(c.against).map((s, i) => ({ ...s, ref: resolve(s?.ref, id, issues, file, `${where}.against${Array.isArray(c.against) ? `[${i}]` : ''}.ref`) })),
       unsourced: c.unsourced as string | undefined,
@@ -513,7 +521,7 @@ function normalizeEntity(file: string, d: Record<string, unknown>, issues: LoadI
   const claims: Claim[] = Object.entries((d.claims ?? {}) as Record<string, Record<string, unknown>>).map(([key, c]) => ({
     ...base(key, c ?? {}, 'claims'),
     prop: String(c?.prop),
-    value: c?.value,
+    value: resolveLocalRef(c?.value, `claims.${key}.value`),
     method: c?.method as string | undefined,
   }));
   const relations: Relation[] = Object.entries((d.relations ?? {}) as Record<string, Record<string, unknown>>).map(([key, r]) => ({
@@ -570,7 +578,7 @@ export async function loadWorld(root: string = WORLD): Promise<World> {
   const relDoc = await yamlOf<{ relations: Vocab['relations'] }>(from('schema/vocab/relations.yaml'));
   const srcDoc = await yamlOf<{ types: Record<string, string>; kinds: Record<string, string> }>(from('schema/vocab/sources.yaml'));
   const vocab: Vocab = {
-    kinds: flatten(kindsDoc.kinds, (p, c) => ({ ...c, moment: c.moment ?? p.moment })),
+    kinds: flatten(kindsDoc.kinds, (p, c) => ({ ...c, moment: c.moment ?? p.moment, start: c.start ?? p.start, end: c.end ?? p.end })),
     properties: propsDoc.properties,
     methods: flatten(propsDoc.methods),
     confidence: propsDoc.confidence,
@@ -608,7 +616,7 @@ export async function loadWorld(root: string = WORLD): Promise<World> {
   for (const d of Object.values(manifest.datasets)) {
     if (d.import?.as !== 'ohm-site') continue;
     const path = d.fetch.url.replace(/^repo:/, '');
-    const snap = JSON.parse(await readFile(join(REPO, path), 'utf8')) as OhmSnapshot;
+    const snap = JSON.parse(await readFile(safeJoin(REPO, path, `${d.id} snapshot`), 'utf8')) as OhmSnapshot;
     snapshots.set(d.id, snap);
     const adopted = new Set<string>();
     for (const e of entities) for (const c of e.claims) if (c.prop === 'footprint') for (const k of (c.value as { elements?: string[] })?.elements ?? []) adopted.add(k);
@@ -620,7 +628,7 @@ export async function loadWorld(root: string = WORLD): Promise<World> {
   for (const d of Object.values(manifest.datasets)) {
     if (d.import?.as !== 'pbdb-formation') continue;
     const path = d.fetch.url.replace(/^repo:/, '');
-    const snap = JSON.parse(await readFile(join(REPO, path), 'utf8')) as PbdbSnapshot;
+    const snap = JSON.parse(await readFile(safeJoin(REPO, path, `${d.id} snapshot`), 'utf8')) as PbdbSnapshot;
     fossils.set(d.id, snap);
     entities.push(...pbdbEntities(snap, d.id, path, entities));
   }
@@ -629,7 +637,7 @@ export async function loadWorld(root: string = WORLD): Promise<World> {
   for (const d of Object.values(manifest.datasets)) {
     if (d.import?.as !== 'pbdb-land') continue;
     const path = d.fetch.url.replace(/^repo:/, '');
-    const snap = JSON.parse(await readFile(join(REPO, path), 'utf8')) as LandSnapshot;
+    const snap = JSON.parse(await readFile(safeJoin(REPO, path, `${d.id} snapshot`), 'utf8')) as LandSnapshot;
     landFossils.set(d.id, snap);
     placeInLand(snap, d.id, path, entities);
   }

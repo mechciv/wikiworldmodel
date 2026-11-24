@@ -233,7 +233,8 @@ export function riverWorkers(): number {
  * keyframes are made in `workers` threads (riverWorkers) when there are two or more, each the same as made here.
  */
 export async function recentRivers(z: Float32Array, ocean: Uint8Array, g: NodeGrid, stack: SeaLevelRows, times: { ageMa: number; water: Water }[], p: DrainageParams, plate: (k: number) => number, today?: Uint8Array, workers = riverWorkers()): Promise<RiverNetwork> {
-  const lowest = Math.min(...stack.map((row) => row[1]));
+  let lowest = Infinity;
+  for (const row of stack) if (row[1] < lowest) lowest = row[1];
   const r = route(z, g, seaAt(z, g, ocean, lowest));
   const h = hollowsOf(z, g, r);
   const { reaches: rs, km2 } = networkOf(z, g, r, h, p.min_km2);
@@ -317,22 +318,29 @@ function inWorkers(ground: SharedGround, runs: RecentRun[], threads: number, kee
   return new Promise((resolve, reject) => {
     let next = 0;
     let busy = 0;
-    let failed = false;
+    let settled = false;
     const pool: Worker[] = [];
     // The workers stopped here, once nothing was left to give them: any other that stops has failed.
     const finished = new Set<Worker>();
+    const stopAll = () => Promise.allSettled(pool.map((w) => {
+      finished.add(w);
+      return w.terminate();
+    }));
     const fail = (e: unknown) => {
-      if (failed) return;
-      failed = true;
-      for (const w of pool) void w.terminate();
-      reject(e instanceof Error ? e : new Error(String(e)));
+      if (settled) return;
+      settled = true;
+      const err = e instanceof Error ? e : new Error(String(e));
+      void stopAll().then(() => reject(err));
     };
     const give = (w: Worker) => {
-      if (failed) return;
+      if (settled) return;
       if (next >= runs.length) {
         finished.add(w);
         void w.terminate();
-        if (busy === 0) resolve();
+        if (busy === 0) {
+          settled = true;
+          void stopAll().then(() => resolve());
+        }
         return;
       }
       const id = next++;
@@ -343,8 +351,14 @@ function inWorkers(ground: SharedGround, runs: RecentRun[], threads: number, kee
       const w = new Worker(WORKER, { execArgv: [], workerData: { module: RIVER_WORKER, data: ground } });
       pool.push(w);
       w.on('message', (m: { id: number; keyframes: RiverKeyframe[] }) => {
+        if (settled) return;
         busy--;
-        keep(runs[m.id], m.keyframes);
+        try {
+          keep(runs[m.id], m.keyframes);
+        } catch (err) {
+          fail(err);
+          return;
+        }
         give(w);
       });
       w.on('error', fail);

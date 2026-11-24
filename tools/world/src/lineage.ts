@@ -52,7 +52,7 @@ export function identityOf(world: World, id: string, s: Scenario = {}): string[]
     depth.set(x, d);
     return d;
   };
-  return [...same].sort((a, b) => depthOf(a, new Set()) - depthOf(b, new Set()) || (a < b ? -1 : 1));
+  return [...same].sort((a, b) => depthOf(a, new Set()) - depthOf(b, new Set()) || (a < b ? -1 : a > b ? 1 : 0));
 }
 
 /**
@@ -68,7 +68,12 @@ export function lineageLoop(world: World, s: Scenario = {}): LineageEdge[] | und
     // the union have arisen from it.
     if (e.rel === 'continues') continue;
     const [a, b] = e.rel === 'merged-into' ? [e.from, e.to] : [e.to, e.from];
-    after.set(a, [...(after.get(a) ?? []), { to: b, edge: e }]);
+    let list = after.get(a);
+    if (!list) {
+      list = [];
+      after.set(a, list);
+    }
+    list.push({ to: b, edge: e });
   }
   const state = new Map<string, 1 | 2>(); // 1: on the walk, 2: done
   const path: LineageEdge[] = [];

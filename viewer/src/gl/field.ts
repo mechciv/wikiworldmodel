@@ -7,7 +7,7 @@
 // sit on different plates the triangles between them stretch or fold; folds are resolved by
 // depth, higher ground winning. The cube map holds (elev_k, elev_k+1, plate_k, plate_k+1).
 import type { FieldGrid } from '../../../core/tileset.ts';
-import { CUBE_FACES, cubeTarget, program, setUniforms, type CubeTarget, type GL, type Program } from './context.ts';
+import { CUBE_FACES, cubeTarget, disposeCubeTarget, program, setUniforms, type CubeTarget, type GL, type Program } from './context.ts';
 
 const VS = `#version 300 es
 precision highp float;
@@ -501,5 +501,36 @@ export class FieldRenderer {
     gl.readPixels(s, t, 1, 1, gl.RGBA, bytes ? gl.UNSIGNED_BYTE : gl.FLOAT, px);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     return [...px];
+  }
+
+  dispose(): void {
+    const gl = this.gl;
+    disposeCubeTarget(gl, this.cube);
+    if (this.climateCubes) {
+      disposeCubeTarget(gl, this.climateCubes[0]);
+      disposeCubeTarget(gl, this.climateCubes[1]);
+      this.climateCubes = null;
+    }
+    if (this.iceCube) {
+      disposeCubeTarget(gl, this.iceCube);
+      this.iceCube = null;
+    }
+    gl.deleteProgram(this.prog.program);
+    if (this.climateProg) gl.deleteProgram(this.climateProg.program);
+    if (this.iceProg) gl.deleteProgram(this.iceProg.program);
+    gl.deleteTexture(this.rot);
+    if (this.climateRot) gl.deleteTexture(this.climateRot);
+    if (this.iceRot) gl.deleteTexture(this.iceRot);
+    if (this.icePlate) gl.deleteTexture(this.icePlate);
+    for (const k of this.climateKeys.values()) {
+      gl.deleteTexture(k.values);
+      gl.deleteTexture(k.plate);
+    }
+    this.climateKeys.clear();
+    for (const t of this.iceKeys.values()) gl.deleteTexture(t);
+    this.iceKeys.clear();
+    for (const m of this.meshes.values()) gl.deleteBuffer(m.index);
+    this.meshes.clear();
+    gl.deleteVertexArray(this.vao);
   }
 }

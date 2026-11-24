@@ -97,18 +97,27 @@ export function resolve(w: ResolveWorld, layer: LayerId, lat: number, lon: numbe
       }
       return a('generic', look.surface ?? 'plain', 'No climate field covers this time: the planet\'s state stands in for it.');
     }
-    case 'ice':
+    case 'ice': {
+      const molten = (x: string | null) => x === 'magma' || x === 'crust-and-magma';
+      const surface = look.into && molten(look.surface) && !molten(look.intoSurface) ? look.intoSurface : look.surface;
+      if (surface === 'magma' || surface === 'crust-and-magma') return a('evidence', 'none', "Molten rock covers the planet's surface: there is no ice.");
       if (within(w.ice, t)) return a('model', 'ice-sheet field', 'A reconstruction of the ice sheets covers this time.');
       if (look.ice) return a('evidence', look.iceReach, 'A glaciation\'s records say how far its ice reached.');
       return a('generic', 'none', 'No ice is drawn: nothing records ice here then, which does not mean there was none.');
+    }
     case 'water': {
+      const molten = (x: string | null) => x === 'magma' || x === 'crust-and-magma';
+      const surface = look.into && molten(look.surface) && !molten(look.intoSurface) ? look.intoSurface : look.surface;
+      if (surface === 'magma' || surface === 'crust-and-magma') return a('evidence', 'none', "Molten rock covers the planet's surface: there is no liquid water.");
       const o = w.water?.observed;
       if (o && within(o.span, t) && o.at(lat, lon)) return a('evidence', 'observed rivers', 'Rivers wider than 30 m were seen here from space, and how wide.');
       if (w.water?.model.some((m) => within(m, t))) return a('model', 'drainage', 'The water of the climate, routed over the ground of the time, says where rivers ran and how much they carried.');
       return a('generic', 'invented', 'Nothing routes water here then: a scene invents its river.');
     }
     case 'substrate': {
-      if (look.surface === 'magma' || look.surface === 'crust-and-magma') return a('evidence', look.surface, 'The planet\'s state covers everything: there is no ground but rock, molten or newly set.');
+      const molten = (x: string | null) => x === 'magma' || x === 'crust-and-magma';
+      const surface = look.into && molten(look.surface) && !molten(look.intoSurface) ? look.intoSurface : look.surface;
+      if (surface === 'magma' || surface === 'crust-and-magma') return a('evidence', surface, 'The planet\'s state covers everything: there is no ground but rock, molten or newly set.');
       const here = within(w.substrate?.span, t) ? w.substrate!.at(lat, lon, t) : undefined;
       const held = here?.held ? ` through the ${here.held}` : '';
       if (here?.from === 'soil') return a('model', here.words, `A map of today's topsoil, held as it is${held}, says what the ground here is made of.`);
@@ -131,11 +140,14 @@ export function resolve(w: ResolveWorld, layer: LayerId, lat: number, lon: numbe
       return a('unknown', tier, tier === 'sea' ? 'Neither atlas has a list for this sea then.' : 'No record of life here then.');
     }
     case 'people': {
-      const here = within(w.landscape?.span, t) ? w.landscape!.at(lat, lon, t) : undefined;
-      if (here?.city) return a('evidence', here.city, 'A list of cities puts a city here then, with its people.');
-      if (here?.tier === 'evidence') return a('evidence', here.pattern, "The region's archaeologists say this way of life was there then; HYDE says where and how many.");
-      if (here?.tier === 'model') return a('model', here.pattern, "HYDE's people and land use, classed as anthromes, say how people lived here; the region's archaeologists do not say it, or disagree.");
-      if (here?.tier === 'generic') return a('generic', here.pattern, 'HYDE has people here and nothing says how they lived: foragers stand in.');
+      if (within(w.landscape?.span, t)) {
+        const here = w.landscape!.at(lat, lon, t);
+        if (here?.city) return a('evidence', here.city, 'A list of cities puts a city here then, with its people.');
+        if (here?.tier === 'evidence') return a('evidence', here.pattern, "The region's archaeologists say this way of life was there then; HYDE says where and how many.");
+        if (here?.tier === 'model') return a('model', here.pattern, "HYDE's people and land use, classed as anthromes, say how people lived here; the region's archaeologists do not say it, or disagree.");
+        if (here?.tier === 'generic') return a('generic', here.pattern, 'HYDE has people here and nothing says how they lived: foragers stand in.');
+        return a('unknown', null, 'No inhabited land is mapped here at this time.');
+      }
       if (within(w.people, t)) return a('model', 'population grid', 'A reconstruction of where people lived covers this time.');
       return a('unknown', null, 'No grid of where people lived covers this time.');
     }
@@ -150,13 +162,16 @@ export function resolve(w: ResolveWorld, layer: LayerId, lat: number, lon: numbe
 /** How many answers of each tier a set of places and times gets, for each layer: how much of the world each tier holds. */
 export function tierCounts(w: ResolveWorld, places: [number, number][], times: number[], s: Scenario = {}): Record<LayerId, Record<Tier, number>> {
   const out = Object.fromEntries(LAYERS.map((l) => [l, Object.fromEntries(TIERS.map((t) => [t, 0]))])) as Record<LayerId, Record<Tier, number>>;
-  for (const layer of LAYERS) for (const t of times) for (const [lat, lon] of places) out[layer][resolve(w, layer, lat, lon, t, s).tier]++;
+  for (const t of times) {
+    const look = lookAt(w.planet, t, s);
+    for (const layer of LAYERS) for (const [lat, lon] of places) out[layer][resolve(w, layer, lat, lon, t, s, look).tier]++;
+  }
   return out;
 }
 
 /** The atlas's tier at a place and time, from its stages: the best tier on the place's list. */
 export function lifeTierOf(bins: { from: number; to: number }[], grid: AtlasGrid, bin: (i: number) => AtlasBin | undefined, lat: number, lon: number, t: number): LifeTier | null {
-  const i = bins.findIndex((b) => b.from <= t && t < b.to);
+  const i = bins.findIndex((b, idx) => b.from <= t && (t < b.to || (idx === bins.length - 1 && t === b.to)));
   if (i < 0) return null;
   const b = bin(i);
   if (!b) return null;
@@ -168,7 +183,7 @@ export function lifeTierOf(bins: { from: number; to: number }[], grid: AtlasGrid
 
 /** The sea's atlas's tier at a place and time, from its stages: the best tier on the place's list, or null where it has none. */
 export function seaTierOf(bins: { from: number; to: number }[], grid: AtlasGrid, bin: (i: number) => SeaBin | undefined, lat: number, lon: number, t: number): LifeTier | null {
-  const i = bins.findIndex((b) => b.from <= t && t < b.to);
+  const i = bins.findIndex((b, idx) => b.from <= t && (t < b.to || (idx === bins.length - 1 && t === b.to)));
   if (i < 0) return null;
   const b = bin(i);
   if (!b) return null;

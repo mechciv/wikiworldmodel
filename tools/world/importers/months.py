@@ -54,6 +54,31 @@ def attributes(ds):
     return out
 
 
+def fill_values(ds):
+    """Finite sentinel values declared by _FillValue or missing_value attributes."""
+    vals = []
+    for attr in ('_FillValue', 'missing_value'):
+        if attr not in ds.attrs:
+            continue
+        raw = ds.attrs[attr]
+        arr = np.atleast_1d(raw)
+        for v in arr:
+            try:
+                fv = float(v)
+                if np.isfinite(fv):
+                    vals.append(fv)
+            except (TypeError, ValueError):
+                pass
+    return vals
+
+
+def valid_mask(arr, fills):
+    ok = np.isfinite(arr)
+    for fv in fills:
+        ok &= arr != fv
+    return ok
+
+
 def main(req):
     out = req['out']
     more = req.get('more') or {}
@@ -73,6 +98,8 @@ def main(req):
         n, months, nlat, nlon = temp.shape
         if prec.shape != temp.shape or months != 12 or (nlat, nlon) != (len(lat), len(lon)) or n != len(times):
             raise ValueError(f'unexpected shapes: temperature {temp.shape}, precipitation {prec.shape}')
+        t_fills = fill_values(temp)
+        p_fills = fill_values(prec)
         units = {'temperature': text(temp.attrs.get('units', '')), 'precipitation': text(prec.attrs.get('units', '')), 'time': text(f[req['time']].attrs.get('units', ''))}
         others = {}
         for name, m in more.items():
@@ -80,7 +107,16 @@ def main(req):
             want = temp.shape if m['per'] == 'month' else (n, nlat, nlon)
             if ds.shape != want:
                 raise ValueError(f'{name}: {m["variable"]} has the shape {ds.shape}, not {want}')
-            others[name] = {'ds': ds, 'scale': float(m.get('scale', 1)), 'per': m['per'], 'min': None, 'max': None, 'whole': True}
+            others[name] = {
+                'ds': ds,
+                'fills': fill_values(ds),
+                'scale': float(m.get('scale', 1)),
+                'per': m['per'],
+                'signed': bool(m.get('signed', False)),
+                'min': None,
+                'max': None,
+                'whole': True,
+            }
         slices = []
         # Read as the file is chunked, several slices at a time.
         block = (temp.chunks or (1,))[0]
@@ -92,7 +128,7 @@ def main(req):
                 i = start + k
                 t = t_block[k].reshape(12, -1)
                 p = p_block[k].reshape(12, -1)
-                ok = np.all(np.isfinite(t), axis=0) & np.all(np.isfinite(p), axis=0)
+                ok = np.all(valid_mask(t, t_fills), axis=0) & np.all(valid_mask(p, p_fills), axis=0)
                 cells = np.nonzero(ok)[0].astype('<u4')
                 tt = np.rint(t[:, cells].T * 10)
                 pp = np.rint(np.maximum(p[:, cells].T, 0) * 10)
@@ -105,17 +141,21 @@ def main(req):
                     # Month by month for each cell, as the temperature is; or the year's one value.
                     v = o_block[name][k].reshape(12, -1)[:, cells].T if o['per'] == 'month' else o_block[name][k].reshape(-1)[cells]
                     v = v.astype('<f8')
-                    if v.size and not np.all(np.isfinite(v)):
+                    if v.size and not np.all(valid_mask(v, o['fills'])):
                         raise ValueError(f'slice {i}: a cell with its months has no {name}')
                     scaled = v * o['scale']
                     vv = np.rint(scaled)
-                    if vv.size and (vv.min() < 0 or vv.max() > 65535):
+                    lo_bound, hi_bound = (-32768, 32767) if o['signed'] else (0, 65535)
+                    if vv.size and (vv.min() < lo_bound or vv.max() > hi_bound):
                         raise ValueError(f'slice {i}: a value of {name} does not fit its integer')
                     if v.size:
                         o['min'] = float(v.min()) if o['min'] is None else min(o['min'], float(v.min()))
                         o['max'] = float(v.max()) if o['max'] is None else max(o['max'], float(v.max()))
                         o['whole'] = o['whole'] and bool(np.all(np.abs(scaled - vv) < 1e-6))
-                    vv.astype('<u2').tofile(os.path.join(out, name, f'{i}.u16'))
+                    if o['signed']:
+                        vv.astype('<i2').tofile(os.path.join(out, name, f'{i}.i16'))
+                    else:
+                        vv.astype('<u2').tofile(os.path.join(out, name, f'{i}.u16'))
                 slices.append({'index': i, 'time': int(times[i]), 'cells': int(cells.size),
                                'min_t': round(float(tt.min()) / 10, 1) if tt.size else None,
                                'max_t': round(float(tt.max()) / 10, 1) if tt.size else None,
@@ -131,9 +171,18 @@ def main(req):
         }
         if others:
             doc['format'] = 'lightworld-months-import@2'
-            doc['arrays']['more'] = 'uint16 little-endian, the value times its scale, 12 per cell by month or 1 by year, <name>/<i>.u16'
+            doc['arrays']['more'] = 'uint16 (or int16 if signed) little-endian, the value times its scale, 12 per cell by month or 1 by year, <name>/<i>.{u16,i16}'
             doc['more'] = {
-                name: {'variable': more[name]['variable'], 'per': o['per'], 'scale': o['scale'], 'min': o['min'], 'max': o['max'], 'whole': o['whole'], 'attributes': attributes(o['ds'])}
+                name: {
+                    'variable': more[name]['variable'],
+                    'per': o['per'],
+                    'scale': o['scale'],
+                    **({'signed': True} if o['signed'] else {}),
+                    'min': o['min'],
+                    'max': o['max'],
+                    'whole': o['whole'],
+                    'attributes': attributes(o['ds']),
+                }
                 for name, o in others.items()
             }
     with open(os.path.join(out, 'meta.json'), 'w') as fh:

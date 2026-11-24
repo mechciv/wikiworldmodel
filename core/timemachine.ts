@@ -129,7 +129,7 @@ export function heldAt(entries: SearchEntry[], t: number, skip: (e: SearchEntry)
     const row = e.dataset ? 1 : 0;
     held.push({ e, rank: rankOf(e.kind), row, length: row ? -(placeIn(e.places, t)?.[4] ?? 0) : e.time.instant ? Math.abs(a - t) : b - a });
   }
-  return held.sort((x, y) => x.rank - y.rank || x.row - y.row || x.length - y.length || (x.e.label < y.e.label ? -1 : 1)).slice(0, limit).map((x) => x.e);
+  return held.sort((x, y) => x.rank - y.rank || x.row - y.row || x.length - y.length || (x.e.label < y.e.label ? -1 : x.e.label > y.e.label ? 1 : 0)).slice(0, limit).map((x) => x.e);
 }
 
 /** Whether a record holds at a time, for a place chosen with a time. */

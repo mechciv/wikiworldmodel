@@ -5,5 +5,11 @@ import { groundOfShared, recentKeyframes, type RecentRun, type SharedGround } fr
 
 const ground = groundOfShared((workerData as { data: SharedGround }).data);
 parentPort!.on('message', ({ id, run }: { id: number; run: RecentRun }) => {
-  parentPort!.postMessage({ id, keyframes: recentKeyframes(ground, run) });
+  const keyframes = recentKeyframes(ground, run);
+  const transfer = new Set<ArrayBuffer>();
+  for (const kf of keyframes) {
+    if (kf.q.buffer instanceof ArrayBuffer) transfer.add(kf.q.buffer);
+    if (kf.wet && kf.wet.buffer instanceof ArrayBuffer) transfer.add(kf.wet.buffer);
+  }
+  parentPort!.postMessage({ id, keyframes }, [...transfer]);
 });

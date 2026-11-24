@@ -3,7 +3,7 @@
 // and the map's imported ones go through the same path; what a form does not say is left for
 // the generator to guess, and evidence mode shows it as such.
 import { existsSync } from 'node:fs';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { formProblem, toLocal, type CityFile, type CityStructure, type FormSpec, type FormType } from '../../../../core/city.ts';
 import type { Basis, FeatureTime } from '../../../../core/tileset.ts';
@@ -22,7 +22,7 @@ const FABRIC = 'gen:rome/fabric';
 async function cachedGrid(name: string, keys: Dataset[], make: () => Promise<GroundGrid>): Promise<GroundGrid> {
   const key = sha256(stableStringify({ name, keys: keys.map((d) => d.fetch.sha256), reader: 4 })).slice(0, 16);
   const path = join(CACHE, 'import', `ground-${name}@${key}`);
-  if (existsSync(`${path}.json`)) {
+  if (existsSync(`${path}.json`) && existsSync(`${path}.bin`)) {
     const meta = JSON.parse(await readFile(`${path}.json`, 'utf8')) as Omit<GroundGrid, 'z'>;
     const b = await readFile(`${path}.bin`);
     return { ...meta, z: new Float32Array(b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength)) };
@@ -30,8 +30,12 @@ async function cachedGrid(name: string, keys: Dataset[], make: () => Promise<Gro
   const g = await make();
   await mkdir(dirname(path), { recursive: true });
   const { z, ...meta } = g;
-  await writeFile(`${path}.json`, JSON.stringify(meta));
-  await writeFile(`${path}.bin`, Buffer.from(z.buffer, z.byteOffset, z.byteLength));
+  const binPart = `${path}.bin.${process.pid}.part`;
+  const jsonPart = `${path}.json.${process.pid}.part`;
+  await writeFile(binPart, Buffer.from(z.buffer, z.byteOffset, z.byteLength));
+  await rename(binPart, `${path}.bin`);
+  await writeFile(jsonPart, JSON.stringify(meta));
+  await rename(jsonPart, `${path}.json`);
   return g;
 }
 
@@ -129,7 +133,7 @@ export async function buildCity(s: Solved, log: (m: string) => void): Promise<Ci
     const flatKind = /^(building|monument)/.test(e.kind) || e.kind === 'open/forum' || e.kind === 'open/square';
     if (flatKind && st.structure.kind !== 'open/district' && area >= 20 && area < 250000 && alive(st.structure.time, site.slice)) flats.push({ s: st.structure, level: st.level, area });
   }
-  structures.sort((a, b) => (a.id < b.id ? -1 : 1));
+  structures.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
   // What the map draws as parts of a monument a record has written: the record's form raises it whole.
   const whole = structures.filter((x) => x.curated && x.rings.length);
   const inWhole = (x: CityStructure) => whole.some((c) => c.id !== x.id && c.rings.some((r) => inRings([r], x.at[0], x.at[1])));
@@ -162,7 +166,12 @@ export async function buildCity(s: Solved, log: (m: string) => void): Promise<Ci
     return { url, ...gridMeta(g) };
   });
   // The generators read the ground as the viewer will: the same integers from the same files.
-  const sampler = new GroundSampler(ground.map((g) => ({ ...g, z: new Int16Array(blobs.get(g.url)!.buffer) })));
+  const sampler = new GroundSampler(
+    ground.map((g) => {
+      const b = blobs.get(g.url)!;
+      return { ...g, z: new Int16Array(b.buffer, b.byteOffset, b.byteLength / 2) };
+    }),
+  );
   for (const st of structures) if (st.base === 0) st.base = Math.round(sampler.at(st.at[0], st.at[1]) * 100) / 100;
 
   // The constraints of the housing: each region, and what the catalogues count there.
@@ -175,7 +184,7 @@ export async function buildCity(s: Solved, log: (m: string) => void): Promise<Ci
       const dom = claimOf(s, e.id, 'domus');
       return { id: e.id, label: labelOf(e.id), at: [Math.round(x), Math.round(y)] as [number, number], insulae: ins?.value as number | undefined, domus: dom?.value as number | undefined };
     })
-    .sort((a, b) => (a.id < b.id ? -1 : 1));
+    .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
 
   const seed = gen.slots.rome.seed;
   const file: CityFile = {

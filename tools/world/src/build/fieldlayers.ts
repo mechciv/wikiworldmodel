@@ -120,7 +120,13 @@ export async function fieldLayers(world: World, claims: ClaimIndex): Promise<{ i
       const part = rows.slice(i, i + BIN_ROWS);
       const file = `layers/${slug}/${bins.length}.json`;
       files.set(file, stableStringify({ format: 'lightworld-layer-bin@1', field: f.id, rows: part } satisfies LayerBin));
-      bins.push({ from: Math.min(...part.map((r) => r.from)), to: Math.max(...part.map((r) => r.to)), file, rows: part.length });
+      let lo = Infinity;
+      let hi = -Infinity;
+      for (const r of part) {
+        if (r.from < lo) lo = r.from;
+        if (r.to > hi) hi = r.to;
+      }
+      bins.push({ from: lo, to: hi, file, rows: part.length });
     }
     const s = world.source.get(f.data.from);
     infos.push({

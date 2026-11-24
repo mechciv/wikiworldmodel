@@ -207,9 +207,11 @@ export class TreePanel {
     const key = JSON.stringify([v.t, v.window, v.scenario, v.selected, this.scroll, this.rowH, this.rows.length, this.hover, w, h]);
     if (key === this.drawKey && !force) return;
     this.drawKey = key;
-    if (this.canvas.width !== w * dpr || this.canvas.height !== h * dpr) {
-      this.canvas.width = w * dpr;
-      this.canvas.height = h * dpr;
+    const pw = Math.max(1, Math.round(w * dpr));
+    const ph = Math.max(1, Math.round(h * dpr));
+    if (this.canvas.width !== pw || this.canvas.height !== ph) {
+      this.canvas.width = pw;
+      this.canvas.height = ph;
     }
     const g = this.canvas.getContext('2d')!;
     g.setTransform(dpr, 0, 0, dpr, 0, 0);

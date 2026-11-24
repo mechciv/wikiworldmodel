@@ -95,7 +95,8 @@ export interface LayerBin {
 export function byValue(v: ByValue | undefined, columns: Record<string, unknown>, fallback: number): number {
   if (v === undefined) return fallback;
   if (typeof v === 'number') return v;
-  return v.values[String(columns[v.by])] ?? v.otherwise;
+  const key = String(columns[v.by]);
+  return Object.hasOwn(v.values, key) ? v.values[key] : v.otherwise;
 }
 
 /** A hue for a name: chosen from it, and so a choice of the viewer's, not a fact; the same name, the same hue, everywhere. */

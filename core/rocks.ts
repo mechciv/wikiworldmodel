@@ -206,7 +206,7 @@ function tally(sites: (RockSite & { km: number })[]): RockTally {
       for (const a of l.adjectives) add(adj, a, s.share / s.lithologies.length);
     }
   }
-  const shares = (m: Map<string, number>): [string, number][] => [...m].map(([k, w]): [string, number] => [k, total ? Math.round((w / total) * 1000) / 1000 : 0]).sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1));
+  const shares = (m: Map<string, number>): [string, number][] => [...m].map(([k, w]): [string, number] => [k, total ? Math.round((w / total) * 1000) / 1000 : 0]).sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
   return { sites: sites.length, nearest: sites.length ? Math.round(sites[0].km) : null, environments: shares(env), lithologies: shares(lith), adjectives: shares(adj), classes: shares(cls) };
 }
 

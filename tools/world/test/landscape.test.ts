@@ -639,4 +639,10 @@ describe('the cities a scene draws', () => {
     expect(figureAt(points, 0)).toBe(300);
     expect(figureAt([], 0)).toBeUndefined();
   });
+
+  it('covers the full polar longitude ring in sceneTiles at high latitudes', async () => {
+    const { sceneTiles } = await import('../../../core/landscape.ts');
+    const sPole = sceneTiles({ tileDeg: 10, reach_deg: 4 }, 88, 0);
+    expect(sPole.length).toBeGreaterThanOrEqual(36);
+  });
 });

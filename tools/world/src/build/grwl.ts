@@ -139,7 +139,14 @@ export function tiles(segs: Segment[], step: number): Map<string, Segment[]> {
   for (const s of segs) {
     const keys = new Set<string>();
     for (let i = 0; i < s.xy.length; i += 2) keys.add(tileKey(s.xy[i], s.xy[i + 1], step));
-    for (const k of keys) out.set(k, [...(out.get(k) ?? []), s]);
+    for (const k of keys) {
+      let bucket = out.get(k);
+      if (!bucket) {
+        bucket = [];
+        out.set(k, bucket);
+      }
+      bucket.push(s);
+    }
   }
   return out;
 }

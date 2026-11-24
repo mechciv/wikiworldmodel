@@ -70,4 +70,10 @@ describe('the water balance', () => {
     const thin = waterYear(t, p.map((x) => x / 3), 62, 300, W);
     expect(thin.runoff).toBeLessThan(thaw.runoff / 5);
   });
+
+  it('handles bare rock (soil_mm = 0) without NaN', () => {
+    const out = waterYear(Array(12).fill(10), Array(12).fill(50), 45, 200, { ...W, soil_mm: 0 });
+    expect(Number.isFinite(out.runoff)).toBe(true);
+    expect(out.runoff).toBeGreaterThan(0);
+  });
 });

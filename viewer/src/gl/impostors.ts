@@ -181,6 +181,23 @@ export class ImpostorAtlas {
     this.nextLayer = 0;
   }
 
+  /** Free all GPU resources owned by this impostor atlas. */
+  dispose(): void {
+    this.clear();
+    const gl = this.gl;
+    if (this.albedoTex) gl.deleteTexture(this.albedoTex);
+    if (this.normalTex) gl.deleteTexture(this.normalTex);
+    if (this.bakeFb) gl.deleteFramebuffer(this.bakeFb);
+    if (this.bakeDepth) gl.deleteRenderbuffer(this.bakeDepth);
+    gl.deleteBuffer(this.quadVbo);
+    gl.deleteBuffer(this.quadIbo);
+    this.albedoTex = null;
+    this.normalTex = null;
+    this.bakeFb = null;
+    this.bakeDepth = null;
+    this.capacity = 0;
+  }
+
   get hasPending(): boolean {
     return this.queue.length > 0;
   }

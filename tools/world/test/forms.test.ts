@@ -159,4 +159,16 @@ describe('the atlas\'s taxa', () => {
     expect(out).toContain('rows');
     expect(out).toContain('txn:');
   });
+
+  it('strips null deletions recursively in canonicalForm', () => {
+    const f = canonicalForm({
+      kind: 'plant',
+      parts: {
+        trunk: { type: 'trunk', taper: 0.5, dead: null } as never,
+        removed: null as never,
+      },
+    } as never);
+    expect('removed' in f.parts).toBe(false);
+    expect('dead' in (f.parts.trunk as Record<string, unknown>)).toBe(false);
+  });
 });

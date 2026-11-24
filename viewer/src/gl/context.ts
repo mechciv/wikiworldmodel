@@ -87,8 +87,15 @@ export function texture2D(
 /** A cube map with one framebuffer and depth buffer per face. */
 export interface CubeTarget {
   texture: WebGLTexture;
+  depth: WebGLRenderbuffer;
   size: number;
   framebuffers: WebGLFramebuffer[];
+}
+
+export function disposeCubeTarget(gl: GL, c: CubeTarget): void {
+  for (const fb of c.framebuffers) gl.deleteFramebuffer(fb);
+  gl.deleteRenderbuffer(c.depth);
+  gl.deleteTexture(c.texture);
 }
 
 export function cubeTarget(gl: GL, size: number, internal: number, format: number, type: number): CubeTarget {
@@ -109,11 +116,18 @@ export function cubeTarget(gl: GL, size: number, internal: number, format: numbe
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_CUBE_MAP_POSITIVE_X + f, texture, 0);
     gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depth);
     const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
-    if (status !== gl.FRAMEBUFFER_COMPLETE) throw new Error(`cube face ${f} framebuffer incomplete (0x${status.toString(16)})`);
+    if (status !== gl.FRAMEBUFFER_COMPLETE) {
+      for (const created of framebuffers) gl.deleteFramebuffer(created);
+      gl.deleteFramebuffer(fb);
+      gl.deleteRenderbuffer(depth);
+      gl.deleteTexture(texture);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+      throw new Error(`cube face ${f} framebuffer incomplete (0x${status.toString(16)})`);
+    }
     framebuffers.push(fb);
   }
   gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-  return { texture, size, framebuffers };
+  return { texture, depth, size, framebuffers };
 }
 
 /**

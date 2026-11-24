@@ -22,19 +22,19 @@ export function scenarioKey(s: Scenario): string {
  */
 export function lookup<T>(variants: Record<string, T> | undefined, s: Scenario, fallback: T): T {
   if (!variants) return fallback;
-  const exact = variants[scenarioKey(s)];
-  if (exact) return exact;
+  const exactKey = scenarioKey(s);
+  if (Object.hasOwn(variants, exactKey)) return variants[exactKey];
   const alts = (s.alts ?? []).slice().sort();
   const pictures = alts.length > 1 ? alts.map((a) => [a]) : [alts];
   for (const p of (s.picks ?? []).slice().sort()) {
     for (const picture of pictures) {
-      const one = variants[scenarioKey({ alts: picture, picks: [p] })];
-      if (one) return one;
+      const k = scenarioKey({ alts: picture, picks: [p] });
+      if (Object.hasOwn(variants, k)) return variants[k];
     }
   }
   for (const picture of pictures) {
-    const one = variants[scenarioKey({ alts: picture })];
-    if (one) return one;
+    const k = scenarioKey({ alts: picture });
+    if (Object.hasOwn(variants, k)) return variants[k];
   }
   return fallback;
 }

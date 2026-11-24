@@ -79,6 +79,7 @@ export class Camera {
   /** Screen position (CSS pixels) of a world point, and whether it faces the camera. */
   project(p: V3): { x: number; y: number; visible: boolean } {
     const c = transform(this.viewProj, p);
+    if (c[3] <= 0) return { x: -1e9, y: -1e9, visible: false };
     const x = ((c[0] / c[3]) * 0.5 + 0.5) * this.width;
     const y = (1 - ((c[1] / c[3]) * 0.5 + 0.5)) * this.height;
     // On the near side of the globe if the point is in front of the horizon plane.
@@ -100,7 +101,11 @@ export class Camera {
     const cq = p0[0] * p0[0] + p0[1] * p0[1] + p0[2] * p0[2] - 1;
     const disc = bq * bq - cq;
     if (disc < 0) return undefined;
-    const s = -bq - Math.sqrt(disc);
+    const root = Math.sqrt(disc);
+    const s0 = -bq - root;
+    const s1 = -bq + root;
+    const s = s0 >= 0 ? s0 : s1 >= 0 ? s1 : -1;
+    if (s < 0) return undefined;
     const point: V3 = [p0[0] + s * d[0], p0[1] + s * d[1], p0[2] + s * d[2]];
     const [lat, lon] = toLatLon(point);
     return { point, lat, lon };

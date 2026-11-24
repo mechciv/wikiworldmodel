@@ -122,6 +122,24 @@ describe('feedbackStore', () => {
 
       const badMethod = await fetch(url('/api/feedback'), { method: 'DELETE' });
       expect(badMethod.status).toBe(405);
+
+      const badOrigin = await fetch(url('/api/feedback'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Origin: 'https://evil.example' },
+        body: '{}',
+      });
+      expect(badOrigin.status).toBe(403);
+      expect(badOrigin.headers.get('x-content-type-options')).toBe('nosniff');
+
+      const badMime = await fetch(url('/api/feedback'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: '{}',
+      });
+      expect(badMime.status).toBe(415);
+
+      const badUri = await fetch(url('/api/feedback/%E0%A4%A/screenshot.png'));
+      expect(badUri.status).toBe(400);
     } finally {
       await new Promise<void>((resolve) => server.close(() => resolve()));
     }

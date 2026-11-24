@@ -101,7 +101,8 @@ export function classAtStep(tile: AnthromeTile, cell: number, step: number): num
 
 /** The cell of a tile a place falls in, or -1. */
 export function cellOf(tile: Pick<AnthromeTileHeader, 'north' | 'west' | 'nx' | 'ny' | 'res'>, lat: number, lon: number): number {
-  const row = Math.floor((tile.north - lat) / tile.res + 1e-9);
+  let row = Math.floor((tile.north - lat) / tile.res + 1e-9);
+  if (row === tile.ny && lat <= -90 + 1e-9 && tile.north - tile.ny * tile.res <= -90 + 1e-9) row = tile.ny - 1;
   let dl = lon - tile.west;
   dl -= 360 * Math.floor(dl / 360);
   const col = Math.floor(dl / tile.res + 1e-9);
@@ -411,12 +412,19 @@ export function cityPeople(c: Pick<City, 'pops'>, t: number, hold: number, gap =
   const p = c.pops;
   for (let i = 0; i < p.length; i++) {
     const [a, pa] = p[i];
-    if (Math.abs(t - a) <= hold && (i + 1 >= p.length || t <= a || p[i + 1][0] - a > gap)) return pa;
-    if (i + 1 < p.length && t > a && t <= p[i + 1][0]) {
+    if (t <= a) return a - t <= hold ? pa : undefined;
+    if (i + 1 < p.length) {
       const [b, pb] = p[i + 1];
-      if (b - a <= gap) return Math.round(pa + ((pb - pa) * (t - a)) / (b - a));
-      if (b - t <= hold) return pb;
-    }
+      if (t <= b) {
+        if (b - a <= gap) return Math.round(pa + ((pb - pa) * (t - a)) / (b - a));
+        const da = t - a;
+        const db = b - t;
+        if (db < da && db <= hold) return pb;
+        if (da <= hold) return pa;
+        if (db <= hold) return pb;
+        return undefined;
+      }
+    } else if (t - a <= hold) return pa;
   }
   return undefined;
 }
@@ -445,10 +453,15 @@ export function citiesNear(f: Pick<CitiesFile, 'lists' | 'cities'>, lat: number,
     const people = cityPeople(c, t, l?.hold ?? 0, l?.gap ?? Infinity);
     if (people !== undefined && people > 0) found.push({ city: c, people, km: Math.round(d * 10) / 10, also: [] });
   }
-  found.sort((a, b) => b.people - a.people || (a.city.source < b.city.source ? -1 : 1));
+  found.sort((a, b) => b.people - a.people || (a.city.source < b.city.source ? -1 : a.city.source > b.city.source ? 1 : 0));
   const out: typeof found = [];
   for (const x of found) {
-    const same = out.find((y) => kmBetween(x.city.lat, x.city.lon, y.city.lat, y.city.lon) <= mergeKm);
+    const same = out.find(
+      (y) =>
+        y.city.source !== x.city.source &&
+        !y.also.some((a) => a.city.source === x.city.source) &&
+        kmBetween(x.city.lat, x.city.lon, y.city.lat, y.city.lon) <= mergeKm,
+    );
     if (same) same.also.push({ city: x.city, people: x.people });
     else out.push(x);
   }
@@ -548,8 +561,23 @@ export const FAR_REACH_DEG = 1;
 /** The tiles a scene of a place reads: the keys of those under its reach. */
 export function sceneTiles(d: Pick<LandscapeData, 'tileDeg' | 'reach_deg'>, lat: number, lon: number): string[] {
   const out = new Set<string>();
-  const dLon = d.reach_deg / Math.max(0.1, Math.cos((lat * Math.PI) / 180));
-  for (const la of [lat - d.reach_deg, lat, lat + d.reach_deg]) for (const lo of [lon - dLon, lon, lon + dLon]) out.add(tileKey(Math.max(-89.99, Math.min(89.99, la)), lo, d.tileDeg).key);
+  const deg = d.tileDeg;
+  const latLo = Math.max(-89.99, lat - d.reach_deg);
+  const latHi = Math.min(89.99, lat + d.reach_deg);
+  const maxAbsLat = Math.max(Math.abs(latLo), Math.abs(latHi));
+  const fullRing = maxAbsLat >= 89.99 - 1e-6;
+  const dLon = fullRing ? 180 : Math.min(180, d.reach_deg / Math.max(0.1, Math.cos((maxAbsLat * Math.PI) / 180)));
+  const lats: number[] = [];
+  for (let la = latLo; la < latHi - 1e-9; la += deg) lats.push(la);
+  lats.push(latHi);
+  const lons: number[] = [];
+  if (fullRing || dLon >= 180) {
+    for (let lo = -180; lo < 180 - 1e-9; lo += deg) lons.push(lo);
+  } else {
+    for (let lo = lon - dLon; lo < lon + dLon - 1e-9; lo += deg) lons.push(lo);
+    lons.push(lon + dLon);
+  }
+  for (const la of lats) for (const lo of lons) out.add(tileKey(la, lo, deg).key);
   return [...out].sort();
 }
 
@@ -571,7 +599,7 @@ export function scenePeople(d: LandscapeData, lat: number, lon: number, t: numbe
     const cell = cellOf(tile, cLat, cLon);
     return cell < 0 ? { k: 0, region: 0 } : { k: classAtStep(tile, cell, step), region: tile.region[cell] };
   };
-  const gr = Math.floor((90 - lat) / res);
+  const gr = Math.min(180 * per - 1, Math.max(0, Math.floor((90 - lat) / res)));
   const gc = Math.floor((lon + 180) / res);
   if (!classAt(gr, gc).k) return undefined;
   // Each 1° cell's people, shared over its 5′ cells by their classes, once per 1° cell.

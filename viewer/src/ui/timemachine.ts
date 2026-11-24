@@ -4,6 +4,7 @@
 import type { PeriodRecord, SearchEntry } from '../../../core/records.ts';
 import { heldAt, holdsAt, nameAt, nameFound, nameMatches, readQuery, spanOfEntry } from '../../../core/timemachine.ts';
 import { formatTime, historical, PRESENT_YEAR } from '../../../core/time.ts';
+import { esc } from './html.ts';
 
 /**
  * The trips offered before anything is typed: records only, by id, so that every time shown is
@@ -54,8 +55,6 @@ interface Row {
   note?: string;
   run: () => void;
 }
-
-const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
 
 /** A slider along a stretch of time: by the year in the calendar's span, by the logarithm of the age beyond it. */
 interface Scale {

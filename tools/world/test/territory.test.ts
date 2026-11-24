@@ -102,4 +102,14 @@ describe('an outline written in a claim (docs/STRUCTURE.md section 5)', () => {
     expect(areaKm2(square(0))).toBeCloseTo(12392, -2);
     expect(areaKm2(square(60)) / areaKm2(square(0))).toBeCloseTo(0.49, 1);
   });
+
+  it('wraps antimeridian-crossing rings in contains()', async () => {
+    const { TERRITORY_SCALE } = await import('../../../core/territory.ts');
+    const ring = [[179, -1], [-179, -1], [-179, 1], [179, 1]];
+    const flatRing = ring.flatMap(([lo, la]) => [lo * TERRITORY_SCALE, la * TERRITORY_SCALE]);
+    const pacific = row('Pacific', 0, 100, [flatRing]);
+    expect(contains(pacific, 179.5, 0)).toBe(true);
+    expect(contains(pacific, -179.5, 0)).toBe(true);
+    expect(contains(pacific, 0, 0)).toBe(false);
+  });
 });

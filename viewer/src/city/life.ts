@@ -25,8 +25,9 @@ import { shadowFocusFor, type LocalView } from './view.ts';
 
 const TIMELESS = 2e7;
 
-/** One renderer for all of a viewer's living scenes: a new place should not compile its shaders again. */
-const renderers = new WeakMap<GL, Promise<LocalRenderer>>();
+/** One renderer per quality mode for all of a viewer's living scenes: a new place should not compile its shaders again. */
+const renderersFull = new WeakMap<GL, Promise<LocalRenderer>>();
+const renderersFast = new WeakMap<GL, Promise<LocalRenderer>>();
 /** Which scene has the renderer now. */
 const owners = new WeakMap<LocalRenderer, LifeScene>();
 
@@ -151,13 +152,14 @@ export class LifeScene {
   readonly sea: boolean;
 
   static async create(gl: GL, source: SceneSpec, expected: Fingerprint | null, opts: { fast?: boolean } = {}): Promise<LifeScene> {
-    let renderer = renderers.get(gl);
+    const cache = opts.fast ? renderersFast : renderersFull;
+    let renderer = cache.get(gl);
     if (!renderer) {
       renderer = CityRenderer.create(gl, opts).catch(err => {
-        renderers.delete(gl);
+        cache.delete(gl);
         throw err;
       });
-      renderers.set(gl, renderer);
+      cache.set(gl, renderer);
     }
     return new LifeScene(await renderer, source, expected, opts);
   }
@@ -615,6 +617,9 @@ export class LifeScene {
     if (owners.get(this.renderer) === this) {
       this.renderer.setSmokes(null);
       this.renderer.shadowCells = () => [];
+      this.renderer.clearGround();
+      this.renderer.clearInstanced();
+      owners.delete(this.renderer);
     }
     this.active = false;
     this.hasComplete = false;

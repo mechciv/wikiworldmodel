@@ -517,6 +517,7 @@ export function agricultureInputs(s: Solved, regionsSource: string): Agriculture
 
 /** To three figures, as the atlas rounds a size. */
 const figures3 = (x: number): number => {
+  if (!Number.isFinite(x) || x <= 0) return 0;
   let k = 1;
   while (x * k < 100) k *= 10;
   while (x * k >= 1000) k /= 10;

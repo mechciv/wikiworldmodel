@@ -89,13 +89,34 @@ export abstract class CellScene {
     if (c) {
       const gpu = this.renderer.upload(m.vertices, m.indices);
       if (m.detail === 1) {
-        if (c.fine) this.renderer.remove(c.fine);
+        if (c.fine) {
+          this.fineBytes -= c.fine.bytes;
+          this.renderer.remove(c.fine);
+        }
         c.fine = gpu;
         this.fineBytes += gpu.bytes;
-      } else c.coarse = gpu;
+      } else {
+        if (c.coarse) this.renderer.remove(c.coarse);
+        c.coarse = gpu;
+      }
     }
     this.pump();
     this.onChange();
+  }
+
+  /** Terminate the worker and release all cell meshes held on the GPU. */
+  dispose(): void {
+    this.worker?.terminate();
+    this.worker = null;
+    for (const c of this.cells.values()) {
+      if (c.coarse) this.renderer.remove(c.coarse);
+      if (c.fine) this.renderer.remove(c.fine);
+    }
+    this.cells.clear();
+    this.queue = [];
+    this.fineBytes = 0;
+    this.inflight = 0;
+    this.ready = false;
   }
 
   /** Ask the worker for every cell wanted: it makes them in its own order, the nearest first (worker.ts). */

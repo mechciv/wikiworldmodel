@@ -56,12 +56,13 @@ export interface TreeIndex {
 export function indexTree(nodes: TreeNode[]): TreeIndex {
   const children: number[][] = nodes.map(() => []);
   const roots: number[] = [];
-  nodes.forEach((n, i) => (n.parent >= 0 ? children[n.parent].push(i) : roots.push(i)));
+  nodes.forEach((n, i) => (n.parent >= 0 && n.parent < nodes.length && n.parent !== i ? children[n.parent].push(i) : roots.push(i)));
   const when = (i: number) => nodes[i].time.start.best ?? Infinity;
-  const order = (a: number, b: number) => when(a) - when(b) || (nodes[a].label < nodes[b].label ? -1 : 1);
+  const order = (a: number, b: number) => when(a) - when(b) || (nodes[a].label < nodes[b].label ? -1 : nodes[a].label > nodes[b].label ? 1 : 0);
   for (const c of children) c.sort(order);
   roots.sort(order);
   const size = new Array<number>(nodes.length).fill(0);
+  const seen = new Uint8Array(nodes.length);
   const stack: [number, boolean][] = roots.map((r) => [r, false]);
   while (stack.length) {
     const [i, done] = stack.pop()!;
@@ -69,8 +70,10 @@ export function indexTree(nodes: TreeNode[]): TreeIndex {
       for (const c of children[i]) size[i] += size[c] + 1;
       continue;
     }
+    if (seen[i]) continue;
+    seen[i] = 1;
     stack.push([i, true]);
-    for (const c of children[i]) stack.push([c, false]);
+    for (const c of children[i]) if (!seen[c]) stack.push([c, false]);
   }
   return { children, roots, size };
 }
@@ -89,17 +92,20 @@ export interface TreeRow {
  */
 export function layoutTree(nodes: TreeNode[], index: TreeIndex, open: ReadonlySet<number>): TreeRow[] {
   const rows: TreeRow[] = [];
+  const seen = new Uint8Array(nodes.length);
   const stack: [number, number][] = [];
   for (let i = index.roots.length - 1; i >= 0; i--) stack.push([index.roots[i], -1]);
   while (stack.length) {
     const [i, parentRow] = stack.pop()!;
+    if (seen[i]) continue;
+    seen[i] = 1;
     const kids = index.children[i];
     // A written taxon shows its children at once; a database's stay folded until asked for.
     const shut = kids.length > 0 && !open.has(i) && kids.every((k) => nodes[k].imported);
     const row = rows.length;
     rows.push({ node: i, parentRow, folded: shut });
     if (shut) continue;
-    for (let k = kids.length - 1; k >= 0; k--) stack.push([kids[k], row]);
+    for (let k = kids.length - 1; k >= 0; k--) if (!seen[kids[k]]) stack.push([kids[k], row]);
   }
   return rows;
 }
@@ -107,11 +113,14 @@ export function layoutTree(nodes: TreeNode[], index: TreeIndex, open: ReadonlySe
 /** A node and everything below it. */
 export function subtree(index: TreeIndex, i: number): number[] {
   const out: number[] = [];
+  const seen = new Set<number>();
   const stack = [i];
   while (stack.length) {
     const x = stack.pop()!;
+    if (seen.has(x) || x < 0 || x >= index.children.length) continue;
+    seen.add(x);
     out.push(x);
-    for (const c of index.children[x]) stack.push(c);
+    for (const c of index.children[x]) if (!seen.has(c)) stack.push(c);
   }
   return out;
 }
@@ -119,6 +128,11 @@ export function subtree(index: TreeIndex, i: number): number[] {
 /** The nodes above a node. */
 export function ancestors(nodes: TreeNode[], i: number): number[] {
   const out: number[] = [];
-  for (let p = nodes[i].parent; p >= 0; p = nodes[p].parent) out.push(p);
+  if (i < 0 || i >= nodes.length) return out;
+  const seen = new Set<number>([i]);
+  for (let p = nodes[i].parent; p >= 0 && p < nodes.length && !seen.has(p); p = nodes[p].parent) {
+    seen.add(p);
+    out.push(p);
+  }
   return out;
 }

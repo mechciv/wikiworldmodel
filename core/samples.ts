@@ -27,10 +27,14 @@ export type Uncertain =
 
 /** A quantity's value as the world writes it (a number, { mean, sd } or { lo, hi }) as something to sample. */
 export function uncertainOf(v: unknown): Uncertain {
-  if (typeof v === 'number') return { kind: 'unknown', value: v };
+  if (typeof v === 'number' && Number.isFinite(v)) return { kind: 'unknown', value: v };
   const q = v as { mean?: number; sd?: number; lo?: number; hi?: number } | null;
-  if (q && typeof q.mean === 'number' && typeof q.sd === 'number') return { kind: 'normal', mean: q.mean, sd: q.sd };
-  if (q && typeof q.lo === 'number' && typeof q.hi === 'number') return { kind: 'range', lo: Math.min(q.lo, q.hi), hi: Math.max(q.lo, q.hi) };
+  if (q && typeof q.mean === 'number' && Number.isFinite(q.mean) && typeof q.sd === 'number' && Number.isFinite(q.sd) && q.sd >= 0) {
+    return { kind: 'normal', mean: q.mean, sd: q.sd };
+  }
+  if (q && typeof q.lo === 'number' && Number.isFinite(q.lo) && typeof q.hi === 'number' && Number.isFinite(q.hi)) {
+    return { kind: 'range', lo: Math.min(q.lo, q.hi), hi: Math.max(q.lo, q.hi) };
+  }
   throw new Error(`not a quantity to sample: ${JSON.stringify(v)}`);
 }
 
@@ -45,8 +49,10 @@ export function central(u: Uncertain): number {
     case 'range':
       return (u.lo + u.hi) / 2;
     case 'members':
+      if (!u.values.length) throw new Error('members ensemble must be non-empty');
       return median(u.values);
     case 'alternatives':
+      if (!u.values.length) throw new Error('alternatives ensemble must be non-empty');
       return u.values[0].value;
   }
 }
@@ -83,8 +89,10 @@ export function sample(u: Uncertain, seed: string, member: number): number {
     case 'range':
       return u.lo + (u.hi - u.lo) * hash(seed, member, 1);
     case 'members':
-      return u.values[member % u.values.length];
+      if (!u.values.length) throw new Error('members ensemble must be non-empty');
+      return u.values[(member - 1) % u.values.length];
     case 'alternatives':
+      if (!u.values.length) throw new Error('alternatives ensemble must be non-empty');
       return u.values[member % u.values.length].value;
   }
 }
@@ -128,6 +136,7 @@ export interface Spread {
  * 95th percentile of the members, or for alternatives, each its own picture, the whole range between them.
  */
 export function spread(members: number[], band: [number, number] = [0.05, 0.95]): Spread {
+  if (!members.length) throw new Error('spread requires at least one member');
   const s = [...members].sort((a, b) => a - b);
   const mean = s.reduce((a, b) => a + b, 0) / s.length;
   const sd = Math.sqrt(s.reduce((a, b) => a + (b - mean) * (b - mean), 0) / s.length);
