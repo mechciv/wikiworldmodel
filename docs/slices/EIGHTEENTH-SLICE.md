@@ -61,7 +61,7 @@ As for the other slices (see the [README](../../README.md)). In the viewer:
 | A recorded wall takes the place of a generated one and bounds the town while it stands; a recorded road stands in its frame; a district counted four times the buildings has smaller plots | `town.test.ts` |
 | Dividing only what is wanted divides it as dividing all of it would | `division.test.ts`: *divides only what is wanted…* |
 | A town keeps its streets and plots where they are as it grows, gives up its outer plots first as it shrinks, builds nothing in its river, is the same town every time, and has a gate on each route through its wall | `world/generators/people/settlement/town.test.ts` |
-| In a scene, a city's houses and streets of one time stand where they stood at another; it shrinks to its oldest ground; a great city has no most of houses; its wall stands only while its claim says | `v10.test.ts`: *a city laid out through its life* |
+| In a scene, a city's houses and streets of one time stand where they stood at another; it shrinks to its oldest ground; a great city has no most of houses; its wall stands only while its claim says; a plot holds as many people as its tradition says lived to a house | `v10.test.ts`: *a city laid out through its life* |
 | Each city of a scene carries its whole life, the same at every time | `tools/world/test/landscape.test.ts`: *gives each city its whole life…* |
 | A survey's ground is laid over the scene's, its water is the scene's there, the scene's own river is taken out of it, and houses keep off its water, its structures and its gardens | `world/generators/life/survey.test.ts` |
 | A city's records are cut into cells, each structure's entity after the scene's own | `tools/world/test/city.test.ts`: *a city's records, cell by cell* |
@@ -90,7 +90,8 @@ each ends where it meets one traced before. A wall is laid round the city's body
 fifths of the most people it had while the wall stood, its ribbons along the roads left outside. The faces of the frame
 are divided only where something is built at the time asked; a lane is drawn along the stretches of it that run by
 built ground; and a plot is a household's share of the ground where it lies at the city's height, so the core's plots
-are small and the edge's large.
+are small and the edge's large. A household is as many people as the city's tradition says lived to a house, where it
+says: forty to a block of flats in Imperial Rome, ten to twenty in a town of the Ganges; six where nothing says.
 
 Where a map of the world is of the city, its walls that go round it and its roads go into the plan in the city's own
 metres: a recorded wall takes the place of a generated one, its years making the growth model's epochs, so Rome grows
