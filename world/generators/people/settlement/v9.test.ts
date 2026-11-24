@@ -67,7 +67,9 @@ const EXTENT = 16000;
 
 describe('the settlement generator', () => {
   it('holds as many people as the world puts in the land it draws', () => {
-    for (const [code, density] of [[32, 40], [23, 260], [33, 4], [42, 3]] as [number, number][]) {
+    // The last, farmsteads far more crowded than their class says (it says 1–10 to the km²), whose cells take more
+    // settlements than the most places a cell weighs.
+    for (const [code, density] of [[32, 40], [23, 260], [33, 4], [42, 3], [33, 300]] as [number, number][]) {
       const p = world(() => ({ code, density, region: 1 }), [{ id: 1, a: assess(1, 1, 3, 2) }]);
       const plan = makeSettlement(spec(p), flat, dry, EXTENT);
       expect(plan.expected).toBeGreaterThan(0);

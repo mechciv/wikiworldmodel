@@ -377,7 +377,8 @@ export function siteCells(cells: SiteCell[], worth: SiteWorth, p: SitingParams):
   const weighed: { x: number; y: number; w: number; k: number }[][] = cells.map((c) => {
     const out: { x: number; y: number; w: number; k: number }[] = [];
     if (!c.sizes.length) return out;
-    const n = clamp(Math.round(p.candidates[0] * c.sizes.length), p.candidates[1], p.candidates[2]);
+    // The most a cell weighs keeps a crowded cell cheap, but never leaves it fewer than four places for each settlement.
+    const n = Math.max(clamp(Math.round(p.candidates[0] * c.sizes.length), p.candidates[1], p.candidates[2]), 4 * c.sizes.length);
     const side = Math.ceil(Math.sqrt(n));
     // Not on the cell's very edge, where two scenes' metres could put a place in the cell beside it.
     const inset = 3 / Math.max(1, c.x1 - c.x0);
