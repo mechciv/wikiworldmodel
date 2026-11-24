@@ -851,6 +851,20 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
     drawnSources.push({ starts, r: s.r, x: s.x, y: s.y, area: PI * s.fieldR * s.fieldR, use: s.fields, settlement: si });
   });
   const fieldGrid = growFields([...drawnSources, ...sources], ground, water, near, earth, G, margin, seedOf(hash2(0x50, 0x12, 0x5017)));
+  // Each settlement's own nodes of the field grid, worked out once when first asked for.
+  let ownMap: Map<number, number[]> | undefined;
+  const ownNodes = (): Map<number, number[]> => {
+    if (ownMap) return ownMap;
+    ownMap = new Map();
+    for (let k = 0; k < fieldGrid.owner.length; k++) {
+      const o = fieldGrid.owner[k];
+      if (o < 0) continue;
+      let l = ownMap.get(o);
+      if (!l) ownMap.set(o, (l = []));
+      l.push(k);
+    }
+    return ownMap;
+  };
   // Whether a place is well inside a settlement's own fields: the node nearest it and those about it all its own, so
   // that the fields are drawn there whole (LandUseMap reads the nodes about a place, its edge a little moved).
   const inOwnFields = (x: number, y: number, si: number): boolean => {
@@ -1755,11 +1769,23 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
         let stookClusters = 0;
         let ploughsAdded = 0;
         let fieldHands = 0;
+        // Where its fields grew, along the contours and the water as they did: a node of its own by chance, and a place in
+        // it; a ring about its houses where it has none.
+        const own = ownNodes().get(si);
         for (let q = 0; q < 48 && (stookClusters < 6 || ploughsAdded < 2 || fieldHands < 6); q++) {
-          const a = rng.next() * TAU;
-          const rr = Math.sqrt(innerR * innerR + (outerR * outerR - innerR * innerR) * rng.next());
-          const x = s.x + Math.sin(a) * rr;
-          const y = s.y + Math.cos(a) * rr;
+          const a = rng.next();
+          const b = rng.next();
+          let x: number;
+          let y: number;
+          if (own?.length) {
+            const k = own[Math.min(own.length - 1, Math.floor(a * own.length))];
+            x = fieldGrid.x0 + (k % fieldGrid.nx) * fieldGrid.cell + (b - 0.5) * fieldGrid.cell;
+            y = fieldGrid.y0 + Math.floor(k / fieldGrid.nx) * fieldGrid.cell + (hash2(q, si, s.seed) - 0.5) * fieldGrid.cell;
+          } else {
+            const rr = Math.sqrt(innerR * innerR + (outerR * outerR - innerR * innerR) * b);
+            x = s.x + Math.sin(a * TAU) * rr;
+            y = s.y + Math.cos(a * TAU) * rr;
+          }
           if (!fit(x, y) || !clearOfHouses(x, y, -1, 4) || laneAvoid?.near(x, y, 2.5)) continue;
           // Work goes on well inside the settlement's own fields, where they are drawn whole, and not at their ragged edge.
           if (!inOwnFields(x, y, si)) continue;

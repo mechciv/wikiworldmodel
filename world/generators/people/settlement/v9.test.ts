@@ -759,8 +759,11 @@ describe('where settlements stand, and what they farm (sites.ts)', () => {
   });
 
   it("takes the record's siting and growth where a build has none", () => {
-    expect(gen.params.siting).toEqual(SITING);
-    expect(gen.params.growth).toEqual(GROWTH);
+    // Version 9's weights, frozen: held to the record while it is at version 9, and left be by any later one.
+    if (gen.version === 9) {
+      expect(gen.params.siting).toEqual(SITING);
+      expect(gen.params.growth).toEqual(GROWTH);
+    }
     const { siting: _s, growth: _g, ...older } = gen.params;
     const old = makeSettlement(spec({ ...p, generator: { ...p.generator, version: 8, params: older } }), plain, dry, EXTENT, undefined, near);
     // The same settlements, each where it stood, as many people and seeded alike; and the same fields.
