@@ -179,9 +179,11 @@ picked, named and lit as in the city's own scene before.
 
 ## How it was checked
 
-By the agent that built it (Claude Code), on one machine, in November 2026: `npm run typecheck`; `npm test`, every unit
-test passing; `npm run validate`, no errors and no warnings; a world build; and views of Uruk, Tenochtitlan,
-Pataliputra, Mohenjo-daro and Rome at 315 and 1200 on the GPU. What the browser groups found is said in the pull request.
+By the agent that built it (Claude Code), on one machine, in November 2026: `npm run typecheck`; `npm test`, 1,015
+tests passing; `npm run validate`, no errors and no warnings; a world build from a clean commit; the browser groups in
+software, with Rome's five full-quality views drawn again and each looked at against the one before; and views of Uruk,
+Tenochtitlan, Pataliputra, Mohenjo-daro, and Rome in 100 BCE, 315 and 1200, on the GPU. What the browser groups found,
+and which of their failures master's nightly run has too, is said in the pull request.
 
 ## Next
 
