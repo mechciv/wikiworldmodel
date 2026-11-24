@@ -2086,8 +2086,8 @@ async function start(root: HTMLElement): Promise<void> {
           setState({ sel: null });
           shownRecord = null;
           const gen = city.spec.people.generator;
-          const text = `A street or country path of the scene (${city.people.paths.toLocaleString('en-US')} paths between settlements and ${city.people.streets.toLocaleString('en-US')} internal lanes). No record says where any street or path ran: settlements are laid out along connected lanes and joined to their nearest neighbours by roads that enter their gates and break where they would cross water.`;
-          const why = `${gen.generator}, version ${gen.version}: nobody surveyed this road. Which settlements it joins follows where the generator put them; its line and paving are invented.`;
+          const text = `A street, farming lane, or country path of the scene (${city.people.paths.toLocaleString('en-US')} routes between settlements and ${city.people.streets.toLocaleString('en-US')} internal lanes and streets). Routes link neighbouring settlements; in farming settlements and towns, lanes and tracks also lead from the fields through enclosure gates to household entrances.`;
+          const why = `${gen.generator}, version ${gen.version}. Nobody surveyed this road: the generator chooses the route and its width from the layout and the ground. Its exact course and paving are procedural.`;
           return inspect.showGenerated('A street or path', 'Generated road', text, why);
         }
         // A continuous perimeter wall, palisade, rampart, or gatehouse round a town or village.

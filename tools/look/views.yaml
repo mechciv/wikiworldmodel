@@ -100,9 +100,9 @@ views:
   - name: rome-street
     what: A street of Rome in 315, from a few metres up.
     link: t=315.5&lat=41.8945&lon=12.4925&d=1.0000006&h=200&v=86&clock=0
-  - name: eastern-han-hebei
+  - name: han-farming-hamlet
     what: >-
-      Foothills near Cishan, Hebei in June 147 CE (Eastern Han): walled courtyard villages linked by roads,
-      domain-oriented millet and winter-wheat parcels, contour-terraced slopes, and everyday settlement activity.
-    link: t=147.974&lat=36.5681082&lon=114.1017057&d=1.0002019725&h=240&v=60&hour=15&mo=6&clock=0
-
+      A walled farming hamlet in North China at 147 CE (Eastern Han): approaches from the fields pass through
+      roofed gatehouses and branch to courtyard entrances, surrounded by domain-oriented millet and winter-wheat
+      parcels, terraced slopes, and everyday settlement activity.
+    link: t=147.974&lat=36.5681082&lon=114.1017057&d=1.0002019725&w=4906.666667Ma%7E-8096Ma&h=240&v=60&hour=15&mo=6&clock=0

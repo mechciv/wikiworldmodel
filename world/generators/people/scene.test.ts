@@ -77,7 +77,8 @@ describe('the people of a scene, drawn', () => {
     // The townspeople keep none: the husbandry is the farmers'.
     expect(plan.animals.some((a) => a.settlement === plan.settlements.indexOf(town))).toBe(false);
     expect(plan.paths.length).toBeGreaterThan(20);
-    expect(plan.streets.length).toBeGreaterThan(20);
+    expect(plan.streets.length).toBeGreaterThan(10);
+    expect(plan.lanes.length).toBeGreaterThan(20);
     expect(stream.smokes()?.length).toBeGreaterThan(0);
   });
 

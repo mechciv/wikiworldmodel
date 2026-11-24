@@ -53,7 +53,7 @@ At aerial and mid-range zoom (for example, the Eastern Han foothills of northern
 
 ## Milestones
 
-### M1. Organic connected settlements and continuous terrain-conforming walls (`gen:people/settlement` v7)
+### M1. Organic connected settlements and continuous terrain-conforming walls (`gen:people/settlement` v8)
 - **Continuous terrain-conforming wall & gatehouse mesh builder** (`world/generators/people/walls.ts`):
   extrudes battered rammed-earth, masonry, brick, earthen bank, palisade, hedge and ditch perimeters along
   sampled terrain elevation with mitered joins, deep foundation skirts (zero gaps on slopes), horizontal

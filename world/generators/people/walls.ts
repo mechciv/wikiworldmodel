@@ -579,18 +579,23 @@ export function buildPerimeterMesh(m: Mesh, spec: PerimeterSpec, g: GroundHeight
     }
   }
 
-  // Place corner & interval watchtowers along fortified walls (staying clear of gates).
+  // Place corner & interval watchtowers along fortified walls (staying clear of gates and adjacent corners).
   let towerCount = 0;
   if (hasTowers) {
     const towerSpacing = 48;
+    const minCornerGap = 22;
+    const totalLen = pts[n - 1].s + Math.hypot(pts[0].x - pts[n - 1].x, pts[0].y - pts[n - 1].y);
+    let firstS = -1;
     let lastS = -towerSpacing;
     for (let i = 0; i < n; i++) {
       if (blocked[i]) continue;
       const p = pts[i];
       const nearGate = spec.gates.some((gt) => Math.hypot(p.x - gt.x, p.y - gt.y) < gt.width + 10);
       if (nearGate) continue;
-      if (p.corner || p.s - lastS >= towerSpacing) {
+      if (firstS >= 0 && totalLen - p.s + firstS < minCornerGap) continue;
+      if ((p.corner && p.s - lastS >= minCornerGap) || p.s - lastS >= towerSpacing) {
         drawWatchtower(m, p.x, p.y, p.ox, p.oy, g, spec.height, spec.thickness, mat, roofMat, tint);
+        if (firstS < 0) firstS = p.s;
         lastS = p.s;
         towerCount++;
       }

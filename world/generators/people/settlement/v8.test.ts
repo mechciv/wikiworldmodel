@@ -12,7 +12,7 @@ import { houseSize, HOUSE_VARIANTS } from '../dwellings.ts';
 import { ROUTE, roundOf, wayAt, type RoutineParams } from '../../life/routines.ts';
 import { personGoes } from '../figures.ts';
 import { WORK_VARIANTS } from '../works.ts';
-import { LandUseMap, makeSettlement, toLocal, type Ground } from './v7.ts';
+import { LandUseMap, makeSettlement, toLocal, type Ground } from './v8.ts';
 
 const ROOT = join(import.meta.dirname, '../../../..');
 // How the living scene's animals go about: the settlement's kept ones go by the same parameters.
@@ -571,17 +571,19 @@ describe('the settlement generator', () => {
       }
     });
 
-    it('joins each settlement to its nearest neighbours by a path that ends at the edge of their houses', () => {
+    it('joins neighbouring farming settlements at the ends of their through lanes', () => {
       const plan = makeSettlement(spec(villages()), flat, dry, EXTENT);
       expect(plan.pathWidth).toBeGreaterThan(1);
       expect(plan.paths.length).toBeGreaterThan(50);
-      const near = (x: number, y: number) => plan.settlements.reduce((best, s) => Math.min(best, Math.hypot(x - s.x, y - s.y) - s.r), Infinity);
+      const ends = plan.lanes.filter(l => l.width === (gen.params.lanes as { main: number }).main)
+        .flatMap(l => [l.line.slice(0, 2), l.line.slice(-2)]);
+      const meets = (x: number, y: number) => ends.some(([ex, ey]) => Math.hypot(x - ex, y - ey) < 1e-6);
       let length = 0;
       for (const line of plan.paths) {
         expect(line.length).toBeGreaterThanOrEqual(6);
-        // Each end at the edge of a settlement's houses; no step of it long enough to cut a corner of the ground.
-        expect(near(line[0], line[1])).toBeLessThan(1);
-        expect(near(line.at(-2)!, line.at(-1)!)).toBeLessThan(1);
+        // Each end meets the through lane in the fields; no step of it long enough to cut a corner of the ground.
+        expect(meets(line[0], line[1])).toBe(true);
+        expect(meets(line.at(-2)!, line.at(-1)!)).toBe(true);
         for (let q = 2; q < line.length; q += 2) {
           const d = Math.hypot(line[q] - line[q - 2], line[q + 1] - line[q - 1]);
           expect(d).toBeLessThan(40);
@@ -705,12 +707,12 @@ describe('how a tradition sets its houses out', () => {
       const mine = dwellings(palisaded, pr.settlement);
       if (mine.length < 20) continue;
       seen++;
-      // Its continuous ring encloses every house with gate openings on the main approaches.
-      expect(pr.ring.length).toBeGreaterThanOrEqual(8);
+      // The continuous convex perimeter surrounds every home with gate openings where the through-lane crosses it.
+      expect(pr.ring.length).toBeGreaterThanOrEqual(6);
       expect(pr.gates.length).toBeGreaterThanOrEqual(2);
-      const maxHouseR = Math.max(...mine.map((h) => Math.hypot(h.x - s.x, h.y - s.y)));
-      const minRingR = Math.min(...pr.ring.map(([rx, ry]) => Math.hypot(rx - s.x, ry - s.y)));
-      expect(minRingR).toBeGreaterThan(maxHouseR * 0.72);
+      const edges = pr.ring.map((a, i) => ({ a, b: pr.ring[(i + 1) % pr.ring.length] }));
+      for (const h of mine) expect(edges.every(({ a, b }) => (b[0] - a[0]) * (h.y - a[1]) > (b[1] - a[1]) * (h.x - a[0]))).toBe(true);
+      void s;
     }
     expect(seen).toBeGreaterThan(5);
     const walled = farmland(compileTraditions([{ id: 'test/walled', label: 'A walled village', ...base, dwelling: house, settlement: { pattern: 'walled', houses: 20 } }]));
@@ -720,7 +722,7 @@ describe('how a tradition sets its houses out', () => {
     expect(farmland(compileTraditions([{ id: 'test/open', label: 'An open village', ...base, dwelling: house }])).perimeters).toEqual([]);
   });
 
-  it('lays out road-first streets, seasonal regional agriculture, living activity, and slope-gated land use', () => {
+  it('lays out connected farming lanes, seasonal regional agriculture, living activity, and slope-gated land use', () => {
     const traditions = compileTraditions([
       {
         id: 'test/han-courtyard',
@@ -754,7 +756,7 @@ describe('how a tradition sets its houses out', () => {
     // Flat valley near origin rising into a steep 0.45 slope hill east of 2000 m.
     const hilly: Ground = { at: (x) => (x > 2000 ? 40 + (x - 2000) * 0.45 : 40) };
     const plan = makeSettlement(s, hilly, dry, EXTENT);
-    expect(plan.streets.length).toBeGreaterThan(20);
+    expect(plan.lanes.length).toBeGreaterThan(20);
     expect(plan.perimeters.length).toBeGreaterThan(5);
     expect(plan.smokes.length).toBeGreaterThan(10);
     expect(plan.agriculture.from).toBe('tradition');

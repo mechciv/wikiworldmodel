@@ -15,7 +15,8 @@ import { freshOf, noise, type Waters } from './land.ts';
 import { GroundSort } from './sorting.ts';
 import { drawStone, drawWood, shedsWood, STONE_FINE, STONE_VARIANTS, WOOD, WOOD_SEEDS, woodLength } from './strewn.ts';
 import { drawDwelling, HOUSE_VARIANTS, houseSize, type HouseDetail } from '../people/dwellings.ts';
-import { LandUseMap, landUseMask, makeSettlement, type LandUse, type SettlementParams, type SettlementPlan } from '../people/settlement/v7.ts';
+import { LandUseMap, landUseMask, makeSettlement, type LandUse, type SettlementParams, type SettlementPlan } from '../people/settlement/v8.ts';
+import { LaneGround } from '../people/settlement/lanes.ts';
 import { drawCrop, slotArchetype, sow, type CropParams } from '../people/crops.ts';
 import { buildFieldworks, type FieldTreeSpot } from '../people/fieldworks.ts';
 import { buildPerimeterMesh } from '../people/walls.ts';
@@ -433,7 +434,7 @@ export class SceneStream {
    */
   paths(): { vertices: ArrayBuffer; indices: Uint32Array } | undefined {
     const plan = this.people;
-    if (!plan || (!plan.paths.length && !plan.streets.length)) return undefined;
+    if (!plan || (!plan.paths.length && !plan.streets.length && !plan.lanes.length)) return undefined;
     const levelAt = this.waters.paths ? waterLevels(this.waters) : undefined;
     const water = levelAt ?? (() => this.look.water);
     const m = new Mesh(8192);
@@ -481,7 +482,14 @@ export class SceneStream {
     if (plan.pathWidth > 0) {
       for (const line of plan.paths) ribbon(line, plan.pathWidth, 0.12, 4, MAT.sand, 92);
     }
-    // 2. Internal village & town streets: weathered stone avenues and compacted earth lanes within 4 km of scene centre.
+    // 2. Farming settlement lanes: main through-lanes, branching side lanes, and courtyard footways.
+    for (const lane of plan.lanes) {
+      if (lane.line.length < 4) continue;
+      const isMain = lane.width >= 3.5;
+      const isSide = !isMain && lane.width >= 2.2;
+      ribbon(lane.line, lane.width, isMain ? 0.115 : isSide ? 0.108 : 0.1, isMain ? 3.5 : 2.8, MAT.sand, isMain ? 92 : isSide ? 82 : 74);
+    }
+    // 3. Internal town & planned streets: weathered stone avenues and compacted earth lanes within 4 km of scene centre.
     let streetCount = 0;
     for (const st of plan.streets) {
       if (st.line.length < 4 || streetCount >= 1200) continue;
@@ -489,11 +497,11 @@ export class SceneStream {
       ribbon(st.line, st.width, st.paved ? 0.11 : 0.1, 3.5, st.paved ? MAT.paving : MAT.sand, st.paved ? 92 : 76);
       streetCount++;
     }
-    // 3. Paved central market/civic square pads in nearby nucleated villages and towns.
+    // 4. Paved central market/civic square pads in nearby towns and non-lane nucleated settlements.
     m.mat = MAT.paving;
     m.tint = 86;
     for (const s of plan.settlements) {
-      if (s.houses < 8 || s.pattern === 'foragers' || s.pattern === 'herders' || Math.hypot(s.x, s.y) > 2400) continue;
+      if (s.boundary || s.houses < 8 || s.pattern === 'foragers' || s.pattern === 'herders' || Math.hypot(s.x, s.y) > 2400) continue;
       const cz = this.ground.at(s.x, s.y);
       if (cz - water(s.x, s.y) <= 0.35) continue;
       const rad = Math.min(9.5, 5.5 + Math.sqrt(s.houses) * 0.35);
@@ -559,11 +567,13 @@ export class SceneStream {
         cy = s.y;
       }
     }
-    // Avoid placing 3D fieldworks inside settlement built cores, on paved roads/paths, or in water.
+    // Avoid placing 3D fieldworks inside settlement built cores, on paved roads/paths/lanes, or in water.
     const nearSett = plan.settlements.filter((s) => Math.hypot(s.x - cx, s.y - cy) < radius + s.r + 30);
     const nearLines = plan.paths.filter((ln) => ln.length >= 4 && Math.hypot(ln[0] - cx, ln[1] - cy) < radius + 1200);
+    const laneGround = new LaneGround(plan.lanes);
     const avoid = (x: number, y: number): boolean => {
       if (this.ground.at(x, y) - water(x, y) < 0.4) return true;
+      if (laneGround.near(x, y, 2.5)) return true;
       for (const s of nearSett) {
         const rr = s.r + 6;
         if ((x - s.x) * (x - s.x) + (y - s.y) * (y - s.y) < rr * rr) return true;
@@ -614,6 +624,7 @@ export class SceneStream {
       return true;
     };
     const streetClear = (x: number, y: number, si: number, pad: number): boolean => {
+      if (laneGround.near(x, y, pad)) return false;
       for (const st of plan.streets) {
         if (st.settlement !== si) continue;
         const ln = st.line;

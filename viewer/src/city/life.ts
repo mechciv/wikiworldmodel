@@ -215,7 +215,7 @@ export class LifeScene {
 
   private groundData: Extract<FromLifeWorker, { type: 'ground' | 'preview' }> | null = null;
   private maskData: Extract<FromLifeWorker, { type: 'mask' }> | null = null;
-  /** static terrain-draped meshes on the GPU: paths/streets, continuous perimeter walls, and 3D fieldworks */
+  /** static terrain-draped meshes on the GPU: farming lanes, streets, inter-settlement paths, perimeter walls, and 3D fieldworks */
   private pathsGpu: MeshHandle | null = null;
   private wallsGpu: MeshHandle | null = null;
   private fieldworksGpu: MeshHandle | null = null;
