@@ -661,6 +661,19 @@ describe('where settlements stand, and what they farm (sites.ts)', () => {
   const CELL = 111194.93 / 12;
   const toEdge = (v: number) => Math.min(((v % CELL) + CELL) % CELL, CELL - (((v % CELL) + CELL) % CELL));
 
+  it('puts a settlement in the same place from two overlapping scenes of a plain with a river and hills', () => {
+    // The same ground and water as above, drawn by a second scene two thirds of a cell to the north-east: the places
+    // are weighed by them, and by grids laid on each scene's own metres, so the two need not agree exactly.
+    const b = { lat: 0.06, lon: 0.05 };
+    const [bx, by] = toLocal({ lat: 0, lon: 0 }, b.lat, b.lon);
+    const other = makeSettlement(spec(p, b), { at: (x, y) => plain.at(x + bx, y + by) }, dry, EXTENT, undefined, { at: (x) => Math.abs(x + bx) });
+    const shared = drawn.filter((s) => Math.abs(s.x - bx) < EXTENT - 2000 && Math.abs(s.y - by) < EXTENT - 2000 && Math.abs(s.x) < EXTENT - 2000 && Math.abs(s.y) < EXTENT - 2000);
+    expect(shared.length).toBeGreaterThan(50);
+    const same = shared.filter((s) => other.settlements.some((o) => Math.hypot(o.x + bx - s.x, o.y + by - s.y) < 2)).length;
+    // When this was written all of them did: 398 of 398.
+    expect(same / shared.length).toBeGreaterThan(0.98);
+  });
+
   it("takes the record's siting and growth where a build has none", () => {
     expect(gen.params.siting).toEqual(SITING);
     expect(gen.params.growth).toEqual(GROWTH);

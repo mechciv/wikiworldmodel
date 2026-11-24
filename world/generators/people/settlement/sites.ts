@@ -12,7 +12,7 @@
 import type { FieldUse } from '../../../../core/landscape.ts';
 import { FIELD_SLOPE } from '../../../../core/plots.ts';
 import { hash2, hash3 } from '../../city/math.ts';
-import { distanceField, fbm, type Waters } from '../../life/land.ts';
+import { chamfer, distanceField, fbm, type Waters } from '../../life/land.ts';
 
 /** A metre on the ground, as a degree of latitude. */
 const M_PER_DEG = 111194.93;
@@ -156,37 +156,6 @@ export function waterNear(w: Waters, half: number, cell = 100): WaterNear | unde
       return (d[k] * (1 - u) + d[k + 1] * u) * (1 - v) + (d[k + n] * (1 - u) + d[k + n + 1] * u) * v;
     },
   };
-}
-
-/** Two sweeps that carry each node's distance on to its neighbours, as distanceField's own. In place. */
-function chamfer(d: Float32Array, nx: number, ny: number, cell: number): void {
-  const diag = cell * Math.SQRT2;
-  for (let j = 0; j < ny; j++) {
-    for (let i = 0; i < nx; i++) {
-      const at = j * nx + i;
-      let v = d[at];
-      if (i > 0 && d[at - 1] + cell < v) v = d[at - 1] + cell;
-      if (j > 0) {
-        if (d[at - nx] + cell < v) v = d[at - nx] + cell;
-        if (i > 0 && d[at - nx - 1] + diag < v) v = d[at - nx - 1] + diag;
-        if (i < nx - 1 && d[at - nx + 1] + diag < v) v = d[at - nx + 1] + diag;
-      }
-      d[at] = v;
-    }
-  }
-  for (let j = ny - 1; j >= 0; j--) {
-    for (let i = nx - 1; i >= 0; i--) {
-      const at = j * nx + i;
-      let v = d[at];
-      if (i < nx - 1 && d[at + 1] + cell < v) v = d[at + 1] + cell;
-      if (j < ny - 1) {
-        if (d[at + nx] + cell < v) v = d[at + nx] + cell;
-        if (i < nx - 1 && d[at + nx + 1] + diag < v) v = d[at + nx + 1] + diag;
-        if (i > 0 && d[at + nx - 1] + diag < v) v = d[at + nx - 1] + diag;
-      }
-      d[at] = v;
-    }
-  }
 }
 
 /** Where a place in the scene's metres is on the Earth, as metres east and north on a sheet that is the same for every scene. */
