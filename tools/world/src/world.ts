@@ -16,9 +16,10 @@ import { basename, join, relative } from 'node:path';
 import { parseDocument } from 'yaml';
 import { parseRef, RefError, rowRef, splitRef, type Ref } from '../../../core/refs.ts';
 import type { LagInput, TimeInput } from '../../../core/time.ts';
+import { resolveDatasetFile } from './manifest.ts';
 import { elementKey, ohmEntities, type OhmSnapshot } from './ohm.ts';
 import { pbdbEntities, placeInLand, type LandSnapshot, type PbdbSnapshot } from './pbdb.ts';
-import { REPO, WORLD } from './paths.ts';
+import { WORLD } from './paths.ts';
 
 export type Status = 'proposed' | 'accepted' | 'disputed' | 'deprecated';
 export type Rank = 'preferred' | 'normal' | 'deprecated';
@@ -145,6 +146,8 @@ export interface Dataset extends Source {
   import?: { as: 'ohm-site' | 'pbdb-formation' | 'pbdb-land'; frame?: string; site?: MapSite };
   fetch: {
     url: string;
+    /** local filename when `url` is a content-addressed `blob:<sha256>` reference */
+    filename?: string;
     sha256: string;
     bytes: number;
     format: 'zip' | 'parquet' | 'csv' | 'tsv' | 'xlsx' | 'tif' | 'json' | 'netcdf';
@@ -154,8 +157,18 @@ export interface Dataset extends Source {
   };
 }
 
+export interface BlobStoreConfig {
+  /** Base HTTPS URL of the R2/S3 content-addressed blob store, ending in a slash. */
+  url: string;
+  /** Key prefix under `url`, defaulting to "blobs/". */
+  prefix?: string;
+  /** Optional fallback mirror URLs tried in order if the primary store fails. */
+  mirrors?: string[];
+}
+
 export interface Manifest {
   publish: { licenses: string[] };
+  blobs?: BlobStoreConfig;
   datasets: Record<string, Dataset>;
 }
 
@@ -501,6 +514,14 @@ export function refString(r: Ref): string {
 function normalizeEntity(file: string, d: Record<string, unknown>, issues: LoadIssue[]): Entity {
   const id = String(d.id);
   const fileAuthor = typeof d.author === 'string' ? d.author : undefined;
+  const resolveLocalRef = (v: unknown, where: string): unknown => {
+    if (!v || typeof v !== 'object' || Array.isArray(v)) return v;
+    const obj = v as Record<string, unknown>;
+    if (typeof obj.ref === 'string' && (obj.ref.startsWith('@') || obj.ref.startsWith('#'))) {
+      return { ...obj, ref: resolve(obj.ref, id, issues, file, `${where}.ref`) };
+    }
+    return v;
+  };
   const base = (key: string, c: Record<string, unknown>, section: 'claims' | 'relations'): ClaimBase => {
     const where = `${section}.${key}`;
     const author = typeof c.author === 'string' ? c.author : fileAuthor ?? '';
@@ -511,7 +532,7 @@ function normalizeEntity(file: string, d: Record<string, unknown>, issues: LoadI
       entity: id,
       ref: `${id}#${key}`,
       subject,
-      valid: c.valid as TimeInput | undefined,
+      valid: resolveLocalRef(c.valid, `${where}.valid`) as TimeInput | undefined,
       sources: citations(c.source).map((s, i) => ({ ...s, ref: resolve(s?.ref, id, issues, file, `${where}.source${Array.isArray(c.source) ? `[${i}]` : ''}.ref`) })),
       against: citations(c.against).map((s, i) => ({ ...s, ref: resolve(s?.ref, id, issues, file, `${where}.against${Array.isArray(c.against) ? `[${i}]` : ''}.ref`) })),
       unsourced: c.unsourced as string | undefined,
@@ -530,7 +551,7 @@ function normalizeEntity(file: string, d: Record<string, unknown>, issues: LoadI
   const claims: Claim[] = Object.entries((d.claims ?? {}) as Record<string, Record<string, unknown>>).map(([key, c]) => ({
     ...base(key, c ?? {}, 'claims'),
     prop: String(c?.prop),
-    value: c?.value,
+    value: resolveLocalRef(c?.value, `claims.${key}.value`),
     method: c?.method as string | undefined,
   }));
   const relations: Relation[] = Object.entries((d.relations ?? {}) as Record<string, Record<string, unknown>>).map(([key, r]) => ({
@@ -587,7 +608,7 @@ export async function loadWorld(root: string = WORLD): Promise<World> {
   const relDoc = await yamlOf<{ relations: Vocab['relations'] }>(from('schema/vocab/relations.yaml'));
   const srcDoc = await yamlOf<{ types: Record<string, string>; kinds: Record<string, string> }>(from('schema/vocab/sources.yaml'));
   const vocab: Vocab = {
-    kinds: flatten(kindsDoc.kinds, (p, c) => ({ ...c, moment: c.moment ?? p.moment })),
+    kinds: flatten(kindsDoc.kinds, (p, c) => ({ ...c, moment: c.moment ?? p.moment, start: c.start ?? p.start, end: c.end ?? p.end })),
     properties: propsDoc.properties,
     methods: flatten(propsDoc.methods),
     confidence: propsDoc.confidence,
@@ -616,7 +637,17 @@ export async function loadWorld(root: string = WORLD): Promise<World> {
   if (existsSync(join(root, 'manifest.yaml'))) raw.push({ file: 'manifest.yaml', type: 'manifest', data: manifestRaw as unknown as Record<string, unknown> });
   const manifest: Manifest = {
     publish: manifestRaw.publish ?? { licenses: [] },
+    ...(manifestRaw.blobs ? { blobs: manifestRaw.blobs } : {}),
     datasets: Object.fromEntries(Object.entries(manifestRaw.datasets ?? {}).map(([id, d]) => [id, { ...d, id, file: 'manifest.yaml' }])),
+  };
+
+  const readSnapshot = async <T>(d: Dataset): Promise<{ snap: T; label: string }> => {
+    const file = resolveDatasetFile(d.id, d);
+    if (!existsSync(file)) {
+      throw new Error(`missing snapshot ${d.id} (sha256 ${d.fetch.sha256}): run \`npm run fetch -- --snapshots\` (or \`npm run fetch -- ${d.id}\`) first`);
+    }
+    const label = d.fetch.filename ? `blob:${d.fetch.filename}` : d.fetch.url.replace(/^repo:/, '');
+    return { snap: JSON.parse(await readFile(file, 'utf8')) as T, label };
   };
 
   const entities = entityFiles.map((f) => normalizeEntity(f.file, f.data, loadIssues));
@@ -624,31 +655,28 @@ export async function loadWorld(root: string = WORLD): Promise<World> {
   const snapshots = new Map<string, OhmSnapshot>();
   for (const d of Object.values(manifest.datasets)) {
     if (d.import?.as !== 'ohm-site') continue;
-    const path = d.fetch.url.replace(/^repo:/, '');
-    const snap = JSON.parse(await readFile(join(REPO, path), 'utf8')) as OhmSnapshot;
+    const { snap, label } = await readSnapshot<OhmSnapshot>(d);
     snapshots.set(d.id, snap);
     const adopted = new Set<string>();
     for (const e of entities) for (const c of e.claims) if (c.prop === 'footprint') for (const k of (c.value as { elements?: string[] })?.elements ?? []) adopted.add(k);
     for (const k of [...adopted]) if (!snap.elements.some((x) => elementKey(x) === k)) loadIssues.push({ file: 'manifest.yaml', where: d.id, message: `no element ${k} in the snapshot` });
-    entities.push(...ohmEntities(snap, d.id, path, d.import.frame!, adopted));
+    entities.push(...ohmEntities(snap, d.id, label, d.import.frame!, adopted));
   }
   // A formation's taxa become records too, but its occurrences stay rows of the snapshot.
   const fossils = new Map<string, PbdbSnapshot>();
   for (const d of Object.values(manifest.datasets)) {
     if (d.import?.as !== 'pbdb-formation') continue;
-    const path = d.fetch.url.replace(/^repo:/, '');
-    const snap = JSON.parse(await readFile(join(REPO, path), 'utf8')) as PbdbSnapshot;
+    const { snap, label } = await readSnapshot<PbdbSnapshot>(d);
     fossils.set(d.id, snap);
-    entities.push(...pbdbEntities(snap, d.id, path, entities));
+    entities.push(...pbdbEntities(snap, d.id, label, entities));
   }
   // The land's fossils stay rows, taxa and all: only a taxon a record adopts joins the world's tree.
   const landFossils = new Map<string, LandSnapshot>();
   for (const d of Object.values(manifest.datasets)) {
     if (d.import?.as !== 'pbdb-land') continue;
-    const path = d.fetch.url.replace(/^repo:/, '');
-    const snap = JSON.parse(await readFile(join(REPO, path), 'utf8')) as LandSnapshot;
+    const { snap, label } = await readSnapshot<LandSnapshot>(d);
     landFossils.set(d.id, snap);
-    placeInLand(snap, d.id, path, entities);
+    placeInLand(snap, d.id, label, entities);
   }
   const plans: Record<string, Form> = {};
   const planDir = from('plans');

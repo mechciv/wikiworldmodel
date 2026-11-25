@@ -89,4 +89,10 @@ describe('the energy-balance model, as the book runs it', () => {
     expect(m.balance(0.8, m.forcing(faint * 0.98), 'warm').iceEdge).toBe(0);
     expect(m.balance(0.8, m.forcing(faint * 1.02), 'warm').iceEdge).toBeGreaterThan(0);
   });
+
+  it('rejects non-positive CO2 in forcing()', () => {
+    const m = model();
+    expect(() => m.forcing(0)).toThrow();
+    expect(() => m.forcing(-1e-4)).toThrow();
+  });
 });

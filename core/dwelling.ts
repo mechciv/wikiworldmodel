@@ -406,7 +406,7 @@ function problemsOf(v: unknown, what: string, words: Record<string, Record<strin
       if (typeof x !== 'boolean') out.push(`${k} is true or false`);
       continue;
     }
-    if (words[k]) {
+    if (Object.hasOwn(words, k)) {
       if (typeof x !== 'string' || !Object.hasOwn(words[k], x)) out.push(`${k} is one of ${Object.keys(words[k]).join(', ')}`);
       continue;
     }
@@ -436,8 +436,9 @@ export function outbuildingProblems(v: unknown): string[] {
   v.forEach((x, i) => {
     const at = `outbuilding ${i + 1}`;
     for (const p of problemsOf(x, 'outbuilding', words, [...DWELLING_NUMBERS, 'count'], DWELLING_FLAGS)) out.push(`${at}: ${p}`);
-    const r = x as { use?: unknown; per?: unknown } | null;
+    const r = x as { use?: unknown; per?: unknown; pitch?: Span } | null;
     if (!r || typeof r !== 'object') return;
+    if (r.pitch !== undefined && !spanProblem(r.pitch) && (typeof r.pitch === 'number' ? r.pitch : r.pitch.hi) >= 90) out.push(`${at}: pitch is in degrees from the level, less than 90`);
     if (r.use === undefined) out.push(`${at}: it says its use, one of ${Object.keys(OUTBUILDING_WORDS.use).join(', ')}`);
     if (r.per === undefined) out.push(`${at}: it says whose it was (per), one of ${Object.keys(OUTBUILDING_WORDS.per).join(', ')}`);
   });
@@ -525,6 +526,7 @@ export function compileTraditions(inputs: TraditionInput[]): Tradition[] {
     // What stood by its houses is a list of its own, whole: a member that gives one does not add to its parent's.
     const outbuildings = t.outbuildings?.length ? t.outbuildings : up?.outbuildings;
     if (t.outbuildings?.length) from.outbuildings = t.id;
+    const townSpan = t.townSpan ?? up?.townSpan;
     const out: Tradition = {
       id: t.id,
       label: t.label,
@@ -539,8 +541,7 @@ export function compileTraditions(inputs: TraditionInput[]): Tradition[] {
       settlement: merge(t.settlement, up?.settlement, 'settlement'),
       fields: merge(t.fields, up?.fields, 'fields'),
       town: merge(t.town, up?.town, 'town'),
-      // A town form that holds for part of a span is its own claim's; a member that says none keeps its parent's.
-      ...((t.town ? t.townSpan : up?.townSpan) ? { townSpan: t.town ? t.townSpan : up!.townSpan } : {}),
+      ...(townSpan ? { townSpan } : {}),
       ...(outbuildings?.length ? { outbuildings } : {}),
       from,
       own: !!t.dwelling && Object.keys(t.dwelling).length > 0,
@@ -548,7 +549,7 @@ export function compileTraditions(inputs: TraditionInput[]): Tradition[] {
     done.set(t.id, out);
     return out;
   };
-  return inputs.map((t) => visit(t, new Set())).sort((a, b) => (a.id < b.id ? -1 : 1));
+  return inputs.map((t) => visit(t, new Set())).sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
 }
 
 /**
@@ -642,7 +643,7 @@ export function compileHusbandry(inputs: HusbandryInput[]): Husbandry[] {
     done.set(t.id, out);
     return out;
   };
-  return inputs.map((t) => visit(t, new Set())).sort((a, b) => (a.id < b.id ? -1 : 1));
+  return inputs.map((t) => visit(t, new Set())).sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
 }
 
 /**
@@ -802,9 +803,9 @@ export function cropProblems(v: unknown): string[] {
     const r = x as Record<string, unknown>;
     for (const k of Object.keys(r)) if (!allowedKeys.has(k)) out.push(`${at}: unknown crop parameter "${k}"`);
     if (r.kind === undefined) out.push(`${at}: it says its kind, one of ${Object.keys(CROP_WORDS.kind).join(', ')}`);
-    else if (typeof r.kind !== 'string' || !(r.kind in CROP_WORDS.kind)) out.push(`${at}: kind "${String(r.kind)}" is not one of ${Object.keys(CROP_WORDS.kind).join(', ')}`);
-    if (r.season !== undefined && (typeof r.season !== 'string' || !(r.season in CROP_WORDS.season))) out.push(`${at}: season "${String(r.season)}" is not one of ${Object.keys(CROP_WORDS.season).join(', ')}`);
-    if (r.share !== undefined && (typeof r.share !== 'string' || !(r.share in CROP_WORDS.share))) out.push(`${at}: share "${String(r.share)}" is not one of ${Object.keys(CROP_WORDS.share).join(', ')}`);
+    else if (typeof r.kind !== 'string' || !Object.hasOwn(CROP_WORDS.kind, r.kind)) out.push(`${at}: kind "${String(r.kind)}" is not one of ${Object.keys(CROP_WORDS.kind).join(', ')}`);
+    if (r.season !== undefined && (typeof r.season !== 'string' || !Object.hasOwn(CROP_WORDS.season, r.season))) out.push(`${at}: season "${String(r.season)}" is not one of ${Object.keys(CROP_WORDS.season).join(', ')}`);
+    if (r.share !== undefined && (typeof r.share !== 'string' || !Object.hasOwn(CROP_WORDS.share, r.share))) out.push(`${at}: share "${String(r.share)}" is not one of ${Object.keys(CROP_WORDS.share).join(', ')}`);
     if (r.name !== undefined && (typeof r.name !== 'string' || !r.name.trim())) out.push(`${at}: name must be a non-empty string`);
     if (r.taxon !== undefined && (typeof r.taxon !== 'string' || !r.taxon.trim())) out.push(`${at}: taxon must be a taxon record id`);
   });
@@ -874,7 +875,7 @@ export function compileAgriculture(inputs: AgricultureInput[]): Agriculture[] {
     done.set(t.id, out);
     return out;
   };
-  return inputs.map((t) => visit(t, new Set())).sort((a, b) => (a.id < b.id ? -1 : 1));
+  return inputs.map((t) => visit(t, new Set())).sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
 }
 
 /**

@@ -339,8 +339,8 @@ export function coarsen(g: Pick<AsciiGrid, 'ncols' | 'nrows' | 'values'>, factor
 export const BASELINE: Archive = { name: 'baseline', url: 'https://archaeology.datastations.nl/api/access/datafile/5490328', bytes: 5339653974 };
 export const GENERAL: Archive = { name: 'general', url: 'https://archaeology.datastations.nl/api/access/datafile/5490327', bytes: 23585889 };
 
-/** Where the snapshot is kept, and how wide its cells are, in HYDE's cells of 5′. */
-export const SNAPSHOT = 'world/snapshots/hyde-3.2.1-population-1deg.csv';
+/** Filename of the snapshot in the content-addressed blob store, and how wide its cells are, in HYDE's cells of 5′. */
+export const SNAPSHOT = 'hyde-3.2.1-population-1deg.csv';
 const FACTOR = 12;
 /** The last step the readme, the DANS record and the article give: the table has two more. */
 const LAST_STEP = 2015;

@@ -143,7 +143,7 @@ export async function exportSnapshot(formation: string, date: string): Promise<P
  * The fossils of the land, for the atlas of who lived where: every regular occurrence named to a genus or
  * better from a terrestrial environment, over the Phanerozoic. It has far too many taxa to make records of,
  * so rows stay rows and taxa stay rows too. Only a taxon a record adopts by its number becomes part of the
- * world's tree. It is kept as tables with few repeated strings, as it is the largest thing in world/snapshots.
+ * world's tree. It is kept as tables with few repeated strings, as it is the largest snapshot blob.
  */
 export interface LandSnapshot {
   format: 'lightworld-pbdb-land@1';
@@ -492,7 +492,14 @@ export function rockRows(snap: RocksSnapshot): Record<string, unknown>[] {
   const w = (k: number) => snap.words[k] ?? '';
   const classOf = (bits: number) => snap.classes.filter((_, k) => bits & (1 << k)).join(', ');
   const measured = new Map<number, RockAge[]>();
-  for (const a of snap.ages) measured.set(a[0], [...(measured.get(a[0]) ?? []), a]);
+  for (const a of snap.ages) {
+    let list = measured.get(a[0]);
+    if (!list) {
+      list = [];
+      measured.set(a[0], list);
+    }
+    list.push(a);
+  }
   const WHICH = ['direct', 'oldest', 'youngest'];
   return snap.collections.map((c) => ({
     collection: c[0],
@@ -583,7 +590,14 @@ export function pbdbEntities(snap: PbdbSnapshot, dataset: string, file: string, 
     }
   }
   const rowsOf = new Map<number, PbdbOccurrence[]>();
-  for (const o of snap.occurrences) rowsOf.set(o.taxon, [...(rowsOf.get(o.taxon) ?? []), o]);
+  for (const o of snap.occurrences) {
+    let list = rowsOf.get(o.taxon);
+    if (!list) {
+      list = [];
+      rowsOf.set(o.taxon, list);
+    }
+    list.push(o);
+  }
   const idOf = (no: number) => adopted.get(no)?.id ?? pbdbId(no);
   const out: Entity[] = [];
   for (const no of [...keep].sort((a, b) => a - b)) {
@@ -611,8 +625,18 @@ export function pbdbEntities(snap: PbdbSnapshot, dataset: string, file: string, 
     });
     const range = (a: [number, number]) => (a[0] === a[1] ? `${a[0]} Ma` : { lo: `${a[0]} Ma`, hi: `${a[1]} Ma` });
     const rows = rowsOf.get(no) ?? [];
-    const first: [number, number] | null = t.first ?? (rows.length ? [Math.max(...rows.map((r) => r.max)), Math.max(...rows.map((r) => r.min))] : null);
-    const last: [number, number] | null = t.last ?? (rows.length ? [Math.min(...rows.map((r) => r.max)), Math.min(...rows.map((r) => r.min))] : null);
+    let maxMax = -Infinity;
+    let maxMin = -Infinity;
+    let minMax = Infinity;
+    let minMin = Infinity;
+    for (const r of rows) {
+      if (r.max > maxMax) maxMax = r.max;
+      if (r.min > maxMin) maxMin = r.min;
+      if (r.max < minMax) minMax = r.max;
+      if (r.min < minMin) minMin = r.min;
+    }
+    const first: [number, number] | null = t.first ?? (rows.length ? [maxMax, maxMin] : null);
+    const last: [number, number] | null = t.last ?? (rows.length ? [minMax, minMin] : null);
     const claims: Claim[] = [];
     const has = (prop: string) => !!mine?.claims.some((c) => c.prop === prop);
     if (!mine) claims.push(claim('name', 'name', { la: t.name }));

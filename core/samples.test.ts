@@ -52,4 +52,10 @@ describe('samples', () => {
     const s = spread([-80, -116], BETWEEN);
     expect([s.central, s.lo, s.hi]).toEqual([-80, -116, -80]);
   });
+
+  it('includes values[0] across a members ensemble', () => {
+    const vals = [10, 20, 30];
+    const seen = new Set([1, 2, 3].map((m) => sample({ kind: 'members', values: vals }, 'seed', m)));
+    expect(seen).toEqual(new Set(vals));
+  });
 });

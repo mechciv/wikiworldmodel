@@ -128,7 +128,10 @@ export class StructureLayer {
     if (c) {
       const gpu = this.renderer.upload(m.vertices, m.indices);
       if (m.detail === 1) {
-        if (c.fine) this.renderer.remove(c.fine);
+        if (c.fine) {
+          this.fineBytes -= c.fine.bytes;
+          this.renderer.remove(c.fine);
+        }
         c.fine = gpu;
         this.fineBytes += gpu.bytes;
       } else {

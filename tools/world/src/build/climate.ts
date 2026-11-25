@@ -583,7 +583,7 @@ interface MonthsMeta {
   units: { temperature: string; precipitation: string; time: string };
   slices: { index: number; time: number; cells: number }[];
   /** the other variables kept for the same cells, by the name each is kept under: what the file says of it, and how it was kept */
-  more?: Record<string, { variable: string; per: 'month' | 'year'; scale: number; min: number | null; max: number | null; whole: boolean; attributes: Record<string, string> }>;
+  more?: Record<string, { variable: string; per: 'month' | 'year'; scale: number; signed?: boolean; min: number | null; max: number | null; whole: boolean; attributes: Record<string, string> }>;
 }
 
 /**
@@ -675,7 +675,7 @@ export async function monthsKeyframes(f: Field, dir: string, present: Snapshot, 
       const readParts: PartOfRun[] = [];
       for (const r of parts) {
         const m = meta.more![r.part];
-        const raw = await read(`${r.part}/${sl.index}.u16`, Uint16Array);
+        const raw = m.signed ? await read(`${r.part}/${sl.index}.i16`, Int16Array) : await read(`${r.part}/${sl.index}.u16`, Uint16Array);
         // On the file's whole grid, as its months are: NaN where the file has no land.
         const per = m.per === 'month' ? 12 : 1;
         const v = new Float32Array(per * cells).fill(NaN);

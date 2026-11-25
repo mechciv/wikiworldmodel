@@ -630,6 +630,7 @@ class Frontier {
   private next = new Int32Array(1 << 16);
   private head: Int32Array;
   private entries = 0;
+  private free = -1;
   private at = 0;
   n = 0;
   /** the entry taken last */
@@ -638,18 +639,24 @@ class Frontier {
     this.head = new Int32Array(Math.ceil(most / width) + 2).fill(-1);
   }
   push(cost: number, node: number, src: number) {
-    if (this.entries === this.cost.length) {
-      const grow = <T extends Float64Array | Int32Array>(a: T): T => {
-        const b = new (a.constructor as new (n: number) => T)(a.length * 2);
-        b.set(a);
-        return b;
-      };
-      this.cost = grow(this.cost);
-      this.node = grow(this.node);
-      this.src = grow(this.src);
-      this.next = grow(this.next);
+    let e: number;
+    if (this.free >= 0) {
+      e = this.free;
+      this.free = this.next[e];
+    } else {
+      if (this.entries === this.cost.length) {
+        const grow = <T extends Float64Array | Int32Array>(a: T): T => {
+          const b = new (a.constructor as new (n: number) => T)(a.length * 2);
+          b.set(a);
+          return b;
+        };
+        this.cost = grow(this.cost);
+        this.node = grow(this.node);
+        this.src = grow(this.src);
+        this.next = grow(this.next);
+      }
+      e = this.entries++;
     }
-    const e = this.entries++;
     this.cost[e] = cost;
     this.node[e] = node;
     this.src[e] = src;
@@ -660,7 +667,14 @@ class Frontier {
   }
   /** Takes the cheapest entry as `top`, and returns false when there is none. */
   pop(): boolean {
-    if (!this.n) return false;
+    if (this.top >= 0) {
+      this.next[this.top] = this.free;
+      this.free = this.top;
+    }
+    if (!this.n) {
+      this.top = -1;
+      return false;
+    }
     while (this.head[this.at] < 0) this.at++;
     const e = this.head[this.at];
     this.head[this.at] = this.next[e];
@@ -821,9 +835,11 @@ export function growFields(
   const STEP = [1, 0, -1, 0, 0, 1, 0, -1, 1, 1, 1, -1, -1, 1, -1, -1];
   // Each step's bearing, as the cosine and sine of twice it: east and west, north and south, then the diagonals.
   const TWICE = [1, 0, 1, 0, -1, 0, -1, 0, 0, 1, 0, -1, 0, -1, 0, 1];
-  // The cheapest reach of each node so far, and by whom: a settlement need not reach a node again at a greater cost.
+  // The two cheapest reaches of each node so far, and by whom: a settlement need not reach a node again at a greater cost.
   const best = new Float32Array(N).fill(Infinity);
   const bestBy = new Int32Array(N).fill(-1);
+  const best2 = new Float32Array(N).fill(Infinity);
+  const best2By = new Int32Array(N).fill(-1);
   while (heap.pop()) {
     const at = heap.top;
     const k = heap.node[at];
@@ -855,10 +871,22 @@ export function growFields(
       const across = 0.5 * (1 - (TWICE[q] * grainC[k] + TWICE[q + 1] * grainS[k]));
       const next = c + len * (1 + GR.across * across) * 0.5 * ((farmed ? 1 / e[k] : 1 / e[m]) + 1 / e[m]);
       if (next > most[si]) continue;
-      if (bestBy[m] === si && next >= best[m]) continue;
-      if (next < best[m]) {
+      if (bestBy[m] === si) {
+        if (next >= best[m]) continue;
+        best[m] = next;
+      } else if (next < best[m]) {
+        if (bestBy[m] >= 0) {
+          best2[m] = best[m];
+          best2By[m] = bestBy[m];
+        }
         best[m] = next;
         bestBy[m] = si;
+      } else if (best2By[m] === si) {
+        if (next >= best2[m]) continue;
+        best2[m] = next;
+      } else if (next < best2[m]) {
+        best2[m] = next;
+        best2By[m] = si;
       }
       heap.push(next, m, si);
     }

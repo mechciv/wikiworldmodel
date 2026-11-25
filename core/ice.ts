@@ -59,22 +59,41 @@ export function iceFrame(h: Pick<IceHeader, 'scenarios'>, s: IceScenario, ageMa:
  * time after the youngest holds it. Null for a time older than the oldest: the field has nothing then.
  */
 export function iceKeysAt(ages: readonly number[], ageMa: number): { younger: number; older: number; mix: number } | null {
+  if (!ages.length) return null;
   const a = Math.max(ageMa, ages[0]);
   if (a > ages[ages.length - 1]) return null;
-  const older = ages.find((k) => k >= a)!;
-  const younger = [...ages].reverse().find((k) => k <= a)!;
+  let younger = ages[0];
+  let older = ages[ages.length - 1];
+  for (let i = 0; i < ages.length; i++) {
+    const k = ages[i];
+    if (k <= a) younger = k;
+    if (k >= a) {
+      older = k;
+      break;
+    }
+  }
   return { younger, older, mix: older === younger ? 0 : (a - younger) / (older - younger) };
 }
 
 /** A value of the grid at a place: bilinear between the four nodes around it. Rows run from `lat0` southwards. */
 export function sampleGrid(grid: FieldGrid, values: ArrayLike<number>, lat: number, lon: number): number {
   const y = Math.max(0, Math.min(grid.ny - 1, (grid.lat0 - lat) / grid.step));
-  const x = (((lon - grid.lon0) / grid.step) % grid.nx + grid.nx) % grid.nx;
-  const j0 = Math.min(grid.ny - 2, Math.floor(y));
-  const i0 = Math.floor(x);
-  const i1 = (i0 + 1) % grid.nx;
+  const j0 = grid.ny <= 1 ? 0 : Math.min(grid.ny - 2, Math.floor(y));
+  const j1 = Math.min(grid.ny - 1, j0 + 1);
   const fy = y - j0;
+  let x: number;
+  let i0: number;
+  let i1: number;
+  if (grid.wrap === false) {
+    x = Math.max(0, Math.min(grid.nx - 1, (lon - grid.lon0) / grid.step));
+    i0 = grid.nx <= 1 ? 0 : Math.min(grid.nx - 2, Math.floor(x));
+    i1 = Math.min(grid.nx - 1, i0 + 1);
+  } else {
+    x = (((lon - grid.lon0) / grid.step) % grid.nx + grid.nx) % grid.nx;
+    i0 = Math.floor(x);
+    i1 = (i0 + 1) % grid.nx;
+  }
   const fx = x - i0;
   const at = (j: number, i: number) => values[j * grid.nx + i];
-  return (at(j0, i0) * (1 - fx) + at(j0, i1) * fx) * (1 - fy) + (at(j0 + 1, i0) * (1 - fx) + at(j0 + 1, i1) * fx) * fy;
+  return (at(j0, i0) * (1 - fx) + at(j0, i1) * fx) * (1 - fy) + (at(j1, i0) * (1 - fx) + at(j1, i1) * fx) * fy;
 }

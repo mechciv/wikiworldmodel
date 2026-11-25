@@ -14,6 +14,7 @@ re-import; any others in an existing file are kept. Requires `pip install rdata`
 Two kinds of row are skipped: the informal Precambrian super-eon, and the four Archean
 "… System" rows, which repeat the Archean eras (the chart has no Archean periods).
 """
+import json
 import os
 import re
 import sys
@@ -79,16 +80,16 @@ def main(path, outdir):
         nxt = [p for p in rows if p['rank'] == r['rank'] and abs(p['max_ma'] - r['min_ma']) < 1e-9]
         rank = KIND[r['rank']]
         loc = f'{rank.capitalize()} {r["interval_name"]}'
-        src = f'{{ ref: {SOURCE}, loc: "{loc}" }}'
+        src = f'{{ ref: {SOURCE}, loc: {json.dumps(loc)} }}'
         file = os.path.join(outdir, f'{r["id"]}.yaml')
         old = open(file, encoding='utf8').read() if os.path.exists(file) else ''
         claims = [
-            f'  {OWN}name:\n    prop: name\n    value: {{ en: {r["interval_name"]} }}\n    source: {src}\n',
+            f'  {OWN}name:\n    prop: name\n    value: {{ en: {json.dumps(r["interval_name"])} }}\n    source: {src}\n',
             f'  {OWN}start:\n    prop: start\n    value: {num(r["max_ma"])} Ma\n    source: {src}\n',
         ]
         if not nxt and r['min_ma'] > 0:
             claims.append(f'  {OWN}end:\n    prop: end\n    value: {num(r["min_ma"])} Ma\n    source: {src}\n')
-        claims.append(f'  {OWN}color:\n    prop: color\n    value: "{r["colour"].upper()}"\n    source: {src}\n')
+        claims.append(f'  {OWN}color:\n    prop: color\n    value: {json.dumps(r["colour"].upper())}\n    source: {src}\n')
         relations = []
         if parent is not None:
             relations.append(f'  {OWN}part-of:\n    rel: part-of\n    to: ics/{parent["id"]}\n    source: {src}\n')

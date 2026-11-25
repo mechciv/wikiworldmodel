@@ -366,4 +366,11 @@ describe("today's shape, carried back", () => {
     expect(spread(turned, 1, 0)).toBeLessThan(20);
     expect(spread(turned, 0, 1)).toBeGreaterThan(150);
   });
+
+  it('wraps antimeridian-crossing outlines in insideOutline', () => {
+    const ring = [[179, -1], [-179, -1], [-179, 1], [179, 1]];
+    expect(insideOutline([[ring]], 179.5, 0)).toBe(true);
+    expect(insideOutline([[ring]], -179.5, 0)).toBe(true);
+    expect(insideOutline([[ring]], 0, 0)).toBe(false);
+  });
 });

@@ -5,7 +5,7 @@
 import { decodeTile } from '../../core/container.ts';
 import type { ClimateHeader } from '../../core/climate.ts';
 import type { ClimateInfo } from '../../core/tileset.ts';
-import { getBytes, type Build } from './data.ts';
+import type { Build } from './data.ts';
 import type { FieldRenderer } from './gl/field.ts';
 
 /** A keyframe of a climate field: its key on the GPU, its age, and the age whose coordinates its nodes are on. */
@@ -59,7 +59,8 @@ export class Climates {
   private fetch(info: ClimateInfo, file: string): void {
     if (this.loaded.has(file) || this.loading.has(file)) return;
     this.loading.add(file);
-    void getBytes(this.build.base + file)
+    void this.build
+      .getBytes(file)
       .then((data) => {
         const { header, arrays } = decodeTile<ClimateHeader>(data);
         this.field.addClimate(header.grid, header.keyframes.map((k) => ({ key: keyOf(info.field, k.ageMa), values: arrays[k.values] as Uint8Array, plate: arrays[k.plate] as Uint16Array })));

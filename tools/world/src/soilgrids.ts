@@ -11,7 +11,7 @@ import { join } from 'node:path';
 import { REPO } from './paths.ts';
 import { readTiff } from './tiff.ts';
 
-export const SNAPSHOT = 'world/snapshots/soilgrids-2.0-topsoil-0.5deg.csv';
+export const SNAPSHOT = 'soilgrids-2.0-topsoil-0.5deg.csv';
 const BASE = 'https://files.isric.org/soilgrids/latest/data_aggregated/5000m';
 const README = 'https://files.isric.org/soilgrids/latest/data_aggregated/README.md';
 const UNITS = 'https://docs.isric.org/globaldata/soilgrids/SoilGrids_faqs_01.html';

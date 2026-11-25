@@ -9,21 +9,21 @@ been checked by a person, which is set 20. The three steps that come out of sets
 |---|---|---|---|
 | 1 | Biomes through time | done, derived from a climate model rather than from lithologic indicators | `world/fields/earth/{climate,biome}.yaml`, `world/entities/life/transitions/`, `world/entities/life/fossil-forests/` |
 | 2 | Life's great transitions | done, bar what is noted | `world/entities/life/transitions/`, `world/entities/life/occurrences/` |
-| 3 | Dinosaurs from a PBDB snapshot | the Hell Creek's, not all of them | `world/snapshots/pbdb-hell-creek-2026-11-04.json`, `world/entities/life/hell-creek/` |
-| 4 | The ice ages | done, with the ice sheets of the last 80 kyr on the globe | `world/fields/earth/{co2-ice-core,methane-ice-core,antarctic-temperature,sea-level-stack,ice-sheets,ice-sheet-sea-level}.yaml`, `world/entities/earth/ice-ages/`, `world/snapshots/paleomist-1.0-ice-thickness.zip`, `world/alternatives/laurentide-mis3*` |
+| 3 | Dinosaurs from a PBDB snapshot | the Hell Creek's, not all of them | `src:pbdb-hell-creek` in `world/manifest.yaml`, `world/entities/life/hell-creek/` |
+| 4 | The ice ages | done, with the ice sheets of the last 80 kyr on the globe | `world/fields/earth/{co2-ice-core,methane-ice-core,antarctic-temperature,sea-level-stack,ice-sheets,ice-sheet-sea-level}.yaml`, `world/entities/earth/ice-ages/`, `src:paleomist-1.0` in `world/manifest.yaml`, `world/alternatives/laurentide-mis3*` |
 | 5 | Hominins and their tools | done | `world/entities/life/hominins/`, `world/entities/people/prehistory/` |
 | 6 | Dispersals, with ancient DNA | done | `world/entities/people/dispersals/`, `world/alternatives/leaving-africa*`, `world/alternatives/peopling-of-the-americas*` |
 | 7 | Megafauna extinctions | done | `world/entities/life/megafauna/`, `world/alternatives/megafauna-causes*` |
 | 8 | Domestication worldwide | done | `world/entities/people/domestication/` |
-| 9 | Population and land use (HYDE) | where people lived as a 1° grid over the globe, 10,000 BCE to 2015; the world's population, cropland and grazing land as series; since the eleventh slice, every 5′ cell's anthrome from Anthromes 12K, ArchaeoGLOBE's assessments by region, and the lists of cities ([HUMAN-LANDSCAPE.md](HUMAN-LANDSCAPE.md)); no grid of land-use shares | `world/fields/earth/{population,world-population,cropland,grazing-land}.yaml`, `world/fields/people/`, `world/snapshots/hyde-3.2.1-*.csv`, `world/snapshots/archaeoglobe-2019-assessments.csv`, `world/snapshots/reba-2016-*.csv` |
+| 9 | Population and land use (HYDE) | where people lived as a 1° grid over the globe, 10,000 BCE to 2015; the world's population, cropland and grazing land as series; since the eleventh slice, every 5′ cell's anthrome from Anthromes 12K, ArchaeoGLOBE's assessments by region, and the lists of cities ([HUMAN-LANDSCAPE.md](HUMAN-LANDSCAPE.md)); no grid of land-use shares | `world/fields/earth/{population,world-population,cropland,grazing-land}.yaml`, `world/fields/people/`, `src:hyde-3.2.1*`, `src:archaeoglobe-2019`, `src:reba-2016-*` in `world/manifest.yaml` |
 | 10 | States worldwide from Cliopatria | done as rows, not records; since the twelfth slice, states with records draw their own rows, 19 of them now ([TWELFTH-SLICE.md](slices/TWELFTH-SLICE.md), [FIFTEENTH-SLICE.md](slices/FIFTEENTH-SLICE.md)) | `world/fields/earth/polities.yaml`, `world/entities/people/polities/` |
 | 11 | People and offices | done, for 44 rulers | `world/entities/people/rulers/`, `world/entities/people/polities/` |
 | 12 | First cities, writing, languages | done; languages as rows | `world/fields/earth/languages.yaml`, `world/entities/people/first-cities/`, `world/entities/people/writing/` |
 | 13 | Routes and trade | done, but for the Silk Road's lines | `world/fields/earth/roman-roads.yaml`, `world/entities/people/trade/` |
 | 14 | Objects that move | done | `world/entities/people/objects/` |
-| 15 | Disasters | done, as rows | `world/snapshots/noaa-hazards-2026-11-04.json`, `world/fields/earth/hazards.yaml` |
+| 15 | Disasters | done, as rows | `src:noaa-hazards` in `world/manifest.yaml`, `world/fields/earth/hazards.yaml` |
 | 16 | Day length and the Moon | done | `world/entities/earth/day-length/`, `world/fields/earth/day-length.yaml` |
-| 17 | Biodiversity through time | done for animals, uncorrected | `world/snapshots/pbdb-diversity-2026-11-04.csv`, `world/fields/earth/genera-through-time.yaml` |
+| 17 | Biodiversity through time | done for animals, uncorrected | `src:pbdb-diversity` in `world/manifest.yaml`, `world/fields/earth/genera-through-time.yaml` |
 | 18 | The present | land borders and cities; coasts remain the elevation field's | `world/fields/earth/present-day.yaml` |
 | 19 | Futures | done | `world/entities/earth/futures/`, `world/alternatives/ipcc-ar6-scenarios*`, `world/alternatives/next-supercontinent*` |
 | 20 | The first human reviews | **not done, and not a machine's to do** | |

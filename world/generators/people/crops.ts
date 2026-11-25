@@ -189,8 +189,8 @@ export function sow(
     const sin = dom.sin;
     const dcx = dom.cx;
     const dcy = dom.cy;
-    const diOff = Math.imul(dom.di, 131) | 0;
-    const djOff = Math.imul(dom.dj, 137) | 0;
+    const diOff = Math.imul(dom.di | 0, 0x9e3779b1) | 0;
+    const djOff = Math.imul(dom.dj | 0, 0x85ebca6b) | 0;
 
     for (let k = k0; k <= k1; k++) {
       // Quick box reject on column before entering l loop? Column covers full ly range, so compute per l.
@@ -214,8 +214,8 @@ export function sow(
         const cj = Math.floor(alongS / sy);
         const fx = across / sx - ci;
         const fy = alongS / sy - cj;
-        const pi = (ci + diOff) | 0;
-        const pj = (cj + djOff) | 0;
+        const pi = (ci ^ diOff) | 0;
+        const pj = (cj ^ djOff) | 0;
         const pick = plotNumber(pi, pj, 0);
         const slotIdx = plotSlotIndex(pick, palette);
         const info = slotInfo[slotIdx];

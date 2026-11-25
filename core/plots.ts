@@ -110,8 +110,8 @@ export interface PlotDomain {
 
 /** Build a macro-domain's frame from its integer cell coordinates. */
 export function domainOf(di: number, dj: number, span: number): PlotDomain {
-  const cx = (di + 0.16 + 0.68 * plotNumber(di, dj, 19)) * span;
-  const cy = (dj + 0.16 + 0.68 * plotNumber(di, dj, 23)) * span;
+  const cx = (di + 0.2 + 0.6 * plotNumber(di, dj, 19)) * span;
+  const cy = (dj + 0.2 + 0.6 * plotNumber(di, dj, 23)) * span;
   const angle = plotNumber(di, dj, 29) * Math.PI;
   const scaleX = 0.78 + 0.44 * plotNumber(di, dj, 31);
   const scaleY = 0.76 + 0.48 * plotNumber(di, dj, 37);
@@ -132,8 +132,8 @@ export function plotDomainAt(x: number, y: number, s: PlotStyle): { domain: Plot
   const pts: [number, number, number, number][] = [];
   for (let dj = gy - 1; dj <= gy + 1; dj++) {
     for (let di = gx - 1; di <= gx + 1; di++) {
-      const cx = (di + 0.16 + 0.68 * plotNumber(di, dj, 19)) * span;
-      const cy = (dj + 0.16 + 0.68 * plotNumber(di, dj, 23)) * span;
+      const cx = (di + 0.2 + 0.6 * plotNumber(di, dj, 19)) * span;
+      const cy = (dj + 0.2 + 0.6 * plotNumber(di, dj, 23)) * span;
       pts.push([di, dj, cx, cy]);
       const d2 = (x - cx) * (x - cx) + (y - cy) * (y - cy);
       if (d2 < bestD2) {
@@ -258,8 +258,8 @@ export function plotOfInDomain(across: number, along: number, d: PlotDomain, s: 
   const cj = Math.floor((along + shift) / sy);
   const fx = across / sx - ci;
   const fy = (along + shift) / sy - cj;
-  const i = (ci + Math.imul(d.di, 131)) | 0;
-  const j = (cj + Math.imul(d.dj, 137)) | 0;
+  const i = (ci ^ Math.imul(d.di | 0, 0x9e3779b1)) | 0;
+  const j = (cj ^ Math.imul(d.dj | 0, 0x85ebca6b)) | 0;
   const pick = plotNumber(i, j, 0);
   const plotEdge = Math.min(Math.min(fx, 1 - fx) * sx, Math.min(fy, 1 - fy) * sy);
   return {
@@ -409,7 +409,7 @@ export function cropPhenology(crop: CropEntry, month: number, lat: number): Stag
 
   // Shift southern hemisphere by 6 months; tropics stay staggered year-round.
   const tropical = Math.abs(lat) < 18;
-  const m = (((Math.round(month) - 1 + (lat < -15 ? 6 : 0)) % 12) + 12) % 12 + 1;
+  const m = (((Math.round(month) - 1 + (lat < 0 ? 6 : 0)) % 12) + 12) % 12 + 1;
 
   if (season === 'year-round' || (tropical && season !== 'perennial')) {
     return [
@@ -514,16 +514,12 @@ export function buildFieldPalette(
   const ploughedShare = swidden ? 0.36 : 0.10;
   const cropBudget = 1 - fallowShare - ploughedShare;
 
-  let weightSum = 0;
-  const entries = list.map((c, idx) => {
-    const w = CROP_SHARE_WEIGHT[c.share ?? 'secondary'] ?? 1.5;
-    weightSum += w;
-    return { c, idx, w };
-  });
+  const entries = list.map((c, idx) => ({ c, idx, w: CROP_SHARE_WEIGHT[c.share ?? 'secondary'] ?? 1.5 }));
 
   // Expand crops into phenological slots, capped at FIELD_SLOTS - 2 (leaving room for ploughed & fallow).
   const maxCropSlots = FIELD_SLOTS - 2;
   for (const { c, idx, w } of entries) {
+    if (raw.length >= maxCropSlots) break;
     const arch = CROP_ARCHETYPE_OF[c.kind];
     const prof = CROP_PROFILE[arch];
     const stages = cropPhenology(c, month, lat);
@@ -532,7 +528,7 @@ export function buildFieldPalette(
     for (const st of keep) {
       if (raw.length >= maxCropSlots) break;
       raw.push({
-        weight: (w / weightSum) * cropBudget * (st.weight / sSum),
+        weight: w * (st.weight / sSum),
         state: st.state,
         color: st.color,
         color2: st.color2,
@@ -545,6 +541,9 @@ export function buildFieldPalette(
       });
     }
   }
+  // Renormalize kept crop slots to fill cropBudget so truncation never inflates ploughed/fallow shares.
+  const keptCropWeight = raw.reduce((a, b) => a + b.weight, 0);
+  if (keptCropWeight > 0) for (const sl of raw) sl.weight = (sl.weight / keptCropWeight) * cropBudget;
 
   raw.push({
     weight: ploughedShare,
@@ -659,7 +658,7 @@ vec4 plotAt(vec2 p, vec4 style, out vec2 size, out float across, out float domai
   for (int dj = -1; dj <= 1; dj++) {
     for (int di = -1; di <= 1; di++) {
       highp ivec2 d = g + ivec2(di, dj);
-      vec2 c = (vec2(d) + vec2(0.16 + 0.68 * plotNumber(d, 19), 0.16 + 0.68 * plotNumber(d, 23))) * span;
+      vec2 c = (vec2(d) + vec2(0.2 + 0.6 * plotNumber(d, 19), 0.2 + 0.6 * plotNumber(d, 23))) * span;
       centers[idx] = c;
       ids[idx] = d;
       idx++;
@@ -695,7 +694,7 @@ vec4 plotAt(vec2 p, vec4 style, out vec2 size, out float across, out float domai
   float alongS = q.y + shift;
   highp int cj = int(floor(alongS / size.y));
   vec2 frac = vec2(q.x / size.x - float(ci), alongS / size.y - float(cj));
-  cellId = ivec2(ci + bestD.x * 131, cj + bestD.y * 137);
+  cellId = ivec2(uint(ci) ^ (uint(bestD.x) * 0x9e3779b1u), uint(cj) ^ (uint(bestD.y) * 0x85ebca6bu));
   across = q.x;
   return vec4(float(ci), float(cj), frac);
 }

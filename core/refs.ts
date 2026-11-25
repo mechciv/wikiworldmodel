@@ -27,7 +27,7 @@ export type Ref =
   | { type: 'external'; scheme: string; id: string };
 
 /** A row of a dataset: src:<dataset>#<key>. */
-export const ROW_REF = /^(src:[a-z0-9][a-z0-9.-]*(?:\/[a-z0-9][a-z0-9.-]*)*)#(\S+)$/;
+export const ROW_REF = /^(src:[a-z0-9][a-z0-9.-]*(?:\/[a-z0-9][a-z0-9.-]*)*)#([^\s#]+)$/;
 
 /** A row's key as it is written in a reference: only what a reference would misread is percent-encoded. */
 export const encodeRowKey = (key: string) => key.replace(/[%#\s]/g, (c) => encodeURIComponent(c));
@@ -76,9 +76,9 @@ export function parseRef(s: string, self?: string): Ref {
  * checking it (parseRef checks). Used where references have already been validated.
  */
 export function splitRef(ref: string): { record: string; phase?: string; part?: string } {
-  const at = ref.indexOf('@');
-  if (at > 0) return { record: ref.slice(0, at), phase: ref.slice(at + 1) };
   const hash = ref.indexOf('#');
-  if (hash > 0) return { record: ref.slice(0, hash), part: ref.slice(hash + 1) };
+  const at = ref.indexOf('@');
+  if (hash > 0 && (at < 0 || hash < at)) return { record: ref.slice(0, hash), part: ref.slice(hash + 1) };
+  if (at > 0) return { record: ref.slice(0, at), phase: ref.slice(at + 1) };
   return { record: ref };
 }

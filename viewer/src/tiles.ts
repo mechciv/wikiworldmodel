@@ -6,7 +6,7 @@
 import { decodeTile } from '../../core/container.ts';
 import { unitVector } from '../../core/quat.ts';
 import type { TileHeader, TileRef } from '../../core/tileset.ts';
-import { getBytes, type Build } from './data.ts';
+import type { Build } from './data.ts';
 
 export interface LoadedTile {
   ref: TileRef;
@@ -118,7 +118,7 @@ export class TileManager {
     while (this.inflight.size < MAX_CONCURRENT && this.queue.length) {
       const r = this.queue.shift()!;
       this.inflight.add(r.id);
-      getBytes(this.build.base + r.url)
+      this.build.getBytes(r.url)
         .then((buf) => {
           const { header, arrays } = decodeTile<TileHeader>(buf);
           const keyframes = (header.field?.keyframes ?? []).map((k) => ({

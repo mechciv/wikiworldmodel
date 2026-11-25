@@ -158,13 +158,21 @@ export class Mesh {
     this.f[f] = this.ox + x * this.cx - y * this.sx;
     this.f[f + 1] = this.oy + x * this.sx + y * this.cx;
     this.f[f + 2] = this.oz + z;
-    const wx = nx * this.cx - ny * this.sx;
-    const wy = nx * this.sx + ny * this.cx;
+    let wx = nx * this.cx - ny * this.sx;
+    let wy = nx * this.sx + ny * this.cx;
+    let wz = nz;
+    const nl2 = wx * wx + wy * wy + wz * wz;
+    if (nl2 > 1.0001) {
+      const inv = 1 / Math.sqrt(nl2);
+      wx *= inv;
+      wy *= inv;
+      wz *= inv;
+    }
     const b = n * STRIDE + 12;
-    this.b[b] = (wx * 127 + 128) | 0;
-    this.b[b + 1] = (wy * 127 + 128) | 0;
-    this.b[b + 2] = (nz * 127 + 128) | 0;
-    this.b[b + 3] = (light * 255) | 0;
+    this.b[b] = Math.max(0, Math.min(255, (wx * 127 + 128) | 0));
+    this.b[b + 1] = Math.max(0, Math.min(255, (wy * 127 + 128) | 0));
+    this.b[b + 2] = Math.max(0, Math.min(255, (wz * 127 + 128) | 0));
+    this.b[b + 3] = Math.max(0, Math.min(255, (light * 255) | 0));
     this.f[f + 4] = u;
     this.f[f + 5] = w;
     this.b[n * STRIDE + 24] = this.mat;

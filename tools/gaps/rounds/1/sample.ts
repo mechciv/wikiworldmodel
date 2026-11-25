@@ -12,6 +12,7 @@ import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { formatTime, PRESENT_YEAR, timeToParam } from '../../../../core/time.ts';
 import { positionOf, timeAt } from '../../../../core/timescale.ts';
+import { loadManifest, resolveDatasetFile } from '../../../world/src/manifest.ts';
 
 const REPO = join(import.meta.dirname, '../../../..');
 const HERE = import.meta.dirname;
@@ -56,7 +57,8 @@ const B = join(REPO, 'dist/builds', build);
 const json = <T>(f: string) => JSON.parse(readFileSync(join(B, f), 'utf8')) as T;
 
 // People: HYDE's count for each 1° cell at the step at or before the time, by its square root.
-const hyde = readFileSync(join(REPO, 'world/snapshots/hyde-3.2.1-population-1deg.csv'), 'utf8')
+const manifest = await loadManifest();
+const hyde = readFileSync(resolveDatasetFile('src:hyde-3.2.1-population-grid', manifest.datasets['src:hyde-3.2.1-population-grid']), 'utf8')
   .split('\n')
   .filter((l) => l && !l.startsWith('#'))
   .map((l) => l.split(','));

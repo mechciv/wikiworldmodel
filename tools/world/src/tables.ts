@@ -10,12 +10,20 @@
 import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import type { Basis } from '../../../core/tileset.ts';
+import { parsePoint, toMa, type TimePointInput } from '../../../core/time.ts';
 export { rowRef } from '../../../core/refs.ts';
 import { parseTable } from './build/series.ts';
-import { datasetFile } from './manifest.ts';
+import { resolveDatasetFile } from './manifest.ts';
 import type { Citation, Field, World } from './world.ts';
 import { rockRows, type LandSnapshot, type RockRow, type RocksSnapshot } from './pbdb.ts';
 import { unitRows, type ColumnsSnapshot, type UnitRow } from './macrostrat.ts';
+
+function toMaValue(v: TimePointInput): number {
+  if (typeof v === 'number') return v;
+  const trimmed = String(v).trim();
+  if (/^-?\d+(?:\.\d+)?$/.test(trimmed)) return Number(trimmed);
+  return Math.round(toMa(parsePoint(trimmed).t) * 1e9) / 1e9;
+}
 
 /** How a column's raw value becomes a claim's value, and back. */
 export type Conversion = 'string' | 'number' | 'text' | 'year' | 'year-end' | 'ma' | 'ma-range' | 'point';
@@ -111,9 +119,9 @@ export function fromValue(map: ColumnMap, value: unknown, columns: Record<string
   }
   if (as === 'ma-range') {
     const [older, younger] = map.column as [string, string];
-    const r = typeof value === 'object' && value !== null ? (value as { lo: string; hi: string }) : { lo: String(value), hi: String(value) };
-    columns[older] = parseFloat(r.lo);
-    columns[younger] = parseFloat(r.hi);
+    const r = typeof value === 'object' && value !== null ? (value as { lo: TimePointInput; hi: TimePointInput }) : { lo: value as TimePointInput, hi: value as TimePointInput };
+    columns[older] = toMaValue(r.lo);
+    columns[younger] = toMaValue(r.hi);
     return;
   }
   const c = map.column as string;
@@ -129,12 +137,13 @@ export function fromValue(map: ColumnMap, value: unknown, columns: Record<string
       return;
     case 'year':
     case 'year-end': {
-      const y = Number(value) - (as === 'year-end' ? 1 : 0);
+      const yr = typeof value === 'number' ? value : parsePoint(value as TimePointInput).t;
+      const y = yr - (as === 'year-end' ? 1 : 0);
       columns[c] = y <= 0 ? y - 1 : y;
       return;
     }
     case 'ma':
-      columns[c] = parseFloat(String(value));
+      columns[c] = toMaValue(value as TimePointInput);
       return;
   }
 }
@@ -164,15 +173,15 @@ export async function rawRows(world: World, field: Field): Promise<Record<string
     return snap ? landRows(snap) : undefined;
   }
   if (field.data!.as === 'rock-record') {
-    const path = datasetFile(id, d, field.data!.file ?? (d.fetch.files ? Object.keys(d.fetch.files)[0] : undefined));
+    const path = resolveDatasetFile(id, d, field.data!.file ?? (d.fetch.files ? Object.keys(d.fetch.files)[0] : undefined));
     return existsSync(path) ? rockRows(JSON.parse(await readFile(path, 'utf8')) as RocksSnapshot) : undefined;
   }
   if (field.data!.as === 'strata') {
-    const path = datasetFile(id, d, field.data!.file ?? (d.fetch.files ? Object.keys(d.fetch.files)[0] : undefined));
+    const path = resolveDatasetFile(id, d, field.data!.file ?? (d.fetch.files ? Object.keys(d.fetch.files)[0] : undefined));
     return existsSync(path) ? unitRows(JSON.parse(await readFile(path, 'utf8')) as ColumnsSnapshot) : undefined;
   }
   const member = field.data!.file ?? (d.fetch.files ? Object.keys(d.fetch.files)[0] : undefined);
-  const path = datasetFile(id, d, member);
+  const path = resolveDatasetFile(id, d, member);
   if (!existsSync(path)) return undefined;
   const text = await readFile(path, 'utf8');
   if (d.fetch.format === 'csv' || d.fetch.format === 'tsv') return parseTable(text);

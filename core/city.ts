@@ -94,7 +94,7 @@ export interface FormSpec {
 export function formProblem(v: unknown): string | undefined {
   if (!v || typeof v !== 'object' || Array.isArray(v)) return 'a form is a mapping with its type: { type: temple, … }';
   const { type, ...rest } = v as Record<string, unknown>;
-  const known = FORM_PARAMS[type as FormType] as readonly string[] | undefined;
+  const known = typeof type === 'string' && Object.hasOwn(FORM_PARAMS, type) ? (FORM_PARAMS[type as FormType] as readonly string[]) : undefined;
   if (!known) return `no form "${String(type)}": the forms are ${Object.keys(FORM_PARAMS).join(', ')}`;
   for (const k of Object.keys(rest)) if (!known.includes(k)) return `a ${String(type)} has no "${k}": it may have ${known.join(', ')}`;
   return undefined;
@@ -180,9 +180,14 @@ export const EARTH_RADIUS = 6371000;
 const RAD = Math.PI / 180;
 
 export function toLocal(origin: { lat: number; lon: number }, lat: number, lon: number): [number, number] {
-  return [EARTH_RADIUS * Math.cos(origin.lat * RAD) * (lon - origin.lon) * RAD, EARTH_RADIUS * (lat - origin.lat) * RAD];
+  const dlon = ((((lon - origin.lon + 180) % 360) + 360) % 360) - 180;
+  return [EARTH_RADIUS * Math.cos(origin.lat * RAD) * dlon * RAD, EARTH_RADIUS * (lat - origin.lat) * RAD];
 }
 
 export function fromLocal(origin: { lat: number; lon: number }, x: number, y: number): [lat: number, lon: number] {
-  return [origin.lat + y / EARTH_RADIUS / RAD, origin.lon + x / (EARTH_RADIUS * Math.cos(origin.lat * RAD)) / RAD];
+  const cosLat = Math.max(1e-6, Math.cos(origin.lat * RAD));
+  const lat = Math.max(-90, Math.min(90, origin.lat + y / EARTH_RADIUS / RAD));
+  const rawLon = origin.lon + x / (EARTH_RADIUS * cosLat) / RAD;
+  const lon = ((((rawLon + 180) % 360) + 360) % 360) - 180;
+  return [lat, lon];
 }

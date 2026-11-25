@@ -143,33 +143,42 @@ export function parseFeedbackSubmission(
   if (!feedback) return { ok: false, error: 'Feedback text is required.' };
   if (feedback.length > MAX_FEEDBACK_LENGTH) return { ok: false, error: `Feedback exceeds ${MAX_FEEDBACK_LENGTH} characters.` };
 
-  if (typeof raw.build !== 'string' || !raw.build.trim()) return { ok: false, error: 'build is required.' };
-  if (typeof raw.url !== 'string' || !raw.url.trim()) return { ok: false, error: 'url is required.' };
-  if (typeof raw.search !== 'string') return { ok: false, error: 'search must be a string.' };
+  if (typeof raw.build !== 'string' || !raw.build.trim() || raw.build.trim().length > 128) return { ok: false, error: 'build is required and must be at most 128 characters.' };
+  if (typeof raw.url !== 'string' || !raw.url.trim() || raw.url.trim().length > 4096) return { ok: false, error: 'url is required.' };
+  try {
+    const parsedUrl = new URL(raw.url.trim());
+    if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') return { ok: false, error: 'url must use http or https.' };
+  } catch {
+    return { ok: false, error: 'url must be a valid http(s) URL.' };
+  }
+  if (typeof raw.search !== 'string' || raw.search.length > 4096) return { ok: false, error: 'search must be a string.' };
 
   if (!isRecord(raw.state)) return { ok: false, error: 'state is required.' };
   const st = raw.state;
   if (!isFiniteNum(st.t)) return { ok: false, error: 'state.t must be a finite number.' };
-  if (typeof st.timeLabel !== 'string') return { ok: false, error: 'state.timeLabel must be a string.' };
+  if (typeof st.timeLabel !== 'string' || st.timeLabel.length > 128) return { ok: false, error: 'state.timeLabel must be a string.' };
   if (!isRecord(st.cam) || !isFiniteNum(st.cam.lat) || !isFiniteNum(st.cam.lon) || !isFiniteNum(st.cam.dist)) {
     return { ok: false, error: 'state.cam must include finite lat, lon and dist.' };
   }
+  if (st.cam.lat < -90 || st.cam.lat > 90 || st.cam.lon < -360 || st.cam.lon > 360 || st.cam.dist <= 0) {
+    return { ok: false, error: 'state.cam coordinates or distance are out of range.' };
+  }
   if (st.cam.heading !== undefined && !isFiniteNum(st.cam.heading)) return { ok: false, error: 'state.cam.heading must be finite.' };
   if (st.cam.tilt !== undefined && !isFiniteNum(st.cam.tilt)) return { ok: false, error: 'state.cam.tilt must be finite.' };
-  if (!Array.isArray(st.window) || st.window.length !== 2 || !isFiniteNum(st.window[0]) || !isFiniteNum(st.window[1])) {
-    return { ok: false, error: 'state.window must be a pair of finite numbers.' };
+  if (!Array.isArray(st.window) || st.window.length !== 2 || !isFiniteNum(st.window[0]) || !isFiniteNum(st.window[1]) || st.window[0] > st.window[1]) {
+    return { ok: false, error: 'state.window must be an ordered pair of finite numbers.' };
   }
   if (typeof st.evidence !== 'boolean' || typeof st.clouds !== 'boolean') {
     return { ok: false, error: 'state.evidence and state.clouds must be booleans.' };
   }
-  if (!isStringArray(st.alt) || !isStringArray(st.picks)) {
-    return { ok: false, error: 'state.alt and state.picks must be string arrays.' };
+  if (!isStringArray(st.alt) || st.alt.length > 128 || st.alt.some((x) => x.length > 256) || !isStringArray(st.picks) || st.picks.length > 128 || st.picks.some((x) => x.length > 256)) {
+    return { ok: false, error: 'state.alt and state.picks must be bounded string arrays.' };
   }
-  if (st.sel !== null && typeof st.sel !== 'string') return { ok: false, error: 'state.sel must be a string or null.' };
+  if (st.sel !== null && (typeof st.sel !== 'string' || st.sel.length > 256)) return { ok: false, error: 'state.sel must be a string or null.' };
   if (!isFiniteNum(st.hour)) return { ok: false, error: 'state.hour must be a finite number.' };
   if (st.month !== undefined && !isFiniteNum(st.month)) return { ok: false, error: 'state.month must be a finite number.' };
   if (st.tree !== undefined && typeof st.tree !== 'boolean') return { ok: false, error: 'state.tree must be a boolean.' };
-  if (st.layers !== undefined && !isStringArray(st.layers)) return { ok: false, error: 'state.layers must be a string array.' };
+  if (st.layers !== undefined && (!isStringArray(st.layers) || st.layers.length > 128 || st.layers.some((x) => x.length > 128))) return { ok: false, error: 'state.layers must be a bounded string array.' };
   if (st.people !== undefined && typeof st.people !== 'boolean') return { ok: false, error: 'state.people must be a boolean.' };
   if (st.quality !== undefined && st.quality !== 'fast') return { ok: false, error: 'state.quality must be "fast" when set.' };
   if (st.clock !== undefined && !isFiniteNum(st.clock)) return { ok: false, error: 'state.clock must be a finite number.' };
@@ -180,15 +189,15 @@ export function parseFeedbackSubmission(
   if (ctx.mode !== 'globe' && ctx.mode !== 'city' && ctx.mode !== 'life') {
     return { ok: false, error: 'context.mode must be globe, city or life.' };
   }
-  if (ctx.siteId !== undefined && typeof ctx.siteId !== 'string') return { ok: false, error: 'context.siteId must be a string.' };
-  if (ctx.siteName !== undefined && typeof ctx.siteName !== 'string') return { ok: false, error: 'context.siteName must be a string.' };
-  if (!isRecord(ctx.viewport) || !isFiniteNum(ctx.viewport.width) || !isFiniteNum(ctx.viewport.height) || !isFiniteNum(ctx.viewport.dpr)) {
-    return { ok: false, error: 'context.viewport must include finite width, height and dpr.' };
+  if (ctx.siteId !== undefined && (typeof ctx.siteId !== 'string' || ctx.siteId.length > 256)) return { ok: false, error: 'context.siteId must be a string.' };
+  if (ctx.siteName !== undefined && (typeof ctx.siteName !== 'string' || ctx.siteName.length > 256)) return { ok: false, error: 'context.siteName must be a string.' };
+  if (!isRecord(ctx.viewport) || !isFiniteNum(ctx.viewport.width) || !isFiniteNum(ctx.viewport.height) || !isFiniteNum(ctx.viewport.dpr) || ctx.viewport.width <= 0 || ctx.viewport.height <= 0 || ctx.viewport.dpr <= 0) {
+    return { ok: false, error: 'context.viewport must include positive finite width, height and dpr.' };
   }
-  if (!isRecord(ctx.canvas) || !isFiniteNum(ctx.canvas.width) || !isFiniteNum(ctx.canvas.height)) {
-    return { ok: false, error: 'context.canvas must include finite width and height.' };
+  if (!isRecord(ctx.canvas) || !isFiniteNum(ctx.canvas.width) || !isFiniteNum(ctx.canvas.height) || ctx.canvas.width <= 0 || ctx.canvas.height <= 0) {
+    return { ok: false, error: 'context.canvas must include positive finite width and height.' };
   }
-  if (ctx.userAgent !== undefined && typeof ctx.userAgent !== 'string') return { ok: false, error: 'context.userAgent must be a string.' };
+  if (ctx.userAgent !== undefined && (typeof ctx.userAgent !== 'string' || ctx.userAgent.length > 1024)) return { ok: false, error: 'context.userAgent must be a string.' };
 
   if (typeof raw.screenshotDataUrl !== 'string' || !raw.screenshotDataUrl.startsWith(PNG_DATA_URL_PREFIX)) {
     return { ok: false, error: 'screenshotDataUrl must be a base64 PNG data URL.' };

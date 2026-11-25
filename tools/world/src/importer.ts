@@ -1,5 +1,6 @@
 // Runs the Python importer (pyGPlates) on fetched datasets, caching its output by input hash.
 import { execFileSync } from 'node:child_process';
+import { randomBytes } from 'node:crypto';
 import { existsSync } from 'node:fs';
 import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { basename, join } from 'node:path';
@@ -83,7 +84,7 @@ async function run(command: string, name: string, key: string, request: Record<s
   const reqPath = join(out, 'request.json');
   await writeFile(reqPath, JSON.stringify({ ...request, out }, null, 1));
   log(`${name}: importing with ${script === IMPORTER ? 'pyGPlates' : 'Python'} (${key})`);
-  execFileSync(python(), script === IMPORTER ? [IMPORTER, command, reqPath] : [script, reqPath], { stdio: 'inherit' });
+  execFileSync(python(), script === IMPORTER ? [IMPORTER, command, reqPath] : [script, reqPath], { stdio: 'inherit', maxBuffer: 64 * 1024 * 1024 });
   return out;
 }
 
@@ -147,7 +148,7 @@ export async function importReliefPlates(field: Field, log: (s: string) => void 
 }
 
 /** Another variable of a climate's file, kept for the cells that have months: the file's name for it, whether it is by month or by year, and what its values are multiplied by before they are rounded. */
-export type MonthsMore = Record<string, { variable: string; per: 'month' | 'year'; scale: number }>;
+export type MonthsMore = Record<string, { variable: string; per: 'month' | 'year'; scale: number; signed?: boolean }>;
 
 /**
  * The months of a climate field's runs, from a NetCDF-4 file: the cells with a value in each slice, and their twelve
@@ -192,11 +193,16 @@ export async function resolvePoints(points: PointQuery[]): Promise<PointResult[]
   for (const p of points) if (!known[keyOf(p)]) missing.set(keyOf(p), { ...p, id: keyOf(p) });
   if (missing.size) {
     await mkdir(join(CACHE, 'import'), { recursive: true });
-    const reqPath = join(CACHE, 'import', `points@${prefix}.request.json`);
-    await writeFile(reqPath, JSON.stringify({ rotations: pm.rotations, polygons: pm.polygons, points: [...missing.values()] }));
-    const stdout = execFileSync(python(), [IMPORTER, 'points', reqPath], { encoding: 'utf8' });
+    const reqPath = join(CACHE, 'import', `points@${prefix}.${process.pid}.${randomBytes(4).toString('hex')}.request.json`);
+    let stdout: string;
+    try {
+      await writeFile(reqPath, JSON.stringify({ rotations: pm.rotations, polygons: pm.polygons, points: [...missing.values()] }));
+      stdout = execFileSync(python(), [IMPORTER, 'points', reqPath], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
+    } finally {
+      await rm(reqPath, { force: true });
+    }
     for (const { id, ...r } of JSON.parse(stdout).points as PointResult[]) known[id] = r;
-    const sorted = Object.fromEntries(Object.entries(known).sort(([a], [b]) => (a < b ? -1 : 1)));
+    const sorted = Object.fromEntries(Object.entries(known).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)));
     // Written aside and moved into place, so that a reader at the same moment never sees half a file.
     const part = `${file}.${process.pid}.part`;
     await writeFile(part, JSON.stringify(sorted));

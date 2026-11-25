@@ -14,7 +14,7 @@ describe('build', () => {
     const quiet = console.log;
     console.log = () => {};
     try {
-      expect(await runBuild([])).toBe(0);
+      expect(await runBuild(['--no-cache'])).toBe(0);
     } finally {
       console.log = quiet;
     }

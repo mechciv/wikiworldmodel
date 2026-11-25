@@ -49,6 +49,7 @@ export class GroundMaterialSet {
   /** why it could not be loaded, if it could not: the ground is then drawn as it is without them */
   failed: string | null = null;
   private started = false;
+  private disposed = false;
 
   constructor(private gl: GL) {}
 
@@ -59,13 +60,27 @@ export class GroundMaterialSet {
 
   /** Fetch them, once. `root` is where the viewer is served from, ending in a slash. */
   load(root: string, onReady: () => void): void {
-    if (this.started) return;
+    if (this.started || this.disposed) return;
     this.started = true;
-    this.fetch(root).then(onReady, (e) => {
-      this.failed = e instanceof Error ? e.message : String(e);
-      console.warn(`The ground's materials could not be loaded, and it is drawn without them: ${this.failed}`);
-      onReady();
-    });
+    this.fetch(root).then(
+      () => { if (!this.disposed) onReady(); },
+      (e) => {
+        if (this.disposed) return;
+        this.failed = e instanceof Error ? e.message : String(e);
+        console.warn(`The ground's materials could not be loaded, and it is drawn without them: ${this.failed}`);
+        onReady();
+      },
+    );
+  }
+
+  /** Release GPU texture arrays owned by this material set. */
+  dispose(): void {
+    this.disposed = true;
+    if (this.colour) this.gl.deleteTexture(this.colour);
+    if (this.normal) this.gl.deleteTexture(this.normal);
+    this.colour = null;
+    this.normal = null;
+    this.ready = false;
   }
 
   /** Try loading pre-packed GPU block-compressed KTX2 arrays when both hardware and manifest support a matching family. */
@@ -107,6 +122,7 @@ export class GroundMaterialSet {
       }),
     );
 
+    if (this.disposed) return false;
     const width = packed[0].colour.width;
     const height = packed[0].colour.height;
     const levels = packed[0].colour.levelCount;
@@ -158,6 +174,7 @@ export class GroundMaterialSet {
     const res = await fetch(`${base}ground.json`);
     if (!res.ok) throw new Error(`ground.json: HTTP ${res.status}`);
     const file = (await res.json()) as GroundMaterials;
+    if (this.disposed) return;
     if (file.format !== GROUND_FORMAT) throw new Error(`ground.json is ${file.format}, not ${GROUND_FORMAT}`);
     // The layers by the names the shaders know them by, whatever order the file has them in.
     const layers = GROUND_LAYERS.map((key) => {
@@ -166,12 +183,17 @@ export class GroundMaterialSet {
       return l;
     });
     if (await this.tryLoadKTX2(base, layers).catch(() => false)) return;
+    if (this.disposed) return;
     const image = async (path: string): Promise<ImageBitmap> => {
       const r = await fetch(base + path);
       if (!r.ok) throw new Error(`${path}: HTTP ${r.status}`);
       return createImageBitmap(await r.blob(), { premultiplyAlpha: 'none', colorSpaceConversion: 'none' });
     };
     const images = await Promise.all(layers.map(async (l) => ({ colour: await image(l.colour), data: await image(l.data) })));
+    if (this.disposed) {
+      for (const im of images) { im.colour.close(); im.data.close(); }
+      return;
+    }
     const size = file.size;
     const n = layers.length;
     const levels = Math.floor(Math.log2(size)) + 1;

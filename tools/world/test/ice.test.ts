@@ -1,15 +1,13 @@
 // The ice sheets: how the distance to their margin is worked out, how a time finds its keyframes,
 // how much ice a grid holds, and the snapshot they are read from.
 import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { unzipSync } from 'fflate';
 import { describe, expect, it } from 'vitest';
 import { decodeMargin, decodeThickness, encodeMargin, encodeThickness, iceFrame, iceKeysAt, iceScenario, sampleGrid, THICKNESS_TOP, type IceKeyframe, type IceScenario } from '../../../core/ice.ts';
 import { parseHeader } from '../src/netcdf.ts';
 import { climateGrid } from '../src/build/climate.ts';
 import { distanceToContour, iceVolume } from '../src/build/ice.ts';
-import { loadManifest } from '../src/manifest.ts';
-import { REPO } from '../src/paths.ts';
+import { loadManifest, resolveDatasetFile } from '../src/manifest.ts';
 import { sha256 } from '../src/util.ts';
 
 const grid = climateGrid(1);
@@ -142,7 +140,7 @@ describe('the snapshot', () => {
   it('is what the manifest pins, holds both scenarios at every keyframe, and is CC BY', async () => {
     const m = await loadManifest();
     const d = m.datasets['src:paleomist-1.0'];
-    const zip = new Uint8Array(readFileSync(join(REPO, d.fetch.url.slice('repo:'.length))));
+    const zip = new Uint8Array(readFileSync(resolveDatasetFile('src:paleomist-1.0', d)));
     expect(zip.length).toBe(d.fetch.bytes);
     expect(sha256(zip)).toBe(d.fetch.sha256);
     expect(d.license).toBe('CC-BY-4.0');

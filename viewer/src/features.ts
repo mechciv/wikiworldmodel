@@ -2,7 +2,7 @@
 // feature asked for by name, wherever it is. What the view does not need is not fetched.
 import { FEATURE_VARIANTS, featureTileUrl, tilesFor, withVariants, type FeatureIndex, type FeatureTileRef, type FeatureVariants, type FeatureView } from '../../core/featuretiles.ts';
 import type { Feature } from '../../core/tileset.ts';
-import { getJSON, type Build } from './data.ts';
+import type { Build } from './data.ts';
 
 export class FeatureTiles {
   private loaded = new Map<FeatureTileRef, Feature[]>();
@@ -33,7 +33,8 @@ export class FeatureTiles {
     let p = this.loading.get(r);
     if (!p) {
       this.inflight++;
-      p = getJSON<Feature[]>(this.build.base + featureTileUrl(r))
+      p = this.build
+        .getJSON<Feature[]>(featureTileUrl(r))
         .then((rows) => {
           for (const f of rows) {
             if (this.variants?.[f.id]) withVariants(f, this.variants[f.id]);
@@ -65,7 +66,8 @@ export class FeatureTiles {
   wantVariants(): Promise<void> {
     if (this.variantsLoading) return this.variantsLoading;
     this.inflight++;
-    this.variantsLoading = getJSON<Record<string, FeatureVariants>>(this.build.base + FEATURE_VARIANTS)
+    this.variantsLoading = this.build
+      .getJSON<Record<string, FeatureVariants>>(FEATURE_VARIANTS)
       .then((v) => {
         this.variants = v;
         for (const [id, x] of Object.entries(v)) {

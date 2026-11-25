@@ -237,8 +237,9 @@ export function cycleOf(v: unknown): CycleDate | undefined {
 export const anchorsOf = (world: World, cycle: string) => epochsOf(world, cycle);
 
 /** The name an anchor gives its day in its cycle, from its `day_name` claim: the place, or undefined. */
-export function anchorPlace(world: World, id: string, cycle: string): number | undefined {
-  const c = world.entity.get(id)?.claims.find((x) => x.prop === 'day_name' && x.status !== 'deprecated' && x.rank !== 'deprecated');
+export function anchorPlace(world: World, id: string, cycle: string, s: Scenario = {}): number | undefined {
+  const g = claimGroup(world, id, 'day_name');
+  const c = g ? chosen(g, s) : undefined;
   const v = typeof c?.value === 'string' ? parseCycle(c.value) : undefined;
   const name = CYCLES[cycle]?.unit === 'year' ? v?.year : v?.day;
   return name && name.cycle === cycle ? name.place : undefined;
@@ -251,7 +252,7 @@ export function anchorPlace(world: World, id: string, cycle: string): number | u
  */
 export function cycleAnchor(world: World, cycle: string, s: Scenario = {}): CycleAnchor | undefined {
   const [id] = anchorsOf(world, cycle);
-  const place = id === undefined ? undefined : anchorPlace(world, id, cycle);
+  const place = id === undefined ? undefined : anchorPlace(world, id, cycle, s);
   const days = place === undefined ? undefined : countDays(world, { calendar: cycle, days: 0 }, s);
   if (!days) return undefined;
   const first = dayNumberAt(days[0]);
@@ -356,7 +357,7 @@ function resolveIn(world: World, v: CycleDate, b: { lo: number; hi: number } | u
     const turn = 366 * 52;
     const first = dayNumberAt(b.lo)!;
     const last = dayNumberAt(Math.max(b.lo, b.hi - 1e-7))!;
-    const before = cycleDays(v, anchorsFor(world, v, s), first - turn, first - 1)?.at(-1);
+    const before = first > 0 ? cycleDays(v, anchorsFor(world, v, s), Math.max(0, first - turn), first - 1)?.at(-1) : undefined;
     const after = cycleDays(v, anchorsFor(world, v, s), last + 1, last + turn)?.[0];
     out.nearest = !before ? after : !after ? before : first - before[1] <= after[0] - last ? before : after;
   }
@@ -448,10 +449,14 @@ export function pickedSplice(world: World, s: Scenario, centres = false): { base
   const claim = world.entity.get(record)?.claims.find((c) => c.key === part);
   const g = claim && claimGroup(world, claim.subject, claim.prop);
   if (!claim || !g || !world.vocab.properties[g.prop]?.moment) return undefined;
-  // A zero day's date moves every date written in its count, and a day others count days from moves them: nothing to
-  // change in place.
+  // A zero day's date moves every date written in its count, a day others count days from moves them,
+  // and cycle-dated claims depend on restSolution's window: rebuild whole when cycles could shift.
   if (isEpoch(world, splitRef(claim.subject).record) || countedFrom(world).has(claim.subject)) return undefined;
   const picture: Scenario = s.alts?.length ? { alts: s.alts } : {};
+  const affected = cycleAffectedPoints(world, picture);
+  if (affected.has(claimPoint(world, claim)) || affected.has(pointOf(world, claim.subject, 'start')) || affected.has(pointOf(world, claim.subject, 'end'))) {
+    return undefined;
+  }
   const before = chosen(g, picture);
   if (!before) return undefined;
   const base = pictureNetwork(world, picture, centres);
@@ -699,6 +704,46 @@ function besideIn(world: World, s: Scenario): Claim[] {
   return list;
 }
 
+const cycleReach = new WeakMap<World, Map<string, Set<string>>>();
+
+/** All points connected (without crossing ORIGIN) to any cycle-dated claim in a picture. */
+function cycleAffectedPoints(world: World, picture: Scenario): Set<string> {
+  let known = cycleReach.get(world);
+  if (!known) cycleReach.set(world, (known = new Map()));
+  const key = scenarioKey({ alts: picture.alts });
+  let set = known.get(key);
+  if (set) return set;
+  set = new Set<string>();
+  const beside = besideIn(world, picture);
+  if (beside.length) {
+    const net = restNetwork(world, picture, false);
+    const adj = new Map<string, string[]>();
+    for (const c of net.constraints) {
+      if (c.from === ORIGIN || c.to === ORIGIN) continue;
+      (adj.get(c.from) ?? adj.set(c.from, []).get(c.from)!).push(c.to);
+      (adj.get(c.to) ?? adj.set(c.to, []).get(c.to)!).push(c.from);
+    }
+    const queue: string[] = [];
+    for (const c of beside) {
+      const p = claimPoint(world, c);
+      if (!set.has(p)) {
+        set.add(p);
+        queue.push(p);
+      }
+    }
+    for (let i = 0; i < queue.length; i++) {
+      for (const next of adj.get(queue[i]) ?? []) {
+        if (!set.has(next)) {
+          set.add(next);
+          queue.push(next);
+        }
+      }
+    }
+  }
+  known.set(key, set);
+  return set;
+}
+
 /*
  * A network is made of parts that most scenarios share: each entity's lifetime and phases, the constraints of a dated
  * claim, those of a relation. Each part that does not turn on the scenario is worked out once per world, and its
@@ -746,7 +791,16 @@ function momentGroups(world: World): { list: ClaimGroup[]; byRef: Map<string, Cl
   if (!known) {
     const list = claimGroups(world).filter((g) => world.vocab.properties[g.prop]?.moment);
     const byRef = new Map<string, ClaimGroup[]>();
-    for (const g of list) for (const c of g.claims) byRef.set(c.ref, [...(byRef.get(c.ref) ?? []), g]);
+    for (const g of list) {
+      for (const c of g.claims) {
+        let bucket = byRef.get(c.ref);
+        if (!bucket) {
+          bucket = [];
+          byRef.set(c.ref, bucket);
+        }
+        bucket.push(g);
+      }
+    }
     known = { list, byRef };
     momentGroupsOf.set(world, known);
   }
@@ -801,7 +855,7 @@ const claimParts = new WeakMap<Claim, Array<Constraint[] | undefined>>();
 function dated(world: World, prop: string, c: Claim, centres: boolean, s: Scenario): Constraint[] {
   if (prop !== c.prop) return claimConstraints(world, prop, c, centres, s);
   const v = timeOrUndefined(c.value);
-  const bound = prop === 'earlier_than' || prop === 'end_before' || prop === 'later_than';
+  const bound = prop === 'earlier_than' || prop === 'end_before' || prop === 'start_before' || prop === 'later_than';
   // A day in a count follows the scenario's zero day, and a lag in days the day its record is dated to there.
   if (v?.kind === 'count' || (v?.kind === 'ref' && v.lagDays && v.edge && !bound)) return claimConstraints(world, prop, c, centres, s);
   let known = claimParts.get(c);
@@ -971,10 +1025,21 @@ function overBase(sol: Solution, base: Bounds | undefined): Solution {
 }
 
 /**
+ * Picture-level STN solutions already computed (for example during validation), keyed by `scenarioKey(picture)`.
+ * Passing this into `solveVariants` avoids re-solving the default picture, its centres, and every alternative picture.
+ */
+export interface SolvedPictures {
+  defaultSol: Solution;
+  defaultCentres?: Solution;
+  pictures: Map<string, Solution>;
+  pictureCentres: Map<string, Solution>;
+}
+
+/**
  * Solve each picture, and each picture with one competing dated claim picked over the default.
  * Each is kept only as it differs from its picture, and each picture as it differs from the default.
  */
-export function solveVariants(world: World, alternatives?: string[]): Variant[] {
+export function solveVariants(world: World, alternatives?: string[], preSolved?: SolvedPictures): Variant[] {
   const out: Variant[] = [];
   const boundsOf = (s: Solution) => (s.ok ? s.bounds : undefined);
   let rootSol: Bounds | undefined;
@@ -1001,10 +1066,11 @@ export function solveVariants(world: World, alternatives?: string[]): Variant[] 
   for (const scenario of scenariosOf(world, alternatives)) {
     let v: Variant;
     if (!scenario.picks?.length) {
+      const key = scenarioKey(scenario);
       nets = { sol: pictureNetwork(world, scenario), centres: pictureNetwork(world, scenario, true) };
-      const sol = solve(nets.sol.points, nets.sol.constraints);
-      const centres = solve(nets.centres.points, nets.centres.constraints);
-      v = { key: scenarioKey(scenario), scenario, solution: overBase(sol, rootSol), centres: overBase(centres, rootCentres) };
+      const sol = preSolved?.pictures.get(key) ?? solve(nets.sol.points, nets.sol.constraints);
+      const centres = preSolved?.pictureCentres.get(key) ?? solve(nets.centres.points, nets.centres.constraints);
+      v = { key, scenario, solution: overBase(sol, rootSol), centres: overBase(centres, rootCentres) };
       picture = v;
       if (!rootSol) {
         rootSol = boundsOf(v.solution);

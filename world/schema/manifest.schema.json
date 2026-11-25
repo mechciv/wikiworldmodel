@@ -12,6 +12,17 @@
       "properties": { "licenses": { "type": "array", "items": { "type": "string" } } },
       "additionalProperties": false
     },
+    "blobs": {
+      "type": "object",
+      "description": "Content-addressed R2/S3 blob store for snapshots and mirrored datasets, addressed as <url><prefix><sha256>.",
+      "required": ["url"],
+      "properties": {
+        "url": { "type": "string", "pattern": "^https://.+/$" },
+        "prefix": { "type": "string", "pattern": "^[a-z0-9/_-]*$" },
+        "mirrors": { "type": "array", "items": { "type": "string", "pattern": "^https://.+/$" } }
+      },
+      "additionalProperties": false
+    },
     "datasets": {
       "type": "object",
       "propertyNames": { "pattern": "^src:[a-z0-9][a-z0-9.-]*(/[a-z0-9][a-z0-9.-]*)*$" },
@@ -28,7 +39,7 @@
           "version": { "type": "string" },
           "container": { "type": "string" },
           "doi": { "type": "string", "pattern": "^10\\.[0-9]{4,9}/\\S+$" },
-          "url": { "type": "string", "format": "uri" },
+          "url": { "type": "string", "format": "uri", "pattern": "^https?://" },
           "credit": { "type": "string", "description": "The short attribution shown wherever the data is displayed" },
           "license": { "type": "string" },
           "license_note": { "type": "string" },
@@ -78,7 +89,8 @@
             "type": "object",
             "required": ["url", "sha256", "bytes", "format"],
             "properties": {
-              "url": { "type": "string", "pattern": "^(https://|repo:)" },
+              "url": { "type": "string", "pattern": "^(https://|blob:[0-9a-f]{64}$)" },
+              "filename": { "type": "string", "minLength": 1, "pattern": "^[^/\\\\]+$" },
               "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
               "bytes": { "type": "integer", "minimum": 1 },
               "format": { "enum": ["zip", "parquet", "csv", "tsv", "xlsx", "tif", "json", "netcdf"] },
@@ -87,14 +99,17 @@
                 "additionalProperties": {
                   "type": "object",
                   "required": ["path", "sha256"],
-                  "properties": { "path": { "type": "string" }, "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" } },
+                  "properties": {
+                    "path": { "type": "string", "minLength": 1, "pattern": "^(?!/)(?!\\\\)(?!.*(?:^|[\\\\/])\\.\\.(?:[\\\\/]|$)).+" },
+                    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+                  },
                   "additionalProperties": false
                 }
               },
               "upstream": {
                 "type": "object",
                 "required": ["url", "sha256"],
-                "properties": { "url": { "type": "string", "format": "uri" }, "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" } },
+                "properties": { "url": { "type": "string", "format": "uri", "pattern": "^https?://" }, "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" } },
                 "additionalProperties": false
               },
               "via": { "type": "string" }

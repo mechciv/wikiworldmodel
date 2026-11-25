@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { bounds, centre, dateAt, formatTime, formatTimeValue, fromMa, parseLag, parsePoint, parseTime, PRESENT_YEAR, quantizeTime, timeFromParam, timeToParam, toMa } from '../../../core/time.ts';
+import { bounds, centre, dateAt, formatTime, formatTimeValue, fromMa, namesSign, parseDuration, parseLag, parsePoint, parseTime, PRESENT_YEAR, quantizeTime, timeFromParam, timeToParam, toMa } from '../../../core/time.ts';
 
 describe('time axis', () => {
   it('uses astronomical years: 44 BCE is −43, and a bare year is that whole year', () => {
@@ -120,5 +120,29 @@ describe('calendar dates', () => {
     expect(timeToParam(fromMa(66.043))).toBe('66.043Ma');
     expect(timeFromParam('44BCE')).toBe(-43);
     expect(timeFromParam('476CE')).toBe(476);
+  });
+  it('rejects 0 BCE, decimal BCE, negative BP, Oct 5–14 1582, and malformed bounds; handles Oct 1582 end and Gyr durations', () => {
+    expect(() => parsePoint('0 BCE')).toThrow();
+    expect(() => parsePoint('1.5 BCE')).toThrow();
+    expect(() => parsePoint('-50 BP')).toThrow();
+    expect(() => parsePoint('10 October 1582 CE')).toThrow();
+    const oct = parseTime('October 1582 CE');
+    expect(oct.kind).toBe('interval');
+    if (oct.kind === 'interval') {
+      expect(oct.hi).toBeCloseTo(parsePoint('1 November 1582 CE').t, 6);
+    }
+    expect(parseDuration('1 Gyr')).toBe(1e9);
+    expect(() => parseTime({ lo: 'not-a-date', hi: '100 CE' })).toThrow();
+  });
+  it('matches cycle signs in standalone, Nahuatl compound, and Spanish plural forms without substring false positives', () => {
+    expect(namesSign('on the day 1 Coatl', 'Coatl')).toBe(true);
+    expect(namesSign('en el día cecoatl del año', 'Coatl')).toBe(true);
+    expect(namesSign('año omeacatl', 'Acatl')).toBe(true);
+    expect(namesSign('en 3Calli', 'Calli')).toBe(true);
+    expect(namesSign('en el año 3 Casas', 'Calli')).toBe(true);
+    expect(namesSign('en el día dos Flores', 'Xochitl')).toBe(true);
+    expect(namesSign('the battle of the North Atlantic', 'Atl')).toBe(false);
+    expect(namesSign('the Florentine Codex', 'Xochitl')).toBe(false);
+    expect(namesSign('played the violin', 'Ollin')).toBe(false);
   });
 });

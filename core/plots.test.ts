@@ -134,4 +134,16 @@ describe("the plots of people's fields", () => {
     expect(PLOTS_GLSL).toContain(`vec3(${PLOT_LOOK.ripe[0].join(', ')})`);
     expect(PLOTS_GLSL).not.toContain('`');
   });
+
+  it('shifts Southern Hemisphere perennial phase and keeps plotAt fractions in [0, 1]', () => {
+    const crops = [{ kind: 'wheat' as const, share: 'staple' as const }, { kind: 'olive' as const, share: 'secondary' as const }];
+    const north = buildFieldPalette(crops, 1, 40);
+    const south = buildFieldPalette(crops, 1, -40);
+    expect(north.slots[0].state).not.toBe(south.slots[0].state);
+    const hit = plotAt(123.4, 567.8, { plot: 60, aspect: 1.5, kind: 1 });
+    expect(hit.fx).toBeGreaterThanOrEqual(0);
+    expect(hit.fx).toBeLessThanOrEqual(1);
+    expect(hit.fy).toBeGreaterThanOrEqual(0);
+    expect(hit.fy).toBeLessThanOrEqual(1);
+  });
 });

@@ -103,10 +103,13 @@ float leafHash(vec2 p) {
 // twig's foot. Read by how the card's own uv changes across a pixel: the tile's number, taken off, changes it at a
 // card's edge, where a pixel's neighbour lies off the card. Red is how light the leaf is, green how much is twig, blue
 // how the leaf's face leans across the card, alpha how much is leaf.
-vec4 leafTexel(vec2 uv) {
+vec4 leafTexelGrad(vec2 uv, vec2 dux, vec2 duy) {
   float tile = floor(uv.x);
   vec2 k = vec2(1.0 / 0.98, 1.0);
-  return textureGrad(uLeaves, vec3((uv.x - tile - 0.01) / 0.98, uv.y, tile), dFdx(uv) * k, dFdy(uv) * k);
+  return textureGrad(uLeaves, vec3((uv.x - tile - 0.01) / 0.98, uv.y, tile), dux * k, duy * k);
+}
+vec4 leafTexel(vec2 uv) {
+  return leafTexelGrad(uv, dFdx(uv), dFdy(uv));
 }
 // The same where no pixel has neighbours to measure by: the shadows' and the pick's passes read the tile as it is.
 bool leafThere(vec2 uv) {
@@ -606,12 +609,16 @@ vec3 bumpBy(vec3 n, vec3 p, float h, float strength) {
   vec3 r2 = cross(n, dpdx);
   float det = dot(dpdx, r1);
   vec3 grad = sign(det) * (dFdx(h) * r1 + dFdy(h) * r2);
-  return normalize(abs(det) * n - strength * grad);
+  vec3 res = abs(det) * n - strength * grad;
+  float l = length(res);
+  return l > 1e-12 ? res / l : n;
 }
 
 // GGX highlight of the sun.
 float sunSpecular(vec3 n, vec3 v, float rough) {
-  vec3 h = normalize(uSun + v);
+  vec3 hv = uSun + v;
+  float hl = length(hv);
+  vec3 h = hl > 1e-6 ? hv / hl : n;
   float nh = max(dot(n, h), 0.0);
   float a = rough * rough;
   float a2 = a * a;
@@ -1691,8 +1698,14 @@ float skinPattern(vec3 q, float tint) {
 }
 
 void main() {
-  vec3 n = normalize(vN);
-  float fw = max(length(dFdx(vUv)), length(dFdy(vUv)));
+  float vNLen = length(vN);
+  vec3 n = vNLen > 1e-6 ? vN / vNLen : vec3(0.0, 0.0, 1.0);
+  // Compute screen-space derivatives before any branch or discard for well-defined 2x2 quad differentials.
+  vec2 dux = dFdx(vUv);
+  vec2 duy = dFdy(vUv);
+  vec3 dpx = dFdx(vRel);
+  vec3 dpy = dFdy(vRel);
+  float fw = max(length(dux), length(duy));
   float glass = 0.0;
   vec3 bumped = n;
   bool card = onCard(vMaterial);
@@ -1707,7 +1720,7 @@ void main() {
   float leafLean = 0.0;
   float family = 0.0;
   if (card) {
-    vec4 t = leafTexel(vUv);
+    vec4 t = leafTexelGrad(vUv, dux, duy);
     leafLight = t.r;
     leafWood = t.g;
     leafLean = t.b * 2.0 - 1.0;
@@ -1794,21 +1807,23 @@ void main() {
     // Close to the ground a plant stands in its neighbours' shade: the foot of a tuft is dark, and its tips are lit.
     float foot = vLow < 100.0 ? 0.42 + 0.58 * smoothstep(0.0, 0.55, vLow) : 1.0;
     // Its own face, from the point's place from the eye: from the world's, far from the scene's middle, it would speckle.
-    vec3 dpx = dFdx(vRel);
-    vec3 dpy = dFdy(vRel);
-    vec3 g = normalize(cross(dpx, dpy));
+    vec3 gRaw = cross(dpx, dpy);
+    float gLen = length(gRaw);
+    vec3 g = gLen > 1e-12 ? gRaw / gLen : n;
     vec3 lit = n;
     if (card || blade) {
       // Each leaf leans its own way across its card, the two halves of its fold apart: the card's own direction across,
       // from how its uv and its place change over a pixel.
-      vec2 dux = dFdx(vUv);
-      vec2 duy = dFdy(vUv);
       vec3 across = dpx * duy.y - dpy * dux.y;
       float l = length(across);
       if (l > 1e-9) {
         across *= sign(dux.x * duy.y - duy.x * dux.y) / l;
-        g = normalize(g + across * leafLean * 0.9);
-        lit = normalize(n + across * leafLean * 0.45);
+        vec3 g2 = g + across * leafLean * 0.9;
+        float g2l = length(g2);
+        if (g2l > 1e-6) g = g2 / g2l;
+        vec3 lit2 = n + across * leafLean * 0.45;
+        float lit2l = length(lit2);
+        if (lit2l > 1e-6) lit = lit2 / lit2l;
       }
     }
     c = foliage(s.albedo, s.rough, lit, g, vPos, vLight * under * foot, sh * mix(1.0, foot, 0.5), card || blade);
@@ -1843,7 +1858,9 @@ void main() {
     c = mix(c, tint2 * 1.2, 0.18 + 0.28 * hatch);
   }
   if ((flags & 8) != 0) {
-    float e = pow(1.0 - abs(dot(normalize(toEye), n)), 2.0);
+    float teLen = length(toEye);
+    vec3 teDir = teLen > 1e-6 ? toEye / teLen : n;
+    float e = pow(1.0 - abs(dot(teDir, n)), 2.0);
     c += vec3(1.0, 0.82, 0.42) * (0.1 + 0.55 * e);
   } else if ((flags & 16) != 0) {
     c += vec3(0.9, 0.8, 0.6) * 0.06;
@@ -2252,7 +2269,7 @@ vec3 plots(vec3 wild, vec3 p, vec3 n, float dist, float paddy, out float tilled,
   vec3 col1 = uSlotColor2[slot].rgb;
   float cover = uSlotColor2[slot].a;
   float state = uSlotMeta[slot].x;
-  float rowPitch = max(0.55, uSlotMeta[slot].y);
+  float rowPitch = max(0.25, uSlotMeta[slot].y);
   float slotPaddy = uSlotMeta[slot].w;
 
   // Parcel base tone modulated by multi-octave crop vigor and soil moisture variation so no parcel is a flat rectangle.
@@ -2435,6 +2452,8 @@ vec3 peopled(vec3 c, vec3 p, vec3 n, float dist, out float yard, out float tille
   yard = f.b * (0.45 + 0.48 * worn);
   return mix(c, trodden, yard);
 }
+vec2 gPDx;
+vec2 gPDy;
 // Bump by a height, from its derivatives across the screen (Mikkelsen 2010): a detail normal with no texture of its own.
 vec3 bumped(vec3 n, vec3 p, float h, float strength) {
   vec3 dpdx = dFdx(p);
@@ -2443,7 +2462,9 @@ vec3 bumped(vec3 n, vec3 p, float h, float strength) {
   vec3 r2 = cross(n, dpdx);
   float det = dot(dpdx, r1);
   vec3 grad = sign(det) * (dFdx(h) * r1 + dFdy(h) * r2);
-  return normalize(abs(det) * n - strength * grad);
+  vec3 res = abs(det) * n - strength * grad;
+  float l = length(res);
+  return l > 1e-12 ? res / l : n;
 }
 // How near the water a point is, and how far above its level: from the water seen from above, blurred to its banks.
 // And how much of it is the bed of a river dry in the month, which holds no water.
@@ -2670,7 +2691,7 @@ vec3 groundClose(vec3 c, vec3 p, vec3 n, float dist, vec4 mask, float slope, out
   if (litterNear > 0.0 && b1 > 0.0) {
     // In drifts: thick where the last wind left them, a few between.
     float drift = clamp(0.18 + 1.25 * smoothstep(0.3, 0.72, fbmM(p + 31.0, 1.3)), 0.0, 1.0);
-    vec2 leaf = fallenLeaves(p, dFdx(p.xy), dFdy(p.xy), drift);
+    vec2 leaf = fallenLeaves(p, gPDx, gPDy, drift);
     // Browns from nearly black to straw: a russet one here, a yellow or a grey one there, by a number each leaf's
     // own lightness gives it.
     float kind = fract(leaf.y * 17.0);
@@ -2828,6 +2849,8 @@ void main() {
   // How the point's place from the eye changes across a pixel, before anything is left out.
   vec3 relDx = dFdx(vRel);
   vec3 relDy = dFdy(vRel);
+  gPDx = relDx.xy;
+  gPDy = relDy.xy;
   if (vPos.x > uInner.x && vPos.y > uInner.y && vPos.x < uInner.z && vPos.y < uInner.w) discard;
   vec3 p = vPos;
   vec3 n = normalAt(p.xy);
@@ -3544,13 +3567,16 @@ vec3 viewPos(vec2 uv) {
 float ign(vec2 p) { return fract(52.9829189 * fract(dot(p, vec2(0.06711056, 0.00583715)))); }
 void main() {
   float raw = texture(uDepth, vUv).r;
+  vec3 p = viewPos(vUv);
+  vec3 rawN = cross(dFdx(p), dFdy(p));
   if (raw >= 1.0) {
     o = vec4(1.0);
     return;
   }
-  vec3 p = viewPos(vUv);
-  vec3 n = normalize(cross(dFdx(p), dFdy(p)));
-  vec3 v = normalize(-p);
+  float nLen = length(rawN);
+  vec3 n = nLen > 1e-12 ? rawN / nLen : vec3(0.0, 0.0, 1.0);
+  float pLen = length(p);
+  vec3 v = pLen > 1e-6 ? -p / pLen : vec3(0.0, 0.0, 1.0);
   if (dot(n, v) < 0.0) n = -n;
   float dist = -p.z;
   // The radius grows with distance, and reaches further close by: the foot of a wall, a crown over the ground; far
@@ -3683,6 +3709,7 @@ vec3 toYCoCg(vec3 c) { return vec3(dot(c, vec3(0.25, 0.5, 0.25)), dot(c, vec3(0.
 vec3 fromYCoCg(vec3 c) { return vec3(c.x + c.y - c.z, c.x + c.z, c.x - c.y - c.z); }
 void main() {
   vec4 cur = texture(uCurrent, vUv);
+  if (any(isnan(cur.rgb)) || any(isinf(cur.rgb))) cur.rgb = vec3(0.0);
   if (uBlend >= 1.0) {
     o = cur;
     return;
@@ -3691,6 +3718,10 @@ void main() {
   if (uMoving > 0.5) {
     float d = texture(uDepth, vUv).r;
     vec4 p = uReproject * vec4(vUv * 2.0 - 1.0, d * 2.0 - 1.0, 1.0);
+    if (p.w <= 1e-6) {
+      o = cur;
+      return;
+    }
     uv = p.xy / p.w * 0.5 + 0.5;
   }
   if (uv.x < 0.0 || uv.y < 0.0 || uv.x > 1.0 || uv.y > 1.0) {
@@ -3698,6 +3729,10 @@ void main() {
     return;
   }
   vec3 h = texture(uHistory, uv).rgb;
+  if (any(isnan(h)) || any(isinf(h))) {
+    o = cur;
+    return;
+  }
   if (uMoving > 0.5) {
     vec3 lo = vec3(1e9);
     vec3 hi = vec3(-1e9);
@@ -4166,13 +4201,18 @@ void main() {
   // Per-instance tone shift matching MESH_FS so adjacent trees vary naturally.
   if (uWild > 0.5) albedo *= 0.82 + 0.36 * fract(vTint * 5.3);
 
-  vec3 nl = normalize(nMix.rgb * 2.0 - 1.0);
-  vec3 n = normalize(vec3(nl.x * vFace.y + nl.y * vFace.x, -nl.x * vFace.x + nl.y * vFace.y, nl.z));
+  vec3 nlRaw = nMix.rgb * 2.0 - 1.0;
+  float nlLen = length(nlRaw);
+  vec3 nl = nlLen > 1e-6 ? nlRaw / nlLen : vec3(0.0, 0.0, 1.0);
+  vec3 nRaw = vec3(nl.x * vFace.y + nl.y * vFace.x, -nl.x * vFace.x + nl.y * vFace.y, nl.z);
+  float nLen = length(nRaw);
+  vec3 n = nLen > 1e-6 ? nRaw / nLen : vec3(0.0, 0.0, 1.0);
   float skyOcc = nMix.a;
   vec3 toEye = uEye - vPos;
-  float pixel = length(toEye) * 0.002;
+  float toEyeLen = length(toEye);
+  float pixel = toEyeLen * 0.002;
   float sh = shadowAt(vPos, n, pixel) * cloudShade(vPos);
-  vec3 v = normalize(toEye);
+  vec3 v = toEyeLen > 1e-6 ? toEye / toEyeLen : vec3(0.0, 0.0, 1.0);
   float wrap = clamp((dot(n, uSun) + 0.3) / 1.3, 0.0, 1.0);
   float up = n.z * 0.5 + 0.5;
   vec3 skyC = skyLight(n);

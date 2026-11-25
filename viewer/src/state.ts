@@ -3,6 +3,7 @@
 // the URL can carry, so a view and the view reloaded from its link are the same.
 import { quantizeTime, timeFromParam, timeToParam } from '../../core/time.ts';
 import type { CameraState } from './camera.ts';
+import { isSafeBuildId } from './ui/html.ts';
 
 export interface ViewState {
   /** astronomical year */
@@ -57,10 +58,11 @@ const q = (x: number, digits: number) => Number(x.toFixed(digits));
 
 export function quantize(s: ViewState): ViewState {
   const lon = ((((s.cam.lon + 180) % 360) + 360) % 360) - 180;
+  const dist = Number.isFinite(s.cam.dist) ? Math.max(1 + 1e-8, s.cam.dist) : 2.5;
   // Near the ground a view needs its place to the centimetre.
-  const fine = s.cam.dist < 1.05;
+  const fine = dist < 1.05;
   const place = fine ? 7 : 3;
-  const cam: CameraState = { lat: q(Math.max(-89.5, Math.min(89.5, s.cam.lat)), place), lon: q(lon, place), dist: q(s.cam.dist, fine ? 10 : 3) };
+  const cam: CameraState = { lat: q(Math.max(-89.5, Math.min(89.5, s.cam.lat)), place), lon: q(lon, place), dist: q(dist, fine ? 10 : 3) };
   if (s.cam.heading) cam.heading = q(((s.cam.heading % 360) + 360) % 360, 2);
   if (s.cam.tilt) cam.tilt = q(s.cam.tilt, 2);
   return {
@@ -102,7 +104,8 @@ export function toSearch(build: string, s: ViewState): string {
 
 /** The build a link names, if any. It is read first: the view's defaults depend on the build. */
 export function buildOf(search: string): string | undefined {
-  return new URLSearchParams(search).get('b') ?? undefined;
+  const b = new URLSearchParams(search).get('b');
+  return isSafeBuildId(b) ? b : undefined;
 }
 
 export function fromSearch(search: string, defaults: ViewState): { build?: string; state: ViewState } {

@@ -244,10 +244,37 @@ export const NEAR_STEPS = 1.5;
 /** Every tile a node within `NEAR_STEPS` of a place could be in. */
 export function tilesNear(lat: number, lon: number, set: Pick<MonthsSet, 'step' | 'tile_deg'>): string[] {
   const r = set.step * NEAR_STEPS;
-  const rl = Math.min(180, r / Math.max(0.05, Math.cos((Math.min(89, Math.abs(lat)) * Math.PI) / 180)));
+  const deg = set.tile_deg;
+  const latLo = Math.max(-90, lat - r);
+  const latHi = Math.min(90, lat + r);
+  const maxAbsLat = Math.max(Math.abs(latLo), Math.abs(latHi));
+  const fullRing = maxAbsLat >= 90 - 1e-6;
+  const rl = fullRing ? 180 : Math.min(180, r / Math.max(1e-6, Math.cos((maxAbsLat * Math.PI) / 180)));
   const out = new Set<string>();
-  for (const la of [lat - r, lat, lat + r]) for (const lo of [lon - rl, lon, lon + rl]) out.add(tileKey(lo, Math.max(-90, Math.min(90, la)), set.tile_deg));
+  const lats: number[] = [];
+  for (let la = latLo; la < latHi - 1e-9; la += deg) lats.push(la);
+  lats.push(latHi);
+  const lons: number[] = [];
+  if (fullRing || rl >= 180) {
+    for (let lo = -180; lo < 180 - 1e-9; lo += deg) lons.push(lo);
+  } else {
+    for (let lo = lon - rl; lo < lon + rl - 1e-9; lo += deg) lons.push(lo);
+    lons.push(lon + rl);
+  }
+  for (const la of lats) for (const lo of lons) out.add(tileKey(lo, la, deg));
   return [...out].sort();
+}
+
+/** Spherical angular distance squared (in degrees²) between two (lat, lon) points. */
+function arcDegSq(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const r = Math.PI / 180;
+  const dLat = (lat2 - lat1) * r;
+  const dLon = (lon2 - lon1) * r;
+  const sLat = Math.sin(dLat / 2);
+  const sLon = Math.sin(dLon / 2);
+  const h = sLat * sLat + Math.cos(lat1 * r) * Math.cos(lat2 * r) * sLon * sLon;
+  const deg = (2 * Math.asin(Math.min(1, Math.sqrt(h)))) / r;
+  return deg * deg;
 }
 
 /** The nearest land node to a place among some tiles, at a keyframe. */
@@ -310,10 +337,8 @@ function nearestOf(g: MonthsTileHeader['grid'], node: ArrayLike<number>, lat: nu
   let bestD = (g.step * NEAR_STEPS) ** 2;
   for (let q = 0; q < node.length; q++) {
     const la = g.lat0 - Math.floor(node[q] / g.nx) * g.step;
-    let dl = (g.lon0 + (node[q] % g.nx) * g.step - lon) % 360;
-    if (dl > 180) dl -= 360;
-    if (dl < -180) dl += 360;
-    const d = (la - lat) ** 2 + (dl * Math.cos((lat * Math.PI) / 180)) ** 2;
+    const lo = g.lon0 + (node[q] % g.nx) * g.step;
+    const d = arcDegSq(lat, lon, la, lo);
     if (d < bestD) {
       bestD = d;
       best = q;
@@ -382,11 +407,9 @@ function cellNear<T>(cells: (T | null)[], step: number, nodeLat: number, nodeLon
   cells.forEach((c, i) => {
     if (!c) return;
     // The middle of the cell: a quarter of a step from the node, each way.
-    const la = nodeLat + (i < 2 ? step / 4 : -step / 4);
-    let dl = (nodeLon + (i % 2 ? step / 4 : -step / 4) - lon) % 360;
-    if (dl > 180) dl -= 360;
-    if (dl < -180) dl += 360;
-    const d = (la - lat) ** 2 + (dl * Math.cos((lat * Math.PI) / 180)) ** 2;
+    const la = Math.max(-90, Math.min(90, nodeLat + (i < 2 ? step / 4 : -step / 4)));
+    const lo = nodeLon + (i % 2 ? step / 4 : -step / 4);
+    const d = arcDegSq(lat, lon, la, lo);
     if (d < bestD) {
       bestD = d;
       best = c;
