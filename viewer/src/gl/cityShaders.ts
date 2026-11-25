@@ -160,6 +160,8 @@ uniform float uShadowInvR;
 // Screen-size fade-in for instanced geometry (uFadeK = cssHeight / (2 * tan(fov/2)), 0 in shadow/depth/pick passes).
 uniform float uFadeK;
 uniform float uProtoExtent;
+// Entity index offset added to static vertex aEntity so reusable structure layers work across scenes.
+uniform int uEntityOffset;
 ${DROP}
 ${ENTITY}
 // Turn a point about a pivot, in the plane of two of its axes.
@@ -306,7 +308,7 @@ void main() {
     }
   }
   vLow = many ? aPos.z * iPlace.w : 1e4;
-  int entity = many ? int(iMeta.x) : int(aEntity);
+  int entity = many ? int(iMeta.x) : (int(aEntity) + uEntityOffset);
   vec4 e = entityOf(entity);
   float up = standing(e);
   if (up <= 0.0) {
@@ -3373,6 +3375,7 @@ uniform vec2 uCloudSize;
 uniform vec2 uCloudHistorySize;
 uniform float uHeight;
 uniform float uCloudBlend;
+uniform int uCloudSteps;
 ${CLOUDS}
 out vec4 o;
 void main() {
@@ -3398,8 +3401,8 @@ void main() {
   float span = max(uCloudTop - uCloudBase, 1.0);
   float t0 = (uCloudBase - uHeight) / d.z;
   float t1 = min((uCloudTop - uHeight) / d.z, t0 + 6000.0);
-  const int STEPS = 32;
-  float dt = (t1 - t0) / float(STEPS);
+  int steps = uCloudSteps > 0 ? min(uCloudSteps, 32) : 32;
+  float dt = (t1 - t0) / float(steps);
   float start = fract(fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715)))) + uFrameNoise);
   float mu = dot(d, uSun);
   float g1 = 0.6;
@@ -3409,7 +3412,8 @@ void main() {
   vec3 glow = vec3(0.0);
   float through = 1.0;
   float foot = t0 * footScale / d.z;
-  for (int i = 0; i < STEPS; i++) {
+  for (int i = 0; i < 32; i++) {
+    if (i >= steps) break;
     vec3 p = eye + d * (t0 + (float(i) + start) * dt);
     float rho = cloudDensityAt(p, foot);
     if (rho <= 0.0) continue;
@@ -3553,6 +3557,7 @@ uniform highp sampler2D uDepth;
 uniform vec2 uProjK;   // tan(fov/2)·aspect, tan(fov/2)
 uniform vec2 uNearFar;
 uniform vec2 uTexel;
+uniform int uAOSteps;
 out vec4 o;
 const float PI = 3.14159265;
 float linear(float z) {
@@ -3586,7 +3591,7 @@ void main() {
   float turn = ign(gl_FragCoord.xy) * PI;
   float jitter = fract(ign(gl_FragCoord.yx + 7.0) + 0.5);
   const int SLICES = 2;
-  const int STEPS = 6;
+  int steps = uAOSteps > 0 ? min(uAOSteps, 6) : 6;
   float sum = 0.0;
   for (int k = 0; k < SLICES; k++) {
     float phi = turn + float(k) * PI / float(SLICES);
@@ -3602,8 +3607,9 @@ void main() {
     // The highest horizon on either side, as the cosine of its angle from the view.
     float c0 = -1.0;
     float c1 = -1.0;
-    for (int i = 0; i < STEPS; i++) {
-      float t = (float(i) + jitter) / float(STEPS);
+    for (int i = 0; i < 6; i++) {
+      if (i >= steps) break;
+      float t = (float(i) + jitter) / float(steps);
       t *= t;
       vec2 off = dir * sr * t;
       vec3 a = viewPos(vUv + off) - p;

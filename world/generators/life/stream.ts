@@ -54,6 +54,11 @@ export interface LifeView {
    * finer at each distance.
    */
   rich?: boolean;
+  /**
+   * Optional fractional frustum margin (e.g. 0.25) used during interactive motion so panning/turning
+   * keeps edge cells populated while worker re-selection runs less frequently.
+   */
+  margin?: number;
 }
 
 export interface Budget {
@@ -971,7 +976,8 @@ export class SceneStream {
   select(v: LifeView, sent: Set<number>, spendMs: () => boolean = () => true): Selection {
     const taxa = this.spec.taxa;
     const K = v.height / (2 * Math.tan(v.fov / 2));
-    const t = Math.tan(v.fov / 2);
+    const pad = 1 + Math.max(0, v.margin ?? 0);
+    const t = Math.tan(v.fov / 2) * pad;
     const side = t * v.aspect;
     const [ex, ey, ez] = v.eye;
     const [fx, fy, fz] = v.forward;

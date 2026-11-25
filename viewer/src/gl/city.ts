@@ -14,24 +14,34 @@ import { invert, multiply, type Mat4, type V3 } from '../mat.ts';
 import { linkProgram, setUniforms, texture2D, type GL, type Program } from './context.ts';
 import {
   batchOverlapsCascade,
+  buildEntityTransitions,
+  canDeferCascade,
   cloudLayerFor,
   computeBatchBounds,
   computeProtoBounds,
   halfSize,
   localEffectWeights,
+  meshBoundsOverlapsCascade,
+  quantizeShadowRadii,
   scaledRenderSize,
+  shadowCascadeSnap,
+  shadowTimeKey,
   type BatchBounds,
+  type CachedShadowCascade,
   type CascadeBox,
   type CloudLayer,
+  type EntityTransitionSchedule,
   type LocalEffectWeights,
+  type MeshBounds2D,
   type ProtoBounds,
 } from './culling.ts';
 import { ImpostorAtlas } from './impostors.ts';
 import type { LeafAtlas } from './leafatlas.ts';
 import { GroundMaterialSet } from './materials.ts';
 import type { CityFrame, InstancedBatch, InstancedMeta, LocalRenderer, MeshHandle } from './renderer.ts';
+import { computeSkyLighting } from './sky.ts';
 import { FrameTimer } from './timer.ts';
-import { AO_FS, BLUR_FS, BRIGHT_FS, CLOUDS_FS, DEPTH_FS, FULLSCREEN_VS, ID_FS, IMP_BAKE_FS, IMP_BAKE_VS, IMPOSTOR_DEPTH_FS, IMPOSTOR_FS, IMPOSTOR_ID_FS, IMPOSTOR_VS, LUM_FS, MESH_FS, MESH_VS, POST_FS, SHAFTS_ADD_FS, SHAFTS_FS, SMOKE_FS, SMOKE_VS, TAA_FS, SEA, SEA_FS, SEA_VS, SKY_FS, SKY_LUT_FS, TERRAIN_FS, TERRAIN_VS, WATER_FS, WATER_VS, WATERBLUR_FS, WATERMAP_FS, WATERMAP_VS } from './cityShaders.ts';
+import { AO_FS, BLUR_FS, BRIGHT_FS, CLOUDS_FS, DEPTH_FS, FULLSCREEN_VS, ID_FS, IMP_BAKE_FS, IMP_BAKE_VS, IMPOSTOR_DEPTH_FS, IMPOSTOR_FS, IMPOSTOR_ID_FS, IMPOSTOR_VS, LUM_FS, MESH_FS, MESH_VS, POST_FS, RISE_YEARS, SHAFTS_ADD_FS, SHAFTS_FS, SMOKE_FS, SMOKE_VS, TAA_FS, SEA, SEA_FS, SEA_VS, SKY_FS, SKY_LUT_FS, TERRAIN_FS, TERRAIN_VS, WATER_FS, WATER_VS, WATERBLUR_FS, WATERMAP_FS, WATERMAP_VS } from './cityShaders.ts';
 
 export type { CityFrame, InstancedBatch, InstancedMeta, LocalRenderer, MeshHandle };
 
@@ -216,62 +226,6 @@ function underExposure(z: number, lit: V3): number {
   return Math.max(1, Math.min(SEA.open, SEA.day / Math.max(1e-6, luminance(lit) * luminance(light))));
 }
 
-/**
- * The sky's light on a surface by the way it faces, from the table of the sky's radiance (docs/plans/RENDERING.md, step 4):
- * the upper half of the sky projected on nine spherical harmonics, turned into irradiance over π (Ramamoorthi & Hanrahan
- * 2001), with each term's constant folded in so that the shader multiplies plain products of the normal's components; and
- * scaled so that a surface facing straight up takes as much light as `top` says, as the two colours before it did.
- */
-function skyHarmonics(table: Float32Array, sun: V3, top: V3): Float32Array {
-  const W = 192;
-  const H = 128;
-  const sample = (u: number, v: number, out: number[]) => {
-    const x = Math.max(0, Math.min(W - 1.001, u * (W - 1)));
-    const y = Math.max(0, Math.min(H - 1.001, v * (H - 1)));
-    const i = Math.floor(x);
-    const j = Math.floor(y);
-    const fx = x - i;
-    const fy = y - j;
-    for (let c = 0; c < 3; c++) {
-      const a = table[(j * W + i) * 4 + c] * (1 - fx) + table[(j * W + i + 1) * 4 + c] * fx;
-      const b = table[((j + 1) * W + i) * 4 + c] * (1 - fx) + table[((j + 1) * W + i + 1) * 4 + c] * fx;
-      out[c] = a * (1 - fy) + b * fy;
-    }
-  };
-  const L = new Float64Array(27);
-  const phiS = Math.atan2(sun[1], sun[0]);
-  const NA = 64;
-  const NE = 24;
-  const rgb = [0, 0, 0];
-  for (let j = 0; j < NE; j++) {
-    const el = ((j + 0.5) / NE) * (Math.PI / 2);
-    const ce = Math.cos(el);
-    const z = Math.sin(el);
-    // The table's elevation: more of it near the horizon (SKY_LUT_FS).
-    const v = 0.5 + 0.5 * Math.sqrt(el / (Math.PI / 2));
-    const dw = ce * (Math.PI / 2 / NE) * ((2 * Math.PI) / NA);
-    for (let i = 0; i < NA; i++) {
-      const phi = ((i + 0.5) / NA) * 2 * Math.PI;
-      const rel = Math.abs(((((phi - phiS) % (2 * Math.PI)) + 3 * Math.PI) % (2 * Math.PI)) - Math.PI);
-      sample(rel / Math.PI, v, rgb);
-      const x = ce * Math.cos(phi);
-      const y = ce * Math.sin(phi);
-      const Y = [1, y, z, x, x * y, y * z, 3 * z * z - 1, x * z, x * x - y * y];
-      for (let k = 0; k < 9; k++) for (let c = 0; c < 3; c++) L[k * 3 + c] += rgb[c] * Y[k] * dw;
-    }
-  }
-  // Each term: its basis constant squared (once to project, once to evaluate) and its band's share of the cosine, Â/π.
-  const C = [0.282095, 0.488603, 0.488603, 0.488603, 1.092548, 1.092548, 0.315392, 1.092548, 0.546274];
-  const A = [1, 2 / 3, 2 / 3, 2 / 3, 1 / 4, 1 / 4, 1 / 4, 1 / 4, 1 / 4];
-  const out = new Float32Array(27);
-  for (let k = 0; k < 9; k++) for (let c = 0; c < 3; c++) out[k * 3 + c] = L[k * 3 + c] * C[k] * C[k] * A[k];
-  // Straight up: the constant, the vertical, and twice the third band's middle term.
-  const up = [0, 1, 2].map((c) => out[c] + out[6 + c] + 2 * out[18 + c]);
-  const scale = luminance(top) / Math.max(1e-6, luminance(up));
-  for (let k = 0; k < 27; k++) out[k] *= scale;
-  return out;
-}
-
 /** A square grid of the terrain's vertices, with the middle of it left out or not. */
 function ringMesh(n: number, hole: number): { positions: Float32Array; indices: Uint32Array; ringCount: number } {
   const side = n * 2 + 1;
@@ -371,11 +325,18 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
   private shadowKeys = ['', '', ''];
   private shadowM: Float32Array = new Float32Array(48);
   private shadowRadii: V3 = [100, 500, 9000];
+  private cascadeSerial = [0, 0, 0];
+  private shadowCached: (CachedShadowCascade | null)[] = [null, null, null];
+  private shadowUpdatedFrame = [-100, -100, -100];
+  private lastInteractiveR0: number | null = null;
   private entityTex: WebGLTexture | null = null;
   private entityData: Float32Array | null = null;
   private entityRows = 0;
+  private entityCount = 0;
   private entitySerial = 0;
-  /** counts the meshes added or removed: shadows must be drawn again */
+  private entityTransitions: EntityTransitionSchedule = { intervals: new Float64Array(0) };
+  private transitionsDirty = false;
+  /** counts the meshes added or removed: triggers fresh TAA/color redraw */
   private meshSerial = 0;
   private groundTex: WebGLTexture[] = [];
   private normalTex: WebGLTexture[] = [];
@@ -781,6 +742,7 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
       gl.activeTexture(gl.TEXTURE0);
       this.leavesReady = true;
       this.meshSerial++;
+      this.dirtyCascadesFor();
     };
     worker.postMessage(0);
   }
@@ -880,6 +842,9 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     this.cloudValid = false;
     this.lastFarVp = null;
     this.meshSerial++;
+    this.shadowKeys = ['', '', ''];
+    this.shadowCached = [null, null, null];
+    this.dirtyCascadesFor();
     // Nor is any land beyond it worked until its scene says so.
     this.farBox = [0, 0, 0, 0];
     // A new ground is the climate's until its scene says what it is made of, and its rock the renderer's own.
@@ -999,6 +964,38 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     }
   }
 
+  /** Mark only the shadow cascades overlapped by `bounds` (or all three if omitted) dirty. */
+  private dirtyCascadesFor(bounds?: MeshBounds2D): void {
+    if (!bounds) {
+      this.cascadeSerial[0]++;
+      this.cascadeSerial[1]++;
+      this.cascadeSerial[2]++;
+      return;
+    }
+    for (let k = 0; k < 3; k++) {
+      const c = this.shadowCached[k];
+      if (!c || meshBoundsOverlapsCascade(bounds, c.focus, c.radius)) this.cascadeSerial[k]++;
+    }
+  }
+
+  /** Draw static cells while updating uEntityOffset only when a cell specifies a different base offset. */
+  private drawCells(p: Program, cells: CellGPU[]): void {
+    const gl = this.gl;
+    const offLoc = p.uniforms.get('uEntityOffset');
+    let curOff = 0;
+    if (offLoc) gl.uniform1i(offLoc, 0);
+    for (const c of cells) {
+      const want = c.entityOffset ?? 0;
+      if (offLoc && want !== curOff) {
+        gl.uniform1i(offLoc, want);
+        curOff = want;
+      }
+      gl.bindVertexArray(c.vao);
+      gl.drawElements(gl.TRIANGLES, c.count, gl.UNSIGNED_INT, 0);
+    }
+    if (offLoc && curOff !== 0) gl.uniform1i(offLoc, 0);
+  }
+
   /**
    * Who is drawn with each mesh this frame. Meshes not named draw nobody. `ways`, where a batch has them, are the ways
    * its bodies go, 48 bytes each in step with `data` (world/generators/life/routines.ts): the shader moves each along
@@ -1006,7 +1003,17 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
    */
   setInstances(batches: InstancedBatch[]): void {
     const gl = this.gl;
+    const dirtyCascade = [false, false, false];
+    const markOverlap = (b: BatchBounds | null) => {
+      if (!b) return;
+      for (let k = 0; k < 3; k++) {
+        if (dirtyCascade[k]) continue;
+        const c = this.shadowCached[k];
+        if (!c || meshBoundsOverlapsCascade(b, c.focus, c.radius)) dirtyCascade[k] = true;
+      }
+    };
     for (const g of this.instanced.values()) {
+      if (g.count > 0 && g.casts) markOverlap(g.batchBounds);
       g.count = 0;
       g.batchBounds = null;
     }
@@ -1020,7 +1027,8 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
       }
       gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Uint8Array(b.data));
       g.count = b.count;
-      g.batchBounds = b.count > 0 ? computeBatchBounds(b.data, b.count, g.bounds, b.ways) : null;
+      g.batchBounds = b.count > 0 ? (b.bounds ?? computeBatchBounds(b.data, b.count, g.bounds, b.ways)) : null;
+      if (g.count > 0 && g.casts) markOverlap(g.batchBounds);
       if (b.ways) {
         if (!g.ways) g.ways = gl.createBuffer()!;
         gl.bindBuffer(gl.ARRAY_BUFFER, g.ways);
@@ -1049,6 +1057,7 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     }
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
     this.meshSerial++;
+    for (let k = 0; k < 3; k++) if (dirtyCascade[k]) this.cascadeSerial[k]++;
   }
 
   /** Let go of everything drawn by instancing. */
@@ -1065,6 +1074,7 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     this.instanced.clear();
     this.impostors.clear();
     this.meshSerial++;
+    this.dirtyCascadesFor();
   }
 
   /** Whether an instanced batch is currently drawn via its GPU-baked octahedral tree impostor. */
@@ -1382,7 +1392,7 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
   /** When each entity stood, and what it rests on: [start, end, flags, ground] per entity. */
   setEntities(data: Float32Array): void {
     const gl = this.gl;
-    this.entityData = data;
+    this.entityCount = data.length >> 2;
     this.entityRows = Math.ceil(data.length / 4 / 256);
     if (this.entityTex) gl.deleteTexture(this.entityTex);
     gl.activeTexture(gl.TEXTURE0 + UNIT.entities);
@@ -1392,6 +1402,7 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     this.entityTex = texture2D(gl, { width: 256, height: this.entityRows, internal: gl.RGBA32F, format: gl.RGBA, type: gl.FLOAT, data: padded });
     gl.activeTexture(gl.TEXTURE0);
     this.entitySerial++;
+    this.transitionsDirty = true;
   }
 
   /** Change when an entity stood, as a scenario dates it. */
@@ -1406,6 +1417,7 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     gl.texSubImage2D(gl.TEXTURE_2D, 0, index & 255, index >> 8, 1, 1, gl.RGBA, gl.FLOAT, this.entityData, index * 4);
     gl.activeTexture(gl.TEXTURE0);
     this.entitySerial++;
+    this.transitionsDirty = true;
   }
 
   /** Change one entity's flags: its basis, selection and hover. */
@@ -1422,7 +1434,7 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
   }
 
   /** Put a mesh on the GPU. */
-  upload(vertices: ArrayBuffer, indices: Uint32Array): CellGPU {
+  upload(vertices: ArrayBuffer, indices: Uint32Array, bounds?: MeshBounds2D): CellGPU {
     const gl = this.gl;
     const vao = gl.createVertexArray()!;
     gl.bindVertexArray(vao);
@@ -1445,12 +1457,14 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
     gl.bindVertexArray(null);
     this.meshSerial++;
-    return { vao, vbo, ibo, count: indices.length, bytes: vertices.byteLength + indices.byteLength };
+    this.dirtyCascadesFor(bounds);
+    return { vao, vbo, ibo, count: indices.length, bytes: vertices.byteLength + indices.byteLength, ...(bounds ? { bounds } : {}) };
   }
 
   remove(c: CellGPU): void {
     const gl = this.gl;
     this.meshSerial++;
+    this.dirtyCascadesFor(c.bounds);
     gl.deleteVertexArray(c.vao);
     gl.deleteBuffer(c.vbo);
     gl.deleteBuffer(c.ibo);
@@ -1704,42 +1718,24 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     gl.disable(gl.BLEND);
     gl.useProgram(this.lutP.program);
     gl.bindVertexArray(this.emptyVao);
-    const draw = (h: number) => {
-      setUniforms(gl, this.lutP, { uSunLut: [Math.cos(el), 0, Math.sin(el)], uHeight: Math.max(1, h) });
-      gl.drawArrays(gl.TRIANGLES, 0, 3);
-    };
-    if (!sunChanged) return draw(height);
-    draw(20);
-    // The light it gives: read back from the table straight up, and around the horizon.
-    const read = (u: number, v: number): V3 => {
-      const px = new Float32Array(4);
-      gl.readPixels(Math.floor(u * 191), Math.floor(v * 127), 1, 1, gl.RGBA, gl.FLOAT, px);
-      return [px[0], px[1], px[2]];
-    };
-    // The whole table, for the sky's light on a surface by the way it faces.
-    const table = new Float32Array(192 * 128 * 4);
-    gl.readPixels(0, 0, 192, 128, gl.RGBA, gl.FLOAT, table);
-    const zen = read(0.5, 0.97);
-    const hA = read(0.1, 0.56);
-    const hB = read(0.9, 0.56);
-    const hM = read(0.5, 0.56);
-    const low: V3 = [(hA[0] + hB[0] + 2 * hM[0]) / 4, (hA[1] + hB[1] + 2 * hM[1]) / 4, (hA[2] + hB[2] + 2 * hM[2]) / 4];
-    // Sunlight, reddened by the air it crossed.
-    const deg = (el * 180) / Math.PI;
-    const air = 1 / (Math.max(Math.sin(el), 0) + 0.15 * Math.pow(Math.max(deg + 3.885, 0.3), -1.253));
-    const tr = (b: number, m: number) => Math.exp(-(b * 8000 + m * 1500 * 1.1) * air);
-    const up = Math.max(0, Math.min(1, (deg + 2) / 4));
-    // Softened toward white a little: a camera's white balance would do as much.
-    const soft = (x: number) => Math.pow(x, 0.62);
-    this.sunColor = [soft(tr(5.8e-6, 14e-6)) * 3.8 * up, soft(tr(13.5e-6, 14e-6)) * 3.75 * up, soft(tr(33.1e-6, 14e-6)) * 3.7 * up];
-    this.skyTop = [zen[0] * 0.62, zen[1] * 0.62, zen[2] * 0.62];
-    this.skyLow = [low[0] * 0.26, low[1] * 0.26, low[2] * 0.26];
-    this.skyHarmonics = skyHarmonics(table, sun, this.skyTop);
-    const s = Math.max(sun[2], 0);
-    this.daylight = luminance(this.sunColor) * s + luminance(this.skyTop);
-    this.bounce = [(this.sunColor[0] * s + this.skyTop[0]) * 0.13, (this.sunColor[1] * s + this.skyTop[1]) * 0.105, (this.sunColor[2] * s + this.skyTop[2]) * 0.075];
-    for (let k = 0; k < 3; k++) this.shadowKeys[k] = '';
-    draw(height);
+    setUniforms(gl, this.lutP, { uSunLut: [Math.cos(el), 0, Math.sin(el)], uHeight: Math.max(1, height) });
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    gl.bindVertexArray(null);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    if (!sunChanged) return;
+    // Compute zenith/horizon sky light, sun transmittance, bounce, exposure and 9-band SH on CPU
+    // using the exact same Rayleigh/Mie model as SKY_LUT_FS, avoiding synchronous gl.readPixels stalls.
+    const sky = computeSkyLighting(sun);
+    this.sunColor = sky.sunColor;
+    this.skyTop = sky.skyTop;
+    this.skyLow = sky.skyLow;
+    this.skyHarmonics = sky.skyHarmonics;
+    this.daylight = sky.daylight;
+    this.bounce = sky.bounce;
+    for (let k = 0; k < 3; k++) {
+      this.shadowKeys[k] = '';
+      this.shadowCached[k] = null;
+    }
   }
 
   private useLit(p: Program, f: CityFrame, vp: Mat4): void {
@@ -1919,71 +1915,122 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
   }
 
   /** The shadow cascades: nearest, middle, and the whole city, each from the sun's side. */
-  private updateShadows(f: CityFrame): void {
+  private updateShadows(f: CityFrame, interactive: boolean): void {
     const gl = this.gl;
     const sun = f.sun;
     if (sun[2] <= 0) return;
+    if (this.transitionsDirty) {
+      this.entityTransitions = buildEntityTransitions(this.entityData, RISE_YEARS, this.entityCount);
+      this.transitionsDirty = false;
+    }
     const range = Math.max(30, Math.hypot(f.eye[0] - f.focus[0], f.eye[1] - f.focus[1], f.eye[2] - f.focus[2]));
-    // The nearest cascade is as wide as the view is far, and no narrower than a clearing: close to, a shadow is fine
-    // enough to meet the foot that casts it.
-    const r0 = Math.min(Math.max(24, range * 1.0), 1400);
-    const r1 = Math.min(r0 * 5, 7000);
-    const r2 = Math.max(r1 * 2.5, 9000);
-    this.shadowRadii = [r0, r1, r2];
+    const wantRadii = quantizeShadowRadii(range, this.lastInteractiveR0, interactive);
+    if (interactive) this.lastInteractiveR0 = wantRadii[0];
+    else this.lastInteractiveR0 = null;
     const right = nrm(crs(LOOKAT_UP, sun));
     const up = crs(sun, right);
-    let animatedCasters = false;
-    for (const g of this.instanced.values()) {
-      if (g.count > 0 && g.casts && (g.bounds.isPlant || !!g.idle || !!g.batchBounds?.hasMovers)) {
-        animatedCasters = true;
-        break;
+    const timeKey = shadowTimeKey(this.entityTransitions, f.time, interactive);
+    const sunKey = sun.map((x) => x.toFixed(4)).join();
+
+    // Fast mode casts no shadows: clear each cascade once and keep them cleared.
+    if (this.fast) {
+      this.shadowRadii = wantRadii;
+      let cleared = false;
+      for (let k = 0; k < 3; k++) {
+        if (this.shadowKeys[k] === 'fast') continue;
+        if (!cleared) {
+          gl.colorMask(false, false, false, false);
+          gl.disable(gl.STENCIL_TEST);
+          gl.depthMask(true);
+          gl.viewport(0, 0, SHADOW_SIZE, SHADOW_SIZE);
+          cleared = true;
+        }
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this.shadowFb[k]);
+        gl.clear(gl.DEPTH_BUFFER_BIT);
+        this.shadowKeys[k] = 'fast';
       }
+      if (cleared) gl.colorMask(true, true, true, true);
+      return;
     }
-    gl.colorMask(false, false, false, false);
-    gl.disable(gl.STENCIL_TEST);
-    gl.enable(gl.DEPTH_TEST);
-    gl.depthFunc(gl.LESS);
-    gl.depthMask(true);
-    gl.enable(gl.CULL_FACE);
-    gl.cullFace(gl.BACK);
-    gl.enable(gl.POLYGON_OFFSET_FILL);
-    gl.polygonOffset(2.0, 4.0);
-    gl.viewport(0, 0, SHADOW_SIZE, SHADOW_SIZE);
-    for (let k = 2; k >= 0; k--) {
-      const r = this.shadowRadii[k];
+
+    const cR = dt(f.focus, right);
+    const cU = dt(f.focus, up);
+    const zc = dt(f.focus, sun);
+    let configured = false;
+    let updated = 0;
+
+    // Update Cascade 0 first so close shadows stay responsive while Cascades 1 & 2 can time-slice cleanly.
+    for (let k = 0; k < 3; k++) {
+      const r = wantRadii[k];
       const texel = (r * 2) / SHADOW_SIZE;
-      // Snap to the shadow map's own grid, so its edges do not crawl as the camera moves.
-      const cR = dt(f.focus, right);
-      const cU = dt(f.focus, up);
-      const sR = Math.round(cR / texel) * texel;
-      const sU = Math.round(cU / texel) * texel;
-      // What moves in the wind, idles or goes from place to place moves its shadow: the nearest cascade is drawn again
-      // ten times a second of the visit's clock, and the middle four times. Static scenes (cities, barren rock) reuse
-      // cached cascades without redrawing on clock ticks.
-      const moved = !animatedCasters ? 0 : k === 0 ? Math.round((f.clock ?? 0) * 10) : k === 1 ? Math.round((f.clock ?? 0) * 4) : 0;
-      const key = `${sR.toFixed(1)},${sU.toFixed(1)},${r.toFixed(1)},${sun.join()},${k === 2 ? Math.round(f.time / 4) : f.time},${this.entitySerial},${this.meshSerial},${moved}`;
+      const snap = shadowCascadeSnap(texel, k, interactive);
+      const sR = Math.round(cR / snap) * snap;
+      const sU = Math.round(cU / snap) * snap;
+      const cascade: CascadeBox = { right, up, sun, sR, sU, radius: r, texel, cascadeIndex: k };
+      // Check animated casters per cascade and skip clock-only redraws during active camera motion.
+      let animated = false;
+      if (!interactive && k < 2) {
+        for (const g of this.instanced.values()) {
+          if (g.count > 0 && g.casts && (g.bounds.isPlant || !!g.idle || !!g.batchBounds?.hasMovers)) {
+            if (!g.batchBounds || batchOverlapsCascade(g.batchBounds, cascade)) {
+              animated = true;
+              break;
+            }
+          }
+        }
+      }
+      const moved = !animated ? 0 : k === 0 ? Math.round((f.clock ?? 0) * 10) : Math.round((f.clock ?? 0) * 4);
+      const key = `${sR.toFixed(1)},${sU.toFixed(1)},${r.toFixed(1)},${sunKey},${timeKey},${this.entitySerial},${this.cascadeSerial[k]},${moved}`;
+      if (key === this.shadowKeys[k]) {
+        const cached = this.shadowCached[k];
+        if (cached) this.shadowRadii[k] = cached.radius;
+        continue;
+      }
+      const cached = this.shadowCached[k];
+      const framesSince = this.frames - this.shadowUpdatedFrame[k];
+      if (interactive && cached && canDeferCascade(cached, cR, cU, r, framesSince, k) && (updated > 0 || framesSince < (k === 1 ? 2 : 4))) {
+        // Keep the previously rendered shadow map and projection matrix locked to world space;
+        // tighten cascade 1 selection radius by the pan offset so edge pixels seamlessly use cascade 2.
+        if (k === 1) {
+          const shift = Math.max(Math.abs(cR - cached.sR), Math.abs(cU - cached.sU));
+          this.shadowRadii[1] = Math.max(this.shadowRadii[0] * 1.35, cached.radius - shift * 1.1);
+        } else {
+          this.shadowRadii[k] = cached.radius;
+        }
+        continue;
+      }
       const depthRange = Math.max(r * 4, 2500);
-      const zc = dt(f.focus, sun);
       const view = new Float32Array([right[0], up[0], sun[0], 0, right[1], up[1], sun[1], 0, right[2], up[2], sun[2], 0, 0, 0, 0, 1]);
       const proj = ortho(sR - r, sR + r, sU - r, sU + r, -(zc + depthRange), -(zc - depthRange));
       const m = multiply(proj, view);
+      this.shadowRadii[k] = r;
       this.shadowM.set(m, k * 16);
-      if (key === this.shadowKeys[k]) continue;
       this.shadowKeys[k] = key;
+      this.shadowCached[k] = { sR, sU, radius: r, focus: [f.focus[0], f.focus[1], f.focus[2]] };
+      this.shadowUpdatedFrame[k] = this.frames;
+      updated++;
+
+      if (!configured) {
+        gl.colorMask(false, false, false, false);
+        gl.disable(gl.STENCIL_TEST);
+        gl.enable(gl.DEPTH_TEST);
+        gl.depthFunc(gl.LESS);
+        gl.depthMask(true);
+        gl.enable(gl.CULL_FACE);
+        gl.cullFace(gl.BACK);
+        gl.enable(gl.POLYGON_OFFSET_FILL);
+        gl.polygonOffset(2.0, 4.0);
+        gl.viewport(0, 0, SHADOW_SIZE, SHADOW_SIZE);
+        configured = true;
+      }
       gl.bindFramebuffer(gl.FRAMEBUFFER, this.shadowFb[k]);
       gl.clear(gl.DEPTH_BUFFER_BIT);
-      // The fast way casts no shadows: a cleared map lights everything.
-      if (this.fast) continue;
-      const cascade: CascadeBox = { right, up, sun, sR, sU, radius: r, texel, cascadeIndex: k };
       // Everything's position already has the eye taken off for the camera; here it is absolute.
       gl.useProgram(this.depthP.program);
       setUniforms(gl, this.depthP, { uViewProj: m, uEye: [0, 0, 0], uTime: f.time, uCards: 1, uClock: f.clock ?? 0, uWind: WIND, uShadowPad: -1, uShadowInvR: 0, uFadeK: 0, uProtoExtent: 1 });
       // Both sides of a face: many of a building's are shells, seen from either side.
       gl.disable(gl.CULL_FACE);
-      for (const c of this.shadowCells(f.focus, r * 1.45)) {
-        gl.bindVertexArray(c.vao);
-        gl.drawElements(gl.TRIANGLES, c.count, gl.UNSIGNED_INT, 0);
-      }
+      this.drawCells(this.depthP, this.shadowCells(f.focus, r * 1.45));
       this.drawInstanced(this.depthP, true, cascade);
       this.drawImpostors(this.impostorDepthP, f, m, right, up, sun, cascade);
       gl.enable(gl.CULL_FACE);
@@ -1994,9 +2041,11 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
       const ring = Math.max(0, Math.ceil(Math.log2((r * 2.2) / 320)));
       this.drawRings(this.terrainDepthP, f.focus, ring, ring, ring);
     }
-    gl.disable(gl.POLYGON_OFFSET_FILL);
-    gl.colorMask(true, true, true, true);
-    gl.bindVertexArray(null);
+    if (configured) {
+      gl.disable(gl.POLYGON_OFFSET_FILL);
+      gl.colorMask(true, true, true, true);
+      gl.bindVertexArray(null);
+    }
   }
 
   /** A frame of the scene. The globe, if it shows through, has already been drawn. */
@@ -2033,6 +2082,7 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
 
   render(frame: CityFrame, cells: CellGPU[], outW: number, outH: number): void {
     const gl = this.gl;
+    const interactive = !!frame.interactive && !this.still;
     const maxTex = (gl.getParameter(gl.MAX_TEXTURE_SIZE) as number) || 4096;
     const maxScale = Math.min(maxTex / Math.max(1, outW), maxTex / Math.max(1, outH));
     this.wantScale = Math.min(STILL_SCALE, Math.max(1, Math.floor(maxScale)));
@@ -2061,13 +2111,16 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
       gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.leaves);
       if (this.impostors.bakePending(8, this.wild, this.tones) > 0) {
         this.impostorSerial++;
-        if (!this.impostors.hasPending) this.meshSerial++;
+        if (!this.impostors.hasPending) {
+          this.meshSerial++;
+          this.dirtyCascadesFor();
+        }
       }
     }
 
     // Whether the view is the last one again: then its frames are averaged, each jittered by its own fraction of a pixel,
     // and once enough are, the picture is done and only shown again.
-    const key = [frame.eye, frame.view, frame.proj, frame.sun, frame.time, frame.evidence, frame.alpha, frame.solid, frame.clock ?? 0, this.meshSerial, this.impostorSerial, this.entitySerial, this.flagSerial, this.waterSerial, this.w, this.h, outW, outH].map(String).join('|');
+    const key = [frame.eye, frame.view, frame.proj, frame.sun, frame.time, frame.evidence, frame.alpha, frame.solid, frame.clock ?? 0, interactive ? 1 : 0, this.meshSerial, this.impostorSerial, this.entitySerial, this.flagSerial, this.waterSerial, this.w, this.h, outW, outH].map(String).join('|');
     const still = key === this.viewKey;
     this.steady = still ? this.steady + 1 : 0;
     if (!still) this.changedAt = performance.now();
@@ -2153,7 +2206,7 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
       gl.bindTexture(gl.TEXTURE_2D, t);
     });
     time.pass('shadows');
-    this.updateShadows(shadowSun === f.sun ? f : { ...f, sun: shadowSun });
+    this.updateShadows(shadowSun === f.sun ? f : { ...f, sun: shadowSun }, interactive);
 
     // Opaque geometry first into 1x RGBA16F + DEPTH24_STENCIL8, marking covered pixels in stencil = 1
     // so half-res volumetric clouds and full-res sky skip every pixel hidden behind land, buildings, or trees.
@@ -2191,6 +2244,7 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     gl.clear(gl.DEPTH_BUFFER_BIT);
 
     // The near scene's depth, written directly to depthTex for GTAO (zero depth resolve blit).
+    let aoTex: WebGLTexture | null = this.aoTex[1] ?? null;
     if (runAO) {
       time.pass('depth');
       gl.colorMask(false, false, false, false);
@@ -2203,16 +2257,13 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
       setUniforms(gl, this.depthP, { uViewProj: vp, uEye: f.eye, uTime: f.time, uCards: 0, uClock: f.clock ?? 0, uWind: WIND, uShadowPad: -1, uShadowInvR: 0, uFadeK: 0, uProtoExtent: 1 });
       // Both sides, as the lit pass draws them.
       gl.disable(gl.CULL_FACE);
-      for (const c of cells) {
-        gl.bindVertexArray(c.vao);
-        gl.drawElements(gl.TRIANGLES, c.count, gl.UNSIGNED_INT, 0);
-      }
+      this.drawCells(this.depthP, cells);
       this.drawInstanced(this.depthP, false, undefined, fadeK);
       gl.bindVertexArray(null);
       gl.colorMask(true, true, true, true);
       gl.stencilMask(0xff);
       time.pass('occlusion');
-      this.occlusion(f);
+      aoTex = this.occlusion(f, interactive);
     }
 
     // The near scene, lit, marking every surviving opaque/foliage/impostor pixel with stencil = 1.
@@ -2228,7 +2279,7 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     gl.stencilOp(gl.KEEP, gl.KEEP, gl.REPLACE);
     gl.enable(gl.CULL_FACE);
     gl.activeTexture(gl.TEXTURE0 + UNIT.ao);
-    gl.bindTexture(gl.TEXTURE_2D, this.aoTex[1]);
+    gl.bindTexture(gl.TEXTURE_2D, aoTex);
     this.useLit(this.terrainP, f, vp);
     setUniforms(gl, this.terrainP, { uUseAO: runAO ? effects.ao : 0, uMaskBox: [this.maskBox[0], this.maskBox[1], this.maskBox[2] - this.maskBox[0], this.maskBox[3] - this.maskBox[1]], uWater: this.waterLevel });
     this.setGrids(this.terrainP);
@@ -2240,10 +2291,7 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     // At full quality, leaf cards and distant instances use temporally stratified hashed alpha smoothed by TAA.
     setUniforms(gl, this.meshP, { uCoverage: this.fast ? 0 : 1, uUseAO: runAO ? effects.ao : 0 });
     gl.depthMask(true);
-    for (const c of cells) {
-      gl.bindVertexArray(c.vao);
-      gl.drawElements(gl.TRIANGLES, c.count, gl.UNSIGNED_INT, 0);
-    }
+    this.drawCells(this.meshP, cells);
     this.drawInstanced(this.meshP, false, undefined, fadeK);
     gl.depthFunc(gl.LESS);
     this.drawImpostors(this.impostorP, f, vp, camRight, camUp, [0, 0, 0], undefined, fadeK);
@@ -2274,25 +2322,31 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
       gl.disable(gl.CULL_FACE);
       gl.disable(gl.BLEND);
       gl.useProgram(this.cloudsP.program);
-      setUniforms(gl, this.cloudsP, {
-        uInvViewProj: invFarVp,
-        uCloudReproject: cloudReproj,
-        uSun: f.sun,
-        uSunColor: this.sunColor,
-        uSkyTop: this.skyTop,
-        uSceneSize: [this.w, this.h],
-        uCloudSize: [this.cloudW, this.cloudH],
-        uCloudHistorySize: cloudHistorySize,
-        uHeight: eyeSea,
-        uCloudCover: this.cloudCover,
-        uCloudBase: cloud.base,
-        uCloudTop: cloud.top,
-        uCloudAlpha: cloud.alpha,
-        uClockSky: f.clock ?? 0,
-        uCloudVolume: 1,
-        uFrameNoise: frameNoise,
-        uCloudBlend: cloudBlend,
-      });
+      setUniforms(
+        gl,
+        this.cloudsP,
+        {
+          uInvViewProj: invFarVp,
+          uCloudReproject: cloudReproj,
+          uSun: f.sun,
+          uSunColor: this.sunColor,
+          uSkyTop: this.skyTop,
+          uSceneSize: [this.w, this.h],
+          uCloudSize: [this.cloudW, this.cloudH],
+          uCloudHistorySize: cloudHistorySize,
+          uHeight: eyeSea,
+          uCloudCover: this.cloudCover,
+          uCloudBase: cloud.base,
+          uCloudTop: cloud.top,
+          uCloudAlpha: cloud.alpha,
+          uClockSky: f.clock ?? 0,
+          uCloudVolume: 1,
+          uFrameNoise: frameNoise,
+          uCloudBlend: cloudBlend,
+          uCloudSteps: interactive ? 16 : 32,
+        },
+        ['uCloudSteps'],
+      );
       gl.activeTexture(gl.TEXTURE12);
       gl.bindTexture(gl.TEXTURE_2D, this.colorTex);
       gl.activeTexture(gl.TEXTURE13);
@@ -2361,7 +2415,8 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     if (this.waterVao && this.waterCount) {
       time.pass('water');
       // On the fuller way, copy the 1x opaque+sky frame once so water can refract the bed and reflect banks & sky.
-      const runScreen = effects.waterScreen > 0.01;
+      // During active camera/time motion, fall back to analytic sky/terrain water reflection and skip the full-res blit.
+      const runScreen = !interactive && effects.waterScreen > 0.01;
       if (runScreen) {
         this.ensureWaterCopy();
         gl.bindFramebuffer(gl.READ_FRAMEBUFFER, this.sceneFb);
@@ -2424,7 +2479,7 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     let shown = this.colorTex;
     if (!this.fast) {
       time.pass('light in the air');
-      if (effects.shafts > 0.01) this.shafts(f, vp, effects.shafts);
+      if (!interactive && effects.shafts > 0.01) this.shafts(f, vp, effects.shafts);
       time.pass('antialiasing');
       shown = this.antialias(frame, still);
     }
@@ -2544,7 +2599,7 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     gl.depthMask(true);
   }
 
-  private occlusion(f: CityFrame): void {
+  private occlusion(f: CityFrame, interactive: boolean): WebGLTexture {
     const gl = this.gl;
     gl.disable(gl.DEPTH_TEST);
     gl.disable(gl.STENCIL_TEST);
@@ -2561,11 +2616,16 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.aoFb[0]);
     gl.viewport(0, 0, aw, ah);
     gl.useProgram(this.aoP.program);
-    setUniforms(gl, this.aoP, { uProjK: [kY * f.aspect, kY], uNearFar: [f.near, f.far], uTexel: [1 / aw, 1 / ah] });
+    setUniforms(
+      gl,
+      this.aoP,
+      { uProjK: [kY * f.aspect, kY], uNearFar: [f.near, f.far], uTexel: [1 / aw, 1 / ah], uAOSteps: interactive ? 3 : 6 },
+      ['uAOSteps'],
+    );
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     gl.useProgram(this.blurP.program);
     setUniforms(gl, this.blurP, { uNearFar: [f.near, f.far] });
-    // Blur across, into the second, then back along into the first; the last read is the second.
+    // Blur across, into the second, then back along into the first; during interactive motion stop after H+V.
     gl.activeTexture(gl.TEXTURE13);
     gl.bindTexture(gl.TEXTURE_2D, this.aoTex[0]);
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.aoFb[1]);
@@ -2575,13 +2635,18 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.aoFb[0]);
     setUniforms(gl, this.blurP, { uDir: [0, 1 / ah] });
     gl.drawArrays(gl.TRIANGLES, 0, 3);
-    gl.bindTexture(gl.TEXTURE_2D, this.aoTex[0]);
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.aoFb[1]);
-    setUniforms(gl, this.blurP, { uDir: [0.7 / aw, 0.7 / ah] });
-    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    let out = this.aoTex[0];
+    if (!interactive) {
+      gl.bindTexture(gl.TEXTURE_2D, this.aoTex[0]);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, this.aoFb[1]);
+      setUniforms(gl, this.blurP, { uDir: [0.7 / aw, 0.7 / ah] });
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      out = this.aoTex[1];
+    }
     gl.bindVertexArray(null);
     gl.activeTexture(gl.TEXTURE12);
     gl.bindTexture(gl.TEXTURE_2D, null);
+    return out;
   }
 
   private finish(f: CityFrame, scene: WebGLTexture): void {
@@ -2724,10 +2789,7 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     gl.colorMask(true, true, true, true);
     gl.useProgram(this.idP.program);
     setUniforms(gl, this.idP, { uViewProj: vp, uEye: f.eye, uTime: f.time, uClock: f.clock ?? 0, uWind: WIND, uShadowPad: -1, uShadowInvR: 0, uFadeK: 0, uProtoExtent: 1 });
-    for (const c of this.lastDraw) {
-      gl.bindVertexArray(c.vao);
-      gl.drawElements(gl.TRIANGLES, c.count, gl.UNSIGNED_INT, 0);
-    }
+    this.drawCells(this.idP, this.lastDraw);
     this.drawInstanced(this.idP, false);
     this.drawImpostors(this.impostorIdP, f, vp, camRight, camUp, [0, 0, 0]);
     gl.bindVertexArray(null);

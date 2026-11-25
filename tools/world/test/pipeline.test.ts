@@ -3,6 +3,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   batchOverlapsCascade,
+  buildEntityTransitions,
+  canDeferCascade,
   cloudLayerFor,
   computeBatchBounds,
   computeProtoBounds,
@@ -11,16 +13,21 @@ import {
   hemiOctEncode,
   INSTANCE_STRIDE,
   localEffectWeights,
+  meshBoundsOverlapsCascade,
   octFrame,
   octGridWeights,
   PLANET_RADIUS,
+  quantizeShadowRadii,
   reprojectMatrix,
   scaledRenderSize,
+  shadowCascadeSnap,
+  shadowTimeKey,
   smoothDown,
   VERTEX_STRIDE,
   WAY_STRIDE,
   type CascadeBox,
 } from '../../../viewer/src/gl/culling.ts';
+import { computeSkyLighting, evalSkyRadiance } from '../../../viewer/src/gl/sky.ts';
 import { IMP_CELL, IMP_GRID, IMP_MAX_LEVEL, IMP_SIZE } from '../../../viewer/src/gl/impostors.ts';
 import {
   blockCompressedSize,
@@ -517,5 +524,135 @@ describe('render scaling, continuous altitude effects, and terrain-relative clou
     expect(seaFloor.base).toBe(1400);
     expect(seaFloor.top).toBe(2400);
     expect(seaFloor.alpha).toBe(1);
+  });
+});
+
+describe('interactive shadow cascade caching and event-driven temporal keys', () => {
+  it('quantizes interactive cascade radii with hysteresis while keeping settled sizing exact', () => {
+    // Settled mode preserves exact continuous range sizing.
+    expect(quantizeShadowRadii(100, null, false)).toEqual([100, 500, 9000]);
+    expect(quantizeShadowRadii(850, null, false)).toEqual([850, 4250, 10625]);
+    expect(quantizeShadowRadii(10, null, false)).toEqual([24, 120, 9000]);
+    expect(quantizeShadowRadii(5000, null, false)).toEqual([1400, 7000, 17500]);
+
+    // Interactive mode snaps to discrete √2 steps and holds prevR0 within a ±1.25x hysteresis band.
+    const [r0] = quantizeShadowRadii(100, null, true);
+    expect(r0).toBe(96);
+    expect(quantizeShadowRadii(115, r0, true)[0]).toBe(96);
+    expect(quantizeShadowRadii(80, r0, true)[0]).toBe(96);
+    // Moving past 1.25x triggers a clean step up or down.
+    expect(quantizeShadowRadii(130, r0, true)[0]).toBe(136);
+    expect(quantizeShadowRadii(70, r0, true)[0]).toBe(68);
+  });
+
+  it('snaps cascades to integer texel multiples and gates cascade deferral safely', () => {
+    expect(shadowCascadeSnap(0.25, 0, false)).toBe(0.25);
+    expect(shadowCascadeSnap(0.25, 1, false)).toBe(0.25);
+    expect(shadowCascadeSnap(0.25, 2, false)).toBe(0.25);
+    expect(shadowCascadeSnap(0.25, 0, true)).toBe(1);
+    expect(shadowCascadeSnap(0.25, 1, true)).toBe(4);
+    expect(shadowCascadeSnap(0.25, 2, true)).toBe(16);
+
+    const cached = { sR: 100, sU: 200, radius: 500, focus: [100, 200, 0] as V3 };
+    // Never defer cascade 0 or null cache.
+    expect(canDeferCascade(null, 100, 200, 500, 0, 1)).toBe(false);
+    expect(canDeferCascade(cached, 100, 200, 500, 0, 0)).toBe(false);
+
+    // Cascade 1: defer within 20% pan margin and < 3 frames.
+    expect(canDeferCascade(cached, 190, 250, 500, 2, 1)).toBe(true);
+    expect(canDeferCascade(cached, 220, 200, 500, 1, 1)).toBe(false); // pan > 0.20 * 500
+    expect(canDeferCascade(cached, 100, 200, 500, 3, 1)).toBe(false); // framesSince >= 3
+    expect(canDeferCascade(cached, 100, 200, 1200, 1, 1)).toBe(false); // radius > 2x
+
+    // Cascade 2: defer within 35% pan margin and < 6 frames.
+    expect(canDeferCascade(cached, 260, 200, 500, 5, 2)).toBe(true);
+    expect(canDeferCascade(cached, 260, 200, 500, 6, 2)).toBe(false);
+    expect(canDeferCascade(cached, 300, 200, 500, 1, 2)).toBe(false);
+  });
+
+  it('tests static cell world bounds conservatively against shadow cascades', () => {
+    const nearCell = { minX: 40, minY: 40, maxX: 160, maxY: 160 };
+    const farCell = { minX: 2500, minY: 2500, maxX: 2700, maxY: 2700 };
+    expect(meshBoundsOverlapsCascade(nearCell, [0, 0, 0], 100)).toBe(true);
+    expect(meshBoundsOverlapsCascade(farCell, [0, 0, 0], 100)).toBe(false);
+    expect(meshBoundsOverlapsCascade(farCell, [0, 0, 0], 2000)).toBe(true);
+  });
+
+  it('caches quiet time gaps between entity rise/fall intervals while stepping inside active transitions', () => {
+    // Entity 0 is unused null slot [0,0,0,0]; entity 1 rises at [68, 80] and falls at [400, 412];
+    // entity 2 overlaps with [74, 86] and timeless end; entity 3 is zero-padded trailing slot.
+    const data = new Float32Array([
+      0, 0, 0, 0,
+      80, 400, 0, 20,
+      86, 2e7, 1, 25,
+      0, 0, 0, 0,
+    ]);
+    const schedule = buildEntityTransitions(data, 12);
+    // Merged intervals: [68, 86] and [400, 412] (neither entity 0 nor trailing zero row creates a fake [−12, 12] interval).
+    expect([...schedule.intervals]).toEqual([68, 86, 400, 412]);
+
+    // Quiet gap before first transition: constant across years (even when settled!).
+    expect(shadowTimeKey(schedule, 0, false)).toBe('q:0');
+    expect(shadowTimeKey(schedule, 50, false)).toBe('q:0');
+    expect(shadowTimeKey(schedule, 67.9, false)).toBe('q:0');
+
+    // Quiet gap between transitions: constant across 300+ years.
+    expect(shadowTimeKey(schedule, 100, false)).toBe('q:1');
+    expect(shadowTimeKey(schedule, 250, true)).toBe('q:1');
+    expect(shadowTimeKey(schedule, 399, false)).toBe('q:1');
+
+    // Inside active rise interval [68, 86]: steps finely when settled (0.01 yr) and coarsely when interactive (0.5 yr).
+    expect(shadowTimeKey(schedule, 75.0, true)).toBe(shadowTimeKey(schedule, 75.2, true));
+    expect(shadowTimeKey(schedule, 75.0, true)).not.toBe(shadowTimeKey(schedule, 76.0, true));
+    expect(shadowTimeKey(schedule, 75.0, false)).not.toBe(shadowTimeKey(schedule, 75.2, false));
+
+    // After last transition: constant again.
+    expect(shadowTimeKey(schedule, 500, false)).toBe('q:2');
+    expect(shadowTimeKey(schedule, 1000, false)).toBe('q:2');
+  });
+});
+
+describe('CPU Rayleigh/Mie sky lighting & SH irradiance', () => {
+  it('computes physically consistent noon, golden-hour, and night lighting with normalized SH and no GPU stalls', () => {
+    const lum = (c: ArrayLike<number>) => 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+    const noonSun: V3 = [0, 0.5, Math.sqrt(0.75)];
+    const duskSun: V3 = [0, Math.cos(0.06), Math.sin(0.06)];
+    const nightSun: V3 = [0, Math.cos(-0.2), Math.sin(-0.2)];
+
+    const t0 = performance.now();
+    const noon = computeSkyLighting(noonSun);
+    const dusk = computeSkyLighting(duskSun);
+    const night = computeSkyLighting(nightSun);
+    const elapsedMs = performance.now() - t0;
+
+    expect(noon.skyHarmonics.length).toBe(27);
+    for (const res of [noon, dusk, night]) {
+      for (const v of [...res.sunColor, ...res.skyTop, ...res.skyLow, ...res.bounce, res.daylight, ...res.skyHarmonics]) {
+        expect(Number.isFinite(v)).toBe(true);
+      }
+      expect(res.daylight).toBeGreaterThanOrEqual(0);
+    }
+
+    // Noon zenith sky is blue-dominant and brighter than dusk; dusk sun is reddened; night sun is off.
+    expect(noon.skyTop[2]).toBeGreaterThan(noon.skyTop[0]);
+    expect(noon.daylight).toBeGreaterThan(dusk.daylight);
+    expect(dusk.sunColor[0]).toBeGreaterThan(dusk.sunColor[2]);
+    expect(night.sunColor).toEqual([0, 0, 0]);
+
+    // Upward normal (0, 0, 1) SH irradiance luminance matches skyTop luminance by construction.
+    const upLit: V3 = [
+      noon.skyHarmonics[0] + noon.skyHarmonics[6] + 2 * noon.skyHarmonics[18],
+      noon.skyHarmonics[1] + noon.skyHarmonics[7] + 2 * noon.skyHarmonics[19],
+      noon.skyHarmonics[2] + noon.skyHarmonics[8] + 2 * noon.skyHarmonics[20],
+    ];
+    expect(lum(upLit)).toBeCloseTo(lum(noon.skyTop), 4);
+
+    // Direct radiance evaluator returns positive blue sky at zenith during daytime.
+    const rad = evalSkyRadiance(Math.PI / 2, Math.PI / 2, Math.PI / 3);
+    expect(rad[2]).toBeGreaterThan(rad[0]);
+    expect(rad[0]).toBeGreaterThan(0);
+
+    // Three full evaluations should complete quickly on CPU (far below synchronous readPixels stalls).
+    expect(elapsedMs).toBeLessThan(200);
   });
 });

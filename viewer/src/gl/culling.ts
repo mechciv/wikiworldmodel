@@ -404,3 +404,154 @@ export function reprojectMatrix(currentVp: Mat4, lastVp: Mat4, eye: V3, lastEye:
   const move = new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, dx, dy, dz, 1]);
   return multiply(lastVp, multiply(move, invert(currentVp)));
 }
+
+/** World-space horizontal bounds of a static chunk/cell mesh for targeted shadow-cascade invalidation. */
+export interface MeshBounds2D {
+  minX: number;
+  minY: number;
+  maxX: number;
+  maxY: number;
+}
+
+/** Conservative horizontal overlap test between a static mesh AABB and a shadow cascade centered on `focus`. */
+export function meshBoundsOverlapsCascade(bounds: MeshBounds2D, focus: V3, radius: number): boolean {
+  const r = radius * 1.45;
+  return bounds.maxX >= focus[0] - r && bounds.minX <= focus[0] + r && bounds.maxY >= focus[1] - r && bounds.minY <= focus[1] + r;
+}
+
+/** Discrete geometric steps (powers of √2) for nearest shadow cascade radius during interactive motion. */
+const SHADOW_R0_STEPS = [24, 34, 48, 68, 96, 136, 192, 272, 384, 544, 768, 1088, 1400];
+
+/**
+ * Compute shadow cascade radii [r0, r1, r2]. When settled (`!interactive`), matches exact continuous
+ * range sizing for golden-image fidelity. During interactive camera motion (`interactive`), quantizes
+ * r0 to discrete √2 steps with hysteresis so continuous zooming does not invalidate all three cascades
+ * on every scroll wheel tick.
+ */
+export function quantizeShadowRadii(range: number, prevR0: number | null, interactive: boolean): V3 {
+  const target = Math.min(Math.max(24, range), 1400);
+  let r0 = target;
+  if (interactive) {
+    if (prevR0 !== null && prevR0 >= 24 && prevR0 <= 1400 && target >= prevR0 / 1.25 && target <= prevR0 * 1.25) {
+      r0 = prevR0;
+    } else {
+      let best = SHADOW_R0_STEPS[SHADOW_R0_STEPS.length - 1];
+      let bestErr = Infinity;
+      for (const s of SHADOW_R0_STEPS) {
+        const err = Math.abs(Math.log2(target / s));
+        if (err < bestErr) {
+          bestErr = err;
+          best = s;
+        }
+      }
+      r0 = best;
+    }
+  }
+  const r1 = Math.min(r0 * 5, 7000);
+  const r2 = Math.max(r1 * 2.5, 9000);
+  return [r0, r1, r2];
+}
+
+/**
+ * Grid snap step for shadow cascade origin alignment. Always an integer multiple of a shadow texel
+ * so shadows never swim, using coarser multiples during interactive motion to cut pan redraws.
+ */
+export function shadowCascadeSnap(texel: number, cascadeIndex: number, interactive: boolean): number {
+  if (!interactive) return texel;
+  return texel * (cascadeIndex === 0 ? 4 : cascadeIndex === 1 ? 16 : 64);
+}
+
+/** Cached shadow cascade coverage used to decide whether a stale cascade can be deferred cleanly. */
+export interface CachedShadowCascade {
+  sR: number;
+  sU: number;
+  radius: number;
+  focus: V3;
+}
+
+/**
+ * Whether a stale shadow cascade can safely reuse its cached shadow map and projection matrix for
+ * another interactive frame without clipping shadows inside the view.
+ */
+export function canDeferCascade(
+  cached: CachedShadowCascade | null,
+  cR: number,
+  cU: number,
+  wantR: number,
+  framesSince: number,
+  cascadeIndex: number,
+): boolean {
+  if (!cached || cascadeIndex === 0) return false;
+  const maxFrames = cascadeIndex === 1 ? 3 : 6;
+  if (framesSince >= maxFrames) return false;
+  if (wantR < cached.radius * 0.5 || wantR > cached.radius * 2.0) return false;
+  const margin = cached.radius * (cascadeIndex === 1 ? 0.2 : 0.35);
+  return Math.abs(cR - cached.sR) <= margin && Math.abs(cU - cached.sU) <= margin;
+}
+
+/** Disjoint sorted [lo0, hi0, lo1, hi1, ...] time intervals where at least one entity is rising or falling. */
+export interface EntityTransitionSchedule {
+  intervals: Float64Array;
+}
+
+/**
+ * Precompute the merged disjoint time intervals during which any entity in `entityData` ([start, end, flags, base])
+ * changes height (within `[start - riseYears, start]` or `[end, end + riseYears]`). Between intervals, every entity's
+ * standing factor is mathematically constant, so shadows need not be re-rendered when scrubbing quiet years.
+ */
+export function buildEntityTransitions(entityData: Float32Array | null, riseYears: number, entityCount?: number): EntityTransitionSchedule {
+  if (!entityData || entityData.length < 8) return { intervals: new Float64Array(0) };
+  const raw: [number, number][] = [];
+  const SENTINEL = 1.99e7;
+  const limit = entityCount !== undefined ? Math.min(entityData.length, entityCount * 4) : entityData.length;
+  // Index 0 is the unused null entity; skip it and any all-zero texture padding rows.
+  for (let i = 4; i + 3 < limit; i += 4) {
+    const start = entityData[i];
+    const end = entityData[i + 1];
+    if (start === 0 && end === 0 && entityData[i + 2] === 0 && entityData[i + 3] === 0) continue;
+    if (!Number.isFinite(start) || !Number.isFinite(end)) continue;
+    if (start - riseYears > end + riseYears) continue;
+    if (Math.abs(start) < SENTINEL) raw.push([start - riseYears, start]);
+    if (Math.abs(end) < SENTINEL) raw.push([end, end + riseYears]);
+  }
+  if (!raw.length) return { intervals: new Float64Array(0) };
+  raw.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  const merged: number[] = [];
+  let lo = raw[0][0];
+  let hi = raw[0][1];
+  for (let i = 1; i < raw.length; i++) {
+    const [a, b] = raw[i];
+    if (a <= hi) {
+      if (b > hi) hi = b;
+    } else {
+      merged.push(lo, hi);
+      lo = a;
+      hi = b;
+    }
+  }
+  merged.push(lo, hi);
+  return { intervals: Float64Array.from(merged) };
+}
+
+/**
+ * Event-driven temporal shadow cache key: constant across all timestamps inside a quiet gap between
+ * entity rise/fall transitions, and smoothly stepped only while an entity is actively changing height.
+ */
+export function shadowTimeKey(schedule: EntityTransitionSchedule, time: number, interactive: boolean): string {
+  const iv = schedule.intervals;
+  const count = iv.length >> 1;
+  if (count === 0) return 'q:0';
+  let lo = 0;
+  let hi = count;
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1;
+    if (iv[mid * 2 + 1] < time) lo = mid + 1;
+    else hi = mid;
+  }
+  if (lo < count && time >= iv[lo * 2] && time <= iv[lo * 2 + 1]) {
+    const step = interactive ? Math.round(time * 2) : Math.round(time * 100);
+    return `a:${lo}:${step}`;
+  }
+  return `q:${lo}`;
+}
+

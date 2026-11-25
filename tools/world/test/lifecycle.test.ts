@@ -1,7 +1,8 @@
 // Unit tests for living-scene lifecycle stability (spatial hysteresis, context matching,
 // LRU standby caching) and damped stream budget / staggered LOD transitions.
 import { describe, expect, it } from 'vitest';
-import { lifeKeepRadius, sameLifeContext, SceneCache } from '../../../viewer/src/city/lifecycle.ts';
+import { lifeKeepRadius, RefCountedPool, sameGeoContext, sameLifeContext, SceneCache } from '../../../viewer/src/city/lifecycle.ts';
+import { structureLayerKey } from '../../../viewer/src/city/structures.ts';
 import { lodDetail, stepKeepBudget } from '../../../world/generators/life/stream.ts';
 
 describe('living-scene spatial hysteresis and context matching', () => {
@@ -41,6 +42,70 @@ describe('living-scene spatial hysteresis and context matching', () => {
     // Malformed keys fall back to exact equality.
     expect(sameLifeContext('short', 'short')).toBe(true);
     expect(sameLifeContext('short', 'other')).toBe(false);
+  });
+
+  it('matches geological era and shore across anthrome-step, month, and spatial transitions via sameGeoContext', () => {
+    const base = '-10000|41.90|12.50|7|0|shore-a';
+    expect(sameGeoContext(base, '-10000|41.90|12.50|7|500|shore-a')).toBe(true);
+    expect(sameGeoContext(base, '-10000|41.90|12.50|1|1500|shore-a')).toBe(true);
+    expect(sameGeoContext(base, '-10000|42.00|12.60|10|-200|shore-a')).toBe(true);
+    // Geological bin or shoreline changes do not share geo context.
+    expect(sameGeoContext(base, '-5000000|41.90|12.50|7|0|shore-a')).toBe(false);
+    expect(sameGeoContext(base, '-10000|41.90|12.50|7|0|shore-b')).toBe(false);
+    expect(sameGeoContext('short', 'short')).toBe(true);
+    expect(sameGeoContext('short', 'other')).toBe(false);
+  });
+});
+
+describe('RefCountedPool standby reuse and StructureLayer key stability', () => {
+  it('shares active entries by ref count, retains up to maxStandby in LRU order, and never evicts active entries', () => {
+    const disposed: string[] = [];
+    let created = 0;
+    const pool = new RefCountedPool<string>(2, (v, k) => disposed.push(`${k}:${v}`));
+
+    const r1 = pool.acquire('rome', () => `layer-${++created}`);
+    const r2 = pool.acquire('rome', () => `layer-${++created}`);
+    expect(r1).toBe('layer-1');
+    expect(r2).toBe('layer-1');
+    expect(created).toBe(1);
+    expect(pool.refs('rome')).toBe(2);
+
+    // Releasing once keeps 'rome' active.
+    pool.release('rome');
+    expect(pool.refs('rome')).toBe(1);
+    expect(disposed).toEqual([]);
+
+    // Releasing to 0 parks 'rome' in standby (still alive, reusable without recreation).
+    pool.release('rome');
+    expect(pool.refs('rome')).toBe(0);
+    expect(disposed).toEqual([]);
+    expect(pool.acquire('rome', () => `layer-${++created}`)).toBe('layer-1');
+    expect(created).toBe(1);
+    pool.release('rome');
+
+    // Acquire and release 'athens' and 'tokyo' while keeping 'active' held (refs = 1).
+    pool.acquire('active', () => `layer-${++created}`);
+    pool.acquire('athens', () => `layer-${++created}`);
+    pool.release('athens');
+    expect(disposed).toEqual([]); // standby = [rome, athens] (<= 2)
+
+    pool.acquire('tokyo', () => `layer-${++created}`);
+    pool.release('tokyo');
+    // Standby exceeded 2 -> oldest standby ('rome') evicted; 'active' untouched.
+    expect(disposed).toEqual(['rome:layer-1']);
+    expect(pool.refs('active')).toBe(1);
+
+    pool.dispose();
+    expect(pool.size).toBe(0);
+    expect(disposed).toContain('active:layer-2');
+    expect(disposed).toContain('athens:layer-3');
+    expect(disposed).toContain('tokyo:layer-4');
+  });
+
+  it('builds stable structure layer keys sensitive to site, offset, and quality tier', () => {
+    expect(structureLayerKey('rome', [12.34, -56.78], false)).toBe('rome|12.3|-56.8|0');
+    expect(structureLayerKey('rome', [12.34, -56.78], true)).toBe('rome|12.3|-56.8|1');
+    expect(structureLayerKey('rome', [0, 0], false)).not.toBe(structureLayerKey('rome', [100, 0], false));
   });
 });
 

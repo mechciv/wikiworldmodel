@@ -39,7 +39,7 @@ import { Climates, type ClimateAt } from './climates.ts';
 import { LifeScene } from './city/life.ts';
 import type { StructureBundle } from './city/structures.ts';
 import { surveyOffset } from '../../world/generators/life/survey.ts';
-import { lifeKeepRadius, sameLifeContext, SceneCache } from './city/lifecycle.ts';
+import { lifeKeepRadius, sameGeoContext, sameLifeContext, SceneCache } from './city/lifecycle.ts';
 import type { PeopleSummary } from './city/lifeworker.ts';
 import { LandscapeAtlas } from './city/landscape.ts';
 import { anthromeOf, classAtStep, kmBetween, nearestStep, PATTERN_LABEL, USE_LABEL, USES, LEVEL_WORDS, type Pattern } from '../../core/landscape.ts';
@@ -784,7 +784,9 @@ async function start(root: HTMLElement): Promise<void> {
   let moving = false;
   let lastDraw = -Infinity;
   let cameraRestAt = 0;
+  let timeScrubAt = 0;
   let reducedResolution = false;
+  let interactiveMode = false;
   /** whether the last frame drew a scene whose frames, the view held still, are still being averaged */
   let refining = false;
   /** whether the last frame of a scene was drawn with the ground's scanned materials */
@@ -855,9 +857,16 @@ async function start(root: HTMLElement): Promise<void> {
     atSite(next.t, next.cam);
     // A time the site is not drawn for takes the camera back up to the globe.
     if (next.cam.dist < MIN_DIST && !siteOpen(next.t) && !canDrawLife(next.t, next.cam)) next.cam = { lat: next.cam.lat, lon: next.cam.lon, dist: MIN_DIST };
-    if (p.cam && (next.cam.lat !== state.cam.lat || next.cam.lon !== state.cam.lon || next.cam.dist !== state.cam.dist ||
-        next.cam.heading !== state.cam.heading || next.cam.tilt !== state.cam.tilt)) {
-      cameraRestAt = performance.now() + 320;
+    const now = performance.now();
+    const camMoved = !!p.cam && (next.cam.lat !== state.cam.lat || next.cam.lon !== state.cam.lon || next.cam.dist !== state.cam.dist ||
+        next.cam.heading !== state.cam.heading || next.cam.tilt !== state.cam.tilt);
+    const timeMoved = p.t !== undefined && next.t !== state.t;
+    const hourMoved = p.hour !== undefined && next.hour !== state.hour;
+    if (camMoved || timeMoved || hourMoved) {
+      cameraRestAt = now + 320;
+    }
+    if (timeMoved && !playing) {
+      timeScrubAt = now + 280;
     }
     const selChanged = next.sel !== state.sel;
     const altsChanged = JSON.stringify([next.alt, next.picks]) !== JSON.stringify([state.alt, state.picks]);
@@ -1213,6 +1222,7 @@ async function start(root: HTMLElement): Promise<void> {
     const interactiveDpr = Math.min(native, 1, Math.sqrt(1_440_000 / pixels));
     const wantReduced = now < cameraRestAt && interactiveDpr < native;
     reducedResolution = inCity && wantReduced;
+    interactiveMode = inCity && now < cameraRestAt;
     const renderScale = reducedResolution ? interactiveDpr / native : 1;
     const globeHidden = inCity && range < GLOBE_GONE;
     // A projection holds the field's youngest keyframe, and the plates where they are then.
@@ -1325,8 +1335,8 @@ async function start(root: HTMLElement): Promise<void> {
       city!.renderer.setCloudCover(state.clouds ? cloudCoverAt(site!.origin.lat, site!.origin.lon) : 0);
       moving = state.clock === undefined && !state.still && !preview && city!.renderer.ambientMotion(v.clearance, city instanceof LifeScene && city.movingInstances);
       const clock = state.clock ?? (moving ? (now - clockStart) / 1000 : 0);
-      city!.render(v, sunAt(state.hour, site!.origin.lat, city instanceof LifeScene ? city.declination : undefined), state.t, state.evidence, alpha, true, w, h, clock, renderScale);
-      refining = !moving && !reducedResolution && city!.settled && city!.renderer.refining;
+      city!.render(v, sunAt(state.hour, site!.origin.lat, city instanceof LifeScene ? city.declination : undefined), state.t, state.evidence, alpha, true, w, h, clock, renderScale, interactiveMode);
+      refining = !moving && !reducedResolution && !interactiveMode && city!.settled && city!.renderer.refining;
       const labelKey = `${site!.id}|${city instanceof LifeScene ? city.labelSerial : 0}`;
       if (labelledSite !== labelKey) {
         labels.setStructures(city!.named, city!.tops, site!.label, (s) => s.label);
@@ -1334,7 +1344,7 @@ async function start(root: HTMLElement): Promise<void> {
       }
       // Under the sea a name is given only to what the water lets one see.
       const seen = city instanceof LifeScene && city.sea ? (x: number, y: number, z: number) => underSea(v.eye, [x, y, z]) < SEEN_THROUGH_WATER : undefined;
-      labels.update(v, city!.ground, city!.skyline, state.t, state.sel, seen);
+      labels.update(v, city!.ground, city!.skyline, state.t, state.sel, seen, interactiveMode);
     }
     labels.el.hidden = !inCity || range > 2.2e4;
     planet.el.hidden = inCity && range < 6e4;
@@ -1447,7 +1457,7 @@ async function start(root: HTMLElement): Promise<void> {
     if (walking.size && frameView) walk((now - lastFrame) / 1000);
     lastFrame = now;
     // A still (step 8): at once where the link asks for one, or once a visitor has rested the view a while.
-    if (cityDrawn && city?.settled && !reducedResolution && !city.renderer.still && !city.renderer.refining &&
+    if (cityDrawn && city?.settled && !reducedResolution && !interactiveMode && !city.renderer.still && !city.renderer.refining &&
         (state.still || (touched && state.clock !== undefined && city.renderer.steadyMs > 1500))) {
       city.renderer.still = true;
       dirty = true;
@@ -1459,7 +1469,8 @@ async function start(root: HTMLElement): Promise<void> {
       dirty = true;
     }
     // A scene whose clock runs, or whose frames are still being averaged, is drawn again; that is not waiting on anything.
-    if (reducedResolution && now >= cameraRestAt) dirty = true;
+    if ((reducedResolution || interactiveMode) && now >= cameraRestAt) dirty = true;
+    if (!playing && !!lifeSite && now < timeScrubAt) dirty = true;
     // Camera and data updates draw immediately. A parked view only pays for visible animation, up to 30 Hz.
     if (!dirty && !refining && !(moving && now - lastDraw >= 1000 / 30 - 1)) return;
     dirty = false;
@@ -1884,6 +1895,12 @@ async function start(root: HTMLElement): Promise<void> {
     const close = inSpan && (lifeSite!.id === key || (sameContext && off < lifeKeepRadius(range)));
     if (close || lifeLoading === key) return;
     if (lifeLoading) return;
+    // While actively scrubbing time inside the same geological era and shoreline, keep the live
+    // scene responsive on the GPU and defer spawning a new anthrome/month worker until scrubbing pauses.
+    if (!playing && now < timeScrubAt && lifeSite && sameGeoContext(lifeSite.id, key)) {
+      dirty = true;
+      return;
+    }
     if (now - lifeRest < (lifeSite ? 260 : 0)) {
       dirty = true;
       return;
@@ -1999,9 +2016,9 @@ async function start(root: HTMLElement): Promise<void> {
       const nextShore = shoreKey(t, { lat, lon });
       const next: SiteInfo = { kind: 'life', id: key, label: spec.site.stage ?? 'this place', file: '', origin: spec.site.origin, span: spec.site.span, slice: spec.site.slice, near: spec.site.span, window: spec.site.span, view: { x: 0, y: 0, range: 74, heading: 0, tilt: 81 } };
       const prevScene = previous ? scenes.get(previous.id) : undefined;
-      // When a ready scene already covers the camera in the same context, build and warm the neighboring
-      // cell off-screen so there is no preview flash or blank frame on handoff.
-      const keepLive = !!previous && prevScene instanceof LifeScene && prevScene.ready && sameLifeContext(previous.id, key) && distanceFrom(previous, state.cam.lat, state.cam.lon) < 28e3;
+      // When a ready scene already covers the camera in the same geological era and shoreline, build
+      // and warm the next spatial/anthrome/month scene off-screen so there is no preview flash on handoff.
+      const keepLive = !!previous && prevScene instanceof LifeScene && prevScene.ready && sameGeoContext(previous.id, key) && distanceFrom(previous, state.cam.lat, state.cam.lon) < 28e3;
       try {
         if (keepLive) {
           await scene.load();
@@ -2953,8 +2970,9 @@ async function start(root: HTMLElement): Promise<void> {
   };
   /** What the view is still waiting on before it is idle, by name: nothing, once it is. */
   const waiting = (): string[] => {
+    const timePending = !playing && !!lifeSite && performance.now() < timeScrubAt;
     const w: [string, boolean][] = [
-      ['tiles', tiles.busy], ['features', features.busy], ['frame', dirty || reducedResolution], ['layers', !layersReady],
+      ['tiles', tiles.busy], ['features', features.busy], ['frame', dirty || reducedResolution || interactiveMode || timePending], ['layers', !layersReady],
       ['polities', !politiesReady && !!politiesLoading], ['field layers', fieldLayers.some((fl) => fl.busy)], ['rivers', !!rivers?.busy],
       ['people', !!state.people && !people.file && !!ts.files.people], ['clouds', !cloudsReady], ['surface', !surfaceReady],
       ['biome texture', !biomeTexReady], ['generic land', !genericReady], ['climate', !climateReady || climates.busy], ['ice', !iceReady],

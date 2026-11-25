@@ -2,12 +2,18 @@
 // needs and who to draw at what detail. They are the same code as the build's, so what they make agrees with it
 // within the tolerance of core/fingerprint.ts.
 import type { Fingerprint } from '../../../core/fingerprint.ts';
+import { computeBatchBounds, computeProtoBounds, type BatchBounds, type ProtoBounds } from '../gl/culling.ts';
 import { groundNormals } from '../gl/groundNormals.ts';
 import { encodeGround, GRIDS, placeLook, worldGround } from '../../../world/generators/life/scene/v14.ts';
 import { plotStyle } from '../../../core/plots.ts';
 import type { SceneSpec } from '../../../core/scene.ts';
 import { FAST_BUDGET, FULL_BUDGET, SceneStream, type Batch, type LifeView, type NamedGroup, type ProtoMesh } from '../../../world/generators/life/stream.ts';
 import type { PlanForm, Settlement, SettlementPlan, WorkForm } from '../../../world/generators/people/settlement/v10.ts';
+
+/** A transferred instance batch with world-space bounds precomputed off the main thread. */
+export interface WorkerBatch extends Batch {
+  bounds?: BatchBounds;
+}
 
 /** What a scene's people are, for its panel: the plan without its houses. */
 export interface PeopleSummary {
@@ -70,7 +76,7 @@ export type FromLifeWorker =
       smokes?: Float32Array;
     }
   | { type: 'mask'; mask: Uint8Array; maskSize: number; maskBox: [number, number, number, number]; fields?: Uint8Array }
-  | { type: 'selection'; serial: number; batches: Batch[]; protos: ProtoMesh[]; instances: number; triangles: number; pending: number; groups: NamedGroup[]; ms: number };
+  | { type: 'selection'; serial: number; batches: WorkerBatch[]; protos: ProtoMesh[]; instances: number; triangles: number; pending: number; groups: NamedGroup[]; ms: number };
 
 /**
  * The far land's image (SceneStream, farFields): its side in texels, and how far it reaches each way from the scene's
@@ -81,6 +87,7 @@ const FAR_HALF = 112000;
 
 let stream: SceneStream | null = null;
 const sent = new Set<number>();
+const protoBounds = new Map<number, ProtoBounds>();
 const post = (m: FromLifeWorker, transfer: Transferable[]) => (self as unknown as { postMessage(m: unknown, t: Transferable[]): void }).postMessage(m, transfer);
 
 self.onmessage = (e: MessageEvent<ToLifeWorker>) => {
@@ -104,6 +111,7 @@ self.onmessage = (e: MessageEvent<ToLifeWorker>) => {
     }
     stream = new SceneStream(m.spec, m.fast ? FAST_BUDGET : FULL_BUDGET);
     sent.clear();
+    protoBounds.clear();
     const print = stream.print();
     const { data, box } = stream.mask(512);
     const water = stream.water();
@@ -203,6 +211,14 @@ self.onmessage = (e: MessageEvent<ToLifeWorker>) => {
   if (!stream) return;
   const t0 = performance.now();
   const s = stream.select(m.view, sent, () => performance.now() - t0 < 28);
-  const buffers: ArrayBuffer[] = [...s.batches.flatMap((b) => (b.ways ? [b.data, b.ways] : [b.data])), ...s.protos.flatMap((p) => [p.vertices, p.indices.buffer as ArrayBuffer])];
-  post({ type: 'selection', serial: m.serial, batches: s.batches, protos: s.protos, instances: s.instances, triangles: s.triangles, pending: s.pending, groups: s.groups, ms: performance.now() - t0 }, buffers);
+  for (const p of s.protos) {
+    if (!protoBounds.has(p.proto)) protoBounds.set(p.proto, computeProtoBounds(p.vertices));
+  }
+  const batches: WorkerBatch[] = s.batches.map((b) => {
+    const pb = protoBounds.get(b.proto);
+    const bounds = pb && b.count > 0 ? computeBatchBounds(b.data, b.count, pb, b.ways) : undefined;
+    return bounds ? { ...b, bounds } : b;
+  });
+  const buffers: ArrayBuffer[] = [...batches.flatMap((b) => (b.ways ? [b.data, b.ways] : [b.data])), ...s.protos.flatMap((p) => [p.vertices, p.indices.buffer as ArrayBuffer])];
+  post({ type: 'selection', serial: m.serial, batches, protos: s.protos, instances: s.instances, triangles: s.triangles, pending: s.pending, groups: s.groups, ms: performance.now() - t0 }, buffers);
 };
