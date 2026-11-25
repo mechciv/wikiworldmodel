@@ -34,7 +34,7 @@ import {
 } from '../../../viewer/src/gl/culling.ts';
 import { IMP_BAKE_FS, IMPOSTOR_FS, IMPOSTOR_VS, MESH_FS, MESH_FS_BUILT, MESH_FS_FOLIAGE, MESH_FS_STATIC } from '../../../viewer/src/gl/cityShaders.ts';
 import { computeSkyLighting, evalSkyRadiance } from '../../../viewer/src/gl/sky.ts';
-import { IMP_CELL, IMP_GRID, IMP_MAX_LAYERS, IMP_MAX_LEVEL, IMP_SIZE, ImpostorLru } from '../../../viewer/src/gl/impostors.ts';
+import { IMP_CELL, IMP_EVICT_IDLE_FRAMES, IMP_GRID, IMP_MAX_LAYERS, IMP_MAX_LEVEL, IMP_SIZE, ImpostorLru } from '../../../viewer/src/gl/impostors.ts';
 import {
   blockCompressedSize,
   detectCompressedFormats,
@@ -702,30 +702,67 @@ describe('mega-buffer free-list allocator, front-to-back sorting, and LRU impost
     expect(sortCellsFrontToBack(cells, [10, 20, 50]).map((c) => c.id)).toEqual(['inside', 'mid', 'far', 'unbounded']);
   });
 
-  it('manages 96-layer impostor LRU eviction while protecting slots used in the current frame', () => {
+  it('manages 96-layer impostor LRU eviction only after slots go idle for minIdleFrames', () => {
     expect(IMP_MAX_LAYERS).toBe(96);
-    const lru = new ImpostorLru(3);
+    expect(IMP_EVICT_IDLE_FRAMES).toBeGreaterThanOrEqual(2);
+    const lru = new ImpostorLru(3, 6);
     expect(lru.allocate(10, 1)).toEqual({ layer: 0 });
     expect(lru.allocate(20, 2)).toEqual({ layer: 1 });
     expect(lru.allocate(30, 3)).toEqual({ layer: 2 });
     expect(lru.size).toBe(3);
 
-    // Touch key 10 at frame 4 so key 20 becomes least-recently-used.
+    // Touch key 10 at frame 4 so key 20 is least-recently-used (lastUsed = 2).
     lru.touch(10, 4);
-    const ev = lru.allocate(40, 5);
+    // At frame 7 (idle age 5 < 6), eviction is still refused so recently used slots stay stable.
+    expect(lru.allocate(40, 7)).toBeNull();
+    // At frame 8 (idle age 6 >= 6), key 20 is cleanly evicted and its layer reused.
+    const ev = lru.allocate(40, 8);
     expect(ev).toEqual({ layer: 1, evictedKey: 20 });
     expect(lru.layerOf(20)).toBeUndefined();
     expect(lru.layerOf(40)).toBe(1);
 
-    // When every resident slot was already used on the current frame, allocation refuses to thrash.
-    lru.touch(10, 10);
-    lru.touch(30, 10);
-    lru.touch(40, 10);
-    expect(lru.allocate(50, 10)).toBeNull();
-
     // Explicitly releasing a key puts its layer back onto the free list for immediate reuse.
     lru.release(30);
-    expect(lru.allocate(50, 10)).toEqual({ layer: 2 });
+    expect(lru.allocate(50, 8)).toEqual({ layer: 2 });
+  });
+
+  it('does not thrash when more active keys than atlas layers are visited every frame', () => {
+    const lru = new ImpostorLru(IMP_MAX_LAYERS, IMP_EVICT_IDLE_FRAMES);
+    const totalKeys = IMP_MAX_LAYERS + 24;
+    // Populate keys 0..95 on frame 1; overflow keys 96..119 fail to evict and remain unslotted.
+    for (let k = 0; k < totalKeys; k++) {
+      const res = lru.allocate(k, 1);
+      if (k < IMP_MAX_LAYERS) expect(res).toEqual({ layer: k });
+      else expect(res).toBeNull();
+    }
+
+    // Visit in worst-case order (unslotted keys FIRST, before resident keys) for 50 consecutive frames.
+    // Every resident slot must stay pinned with zero evictions so a rich scene settles cleanly.
+    const visitOrder = [
+      ...Array.from({ length: totalKeys - IMP_MAX_LAYERS }, (_, i) => IMP_MAX_LAYERS + i),
+      ...Array.from({ length: IMP_MAX_LAYERS }, (_, i) => i),
+    ];
+    for (let frame = 2; frame <= 50; frame++) {
+      for (const key of visitOrder) {
+        if (lru.layerOf(key) !== undefined) {
+          lru.touch(key, frame);
+        } else {
+          expect(lru.allocate(key, frame)).toBeNull();
+        }
+      }
+    }
+    for (let k = 0; k < IMP_MAX_LAYERS; k++) expect(lru.layerOf(k)).toBe(k);
+    for (let k = IMP_MAX_LAYERS; k < totalKeys; k++) expect(lru.layerOf(k)).toBeUndefined();
+
+    // Once keys 0..3 leave the view for IMP_EVICT_IDLE_FRAMES frames, overflow keys reclaim their layers cleanly.
+    const nextFrame = 50 + IMP_EVICT_IDLE_FRAMES;
+    for (let k = 4; k < IMP_MAX_LAYERS; k++) lru.touch(k, nextFrame);
+    for (let i = 0; i < 4; i++) {
+      const res = lru.allocate(IMP_MAX_LAYERS + i, nextFrame);
+      expect(res).toEqual({ layer: i, evictedKey: i });
+    }
+    // Further overflow keys still refuse to evict the remaining active slots.
+    expect(lru.allocate(IMP_MAX_LAYERS + 4, nextFrame)).toBeNull();
   });
 });
 

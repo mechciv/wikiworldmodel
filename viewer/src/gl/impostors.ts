@@ -11,6 +11,8 @@ export const IMP_CELL = 64;
 export const IMP_SIZE = IMP_GRID * IMP_CELL;
 export const IMP_MAX_LEVEL = 6; // 64 >> 6 == 1 texel/cell, so mipmaps never cross cell borders.
 export const IMP_MAX_LAYERS = 96;
+/** Minimum rendered frames a resident impostor slot must go unused before it can be evicted. */
+export const IMP_EVICT_IDLE_FRAMES = 6;
 
 export type ImpostorKind = 'foliage' | 'rigid';
 
@@ -44,15 +46,20 @@ export interface ImpostorLruResult {
 /**
  * Pure LRU texture-array layer allocator for hemi-octahedral impostor slots.
  * Reuses freed layers first, allocates sequentially up to `capacity`, and otherwise evicts the
- * least-recently-used key whose `lastUsed` frame is strictly earlier than `frame`.
+ * least-recently-used key that has gone unused for at least `minIdleFrames` rendered frames,
+ * preventing thrashing when more than `capacity` families are simultaneously active in a view.
  */
 export class ImpostorLru {
   private entries = new Map<number, { layer: number; lastUsed: number }>();
   private freeLayers: number[] = [];
   private nextLayer = 0;
 
-  constructor(readonly capacity: number = IMP_MAX_LAYERS) {
+  constructor(
+    readonly capacity: number = IMP_MAX_LAYERS,
+    readonly minIdleFrames: number = IMP_EVICT_IDLE_FRAMES,
+  ) {
     if (capacity <= 0) throw new Error('ImpostorLru capacity must be positive');
+    if (minIdleFrames < 1) throw new Error('ImpostorLru minIdleFrames must be at least 1');
   }
 
   get size(): number {
@@ -84,10 +91,11 @@ export class ImpostorLru {
       this.entries.set(key, { layer, lastUsed: frame });
       return { layer };
     }
+    const cutoff = frame - this.minIdleFrames;
     let victimKey: number | undefined;
     let victimUsed = Infinity;
     for (const [k, e] of this.entries) {
-      if (e.lastUsed < frame && e.lastUsed < victimUsed) {
+      if (e.lastUsed <= cutoff && e.lastUsed < victimUsed) {
         victimUsed = e.lastUsed;
         victimKey = k;
       }
@@ -274,10 +282,16 @@ export class ImpostorAtlas {
     this.allocateSlot(src, frame);
   }
 
+  /** Read-only lookup of a ready baked impostor slot without mutating LRU state or queueing bakes. */
+  peek(key: number): ImpostorSlot | null {
+    const s = this.slots.get(key);
+    return s && s.ready ? s : null;
+  }
+
   /**
    * Look up a ready baked impostor slot for `key`, updating its LRU recency.
    * If `key` has a registered source that was previously evicted, re-allocates an LRU layer and
-   * queues it for re-baking on the next frame.
+   * queues it for re-baking only if a free or sufficiently idle slot is available.
    */
   get(key: number, frame = 0): ImpostorSlot | null {
     const s = this.slots.get(key);

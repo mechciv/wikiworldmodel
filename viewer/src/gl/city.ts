@@ -1113,10 +1113,10 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
   }
 
   /** Whether an instanced batch is currently drawn via its GPU-baked hemi-octahedral impostor. */
-  private impostorFor(g: InstancedGPU) {
+  private impostorFor(g: InstancedGPU, readOnly = false) {
     if (this.fast || g.impKey === null || g.detail > g.impMaxDetail || g.waysOn || g.idle) return null;
     if (g.impKind === 'foliage' && !this.leavesReady) return null;
-    return this.impostors.get(g.impKey, this.frames);
+    return readOnly ? this.impostors.peek(g.impKey) : this.impostors.get(g.impKey, this.frames);
   }
 
   /** How many are drawn by instancing, and the triangles that makes (2 tris per octahedral impostor). */
@@ -1129,7 +1129,7 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
       if (!g.count) continue;
       meshes++;
       instances += g.count;
-      if (this.impostorFor(g)) {
+      if (this.impostorFor(g, true)) {
         impostorInstances += g.count;
         triangles += g.count * 2;
       } else {
@@ -2254,12 +2254,12 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     this.steady = still ? this.steady + 1 : 0;
     if (!still) this.changedAt = performance.now();
     this.viewKey = key;
-    this.frames++;
     const enough = this.still ? STILL_FRAMES : STEADY_FRAMES;
     if (!this.fast && still && this.steady > enough && !this.impostors.hasPending(this.leavesReady)) {
       this.finish(frame, this.prevHistoryTex ?? this.historyTex[this.historyAt]);
       return;
     }
+    this.frames++;
     let f = frame;
     let shadowSun = frame.sun;
     if (!this.fast) {
