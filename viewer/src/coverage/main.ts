@@ -245,7 +245,9 @@ class Page {
     meta.append(`build ${this.id}${commit} · `);
     const globe = el('a', undefined, 'Open the globe');
     globe.href = `./?b=${encodeURIComponent(this.id)}`;
-    meta.append(globe);
+    const history = el('a', undefined, 'World history atlas');
+    history.href = `./history.html?b=${encodeURIComponent(this.id)}`;
+    meta.append(globe, ' · ', history);
     head.append(h1, meta);
     const wrap = el('div');
     const lede = el(

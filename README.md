@@ -63,6 +63,8 @@ share of the globe that evidence, a model or a generic stand-in answers, or wher
 Expand a layer to see what answers it when, with its grid; switch to *Finest grid* to see the scale;
 pick a cell to map it, and click the map to open the globe there and then. Below the layers are the
 fields drawn over the globe, the whole-planet series and the records, by kind.
+The [world history atlas](https://wikiworldmodel.org/world/history.html) places societies on regional
+timelines and shows which have model records, border observations or a reference chronology.
 
 ## Checks
 
