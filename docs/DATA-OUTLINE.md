@@ -265,7 +265,7 @@ region's sources.
 | Rome, 315 CE | ✓ | OpenHistoricalMap; Platner and Ashby; the Regionary Catalogues | ✓ | R + D + G |
 | Rome at other times (growth, fires, the medieval city, Nolli's 1748) | ○ | Lanciani's Forma Urbis Romae; Nolli; OHM | ✓ PD | R + G |
 | A second ancient city (Ostia, Constantinople, Athens, Alexandria) | ○ | OHM; excavation reports; Pleiades | ✓ | slice |
-| Cities of other cultures (Chang'an, Tenochtitlan, Teotihuacan, Angkor, Babylon, Mohenjo-daro) | ○ | literature; lidar and excavation plans | — | slices |
+| Cities of other cultures (Chang'an, Tenochtitlan, Teotihuacan, Angkor, Babylon, Mohenjo-daro) | ◐ each a record; a plan's skeleton (its grid's direction or its walls) for Chang'an, Teotihuacan and Babylon | literature; lidar and excavation plans | — | slices |
 | Ground levels and ancient topography | ◐ around the Forum | geoarchaeological studies; Lanciani | — | R + F |
 | Building typologies for each culture and era (houses, temples, markets) | ◐ Roman insula, domus; houses of a first batch of building traditions (docs/DWELLINGS.md), and generic ones by way of life and climate | architectural histories; excavation reports | — | R + G |
 | 3D models of surviving monuments | ○ | Smithsonian 3D (CC0); Sketchfab (per model: keep CC0 and CC BY); Europeana (mixed) | ◐ | assets |
