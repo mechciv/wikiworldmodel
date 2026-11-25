@@ -3,9 +3,8 @@
 // stood up to 1850, as the model of a settlement's people reads them (core/citypop.ts). The top of the list is where most
 // lives were lived in a city drawn from little more than its figure: a plan's skeleton there (its outline at dated
 // times, its walls and gates, its grid's direction, its main streets) does the most.
-import { cityPopulation, type PopulationSource } from '../../../core/citypop.ts';
 import { peopleAt } from '../../../core/growth.ts';
-import { kmBetween, type CitiesFile, type City, type CityRecord } from '../../../core/landscape.ts';
+import { kmBetween, populationOf, type CitiesFile, type City, type CityRecord } from '../../../core/landscape.ts';
 import { formatTime } from '../../../core/time.ts';
 
 /** The tiers of what is known of a city (docs/plans/CITIES.md). */
@@ -47,7 +46,6 @@ function peopleYears(members: { t: number[]; people: number[] }[], span: [number
  * are one city. `mapped` names the settlements whose fabric a map of the world gives (a dataset's `import.site`).
  */
 export function citiesWanted(f: CitiesFile, mapped: Set<string>, recordKm = 12, merge = 5): CityWanted[] {
-  const list = new Map(f.lists.map((l) => [l.source, l]));
   const groups: { rows: City[]; record?: CityRecord }[] = [];
   for (const c of f.cities) {
     const g = groups.find((x) => x.rows.some((r) => kmBetween(r.lat, r.lon, c.lat, c.lon) <= merge));
@@ -71,10 +69,9 @@ export function citiesWanted(f: CitiesFile, mapped: Set<string>, recordKm = 12, 
   const out: CityWanted[] = [];
   for (const g of groups) {
     const r = g.record;
-    const sources: PopulationSource[] = g.rows.map((c) => ({ source: c.source, pops: c.pops, hold: list.get(c.source)?.hold ?? 50 }));
-    if (r?.pops.length) sources.push({ source: r.id, pops: r.pops, hold: 50, record: true });
-    if (!sources.length) continue;
-    const pop = cityPopulation(sources, r?.span);
+    if (!g.rows.length && !r) continue;
+    const pop = populationOf(f, r?.lat ?? g.rows[0].lat, r?.lon ?? g.rows[0].lon, g.rows, r, { hold: 50 });
+    if (!pop.members.length) continue;
     const span = pop.span;
     if (span[0] > UNTIL) continue;
     const most = Math.max(...pop.members[0].people);

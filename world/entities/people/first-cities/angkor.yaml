@@ -21,6 +21,8 @@ claims:
     method: expert-estimate
     rank: preferred
     note: The ninth century. The paper's Table 1 begins its first period, of 248,696 people in all, in 770, so some settlement is older.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in klassen-2021.txt (sha256 62df9d046be766cf), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-25" }
   start-pleiades:
     prop: start
     value: 889 CE
@@ -30,6 +32,8 @@ claims:
       quote: founded in the late 9th century by Yasovarman I (889-901)
     method: historical-account
     note: The start of the reign of the king the gazetteer names as founder.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in pleiades-531398484.txt (sha256 24d98dcbf5e2871f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-25" }
   end-penny:
     prop: end
     value: { lo: 1401 CE, hi: 1500 CE }
@@ -51,6 +55,8 @@ claims:
       quote: The city was sacked in 1431 by invaders from the Ayutthaya kingdom, and was abandoned except for the temple of Angkor Wat
     method: historical-account
     note: The traditional date of the fall.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in pleiades-531398484.txt (sha256 24d98dcbf5e2871f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-25" }
   location:
     prop: location
     value: { lat: 13.43333, lon: 103.8333, frame: frame:earth/present-day }
@@ -64,6 +70,7 @@ claims:
     basis: reconstruction
   area-region:
     prop: settlement_area
+    ground: region
     value: 300000
     valid: { lo: 1181 CE, hi: 1300 CE }
     source:
@@ -73,8 +80,11 @@ claims:
     method: survey
     rank: preferred
     note: 3,000 km², the mapped region as the population model takes it, and much of it fields and forest. Half of the space was not cultivated, the paper says, and may not have been occupied.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in klassen-2021.txt (sha256 62df9d046be766cf), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-25" }
   area-cores:
     prop: settlement_area
+    ground: core
     value: 4207
     valid: { lo: 1181 CE, hi: 1300 CE }
     source:
@@ -84,6 +94,7 @@ claims:
     note: The civic-ceremonial centres alone, the dense part of the city, by the table's column for their area in hectares.
   area-unesco:
     prop: settlement_area
+    ground: site
     value: 40000
     source:
       ref: src:unesco-whc-668-angkor
@@ -93,6 +104,7 @@ claims:
     note: The modern park, so with no date. It is not the extent of the medieval city.
   population-klassen:
     prop: population
+    ground: region
     value: { lo: 700000, hi: 900000 }
     valid: { lo: 1101 CE, hi: 1300 CE }
     source:
@@ -104,8 +116,11 @@ claims:
     note: >-
       The whole region, modelled from mapped features and their dates. Preferred as the first full demographic study. Of these, 159,852 are in the civic-ceremonial centres in the last period of its
       Table 1 (1181–1300).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in klassen-2021.txt (sha256 62df9d046be766cf), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-25" }
   population-groslier:
     prop: population
+    ground: region
     value: 1900000
     valid: { lo: 1151 CE, hi: 1200 CE }
     source:
@@ -114,8 +129,11 @@ claims:
       quote: cautiously suggested a total population of 1.9 million in a region around Angkor in the last half of the 12th century CE
     method: expert-estimate
     note: Groslier's estimate, at second hand through Klassen et al.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in klassen-2021.txt (sha256 62df9d046be766cf), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-25" }
   population-rice:
     prop: population
+    ground: region
     value: 750000
     source:
       ref: src:klassen-2021-angkor-population
@@ -123,6 +141,8 @@ claims:
       quote: More recent attempts based on the carrying capacity of the landscape estimate have estimated a population of approximately 750,000 people
     method: expert-estimate
     note: At second hand through Klassen et al., from the rice the land could grow without irrigation. No moment is given.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in klassen-2021.txt (sha256 62df9d046be766cf), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-25" }
   population-chandler:
     prop: population
     value: 150000
@@ -130,3 +150,219 @@ claims:
     source: { ref: src:reba-2016-urban-population, loc: "chandlerV2.csv, row Angkor, column AD_1200" }
     method: compilation
     note: Chandler's figure, as digitized by Reba et al. (2016), and closer to the civic-ceremonial centres than to the region.
+  population-centres-770:
+    prop: population
+    ground: core
+    value: 89137
+    valid: { lo: 770 CE, hi: 888 CE }
+    source:
+      ref: src:klassen-2021-angkor-population
+      loc: "Table 1, period 1 (770–888), population, CCCs"
+      quote: "770–888 … 89,137"
+    method: model
+    note: >-
+      The people of the civic-ceremonial centres (CCCs) in the paper's period 1, the dense part of the settlement
+      complex where its temples and palaces stood, as its model has them from mapped features and their dates.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in klassen-2021.txt (sha256 62df9d046be766cf), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-25" }
+  area-centres-770:
+    prop: settlement_area
+    ground: core
+    value: 5847
+    valid: { lo: 770 CE, hi: 888 CE }
+    source:
+      ref: src:klassen-2021-angkor-population
+      loc: "Table 1, period 1 (770–888), CCC area"
+      quote: "770–888 … 5847"
+    method: survey
+    note: The ground of the civic-ceremonial centres in the paper's period 1, in hectares, by the table's column for their area.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in klassen-2021.txt (sha256 62df9d046be766cf), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-25" }
+  population-region-770:
+    prop: population
+    ground: region
+    value: 248696
+    valid: { lo: 770 CE, hi: 888 CE }
+    source:
+      ref: src:klassen-2021-angkor-population
+      loc: "Table 1, period 1 (770–888), population, Total; and its note ‡"
+      quote: "770–888 … 248,696 … The population of the embankment ranges from 0 to the numbers shown here."
+    method: model
+    note: >-
+      The whole 3,000 km² region in the paper's period 1. The total counts the people of the embankments at the most
+      the paper allows, and its note says they may be as few as none, so this is a high reading. The table's totals are
+      not the sums of its columns, so no lower total is worked out here.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in klassen-2021.txt (sha256 62df9d046be766cf), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-25" }
+  population-centres-889:
+    prop: population
+    ground: core
+    value: 76796
+    valid: { lo: 889 CE, hi: 1001 CE }
+    source:
+      ref: src:klassen-2021-angkor-population
+      loc: "Table 1, period 2 (889–1001), population, CCCs"
+      quote: "889–1001 … 76,796"
+    method: model
+    note: >-
+      The people of the civic-ceremonial centres (CCCs) in the paper's period 2, the dense part of the settlement
+      complex where its temples and palaces stood, as its model has them from mapped features and their dates.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in klassen-2021.txt (sha256 62df9d046be766cf), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-25" }
+  area-centres-889:
+    prop: settlement_area
+    ground: core
+    value: 8498
+    valid: { lo: 889 CE, hi: 1001 CE }
+    source:
+      ref: src:klassen-2021-angkor-population
+      loc: "Table 1, period 2 (889–1001), CCC area"
+      quote: "889–1001 … 8498"
+    method: survey
+    note: The ground of the civic-ceremonial centres in the paper's period 2, in hectares, by the table's column for their area.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in klassen-2021.txt (sha256 62df9d046be766cf), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-25" }
+  population-region-889:
+    prop: population
+    ground: region
+    value: 525313
+    valid: { lo: 889 CE, hi: 1001 CE }
+    source:
+      ref: src:klassen-2021-angkor-population
+      loc: "Table 1, period 2 (889–1001), population, Total; and its note ‡"
+      quote: "889–1001 … 525,313 … The population of the embankment ranges from 0 to the numbers shown here."
+    method: model
+    note: >-
+      The whole 3,000 km² region in the paper's period 2. The total counts the people of the embankments at the most
+      the paper allows, and its note says they may be as few as none, so this is a high reading. The table's totals are
+      not the sums of its columns, so no lower total is worked out here.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in klassen-2021.txt (sha256 62df9d046be766cf), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-25" }
+  population-centres-1002:
+    prop: population
+    ground: core
+    value: 117288
+    valid: { lo: 1002 CE, hi: 1112 CE }
+    source:
+      ref: src:klassen-2021-angkor-population
+      loc: "Table 1, period 3 (1002–1112), population, CCCs"
+      quote: "1002–1112 … 117,288"
+    method: model
+    note: >-
+      The people of the civic-ceremonial centres (CCCs) in the paper's period 3, the dense part of the settlement
+      complex where its temples and palaces stood, as its model has them from mapped features and their dates.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in klassen-2021.txt (sha256 62df9d046be766cf), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-25" }
+  area-centres-1002:
+    prop: settlement_area
+    ground: core
+    value: 3200
+    valid: { lo: 1002 CE, hi: 1112 CE }
+    source:
+      ref: src:klassen-2021-angkor-population
+      loc: "Table 1, period 3 (1002–1112), CCC area"
+      quote: "1002–1112 … 3200"
+    method: survey
+    note: The ground of the civic-ceremonial centres in the paper's period 3, in hectares, by the table's column for their area.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in klassen-2021.txt (sha256 62df9d046be766cf), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-25" }
+  population-region-1002:
+    prop: population
+    ground: region
+    value: 761663
+    valid: { lo: 1002 CE, hi: 1112 CE }
+    source:
+      ref: src:klassen-2021-angkor-population
+      loc: "Table 1, period 3 (1002–1112), population, Total; and its note ‡"
+      quote: "1002–1112 … 761,663 … The population of the embankment ranges from 0 to the numbers shown here."
+    method: model
+    note: >-
+      The whole 3,000 km² region in the paper's period 3. The total counts the people of the embankments at the most
+      the paper allows, and its note says they may be as few as none, so this is a high reading. The table's totals are
+      not the sums of its columns, so no lower total is worked out here.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in klassen-2021.txt (sha256 62df9d046be766cf), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-25" }
+  population-centres-1113:
+    prop: population
+    ground: core
+    value: 122534
+    valid: { lo: 1113 CE, hi: 1180 CE }
+    source:
+      ref: src:klassen-2021-angkor-population
+      loc: "Table 1, period 4 (1113–1180), population, CCCs"
+      quote: "1113–1180 … 122,534"
+    method: model
+    note: >-
+      The people of the civic-ceremonial centres (CCCs) in the paper's period 4, the dense part of the settlement
+      complex where its temples and palaces stood, as its model has them from mapped features and their dates.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in klassen-2021.txt (sha256 62df9d046be766cf), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-25" }
+  area-centres-1113:
+    prop: settlement_area
+    ground: core
+    value: 3868
+    valid: { lo: 1113 CE, hi: 1180 CE }
+    source:
+      ref: src:klassen-2021-angkor-population
+      loc: "Table 1, period 4 (1113–1180), CCC area"
+      quote: "1113–1180 … 3868"
+    method: survey
+    note: The ground of the civic-ceremonial centres in the paper's period 4, in hectares, by the table's column for their area.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in klassen-2021.txt (sha256 62df9d046be766cf), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-25" }
+  population-centres-1181:
+    prop: population
+    ground: core
+    value: 159852
+    valid: { lo: 1181 CE, hi: 1300 CE }
+    source:
+      ref: src:klassen-2021-angkor-population
+      loc: "Table 1, period 5 (1181–1300), population, CCCs"
+      quote: "1181–1300 … 159,852"
+    method: model
+    note: >-
+      The people of the civic-ceremonial centres (CCCs) in the paper's period 5, the dense part of the settlement
+      complex where its temples and palaces stood, as its model has them from mapped features and their dates.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in klassen-2021.txt (sha256 62df9d046be766cf), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-25" }
+  core-hariharalaya:
+    prop: core
+    value: { lat: 13.335986, lon: 103.974117, frame: frame:earth/present-day }
+    valid: { hi: 889 CE }
+    source:
+      - { ref: src:wikidata-bakong, loc: "P625 coordinate location" }
+      - ref: src:pottier-soutif-2014-hariharalaya
+        loc: "p. 147"
+        quote: à Bakong, temple central de l’ancienne capitale de Hariharālaya, dans le district actuel de Roluos au sud-est d’Angkor
+      - ref: src:lustig-2009-angkor-political-economy
+        loc: "p. 19, section 1.2.2"
+        quote: Jayavarman II is considered to have established the Khmer kingdom in the early 9th century CE at Roluos, near present day Angkor, on the northern shore of the Tonle Sap. The capital moved in the late 9th century to sites around Phnom Bakheng, the designated centre of Angkor.
+      - ref: src:pleiades-angkor
+        loc: "place 531398484, description"
+        quote: founded in the late 9th century by Yasovarman I (889-901)
+    method: gazetteer
+    note: >-
+      Bakong, the central temple of Hariharalaya at Roluos, about 16 km south-east of the record's point, where the
+      kingdom's capital stood before it moved to Yasodharapura. The point is Bakong's in the gazetteer. The years are
+      until 889, when the gazetteer says Yasovarman I founded the city round Phnom Bakheng, the late 9th century Lustig
+      gives for the move; Pottier and Soutif date Bakong's moats and enclosures earlier than the conventional 881.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in pottier-soutif-2014.txt (sha256 31ec941547763b3e), lustig-2009.txt (sha256 494d50a16c137857) and pleiades-531398484.txt (sha256 24d98dcbf5e2871f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-25" }
+  core-yasodharapura:
+    prop: core
+    value: { lat: 13.43333, lon: 103.8333, frame: frame:earth/present-day }
+    valid: { lo: 889 CE }
+    source:
+      - { ref: src:pleiades-angkor, loc: "place 531398484, representative point" }
+      - ref: src:pleiades-angkor
+        loc: "place 531398484, description"
+        quote: founded in the late 9th century by Yasovarman I (889-901)
+      - ref: src:lustig-2009-angkor-political-economy
+        loc: "p. 19, section 1.2.2"
+        quote: The capital moved in the late 9th century to sites around Phnom Bakheng, the designated centre of Angkor.
+    method: gazetteer
+    note: >-
+      Yasodharapura, the city round Phnom Bakheng from Yasovarman I's founding of it, as the gazetteer dates it; its point
+      is the record's own, the gazetteer's representative point for Angkor.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in pleiades-531398484.txt (sha256 24d98dcbf5e2871f) and lustig-2009.txt (sha256 494d50a16c137857), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-25" }

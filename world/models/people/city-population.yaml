@@ -1,49 +1,100 @@
 # A model run here (section 4.10 of the design). It makes no field: what it derives is each settlement's people
-# through time, which the settlement generator lays its town out from (docs/plans/CITIES.md, The models).
+# through time, on each ground its figures count, which the settlement generator lays its town out from
+# (docs/plans/MODELS.md, the pilot; docs/plans/CITIES.md, The models).
 id: model:people/city-population
 type: model
-title: A settlement's people through time
+title: A settlement's people through time, from every figure of them
 description: >-
-  Gathers every figure of a settlement's people that the world has, the lists' (Chandler's and Modelski's, as Reba,
-  Reitsma and Seto placed them) and its own record's, into one reading through time. A record's own figure takes the
-  place of a list's within a few years of it, and a list's stands elsewhere. Between two figures the people are taken to
-  have changed by a constant rate. Before the first figure they rise from a founding size, from the start its record
-  gives, and after the last they fall to it, to its end; a settlement whose record runs on to the present holds its last
-  figure. One with no record stands from the first figure, less the years its list holds a figure for, to the last, plus
-  them. The model knows nothing of what happened to a city between two figures: a sack, a plague or a boom between them
-  is not in it until a figure or a record says so.
+  Reads every figure the world has of a settlement, the lists' (Chandler's and Modelski's, as Reba, Reitsma and Seto
+  placed them) and its own record's, as an observation of what it counts, and conditions on them all together. The log
+  of the settlement's people wanders through time as a random walk, so that between two figures it changes at a
+  constant rate and its doubt grows with the years from the nearest figure. A figure of the settlement's people
+  observes their mean over the years it is for, and says the people were there from the start of those years; one that
+  gives no years observes the whole of the settlement's life, weakly, and is never a point at its founding. A figure of its core observes a part of its people, a count of its
+  houses its people over a household, and its ground its people over the density they lived at, whose prior is
+  model:people/density's. A figure of its region observes the settlement's people and the land's about it together,
+  over a prior of the settlement's and HYDE's in the region's ground; the bounds of a site today observe none of its
+  people. Each source's figures for a settlement share a bias, a factor by which they may all be high or low. A
+  preferred figure passes over its rivals: the record's other figures for the same ground at about the same time, a
+  count of houses then, and a list's figure within 25 years of it. Before the first figure the people rise from a
+  founding size at the settlement's start to where the first figure's years begin, and after the last figure's years
+  they fall to it at its end, or hold where its record runs on to the present. The model knows nothing of what happened to a city between two figures: a sack, a plague or a
+  boom is not in it until a figure says so.
 author: machine:claude-code
 code: core/citypop.ts
 inputs:
   - { ref: field:people/cities-ancient, note: "Modelski's figures, by city and year" }
   - { ref: field:people/cities, note: "Chandler's figures, by city and year" }
-  - { prop: population, kind: settlement, note: "a settlement's own figures, at the times they are for" }
-  - { prop: houses, kind: settlement, note: "its houses, where a record counts them and gives no people" }
-  - { prop: settlement_area, kind: settlement, note: "its ground, where a record gives neither people nor houses" }
+  - { prop: population, kind: settlement, note: "a settlement's own figures, each with the ground it counts and the years it is for" }
+  - { prop: houses, kind: settlement, note: "its houses, where a record counts them" }
+  - { prop: settlement_area, kind: settlement, note: "its ground, and its region's, which its people are read over" }
   - { prop: start, kind: settlement, note: "when it was founded" }
   - { prop: end, kind: settlement, note: "when it was left" }
-derives: Each settlement's people through time, as the members of a band, from its founding to its end.
+  - { ref: model:people/density, note: "the prior of how densely it lived, from the settlements near it" }
+  - { ref: field:earth/population, note: "HYDE's people within a region's ground, the prior of a region's people beside the settlement's own" }
+derives: >-
+  Each settlement's people through time, as the central reading and the band's edges, from its founding to its end;
+  its density scale; and, where its record gives a region, the region's people. Each figure's fit, and its prediction
+  from all the others, for the panel and the scores.
 params:
+  walk:
+    choice: >-
+      0.004 a year: the variance of the log of the people's random walk, so that a century from the nearest figure the
+      people may be about twice or half as many. The build fits it again to the lists' figures held out one at a time
+      (tools/world/src/holdout.ts), and writes what it fitted in the cities file.
+  bias:
+    choice: >-
+      0.286 for a list's figures and for a work's, where the build has fitted none: the spread of the log of the factor by
+      which one source's figures for a settlement may all be high or low. A work's figures of the settlement and its core
+      share one bias whatever they count, its people, its ground and its houses: a work that drew a city's ground wide
+      counted its people over it, so that how densely they lived is what it says most surely. Its figures of the region
+      have a bias of their own. At a list's figure 0.286 makes the band 1.6 times higher and lower, the band this model
+      drew before it read figures as observations. The build fits a list's to the lists' figures held out one at a time,
+      and a work's to the records' figures held out with their record's, and writes what it fitted in the cities file.
+  point:
+    choice: >-
+      0.05 on the log, about 5%: one figure's own error besides its source's bias, where the figure gives no range, so
+      that two lists whose figures for the same two years disagree in their trend, as Chandler's and Modelski's for
+      Chang'an in 800 and 900, are both read. A settlement whose figures read are all one source's has none: its error
+      is all its source's bias, and it is drawn through its figures exactly.
+  core:
+    choice: >-
+      A settlement 1.25 times its core, in people and in ground, with a spread of 0.35 on the log. No work gives it; the
+      civic-ceremonial centres of Greater Angkor and its 12th-century city are about the same size (Klassen et al.
+      2021, Table 1, and Chandler's figure), which a larger ratio would not fit.
+  household:
+    choice: Five people to a house, with a spread of 0.25 on the log, as the settlement generator's own household.
+  density:
+    follows: model:people/density
+  hyde:
+    choice: >-
+      0.34 on the log: HYDE's people within a region may be 1.75 times higher or lower, at the edges of a 90% band, as
+      HYDE's authors give for their numbers at 1 CE (field:earth/population's range).
   founding:
     choice: >-
       A thousand people: how many a settlement had when it was founded and when it was left, where no figure says. It
       only shapes the years before a settlement's first figure and after its last; no work gives it.
-  doubt:
-    choice: >-
-      1.6: how many times higher and lower the band's other members read the people. The lists' figures and later
-      archaeologists' differ by a factor of two or more (docs/HUMAN-LANDSCAPE.md); this is a band of that kind, not a
-      measured spread.
   near:
-    choice: Twenty-five years, within which a record's own figure takes the place of a list's.
-  rate:
+    choice: Twenty-five years, within which a record's preferred figure passes over a list's.
+  rivals:
     choice: >-
-      Between two figures the people change by a constant rate, so a city that doubled in a century grew a little more
-      every year. Nothing records how they changed between figures.
+      Fifty years: two figures for moments this close are rivals, and two for spans are where their years, widened by
+      25 either way, overlap by half the shorter.
+  hold:
+    choice: Fifty years either side of a record's figure, for a settlement whose record gives no start or end.
+  band:
+    choice: The band's edges are 1.645 standard deviations either side of the central reading, so that 90% lies within.
 uncertainty:
   kind: ensemble
   note: >-
-    Member 0 is the central reading; members 1 and 2 are it higher and lower by the doubt; each list whose figures the
-    central reading passed over adds a member of its own. They are not drawn from any measured spread.
+    Member 0 is the central reading; members 1 and 2 are the band's higher and lower edges, at each figure's time and
+    between, as the model's posterior gives them. The spread comes from the figures' own ranges, their sources' biases
+    and the years between them.
 checks:
-  - { test: core/citypop.test.ts, holds: "prefers the record’s own figures, and keeps a list’s apart as a reading of its own" }
-  - { test: core/citypop.test.ts, holds: "rises from a founding size at the record’s start, and holds its last figure where the record runs on" }
+  - { test: core/citypop.test.ts, holds: "reads a list between its figures at a constant rate, and stands only while the list holds it" }
+  - { test: core/citypop.test.ts, holds: "passes over a list's figure near a record's preferred one, and reads it elsewhere" }
+  - { test: core/citypop.test.ts, holds: "reads a figure that gives no time over the whole span, never as a point at the founding" }
+  - { test: core/citypop.test.ts, holds: "stands a figure's people from the start of its years, and ramps from a founding size only before them" }
+  - { test: core/citypop.test.ts, holds: "takes a core's figure for a part of the settlement, and a region's for the land about it besides" }
+  - { test: core/citypop.test.ts, holds: "passes over a count of houses where a preferred figure gives the people, and reads it where none does" }
+  - { test: core/citypop.test.ts, holds: "scores a figure held out by how well the others predict it" }

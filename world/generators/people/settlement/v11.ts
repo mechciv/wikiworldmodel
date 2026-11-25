@@ -1,4 +1,4 @@
-// The settlement generator, version 10 (docs/HUMAN-LANDSCAPE.md): the anonymous human landscape of a scene. From the
+// The settlement generator, version 11 (docs/HUMAN-LANDSCAPE.md): the anonymous human landscape of a scene. From the
 // people part of a scene's spec it lays out where people lived, how many houses, of what kind, and the fields and
 // pastures around them, in the scene's local metres. Nobody recorded any of these houses: how many there are follows
 // HYDE's people through the anthromes, and the cities of the lists and of the world's records where they name one; what
@@ -99,6 +99,19 @@
 //     more, larger houses on more plots. Builds made before version 10 carry no `town` parameters, and lay their towns
 //     out as version 9 did.
 //
+// Version 11 (docs/plans/MODELS.md, the pilot):
+//   - A city's people are model:people/city-population's: every figure of its lists and its record read as an
+//     observation of the ground it counts over the years it is for, conditioned on together, so a figure with no date
+//     is no longer the people at its founding, and a region's figure is no longer the city's.
+//   - Its town is laid out at the density that model gives it, from its own ground and people and from those of the
+//     settlements near it (model:people/density), with no floor of fifteen to the hectare: a dispersed city is drawn
+//     as one.
+//   - Its ground is ranked from the cores its record says it was centred on, each while it was one.
+//   - Where its record counts a region's people, those beyond the town's are spread over the region's ground among
+//     the scene's villages and farmsteads (core/landscape.ts, regionsInto), in place of HYDE's there.
+//   Builds made before version 11 give a record's figures one to a time, of the settlement itself, and no fitted
+//   parameters; their cities are drawn from those by the model's defaults.
+//
 // Everything is seeded by the world's 5′ cells and the anthromes' step, not by the scene, so two scenes that overlap put
 // their settlements in the same places: only the ground they stand on, which is the scene's, can move one a little.
 import { fillDwelling, homesteadOf, houseSize, HOUSE_VARIANTS, outbuildingSpec, type Homestead, type HouseDims, type OutbuildingParams } from '../dwellings.ts';
@@ -126,7 +139,7 @@ import { MAT } from '../../city/kit.ts';
 export { peopleReach, waterNear, type WaterNear } from './sites.ts';
 
 export const GENERATOR = 'gen:people/settlement';
-export const VERSION = 10;
+export const VERSION = 11;
 
 const EARTH = 6371000;
 const DEG = PI / 180;
@@ -2422,6 +2435,9 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
       span: life.span,
       members: life.members,
       areas: life.areas,
+      // The density the population model gives it, and the places it was centred on (version 11).
+      ...(life.at10k !== undefined ? { at10k: life.at10k } : {}),
+      ...(life.cores?.length ? { cores: life.cores } : {}),
       toward: life.toward,
       ground: { height, above: height },
       streets: streetKind,
@@ -2502,7 +2518,8 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
       }
       streets.push({ line: [cx + ax, cy + ay, cx + bx, cy + by], width: Math.max(2.4, l.width * 0.9), paved: gridded && s.pattern === 'city', settlement: si });
     }
-    for (const r of plan.routes) streets.push({ line: r.line.map((v, i) => v + (i % 2 ? cy : cx)), width: Math.max(4, main * 0.85), paved: gridded && s.pattern === 'city', settlement: si });
+    // A route that led to a core only while it was one is drawn only then.
+    for (const r of plan.routes) if (r.from === undefined || (P.t >= r.from && P.t <= (r.to ?? Infinity))) streets.push({ line: r.line.map((v, i) => v + (i % 2 ? cy : cx)), width: Math.max(4, main * 0.85), paved: gridded && s.pattern === 'city', settlement: si });
     // In words, as layOutTown says it.
     const { wall: _generic, ...walled } = form;
     const stated = (town.from.wall ?? 'generic') !== 'generic' || !said;
@@ -2922,7 +2939,7 @@ export interface LandUse {
  * What the far land (farLand) takes on the average for what LandUseMap works out at each place from the ground there: the
  * share of a shifting cultivator's fields cleared at a time, which LandUseMap draws where a noise passes a threshold; and
  * the share of a rice or irrigated field flooded as a paddy, which it draws on low, gentle ground near the water (all of
- * it for rice, half for irrigated land). The first is held to LandUseMap's by a test (settlement/v10.test.ts); the second
+ * it for rice, half for irrigated land). The first is held to LandUseMap's by a test (settlement/v11.test.ts); the second
  * hangs on how much of a cell lies low by its water, which no far cell says, and is the generator's guess.
  */
 export const FAR_AVERAGE = { swiddenCleared: 0.4, paddy: { rice: 0.6, irrigated: 0.25 } };

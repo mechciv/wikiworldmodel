@@ -114,3 +114,13 @@ views:
   - name: huai-farmland-above
     what: The same plain from 10 km up, over the whole of a few 5′ cells, whose edges should not show.
     link: t=-201.5&lat=33.58&lon=117.71&d=1.00157&h=0&v=0&hour=12&mo=6&clock=0
+  - name: angkor-851-plain
+    what: >-
+      The plain under Angkor's record point in 851 CE from 1.5 km up, before Yasodharapura was founded: the people of
+      Greater Angkor beyond its towns, in hamlets among their fields (model:people/density; docs/slices/NINETEENTH-SLICE.md).
+    link: t=851.6&lat=13.415&lon=103.8333&d=1.00024&h=10&v=60&hour=10&mo=8&clock=0
+  - name: angkor-851-hariharalaya
+    what: >-
+      Hariharalaya at Roluos in 851 CE from 1.5 km up, the court's town about Bakong at the density Klassen et al. measured
+      for Angkor's civic-ceremonial centres.
+    link: t=851.6&lat=13.31&lon=103.974&d=1.00024&h=10&v=60&hour=10&mo=8&clock=0

@@ -66,13 +66,24 @@ export const GROWTH_DEFAULTS: GrowthParams = {
   flood: { margin: 1.5, factor: 3 },
   outside: 1.8,
   water: { reach: 400, weight: 0.5 },
-  density: { at10k: 100, beta: 0.2, gradient: 4, least: 15, most: 600 },
+  density: { at10k: 100, beta: 0.2, gradient: 4, least: 1, most: 600 },
 };
 
+/** A place the settlement was centred on, in its own metres, and the years it was: always, where they are left out. */
+export interface GrowthCore {
+  x: number;
+  y: number;
+  from?: number;
+  to?: number;
+}
+
 export interface GrowthInput {
-  cores: { x: number; y: number }[];
+  /** the places it was centred on: its ground is ranked from those that stood in an epoch, from all where none did */
+  cores: GrowthCore[];
   /** polylines, x, y pairs in local metres */
   routes: number[][];
+  /** the years each route stood, where it did not stand through the whole span: an epoch ranks only those standing */
+  routeYears?: ([number, number] | undefined)[];
   walls: GrowthWall[];
   ground: GrowthGround;
   /** the members' people; member 0 is the central estimate */
@@ -81,6 +92,11 @@ export interface GrowthInput {
   span: [number, number];
   /** areas a record gives, ha, at a time: the people's density is set to meet them (see `densityScale`) */
   areas?: { t: number; ha: number }[];
+  /**
+   * People to the hectare at 10,000 people, where the population model gives it from the settlement's figures and its
+   * neighbours' (model:people/density): it takes the place of what `densityScale` sets from `areas`
+   */
+  at10k?: number;
   params?: Partial<GrowthParams>;
   /** the side of a cell, m; chosen from the largest area if not given */
   cell?: number;
@@ -360,9 +376,9 @@ function rankGround(input: GrowthInput, g: GrowthGrid, p: GrowthParams, walls: G
  * ever took in any member, three times the radius of a disc of that area, for growth along routes and round water
  * and hills. Known before anything is ranked, so the routes that the ranking reads can be laid over the same ground.
  */
-export function growthGrid(input: Pick<GrowthInput, 'people' | 'areas' | 'params' | 'cell'>): { grid: GrowthGrid; at10k: number; params: GrowthParams } {
+export function growthGrid(input: Pick<GrowthInput, 'people' | 'areas' | 'params' | 'cell' | 'at10k'> & { cores?: GrowthCore[] }): { grid: GrowthGrid; at10k: number; params: GrowthParams } {
   const p = merge(input.params);
-  const at10k = densityScale(input.people[0] ?? { t: [], people: [] }, input.areas, p.density);
+  const at10k = input.at10k !== undefined && input.at10k > 0 ? Math.min(p.density.most, Math.max(p.density.least, input.at10k)) : densityScale(input.people[0] ?? { t: [], people: [] }, input.areas, p.density);
   // The most people it had up to the horizon this model draws to: a city of millions in the twentieth century is drawn
   // by none of this, and its ground beyond the grid ranks after all that is in it, so its old core ranks the same.
   let maxHa = 0;
@@ -372,7 +388,9 @@ export function growthGrid(input: Pick<GrowthInput, 'people' | 'areas' | 'params
   }
   const cell = input.cell ?? cellFor(maxHa);
   const radius = Math.sqrt((maxHa * 1e4) / Math.PI);
-  const reach = Math.min(REACH_MOST, Math.max(radius * 3, cell * 8));
+  // Far enough for every core it was centred on, with the ground about each.
+  const coreFar = Math.max(0, ...(input.cores ?? []).map((k) => Math.hypot(k.x, k.y) + radius * 1.5));
+  const reach = Math.min(REACH_MOST, Math.max(radius * 3, cell * 8, coreFar));
   const nx = Math.max(8, Math.ceil((reach * 2) / cell));
   return { grid: { x0: -(nx * cell) / 2, y0: -(nx * cell) / 2, cell, nx, ny: nx }, at10k, params: p };
 }
@@ -381,17 +399,25 @@ export function growthGrid(input: Pick<GrowthInput, 'people' | 'areas' | 'params
 export function growSettlement(input: GrowthInput): Growth {
   const { grid, at10k, params: p } = growthGrid(input);
   const cell = grid.cell;
-  // Epochs: wherever a wall begins or ends to stand within the span.
+  // Epochs: wherever a wall begins or ends to stand within the span, or a core to be one.
   const [t0, t1] = input.span;
   const bounds = new Set<number>([t0, t1]);
   for (const w of input.walls) for (const b of [w.from, w.to]) if (b > t0 && b < t1) bounds.add(b);
+  for (const k of input.cores) for (const b of [k.from, k.to]) if (b !== undefined && b > t0 && b < t1) bounds.add(b);
+  for (const y of input.routeYears ?? []) for (const b of y ?? []) if (b > t0 && b < t1) bounds.add(b);
   const times = [...bounds].sort((a, b) => a - b);
   const epochs: GrowthEpoch[] = [];
   for (let i = 0; i + 1 < times.length; i++) {
     const from = times[i];
     const to = times[i + 1];
     const standing = input.walls.filter((w) => w.from <= from && w.to > from);
-    epochs.push({ from, to, ...rankGround(input, grid, p, standing) });
+    // The cores that stood through the epoch, all of them where none did; and the routes that led to them then.
+    const cores = input.cores.filter((k) => (k.from ?? -Infinity) <= from && (k.to ?? Infinity) > from);
+    const routes = input.routes.filter((_, i) => {
+      const y = input.routeYears?.[i];
+      return !y || (y[0] <= from && y[1] > from);
+    });
+    epochs.push({ from, to, ...rankGround({ ...input, cores: cores.length ? cores : input.cores, routes }, grid, p, standing) });
   }
   const cellHa = (cell * cell) / 1e4;
   const cut = input.people.map((s) => ({ t: [...s.t], cells: s.people.map((P) => areaFor(P, at10k, p.density) / cellHa) }));

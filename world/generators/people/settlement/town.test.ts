@@ -55,6 +55,25 @@ describe('a town through its life', () => {
     for (const l of a.lanes) expect(laneLater.get(l.id.split('#')[0])?.some((t) => within(l.line, t))).toBe(true);
   });
 
+  it('lays its routes to each core while it was one, and builds about the core that stood', () => {
+    // Its centre moved: first 1.5 km west of its point, then on its point.
+    const plan = planTown(input({ cores: [{ x: -1500, y: 0, from: -200, to: 300 }, { x: 0, y: 0, from: 300, to: 800 }] }));
+    const first = plan.routes.filter((r) => r.to === 300);
+    const second = plan.routes.filter((r) => r.from === 300);
+    expect(first.length).toBeGreaterThan(0);
+    expect(second.length).toBeGreaterThan(0);
+    // One of each core's routes runs from it, the others from where they meet one of its own.
+    expect(first.some((r) => r.line[0] === -1500 && r.line[1] === 0)).toBe(true);
+    expect(second.some((r) => r.line[0] === 0 && r.line[1] === 0)).toBe(true);
+    // Its plots stand about the core of the time.
+    const mean = (t: number) => {
+      const ps = townAt(plan, t).plots;
+      return ps.reduce((a, q) => a + q.x, 0) / ps.length;
+    };
+    expect(mean(0)).toBeLessThan(-1000);
+    expect(mean(600)).toBeGreaterThan(-500);
+  });
+
   it('gives up its outer plots first as its people fall', () => {
     const plan = planTown(input());
     const peak = townAt(plan, 300);

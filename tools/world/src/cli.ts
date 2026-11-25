@@ -233,6 +233,19 @@ const commands: Record<string, (args: string[]) => Promise<number | void>> = {
     const mapped = new Set((ts.sites ?? []).filter((s) => s.kind === 'city' && s.place).map((s) => s.place!));
     console.log(citiesWantedText(citiesWanted(f, mapped), Number(opt('--n') ?? 40), Number(opt('--below') ?? 2)));
   },
+  // The population model's scores on figures it did not see (docs/plans/MODELS.md, decision 7), on the latest build's
+  // cities file: `npm run world -- holdout [<record id> …] [--fit]`. Each record named gets each of its figures predicted
+  // with all of its record's held out; `--fit` fits the model's parameters again rather than read the build's.
+  async holdout(args) {
+    const { fitCitiesModel, peopleScores, scoresText, settlementsOf } = await import('./holdout.ts');
+    const index = join(REPO, 'dist/builds/index.json');
+    if (!existsSync(index)) throw new Error('no build: run npm run build:world first');
+    const dir = join(REPO, 'dist/builds', JSON.parse(readFileSync(index, 'utf8')).latest);
+    const f = JSON.parse(readFileSync(join(dir, 'people/cities.json'), 'utf8'));
+    const ids = args.filter((a) => !a.startsWith('--'));
+    const s = args.includes('--fit') ? fitCitiesModel(f) : peopleScores(f, settlementsOf(f));
+    console.log(scoresText(s, ids));
+  },
   // What most wants a building tradition: `npm run world -- dwellings-wanted [--n 40] [--region 59] [--lifeway herders]`;
   // `--totals` for each time's people by way of life and how many a tradition houses; `--regions` for the regions' numbers.
   async 'dwellings-wanted'(args) {

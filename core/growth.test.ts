@@ -115,6 +115,23 @@ describe('the growth of a settlement', () => {
     expect(Math.abs(people - 20000) / 20000).toBeLessThan(0.02);
   });
 
+  it('lays its ground out at the density the population model gives, in place of what its areas would set', () => {
+    const g = growSettlement(base({ areas: [{ t: 0, ha: 300 }], at10k: 12 }));
+    expect(g.at10k).toBe(12);
+    expect(Math.abs(builtHa(g, 0) - areaFor(20000, 12, g.params.density))).toBeLessThan(0.5);
+    // A density below the fifteen to the hectare it was once held to is drawn so: a dispersed city's.
+    expect(20000 / builtHa(g, 0)).toBeLessThan(15);
+  });
+
+  it('ranks its ground from the cores that stood at a time, each while it was one', () => {
+    const g = growSettlement(base({ cores: [{ x: -1500, y: 0, from: -500, to: 0 }, { x: 1500, y: 0, from: 0, to: 600 }], people: [{ t: [-500, 600], people: [5000, 5000] }] }));
+    expect(g.epochs.map((e) => [e.from, e.to])).toEqual([[-500, 0], [0, 600]]);
+    expect(builtAt(g, -1500, 0, -250)).toBe(true);
+    expect(builtAt(g, 1500, 0, -250)).toBe(false);
+    expect(builtAt(g, 1500, 0, 250)).toBe(true);
+    expect(builtAt(g, -1500, 0, 250)).toBe(false);
+  });
+
   it('ranks the same ground the same way every time', () => {
     const a = growSettlement(base({ ground: valley, routes: [[0, 0, 900, 300]] }));
     const b = growSettlement(base({ ground: valley, routes: [[0, 0, 900, 300]] }));

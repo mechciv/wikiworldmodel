@@ -14,15 +14,16 @@ import { join } from 'node:path';
 import { unzipSync } from 'fflate';
 import { decodeTile, encodeTile } from '../../../../core/container.ts';
 import { compileAgriculture, compileHusbandry, compileTraditions, prevalenceOf, traditionAt, traditionsFor, type Agriculture, type AgricultureInput, type CropEntry, type PrevalenceWord, type DwellingSpec, type FieldSpec, type Husbandry, type HusbandryInput, type LifewayWord, type OutbuildingSpec, type SettlementSpec, type TownSpec, type Tradition, type TraditionInput } from '../../../../core/dwelling.ts';
+import type { Figure } from '../../../../core/citypop.ts';
 import { canonicalForm, type Form } from '../../../../core/form.ts';
 import type { LivingTaxon } from '../../../../core/scene.ts';
-import { GENERATOR as SETTLEMENT, peopleReach, VERSION as SETTLEMENT_VERSION } from '../../../../world/generators/people/settlement/v10.ts';
+import { GENERATOR as SETTLEMENT, peopleReach, VERSION as SETTLEMENT_VERSION } from '../../../../world/generators/people/settlement/v11.ts';
 import { EXTENT } from '../../../../world/generators/life/scene/current.ts';
 import { FormTree } from '../forms.ts';
 import type { LandscapeIndex, TraditionsFile } from '../../../../core/landscape.ts';
 export type { LandscapeIndex, TraditionsFile };
-import { anthromeTile, assessmentAt, cityPeople, classAtStep, cellOf, kmBetween, LEVEL_WORDS, LIFEWAY_OF, lifewayOf, nameAt, nearestStep, shareDensity, tileKey, type AnthromeClass, type City, type CityRecord, type CitiesFile, type AnthromeTile, type AnthromeTileHeader, type Assessment, type AssessmentsFile, type HousingCount, type Pattern } from '../../../../core/landscape.ts';
-import { gridSize, peopleAt, type PeopleFile } from '../../../../core/layers.ts';
+import { anthromeTile, assessmentAt, cityPeople, classAtStep, cellOf, figuresOf, kmBetween, LEVEL_WORDS, LIFEWAY_OF, lifewayOf, nameAt, nearestStep, shareDensity, tileKey, type AnthromeClass, type City, type CityRecord, type CitiesFile, type AnthromeTile, type AnthromeTileHeader, type Assessment, type AssessmentsFile, type HousingCount, type Pattern } from '../../../../core/landscape.ts';
+import { cellAt, gridSize, peopleAt, type PeopleFile } from '../../../../core/layers.ts';
 import { datasetFile } from '../manifest.ts';
 import { CACHE } from '../paths.ts';
 import { sha256, stableStringify } from '../util.ts';
@@ -584,14 +585,14 @@ export function keptAnimals(w: World, ids: string[], log: (s: string) => void = 
 
 // ——— The settlements with records ———
 
-/** How near in years a second figure of a record is taken for a rival of one already kept, and not for another time's. */
-const RIVAL_YEARS = 50;
+/** The properties whose figures the population model reads (core/citypop.ts). */
+const FIGURE_PROPS: Figure['prop'][] = ['population', 'settlement_area', 'houses'];
 
 /**
  * The settlements the world has records of, as the landscape reads them (core/landscape.ts, CityRecord): each with a
- * place, with what its claims say of its people, its houses and its ground at the times they are for, and how it was
- * laid out. Of several claims for one time, or for times within fifty years of each other, the one the default picture
- * prefers is kept, or the only one; where they cannot be told apart none is, and the lists' figure stands.
+ * place, with every claim of its people, its houses and its ground but those deprecated, each with the ground it counts
+ * and the years it is for, which the population model reads together (core/citypop.ts), with its cores while they
+ * stood, and how it was laid out.
  */
 export function cityRecords(s: Solved): CityRecord[] {
   const out: CityRecord[] = [];
@@ -604,29 +605,42 @@ export function cityRecords(s: Solved): CityRecord[] {
     const start = best(time.start, time.start.lo);
     const end = time.endUnknown ? best(time.end, time.end.hi) : best(time.end, Infinity);
     const span: [number, number] = [Number.isFinite(start) ? start : -1e9, Number.isFinite(end) ? end : 1e9];
-    // A property's figures through time: the preferred claim first, then the others where they stand alone at their time.
-    const figures = (prop: string): [number, number][] => {
-      const claims = e.claims.filter((c) => c.subject === e.id && c.prop === prop && !c.alt && c.status !== 'deprecated' && c.rank !== 'deprecated');
-      const points: { t: number; v: number; preferred: boolean }[] = [];
-      for (const c of claims) {
-        const q = c.value as number | { mean?: number; lo?: number; hi?: number };
-        const v = typeof q === 'number' ? q : typeof q?.mean === 'number' ? q.mean : typeof q?.lo === 'number' && typeof q?.hi === 'number' ? (q.lo + q.hi) / 2 : NaN;
-        if (!(v > 0)) continue;
-        const valid = validSpan(s, c.valid, e.id);
-        // A claim that says no time holds while the record stands: at its start.
-        const ts = !valid ? [span[0] > -1e8 ? span[0] : span[1]] : valid[0] !== null && valid[1] !== null && valid[1] - valid[0] > 1 ? [valid[0], valid[1]] : [valid[0] ?? valid[1]];
-        for (const t of ts) if (t !== null && Number.isFinite(t)) points.push({ t, v, preferred: c.rank === 'preferred' });
-      }
-      const kept: { t: number; v: number }[] = [];
-      for (const x of points.filter((x) => x.preferred)) kept.push(x);
-      for (const x of points.filter((x) => !x.preferred)) {
-        if (kept.some((k) => Math.abs(k.t - x.t) <= RIVAL_YEARS)) continue;
-        // Unranked rivals for one time cannot be told apart: none is kept.
-        const rivals = points.filter((y) => !y.preferred && y !== x && Math.abs(y.t - x.t) <= RIVAL_YEARS && y.v !== x.v);
-        if (!rivals.length) kept.push(x);
-      }
-      return kept.sort((a, b) => a.t - b.t).map((x) => [x.t, Math.round(x.v * 100) / 100] as [number, number]);
+    // The years a claim is for: a span over more than a year, else the moment it names; none where it names none.
+    const yearsOf = (c: { valid?: unknown }): [number, number] | undefined => {
+      const valid = validSpan(s, c.valid as never, e.id);
+      if (!valid) return undefined;
+      if (valid[0] !== null && valid[1] !== null && valid[1] - valid[0] > 1) return [valid[0], valid[1]];
+      const p = valid[0] ?? valid[1];
+      return p !== null && Number.isFinite(p) ? [p, p] : undefined;
     };
+    const figures: Figure[] = [];
+    for (const c of e.claims) {
+      if (c.subject !== e.id || !FIGURE_PROPS.includes(c.prop as Figure['prop']) || c.alt || c.status === 'deprecated' || c.rank === 'deprecated') continue;
+      const q = c.value as number | { mean?: number; lo?: number; hi?: number };
+      const range = typeof q === 'object' && q !== null && typeof q.lo === 'number' && typeof q.hi === 'number' && q.lo > 0 && q.hi > q.lo ? { lo: q.lo, hi: q.hi } : undefined;
+      const v = typeof q === 'number' ? q : typeof q?.mean === 'number' ? q.mean : range ? Math.sqrt(range.lo * range.hi) : NaN;
+      if (!(v > 0)) continue;
+      const t = yearsOf(c);
+      figures.push({
+        prop: c.prop as Figure['prop'],
+        ground: (c.ground ?? 'settlement') as Figure['ground'],
+        ...(t ? { t } : {}),
+        v: Math.round(v * 100) / 100,
+        ...(range ?? {}),
+        source: c.sources[0]?.ref ?? 'unsourced',
+        claim: `${e.id}#${c.key}`,
+        ...(c.rank === 'preferred' ? { preferred: true } : {}),
+      });
+    }
+    // The places it was centred on, while each was.
+    const cores = e.claims
+      .filter((c) => c.subject === e.id && c.prop === 'core' && !c.alt && c.status !== 'deprecated' && c.rank !== 'deprecated')
+      .flatMap((c) => {
+        const p = c.value as { lat?: number; lon?: number };
+        if (typeof p?.lat !== 'number' || typeof p?.lon !== 'number') return [];
+        const valid = validSpan(s, c.valid, e.id);
+        return [{ lat: p.lat, lon: p.lon, span: [valid?.[0] ?? span[0], valid?.[1] ?? span[1]] as [number, number] }];
+      });
     const name = claimOf(s, e.id, 'name')?.value as Record<string, string> | undefined;
     // Its names in turn, where they have their times: a scene of 1500 names Tenochtitlan, not Mexico City.
     const names = e.claims
@@ -644,9 +658,8 @@ export function cityRecords(s: Solved): CityRecord[] {
       lat: at.lat,
       lon: at.lon,
       span,
-      pops: figures('population'),
-      areas: figures('settlement_area'),
-      houses: figures('houses'),
+      figures,
+      ...(cores.length ? { cores } : {}),
       ...(town ? { town } : {}),
       ...(town && townSpan(s, e.id) ? { townSpan: townSpan(s, e.id) } : {}),
     });
@@ -862,7 +875,7 @@ export function landscapeResolve(b: LandscapeBuilt): NonNullable<import('../../.
           if (kmBetween(lat, lon, c.lat, c.lon) <= reach && (cityPeople(c, t, l?.hold ?? 0, l?.gap ?? Infinity) ?? 0) > 0) return { tier: 'evidence', pattern: 'city', city: c.name };
         }
         for (const r of records.get(key) ?? []) {
-          if (t >= r.span[0] && t <= r.span[1] && (r.pops.length || r.houses.length || r.areas.length) && kmBetween(lat, lon, r.lat, r.lon) <= reach) return { tier: 'evidence', pattern: 'city', city: nameAt(r, t) };
+          if (t >= r.span[0] && t <= r.span[1] && figuresOf(r).some((x) => x.ground !== 'site' && x.ground !== 'region') && kmBetween(lat, lon, r.lat, r.lon) <= reach) return { tier: 'evidence', pattern: 'city', city: nameAt(r, t) };
         }
       }
       const a = here.region ? assessmentAt(b.assessments, here.region, t)?.a : undefined;
@@ -969,6 +982,56 @@ export function housing(b: LandscapeBuilt, people: PeopleFile, times: number[]):
     }
   }
   return rows;
+}
+
+/**
+ * HYDE's people within a record's region at each of HYDE's steps while the record stood, as a scene shares a 1° cell's
+ * people over its 5′ cells by their classes (core/landscape.ts, regionsInto): the prior of the region's people beside
+ * the settlement's own (core/citypop.ts). The region is a disc of its ground about the record's point.
+ */
+export function regionHyde(b: LandscapeBuilt, people: PeopleFile, r: CityRecord, km: number): [number, number][] {
+  const per = Math.round(1 / RES);
+  if (Math.abs(people.res - 1) > 1e-9) throw new Error('the people are shared over 5′ cells from cells of 1°');
+  const now = new Float64Array(people.cell.length);
+  const out: [number, number][] = [];
+  const dLat = km / 111.195;
+  const dLon = dLat / Math.max(0.05, Math.cos((r.lat * Math.PI) / 180));
+  const ks = new Array<number>(per * per).fill(0);
+  const land = new Array<number>(per * per).fill(0);
+  for (const t of people.steps) {
+    if (t < r.span[0] - 200 || t > r.span[1] + 200) continue;
+    const step = nearestStep(b.index.steps, t);
+    if (step < 0 || !peopleAt(people, t, now)) continue;
+    let sum = 0;
+    for (let north = Math.ceil(r.lat + dLat); north > r.lat - dLat - 1; north--) {
+      for (let west = Math.floor(r.lon - dLon); west < r.lon + dLon; west++) {
+        const at = cellAt(people, west + 0.5, north - 0.5);
+        const p = at.index >= 0 ? now[at.index] : 0;
+        if (!(p > 0)) continue;
+        const tile = b.tile(tileKey(north - 0.5, west + 0.5, b.index.tile_deg).key);
+        if (!tile) continue;
+        for (let i = 0; i < per; i++) {
+          const lat = north - (i + 0.5) * RES;
+          const area = Math.cos((lat * Math.PI) / 180) * (RES * 111.195) ** 2;
+          for (let j = 0; j < per; j++) {
+            const cell = cellOf(tile, lat, west + (j + 0.5) * RES);
+            const k = cell < 0 ? 0 : classAtStep(tile, cell, step);
+            ks[i * per + j] = k;
+            land[i * per + j] = k ? area : 0;
+          }
+        }
+        const d = shareDensity(b.classes, ks, land, p);
+        for (let i = 0; i < per; i++)
+          for (let j = 0; j < per; j++) {
+            const q = i * per + j;
+            if (!(d[q] > 0) || !land[q]) continue;
+            if (kmBetween(r.lat, r.lon, north - (i + 0.5) * RES, west + (j + 0.5) * RES) <= km) sum += d[q] * land[q];
+          }
+      }
+    }
+    out.push([t, Math.round(sum)]);
+  }
+  return out;
 }
 
 /**

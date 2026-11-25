@@ -84,6 +84,7 @@ claims:
       UNESCO's statement speaks of villages developing into urban centres.
   area-two-mounds:
     prop: settlement_area
+    ground: site
     value: 37
     source:
       ref: src:unesco-whc-1405-catalhoyuk

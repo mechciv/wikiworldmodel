@@ -68,6 +68,7 @@ claims:
     basis: reconstruction
   area-720:
     prop: settlement_area
+    ground: site
     value: 720
     source:
       ref: src:chirikure-2017-great-zimbabwe

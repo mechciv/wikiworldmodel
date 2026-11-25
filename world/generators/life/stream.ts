@@ -16,7 +16,7 @@ import { GroundSort } from './sorting.ts';
 import { drawStone, drawWood, shedsWood, STONE_FINE, STONE_VARIANTS, WOOD, WOOD_SEEDS, woodLength } from './strewn.ts';
 import { drawDwelling, HOUSE_VARIANTS, houseSize, type HouseDetail } from '../people/dwellings.ts';
 import { clipWaters, joinWater, overlaySurvey, placeSurvey, surveyWaterMesh, withSurveyWater, type PlacedSurvey } from './survey.ts';
-import { farLand, farLandMask, farScale, LandUseMap, landUseMask, makeSettlement, waterNear, type LandUse, type SettlementParams, type SettlementPlan } from '../people/settlement/v10.ts';
+import { farLand, farLandMask, farScale, LandUseMap, landUseMask, makeSettlement, waterNear, type LandUse, type SettlementParams, type SettlementPlan } from '../people/settlement/v11.ts';
 import { LaneGround } from '../people/settlement/lanes.ts';
 import { drawCrop, slotArchetype, sow, type CropParams } from '../people/crops.ts';
 import { buildFieldworks, type FieldTreeSpot } from '../people/fieldworks.ts';
@@ -512,7 +512,7 @@ export class SceneStream {
 
   /**
    * How much of the land was worked beyond the scene's own settlements, coarsely, as an image `half` metres each way about
-   * its middle: R crops, G pasture, A paddies, as shares (settlement/v10.ts, farLand). The shader lays it out in patches
+   * its middle: R crops, G pasture, A paddies, as shares (settlement/v11.ts, farLand). The shader lays it out in patches
    * beyond the plan's own map and across a band at its edge. Its shares are scaled to agree, on the average, with what the
    * plan lays out in the cells the scene holds whole, so that the two meet without a step in how much is worked.
    * Undefined where the scene has no people, or its spec no far cells.

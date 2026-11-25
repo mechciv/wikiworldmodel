@@ -384,8 +384,11 @@ properties:
     interp: step
     applies_to: [settlement]
     description: >-
-      The area a settlement covered, in hectares, at the moment `valid` gives. Sources measure
-      different things, the settled area, the walled area or a protected zone, and the note says which.
+      The area a settlement covered, in hectares, over the years `valid` gives. Sources measure
+      different things, the settled area, the walled area or a protected zone: the claim's `ground` says which
+      (`settlement`, the default; `core`, its dense centre alone; `region`, the settlement with the land about it,
+      over which the population model spreads the region's people; `site`, the bounds of a site today, which count
+      none of its people), and the note says more (core/citypop.ts).
   houses:
     type: quantity
     unit: houses
@@ -394,15 +397,29 @@ properties:
     description: >-
       How many houses or households a settlement had at the moment `valid` gives, as a source counts them: houses,
       householders (vecinos) or hearths, and the note says which. How many lived in each is another question, and an
-      estimate of its people that rests on such a count is a claim of population, with its own source.
+      estimate of its people that rests on such a count is a claim of population, with its own source. Its `ground`
+      says what it counts, as for population; the population model reads a count of houses only where no preferred
+      figure gives the people then.
+  core:
+    type: point
+    interp: step
+    applies_to: [settlement]
+    description: >-
+      A place a settlement was centred on, over the years `valid` gives: a palace and its temple, a citadel, the
+      oldest dated quarter. A settlement whose centre moved, as Angkor's did from Hariharalaya to Yasodharapura, has
+      one for each. The growth model ranks its ground from those that stood at a time, and from its own point where it
+      has none (model:people/settlement-growth); its source says why the place was its centre then.
   population:
     type: quantity
     unit: people
     interp: step
     applies_to: [settlement]
     description: >-
-      How many people lived in a settlement at the moment `valid` gives. For a city without a census
-      this is an estimate from its area, houses or food supply, and the estimates differ widely.
+      How many people lived in a settlement over the years `valid` gives; a claim that gives no years is read over the
+      whole of the settlement's life. For a city without a census this is an estimate from its area, houses or food
+      supply, and the estimates differ widely. Its `ground` says what it counts: the settlement (the default), its core
+      alone (a walled city without its suburbs, the civic-ceremonial centres of a dispersed city), or its region with
+      the land about it; the population model reads each so (core/citypop.ts).
   decipherment:
     type: string
     interp: step

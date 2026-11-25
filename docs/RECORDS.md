@@ -128,6 +128,42 @@ a note saying why. A count of something else that an estimate rests on, the hous
 a chronicler gives, is a claim of what it counts (`houses`), never turned into people here: an
 estimate of the people from it is a claim of `population`, with its own source.
 
+### What a settlement's figure counts
+
+A figure of a settlement's people, its ground or its houses counts some ground, and says which in `ground`:
+
+- `settlement`, the default: the town or the city itself, as the lists of cities count it;
+- `core`: its dense centre alone, a walled city without its suburbs, the civic-ceremonial centres of a dispersed city;
+- `region`: the settlement with the land about it, its fields and its villages, as a regional survey counts it. A
+  figure of the region's ground (`settlement_area`, `ground: region`) gives the ground its people are spread over;
+- `site`: the bounds of a site today, a protected property or the extent of the remains, which count none of its
+  people.
+
+```yaml
+# world/entities/people/first-cities/angkor.yaml
+  population-region-770:
+    prop: population
+    ground: region
+    value: 248696
+    valid: { lo: 770 CE, hi: 888 CE }
+    source:
+      ref: src:klassen-2021-angkor-population
+      loc: "Table 1, period 1 (770–888), population, Total; and its note ‡"
+      quote: "770–888 … 248,696 … The population of the embankment ranges from 0 to the numbers shown here."
+    method: model
+```
+
+- **Write the figure for the ground its source counts.** A region's people are not the city's, and a park's bounds are
+  not the city's ground: the population model reads each as an observation of what it counts
+  ([plans/MODELS.md](plans/MODELS.md)), and two grounds read as one make a city that leaps between them.
+- **A figure is for the years `valid` gives,** a moment or a span. One with no years is read over the whole of the
+  settlement's life, weakly, and never as the people at its founding: give its years where the source gives them.
+- **A place a settlement was centred on** is a claim of `core`: a point, with the years it was, sourced to what says it
+  was the centre then. A settlement whose centre moved, as Angkor's did from Hariharalaya to Yasodharapura, has one for
+  each, and its town is ranked from the one that stood at a time.
+- **A count of houses** is read for the people only where no preferred figure gives the people then, which most such
+  estimates rest on.
+
 ### Evidence about time
 
 ```yaml

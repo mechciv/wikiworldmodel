@@ -1,0 +1,16 @@
+id: src:lustig-2009-angkor-political-economy
+type: publication
+kind: review
+citation: >-
+  Lustig, E.J. (2009). Power and Pragmatism in the Political Economy of Angkor. PhD thesis, Department of Archaeology,
+  University of Sydney.
+authors: ["Lustig, E.J."]
+published: 2009
+title: Power and Pragmatism in the Political Economy of Angkor
+container: PhD thesis, University of Sydney
+url: https://angkordatabase.asia/libs/docs/publications/power-and-pragmatism-in-the-political-economy-of-angkor/lustig-power-pragmatism-angkor.pdf
+verified:
+  by: machine:claude-code
+  how: >-
+    The thesis read whole as the PDF the Angkor Database serves (sha256 449f64c6…6df), turned to text page by page;
+    the quotes checked by script against that text. Pages are the thesis's own printed numbers.

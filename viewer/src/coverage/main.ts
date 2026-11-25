@@ -215,7 +215,7 @@ class Page {
     this.detail = el('aside', 'cov-detail');
     this.detail.setAttribute('aria-live', 'polite');
     main.append(this.chart, this.detail);
-    page.append(main, this.houses(), this.table());
+    page.append(main, this.houses(), this.peopleScores(), this.table());
     app.append(page);
     this.tip = el('div', 'tip');
     this.tip.hidden = true;
@@ -893,6 +893,68 @@ class Page {
     const scroll = el('div', 'scroll');
     scroll.append(table);
     box.append(scroll, el('p', 'cov-note', "Under each way of life: the share of its people a tradition houses, and its share of all the people then. Cities of the lists are Chandler's and Modelski's, counted beside HYDE's people. Regions: those where a tradition houses anyone, of those with people. The world after 1850 is not counted."));
+    return box;
+  }
+
+  /**
+   * The population model on what it did not see (docs/plans/MODELS.md; model:people/city-population): each list's figure
+   * predicted from its city's others, each record's figures with all of its own held out, and the places of judging.
+   */
+  peopleScores(): HTMLElement {
+    const box = el('section', 'cov-houses');
+    const s = this.cov.landscape?.people;
+    if (!s) return box;
+    box.append(el('h2', undefined, "A city's people, on what the model did not see"));
+    box.append(
+      el(
+        'p',
+        'cov-lede',
+        `The population model reads every figure of a city, the lists' and its record's, as an observation of the ground it counts over the years it is for. Here each is predicted without it: a list's figure from its city's others, and a record's figures with all of its record's left out, from the lists and the settlements near it alone. 90% should fall within the band. The build fitted the walk of a city's people at ${s.params.walk} a year on the log and a list's bias at ${s.params.bias?.list} to the first, and a work's bias at ${s.params.bias?.work} to the second; ${count(s.anchors)} settlements give the density their neighbours are pulled towards.`,
+      ),
+    );
+    const sum = el('table');
+    const h = el('tr');
+    h.append(el('th', undefined, 'Figures held out'), el('th', undefined, 'How many'), el('th', undefined, 'Mean log density'), el('th', undefined, 'Within the band'));
+    sum.append(h);
+    for (const [label, x] of [["The lists', each from its city's others", s.lists], ["The records', with all of their record's", s.records]] as const) {
+      const tr = el('tr');
+      tr.append(el('td', undefined, label), el('td', undefined, count(x.n)), el('td', undefined, x.lpd.toFixed(2)), el('td', undefined, pct(x.within)));
+      sum.append(tr);
+    }
+    box.append(sum);
+    if (s.places.length) {
+      const t = el('table');
+      const head = el('tr');
+      head.append(el('th', undefined, 'Place of judging'), el('th', undefined, 'Its figure says'), el('th', undefined, 'Predicted without it'), el('th', undefined, '90% between'), el('th', undefined, 'Reaches it'));
+      t.append(head);
+      for (const p of s.places) {
+        const tr = el('tr');
+        tr.append(el('td', undefined, p.name), el('td', undefined, p.range ? `${count(p.range[0])} to ${count(p.range[1])}` : count(p.says)), el('td', undefined, count(p.predicted[0])), el('td', undefined, `${count(p.predicted[1])} to ${count(p.predicted[2])}`), el('td', undefined, p.overlaps ? 'yes' : 'no'));
+        t.append(tr);
+      }
+      const scroll = el('div', 'scroll');
+      scroll.append(t);
+      box.append(scroll);
+    }
+    const worst = [...s.records.by].sort((a, b) => a.summary.lpd - b.summary.lpd);
+    if (worst.length) {
+      const t = el('table');
+      const head = el('tr');
+      head.append(el('th', undefined, 'Record, worst predicted first'), el('th', undefined, 'Figures'), el('th', undefined, 'Mean log density'), el('th', undefined, 'Within the band'));
+      t.append(head);
+      for (const r of worst) {
+        const tr = el('tr');
+        tr.append(el('td', undefined, r.id), el('td', undefined, count(r.summary.n)), el('td', undefined, r.summary.lpd.toFixed(2)), el('td', undefined, pct(r.summary.within)));
+        t.append(tr);
+      }
+      const det = el('details', 'cov-table');
+      det.append(el('summary', undefined, 'Each record'));
+      const scroll = el('div', 'scroll');
+      scroll.append(t);
+      det.append(scroll);
+      box.append(det);
+    }
+    box.append(el('p', 'cov-note', 'The log density is of what a figure says, on the log of the people, under the prediction made without it: higher is better, and a figure far outside its band costs much. `npm run world -- holdout <record>` gives each figure of a record.'));
     return box;
   }
 

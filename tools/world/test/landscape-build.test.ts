@@ -15,7 +15,7 @@ import { LakeMap } from '../../../world/generators/life/lakes.ts';
 import { WATER_REACH } from '../../../world/generators/life/water.ts';
 import type { SceneSpec } from '../../../core/scene.ts';
 import type { Tileset } from '../../../core/tileset.ts';
-import { makeSettlement } from '../../../world/generators/people/settlement/v10.ts';
+import { makeSettlement } from '../../../world/generators/people/settlement/v11.ts';
 import { HOUSING_TIMES, parseClassGrid } from '../src/build/landscape.ts';
 import { dataset, latestBuild } from './helpers.ts';
 
@@ -130,20 +130,29 @@ describe('the human landscape, built', () => {
     const records = cities.records!;
     expect(records.length).toBeGreaterThanOrEqual(20);
     const of = (id: string) => records.find((r) => r.id === id)!;
-    // Mohenjo-daro: the ground UNESCO gives it, held over its urban phase; Modelski's people at its height.
+    // Mohenjo-daro: the ground UNESCO gives it, over the years of its urban phase; Modelski's people at its height.
     const m = of('people/first-cities/mohenjo-daro');
     expect(m.lat).toBeCloseTo(27.3254, 3);
     expect(m.span[0]).toBeLessThan(-2500);
     expect(m.span[1]).toBeLessThan(-1400);
-    expect(m.areas.map((a) => a[1])).toEqual([240, 240]);
-    expect(m.pops[0][1]).toBe(40000);
-    // Tenochtitlan: the estimate the record prefers for 1519, not the eight beside it; and its name of the time.
+    const area = m.figures!.find((f) => f.prop === 'settlement_area' && f.preferred)!;
+    expect(area.v).toBe(240);
+    expect(area.t![1] - area.t![0]).toBeGreaterThan(600);
+    expect(m.figures!.find((f) => f.prop === 'population' && f.preferred)!.v).toBe(40000);
+    // Tenochtitlan: every estimate for 1519 is a figure, the one the record prefers marked so; and its name of the time.
     const t = of('people/cities/tenochtitlan');
-    const p1519 = t.pops.filter(([y]) => y >= 1519 && y < 1521);
-    expect(p1519).toHaveLength(1);
-    expect(p1519[0][1]).toBeGreaterThanOrEqual(150000);
-    expect(p1519[0][1]).toBeLessThanOrEqual(200000);
-    expect(t.houses.some(([, n]) => n === 60000)).toBe(true);
+    const p1519 = t.figures!.filter((f) => f.prop === 'population' && f.t![0] >= 1519 && f.t![0] < 1521);
+    expect(p1519.length).toBeGreaterThanOrEqual(8);
+    const preferred = p1519.filter((f) => f.preferred);
+    expect(preferred).toHaveLength(1);
+    expect(preferred[0].lo).toBe(150000);
+    expect(preferred[0].hi).toBe(200000);
+    expect(t.figures!.some((f) => f.prop === 'houses' && f.v === 60000)).toBe(true);
+    // Angkor: its region's figures are its region's, and the bounds of its park today count none of its people.
+    const a = of('people/first-cities/angkor');
+    expect(a.figures!.find((f) => f.claim === 'people/first-cities/angkor#population-klassen')!.ground).toBe('region');
+    expect(a.figures!.find((f) => f.claim === 'people/first-cities/angkor#area-unesco')!.ground).toBe('site');
+    expect(a.hyde!.length).toBeGreaterThan(3);
     expect(nameAt(t, 1500)).toBe('Tenochtitlan');
     expect(nameAt(t, 1900)).toBe('Mexico City');
     // A scene of it in 1519 draws the record's city, with the record's people, where a list's row stands beside it.

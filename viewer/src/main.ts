@@ -42,7 +42,7 @@ import { surveyOffset } from '../../world/generators/life/survey.ts';
 import { lifeKeepRadius, sameLifeContext, SceneCache } from './city/lifecycle.ts';
 import type { PeopleSummary } from './city/lifeworker.ts';
 import { LandscapeAtlas } from './city/landscape.ts';
-import { anthromeOf, classAtStep, kmBetween, nearestStep, PATTERN_LABEL, USE_LABEL, USES, LEVEL_WORDS, type Pattern } from '../../core/landscape.ts';
+import { anthromeOf, classAtStep, kmBetween, nearestStep, PATTERN_LABEL, USE_LABEL, USES, LEVEL_WORDS, type CityNear, type Pattern } from '../../core/landscape.ts';
 import { lifewayText, outbuildingsText, specText, townText, prevalenceOf, traditionsFor } from '../../core/dwelling.ts';
 import { autoTilt, EYE_HEIGHT, groundHit, localView, lookThrough, projectLocal, rayOf, sunAt, underSea, type LocalView } from './city/view.ts';
 import { SEA } from './gl/cityShaders.ts';
@@ -180,14 +180,41 @@ function nearestSettlements(c: LifeScene): { lat: number; lon: number; r: number
     .map((s) => ({ ...at(s.x, s.y), r: s.r, pattern: s.pattern, houses: s.houses, ...(s.city ? { city: s.city } : {}), ...(s.house ? { house: { ...at(s.house[0], s.house[1]), faces: (s.house[2] * 180) / Math.PI } } : {}) }));
 }
 
-/** A city of a scene in words: whose its people are, and how it is laid out. */
-function cityWords(x: { people: number; record?: string; from?: 'record' | 'list' | 'guess'; town?: { text: string; from: Record<string, string> } }): string {
-  const people = `about ${x.people.toLocaleString('en-US')} people then`;
-  const whose = x.from === 'record' ? `a city the world has a record of, of ${people} by its record` : x.from === 'guess' ? `a city the world has a record of, of ${people}, a guess from the ground or the houses its record gives` : x.record ? `a city the world has a record of, of ${people} by the lists of cities` : `a city of the lists, of ${people}`;
-  if (!x.town) return whose;
+/** A city of a scene in words: whose its people are, what the population model read of them, and how it is laid out. */
+function cityWords(x: { people: number; record?: string; from?: 'record' | 'list' | 'guess'; town?: { text: string; from: Record<string, string> } }, near?: Pick<CityNear, 'band' | 'life'>, lists?: { source: string; title: string }[]): string {
+  const band = near?.band ? ` (90% between ${near.band[0].toLocaleString('en-US')} and ${near.band[1].toLocaleString('en-US')})` : '';
+  const people = `about ${x.people.toLocaleString('en-US')} people then${band}`;
+  const whose = x.from === 'record' ? `a city the world has a record of, of ${people} by the population model from its record's figures and the lists'` : x.from === 'guess' ? `a city the world has a record of, of ${people}, from the ground or the houses its record gives and the density of the settlements near it` : x.record ? `a city the world has a record of, of ${people} by the lists of cities` : `a city of the lists, of ${people}`;
+  const read = near?.life ? populationWords(near.life, lists ?? []) : '';
+  if (!x.town) return `${whose}${read}`;
   const said = [...new Set(Object.values(x.town.from))];
   const by = said.every((s) => s === 'generic') ? 'the generic town, as nothing says how it was laid out' : said.includes('generic') ? 'partly as its tradition or its record says, partly the generic town' : 'as its tradition or its record says';
-  return `${whose}, laid out with ${x.town.text} (${by})`;
+  return `${whose}${read}, laid out with ${x.town.text} (${by})`;
+}
+
+const GROUND_WORDS: Record<string, string> = { settlement: 'the city', core: 'its centre', region: 'its region', site: 'the site today' };
+const USE_WORDS: Record<string, string> = { passed: 'passed over for', outside: 'outside its years', undated: 'with no years to read it over', site: 'counts none of its people', 'no-region': 'no ground of its region to count it over', held: 'held out' };
+
+/**
+ * What the population model read of a city (model:people/city-population): each figure, what the model gives for it with
+ * everything else and how far it moved the reading, the figures passed over and why, and how densely it lived.
+ */
+function populationWords(life: NonNullable<CityNear['life']>, lists: { source: string; title: string }[]): string {
+  const obs = life.observations ?? [];
+  if (!obs.length) return '';
+  const name = (o: (typeof obs)[number]) => (o.list ? (lists.find((l) => l.source === o.source)?.title.replace(/,.*$/, '') ?? o.source) : o.source.replace(/^src:/, ''));
+  const value = (o: (typeof obs)[number]) => (o.lo !== undefined && o.hi !== undefined ? `${o.lo.toLocaleString('en-US')} to ${o.hi.toLocaleString('en-US')}` : o.v.toLocaleString('en-US'));
+  const what = (o: (typeof obs)[number]) => `${o.prop === 'settlement_area' ? `${value(o)} ha` : o.prop === 'houses' ? `${value(o)} houses` : value(o)} of ${GROUND_WORDS[o.ground] ?? o.ground}${o.t ? ` in ${formatTime(o.t[0])}${o.t[1] !== o.t[0] ? `–${formatTime(o.t[1])}` : ''}` : ''}`;
+  const used = obs.filter((o) => o.use === 'used' && !o.list);
+  const fromLists = obs.filter((o) => o.use === 'used' && o.list).length;
+  const moved = (o: (typeof obs)[number]) => (o.fit && o.loo ? Math.exp(o.fit[0] - o.loo[0]) : 1);
+  const parts = used.slice(0, 8).map((o) => `${name(o)}, ${what(o)}${Math.abs(Math.log(moved(o))) > 0.05 ? `, which moves the reading ${moved(o) > 1 ? 'up' : 'down'} ${moved(o) > 1 ? moved(o).toFixed(2) : (1 / moved(o)).toFixed(2)} times` : ''}`);
+  if (fromLists) parts.push(`${fromLists} figure${fromLists === 1 ? '' : 's'} of the lists`);
+  const passed = obs.filter((o) => o.use !== 'used' && o.use !== 'held' && !o.list).slice(0, 6).map((o) => `${name(o)}, ${what(o)}, ${USE_WORDS[o.use] ?? o.use}${o.by ? ` ${o.by.replace(/^.*#/, '')}` : ''}`);
+  const d = life.density;
+  const density = d && life.at10k !== undefined ? `; it is laid out at ${Math.round(life.at10k)} to the hectare at 10,000 people${Math.abs(d.post[0] - d.prior[0]) > 0.05 ? `, from its own figures (the settlements near it would give ${Math.round(Math.exp(d.prior[0]))})` : ', as the settlements near it lived'}` : '';
+  const region = life.region ? `; its region of ${Math.round(life.region.ha / 100).toLocaleString('en-US')} km² is read apart, its people beyond the city's spread over the villages and farmsteads about it` : '';
+  return `, reading ${parts.join('; ')}${passed.length ? `; and not reading ${passed.join('; ')}` : ''}${density}${region}`;
 }
 
 const SETTLEMENT_WORDS: Record<Pattern, [string, string]> = {
@@ -2243,7 +2270,7 @@ async function start(root: HTMLElement): Promise<void> {
           const counts = new Map<Pattern, number>();
           for (const x of mine) if (!x.city) counts.set(x.pattern as Pattern, (counts.get(x.pattern as Pattern) ?? 0) + 1);
           const where = [
-            ...mine.filter((x) => x.city).sort((a, b) => b.people - a.people).map((x) => `${x.city}, ${cityWords(x)}`),
+            ...mine.filter((x) => x.city).sort((a, b) => b.people - a.people).map((x) => `${x.city}, ${cityWords(x, sp.cities.find((c) => (x.record && c.record === x.record) || c.name === x.city), landscape?.cities.lists)}`),
             ...[...counts].sort((a, b) => b[1] - a[1]).map(([p, c]) => `${c.toLocaleString('en-US')} ${SETTLEMENT_WORDS[p][c === 1 ? 0 : 1]}`),
           ];
           // A tradition that was the house of a part of the region's people is drawn for a part of its settlements, by
@@ -2525,9 +2552,10 @@ async function start(root: HTMLElement): Promise<void> {
         name: c.name,
         people: c.people,
         km: c.km,
-        list: c.from === 'list' ? listTitle(c.field!) : c.from === 'record' ? 'its record' : "a guess from its record's ground or houses, as no claim gives its people then",
+        list: c.from === 'list' ? listTitle(c.field!) : c.from === 'record' ? "the population model, from its record's figures and the lists'" : "the population model, from its record's ground or houses and the density of the settlements near it, as no claim gives its people",
         also: c.also.map((x) => ({ people: x.people, list: listTitle(x.field) })),
         ...(c.record ? { record: c.record } : {}),
+        ...(c.band ? { band: c.band } : {}),
       })),
       ...(place.whose ? { whose: lifewayText([place.whose]) } : {}),
       ...(place.kin ? { kin: lifewayText([place.kin]) } : {}),
@@ -3040,7 +3068,7 @@ async function start(root: HTMLElement): Promise<void> {
       const drawn = new Set(c.named.map((x) => x.id));
       // Where the eye is in the scene drawn, above its sea, and the ground under it.
       const eye = c === city && frameView && c.ground ? { z: frameView.eye[2], floor: c.ground.at(frameView.eye[0], frameView.eye[1]) } : null;
-      return { site: c.spec.site.id, plan: c.plan, taxa: c.spec.taxa.map((t) => ({ id: t.id, label: t.label, form: t.form_label, own: t.own, tier: t.tier, km: t.km, rows: t.rows, drawn: drawn.has(t.id) })), instances: c.last.instances, triangles: c.last.triangles, meshes: c.last.meshes, going: c.last.going, groundMs: c.groundMs, stage: c.spec.site.stage, climate: c.spec.biome.climate, climateField: c.spec.biome.field, month: c.spec.climate?.month ?? null, snow: Number.isFinite(snowOf(c.spec).line) ? snowOf(c.spec).line : null, focus: c.focus, toRiver: c.toRiver, origin: c.spec.site.origin, water: c.spec.water ? { tier: c.spec.water.tier, rivers: c.spec.water.rivers.map((r) => ({ key: r.key, from: r.from, ...(r.wet !== undefined ? { wet: r.wet, dry: !wetInMonth(r.wet, c.spec.climate?.month) } : {}) })), lakes: (c.spec.water.lakes ?? []).map((l) => ({ key: l.key, level: l.level, ...(l.rings ? { field: l.field } : { spills: l.spills, cells: l.cells.length / 2 }) })) } : null, sea: c.sea, list: listOf(c), eye, people: c.spec.people ? { asked: true, houses: c.people?.houses ?? 0, drawn: c.people?.drawn ?? 0, expected: c.people?.expected ?? 0, settlements: c.people?.settlements.length ?? 0, pattern: c.people?.lifeway.pattern, tier: c.people?.lifeway.tier, forms: c.people?.forms.map((f) => f.label) ?? [], yards: c.people?.forms.filter((f) => f.home).map((f) => f.label) ?? [], things: c.people?.forms.filter((f) => f.outbuilding).map((f) => f.label) ?? [], works: c.people?.works.map((f) => f.label) ?? [], pieces: c.people?.pieces ?? 0, kept: c.spec.people.kept?.map((k) => k.label) ?? [], animals: c.people?.animals ?? 0, paths: c.people?.paths ?? 0, crops: c.people?.crops ?? false, cities: c.people?.settlements.filter((x) => x.city).map((x) => ({ name: x.city!, people: x.people, ...(x.record ? { record: x.record } : {}), ...(x.from ? { from: x.from } : {}), ...(x.town ? { town: x.town.text } : {}) })) ?? [], near: nearestSettlements(c) } : null, shape: c.spec.shape ? { field: c.spec.shape.field, held: c.spec.shape.held, share: c.spec.shape.share, range: c.spec.shape.range?.id ?? null, cells: c.spec.shape.patch.z.length } : null, relief: { step: c.spec.relief.step, units: c.ground?.levels.map((l) => l.unit ?? 0.1) ?? [] }, ground: c.spec.substrate ? { tier: c.spec.substrate.tier, from: c.spec.substrate.from, weight: c.spec.substrate.weight, materials: c.spec.substrate.materials, source: c.spec.substrate.source, rows: c.spec.substrate.rows } : null, bedrock: c.spec.bedrock ? { code: c.spec.bedrock.code, label: c.spec.bedrock.label, rock: c.spec.bedrock.rock, source: c.spec.bedrock.source } : null };
+      return { site: c.spec.site.id, plan: c.plan, taxa: c.spec.taxa.map((t) => ({ id: t.id, label: t.label, form: t.form_label, own: t.own, tier: t.tier, km: t.km, rows: t.rows, drawn: drawn.has(t.id) })), instances: c.last.instances, triangles: c.last.triangles, meshes: c.last.meshes, going: c.last.going, groundMs: c.groundMs, stage: c.spec.site.stage, climate: c.spec.biome.climate, climateField: c.spec.biome.field, month: c.spec.climate?.month ?? null, snow: Number.isFinite(snowOf(c.spec).line) ? snowOf(c.spec).line : null, focus: c.focus, toRiver: c.toRiver, origin: c.spec.site.origin, water: c.spec.water ? { tier: c.spec.water.tier, rivers: c.spec.water.rivers.map((r) => ({ key: r.key, from: r.from, ...(r.wet !== undefined ? { wet: r.wet, dry: !wetInMonth(r.wet, c.spec.climate?.month) } : {}) })), lakes: (c.spec.water.lakes ?? []).map((l) => ({ key: l.key, level: l.level, ...(l.rings ? { field: l.field } : { spills: l.spills, cells: l.cells.length / 2 }) })) } : null, sea: c.sea, list: listOf(c), eye, people: c.spec.people ? { asked: true, houses: c.people?.houses ?? 0, drawn: c.people?.drawn ?? 0, expected: c.people?.expected ?? 0, settlements: c.people?.settlements.length ?? 0, pattern: c.people?.lifeway.pattern, tier: c.people?.lifeway.tier, forms: c.people?.forms.map((f) => f.label) ?? [], yards: c.people?.forms.filter((f) => f.home).map((f) => f.label) ?? [], things: c.people?.forms.filter((f) => f.outbuilding).map((f) => f.label) ?? [], works: c.people?.works.map((f) => f.label) ?? [], pieces: c.people?.pieces ?? 0, kept: c.spec.people.kept?.map((k) => k.label) ?? [], animals: c.people?.animals ?? 0, paths: c.people?.paths ?? 0, crops: c.people?.crops ?? false, cities: c.people?.settlements.filter((x) => x.city).map((x) => { const n = c.spec.people!.cities.find((y) => (x.record && y.record === x.record) || y.name === x.city); return { name: x.city!, people: x.people, ...(x.record ? { record: x.record } : {}), ...(x.from ? { from: x.from } : {}), ...(x.town ? { town: x.town.text } : {}), ...(n?.band ? { band: n.band } : {}), ...(n?.life?.at10k !== undefined ? { at10k: Math.round(n.life.at10k * 10) / 10 } : {}) }; }) ?? [], near: nearestSettlements(c) } : null, shape: c.spec.shape ? { field: c.spec.shape.field, held: c.spec.shape.held, share: c.spec.shape.share, range: c.spec.shape.range?.id ?? null, cells: c.spec.shape.patch.z.length } : null, relief: { step: c.spec.relief.step, units: c.ground?.levels.map((l) => l.unit ?? 0.1) ?? [] }, ground: c.spec.substrate ? { tier: c.spec.substrate.tier, from: c.spec.substrate.from, weight: c.spec.substrate.weight, materials: c.spec.substrate.materials, source: c.spec.substrate.source, rows: c.spec.substrate.rows } : null, bedrock: c.spec.bedrock ? { code: c.spec.bedrock.code, label: c.spec.bedrock.label, rock: c.spec.bedrock.rock, source: c.spec.bedrock.source } : null };
     },
     lifePrint: async (lat, lon, t) => {
       const spec = await lifeAtlas?.spec(lat, lon, t, {});

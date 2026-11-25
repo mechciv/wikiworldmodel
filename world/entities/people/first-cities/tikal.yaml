@@ -63,6 +63,7 @@ claims:
     basis: reconstruction
   area:
     prop: settlement_area
+    ground: site
     value: 1200
     source:
       ref: src:unesco-whc-64-tikal

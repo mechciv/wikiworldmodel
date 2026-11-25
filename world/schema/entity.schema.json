@@ -57,6 +57,10 @@
         "prop": { "type": "string" },
         "value": {},
         "method": { "type": "string" },
+        "ground": {
+          "description": "What a figure of a settlement's people, ground or houses counts: the settlement (the default), its core alone, its region with the land about it, or the bounds of a site today, which count none of its people (core/citypop.ts)",
+          "enum": ["settlement", "core", "region", "site"]
+        },
         "subject": true, "valid": true, "source": true, "against": true, "unsourced": true, "confidence": true, "basis": true,
         "alt": true, "author": true, "status": true, "rank": true, "checked": true, "note": true
       },
