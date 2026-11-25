@@ -71,7 +71,10 @@ import { FEATURE_INDEX } from '../../../../core/featuretiles.ts';
 import { prominenceOf, tileFeatures } from './featuretiles.ts';
 import { buildIce, type IceBuilt } from './ice.ts';
 import { hazardLayer, peopleLayer, polityLayer, presentLayer, stateRowKey } from './layers.ts';
-import { buildLandscape, disagreement, farmingAgreement, housing, housingCounts, HOUSING_TIMES, landscapeResolve, type LandscapeBuilt } from './landscape.ts';
+import { buildLandscape, disagreement, farmingAgreement, housing, housingCounts, HOUSING_TIMES, landscapeResolve, regionHyde, type LandscapeBuilt } from './landscape.ts';
+import { fitCitiesModel } from '../holdout.ts';
+import { regionReach } from '../../../../core/landscape.ts';
+import type { PeopleScores } from '../../../../core/citypop.ts';
 import { mappedLake, shoresNear } from '../../../../core/shorelines.ts';
 import type { LayerInfo, LayerRow } from '../../../../core/fieldlayers.ts';
 import { fieldLayers, mappedShores } from './fieldlayers.ts';
@@ -1741,6 +1744,7 @@ export async function runBuild(args: string[]): Promise<number> {
         disagree?: ReturnType<typeof disagreement>;
         farming?: ReturnType<typeof farmingAgreement>;
         housing?: HousingCount[];
+        people?: PeopleScores;
       }
     | undefined;
   let landscapeStageKey = '';
@@ -1764,13 +1768,23 @@ export async function runBuild(args: string[]): Promise<number> {
       async (sink) => {
         const landscape = await buildLandscape(solved, log);
         if (!landscape) return { present: false };
+        const decodedPeople = peopleHeader ? decodeTile<PeopleHeader>(toArrayBuffer(dag.readBlobBytesSync('people.lwt'))) : undefined;
+        const pf = decodedPeople ? ({ ...decodedPeople.header, cell: decodedPeople.arrays[0], land: decodedPeople.arrays[1], people: decodedPeople.arrays[2] } as unknown as PeopleFile) : undefined;
+        // The population model (model:people/city-population, docs/plans/MODELS.md): HYDE's people in each region a
+        // record gives, the prior of its people beside the town's; then its parameters fitted to the figures held out,
+        // the density model's anchors, and its scores, written into the cities file the browser reads.
+        if (pf)
+          for (const r of landscape.cities.records ?? []) {
+            const km = regionReach(r);
+            if (km) r.hyde = regionHyde(landscape, pf, r, km);
+          }
+        const peopleScores = fitCitiesModel(landscape.cities, log);
+        landscape.files.set('people/cities.json', stableStringify(landscape.cities));
         for (const [p, c] of landscape.files) await sink.put(p, c);
         const disagree = disagreement(landscape, [-2999, -999, 1, 1000, 1500], 2);
         for (const x of disagree) log(`landscape  at ${x.t}: HYDE and the archaeologists disagree on ${(x.disagree * 100).toFixed(0)}% of the land; ${(x.evidence * 100).toFixed(0)}% rests on the archaeologists`);
         let housingRes: HousingCount[] | undefined;
-        if (peopleHeader) {
-          const decodedPeople = decodeTile<PeopleHeader>(toArrayBuffer(dag.readBlobBytesSync('people.lwt')));
-          const pf = { ...decodedPeople.header, cell: decodedPeople.arrays[0], land: decodedPeople.arrays[1], people: decodedPeople.arrays[2] } as unknown as PeopleFile;
+        if (pf) {
           housingRes = housingCounts(landscape, housing(landscape, pf, HOUSING_TIMES));
           for (const h of housingRes) log(`landscape  at ${formatTime(h.t)}: ${((100 * h.housed) / Math.max(1, h.people)).toFixed(1)}% of ${(h.people / 1e6).toFixed(1)} million people in a tradition's house, in ${h.regions[1]} of ${h.regions[0]} regions; ${h.cities[0]} cities of the lists`);
         }
@@ -1790,9 +1804,10 @@ export async function runBuild(args: string[]): Promise<number> {
           disagree,
           farming,
           ...(housingRes ? { housing: housingRes } : {}),
+          people: peopleScores,
         };
       },
-      { codeFiles: ['tools/world/src/build/landscape.ts', 'core/landscape.ts', 'core/dwelling.ts', 'world/generators/people/settlement/v10.ts'] },
+      { codeFiles: ['tools/world/src/build/landscape.ts', 'core/landscape.ts', 'core/dwelling.ts', 'core/citypop.ts', 'core/gauss.ts', 'tools/world/src/holdout.ts', 'world/generators/people/settlement/v11.ts'] },
     );
     landscapeMeta = landscapeStage.meta;
     landscapeStageKey = landscapeStage.key;
@@ -2194,7 +2209,7 @@ export async function runBuild(args: string[]): Promise<number> {
   // then combine with fast per-build claims/wanted/tiles/glance into `coverage.json`.
   const coverageFile = coverage(world, wanted, allFeatures, tiles);
   if (landscapeMeta?.present && landscapeMeta.disagree && landscapeMeta.farming) {
-    coverageFile.landscape = { disagree: landscapeMeta.disagree, farming: landscapeMeta.farming, ...(landscapeMeta.housing ? { housing: landscapeMeta.housing } : {}) };
+    coverageFile.landscape = { disagree: landscapeMeta.disagree, farming: landscapeMeta.farming, ...(landscapeMeta.housing ? { housing: landscapeMeta.housing } : {}), ...(landscapeMeta.people ? { people: landscapeMeta.people } : {}) };
   }
   if (rocksMeta.stats) coverageFile.rocks = rocksMeta.stats;
   if (strataMeta.stats) coverageFile.strata = strataMeta.stats;

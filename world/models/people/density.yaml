@@ -1,0 +1,45 @@
+# A model run here (section 4.10 of the design; docs/plans/MODELS.md, the pilot's node). It makes no field: what it
+# derives is how densely each settlement lived, and how many people a region about one held beyond the town's.
+id: model:people/density
+type: model
+title: People to the hectare, from the settlements near
+description: >-
+  How densely a settlement's people lived, as people to the hectare of its built ground at 10,000 people (its density
+  scale; density grows with a settlement's size as a power of its people, as model:people/settlement-growth reads it).
+  Where a settlement's own figures give both its people and its ground, they set its scale (model:people/city-population).
+  Each such settlement is an anchor, and every other settlement's scale has a prior pulled from the world's towards the
+  anchors near it in space and time, each by how near it is and how sure its own scale is, and spread by how far
+  neighbours' scales differ: a city of the lists in monsoon Asia lives about as densely as the Khmer centres whose ground
+  was measured, and one far from any anchor at the world's hundred to the hectare. Beyond the town, where a record counts
+  the people of a region about a settlement (the settlement with the land about it, over a ground the record gives),
+  the people the region holds beyond the town's are spread over the region's ground in a scene, in place of HYDE's
+  there, each cell of land in it as many times more crowded than HYDE has it as the region's people beyond the town's
+  are than HYDE's in it. The model knows nothing of how a region's people stood within it: they are spread as HYDE's
+  are, among the cells by their classes.
+author: machine:claude-code
+code: core/citypop.ts
+inputs:
+  - { prop: population, kind: settlement, note: "a settlement's people, read with its ground for its density" }
+  - { prop: settlement_area, kind: settlement, note: "its ground, and a region's ground about it" }
+  - { ref: model:people/city-population, note: "each anchor's density scale as its own figures give it, and a region's people beyond the town's" }
+  - { ref: field:earth/population, note: "HYDE's people in the cells of a region's ground, which its people beyond the town's take the place of" }
+derives: >-
+  The prior of each settlement's density scale, from the anchors near it; and, in a scene, how many times more crowded
+  than HYDE has it each cell of land within a region was, where a record counts the region's people.
+params:
+  density:
+    choice: >-
+      A hundred people to the hectare at 10,000 people where no anchor is near, with a spread of 0.5 on the log;
+      neighbours' scales differ by 0.4 on the log; density grows as the people to the power 0.2; and an anchor speaks for a
+      settlement with a weight falling as a Gaussian of 800 km and 800 years. The hundred and the power are those
+      model:people/settlement-growth drew with before this model; the spreads and the reach are choices, held to the
+      anchors by the scores of their own scales from their neighbours'.
+uncertainty:
+  kind: interval
+  note: >-
+    A settlement's scale has a prior mean and spread, and a posterior where its own figures give its ground; the town is
+    laid out at the posterior's mean. A region's spread is its people's band, which the scene does not draw: it spreads
+    the central reading only.
+checks:
+  - { test: core/citypop.test.ts, holds: "sets its density scale from its own ground and people, and from its neighbours where it has no ground" }
+  - { test: tools/world/test/landscape.test.ts, holds: "spreads a region's people beyond its town over the region's ground, and leaves HYDE's elsewhere" }

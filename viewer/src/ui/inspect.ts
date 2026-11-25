@@ -156,7 +156,7 @@ export interface LandscapeHere {
   /** the step read, and the people per km² a scene draws there */
   density?: number;
   regionUses?: string[];
-  cities: { name: string; people: number; km: number; list: string; also: { people: number; list: string }[]; record?: string }[];
+  cities: { name: string; people: number; km: number; list: string; also: { people: number; list: string }[]; record?: string; band?: [number, number] }[];
   /** whose houses a scene draws here, in words: "herders", "townspeople"; and whose house stands in for theirs, if one does */
   whose?: string;
   kin?: string;
@@ -785,7 +785,7 @@ export class InspectPanel {
       ? `<p><strong>The archaeologists of ${esc(p.region.label)}</strong>, at ${esc(p.region.slice)} (ArchaeoGLOBE, their consensus): ${esc((h.regionUses ?? []).join('; '))}.</p>`
       : '<p>No region of the archaeologists\' survey holds this place.</p>';
     const cities = h.cities.length
-      ? `<p><strong>Cities near</strong>: ${h.cities.map((c) => `${esc(c.name)}, about ${fmtValue(c.people)} people, ${c.km} km away (${esc(c.list)}${c.also.length ? `; ${c.also.map((a) => `${esc(a.list)} gives ${fmtValue(a.people)}`).join('; ')}` : ''})`).join('; ')}.</p>`
+      ? `<p><strong>Cities near</strong>: ${h.cities.map((c) => `${esc(c.name)}, about ${fmtValue(c.people)} people${c.band ? ` (90% between ${fmtValue(c.band[0])} and ${fmtValue(c.band[1])})` : ''}, ${c.km} km away (${esc(c.list)}${c.also.length ? `; ${c.also.map((a) => `${esc(a.list)} gives ${fmtValue(a.people)}`).join('; ')}` : ''})`).join('; ')}.</p>`
       : '';
     const whose = h.whose ? `the ${h.whose}` : 'the people';
     const houses = !h.whose

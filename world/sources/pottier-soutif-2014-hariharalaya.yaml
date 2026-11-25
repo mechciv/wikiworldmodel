@@ -1,0 +1,17 @@
+id: src:pottier-soutif-2014-hariharalaya
+type: publication
+kind: measurement
+citation: >-
+  Pottier, C. & Soutif, D. (2014). De l'ancienneté de Hariharālaya. Une inscription préangkorienne opportune à Bakong.
+  Bulletin de l'École française d'Extrême-Orient 100, 147–166.
+authors: ["Pottier, C.", "Soutif, D."]
+published: 2014
+title: De l'ancienneté de Hariharālaya. Une inscription préangkorienne opportune à Bakong
+container: Bulletin de l'École française d'Extrême-Orient
+url: https://angkordatabase.asia/libs/docs/publications/de-lanciennet%C3%A9-de-harihar%C4%81laya-a-bakong-inscription-and-the-datation-of-hariharalaya-city/De_l_anciennete_de_Hariharalaya_Une_insc.pdf
+license_note: © École française d'Extrême-Orient; cited here for single facts and short quotes, with credit.
+verified:
+  by: machine:claude-code
+  how: >-
+    The article read whole as the PDF the Angkor Database serves (sha256 022de5f0…98f), turned to text; the quotes
+    checked by script against that text.

@@ -64,6 +64,8 @@ export interface Claim extends ClaimBase {
   prop: string;
   value: unknown;
   method?: string;
+  /** what a figure of a settlement counts: the settlement, its core, its region or a site's bounds (core/citypop.ts) */
+  ground?: string;
 }
 
 export interface Relation extends ClaimBase {
@@ -553,6 +555,7 @@ function normalizeEntity(file: string, d: Record<string, unknown>, issues: LoadI
     prop: String(c?.prop),
     value: resolveLocalRef(c?.value, `claims.${key}.value`),
     method: c?.method as string | undefined,
+    ...(c?.ground !== undefined ? { ground: String(c.ground) } : {}),
   }));
   const relations: Relation[] = Object.entries((d.relations ?? {}) as Record<string, Record<string, unknown>>).map(([key, r]) => ({
     ...base(key, r ?? {}, 'relations'),

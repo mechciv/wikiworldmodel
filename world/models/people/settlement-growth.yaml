@@ -9,16 +9,19 @@ description: >-
   settlement's core along its routes or across the ground, raised for steep ground, ground that floods, ground far from
   water people could draw, and ground outside its walls while they stood. A settlement grows and shrinks by the one cut
   moving along the one ranking, so the ground it built first it left last; an epoch begins where a wall was built or
-  pulled down, and the ranking is made again from then. Nothing is stepped forward: whether a place was built at a time
-  is worked out from the ranking and the people then, directly. The area the people needed is their number over a
-  density, which grows a little with the settlement's size; where a record gives the settlement's area at a time, the
-  density is set to meet it. The model knows where no one lived within a city only by the ground: quarters, gardens
-  and fields inside the walls that a record names are not in it yet.
+  pulled down, or a core began or ended to be one, and the ranking is made again from then. Nothing is stepped
+  forward: whether a place was built at a time is worked out from the ranking and the people then, directly. The area
+  the people needed is their number over a density, which grows a little with the settlement's size, at the scale
+  model:people/density gives the settlement from its own figures and its neighbours'. The model knows where no one
+  lived within a city only by the ground: quarters, gardens and fields inside the walls that a record names are not in
+  it yet.
 author: machine:claude-code
 code: core/growth.ts
 inputs:
   - { ref: model:people/city-population, note: "the settlement's people through time, as members" }
-  - { prop: settlement_area, kind: settlement, note: "areas its record gives, which the density is set to meet" }
+  - { prop: settlement_area, kind: settlement, note: "areas its record gives, which the density is set to meet where no density is given" }
+  - { ref: model:people/density, note: "how densely it lived, from its own figures and its neighbours'" }
+  - { prop: core, kind: settlement, note: "the places it was centred on, each while it was: its ground is ranked from those standing" }
   - { prop: town_form, kind: settlement, note: "whether it had a wall, and when, from its record or its tradition" }
   - { ref: field:earth/relief, note: "the ground's height, for its slope and for what floods" }
 derives: Which of a settlement's ground was built on at every time, and how densely, for each member of its people.
@@ -37,10 +40,12 @@ params:
     choice: Beyond 400 m from water people could draw, each metre more counts half a metre of travel.
   density:
     choice: >-
-      A hundred people to the hectare of built ground at 10,000 people, growing as the people to the power 0.2, within
-      15 and 600; four times as dense where it was built first as at its edge. The power follows the finding that
-      larger settlements are denser, which studies of settlement scaling report; it is not yet read from one of them,
-      and a record's area at a time takes the place of the hundred.
+      People to the hectare of built ground at 10,000 people as model:people/density gives it for the settlement, from
+      its own figures and its neighbours' (a hundred where nothing near says otherwise), growing as the people to the
+      power 0.2, within 1 and 600; four times as dense where it was built first as at its edge. The power follows the
+      finding that larger settlements are denser, which studies of settlement scaling report; it is not yet read from
+      one of them. Before the settlement generator's version 11 the density was set here from a record's areas alone,
+      and held to at least 15 to the hectare, which drew a dispersed city as a dense one.
 uncertainty:
   kind: ensemble
   note: >-
@@ -51,3 +56,5 @@ checks:
   - { test: core/growth.test.ts, holds: "meets the area a record gives at its time" }
   - { test: core/growth.test.ts, holds: "leaves first the ground it built last" }
   - { test: core/growth.test.ts, holds: "never builds in the water, and builds the low bank after higher ground as near" }
+  - { test: core/growth.test.ts, holds: "lays its ground out at the density the population model gives, in place of what its areas would set" }
+  - { test: core/growth.test.ts, holds: "ranks its ground from the cores that stood at a time, each while it was one" }

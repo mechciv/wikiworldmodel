@@ -74,6 +74,7 @@ claims:
       passage's walls of Suppiluliuma I (c. 1344–1322 BC) to the abandonment. Preferred because it speaks of the city itself.
   area-unesco:
     prop: settlement_area
+    ground: site
     value: 268.46
     source:
       ref: src:unesco-whc-377-hattusha

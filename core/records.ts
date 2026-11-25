@@ -264,6 +264,8 @@ export interface CoverageFile {
     farming: { slice: string; year: number; none: [number, number]; widespread: [number, number, number] }[];
     /** at some times, how many people are drawn in a house of a tradition written for their way of life, by pattern of settlement */
     housing?: HousingCount[];
+    /** the population model's scores on figures it did not see, and what the build fitted to them (model:people/city-population) */
+    people?: import('./citypop.ts').PeopleScores;
   };
   /**
    * the rock record of fossil sites (model:earth/rock-record): how many collections it has and how many stand in a stage,

@@ -355,6 +355,9 @@ export function areaProblems(v: unknown): string[] {
   return out;
 }
 
+/** The properties whose figures say what ground they count (core/citypop.ts). */
+const FIGURE_PROPS = ['population', 'settlement_area', 'houses'];
+
 const SPAN_FORM = 'when it holds is { lo, hi }, either left open, each a year, a month, a day or a point, or the start or end of another record ({ ref, edge }), lo no later than hi; or one time at which it held';
 
 /** Claims and relations: what they share (section 4.3). */
@@ -442,7 +445,14 @@ function checkRecords(world: World, issues: Issue[], tables: Map<string, Table> 
         issues.push({ level: 'error', check: 'fit', file: c.file, where: c.where, message: `"${c.prop}" does not apply to ${phaseSubject ? `a phase of ${article(e.kind)}` : article(e.kind)} (it applies to ${prop.applies_to!.join(', ')})` });
       }
       if (c.method && !world.vocab.methods[c.method]) issues.push({ level: 'error', check: 'vocab', file: c.file, where: `${c.where}.method`, message: `unknown method "${c.method}"` });
+      // What a figure counts is said of a settlement's people, ground and houses only (core/citypop.ts).
+      if (c.ground !== undefined && !FIGURE_PROPS.includes(c.prop)) issues.push({ level: 'error', check: 'fit', file: c.file, where: `${c.where}.ground`, message: `only a figure of ${FIGURE_PROPS.join(', ')} says what ground it counts` });
       checkValue(world, refs, c, issues);
+    }
+    // A region's people are spread over its ground, which a figure of the region's area gives.
+    const regionPeople = e.claims.find((c) => c.prop === 'population' && c.ground === 'region' && c.rank !== 'deprecated');
+    if (regionPeople && !e.claims.some((c) => c.prop === 'settlement_area' && c.ground === 'region')) {
+      issues.push({ level: 'warning', check: 'values', file: regionPeople.file, where: `${regionPeople.where}.ground`, message: 'a figure of the region\'s people with no figure of the region\'s ground (settlement_area, ground: region): the model has no ground to count them over, and leaves them out' });
     }
     for (const r of e.relations) {
       const subjectEntity = refs.check(r.subject, r.file, `${r.where}.subject`, { self: e.id, types: ['entity'] });

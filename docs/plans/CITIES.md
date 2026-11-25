@@ -368,8 +368,10 @@ shows where a city's drawing rests on what.
 
 - **`model:people/city-population`:** a settlement's people through time, as a band with members. It reads every
   list's figure and every record's claim, and replaces the rules that read the nearest figure within fifty years.
-  - Rival estimates are members; the preferred one is member 0.
-  - Between figures it interpolates on a log scale.
+  Since the nineteenth slice ([MODELS.md](MODELS.md), the pilot) each figure is an observation of the ground it counts
+  over the years it is for, conditioned on together with each source's bias, and the band is the posterior's.
+  - A preferred figure passes over its rivals; the others are read with their sources' biases.
+  - Between figures it changes at a constant rate, its doubt growing with the years from the nearest figure.
   - Before the first figure and after the last, it says how far it reaches. The founding and the end bound it.
 - **`model:people/settlement-growth`:** decision 3. Its checks:
   - each record's areas and outlines at their dates;
@@ -564,8 +566,10 @@ of decision 11:
 
 ## What it will not do
 
-- **No forward modelling.** No city is stepped forward from its founding, and nothing predicts what was not recorded.
-  The growth model ranks ground and cuts it, and its checks are the records.
+- **No forward modelling.** No city is stepped forward from its founding. The growth model ranks ground and cuts it,
+  and its checks are the records. The models do predict what was not recorded, with their spread, and say so, and
+  are scored on records held out ([MODELS.md](MODELS.md)): that changes this plan's first statement of this rule, that
+  nothing predicts what was not recorded.
 - **No data outside the licences.** Today's street network does not come in from OpenStreetMap, nor buildings from any
   source that is not CC0, CC BY or public domain.
 - **No invented districts.** Where people lived within a city, who was rich, what a quarter made: only what records

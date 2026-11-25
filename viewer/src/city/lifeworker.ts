@@ -8,7 +8,7 @@ import { encodeGround, GRIDS, placeLook, worldGround } from '../../../world/gene
 import { plotStyle } from '../../../core/plots.ts';
 import type { SceneSpec } from '../../../core/scene.ts';
 import { FAST_BUDGET, FULL_BUDGET, SceneStream, type Batch, type LifeView, type NamedGroup, type ProtoMesh } from '../../../world/generators/life/stream.ts';
-import type { PlanForm, Settlement, SettlementPlan, WorkForm } from '../../../world/generators/people/settlement/v10.ts';
+import type { PlanForm, Settlement, SettlementPlan, WorkForm } from '../../../world/generators/people/settlement/v11.ts';
 
 /** A transferred instance batch with world-space bounds precomputed off the main thread. */
 export interface WorkerBatch extends Batch {

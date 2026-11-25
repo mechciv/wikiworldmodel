@@ -12,7 +12,7 @@ import { houseSize, HOUSE_VARIANTS } from '../dwellings.ts';
 import { ROUTE, roundOf, wayAt, type RoutineParams } from '../../life/routines.ts';
 import { personGoes } from '../figures.ts';
 import { WORK_VARIANTS } from '../works.ts';
-import { farCellsWeighed, farLand, farLandMask, farScale, LandUseMap, makeSettlement, peopleReach, toLocal, type Ground } from './v10.ts';
+import { farCellsWeighed, farLand, farLandMask, farScale, LandUseMap, makeSettlement, peopleReach, toLocal, type Ground } from './v11.ts';
 import { FIELD_USE, growFields, GROWTH, SITING, type WaterNear } from './sites.ts';
 
 const ROOT = join(import.meta.dirname, '../../../..');

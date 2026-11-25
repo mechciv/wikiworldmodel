@@ -14,8 +14,8 @@
 import type { Agriculture, Husbandry, LifewayWord, TownSpec, Tradition } from './dwelling.ts';
 import type { Form } from './form.ts';
 import type { LivingTaxon, ScenePeople } from './scene.ts';
-import { cityPopulation, type PopulationSource } from './citypop.ts';
-import type { PeopleSeries } from './growth.ts';
+import { centralAt, cityPopulation, densityPrior, dispersedAt, populationSpan, type DensityAnchor, type Figure, type Observation, type PeopleModel, type Population, type PopulationInput } from './citypop.ts';
+import { peopleAt as peopleAtSeries, type PeopleSeries } from './growth.ts';
 
 /** A class of Anthromes 12K: its code in the grids, its name and broader level, the legend's colour, and what it means. */
 export interface AnthromeClass {
@@ -342,16 +342,40 @@ export interface CityRecord {
   lon: number;
   /** when it stood, on the axis: [start, end]; a billion years either way stands for no bound */
   span: [number, number];
-  /** [year, people], in order: its `population` claims, one for each time they are for */
-  pops: [number, number][];
-  /** [year, hectares]: its `settlement_area` claims */
-  areas: [number, number][];
-  /** [year, houses]: its `houses` claims */
-  houses: [number, number][];
+  /**
+   * Its claims of its people, its ground and its houses, each with the ground it counts and the years it is for, as the
+   * population model reads them (core/citypop.ts). A build made before version 11 of the settlement generator gives
+   * `pops`, `areas` and `houses` instead, one figure to a time (figuresOf reads either).
+   */
+  figures?: Figure[];
+  pops?: [number, number][];
+  areas?: [number, number][];
+  houses?: [number, number][];
+  /** HYDE's people within its region's ground, [year, people], where its record gives a region: the build's */
+  hyde?: [number, number][];
+  /**
+   * The places it was centred on, each while it was (a `core` claim's point and years): its town is ranked from those that
+   * stood at a time (model:people/settlement-growth). None, and it is centred on its own point.
+   */
+  cores?: { lat: number; lon: number; span: [number, number] }[];
   /** how it was laid out: its `town_form` claim, and when that held, where the claim says */
   town?: TownSpec;
   townSpan?: [number, number];
 }
+
+/** A record's figures: those its build gives, or, from a build made before them, its figures of the settlement one to a time. */
+export function figuresOf(r: Pick<CityRecord, 'id' | 'figures' | 'pops' | 'areas' | 'houses'>): Figure[] {
+  if (r.figures) return r.figures;
+  const old = (prop: Figure['prop'], points: [number, number][] | undefined): Figure[] => (points ?? []).map(([t, v]) => ({ prop, ground: 'settlement', t: [t, t], v, source: r.id, preferred: true }));
+  return [...old('population', r.pops), ...old('settlement_area', r.areas), ...old('houses', r.houses)];
+}
+
+/** A record's figures of one property of the settlement itself, [year, value] at the middle of the years each is for. */
+export const ownFigures = (r: Pick<CityRecord, 'id' | 'figures' | 'pops' | 'areas' | 'houses'>, prop: Figure['prop']): [number, number][] =>
+  figuresOf(r)
+    .filter((f) => f.prop === prop && f.ground === 'settlement' && f.t)
+    .map((f): [number, number] => [(f.t![0] + f.t![1]) / 2, f.v])
+    .sort((a, b) => a[0] - b[0]);
 
 export interface CitiesFile {
   format: 'lightworld-cities@1';
@@ -363,6 +387,12 @@ export interface CitiesFile {
   cities: City[];
   /** the settlements the world has records of, with a place */
   records?: CityRecord[];
+  /**
+   * The population model as the build fitted it (core/citypop.ts, model:people/density): its parameters, and the
+   * settlements whose own figures say how densely they lived, which the others' density scales are pulled towards.
+   * Absent from a build made before version 11 of the settlement generator, which then takes the model's defaults.
+   */
+  model?: { params?: Partial<PeopleModel>; anchors?: DensityAnchor[] };
 }
 
 /** A record's name at a time: the one in use then, where its names have their times; else its name. */
@@ -398,14 +428,22 @@ export interface CityNear {
   also: { people: number; field: string; source: string }[];
   /** the record it has, and what the record's own claims give at the time: its people, its houses, its ground in hectares, its layout */
   record?: string;
-  /** whose the people are: the record's own claim, a list's figure, or the generator's guess from the record's ground or houses */
+  /**
+   * What its people rest on (model:people/city-population): its record's own figures of them, the lists' alone, or, with
+   * neither, its record's ground or houses and the density of the settlements near it
+   */
   from: 'record' | 'list' | 'guess';
   houses?: number;
   area?: number;
   town?: TownSpec;
+  /** the band about its people at the time, as the model gives it: [lower, higher] */
+  band?: [number, number];
   /** what the settlement generator lays the city out from through the whole of its life (docs/plans/CITIES.md) */
   life?: CityLife;
 }
+
+/** A figure as the population model read it, for the panel: what it says, whether it was read, and what the model gives for it. */
+export type CityObservation = Pick<Observation, 'source' | 'claim' | 'list' | 'prop' | 'ground' | 't' | 'v' | 'lo' | 'hi' | 'use' | 'by' | 'fit' | 'loo'>;
 
 /**
  * A city through the whole of its life, as the settlement generator lays it out (world/generators/people/settlement/
@@ -417,6 +455,19 @@ export interface CityLife {
   span: [number, number];
   members: PeopleSeries[];
   areas: { t: number; ha: number }[];
+  /**
+   * The density it is laid out at, people to the hectare at 10,000 people, as the population model gives it from its own
+   * figures and its neighbours' (core/citypop.ts); absent, the growth model sets it from `areas` as before version 11
+   */
+  at10k?: number;
+  /** its density scale's log prior and posterior, mean and sd, for the panel */
+  density?: { prior: [number, number]; post: [number, number] };
+  /** its region, where its record gives one: its ground in hectares, and its people through time as members */
+  region?: { ha: number; members: PeopleSeries[] };
+  /** the places it was centred on, in its own metres about its point, each with the years it was */
+  cores?: { x: number; y: number; from: number; to: number }[];
+  /** every figure the model read of it, and how */
+  observations?: CityObservation[];
   /** radians from east, the most important first */
   toward: number[];
   /** how its record says it was laid out (its `town_form`), whatever the time, and the years that held */
@@ -461,31 +512,66 @@ export function towardOf(f: Pick<CitiesFile, 'cities' | 'records'>, lat: number,
   };
   for (const c of f.cities) consider(c.lat, c.lon, c.pops);
   // A record with no people of its own counts by its houses, at six to a house, or its ground, at a hundred to the hectare.
-  for (const r of f.records ?? []) consider(r.lat, r.lon, r.pops.length ? r.pops : r.houses.length ? r.houses.map(([t, h]) => [t, h * 6]) : r.areas.map(([t, ha]) => [t, ha * 100]));
+  for (const r of f.records ?? []) {
+    const pops = ownFigures(r, 'population');
+    consider(r.lat, r.lon, pops.length ? pops : ownFigures(r, 'houses').length ? ownFigures(r, 'houses').map(([t, h]) => [t, h * 6]) : ownFigures(r, 'settlement_area').map(([t, ha]) => [t, ha * 100]));
+  }
   found.sort((a, b) => b.score - a.score || a.b - b.b);
   return found.slice(0, TOWARD.most).map((x) => x.b);
 }
 
-/** A city's life from its lists' rows and its record. */
-function lifeOf(f: CitiesFile, lat: number, lon: number, rows: City[], r: CityRecord | undefined, guess: { perHouse: number; lot: number; hold: number }): CityLife {
+/** Metres east and north of a place, on a plane about it. */
+function metresFrom(lat0: number, lon0: number, lat: number, lon: number): [number, number] {
+  const perDeg = 111194.93;
+  return [(lon - lon0) * perDeg * Math.cos((lat0 * Math.PI) / 180), (lat - lat0) * perDeg];
+}
+
+/** The middle of when a settlement stood, for the density of the settlements near it then. */
+const middleOf = (span: [number, number]) => (span[0] + span[1]) / 2;
+
+/**
+ * What the population model reads of a city (core/citypop.ts): its lists' rows, its record's figures and span, HYDE's
+ * people in its region, the parameters the build fitted, and the prior of its density from the settlements near it
+ * then, its own anchor left out so that it is pulled only by its neighbours.
+ */
+export function populationInput(f: Pick<CitiesFile, 'lists' | 'model'>, lat: number, lon: number, rows: City[], r: CityRecord | undefined, guess: { hold: number }, model?: Partial<PeopleModel>): PopulationInput {
   const list = new Map(f.lists.map((l) => [l.source, l]));
-  const sources: PopulationSource[] = rows.map((c) => ({ source: c.source, pops: c.pops, hold: list.get(c.source)?.hold ?? guess.hold }));
-  if (r) {
-    // A record with no people of its own is read from its houses or its ground, as citiesAround guesses them.
-    const pops: [number, number][] = r.pops.length
-      ? r.pops
-      : r.houses.length
-        ? r.houses.map(([t, h]) => [t, h * guess.perHouse])
-        : r.areas.map(([t, ha]) => [t, ((ha * 1e4) / guess.lot) * guess.perHouse]);
-    if (pops.length) sources.push({ source: r.id, pops, hold: guess.hold, record: true });
-  }
-  const pop = cityPopulation(sources, r?.span);
+  const lists = rows.map((c) => ({ source: c.source, pops: c.pops, hold: list.get(c.source)?.hold ?? guess.hold }));
+  const params = model ?? f.model?.params;
+  const input: PopulationInput = { lists, ...(r ? { figures: figuresOf(r), span: r.span } : {}), ...(r?.hyde ? { hyde: r.hyde } : {}), ...(params ? { model: params } : {}) };
+  return { ...input, density: densityPrior(f.model?.anchors, lat, lon, middleOf(populationSpan(input)), params, r?.id) };
+}
+
+/** A city's people through its life, as the population model gives them from its lists' rows and its record. */
+export const populationOf = (f: Pick<CitiesFile, 'lists' | 'model'>, lat: number, lon: number, rows: City[], r: CityRecord | undefined, guess: { hold: number }): Population =>
+  cityPopulation(populationInput(f, lat, lon, rows, r, guess));
+
+/** What its people rest on: its record's own figures of them, the lists' alone, or its record's ground or houses. */
+function restsOn(pop: Population, rows: City[]): CityNear['from'] {
+  const own = pop.observations.filter((o) => !o.list && o.use === 'used');
+  if (own.some((o) => o.prop === 'population' && o.ground !== 'region')) return 'record';
+  if (rows.length || !own.length) return 'list';
+  return 'guess';
+}
+
+/** A city's life from its lists' rows and its record. */
+function lifeOf(f: CitiesFile, lat: number, lon: number, rows: City[], r: CityRecord | undefined, pop: Population): CityLife {
   const row = rows[0];
+  // Its cores, where its record gives them, in its own metres about its point.
+  const cores = (r?.cores ?? []).map((c) => {
+    const [x, y] = metresFrom(lat, lon, c.lat, c.lon);
+    return { x, y, from: c.span[0], to: c.span[1] };
+  });
   return {
     key: r ? r.id : `${row.source}#${row.name}@${row.lat.toFixed(3)},${row.lon.toFixed(3)}`,
     span: pop.span,
     members: pop.members,
-    areas: (r?.areas ?? []).map(([t, ha]) => ({ t, ha })),
+    areas: r ? ownFigures(r, 'settlement_area').map(([t, ha]) => ({ t, ha })) : [],
+    at10k: pop.at10k,
+    density: pop.density,
+    ...(pop.region ? { region: pop.region } : {}),
+    ...(cores.length ? { cores } : {}),
+    observations: pop.observations.map(({ source, claim, list, prop, ground, t, v, lo, hi, use, by, fit, loo }) => ({ source, ...(claim ? { claim } : {}), ...(list ? { list } : {}), prop, ground, ...(t ? { t } : {}), v, ...(lo !== undefined ? { lo } : {}), ...(hi !== undefined ? { hi } : {}), use, ...(by ? { by } : {}), ...(fit ? { fit } : {}), ...(loo ? { loo } : {}) })),
     toward: towardOf(f, lat, lon),
     ...(r?.town ? { town: r.town } : {}),
     ...(r?.townSpan ? { townSpan: r.townSpan } : {}),
@@ -560,10 +646,9 @@ export function citiesNear(f: Pick<CitiesFile, 'lists' | 'cities'>, lat: number,
 /**
  * The cities a scene draws near a place at a time: the lists' (citiesNear), and the settlements the world has records
  * of that stood then. A record within `recordKm` of a list's city is that city: it is drawn where the record puts it, with
- * the record's houses, ground and layout, and with the record's own people where a claim gives them for about that time
- * (within `hold` years of a figure, or between two no more than `gap` apart, as a list's are read) and the list's where
- * none does. A record no list has then is drawn with its own nearest figure, or with its houses or its ground to guess
- * its people from (`perHouse` people to a house, `lot` square metres to a house); one that says none of these is left out.
+ * the record's houses, ground and layout. Every city's people are the population model's (populationOf), from its
+ * lists' rows and its record's figures together; a record no list has then is drawn while its record says it stood, if
+ * any of its figures can be read, and left out where none can.
  */
 export function citiesAround(f: CitiesFile, lat: number, lon: number, t: number, km: number, guess: { perHouse: number; lot: number; hold: number; gap: number }, recordKm = 12): CityNear[] {
   const near = citiesNear(f, lat, lon, t, km);
@@ -571,14 +656,14 @@ export function citiesAround(f: CitiesFile, lat: number, lon: number, t: number,
   // Each entry's rows of the lists and its record, for its life.
   const rowsOf = new Map<CityNear, City[]>(out.map((c, i) => [c, [near[i].city, ...near[i].also.map((a) => a.city)]]));
   const recordOf = new Map<CityNear, CityRecord>();
+  const popOf = new Map<CityNear, Population>();
   const dLat = km / 111;
   for (const r of f.records ?? []) {
     if (t < r.span[0] || t > r.span[1] || Math.abs(r.lat - lat) > dLat) continue;
     const d = kmBetween(lat, lon, r.lat, r.lon);
     if (d > km) continue;
-    const people = cityPeople({ pops: r.pops }, t, guess.hold, guess.gap);
-    const houses = figureAt(r.houses, t);
-    const area = figureAt(r.areas, t);
+    const houses = figureAt(ownFigures(r, 'houses'), t);
+    const area = figureAt(ownFigures(r, 'settlement_area'), t);
     const laid = r.town && (!r.townSpan || (t >= r.townSpan[0] && t <= r.townSpan[1])) ? r.town : undefined;
     const own = { record: r.id, ...(houses !== undefined ? { houses: Math.round(houses) } : {}), ...(area !== undefined ? { area } : {}), ...(laid ? { town: laid } : {}) };
     // The list's city nearest the record, if one stands within reach of it.
@@ -591,33 +676,124 @@ export function citiesAround(f: CitiesFile, lat: number, lon: number, t: number,
         bestKm = k;
       }
     });
+    // Its lists' rows near its point, whatever their times, so that its people are the same at every time.
+    const rows = rowsNear(f, r.lat, r.lon, recordKm);
+    const pop = populationOf(f, r.lat, r.lon, rows, r, guess);
+    const people = centralAt(pop, t);
+    const from = restsOn(pop, rows);
     if (best >= 0) {
       const c = out[best];
-      // The list's figure stays beside the record's own, as what the list says.
-      out[best] = { ...c, ...own, name: nameAt(r, t), lat: r.lat, lon: r.lon, km: Math.round(d * 10) / 10, ...(people !== undefined ? { people: Math.round(people), from: 'record' as const, also: [{ people: c.people, field: c.field!, source: c.source! }, ...c.also] } : {}) };
-      if (people !== undefined) {
+      // The list's figure stays beside the model's, as what the list says, where the record's own figures are read too.
+      out[best] = { ...c, ...own, name: nameAt(r, t), lat: r.lat, lon: r.lon, km: Math.round(d * 10) / 10, ...(people > 0 ? { people: Math.round(people) } : {}), from, ...(from !== 'list' ? { also: [{ people: c.people, field: c.field!, source: c.source! }, ...c.also] } : {}) };
+      if (from !== 'list') {
         delete out[best].field;
         delete out[best].source;
       }
-      rowsOf.set(out[best], rowsOf.get(c) ?? []);
+      rowsOf.set(out[best], rows);
       recordOf.set(out[best], r);
+      popOf.set(out[best], pop);
       continue;
     }
-    // No list has it then: its own nearest figure, whenever that is for, or a guess from its houses or its ground.
-    const own2 = people ?? figureAt(r.pops, t);
-    const guessed = own2 ?? (houses !== undefined ? houses * guess.perHouse : area !== undefined ? ((area * 1e4) / guess.lot) * guess.perHouse : undefined);
-    if (guessed === undefined || !(guessed > 0)) continue;
-    const entry: CityNear = { name: nameAt(r, t), country: '', lat: r.lat, lon: r.lon, people: Math.round(guessed), km: Math.round(d * 10) / 10, also: [], from: own2 !== undefined ? 'record' : 'guess', ...own };
+    // No list has it then: the model's reading of its own figures, while its record says it stood.
+    if (!(people > 0)) continue;
+    const entry: CityNear = { name: nameAt(r, t), country: '', lat: r.lat, lon: r.lon, people: Math.round(people), km: Math.round(d * 10) / 10, also: [], from, ...own };
     out.push(entry);
     rowsOf.set(entry, []);
     recordOf.set(entry, r);
+    popOf.set(entry, pop);
   }
   for (const c of out) {
     const rows = rowsOf.get(c) ?? [];
     const r = recordOf.get(c);
-    if (rows.length || r) c.life = lifeOf(f, c.lat, c.lon, rows, r, guess);
+    if (!rows.length && !r) continue;
+    const pop = popOf.get(c) ?? populationOf(f, c.lat, c.lon, rows, r, guess);
+    if (!pop.members.length) continue;
+    c.life = lifeOf(f, c.lat, c.lon, rows, r, pop);
+    const central = centralAt(pop, t);
+    if (central > 0) {
+      c.people = Math.round(central);
+      c.band = [Math.round(peopleAtSeries(pop.members[2], t)), Math.round(peopleAtSeries(pop.members[1], t))];
+    }
   }
   return out.sort((a, b) => a.km - b.km || b.people - a.people);
+}
+
+/** The lists' rows within `km` of a place whatever their times, the nearest of each list: a record's, for its people. */
+export function rowsNear(f: Pick<CitiesFile, 'cities'>, lat: number, lon: number, km: number): City[] {
+  const best = new Map<string, { c: City; d: number }>();
+  const dLat = km / 111;
+  for (const c of f.cities) {
+    if (Math.abs(c.lat - lat) > dLat) continue;
+    const d = kmBetween(lat, lon, c.lat, c.lon);
+    if (d > km) continue;
+    const b = best.get(c.source);
+    if (!b || d < b.d) best.set(c.source, { c, d });
+  }
+  return [...best.values()].sort((a, b) => a.d - b.d || (a.c.source < b.c.source ? -1 : 1)).map((x) => x.c);
+}
+
+/** How far a record's region reaches from its point, km: the radius of a disc of the region's ground; undefined where it has none. */
+export function regionReach(r: CityRecord): number | undefined {
+  const ha = figuresOf(r).find((x) => x.prop === 'settlement_area' && x.ground === 'region' && x.preferred)?.v ?? figuresOf(r).find((x) => x.prop === 'settlement_area' && x.ground === 'region')?.v;
+  return ha && ha > 0 ? Math.sqrt((ha * 1e4) / Math.PI) / 1000 : undefined;
+}
+
+/** A grid of 5′ cells' people to the km², rows from the north, as a scene has them. */
+interface DensityGrid {
+  north: number;
+  west: number;
+  nx: number;
+  ny: number;
+  res: number;
+  anthrome: number[];
+  density: number[];
+}
+
+/**
+ * The regions about settlements whose records count the region's people (core/citypop.ts, dispersedAt), spread over
+ * their ground in a scene's grids: each cell of land within a region's disc is as many times more crowded than HYDE has
+ * it as the model's people beyond the town's are than HYDE's in the part of the disc the grids cover.
+ */
+export function regionsInto(d: Pick<LandscapeData, 'cities'>, lat: number, lon: number, t: number, grids: DensityGrid[]): void {
+  const recs = (d.cities.records ?? []).filter((r) => r.hyde && t >= r.span[0] && t <= r.span[1]);
+  if (!recs.length) return;
+  const wide = grids.reduce((a, g) => Math.max(a, g.ny * g.res * 111 / 2), 0);
+  for (const r of recs) {
+    const reach = regionReach(r);
+    if (!reach || kmBetween(lat, lon, r.lat, r.lon) > wide * 1.5 + reach) continue;
+    const pop = populationOf(d.cities, r.lat, r.lon, rowsNear(d.cities, r.lat, r.lon, 12), r, { hold: 50 });
+    const extra = dispersedAt(pop, t);
+    if (extra === undefined) continue;
+    const ha = pop.region!.ha;
+    // HYDE's people in the part of the disc the widest grid covers, and that part's land.
+    const g = grids.reduce((a, b) => (b.nx * b.ny > a.nx * a.ny ? b : a));
+    let people = 0;
+    let land = 0;
+    let all = 0;
+    const inDisc = (gr: DensityGrid, i: number) => {
+      const row = Math.floor(i / gr.nx);
+      const col = i % gr.nx;
+      const la = gr.north - (row + 0.5) * gr.res;
+      const lo = gr.west + (col + 0.5) * gr.res;
+      return kmBetween(r.lat, r.lon, la, lo) <= reach ? Math.cos((la * Math.PI) / 180) * (gr.res * 111.195) ** 2 : 0;
+    };
+    for (let i = 0; i < g.density.length; i++) {
+      const a = inDisc(g, i);
+      if (!a) continue;
+      all += a;
+      if (!g.anthrome[i]) continue;
+      people += g.density[i] * a;
+      land += a;
+    }
+    if (!(land > 0)) continue;
+    // People to the km² of land beyond the town's, against HYDE's: the region's ground less its water, in the share of
+    // land the grid finds in the part of the disc it covers.
+    const regionLand = (ha / 100) * (land / all);
+    const factor = people > 0 ? extra / regionLand / (people / land) : 1;
+    if (!(factor > 0) || !Number.isFinite(factor)) continue;
+    for (const gr of grids)
+      for (let i = 0; i < gr.density.length; i++) if (gr.anthrome[i] && inDisc(gr, i)) gr.density[i] = Math.round(gr.density[i] * factor * 1000) / 1000;
+  }
 }
 
 /** What citiesAround reads of the settlement generator's parameters (world/generators/people/settlement.yaml, cities). */
@@ -771,6 +947,12 @@ export function scenePeople(d: LandscapeData, lat: number, lon: number, t: numbe
       return at ? [{ id, assessment: at.a }] : [];
     }),
   };
+  // A region about a settlement whose record counts its people (model:people/city-population): the people beyond the
+  // town's are spread over the region's ground as densely as the model has them, in place of HYDE's alone.
+  regionsInto(d, lat, lon, t, [
+    { north: 90 - r0 * res, west: -180 + c0 * res, nx, ny, res, anthrome, density },
+    { north: far.north, west: far.west, nx: far.nx, ny: far.ny, res, anthrome: far.anthrome, density: far.density },
+  ]);
   const lifeway = lifewayOf(d.classes, anthrome[centre], density[centre], regions.find((x) => x.id === region[centre])?.assessment);
   const cities = citiesAround(d.cities, lat, lon, t, d.reach_km, cityGuess(d.generator.params)).map(({ km: _km, also, ...c }) => ({ ...c, ...(also.length ? { also } : {}) }));
   const traditions = d.traditions.filter((x) => t >= x.span[0] && t <= x.span[1] && x.regions.some((g) => ids.includes(g)));

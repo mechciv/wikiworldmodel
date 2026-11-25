@@ -7,7 +7,8 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { parse } from 'yaml';
 import { agricultureAt, compileAgriculture, compileHusbandry, compileTraditions, cropProblems, cropsText, genericCropsFor, husbandryAt, dwellingProblems, fieldProblems, lifewayProblems, lifewayText, OUTBUILDING_LABEL, OUTBUILDING_ROOFED, OUTBUILDING_WORDS, outbuildingProblems, outbuildingsText, prevalenceOf, PREVALENCE_WORDS, settlementProblems, specText, traditionAt, traditionFor, traditionsFor, type LifewayWord, type Prevalence, type Tradition } from '../../../core/dwelling.ts';
-import { anthromeTile, assessmentAt, cityPeople, citiesAround, citiesNear, classAtStep, figureAt, nameAt, LIFEWAY_OF, lifewayOf, nearestStep, shareDensity, tileKey, cellOf, type AnthromeClass, type Assessment, type CitiesFile, type City } from '../../../core/landscape.ts';
+import { dispersedAt } from '../../../core/citypop.ts';
+import { anthromeTile, assessmentAt, cityPeople, citiesAround, citiesNear, classAtStep, figureAt, kmBetween, nameAt, LIFEWAY_OF, lifewayOf, nearestStep, populationOf, regionReach, regionsInto, shareDensity, tileKey, cellOf, type AnthromeClass, type Assessment, type CitiesFile, type City, type CityRecord } from '../../../core/landscape.ts';
 import type { PeopleFile } from '../../../core/layers.ts';
 import { assessmentsFile, cityYear, citiesOf, eckert4Inverse, housing, housingCounts, parseClassGrid, rasterizeRegions, stepOfName, type LandscapeBuilt } from '../src/build/landscape.ts';
 import { wantedRows, wantedText, wantedTotals } from '../src/dwellingsWanted.ts';
@@ -191,6 +192,44 @@ describe('the lists of cities', () => {
     const near = citiesNear(f, 41.9, 12.5, 100, 40);
     expect(near.map((x) => [x.city.name, x.people])).toEqual([['Rome', 1000000], ['Ostia', 50000]]);
     expect(near[0].also.map((x) => x.people)).toEqual([450000]);
+  });
+});
+
+describe('a region about a settlement, model:people/density', () => {
+  it("spreads a region's people beyond its town over the region's ground, and leaves HYDE's elsewhere", () => {
+    const record: CityRecord = {
+      id: 'people/x',
+      name: 'X',
+      lat: 13.4,
+      lon: 103.9,
+      span: [800, 1450],
+      figures: [
+        { prop: 'population', ground: 'settlement', t: [850, 850], v: 50000, source: 'src:a' },
+        { prop: 'population', ground: 'region', t: [800, 900], v: 200000, source: 'src:k' },
+        { prop: 'settlement_area', ground: 'region', t: [800, 900], v: 300000, source: 'src:k' },
+      ],
+      hyde: [[800, 30000], [900, 30000]],
+    };
+    const cities: CitiesFile = { format: 'lightworld-cities@1', lists: [], cities: [], records: [record] };
+    // A grid of 5′ cells about it, all land, with HYDE's people even at ten to the km².
+    const res = 5 / 60;
+    const n = 31;
+    const north = record.lat + (n / 2) * res;
+    const west = record.lon - (n / 2) * res;
+    const grid = { north, west, nx: n, ny: n, res, anthrome: new Array<number>(n * n).fill(1), density: new Array<number>(n * n).fill(10) };
+    regionsInto({ cities }, record.lat, record.lon, 850, [grid]);
+    const reach = regionReach(record)!;
+    expect(reach).toBeCloseTo(Math.sqrt(3e9 / Math.PI) / 1000, 3);
+    const extra = dispersedAt(populationOf(cities, record.lat, record.lon, [], record, { hold: 50 }), 850)!;
+    expect(extra).toBeGreaterThan(30000);
+    const cell = (i: number) => ({ lat: north - (Math.floor(i / n) + 0.5) * res, lon: west + ((i % n) + 0.5) * res });
+    for (let i = 0; i < n * n; i++) {
+      const c = cell(i);
+      const within = kmBetween(record.lat, record.lon, c.lat, c.lon) <= reach;
+      // Within the disc, as crowded as the people beyond the town over the region's ground; beyond it, HYDE's.
+      if (within) expect(grid.density[i]).toBeCloseTo(extra / 3000, 0);
+      else expect(grid.density[i]).toBe(10);
+    }
   });
 });
 
@@ -589,6 +628,7 @@ describe('whose houses rest on a tradition', () => {
 
 describe('the cities a scene draws', () => {
   // A list with one city, and three records: one of the list's city, one of a town no list has, one that says nothing.
+  // They are written as a build made before version 11 gave them, one figure of the settlement to a time.
   const file: CitiesFile = {
     format: 'lightworld-cities@1',
     lists: [{ source: 'src:list', field: 'field:list', title: 'A list', hold: 50, gap: 600 }],
@@ -602,10 +642,16 @@ describe('the cities a scene draws', () => {
   const guess = { perHouse: 6, lot: 200, hold: 50, gap: 600 };
   const at = (t: number) => citiesAround(file, 10, 20, t, 40, guess);
 
-  it("draws a list's city that has a record where the record puts it, with the record's own people about the time they are for", () => {
+  it("draws a list's city that has a record where the record puts it, with the model's people from the record's own figures and the list's", () => {
     const [c, ...rest] = at(-480);
-    expect(c).toMatchObject({ name: 'Listed of old', lat: 10.03, lon: 20.02, people: 35000, from: 'record', record: 'people/cities/listed', area: 150, town: { streets: 'grid' } });
-    // The list's figure stays beside it, and the record's people are no list's.
+    expect(c).toMatchObject({ name: 'Listed of old', lat: 10.03, lon: 20.02, from: 'record', record: 'people/cities/listed', area: 150, town: { streets: 'grid' } });
+    // Near the record's own figure for the time, which passes over the list's twenty years from it: shaded by the list's
+    // other figure and by its own ground, which shares its bias.
+    expect(c.people / 35000).toBeGreaterThan(0.9);
+    expect(c.people / 35000).toBeLessThan(1.1);
+    expect(c.band![0]).toBeLessThan(c.people);
+    expect(c.band![1]).toBeGreaterThan(c.people);
+    // The list's figure stays beside it, and the people are no list's.
     expect(c.also).toEqual([{ people: 21600, field: 'field:list', source: 'src:list' }]);
     expect(c.field).toBeUndefined();
     expect(rest.map((x) => x.name)).toEqual(['Unlisted']);
@@ -617,19 +663,28 @@ describe('the cities a scene draws', () => {
     expect(citiesAround(walled, 10, 20, 0, 40, guess)[0].town).toEqual({ wall: 'timber' });
   });
 
-  it("keeps the list's figure at a time the record gives none for, and the record's name of that time", () => {
+  it("reads its people at a time the record gives none for between its figures and the list's, with the record's name of that time", () => {
     const then = at(-100)[0];
-    expect(then).toMatchObject({ name: 'Listed of old', people: 52000, from: 'list', field: 'field:list', record: 'people/cities/listed' });
+    expect(then).toMatchObject({ name: 'Listed of old', from: 'record', record: 'people/cities/listed' });
+    expect(then.people).toBeGreaterThan(35000);
+    expect(then.people).toBeLessThan(60000);
     // Its ground is held past the last time a claim is for, while it stands; its old name is not.
     expect(at(-50)[0]).toMatchObject({ name: 'Listed', area: 150 });
   });
 
-  it("draws a record's city no list has then with its own nearest figure, or a guess from its ground, and leaves out one that says nothing", () => {
-    // The list falls silent fifty years after its last figure; the record stands until 400.
-    expect(at(300)).toEqual([expect.objectContaining({ name: 'Listed', people: 35000, from: 'record', also: [] })]);
+  it("draws a record's city no list has then while its record says it stood, from its ground where it gives no people, and leaves out one that says nothing", () => {
+    // The list falls silent fifty years after its last figure; the record stands until 400, its people falling to a
+    // founding size at its end.
+    const late = at(300);
+    expect(late).toEqual([expect.objectContaining({ name: 'Listed', from: 'record', also: [] })]);
+    expect(late[0].people).toBeLessThan(60000);
+    expect(late[0].people).toBeGreaterThan(1000);
     expect(at(500)).toEqual([]);
-    // Forty hectares at 200 m² to a house and six to a house.
-    expect(at(-480).find((x) => x.name === 'Unlisted')).toMatchObject({ people: 12000, from: 'guess', area: 40, record: 'people/cities/unlisted' });
+    // Forty hectares, at the density of a settlement of its size where no neighbour says otherwise.
+    const unlisted = at(-700).find((x) => x.name === 'Unlisted')!;
+    expect(unlisted).toMatchObject({ from: 'guess', area: 40, record: 'people/cities/unlisted' });
+    const people = unlisted.people;
+    expect(people / 40).toBeCloseTo(100 * Math.pow(people / 1e4, 0.2), -1);
     expect(at(-480).some((x) => x.name === 'Silent')).toBe(false);
     expect(nameAt(file.records![0], 0)).toBe('Listed');
   });
@@ -643,9 +698,10 @@ describe('the cities a scene draws', () => {
     expect(early.span).toEqual([-800, 400]);
     expect(early.areas).toEqual([{ t: -600, ha: 150 }, { t: -300, ha: 150 }]);
     const central = early.members[0];
-    expect(central.people[central.t.indexOf(-480)]).toBe(35000);
-    // The list's own reading is a member of its own.
-    expect(early.members.length).toBeGreaterThan(3);
+    expect(Math.abs(central.people[central.t.indexOf(-480)] / 35000 - 1)).toBeLessThan(0.1);
+    // The band's edges are members either side of it, and every figure is said, read or passed over.
+    expect(early.members.length).toBe(3);
+    expect(early.observations!.find((o) => o.list && o.t![0] === -500)!.use).toBe('passed');
     // The town no list has, about 24 km north-north-east, is a place its routes lead to.
     expect(early.toward.length).toBe(1);
     expect(early.toward[0]).toBeGreaterThan(1);

@@ -40,6 +40,10 @@ export interface TownInput {
   members: PeopleSeries[];
   /** areas its record gives, ha, at their times */
   areas?: { t: number; ha: number }[];
+  /** people to the hectare at 10,000 people, as the population model gives it (core/citypop.ts): in place of `areas` */
+  at10k?: number;
+  /** the places it was centred on, in its own metres, and the years each was; its own point where none is given */
+  cores?: { x: number; y: number; from: number; to: number }[];
   /** the directions its routes lead in, radians from east, the most important first: towards the places it dealt with */
   toward: number[];
   /** the ground in the settlement's own metres about its point */
@@ -69,6 +73,9 @@ export interface TownRoute {
   id: string;
   /** from the settlement's core outwards, x, y pairs in its own metres */
   line: number[];
+  /** the years it led to its core, where the settlement's cores have years: drawn only then */
+  from?: number;
+  to?: number;
 }
 
 export interface TownWall {
@@ -125,7 +132,7 @@ const mostPeople = (members: PeopleSeries[]) => Math.max(1, ...members.flatMap((
  * round steep ground, across water only where it must. They are traced most important first, and each ends where it
  * meets one already traced, so they make a tree of roads that join, as roads near a town do.
  */
-function routesOf(input: TownInput, reach: number, p: TownParams): TownRoute[] {
+function routesOf(input: TownInput, reach: number, p: TownParams, origin: { x: number; y: number } = { x: 0, y: 0 }): TownRoute[] {
   const cell = Math.max(20, Math.round(reach / 160));
   const n = Math.max(16, Math.ceil((reach * 2) / cell));
   const x0 = -(n * cell) / 2;
@@ -149,7 +156,10 @@ function routesOf(input: TownInput, reach: number, p: TownParams): TownRoute[] {
   };
   const cost = new Float64Array(N).fill(Infinity);
   const prev = new Int32Array(N).fill(-1);
-  const core = Math.floor(n / 2) * n + Math.floor(n / 2);
+  // The core the routes lead to: the settlement's point, or one of the cores its record gives.
+  const ci = Math.min(n - 1, Math.max(0, Math.floor((origin.x - x0) / cell)));
+  const cj = Math.min(n - 1, Math.max(0, Math.floor((origin.y - x0) / cell)));
+  const core = cj * n + ci;
   cost[core] = 0;
   // A simple heap of [cost, cell].
   const heap: number[] = [0, core];
@@ -226,8 +236,8 @@ function routesOf(input: TownInput, reach: number, p: TownParams): TownRoute[] {
     // The edge of the ground in this direction, pulled in to a cell that can be reached.
     let target = -1;
     for (let f = 0.97; f > 0.3 && target < 0; f -= 0.03) {
-      const i = Math.floor(n / 2 + (Math.cos(b) * f * n) / 2);
-      const j = Math.floor(n / 2 + (Math.sin(b) * f * n) / 2);
+      const i = Math.floor(ci + 0.5 + (Math.cos(b) * f * n) / 2);
+      const j = Math.floor(cj + 0.5 + (Math.sin(b) * f * n) / 2);
       const c = j * n + i;
       if (i >= 0 && j >= 0 && i < n && j < n && cost[c] < Infinity) target = c;
     }
@@ -250,8 +260,8 @@ function routesOf(input: TownInput, reach: number, p: TownParams): TownRoute[] {
     const pts: number[] = [];
     for (let k = cells.length - 1; k >= 0; k--) pts.push(...at(cells[k] % n, Math.floor(cells[k] / n)));
     if (cells[cells.length - 1] === core) {
-      pts[0] = 0;
-      pts[1] = 0;
+      pts[0] = origin.x;
+      pts[1] = origin.y;
     }
     const line = simplify(pts, cell * 0.8);
     if (line.length >= 4) routes.push({ id: `${input.key}/route:${r}`, line });
@@ -429,10 +439,16 @@ export function planTown(input: TownInput): TownPlan {
   const p = merge(input.params);
   const areas = input.areas;
   // The ground the model works on, which the routes are laid across first.
-  const bare = growthGrid({ people: input.members, ...(areas ? { areas } : {}), ...(input.growth ? { params: input.growth } : {}) });
+  const cores = input.cores?.length ? input.cores : [{ x: 0, y: 0 }];
+  const dense = input.at10k !== undefined ? { at10k: input.at10k } : {};
+  const bare = growthGrid({ people: input.members, ...(areas ? { areas } : {}), ...dense, cores, ...(input.growth ? { params: input.growth } : {}) });
   const reach = (bare.grid.nx * bare.grid.cell) / 2;
   const cell0 = bare.grid.cell;
-  const routes = routesOf(input, reach, p);
+  // Its routes lead to its point; where its record gives its cores with their years, to each core while it was one.
+  const routes: TownRoute[] = input.cores?.length
+    ? input.cores.flatMap((k, i) => routesOf(input, reach, p, k).map((r) => ({ ...r, id: `${r.id}@core:${i}`, from: k.from, to: k.to })))
+    : routesOf(input, reach, p);
+  const routeYears = routes.map((r): [number, number] | undefined => (r.from !== undefined && r.to !== undefined ? [r.from, r.to] : undefined));
   const planned = input.streets !== 'lanes';
   const angle = input.angle ?? new Rng(hashString(`${input.key}/grid`)).next() * Math.PI;
   const grid: DivisionGrid | undefined = planned ? { angle, ox: 0, oy: 0, block: [input.sizes.block, input.sizes.block * 0.75], street: input.sizes.lane } : undefined;
@@ -459,7 +475,7 @@ export function planTown(input: TownInput): TownPlan {
           break;
         }
       }
-      const withRoutes = growSettlement({ cores: [{ x: 0, y: 0 }], routes: routes.map((r) => r.line), walls: [], ground: input.ground, people: input.members, span: input.span, ...(areas ? { areas } : {}), ...(input.growth ? { params: input.growth } : {}), cell: cell0 });
+      const withRoutes = growSettlement({ cores, routes: routes.map((r) => r.line), routeYears, walls: [], ground: input.ground, people: input.members, span: input.span, ...(areas ? { areas } : {}), ...dense, ...(input.growth ? { params: input.growth } : {}), cell: cell0 });
       const ring = ringRound(withRoutes, when, p.wall_margin + input.wall.thickness / 2 + input.sizes.lane, input.streets === 'grid' ? grid : undefined);
       if (ring) {
         const gates = routes.flatMap((r) => crossings(r.line, ring));
@@ -468,7 +484,7 @@ export function planTown(input: TownInput): TownPlan {
       }
     }
   }
-  const growth = growSettlement({ cores: [{ x: 0, y: 0 }], routes: [...routes.map((r) => r.line), ...roads], walls, ground: input.ground, people: input.members, span: input.span, ...(areas ? { areas } : {}), ...(input.growth ? { params: input.growth } : {}), cell: cell0 });
+  const growth = growSettlement({ cores, routes: [...routes.map((r) => r.line), ...roads], routeYears: [...routeYears, ...roads.map(() => undefined)], walls, ground: input.ground, people: input.members, span: input.span, ...(areas ? { areas } : {}), ...dense, ...(input.growth ? { params: input.growth } : {}), cell: cell0 });
   // The frame: the routes, the walls and roads a map gives, the wall laid round it, and the edge of the ground it covers.
   const { x0, y0, cell, nx, ny } = growth.grid;
   const lines: FrameLine[] = [

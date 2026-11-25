@@ -78,6 +78,7 @@ claims:
     note: The central zone. Preferred because it says what it measures.
   area-unesco:
     prop: settlement_area
+    ground: site
     value: 626
     source:
       ref: src:unesco-whc-1269-caral

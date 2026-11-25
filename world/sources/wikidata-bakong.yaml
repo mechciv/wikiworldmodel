@@ -1,0 +1,20 @@
+id: src:wikidata-bakong
+type: database-record
+kind: compilation
+citation: >-
+  Wikidata, item Q788982 (Bakong, the central temple of Hariharalaya at Roluos, Cambodia), property P625 (coordinate
+  location).
+snapshot: "2026-11-25"
+container: Wikidata
+url: https://www.wikidata.org/wiki/Q788982
+license: CC0-1.0
+license_note: >-
+  Wikidata's rights statement: all structured data from the main and property namespace is available
+  under the Creative Commons CC0 License.
+reliability: >-
+  A crowd-edited gazetteer entry; no source is given for the point.
+verified:
+  by: machine:claude-code
+  how: >-
+    Coordinates (13.335986111111, 103.97411666667; precision 0.00027777777777778) read from the item's JSON
+    (Special:EntityData/Q788982.json, last revision 2570497367, modified 2026-11-16).
