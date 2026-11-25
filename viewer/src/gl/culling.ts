@@ -13,9 +13,36 @@ export const INSTANCE_STRIDE = 28;
 /** Float stride for per-instance movement routes (world/generators/life/routines.ts, ROUTE). */
 export const WAY_STRIDE = 12;
 
-/** Material codes for foliage cards and plants (cityShaders.ts, LEAVES / MESH_VS). */
+/** Material codes for foliage cards, plants, and organic animal skins (cityShaders.ts). */
 const isCardMat = (m: number): boolean => (m >= 44 && m <= 47) || m === 49 || m === 73;
+const isLeafyMat = (m: number): boolean => (m >= 44 && m <= 49) || m === 71 || m === 73;
 const isPlantMat = (m: number): boolean => (m >= 35 && m <= 38) || (m >= 44 && m <= 49) || m === 71 || m === 73;
+const isSkinMat = (m: number): boolean => m === 31 || m === 34 || (m >= 39 && m <= 41);
+const isCanopyHoleMat = (m: number): boolean => m === 35 || m === 38;
+
+/** Coarse shader family for low-divergence fragment shader specialization. */
+export type MaterialClass = 'foliage' | 'built' | 'mixed';
+
+/** Classify a packed 28-byte mesh buffer into its tightest compatible fragment-shader family. */
+export function classifyMeshMaterials(vertices: ArrayBuffer): MaterialClass {
+  const count = Math.floor(vertices.byteLength / VERTEX_STRIDE);
+  if (count === 0) return 'built';
+  const u8 = new Uint8Array(vertices);
+  let hasLeafy = false;
+  let hasNonLeafy = false;
+  let hasSkinOrHole = false;
+  for (let i = 0; i < count; i++) {
+    const mat = u8[i * VERTEX_STRIDE + 24];
+    if (isLeafyMat(mat)) hasLeafy = true;
+    else {
+      hasNonLeafy = true;
+      if (isSkinMat(mat) || isCanopyHoleMat(mat)) hasSkinOrHole = true;
+    }
+  }
+  if (hasLeafy && !hasNonLeafy) return 'foliage';
+  if (!hasLeafy && !hasSkinOrHole) return 'built';
+  return 'mixed';
+}
 
 /** Local-space bounding volume and material flags of an instanced prototype mesh. */
 export interface ProtoBounds {
@@ -37,6 +64,8 @@ export interface ProtoBounds {
   hasCards: boolean;
   /** Whether any vertex uses a wind-swayed plant material. */
   isPlant: boolean;
+  /** Tightest fragment shader family covering every vertex material in this prototype. */
+  materialClass: MaterialClass;
 }
 
 /** World-space conservative bounds of an instanced batch for per-cascade shadow culling. */
@@ -70,7 +99,7 @@ export interface CascadeBox {
 export function computeProtoBounds(vertices: ArrayBuffer): ProtoBounds {
   const count = Math.floor(vertices.byteLength / VERTEX_STRIDE);
   if (count === 0) {
-    return { minX: 0, minY: 0, minZ: 0, maxX: 0, maxY: 0, maxZ: 0, xyRadius: 0, originRadius: 0, midZ: 0, sphereRadius: 0, hasCards: false, isPlant: false };
+    return { minX: 0, minY: 0, minZ: 0, maxX: 0, maxY: 0, maxZ: 0, xyRadius: 0, originRadius: 0, midZ: 0, sphereRadius: 0, hasCards: false, isPlant: false, materialClass: 'built' };
   }
   const f32 = new Float32Array(vertices);
   const u8 = new Uint8Array(vertices);
@@ -84,6 +113,9 @@ export function computeProtoBounds(vertices: ArrayBuffer): ProtoBounds {
   let originR2 = 0;
   let hasCards = false;
   let isPlant = false;
+  let hasLeafy = false;
+  let hasNonLeafy = false;
+  let hasSkinOrHole = false;
   for (let i = 0; i < count; i++) {
     const o = i * 7;
     const x = f32[o];
@@ -102,6 +134,11 @@ export function computeProtoBounds(vertices: ArrayBuffer): ProtoBounds {
     const mat = u8[i * VERTEX_STRIDE + 24];
     if (!hasCards && isCardMat(mat)) hasCards = true;
     if (!isPlant && isPlantMat(mat)) isPlant = true;
+    if (isLeafyMat(mat)) hasLeafy = true;
+    else {
+      hasNonLeafy = true;
+      if (isSkinMat(mat) || isCanopyHoleMat(mat)) hasSkinOrHole = true;
+    }
   }
   const midZ = 0.5 * (minZ + maxZ);
   let sphereR2 = 0;
@@ -113,6 +150,7 @@ export function computeProtoBounds(vertices: ArrayBuffer): ProtoBounds {
     const d2 = x * x + y * y + dz * dz;
     if (d2 > sphereR2) sphereR2 = d2;
   }
+  const materialClass: MaterialClass = hasLeafy && !hasNonLeafy ? 'foliage' : !hasLeafy && !hasSkinOrHole ? 'built' : 'mixed';
   return {
     minX,
     minY,
@@ -126,6 +164,7 @@ export function computeProtoBounds(vertices: ArrayBuffer): ProtoBounds {
     sphereRadius: Math.sqrt(sphereR2),
     hasCards,
     isPlant,
+    materialClass,
   };
 }
 
@@ -554,4 +593,53 @@ export function shadowTimeKey(schedule: EntityTransitionSchedule, time: number, 
   }
   return `q:${lo}`;
 }
+
+/** Squared horizontal distance from `eye` to the nearest point of a 2D AABB (0 when inside). */
+export function boundsDistanceSq2D(bounds: MeshBounds2D | undefined, eye: V3): number {
+  if (!bounds) return Infinity;
+  const dx = eye[0] < bounds.minX ? bounds.minX - eye[0] : eye[0] > bounds.maxX ? eye[0] - bounds.maxX : 0;
+  const dy = eye[1] < bounds.minY ? bounds.minY - eye[1] : eye[1] > bounds.maxY ? eye[1] - bounds.maxY : 0;
+  return dx * dx + dy * dy;
+}
+
+/**
+ * Return a front-to-back sorted copy of static cells by nearest horizontal distance from `eye`
+ * to maximize hardware Early-Z rejection in dense landscapes and urban canyons.
+ */
+export function sortCellsFrontToBack<T extends { bounds?: MeshBounds2D }>(cells: readonly T[], eye: V3): T[] {
+  if (cells.length <= 1) return cells.slice();
+  return cells
+    .map((cell, index) => ({ cell, index, d2: boundsDistanceSq2D(cell.bounds, eye) }))
+    .sort((a, b) => a.d2 - b.d2 || a.index - b.index)
+    .map((x) => x.cell);
+}
+
+/** Summary statistics (in ms) for an interactive stress-test frame-time trace. */
+export interface FrameDeltaSummary {
+  count: number;
+  p50: number;
+  p95: number;
+  p99: number;
+  max: number;
+  mean: number;
+}
+
+/** Compute p50 / p95 / p99 / max / mean over finite positive frame deltas (ms). */
+export function summarizeFrameDeltas(deltasMs: readonly number[]): FrameDeltaSummary {
+  const clean = deltasMs.filter((d) => Number.isFinite(d) && d >= 0).sort((a, b) => a - b);
+  const n = clean.length;
+  if (n === 0) return { count: 0, p50: 0, p95: 0, p99: 0, max: 0, mean: 0 };
+  const pct = (p: number) => clean[Math.min(n - 1, Math.max(0, Math.ceil(p * n) - 1))];
+  let sum = 0;
+  for (const d of clean) sum += d;
+  return {
+    count: n,
+    p50: pct(0.5),
+    p95: pct(0.95),
+    p99: pct(0.99),
+    max: clean[n - 1],
+    mean: sum / n,
+  };
+}
+
 

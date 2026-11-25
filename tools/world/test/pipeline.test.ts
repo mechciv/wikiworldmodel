@@ -1,10 +1,13 @@
 // Unit tests for Phase 1 rendering pipeline foundations: shadow-cascade culling, hemi-octahedral
 // impostor math, KTX2 container parsing/compression/format negotiation, and WebGPU capability probe.
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
   batchOverlapsCascade,
+  boundsDistanceSq2D,
   buildEntityTransitions,
   canDeferCascade,
+  classifyMeshMaterials,
   cloudLayerFor,
   computeBatchBounds,
   computeProtoBounds,
@@ -23,12 +26,15 @@ import {
   shadowCascadeSnap,
   shadowTimeKey,
   smoothDown,
+  sortCellsFrontToBack,
+  summarizeFrameDeltas,
   VERTEX_STRIDE,
   WAY_STRIDE,
   type CascadeBox,
 } from '../../../viewer/src/gl/culling.ts';
+import { IMP_BAKE_FS, IMPOSTOR_FS, IMPOSTOR_VS, MESH_FS, MESH_FS_BUILT, MESH_FS_FOLIAGE, MESH_FS_STATIC } from '../../../viewer/src/gl/cityShaders.ts';
 import { computeSkyLighting, evalSkyRadiance } from '../../../viewer/src/gl/sky.ts';
-import { IMP_CELL, IMP_GRID, IMP_MAX_LEVEL, IMP_SIZE } from '../../../viewer/src/gl/impostors.ts';
+import { IMP_CELL, IMP_GRID, IMP_MAX_LAYERS, IMP_MAX_LEVEL, IMP_SIZE, ImpostorLru } from '../../../viewer/src/gl/impostors.ts';
 import {
   blockCompressedSize,
   detectCompressedFormats,
@@ -38,8 +44,10 @@ import {
   VK_FORMAT,
   writeKTX2,
 } from '../../../viewer/src/gl/ktx2.ts';
+import { FreeListAllocator } from '../../../viewer/src/gl/megabuffer.ts';
 import { probeWebGPU, selectRenderBackend } from '../../../viewer/src/gl/webgpu.ts';
 import { lookAt, multiply, perspective, type Mat4, type V3 } from '../../../viewer/src/mat.ts';
+import { readViews } from '../../look/views.ts';
 
 function packVertices(verts: { x: number; y: number; z: number; mat: number }[]): ArrayBuffer {
   const buf = new ArrayBuffer(verts.length * VERTEX_STRIDE);
@@ -654,5 +662,178 @@ describe('CPU Rayleigh/Mie sky lighting & SH irradiance', () => {
 
     // Three full evaluations should complete quickly on CPU (far below synchronous readPixels stalls).
     expect(elapsedMs).toBeLessThan(200);
+  });
+});
+
+describe('mega-buffer free-list allocator, front-to-back sorting, and LRU impostor slots', () => {
+  it('allocates, frees, and coalesces adjacent spans without fragmenting capacity', () => {
+    const alloc = new FreeListAllocator(100);
+    expect(alloc.used).toBe(0);
+    expect(alloc.freeBlocks).toBe(1);
+
+    const a = alloc.allocate(30);
+    const b = alloc.allocate(40);
+    const c = alloc.allocate(30);
+    expect([a, b, c]).toEqual([0, 30, 70]);
+    expect(alloc.used).toBe(100);
+    expect(alloc.freeBlocks).toBe(0);
+    expect(alloc.allocate(1)).toBe(-1);
+
+    // Freeing left and right leaves two disjoint blocks; freeing middle merges all three back into one.
+    alloc.free(a, 30);
+    alloc.free(c, 30);
+    expect(alloc.freeBlocks).toBe(2);
+    expect(alloc.allocate(40)).toBe(-1);
+    alloc.free(b, 40);
+    expect(alloc.used).toBe(0);
+    expect(alloc.freeBlocks).toBe(1);
+    expect(alloc.allocate(100)).toBe(0);
+  });
+
+  it('sorts static cells front-to-back by nearest horizontal distance with unbounded cells last', () => {
+    const cells = [
+      { id: 'unbounded' },
+      { id: 'far', bounds: { minX: 400, minY: 0, maxX: 800, maxY: 400 } },
+      { id: 'inside', bounds: { minX: -100, minY: -100, maxX: 100, maxY: 100 } },
+      { id: 'mid', bounds: { minX: 120, minY: 0, maxX: 200, maxY: 100 } },
+    ];
+    expect(boundsDistanceSq2D(cells[2].bounds, [10, 20, 50])).toBe(0);
+    expect(boundsDistanceSq2D(cells[3].bounds, [10, 20, 50])).toBeCloseTo(110 * 110, 6);
+    expect(sortCellsFrontToBack(cells, [10, 20, 50]).map((c) => c.id)).toEqual(['inside', 'mid', 'far', 'unbounded']);
+  });
+
+  it('manages 96-layer impostor LRU eviction while protecting slots used in the current frame', () => {
+    expect(IMP_MAX_LAYERS).toBe(96);
+    const lru = new ImpostorLru(3);
+    expect(lru.allocate(10, 1)).toEqual({ layer: 0 });
+    expect(lru.allocate(20, 2)).toEqual({ layer: 1 });
+    expect(lru.allocate(30, 3)).toEqual({ layer: 2 });
+    expect(lru.size).toBe(3);
+
+    // Touch key 10 at frame 4 so key 20 becomes least-recently-used.
+    lru.touch(10, 4);
+    const ev = lru.allocate(40, 5);
+    expect(ev).toEqual({ layer: 1, evictedKey: 20 });
+    expect(lru.layerOf(20)).toBeUndefined();
+    expect(lru.layerOf(40)).toBe(1);
+
+    // When every resident slot was already used on the current frame, allocation refuses to thrash.
+    lru.touch(10, 10);
+    lru.touch(30, 10);
+    lru.touch(40, 10);
+    expect(lru.allocate(50, 10)).toBeNull();
+
+    // Explicitly releasing a key puts its layer back onto the free list for immediate reuse.
+    lru.release(30);
+    expect(lru.allocate(50, 10)).toEqual({ layer: 2 });
+  });
+});
+
+describe('low-divergence material classification & specialized MESH_FS variants', () => {
+  it('classifies meshes tightly into foliage, built, and mixed shader families', () => {
+    // Pure foliage cards / blades / leaf mass -> 'foliage'
+    const foliageBuf = packVertices([
+      { x: 0, y: 0, z: 1, mat: 46 }, // BROAD_CARD
+      { x: 1, y: 0, z: 2, mat: 48 }, // LEAF_MASS
+      { x: 0, y: 1, z: 1, mat: 71 }, // BLADE
+      { x: 1, y: 1, z: 1, mat: 73 }, // CROP_CARD
+    ]);
+    expect(classifyMeshMaterials(foliageBuf)).toBe('foliage');
+    expect(computeProtoBounds(foliageBuf).materialClass).toBe('foliage');
+
+    // Pure masonry / built / stone -> 'built'
+    const builtBuf = packVertices([
+      { x: 0, y: 0, z: 0, mat: 1 },  // MARBLE
+      { x: 1, y: 0, z: 3, mat: 20 }, // FACADE
+      { x: 1, y: 1, z: 4, mat: 42 }, // THATCH
+      { x: 0, y: 1, z: 0, mat: 69 }, // ADOBE
+      { x: 2, y: 0, z: 0, mat: 74 }, // STONE
+    ]);
+    expect(classifyMeshMaterials(builtBuf)).toBe('built');
+    expect(computeProtoBounds(builtBuf).materialClass).toBe('built');
+
+    // Tree with bark + leaf cards -> 'mixed'
+    const treeBuf = packVertices([
+      { x: 0, y: 0, z: 0, mat: 37 }, // BARK
+      { x: 0, y: 0, z: 5, mat: 46 }, // BROAD_CARD
+    ]);
+    expect(classifyMeshMaterials(treeBuf)).toBe('mixed');
+
+    // Animal skin or canopy-hole material -> 'mixed'
+    expect(classifyMeshMaterials(packVertices([{ x: 0, y: 0, z: 1, mat: 31 }]))).toBe('mixed'); // HIDE
+    expect(classifyMeshMaterials(packVertices([{ x: 0, y: 0, z: 1, mat: 34 }]))).toBe('mixed'); // FUR
+    expect(classifyMeshMaterials(packVertices([{ x: 0, y: 0, z: 1, mat: 35 }]))).toBe('mixed'); // NEEDLE
+    expect(classifyMeshMaterials(packVertices([{ x: 0, y: 0, z: 1, mat: 38 }]))).toBe('mixed'); // BROAD
+  });
+
+  it('prunes specialized MESH_FS variants cleanly with zero discard in MESH_FS_STATIC', () => {
+    const stripComments = (src: string) => src.replace(/\/\/.*$/gm, '');
+    const countBraces = (src: string) => {
+      let depth = 0;
+      for (const ch of src) {
+        if (ch === '{') depth++;
+        else if (ch === '}') depth--;
+        if (depth < 0) return -1;
+      }
+      return depth;
+    };
+
+    for (const src of [MESH_FS, MESH_FS_STATIC, MESH_FS_BUILT, MESH_FS_FOLIAGE]) {
+      expect(src.startsWith('#version 300 es')).toBe(true);
+      expect(src).not.toMatch(/^#(?:ifdef|ifndef|else|endif)\b/m);
+      expect(countBraces(src)).toBe(0);
+    }
+
+    // MESH_FS_STATIC must have ZERO discard statements so GPU hardware Early-Z stays enabled!
+    expect(stripComments(MESH_FS_STATIC)).not.toMatch(/\bdiscard\b/);
+    expect(MESH_FS_STATIC).toContain('Surface facade(');
+    expect(MESH_FS_STATIC).toContain('Surface built(');
+    expect(MESH_FS_STATIC).not.toContain('Surface leaves(');
+    expect(MESH_FS_STATIC).not.toContain('skinGrain(');
+
+    // MESH_FS_BUILT retains vInstFade dither discard while stripping foliage and animal skins.
+    expect(stripComments(MESH_FS_BUILT)).toMatch(/\bdiscard\b/);
+    expect(MESH_FS_BUILT).toContain('Surface built(');
+    expect(MESH_FS_BUILT).not.toContain('Surface leaves(');
+    expect(MESH_FS_BUILT).not.toContain('skinGrain(');
+
+    // MESH_FS_FOLIAGE keeps foliage shading while stripping all masonry/facade/skin code.
+    expect(MESH_FS_FOLIAGE).toContain('Surface leaves(');
+    expect(MESH_FS_FOLIAGE).toContain('vec3 foliage(');
+    expect(MESH_FS_FOLIAGE).not.toContain('Surface facade(');
+    expect(MESH_FS_FOLIAGE).not.toContain('Surface built(');
+    expect(MESH_FS_FOLIAGE).not.toContain('Surface surface(');
+    expect(MESH_FS_FOLIAGE).not.toContain('skinGrain(');
+
+    // Generalized impostor shaders expose sway, kind, rock, and substrate uniforms.
+    expect(IMPOSTOR_VS).toContain('uniform float uImpSway;');
+    expect(IMPOSTOR_FS).toContain('uniform float uImpKind;');
+    expect(IMP_BAKE_FS).toContain('uniform vec3 uRock[2];');
+    expect(IMP_BAKE_FS).toContain('uniform vec3 uSubTone[16];');
+  });
+});
+
+describe('interactive stress-test telemetry and views.yaml trace parsing', () => {
+  it('computes p50/p95/p99/max/mean frame delta summaries accurately', () => {
+    expect(summarizeFrameDeltas([])).toEqual({ count: 0, p50: 0, p95: 0, p99: 0, max: 0, mean: 0 });
+    const samples = Array.from({ length: 100 }, (_, i) => i + 1);
+    const s = summarizeFrameDeltas([...samples, Number.NaN, -5, Infinity]);
+    expect(s.count).toBe(100);
+    expect(s.p50).toBe(50);
+    expect(s.p95).toBe(95);
+    expect(s.p99).toBe(99);
+    expect(s.max).toBe(100);
+    expect(s.mean).toBeCloseTo(50.5, 6);
+  });
+
+  it('parses and validates tools/look/views.yaml including interactive traces', () => {
+    const look = readViews(join(import.meta.dirname, '../../look/views.yaml'));
+    expect(look.views.length).toBeGreaterThan(20);
+    expect(look.traces?.length).toBeGreaterThanOrEqual(4);
+    const names = new Set((look.traces ?? []).map((t) => t.name));
+    expect(names.has('rome-zoom-sweep')).toBe(true);
+    expect(names.has('rome-orbit-walk')).toBe(true);
+    expect(names.has('rome-time-scrub')).toBe(true);
+    expect(names.has('hell-creek-zoom-sweep')).toBe(true);
   });
 });

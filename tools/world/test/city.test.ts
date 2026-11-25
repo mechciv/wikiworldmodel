@@ -9,7 +9,7 @@ import { FORM_PARAMS, formProblem, fromLocal, toLocal, type CityFile, type CityS
 import { blur, carve, flatten, lowerAround, medianUnder, sampleGrid, type GroundGrid } from '../src/build/ground.ts';
 import { assembleRings, elementKey, ohmEntities, ohmKind, ohmYear, snapshotFrom, type OhmElement, type OhmSnapshot } from '../src/ohm.ts';
 import { readTiff, sampleRaster, utm } from '../src/tiff.ts';
-import { CityBuilder } from '../../../world/generators/city/cells.ts';
+import { cellBox, CityBuilder, macroBox, macroChildren, macroKeyOf, simplifyMacroMesh } from '../../../world/generators/city/cells.ts';
 import { raise, type FormContext } from '../../../world/generators/city/forms.ts';
 import { GroundSampler } from '../../../world/generators/city/ground.ts';
 import { Mesh, STRIDE } from '../../../world/generators/city/kit.ts';
@@ -733,5 +733,62 @@ describe('the camera near the ground', () => {
       totalArea += triArea;
     }
     expect(totalArea).toBeCloseTo(area(concaveOuter) - area(hole), 3);
+  });
+
+  it('builds simplified quadtree macro HLOD tiles that cover their 4x4 child leaf cells cleanly', () => {
+    // Verify macro coordinate mapping and 4x4 child tiling.
+    const mk = macroKeyOf(0);
+    const children = macroChildren(mk);
+    expect(children).toHaveLength(16);
+    const mb = macroBox(mk);
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    for (const ck of children) {
+      expect(macroKeyOf(ck)).toBe(mk);
+      const cb = cellBox(ck);
+      if (cb[0] < minX) minX = cb[0];
+      if (cb[1] < minY) minY = cb[1];
+      if (cb[2] > maxX) maxX = cb[2];
+      if (cb[3] > maxY) maxY = cb[3];
+    }
+    expect([minX, minY, maxX, maxY]).toEqual(mb);
+
+    // Verify simplifyMacroMesh removes sub-threshold micro triangles and compacts vertices safely.
+    const m = new Mesh();
+    m.entity = 7;
+    // Large 10x10 triangle (area = 50 m^2)
+    const a = m.v(0, 0, 0, 0, 0, 1, 0, 0);
+    const b = m.v(10, 0, 0, 0, 0, 1, 10, 0);
+    const c = m.v(0, 10, 0, 0, 0, 1, 0, 10);
+    m.tri(a, b, c);
+    // Tiny 0.5x0.5 triangle (area = 0.125 m^2)
+    const d = m.v(50, 50, 0, 0, 0, 1, 0, 0);
+    const e = m.v(50.5, 50, 0, 0, 0, 1, 0.5, 0);
+    const f = m.v(50, 50.5, 0, 0, 0, 1, 0, 0.5);
+    m.tri(d, e, f);
+    const raw = m.arrays();
+    const simp = simplifyMacroMesh(raw.vertices, raw.indices, 1.0);
+    expect(simp.indices.length).toBe(3);
+    expect(simp.vertices.byteLength).toBe(3 * STRIDE);
+    for (const idx of simp.indices) expect(idx).toBeLessThan(3);
+
+    // Verify CityBuilder.macroCells() and buildMacro() produce valid simplified macro geometry across multiple cells.
+    const city = smallCity();
+    const builder = new CityBuilder(city, [{ nx: 2, ny: 2, x0: -9000, y0: -9000, cell: 18000, z: new Float32Array([20, 20, 20, 20]) }]);
+    const macros = builder.macroCells();
+    expect(macros.length).toBeGreaterThan(0);
+    for (const key of macros) {
+      const macro = builder.buildMacro(key);
+      expect(macro.indices.length).toBeGreaterThan(0);
+      expect(macro.indices.length % 3).toBe(0);
+      const vCount = macro.vertices.byteLength / STRIDE;
+      for (const idx of macro.indices) {
+        expect(idx).toBeGreaterThanOrEqual(0);
+        expect(idx).toBeLessThan(vCount);
+      }
+      // Macro HLOD index count must not exceed the sum of its child coarse leaf meshes.
+      let childIndices = 0;
+      for (const ck of macroChildren(key)) childIndices += builder.build(ck, 0).arrays().indices.length;
+      expect(macro.indices.length).toBeLessThanOrEqual(childIndices);
+    }
   });
 });

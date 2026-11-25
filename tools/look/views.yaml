@@ -124,3 +124,36 @@ views:
       Hariharalaya at Roluos in 851 CE from 1.5 km up, the court's town about Bakong at the density Klassen et al. measured
       for Angkor's civic-ceremonial centres.
     link: t=851.6&lat=13.31&lon=103.974&d=1.00024&h=10&v=60&hour=10&mo=8&clock=0
+
+# Interactive stress-test traces (docs/plans/PERFORMANCE.md, Phase 1): scripted camera and time sweeps measuring
+# p50/p95/p99 frame deltas, shadow cascade churn, mega-buffer draw batching, macro HLODs, and impostor counts.
+traces:
+  - name: rome-zoom-sweep
+    what: Continuous descent into Rome (315 CE) from 10 km altitude down to 30 m over the Forum.
+    link: t=315.5&lat=41.89185&lon=12.48665&d=1.00157&h=300&v=68&clock=0
+    motion: zoom
+    steps: 90
+    from: 10000
+    to: 30
+  - name: rome-orbit-walk
+    what: Continuous 180-degree orbit and pan across central Rome (315 CE) at mid-low altitude.
+    link: t=315.5&lat=41.89185&lon=12.48665&d=1.00004&h=240&v=72&clock=0
+    motion: orbit
+    steps: 90
+    from: 0
+    to: 180
+  - name: rome-time-scrub
+    what: Scrubbing Rome across nine centuries (-500 to 400 CE) at urban overview altitude.
+    link: t=-500&lat=41.89185&lon=12.48665&d=1.00008&h=300&v=66&clock=0
+    motion: scrub
+    steps: 90
+    from: -500
+    to: 400
+  - name: hell-creek-zoom-sweep
+    what: Continuous descent into Late Cretaceous Hell Creek forest from 6 km altitude down to 12 m.
+    link: t=-66498050&lat=54.2141999&lon=-81.2315790&d=1.00094&h=19&v=72&clock=0
+    motion: zoom
+    steps: 90
+    from: 6000
+    to: 12
+

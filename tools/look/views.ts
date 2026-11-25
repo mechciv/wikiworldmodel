@@ -15,10 +15,31 @@ export interface LookView {
   link: string;
 }
 
+/** A scripted interactive camera or time sweep for frame-time stability profiling. */
+export interface InteractiveTrace {
+  name: string;
+  /** what interactive scenario the trace stresses */
+  what: string;
+  /** starting viewer link, without the build */
+  link: string;
+  /** motion profile: logarithmic altitude zoom, continuous orbit+pan, or time-slider scrub */
+  motion: 'zoom' | 'orbit' | 'scrub';
+  /** number of requestAnimationFrame steps to record */
+  steps: number;
+  /** starting value (altitude m for zoom, heading delta deg for orbit, year for scrub) */
+  from: number;
+  /** ending value (altitude m for zoom, heading delta deg for orbit, year for scrub) */
+  to: number;
+  /** optional p95 frame-time budget in ms (defaults to BUDGET.ms) */
+  budgetMs?: number;
+}
+
 export interface LookFile {
   /** the GPU the timings are for, by the name its driver gives */
   reference: string;
   views: LookView[];
+  /** optional interactive stress-test traces for zoom, orbit, and time-scrub profiling */
+  traces?: InteractiveTrace[];
 }
 
 export function readViews(file: string): LookFile {
@@ -29,6 +50,16 @@ export function readViews(file: string): LookFile {
     if (names.has(v.name)) throw new Error(`two views are named "${v.name}"`);
     names.add(v.name);
     if (/(^|&)b=/.test(v.link)) throw new Error(`view ${v.name}: its link names no build; the shoot adds the latest`);
+  }
+  const traceNames = new Set<string>();
+  for (const tr of f.traces ?? []) {
+    if (!/^[a-z0-9-]+$/.test(tr.name)) throw new Error(`a trace's name is lowercase words and dashes: "${tr.name}"`);
+    if (traceNames.has(tr.name)) throw new Error(`two traces are named "${tr.name}"`);
+    traceNames.add(tr.name);
+    if (/(^|&)b=/.test(tr.link)) throw new Error(`trace ${tr.name}: its link names no build; the harness adds the latest`);
+    if (tr.motion !== 'zoom' && tr.motion !== 'orbit' && tr.motion !== 'scrub') throw new Error(`trace ${tr.name}: unknown motion "${String(tr.motion)}"`);
+    if (!Number.isInteger(tr.steps) || tr.steps < 2) throw new Error(`trace ${tr.name}: steps must be an integer >= 2`);
+    if (!Number.isFinite(tr.from) || !Number.isFinite(tr.to)) throw new Error(`trace ${tr.name}: from and to must be finite numbers`);
   }
   return f;
 }

@@ -2,14 +2,19 @@
 // can be raised a cell at a time. A living scene draws them so among its own houses (viewer/src/city/structures.ts):
 // every structure of the build's city file, raised by forms.ts on the city's surveyed ground. The houses between them
 // are the settlement generator's, as every town's are (docs/plans/CITIES.md, decision 1).
-import type { CityFile } from '../../../core/city.ts';
+import type { CityFile, CityStructure } from '../../../core/city.ts';
 import { raise, LINE_FORMS, type FormContext } from './forms.ts';
 import { GroundSampler, type GroundGridData } from './ground.ts';
-import { MAT, Mesh } from './kit.ts';
+import { MAT, Mesh, STRIDE } from './kit.ts';
 
 export const CELL = 400;
 export const CELLS = 34;
 const HALF = (CELL * CELLS) / 2;
+
+/** Macro HLOD tile span in leaf cells (4 x 4 = 1600 m x 1600 m merged proxy tile). */
+export const MACRO_SPAN = 4;
+export const MACRO_CELL = CELL * MACRO_SPAN;
+export const MACRO_CELLS = Math.ceil(CELLS / MACRO_SPAN);
 
 export const cellOf = (x: number, y: number) => {
   const i = Math.floor((x + HALF) / CELL);
@@ -22,6 +27,125 @@ export const cellBox = (key: number): [number, number, number, number] => {
   const j = Math.floor(key / CELLS);
   return [-HALF + i * CELL, -HALF + j * CELL, -HALF + (i + 1) * CELL, -HALF + (j + 1) * CELL];
 };
+
+/** Map a leaf cell key into its parent macro HLOD tile key. */
+export const macroKeyOf = (cellKey: number): number => {
+  const i = cellKey % CELLS;
+  const j = Math.floor(cellKey / CELLS);
+  return Math.floor(j / MACRO_SPAN) * MACRO_CELLS + Math.floor(i / MACRO_SPAN);
+};
+
+/** World-local XY bounding box of a macro HLOD tile, clamped to the leaf grid extent. */
+export const macroBox = (macroKey: number): [number, number, number, number] => {
+  const mi = macroKey % MACRO_CELLS;
+  const mj = Math.floor(macroKey / MACRO_CELLS);
+  const i0 = mi * MACRO_SPAN;
+  const j0 = mj * MACRO_SPAN;
+  const i1 = Math.min(CELLS, i0 + MACRO_SPAN);
+  const j1 = Math.min(CELLS, j0 + MACRO_SPAN);
+  return [-HALF + i0 * CELL, -HALF + j0 * CELL, -HALF + i1 * CELL, -HALF + j1 * CELL];
+};
+
+/** All valid leaf cell keys covered by a macro HLOD tile. */
+export const macroChildren = (macroKey: number): number[] => {
+  const mi = macroKey % MACRO_CELLS;
+  const mj = Math.floor(macroKey / MACRO_CELLS);
+  const i0 = mi * MACRO_SPAN;
+  const j0 = mj * MACRO_SPAN;
+  const i1 = Math.min(CELLS, i0 + MACRO_SPAN);
+  const j1 = Math.min(CELLS, j0 + MACRO_SPAN);
+  const out: number[] = [];
+  for (let j = j0; j < j1; j++) {
+    for (let i = i0; i < i1; i++) out.push(j * CELLS + i);
+  }
+  return out;
+};
+
+/**
+ * Drop triangles smaller than `minAreaM2` (m²) and compact away unreferenced vertices to produce
+ * lightweight macro HLOD proxy geometry without altering generator leaf meshes.
+ */
+export function simplifyMacroMesh(vertices: ArrayBuffer, indices: Uint32Array, minAreaM2: number): { vertices: ArrayBuffer; indices: Uint32Array } {
+  if (minAreaM2 <= 0 || indices.length === 0 || vertices.byteLength === 0) {
+    return { vertices, indices };
+  }
+  const vCount = Math.floor(vertices.byteLength / STRIDE);
+  const f = new Float32Array(vertices);
+  const minDoubleArea2 = (2 * minAreaM2) * (2 * minAreaM2);
+  const kept = new Uint32Array(indices.length);
+  let kn = 0;
+  for (let k = 0; k + 2 < indices.length; k += 3) {
+    const a = indices[k];
+    const b = indices[k + 1];
+    const c = indices[k + 2];
+    const ao = a * 7;
+    const bo = b * 7;
+    const co = c * 7;
+    const e1x = f[bo] - f[ao];
+    const e1y = f[bo + 1] - f[ao + 1];
+    const e1z = f[bo + 2] - f[ao + 2];
+    const e2x = f[co] - f[ao];
+    const e2y = f[co + 1] - f[ao + 1];
+    const e2z = f[co + 2] - f[ao + 2];
+    const cx = e1y * e2z - e1z * e2y;
+    const cy = e1z * e2x - e1x * e2z;
+    const cz = e1x * e2y - e1y * e2x;
+    if (cx * cx + cy * cy + cz * cz >= minDoubleArea2) {
+      kept[kn++] = a;
+      kept[kn++] = b;
+      kept[kn++] = c;
+    }
+  }
+  if (kn === indices.length) return { vertices, indices };
+  if (kn === 0) return { vertices: new ArrayBuffer(0), indices: new Uint32Array(0) };
+
+  const remap = new Int32Array(vCount);
+  remap.fill(-1);
+  let used = 0;
+  const outIdx = new Uint32Array(kn);
+  for (let k = 0; k < kn; k++) {
+    const oldV = kept[k];
+    let newV = remap[oldV];
+    if (newV < 0) {
+      newV = used++;
+      remap[oldV] = newV;
+    }
+    outIdx[k] = newV;
+  }
+  const srcU32 = new Uint32Array(vertices);
+  const outVerts = new ArrayBuffer(used * STRIDE);
+  const dstU32 = new Uint32Array(outVerts);
+  const words = STRIDE >> 2;
+  for (let oldV = 0; oldV < vCount; oldV++) {
+    const newV = remap[oldV];
+    if (newV < 0) continue;
+    const s = oldV * words;
+    const d = newV * words;
+    for (let w = 0; w < words; w++) dstU32[d + w] = srcU32[s + w];
+  }
+  return { vertices: outVerts, indices: outIdx };
+}
+
+/** Whether a structure is visually significant at macro HLOD distance (> 1.5 km) or in Cascade 2 shadows. */
+function macroWorthy(s: CityStructure): boolean {
+  if (s.rank <= 1 || s.curated) return true;
+  if (s.kind === 'works/road') return false;
+  if (LINE_FORMS.has(s.form.type)) return true;
+  if (s.form.type !== 'generic' && s.form.type !== 'fountain' && s.form.type !== 'statue') return true;
+  if ((s.height ?? 0) >= 8) return true;
+  let r2 = 0;
+  const ax = s.at[0];
+  const ay = s.at[1];
+  for (const ring of s.rings) {
+    for (let i = 0; i + 1 < ring.length; i += 2) {
+      const dx = ring[i] - ax;
+      const dy = ring[i + 1] - ay;
+      const d2 = dx * dx + dy * dy;
+      if (d2 > r2) r2 = d2;
+    }
+  }
+  return r2 >= 7 * 7;
+}
 
 export class CityBuilder {
   readonly ground: GroundSampler;
@@ -92,6 +216,14 @@ export class CityBuilder {
     return [...new Set([...this.cellStructures.keys(), ...this.cellLines.keys()])].sort((a, b) => a - b);
   }
 
+  /** Every macro HLOD tile (4 x 4 leaf cells) with at least one populated leaf cell. */
+  macroCells(): number[] {
+    const out = new Set<number>();
+    for (const k of this.cellStructures.keys()) out.add(macroKeyOf(k));
+    for (const k of this.cellLines.keys()) out.add(macroKeyOf(k));
+    return [...out].sort((a, b) => a - b);
+  }
+
   /** How high each structure stands as raised, above sea level: 0 for one drawn along a line. */
   tops(): Float32Array {
     const c = this.city;
@@ -120,6 +252,37 @@ export class CityBuilder {
       raise(m, c.structures[i], { ...ctx, clip });
     }
     return m;
+  }
+
+  /**
+   * Merged macro HLOD proxy mesh for a 4 x 4 tile (1600 m): raises prominent structures and walls
+   * across all child cells at coarse detail and strips sub-1.5 m² sliver triangles.
+   */
+  buildMacro(macroKey: number): { vertices: ArrayBuffer; indices: Uint32Array } {
+    const m = new Mesh(32768);
+    const c = this.city;
+    const ctx: FormContext = { ...this.ctx, detail: 0 };
+    const structs = new Set<number>();
+    const lines = new Set<number>();
+    for (const child of macroChildren(macroKey)) {
+      for (const i of this.cellStructures.get(child) ?? []) structs.add(i);
+      for (const i of this.cellLines.get(child) ?? []) lines.add(i);
+    }
+    for (const i of structs) {
+      const s = c.structures[i];
+      if (!macroWorthy(s)) continue;
+      m.entity = this.first + i;
+      raise(m, s, { ...ctx, clip: undefined });
+    }
+    const clip = macroBox(macroKey);
+    for (const i of lines) {
+      const s = c.structures[i];
+      if (!macroWorthy(s)) continue;
+      m.entity = this.first + i;
+      raise(m, s, { ...ctx, clip });
+    }
+    const raw = m.arrays();
+    return simplifyMacroMesh(raw.vertices, raw.indices, 1.5);
   }
 }
 

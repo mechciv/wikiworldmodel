@@ -51,6 +51,7 @@ import { FeatureTiles } from './features.ts';
 import { builds, fetchLog, loadBuild, loadRecord, type Build } from './data.ts';
 import { FieldRenderer, type FieldTileGPU } from './gl/field.ts';
 import { cloudDriftAt, globeLook, GlobeRenderer, type CloudDrift } from './gl/globe.ts';
+import { summarizeFrameDeltas, type FrameDeltaSummary } from './gl/culling.ts';
 import type { FrameProfile } from './gl/timer.ts';
 import { capturePicture, savePicture } from './picture.ts';
 import { add, cross, norm, scale, type V3 } from './mat.ts';
@@ -80,6 +81,28 @@ declare global {
   interface Window {
     __wikiworldmodel?: WikiWorldModelHandle;
   }
+}
+
+/** Input specification for a scripted interactive camera/time sweep. */
+export interface InteractiveProfileSpec {
+  motion: 'zoom' | 'orbit' | 'scrub';
+  steps: number;
+  from: number;
+  to: number;
+}
+
+/** Frame-delta percentiles and GPU/streaming counters captured during an interactive sweep. */
+export interface InteractiveProfile {
+  deltas: FrameDeltaSummary;
+  frames: number;
+  shadowCascades: number;
+  avgDrawCalls: number;
+  megaDraws: number;
+  maxStaticCells: number;
+  maxMacroCells: number;
+  avgImpostorInstances: number;
+  avgMeshInstances: number;
+  workerSelections: number;
 }
 
 /** What tests and the console can see. */
@@ -139,6 +162,11 @@ export interface WikiWorldModelHandle {
    * is (docs/plans/RENDERING.md, step 0); null where no scene is drawn.
    */
   profile(frames?: number): Promise<FrameProfile | null>;
+  /**
+   * Drive a scripted interactive zoom, orbit, or time-scrub sweep across `trace.steps` animation frames and return
+   * frame-delta percentiles plus draw, shadow-cascade, macro-HLOD, impostor, and worker-selection counters.
+   */
+  profileInteractive(trace: InteractiveProfileSpec): Promise<InteractiveProfile | null>;
   /** for a capture: how far the clouds have drifted along their bands, or null to put them back */
   driftClouds(d: CloudDrift | null): void;
 }
@@ -3207,6 +3235,80 @@ async function start(root: HTMLElement): Promise<void> {
         await new Promise((done) => requestAnimationFrame(() => done(undefined)));
       }
       return timer.stop();
+    },
+    profileInteractive: async (trace) => {
+      const steps = Math.max(2, Math.floor(trace.steps));
+      const baseT = state.t;
+      const baseCam = { ...state.cam };
+      const deltas: number[] = [];
+      const seenSelections = new Map<LifeScene, number>();
+      if (city instanceof LifeScene) seenSelections.set(city, city.workerSelections);
+      let shadowCascades = 0;
+      let totalDrawCalls = 0;
+      let megaDraws = 0;
+      let maxStaticCells = 0;
+      let maxMacroCells = 0;
+      let totalImpInst = 0;
+      let totalMeshInst = 0;
+      let localFrames = 0;
+      try {
+        await new Promise((done) => requestAnimationFrame(() => done(undefined)));
+        let prev = performance.now();
+        for (let i = 0; i < steps; i++) {
+          const u = steps > 1 ? i / (steps - 1) : 1;
+          if (trace.motion === 'zoom') {
+            const lo = Math.max(1, trace.from);
+            const hi = Math.max(1, trace.to);
+            const altM = Math.exp(Math.log(lo) * (1 - u) + Math.log(hi) * u);
+            setState({ cam: { ...baseCam, dist: 1 + altM / EARTH_RADIUS } });
+          } else if (trace.motion === 'orbit') {
+            const heading = (baseCam.heading ?? 0) + trace.from + (trace.to - trace.from) * u;
+            const dLat = Math.sin(u * Math.PI * 2) * 0.0018;
+            const dLon = (Math.cos(u * Math.PI * 2) - 1) * 0.0022;
+            setState({ cam: { ...baseCam, lat: baseCam.lat + dLat, lon: baseCam.lon + dLon, heading } });
+          } else {
+            const t = trace.from + (trace.to - trace.from) * u;
+            setState({ t });
+          }
+          await new Promise((done) => requestAnimationFrame(() => done(undefined)));
+          const now = performance.now();
+          deltas.push(now - prev);
+          prev = now;
+          if (city instanceof LifeScene && !seenSelections.has(city)) {
+            seenSelections.set(city, city.workerSelections);
+          }
+          if (cityDrawn && city) {
+            const c = city.renderer.lastCounters;
+            localFrames++;
+            shadowCascades += c.shadowCascades;
+            totalDrawCalls += c.drawCalls;
+            megaDraws += c.megaDraws;
+            if (c.staticCells > maxStaticCells) maxStaticCells = c.staticCells;
+            if (c.macroCells > maxMacroCells) maxMacroCells = c.macroCells;
+            totalImpInst += c.impostorInstances;
+            totalMeshInst += c.meshInstances;
+          }
+        }
+      } finally {
+        setState({ t: baseT, cam: baseCam });
+      }
+      let workerSelections = 0;
+      for (const [scene, start] of seenSelections) {
+        workerSelections += Math.max(0, scene.workerSelections - start);
+      }
+      const denom = Math.max(1, localFrames);
+      return {
+        deltas: summarizeFrameDeltas(deltas),
+        frames: deltas.length,
+        shadowCascades,
+        avgDrawCalls: totalDrawCalls / denom,
+        megaDraws,
+        maxStaticCells,
+        maxMacroCells,
+        avgImpostorInstances: totalImpInst / denom,
+        avgMeshInstances: totalMeshInst / denom,
+        workerSelections,
+      };
     },
     driftClouds: (d) => {
       cloudDrift = d ?? undefined;

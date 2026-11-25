@@ -6,7 +6,7 @@
 // strip raises and lowers them as it did in Rome's own scene.
 
 import type { CityFile, CityStructure } from '../../../core/city.ts';
-import { cellBox, CELL } from '../../../world/generators/city/cells.ts';
+import { cellBox, CELL, MACRO_CELL, macroBox, macroKeyOf } from '../../../world/generators/city/cells.ts';
 import type { MeshBounds2D } from '../gl/culling.ts';
 import type { LocalRenderer, MeshHandle } from '../gl/renderer.ts';
 import type { V3 } from '../mat.ts';
@@ -15,7 +15,7 @@ import { Skyline } from './skyline.ts';
 import type { LocalView } from './view.ts';
 import type { FromWorker, ToWorker } from './worker.ts';
 
-/** A cell of the city's grid, with its meshes at the details made so far. */
+/** A leaf cell (400 m) of the city's grid, with its meshes at the details made so far. */
 interface Cell {
   key: number;
   box: [number, number, number, number];
@@ -26,8 +26,28 @@ interface Cell {
   usedAt: number;
 }
 
-/** Within this distance of the eye a cell is drawn finely. */
+/** A quadtree macro HLOD tile (1600 m = 4 x 4 leaf cells) covering distant views and Cascade 2 shadows. */
+interface MacroCell {
+  key: number;
+  box: [number, number, number, number];
+  children: Cell[];
+  gpu?: MeshHandle;
+  asked: boolean;
+}
+
+type PendingUpload =
+  | Extract<FromWorker, { type: 'cell' }>
+  | Extract<FromWorker, { type: 'macro' }>;
+
+/** Within this distance of the eye a leaf cell is drawn finely. */
 const FINE_DISTANCE = 620;
+/** Beyond this distance from a macro tile's AABB, the merged 1600 m macro HLOD replaces all 16 leaf cells. */
+const MACRO_DISTANCE = 1500;
+const MACRO_DISTANCE_INTERACTIVE = 1100;
+/** Only build and keep leaf coarse cells within this radius of the eye; beyond it, macro HLODs cover the skyline. */
+const LEAF_LOAD_DISTANCE = 2000;
+/** Shadow cascades wider than this radius use macro HLOD tiles directly (Cascade 2). */
+const SHADOW_MACRO_RADIUS = 2400;
 /** Finely drawn cells kept, once out of range, before the oldest is let go. */
 const FINE_BUDGET_BYTES = 600e6;
 /** How far the eye goes before the worker is told, for which cells to make first. */
@@ -45,6 +65,13 @@ export function structureLayerKey(siteId: string, offset: [number, number], fast
   return `${siteId}|${offset[0].toFixed(1)}|${offset[1].toFixed(1)}|${fast ? 1 : 0}`;
 }
 
+/** Minimum 2D Euclidean distance from point `(x, y)` to axis-aligned box `[x0, y0, x1, y1]`. */
+function boxDist2D(box: [number, number, number, number], x: number, y: number): number {
+  const dx = x < box[0] ? box[0] - x : x > box[2] ? x - box[2] : 0;
+  const dy = y < box[1] ? box[1] - y : y > box[3] ? y - box[3] : 0;
+  return Math.hypot(dx, dy);
+}
+
 export class StructureLayer {
   ready = false;
   /** Fixed entity base baked into vertex buffers so pooled cells can serve scenes with any `entityBase` via `uEntityOffset`. */
@@ -56,14 +83,15 @@ export class StructureLayer {
   /** cached wall-occlusion grid built once from `named` and `tops` */
   skyline = new Skyline();
   private cells = new Map<number, Cell>();
+  private macros = new Map<number, MacroCell>();
   private worker: Worker | null = null;
   private loadPromise: Promise<void> | null = null;
   private inflight = 0;
   private frame = 0;
   private serial = 0;
   private fineBytes = 0;
-  private queue: { key: number; detail: number }[] = [];
-  private pendingUploads: Extract<FromWorker, { type: 'cell' }>[] = [];
+  private queue: ({ kind: 'cell'; key: number; detail: number } | { kind: 'macro'; key: number })[] = [];
+  private pendingUploads: PendingUpload[] = [];
   private eyeTold: [number, number] | null = null;
   private listeners = new Set<() => void>();
   onChange: () => void = () => {};
@@ -118,12 +146,25 @@ export class StructureLayer {
         const m = e.data;
         if (m.type === 'structures') {
           this.tops = m.tops;
-          for (const key of m.cells) this.cells.set(key, { key, box: cellBox(key), asked: [false, false], usedAt: 0 });
+          for (const mk of m.macros) {
+            this.macros.set(mk, { key: mk, box: macroBox(mk), children: [], asked: false });
+          }
+          for (const key of m.cells) {
+            const cell: Cell = { key, box: cellBox(key), asked: [false, false], usedAt: 0 };
+            this.cells.set(key, cell);
+            const mk = macroKeyOf(key);
+            let macro = this.macros.get(mk);
+            if (!macro) {
+              macro = { key: mk, box: macroBox(mk), children: [], asked: false };
+              this.macros.set(mk, macro);
+            }
+            macro.children.push(cell);
+          }
           this.skyline = Skyline.of(this.named, this.tops, { offset: new Int32Array(1), points: new Float32Array(0), top: new Float32Array(0), valid: [0, 0] });
           this.ready = true;
           resolve();
           this.notify();
-        } else if (m.type === 'cell') this.received(m);
+        } else if (m.type === 'cell' || m.type === 'macro') this.received(m);
       };
       const f = this.bundle.file;
       const msg: ToWorker = { type: 'structures', city: f, levels: f.ground, heights: this.bundle.heights, entityBase: this.builtBase, offset: this.offset };
@@ -157,22 +198,40 @@ export class StructureLayer {
     return i >= 0 ? first + i : undefined;
   }
 
-  private received(m: Extract<FromWorker, { type: 'cell' }>): void {
+  private received(m: PendingUpload): void {
     this.inflight--;
-    const existing = this.pendingUploads.findIndex((p) => p.key === m.key && p.detail === m.detail);
+    const existing = this.pendingUploads.findIndex(
+      (p) => p.type === m.type && p.key === m.key && (m.type === 'macro' || (p.type === 'cell' && p.detail === m.detail)),
+    );
     if (existing >= 0) this.pendingUploads[existing] = m;
     else this.pendingUploads.push(m);
     this.pump();
     this.notify();
   }
 
-  /** Upload queued cell meshes to the GPU within a per-frame time budget (always at least one cell). */
+  /** Upload queued cell and macro HLOD meshes to the GPU within a per-frame time budget (always at least one). */
   private flushUploads(budgetMs: number): void {
     if (!this.pendingUploads.length) return;
     const t0 = performance.now();
     let uploaded = 0;
     while (this.pendingUploads.length > 0 && (uploaded === 0 || performance.now() - t0 < budgetMs)) {
       const m = this.pendingUploads.shift()!;
+      if (m.type === 'macro') {
+        const mc = this.macros.get(m.key);
+        if (!mc) continue;
+        const bounds: MeshBounds2D = {
+          minX: mc.box[0] + this.offset[0],
+          minY: mc.box[1] + this.offset[1],
+          maxX: mc.box[2] + this.offset[0],
+          maxY: mc.box[3] + this.offset[1],
+        };
+        const gpu = this.renderer.upload(m.vertices, m.indices, bounds);
+        gpu.macro = true;
+        if (mc.gpu) this.renderer.remove(mc.gpu);
+        mc.gpu = gpu;
+        uploaded++;
+        continue;
+      }
       const c = this.cells.get(m.key);
       if (!c) continue;
       const bounds: MeshBounds2D = {
@@ -202,7 +261,11 @@ export class StructureLayer {
     while (this.queue.length) {
       const q = this.queue.shift()!;
       this.inflight++;
-      this.worker!.postMessage({ type: 'cell', key: q.key, detail: q.detail, serial: ++this.serial } satisfies ToWorker);
+      if (q.kind === 'macro') {
+        this.worker!.postMessage({ type: 'macro', key: q.key, serial: ++this.serial } satisfies ToWorker);
+      } else {
+        this.worker!.postMessage({ type: 'cell', key: q.key, detail: q.detail, serial: ++this.serial } satisfies ToWorker);
+      }
     }
   }
 
@@ -211,7 +274,7 @@ export class StructureLayer {
     return [v.eye[0] - this.offset[0], v.eye[1] - this.offset[1]];
   }
 
-  /** Ask for the cells a view wants, the nearest first. */
+  /** Ask for the macro HLOD tiles and nearby leaf cells a view wants, nearest first. */
   update(v: LocalView): void {
     if (!this.ready) return;
     this.frame++;
@@ -221,16 +284,33 @@ export class StructureLayer {
       this.eyeTold = [ex, ey];
       this.worker!.postMessage({ type: 'eye', at: this.eyeTold } satisfies ToWorker);
     }
-    const want: { key: number; detail: number; d: number }[] = [];
-    for (const c of this.cells.values()) {
-      const d = Math.hypot((c.box[0] + c.box[2]) / 2 - ex, (c.box[1] + c.box[3]) / 2 - ey, Math.max(v.clearance, 0));
-      if (!c.coarse && !c.asked[0]) want.push({ key: c.key, detail: 0, d });
-      if (!this.fast && d < FINE_DISTANCE + CELL * 0.71 && !c.fine && !c.asked[1]) want.push({ key: c.key, detail: 1, d: d - 1e5 });
+    const clearance = Math.max(v.clearance, 0);
+    const want: ({ kind: 'cell'; key: number; detail: number; d: number } | { kind: 'macro'; key: number; d: number })[] = [];
+    for (const m of this.macros.values()) {
+      const md = Math.hypot(boxDist2D(m.box, ex, ey), clearance);
+      if (!m.gpu && !m.asked) {
+        want.push({ kind: 'macro', key: m.key, d: md - 1e5 });
+      }
+      if (md > LEAF_LOAD_DISTANCE) continue;
+      for (const c of m.children) {
+        const d = Math.hypot((c.box[0] + c.box[2]) / 2 - ex, (c.box[1] + c.box[3]) / 2 - ey, clearance);
+        if (!c.coarse && !c.asked[0]) {
+          want.push({ kind: 'cell', key: c.key, detail: 0, d });
+        }
+        if (!this.fast && d < FINE_DISTANCE + CELL * 0.71 && !c.fine && !c.asked[1]) {
+          want.push({ kind: 'cell', key: c.key, detail: 1, d: d - 2e5 });
+        }
+      }
     }
     want.sort((a, b) => a.d - b.d);
     for (const w of want) {
-      this.cells.get(w.key)!.asked[w.detail as 0 | 1] = true;
-      this.queue.push({ key: w.key, detail: w.detail });
+      if (w.kind === 'macro') {
+        this.macros.get(w.key)!.asked = true;
+        this.queue.push({ kind: 'macro', key: w.key });
+      } else {
+        this.cells.get(w.key)!.asked[w.detail as 0 | 1] = true;
+        this.queue.push({ kind: 'cell', key: w.key, detail: w.detail });
+      }
     }
     this.pump();
     this.evict();
@@ -249,27 +329,64 @@ export class StructureLayer {
     }
   }
 
-  /** The meshes within a radius of a point of the scene, for a shadow's cascade. */
+  /**
+   * The meshes within a radius of a point of the scene, for a shadow cascade.
+   * Cascade 2 (`radius >= 2400 m`) uses merged 1600 m macro HLOD tiles directly, cutting distant
+   * shadow draw counts and triangles dramatically while Cascades 0/1 use fine/coarse leaf cells.
+   */
   near(focus: V3, radius: number, first = this.first): MeshHandle[] {
     const out: MeshHandle[] = [];
-    const r = radius + CELL;
     const fx = focus[0] - this.offset[0];
     const fy = focus[1] - this.offset[1];
     const entityOffset = first - this.builtBase;
-    for (const c of this.cells.values()) {
-      const cx = (c.box[0] + c.box[2]) / 2;
-      const cy = (c.box[1] + c.box[3]) / 2;
-      if (Math.abs(cx - fx) > r || Math.abs(cy - fy) > r) continue;
-      const g = radius < 1200 ? (c.fine ?? c.coarse) : (c.coarse ?? c.fine);
-      if (g) {
-        g.entityOffset = entityOffset;
-        out.push(g);
+    const useMacro = radius >= SHADOW_MACRO_RADIUS;
+    const mr = radius + MACRO_CELL * 0.75;
+    const lr = radius + CELL;
+
+    for (const m of this.macros.values()) {
+      const mcx = (m.box[0] + m.box[2]) / 2;
+      const mcy = (m.box[1] + m.box[3]) / 2;
+      if (Math.abs(mcx - fx) > mr || Math.abs(mcy - fy) > mr) continue;
+      if (useMacro && m.gpu) {
+        if (m.gpu.count > 0) {
+          m.gpu.entityOffset = entityOffset;
+          out.push(m.gpu);
+        }
+        continue;
+      }
+      let missingChild = false;
+      const childOut: MeshHandle[] = [];
+      for (const c of m.children) {
+        const cx = (c.box[0] + c.box[2]) / 2;
+        const cy = (c.box[1] + c.box[3]) / 2;
+        if (Math.abs(cx - fx) > lr || Math.abs(cy - fy) > lr) continue;
+        const g = radius < 1200 ? (c.fine ?? c.coarse) : (c.coarse ?? c.fine);
+        if (g) {
+          if (g.count > 0) {
+            g.entityOffset = entityOffset;
+            childOut.push(g);
+          }
+        } else {
+          missingChild = true;
+        }
+      }
+      if (missingChild && m.gpu) {
+        if (m.gpu.count > 0) {
+          m.gpu.entityOffset = entityOffset;
+          out.push(m.gpu);
+        }
+      } else {
+        for (const g of childOut) out.push(g);
       }
     }
     return out;
   }
 
-  /** The meshes in view: fine near the eye, coarse beyond. `ground` is the scene's, in its own metres. */
+  /**
+   * The meshes in view via a 2-tier quadtree pyramid: frustum-culls 1600 m macro HLOD tiles first,
+   * substituting a single macro proxy beyond `MACRO_DISTANCE` (or while child leaf cells stream in)
+   * and descending to 400 m fine/coarse leaf cells close to the eye.
+   */
   visible(v: LocalView, ground: (x: number, y: number) => number, first = this.first, interactive = false): MeshHandle[] {
     if (!this.ready) return [];
     this.flushUploads(interactive ? 3 : 10);
@@ -277,26 +394,72 @@ export class StructureLayer {
     const out: MeshHandle[] = [];
     const t = Math.tan(v.fov / 2);
     const side = t * v.aspect;
+    const sSide = Math.sqrt(1 + side * side);
+    const sUp = Math.sqrt(1 + t * t);
     const entityOffset = first - this.builtBase;
-    for (const c of this.cells.values()) {
-      const cx = (c.box[0] + c.box[2]) / 2 + this.offset[0];
-      const cy = (c.box[1] + c.box[3]) / 2 + this.offset[1];
-      const dx = cx - v.eye[0];
-      const dy = cy - v.eye[1];
-      const dz = ground(cx, cy) + 30 - v.eye[2];
-      const fw = dx * v.forward[0] + dy * v.forward[1] + dz * v.forward[2];
-      const r = CELL * 0.75 + 70;
-      if (fw < -r) continue;
-      const rt = dx * v.right[0] + dy * v.right[1] + dz * v.right[2];
-      const up = dx * v.up[0] + dy * v.up[1] + dz * v.up[2];
-      if (Math.abs(rt) > fw * side + r * Math.sqrt(1 + side * side)) continue;
-      if (Math.abs(up) > fw * t + r * Math.sqrt(1 + t * t)) continue;
-      const d = Math.hypot(dx, dy, Math.max(0, v.clearance));
-      const g = d < FINE_DISTANCE + CELL * 0.71 ? (c.fine ?? c.coarse) : (c.coarse ?? c.fine);
-      if (g) {
-        c.usedAt = this.frame;
-        g.entityOffset = entityOffset;
-        out.push(g);
+    const [exLocal, eyLocal] = this.local(v);
+    const clearance = Math.max(0, v.clearance);
+    const macroDist = interactive ? MACRO_DISTANCE_INTERACTIVE : MACRO_DISTANCE;
+
+    for (const m of this.macros.values()) {
+      const mcx = (m.box[0] + m.box[2]) / 2 + this.offset[0];
+      const mcy = (m.box[1] + m.box[3]) / 2 + this.offset[1];
+      const mdx = mcx - v.eye[0];
+      const mdy = mcy - v.eye[1];
+      const mdz = ground(mcx, mcy) + 40 - v.eye[2];
+      const mfw = mdx * v.forward[0] + mdy * v.forward[1] + mdz * v.forward[2];
+      const mr = MACRO_CELL * 0.75 + 90;
+      if (mfw < -mr) continue;
+      const mrt = mdx * v.right[0] + mdy * v.right[1] + mdz * v.right[2];
+      const mup = mdx * v.up[0] + mdy * v.up[1] + mdz * v.up[2];
+      if (Math.abs(mrt) > mfw * side + mr * sSide) continue;
+      if (Math.abs(mup) > mfw * t + mr * sUp) continue;
+
+      const dMin = Math.hypot(boxDist2D(m.box, exLocal, eyLocal), clearance);
+      if (dMin > macroDist && m.gpu) {
+        if (m.gpu.count > 0) {
+          m.gpu.entityOffset = entityOffset;
+          out.push(m.gpu);
+        }
+        continue;
+      }
+
+      // Close enough for leaf cells: check visible children, falling back cleanly to the macro tile
+      // if any visible child has not finished streaming yet so zooming in never shows empty holes.
+      const childOut: MeshHandle[] = [];
+      let missingChild = false;
+      for (const c of m.children) {
+        const cx = (c.box[0] + c.box[2]) / 2 + this.offset[0];
+        const cy = (c.box[1] + c.box[3]) / 2 + this.offset[1];
+        const dx = cx - v.eye[0];
+        const dy = cy - v.eye[1];
+        const dz = ground(cx, cy) + 30 - v.eye[2];
+        const fw = dx * v.forward[0] + dy * v.forward[1] + dz * v.forward[2];
+        const r = CELL * 0.75 + 70;
+        if (fw < -r) continue;
+        const rt = dx * v.right[0] + dy * v.right[1] + dz * v.right[2];
+        const up = dx * v.up[0] + dy * v.up[1] + dz * v.up[2];
+        if (Math.abs(rt) > fw * side + r * sSide) continue;
+        if (Math.abs(up) > fw * t + r * sUp) continue;
+        const d = Math.hypot(dx, dy, clearance);
+        const g = d < FINE_DISTANCE + CELL * 0.71 ? (c.fine ?? c.coarse) : (c.coarse ?? c.fine);
+        if (g) {
+          c.usedAt = this.frame;
+          if (g.count > 0) {
+            g.entityOffset = entityOffset;
+            childOut.push(g);
+          }
+        } else {
+          missingChild = true;
+        }
+      }
+      if (missingChild && m.gpu) {
+        if (m.gpu.count > 0) {
+          m.gpu.entityOffset = entityOffset;
+          out.push(m.gpu);
+        }
+      } else {
+        for (const g of childOut) out.push(g);
       }
     }
     return out;
@@ -305,6 +468,10 @@ export class StructureLayer {
   /** Everything this layer put on the GPU goes, and its worker with it. */
   dispose(): void {
     this.pendingUploads = [];
+    for (const m of this.macros.values()) {
+      if (m.gpu) this.renderer.remove(m.gpu);
+    }
+    this.macros.clear();
     for (const c of this.cells.values()) {
       if (c.coarse) this.renderer.remove(c.coarse);
       if (c.fine) this.renderer.remove(c.fine);
@@ -317,7 +484,7 @@ export class StructureLayer {
     this.ready = false;
   }
 
-  /** Whether every cell has its coarse mesh, and every near one its fine mesh, uploaded to the GPU. */
+  /** Whether every requested macro tile and nearby leaf cell is uploaded to the GPU. */
   get settled(): boolean {
     return this.ready && this.inflight === 0 && this.queue.length === 0 && this.pendingUploads.length === 0;
   }

@@ -1,8 +1,8 @@
-// GPU-baked hemi-octahedral tree impostor atlas (8x8 upper-hemisphere views per tree prototype).
-// Bakes unlit premultiplied albedo+alpha and local crown normal+sky occlusion directly from the
-// generator's tree meshes on the GPU so mid/far canopy trees draw as 2-triangle instanced quads
-// with dynamic sun/SH lighting, shadow casting, wind sway, picking, and evidence mode—without
-// changing generator mesh fingerprints.
+// GPU-baked hemi-octahedral impostor atlas (8x8 upper-hemisphere views per prototype family).
+// Bakes unlit premultiplied albedo+alpha and local normal+sky occlusion directly from generator
+// meshes on the GPU so distant canopy trees, understory shrubs, procedural dwellings, and compact
+// rigid works draw as 2-triangle instanced quads with dynamic sun/SH lighting, shadow casting,
+// optional wind sway, picking, and evidence mode—without changing generator mesh fingerprints.
 import { hemiOctDecode, octFrame, type ProtoBounds } from './culling.ts';
 import { setUniforms, type GL, type Program } from './context.ts';
 
@@ -10,23 +10,107 @@ export const IMP_GRID = 8;
 export const IMP_CELL = 64;
 export const IMP_SIZE = IMP_GRID * IMP_CELL;
 export const IMP_MAX_LEVEL = 6; // 64 >> 6 == 1 texel/cell, so mipmaps never cross cell borders.
-export const IMP_MAX_LAYERS = 64;
+export const IMP_MAX_LAYERS = 96;
+
+export type ImpostorKind = 'foliage' | 'rigid';
 
 export interface ImpostorSlot {
+  /** Generalized prototype family key (kept aliased as treeKey for backward compatibility). */
+  key: number;
   treeKey: number;
+  kind: ImpostorKind;
   layer: number;
   midZ: number;
   radius: number;
   sourceDetail: number;
+  lastUsed: number;
   ready: boolean;
 }
 
 interface PendingBake {
-  treeKey: number;
+  key: number;
+  kind: ImpostorKind;
   vao: WebGLVertexArrayObject;
   indexCount: number;
   bounds: ProtoBounds;
   detail: number;
+}
+
+export interface ImpostorLruResult {
+  layer: number;
+  evictedKey?: number;
+}
+
+/**
+ * Pure LRU texture-array layer allocator for hemi-octahedral impostor slots.
+ * Reuses freed layers first, allocates sequentially up to `capacity`, and otherwise evicts the
+ * least-recently-used key whose `lastUsed` frame is strictly earlier than `frame`.
+ */
+export class ImpostorLru {
+  private entries = new Map<number, { layer: number; lastUsed: number }>();
+  private freeLayers: number[] = [];
+  private nextLayer = 0;
+
+  constructor(readonly capacity: number = IMP_MAX_LAYERS) {
+    if (capacity <= 0) throw new Error('ImpostorLru capacity must be positive');
+  }
+
+  get size(): number {
+    return this.entries.size;
+  }
+
+  layerOf(key: number): number | undefined {
+    return this.entries.get(key)?.layer;
+  }
+
+  touch(key: number, frame: number): void {
+    const e = this.entries.get(key);
+    if (e && frame > e.lastUsed) e.lastUsed = frame;
+  }
+
+  allocate(key: number, frame: number): ImpostorLruResult | null {
+    const existing = this.entries.get(key);
+    if (existing) {
+      if (frame > existing.lastUsed) existing.lastUsed = frame;
+      return { layer: existing.layer };
+    }
+    if (this.freeLayers.length > 0) {
+      const layer = this.freeLayers.pop()!;
+      this.entries.set(key, { layer, lastUsed: frame });
+      return { layer };
+    }
+    if (this.nextLayer < this.capacity) {
+      const layer = this.nextLayer++;
+      this.entries.set(key, { layer, lastUsed: frame });
+      return { layer };
+    }
+    let victimKey: number | undefined;
+    let victimUsed = Infinity;
+    for (const [k, e] of this.entries) {
+      if (e.lastUsed < frame && e.lastUsed < victimUsed) {
+        victimUsed = e.lastUsed;
+        victimKey = k;
+      }
+    }
+    if (victimKey === undefined) return null;
+    const victim = this.entries.get(victimKey)!;
+    this.entries.delete(victimKey);
+    this.entries.set(key, { layer: victim.layer, lastUsed: frame });
+    return { layer: victim.layer, evictedKey: victimKey };
+  }
+
+  release(key: number): void {
+    const e = this.entries.get(key);
+    if (!e) return;
+    this.entries.delete(key);
+    this.freeLayers.push(e.layer);
+  }
+
+  clear(): void {
+    this.entries.clear();
+    this.freeLayers = [];
+    this.nextLayer = 0;
+  }
 }
 
 /** Precomputed 8x8 hemi-octahedral camera frames for baking. */
@@ -52,7 +136,7 @@ export class ImpostorAtlas {
   private slots = new Map<number, ImpostorSlot>();
   private sources = new Map<number, PendingBake>();
   private queue: number[] = [];
-  private nextLayer = 0;
+  private lru = new ImpostorLru(IMP_MAX_LAYERS);
   private capacity = 0;
 
   constructor(private gl: GL, private bakeP: Program) {
@@ -68,7 +152,7 @@ export class ImpostorAtlas {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
   }
 
-  /** Lazily allocate the 2D array textures and bake framebuffer on the first tree bake. */
+  /** Lazily allocate the 2D array textures and bake framebuffer on the first impostor bake. */
   private ensureStorage(): void {
     if (this.albedoTex) return;
     const gl = this.gl;
@@ -125,45 +209,89 @@ export class ImpostorAtlas {
     return vao;
   }
 
+  /** Allocate or evict an LRU layer for `src` and queue it for baking. */
+  private allocateSlot(src: PendingBake, frame: number): ImpostorSlot | null {
+    const alloc = this.lru.allocate(src.key, frame);
+    if (!alloc) return null;
+    if (alloc.evictedKey !== undefined) {
+      this.slots.delete(alloc.evictedKey);
+      const qIdx = this.queue.indexOf(alloc.evictedKey);
+      if (qIdx >= 0) this.queue.splice(qIdx, 1);
+    }
+    const slot: ImpostorSlot = {
+      key: src.key,
+      treeKey: src.key,
+      kind: src.kind,
+      layer: alloc.layer,
+      midZ: src.bounds.midZ,
+      radius: src.bounds.sphereRadius * 1.04,
+      sourceDetail: src.detail,
+      lastUsed: frame,
+      ready: false,
+    };
+    this.slots.set(src.key, slot);
+    if (!this.queue.includes(src.key)) this.queue.push(src.key);
+    return slot;
+  }
+
   /**
-   * Register a tree prototype mesh (detail 1 or 2) as a bake source for its `(taxon, variant)` family.
-   * Prefers the first detail >= 1 mesh that carries foliage cards, upgrading detail 1 -> 2 when available.
+   * Register a prototype mesh as a bake source for its family `key`.
+   * Foliage requires detail >= 1 (upgrading 1 -> 2 when foliage cards arrive); rigid prototypes
+   * (dwellings, works) accept detail >= 0 so distant settlements bake immediately and upgrade when
+   * finer geometry streams in.
    */
-  registerSource(treeKey: number, vao: WebGLVertexArrayObject, indexCount: number, bounds: ProtoBounds, detail: number): void {
-    if (detail < 1 || bounds.sphereRadius <= 0 || indexCount <= 0) return;
-    const existing = this.slots.get(treeKey);
+  registerSource(
+    key: number,
+    vao: WebGLVertexArrayObject,
+    indexCount: number,
+    bounds: ProtoBounds,
+    detail: number,
+    kind: ImpostorKind = 'foliage',
+    frame = 0,
+  ): void {
+    const minDetail = kind === 'rigid' ? 0 : 1;
+    if (detail < minDetail || bounds.sphereRadius <= 0 || indexCount <= 0) return;
+    const prevSrc = this.sources.get(key);
+    if (prevSrc) {
+      const shouldUpgrade = kind === 'rigid' ? detail > prevSrc.detail : detail > prevSrc.detail && bounds.hasCards;
+      if (!shouldUpgrade) return;
+    }
+    const src: PendingBake = { key, kind, vao, indexCount, bounds, detail };
+    this.sources.set(key, src);
+
+    const existing = this.slots.get(key);
     if (existing) {
-      // Only upgrade if a finer detail with cards arrives for an already-allocated slot.
-      if (detail <= existing.sourceDetail || !bounds.hasCards) return;
+      existing.kind = kind;
       existing.midZ = bounds.midZ;
       existing.radius = bounds.sphereRadius * 1.04;
       existing.sourceDetail = detail;
+      existing.lastUsed = Math.max(existing.lastUsed, frame);
       existing.ready = false;
-      this.sources.set(treeKey, { treeKey, vao, indexCount, bounds, detail });
-      if (!this.queue.includes(treeKey)) this.queue.push(treeKey);
+      this.lru.touch(key, frame);
+      if (!this.queue.includes(key)) this.queue.push(key);
       return;
     }
-    if (this.nextLayer >= IMP_MAX_LAYERS) return;
-    const layer = this.nextLayer++;
-    this.slots.set(treeKey, {
-      treeKey,
-      layer,
-      midZ: bounds.midZ,
-      radius: bounds.sphereRadius * 1.04,
-      sourceDetail: detail,
-      ready: false,
-    });
-    this.sources.set(treeKey, { treeKey, vao, indexCount, bounds, detail });
-    this.queue.push(treeKey);
+    this.allocateSlot(src, frame);
   }
 
-  /** Look up a ready baked impostor slot for a canopy tree family, or null if not yet baked. */
-  get(treeKey: number): ImpostorSlot | null {
-    const s = this.slots.get(treeKey);
-    return s && s.ready ? s : null;
+  /**
+   * Look up a ready baked impostor slot for `key`, updating its LRU recency.
+   * If `key` has a registered source that was previously evicted, re-allocates an LRU layer and
+   * queues it for re-baking on the next frame.
+   */
+  get(key: number, frame = 0): ImpostorSlot | null {
+    const s = this.slots.get(key);
+    if (s) {
+      if (frame > s.lastUsed) s.lastUsed = frame;
+      this.lru.touch(key, frame);
+      return s.ready ? s : null;
+    }
+    const src = this.sources.get(key);
+    if (src) this.allocateSlot(src, frame);
+    return null;
   }
 
-  /** Mark all baked slots dirty when scene land tones change so they re-bake cleanly. */
+  /** Mark all baked slots dirty when scene land tones/rock change so they re-bake cleanly. */
   invalidateTones(): void {
     for (const [key, slot] of this.slots) {
       if (this.sources.has(key)) {
@@ -173,12 +301,12 @@ export class ImpostorAtlas {
     }
   }
 
-  /** Drop scene-specific tree slots on scene switch (keeps allocated GPU texture arrays for reuse). */
+  /** Drop scene-specific slots on scene switch (keeps allocated GPU texture arrays for reuse). */
   clear(): void {
     this.slots.clear();
     this.sources.clear();
     this.queue = [];
-    this.nextLayer = 0;
+    this.lru.clear();
   }
 
   /** Free all GPU resources owned by this impostor atlas. */
@@ -198,17 +326,30 @@ export class ImpostorAtlas {
     this.capacity = 0;
   }
 
-  get hasPending(): boolean {
-    return this.queue.length > 0;
+  /** Whether any queued prototype can be baked given current leaf-atlas readiness. */
+  hasPending(leavesReady = true): boolean {
+    if (!this.queue.length) return false;
+    if (leavesReady) return true;
+    for (const key of this.queue) {
+      if (this.slots.get(key)?.kind === 'rigid') return true;
+    }
+    return false;
   }
 
   /**
-   * Bake up to `maxCount` queued tree prototypes into the 8x8 octahedral atlas.
+   * Bake up to `maxCount` eligible queued prototypes into the 8x8 octahedral atlas.
    * Caller must ensure `uNoise` (unit 0) and `uLeaves` (unit 23) are already bound.
    * Returns how many slots were baked.
    */
-  bakePending(maxCount: number, wild: boolean, tones: Float32Array): number {
-    if (!this.queue.length) return 0;
+  bakePending(
+    maxCount: number,
+    wild: boolean,
+    tones: Float32Array,
+    rock?: Float32Array,
+    subTone?: Float32Array,
+    leavesReady = true,
+  ): number {
+    if (!this.hasPending(leavesReady)) return 0;
     this.ensureStorage();
     const gl = this.gl;
     let baked = 0;
@@ -225,17 +366,26 @@ export class ImpostorAtlas {
     gl.useProgram(this.bakeP.program);
     const toneLoc = this.bakeP.uniforms.get('uTone');
     if (toneLoc) gl.uniform3fv(toneLoc, tones);
+    const rockLoc = this.bakeP.uniforms.get('uRock');
+    if (rockLoc && rock) gl.uniform3fv(rockLoc, rock);
+    const subToneLoc = this.bakeP.uniforms.get('uSubTone');
+    if (subToneLoc && subTone) gl.uniform3fv(subToneLoc, subTone);
     setUniforms(gl, this.bakeP, { uWild: wild ? 1 : 0 });
 
     const clearAlbedo = new Float32Array([0, 0, 0, 0]);
     const clearNormal = new Float32Array([0.5, 0.5, 0.85, 0.65]);
     const clearDepth = new Float32Array([1.0]);
 
+    const deferred: number[] = [];
     while (this.queue.length && baked < maxCount) {
       const key = this.queue.shift()!;
       const slot = this.slots.get(key);
       const src = this.sources.get(key);
       if (!slot || !src) continue;
+      if (slot.kind === 'foliage' && !leavesReady) {
+        deferred.push(key);
+        continue;
+      }
 
       gl.framebufferTextureLayer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, this.albedoTex, 0, slot.layer);
       gl.framebufferTextureLayer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT1, this.normalTex, 0, slot.layer);
@@ -260,6 +410,7 @@ export class ImpostorAtlas {
       slot.ready = true;
       baked++;
     }
+    if (deferred.length) this.queue.unshift(...deferred);
 
     gl.bindVertexArray(null);
     gl.disable(gl.SCISSOR_TEST);

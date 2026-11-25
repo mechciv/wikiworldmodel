@@ -14,8 +14,10 @@ import { invert, multiply, type Mat4, type V3 } from '../mat.ts';
 import { linkProgram, setUniforms, texture2D, type GL, type Program } from './context.ts';
 import {
   batchOverlapsCascade,
+  boundsDistanceSq2D,
   buildEntityTransitions,
   canDeferCascade,
+  classifyMeshMaterials,
   cloudLayerFor,
   computeBatchBounds,
   computeProtoBounds,
@@ -26,6 +28,7 @@ import {
   scaledRenderSize,
   shadowCascadeSnap,
   shadowTimeKey,
+  sortCellsFrontToBack,
   type BatchBounds,
   type CachedShadowCascade,
   type CascadeBox,
@@ -35,15 +38,16 @@ import {
   type MeshBounds2D,
   type ProtoBounds,
 } from './culling.ts';
-import { ImpostorAtlas } from './impostors.ts';
+import { ImpostorAtlas, type ImpostorKind } from './impostors.ts';
 import type { LeafAtlas } from './leafatlas.ts';
 import { GroundMaterialSet } from './materials.ts';
-import type { CityFrame, InstancedBatch, InstancedMeta, LocalRenderer, MeshHandle } from './renderer.ts';
+import { StaticMegaBuffer } from './megabuffer.ts';
+import type { CityFrame, FrameCounters, InstancedBatch, InstancedMeta, LocalRenderer, MeshHandle } from './renderer.ts';
 import { computeSkyLighting } from './sky.ts';
 import { FrameTimer } from './timer.ts';
-import { AO_FS, BLUR_FS, BRIGHT_FS, CLOUDS_FS, DEPTH_FS, FULLSCREEN_VS, ID_FS, IMP_BAKE_FS, IMP_BAKE_VS, IMPOSTOR_DEPTH_FS, IMPOSTOR_FS, IMPOSTOR_ID_FS, IMPOSTOR_VS, LUM_FS, MESH_FS, MESH_VS, POST_FS, RISE_YEARS, SHAFTS_ADD_FS, SHAFTS_FS, SMOKE_FS, SMOKE_VS, TAA_FS, SEA, SEA_FS, SEA_VS, SKY_FS, SKY_LUT_FS, TERRAIN_FS, TERRAIN_VS, WATER_FS, WATER_VS, WATERBLUR_FS, WATERMAP_FS, WATERMAP_VS } from './cityShaders.ts';
+import { AO_FS, BLUR_FS, BRIGHT_FS, CLOUDS_FS, DEPTH_FS, FULLSCREEN_VS, ID_FS, IMP_BAKE_FS, IMP_BAKE_VS, IMPOSTOR_DEPTH_FS, IMPOSTOR_FS, IMPOSTOR_ID_FS, IMPOSTOR_VS, LUM_FS, MESH_FS, MESH_FS_BUILT, MESH_FS_FOLIAGE, MESH_FS_STATIC, MESH_VS, POST_FS, RISE_YEARS, SHAFTS_ADD_FS, SHAFTS_FS, SMOKE_FS, SMOKE_VS, TAA_FS, SEA, SEA_FS, SEA_VS, SKY_FS, SKY_LUT_FS, TERRAIN_FS, TERRAIN_VS, WATER_FS, WATER_VS, WATERBLUR_FS, WATERMAP_FS, WATERMAP_VS } from './cityShaders.ts';
 
-export type { CityFrame, InstancedBatch, InstancedMeta, LocalRenderer, MeshHandle };
+export type { CityFrame, FrameCounters, InstancedBatch, InstancedMeta, LocalRenderer, MeshHandle };
 
 /** How many heights the land's shares are given at, beyond the plan's map (setLand). */
 export const SHARE_STEPS = 32;
@@ -122,11 +126,11 @@ function jittered(p: Mat4, dx: number, dy: number): Mat4 {
   return m;
 }
 
-/** A mesh of the city on the GPU. */
+/** A mesh of the city on the GPU (either mega-buffer sub-allocated or standalone VAO). */
 export interface CellGPU extends MeshHandle {
-  vao: WebGLVertexArrayObject;
-  vbo: WebGLBuffer;
-  ibo: WebGLBuffer;
+  vao: WebGLVertexArrayObject | null;
+  vbo: WebGLBuffer | null;
+  ibo: WebGLBuffer | null;
 }
 
 /** One kind of mesh drawn many times, with a buffer of everyone drawn with it. */
@@ -151,14 +155,22 @@ export interface InstancedGPU {
   ways: WebGLBuffer | null;
   waysCapacity: number;
   waysOn: boolean;
-  /** local bounding geometry and material flags for shadow culling and impostors */
+  /** local bounding geometry and material flags for shadow culling, shader routing, and impostors */
   bounds: ProtoBounds;
   /** conservative world AABB of the current instance batch */
   batchBounds: BatchBounds | null;
-  /** canopy tree family key when eligible for octahedral impostors, else null */
+  /** generalized prototype family key when eligible for octahedral impostors, else null */
+  impKey: number | null;
+  /** alias of impKey retained for compatibility */
   treeKey: number | null;
+  /** lighting/sway profile of this prototype's impostor */
+  impKind: ImpostorKind;
+  /** highest detail tier substituted by its octahedral impostor */
+  impMaxDetail: number;
   /** level of detail (0 far, 1 mid, 2 close, 3 clump) */
   detail: number;
+  /** true only when verified as a closed outward-wound manifold safe for back-face culling */
+  closed: boolean;
   /** lazily built billboard VAO sharing `instances` when drawn via octahedral impostors */
   impVao: WebGLVertexArrayObject | null;
 }
@@ -253,6 +265,9 @@ function ringMesh(n: number, hole: number): { positions: Float32Array; indices: 
 function localPrograms(gl: GL) {
   return {
     meshP: linkProgram(gl, 'city mesh', MESH_VS, MESH_FS),
+    meshStaticP: linkProgram(gl, 'city mesh static', MESH_VS, MESH_FS_STATIC),
+    meshBuiltP: linkProgram(gl, 'city mesh built', MESH_VS, MESH_FS_BUILT),
+    meshFoliageP: linkProgram(gl, 'city mesh foliage', MESH_VS, MESH_FS_FOLIAGE),
     depthP: linkProgram(gl, 'city depth', MESH_VS, DEPTH_FS),
     idP: linkProgram(gl, 'city id', MESH_VS, ID_FS),
     terrainP: linkProgram(gl, 'city terrain', TERRAIN_VS, TERRAIN_FS),
@@ -290,6 +305,9 @@ void main() {
 
 export class CityRenderer implements LocalRenderer<CellGPU> {
   private meshP: Program;
+  private meshStaticP: Program;
+  private meshBuiltP: Program;
+  private meshFoliageP: Program;
   private depthP: Program;
   private idP: Program;
   private terrainP: Program;
@@ -315,6 +333,8 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
   private impostorIdP: Program;
   private smokeP: Program;
   private impostors: ImpostorAtlas;
+  private mega: StaticMegaBuffer;
+  private counters: FrameCounters = { shadowCascades: 0, drawCalls: 0, megaDraws: 0, staticCells: 0, macroCells: 0, impostorInstances: 0, meshInstances: 0 };
 
   private noise: WebGLTexture;
   private lut: WebGLTexture;
@@ -538,6 +558,10 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     return this._targetAllocations;
   }
 
+  get lastCounters(): FrameCounters {
+    return { ...this.counters };
+  }
+
   /** A distant parked view holds one sample of the scene's clock. Close by, only its animated layers need another. */
   ambientMotion(clearance: number, movingInstances: boolean): boolean {
     const e = localEffectWeights(clearance, this.fast);
@@ -591,6 +615,9 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     if (!ext) throw new Error('This view of the city needs floating-point render targets (EXT_color_buffer_float).');
     gl.getExtension('OES_texture_float_linear');
     this.meshP = programs.meshP.finish();
+    this.meshStaticP = programs.meshStaticP.finish();
+    this.meshBuiltP = programs.meshBuiltP.finish();
+    this.meshFoliageP = programs.meshFoliageP.finish();
     this.depthP = programs.depthP.finish();
     this.idP = programs.idP.finish();
     this.terrainP = programs.terrainP.finish();
@@ -616,6 +643,7 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     this.impostorIdP = programs.impostorIdP.finish();
     this.smokeP = programs.smokeP.finish();
     this.impostors = new ImpostorAtlas(gl, this.impBakeP);
+    this.mega = new StaticMegaBuffer(gl);
 
     // Noise, tiling, in four independent channels: everything's roughness and grain comes from it.
     // Its values are the generator's (world/generators/life/sorting.ts), which reads the same noise where it sows what
@@ -771,7 +799,11 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     };
     const lit = { uNoise: UNIT.noise, uSkyLut: UNIT.sky, uShadow: UNIT.shadow, uAO: UNIT.ao, uEntities: UNIT.entities };
     const ground = { uGround0: UNIT.ground, uGround1: UNIT.ground + 1, uGround2: UNIT.ground + 2, uNormal0: UNIT.normal, uNormal1: UNIT.normal + 1, uNormal2: UNIT.normal + 2, uMask: UNIT.mask, uFields: UNIT.fields, uFarFields: UNIT.farFields };
-    ints(this.meshP, { ...lit, uMask: UNIT.mask, uLeaves: UNIT.leaves, uMatColour: UNIT.matColour, uMatNormal: UNIT.matNormal });
+    const meshSamplers = { ...lit, uMask: UNIT.mask, uLeaves: UNIT.leaves, uMatColour: UNIT.matColour, uMatNormal: UNIT.matNormal };
+    ints(this.meshP, meshSamplers);
+    ints(this.meshStaticP, meshSamplers);
+    ints(this.meshBuiltP, meshSamplers);
+    ints(this.meshFoliageP, meshSamplers);
     ints(this.depthP, { uEntities: UNIT.entities, uLeaves: UNIT.leaves });
     ints(this.idP, { uEntities: UNIT.entities, uLeaves: UNIT.leaves });
     // The ground reads the atlas of leaves for what lies fallen, through a sampler of its own that repeats its tiles.
@@ -894,11 +926,13 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     this.subBand = look ? look.bands : new Float32Array(16);
     this.subTone = look ? look.tones : new Float32Array(48);
     this.subSoil = look ? [look.soil, look.shade] : [0, 0];
+    this.impostors.invalidateTones();
   }
 
   /** The colour of the rock under the ground and of its stones, where the world says what rock it is; null for the renderer's own. */
   setRock(look: { rock: V3; stones: V3 } | null): void {
     this.rock = look ? Float32Array.of(...look.rock, ...look.stones) : Float32Array.of(...PLAIN_ROCK);
+    this.impostors.invalidateTones();
   }
 
   /** A mesh that will be drawn by instancing. */
@@ -938,8 +972,12 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
     gl.bindVertexArray(null);
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
-    const treeKey = meta?.treeKey !== undefined ? meta.treeKey : null;
+    const impKey = meta?.impKey !== undefined ? meta.impKey : meta?.treeKey !== undefined ? meta.treeKey : null;
+    const impKind: ImpostorKind = meta?.impKind ?? 'foliage';
+    const impMaxDetail = meta?.impMaxDetail ?? (impKind === 'rigid' ? 0 : 1);
     const detail = meta?.detail ?? 2;
+    const closed = !!meta?.closed;
+    const idleArr = idle && idle.length >= 16 ? Float32Array.from(idle.slice(0, 16)) : null;
     this.instanced.set(id, {
       vao,
       vbo,
@@ -949,18 +987,23 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
       indexCount: indices.length,
       count: 0,
       casts,
-      idle: idle && idle.length >= 16 ? Float32Array.from(idle.slice(0, 16)) : null,
+      idle: idleArr,
       ways: null,
       waysCapacity: 0,
       waysOn: false,
       bounds,
       batchBounds: null,
-      treeKey,
+      impKey,
+      treeKey: impKey,
+      impKind,
+      impMaxDetail,
       detail,
+      closed,
       impVao: null,
     });
-    if (!this.fast && treeKey !== null && detail >= 1) {
-      this.impostors.registerSource(treeKey, vao, indices.length, bounds, detail);
+    const minBakeDetail = impKind === 'rigid' ? 0 : 1;
+    if (!this.fast && impKey !== null && detail >= minBakeDetail && !idleArr) {
+      this.impostors.registerSource(impKey, vao, indices.length, bounds, detail, impKind, this.frames);
     }
   }
 
@@ -978,22 +1021,14 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     }
   }
 
-  /** Draw static cells while updating uEntityOffset only when a cell specifies a different base offset. */
-  private drawCells(p: Program, cells: CellGPU[]): void {
-    const gl = this.gl;
-    const offLoc = p.uniforms.get('uEntityOffset');
-    let curOff = 0;
-    if (offLoc) gl.uniform1i(offLoc, 0);
-    for (const c of cells) {
-      const want = c.entityOffset ?? 0;
-      if (offLoc && want !== curOff) {
-        gl.uniform1i(offLoc, want);
-        curOff = want;
-      }
-      gl.bindVertexArray(c.vao);
-      gl.drawElements(gl.TRIANGLES, c.count, gl.UNSIGNED_INT, 0);
+  /** Draw static cells via StaticMegaBuffer (WEBGL_multi_draw where supported), preserving cell order. */
+  private drawCells(p: Program, cells: readonly CellGPU[], count = true): void {
+    if (!cells.length) return;
+    const res = this.mega.draw(p, cells);
+    if (count) {
+      this.counters.drawCalls += res.drawCalls;
+      this.counters.megaDraws += res.megaDraws;
     }
-    if (offLoc && curOff !== 0) gl.uniform1i(offLoc, 0);
   }
 
   /**
@@ -1077,10 +1112,11 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     this.dirtyCascadesFor();
   }
 
-  /** Whether an instanced batch is currently drawn via its GPU-baked octahedral tree impostor. */
+  /** Whether an instanced batch is currently drawn via its GPU-baked hemi-octahedral impostor. */
   private impostorFor(g: InstancedGPU) {
-    if (this.fast || !this.leavesReady || g.treeKey === null || g.detail > 1) return null;
-    return this.impostors.get(g.treeKey);
+    if (this.fast || g.impKey === null || g.detail > g.impMaxDetail || g.waysOn || g.idle) return null;
+    if (g.impKind === 'foliage' && !this.leavesReady) return null;
+    return this.impostors.get(g.impKey, this.frames);
   }
 
   /** How many are drawn by instancing, and the triangles that makes (2 tris per octahedral impostor). */
@@ -1103,8 +1139,17 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     return { meshes, instances, triangles, impostorInstances };
   }
 
-  private drawInstanced(p: Program, shadow: boolean, cascade?: CascadeBox, fadeK = 0): void {
-    if (!this.instanced.size) return;
+  /** Submit a pre-filtered list of instanced batches on the currently bound program `p`. */
+  private submitInstancedList(
+    p: Program,
+    list: readonly InstancedGPU[],
+    shadow: boolean,
+    cascade: CascadeBox | undefined,
+    fadeK: number,
+    count: boolean,
+    countMeshInstances: boolean,
+  ): void {
+    if (!list.length) return;
     const gl = this.gl;
     const loc = p.uniforms.get('uInstanced');
     const idle = p.uniforms.get('uIdle');
@@ -1116,17 +1161,25 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     if (loc) gl.uniform1f(loc, 1);
     if (shadowInvR) gl.uniform1f(shadowInvR, shadow && cascade ? 1 / cascade.radius : 0);
     if (fadeLoc) gl.uniform1f(fadeLoc, fadeK);
-    for (const g of this.instanced.values()) {
-      if (!g.count || (shadow && !g.casts)) continue;
-      if (this.impostorFor(g)) continue;
-      if (shadow && cascade && g.batchBounds && !batchOverlapsCascade(g.batchBounds, cascade)) continue;
+    let culling = false;
+    for (const g of list) {
       if (shadowPad) gl.uniform1f(shadowPad, shadow && cascade ? (g.bounds.originRadius * 1.15) / cascade.radius : -1);
       if (extentLoc && fadeK > 0) gl.uniform1f(extentLoc, Math.max(g.bounds.maxZ - g.bounds.minZ, g.bounds.xyRadius, 0.25));
       if (idling) gl.uniform1f(idling, g.idle ? 1 : 0);
       if (idle && g.idle) gl.uniform4fv(idle, g.idle);
+      if (g.closed !== culling) {
+        if (g.closed) gl.enable(gl.CULL_FACE);
+        else gl.disable(gl.CULL_FACE);
+        culling = g.closed;
+      }
       gl.bindVertexArray(g.vao);
       gl.drawElementsInstanced(gl.TRIANGLES, g.indexCount, gl.UNSIGNED_INT, 0, g.count);
+      if (count) {
+        this.counters.drawCalls++;
+        if (countMeshInstances) this.counters.meshInstances += g.count;
+      }
     }
+    if (culling) gl.disable(gl.CULL_FACE);
     if (loc) gl.uniform1f(loc, 0);
     if (idling) gl.uniform1f(idling, 0);
     if (shadowPad) gl.uniform1f(shadowPad, -1);
@@ -1135,56 +1188,136 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     gl.bindVertexArray(null);
   }
 
-  /** Draw mid/far canopy trees as 2-triangle instanced hemi-octahedral billboards. */
-  private drawImpostors(p: Program, f: CityFrame, vp: Mat4, camRight: V3, camUp: V3, orthoDir: V3, cascade?: CascadeBox, fadeK = 0): void {
-    if (this.fast || !this.leavesReady || !this.impostors.albedoTex || !this.impostors.normalTex || !this.instanced.size) return;
+  private drawInstanced(p: Program, shadow: boolean, cascade?: CascadeBox, fadeK = 0, count = true, eye?: V3): void {
+    if (!this.instanced.size) return;
+    const list: InstancedGPU[] = [];
+    for (const g of this.instanced.values()) {
+      if (!g.count || (shadow && !g.casts)) continue;
+      if (this.impostorFor(g)) continue;
+      if (shadow && cascade && g.batchBounds && !batchOverlapsCascade(g.batchBounds, cascade)) continue;
+      list.push(g);
+    }
+    if (eye && list.length > 1) {
+      list.sort((a, b) => {
+        const ca = a.bounds.hasCards ? 1 : 0;
+        const cb = b.bounds.hasCards ? 1 : 0;
+        if (ca !== cb) return ca - cb;
+        return boundsDistanceSq2D(a.batchBounds ?? undefined, eye) - boundsDistanceSq2D(b.batchBounds ?? undefined, eye);
+      });
+    }
+    this.submitInstancedList(p, list, shadow, cascade, fadeK, count, false);
+  }
+
+  /**
+   * Draw lit instanced geometry partitioned by MaterialClass (built -> mixed -> foliage) and sorted
+   * front-to-back within each specialized low-divergence fragment shader family.
+   */
+  private drawInstancedLit(f: CityFrame, vp: Mat4, runAO: boolean, effects: LocalEffectWeights, fadeK: number): void {
+    if (!this.instanced.size) return;
+    const built: InstancedGPU[] = [];
+    const mixed: InstancedGPU[] = [];
+    const foliage: InstancedGPU[] = [];
+    for (const g of this.instanced.values()) {
+      if (!g.count) continue;
+      if (this.impostorFor(g)) continue;
+      if (g.bounds.materialClass === 'built') built.push(g);
+      else if (g.bounds.materialClass === 'foliage') foliage.push(g);
+      else mixed.push(g);
+    }
+    const byDist = (a: InstancedGPU, b: InstancedGPU) => {
+      const ca = a.bounds.hasCards ? 1 : 0;
+      const cb = b.bounds.hasCards ? 1 : 0;
+      if (ca !== cb) return ca - cb;
+      return boundsDistanceSq2D(a.batchBounds ?? undefined, f.eye) - boundsDistanceSq2D(b.batchBounds ?? undefined, f.eye);
+    };
     const gl = this.gl;
-    let bound = false;
-    const layerLoc = p.uniforms.get('uImpLayer');
-    const midLoc = p.uniforms.get('uImpMidZ');
-    const radLoc = p.uniforms.get('uImpRadius');
-    const padLoc = p.uniforms.get('uShadowPad');
-    const fadeLoc = p.uniforms.get('uFadeK');
-    const extentLoc = p.uniforms.get('uProtoExtent');
+    const coverage = this.fast ? 0 : 1;
+    const useAO = runAO ? effects.ao : 0;
+    const groups: [Program, InstancedGPU[]][] = [
+      [this.meshBuiltP, built],
+      [this.meshP, mixed],
+      [this.meshFoliageP, foliage],
+    ];
+    for (const [prog, group] of groups) {
+      if (!group.length) continue;
+      if (group.length > 1) group.sort(byDist);
+      this.useLit(prog, f, vp);
+      setUniforms(gl, prog, { uCoverage: coverage, uUseAO: useAO });
+      this.submitInstancedList(prog, group, false, undefined, fadeK, true, true);
+    }
+  }
+
+  /** Draw mid/far trees, shrubs, dwellings, and compact works as 2-triangle instanced hemi-octahedral billboards. */
+  private drawImpostors(
+    p: Program,
+    f: CityFrame,
+    vp: Mat4,
+    camRight: V3,
+    camUp: V3,
+    orthoDir: V3,
+    cascade?: CascadeBox,
+    fadeK = 0,
+    count = true,
+    countLit = false,
+  ): void {
+    if (this.fast || !this.impostors.albedoTex || !this.impostors.normalTex || !this.instanced.size) return;
+    const items: { g: InstancedGPU; slot: NonNullable<ReturnType<CityRenderer['impostorFor']>> }[] = [];
     for (const g of this.instanced.values()) {
       if (!g.count || (cascade && !g.casts)) continue;
       const slot = this.impostorFor(g);
       if (!slot) continue;
       if (cascade && g.batchBounds && !batchOverlapsCascade(g.batchBounds, cascade)) continue;
-      if (!bound) {
-        bound = true;
-        if (p === this.impostorP) {
-          this.useLit(p, f, vp);
-        } else {
-          gl.useProgram(p.program);
-          setUniforms(gl, p, { uViewProj: vp, uEye: cascade ? [0, 0, 0] : f.eye, uTime: f.time, uClock: f.clock ?? 0, uWind: WIND });
-        }
-        setUniforms(gl, p, { uCamRight: camRight, uCamUp: camUp, uOrthoDir: orthoDir });
-        if (fadeLoc) gl.uniform1f(fadeLoc, fadeK);
-        gl.activeTexture(gl.TEXTURE15);
-        gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.impostors.albedoTex);
-        gl.activeTexture(gl.TEXTURE16);
-        gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.impostors.normalTex);
-      }
+      items.push({ g, slot });
+    }
+    if (!items.length) return;
+    if (!cascade && items.length > 1) {
+      items.sort((a, b) => boundsDistanceSq2D(a.g.batchBounds ?? undefined, f.eye) - boundsDistanceSq2D(b.g.batchBounds ?? undefined, f.eye));
+    }
+    const gl = this.gl;
+    const layerLoc = p.uniforms.get('uImpLayer');
+    const midLoc = p.uniforms.get('uImpMidZ');
+    const radLoc = p.uniforms.get('uImpRadius');
+    const swayLoc = p.uniforms.get('uImpSway');
+    const kindLoc = p.uniforms.get('uImpKind');
+    const padLoc = p.uniforms.get('uShadowPad');
+    const fadeLoc = p.uniforms.get('uFadeK');
+    const extentLoc = p.uniforms.get('uProtoExtent');
+    if (p === this.impostorP) {
+      this.useLit(p, f, vp);
+    } else {
+      gl.useProgram(p.program);
+      setUniforms(gl, p, { uViewProj: vp, uEye: cascade ? [0, 0, 0] : f.eye, uTime: f.time, uClock: f.clock ?? 0, uWind: WIND });
+    }
+    setUniforms(gl, p, { uCamRight: camRight, uCamUp: camUp, uOrthoDir: orthoDir });
+    if (fadeLoc) gl.uniform1f(fadeLoc, fadeK);
+    gl.activeTexture(gl.TEXTURE15);
+    gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.impostors.albedoTex);
+    gl.activeTexture(gl.TEXTURE16);
+    gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.impostors.normalTex);
+    for (const { g, slot } of items) {
       if (!g.impVao) g.impVao = this.impostors.createBatchVao(g.instances);
       if (layerLoc) gl.uniform1f(layerLoc, slot.layer);
       if (midLoc) gl.uniform1f(midLoc, slot.midZ);
       if (radLoc) gl.uniform1f(radLoc, slot.radius);
+      if (swayLoc) gl.uniform1f(swayLoc, slot.kind === 'foliage' ? 1 : 0);
+      if (kindLoc) gl.uniform1f(kindLoc, slot.kind === 'rigid' ? 1 : 0);
       if (padLoc) gl.uniform1f(padLoc, cascade ? (slot.radius * 1.15) / cascade.radius : -1);
       if (extentLoc && fadeK > 0) gl.uniform1f(extentLoc, Math.max(g.bounds.maxZ - g.bounds.minZ, g.bounds.xyRadius, 0.25));
       gl.bindVertexArray(g.impVao);
       gl.drawElementsInstanced(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0, g.count);
+      if (count) {
+        this.counters.drawCalls++;
+        if (countLit) this.counters.impostorInstances += g.count;
+      }
     }
-    if (bound) {
-      if (padLoc) gl.uniform1f(padLoc, -1);
-      if (fadeLoc) gl.uniform1f(fadeLoc, 0);
-      gl.bindVertexArray(null);
-      gl.activeTexture(gl.TEXTURE15);
-      gl.bindTexture(gl.TEXTURE_2D_ARRAY, null);
-      gl.activeTexture(gl.TEXTURE16);
-      gl.bindTexture(gl.TEXTURE_2D_ARRAY, null);
-      gl.activeTexture(gl.TEXTURE0);
-    }
+    if (padLoc) gl.uniform1f(padLoc, -1);
+    if (fadeLoc) gl.uniform1f(fadeLoc, 0);
+    gl.bindVertexArray(null);
+    gl.activeTexture(gl.TEXTURE15);
+    gl.bindTexture(gl.TEXTURE_2D_ARRAY, null);
+    gl.activeTexture(gl.TEXTURE16);
+    gl.bindTexture(gl.TEXTURE_2D_ARRAY, null);
+    gl.activeTexture(gl.TEXTURE0);
   }
 
   /** What the plan says the ground is: R built-up, G garden. */
@@ -1433,41 +1566,35 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     gl.activeTexture(gl.TEXTURE0);
   }
 
-  /** Put a mesh on the GPU. */
+  /** Put a static mesh into the shared GPU mega-buffer and tag its tightest fragment shader family. */
   upload(vertices: ArrayBuffer, indices: Uint32Array, bounds?: MeshBounds2D): CellGPU {
-    const gl = this.gl;
-    const vao = gl.createVertexArray()!;
-    gl.bindVertexArray(vao);
-    const vbo = gl.createBuffer()!;
-    gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
-    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
-    const stride = 28;
-    gl.enableVertexAttribArray(0);
-    gl.vertexAttribPointer(0, 3, gl.FLOAT, false, stride, 0);
-    gl.enableVertexAttribArray(1);
-    gl.vertexAttribPointer(1, 4, gl.UNSIGNED_BYTE, true, stride, 12);
-    gl.enableVertexAttribArray(2);
-    gl.vertexAttribPointer(2, 2, gl.FLOAT, false, stride, 16);
-    gl.enableVertexAttribArray(3);
-    gl.vertexAttribIPointer(3, 2, gl.UNSIGNED_BYTE, stride, 24);
-    gl.enableVertexAttribArray(4);
-    gl.vertexAttribIPointer(4, 1, gl.UNSIGNED_SHORT, stride, 26);
-    const ibo = gl.createBuffer()!;
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
-    gl.bindVertexArray(null);
+    const materialClass = classifyMeshMaterials(vertices);
+    const mega = this.mega.upload(vertices, indices);
     this.meshSerial++;
     this.dirtyCascadesFor(bounds);
-    return { vao, vbo, ibo, count: indices.length, bytes: vertices.byteLength + indices.byteLength, ...(bounds ? { bounds } : {}) };
+    return {
+      vao: null,
+      vbo: null,
+      ibo: null,
+      mega,
+      materialClass,
+      count: indices.length,
+      bytes: vertices.byteLength + indices.byteLength,
+      ...(bounds ? { bounds } : {}),
+    };
   }
 
   remove(c: CellGPU): void {
     const gl = this.gl;
     this.meshSerial++;
     this.dirtyCascadesFor(c.bounds);
-    gl.deleteVertexArray(c.vao);
-    gl.deleteBuffer(c.vbo);
-    gl.deleteBuffer(c.ibo);
+    if (c.mega) {
+      this.mega.free(c.mega);
+    } else {
+      if (c.vao) gl.deleteVertexArray(c.vao);
+      if (c.vbo) gl.deleteBuffer(c.vbo);
+      if (c.ibo) gl.deleteBuffer(c.ibo);
+    }
   }
 
   private createTargets(w: number, h: number): RenderTargets {
@@ -2041,6 +2168,7 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
       const ring = Math.max(0, Math.ceil(Math.log2((r * 2.2) / 320)));
       this.drawRings(this.terrainDepthP, f.focus, ring, ring, ring);
     }
+    this.counters.shadowCascades += updated;
     if (configured) {
       gl.disable(gl.POLYGON_OFFSET_FILL);
       gl.colorMask(true, true, true, true);
@@ -2065,9 +2193,9 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
   /** when the view last changed, in ms of the page's clock */
   private changedAt = performance.now();
 
-  /** Whether the view holds still and its frames are still being averaged, or tree impostors are still baking. */
+  /** Whether the view holds still and its frames are still being averaged, or impostors are still baking. */
   get refining(): boolean {
-    return !this.fast && ((this.leavesReady && this.impostors.hasPending) || this.steady < STEADY_FRAMES || (this.still && (this.scale < this.wantScale || this.steady < STILL_FRAMES)));
+    return !this.fast && (this.impostors.hasPending(this.leavesReady) || this.steady < STEADY_FRAMES || (this.still && (this.scale < this.wantScale || this.steady < STILL_FRAMES)));
   }
 
   /** How long, in ms, the view has held still. */
@@ -2082,6 +2210,7 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
 
   render(frame: CityFrame, cells: CellGPU[], outW: number, outH: number): void {
     const gl = this.gl;
+    this.counters = { shadowCascades: 0, drawCalls: 0, megaDraws: 0, staticCells: 0, macroCells: 0, impostorInstances: 0, meshInstances: 0 };
     const interactive = !!frame.interactive && !this.still;
     const maxTex = (gl.getParameter(gl.MAX_TEXTURE_SIZE) as number) || 4096;
     const maxScale = Math.min(maxTex / Math.max(1, outW), maxTex / Math.max(1, outH));
@@ -2102,16 +2231,16 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     this.lastFrame = frame;
     this.lastDraw = cells;
 
-    // Bake up to 8 queued canopy tree impostors per frame once the leaf atlas has arrived.
+    // Bake up to 8 queued impostor prototypes per frame (rigid immediately; foliage once the leaf atlas arrives).
     // Refresh color via impostorSerial while deferring full shadow-cascade invalidation until the queue drains.
-    if (!this.fast && this.leavesReady && this.impostors.hasPending) {
+    if (!this.fast && this.impostors.hasPending(this.leavesReady)) {
       gl.activeTexture(gl.TEXTURE0 + UNIT.noise);
       gl.bindTexture(gl.TEXTURE_3D, this.noise);
       gl.activeTexture(gl.TEXTURE0 + UNIT.leaves);
       gl.bindTexture(gl.TEXTURE_2D_ARRAY, this.leaves);
-      if (this.impostors.bakePending(8, this.wild, this.tones) > 0) {
+      if (this.impostors.bakePending(8, this.wild, this.tones, this.rock, this.subTone, this.leavesReady) > 0) {
         this.impostorSerial++;
-        if (!this.impostors.hasPending) {
+        if (!this.impostors.hasPending(this.leavesReady)) {
           this.meshSerial++;
           this.dirtyCascadesFor();
         }
@@ -2127,7 +2256,7 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     this.viewKey = key;
     this.frames++;
     const enough = this.still ? STILL_FRAMES : STEADY_FRAMES;
-    if (!this.fast && still && this.steady > enough && !(this.leavesReady && this.impostors.hasPending)) {
+    if (!this.fast && still && this.steady > enough && !this.impostors.hasPending(this.leavesReady)) {
       this.finish(frame, this.prevHistoryTex ?? this.historyTex[this.historyAt]);
       return;
     }
@@ -2167,6 +2296,10 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     const runAO = effects.ao > 0.01;
     const runBanks = effects.banks > 0.01 && this.wild && !this.sea;
     const fadeK = this.fast ? 0 : (f.cssHeight ?? f.height) / (2 * Math.tan(f.fov / 2));
+    // Sort static cells front-to-back once per frame to maximize hardware Early-Z rejection.
+    const orderedCells = sortCellsFrontToBack(cells, f.eye);
+    this.counters.staticCells = orderedCells.length;
+    for (const c of orderedCells) if (c.macro) this.counters.macroCells++;
     // The light on the sea, as the shaders' water has it.
     const s = Math.max(f.sun[2], 0) * 0.8;
     this.exposure = this.sea ? underExposure(eyeSea, [this.sunColor[0] * s + this.skyTop[0] * 0.6, this.sunColor[1] * s + this.skyTop[1] * 0.6, this.sunColor[2] * s + this.skyTop[2] * 0.6]) : 1;
@@ -2255,10 +2388,10 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
       this.drawRings(this.terrainDepthP, f.eye, finest, Math.min(split, last), finest);
       gl.useProgram(this.depthP.program);
       setUniforms(gl, this.depthP, { uViewProj: vp, uEye: f.eye, uTime: f.time, uCards: 0, uClock: f.clock ?? 0, uWind: WIND, uShadowPad: -1, uShadowInvR: 0, uFadeK: 0, uProtoExtent: 1 });
-      // Both sides, as the lit pass draws them.
+      // Both sides, as the lit pass draws them (verified closed instanced meshes enable CULL_FACE per batch).
       gl.disable(gl.CULL_FACE);
-      this.drawCells(this.depthP, cells);
-      this.drawInstanced(this.depthP, false, undefined, fadeK);
+      this.drawCells(this.depthP, orderedCells);
+      this.drawInstanced(this.depthP, false, undefined, fadeK, true, f.eye);
       gl.bindVertexArray(null);
       gl.colorMask(true, true, true, true);
       gl.stencilMask(0xff);
@@ -2287,14 +2420,29 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
 
     time.pass('meshes');
     gl.disable(gl.CULL_FACE);
-    this.useLit(this.meshP, f, vp);
-    // At full quality, leaf cards and distant instances use temporally stratified hashed alpha smoothed by TAA.
-    setUniforms(gl, this.meshP, { uCoverage: this.fast ? 0 : 1, uUseAO: runAO ? effects.ao : 0 });
     gl.depthMask(true);
-    this.drawCells(this.meshP, cells);
-    this.drawInstanced(this.meshP, false, undefined, fadeK);
+    if (orderedCells.length) {
+      const builtCells: CellGPU[] = [];
+      const otherCells: CellGPU[] = [];
+      for (const c of orderedCells) {
+        if (c.materialClass === 'built') builtCells.push(c);
+        else otherCells.push(c);
+      }
+      if (builtCells.length) {
+        // Zero-discard specialized shader unlocks full hardware Early-Z for static buildings, monuments, walls, and roads.
+        this.useLit(this.meshStaticP, f, vp);
+        setUniforms(gl, this.meshStaticP, { uCoverage: this.fast ? 0 : 1, uUseAO: runAO ? effects.ao : 0 });
+        this.drawCells(this.meshStaticP, builtCells);
+      }
+      if (otherCells.length) {
+        this.useLit(this.meshP, f, vp);
+        setUniforms(gl, this.meshP, { uCoverage: this.fast ? 0 : 1, uUseAO: runAO ? effects.ao : 0 });
+        this.drawCells(this.meshP, otherCells);
+      }
+    }
+    this.drawInstancedLit(f, vp, runAO, effects, fadeK);
     gl.depthFunc(gl.LESS);
-    this.drawImpostors(this.impostorP, f, vp, camRight, camUp, [0, 0, 0], undefined, fadeK);
+    this.drawImpostors(this.impostorP, f, vp, camRight, camUp, [0, 0, 0], undefined, fadeK, true, true);
     gl.disable(gl.STENCIL_TEST);
 
     // Half-resolution volumetric clouds, skipping every 2x2 block occluded by opaque terrain/meshes.
@@ -2789,9 +2937,9 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     gl.colorMask(true, true, true, true);
     gl.useProgram(this.idP.program);
     setUniforms(gl, this.idP, { uViewProj: vp, uEye: f.eye, uTime: f.time, uClock: f.clock ?? 0, uWind: WIND, uShadowPad: -1, uShadowInvR: 0, uFadeK: 0, uProtoExtent: 1 });
-    this.drawCells(this.idP, this.lastDraw);
-    this.drawInstanced(this.idP, false);
-    this.drawImpostors(this.impostorIdP, f, vp, camRight, camUp, [0, 0, 0]);
+    this.drawCells(this.idP, this.lastDraw, false);
+    this.drawInstanced(this.idP, false, undefined, 0, false);
+    this.drawImpostors(this.impostorIdP, f, vp, camRight, camUp, [0, 0, 0], undefined, 0, false);
     gl.bindVertexArray(null);
     const px = new Uint8Array(4);
     gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px);
@@ -2813,6 +2961,7 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     this.clearInstanced();
     this.clearGround();
     this.impostors.dispose();
+    this.mega.dispose();
     this.materials.dispose();
     this.timer.dispose();
     for (const t of this.targetPool.values()) this.disposeTargets(t);
@@ -2825,7 +2974,8 @@ export class CityRenderer implements LocalRenderer<CellGPU> {
     this.shaftsTex = null;
     this.shaftsFb = null;
     const programs = [
-      this.meshP, this.depthP, this.idP, this.terrainP, this.terrainDepthP, this.waterP, this.seaP,
+      this.meshP, this.meshStaticP, this.meshBuiltP, this.meshFoliageP, this.depthP, this.idP,
+      this.terrainP, this.terrainDepthP, this.waterP, this.seaP,
       this.cloudsP, this.skyP, this.lutP, this.aoP, this.blurP, this.brightP, this.postP, this.taaP,
       this.lumP, this.shaftsP, this.shaftsAddP, this.waterMapP, this.waterBlurP, this.impBakeP,
       this.impostorP, this.impostorDepthP, this.impostorIdP, this.smokeP,
