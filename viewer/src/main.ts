@@ -414,13 +414,13 @@ async function start(root: HTMLElement): Promise<void> {
   const territory = new TerritoryLayer();
   stage.appendChild(territory.el);
   let territoryReady = !ts.files.territory;
-  if (ts.files.territory) {
-    void build.getJSON<TerritoryFile>(ts.files.territory).then((f) => {
-      territory.setFile(f);
+  const territoryLoading = ts.files.territory ? build.getJSON<TerritoryFile>(ts.files.territory)
+    .then((f) => territory.setFile(f))
+    .catch((err) => console.error('Could not load territories', err))
+    .finally(() => {
       territoryReady = true;
       dirty = true;
-    });
-  }
+    }) : undefined;
   /** Where the last click inside a territory fell, for the record it opened. */
   let here: { entity: string; source: string; info: Omit<TerritoryHere, 'source'> } | null = null;
 
@@ -804,7 +804,23 @@ async function start(root: HTMLElement): Promise<void> {
   let urlTimer = 0;
   let playing = false;
   let navigation = 0;
-  let travel: { from: number; to: number; ms: number; start: number; last: number; arrive: () => void } | null = null;
+  type Point = Pick<ViewState['cam'], 'lat' | 'lon'>;
+  interface Destination {
+    point?: Point;
+    arrive(): void;
+  }
+  interface Travel {
+    from: number;
+    to: number;
+    ms: number;
+    elapsed: number;
+    lastFrame: number;
+    lastDate: number;
+    origin: Point;
+    turn?: { dLat: number; dLon: number };
+    destination?: Destination;
+  }
+  let travel: Travel | null = null;
   let lastFrame = performance.now();
   /** when the visit's clock started, and whether the last frame drew a scene whose clock runs */
   const clockStart = performance.now();
@@ -1743,7 +1759,7 @@ async function start(root: HTMLElement): Promise<void> {
   let seaDown = 0;
 
   /** The way from one view to another, the short way round: in degrees north and east, and in radians in all; and the height a long way is flown at, as its logarithm. */
-  function wayOf(from: ViewState['cam'], to: ViewState['cam']): { dLat: number; dLon: number; reach: number; top: number } {
+  function wayOf(from: Point, to: Point): { dLat: number; dLon: number; reach: number; top: number } {
     const dLon = ((to.lon - from.lon + 540) % 360) - 180;
     const dLat = to.lat - from.lat;
     const reach = Math.hypot(dLat, dLon * Math.cos(((from.lat + to.lat) / 2) * RAD)) * RAD;
@@ -2235,8 +2251,8 @@ async function start(root: HTMLElement): Promise<void> {
     inspect.showLifeHere(city.spec, note, { list: sea ? 'sea' : 'land', sea: city.sea }, { t: state.t, taxa: standingAt(city.spec, state.t, scenario()) });
   };
 
-  /** Fly to a structure of the city, looking at its front, at a time it stands. */
-  function flyToStructure(home: SiteInfo, s: CityStructure, at?: number): void {
+  /** The point over a structure, and the view of its front at a time it stands. */
+  function structureDestination(home: SiteInfo, s: CityStructure, at?: number): Destination {
     const a = s.time.start.best ?? -Infinity;
     const b = s.time.end.best ?? Infinity;
     const t = at ?? (state.t >= a && state.t <= b ? state.t : home.slice >= a && home.slice <= b ? home.slice : Math.max(a, Math.min(b, state.t)));
@@ -2244,8 +2260,13 @@ async function start(root: HTMLElement): Promise<void> {
     let extent = 60;
     for (const r of s.rings) for (let i = 0; i < r.length; i += 2) extent = Math.max(extent, Math.hypot(r[i] - s.at[0], r[i + 1] - s.at[1]));
     const range = Math.max(90, Math.min(1800, extent * 2.6));
-    setState({ t, sel: s.id, window: t >= state.window[0] && t <= state.window[1] && state.window[1] - state.window[0] < 5000 ? state.window : clampWindow(home.window, limits) });
-    flyTo({ lat, lon, dist: 1 + range / EARTH_RADIUS, heading: state.cam.dist < 1.01 ? state.cam.heading : 330, tilt: 62 }, state.cam.dist < 1.001 ? 1800 : 4600);
+    return {
+      point: { lat, lon },
+      arrive() {
+        setState({ t, sel: s.id, window: t >= state.window[0] && t <= state.window[1] && state.window[1] - state.window[0] < 5000 ? state.window : clampWindow(home.window, limits) });
+        flyTo({ lat, lon, dist: 1 + range / EARTH_RADIUS, heading: state.cam.dist < 1.01 ? state.cam.heading : 330, tilt: 62 }, state.cam.dist < 1.001 ? 1800 : 4600);
+      },
+    };
   }
 
   /** Clicks so far, so that what a click fetches is shown only if no other click came after it. */
@@ -2718,44 +2739,57 @@ async function start(root: HTMLElement): Promise<void> {
     return clampWindow([a - pad, b + pad], limits);
   }
 
-  /** Show the destination's date and record as the camera starts its approach. */
-  function showDestination(view: Pick<ViewState, 't' | 'window' | 'sel'>, cam: ViewState['cam'] | undefined, fly: boolean): void {
-    setState(cam && !fly ? { ...view, cam } : view);
-    if (cam && fly) flyTo(cam);
+  /** On arrival, frame the record at its map scale or the camera's current distance, whichever is closer. */
+  function mapDestination(view: Pick<ViewState, 't' | 'window' | 'sel'>, target: ViewState['cam'] | undefined, fly: boolean, inspectRow?: () => void): Destination {
+    return {
+      point: target,
+      arrive() {
+        const cam = target && { ...target, dist: Math.min(state.cam.dist, target.dist) };
+        setState(cam && !fly ? { ...view, cam } : view);
+        if (cam && fly) flyTo(cam);
+        inspectRow?.();
+      },
+    };
   }
 
-  /** Open an entity, and move to its time and place if it is not in view: to the time given, if one is. */
-  function goTo(id: string, at?: number, request = ++navigation): void {
-    if (request !== navigation) return;
+  async function goTo(id: string): Promise<void> {
+    if (travel) stopFlight();
+    const request = ++navigation;
+    const destination = await destinationFor(id);
+    if (request === navigation) destination.arrive();
+  }
+
+  /** Resolve the place at the requested date before moving either the clock or the camera. */
+  async function destinationFor(id: string, at?: number): Promise<Destination> {
     here = null;
     // Its marker may be somewhere the view has not asked for: fetch it, then go.
     if (features.has(id) && (!features.get(id) || (scenarioKey(scenario()) && !features.hasVariants))) {
-      void Promise.all([features.load([id]), scenarioKey(scenario()) ? features.wantVariants() : undefined]).then(() => goTo(id, at, request));
-      return;
+      await Promise.all([features.load([id]), scenarioKey(scenario()) ? features.wantVariants() : undefined]);
     }
     const f = features.get(id) ?? null;
     const entry = entryOf(id)!;
     // Rows of a dataset found by their name: no record to open, but where and when they were drawn.
-    if (entry?.dataset) return goToRows(entry, at);
+    if (entry?.dataset) return rowDestination(entry, at);
     // A structure of a city with records: fly to it, where the living scene there draws it.
     const homes = entry && cityKind(entry.kind) ? bundles.filter((b) => at === undefined || (at >= b.span[0] && at <= b.span[1])) : [];
     if (homes.length) {
-      void (async () => {
-        for (const home of homes) {
-          const b = await bundleOf(home).catch(() => undefined);
-          const s = b?.file.structures.find((x) => x.id === id);
-          if (request !== navigation) return;
-          if (s) return flyToStructure(home, s, at);
-        }
-        setState({ sel: id, ...(at === undefined ? {} : { t: at }) });
-      })();
-      return;
+      for (const home of homes) {
+        const b = await bundleOf(home).catch(() => undefined);
+        const s = b?.file.structures.find((x) => x.id === id);
+        if (s) return structureDestination(home, s, at);
+      }
+      return { arrive: () => setState({ sel: id, ...(at === undefined ? {} : { t: at }) }) };
     }
     const placed = sites.find((s) => s.place === id);
     // A site is entered at a time its scene is drawn for; at another, it is seen from above.
     if (placed && (at === undefined || (at >= placed.near[0] && at <= placed.near[1]))) {
-      setState({ sel: id, ...(at === undefined ? {} : { t: at, window: windowAround(at) }) });
-      return enterSite(placed);
+      return {
+        point: arrivalCam(placed),
+        arrive() {
+          setState({ sel: id, ...(at === undefined ? {} : { t: at, window: windowAround(at) }) });
+          enterSite(placed);
+        },
+      };
     }
     const time = f ? timeFor(f, scenario()) : entry.time;
     let t = at ?? state.t;
@@ -2764,10 +2798,11 @@ async function start(root: HTMLElement): Promise<void> {
     const window = (at === undefined ? windowFor(time) : windowAround(t)) ?? state.window;
     if (!entry.located) {
       // A polity is where its land was drawn then: its own territory, or the rows of a dataset that are rows of it.
+      if (at !== undefined && !territoryReady && entry.kind.startsWith('polity')) await territoryLoading;
       const p = placeIn(entry.places, t);
       const c = territory.centre(id, t, scenario()) ?? (p ? [p[2], p[3]] : undefined);
-      const cam = c ? { lat: c[1], lon: c[0], dist: Math.min(state.cam.dist, p ? distFor(p[4]) : 2.6) } : undefined;
-      return showDestination({ t, sel: id, window }, cam, at !== undefined);
+      const cam = c ? { lat: c[1], lon: c[0], dist: p ? distFor(p[4]) : 2.6 } : undefined;
+      return mapDestination({ t, sel: id, window }, cam, at !== undefined);
     }
     const ageAt = toMa(t);
     const spot = f ? placeAt(f, t, (m) => lookup(m.variants, scenario(), m.time)) : undefined;
@@ -2779,9 +2814,9 @@ async function start(root: HTMLElement): Promise<void> {
       const u = q.slice(1) as V3;
       const c = cross(u, v);
       const p = add(v, scale(add(scale(c, q[0]), cross(u, c)), 2));
-      cam = { lat: (Math.asin(Math.max(-1, Math.min(1, p[2]))) * 180) / Math.PI, lon: (Math.atan2(p[1], p[0]) * 180) / Math.PI, dist: Math.min(state.cam.dist, at === undefined ? 2.4 : 1.24) };
+      cam = { lat: (Math.asin(Math.max(-1, Math.min(1, p[2]))) * 180) / Math.PI, lon: (Math.atan2(p[1], p[0]) * 180) / Math.PI, dist: at === undefined ? 2.4 : 1.24 };
     }
-    showDestination({ t, sel: id, window }, cam, at !== undefined);
+    return mapDestination({ t, sel: id, window }, cam, at !== undefined);
   }
 
   /** How far out to see a land of so many km² whole: a small state from nearer, a large one from as far as a polity is seen. */
@@ -2796,31 +2831,32 @@ async function start(root: HTMLElement): Promise<void> {
    * Go to a state of a dataset that no record adopts: to the time asked, or its start if it is not
    * drawn then, over where its row of that time was drawn; and open that row, as a click on it would.
    */
-  function goToRows(entry: SearchEntry, at?: number): void {
+  function rowDestination(entry: SearchEntry, at?: number): Destination {
     const [a, b] = [entry.time.start.best ?? state.t, entry.time.end.best ?? state.t];
     let t = at ?? (state.t >= a && state.t < b ? state.t : a);
     t = Math.max(dataRange[0], Math.min(dataRange[1], t));
     const p = placeIn(entry.places, t);
-    const cam = p ? { lat: p[3], lon: p[2], dist: Math.min(state.cam.dist, distFor(p[4])) } : undefined;
-    showDestination({ t, sel: null, window: windowAround(t) }, cam, at !== undefined);
-    shownRecord = null;
-    wantPolities();
-    const asked = t;
-    void politiesLoading?.then(() => {
-      const file = polities.file;
-      if (!file || state.t !== quantize({ ...state, t: asked }).t || state.sel) return;
-      const named = file.rows.filter((r) => r.name === entry.label && (!p || (r.from === p[0] && r.at[0] === p[2] && r.at[1] === p[3])));
-      const row = named.find((r) => r.from <= t && t < r.to) ?? named[0];
-      if (!row) return;
-      const runs = entry.places?.length ?? 1;
-      inspect.showRow(
-        nameAt(entry, t),
-        `${kindLabel(entry.kind)}, as the dataset draws it`,
-        [`${formatTime(row.from)} – ${formatTime(row.to - 1)}`, `${row.area.toLocaleString('en-US')} km², as the dataset gives it`, ...(runs > 1 ? [`One of ${runs} rows the dataset gives under this name, ${formatTime(a)} – ${formatTime(b - 1)}`] : [])],
-        file.sourceRecord,
-        file.description,
-        rowInfo(row),
-      );
+    const cam = p ? { lat: p[3], lon: p[2], dist: distFor(p[4]) } : undefined;
+    return mapDestination({ t, sel: null, window: windowAround(t) }, cam, at !== undefined, () => {
+      shownRecord = null;
+      wantPolities();
+      const asked = t;
+      void politiesLoading?.then(() => {
+        const file = polities.file;
+        if (!file || state.t !== quantize({ ...state, t: asked }).t || state.sel) return;
+        const named = file.rows.filter((r) => r.name === entry.label && (!p || (r.from === p[0] && r.at[0] === p[2] && r.at[1] === p[3])));
+        const row = named.find((r) => r.from <= t && t < r.to) ?? named[0];
+        if (!row) return;
+        const runs = entry.places?.length ?? 1;
+        inspect.showRow(
+          nameAt(entry, t),
+          `${kindLabel(entry.kind)}, as the dataset draws it`,
+          [`${formatTime(row.from)} – ${formatTime(row.to - 1)}`, `${row.area.toLocaleString('en-US')} km², as the dataset gives it`, ...(runs > 1 ? [`One of ${runs} rows the dataset gives under this name, ${formatTime(a)} – ${formatTime(b - 1)}`] : [])],
+          file.sourceRecord,
+          file.description,
+          rowInfo(row),
+        );
+      });
     });
   }
 
@@ -2830,35 +2866,60 @@ async function start(root: HTMLElement): Promise<void> {
     return fitWindow(t - d, Math.min(t + d, Math.max(t, PRESENT_YEAR)), limits);
   }
 
-  /** Move along the same time scale that the strip uses. Each intermediate date goes through
-   * the normal renderer. On a long trip from the ground, climb out before moving the clock. */
-  function travelTo(t: number | undefined, arrive: () => void): void {
+  /** Climb out if necessary, then turn in orbit while moving along the time strip. */
+  async function travelTo(t: number | undefined, choice: Promise<Destination> | Destination): Promise<void> {
     stopFlight();
     playing = false;
-    if (t === undefined || matchMedia('(prefers-reduced-motion: reduce)').matches) return arrive();
-    const from = positionOf(state.t), to = positionOf(t);
-    if (Math.abs(to - from) < 1) return arrive();
-    const climb = state.cam.dist < 2 ? 1400 : 0;
-    if (climb) flyTo({ lat: state.cam.lat, lon: state.cam.lon, dist: 2.6 }, climb);
-    setState({ sel: null, window: fitWindow(Math.min(state.t, t), Math.max(state.t, t), limits) });
-    // A longer way along the strip takes longer, so that what changes on the way can be seen: a second and a half,
-    // and about as long again for each fifth of the strip.
-    travel = { from, to, ms: 1500 + 80 * Math.abs(to - from), start: performance.now() + climb, last: -Infinity, arrive };
+    const from = positionOf(state.t), to = positionOf(t ?? state.t);
+    const sweep = t !== undefined && Math.abs(to - from) >= 1 && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const trip: Travel = {
+      from, to, ms: 1500 + 80 * Math.abs(to - from), origin: state.cam,
+      elapsed: 0, lastFrame: performance.now(), lastDate: -Infinity,
+    };
+    travel = trip;
+    if (sweep) {
+      if (state.cam.dist < 2) flyTo({ lat: state.cam.lat, lon: state.cam.lon, dist: 2.6 }, 1400);
+      setState({ sel: null, window: fitWindow(Math.min(state.t, t), Math.max(state.t, t), limits) });
+    }
+    try {
+      const destination = await choice;
+      if (travel !== trip) return;
+      if (!sweep) {
+        travel = null;
+        return destination.arrive();
+      }
+      trip.destination = destination;
+      if (destination.point) {
+        const turn = wayOf(trip.origin, destination.point);
+        if (turn.dLat || turn.dLon) trip.turn = turn;
+      }
+      trip.lastFrame = performance.now();
+    } catch (err) {
+      if (travel === trip) stopFlight();
+      throw err;
+    }
   }
 
   function stepTravel(now: number): void {
     const trip = travel!;
-    if (now < trip.start) return;
-    const u = Math.min(1, (now - trip.start) / trip.ms);
-    if (u === 1) {
-      travel = null;
-      setState({ t: timeAt(trip.to) });
-      trip.arrive();
-    } else if (now - trip.last >= 80) {
-      // Bound expensive field requests during a sweep, just as for a hand scrubbing the strip.
-      trip.last = now;
-      setState({ t: timeAt(trip.from + (trip.to - trip.from) * u * u * (3 - 2 * u)) });
+    const dt = Math.max(0, now - trip.lastFrame);
+    trip.lastFrame = now;
+    if (!trip.destination || flight) return;
+    // A slow frame must not skip the visible turn. Both motions use the same eased progress.
+    trip.elapsed += trip.turn ? Math.min(100, dt) : dt;
+    const u = Math.min(1, trip.elapsed / trip.ms);
+    const e = u * u * (3 - 2 * u);
+    const change: Partial<ViewState> = {};
+    if (trip.turn) change.cam = { ...state.cam, lat: trip.origin.lat + trip.turn.dLat * e, lon: trip.origin.lon + trip.turn.dLon * e };
+    // The camera moves every frame; throttle date changes because each can request new fields.
+    if (u === 1 || now - trip.lastDate >= 80) {
+      trip.lastDate = now;
+      change.t = timeAt(trip.from + (trip.to - trip.from) * e);
     }
+    if (change.cam || change.t !== undefined) setState(change);
+    if (u < 1) return;
+    travel = null;
+    trip.destination.arrive();
   }
 
   // Any new gesture takes the controls back immediately, including opening a second trip.
@@ -2878,12 +2939,14 @@ async function start(root: HTMLElement): Promise<void> {
     go: (id, t) => {
       const entry = build.search.entities.find((e) => e.id === id);
       const at = t ?? (entry?.time.instant ? entry.time.start.best ?? undefined : undefined);
-      travelTo(at, () => goTo(id, at));
+      return travelTo(at, destinationFor(id, at));
     },
-    goTime: (t) => travelTo(t, () => {
-      here = null;
-      const cam = state.cam.dist < 2 ? { lat: state.cam.lat, lon: state.cam.lon, dist: 2.6 } : state.cam;
-      setState({ t, window: windowAround(t), sel: null, cam });
+    goTime: (t) => travelTo(t, {
+      arrive() {
+        here = null;
+        const cam = state.cam.dist < 2 ? { lat: state.cam.lat, lon: state.cam.lon, dist: 2.6 } : state.cam;
+        setState({ t, window: windowAround(t), sel: null, cam });
+      },
     }),
     goPeriod: (p) => setState({ window: fitWindow(p.start, p.end, limits), t: Math.max(dataRange[0], Math.min(dataRange[1], (p.start + p.end) / 2)) }),
   });
