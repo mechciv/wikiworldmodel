@@ -21,7 +21,7 @@ import type { V3 } from '../mat.ts';
 import { groundLook, groundTones, rockLook } from './groundlook.ts';
 import { fieldStyle, type FromLifeWorker, type PeopleSummary, type ToLifeWorker } from './lifeworker.ts';
 import { Skyline } from './skyline.ts';
-import { StructureLayer, type StructureBundle } from './structures.ts';
+import { StructureLayer, StructureLayerPool, type StructureBundle } from './structures.ts';
 import { surveyOffset } from '../../../world/generators/life/survey.ts';
 import { shadowFocusFor, type LocalView } from './view.ts';
 
@@ -32,6 +32,16 @@ const renderersFull = new WeakMap<GL, Promise<LocalRenderer>>();
 const renderersFast = new WeakMap<GL, Promise<LocalRenderer>>();
 /** Which scene has the renderer now. */
 const owners = new WeakMap<LocalRenderer, LifeScene>();
+/** Per-renderer pool of static settlement StructureLayers shared across time/month/standby scenes. */
+const structurePools = new WeakMap<LocalRenderer, StructureLayerPool>();
+function structurePool(r: LocalRenderer): StructureLayerPool {
+  let pool = structurePools.get(r);
+  if (!pool) {
+    pool = new StructureLayerPool();
+    structurePools.set(r, pool);
+  }
+  return pool;
+}
 
 /** The leaves a plant's part holds when its form does not say: as the part types draw them (world/generators/life/forms.ts). */
 const LEAVES_OF: Record<string, string> = { conifer: 'needle', whorled: 'needle', 'scale-tree': 'needle', broadleaf: 'broad', shrub: 'broad', palm: 'frond', fern: 'frond', tuft: 'frond', mat: 'frond' };
@@ -144,6 +154,13 @@ export class LifeScene {
   private want: LocalView | null = null;
   /** whether the last view sent asked for a still's richer frame */
   private sentRich = false;
+  /** whether the last view sent used interactive frustum padding and throttling */
+  private sentInteractive = false;
+  private lastSendAt = 0;
+  private lastInteractive = false;
+  private structureKey: string | null = null;
+  private structureListener: (() => void) | null = null;
+  private disposed = false;
   private active = false;
   private needsReset = false;
   private hasComplete = false;
@@ -183,7 +200,7 @@ export class LifeScene {
   }
 
   get settled(): boolean {
-    return this.ready && !this.waiting && this.last.pending === 0 && !this.moved() && (!this.bundle || !!this.structures?.settled);
+    return this.ready && !this.waiting && this.last.pending === 0 && !this.moved(false) && (!this.bundle || !!this.structures?.settled);
   }
 
   /** Make the ground, and be ready to take over the renderer. */
@@ -250,9 +267,11 @@ export class LifeScene {
       this.heldProtos = [];
       this.held = null;
       this.lastSent = null;
+      this.sentInteractive = false;
+      this.lastSendAt = 0;
     }
     this.want = v;
-    this.send();
+    this.send(false);
     if (!this.waiting && this.held && this.last.pending === 0) return Promise.resolve();
     return new Promise<void>((resolve) => {
       let done = false;
@@ -295,6 +314,8 @@ export class LifeScene {
       this.validSerial = this.serial;
       this.needsReset = false;
       this.lastSent = null;
+      this.sentInteractive = false;
+      this.lastSendAt = 0;
       this.heldProtos = [];
       this.held = null;
     }
@@ -346,7 +367,7 @@ export class LifeScene {
       const casters: MeshHandle[] = [];
       if (this.wallsGpu) casters.push(this.wallsGpu);
       if (this.fieldworksGpu) casters.push(this.fieldworksGpu);
-      if (this.structures?.ready) casters.push(...this.structures.near(focus, radius));
+      if (this.structures?.ready) casters.push(...this.structures.near(focus, radius, this.entityBase()));
       return casters;
     };
     // A city's structures follow the scene's own entities, each dated by its record.
@@ -411,24 +432,40 @@ export class LifeScene {
 
   /** A city's recorded structures, once the scene's people are known: they are drawn among them. */
   private startStructures(): void {
-    if (!this.bundle || this.structures) return;
-    const layer = new StructureLayer(this.renderer, this.bundle, surveyOffset(this.spec.site.origin, this.bundle.file.site.origin), this.entityBase(), !!this.opts.fast);
+    if (!this.bundle || this.structures || this.disposed) return;
+    const pool = structurePool(this.renderer);
+    const { key, layer } = pool.acquire(
+      this.renderer,
+      this.bundle,
+      surveyOffset(this.spec.site.origin, this.bundle.file.site.origin),
+      this.entityBase(),
+      !!this.opts.fast,
+    );
+    this.structureKey = key;
     this.structures = layer;
-    layer.onChange = () => this.onChange();
-    layer
-      .load()
-      .then(() => {
-        this.skyline = Skyline.of(layer.named, layer.tops, { offset: new Int32Array(1), points: new Float32Array(0), top: new Float32Array(0), valid: [0, 0] });
-        this.updateNames(this.homes);
-        this.onChange();
-      })
-      .catch((err) => console.error(`a city's structures: ${err instanceof Error ? err.message : String(err)}`));
+    this.structureListener = () => {
+      if (this.active || !layer.ready) this.onChange();
+    };
+    layer.addListener(this.structureListener);
+    const onReady = () => {
+      if (this.disposed || this.structures !== layer) return;
+      this.skyline = layer.skyline;
+      this.updateNames(this.homes);
+      this.onChange();
+    };
+    if (layer.ready) onReady();
+    else {
+      layer
+        .load()
+        .then(onReady)
+        .catch((err) => console.error(`a city's structures: ${err instanceof Error ? err.message : String(err)}`));
+    }
   }
 
   private selection(m: Extract<FromLifeWorker, { type: 'selection' }>): void {
     this.waiting = false;
     if (m.serial <= this.validSerial) {
-      if (this.active || this.warmWaiters.length > 0) this.send();
+      if (this.active || this.warmWaiters.length > 0) this.send(this.active ? this.lastInteractive : false);
       return;
     }
     // Those among them that go somewhere: a way's ninth number is how fast.
@@ -463,7 +500,7 @@ export class LifeScene {
         this.updateNames(m.groups);
       }
       this.onChange();
-      this.send();
+      this.send(this.lastInteractive);
     } else {
       // Always retain prototypes and the latest selection while inactive (even after warm() times
       // out or while parked in lifeCache), because the worker marks sent prototypes as already
@@ -473,7 +510,7 @@ export class LifeScene {
       this.updateNames(m.groups);
       if (this.warmWaiters.length > 0) {
         if (m.pending === 0) this.flushWarmWaiters();
-        else this.send();
+        else this.send(false);
       }
     }
   }
@@ -513,38 +550,63 @@ export class LifeScene {
   }
 
   /** Whether the view has moved enough since the last was sent to need another. */
-  private moved(): boolean {
+  private moved(interactive = false): boolean {
     const a = this.want;
     const b = this.lastSent;
     if (!a) return false;
     if (!b) return true;
+    // Once motion settles, perform one exact-frustum pass if the previous selection used interactive padding.
+    if (!interactive && this.sentInteractive) return true;
     const dx = a.eye[0] - b.eye[0];
     const dy = a.eye[1] - b.eye[1];
     const dz = a.eye[2] - b.eye[2];
-    const far = Math.max(3, a.clearance * 0.03);
+    const far = interactive ? Math.max(12, a.clearance * 0.12) : Math.max(3, a.clearance * 0.03);
     if (dx * dx + dy * dy + dz * dz > far * far) return true;
     const turn = a.forward[0] * b.forward[0] + a.forward[1] * b.forward[1] + a.forward[2] * b.forward[2];
-    return turn < 0.9995 || a.height !== b.height || a.fov !== b.fov || this.renderer.still !== this.sentRich;
+    const minDot = interactive ? 0.99 : 0.9995;
+    return turn < minDot || a.height !== b.height || a.fov !== b.fov || this.renderer.still !== this.sentRich;
   }
 
-  private send(): void {
+  private send(interactive = false): void {
     if (!this.ready || this.waiting || !this.worker || !this.want) return;
-    if (!this.moved() && !this.last.pending) return;
+    if (!this.moved(interactive) && !this.last.pending) return;
+    const now = performance.now();
+    // During interactive camera motion, throttle non-pending re-selection passes (~8 Hz) so the worker
+    // isn't flooded and the main thread avoids uploading full instance buffers every frame.
+    if (interactive && !this.last.pending && this.lastSent && now - this.lastSendAt < 120) return;
     const v = this.want;
     this.lastSent = v;
+    this.lastSendAt = now;
+    this.sentInteractive = interactive;
     this.waiting = true;
     // A still asks for more of the scene than a live frame can afford (step 8).
     this.sentRich = this.renderer.still;
-    const msg: ToLifeWorker = { type: 'view', serial: ++this.serial, view: { eye: [v.eye[0], v.eye[1], v.eye[2]], forward: [v.forward[0], v.forward[1], v.forward[2]], right: [v.right[0], v.right[1], v.right[2]], up: [v.up[0], v.up[1], v.up[2]], fov: v.fov, aspect: v.aspect, height: v.height, clearance: v.clearance, rich: this.sentRich } };
+    const msg: ToLifeWorker = {
+      type: 'view',
+      serial: ++this.serial,
+      view: {
+        eye: [v.eye[0], v.eye[1], v.eye[2]],
+        forward: [v.forward[0], v.forward[1], v.forward[2]],
+        right: [v.right[0], v.right[1], v.right[2]],
+        up: [v.up[0], v.up[1], v.up[2]],
+        fov: v.fov,
+        aspect: v.aspect,
+        height: v.height,
+        clearance: v.clearance,
+        rich: this.sentRich,
+        ...(interactive ? { margin: 0.25 } : {}),
+      },
+    };
     this.worker.postMessage(msg);
   }
 
   /** Draw a frame. */
-  render(v: LocalView, sun: V3, time: number, evidence: boolean, alpha: number, solid: boolean, outW: number, outH: number, clock = 0, renderScale = 1): void {
+  render(v: LocalView, sun: V3, time: number, evidence: boolean, alpha: number, solid: boolean, outW: number, outH: number, clock = 0, renderScale = 1, interactive = false): void {
     if (!this.groundData) return;
     this.activate();
+    this.lastInteractive = interactive;
     this.want = v;
-    this.send();
+    this.send(interactive);
     const f: CityFrame = {
       eye: v.gpuEye,
       focus: shadowFocusFor(v),
@@ -566,13 +628,14 @@ export class LifeScene {
       height: outH,
       renderScale,
       cssHeight: v.height,
+      interactive,
     };
     this.follow(clock);
     const staticMeshes: MeshHandle[] = [];
     if (this.pathsGpu) staticMeshes.push(this.pathsGpu);
     if (this.wallsGpu) staticMeshes.push(this.wallsGpu);
     if (this.fieldworksGpu) staticMeshes.push(this.fieldworksGpu);
-    if (this.structures?.ready) staticMeshes.push(...this.structures.visible(v, (x, y) => this.ground.at(x, y)));
+    if (this.structures?.ready) staticMeshes.push(...this.structures.visible(v, (x, y) => this.ground.at(x, y), this.entityBase(), interactive));
     this.renderer.render(f, staticMeshes, outW, outH);
   }
 
@@ -595,7 +658,7 @@ export class LifeScene {
   pick(x: number, y: number): { taxon?: LivingTaxon; house?: number; work?: number; kept?: LivingTaxon; path?: boolean; crop?: boolean; cropSlot?: number; perimeter?: number; fieldworks?: boolean; structure?: CityStructure } {
     const e = this.renderer.pick(x, y);
     if (!e) return {};
-    const structure = this.structures?.structureOf(e);
+    const structure = this.structures?.structureOf(e, this.entityBase());
     if (structure) return { structure };
     const made = e - this.spec.taxa.length - 1;
     const forms = this.people?.forms.length ?? 0;
@@ -630,12 +693,14 @@ export class LifeScene {
     });
     // A competing claim for a structure's date moves it, as it did in a city's own scene.
     const layer = this.structures;
-    if (layer)
+    if (layer) {
+      const base = this.entityBase();
       layer.bundle.file.structures.forEach((st, i) => {
         if (!st.variants) return;
         const v = lookup(st.variants, s, st.time);
-        this.renderer.setEntityTime(layer.first + i, clamp(v.start.best, -TIMELESS), clamp(v.end.best, TIMELESS));
+        this.renderer.setEntityTime(base + i, clamp(v.start.best, -TIMELESS), clamp(v.end.best, TIMELESS));
       });
+    }
   }
 
   /** Light up every one of the taxon whose record is open. */
@@ -652,9 +717,10 @@ export class LifeScene {
       return;
     }
     // A city's structure: its basis, lit.
-    const e = this.structures?.entityOf(id);
+    const base = this.entityBase();
+    const e = this.structures?.entityOf(id, base);
     if (e !== undefined) {
-      const st = this.structures!.structureOf(e)!;
+      const st = this.structures!.structureOf(e, base)!;
       this.selected = e;
       this.selectedFlags = ({ evidence: 0, reconstruction: 1, projection: 2, procedural: 3 } as Record<string, number>)[st.basis] ?? 1;
       this.renderer.setEntityFlags(e, this.selectedFlags + 8);
@@ -676,6 +742,7 @@ export class LifeScene {
 
   /** The scene is no longer wanted. */
   dispose(): void {
+    this.disposed = true;
     this.flushWarmWaiters();
     this.worker?.terminate();
     this.worker = null;
@@ -696,7 +763,12 @@ export class LifeScene {
     this.pathsGpu = null;
     this.wallsGpu = null;
     this.fieldworksGpu = null;
-    this.structures?.dispose();
+    if (this.structures && this.structureListener) this.structures.removeListener(this.structureListener);
+    this.structureListener = null;
+    if (this.structureKey !== null) {
+      structurePools.get(this.renderer)?.release(this.structureKey);
+      this.structureKey = null;
+    }
     this.structures = undefined;
   }
 }

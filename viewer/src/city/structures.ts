@@ -7,8 +7,11 @@
 
 import type { CityFile, CityStructure } from '../../../core/city.ts';
 import { cellBox, CELL } from '../../../world/generators/city/cells.ts';
+import type { MeshBounds2D } from '../gl/culling.ts';
 import type { LocalRenderer, MeshHandle } from '../gl/renderer.ts';
 import type { V3 } from '../mat.ts';
+import { RefCountedPool } from './lifecycle.ts';
+import { Skyline } from './skyline.ts';
 import type { LocalView } from './view.ts';
 import type { FromWorker, ToWorker } from './worker.ts';
 
@@ -37,25 +40,37 @@ export interface StructureBundle {
   heights: Int16Array[];
 }
 
+/** Stable pool key for a settlement's static structure geometry at a given scene offset and quality tier. */
+export function structureLayerKey(siteId: string, offset: [number, number], fast: boolean): string {
+  return `${siteId}|${offset[0].toFixed(1)}|${offset[1].toFixed(1)}|${fast ? 1 : 0}`;
+}
+
 export class StructureLayer {
   ready = false;
+  /** Fixed entity base baked into vertex buffers so pooled cells can serve scenes with any `entityBase` via `uEntityOffset`. */
+  readonly builtBase = 1;
   /** the structures as the scene names them: their places moved into its metres */
   named: CityStructure[] = [];
   /** how high each stands as raised, above sea level */
   tops: Float32Array = new Float32Array(0);
+  /** cached wall-occlusion grid built once from `named` and `tops` */
+  skyline = new Skyline();
   private cells = new Map<number, Cell>();
   private worker: Worker | null = null;
+  private loadPromise: Promise<void> | null = null;
   private inflight = 0;
   private frame = 0;
   private serial = 0;
   private fineBytes = 0;
   private queue: { key: number; detail: number }[] = [];
+  private pendingUploads: Extract<FromWorker, { type: 'cell' }>[] = [];
   private eyeTold: [number, number] | null = null;
+  private listeners = new Set<() => void>();
   onChange: () => void = () => {};
 
   /**
-   * `offset` is where the city's point lies in the scene's metres; `first` the entity of its first structure, after the
-   * scene's own; `slice` the scene's moment, which the shader's time is counted from.
+   * `offset` is where the city's point lies in the scene's metres; `first` the default entity of its first structure,
+   * after the scene's own.
    */
   constructor(
     private renderer: LocalRenderer,
@@ -77,24 +92,44 @@ export class StructureLayer {
     return this.bundle.file.structures.length;
   }
 
+  addListener(fn: () => void): void {
+    this.listeners.add(fn);
+  }
+
+  removeListener(fn: () => void): void {
+    this.listeners.delete(fn);
+  }
+
+  private notify(): void {
+    this.onChange();
+    for (const fn of this.listeners) fn();
+  }
+
   load(): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
+    if (this.ready) return Promise.resolve();
+    if (this.loadPromise) return this.loadPromise;
+    this.loadPromise = new Promise<void>((resolve, reject) => {
       this.worker = new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' });
-      this.worker.onerror = (e) => reject(new Error(`a city's structures failed: ${e.message}`));
+      this.worker.onerror = (e) => {
+        this.loadPromise = null;
+        reject(new Error(`a city's structures failed: ${e.message}`));
+      };
       this.worker.onmessage = (e: MessageEvent<FromWorker>) => {
         const m = e.data;
         if (m.type === 'structures') {
           this.tops = m.tops;
           for (const key of m.cells) this.cells.set(key, { key, box: cellBox(key), asked: [false, false], usedAt: 0 });
+          this.skyline = Skyline.of(this.named, this.tops, { offset: new Int32Array(1), points: new Float32Array(0), top: new Float32Array(0), valid: [0, 0] });
           this.ready = true;
           resolve();
-          this.onChange();
+          this.notify();
         } else if (m.type === 'cell') this.received(m);
       };
       const f = this.bundle.file;
-      const msg: ToWorker = { type: 'structures', city: f, levels: f.ground, heights: this.bundle.heights, entityBase: this.first, offset: this.offset };
+      const msg: ToWorker = { type: 'structures', city: f, levels: f.ground, heights: this.bundle.heights, entityBase: this.builtBase, offset: this.offset };
       this.worker.postMessage(msg);
     });
+    return this.loadPromise;
   }
 
   /** When each structure stood, from the scene's moment, and what it rests on: rows for the scene's entity texture. */
@@ -111,22 +146,42 @@ export class StructureLayer {
   }
 
   /** The structure an entity is, if it is one of these. */
-  structureOf(entity: number): CityStructure | undefined {
-    const i = entity - this.first;
+  structureOf(entity: number, first = this.first): CityStructure | undefined {
+    const i = entity - first;
     return i >= 0 && i < this.count ? this.bundle.file.structures[i] : undefined;
   }
 
   /** The entity of a structure's record, if it is drawn here. */
-  entityOf(id: string): number | undefined {
+  entityOf(id: string, first = this.first): number | undefined {
     const i = this.bundle.file.structures.findIndex((s) => s.id === id);
-    return i >= 0 ? this.first + i : undefined;
+    return i >= 0 ? first + i : undefined;
   }
 
   private received(m: Extract<FromWorker, { type: 'cell' }>): void {
     this.inflight--;
-    const c = this.cells.get(m.key);
-    if (c) {
-      const gpu = this.renderer.upload(m.vertices, m.indices);
+    const existing = this.pendingUploads.findIndex((p) => p.key === m.key && p.detail === m.detail);
+    if (existing >= 0) this.pendingUploads[existing] = m;
+    else this.pendingUploads.push(m);
+    this.pump();
+    this.notify();
+  }
+
+  /** Upload queued cell meshes to the GPU within a per-frame time budget (always at least one cell). */
+  private flushUploads(budgetMs: number): void {
+    if (!this.pendingUploads.length) return;
+    const t0 = performance.now();
+    let uploaded = 0;
+    while (this.pendingUploads.length > 0 && (uploaded === 0 || performance.now() - t0 < budgetMs)) {
+      const m = this.pendingUploads.shift()!;
+      const c = this.cells.get(m.key);
+      if (!c) continue;
+      const bounds: MeshBounds2D = {
+        minX: c.box[0] + this.offset[0],
+        minY: c.box[1] + this.offset[1],
+        maxX: c.box[2] + this.offset[0],
+        maxY: c.box[3] + this.offset[1],
+      };
+      const gpu = this.renderer.upload(m.vertices, m.indices, bounds);
       if (m.detail === 1) {
         if (c.fine) {
           this.fineBytes -= c.fine.bytes;
@@ -138,9 +193,9 @@ export class StructureLayer {
         if (c.coarse) this.renderer.remove(c.coarse);
         c.coarse = gpu;
       }
+      uploaded++;
     }
-    this.pump();
-    this.onChange();
+    if (this.pendingUploads.length > 0) this.notify();
   }
 
   private pump(): void {
@@ -195,28 +250,34 @@ export class StructureLayer {
   }
 
   /** The meshes within a radius of a point of the scene, for a shadow's cascade. */
-  near(focus: V3, radius: number): MeshHandle[] {
+  near(focus: V3, radius: number, first = this.first): MeshHandle[] {
     const out: MeshHandle[] = [];
     const r = radius + CELL;
     const fx = focus[0] - this.offset[0];
     const fy = focus[1] - this.offset[1];
+    const entityOffset = first - this.builtBase;
     for (const c of this.cells.values()) {
       const cx = (c.box[0] + c.box[2]) / 2;
       const cy = (c.box[1] + c.box[3]) / 2;
       if (Math.abs(cx - fx) > r || Math.abs(cy - fy) > r) continue;
       const g = radius < 1200 ? (c.fine ?? c.coarse) : (c.coarse ?? c.fine);
-      if (g) out.push(g);
+      if (g) {
+        g.entityOffset = entityOffset;
+        out.push(g);
+      }
     }
     return out;
   }
 
   /** The meshes in view: fine near the eye, coarse beyond. `ground` is the scene's, in its own metres. */
-  visible(v: LocalView, ground: (x: number, y: number) => number): MeshHandle[] {
+  visible(v: LocalView, ground: (x: number, y: number) => number, first = this.first, interactive = false): MeshHandle[] {
     if (!this.ready) return [];
+    this.flushUploads(interactive ? 3 : 10);
     this.update(v);
     const out: MeshHandle[] = [];
     const t = Math.tan(v.fov / 2);
     const side = t * v.aspect;
+    const entityOffset = first - this.builtBase;
     for (const c of this.cells.values()) {
       const cx = (c.box[0] + c.box[2]) / 2 + this.offset[0];
       const cy = (c.box[1] + c.box[3]) / 2 + this.offset[1];
@@ -234,6 +295,7 @@ export class StructureLayer {
       const g = d < FINE_DISTANCE + CELL * 0.71 ? (c.fine ?? c.coarse) : (c.coarse ?? c.fine);
       if (g) {
         c.usedAt = this.frame;
+        g.entityOffset = entityOffset;
         out.push(g);
       }
     }
@@ -242,6 +304,7 @@ export class StructureLayer {
 
   /** Everything this layer put on the GPU goes, and its worker with it. */
   dispose(): void {
+    this.pendingUploads = [];
     for (const c of this.cells.values()) {
       if (c.coarse) this.renderer.remove(c.coarse);
       if (c.fine) this.renderer.remove(c.fine);
@@ -249,11 +312,41 @@ export class StructureLayer {
     this.cells.clear();
     this.worker?.terminate();
     this.worker = null;
+    this.loadPromise = null;
+    this.listeners.clear();
     this.ready = false;
   }
 
-  /** Whether every cell has its coarse mesh, and every near one its fine mesh. */
+  /** Whether every cell has its coarse mesh, and every near one its fine mesh, uploaded to the GPU. */
   get settled(): boolean {
-    return this.ready && this.inflight === 0 && this.queue.length === 0;
+    return this.ready && this.inflight === 0 && this.queue.length === 0 && this.pendingUploads.length === 0;
+  }
+}
+
+/**
+ * Per-renderer pool of `StructureLayer` instances, keyed by city + offset + quality.
+ * Reuses already-built and uploaded settlement cells across time-step, month, and cached-scene swaps.
+ */
+export class StructureLayerPool {
+  private pool = new RefCountedPool<StructureLayer>(2, (layer) => layer.dispose());
+
+  acquire(
+    renderer: LocalRenderer,
+    bundle: StructureBundle,
+    offset: [number, number],
+    first: number,
+    fast: boolean,
+  ): { key: string; layer: StructureLayer } {
+    const key = structureLayerKey(bundle.file.site.id, offset, fast);
+    const layer = this.pool.acquire(key, () => new StructureLayer(renderer, bundle, offset, first, fast));
+    return { key, layer };
+  }
+
+  release(key: string): void {
+    this.pool.release(key);
+  }
+
+  dispose(): void {
+    this.pool.dispose();
   }
 }

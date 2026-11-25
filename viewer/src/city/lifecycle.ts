@@ -26,6 +26,77 @@ export function sameLifeContext(aKey: string, bKey: string): boolean {
 }
 
 /**
+ * Whether two `lifeKeyAt` keys share the same geological bin and shoreline mapping
+ * (allowing spatial cell, month, or anthrome-step transitions to keep the active scene
+ * live while the next scene warms off-screen).
+ */
+export function sameGeoContext(aKey: string, bKey: string): boolean {
+  const a = aKey.split('|');
+  const b = bKey.split('|');
+  if (a.length < 6 || b.length < 6) return aKey === bKey;
+  return a[0] === b[0] && a[5] === b[5];
+}
+
+/**
+ * Reference-counted cache with bounded standby LRU eviction, used to share heavy GPU-backed
+ * layers (such as a settlement's static structure cells) across scenes that differ only in
+ * time step, month, or cached standby state.
+ */
+export class RefCountedPool<T> {
+  private entries = new Map<string, { value: T; refs: number }>();
+
+  constructor(
+    readonly maxStandby: number,
+    private onDispose: (value: T, key: string) => void,
+  ) {
+    if (maxStandby < 0) throw new Error('RefCountedPool maxStandby must be non-negative');
+  }
+
+  get size(): number {
+    return this.entries.size;
+  }
+
+  refs(key: string): number {
+    return this.entries.get(key)?.refs ?? 0;
+  }
+
+  acquire(key: string, create: () => T): T {
+    const existing = this.entries.get(key);
+    if (existing) {
+      existing.refs++;
+      return existing.value;
+    }
+    const value = create();
+    this.entries.set(key, { value, refs: 1 });
+    return value;
+  }
+
+  release(key: string): void {
+    const entry = this.entries.get(key);
+    if (!entry || entry.refs <= 0) return;
+    entry.refs--;
+    if (entry.refs > 0) return;
+    // Move to the MRU end of standby entries, then evict oldest standby entries beyond maxStandby.
+    this.entries.delete(key);
+    this.entries.set(key, entry);
+    let standby = 0;
+    for (const e of this.entries.values()) if (e.refs === 0) standby++;
+    for (const [k, e] of [...this.entries.entries()]) {
+      if (standby <= this.maxStandby) break;
+      if (e.refs !== 0) continue;
+      this.entries.delete(k);
+      standby--;
+      this.onDispose(e.value, k);
+    }
+  }
+
+  dispose(): void {
+    for (const [k, e] of this.entries) this.onDispose(e.value, k);
+    this.entries.clear();
+  }
+}
+
+/**
  * Bounded least-recently-used cache for standby local scenes so panning or zooming back across
  * a lattice border swaps instantaneously without re-running ground/settlement workers.
  */

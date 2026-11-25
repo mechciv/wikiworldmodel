@@ -4,12 +4,17 @@
 import type { GroundLevel } from '../../../core/city.ts';
 import type { LeafKindName } from '../../../core/leaves.ts';
 import type { Mat4, V3 } from '../mat.ts';
+import type { BatchBounds, MeshBounds2D } from './culling.ts';
 import type { FrameTimer } from './timer.ts';
 
 /** Opaque handle to a static uploaded cell/path mesh; WebGL 2 implements this as CellGPU. */
 export interface MeshHandle {
   count: number;
   bytes: number;
+  /** optional world XY bounds used to restrict shadow-cascade invalidation on upload/remove */
+  bounds?: MeshBounds2D;
+  /** optional entity-index offset added to vertex aEntity so reusable static layers work across scenes */
+  entityOffset?: number;
 }
 
 /** Optional semantic metadata attached to an instanced prototype mesh for renderer optimizations. */
@@ -28,6 +33,8 @@ export interface InstancedBatch {
   count: number;
   data: ArrayBuffer;
   ways?: ArrayBuffer;
+  /** precomputed conservative world bounds from the worker, avoiding main-thread loops over instances */
+  bounds?: BatchBounds;
 }
 
 export interface CityFrame {
@@ -61,6 +68,8 @@ export interface CityFrame {
   renderScale?: number;
   /** viewport height in CSS pixels, matching SceneStream screen-size culling */
   cssHeight?: number;
+  /** true while the camera, time slider, or lighting is actively being moved by the visitor */
+  interactive?: boolean;
 }
 
 export interface MaterialSetStatus {
@@ -112,7 +121,7 @@ export interface LocalRenderer<TMesh extends MeshHandle = MeshHandle> {
   setEntities(data: Float32Array): void;
   setEntityTime(index: number, start: number, end: number): void;
   setEntityFlags(index: number, flags: number): void;
-  upload(vertices: ArrayBuffer, indices: Uint32Array): TMesh;
+  upload(vertices: ArrayBuffer, indices: Uint32Array, bounds?: MeshBounds2D): TMesh;
   remove(c: TMesh): void;
   restart(): void;
   render(frame: CityFrame, cells: TMesh[], outW: number, outH: number): void;
