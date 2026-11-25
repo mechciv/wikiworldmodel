@@ -512,7 +512,8 @@ properties:
     interp: step
     applies_to: [tradition/building, settlement]
     description: >-
-      How a town or a city was laid out: its streets (on a grid, winding lanes, or canals among them), the size of
+      How a town or a city was laid out: whether its houses were packed together or stood in its people's own
+      settlements set apart among their fields (`fabric`, compact or dispersed), its streets (on a grid, winding lanes, or canals among them), the size of
       its blocks, what enclosed it (a rampart, a palisade, a wall of mudbrick, rammed earth, stone or brick), how
       high, how many gates, a moat, an open square, and which way its grid or its main street ran (`orientation`,
       the bearing of the axis in degrees east of north) (core/dwelling.ts). A tradition that housed townspeople

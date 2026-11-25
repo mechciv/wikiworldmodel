@@ -12,7 +12,7 @@ import { houseSize, HOUSE_VARIANTS } from '../dwellings.ts';
 import { ROUTE, roundOf, wayAt, type RoutineParams } from '../../life/routines.ts';
 import { personGoes } from '../figures.ts';
 import { WORK_VARIANTS } from '../works.ts';
-import { farCellsWeighed, farLand, farLandMask, farScale, LandUseMap, makeSettlement, peopleReach, toLocal, type Ground } from './v11.ts';
+import { farCellsWeighed, farLand, farLandMask, farScale, LandUseMap, makeSettlement, peopleReach, toLocal, type Ground } from './v12.ts';
 import { FIELD_USE, growFields, GROWTH, SITING, type WaterNear } from './sites.ts';
 
 const ROOT = join(import.meta.dirname, '../../../..');
@@ -348,6 +348,62 @@ describe('the settlement generator', () => {
       expect(a.mine.filter(near).length / a.mine.length).toBeGreaterThan(0.97);
       // Each street of the earlier time runs within one of the later: streets run on as the city reaches along them.
       expect(a.streets.filter((s) => b.streets.some((t) => within(s.line, t.line))).length / a.streets.length).toBeGreaterThan(0.97);
+    });
+
+    it("draws a dispersed town as its people's own settlements among their fields, each keeping its place", () => {
+      // A town of a tradition whose town form says it was dispersed: settlements of twenty households of five, 25 m apart,
+      // each with a shrine and a pond, and a pond to every other house; at a density that leaves ground between them.
+      const traditions = compileTraditions([
+        {
+          id: 'test/temple-villages',
+          label: 'Villages round a temple',
+          regions: [1],
+          span: [-500, 1500],
+          lifeways: ['townspeople', 'farmers'],
+          dwelling: { plan: 'rectangular', roof: 'gable', roof_material: 'thatch', floor: 'stilts' },
+          settlement: { pattern: 'nucleated', houses: 20, spacing: 25, household: 5 },
+          outbuildings: [{ use: 'shrine', per: 'settlement' }, { use: 'pond', per: 'settlement' }, { use: 'pond', per: 'house', count: 0.5 }],
+          town: { fabric: 'dispersed' },
+        },
+      ]);
+      const sparse = { at10k: 12 };
+      const a = at(500, { life: { ...life, ...sparse } }, traditions);
+      const b = at(1000, { life: { ...life, ...sparse } }, traditions);
+      // The town itself draws nothing: its units do, each a settlement of its own.
+      expect(a.s.units).toBe(true);
+      expect(a.mine).toEqual([]);
+      // Its panel says so, and says nothing of the streets and blocks of a compact town, which are not drawn.
+      expect(a.s.town).toEqual({ text: 'its own settlements set apart among their fields, no wall', from: { fabric: 'test/temple-villages', wall: 'generic' } });
+      const units = (x: typeof a) => x.plan.settlements.filter((s) => s.unitOf === 'Lifeton');
+      const ua = units(a);
+      expect(ua.length).toBeGreaterThan(20);
+      // Together they hold about the town's people then.
+      const people = ua.reduce((sum, u) => sum + u.people, 0);
+      expect(people / 60000).toBeGreaterThan(0.6);
+      expect(people / 60000).toBeLessThan(1.5);
+      // Each has its own fields, and houses about its middle.
+      expect(ua.every((u) => u.fields !== 'none' && u.houses > 0)).toBe(true);
+      // None of the town's ground is laid down trodden.
+      expect(a.plan.urban ?? []).toEqual([]);
+      // A unit of the later, smaller town stands where it stood before.
+      const ub = units(b);
+      expect(ub.length).toBeLessThan(ua.length);
+      expect(ub.filter((u) => ua.some((v) => Math.hypot(u.x - v.x, u.y - v.y) < 1e-6)).length).toBe(ub.length);
+      // Each unit's shrine and its ponds are drawn: things its tradition says a settlement and a house had.
+      const shrines = a.plan.houses.filter((h) => a.plan.forms[h.form].outbuilding?.use === 'shrine');
+      const ponds = a.plan.works.filter((w) => a.plan.workForms[w.form].spec.kind === 'pond');
+      expect(shrines.length).toBeGreaterThanOrEqual(ua.length * 0.9);
+      expect(ponds.length).toBeGreaterThanOrEqual(ua.length * 0.9);
+      // And a house's own pond is drawn with the house, as what stood by it.
+      const unitForms = new Set(ua.map((u) => u.form));
+      expect([...unitForms].every((f) => a.plan.forms[f].by?.some((b) => /pond/i.test(b.text)))).toBe(true);
+    });
+
+    it('keeps a dense town compact even where its form says it was dispersed', () => {
+      const traditions = compileTraditions([{ id: 'test/temple-villages', label: 'Villages round a temple', regions: [1], span: [-500, 1500], lifeways: ['townspeople'], dwelling: { plan: 'rectangular' }, settlement: { houses: 20, spacing: 25, household: 5 }, town: { fabric: 'dispersed' } }]);
+      const dense = at(500, { life: { ...life, at10k: 400 } }, traditions);
+      expect(dense.s.units).toBeUndefined();
+      expect(dense.mine.length).toBeGreaterThan(300);
     });
 
     it('shrinks back to its oldest ground as its people fall', () => {

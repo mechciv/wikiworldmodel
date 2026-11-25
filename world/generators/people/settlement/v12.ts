@@ -1,4 +1,4 @@
-// The settlement generator, version 11 (docs/HUMAN-LANDSCAPE.md): the anonymous human landscape of a scene. From the
+// The settlement generator, version 12 (docs/HUMAN-LANDSCAPE.md): the anonymous human landscape of a scene. From the
 // people part of a scene's spec it lays out where people lived, how many houses, of what kind, and the fields and
 // pastures around them, in the scene's local metres. Nobody recorded any of these houses: how many there are follows
 // HYDE's people through the anthromes, and the cities of the lists and of the world's records where they name one; what
@@ -112,10 +112,22 @@
 //   Builds made before version 11 give a record's figures one to a time, of the settlement itself, and no fitted
 //   parameters; their cities are drawn from those by the model's defaults.
 //
+// Version 12 (docs/plans/MODELS.md, The settlement's form; core/fabric.ts):
+//   - A town whose town form says it was dispersed, its record's or its townspeople's tradition's, is drawn as its units
+//     (layOutUnits): each one of its tradition's settlements, laid out as a village of the tradition is, with its houses,
+//     lanes, shrine and ponds, and its own fields, as far apart as the town's density leaves room for; nothing of the
+//     town's own ground is trodden. A unit keeps its place and its name through the town's life, and stands where the
+//     growth model has its ground built at the scene's time. A dense town stays compact whatever its form says.
+//   - A city's fields are of the scene's own use, as its region farmed; they were all rainfed before.
+//   - A village whose tradition sets its houses farther apart than `garden_lot` square metres to a house is not trodden
+//     bare between them: each house keeps its yard, and gardens and fields lie between. Before, a nucleated village was
+//     trodden bare inside its edge however far apart its houses stood.
+//   Builds made before version 12 carry no town form that says a town was dispersed, and draw every town compact.
+//
 // Everything is seeded by the world's 5′ cells and the anthromes' step, not by the scene, so two scenes that overlap put
 // their settlements in the same places: only the ground they stand on, which is the scene's, can move one a little.
 import { fillDwelling, homesteadOf, houseSize, HOUSE_VARIANTS, outbuildingSpec, type Homestead, type HouseDims, type OutbuildingParams } from '../dwellings.ts';
-import { agricultureAt, genericCropsFor, husbandryAt, mid, OUTBUILDING_LABEL, OUTBUILDING_ROOFED, outbuildingText, prevalenceOf, townText, traditionFor, traditionsFor, within, type CropEntry, type DwellingSpec, type EnclosureWord, type FieldSpec, type Housed, type LifewayWord, type OutbuildingUse, type TownSpec, type Tradition } from '../../../../core/dwelling.ts';
+import { agricultureAt, COMPACT_WORDS, genericCropsFor, husbandryAt, mid, OUTBUILDING_LABEL, OUTBUILDING_ROOFED, outbuildingText, prevalenceOf, townText, traditionFor, traditionsFor, within, type CropEntry, type DwellingSpec, type EnclosureWord, type FieldSpec, type Housed, type LifewayWord, type OutbuildingUse, type TownSpec, type Tradition } from '../../../../core/dwelling.ts';
 import { anthromeOf, lifewayOf, LIFEWAY_OF, type CityNear, type FieldUse, type Lifeway, type Pattern } from '../../../../core/landscape.ts';
 import { buildFieldPalette, FIELD_SLOPE, PLOT, plotAt, plotSlotIndex, plotStyle, type FieldPalette } from '../../../../core/plots.ts';
 import type { ClimateClass } from '../../../../core/climate.ts';
@@ -131,15 +143,16 @@ import type { CropParams } from '../crops.ts';
 import type { FieldBoundKind } from '../fieldworks.ts';
 import type { GateOpening, PerimeterSpec } from '../walls.ts';
 import { farmLanes, LaneGround, type FarmLayout, type Lane, type LaneWidths, type Point } from './lanes.ts';
-import { planTown, townAt, type TownParams as TownPlanParams } from './town.ts';
-import { cutAt, epochAt, HORIZON, peopleAt } from '../../../../core/growth.ts';
+import { planTown, townAt, type TownParams as TownPlanParams, type TownPlan } from './town.ts';
+import { builtAt, cutAt, epochAt, HORIZON, meanDensity, peopleAt } from '../../../../core/growth.ts';
+import { fabricOf, unitSlots, type FabricModel, type Units } from '../../../../core/fabric.ts';
 import { earthOf, FIELD_USE, growFields, GROWTH, nodeOf, siteCells, SITING, SiteWorth, sizesOf, USE_OF, type FieldGrid, type FieldSource, type GrowthParams, type SiteCell, type SitingParams, type WaterNear } from './sites.ts';
 import { MAT } from '../../city/kit.ts';
 
 export { peopleReach, waterNear, type WaterNear } from './sites.ts';
 
 export const GENERATOR = 'gen:people/settlement';
-export const VERSION = 11;
+export const VERSION = 12;
 
 const EARTH = 6371000;
 const DEG = PI / 180;
@@ -204,11 +217,18 @@ export interface LivestockParams {
 export interface SettlementParams {
   /** people to a house where no tradition says */
   household: number;
+  /** the settlement-form model's choices, where a tradition says nothing of a dispersed town's units (core/fabric.ts) */
+  fabric?: Partial<FabricModel>;
   /**
    * how far apart houses set in a ring or in rows stand, where their tradition says they stood so and not how far
    * apart: in lengths of a house, from the middle of one to the middle of the next
    */
   compact: number;
+  /**
+   * the ground to a house, m², above which a village's houses stand each on its own ground, with its garden and its
+   * fields between them, and the village's ground is not trodden bare (version 12); unset, every compact village's is
+   */
+  garden_lot?: number;
   lanes?: LaneWidths;
   patterns: Record<Exclude<Pattern, 'none'>, PatternParams>;
   /** the houses drawn where no tradition holds: for foragers and herders, for towns and cities, and for farmers by climate */
@@ -451,6 +471,10 @@ export interface Settlement {
   seed: number;
   /** its houses stand far apart, each on its own ground: the ground between them is not trodden bare */
   loose?: boolean;
+  /** a dispersed town drawn as its units, each a settlement of its own (model:people/settlement-form): it draws nothing itself */
+  units?: boolean;
+  /** the town this settlement is a unit of, by name, where it is one */
+  unitOf?: string;
 }
 
 export interface SettlementPlan {
@@ -711,6 +735,8 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
   // Whether a place is on the ground of a city that is not this settlement: an earlier city keeps its ground against a
   // later one, and any city against a settlement that is none, so that no house of one stands among another's.
   const cityOf = new Map<Settlement, number>();
+  // A dispersed town's units, by the town's place in the settlements (layOutUnits).
+  const unitsOf = new Map<number, number[]>();
   const onAnothers = (x: number, y: number, s: Settlement): boolean => {
     const own = cityOf.get(s);
     for (let i = 0; i < (own ?? cityHere.length); i++) {
@@ -775,14 +801,18 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
       const way = LIFEWAY_OF[pattern];
       const housed = traditionsFor(P.traditions, region, P.t, way, parts);
       const most = mostOf(housed);
-      const s = settlements.push({ x: cx, y: cy, r: 0, fieldR: 0, pattern, fields: 'rainfed', houses: 0, people: c.people, city: c.name, ...(c.record ? { record: c.record } : {}), from: c.from, anthrome: cell >= 0 ? P.grid.anthrome[cell] : 0, region, form: formOf(pattern, most?.tradition, most?.kin), tier: 'evidence', seed: citySeed }) - 1;
+      // Its fields are of the scene's own use, as its region farmed (version 12: they were all rainfed before).
+      const s = settlements.push({ x: cx, y: cy, r: 0, fieldR: 0, pattern, fields: use, houses: 0, people: c.people, city: c.name, ...(c.record ? { record: c.record } : {}), from: c.from, anthrome: cell >= 0 ? P.grid.anthrome[cell] : 0, region, form: formOf(pattern, most?.tradition, most?.kin), tier: 'evidence', seed: citySeed }) - 1;
       const first = houses.length;
       const r2 = layOutPlanned(settlements[s], s, c, cx, cy, plannedBy(c.life, region, way), housed, pattern);
       settlements[s].r = r2;
       settlements[s].fieldR = r2 * 1.6;
       cityHere.push({ x: cx, y: cy, r: r2 * 1.15 });
       cityOf.set(settlements[s], cityHere.length - 1);
-      housesOf[s] = [first, houses.length];
+      // A dispersed town's houses are its units', each a settlement of its own with its own fields; and its units stand
+      // on its own ground, which keeps others' houses and things off it but not theirs.
+      housesOf[s] = settlements[s].units ? [houses.length, houses.length] : [first, houses.length];
+      for (const ui of unitsOf.get(s) ?? []) cityOf.set(settlements[ui], cityHere.length - 1);
       continue;
     }
     const s = settlements.push({ x: cx, y: cy, r, fieldR: r * 1.6, pattern, fields: 'rainfed', houses: 0, people: c.people, city: c.name, ...(c.record ? { record: c.record } : {}), from: c.from, anthrome: cell >= 0 ? P.grid.anthrome[cell] : 0, region, form, tier: 'evidence', seed: citySeed }) - 1;
@@ -2092,7 +2122,9 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
       const sizes = Array.from({ length: HOUSE_VARIANTS }, (_, i) => houseSize(f.spec, i));
       const yard = f.home?.yard && !f.spec.court && f.spec.plan !== 'courtyard' ? f.home.lot / 2 - 0.3 : 0;
       const footprints = sizes.map(z => ({ w: Math.max(z.w, Math.min(2 * yard, z.w + 11)), l: Math.max(z.l, 2 * yard), door: z.l / 2 }));
-      const dispersed = pattern === 'dispersed';
+      // Houses that stand each on a garden's worth of ground, as their tradition's spacing says, are set apart as a
+      // dispersed village's are: the ground between them is theirs and their fields', not trodden (version 12).
+      const dispersed = pattern === 'dispersed' || (p.garden_lot !== undefined && st.spacing !== undefined && lot > p.garden_lot);
       const fits = (x: number, y: number) => fit(x, y) && !onAnothers(x, y, s);
       const riseX = ground.at(s.x + 25, s.y) - ground.at(s.x - 25, s.y);
       const riseY = ground.at(s.x, s.y + 25) - ground.at(s.x, s.y - 25);
@@ -2454,6 +2486,23 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
       ...(life.walls?.length || life.roads?.length ? { recorded: { ...(life.walls ? { walls: life.walls } : {}), ...(life.roads ? { roads: life.roads } : {}) } } : {}),
       params: tp,
     });
+    // How its people stood on its ground (model:people/settlement-form, core/fabric.ts; version 12): in its plots, packed
+    // along its lanes, or in its people's own settlements among their fields, where its town form says it was dispersed.
+    const m0 = life.members[0];
+    let peakPeople = 0;
+    for (let i = 0; i < m0.t.length; i++) if (m0.t[i] <= HORIZON) peakPeople = Math.max(peakPeople, m0.people[i]);
+    const st = t?.settlement;
+    const fab = fabricOf(
+      {
+        ...(form.fabric ? { fabric: form.fabric } : {}),
+        ...(st?.houses !== undefined ? { houses: st.houses } : {}),
+        ...(st?.spacing !== undefined ? { spacing: st.spacing } : {}),
+        ...(st?.household !== undefined ? { household: st.household } : {}),
+        density: meanDensity(Math.max(1, peakPeople), plan.growth.at10k, plan.growth.params.density),
+      },
+      p.fabric,
+    );
+    if (fab.fabric === 'dispersed') return layOutUnits(s, si, c, cx, cy, plan, fab, housed, town, main, gridded);
     // An open square at its middle, where its form says one lay there: a share of the ground it covered at its height,
     // square to its grid, and kept for its whole life.
     const most = Math.max(0, ...plan.growth.cut[0].cells);
@@ -2562,6 +2611,52 @@ export function makeSettlement(spec: SceneSpec, ground: Ground, water: (x: numbe
       }
     const cellArea = g.cell * g.cell;
     return Math.sqrt((Math.max(1, cutAt(plan.growth, P.t, 0)) * cellArea) / PI);
+  }
+
+  /**
+   * A dispersed town (model:people/settlement-form, core/fabric.ts): its units, each one of its people's own settlements,
+   * at the places the town's form gives them, standing where the growth model has their ground built at the scene's
+   * time. Each is laid out as a village of its tradition is, with its houses, its lanes, what its tradition says a
+   * settlement and a house had (a shrine, a pond), and its own fields, so that the town's open ground is farmed as its
+   * region farmed. A unit keeps its place, and its name, through the town's life; how many households it held is a number
+   * of its own about the tradition's, so the units together hold about the town's people. Nothing of the town's own
+   * ground is trodden: only its units' yards and lanes. Returns how far its built ground reaches, as the radius of a disc
+   * of its area.
+   */
+  function layOutUnits(s: Settlement, si: number, c: Pick<CityNear, 'life' | 'record'>, cx: number, cy: number, plan: TownPlan, u: Units, housed: Housed[], town: TownOf, main: number, gridded: boolean): number {
+    const life = c.life!;
+    const g = plan.growth;
+    const half = (g.grid.nx * g.grid.cell) / 2;
+    const unitName = (name: string) => (hashString(name) >>> 0) / 4294967296;
+    const slots = unitSlots(life.key, half, u, unitName);
+    s.units = true;
+    s.fields = 'none';
+    for (const slot of slots) {
+      if (!builtAt(g, slot.x, slot.y, P.t)) continue;
+      const x = cx + slot.x;
+      const y = cy + slot.y;
+      if (!fitCity(x, y) || onAnothers(x, y, s)) continue;
+      // Its households: about its tradition's number, by a number of its own, so that the units vary as settlements do.
+      const n = Math.max(1, Math.round(u.houses * (0.7 + 0.6 * unitName(`${slot.id}/n`))));
+      // Its houses are of the tradition its people fall to, by a number of the unit's own, each taking its share.
+      const v = unitName(`${slot.id}/who`);
+      let mine: Housed | undefined;
+      for (let i = 0, upTo = 0; i < housed.length; i++) if (v < (upTo += housed[i].share)) {
+        mine = housed[i];
+        break;
+      }
+      const r = Math.sqrt((n * u.spacing * u.spacing) / PI);
+      const seed = seedOf(hashString(slot.id));
+      const us = settlements.push({ x, y, r, fieldR: Math.sqrt(u.area / PI), pattern: 'villages', fields: use, houses: 0, people: n * u.household, anthrome: s.anthrome, region: s.region, form: formOf('villages', mine?.tradition, mine?.kin, 1, u.spacing * u.spacing), tier: s.tier, seed, unitOf: s.city ?? life.key }) - 1;
+      const first = houses.length;
+      layOut(settlements[us], us, n, u.spacing * u.spacing, seed, mine?.tradition);
+      housesOf[us] = [first, houses.length];
+      (unitsOf.get(si) ?? unitsOf.set(si, []).get(si)!).push(us);
+    }
+    // Its routes, while their cores stood.
+    for (const r of plan.routes) if (r.from === undefined || (P.t >= r.from && P.t <= (r.to ?? Infinity))) streets.push({ line: r.line.map((v, i) => v + (i % 2 ? cy : cx)), width: Math.max(4, main * 0.85), paved: gridded && s.pattern === 'city', settlement: si });
+    s.town = { text: townText(town.spec), from: Object.fromEntries(Object.entries(town.from).filter(([k]) => !COMPACT_WORDS.has(k))) };
+    return Math.sqrt((Math.max(1, cutAt(g, P.t, 0)) * g.grid.cell * g.grid.cell) / PI);
   }
 
   function layOutTown(s: Settlement, si: number, n: number, lot: number, seed: number, town: TownOf, sized?: (grow: number) => number): void {
@@ -2939,7 +3034,7 @@ export interface LandUse {
  * What the far land (farLand) takes on the average for what LandUseMap works out at each place from the ground there: the
  * share of a shifting cultivator's fields cleared at a time, which LandUseMap draws where a noise passes a threshold; and
  * the share of a rice or irrigated field flooded as a paddy, which it draws on low, gentle ground near the water (all of
- * it for rice, half for irrigated land). The first is held to LandUseMap's by a test (settlement/v11.test.ts); the second
+ * it for rice, half for irrigated land). The first is held to LandUseMap's by a test (settlement/v12.test.ts); the second
  * hangs on how much of a cell lies low by its water, which no far cell says, and is the generator's guess.
  */
 export const FAR_AVERAGE = { swiddenCleared: 0.4, paddy: { rice: 0.6, irrigated: 0.25 } };

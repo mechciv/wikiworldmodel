@@ -1,0 +1,19 @@
+id: src:zhou-daguan-zhenla-fengtu-ji-wikisource
+type: text
+kind: eyewitness
+citation: >-
+  Zhou Daguan (周達觀), Zhenla fengtu ji (真臘風土記, A Record of the Customs of Cambodia), Chinese text on Chinese
+  Wikisource.
+title: "真臘風土記"
+url: https://zh.wikisource.org/wiki/%E7%9C%9F%E8%87%98%E9%A2%A8%E5%9C%9F%E8%A8%98
+via: Chinese Wikisource's transcription, read as the page's raw text.
+reliability: >-
+  An eyewitness: by his own preface Zhou went with the embassy the Yuan court sent in 1295, sailed in the second month
+  of 1296, reached Angkor that autumn, and was back at Siming in the eighth month of 1297, writing from what he had
+  seen and heard. He describes the capital and its people in 1296–1297, four and a half centuries after the city's
+  first years, and what he says of an earlier time is hearsay.
+verified:
+  by: machine:claude-code
+  how: >-
+    The raw text of the Wikisource page (action=raw) read whole on 24 November 2026, and again on 25 November 2026, the
+    same text (sha256 168e1b1bfa28727d…); the quotations checked by script against it.
