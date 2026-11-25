@@ -11,7 +11,7 @@ for (const trip of [
   { name: 'Abbasid Caliphate 900 CE', from: 1, card: false },
   { name: 'Mongol Empire 1250 CE', from: 2020, card: false },
 ]) {
-  test(`the time machine turns the globe before descending to ${trip.name}`, async ({ page }) => {
+  test(`the time machine turns the globe while scrubbing to ${trip.name}`, async ({ page }) => {
     await page.setViewportSize({ width: 800, height: 600 });
     await page.emulateMedia({ reducedMotion: 'no-preference' });
     await page.clock.install();
@@ -25,28 +25,30 @@ for (const trip of [
     const start = await state();
     await page.clock.pauseAt(await page.evaluate(() => Date.now() + 60_000));
     await choice.dispatchEvent('click');
-    await page.clock.fastForward(800);
-    const sweeping = await state();
-    expect(sweeping.cam).toEqual(start.cam);
-    expect(sweeping.t).not.toBe(start.t);
-
+    // Allow a cold destination tile to arrive, then sample two frames of the same sweep.
+    await expect.poll(async () => {
+      await page.clock.fastForward(100);
+      return (await state()).cam.lon;
+    }).toBeGreaterThan(start.cam.lon);
+    const first = await state();
+    expect(first.t).not.toBe(start.t);
+    expect(first.cam.dist).toBe(start.cam.dist);
+    // Even a stalled frame must leave both the clock and the camera partway through the trip.
     await page.clock.fastForward(10_000);
-    const at = await state();
-    expect(when).toContain(formatTime(at.t));
-    expect(sweeping.t).toBeGreaterThan(Math.min(start.t, at.t));
-    expect(sweeping.t).toBeLessThan(Math.max(start.t, at.t));
-    await expect.poll(() => page.evaluate(() => window.__wikiworldmodel!.waiting().includes('flight'))).toBe(true);
-    // A delayed first frame after arrival must still show the globe turning at orbital height.
-    await page.clock.fastForward(8000);
-    const turning = await state();
-    expect(turning.cam.lon).toBeGreaterThan(start.cam.lon);
-    expect(turning.cam.dist).toBe(start.cam.dist);
+    const sweeping = await state();
+    expect(sweeping.cam.lon).toBeGreaterThan(first.cam.lon);
+    expect(sweeping.cam.dist).toBe(start.cam.dist);
     await page.clock.resume();
+    await page.waitForFunction((d) => window.__wikiworldmodel!.state().cam.dist < d, start.cam.dist);
+    const descending = await state();
+    expect(when).toContain(formatTime(descending.t));
+    expect(sweeping.t).toBeGreaterThan(Math.min(first.t, descending.t));
+    expect(sweeping.t).toBeLessThan(Math.max(first.t, descending.t));
+    expect(descending.cam.lon).toBeGreaterThan(sweeping.cam.lon);
     await idle(page);
     const landed = await state();
-    expect(landed.cam.lon).toBeGreaterThan(turning.cam.lon);
-    expect(landed.cam.dist).toBeLessThan(turning.cam.dist);
-    expect(landed.t).toBe(at.t);
+    expect(landed.cam.lon).toBe(descending.cam.lon);
+    expect(landed.t).toBe(descending.t);
   });
 }
 
