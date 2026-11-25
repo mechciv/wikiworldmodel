@@ -27,7 +27,7 @@ import { cellAt, gridSize, peopleAt, type PeopleFile } from '../../../../core/la
 import { datasetFile } from '../manifest.ts';
 import { CACHE } from '../paths.ts';
 import { sha256, stableStringify } from '../util.ts';
-import { kindIs, type Field, type World } from '../world.ts';
+import { kindIs, type Entity, type Field, type World } from '../world.ts';
 import { claimOf, subjectTime, validSpan, type Solved } from './records.ts';
 
 const NX = 4320;
@@ -587,6 +587,23 @@ export function keptAnimals(w: World, ids: string[], log: (s: string) => void = 
 
 /** The properties whose figures the population model reads (core/citypop.ts). */
 const FIGURE_PROPS: Figure['prop'][] = ['population', 'settlement_area', 'houses'];
+
+/**
+ * The records the landscape reads, of which its stage's key in the build's cache is made (build/index.ts): the
+ * traditions and the taxa they keep, anything with figures of people, animals or crops, and every settlement, figures of
+ * its own or none. cityRecords reads them all, and one whose people only the lists give still sets its place, its span
+ * and its plan: left out of the key, a change to it would leave the cities of an earlier build in place.
+ */
+export function landscapeEntities(w: World): Entity[] {
+  return w.entities.filter(
+    (e) =>
+      e.kind.startsWith('tradition/') ||
+      e.kind.startsWith('place/') ||
+      kindIs(e.kind, 'settlement') ||
+      e.kind === 'taxon' ||
+      e.claims.some((c) => c.prop === 'population' || c.prop === 'livestock' || c.prop === 'crops'),
+  );
+}
 
 /**
  * The settlements the world has records of, as the landscape reads them (core/landscape.ts, CityRecord): each with a
