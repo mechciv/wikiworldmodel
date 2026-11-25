@@ -1,0 +1,24 @@
+id: src:vitruvius-de-architectura
+type: text
+kind: eyewitness
+citation: >-
+  Vitruvius, De architectura (On Architecture), books 2 and 6, translated by J. Gwilt, The Architecture of Marcus
+  Vitruvius Pollio (London: Priestley and Weale, 1826).
+published: 1826
+title: De architectura
+url: https://penelope.uchicago.edu/Thayer/E/Roman/Texts/Vitruvius/home.html
+license: public domain
+via: >-
+  LacusCurtius, which reproduces Gwilt's translation with the chapters and sections numbered as in the Loeb edition;
+  both pages read are marked there as carefully proofread.
+reliability: >-
+  An architect's treatise, dedicated to the emperor Augustus. What it says of the high houses of Rome and the walls
+  they were built with is the building of its author's own day. Its rules for the parts and proportions of a house are
+  his own prescriptions rather than a survey of the houses that stood, as Smith's dictionary (1890, vol. 1, p. 667)
+  warns.
+verified:
+  by: machine:claude-code
+  how: >-
+    Book 2, chapter 8 (walls, with the passage on the high houses of Rome, 2.8.16–20), and book 6, chapters 3–5 (the
+    atrium and its proportions, and the houses suited to each rank), read on 24 November 2026 in Gwilt's translation on
+    LacusCurtius; the quotes were checked by script against that text.

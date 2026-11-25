@@ -1,7 +1,9 @@
 # Cities: every settlement, at any time, drawn from what is known of it
 
-Status: proposed, 24 November 2026. Nothing here is built. It replaces both ways a city is drawn today: Rome's own
-pipeline ([fifth slice](../slices/FIFTH-SLICE.md)) and the cluster of houses every other city gets
+Status: in progress, 24 November 2026: step 1, the growth model of step 2, the town's division of step 3, the houses of
+step 4 that a plot carries through its centuries, Rome's move (step 5) and `cities-wanted` (step 7) are built, as the
+[eighteenth slice](../slices/EIGHTEENTH-SLICE.md) says, with what each leaves out. It replaces both ways a city was drawn before: Rome's own
+pipeline ([fifth slice](../slices/FIFTH-SLICE.md)) and the cluster of houses every other city got
 ([sixteenth slice](../slices/SIXTEENTH-SLICE.md)). It is written from what a city system has to do, not from what
 exists. What exists is kept only where it is what that would build anyway.
 

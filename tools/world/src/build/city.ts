@@ -6,17 +6,18 @@ import { existsSync } from 'node:fs';
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { formProblem, toLocal, type CityFile, type CityStructure, type FormSpec, type FormType } from '../../../../core/city.ts';
-import type { Basis, FeatureTime } from '../../../../core/tileset.ts';
-import { fabricPlan, planPrint, VERSION as FABRIC_VERSION, type FabricParams } from '../../../../world/generators/rome/fabric/v1.ts';
+import type { Basis } from '../../../../core/tileset.ts';
+import { CELL, CELLS } from '../../../../world/generators/city/cells.ts';
 import { GroundSampler } from '../../../../world/generators/city/ground.ts';
 import { elementKey, type LatLon, type OhmElement, type OhmSnapshot } from '../ohm.ts';
 import { CACHE } from '../paths.ts';
 import { sha256, stableStringify } from '../util.ts';
-import type { Dataset, Entity } from '../world.ts';
+import type { Dataset, Entity, MapSite } from '../world.ts';
 import { carve, cityGrid, encodeGrid, flatten, hillsGrid, inRings, lowerAround, medianUnder, regionGrid, type FlatPlace, type GroundGrid } from './ground.ts';
 import { claimOf, labeller, subjectTime, weakest, type Solved } from './records.ts';
 
-const FABRIC = 'gen:rome/fabric';
+/** How far from a city's point its records are drawn: the grid of cells its scene keeps them in. */
+const HALF = (CELL * CELLS) / 2;
 
 /** A grid of a dataset, kept between builds: reading and smoothing the surveys takes a while. */
 async function cachedGrid(name: string, keys: Dataset[], make: () => Promise<GroundGrid>): Promise<GroundGrid> {
@@ -93,15 +94,20 @@ export interface CityBuild {
   blobs: Map<string, Uint8Array>;
 }
 
-export async function buildCity(s: Solved, log: (m: string) => void): Promise<CityBuild | undefined> {
+/** Every city a map of the world is of (a dataset imported as an `ohm-site` with its `site`), as a file of its records. */
+export async function buildCities(s: Solved, log: (m: string) => void): Promise<CityBuild[]> {
+  const out: CityBuild[] = [];
+  for (const [id, d] of Object.entries(s.world.manifest.datasets)) {
+    const site = d.import?.as === 'ohm-site' ? d.import.site : undefined;
+    const snap = site ? (s.world.snapshots.get(id) as OhmSnapshot | undefined) : undefined;
+    if (site && snap) out.push(await buildCity(s, site, snap, log));
+  }
+  return out;
+}
+
+async function buildCity(s: Solved, site: MapSite, snap: OhmSnapshot, log: (m: string) => void): Promise<CityBuild> {
   const w = s.world;
-  const gen = w.generators.find((g) => g.id === FABRIC);
-  const datasetId = [...w.snapshots.keys()][0];
-  if (!gen || !datasetId) return undefined;
-  const snap = w.snapshots.get(datasetId) as OhmSnapshot;
   const elements = new Map(snap.elements.map((e) => [elementKey(e), e]));
-  const params = gen.params as unknown as FabricParams;
-  const site = params.site;
   const origin = site.origin;
   const labelOf = labeller(s);
 
@@ -115,23 +121,24 @@ export async function buildCity(s: Solved, log: (m: string) => void): Promise<Ci
       for (const r of e.outer ?? []) if (isClosed(r)) keep(outlines.water, flat(origin, r, true));
       for (const r of e.inner ?? []) if (isClosed(r)) keep(outlines.islands, flat(origin, r, true));
     }
-    if (e.tags.name === 'Insula Tiberina' && e.line && isClosed(e.line)) keep(outlines.islands, flat(origin, e.line, true));
+    if ((e.tags.place === 'islet' || e.tags.place === 'island') && e.line && isClosed(e.line)) keep(outlines.islands, flat(origin, e.line, true));
   }
   const water = [...outlines.water.values()];
   const islands = [...outlines.islands.values()];
 
-  // The structures, without their ground for now.
+  // The structures within the city's reach, without their ground for now: a building of another city is no part of it.
   const structures: CityStructure[] = [];
   const flats: { s: CityStructure; level?: number; area: number }[] = [];
-  const alive = (t: FeatureTime, y: number) => (t.start.best ?? -Infinity) <= y && y <= (t.end.best ?? Infinity);
   for (const e of w.entities) {
     if (!DRAWN.test(e.kind) || e.kind === 'open/region') continue;
     const st = structureOf(s, e, elements, origin, labelOf);
     if (!st) continue;
+    const [x, y] = st.structure.at;
+    if (Math.abs(x) > HALF || Math.abs(y) > HALF) continue;
     structures.push(st.structure);
     const area = st.structure.rings.reduce((a, r) => a + ringArea(r), 0);
     const flatKind = /^(building|monument)/.test(e.kind) || e.kind === 'open/forum' || e.kind === 'open/square';
-    if (flatKind && st.structure.kind !== 'open/district' && area >= 20 && area < 250000 && alive(st.structure.time, site.slice)) flats.push({ s: st.structure, level: st.level, area });
+    if (flatKind && st.structure.kind !== 'open/district' && area >= 20 && area < 250000) flats.push({ s: st.structure, level: st.level, area });
   }
   structures.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
   // What the map draws as parts of a monument a record has written: the record's form raises it whole.
@@ -143,10 +150,12 @@ export async function buildCity(s: Solved, log: (m: string) => void): Promise<Ci
   }
 
   // The ground: the city's survey, lowered to the structures' levels, the river carved in.
+  const g = site.ground;
+  const sets = (ids: string[]) => ids.map((id) => w.manifest.datasets[id]);
   const [city, hills, region] = await Promise.all([
-    cachedGrid('city', [w.manifest.datasets['src:tinitaly-1.1-w46075']], () => cityGrid(w, origin)),
-    cachedGrid('hills', [w.manifest.datasets['src:srtm-gl1-n41e012'], w.manifest.datasets['src:srtm-gl1-n42e012']], () => hillsGrid(w, origin)),
-    cachedGrid('region', [w.manifest.datasets['src:etopo-2022-n45e000'], w.manifest.datasets['src:etopo-2022-n45e015']], () => regionGrid(w, origin)),
+    cachedGrid(`city-${site.id}`, sets([g.city]), () => cityGrid(w, origin, { city: g.city, utm_zone: g.utm_zone })),
+    cachedGrid(`hills-${site.id}`, sets(g.hills), () => hillsGrid(w, origin, g.hills)),
+    cachedGrid(`region-${site.id}`, sets(g.region), () => regionGrid(w, origin, g.region)),
   ]);
   carve(city, water, islands, site.water_level, 70);
   // Where a record gives the ancient level, the valley around it lies buried under today's ground:
@@ -165,7 +174,7 @@ export async function buildCity(s: Solved, log: (m: string) => void): Promise<Ci
     blobs.set(url, encodeGrid(g));
     return { url, ...gridMeta(g) };
   });
-  // The generators read the ground as the viewer will: the same integers from the same files.
+  // The viewer reads the ground as the build does: the same integers from the same files.
   const sampler = new GroundSampler(
     ground.map((g) => {
       const b = blobs.get(g.url)!;
@@ -174,32 +183,28 @@ export async function buildCity(s: Solved, log: (m: string) => void): Promise<Ci
   );
   for (const st of structures) if (st.base === 0) st.base = Math.round(sampler.at(st.at[0], st.at[1]) * 100) / 100;
 
-  // The constraints of the housing: each region, and what the catalogues count there.
-  const regions = w.entities
-    .filter((e) => e.kind === 'open/region')
-    .map((e) => {
-      const loc = claimOf(s, e.id, 'location')!.value as { lat: number; lon: number };
+  // Its districts that a record counts the buildings of, within its reach: Rome's regions, by the Regionary Catalogues'
+  // insulae and domus.
+  const districts = w.entities
+    .filter((e) => e.kind === 'open/region' || e.kind === 'open/district')
+    .flatMap((e) => {
+      const loc = claimOf(s, e.id, 'location')?.value as { lat: number; lon: number } | undefined;
+      const count = ['insulae', 'domus', 'houses'].reduce((n, prop) => n + ((claimOf(s, e.id, prop)?.value as number | undefined) ?? 0), 0);
+      if (!loc || !(count > 0)) return [];
       const [x, y] = toLocal(origin, loc.lat, loc.lon);
-      const ins = claimOf(s, e.id, 'insulae');
-      const dom = claimOf(s, e.id, 'domus');
-      return { id: e.id, label: labelOf(e.id), at: [Math.round(x), Math.round(y)] as [number, number], insulae: ins?.value as number | undefined, domus: dom?.value as number | undefined };
+      return Math.abs(x) > HALF || Math.abs(y) > HALF ? [] : [{ id: e.id, label: labelOf(e.id), at: [Math.round(x), Math.round(y)] as [number, number], buildings: count }];
     })
     .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
-
-  const seed = gen.slots.rome.seed;
   const file: CityFile = {
-    format: 'lightworld-city@1',
-    site: { id: site.id, label: site.label, origin, span: site.span, slice: site.slice, water_level: site.water_level },
+    format: 'lightworld-city@2',
+    site: { id: site.id, label: site.label, settlement: site.settlement, origin, span: site.span, water_level: site.water_level },
     ground,
     structures,
     water,
     islands,
-    fabric: { generator: gen.id, version: gen.version, seed, basis: 'procedural', params: gen.params, regions, output: {} },
+    ...(districts.length ? { districts } : {}),
   };
-  if (gen.version !== FABRIC_VERSION) throw new Error(`${FABRIC}: the record is version ${gen.version}, the code version ${FABRIC_VERSION}`);
-  const plan = fabricPlan(file, sampler);
-  file.fabric.output = planPrint(plan);
-  log(`city    ${site.id}: ${structures.length} structures, ${structures.filter((x) => x.curated).length} written by hand; ${plan.lots} generated buildings, ${plan.treeCount} trees`);
+  log(`city    ${site.id}: ${structures.length} structures, ${structures.filter((x) => x.curated).length} written by hand`);
   return { file, blobs };
 }
 

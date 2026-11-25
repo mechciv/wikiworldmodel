@@ -1,6 +1,5 @@
-// Pass criteria for the city: what is imported from the map and how, the ground under it, the forms
-// it is raised from, and the generated fabric's promises: the same everywhere, clear of everything
-// real, as dense as the catalogues say, and undisturbed by an edit elsewhere.
+// Pass criteria for a city's records: what is imported from the map and how, the ground under it, the
+// forms they are raised from, and how they are cut into cells for a living scene to draw among its houses.
 import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -15,8 +14,6 @@ import { raise, type FormContext } from '../../../world/generators/city/forms.ts
 import { GroundSampler } from '../../../world/generators/city/ground.ts';
 import { Mesh, STRIDE } from '../../../world/generators/city/kit.ts';
 import { area, centroid, clipHalf, convexHull, dcos, dsin, hash2, minBox, triangulate } from '../../../world/generators/city/math.ts';
-import { fingerprintProblems } from '../../../core/fingerprint.ts';
-import { fabricPlan, lotPoly, planPrint } from '../../../world/generators/rome/fabric/v1.ts';
 import { Skyline } from '../../../viewer/src/city/skyline.ts';
 import { autoTilt, groundHit, localView, projectLocal, rayOf, sunAt } from '../../../viewer/src/city/view.ts';
 import { fromSearch, quantize, toSearch, type ViewState } from '../../../viewer/src/state.ts';
@@ -505,28 +502,17 @@ describe('the forms', () => {
   });
 });
 
-/** A small city: a wall around it, a street, some monuments, two regions the catalogues count differently. */
+/** A small city's records: a wall around it, a street, some monuments, a garden and a stretch of river. */
 function smallCity(extra: CityStructure[] = []): CityFile {
   const R = 900;
   const wall: number[] = [];
   for (let i = 0; i < 24; i++) wall.push(Math.round(Math.cos((i / 24) * 2 * Math.PI) * R * 100) / 100, Math.round(Math.sin((i / 24) * 2 * Math.PI) * R * 100) / 100);
-  const params = {
-    site: { id: 'x', label: 'X', origin: { lat: 41.9, lon: 12.5 }, span: [-1000, 1950], slice: 315, water_level: 7 },
-    block: 78,
-    street: 3.2,
-    insula_area: 620,
-    domus_area: 1100,
-    domus_weight: 1.8,
-    storeys: [3, 6],
-    storey_height: 3.3,
-    tree_spacing: 22,
-  };
   return {
-    format: 'lightworld-city@1',
-    site: { id: 'x', label: 'X', origin: params.site.origin, span: [-1000, 1950], slice: 315, water_level: 7 },
+    format: 'lightworld-city@2',
+    site: { id: 'x', label: 'X', settlement: 'places/x', origin: { lat: 41.9, lon: 12.5 }, span: [-1000, 1950], water_level: 7 },
     ground: [],
     structures: [
-      structure('rome/aurelian-walls', 'works/wall', { type: 'wall' }, [], { lines: [[...wall, wall[0], wall[1]]], at: [R, 0] }),
+      structure('x/walls', 'works/wall', { type: 'wall' }, [], { lines: [[...wall, wall[0], wall[1]]], at: [R, 0] }),
       structure('x/street', 'works/road', { type: 'generic' }, [], { lines: [[-R, 0, R, 0]], look: { highway: 'primary' }, at: [0, 0] }),
       structure('x/temple', 'building/temple', { type: 'temple' }, [rect(-300, 200, 40, 60)]),
       structure('x/later', 'building/temple', { type: 'temple' }, [rect(300, 200, 40, 60)], { time: time(1000) }),
@@ -535,119 +521,38 @@ function smallCity(extra: CityStructure[] = []): CityFile {
     ].sort((a, b) => (a.id < b.id ? -1 : 1)),
     water: [rect(700, -700, 50, 150)],
     islands: [],
-    fabric: {
-      generator: 'gen:rome/fabric',
-      version: 1,
-      seed: 'x/fabric',
-      basis: 'procedural',
-      params,
-      regions: [
-        { id: 'x/west', label: 'West', at: [-450, 0], insulae: 4000, domus: 100 },
-        { id: 'x/east', label: 'East', at: [450, 0], insulae: 1000, domus: 100 },
-      ],
-      output: {},
-    },
   };
 }
 
-describe('the generated fabric', () => {
-  const ground = flatGround();
-
-  it('is the same every time: the same lots exactly, and the same places within the tolerance', () => {
-    expect(fingerprintProblems(planPrint(fabricPlan(smallCity(), ground)), planPrint(fabricPlan(smallCity(), ground)))).toEqual([]);
-  });
-
-  it('builds on nothing real: no monument standing at its date, no garden, no river, no street', () => {
+describe("a city's records, cell by cell", () => {
+  it('cuts into cells, each structure in its place with its entity after the scene’s own, and draws nothing past its own', () => {
     const c = smallCity();
-    const plan = fabricPlan(c, ground);
-    expect(plan.lots).toBeGreaterThan(200);
-    const temple = c.structures.find((s) => s.id === 'x/temple')!.rings[0];
-    const garden = c.structures.find((s) => s.id === 'x/garden')!.rings[0];
-    const inside = (r: number[], x: number, y: number) => x > r[0] && x < r[2] && y > r[1] && y < r[5];
-    for (let i = 0; i < plan.lots; i++) {
-      const p = lotPoly(plan, i);
-      for (let k = 0; k < p.length; k += 2) {
-        expect(inside(temple, p[k], p[k + 1])).toBe(false);
-        expect(inside(garden, p[k], p[k + 1])).toBe(false);
-        expect(inside(c.water[0], p[k], p[k + 1])).toBe(false);
-      }
-      const [cx, cy] = centroid(p);
-      // The street runs along y = 0, 7.5 m wide.
-      expect(Math.abs(cy)).toBeGreaterThan(3);
-      expect(Number.isFinite(cx)).toBe(true);
-    }
-  });
-
-  it('does not keep clear of what is not yet built', () => {
-    const c = smallCity();
-    const plan = fabricPlan(c, ground);
-    const later = c.structures.find((s) => s.id === 'x/later')!.rings[0];
-    let overlaps = 0;
-    for (let i = 0; i < plan.lots; i++) {
-      const [x, y] = centroid(lotPoly(plan, i));
-      if (x > later[0] && x < later[2] && y > later[1] && y < later[5]) overlaps++;
-    }
-    expect(overlaps).toBeGreaterThan(0);
-  });
-
-  it('is as dense in each region as the catalogues say', () => {
-    const plan = fabricPlan(smallCity(), ground);
-    // West counts four times the insulae of East, on about as much ground.
-    expect(plan.regionLots[0] / plan.regionLots[1]).toBeGreaterThan(1.8);
-  });
-
-  it('is left alone by an edit elsewhere: only blocks near a moved temple change', () => {
-    const a = fabricPlan(smallCity(), ground);
-    // A change of height changes nothing.
-    const taller = smallCity();
-    taller.structures.find((s) => s.id === 'x/temple')!.height = 40;
-    expect(planPrint(fabricPlan(taller, ground))).toEqual(planPrint(a));
-    // Adding a temple changes what is near it, and leaves the far side of the city as it was.
-    const edited = fabricPlan(smallCity([structure('x/new', 'building/temple', { type: 'temple' }, [rect(-400, -300, 30, 40)])]), ground);
-    const key = (p: typeof a, i: number) => lotPoly(p, i).join();
-    const before = new Set(Array.from({ length: a.lots }, (_, i) => key(a, i)));
-    const after = new Set(Array.from({ length: edited.lots }, (_, i) => key(edited, i)));
-    let farDiff = 0;
-    for (let i = 0; i < a.lots; i++) {
-      const [x, y] = centroid(lotPoly(a, i));
-      if (Math.hypot(x + 400, y + 300) > 450 && !after.has(key(a, i))) farDiff++;
-    }
-    expect(farDiff / a.lots).toBeLessThan(0.3);
-    expect([...before].some((k) => !after.has(k))).toBe(true);
-  });
-
-  it('cuts into cells, each entity in its place, and draws nothing past its own', () => {
-    const c = smallCity();
-    const b = new CityBuilder(c, [{ nx: 2, ny: 2, x0: -9000, y0: -9000, cell: 18000, z: new Float32Array([20, 20, 20, 20]) }]);
+    const first = 500;
+    const b = new CityBuilder(c, [{ nx: 2, ny: 2, x0: -9000, y0: -9000, cell: 18000, z: new Float32Array([20, 20, 20, 20]) }], { entityBase: first });
     const cells = b.cells();
     expect(cells.length).toBeGreaterThan(10);
-    const entities = b.entities();
-    const kept = c.structures.findIndex((s) => s.id === 'x/later');
-    expect(entities[(kept + 1) * 4]).toBe(1000);
-    expect(entities[(kept + 1) * 4 + 2]).toBe(1);
-    expect(entities[b.lotEntity * 4 + 2]).toBe(3);
-    expect(entities[b.treeEntity * 4 + 2]).toBe(3);
     let verts = 0;
-    for (const k of cells) verts += b.build(k, 0).verts;
+    const seen = new Set<number>();
+    for (const k of cells) {
+      const m = b.build(k, 0);
+      verts += m.verts;
+      const { vertices } = m.arrays();
+      const v = new DataView(vertices);
+      for (let i = 0; i < vertices.byteLength; i += STRIDE) seen.add(v.getUint16(i + 26, true));
+    }
     expect(verts).toBeGreaterThan(1000);
+    // Every vertex is a structure's, numbered after the scene's own entities, in the file's order.
+    for (const e of seen) {
+      expect(e).toBeGreaterThanOrEqual(first);
+      expect(e).toBeLessThan(first + c.structures.length);
+    }
+    expect(seen.has(first + c.structures.findIndex((s) => s.id === 'x/temple'))).toBe(true);
     const fine = b.build(cells[Math.floor(cells.length / 2)], 1);
     expect(fine.count).toBeGreaterThan(0);
-    const { data } = b.mask(256);
-    let built = 0;
-    let garden = 0;
-    for (let i = 0; i < data.length; i += 4) {
-      if (data[i]) built++;
-      if (data[i + 1]) garden++;
-    }
-    expect(built).toBeGreaterThan(0);
-    expect(garden).toBeGreaterThan(0);
-    const w = b.water();
-    expect(w.indices.length).toBeGreaterThan(0);
-    expect(w.vertices[2]).toBe(7);
     // A structure's height is what it was raised to; one drawn along a line has none.
     const tops = b.tops();
-    expect(tops[kept]).toBeGreaterThan(20);
-    expect(tops[c.structures.findIndex((s) => s.id === 'rome/aurelian-walls')]).toBe(0);
+    expect(tops[c.structures.findIndex((s) => s.id === 'x/later')]).toBeGreaterThan(20);
+    expect(tops[c.structures.findIndex((s) => s.id === 'x/walls')]).toBe(0);
   });
 });
 
@@ -828,55 +733,5 @@ describe('the camera near the ground', () => {
       totalArea += triArea;
     }
     expect(totalArea).toBeCloseTo(area(concaveOuter) - area(hole), 3);
-  });
-
-  it('builds east and west courtyard roofs on a domus far from the origin', async () => {
-    const { MAT } = await import('../../../world/generators/city/kit.ts');
-    const { LOT_DOMUS, raiseLot } = await import('../../../world/generators/rome/fabric/v1.ts');
-    const cx = 100;
-    const cy = 100;
-    const h = 10;
-    const plan = {
-      lots: 1,
-      offset: new Int32Array([0, 8]),
-      points: new Float32Array([cx - h, cy - h, cx + h, cy - h, cx + h, cy + h, cx - h, cy + h]),
-      base: new Float32Array([0]),
-      top: new Float32Array([8]),
-      type: new Uint8Array([LOT_DOMUS]),
-      region: new Uint8Array([1]),
-      style: new Uint8Array([1]),
-      treeCount: 0,
-      trees: new Float32Array(0),
-      treeType: new Uint8Array(0),
-      regionLots: [],
-      domain: [],
-    };
-    const m = new Mesh();
-    raiseLot(m, plan, 0, 0);
-    const { vertices, indices } = m.arrays();
-    const f = new Float32Array(vertices);
-    const b = new Uint8Array(vertices);
-    let eastRoof = 0;
-    let westRoof = 0;
-    let northRoof = 0;
-    let southRoof = 0;
-    for (let t = 0; t < indices.length; t += 3) {
-      const i0 = indices[t];
-      if (b[i0 * STRIDE + 24] !== MAT.tile) continue;
-      const mx = (f[i0 * 7] + f[indices[t + 1] * 7] + f[indices[t + 2] * 7]) / 3;
-      const my = (f[i0 * 7 + 1] + f[indices[t + 1] * 7 + 1] + f[indices[t + 2] * 7 + 1]) / 3;
-      if (Math.abs(my - cy) < 4) {
-        if (mx > cx + 4) eastRoof++;
-        if (mx < cx - 4) westRoof++;
-      }
-      if (Math.abs(mx - cx) < 4) {
-        if (my > cy + 4) northRoof++;
-        if (my < cy - 4) southRoof++;
-      }
-    }
-    expect(northRoof).toBeGreaterThan(0);
-    expect(southRoof).toBeGreaterThan(0);
-    expect(eastRoof).toBeGreaterThan(0);
-    expect(westRoof).toBeGreaterThan(0);
   });
 });

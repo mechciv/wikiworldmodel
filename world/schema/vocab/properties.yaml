@@ -497,9 +497,10 @@ properties:
     description: >-
       How a town or a city was laid out: its streets (on a grid, winding lanes, or canals among them), the size of
       its blocks, what enclosed it (a rampart, a palisade, a wall of mudbrick, rammed earth, stone or brick), how
-      high, how many gates, a moat, an open square (core/dwelling.ts). A tradition that housed townspeople states
-      it for the towns of its region and time; a settlement's own record states it for that city, with the time it
-      held (`valid`). What neither says is the generator's guess, and the panel says so.
+      high, how many gates, a moat, an open square, and which way its grid or its main street ran (`orientation`,
+      the bearing of the axis in degrees east of north) (core/dwelling.ts). A tradition that housed townspeople
+      states it for the towns of its region and time; a settlement's own record states it for that city, with the
+      time it held (`valid`). What neither says is the generator's guess, and the panel says so.
   lifeway:
     type: lifeway
     interp: step
@@ -548,7 +549,7 @@ properties:
   extent:
     type: geometry
     interp: step
-    applies_to: [tradition, landform/mountain-range]
+    applies_to: [tradition, landform/mountain-range, settlement]
     # A range's ground may be written in the claim itself, as a territory's may: no dataset read here outlines ranges.
     inline: true
     description: >-
@@ -556,7 +557,10 @@ properties:
       ArchaeoGLOBE regions. A region named is a region where the tradition was, not a claim that it covered all of it.
       Of a mountain range, the ground its record speaks for, as an outline on today's Earth: where the relief of
       today is carried back for as long as the record says the range stood (model:earth/relief-carried). A range
-      has no agreed edge, and an outline drawn round it says so.
+      has no agreed edge, and an outline drawn round it says so. Of a settlement, the ground it covered at the time
+      the claim is valid (`valid`), as an outline on today's Earth or a map's element: a walled circuit, an excavated
+      limit or a survey's scatter of sherds, and the note says which (docs/plans/CITIES.md, The evidence a city can
+      have).
   insulae:
     type: quantity
     unit: blocks

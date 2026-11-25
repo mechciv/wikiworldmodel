@@ -1,8 +1,8 @@
-// Pass criteria for the city: a link lands in it and the browser's generated fabric matches the
-// build's within the tolerance of core/fingerprint.ts; the wheel comes down from the globe without a seam; what stands depends on
-// the time shown; a click opens a monument's record, or says a house is the generator's; and deep
-// time lifts the camera off a ground that isn't there yet; and on a touch screen, two fingers turn, tilt and come nearer.
-// The views it is drawn in are checked in city-views.spec.ts.
+// Pass criteria for the city: Rome is drawn by the living scene of where the camera is, its records among the
+// settlement generator's houses (docs/plans/CITIES.md, decisions 1 and 10); a link lands in it and holds its view; the wheel
+// comes down from the globe without a seam; what stands depends on the time shown; a click opens a monument's record, or
+// says a house is the generator's; deep time lifts the camera off a ground that isn't there yet; and on a touch screen,
+// two fingers turn, tilt and come nearer. The views it is drawn in are checked in city-views.spec.ts.
 import { expect, test } from '@playwright/test';
 import { canvasPng, idle, latestBuild, line, settledUrl, touch } from './helpers.ts';
 
@@ -27,15 +27,17 @@ const labelled = (page: import('@playwright/test').Page, id: string) => page.eva
 test.describe('in the city', () => {
   test.use(small);
 
-  test('a link lands in the city, and the browser makes the fabric the build recorded, within the tolerance', async ({ page, context }) => {
+  test('a link lands in Rome, drawn by the living scene with its records among its houses', async ({ page, context }) => {
     await page.goto(`/?b=${latestBuild()}&${OVERVIEW}&${FAST}`);
     await idle(page);
-    const fabric = await page.evaluate(() => window.__wikiworldmodel!.fabric());
-    expect(fabric!.actual).not.toBeNull();
-    expect(fabric!.problems).toEqual([]);
-    const stats = await page.evaluate(() => window.__wikiworldmodel!.cityStats());
-    expect(stats!.cells).toBeGreaterThan(100);
-    expect(stats!.coarse).toBeGreaterThan(50);
+    const scene = (await page.evaluate(() => window.__wikiworldmodel!.scene()))!;
+    expect(scene).not.toBeNull();
+    // Rome among its houses, laid out by the settlement generator, and its records named over them: which of them
+    // depends on the view, as a nearer name is placed first and none is drawn over another (the Colosseum's, here,
+    // would lie on the Temple of Claudius's).
+    expect(scene.people!.cities.map((c) => c.name)).toContain('Rome');
+    const named = await page.locator('.city-label').evaluateAll((els) => els.filter((e) => (e as HTMLElement).style.display !== 'none').map((e) => (e as HTMLElement).dataset.entity ?? ''));
+    expect(named.filter((id) => id.startsWith('rome/')).length).toBeGreaterThanOrEqual(3);
     // A step on the ground, an hour later: all of it stays in the link.
     await page.evaluate(() => window.__wikiworldmodel!.set({ hour: 11 }));
     await idle(page);
@@ -44,19 +46,19 @@ test.describe('in the city', () => {
     expect(url).toContain(FAST);
     expect(url).toContain('h=302');
     expect(url).toContain('v=66');
+    // Another load of the link is the same view. Not the same pixels: a city of a million passes the fast budget's cap
+    // on what a living scene draws, and which of its far houses are drawn under the cap depends on how they were
+    // streamed in, as for any living scene (life.spec.ts).
     const state = await page.evaluate(() => window.__wikiworldmodel!.state());
-    const pixels = await canvasPng(page);
     const other = await context.newPage();
     await other.goto(url);
     await idle(other);
     expect(await other.evaluate(() => window.__wikiworldmodel!.state())).toEqual(state);
-    expect((await canvasPng(other)).equals(pixels)).toBe(true);
   });
 
   test('the wheel comes down from the globe into the city, and back', async ({ page }) => {
     await page.goto(`/?b=${latestBuild()}&t=315&lat=41.9&lon=12.49&d=1.4&${FAST}`);
     await idle(page);
-    await expect(page.locator('.city-enter')).toHaveText('Fly down into Rome, 315 CE');
     const height = async () => ((await page.evaluate(() => window.__wikiworldmodel!.state())).cam.dist - 1) * 6371;
     await page.mouse.move(320, 190);
     const heights: number[] = [await height()];
@@ -69,24 +71,12 @@ test.describe('in the city', () => {
     const low = heights[heights.length - 1];
     expect(low).toBeLessThan(600);
     await idle(page);
-    expect(await page.evaluate(() => window.__wikiworldmodel!.cityStats()))!.not.toBeNull();
+    expect(await page.evaluate(() => window.__wikiworldmodel!.scene())).not.toBeNull();
     for (let i = 0; i < 14; i++) {
       await page.mouse.wheel(0, 1000);
       await page.waitForTimeout(60);
     }
     expect(await height()).toBeGreaterThan(low);
-  });
-
-  test('the button flies down, and the city is ready when it arrives', async ({ page }) => {
-    await page.goto(`/?b=${latestBuild()}&t=315&lat=41.9&lon=12.49&d=1.4&${FAST}`);
-    await idle(page);
-    await page.locator('.city-enter').click();
-    await idle(page);
-    const state = await page.evaluate(() => window.__wikiworldmodel!.state());
-    expect((state.cam.dist - 1) * 6371000).toBeLessThan(3000);
-    const stats = await page.evaluate(() => window.__wikiworldmodel!.cityStats());
-    expect(stats!.coarse).toBeGreaterThan(50);
-    await expect(page.locator('.city-enter')).toBeHidden();
   });
 
   test('what stands depends on the time: Constantine’s arch is not there before it was built', async ({ page }) => {
@@ -108,26 +98,6 @@ test.describe('in the city', () => {
     await page.mouse.click(spot.x, spot.y);
     await idle(page);
     expect((await page.evaluate(() => window.__wikiworldmodel!.state())).sel).not.toBe(arch);
-  });
-
-  test('a click on an ordinary house says the generator placed it, and that nothing is known of it', async ({ page }) => {
-    // The Subura, in the thick of the housing: look straight down, and try until a house is hit.
-    await page.goto(`/?b=${latestBuild()}&${over(41.8957, 12.4955, 120)}&${FAST}`);
-    await idle(page);
-    const panel = page.locator('.inspect');
-    let found = false;
-    for (const [x, y] of [[320, 190], [260, 150], [380, 230], [260, 230], [380, 150], [320, 110], [320, 270], [200, 190], [440, 190]]) {
-      await page.mouse.click(x, y);
-      await idle(page);
-      if ((await panel.isVisible()) && /building/i.test((await panel.locator('.kind').textContent()) ?? '')) {
-        found = true;
-        break;
-      }
-    }
-    expect(found).toBe(true);
-    await expect(panel.locator('.badge.basis-procedural')).toBeVisible();
-    await expect(panel).toContainText('Nothing is known of this building');
-    expect((await page.evaluate(() => window.__wikiworldmodel!.state())).sel).toBe(null);
   });
 
   test('a time with no ground lifts the camera off the place', async ({ page }) => {
@@ -157,6 +127,34 @@ test.describe('in the city', () => {
     await idle(page);
     expect((await canvasPng(page)).equals(plain)).toBe(true);
   });
+});
+
+// A living scene's panel takes much of a small window: these are looked at in a full one.
+test.describe('in the city, in a full window', () => {
+  test.use({ viewport: { width: 1280, height: 760 } });
+
+  test('a click on an ordinary house says the generator placed it, and that nothing is known of it', async ({ page }) => {
+    // The Subura, in the thick of the housing: look straight down, and try until a house is hit, clear of the scene's panel.
+    await page.goto(`/?b=${latestBuild()}&${over(41.8957, 12.4955, 120)}&${FAST}`);
+    await idle(page);
+    const panel = page.locator('.inspect');
+    let found = false;
+    const spots: [number, number][] = [];
+    for (let y = 160; y <= 460; y += 50) for (let x = 360; x <= 920; x += 40) spots.push([x, y]);
+    for (const [x, y] of spots) {
+      await page.mouse.click(x, y);
+      await idle(page);
+      if ((await panel.isVisible()) && /house/i.test((await panel.locator('.kind').textContent()) ?? '')) {
+        found = true;
+        break;
+      }
+    }
+    expect(found).toBe(true);
+    await expect(panel.locator('.badge.basis-procedural')).toBeVisible();
+    await expect(panel).toContainText('nobody recorded this house');
+    expect((await page.evaluate(() => window.__wikiworldmodel!.state())).sel).toBe(null);
+  });
+
 });
 
 test.describe('names', () => {
@@ -192,28 +190,29 @@ test.describe('names', () => {
 });
 
 test.describe('on a touch screen', () => {
-  test.use({ ...small, hasTouch: true });
+  // A full window, which the living scene's panel leaves the middle of.
+  test.use({ viewport: { width: 1280, height: 760 }, hasTouch: true });
 
   test('two fingers twist the view round, go up together to tilt it, and spread to come nearer', async ({ page }) => {
     await page.goto(`/?b=${latestBuild()}&${OVERVIEW}&${FAST}`);
     await idle(page);
     const cam = async () => (await page.evaluate(() => window.__wikiworldmodel!.state())).cam;
     const c0 = await cam();
-    // An eighth of a turn, clockwise on the screen, clear of the city's bar: what is under the fingers turns with them, so
+    // An eighth of a turn, clockwise on the screen, in the middle of the picture clear of the scene's panel: what is under the fingers turns with them, so
     // the view turns the other way.
-    const round = (side: number) => Array.from({ length: 9 }, (_, i) => [260 + side * 50 * Math.cos((i / 8) * (Math.PI / 4)), 150 + side * 50 * Math.sin((i / 8) * (Math.PI / 4))] as [number, number]);
+    const round = (side: number) => Array.from({ length: 9 }, (_, i) => [640 + side * 50 * Math.cos((i / 8) * (Math.PI / 4)), 380 + side * 50 * Math.sin((i / 8) * (Math.PI / 4))] as [number, number]);
     await touch(page, [round(-1), round(1)]);
     const c1 = await cam();
     expect((((c0.heading! - c1.heading! + 540) % 360) - 180)).toBeCloseTo(45, 0);
     expect(c1.tilt).toBe(c0.tilt);
     // Both up together tilts it towards the horizon, and nothing else.
-    await touch(page, [line([200, 200], [200, 120]), line([320, 200], [320, 120])]);
+    await touch(page, [line([580, 430], [580, 350]), line([700, 430], [700, 350])]);
     const c2 = await cam();
     expect(c2.tilt!).toBeGreaterThan(c1.tilt! + 10);
     expect(c2.heading).toBe(c1.heading);
     expect(c2.dist).toBe(c1.dist);
     // Spread apart, they come nearer the ground.
-    await touch(page, [line([240, 150], [160, 150]), line([280, 150], [360, 150])]);
+    await touch(page, [line([620, 380], [540, 380]), line([660, 380], [740, 380])]);
     expect((await cam()).dist).toBeLessThan(c2.dist);
   });
 });

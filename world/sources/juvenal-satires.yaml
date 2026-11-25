@@ -1,0 +1,20 @@
+id: src:juvenal-satires
+type: text
+kind: eyewitness
+citation: >-
+  Juvenal, Satires, translated by G.G. Ramsay, in Juvenal and Persius (Loeb Classical Library; London: William
+  Heinemann; New York: G.P. Putnam's Sons; first printed 1918, reprinted 1920 and 1924).
+published: 1918
+title: Saturae
+url: https://archive.org/details/juvenalpersius0000ggra_k6l0
+license: public domain
+via: The Internet Archive's scan of the 1924 reprint (juvenalpersius0000ggra_k6l0), read in its OCR text.
+reliability: >-
+  A satirist's picture of the Rome of his day, drawn to mock it: the tenement propped up, and a fire climbing from its
+  ground floor to the lodger under the tiles. What it shows of how the houses were built is incidental to the joke, and
+  it gives no measures.
+verified:
+  by: machine:claude-code
+  how: >-
+    Satire 3, lines 190–202 (p. 47 of the Loeb), read on 24 November 2026 in the OCR text of the scan and on its page
+    image; the quotes were checked by script against the OCR text.

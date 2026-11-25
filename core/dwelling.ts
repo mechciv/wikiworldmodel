@@ -374,13 +374,18 @@ export interface TownSpec extends Words<typeof TOWN_WORDS> {
   moat?: boolean;
   /** whether an open place, a square or a market, lay at its middle */
   square?: boolean;
+  /**
+   * which way its grid or its main street ran: the bearing of the axis, in degrees east of north, from more than 0 to 180
+   * (an axis has two ends, so 15.5 and 195.5 are one; a grid of north and east is 90, or 180)
+   */
+  orientation?: Span;
 }
 
 const DWELLING_NUMBERS = ['diameter', 'width', 'length', 'wall_height', 'height', 'storeys', 'rooms', 'floor_height', 'pitch'] as const;
 const DWELLING_FLAGS = ['court', 'porch', 'veranda', 'byre'] as const;
 const SETTLEMENT_NUMBERS = ['houses', 'spacing', 'household'] as const;
 const FIELD_NUMBERS = ['plot'] as const;
-const TOWN_NUMBERS = ['block', 'street', 'main_street', 'wall_height', 'wall_thickness', 'gates'] as const;
+const TOWN_NUMBERS = ['block', 'street', 'main_street', 'wall_height', 'wall_thickness', 'gates', 'orientation'] as const;
 
 /** What is wrong with a span: a positive number, or { lo, hi } of them with lo ≤ hi. */
 export function spanProblem(v: unknown): string | undefined {
@@ -578,6 +583,7 @@ export function townText(v: TownSpec): string {
   if (v.gates !== undefined) parts.push(`${spanText(v.gates)} gates`);
   if (v.moat !== undefined) parts.push(v.moat ? 'a moat outside it' : 'no moat');
   if (v.square !== undefined) parts.push(v.square ? 'an open square at its middle' : 'no open square');
+  if (v.orientation !== undefined) parts.push(`laid out ${spanText(v.orientation, '°')} east of north`);
   return parts.join(', ');
 }
 

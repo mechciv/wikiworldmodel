@@ -12,7 +12,7 @@ import { houseSize, HOUSE_VARIANTS } from '../dwellings.ts';
 import { ROUTE, roundOf, wayAt, type RoutineParams } from '../../life/routines.ts';
 import { personGoes } from '../figures.ts';
 import { WORK_VARIANTS } from '../works.ts';
-import { farCellsWeighed, farLand, farLandMask, farScale, LandUseMap, makeSettlement, peopleReach, toLocal, type Ground } from './v9.ts';
+import { farCellsWeighed, farLand, farLandMask, farScale, LandUseMap, makeSettlement, peopleReach, toLocal, type Ground } from './v10.ts';
 import { FIELD_USE, growFields, GROWTH, SITING, type WaterNear } from './sites.ts';
 
 const ROOT = join(import.meta.dirname, '../../../..');
@@ -301,6 +301,130 @@ describe('the settlement generator', () => {
     expect(far).toBeLessThan(city!.r * 1.6);
     const quarter = [0, 1, 2, 3].map((q) => mine.filter((h) => Math.floor(((Math.atan2(h.y - cy, h.x - cx) + Math.PI) / (Math.PI / 2)) % 4) === q).length / mine.length);
     for (const share of quarter) expect(share).toBeGreaterThan(0.15);
+  });
+
+  describe('a city laid out through its life', () => {
+    // A city of the lists that rose to 60,000 and fell back, with the places it dealt with to the east and the north-west.
+    const life = { key: 'src:test#Lifeton@0.000,0.000', span: [-500, 1500] as [number, number], members: [{ t: [-500, 0, 500, 1000, 1500], people: [2000, 20000, 60000, 15000, 8000] }], areas: [], toward: [0, 2.2] };
+    const at = (t: number, extra: Partial<ScenePeople['cities'][number]> = {}, traditions: Tradition[] = []) => {
+      const cities = [{ name: 'Lifeton', country: 'Nowhere', lat: 0, lon: 0, people: 30000, field: 'field:people/cities-ancient', source: 'src:test', from: 'list' as const, life, ...extra }];
+      const p = world(() => ({ code: 54, density: 2, region: 1 }), [{ id: 1, a: assess(1, 0, 1, 3, 1) }], { cities, traditions, t });
+      const plan = makeSettlement(spec(p), flat, dry, EXTENT);
+      const si = plan.settlements.findIndex((s) => s.city === 'Lifeton');
+      return { plan, si, s: plan.settlements[si], mine: plan.houses.filter((h) => h.settlement === si), streets: plan.streets.filter((s) => s.settlement === si) };
+    };
+    /** Whether a street lies within another, along it: a lane drawn further as the city reaches further along it. */
+    const within = (s: number[], t: number[]) => {
+      if (s.length !== 4 || t.length !== 4) return s.join() === t.join();
+      const [ax, ay, bx, by] = t;
+      const len = Math.hypot(bx - ax, by - ay) || 1;
+      const ux = (bx - ax) / len;
+      const uy = (by - ay) / len;
+      return [0, 2].every((k) => {
+        const px = s[k] - ax;
+        const py = s[k + 1] - ay;
+        const along = px * ux + py * uy;
+        return Math.abs(px * uy - py * ux) < 1e-6 && along > -1e-6 && along < len + 1e-6;
+      });
+    };
+
+    it('keeps the houses and streets of an earlier time where they stood at a later one, as the city grows', () => {
+      const a = at(0);
+      const b = at(500);
+      expect(a.mine.length).toBeGreaterThan(300);
+      expect(b.mine.length).toBeGreaterThan(a.mine.length * 1.5);
+      // Each house of the earlier time has one of the later time within a few metres: a plot keeps its place, and its
+      // house may only be drawn bigger as the city fills.
+      const cells = new Map<string, { x: number; y: number }[]>();
+      for (const h of b.mine) {
+        const k = `${Math.floor(h.x / 10)},${Math.floor(h.y / 10)}`;
+        (cells.get(k) ?? cells.set(k, []).get(k)!).push(h);
+      }
+      const near = (h: { x: number; y: number }) => {
+        for (let i = -1; i <= 1; i++)
+          for (let j = -1; j <= 1; j++) for (const o of cells.get(`${Math.floor(h.x / 10) + i},${Math.floor(h.y / 10) + j}`) ?? []) if (Math.hypot(o.x - h.x, o.y - h.y) < 4) return true;
+        return false;
+      };
+      expect(a.mine.filter(near).length / a.mine.length).toBeGreaterThan(0.97);
+      // Each street of the earlier time runs within one of the later: streets run on as the city reaches along them.
+      expect(a.streets.filter((s) => b.streets.some((t) => within(s.line, t.line))).length / a.streets.length).toBeGreaterThan(0.97);
+    });
+
+    it('shrinks back to its oldest ground as its people fall', () => {
+      const peak = at(500);
+      const late = at(1200);
+      expect(late.mine.length).toBeLessThan(peak.mine.length / 2);
+      const reach = (hs: { x: number; y: number }[]) => hs.reduce((m, h) => m + Math.hypot(h.x, h.y), 0) / hs.length;
+      expect(reach(late.mine)).toBeLessThan(reach(peak.mine));
+    });
+
+    it('leaves open the square its form says lay at its middle, the same at every time', () => {
+      for (const t of [0, 500]) expect(at(t, { town: { square: true }, life: { ...life, town: { square: true } } }).mine.filter((h) => Math.hypot(h.x, h.y) < 40).length).toBe(0);
+      expect(at(500).mine.filter((h) => Math.hypot(h.x, h.y) < 40).length).toBeGreaterThan(0);
+    });
+
+    it('has no most of houses: a great city has a house to each plot it built', () => {
+      const big = { ...life, members: [{ t: [-500, 0, 1500], people: [2000, 150000, 150000] }] };
+      const { mine } = at(500, { people: 150000, life: big });
+      expect(mine.length).toBeGreaterThan(12000);
+    });
+
+    it('leads its routes out towards the places it dealt with, and has its wall while the wall stood, with a gate on each route', () => {
+      const traditions = compileTraditions([{ id: 'test/walled-town', label: 'A walled town', regions: [1], span: [-500, 1500], lifeways: ['townspeople'], dwelling: { plan: 'long' }, town: { wall: 'stone', streets: 'lanes' }, townSpan: [0, 900] }]);
+      const during = at(500, {}, traditions);
+      const routes = during.streets.filter((s) => Math.hypot(s.line[0], s.line[1]) < 1 && s.line.length > 4);
+      expect(routes.length).toBeGreaterThanOrEqual(3);
+      const wall = during.plan.perimeters.find((p) => p.settlement === during.si);
+      expect(wall).toBeDefined();
+      expect(wall!.kind).toBe('stone');
+      expect(wall!.gates.length).toBeGreaterThanOrEqual(3);
+      expect(at(1200, {}, traditions).plan.perimeters.filter((p) => p.settlement === during.si)).toEqual([]);
+    });
+
+    it('keeps its plots where they are when the house its people lived in changes: its plan is its height\'s', () => {
+      // Its people take up a block of flats from 300 on, at its height in 500: the plan is the flats', before them too.
+      const traditions = compileTraditions([{ id: 'test/flats', label: 'A block of flats', regions: [1], span: [300, 1500], lifeways: ['townspeople'], dwelling: { plan: 'courtyard', storeys: 4 }, settlement: { household: 40 } }]);
+      const before = at(200, {}, traditions);
+      const after = at(500, {}, traditions);
+      expect(before.streets.length).toBeGreaterThan(20);
+      expect(before.streets.filter((s) => after.streets.some((t) => within(s.line, t.line))).length / before.streets.length).toBeGreaterThan(0.97);
+      // Before them, the generic house stands on the flats' plots: a sixth as many as on the plots of a city that never
+      // had them.
+      expect(before.mine.every((h) => !before.plan.forms[h.form].tradition)).toBe(true);
+      expect(before.mine.length / at(200).mine.length).toBeLessThan(0.3);
+      expect(after.mine.some((h) => after.plan.forms[h.form].tradition === 'test/flats')).toBe(true);
+    });
+
+    it('is planned by what is known of its houses before the generic house: a tradition that ended before its height still sizes its plots', () => {
+      // Its people lived in blocks of flats until 300, and in houses nothing describes at its height, in 500.
+      const traditions = compileTraditions([{ id: 'test/flats', label: 'A block of flats', regions: [1], span: [-500, 300], lifeways: ['townspeople'], dwelling: { plan: 'courtyard', storeys: 4 }, settlement: { household: 40 } }]);
+      const after = at(500, {}, traditions);
+      expect(after.mine.every((h) => !after.plan.forms[h.form].tradition)).toBe(true);
+      expect(after.mine.length / at(500).mine.length).toBeLessThan(0.3);
+    });
+
+    it('builds each plot in the house of the tradition it falls to, in the parts the traditions say their people were', () => {
+      const traditions = compileTraditions([
+        { id: 'test/flats', label: 'A block of flats', regions: [1], span: [-500, 1500], lifeways: ['townspeople'], prevalence: 'most', dwelling: { plan: 'courtyard', storeys: 4 } },
+        { id: 'test/mansion', label: 'A mansion', regions: [1], span: [-500, 1500], lifeways: ['townspeople'], prevalence: 'few', dwelling: { plan: 'courtyard', storeys: 2 } },
+      ]);
+      const { plan, mine } = at(500, {}, traditions);
+      const share = (id?: string) => mine.filter((h) => plan.forms[h.form].tradition === id).length / mine.length;
+      const parts = gen.params.prevalence as { few: number; most: number };
+      expect(Math.abs(share('test/flats') - parts.most)).toBeLessThan(0.05);
+      expect(share('test/mansion')).toBeGreaterThan(0);
+      expect(share('test/mansion')).toBeLessThan(parts.few * 3);
+      expect(share(undefined)).toBeGreaterThan(0.1);
+    });
+
+    it('gives a plot to as many people as its tradition says lived to a house: forty to a block of flats is a sixth as many houses', () => {
+      const of = (household?: number) => compileTraditions([{ id: 'test/town-house', label: 'A town house', regions: [1], span: [-500, 1500], lifeways: ['townspeople'], dwelling: { plan: 'courtyard', storeys: 4 }, ...(household ? { settlement: { household } } : {}) }]);
+      const houses = at(500, {}, of()).mine.length;
+      const blocks = at(500, {}, of(40)).mine.length;
+      expect(houses).toBeGreaterThan(1000);
+      expect(blocks / houses).toBeGreaterThan(0.08);
+      expect(blocks / houses).toBeLessThan(0.3);
+    });
   });
 
   describe('a town', () => {

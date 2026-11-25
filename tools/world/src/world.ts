@@ -124,9 +124,26 @@ export interface DatasetFile {
   sha256: string;
 }
 
+/**
+ * The city a map dataset is of (world/schema/manifest.schema.json, import.site): the settlement, the point its metres are
+ * laid out about, the surveys of its ground, the level of its mapped water, its span and the way in to it.
+ */
+export interface MapSite {
+  id: string;
+  label: string;
+  settlement: string;
+  origin: { lat: number; lon: number };
+  ground: { city: string; utm_zone: number; hills: string[]; region: string[] };
+  water_level: number;
+  span: [number, number];
+  near?: [number, number];
+  window?: [number, number];
+  view?: { x: number; y: number; range: number; heading: number; tilt: number };
+}
+
 export interface Dataset extends Source {
-  /** a snapshot of a database whose elements become records (tools/world/src/ohm.ts) */
-  import?: { as: 'ohm-site' | 'pbdb-formation' | 'pbdb-land'; frame?: string };
+  /** a snapshot of a database whose elements become records (tools/world/src/ohm.ts), and for a map of a city, its site */
+  import?: { as: 'ohm-site' | 'pbdb-formation' | 'pbdb-land'; frame?: string; site?: MapSite };
   fetch: {
     url: string;
     /** local filename when `url` is a content-addressed `blob:<sha256>` reference */

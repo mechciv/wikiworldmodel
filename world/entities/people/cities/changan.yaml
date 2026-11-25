@@ -1,0 +1,173 @@
+id: people/cities/changan
+kind: settlement
+summary: >-
+  Chang'an of the Sui and Tang, the capital whose building an edict of 582 began on the Longshou plain, south-east of
+  the Han city: Daxingcheng under the Sui, Chang'an under the Tang. Its outer walls enclosed a rectangle of 9,721 by
+  8,651.7 m, laid out on a grid of 11 streets running north and south and 14 running east and west, with some 110
+  wards, two major markets, the palaces in the north and the government's Imperial City south of them. About a million
+  people lived in it at its two peaks, in 742 and 803, as Xiong reports the estimates. Looted and burned again and
+  again from the Huang Chao rebellion on, it was dismantled in 904 on the orders of Zhu Wen. The smaller town then
+  walled round the former Palace and Imperial Cities, where modern Xi'an grew, is not this record, nor is the Han city.
+author: machine:claude-code
+same_as: { wikidata: Q10923028 }
+claims:
+  name-daxingcheng:
+    prop: name
+    value: { en: Daxingcheng }
+    valid: { hi: 618 CE }
+    source:
+      - ref: src:xiong-1988-sui-tang-changan
+        loc: "Introduction, p. 2"
+        quote: which was to be known as Daxingcheng in the Sui and as Chang'an in the Tang dynasties
+      - ref: src:xiong-1988-sui-tang-changan
+        loc: "ch. 3, \"The Taiji Hall\", p. 67"
+        quote: In 618, Li Yuan decided to replace the Sui with his own Tang empire.
+    note: >-
+      The city's name under the Sui, after the title of Duke of Daxing that the emperor Wen had held (Xiong, p. 23), or
+      after its palace, the Daxing Palace (pp. 66–67). Its turn ends with the dynasty, in 618.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in xiong-1988-sui-tang-changan.txt (sha256 39e26db59877529e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
+  name-changan:
+    prop: name
+    value: { en: "Chang'an" }
+    valid: { lo: 618 CE }
+    source:
+      - ref: src:xiong-1988-sui-tang-changan
+        loc: "Introduction, p. 2"
+        quote: which was to be known as Daxingcheng in the Sui and as Chang'an in the Tang dynasties
+      - ref: src:xiong-1988-sui-tang-changan
+        loc: "ch. 3, \"The Taiji Hall\", p. 67"
+        quote: In 618, Li Yuan decided to replace the Sui with his own Tang empire.
+    rank: preferred
+    note: >-
+      The city's name under the Tang, from the founding of the dynasty in 618. Preferred as the name the record goes by,
+      for most of its life.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in xiong-1988-sui-tang-changan.txt (sha256 39e26db59877529e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
+  start:
+    prop: start
+    value: 582 CE
+    source:
+      - ref: src:xiong-1988-sui-tang-changan
+        loc: "Preface, p. i"
+        quote: The construction of the city started in 582.
+      - ref: src:xiong-1988-sui-tang-changan
+        loc: "Introduction, p. 2"
+        quote: On the 24th of the sixth month (29 July) 582, an imperial edict initiated the construction of the city
+    method: historical-account
+    note: >-
+      The edict that began the building, dated 29 July 582 as Xiong converts the Chinese date. The first stage was
+      finished early in 583, when the first settlers came, and the emperor moved in on 15 April 583.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in xiong-1988-sui-tang-changan.txt (sha256 39e26db59877529e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
+  end:
+    prop: end
+    value: 904 CE
+    source:
+      ref: src:xiong-1988-sui-tang-changan
+      loc: "Conclusions, p. 287"
+      quote: In 904, on orders from general Zhu Wen, Sui-Tang Chang'an was physically destroyed and its remaining structures dismantled and transported to Luoyang.
+    method: historical-account
+    note: >-
+      Early in 904 Zhu Wen (Zhu Quanzhong) made the emperor move the capital to Luoyang, with the city's registered
+      people, and its palaces and houses were taken down and their timbers shipped downriver. Han Jian, left to govern
+      the area, then had the city walls demolished and a new wall built round the former Palace and Imperial Cities
+      (Xiong, pp. 279–280): that smaller town is not this record.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in xiong-1988-sui-tang-changan.txt (sha256 39e26db59877529e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
+  location:
+    prop: location
+    value: { lat: 34.266667, lon: 108.9, frame: frame:earth/present-day }
+    source: { ref: src:wikidata-tang-changan, loc: "Q10923028, P625 coordinate location" }
+    method: gazetteer
+    note: The gazetteer's point for the Sui and Tang city, 34°16′ N 108°54′ E, given to the minute of arc.
+  frame:
+    prop: frame
+    value: frame:paleomap/plate-604
+    source: { ref: src:paleomap-plate-model, loc: PALEOMAP_PlatePolygons.gpml }
+    method: plate-polygon
+    basis: reconstruction
+  area:
+    prop: settlement_area
+    value: 8410
+    valid: { lo: 742 CE, hi: 803 CE }
+    source:
+      - ref: src:wen-2023-deep-map-changan
+        loc: "p. 1"
+        quote: In its heyday during the Tang dynasty, the area covered by the walled city (84.1 square kilometers)
+      - ref: src:xiong-1988-sui-tang-changan
+        loc: "Introduction, p. 2"
+        quote: Measuring 9721 (east-west) by 8651.7 m (north-south), the walled area was more than 84 km2 in size.
+    method: survey
+    note: >-
+      84.1 km², the walled area: the rectangle of the outer walls, 9,721 m from east to west by 8,651.7 m from north to
+      south as the archaeologists measured it. The Daming Palace, which Gaozong built out from the northern wall into
+      the suburbs, lies outside it. The walled area was not all built on: the thirty wards in the far south were nearly
+      empty, with fields among them (Xiong, ch. 6). The moment given is the city's height, the years of its two peaks
+      of population as Xiong dates them.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wen-2023-deep-map-changan.txt (sha256 398c7012f7088a6a) and xiong-1988-sui-tang-changan.txt (sha256 39e26db59877529e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
+  population-742:
+    prop: population
+    value: 1000000
+    valid: 742 CE
+    source:
+      ref: src:xiong-1988-sui-tang-changan
+      loc: "ch. 6, \"Population\", p. 171"
+      quote: According to the above-mentioned two scholars, the population of Chang'an was one million in 742 and 803 respectively. These probably represented two peaks of Chang'an's population.
+    method: expert-estimate
+    note: >-
+      Wu Bolun's estimate (1959), as Xiong reports it: of the 1,960,188 people the census of 742 registered in the
+      metropolitan area, allowing 10,000 households of five for each of its 18 rural counties leaves 1,060,188 in the
+      two city counties; with the royal family, soldiers, monks and runaways, who were not registered, the city had
+      well over a million. The source gives no range: a round figure. The Sui and early Tang city had fewer.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in xiong-1988-sui-tang-changan.txt (sha256 39e26db59877529e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
+  population-803:
+    prop: population
+    value: 1000000
+    valid: 803 CE
+    source:
+      ref: src:xiong-1988-sui-tang-changan
+      loc: "ch. 6, \"Population\", p. 171"
+      quote: According to the above-mentioned two scholars, the population of Chang'an was one million in 742 and 803 respectively. These probably represented two peaks of Chang'an's population.
+    method: expert-estimate
+    note: >-
+      Hiraoka Takeo's estimate (1956), as Xiong reports it: from a memorial of Han Yu of 803, which put the city's
+      people below a million at ten to a registered household, adding about 100,000 soldiers, more than 50,000
+      religious, and the vagrants and runaways who escaped the census. After the An Lushan rebellion the city had lost
+      more than half its people (an edict of 769), and it was back to a million by 803 (Xiong, p. 172). The source gives
+      no range.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in xiong-1988-sui-tang-changan.txt (sha256 39e26db59877529e), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
+  town-form:
+    prop: town_form
+    value: { streets: grid, orientation: 180, main_street: 150, gates: 13 }
+    source:
+      - ref: src:xiong-1988-sui-tang-changan
+        loc: "ch. 6, \"Streets\", p. 188"
+        quote: The major road network of Chang'an consisted of 11 north-south and 14 east-west streets. They delineated the gridiron patterns of the city
+      - ref: src:xiong-1988-sui-tang-changan
+        loc: "ch. 1, \"Building of Chang'an\", p. 20"
+        quote: running north-south and dividing the city into two symmetrical parts
+      - ref: src:wen-2023-deep-map-changan
+        loc: "p. 2"
+        quote: the Zhuque boulevard — the main north-south axis of the Tang city
+      - ref: src:xiong-1988-sui-tang-changan
+        loc: "ch. 6, \"Streets\", p. 188"
+        quote: Officially known as the Zhuquemen Street, it measured more than 150 m in width.
+      - ref: src:xiong-1988-sui-tang-changan
+        loc: "ch. 2, \"Shape, Gates and Road Network\", p. 37"
+        quote: For Sui-Tang Chang'an, thirteen gates were planned from the outset.
+    method: excavation
+    note: >-
+      The plan as the archaeological survey found it, in Xiong's account. A grid of 11 streets running north and south
+      and 14 running east and west (9 and 12 without those along the inside of the walls), between some 110 wards of
+      500 by 550 m to 838 by 1,125 m, the larger ones each divided in four by streets of their own. The orientation, 180,
+      is the north-south axis of Zhuquemen Street, as both sources give it in words: no measured bearing was read. The
+      main street is Zhuquemen Street, more than 150 m wide, written at that bound. The 13 gates are three in each of
+      the east, west and south walls and four in the north, by Xiong's count (his note 36), which leaves out three that
+      led from the Palace City into a small enclosed park; the Sui shu records only one northern gate built. What the
+      outer walls were built of is not said in what could be read, so no wall is claimed.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in xiong-1988-sui-tang-changan.txt (sha256 39e26db59877529e) and wen-2023-deep-map-changan.txt (sha256 398c7012f7088a6a), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }

@@ -1,0 +1,49 @@
+# A model run here (section 4.10 of the design). It makes no field: what it derives is each settlement's people
+# through time, which the settlement generator lays its town out from (docs/plans/CITIES.md, The models).
+id: model:people/city-population
+type: model
+title: A settlement's people through time
+description: >-
+  Gathers every figure of a settlement's people that the world has, the lists' (Chandler's and Modelski's, as Reba,
+  Reitsma and Seto placed them) and its own record's, into one reading through time. A record's own figure takes the
+  place of a list's within a few years of it, and a list's stands elsewhere. Between two figures the people are taken to
+  have changed by a constant rate. Before the first figure they rise from a founding size, from the start its record
+  gives, and after the last they fall to it, to its end; a settlement whose record runs on to the present holds its last
+  figure. One with no record stands from the first figure, less the years its list holds a figure for, to the last, plus
+  them. The model knows nothing of what happened to a city between two figures: a sack, a plague or a boom between them
+  is not in it until a figure or a record says so.
+author: machine:claude-code
+code: core/citypop.ts
+inputs:
+  - { ref: field:people/cities-ancient, note: "Modelski's figures, by city and year" }
+  - { ref: field:people/cities, note: "Chandler's figures, by city and year" }
+  - { prop: population, kind: settlement, note: "a settlement's own figures, at the times they are for" }
+  - { prop: houses, kind: settlement, note: "its houses, where a record counts them and gives no people" }
+  - { prop: settlement_area, kind: settlement, note: "its ground, where a record gives neither people nor houses" }
+  - { prop: start, kind: settlement, note: "when it was founded" }
+  - { prop: end, kind: settlement, note: "when it was left" }
+derives: Each settlement's people through time, as the members of a band, from its founding to its end.
+params:
+  founding:
+    choice: >-
+      A thousand people: how many a settlement had when it was founded and when it was left, where no figure says. It
+      only shapes the years before a settlement's first figure and after its last; no work gives it.
+  doubt:
+    choice: >-
+      1.6: how many times higher and lower the band's other members read the people. The lists' figures and later
+      archaeologists' differ by a factor of two or more (docs/HUMAN-LANDSCAPE.md); this is a band of that kind, not a
+      measured spread.
+  near:
+    choice: Twenty-five years, within which a record's own figure takes the place of a list's.
+  rate:
+    choice: >-
+      Between two figures the people change by a constant rate, so a city that doubled in a century grew a little more
+      every year. Nothing records how they changed between figures.
+uncertainty:
+  kind: ensemble
+  note: >-
+    Member 0 is the central reading; members 1 and 2 are it higher and lower by the doubt; each list whose figures the
+    central reading passed over adds a member of its own. They are not drawn from any measured spread.
+checks:
+  - { test: core/citypop.test.ts, holds: "prefers the record’s own figures, and keeps a list’s apart as a reading of its own" }
+  - { test: core/citypop.test.ts, holds: "rises from a founding size at the record’s start, and holds its last figure where the record runs on" }

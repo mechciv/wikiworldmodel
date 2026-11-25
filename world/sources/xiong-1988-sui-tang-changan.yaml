@@ -1,0 +1,26 @@
+id: src:xiong-1988-sui-tang-changan
+type: publication
+kind: review
+citation: >-
+  Xiong, C. (1988). Sui-Tang Chang'an (AD 582–904). PhD thesis, Australian National University, Canberra.
+authors: ["Xiong, C."]
+published: 1988
+title: "Sui-Tang Chang'an (AD 582 - 904)"
+container: PhD thesis, Australian National University
+doi: 10.25911/5d763263c872a
+url: https://openresearch-repository.anu.edu.au/handle/1885/112041
+license_note: >-
+  In the university's collection of open-access theses, which states no licence for it. Only single facts and short
+  quotes are taken, with credit.
+reliability: >-
+  A doctoral thesis on the city, from the dynastic histories, the Song and Qing descriptions of the city and the
+  archaeological reports of 1958–1963. Its population figures are the estimates of Wu Bolun (1959) and Hiraoka Takeo
+  (1956), as Xiong reports them. Revised as his book Sui-Tang Chang'an: A Study in the Urban History of Medieval China
+  (Ann Arbor, 2000), which could not be read here.
+verified:
+  by: machine:claude-code
+  how: >-
+    The thesis's PDF (375 pages, sha256 26172fd49f6f4ce6) downloaded from ANU's Open Research repository on
+    2026-11-24, and its OCR text layer extracted with PyMuPDF. Each passage quoted was read against the image of its
+    page (pp. i, 2, 20, 37, 67, 171, 188, 280, 287). Quotes checked by script against the extracted text, after
+    normalizing whitespace.

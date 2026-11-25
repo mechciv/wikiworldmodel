@@ -1,0 +1,194 @@
+id: people/traditions/roman-domus
+kind: tradition/building
+summary: >-
+  The town house (domus) of the well-off in Roman Italy, from the second century BCE: a house turned inward on its
+  atrium, a hall whose roof sloped down on all sides to an opening over a basin, and behind it a peristyle, a garden
+  within a colonnade, with the rooms about the two. It was low, of one storey with rooms over parts of it, of rubble set
+  in mortar under tiled roofs, with few and small windows on the street, and its front rooms on a busy street were
+  often shops. Known from Vitruvius, from the houses dug at Pompeii as Mau describes them, and from Smith's dictionary;
+  in Rome it was the house of the rich, of which the fourth-century catalogue counted about 1,790 against some 44,000 to
+  46,600 apartment blocks (people/traditions/roman-insula).
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Atrium house (domus) of Roman Italy }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: { lo: 200 BCE, hi: 101 BCE }
+    source:
+      ref: src:mau-1902-pompeii
+      loc: "chap. XXXIII, p. 246"
+      quote: >-
+        We find the union of atrium and peristyle with their respective groups of apartments fully accomplished in the
+        second century B.C., the Tufa Period; the type of dwelling thus developed remained in vogue during Roman times
+        and is often called the Roman house.
+    method: expert-estimate
+    note: >-
+      The second century BCE, by when the atrium and the peristyle had been joined in one house at Pompeii, in Mau's
+      Tufa Period, which he puts at about 200 to 90 BCE (p. 40). The atrium house without a peristyle is older there;
+      the dictionary has houses of any splendour built at Rome only in the last century of the Republic.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in mau-1902-pompeii.txt (sha256 35b30b5906cc32ba), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
+  end:
+    prop: end
+    value: { lo: 334 CE, hi: 357 CE }
+    source:
+      ref: src:smith-1890-dictionary-of-antiquities
+      loc: 's.v. "Domus", III. Roman, p. 665 a'
+      quote: >-
+        The number of insulae at Rome naturally exceeded that of the domus … which was compiled between A.D. 334 and 357,
+        that there were at Rome 44,171 insulae and 1782 domus
+    method: expert-estimate
+    note: >-
+      An end of the evidence and not of the house: the latest count read of the city's domus, in the fourth-century
+      catalogue as the dictionary dates it. When the house ceased to be built or lived in, nothing read says.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in smith-1890-dictionary-of-antiquities-vol1.txt (sha256 6870cebc90dd52e4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["44"] }
+    source:
+      - ref: src:mau-1902-pompeii
+        loc: "chap. XXXIII, p. 245"
+        quote: >-
+          Our chief sources of information regarding the domestic architecture of ancient Italy are two,—the treatise of
+          Vitruvius, and the remains found at Pompeii.
+      - ref: src:smith-1890-dictionary-of-antiquities
+        loc: 's.v. "Domus", III. Roman, p. 667 b'
+        quote: There can be no doubt that the latter are constructed upon the model of the houses at Rome
+      - ref: src:smith-1890-dictionary-of-antiquities
+        loc: 's.v. "Domus", III. Roman, p. 667 b'
+        quote: The municipal towns imitated in their buildings those of Rome
+    method: editorial
+    note: >-
+      Region 44 (Southern Europe), which holds Rome and Pompeii, by their coordinates against the region outlines. The
+      dictionary has the houses of Pompeii built on the model of Rome's, and the towns of Italy imitating Rome's
+      buildings. The house is not claimed for the rest of the region, Greece and the Balkans.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in mau-1902-pompeii.txt (sha256 35b30b5906cc32ba) and smith-1890-dictionary-of-antiquities-vol1.txt (sha256 6870cebc90dd52e4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
+  lifeway:
+    prop: lifeway
+    value: [townspeople]
+    source:
+      - ref: src:vitruvius-de-architectura
+        loc: "6.5.3 (Gwilt's translation)"
+        quote: >-
+          These rules are no less applicable to country than to town dwellings, except that in town the atria must be
+          close to the gates
+      - ref: src:smith-1890-dictionary-of-antiquities
+        loc: 's.v. "Domus", III. Roman, p. 666 b'
+        quote: We now turn to the history and construction of the domus, or mansion of the great and wealthy.
+    method: editorial
+    note: >-
+      The town house: Vitruvius sets the atrium by the gates in town, and the peristyle by the entrance in the country
+      house, which is not this record's and is not claimed for the countryside's people.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in vitruvius-de-architectura.txt (sha256 aba7d4ceca3132c5) and smith-1890-dictionary-of-antiquities-vol1.txt (sha256 6870cebc90dd52e4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
+  prevalence:
+    prop: prevalence
+    value: few
+    source:
+      - ref: src:smith-1890-dictionary-of-antiquities
+        loc: 's.v. "Domus", III. Roman, p. 665 a'
+        quote: >-
+          was a separate house, in later times a palace, usually with only one story above the ground-floor, the abode of
+          the rich and great
+      - ref: src:smith-1890-dictionary-of-antiquities
+        loc: 's.v. "Domus", III. Roman, p. 665 a'
+        quote: >-
+          The number of insulae at Rome naturally exceeded that of the domus … which was compiled between A.D. 334 and 357,
+          that there were at Rome 44,171 insulae and 1782 domus
+      - ref: src:platner-ashby-1929
+        loc: "s.v. Insula, p. 281"
+        quote: Assigning to one-third of the 44,300 … insulae enumerated in Reg. (Brev. gives 46,602)
+      - ref: src:platner-ashby-1929
+        loc: "s.v. Insula, p. 281"
+        quote: adding 500 square metres for each of the 1790 domus
+      - ref: src:vitruvius-de-architectura
+        loc: "6.5.1 (Gwilt's translation)"
+        quote: >-
+          Hence, for a person of middling condition in life, magnificent vestibules are not necessary, nor tablina, nor
+          atria, because persons of that description are those who seek favours which are granted by the higher ranks.
+      - ref: src:vitruvius-de-architectura
+        loc: "6.5.2 (Gwilt's translation)"
+        quote: >-
+          But for nobles, who in bearing honours, and discharging the duties of the magistracy, must have much intercourse
+          with the citizens, princely vestibules must be provided, lofty atria, and spacious peristylia
+    method: editorial
+    note: >-
+      A few: in Rome the domus was the house of the rich and great, 1,782 or 1,790 of them in the fourth-century
+      catalogue against some 44,000 to 46,600 insulae, and Vitruvius gives the atrium and the peristyle to the houses of
+      the higher ranks. In smaller towns the atrium was more widely built: the dictionary describes shopkeepers' houses
+      at Pompeii with small atria behind their shops (pp. 679–680), so there the word says too few. The rest of the
+      townspeople of the region lived in the insula (people/traditions/roman-insula) or in houses no record yet
+      describes.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in smith-1890-dictionary-of-antiquities-vol1.txt (sha256 6870cebc90dd52e4), platner-ashby-1929-insulae.txt (sha256 c983672daa1c821a) and vitruvius-de-architectura.txt (sha256 aba7d4ceca3132c5), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }
+  dwelling:
+    prop: dwelling
+    value: { plan: courtyard, court: true, storeys: { lo: 1, hi: 2 }, walls: stone, roof_material: tile, windows: small }
+    source:
+      - ref: src:mau-1902-pompeii
+        loc: "chap. XXXIII, p. 245"
+        quote: >-
+          They took their light and air from the inside, the apartments being grouped about a court or about a large
+          central room which ordinarily had an opening in the ceiling
+      - ref: src:mau-1902-pompeii
+        loc: "chap. XXXIII, p. 245"
+        quote: >-
+          The ancient houses were relatively low, in most cases, if we except the crowded tenements of imperial Rome, not
+          exceeding two stories.
+      - ref: src:mau-1902-pompeii
+        loc: "chap. XXXIII, section XI, p. 273"
+        quote: With few exceptions the houses of pre-Roman Pompeii were built in only one story
+      - ref: src:mau-1902-pompeii
+        loc: "chap. XXXIII, section XI, p. 273"
+        quote: A complete second story was rare
+      - ref: src:smith-1890-dictionary-of-antiquities
+        loc: 's.v. "Domus", III. Roman, p. 665 a'
+        quote: >-
+          was a separate house, in later times a palace, usually with only one story above the ground-floor, the abode of
+          the rich and great
+      - ref: src:smith-1890-dictionary-of-antiquities
+        loc: 's.v. "Domus", III. Roman, p. 679'
+        quote: >-
+          The presence of stairs in apparently all the houses proves that one-storied buildings were practically unknown
+          in Pompeii
+      - ref: src:mau-1902-pompeii
+        loc: "chap. VI, p. 38"
+        quote: >-
+          Rubble work is the prevailing masonry at Pompeii; in comparison the other kinds described may be considered
+          exceptional.
+      - ref: src:mau-1902-pompeii
+        loc: "chap. XXXIII, section II, p. 251"
+        quote: >-
+          carrying the tiles, the arrangement of which can be seen in Figs. 114, 117, and 118. This was the most common
+          arrangement of the roof at Pompeii.
+      - ref: src:mau-1902-pompeii
+        loc: "chap. XXXIII, p. 245"
+        quote: The windows in the outside walls were generally few and small
+      - ref: src:mau-1902-pompeii
+        loc: "chap. XXXIII, section V, p. 259"
+        quote: >-
+          In front there were rooms at either side of the entrance, ordinarily fitted up as shops and opening on the
+          street
+    method: excavation
+    note: >-
+      The house as dug at Pompeii, which the dictionary takes for the model of Rome's: rooms about the atrium, and in the
+      larger houses about the peristyle too, so a courtyard plan. The atrium's roof sloped down on all sides to the
+      opening over its basin (Mau, p. 250), which the vocabulary has no word for, and its covering was tile on the
+      common Tuscan atrium. One storey or two: Mau has the houses of pre-Roman Pompeii of one storey, with rooms built
+      over those about the atrium in Roman times and a complete second storey rare; the dictionary has the domus usually
+      with one storey above the ground floor, and holds that stairs in apparently all the houses of Pompeii show that
+      houses of one storey were all but unknown there. A second storey drawn whole is more than most had. The walls are
+      rubble laid in mortar (opus incertum), the prevailing masonry of Pompeii, with corners and door-posts of squared
+      stone or brick, for which stone is the vocabulary's word; under the Empire many of Rome's substantial buildings
+      were of concrete faced with burnt brick (people/traditions/roman-insula), which nothing read says of its houses.
+      The walls of the rooms were plastered and painted (Mau, p. 278); their outer face is not described, and no finish
+      is written. Rooms facing a busy street were often shops, which the vocabulary has no word for. No size of a house
+      is written: they ranged from small houses to whole blocks like the house of the Faun, about 315 by 115 feet (Mau,
+      p. 289).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in mau-1902-pompeii.txt (sha256 35b30b5906cc32ba) and smith-1890-dictionary-of-antiquities-vol1.txt (sha256 6870cebc90dd52e4), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-24" }

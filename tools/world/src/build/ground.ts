@@ -215,11 +215,11 @@ export function encodeGrid(g: GroundGrid): Uint8Array {
 const dataset = (w: World, id: string, name?: string) => datasetFile(id, w.manifest.datasets[id], name);
 
 /** The survey of the city, smoothed: today's ground, bare of buildings. */
-export async function cityGrid(w: World, origin: Origin): Promise<GroundGrid> {
-  const dem = await readTiff(dataset(w, 'src:tinitaly-1.1-w46075', 'dem'));
+export async function cityGrid(w: World, origin: Origin, survey: { city: string; utm_zone: number }): Promise<GroundGrid> {
+  const dem = await readTiff(dataset(w, survey.city, 'dem'));
   const g = grid(-6400, -6400, 1281, 1261, 10, (x, y) => {
     const [lat, lon] = fromLocal(origin, x, y);
-    const [e, n] = utm(lat, lon, 32);
+    const [e, n] = utm(lat, lon, survey.utm_zone);
     return sampleRaster(dem, e, n);
   });
   // The survey is a mesh of flat triangles from sparse points: round off their edges.
@@ -228,8 +228,8 @@ export async function cityGrid(w: World, origin: Origin): Promise<GroundGrid> {
 }
 
 /** The hills around the city, from radar: its buildings and woods are averaged away by the grid. */
-export async function hillsGrid(w: World, origin: Origin): Promise<GroundGrid> {
-  const tiles: Raster[] = [await readTiff(dataset(w, 'src:srtm-gl1-n41e012')), await readTiff(dataset(w, 'src:srtm-gl1-n42e012'))];
+export async function hillsGrid(w: World, origin: Origin, ids: string[]): Promise<GroundGrid> {
+  const tiles: Raster[] = await Promise.all(ids.map((id) => readTiff(dataset(w, id))));
   const g = grid(-40000, -40000, 1601, 1601, 50, (x, y) => {
     const [lat, lon] = fromLocal(origin, x, y);
     for (const t of tiles) {
@@ -243,8 +243,8 @@ export async function hillsGrid(w: World, origin: Origin): Promise<GroundGrid> {
 }
 
 /** The region, with the sea floor. */
-export async function regionGrid(w: World, origin: Origin): Promise<GroundGrid> {
-  const tiles: Raster[] = [await readTiff(dataset(w, 'src:etopo-2022-n45e000')), await readTiff(dataset(w, 'src:etopo-2022-n45e015'))];
+export async function regionGrid(w: World, origin: Origin, ids: string[]): Promise<GroundGrid> {
+  const tiles: Raster[] = await Promise.all(ids.map((id) => readTiff(dataset(w, id))));
   return grid(-480000, -480000, 1201, 1031, 800, (x, y) => {
     const [lat, lon] = fromLocal(origin, x, y);
     for (const t of tiles) {

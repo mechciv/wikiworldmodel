@@ -62,7 +62,7 @@ import {
 import type { AtlasBin, AtlasIndex, SeaBin, SeaIndex } from '../../../../core/atlas.ts';
 import type { RocksBin, RocksIndex } from '../../../../core/rocks.ts';
 import { fieldFor, fieldLods, loadBlocks, loadRelief, loadSnapshots, paleoElevation, sliceField, SRC_H, SRC_W, tileGrid, timeBins, type GridField } from './fields.ts';
-import { buildCity } from './city.ts';
+import { buildCities } from './city.ts';
 import { climateGrid, climateKeyframes, encodeClimate, forestChecks, heightOn, monthsFiles, monthsKeyframes, partClasses, partsFiles, waterParamsOf, type ClimateKeyframe, type PartRead, type WaterOptions } from './climate.ts';
 import { MONTHS_PARTS, MonthsTile, PARTS, PartsTile, partsFile, tilesNear, type MonthsInfo, type MonthsPart, type MonthsSet, type MonthsTileHeader, type PartInfo, type PartsTileHeader } from '../../../../core/months.ts';
 import { monthsPlace, placeMonths } from '../../../../world/generators/life/climate.ts';
@@ -1544,44 +1544,37 @@ export async function runBuild(args: string[]): Promise<number> {
     iceMeta = iceStage.meta;
     iceStageKey = iceStage.key;
   }
-
-  // Stage: city (Rome fabric + DEM ground grids)
-  const fabricGen = world.generators.find((g) => g.id === 'gen:rome/fabric');
-  const cityDatasetId = [...world.snapshots.keys()][0];
-  let cityMeta: { file?: string; site?: SiteInfo } = {};
-  if (fabricGen && cityDatasetId) {
-    const drawnEntities = world.entities.filter((e) => /^(building|monument|works|open)(\/|$)/.test(e.kind) && e.kind !== 'open/region');
+  // Stage: city. Every city a map of the world is of (a dataset imported as an `ohm-site` with its `site`): its records,
+  // building by building, which a living scene near it draws, its surveyed ground, and the way in to it.
+  const mapped = Object.entries(world.manifest.datasets).filter(([, d]) => d.import?.as === 'ohm-site' && d.import.site);
+  let cityMeta: { files: string[]; sites: SiteInfo[] } = { files: [], sites: [] };
+  if (mapped.length) {
+    const drawnEntities = world.entities.filter((e) => /^(building|monument|works|open)(\/|$)/.test(e.kind));
     const cityStage = await dag.runStage(
       'city',
       {
-        gen: { id: fabricGen.id, version: fabricGen.version, params: fabricGen.params, slots: fabricGen.slots },
-        snapshot: dsKey(cityDatasetId),
-        dems: ['src:tinitaly-1.1-w46075', 'src:srtm-gl1-n41e012', 'src:srtm-gl1-n42e012', 'src:etopo-2022-n45e000', 'src:etopo-2022-n45e015'].map(dsKey),
+        maps: mapped.map(([id, d]) => {
+          const site = d.import!.site!;
+          return { map: dsKey(id), site, surveys: [site.ground.city, ...site.ground.hills, ...site.ground.region].map(dsKey) };
+        }),
         entities: entitiesKey(drawnEntities, solved),
       },
       async (sink) => {
-        const built = await buildCity(solved, log);
-        if (!built) return {};
-        for (const [path, bytes] of built.blobs) await sink.put(path, bytes);
-        const cityPath = `city/${built.file.site.id}.json`;
-        await sink.put(cityPath, stableStringify(built.file));
-        const v = (fabricGen.params as unknown as { site: Pick<SiteInfo, 'near' | 'window' | 'view'> }).site;
-        const site: SiteInfo = {
-          kind: 'city',
-          id: built.file.site.id,
-          label: built.file.site.label,
-          file: cityPath,
-          place: 'places/rome',
-          origin: built.file.site.origin,
-          span: built.file.site.span,
-          slice: built.file.site.slice,
-          near: v.near,
-          window: v.window,
-          view: v.view,
-        };
-        return { file: cityPath, site };
+        const files: string[] = [];
+        const sites: SiteInfo[] = [];
+        for (const c of await buildCities(solved, log)) {
+          for (const [path, bytes] of c.blobs) await sink.put(path, bytes);
+          const f = c.file.site;
+          const file = `city/${f.id}.json`;
+          await sink.put(file, stableStringify(c.file));
+          files.push(file);
+          // A map's way in, from its dataset's site: where a link to the city lands.
+          const site = mapped.find(([, d]) => d.import!.site!.id === f.id)![1].import!.site!;
+          sites.push({ kind: 'city', id: f.id, label: f.label, file, place: f.settlement, origin: f.origin, span: f.span, slice: (f.span[0] + f.span[1]) / 2, near: site.near ?? f.span, window: site.window ?? f.span, view: site.view ?? { x: 0, y: 0, range: 1500, heading: 0, tilt: 60 } });
+        }
+        return { files, sites };
       },
-      { codeFiles: ['tools/world/src/build/city.ts', 'tools/world/src/build/ground.ts', 'core/city.ts', 'world/generators/rome/fabric/v1.ts'] },
+      { codeFiles: ['tools/world/src/build/city.ts', 'tools/world/src/build/ground.ts', 'core/city.ts'] },
     );
     cityMeta = cityStage.meta;
   }
@@ -1799,7 +1792,7 @@ export async function runBuild(args: string[]): Promise<number> {
           ...(housingRes ? { housing: housingRes } : {}),
         };
       },
-      { codeFiles: ['tools/world/src/build/landscape.ts', 'core/landscape.ts', 'core/dwelling.ts', 'world/generators/people/settlement/v1.ts'] },
+      { codeFiles: ['tools/world/src/build/landscape.ts', 'core/landscape.ts', 'core/dwelling.ts', 'world/generators/people/settlement/v10.ts'] },
     );
     landscapeMeta = landscapeStage.meta;
     landscapeStageKey = landscapeStage.key;
@@ -1995,7 +1988,7 @@ export async function runBuild(args: string[]): Promise<number> {
 
   // Life stages: life-scene, life-sea, life-atlas, life-witness.
   const sites: SiteInfo[] = [];
-  if (cityMeta.site) sites.push(cityMeta.site);
+  sites.push(...cityMeta.sites);
   let atlasFile: string | undefined;
   let seaStageKey = '';
   let hasSea = false;
@@ -2378,7 +2371,7 @@ export async function runBuild(args: string[]): Promise<number> {
       series: 'series.json',
       planet: 'planet.json',
       territory: 'territory.json',
-      city: cityMeta.file,
+      city: cityMeta.files[0],
       climate: deepClimateMeta?.ages.length ? 'climate.lwt' : undefined,
       ice: iceMeta ? 'ice.lwt' : undefined,
       tree: 'tree.json',
