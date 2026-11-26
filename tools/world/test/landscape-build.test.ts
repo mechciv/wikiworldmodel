@@ -15,7 +15,7 @@ import { LakeMap } from '../../../world/generators/life/lakes.ts';
 import { WATER_REACH } from '../../../world/generators/life/water.ts';
 import type { SceneSpec } from '../../../core/scene.ts';
 import type { Tileset } from '../../../core/tileset.ts';
-import { makeSettlement } from '../../../world/generators/people/settlement/v11.ts';
+import { makeSettlement } from '../../../world/generators/people/settlement/v12.ts';
 import { HOUSING_TIMES, parseClassGrid } from '../src/build/landscape.ts';
 import { dataset, latestBuild } from './helpers.ts';
 

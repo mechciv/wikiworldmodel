@@ -17,7 +17,7 @@ import { compileAgriculture, compileHusbandry, compileTraditions, prevalenceOf, 
 import type { Figure } from '../../../../core/citypop.ts';
 import { canonicalForm, type Form } from '../../../../core/form.ts';
 import type { LivingTaxon } from '../../../../core/scene.ts';
-import { GENERATOR as SETTLEMENT, peopleReach, VERSION as SETTLEMENT_VERSION } from '../../../../world/generators/people/settlement/v11.ts';
+import { GENERATOR as SETTLEMENT, peopleReach, VERSION as SETTLEMENT_VERSION } from '../../../../world/generators/people/settlement/v12.ts';
 import { EXTENT } from '../../../../world/generators/life/scene/current.ts';
 import { FormTree } from '../forms.ts';
 import type { LandscapeIndex, TraditionsFile } from '../../../../core/landscape.ts';

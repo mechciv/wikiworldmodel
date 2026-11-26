@@ -1,0 +1,19 @@
+id: src:carter-2018-angkor-residential-patterning
+type: publication
+kind: measurement
+citation: >-
+  Carter, A., Heng, P., Stark, M., Chhay, R. & Evans, D. (2018). Urbanism and residential patterning in Angkor. Journal of
+  Field Archaeology 43(6), 492–506.
+authors: ["Carter, A.", "Heng, P.", "Stark, M.", "Chhay, R.", "Evans, D."]
+published: 2018
+title: Urbanism and residential patterning in Angkor
+container: Journal of Field Archaeology
+doi: 10.1080/00934690.2018.1503034
+url: https://scholarsbank.uoregon.edu/bitstreams/6e1421c1-f7a7-4ca0-a424-125557703348/download
+license_note: Cited for single facts and short quotes, with credit.
+verified:
+  by: machine:claude-code
+  how: >-
+    The article read whole as the PDF the University of Oregon's ScholarsBank serves (sha256 4f9d005217a0b1af…), whose
+    first page is the publisher's cover, so that the article's page 492 is the PDF's second; the quotations checked by
+    script against its text.

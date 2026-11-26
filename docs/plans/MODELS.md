@@ -231,6 +231,26 @@ year (it needs no new data, only the place's months); crops and fields; houses w
 animals; institutions. Each is judged, as well as by
 its score, by a [visual-gaps](VISUAL-GAPS.md) card at the places of judging.
 
+### The settlement's form
+
+`model:people/settlement-form`, the second node, decides how a settlement's people stood on its ground. In the design
+built as the [twentieth slice](../slices/TWENTIETH-SLICE.md):
+
+- **The fabric is the evidence's word.** A town is `compact`, houses packed along its lanes as the city system has drawn
+  every town, or `dispersed`: its tradition's own settlements, each with its houses, ponds and shrine, set apart among
+  fields, gardens and water. A town form says which (`fabric`), its record's or its townspeople's tradition's. Neither
+  the density nor a village pattern can tell them apart: Angkor's households took about half its ground at its measured
+  density, and so would Uruk's.
+- **A dispersed town is a field of units.** Each unit is one of its tradition's settlements, as many households as the
+  tradition says a settlement held, on the ground each household took, and the units are as far apart as the town's
+  density, from the density node, leaves room for. What lies between is the open share of the town, farmed as its
+  region farmed.
+- **A unit keeps its place.** Units stand on a lattice of the town's own metres, each named by its place in it, and
+  stand at a time where the growth model has built their ground then, so a link to one holds through the town's life.
+- **What it is held to:** the households the units draw add up to the town's people; the open share is what the density
+  leaves. No measured plan of a dispersed town is open to score it on yet. Chevance et al.'s plan of Mahendraparvata
+  (2019), whose figures are CC BY, is the first candidate.
+
 **The places of judging,** the test set for every node: Angkor in 850 and 1200; Rome in 100 CE; Tenochtitlan in 1519;
 the Eastern Han hamlet of 147 CE; and one settlement in each culture area that has a broad tradition, chosen where the
 evidence is best.

@@ -1804,7 +1804,7 @@ export async function runBuild(args: string[]): Promise<number> {
           people: peopleScores,
         };
       },
-      { codeFiles: ['tools/world/src/build/landscape.ts', 'core/landscape.ts', 'core/dwelling.ts', 'core/citypop.ts', 'core/gauss.ts', 'tools/world/src/holdout.ts', 'world/generators/people/settlement/v11.ts'] },
+      { codeFiles: ['tools/world/src/build/landscape.ts', 'core/landscape.ts', 'core/dwelling.ts', 'core/citypop.ts', 'core/gauss.ts', 'tools/world/src/holdout.ts', 'world/generators/people/settlement/v12.ts'] },
     );
     landscapeMeta = landscapeStage.meta;
     landscapeStageKey = landscapeStage.key;

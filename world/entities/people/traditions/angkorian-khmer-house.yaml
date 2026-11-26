@@ -1,0 +1,171 @@
+id: people/traditions/angkorian-khmer-house
+kind: tradition/building
+summary: >-
+  The houses and settlements of the Khmer of the Angkorian period: houses of thatch raised on piles, their size by the
+  household's wealth or the official's rank; households on their own earthen mounds, each with a pond or sharing one;
+  and the mounds gathered in village-level communities round a temple and its reservoir, scattered among the rice fields,
+  so that the capital itself was a low-density city of such communities among fields and water. Zhou Daguan describes
+  the houses of the capital in 1296–1297; the mounds, temples and ponds are the archaeologists' mapping of Greater Angkor.
+author: machine:claude-code
+claims:
+  name:
+    prop: name
+    value: { en: Khmer house on piles of the Angkorian period }
+    unsourced: An editorial label.
+  start:
+    prop: start
+    value: 802 CE
+    source:
+      ref: src:lustig-2009-angkor-political-economy
+      loc: "p. 66"
+      quote: Jayavarman II appears to have brought significant land and regional lords into a ‘single’ domain by 802 CE
+    method: historical-account
+    note: >-
+      The year by which the Angkorian kingdom was one, as Lustig dates it, taken as the start of the Angkorian period's
+      houses and settlements. Their forms are older: Klassen et al. date the first houses of Greater Angkor's centres from
+      770, and some habitation mounds at Hariharalaya are older still.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in lustig-2009.txt (sha256 494d50a16c137857), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-25" }
+  end:
+    prop: end
+    value: 1431 CE
+    source:
+      ref: src:pleiades-angkor
+      loc: "place 531398484, description"
+      quote: >-
+        The city was sacked in 1431 by invaders from the Ayutthaya kingdom, and was abandoned except for the temple of Angkor
+        Wat
+    method: historical-account
+    note: >-
+      The end of the capital whose houses Zhou describes, taken as the end of this record. Khmer houses on piles and
+      villages round a temple and its pond went on after it (Klassen et al. describe them in the mid-20th century), which a
+      later record should take.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in pleiades-531398484.txt (sha256 24d98dcbf5e2871f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-25" }
+  extent:
+    prop: extent
+    value: { from: src:archaeoglobe-2019-regions, names: ["128"] }
+    unsourced: >-
+      Region 128 holds Cambodia, where Angkor and the houses and settlements described here stood, and Vietnam, where the
+      Khmer were not most of the people. The region is the finest the world's regions give; the tradition is not claimed
+      for Vietnam, whose houses another record should take.
+    method: editorial
+  lifeway:
+    prop: lifeway
+    value: [farmers, townspeople]
+    source:
+      - ref: src:zhou-daguan-zhenla-fengtu-ji-wikisource
+        loc: "宫室 (palaces and houses)"
+        quote: 其下如百姓之家，止用草蓋，瓦片不敢上屋。其廣狹雖隨家之貧富
+      - ref: src:carter-2018-angkor-residential-patterning
+        loc: "p. 494"
+        quote: >-
+          A sprawling residential pattern of scattered small temples, ponds, and house mounds was identified in the
+          agricultural areas surrounding the central monument zone
+    method: documentary
+    note: >-
+      Zhou's houses of the common people are those of the capital, its townspeople; the archaeologists' house mounds are
+      those of the farmers of the agricultural land about the monuments, and of its metropolitan area.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zhou-daguan-zh-wikisource.txt (sha256 168e1b1bfa28727d) and carter-2018.txt (sha256 69ffde9de1197386), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-25" }
+  dwelling:
+    prop: dwelling
+    value: { roof_material: thatch, floor: stilts }
+    source:
+      - ref: src:zhou-daguan-zhenla-fengtu-ji-wikisource
+        loc: "宫室 (palaces and houses)"
+        quote: 其下如百姓之家，止用草蓋，瓦片不敢上屋。其廣狹雖隨家之貧富
+      - ref: src:zhou-daguan-zhenla-fengtu-ji-wikisource
+        loc: "奴婢 (slaves)"
+        quote: 只許于樓下坐卧。若執役，方許登樓
+    method: documentary
+    note: >-
+      Zhou: the common people's houses were roofed with thatch only, and dared put no tile on a roof, their size following
+      the household's wealth; an official's house was of thatch too but for its family shrine and main bedroom, which might
+      be tiled, its size set by his rank. The house stood raised: slaves might sit and lie only below its floor (樓下),
+      and went up into it only to serve. The rest of the house, its rectangular plan and its gabled roof, is the broader
+      tradition's, and no size is given.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zhou-daguan-zh-wikisource.txt (sha256 168e1b1bfa28727d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-25" }
+  settlement:
+    prop: settlement_form
+    value: { pattern: nucleated, houses: 100, spacing: { lo: 25, hi: 38 }, household: 5 }
+    source:
+      - ref: src:klassen-2021-angkor-population
+        loc: "Methods, \"Estimating population in the AMA\""
+        quote: >-
+          They were typically organized in village-level units called phum, built on elevated earthen mounds, and have
+          temple and reservoir (prasat-trapeang) configurations analogous to those of the Angkor period (16, 35, 42).
+      - ref: src:klassen-2021-angkor-population
+        loc: "Methods, \"Estimating population in the AMA\""
+        quote: Ethnographic reports indicate that these village-level temples serviced approximately 100 families (41).
+      - ref: src:klassen-2021-angkor-population
+        loc: "Methods, \"Estimating population in the AMA\""
+        quote: (100 families with five people)
+      - ref: src:carter-2018-angkor-residential-patterning
+        loc: "p. 502"
+        quote: Each individual mound measures approximately 25 × 38 m
+    method: expert-estimate
+    note: >-
+      A temple community of about a hundred households of five, by analogy with the Khmer villages of the mid-20th
+      century, which Klassen et al. take for the Angkorian period's: their model of Greater Angkor's population is set to
+      give that mean. The spacing is the house mounds of the Angkor Wat enclosure, 25 by 38 m; whether each held one
+      household or several, Carter et al. say, is not yet known.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in klassen-2021.txt (sha256 62df9d046be766cf) and carter-2018.txt (sha256 69ffde9de1197386), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-25" }
+  outbuildings:
+    prop: outbuildings
+    value:
+      - { use: pond, per: house, count: { lo: 0.33, hi: 1 } }
+      - { use: shrine, per: settlement, roof_material: tile }
+      - { use: pond, per: settlement }
+    source:
+      - ref: src:zhou-daguan-zhenla-fengtu-ji-wikisource
+        loc: "澡浴 (bathing)"
+        quote: 但每家須有一池；否則亦兩三家合一池。
+      - ref: src:zhou-daguan-zhenla-fengtu-ji-wikisource
+        loc: "村落 (villages)"
+        quote: 每一村，或有寺，或有塔。
+      - ref: src:zhou-daguan-zhenla-fengtu-ji-wikisource
+        loc: "三教 (the three teachings)"
+        quote: 寺亦許用瓦蓋
+      - ref: src:klassen-2021-angkor-population
+        loc: "Methods, \"Estimating population in the AMA\""
+        quote: >-
+          They were typically organized in village-level units called phum, built on elevated earthen mounds, and have
+          temple and reservoir (prasat-trapeang) configurations analogous to those of the Angkor period (16, 35, 42).
+    method: documentary
+    note: >-
+      Each household had its pond, or two or three shared one (Zhou), so from a third to one a house; and each community
+      its temple and its reservoir, the prasat-trapeang of the mapped temples. Zhou says every village had a temple (寺)
+      or a tower (塔), and that a temple might be roofed with tiles, where a commoner's house might not (宮室). How big
+      the ponds and the temple were is not given here.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in zhou-daguan-zh-wikisource.txt (sha256 168e1b1bfa28727d) and klassen-2021.txt (sha256 62df9d046be766cf), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-25" }
+  town:
+    prop: town_form
+    value: { fabric: dispersed }
+    source:
+      - ref: src:klassen-2021-angkor-population
+        loc: Introduction
+        quote: >-
+          Studies of tropical urban societies have long acknowledged the importance of dispersed or agro-urban landscapes,
+          sometimes referred to as low-density urbanism, in which agricultural or garden spaces are intertwined with urban
+          infrastructure and activities (1–3).
+      - ref: src:carter-2018-angkor-residential-patterning
+        loc: "p. 494"
+        quote: >-
+          A sprawling residential pattern of scattered small temples, ponds, and house mounds was identified in the
+          agricultural areas surrounding the central monument zone
+    method: survey
+    note: >-
+      The city was its communities and their fields: households on their mounds round temples and ponds, scattered
+      among the rice fields about and between the civic-ceremonial centres. The walled centres themselves, as Angkor Thom
+      was, are not described here.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in klassen-2021.txt (sha256 62df9d046be766cf) and carter-2018.txt (sha256 69ffde9de1197386), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-25" }
+relations:
+  broader:
+    rel: member-of
+    to: people/traditions/southeast-asian-house-on-piles
+    unsourced: An editorial grouping.

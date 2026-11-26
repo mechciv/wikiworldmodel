@@ -234,6 +234,14 @@ export const FIELD_WORDS = {
  * generator lays a town's houses out by it; where neither says, by its generic town, which says so.
  */
 export const TOWN_WORDS = {
+  /**
+   * How its houses stood on its ground (model:people/settlement-form): packed together, as the city system draws every
+   * town where nothing says otherwise; or its tradition's own settlements set apart among their fields
+   */
+  fabric: {
+    compact: 'Its houses packed together along its streets and lanes: the town one built-up mass.',
+    dispersed: "Its people's own settlements, each with its houses, set apart among fields, gardens and water: a low-density town.",
+  },
   streets: {
     grid: 'Straight streets crossing at right angles, the houses in blocks between them.',
     lanes: 'Winding lanes and alleys that follow no plan, the houses packed between them.',
@@ -573,19 +581,26 @@ export function traditionAt(list: Tradition[], region: number | undefined, t: nu
 /** A town's layout in words, for a panel: "streets on a grid, in blocks of 60–100 m, a wall of stone 8 m high, 4 gates". */
 export function townText(v: TownSpec): string {
   const parts: string[] = [];
-  if (v.streets) parts.push(v.streets === 'grid' ? 'streets on a grid' : v.streets === 'lanes' ? 'winding lanes' : 'streets of water and of earth');
-  if (v.block !== undefined) parts.push(`blocks of ${spanText(v.block, ' m')}`);
-  if (v.street !== undefined) parts.push(`streets ${spanText(v.street, ' m')} wide`);
-  if (v.main_street !== undefined) parts.push(`main streets ${spanText(v.main_street, ' m')} wide`);
+  // A dispersed town is its people's own settlements, each laid out as its tradition's are: the words for a compact
+  // town's streets, blocks, square and axis say nothing of how it was drawn (COMPACT_WORDS).
+  const compact = v.fabric !== 'dispersed';
+  if (!compact) parts.push('its own settlements set apart among their fields');
+  if (compact && v.streets) parts.push(v.streets === 'grid' ? 'streets on a grid' : v.streets === 'lanes' ? 'winding lanes' : 'streets of water and of earth');
+  if (compact && v.block !== undefined) parts.push(`blocks of ${spanText(v.block, ' m')}`);
+  if (compact && v.street !== undefined) parts.push(`streets ${spanText(v.street, ' m')} wide`);
+  if (compact && v.main_street !== undefined) parts.push(`main streets ${spanText(v.main_street, ' m')} wide`);
   if (v.wall === 'none') parts.push('no wall');
   else if (!v.wall && (v.wall_height !== undefined || v.wall_thickness !== undefined)) parts.push(`a wall${v.wall_height !== undefined ? ` ${spanText(v.wall_height, ' m')} high` : ''}${v.wall_thickness !== undefined ? `${v.wall_height !== undefined ? ',' : ''} ${spanText(v.wall_thickness, ' m')} thick` : ''}`);
   else if (v.wall) parts.push(`${v.wall === 'earth' ? 'a rampart of earth' : v.wall === 'timber' ? 'a palisade' : `a wall of ${v.wall === 'rammed-earth' ? 'rammed earth' : v.wall}`}${v.wall_height !== undefined ? ` ${spanText(v.wall_height, ' m')} high` : ''}${v.wall_thickness !== undefined ? `, ${spanText(v.wall_thickness, ' m')} thick` : ''}`);
   if (v.gates !== undefined) parts.push(`${spanText(v.gates)} gates`);
   if (v.moat !== undefined) parts.push(v.moat ? 'a moat outside it' : 'no moat');
-  if (v.square !== undefined) parts.push(v.square ? 'an open square at its middle' : 'no open square');
-  if (v.orientation !== undefined) parts.push(`laid out ${spanText(v.orientation, '°')} east of north`);
+  if (compact && v.square !== undefined) parts.push(v.square ? 'an open square at its middle' : 'no open square');
+  if (compact && v.orientation !== undefined) parts.push(`laid out ${spanText(v.orientation, '°')} east of north`);
   return parts.join(', ');
 }
+
+/** The words of a town form that say how a compact town's streets were laid out, and nothing of a dispersed one. */
+export const COMPACT_WORDS: ReadonlySet<string> = new Set(['streets', 'block', 'street', 'main_street', 'square', 'orientation']);
 
 // ——— Husbandry ———
 

@@ -113,7 +113,7 @@ parameter you cannot source out of the claim: what no claim says is the generato
 | `settlement_form` | how the houses stood together: `pattern`, `layout` (`ring`, `rows`), `enclosure` (what stood round the settlement or the compound), `yard` (what stood round each house's yard), `plaza`, `houses` (in one settlement), `spacing` (metres between them), `household` (people in one house) |
 | `outbuildings` | [what stood by the houses](#what-stood-by-the-houses): granaries, byres, pens, cookhouses, ovens, wells, racks, stacks, shrines, houses to meet in, as a list |
 | `field_system` | the fields: `kind`, `plot` (hectares), `bounds` |
-| `town_form` | for a tradition that housed townspeople, how its towns were laid out: `streets` (`grid`, `lanes`, `canals`), `block` and `street` and `main_street` (metres), `wall` (`none`, `earth`, `rammed-earth`, `timber`, `mudbrick`, `stone`, `brick`), `wall_height`, `wall_thickness`, `gates`, `moat`, `square` |
+| `town_form` | for a tradition that housed townspeople, how its towns were laid out: `fabric` (`compact`, `dispersed`), `streets` (`grid`, `lanes`, `canals`), `block` and `street` and `main_street` (metres), `wall` (`none`, `earth`, `rammed-earth`, `timber`, `mudbrick`, `stone`, `brick`), `wall_height`, `wall_thickness`, `gates`, `moat`, `square` |
 | `member-of` | the broader tradition it belongs to: it inherits every parameter it does not state |
 
 The words each may take are in [core/dwelling.ts](../core/dwelling.ts), each with what it means. Lengths are in metres
@@ -284,6 +284,14 @@ and no wall, and the panel says that it is generic.
 
 The wall is drawn round the whole town, and the form for every town of a tradition's regions. A wall round a precinct,
 or one that some towns had and others did not, belongs in the note until a record can say so.
+
+**A town of its people's own settlements.** Where a source says a town's people lived in settlements of their own set
+apart among their fields, gardens and water, as at Angkor and in the low-density cities of the tropics, its form says
+`fabric: dispersed`. The town is then drawn as the tradition's settlements, each as its `settlement_form` and
+`outbuildings` say (how many houses one held, how far apart they stood, its shrine and its ponds), as far apart as the
+town's density leaves room for, with fields between (model:people/settlement-form). A town is compact where nothing
+says otherwise, and where its density leaves no ground between its settlements. A village pattern is not enough: a
+`nucleated` village says nothing of how the tradition's towns stood.
 
 ## Animals
 

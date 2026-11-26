@@ -8,7 +8,7 @@ import { encodeGround, GRIDS, placeLook, worldGround } from '../../../world/gene
 import { plotStyle } from '../../../core/plots.ts';
 import type { SceneSpec } from '../../../core/scene.ts';
 import { FAST_BUDGET, FULL_BUDGET, SceneStream, type Batch, type LifeView, type NamedGroup, type ProtoMesh } from '../../../world/generators/life/stream.ts';
-import type { PlanForm, Settlement, SettlementPlan, WorkForm } from '../../../world/generators/people/settlement/v11.ts';
+import type { PlanForm, Settlement, SettlementPlan, WorkForm } from '../../../world/generators/people/settlement/v12.ts';
 
 /** A transferred instance batch with world-space bounds precomputed off the main thread. */
 export interface WorkerBatch extends Batch {
@@ -33,7 +33,7 @@ export interface PeopleSummary {
   crops: boolean;
   /** the resolved regional agricultural tradition (or generic fallback) and seasonal 8-slot palette */
   agriculture: SettlementPlan['agriculture'];
-  settlements: { pattern: string; houses: number; people: number; city?: string; record?: string; from?: Settlement['from']; town?: Settlement['town']; husbandry?: string; tier: string; form: number; region: number; x: number; y: number; r: number; house?: [number, number, number] }[];
+  settlements: { pattern: string; houses: number; people: number; city?: string; record?: string; from?: Settlement['from']; town?: Settlement['town']; husbandry?: string; unitOf?: string; tier: string; form: number; region: number; x: number; y: number; r: number; house?: [number, number, number] }[];
   houses: number;
   drawn: number;
   expected: number;
@@ -148,7 +148,7 @@ self.onmessage = (e: MessageEvent<ToLifeWorker>) => {
       streets: pl.streets.length + pl.lanes.length,
       crops: !!stream.crops,
       agriculture: pl.agriculture,
-      settlements: pl.settlements.map((x, i) => ({ ...(houseOf.has(i) ? { house: houseOf.get(i)! } : {}), pattern: x.pattern, houses: x.houses, people: Math.round(x.people), ...(x.city ? { city: x.city } : {}), ...(x.record ? { record: x.record } : {}), ...(x.from ? { from: x.from } : {}), ...(x.town ? { town: x.town } : {}), ...(x.husbandry ? { husbandry: x.husbandry } : {}), tier: x.tier, form: x.form, region: x.region, x: Math.round(x.x), y: Math.round(x.y), r: Math.round(x.r) })),
+      settlements: pl.settlements.map((x, i) => ({ ...(houseOf.has(i) ? { house: houseOf.get(i)! } : {}), pattern: x.pattern, houses: x.houses, people: Math.round(x.people), ...(x.city ? { city: x.city } : {}), ...(x.record ? { record: x.record } : {}), ...(x.from ? { from: x.from } : {}), ...(x.town ? { town: x.town } : {}), ...(x.husbandry ? { husbandry: x.husbandry } : {}), ...(x.unitOf ? { unitOf: x.unitOf } : {}), tier: x.tier, form: x.form, region: x.region, x: Math.round(x.x), y: Math.round(x.y), r: Math.round(x.r) })),
       houses: pl.houses.length,
       drawn: pl.drawn,
       expected: pl.expected,

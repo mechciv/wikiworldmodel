@@ -124,6 +124,17 @@ views:
       Hariharalaya at Roluos in 851 CE from 1.5 km up, the court's town about Bakong at the density Klassen et al. measured
       for Angkor's civic-ceremonial centres.
     link: t=851.6&lat=13.31&lon=103.974&d=1.00024&h=10&v=60&hour=10&mo=8&clock=0
+  - name: angkor-851-hariharalaya-low
+    what: >-
+      Hariharalaya in 851 CE from 150 m up: a dispersed town, its people's own settlements of Khmer houses on piles with
+      their ponds and shrines, set apart among rice fields (model:people/settlement-form; docs/slices/TWENTIETH-SLICE.md).
+    link: t=851.6&lat=13.33&lon=103.974&d=1.000024&h=20&v=72&hour=10&mo=8&clock=0
+  - name: angkor-1200-low
+    what: Yasodharapura in 1200 CE from 150 m up, the dispersed town at its later centre.
+    link: t=1200.6&lat=13.42&lon=103.85&d=1.000024&h=20&v=72&hour=10&mo=8&clock=0
+  - name: angkor-1200-ground
+    what: Yasodharapura in 1200 CE near eye level, in a rice field among houses on piles.
+    link: t=1200.6&lat=13.425&lon=103.85&d=1.0000035&h=20&v=84&hour=10&mo=8&clock=0
 
 # Interactive stress-test traces (docs/plans/PERFORMANCE.md, Phase 1): scripted camera and time sweeps measuring
 # p50/p95/p99 frame deltas, shadow cascade churn, mega-buffer draw batching, macro HLODs, and impostor counts.

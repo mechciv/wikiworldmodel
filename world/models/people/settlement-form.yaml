@@ -1,0 +1,49 @@
+# A model run here (section 4.10 of the design; docs/plans/MODELS.md, The settlement's form). It makes no field: what it
+# derives is how each town's people stood on its ground, which the settlement generator lays the town out by.
+id: model:people/settlement-form
+type: model
+title: How a town's people stood on its ground
+description: >-
+  Whether a town was compact, its houses packed together along its streets and lanes, or dispersed: its people's own
+  settlements, each with its houses, set apart among the fields, gardens and water they worked, as the low-density cities
+  of the tropics were. Which it was is the evidence's word, a town form's `fabric`, its record's or its townspeople's
+  tradition's; where none says, a town is compact, as the city system drew every town before. Neither the density nor a
+  village pattern tells the two apart: the households of a city of house mounds and those of a city of courtyard houses
+  packed in their blocks can take about the same share of their ground. A dispersed town is made of units, each one of
+  its tradition's settlements: as many households as the tradition says one held, of as many people as it says lived
+  to a house, each on the ground it says lay between one house and the next. The units are as far apart as the town's
+  density leaves room for, so that the households they hold add up to its people, and the ground between them is open.
+  Where the density leaves too little open ground for units to stand apart, the town is compact after all. The model
+  knows nothing of how a town's units differed from one another, its centres from its outskirts: each holds about its
+  tradition's number, by a number of its own.
+author: machine:claude-code
+code: core/fabric.ts
+inputs:
+  - { prop: town_form, note: "a town's fabric, its record's or its townspeople's tradition's" }
+  - { prop: settlement_form, note: "how many households a settlement of the tradition held, how far apart its houses stood, and how many lived to a house" }
+  - { ref: model:people/density, note: "how densely the town lived at its height, which sets how far apart its units stood" }
+  - { ref: model:people/city-population, note: "the town's people at its height" }
+derives: >-
+  Each town's fabric; and, for a dispersed town, its units: their households, the ground each took, how far apart they
+  stood, and the shares of the town's ground their houses took and left open.
+params:
+  houses:
+    choice: Thirty households to a unit, where the town's tradition says nothing of how many a settlement held.
+  spacing:
+    choice: Twenty metres from one house to the next in a unit, where its tradition does not say.
+  household:
+    choice: Five people to a household, where its tradition does not say, as the population model's own household.
+  open:
+    choice: >-
+      A town is drawn as units only where they leave at least 15% of its ground open between them; where the density
+      leaves less, its units would touch, and it is drawn compact.
+uncertainty:
+  kind: none
+  note: >-
+    A town is one fabric or the other, and its units are as many as its central reading of its people needs. No measured
+    plan of a dispersed town is open to score the model on yet; Chevance et al.'s plan of Mahendraparvata (2019), whose
+    figures are CC BY, is the first candidate.
+checks:
+  - { test: core/fabric.test.ts, holds: "makes a dispersed town of its tradition's settlements, as far apart as its density leaves room for" }
+  - { test: core/fabric.test.ts, holds: "draws a dispersed town as a compact one where its density leaves no ground between its units" }
+  - { test: world/generators/people/settlement/v12.test.ts, holds: "draws a dispersed town as its people's own settlements among their fields, each keeping its place" }
