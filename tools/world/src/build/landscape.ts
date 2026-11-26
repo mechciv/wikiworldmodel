@@ -680,7 +680,7 @@ export function cityRecords(s: Solved): CityRecord[] {
       return { ref: c.ref, span: [v?.[0] ?? span[0], v?.[1] ?? span[1]] as [number, number], rank: c.rank, ...(c.alt ? { alt: c.alt } : {}) };
     };
     const extents = e.claims
-      .filter((c) => c.subject === e.id && c.prop === 'extent' && c.status !== 'deprecated')
+      .filter((c) => c.subject === e.id && c.prop === 'extent' && c.status !== 'deprecated' && (!c.ground || c.ground === 'settlement' || c.ground === 'core'))
       .flatMap((c) => {
         const polygons = settlementOutline(s.world, c.value);
         if (!polygons.length) return [];

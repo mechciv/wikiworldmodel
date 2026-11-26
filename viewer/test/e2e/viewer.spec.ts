@@ -42,6 +42,7 @@ for (const trip of [
     await page.clock.resume();
     await page.waitForFunction((d) => window.__wikiworldmodel!.state().cam.dist !== d, start.cam.dist);
     const framing = await state();
+    if (trip.card) expect(framing.cam.dist).toBeLessThan(start.cam.dist);
     expect(when).toContain(formatTime(framing.t));
     expect(sweeping.t).toBeGreaterThan(Math.min(first.t, framing.t));
     expect(sweeping.t).toBeLessThan(Math.max(first.t, framing.t));
@@ -54,6 +55,24 @@ for (const trip of [
     expect(landed.t).toBe(framing.t);
   });
 }
+
+test('state search uses the indexed location when the border file is unavailable and retries on the next visit', async ({ page }) => {
+  const hash = buildFile<{ files: Record<string, string> }>('manifest.json').files['polities.json'];
+  const missing = '**/blobs/' + hash;
+  await page.route(missing, (route) => route.fulfill({ status: 503, body: 'Unavailable' }));
+  await page.goto(`/?b=${latestBuild()}&t=120&lat=0&lon=0&d=2.6&cl=0`);
+  const search = page.locator('.search input');
+  const choose = async () => {
+    await search.fill('Parthian Empire');
+    await page.locator('.search li').filter({ hasText: 'Parthian Empire' }).first().click();
+  };
+  await choose();
+  await expect(page.locator('.inspect')).toContainText('Detailed boundary geometry is unavailable');
+  expect((await page.evaluate(() => window.__wikiworldmodel!.state())).cam.lon).toBeGreaterThan(30);
+  await page.unroute(missing);
+  await choose();
+  await expect(page.locator('.inspect')).toContainText('as the dataset draws it');
+});
 
 test('a shared link reproduces the same view', async ({ page, context }) => {
   await page.goto(`/?b=${latestBuild()}`);

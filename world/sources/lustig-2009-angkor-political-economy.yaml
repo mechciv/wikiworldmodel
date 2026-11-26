@@ -14,4 +14,4 @@ verified:
   how: >-
     The thesis read whole as the PDF the Angkor Database serves (sha256 449f64c6…6df), turned to text page by page;
     the quotes checked by script against that text. Pages are the thesis's own printed numbers.
-    Codex also checked the two capital names on printed p. 66 against the retained page text with the quote checker.
+note: machine:codex checked the two capital names on printed p. 66 against the retained page text with the quote checker.

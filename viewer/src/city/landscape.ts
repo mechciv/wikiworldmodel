@@ -118,7 +118,7 @@ export class LandscapeAtlas {
     if (step === null) return '';
     const keys = [String(step)];
     for (const r of this.places.values()) {
-      if (!r.cores?.length || t < r.span[0] || t > r.span[1]) continue;
+      if (!r.cores?.length || t < r.span[0] || t >= r.span[1]) continue;
       if (Math.abs(lat - r.lat) > 2 || Math.abs(toLocal(r, lat, lon)[0]) > 200000) continue;
       for (const c of activeSiteClaims(r.cores, t, scenario)) keys.push(c.ref ?? `${c.lat},${c.lon}`);
       // An earlier chosen centre can still affect the later town's growth and roads.

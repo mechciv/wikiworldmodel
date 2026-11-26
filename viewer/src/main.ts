@@ -534,13 +534,15 @@ async function start(root: HTMLElement): Promise<void> {
   // The states of the world are the heaviest of these: loaded when a time first shows them.
   let politiesLoading: Promise<void> | null = null;
   let politiesReady = !ts.files.polities;
-  const wantPolities = () => {
-    if (politiesLoading || !ts.files.polities) return;
-    politiesLoading = build.getJSON<PolitiesFile>(ts.files.polities).then((f) => {
-      polities.file = f;
-      politiesReady = true;
-      dirty = true;
-    });
+  const wantPolities = (retry = false) => {
+    if (polities.file || !ts.files.polities) return;
+    if (politiesLoading && !(retry && politiesReady)) return politiesLoading;
+    politiesReady = false;
+    politiesLoading = build.getJSON<PolitiesFile>(ts.files.polities)
+      .then((f) => { polities.file = f; })
+      .catch((err) => console.error('Could not load historical state boundaries', err))
+      .finally(() => { politiesReady = true; dirty = true; });
+    return politiesLoading;
   };
   let layersReady = !ts.files.present && !ts.files.hazards;
   // What overlays say of rows of datasets, for the panel of a row that is clicked.
@@ -3099,8 +3101,7 @@ async function start(root: HTMLElement): Promise<void> {
     let t = at ?? (state.t >= a && state.t < b ? state.t : a);
     t = Math.max(dataRange[0], Math.min(dataRange[1], t));
     const p = placeIn(entry.places, t);
-    wantPolities();
-    await politiesLoading;
+    await wantPolities(true);
     const file = polities.file;
     const named = file?.rows.filter((r) => r.name === entry.label && (!p || (r.from === p[0] && r.at[0] === p[2] && r.at[1] === p[3])));
     const row = named?.find((r) => r.from <= t && t < r.to) ?? named?.[0];
@@ -3111,7 +3112,10 @@ async function start(root: HTMLElement): Promise<void> {
         setState({ t, sel: null, window: windowAround(t), ...(cam && at === undefined ? { cam } : {}) });
         if (cam && at !== undefined) flyTo(cam);
         shownRecord = null;
-        if (!file || !row) return;
+        if (!file || !row) {
+          inspect.showRow(entry.label, 'Historical territory', [formatTime(t)], undefined, 'Detailed boundary geometry is unavailable for this visit.');
+          return;
+        }
         const runs = entry.places?.length ?? 1;
         inspect.showRow(
           nameAt(entry, t),
