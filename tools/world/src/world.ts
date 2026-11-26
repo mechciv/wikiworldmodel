@@ -93,6 +93,12 @@ export interface Entity {
   claims: Claim[];
   relations: Relation[];
   file: string;
+  /**
+   * The dataset an import made this record from, an element or a row of it, where no record written by hand
+   * adopts that one; absent for a record written by hand. What a record is made by is said here, and never read
+   * from its id.
+   */
+  imported?: string;
 }
 
 export interface Source {
@@ -380,6 +386,8 @@ export interface Vocab {
   sourceTypes: Record<string, string>;
   sourceKinds: Record<string, string>;
   prominence: ProminenceRule;
+  /** where a record's file goes, by kind: the directories for each, as world/schema/layout.yaml gives them */
+  layout: Record<string, string[]>;
 }
 
 /** How the build derives from how far away a record shows: see schema/vocab/prominence.yaml. */
@@ -619,6 +627,7 @@ export async function loadWorld(root: string = WORLD): Promise<World> {
     sourceTypes: srcDoc.types,
     sourceKinds: srcDoc.kinds,
     prominence: await yamlOf<ProminenceRule>(from('schema/vocab/prominence.yaml')),
+    layout: Object.fromEntries(Object.entries((await yamlOf<{ kinds: Record<string, string | string[]> }>(from('schema/layout.yaml'))).kinds ?? {}).map(([k, v]) => [k, [v].flat()])),
   };
 
   const raw: RawRecord[] = [];
@@ -663,6 +672,8 @@ export async function loadWorld(root: string = WORLD): Promise<World> {
     const adopted = new Set<string>();
     for (const e of entities) for (const c of e.claims) if (c.prop === 'footprint') for (const k of (c.value as { elements?: string[] })?.elements ?? []) adopted.add(k);
     for (const k of [...adopted]) if (!snap.elements.some((x) => elementKey(x) === k)) loadIssues.push({ file: 'manifest.yaml', where: d.id, message: `no element ${k} in the snapshot` });
+    // A record that names an element as what it is, by the map's own key, adopts it too: a point has no footprint to name.
+    for (const e of entities) if (e.same_as?.ohm !== undefined && snap.elements.some((x) => elementKey(x) === String(e.same_as!.ohm))) adopted.add(String(e.same_as.ohm));
     entities.push(...ohmEntities(snap, d.id, label, d.import.frame!, adopted));
   }
   // A formation's taxa become records too, but its occurrences stay rows of the snapshot.
@@ -723,6 +734,12 @@ export async function loadWorld(root: string = WORLD): Promise<World> {
 
 export function schemaDir(root: string): string {
   return existsSync(join(root, 'schema/entity.schema.json')) ? join(root, 'schema') : join(WORLD, 'schema');
+}
+
+/** The directories a record of a kind goes in (world/schema/layout.yaml): its own, or its nearest parent's. */
+export function layoutOf(vocab: Pick<Vocab, 'layout'>, kind: string): string[] | undefined {
+  for (let k = kind; k; k = k.includes('/') ? k.slice(0, k.lastIndexOf('/')) : '') if (vocab.layout[k]) return vocab.layout[k];
+  return undefined;
 }
 
 /** Is `kind` the kind `of`, or one of its descendants? */

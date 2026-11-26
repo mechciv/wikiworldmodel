@@ -16,7 +16,7 @@ export function tree(s: Solved): TreeFile {
     const rank = claimOf(s, e.id, 'taxon_rank')?.value as string | undefined;
     const node: TreeNode = { id: e.id, label: labelOf(e.id), parent: parent ? index.get(splitRef(parent.to).record) ?? -1 : -1, ...subjectTime(s, e.id) };
     if (rank) node.rank = rank;
-    if (e.id.startsWith('life/pbdb/')) node.imported = true;
+    if (e.imported) node.imported = true;
     return node;
   });
   const members: TreeFile['members'] = [];

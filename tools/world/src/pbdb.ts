@@ -654,7 +654,7 @@ export function pbdbEntities(snap: PbdbSnapshot, dataset: string, file: string, 
     if (mine) {
       mine.claims.push(...claims);
       mine.relations.push(...relations);
-    } else out.push({ id, kind: 'taxon', summary: `A ${t.rank || 'taxon'} in the Paleobiology Database.`, same_as: { pbdb: `txn:${no}` }, phases: [], claims, relations, file });
+    } else out.push({ id, kind: 'taxon', summary: `A ${t.rank || 'taxon'} in the Paleobiology Database.`, same_as: { pbdb: `txn:${no}` }, phases: [], claims, relations, file, imported: dataset });
   }
   return out;
 }

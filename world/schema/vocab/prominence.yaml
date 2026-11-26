@@ -38,7 +38,7 @@ domains:
       ecosystem: 7
       taxon: 5
       occurrence: 3
-  people:
+  civilization:
     reserve: 6
     kinds:
       event: 6

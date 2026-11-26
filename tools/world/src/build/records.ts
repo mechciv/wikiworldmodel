@@ -827,7 +827,7 @@ export function search(s: Solved, feats: Feature[]): SearchFile {
         // Every name it goes by, so that it is found by any: absent where its label is its only one.
         const { label, names } = namesOf(s, e);
         const more = names.some((n) => n.text !== label || n.valid);
-        return { id: e.id, label, kind: e.kind, summary: e.summary, time: timeOf(s, e.id, s.sol.bounds, boundsOf(s.centres)), located: located.has(e.id), ...(e.id.startsWith('life/pbdb/') ? { bulk: true } : {}), ...(more ? { names } : {}) };
+        return { id: e.id, label, kind: e.kind, summary: e.summary, time: timeOf(s, e.id, s.sol.bounds, boundsOf(s.centres)), located: located.has(e.id), ...(e.imported && e.kind === 'taxon' ? { bulk: true } : {}), ...(more ? { names } : {}) };
       }),
   };
 }

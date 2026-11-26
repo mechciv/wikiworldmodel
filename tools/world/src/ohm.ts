@@ -239,7 +239,7 @@ export function ohmEntities(snap: OhmSnapshot, dataset: string, file: string, fr
     if (!e.point) add('footprint', 'footprint', { from: dataset, elements: [key] });
     const height = Number(t.height);
     if (t.height && Number.isFinite(height) && height > 0) add('height', 'height', height);
-    out.push({ id, kind: ohmKind(e), phases: [], claims, relations: [], file, same_as: t.wikidata ? { ohm: key, wikidata: t.wikidata } : { ohm: key } });
+    out.push({ id, kind: ohmKind(e), phases: [], claims, relations: [], file, same_as: t.wikidata ? { ohm: key, wikidata: t.wikidata } : { ohm: key }, imported: dataset });
   }
   return out;
 }

@@ -1,0 +1,78 @@
+# Where a record's file goes: the directory for its kind, under world/entities. No tool reads anything
+# into a path (rule 7): a record is known by its id, and moving its file changes nothing the world says.
+# The layout is for the people and agents who write records, so that "where does this go" has one
+# answer, which `npm run validate` checks: it warns at a record that lies outside its kind's directory.
+#
+# A directory is named for a kind of thing, never for the job that wrote its files. A set of records is
+# a relation (the Hell Creek's taxa are members of its ecosystem; Rome's buildings are part of Rome) or
+# a list in its slice's document, never a folder.
+#
+# A kind with no line of its own goes with its nearest parent. A few kinds belong to more than one
+# domain, and list a directory in each: such a record goes in the domain of what it is of, as the
+# comment beside it says. Below a kind's directory, shards are free, and each says what it holds by its
+# name: a clade for taxa (life/taxa/dinosaurs), the settlement for what was built in it
+# (civilization/structures/rome), the finer kind for traditions (civilization/traditions/building).
+#
+# See docs/plans/ENTITIES.md, step 1.
+kinds:
+  # Space: the bodies, and what happened among them.
+  body: space/bodies
+  event/astronomical: space/events
+  event/spaceflight: space/events
+
+  # The Earth: its plates, rocks and ground, and what changed them.
+  plate: earth/plates
+  landform: earth/landforms
+  large-igneous-province: earth/igneous-provinces
+  rock-unit: earth/rock-units
+  sample: earth/samples
+  event/impact: earth/events
+  event/collision: earth/events
+  event/glaciation: earth/events
+  event/boundary: earth/events
+  event/hazard: earth/events
+
+  # Life.
+  taxon: life/taxa
+  ecosystem: life/ecosystems
+  event/extinction: life/events
+
+  # Time: the named periods, of the geologic time scale and of the climate.
+  period: periods
+
+  # Civilization: people, what they made and what they did.
+  person: civilization/persons
+  polity: civilization/polities
+  organization: civilization/organizations
+  settlement: civilization/settlements
+  building: civilization/structures
+  monument: civilization/structures
+  works: civilization/structures
+  open: civilization/structures
+  tradition: civilization/traditions
+  development: civilization/developments
+  industry: civilization/industries
+  artefact: civilization/artefacts
+  language: civilization/languages
+  event/political: civilization/events
+  event/battle: civilization/events
+  event/conquest: civilization/events
+  event/massacre: civilization/events
+  event/war: civilization/events
+  event/campaign: civilization/events
+  event/treaty: civilization/events
+  event/dispersal: civilization/events
+  event/admixture: civilization/events
+  event/shipwreck: civilization/events
+  event/epoch: civilization/calendars
+
+  # In more than one domain.
+  # A find of a living thing, a fossil or a seed, is life's, and a find of what people made, a tablet or
+  # a letter, is civilization's.
+  occurrence: [life/occurrences, civilization/occurrences]
+  # A lasting change of the Earth system, or of life on it, such as the first forests.
+  event/transition: [earth/events, life/events]
+  # The forming of the Solar System, or of a supercontinent.
+  event/formation: [space/events, earth/events]
+  # An event of no finer kind, in the domain of what it changed.
+  event: [space/events, earth/events, life/events, civilization/events]

@@ -23,7 +23,7 @@ It adds:
 - **A city's fields of its region's use.** A city's fields were all rainfed; they are now of the scene's own use, as
   its region farmed: paddies about a city of the rice lands.
 - **The Khmer house of the Angkorian period**
-  ([angkorian-khmer-house.yaml](../../world/entities/people/traditions/angkorian-khmer-house.yaml)), a member of the
+  ([angkorian-khmer-house.yaml](../../world/entities/civilization/traditions/building/angkorian-khmer-house.yaml)), a member of the
   Southeast Asian house on piles, for farmers and townspeople in 802–1431. From Zhou Daguan
   (1296–1297): houses of thatch only, raised on piles, their size by their household's wealth, a pond to each house or
   one to two or three, a temple or a tower in every village, and a temple's roof of tiles. From Klassen et al. (2021):

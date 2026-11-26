@@ -138,12 +138,13 @@ describe('the world', async () => {
   describe('ids carry no meaning', () => {
     const copy = mkdtempSync(join(tmpdir(), 'wikiworldmodel-'));
     afterAll(() => rmSync(copy, { recursive: true, force: true }));
-    it('so moving a file changes nothing', async () => {
+    it('so moving a file changes nothing but where the layout says it goes', async () => {
       cpSync(WORLD, copy, { recursive: true });
-      renameSync(join(copy, 'entities/earth/orogens/himalaya.yaml'), join(copy, 'entities/life/mesosaurus/somewhere-else.yaml'));
+      renameSync(join(copy, 'entities/earth/landforms/himalaya.yaml'), join(copy, 'entities/life/occurrences/somewhere-else.yaml'));
       const moved = await loadWorld(copy);
       const r = await validateWorld(moved, { frames: false });
-      expect(r.issues.filter((i) => i.level !== 'info')).toEqual([]);
+      // The layout is advice to whoever writes the next record (world/schema/layout.yaml): the one thing a move changes.
+      expect(r.issues.filter((i) => i.level !== 'info').map((i) => `${i.level} ${i.check} ${i.file}`)).toEqual(['warning layout entities/life/occurrences/somewhere-else.yaml']);
       const s = solveScenario(moved);
       expect(s.ok && s.bounds.get('earth/orogens/himalaya|start')).toEqual(sol.bounds.get('earth/orogens/himalaya|start'));
     });

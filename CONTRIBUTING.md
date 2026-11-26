@@ -126,8 +126,10 @@ Figshare, PANGAEA, CEDA, publishers' sites, NOAA, OpenTopography, INGV, and the 
    has one, so two people or agents don't do the same thing.
 2. **Research it.** Find the best sources you can actually read (see
    [Research](docs/RECORDS.md#research)). Note each fact with its source, locator and verbatim quote as you go.
-3. **Write the records** in [world/](world/): one entity per file, claims and relations in their
-   subject's file, sources one per work.
+3. **Write the records** in [world/](world/): one entity per file, in the directory for its kind
+   ([world/schema/layout.yaml](world/schema/layout.yaml)), claims and relations in their subject's
+   file, sources one per work. A thing a dataset already lists is named by its id there, in
+   `same_as`, so that one thing is never written twice ([Where a record goes](docs/RECORDS.md#where-a-record-goes)).
 4. **Check quotes against the texts** you retrieved, by script, not by eye: save the text you read
    and run `npm run world -- quote-check src:… <text file>`. Every `quote` must be found in it
    (after normalizing whitespace and typography); the command lists any that are not, and records

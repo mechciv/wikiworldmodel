@@ -43,7 +43,7 @@ of the land and, before 3000 BCE, most of the people.
 
 ## Where a tradition goes
 
-In `world/entities/people/traditions/`, one file per tradition:
+In `world/entities/civilization/traditions/building/`, one file per tradition:
 
 ```yaml
 # The shape of one: every value here must come from what you read, with its quote.
@@ -298,7 +298,7 @@ says otherwise, and where its density leaves no ground between its settlements. 
 Which animals people kept is a record of its own kind, a husbandry tradition (`kind: tradition/husbandry`), written as
 a building tradition is: `name`, `start`, `end`, `extent`, `lifeway`, and in place of a dwelling its `livestock`, the
 animals as a list of taxon records. A narrower one is a `member-of` a broader one and says only what differs. The file
-goes in `world/entities/people/husbandry/`.
+goes in `world/entities/civilization/traditions/husbandry/`.
 
 ```yaml
 id: people/husbandry/neolithic-europe

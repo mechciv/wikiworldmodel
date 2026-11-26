@@ -7,25 +7,25 @@ been checked by a person, which is set 20. The three steps that come out of sets
 
 | # | Set | Stands | Where |
 |---|---|---|---|
-| 1 | Biomes through time | done, derived from a climate model rather than from lithologic indicators | `world/fields/earth/{climate,biome}.yaml`, `world/entities/life/transitions/`, `world/entities/life/fossil-forests/` |
-| 2 | Life's great transitions | done, bar what is noted | `world/entities/life/transitions/`, `world/entities/life/occurrences/` |
-| 3 | Dinosaurs from a PBDB snapshot | the Hell Creek's, not all of them | `src:pbdb-hell-creek` in `world/manifest.yaml`, `world/entities/life/hell-creek/` |
-| 4 | The ice ages | done, with the ice sheets of the last 80 kyr on the globe | `world/fields/earth/{co2-ice-core,methane-ice-core,antarctic-temperature,sea-level-stack,ice-sheets,ice-sheet-sea-level}.yaml`, `world/entities/earth/ice-ages/`, `src:paleomist-1.0` in `world/manifest.yaml`, `world/alternatives/laurentide-mis3*` |
-| 5 | Hominins and their tools | done | `world/entities/life/hominins/`, `world/entities/people/prehistory/` |
-| 6 | Dispersals, with ancient DNA | done | `world/entities/people/dispersals/`, `world/alternatives/leaving-africa*`, `world/alternatives/peopling-of-the-americas*` |
-| 7 | Megafauna extinctions | done | `world/entities/life/megafauna/`, `world/alternatives/megafauna-causes*` |
-| 8 | Domestication worldwide | done | `world/entities/people/domestication/` |
+| 1 | Biomes through time | done, derived from a climate model rather than from lithologic indicators | `world/fields/earth/{climate,biome}.yaml`, `world/entities/life/events/`, `world/entities/life/occurrences/` (the fossil forests) |
+| 2 | Life's great transitions | done, bar what is noted | `world/entities/life/events/`, `world/entities/life/occurrences/` |
+| 3 | Dinosaurs from a PBDB snapshot | the Hell Creek's, not all of them | `src:pbdb-hell-creek` in `world/manifest.yaml`, `world/entities/life/ecosystems/hell-creek-ecosystem.yaml`, and its taxa in `world/entities/life/taxa/` (those citing the snapshot) |
+| 4 | The ice ages | done, with the ice sheets of the last 80 kyr on the globe | `world/fields/earth/{co2-ice-core,methane-ice-core,antarctic-temperature,sea-level-stack,ice-sheets,ice-sheet-sea-level}.yaml`, `world/entities/earth/events/`, `world/entities/periods/climate/`, `src:paleomist-1.0` in `world/manifest.yaml`, `world/alternatives/laurentide-mis3*` |
+| 5 | Hominins and their tools | done | `world/entities/life/taxa/mammals/`, `world/entities/life/occurrences/`, `world/entities/civilization/industries/`, `world/entities/civilization/artefacts/` |
+| 6 | Dispersals, with ancient DNA | done | `world/entities/civilization/events/`, `world/entities/life/occurrences/` (the individuals), `world/alternatives/leaving-africa*`, `world/alternatives/peopling-of-the-americas*` |
+| 7 | Megafauna extinctions | done | `world/entities/life/events/` (the extinctions), `world/entities/life/taxa/`, `world/entities/life/occurrences/`, `world/alternatives/megafauna-causes*` |
+| 8 | Domestication worldwide | done | `world/entities/civilization/developments/`, `world/entities/life/occurrences/` (the finds) |
 | 9 | Population and land use (HYDE) | where people lived as a 1° grid over the globe, 10,000 BCE to 2015; the world's population, cropland and grazing land as series; since the eleventh slice, every 5′ cell's anthrome from Anthromes 12K, ArchaeoGLOBE's assessments by region, and the lists of cities ([HUMAN-LANDSCAPE.md](HUMAN-LANDSCAPE.md)); no grid of land-use shares | `world/fields/earth/{population,world-population,cropland,grazing-land}.yaml`, `world/fields/people/`, `src:hyde-3.2.1*`, `src:archaeoglobe-2019`, `src:reba-2016-*` in `world/manifest.yaml` |
-| 10 | States worldwide from Cliopatria | done as rows, not records; since the twelfth slice, states with records draw their own rows, 19 of them now ([TWELFTH-SLICE.md](slices/TWELFTH-SLICE.md), [FIFTEENTH-SLICE.md](slices/FIFTEENTH-SLICE.md)) | `world/fields/earth/polities.yaml`, `world/entities/people/polities/` |
-| 11 | People and offices | done, for 44 rulers | `world/entities/people/rulers/`, `world/entities/people/polities/` |
-| 12 | First cities, writing, languages | done; languages as rows | `world/fields/earth/languages.yaml`, `world/entities/people/first-cities/`, `world/entities/people/writing/` |
-| 13 | Routes and trade | done, but for the Silk Road's lines | `world/fields/earth/roman-roads.yaml`, `world/entities/people/trade/` |
-| 14 | Objects that move | done | `world/entities/people/objects/` |
+| 10 | States worldwide from Cliopatria | done as rows, not records; since the twelfth slice, states with records draw their own rows, 19 of them now ([TWELFTH-SLICE.md](slices/TWELFTH-SLICE.md), [FIFTEENTH-SLICE.md](slices/FIFTEENTH-SLICE.md)) | `world/fields/earth/polities.yaml`, `world/entities/civilization/polities/` |
+| 11 | People and offices | done, for 44 rulers | `world/entities/civilization/persons/`, `world/entities/civilization/polities/` |
+| 12 | First cities, writing, languages | done; languages as rows | `world/fields/earth/languages.yaml`, `world/entities/civilization/settlements/`, `world/entities/civilization/developments/scripts/`, `world/entities/civilization/occurrences/` (the first finds) |
+| 13 | Routes and trade | done, but for the Silk Road's lines | `world/fields/earth/roman-roads.yaml`, `world/entities/civilization/events/` (the wrecks and missions) |
+| 14 | Objects that move | done | `world/entities/civilization/artefacts/` |
 | 15 | Disasters | done, as rows | `src:noaa-hazards` in `world/manifest.yaml`, `world/fields/earth/hazards.yaml` |
-| 16 | Day length and the Moon | done | `world/entities/earth/day-length/`, `world/fields/earth/day-length.yaml` |
+| 16 | Day length and the Moon | done | `world/entities/earth/samples/`, `world/fields/earth/day-length.yaml` |
 | 17 | Biodiversity through time | done for animals, uncorrected | `src:pbdb-diversity` in `world/manifest.yaml`, `world/fields/earth/genera-through-time.yaml` |
 | 18 | The present | land borders and cities; coasts remain the elevation field's | `world/fields/earth/present-day.yaml` |
-| 19 | Futures | done | `world/entities/earth/futures/`, `world/alternatives/ipcc-ar6-scenarios*`, `world/alternatives/next-supercontinent*` |
+| 19 | Futures | done | `world/entities/earth/events/`, `world/alternatives/ipcc-ar6-scenarios*`, `world/alternatives/next-supercontinent*` |
 | 20 | The first human reviews | **not done, and not a machine's to do** | |
 
 ## Rows over the globe
@@ -297,7 +297,7 @@ A reviewer should look at these first:
 - 42 rulers: 27 Roman emperors from Augustus to Constantine (not Lucius Verus or Geta, nor most of the third century), and 15 elsewhere,
   from Djoser to Akbar. A reign is a phase of the person, and `held-office` puts it inside its polity. It stops at Akbar: no modern
   ruler has a record.
-- Eleven polities were written for them, from Cliopatria's rows where those fit (`world/entities/people/polities/`): names, with the
+- Eleven polities were written for them, from Cliopatria's rows where those fit (`world/entities/civilization/polities/`): names, with the
   rows' first and last years. Four have no dates of their own (the First Dynasty of Babylon, the Old and New Kingdoms of Egypt,
   Palenque), because the chronologies compete or no row exists; Maurya and Han start with their first ruler's reign.
 - Wikipedia is a last resort in three places, each said so: Diocletian's death, Charlemagne's birth, Hammurabi's 43 regnal years. The Long
@@ -508,7 +508,7 @@ at; a few from memory, which their claims say. A reviewer should look at a form'
   from the groups within it, and those lengths are snout to vent, as the plan's length is. Pterosaurs have mass only. Proterochampsia, Younginiformes and Protorothyrididae had no size an agent could
   source, and are not drawn. Some sizes rest on Wikipedia. Confuciusornithiformes hang from Avialae and not where the database files them, because Aves here is the crown group, and its dates would squeeze
   theirs: the relation's note says so. The database flags most crocodiles and pterosaurs as marine, so a flag is now refused only for what does not keep to the air, the water's edge or wet ground.
-- **Some megafauna repeat their forms.** Eleven records in `world/entities/life/megafauna/` hang directly on Mammalia, so they could not inherit from the clade nodes written since.
+- **Some megafauna repeat their forms.** Eleven records of the megafauna, now in `world/entities/life/taxa/mammals/`, hang directly on Mammalia, so they could not inherit from the clade nodes written since.
 
 What agents found the form language lacks, for the next version of it: a spike that curves; a foreleg with an elbow and a wrist, a human leg and a flat foot (`digitigrade` bends at fixed places); parts that follow the neck, such as a mane;
 a row that is not straight; a forking `tuft`, a swollen foot to a stem, a liverwort's thallus; a wing given by its span, and a body that bends sideways; and a depth for what swims, as fish are listed and not drawn.
@@ -543,7 +543,7 @@ shell; a sheet that is not flat; spines at angles other than 45°; and a pose fo
 
 ### Building traditions
 
-Written by agents, one to each part of the world, for the [eleventh slice](slices/ELEVENTH-SLICE.md), in `world/entities/people/traditions/`, on the
+Written by agents, one to each part of the world, for the [eleventh slice](slices/ELEVENTH-SLICE.md), in `world/entities/civilization/traditions/building/`, on the
 brief in [DWELLINGS.md](DWELLINGS.md): 36 records, seven of them members that take what they do not say from a broader one. Of their 199 claims, 162
 cite a source and 37 do not: the names, and one end that is an editorial split (the Iron Age longhouse village ends where the Viking Age's begins).
 The 348 quotes were all found by script in the texts the agents kept, each in the file named for its source; `quote-check` records one `quoted` step
@@ -581,11 +581,11 @@ Written by agents for the [sixteenth slice](slices/SIXTEENTH-SLICE.md), from the
 (South Asia, China, Japan and Korea, Europe) and by way of life (herders, foragers, shifting cultivators). All are
 `proposed`, and nothing has been looked at by a person.
 
-- **Building traditions:** 55 new records beside the 37, in `world/entities/people/traditions/`. Of their 376 claims
+- **Building traditions:** 55 new records beside the 37, in `world/entities/civilization/traditions/building/`. Of their 376 claims
   and relations, 319 cite a source, with 828 quotes, and every one of the 319 has its `quoted` step; the 57 that cite
   none are the names and two editorial groupings of a tradition under a broader one. Each of the 37 older records gained a `lifeway` claim, and five of them
   and eight recorded cities a `town_form`.
-- **Husbandry:** 20 records in `world/entities/people/husbandry/`: 107 claims and relations, 80 sourced and quoted;
+- **Husbandry:** 20 records in `world/entities/civilization/traditions/husbandry/`: 107 claims and relations, 80 sourced and quoted;
   the rest are the names and seven editorial groupings. The two camel traditions rest on Wikipedia alone.
 - **The animals people kept:** 14 domestic taxa in `world/entities/life/taxa/`, and sizes and a nearer parent for the
   dog and the horse, which keep the parent they had as a second, unpreferred claim. Twelve are named by a husbandry
@@ -705,7 +705,7 @@ What to check first:
 ### Mountain ranges, and by when each stood
 
 Written by an agent for the relief of a scene before the glacial cycles ([SCENES.md](SCENES.md#the-grounds-shape),
-[RECORDS.md](RECORDS.md#a-mountain-range)), in `world/entities/earth/orogens/`: eight ranges, each with an outline, the
+[RECORDS.md](RECORDS.md#a-mountain-range)), in `world/entities/earth/landforms/`: eight ranges, each with an outline, the
 phase in which it stands at about its present height, and the evidence of when that began. The Himalaya (which had
 only its cause), the Tibetan Plateau, the Altiplano and the Western Cordillera of the central Andes, the Alps, the
 Sierra Nevada of California, the Southern Alps of New Zealand and the Front Range of Colorado. 25 sources; all 27

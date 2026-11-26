@@ -34,7 +34,7 @@ At aerial and mid-range zoom (for example, the Eastern Han foothills of northern
 ## Locked architectural decisions
 
 1. **Agricultural traditions as their own record kind (`tradition/agriculture`).** Parallel to
-   `tradition/husbandry`, agricultural traditions live in `world/entities/people/agriculture/`, naming regions
+   `tradition/husbandry`, agricultural traditions live in `world/entities/civilization/traditions/agriculture/`, naming regions
    (`extent`), time span, `lifeway`, optional `field_system`, and `crops` (each entry specifying a botanical
    crop kind, optional `taxon` record, growing `season`, and `share`). Where no record holds for a region and
    time, a climate-appropriate generic crop mix stands in and reports itself as generic.
@@ -93,7 +93,7 @@ At aerial and mid-range zoom (for example, the Eastern Han foothills of northern
   compilation/lookup in `core/dwelling.ts`, validation in `tools/world/src/validate/index.ts`, build export in
   `tools/world/src/build/landscape.ts`, and streaming into `ScenePeople` via `core/landscape.ts` and
   `viewer/src/city/landscape.ts`.
-- **Initial sourced agricultural traditions** (in `world/entities/people/agriculture/`, quote-checked against
+- **Initial sourced agricultural traditions** (in `world/entities/civilization/traditions/agriculture/`, quote-checked against
   retrieved sources): Han/North China dryland millet–wheat–soybean–hemp–mulberry, Yangtze wet-rice,
   Mediterranean wheat–barley–olive–vine triad, Northern/Central European mixed cereal–legume, Mesoamerican
   maize–bean–squash milpa, and South Asian monsoon rice–millet–pulse.
