@@ -663,7 +663,35 @@ vec3 shade(vec3 albedo, float rough, float metal, vec3 n, vec3 p, vec3 eye, floa
 }
 `;
 
-export const MESH_FS = /* glsl */ `#version 300 es
+/** Strip compile-time #ifdef/#ifndef/#else/#endif blocks before sending specialized GLSL to the driver. */
+function stripGlslVariants(src: string, defs: ReadonlySet<string>): string {
+  const out: string[] = [];
+  const stack: { parent: boolean; branch: boolean }[] = [];
+  const active = () => (stack.length === 0 ? true : stack[stack.length - 1].parent && stack[stack.length - 1].branch);
+  for (const line of src.split('\n')) {
+    const trimmed = line.trim();
+    if (trimmed.startsWith('#ifdef ')) {
+      const sym = trimmed.slice(7).trim();
+      stack.push({ parent: active(), branch: defs.has(sym) });
+    } else if (trimmed.startsWith('#ifndef ')) {
+      const sym = trimmed.slice(8).trim();
+      stack.push({ parent: active(), branch: !defs.has(sym) });
+    } else if (trimmed === '#else') {
+      const top = stack[stack.length - 1];
+      if (!top) throw new Error('Unmatched #else in GLSL template');
+      top.branch = !top.branch;
+    } else if (trimmed === '#endif') {
+      if (!stack.length) throw new Error('Unmatched #endif in GLSL template');
+      stack.pop();
+    } else if (active()) {
+      out.push(line);
+    }
+  }
+  if (stack.length) throw new Error('Unclosed #ifdef/#ifndef in GLSL template');
+  return out.join('\n');
+}
+
+const MESH_FS_TEMPLATE = /* glsl */ `#version 300 es
 precision highp float;
 precision highp int;
 precision highp sampler3D;
@@ -714,8 +742,13 @@ uniform vec4 uSlotColor2[8];
 uniform vec4 uSlotMeta[8];
 out vec4 o;
 ${LIGHTING}
+#ifndef MESH_ONLY_BUILT
 ${LEAVES}
 ${PLOTS_GLSL}
+#endif
+struct Surface { vec3 albedo; float rough; float metal; float bump; };
+
+#ifndef MESH_ONLY_FOLIAGE
 // A scanned material's grain on a built face, laid by the face's own uv in metres: what to multiply its colour by; and
 // its height, 0 to 1, for the light to be bumped by. Nothing where the scans are not loaded, or from too far to show.
 vec4 builtGrain(int layer, vec2 uv, float scale, vec3 p) {
@@ -743,8 +776,6 @@ float hash(vec2 p) {
 
 // Fades a pattern away once it is finer than a pixel or two, so nothing shimmers.
 float visible(float size, float fw) { return 1.0 - smoothstep(size * 0.25, size * 0.9, fw); }
-
-struct Surface { vec3 albedo; float rough; float metal; float bump; };
 
 // Courses of blocks: a joint mask and a per-block number.
 vec2 courses(vec2 uv, vec2 size) {
@@ -962,6 +993,7 @@ Surface surface(int m, vec3 p, vec2 uv, float tint, vec3 n, float fw, out vec3 b
     base *= 0.7 + 0.56 * noiseS(p, vec3(0.03, 0.03, 0.5));
     s.albedo = base;
     s.rough = 0.86;
+#ifndef MESH_ONLY_BUILT
   } else if (m == HIDE) {
     // Pebbled skin, darker along the back, paler beneath, its colours nobody's record: the generator's.
     float k = tint * 4.0;
@@ -986,6 +1018,7 @@ Surface surface(int m, vec3 p, vec2 uv, float tint, vec3 n, float fw, out vec3 b
     vec3 q = b3 / (64.0 * 0.045);
     vec3 wob = vec3(texture(uNoise, q).r, texture(uNoise, q).g, texture(uNoise, q).b) - 0.5;
     bumpN = normalize(n + wob * 1.2);
+#endif
   } else if (m == HORN) {
     s.albedo = mix(vec3(0.58, 0.52, 0.40), vec3(0.20, 0.17, 0.13), tint) * (0.84 + 0.3 * noiseM(p, 0.05));
     s.rough = 0.48;
@@ -998,6 +1031,7 @@ Surface surface(int m, vec3 p, vec2 uv, float tint, vec3 n, float fw, out vec3 b
     vec3 base = mix(vec3(0.17, 0.15, 0.09), vec3(0.30, 0.25, 0.13), hash(cell + floor(tint * 8.0)));
     s.albedo = base * mix(0.5, 1.0, seam * visible(0.06, fw) + 1.0 - visible(0.06, fw)) * (0.8 + 0.4 * noiseM(p, 0.04));
     s.rough = 0.42;
+#ifndef MESH_ONLY_BUILT
   } else if (m == FUR) {
     float k = fract(tint * 4.0);
     // Natural mammal coats ranging from dark bay/brown and warm dun to creamy wool fleece.
@@ -1032,6 +1066,7 @@ Surface surface(int m, vec3 p, vec2 uv, float tint, vec3 n, float fw, out vec3 b
     vec3 base = mix(vec3(0.26, 0.17, 0.11), vec3(0.42, 0.29, 0.17), tint);
     s.albedo = base * (0.8 + 0.34 * noiseS(p, vec3(0.3, 0.04, 0.3)));
     s.rough = 0.62;
+#endif
   } else if (m == THATCH) {
     // Thatch of straw, reed or leaves: bundles in courses down the slope, greying where it is old.
     vec3 straw = mix(vec3(0.42, 0.33, 0.17), vec3(0.30, 0.25, 0.15), tint);
@@ -1045,6 +1080,7 @@ Surface surface(int m, vec3 p, vec2 uv, float tint, vec3 n, float fw, out vec3 b
     float bricks = smoothstep(0.88, 0.97, fract(p.z * 3.0)) * 0.08;
     s.albedo = earth * (0.86 + 0.24 * fbmM(p, 0.9) - bricks) * (0.92 + 0.16 * noiseM(p, 0.08));
     s.rough = 0.9;
+#ifndef MESH_ONLY_BUILT
   } else if (m == CHITIN) {
     // A hard, glossy shell of plates.
     vec3 base = mix(vec3(0.05, 0.035, 0.025), vec3(0.20, 0.13, 0.06), tint);
@@ -1060,6 +1096,7 @@ Surface surface(int m, vec3 p, vec2 uv, float tint, vec3 n, float fw, out vec3 b
     vec3 q = p / (64.0 * 0.26);
     vec3 wob = vec3(texture(uNoise, q).r, texture(uNoise, q).g, texture(uNoise, q).b) - 0.5;
     bumpN = normalize(n + wob * 1.5);
+#endif
   } else if (m == FROND) {
     // Veined blades: fans and fronds, with a glossy side.
     vec3 dark = mix(vec3(0.05, 0.11, 0.035), vec3(0.075, 0.13, 0.04), tint);
@@ -1067,6 +1104,7 @@ Surface surface(int m, vec3 p, vec2 uv, float tint, vec3 n, float fw, out vec3 b
     float vein = abs(fract(uv.x + 0.5) - 0.5) * 2.0;
     s.albedo = mix(dark, lite, 0.42 + 0.5 * vein * visible(0.1, fw)) * (0.8 + 0.4 * noiseM(p, 0.22));
     s.rough = 0.56;
+#ifndef MESH_ONLY_BUILT
   } else if (m == BROAD) {
     // A mass of broad leaves: the light on them, in small flecks.
     vec3 dark = mix(vec3(0.028, 0.06, 0.024), vec3(0.052, 0.078, 0.022), tint);
@@ -1077,6 +1115,7 @@ Surface surface(int m, vec3 p, vec2 uv, float tint, vec3 n, float fw, out vec3 b
     vec3 q = p / (64.0 * 0.14);
     vec3 wob = vec3(texture(uNoise, q).r, texture(uNoise, q).g, texture(uNoise, q).b) - 0.5;
     bumpN = normalize(n + wob * 2.2);
+#endif
   } else if (m == BARK || m == FALLEN_BARK) {
     // Bark, laid along a limb (world/generators/life/plants.ts, tube): u counts ridges round it, a whole number of
     // them; v is metres along it, and its thousands say which bark: 0 furrowed, 1 smooth, 2 in scales, 3 in diamond
@@ -1584,7 +1623,9 @@ Surface built(int m, vec3 q, vec3 p, vec2 uv, float tint, vec3 n, float fw, out 
   }
   return s;
 }
+#endif
 
+#ifndef MESH_ONLY_BUILT
 // Leaves, on cards and in the mass inside a crown: patches across the crown as sun and age colour it, and each leaf as
 // light as the atlas has it (0 to 1), with its twig in bark. Their colours are the renderer's, and nobody's record.
 Surface leaves(int m, vec3 p, float tint, float light, float wood, float family) {
@@ -1667,7 +1708,10 @@ vec3 foliage(vec3 albedo, float rough, vec3 n, vec3 g, vec3 p, float sky, float 
   }
   return uSea > 0.5 && p.z < 0.0 ? c * seaLight(p.z) : c;
 }
+#endif
 
+#ifndef MESH_ONLY_BUILT
+#ifndef MESH_ONLY_FOLIAGE
 // A body's skin close by (docs/plans/RENDERING.md, step 6): a height for its grain, in the body's own frame, as its
 // material is: pebbled scales on a hide, hair lying along a body, feathers lapping back from the head, seams between a
 // shell's scutes, the plates of chitin, the veins of a wing. Which a body has is its form's; how it looks is this.
@@ -1698,6 +1742,8 @@ float skinPattern(vec3 q, float tint) {
   if (kind == 3) return smoothstep(0.45, 0.7, texture(uNoise, q / (64.0 * 0.11)).b) * 0.7;
   return 0.0;
 }
+#endif
+#endif
 
 void main() {
   float vNLen = length(vN);
@@ -1705,17 +1751,24 @@ void main() {
   // Compute screen-space derivatives before any branch or discard for well-defined 2x2 quad differentials.
   vec2 dux = dFdx(vUv);
   vec2 duy = dFdy(vUv);
+#ifndef MESH_ONLY_BUILT
   vec3 dpx = dFdx(vRel);
   vec3 dpy = dFdy(vRel);
+#endif
+#ifndef MESH_ONLY_FOLIAGE
   float fw = max(length(dux), length(duy));
   float glass = 0.0;
   vec3 bumped = n;
+#endif
+  float alpha = 1.0;
+#ifndef MESH_ONLY_BUILT
   bool card = onCard(vMaterial);
   // A tuft's own blades are thin leaves, lit as the leaves on cards are (world/generators/life/forms.ts, tuft): by the
   // tuft's normal on either side, with the sun through them and none of the sky mirrored, and never holed.
   bool blade = vMaterial == BLADE;
+#ifndef MESH_ONLY_FOLIAGE
   bool leafy = card || blade || vMaterial == LEAF_MASS;
-  float alpha = 1.0;
+#endif
   // How light a leaf is, how much of it is twig, how its face leans across its card, and whose colour a blade takes.
   float leafLight = 0.6;
   float leafWood = 0.0;
@@ -1747,8 +1800,19 @@ void main() {
       leafLean = vUv.x * 0.5;
     }
   }
+#else
+#ifndef MESH_NO_DISCARD
+  if (uCoverage > 0.5 && vInstFade < 0.995) {
+    float dither = fract(fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715)))) + uFrameNoise);
+    if (vInstFade <= 0.01 || vInstFade < dither) discard;
+  }
+#endif
+#endif
   Surface s;
+#ifndef MESH_ONLY_BUILT
+#ifndef MESH_ONLY_FOLIAGE
   if (leafy) {
+#endif
     s = leaves(vMaterial, vPos, vTint, leafLight, leafWood, family);
     // On wild land a leaf takes most of its hue from its place's own tones, as the ground under it does: what grows low
     // from its low plants' tone, a crown from its canopy's. So a steppe's tufts are the straw of its ground and a
@@ -1769,8 +1833,12 @@ void main() {
       s.albedo *= 0.78 + 0.44 * own;
       s.albedo = mix(s.albedo, s.albedo * vec3(1.14, 1.0, 0.7), 0.55 * fract(vTint * 9.7) * low * (1.0 - leafWood));
     }
-  }
-  else if (vMaterial == FACADE) s = facade(vPos, vUv, vTint, fw, n, glass);
+#ifndef MESH_ONLY_FOLIAGE
+  } else
+#endif
+#endif
+#ifndef MESH_ONLY_FOLIAGE
+  if (vMaterial == FACADE) s = facade(vPos, vUv, vTint, fw, n, glass);
   else if (isBuilt(vMaterial)) {
     s = built(vMaterial, vLocal, vPos, vUv, vTint, n, fw, bumped);
     // What it is built of stands in relief, as each material says with a height: the light is bumped by it close by.
@@ -1778,6 +1846,9 @@ void main() {
     if (s.bump != 0.0 && close > 0.0) bumped = bumpBy(bumped, vRel, s.bump, 0.012 * close);
   }
   else s = surface(vMaterial, vPos, vUv, vTint, n, fw, bumped);
+#endif
+#ifndef MESH_ONLY_BUILT
+#ifndef MESH_ONLY_FOLIAGE
   bool skin = vMaterial == HIDE || vMaterial == FUR || vMaterial == FEATHER || vMaterial == CHITIN || vMaterial == MEMBRANE;
   if (skin) {
     // Close by, the grain of its skin, while a pixel is small enough to show it; and its pattern, at any distance.
@@ -1786,8 +1857,12 @@ void main() {
     float patStr = vMaterial == FUR && vTint >= 0.75 ? 0.14 : 0.38;
     if (vMaterial != MEMBRANE && vMaterial != CHITIN) s.albedo *= 1.0 - patStr * skinPattern(vLocal, vKind);
   }
+#endif
+#endif
   // The eye's side of a face.
   vec3 toEye = uEye - vPos;
+#ifndef MESH_ONLY_BUILT
+#ifndef MESH_ONLY_FOLIAGE
   // Foliage has holes in it, up close, where the leaves stop: fewer with distance, none once they would shimmer.
   if (vMaterial == BROAD || vMaterial == NEEDLE) {
     float span = vMaterial == BROAD ? 0.34 : 0.26;
@@ -1795,6 +1870,8 @@ void main() {
     float reach = 1.0 - smoothstep(14.0, 70.0, length(toEye));
     if (gap < 0.46 * reach) discard;
   }
+#endif
+#endif
   float pixel = length(toEye) * 0.002;
   // Under the canopy, close to the ground, the sky's light is the forest floor's (docs/plans/RENDERING.md, step 4).
   float under = 1.0;
@@ -1803,7 +1880,10 @@ void main() {
     if (muv.x > 0.0 && muv.y > 0.0 && muv.x < 1.0 && muv.y < 1.0) under = 1.0 - 0.72 * texture(uMask, muv).r * (1.0 - smoothstep(4.0, 14.0, vLow));
   }
   vec3 c;
+#ifndef MESH_ONLY_BUILT
+#ifndef MESH_ONLY_FOLIAGE
   if (leafy) {
+#endif
     // A leaf's normal is its crown's, whichever side of it is seen; and what it sees of the sky is the crown's to say.
     float sh = shadowAt(vPos, n, pixel) * cloudShade(vPos);
     // Close to the ground a plant stands in its neighbours' shade: the foot of a tuft is dark, and its tips are lit.
@@ -1829,12 +1909,18 @@ void main() {
       }
     }
     c = foliage(s.albedo, s.rough, lit, g, vPos, vLight * under * foot, sh * mix(1.0, foot, 0.5), card || blade);
+#ifndef MESH_ONLY_FOLIAGE
   } else {
+#endif
+#endif
+#ifndef MESH_ONLY_FOLIAGE
     vec3 w = gl_FrontFacing ? bumped : -bumped;
     float sh = shadowAt(vPos, gl_FrontFacing ? n : -n, pixel) * cloudShade(vPos);
     float ao = uUseAO > 0.005 ? mix(1.0, texture(uAO, gl_FragCoord.xy / uAOSize).r, uUseAO) : 1.0;
+#ifndef MESH_ONLY_BUILT
     // Under a body, and about its legs, less of the sky is seen than on its back.
     if (skin) ao *= 0.62 + 0.38 * smoothstep(-0.7, 0.35, n.z);
+#endif
     float occl = ao * (vLight * 0.5 + 0.5) * under;
     c = shade(s.albedo, s.rough, s.metal, w, vPos, uEye, occl, sh * mix(1.0, ao, 0.35));
     // Warm hearthlight glow inside building doorways/windows at dusk/dawn, and glowing embers in kiln mouths.
@@ -1849,7 +1935,10 @@ void main() {
       float flick = 0.8 + 0.2 * sin(uClockSky * 6.5 + vPos.x * 2.1);
       c += vec3(1.5, 0.45, 0.08) * (0.35 + 0.9 * dusk) * flick;
     }
+#ifndef MESH_ONLY_BUILT
   }
+#endif
+#endif
   c = seen(c, vPos, uEye);
   // Evidence mode: what rests on a reconstruction is amber, what was generated magenta.
   int flags = int(vFlags);
@@ -1869,6 +1958,15 @@ void main() {
   }
   o = vec4(c, alpha);
 }`;
+
+/** Full mesh fragment shader supporting mixed meshes (foliage + bark, animal skins, canopy holes). */
+export const MESH_FS = stripGlslVariants(MESH_FS_TEMPLATE, new Set());
+/** Specialized static built/city mesh fragment shader with ZERO discard instructions (enables hardware Early-Z). */
+export const MESH_FS_STATIC = stripGlslVariants(MESH_FS_TEMPLATE, new Set(['MESH_ONLY_BUILT', 'MESH_NO_DISCARD']));
+/** Specialized instanced built/stone mesh fragment shader (retains vInstFade hashed alpha, strips foliage/skin). */
+export const MESH_FS_BUILT = stripGlslVariants(MESH_FS_TEMPLATE, new Set(['MESH_ONLY_BUILT']));
+/** Specialized pure-foliage mesh fragment shader (strips all masonry/built/skin material branches). */
+export const MESH_FS_FOLIAGE = stripGlslVariants(MESH_FS_TEMPLATE, new Set(['MESH_ONLY_FOLIAGE']));
 
 // ——— Terrain ———
 
@@ -3969,6 +4067,8 @@ flat in float vTint;
 uniform highp sampler3D uNoise;
 uniform float uWild;
 uniform vec3 uTone[10];
+uniform vec3 uRock[2];
+uniform vec3 uSubTone[16];
 ${LEAVES}
 layout(location = 0) out vec4 oAlbedo;
 layout(location = 1) out vec4 oNormal;
@@ -3978,12 +4078,17 @@ float impFbm(vec3 p, float size) {
   return texture(uNoise, q).r * 0.5 + texture(uNoise, q * 2.03 + 0.37).g * 0.3 + texture(uNoise, q * 4.1 + 0.71).b * 0.2;
 }
 void main() {
-  const int NEEDLE = 35, FROND = 36, BARK = 37, BROAD = 38, LEAF = 16, TRUNK = 17;
+  const int MARBLE=1, TRAVERTINE=2, BRICK=3, PLASTER=4, TILE=5, GILT=6, BRONZE=7, GRANITE=8, WOOD=9, DARK=10, PAVING=11, BASALT=12, SAND=13, CONCRETE=14, LEAD=15, LEAF=16, TRUNK=17, GRASS=18, SHAFT=19, FACADE=20, STATUE=21, EARTH=22, SEATS=23, AWNING=24, SPIRAL=25, CLOTH=26, DENTIL=28, FRIEZE=29, POOL=30, NEEDLE=35, FROND=36, BARK=37, BROAD=38, THATCH=42, MUD=43;
+  const int WATTLE=50, LIMEWASH=51, HALFTIMBER=52, LOGS=53, PLANKS=54, RUBBLE=55, MATTING=56, FELT=57, TANNED=58, HAIRCLOTH=59, SOD=60, SNOW=61, EARTHROOF=62, SHINGLE=63, LEAFTHATCH=64, BRUSHWOOD=65, REEDWORK=66, ROPE=67, PAINTED=68, ADOBE=69, CLAYTILE=70;
+  const int STONE=74, FALLEN_BARK=75, HEARTWOOD=76;
   bool card = onCard(vMaterial);
   float leafLight = 0.58;
   float leafWood = 0.0;
-  vec3 albedo = vec3(0.18, 0.14, 0.10);
-  bool leafy = card || vMaterial == LEAF_MASS || vMaterial == NEEDLE || vMaterial == FROND || vMaterial == BROAD || vMaterial == LEAF;
+  vec3 albedo = vec3(0.45, 0.40, 0.34);
+  bool leafy = card || vMaterial == LEAF_MASS || vMaterial == BLADE || vMaterial == NEEDLE || vMaterial == FROND || vMaterial == BROAD || vMaterial == LEAF;
+  float age = fract(vTint * 11.3);
+  float shade = fract(vTint * 29.7);
+  float fbm = impFbm(vPos, 1.4);
   if (card) {
     vec4 t = leafTexel(vUv);
     if (t.a < LEAF_CUT) discard;
@@ -4004,15 +4109,99 @@ void main() {
   } else if (vMaterial == LEAF_MASS) {
     float fleck = impNoise(vPos, 0.11) * 0.55 + impNoise(vPos + 5.0, 0.3) * 0.45;
     albedo = mix(vec3(0.03, 0.06, 0.026), vec3(0.05, 0.08, 0.03), vTint) * (0.45 + 0.9 * smoothstep(0.3, 0.75, fleck)) * (0.8 + 0.4 * impFbm(vPos, 1.5));
-  } else if (vMaterial == NEEDLE || vMaterial == BROAD || vMaterial == FROND || vMaterial == LEAF) {
+  } else if (vMaterial == BLADE || vMaterial == NEEDLE || vMaterial == BROAD || vMaterial == FROND || vMaterial == LEAF) {
     vec3 dark = vMaterial == FROND ? mix(vec3(0.05, 0.11, 0.035), vec3(0.075, 0.13, 0.04), vTint) : mix(vec3(0.028, 0.06, 0.024), vec3(0.052, 0.078, 0.022), vTint);
     vec3 lite = vMaterial == FROND ? mix(vec3(0.16, 0.25, 0.07), vec3(0.25, 0.30, 0.085), vTint) : mix(vec3(0.085, 0.14, 0.04), vec3(0.16, 0.185, 0.05), vTint);
     float fleck = impNoise(vPos, 0.18) * 0.6 + impNoise(vPos + 5.0, 0.35) * 0.4;
     albedo = mix(dark, lite, smoothstep(0.3, 0.72, fleck)) * (0.82 + 0.38 * impFbm(vPos, 3.0));
-  } else if (vMaterial == BARK || vMaterial == TRUNK) {
+  } else if (vMaterial == BARK || vMaterial == TRUNK || vMaterial == FALLEN_BARK) {
     vec3 base = mix(vec3(0.17, 0.13, 0.095), vec3(0.31, 0.22, 0.14), vTint);
     base = mix(base, vec3(dot(base, vec3(0.333))) * vec3(1.03, 1.0, 0.95), 0.4 * fract(vTint * 7.3));
     albedo = base * (0.76 + 0.42 * impFbm(vPos, 1.2));
+  } else if (vMaterial == HEARTWOOD) {
+    albedo = mix(vec3(0.28, 0.19, 0.10), vec3(0.17, 0.155, 0.135), 0.5) * (0.84 + 0.32 * fbm);
+  } else if (vMaterial == THATCH) {
+    albedo = mix(vec3(0.50, 0.40, 0.20), vec3(0.27, 0.24, 0.17), 0.2 + 0.65 * age) * (0.84 + 0.30 * fbm);
+  } else if (vMaterial == MUD || vMaterial == ADOBE) {
+    albedo = mix(vec3(0.52, 0.42, 0.30), vec3(0.41, 0.32, 0.23), shade) * (0.84 + 0.28 * fbm);
+  } else if (vMaterial == WATTLE) {
+    albedo = mix(vec3(0.31, 0.24, 0.15), vec3(0.42, 0.33, 0.21), shade) * (0.82 + 0.32 * fbm);
+  } else if (vMaterial == LIMEWASH || vMaterial == PAINTED) {
+    vec3 base = mix(vec3(0.80, 0.78, 0.71), vec3(0.87, 0.85, 0.79), shade);
+    if (vMaterial == PAINTED) {
+      vec3 pigment = mix(vec3(0.45, 0.19, 0.11), vec3(0.50, 0.32, 0.16), smoothstep(0.45, 0.85, shade));
+      base = mix(base, pigment, (1.0 - smoothstep(0.68, 0.74, vPos.z)) * 0.78);
+    }
+    albedo = base * (0.86 + 0.22 * fbm);
+  } else if (vMaterial == HALFTIMBER) {
+    vec3 daub = mix(vec3(0.70, 0.64, 0.50), vec3(0.80, 0.76, 0.66), shade);
+    vec3 wood = vec3(0.17, 0.12, 0.08);
+    albedo = mix(daub, wood, 0.22) * (0.86 + 0.24 * fbm);
+  } else if (vMaterial == LOGS || vMaterial == PLANKS || vMaterial == WOOD) {
+    vec3 base = mix(vec3(0.31, 0.21, 0.13), vec3(0.42, 0.31, 0.20), shade);
+    albedo = mix(base, vec3(0.34, 0.32, 0.29), 0.25 * age) * (0.80 + 0.36 * fbm);
+  } else if (vMaterial == RUBBLE) {
+    albedo = mix(vec3(0.38, 0.36, 0.33), vec3(0.56, 0.52, 0.45), shade) * (0.82 + 0.34 * fbm);
+  } else if (vMaterial == MATTING || vMaterial == REEDWORK) {
+    albedo = mix(vec3(0.52, 0.44, 0.25), vec3(0.41, 0.36, 0.22), 0.2 + 0.6 * age) * (0.84 + 0.30 * fbm);
+  } else if (vMaterial == FELT) {
+    albedo = mix(vec3(0.63, 0.60, 0.53), vec3(0.74, 0.72, 0.66), shade) * (0.86 + 0.22 * fbm);
+  } else if (vMaterial == TANNED) {
+    albedo = mix(vec3(0.50, 0.40, 0.27), vec3(0.63, 0.54, 0.39), shade) * (0.84 + 0.28 * fbm);
+  } else if (vMaterial == HAIRCLOTH) {
+    albedo = mix(vec3(0.05, 0.045, 0.04), vec3(0.09, 0.075, 0.058), shade) * (0.80 + 0.40 * fbm);
+  } else if (vMaterial == SOD) {
+    vec3 grass = mix(vec3(0.15, 0.21, 0.08), vec3(0.30, 0.31, 0.13), fbm);
+    vec3 earth = mix(vec3(0.20, 0.16, 0.10), vec3(0.29, 0.23, 0.15), shade);
+    albedo = mix(earth, grass, smoothstep(0.35, 0.7, vN.z));
+  } else if (vMaterial == SNOW) {
+    albedo = vec3(0.84, 0.89, 0.95) * (0.92 + 0.12 * fbm);
+  } else if (vMaterial == EARTHROOF || vMaterial == EARTH) {
+    albedo = mix(vec3(0.47, 0.39, 0.28), vec3(0.34, 0.28, 0.18), shade) * (0.84 + 0.30 * fbm);
+  } else if (vMaterial == SHINGLE) {
+    albedo = mix(vec3(0.31, 0.26, 0.21), vec3(0.42, 0.39, 0.35), 0.2 + 0.7 * age) * (0.82 + 0.34 * fbm);
+  } else if (vMaterial == CLAYTILE || vMaterial == TILE) {
+    vec3 fresh = mix(vec3(0.58, 0.28, 0.16), vec3(0.66, 0.38, 0.22), vTint);
+    vec3 old = mix(vec3(0.36, 0.28, 0.24), vec3(0.45, 0.34, 0.27), shade);
+    albedo = mix(fresh, old, vMaterial == CLAYTILE ? 0.65 : fract(vTint * 7.3) * 0.75) * (0.80 + 0.36 * fbm);
+  } else if (vMaterial == LEAFTHATCH) {
+    albedo = mix(vec3(0.34, 0.29, 0.14), vec3(0.22, 0.27, 0.11), (1.0 - age) * 0.5) * (0.82 + 0.34 * fbm);
+  } else if (vMaterial == BRUSHWOOD) {
+    albedo = mix(vec3(0.15, 0.125, 0.095), vec3(0.22, 0.18, 0.125), shade) * (0.78 + 0.40 * fbm);
+  } else if (vMaterial == ROPE) {
+    albedo = vec3(0.21, 0.16, 0.10) * (0.80 + 0.35 * fbm);
+  } else if (vMaterial == MARBLE || vMaterial == SHAFT || vMaterial == DENTIL || vMaterial == FRIEZE || vMaterial == SPIRAL) {
+    albedo = vec3(0.83, 0.81, 0.76) * (0.88 + 0.18 * fbm);
+  } else if (vMaterial == TRAVERTINE || vMaterial == SEATS) {
+    albedo = vec3(0.64, 0.58, 0.47) * (0.84 + 0.26 * fbm);
+  } else if (vMaterial == BRICK) {
+    albedo = mix(vec3(0.46, 0.28, 0.21), vec3(0.58, 0.38, 0.27), vTint) * (0.82 + 0.30 * fbm);
+  } else if (vMaterial == PLASTER || vMaterial == FACADE) {
+    albedo = mix(vec3(0.62, 0.48, 0.37), vec3(0.78, 0.74, 0.65), vTint) * (0.82 + 0.28 * fbm);
+  } else if (vMaterial == GILT) {
+    albedo = vec3(0.95, 0.74, 0.34) * (0.86 + 0.20 * fbm);
+  } else if (vMaterial == BRONZE || vMaterial == STATUE) {
+    albedo = mix(vec3(0.50, 0.38, 0.22), vec3(0.28, 0.40, 0.33), fbm);
+  } else if (vMaterial == GRANITE) {
+    albedo = mix(vec3(0.42, 0.37, 0.37), vec3(0.60, 0.47, 0.44), vTint);
+  } else if (vMaterial == DARK) {
+    albedo = vec3(0.025, 0.022, 0.020);
+  } else if (vMaterial == PAVING || vMaterial == CONCRETE) {
+    albedo = mix(vec3(0.56, 0.52, 0.46), vec3(0.38, 0.35, 0.29), uWild) * (0.84 + 0.28 * fbm);
+  } else if (vMaterial == BASALT || vMaterial == LEAD) {
+    albedo = vec3(0.26, 0.26, 0.26) * (0.82 + 0.32 * fbm);
+  } else if (vMaterial == SAND) {
+    albedo = mix(vec3(0.72, 0.62, 0.46), vec3(0.38, 0.31, 0.21), uWild) * (0.84 + 0.28 * fbm);
+  } else if (vMaterial == GRASS) {
+    albedo = mix(vec3(0.15, 0.21, 0.08), vec3(0.28, 0.30, 0.12), fbm);
+  } else if (vMaterial == CLOTH || vMaterial == AWNING) {
+    albedo = vTint < 0.33 ? vec3(0.56, 0.20, 0.15) : vTint < 0.66 ? vec3(0.72, 0.66, 0.54) : vec3(0.24, 0.32, 0.42);
+  } else if (vMaterial == POOL) {
+    albedo = vec3(0.05, 0.10, 0.09);
+  } else if (vMaterial == STONE) {
+    bool said = dot(uSubTone[3], vec3(1.0)) > 0.0;
+    vec3 tone = said ? mix(uSubTone[2], uSubTone[3], fract(vTint * 7.0)) : uRock[1];
+    albedo = tone * (0.72 + 0.46 * fbm);
   }
   if (leafy && uWild > 0.5) {
     const vec3 LUMA = vec3(0.2126, 0.7152, 0.0722);
@@ -4021,8 +4210,10 @@ void main() {
     float plum = max(dot(place, LUMA), 1e-3);
     albedo = mix(albedo, place * (lum / plum), 0.62 * (1.0 - leafWood));
   }
+  vec3 bn = length(vN) > 1e-6 ? normalize(vN) : vec3(0.0, 0.0, 1.0);
+  if (!leafy && !gl_FrontFacing) bn = -bn;
   oAlbedo = vec4(clamp(albedo, 0.0, 1.0), 1.0);
-  oNormal = vec4(normalize(vN) * 0.5 + 0.5, clamp(vLight, 0.0, 1.0));
+  oNormal = vec4(bn * 0.5 + 0.5, clamp(vLight, 0.0, 1.0));
 }`;
 
 export const IMPOSTOR_VS = /* glsl */ `#version 300 es
@@ -4042,9 +4233,11 @@ uniform float uClock;
 uniform vec2 uWind;
 uniform float uImpMidZ;
 uniform float uImpRadius;
+// 1.0 for foliage impostors (sway gently in wind), 0.0 for rigid structures/dwellings.
+uniform float uImpSway;
 // >= 0 during shadow passes for conservative per-instance cascade frustum culling.
 uniform float uShadowPad;
-// Screen-size fade-in for canopy tree impostors (0 in shadow/depth/pick passes).
+// Screen-size fade-in for impostors (0 in shadow/depth/pick passes).
 uniform float uFadeK;
 uniform float uProtoExtent;
 ${DROP}
@@ -4103,7 +4296,7 @@ void main() {
     return;
   }
   vec3 center = iPlace.xyz + vec3(0.0, 0.0, uImpMidZ * sc);
-  if (dot(uWind, uWind) > 0.0) {
+  if (uImpSway > 0.5 && dot(uWind, uWind) > 0.0) {
     float own = fract(sin(dot(iPlace.xy, vec2(12.9898, 78.233))) * 43758.5453);
     float h = max(uImpMidZ * sc, 0.5);
     float speed = length(uWind);
@@ -4180,6 +4373,8 @@ uniform float uEvidence;
 uniform highp sampler2DArray uImpAlbedo;
 uniform highp sampler2DArray uImpNormal;
 uniform float uImpLayer;
+// 0.0 = foliage (wrap lighting + green backlit translucency), 1.0 = rigid built/stone (Lambertian + SH sky).
+uniform float uImpKind;
 out vec4 o;
 ${LIGHTING}
 ${IMP_OCT_COMMON}
@@ -4204,8 +4399,13 @@ void main() {
   vec4 nMix = (n0 * (a0.a * vWeights.x) + n1 * (a1.a * vWeights.y) + n2 * (a2.a * vWeights.z)) / nw;
 
   vec3 albedo = clamp(aMix.rgb / max(alpha, 0.06), 0.0, 1.0);
-  // Per-instance tone shift matching MESH_FS so adjacent trees vary naturally.
-  if (uWild > 0.5) albedo *= 0.82 + 0.36 * fract(vTint * 5.3);
+  bool rigid = uImpKind > 0.5;
+  if (rigid) {
+    albedo *= 0.92 + 0.16 * fract(vTint * 5.3);
+  } else if (uWild > 0.5) {
+    // Per-instance tone shift matching MESH_FS so adjacent trees vary naturally.
+    albedo *= 0.82 + 0.36 * fract(vTint * 5.3);
+  }
 
   vec3 nlRaw = nMix.rgb * 2.0 - 1.0;
   float nlLen = length(nlRaw);
@@ -4219,15 +4419,22 @@ void main() {
   float pixel = toEyeLen * 0.002;
   float sh = shadowAt(vPos, n, pixel) * cloudShade(vPos);
   vec3 v = toEyeLen > 1e-6 ? toEye / toEyeLen : vec3(0.0, 0.0, 1.0);
-  float wrap = clamp((dot(n, uSun) + 0.3) / 1.3, 0.0, 1.0);
   float up = n.z * 0.5 + 0.5;
   vec3 skyC = skyLight(n);
   float grey = dot(skyC, vec3(0.3, 0.5, 0.2));
   skyC = mix(vec3(grey), skyC, 0.5) + uBounce * 0.45;
   vec3 bounce = uBounce * (1.0 - up) * (0.4 + 0.6 * sh);
-  vec3 c = albedo * (uSunColor * wrap * sh + (skyC + bounce) * skyOcc);
-  float behind = pow(max(dot(-v, uSun), 0.0), 4.0);
-  c += albedo * vec3(1.1, 1.3, 0.5) * uSunColor * sh * (0.28 * behind);
+  vec3 c;
+  if (rigid) {
+    float ndl = max(dot(n, uSun), 0.0);
+    float occl = skyOcc * 0.5 + 0.5;
+    c = albedo * (uSunColor * ndl * sh + (skyC + bounce) * occl);
+  } else {
+    float wrap = clamp((dot(n, uSun) + 0.3) / 1.3, 0.0, 1.0);
+    c = albedo * (uSunColor * wrap * sh + (skyC + bounce) * skyOcc);
+    float behind = pow(max(dot(-v, uSun), 0.0), 4.0);
+    c += albedo * vec3(1.1, 1.3, 0.5) * uSunColor * sh * (0.28 * behind);
+  }
   if (uSea > 0.5 && vPos.z < 0.0) c *= seaLight(vPos.z);
   c = seen(c, vPos, uEye);
 

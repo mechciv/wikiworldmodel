@@ -93,7 +93,7 @@ export default defineConfig({
     outDir: resolve(import.meta.dirname, '../dist/site'),
     emptyOutDir: true,
     target: 'es2022',
-    // Two pages: the globe, and the coverage of the world (viewer/src/coverage).
-    rollupOptions: { input: { main: resolve(import.meta.dirname, 'index.html'), coverage: resolve(import.meta.dirname, 'coverage.html') } },
+    // The globe and its two coverage views.
+    rollupOptions: { input: { main: resolve(import.meta.dirname, 'index.html'), coverage: resolve(import.meta.dirname, 'coverage.html'), history: resolve(import.meta.dirname, 'history.html') } },
   },
 });
