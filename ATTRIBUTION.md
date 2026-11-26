@@ -437,6 +437,11 @@ Instituto de Planeación Democrática y Prospectiva. Lago de Texcoco 1519. Porta
 - From: <https://datos.cdmx.gob.mx/dataset/lago-de-texcoco-1519/resource/5f5de1e3-e530-460d-9829-0f1c61099b7e>
 - Source id: `src:ipdp-texcoco-1519`
 
+## World history atlas
+
+The atlas uses selected period definitions from the public-domain [PeriodO initial collection](https://github.com/periodo/periodo-data/blob/51fe03a205ac049b818c83bafe852bec2dc2b6e9/initial-data.json). Each entry names the work and definition it follows.
+Its geographic index uses simplified, grouped land outlines from [Natural Earth 1:110m Admin 0, v5.1.2](https://github.com/nvkelso/natural-earth-vector/blob/v5.1.2/geojson/ne_110m_admin_0_countries.geojson), in the public domain.
+
 ## Databases the records cite
 
 Records cite entries in these databases for facts, with short quotes as evidence. Nothing is imported

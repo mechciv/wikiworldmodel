@@ -83,6 +83,13 @@ export function attributionMarkdown(world: World, fonts: string[] = siteFonts(),
     if (d.url) lines.push(`- From: <${safeMdUrl(d.url)}>`);
     lines.push(`- Source id: \`${id}\``, '');
   }
+  lines.push(
+    '## World history atlas',
+    '',
+    'The atlas uses selected period definitions from the public-domain [PeriodO initial collection](https://github.com/periodo/periodo-data/blob/51fe03a205ac049b818c83bafe852bec2dc2b6e9/initial-data.json). Each entry names the work and definition it follows.',
+    'Its geographic index uses simplified, grouped land outlines from [Natural Earth 1:110m Admin 0, v5.1.2](https://github.com/nvkelso/natural-earth-vector/blob/v5.1.2/geojson/ne_110m_admin_0_countries.geojson), in the public domain.',
+    '',
+  );
   const databases = citedDatabases(world);
   if (databases.length) {
     lines.push(

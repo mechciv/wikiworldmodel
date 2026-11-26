@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="theme-color" content="#faf9f5">
+    <title>World history atlas · WikiWorldModel</title>
+    <meta name="description" content="Explore civilizations across time and compare the historical record with WikiWorldModel’s coverage.">
+  </head>
+  <body>
+    <header class="mast"><div class="wrap mast-inner">
+      <a class="brand" href="./" data-dest="globe"><img src="../site/img/logo.svg" alt="" width="27" height="27">WikiWorldModel</a>
+      <nav aria-label="Viewer"><a href="history.html" aria-current="page">History atlas</a><a href="coverage.html" data-dest="coverage">Layer coverage</a><a class="globe-link" href="./" data-dest="globe">Explore globe</a></nav>
+    </div></header>
+    <main class="wrap">
+      <section class="intro"><div><p class="section-label"><span class="atlas-symbol" aria-hidden="true">▤</span> Coverage atlas</p>
+        <h1>World history atlas</h1>
+        <p class="dek">Trace societies across time and see where WikiWorldModel has mapped their histories.</p></div>
+        <div id="map" class="map" aria-hidden="true"></div>
+      </section>
+      <div id="summary" class="summary" aria-label="Atlas coverage totals"></div>
+      <section class="explorer" aria-label="Historical chronology">
+        <div class="toolbar"><div class="view-group" aria-label="Atlas view"><button id="timeline" aria-pressed="true">Timeline</button><button id="index" aria-pressed="false">Full index</button></div>
+          <label class="search-box"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><input id="search" type="search" aria-label="Search the full atlas" placeholder="Search the atlas"></label>
+          <label class="select"><span class="sr">Region</span><select id="region"><option value="">All regions</option></select></label>
+          <label class="select"><span class="sr">Coverage</span><select id="status"><option value="">All coverage</option><option value="record">Model record</option><option value="border">Border data</option><option value="reference">Reference only</option></select></label>
+        </div>
+        <div class="chart-head"><div><h2 id="chart-title">Civilization timeline</h2><p id="chart-sub" aria-live="polite">Loading the build’s historical index…</p></div>
+          <label class="time-select">Time window <span class="select"><select id="era" aria-label="Time window"></select></span></label>
+        </div>
+        <div id="chart" aria-busy="true"></div>
+        <div id="chart-foot"></div>
+      </section>
+      <details class="method" id="method"><summary>How the atlas measures coverage</summary><div>
+        <p>The full index includes every polity and named border run in the selected build, selected records for settlements and cultural practices, and a small reference chronology. The timeline opens on highlights. Search draws from the full index. Counts refer to entries in this atlas.</p>
+        <p>Solid marks show dated model records. A single date appears as a point. Striped marks show years with mapped borders in Cliopatria. A name that returns after a long gap can have multiple entries. Dotted marks show selected archaeological periods with no direct record linked here. A society can also appear through its cities, people or material culture.</p>
+        <p>Regions group entries for browsing. Border entries use their first map label point or an editorial placement. The overview expands recent centuries. Each narrower time window has a linear scale. Dates follow the build’s default chronology and each reference work’s periodization.</p>
+        <p>Border data from Bennett et al., <a href="https://doi.org/10.1038/s41597-025-04516-9">Cliopatria</a> (CC BY 4.0). Reference periods from the public-domain <a href="https://github.com/periodo/periodo-data/blob/51fe03a205ac049b818c83bafe852bec2dc2b6e9/initial-data.json">PeriodO initial collection</a>. Map outlines from <a href="https://www.naturalearthdata.com/">Natural Earth</a> (public domain).</p>
+      </div></details>
+      <footer><span>WikiWorldModel</span><span id="build-label"></span></footer>
+    </main>
+    <dialog id="inspector" aria-labelledby="detail-title"><div class="sheet-top"><span class="section-label">Atlas entry</span><button id="close-detail" aria-label="Close entry">×</button></div><div id="detail"></div></dialog>
+    <script type="module" src="./src/history/main.ts"></script>
+  </body>
+</html>
