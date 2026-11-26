@@ -1,9 +1,10 @@
 # Entities: every kind of thing, listed, written or generated
 
-Status: a report and a proposal, 25 November 2026. Nothing in it is built. It reads `world/entities` as it
-stands at commit `1654c57` (build `1753e842a906c808`), says what stands between the world and an entry for
-every thing of every kind, and proposes how to get there. It goes with three documents and repeats none of
-them:
+Status: a report and a plan, 25 November 2026; steps 1 to 4 built on 26 November 2026, and
+[section 8](#8-what-is-built) says what was built and where it differs from the plan. Sections 2 to 4 read
+`world/entities` as it stood at commit `1654c57` (build `1753e842a906c808`), before them: they say what
+stood between the world and an entry for every thing of every kind. It goes with three documents and repeats
+none of them:
 
 - [STRUCTURE.md](../STRUCTURE.md) section 3.1, *rows are claims*: this finishes it, so that a row is a thing;
 - [CATALOG.md](CATALOG.md), which measures what is missing: this says where its lists come from;
@@ -35,6 +36,9 @@ them:
 - **The plan** (section 5): shelve the records by kind; make a row a thing; make the outputs hold millions;
   join the lists into one identity; bring in a backbone for each kind, in order of what it unlocks; write
   records where the build says they are most wanted; and model what no list reaches.
+- **Built** (section 8): the first four. The records are shelved by kind under `civilization/`, `life/`,
+  `earth/`, `space/` and `periods/`; 341,382 things of six lists are found by search and open a page; and
+  a record that names a thing's id is that thing.
 
 ## 2. What is there
 
@@ -380,8 +384,9 @@ follow:
 **Step 1. Shelve by kind.** A move of files, with no id changed.
 
 - *The rule:* a directory is named for a kind of thing, never for the job that wrote its files. A path is
-  `<domain>/<kind's directory>[/<shard>]/<name>.yaml`. The exception is the detail of one settlement, its
-  buildings, streets and districts, which a contributor works on a city at a time: `places/<settlement>/`.
+  `<domain>/<kind's directory>[/<shard>]/<name>.yaml`. Shards are free, and what was built in a settlement,
+  its buildings, streets and districts, which a contributor works on a city at a time, is sharded by the
+  settlement: `civilization/structures/rome/`.
 - *The table:* `world/schema/layout.yaml` gives each kind its directory. The validator warns at a record
   that sits elsewhere, so "where does this go" has one answer, which an agent can look up.
 - *A set is a relation or a list, never a folder.* The Hell Creek's taxa are members of its ecosystem;
@@ -401,15 +406,17 @@ A field's `rows:` already says a row's kind, its key and which column is which p
 makes a row a thing:
 
 ```yaml
-# world/fields/earth/languages.yaml: a sketch
+# world/fields/earth/languages.yaml, as built
 rows:
   kind: language
   key: "{Glottocode}"
   scheme: glottolog                     # its things are known as glottolog:stan1293, in every snapshot
-  parent: { column: Family_ID }         # for a list that is a tree
+  # for a list that is a tree: the first of these that names a row of the list, and the relation
+  parent: { key: ["{Language_ID}", "{Family_ID}"], rel: member-of }
   same_as: { iso639-3: ISO639P3code }   # the other schemes its columns carry
   claims:
     name: { column: Name, as: text }
+    language_level: { column: Level }
     location: { column: [Latitude, Longitude], as: point, method: compilation }
 ```
 
@@ -430,7 +437,9 @@ to them are out.
 
 - *Done when:* any taxon the atlas can draw is found by name and opens a page; the count of findable things
   goes from 3,263 to more than 100,000 with no new dataset; `ohm-site`, `pbdb-formation` and `pbdb-land` are
-  no longer kinds of import; a test asks every list's rows for search, a page and a reference.
+  no longer kinds of import; a test asks every list's rows for search, a page and a reference. *As built
+  (section 8):* all but the third, since the date solver reads what those imports date; their records are
+  their lists' things by step 4 instead.
 - *Left as it is:* the date solver reads records only. A row's dates are the list's, shown as given.
 
 **Step 3. Outputs that hold millions.**
@@ -509,14 +518,14 @@ and that the rest are drawn as stand-ins.
 
 ## 6. Decisions needed
 
-1. **The layout:** by kind, as step 1 has it (recommended), or by region and era, as the design first drew
-   it. By kind gives every record one right place, which a region does not for a thing that crossed regions
-   or lived before them.
-2. **When to move the files:** in one pull request, once the open branches that add records have merged.
-   Git follows a renamed file, but a file added to an old directory would land beside the rule.
-3. **How a listed thing is referred to:** by its own scheme and identifier, `glottolog:stan1293`
-   (recommended), which is stable across snapshots and is what the design already calls an external id; or
-   by an id the importer makes, as `life/pbdb/txn-<n>` is now.
+1. **The layout:** *decided 26 November 2026,* by kind, with `civilization/` in place of `people/` for the
+   domain of people and what they made.
+2. **When to move the files:** *done* in one change, on master as of `bddc924`. A branch that adds a record
+   to an old directory is told by the validator where it goes.
+3. **How a listed thing is referred to:** *decided,* by its own scheme and identifier,
+   `glottolog:stan1293`, which is stable across snapshots and is what the design already calls an external
+   id. The records two imports make keep their ids (`life/pbdb/txn-<n>`, `rome/ohm/…`), and are those
+   things.
 4. **Whether Wikidata's statements may come in as a listed thing's claims.** [RECORDS.md](../RECORDS.md) has
    Wikidata "for identifiers more than for facts". Recommended: yes, for a name, a place and a date, marked
    as Wikidata's, never preferred over a record's claim, and never read by the solver. A labelled lead is
@@ -551,35 +560,49 @@ and that the rest are drawn as stand-ins.
 - **Things with no edge.** A monsoon, an ocean current and a culture are not rows of anything. Whether each
   is a record, a field or both is decided kind by kind.
 
-## Appendix A: where each directory's files would go
+## 8. What is built
 
-No id changes. *Kinds* are those in the directory today.
+Steps 1 to 4, on 26 November 2026, with what each did not reach. The build they were checked with is
+`3ceea9c276ca1e33`.
 
-| Now | Files | Kinds | To |
+| Step | Built | Left |
+|---|---|---|
+| 1. Shelve by kind | 736 files moved, no id changed: every record is in the directory for its kind under `space/`, `earth/`, `life/`, `civilization/` and `periods/` ([world/schema/layout.yaml](../../world/schema/layout.yaml)), a few kinds in one of several by what they are of. `npm run validate` warns at a record outside its kind's directory and says where it goes, in this repository's world only; it refuses two written records that give one external id. The world reads its records in the order of their ids, not of their files, so where a file is shelved changes nothing, not even which of two of a name search finds first. A record an import made names its dataset (`imported`), so the three tests that read an id's prefix are gone. An OpenHistoricalMap element that a record names in `same_as` by the map's own key is adopted: Rome's fourteen regions had each been a record twice. The prominence rule's domain `people` is named `civilization`. | `npm run test:reproducible` was not run. Against a build of the commit before, file by file, the features, tiles, climate, people, scenes and life are the same bytes: what differs is Rome's city, with its fourteen regions once, and the records, search, the tree and coverage, with the things. |
+| 2. A row is a thing | A field's `rows:` may give a `scheme`, a `parent`, the `same_as` its columns give, and the properties it is `preferred` for; a column may say its text's language. Six lists: the Paleobiology Database's taxa of the land's fossils and of the sea's (`field:life/taxa-land`, `field:life/taxa-sea`, one scheme, 268,350 taxa), Glottolog's 27,177 languoids, NOAA's 9,123 hazards, Macrostrat's 35,481 units and Natural Earth's 1,251 cities (`field:earth/places-today`): 341,382 things ([tools/world/src/things.ts](../../tools/world/src/things.ts)). Each is found by search as it is typed, opens a page made from its list's chunk ([core/things.ts](../../core/things.ts)), can be pointed to by a relation, which the validator holds to its list's kind, and hangs in its list's tree; the tree of life opens a record onto its list's children; a scene's taxon with no record opens its page. `npm run world -- thing <id>`, and `claims` of a thing's id. | **The two imports that make records still do:** the date solver reads only records, and it dates what they import, the city's structures and the Hell Creek's taxa. They name their dataset, and are the things of their lists by step 4. **No markers:** the lists' things that have places are drawn by their layers (the hazards, the languages, today's cities) or stand in columns of rock. **Rows that are not things:** Cliopatria's, Itiner-e's and the PBDB's occurrences and collections, whose keys are a name and a year, a place in a file, or finds no one looks for by name. **An overlay** cannot yet correct a thing of a list that shares its dataset with another field's rows, the land's taxa and its occurrences: the claim index keeps one table to a dataset. **In the viewer,** a taxon's page as a thing has no way yet to go and see it where it lived (the atlas says where only for records), and the time machine's box finds records and not things. |
+| 3. Outputs that hold millions | `things/index.json`, 43 KB, read at the first search; the pages in 854 chunks by the hash of their ids; search in 2,415 shards, a beginning of a word cut finer where more than 3,000 names share it, to six letters; the trees' children in 297 chunks. 141 MB in all, none of it loaded until asked for. `search.json` holds the records alone, and a build test holds it under 3 MB and the index under 150 KB. | **Snapshots** are kept as they were, not columnar. `search.json` still grows with the records written, which is tens of thousands before it matters. |
+| 4. One identity | Ids join: a record's `same_as`, a row's columns that give another scheme's id (Glottolog's ISO 639-3 codes), an overlay's `same_as`. A thing a record is opens the record, whose page shows what each row says ("In the lists"); an import's record that gives an id a written one gives is found and opened as the written one (the Flaminian and Lateran obelisks). `npm run world -- matches-wanted` proposes joins by name, kind and distance, and never makes one. Three settlements were joined so, as an example: Rome, Constantinople to Istanbul, Tenochtitlan to Mexico City. | No two lists here name each other's ids yet, so a join between lists is tested and not yet exercised by data. Wikidata is not read. The written taxa that `matches-wanted` pairs with the database's, mostly the animals people kept, are left to someone who will check that adopting a database's number, and with it its first and last records, is right for each. |
+
+## Appendix A: where each directory's files went
+
+The move of step 1, on 26 November 2026: 736 files, and no id changed. *Kinds* are those the directory held.
+
+| Was | Files | Kinds | Went to |
 |---|---|---|---|
-| `life/taxa/` and its shards | 619 | taxa | stays; its shards named by clade, with a rule for which |
-| `life/hell-creek/` | 43 | 42 taxa, the ecosystem | `life/taxa/…`, `life/ecosystems/` |
-| `life/hominins/` | 34 | 14 taxa, 20 finds | `life/taxa/…`, `life/occurrences/` |
-| `life/megafauna/` | 27 | 13 taxa, 9 events, 5 finds | `life/taxa/…`, `life/events/`, `life/occurrences/` |
+| `life/taxa/` and its shards | 619 | taxa | stayed |
+| `life/hell-creek/` | 43 | 42 taxa, the ecosystem | `life/taxa/` by clade (`dinosaurs/`, `mammals/`, `plants/`, `reptiles/`), `life/ecosystems/` |
+| `life/hominins/` | 34 | 14 taxa, 20 finds | `life/taxa/mammals/`, `life/occurrences/` |
+| `life/megafauna/` | 27 | 13 taxa, 9 events, 5 finds | `life/taxa/mammals/` and `reptiles/`, `life/events/` (the extinctions), `earth/events/` (the changes of climate), `civilization/events/` (New Zealand's settlement), `life/occurrences/` |
 | `life/occurrences/`, `life/fossil-forests/`, `life/mesosaurus/` | 69 | finds | `life/occurrences/` |
 | `life/transitions/` | 25 | events | `life/events/` |
-| `earth/events/`, `earth/ice-ages/`, `earth/futures/` | 33 | 29 events, 4 periods | `earth/events/`, `periods/` |
+| `earth/events/` | 13 | events | `earth/events/`, but for the five mass extinctions, `life/events/` |
+| `earth/ice-ages/`, `earth/futures/` | 20 | 16 events, 4 periods | `earth/events/`, `periods/climate/` |
 | `earth/orogens/`, `earth/structures/` | 9 | landforms | `earth/landforms/` |
-| `earth/day-length/`, `earth/samples/` | 27 | 24 samples, 2 finds, an event | `earth/samples/`, `life/occurrences/`, `earth/events/` |
-| `earth/plates/`, `earth/lips/`, `periods/ics/`, `space/` | 249 | as named | stay |
-| `people/first-cities/`, `people/cities/`, `places/` | 24 | settlements | `people/settlements/` |
-| `rome/` | 110 | buildings, monuments, works, open spaces | `places/rome/` |
-| `people/rulers/`, `people/persons/` | 46 | persons | `people/persons/` |
-| `people/events/`, `people/wars/`, `people/conquest/` | 24 | events | `people/events/` |
-| `people/calendars/` | 3 | the days that anchor calendars | `periods/calendars/` |
-| `people/dispersals/` | 30 | 17 events, 13 finds | `people/events/`, `people/occurrences/` |
-| `people/trade/` | 24 | 19 events, 3 finds, a building, a polity | `people/events/`, `people/occurrences/`, `places/…`, `people/polities/` |
-| `people/domestication/` | 47 | 20 developments, 25 finds, 2 taxa | `people/developments/`, `people/occurrences/`, `life/taxa/…` |
-| `people/writing/` | 26 | 13 scripts, 13 finds | `people/developments/`, `people/occurrences/` |
-| `people/prehistory/` | 14 | 8 industries, 6 artefacts | `people/industries/`, `people/artefacts/` |
-| `people/objects/` | 13 | artefacts | `people/artefacts/` |
-| `people/traditions/`, `people/husbandry/`, `people/agriculture/` | 122 | traditions | `people/traditions/`, a shard for each of the three |
-| `people/polities/`, `people/developments/`, `people/organizations/` | 46 | as named | stay |
+| `earth/lips/` | 3 | large igneous provinces | `earth/igneous-provinces/` |
+| `earth/day-length/` | 21 | 18 samples, 2 finds, an event | `earth/samples/`, `life/occurrences/`, `space/events/` |
+| `earth/plates/`, `earth/samples/`, `periods/ics/`, `space/` | 248 | as named | stayed |
+| `people/first-cities/`, `people/cities/`, `places/` | 24 | settlements | `civilization/settlements/` |
+| `rome/` | 110 | buildings, monuments, works, open spaces | `civilization/structures/rome/` |
+| `people/rulers/`, `people/persons/` | 46 | persons | `civilization/persons/` |
+| `people/events/`, `people/wars/`, `people/conquest/` | 24 | events | `civilization/events/` |
+| `people/calendars/` | 3 | the days that anchor calendars | `civilization/calendars/` |
+| `people/dispersals/` | 30 | 17 events, 13 finds | `civilization/events/`, `life/occurrences/` (the individuals) |
+| `people/trade/` | 24 | 19 events, 3 finds, a building, a polity | `civilization/events/`, `civilization/occurrences/`, `civilization/structures/`, `civilization/polities/` |
+| `people/domestication/` | 47 | 20 developments, 25 finds, 2 taxa | `civilization/developments/`, `life/occurrences/`, `life/taxa/mammals/` |
+| `people/writing/` | 26 | 13 scripts, 13 finds | `civilization/developments/scripts/`, `civilization/occurrences/` |
+| `people/prehistory/` | 14 | 8 industries, 6 artefacts | `civilization/industries/`, `civilization/artefacts/` |
+| `people/objects/` | 13 | artefacts | `civilization/artefacts/` |
+| `people/traditions/`, `people/husbandry/`, `people/agriculture/` | 122 | traditions | `civilization/traditions/building/`, `husbandry/` and `agriculture/` |
+| `people/polities/`, `people/developments/`, `people/organizations/` | 46 | as named | `civilization/` under the same names |
 
 ## Appendix B: what the reading of the licences could not reach
 

@@ -5,7 +5,7 @@ import { splitRef } from '../../../../core/refs.ts';
 import { pbdbId, pbdbNumber } from '../pbdb.ts';
 import { claimOf, labeller, subjectTime, type Solved } from './records.ts';
 
-export function tree(s: Solved): TreeFile {
+export function tree(s: Solved, listed: ReadonlyMap<string, { thing: string; count: number }> = new Map()): TreeFile {
   const w = s.world;
   const labelOf = labeller(s);
   const taxa = w.entities.filter((e) => e.kind === 'taxon').sort((a, b) => (a.id < b.id ? -1 : 1));
@@ -17,6 +17,11 @@ export function tree(s: Solved): TreeFile {
     const node: TreeNode = { id: e.id, label: labelOf(e.id), parent: parent ? index.get(splitRef(parent.to).record) ?? -1 : -1, ...subjectTime(s, e.id) };
     if (rank) node.rank = rank;
     if (e.imported) node.imported = true;
+    const more = listed.get(e.id);
+    if (more) {
+      node.thing = more.thing;
+      node.listed = more.count;
+    }
     return node;
   });
   const members: TreeFile['members'] = [];

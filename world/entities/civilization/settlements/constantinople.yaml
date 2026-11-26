@@ -6,7 +6,7 @@ summary: >-
   Wikidata splits it into three items, Byzantium (Q23725), Constantinople (Q16869) and Istanbul
   (Q406), and Pleiades into two (520985 and 520998); one of each is given here.
 author: machine:claude-code
-same_as: { wikidata: Q406, pleiades: 520985 }
+same_as: { wikidata: Q406, pleiades: 520985, natural-earth: 1159151579 }
 claims:
   name-byzantium:
     prop: name

@@ -33,8 +33,9 @@ been checked by a person, which is set 20. The three steps that come out of sets
 Sets 10, 12, 13, 15 and 18 add a new way of holding what has thousands of members: a field with
 `grid: { kind: rows }`, whose rows stay rows of a pinned dataset, thinned for the globe, and are drawn on a
 canvas over it (`core/layers.ts`, `tools/world/src/build/layers.ts`, `viewer/src/ui/layers.ts`). They are not
-records: they are not dated by the solver, and a click says what the dataset says of a row. Search finds only the states,
-by name, and a row an overlay ties to a record as that record.
+records: they are not dated by the solver, and a click says what the dataset says of a row. Search finds the states,
+by name, and a row an overlay ties to a record as that record; the hazards and the languages are things of their lists
+too, found by search with a page each ([plans/ENTITIES.md](plans/ENTITIES.md)).
 Their tests are `tools/world/test/layers.test.ts` and `viewer/test/e2e/layers.spec.ts`.
 
 - **States.** All of Cliopatria's rows at the time shown, tinted and outlined, the largest named; Rome's are

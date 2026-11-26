@@ -1,0 +1,23 @@
+id: field:earth/places-today
+type: field
+title: The world's cities today
+description: >-
+  The populated places of Natural Earth's map at 1:50m, as they are about 2020: the capitals and the larger cities, a
+  point each. Rows of the map, not records written here. A city's place today says nothing of where it stood before, or
+  when it was founded; a record of a settlement that names a place's id in same_as is that place.
+grid: { kind: rows }
+time: { lo: 1950 CE, hi: 2100 CE }
+data:
+  from: src:natural-earth-places-5.1.2
+  as: places
+basis: evidence
+spread: unknown
+# A list of things (docs/plans/ENTITIES.md, step 2): each place is natural-earth:<ne_id>, the map's own id, which it keeps
+# from one release to the next.
+rows:
+  kind: settlement
+  key: "{ne_id}"
+  scheme: natural-earth
+  claims:
+    name: { column: name, as: text }
+    location: { column: [latitude, longitude], as: point, method: gazetteer }

@@ -219,6 +219,14 @@ properties:
     type: string
     applies_to: [taxon]
     description: A taxon's rank in the classification it comes from, such as genus or family.
+  language_level:
+    type: string
+    applies_to: [language]
+    values:
+      family: A family of languages, all descended from one.
+      language: A language.
+      dialect: A dialect of a language.
+    description: What a languoid of a catalogue of languages is, as the catalogue classifies it.
   body_plan:
     type: string
     interp: step

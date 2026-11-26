@@ -5,7 +5,9 @@ import { esc } from './html.ts';
 
 export type SearchHit =
   | { type: 'entity'; id: string; label: string; detail: string; located: boolean }
-  | { type: 'period'; id: string; label: string; detail: string; start: number; end: number };
+  | { type: 'period'; id: string; label: string; detail: string; start: number; end: number }
+  /** a thing of a list, found in the shard of search its name is in (core/things.ts) */
+  | { type: 'thing'; id: string; label: string; detail: string };
 
 export class Search {
   readonly el: HTMLElement;
@@ -15,7 +17,13 @@ export class Search {
   private active = 0;
   onChoose: (h: SearchHit) => void = () => {};
 
-  constructor(private index: SearchFile, private periods: PeriodRecord[], kindLabel: (k: string) => string) {
+  constructor(
+    private index: SearchFile,
+    private periods: PeriodRecord[],
+    kindLabel: (k: string) => string,
+    /** the things of lists a text finds, fetched as it is typed: after the records' and the periods' hits */
+    private listed?: (text: string) => Promise<SearchHit[]>,
+  ) {
     this.el = document.createElement('div');
     this.el.className = 'search';
     this.el.innerHTML = `<label class="search-box"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg><input type="search" placeholder="Go to a place, an event or a period" aria-label="Search" autocomplete="off"><kbd title="Press / to search">/</kbd></label><ul role="listbox" hidden></ul>`;
@@ -41,6 +49,8 @@ export class Search {
     // Records found by a name they went by come before those that match only in their summary or id, and rows of
     // datasets, found by their name alone, after records. A name not the label says what it is a name of.
     const named = [...this.index.entities, ...(this.index.rows ?? [])]
+      // A record an import made that is a written one's thing is found as the written one.
+      .filter((e) => !e.same)
       .map((e) => ({ e, name: nameFound(e, q) }))
       .filter(({ e, name }) => name || (!e.dataset && match(`${e.summary ?? ''} ${e.id}`)))
       .sort((a, b) => Number(!!b.name) - Number(!!a.name) || Number(!!a.e.dataset) - Number(!!b.e.dataset));
@@ -57,6 +67,13 @@ export class Search {
     this.hits = [...ents, ...pers].slice(0, 12);
     this.active = 0;
     this.render();
+    // The things of lists come after, once their shard is here, and only while the text is still the one typed.
+    const asked = this.input.value;
+    void this.listed?.(q).then((more) => {
+      if (this.input.value !== asked || !more.length) return;
+      this.hits = [...ents.slice(0, 7), ...pers.slice(0, 2), ...more, ...ents.slice(7), ...pers.slice(2)].slice(0, 12);
+      this.render();
+    }).catch(() => {});
   }
 
   private render(): void {

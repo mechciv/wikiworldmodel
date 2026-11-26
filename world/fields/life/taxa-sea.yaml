@@ -1,0 +1,25 @@
+id: field:life/taxa-sea
+type: field
+title: The taxa of the sea's fossils
+description: >-
+  The Paleobiology Database's taxa: every taxon an occurrence of the sea's snapshot names, with all its parents, as the
+  database classifies them, each with the interval of its oldest and of its youngest record in the whole database. Rows
+  of the database, as the land's are, and the same things where a taxon is in both: one taxon, pbdb:txn:<number>, whose
+  page shows what each snapshot says of it.
+grid: { kind: rows }
+time: { lo: 541 Ma, hi: 0 Ma }
+data:
+  from: src:pbdb-sea-2026-11-06
+  as: taxa
+basis: evidence
+spread: unknown
+rows:
+  kind: taxon
+  key: "txn:{no}"
+  scheme: pbdb
+  parent: { key: "txn:{parent}", rel: descends-from }
+  claims:
+    name: { column: name, as: text, lang: la }
+    taxon_rank: { column: rank, none: [""] }
+    start: { column: [first_max, first_min], as: ma-range, method: stratigraphic }
+    end: { column: [last_max, last_min], as: ma-range, method: stratigraphic }

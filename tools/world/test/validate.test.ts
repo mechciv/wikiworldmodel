@@ -84,10 +84,11 @@ describe('validators', () => {
       'entities/a.yaml': entity('test/planet', 'body/planet', `phases:\n  - id: hot\n  - id: wet\nclaims:\n  s1: { prop: surface, subject: "@hot", value: magma, ${cite} }\n  s2: { prop: surface, subject: "@wet", value: lava, ${cite} }\n  e: { prop: end, subject: "@hot", value: { ref: test/flow, lag: 1 Myr }, ${cite} }\n`),
       'entities/b.yaml': entity('test/flow', 'large-igneous-province', `claims:\n  start: { prop: start, value: 70 Ma, ${cite} }\n  s: { prop: surface, value: magma, ${cite} }\n`),
     });
+    // In the order of the records' ids, test/flow's before test/planet's.
     expect(errors(issues).map((i) => [i.where, i.message])).toEqual([
+      ['claims.s', '"surface" does not apply to a large-igneous-province (it applies to body/planet)'],
       ['claims.s2.value', 'not one of the values of surface: magma, crust-and-magma, ocean, bare-rock'],
       ['claims.e.value', 'a lag counts from an edge of the record: add edge: start or end'],
-      ['claims.s', '"surface" does not apply to a large-igneous-province (it applies to body/planet)'],
     ]);
   });
 
@@ -204,9 +205,10 @@ describe('where a record goes, and one id for one thing (docs/plans/ENTITIES.md,
       'entities/c.yaml': entity('test/state', 'polity', `phases:\n  - id: first\n    same_as: { wikidata: Q2 }\nclaims:\n  start: { prop: start, value: 100 CE, ${cite} }\n`),
       'entities/d.yaml': entity('test/other', 'polity', `same_as: { wikidata: Q2 }\nclaims:\n  start: { prop: start, value: 100 CE, ${cite} }\n`),
     });
+    // The second of each pair, in the order of their ids, names the first.
     expect(errors(issues).filter((i) => i.check === 'ids').map((i) => i.message)).toEqual([
-      expect.stringContaining('wikidata:Q1 is also given by test/flow'),
-      expect.stringContaining('wikidata:Q2 is also given by test/state'),
+      expect.stringContaining('wikidata:Q1 is also given by test/again'),
+      expect.stringContaining('wikidata:Q2 is also given by test/other'),
     ]);
   });
 });

@@ -6,7 +6,7 @@ summary: >-
   Romulus that the Romans dated to 753 BCE belongs to the legend, and starts the Roman state
   (people/polities/rome), not the settlement.
 author: machine:claude-code
-same_as: { wikidata: Q220, pleiades: 423025 }
+same_as: { wikidata: Q220, pleiades: 423025, natural-earth: 1159151593 }
 claims:
   name:
     prop: name

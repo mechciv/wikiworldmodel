@@ -10,6 +10,8 @@ summary: >-
   How many lived in it in 1519 is estimated from 60,000 to 700,000 people: the chroniclers counted houses or
   householders, and the estimates turn on what they counted and how large the city was.
 author: machine:claude-code
+# Natural Earth's point for Mexico City today, the city this record is in its last phase.
+same_as: { natural-earth: 1159151587 }
 phases:
   - id: mexica
     label: Mexico Tenochtitlan

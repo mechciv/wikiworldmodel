@@ -24,6 +24,7 @@ import { resolvePoints } from '../importer.ts';
 import { lineageLoop } from '../lineage.ts';
 import { REPO, safeJoin, WORLD } from '../paths.ts';
 import { readTable, rowClaims, type Table } from '../tables.ts';
+import { readLists, thingsOf, type Things } from '../things.ts';
 import { stableStringify } from '../util.ts';
 import { kindIs, layoutOf, loadWorld, schemaDir, type Claim, type Entity, type Field, type Input, type Model, type Relation, type World } from '../world.ts';
 
@@ -110,6 +111,8 @@ class RefChecker {
     private issues: Issue[],
     /** the datasets read as tables of rows, for references to their rows */
     private tables: Map<string, Table> = new Map(),
+    /** the things of lists, for references to them by their ids (core/things.ts) */
+    private listed?: Things,
   ) {}
 
   /**
@@ -128,11 +131,20 @@ class RefChecker {
       this.issues.push({ level: 'error', check: 'refs', file, where, message: (e as RefError).message });
       return undefined;
     }
-    if (opts.types && !opts.types.includes(r.type)) {
+    // A thing of a list stands where a record may: it is known by its scheme's id, as a record is by its own.
+    const kind = r.type === 'external' ? this.listed?.schemes.get(r.scheme) : undefined;
+    if (opts.types && !opts.types.includes(r.type) && !(kind && opts.types.includes('entity'))) {
       this.issues.push({ level: 'error', check: 'refs', file, where, message: `"${s}" should name a ${opts.types.join(' or ')} record` });
       return undefined;
     }
-    if (r.type === 'external') return undefined;
+    if (r.type === 'external') {
+      if (!kind) return undefined;
+      if (!this.listed!.things.has(s)) {
+        this.issues.push({ level: 'warning', check: 'refs', file, where, message: `${s} is in none of the lists of ${r.scheme} read here (${this.listed!.lists.filter((l) => l.spec.scheme === r.scheme).map((l) => l.field.id).join(', ')})` });
+        return undefined;
+      }
+      return { id: s, kind, phases: [], claims: [], relations: [], file: '' };
+    }
     if (r.type === 'row') {
       if (!this.ids.has(r.id)) {
         this.issues.push({ level: 'error', check: 'refs', file, where, message: `${s} is a row of ${r.id}, which is not a dataset of the world` });
@@ -414,9 +426,9 @@ function checkLadder(c: Claim | Relation, issues: Issue[]): void {
   }
 }
 
-function checkRecords(world: World, issues: Issue[], tables: Map<string, Table> = new Map()): Wanted[] {
+function checkRecords(world: World, issues: Issue[], tables: Map<string, Table> = new Map(), listed?: Things): Wanted[] {
   const ids = registry(world, issues);
-  const refs = new RefChecker(world, ids, issues, tables);
+  const refs = new RefChecker(world, ids, issues, tables, listed);
   for (const e of world.entities) {
     const kind = world.vocab.kinds[e.kind];
     if (!kind) issues.push({ level: 'error', check: 'vocab', file: e.file, where: 'kind', message: `unknown kind "${e.kind}"` });
@@ -654,6 +666,20 @@ function checkRowSpecs(world: World, issues: Issue[]): void {
       if (map.method && !world.vocab.methods[map.method]) issues.push({ level: 'error', check: 'vocab', ...at(`.claims.${prop}.method`), message: `unknown method "${map.method}"` });
       if ((map.as === 'point' || map.as === 'ma-range') !== Array.isArray(map.column)) issues.push({ level: 'error', check: 'rows', ...at(`.claims.${prop}.column`), message: 'a point reads two columns, latitude and longitude, and a range of ages two, older and younger; anything else reads one' });
     }
+    // A list of things (core/things.ts): its rows are known by the dataset's own ids.
+    const spec = f.rows;
+    if (spec.scheme) {
+      if (spec.key.includes('{#}')) issues.push({ level: 'error', check: 'rows', ...at('.key'), message: 'a row known by its place in the file is not the same row in the next snapshot: a list of things keys its rows by the dataset\'s own ids' });
+      
+      const other = world.fields.find((g) => g !== f && g.rows?.scheme === spec.scheme && g.rows?.kind !== spec.kind);
+      if (other) issues.push({ level: 'error', check: 'rows', ...at('.kind'), message: `${other.id} reads things of ${spec.scheme} as ${article(other.rows!.kind)}: the things of one scheme are of one kind` });
+    }
+    if (spec.parent) {
+      if (!spec.scheme) issues.push({ level: 'error', check: 'rows', ...at('.parent'), message: 'only a list of things (rows: scheme) is a tree' });
+      if (!world.vocab.relations[spec.parent.rel]) issues.push({ level: 'error', check: 'vocab', ...at('.parent.rel'), message: `unknown relation type "${spec.parent.rel}"` });
+    }
+    if (spec.same_as && !spec.scheme) issues.push({ level: 'error', check: 'rows', ...at('.same_as'), message: 'only a list of things (rows: scheme) gives other ids of its rows' });
+    for (const prop of spec.preferred ?? []) if (!spec.claims[prop]) issues.push({ level: 'error', check: 'rows', ...at('.preferred'), message: `its rows give no "${prop}"` });
   }
 }
 
@@ -1355,10 +1381,10 @@ function checkTraditions(world: World, issues: Issue[]): void {
   }
 }
 
-export async function validateWorld(world: World, opts: { frames?: boolean; tables?: Map<string, Table> } = {}): Promise<Report> {
+export async function validateWorld(world: World, opts: { frames?: boolean; tables?: Map<string, Table>; things?: Things } = {}): Promise<Report> {
   const issues: Issue[] = world.loadIssues.map((e) => ({ level: 'error', check: 'load', file: e.file, where: e.where, message: e.message }));
   checkSchemas(world, issues);
-  const wanted = checkRecords(world, issues, opts.tables ?? (await overlayTables(world)));
+  const wanted = checkRecords(world, issues, opts.tables ?? (await overlayTables(world)), opts.things ?? thingsOf(await readLists(world)));
   checkRanks(world, issues);
   checkLineage(world, issues);
   // The layout is this repository's: a world made for a test keeps its records where it likes, unless it has its own.

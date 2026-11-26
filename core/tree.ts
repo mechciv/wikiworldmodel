@@ -15,6 +15,12 @@ export interface TreeNode {
   variants?: Record<string, FeatureTime>;
   /** imported from a database, rather than written: folded away until asked for */
   imported?: boolean;
+  /**
+   * The thing of a list it is (core/things.ts), and how many things of the list hang from it that no record is: they are
+   * fetched when it is opened (things/tree/), and stay folded until asked for.
+   */
+  thing?: string;
+  listed?: number;
 }
 
 /** One formation's fossils: places and rows, too many to be records. */
@@ -88,9 +94,10 @@ export interface TreeRow {
 
 /**
  * The rows of a tree, parent before children: one row per taxon, children of a folded node left out.
- * What is folded is a node in `folded`, or an imported node not in `open`.
+ * What is folded is a node whose children are all imported, or that has children not fetched yet (`more`), and that
+ * is not in `open`.
  */
-export function layoutTree(nodes: TreeNode[], index: TreeIndex, open: ReadonlySet<number>): TreeRow[] {
+export function layoutTree(nodes: TreeNode[], index: TreeIndex, open: ReadonlySet<number>, more: (i: number) => boolean = () => false): TreeRow[] {
   const rows: TreeRow[] = [];
   const seen = new Uint8Array(nodes.length);
   const stack: [number, number][] = [];
@@ -101,7 +108,7 @@ export function layoutTree(nodes: TreeNode[], index: TreeIndex, open: ReadonlySe
     seen[i] = 1;
     const kids = index.children[i];
     // A written taxon shows its children at once; a database's stay folded until asked for.
-    const shut = kids.length > 0 && !open.has(i) && kids.every((k) => nodes[k].imported);
+    const shut = (kids.length > 0 || more(i)) && !open.has(i) && kids.every((k) => nodes[k].imported);
     const row = rows.length;
     rows.push({ node: i, parentRow, folded: shut });
     if (shut) continue;

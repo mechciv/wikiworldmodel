@@ -159,6 +159,9 @@ Figshare, PANGAEA, CEDA, publishers' sites, NOAA, OpenTopography, INGV, and the 
   so a coarse form on a family is worth a lot, and a form for each species is the long-run aim.
 - **Building traditions**: `npm run world -- dwellings-wanted` lists the regions and times where the most people are drawn
   with generic houses, and [docs/DWELLINGS.md](docs/DWELLINGS.md) is the brief for a tradition's record.
+- **Matches wanted**: `npm run world -- matches-wanted` lists records that may be things of the lists
+  the world reads, by name, kind and place: check each, and where it is right, name the thing's id in
+  the record's `same_as` ([A list of things](docs/RECORDS.md#a-row-of-a-dataset)).
 - **Wanted records**: references to records nobody has written, listed by
   `npm run validate -- --verbose` and in each build's `coverage.json`.
 - **Unsourced claims**: listed in `coverage.json`, and counted by `npm run validate`. Find a source, or

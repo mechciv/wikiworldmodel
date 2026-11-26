@@ -81,7 +81,8 @@ it, and says where it goes.
   a living thing is `life/occurrences/`, a find of what people made `civilization/occurrences/`.
 - **The id is the path you first wrote it at,** and never changes after: a file that moves keeps its
   id ([rule 7](../CONTRIBUTING.md#the-rules)). An id carries no meaning, so an old one that no longer
-  matches its path is fine.
+  matches its path is fine. The world is read in the order of its ids, so a move changes nothing the
+  build makes.
 - **A thing a dataset already lists is named by its id there,** in `same_as`: a taxon by its number
   in the Paleobiology Database, a place by its Pleiades or Wikidata id. Then the record and the
   dataset's row are one thing, and the validator refuses a second record that names the same id.
@@ -649,6 +650,21 @@ languages, Itiner-e's roads) is a source whose rows are claims. Its field's `row
 how a row is keyed and which column gives which property ([tools/world/src/tables.ts](../tools/world/src/tables.ts)).
 A row's address is `src:<dataset>#<key>`: the inspect panel shows it, and
 `npm run world -- claims <address>` lists what the row says.
+
+**A list of things.** Where a dataset gives its rows ids of its own, the same in every snapshot, its
+field's `rows:` names their `scheme`, and each row is a thing, `<scheme>:<key>`: `pbdb:txn:38613`,
+`glottolog:stan1293`, `ncei:eruption:5238`. A thing is found by search, has a page made from what its
+row says, and can be the target of a relation, as a record can
+([plans/ENTITIES.md](plans/ENTITIES.md)). A list that is a tree says which row each hangs from
+(`parent`), and the ids of other schemes its columns give (`same_as`). Two snapshots of one catalogue
+give one scheme, and a thing in both is one thing with a row in each.
+
+- **A record that names a thing's id in `same_as` is that thing.** Its page shows what the row says
+  beside its own claims, and search finds it as the record. So before writing a record of something a
+  list has, look it up there (`npm run world -- thing <scheme>:<key>`), and name it.
+- **Nothing is joined by a name.** `npm run world -- matches-wanted` lists the records that may be
+  things of the lists by their names (and places): each is a proposal to check, and becomes a join
+  when someone adds the id.
 
 A record can't be written into a dataset, so an **overlay**, one file per row in
 [world/overlays/](../world/overlays/), names the row and does one of three things:

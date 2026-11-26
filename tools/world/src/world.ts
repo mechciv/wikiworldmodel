@@ -210,7 +210,7 @@ export interface Field {
     from: string;
     file?: string;
     /** what the data is read as, where it is not elevation */
-    as?: 'climate' | 'months' | 'ice-sheets' | 'borders' | 'hazards' | 'polities' | 'routes' | 'languages' | 'people' | 'community' | 'community-sea' | 'rock-record' | 'relief' | 'river-widths' | 'anthromes' | 'land-use-assessment' | 'cities' | 'topsoil' | 'bedrock' | 'strata';
+    as?: 'climate' | 'months' | 'ice-sheets' | 'borders' | 'hazards' | 'polities' | 'routes' | 'languages' | 'people' | 'community' | 'community-sea' | 'rock-record' | 'relief' | 'river-widths' | 'anthromes' | 'land-use-assessment' | 'cities' | 'topsoil' | 'bedrock' | 'strata' | 'taxa' | 'places';
     places?: string;
     /** for a land-use assessment by region: the dataset of the regions' shapes */
     regions?: string;
@@ -662,7 +662,9 @@ export async function loadWorld(root: string = WORLD): Promise<World> {
     return { snap: JSON.parse(await readFile(file, 'utf8')) as T, label };
   };
 
-  const entities = entityFiles.map((f) => normalizeEntity(f.file, f.data, loadIssues));
+  // In the order of their ids, not of their files: where a file is shelved changes nothing, not even which of two
+  // records search finds first.
+  const entities = entityFiles.map((f) => normalizeEntity(f.file, f.data, loadIssues)).sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
   // A snapshot's elements become records, but for those a written record has adopted.
   const snapshots = new Map<string, OhmSnapshot>();
   for (const d of Object.values(manifest.datasets)) {

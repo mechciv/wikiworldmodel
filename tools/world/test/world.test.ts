@@ -147,6 +147,8 @@ describe('the world', async () => {
       expect(r.issues.filter((i) => i.level !== 'info').map((i) => `${i.level} ${i.check} ${i.file}`)).toEqual(['warning layout entities/life/occurrences/somewhere-else.yaml']);
       const s = solveScenario(moved);
       expect(s.ok && s.bounds.get('earth/orogens/himalaya|start')).toEqual(sol.bounds.get('earth/orogens/himalaya|start'));
+      // Nor the order the records come in, which settles which of two of a name search finds first.
+      expect(moved.entities.map((e) => e.id)).toEqual(world.entities.map((e) => e.id));
     });
   });
 });
