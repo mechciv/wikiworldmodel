@@ -1,0 +1,57 @@
+# Round 5's verdicts for p07, judged again on the new build: a slope at about 4,390 m above the Coposa basin on the Chilean Altiplano, eye level facing west, 10:00 in April of 10.9 ka.
+author: machine:claude-code
+judged: "2026-11-23"
+build: 3b9f48adb1090be2
+changes: >-
+  The clip at 3,200 m is gone: the scene now keeps each grid's heights as steps above a base, and the eye stands at
+  4,460, 4,698 and 4,255 m over floors of 4,443, 4,694 and 4,243 m, where the first take had all three at 3,201.7 over
+  a floor of 3,200. So the frames are now of steep, rough mountain ground. They do not show the brief's view, though:
+  at a and c a near slope rises across the view and hides everything beyond, and at b a slope runs down to the right
+  to a flat tan floor. The plants are now straw-coloured leafy herbs, where the first take had green tussocks. With real
+  heights the scene's snow line (4,251 m) reaches the ground, so snow lies among the shrubs at b and a smooth white hill
+  stands at the left of a: ice-snow-on-peaks moved from untested to wrong. No other verdict moved.
+summary: >-
+  The heights are now right, within some 50 m of the survey at the camera, and a clear, deep-blue morning with hard
+  light and straw-coloured plants is close to the Altiplano in April. But the view is not the brief's. At a and c a
+  near slope rising across the view hides the basin, the salar and Cerro Napa; at b a slope runs down to a flat floor
+  off to the right. The scene's snow line at 4,251 m whitens slopes the brief has bare. What grows is still not tola
+  and bunchgrass, the atlas still fills the slope with lowland animals, and the foragers' camps are rightly kept out of
+  the frame.
+items:
+  relief-slope-to-basin: { verdict: wrong, spots: { a: wrong, b: wrong, c: wrong }, owner: "gen:life/scene", why: "The heights are now right (floor 4,443 m at a, against 4,392 m by SRTM), but no frame looks down a long fall to a basin. At a and c a steep near slope rises across the view and hides the land beyond. At b the slope rises to the left and runs down to the right, to a flat tan floor with low ridges on the skyline, off to the side rather than ahead." }
+  relief-cerro-napa: { verdict: missing-held, spots: { a: missing-held, b: missing-held, c: missing-held }, owner: "gen:life/scene", why: "No cone on any skyline. The relief now holds heights above 3,200 m, but at a and c the near slope hides the right of the view, and at b the right-hand skyline is low ridges with no peak standing 750 m above the eye." }
+  geography-basins-and-volcanoes: { verdict: missing-held, spots: { a: missing-held, b: missing-held, c: missing-held }, owner: "gen:life/scene", why: "At b there is a flat basin floor, but no volcano rises over it; at a and c only the near slopes show. The world's heights hold both the basins and the cones." }
+  geography-salar-de-coposa: { verdict: missing-held, spots: { a: missing-held, b: missing-held, c: missing-held }, owner: "gen:life/scene", why: "No low white flat or water at the left of any frame: the left of a is a white hill rising above the eye, the left of c is a tan hill, and at b the slope fills the left. The scene's account still holds the closed lake (lake:3979119, level 3,691.5 m, not spilling)." }
+  water-salt-flat-and-saline-lakes: { verdict: missing-held, spots: { a: missing-held, b: missing-held, c: missing-held }, owner: "gen:life/scene", why: "No salt crust or lake in view. The flat floor at b is dry tan ground. The drainage model's closed lake is in the account, but it is out of every frame, and nothing would make it a salt crust." }
+  water-higher-groundwater: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "model:earth/drainage", why: "Said of the basin floor, and of slopes 200 to 300 km south. No frame shows the basin floor close enough to judge springs or wet ground." }
+  cover-tola-and-bunchgrass: { verdict: wrong, spots: { a: wrong, b: wrong, c: wrong }, owner: "gen:life/scene", why: "The cover is now open, low and straw-coloured, as April should be, but it is leafy broad-leaved herbs and small bushes. There is no hard tussock grass except a few tufts at c, and no tola; at b it stands in snow. The daisies, the stand-in for Parastrephia's family, are still not placed." }
+  "cover-queñoa-groves": { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "model:life/atlas", why: "No tree in any frame, which may be right: the brief does not know whether queñoa grew on these hills." }
+  cover-bofedal-at-springs: { verdict: missing-not-held, spots: { a: missing-not-held, b: missing-not-held, c: missing-not-held }, owner: "model:life/atlas", why: "No green bog or meadow anywhere, and the list still has no plant of the wetlands; the biome is desert." }
+  life-camelids: { verdict: missing-held, spots: { a: missing-held, b: missing-held, c: missing-held }, owner: "gen:life/scene", why: "Lama is still listed (600 km off) and placed at a and b, but no animal can be made out in any frame: the steep near slopes leave little ground in view. At c it is not placed, and no vicuña is listed." }
+  life-chinchilla-rats: { verdict: missing-not-held, spots: { a: missing-not-held, b: missing-not-held, c: missing-not-held }, owner: "model:life/atlas", why: "Abrocoma is still not on the list, and no boulder or outcrop is drawn for it." }
+  life-flamingos: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "model:life/atlas", why: "Only possible, and on water no frame shows; no flamingo is on the list." }
+  weather-after-summer-rains: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "gen:earth/clouds", why: "A dry, cloudless morning at every spot, and the plants are now straw and olive rather than green, closer to the brief's turning grass." }
+  weather-cape-ii-pluvial: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "field:earth/climate-late-quaternary", why: "A rainfall of the centuries, which no frame shows; the climate field still answers desert here." }
+  sky-intense-sun: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "renderer", why: "A deep blue sky and a hard sun throwing sharp plant shadows down the slope at a and c. The thick pale haze of the first take is gone; at b the far skyline is only lightly hazed." }
+  ice-snow-on-peaks: { verdict: wrong, spots: { a: wrong, b: wrong, c: drawn }, owner: "gen:life/scene", why: "Was untested: no peak could carry snow under the clip. Now the scene's snow line of 4,251 m reaches the ground. At b, at 4,694 m, snow lies everywhere between the shrubs; at a a smooth white hill bare of plants fills the left, and white flecks cover the near slope. At c, at 4,243 m, there is no snow, as the brief has for the lower slopes." }
+  people-hunters-around-wetlands: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "model:people/lifeways", why: "The people layer still answers foragers on evidence, 19 shelters at a and b and 35 at c, and none is in any frame, as the brief expects of this slope; the nearest camps are still on the hills, not by the water." }
+  people-links-to-the-lowland: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "model:people/lifeways", why: "About camps 100 km away and out of sight." }
+findings:
+  - >-
+    The 3,200 m clip is fixed. encode in world/generators/life/scene/v12.ts now stores each grid as whole steps above
+    a base, with the step (0.1, 0.25, 0.5 or 1 m) as fine as the grid's range allows. Here the fine and middle grids
+    span about ±560 m and ±775 m around their base, where in the first take every cell stood at the 32,000 ceiling.
+    The scene's floor at a is 4,443 m, 51 m above SRTM's 4,392 m at the point and 216 m above the 4,227 m of the
+    tenth-of-a-degree relief, so the scene now reads the survey's finer cells (shape: field:earth/relief, held).
+  - >-
+    The view no longer has the brief's shape. Facing 280°, where SRTM has the ground falling some 300 m in the first
+    2 km, the near ground at a and c rises across the view and hides the horizon. The scene adds ground of its own
+    below the survey's one-sixtieth-of-a-degree cells (inventedFor and landAt in v12.ts). I did not trace whether these
+    slopes are that invented ground or the survey's cells.
+  - >-
+    With the heights right, the snow line the scene gives (4,251 m in April) now whitens slopes at 4,450 to 4,700 m,
+    which the brief has bare of snow below Cerro Napa's 5,140 m summit. Every high scene in a dry range will show the
+    same.
+  - >-
+    The atlas still carries the lowlands up the mountain, the same list as the first take: capybara, potoo, cuckoo,
+    guinea pigs, armadillos and a bat are placed on a desert slope at 4,400 m. The foragers' works still include 'A boat'.

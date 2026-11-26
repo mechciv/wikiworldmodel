@@ -1,0 +1,290 @@
+view: t=147.974&lat=36.57518&lon=114.11200&d=1.0000941767&h=240&v=60&hour=15&mo=6&clock=0
+when: 147 CE
+place: >-
+  The Cishan site, Cishan town, Wu'an, Handan, Hebei, on the north terrace of the Ming (Nanming) River where the
+  Taihang foothills meet the North China Plain; the ground is about 260 to 270 m up. In 147 CE, the first year of
+  Emperor Huan's Jianhe era, this was Wu'an county of Wei commandery in Ji province. The camera is 600 m above the
+  point, tilted 60° from straight down, facing 240°, west-south-west, up the valley into the foothills. Handan, the
+  seat of the kingdom of Zhao, is about 33 km east, behind the camera, and the Han seat of Wu'an to the north-east,
+  also behind it. By my own reckoning (not from a source) the sun at 15:00 local solar time in mid-June stands about
+  49° up at an azimuth of about 264°, some 24° to the right of the heading: the camera looks partly into the
+  afternoon light.
+author: machine:claude-code
+expects:
+  - id: relief-terrace-at-the-plain-edge
+    layer: relief
+    what: >-
+      Flat-topped alluvial terraces capped with loess, ending in steep edges and low cliffs over the river; the ground
+      is the seam where the foothills give way to the plain, a little over 250 m up.
+    reach: place
+    source:
+      cite: "Lu, H., Zhang, J., Liu, K.-b., Wu, N., Li, Y., Zhou, K., et al. (2009). Earliest domestication of common millet (Panicum miliaceum) in East Asia extended to 10,000 years ago. PNAS 106(18), 7367–7372. doi:10.1073/pnas.0900158106"
+      url: https://pmc.ncbi.nlm.nih.gov/articles/PMC2678631/
+      text: lu-2009.txt
+      loc: "Results and Discussion, first paragraph; Materials and Methods, Site"
+      quote: "is located near the junction between the Loess Plateau and the North China Plain at an elevation of 260–270 m above sea level … The geography of this region consists of alluvial terraces covered by loess deposits."
+    note: >-
+      Said of the site itself; the relief is the same in 147 CE as when the paper was written. The paper's Fig. 1C
+      shows a storage pit "found on the cliff of the northern terrace", so the terrace edge is a cliff in places.
+      Nothing read gives the heights of the hills in the frame.
+  - id: relief-taihang-beyond
+    layer: relief
+    what: >-
+      Beyond the foothills, west and west-south-west, the Taihang range rising to the plateau's edge, its main ridges
+      1,500 to 2,000 m high; at a few kilometres' reach the frame holds only the foothills, the range itself at most
+      on the horizon.
+    reach: region
+    source:
+      cite: "Taihang Mountains. Wikipedia, English, read 22 November 2026."
+      url: https://en.wikipedia.org/wiki/Taihang_Mountains
+      text: wiki-taihang.txt
+      loc: "lead section"
+      quote: "are a Chinese mountain range running down the eastern edge of the Loess Plateau in Shanxi, Henan and Hebei provinces. The range extends over 400 kilometers (250 mi)[1] from north to south and has an average elevation of 1,500 to 2,000 m"
+    note: >-
+      Wikipedia, cited because no gazetteer or survey of the range's heights near Wu'an could be read. How far west
+      of the point the higher ridges stand was not found in any source read, nor whether they would show through a
+      June haze.
+  - id: substrate-loess
+    layer: substrate
+    what: >-
+      Yellow-brown loess on the terrace tops and in the cut faces, metres thick, with buried soils in it; bare where
+      a field is fallow or a bank is cut.
+    reach: place
+    source:
+      cite: "Lu, H., Zhang, J., Liu, K.-b., Wu, N., Li, Y., Zhou, K., et al. (2009). Earliest domestication of common millet (Panicum miliaceum) in East Asia extended to 10,000 years ago. PNAS 106(18), 7367–7372. doi:10.1073/pnas.0900158106"
+      url: https://pmc.ncbi.nlm.nih.gov/articles/PMC2678631/
+      text: lu-2009.txt
+      loc: "Materials and Methods, Site"
+      quote: "The terrace is composed of thick sediments (4–5 m thick for CS-I to CS-IV, 11 m thick for CS-V) that consist of alternating layers of loess and soil."
+    note: >-
+      The sections at the site, measured in the 2000s; the loess is far older than 147 CE. Its colour is not given in
+      the paper. The build's rock record holds no collection within 30 km.
+  - id: water-ming-river
+    layer: water
+    what: >-
+      The Ming River below the terrace, running out of the foothills towards the plain: in the frame it comes from
+      ahead, up the valley, and passes under the camera eastward.
+    reach: place
+    source:
+      cite: "Lu, H., Zhang, J., Liu, K.-b., Wu, N., Li, Y., Zhou, K., et al. (2009). Earliest domestication of common millet (Panicum miliaceum) in East Asia extended to 10,000 years ago. PNAS 106(18), 7367–7372. doi:10.1073/pnas.0900158106"
+      url: https://pmc.ncbi.nlm.nih.gov/articles/PMC2678631/
+      text: lu-2009.txt
+      loc: "Materials and Methods, Site"
+      quote: "The Cishan site is located on the north terrace of the Ming River (Fig. 1)."
+    note: >-
+      Today's river, carried back. That it flows from the west-south-west, up the valley the camera faces, is my
+      reading of the place on today's maps, not the paper's words. The Han name of this stream is not settled by
+      what I read: the Hanshu's treatise of geography names for Wu'an the Baiqu river from Mount Qinkou ("白渠水所出，東至列人入漳")
+      and the Shuijing zhu has it flow south-east past the south of Handan, which may be another stream. How much
+      water it carried in a June before the rains is not known.
+  - id: cover-fields-wheat-reaped-millet-sown
+    layer: cover
+    what: >-
+      Fields across the terrace tops and the valley floor: winter wheat just reaped and carried in, stubble and bare
+      ground being opened, and strips newly sown or just up with foxtail and broomcorn millet and hemp, sown around
+      the summer solstice; few if any fields stand tall and green at this date.
+    reach: region
+    source:
+      cite: "Cui Shi 崔寔 (2nd century CE). Simin yueling 四民月令 (Monthly Ordinances for the Four Classes of People), as reconstructed by Tang Hongxue 唐鴻學 (大關唐氏輯本). Chinese Wikisource."
+      url: https://zh.wikisource.org/wiki/%E5%9B%9B%E6%B0%91%E6%9C%88%E4%BB%A4
+      text: simin-yueling.txt
+      loc: "五月 (fifth month)"
+      quote: "可種禾及牡麻。 … 先後各二日，可種黍。 … 可菑麥田。刈蒭茭。〈舊作「英蒭」，據七月章改。〉麥旣入，多作糒，以供出入之糧。"
+    note: >-
+      An almanac for a landed household by an official of this very reign (Cui Shi lived in the middle of the 2nd
+      century CE); it is written for the lower Yellow River and the region of Luoyang, some 300 km south-west, not for
+      Wu'an. It says that around the solstice of the fifth month one may sow millet (禾) and male hemp, broomcorn millet
+      (黍) within two days of it, that the wheat fields are to be broken up and the wheat is in. That a June of the
+      Julian calendar falls mostly within the fifth Chinese month is my gloss, not the text's. How much of the
+      terrace was wheat and how much millet in 147 is not known.
+  - id: cover-millet-the-staple
+    layer: cover
+    what: >-
+      Millet the main crop of the dry fields, wheat beside it but not yet its equal; no rice paddies.
+    reach: region
+    source:
+      cite: "Liu, X. & Reid, R. E. B. (2020). The prehistoric roots of Chinese cuisines: Mapping staple food systems of China, 6000 BC–220 AD. PLoS ONE 15(11), e0240930. doi:10.1371/journal.pone.0240930"
+      url: https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0240930
+      text: cuisines-2020.txt
+      loc: "Results, the paragraph beginning 'Between 2000 cal BC and 220 cal AD'"
+      quote: "In the Loess Plateau, other than a few exceptional individuals from Henan Province, humans show isotopic signatures consistent with predominantly-C4 or mixed C3-C4 consumption."
+    note: >-
+      Human bone isotopes compiled over two thousand years, to the end of the Han; the authors' "Loess Plateau"
+      region is the eastern agricultural heartland, at whose eastern edge Cishan lies. It says what people ate, which
+      stands for what they grew; it does not map the fields of Wu'an.
+  - id: cover-open-woodland-on-the-hills
+    layer: cover
+    what: >-
+      On the foothills ahead, beyond the fields, open woodland and grassland, pines among it, with wormwood (Artemisia)
+      and grasses: no closed forest, and no lakes or marshes in the hollows.
+    reach: region
+    source:
+      cite: "Zhang, X., Yang, S., Lu, P., et al. (2022). Holocene landscape evolution and its interaction with human activities in the southern piedmont of Taihang Mountain, Central China. Frontiers in Plant Science 13, 980840. doi:10.3389/fpls.2022.980840"
+      url: https://pmc.ncbi.nlm.nih.gov/articles/PMC9546756/
+      text: taihang-piedmont-2022.txt
+      loc: "Discussion, Holocene environmental evolution in the study region"
+      quote: "Since 2000 BP, the limnetic facies vanishes, accompanied by the prevalence of open forests and grasslands. Human activities further grow during this period."
+    note: >-
+      The Fengtougang site, 35.31° N, 113.57° E, about 150 km south-south-west, at 80 m on the southern Taihang
+      piedmont. Its pollen counts are very low, its dated assemblages stop at about 2400 BP and resume only in the
+      Ming-Qing, so the Han itself falls in a gap; the "since 2000 BP" is the authors' reading across it. The pollen
+      of 4000-2400 BP is Pinus, Artemisia, Spiraea and Compositae.
+  - id: cover-cleared-for-fields-and-fuel
+    layer: cover
+    what: >-
+      Slopes cleared for fields and stripped for firewood near the villages: the trees thin, the hills near the
+      plain mostly open.
+    reach: region
+    source:
+      cite: "Chen, Y., Syvitski, J. P. M., Gao, S., Overeem, I. & Kettner, A. J. (2012). Socio-economic impacts on flooding: a 4000-year history of the Yellow River, China. Ambio 41(7), 682–698. doi:10.1007/s13280-012-0290-5"
+      url: https://pmc.ncbi.nlm.nih.gov/articles/PMC3472015/
+      text: yellow-river-2012.txt
+      loc: "History, 5th century BC–70 AD"
+      quote: "Reclamation, firewood cutting, and constructions of grand palaces resulted in large-scale deforestation."
+    note: >-
+      Said of the middle Yellow River basin in the Western Han, a synthesis resting on Chinese works not read here;
+      the Taihang foothills of Wu'an lie east of that basin. Carried here as the region's trend, not as a fact of this
+      valley.
+  - id: people-ox-ploughs-and-iron
+    layer: people
+    what: >-
+      People in the fields at the turn of the season: hoeing, breaking the reaped wheat ground, sowing millet; oxen
+      drawing iron-shod ploughs.
+    reach: region
+    source:
+      cite: "Chen, Y., Syvitski, J. P. M., Gao, S., Overeem, I. & Kettner, A. J. (2012). Socio-economic impacts on flooding: a 4000-year history of the Yellow River, China. Ambio 41(7), 682–698. doi:10.1007/s13280-012-0290-5"
+      url: https://pmc.ncbi.nlm.nih.gov/articles/PMC3472015/
+      text: yellow-river-2012.txt
+      loc: "History, 5th century BC–70 AD"
+      quote: "human’s ability to engineer nature increased significantly as iron tools and cattle plows spread"
+    note: >-
+      Of the Yellow River basin from the Warring States to the Western Han. The Simin yueling's sixth month bids the
+      household hurry the hoeing ("趣耘耡，毋失時"), and its twelfth month to feed the plough oxen ("養耕牛"); at 600 m up and a few
+      kilometres out a person or an ox is a speck.
+  - id: people-courtyard-farmsteads
+    layer: people
+    what: >-
+      Farmsteads built as courtyard compounds, scattered among the fields or gathered in hamlets along the terrace and
+      the river.
+    reach: region
+    source:
+      cite: "Kidder, T. R., Liu, H. & Li, M. (2012). Sanyangzhuang: early farming and a Han settlement preserved beneath Yellow River flood deposits. Antiquity 86(331), 30–47. doi:10.1017/S0003598X0006244X"
+      url: https://www.cambridge.org/core/journals/antiquity/article/abs/sanyangzhuang-early-farming-and-a-han-settlement-preserved-beneath-yellow-river-flood-deposits/D33907BB6863D24F9CD455ED98590431
+      text: kidder-2012.txt
+      loc: "abstract"
+      quote: "where courtyard houses have been excavated belonging to the Western Han Dynasty and Wang Mang period (c. 140 BC–AD 23)"
+    note: >-
+      Only the abstract could be read. Sanyangzhuang, in Neihuang, Henan, is on the plain about 100 km south-east,
+      and its houses are a century and more older than 147 CE. The abstract's keywords say "Han building compounds";
+      what the houses were built of, how they were roofed and how they lay among their fields is in the full text,
+      which could not be read. No Han farmstead of Wu'an itself appears in any source read.
+  - id: people-dense-countryside
+    layer: people
+    what: >-
+      A thickly settled countryside: the commandery around the camera held some seven hundred thousand people, so
+      that villages and farmsteads would be within sight in every direction over the farmland.
+    reach: region
+    source:
+      cite: "Sima Biao 司馬彪, Treatise on Commanderies and Kingdoms 郡國志, part 2, in the Hou Hanshu 後漢書, with Wang Xianqian 王先謙, Hou Hanshu jijie 後漢書集解. Chinese Wikisource."
+      url: https://zh.wikisource.org/wiki/%E5%BE%8C%E6%BC%A2%E6%9B%B8%E9%9B%86%E8%A7%A3/%E7%BA%8C%E6%BC%A2%E5%BF%97%E7%AC%AC%E4%BA%8C%E5%8D%81
+      text: houhanshu-junguo-2.txt
+      loc: "冀州, 魏郡 (Ji province, Wei commandery), household and population counts"
+      quote: "戶十二萬九千三百一十。口六十九萬五千六百六。"
+    note: >-
+      Wei commandery, fifteen counties, 129,310 households and 695,606 people; the census the treatise gives is
+      usually dated to the 140s CE, which is my gloss. The Hanshu's count for the commandery in Western Han was
+      larger, 909,655 people in eighteen counties. Neither says how they lay over the hill country of Wu'an, which
+      was surely thinner than the plain about Ye.
+  - id: people-iron-of-wuan
+    layer: people
+    what: >-
+      Wu'an a county of iron: smelting and its smoke, charcoal burning and ore-working somewhere in the county, though
+      where the works stood, and whether any is in this frame, is not known.
+    reach: region
+    source:
+      cite: "Sima Biao 司馬彪, Treatise on Commanderies and Kingdoms 郡國志, part 2, in the Hou Hanshu 後漢書, with Wang Xianqian 王先謙, Hou Hanshu jijie 後漢書集解. Chinese Wikisource."
+      url: https://zh.wikisource.org/wiki/%E5%BE%8C%E6%BC%A2%E6%9B%B8%E9%9B%86%E8%A7%A3/%E7%BA%8C%E6%BC%A2%E5%BF%97%E7%AC%AC%E4%BA%8C%E5%8D%81
+      text: houhanshu-junguo-2.txt
+      loc: "冀州, 魏郡, 武安 (Wu'an), main text and commentary"
+      quote: "武安。〈集解馬與龍曰。武安長尹楷見魏志武紀。〉有鐵。"
+    note: >-
+      Said of the county as a whole: "has iron". The Hanshu's treatise of geography, for Western Han, says Wu'an had an
+      iron office ("有鐵官", hanshu-dili.txt). The same commentary puts the old county seat south-west of the Qing
+      seat of Wu'an ("故城今彰德府武安縣西南"), which is north-east of the point, behind the camera. Charcoal and
+      smoke are my gloss of what ironworking needs.
+  - id: polity-wei-commandery
+    layer: polity
+    what: >-
+      Wu'an county of Wei commandery, in Ji province of the Eastern Han; the kingdom of Zhao, with Handan, lies to the
+      east. Nothing of the boundary shows on the ground.
+    reach: place
+    source:
+      cite: "Ban Gu 班固, Hanshu 漢書, Treatise on Geography 地理志, with Yan Shigu's commentary. Chinese Wikisource."
+      url: https://zh.wikisource.org/wiki/%E6%BC%A2%E6%9B%B8%E9%A1%8F%E5%B8%AB%E5%8F%A4%E8%A8%BB/%E5%9C%B0%E7%90%86%E5%BF%97/%E5%9C%B0%E7%90%86
+      text: hanshu-dili.txt
+      loc: "魏郡 (Wei commandery), the county of 武安"
+      quote: "武安。欽口山，白渠水所出，東至列人入漳。又有浸水，東北至東昌入虖池河，過郡五，行六百一里。有鐵官。莽曰桓安。"
+    note: >-
+      This is the Western Han treatise; the Hou Hanshu's treatise (houhanshu-junguo-2.txt) keeps Wu'an under Wei
+      commandery, and Handan under the kingdom of Zhao with 188,381 people. That Cishan lay in Han Wu'an county is
+      my inference from today's county and from the commentary's placing of the old seat; no source read draws the
+      county's bounds.
+  - id: weather-hot-before-the-rains
+    layer: weather
+    what: >-
+      A hot early-summer afternoon, low 30s °C, in the dry weeks before the summer rains; a clear or hazy sky more
+      likely than rain.
+    reach: region
+    source:
+      cite: "Wu'an. Wikipedia, English, read 22 November 2026: climate table, 1991–2020 normals."
+      url: https://en.wikipedia.org/wiki/Wu%27an
+      text: wiki-wuan.txt
+      loc: "Climate data for Wu'an, elevation 280 m, rows Mean daily maximum and Average precipitation, Jan–Jul"
+      quote: "Average precipitation mm (inches) 3.6 (0.14) 8.3 (0.33) 9.4 (0.37) 27.9 (1.10) 48.2 (1.90) 53.4 (2.10) 167.9 (6.61)"
+    note: >-
+      Today's normals, carried back 1,880 years: June 53 mm against July's 168 mm, and the June mean daily maximum
+      31.9 °C in the same table. Wikipedia, cited because no station record was read. Handan's article says "A
+      majority of the normal annual precipitation of 502 mm (19.8 in) occurs in July and August" (wiki-handan.txt).
+      The Simin yueling's fifth month warns that the long rains are about to fall ("淋雨將降").
+  - id: weather-dry-spring-147
+    layer: weather
+    what: >-
+      The spring of 147 dry in the north: clouds that gathered and broke without rain.
+    reach: region
+    source:
+      cite: "Fan Ye 范曄, Hou Hanshu 後漢書, chapter 7, Annals of Emperor Huan 孝桓帝紀, with Li Xian's commentary. Chinese Wikisource."
+      url: https://zh.wikisource.org/wiki/%E5%BE%8C%E6%BC%A2%E6%9B%B8/%E5%8D%B77
+      text: houhanshu-7.txt
+      loc: "建和元年, 夏四月 (Jianhe 1, fourth month), edict of the day 丙午"
+      quote: "頃雨澤不沾，密雲復散，儻或在茲。"
+    note: >-
+      An edict of the fourth month of 147, about the capital Luoyang, some 300 km south-west, giving the lack of rain as
+      a reason to lighten the sentences of convicts building the imperial tomb. It is of the weeks before this June,
+      and not of Wu'an; whether the drought held into the fifth month is not said. The same annals record in that month
+      that the ground split in six commanderies and kingdoms ("郡國六地裂，水涌井溢"), without naming them.
+unknown:
+  - What grew on the Taihang foothills in view in 147 CE. No pollen or charcoal record of the Han period within 100 km of Cishan could be read; the nearest read is 150 km away and has a gap over the Han.
+  - Where the villages, hamlets and farmsteads of this valley stood in 147, how many were in the frame, and how their roofs looked from above. No Han settlement of the Ming valley near Cishan appears in any source read.
+  - Whether the fields in the frame were mostly wheat stubble, young millet or fallow on this day, and whether the terraces were cut into small strips or long ones.
+  - Where Han Wu'an's iron was mined and smelted, and whether any works, spoil or smoke would be in this frame.
+  - The Han name of the river below Cishan, and how much water it carried in June 147.
+  - The sky of the afternoon: whether a dry spring's dust or the season's haze dimmed the view, and whether the higher Taihang showed on the horizon.
+  - Roads: whether a road up the Ming valley into the Taihang ran through the frame.
+  - Trees about the farmsteads (elms, jujubes, mulberries are what an almanac and today's villages suggest; nothing read places them here).
+pictures:
+  - { url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC2678631/", what: "Lu et al. (2009), Fig. 1B and 1C: the site on the Ming River's terrace, and the storage pit CS-V in the cliff of the north terrace." }
+  - { url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC9546756/", what: "Zhang et al. (2022), Figure 6: the landscape of the southern Taihang piedmont drawn for each stage of the Holocene." }
+effort:
+  fetched: 14
+  cited: 11
+  failed: 6
+  note: >-
+    Kept: Lu et al. 2009 (PMC), the Simin yueling, Hou Hanshu chapter 7 and the commanderies treatise (Jijie edition),
+    the Hanshu's treatise of geography, the Shuijing zhu chapter 10 (used only in a note), Liu and Reid 2020 (PLOS),
+    Zhang et al. 2022 and Chen et al. 2012 (PMC), the abstract page of Kidder et al. 2012 (Cambridge), and Wikipedia's
+    Taihang, Wu'an and Handan pages. Removed: a 2018 starch paper on millet domestication that says nothing of the
+    Han. Failed: two Wikisource page names I guessed wrongly, PMC's pages for two articles (a browser check, after
+    many fetches from this machine), Europe PMC's full-text service (error 500) for the same two, and Semantic
+    Scholar's search (rate limit, not counted). The longest search, without result, was for a dated Han-period vegetation record
+    or a Han settlement near Cishan. Two of my first fetches went into another researcher's folder through a shared
+    helper script; I moved them to mine.

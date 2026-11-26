@@ -1,0 +1,40 @@
+# Round 5's verdicts for p10, judged again on the new build: the north side of Kanchipuram, eye level facing north, 11:00 in January 1285.
+author: machine:claude-code
+judged: "2026-11-23"
+build: 3b9f48adb1090be2
+changes: >-
+  Still no town. The viewer's account is the same as in the first take: no city, and 48,250 houses in 864 farming
+  villages, with the same round thatched huts on the skyline at a and b. What changed is the ground. The sparse green
+  tufts on bare sand are now a dense, straw-green cover of tussock grass and leafy herbs, with pale gritty sand showing
+  through at b and c and leaf litter under the trees at a; the trees now have open, leafy crowns. No verdict moved.
+summary: >-
+  No town is drawn, for the same reason as before: gen:people/settlement reads Kanchipuram's figures in the cities'
+  list as a silence in 1285, so the scene has farming villages of round thatched huts in open woodland and rank
+  grassland, and no street, court house, shrine or tank. The flat plain, the bright dry January morning, the pale
+  gritty sand, the lack of a towering gateway and the Pandyas' rule are right. The largest gap is still the missing
+  town; behind it are no tradition for the houses of 1285, no tanks, no palms and no cattle.
+items:
+  relief-flat-plain-rising-north: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "field:earth/elevation", why: "Level ground to a skyline of trees at every spot, with no hill. The build still has 91 m where the brief gives 83, and the gentle rise cannot be seen." }
+  substrate-quartzite-gravel-north: { verdict: drawn, spots: { a: wrong, b: drawn, c: drawn }, owner: "model:earth/substrate", why: "At b and c pale, gritty sand shows in patches between the plants, which agrees with the brief's coarse light sand. At a the woodland floor is a mid-tan ground under leaf litter. There is no bed of quartzite pebbles anywhere (6.5% gravel in today's topsoil map)." }
+  water-great-tank-north: { verdict: missing-not-held, spots: { a: missing-not-held, b: missing-not-held, c: missing-not-held }, owner: "records: the tanks (eris) of the Palar plain", why: "No bund or sheet of water in any frame; the scene's water is still two rivers and no lake, and no tank is a record." }
+  weather-after-the-north-east-monsoon: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "gen:earth/clouds", why: "A bright, dry morning under scattered fair-weather cumulus, with green trees. The ground cover is now more straw than green, but no rain falls." }
+  weather-mild-january-morning: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "field:earth/climate-late-quaternary", why: "A temperature, which no frame shows." }
+  cover-samba-rice-ripe: { verdict: wrong, spots: { a: missing-held, b: wrong, c: wrong }, owner: "building traditions: fields and crops", why: "At b and c the ground ahead is a dense, dry cover of straw-green tussocks and herbs over sand, with a few tall stalks; there is no bund, no standing water and no ripening grain, and the plot of the first take can no longer be told from rough grassland. At a there is open woodland and no field." }
+  cover-palmyra-palms: { verdict: missing-not-held, spots: { a: missing-not-held, b: missing-not-held, c: missing-not-held }, owner: "model:life/atlas", why: "Not a palm in sight: the trees are the savanna's generic broadleaves, now with open, leafy crowns. No palm or tamarind is on the list." }
+  people-street-with-coconut-rows: { verdict: missing-held, spots: { a: missing-held, b: missing-held, c: missing-held }, owner: "gen:people/settlement", why: "No street at any spot: the scene's account still has no city, so only open ground and villages are drawn." }
+  people-mud-courtyard-houses: { verdict: wrong, spots: { a: wrong, b: wrong, c: missing-held }, owner: "building traditions: dwellings", why: "At a, between the trunks at the right, and at b, on the left of the skyline, the houses are still round huts with conical thatched roofs, the savanna's generic farmhouse. At c no house can be made out." }
+  people-dung-washed-walls: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "building traditions: dwellings", why: "The only walls are of huts 0.5 to 2 km off, a few pixels each, and their finish cannot be told." }
+  people-dress: { verdict: missing-held, spots: { a: missing-held, b: missing-held, c: missing-held }, owner: "gen:people/settlement", why: "No person in any frame, though the scene's works include persons and villagers now move about; so there is no dress to judge." }
+  people-weavers-quarter: { verdict: no-layer, spots: { a: no-layer, b: no-layer, c: no-layer }, owner: "a town's quarters and crafts (no layer)", why: "No loom, warp or quarter; nothing in the world says what a town's quarters made, and here there is no town." }
+  people-small-shrines: { verdict: missing-not-held, spots: { a: missing-not-held, b: missing-not-held, c: missing-not-held }, owner: "records: the temples of Kanchipuram", why: "No shrine in any frame; no temple of the town is a record." }
+  people-no-tall-gopurams: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "gen:people/settlement", why: "No gateway tower on any skyline, as the brief expects; nor any lower temple tower." }
+  life-cattle: { verdict: missing-not-held, spots: { a: missing-not-held, b: missing-not-held, c: missing-not-held }, owner: "husbandry traditions: south India", why: "No cattle in sight and none in the scene (animals 0, nothing kept)." }
+  polity-pandya-held: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "src:cliopatria-0.2.1", why: "The polity layer still answers the Pandya Empire, on evidence." }
+findings:
+  - >-
+    Still no town. The scene's account is unchanged: 'cities' is empty, and there are 48,250 houses in 864 villages,
+    242,295 people drawn. The cause in the first take's finding stands: Chandler's figures for 1150 and 1800 are more
+    than record_gap apart, so gen:people/settlement draws no Kanchipuram from 1200 to 1750.
+  - >-
+    The atlas's placed taxa are the same as before (pigeons and doves, proboscideans, ants), so elephants are still
+    placed among the villages, though none is in a frame.

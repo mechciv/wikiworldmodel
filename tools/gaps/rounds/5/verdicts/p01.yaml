@@ -1,0 +1,28 @@
+# Round 5's verdicts for p01: eye level in Saurashtra (north-western India) in the early Ediacaran, 611.8 Ma, with no local scene drawn.
+author: machine:claude-code
+judged: "2026-11-22"
+summary: >-
+  No frame of this point draws a place. With no atlas reaching the Ediacaran the viewer makes no local scene (scene,
+  biome, ground and climate are all null, and the panel says nothing), so at eye level it shows the globe's own
+  picture from 15 m: a blurred grey-brown field with two outlined patches of blue, no horizon and no sky, nearly the
+  same at all three spots. What the frames can carry is only absence, and that is right: no plants, no animals, no
+  ice. The root is the scene generator, which makes nothing where neither atlas has a list; the relief is missing
+  too, since no elevation answers before the plate model's continental blocks.
+items:
+  geography-nw-india-mozambique-ocean: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "field:earth/continental-blocks", why: "Said of the region; the geography answers only continental blocks here, and an eye-level frame with no scene shows none of them." }
+  substrate-malani-volcanic-basement: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "model:earth/substrate", why: "No ground is drawn; the substrate answers by climate, as nothing in the world holds a rock of this age within reach, and the brief cannot say the Malani rocks reach under the spot." }
+  relief-long-worn-land-surface: { verdict: no-layer, spots: { a: no-layer, b: no-layer, c: no-layer }, owner: "field:earth/elevation", why: "The globe holds no height here at 611.8 Ma (ground null, geography only continental blocks), and the frames show no relief or horizon at all." }
+  substrate-maroon-sand-and-shale: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "model:earth/substrate", why: "Of the Marwar beds 400 to 500 km away; no ground is drawn here, and the substrate answers by climate." }
+  substrate-wind-cut-stones: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "model:earth/substrate", why: "Of the Pokaran boulder bed some 430 km away; no ground, stone or boulder is drawn." }
+  cover-no-plants: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "model:life/atlas", why: "Grey-brown with no green anywhere; the life layer answers nothing, so nothing is drawn, which here is right." }
+  life-microbial-crusts-on-wet-ground: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "model:earth/biome-from-climate", why: "The biome is null and no ground is drawn; the source is of Newfoundland at 565 Ma, and nothing says mats grew here." }
+  life-no-large-organisms-on-land: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "model:life/atlas", why: "Nothing recorded, nothing drawn." }
+  life-no-ediacara-biota-yet: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "model:life/sea-atlas", why: "No sea in view to hold any, unless the two blue patches of the globe's picture are sea, and nothing is drawn in them." }
+  ice-none: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "field:earth/ice", why: "The ice layer answers none, and no ice or snow shows." }
+  sky-sun-slightly-fainter: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "model:sun/gough-1981", why: "No sky or sun is in any frame; the brief says the eye would not see 5% in any case." }
+  sky-shorter-day: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "field:earth/day-length", why: "The world holds the day-length records; a still cannot show them." }
+  sky-moon-closer: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "field:earth/moon-distance", why: "No Moon or sky in the frames, and 3% could not be seen without a measure." }
+findings:
+  - "The frames failed to draw a place. world/generators/life/spec.ts (placeSpec) returns no scene where neither atlas has a list, and both reach only the Phanerozoic, so every eye-level view before 538.8 Ma falls back to the globe's texture seen from 15 m: a blur with no horizon and no sky. An eye-level view in the Precambrian needs a scene of bare ground (and sea) with no list. Owner: gen:life/scene."
+  - "The three spots (1 and 2.6 km apart, headings 180, 161 and 177 degrees) give near-identical frames: the globe's picture at this height does not change over a few kilometres or 20 degrees of heading."
+  - "The globe draws the spot as land (grey-brown), with blue patches outlined in white nearby; the brief says nothing read tells whether it was land, shore or sea floor then."

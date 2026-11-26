@@ -1,0 +1,353 @@
+view: t=377.737404Ma&lat=4.20&lon=5.57&d=2.6&hour=14&mo=9&clock=0
+when: 377.7 Ma
+place: >-
+  Late Devonian, Frasnian. The point is today at about 68.24°N, 43.86°E, on or beside the Kanin Peninsula at the
+  north-west end of the Timan, about 433 km from Arkhangelsk, Russia: the north-eastern edge of Baltica, at the
+  join of the Mezen and Timan–Pechora regions. The coordinates in the link (4.20°N, 5.57°E) are the place as the
+  build's plates have it then, a few degrees north of the equator. The camera is in orbit, 2.6 Earth radii from the
+  centre, looking straight down at the point; from there it sees a cap of the globe out to about 67° from the point
+  in every direction. At 14:00 local time in September the sun stands a little west of the point, near the
+  equinox, so almost the whole cap is lit, with the evening terminator near the eastern limb. By the build's own
+  plates (worked out for this brief from tools/world/src/rocksnear.ts, not from a source), today's places in the
+  cap at this moment are: Ukhta (south Timan) 6.5°N 11.3°E; Riga -9.4° 10.1°; Oslo -12.0° 2.9°; Orkney -16.2°
+  -2.9°; Hudson Bay -16.5° -24.9°; New York -36.9° -22.9°; Alberta -13.0° -41.8°; Svalbard 3.4° -6.9°; the Ardennes
+  -21.9° 5.7°; Prague -21.2° 27.8°; Kazakhstan 8.3° 40.8°; Norilsk 24.8° 4.9°; Yakutsk 39.6° -7.7°; Rabat -36.9°
+  7.4°; the Algerian Sahara -45.5° 19.0°; Cairo -40.8° 51.5°. So Laurussia fills the middle and the south-west of
+  the disc, Siberia lies to the north, Kazakhstan to the east, and the northern edge of Gondwana (north Africa)
+  along the southern limb. The south pole is near today's São Paulo, beyond the limb.
+author: machine:claude-code
+expects:
+  - id: geography-laurussia
+    layer: geography
+    what: >-
+      One large continent fills the middle and south-west of the disc: Laurussia, North America and Baltica (with
+      Avalonia) joined in one landmass, with the point on its north-eastern coast. It is not today's map: what is now
+      northern Russia faces the equator, and North America lies to the south-west of it.
+    reach: region
+    source:
+      cite: "Golonka, J. (2007). Phanerozoic paleoenvironment and paleolithofacies maps. Late Paleozoic. Geologia (AGH Kraków) 33(2), 145–209."
+      url: https://repo.agh.edu.pl/bitstreams/3fcac084-56c1-453d-a8aa-72de74d0d0ad/download
+      text: golonka-agh.txt
+      loc: "p. 146 (PDF page 2), Map discussion: Early Devonian"
+      quote: "North America, Baltica, Avalonia and Chukotka-Slope plates form the Laurussia continent"
+    note: >-
+      Said under the Early Devonian; the same paper's Late Devonian section (pp. 157–161) goes on with Laurussia as
+      one continent. Golonka's maps place the plates by his own model (370 Ma for the Late Devonian), not the
+      build's PALEOMAP plates, so where on the disc each part sits is the build's, given above, not the source's. The
+      paper says Laurussia's "central part was occupied by the large mountain belt" (the Caledonides), but says so of
+      the Early Devonian; how high it still stood in the Frasnian is not said.
+  - id: geography-rheic-narrow
+    layer: geography
+    what: >-
+      To the south, between Laurussia and Gondwana, a remnant ocean, the Rheic, narrowing: in central Europe the two
+      continents had begun to touch, so the sea between them is a narrow, closing strait rather than a wide ocean.
+    reach: region
+    source:
+      cite: "Golonka, J. (2007). Phanerozoic paleoenvironment and paleolithofacies maps. Late Paleozoic. Geologia (AGH Kraków) 33(2), 145–209."
+      url: https://repo.agh.edu.pl/bitstreams/3fcac084-56c1-453d-a8aa-72de74d0d0ad/download
+      text: golonka-agh.txt
+      loc: "p. 158 (PDF page 15), Late Devonian"
+      quote: "The remnant Rheic Ocean still existed during the Late Devonian, closing gradually with the movements of the"
+    note: >-
+      The sentence before says that "the first contact between Laurussia and the Central European promontory of
+      Gondwana occurred in the Tornquist-Teisseyre zone". How wide the gap was is disputed: the same page says it
+      "seems much larger" on an alternative position of Gondwana. Which of these the build's plates follow was not
+      checked.
+  - id: water-north-america-flooded
+    layer: water
+    what: >-
+      In the south-west of the disc, North America is mostly under a shallow sea: an epicontinental sea across almost
+      the whole of its interior, so that the continent shows as pale shelf water with land only round its edges.
+    reach: region
+    source:
+      cite: "Golonka, J. (2007). Phanerozoic paleoenvironment and paleolithofacies maps. Late Paleozoic. Geologia (AGH Kraków) 33(2), 145–209."
+      url: https://repo.agh.edu.pl/bitstreams/3fcac084-56c1-453d-a8aa-72de74d0d0ad/download
+      text: golonka-agh.txt
+      loc: "p. 158 (PDF page 15), Late Devonian, the paragraph on North America"
+      quote: "The seas covered almost the entire craton"
+    note: >-
+      Said of the Late Devonian transgression after the Middle–Late Devonian regression, from the Peri-Cordilleran
+      zone to the Peri-Appalachian. By the build's plates Hudson Bay and New York are some 35° to 50° from the point,
+      well inside the disc. "Pale shelf water" is my gloss of a shallow sea seen from orbit.
+  - id: life-reefs-west-canada
+    layer: life
+    what: >-
+      On the far western shelf of the disc (today's western Canada), reef-rimmed carbonate banks: pale shoals and
+      reef tracts in the shallow sea.
+    reach: region
+    source:
+      cite: "Golonka, J. (2007). Phanerozoic paleoenvironment and paleolithofacies maps. Late Paleozoic. Geologia (AGH Kraków) 33(2), 145–209."
+      url: https://repo.agh.edu.pl/bitstreams/3fcac084-56c1-453d-a8aa-72de74d0d0ad/download
+      text: golonka-agh.txt
+      loc: "p. 159 (PDF page 16), Late Devonian"
+      quote: "the West-Canadian basin where carbonate rocks with reefogeneous limestones (Webb 2002) formed a large part of deposits"
+    note: >-
+      Late Devonian as a whole, not the Frasnian alone. Alberta is about 50° from the point by the build's plates,
+      inside the disc but towards its western edge. The same page has evaporites in the Williston basin at the start
+      of the epoch.
+  - id: life-reefs-devonian-maximum
+    layer: life
+    what: >-
+      Reefs along the warm shelves generally: this is the age of the largest reef systems the Earth has had, and in
+      the Frasnian, after a setback at its start, the reef corals had recovered. Shelf margins across the tropical
+      part of the disc show reef rims and carbonate banks.
+    reach: region
+    source:
+      cite: "Bridge, T.C.L., Baird, A.H., Pandolfi, J.M., McWilliam, M.J. & Zapalski, M.K. (2022). Functional consequences of Palaeozoic reef collapse. Scientific Reports 12, 1386. doi:10.1038/s41598-022-05154-6"
+      url: https://pmc.ncbi.nlm.nih.gov/articles/PMC8792005/
+      text: pmc8792005.txt
+      loc: "Introduction, first paragraph"
+      quote: "saw the largest development of metazoan reefs in the Earth’s history"
+    note: >-
+      Said of the Devonian as a whole; the paper's own record (tabulate corals of the Ardennes and the Holy Cross
+      Mountains) puts the peak of reef building in the Givetian, before this moment, and says that taxonomic richness
+      "recovered substantially during the Frasnian" before the Kellwasser collapse at its end. The Ardennes and the
+      Holy Cross Mountains are some 20° to 30° south of the point by the build's plates, on Laurussia's southern
+      shelf. Where on the disc reefs stood at 377.7 Ma, and how much of the shelf they rimmed, is not known from
+      anything read.
+  - id: water-pechora-reef-rimmed-shelf
+    layer: water
+    what: >-
+      Just east and south-east of the point, the Pechora shelf: a carbonate and clastic shelf sea with reefs along
+      the outer margin of the craton and around the Pechora–Kolva trough.
+    reach: region
+    source:
+      cite: "Golonka, J. (2007). Phanerozoic paleoenvironment and paleolithofacies maps. Late Paleozoic. Geologia (AGH Kraków) 33(2), 145–209."
+      url: https://repo.agh.edu.pl/bitstreams/3fcac084-56c1-453d-a8aa-72de74d0d0ad/download
+      text: golonka-agh.txt
+      loc: "p. 161 (PDF page 18), Late Devonian, the paragraph on the East European craton"
+      quote: "It was the major time of the Pechora-Kolva trough development at the Pechora plate. The trough was also bordered by reefs (Webb 2002)."
+    note: >-
+      The Pechora–Kolva trough lies today some hundreds of kilometres east of the point; from orbit it is near the
+      centre of the disc. Late Devonian as a whole.
+  - id: water-domanik-deep-basin
+    layer: water
+    what: >-
+      Between the shallow shelves of Timan–Pechora, deeper, starved basins whose bottom water was without oxygen:
+      darker water among paler banks.
+    reach: region
+    source:
+      cite: "Kotik, I.S., Zhuravlev, A.V., Maydl, T.V., Bushnev, D.A. et al. (2021). Early-Middle Frasnian (Late Devonian) carbon isotope Event in the Timan-Pechora Basin (Chernyshev Swell, Pymvashor River section, North Cis-Urals, Russia). Geologica Acta 19."
+      url: https://revistes.ub.edu/index.php/GEOACTA/article/view/31740
+      text: kotik-2021-page.txt
+      loc: "Abstract"
+      quote: "Organic-rich black shale that lacks bioturbation and benthic organisms indicates an oxygen-depleted depositional environment."
+    note: >-
+      The Pymvashor section is on the Chernyshev Swell in the north Cis-Urals, several hundred kilometres east of the
+      point, and the interval is the Early–Middle Frasnian boundary (punctata Zone), a little before this moment.
+      Golonka (golonka-agh.txt, p. 161) says the Domanik-type deposits of the north-east "covered bottoms of four
+      submeridional depressions" joined in the south-east into a basin up to 600 km wide. "Darker water" is my gloss:
+      no source read says how such a basin looked from above.
+  - id: water-peri-uralian-sea
+    layer: water
+    what: >-
+      Further east, towards the Urals of today, the sea does not withdraw: the shelf deepens steadily eastwards to the
+      ocean beyond Baltica's margin.
+    reach: region
+    source:
+      cite: "Golonka, J. (2007). Phanerozoic paleoenvironment and paleolithofacies maps. Late Paleozoic. Geologia (AGH Kraków) 33(2), 145–209."
+      url: https://repo.agh.edu.pl/bitstreams/3fcac084-56c1-453d-a8aa-72de74d0d0ad/download
+      text: golonka-agh.txt
+      loc: "p. 160 (PDF page 17), Late Devonian"
+      quote: "In the Peri-Urals zone, subsidence was not interrupted by regressions."
+    note: >-
+      The same sentence's paragraph puts rifting along Baltica's eastern margin, "in the Barents Sea, Kola, Timan,
+      Vyatka and Soligalich areas", above a subduction zone dipping under Baltica. What ocean lay east of the margin,
+      and how wide, is not said here.
+  - id: water-deltaic-coast
+    layer: water
+    what: >-
+      At the point itself, a coast: deltas and coastal plains where rivers off Baltica met the sea, sand, silt and
+      mud spreading into shallow water. From orbit a ragged shoreline with brown-tinged water off river mouths, not
+      a clean cliffed coast.
+    reach: place
+    source:
+      cite: "Lyubarova, A. & Snigirevsky, S.M. (2020). New investigations of Upper Devonian wood from the north of the European part of Russia. Acta Palaeobotanica 60(1), 143–155. doi:10.35535/acpa-2020-0006"
+      url: "https://acpa.botany.pl/pdf-120180-52801?filename=New-investigations-of-Upp.pdf"
+      text: snigirevsky-2020-wood.txt
+      loc: "p. 145 (PDF page 3), Materials and methods, the list of formations"
+      quote: "Upper Frasnian: in terrigenous sediments of a complex of deltaic sandstones, siltstones and clays"
+    note: >-
+      The Ust'e Bezmoshitsa Formation, on the east coast of Chesha Bay (North Timan), a short way east of the point.
+      The same list has the Lower Frasnian Grubyj Ruchey Formation "in coastal-marine terrigenous sediments" on the
+      Sula River, and coarse conglomerates, sandstones and siltstones on the Kanin Peninsula itself. So the point was
+      at or near the shore, now land, now sea; where the shoreline ran at 377.7 Ma is not known (see unknown). The
+      brown water is my gloss.
+  - id: cover-archaeopteris-forest
+    layer: cover
+    what: >-
+      The land round the point is green: forest of Archaeopteris, the first large trees, on the coastal plains of
+      Kanin and Timan. From orbit, a dark green fringe to the coast rather than bare red or tan ground.
+    reach: place
+    source:
+      cite: "Lyubarova, A. & Snigirevsky, S.M. (2020). New investigations of Upper Devonian wood from the north of the European part of Russia. Acta Palaeobotanica 60(1), 143–155. doi:10.35535/acpa-2020-0006"
+      url: "https://acpa.botany.pl/pdf-120180-52801?filename=New-investigations-of-Upp.pdf"
+      text: snigirevsky-2020-wood.txt
+      loc: "p. 144 (PDF page 2), Introduction, on the Kanin Peninsula"
+      quote: "Numerous remains of Archaeopteris fissilis Schmalhausen of Frasnian age were found in almost all studied sections."
+    note: >-
+      Of the south-east of the Kanin Peninsula, the same peninsula as the point; the paper goes on to call these
+      plants "dominant in the Late Devonian plant communities of this territory", and its conclusion that "Timan Ridge
+      and the Kanin Peninsula were sites of the active development of the Earth's first forests". Fossil leaves and
+      wood in coastal sediments say the trees grew near, not how close-set they stood or how far inland. "Dark
+      green" is my gloss. The build's atlas lists only stand-ins (sphenopsids, cladoxylopsids, lycopsids, a generic
+      gymnosperm) and a few genera from farther away for this patch, not Archaeopteris.
+  - id: cover-humid-north-coal
+    layer: cover
+    what: >-
+      The north of Baltica (round the point) is wet ground: river and lake plains with coal-forming swamps, unlike the
+      drier south-west of the craton.
+    reach: region
+    source:
+      cite: "Golonka, J. (2007). Phanerozoic paleoenvironment and paleolithofacies maps. Late Paleozoic. Geologia (AGH Kraków) 33(2), 145–209."
+      url: https://repo.agh.edu.pl/bitstreams/3fcac084-56c1-453d-a8aa-72de74d0d0ad/download
+      text: golonka-agh.txt
+      loc: "p. 161 (PDF page 18), Late Devonian, the paragraph on the East European craton"
+      quote: "continental alluvium-lacustrine rock complexes (coal-bearing in the north) formed an essential part of deposits"
+    note: >-
+      "In the north" is today's north of the East European craton, which takes in Timan. Lyubarova & Snigirevsky
+      (snigirevsky-2020-wood.txt, p. 145) have Lower Frasnian wood "in inter-basalt interlayers and coal lenses" on
+      the Sula River, North Timan. The contrast with the south-west is from the next item, not this source.
+  - id: substrate-timan-basalts
+    layer: substrate
+    what: >-
+      On the Timan near the point, basalt lavas among the coastal sediments: a rift zone, with dark lava ground in
+      places.
+    reach: place
+    source:
+      cite: "Lyubarova, A. & Snigirevsky, S.M. (2020). New investigations of Upper Devonian wood from the north of the European part of Russia. Acta Palaeobotanica 60(1), 143–155. doi:10.35535/acpa-2020-0006"
+      url: "https://acpa.botany.pl/pdf-120180-52801?filename=New-investigations-of-Upp.pdf"
+      text: snigirevsky-2020-wood.txt
+      loc: "p. 145 (PDF page 3), Materials and methods: Kumushka Formation, Lower Frasnian"
+      quote: "basalt interlayers and coal lenses (E slope of Northern Timan, Sula River at Padun waterfall)"
+    note: >-
+      Lower Frasnian, so somewhat before this moment; whether lavas were still erupting at 377.7 Ma is not said.
+      Golonka (golonka-agh.txt, p. 160) places Late Devonian rifting in the Timan. How large the lava fields were, and
+      whether they would show at all from 2.6 Earth radii, is not known.
+  - id: weather-dry-baltic-southwest
+    layer: weather
+    what: >-
+      South-west of the point (today's Baltic states), the climate had turned dry and warm or hot: a shallow sea with
+      dolomite banks and gypsum lagoons, pale and evaporitic from above, rather than green coastal plain.
+    reach: region
+    source:
+      cite: "Stinkulis, Ģ., Lukševičs, E., Pipira, D., Meire-Kārkle, M. & Martma, T. (2026). Dolocretes in the Amata Formation of Latvia as indicators of climate aridification during the Givetian–Frasnian transition. Estonian Journal of Earth Sciences 75(1), 67–82. doi:10.3176/earth.2026.05"
+      url: https://kirj.ee/wp-content/plugins/kirj/pub/earth-1-2026-67-82_20260420162220.pdf
+      text: stinkulis-2026-dolocrete.txt
+      loc: "p. 78 (PDF page 12), Discussion: climate changes during the Givetian–Frasnian transition"
+      quote: "These longer-time changes likely led from a moist warm climate to a drier warm or even hot climate."
+    note: >-
+      Said of the western Main Devonian Field (Latvia) up to the Middle Frasnian Salaspils deposits, of carbonate,
+      clay and gypsum; the paper says that after them, to the end of the Frasnian, the deposits "changed several
+      times from carbonate to sandy and clayey, and back". Riga is about 15° south-south-west of the point by the
+      build's plates. "Pale and evaporitic from above" is my gloss.
+  - id: water-siberia-shallow-seas
+    layer: water
+    what: >-
+      To the north of the disc, Siberia: a separate continent, much of it under shallow seas laying down limestone
+      and salt, with rift basins and basalt fields.
+    reach: region
+    source:
+      cite: "Golonka, J. (2007). Phanerozoic paleoenvironment and paleolithofacies maps. Late Paleozoic. Geologia (AGH Kraków) 33(2), 145–209."
+      url: https://repo.agh.edu.pl/bitstreams/3fcac084-56c1-453d-a8aa-72de74d0d0ad/download
+      text: golonka-agh.txt
+      loc: "p. 161 (PDF page 18), Late Devonian, the paragraph on Siberia"
+      quote: "On the whole, carbonate and evaporite sediments dominated there."
+    note: >-
+      "There" is the Tunguska basin, which the sentence before says subsided most in the Middle Frasnian. The same
+      paragraph has the Taimyr basin deep, with Domanik-type facies in the west, and "wide eruptions of basalts" in
+      the Viluy trough, which "was not connected with a sea". Norilsk and Yakutsk are some 20° and 37° north of the
+      point by the build's plates. How wide the sea between Baltica and Siberia was is not said.
+  - id: water-north-africa-shallow-sea
+    layer: water
+    what: >-
+      Along the southern limb, the northern edge of Gondwana (today's north Africa): a broad, shallow sea over the
+      north and north-west of the craton, at its widest in the Frasnian.
+    reach: region
+    source:
+      cite: "Golonka, J. (2007). Phanerozoic paleoenvironment and paleolithofacies maps. Late Paleozoic. Geologia (AGH Kraków) 33(2), 145–209."
+      url: https://repo.agh.edu.pl/bitstreams/3fcac084-56c1-453d-a8aa-72de74d0d0ad/download
+      text: golonka-agh.txt
+      loc: "p. 162 (PDF page 19), Late Devonian, the paragraph on Africa"
+      quote: "large marine basin in the north and north-west of the craton was shallow. Its size was maximal in the Frasnian time"
+    note: >-
+      By the build's plates Rabat, the Algerian Sahara and Cairo are some 41° to 64° from the point, the last near the
+      limb, so this is seen obliquely. The same paragraph has reef limestones north of the Peri-Atlas zone.
+  - id: water-hot-tropical-seas
+    layer: water
+    what: >-
+      Very warm surface seas in the tropics, warmer than any open tropical sea now, and warming through the Frasnian.
+    reach: region
+    source:
+      cite: "Bridge, T.C.L., Baird, A.H., Pandolfi, J.M., McWilliam, M.J. & Zapalski, M.K. (2022). Functional consequences of Palaeozoic reef collapse. Scientific Reports 12, 1386. doi:10.1038/s41598-022-05154-6"
+      url: https://pmc.ncbi.nlm.nih.gov/articles/PMC8792005/
+      text: pmc8792005.txt
+      loc: "Introduction, first paragraph"
+      quote: "Temperature rose steadily through the Frasnian"
+    note: >-
+      The sentence goes on that it "again exceeded at least 32 °C in the latest Frasnian", about 372 Ma, after this
+      moment; the same paragraph puts CO2 "probably approaching 2000 ppm for much of the Devonian". "Warmer than any
+      open tropical sea now" is my gloss. Brugger et al. (brugger-2018-cpd.txt, abstract) find their modelled
+      tropical temperatures well below those from oxygen isotopes. Nothing here a camera in orbit sees directly.
+  - id: ice-none-in-view
+    layer: ice
+    what: >-
+      No ice anywhere on the disc: no polar caps, no sea ice in sight, no snow on the land in view.
+    reach: region
+    source:
+      cite: "Bridge, T.C.L., Baird, A.H., Pandolfi, J.M., McWilliam, M.J. & Zapalski, M.K. (2022). Functional consequences of Palaeozoic reef collapse. Scientific Reports 12, 1386. doi:10.1038/s41598-022-05154-6"
+      url: https://pmc.ncbi.nlm.nih.gov/articles/PMC8792005/
+      text: pmc8792005.txt
+      loc: "Introduction, first paragraph"
+      quote: "minimal temperature gradients from the equator to the poles and a corresponding lack of polar ice caps"
+    note: >-
+      Said of the Devonian generally. The disc reaches only to about 71°N and 63°S along the point's meridian, and
+      the south pole of the build's plates (near today's São Paulo) is beyond the limb. A climate model of the Late
+      Devonian (Brugger et al., brugger-2018-cpd.txt, p. 10, section 3.2) has the continents "covered by snow at higher southern
+      latitudes" and seasonal Arctic sea ice in a cold mode; both would lie at or beyond the edge of this view.
+  - id: weather-itcz-over-laurussia
+    layer: weather
+    what: >-
+      A band of tropical cloud and rain (the intertropical convergence zone) near the equator, strengthened and
+      widened where it crosses Laurussia's interior mountains, with rain on the mountains' ocean-facing side. The
+      point, a few degrees north of the equator, is near this band.
+    reach: region
+    source:
+      cite: "Brugger, J., Hofmann, M., Petri, S. & Feulner, G. (2018). On the sensitivity of the Devonian climate to continental configuration, vegetation cover and insolation. Climate of the Past Discussions, doi:10.5194/cp-2018-36 (preprint, CC BY 4.0)."
+      url: https://cp.copernicus.org/preprints/cp-2018-36/cp-2018-36.pdf
+      text: brugger-2018-cpd.txt
+      loc: "p. 18, section 3.5, best-guess simulation for each timeslice"
+      quote: "the Laurussian continent: The mountain range in the continent’s interior inﬂuences atmospheric circulation and intensiﬁes and enlarges the intertropical convergence zone’s low-pressure areas"
+    note: >-
+      A model, not evidence, and the paper says the effect "is most pronounced for the Early Devonian simulation" and
+      is on the continent's western margin in its own frame; its Late Devonian run is at 380 Ma on another plate
+      model. Where the band lay in
+      September, and how much cloud covered the disc, no source read says. The paper's later published version
+      (Paleoceanography and Paleoclimatology 2019) could not be read as text.
+unknown:
+  - Whether the point itself was land or sea at 377.7 Ma. The nearby Frasnian sections alternate coastal-marine and deltaic beds (snigirevsky-2020-wood.txt), so the shoreline swung across this ground; no palaeogeographic map of the Frasnian of Kanin and North Timan could be read.
+  - Where the coastline of Baltica ran across the disc at this moment, and which parts of Laurussia were land; Golonka's maps (figs 12 and 14) were not readable as text, and they are drawn at 370 Ma on another plate model.
+  - The cloud on the disc on a September afternoon, where the tropical rain band and the dry subtropical belts lay, and whether the point was under cloud; only a model's general remark was read.
+  - The colour of the land away from the point; how much of Laurussia was forest, scrub or bare red ground. The Old Red Sandstone land of Britain, Norway and Greenland is in the disc, and no source read says how it looked in the Frasnian.
+  - How high the Caledonian mountains in Laurussia's interior still stood in the Frasnian; the one statement read is of the Early Devonian.
+  - How wide the ocean between Baltica and Siberia was, and what lay east of Baltica's Uralian margin (ocean, island arcs, Kazakhstan's blocks); the sources read name rifts and subduction but give no widths.
+  - Whether reefs rimmed the shelf near the point at this moment; the Pechora reefs are dated only to the Late Devonian in the source read, and the Frasnian reefs of Timan proper (Ukhta) were not reached.
+  - The colour of the sea over the oxygen-starved Domanik basins; a source read says the anoxia reached the photic zone (kotik-2021-page.txt), but nothing says how it looked.
+  - The sun's brightness is about 3% below today's (Brugger et al. use a solar constant of 1319.1 W m-2 for about 380 Ma, against 1361 now), too little to see; not made an item.
+  - The animals of the build's atlas in this patch (fishes and arthropods of the Frasnian and the stand-ins) cannot be seen from orbit, and were not looked into.
+pictures:
+  - { url: "https://repo.agh.edu.pl/bitstreams/3fcac084-56c1-453d-a8aa-72de74d0d0ad/download", what: "Golonka (2007), figs 11, 12 and 14 (PDF pages 14, 15 and 17): plate tectonic and lithofacies maps of the Late Devonian at 370 Ma, Laurussia, the Rheic Ocean, Siberia and northern Laurussia." }
+effort:
+  fetched: 15
+  cited: 6
+  failed: 5
+  note: >-
+    Fifteen fetches; six texts kept and cited (Golonka 2007, Bridge et al. 2022, Kotik et al. 2021, Lyubarova &
+    Snigirevsky 2020, Stinkulis et al. 2026, Brugger et al. 2018). Three read and dropped as off the moment (a Silurian
+    paper of Timan, an Eifelian reef of Belgium, a landing page). Refused or unreadable: Golonka in the Baztech
+    library (4xx), the published Brugger et al. 2019 PDF (pypdf gave up on a stream), a Southampton Maywood
+    Formation preprint, Snigirevsky & Lyubarova 2023 on Chesha Bay plants (SPbU portal), and a CORE copy of Racki
+    2020 on Late Devonian volcanism (all 4xx). Semantic Scholar was rate-limited. The build's rocks command found no
+    collection within 200 km. Most time went to finding anything of the Frasnian near Kanin; the Acta Palaeobotanica
+    paper was the one that speaks of the place. Where today's places stood on the disc was worked out on the build's
+    own plates with a small script (tools/world/src/rocksnear.ts placesOf), not from a source.

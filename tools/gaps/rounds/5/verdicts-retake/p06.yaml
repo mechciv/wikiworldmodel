@@ -1,0 +1,45 @@
+# Round 5's verdicts for p06, judged again on the new build: the western Amazon lowland of the Ucayali basin, eye level facing east-north-east, 16:00 in May, 2.65 Ma.
+author: machine:claude-code
+judged: "2026-11-23"
+build: 3b9f48adb1090be2
+changes: >-
+  The ground now rolls gently instead of lying dead level, and stands lower: the eye is at 186 to 200 m (floor 185 to
+  198 m) against 245 to 255 m before, nearer Pucallpa's 145 m, from the carried relief below the grid. The trees are
+  now grown as skeletons with leaves, the herbs come in patches of yellowed fern-like fronds, and the mud is drawn as a
+  scanned ground with leaf litter at b and c; but it is the same open savanna of evenly spaced trees over bare ground,
+  from the same savanna class, list and substrate. No verdict moved.
+summary: >-
+  The viewer still gets the lie of the land and the empty human world right: a low, now gently rolling lowland with no
+  mountain on the skyline, and no people. What it draws on it is still an open savanna of evenly spaced, round-crowned
+  trees over bare mud and leaf litter, where the reviews put closed terra firme rainforest; the climate field's driest
+  month misses the monsoon-forest line by under 4 mm, and that tips the whole frame. There is still no river, so the
+  caimans the atlas lists here are not placed, and the list still carries a specialised giant caiman past its time.
+items:
+  relief-low-flat-lowland: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "field:earth/elevation", why: "Low ground to the horizon at every spot, now with a gentle swell in the middle distance at a; the floor stands at 185 to 198 m from the carried relief (the grid still says 250 m), against 145 m at Pucallpa's gauge today." }
+  relief-divisor-far-skyline: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "field:earth/elevation", why: "No mountains anywhere; at a a faint grey low line still shows between the trunks on the left, and at b and c the trees close the skyline." }
+  water-meandering-river-oxbows: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "model:earth/drainage", why: "The drainage model still has no river or lake in the scene, and the brief cannot say where the Ucayali ran at 2.65 Ma, only that it runs near here today." }
+  water-floodplain-draining-in-may: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "model:earth/drainage", why: "No water is in view, so a falling river in May cannot be held to the frames." }
+  geography-drains-east-to-atlantic: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "model:earth/drainage", why: "A setting of the whole basin, not a sight." }
+  cover-terra-firme-rainforest: { verdict: wrong, spots: { a: wrong, b: wrong, c: wrong }, owner: "field:earth/climate", why: "Still an open savanna of evenly spaced round-crowned trees over bare ground with patches of dry fronds at every spot; the climate field still answers savanna, its driest month 3.7 mm short of what monsoon forest needs, with rain 2.7 times the arid threshold." }
+  cover-varzea-floodplain-forest: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "model:earth/drainage", why: "There is no floodplain in the scene, and whether one lay here at 2.65 Ma is not known." }
+  substrate-oxidized-sand-gravel: { verdict: wrong, spots: { a: wrong, b: wrong, c: wrong }, owner: "model:earth/substrate", why: "A brown, finely gritty mud at a and mud under a scatter of leaf litter at b and c, from the same one rock collection (gray claystone, 157 km east, at half weight); not the orange-red oxidized sand and gravel of the Madre de Dios beds, 600 km off, which the world does not read." }
+  substrate-red-beds-in-cutbanks: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "model:earth/substrate", why: "No river and no cutbank in view." }
+  life-caimans: { verdict: missing-held, spots: { a: missing-held, b: missing-held, c: missing-held }, owner: "gen:life/scene", why: "Caiman is still on the list as recorded here (4 rows) and is not placed at any spot: there is no water for it." }
+  life-no-gharials-or-giant-crocodilians: { verdict: wrong, spots: { a: wrong, b: wrong, c: wrong }, owner: "model:life/atlas", why: "No gavialoid is listed, but Mourasuchus, a specialised giant caiman, still is, from one row 310 km off dated only 5.33 to 2.58 Ma; it is not placed only because there is no water." }
+  life-giant-rodent-uncertain: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "gen:life/scene", why: "Phoberomys is still listed as recorded here (2 rows) and placed at every spot, none in sight; one queried tooth is all the brief has, so a frame without one says nothing." }
+  life-freshwater-crabs: { verdict: missing-not-held, spots: { a: missing-not-held, b: missing-not-held, c: missing-not-held }, owner: "model:life/atlas", why: "No crab is on the list, which is the same 40 taxa as before: the Contamana row is Trichodactylidae indet., a family, and the atlas holds no Trichodactylidae." }
+  people-none: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "model:people/lifeways", why: "No people and nothing made; the people layer answers unknown and the scene has no settlement." }
+findings:
+  - >-
+    One number still decides the frame: the climate field's driest month here is 3.7 mm under the monsoon-forest line
+    (margin -3.67), so a place with rain 2.7 times the arid threshold is classed savanna and drawn as open woodland
+    over bare ground. The new plant bodies make the trees look more like real trees, which makes the wrong cover the
+    more convincing.
+  - >-
+    The scene's labelled animals are still mostly of the pampas, carried from 1,370 to 2,200 km south: Panochthus,
+    Plaina, Platygonus, Abrothrix, Akodon, Ctenomys, Microcavia and Prodaedicurus carry labels in the frames. None of
+    the list's plants (Cassia, Acacia, Copaifera, Terminalia) is placed.
+  - >-
+    The scene's ground now stands 50 to 65 m below the height the viewer's account gives for the place (250 m), since
+    it takes the carried relief below the grid (the account's shape: field:earth/relief-carried, share 0.975, held false). The two heights
+    are reported side by side and disagree.

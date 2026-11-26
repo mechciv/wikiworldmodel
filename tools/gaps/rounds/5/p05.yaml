@@ -1,0 +1,252 @@
+view: t=17.119325Ma&lat=31.48972&lon=114.22665&d=1.0000023544&h=110&v=84&hour=9&mo=11&clock=0
+when: 17.12 Ma
+place: >-
+  Low ground at the northern foot of the Dabie Shan, in the western part of the Hefei Basin, Anhui, China: by the
+  build's plates the spot is today at about 31.58°N, 116.60°E, some 18 km south-south-east of Lu'an and 71 km from
+  Hefei, where the Jianghuai plain meets the Dabie foothills. The coordinates in the link are the place as it stood
+  then. Early Miocene (late Burdigalian), at or just before the start of the Miocene Climatic Optimum, long before
+  any hominin. The camera stands at eye level and faces 110° (east-south-east), along the range's northern foot
+  toward its north-eastern end, at 09:00 in November. The nearest fossil faunas of the age are 160 to 260 km east
+  and north-east (Fanchang in Anhui; Puzhen by Nanjing and Sihong in Jiangsu), and the nearest flora of the age
+  with a climate is Shanwang in Shandong, about 590 km north.
+author: machine:claude-code
+expects:
+  - id: relief-dabie-old-range
+    layer: relief
+    what: >-
+      To the right of the view (south and south-east) rise the hills and ridges of the Dabie Shan's north-eastern
+      end: an old range, long past its growth, wearing down slowly, not a young steep front. Ahead the ground stays
+      low.
+    reach: region
+    source:
+      cite: "Reiners, P.W., Zhou, Z., Ehlers, T.A., Xu, C., Brandon, M.T., Donelick, R.A. & Nicolescu, S. (2003). Post-orogenic evolution of the Dabie Shan, eastern China, from (U-Th)/He and fission-track thermochronology. American Journal of Science 303, 489–518."
+      url: https://ajsonline.org/article/61695.pdf
+      text: reiners-2003-dabie.txt
+      loc: "Abstract, p. 489"
+      quote: "Even in the core of the range, these recent exhumation rates are at least 10 to 20 times slower than those estimated for the initial stages of exhumation in the Triassic-Jurassic."
+    note: >-
+      The paper says of the range as a whole that it erodes steadily and slowly since the Cretaceous (its rates,
+      0.02 km/myr on the flanks and 0.06 in the core, would take off a few hundred metres to about a kilometre
+      since 17 Ma). It gives today's relief ("nearly 2 kilometers") and no height for the Miocene. That the range
+      stands to the right of a camera facing 110° here is read from today's map, carried back.
+  - id: relief-basin-plain-ahead
+    layer: relief
+    what: >-
+      Ahead, east-south-east, a broad low basin floor being built up by river sediment, with no fault scarps: the
+      faults that had shaped the basin were being buried.
+    reach: place
+    source:
+      cite: "Patin, M., Mansy, J.-L., Zhou, Z., Lamarche, J., Xu, C., Brunet, M.-F. & Trentesaux, A. (2008). 4D basin analysis of the intra-continental Hefei Basin in correlation with adjacent Dabie Orogen (East China). Geophysical Research Abstracts 10, EGU2008-A-11843."
+      url: https://meetings.copernicus.org/www.cosis.net/abstracts/EGU2008/11843/EGU2008-A-11843.pdf
+      text: egu2008-hefei.txt
+      loc: "Abstract, p. 2, last paragraph"
+      quote: "During the last stage of basin development (Neogene), the sediments deposited in the western part of the basin and blanketed the major faults."
+    note: >-
+      A conference abstract. The spot is in the western part of the Hefei Basin by today's map, so the statement
+      reaches this place, but it covers the whole Neogene (23 to 2.6 Ma) and gives no thickness, grain or date
+      for 17 Ma. "Low basin floor" and "no scarps" are my reading of it.
+  - id: substrate-river-sand
+    layer: substrate
+    what: >-
+      Underfoot and in the banks, river-laid sand, loose or weakly bedded, not bare rock.
+    reach: region
+    source:
+      cite: "The Paleobiology Database, collections 223945 (Yangluo, Xinzhou, Wuhan) and 223948 (Mingguang County), from Liu, Y.-S., Guo, S.-X. & Ferguson, D.K. (1996), A catalogue of Cenozoic megafossil plants in China, Palaeontographica B 238; downloaded 22 November 2026."
+      url: https://paleobiodb.org/data1.2/colls/list.txt?id=223945,223948&show=loc,strat,lith,geo,ref
+      text: pbdb-colls-near.txt
+      loc: "row for collection 223948"
+      quote: "Mingguang County … Middle Miocene … sandstone … fluvial indet."
+    note: >-
+      These two are the only rock collections the build holds within 200 km of the point for the Burdigalian
+      (`npm run world -- rocks` names them at 150 and 189 km). Mingguang is about 190 km north-east and dated
+      15.98–11.63 Ma; Yangluo (Wuhan), about 150 km west-south-west by the build's reckoning, is also "fluvial
+      indet." sandstone but dated only to the Neogene. The database's lithology comes from a plant catalogue, not a
+      sedimentological study; "sand, loose" is my gloss of a sandstone that was then fresh sediment.
+  - id: cover-mixed-broadleaf-forest
+    layer: cover
+    what: >-
+      Forest of broad-leaved trees, a mix of evergreen and deciduous: evergreen oaks and their kin, magnolias and
+      laurels among birches, hornbeams, elms, willows and poplars. Not conifer forest and not open grassland.
+    reach: region
+    source:
+      cite: "Zhao, J., Li, S., Huang, J., Ding, W., Wu, M., Su, T., Farnsworth, A., Valdes, P.J., Chen, L., Xing, Y. & Zhou, Z. (2025). Heterogeneous occurrence of evergreen broad-leaved forests in East Asia: Evidence from plant fossils. Plant Diversity 47(1), 1–12. doi:10.1016/j.pld.2024.07.004"
+      url: https://pmc.ncbi.nlm.nih.gov/articles/PMC11873578/
+      text: ebLF-heterogeneous.txt
+      loc: "Discussion, first paragraph (the paragraph beginning 'Some fossil assemblages')"
+      quote: "middle Miocene Shanwang assemblage in central-eastern China) represent evergreen-deciduous broadleaved mixed forests, dominated by the evergreen groups of Fagaceae, Magnoliaceae, Lauraceae and the deciduous groups of Betulaceae, Ulmaceae, Salicaceae"
+    note: >-
+      Shanwang (Shandong) is about 590 km north and its flora is dated 17–15.2 Ma (shanwang-climate-2007.txt),
+      the right time. The same review says central-eastern China's evergreen broad-leaved forests arose "around
+      the Miocene", so a place this far south was at least as evergreen. The genera named in "what" (hornbeam and
+      the rest) are my gloss of the families. In November the deciduous part would be turning or bare; no source
+      read says so of the Miocene.
+  - id: cover-oak-chestnut-poplar-willow
+    layer: cover
+    what: >-
+      Among the trees, oaks and chestnuts on the drier ground, and poplars and willows along the streams.
+    reach: region
+    source:
+      cite: "The Paleobiology Database, occurrences in collection 223948 (Mingguang County, Middle Miocene; reference 78641, Liu, Guo & Ferguson 1996), downloaded 22 November 2026."
+      url: https://paleobiodb.org/data1.2/occs/list.txt?coll_id=223948,223945&show=class
+      text: pbdb-mingguang-plants.txt
+      loc: "rows for occurrences 1584493, 1584868, 1585497 and 1585541"
+      quote: "Castanea miomollissima … Quercus sinomiocenicum … Populus glandulifera … Salix sp."
+    note: >-
+      Leaves from fluvial sandstone at Mingguang, Anhui, about 190 km north-east, dated 15.98–11.63 Ma, a
+      little younger than this moment. "Drier ground" and "along the streams" are my gloss of where these genera
+      grow today. The other collection (Yangluo, Wuhan, about 150 km west-south-west, Neogene only) has the
+      evergreen Bischofia javanica and Euodia. These are rows the build's atlas reads.
+  - id: weather-mild-humid
+    layer: weather
+    what: >-
+      A mild, humid climate, about as warm through the year as the region now or a little cooler, with plenty of
+      rain: a November morning cool but not cold, no snow or frost on the ground.
+    reach: region
+    source:
+      cite: "Yang, J., Wang, Y.-F., Spicer, R.A., Mosbrugger, V., Li, C.-S. & Sun, Q.-G. (2007). Climatic reconstruction at the Miocene Shanwang basin, China, using leaf margin analysis, CLAMP, coexistence approach, and overlapping distribution analysis. American Journal of Botany 94(4), 599–608."
+      url: https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=DOI:10.3732/ajb.94.4.599&format=json&resultType=core
+      text: shanwang-climate-2007.txt
+      loc: "Abstract"
+      quote: "The Shanwang flora (17-15.2 Ma) suggests a MAT of 10.9-14.5°C and a mean annual precipitation (MAP) of 1107.3-1880.0 mm."
+    note: >-
+      Only the abstract could be read (the article is paywalled). Shanwang is about 590 km north of this spot; a
+      place this far south would have been warmer. The abstract notes the coexistence approach gave higher
+      temperatures. "No snow or frost" on a November morning is my inference from the annual mean, not the
+      source's; the source gives no monthly values.
+  - id: weather-winter-monsoon-season
+    layer: weather
+    what: >-
+      November is the turn of the year to the dry season of a monsoon climate: the wet summer winds off the ocean
+      giving way to drier northerly winds from the interior.
+    reach: region
+    source:
+      cite: "Guo, Z.T., Sun, B., Zhang, Z.S., Peng, S.Z., Xiao, G.Q., Ge, J.Y., Hao, Q.Z., Qiao, Y.S., Liang, M.Y., Liu, J.F., Yin, Q.Z. & Wei, J.J. (2008). A major reorganization of Asian climate by the early Miocene. Climate of the Past 4, 153–174."
+      url: https://cp.copernicus.org/articles/4/153/2008/cp-4-153-2008.pdf
+      text: guo-2008-reorganization.txt
+      loc: "Abstract, p. 153"
+      quote: "This evidence shows the coexistence of two kinds of circulations, one from the ocean carrying moisture and another from the inland deserts transporting dust."
+    note: >-
+      The evidence is loess and soils of the Loess Plateau, 800 km and more to the north-west, from 22 Ma on; the
+      paper's maps put eastern China in the humid belt by the early Miocene. That November falls in the winter
+      half here is today's calendar carried back; the paper gives no month. How windy, dusty or clouded this
+      morning was is not known.
+  - id: life-small-deer-chevrotains
+    layer: life
+    what: >-
+      In the forest and at its edges, small hoofed browsers: mouse-deer (chevrotains) and small deer with short,
+      branched antlers, no bigger than a muntjac or roe deer.
+    reach: region
+    source:
+      cite: "The Paleobiology Database, Burdigalian occurrences between 29–36°N and 112–121°E (Sihong, Xiacaowan Formation, IVPP localities 82026–82029; Puzhen quarry, Nanjing), downloaded 22 November 2026."
+      url: https://paleobiodb.org/data1.2/occs/list.txt?lngmin=112&lngmax=121&latmin=29&latmax=36&interval=Burdigalian&show=coords,loc,strat,geo
+      text: pbdb-burdigalian.txt
+      loc: "rows for occurrences 442298, 442300, 442301 and 442354"
+      quote: "Dorcatherium … Dicrocerus sp. … Stephanocemas sp. … Xiacaowan … Lagomeryx sp."
+    note: >-
+      Sihong, Jiangsu, about 255 km north-east (coordinates in the rows are the county's). The database dates the
+      rows only to the Burdigalian (20.45–15.98 Ma); Harrison & Gu (1999, Journal of Human Evolution 37, 225–277; abstract in sihong-catarrhines-1999.txt) put the
+      fauna at about 17–18 Ma. Dicrocerus and Stephanocemas are also listed from the Puzhen quarry by Nanjing
+      (about 205 km east). The sizes and the antlers' look are my gloss from what these genera are known to be,
+      not from the rows.
+  - id: life-rhinos-mastodonts-horses
+    layer: life
+    what: >-
+      Larger animals now and then: rhinoceroses (a long-bodied, short-legged one among them), a mastodont, and
+      small three-toed forest horses (Anchitherium); wild pigs.
+    reach: region
+    source:
+      cite: "The Paleobiology Database, Burdigalian occurrences between 29–36°N and 112–121°E (Sihong, Xiacaowan Formation; Puzhen quarry, Nanjing), downloaded 22 November 2026."
+      url: https://paleobiodb.org/data1.2/occs/list.txt?lngmin=112&lngmax=121&latmin=29&latmax=36&interval=Burdigalian&show=coords,loc,strat,geo
+      text: pbdb-burdigalian.txt
+      loc: "rows for occurrences 428396, 428397, 442305, 442345 and 442346"
+      quote: "Brachypotherium cf. brachypus … Mastodontoidea indet. … Plesiaceratherium shanwangensis … Anchitherium sp. … Suidae"
+    note: >-
+      Brachypotherium and the mastodont are from the quarry near Puzhen, 8 km north of the Yangtze by Nanjing,
+      about 205 km east; Plesiaceratherium, Anchitherium (marked "?" in the row) and the pigs from Sihong, about
+      255 km north-east. The mastodont is not named below suborder. "Long-bodied, short-legged" is my gloss of
+      Brachypotherium; how common any of them was is not known.
+  - id: life-small-apes
+    layer: life
+    what: >-
+      In the trees, small apes (pliopithecoids), not monkeys, perhaps glimpsed in the canopy; no people anywhere.
+    reach: region
+    source:
+      cite: "Harrison, T., Zhang, Y., Wei, G., Sun, C., Wang, Y., Liu, J., Tong, H., Huang, B. & Xu, F. (2020). A new genus of pliopithecoid from the late Early Miocene of China and its implications for understanding the paleozoogeography of the Pliopithecoidea. Journal of Human Evolution 145, 102838. (Abstract read through Europe PMC.)"
+      url: https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=DOI:10.1016/j.jhevol.2020.102838&format=json&resultType=core
+      text: pliopithecoid-2020.txt
+      loc: "Abstract"
+      quote: "Paleontological investigations at a late Early Miocene locality near Fanchang in Anhui Province have yielded a large sample of isolated teeth (more than one hundred) of a previously unknown species of pliopithecoid."
+    note: >-
+      Fanchang is by today's map roughly 160 km east-south-east, the way the camera faces; the abstract dates its
+      fauna as of the Shanwang Formation's age (MN 3–4, about 18–17 Ma). The same abstract names Dionysopithecus
+      and Platodontopithecus from Sihong (about 255 km north-east), which the PBDB rows also hold. "In the trees"
+      and "glimpsed" are mine: teeth do not say how the apes lived, nor how often a person would see one. "No
+      people" is general knowledge (hominins arose in Africa millions of years later), not this source's.
+  - id: life-birds
+    layer: life
+    what: >-
+      Birds of prey overhead (an eagle, a vulture of the bearded-vulture kind), and partridges and pheasants on the
+      ground.
+    reach: region
+    source:
+      cite: "The Paleobiology Database, Burdigalian occurrences between 29–36°N and 112–121°E (Sihong, Xiacaowan Formation, IVPP locality 82027), downloaded 22 November 2026."
+      url: https://paleobiodb.org/data1.2/occs/list.txt?lngmin=112&lngmax=121&latmin=29&latmax=36&interval=Burdigalian&show=coords,loc,strat,geo
+      text: pbdb-burdigalian.txt
+      loc: "rows for occurrences 442319 to 442322"
+      quote: "Aquila sp. … Gypaetinae indet. … Perdicinae indet. … Phasianidae indet."
+    note: >-
+      One Sihong locality, about 255 km north-east, dated only to the Burdigalian by the database. "Overhead" and
+      "on the ground" are my gloss of what these birds do today.
+  - id: life-squirrels-pikas
+    layer: life
+    what: >-
+      Squirrels and flying squirrels in the trees, and pikas in the undergrowth.
+    reach: region
+    source:
+      cite: "The Paleobiology Database, Burdigalian occurrences between 29–36°N and 112–121°E (Sihong, Xiacaowan Formation, IVPP locality 82028), downloaded 22 November 2026."
+      url: https://paleobiodb.org/data1.2/occs/list.txt?lngmin=112&lngmax=121&latmin=29&latmax=36&interval=Burdigalian&show=coords,loc,strat,geo
+      text: pbdb-burdigalian.txt
+      loc: "rows for occurrences 442284, 442285 and 442292"
+      quote: "Sciurus sp. … Miopetaurista … Alloptox sp."
+    note: >-
+      Sihong, about 255 km north-east. Flying squirrels glide at dusk and night, not at 09:00; a squirrel by day
+      is likelier. Where in the scene each lived is my gloss.
+  - id: water-lakes-crocodiles
+    layer: water
+    what: >-
+      Where there is standing water or a slow river, it holds carp-family fish (grass carp, silver carp),
+      pond turtles and softshell turtles, beavers, and crocodilians, an alligator among them.
+    reach: region
+    source:
+      cite: "The Paleobiology Database, Burdigalian occurrences between 29–36°N and 112–121°E (Sihong, Xiacaowan Formation; Puzhen quarry, Nanjing), downloaded 22 November 2026."
+      url: https://paleobiodb.org/data1.2/occs/list.txt?lngmin=112&lngmax=121&latmin=29&latmax=36&interval=Burdigalian&show=coords,loc,strat,geo
+      text: pbdb-burdigalian.txt
+      loc: "rows for occurrences 428398, 428399, 428400, 430800, 442243, 442274 and 442276"
+      quote: "Hypophthalmichthys sp. … Ctenopharyngodon sp. … Youngfiber sinensis … Chinemys reevesii … Alligator sp. … Trionyx sp. … Crocodylidae indet. … lacustrine indet."
+    note: >-
+      The Sihong rows give the setting as "lacustrine indet."; the alligator is from the Puzhen quarry by Nanjing
+      (about 205 km east). Whether any lake or river lies in this camera's view is not known (see unknown). The
+      common names are my gloss of the genera. A November morning is cool for crocodilians to bask; nothing read
+      says how they passed the season.
+unknown:
+  - What lies underfoot at this spot. No Neogene section of the western Hefei Basin, near Lu'an, could be read; the substrate item rests on collections 150–190 km away, and only a conference abstract says Neogene sediment was laid in this part of the basin.
+  - Whether a river or lake is in view, and where the forerunners of today's Pi and Hangbu rivers and of the lower Yangtze ran at 17 Ma. A paper on the Yangtze's age (Zheng et al. 2013, PNAS) could not be fetched.
+  - How high the Dabie Shan stood at 17 Ma, and how far its foothills lay from this spot; the thermochronology gives erosion rates and today's relief, not a Miocene skyline.
+  - What grew at this spot. No pollen or leaf record of the Burdigalian from the Hefei Basin or the Dabie foothills was found; the nearest floras of about this age are Mingguang (190 km, a little younger) and Shanwang (590 km).
+  - The look of the forest in November, how much of it was bare, turning or evergreen. The sources give families and a climate, not a season's colour.
+  - The sky and light. No source read gives the weather of a November morning then. By computation (not from a source), the sun at 09:00 local solar time in November at this latitude stands about 21–26° up at an azimuth of about 130–135°, a little right of the camera's heading, so the view is toward a low morning sun.
+  - Which animals lived at this spot. The 23 taxa of the atlas patch come from Sihong and the Puzhen quarry, 205–255 km away; no vertebrate fossil of the age is reported within 150 km in anything read.
+  - The soil: whether red, lateritic soils formed on the ground here under the Miocene's warmth; nothing read speaks of soils in this basin at this time.
+effort:
+  fetched: 22
+  cited: 9
+  failed: 10
+  note: >-
+    22 fetches, 10 kept texts, 9 cited (the Harrison & Gu 1999 abstract is kept and named in a note for the Sihong
+    fauna's age). Refused or empty: PubMed Central twice and Europe PMC's full-text and search routes four times
+    (rate-limited partway through), PNAS's PDF, BioOne's AMNH Bulletin chapter on the Chinese Miocene (Incapsula),
+    and Semantic Scholar (the publisher withholds the PNAS abstract). A Frontiers paper on Lu Mountain's Miocene
+    uplift and a UCLA eScholarship paper on Yunnan were read and dropped as off the point. Most time went to
+    finding anything at all on the Hefei Basin's Neogene, and to the PBDB rows that the atlas's 23 taxa come from.
+    The scratchpad helper was overwritten by another researcher's partway through, and four of this point's
+    fetches landed in p04's folder; they were moved back or deleted.

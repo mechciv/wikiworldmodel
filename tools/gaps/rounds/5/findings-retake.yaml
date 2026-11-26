@@ -1,0 +1,44 @@
+# Round 5's re-take: the same 34 views shot again on build 3b9f48ad (master 70e5d4b, 2026-11-23), after the fidelity
+# pass (gen:life/scene versions 11 and 12), the relief below a scene's grid, scene behaviours, finer clouds and the
+# satellite globe; judged afresh by four readers (verdicts-retake/pNN.yaml), each verdict beside the first take's.
+# The encoding and the resolver were checked by reading the code; the rest are the readers' judgements of pictures.
+author: machine:claude-code
+judged: "2026-11-23"
+findings:
+  - title: The pictures changed far more than the verdicts
+    text: >-
+      Every eye-level frame looks better: leafy broad-leaved crowns, leaf litter, ground cover in patches, scanned
+      ground, sculpted relief, a satellite globe. Yet 2 of 188 verdicts moved, both for the worse, and the share of
+      testable items drawn went from 37.8% to 36.8%. What the briefs ask for is mostly what is there, not how it
+      looks: a town, a forest rather than a savanna, the sea, a river, the right animals. The fidelity pass draws the
+      same wrong things better.
+  - title: Heights above 3,200 m are fixed, and snow came down with them
+    text: >-
+      The scene now keeps each grid as steps above a base, sized to its range (encode in
+      world/generators/life/scene/v12.ts). The Altiplano point stands at 4,243–4,694 m where it stood at 3,200 m, and
+      the North Pacific floor at its surveyed 3,326–3,342 m. But the scene's snow line, 4,251 m, now reaches the
+      ground: snow lies among the shrubs and a white hill stands on slopes the brief has bare in a dry April. Every
+      high scene in a dry range will show it. The near slopes still hide the basin, the salt flat and the volcano.
+  - title: The relief below the grid lifted the hills, not far enough
+    text: >-
+      Euboea's hillside, drawn flat at 275 m, now stands at 277–416 m across the spots, still about 75 m under the
+      brief's 443 m at a: the survey's cells of a sixtieth of a degree average a steep slope down. The Cishan loess
+      became ridges and gullies, crumpled rather than flat-topped terraces. The Amazon floor fell 50–65 m nearer
+      Pucallpa's 145 m, and now sits below the height the viewer reports for the same place.
+  - title: Still not drawn, and still the largest gaps
+    text: >-
+      No town at Kanchipuram or Khiva (the settlement generator's 50-year hold); the camera under the water at both sea
+      points; the land's list on the Eocene shelf; savanna where the evidence says forest; no local scene before the
+      Phanerozoic; the atlas's animals far from their places. None of these is touched by the merged work, and they
+      are what to take next.
+  - title: The viewer's resolver still never answers life
+    text: >-
+      resolveWorld() in viewer/src/main.ts still gives the resolver no life function, so every view reports life as
+      unknown, at 17 Ma with 46 taxa listed as at 611 Ma.
+  - title: New faults to look at
+    text: >-
+      At Cishan, sharp dark diamond-shaped shadows lie on the grass with nothing visible casting them, and they are not
+      in the page shot taken a moment apart: perhaps the shadows of something the scene now moves, drawn while the thing
+      is not. At the Miocene point the panel says "Ground of sand" over stony soil and leaf litter. At the Albian point
+      some conifers are bare spars that read as dead trees, and the low cover reads as grass, which the scene does not
+      list. From orbit, the new cloud band sits over the Devonian point and hides it.

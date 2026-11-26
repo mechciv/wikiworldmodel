@@ -1,0 +1,38 @@
+# Round 5's verdicts for p04, judged again on the new build: an aerial view over the edge of the Eocene Bengal shelf (central Bangladesh today), 43.52 Ma.
+author: machine:claude-code
+judged: "2026-11-23"
+build: 3b9f48adb1090be2
+changes: >-
+  Nothing visible changed. The camera is still under the water (the eye at -38, -29 and -32 m over a floor at -336,
+  -328 and -328 m) and every frame is the same plain blue gradient as before, within two levels of colour per pixel;
+  the scene still carries the land atlas's list. The only change in the account is that b and c now report 8 and 5
+  moving animals, none of them in a frame. No verdict moved.
+summary: >-
+  The viewer still rightly has sea here, not land: the scene says sea, with the floor 313 m down on the globe and
+  about 330 m in the scene, at 3 degrees north. But it still puts the camera inside the water, about 300 m over the
+  floor and 30 to 38 m under the surface, so every frame is a plain blue gradient with no surface, horizon, sky or
+  floor. Under it the scene still carries the land atlas's list (brontotheres, rodents, flowering plants, a freshwater
+  gar and snail) where the sea atlas has the shelf's larger foraminifera and coralline algae.
+items:
+  geography-shelf-edge: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "field:earth/elevation", why: "No floor is seen from under the water; the elevation answers 313 m deep here, a depth at a shelf edge, but whether it falls away to the east-south-east is not in the frames." }
+  water-sea-everywhere: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "field:earth/elevation", why: "The scene says sea, the ground is 313 m under it, and nothing but water fills any frame; no land is drawn." }
+  water-deeper-ahead: { verdict: missing-held, spots: { a: missing-held, b: missing-held, c: missing-held }, owner: "renderer", why: "The world holds the depths, but no sea surface is in the frames to darken toward the basin: the eye is still 29 to 38 m under the water." }
+  water-clear: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "ocean colour (no layer)", why: "Clear blue water with no muddy plume, as every sea is drawn." }
+  water-warm: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "field:earth/climate", why: "Not seen; the climate field's 29 to 36 degrees agrees with the source's 30 to 35." }
+  substrate-skeletal-carbonate-floor: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "model:earth/substrate", why: "The floor is about 300 m down and in no frame; the substrate still answers by climate, with no bedrock in the account." }
+  substrate-shelf-subtidal: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "model:earth/substrate", why: "Of a well 190 km away; no floor or tidal flat is in any frame." }
+  life-calcareous-algae: { verdict: missing-held, spots: { a: missing-held, b: missing-held, c: missing-held }, owner: "gen:life/scene", why: "The sea atlas lists coralline algae near the patch, by the brief's reading; the scene still takes the land atlas's list instead, and no floor is seen." }
+  life-larger-foraminifera: { verdict: missing-held, spots: { a: missing-held, b: missing-held, c: missing-held }, owner: "gen:life/scene", why: "Nummulites, Discocyclina and Alveolina are in the sea atlas near the patch and still not on the scene's list, which is the land's." }
+  water-shoals-inner-shelf: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "field:earth/elevation", why: "Out of the frame by the brief's own account." }
+  geography-open-seaways: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "field:earth/elevation", why: "Said of the region; not in a frame." }
+  relief-flat-horizon: { verdict: wrong, spots: { a: wrong, b: wrong, c: wrong }, owner: "renderer", why: "Still no horizon at all, flat or not: the frames are a plain blue gradient seen from under the surface; no mountain shows either." }
+  life-archaeocete-whales: { verdict: missing-held, spots: { a: missing-held, b: missing-held, c: missing-held }, owner: "gen:life/scene", why: "Pakicetus and Ichthyolestes, early whales of 1,870 km away, are still on the list and not drawn; b and c report 8 and 5 moving animals, but nothing is in sight in the water." }
+  cover-seagrass: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "model:life/sea-atlas", why: "Of the shallow shelf behind the camera, not over the slope ahead, and of Kutch 2,000 km away." }
+  weather-wet-equatorial: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "gen:earth/clouds", why: "No sky in any frame; the climate field calls the place savanna (aridity index 1.84), and the source for afternoon cloud is a model and a gloss." }
+  geography-near-equator: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "src:paleomap-plate-model", why: "The build's plates put the spot at 3.08 degrees north; no sun or shadow is in the frames to show the light." }
+findings:
+  - "Unchanged: the camera is under the sea. scene.sea is true and the eye stands at -38, -29 and -32 m over a floor at -336, -328 and -328 m: about 300 m above the floor, the link's d of 600 m taken along a view tilted 60 degrees from straight down. The relief work moved the floor by about a metre and nothing else; the new frames differ from the old by at most two levels of colour per pixel. Over any sea deeper than about 300 m an aerial view of this kind is still drawn from inside the water, as a blue gradient. Owner: renderer (the camera over the sea)."
+  - "Unchanged: a sea scene with the land's list. scene.sea is true but scene.list is still land, and the list is the same thirty-seven taxa as before: brontotheres, odd- and even-toed ungulates, rodents, primates, a hyaenodont, flowering plants, a freshwater gar (Lepisosteus) and a ramshorn snail (Planorbis), all from 220 to 2,080 km off. Owner: gen:life/scene."
+  - "New in the account only: the scene now reports moving animals (going: 0, 8 and 5 at a, b and c, the same counts as its instances), so the behaviours are running in this water, but none of them is in any frame."
+  - "Unchanged: the world's floor here is 313 m (globe) to about 336 m (scene) deep, where the nearest well on the same hinge has a shallow subtidal limestone; the brief cannot say the depth at the spot, so this is a question, not an error."
+  - "Unchanged: the life layer's tier reads unknown at 43.5 Ma while the panel says 7 recorded here, 29 nearby, 1 stand-in (as at p03)."

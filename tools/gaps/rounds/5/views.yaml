@@ -1,0 +1,108 @@
+# The fifth round of visual gaps (docs/plans/VISUAL-GAPS.md), a fresh draw: 12 points, drawn by sample.ts beside this file
+# with the seed "gaps-round-5" from build 46e013ad3acac105, each with up to three spots (a, b, c). Each is a link without its build, as the
+# look book's views are. Before the Holocene a place is where the viewer has it at that time, not where it is today.
+reference: Apple M1
+
+views:
+  - name: p01a
+    what: "611.8 Ma, at 0.62846, 154.08038, at eye level. Drawn by floor: anywhere on the globe, evenly by area."
+    link: t=611.757063Ma&lat=0.62846&lon=154.08038&d=1.0000023544&h=180&v=84&hour=16&mo=8&clock=0
+  - name: p01b
+    what: "611.8 Ma, at 0.62946, 154.07104 (1.05 km from p01a), at eye level. Drawn by floor: anywhere on the globe, evenly by area."
+    link: t=611.757063Ma&lat=0.62946&lon=154.07104&d=1.0000023544&h=161&v=84&hour=16&mo=8&clock=0
+  - name: p01c
+    what: "611.8 Ma, at 0.65155, 154.08419 (2.6 km from p01a), at eye level. Drawn by floor: anywhere on the globe, evenly by area."
+    link: t=611.757063Ma&lat=0.65155&lon=154.08419&d=1.0000023544&h=177&v=84&hour=16&mo=8&clock=0
+  - name: p02a
+    what: "377.7 Ma, at 4.20239, 5.56683, from orbit. Drawn by fossils: 3 taxa recorded in this patch of the atlas in the Frasnian, part 1 of 2."
+    link: t=377.737404Ma&lat=4.20&lon=5.57&d=2.6&hour=14&mo=9&clock=0
+  - name: p03a
+    what: "104.9 Ma, at 31.96341, -41.31303, at eye level. Drawn by fossils: 7 taxa recorded in this patch of the atlas in the Albian, part 2 of 2."
+    link: t=104.928688Ma&lat=31.96341&lon=-41.31303&d=1.0000023544&h=190&v=84&hour=12&mo=8&clock=0
+  - name: p03b
+    what: "104.9 Ma, at 31.95769, -41.33275 (1.97 km from p03a), at eye level. Drawn by fossils: 7 taxa recorded in this patch of the atlas in the Albian, part 2 of 2."
+    link: t=104.928688Ma&lat=31.95769&lon=-41.33275&d=1.0000023544&h=186&v=84&hour=12&mo=8&clock=0
+  - name: p03c
+    what: "104.9 Ma, at 31.96447, -41.32253 (0.9 km from p03a), at eye level. Drawn by fossils: 7 taxa recorded in this patch of the atlas in the Albian, part 2 of 2."
+    link: t=104.928688Ma&lat=31.96447&lon=-41.32253&d=1.0000023544&h=178&v=84&hour=12&mo=8&clock=0
+  - name: p04a
+    what: "43.52 Ma, at 3.081, 81.62832, from 300 m up. Drawn by fossils: 7 taxa recorded in this patch of the atlas in the Lutetian."
+    link: t=43.524917Ma&lat=3.08100&lon=81.62832&d=1.0000941767&h=100&v=60&hour=16&mo=5&clock=0
+  - name: p04b
+    what: "43.52 Ma, at 3.08707, 81.62202 (0.97 km from p04a), from 300 m up. Drawn by fossils: 7 taxa recorded in this patch of the atlas in the Lutetian."
+    link: t=43.524917Ma&lat=3.08707&lon=81.62202&d=1.0000941767&h=91&v=60&hour=16&mo=5&clock=0
+  - name: p04c
+    what: "43.52 Ma, at 3.0839, 81.61853 (1.13 km from p04a), from 300 m up. Drawn by fossils: 7 taxa recorded in this patch of the atlas in the Lutetian."
+    link: t=43.524917Ma&lat=3.08390&lon=81.61853&d=1.0000941767&h=124&v=60&hour=16&mo=5&clock=0
+  - name: p05a
+    what: "17.12 Ma, at 31.48972, 114.22665, at eye level. Drawn by fossils: 23 taxa recorded in this patch of the atlas in the Burdigalian."
+    link: t=17.119325Ma&lat=31.48972&lon=114.22665&d=1.0000023544&h=110&v=84&hour=9&mo=11&clock=0
+  - name: p05b
+    what: "17.12 Ma, at 31.49743, 114.22897 (0.89 km from p05a), at eye level. Drawn by fossils: 23 taxa recorded in this patch of the atlas in the Burdigalian."
+    link: t=17.119325Ma&lat=31.49743&lon=114.22897&d=1.0000023544&h=94&v=84&hour=9&mo=11&clock=0
+  - name: p05c
+    what: "17.12 Ma, at 31.49562, 114.24982 (2.29 km from p05a), at eye level. Drawn by fossils: 23 taxa recorded in this patch of the atlas in the Burdigalian."
+    link: t=17.119325Ma&lat=31.49562&lon=114.24982&d=1.0000023544&h=99&v=84&hour=9&mo=11&clock=0
+  - name: p06a
+    what: "2.65 Ma, at -7.97386, -74.43028, at eye level. Drawn by fossils: 7 taxa recorded in this patch of the atlas in the Piacenzian."
+    link: t=2.647759Ma&lat=-7.97386&lon=-74.43028&d=1.0000023544&h=70&v=84&hour=16&mo=5&clock=0
+  - name: p06b
+    what: "2.65 Ma, at -7.96766, -74.40975 (2.36 km from p06a), at eye level. Drawn by fossils: 7 taxa recorded in this patch of the atlas in the Piacenzian."
+    link: t=2.647759Ma&lat=-7.96766&lon=-74.40975&d=1.0000023544&h=64&v=84&hour=16&mo=5&clock=0
+  - name: p06c
+    what: "2.65 Ma, at -7.96595, -74.43685 (1.14 km from p06a), at eye level. Drawn by fossils: 7 taxa recorded in this patch of the atlas in the Piacenzian."
+    link: t=2.647759Ma&lat=-7.96595&lon=-74.43685&d=1.0000023544&h=80&v=84&hour=16&mo=5&clock=0
+  - name: p07a
+    what: "10.9 ka, at -20.5828, -68.53883, at eye level. Drawn by people: HYDE has 1,422 in this 1° cell at its step -9000."
+    link: t=0.010942Ma&lat=-20.58280&lon=-68.53883&d=1.0000023544&h=280&v=84&hour=10&mo=4&clock=0
+  - name: p07b
+    what: "10.9 ka, at -20.57231, -68.52154 (2.15 km from p07a), at eye level. Drawn by people: HYDE has 1,422 in this 1° cell at its step -9000."
+    link: t=0.010942Ma&lat=-20.57231&lon=-68.52154&d=1.0000023544&h=279&v=84&hour=10&mo=4&clock=0
+  - name: p07c
+    what: "10.9 ka, at -20.60652, -68.54209 (2.66 km from p07a), at eye level. Drawn by people: HYDE has 1,422 in this 1° cell at its step -9000."
+    link: t=0.010942Ma&lat=-20.60652&lon=-68.54209&d=1.0000023544&h=297&v=84&hour=10&mo=4&clock=0
+  - name: p08a
+    what: "594 BCE, at 38.82069, 23.3123, at eye level. Drawn by people: HYDE has 214,807 in this 1° cell at its step -1000."
+    link: t=-592.489&lat=38.82069&lon=23.31230&d=1.0000023544&h=110&v=84&hour=12&mo=5&clock=0
+  - name: p08b
+    what: "594 BCE, at 38.80935, 23.29122 (2.22 km from p08a), at eye level. Drawn by people: HYDE has 214,807 in this 1° cell at its step -1000."
+    link: t=-592.489&lat=38.80935&lon=23.29122&d=1.0000023544&h=113&v=84&hour=12&mo=5&clock=0
+  - name: p08c
+    what: "594 BCE, at 38.82908, 23.31799 (1.06 km from p08a), at eye level. Drawn by people: HYDE has 214,807 in this 1° cell at its step -1000."
+    link: t=-592.489&lat=38.82908&lon=23.31799&d=1.0000023544&h=86&v=84&hour=12&mo=5&clock=0
+  - name: p09a
+    what: "147 CE, at 36.57518, 114.112, from 300 m up. Drawn by records: people/domestication/broomcorn-millet (Broomcorn millet domestication)."
+    link: t=147.974&lat=36.57518&lon=114.11200&d=1.0000941767&h=240&v=60&hour=15&mo=6&clock=0
+  - name: p09b
+    what: "147 CE, at 36.56252, 114.08436 (2.84 km from p09a), from 300 m up. Drawn by records: people/domestication/broomcorn-millet (Broomcorn millet domestication)."
+    link: t=147.974&lat=36.56252&lon=114.08436&d=1.0000941767&h=264&v=60&hour=15&mo=6&clock=0
+  - name: p09c
+    what: "147 CE, at 36.58336, 114.13447 (2.2 km from p09a), from 300 m up. Drawn by records: people/domestication/broomcorn-millet (Broomcorn millet domestication)."
+    link: t=147.974&lat=36.58336&lon=114.13447&d=1.0000941767&h=264&v=60&hour=15&mo=6&clock=0
+  - name: p10a
+    what: "1285 CE, at 12.8469, 79.68709, at eye level. Drawn by town: Kanchipuram (India), 50,000 people in 1150 by its list."
+    link: t=1285.685&lat=12.84690&lon=79.68709&d=1.0000023544&h=10&v=84&hour=11&mo=1&clock=0
+  - name: p10b
+    what: "1285 CE, at 12.84517, 79.67504 (1.32 km from p10a), at eye level. Drawn by town: Kanchipuram (India), 50,000 people in 1150 by its list."
+    link: t=1285.685&lat=12.84517&lon=79.67504&d=1.0000023544&h=13&v=84&hour=11&mo=1&clock=0
+  - name: p10c
+    what: "1285 CE, at 12.82941, 79.67627 (2.27 km from p10a), at eye level. Drawn by town: Kanchipuram (India), 50,000 people in 1150 by its list."
+    link: t=1285.685&lat=12.82941&lon=79.67627&d=1.0000023544&h=28&v=84&hour=11&mo=1&clock=0
+  - name: p11a
+    what: "1779 CE, at 51.90531, 167.64464, at eye level. Drawn by floor: anywhere on the globe, evenly by area."
+    link: t=1779.372&lat=51.90531&lon=167.64464&d=1.0000023544&h=340&v=84&hour=11&mo=3&clock=0
+  - name: p11b
+    what: "1779 CE, at 51.91251, 167.62819 (1.38 km from p11a), at eye level. Drawn by floor: anywhere on the globe, evenly by area."
+    link: t=1779.372&lat=51.91251&lon=167.62819&d=1.0000023544&h=330&v=84&hour=11&mo=3&clock=0
+  - name: p11c
+    what: "1779 CE, at 51.91954, 167.62636 (2.02 km from p11a), at eye level. Drawn by floor: anywhere on the globe, evenly by area."
+    link: t=1779.372&lat=51.91954&lon=167.62636&d=1.0000023544&h=335&v=84&hour=11&mo=3&clock=0
+  - name: p12a
+    what: "1890 CE, at 41.37781, 60.34167, from 300 m up. Drawn by town: Khiva (Uzbekistan), 20,000 people in 1800 by its list."
+    link: t=1890.427&lat=41.37781&lon=60.34167&d=1.0000941767&h=170&v=60&hour=10&mo=10&clock=0
+  - name: p12b
+    what: "1890 CE, at 41.36752, 60.32974 (1.52 km from p12a), from 300 m up. Drawn by town: Khiva (Uzbekistan), 20,000 people in 1800 by its list."
+    link: t=1890.427&lat=41.36752&lon=60.32974&d=1.0000941767&h=193&v=60&hour=10&mo=10&clock=0
+  - name: p12c
+    what: "1890 CE, at 41.3622, 60.36216 (2.44 km from p12a), from 300 m up. Drawn by town: Khiva (Uzbekistan), 20,000 people in 1800 by its list."
+    link: t=1890.427&lat=41.36220&lon=60.36216&d=1.0000941767&h=192&v=60&hour=10&mo=10&clock=0

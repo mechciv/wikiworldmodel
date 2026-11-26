@@ -1,0 +1,42 @@
+# Round 5's verdicts for p03, judged again on the new build: eye level in the central Appalachians (Valley and Ridge, West Virginia) in the late Albian, 104.9 Ma.
+author: machine:claude-code
+judged: "2026-11-23"
+build: 3b9f48adb1090be2
+changes: >-
+  The new build draws the same place with more detail and the same faults. The scene now takes the world's relief
+  (the eye stands at 887 to 921 m, nearer the globe's 943 m, where it stood at 750 to 800 m), so spot a looks up a
+  real slope; the ground is a scanned material, leaf litter under the trees at b and c and a dense low green cover at
+  a; the broadleaf trees have forked trunks and leaflet sprays, the conifers tall bare spars with thin tiers, and the
+  four small bipeds at a have clearer bodies. The plant list, the mix of trees and the animals are unchanged, and no
+  verdict moved.
+summary: >-
+  The viewer still gets the setting right: dry land on an upland (943 m on the globe, now 887 to 921 m in the scene,
+  on a visible slope at a), no sea, no river, a humid climate, and ground over the column's Pennsylvanian sandstone.
+  What it draws on that ground is still less right: at b and c a woodland of conifers and round-crowned broadleaf
+  trees mixed stem by stem over leaf litter, at a an open slope of low green shoots with trees only on the skyline;
+  the flowering plants are tall generic trees, not shrubs in patches, and the only animals in sight are four small
+  ornithischian stand-ins. The plant list is still lowland leaves from 190 to 280 km away across the drainage divide.
+items:
+  water-streams-flow-west: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "model:earth/drainage", why: "No stream is in view at any spot; the drainage model still routes no river here." }
+  geography-divide-to-the-east: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "field:earth/elevation", why: "Out of sight by the brief's own account, 50 to 90 km east." }
+  relief-eroding-upland: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "field:earth/elevation", why: "Land 943 m up on the globe and now 887 to 921 m in the scene; a looks up a rounded slope and b and c over gently rising ground, which agrees with an upland whose height then is not known." }
+  substrate-paleozoic-bedrock: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "model:earth/substrate", why: "No outcrop shows, nor need one; the panel still says Ground over sandstone, the column's Kanawha Formation (Pennsylvanian), a Paleozoic sedimentary rock as the source says." }
+  substrate-weathered-regolith: { verdict: no-layer, spots: { a: no-layer, b: no-layer, c: no-layer }, owner: "substrate (no layer)", why: "Leaf litter at b and c and brown earth under low shoots at a, with no stones or chert rubble; the substrate names the rock under the ground and still says nothing of the loose mantle over it." }
+  water-no-sea: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "field:earth/elevation", why: "Land to the horizon; the scene says no sea." }
+  cover-conifers-and-ferns: { verdict: wrong, spots: { a: drawn, b: wrong, c: wrong }, owner: "gen:life/scene", why: "At a, an open slope of low plants with a line of conifers and round crowns on the skyline (the low cover now reads more as narrow-leaved shoots than fronds); at b and c, conifers and broadleaf trees about equally common over leaf litter with almost nothing low, not conifers over ferns with flowering plants uncommon." }
+  cover-flowering-plants-local: { verdict: wrong, spots: { a: wrong, b: wrong, c: wrong }, owner: "gen:life/scene", why: "The broadleaf trees still stand mixed stem by stem with the conifers everywhere they grow, at b and c and on a's skyline, not in patches where they dominate." }
+  cover-plane-tree-kin-by-streams: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "gen:life/scene", why: "No stream in view to line; the broadleaf trees stand everywhere, not by water." }
+  cover-sapindopsis: { verdict: wrong, spots: { a: wrong, b: wrong, c: wrong }, owner: "forms: flowering plants", why: "Sapindopsis is on the list as recorded here and drawn, as every flowering plant is, with the one generic tree body; that body now has leaflet sprays that look pinnate, but it is a tree 10 m or more tall with a forked trunk, not a shrub." }
+  cover-atlas-leaf-taxa: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "gen:life/scene", why: "All six are still on the list and drawn with their groups' bodies: low plants for the ferns, tiered conifers for Podozamites and Nageiopsis (not broad-leaved), broadleaf trees for the angiosperm leaves." }
+  life-large-dinosaurs: { verdict: missing-held, spots: { a: missing-held, b: missing-held, c: missing-held }, owner: "gen:life/scene", why: "Nodosauridae is still placed as a stand-in and its label shows at a (on the skyline) and b, but no animal can be made out at it; no sauropod is on the list." }
+  life-small-animals: { verdict: missing-not-held, spots: { a: missing-not-held, b: missing-not-held, c: missing-not-held }, owner: "model:life/atlas", why: "No mammal and no small theropod is on the list; at a four small long-tailed bipeds run on the slope, the Ornithischia stand-in, its label also at b and c with nothing seen at it, and the pterosaurs are placed but in no frame." }
+  weather-humid: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "field:earth/climate", why: "The climate field answers humid (aridity index 1.75), warm (37 and 12 degrees), and the frames are green under a broken sky." }
+  weather-warm-seasonal-floods: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "weather and season (no layer)", why: "No stream to flood, and nothing read says August was the wet season." }
+  cover-fire-scars: { verdict: no-layer, spots: { a: no-layer, b: no-layer, c: no-layer }, owner: "disturbance: fire (no layer)", why: "No charred or burnt ground; nothing in the world holds fire." }
+findings:
+  - "Unchanged: the atlas's seven taxa recorded here are leaves of one 1889 collection near Richmond, in the lowland 190 to 280 km east and across the drainage divide of the time, so the upland is still given the coastal plain's flora (model:life/atlas). The taxa list in drawn-retake.json is the same seventeen, in the same order."
+  - "Unchanged: the life layer's tier still reads unknown, saying the atlases reach only the Phanerozoic, at 104.9 Ma, while the scene has its list and the panel says 7 recorded here, 3 nearby, 7 stand-ins (core/resolve.ts). The same holds at p04."
+  - "Unchanged: PBDB collection 107496 (Albian, marine indet., claystone) still sits 80 km from the spot by its coordinates while its own fields name the Puddledock pit, Prince George County, Virginia, some 220 km east."
+  - "New look at b: several of the tall conifers are bare spars with a few thin, drooping tiers of branches, so that they read as dead or dying trees among the leafy broadleaves. If the conifer body is meant to be in full leaf, the skeleton is too sparse at this distance. Owner: forms: conifers."
+  - "New look at a: the low cover on the open slope is dense narrow-leaved shoots, much like grass or cereal seedlings; the biome gives grasses 0 and grasses are not on the list, so these are the ferns' (or another low group's) body, but at eye level they could be taken for grass, which did not grow here then. Owner: forms: ferns and their allies."
+  - "Labels without bodies: Nodosauridae, Ornithischia and beetles are labelled at spots where nothing can be made out at the label, as in the first take."

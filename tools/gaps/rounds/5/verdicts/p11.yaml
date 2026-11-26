@@ -1,0 +1,37 @@
+# Round 5's verdicts for p11: the open North Pacific south of the Commander Islands, eye level facing north-north-west, 11:00 in March 1779.
+author: machine:claude-code
+judged: "2026-11-22"
+summary: >-
+  The brief stands a little above the waves; the viewer, asked for eye level at sea, puts the camera on the floor
+  3.2 km down and draws a sunlit, rippled sand bed as if in shallow water. So the depth is right and no land, ice or ship
+  is drawn, as the sources say, but the sky, the sea's surface and the March weather that make up most of the brief
+  cannot be tested. The sea atlas places sea otters and sea lions 290 km from the nearest shore.
+items:
+  geography-no-land: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "field:earth/elevation", why: "Sea at every spot, with no land in any frame or in the scene's account." }
+  water-deep-ocean: { verdict: wrong, spots: { a: wrong, b: wrong, c: wrong }, owner: "renderer", why: "The viewer has the depth right (3,316 m at a, 3,458 m at b and c, against ETOPO1's 3,104 m), but draws the floor there pale, sandy and lit by daylight, the colour of a shoal." }
+  ice-none: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "field:earth/ice", why: "No ice in the frames, and the viewer's account draws none." }
+  weather-storm-track: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "gen:earth/clouds", why: "The camera is on the sea floor, and no sky is in the frame." }
+  water-swell-and-sea: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "renderer", why: "The sea's surface is not in the frame: the camera is 3.2 km below it." }
+  weather-snow-showers: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "weather and season (no layer)", why: "No sky or air above the sea is in the frame." }
+  weather-not-fog-season: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "weather and season (no layer)", why: "No air above the sea is in the frame." }
+  weather-cold-spring-1779: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "weather of a year (no layer)", why: "Nothing above the water is in the frame; the climate field's coldest month here is -6.7 °C." }
+  life-wildfowl-flocks: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "gen:life/scene", why: "No air is in the frame; the list's one bird is Phoebastria." }
+  life-short-tailed-albatross: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "gen:life/scene", why: "Phoebastria is listed, from one row 2,050 km off, and placed; the camera is under the sea, where no albatross would be in sight." }
+  life-fur-seal-males: { verdict: missing-not-held, spots: { a: missing-not-held, b: missing-not-held, c: missing-not-held }, owner: "model:life/sea-atlas", why: "Callorhinus is not on the list; a California sea lion, Zalophus, from rows 2,050 km off, stands for the eared seals." }
+  life-whales-sparse: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "model:life/sea-atlas", why: "No whale in the frames; the list's two beaked whales, Mesoplodon and Berardius, are not placed." }
+  life-otters-at-the-islands: { verdict: wrong, spots: { a: wrong, b: wrong, c: wrong }, owner: "model:life/sea-atlas", why: "Enhydra and Zalophus are on the list and placed over 3 km of water 290 km from land (the scene has 10 animals at b and 20 at c, none in sight)." }
+  people-no-fur-ships: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "model:people/lifeways", why: "No ship or boat; the people layer answers unknown at sea." }
+  people-no-whalers: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "model:people/lifeways", why: "No ship of any kind." }
+findings:
+  - >-
+    An eye-level view at sea is a view of the sea floor. The link asks for 15 m above the sea, and at all three spots the
+    viewer sets the eye 1.7 m above the bed at 3,200 m (drawn.json, scene.eye), so no frame shows the surface, the sky
+    or anything that lives in the air. Seven of the brief's fifteen items could not be tested for that reason alone;
+    a round that samples the sea needs a camera on the surface, or the viewer one to offer.
+  - >-
+    The floor 3.2 km down is drawn as a shallow bed: pale sand with ripples, lit from above, under blue water that
+    brightens toward the bottom. No daylight reaches that depth; the floor should be dark. The scene also leaves
+    its month unset at sea (scene.month null).
+  - >-
+    The sea atlas's list for this patch is of the region only, 1,170 to 2,050 km off: sea otters, a California sea
+    lion, an albatross and two beaked whales. It places the otters and sea lions in mid-ocean, where they do not go.

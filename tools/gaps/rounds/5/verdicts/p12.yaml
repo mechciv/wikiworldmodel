@@ -1,0 +1,42 @@
+# Round 5's verdicts for p12: 300 m above the western garden quarter of Khiva, facing south, 10:00 in October 1890.
+author: machine:claude-code
+judged: "2026-11-22"
+summary: >-
+  No town is drawn. Seen from 300 m over the garden quarter of a walled town in an irrigated oasis, the viewer draws bare
+  tan desert at every spot, dappled by cloud shadows, with a line of conifers and bushes along a dry channel and a few
+  far clusters of dark specks, farming hamlets and herders' camps. Khiva's only figure on the cities' list is for 1800,
+  held to 1850, so gen:people/settlement draws no town in 1890; and the oasis itself, its fields, gardens, canals and
+  trees, is not held, so the climate's desert stands in. The flat ground and its silt are right; the polity is the
+  Russian Empire where the Khan still ruled.
+items:
+  geography-western-garden-quarter: { verdict: wrong, spots: { a: wrong, b: wrong, c: wrong }, owner: "gen:people/settlement", why: "Bare tan ground under the camera at every spot, with no wall, garden, elm or canal; the town is not drawn (no city in the scene's account) and its ground is the desert biome." }
+  people-outer-wall-and-ditch: { verdict: missing-not-held, spots: { a: missing-not-held, b: missing-not-held, c: missing-not-held }, owner: "records: the towns of Central Asia", why: "No wall or ditch in any frame; Khiva is no record, and its list row gives only people, so even a drawn town would have the generic one's no wall." }
+  water-ingrik-canal: { verdict: missing-not-held, spots: { a: missing-not-held, b: missing-not-held, c: missing-not-held }, owner: "building traditions: fields and crops", why: "No canal anywhere; nothing in the world holds the oasis's canals." }
+  water-palvan-ata-aryk: { verdict: missing-not-held, spots: { a: missing-not-held, b: missing-not-held, c: missing-not-held }, owner: "building traditions: fields and crops", why: "No canal; the only watercourse drawn is a shallow dry channel lined with trees, one of the drainage model's four channels here, all dry." }
+  people-flat-roofs-courts-trees: { verdict: missing-held, spots: { a: missing-held, b: missing-held, c: missing-held }, owner: "gen:people/settlement", why: "No roofs, courts or minarets: Khiva is on the cities' list and the generator draws no town from it in 1890." }
+  people-courtyard-houses: { verdict: missing-held, spots: { a: missing-held, b: missing-held, c: missing-held }, owner: "gen:people/settlement", why: "No town's houses or streets; the only houses are a hamlet or two of dark specks 1.5 to 3 km off, whose form cannot be read (the generic farmhouse of the desert is a flat-roofed mud-brick court, with no wind porch)." }
+  people-skyline-cupolas-minarets: { verdict: missing-not-held, spots: { a: missing-not-held, b: missing-not-held, c: missing-not-held }, owner: "records: Khiva's monuments", why: "No cupola or minaret at the left of any frame, which may be just out of view; none of Khiva's buildings is a record." }
+  people-ichan-kala-walls: { verdict: missing-not-held, spots: { a: missing-not-held, b: missing-not-held, c: missing-not-held }, owner: "records: Khiva's monuments", why: "No inner town in view or in the scene's account; the Ichan Kala is no record." }
+  people-fields-and-havlis-beyond: { verdict: wrong, spots: { a: wrong, b: wrong, c: wrong }, owner: "model:people/lifeways", why: "The people layer answers herders at a and c and hamlets at b, 1.3 km from the inner town; the frames show a few clusters of specks on bare desert, with no field, meadow, walled farmstead or poplar." }
+  people-arbas-on-the-roads: { verdict: no-layer, spots: { a: no-layer, b: no-layer, c: no-layer }, owner: "carts and vehicles (no layer)", why: "No road traffic; the scene's works are persons and boats, and nothing draws a cart." }
+  geography-sand-tongue-to-the-west: { verdict: wrong, spots: { a: wrong, b: wrong, c: wrong }, owner: "model:earth/biome-from-climate", why: "Everything in view is the same bare tan ground, so no tongue of sand stands out against fields: the oasis is drawn as the desert around it." }
+  relief-flat-plain: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "field:earth/elevation", why: "Flat ground with only soft undulations and the shallow channel, no hill; 95 m in the build." }
+  substrate-amu-silt: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "model:earth/substrate", why: "A smooth, fine, pale tan ground with no stones; the account has silt and clay (silt 44%, mud 28%) over sedimentary rock." }
+  cover-elms-poplars-fields: { verdict: wrong, spots: { a: wrong, b: wrong, c: wrong }, owner: "model:earth/biome-from-climate", why: "No fields; the only trees are a thin line of spire-shaped conifers and round bushes along the dry channel, not elms and poplars among farms; the biome answers desert (aridity index 0.22), with nothing for the irrigation." }
+  cover-walled-orchards-mulberries: { verdict: missing-not-held, spots: { a: missing-not-held, b: missing-not-held, c: missing-not-held }, owner: "building traditions: fields and crops", why: "No orchard, wall or avenue; nothing holds what was grown here." }
+  cover-late-crops-in-october: { verdict: missing-not-held, spots: { a: missing-not-held, b: missing-not-held, c: missing-not-held }, owner: "building traditions: fields and crops", why: "No crop of any kind in view." }
+  weather-crisp-autumn: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "field:earth/climate-late-quaternary", why: "Temperatures and rime, which a frame from 300 m cannot show; the bushes cast sharp shadows in a morning sun." }
+  sky-clear: { verdict: wrong, spots: { a: wrong, b: wrong, c: wrong }, owner: "gen:earth/clouds", why: "The sky is out of the frame, but at all three spots the ground is dappled with the broad soft shadows of clouds overhead, where the source has a cloudless sky most of the year." }
+  life-nightingales-no-storks: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "model:life/atlas", why: "No stork, and no tower to nest on; no stork is on the list." }
+  polity-russian-protectorate: { verdict: wrong, spots: { a: wrong, b: wrong, c: wrong }, owner: "src:cliopatria-0.2.1", why: "The polity layer answers the Russian Empire here, where the left bank of the Amu stayed the Khan's, subject to Russia and not annexed." }
+findings:
+  - >-
+    Why no town. Chandler's list (people/cities.json) has one figure for Khiva, 20,000 in 1800. gen:people/settlement
+    holds a city's figure 50 years either side of its year (record_hold) and no further, so Khiva is drawn from 1750 to
+    1850 only; in 1890 the scene's account has no city and 860 houses in hamlets and herders' camps. The sampler drew
+    the point by that 1800 figure (its stretch runs 1824-1950), as at p10.
+  - >-
+    The atlas's list is of fossils 950 to 2,130 km away: petrels and shearwaters, which are placed at c, a diamondback
+    terrapin (Malaclemys), a river dolphin, Indian trees; and the proboscideans' stand-in is placed at every spot, so
+    the scene of Khiva in 1890 has elephants.
+  - At b the trees by the dry channel cast shadows striped like a comb, a fault of the shadow maps.

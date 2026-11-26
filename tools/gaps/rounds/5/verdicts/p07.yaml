@@ -1,0 +1,43 @@
+# Round 5's verdicts for p07: a slope at about 4,390 m above the Coposa basin on the Chilean Altiplano, eye level facing west, 10:00 in April of 10.9 ka.
+author: machine:claude-code
+judged: "2026-11-22"
+summary: >-
+  A clear, deep-blue morning over dry ground with tussock grass, which is close to the Altiplano's look, and the
+  people layer rightly has foragers here. Everything else of the view is lost to one fault: the scene keeps its heights
+  as decimetres in 16 bits and clips them at 3,200 m, so ground the build has at 4,227 m is drawn as a level plain at
+  3,200 m at all three spots. No slope, basin, salar, volcano or snow can appear, and the drainage model's closed lake
+  in the basin (3,691.5 m) lies above the clip. The atlas fills the slope with lowland animals from 630 km off.
+items:
+  relief-slope-to-basin: { verdict: wrong, spots: { a: wrong, b: wrong, c: wrong }, owner: "gen:life/scene", why: "Dead level ground to a straight horizon at every spot, where the brief has 650 m of fall to a basin; the scene's ground grids are all at their 32,000 dm ceiling, so the build's 4,227 m is drawn at 3,200 m and every relief above it is cut off." }
+  relief-cerro-napa: { verdict: missing-held, spots: { a: missing-held, b: missing-held, c: missing-held }, owner: "gen:life/scene", why: "No cone on any skyline; today's relief holds the volcano, and the scene's clip at 3,200 m flattens it with everything else." }
+  geography-basins-and-volcanoes: { verdict: missing-held, spots: { a: missing-held, b: missing-held, c: missing-held }, owner: "gen:life/scene", why: "Neither basin nor volcano in any frame: one flat plain, for the same clip of heights above 3,200 m." }
+  geography-salar-de-coposa: { verdict: missing-held, spots: { a: missing-held, b: missing-held, c: missing-held }, owner: "gen:life/scene", why: "No low flat or water at the left of any frame; the scene's account holds a closed lake (lake:3979119, level 3,691.5 m, not spilling), which cannot show on ground drawn level at 3,200 m." }
+  water-salt-flat-and-saline-lakes: { verdict: missing-held, spots: { a: missing-held, b: missing-held, c: missing-held }, owner: "gen:life/scene", why: "No white flat or lake in view; the drainage model rightly has the basin closed, with a lake that does not spill, and the scene cannot draw it under its clip; nothing would make it a salt crust rather than open water." }
+  water-higher-groundwater: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "model:earth/drainage", why: "Of the basin floor and of slopes 200 to 300 km south; no basin floor is in any frame." }
+  cover-tola-and-bunchgrass: { verdict: wrong, spots: { a: wrong, b: wrong, c: wrong }, owner: "gen:life/scene", why: "Knee-high tussocks stand apart on bare cracked ground, as the brief has, but bright green in April, and with no tola shrub: the list's stand-in for the daisies, Parastrephia's family, is not placed." }
+  "cover-queñoa-groves": { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "model:life/atlas", why: "No tree in any frame, which may be right: the brief does not know whether queñoa grew on these hills, and the slopes it would stand on are not drawn." }
+  cover-bofedal-at-springs: { verdict: missing-not-held, spots: { a: missing-not-held, b: missing-not-held, c: missing-not-held }, owner: "model:life/atlas", why: "No green bog or meadow anywhere; the list has no living plant of the wetlands and the biome is desert, so even a drawn basin floor would have none." }
+  life-camelids: { verdict: missing-held, spots: { a: missing-held, b: drawn, c: missing-held }, owner: "gen:life/scene", why: "Lama is on the list (600 km off) and placed at a and b; at b one four-legged animal with a raised neck stands on the skyline, a few pixels high and likely it; none is in sight at a, and at c it is not placed; no vicuña is listed." }
+  life-chinchilla-rats: { verdict: missing-not-held, spots: { a: missing-not-held, b: missing-not-held, c: missing-not-held }, owner: "model:life/atlas", why: "Abrocoma is not on the list, though its dated middens are the region's best record; no rock or outcrop is drawn for it either." }
+  life-flamingos: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "model:life/atlas", why: "Only possible, and on water no frame shows; no flamingo is on the list." }
+  weather-after-summer-rains: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "gen:earth/clouds", why: "A dry, cloudless morning with no cloud shadow on the ground; the grass is green, not turning straw, which is the brief's gloss." }
+  weather-cape-ii-pluvial: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "field:earth/climate-late-quaternary", why: "A rainfall of the centuries, which no frame shows; the climate field answers desert here (aridity index 0.37)." }
+  sky-intense-sun: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "renderer", why: "A deep blue zenith and hard light from behind the camera; the horizon is a thick pale haze, more than thin air at 4,400 m would hold, as if the eye were at the clipped 3,200 m." }
+  ice-snow-on-peaks: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "gen:life/scene", why: "Only 'perhaps', and no peak is drawn to carry it; the scene's account has a snow line at 4,251 m, which no ground under the 3,200 m clip can reach." }
+  people-hunters-around-wetlands: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "model:people/lifeways", why: "The people layer answers foragers on evidence, 18 shelters at a and b and 35 at c, none in any frame, as the brief expects of this slope; the camps are scattered over the hills, several 5 to 8 km east on the volcanoes' flanks, not kept to the water." }
+  people-links-to-the-lowland: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "model:people/lifeways", why: "Of camps 100 km away and out of sight." }
+findings:
+  - >-
+    The scene clips its heights at 3,200 m. It stores them as decimetres in 16-bit integers and caps them at 32,000
+    (encode in world/generators/life/scene/v9.ts); here the fine and middle ground grids are 32,000 in every cell, and
+    the eye stands at 3,201.7 m over a floor of 3,200 m where the build's ground is 4,227 m. Every scene above 3,200 m,
+    the Altiplano, Tibet, the high Andes and the Ethiopian highlands, is drawn as a level plain at 3,200 m, and its lakes,
+    snow and far relief cannot show. It is the root of six of this point's gaps.
+  - >-
+    The ground is the same 4,227 m at all three spots, 2 to 2.7 km apart and on two different scene sites: one cell of
+    the tenth-of-a-degree relief, about 165 m below the camera's 4,392 m by SRTM.
+  - >-
+    The atlas carries the lowlands up the mountain: capybara (Hydrochoerus), a potoo, a cuckoo, guinea pigs, armadillos
+    and a bat, from rows 630 km off, are placed on a desert slope at 4,400 m; a porpoise and three river dolphins
+    (1,870 to 2,070 km), the matamata turtle and the gomphothere Notiomastodon are listed and not placed.
+  - The foragers' works include 'A boat', on a slope 13 km from the basin's lake.

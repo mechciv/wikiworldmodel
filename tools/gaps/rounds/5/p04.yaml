@@ -1,0 +1,300 @@
+view: t=43.524917Ma&lat=3.08100&lon=81.62832&d=1.0000941767&h=100&v=60&hour=16&mo=5&clock=0
+when: 43.52 Ma
+place: >-
+  The Bengal Basin of central Bangladesh, today about 24.39°N, 89.82°E, on the floodplain of the Jamuna between
+  Sirajganj and Tangail, some 95 km north-west of Dhaka; Middle Eocene (Lutetian). The coordinates in the link (3.08°N,
+  81.63°E) are the place as the build's plate model puts it then, on the north-eastern corner of India as it drifted
+  north near the equator, long before Asia was reached here. Then it was not land but sea: the outer edge of the
+  shelf on which the Sylhet (Nummulitic) Limestone was being laid down, where the shelf bent down into the deeper
+  basin to the south-east. The camera hangs 600 m above the water, tilted 60° from straight down, and looks east-
+  south-east, out across that edge toward the deeper water. At 16:00 in May at the equator the sun stands in the
+  west-north-west, roughly a third of the way up the sky, behind the camera (my reckoning, not a source's). There
+  were no people anywhere then.
+author: machine:claude-code
+expects:
+  - id: geography-shelf-edge
+    layer: geography
+    what: >-
+      The camera stands over the hinge of the basin: the edge of the Eocene shelf, where the sea floor turned from
+      the gently sloping platform of the north-west down a continental slope into the deep basin of the south-east.
+    reach: place
+    source:
+      cite: "Banglapedia: National Encyclopedia of Bangladesh, s.v. 'Tectonic Framework' (entries by S.Q. Chowdhury, M. Alam, D.K. Guha and A.S.M. Woobaidullah). Asiatic Society of Bangladesh."
+      url: https://en.banglapedia.org/index.php/Tectonic_Framework
+      text: banglapedia-tectonic.txt
+      loc: "Paragraph 'Calcutta-Mymensingh Gravity High'"
+      quote: "Calcutta-Mymensingh Gravity High reflects a tectonic element known as Hinge Zone and more recently as palaeo continental slope in the framework of Bangladesh."
+    note: >-
+      The same paragraph traces the hinge as a zone about 25 km wide running N 30° E along the Calcutta-Pabna-Mymensingh
+      gravity high. A straight line from Pabna to Mymensingh passes within a few kilometres of today's 24.39°N,
+      89.82°E (my reckoning from the towns' positions), so the point lies in the zone; how sharp the slope was at
+      43.5 Ma, and its depth, are not in the text. An encyclopedia, cited because its entries are written by the
+      Bangladeshi geologists who mapped the basin and the primary seismic reports (Salt et al. 1986) could not be read.
+      The same entry puts the top of the Sylhet Limestone at 6500 m depth south of the Padma-Jamuna confluence, some
+      65 km south of the point: the deep side of the hinge.
+  - id: water-sea-everywhere
+    layer: water
+    what: >-
+      Open sea in every direction, to the horizon. The whole Bengal shelf was under water; no coast, island or river
+      mouth is in sight.
+    reach: region
+    source:
+      cite: "Brouwers, E.M., Khan, M.R. & Akhtar, A. (1992). Microfossil assemblages from the Eocene Sylhet Limestone and Kopili Formation, Sylhet District, northeast Bangladesh. U.S. Geological Survey Open-File Report 92-191."
+      url: https://pubs.usgs.gov/of/1992/0191/report.pdf
+      text: usgs-1992-sylhet-microfossils.txt
+      loc: "p. 15, Zoogeographic Affinities"
+      quote: "were a consequence of an extensive marine transgression that ranged over most of the Bengal-Assam shelves"
+    note: >-
+      Said of the Sylhet Limestone and Kopili Formation together, over the whole Bengal-Assam shelf. That no land is in
+      sight is my inference: the nearest ground the texts read put above the sea is the Rangpur Saddle and the Indian
+      shield to the north-west, well over 100 km away and behind the camera; the horizon from 600 m is about 90 km off.
+  - id: water-deeper-ahead
+    layer: water
+    what: >-
+      The water the camera looks out over, to the east-south-east, is the deeper basin beyond the shelf edge: a
+      darker, bluer sea than the shallow shelf behind and to the left.
+    reach: region
+    source:
+      cite: "Johnson, S.Y. & Nur Alam, A.M. (1990). Sedimentation and tectonics of the Sylhet trough, northeastern Bangladesh. U.S. Geological Survey Open-File Report 90-313."
+      url: https://pubs.usgs.gov/of/1990/0313/report.pdf
+      text: usgs-1990-0313.txt
+      loc: "PDF page 2, Abstract"
+      quote: "The Sylhet trough likely occupied a transitional setting on this margin between shelf deposits to the northwest and basinal deposits to the southeast"
+    note: >-
+      Said of the Sylhet trough, some 150 to 250 km east of the point, on the same passive margin. The colour of the water
+      over shelf and basin is my gloss of shallow carbonate shelf against deep basin; no source gives a depth for
+      either at this spot.
+  - id: water-clear
+    layer: water
+    what: >-
+      Clear water with no muddy river plumes: the sea over the limestone shelf received little sediment from land.
+    reach: region
+    source:
+      cite: "Islam, M.N., Bhuiyan, M.A.H., Solaiman, M., Fahim, M.S.I. & Ahmed, Z. (2023). Evaluation of reservoir properties of Sylhet Limestone of Jaintia Group, north-eastern Sylhet, Bangladesh. The Dhaka University Journal of Earth and Environmental Sciences 12(2). doi:10.3329/dujees.v12i2.73167"
+      url: https://journals.du.ac.bd/index.php/dujees/article/download/123/98/215
+      text: du-sylhet-reservoir.txt
+      loc: "Abstract, p. 119"
+      quote: "this limestone formation was deposited in a shallow marine environment with minimal sediment input under a warm and humid climate"
+    note: >-
+      From the outcrops at Jaflong on the Dauki River, about 230 km north-east of the point and on the inner shelf.
+      The great rivers that now make the Bengal delta did not reach here until the Oligocene (Johnson & Nur Alam 1990,
+      PDF page 5, on the basin's deltaic sedimentation since the Oligocene).
+  - id: water-warm
+    layer: water
+    what: >-
+      Very warm surface water, around 30 to 35 °C, warmer than the Bay of Bengal today.
+    reach: region
+    source:
+      cite: "Evans, D., Sagoo, N., Renema, W., et al. (2018). Eocene greenhouse climate revealed by coupled clumped isotope-Mg/Ca thermometry. PNAS 115(6), 1174–1179. doi:10.1073/pnas.1714744115"
+      url: https://pmc.ncbi.nlm.nih.gov/articles/PMC5819407/
+      text: evans-2018-eocene-sst.txt
+      loc: "Abstract (Significance and Abstract)"
+      quote: "The combined dataset constrains the range in Eocene tropical SST to 30–36 °C (from sites in all basins)."
+    note: >-
+      A tropical compilation; the nearest of its sites is Kutch on India's west coast, then within 5° of the equator,
+      in the early Eocene. Measured on nummulitid larger foraminifera, the same animals that make the Sylhet
+      Limestone. Not seen by a camera, but it sets the haze and the colour of a tropical sea.
+  - id: substrate-skeletal-carbonate-floor
+    layer: substrate
+    what: >-
+      Where the water is shallow enough to see the floor, it is pale grey to buff carbonate sand and mud made of
+      shells, not quartz sand or mud from rivers.
+    reach: region
+    source:
+      cite: "Brouwers, E.M., Khan, M.R. & Akhtar, A. (1992). Microfossil assemblages from the Eocene Sylhet Limestone and Kopili Formation, Sylhet District, northeast Bangladesh. U.S. Geological Survey Open-File Report 92-191."
+      url: https://pubs.usgs.gov/of/1992/0191/report.pdf
+      text: usgs-1992-sylhet-microfossils.txt
+      loc: "p. 10, Lithologic Descriptions"
+      quote: "The Sylhet Limestone consists of light gray to gray brown, locally massive, highly fossiliferous detrital limestone"
+    note: >-
+      The colour is of the rock today, in outcrop near Sylhet some 230 km north-east; the floor as sediment would have
+      been loose skeletal sand. Over the slope and the basin ahead the floor is too deep to be seen at all.
+  - id: substrate-shelf-subtidal
+    layer: substrate
+    what: >-
+      Along this same shelf edge the Lutetian floor was an open, shallow subtidal limestone bottom: below low tide,
+      with no tidal flats exposed.
+    reach: region
+    source:
+      cite: "The Paleobiology Database, collection 215253 'Well 4, Bengal Basin' (Sylhet Limestone, Lutetian), entered from Chaurpagar, S.N., Humane, S.K., Kundal, P. & Humane, S.S. (2012), ONGC Bulletin 47(2), 50–69. Data API, read 2026-11-22."
+      url: https://paleobiodb.org/data1.2/colls/list.txt?coll_id=215253,148414&show=full,ref&vocab=pbdb
+      text: pbdb-sylhet-colls.txt
+      loc: "Collection 215253, column environment"
+      quote: "open shallow subtidal"
+    note: >-
+      A well in Nadia District, West Bengal (23.10°N, 88.55°E today), about 190 km south-west of the point and, like
+      it, near the Calcutta-Mymensingh hinge. This is one of the six collections the build's rocks command finds
+      within 200 km; none lies within 30 km. The database's own GPlates model puts this well at 2.02°S then, where the
+      build puts the point at 3.08°N: on the equator either way.
+  - id: life-calcareous-algae
+    layer: life
+    what: >-
+      On the floor of the shelf, crusts and nodules of coralline red algae and green calcareous algae (Halimeda and
+      dasyclads). From 600 m they would show, if at all, only as darker patches on the pale floor.
+    reach: region
+    source:
+      cite: "The Paleobiology Database, collection 215253 'Well 4, Bengal Basin' (Sylhet Limestone, Lutetian), entered from Chaurpagar, S.N., Humane, S.K., Kundal, P. & Humane, S.S. (2012), ONGC Bulletin 47(2), 50–69. Data API, read 2026-11-22."
+      url: https://paleobiodb.org/data1.2/colls/list.txt?coll_id=215253,148414&show=full,ref&vocab=pbdb
+      text: pbdb-sylhet-colls.txt
+      loc: "Collection 215253, column primary_reference"
+      quote: "Paleoenvironmental implications of the non-geniculate Coralline algae from the Middle Eocene Sylhet Limestone, Bengal Basin"
+    note: >-
+      The collection's occurrences (pbdb-sylhet-occs.txt, read from the same API) are Mesophyllum, Lithothamnion,
+      Lithophyllum, Lithoporella, Sporolithon, Halimeda, Ovulites, Cymopolia, Clypeina, Dissocladella, Jodotella,
+      Terquemella and Neomeris, all Lutetian. Only the database's entry could be read, not the paper. Whether they
+      grew as patches, a meadow of Halimeda or scattered nodules is not said; the patches are my gloss. These genera
+      are the build's own sea-atlas list for the patch.
+  - id: life-larger-foraminifera
+    layer: life
+    what: >-
+      The floor's sand is mostly the coin-shaped shells of larger foraminifera, Nummulites and their kin, living in
+      their millions on the shelf. Too small to see from the air; they are the pale floor.
+    reach: region
+    source:
+      cite: "Brouwers, E.M., Khan, M.R. & Akhtar, A. (1992). Microfossil assemblages from the Eocene Sylhet Limestone and Kopili Formation, Sylhet District, northeast Bangladesh. U.S. Geological Survey Open-File Report 92-191."
+      url: https://pubs.usgs.gov/of/1992/0191/report.pdf
+      text: usgs-1992-sylhet-microfossils.txt
+      loc: "Abstract, p. 1"
+      quote: "The Sylhet Limestone, known regionally as the \"Nummulitic Limestone\", includes an abundant and diverse larger foraminifer assemblage"
+    note: >-
+      The abstract names Nummulites, Assilina, Discocyclina and Alveolina. From outcrops near Sylhet, about 230 km
+      north-east. That they make up most of the sand is my gloss of "Nummulitic Limestone"; Islam et al. (2023) call the
+      rock rudstone and packstone.
+  - id: water-shoals-inner-shelf
+    layer: water
+    what: >-
+      Back on the inner shelf, out of this frame, sand shoals and tidal channels; here at the shelf edge the floor
+      lies deeper.
+    reach: region
+    source:
+      cite: "Anonymous on the page read. Eocene larger foraminiferal biostratigraphy, depositional history and paleogeography of the Sylhet Limestone of the Mikir Hills of Assam, NE India: Implications for an Open Tethys. Micropaleontology (Micropress), MicroAccess article 2245, abstract."
+      url: https://www.micropress.org/micropen2/articles/2/2/73747_articles_article_file_2245.pdf
+      text: mikir-hills-lbf.txt
+      loc: "Abstract"
+      quote: "The overlying barren interval lies in the arenaceous interval and was likely deposited in a subtidal channel sand shoaling bars."
+    note: >-
+      From the Mikir Hills of Assam, about 400 km north-east, on the inner shelf. The barren interval lies between an
+      early Lutetian zone (SBZ 13) and a late Lutetian to Bartonian one (SBZ 16-18), so it may span 43.5 Ma. Only the
+      abstract could be read (the article is for subscribers), and it names no authors on the page fetched. Whether
+      shoals stood near the hinge is not known.
+  - id: geography-open-seaways
+    layer: geography
+    what: >-
+      This sea was open to the wider ocean: to the Tethys in the west and to the Indian Ocean and the Indo-Pacific,
+      with no barrier of land to the east-south-east.
+    reach: region
+    source:
+      cite: "Brouwers, E.M., Khan, M.R. & Akhtar, A. (1992). Microfossil assemblages from the Eocene Sylhet Limestone and Kopili Formation, Sylhet District, northeast Bangladesh. U.S. Geological Survey Open-File Report 92-191."
+      url: https://pubs.usgs.gov/of/1992/0191/report.pdf
+      text: usgs-1992-sylhet-microfossils.txt
+      loc: "p. 15, Zoogeographic Affinities"
+      quote: "Northern Bangladesh had open ocean connections with both the Tethys Seaway and the Indopacific at this time"
+    note: >-
+      Inferred by the authors from the mix of Tethyan and Indo-Pacific species. Long ocean swell from the south is my
+      gloss, not theirs.
+  - id: relief-flat-horizon
+    layer: relief
+    what: >-
+      A flat sea horizon. No mountains anywhere: the Shillong Plateau, whose scarp now stands 1200 to 1800 m high some
+      100 km to the north and north-east, had not yet risen, and the Indo-Burman ranges to the east did not yet exist.
+    reach: region
+    source:
+      cite: "Johnson, S.Y. & Nur Alam, A.M. (1990). Sedimentation and tectonics of the Sylhet trough, northeastern Bangladesh. U.S. Geological Survey Open-File Report 90-313."
+      url: https://pubs.usgs.gov/of/1990/0313/report.pdf
+      text: usgs-1990-0313.txt
+      loc: "PDF page 2, Abstract"
+      quote: "The Shillong Plateau is draped by Mesozoic to Miocene rocks, but Pliocene strata are not represented, suggesting the massif was an uplifted block at this time."
+    note: >-
+      The plateau rose in the Pliocene; the same report has the Indo-Burman ranges beginning to rise in the Oligocene
+      (p. 26, PDF page 27) and the Himalaya's main uplift no earlier than the Miocene (PDF page 5). The plateau's height today is from
+      Brouwers et al. (1992, PDF page 5). The Shillong area lies to the north-east, outside a frame facing east-south-east
+      in any case.
+  - id: life-archaeocete-whales
+    layer: life
+    what: >-
+      Early whales hunting in clear coastal water: protocetids, a few metres long, which could still haul out on land.
+      A dark shape at the surface would be the most one could hope to see from 600 m.
+    reach: region
+    source:
+      cite: "Bajpai, S. & Thewissen, J.G.M. (2014). Protocetid cetaceans (Mammalia) from the Eocene of India. Palaeontologia Electronica 17(3), 34A. doi:10.26879/459"
+      url: https://palaeo-electronica.org/content/2014/914-whales-from-india
+      text: pe-2014-protocetids-india.txt
+      loc: "Discussion"
+      quote: "This locality faced the open ocean, and its sediments were deposited in clear water. This is consistent with the interpretation that Indocetus was a coastal hunter"
+    note: >-
+      From Kutch on India's west coast, about 42 Ma: some 2,000 km from the point, on the other side of the
+      subcontinent. No whale has been read from the Eocene of the Bengal shelf. Their size and that they could come
+      ashore are my gloss from what is generally known of protocetids, not this paper's words.
+  - id: cover-seagrass
+    layer: cover
+    what: >-
+      Seagrass meadows on the shallow parts of the shelf, dark green-brown under clear water; not over the slope or
+      the basin ahead.
+    reach: region
+    source:
+      cite: "Bajpai, S. & Thewissen, J.G.M. (2014). Protocetid cetaceans (Mammalia) from the Eocene of India. Palaeontologia Electronica 17(3), 34A. doi:10.26879/459"
+      url: https://palaeo-electronica.org/content/2014/914-whales-from-india
+      text: pe-2014-protocetids-india.txt
+      loc: "Discussion"
+      quote: "A variety of marine environments occurred in the Eocene of Kutch, including tidal flats, reefs and seagrass meadows"
+    note: >-
+      Kutch again, 2,000 km west. No seagrass has been read from the Sylhet Limestone, though the dasyclad and
+      Halimeda algae of the Nadia well are of the kind that grows among seagrass today (my gloss).
+  - id: weather-wet-equatorial
+    layer: weather
+    what: >-
+      A wet equatorial climate: rain-bearing convective cloud is likely in the afternoon sky, with heavy showers.
+    reach: region
+    source:
+      cite: "Tardif, D., Fluteau, F., Donnadieu, Y., et al. (2020). The origin of Asian monsoons: a modelling perspective. Climate of the Past 16, 847–865. doi:10.5194/cp-16-847-2020"
+      url: https://cp.copernicus.org/articles/16/847/2020/cp-16-847-2020.pdf
+      text: tardif-2020-eocene-monsoon.txt
+      loc: "p. 854 (PDF page 8), on the Eocene simulation's rainfall (Fig. 6)"
+      quote: "southern India and Myanmar experience intense rainfall due to their position closer to the Equator in the Eocene"
+    note: >-
+      A climate model of about 40 Ma, not evidence. It makes northern India dry, which its authors say disagrees with
+      the forests of northern India and Bengal that plant fossils record (p. 856). The Sylhet outcrops are read as laid
+      down "under a warm and humid climate" (Islam et al. 2023). The afternoon convection is my gloss; nothing read says
+      what a May afternoon here was like.
+  - id: geography-near-equator
+    layer: geography
+    what: >-
+      The place lay within a few degrees of the equator, so the sun at 16:00 in May sets a tropical light: high,
+      bright, from the west-north-west behind the camera.
+    reach: region
+    source:
+      cite: "The Paleobiology Database, collection 215253 'Well 4, Bengal Basin' (Sylhet Limestone, Lutetian), entered from Chaurpagar, S.N., Humane, S.K., Kundal, P. & Humane, S.S. (2012), ONGC Bulletin 47(2), 50–69. Data API, read 2026-11-22."
+      url: https://paleobiodb.org/data1.2/colls/list.txt?coll_id=215253,148414&show=full,ref&vocab=pbdb
+      text: pbdb-sylhet-colls.txt
+      loc: "Collection 215253, columns paleomodel, paleolng, paleolat"
+      quote: "\"gplates\",\"501\",\"mid\",\"86.10\",\"-2.02\""
+    note: >-
+      The database's GPlates model puts this well, 190 km south-west of the point, at 2.02°S, 86.10°E in mid-Lutetian;
+      the build's PALEOMAP puts the point at 3.08°N. The two models differ by some 5°, but both put it on the equator.
+      The sun's direction is my reckoning from the hour, month and latitude.
+unknown:
+  - How deep the water was at the spot, and whether the shelf edge here was a gentle ramp or a rimmed margin with reef or algal build-ups that would show as pale banks along the hinge. The seismic reports that map the Sylhet Limestone across the hinge (Salt et al. 1986 and others) could not be read.
+  - Whether any land was in sight. No palaeogeographic map of the Lutetian coastline of the Bengal shelf could be read; the inference that the nearest land was more than 100 km to the north-west rests on where the limestone is found and where it is missing (the Salbanhat well), not on a mapped shore.
+  - Whether the Sylhet Limestone was still being laid down at this spot at 43.5 Ma, or a pause or the first Kopili muds had come; the limestone is dated to the Middle Eocene and the Kopili to the late Middle to Late Eocene, but no well near the point dated within the Lutetian was read.
+  - The weather of a May afternoon: cloud, squalls, wind and sea state. Whether the Eocene Bengal shelf had a monsoon season at all is disputed, and no proxy for seasonality on this side of India was read.
+  - Which animals were at or above the surface here: sea turtles, sea snakes, sharks, sea cows, sea birds. No vertebrate fossil of the Eocene of the Bengal Basin was found; the whales are from Kutch.
+  - Whether mangroves fringed the nearest coast; out of the frame in any case.
+pictures: []
+effort:
+  fetched: 17
+  cited: 9
+  failed: 5
+  note: >-
+    Started from the build's rocks (six collections within 200 km, none within 30 km: the Sylhet Limestone in two West
+    Bengal wells, the Tura Formation in the Garo Hills) and its atlases (the sea atlas lists Nummulites, Discocyclina,
+    Alveolina and coralline algae near the patch; the land atlas lists Eocene mammals and plants of the Indian
+    plate, which can only be of the land far off). Kept and cited: two USGS open-file reports from the Bangladesh
+    cooperative programme (public domain), Banglapedia's tectonic entry, a Dhaka University paper on the Sylhet
+    Limestone, Evans et al. 2018 from PMC, the Micropress abstract for the Mikir Hills, Bajpai & Thewissen 2014 from
+    Palaeontologia Electronica, Tardif et al. 2020 from Climate of the Past, and two PBDB API reads. Read and dropped:
+    a Solid Earth paper on the Rangpur Saddle (nothing on the Eocene surface) and an EGUsphere preprint on Kutch
+    oysters (western India, not used). Refused or failed: Semantic Scholar's API (rate-limited, shared with the round's
+    other researchers), two Journal of Palaeosciences PDFs on Meghalaya palynology (host unreachable), two CORE
+    downloads (404), a guessed Palaeontologia Electronica URL (fixed through the DOI). Elsevier and AGU papers on the
+    hinge, the Shillong uplift (Biswas et al. 2007) and the Bengal Basin synthesis (Alam et al. 2003) were not tried,
+    being closed. No reconstruction picture of the Eocene Bengal shelf was found.

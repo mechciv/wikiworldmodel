@@ -1,0 +1,31 @@
+# Round 5's verdicts for p05: eye level at the northern foot of the Dabie Shan, Hefei Basin, in the Early Miocene (17.1 Ma), a November morning.
+author: machine:claude-code
+judged: "2026-11-22"
+summary: >-
+  The viewer gets the ground and the season: a level basin floor of river sand (from the rocks of two nearby
+  collections), green growth and no snow on a mild, humid November morning, a herd of small deer at spot a and a
+  rhinoceros on its horizon. It lacks the forest: open grass at a, and open stands of one umbrella-crowned tree on
+  bare sand at b and c, where the floras say mixed broad-leaved forest, and none of the plants on its list is drawn
+  (gen:life/scene). The Dabie hills are missing because a 1° relief answers at 17 Ma, and the scene has no water, so
+  the alligator, turtles, beaver and carp it lists have nowhere to be.
+items:
+  relief-dabie-old-range: { verdict: missing-held, spots: { a: missing-held, b: missing-held, c: missing-held }, owner: "field:earth/elevation", why: "The horizon is level on the right in every frame; today's ground has the Dabie, but at 17 Ma a 1° paleo-relief answers and the range is not in it." }
+  relief-basin-plain-ahead: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "field:earth/elevation", why: "Level ground ahead to the horizon, with no scarp." }
+  substrate-river-sand: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "model:earth/substrate", why: "Sandy tan ground underfoot in every frame; the viewer says ground of sand, from the PBDB rock record (collections 223945 and 223948)." }
+  cover-mixed-broadleaf-forest: { verdict: wrong, spots: { a: wrong, b: wrong, c: wrong }, owner: "gen:life/scene", why: "Spot a is open grass with trees only on the horizon; b and c are open stands of one flat, umbrella-crowned tree over bare sand, not a closed mixed forest of evergreen and deciduous kinds, though the biome gives forest cover 1." }
+  cover-oak-chestnut-poplar-willow: { verdict: missing-held, spots: { a: missing-held, b: missing-held, c: missing-held }, owner: "gen:life/scene", why: "Populus and Salix are on the list as recorded here (190 km) and the scene's account draws neither, nor any of its plants; every tree in the frames is the same kind, and there is no stream for willows to stand by." }
+  weather-mild-humid: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "field:earth/climate", why: "Green grass, trees in leaf and no snow or frost; the climate field gives a coldest month near 0 °C and an aridity index of 1.2, a humid climate a little cooler than the region's now." }
+  weather-winter-monsoon-season: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "field:earth/climate", why: "A still with fair-weather cloud cannot show which way the wind has turned." }
+  life-small-deer-chevrotains: { verdict: missing-held, spots: { a: drawn, b: missing-held, c: missing-held }, owner: "gen:life/scene", why: "A herd of six small deer stands in the grass at a (labelled Dicrocerus); at b and c, where Dorcatherium, Stephanocemas and Lagomeryx are also placed, none is in sight." }
+  life-rhinos-mastodonts-horses: { verdict: missing-held, spots: { a: drawn, b: missing-held, c: missing-held }, owner: "model:life/atlas", why: "A dark rhinoceros (Diaceratherium) stands on a's horizon and pigs are labelled at b and c, but no large animal is in sight there; Gomphotherium is listed and placed at no spot, and Anchitherium, in the PBDB snapshot at Sihong (collection 43400, 256 km, Burdigalian), is not on the list." }
+  life-small-apes: { verdict: missing-held, spots: { a: missing-held, b: missing-held, c: missing-held }, owner: "model:life/atlas", why: "No ape in any frame, and none on the list: Dionysopithecus and Platodontopithecus are in the PBDB snapshot in collection 43400 at Sihong, the same collection the list takes Aquila and Palaeomeryx from, and are left out." }
+  life-birds: { verdict: missing-held, spots: { a: missing-held, b: missing-held, c: missing-held }, owner: "gen:life/scene", why: "Aquila is listed and placed at every spot, and no bird is in any sky; partridges and pheasants are not on the list." }
+  life-squirrels-pikas: { verdict: missing-held, spots: { a: missing-held, b: missing-held, c: missing-held }, owner: "gen:life/scene", why: "Miopetaurista and Alloptox are placed at every spot (Alloptox labelled on a's tree line), but nothing that small is visible." }
+  water-lakes-crocodiles: { verdict: missing-held, spots: { a: missing-held, b: missing-held, c: missing-held }, owner: "model:earth/drainage", why: "The scene has no river and no lake (its water list is empty), so the Alligator, Trionyx, Chinemys, Youngofiber and Cyprinus it lists as recorded here are not drawn." }
+findings:
+  - Every view of this round, this one included, has the life layer answering "unknown" with "the atlases of who lived
+    where reach only the Phanerozoic", at 17 Ma, where the scene lists 46 taxa from the atlas. The tier the panel or
+    the shooter reads for life is wrong across the round.
+  - The atlas's list for this patch takes some taxa of the Sihong collection 43400 (256 km, Burdigalian) and leaves
+    out others in it, Anchitherium and both pliopithecoids among them. Whatever caps or filters the list drops the
+    animals the brief most expects.

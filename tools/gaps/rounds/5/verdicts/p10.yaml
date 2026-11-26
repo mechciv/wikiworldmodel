@@ -1,0 +1,38 @@
+# Round 5's verdicts for p10: the north side of Kanchipuram, eye level facing north, 11:00 in January 1285.
+author: machine:claude-code
+judged: "2026-11-22"
+summary: >-
+  No town is drawn. The point was drawn by Kanchipuram's weight in Chandler's list, but the settlement generator reads
+  that list as a silence in 1285, so the scene has 864 farming villages of round thatched huts in woodland and dry
+  plots, and no street, court house, shrine or tank. What it gets right is the flat plain, a bright dry January
+  morning, no towering gateway, and the Pandyas' rule. The largest gap is the missing town, owned by
+  gen:people/settlement's reading of the cities' lists; behind it, no tradition for the houses of 1285 and no living
+  flora or animals.
+items:
+  relief-flat-plain-rising-north: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "field:earth/elevation", why: "Level ground to a skyline of trees at every spot, no hill; the build has it at 91 m where the brief gives 83, and the gentle rise cannot be seen." }
+  substrate-quartzite-gravel-north: { verdict: drawn, spots: { a: wrong, b: drawn, c: drawn }, owner: "model:earth/substrate", why: "Pale fine sand at b and c, which agrees with the brief's coarse light sand from rotted granite, and a darker tan loam at a; no quartzite gravel anywhere (6.5% gravel in today's topsoil map), which the source does not place at the spot." }
+  water-great-tank-north: { verdict: missing-not-held, spots: { a: missing-not-held, b: missing-not-held, c: missing-not-held }, owner: "records: the tanks (eris) of the Palar plain", why: "No bund or sheet of water in any frame; the scene's water is two rivers and no lake, and a tank is neither a lake the drainage model can find (500 km² at least) nor a record." }
+  weather-after-the-north-east-monsoon: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "gen:earth/clouds", why: "A bright, dry morning under scattered fair-weather cumulus, with no rain and green growth." }
+  weather-mild-january-morning: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "field:earth/climate-late-quaternary", why: "A temperature, which no frame shows; the climate field's coldest month, 23.4 °C on average, agrees with the brief's 19 to 29 °C." }
+  cover-samba-rice-ripe: { verdict: wrong, spots: { a: missing-held, b: wrong, c: wrong }, owner: "building traditions: fields and crops", why: "At b and c a dry plot of pale sand set with tall green tufts, with no bund, no water and no grain turning gold; at a, open woodland and no field." }
+  cover-palmyra-palms: { verdict: missing-not-held, spots: { a: missing-not-held, b: missing-not-held, c: missing-not-held }, owner: "model:life/atlas", why: "Not a palm in sight: the trees are the savanna's generic round-crowned broadleaves; no palm or tamarind is on the list, which is of fossils, and its Acacia is not placed." }
+  people-street-with-coconut-rows: { verdict: missing-held, spots: { a: missing-held, b: missing-held, c: missing-held }, owner: "gen:people/settlement", why: "No street at any spot; the town is on the cities' list and the generator draws none in 1285 (the scene's account has no city), so only open ground and villages are drawn." }
+  people-mud-courtyard-houses: { verdict: wrong, spots: { a: wrong, b: wrong, c: missing-held }, owner: "building traditions: dwellings", why: "At a and b the houses on the skyline are round huts with conical thatched roofs, the savanna's generic farmhouse; the record of the south Indian mud courtyard house starts in 1520-22, so it is not used in 1285; at c no house can be made out." }
+  people-dung-washed-walls: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "building traditions: dwellings", why: "The only walls are of huts 0.5 to 2 km off, a few pixels each and pale; a finish cannot be told at that distance." }
+  people-dress: { verdict: missing-held, spots: { a: missing-held, b: missing-held, c: missing-held }, owner: "gen:people/settlement", why: "No person in any frame, though the scene's works include persons; so no dress to judge." }
+  people-weavers-quarter: { verdict: no-layer, spots: { a: no-layer, b: no-layer, c: no-layer }, owner: "a town's quarters and crafts (no layer)", why: "No loom, warp or quarter; nothing in the world says what a town's quarters made, and here there is no town." }
+  people-small-shrines: { verdict: missing-not-held, spots: { a: missing-not-held, b: missing-not-held, c: missing-not-held }, owner: "records: the temples of Kanchipuram", why: "No shrine in any frame; no temple of the town, not even the Kailasanathar, is a record." }
+  people-no-tall-gopurams: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "gen:people/settlement", why: "No gateway tower on any skyline, as the brief expects; nor any lower temple tower." }
+  life-cattle: { verdict: missing-not-held, spots: { a: missing-not-held, b: missing-not-held, c: missing-not-held }, owner: "husbandry traditions: south India", why: "No cattle in sight and none in the scene (animals 0, nothing kept): no husbandry record reaches south India." }
+  polity-pandya-held: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "src:cliopatria-0.2.1", why: "The polity layer answers the Pandya Empire, on evidence; an eye-level frame shows no more." }
+findings:
+  - >-
+    Why no town. Chandler's list (people/cities.json) gives Kanchipuram 70,000 to 1118, 50,000 in 1150, then 35,000 in
+    1800. gen:people/settlement holds a figure 50 years either side (record_hold) and joins two only when they are no
+    more than 600 years apart (record_gap); 1150 to 1800 is 650, so from 1200 to 1750 the town has no people and is not
+    drawn. The scene's account has no city ('cities' empty) and 48,250 houses in 864 villages instead. The sampler drew
+    the point by the same list's 1150 figure without that rule, so it sends the survey to towns the viewer does not draw.
+  - >-
+    The list is of fossils of the whole Holocene, 220 km off: montane plants (Strobilanthes, Impatiens, Ilex, Valeriana,
+    Gordonia) and a Ganges river dolphin (1,960 km); none of them is placed. The stand-ins for pigeons, ants and
+    proboscideans are, so elephants are placed in the scene among the villages.

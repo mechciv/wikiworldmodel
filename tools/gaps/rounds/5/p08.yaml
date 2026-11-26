@@ -1,0 +1,263 @@
+view: t=-592.489&lat=38.82069&lon=23.31230&d=1.0000023544&h=110&v=84&hour=12&mo=5&clock=0
+when: 594 BCE
+place: >-
+  North Euboea (Evia), Greece, about 5.5 km north of the town of Limni and just above the village of Kourkouloi, on a
+  hillside at about 440 m (SRTM 30 m, 443 m at the point). Not the Lelantine plain: Chalcis is some 47 km to the
+  south-east. The camera faces east-south-east, downhill, across the low country of the Neogene Limni-Istiaia basin
+  toward the valley of the Kireas (today's Prokopi and Mantoudi), which drains to the Aegean coast at Krya Vrysi. By
+  today's elevations (SRTM, sampled along the bearings; not a source of the brief): the ground falls from 443 m to
+  about 130 m within 4 km and to some 30 m on the valley floor at 10 km; low hills of 100-200 m stand between; straight
+  ahead the skyline is mountains of 900-1,100 m at 28-35 km; to the right, at 140°, a ridge over 1,100 m at 17-20 km
+  (the Kandili side); to the left, at 80-95°, the open Aegean shows beyond the coast from 12-19 km. Late Holocene, so
+  the place stood where it stands today. May, noon.
+author: machine:claude-code
+expects:
+  - id: substrate-conglomerate-underfoot
+    layer: substrate
+    what: >-
+      The ground underfoot and on the slope below is coarse conglomerate (rounded cobbles and pebbles in a cemented
+      matrix) of the Neogene basin fill, resting on older, harder basement rocks; stony, not soft soil.
+    reach: place
+    source:
+      cite: "Katsikatsos, G., de Bruijn, H. & van der Meulen, A.J. (1981). The Neogene of the island of Euboea (Evia), a review. Geologie en Mijnbouw 60, 509-516."
+      url: https://njgjournal.nl/index.php/njg/article/download/13657/20348
+      text: neogene-euboea-1981.txt
+      loc: "p. 514 (PDF page 6), The Limni-Istiea Basin, General"
+      quote: "The section N of Limni shows conglomerates that overlie the pre-Tertiary basement"
+    note: >-
+      The section is "N of Limni", which is where the point is (5.5 km north of the town), though the paper does not
+      say exactly where the section was measured. What the cobbles are made of, and how much soil covers them on this
+      slope, it does not say.
+  - id: substrate-pale-marls-below
+    layer: substrate
+    what: >-
+      Lower down, in the cuttings and bare banks of the valley, pale beds of marl and freshwater limestone, with thin
+      dark lignite seams here and there, over the conglomerates.
+    reach: place
+    source:
+      cite: "Katsikatsos, G., de Bruijn, H. & van der Meulen, A.J. (1981). The Neogene of the island of Euboea (Evia), a review. Geologie en Mijnbouw 60, 509-516."
+      url: https://njgjournal.nl/index.php/njg/article/download/13657/20348
+      text: neogene-euboea-1981.txt
+      loc: "p. 514 (PDF page 6), The Limni-Istiea Basin, General"
+      quote: "Overlying the conglomerates near Limni is a section of marls and fresh water limestones"
+    note: >-
+      The same paragraph gives the marls about 150 m thick, with poor lignites and freshwater molluscs, and says
+      elsewhere in the basin they are absent and the section is sands and conglomerates only. "Pale" is my gloss of
+      marl and freshwater limestone; the paper gives no colour.
+  - id: relief-travertine-plateaus
+    layer: relief
+    what: >-
+      Flat-topped tablelands and benches capped by hard travertine-like limestone among the low hills of the basin,
+      rather than only rounded hills.
+    reach: region
+    source:
+      cite: "Katsikatsos, G., de Bruijn, H. & van der Meulen, A.J. (1981). The Neogene of the island of Euboea (Evia), a review. Geologie en Mijnbouw 60, 509-516."
+      url: https://njgjournal.nl/index.php/njg/article/download/13657/20348
+      text: neogene-euboea-1981.txt
+      loc: "p. 514 (PDF page 6), The age of the deposits in the Limni-Istiea Basin"
+      quote: "the travertinous limestones that form plateaus on northern Euboea are considered to be of Plio-Pleistocene age"
+    note: >-
+      Said of northern Euboea as a whole; whether such plateaus stand in this view, and where, the paper does not say.
+  - id: water-aegean-to-the-left
+    layer: water
+    what: >-
+      On the left of the frame, beyond the valley's mouth, the open Aegean, with the coastal town of Kerinthos on its
+      shore.
+    reach: place
+    source:
+      cite: "Strabo, Geography, book 10, tr. H.L. Jones (Loeb Classical Library, vol. V), as transcribed on LacusCurtius (Bill Thayer)."
+      url: https://penelope.uchicago.edu/Thayer/E/Roman/Texts/Strabo/10A*.html
+      text: strabo-10.txt
+      loc: "10.1.5"
+      quote: "Cerinthus, a small city by the sea"
+    note: >-
+      Strabo wrote some six centuries later. That the sea is in view is from today's elevations (SRTM): on bearings
+      80-95° the land falls to sea level at 12-19 km and nothing higher than the camera stands between. Sea level in
+      594 BCE is taken as near today's; no source read speaks to this coast's shoreline then.
+  - id: water-budorus-river
+    layer: water
+    what: >-
+      A river in the valley floor below, running east toward the coast near Kerinthos; in May probably a modest
+      stream in a wide gravel bed, lined with trees.
+    reach: place
+    source:
+      cite: "Strabo, Geography, book 10, tr. H.L. Jones (Loeb Classical Library, vol. V), as transcribed on LacusCurtius (Bill Thayer)."
+      url: https://penelope.uchicago.edu/Thayer/E/Roman/Texts/Strabo/10A*.html
+      text: strabo-10.txt
+      loc: "10.1.5"
+      quote: "near it is the Budorus River"
+    note: >-
+      Strabo names a river near Cerinthus; today the main river there is the Kireas, and a smaller stream, the
+      Voudoros, also reaches that coast (both names from a search result, not read), so which river Strabo meant is
+      not settled here. The river's size in May, its gravel bed and its trees are my gloss; no source read describes
+      them in antiquity. Today the Kireas valley is known for its plane trees, which no ancient text read mentions.
+  - id: people-kerinthos-town
+    layer: people
+    what: >-
+      Far off on the left (about 14 km, bearing about 84°), a small walled town on a hill by the shore: Kerinthos, with
+      its acropolis. At that distance a pale cluster of walls and roofs on a coastal hill, no more.
+    reach: place
+    source:
+      cite: "Pleiades, place 540861, Kerinthos (Barrington Atlas 55 E3), location after OpenStreetMap; retrieved 22 November 2026."
+      url: https://pleiades.stoa.org/places/540861/json
+      text: pleiades-kerinthos.txt
+      loc: "features[0].properties.snippet (location 'OSM location of Ακρόπολη αρχαίας Κηρύνθου')"
+      quote: "Acropolis; 750 BC - AD 300"
+    note: >-
+      The gazetteer puts the acropolis at 38.8346°N, 23.4719°E, which from the camera is about 14 km at a bearing of
+      about 84°, so at or just inside the left edge of a frame facing 110°. Its dates are the Barrington Atlas
+      directory's period span, not an excavation's. Whether the walls of the acropolis stood by 594 BCE is not known
+      from anything read (a search summary said the first phase of the wall is probably Archaic and the towers
+      mostly Classical; not read, not used).
+  - id: people-grain-harvest
+    layer: people
+    what: >-
+      In the cleared fields of the valley floor and the lower slopes, the grain harvest just beginning: men cutting
+      ripe barley or wheat with sickles, sheaves on the stubble. The fields are gold or pale straw, not green.
+    reach: region
+    source:
+      cite: "Hesiod, Works and Days, in Hesiod, the Homeric Hymns and Homerica, tr. H.G. Evelyn-White (Loeb Classical Library, 1914), Project Gutenberg ebook 348."
+      url: https://web.archive.org/web/2022id_/https://www.gutenberg.org/files/348/348-h/348-h.htm
+      text: hesiod-evelyn-white.txt
+      loc: "ll. 383-404, with the translator's note 1310 ('Early in May.')"
+      quote: "begin your harvest, and your ploughing when they are going to set"
+    note: >-
+      Hesiod farmed at Ascra in Boeotia, about 70 km south across the gulf, a century or so before 594 BCE; the
+      harvest begins with the morning rising of the Pleiades, which the translator puts early in May. The crops
+      (barley, wheat) are my gloss: Hesiod's lines say harvest, not which grain. How much of this valley was
+      cleared and sown is not known; HYDE's 214,807 people in the 1° cell (at its step 1000 BCE) say people were
+      many in the region, not that they farmed here.
+  - id: weather-scorching-noon
+    layer: weather
+    what: >-
+      A hot, bright noon: strong sun, sharp shadows, people out in the fields avoiding the shade only out of need.
+    reach: region
+    source:
+      cite: "Hesiod, Works and Days, in Hesiod, the Homeric Hymns and Homerica, tr. H.G. Evelyn-White (Loeb Classical Library, 1914), Project Gutenberg ebook 348."
+      url: https://web.archive.org/web/2022id_/https://www.gutenberg.org/files/348/348-h/348-h.htm
+      text: hesiod-evelyn-white.txt
+      loc: "ll. 571-581, with the translator's note 1326 ('The season is the middle of May.')"
+      quote: "Avoid shady seats and sleeping until dawn in the harvest season, when the sun scorches the body."
+    note: >-
+      Boeotia, about 70 km south, a century or so earlier; a farmer's season, not a record of any one day. Whether
+      this noon in May 594 BCE was clear or clouded is not known. The cicadas' song Hesiod gives for June (note 1327),
+      so not yet.
+  - id: life-flocks-to-the-shore
+    layer: life
+    what: >-
+      Flocks of sheep and goats on the open hillsides and on the way down to the coastal grazing, with herdsmen.
+    reach: region
+    source:
+      cite: "Herodotus, The History of Herodotus, vol. 2, tr. G.C. Macaulay (1890), Project Gutenberg ebook 2456."
+      url: https://web.archive.org/web/2022id_/https://www.gutenberg.org/files/2456/2456-h/2456-h.htm
+      text: herodotus-macaulay-2.txt
+      loc: "Book 8, ch. 19"
+      quote: "when the people of Euboea were driving their flocks down to that sea"
+    note: >-
+      North Euboea at Artemision, some 20-25 km north of the point, in 480 BCE: 114 years later and in late summer, not
+      May. "Sheep and goats" is my gloss of the translator's "flocks". The Euboeans' flocks are a fact of the
+      region in the period, not a sighting at this spot.
+  - id: cover-pine-forest
+    layer: cover
+    what: >-
+      Where not cleared, the slopes and hills are pine woods (Aleppo pine), open and bright green, with maquis between.
+    reach: region
+    source:
+      cite: "Koulelis, P.P., Solomou, A.D., Proutsos, N.D., Fassouli, V.P., Petrakis, P.V. & Xanthopoulos, G. Representative Policy Actions Linked to Burned Forests in Northern Evia: A Short Contribution to the Public Debate. CEUR Workshop Proceedings Vol-3293, pp. 448-455."
+      url: https://ceur-ws.org/Vol-3293/paper89.pdf
+      text: ceur-evia-fire.txt
+      loc: "p. 449 (PDF page 2), section 2, Forest Sector and Resin Production in Evia Island"
+      quote: "Aleppo pine forest, before the 2021 fire it occupied an area of 85,145 ha in Evia, representing ~ 74%"
+    note: >-
+      Today's forest (before the fire of August 2021), carried back 2,600 years. A second paper (Sargentis et al. 2024,
+      mantoudi-land-use.txt, section 3) puts pine forest at about 83.9% of today's municipality of
+      Mantoudi-Limni-Agia Anna. No pollen record of north Euboea could be found; how much of the Archaic landscape
+      was pine, oak, scrub or field is not known. The maquis is my gloss.
+  - id: cover-knotty-euboean-timber
+    layer: cover
+    what: >-
+      The trees of the island's woods are rough and branchy, many-knotted rather than tall and straight.
+    reach: region
+    source:
+      cite: "Theophrastus, Enquiry into Plants, vol. 1, tr. Sir Arthur Hort (Loeb Classical Library, 1916), as scanned on the Internet Archive (enquiryintoplant01theouoft)."
+      url: https://archive.org/stream/enquiryintoplant01theouoft/enquiryintoplant01theouoft_djvu.txt
+      text: theophrastus-hort-1.txt
+      loc: "V.ii.1, p. 429"
+      quote: "of Euboea, for it is full of knots and rough and quickly rots"
+    note: >-
+      Written about 300 BCE, three centuries later, of the carpenter's timber that came into Greece from Euboea,
+      ranked worst; it says nothing of which tree, nor where on the island. Taking it as a sign of the woods' look is
+      my reading.
+  - id: cover-sweet-chestnut
+    layer: cover
+    what: >-
+      Sweet chestnut trees among the woods, in leaf and coming into flower in May, most likely on the higher, cooler
+      slopes.
+    reach: region
+    source:
+      cite: "Theophrastus, Enquiry into Plants, vol. 1, tr. Sir Arthur Hort (Loeb Classical Library, 1916), as scanned on the Internet Archive (enquiryintoplant01theouoft)."
+      url: https://archive.org/stream/enquiryintoplant01theouoft/enquiryintoplant01theouoft_djvu.txt
+      text: theophrastus-hort-1.txt
+      loc: "IV.v.4, p. 327"
+      quote: "in Euboea and Magnesia the sweet chestnut"
+    note: >-
+      The sentence goes on "is common"; the line break in the scan splits the word, so the quote stops before it.
+      About 300 BCE, of the island as a whole. Where chestnut grew, and whether it flowered by this noon in May, are my gloss.
+  - id: cover-olives
+    layer: cover
+    what: >-
+      Rows of olive trees on the lower ground and terraces near the coast, grey-green among the fields.
+    reach: region
+    source:
+      cite: "Sargentis, G.-F., Mamassis, N. & Koutsoyiannis, D. (2024). The multifaceted importance of mediterranean pine-tree forests to social cohesion. Energy, resin, grazing, and wildfire management in North Euboea, Greece. Natural Resources Conservation and Research 7(2), 9962. doi:10.24294/nrcr9962"
+      url: https://systems.enpress-publisher.com/index.php/NRCR/article/viewFile/9962/4871
+      text: mantoudi-land-use.txt
+      loc: "p. 4 (PDF page 4), section 3, Methodology (land use of the municipality of Mantoudi-Limni-Agia Anna)"
+      quote: "tree crops such as olives (5%)"
+    note: >-
+      Today's land use, from Google Earth, carried back; nothing read says olives were grown here in 594 BCE, though
+      the olive was grown widely in Archaic Greece. A weak item, kept because a viewer will draw some tree crop or
+      none, and the brief should say which it expects.
+  - id: polity-chalcis-hippobotae
+    layer: polity
+    what: >-
+      No border or mark in view. Euboea's powers were the cities of Chalcis and Eretria to the south; Chalcis was ruled
+      by the Hippobotae, an aristocracy of the wealthy.
+    reach: region
+    source:
+      cite: "Strabo, Geography, book 10, tr. H.L. Jones (Loeb Classical Library, vol. V), as transcribed on LacusCurtius (Bill Thayer)."
+      url: https://penelope.uchicago.edu/Thayer/E/Roman/Texts/Strabo/10A*.html
+      text: strabo-10.txt
+      loc: "10.1.8"
+      quote: "for at the head of it were men chosen according to the value of their property, who ruled in an aristocratic manner"
+    note: >-
+      Strabo, after Aristotle, ties the Hippobotae to the time of the colonies (the eighth century BCE); that they
+      still ruled in 594 BCE is not said. Whether this valley belonged to Chalcis, to Histiaia in the north or to
+      Kerinthos itself is not known from anything read. Strabo (10.1.3) names Histiaea, Cerinthus and Orobia
+      together as Ellops' dominions, a legend.
+unknown:
+  - "The look of the sky at noon in May 594 BCE: clear, hazy or clouded. By arithmetic (not a source), the sun stands about 70° high, due south, so to the camera's right and behind it, and shadows are short."
+  - "How much of this valley and its slopes was cleared for fields, terraced or left in forest in 594 BCE. No pollen or charcoal record from north Euboea could be found; the nearest, at Amarynthos in south-central Euboea (Ghilardi et al. 2018), could not be read (its hosts refuse automated reading) and its sequence stops in the Early Iron Age."
+  - "Whether any farmstead, hamlet or shrine stood in the frame. The nearest named places of the period are Elymnion at Limni (Pleiades 540761, about 5 km south, behind the camera's right shoulder, out of frame) and Orobiai at Rovies (about 8.5 km west, behind); in front only Kerinthos is known."
+  - "Which trees lined the river: plane trees are known in the Kireas valley today (Sargentis et al. 2024 mention plane-tree disease since 2017), but nothing ancient read says so."
+  - "Which wild animals a person might see (deer, boar, hares, raptors); no source read lists the fauna of Archaic Euboea."
+  - "Whether the walls of Kerinthos's acropolis stood by 594 BCE, and what the town looked like; no excavation report could be read (the Archaeological Reports review of Euboea 2014-2024 gave only its abstract)."
+  - "Which polity held this valley in 594 BCE: Chalcis, Histiaia or Kerinthos."
+  - "Today's peak names on the skyline ahead (heights from SRTM only) and whether the far mountains had forest to their tops."
+pictures:
+  - { url: "https://commons.wikimedia.org/wiki/File:Kireas,_Greece_-_panoramio.jpg", what: "A photograph titled the Kireas, Greece (title only checked, not looked at)." }
+  - { url: "https://commons.wikimedia.org/wiki/File:Cerinthus_(8175679762).jpg", what: "A photograph titled Cerinthus, probably the site of Kerinthos (title only checked, not looked at)." }
+effort:
+  fetched: 15
+  cited: 8
+  failed: 4
+  note: >-
+    Kept and cited: Strabo 10.1 (LacusCurtius), Hesiod (Gutenberg via Wayback), Herodotus vol. 2 (Gutenberg via
+    Wayback), Theophrastus vol. 1 (Internet Archive scan), the 1981 review of the Euboean Neogene, two papers on
+    today's north Euboean forests, and Pleiades for Kerinthos. Kept, not cited: Pleiades for Elymnion (in an unknown),
+    the abstract page of the Archaeological Reports review of Euboea 2014-2024 (only the abstract shows). Refused:
+    the review's PDF host (not resolved), grissh.gr (HTTP error), HAL's Amarynthos record and an aggregator's record
+    of Ghilardi et al. 2018 (both behind an anti-bot wall, deleted); a copy of Ghilardi 2018 on ancientportsantiques
+    was not used, as a copy of doubtful origin. The place itself was found from SRTM elevations and OSM's reverse
+    geocoder: the hint (Lelantine plain, Psachna) was wrong by some 30-45 km; the point is above Limni. Most of the
+    time went to looking for a vegetation record of north Euboea, which none of the routes reached.

@@ -1,0 +1,110 @@
+{
+ "p01": {
+  "model": "grok-imagine-image-2.0",
+  "quality": "medium",
+  "made": "2026-11-22",
+  "prompt": "A barren land on the equator 612 million years ago, before any plant or animal lived on land, at four in the afternoon, the sun in the west to the right of the view. Low, worn, gently rolling ground to a level skyline: an old land surface long eroded, with no volcano, no cliff and no young mountain. Low rounded outcrops of weathered pinkish-grey rhyolite and granite break through. Between them, sheets of dull maroon and reddish-brown sand, silt and mud, with pebbly patches, mixed with grey and buff grit: muted earth colours, not a vivid Mars-like red. Rounded boulders and cobbles lie on the bare ground, some polished smooth and grooved by wind-blown sand. A shallow, mostly dry stream bed crosses the foreground; where it is still damp, a thin dark film of microbial crust lies flat on the mud, cracked into plates where it has dried. The puddles in it are clear and empty. No plants of any kind: no moss, no lichen, no grass, no shrubs, no trees, nothing green. No animals, no insects, no birds, no shells, no footprints, no fronds, no seaweed. No ice, no snow, no sea. Seen from the eye height of a person standing on the ground, looking level at the horizon, wide angle. Photorealistic, like a documentary photograph taken in natural light, 16:9, sharp and plainly lit, no dramatic colour grading. No text, no labels, no captions, no borders, no watermark.",
+  "mime": "image/jpeg",
+  "usd": 0.06,
+  "takes": 1
+ },
+ "p02": {
+  "model": "grok-imagine-image-2.0",
+  "quality": "medium",
+  "made": "2026-11-22",
+  "prompt": "The Earth 378 million years ago, in the Late Devonian, seen from space; no continent has a modern outline. Early afternoon at the centre of the disc, which is almost all sunlit, the terminator near the right-hand limb. One large continent fills the middle and lower left; the centre lies on its north-eastern coast, a ragged shore of river deltas with brown plumes of mud, fringed by dark green forest and wet green lowland. Round it, pale turquoise shelf seas with pale reef rims and carbonate banks, broken by patches of darker, deeper water. Just below the centre, white gypsum lagoons and dolomite banks in a dry, warm sea. At the lower left the continent is drowned under a pale shallow inland sea, land only at its edges, reef-rimmed shoals at the far left. Its interior is muted brown and olive, with a worn mountain belt. At the top, a separate continent, much of it under shallow sea, with dark basalt fields; to the right, smaller land blocks. Along the bottom limb, another continent's edge under a broad shallow sea, close to the large one across a narrow strait. A band of tropical cloud crosses near the centre, thickest over the mountains. No ice caps, no sea ice, no snow, no city lights. The whole disc of the planet seen from space, about ten thousand kilometres above the surface, against black. Photorealistic, like a documentary photograph taken in natural light, 16:9, sharp and plainly lit, no dramatic colour grading. No text, no labels, no captions, no borders, no watermark.",
+  "mime": "image/jpeg",
+  "usd": 0.06,
+  "takes": 1
+ },
+ "p03": {
+  "model": "grok-imagine-image-2.0",
+  "quality": "medium",
+  "made": "2026-11-23",
+  "prompt": "An eroding upland in the Appalachians 105 million years ago, in the Early Cretaceous, at noon on a humid August day, the sun high ahead. Rounded wooded ridges and valleys of moderate height, worn down, with no jagged peaks and no sea. Ledges of tilted grey and tan sandstone, shale and limestone break through the slopes; over the limestone, a rotted mantle of ochre chert rubble in clay. A small stream with a flood-scoured gravel bar and stranded logs crosses the view from left to right. Conifers make most of the woods: low, broad, irregular trees with drooping branchlets of tiny scale leaves like a cypress or a monkey-puzzle, and others with flat strap-shaped leaves like a podocarp or a yew; none has needles in bundles or a cone-shaped Christmas-tree outline, nothing like a pine, a spruce or a fir; dense ferns beneath. In patches, early flowering shrubs and herbs crowd the ground, with no showy flowers. By the stream, shrubs with palmately lobed, maple-like leaves and shrubs with pinnately compound leaves. One burnt patch of charred trunks. In a clearing, a nodosaur: a broad, low, four-legged dinosaur armoured with bony plates and spikes, no tail club. Far off among the trees, the neck of a long-necked sauropod. Warm haze, cumulus building. No grass, no palms, no oaks, no birds, no people. Seen from the eye height of a person standing on the ground, looking level at the horizon, wide angle. Photorealistic, like a documentary photograph taken in natural light, 16:9, sharp and plainly lit, no dramatic colour grading. No text, no labels, no captions, no borders, no watermark.",
+  "mime": "image/jpeg",
+  "usd": 0.06,
+  "takes": 3
+ },
+ "p04": {
+  "model": "grok-imagine-image-2.0",
+  "quality": "medium",
+  "made": "2026-11-22",
+  "prompt": "A view from the air over open tropical sea 43.5 million years ago, in the Middle Eocene, near the equator, at four in the afternoon, the sun behind the camera a third of the way up the sky. Open water to the horizon in every direction: no land, no coast, no island, no beach, no sandbank, no surf line. Below and to the near left, clear, shallow water over a pale grey and buff floor of shell sand, with dark green-brown meadows of seagrass and darker patches of algal crust on it. Ahead the floor drops away over the edge of the shelf, and the water turns to deep, dark blue. The water is clear and warm, with no muddy river plumes. At the surface in the middle distance, two dark slender shapes: early whales about three metres long, with long narrow snouts and four short paddle-like legs, not like any modern whale or dolphin, and no spout. A flat sea horizon with no mountains. Warm humid haze; far off ahead, towering cumulus with grey veils of heavy showers falling. No boats, no people, no reef breaking the surface. Seen from about 300 metres above the surface of the sea, looking obliquely down and ahead, the horizon near the top of the frame. Photorealistic, like a documentary photograph taken in natural light, 16:9, sharp and plainly lit, no dramatic colour grading. No text, no labels, no captions, no borders, no watermark.",
+  "mime": "image/jpeg",
+  "usd": 0.06,
+  "takes": 1
+ },
+ "p05": {
+  "model": "grok-imagine-image-2.0",
+  "quality": "medium",
+  "made": "2026-11-23",
+  "prompt": "The edge of a basin plain in eastern China 17 million years ago, in the Early Miocene, at nine on a cool, dry November morning, the low sun ahead and a little to the right, the view backlit through a thin haze. No frost and no snow. Ahead, a broad low plain of river-laid ground with no scarps, to a level horizon. To the right, the rounded forested hills of an old, worn range, not steep young peaks. Underfoot, loose pale river sand under leaf litter. The camera stands inside a closed forest: trunks and canopy fill the whole frame from edge to edge, with no open ground, wash or clearing in the middle. Mixed broad-leaved forest: dark evergreen oaks, magnolias and laurels among birches, hornbeams and elms, some of these turning yellow or partly bare; oaks and chestnuts on the drier ground, poplars and willows in the lower ground. At the forest edge, a tiny tusked mouse-deer and a small deer with short forked antlers; farther off, a long-bodied, short-legged rhinoceros and a few small three-toed horses. High in a tree, one small ape with no tail at all, like a small gibbon. A pheasant on the ground, an eagle overhead. No grassland, no conifer forest, no fields, no people, no monkeys, no modern elephants. Seen from the eye height of a person standing on the ground, looking level at the horizon, wide angle. Photorealistic, like a documentary photograph taken in natural light, 16:9, sharp and plainly lit, no dramatic colour grading. No text, no labels, no captions, no borders, no watermark.",
+  "mime": "image/jpeg",
+  "usd": 0.06,
+  "takes": 3
+ },
+ "p06": {
+  "model": "grok-imagine-image-2.0",
+  "quality": "medium",
+  "made": "2026-11-22",
+  "prompt": "The western Amazon lowland 2.6 million years ago, at four in the afternoon in May, the sun low behind the camera to the left, warm light on the scene ahead. Dead flat ground in every direction. A wide brown river meanders across a broad floodplain, and a crescent-shaped oxbow lake lies cut off beside it. The water is falling after the high-water season: muddy banks and sand bars are showing, with a dark high-water line on the trunks of the flooded forest. On the floodplain, forest that stands in water part of the year; behind it, tall closed evergreen rainforest on the higher ground. On a bar in front, loose orange-red sand and gravel; in a high cut bank across the river, layers of older red siltstone and sandstone with gravelly channels. Two small caimans of the living kind lie on the bar. Far off, over the canopy, a low faint line of hills. No mountains. No gharials, no long-snouted or giant crocodiles, no hippos. No grassland or savanna. No people, no canoes, no huts, no clearings, no fields, no smoke. Seen from the eye height of a person standing on the ground, looking level at the horizon, wide angle. Photorealistic, like a documentary photograph taken in natural light, 16:9, sharp and plainly lit, no dramatic colour grading. No text, no labels, no captions, no borders, no watermark.",
+  "mime": "image/jpeg",
+  "usd": 0.06,
+  "takes": 1
+ },
+ "p07": {
+  "model": "grok-imagine-image-2.0",
+  "quality": "medium",
+  "made": "2026-11-22",
+  "prompt": "The high Andean plateau of northern Chile about 11,000 years ago, at 4,400 metres, at ten on a dry, clear April morning just after the rainy season. Deep dark blue sky, hard brilliant light, sharp shadows, the sun high behind the camera's right shoulder. The camera stands high on a mountain flank and looks down a long stony slope, some 650 metres of fall, to a flat closed basin floor 6 km away. On the slope in front, low open shrubland of resinous tola bushes with straw-coloured tussocks of hard bunchgrass between them, knee-high or less. On the basin floor, a white salt crust with shallow saline lakes on it, more water than today; at its edges, springs and bright green cushion bogs. Pink specks of flamingos on the water. A small family group of vicuñas grazing on the slope, guanacos farther down. Far off by the water, a thin wisp of campfire smoke. Across the basin, low rolling hills, and a skyline of ridges level with the eye. On the right, the tall cone of a volcano, a little snow on its summit only. To the far left, the low white flat of a salt pan. No llamas, no sheep, no cattle, no trees nearby, no fences, no roads, no buildings, no lake filling the basin. Seen from the eye height of a person standing on the ground, looking level at the horizon, wide angle. Photorealistic, like a documentary photograph taken in natural light, 16:9, sharp and plainly lit, no dramatic colour grading. No text, no labels, no captions, no borders, no watermark.",
+  "mime": "image/jpeg",
+  "usd": 0.06,
+  "takes": 1
+ },
+ "p08": {
+  "model": "grok-imagine-image-2.0",
+  "quality": "medium",
+  "made": "2026-11-23",
+  "prompt": "A hillside in northern Euboea, Greece, in 594 BCE, at noon in May, hot and bright, the sun high to the right, short sharp shadows. The camera stands on a stony slope of coarse conglomerate, brown rounded river cobbles set in a cemented matrix, not grey limestone karst, and looks down over low hills and flat-topped benches capped with hard pale limestone to a valley. Pale banks of marl show in the valley's cuttings. A modest river runs in a wide gravel bed lined with trees, toward the coast on the left, where the open blue Aegean lies beyond the valley mouth; far off at the very left edge, 14 km away, a tiny cluster of a few dozen low flat-roofed houses inside a stone wall on a low hill by the shore: a speck in the distance, not a large town. Ahead, a skyline of mountains, and on the right a high ridge. Uncleared slopes carry open woods of bright green Aleppo pine with maquis, the trees rough, branchy and knotted, not tall and straight; on the higher slopes, chestnut trees in leaf. On the lower ground, grey-green olive trees. In the fields of the valley floor, ripe grain is pale gold, not green: men are cutting it with sickles and sheaves lie on the stubble. A flock of sheep and goats with a herdsman on the hillside. No roads, no modern houses, no churches, no power lines, no fences, no marble temple. Seen from the eye height of a person standing on the ground, looking level at the horizon, wide angle. Photorealistic, like a documentary photograph taken in natural light, 16:9, sharp and plainly lit, no dramatic colour grading. No text, no labels, no captions, no borders, no watermark.",
+  "mime": "image/jpeg",
+  "usd": 0.06,
+  "takes": 3
+ },
+ "p09": {
+  "model": "grok-imagine-image-2.0",
+  "quality": "medium",
+  "made": "2026-11-23",
+  "prompt": "The Taihang foothills of northern China in June of 147 CE, in the Han dynasty, at three on a hot, dry afternoon, the camera looking up a valley partly into the sun, a dusty haze in the air and a few clouds that bring no rain. Below, flat-topped terraces of yellow-brown loess end in steep edges and low cliffs over a river that comes down the valley from ahead and passes beneath. Cut faces show the loess. Fields cover the terraces and the valley floor: winter wheat just reaped, pale stubble and freshly opened bare ground, and strips newly sown or just up with millet and hemp; little stands tall and green. Tiny figures hoe; oxen draw ploughs. Small walled courtyard farmsteads lie scattered among the fields and gathered in hamlets along the terrace and the river, villages in sight in every direction. On the foothills ahead, open woodland and grassland with scattered pines and wormwood; the hills near the plain mostly cleared, trees thin. On the horizon, the faint line of a high mountain range. No rice paddies, no maize, no closed forest, no lakes, no pagodas, no brick towers, no paved roads, no power lines, no modern buildings. Seen from about 300 metres above the ground, looking obliquely down and ahead, the horizon near the top of the frame. Photorealistic, like a documentary photograph taken in natural light, 16:9, sharp and plainly lit, no dramatic colour grading. No text, no labels, no captions, no borders, no watermark.",
+  "mime": "image/jpeg",
+  "usd": 0.06,
+  "takes": 1
+ },
+ "p10": {
+  "model": "grok-imagine-image-2.0",
+  "quality": "medium",
+  "made": "2026-11-23",
+  "prompt": "The western edge of Kanchipuram in South India in January 1285, at eleven on a warm, dry, bright morning after the monsoon, the sun high behind the camera's right shoulder. A straight, fairly wide street of beaten earth runs away north, with a row of coconut palms down each side, each row fenced by a low mud wall. Beside it, low single-storey mud houses with thatched or tiled roofs, each with one door to the street; walls and the ground before them smeared dull grey-green and brown with cow-dung, not whitewashed. In front of one house, a handloom and long stretched warp threads. A small stone shrine with a low tower. People in unstitched cloths wrapped about the hips, men bare above the waist; no tailored clothes. Small humped bullocks in the street. Beyond the houses, a flat plain rising very gently, pale quartz gravel and coarse light sand, not red earth; flooded rice fields, ripe and golden-green, some being reaped; tall palmyra palms singly and along bunds, tamarinds; on the horizon the long low earthen bank of a reservoir. No tall temple gateways on the skyline, no casuarinas, no horses, no paved road, no power lines, no concrete, no bicycles, no vehicles. Seen from the eye height of a person standing on the ground, looking level at the horizon, wide angle. Photorealistic, like a documentary photograph taken in natural light, 16:9, sharp and plainly lit, no dramatic colour grading. No text, no labels, no captions, no borders, no watermark.",
+  "mime": "image/jpeg",
+  "usd": 0.06,
+  "takes": 1
+ },
+ "p11": {
+  "model": "grok-imagine-image-2.0",
+  "quality": "medium",
+  "made": "2026-11-23",
+  "prompt": "The open North Pacific in March 1779, at eleven in the morning, seen from just above the surface of the sea, a metre or two up among the waves, with no boat, deck or rail in the frame. Sea to every horizon: no land, no island, no rock, no coast. Deep-ocean water, dark blue-grey, with no shoal colour and no kelp. A rough sea: waves of three metres and more with white caps blown into streaks of spray by a strong wind, and a long swell running under them. A low, grey, moving overcast of a winter storm sky, the light flat and grey, the sun hidden behind the camera; ahead, a grey curtain of snow showers trailing from the cloud and cutting the view. Bitter cold. No fog. A flock of seabirds low over the water, and one large dark albatross gliding close above the swell on long stiff wings. No sea ice, no floes, no icebergs. No ships, no sails, no boats, no whales, no sea otters, no sea lions. Seen from just above the surface of the open sea, at the eye height of a person, looking level at the horizon, wide angle. Photorealistic, like a documentary photograph taken in natural light, 16:9, sharp and plainly lit, no dramatic colour grading. No text, no labels, no captions, no borders, no watermark.",
+  "mime": "image/jpeg",
+  "usd": 0.06,
+  "takes": 1
+ },
+ "p12": {
+  "model": "grok-imagine-image-2.0",
+  "quality": "medium",
+  "made": "2026-11-23",
+  "prompt": "Khiva, in Central Asia, in October 1890, at ten on a bright, cool, cloudless morning, the air very clear, the sun ahead and to the left. From the air over the town's western garden quarter, looking south over dead flat ground. Below, walled gardens and orchards of elms and fruit trees, mulberry avenues, small canals, and flat-roofed houses of grey-brown mud round small courts with pools, each court with one high porch roof on its south side; dusty lanes between mud walls. At the left edge, the inner town's walls, low mud domes, two slender minarets and the wide, short, unfinished tower of the Kalta Minor, banded in blue, green and brown glazed tile. Across the middle ground, the outer wall: battlemented beaten clay about eight metres high, with towers, and a ditch, part water, part dry. Beyond it, flat farmland: walled farmsteads like small forts among tall poplars, sorghum, cotton with open white bolls, melons. Two-wheeled carts with very tall wheels on a dirt road. At the right, near the horizon, a sharp edge of bare pale sand hills. No storks, no tall tiled minaret over the town, no Russian flags or soldiers, no railway, no power lines, no paved roads. Seen from about 300 metres above the ground, looking obliquely down and ahead, the horizon near the top of the frame. Photorealistic, like a documentary photograph taken in natural light, 16:9, sharp and plainly lit, no dramatic colour grading. No text, no labels, no captions, no borders, no watermark.",
+  "mime": "image/jpeg",
+  "usd": 0.06,
+  "takes": 1
+ }
+}

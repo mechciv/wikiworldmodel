@@ -1,0 +1,332 @@
+view: t=0.010942Ma&lat=-20.58280&lon=-68.53883&d=1.0000023544&h=280&v=84&hour=10&mo=4&clock=0
+when: 10.9 ka
+place: >-
+  The Chilean Altiplano in the commune of Pica, Tarapacá Region, close to the Bolivian border: on a slope at about
+  4,390 m (SRTM 90 m, 4,392 m at the point) between Cerro Tornasol (4,878 m, 1.5 km to the north-north-east) and Cerro
+  Caiti (5,026 m, 2.3 km to the east), both behind the camera. Not Coipasa, Huasco, Cancosa or Isluga: Salar de Coposa
+  is 13 km west-south-west, Salar del Huasco some 40 km north-west, Cancosa 80 km north, and Volcán Irruputuncu 17 km
+  south, out of view. The camera faces west (280°), downhill. By today's elevations (SRTM, sampled along the bearing):
+  the ground falls to about 4,100 m at 2 km and to a basin floor near 3,740 m at 6 km, the northern end of the
+  Coposa basin; beyond it, hills of 3,800-4,150 m at 10-25 km and a ridge near 4,370 m at 30 km close the skyline
+  roughly level with the eye. The Pacific slope falls away behind that ridge (about 3,000 m at 60 km and 1,500 m at
+  80 km, toward Pica and the Pampa del Tamarugal), hidden from here. To the right of the axis, at 299° and 15 km,
+  stands the cone of Cerro Napa (5,140 m). Early Holocene, so the coordinates are the place as it stands today. April,
+  10:00: by my own reckoning (not a source) the sun is near 47° up in the north-east, behind the camera's right
+  shoulder.
+author: machine:claude-code
+expects:
+  - id: relief-slope-to-basin
+    layer: relief
+    what: >-
+      The camera stands high on a mountain flank and looks down a long slope, some 650 m of fall, to a flat basin
+      floor 5-8 km away; across the basin, low rolling hills, and a skyline of ridges about as high as the camera
+      itself, 25-30 km off. No lowland or sea is visible.
+    reach: place
+    source:
+      cite: "OpenTopography / Open Topo Data, SRTM 90 m (srtm90m) elevations at nine points along the 280° bearing from the camera, queried 22 November 2026."
+      url: "https://api.opentopodata.org/v1/srtm90m?locations=-20.58280,-68.53883|-20.57970,-68.55780|-20.57340,-68.59570|-20.56720,-68.63360|-20.55780,-68.69050|-20.53590,-68.82310|-20.50460,-69.01270|-20.48890,-69.10750|-20.45760,-69.29700"
+      text: srtm-profile-west.txt
+      loc: "results 1, 3 and 6 (0, 6 and 30 km along the bearing)"
+      quote: '"elevation": 4392.0'
+    note: >-
+      Today's surface, from a radar model. The quote is the camera's own height; the other heights are in the same
+      text (3741.0 at 6 km, 4369.0 at 30 km, 2992.0 at 60 km, 1525.0 at 80 km). No faulting or volcanism of the last
+      11,000 years is known to me that would change this view; the relief is carried back unchanged.
+  - id: relief-cerro-napa
+    layer: relief
+    what: >-
+      To the right of the view, a volcanic cone, Cerro Napa, rising about 750 m above the camera's height at 15 km,
+      the highest thing on the western skyline.
+    reach: place
+    source:
+      cite: "OpenStreetMap, node 452866158 (Cerro Napa), through Nominatim, queried 22 November 2026."
+      url: "https://nominatim.openstreetmap.org/search?q=Cerro%20Napa%2C%20Pica&format=json&limit=1&extratags=1"
+      text: osm-cerro-napa.txt
+      loc: "the one result"
+      quote: '"type":"volcano","place_rank":18'
+    note: >-
+      The same result gives its point (-20.5167, -68.6664) and "ele": "5140"; bearing and distance from the camera
+      are my arithmetic. A gazetteer, not a geological source: the age of the cone, and whether its slopes were
+      glaciated or snow-covered at 10.9 ka, were not found.
+  - id: geography-basins-and-volcanoes
+    layer: geography
+    what: >-
+      The scene is typical of the Puna of northern Chile: flat closed basins near 3,800 m, ringed by large volcanoes
+      that rise above 5,000 m.
+    reach: region
+    source:
+      cite: "López-García, P., Moreira, D., Gutiérrez-Preciado, A., López-García, J.M., López-Archilla, A.I., Benzerara, K., et al. (2026). Vulnerable microbial communities in Atacama–Altiplano wetlands: modern analogs of ancient ecosystems with implications for sustainability and conservation. FEMS Microbes 7, xtag045."
+      url: https://pmc.ncbi.nlm.nih.gov/articles/PMC13556470/
+      text: altiplano-wetlands-2026.txt
+      loc: "Box 1, The geological setting of the Central Andes Altiplano and the Atacama Desert"
+      quote: "These basins are surrounded by massive volcanoes, most of them active, dating back to the Miocene-Quaternary and rising well over 5000 masl"
+    note: >-
+      Said of the Puna of northern Chile as a whole. The Coposa basin floor ahead is at 3,740 m by SRTM, close to the
+      paper's "∼3800 masl".
+  - id: geography-salar-de-coposa
+    layer: geography
+    what: >-
+      At the left edge of the view (about 240°, 13 km), the low flat of Salar de Coposa, the lowest ground of the
+      basin.
+    reach: place
+    source:
+      cite: "OpenStreetMap, relation 17361600 (Salar de Coposa), through Nominatim, queried 22 November 2026."
+      url: "https://nominatim.openstreetmap.org/search?q=Salar%20de%20Coposa&format=json&limit=1"
+      text: osm-salar-coposa.txt
+      loc: "the one result"
+      quote: '"name":"Salar de Coposa"'
+    note: >-
+      OSM tags it a wetland; its bounding box runs from -20.576 to -20.704 latitude and -68.613 to -68.709
+      longitude, so its northern tip is about 8 km from the camera, some 30° left of the view axis. Whether it lies
+      inside the frame depends on the field of view. Today's outline: what it was at 10.9 ka is under water-* below.
+  - id: water-salt-flat-and-saline-lakes
+    layer: water
+    what: >-
+      On the lowest part of the basin floor, a white salt-encrusted flat with shallow saline lakes on it; no stream
+      leaves the basin.
+    reach: place
+    source:
+      cite: "Montgomery, E.L., Rosko, M.J., Castro, S.O., Keller, B.R. & Bevacqua, P.S. (2003). Interbasin underflow between closed Altiplano basins in Chile. Ground Water 41(4), 523-531."
+      url: "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=DOI:10.1111/j.1745-6584.2003.tb02386.x&format=json&resultType=core"
+      text: interbasin-underflow-abstract.txt
+      loc: "Abstract (as Europe PMC carries it)"
+      quote: "Salt-encrusted flats (salars) and saline lakes occur on the lowest parts of the basin floors and comprise the principal evaporative discharge areas for the basins."
+    note: >-
+      Of today's Coposa and Michincha basins, which the abstract names as "internally drained". Today's state: at
+      10.9 ka, with more rain (weather-cape-ii-pluvial) and higher groundwater (water-higher-groundwater), the salar
+      may have held more open water or a lake; no dated shoreline or lake record of the Coposa basin was found. Only
+      the abstract was read.
+  - id: water-higher-groundwater
+    layer: water
+    what: >-
+      More water on the basin floor than today: springs, wet ground and pools where groundwater reached the surface,
+      as the late-glacial wet phase was ending.
+    reach: region
+    source:
+      cite: "Nester, P.L., Gayó, E., Latorre, C., Jordan, T.E. & Blanco, N. (2007). Perennial stream discharge in the hyperarid Atacama Desert of northern Chile during the latest Pleistocene. PNAS 104(50), 19724-19729."
+      url: https://pmc.ncbi.nlm.nih.gov/articles/PMC2148365/
+      text: nester-2007-streams.txt
+      loc: "Paleoenvironmental Interpretation and Regional Paleoclimate, the paragraph on rodent middens and paleowetlands"
+      quote: "Across the same area, paleowetland deposits signify higher groundwater tables from >15,400 to 9,000 cal yr BP at altitudes above 2,500 m"
+    note: >-
+      "The same area" is 170-300 km south-south-east of the Pampa del Tamarugal, i.e. some 200-300 km south of this
+      point, on the Andean slope rather than the Altiplano. The same paragraph says the second Altiplano lake cycle,
+      "Coipasa", existed 13,000-11,000 cal yr BP: by 10.9 ka it was ending, and the Coipasa basin lies some 100 km
+      north-east, behind the camera, so no great lake is in this frame either way.
+  - id: cover-tola-and-bunchgrass
+    layer: cover
+    what: >-
+      The slope around and below the camera: a low open shrubland of resinous tola bushes (Parastrephia) with tussocks
+      of hard bunchgrass (Festuca orthophylla) between them, knee-high or less, on stony ground.
+    reach: region
+    source:
+      cite: "Araneda, P., Sielfeld, W., Bonacic, C. & Ibarra, J.T. (2018). Bird diversity along elevational gradients in the Dry Tropical Andes of northern Chile: the potential role of Aymara indigenous traditional agriculture. PLoS ONE 13(12), e0207544."
+      url: "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0207544"
+      text: araneda-2018-birds.txt
+      loc: "Methods, Study area, the list of vegetation belts, item (4)"
+      quote: "The High-Andean belt (>4000 masl) is represented by the Andean Tropical Low Shrub Formation of zonal vegetation dominated by Parastrephia lepidophylla and P. quadrangularis, where abundant Festuca orthophylla and Tetraglochin cristatum can also be found."
+    note: >-
+      Today's vegetation of the Aroma/Chiapa basin, about 90 km north-west on the Pacific slope. Carried to this
+      Altiplano slope and back 10,900 years: middens of the late-glacial wet phase record plant belts lower and
+      denser than today, so the cover may have been thicker or of other species. "Knee-high" and "stony" are mine.
+  - id: cover-queñoa-groves
+    layer: cover
+    what: >-
+      Possibly, on the higher volcano slopes, scattered groves of queñoa (Polylepis tarapacana): gnarled, many-stemmed
+      evergreen trees and shrubs 1-5 m high, the only trees in view.
+    reach: region
+    source:
+      cite: "López, V.L., Bottan, L., Martínez Pastur, G., Lencinas, M.V., Cuyckens, G.A.E., Cellini, J.M., et al. (2023). Characterization of Polylepis tarapacana life forms in the highest-elevation Altiplano in South America: influence of the topography, climate and human uses. Plants 12(9), 1806."
+      url: https://pmc.ncbi.nlm.nih.gov/articles/PMC10180703/
+      text: polylepis-tarapacana-forms.txt
+      loc: "4. Materials and Methods, first paragraph"
+      quote: "Polylepis tarapacana (Rosaceae: Sanguisorbeae) is a species that constitute rare, monospecific evergreen forests distributed in the sem-iarid high beds of the western Altiplano from southern Peru to south-western Bolivia, northern Chile and adjacent northwest Argentina (16°–23° S) [72] at 3400–5013 m a.s.l."
+    note: >-
+      The range covers this point's latitude and height, and the same text says the species is "usually" 1-5 m
+      high; the paper's plots are in Argentina. No stand on these particular hills, today or at 10.9 ka, was found:
+      whether any queñoa is in the frame is not known.
+  - id: cover-bofedal-at-springs
+    layer: cover
+    what: >-
+      On the basin floor, where springs rise at the edge of the salt flat, bright green cushion bogs and wet
+      meadows (bofedal) against the tawny slopes.
+    reach: region
+    source:
+      cite: "López-García, P., Moreira, D., Gutiérrez-Preciado, A., López-García, J.M., López-Archilla, A.I., Benzerara, K., et al. (2026). Vulnerable microbial communities in Atacama–Altiplano wetlands: modern analogs of ancient ecosystems with implications for sustainability and conservation. FEMS Microbes 7, xtag045."
+      url: https://pmc.ncbi.nlm.nih.gov/articles/PMC13556470/
+      text: altiplano-wetlands-2026.txt
+      loc: "Distinctive wetland ecosystems in harsh arid land, the paragraph after Figure 1"
+      quote: "Mildly saline Altiplano–Puna wetlands are often associated with grasses and cushion plant species that form bofedal ecosystems"
+    note: >-
+      Today's wetlands of the region (the paper's figure shows bofedal at Salar del Huasco, 40 km north-west).
+      Whether bofedal lay on the Coposa basin floor at 10.9 ka is not recorded; the colours are my gloss.
+  - id: life-camelids
+    layer: life
+    what: >-
+      Wild camelids on the slopes and basin floor: small family groups of vicuña, and guanaco, grazing toward the
+      wet ground. No llamas or alpacas: none were yet domesticated.
+    reach: region
+    source:
+      cite: "López-García, P., Moreira, D., Gutiérrez-Preciado, A., López-García, J.M., López-Archilla, A.I., Benzerara, K., et al. (2026). Vulnerable microbial communities in Atacama–Altiplano wetlands: modern analogs of ancient ecosystems with implications for sustainability and conservation. FEMS Microbes 7, xtag045."
+      url: https://pmc.ncbi.nlm.nih.gov/articles/PMC13556470/
+      text: altiplano-wetlands-2026.txt
+      loc: "Distinctive wetland ecosystems in harsh arid land, the paragraph after Figure 1"
+      quote: "They also offer food and habitat for a diversity of small (e.g. vizcachas) and large (e.g. Andean camelids: vicuñas, guanacos, and llamas) mammals and their predators"
+    note: >-
+      Today's fauna of Altiplano–Puna wetlands, carried back. For the time: camps of 11,950-11,370 cal BP at the
+      Pampa del Tamarugal, 100 km west, held "a few young camelid bones" (Ugalde et al. 2024, first-peoples-grove-2024.txt,
+      Results, site PR7). Llamas are left out of the frame because they are domestic; that they had not yet been
+      bred at 10.9 ka is my reading, not this source's. Vizcachas among rocks are possible and too small to see far off.
+  - id: life-chinchilla-rats
+    layer: life
+    what: >-
+      Among boulders and rock outcrops, ashy chinchilla rats (Abrocoma cinerea), shy and seldom seen, and their
+      urine-cemented midden heaps in crevices.
+    reach: region
+    source:
+      cite: "González-Pinilla, F.J., Latorre, C., Rojas, M., Houston, J., Rocuant, M.I., Maldonado, A., Santoro, C.M., Quade, J. & Betancourt, J.L. (2021). High- and low-latitude forcings drive Atacama Desert rainfall variations over the past 16,000 years. Science Advances 7(38), eabg1333."
+      url: https://pmc.ncbi.nlm.nih.gov/articles/PMC8448445/
+      text: atacama-rainfall-16ka.txt
+      loc: "Introduction, last paragraphs (the one on A. cinerea middens)"
+      quote: "At present, this species occurs at elevations >3500 m, where MAR and mean annual temperature (MAT) are ca. 60 to 70 mm/year and 5° to 6°C, respectively"
+    note: >-
+      Of northern Chile from 21° to 24°S, today; the same paragraph says radiocarbon-dated middens of the late
+      Quaternary record it lower down than today. A small animal: in an eye-level frame at most a dot on a rock, and its middens
+      only close up.
+  - id: life-flamingos
+    layer: life
+    what: >-
+      Possibly, on the shallow saline water of the basin floor, flamingos: pink specks at 6-13 km.
+    reach: region
+    source:
+      cite: "López-García, P., Moreira, D., Gutiérrez-Preciado, A., López-García, J.M., López-Archilla, A.I., Benzerara, K., et al. (2026). Vulnerable microbial communities in Atacama–Altiplano wetlands: modern analogs of ancient ecosystems with implications for sustainability and conservation. FEMS Microbes 7, xtag045."
+      url: https://pmc.ncbi.nlm.nih.gov/articles/PMC13556470/
+      text: altiplano-wetlands-2026.txt
+      loc: "Distinctive wetland ecosystems in harsh arid land, the paragraph after Figure 1"
+      quote: "including endangered migratory species such as the emblematic flamingos"
+    note: >-
+      Today's birds of the Altiplano wetlands in general; no record of flamingos at Coposa at 10.9 ka was found. At
+      this distance they would be at the edge of what an eye can make out.
+  - id: weather-after-summer-rains
+    layer: weather
+    what: >-
+      April is just after the rainy season: the summer storms of January to March are over, the morning is dry and
+      mostly clear, the grass already turning straw-coloured.
+    reach: region
+    source:
+      cite: "Araneda, P., Sielfeld, W., Bonacic, C. & Ibarra, J.T. (2018). Bird diversity along elevational gradients in the Dry Tropical Andes of northern Chile: the potential role of Aymara indigenous traditional agriculture. PLoS ONE 13(12), e0207544."
+      url: "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0207544"
+      text: araneda-2018-birds.txt
+      loc: "Methods, Study area, first paragraph"
+      quote: "The area receives rainwater during the summer season (45.56 ± 35.32 mm), mainly between January and March"
+    note: >-
+      Today's climate of the Aroma/Chiapa basin, 90 km north-west. Hernández et al. (2016, huasco-solar-radiation.txt,
+      Study Area) say the same of Salar del Huasco, 40 km north-west: "Precipitation at Salar de Huasco is low and
+      occurs over a short summer rainy season". That the rain came in summer in the early Holocene too is my reading
+      of González-Pinilla et al. (2021), who tie the wet phases to the summer monsoon; "mostly clear" and the grass's colour are my gloss.
+  - id: weather-cape-ii-pluvial
+    layer: weather
+    what: >-
+      A wetter climate than today's, though variable from century to century: this is the last part of the
+      late-glacial wet phase (CAPE II), so the year may have brought one and a half to twice today's rain, or about
+      today's.
+    reach: region
+    source:
+      cite: "González-Pinilla, F.J., Latorre, C., Rojas, M., Houston, J., Rocuant, M.I., Maldonado, A., Santoro, C.M., Quade, J. & Betancourt, J.L. (2021). High- and low-latitude forcings drive Atacama Desert rainfall variations over the past 16,000 years. Science Advances 7(38), eabg1333."
+      url: https://pmc.ncbi.nlm.nih.gov/articles/PMC8448445/
+      text: atacama-rainfall-16ka.txt
+      loc: "Results, first paragraph"
+      quote: "rainfall was much more variable from 13.0 to 8.6 ka B.P. during CAPE II (Fig. 2), characterized by large centennial-scale fluctuations of very wet (from 100 to 60 mm/year, the largest anomalies in our record) to mildly wet or dry periods (60 to 10 mm/year)"
+    note: >-
+      The figures are anomalies above today's mean annual rainfall, from rodent middens of the central Atacama
+      (22-23°S, 200-280 km south) at lower elevations. Whether the decades around 10.9 ka were in a very wet or a
+      mild spell cannot be read from the text; "one and a half to twice" is my gloss of the anomalies against the
+      60-70 mm a year that the same paper gives for today above 3,500 m.
+  - id: sky-intense-sun
+    layer: sky
+    what: >-
+      A deep, dark blue sky and a hard, brilliant light: thin air and some of the strongest sunlight and ultraviolet
+      on Earth, with sharp shadows on the slope.
+    reach: region
+    source:
+      cite: "López-García, P., Moreira, D., Gutiérrez-Preciado, A., López-García, J.M., López-Archilla, A.I., Benzerara, K., et al. (2026). Vulnerable microbial communities in Atacama–Altiplano wetlands: modern analogs of ancient ecosystems with implications for sustainability and conservation. FEMS Microbes 7, xtag045."
+      url: https://pmc.ncbi.nlm.nih.gov/articles/PMC13556470/
+      text: altiplano-wetlands-2026.txt
+      loc: "Distinctive wetland ecosystems in harsh arid land, first paragraph"
+      quote: "The Altiplano–Puna is also extremely arid and experiences among the highest levels of surface ultraviolet radiation and total solar irradiance measured on the planet"
+    note: >-
+      Today's measurements carried back; the colour of the sky is my gloss of thin, dry air at 4,400 m. The sun is behind the camera at 10:00, so the slope ahead is lit
+      from behind.
+  - id: ice-snow-on-peaks
+    layer: ice
+    what: >-
+      Perhaps a little snow lingering on the summit of Cerro Napa after the wet season; none on the lower slopes.
+    reach: region
+    source:
+      cite: "López-García, P., Moreira, D., Gutiérrez-Preciado, A., López-García, J.M., López-Archilla, A.I., Benzerara, K., et al. (2026). Vulnerable microbial communities in Atacama–Altiplano wetlands: modern analogs of ancient ecosystems with implications for sustainability and conservation. FEMS Microbes 7, xtag045."
+      url: https://pmc.ncbi.nlm.nih.gov/articles/PMC13556470/
+      text: altiplano-wetlands-2026.txt
+      loc: "Distinctive wetland ecosystems in harsh arid land, first paragraph"
+      quote: "Moisture availability increases with elevation, where water condenses and falls as snow on volcano peaks and, less frequently, as rain or snow across the Altiplano."
+    note: >-
+      A general statement of today. Whether Cerro Napa (5,140 m) carried snow, firn or a small glacier in April of
+      10.9 ka is not known; no glacial record of this range was read.
+  - id: people-hunters-around-wetlands
+    layer: people
+    what: >-
+      People could be in this landscape: small bands of hunters who camped in the open around the lakes and wetlands
+      of the high basins. A camp would be by the water on the basin floor, not on this slope; at most a wisp of smoke
+      or a few figures far off.
+    reach: region
+    source:
+      cite: "Núñez, L., Grosjean, M. & Cartajena, I. (2002). Human occupations and climate change in the Puna de Atacama, Chile. Science 298(5594), 821-824."
+      url: "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=DOI:10.1126/science.1076449&format=json&resultType=core"
+      text: nunez-2002-puna-abstract.txt
+      loc: "Abstract (as Europe PMC carries it)"
+      quote: "More than 39 open early Archaic campsites at elevations above 3600 meters show that hunters lived around late glacial/early Holocene paleolakes on the Altiplano."
+    note: >-
+      Only the abstract could be read. The same abstract gives the span as 13,000 to 9500 cal yr B.P. and the area
+      as 20° to 25°S, which takes in this point, but its sites are in the Puna de Atacama, mostly far south of here.
+      No camp is recorded in the Coposa basin in anything read. "Smoke" and "figures" are mine; the weight that drew
+      this point (HYDE's 1,422 people in the 1° cell) is a model's, not a count.
+  - id: people-links-to-the-lowland
+    layer: people
+    what: >-
+      Beyond the western skyline, out of sight 100 km away, lowland camps among trees and wetlands in the Pampa del
+      Tamarugal whose people were in touch with the highlands, so paths across these hills are possible.
+    reach: region
+    source:
+      cite: "Ugalde, P.C., Joly, D., Latorre, C., Gayo, E.M., Labarca, R., Simunovic, M., McRostie, V., Holliday, V.T., Quade, J., Santoro, C.M., et al. (2024). The first peoples of the Atacama Desert lived among the trees: a 11,600- to 11,200-year-old grove and congregation site. PNAS 121(18), e2320506121."
+      url: https://pmc.ncbi.nlm.nih.gov/articles/PMC11067013/
+      text: first-peoples-grove-2024.txt
+      loc: "Introduction, the paragraph on what the sites reveal"
+      quote: "Connections with people from the Andes (80 to 100 km away), the Pacific coast (60 to 80 km away), and the tropical lowlands east of the Andes (800 km away) were revealed by the presence of exotic materials, such as obsidian and marine shells"
+    note: >-
+      The camps (QM12, QM32, QM35, PR7) date from about 12,900 to 11,200 cal BP, just before this moment; they are
+      not in the frame. Which Andean places those connections reached is not said. A path or a trail is my inference,
+      and nothing built would show.
+unknown:
+  - Whether the Coposa basin held a lake, a larger salar or only wetlands at 10.9 ka; no dated shoreline, core or lake record of this basin was found.
+  - What the ground underfoot is made of (lava, ignimbrite, scree, volcanic sand) and its colour; no geological map or description of the slopes of Cerro Tornasol and Cerro Caiti was read.
+  - Whether any glacier or perennial snow stood on Cerro Napa, Cerro Caiti or the other peaks above 5,000 m at 10.9 ka.
+  - How dense and how tall the shrub and grass cover was on this slope during CAPE II, and whether the plant belts stood lower than today; no plant macrofossil or pollen record from 20-21°S on the Altiplano was read.
+  - Whether queñoa (Polylepis tarapacana) grew on these hills then, or grows on them now.
+  - Which animals were actually here: no faunal record of the early Holocene from the Coposa, Huasco or Michincha basins was found. Whether any extinct large mammal still lived at this height at 10.9 ka is not known.
+  - Whether people camped in this basin, and how many; no archaeological site in the Coposa basin was found in anything read, and the nearest dated highland sites were not reached.
+  - The weather of that morning (clouds, wind, frost on the ground at 10:00); the sources give a season and a climate, not a day.
+pictures:
+  - { url: "https://commons.wikimedia.org/wiki/File:Salar_Coposa_-_Chile.jpg", what: "Salar de Coposa today: the basin floor the camera looks toward." }
+  - { url: "https://commons.wikimedia.org/wiki/File:Salar_de_Coposa,_Regi%C3%B3n_de_Tarapac%C3%A1.JPG", what: "Salar de Coposa today, another view of the salt flat and its rim of hills." }
+  - { url: "https://commons.wikimedia.org/wiki/File:Salar_del_Huasco,_I_Region.jpg", what: "Salar del Huasco today, 40 km north-west: a nearby basin with bofedal and lagoons." }
+effort:
+  fetched: 21
+  cited: 11
+  failed: 8
+  note: >-
+    21 fetches through fetch_text, 13 texts kept, 11 cited (12 read; an eLife paper on ancient camelid DNA was read
+    and dropped, as it is of the Salar de Atacama 3,000 years ago). Refused: three PubMed Central pages at first (a
+    browser check), later fetched; Europe PMC's full-text service (500) three times; MDPI (403); eLife (403). The
+    place was found first, with SRTM and OpenStreetMap: the hint's Coipasa, Huasco, Cancosa and Isluga are 40-120 km
+    off, and the point is on a slope above the Coposa basin. Longest: looking for anything dated to the early Holocene
+    in the Coposa, Huasco or Michincha basins (a lake record, a midden, a camp); none was reached. The build holds no
+    rock collection within 30 km.

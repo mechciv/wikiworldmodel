@@ -1,0 +1,38 @@
+# Round 5's verdicts for p06: the western Amazon lowland of the Ucayali basin, eye level facing east-north-east, 16:00 in May, 2.65 Ma.
+author: machine:claude-code
+judged: "2026-11-22"
+summary: >-
+  The viewer gets the lie of the land and the empty human world right: a level lowland with no mountain on the
+  skyline, and no people. What it draws on it is an open savanna of evenly spaced umbrella trees over bare mud, where
+  the reviews put closed terra firme rainforest; the climate field's driest month misses the monsoon-forest line by
+  under 4 mm, and that tips the whole frame. There is no river, so the caimans the atlas lists here are not placed,
+  and the list carries a specialised giant caiman past its time.
+items:
+  relief-low-flat-lowland: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "field:earth/elevation", why: "Level ground to the horizon at every spot; the viewer has it 250 m up where Pucallpa's gauge today is at 145 m, which the frames do not show." }
+  relief-divisor-far-skyline: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "field:earth/elevation", why: "No mountains anywhere; at a a faint low line of hills shows between the trunks, and at b and c the trees close the skyline." }
+  water-meandering-river-oxbows: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "model:earth/drainage", why: "The drainage model has no river or lake in the scene, and the brief cannot say where the Ucayali ran at 2.65 Ma, only that it runs near here today." }
+  water-floodplain-draining-in-may: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "model:earth/drainage", why: "No water is in view, so a falling river in May cannot be held to the frames." }
+  geography-drains-east-to-atlantic: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "model:earth/drainage", why: "A setting of the whole basin, not a sight." }
+  cover-terra-firme-rainforest: { verdict: wrong, spots: { a: wrong, b: wrong, c: wrong }, owner: "field:earth/climate", why: "An open savanna of evenly spaced umbrella trees over bare ground with sparse herbs at every spot; the climate field answers savanna (Aw), its driest month 3.7 mm short of what monsoon forest needs, with rain 2.7 times the arid threshold." }
+  cover-varzea-floodplain-forest: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "model:earth/drainage", why: "There is no floodplain in the scene, and whether one lay here at 2.65 Ma is not known." }
+  substrate-oxidized-sand-gravel: { verdict: wrong, spots: { a: wrong, b: wrong, c: wrong }, owner: "model:earth/substrate", why: "The ground is a smooth tan mud everywhere, from the one rock collection the model reads (gray claystone, 157 km east, at half weight); not the oxidized sand and gravel of the Madre de Dios beds, 600 km off, which the world does not read." }
+  substrate-red-beds-in-cutbanks: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "model:earth/substrate", why: "No river and no cutbank in view." }
+  life-caimans: { verdict: missing-held, spots: { a: missing-held, b: missing-held, c: missing-held }, owner: "gen:life/scene", why: "Caiman is on the list as recorded here (4 rows) and is not placed at any spot: there is no water for it." }
+  life-no-gharials-or-giant-crocodilians: { verdict: wrong, spots: { a: wrong, b: wrong, c: wrong }, owner: "model:life/atlas", why: "No gavialoid is listed, but Mourasuchus, a specialised giant caiman, is, from one row 310 km off dated only 5.33 to 2.58 Ma; it is not placed only because there is no water." }
+  life-giant-rodent-uncertain: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "gen:life/scene", why: "Phoberomys is listed as recorded here (2 rows) and placed at every spot, none in sight; one queried tooth is all the brief has, so a frame without one says nothing." }
+  life-freshwater-crabs: { verdict: missing-not-held, spots: { a: missing-not-held, b: missing-not-held, c: missing-not-held }, owner: "model:life/atlas", why: "No crab is on the list: the Contamana row is Trichodactylidae indet., a family, and the build's atlas holds no Trichodactylidae at all." }
+  people-none: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "model:people/lifeways", why: "No people and nothing made; the people layer answers unknown and the scene has no settlement." }
+findings:
+  - >-
+    One number decides the frame: the climate field's driest month here is 3.7 mm under the monsoon-forest line
+    (margin -3.67), so a place with rain 2.7 times the arid threshold is classed savanna and drawn as open umbrella
+    trees over bare mud. A class this close to its edge could carry the spread of the climate, or draw a transition,
+    rather than flip the whole cover.
+  - >-
+    The scene's animals are mostly of the pampas, carried from 1,370 to 2,200 km south: glyptodonts (Plaina,
+    Panochthus, Glyptodon, Prodaedicurus), tuco-tucos (Ctenomys), cavies (Microcavia) and Andean mice (Akodon,
+    Abrothrix) are placed and labelled in an Amazonian lowland. None of the list's plants (Cassia, Acacia,
+    Copaifera, Terminalia) is placed; every tree is a generic flowering-plant body.
+  - >-
+    The viewer has the ground 250 m up at all three spots (the eye at 245 to 255 m), against 145 m at Pucallpa's
+    gauge today in a basin that has been filling since; a flat frame cannot show it.

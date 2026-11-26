@@ -247,3 +247,20 @@ behind each, is in [PARITY.md](PARITY.md). That reading corrected eight of the r
   than the brief is, most of all for plants and animals.
 - **No seed.** The model takes none, so a picture cannot be made again as it was: the prompt and the number of
   the take are what a round keeps.
+
+## 8. The fifth round: a fresh draw
+
+Rounds 2 to 4 shot round 1's panel again on newer builds. Round 5, in
+[tools/gaps/rounds/5/](../../tools/gaps/rounds/5/), is the first fresh draw: twelve new points from round 1's sampler
+with its lessons taken (time from 1 Ga, people by number with half their draws to towns, three spots a point), on
+build 46e013ad3acac105 with the seed `gaps-round-5`, and shot again on build 3b9f48ad after the fidelity pass. Its
+[README](../../tools/gaps/rounds/5/README.md) has the counts, the owners and the ranked findings.
+
+**The count.** 188 items; of the 135 testable, 51 drawn (37.8%), against round 1's 31.3% and round 4's 33.1% on the
+fixed panel. The re-take drew 50 of 136: the pictures changed far more than the verdicts, since the briefs ask mostly
+what is there, not how it looks.
+
+**What it found**, by reach: scenes cut flat above 3,200 m (since fixed in the scene generator's `v12`); at sea the
+camera under the water and the land's list on the shelf; towns between two figures of a city list gone; the atlas
+carrying life too far and into the wrong habitats; forest drawn as savanna; no scene before the Phanerozoic; and the
+viewer's resolver never asked about life.

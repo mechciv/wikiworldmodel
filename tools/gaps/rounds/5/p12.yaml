@@ -1,0 +1,375 @@
+view: t=1890.427&lat=41.37781&lon=60.34167&d=1.0000941767&h=170&v=60&hour=10&mo=10&clock=0
+when: 1890 CE
+place: >-
+  Khiva, Khorezm, Uzbekistan, then the capital of the Khanate of Khiva. The point is about 1.3 km due west of the Ata
+  (Ota) Darvoza, the west gate of the inner town, the Ichan Kala (OpenStreetMap through Nominatim: the point on road
+  D227a at 41.3789 N, 60.3419 E; the gate at 41.3787 N, 60.3572 E). That is the western quarter between the inner
+  town and the outer wall of 1842 (the Dishan Kala), at or near the outer wall itself, on the flat irrigated plain of
+  the Amu-darya delta, about 100 m above the sea. The camera is about 300 m up and about 520 m north of the point,
+  looking south (170°) across the western gardens and over the farmland beyond the wall, at 10 in the morning in
+  October.
+author: machine:claude-code
+expects:
+  - id: geography-western-garden-quarter
+    layer: geography
+    what: >-
+      The ground under and in front of the camera is the garden quarter of the town: walled gardens with many elms
+      and fruit trees, threaded with little canals, between the mud-built inner town on the left and the outer wall;
+      more like a country suburb than a town.
+    reach: place
+    source:
+      cite: "MacGahan, J. A. (1874). Campaigning on the Oxus, and the Fall of Khiva. London: Sampson Low, Marston, Low, and Searle. Internet Archive campaigningonoxu00macg."
+      url: https://archive.org/download/campaigningonoxu00macg/campaigningonoxu00macg_djvu.txt
+      text: macgahan-1874.txt
+      loc: "Ch. XV, The City of Khiva in the Year 1873, p. 293"
+      quote: "In another place, the interspace between the citadel and outer wall is taken up with gardens. This — the western part of the city — is by far its pleasantest quarter. There are numbers of elms and fruit trees, and many little canals"
+    note: >-
+      Seen in June 1873, seventeen years before the scene, of exactly the quarter the point is in. The Britannica of
+      1911 (eb1911-khiva-town.txt) still has "Large gardens exist in the western part of the town", so the quarter
+      held through 1890. Lansdell, looking down from the Juma minaret in November 1882, saw within the outer wall
+      "many fields and gardens ... and fortress-like farmhouses" (lansdell-1885-v2.txt, p. 305, footnote): not a
+      continuous town but open ground with houses in it.
+  - id: people-outer-wall-and-ditch
+    layer: people
+    what: >-
+      The outer wall of beaten clay, about 8 m high on average and higher in places, as thick at its foot and
+      narrowing to under a metre at the top, battlemented, with towers and gates; a ditch 6 to 8 m wide runs round
+      it, in places full of water like a canal, in places dry. The ring of the wall is 1.6 to 2.4 km across, so its
+      western side runs within a few hundred metres of the point.
+    reach: place
+    source:
+      cite: "MacGahan, J. A. (1874). Campaigning on the Oxus, and the Fall of Khiva. London: Sampson Low, Marston, Low, and Searle. Internet Archive campaigningonoxu00macg."
+      url: https://archive.org/download/campaigningonoxu00macg/campaigningonoxu00macg_djvu.txt
+      text: macgahan-1874.txt
+      loc: "Ch. XV, pp. 292-293"
+      quote: "The diameter at longest is a mile and a half; and at shortest a mile. In height the wall is, on the average, twenty-five feet, but in many places higher … I saw this ditch quite full of water in some places — a regular canal, in fact ; in other places it was quite dry."
+    note: >-
+      Of 1873; MacGahan dates the wall to 1842, built by Allah-Kuli Khan. Lansdell (p. 305, footnote) gives the same
+      figures in 1882 and adds that the wall "is pierced by 12 gates, and the whole is girdled by a wide ditch".
+      Burnaby (January 1876, burnaby-1876.txt, p. 142) has the outer wall "about fifty feet high", with a footing of
+      baked brick and an upper part of dried clay: a competing height, twice MacGahan's. Exactly where the western
+      wall ran in relation to the point, inside or outside, could not be found (see unknown).
+  - id: water-ingrik-canal
+    layer: water
+    what: >-
+      One of the two canals that water the town runs through this south-western part of it, feeding the pools in the
+      courtyards of the houses.
+    reach: place
+    source:
+      cite: "MacGahan, J. A. (1874). Campaigning on the Oxus, and the Fall of Khiva. London: Sampson Low, Marston, Low, and Searle. Internet Archive campaigningonoxu00macg."
+      url: https://archive.org/download/campaigningonoxu00macg/campaigningonoxu00macg_djvu.txt
+      text: macgahan-1874.txt
+      loc: "Ch. XV, p. 293"
+      quote: "the water supply comes principally from two canals : the Chingeri, in the northern, and the Ingrik, in the south-western part of the town."
+    note: >-
+      Of 1873. Its course, width and whether it ran full in October are not given. The same page has a little pool of
+      water in many of the courts of the houses, fed from the canals.
+  - id: water-palvan-ata-aryk
+    layer: water
+    what: >-
+      The great canal of Khiva, the Palvan-Ata (Palvan-yab), comes in from the east past the town, branching all
+      along its course into smaller canals, and runs out into the desert about 5 km west of the town.
+    reach: place
+    source:
+      cite: "Lansdell, H. (1885). Russian Central Asia, including Kuldja, Bokhara, Khiva and Merv. Vol. II. London: Sampson Low, Marston, Searle, and Rivington. Internet Archive russiancentralas02lansuoft."
+      url: https://archive.org/download/russiancentralas02lansuoft/russiancentralas02lansuoft_djvu.txt
+      text: lansdell-1885-v2.txt
+      loc: "Vol. II, ch. LX, pp. 253-254, footnote"
+      quote: "the great Palvan-Ata-aryk, running almost due west, a course of about 50 miles past Hazarasp and Bagat to Khiva. It throws out canals and smaller branches all along this stem, … like a well-trained espalier tree, till it disappears in the desert, 3 mile west of the capital."
+    note: >-
+      Written of the early 1880s, from Russian maps. "3 mile" is the scan's reading. Where the canal's main bed runs
+      in relation to the point (north of it, through the town, or south) the footnote does not say; today it runs
+      past the north side of the Ichan Kala, which would put it behind the camera.
+  - id: people-flat-roofs-courts-trees
+    layer: people
+    what: >-
+      From above, the town is flat mud roofs and small courts and gardens, with the dark crowns of great elms and the
+      thin columns of poplars rising out of them, and slender minarets above all.
+    reach: place
+    source:
+      cite: "MacGahan, J. A. (1874). Campaigning on the Oxus, and the Fall of Khiva. London: Sampson Low, Marston, Low, and Searle. Internet Archive campaigningonoxu00macg."
+      url: https://archive.org/download/campaigningonoxu00macg/campaigningonoxu00macg_djvu.txt
+      text: macgahan-1874.txt
+      loc: "Ch. XI, p. 255"
+      quote: "The flat mud roofs had turned to marble ; the tall, slender minarets rose dim and indistinct, like spectre sentinels watching over the city. Here and there little courts and gardens lay buried in deepest shadow, from which arose the dark masses of mighty elms and the still and ghostly forms of the slender poplars."
+    note: >-
+      Seen by moonlight in June 1873 from a tower of the Khan's palace in the inner town, so the light is not the
+      scene's; what it shows of the town from above, roofs, courts, elms and poplars, is. The Britannica of 1911
+      (eb1911-khiva-khanate.txt) speaks of "white-washed houses scattered amidst the elms and poplars" in the oasis,
+      where MacGahan and Lansdell see bare mud: the colour of the walls is not settled.
+  - id: people-courtyard-houses
+    layer: people
+    what: >-
+      The houses are of clay, windowless to the street, each built round a court with its rooms opening into it; on
+      the south side of each court a high porch facing north, its roof standing 2.5 to 3 m above the walls to catch
+      the wind. The streets between are 3 to 6 m wide, between mud walls 3 to 6 m high.
+    reach: place
+    source:
+      cite: "MacGahan, J. A. (1874). Campaigning on the Oxus, and the Fall of Khiva. London: Sampson Low, Marston, Low, and Searle. Internet Archive campaigningonoxu00macg."
+      url: https://archive.org/download/campaigningonoxu00macg/campaigningonoxu00macg_djvu.txt
+      text: macgahan-1874.txt
+      loc: "Ch. XV, pp. 294-295"
+      quote: "Around this court are disposed the rooms of the dwelling, all opening into it, and rarely having any other communication with each other. On the south side, and always facing the north, is a high porch, … whose roof usually rises some eight or ten feet above the surrounding walls ; and serves to catch the wind"
+    note: >-
+      Of Khiva in 1873; the widths and heights of streets and walls are from the same pages ("from ten to twenty feet
+      wide", walls "from ten to twenty feet"). From 300 m up looking south the porches would face the camera, a row
+      of raised roofs on the far side of each court. How many people lived in the town is disputed: Lansdell put it
+      at about 30,000 from the minaret in 1882 (p. 307), the Britannica of 1911 "about 10,000", the build's list
+      20,000 for 1800.
+  - id: people-skyline-cupolas-minarets
+    layer: people
+    what: >-
+      To the left, over the inner town, a skyline of low mud cupolas over the mosques and madrasas, two slender
+      minarets alike in form (the Juma mosque's and another), and the great unfinished tower of the Kalta Minor,
+      broad and banded in blue, green and brown glazed brick; few other buildings stand out.
+    reach: place
+    source:
+      cite: "Lansdell, H. (1885). Russian Central Asia, including Kuldja, Bokhara, Khiva and Merv. Vol. II. London: Sampson Low, Marston, Searle, and Rivington. Internet Archive russiancentralas02lansuoft."
+      url: https://archive.org/download/russiancentralas02lansuoft/russiancentralas02lansuoft_djvu.txt
+      text: lansdell-1885-v2.txt
+      loc: "Vol. II, ch. LXII, p. 307, from the top of the Juma mosque's minaret"
+      quote: "the mud cupolas over them, and we could see well another minaret belonging, I think, to the mosque Seid Bai, almost a facsimile of the one on which we were standing. The big minaret also stood out well, but there were few other buildings sufficiently conspicuous to be worthy of mention."
+    note: >-
+      November 1882. The "big minaret" is the unfinished tower Lansdell describes on pp. 289-290 as "the most
+      prominent architectural object in the town", with zones of light and dark blue, green and brown bricks, about
+      146 ft round. The tallest minaret of Khiva today, the Islam Khodja (56.6 m), was built in 1908-1910
+      (wiki-islamkhodja-madrasah.txt) and must not be in the scene. From the camera the inner town lies at a bearing of
+      about 110°, some 60° left of the heading, so it is at the left edge of the view or just out of it.
+  - id: people-ichan-kala-walls
+    layer: people
+    what: >-
+      The inner town is a walled rectangle about 650 by 400 m, long from south to north, with walls up to 10 m high;
+      its west wall and gate face the point across about 1.3 km of garden quarter.
+    reach: place
+    source:
+      cite: "UNESCO World Heritage Centre. Itchan Kala (list no. 543), description and statement of outstanding universal value, read through the Wayback Machine (2023)."
+      url: https://web.archive.org/web/2023id_/https://whc.unesco.org/en/list/543/
+      text: unesco-itchan-kala.txt
+      loc: "Brief synthesis"
+      quote: "as a regular rectangle (650 by 400 meters) elongated from south to north and closed by brick fortification walls that are up to ten meters high."
+    note: >-
+      Today's description, of walls much restored; that the walls stood in 1890 is from MacGahan (1873), who gives the
+      inner wall as "a mile long by a quarter wide", and Lansdell (1882), "700 yards long on the eastern and western
+      sides, and 540 yards broad": competing sizes, the modern survey preferred.
+  - id: people-fields-and-havlis-beyond
+    layer: people
+    what: >-
+      Beyond the wall, out to the south over a few kilometres, open farmland: fields and meadows with farmsteads
+      (havlis) scattered among them, each walled like a little fort and shaded by tall poplars.
+    reach: place
+    source:
+      cite: "Vámbéry, A. (1864). Travels in Central Asia: being the account of a journey from Teheran across the Turkoman desert on the eastern shore of the Caspian to Khiva, Bokhara, and Samarcand. London: John Murray. Internet Archive cu31924080796547."
+      url: https://archive.org/download/cu31924080796547/cu31924080796547_djvu.txt
+      text: vambery-1864.txt
+      loc: "Ch. VIII, Arrival in Khiva, p. 121"
+      quote: "the environs of Khiva with its small havhs,* in the form of strongholds shaded by lofty poplars, with its fine meadows and rich fields"
+    note: >-
+      "havhs" is the scan's reading of havlis. Seen on 2 or 3 June 1863 coming in from the west past Sheikhlar Kalesi,
+      which is likely today's Shixlar, about 1.2 km south-south-east of the point and so in the middle of the view.
+      Lansdell, riding in from the east in October 1882, passed "numerous fortified farm-houses, or havlis" (p. 253).
+  - id: people-arbas-on-the-roads
+    layer: people
+    what: >-
+      On the roads, two-wheeled carts (arbas) with wheels about 2 m high, the only wheeled vehicles of the country,
+      many of them going to and from market.
+    reach: place
+    source:
+      cite: "Lansdell, H. (1885). Russian Central Asia, including Kuldja, Bokhara, Khiva and Merv. Vol. II. London: Sampson Low, Marston, Searle, and Rivington. Internet Archive russiancentralas02lansuoft."
+      url: https://archive.org/download/russiancentralas02lansuoft/russiancentralas02lansuoft_djvu.txt
+      text: lansdell-1885-v2.txt
+      loc: "Vol. II, p. 253 (approach to Khiva, 30 October 1882) and p. 316 (the arba)"
+      quote: "met a large number of arbas returning from market. … Imagine, then, a thick wooden axle, 10 feet long, with 2 wheels attached, … that is to say, about 7 feet in diameter."
+    note: >-
+      The carts were met on the road from the east in the evening; whether a market day fell on the scene's day is
+      not known. The same page has cattle near the farmhouses.
+  - id: geography-sand-tongue-to-the-west
+    layer: geography
+    what: >-
+      A tongue of bare sand hills from the desert reaching to within about 5 km of the town on its western side,
+      sharply edged against the fields; looking south it would show at the right of the view, near the horizon.
+    reach: place
+    source:
+      cite: "Vámbéry, A. (1864). Travels in Central Asia: being the account of a journey from Teheran across the Turkoman desert on the eastern shore of the Caspian to Khiva, Bokhara, and Samarcand. London: John Murray. Internet Archive cu31924080796547."
+      url: https://archive.org/download/cu31924080796547/cu31924080796547_djvu.txt
+      text: vambery-1864.txt
+      loc: "Ch. VIII, p. 121"
+      quote: "A prominent feature is the projection of a tongue of barren earth belonging to the sandy desert of Merv : it stretches to within a league of the city, as if to mark completely here, too, the sharply-defined contrast between life and death."
+    note: >-
+      Of 1863, from the western approach. Vámbéry names it Toyesitchti and could still see the sand hills from the
+      gate. Lansdell has the Palvan-Ata canal ending in the desert 3 miles west of the capital, and Grierson (1884,
+      grierson-1884-khiva.txt, p. 2) that "To the west of Khiva, between it and Gazawat, strips of sandy desert
+      penetrate into the oasis". How far south the fields ran before the open Karakum is not known; MacGahan
+      (p. 356) calls the oasis a series of islands with a line between soil and sand "as distinct and clearly
+      defined as that between land and water".
+  - id: relief-flat-plain
+    layer: relief
+    what: >-
+      Dead flat ground in every direction, falling very gently westward, so that the horizon to the south is a level
+      line of trees and fields with no hill in it.
+    reach: region
+    source:
+      cite: "Bealby, J. T. & Eliot, C. N. E. (1911). Khiva (khanate). Encyclopædia Britannica, 11th edition, vol. 15. Wikisource transcription."
+      url: https://en.wikisource.org/wiki/1911_Encyclop%C3%A6dia_Britannica/Khiva_(khanate)
+      text: eb1911-khiva-khanate.txt
+      loc: "first paragraph"
+      quote: "The water of the Amu is brought by a number of irrigation canals to the oasis, the general declivity of the surface westwards facilitating the irrigation."
+    note: >-
+      Of the whole oasis. That no hill is in sight to the south is my reading of a plain irrigated by gravity, not the
+      article's words; the sand hills of the desert (above) are the only relief the travellers name near the town.
+  - id: substrate-amu-silt
+    layer: substrate
+    what: >-
+      The ground is the fine silt the Amu's water lays down on the fields, the same clay the walls and houses are
+      built of; dusty in the streets in the dry season.
+    reach: region
+    source:
+      cite: "Bealby, J. T. & Eliot, C. N. E. (1911). Khiva (khanate). Encyclopædia Britannica, 11th edition, vol. 15. Wikisource transcription."
+      url: https://en.wikisource.org/wiki/1911_Encyclop%C3%A6dia_Britannica/Khiva_(khanate)
+      text: eb1911-khiva-khanate.txt
+      loc: "first paragraph"
+      quote: "The water of the Amu and the very thin layer of ooze which it deposits render the oasis very fertile."
+    note: >-
+      That the houses and walls are of clay is MacGahan's (p. 291, "the rest are all of clay"); the dust is his of the
+      streets in early summer ("very dusty this time of year"), not of October.
+  - id: cover-elms-poplars-fields
+    layer: cover
+    what: >-
+      Across the oasis, houses scattered among elms and poplars in the middle of well-kept fields, green against the
+      dry desert beyond.
+    reach: region
+    source:
+      cite: "Bealby, J. T. & Eliot, C. N. E. (1911). Khiva (khanate). Encyclopædia Britannica, 11th edition, vol. 15. Wikisource transcription."
+      url: https://en.wikisource.org/wiki/1911_Encyclop%C3%A6dia_Britannica/Khiva_(khanate)
+      text: eb1911-khiva-khanate.txt
+      loc: "first paragraph"
+      quote: "The white-washed houses scattered amidst the elms and poplars, and surrounded by flourishing fields, produce the most agreeable contrast with the arid steppes."
+    note: >-
+      Of the oasis at large, about 1910. The crops it names are millet, rice, wheat, barley, oats, peas, flax, hemp,
+      madder, vegetables, fruit, melons above all, the vine and cotton. Near Khanki in October 1882 Lansdell saw the
+      field ditches "skirted by willows, djida, and pollard mulberry trees" (p. 252). How yellow the leaves were in
+      October no source read says.
+  - id: cover-walled-orchards-mulberries
+    layer: cover
+    what: >-
+      Close to the town, orchards inside clay walls 2.5 to 3 m high, and avenues of mulberry trees along the roads.
+    reach: place
+    source:
+      cite: "Burnaby, F. (1876). A Ride to Khiva: Travels and Adventures in Central Asia. Read in the Seaside Library pocket edition (New York: George Munro). Internet Archive ridetokhiva00burn."
+      url: https://archive.org/download/ridetokhiva00burn/ridetokhiva00burn_djvu.txt
+      text: burnaby-1876.txt
+      loc: "Ch. XXXI, p. 142, the approach to Khiva"
+      quote: "Orchards, surrounded by walls eight and ten feet high, continually met the gaze, and avenues of mulberry-trees studded the landscape."
+    note: >-
+      Burnaby rode in at the end of January 1876; his "leafy groves" in the same passage are odd for midwinter and
+      may be written up afterwards. Grierson (1884, p. 6) lists the fruit trees of the orchards near the towns as
+      apple, plum, pomegranate, fig, quince, walnut, cherry and pear, with the vine.
+  - id: cover-late-crops-in-october
+    layer: cover
+    what: >-
+      In the fields in mid-October, late crops still standing: sorghum (jugara), wheat and cotton with its bolls
+      open; melons being brought in.
+    reach: region
+    source:
+      cite: "Lansdell, H. (1885). Russian Central Asia, including Kuldja, Bokhara, Khiva and Merv. Vol. II. London: Sampson Low, Marston, Searle, and Rivington. Internet Archive russiancentralas02lansuoft."
+      url: https://archive.org/download/russiancentralas02lansuoft/russiancentralas02lansuoft_djvu.txt
+      text: lansdell-1885-v2.txt
+      loc: "Vol. II, pp. 164-165, leaving Bukhara on 16 October 1882"
+      quote: "As we passed along I noticed late crops of jugara, bearded wheat, and cotton. Of this last plant I picked some pods, which I brought home."
+    note: >-
+      Seen outside Bukhara, about 400 km south-east, in the same month and year as Lansdell's visit to Khiva: the
+      region and the season, not this place. At Khiva in early November he was told that two kinds of melon were "ripe
+      at harvest" and that winter melons were hung from the ceilings of cool rooms (p. 266);
+      the melon fields themselves he does not describe.
+  - id: weather-crisp-autumn
+    layer: weather
+    what: >-
+      Late October weather: a bright sun, cold nights with rime and thin ice on the ponds by the end of the month, the
+      afternoons mild (about 15 °C).
+    reach: place
+    source:
+      cite: "Lansdell, H. (1885). Russian Central Asia, including Kuldja, Bokhara, Khiva and Merv. Vol. II. London: Sampson Low, Marston, Searle, and Rivington. Internet Archive russiancentralas02lansuoft."
+      url: https://archive.org/download/russiancentralas02lansuoft/russiancentralas02lansuoft_djvu.txt
+      text: lansdell-1885-v2.txt
+      loc: "Vol. II, p. 252 (Khanki, 30 October 1882) and p. 331 (Khiva, night of 1 November 1882)"
+      quote: "we resumed our journey under a bright sun, but without sufficient power to melt the rime and thin ice on the ponds. … where the night before our departure the temperature fell to … the maximum of the previous day being 60°."
+    note: >-
+      Khanki is about 30 km north-east of Khiva; Lansdell left Khiva on Thursday 2 November 1882 (p. 316). The
+      night's low is unreadable in the scan. 60 °F is about 15.5 °C. This is the end of October; the middle of the
+      month would be warmer. Grierson (1884, p. 5) has winter beginning at the end of November, and "In autumn the
+      weather is very changeable. Rain sometimes falls in the oasis, but is generally accompanied by violent gales
+      of dust-laden wind from the surrounding deserts."
+  - id: sky-clear
+    layer: sky
+    what: A clear, cloudless sky and very clear air, as on most days of the year.
+    reach: region
+    source:
+      cite: "Grierson, J. M. (1884). Military Report and Gazetteer of the Trans-Caspian Territories, Part III: The Khanate of Khiva, River Amu, and Kara-Kum Steppe. Simla: Government Central Branch Press (confidential). Internet Archive dli.pahar.1055."
+      url: https://archive.org/download/dli.pahar.1055/1884%20Military%20Report%20and%20Gazetteer%20of%20Trans-Caspian%20Territories%20Part%203%20Khanate%20of%20Khiva%20by%20Grierson%20%28confidential%29%20s_djvu.txt
+      text: grierson-1884-khiva.txt
+      loc: "Section I, Military Report, Climate, p. 6"
+      quote: "Nearly all the year round the sky is serene and cloudless, which may be ascribed to the flat surface of so vast an area of steppe offering nothing to attract the clouds to it. The clearness of the atmosphere makes every object look unusually bright"
+    note: >-
+      A compilation from earlier travellers (this passage is quoted from another author). A dust-laden autumn gale
+      would change this; whether one blew on the scene's day cannot be known.
+  - id: life-nightingales-no-storks
+    layer: life
+    what: >-
+      No storks on the minarets and towers, unlike Bukhara's; nightingales in the gardens (heard, not seen, and
+      gone south by October).
+    reach: place
+    source:
+      cite: "Vámbéry, A. (1864). Travels in Central Asia: being the account of a journey from Teheran across the Turkoman desert on the eastern shore of the Caspian to Khiva, Bokhara, and Samarcand. London: John Murray. Internet Archive cu31924080796547."
+      url: https://archive.org/download/cu31924080796547/cu31924080796547_djvu.txt
+      text: vambery-1864.txt
+      loc: "Ch. IX, p. 166, footnote"
+      quote: "In Khiva nightingales abound, but there are no storks ; the reverse is the case at Bokhara"
+    note: >-
+      Of 1863. Kept as a test: a scene of Khiva should not put storks' nests on the towers. That nightingales leave
+      before October is my own knowledge, not the source's. No source read names the birds of an October morning
+      over the gardens.
+  - id: polity-russian-protectorate
+    layer: polity
+    what: >-
+      The Khan still rules from the inner town, but under Russia since 1873: no Russian garrison or flag is described
+      in the town itself, and the Russian post is across the Amu at Petro-Alexandrovsk.
+    reach: place
+    source:
+      cite: "Bealby, J. T. & Eliot, C. N. E. (1911). Khiva (khanate). Encyclopædia Britannica, 11th edition, vol. 15. Wikisource transcription."
+      url: https://en.wikisource.org/wiki/1911_Encyclop%C3%A6dia_Britannica/Khiva_(khanate)
+      text: eb1911-khiva-khanate.txt
+      loc: "History, last paragraph"
+      quote: "All the territory (35,700 sq. m. and 110,000 souls) on the right bank of the Oxus was annexed to Russia, while a heavy war indemnity was imposed upon the khanate. The Russians thereby so crippled the finances of the state that the khan is in complete subjection to his more powerful neighbour."
+    note: >-
+      That the Russian governor sat at Petro-Alexandrovsk, a day's ride from Khiva across the Amu, is from Lansdell
+      (pp. 246-253, 1882), whose Khan had no soldiers of his own by Burnaby's account (p. 142, 1876). The Britannica's
+      town article has "A small Russian quarter has grown up" by 1911; whether there was one in 1890, and where, is
+      not known.
+unknown:
+  - Exactly where the western outer wall (Dishan Kala) ran in 1890 in relation to the point, and so whether the point and the ground in front of the camera were inside the wall in the garden quarter or outside it in the fields; and where its western gates stood. No plan of the wall with coordinates could be read.
+  - Where the main bed of the Palvan-Ata canal ran in relation to the point, and the course of the Ingrik canal through the south-western quarter.
+  - Where in the space between the walls the tombs MacGahan saw stood ("at one place almost completely occupied by tombs", p. 293), and whether a cemetery is in this view.
+  - How far south of the town the fields ran before the Karakum, and whether open sand is in sight to the south at all (the sand the sources name is to the west).
+  - What crops stood in the fields south of the town in October 1890, and how far the cotton and sorghum had been harvested.
+  - The colour of the trees in October (elms, poplars, mulberries, fruit trees), and whether the leaves had begun to turn.
+  - Whether the house walls were bare grey-brown clay or whitewashed (MacGahan and Lansdell against the Britannica of 1911).
+  - The weather of a mid-October morning here, beyond the season's run; no daily or monthly record of Khiva in the 1880s or 1890s was read.
+  - Whether a Russian quarter, a Russian building or a telegraph line stood in Khiva in 1890.
+  - What buildings of the Khan stood in the western garden quarter (Lansdell's "summer palace of the Khan" within the outer wall is not placed).
+pictures:
+  - { url: "https://archive.org/details/russiancentralas02lansuoft", what: "Lansdell (1885), vol. II: engravings 'View of Khiva within the outer wall' (frontispiece list) and 'The great minaret of Khiva' (p. 291), from 1882." }
+  - { url: "https://archive.org/details/campaigningonoxu00macg", what: "MacGahan (1874): engravings after Feodoroff, 'View of the citadel' and 'A view inside the exterior wall' (pp. 292-294), of 1873." }
+effort:
+  fetched: 17
+  cited: 7
+  failed: 8
+  note: >-
+    Nine texts are kept: MacGahan (1874), Lansdell (1885, vol. II), Burnaby (1876), Vámbéry (1864) and Grierson's
+    gazetteer (1884), all from the Internet Archive's OCR text; the Britannica of 1911 on Khiva town and khanate from
+    Wikisource; UNESCO's Itchan Kala page through the Wayback Machine; and Wikipedia's Islamkhodja Madrasah page, used
+    only in a note for the date of the Islam Khodja minaret. Eight fetches failed: gutendex.com (the Gutenberg
+    catalogue, no answer), Wikisource's 1911 'Khiva' page under a wrong title, directly and through the Wayback
+    Machine, UNESCO directly, Wikipedia's Islam
+    Khoja Minaret page directly and through the Wayback Machine (not found), and the Overpass API twice (no answer),
+    so the line of the outer wall could not be drawn from OpenStreetMap; Nominatim gave the gates of the inner town and
+    the village of Shixlar. Moser's book (in French) was not looked for. Most of the time went to reading the four
+    travellers for what a view from above the western quarter would show.
