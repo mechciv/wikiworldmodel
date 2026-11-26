@@ -450,11 +450,19 @@ export class InspectPanel {
 
   private siteRecord?: EntityRecord;
 
-  siteDetails(cores: { lat: number; lon: number; ref?: string; label?: string }[], extent: string): void {
+  siteDetails(
+    cores: { lat: number; lon: number; ref?: string; label?: string }[],
+    extent: { description: string; generated: boolean; visible: boolean } | undefined,
+    toggle: (show: boolean) => void,
+  ): void {
     const details = this.el.querySelector<HTMLElement>('.site-details');
     if (!details || !this.siteRecord) return;
-    const key = JSON.stringify([cores, extent]);
-    if (details.dataset.view === key) return;
+    const key = JSON.stringify([cores, extent?.description, extent?.generated]);
+    if (details.dataset.view === key) {
+      const checkbox = details.querySelector('input');
+      if (checkbox) checkbox.checked = !!extent?.visible;
+      return;
+    }
     details.dataset.view = key;
     details.replaceChildren();
     for (const core of cores) {
@@ -472,10 +480,23 @@ export class InspectPanel {
       link.onclick = () => this.el.querySelector(`[data-claim="${CSS.escape(claim.ref)}"]`)?.scrollIntoView({ block: 'center' });
       details.append(link);
     }
-    if (extent) {
+    if (extent?.generated) {
+      const label = document.createElement('label');
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.checked = extent.visible;
+      checkbox.onchange = () => toggle(checkbox.checked);
+      label.append(checkbox, ' Show reconstructed housing clusters');
+      const legend = document.createElement('span');
+      legend.className = 'cluster-legend';
+      legend.id = 'cluster-legend';
+      legend.textContent = 'Each loop follows the outer houses of one modelled cluster.';
+      checkbox.setAttribute('aria-describedby', legend.id);
+      details.append(label, legend);
+    } else if (extent) {
       const info = document.createElement('span');
-      info.textContent = extent.split(' · ')[0];
-      info.title = extent;
+      info.textContent = extent.description.split(' · ')[0];
+      info.title = extent.description;
       details.append(info);
     }
   }

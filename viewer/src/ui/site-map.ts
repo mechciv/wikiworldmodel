@@ -56,7 +56,8 @@ export class SiteMap {
   private canvas = document.createElement('canvas');
   private pins = new Map<string, HTMLButtonElement>();
   private country = document.createElement('button');
-  private shapes: { path: Path2D; pin: SitePin; description: string }[] = [];
+  private shapes: { path: Path2D; pin: SitePin; description: string; generated: boolean; visible: boolean }[] = [];
+  clusterSite: string | null = null;
   private frontiers = new Map<BorderRow, Path2D>();
   private key = '';
   private people?: PeopleSummary;
@@ -77,8 +78,8 @@ export class SiteMap {
     this.el.hidden = true;
   }
 
-  description(id: string): string {
-    return this.el.hidden ? '' : (this.shapes.find((s) => s.pin.id === id)?.description ?? '');
+  extentFor(id: string) {
+    return this.el.hidden ? undefined : this.shapes.find(s => s.pin.id === id);
   }
 
   hide(): void {
@@ -86,9 +87,9 @@ export class SiteMap {
     this.key = '';
   }
 
-  extentAt(x: number, y: number) {
+  extentAt(x: number, y: number, includeHidden = false) {
     const ctx = this.canvas.getContext('2d')!;
-    return this.shapes.find((s) => ctx.isPointInPath(s.path, x, y, 'evenodd'));
+    return this.shapes.find((s) => (s.visible || includeHidden) && ctx.isPointInPath(s.path, x, y, 'evenodd'));
   }
 
   frontierAt(x: number, y: number): BorderRow | undefined {
@@ -123,6 +124,7 @@ export class SiteMap {
       t,
       scenario,
       selected,
+      this.clusterSite,
       pins.map((p) => [p.id, p.lat, p.lon, p.label, p.record?.id]),
     ]);
     if (key === this.key && this.people === people && this.borders === borders && this.ground === ground) return;
@@ -214,7 +216,10 @@ export class SiteMap {
             description = 'Reconstructed settlement extent · occupied ground in the generated settlement plan';
           }
       }
-      if (description) {
+      const generated = !data?.extents.length;
+      const visible = !generated || (chosen && this.clusterSite === selected);
+      if (description) this.shapes.push({ path: footprint, pin, description, generated, visible });
+      if (description && visible) {
         ctx.fillStyle = chosen ? 'rgba(242,187,98,.14)' : 'rgba(242,187,98,.07)';
         ctx.lineWidth = v.range > 15000 ? 0.65 : 1.15;
         ctx.strokeStyle = chosen ? 'rgba(255,217,144,.60)' : 'rgba(255,217,144,.43)';
@@ -222,7 +227,6 @@ export class SiteMap {
         ctx.fill(footprint, 'evenodd');
         ctx.stroke(footprint);
         ctx.setLineDash([]);
-        this.shapes.push({ path: footprint, pin, description });
       }
       const z = ground.at(x, y);
       const p = projectLocal(v, x, y, z);
