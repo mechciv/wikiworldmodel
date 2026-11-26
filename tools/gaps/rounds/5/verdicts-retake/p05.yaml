@@ -1,0 +1,40 @@
+# Round 5's verdicts for p05, judged again on the new build: eye level at the northern foot of the Dabie Shan, Hefei Basin, in the Early Miocene (17.1 Ma), a November morning.
+author: machine:claude-code
+judged: "2026-11-23"
+build: 3b9f48adb1090be2
+changes: >-
+  The plants are new: spot a is now a dense sward of full grass tufts instead of sparse cards on sand, and the trees at
+  b and c have real leafy, broad-leaved crowns instead of flat umbrella crowns, over a floor of fallen leaves. That
+  litter and a brown, gritty soil at a now hide the sand the viewer says the ground is made of, so the substrate item
+  moved from drawn to missing-held. The forest is still an open stand of one kind of tree, and the account's lists
+  of taxa, water and ground are the same as before; no other verdict moved.
+summary: >-
+  The viewer still gets the basin floor, the season and some of the animals: level ground ahead, green growth and no
+  snow on a mild November morning, a herd of small deer at spot a and a rhinoceros on its horizon. It still lacks the
+  forest: open grass at a, and open stands of one broad-leaved tree at b and c, where the floras say a mixed
+  broad-leaved forest, and none of the plants on its list is drawn (gen:life/scene). The ground it says is sand is now
+  drawn as leaf litter and brown soil. The Dabie hills are missing because a 1° relief answers at 17 Ma, and the scene
+  has no water, so the alligator, turtles, beaver and carp it lists have nowhere to be.
+items:
+  relief-dabie-old-range: { verdict: missing-held, spots: { a: missing-held, b: missing-held, c: missing-held }, owner: "field:earth/elevation", why: "The horizon is still level on the right in every frame; the scene's relief is still the coarse paleo-relief, and the range is not in it." }
+  relief-basin-plain-ahead: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "field:earth/elevation", why: "Level ground ahead to the horizon, with no scarp." }
+  substrate-river-sand: { verdict: missing-held, spots: { a: wrong, b: missing-held, c: missing-held }, owner: "renderer", why: "Was drawn: the sandy tan ripples are gone; at a the bare ground between the grass is a brown, gritty soil with small stones, and at b and c a floor of fallen leaves covers everything, though the panel and the scene's account still say ground of sand (PBDB collections 223945 and 223948)." }
+  cover-mixed-broadleaf-forest: { verdict: wrong, spots: { a: wrong, b: wrong, c: wrong }, owner: "gen:life/scene", why: "Spot a is open grass, now dense, with trees only on the horizon; b and c are open stands of one broad-leaved tree, now with leafy crowns and leaf litter below, but widely spaced under open sky, with no understorey and no second kind, not a closed mixed forest of evergreen and deciduous trees, though the biome gives forest cover 1." }
+  cover-oak-chestnut-poplar-willow: { verdict: missing-held, spots: { a: missing-held, b: missing-held, c: missing-held }, owner: "gen:life/scene", why: "Populus and Salix are still on the list as recorded here (190 km) and the scene's account draws none of its plants; every tree in the frames is the same kind, and there is no stream for willows to stand by." }
+  weather-mild-humid: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "field:earth/climate", why: "Green grass, trees in leaf and no snow or frost; the climate field gives a coldest month near 0 °C and an aridity index of 1.2." }
+  weather-winter-monsoon-season: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "field:earth/climate", why: "A still with fair-weather cloud cannot show which way the wind has turned." }
+  life-small-deer-chevrotains: { verdict: missing-held, spots: { a: drawn, b: missing-held, c: missing-held }, owner: "gen:life/scene", why: "The herd of small deer still stands in the grass at a (labelled Dicrocerus), now half hidden in the taller sward; at b and c, where Dorcatherium, Stephanocemas and Lagomeryx are also placed, none is in sight." }
+  life-rhinos-mastodonts-horses: { verdict: missing-held, spots: { a: drawn, b: missing-held, c: missing-held }, owner: "model:life/atlas", why: "A small dark rhinoceros (labelled Diaceratherium) still stands on a's horizon and pigs (Hyotherium) are labelled at b and c, but no large animal is in sight there; Gomphotherium is listed and placed at no spot, and Anchitherium is still not on the list." }
+  life-small-apes: { verdict: missing-held, spots: { a: missing-held, b: missing-held, c: missing-held }, owner: "model:life/atlas", why: "No ape in any frame, and none on the list, which is unchanged: the pliopithecoids of the Sihong collection are still left out." }
+  life-birds: { verdict: missing-held, spots: { a: missing-held, b: missing-held, c: missing-held }, owner: "gen:life/scene", why: "Aquila is listed and placed at every spot, and no bird is in any sky; partridges and pheasants are not on the list." }
+  life-squirrels-pikas: { verdict: missing-held, spots: { a: missing-held, b: missing-held, c: missing-held }, owner: "gen:life/scene", why: "Miopetaurista and Alloptox are placed at every spot (Alloptox labelled on a's tree line), but nothing that small is visible." }
+  water-lakes-crocodiles: { verdict: missing-held, spots: { a: missing-held, b: missing-held, c: missing-held }, owner: "model:earth/drainage", why: "The scene still has no river and no lake (its water list is empty), so the Alligator, Trionyx, Chinemys, Youngofiber and Cyprinus it lists as recorded here are not drawn." }
+findings:
+  - The ground that the substrate model says is sand is drawn in the new build as a forest floor of fallen leaves (b and
+    c) and a brown, stony soil (a). Litter under trees is right for a forest in November, but where the ground is bare
+    at a it is not drawn as the sand the panel names; the material the renderer chooses no longer follows the
+    substrate there.
+  - The life layer still answers "unknown" ("the atlases of who lived where reach only the Phanerozoic") at 17 Ma,
+    where the scene lists 47 taxa from the atlas, as in the first take.
+  - The atlas's list for this patch is unchanged, and still leaves out Anchitherium and both pliopithecoids of the
+    Sihong collection 43400, which it takes other taxa from.

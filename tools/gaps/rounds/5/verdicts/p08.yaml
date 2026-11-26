@@ -1,0 +1,37 @@
+# Round 5's verdicts for p08: a hillside above Kourkouloi in north Euboea, eye level facing east-south-east, noon in May 594 BCE.
+author: machine:claude-code
+judged: "2026-11-22"
+summary: >-
+  A bright May noon, rightly, and nothing of the view the place commands: the camera stands on a hillside at 443 m
+  looking down a valley to the Aegean and Kerinthos, and the viewer draws a flat wood of spruce-shaped conifers and
+  broadleaves on smooth silt, with the ground at 275 m and no slope, valley, sea or town. The people are herders' camps
+  at two spots and farmsteads at the third, and neither their flocks nor a ripe field is in sight. The root of the
+  largest gap is the relief: today's ground is held and the scene flattens it, as in round 1.
+items:
+  substrate-conglomerate-underfoot: { verdict: wrong, spots: { a: wrong, b: wrong, c: wrong }, owner: "model:earth/substrate", why: "Smooth tan silt at a and c, and a pale soil with patches of small pebbles at b, from today's topsoil map (silt 37%, sand 25%, mud 22%, gravel 16%); not the stony conglomerate of the basin fill." }
+  substrate-pale-marls-below: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "model:earth/substrate", why: "No valley, cutting or bank is in view to show them." }
+  relief-travertine-plateaus: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "field:earth/elevation", why: "Said of northern Euboea as a whole, and the source does not say any stands in this view." }
+  water-aegean-to-the-left: { verdict: missing-held, spots: { a: missing-held, b: missing-held, c: missing-held }, owner: "field:earth/elevation", why: "No sea at any spot: the scene stands on flat ground at 214 to 285 m, its trees closing the view, where today's ground falls from 443 m to the coast and the sea shows at 12 to 19 km." }
+  water-budorus-river: { verdict: missing-not-held, spots: { a: missing-not-held, b: missing-not-held, c: missing-not-held }, owner: "model:earth/drainage", why: "No river in any frame or in the scene's account: the Kireas drains less than the model's 2,000 km² floor, and the scene invents no stream here." }
+  people-kerinthos-town: { verdict: missing-not-held, spots: { a: missing-not-held, b: missing-not-held, c: missing-not-held }, owner: "records: the towns of Archaic Greece", why: "No town in view, and the build's lists of cities hold none in Euboea; Kerinthos is not a record." }
+  people-grain-harvest: { verdict: missing-held, spots: { a: missing-held, b: wrong, c: missing-held }, owner: "model:people/lifeways", why: "At a and c the lifeways model sets herders' camps in woodland, with no field; at b, by farmsteads, a cleared plot is green-grey with tufts, not ripe grain, and nobody is at work." }
+  weather-scorching-noon: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "renderer", why: "A high sun with sharp, short shadows under broken fair-weather cloud." }
+  life-flocks-to-the-shore: { verdict: missing-held, spots: { a: missing-held, b: missing-held, c: missing-held }, owner: "gen:people/settlement", why: "The scene keeps sheep, goats and cattle (21 animals at a and c, 62 at b) and none is in any frame." }
+  cover-pine-forest: { verdict: wrong, spots: { a: wrong, b: wrong, c: wrong }, owner: "gen:life/scene", why: "Tall, dark, spire-shaped conifers mixed with round broadleaves over bare ground, with no maquis; Pinus and Quercus are on the list and are not placed, so the trees are the biome's generic bodies, not open Aleppo pine." }
+  cover-knotty-euboean-timber: { verdict: wrong, spots: { a: wrong, b: wrong, c: wrong }, owner: "forms: conifers", why: "The conifers are tall and straight-stemmed with clean trunks, the opposite of rough, knotty, branchy trees." }
+  cover-sweet-chestnut: { verdict: missing-not-held, spots: { a: missing-not-held, b: missing-not-held, c: missing-not-held }, owner: "model:life/atlas", why: "No Castanea on the list: the atlas is of fossils, and no living or written flora of the island is held." }
+  cover-olives: { verdict: missing-not-held, spots: { a: missing-not-held, b: missing-not-held, c: missing-not-held }, owner: "building traditions: fields and crops", why: "No olive or other tree crop in view; nothing says what was grown here." }
+  polity-chalcis-hippobotae: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "src:cliopatria-0.2.1", why: "No border or mark in view, as the brief expects; the polity layer has no state at all here in 594 BCE, which an eye-level frame cannot show." }
+findings:
+  - >-
+    The frame's whole layout is lost. The brief's camera stands at 443 m and looks down 300 m in 4 km to a valley floor,
+    the sea on the left and mountains of 900 to 1,100 m ahead; the viewer's ground is 275 m for all three spots, and the
+    eye stands at 214 to 285 m on level ground in a wood. Only at a's right edge does a faint far ridge show, where the
+    Kandili side should be. The same gap as round 1's Safed Koh and Nubian hills.
+  - >-
+    The way of life changes between spots 1.9 km apart: herders' camps at a and c (74 houses, a herder's tent), scattered
+    farmsteads at b (93 houses). The lifeways model takes herding where the anthrome is woodland, so most of a
+    well-peopled Archaic Greek valley is drawn as herders' country.
+  - >-
+    The Holocene list has Dihoplus, a rhinoceros of the Miocene and Pliocene, from one row 2,070 km off, and dolphins,
+    a porpoise and a turbot for a hillside; none is placed.

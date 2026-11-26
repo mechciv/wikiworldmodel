@@ -1,0 +1,279 @@
+view: t=1779.372&lat=51.90531&lon=167.64464&d=1.0000023544&h=340&v=84&hour=11&mo=3&clock=0
+when: 1779 CE, March, 11:00
+place: >-
+  The open North Pacific at 51.905°N, 167.645°E, about 290 km south of Medny (Copper) Island in the Commander
+  Islands, about 370 km west-south-west of Attu in the Near Aleutians, and 624 km east of Petropavlovsk-Kamchatsky.
+  The point lies on the Pacific side of the submarine ridge that joins the Commanders to the Aleutians, over about
+  3,100 m of water. The camera stands at eye level a little above the sea and looks north-north-west (340°), toward
+  the Commanders and Kamchatka, both far below the horizon. By my own reckoning (not a source), at 11:00 solar time
+  in mid-March the sun stands about 34° high, a little east of south, so it is behind the camera's right shoulder.
+author: machine:claude-code
+expects:
+  - id: geography-no-land
+    layer: geography
+    what: >-
+      Sea to every horizon: no island, rock or coast in sight. The nearest land is Medny Island, high land, some
+      290 km to the north, nearly the way the camera faces, but far below the horizon from a viewer at sea level.
+    reach: place
+    source:
+      cite: "Cook, J. & King, J. (1784). A Voyage to the Pacific Ocean, vol. 3 (King's continuation), as reprinted in The Three Voyages of Captain Cook Round the World, vol. VII, Being the Third of the Third Voyage (London, 1821). Project Gutenberg eBook #62659."
+      url: https://web.archive.org/web/2022id_/https://www.gutenberg.org/ebooks/62659.txt.utf-8
+      text: cook-voyages-vol7.txt
+      loc: "Book VI, the entry for 17 August 1779 (line 7208 of the saved text)"
+      quote: "The land in sight bore north by west, twelve or fourteen leagues distant. This land we take to be the island Mednoi, laid down in the Russian charts to the south-east of Beering’s Island. It is high land, and appeared clear of snow."
+    note: >-
+      Resolution and Discovery saw Mednoi from 53°49'N, 168°05'E, about 210 km north of this point, at twelve to
+      fourteen leagues (some 65-80 km). The 290 km to the nearest land is my reckoning from the ETOPO1 grid read at
+      0.05° (etopo-region.txt, its first cell above sea level being "54.5,168.10000000000002,2"); the Near Islands
+      are farther still. That Medny would be hidden is a geometric gloss: no source read says how far it can be
+      seen. The ships passed in August, not March: on 15 March 1779 they were weighing anchor in Hawaii.
+  - id: water-deep-ocean
+    layer: water
+    what: >-
+      Deep, open-ocean water, dark blue-grey, with no shoal colour, kelp or surf: about 3.1 km to the bottom here,
+      on the slope south of the Commander-Aleutian ridge.
+    reach: place
+    source:
+      cite: "NOAA National Centers for Environmental Information. ETOPO1 Global Relief Model, 1 arc-minute (served as etopo180 by NOAA CoastWatch ERDDAP), read 22 November 2026."
+      url: https://coastwatch.pfeg.noaa.gov/erddap/griddap/etopo180.csv?altitude%5B(51.80):(52.00)%5D%5B(167.55):(167.75)%5D
+      text: etopo-point.txt
+      loc: "the cell at 51.900°N, 167.650°E"
+      quote: "51.900000000000006,167.64999999999998,-3104"
+    note: >-
+      Today's bathymetry carried back 247 years, which is safe for depth. Across the 0.2° window around the point the
+      depth runs from 2,344 to 3,546 m. The colour of the water is my gloss, not the dataset's.
+  - id: ice-none
+    layer: ice
+    what: >-
+      No sea ice, not even drifting floes: March is the month of the Bering Sea's greatest ice, but the ice stays on
+      the shelf far to the north, and this point is not in the Bering Sea at all, but south of the island arc.
+    reach: region
+    source:
+      cite: "Dunbar, M. (1967). The monthly and extreme limits of ice in the Bering Sea. In: Physics of Snow and Ice, Proceedings of the International Conference on Low Temperature Science, Sapporo 1966, 1(1), 687-703."
+      url: https://eprints.lib.hokudai.ac.jp/repo/huscap/all/20334/1_p687-703.pdf
+      text: hokudai-bering-ice.txt
+      loc: "p. 694 (PDF page 9), first paragraph"
+      quote: "for most of the sea not only does no ice form south of the shelf, but ice drifting into the deep water with the prevailing northerly winds is quickly melted"
+    note: >-
+      Ice limits of 1954-65, carried back into the Little Ice Age. The paper notes that in the western Bering Sea the
+      extreme line of Bulgakov projects beyond the shelf, but that is still north of the Commanders; nothing read
+      puts ice in the open Pacific south of them in any year.
+  - id: weather-storm-track
+    layer: weather
+    what: >-
+      Low, grey, moving cloud of the winter storm track: the Aleutian Low is a procession of storms, three or four a
+      month even late in the season, so an overcast, windy sky is the likeliest, with a clear spell between storms
+      possible.
+    reach: region
+    source:
+      cite: "NOAA Office of Coast Survey. United States Coast Pilot 9, Alaska: Cape Spencer to Beaufort Sea, Chapter 3, edition of 15 November 2026."
+      url: https://nauticalcharts.noaa.gov/publications/coast-pilot/files/cp9/CPB9_C03_WEB.pdf
+      text: coast-pilot-9-ch3.txt
+      loc: "Winter (October–March), paragraph (79), p. 117 (PDF page 5)"
+      quote: "This semipermanent feature is made up of the day-to-day storms that traverse these seas in a seemingly endless procession."
+    note: >-
+      Today's climatology for Alaskan waters, carried back to 1779 and to a point just west of the waters it
+      describes. Paragraph (80) adds that the Bering Sea centre of the Low holds until March, when the gradient
+      weakens, and that on average three or four storms per month still move through.
+  - id: water-swell-and-sea
+    layer: water
+    what: >-
+      A rough sea: waves of 3 m or more are usual in winter, white-capped under a 16-20 knot wind, with a long swell
+      from the south or south-west running under them, coming from behind the camera's left.
+    reach: region
+    source:
+      cite: "NOAA Office of Coast Survey. United States Coast Pilot 9, Alaska: Cape Spencer to Beaufort Sea, Chapter 3, edition of 15 November 2026."
+      url: https://nauticalcharts.noaa.gov/publications/coast-pilot/files/cp9/CPB9_C03_WEB.pdf
+      text: coast-pilot-9-ch3.txt
+      loc: "Winter (October–March), paragraphs (81) and (83), p. 117 (PDF page 5)"
+      quote: "Wave heights climb to 10 feet (3 m) or more throughout the winter."
+    note: >-
+      Paragraph (81) gives winter wind speeds averaging 16 to 20 knots; paragraph (83) says heavy swells out of the
+      south through south-west in Aleutian waters often run ahead of storms from the waters around Japan. Said of the
+      winter as a whole; how the sea stood on one March morning is not known. That a swell from the south-west
+      comes from behind the camera's left is my gloss on a camera facing 340°.
+  - id: weather-snow-showers
+    layer: weather
+    what: >-
+      Snow showers and sleet out of the cloud are likely enough to be in view: in winter precipitation falls a
+      fifth to a third of the time, as snow more than half of that in midwinter, and snow is what most often cuts the
+      view to a few kilometres.
+    reach: region
+    source:
+      cite: "NOAA Office of Coast Survey. United States Coast Pilot 9, Alaska: Cape Spencer to Beaufort Sea, Chapter 3, edition of 15 November 2026."
+      url: https://nauticalcharts.noaa.gov/publications/coast-pilot/files/cp9/CPB9_C03_WEB.pdf
+      text: coast-pilot-9-ch3.txt
+      loc: "Winter (October–March), paragraph (82), p. 117 (PDF page 5)"
+      quote: "In winter, precipitation occurs 20 to 35 percent of the time. It is most likely along the Aleutians, where it falls as snow more than one-half of the time in midwinter."
+    note: >-
+      Midwinter, not March, and today's climate. The same paragraph says visibilities under two miles occur 5 to 15
+      percent of the time in winter, with snow the main cause.
+  - id: weather-not-fog-season
+    layer: weather
+    what: >-
+      Probably no sea fog: the thick advection fog of these waters belongs to summer, not March. If the view is
+      closed down, it is by snow or low cloud.
+    reach: region
+    source:
+      cite: "NOAA Office of Coast Survey. United States Coast Pilot 9, Alaska: Cape Spencer to Beaufort Sea, Chapter 3, edition of 15 November 2026."
+      url: https://nauticalcharts.noaa.gov/publications/coast-pilot/files/cp9/CPB9_C03_WEB.pdf
+      text: coast-pilot-9-ch3.txt
+      loc: "Summer, paragraph (89), p. 118 (PDF page 6)"
+      quote: "Fog hampers navigation most often during June, July and August."
+    note: >-
+      The same paragraph names the Oyashio off Kamchatka as the source of the dense fog the south-westerlies bring
+      to the Aleutians. Cook's ships nevertheless met fog and "thick hazy weather and sleet" off Kamchatka in late
+      April 1779 (cook-voyages-vol7.txt), so fog in March is not ruled out.
+  - id: weather-cold-spring-1779
+    layer: weather
+    what: >-
+      Bitter cold for the latitude, near or below freezing: in the spring of 1779 the nearest ships at sea had snow
+      and sleet in south-westerly gales, and spray froze on their rigging.
+    reach: region
+    source:
+      cite: "Cook, J. & King, J. (1784). A Voyage to the Pacific Ocean, vol. 3 (King's continuation), as reprinted in The Three Voyages of Captain Cook Round the World, vol. VII, Being the Third of the Third Voyage (London, 1821). Project Gutenberg eBook #62659."
+      url: https://web.archive.org/web/2022id_/https://www.gutenberg.org/ebooks/62659.txt.utf-8
+      text: cook-voyages-vol7.txt
+      loc: "Book VI, the entry for 22 April 1779 (line 4759 of the saved text)"
+      quote: "The cold was exceedingly severe, and the ropes were so frozen, that it was with difficulty we could force them through the blocks."
+    note: >-
+      This year's own weather, but a month later and about 520 km west (51°38'N, 160°07'E). On 18 April, at 45°40'N,
+      they "had snow and sleet, accompanied with strong gales from the south-west", and the thermometer stood at
+      freezing on the 19th. The Coast Pilot (paragraph 107) puts the risk of moderate icing on ships along the
+      Aleutians at 10 to 25 percent of the time from December through March.
+  - id: life-wildfowl-flocks
+    layer: life
+    what: >-
+      Seabirds on the wing and on the water, at times in large flocks.
+    reach: region
+    source:
+      cite: "Cook, J. & King, J. (1784). A Voyage to the Pacific Ocean, vol. 3 (King's continuation), as reprinted in The Three Voyages of Captain Cook Round the World, vol. VII, Being the Third of the Third Voyage (London, 1821). Project Gutenberg eBook #62659."
+      url: https://web.archive.org/web/2022id_/https://www.gutenberg.org/ebooks/62659.txt.utf-8
+      text: cook-voyages-vol7.txt
+      loc: "Book VI, the entry for 21 April 1779 (line 4752 of the saved text)"
+      quote: "During the three preceding days, we saw large flocks of wild-fowl, of a species resembling ducks."
+    note: >-
+      Seen between about 45° and 50°N near 160-161°E, 500-700 km west-south-west, in April 1779. "Resembling ducks"
+      names no species; which birds of the open sea (fulmars, kittiwakes, murres, auklets, sea ducks) flew here in
+      March is not known from anything read.
+  - id: life-short-tailed-albatross
+    layer: life
+    what: >-
+      Possibly a large dark albatross gliding low over the swell: the short-tailed albatross was then perhaps the
+      commonest albatross of the North Pacific, before feather hunters killed millions of them.
+    reach: region
+    source:
+      cite: "U.S. Fish and Wildlife Service (2008). Short-Tailed Albatross Recovery Plan. Anchorage, Alaska."
+      url: https://www.adfg.alaska.gov/static/species/specialstatus/pdfs/sta_recovery.pdf
+      text: stal-recovery-2008.txt
+      loc: "p. iii (PDF page 5), Species Status"
+      quote: "Prior to its exploitation, the short-tailed albatross was possibly the most abundant of the three North Pacific albatross species."
+    note: >-
+      In March breeding adults are at their colonies off Japan; the plan (p. 11, PDF page 19) says non-breeders and
+      failed breeders leave the colony "during late winter through spring", and today's tracked birds concentrate
+      along shelf edges and in the Aleutians rather than over deep water like this. The species was described from a
+      specimen Steller took in the 1740s on Bering's voyage. Whether any albatross flew past this point in March 1779
+      is not known.
+  - id: life-fur-seal-males
+    layer: life
+    what: >-
+      Perhaps a northern fur seal at the surface: in winter the big adult males stay at sea in the stormy northern
+      North Pacific and Bering Sea, while the females go far to the south and east.
+    reach: region
+    source:
+      cite: "Sterling, J.T., Springer, A.M., Iverson, S.J., Johnson, S.P., Pelland, N.A., Johnson, D.S., Lea, M.-A. & Bond, N.A. (2014). The Sun, Moon, Wind, and Biological Imperative–Shaping Contrasting Wintertime Migration and Foraging Strategies of Adult Male and Female Northern Fur Seals (Callorhinus ursinus). PLoS ONE 9(4): e93068."
+      url: https://pmc.ncbi.nlm.nih.gov/articles/PMC3983057/
+      text: sterling-2014-fur-seals.txt
+      loc: "Discussion, last paragraphs"
+      quote: "We conclude that adult male NFS winter in the northern NP and Bering Sea because they can."
+    note: >-
+      Seals tagged on St. Paul (Pribilofs), 2,000 km east, in 2002-03 and 2009-10. The Commander Islands' own
+      rookeries are nearer, and their seals were being killed by the thousand in the 1750s (Coxe 1780 lists
+      cargoes of "sea-bears" from Bering's Island), but nothing read tracks where Commander seals spend March. A
+      fur seal is a head or a flipper at the surface, easily missed.
+  - id: life-whales-sparse
+    layer: life
+    what: >-
+      Few whales, if any, in March: in the whalers' logs right whales and humpbacks of March and April are south of
+      about 50°N, and move north to Kamchatka only after April.
+    reach: region
+    source:
+      cite: "Smith, T.D., Reeves, R.R., Josephson, E.A. & Lund, J.N. (2012). Spatial and Seasonal Distribution of American Whaling and Whales in the Age of Sail. PLoS ONE 7(4): e34905."
+      url: https://pmc.ncbi.nlm.nih.gov/articles/PMC3338773/
+      text: smith-2012-whaling.txt
+      loc: "Discussion, the paragraph on Figures 17-23 (the north-western North Pacific by month)"
+      quote: "Humpbacks were observed in March and April in the Sea of Japan and right whales there and further east to 180° longitude between 30° and 50°N latitude (Figures 18 and 19)"
+    note: >-
+      Logs of 1780-1920, mostly after 1820; this point at 52°N is just north of the March band. The next sentences
+      put right whales and humpbacks north of 40°N toward Kamchatka after April. The paper says the logs record few
+      sperm whales north of 40°N, perhaps falsely, and it does not count fin whales. Cook's ships saw "a whale" on
+      21 April 1779 near 50°N, 161°E (cook-voyages-vol7.txt).
+  - id: life-otters-at-the-islands
+    layer: life
+    what: >-
+      No sea otters, sea lions or sea cows here: these beasts kept to the islands and their shores, 290 km away, and
+      the open sea between shows none.
+    reach: region
+    source:
+      cite: "Coxe, W. (1780). Account of the Russian Discoveries between Asia and America. London: T. Cadell. Project Gutenberg eBook #49637."
+      url: https://web.archive.org/web/2022id_/https://www.gutenberg.org/ebooks/49637.txt.utf-8
+      text: coxe-1780-russian-discoveries.txt
+      loc: "the second chapter headed CHAP. I., on the first ventures to Bering's and Copper Island (line 783 of the saved text)"
+      quote: "the inhabitants of Kamtchatka ventured over to that island, to which the sea-otters and other sea-animals were accustomed to resort in great numbers."
+    note: >-
+      The quote shows the animals at the islands, not their absence here: that they are not seen 290 km out is my
+      gloss. The same work says their numbers were "greatly diminished by the Russian hunters". Steller's sea cow,
+      which the hunters salted for provisions at Bering's Island in 1754 (Coxe, line 1408), lived only in the
+      Commanders' shallows; by 1779 it is generally held to have been hunted out, but no source read was checked for
+      that date.
+  - id: people-no-fur-ships
+    layer: people
+    what: >-
+      No ship in sight. The Russian fur traders' small vessels from Kamchatka sailed in summer and wintered on
+      Bering's Island or farther east, so none would be at sea here in March.
+    reach: region
+    source:
+      cite: "Coxe, W. (1780). Account of the Russian Discoveries between Asia and America. London: T. Cadell. Project Gutenberg eBook #49637."
+      url: https://web.archive.org/web/2022id_/https://www.gutenberg.org/ebooks/49637.txt.utf-8
+      text: coxe-1780-russian-discoveries.txt
+      loc: "the first CHAP. II., General idea of the commerce (line 593 of the saved text)"
+      quote: "which are caught and cured upon Beering's Island, where the vessels for the most part winter."
+    note: >-
+      Coxe gives sailing dates in July and August for the voyages he lists, and voyages of "three or four
+      years". Their route ran from Kamchatka to the Commanders and on to the Near Islands, north of this point. No
+      Aleut or Itelmen craft would be here either, 290 km from land; that is my gloss.
+  - id: people-no-whalers
+    layer: people
+    what: >-
+      No whaleships: the Pacific whale fishery had not begun.
+    reach: region
+    source:
+      cite: "Smith, T.D., Reeves, R.R., Josephson, E.A. & Lund, J.N. (2012). Spatial and Seasonal Distribution of American Whaling and Whales in the Age of Sail. PLoS ONE 7(4): e34905."
+      url: https://pmc.ncbi.nlm.nih.gov/articles/PMC3338773/
+      text: smith-2012-whaling.txt
+      loc: "Results, the paragraph on 1780–1824"
+      quote: "American whaling was confined almost entirely to the Atlantic Ocean until 1792, and then expanded into the Pacific"
+    note: >-
+      American whaling only; the paper reaches the north-western North Pacific grounds much later. Cook's two ships,
+      the only European ships besides the Russians' in these waters in 1779, were at Hawaii in March and passed
+      210 km north of here in August.
+unknown:
+  - The sky at 11:00 on a March morning of 1779 here (overcast, broken, or clear between storms), the cloud's height and the wind's direction; climatology gives frequencies, and no log of 1779 within 500 km in March could be read.
+  - The sea surface temperature and the colour and state of the sea that morning; no source read gives the water's temperature here in March.
+  - Which seabirds flew here in March (fulmars, kittiwakes, murres, auklets, Laysan or short-tailed albatrosses, gulls); no at-sea census of these waters in late winter could be read.
+  - Whether Steller's sea cow still lived in the Commanders in 1779; Coxe gives it at Bering's Island in 1754, and nothing read dates its end.
+  - Where the Commander Islands' fur seals and Steller sea lions spend March; the one tracking study read is of Pribilof seals.
+  - Whether fin, sperm or killer whales were here in March; the whaling logs read count right, sperm, bowhead, gray and humpback whales only, and few ships went this far north so early in the year.
+  - How cold the winter of 1778-79 was here compared with today's; Cook's log of April 1779 says it was severe, but no reconstruction for the region was read.
+pictures: []
+effort:
+  fetched: 12
+  cited: 9
+  failed: 1
+  note: >-
+    Twelve fetches, eleven texts kept, nine cited. Refused: Steller's De Bestiis Marinis on the University of
+    Nebraska's repository (HTTP error), so nothing of Steller's own on the sea animals could be quoted. Read but not
+    cited, and deleted: the Coast Pilot's Aleutian chapter (ch. 7) and the Encyclopedia Arctica's article on the
+    Aleutians. The useful finds were King's continuation of Cook's third voyage, whose ships passed 210 km north of
+    the point in August 1779 and met April's weather 520 km west, and the Coast Pilot's winter climatology. Most of
+    the time went on finding something about seabirds and whales in March, where little could be read.

@@ -1,0 +1,35 @@
+# Round 5's verdicts for p01, judged again on the new build: eye level in Saurashtra (north-western India) in the early Ediacaran, 611.8 Ma, still with no local scene drawn.
+author: machine:claude-code
+judged: "2026-11-23"
+build: 3b9f48adb1090be2
+changes: >-
+  The new build still makes no local scene here: the viewer's account is the same word for word (scene, biome,
+  ground and climate null, panel silent), so the frames are still the globe's own picture seen from 15 m, with no
+  horizon and no sky. Only that picture changed: the smooth grey-brown blur is now a marbled brown with fine swirling
+  bands, the lighter patch on the left is now a white, blocky mottle, and the two blue patches have lost their white
+  outlines. No verdict moved.
+summary: >-
+  Still no frame of this point draws a place. With no atlas reaching the Ediacaran the viewer makes no local scene,
+  and at eye level it shows the globe's texture from 15 m: now a marbled brown surface with a white mottled patch on
+  the left and two small blue patches, the same at all three spots. What the frames can carry is only absence, and
+  that is right: no plants, no animals, nothing the account calls ice. The root is still the scene generator, which
+  makes nothing where neither atlas has a list; the relief is missing too, since no elevation answers before the plate
+  model's continental blocks.
+items:
+  geography-nw-india-mozambique-ocean: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "field:earth/continental-blocks", why: "Said of the region; the geography still answers only continental blocks here, and an eye-level frame with no scene shows none of them." }
+  substrate-malani-volcanic-basement: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "model:earth/substrate", why: "No ground of a scene is drawn, only the globe's marbled texture; the substrate still answers by climate, and the brief cannot say the Malani rocks reach under the spot." }
+  relief-long-worn-land-surface: { verdict: no-layer, spots: { a: no-layer, b: no-layer, c: no-layer }, owner: "field:earth/elevation", why: "The globe still holds no height here at 611.8 Ma (ground null, geography only continental blocks), and the frames show no relief or horizon at all." }
+  substrate-maroon-sand-and-shale: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "model:earth/substrate", why: "Of the Marwar beds 400 to 500 km away; no ground is drawn here, and the brown of the globe's texture is not maroon or red in any case." }
+  substrate-wind-cut-stones: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "model:earth/substrate", why: "Of the Pokaran boulder bed some 430 km away; no ground, stone or boulder is drawn." }
+  cover-no-plants: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "model:life/atlas", why: "Brown and white with no green anywhere; the life layer answers nothing, so nothing is drawn, which here is right." }
+  life-microbial-crusts-on-wet-ground: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "model:earth/biome-from-climate", why: "The biome is still null and no ground is drawn; the source is of Newfoundland at 565 Ma, and nothing says mats grew here." }
+  life-no-large-organisms-on-land: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "model:life/atlas", why: "Nothing recorded, nothing drawn." }
+  life-no-ediacara-biota-yet: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "model:life/sea-atlas", why: "No sea in view to hold any, unless the two small blue patches of the globe's picture are sea, and nothing is drawn in them." }
+  ice-none: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "field:earth/ice", why: "The ice layer answers none and the account has no ice; the white mottled patch on the left is most likely the cloud layer (Clouds is on in the page), though from 15 m it could be taken for snow." }
+  sky-sun-slightly-fainter: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "model:sun/gough-1981", why: "No sky or sun is in any frame; the brief says the eye would not see 5% in any case." }
+  sky-shorter-day: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "field:earth/day-length", why: "The world holds the day-length records; a still cannot show them." }
+  sky-moon-closer: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "field:earth/moon-distance", why: "No Moon or sky in the frames, and 3% could not be seen without a measure." }
+findings:
+  - "Unchanged from the first take: the frames still fail to draw a place. The account in drawn-retake.json is the same as in drawn.json (scene null, biome null, ground null, the panel's text empty), so world/generators/life/spec.ts (placeSpec) still makes no scene where neither atlas has a list, and every eye-level view before 538.8 Ma falls back to the globe's texture from 15 m. An eye-level view in the Precambrian needs a scene of bare ground (and sea) with no list. Owner: gen:life/scene."
+  - "The globe's picture under the camera did change: a smooth grey-brown blur became a marbled brown with fine swirling bands, which at 15 m reads like polished stone or wood grain rather than ground; the lighter patch on the left became a white, blocky mottle with visible square cells; the blue patches lost their white outlines. The three spots still give nearly identical frames."
+  - "The white mottle at the left of every frame is not explained by the account (ice none, snow null); with the Clouds layer on, it is most likely the cloud layer drawn on or near the ground at eye level. If so, clouds should not be drawn at the camera's own height over land; if not, it is snow the world does not hold. Owner: gen:earth/clouds or renderer."

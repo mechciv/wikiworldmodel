@@ -1,0 +1,656 @@
+{
+ "seed": "gaps-round-5",
+ "build": "46e013ad3acac105",
+ "from_ma": 1000,
+ "mix": {
+  "people": 0.45,
+  "records": 0.2,
+  "fossils": 0.2,
+  "floor": 0.15
+ },
+ "town_share": 0.5,
+ "cameras": {
+  "eye": {
+   "range": 15,
+   "tilt": 84
+  },
+  "air": {
+   "range": 600,
+   "tilt": 60
+  },
+  "orbit": {
+   "d": 2.6
+  }
+ },
+ "points": [
+  {
+   "name": "p01",
+   "t": -611755113.4548321,
+   "when": "611.8 Ma",
+   "stretch": [
+    "1000 Ma",
+    "388.2 Ma"
+   ],
+   "lat": 0.62846,
+   "lon": 154.08038,
+   "today": {
+    "lat": 22.755,
+    "lon": 70.826,
+    "near": "49 km from Rajkot, India"
+   },
+   "camera": "eye",
+   "heading": 180,
+   "hour": 16,
+   "month": 8,
+   "drawnBy": "floor",
+   "why": "floor: anywhere on the globe, evenly by area",
+   "available": [
+    "floor"
+   ],
+   "spots": [
+    {
+     "spot": "a",
+     "lat": 0.62846,
+     "lon": 154.08038,
+     "heading": 180,
+     "km": 0,
+     "link": "t=611.757063Ma&lat=0.62846&lon=154.08038&d=1.0000023544&h=180&v=84&hour=16&mo=8&clock=0"
+    },
+    {
+     "spot": "b",
+     "lat": 0.62946,
+     "lon": 154.07104,
+     "heading": 161,
+     "km": 1.05,
+     "link": "t=611.757063Ma&lat=0.62946&lon=154.07104&d=1.0000023544&h=161&v=84&hour=16&mo=8&clock=0"
+    },
+    {
+     "spot": "c",
+     "lat": 0.65155,
+     "lon": 154.08419,
+     "heading": 177,
+     "km": 2.6,
+     "link": "t=611.757063Ma&lat=0.65155&lon=154.08419&d=1.0000023544&h=177&v=84&hour=16&mo=8&clock=0"
+    }
+   ],
+   "link": "t=611.757063Ma&lat=0.62846&lon=154.08038&d=1.0000023544&h=180&v=84&hour=16&mo=8&clock=0"
+  },
+  {
+   "name": "p02",
+   "t": -377735453.9385986,
+   "when": "377.7 Ma",
+   "stretch": [
+    "388.2 Ma",
+    "194.8 Ma"
+   ],
+   "lat": 4.20239,
+   "lon": 5.56683,
+   "today": {
+    "lat": 68.237,
+    "lon": 43.86,
+    "near": "433 km from Archangel, Russia"
+   },
+   "camera": "orbit",
+   "heading": 190,
+   "hour": 14,
+   "month": 9,
+   "drawnBy": "fossils",
+   "why": "fossils: 3 taxa recorded in this patch of the atlas in the Frasnian, part 1 of 2",
+   "available": [
+    "fossils",
+    "floor"
+   ],
+   "spots": [
+    {
+     "spot": "a",
+     "lat": 4.20239,
+     "lon": 5.56683,
+     "heading": 190,
+     "km": 0,
+     "link": "t=377.737404Ma&lat=4.20&lon=5.57&d=2.6&hour=14&mo=9&clock=0"
+    }
+   ],
+   "link": "t=377.737404Ma&lat=4.20&lon=5.57&d=2.6&hour=14&mo=9&clock=0"
+  },
+  {
+   "name": "p03",
+   "t": -104926737.8643281,
+   "when": "104.9 Ma",
+   "stretch": [
+    "194.8 Ma",
+    "86.11 Ma"
+   ],
+   "lat": 31.96341,
+   "lon": -41.31303,
+   "today": {
+    "lat": 37.54,
+    "lon": -80.469,
+    "near": "136 km from Charleston, United States of America"
+   },
+   "camera": "eye",
+   "heading": 190,
+   "hour": 12,
+   "month": 8,
+   "drawnBy": "fossils",
+   "why": "fossils: 7 taxa recorded in this patch of the atlas in the Albian, part 2 of 2",
+   "available": [
+    "fossils",
+    "floor"
+   ],
+   "spots": [
+    {
+     "spot": "a",
+     "lat": 31.96341,
+     "lon": -41.31303,
+     "heading": 190,
+     "km": 0,
+     "link": "t=104.928688Ma&lat=31.96341&lon=-41.31303&d=1.0000023544&h=190&v=84&hour=12&mo=8&clock=0"
+    },
+    {
+     "spot": "b",
+     "lat": 31.95769,
+     "lon": -41.33275,
+     "heading": 186,
+     "km": 1.97,
+     "link": "t=104.928688Ma&lat=31.95769&lon=-41.33275&d=1.0000023544&h=186&v=84&hour=12&mo=8&clock=0"
+    },
+    {
+     "spot": "c",
+     "lat": 31.96447,
+     "lon": -41.32253,
+     "heading": 178,
+     "km": 0.9,
+     "link": "t=104.928688Ma&lat=31.96447&lon=-41.32253&d=1.0000023544&h=178&v=84&hour=12&mo=8&clock=0"
+    }
+   ],
+   "link": "t=104.928688Ma&lat=31.96341&lon=-41.31303&d=1.0000023544&h=190&v=84&hour=12&mo=8&clock=0"
+  },
+  {
+   "name": "p04",
+   "t": -43522967.02667132,
+   "when": "43.52 Ma",
+   "stretch": [
+    "86.11 Ma",
+    "24.87 Ma"
+   ],
+   "lat": 3.081,
+   "lon": 81.62832,
+   "today": {
+    "lat": 24.387,
+    "lon": 89.816,
+    "near": "95 km from Dhaka, Bangladesh"
+   },
+   "camera": "air",
+   "heading": 100,
+   "hour": 16,
+   "month": 5,
+   "drawnBy": "fossils",
+   "why": "fossils: 7 taxa recorded in this patch of the atlas in the Lutetian",
+   "available": [
+    "fossils",
+    "floor"
+   ],
+   "spots": [
+    {
+     "spot": "a",
+     "lat": 3.081,
+     "lon": 81.62832,
+     "heading": 100,
+     "km": 0,
+     "link": "t=43.524917Ma&lat=3.08100&lon=81.62832&d=1.0000941767&h=100&v=60&hour=16&mo=5&clock=0"
+    },
+    {
+     "spot": "b",
+     "lat": 3.08707,
+     "lon": 81.62202,
+     "heading": 91,
+     "km": 0.97,
+     "link": "t=43.524917Ma&lat=3.08707&lon=81.62202&d=1.0000941767&h=91&v=60&hour=16&mo=5&clock=0"
+    },
+    {
+     "spot": "c",
+     "lat": 3.0839,
+     "lon": 81.61853,
+     "heading": 124,
+     "km": 1.13,
+     "link": "t=43.524917Ma&lat=3.08390&lon=81.61853&d=1.0000941767&h=124&v=60&hour=16&mo=5&clock=0"
+    }
+   ],
+   "link": "t=43.524917Ma&lat=3.08100&lon=81.62832&d=1.0000941767&h=100&v=60&hour=16&mo=5&clock=0"
+  },
+  {
+   "name": "p05",
+   "t": -17117374.54578405,
+   "when": "17.12 Ma",
+   "stretch": [
+    "24.87 Ma",
+    "4.15 Ma"
+   ],
+   "lat": 31.48972,
+   "lon": 114.22665,
+   "today": {
+    "lat": 31.58,
+    "lon": 116.598,
+    "near": "71 km from Hefei, China"
+   },
+   "camera": "eye",
+   "heading": 110,
+   "hour": 9,
+   "month": 11,
+   "drawnBy": "fossils",
+   "why": "fossils: 23 taxa recorded in this patch of the atlas in the Burdigalian",
+   "available": [
+    "fossils",
+    "floor"
+   ],
+   "spots": [
+    {
+     "spot": "a",
+     "lat": 31.48972,
+     "lon": 114.22665,
+     "heading": 110,
+     "km": 0,
+     "link": "t=17.119325Ma&lat=31.48972&lon=114.22665&d=1.0000023544&h=110&v=84&hour=9&mo=11&clock=0"
+    },
+    {
+     "spot": "b",
+     "lat": 31.49743,
+     "lon": 114.22897,
+     "heading": 94,
+     "km": 0.89,
+     "link": "t=17.119325Ma&lat=31.49743&lon=114.22897&d=1.0000023544&h=94&v=84&hour=9&mo=11&clock=0"
+    },
+    {
+     "spot": "c",
+     "lat": 31.49562,
+     "lon": 114.24982,
+     "heading": 99,
+     "km": 2.29,
+     "link": "t=17.119325Ma&lat=31.49562&lon=114.24982&d=1.0000023544&h=99&v=84&hour=9&mo=11&clock=0"
+    }
+   ],
+   "link": "t=17.119325Ma&lat=31.48972&lon=114.22665&d=1.0000023544&h=110&v=84&hour=9&mo=11&clock=0"
+  },
+  {
+   "name": "p06",
+   "t": -2645808.6957441615,
+   "when": "2.65 Ma",
+   "stretch": [
+    "4.15 Ma",
+    "17.3 ka"
+   ],
+   "lat": -7.97386,
+   "lon": -74.43028,
+   "today": {
+    "lat": -7.934,
+    "lon": -74.778,
+    "near": "55 km from Pucallpa, Peru"
+   },
+   "camera": "eye",
+   "heading": 70,
+   "hour": 16,
+   "month": 5,
+   "drawnBy": "fossils",
+   "why": "fossils: 7 taxa recorded in this patch of the atlas in the Piacenzian",
+   "available": [
+    "fossils",
+    "floor"
+   ],
+   "spots": [
+    {
+     "spot": "a",
+     "lat": -7.97386,
+     "lon": -74.43028,
+     "heading": 70,
+     "km": 0,
+     "link": "t=2.647759Ma&lat=-7.97386&lon=-74.43028&d=1.0000023544&h=70&v=84&hour=16&mo=5&clock=0"
+    },
+    {
+     "spot": "b",
+     "lat": -7.96766,
+     "lon": -74.40975,
+     "heading": 64,
+     "km": 2.36,
+     "link": "t=2.647759Ma&lat=-7.96766&lon=-74.40975&d=1.0000023544&h=64&v=84&hour=16&mo=5&clock=0"
+    },
+    {
+     "spot": "c",
+     "lat": -7.96595,
+     "lon": -74.43685,
+     "heading": 80,
+     "km": 1.14,
+     "link": "t=2.647759Ma&lat=-7.96595&lon=-74.43685&d=1.0000023544&h=80&v=84&hour=16&mo=5&clock=0"
+    }
+   ],
+   "link": "t=2.647759Ma&lat=-7.97386&lon=-74.43028&d=1.0000023544&h=70&v=84&hour=16&mo=5&clock=0"
+  },
+  {
+   "name": "p07",
+   "t": -8991.550489395491,
+   "when": "10.9 ka",
+   "stretch": [
+    "17.3 ka",
+    "1985 BCE"
+   ],
+   "lat": -20.5828,
+   "lon": -68.53883,
+   "today": {
+    "lat": -20.583,
+    "lon": -68.539,
+    "near": "170 km from Iquique, Chile"
+   },
+   "camera": "eye",
+   "heading": 280,
+   "hour": 10,
+   "month": 4,
+   "drawnBy": "people",
+   "why": "people: HYDE has 1,422 in this 1° cell at its step -9000",
+   "available": [
+    "people",
+    "records",
+    "floor"
+   ],
+   "spots": [
+    {
+     "spot": "a",
+     "lat": -20.5828,
+     "lon": -68.53883,
+     "heading": 280,
+     "km": 0,
+     "link": "t=0.010942Ma&lat=-20.58280&lon=-68.53883&d=1.0000023544&h=280&v=84&hour=10&mo=4&clock=0"
+    },
+    {
+     "spot": "b",
+     "lat": -20.57231,
+     "lon": -68.52154,
+     "heading": 279,
+     "km": 2.15,
+     "link": "t=0.010942Ma&lat=-20.57231&lon=-68.52154&d=1.0000023544&h=279&v=84&hour=10&mo=4&clock=0"
+    },
+    {
+     "spot": "c",
+     "lat": -20.60652,
+     "lon": -68.54209,
+     "heading": 297,
+     "km": 2.66,
+     "link": "t=0.010942Ma&lat=-20.60652&lon=-68.54209&d=1.0000023544&h=297&v=84&hour=10&mo=4&clock=0"
+    }
+   ],
+   "link": "t=0.010942Ma&lat=-20.58280&lon=-68.53883&d=1.0000023544&h=280&v=84&hour=10&mo=4&clock=0"
+  },
+  {
+   "name": "p08",
+   "t": -592.4886202686307,
+   "when": "594 BCE",
+   "stretch": [
+    "1985 BCE",
+    "28 BCE"
+   ],
+   "lat": 38.82069,
+   "lon": 23.3123,
+   "today": {
+    "lat": 38.821,
+    "lon": 23.312,
+    "near": "100 km from Athens, Greece"
+   },
+   "camera": "eye",
+   "heading": 110,
+   "hour": 12,
+   "month": 5,
+   "drawnBy": "people",
+   "why": "people: HYDE has 214,807 in this 1° cell at its step -1000",
+   "available": [
+    "people",
+    "records",
+    "towns",
+    "floor"
+   ],
+   "spots": [
+    {
+     "spot": "a",
+     "lat": 38.82069,
+     "lon": 23.3123,
+     "heading": 110,
+     "km": 0,
+     "link": "t=-592.489&lat=38.82069&lon=23.31230&d=1.0000023544&h=110&v=84&hour=12&mo=5&clock=0"
+    },
+    {
+     "spot": "b",
+     "lat": 38.80935,
+     "lon": 23.29122,
+     "heading": 113,
+     "km": 2.22,
+     "link": "t=-592.489&lat=38.80935&lon=23.29122&d=1.0000023544&h=113&v=84&hour=12&mo=5&clock=0"
+    },
+    {
+     "spot": "c",
+     "lat": 38.82908,
+     "lon": 23.31799,
+     "heading": 86,
+     "km": 1.06,
+     "link": "t=-592.489&lat=38.82908&lon=23.31799&d=1.0000023544&h=86&v=84&hour=12&mo=5&clock=0"
+    }
+   ],
+   "link": "t=-592.489&lat=38.82069&lon=23.31230&d=1.0000023544&h=110&v=84&hour=12&mo=5&clock=0"
+  },
+  {
+   "name": "p09",
+   "t": 147.97439917761153,
+   "when": "147 CE",
+   "stretch": [
+    "28 BCE",
+    "804 CE"
+   ],
+   "lat": 36.57518,
+   "lon": 114.112,
+   "today": {
+    "lat": 36.575,
+    "lon": 114.112,
+    "near": "33 km from Handan, China"
+   },
+   "camera": "air",
+   "heading": 240,
+   "hour": 15,
+   "month": 6,
+   "drawnBy": "records",
+   "why": "records: people/domestication/broomcorn-millet (Broomcorn millet domestication)",
+   "available": [
+    "people",
+    "records",
+    "towns",
+    "floor"
+   ],
+   "spots": [
+    {
+     "spot": "a",
+     "lat": 36.57518,
+     "lon": 114.112,
+     "heading": 240,
+     "km": 0,
+     "link": "t=147.974&lat=36.57518&lon=114.11200&d=1.0000941767&h=240&v=60&hour=15&mo=6&clock=0"
+    },
+    {
+     "spot": "b",
+     "lat": 36.56252,
+     "lon": 114.08436,
+     "heading": 264,
+     "km": 2.84,
+     "link": "t=147.974&lat=36.56252&lon=114.08436&d=1.0000941767&h=264&v=60&hour=15&mo=6&clock=0"
+    },
+    {
+     "spot": "c",
+     "lat": 36.58336,
+     "lon": 114.13447,
+     "heading": 264,
+     "km": 2.2,
+     "link": "t=147.974&lat=36.58336&lon=114.13447&d=1.0000941767&h=264&v=60&hour=15&mo=6&clock=0"
+    }
+   ],
+   "link": "t=147.974&lat=36.57518&lon=114.11200&d=1.0000941767&h=240&v=60&hour=15&mo=6&clock=0"
+  },
+  {
+   "name": "p10",
+   "t": 1285.6849980952195,
+   "when": "1285 CE",
+   "stretch": [
+    "804 CE",
+    "1452 CE"
+   ],
+   "lat": 12.8469,
+   "lon": 79.68709,
+   "today": {
+    "lat": 12.847,
+    "lon": 79.687,
+    "near": "70 km from Chennai, India"
+   },
+   "camera": "eye",
+   "heading": 10,
+   "hour": 11,
+   "month": 1,
+   "drawnBy": "towns",
+   "why": "town: Kanchipuram (India), 50,000 people in 1150 by its list",
+   "available": [
+    "people",
+    "records",
+    "towns",
+    "floor"
+   ],
+   "spots": [
+    {
+     "spot": "a",
+     "lat": 12.8469,
+     "lon": 79.68709,
+     "heading": 10,
+     "km": 0,
+     "link": "t=1285.685&lat=12.84690&lon=79.68709&d=1.0000023544&h=10&v=84&hour=11&mo=1&clock=0"
+    },
+    {
+     "spot": "b",
+     "lat": 12.84517,
+     "lon": 79.67504,
+     "heading": 13,
+     "km": 1.32,
+     "link": "t=1285.685&lat=12.84517&lon=79.67504&d=1.0000023544&h=13&v=84&hour=11&mo=1&clock=0"
+    },
+    {
+     "spot": "c",
+     "lat": 12.82941,
+     "lon": 79.67627,
+     "heading": 28,
+     "km": 2.27,
+     "link": "t=1285.685&lat=12.82941&lon=79.67627&d=1.0000023544&h=28&v=84&hour=11&mo=1&clock=0"
+    }
+   ],
+   "link": "t=1285.685&lat=12.84690&lon=79.68709&d=1.0000023544&h=10&v=84&hour=11&mo=1&clock=0"
+  },
+  {
+   "name": "p11",
+   "t": 1779.3716916530773,
+   "when": "1779 CE",
+   "stretch": [
+    "1452 CE",
+    "1824 CE"
+   ],
+   "lat": 51.90531,
+   "lon": 167.64464,
+   "today": {
+    "lat": 51.905,
+    "lon": 167.645,
+    "near": "624 km from Petropavlovsk-Kamchatsky, Russia"
+   },
+   "camera": "eye",
+   "heading": 340,
+   "hour": 11,
+   "month": 3,
+   "drawnBy": "floor",
+   "why": "floor: anywhere on the globe, evenly by area",
+   "available": [
+    "people",
+    "records",
+    "towns",
+    "floor"
+   ],
+   "spots": [
+    {
+     "spot": "a",
+     "lat": 51.90531,
+     "lon": 167.64464,
+     "heading": 340,
+     "km": 0,
+     "link": "t=1779.372&lat=51.90531&lon=167.64464&d=1.0000023544&h=340&v=84&hour=11&mo=3&clock=0"
+    },
+    {
+     "spot": "b",
+     "lat": 51.91251,
+     "lon": 167.62819,
+     "heading": 330,
+     "km": 1.38,
+     "link": "t=1779.372&lat=51.91251&lon=167.62819&d=1.0000023544&h=330&v=84&hour=11&mo=3&clock=0"
+    },
+    {
+     "spot": "c",
+     "lat": 51.91954,
+     "lon": 167.62636,
+     "heading": 335,
+     "km": 2.02,
+     "link": "t=1779.372&lat=51.91954&lon=167.62636&d=1.0000023544&h=335&v=84&hour=11&mo=3&clock=0"
+    }
+   ],
+   "link": "t=1779.372&lat=51.90531&lon=167.64464&d=1.0000023544&h=340&v=84&hour=11&mo=3&clock=0"
+  },
+  {
+   "name": "p12",
+   "t": 1890.426512289976,
+   "when": "1890 CE",
+   "stretch": [
+    "1824 CE",
+    "1950 CE"
+   ],
+   "lat": 41.37781,
+   "lon": 60.34167,
+   "today": {
+    "lat": 41.378,
+    "lon": 60.342,
+    "near": "136 km from Nukus, Uzbekistan"
+   },
+   "camera": "air",
+   "heading": 170,
+   "hour": 10,
+   "month": 10,
+   "drawnBy": "towns",
+   "why": "town: Khiva (Uzbekistan), 20,000 people in 1800 by its list",
+   "available": [
+    "people",
+    "towns",
+    "floor"
+   ],
+   "spots": [
+    {
+     "spot": "a",
+     "lat": 41.37781,
+     "lon": 60.34167,
+     "heading": 170,
+     "km": 0,
+     "link": "t=1890.427&lat=41.37781&lon=60.34167&d=1.0000941767&h=170&v=60&hour=10&mo=10&clock=0"
+    },
+    {
+     "spot": "b",
+     "lat": 41.36752,
+     "lon": 60.32974,
+     "heading": 193,
+     "km": 1.52,
+     "link": "t=1890.427&lat=41.36752&lon=60.32974&d=1.0000941767&h=193&v=60&hour=10&mo=10&clock=0"
+    },
+    {
+     "spot": "c",
+     "lat": 41.3622,
+     "lon": 60.36216,
+     "heading": 192,
+     "km": 2.44,
+     "link": "t=1890.427&lat=41.36220&lon=60.36216&d=1.0000941767&h=192&v=60&hour=10&mo=10&clock=0"
+    }
+   ],
+   "link": "t=1890.427&lat=41.37781&lon=60.34167&d=1.0000941767&h=170&v=60&hour=10&mo=10&clock=0"
+  }
+ ]
+}

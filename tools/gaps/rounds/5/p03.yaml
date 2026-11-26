@@ -1,0 +1,293 @@
+view: t=104.928688Ma&lat=31.96341&lon=-41.31303&d=1.0000023544&h=190&v=84&hour=12&mo=8&clock=0
+when: 104.9 Ma
+place: >-
+  The central Appalachians in the late Albian (Early Cretaceous). By the build's plates the spot is today at about
+  37.54°N, 80.47°W, in the Valley and Ridge near the Virginia-West Virginia line (Monroe County, West Virginia,
+  136 km from Charleston), close to today's New River; the coordinates in the link are the place as it stood then,
+  at about 32°N. The camera stands at eye level and faces 190°, about south, at noon in August. How high the ground
+  stood then is not known. The fossils that drew the point are not from here: the build's seven taxa "recorded here"
+  are leaves from one 1889 collection of the Potomac Group near Richmond, Virginia, to the east, in the
+  lowland on the far side of the Atlantic drainage divide of the time (some 280 km by today's map).
+author: machine:claude-code
+expects:
+  - id: water-streams-flow-west
+    layer: water
+    what: >-
+      Any stream in view runs west, toward the interior of the continent, not east toward the Atlantic: this upland
+      was not part of the catchment that fed the Potomac Group's rivers and deltas.
+    reach: region
+    source:
+      cite: "Naeser, C.W., Naeser, N.D., Newell, W.L., Southworth, S., Edwards, L.E. & Weems, R.E. (2016). Erosional and depositional history of the Atlantic passive margin as recorded in detrital zircon fission-track ages and lithic detritus in Atlantic Coastal Plain sediments. American Journal of Science 316, 110-168. doi:10.2475/02.2016.02"
+      url: https://ajsonline.org/api/v1/articles/65690-erosional-and-depositional-history-of-the-atlantic-passive-margin-as-recorded-in-detrital-zircon-fission-track-ages-and-lithic-detritus-in-atlantic-co.pdf
+      text: naeser-ajs.txt
+      loc: "Discussion, the paragraph beginning 'Our interpretation of the ZFT data' (PDF page 21, p. 129)"
+      quote: "Drainage from the western Appalachians during this time is interpreted to have been directed entirely to the west."
+    note: >-
+      "Western Appalachians" is the paper's term for the Appalachian Plateau, Valley and Ridge and far western Blue
+      Ridge, which takes in this spot; "this time" is the Early Cretaceous deposition of the Potomac Group. The
+      evidence is the absence of the west's old zircons and fossiliferous chert from Coastal Plain sands until the
+      Miocene. So the task's premise (an upland draining to the Potomac Group) does not hold here: the Potomac's
+      catchment lay east of this spot. Where the west-flowing water went (which basin or sea) the paper does not say.
+  - id: geography-divide-to-the-east
+    layer: geography
+    what: >-
+      The Atlantic drainage divide lay east of the spot, in the Blue Ridge; the coastal lowland and its rivers were
+      beyond it, out of sight.
+    reach: region
+    source:
+      cite: "Naeser, C.W., Naeser, N.D., Newell, W.L., Southworth, S., Edwards, L.E. & Weems, R.E. (2016). Erosional and depositional history of the Atlantic passive margin as recorded in detrital zircon fission-track ages and lithic detritus in Atlantic Coastal Plain sediments. American Journal of Science 316, 110-168. doi:10.2475/02.2016.02"
+      url: https://ajsonline.org/api/v1/articles/65690-erosional-and-depositional-history-of-the-atlantic-passive-margin-as-recorded-in-detrital-zircon-fission-track-ages-and-lithic-detritus-in-atlantic-co.pdf
+      text: naeser-ajs.txt
+      loc: "p. 131 (PDF page 22-23), the paragraph citing Pazzaglia and others (2002)"
+      quote: "the drainage divide at least locally migrated west into the Blue Ridge during the Early Cretaceous, based on the Blue Ridge provenance interpreted for detritus in \"upper\" Potomac Group sediments in the Coastal Plain"
+    note: >-
+      The "upper" Potomac Group is the Albian part, so of about this time. The paper does not map the divide; by
+      today's map the Blue Ridge is some 50-90 km east of the spot (my reading of a map, not the paper's).
+  - id: relief-eroding-upland
+    layer: relief
+    what: >-
+      An upland being worn down, not a lowland plain or a sea floor: the rocks here were being slowly unroofed, and
+      an escarpment facing the Atlantic was retreating westward somewhere to the east.
+    reach: region
+    source:
+      cite: "Baughman, J.S., Fame, M., Basler, L. & Haproff, P.J. (2020). Spatially variable burial and exhumation history of the Central Appalachian Mountains from zircon (U-Th)/He thermochronology. Geological Society of America Abstracts with Programs 52(2), paper 52-2. doi:10.1130/abs/2020SE-344484"
+      url: https://gsa.confex.com/gsa/2020SE/webprogram/Paper344484.html
+      text: gsa2020se-aft.txt
+      loc: "Abstract, second paragraph"
+      quote: "~200-100 Ma apatite fission track (AFT) dates (closure temperature ~110°C), both of which young to the east and have been interpreted as evidence for westward escarpment retreat following rifting"
+    note: >-
+      A conference abstract reporting earlier studies' dates along a West Virginia-Virginia transect that crosses
+      this region. It says how deep the rocks were, not how high the land stood: the height of the ground and the
+      relief at 104.9 Ma are not known. Today's ~1400 m of relief it mentions is today's.
+  - id: substrate-paleozoic-bedrock
+    layer: substrate
+    what: >-
+      Where bedrock shows, it is Paleozoic sedimentary rock (sandstone, shale, limestone and chert-bearing
+      carbonate) of the old fold belt, not young sediment.
+    reach: region
+    source:
+      cite: "Naeser, C.W., Naeser, N.D., Newell, W.L., Southworth, S., Edwards, L.E. & Weems, R.E. (2016). Erosional and depositional history of the Atlantic passive margin as recorded in detrital zircon fission-track ages and lithic detritus in Atlantic Coastal Plain sediments. American Journal of Science 316, 110-168. doi:10.2475/02.2016.02"
+      url: https://ajsonline.org/api/v1/articles/65690-erosional-and-depositional-history-of-the-atlantic-passive-margin-as-recorded-in-detrital-zircon-fission-track-ages-and-lithic-detritus-in-atlantic-co.pdf
+      text: naeser-ajs.txt
+      loc: "Results, bedrock of the western Appalachians (PDF page 8)"
+      quote: "throughout the Valley and Ridge and Appalachian Plateau, the samples, which are all from Neoproterozoic to late Paleozoic sedimentary rocks"
+    note: >-
+      Today's surface rocks. Some kilometres of rock have been eroded here since the Albian, so the beds at the
+      surface then were higher in the same Paleozoic pile; which ones (and whether the hard sandstone ridges of
+      today's Valley and Ridge already stood out) is not known. The rock types in "what" are my gloss from the
+      paper's mention of Paleozoic carbonates, chert and quartzites west of the Blue Ridge.
+  - id: substrate-weathered-regolith
+    layer: substrate
+    what: >-
+      Over the limestone and dolomite, a deep, rotted mantle of weathered rock: brown and ochre-stained chert
+      rubble in clayey residue rather than bare rock or fresh soil.
+    reach: region
+    source:
+      cite: "Naeser, C.W., Naeser, N.D., Newell, W.L., Southworth, S., Edwards, L.E. & Weems, R.E. (2016). Erosional and depositional history of the Atlantic passive margin as recorded in detrital zircon fission-track ages and lithic detritus in Atlantic Coastal Plain sediments. American Journal of Science 316, 110-168. doi:10.2475/02.2016.02"
+      url: https://ajsonline.org/api/v1/articles/65690-erosional-and-depositional-history-of-the-atlantic-passive-margin-as-recorded-in-detrital-zircon-fission-track-ages-and-lithic-detritus-in-atlantic-co.pdf
+      text: naeser-ajs.txt
+      loc: "Lithic detritus, the paragraph beginning 'From New Jersey south' (PDF page 17)"
+      quote: "generally brown or ochre-stained with leached rinds and opaline fracture fillings indicate that an extensive deeply weathered regolith has long blanketed the Paleozoic carbonate sequences exposed in the Valley and Ridge"
+    note: >-
+      "Has long blanketed" is not dated; the deposits are seen today. That the mantle was there in the Albian is an
+      inference, not the paper's claim, and "clayey residue" is my gloss. The colour of the soil at this spot then is
+      not known.
+  - id: water-no-sea
+    layer: water
+    what: >-
+      No sea anywhere in view. Even the coastal lowland hundreds of kilometres to the east was a land of rivers and
+      deltas at this time; nothing marine lay near.
+    reach: region
+    source:
+      cite: "Naeser, C.W., Naeser, N.D., Newell, W.L., Southworth, S., Edwards, L.E. & Weems, R.E. (2016). Erosional and depositional history of the Atlantic passive margin as recorded in detrital zircon fission-track ages and lithic detritus in Atlantic Coastal Plain sediments. American Journal of Science 316, 110-168. doi:10.2475/02.2016.02"
+      url: https://ajsonline.org/api/v1/articles/65690-erosional-and-depositional-history-of-the-atlantic-passive-margin-as-recorded-in-detrital-zircon-fission-track-ages-and-lithic-detritus-in-atlantic-co.pdf
+      text: naeser-ajs.txt
+      loc: "Summary, PDF page 20"
+      quote: "In Coastal Plain sands sampled in Virginia and Maryland, Early Cretaceous fluvial-deltaic sands and Tertiary shallow marine sands"
+    note: >-
+      Against the build: `world rocks` reports one Albian collection 80 km off, "marine indet.; claystone"
+      (PBDB collection 107496). That row is misplaced. Its own fields name the Puddledock sand and gravel pit in
+      Prince George County, Virginia (pbdb-coll-107496.txt), which PBDB collections 31381 and 31672 place 9 km
+      south-west of Hopewell at about 37.26-37.30°N, 77.29-77.37°W (pbdb-colls-compare.txt); 107496 sits at
+      38.00°N, 79.77°W, some 220 km west of its own locality, inside the Valley and Ridge, and its "marine" setting
+      contradicts the terrestrial Patapsco beds the other two Puddledock rows describe. No Albian rock is held within
+      200 km of the spot once that row is moved.
+  - id: cover-conifers-and-ferns
+    layer: cover
+    what: >-
+      Away from the stream banks, vegetation of conifers and ferns, with flowering plants not everywhere common:
+      conifer trees over an understorey of ferns and small plants.
+    reach: region
+    source:
+      cite: "Jud, N.A. (2014). The Ecology of Early Cretaceous Angiosperms: Insights from the Fossil Record. PhD dissertation, University of Maryland, College Park."
+      url: https://drum.lib.umd.edu/bitstreams/f3d37391-974e-43ed-bd00-0bf19f86f410/download
+      text: jud-2014-thesis.txt
+      loc: "Chapter 4, Discussion, PDF pages 98-99 (printed pp. 87-88)"
+      quote: "Although angiosperm dominance is common among the late Albian and Cenomanian plant fossil assemblages included in this study, it is not ubiquitous. … Many assemblages are dominated by fern or conifer foliage."
+    note: >-
+      A survey of North American Aptian-Cenomanian leaf collections, all from lowland river deposits; none is from an
+      upland like this one, and no Albian plant fossil is known in the western Appalachians. The understorey wording
+      is from the same thesis's chapter 2 (PDF page 54), of an Aptian-earliest Albian Potomac site: "a conifer-dominated
+      and disturbance-prone riparian community", with ferns, angiosperms and small gymnosperms beneath.
+  - id: cover-flowering-plants-local
+    layer: cover
+    what: >-
+      Flowering plants locally abundant, in patches where they dominate the ground, rather than rare: the late
+      Albian is when they first did so in eastern North America.
+    reach: region
+    source:
+      cite: "Jud, N.A. (2014). The Ecology of Early Cretaceous Angiosperms: Insights from the Fossil Record. PhD dissertation, University of Maryland, College Park."
+      url: https://drum.lib.umd.edu/handle/1903/15821
+      text: jud-2014-abstract.txt
+      loc: "Abstract (repository page)"
+      quote: "angiosperms were consistently rare during the Aptan-middle Albian, and that locally abundant angiosperms became common during the late Albian, long after the initial diversification"
+    note: >-
+      Of fossil collections, all from lowland floodplains. "Aptan" is the abstract's own spelling. No grass: grasses
+      had not appeared, and none of the sources lists any.
+  - id: cover-plane-tree-kin-by-streams
+    layer: cover
+    what: >-
+      Along stream channels and their levees, shrubs or trees with palmately lobed, maple- or sycamore-like leaves
+      (the "platanoids", early relatives of the plane tree).
+    reach: region
+    source:
+      cite: "Doyle, J.A. & Upchurch, G.R. Jr. (2014). Angiosperm clades in the Potomac Group: what have we learned since 1977? Bulletin of the Peabody Museum of Natural History 55(2), 111-134."
+      url: https://escholarship.org/content/qt2g72j32q/qt2g72j32q.pdf
+      text: doyle-upchurch-2014.txt
+      loc: "p. 123, 'Potomac Zone II (Middle to Late Albian)', Eudicots"
+      quote: "Platanoid leaves are abundant in channel margin and levee facies in Potomac Subzone II-C (latest Albian), as in the correlative Dakota flora of Kansas"
+    note: >-
+      Of the Coastal Plain lowland, 250 km or more east and across the divide; Subzone II-C is a little younger than
+      104.9 Ma, and the paper says leaves of the same kind reach down into Subzone II-B (middle to late Albian). Their
+      size and habit (shrub or tree) are not given; "maple- or sycamore-like" is my gloss.
+  - id: cover-sapindopsis
+    layer: cover
+    what: >-
+      Shrubs with pinnately compound leaves (Sapindopsis), also kin of the plane tree, common in the late Albian
+      leaf beds.
+    reach: region
+    source:
+      cite: "Doyle, J.A. & Upchurch, G.R. Jr. (2014). Angiosperm clades in the Potomac Group: what have we learned since 1977? Bulletin of the Peabody Museum of Natural History 55(2), 111-134."
+      url: https://escholarship.org/content/qt2g72j32q/qt2g72j32q.pdf
+      text: doyle-upchurch-2014.txt
+      loc: "p. 124, the paragraph on Sapindopsis"
+      quote: "Pinnatifid leaves occur at Fontaine's (1889) lower Subzone II-B locality near Brooke, Virginia, while truly compound leaves dominate at upper Subzone II-B localities, such as West Brothers and Red Point in Maryland."
+    note: >-
+      Sapindopsis is one of the build's seven taxa "recorded here". Brooke is about 290 km north-east by today's map,
+      and the Maryland sites farther; all are lowland. The abstract (p. 111) places Sapindopsis as a stem relative of
+      Platanus. "Shrubs" is a gloss: Jud (2014, Appendix, PDF pages near 'cf. Sapindopsis') reads morphotypes like it
+      as shrubs or herbs.
+  - id: cover-atlas-leaf-taxa
+    layer: cover
+    what: >-
+      Among the plants, the build's "recorded here" list: ferns (Cladophlebis), broad-leaved conifers (Podozamites,
+      Nageiopsis) and angiosperm leaves named Sassafras, Sapindopsis and Aralia.
+    reach: region
+    source:
+      cite: "The Paleobiology Database, occurrences 929598-929611 (collection 106317, Deep Bottom (Fontaine), Henrico County, Virginia, Patapsco Formation, Middle-Late Albian; reference: Fontaine, W.M. 1889, The Potomac or Younger Mesozoic Flora, USGS Monograph 15), downloaded 22 November 2026."
+      url: https://paleobiodb.org/data1.2/occs/list.txt?lngmin=-80&lngmax=-75&latmin=36&latmax=40&interval=Albian&show=coords,loc,strat,geo,lith,env
+      text: pbdb-albian-occs.txt
+      loc: "rows for occurrences 929598, 929601, 929602, 929603, 929605 and 929609"
+      quote: "Cladophlebis constricta … Podozamites acutifolius … Nageiopsis longifolia … Sassafras bilobata … Sapindopsis obtusifolia … Aralia dubia"
+    note: >-
+      One collection of 1889, at about 37.38°N, 77.28°W, near Richmond: some 280 km east of the spot by today's map,
+      in a fluvial siltstone of the lowland, on the far side of the divide. Fontaine's names are nineteenth-century
+      leaf-form names: Doyle & Upchurch (2014, p. 123) note that early authors put platanoid leaves into Araliaceae and
+      Lauraceae among others, so "Sassafras" and "Aralia" here are not today's genera. Fontaine's monograph itself
+      could not be fetched (pubs.usgs.gov refused).
+  - id: life-large-dinosaurs
+    layer: life
+    what: >-
+      Large dinosaurs: long-necked sauropods and armoured nodosaurs.
+    reach: region
+    source:
+      cite: "Stanford, R., Lockley, M.G., Tucker, C., Godfrey, S. & Stanford, S.M. (2018). A diverse mammal-dominated, footprint assemblage from wetland deposits in the Lower Cretaceous of Maryland. Scientific Reports 8, 741. doi:10.1038/s41598-017-18619-w"
+      url: https://pmc.ncbi.nlm.nih.gov/articles/PMC5792599/
+      text: stanford-2018-goddard.txt
+      loc: "Abstract"
+      quote: "Large well-preserved sauropod and nodosaurs tracks indicate the presence of large dinosaurs."
+    note: >-
+      Tracks from the Patuxent Formation at Greenbelt, Maryland, which the paper dates as Aptian: some 10 million
+      years older than this moment and about 350 km north-east, in a lowland wetland. No dinosaur of the late
+      Albian is recorded within reach of the spot in anything read. The build has nodosaurids only as a stand-in
+      ("nothing like it is recorded near here") and no sauropod.
+  - id: life-small-animals
+    layer: life
+    what: >-
+      Small animals on the ground: mouse- to rat-sized mammals and crow-sized theropods; pterosaurs.
+    reach: region
+    source:
+      cite: "Stanford, R., Lockley, M.G., Tucker, C., Godfrey, S. & Stanford, S.M. (2018). A diverse mammal-dominated, footprint assemblage from wetland deposits in the Lower Cretaceous of Maryland. Scientific Reports 8, 741. doi:10.1038/s41598-017-18619-w"
+      url: https://pmc.ncbi.nlm.nih.gov/articles/PMC5792599/
+      text: stanford-2018-goddard.txt
+      loc: "Abstract"
+      quote: "The assemblage is dominated by small mammal tracks including the new ichnotxon Sederipes goddardensis, indicating sitting postures. Small crow-sized theropod trackways, the first from this unit, indicate social trackmakers"
+    note: >-
+      The same Aptian wetland, ~350 km north-east and ~10 Myr earlier; the abstract also names pterosaur tracks.
+      "Ichnotxon" is the abstract's own spelling. The build's list has pterosaurs as a stand-in and no mammal. Small
+      animals are unlikely to show in one frame at eye level; how many were about is not known.
+  - id: weather-humid
+    layer: weather
+    what: >-
+      A humid climate: soils formed under wet conditions, though wetter and drier spells came and went.
+    reach: region
+    source:
+      cite: "Thornburg, J.D., Miller, K.G. & McLaughlin, P.P. (2013). Reconstructing the mid-Cretaceous paleoclimate and paleoenvironment of eastern North America using Potomac Formation paleosols. Geological Society of America Abstracts with Programs 45(7), 619."
+      url: https://gsa.confex.com/gsa/2013AM/webprogram/Paper232389.html
+      text: gsa2013-paleosols.txt
+      loc: "Abstract, fourth paragraph"
+      quote: "Although these soils all formed under generally humid conditions, there are distinct fluctuations of this humidity within each unit through time."
+    note: >-
+      Paleosols of Aptian-Cenomanian age in cores in New Jersey and Delaware, 500 km and more north-east, on the
+      coastal lowland. An abstract only.
+  - id: weather-warm-seasonal-floods
+    layer: weather
+    what: >-
+      A warm, humid subtropical summer, with rain that comes in spells and storms strong enough to flood the streams.
+    reach: region
+    source:
+      cite: "Jud, N.A. (2014). The Ecology of Early Cretaceous Angiosperms: Insights from the Fossil Record. PhD dissertation, University of Maryland, College Park."
+      url: https://drum.lib.umd.edu/bitstreams/f3d37391-974e-43ed-bd00-0bf19f86f410/download
+      text: jud-2014-thesis.txt
+      loc: "Chapter 3, Geologic setting, PDF page 68 (printed p. 57)"
+      quote: "These depositional end-members indicate a wide range of flow regimes typical of regions with seasonal rainfall or extreme weather events (Blum and Törnqvist, 2000). Based on sedimentary evidence and paleoclimate models the climate of the Potomac basin is thought to have been humid subtropical"
+    note: >-
+      Said of the Potomac basin as a whole, from its Aptian-Albian river deposits and others' models; a thesis
+      reporting others' work. That August was the wet or the stormy season is not said by anything read.
+  - id: cover-fire-scars
+    layer: cover
+    what: >-
+      Fire was part of the vegetation's life: charred conifer debris, burnt patches among the trees.
+    reach: region
+    source:
+      cite: "Jud, N.A. (2014). The Ecology of Early Cretaceous Angiosperms: Insights from the Fossil Record. PhD dissertation, University of Maryland, College Park."
+      url: https://drum.lib.umd.edu/bitstreams/f3d37391-974e-43ed-bd00-0bf19f86f410/download
+      text: jud-2014-thesis.txt
+      loc: "Chapter 2, Discussion, PDF pages 53-54 (printed p. 42)"
+      quote: "abundance of charcoalified conifer (Pagiophyllum) shoots suggests that in addition to overbank floods or channel avulsion events, disturbance by fire was a common form of disturbance in this community"
+    note: >-
+      Of one Aptian-earliest Albian (Zone I) site of the Potomac Group in northern Virginia, a few million years
+      older, in northern Virginia some 250-300 km north-east. Whether anything was burning or freshly burnt in this frame cannot be said.
+unknown:
+  - How high the ground stood at this spot in the Albian, how much relief it had, and whether the hard sandstone ridges of today's Valley and Ridge already stood out; the thermochronology read gives burial and unroofing, not height.
+  - Which Paleozoic beds were at the surface here then; some kilometres have been eroded since.
+  - What grew on this upland. Every plant record of the Albian read is from the Coastal Plain lowland, 250 km or more east and across the drainage divide; no Albian plant fossil is known in the western Appalachians.
+  - Where the west-flowing streams went (which river, basin or sea) and whether a large river (a forerunner of the New River) ran near the spot.
+  - Which animals lived on this upland; no Albian vertebrate is recorded within reach, and the animals in this brief are from an Aptian lowland wetland 350 km away.
+  - The sky at noon in August (cloud, haze, storm); nothing read gives the season's weather here. The sun would stand high, a little south of overhead, at 32°N in August, but that is geometry, not a source.
+  - The colour and kind of soil at the spot (red, grey or mottled; how deep).
+  - Whether the build's seven "recorded here" taxa, from one lowland collection of 1889, grew on uplands at all.
+pictures:
+  - { url: "https://escholarship.org/content/qt2g72j32q/qt2g72j32q.pdf", what: "Doyle & Upchurch 2014, figures 5-8: photographs of Potomac Group angiosperm leaves of Zones I and II, including platanoids, Nelumbites and Sapindopsis." }
+  - { url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC5792599/", what: "Stanford et al. 2018, figures 2-8: the Aptian track surface at Goddard, with mammal, small theropod, pterosaur, sauropod and nodosaur tracks." }
+effort:
+  fetched: 18
+  cited: 8
+  failed: 4
+  note: >-
+    18 fetches, 10 texts kept, 8 cited (plus two PBDB collection listings used in a note). Not reached: Fontaine's
+    1889 monograph (pubs.usgs.gov, HTTP error), a Bowdoin thesis on mid-Cretaceous Appalachian cooling (HTTP error), the
+    abstract of Jess et al. 2022 "Why are the Appalachians high?" (Semantic Scholar holds none, and a first search there failed; Elsevier closed). A Europe PMC search found the Goddard tracks paper.
+    A second Doyle & Upchurch copy, a review on recognising Early Cretaceous angiosperm clades and a 2015 GSA abstract on Potomac paleosols in New Jersey gave nothing new and were deleted. The
+    time went to the point's premise: the atlas's "recorded here" taxa are a lowland collection across the divide,
+    and the build's only rock row near the spot is a misplaced Puddledock collection labelled marine.

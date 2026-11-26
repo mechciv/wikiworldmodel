@@ -1,0 +1,36 @@
+# Round 5's verdicts for p02: the Late Devonian (Frasnian) from orbit, over the Kanin–Timan coast of north-eastern Baltica.
+author: machine:claude-code
+judged: "2026-11-22"
+summary: >-
+  The viewer gets the frame's main lines right: one large continent in the middle and south-west with the point on
+  its north-eastern coast, pale shelf sea deepening to the east, reef flecks along every warm shore, green land round
+  the point, no ice, and a cloud band near the equator. What it gets wrong is North America: its interior is drawn as
+  dry land, green and a broad tan desert, where an epicontinental sea covered it (field:earth/elevation). What it
+  lacks is the sea's own detail: dark starved basins, brown water off deltas and pale evaporite lagoons, which
+  nothing in the world colours the sea by.
+items:
+  geography-laurussia: { verdict: drawn, spots: { a: drawn }, owner: "field:earth/elevation", why: "One large continent fills the middle and south-west of the disc, with the point (165 m up) on land just inside its north-eastern coast; by my reckoning of the projection, Hudson Bay, Orkney and the Ardennes lie on it, and Riga and Ukhta in the shelf sea east of it." }
+  geography-rheic-narrow: { verdict: untested, spots: { a: untested }, owner: "field:earth/elevation", why: "The canvas cuts the disc off about 35° south of the point, before Gondwana's edge; central Europe (Prague, the Zachełmie marker) is open sea within the frame, and whether it narrows to a strait beyond is out of sight." }
+  water-north-america-flooded: { verdict: wrong, spots: { a: wrong }, owner: "field:earth/elevation", why: "The south-west of the continent, where Hudson Bay and the North American interior lie, is dry land, green in the north and a broad tan desert in the south, with sea only off its western edge." }
+  life-reefs-west-canada: { verdict: missing-held, spots: { a: missing-held }, owner: "model:earth/biome-from-climate", why: "Western Canada lies in pale shelf water off the continent's west coast, but no reef tract or carbonate bank shows on it: the globe's reef speckle follows depth and latitude alone and hugs the shores, not the rock record's reefs." }
+  life-reefs-devonian-maximum: { verdict: drawn, spots: { a: drawn }, owner: "model:earth/biome-from-climate", why: "Pale green reef flecks fringe every shore and shelf margin in the tropical part of the disc (the build's reef cover is on, 1)." }
+  water-pechora-reef-rimmed-shelf: { verdict: drawn, spots: { a: drawn }, owner: "field:earth/elevation", why: "East and south-east of the point a broad pale shelf sea, flecked with reef along its coasts, reaches out to deeper water." }
+  water-domanik-deep-basin: { verdict: missing-not-held, spots: { a: missing-not-held }, owner: "field:earth/elevation", why: "The Timan–Pechora shelf is one even pale blue: no darker basins lie among its banks, which a paleo-elevation grid this coarse does not hold, and nothing colours water by its oxygen." }
+  water-peri-uralian-sea: { verdict: drawn, spots: { a: drawn }, owner: "field:earth/elevation", why: "East of the point the pale shelf gives way to deep blue ocean beyond a few islands, with no land rising between." }
+  water-deltaic-coast: { verdict: no-layer, spots: { a: no-layer }, owner: "ocean colour (no layer)", why: "The coast at the point is a smooth outlined curve with clear blue water off it: no river mouths, no ragged deltas, no brown sediment in the sea." }
+  cover-archaeopteris-forest: { verdict: drawn, spots: { a: drawn }, owner: "model:earth/biome-from-climate", why: "The land round the point is dark green to the coast; the viewer says rainforest, forest cover 0.68." }
+  cover-humid-north-coal: { verdict: drawn, spots: { a: drawn }, owner: "field:earth/climate", why: "The north of the continent round the point is green and the climate field calls it wet (aridity index 3.4); swamps as such are too fine to show from orbit." }
+  substrate-timan-basalts: { verdict: untested, spots: { a: untested }, owner: "model:earth/substrate", why: "Lava fields on the Timan would be a few pixels from orbit; the viewer says the ground here is generic, drawn by the climate's class alone." }
+  weather-dry-baltic-southwest: { verdict: no-layer, spots: { a: no-layer }, owner: "ocean colour (no layer)", why: "Where the Baltic states lie the frame has pale-blue shallow sea under cloud, rightly not green land, but nothing pale or evaporitic: the sea is coloured by its depth alone." }
+  water-siberia-shallow-seas: { verdict: drawn, spots: { a: drawn }, owner: "field:earth/elevation", why: "To the north, where Norilsk lies, a wide pale shelf sea with a few islands of land; the rest of Siberia is beyond the canvas's top edge." }
+  water-north-africa-shallow-sea: { verdict: untested, spots: { a: untested }, owner: "field:earth/elevation", why: "The southern limb, where Gondwana's edge lies, is below the bottom of the canvas." }
+  water-hot-tropical-seas: { verdict: untested, spots: { a: untested }, owner: "field:earth/climate", why: "A sea's warmth does not show in a frame; the climate field gives the land at the point a warmest month near 35 °C." }
+  ice-none-in-view: { verdict: drawn, spots: { a: drawn }, owner: "field:earth/ice", why: "No ice, sea ice or snow anywhere on the disc." }
+  weather-itcz-over-laurussia: { verdict: drawn, spots: { a: drawn }, owner: "gen:earth/clouds", why: "A broad band of cloud crosses the disc a little south of the point, over the continent and the sea east of it; whether it strengthens over mountains cannot be told." }
+findings:
+  - The canvas (1600 × 788) is narrower than the disc at 2.6 Earth radii, so the cap's top and bottom, some 35° from the
+    point, are cut off. Three of the brief's items (the Rheic, Gondwana's shelf sea, most of Siberia) fall outside the
+    frame for that reason, not for anything the world lacks.
+  - The Zachełmie trackways marker, a tidal-flat site, stands in open deep-blue sea some 300 km from the nearest drawn
+    coast, with Prague near it. Its age is Eifelian, older than this frame, so it may be the marker's time window rather
+    than the map; but a site of land animals' tracks drawn far out at sea is worth a look.

@@ -1,0 +1,33 @@
+# Round 5's verdicts for p09: from the air over the Han countryside at Cishan, Wu'an, near Handan, a June afternoon in 147 CE.
+author: machine:claude-code
+judged: "2026-11-22"
+summary: >-
+  The best of these three points. The viewer draws Han courtyard compounds, in hamlets and scattered, each ringed by
+  a patchwork of tan, brown and green plots, with open wooded grassland between, no paddies and a clear afternoon;
+  the polity is the Han. What it lacks is the river: there is no water in any frame, since the scene's observed river
+  lies far off and the model's reaches near the point are dry in June. The ground is smooth swells, not loess terraces
+  with steep edges, and no bare loess shows.
+items:
+  relief-terrace-at-the-plain-edge: { verdict: wrong, spots: { a: wrong, b: wrong, c: wrong }, owner: "field:earth/elevation", why: "Gently rolling ground with no flat-topped terraces, steep edges or low cliffs; the viewer has the point 302 m up where the brief says 260 to 270 m." }
+  relief-taihang-beyond: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "field:earth/elevation", why: "Tilted 60° down from 600 m, no frame reaches the horizon; spot b, 2.8 km up the valley, is 417 m up, so the ground does rise westward." }
+  substrate-loess: { verdict: missing-held, spots: { a: missing-held, b: missing-held, c: missing-held }, owner: "renderer", why: "The substrate answers silt and sand (SoilGrids topsoil), as loess is, but no bare yellow-brown ground or cut face shows: the land is olive grass and the plots are the renderer's own colours." }
+  water-ming-river: { verdict: missing-held, spots: { a: missing-held, b: missing-held, c: missing-held }, owner: "model:earth/drainage", why: "No river and no dry bed in any frame; the scene's one observed river (a GRWL reach) lies about 22 km off by the scene's focus, and its modelled reaches nearby are all marked dry in June." }
+  cover-fields-wheat-reaped-millet-sown: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "building traditions: fields and crops", why: "Plots of tan, brown and low green, about a third green, as reaped, opened and newly sown fields would look from above; the colours are a fixed mix, not chosen by month (see the findings)." }
+  cover-millet-the-staple: { verdict: missing-not-held, spots: { a: missing-not-held, b: missing-not-held, c: missing-not-held }, owner: "building traditions: fields and crops", why: "Dry fields and no paddies, rightly, but nothing says which crops were grown, so millet and wheat are not told apart." }
+  cover-open-woodland-on-the-hills: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "gen:life/scene", why: "Between the fields, grassland with trees standing apart, and no lake or marsh; the trees are all round-crowned, with no pine among them." }
+  cover-cleared-for-fields-and-fuel: { verdict: drawn, spots: { a: drawn, b: drawn, c: wrong }, owner: "gen:people/settlement", why: "At a and b the ground beyond the fields is mostly open grass with thin trees; at c trees stand thick right up to the fields' edge across half the frame." }
+  people-ox-ploughs-and-iron: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "gen:people/settlement", why: "The scene places people and 6,703 kept animals, cattle among them, but from 600 m a person or an ox is a pixel or two, and no frame shows whether anyone ploughs." }
+  people-courtyard-farmsteads: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "gen:people/settlement", why: "Courtyard houses of Han China, gathered in a hamlet at a and scattered among the plots at c and b; the viewer says scattered farmsteads, 4,532 houses." }
+  people-dense-countryside: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "gen:people/settlement", why: "Several hamlets with their fields are in sight in every frame (eight settlements in a's view), from HYDE's count; between them lie wide stretches of untilled wooded grass." }
+  people-iron-of-wuan: { verdict: untested, spots: { a: untested, b: untested, c: untested }, owner: "crafts and industry (no layer)", why: "No source places the works, and nothing in the frames smokes; the scene's works are ponds, walls, people and boats." }
+  polity-wei-commandery: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "src:cliopatria-0.2.1", why: "The polity layer answers Han Dynasty from evidence, and nothing of a boundary shows on the ground, as the brief says; commandery and province are finer than the dataset." }
+  weather-hot-before-the-rains: { verdict: drawn, spots: { a: drawn, b: drawn, c: drawn }, owner: "gen:earth/clouds", why: "A bright afternoon with hard shadows and only a few cloud shadows, no rain; the heat does not show, and the climate field's warmest month is a mean of 24 to 25 °C." }
+  weather-dry-spring-147: { verdict: no-layer, spots: { a: no-layer, b: no-layer, c: no-layer }, owner: "weather of a year (no layer)", why: "Nothing holds the weather of one year." }
+findings:
+  - The plots' colours are fixed in the renderer (viewer/src/gl/cityShaders.ts, plots()) at four tenths ripe, about a
+    third green, the rest ploughed or fallow, in every month and for every crop. June here happens to look right; the
+    same mix will be drawn in January and for rice.
+  - The farmland is drawn as discs round each hamlet with untilled wooded grass between them, where a commandery of
+    some seven hundred thousand people would more likely farm the terrace tops continuously.
+  - The scene reports an observed river, but it is a GRWL reach some 22 km off by the scene's focus, probably not the
+    Ming; the Ming itself, too narrow for GRWL, is not drawn.

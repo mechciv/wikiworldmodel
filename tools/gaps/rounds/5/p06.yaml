@@ -1,0 +1,255 @@
+view: t=2.647759Ma&lat=-7.97386&lon=-74.43028&d=1.0000023544&h=70&v=84&hour=16&mo=5&clock=0
+when: 2.65 Ma
+place: >-
+  The western Amazon lowland of eastern Peru, in the Ucayali basin between the Sub-Andean foothills and the Moa
+  Divisor (Sierra del Divisor). By the build's plates the spot is today at about 7.93°S, 74.78°W, some 55 km
+  north-north-west of Pucallpa (Ucayali), near the Ucayali river's floodplain, at roughly 100 to 150 m above the sea
+  (Pucallpa's gauge is at 145 m). The coordinates in the link (7.97°S, 74.43°W) are the place as it stood at 2.65 Ma,
+  at the end of the Piacenzian. Eye level, facing 70° (east-north-east), away from the Andes and toward the Divisor
+  hills, at 16:00 in May.
+author: machine:claude-code
+expects:
+  - id: relief-low-flat-lowland
+    layer: relief
+    what: >-
+      Flat, low ground in every direction the camera looks: a lowland a hundred-odd metres above the sea, with no
+      hill close by. The Andes are behind the camera, out of the frame.
+    reach: region
+    source:
+      cite: "Santini, W., Martinez, J.-M., Espinoza-Villar, R., Cochonneau, G., Vauchel, P., Moquet, J.-S., Baby, P., Espinoza, J.-C., Lavado, W., Carranza, J. & Guyot, J.-L. (2015). Sediment budget in the Ucayali River basin, an Andean tributary of the Amazon River. Proc. IAHS 367, 320–325. doi:10.5194/piahs-367-320-2015"
+      url: https://piahs.copernicus.org/articles/367/320/2015/piahs-367-320-2015.pdf
+      text: ucayali-sediment.txt
+      loc: "p. 321 (PDF page 2), Table 1, row PUC (station, river, altitude in m, lat., long.)"
+      quote: "PUC Pucallpa Ucayali 145 –8.38 –74.53"
+    note: >-
+      Today's height of the gauge at Pucallpa, 55 km south-south-east of the spot, carried back. How high the
+      lowland stood at 2.65 Ma is not known; the basin has been filling with Andean sediment since, so the 2.65 Ma
+      surface was probably no higher, but no source read says so.
+  - id: relief-divisor-far-skyline
+    layer: relief
+    what: >-
+      The camera faces across the basin toward the Moa Divisor, the low range on the Peru–Brazil border: if the
+      skyline shows through the trees at all, it is a far, low line of hills, not mountains.
+    reach: region
+    source:
+      cite: "Santini, W., Martinez, J.-M., Espinoza-Villar, R., et al. (2015). Sediment budget in the Ucayali River basin, an Andean tributary of the Amazon River. Proc. IAHS 367, 320–325. doi:10.5194/piahs-367-320-2015"
+      url: https://piahs.copernicus.org/articles/367/320/2015/piahs-367-320-2015.pdf
+      text: ucayali-sediment.txt
+      loc: "p. 322 (PDF page 3), section The Ucayali River basin, first paragraph of the page"
+      quote: "towards the NNW between the Sub-Andean foothills and the Moa Divisor, over a vast flood plain sprinkled with oxbow lakes"
+    note: >-
+      Today's description of the reach from Pucallpa to Contamana, which contains the spot. That the Divisor lies
+      to the east-north-east, some 50 to 100 km off, is my reading of today's map, not the source's; "low" and "far"
+      are gloss. Whether the Divisor stood as hills at 2.65 Ma, and how high, no source read says.
+  - id: water-meandering-river-oxbows
+    layer: water
+    what: >-
+      A great meandering river on a wide floodplain, with crescent-shaped oxbow lakes cut off from it; the spot is on
+      or near that floodplain, so open water (river or oxbow) may lie in the frame.
+    reach: region
+    source:
+      cite: "Santini, W., Martinez, J.-M., Espinoza-Villar, R., et al. (2015). Sediment budget in the Ucayali River basin, an Andean tributary of the Amazon River. Proc. IAHS 367, 320–325. doi:10.5194/piahs-367-320-2015"
+      url: https://piahs.copernicus.org/articles/367/320/2015/piahs-367-320-2015.pdf
+      text: ucayali-sediment.txt
+      loc: "p. 322 (PDF page 3), section The Ucayali River basin"
+      quote: "the Ucayali River mean ders towards the NNW between the Sub-Andean foothills and the Moa Divisor, over a vast flood plain sprinkled with oxbow lakes"
+    note: >-
+      The quote keeps the saved text's split word ("mean ders"), as the text reads. Today's river; the same table
+      gives a mean discharge of 9,720 m³/s at Pucallpa. Where the river ran at 2.65 Ma, and whether a river of this
+      size was here at all, is not known; that a big river drained this basin then rests on the item below.
+  - id: water-floodplain-draining-in-may
+    layer: water
+    what: >-
+      In May the floodplain is past its high water: the lakes and flooded forest are draining back into the river,
+      and the river is falling, with banks and bars beginning to show.
+    reach: region
+    source:
+      cite: "Santini, W., Martinez, J.-M., Espinoza-Villar, R., et al. (2015). Sediment budget in the Ucayali River basin, an Andean tributary of the Amazon River. Proc. IAHS 367, 320–325. doi:10.5194/piahs-367-320-2015"
+      url: https://piahs.copernicus.org/articles/367/320/2015/piahs-367-320-2015.pdf
+      text: ucayali-sediment.txt
+      loc: "p. 323 (PDF page 4), Results and discussion, first paragraph"
+      quote: "show important water storage in the flood plain from November to March"
+    note: >-
+      Measured 2009–2012. The next sentence says the stored water flows back to the main stream from April to
+      August. "Banks and bars beginning to show" is my gloss. The Pliocene's seasons here are not known.
+  - id: geography-drains-east-to-atlantic
+    layer: geography
+    what: >-
+      The water in view belongs to the transcontinental Amazon: the western Amazonian basins already drained east to
+      the Atlantic, not into a great inland wetland or lake.
+    reach: region
+    source:
+      cite: "Albert, J.S., Val, P. & Hoorn, C. (2018). The changing course of the Amazon River in the Neogene: center stage for Neotropical diversification. Neotropical Ichthyology 16(3): e180033. doi:10.1590/1982-0224-20180033"
+      url: http://www.scielo.br/pdf/ni/v16n3/1982-0224-ni-16-03-e180033.pdf
+      text: albert-2018-amazon-course.txt
+      loc: "p. 10 (PDF page 10), the paragraph on Transcontinental Amazon Stage 2"
+      quote: "Transcontinental Amazon Stage 2 occurred from about the middle Pliocene to Recent (4.5-0 Ma), with Western Amazonian basins discharging east to the Atlantic"
+    note: >-
+      A review of the whole basin. The same paragraph puts the greatest rise in sedimentation at the start of the
+      Quaternary, about 2.6 Ma, which is this moment. The paper leaves the Ucayali–Madeira capture marked with
+      question marks.
+  - id: cover-terra-firme-rainforest
+    layer: cover
+    what: >-
+      Closed, tall evergreen rainforest on the ground above the floods (terra firme), not open country: the Miocene
+      mega-wetlands were drained by this time.
+    reach: region
+    source:
+      cite: "Guayasamin, J.M., Ribas, C.C., Carnaval, A.C., Carrillo, J.D., Hoorn, C., Lohmann, L.G., Riff, D., Ulloa Ulloa, C. & Albert, J.S. (2024). Evolution of Amazonian biodiversity: A review. Acta Amazonica 54: e54bc21360. doi:10.1590/1809-4392202103601"
+      url: https://www.scielo.br/j/aa/a/VHPxkxRLvYT8qkrThXcRvFD/?lang=en
+      text: amazon-biodiversity-review.txt
+      loc: "Section on the five rearrangements of landforms (summarized from Val et al. 2021), the fourth"
+      quote: "From the end of the Miocene (ca. 7 Ma) on, further Andean uplift forced the mega-wetland to be completely drained and the onset of the modern Amazon River system. This led to the development of widespread river terrace systems with expanded terra firme rainforests."
+    note: >-
+      Said of Amazonia from 7 Ma on, not of this spot or of 2.65 Ma. "Closed, tall, evergreen" is my gloss of
+      "rainforest". No pollen record of the Pliocene from the Ucayali basin was found.
+  - id: cover-varzea-floodplain-forest
+    layer: cover
+    what: >-
+      On the floodplain itself, forest of the modern floodplain kind (várzea), which stands in water for part of the
+      year: different trees from the terra firme behind.
+    reach: region
+    source:
+      cite: "Albert, J.S., Val, P. & Hoorn, C. (2018). The changing course of the Amazon River in the Neogene: center stage for Neotropical diversification. Neotropical Ichthyology 16(3): e180033. doi:10.1590/1982-0224-20180033"
+      url: http://www.scielo.br/pdf/ni/v16n3/1982-0224-ni-16-03-e180033.pdf
+      text: albert-2018-amazon-course.txt
+      loc: "p. 12 (PDF page 12), the paragraph on mega-wetlands from the Miocene to the Pliocene"
+      quote: "the plant species composition of the Plio-Pleistocene Nauta/Içá Formation and modern várzeas differ from that of the Miocene Solimões/Pebas Formation"
+    note: >-
+      The paragraph goes on to say that the plant composition of the floodplains of the large sediment-rich rivers
+      first appeared in the Pliocene. The Nauta/Içá Formation lies north of here (the Marañón and Solimões
+      forelands), some hundreds of kilometres off.
+  - id: substrate-oxidized-sand-gravel
+    layer: substrate
+    what: >-
+      Where the ground shows (bank, bar, fallen tree), loose orange-to-red oxidized sand, gravel and sandy clay,
+      unconsolidated, not rock.
+    reach: region
+    source:
+      cite: "Boivin, M., Antoine, P.-O., Benites-Palomino, A., Marivaux, L. & Salas-Gismondi, R. (2019). A new record of a giant neoepiblemid rodent from Peruvian Amazonia and an overview of lower tooth dental homologies among chinchilloids. Acta Palaeontologica Polonica 64(3): 627–642. doi:10.4202/app.00609.2019"
+      url: http://www.app.pan.pl/archive/published/app64/app006092019.pdf
+      text: app-neoepiblemid-pdf.txt
+      loc: "p. 631 (PDF page 5), Geological setting, on Units B and C of the Madre de Dios Formation"
+      quote: "they typically consist of unconsolidated and oxidized sand and gravel or sandy clay"
+    note: >-
+      Said of the Madre de Dios Formation in Madre de Dios Department, some 600 km south-east; the same section
+      places an ash dated 3.12 ± 0.02 Ma in Unit C (late Pliocene). Carried here as the nearest described deposit of
+      the right age; "orange-to-red" is my gloss of "oxidized". The PBDB's only lithology near (157 km east, in
+      Acre) is gray claystone (pbdb-colls.txt, collection 217809).
+  - id: substrate-red-beds-in-cutbanks
+    layer: substrate
+    what: >-
+      Where a river cuts deep into its bank, older red beds: red siltstone and sandstone with conglomerate channels.
+    reach: region
+    source:
+      cite: "Boivin, M., Antoine, P.-O., Benites-Palomino, A., Marivaux, L. & Salas-Gismondi, R. (2019). A new record of a giant neoepiblemid rodent from Peruvian Amazonia and an overview of lower tooth dental homologies among chinchilloids. Acta Palaeontologica Polonica 64(3): 627–642. doi:10.4202/app.00609.2019"
+      url: http://www.app.pan.pl/archive/published/app64/app006092019.pdf
+      text: app-neoepiblemid-pdf.txt
+      loc: "p. 631 (PDF page 5), Geological setting, on the Ipururo Formation"
+      quote: "The latter deposits are dominated by red siltstone, sandstone and conglomeratic channels"
+    note: >-
+      Said of the Ipururo Formation where it underlies the Madre de Dios Formation, there dated middle–upper
+      Miocene. The Ipururo is also the formation of the build's two nearest fossil rows (CTA-42 and CTA-59 at
+      Contamana, 66 km north-west; pbdb-colls.txt), which the PBDB dates Late Miocene to Pliocene. Whether it lies at
+      or near the surface at this spot is not known.
+  - id: life-caimans
+    layer: life
+    what: >-
+      Caimans in the river and oxbows, of the living kinds (Caiman and its relatives), not giants.
+    reach: region
+    source:
+      cite: "Guayasamin, J.M., Ribas, C.C., Carnaval, A.C., et al. (2024). Evolution of Amazonian biodiversity: A review. Acta Amazonica 54: e54bc21360. doi:10.1590/1809-4392202103601"
+      url: https://www.scielo.br/j/aa/a/VHPxkxRLvYT8qkrThXcRvFD/?lang=en
+      text: amazon-biodiversity-review.txt
+      loc: "Section Extinctions and Amazonian mega-wetlands, the paragraph on the Acre System"
+      quote: "Beyond some generalist taxa that have been present in the Amazon since the Middle Miocene through to today (e.g., Caiman, Melanosuchus, and Paleosuchus)"
+    note: >-
+      Agrees with the build's rows: Caiman sp. and Caimaninae indet. from the Ipururo Formation at Contamana, 66 km
+      north-west (pbdb-occs.txt, occurrences 1312635 and 1312636), dated by the PBDB only to 11.63–2.58 Ma.
+  - id: life-no-gharials-or-giant-crocodilians
+    layer: life
+    what: >-
+      No gharials (long-snouted gavialoids) and no giant or specialised crocodilians: those were gone from Amazonia
+      before this moment.
+    reach: region
+    source:
+      cite: "Guayasamin, J.M., Ribas, C.C., Carnaval, A.C., et al. (2024). Evolution of Amazonian biodiversity: A review. Acta Amazonica 54: e54bc21360. doi:10.1590/1809-4392202103601"
+      url: https://www.scielo.br/j/aa/a/VHPxkxRLvYT8qkrThXcRvFD/?lang=en
+      text: amazon-biodiversity-review.txt
+      loc: "Section Extinctions and Amazonian mega-wetlands, the paragraph after the Acre System"
+      quote: "The transition from the Acre System to the modern fluvial and terra firme Amazonian environments, starting at around 7 Ma, led to a large extinction event affecting crocodilian fauna. All specialized forms, from small to giant, vanished."
+    note: >-
+      Against the build: its atlas carries Gavialoidea indet. into the Piacenzian from one row (pbdb-occs.txt,
+      occurrence 1312634, lower Ipururo, CTA-42, 66 km north-west), which the PBDB dates only as Late Miocene to
+      Pliocene, 11.63–2.58 Ma. The review's earlier paragraph counts the long-snouted gharials among the specialised
+      forms. The row does not place a gharial at 2.65 Ma; the review says they were gone. The same goes for the
+      Crocodyliformes indet. row from Acre (occurrence 1546273, 157 km east), dated 5.33–2.58 Ma.
+  - id: life-giant-rodent-uncertain
+    layer: life
+    what: >-
+      Perhaps a giant rodent of the Phoberomys kind, hundreds of kilograms, near the water; the one record near
+      here is a single tooth whose late Pliocene age is queried.
+    reach: region
+    source:
+      cite: "Boivin, M., Antoine, P.-O., Benites-Palomino, A., Marivaux, L. & Salas-Gismondi, R. (2019). A new record of a giant neoepiblemid rodent from Peruvian Amazonia and an overview of lower tooth dental homologies among chinchilloids. Acta Palaeontologica Polonica 64(3): 627–642. doi:10.4202/app.00609.2019"
+      url: http://www.app.pan.pl/archive/published/app64/app006092019.pdf
+      text: app-neoepiblemid-pdf.txt
+      loc: "p. 629 (PDF page 3), Introduction, the paragraphs on the Neoepiblemidae"
+      quote: "Phoberomys Kraglievich, 1926 would be 200–655 kg … Perumys gyulavarii from the Upper Pisqui River in the Nuevo Edén area (Peruvian Amazonia; late? Pliocene) was described by Kretzoi and Vörös (1989) based on a single tooth"
+    note: >-
+      The build's row (pbdb-occs.txt, occurrence 1148743, Phoberomys gyulavarii, Late Pliocene, 3.6–2.58 Ma) is this
+      tooth, from 56 km south, its coordinates "based on nearby landmark". The paper itself queries the age ("late?
+      Pliocene") and the same authors date their own Phoberomys from Madre de Dios to the late Miocene. One tooth
+      is thin ground for an animal in the frame; a viewer that places a herd of them goes beyond the evidence.
+  - id: life-freshwater-crabs
+    layer: life
+    what: >-
+      Freshwater crabs (Trichodactylidae) in the shallows and on muddy banks.
+    reach: region
+    source:
+      cite: "The Paleobiology Database, occurrences of collections 146532, 176132, 176145 and 217809, downloaded 22 November 2026 (occurrence 1312633 from Antoine et al. 2016, Gondwana Research 31:30–59)."
+      url: https://paleobiodb.org/data1.2/occs/list.txt?coll_id=146532,176132,176145,217809&show=class,coords,loc,strat,ref
+      text: pbdb-occs.txt
+      loc: "row for occurrence 1312633"
+      quote: "Trichodactylidae indet. … Late Miocene … Pliocene … Ipururo"
+    note: >-
+      Contamana, 66 km north-west, dated only to 11.63–2.58 Ma; a database row, not the paper, which is behind a
+      paywall. The family lives in Amazonian rivers today; "shallows and muddy banks" is my gloss.
+  - id: people-none
+    layer: people
+    what: >-
+      No people and nothing made by people: humans reached South America only in the last fifteen thousand years or
+      so, two and a half million years after this moment.
+    reach: region
+    source:
+      cite: "Dillehay, T.D., Ocampo, C., Saavedra, J., et al. (2015). New Archaeological Evidence for an Early Human Presence at Monte Verde, Chile. PLoS ONE 10(11): e0141923. doi:10.1371/journal.pone.0141923"
+      url: https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0141923
+      text: monte-verde.txt
+      loc: "Introduction, the paragraph after Fig 1 beginning 'Previous work at Monte Verde'"
+      quote: "Previous work at Monte Verde revealed one valid human site (MV-II) dated ~14,500 cal BP"
+    note: >-
+      Monte Verde is in southern Chile, some 4,500 km off; one of the oldest accepted sites in South America. The
+      paper reports horizons dated as early as ~18,500 to 19,000 cal BP, still three orders of magnitude after 2.65 Ma.
+      No hominin of any kind was in the Americas at this time.
+unknown:
+  - The sky at 16:00 in May. No source read; by today's astronomy the sun would be low in the west-north-west, behind the camera's left shoulder, so the scene ahead is lit from behind, but that is computed here, not cited. Whether the afternoon had towering cumulus or showers, as Amazonian afternoons often do today, nothing read for this time says.
+  - What grew here. No pollen or plant fossil of the late Pliocene from the Ucayali basin was found; the forest items rest on reviews of the whole of Amazonia. How tall the canopy stood, how many palms, and whether the floodplain had open grassy patches is not known.
+  - Whether the Ucayali, or any river this big, ran past this spot at 2.65 Ma. The river and its oxbows are today's; Bicudo et al. (2019, andean-mantle-amazon.txt) call the Pliocene units of Amazonian basins "similar but poorly documented", and Campbell et al.'s Ucayali Peneplain paper (Palaeogeography, Palaeoclimatology, Palaeoecology 239, 2006), which treats the late Neogene surface of this region, could not be read (Elsevier, closed).
+  - How high the Moa Divisor stood at 2.65 Ma, and whether it could be seen from the floodplain over the canopy.
+  - Which large land mammals walked here. No mammal of the Piacenzian within 150 km is recorded except one tooth of a giant rodent of queried age; whether North American immigrants of the interchange (peccaries, deer, cats) had reached the western Amazon by 2.65 Ma, nothing read says of this region.
+  - The weather of a Pliocene May. The dry season of austral winter is today's (Santini et al. 2015, ucayali-sediment.txt, p. 322); how marked the seasons were at 2.65 Ma, just as the great northern glaciations began, is not known.
+  - What the ground was underfoot at the spot (floodplain mud, terrace sand, or older red beds); the nearest described deposits of the age are 66 km (fossil rows without lithology) to 600 km away.
+pictures:
+  - { url: "https://www.scielo.br/j/aa/a/VHPxkxRLvYT8qkrThXcRvFD/?lang=en", what: "Figure 11 of Guayasamin et al. 2024: Orlando Grillo's reconstruction of a Miocene Amazonian mega-wetland with Purussaurus (16–7 Ma). An earlier world than this one: no giant caiman, no mega-wetland at 2.65 Ma." }
+effort:
+  fetched: 16
+  cited: 7
+  failed: 3
+  note: >-
+    Sixteen texts fetched, seven cited, one more (andean-mantle-amazon.txt) kept for an unknown; search through
+    OpenAlex and Europe PMC (Semantic Scholar rate-limited at once). Not reached: Antoine et al. 2016 on Contamana
+    and Campbell et al. 2006 on the Ucayali Peneplain (Elsevier, closed, no abstract in the indexes), a 2022 MDPI paper
+    on Ucayali meanders (refused), and an erosivity paper from near Pucallpa (an empty page). Fetched and dropped for
+    giving nothing of this place and time: a Juruá orogeny paper (Jurassic), crocodylians of Urumaco (Venezuela), a
+    mid-Pliocene rainfall model study, an Amazon Fan paper (Pleistocene) and a Madre de Dios provenance paper. Most of
+    the time went on looking for any Pliocene plant or sediment record of the Ucayali basin itself; none was found.

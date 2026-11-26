@@ -1,0 +1,70 @@
+# Round 5's findings across its points (docs/plans/VISUAL-GAPS.md): what the twelve briefs, the 34 frames and the
+# four readers' verdicts (verdicts/pNN.yaml) say together, ranked by how much of a picture each changes and on how
+# many points. The two code defects named here were confirmed by reading the code; the rest are the readers'
+# judgements of pictures, proposed, and for a person to overrule.
+author: machine:claude-code
+judged: "2026-11-22"
+findings:
+  - title: Scenes are cut flat above 3,200 m and below −3,200 m
+    text: >-
+      A scene keeps its heights as decimetres in 16-bit integers, clamped at ±32,000 (encode in
+      world/generators/life/scene/v9.ts). At the Altiplano point the ground is 4,227 m, the slope falls 650 m to a salt
+      basin and a 5,140 m volcano stands 15 km off; the scene draws one level plain at 3,200 m, with the basin's lake
+      lost under it. At the North Pacific point the sea floor at 3,300–3,460 m is clamped to 3,200 m. Every scene on
+      the Tibetan Plateau, the Altiplano, the high Andes and Ethiopia, and every deep-sea floor, is drawn so. A small
+      change of encoding (a coarser step or an offset) and a new version of the generator would end it.
+  - title: At sea the camera goes under the water, and the sea gets the land's list
+    text: >-
+      Both sea points failed to show the sea. At eye level the camera stood 1.7 m above the (clamped) floor; from the
+      air it sat 30–40 m under the surface, in a plain blue gradient. So no surface, swell, sky, weather or seabird
+      could be tested: 15 of the two cards' 31 items are untested, most for that alone. And where both atlases have a list,
+      the scene takes the land's: the Eocene shelf carries brontotheres and a freshwater gar, and the sea atlas's
+      Nummulites and coralline algae are left out. A camera that rides the surface at sea, and the sea list for a sea
+      scene, are what a tenth of every round needs.
+  - title: Towns between two figures of a city list vanish
+    text: >-
+      Both points the sampler sent to towns drew farmland or desert. Kanchipuram has 50,000 people in 1150 and nothing
+      until 1800 in Chandler's list; the settlement generator holds a figure 50 years either side and joins two only if
+      they are 600 years apart or less, so the town is gone from 1200 to 1750 and in 1285 it is 864 generic farming
+      villages of round thatched huts. Khiva's one figure (1800) makes it a town only from 1750 to 1850, so in 1890 it
+      is bare desert. A town that the list names before and after should stand in between; and an oasis needs fields,
+      canals and orchards that nothing in the world holds (building traditions: fields and crops, 7 gaps on 4 points).
+  - title: The atlas still carries life too far and into the wrong places
+    text: >-
+      As in round 1: pampas animals (glyptodonts, tuco-tucos) placed 1,400–2,200 km north in the Amazon; capybara and
+      armadillos at 4,400 m on the Altiplano; sea otters and a California sea lion 290 km from land in the open
+      Pacific; dolphins and a turbot on a Euboean hillside; a Miocene rhinoceros in Archaic Greece; a gharial-group row
+      dated only 11.6–2.6 Ma carried into the Pliocene. And it drops what the briefs most expect: Anchitherium and the
+      small apes of Sihong, in the same collection as taxa it keeps. Habitat (height, sea or land, water) and the
+      dates of a row gate nothing yet.
+  - title: Forest is drawn as savanna, and the listed plants are not placed
+    text: >-
+      Where the evidence says closed forest the scene draws open stands of one umbrella-crowned tree on bare ground:
+      the Pliocene Amazon (its climate falls 3.7 mm short of the monsoon-forest line in its driest month, so it counts
+      as savanna), the Miocene of Anhui, north Euboea. Conifers and broadleaves are mixed tree by tree, not in stands.
+      At several points none of the listed plants is placed and generic bodies stand in. Cover drawn fell from 43% of
+      testable items in round 1 to 27% here: a different sample, but the same generator.
+  - title: The ground now says what it is made of
+    text: >-
+      Round 1 drew none of its 17 testable substrate items. Since then the world gained a substrate layer, and here 4
+      of 8 are drawn: sandstone ground in the Appalachians, sand and stones over volcanic rock on the Altiplano, silt
+      and sand at Cishan. Where it is wrong it is wrong by its source: tan mud from one claystone collection 157 km
+      off, silt from the topsoil map on a conglomerate hillside.
+  - title: Before the Phanerozoic there is no scene at all
+    text: >-
+      At 611.8 Ma the three eye-level spots show the globe's texture seen from 15 m: no horizon, no sky, no ground.
+      The scene asks the atlases for a list and they reach only the Phanerozoic, so nothing is made. A bare scene of
+      rock and sky needs no list.
+  - title: The viewer's resolver never answers life
+    text: >-
+      In every view of rounds 1 and 5 the life layer answers "unknown: the atlases reach only the Phanerozoic", even
+      at 17 Ma with 46 taxa listed: resolveWorld() in viewer/src/main.ts passes the resolver no life function. The
+      coverage page may answer it its own way; the inspect panel and every check through window.__wikiworldmodel
+      read it wrong.
+  - title: What this round's sampler got wrong
+    text: >-
+      It weighted towns by every figure in a list within 600 years before the time, not by the settlement generator's
+      rule, and so sent two of twelve points to towns the viewer does not draw: telling, but by accident. Its place
+      hints were wrong twice (Euboea, the Altiplano), and its eye-level camera is no use at sea. The next round should
+      take the generator's own rule for towns, name the place by its nearest settlement and height, and put a sea point
+      at the surface.

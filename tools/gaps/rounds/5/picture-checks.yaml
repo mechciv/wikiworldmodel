@@ -1,0 +1,119 @@
+# The fifth round's check of each expected picture against its brief (docs/plans/VISUAL-GAPS.md, section 3.3): one
+# reader looking at dist/gaps/5/expected/pNN.png beside pNN.yaml and prompts.yaml. Every picture is a first take. An
+# item the prompt asked for is taken as shown unless it is listed here as `absent` (asked for, not in the picture) or
+# `against` (the picture shows otherwise); items in a prompt's `leaves_out` are not judged. `adds` is what the model put
+# in that no item of the brief says: its answers to the brief's `unknown`, and extinct things drawn as their living
+# kin, anachronisms and modern features. These are a machine's judgements of pictures: proposed, and for a person to
+# overrule. The pictures are illustrations, never evidence, and no verdict in verdicts rests on one.
+author: machine:claude-code
+checked: "2026-11-23"
+points:
+  p01:
+    absent:
+      substrate-wind-cut-stones: Rounded boulders and cobbles lie about, but none shows the polished, grooved faces of a ventifact.
+    adds:
+      - ground reddish-brown nearly all over, with little of the grey and buff grit the prompt asked for; muted, but still close to the red the prompt warned against
+      - the sun low on the horizon as at sunset, where at four in the afternoon on the equator it would stand some way up the sky
+      - a pale hazy sky, where the brief leaves the weather and the colour of the air unknown
+      - low dune-like swells on the skyline, where the brief leaves the shape of the hills unknown
+  p02:
+    against:
+      geography-laurussia: The centre lies on the continent's southern side, at the head of a great delta that runs south into the sea; the brief puts the point on its north-eastern coast.
+    adds:
+      - the mountain belt across the middle drawn as a high, sharp-ridged range, where the brief does not know how high the Caledonides still stood
+      - almost no open deep ocean on the disc; the dark blue water is a few enclosed basins among shelf seas
+      - the land away from the point mostly green and olive, where the brief does not know how much of it was forest or bare ground
+      - white flecks among the ridges that read as cloud, though some could be taken for snow
+  p03:
+    note: >-
+      Take 3. Takes 1 and 2 drew pines and spruces; take 3's prompt asked for low, broad conifers with scale or strap
+      leaves, like a cypress, a monkey-puzzle or a podocarp, and named the Christmas-tree outline as forbidden. The model
+      drew spruces again, and a burnt stand of them: as in round 1, a third take does not cure a plant the model has not
+      seen. Checked by eye against take 3 by the round's author, not by the reader who checked takes 1.
+    against:
+      cover-conifers-and-ferns: The conifers are tall spire-shaped trees with the look of spruces, which the prompt forbade.
+    absent:
+      cover-atlas-leaf-taxa: No conifer with flat strap-shaped leaves (Podozamites, Nageiopsis) can be made out.
+      cover-flowering-plants-local: No patch where small flowering plants crowd the ground can be told from the general green undergrowth.
+    adds:
+      - a stream flowing toward the lower left, where the brief has streams running west and the camera's bearing does not say which way that is
+      - the far ridges wooded to the top in the same spruce-like conifers
+  p04:
+    adds:
+      - the whales with the sleek body and flippers of a living whale; the four legs and the long narrow snout can hardly be made out
+      - a bright sheen on the water toward the horizon, as if the light came from ahead; the brief has the sun behind the camera
+      - the edge of the shelf as a sharp line between pale floor and deep blue, where the brief does not know whether it was a ramp or a rimmed margin
+  p05:
+    note: >-
+      Take 3. Take 1 put a bare sandy wash in the middle and a long-tailed monkey in a tree, take 2 the same; take 3's
+      prompt asked for the camera inside a closed forest, trunks edge to edge, and an ape with no tail, like a small
+      gibbon. The forest now frames the view, with leaf litter underfoot, but an open plain still shows through the
+      middle; the ape sits with no tail in view and reads as a macaque more than a gibbon. Checked by eye against take 3
+      by the round's author. life-rhinos-mastodonts-horses is in the prompt's leaves_out for its mastodont and pigs
+      only; the rhinoceros and the horses it asked for are drawn as their living kin (see adds).
+    absent:
+      cover-mixed-broadleaf-forest: Broad-leaved forest frames the view, but no evergreen oak, magnolia or laurel can be told from the deciduous trees, and an open plain fills the middle distance.
+      life-small-deer-chevrotains: The small deer with forked antlers is there; the small animal at the lower middle reads as a hare or a fawn more than as a tusked mouse-deer.
+    adds:
+      - the rhinoceros as a living rhino on ordinary legs, not the long-bodied, short-legged one the prompt asked for
+      - the three-toed horses as modern horses, their toes not to be seen
+      - the pheasant as the living common pheasant
+      - an open plain in the middle distance, where the brief does not know whether one was in view
+      - yellow autumn leaves on many trees, where the brief does not know the colour of the forest in November
+  p06:
+    absent:
+      water-meandering-river-oxbows: The river bends, but no crescent of cut-off water is in view.
+      cover-varzea-floodplain-forest: No forest stands in water and no dark high-water line marks the trunks; one forest runs along both banks.
+    adds:
+      - a high, bright red cut bank and red bar, redder than the orange-red the prompt asked for
+      - a pink evening sky with broken cloud, where the brief does not know the weather of the afternoon
+      - the canopy as one even, rather low forest, where the brief does not know how tall it stood or how many palms it had
+  p07:
+    against:
+      people-hunters-around-wetlands: The one plume rises as a tall white jet from a vent on the basin floor, reading as a geyser or fumarole, not as a campfire's wisp; no figures.
+    adds:
+      - the flamingos as white specks rather than pink
+      - the salt flat covering most of the basin floor ahead, where the brief puts the low flat of the salar at the left edge and does not know how far it spread
+      - the hills across the basin as a range of steep bare peaks rather than low rolling hills
+      - shadows falling to the right, as if the sun stood behind the left shoulder
+  p08:
+    note: >-
+      Take 3. Take 1 drew a large white modern-looking town over a headland and grey limestone karst underfoot, take 2
+      the same; take 3's prompt asked for a tiny walled cluster at the edge and brown river cobbles in a cemented matrix.
+      Both now hold. Checked by eye against take 3 by the round's author.
+    absent:
+      relief-travertine-plateaus: Flat-topped pale benches stand in the middle distance; whether they read as travertine caps over marl, rather than limestone tablelands, cannot be told.
+    adds:
+      - a full blue river, where the brief has a modest stream in a wide gravel bed in May
+      - pale scarps and badlands along the valley, more than the brief's banks of marl in its cuttings
+      - mountains ahead across what may be a stretch of sea
+  p09:
+    adds:
+      - two strips of a tall green crop at the right with the look of maize, which the prompt forbade; the brief has few if any fields standing tall
+      - farmsteads with grey tiled roofs and trees about them, where the brief does not know how the roofs looked or which trees grew there
+      - cattle loose in the reaped fields as well as at the plough
+      - the terraces cut into many small strips, where the brief does not know whether they were small or long
+  p10:
+    absent:
+      people-dung-washed-walls: The house walls are a pale grey-white plaster, near whitewash; no dull grey-green or brown dung wash.
+      cover-palmyra-palms: Every palm has the feathered leaves of a coconut; no fan-leaved palmyra is in view, in the fields or along the bunds.
+    adds:
+      - the bund on the horizon as a high, eroded earthen bluff rather than a long low bank
+      - the shrine as a carved pyramidal stone tower standing by the fields at the street's edge
+      - tiled roofs on all the houses, where the brief does not know whether they were tiled or thatched
+      - a few small clouds, where the brief does not know the sky of the morning
+  p11:
+    adds:
+      - the showers as grey shafts that read as rain as much as snow
+      - light breaking through the showers ahead, as if the sun stood beyond them; the prompt had it behind the camera
+      - the flock as gull-like birds in a line, where the brief does not know which seabirds flew here
+      - the albatross with something of a giant petrel's look
+  p12:
+    against:
+      people-arbas-on-the-roads: The two carts on the road are low wagons on small wheels, not two-wheeled arbas with wheels taller than a man.
+    adds:
+      - fields speckled white in rows, which read as cotton or as rows of gravestones
+      - a domed building among poplars beyond the wall, where the brief has walled farmsteads
+      - trees turning orange and brown, where the brief does not know the colour of the leaves in October
+      - the courts' porches as arched iwans in raised blocks rather than a high roof over a porch
+      - large dunes at the right, higher than the sand hills the brief describes

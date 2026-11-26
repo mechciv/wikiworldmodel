@@ -1,0 +1,321 @@
+view: t=1285.685&lat=12.84690&lon=79.68709&d=1.0000023544&h=10&v=84&hour=11&mo=1&clock=0
+when: 1285 CE
+place: >-
+  The western edge of Kanchipuram (Kanchi, Conjeeveram), Tamil Nadu, about 83 m above the sea, on the flat plain north
+  of the Palar, at 11:00 on a January morning, the camera at eye level facing 10°, a little east of north. By
+  OpenStreetMap (queried 22 November 2026; not a source cited below) the spot is on today's Sarvatheertham to
+  Musaravakkam road, which runs north out of the town past it; at the north edge of the quarter called
+  Pillaiyarpalayam (its point in Nominatim is about 350 m south); about 600 m north-north-west of the Pallava
+  Kailasanathar temple (behind the camera, at 152°); about 750 m west of the Sarva Theertham tank and 1.4 km west of
+  the Ekambaranatha temple (both at about 90°, to the camera's right and out of a forward view); and 1.4 to 1.6 km
+  north of the Vegavati, which is behind the camera. Ahead, to the north, today's map has no great temple and no
+  large tank within 3 km; the nearest mapped reservoir is 3.7 km off at 38°. The sun at 11:00 in January at 12.8°N
+  stands about 50° up in the south-south-east, behind the camera's right shoulder (my reckoning from the hour and
+  latitude, not a source). In 1285 the town was held by the Pandyas.
+author: machine:claude-code
+expects:
+  - id: relief-flat-plain-rising-north
+    layer: relief
+    what: >-
+      A flat, featureless plain to the horizon, rising very gently away from the camera towards the north; no hill
+      in the frame (the nearest low hills are far off to the north-east, at the edge of the taluk).
+    reach: place
+    source:
+      cite: "The Imperial Gazetteer of India, new edition, vol. X (Central India to Coondapoor). Oxford: Clarendon Press, 1908. Internet Archive scan in.ernet.dli.2015.38094, OCR text."
+      url: https://archive.org/download/in.ernet.dli.2015.38094/2015.38094.The-Imperial-Gazetteer-Of-India--Vol10_djvu.txt
+      text: igi-1908-vol10.txt
+      loc: "Article Conjeeveram Taluk, p. 376"
+      quote: "Its general appearance is tame and dreary in the extreme, there being only one or two low conical hills in the north-east. The general level rises gradually but considerably from the river Palar towards the north and west."
+    note: >-
+      Said of the whole taluk (514 square miles) in 1908; the relief is the same in 1285. The camera faces exactly the
+      direction in which the ground rises, away from the Palar, so the view is of a slightly higher, drier plain.
+  - id: substrate-quartzite-gravel-north
+    layer: substrate
+    what: >-
+      On the higher ground ahead the surface is a pale gravel of quartzite pebbles, not the red, iron-stained laterite
+      gravel of other parts of the district; where it is not gravel it is coarse, light sand from rotted granite.
+    reach: place
+    source:
+      cite: "Crole, C. S. (1879). The Chingleput, late Madras, District: a Manual. Madras: Government Press. Internet Archive scan the-chingleput-late-madras-district, OCR text."
+      url: https://archive.org/download/the-chingleput-late-madras-district/The_Chingleput_Late_Madras_District_djvu.txt
+      text: crole-1879-chingleput.txt
+      loc: "Chapter I, Geology, The Conjeveram Gravels, p. 7"
+      quote: "The high grounds, north-north-east and north-west of Conjeveram, are covered by a peculiar quartzite gravel formation distinguishable from laterite gravel by the absence of ferruginous matter."
+    note: >-
+      The camera faces between the two directions named, on the side of the town where these grounds lie; how near
+      they come to the spot the manual does not say. Its geological appendix (in the same text) adds that the gravel is
+      told from laterite by its pale colour. Buchanan (buchanan-1807.txt, p. 10), riding
+      into the town from the east in April 1800, found the soil "a coarse sand, seemingly deriving its origin from
+      decomposed granite". The Imperial Gazetteer (p. 376) has the taluk's soil "either stony or mixed with lime,
+      gravel, or laterite". The build's rock record has nothing within 30 km.
+  - id: water-great-tank-north
+    layer: water
+    what: >-
+      Somewhere ahead, north of the town, a large tank (an eri, a reservoir held by an earthen bund), full or nearly
+      so in January; from the camera most likely seen only as the long low line of its bund on the horizon, with
+      irrigated fields below it.
+    reach: place
+    source:
+      cite: "Buchanan, F. (1807). A Journey from Madras through the Countries of Mysore, Canara, and Malabar, vol. I. London: Cadell and Davies. Internet Archive scan b30455091_0001 (Wellcome Library), OCR text."
+      url: https://archive.org/download/b30455091_0001/b30455091_0001_djvu.txt
+      text: buchanan-1807.txt
+      loc: "Chapter I, entry for 26 April 1800, p. 11"
+      quote: "Near Conjeveram many of the fields, receiving a supply of water from a large"
+    note: >-
+      The sentence runs on, across a word the OCR breaks ("reser¬voir"), to "on the north side of the town, were
+      covered with a thriving crop of rice, which displayed a verdure highly refreshing to the eye"; the quote stops
+      where the check can follow it. Seen in 1800. Whether this tank was already there in 1285, and where exactly it
+      lay, no source read says; today's map has its nearest reservoir 3.7 km north-north-east, which would be at the
+      right edge of the frame or beyond it. On the same page Buchanan distinguishes the eri, made by a bank thrown
+      across low ground, from the kulam, a dug tank lined with cut stone for the town's use, such as the Sarva
+      Theertham 750 m to the camera's right.
+  - id: weather-after-the-north-east-monsoon
+    layer: weather
+    what: >-
+      The dry, bright weeks just after the north-east monsoon: the rains of October to December are over, the tanks
+      are full and the land is still green with irrigated rice; little or no rain falls in January.
+    reach: region
+    source:
+      cite: "The Imperial Gazetteer of India, new edition, vol. X (Central India to Coondapoor). Oxford: Clarendon Press, 1908. Internet Archive scan in.ernet.dli.2015.38094, OCR text."
+      url: https://archive.org/download/in.ernet.dli.2015.38094/2015.38094.The-Imperial-Gazetteer-Of-India--Vol10_djvu.txt
+      text: igi-1908-vol10.txt
+      loc: "Article Chingleput District, Physical aspects, rainfall, p. 254"
+      quote: "the greater part of the annual supply is received from the north-east monsoon, and this has parted with some of its moisture by the time it has traversed the eastern side of the District."
+    note: >-
+      The climate of the district about 1900, carried back. The same paragraph says the north-east rains "fill the
+      tanks", and gives the westernmost parts, where Kanchipuram is, the lightest fall, 43 inches. Crole (1879, p.
+      18) has a table of the rain by month, but its January figure is unreadable in the OCR. What the sky held on a January morning of 1285,
+      haze or a few clouds, no source says.
+  - id: weather-mild-january-morning
+    layer: weather
+    what: >-
+      A warm late morning after a cool night: January is the coolest month, nights falling to about 16 to 19 °C and
+      days reaching about 29 °C.
+    reach: place
+    source:
+      cite: "Kanchipuram. Wikipedia, the free encyclopedia (read 22 November 2026), section Climate, citing the district's official site and climate-data.org."
+      url: https://en.wikipedia.org/wiki/Kanchipuram
+      text: wiki-kanchipuram.txt
+      loc: "section Climate"
+      quote: "an average minimum of 16 °C (60.8 °F) between December and February"
+    note: >-
+      Today's climate, carried back; an encyclopedia, cited because no measured series for the town itself could be
+      read. The page's table (from climate-data.org) gives January a mean daily maximum of 29.1 °C and minimum of
+      19.2 °C, and says the humidity is highest between November and January. Crole (1879, p. 18) gives Madras,
+      70 km east, about 71 °F at 5 a.m. and 81.5 °F at 2 p.m. in January.
+  - id: cover-samba-rice-ripe
+    layer: cover
+    what: >-
+      Wherever the ground ahead is watered, flooded rice fields between low earth bunds, the main crop (samba) ripe
+      or ripening, golden-green, and here and there being reaped.
+    reach: region
+    source:
+      cite: "Crole, C. S. (1879). The Chingleput, late Madras, District: a Manual. Madras: Government Press. Internet Archive scan the-chingleput-late-madras-district, OCR text."
+      url: https://archive.org/download/the-chingleput-late-madras-district/The_Chingleput_Late_Madras_District_djvu.txt
+      text: crole-1879-chingleput.txt
+      loc: "Chapter on agriculture, table SAMBA (kinds of paddy, season of cultivation, harvest months), p. 38"
+      quote: "Serumani or Polam Samba ...From July to Oct.. 6 Months.Jan. to March."
+    note: >-
+      The OCR of a table row: the first kind of samba is sown from July to October, takes six months, and is
+      harvested from January to March; the manual says on p. 40 that it and Chinna Samba (harvested November to
+      January) are "raised abundantly in this district". The rice calendar of the 1870s, carried back six centuries;
+      the varieties of 1285 are not known. Buchanan (p. 11) saw the fields below the northern tank green with rice
+      even in April 1800, and the Imperial Gazetteer (p. 259) has rice and ragi as the district's staple grains. How
+      much of the view ahead was field rather than dry waste or houses in 1285 is not known.
+  - id: cover-palmyra-palms
+    layer: cover
+    what: >-
+      Tall palmyra palms, singly and in lines along bunds and round the houses, the most noticeable trees in the view;
+      tamarinds among them.
+    reach: region
+    source:
+      cite: "The Imperial Gazetteer of India, new edition, vol. X (Central India to Coondapoor). Oxford: Clarendon Press, 1908. Internet Archive scan in.ernet.dli.2015.38094, OCR text."
+      url: https://archive.org/download/in.ernet.dli.2015.38094/2015.38094.The-Imperial-Gazetteer-Of-India--Vol10_djvu.txt
+      text: igi-1908-vol10.txt
+      loc: "Article Chingleput District, flora, p. 254"
+      quote: "The most noticeable trees among the villages are the palmyra palm and the casuarina."
+    note: >-
+      Of the district in 1908. The casuarina is an Australian tree planted along the coast in the nineteenth century
+      (the gazetteer says it "has been planted extensively all along the belt of sandy soil which fringes the
+      sea-coast"; that it is Australian is my own knowledge), so it should not be carried back to 1285 or inland. The
+      Conjeeveram Taluk article (p. 377) has palmyra, coconut and tamarind "largely planted" along the north bank of
+      the Palar, which is south of the town, behind the camera.
+  - id: people-street-with-coconut-rows
+    layer: people
+    what: >-
+      If the camera stands in a street, a straight, fairly wide street of beaten earth running away north, with a row
+      of coconut palms down each side, each row fenced by a low mud wall.
+    reach: place
+    source:
+      cite: "Buchanan, F. (1807). A Journey from Madras through the Countries of Mysore, Canara, and Malabar, vol. I. London: Cadell and Davies. Internet Archive scan b30455091_0001 (Wellcome Library), OCR text."
+      url: https://archive.org/download/b30455091_0001/b30455091_0001_djvu.txt
+      text: buchanan-1807.txt
+      loc: "Chapter I, entry for 26 April 1800, Conjeveram, p. 12"
+      quote: "The streets are tolerably wide and clean, and cross one another at right angles. On each side is a row of coco-nut trees, enclosed by a small mud wall"
+    note: >-
+      The town of 1800, rebuilt after the French burned it in 1757 (Imperial Gazetteer, p. 377), carried back five
+      centuries. The wall was painted in vertical red and white stripes, which may be of Buchanan's time only.
+      Wikipedia's Kanchipuram article (section Demographics) says that the Pallava city of the seventh century already
+      had "cross patterned links with rectangular streets", citing a secondary work not read here. Today's road at the
+      spot runs north, the way the camera faces; whether a street ran here in 1285 is not known.
+  - id: people-mud-courtyard-houses
+    layer: people
+    what: >-
+      Low houses of one storey with mud walls and tiled roofs, each built round a small open court, one door to the
+      street; no house higher than a single storey.
+    reach: place
+    source:
+      cite: "Buchanan, F. (1807). A Journey from Madras through the Countries of Mysore, Canara, and Malabar, vol. I. London: Cadell and Davies. Internet Archive scan b30455091_0001 (Wellcome Library), OCR text."
+      url: https://archive.org/download/b30455091_0001/b30455091_0001_djvu.txt
+      text: buchanan-1807.txt
+      loc: "Chapter I, entry for 26 April 1800, Conjeveram, p. 12"
+      quote: "The houses have mud walls, and are roofed with tiles. Each is built in the form of a square with a small court in the centre."
+    note: >-
+      Of this town, in 1800. The same paragraph has "none of the houses are more than one story high" and many lots
+      empty. This is the quote the world's record people/traditions/south-indian-mud-courtyard-house rests on, but
+      that record's start is bounded by Paes's account of 1520-22, so the build may not use it for 1285 and draw a
+      generic house instead. Whether the roofs of 1285 were tiled or thatched no source read says; Wikipedia
+      (Kanchipuram, section Demographics) has houses on raised platforms of burnt brick under Nandivarman II in the eighth
+      century, again from a secondary work not read.
+  - id: people-dung-washed-walls
+    layer: people
+    what: >-
+      House walls and the ground before them smeared with cow-dung, a dull grey-green to brown, not whitewashed.
+    reach: region
+    source:
+      cite: "Marco Polo, The Travels of Marco Polo, trans. and ed. H. Yule, rev. H. Cordier (3rd ed., 1903), vol. 2. Project Gutenberg eBook 12410."
+      url: https://web.archive.org/web/2022id_/https://www.gutenberg.org/files/12410/12410-0.txt
+      text: polo-yule-vol2.txt
+      loc: "Book III, chapter XVII, Continues to speak of the province of Maabar"
+      quote: "the people of this country have a custom of rubbing their houses all over with cow-dung."
+    note: >-
+      Said of Maabar, the Pandya country on the Coromandel coast, which Polo visited about 1292, seven years after the
+      scene and some 250 to 400 km to the south. Yule identifies Polo's king Sonder Bandi with a Sundara Pandya whose
+      inscriptions reach "Conjeveram". The colour is my gloss.
+  - id: people-dress
+    layer: people
+    what: >-
+      People in the street, men and women alike, bare above the waist or nearly so, wearing only a length of unstitched
+      cloth about the hips; no tailored clothes.
+    reach: region
+    source:
+      cite: "Marco Polo, The Travels of Marco Polo, trans. and ed. H. Yule, rev. H. Cordier (3rd ed., 1903), vol. 2. Project Gutenberg eBook 12410."
+      url: https://web.archive.org/web/2022id_/https://www.gutenberg.org/files/12410/12410-0.txt
+      text: polo-yule-vol2.txt
+      loc: "Book III, chapter XVII, opening paragraph"
+      quote: "in all this Province of Maabar there is never a Tailor to cut a coat or stitch it, seeing that everybody goes naked! For decency only do they wear a scrap of cloth; and so ’tis with men and women, with rich and poor"
+    note: >-
+      A visitor's account of the Pandya country about 1292, overstated for effect ("naked"); not of Kanchi itself.
+      Polo says the king too went so, with a necklace of jewels. That women covered more of themselves than he
+      allows, and what colours the cloths were, no source read says.
+  - id: people-weavers-quarter
+    layer: people
+    what: >-
+      The camera stands in or at the edge of the weavers' quarter of the town: looms and the long stretched warps of
+      cotton and silk weavers may be in sight in front of the houses.
+    reach: place
+    source:
+      cite: "The Imperial Gazetteer of India, new edition, vol. X (Central India to Coondapoor). Oxford: Clarendon Press, 1908. Internet Archive scan in.ernet.dli.2015.38094, OCR text."
+      url: https://archive.org/download/in.ernet.dli.2015.38094/2015.38094.The-Imperial-Gazetteer-Of-India--Vol10_djvu.txt
+      text: igi-1908-vol10.txt
+      loc: "Article Conjeeveram Town, p. 377"
+      quote: "The old Jain temple is situated in the hamlet of Tirupparuttikunram, about 2 miles south of the weaver quarter of Conjeeveram, called Pillapalaiyam."
+    note: >-
+      Of 1908. Pillaiyarpalayam, as Nominatim names it, is centred about 350 m south of the spot, so this is the
+      place, but the quarter's age is not known. Wikipedia (Kanchipuram, section Economy) says the silk trade began when
+      Rajaraja Chola I (985-1014) invited weavers from Saurashtra to Kanchi, and that weavers came in numbers from
+      Andhra in the fifteenth century, both from secondary works not read; so weavers in the town in 1285 are likely,
+      weavers at this spot are not shown. The warps in the street are my gloss from today's town, not a source.
+  - id: people-small-shrines
+    layer: people
+    what: >-
+      Among the houses, small stone shrines with low towers over their sanctums; one or two may stand in the view
+      ahead.
+    reach: place
+    source:
+      cite: "The Imperial Gazetteer of India, new edition, vol. X (Central India to Coondapoor). Oxford: Clarendon Press, 1908. Internet Archive scan in.ernet.dli.2015.38094, OCR text."
+      url: https://archive.org/download/in.ernet.dli.2015.38094/2015.38094.The-Imperial-Gazetteer-Of-India--Vol10_djvu.txt
+      text: igi-1908-vol10.txt
+      loc: "Article Conjeeveram Town, p. 377"
+      quote: "It is crowded with temples and shrines."
+    note: >-
+      Of the town in 1908. OpenStreetMap has over a hundred mapped shrines within 1.5 km, nearly all east and south
+      of the spot; ahead it has few (one, the Vaneswarar, about 1 km off at 27°). Which of them stood in 1285 is not
+      known. The Pallava Kailasanathar temple (built between 640 and 730 by
+      Wikipedia's article on it) is 600 m behind the camera, and so out of the frame.
+  - id: people-no-tall-gopurams
+    layer: people
+    what: >-
+      No towering gateway (gopuram) on the skyline: the tall gopurams that mark Kanchipuram today, the Ekambaranatha's
+      of eleven storeys among them, were not yet built. The skyline is of palms and of temple towers much lower.
+    reach: place
+    source:
+      cite: "Ekambareswarar Temple (Kanchipuram). Wikipedia, the free encyclopedia (read 22 November 2026)."
+      url: https://en.wikipedia.org/wiki/Ekambareswarar_Temple_(Kanchipuram)
+      text: wiki-ekambareswarar.txt
+      loc: "section History"
+      quote: "The eleven-storied southern gopuram, built by Krishnadevaraya (1509–29), is 57 m (187 ft) tall and is one of the tallest gopurams in the country."
+    note: >-
+      An encyclopedia, cited for a date that the Imperial Gazetteer (p. 378) supports: two temples "were built about
+      1502 by Krishna Deva". The same page gives the tower 59 m in another section. The Ekambaranatha is 1.4 km east
+      of the camera, at 88°, so at most at the right edge of a wide frame. Wikipedia (Kanchipuram) has the Varadaraja
+      temple's further wall and gopura built in the fourteenth century; that temple is 5 km to the south-east, behind.
+      How tall the gateways of 1285 were, and whether any could be seen from here over the houses, no source read
+      says.
+  - id: life-cattle
+    layer: life
+    what: Small humped cattle and bullocks in the street and on the field paths; no horses to speak of.
+    reach: region
+    source:
+      cite: "The Imperial Gazetteer of India, new edition, vol. X (Central India to Coondapoor). Oxford: Clarendon Press, 1908. Internet Archive scan in.ernet.dli.2015.38094, OCR text."
+      url: https://archive.org/download/in.ernet.dli.2015.38094/2015.38094.The-Imperial-Gazetteer-Of-India--Vol10_djvu.txt
+      text: igi-1908-vol10.txt
+      loc: "Article Chingleput District, Agriculture, p. 260"
+      quote: "No breed of cattle is peculiar to Chingleput. Those raised locally are mostly inferior, as there are few good grazing-grounds."
+    note: >-
+      Of 1908; it shows cattle were kept, not how many would be in sight. The same page has wells worked by bullocks.
+      Polo (polo-yule-vol2.txt, Book III ch. XVII) says many in Maabar "worship the ox" and would not kill one, and
+      elsewhere in the chapter that the country bred no horses and bought them from overseas. "Humped" is my gloss.
+  - id: polity-pandya-held
+    layer: polity
+    what: >-
+      The town is under the Pandyas of Madurai, who took it in 1258; the Chola line has ended a few years before.
+    reach: place
+    source:
+      cite: "Kanchipuram. Wikipedia, the free encyclopedia (read 22 November 2026), section History, citing secondary works not read."
+      url: https://en.wikipedia.org/wiki/Kanchipuram
+      text: wiki-kanchipuram.txt
+      loc: "section History"
+      quote: "Jatavarman Sundara Pandyan I took the city in 1258. … The city remained with the Pandyas until 1311 when the Sambuvarayars declared independence"
+    note: >-
+      An encyclopedia, cited because Nilakanta Sastri's histories could not be read (one scan refused, two with the
+      chapters missing or the OCR unreadable). Wikipedia's article on Maravarman Kulasekara Pandyan I
+      (wiki-kulasekara.txt) has him ruling 1268-1308 and ending the Chola line in 1279. The Imperial Gazetteer of 1908
+      (p. 377) has the town "in the hands of the Cholas until they were overthrown by the Musalmans of the north in
+      1310", an older view. Not a thing the camera shows, except perhaps in who is in the street.
+unknown:
+  - Whether the spot was inside the town in 1285 at all. Kanchi's extent then is not known from anything read; the Kailasanathar, 600 m south-south-east, is described as on the town's west, and the land ahead may have been fields, waste or a suburb rather than streets.
+  - What stood in the view to the north in 1285, a street, houses, a temple, a tank's bund or open fields; no medieval description of this side of the town was found.
+  - Whether the large tank north of the town that Buchanan saw in 1800 existed in 1285, where its bund lay, and whether it can be seen from eye level here.
+  - Which of the many small shrines mapped today near the spot stood in 1285, and how high any temple tower in the town rose then.
+  - Whether roofs were tiled or thatched in 1285, and the colours of walls and clothes.
+  - How many people were about at 11:00 on a January day, and whether this was a festival time (Pongal, the harvest festival of mid-January, is not attested for 1285 in anything read).
+  - The sky of the morning, clear, hazy or with the last clouds of the monsoon.
+  - What wild birds and animals would be in sight; no list for the town or the period was read.
+pictures:
+  - { url: "https://en.wikipedia.org/wiki/Ekambareswarar_Temple_(Kanchipuram)", what: "A photograph of the Ekambaranatha's southern gopuram in 1961: the kind of tower that is not on the skyline in 1285." }
+  - { url: "https://en.wikipedia.org/wiki/Kailasanathar_Temple,_Kanchipuram", what: "Photographs of the Pallava Kailasanathar temple, 600 m behind the camera: the low pyramidal tower of the time, in sandstone." }
+effort:
+  fetched: 14
+  cited: 6
+  failed: 5
+  note: >-
+    Eight texts are kept: Buchanan's journal of 1800 (the one eyewitness description of the town before modern times
+    that could be read), the Imperial Gazetteer's vol. X, Crole's Chingleput manual of 1879, Yule's Marco Polo, and
+    four Wikipedia pages (Kanchipuram, the Ekambareswarar and Kailasanathar temples, and Maravarman Kulasekara I,
+    the last two used only in notes). Failed or dropped: a first scan of the gazetteer's vol. X whose OCR was cut off
+    before Chingleput; Nilakanta Sastri's History of South India (one scan refused with 401, another with the
+    political chapters missing) and his Colas vol. II (OCR unreadable); Wikipedia's Vegavathi River page (404). The
+    spot was placed with OpenStreetMap through Overpass and Nominatim, which are not cited. No source of the thirteenth
+    century describes the town's streets or houses; the nearest in time is Marco Polo, of the Pandya coast about
+    1292. Most of the time went into the history and into finding what lies north of the spot.

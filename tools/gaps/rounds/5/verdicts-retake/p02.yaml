@@ -1,0 +1,45 @@
+# Round 5's verdicts for p02, judged again on the new build: the Late Devonian (Frasnian) from orbit, over the Kanin–Timan coast of north-eastern Baltica.
+author: machine:claude-code
+judged: "2026-11-23"
+build: 3b9f48adb1090be2
+changes: >-
+  The globe is redrawn as from a satellite, and the geography under it is unchanged: the coasts have lost their white
+  outlines, deep water is a dark navy, the shelves a clear teal with bright turquoise reef speckle along every warm
+  shore, the land carries a fine relief texture, and the clouds are a dense, ragged white band in place of a soft
+  haze. The cloud band now lies right over the point and the shelf east of it, so those are seen through gaps. The
+  viewer's account is the same word for word. No verdict moved: North America's interior is still dry land and a tan
+  desert.
+summary: >-
+  The frame's main lines are still right, and read more clearly: one large continent in the middle and south-west
+  with the point on its north-eastern coast, teal shelf sea deepening to a dark ocean in the east, reefs flecking
+  every warm shore, green land round the point, no ice, and a thick cloud band near the equator. What it gets wrong is
+  still North America, whose interior is drawn as dry land, green and a broad tan desert, where an epicontinental sea
+  covered it (field:earth/elevation). What it lacks is still the sea's own detail: dark starved basins, brown water
+  off deltas and pale evaporite lagoons, which nothing in the world colours the sea by.
+items:
+  geography-laurussia: { verdict: drawn, spots: { a: drawn }, owner: "field:earth/elevation", why: "The same large continent fills the middle and south-west of the disc, now without white coast outlines, with the point (165 m up) just inside its north-eastern coast under the cloud band, and the Svalbard and Tiktaalik markers on its northern and north-western coasts." }
+  geography-rheic-narrow: { verdict: untested, spots: { a: untested }, owner: "field:earth/elevation", why: "The canvas still cuts the disc off about 35° south of the point, before Gondwana's edge; round the Zachełmie marker and Prague it is open dark sea under cloud streaks, and whether it narrows beyond is out of sight." }
+  water-north-america-flooded: { verdict: wrong, spots: { a: wrong }, owner: "field:earth/elevation", why: "The south-west of the continent is still dry land, dark green in the north and a broad tan desert with fine ridged texture in the south, with only a narrow teal shelf off its western edge." }
+  life-reefs-west-canada: { verdict: missing-held, spots: { a: missing-held }, owner: "model:earth/biome-from-climate", why: "Off the continent's west coast a narrow teal shelf, largely under cloud, has a sparse line of reef flecks hugging the shore but no banks or reef tracts out on the shelf: the speckle still follows depth and latitude, not the rock record's reefs." }
+  life-reefs-devonian-maximum: { verdict: drawn, spots: { a: drawn }, owner: "model:earth/biome-from-climate", why: "Bright turquoise reef speckle, plainer than before, fringes every shore and shelf margin in the tropical part of the disc and spreads in patches over the broad shelf north of the continent (reef cover 1)." }
+  water-pechora-reef-rimmed-shelf: { verdict: drawn, spots: { a: drawn }, owner: "field:earth/elevation", why: "East and south-east of the point a broad teal shelf, reef-flecked where the cloud breaks, reaches out to dark deep water; most of it now lies under the cloud band." }
+  water-domanik-deep-basin: { verdict: missing-not-held, spots: { a: missing-not-held }, owner: "field:earth/elevation", why: "Where the Timan–Pechora shelf shows through the cloud it is one even teal, with no darker basins among paler banks; a paleo-elevation grid this coarse does not hold them, and nothing colours water by its oxygen." }
+  water-peri-uralian-sea: { verdict: drawn, spots: { a: drawn }, owner: "field:earth/elevation", why: "East of the point the teal shelf gives way to dark navy ocean beyond a few small reef-ringed islands, with no land rising between." }
+  water-deltaic-coast: { verdict: no-layer, spots: { a: no-layer }, owner: "ocean colour (no layer)", why: "The coast near the point, seen through the cloud, is a smooth curve with clear teal water and reef flecks off it: no river mouths, no ragged deltas, no brown sediment in the sea." }
+  cover-archaeopteris-forest: { verdict: drawn, spots: { a: drawn }, owner: "model:earth/biome-from-climate", why: "The land round the point is dark green to the coast where it shows through the cloud, as is the lobe north of it; the viewer says rainforest, forest cover 0.68." }
+  cover-humid-north-coal: { verdict: drawn, spots: { a: drawn }, owner: "field:earth/climate", why: "The north of the continent round the point is green and the climate field calls it wet (aridity index 3.4); swamps as such are too fine to show from orbit." }
+  substrate-timan-basalts: { verdict: untested, spots: { a: untested }, owner: "model:earth/substrate", why: "Lava fields on the Timan would be a few pixels from orbit, and the point is under cloud; the viewer says the ground here is generic, drawn by the climate's class alone." }
+  weather-dry-baltic-southwest: { verdict: no-layer, spots: { a: no-layer }, owner: "ocean colour (no layer)", why: "Where the Baltic states lie the frame has teal shelf sea under the thickest of the cloud band, rightly not green land, but nothing pale or evaporitic: the sea is coloured by its depth alone." }
+  water-siberia-shallow-seas: { verdict: drawn, spots: { a: drawn }, owner: "field:earth/elevation", why: "To the north, where Norilsk lies, a wide teal shelf sea crosses the disc with a few islands of tan land; the rest of Siberia is beyond the canvas's top edge." }
+  water-north-africa-shallow-sea: { verdict: untested, spots: { a: untested }, owner: "field:earth/elevation", why: "The southern limb, where Gondwana's edge lies, is below the bottom of the canvas." }
+  water-hot-tropical-seas: { verdict: untested, spots: { a: untested }, owner: "field:earth/climate", why: "A sea's warmth does not show in a frame; the climate field gives the land at the point a warmest month near 35 °C." }
+  ice-none-in-view: { verdict: drawn, spots: { a: drawn }, owner: "field:earth/ice", why: "No ice, sea ice or snow anywhere on the disc; the white near the top edge is ragged cloud, not a cap." }
+  weather-itcz-over-laurussia: { verdict: drawn, spots: { a: drawn }, owner: "gen:earth/clouds", why: "A dense band of white cloud, much plainer than the old haze, crosses the disc from west to east over and just south of the point, over the continent and the shelf east of it; whether it strengthens over mountains cannot be told." }
+findings:
+  - As in the first take, the canvas (1600 × 788) is narrower than the disc at 2.6 Earth radii, so the Rheic, Gondwana's
+    shelf sea and most of Siberia fall outside the frame for that reason, not for anything the world lacks.
+  - The Zachełmie trackways marker still stands in open dark sea some 300 km from the nearest drawn coast; with the
+    coast outlines gone and the deep water now near-black, it reads even more plainly as a land site drawn at sea.
+  - The new cloud band sits over the point itself, so the items the brief places at the point (the deltaic coast, the
+    forest, the Pechora shelf) are now judged through gaps in the cloud. That is a fair picture of an equatorial
+    afternoon, but a survey that wants the ground at the point may want a frame with clouds off as well.

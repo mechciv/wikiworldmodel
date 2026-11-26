@@ -1,0 +1,250 @@
+view: t=611.757063Ma&lat=0.62846&lon=154.08038&d=1.0000023544&h=180&v=84&hour=16&mo=8&clock=0
+when: 611.8 Ma
+place: >-
+  Early Ediacaran, about 24 million years after the Marinoan snowball ended and 30 million years before the
+  Gaskiers glaciation. The coordinates in the link (0.63°N, 154.08°E) are where the build's plates put the place
+  then, almost on the equator. Today the place is in Saurashtra (Kathiawar), Gujarat, India, at about 22.76°N,
+  70.83°E, 49 km from Rajkot, where Deccan basalts of 66 Ma and younger cover now hide whatever rock was the
+  surface at 611.8 Ma. The camera is at eye level and faces south (heading 180°) at 16:00 in August. On the
+  equator August is no season of note, and at 16:00 the sun would stand in the western half of the sky, to the
+  camera's right. That is my gloss from the hour and the latitude, and assumes a day split into 24 like ours. Nothing
+  read says whether this spot was land, shore or sea floor then. The nearest rocks of this age that could be read
+  about are those of the Marwar basin in western Rajasthan, 400 to 500 km north-north-east by today's map. India's
+  rotation since then is not known from what was read, so "north-north-east" says nothing about which way they
+  lay from the camera then.
+author: machine:claude-code
+expects:
+  - id: geography-nw-india-mozambique-ocean
+    layer: geography
+    what: >-
+      The place is on the north-western margin of India, a continent of its own that had not yet joined Gondwana.
+      The ocean between India and the Congo craton was closing in this period, and its closing made the East
+      African Orogen. No supercontinent stood here yet.
+    reach: region
+    source:
+      cite: "Merdith, A.S., Williams, S.E., Collins, A.S., Tetley, M.G., Mulder, J.A., Blades, M.L., Young, A., Armistead, S.E., Cannon, J., Zahirovic, S. & Müller, R.D. (2021). Extending full-plate tectonic models into deep time: Linking the Neoproterozoic and the Phanerozoic. Earth-Science Reviews, doi:10.1016/j.earscirev.2020.103477. Read as the preprint on EarthArXiv, doi:10.31223/X52S4G."
+      url: https://eartharxiv.org/repository/object/2131/download/4424/
+      text: merdith-2021-plate-model.txt
+      loc: "PDF page 71, section on the Mozambique Ocean (manuscript line 1656)"
+      quote: "The Mozambique Ocean is described as the ocean that closed with the collision of India and Congo along"
+    note: >-
+      The sentence goes on: "the East African Orogen" during the Cryogenian and Ediacaran. The same model puts India
+      at about 60°N at 750 Ma. The build's own plates put this spot at 0.6°N at 611.8 Ma, and nothing read checks
+      that latitude. The preprint, not the published version, was read.
+  - id: substrate-malani-volcanic-basement
+    layer: substrate
+    what: >-
+      Where old rock is bare, it is volcanic: rhyolite and granite of the Malani province, which had erupted
+      150 million years before and had been weathering at the surface ever since.
+    reach: region
+    source:
+      cite: "Xu, H., Meert, J.G. & Pandit, M. (2021). A Short Note on the Age of the Marwar Supergroup, NW India. EarthArXiv preprint, doi:10.31223/X5V61M."
+      url: http://eartharxiv.org/repository/object/2382/download/4893/
+      text: marwar-age-note.txt
+      loc: "PDF page 2, Introduction, second paragraph"
+      quote: "The sediments rest unconformably over the Malani Rhyolite province."
+    note: >-
+      The paragraph dates the Malani rocks to 750 to 771 Ma. Whether the Malani province reaches under Saurashtra,
+      400 to 500 km from the Marwar outcrops, is not said in anything read; the basement under the Deccan lavas
+      here is not known.
+  - id: relief-long-worn-land-surface
+    layer: relief
+    what: >-
+      Worn, low ground rather than fresh mountains: a land surface that had been eroding for over a hundred
+      million years, with no volcano and no young range in it.
+    reach: region
+    source:
+      cite: "Xu, H., Meert, J.G. & Pandit, M. (2021). A Short Note on the Age of the Marwar Supergroup, NW India. EarthArXiv preprint, doi:10.31223/X5V61M."
+      url: http://eartharxiv.org/repository/object/2382/download/4893/
+      text: marwar-age-note.txt
+      loc: "PDF page 6, Discussion"
+      quote: "Therefore, the unconformity between the Malani rhyolites and the Sonia sandstone spans ~125 Ma."
+    note: >-
+      "Low" and "worn" are my gloss. The quote gives only the length of the gap in the rock record, not the
+      height of the land. The same text notes intrusions in Pakistan as young as 643 Ma, and possible
+      volcanism near the Cryogenian/Ediacaran boundary at Chhoti Khatu, so the region was not wholly quiet.
+  - id: substrate-maroon-sand-and-shale
+    layer: substrate
+    what: >-
+      Where sediment lay, it was maroon to red sand, silt and mud, with pebbly cross-bedded sand above. These are
+      the first beds of the Marwar basin, laid down from about the start of the Ediacaran.
+    reach: region
+    source:
+      cite: "Xu, H., Meert, J.G. & Pandit, M. (2021). A Short Note on the Age of the Marwar Supergroup, NW India. EarthArXiv preprint, doi:10.31223/X5V61M."
+      url: http://eartharxiv.org/repository/object/2382/download/4893/
+      text: marwar-age-note.txt
+      loc: "PDF page 3, last paragraph"
+      quote: "There is a basal conglomerate overlying the Sirohi metasediments followed by the maroon-colored sandstones and shales of the Sonia Formation."
+    note: >-
+      Said of Chhoti Khatu, about 450 km north-east of the spot by today's map. The note's own conclusion is that
+      "Marwar sedimentation started shortly after the end of the Marinoan glaciation near the Cryogenian/Ediacaran
+      boundary" (PDF page 6). Its youngest detrital zircons in the Sonia sandstone are 624 to 622 Ma, so these beds
+      may be a little older or younger than 611.8 Ma. Whether they were laid by rivers or by a shallow sea is not
+      said in this text.
+  - id: substrate-wind-cut-stones
+    layer: substrate
+    what: >-
+      Rounded boulders and cobbles from nearby rock, some with surfaces polished and grooved by blown sand
+      (ventifacts), lying on bare ground.
+    reach: region
+    source:
+      cite: "Xu, H., Meert, J.G. & Pandit, M. (2021). A Short Note on the Age of the Marwar Supergroup, NW India. EarthArXiv preprint, doi:10.31223/X5V61M."
+      url: http://eartharxiv.org/repository/object/2382/download/4893/
+      text: marwar-age-note.txt
+      loc: "PDF page 3, first paragraph (on the Pokaran boulder bed)"
+      quote: "striations observed in the Sankra region are ventifacts  and most of the boulders are well-rounded and locally derived"
+    note: >-
+      Reported second-hand from Cozzi et al. (2012) and Davis et al. (2014). It concerns the Pokaran boulder bed at
+      the base of the Marwar Supergroup, near Pokaran about 430 km north of the spot, and is dated only as basal
+      Marwar. The view it supports is wind at work on ground with no plants, not glacial ice.
+  - id: cover-no-plants
+    layer: cover
+    what: >-
+      No plants of any kind, no moss, no grass, no tree. The land is bare rock, gravel, sand and mud in its own
+      colours.
+    reach: region
+    source:
+      cite: "Morris, J.L., Puttick, M.N., Clark, J.W., Edwards, D., Kenrick, P., Pressel, S., Wellman, C.H., Yang, Z., Schneider, H. & Donoghue, P.C.J. (2018). The timescale of early land plant evolution. PNAS 115(10), E2274–E2283."
+      url: https://pmc.ncbi.nlm.nih.gov/articles/PMC5877938/
+      text: morris-2018-land-plants.txt
+      loc: "Significance"
+      quote: "We estimate land plants to have emerged in a middle Cambrian–Early Ordovocian interval"
+    note: >-
+      Land plants come over 100 million years after this moment. The spelling "Ordovocian" is the text's. The
+      paper's discussion says only one of its analyses has a 95% interval reaching into the Proterozoic, and
+      that interval does not reach 611 Ma either.
+  - id: life-microbial-crusts-on-wet-ground
+    layer: life
+    what: >-
+      Where ground stayed damp (tidal flats, stream beds), possibly thin dark microbial mats and films, cracked
+      where they dried. Nothing larger.
+    reach: region
+    source:
+      cite: "McMahon, S., Matthews, J.J., Brasier, A. & Still, J. (2021). Late Ediacaran life on land: desiccated microbial mats and large biofilm streamers. Proceedings of the Royal Society B 288, 20211875."
+      url: https://pmc.ncbi.nlm.nih.gov/articles/PMC8564610/
+      text: mcmahon-2021-ediacaran-land.txt
+      loc: "Abstract"
+      quote: "Their presence shows that late Ediacaran terrestrial environments could produce substantial biomass"
+    note: >-
+      Far and later. The evidence is from the Signal Hill Group of Newfoundland, about 565 Ma or younger, on
+      another continent. The paper reads its mats as living in a tidal setting. Nothing read says mats grew on
+      land in north-western India at 611.8 Ma, and the colour of a mat is my gloss.
+  - id: life-no-large-organisms-on-land
+    layer: life
+    what: >-
+      No animal or other large organism on the ground, in the air or in any pool in view.
+    reach: region
+    source:
+      cite: "McMahon, S., Matthews, J.J., Brasier, A. & Still, J. (2021). Late Ediacaran life on land: desiccated microbial mats and large biofilm streamers. Proceedings of the Royal Society B 288, 20211875."
+      url: https://pmc.ncbi.nlm.nih.gov/articles/PMC8564610/
+      text: mcmahon-2021-ediacaran-land.txt
+      loc: "Introduction, first paragraph"
+      quote: "this conflicts with sedimentary evidence indicating that all known Ediacaran macroorganisms resided within marine environments"
+    note: >-
+      Said of the whole Ediacaran. It holds all the more at 611.8 Ma, before any large organism is known anywhere
+      (next item).
+  - id: life-no-ediacara-biota-yet
+    layer: life
+    what: >-
+      If the sea is in view, nothing large lives in it yet either: no fronds or discs on the sea floor. Life in
+      the water is microscopic: cells, algae, microbial mats.
+    reach: region
+    source:
+      cite: "Matthews, J.J., Liu, A.G., Yang, C., McIlroy, D., Levell, B. & Condon, D.J. (2020). A chronostratigraphic framework for the rise of the Ediacaran macrobiota: new constraints from Mistaken Point Ecological Reserve, Newfoundland. GSA Bulletin, doi:10.1130/B35646.1. Read as the accepted manuscript in the Oxford Research Archive."
+      url: https://ora.ox.ac.uk/objects/uuid:8891e6c5-3fef-459e-a45d-3a8ab82d4cae/files/r6h440s572
+      text: matthews-2020-mistaken-point.txt
+      loc: "Section 8, Discussion, first sentence (manuscript lines 502–503)"
+      quote: "assemblage of the Ediacaran macrobiota (spanning at least the interval ~574–564 Ma)."
+    note: >-
+      The sentence begins "The geochronological ages presented here confirm the Mistaken Point biota as the oldest
+      known". Its oldest complex macrofossils are 574.17 ± 0.66 Ma (abstract), 37 million years after this moment.
+      That the sea held only microscopic life at 611.8 Ma is my inference from that oldest date; no source on
+      the microbiota was cited. The published version was not read.
+  - id: ice-none
+    layer: ice
+    what: >-
+      No ice or snow anywhere in view. The last global glaciation had ended about 24 million years before.
+    reach: region
+    source:
+      cite: "Hoffman, P.F., Abbot, D.S., Ashkenazy, Y., et al. (2017). Snowball Earth climate dynamics and Cryogenian geology-geobiology. Science Advances 3(11), e1600983."
+      url: https://pmc.ncbi.nlm.nih.gov/articles/PMC5677351/
+      text: hoffman-2017-snowball.txt
+      loc: "Section on the Marinoan termination and cap dolostone"
+      quote: "The date of Marinoan deglaciation is tightly constrained between 636.0 and 634.7 Ma"
+    note: >-
+      At sea level on the equator ice is unlikely in any case between glaciations. The next glaciation, the
+      Gaskiers at about 580 Ma, came 30 million years later; the same review calls it "short-lived (<350 ky),
+      mid-latitude".
+  - id: sky-sun-slightly-fainter
+    layer: sky
+    what: >-
+      The sun looks as it does today. It gave about 5% less light, which the eye would not notice.
+    reach: region
+    source:
+      cite: "Feulner, G. (2012). The faint young Sun problem. Reviews of Geophysics. Read as arXiv:1204.4449v1."
+      url: https://arxiv.org/pdf/1204.4449
+      text: feulner-2012-faint-sun.txt
+      loc: "p. 2, the text before equation (1)"
+      quote: "can be approximated by a simple formula [Gough, 1981]"
+    note: >-
+      The 5% is my arithmetic from Gough's formula as the text gives it, L/L⊙ = 1/(1 + 2/5 (1 − t/t⊙)) with
+      t⊙ = 4.57 Gyr: at t = 3.958 Gyr it is about 0.95. The text says the formula agrees with standard solar models
+      after the Sun's first 0.2 Gyr. It is a derived value, not a measurement for this moment.
+  - id: sky-shorter-day
+    layer: sky
+    what: >-
+      A day of about 22 hours, not 24, so "16:00" is a fraction of a shorter day. The sun would move about 9%
+      faster across the sky.
+    reach: region
+    source:
+      cite: "Farhat, M., Auclair-Desrotour, P., Boué, G. & Laskar, J. (2022). The resonant tidal evolution of the Earth-Moon distance. Astronomy & Astrophysics (Letter). arXiv:2207.00438."
+      url: https://arxiv.org/pdf/2207.00438v1
+      text: farhat-2022-tidal.txt
+      loc: "Appendix, Table D.2 (tidal rhythmites), row Elatina, Williams (1997, 2000); columns T [Ga], LOD [hr] last"
+      quote: "Elatina Williams (1997, 2000) 0.620 14.10 ± 0.10 58.55 ± 1.24 58.22 ± 0.28 22.27 ± 0.23"
+    note: >-
+      The row is for 620 Ma, 8 million years before this moment, from the tidal laminae of the Elatina Formation,
+      South Australia. The length of day (22.27 ± 0.23 h) is derived from the observed months per year with the
+      paper's own model. The other reading of the same laminae in the table (Sonett & Chan 1998) gives 20.56 h. A
+      2025 preprint (arXiv:2506.02628) argues the laminae may not be tidal at all; it was found in a search and not
+      read. The 9% is my arithmetic (24/22.27).
+  - id: sky-moon-closer
+    layer: sky
+    what: >-
+      If the Moon is up, it is about 3% closer, and so about 3% wider in the sky than today: too little to see
+      without a measure.
+    reach: region
+    source:
+      cite: "Farhat, M., Auclair-Desrotour, P., Boué, G. & Laskar, J. (2022). The resonant tidal evolution of the Earth-Moon distance. Astronomy & Astrophysics (Letter). arXiv:2207.00438."
+      url: https://arxiv.org/pdf/2207.00438v1
+      text: farhat-2022-tidal.txt
+      loc: "Appendix, Table D.2, row Elatina, Williams (1997, 2000); column aM [RE]"
+      quote: "Elatina Williams (1997, 2000) 0.620 14.10 ± 0.10 58.55 ± 1.24 58.22 ± 0.28 22.27 ± 0.23"
+    note: >-
+      58.22 Earth radii at 620 Ma against 60.14 today (the table's IC row, Laskar et al. 2004). The 3% is my
+      arithmetic. Whether the Moon was above the horizon at 16:00 on that day cannot be known.
+unknown:
+  - Whether this spot was dry land, a shore or a sea floor at 611.8 Ma. No rock of this age is exposed in Saurashtra, and nothing read describes its basement under the Deccan lavas and the Mesozoic beds.
+  - Whether the sea was in sight to the south, and how far the nearest shore was; nothing read maps a shoreline for north-western India at this time.
+  - Whether the Marwar beds near 611.8 Ma were laid by rivers, in a desert, on tidal flats or in a shallow sea; the text read gives only the rock types and the ages.
+  - Which way the camera's south pointed relative to the rocks of today; India's rotation since the Ediacaran is not given in anything read.
+  - The heights and shapes of hills on the skyline; no source gives the relief of the Malani surface at this time.
+  - The weather at 16:00 (clouds, rain, wind, haze) and any rainy season near the Ediacaran equator; no climate of this region and time could be read.
+  - The make-up of the air (how much oxygen and carbon dioxide) and whether that changed the colour of the sky; nothing read speaks to it for 611.8 Ma.
+  - Whether microbial mats or crusts covered the ground here, and what colour the ground had; the red of the Sonia beds is the rock's colour after burial, which may not be its colour at the surface.
+  - Where any river ran, and whether it held water in August.
+  - What lived in the nearest sea; no microfossil record of this age from north-western India was read.
+pictures:
+  - { url: "https://eartharxiv.org/repository/object/2131/download/4424/", what: "Merdith et al. (2021), maps of the full-plate model through the Neoproterozoic, including India before Gondwana closed (preprint figures)." }
+effort:
+  fetched: 11
+  cited: 8
+  failed: 2
+  note: >-
+    11 fetches tried, 9 texts read, 8 cited (one, Droser & Gehling 2015 in PNAS, was read and dropped because it
+    gave no date for the first macrofossils). Refused: the Marwar synthesis in Proc. Indian National Science
+    Academy (2019; expired certificate on the publisher's host) and a 2004 paper on the seismic structure of the
+    Saurashtra crust (Geophysical Journal International, OUP, 403). Semantic Scholar's search refused every query
+    (429), so OpenAlex and Europe PMC were used to find works. `npm run world -- rocks` holds no rock record for the
+    place and time. Most time went on looking for anything about the place itself at this age. Nothing was found
+    nearer than the Marwar basin, 400 to 500 km off, so every item is `region`.
