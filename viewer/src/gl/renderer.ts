@@ -4,28 +4,62 @@
 import type { GroundLevel } from '../../../core/city.ts';
 import type { LeafKindName } from '../../../core/leaves.ts';
 import type { Mat4, V3 } from '../mat.ts';
-import type { BatchBounds, MeshBounds2D } from './culling.ts';
+import type { BatchBounds, MaterialClass, MeshBounds2D } from './culling.ts';
+import type { MegaSlice } from './megabuffer.ts';
 import type { FrameTimer } from './timer.ts';
+
+/** Per-frame draw, shadow, and HLOD counters exposed for interactive performance telemetry. */
+export interface FrameCounters {
+  /** Number of shadow cascades re-rasterized during the frame (0–3). */
+  shadowCascades: number;
+  /** Total WebGL draw calls submitted across depth, shadow, lit, and impostor geometry passes. */
+  drawCalls: number;
+  /** Number of WEBGL_multi_draw batched submissions used for static chunks. */
+  megaDraws: number;
+  /** Total static chunk meshes submitted (leaf + macro HLOD). */
+  staticCells: number;
+  /** Number of macro HLOD static tiles submitted in place of leaf cells. */
+  macroCells: number;
+  /** Number of instanced objects rendered via 2-triangle hemi-octahedral impostors. */
+  impostorInstances: number;
+  /** Number of instanced objects rendered as full 3D geometry. */
+  meshInstances: number;
+}
 
 /** Opaque handle to a static uploaded cell/path mesh; WebGL 2 implements this as CellGPU. */
 export interface MeshHandle {
   count: number;
   bytes: number;
-  /** optional world XY bounds used to restrict shadow-cascade invalidation on upload/remove */
+  /** optional world XY bounds used to restrict shadow-cascade invalidation and sort front-to-back */
   bounds?: MeshBounds2D;
   /** optional entity-index offset added to vertex aEntity so reusable static layers work across scenes */
   entityOffset?: number;
+  /** optional sub-allocation inside the shared StaticMegaBuffer */
+  mega?: MegaSlice;
+  /** tightest fragment shader family covering every vertex material in this mesh */
+  materialClass?: MaterialClass;
+  /** true when this handle represents a merged macro HLOD proxy tile */
+  macro?: boolean;
 }
 
 /** Optional semantic metadata attached to an instanced prototype mesh for renderer optimizations. */
 export interface InstancedMeta {
   /**
    * Stable prototype family key for canopy trees that share an octahedral impostor across LODs
-   * (e.g. `(taxon << 2) | (variant & 3)`). Undefined for non-tree or understory prototypes.
+   * (e.g. `(taxon << 2) | (variant & 3)`). Kept for backwards compatibility; generalized callers
+   * should prefer `impKey` / `impKind` / `impMaxDetail`.
    */
   treeKey?: number;
+  /** Generalized stable prototype family key for GPU-baked hemi-octahedral impostors. */
+  impKey?: number;
+  /** Lighting/sway profile for the impostor ('foliage' for plants; 'rigid' for dwellings, works, rocks). */
+  impKind?: 'foliage' | 'rigid';
+  /** Highest detail tier drawn as an impostor (e.g. 1 for canopy trees, 0 for far dwellings/works/shrubs). */
+  impMaxDetail?: number;
   /** Level of detail of this prototype (0 far, 1 mid, 2 close, 3 ground-cover clump). */
   detail?: number;
+  /** True only when the mesh is a verified closed outward-wound manifold safe for back-face culling. */
+  closed?: boolean;
 }
 
 export interface InstancedBatch {
@@ -93,6 +127,8 @@ export interface LocalRenderer<TMesh extends MeshHandle = MeshHandle> {
   readonly renderSize: [number, number];
   /** total number of internal render-target sets allocated since creation (for diagnostics) */
   readonly targetAllocations: number;
+  /** per-frame draw, shadow, HLOD, and impostor counters from the most recent render() */
+  readonly lastCounters: FrameCounters;
   shadowCells: (focus: V3, radius: number) => TMesh[];
 
   ambientMotion(clearance: number, movingInstances: boolean): boolean;

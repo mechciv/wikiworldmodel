@@ -13,9 +13,9 @@ import { snowOf } from '../../../world/generators/life/climate.ts';
 import { declination, MID_DAY } from '../../../core/water.ts';
 import { FIELD_SLOTS } from '../../../core/plots.ts';
 import { meanBears } from '../../../world/generators/life/sorting.ts';
-import { HOUSE, KEPT, protoParts, STREWN, type NamedGroup, type ProtoMesh } from '../../../world/generators/life/stream.ts';
+import { HOUSE, KEPT, protoParts, STREWN, WORK, type NamedGroup, type ProtoMesh } from '../../../world/generators/life/stream.ts';
 import { ROUTE, wayAt } from '../../../world/generators/life/routines.ts';
-import { CityRenderer, SHARE_STEPS, type CityFrame, type LocalRenderer, type MeshHandle } from '../gl/city.ts';
+import { CityRenderer, SHARE_STEPS, type CityFrame, type InstancedMeta, type LocalRenderer, type MeshHandle } from '../gl/city.ts';
 import type { GL } from '../gl/context.ts';
 import type { V3 } from '../mat.ts';
 import { groundLook, groundTones, rockLook } from './groundlook.ts';
@@ -26,6 +26,8 @@ import { surveyOffset } from '../../../world/generators/life/survey.ts';
 import { shadowFocusFor, type LocalView } from './view.ts';
 
 const TIMELESS = 2e7;
+/** Compact 3D town works safe to substitute with 2-triangle hemi-octahedral impostors at far detail (0). */
+const RIGID_IMPOSTOR_WORKS = new Set(['tower', 'gate', 'well', 'oven', 'rack', 'stack', 'stook', 'stall', 'kiln', 'altar']);
 
 /** One renderer per quality mode for all of a viewer's living scenes: a new place should not compile its shaders again. */
 const renderersFull = new WeakMap<GL, Promise<LocalRenderer>>();
@@ -144,6 +146,8 @@ export class LifeScene {
   last = { instances: 0, triangles: 0, meshes: 0, pending: 0, ms: 0, going: 0 };
   /** how long the ground took, in ms */
   groundMs = 0;
+  /** total accepted worker view-selection completions (for interactive profiling telemetry) */
+  workerSelections = 0;
   movingInstances = false;
   private worker: Worker | null = null;
   private selected = 0;
@@ -468,6 +472,7 @@ export class LifeScene {
       if (this.active || this.warmWaiters.length > 0) this.send(this.active ? this.lastInteractive : false);
       return;
     }
+    this.workerSelections++;
     // Those among them that go somewhere: a way's ninth number is how fast.
     let going = 0;
     for (const b of m.batches) {
@@ -537,15 +542,38 @@ export class LifeScene {
   private uploadProtos(protos: ProtoMesh[]): void {
     for (const p of protos) {
       const { taxon, variant, detail } = protoParts(p.proto);
-      let treeKey: number | undefined;
+      const meta: InstancedMeta = { detail };
       if (taxon < HOUSE && detail <= 2) {
         const t = this.spec.taxa[taxon];
         const form = t ? this.spec.forms[t.form] : undefined;
-        if (form?.kind === 'plant' && (form.behave?.layer ?? 'canopy') === 'canopy') {
-          treeKey = (taxon << 2) | (variant & 3);
+        if (form?.kind === 'plant') {
+          const layer = form.behave?.layer ?? 'canopy';
+          if (layer === 'canopy') {
+            meta.impKey = (taxon << 2) | (variant & 3);
+            meta.impKind = 'foliage';
+            meta.impMaxDetail = 1;
+          } else if (layer === 'under') {
+            meta.impKey = 0x10000 | ((taxon << 2) | (variant & 3));
+            meta.impKind = 'foliage';
+            meta.impMaxDetail = 1;
+          }
         }
+      } else if (taxon >= HOUSE && taxon < WORK && detail <= 2) {
+        meta.impKey = 0x20000 | (((taxon - HOUSE) << 3) | (variant & 7));
+        meta.impKind = 'rigid';
+        meta.impMaxDetail = 0;
+      } else if (taxon >= WORK && taxon < KEPT && detail <= 2) {
+        const work = this.people?.works[taxon - WORK];
+        if (work && RIGID_IMPOSTOR_WORKS.has(work.spec.kind)) {
+          meta.impKey = 0x30000 | (((taxon - WORK) << 3) | (variant & 7));
+          meta.impKind = 'rigid';
+          meta.impMaxDetail = 0;
+        }
+      } else if (taxon >= STREWN) {
+        // Strewn stones (world/generators/life/strewn.ts) are outward-wound subdivided icospheres.
+        meta.closed = true;
       }
-      this.renderer.addInstanced(p.proto, p.vertices, p.indices, detail >= 1, p.idle, treeKey !== undefined ? { treeKey, detail } : { detail });
+      this.renderer.addInstanced(p.proto, p.vertices, p.indices, detail >= 1, p.idle, meta);
     }
   }
 

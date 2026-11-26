@@ -43,3 +43,23 @@ for (const v of look.views) {
     expect(profile!.total, JSON.stringify(profile!.passes)).toBeLessThanOrEqual(BUDGET.ms);
   });
 }
+
+for (const tr of look.traces ?? []) {
+  const budget = tr.budgetMs ?? BUDGET.ms;
+  test(`interactive trace ${tr.name} stays within ${budget} ms p95 on the reference GPU`, async ({ page }) => {
+    test.skip(!new RegExp(look.reference, 'i').test(gpu), `drawn on ${gpu}, not the reference GPU (${look.reference})`);
+    await page.goto(`/?b=${latestBuild()}&${tr.link}`);
+    await idle(page);
+    const res = await page.evaluate(
+      (spec) => window.__wikiworldmodel!.profileInteractive(spec),
+      { motion: tr.motion, steps: tr.steps, from: tr.from, to: tr.to },
+    );
+    expect(res, 'interactive trace recorded frames').not.toBeNull();
+    const d = res!.deltas;
+    test.info().annotations.push({
+      type: 'interactive',
+      description: `${gpu}: p50=${d.p50.toFixed(1)}ms p95=${d.p95.toFixed(1)}ms p99=${d.p99.toFixed(1)}ms max=${d.max.toFixed(1)}ms | cascades=${res!.shadowCascades} draws=${res!.avgDrawCalls.toFixed(1)} mega=${res!.megaDraws} cells=${res!.maxStaticCells}(macro=${res!.maxMacroCells}) imp=${Math.round(res!.avgImpostorInstances)} mesh=${Math.round(res!.avgMeshInstances)} sel=${res!.workerSelections}`,
+    });
+    expect(d.p95, JSON.stringify(res)).toBeLessThanOrEqual(budget);
+  });
+}

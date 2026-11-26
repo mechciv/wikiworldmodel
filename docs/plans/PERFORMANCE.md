@@ -1,7 +1,8 @@
 # Performance: 60 fps across space, scale and time
 
-Status: Phase 0 (WebGL 2 quick wins) implemented, November 2026; Phases 1–5 proposed. Connects the current WebGL 2 local
-renderer ([city.ts](../../viewer/src/gl/city.ts), [cityShaders.ts](../../viewer/src/gl/cityShaders.ts),
+Status: Phases 0–3 and Phase 4a implemented in WebGL 2, November 2026; Phases 4b–5 proposed. Connects the current
+WebGL 2 local renderer ([city.ts](../../viewer/src/gl/city.ts), [cityShaders.ts](../../viewer/src/gl/cityShaders.ts),
+[megabuffer.ts](../../viewer/src/gl/megabuffer.ts), [impostors.ts](../../viewer/src/gl/impostors.ts),
 [sky.ts](../../viewer/src/gl/sky.ts)) and streaming workers ([life.ts](../../viewer/src/city/life.ts),
 [stream.ts](../../world/generators/life/stream.ts), [structures.ts](../../viewer/src/city/structures.ts)) to the WebGPU
 compute / visibility-buffer backend planned in [RENDERING.md](RENDERING.md) (step 9).
@@ -287,45 +288,54 @@ Low-risk, high-impact fixes requiring no format breaks or generator version bump
 temporal shadow transition keying, CPU sky SH accuracy, and structure-layer reuse; golden settled views remain
 unchanged; Rome zoom/pan/scrub shadow redraws and main-thread stalls drop sharply.
 
-### Phase 1: Interactive benchmark & telemetry harness
+### Phase 1: Interactive benchmark & telemetry harness *(implemented)*
 
-- Extend [`tools/look/views.yaml`](../../tools/look/views.yaml) and [`frametime.spec.ts`](../../viewer/test/e2e/frametime.spec.ts)
-  with scripted **interactive stress traces**:
-  - *Zoom sweep:* 50 km → 10 m over `rome-forum`, `hell-creek-arrival`, and a synthetic high-density stress scene
-    (simulating modern urban density: 200k+ instances + dense static cells).
-  - *Pan / orbit sweep:* 360° turn + street walk in `rome-street` and `forest-floor`.
-  - *Time scrub sweep:* continuous scrub across 500 years in Rome (crossing multiple anthrome steps and monument
-    construction dates) and across 100 Ma in deep time.
-- Log per-trace p50 / p95 / p99 frame times, max single-frame stall, shadow cascade rebuild count, worker round-trip
-  count, and GPU buffer upload bytes.
+- Extended [`tools/look/views.yaml`](../../tools/look/views.yaml), [`tools/look/views.ts`](../../tools/look/views.ts),
+  [`viewer/src/main.ts`](../../viewer/src/main.ts) (`window.__wikiworldmodel.profileInteractive`), and
+  [`frametime.spec.ts`](../../viewer/test/e2e/frametime.spec.ts) with scripted **interactive stress traces**
+  (`rome-zoom-sweep`, `rome-orbit-walk`, `rome-time-scrub`, `hell-creek-zoom-sweep`) plus per-frame
+  [`FrameCounters`](../../viewer/src/gl/renderer.ts) telemetry (`shadowCascades`, `drawCalls`, `megaDraws`,
+  `staticCells`, `macroCells`, `impostorInstances`, `meshInstances`, and `workerSelections`).
 
-### Phase 2: Persistent chunk mega-buffers, multi-draw and winding-aware culling (WebGL 2)
+### Phase 2: Persistent chunk mega-buffers, multi-draw and winding-aware culling (WebGL 2) *(implemented; coarse occlusion culling deferred to WebGPU/Phase 5)*
 
-- Sub-allocate static chunk meshes into pooled GPU mega-buffers and submit visible chunks via `WEBGL_multi_draw`
-  (with fallback).
-- Split closed solid geometry (`CULL_FACE` on) from double-sided shells/cards (`CULL_FACE` off) across generators and
-  upload paths.
-- Front-to-back chunk sorting before depth/lit submission.
-- Add conservative coarse occlusion culling for WebGL 2 (CPU masked depth rasterizer or amortized conservative
-  occlusion queries on spatial chunks).
+- Sub-allocated static chunk meshes into shared 28-byte VAO/VBO/IBO pages via
+  [`StaticMegaBuffer`](../../viewer/src/gl/megabuffer.ts) with coalescing [`FreeListAllocator`](../../viewer/src/gl/megabuffer.ts),
+  index rebasing, and `WEBGL_multi_draw` batching (falling back cleanly to single-VAO-bind `drawElements`).
+- Sorted visible static cells and instanced batches front-to-back ([`sortCellsFrontToBack`](../../viewer/src/gl/culling.ts))
+  and opaque-before-foliage-cards across depth and lit passes.
+- Enabled `gl.CULL_FACE` selectively for verified closed outward-wound manifolds (`closed: true`, starting with
+  subdivided-icosphere strewn stones) while keeping open/single-sheet architecture and foliage shells double-sided.
+- *Remaining (optional WebGL 2 / Phase 5):* Conservative coarse occlusion culling (CPU masked depth rasterizer or Hi-Z
+  compute occlusion on WebGPU).
 
-### Phase 3: Unified HLOD pyramid and generalized octahedral impostors
+### Phase 3: Unified HLOD pyramid and generalized octahedral impostors *(implemented; contact shadows pending)*
 
-- Generalize [`ImpostorAtlas`](../../viewer/src/gl/impostors.ts) from canopy trees to all rigid instanced prototypes
-  (dwellings, rocks, shrubs, landmarks, props, vehicles) with LRU layer eviction when >64 prototype families are active.
-- Build a 3–4 level quadtree HLOD hierarchy for static chunk meshes (simplifying and merging 4 children into 1 parent
-  chunk) governed by a single SSE pixel-error threshold.
-- Add screen-space contact shadows to decouple close shadow crispness from tight Cascade 0 radii.
+- **Quadtree macro HLOD pyramid** ([`cells.ts`](../../world/generators/city/cells.ts),
+  [`worker.ts`](../../viewer/src/city/worker.ts), [`structures.ts`](../../viewer/src/city/structures.ts)): added
+  `1600 m` (`4 × 4` leaf cells) merged & area-simplified macro tiles (`CityBuilder.macroCells()` / `buildMacro()` /
+  `simplifyMacroMesh`) streamed first, substituting for leaf cells beyond `1500 m` (`1100 m` interactive) and serving
+  Shadow Cascade 2 directly while restricting leaf coarse streaming to within `2000 m`.
+- **Generalized hemi-octahedral impostors** ([`impostors.ts`](../../viewer/src/gl/impostors.ts),
+  [`cityShaders.ts`](../../viewer/src/gl/cityShaders.ts), [`life.ts`](../../viewer/src/city/life.ts)): raised atlas
+  capacity to 96 layers with pure [`ImpostorLru`](../../viewer/src/gl/impostors.ts) eviction and on-demand re-baking,
+  extended baking and shading (`uImpSway`, `uImpKind`) beyond canopy trees to understory shrubs, procedural dwellings,
+  and compact rigid town works (accepting `detail >= 0` sources so distant settlements bake immediately).
+- *Remaining:* Screen-space contact shadows to further decouple close shadow crispness from Cascade 0 radii.
 
-### Phase 4: Low-divergence shading and 4D temporal GPU layers
+### Phase 4: Low-divergence shading and 4D temporal GPU layers *(Phase 4a shader specialization implemented; 4b KTX2 procedural arrays, 4D GPU lifespans, and toroidal shadows proposed)*
 
-- Split `MESH_FS` into focused per-class fragment shaders (opaque built, foliage cards, organic/animal, rock/terrain).
-- Bake high-frequency procedural patterns (basalt Voronoi, coursed stone/brick, roof tiles, bark) into KTX2 compressed
-  material arrays via `tools/materials/pack.ts`.
-- Move procedural house/clearing cohorts and land-use surface masks to GPU 4D lifespans (`[t_start, t_end]`) and
-  interpolated `sampler2DArray` temporal fields so time scrubbing across decades/centuries requires zero scene
-  rebuilds.
-- Add toroidal scrolling for static shadow cascades on WebGL 2.
+- **Phase 4a (implemented):** Specialized [`MESH_FS`](../../viewer/src/gl/cityShaders.ts) from a single `#ifdef`-pruned
+  template into `MESH_FS_STATIC` (**zero `discard` instructions**, unlocking hardware Early-Z across static buildings,
+  monuments, walls, and roads), `MESH_FS_BUILT` (instanced built/stone), `MESH_FS_FOLIAGE` (pure leaf cards/blades),
+  and `MESH_FS` (mixed meshes), dispatched via [`classifyMeshMaterials`](../../viewer/src/gl/culling.ts).
+- **Phase 4b (proposed):**
+  - Bake high-frequency procedural patterns (basalt Voronoi, coursed stone/brick, roof tiles, bark) into KTX2 compressed
+    material arrays via `tools/materials/pack.ts`.
+  - Move procedural house/clearing cohorts and land-use surface masks to GPU 4D lifespans (`[t_start, t_end]`) and
+    interpolated `sampler2DArray` temporal fields so time scrubbing across decades/centuries requires zero scene
+    rebuilds.
+  - Add toroidal scrolling for static shadow cascades on WebGL 2.
 
 ### Phase 5: WebGPU compute culling, Hi-Z occlusion and Visibility Buffer (`RENDERING.md` step 9)
 
