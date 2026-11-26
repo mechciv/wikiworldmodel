@@ -30,7 +30,7 @@ export function siteClaimHistory<T extends SiteClaim>(claims: T[], scenario: Sce
 
 export function settlementFocus(record: CityRecord, t: number, scenario: Scenario) {
   const cores = activeSiteClaims(record.cores, t, scenario);
-  const extents = activeSiteClaims(record.extents, t, scenario);
+  const extents = activeSiteClaims(record.extents, t, scenario).map((e) => ({ ...e, basis: e.basis ?? 'evidence' }));
   const origin = cores[0] ?? record;
   const points = cores.map((c) => toLocal(origin, c.lat, c.lon));
   for (const extent of extents)

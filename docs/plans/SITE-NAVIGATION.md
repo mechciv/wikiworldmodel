@@ -2,7 +2,7 @@
 
 ## The Angkor case
 
-Open the [851 CE view](http://localhost:5175/?b=1753e842a906c808&t=851&lat=13.318067&lon=104.0184444&d=1.0062041066&w=752.531%7E949.81&v=33.88&sel=people%2Ffirst-cities%2Fangkor).
+Open the [851 CE view](https://wikiworldmodel.org/?b=1753e842a906c808&t=851&lat=13.318067&lon=104.0184444&d=1.0062041066&w=752.531%7E949.81&v=33.88&sel=people%2Ffirst-cities%2Fangkor).
 Before this change, the inspector named Angkor and the bottom bar reported its houses. The terrain gave the visitor no way to point out
 the city. Its centre for 851, Hariharalaya at Bakong, is about 5.2 km west-northwest of the saved camera target.
 Angkor's representative point lies farther northwest. The record uses that point for the later centre, Yasodharapura,

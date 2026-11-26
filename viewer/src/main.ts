@@ -2492,10 +2492,7 @@ async function start(root: HTMLElement): Promise<void> {
       shape.pin.select();
       return true;
     }
-    const hit = groundHit(frameView, rayOf(frameView, x, y), city.ground);
-    if (!hit) return false;
-    const [lat, lon] = fromLocal(site.origin, hit[0], hit[1]);
-    const row = borders?.at(lon, lat);
+    const row = siteMap.frontierAt(x, y);
     if (!row) return false;
     inspectLocalPolity(row);
     return true;

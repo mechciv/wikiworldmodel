@@ -7,7 +7,7 @@ export type BorderRow = PolityRow & { source?: string };
 type Origin = { lat: number; lon: number };
 export class LocalBorders {
   private nearby: BorderRow[] = [];
-  segments: number[][] = [];
+  segments: { coords: number[]; row: BorderRow }[] = [];
 
   constructor(origin: Origin, rows: BorderRow[]) {
     const reach = 400_000;
@@ -22,7 +22,7 @@ export class LocalBorders {
           if (Math.min(a[0], b[0]) > reach || Math.max(a[0], b[0]) < -reach || Math.min(a[1], b[1]) > reach || Math.max(a[1], b[1]) < -reach)
             continue;
           close = true;
-          this.segments.push([...a, ...b]);
+          this.segments.push({ coords: [...a, ...b], row });
         }
       }
       if (close || insideRow(row, origin.lon, origin.lat)) this.nearby.push(row);

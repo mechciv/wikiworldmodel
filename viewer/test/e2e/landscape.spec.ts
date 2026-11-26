@@ -83,22 +83,30 @@ test.describe('the human landscape', () => {
     await page.goto(`/?b=${latestBuild()}&t=120&lat=50.415&lon=8.13&d=1.004&v=0&${FAST}`);
     const country = page.locator('.local-country');
     await expect(country).toContainText('Rome');
+    const ground = page.locator('canvas.globe');
+    const bounds = (await ground.boundingBox())!;
+    await ground.click({ position: { x: bounds.width / 2, y: bounds.height / 2 } });
+    await expect(page.locator('.inspect')).toContainText('Generated ground');
     await country.click();
     await expect(page.locator('.inspect .here')).toContainText('Roman Empire');
     await page.evaluate(() => window.__wikiworldmodel!.set({ sel: null, cam: { lat: 50.415, lon: 7.96, dist: 1.004, tilt: 0 } }));
     await expect(page.locator('.site-map')).toBeVisible();
     await expect(country).toBeHidden();
     // The visible frontier is painted in its own map colour on the transparent overlay.
-    await expect
-      .poll(() =>
-        page.locator('.site-map canvas').evaluate((el) => {
-          const canvas = el as HTMLCanvasElement;
-          const { data } = canvas.getContext('2d')!.getImageData(0, 0, canvas.width, canvas.height);
-          for (let i = 0; i < data.length; i += 4) if (data[i + 2] > 230 && data[i + 2] > data[i] + 15 && data[i + 3] > 170) return true;
-          return false;
-        }),
-      )
-      .toBe(true);
+    const frontierPixel = () => page.locator('.site-map canvas').evaluate(el => {
+      const canvas = el as HTMLCanvasElement;
+      const { data } = canvas.getContext('2d')!.getImageData(0, 0, canvas.width, canvas.height);
+      for (let y = Math.round(canvas.height / 2); y < canvas.height - 80; y++) {
+        for (let x = 12; x < canvas.width - 12; x++) {
+          const i = 4 * (y * canvas.width + x);
+          if (data[i + 2] > 230 && data[i + 2] > data[i] + 15 && data[i + 3] > 170) return { x, y };
+        }
+      }
+      return null;
+    });
+    await expect.poll(frontierPixel).toBeTruthy();
+    await ground.click({ position: (await frontierPixel())! });
+    await expect(page.locator('.inspect .here')).toContainText('Roman Empire');
   });
 
   test('Settlement paints the anthromes of the time, with a legend of the classes present, and stays in the link', async ({ page }) => {

@@ -327,7 +327,7 @@ claims:
       - { step: quoted, by: machine:quote-check, how: "Found in klassen-2021.txt (sha256 62df9d046be766cf), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-25" }
   core-hariharalaya:
     prop: core
-    value: { label: Hariharalaya, lat: 13.335986, lon: 103.974117, frame: frame:earth/present-day }
+    value: { lat: 13.335986, lon: 103.974117, frame: frame:earth/present-day }
     valid: { hi: 889 CE }
     source:
       - { ref: src:wikidata-bakong, loc: "P625 coordinate location" }
@@ -350,7 +350,7 @@ claims:
       - { step: quoted, by: machine:quote-check, how: "Found in pottier-soutif-2014.txt (sha256 31ec941547763b3e), lustig-2009.txt (sha256 494d50a16c137857) and pleiades-531398484.txt (sha256 24d98dcbf5e2871f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-25" }
   core-yasodharapura:
     prop: core
-    value: { label: Yasodharapura, lat: 13.43333, lon: 103.8333, frame: frame:earth/present-day }
+    value: { lat: 13.43333, lon: 103.8333, frame: frame:earth/present-day }
     valid: { lo: 889 CE }
     source:
       - { ref: src:pleiades-angkor, loc: "place 531398484, representative point" }
@@ -366,3 +366,27 @@ claims:
       is the record's own, the gazetteer's representative point for Angkor.
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in pleiades-531398484.txt (sha256 24d98dcbf5e2871f) and lustig-2009.txt (sha256 494d50a16c137857), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-25" }
+  name-hariharalaya:
+    subject: "#core-hariharalaya"
+    prop: name
+    value: { en: Hariharalaya }
+    author: machine:codex
+    source:
+      ref: src:lustig-2009-angkor-political-economy
+      loc: "p. 66, the series of preeminent capitals"
+      quote: "Hariharālaya (Roluos)"
+    note: The English map label uses the spelling without diacritics.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in lustig-2009.txt (sha256 494d50a16c137857), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-26" }
+  name-yasodharapura:
+    subject: "#core-yasodharapura"
+    prop: name
+    value: { en: Yasodharapura }
+    author: machine:codex
+    source:
+      ref: src:lustig-2009-angkor-political-economy
+      loc: "p. 66, the series of preeminent capitals"
+      quote: "Yaśodharapura (Angkor)"
+    note: The English map label uses the spelling without diacritics.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in lustig-2009.txt (sha256 494d50a16c137857), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-26" }

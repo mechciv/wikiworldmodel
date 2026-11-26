@@ -28,7 +28,7 @@ import { datasetFile } from '../manifest.ts';
 import { CACHE } from '../paths.ts';
 import { sha256, stableStringify } from '../util.ts';
 import { insideOutline } from '../../../../core/relief.ts';
-import { elementKey, type LatLon, type OhmSnapshot } from '../ohm.ts';
+import { elementKey, type LatLon } from '../ohm.ts';
 import { kindIs, type Entity, type Field, type World } from '../world.ts';
 import { claimOf, subjectTime, validSpan, type Solved } from './records.ts';
 
@@ -608,11 +608,11 @@ export function landscapeEntities(w: World): Entity[] {
 }
 
 /** Measured outlines in geographic degrees, retaining holes and separate enclosures. */
-function settlementOutline(world: World, value: unknown): number[][][][] {
+export function settlementOutline(world: Pick<World, 'snapshots'>, value: unknown): number[][][][] {
   const g = value as { type?: string; coordinates?: number[][][] | number[][][][]; from?: string; elements?: string[] };
   if (g.type === 'Polygon') return [g.coordinates as number[][][]];
   if (g.type === 'MultiPolygon') return g.coordinates as number[][][][];
-  const snapshot = g.from && (world.snapshots.get(g.from) as OhmSnapshot | undefined);
+  const snapshot = g.from && world.snapshots.get(g.from);
   if (!snapshot || snapshot.format !== 'lightworld-ohm-snapshot@1' || !g.elements) return [];
   const ids = new Set(g.elements);
   const polygons: number[][][][] = [];
@@ -689,9 +689,11 @@ export function cityRecords(s: Solved): CityRecord[] {
     const cores = e.claims
       .filter((c) => c.subject === e.id && c.prop === 'core' && c.status !== 'deprecated')
       .flatMap((c) => {
-        const p = c.value as { lat?: number; lon?: number; label?: string };
+        const p = c.value as { lat?: number; lon?: number };
         if (typeof p?.lat !== 'number' || typeof p?.lon !== 'number') return [];
-        return [{ lat: p.lat, lon: p.lon, ...(p.label ? { label: p.label } : {}), ...siteClaim(c) }];
+        const name = claimOf(s, c.ref, 'name')?.value as Record<string, string> | undefined;
+        const label = name?.en ?? Object.values(name ?? {})[0];
+        return [{ lat: p.lat, lon: p.lon, ...(label ? { label } : {}), ...siteClaim(c) }];
       });
     const name = claimOf(s, e.id, 'name')?.value as Record<string, string> | undefined;
     // Its names in turn, where they have their times: a scene of 1500 names Tenochtitlan, not Mexico City.

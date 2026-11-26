@@ -135,7 +135,8 @@ export class Markers {
       const unplaced = !!f.unplaced || (!!here.plate && !ctx.placed(here.plate));
       const q = here.plate && !unplaced ? ctx.plateRotation(here.plate) : ([1, 0, 0, 0] as Quat);
       const core = ctx.settlementPoint?.(f.id);
-      const p = core ? (unitVector(core.lat, core.lon) as V3) : (rotate(q, unitVector(here.location.lat, here.location.lon)) as V3);
+      const point = core ?? here.location;
+      const p = rotate(q, unitVector(point.lat, point.lon)) as V3;
       const s = camera.project(p);
       if (ctx.frame && f.id === ctx.selected && f.kind.split('/')[0] === 'settlement') {
         const { room, go } = ctx.frame;

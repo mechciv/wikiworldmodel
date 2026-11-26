@@ -10,7 +10,8 @@ import { agricultureAt, compileAgriculture, compileHusbandry, compileTraditions,
 import { dispersedAt } from '../../../core/citypop.ts';
 import { anthromeTile, assessmentAt, cityPeople, citiesAround, citiesNear, classAtStep, figureAt, kmBetween, nameAt, LIFEWAY_OF, lifewayOf, nearestStep, populationOf, regionReach, regionsInto, shareDensity, tileKey, cellOf, type AnthromeClass, type Assessment, type CitiesFile, type City, type CityRecord } from '../../../core/landscape.ts';
 import type { PeopleFile } from '../../../core/layers.ts';
-import { assessmentsFile, cityYear, citiesOf, eckert4Inverse, housing, housingCounts, landscapeEntities, parseClassGrid, rasterizeRegions, stepOfName, type LandscapeBuilt } from '../src/build/landscape.ts';
+import { assessmentsFile, cityYear, citiesOf, eckert4Inverse, housing, housingCounts, landscapeEntities, settlementOutline, parseClassGrid, rasterizeRegions, stepOfName, type LandscapeBuilt } from '../src/build/landscape.ts';
+import type { LatLon, OhmSnapshot } from '../src/ohm.ts';
 import type { World } from '../src/world.ts';
 import { wantedRows, wantedText, wantedTotals } from '../src/dwellingsWanted.ts';
 import { readTable, snapshotText, SLICES } from '../src/archaeoglobe.ts';
@@ -742,4 +743,20 @@ describe('the cities a scene draws', () => {
     const sPole = sceneTiles({ tileDeg: 10, reach_deg: 4 }, 88, 0);
     expect(sPole.length).toBeGreaterThanOrEqual(36);
   });
+});
+
+it('reads only closed polygons from the named OHM elements of a settlement extent and retains their holes', () => {
+  const outer: LatLon[] = [[10, 20], [10, 22], [12, 22], [12, 20], [10, 20]];
+  const inner: LatLon[] = [[10.5, 20.5], [10.5, 21], [11, 21], [11, 20.5], [10.5, 20.5]];
+  const snapshots = new Map<string, OhmSnapshot>([['src:map', {
+    snapshot: 'test', bbox: [10, 20, 12, 22], query: '',
+    format: 'lightworld-ohm-snapshot@1',
+    elements: [
+      { type: 'relation', id: 1, tags: {}, outer: [outer], inner: [inner] },
+      { type: 'way', id: 2, tags: {}, line: outer.slice(0, 4) },
+      { type: 'way', id: 3, tags: {}, line: outer },
+    ],
+  }]]);
+  const swap = (ring: number[][]) => ring.map(([lat, lon]) => [lon, lat]);
+  expect(settlementOutline({ snapshots }, { from: 'src:map', elements: ['relation/1', 'way/2'] })).toEqual([[swap(outer), swap(inner)]]);
 });

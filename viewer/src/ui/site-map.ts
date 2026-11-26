@@ -57,6 +57,7 @@ export class SiteMap {
   private pins = new Map<string, HTMLButtonElement>();
   private country = document.createElement('button');
   private shapes: { path: Path2D; pin: SitePin; description: string }[] = [];
+  private frontiers = new Map<BorderRow, Path2D>();
   private key = '';
   private people?: PeopleSummary;
   private borders?: LocalBorders;
@@ -88,6 +89,15 @@ export class SiteMap {
   extentAt(x: number, y: number) {
     const ctx = this.canvas.getContext('2d')!;
     return this.shapes.find((s) => ctx.isPointInPath(s.path, x, y, 'evenodd'));
+  }
+
+  frontierAt(x: number, y: number): BorderRow | undefined {
+    const ctx = this.canvas.getContext('2d')!;
+    ctx.save();
+    ctx.lineWidth = 8;
+    const row = [...this.frontiers].find(([, path]) => ctx.isPointInStroke(path, x, y))?.[0];
+    ctx.restore();
+    return row;
   }
 
   draw(
@@ -146,9 +156,12 @@ export class SiteMap {
         }
       if (closed) path.closePath();
     };
-    const frontier = new Path2D();
+    this.frontiers.clear();
     const reach = Math.min(400000, Math.max(2500, v.range * 5));
-    for (const [ax, ay, bx, by] of borders?.segments ?? []) {
+    for (const {
+      coords: [ax, ay, bx, by],
+      row,
+    } of borders?.segments ?? []) {
       if (
         Math.min(ax, bx) > v.target[0] + reach ||
         Math.max(ax, bx) < v.target[0] - reach ||
@@ -156,16 +169,21 @@ export class SiteMap {
         Math.max(ay, by) < v.target[1] - reach
       )
         continue;
+      let frontier = this.frontiers.get(row);
+      if (!frontier) {
+        frontier = new Path2D();
+        this.frontiers.set(row, frontier);
+      }
       const n = Math.max(1, Math.ceil(Math.hypot(bx - ax, by - ay) / 4000));
       for (let j = 0; j < n; j++)
         pathOf(frontier, [ax + ((bx - ax) * j) / n, ay + ((by - ay) * j) / n, ax + ((bx - ax) * (j + 1)) / n, ay + ((by - ay) * (j + 1)) / n], false);
     }
     ctx.lineWidth = 3;
     ctx.strokeStyle = 'rgba(30,25,52,.62)';
-    ctx.stroke(frontier);
+    for (const path of this.frontiers.values()) ctx.stroke(path);
     ctx.lineWidth = 1.4;
     ctx.strokeStyle = '#ddcafa';
-    ctx.stroke(frontier);
+    for (const path of this.frontiers.values()) ctx.stroke(path);
 
     const seen = new Set<string>();
     const boxes: Rect[] = [];
