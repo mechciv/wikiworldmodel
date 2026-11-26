@@ -15,11 +15,13 @@ author: machine:claude-code
 code: tools/world/src/build/atlas.ts
 inputs:
   - { ref: src:pbdb-land-2026-11-05, note: "the rows: who was found where, and when" }
+  - { ref: src:pbdb-rocks-2026-11-20, note: "measured radiometric and radiocarbon ages per collection, tightening stratigraphic spans" }
   - { kind: period/stage, note: "the bins it lists by" }
   - { kind: taxon, note: "taxa the world adopts by their PBDB number, which keep their own place on a list" }
-  - { ref: field:earth/elevation, note: "the plates and the land of each time, which carry the rows and set the distances" }
+  - { ref: field:earth/elevation, note: "the plates and the land of each time, which carry the rows, set distances, and gate elevation differences" }
   - { ref: field:earth/coastline, note: "what is land and what is sea" }
-  - { ref: field:earth/climate, note: "how alike two places are" }
+  - { ref: field:earth/climate, note: "how alike two places are in deep time" }
+  - { ref: field:earth/climate-late-quaternary, note: "finer 1° climate for the last 120,000 years" }
   - { ref: field:earth/biome, note: "the thresholds that class a climate" }
   - { prop: body_plan, note: "to sort taxa by habit" }
   - { prop: body_form, note: "to sort taxa by habit" }
@@ -35,6 +37,11 @@ params:
   here_km: { choice: "How near a row must be for its taxon to be \"here\"." }
   region_km: { choice: "How far overland a row may be for its taxon to be in the region." }
   kernel_km: { choice: "How fast a row's weight falls with distance." }
+  here_share: { choice: "The minimum share of a row's time span that must lie inside the stage for it to count as \"here\" rather than regional inference." }
+  climb_cost: { choice: "Extra km of overland cost added per 1,000 m of vertical elevation change along a graph step, so mountain ranges act as dispersal barriers." }
+  max_elev_diff_m: { choice: "Maximum elevation difference (m) between a fossil site and a patch before the site is gated out as a different altitudinal zone." }
+  elev_scale_m: { choice: "Elevation difference scale (m) over which a site's weight decays exponentially." }
+  min_climate_like: { choice: "Minimum climate similarity (0–1) required for a distant row to reach a patch as \"region\", preventing cross-biome leakage." }
   shallow_cost: { choice: "How many km of land one km of shallow sea counts as." }
   deep_cost: { choice: "How many km of land one km of deep sea counts as." }
   shallow_m: { choice: "How deep the sea may be and still count as shallow." }
@@ -64,3 +71,7 @@ checks:
   - { test: tools/world/test/life.test.ts, holds: "has a tier that is true: *here* has a row of the taxon close by at the time, recounted from the snapshot" }
   - { test: tools/world/test/life.test.ts, holds: "gives each taxon of a stage the climate its rows lived in: reindeer of colder places than hippopotamuses" }
   - { test: tools/world/test/life.test.ts, holds: "puts the Hell Creek's own taxa in the Hell Creek's patch, as recorded here" }
+  - { test: tools/world/test/atlas.test.ts, holds: "tightens site spans with measured ages from the rock record, per patch, so a dated region ends before an undated one" }
+  - { test: tools/world/test/atlas.test.ts, holds: "keeps loosely dated nearby rows out of here, and puts direct local evidence ahead of distant regional taxa" }
+  - { test: tools/world/test/atlas.test.ts, holds: "gates regional taxa across mountain barriers, elevation differences, dissimilar climates, and deep inland coasts, and prefers late-Quaternary climate near the present" }
+  - { test: tools/world/test/atlas.test.ts, holds: "excludes strictly marine taxa and marine depth-zone swimmers from the land atlas while keeping freshwater and water-edge taxa" }

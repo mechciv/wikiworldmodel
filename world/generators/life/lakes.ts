@@ -6,7 +6,7 @@ import type { SceneLake } from '../../../core/scene.ts';
 import { fbm } from './land.ts';
 import type { GridSpec } from './land.ts';
 
-/** How the generator draws a lake's shore and bed: its parameters' meaning is in LivingParams['lakes'] (scene/v14.ts). */
+/** How the generator draws a lake's shore and bed: its parameters' meaning is in LivingParams['lakes'] (scene/v15.ts). */
 export interface LakeChoices {
   wander: number;
   scale: number;

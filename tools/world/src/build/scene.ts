@@ -15,7 +15,7 @@ import { cubeRoot, placeSpec, reliefPatch, sizeWithin, type PlaceWorld } from '.
 import type { SceneWater } from '../../../../core/scene.ts';
 import { bedrockWords, substrateWords, type SceneBedrock, type SceneSubstrate } from '../../../../core/substrate.ts';
 import { FULL_BUDGET, SceneStream } from '../../../../world/generators/life/stream.ts';
-import { VERSION, type LivingParams } from '../../../../world/generators/life/scene/v14.ts';
+import { VERSION, type LivingParams } from '../../../../world/generators/life/scene/v15.ts';
 import { FormTree } from '../forms.ts';
 import { pbdbNumber } from '../pbdb.ts';
 import { sha256, stableStringify } from '../util.ts';

@@ -17,9 +17,10 @@ import type { SceneFileV2 } from '../../../core/scene.ts';
 import { parsePoint, toMa, type TimePointInput } from '../../../core/time.ts';
 import type { FramesFile, Tileset } from '../../../core/tileset.ts';
 import { indexTree, layoutTree, type TreeFile } from '../../../core/tree.ts';
-import { CELL } from '../../../world/generators/life/scene/v14.ts';
+import { CELL } from '../../../world/generators/life/scene/v15.ts';
 import { FULL_BUDGET, SceneStream } from '../../../world/generators/life/stream.ts';
-import type { LandSnapshot, PbdbSnapshot } from '../src/pbdb.ts';
+import { siteSpans } from '../src/build/atlas.ts';
+import type { LandSnapshot, PbdbSnapshot, RocksSnapshot } from '../src/pbdb.ts';
 import { pbdbNumber } from '../src/pbdb.ts';
 import { loadWorld, type World } from '../src/world.ts';
 import { datasetFile } from '../src/manifest.ts';
@@ -329,11 +330,16 @@ describe('the atlas', () => {
     const loosest = p.longest_span_in_stages * (older - younger);
     const byNo = new Map(land.taxa.map((x) => [x[0], x]));
     const rankOf = (no: number) => land.words[byNo.get(no)?.[2] ?? 0];
-    // The rows that reach the time, as a species is on a list as its genus: dated to a span that takes it in, and no longer
-    // than the stage allows.
+    // The rows that reach the time, as a species is on a list as its genus: dated to a span (tightened by measured
+    // rock-record ages where available) that takes it in, and no longer than the stage allows.
+    const rockField = world.fields.find((f) => f.data?.as === 'rock-record');
+    const rocks = rockField && world.manifest.datasets[rockField.data!.from]
+      ? (JSON.parse(readFileSync(datasetFile(rockField.data!.from, world.manifest.datasets[rockField.data!.from], rockField.data!.file), 'utf8')) as RocksSnapshot)
+      : undefined;
+    const spans = siteSpans(land.sites, rocks);
     const reaching = new Map<number, number[]>();
     for (const [, site, taxon] of land.rows) {
-      const [, , , max, min] = land.sites[site];
+      const [max, min] = spans[site];
       if (max < ageMa || min > ageMa || max - min > loosest) continue;
       for (let x = taxon, g = 0; x && g < 4; x = byNo.get(x)?.[3] ?? 0, g++) {
         const l = reaching.get(x);

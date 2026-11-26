@@ -591,8 +591,8 @@ export class LifeAtlas {
     if (mInfo && where && tiles.length) pw.months = placeMonths(mInfo, where, tiles, month, parts);
     const spec = placeSpec(pw, lat, lon, ageMa);
     if (!spec) return null;
-    // Its list is the sea's where the land's atlas has none for its place, as placeSpec chooses.
-    if (!atlasHasLand(bin, this.index.grid, origin.lat, origin.lon)) this.ofSea.add(spec);
+    // Its list is the sea's whenever placeSpec chose the sea atlas (open sea or submerged shelf inside a coastal patch).
+    if (sea ? spec.fossils.source === sea.source : !atlasHasLand(bin, this.index.grid, origin.lat, origin.lon)) this.ofSea.add(spec);
     const water = await this.waterOf(spec, when, ageMa, pw.isoline);
     if (water) spec.water = water;
     return spec;

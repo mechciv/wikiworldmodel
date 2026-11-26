@@ -38,6 +38,14 @@ params:
   here_km: 350
   region_km: 2200
   kernel_km: 900
+  # How much of a row's time span must lie in the stage for it to count as recorded here, rather than regional inference.
+  here_share: 0.5
+  # How much mountain relief and elevation difference separate habitats: extra overland km per 1,000 m of climb,
+  # the maximum elevation difference (m) and its e-folding scale (m), and the minimum climate similarity (0–1) for regional reach.
+  climb_cost: 80
+  max_elev_diff_m: 1500
+  elev_scale_m: 1000
+  min_climate_like: 0.24
   # A km of sea is as far as this many of land: shallow, then deep.
   shallow_cost: 4
   deep_cost: 14

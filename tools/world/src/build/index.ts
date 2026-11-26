@@ -7,7 +7,7 @@ import { existsSync } from 'node:fs';
 import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { inflateSync } from 'node:zlib';
-import type { ClimateRule } from '../../../../core/climate.ts';
+import { decodeNode, LAND_BIT, type ClimateHeader, type ClimateRule } from '../../../../core/climate.ts';
 import { decodeTile, encodeTile } from '../../../../core/container.ts';
 import { bytesPrint } from '../../../../core/fingerprint.ts';
 import { ladderCounts } from '../../../../core/ladder.ts';
@@ -78,7 +78,7 @@ import type { PeopleScores } from '../../../../core/citypop.ts';
 import { mappedLake, shoresNear } from '../../../../core/shorelines.ts';
 import type { LayerInfo, LayerRow } from '../../../../core/fieldlayers.ts';
 import { fieldLayers, mappedShores } from './fieldlayers.ts';
-import { buildAtlas } from './atlas.ts';
+import { buildAtlas, type RecentClimateSource, type RocksAgeData } from './atlas.ts';
 import { buildSeaAtlas, type SeaOut, type SeaParams } from './sea.ts';
 import { buildRocks, type NoneWords, type RocksOut, type RocksParams } from './rocks.ts';
 import { buildGround, groundResolve, type GroundBuilt } from './groundmaps.ts';
@@ -2057,10 +2057,62 @@ export async function runBuild(args: string[]): Promise<number> {
           };
           return { site };
         },
-        { codeFiles: ['tools/world/src/build/scene.ts', 'world/generators/life/scene/v1.ts', 'world/generators/life/forms.ts', 'core/scene.ts'] },
+        { codeFiles: ['tools/world/src/build/scene.ts', 'world/generators/life/scene/v15.ts', 'world/generators/life/forms.ts', 'core/scene.ts'] },
       );
       if (sceneStage.meta.site) sites.push(sceneStage.meta.site);
     }
+
+    // Shared measured ages from the rock record (tightening stratigraphic spans for both land and sea atlases)
+    // and finer recent climates (last 120 kyr) for the land atlas's climate gating.
+    const rocksDataset = rockField?.data?.from;
+    let cachedRocksAges: RocksAgeData | undefined;
+    const loadRocksAges = async (): Promise<RocksAgeData | undefined> => {
+      if (!rockField || !rocksDataset) return undefined;
+      if (!cachedRocksAges) {
+        const rd = world.manifest.datasets[rocksDataset];
+        if (!rd) return undefined;
+        const raw = JSON.parse(await readFile(datasetFile(rocksDataset, rd, rockField.data!.file), 'utf8')) as RocksSnapshot;
+        cachedRocksAges = { ages: raw.ages, words: raw.words };
+      }
+      return cachedRocksAges;
+    };
+    const loadRecentClimateSources = (): RecentClimateSource[] =>
+      recentClimates.map((rc) => {
+        const grid = climateGrid((rc.field.grid as { res_deg: number }).res_deg);
+        const keys: ClimateKeyframe[] = [];
+        const seen = new Set<number>();
+        for (const ch of rc.chunks) {
+          const { header, arrays } = decodeTile<ClimateHeader>(toArrayBuffer(dag.readBlobBytesSync(ch.file)));
+          for (const kf of header.keyframes) {
+            if (seen.has(kf.ageMa)) continue;
+            seen.add(kf.ageMa);
+            const vals = arrays[kf.values] as Uint8Array;
+            const plate = arrays[kf.plate] as Uint16Array;
+            const n = grid.nx * grid.ny;
+            const nodes = new Float32Array(n * 4);
+            for (let k = 0; k < n; k++) {
+              const p = plate[k];
+              const b = k * 4;
+              // Empty cells outside the recent climate's domain encode { hot: 0, cold: 0, aridity: 1, margin: 0 } without LAND_BIT.
+              const empty = !(p & LAND_BIT) && vals[b] === 139 && vals[b + 1] === 139 && vals[b + 2] === 128 && vals[b + 3] === 128;
+              if (empty) {
+                nodes[b] = NaN;
+                nodes[b + 1] = NaN;
+                nodes[b + 2] = NaN;
+                nodes[b + 3] = NaN;
+              } else {
+                const c = decodeNode([vals[b] / 255, vals[b + 1] / 255, vals[b + 2] / 255, vals[b + 3] / 255]);
+                nodes[b] = c.hot;
+                nodes[b + 1] = c.cold;
+                nodes[b + 2] = c.aridity;
+                nodes[b + 3] = c.margin;
+              }
+            }
+            keys.push({ ageMa: kf.ageMa, frameMa: kf.frameMa, values: vals, plate, nodes });
+          }
+        }
+        return { keys, grid, maxAgeMa: Math.max(0, ...rc.ages) };
+      });
 
     // Stage: life-sea
     const seaField = world.fields.find((f) => f.data?.as === 'community-sea');
@@ -2071,6 +2123,7 @@ export async function runBuild(args: string[]): Promise<number> {
         'life-sea',
         {
           field: fieldKey(seaField),
+          rocksDataset: dsKey(rocksDataset),
           periodHash,
           paleoImport,
           isoline: coastIsoline,
@@ -2081,12 +2134,12 @@ export async function runBuild(args: string[]): Promise<number> {
         async (sink) => {
           const snap = JSON.parse(await readFile(datasetFile(id, d, seaField.data!.file), 'utf8')) as LandSnapshot;
           const started = Date.now();
-          const built = buildSeaAtlas(solved, periodList, paleo.snapshots, snap, id, seaField.params as unknown as SeaParams, coastIsoline, log);
+          const built = buildSeaAtlas(solved, periodList, paleo.snapshots, snap, id, seaField.params as unknown as SeaParams, coastIsoline, log, undefined, await loadRocksAges());
           for (const [path, content] of built.files) await sink.put(path, content);
           log(`sea     built in ${((Date.now() - started) / 1000).toFixed(1)} s`);
           return { present: true };
         },
-        { codeFiles: ['tools/world/src/build/sea.ts', 'tools/world/src/forms.ts', 'core/atlas.ts', 'core/form.ts'] },
+        { codeFiles: ['tools/world/src/build/sea.ts', 'tools/world/src/build/atlas.ts', 'tools/world/src/forms.ts', 'core/atlas.ts', 'core/form.ts'] },
       );
       hasSea = seaStage.meta.present;
       seaStageKey = seaStage.key;
@@ -2099,7 +2152,9 @@ export async function runBuild(args: string[]): Promise<number> {
       {
         fields: atlasFields.map(fieldKey),
         landFossils: landFossilDatasets,
+        rocksDataset: dsKey(rocksDataset),
         climateKey: deepClimateStageKey,
+        recentClimateKeys: recentClimates.map((c) => c.stageKey),
         biomeField: fieldKey(biomeField),
         periodHash,
         paleoImport,
@@ -2108,7 +2163,7 @@ export async function runBuild(args: string[]): Promise<number> {
         entities: lifeEntitiesDigest,
       },
       async (sink) => {
-        const atlas = buildAtlas(solved, periodList, paleo.snapshots, loadDeepClimateKeys(), cg, biomeField.params as unknown as ClimateRule, log);
+        const atlas = buildAtlas(solved, periodList, paleo.snapshots, loadDeepClimateKeys(), cg, biomeField.params as unknown as ClimateRule, log, undefined, loadRecentClimateSources(), await loadRocksAges());
         if (!atlas) return { present: false };
         for (const [path, content] of atlas.files) await sink.put(path, content);
         return { present: true, forms: { ...atlas.index.coverage, wanted: atlas.wanted.slice(0, 200) } };
@@ -2191,7 +2246,8 @@ export async function runBuild(args: string[]): Promise<number> {
         {
           codeFiles: [
             'tools/world/src/build/scene.ts',
-            'world/generators/life/scene/v1.ts',
+            'world/generators/life/spec.ts',
+            'world/generators/life/scene/v15.ts',
             'world/generators/life/climate.ts',
             'world/generators/life/water.ts',
             'world/generators/life/forms.ts',
