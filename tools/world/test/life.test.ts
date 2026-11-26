@@ -337,14 +337,14 @@ describe('the atlas', () => {
       ? (JSON.parse(readFileSync(datasetFile(rockField.data!.from, world.manifest.datasets[rockField.data!.from], rockField.data!.file), 'utf8')) as RocksSnapshot)
       : undefined;
     const spans = siteSpans(land.sites, rocks);
-    const reaching = new Map<number, number[]>();
+    const inStage = new Map<number, number[]>();
     for (const [, site, taxon] of land.rows) {
       const [max, min] = spans[site];
-      if (max < ageMa || min > ageMa || max - min > loosest) continue;
+      if (max <= younger || min >= older || max - min > loosest) continue;
       for (let x = taxon, g = 0; x && g < 4; x = byNo.get(x)?.[3] ?? 0, g++) {
-        const l = reaching.get(x);
+        const l = inStage.get(x);
         if (l) l.push(site);
-        else reaching.set(x, [site]);
+        else inStage.set(x, [site]);
         if (!['species', 'subspecies', 'subgenus'].includes(rankOf(x))) break;
       }
     }
@@ -380,13 +380,20 @@ describe('the atlas', () => {
         // A scene hides a taxon while its rows in the stage do not reach the time shown (viewer/src/city/life.ts): one whose
         // rows all end before 1500 CE is not drawn then.
         if (e.taxon.span[1] > ageMa || e.taxon.span[0] < ageMa) continue;
-        // A patch is up to 4° across, and the graph 2° a step: that is the slack.
+        // A patch is up to 4° across, and the graph 2° a step: that is the slack. Radiocarbon-dated collections at a site
+        // may bracket 1500 CE (e.g. 150–950 CE and 1700–1800 CE), so check that nearby stage rows span `ageMa`.
         const reach = (e.tier === TIER.here ? p.here_km : p.region_km) + 900;
-        const near = (reaching.get(e.taxon.no) ?? []).some((s) => {
+        let hasOlder = false;
+        let hasYounger = false;
+        for (const s of inStage.get(e.taxon.no) ?? []) {
           const q = at(s);
-          return !!q && km(q, [lat, lon]) <= reach;
-        });
-        if (!near) problems.push(`${e.taxon.label} at ${lat}, ${lon}, tier ${e.tier}: no row within reach reaches ${t} CE`);
+          if (!q || km(q, [lat, lon]) > reach) continue;
+          const [max, min] = spans[s];
+          if (max >= ageMa) hasOlder = true;
+          if (min <= ageMa) hasYounger = true;
+          if (hasOlder && hasYounger) break;
+        }
+        if (!hasOlder || !hasYounger) problems.push(`${e.taxon.label} at ${lat}, ${lon}, tier ${e.tier}: no rows within reach span ${t} CE`);
         checked++;
       }
     }

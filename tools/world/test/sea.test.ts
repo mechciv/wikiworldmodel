@@ -154,5 +154,17 @@ describe("habitat and date gating in the sea's atlas", () => {
     // Loosewhale is at the same shelf node (km = 0), but only 29% of its span lies in Holocene (< here_share 0.5).
     const loose = shelf.find((e) => e.taxon.label === 'Loosewhale')!;
     expect(loose.tier).toBe(TIER.region);
+    // Adding a distant Holocene row of Pelagicwhale reaching 0 Ma widens the shelf patch's span past the local
+    // 7000..4000 YBP record, so the extended entry must be demoted to TIER.region.
+    const wideSnap: LandSnapshot = {
+      ...snap,
+      sites: [...snap.sites, [103, 6, -6, 0.0117, 0, 0]],
+      rows: [...snap.rows, [4, 2, 11]],
+    };
+    const wideOut = buildSeaAtlas({ world, model } as unknown as Solved, periods as PeriodRecord[], [seaSnapshot()], wideSnap, 'src:sea', SEA_PARAMS, 20, () => {}, () => undefined, rocks);
+    const wideBin = JSON.parse(wideOut.files.get(wideOut.index.bins[0].file)!) as SeaBin;
+    const wideWhale = (seaList(wideBin, wideOut.index.grid, 6, -14) ?? []).find((e) => e.taxon.label === 'Pelagicwhale')!;
+    expect(wideWhale.taxon.span).toEqual([0.0117, 0]);
+    expect(wideWhale.tier).toBe(TIER.region);
   });
 });

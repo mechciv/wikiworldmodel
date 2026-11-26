@@ -480,7 +480,7 @@ export function buildAtlas(
     if (Math.abs(key.ageMa - midMa) > 12) return;
     const graph = new LandGraph(p.graph_deg, key, isoline, p);
     // Each site in the stage, where it was, on the graph.
-    const atNode = new Map<number, Map<number, { w: number; rows: number; older: number; younger: number; maxShare: number }>>();
+    const atNode = new Map<number, Map<number, { w: number; rows: number; older: number; younger: number; hOlder: number; hYounger: number }>>();
     let rowsHere = 0;
     snap.sites.forEach((site, i) => {
       const [, lat, lng] = site;
@@ -498,6 +498,7 @@ export function buildAtlas(
         here = new Map();
         atNode.set(node, here);
       }
+      const qualHere = share >= hereShare;
       for (const t of list) {
         if (max - min > p.tight_span && tight.has(t)) continue;
         const end = endOf(t);
@@ -509,8 +510,11 @@ export function buildAtlas(
           e.rows++;
           e.older = Math.max(e.older, max);
           e.younger = Math.min(e.younger, min);
-          if (share > e.maxShare) e.maxShare = share;
-        } else here.set(t, { w: share, rows: 1, older: max, younger: min, maxShare: share });
+          if (qualHere) {
+            e.hOlder = Math.max(e.hOlder, max);
+            e.hYounger = Math.min(e.hYounger, min);
+          }
+        } else here.set(t, { w: share, rows: 1, older: max, younger: min, hOlder: qualHere ? max : -Infinity, hYounger: qualHere ? min : Infinity });
       }
     });
     // The most of each record's taxon in one place in this stage.
@@ -694,7 +698,7 @@ export function buildAtlas(
       const { k, lo: pLo, hi: pHi, coastal, clims } = info;
       const c = climateAt(nodeLat(k), nodeLon(k));
       const cls = c ? climateClass(c, rule) : null;
-      const score = new Map<number, { s: number; km: number; here: boolean; older: number; younger: number }>();
+      const score = new Map<number, { s: number; km: number; older: number; younger: number; hOlder: number; hYounger: number }>();
       for (const { node, km } of reachOf.get(patch) ?? []) {
         if (km > p.region_km) continue;
         const sElev = graph.elev[node];
@@ -714,25 +718,40 @@ export function buildAtlas(
         const fall = Math.exp(-km / p.kernel_km);
         for (const [t, e] of atNode.get(node)!) {
           if (km > p.here_km && !coastal && known.get(t)!.strictlySea) continue;
-          const isHere = km <= p.here_km && e.maxShare >= hereShare;
+          const isHere = km <= p.here_km && e.hOlder >= e.hYounger;
           const add = e.w * fall * like * elevLike;
           const q = score.get(t);
           if (q) {
             q.s += add;
             if (km < q.km) q.km = km;
-            if (isHere) q.here = true;
             if (e.older > q.older) q.older = e.older;
             if (e.younger < q.younger) q.younger = e.younger;
-          } else score.set(t, { s: add, km, here: isHere, older: e.older, younger: e.younger });
+            if (isHere) {
+              if (e.hOlder > q.hOlder) q.hOlder = e.hOlder;
+              if (e.hYounger < q.hYounger) q.hYounger = e.hYounger;
+            }
+          } else score.set(t, { s: add, km, older: e.older, younger: e.younger, hOlder: isHere ? e.hOlder : -Infinity, hYounger: isHere ? e.hYounger : Infinity });
         }
       }
       // Local direct evidence (`here`) ahead of regional inference (`region`), then heaviest first, up to each bucket's quota.
-      const byBucket = new Map<string, { t: number; s: number; km: number; here: boolean; older: number; younger: number }[]>();
+      // A taxon only receives `TIER.here` if local rows (`km <= here_km`, `share >= here_share`) cover the full in-stage span
+      // emitted for this patch; when distant regional rows extend the span past what local rows attest, the entry is `TIER.region`.
+      const byBucket = new Map<string, { t: number; s: number; km: number; here: boolean; olderR: number; youngerR: number }[]>();
       for (const [t, v] of score) {
+        const end = endOf(t);
+        const olderR = round(v.older, YEAR);
+        const youngerR = round(Math.max(v.younger, end ?? -Infinity), YEAR);
+        const hOlderR = round(v.hOlder, YEAR);
+        const hYoungerR = round(Math.max(v.hYounger, end ?? -Infinity), YEAR);
+        const here =
+          v.hOlder >= v.hYounger &&
+          Math.min(hOlderR, olderMa) >= Math.min(olderR, olderMa) - 1e-9 &&
+          Math.max(hYoungerR, youngerMa) <= Math.max(youngerR, youngerMa) + 1e-9;
         const b = known.get(t)!.bucket;
         const l = byBucket.get(b);
-        if (l) l.push({ t, ...v });
-        else byBucket.set(b, [{ t, ...v }]);
+        const item = { t, s: v.s, km: v.km, here, olderR, youngerR };
+        if (l) l.push(item);
+        else byBucket.set(b, [item]);
       }
       const flat: number[] = [];
       const far = Math.round(Math.min(65535, (nearest[k] === Infinity ? 20000 : nearest[k]) / 10));
@@ -742,9 +761,7 @@ export function buildAtlas(
           .slice(0, p.quotas[bucket]);
         if (list.length) {
           const top = list.reduce((m, x) => (x.s > m ? x.s : m), 0) || 1;
-          for (const { t, s: sc, km, here: isHere, older, younger } of list) {
-            const olderR = round(older, YEAR);
-            const youngerR = round(Math.max(younger, endOf(t) ?? -Infinity), YEAR);
+          for (const { t, s: sc, km, here: isHere, olderR, youngerR } of list) {
             const i = entry(`t${t}|${olderR}|${youngerR}`, () => {
               const kn = known.get(t)!;
               const climate = climateOf.get(t);

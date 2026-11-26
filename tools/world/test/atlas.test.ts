@@ -482,6 +482,41 @@ describe('habitat and date gating', () => {
     const list3 = atlasList(binNamed(out3, 'Holocene'), out3.index.grid, 10, -15);
     expect(list3.find((e) => e.taxon.label === 'Loosecroc')!.tier).toBe(TIER.region);
     expect(list3.find((e) => e.taxon.label === 'Localhorse')!.tier).toBe(TIER.here);
+
+    // When a nearby dated row ends early (7000..5000 YBP) while a distant regional row reaches the present (0 Ma),
+    // the combined patch span relies on regional inference and must be demoted to TIER.region. By contrast, when local
+    // rows already cover the full in-stage span [0.0117, 0] and a distant row only extends older than the stage boundary,
+    // the entry stays TIER.here.
+    const mixSnap: LandSnapshot = {
+      ...land,
+      taxa: [
+        [1, 'Life', 1, 0, 1, null, null, null, null, 0, 0, 0, 0],
+        [10, 'Beasts', 1, 1, 1, null, null, null, null, 0, 0, 0, 0],
+        [11, 'Earlylocal', 2, 10, 1, null, null, null, null, 0, 0, 0, 0],
+        [12, 'Fullstage', 2, 10, 1, null, null, null, null, 0, 0, 0, 0],
+      ],
+      sites: [
+        [1, 10, -15, 0.007, 0.005, 0], // local early-Holocene row (here_km)
+        [2, 2, -15, 0.0117, 0, 0],     // distant Holocene row reaching present (~890 km, region)
+        [3, 10, -15, 0.0117, 0, 0],    // local row covering full Holocene
+        [4, 2, -15, 0.05, 0, 0],       // distant row extending older than Holocene boundary
+      ],
+      rows: [
+        [1, 0, 11],
+        [2, 1, 11],
+        [3, 2, 12],
+        [4, 3, 12],
+      ],
+    };
+    const wm = makeWorld(mixSnap);
+    (wm.fields[0] as { params: unknown }).params = { ...PARAMS, here_share: 0.5 };
+    const mixOut = buildAtlas({ world: wm, model } as unknown as Solved, holoChart as PeriodRecord[], [snapshot()], [key], { step: 2, nx: 180, lon0: -180, lat0: 90 }, rule, () => {}, () => undefined)!;
+    const mixList = atlasList(binNamed(mixOut, 'Holocene'), mixOut.index.grid, 10, -15);
+    const earlyLocal = mixList.find((e) => e.taxon.label === 'Earlylocal')!;
+    expect(earlyLocal.taxon.span).toEqual([0.0117, 0]);
+    expect(earlyLocal.tier).toBe(TIER.region);
+    const fullStage = mixList.find((e) => e.taxon.label === 'Fullstage')!;
+    expect(fullStage.tier).toBe(TIER.here);
   });
 
   it('gates regional taxa across mountain barriers, elevation differences, dissimilar climates, and deep inland coasts, and prefers late-Quaternary climate near the present', () => {
