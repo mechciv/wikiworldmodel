@@ -1,0 +1,29 @@
+id: src:koldewey-1914-excavations-at-babylon
+type: publication
+kind: measurement
+citation: >-
+  Koldewey, R. (1914). The Excavations at Babylon. Translated by A.S. Johns. London: Macmillan and Co.
+authors:
+  - "Koldewey, R."
+published: 1914
+title: The Excavations at Babylon
+url: https://archive.org/details/ldpd_10797913_000
+license: public-domain
+via: >-
+  The Internet Archive's scan of Columbia University Libraries' copy (identifier ldpd_10797913_000), read in its OCR
+  text, which Pleiades lists among the references for Babylon.
+reliability: >-
+  The excavator's own account of the German excavations he led from 1899, written while they went on: what the
+  trenches showed of the city's walls, streets, houses, palaces and temples, with his readings of the inscriptions
+  found in them. He says himself that much was not yet dug, the gates of the outer wall among it. Its dates are those
+  of 1914, which put Hammurabi about 2250 or 2500 BC, centuries too early; its dates for the Neo-Babylonian and later
+  kings are within a year or two of those used now.
+verified:
+  by: machine:claude-code
+  how: >-
+    The OCR text of the scan (ldpd_10797913_000_djvu.txt, whose SHA-1, 05e9709346fe6f1e335ecac2745adbdd9665cd16, is the
+    one the Internet Archive lists for it) read on 25 November 2026: chapters I (the outer city walls), III (a general
+    view of the city), IV (the Euphrates), XXV (the inner city wall), XLII (Merkes) and LI (the retrospect). The quotes
+    were checked by script against that text. Pages are those of the running heads, some of which the OCR garbles (the
+    head of p. 313 reads 213). The page images could not be reached from here, so where a quote keeps an OCR error the
+    claim's note says so.

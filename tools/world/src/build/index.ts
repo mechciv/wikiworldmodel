@@ -71,7 +71,7 @@ import { FEATURE_INDEX } from '../../../../core/featuretiles.ts';
 import { prominenceOf, tileFeatures } from './featuretiles.ts';
 import { buildIce, type IceBuilt } from './ice.ts';
 import { hazardLayer, peopleLayer, polityLayer, presentLayer, stateRowKey } from './layers.ts';
-import { buildLandscape, disagreement, farmingAgreement, housing, housingCounts, HOUSING_TIMES, landscapeResolve, regionHyde, type LandscapeBuilt } from './landscape.ts';
+import { buildLandscape, disagreement, farmingAgreement, housing, housingCounts, HOUSING_TIMES, landscapeEntities, landscapeResolve, regionHyde, type LandscapeBuilt } from './landscape.ts';
 import { fitCitiesModel } from '../holdout.ts';
 import { regionReach } from '../../../../core/landscape.ts';
 import type { PeopleScores } from '../../../../core/citypop.ts';
@@ -1751,9 +1751,6 @@ export async function runBuild(args: string[]): Promise<number> {
   if (anthromesField) {
     const landscapeFields = world.fields.filter((f) => ['anthromes', 'land-use-assessment', 'cities', 'lifeways', 'people', 'regions'].includes(f.data?.as ?? '') || f.id === 'field:people/lifeways');
     const settlementGen = world.generators.find((g) => g.id === 'gen:people/settlement');
-    const landscapeEntities = world.entities.filter(
-      (e) => e.kind.startsWith('tradition/') || e.kind.startsWith('place/') || e.kind === 'taxon' || e.claims.some((c) => c.prop === 'population' || c.prop === 'livestock' || c.prop === 'crops'),
-    );
     const regionsId = (anthromesField.params as { regions?: string } | undefined)?.regions;
     const landscapeStage = await dag.runStage(
       'landscape',
@@ -1763,7 +1760,7 @@ export async function runBuild(args: string[]): Promise<number> {
         settlementGen: settlementGen ? { id: settlementGen.id, version: settlementGen.version, params: settlementGen.params } : undefined,
         peopleSha: peopleHeader ? dag.fileRef('people.lwt')?.sha256 : null,
         plans: world.plans,
-        entities: entitiesKey(landscapeEntities, solved),
+        entities: entitiesKey(landscapeEntities(world), solved),
       },
       async (sink) => {
         const landscape = await buildLandscape(solved, log);

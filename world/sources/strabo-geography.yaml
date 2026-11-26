@@ -2,8 +2,8 @@ id: src:strabo-geography
 type: text
 kind: eyewitness
 citation: >-
-  Strabo, Geography, book 5, translated by H.L. Jones, in The Geography of Strabo, vol. 2 (Loeb Classical Library,
-  1923).
+  Strabo, Geography, translated by H.L. Jones, in The Geography of Strabo (Loeb Classical Library): book 5 in vol. 2
+  (1923), book 16 in vol. 7 (1932).
 published: 1923
 title: Geographica
 url: https://penelope.uchicago.edu/Thayer/E/Roman/Texts/Strabo/5C*.html
@@ -11,10 +11,13 @@ license: public domain
 via: LacusCurtius, which reproduces Jones's translation and marks the page read as carefully proofread.
 reliability: >-
   A Greek geographer of the Augustan age, describing the Rome of his own day: his account of what Augustus did against
-  fires and the collapse of houses is a contemporary's, though he gives no year for it.
+  fires and the collapse of houses is a contemporary's, though he gives no year for it. Of Babylon he writes from
+  earlier authors, whom the chapter names (Aristobulus, Eratosthenes), and adds the state of the city in his own day.
 verified:
   by: machine:claude-code
   how: >-
     The passage on the building of Rome and Augustus's measures (5.3.7, pp. 403–405 of the Loeb volume) read on 24
     November 2026 in Jones's translation, on LacusCurtius's page for book 5, chapter 3; the quotes were checked by script
-    against the text of that page.
+    against the text of that page. The passage on Babylon (16.1.5, pp. 197–201 of vol. 7) read on 25 November 2026 on
+    LacusCurtius's page for book 16, chapter 1, which it also marks as carefully proofread; its quotes were checked by
+    script against the text of that page.

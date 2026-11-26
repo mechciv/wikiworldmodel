@@ -1,0 +1,174 @@
+id: people/cities/babylon
+kind: settlement
+summary: >-
+  Babylon, on the Euphrates in central Iraq. First named as a town of the Akkadian empire, it was the city of Hammurabi's
+  dynasty (people/polities/babylon-first-dynasty), and Nabopolassar and Nebuchadnezzar II rebuilt it as the city the
+  German excavations begun in 1899 uncovered: houses in blocks along straight streets that crossed about 16° west of
+  north, the river through the middle, an inner double wall of mud brick, and an outer wall of crude brick faced with
+  burnt brick that ran about 18 km round with the river. The Seleucid kings moved their residence to Seleucia on the
+  Tigris, and by Strabo's day the greater part of Babylon was deserted; people went on living on the mound of Amran, over
+  the temple of Esagila, until about 1200 CE. Its walls are told three ways, by the excavator, by Herodotus and by Strabo,
+  and their measures disagree.
+author: machine:claude-code
+same_as: { wikidata: Q5684, pleiades: 893951 }
+claims:
+  name:
+    prop: name
+    value: { en: Babylon }
+    source: { ref: src:pleiades-babylon, loc: "place 893951, names" }
+  start-before-first-mention:
+    prop: start_before
+    value: 2193 BCE
+    source:
+      - ref: src:wikipedia-babylon
+        loc: lead section
+        quote: The earliest known mention of Babylon as a small town appears on a clay tablet from the reign of Shar-Kali-Sharri (2217–2193 BC)
+      - ref: src:wikipedia-babylon
+        loc: section "History"
+        quote: during the reign of the Akkadian ruler Shar-Kali-Sharri, one of whose year names mentions the construction of two temples there
+    method: documentary
+    note: >-
+      The town is first named in a year name of Shar-kali-sharri of Akkad, which records the building of two temples
+      there, so it stood by the end of his reign: 2193 BCE in the dates the article gives, those of the middle chronology.
+      How much older it was is not known, as its earliest levels lie below the water table, where Koldewey could not dig;
+      the city is drawn from this bound, the latest the evidence allows. An encyclopedia is cited because the works it
+      rests on could not be read here (src:wikipedia-babylon names them).
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in wikipedia-babylon.txt (sha256 214a26d3e90fa45d), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-25" }
+  end:
+    prop: end
+    value: 1200 CE
+    source:
+      - ref: src:koldewey-1914-excavations-at-babylon
+        loc: "ch. LI, Retrospect, p. 313"
+        quote: At that time began the process of demolishing the city area, which perhaps was now only occupied by isolated dwellings
+      - ref: src:koldewey-1914-excavations-at-babylon
+        loc: "ch. LI, Retrospect, p. 313"
+        quote: Amran alone was inhabited, and that only scantily
+      - ref: src:koldewey-1914-excavations-at-babylon
+        loc: "ch. LI, Retrospect, p. 314"
+        quote: is shown by the uppermost levels there, which reach down as late as the Arab middle age (czvca 1200 a.p.)
+      - ref: src:koldewey-1914-excavations-at-babylon
+        loc: "ch. III, General view of the city, p. 15"
+        quote: after all the other sites were abandoned it was occupied for habitation right up to the Middle Ages
+    method: excavation
+    note: >-
+      The end of settlement, not of the city, which had emptied long before. From the Greek or the Parthian period on, the
+      city's area was being demolished, perhaps with only isolated dwellings left in it, and at last only the mound of
+      Amran ibn Ali, over Esagila, was lived on, as its uppermost levels show. Circa 1200 CE is Koldewey's date: the OCR of
+      the text read prints it "czvca 1200 a.p.", for the italic circa and the A.D. he writes elsewhere. No figure of the
+      city's people in its decline was read.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in koldewey-1914-excavations-at-babylon.txt (sha256 b0d2b3117011a110), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-25" }
+  location:
+    prop: location
+    value: { lat: 32.537297, lon: 44.424978, frame: frame:earth/present-day }
+    source: { ref: src:pleiades-babylon, loc: "place 893951, representative point" }
+    method: gazetteer
+  frame:
+    prop: frame
+    value: frame:paleomap/plate-503
+    source: { ref: src:paleomap-plate-model, loc: PALEOMAP_PlatePolygons.gpml }
+    method: plate-polygon
+    basis: reconstruction
+  town-form:
+    prop: town_form
+    value: { streets: grid, orientation: 164, wall: brick, wall_thickness: 7.8, moat: true }
+    valid: { lo: 604 BCE, hi: 139 BCE }
+    source:
+      - ref: src:koldewey-1914-excavations-at-babylon
+        loc: "ch. XLII, Merkes, p. 242"
+        quote: The streets, though not entirely regular, show an obvious attempt to run them as much in straight lines as possible
+      - ref: src:koldewey-1914-excavations-at-babylon
+        loc: "ch. XLII, Merkes, p. 242"
+        quote: They show a tendency to cross at right angles, about 16 degrees west of north, and therefore as many degrees north of east.
+      - ref: src:koldewey-1914-excavations-at-babylon
+        loc: "ch. XLII, Merkes, p. 242"
+        quote: The Procession Street on the whole follows the same direction, and so do the inner city walls and all the temples, including Esagila
+      - ref: src:koldewey-1914-excavations-at-babylon
+        loc: "ch. LI, Retrospect, p. 312"
+        quote: the division of the city into streets and blocks of houses remained practically unchanged throughout the course of centuries
+      - ref: src:koldewey-1914-excavations-at-babylon
+        loc: "ch. I, The outer city walls, p. 1"
+        quote: There was a massive wall of crude brick 7 metres thick, in front of which, at an interval of about 12 metres, stood another wall of burnt brick 7.8 metres thick, with the strong wall of the fosse at its foot
+      - ref: src:koldewey-1914-excavations-at-babylon
+        loc: "ch. I, The outer city walls, p. 3"
+        quote: To an observer from without it would no doubt appear as such, as only the top of the inner mud wall could be seen from outside.
+      - ref: src:koldewey-1914-excavations-at-babylon
+        loc: "ch. I, The outer city walls, p. 6, quoting Nebuchadnezzar's East India House inscription, col. 7, as Winckler translated it"
+        quote: I dug out its moat, and I built a scarp with bitumen and bricks.
+      - ref: src:koldewey-1914-excavations-at-babylon
+        loc: "ch. LI, Retrospect, pp. 312–313"
+        quote: With Nebuchadnezzar (604-561) began the colossal rebuilding of the entire city
+      - ref: src:koldewey-1914-excavations-at-babylon
+        loc: "ch. LI, Retrospect, pp. 312–313"
+        quote: surrounded the city which he had enlarged in this fashion … with the great outer city wall
+      - ref: src:koldewey-1914-excavations-at-babylon
+        loc: "ch. I, The outer city walls, p. 4"
+        quote: During the Parthian period these lines of fortification can have been no longer in a condition to afford protection.
+      - ref: src:koldewey-1914-excavations-at-babylon
+        loc: "ch. LI, Retrospect, p. 313"
+        quote: Parthian (139 B.c.-226 A.D.) periods
+    method: excavation
+    rank: preferred
+    note: >-
+      The city as the excavations found it. In Merkes, where Koldewey could follow them, its streets ran as straight as
+      they could and tended to cross at right angles, 16° west of north, written here as the bearing of that axis, 164;
+      the Procession Street, the inner city walls and the temples kept the same direction, and so did the older levels,
+      whose division into streets and blocks changed little over the centuries. The wall is Nebuchadnezzar's outer city
+      wall: one of crude brick 7 m thick and, 12 m in front of it, one of burnt brick 7.8 m thick, with rubble between them,
+      presumably to the top, so that a road ran along it wide enough for two teams of four horses to pass; at its foot the
+      moat had a wall of burnt brick. From outside it showed as burnt brick, and the thickness drawn is that of the
+      burnt-brick wall alone. Within it stood the inner city's double wall of mud brick, 6.5 m and 3.72 m thick and 7.2 m
+      apart (ch. XXV, p. 150). With the river the outer wall ran about 18 km round, where Herodotus gives about 86 and
+      Ctesias about 65 (p. 2). None of its gates had been found, and nothing of its height survives (p. 4), so neither is
+      claimed. Held from the first year of Nebuchadnezzar, in whose reign the outer wall was built, 604 BCE in Koldewey's
+      dates, to the start of the Parthian period, 139 BCE in his dates, during which the walls could no longer have
+      defended the city. Only the claim preferred is drawn, so before 604 BCE the city's layout is not this record's.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in koldewey-1914-excavations-at-babylon.txt (sha256 b0d2b3117011a110), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-25" }
+  town-form-herodotus:
+    prop: town_form
+    value: { streets: grid, wall: brick, wall_thickness: 25.3, wall_height: 101.5, gates: 100, moat: true }
+    valid: { lo: 604 BCE, hi: 139 BCE }
+    source:
+      - ref: src:herodotus-histories
+        loc: "1.178.3"
+        quote: Around it runs first a moat deep and wide and full of water, and then a wall eighty three feet thick and three hundred thirty three feet high.
+      - ref: src:herodotus-histories
+        loc: "1.179.1"
+        quote: when they had moulded bricks enough, they baked them in ovens
+      - ref: src:herodotus-histories
+        loc: "1.179.3"
+        quote: There are a hundred gates in the circuit of the wall, all of bronze, with posts and lintels of the same.
+      - ref: src:herodotus-histories
+        loc: "1.180.3"
+        quote: the ways that traverse it, those that run crosswise towards the river and the rest, are all straight.
+    method: historical-account
+    note: >-
+      The city as Herodotus describes it in the fifth century BCE (1.178–180): a square of fifteen miles a side, sixty
+      round, in a great plain, cut in half by the Euphrates; a moat deep and wide and full of water; a wall of baked brick
+      laid in bitumen, with one-roomed houses facing each other along its edges and room between them for a four-horse
+      chariot; a hundred gates of bronze; and straight streets, some running across to the river. The wall's measures are
+      as the text read gives them, in feet: 83 feet thick and 333 high, which are 25.3 and 101.5 m. Koldewey found the
+      ancient writers' general description of the city usually accurate and their measures not, the circuit he traced
+      being about 18 km against Herodotus's 86 (src:koldewey-1914-excavations-at-babylon, pp. 2–3). Held for the same years
+      as the claim preferred, as another reading of the same walls.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in herodotus-1.178-191-godley-perseus.txt (sha256 e3df388f4d45e1d2), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-25" }
+  town-form-strabo:
+    prop: town_form
+    value: { wall_thickness: 9.75 }
+    valid: { lo: 604 BCE, hi: 139 BCE }
+    source:
+      ref: src:strabo-geography
+      loc: "16.1.5, vol. 7 p. 197"
+      quote: the circuit of its wall is three hundred and eighty-five stadia. The thickness of its wall is thirty-two feet
+    method: historical-account
+    note: >-
+      Strabo's measures of the wall: 385 stadia round and thirty-two feet thick, which is 9.75 m, fifty cubits high
+      between the towers and sixty at them, with a passage along the top where four-horse chariots could pass each other.
+      Only the thickness is claimed, as he does not say how long his cubit was. He wrote under Augustus, from earlier
+      authors. Held for the same years as the claim preferred, as another reading of the same walls.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in strabo-16.1-jones-lacuscurtius.txt (sha256 609ad802d56a0384), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-25" }

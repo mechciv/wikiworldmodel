@@ -12,7 +12,12 @@ via: The Perseus Digital Library, which gives Godley's translation.
 reliability: >-
   A historian of the fifth century BCE, two centuries after the founding of Byzantion, telling
   a story current among the Greeks of the Hellespont; he gives the interval between the
-  foundings of Calchedon and Byzantion, not a date.
+  foundings of Calchedon and Byzantion, not a date. His description of Babylon (1.178–187) tells of its walls, streets
+  and temples, some of it, he says, as the Chaldaeans told it; its excavator found its general description usually
+  accurate and its measures not (src:koldewey-1914-excavations-at-babylon, p. 3).
 verified:
   by: machine:claude-code
-  how: Godley's translation of 4.144 read on Perseus.
+  how: >-
+    Godley's translation of 4.144 read on Perseus. Book 1, chapters 178 to 191, read on 25 November 2026 on Perseus, a
+    chapter to a page, and saved as text; the quotes from them were checked by script against that text. Perseus's text
+    of the translation gives the measures in miles, feet and yards.

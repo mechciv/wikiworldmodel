@@ -1,0 +1,21 @@
+id: src:wikipedia-babylon
+type: database-record
+kind: review
+citation: >-
+  "Babylon." Wikipedia, the free encyclopedia (English edition), revision 1385289453.
+snapshot: 2026-11-25
+title: Babylon
+container: Wikipedia
+url: https://en.wikipedia.org/w/index.php?title=Babylon&oldid=1385289453
+license: CC-BY-SA-4.0
+license_note: Short quotes, with credit.
+reliability: >-
+  A general encyclopedia article, cited only for the first mention of Babylon, because no work stating it could be read
+  here. It cites the mention to Beaulieu, P.-A. (2017), A History of Babylon, 2200 BC – AD 75 (Wiley), p. 50, and to de
+  Boer, R. (2018), "Beginnings of Old Babylonian Babylon: Sumu-Abum and Sumu-La-El", Journal of Cuneiform Studies 70,
+  pp. 53–86. Neither was reached, and either should replace it.
+verified:
+  by: machine:claude-code
+  how: >-
+    The article's HTML, rendered from revision 1385289453 (of 12 November 2026), fetched from Wikipedia on 25 November
+    2026 and read as text; the quotes checked by script against that text.

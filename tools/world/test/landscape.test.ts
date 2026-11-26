@@ -10,7 +10,8 @@ import { agricultureAt, compileAgriculture, compileHusbandry, compileTraditions,
 import { dispersedAt } from '../../../core/citypop.ts';
 import { anthromeTile, assessmentAt, cityPeople, citiesAround, citiesNear, classAtStep, figureAt, kmBetween, nameAt, LIFEWAY_OF, lifewayOf, nearestStep, populationOf, regionReach, regionsInto, shareDensity, tileKey, cellOf, type AnthromeClass, type Assessment, type CitiesFile, type City, type CityRecord } from '../../../core/landscape.ts';
 import type { PeopleFile } from '../../../core/layers.ts';
-import { assessmentsFile, cityYear, citiesOf, eckert4Inverse, housing, housingCounts, parseClassGrid, rasterizeRegions, stepOfName, type LandscapeBuilt } from '../src/build/landscape.ts';
+import { assessmentsFile, cityYear, citiesOf, eckert4Inverse, housing, housingCounts, landscapeEntities, parseClassGrid, rasterizeRegions, stepOfName, type LandscapeBuilt } from '../src/build/landscape.ts';
+import type { World } from '../src/world.ts';
 import { wantedRows, wantedText, wantedTotals } from '../src/dwellingsWanted.ts';
 import { readTable, snapshotText, SLICES } from '../src/archaeoglobe.ts';
 import { loadManifest, resolveDatasetFile } from '../src/manifest.ts';
@@ -192,6 +193,22 @@ describe('the lists of cities', () => {
     const near = citiesNear(f, 41.9, 12.5, 100, 40);
     expect(near.map((x) => [x.city.name, x.people])).toEqual([['Rome', 1000000], ['Ostia', 50000]]);
     expect(near[0].also.map((x) => x.people)).toEqual([450000]);
+  });
+});
+
+describe("the records the landscape stage's key is made of", () => {
+  it('takes every settlement, with figures of its own or none, so that a change to one makes the cities again', () => {
+    const e = (id: string, kind: string, props: string[] = []) => ({ id, kind, claims: props.map((prop) => ({ prop })) });
+    const w = {
+      entities: [
+        e('test/lists-only', 'settlement', ['name', 'location', 'start_before', 'town_form']),
+        e('test/counted', 'settlement', ['name', 'location', 'population']),
+        e('test/house', 'tradition/building', ['dwelling']),
+        e('test/horse', 'taxon'),
+        e('test/battle', 'event/battle', ['date', 'location']),
+      ],
+    } as unknown as World;
+    expect(landscapeEntities(w).map((x) => x.id)).toEqual(['test/lists-only', 'test/counted', 'test/house', 'test/horse']);
   });
 });
 
