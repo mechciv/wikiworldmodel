@@ -26,6 +26,81 @@ const traditionOf = (region: number, t: number, lifeway: LifewayWord) => {
 const uruksTradition = () => traditionOf(59, -2999, 'townspeople');
 
 test.describe('the human landscape', () => {
+  test('Angkor keeps its dated centre, extent, and political context on the local map', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    const id = 'people/first-cities/angkor';
+    await page.goto(`/?b=${latestBuild()}&t=851&lat=13.318067&lon=104.0184444&d=1.0062041066&v=33.88&sel=${id}&${FAST}`);
+    const pin = page.locator(`.site-map .site-pin[data-entity="${id}"]`);
+    await expect(pin).toBeVisible({ timeout: 120_000 });
+    await expect(pin).toContainText('Hariharalaya');
+    await expect(page.locator('.site-details')).toContainText('Reconstructed settlement extent');
+    const saved = await page.evaluate(() => window.__wikiworldmodel!.state().cam);
+    expect(saved.lat).toBeCloseTo(13.318067, 5);
+    expect(saved.lon).toBeCloseTo(104.0184444, 5);
+    await page.getByRole('button', { name: 'Frame settlement', exact: true }).click();
+    await expect.poll(() => page.evaluate(() => window.__wikiworldmodel!.state().cam.dist), { timeout: 60000 }).toBeLessThan(saved.dist);
+    await expect(pin).toHaveAttribute('title', /Inspect settlement/);
+    await page.evaluate(() => window.__wikiworldmodel!.set({ t: 1200 }));
+    await expect(pin).toContainText('Yasodharapura');
+    await expect(pin).toHaveAttribute('title', /Frame settlement/);
+    await pin.click();
+    await expect(pin).toHaveAttribute('title', /Inspect settlement/);
+    const country = page.getByRole('button', { name: 'Khmer Empire', exact: true });
+    await country.click();
+    await expect(page.locator('.inspect h2')).toContainText('Khmer Empire');
+  });
+
+  test('phone search frames the dated centre above the newly opened inspector', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto(`/?b=${latestBuild()}&t=851&lat=10&lon=100&d=2.6&${FAST}`);
+    await page.fill('.search input', 'Angkor');
+    await page.locator('.search li').filter({ hasText: 'Angkor' }).first().click();
+    await expect(page.locator('.inspect h2')).toHaveText('Angkor');
+    const pin = page.locator('.site-map .site-pin[data-entity="people/first-cities/angkor"]');
+    await expect(pin).toHaveAttribute('title', /Inspect settlement/);
+    await expect(pin).toContainText('Hariharalaya');
+    const panel = await page.locator('.inspect').boundingBox();
+    const label = await pin.boundingBox();
+    expect(label!.y + label!.height).toBeLessThan(panel!.y);
+  });
+
+  test('one Angkor label survives the descent and the return to the globe', async ({ page }) => {
+    const id = 'people/first-cities/angkor';
+    await page.goto(`/?b=${latestBuild()}&t=851&lat=13.335986&lon=103.974117&d=1.02&sel=${id}&${FAST}`);
+    const label = page.locator(`.marker[data-entity="${id}"]:visible,.site-pin[data-entity="${id}"]:visible`);
+    await expect(label).toHaveCount(1);
+    for (const km of [79, 46, 44, 23, 21, 1, 81]) {
+      await page.evaluate((k) => window.__wikiworldmodel!.set({ cam: { lat: 13.335986, lon: 103.974117, dist: 1 + k / 6371, tilt: 0 } }), km);
+      await expect(label).toHaveCount(1);
+      if (km === 1) await expect(page.locator(`.site-map .site-pin[data-entity="${id}"]`)).toBeVisible({ timeout: 120_000 });
+    }
+    await expect(page.locator(`.marker[data-entity="${id}"]`)).toBeVisible();
+  });
+
+  test('a local Roman frontier remains visible when crossing from inside to outside', async ({ page }) => {
+    // Either side of the 120 CE row's segment (7.92,50.25)–(8.17,50.58), on the Taunus frontier.
+    await page.goto(`/?b=${latestBuild()}&t=120&lat=50.415&lon=8.13&d=1.004&v=0&${FAST}`);
+    const country = page.locator('.local-country');
+    await expect(country).toContainText('Rome');
+    await country.click();
+    await expect(page.locator('.inspect .here')).toContainText('Roman Empire');
+    await page.evaluate(() => window.__wikiworldmodel!.set({ sel: null, cam: { lat: 50.415, lon: 7.96, dist: 1.004, tilt: 0 } }));
+    await expect(page.locator('.site-map')).toBeVisible();
+    await expect(country).toBeHidden();
+    // The visible frontier is painted in its own map colour on the transparent overlay.
+    await expect
+      .poll(() =>
+        page.locator('.site-map canvas').evaluate((el) => {
+          const canvas = el as HTMLCanvasElement;
+          const { data } = canvas.getContext('2d')!.getImageData(0, 0, canvas.width, canvas.height);
+          for (let i = 0; i < data.length; i += 4) if (data[i + 2] > 230 && data[i + 2] > data[i] + 15 && data[i + 3] > 170) return true;
+          return false;
+        }),
+      )
+      .toBe(true);
+  });
+
   test('Settlement paints the anthromes of the time, with a legend of the classes present, and stays in the link', async ({ page }) => {
     await page.goto(`/?b=${latestBuild()}&t=-1999&lat=30&lon=40&d=2.6&ly=landscape`);
     await idle(page);

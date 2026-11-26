@@ -12,6 +12,8 @@
 // towns), how many people, what they did on the land, and how sure each part is. Nothing here is a fact about any
 // place: the classes' thresholds are the classification's own, quoted in the field's record.
 import type { Agriculture, Husbandry, LifewayWord, TownSpec, Tradition } from './dwelling.ts';
+import { siteClaimHistory } from './site-navigation.ts';
+import type { Scenario } from './scenario.ts';
 import type { Form } from './form.ts';
 import type { LivingTaxon, ScenePeople } from './scene.ts';
 import { centralAt, cityPopulation, densityPrior, dispersedAt, populationSpan, type DensityAnchor, type Figure, type Observation, type PeopleModel, type Population, type PopulationInput } from './citypop.ts';
@@ -328,6 +330,14 @@ export interface City {
   pops: [number, number][];
 }
 
+/** A dated placement or extent, with the claim and scenario that supply it. */
+export interface SiteClaim {
+  span: [number, number];
+  ref?: string;
+  rank?: string;
+  alt?: string;
+}
+
 /**
  * A settlement the world has a record of, as the landscape reads it (docs/plans/LIFEWAY-RENDERINGS.md, step 4): where and
  * when it stood, and what its own claims say of its people, its houses, the ground it covered and how it was laid out. A
@@ -357,7 +367,8 @@ export interface CityRecord {
    * The places it was centred on, each while it was (a `core` claim's point and years): its town is ranked from those that
    * stood at a time (model:people/settlement-growth). None, and it is centred on its own point.
    */
-  cores?: { lat: number; lon: number; span: [number, number] }[];
+  cores?: ({ lat: number; lon: number; label?: string } & SiteClaim)[];
+  extents?: ({ polygons: number[][][][]; basis: string } & SiteClaim)[];
   /** how it was laid out: its `town_form` claim, and when that held, where the claim says */
   town?: TownSpec;
   townSpan?: [number, number];
@@ -555,10 +566,10 @@ function restsOn(pop: Population, rows: City[]): CityNear['from'] {
 }
 
 /** A city's life from its lists' rows and its record. */
-function lifeOf(f: CitiesFile, lat: number, lon: number, rows: City[], r: CityRecord | undefined, pop: Population): CityLife {
+function lifeOf(f: CitiesFile, lat: number, lon: number, rows: City[], r: CityRecord | undefined, pop: Population, scenario: Scenario): CityLife {
   const row = rows[0];
   // Its cores, where its record gives them, in its own metres about its point.
-  const cores = (r?.cores ?? []).map((c) => {
+  const cores = siteClaimHistory(r?.cores ?? [], scenario).map((c) => {
     const [x, y] = metresFrom(lat, lon, c.lat, c.lon);
     return { x, y, from: c.span[0], to: c.span[1] };
   });
@@ -650,7 +661,7 @@ export function citiesNear(f: Pick<CitiesFile, 'lists' | 'cities'>, lat: number,
  * lists' rows and its record's figures together; a record no list has then is drawn while its record says it stood, if
  * any of its figures can be read, and left out where none can.
  */
-export function citiesAround(f: CitiesFile, lat: number, lon: number, t: number, km: number, guess: { perHouse: number; lot: number; hold: number; gap: number }, recordKm = 12): CityNear[] {
+export function citiesAround(f: CitiesFile, lat: number, lon: number, t: number, km: number, guess: { perHouse: number; lot: number; hold: number; gap: number }, recordKm = 12, scenario: Scenario = {}): CityNear[] {
   const near = citiesNear(f, lat, lon, t, km);
   const out: CityNear[] = near.map(({ city, people, km: d, also }) => ({ name: city.name, country: city.country, lat: city.lat, lon: city.lon, people, km: d, field: city.field, source: city.source, also: also.map((a) => ({ people: a.people, field: a.city.field, source: a.city.source })), from: 'list' as const }));
   // Each entry's rows of the lists and its record, for its life.
@@ -708,7 +719,7 @@ export function citiesAround(f: CitiesFile, lat: number, lon: number, t: number,
     if (!rows.length && !r) continue;
     const pop = popOf.get(c) ?? populationOf(f, c.lat, c.lon, rows, r, guess);
     if (!pop.members.length) continue;
-    c.life = lifeOf(f, c.lat, c.lon, rows, r, pop);
+    c.life = lifeOf(f, c.lat, c.lon, rows, r, pop, scenario);
     const central = centralAt(pop, t);
     if (central > 0) {
       c.people = Math.round(central);
@@ -865,7 +876,7 @@ export function sceneTiles(d: Pick<LandscapeData, 'tileDeg' | 'reach_deg'>, lat:
  * people of each 1° cell shared over its 5′ cells, the regions' assessments, the cities standing near and the traditions
  * holding there. Undefined outside the anthromes' span, or where the place itself is no land.
  */
-export function scenePeople(d: LandscapeData, lat: number, lon: number, t: number): ScenePeople | undefined {
+export function scenePeople(d: LandscapeData, lat: number, lon: number, t: number, scenario: Scenario = {}): ScenePeople | undefined {
   const step = nearestStep(d.steps, t);
   if (step < 0) return undefined;
   const res = d.res;
@@ -954,7 +965,7 @@ export function scenePeople(d: LandscapeData, lat: number, lon: number, t: numbe
     { north: far.north, west: far.west, nx: far.nx, ny: far.ny, res, anthrome: far.anthrome, density: far.density },
   ]);
   const lifeway = lifewayOf(d.classes, anthrome[centre], density[centre], regions.find((x) => x.id === region[centre])?.assessment);
-  const cities = citiesAround(d.cities, lat, lon, t, d.reach_km, cityGuess(d.generator.params)).map(({ km: _km, also, ...c }) => ({ ...c, ...(also.length ? { also } : {}) }));
+  const cities = citiesAround(d.cities, lat, lon, t, d.reach_km, cityGuess(d.generator.params), 12, scenario).map(({ km: _km, also, ...c }) => ({ ...c, ...(also.length ? { also } : {}) }));
   const traditions = d.traditions.filter((x) => t >= x.span[0] && t <= x.span[1] && x.regions.some((g) => ids.includes(g)));
   // The husbandry that holds there then, and of the animals the world can draw, those it names.
   const husbandry = (d.husbandry ?? []).filter((x) => t >= x.span[0] && t <= x.span[1] && x.regions.some((g) => ids.includes(g)));

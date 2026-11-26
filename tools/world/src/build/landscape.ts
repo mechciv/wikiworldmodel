@@ -27,6 +27,8 @@ import { cellAt, gridSize, peopleAt, type PeopleFile } from '../../../../core/la
 import { datasetFile } from '../manifest.ts';
 import { CACHE } from '../paths.ts';
 import { sha256, stableStringify } from '../util.ts';
+import { insideOutline } from '../../../../core/relief.ts';
+import { elementKey, type LatLon, type OhmSnapshot } from '../ohm.ts';
 import { kindIs, type Entity, type Field, type World } from '../world.ts';
 import { claimOf, subjectTime, validSpan, type Solved } from './records.ts';
 
@@ -605,6 +607,29 @@ export function landscapeEntities(w: World): Entity[] {
   );
 }
 
+/** Measured outlines in geographic degrees, retaining holes and separate enclosures. */
+function settlementOutline(world: World, value: unknown): number[][][][] {
+  const g = value as { type?: string; coordinates?: number[][][] | number[][][][]; from?: string; elements?: string[] };
+  if (g.type === 'Polygon') return [g.coordinates as number[][][]];
+  if (g.type === 'MultiPolygon') return g.coordinates as number[][][][];
+  const snapshot = g.from && (world.snapshots.get(g.from) as OhmSnapshot | undefined);
+  if (!snapshot || snapshot.format !== 'lightworld-ohm-snapshot@1' || !g.elements) return [];
+  const ids = new Set(g.elements);
+  const polygons: number[][][][] = [];
+  const closed = (r: LatLon[]) => r.length >= 4 && r[0][0] === r.at(-1)![0] && r[0][1] === r.at(-1)![1];
+  const ring = (r: LatLon[]) => r.map(([lat, lon]) => [lon, lat]);
+  for (const el of snapshot.elements) {
+    if (!ids.has(elementKey(el))) continue;
+    const outer = (el.outer ?? (el.line ? [el.line] : [])).filter(closed).map((r) => [ring(r)]);
+    for (const hole of (el.inner ?? []).filter(closed)) {
+      const [lat, lon] = hole[0];
+      outer.find((p) => insideOutline([p], lon, lat))?.push(ring(hole));
+    }
+    polygons.push(...outer);
+  }
+  return polygons;
+}
+
 /**
  * The settlements the world has records of, as the landscape reads them (core/landscape.ts, CityRecord): each with a
  * place, with every claim of its people, its houses and its ground but those deprecated, each with the ground it counts
@@ -650,13 +675,23 @@ export function cityRecords(s: Solved): CityRecord[] {
       });
     }
     // The places it was centred on, while each was.
-    const cores = e.claims
-      .filter((c) => c.subject === e.id && c.prop === 'core' && !c.alt && c.status !== 'deprecated' && c.rank !== 'deprecated')
+    const siteClaim = (c: Entity['claims'][number]) => {
+      const v = validSpan(s, c.valid, e.id);
+      return { ref: c.ref, span: [v?.[0] ?? span[0], v?.[1] ?? span[1]] as [number, number], rank: c.rank, ...(c.alt ? { alt: c.alt } : {}) };
+    };
+    const extents = e.claims
+      .filter((c) => c.subject === e.id && c.prop === 'extent' && c.status !== 'deprecated')
       .flatMap((c) => {
-        const p = c.value as { lat?: number; lon?: number };
+        const polygons = settlementOutline(s.world, c.value);
+        if (!polygons.length) return [];
+        return [{ ...siteClaim(c), basis: c.basis, polygons }];
+      });
+    const cores = e.claims
+      .filter((c) => c.subject === e.id && c.prop === 'core' && c.status !== 'deprecated')
+      .flatMap((c) => {
+        const p = c.value as { lat?: number; lon?: number; label?: string };
         if (typeof p?.lat !== 'number' || typeof p?.lon !== 'number') return [];
-        const valid = validSpan(s, c.valid, e.id);
-        return [{ lat: p.lat, lon: p.lon, span: [valid?.[0] ?? span[0], valid?.[1] ?? span[1]] as [number, number] }];
+        return [{ lat: p.lat, lon: p.lon, ...(p.label ? { label: p.label } : {}), ...siteClaim(c) }];
       });
     const name = claimOf(s, e.id, 'name')?.value as Record<string, string> | undefined;
     // Its names in turn, where they have their times: a scene of 1500 names Tenochtitlan, not Mexico City.
@@ -677,6 +712,7 @@ export function cityRecords(s: Solved): CityRecord[] {
       span,
       figures,
       ...(cores.length ? { cores } : {}),
+      ...(extents.length ? { extents } : {}),
       ...(town ? { town } : {}),
       ...(town && townSpan(s, e.id) ? { townSpan: townSpan(s, e.id) } : {}),
     });

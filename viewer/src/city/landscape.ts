@@ -1,10 +1,13 @@
 // The anonymous human landscape in the browser (docs/HUMAN-LANDSCAPE.md): the build's files, fetched as they are wanted,
 // and put together into what a scene's people are and what the globe paints. The same core code as the build's, so what
 // a scene draws rests on the same anthromes, assessments, cities and traditions.
+import { toLocal } from '../../../core/city.ts';
+import { activeSiteClaims } from '../../../core/site-navigation.ts';
+import type { Scenario } from '../../../core/scenario.ts';
 import { decodeTile } from '../../../core/container.ts';
 import { prevalenceOf, traditionFor, type Agriculture, type Husbandry, type LifewayWord, type Tradition } from '../../../core/dwelling.ts';
 import type { Form } from '../../../core/form.ts';
-import { anthromeTile, classAtStep, FAR_REACH_DEG, nearestStep, sceneTiles, scenePeople, assessmentAt, lifewayOf, LIFEWAY_OF, citiesAround, cityGuess, cellOf, tileKey, type AnthromeTile, type AnthromeTileHeader, type AssessmentsFile, type CitiesFile, type CityNear, type LandscapeData, type LandscapeIndex, type Lifeway, type TraditionsFile } from '../../../core/landscape.ts';
+import { anthromeTile, classAtStep, FAR_REACH_DEG, nearestStep, sceneTiles, scenePeople, assessmentAt, lifewayOf, LIFEWAY_OF, citiesAround, cityGuess, cellOf, tileKey, type AnthromeTile, type AnthromeTileHeader, type AssessmentsFile, type CitiesFile, type CityRecord, type CityNear, type LandscapeData, type LandscapeIndex, type Lifeway, type TraditionsFile } from '../../../core/landscape.ts';
 import { cellAt, stepsAround, type PeopleFile } from '../../../core/layers.ts';
 import type { ResolveWorld } from '../../../core/resolve.ts';
 import type { LivingTaxon, ScenePeople } from '../../../core/scene.ts';
@@ -43,6 +46,23 @@ export class LandscapeAtlas {
   globe?: AnthromeTile;
   private io: BuildFetch;
   private indexed: Promise<void> | null = null;
+  private cityFile: Promise<CitiesFile> | null = null;
+  readonly places = new Map<string, CityRecord>();
+
+  loadCities(): Promise<CitiesFile> {
+    return (this.cityFile ??= this.loadIndex()
+      .then(() => this.io.getJSON<CitiesFile>(this.index.cities))
+      .then((file) => {
+        this.cities = file;
+        for (const record of file.records ?? []) this.places.set(record.id, record);
+        return file;
+      })
+      .catch((err) => {
+        this.cityFile = null;
+        throw err;
+      }));
+  }
+
   private ready: Promise<void> | null = null;
   private tiles = new Map<string, Promise<AnthromeTile | undefined>>();
   private loaded = new Map<string, AnthromeTile | undefined>();
@@ -64,7 +84,7 @@ export class LandscapeAtlas {
   load(): Promise<void> {
     this.ready ??= (async () => {
       await this.loadIndex();
-      const [a, tr, c] = await Promise.all([this.io.getJSON<AssessmentsFile>(this.index.assessments), this.io.getJSON<TraditionsFile>(this.index.traditions), this.io.getJSON<CitiesFile>(this.index.cities)]);
+      const [a, tr, c] = await Promise.all([this.io.getJSON<AssessmentsFile>(this.index.assessments), this.io.getJSON<TraditionsFile>(this.index.traditions), this.loadCities()]);
       this.assessments = a;
       this.traditions = tr.traditions;
       this.husbandry = tr.husbandry ?? [];
@@ -90,6 +110,23 @@ export class LandscapeAtlas {
     if (!this.index) return null;
     const i = nearestStep(this.index.steps, t);
     return i < 0 ? null : this.index.steps[i];
+  }
+
+  /** Rebuild the nearby town when its active cores change within one anthrome time step. */
+  settlementStep(lat: number, lon: number, t: number, scenario: Scenario): string {
+    const step = this.stepAt(t);
+    if (step === null) return '';
+    const keys = [String(step)];
+    for (const r of this.places.values()) {
+      if (!r.cores?.length || t < r.span[0] || t > r.span[1]) continue;
+      if (Math.abs(lat - r.lat) > 2 || Math.abs(toLocal(r, lat, lon)[0]) > 200000) continue;
+      for (const c of activeSiteClaims(r.cores, t, scenario)) keys.push(c.ref ?? `${c.lat},${c.lon}`);
+      // An earlier chosen centre can still affect the later town's growth and roads.
+      for (const c of r.cores) {
+        if ((c.alt && scenario.alts?.includes(c.alt)) || (c.ref && scenario.picks?.includes(c.ref))) keys.push(c.ref ?? c.alt!);
+      }
+    }
+    return keys.join(':');
   }
 
   private tile(key: string): Promise<AnthromeTile | undefined> {
@@ -148,7 +185,7 @@ export class LandscapeAtlas {
   }
 
   /** The people of a scene at a place and time, or undefined where the human landscape does not reach it. */
-  async peopleFor(lat: number, lon: number, t: number): Promise<ScenePeople | undefined> {
+  async peopleFor(lat: number, lon: number, t: number, scenario: Scenario = {}): Promise<ScenePeople | undefined> {
     await this.load();
     if (!this.index.generator || nearestStep(this.index.steps, t) < 0) return undefined;
     const [people] = await Promise.all([this.people(), ...sceneTiles({ tileDeg: this.index.tile_deg, reach_deg: this.reach() }, lat, lon).map((k) => this.tile(k))]);
@@ -156,7 +193,7 @@ export class LandscapeAtlas {
     // was used (FAR_REACH_DEG): fetch those too.
     const extra = sceneTiles({ tileDeg: this.index.tile_deg, reach_deg: Math.max(this.reach(), FAR_REACH_DEG) + 1 }, lat, lon);
     await Promise.all(extra.map((k) => this.tile(k)));
-    return scenePeople(this.data(people), lat, lon, t);
+    return scenePeople(this.data(people), lat, lon, t, scenario);
   }
 
   /** The cities a scene would draw near a place at a time: the lists', and the settlements with records (core/landscape.ts). */

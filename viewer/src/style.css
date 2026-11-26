@@ -545,3 +545,14 @@ html { touch-action: manipulation; overscroll-behavior-y: none; }
   .inspect .close, .tree-panel .close { min-width: 40px; min-height: 40px; }
   .planet-row { padding: 6px 8px; }
 }
+
+.site-map, .site-map canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.site-map[hidden] { display: none; }
+.site-pin, .local-country { position: absolute; pointer-events: auto; background: rgba(15, 18, 20, .88); border: 1px solid #c4b189; border-radius: 5px; color: #fff1d4; padding: 4px 8px; font: 500 12px var(--font); white-space: nowrap; cursor: pointer; }
+.site-pin { transform: translate(-50%, -50%); }
+.site-pin.selected { border-color: #ffc268; color: #ffe1ac; }
+.local-country { border-color: #b3a4cc; color: #eee5ff; }
+.site-pin:focus-visible, .local-country:focus-visible { outline: 2px solid white; }
+.site-details { display: flex; flex-wrap: wrap; align-items: baseline; gap: 3px 12px; margin-top: 6px; color: var(--muted); font-size: 12px; }
+.site-details:empty { display: none; }
+.site-details button { padding: 0; border: 0; color: var(--accent-text); background: none; text-decoration: underline; cursor: pointer; }

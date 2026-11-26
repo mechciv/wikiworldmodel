@@ -7,8 +7,9 @@ import { unitVector } from '../../../core/quat.ts';
 import type { Scenario } from '../../../core/scenario.ts';
 import { PRESENT_YEAR } from '../../../core/time.ts';
 import { chosenClaim, spanOf } from '../../../core/planet.ts';
-import { contains, drawnFirst, territoriesAt, TERRITORY_SCALE, type TerritoryAt, type TerritoryClaim, type TerritoryFile } from '../../../core/territory.ts';
-import type { Camera } from '../camera.ts';
+import { contains, drawnFirst, territoriesAt, TERRITORY_SCALE, type TerritoryAt, type TerritoryClaim, type TerritoryRow, type TerritoryFile } from '../../../core/territory.ts';
+import { MAX_DIST, type Camera } from '../camera.ts';
+import { fovFor, fovY } from '../city/view.ts';
 import type { V3 } from '../mat.ts';
 
 /** At most this many polities at once, one per colour channel of the texture. */
@@ -25,12 +26,51 @@ export const TERRITORY_COLORS: [number, number, number][] = [
   [0.25, 0.74, 0.66],
 ];
 
+/** Fit the dated rings to the globe camera, including territory that approaches the horizon. */
+export function frameRows(rows: TerritoryRow[], aspect: number) {
+  if (!rows.length) return undefined;
+  const origin = rows.reduce((a, b) => (a.area > b.area ? a : b)).at[0];
+  const points: [number, number][] = [];
+  let west = Infinity,
+    east = -Infinity,
+    south = 90,
+    north = -90;
+  for (const row of rows)
+    for (const ring of row.rings)
+      for (let i = 0; i < ring.length; i += 2) {
+        const dx = ((ring[i] / TERRITORY_SCALE - origin + 540) % 360) - 180;
+        const lat = ring[i + 1] / TERRITORY_SCALE;
+        west = Math.min(west, dx);
+        east = Math.max(east, dx);
+        south = Math.min(south, lat);
+        north = Math.max(north, lat);
+        points.push([lat, origin + dx]);
+      }
+  if (!points.length) return undefined;
+  const lat = (south + north) / 2,
+    lon = ((origin + (west + east) / 2 + 540) % 360) - 180;
+  const rad = Math.PI / 180;
+  const sin = Math.sin(lat * rad),
+    cos = Math.cos(lat * rad);
+  const halfHeight = 0.9 * Math.tan(fovY(fovFor(1e6), aspect) / 2);
+  let dist = 1.02;
+  for (const [la, lo] of points) {
+    const x = Math.cos(la * rad) * Math.sin((lo - lon) * rad);
+    const meridian = Math.cos(la * rad) * Math.cos((lo - lon) * rad);
+    const y = cos * Math.sin(la * rad) - sin * meridian;
+    const z = sin * Math.sin(la * rad) + cos * meridian;
+    dist = Math.max(dist, z + Math.abs(x) / (halfHeight * aspect), z + Math.abs(y) / halfHeight, 1 / Math.max(0.01, z));
+  }
+  return { lat, lon, dist: Math.min(MAX_DIST, dist) };
+}
+
 export class TerritoryLayer {
   readonly el: HTMLElement;
   /** the texture's source: an equirectangular map, row 0 at the north pole */
   readonly canvas: HTMLCanvasElement;
   private file: TerritoryFile | null = null;
   private key = '';
+  localRows: (TerritoryRow & { record: string; label: string; source: string })[] = [];
   private active: TerritoryAt[] = [];
   /** the territories that hold but have no colour of their own: the states layer draws them among the states */
   rest: TerritoryAt[] = [];
@@ -58,6 +98,14 @@ export class TerritoryLayer {
     return rows.length ? [Math.min(...rows.map((r) => r.from)), Math.max(...rows.map((r) => r.to))] : null;
   }
 
+  private label(a: TerritoryAt, t: number, s: Scenario): string {
+    const phase = a.territory.phases?.find((ph) => {
+      const [start, end] = spanOf(ph, s);
+      return start <= t && t < end;
+    });
+    return phase ? a.territory.label + ' · ' + phase.label : a.territory.label;
+  }
+
   /**
    * What holds at time t; redraws the texture when that changes, and says whether it did. There are three
    * colours, so the record that is open and then the largest take them, and the others are left in `rest`.
@@ -65,10 +113,19 @@ export class TerritoryLayer {
   update(t: number, s: Scenario, selected: string | null = null): boolean {
     // At the present and after, today's map takes over, as it does from the states.
     const { drawn: now, rest } = drawnFirst(this.file && t < PRESENT_YEAR ? territoriesAt(this.file, t, s) : [], selected, CHANNELS);
-    const keyOf = (list: TerritoryAt[]) => list.map((a) => `${a.territory.subject}:${a.claim.claim}:${a.rows.map((r) => `${r.name}@${r.from}`).join('+')}`).join('|');
+    const keyOf = (list: TerritoryAt[]) =>
+      list.map((a) => `${a.territory.subject}:${a.claim.claim}:${this.label(a, t, s)}:${a.rows.map((r) => `${r.name}@${r.from}`).join('+')}`).join('|');
     const key = `${keyOf(now)}||${keyOf(rest)}`;
     if (key === this.key) return false;
     this.key = key;
+    this.localRows = [...now, ...rest].flatMap((a) =>
+      a.rows.map((row) => ({
+        ...row,
+        record: a.territory.subject,
+        label: this.label(a, t, s),
+        source: a.claim.source,
+      })),
+    );
     this.active = now;
     this.rest = rest;
     this.holding = new Set([...now, ...rest].map((a) => a.territory.subject));
@@ -128,6 +185,12 @@ export class TerritoryLayer {
     }
   }
 
+  /** A regional camera framing all the rows of the territory that hold now. */
+  frame(subject: string, t: number, scenario: Scenario, aspect: number) {
+    const territory = this.file && territoriesAt(this.file, t, scenario).find((a) => a.territory.subject === subject);
+    return territory ? frameRows(territory.rows, aspect) : undefined;
+  }
+
   /** Where a polity's land is drawn at time t, or at the nearest time it has land: its largest row's centre. */
   centre(subject: string, t: number, s: Scenario): [number, number] | undefined {
     const ter = this.file?.territories.find((x) => x.subject === subject);
@@ -174,11 +237,7 @@ export class TerritoryLayer {
         this.el.appendChild(el);
         this.labels.set(id, el);
       }
-      const phase = a.territory.phases?.find((ph) => {
-        const [x, y] = spanOf(ph, s);
-        return x <= t && t < y;
-      });
-      const text = phase ? `${a.territory.label} · ${phase.label}` : a.territory.label;
+      const text = this.label(a, t, s);
       if (el.textContent !== text) el.textContent = text;
       const [r, g, b] = TERRITORY_COLORS[this.channel.get(id)!].map((c) => Math.round(Math.min(1, c * 0.4 + 0.6) * 255));
       el.style.color = `rgb(${r}, ${g}, ${b})`;

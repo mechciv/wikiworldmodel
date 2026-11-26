@@ -1,3 +1,6 @@
+import { settlementFocus } from '../../core/site-navigation.ts';
+import { LocalBorders, type BorderRow } from './city/local-borders.ts';
+import { SiteMap, mapRoom, type SitePin } from './ui/site-map.ts';
 import { shoresNear } from '../../core/shorelines.ts';
 import { WATER_REACH } from '../../world/generators/life/water.ts';
 // The WikiWorldModel viewer: fly around the globe and through time, click anything to see what
@@ -7,7 +10,7 @@ import { CLIMATE_LABEL, climateClass, decodeNode, type ClimateClass, type Climat
 import { decodeTile, type TypedArray } from '../../core/container.ts';
 import { bytesPrint, printCheck, settlePrint, type Fingerprint, type PrintCheck } from '../../core/fingerprint.ts';
 import { decodeMargin, decodeThickness, iceFrame, iceKeysAt, iceScenario, sampleGrid, type IceHeader, type IceKeyframe, type IceScenario } from '../../core/ice.ts';
-import { levelOf, type HazardFile, type HazardRow, type PeopleFile, type PeopleHeader, type PolitiesFile, type PresentFile } from '../../core/layers.ts';
+import { statesAt, levelOf, type HazardFile, type HazardRow, type PeopleFile, type PeopleHeader, type PolitiesFile, type PresentFile } from '../../core/layers.ts';
 import { coverAt, lookAt, spanOf, valueOf, type Cover, type Look } from '../../core/planet.ts';
 import { conj, mul, rotate, toLatLon, unitVector, type Quat } from '../../core/quat.ts';
 import type { EntityRecord, OverlaysFile, SearchEntry } from '../../core/records.ts';
@@ -42,9 +45,9 @@ import { surveyOffset } from '../../world/generators/life/survey.ts';
 import { lifeKeepRadius, sameGeoContext, sameLifeContext, SceneCache } from './city/lifecycle.ts';
 import type { PeopleSummary } from './city/lifeworker.ts';
 import { LandscapeAtlas } from './city/landscape.ts';
-import { anthromeOf, classAtStep, kmBetween, nearestStep, PATTERN_LABEL, USE_LABEL, USES, LEVEL_WORDS, type CityNear, type Pattern } from '../../core/landscape.ts';
+import { figuresOf, anthromeOf, classAtStep, kmBetween, nearestStep, PATTERN_LABEL, USE_LABEL, USES, LEVEL_WORDS, type CityNear, type CityRecord, type Pattern } from '../../core/landscape.ts';
 import { lifewayText, outbuildingsText, specText, townText, prevalenceOf, traditionsFor } from '../../core/dwelling.ts';
-import { autoTilt, EYE_HEIGHT, groundHit, localView, lookThrough, projectLocal, rayOf, sunAt, underSea, type LocalView } from './city/view.ts';
+import { autoTilt, fovFor, fovY, EYE_HEIGHT, groundHit, localView, lookThrough, projectLocal, rayOf, sunAt, underSea, type LocalView } from './city/view.ts';
 import { SEA } from './gl/cityShaders.ts';
 import { CityLabels } from './ui/citylabels.ts';
 import { FeatureTiles } from './features.ts';
@@ -61,12 +64,12 @@ import { FeedbackDialog } from './ui/feedback.ts';
 import { esc } from './ui/html.ts';
 import { InspectPanel, stepName, type BiomeHere, type IceHere, type LandscapeHere, type OrganismHere, type PlanetStateInfo, type RowInfo, type TerrainInfo, type TerritoryHere } from './ui/inspect.ts';
 import { barWords, noticeWords, standingAt } from './ui/lifewords.ts';
-import { Markers, timeFor, visibility } from './ui/markers.ts';
+import { labelAt, Markers, timeFor, visibility } from './ui/markers.ts';
 import { PlanetPanel, valueAt } from './ui/planet.ts';
 import { Search } from './ui/search.ts';
 import { TimeMachine, type Mark } from './ui/timemachine.ts';
 import { nameAt, placeIn } from '../../core/timemachine.ts';
-import { TERRITORY_COLORS, TerritoryLayer } from './ui/territory.ts';
+import { frameRows, TERRITORY_COLORS, TerritoryLayer } from './ui/territory.ts';
 import { FossilLayer } from './ui/fossils.ts';
 import { HazardLayer, PeopleLayer, PolityLayer, PresentLayer } from './ui/layers.ts';
 import { FieldLayer } from './ui/fieldlayer.ts';
@@ -492,6 +495,8 @@ async function start(root: HTMLElement): Promise<void> {
   // The anonymous human landscape (docs/HUMAN-LANDSCAPE.md): what kind of place any land was, what people a scene draws,
   // and the globe's picture of it, which its toggle draws.
   const landscape = ts.files.landscape ? new LandscapeAtlas(build, ts.files.landscape, peopleFile) : null;
+  // The small city catalogue is shared by destinations, globe markers and local labels.
+  const cityCatalogue = landscape?.loadCities().then(() => { dirty = true; }).catch(err => console.error('Could not load settlement centres', err));
   const LANDSCAPE_TOGGLE = { key: 'landscape', label: 'Settlement', title: 'How people lived: the anthromes of HYDE, from wildlands to cities' };
   const landscapeOn = () => !!landscape && !!state.layers?.includes(LANDSCAPE_TOGGLE.key);
   if (landscape) void landscape.loadIndex().then(() => (dirty = true));
@@ -689,7 +694,10 @@ async function start(root: HTMLElement): Promise<void> {
     altTitle,
     altHeld,
   });
+  const siteMap = new SiteMap(frameSettlement, inspectLocalPolity);
+  labels.el.after(siteMap.el);
   stage.appendChild(inspect.el);
+  new ResizeObserver(() => { dirty = true; }).observe(inspect.el);
   /** Close the panel. One that is not a record's (the ground, a row of a dataset, a series) has no selection to clear. */
   const closePanel = () => {
     if (!state.sel) inspect.hide();
@@ -963,11 +971,12 @@ async function start(root: HTMLElement): Promise<void> {
       inspect.hide();
       return;
     }
-    const [r] = await Promise.all([loadRecord(build, id), features.load([id]), scenarioKey(scenario()) ? features.wantVariants() : undefined, wantWhere()]);
+    const [r] = await Promise.all([loadRecord(build, id), cityCatalogue, features.load([id]), scenarioKey(scenario()) ? features.wantVariants() : undefined, wantWhere()]);
     if (state.sel !== id) return;
     const f = features.get(id);
     shownRecord = id;
     const inside = here?.entity === id ? { ...here.info, source: r.sources[here.source] } : undefined;
+    dirty = true;
     inspect.showEntity(r, scenario(), f ? timeFor(f, scenario()) : recordTime(r, scenario()), inside, organismInfo(id));
   }
 
@@ -989,6 +998,9 @@ async function start(root: HTMLElement): Promise<void> {
   /** A taxon to show when the scene of where it lived has come. */
   let arriving: string | null = null;
   inspect.seeIt = (id, local) => {
+    if (landscape?.places.has(id) || features.get(id)?.kind.split('/')[0] === 'settlement') {
+      return { label: 'Frame settlement', go: () => frameSettlement(id) };
+    }
     if (local) {
       const current = city;
       if (!(current instanceof LifeScene) || !current.named.some((item) => item.id === id)) return undefined;
@@ -1469,12 +1481,12 @@ async function start(root: HTMLElement): Promise<void> {
     fossils.el.hidden = inCity && range < 1.2e5;
     if (!fossils.el.hidden) fossils.update(camera, state.t, stage.clientWidth, stage.clientHeight, plateNow, (plate) => !!fi && build.model.reaches(plate, age));
     const hide = inCity && range < 1.2e5;
+    if (state.t < PRESENT_YEAR) wantPolities();
     if (hide) {
       present.el.hidden = hazards.el.hidden = polities.el.hidden = true;
       for (const fl of fieldLayers) fl.el.hidden = true;
     }
     else {
-      if (state.t < PRESENT_YEAR) wantPolities();
       // Over the people drawn, states are their outlines only.
       // Territories of records beyond the three colours are drawn among the states, under their records' names.
       polities.update(camera, state.t, state.cam.dist, stage.clientWidth, stage.clientHeight, !peopleDrawn, territory.rest.flatMap((a) => a.rows.map((r) => ({ ...r, record: a.territory.subject, label: a.territory.label }))), territory.holding);
@@ -1494,13 +1506,26 @@ async function start(root: HTMLElement): Promise<void> {
       scenario: scenario(),
       selected: state.sel,
       lit: litMarkers,
+      frame: !inCity && state.sel ? { ...state.cam, room: mapRoom(stage, inspect.el, cityBar), go: frameSettlement } : undefined,
+      settlementPoint: (id) => {
+        const r = landscape?.places.get(id);
+        return r?.cores?.length ? settlementFocus(r, state.t, scenario()).cores[0] : undefined;
+      },
       closest: camera.reach().footprint === 0,
       plateRotation: plateNow,
       // Where no field covers the time, or the plate model does not reach, nothing is placed.
       placed: (plate) => !!fi && build.model.reaches(plate, age),
     });
-    territory.el.hidden = !showTerritory;
-    if (showTerritory) territory.place(camera, state.t, scenario(), state.sel);
+    if (frameView && site && city?.ground) {
+      drawSiteMap(frameView, site, city.ground, datedPeople(state.t), onGlobe);
+    } else siteMap.hide();
+    const place = state.sel && landscape?.places.get(state.sel);
+    if (place && shownRecord === place.id) {
+      const cores = settlementFocus(place, state.t, scenario()).cores;
+      inspect.siteDetails(cores, siteMap.description(place.id));
+    }
+    territory.el.hidden = !showTerritory || hide;
+    if (showTerritory && !hide) territory.place(camera, state.t, scenario(), state.sel);
     timebar.set(state.t, state.window, playing);
     planet.update(state.t, look, state.alt);
     toolbar.set({ evidence: state.evidence, clouds: state.clouds, alt: state.alt, tree: !!state.tree, layers: state.layers ?? [], people: !!state.people });
@@ -1657,7 +1682,7 @@ async function start(root: HTMLElement): Promise<void> {
   function tappedOver(x: number, y: number): HTMLElement | null {
     let best: HTMLElement | null = null;
     let reach = 12;
-    for (const el of stage.querySelectorAll<HTMLElement>('.marker, .city-label')) {
+    for (const el of stage.querySelectorAll<HTMLElement>('.marker, .city-label, .site-pin, .local-country')) {
       if (el.style.display === 'none' || el.closest('[hidden]')) continue;
       for (const part of el.classList.contains('marker') ? el.querySelectorAll<HTMLElement>('.dot, .label') : [el]) {
         const r = part.getBoundingClientRect();
@@ -1700,7 +1725,7 @@ async function start(root: HTMLElement): Promise<void> {
     const box = canvas.getBoundingClientRect();
     zoomBy(e.deltaY, e.clientX - box.left, e.clientY - box.top);
   };
-  for (const el of [canvas, markers.el, labels.el]) el.addEventListener('wheel', onWheel, { passive: false });
+  for (const el of [canvas, markers.el, labels.el, siteMap.el]) el.addEventListener('wheel', onWheel, { passive: false });
 
   // Walking: W, A, S and D move the camera over the ground, at a pace that suits its height.
   const walking = new Set<string>();
@@ -1913,7 +1938,7 @@ async function start(root: HTMLElement): Promise<void> {
     const { lat, lon } = latticeOf(at.lat, at.lon);
     // A month is a different scene: its snow and its sun.
     // And in the human landscape's span, a step of the anthromes is a different scene: its people.
-    return `${lifeAtlas?.binAt(t)?.from}|${lat.toFixed(2)}|${lon.toFixed(2)}|${state.month ?? ''}|${landscape?.stepAt(t) ?? ''}|${shoreKey(t, at)}`;
+    return `${lifeAtlas?.binAt(t)?.from}|${lat.toFixed(2)}|${lon.toFixed(2)}|${state.month ?? ''}|${landscape?.settlementStep(lat, lon, t, scenario()) ?? ''}|${shoreKey(t, at)}`;
   };
 
   const parkLife = (previous: SiteInfo | null, prevShore: string, nextKey: string): void => {
@@ -2026,7 +2051,7 @@ async function start(root: HTMLElement): Promise<void> {
       }
       // Its people, where the human landscape reaches it and it is a scene of the land.
       if (landscape && !lifeAtlas!.fromSea(spec)) {
-        const p = await landscape.peopleFor(spec.site.origin.lat, spec.site.origin.lon, t).catch((err) => {
+        const p = await landscape.peopleFor(spec.site.origin.lat, spec.site.origin.lon, t, scenario()).catch((err) => {
           console.error(`the people of ${key}: ${err instanceof Error ? err.message : String(err)}`);
           return undefined;
         });
@@ -2299,6 +2324,183 @@ async function start(root: HTMLElement): Promise<void> {
 
   /** Clicks so far, so that what a click fetches is shown only if no other click came after it. */
   let clicks = 0;
+  function inspectLocalPolity(row: BorderRow): void {
+    if (row.record) {
+      const entity = splitRef(row.record).record;
+      const { name, from, to, area } = row;
+      here = { entity, source: row.source ?? '', info: { t: state.t, name, from, to, area } };
+      setState({ sel: entity });
+      if (shownRecord === entity) void showSelection();
+    } else {
+      setState({ sel: null });
+      shownRecord = null;
+      inspect.showRow(
+        row.name,
+        'Historical territory',
+        [`${formatTime(row.from)} – ${formatTime(row.to - 1)}`, 'Boundary coordinates mapped to 0.01°'],
+        polities.file?.sourceRecord,
+        polities.file?.description,
+        rowInfo(row),
+      );
+    }
+  }
+
+  /** A previous terrain scene can stay visible while the next one warms. Its footprint belongs to its own epoch. */
+  function datedPeople(t: number): PeopleSummary | undefined {
+    if (!(city instanceof LifeScene) || !site || !city.people) return undefined;
+    if (site === lifeSite && !sameLifeContext(site.id, lifeKeyAt(t, site.origin))) return undefined;
+    return city.people;
+  }
+
+  function settlementCamera(id: string, t: number): ViewState['cam'] | undefined {
+    const authored = sites.find((s) => s.place === id && t >= s.near[0] && t <= s.near[1]);
+    if (authored) return arrivalCam(authored);
+    const r = landscape?.places.get(id);
+    const feature = features.get(id);
+    const spot = r ? settlementFocus(r, t, scenario()) : feature && placeAt(feature, t);
+    if (!spot) return undefined;
+    const p = 'location' in spot ? spot.location : spot;
+    let radius = 'radius' in spot ? spot.radius : 0;
+    // An area can set the camera scale even when no source describes the shape of its edge.
+    if (r && !radius)
+      for (const f of figuresOf(r)) {
+        if (f.prop !== 'settlement_area' || (f.ground && f.ground !== 'settlement' && f.ground !== 'core')) continue;
+        if (f.t && (t < f.t[0] || t > f.t[1])) continue;
+        radius = Math.max(radius, Math.sqrt((f.v * 10000) / Math.PI));
+      }
+    const people = datedPeople(t);
+    if (people && site) {
+      const town = people.settlements.find((s) => s.record === id);
+      if (town) {
+        const [cx, cy] = toLocal(site.origin, p.lat, p.lon);
+        for (const s of people.settlements)
+          if (s === town || (town.city && s.unitOf === town.city)) {
+            const ring = s.outline ?? [];
+            for (let i = 0; i < ring.length; i += 2) radius = Math.max(radius, Math.hypot(ring[i] - cx, ring[i + 1] - cy));
+          }
+      }
+    }
+    // Search and the time machine also open the inspector on arrival. Measure that layout
+    // synchronously so the dated centre lands in the free map area on a phone or a desktop.
+    const wasHidden = inspect.el.hidden;
+    if (wasHidden) inspect.el.hidden = false;
+    const room = mapRoom(stage, inspect.el, cityBar);
+    const w = stage.clientWidth, h = stage.clientHeight;
+    if (wasHidden) inspect.el.hidden = true;
+    const pixels = Math.max(40, Math.min(room.right - room.left, room.bottom - room.top));
+    // Fit the occupied ground into the unobscured rectangle as the field of view widens on descent.
+    let range = 6000;
+    for (let i = 0; i < 3; i++) range = Math.min(1e6, Math.max(6000, (1.15 * radius * h) / (pixels * Math.tan(fovY(fovFor(range), w / h) / 2))));
+    const metres = (2 * range * Math.tan(fovY(fovFor(range), w / h) / 2)) / h;
+    const [lat, lon] = fromLocal(p, ((w - room.right - room.left) * metres) / 2, ((room.top + room.bottom - h) * metres) / 2);
+    return { lat, lon, dist: 1 + range / EARTH_RADIUS, heading: 0, tilt: 0 };
+  }
+
+  function frameSettlement(id: string): void {
+    const target = settlementCamera(id, state.t);
+    if (target) flyTo(target, 1400);
+  }
+
+  let borders: LocalBorders | undefined;
+  let borderOrigin: SiteInfo['origin'] | undefined;
+  let borderFrom = Infinity,
+    borderTo = -Infinity;
+  let borderTerritories = territory.localRows;
+  let borderFile: PolitiesFile | null = null;
+
+  function drawSiteMap(
+    v: LocalView,
+    site: SiteInfo,
+    ground: NonNullable<LifeScene['ground']>,
+    people: PeopleSummary | undefined,
+    visible: ReturnType<FeatureTiles['update']>,
+  ): void {
+    if (
+      site.origin !== borderOrigin ||
+      state.t < borderFrom ||
+      state.t >= borderTo ||
+      borderTerritories !== territory.localRows ||
+      borderFile !== polities.file
+    ) {
+      borderOrigin = site.origin;
+      borderFrom = -Infinity;
+      borderTo = Infinity;
+      borderTerritories = territory.localRows;
+      borderFile = polities.file;
+      if (state.t < PRESENT_YEAR) borderTo = PRESENT_YEAR;
+      else borderFrom = PRESENT_YEAR;
+      for (const row of borderFile?.rows ?? [])
+        for (const edge of [row.from, row.to]) {
+          if (edge <= state.t) borderFrom = Math.max(borderFrom, edge);
+          else borderTo = Math.min(borderTo, edge);
+        }
+      const rows = borderFile && state.t < PRESENT_YEAR ? statesAt(borderFile, state.t, territory.holding) : [];
+      borders = new LocalBorders(site.origin, [...borderTerritories, ...rows]);
+    }
+    const pins: SitePin[] = [];
+    const addRecord = (id: string, r: CityRecord | undefined, label: string, point: { lat: number; lon: number }) => {
+      const focus = r && settlementFocus(r, state.t, scenario());
+      const at = focus?.cores[0] ?? point;
+      pins.push({
+        id,
+        record: r,
+        label,
+        lat: at.lat,
+        lon: at.lon,
+        select: () => {
+          here = null;
+          setState({ sel: id });
+        },
+      });
+    };
+    for (const f of visible) {
+      if (f.kind.split('/')[0] !== 'settlement' || !visibility(timeFor(f, scenario()), state.t, 0, false)) continue;
+      const r = landscape?.places.get(f.id);
+      addRecord(f.id, r, labelAt(f, state.t), placeAt(f, state.t).location);
+    }
+    for (const s of people?.settlements ?? []) {
+      if (!s.city || pins.some((p) => p.id === s.record || (!s.record && p.label === s.city))) continue;
+      const [lat, lon] = fromLocal(site.origin, s.x, s.y);
+      if (s.record) addRecord(s.record, landscape?.places.get(s.record), s.city, { lat, lon });
+      else {
+        const id = `list:${s.city}@${lat.toFixed(4)},${lon.toFixed(4)}`;
+        pins.push({
+          id,
+          label: s.city,
+          lat,
+          lon,
+          select: () => {
+            setState({ sel: null });
+            inspect.showGenerated(
+              s.city!,
+              'Listed settlement',
+              cityWords(s),
+              'Its occupied ground is reconstructed from the generated settlement plan.',
+            );
+          },
+        });
+      }
+    }
+    pins.sort((a, b) => Number(b.id === state.sel) - Number(a.id === state.sel));
+    siteMap.draw(v, site.origin, ground, pins, people, borders, state.t, scenario(), state.sel, mapRoom(stage, inspect.el, cityBar));
+  }
+
+  function pickLocalMap(x: number, y: number): boolean {
+    if (!site || !city?.ground || !frameView) return false;
+    const shape = siteMap.extentAt(x, y);
+    if (shape) {
+      shape.pin.select();
+      return true;
+    }
+    const hit = groundHit(frameView, rayOf(frameView, x, y), city.ground);
+    if (!hit) return false;
+    const [lat, lon] = fromLocal(site.origin, hit[0], hit[1]);
+    const row = borders?.at(lon, lat);
+    if (!row) return false;
+    inspectLocalPolity(row);
+    return true;
+  }
+
   function pickAt(x: number, y: number): void {
     const click = ++clicks;
     if (frameView && city && (state.cam.dist - 1) * EARTH_RADIUS < 6e4) {
@@ -2338,8 +2540,14 @@ async function start(root: HTMLElement): Promise<void> {
           const units = new Map<string, number>();
           for (const x of mine) if (x.unitOf) units.set(x.unitOf, (units.get(x.unitOf) ?? 0) + 1);
           for (const x of mine) if (!x.city && !x.unitOf) counts.set(x.pattern as Pattern, (counts.get(x.pattern as Pattern) ?? 0) + 1);
+          // A scaled house can use a different form slot from its town. The plotted occupied
+          // ground still identifies which town the visitor actually clicked in.
+          const occupied = siteMap.extentAt(x, y)?.pin;
+          const towns = pp.settlements.filter(
+            (s) => s.city && (mine.includes(s) || (occupied && (s.record ? s.record === occupied.id : s.city === occupied.label))),
+          );
           const where = [
-            ...mine.filter((x) => x.city).sort((a, b) => b.people - a.people).map((x) => `${x.city}, ${cityWords(x, sp.cities.find((c) => (x.record && c.record === x.record) || c.name === x.city), landscape?.cities.lists)}`),
+            ...towns.sort((a, b) => b.people - a.people).map((x) => `${x.city}, ${cityWords(x, sp.cities.find((c) => (x.record && c.record === x.record) || c.name === x.city), landscape?.cities.lists)}`),
             ...[...units].sort((a, b) => b[1] - a[1]).map(([town, c]) => `${c.toLocaleString('en-US')} ${c === 1 ? 'settlement' : 'settlements'} of ${town}'s own, set apart among their fields, of which its people's houses were (a dispersed town: how far apart follows its density, and where each stands is the generator's)`),
             ...[...counts].sort((a, b) => b[1] - a[1]).map(([p, c]) => `${c.toLocaleString('en-US')} ${SETTLEMENT_WORDS[p][c === 1 ? 0 : 1]}`),
           ];
@@ -2502,6 +2710,7 @@ async function start(root: HTMLElement): Promise<void> {
         }
         setState({ sel: null });
         shownRecord = null;
+        if (pickLocalMap(x, y)) return;
         const b = city.spec.biome;
         const g = city.spec.generator;
         const made = `${g.generator}, version ${g.version}, seed "${g.seed}"`;
@@ -2515,6 +2724,7 @@ async function start(root: HTMLElement): Promise<void> {
         return inspect.showGenerated(city.spec.site.place ? 'The floodplain' : 'The land here', 'Generated ground', `A land ${where}. Its rivers, ponds and glades are invented, so that what lived here has somewhere to stand. Where the climate field reads the land at ${b.ageMa} Ma, it is ${b.label.toLowerCase()}, and the transitions allow forest over ${Math.round(b.cover.forests * 100)}% of it and grass over ${Math.round(b.cover.grasses * 100)}%.`, `${made}: no bend of this river was recorded. Only the land it lies in comes from the world, from the elevation field beyond its edge.`);
       }
     }
+    if (frameView && pickLocalMap(x, y)) return;
     const row = hazards.pick(x, y);
     if (row) {
       setState({ sel: null });
@@ -2772,14 +2982,13 @@ async function start(root: HTMLElement): Promise<void> {
   }
 
   /** On arrival, frame the record at its map scale or the camera's current distance, whichever is closer. */
-  function mapDestination(view: Pick<ViewState, 't' | 'window' | 'sel'>, target: ViewState['cam'] | undefined, fly: boolean, inspectRow?: () => void): Destination {
+  function mapDestination(view: Pick<ViewState, 't' | 'window' | 'sel'>, target: ViewState['cam'] | undefined, fly: boolean): Destination {
     return {
       point: target,
       arrive() {
         const cam = target && { ...target, dist: Math.min(state.cam.dist, target.dist) };
         setState(cam && !fly ? { ...view, cam } : view);
         if (cam && fly) flyTo(cam);
-        inspectRow?.();
       },
     };
   }
@@ -2828,13 +3037,38 @@ async function start(root: HTMLElement): Promise<void> {
     if (at === undefined && visibility(time, t, halo(t), false) < 0.5) t = time.start.best ?? t;
     t = Math.max(dataRange[0], Math.min(dataRange[1], t));
     const window = (at === undefined ? windowFor(time) : windowAround(t)) ?? state.window;
+    if (entry.kind.startsWith('polity')) {
+      await territoryLoading;
+      const bounds = territory.frame(id, t, scenario(), stage.clientWidth / stage.clientHeight);
+      const place = placeIn(entry.places, t);
+      const focus = bounds ?? (place && { lat: place[3], lon: place[2], dist: distFor(place[4]) });
+      if (focus)
+        return {
+          point: focus,
+          arrive() {
+            setState({ t, sel: id, window });
+            flyTo(focus);
+          },
+        };
+    }
     if (!entry.located) {
       // A polity is where its land was drawn then: its own territory, or the rows of a dataset that are rows of it.
-      if (at !== undefined && !territoryReady && entry.kind.startsWith('polity')) await territoryLoading;
       const p = placeIn(entry.places, t);
       const c = territory.centre(id, t, scenario()) ?? (p ? [p[2], p[3]] : undefined);
       const cam = c ? { lat: c[1], lon: c[0], dist: p ? distFor(p[4]) : 2.6 } : undefined;
       return mapDestination({ t, sel: id, window }, cam, at !== undefined);
+    }
+    if (f?.kind.split('/')[0] === 'settlement') {
+      await cityCatalogue;
+      const target = settlementCamera(id, t);
+      if (target)
+        return {
+          point: target,
+          arrive() {
+            setState({ t, sel: id, window });
+            flyTo(target);
+          },
+        };
     }
     const ageAt = toMa(t);
     const spot = f ? placeAt(f, t, (m) => lookup(m.variants, scenario(), m.time)) : undefined;
@@ -2863,33 +3097,39 @@ async function start(root: HTMLElement): Promise<void> {
    * Go to a state of a dataset that no record adopts: to the time asked, or its start if it is not
    * drawn then, over where its row of that time was drawn; and open that row, as a click on it would.
    */
-  function rowDestination(entry: SearchEntry, at?: number): Destination {
+  async function rowDestination(entry: SearchEntry, at?: number): Promise<Destination> {
     const [a, b] = [entry.time.start.best ?? state.t, entry.time.end.best ?? state.t];
     let t = at ?? (state.t >= a && state.t < b ? state.t : a);
     t = Math.max(dataRange[0], Math.min(dataRange[1], t));
     const p = placeIn(entry.places, t);
-    const cam = p ? { lat: p[3], lon: p[2], dist: distFor(p[4]) } : undefined;
-    return mapDestination({ t, sel: null, window: windowAround(t) }, cam, at !== undefined, () => {
-      shownRecord = null;
-      wantPolities();
-      const asked = t;
-      void politiesLoading?.then(() => {
-        const file = polities.file;
-        if (!file || state.t !== quantize({ ...state, t: asked }).t || state.sel) return;
-        const named = file.rows.filter((r) => r.name === entry.label && (!p || (r.from === p[0] && r.at[0] === p[2] && r.at[1] === p[3])));
-        const row = named.find((r) => r.from <= t && t < r.to) ?? named[0];
-        if (!row) return;
+    wantPolities();
+    await politiesLoading;
+    const file = polities.file;
+    const named = file?.rows.filter((r) => r.name === entry.label && (!p || (r.from === p[0] && r.at[0] === p[2] && r.at[1] === p[3])));
+    const row = named?.find((r) => r.from <= t && t < r.to) ?? named?.[0];
+    const cam = (row && frameRows([row], stage.clientWidth / stage.clientHeight)) ?? (p && { lat: p[3], lon: p[2], dist: distFor(p[4]) });
+    return {
+      point: cam,
+      arrive() {
+        setState({ t, sel: null, window: windowAround(t), ...(cam && at === undefined ? { cam } : {}) });
+        if (cam && at !== undefined) flyTo(cam);
+        shownRecord = null;
+        if (!file || !row) return;
         const runs = entry.places?.length ?? 1;
         inspect.showRow(
           nameAt(entry, t),
           `${kindLabel(entry.kind)}, as the dataset draws it`,
-          [`${formatTime(row.from)} – ${formatTime(row.to - 1)}`, `${row.area.toLocaleString('en-US')} km², as the dataset gives it`, ...(runs > 1 ? [`One of ${runs} rows the dataset gives under this name, ${formatTime(a)} – ${formatTime(b - 1)}`] : [])],
+          [
+            `${formatTime(row.from)} – ${formatTime(row.to - 1)}`,
+            `${row.area.toLocaleString('en-US')} km², as the dataset gives it`,
+            ...(runs > 1 ? [`One of ${runs} rows the dataset gives under this name, ${formatTime(a)} – ${formatTime(b - 1)}`] : []),
+          ],
           file.sourceRecord,
           file.description,
           rowInfo(row),
         );
-      });
-    });
+      },
+    };
   }
 
   /** A window around a moment: a few centuries in the calendar's span, and a share of the age beyond it. */

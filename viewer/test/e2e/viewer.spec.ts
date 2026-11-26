@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import type { PlanetFile } from '../../../core/planet.ts';
+import { quantize } from '../../src/state.ts';
 import { formatTime } from '../../../core/time.ts';
 import { xOf } from '../../src/ui/timebar.ts';
 import { buildFile, canvasGrid, canvasPatch, canvasPng, gridsApart, idle, latestBuild, markerPositions, openLayers, openPlanet, settledUrl } from './helpers.ts';
@@ -39,16 +40,18 @@ for (const trip of [
     expect(sweeping.cam.lon).toBeGreaterThan(first.cam.lon);
     expect(sweeping.cam.dist).toBe(start.cam.dist);
     await page.clock.resume();
-    await page.waitForFunction((d) => window.__wikiworldmodel!.state().cam.dist < d, start.cam.dist);
-    const descending = await state();
-    expect(when).toContain(formatTime(descending.t));
-    expect(sweeping.t).toBeGreaterThan(Math.min(first.t, descending.t));
-    expect(sweeping.t).toBeLessThan(Math.max(first.t, descending.t));
-    expect(descending.cam.lon).toBeGreaterThan(sweeping.cam.lon);
+    await page.waitForFunction((d) => window.__wikiworldmodel!.state().cam.dist !== d, start.cam.dist);
+    const framing = await state();
+    expect(when).toContain(formatTime(framing.t));
+    expect(sweeping.t).toBeGreaterThan(Math.min(first.t, framing.t));
+    expect(sweeping.t).toBeLessThan(Math.max(first.t, framing.t));
+    expect(framing.cam.lon).toBeGreaterThan(sweeping.cam.lon);
     await idle(page);
     const landed = await state();
-    expect(landed.cam.lon).toBe(descending.cam.lon);
-    expect(landed.t).toBe(descending.t);
+    // The saved camera gains four decimal places below the globe. Compare at the precision of the first framing movement.
+    const samePlaceFromAbove = quantize({ ...landed, cam: { ...landed.cam, dist: framing.cam.dist } });
+    expect(samePlaceFromAbove.cam.lon).toBe(framing.cam.lon);
+    expect(landed.t).toBe(framing.t);
   });
 }
 

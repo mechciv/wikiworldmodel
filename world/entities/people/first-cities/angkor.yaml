@@ -327,7 +327,7 @@ claims:
       - { step: quoted, by: machine:quote-check, how: "Found in klassen-2021.txt (sha256 62df9d046be766cf), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-25" }
   core-hariharalaya:
     prop: core
-    value: { lat: 13.335986, lon: 103.974117, frame: frame:earth/present-day }
+    value: { label: Hariharalaya, lat: 13.335986, lon: 103.974117, frame: frame:earth/present-day }
     valid: { hi: 889 CE }
     source:
       - { ref: src:wikidata-bakong, loc: "P625 coordinate location" }
@@ -350,7 +350,7 @@ claims:
       - { step: quoted, by: machine:quote-check, how: "Found in pottier-soutif-2014.txt (sha256 31ec941547763b3e), lustig-2009.txt (sha256 494d50a16c137857) and pleiades-531398484.txt (sha256 24d98dcbf5e2871f), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-25" }
   core-yasodharapura:
     prop: core
-    value: { lat: 13.43333, lon: 103.8333, frame: frame:earth/present-day }
+    value: { label: Yasodharapura, lat: 13.43333, lon: 103.8333, frame: frame:earth/present-day }
     valid: { lo: 889 CE }
     source:
       - { ref: src:pleiades-angkor, loc: "place 531398484, representative point" }

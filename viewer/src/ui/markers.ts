@@ -1,7 +1,9 @@
 // Entity markers: HTML elements placed over the globe. Each carries its entity id, so a
 // click resolves to the entity's record. Positions come from the frames: a marker rides its
 // plate, so at 250 Ma it is where its locality was then.
-import { rotate, unitVector, type Quat } from '../../../core/quat.ts';
+import { mapCue, type MapRoom } from './map-cue.ts';
+import { EARTH_RADIUS } from '../../../core/city.ts';
+import { rotate, toLatLon, unitVector, type Quat } from '../../../core/quat.ts';
 import { lookup, type Scenario } from '../../../core/scenario.ts';
 import { PRESENT_YEAR } from '../../../core/time.ts';
 import { placeAt, type Basis, type Feature, type FeatureTime } from '../../../core/tileset.ts';
@@ -22,6 +24,8 @@ export interface MarkerContext {
   lit?: ReadonlySet<string> | null;
   /** the camera is as close as the globe goes: nothing in view is left out */
   closest?: boolean;
+  frame?: { room: MapRoom; lat: number; lon: number; heading?: number; go: (id: string) => void };
+  settlementPoint?: (id: string) => { lat: number; lon: number } | undefined;
 }
 
 const KIND_CLASS_PREFIX: [string, string][] = [
@@ -103,15 +107,21 @@ export function mostProminent<T extends { f: Pick<Feature, 'id' | 'prominence'> 
 
 export class Markers {
   readonly el: HTMLElement;
+  private cue = document.createElement('button');
   private nodes = new Map<string, HTMLButtonElement>();
   onSelect: (id: string) => void = () => {};
 
   constructor() {
     this.el = document.createElement('div');
     this.el.className = 'markers';
+    this.cue.className = 'site-pin selected';
+    this.cue.title = 'Frame settlement';
+    this.cue.hidden = true;
+    this.el.append(this.cue);
   }
 
   update(features: Feature[], camera: Camera, ctx: MarkerContext): void {
+    this.cue.hidden = true;
     const seen = new Set<string>();
     const all: { f: Feature; x: number; y: number; vis: number; t: FeatureTime; unplaced: boolean }[] = [];
     for (const f of features) {
@@ -124,8 +134,31 @@ export class Markers {
       // Where no plate model reaches, or its frame is a placeholder, a thing is drawn where it is today and marked so.
       const unplaced = !!f.unplaced || (!!here.plate && !ctx.placed(here.plate));
       const q = here.plate && !unplaced ? ctx.plateRotation(here.plate) : ([1, 0, 0, 0] as Quat);
-      const p = rotate(q, unitVector(here.location.lat, here.location.lon)) as V3;
+      const core = ctx.settlementPoint?.(f.id);
+      const p = core ? (unitVector(core.lat, core.lon) as V3) : (rotate(q, unitVector(here.location.lat, here.location.lon)) as V3);
       const s = camera.project(p);
+      if (ctx.frame && f.id === ctx.selected && f.kind.split('/')[0] === 'settlement') {
+        const { room, go } = ctx.frame;
+        const label = labelAt(f, ctx.t);
+        if (!s.visible || s.x < room.left || s.x + 20 + label.length * 7 > room.right || s.y < room.top || s.y > room.bottom) {
+          const rad = Math.PI / 180;
+          const [lat, lon] = toLatLon(p);
+          const a = ctx.frame.lat * rad,
+            b = lat * rad,
+            d = (lon - ctx.frame.lon) * rad;
+          const east = Math.cos(b) * Math.sin(d),
+            north = Math.cos(a) * Math.sin(b) - Math.sin(a) * Math.cos(b) * Math.cos(d);
+          const arc = Math.atan2(Math.hypot(east, north), Math.sin(a) * Math.sin(b) + Math.cos(a) * Math.cos(b) * Math.cos(d));
+          const cue = mapCue(label, Math.atan2(east, north) - (ctx.frame.heading ?? 0) * rad, arc * EARTH_RADIUS, room);
+          this.cue.textContent = cue.text;
+          this.cue.dataset.entity = f.id;
+          this.cue.hidden = false;
+          this.cue.style.left = cue.x + 'px';
+          this.cue.style.top = cue.y + 'px';
+          this.cue.onclick = () => go(f.id);
+          continue;
+        }
+      }
       if (!s.visible) continue;
       all.push({ f, x: s.x, y: s.y, vis, t: time, unplaced });
     }
