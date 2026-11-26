@@ -1,6 +1,7 @@
 // A living scene's generators, off the main thread: the ground once, and then for each view which cells it
 // needs and who to draw at what detail. They are the same code as the build's, so what they make agrees with it
 // within the tolerance of core/fingerprint.ts.
+import { convexHull } from '../../../world/generators/city/math.ts';
 import type { Fingerprint } from '../../../core/fingerprint.ts';
 import { computeBatchBounds, computeProtoBounds, type BatchBounds, type ProtoBounds } from '../gl/culling.ts';
 import { groundNormals } from '../gl/groundNormals.ts';
@@ -33,7 +34,7 @@ export interface PeopleSummary {
   crops: boolean;
   /** the resolved regional agricultural tradition (or generic fallback) and seasonal 8-slot palette */
   agriculture: SettlementPlan['agriculture'];
-  settlements: { pattern: string; houses: number; people: number; city?: string; record?: string; from?: Settlement['from']; town?: Settlement['town']; husbandry?: string; unitOf?: string; tier: string; form: number; region: number; x: number; y: number; r: number; house?: [number, number, number] }[];
+  settlements: { outline?: number[]; pattern: string; houses: number; people: number; city?: string; record?: string; from?: Settlement['from']; town?: Settlement['town']; husbandry?: string; unitOf?: string; tier: string; form: number; region: number; x: number; y: number; r: number; house?: [number, number, number] }[];
   houses: number;
   drawn: number;
   expected: number;
@@ -127,15 +128,28 @@ self.onmessage = (e: MessageEvent<ToLifeWorker>) => {
     const pl = stream.people;
     // A house of each settlement, the nearest its middle: where it stands and which way it faces, for a look at it.
     const houseOf = new Map<number, [number, number, number]>();
+    const housePoints = new Map<number, number[]>();
     const nearest = new Map<number, number>();
     for (const h of pl?.houses ?? []) {
       if (pl!.forms[h.form].outbuilding) continue;
       const s = pl!.settlements[h.settlement];
+      if ((s.city || s.unitOf) && !s.boundary) {
+        const points = housePoints.get(h.settlement) ?? [];
+        if (!points.length) housePoints.set(h.settlement, points);
+        points.push(h.x, h.y);
+      }
       const d = Math.hypot(h.x - s.x, h.y - s.y);
       if (d < (nearest.get(h.settlement) ?? Infinity)) {
         nearest.set(h.settlement, d);
         houseOf.set(h.settlement, [Math.round(h.x * 10) / 10, Math.round(h.y * 10) / 10, Math.round(h.face * 100) / 100]);
       }
+    }
+    // Each dispersed unit keeps its own occupied ground. The empty parent has no perimeter.
+    const outlines = new Map<number, number[]>();
+    for (const [i, settlement] of (pl?.settlements ?? []).entries()) {
+      if (!settlement.city && !settlement.unitOf) continue;
+      const ring = settlement.boundary?.flat() ?? convexHull(housePoints.get(i) ?? []);
+      if (ring.length >= 6) outlines.set(i, ring.map(Math.round));
     }
     const people: PeopleSummary | undefined = pl && {
       forms: pl.forms,
@@ -148,7 +162,7 @@ self.onmessage = (e: MessageEvent<ToLifeWorker>) => {
       streets: pl.streets.length + pl.lanes.length,
       crops: !!stream.crops,
       agriculture: pl.agriculture,
-      settlements: pl.settlements.map((x, i) => ({ ...(houseOf.has(i) ? { house: houseOf.get(i)! } : {}), pattern: x.pattern, houses: x.houses, people: Math.round(x.people), ...(x.city ? { city: x.city } : {}), ...(x.record ? { record: x.record } : {}), ...(x.from ? { from: x.from } : {}), ...(x.town ? { town: x.town } : {}), ...(x.husbandry ? { husbandry: x.husbandry } : {}), ...(x.unitOf ? { unitOf: x.unitOf } : {}), tier: x.tier, form: x.form, region: x.region, x: Math.round(x.x), y: Math.round(x.y), r: Math.round(x.r) })),
+      settlements: pl.settlements.map((x, i) => ({ ...(outlines.has(i) ? { outline: outlines.get(i) } : {}), ...(houseOf.has(i) ? { house: houseOf.get(i)! } : {}), pattern: x.pattern, houses: x.houses, people: Math.round(x.people), ...(x.city ? { city: x.city } : {}), ...(x.record ? { record: x.record } : {}), ...(x.from ? { from: x.from } : {}), ...(x.town ? { town: x.town } : {}), ...(x.husbandry ? { husbandry: x.husbandry } : {}), ...(x.unitOf ? { unitOf: x.unitOf } : {}), tier: x.tier, form: x.form, region: x.region, x: Math.round(x.x), y: Math.round(x.y), r: Math.round(x.r) })),
       houses: pl.houses.length,
       drawn: pl.drawn,
       expected: pl.expected,

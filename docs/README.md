@@ -60,6 +60,7 @@ Proposals for running the project in public, and for the viewer. Not built, exce
 | [plans/HUMAN-LANDSCAPE-REALISM.md](plans/HUMAN-LANDSCAPE-REALISM.md) | moving settlements, walls, roads, fields, crops and daily activity from schematic placeholders to cohesive, living historical landscapes |
 | [plans/MODELS.md](plans/MODELS.md) | an estimate of every quantity at any place and time: each a node with a prior from its causes, the evidence as what it observes, pooled by distance and relatedness, and scored on what it predicts of evidence held out; first, people per hectare, from Angkor's case |
 | [plans/CITIES.md](plans/CITIES.md) | every settlement at any time from one system, graded by what is known of it: a city in layers that last differently long, one ranking of the ground that makes it grow and shrink, the land divided once, buildings in generations on plots that last, work that goes somewhere, and Rome moved over to it |
+| [plans/SITE-NAVIGATION.md](plans/SITE-NAVIGATION.md) | keeping cities, settlements and polities identifiable from the globe to the ground, with Angkor in 851 CE as the first test |
 
 ## Archive
 

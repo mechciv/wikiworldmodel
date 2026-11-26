@@ -448,7 +448,40 @@ export class InspectPanel {
   /** How to go and see a taxon where it lived, if there is somewhere to go: what the panel offers. */
   seeIt: ((id: string, local: boolean) => { label: string; go: () => void } | undefined) | null = null;
 
+  private siteRecord?: EntityRecord;
+
+  siteDetails(cores: { lat: number; lon: number; ref?: string; label?: string }[], extent: string): void {
+    const details = this.el.querySelector<HTMLElement>('.site-details');
+    if (!details || !this.siteRecord) return;
+    const key = JSON.stringify([cores, extent]);
+    if (details.dataset.view === key) return;
+    details.dataset.view = key;
+    details.replaceChildren();
+    for (const core of cores) {
+      // Older catalogues lack claim references. Match the point to the open record to recover its source.
+      const claim = this.siteRecord.claims.find(
+        (c) =>
+          c.ref === core.ref ||
+          (!core.ref && c.prop === 'core' && (c.value as { lat: number }).lat === core.lat && (c.value as { lon: number }).lon === core.lon),
+      );
+      if (!claim) continue;
+      const link = document.createElement('button');
+      link.type = 'button';
+      link.textContent = core.label ? 'Centre · ' + core.label : 'Historical centre';
+      link.title = claim.note ?? claim.valueText;
+      link.onclick = () => this.el.querySelector(`[data-claim="${CSS.escape(claim.ref)}"]`)?.scrollIntoView({ block: 'center' });
+      details.append(link);
+    }
+    if (extent) {
+      const info = document.createElement('span');
+      info.textContent = extent.split(' · ')[0];
+      info.title = extent;
+      details.append(info);
+    }
+  }
+
   showEntity(r: EntityRecord, scenario: Scenario, time: FeatureTime, here?: TerritoryHere, organism?: OrganismHere): void {
+    this.siteRecord = r;
     const status = r.claims.length > 0 && r.claims.every((c) => c.status === 'accepted') ? 'accepted' : r.claims.some((c) => c.status === 'disputed') ? 'disputed' : 'proposed';
     const machine = r.claims.some((c) => c.author.startsWith('machine:'));
     const alts = new Set(scenario.alts ?? []);
@@ -582,7 +615,11 @@ export class InspectPanel {
       button.className = 'see-it';
       button.textContent = see.label;
       button.onclick = see.go;
-      this.el.querySelector('.meta')?.after(button);
+      if (r.kind.split('/')[0] === 'settlement') {
+        const details = document.createElement('div');
+        details.className = 'site-details';
+        this.el.querySelector('header')?.after(button, details);
+      } else this.el.querySelector('.meta')?.after(button);
     }
     for (const input of this.el.querySelectorAll<HTMLInputElement>('input[type=radio]')) {
       input.onchange = () => this.cb.onPick(input.dataset.members!.split(' '), input.value === input.dataset.default ? null : input.value);

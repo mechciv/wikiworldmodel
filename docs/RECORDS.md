@@ -161,6 +161,8 @@ A figure of a settlement's people, its ground or its houses counts some ground, 
 - **A place a settlement was centred on** is a claim of `core`: a point, with the years it was, sourced to what says it
   was the centre then. A settlement whose centre moved, as Angkor's did from Hariharalaya to Yasodharapura, has one for
   each, and its town is ranked from the one that stood at a time.
+  Give a core its own map label with a separate `name` claim whose subject is the local core claim, for example
+  `subject: "#core-hariharalaya"`. Cite the name independently. Its coordinates and active years come from the core.
 - **A count of houses** is read for the people only where no preferred figure gives the people then, which most such
   estimates rest on.
 

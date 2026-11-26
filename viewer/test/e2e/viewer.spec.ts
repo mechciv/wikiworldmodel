@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import type { PlanetFile } from '../../../core/planet.ts';
+import { quantize } from '../../src/state.ts';
 import { formatTime } from '../../../core/time.ts';
 import { xOf } from '../../src/ui/timebar.ts';
 import { buildFile, canvasGrid, canvasPatch, canvasPng, gridsApart, idle, latestBuild, markerPositions, openLayers, openPlanet, settledUrl } from './helpers.ts';
@@ -39,18 +40,39 @@ for (const trip of [
     expect(sweeping.cam.lon).toBeGreaterThan(first.cam.lon);
     expect(sweeping.cam.dist).toBe(start.cam.dist);
     await page.clock.resume();
-    await page.waitForFunction((d) => window.__wikiworldmodel!.state().cam.dist < d, start.cam.dist);
-    const descending = await state();
-    expect(when).toContain(formatTime(descending.t));
-    expect(sweeping.t).toBeGreaterThan(Math.min(first.t, descending.t));
-    expect(sweeping.t).toBeLessThan(Math.max(first.t, descending.t));
-    expect(descending.cam.lon).toBeGreaterThan(sweeping.cam.lon);
+    await page.waitForFunction((d) => window.__wikiworldmodel!.state().cam.dist !== d, start.cam.dist);
+    const framing = await state();
+    if (trip.card) expect(framing.cam.dist).toBeLessThan(start.cam.dist);
+    expect(when).toContain(formatTime(framing.t));
+    expect(sweeping.t).toBeGreaterThan(Math.min(first.t, framing.t));
+    expect(sweeping.t).toBeLessThan(Math.max(first.t, framing.t));
+    expect(framing.cam.lon).toBeGreaterThan(sweeping.cam.lon);
     await idle(page);
     const landed = await state();
-    expect(landed.cam.lon).toBe(descending.cam.lon);
-    expect(landed.t).toBe(descending.t);
+    // The saved camera gains four decimal places below the globe. Compare at the precision of the first framing movement.
+    const samePlaceFromAbove = quantize({ ...landed, cam: { ...landed.cam, dist: framing.cam.dist } });
+    expect(samePlaceFromAbove.cam.lon).toBe(framing.cam.lon);
+    expect(landed.t).toBe(framing.t);
   });
 }
+
+test('state search uses the indexed location when the border file is unavailable and retries on the next visit', async ({ page }) => {
+  const hash = buildFile<{ files: Record<string, string> }>('manifest.json').files['polities.json'];
+  const missing = '**/blobs/' + hash;
+  await page.route(missing, (route) => route.fulfill({ status: 503, body: 'Unavailable' }));
+  await page.goto(`/?b=${latestBuild()}&t=120&lat=0&lon=0&d=2.6&cl=0`);
+  const search = page.locator('.search input');
+  const choose = async () => {
+    await search.fill('Parthian Empire');
+    await page.locator('.search li').filter({ hasText: 'Parthian Empire' }).first().click();
+  };
+  await choose();
+  await expect(page.locator('.inspect')).toContainText('Detailed boundary geometry is unavailable');
+  expect((await page.evaluate(() => window.__wikiworldmodel!.state())).cam.lon).toBeGreaterThan(30);
+  await page.unroute(missing);
+  await choose();
+  await expect(page.locator('.inspect')).toContainText('as the dataset draws it');
+});
 
 test('a shared link reproduces the same view', async ({ page, context }) => {
   await page.goto(`/?b=${latestBuild()}`);

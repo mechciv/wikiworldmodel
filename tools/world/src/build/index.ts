@@ -73,6 +73,7 @@ import { buildIce, type IceBuilt } from './ice.ts';
 import { hazardLayer, peopleLayer, polityLayer, presentLayer, stateRowKey } from './layers.ts';
 import { buildLandscape, disagreement, farmingAgreement, housing, housingCounts, HOUSING_TIMES, landscapeEntities, landscapeResolve, regionHyde, type LandscapeBuilt } from './landscape.ts';
 import { fitCitiesModel } from '../holdout.ts';
+import { kindIs } from '../world.ts';
 import { regionReach } from '../../../../core/landscape.ts';
 import type { PeopleScores } from '../../../../core/citypop.ts';
 import { mappedLake, shoresNear } from '../../../../core/shorelines.ts';
@@ -1757,6 +1758,9 @@ export async function runBuild(args: string[]): Promise<number> {
       {
         fields: landscapeFields.map(fieldKey),
         regionsDataset: dsKey(regionsId),
+        settlementOutlines: [...new Set(world.entities.filter(e => kindIs(e.kind, 'settlement')).flatMap(e =>
+          e.claims.filter(c => c.prop === 'extent').map(c => (c.value as { from?: string }).from).filter((id): id is string => !!id)
+        ))].sort().map(dsKey),
         settlementGen: settlementGen ? { id: settlementGen.id, version: settlementGen.version, params: settlementGen.params } : undefined,
         peopleSha: peopleHeader ? dag.fileRef('people.lwt')?.sha256 : null,
         plans: world.plans,

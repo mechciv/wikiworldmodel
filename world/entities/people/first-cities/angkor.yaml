@@ -366,3 +366,27 @@ claims:
       is the record's own, the gazetteer's representative point for Angkor.
     checked:
       - { step: quoted, by: machine:quote-check, how: "Found in pleiades-531398484.txt (sha256 24d98dcbf5e2871f) and lustig-2009.txt (sha256 494d50a16c137857), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-25" }
+  name-hariharalaya:
+    subject: "#core-hariharalaya"
+    prop: name
+    value: { en: Hariharalaya }
+    author: machine:codex
+    source:
+      ref: src:lustig-2009-angkor-political-economy
+      loc: "p. 66, the series of preeminent capitals"
+      quote: "Hariharālaya (Roluos)"
+    note: The English map label uses the spelling without diacritics.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in lustig-2009.txt (sha256 494d50a16c137857), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-26" }
+  name-yasodharapura:
+    subject: "#core-yasodharapura"
+    prop: name
+    value: { en: Yasodharapura }
+    author: machine:codex
+    source:
+      ref: src:lustig-2009-angkor-political-economy
+      loc: "p. 66, the series of preeminent capitals"
+      quote: "Yaśodharapura (Angkor)"
+    note: The English map label uses the spelling without diacritics.
+    checked:
+      - { step: quoted, by: machine:quote-check, how: "Found in lustig-2009.txt (sha256 494d50a16c137857), after normalizing whitespace and typography, by npm run world -- quote-check.", on: "2026-11-26" }
