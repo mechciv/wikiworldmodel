@@ -368,7 +368,7 @@ export interface CityRecord {
    * stood at a time (model:people/settlement-growth). None, and it is centred on its own point.
    */
   cores?: ({ lat: number; lon: number; label?: string } & SiteClaim)[];
-  extents?: ({ polygons: number[][][][]; basis?: string } & SiteClaim)[];
+  extents?: ({ polygons: number[][][][]; basis?: string; source?: string } & SiteClaim)[];
   /** how it was laid out: its `town_form` claim, and when that held, where the claim says */
   town?: TownSpec;
   townSpan?: [number, number];

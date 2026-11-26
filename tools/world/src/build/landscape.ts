@@ -684,7 +684,7 @@ export function cityRecords(s: Solved): CityRecord[] {
       .flatMap((c) => {
         const polygons = settlementOutline(s.world, c.value);
         if (!polygons.length) return [];
-        return [{ ...siteClaim(c), basis: c.basis, polygons }];
+        return [{ ...siteClaim(c), basis: c.basis, ...(c.sources[0] ? { source: c.sources[0].ref } : {}), polygons }];
       });
     const cores = e.claims
       .filter((c) => c.subject === e.id && c.prop === 'core' && c.status !== 'deprecated')

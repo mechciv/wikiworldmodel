@@ -33,6 +33,7 @@ describe('settlement navigation', () => {
   it('uses only the dated settlement outline in the current picture', () => {
     const extent = {
       ref: 'outline',
+      source: 'src:survey',
       span: [889, 1000] as [number, number],
       polygons: [
         [
@@ -48,6 +49,9 @@ describe('settlement navigation', () => {
     const r = { ...city, extents: [extent] };
     expect(settlementFocus(r, 851, {}).extents).toHaveLength(0);
     expect(settlementFocus(r, 900, {}).extents[0].basis).toBe('evidence');
+    for (const variant of [{ ...extent, source: undefined }, { ...extent, basis: 'reconstruction' }]) {
+      expect(settlementFocus({ ...city, extents: [variant] }, 900, {}).extents[0].basis).toBe('reconstruction');
+    }
     expect(settlementFocus(r, 900, {}).radius).toBeGreaterThan(5000);
   });
 });

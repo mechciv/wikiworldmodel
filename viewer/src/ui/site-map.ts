@@ -204,7 +204,7 @@ export class SiteMap {
                 true,
               );
           }
-        description = data.extents.map((e) => (e.basis === 'evidence' ? 'Recorded' : 'Reconstructed') + ' settlement extent · ' + e.ref).join(' / ');
+        description = data.extents.map((e) => (e.basis === 'evidence' ? 'Recorded' : 'Reconstructed') + ' settlement extent · ' + [e.ref, e.source].filter(Boolean).join(' · ')).join(' / ');
       } else if (people) {
         const town = people.settlements.find((s) => s.city && (s.record ? s.record === pin.id : s.city === pin.label));
         if (town)
