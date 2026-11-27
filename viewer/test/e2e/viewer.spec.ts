@@ -13,7 +13,8 @@ for (const trip of [
   { name: 'Mongol Empire 1250 CE', from: 2020, card: false },
 ]) {
   test(`the time machine turns the globe while scrubbing to ${trip.name}`, async ({ page }) => {
-    // Angkor's trip ends nearer the ground, where the view took nearly five minutes to settle in software on CI's runner.
+    // A trip draws the globe at each time it passes through, in software: on CI's runner Angkor's, which also waited
+    // for its city to be drawn, ran past five minutes.
     test.setTimeout(10 * 60_000);
     await page.setViewportSize({ width: 800, height: 600 });
     await page.emulateMedia({ reducedMotion: 'no-preference' });
@@ -49,7 +50,9 @@ for (const trip of [
     expect(sweeping.t).toBeGreaterThan(Math.min(first.t, framing.t));
     expect(sweeping.t).toBeLessThan(Math.max(first.t, framing.t));
     expect(framing.cam.lon).toBeGreaterThan(sweeping.cam.lon);
-    await idle(page);
+    // Landed, and the link says so: what lies there need not be drawn, which near Angkor's ground is its city.
+    await page.waitForFunction(() => !window.__wikiworldmodel!.waiting().includes('flight'), null, { polling: 100 });
+    await settledUrl(page);
     const landed = await state();
     // The saved camera gains four decimal places below the globe. Compare at the precision of the first framing movement.
     const samePlaceFromAbove = quantize({ ...landed, cam: { ...landed.cam, dist: framing.cam.dist } });
