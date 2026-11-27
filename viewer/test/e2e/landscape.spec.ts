@@ -33,7 +33,21 @@ test.describe('the human landscape', () => {
     const pin = page.locator(`.site-map .site-pin[data-entity="${id}"]`);
     await expect(pin).toBeVisible({ timeout: 120_000 });
     await expect(pin).toContainText('Hariharalaya');
-    await expect(page.locator('.site-details')).toContainText('Reconstructed settlement extent');
+    const clusters = page.getByRole('checkbox', { name: 'Show reconstructed housing clusters' });
+    await expect(clusters).toBeVisible();
+    await expect(clusters).not.toBeChecked();
+    const painted = () => page.locator('.site-map canvas').evaluate(el => {
+      const canvas = el as HTMLCanvasElement;
+      return canvas.getContext('2d')!.getImageData(0, 0, canvas.width, canvas.height).data.some((v,i) => i % 4 === 3 && v > 0);
+    });
+    // The Khmer frontier is outside the saved view. Only the optional housing clusters paint this canvas.
+    await expect.poll(painted).toBe(false);
+    await clusters.check();
+    await expect(page.locator('.cluster-legend')).toBeVisible();
+    await expect.poll(painted).toBe(true);
+    await clusters.uncheck();
+    await expect(page.locator('.cluster-legend')).toBeHidden();
+    await expect.poll(painted).toBe(false);
     const saved = await page.evaluate(() => window.__wikiworldmodel!.state().cam);
     expect(saved.lat).toBeCloseTo(13.318067, 5);
     expect(saved.lon).toBeCloseTo(104.0184444, 5);

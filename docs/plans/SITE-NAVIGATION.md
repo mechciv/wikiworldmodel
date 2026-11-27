@@ -34,8 +34,8 @@ the bottom bar. This accounted for both the blank middle distance and the missin
    identity so switching projections or panning across scene tiles never shows Angkor twice.
 
 3. **Show what ground the settlement occupied.** Use a dated, sourced outline where the record supplies one.
-   Otherwise draw a subdued overlay from the occupied parts of the generated plan and identify it on inspection as
-   **reconstructed settlement extent**. For dispersed Angkor, show groups of occupied ground with fields and gaps
+   Otherwise offer **Show reconstructed housing clusters** in the inspector. It starts unchecked and draws
+   the occupied parts of the generated plan for the selected settlement. For dispersed Angkor, show groups of occupied ground with fields and gaps
    between them. For a point-only site, the named pin is sufficient. A regional area estimate or a modern park
    boundary cannot establish a medieval city's perimeter. Compute the display geometry once per plan and date in
    the worker and simplify it for the current scale.
@@ -59,7 +59,7 @@ the bottom bar. This accounted for both the blank middle distance and the missin
 | Polity interior and frontier | Start inside the Roman Empire in 120 CE, then cross a boundary present in that year's data. The interior names the polity, the crossing shows its edge, and inspection on either side agrees with the dated polygons. |
 
 The matched screenshots below use the saved 851 CE camera and a fixed clock. The local pin marks Hariharalaya.
-The dashed patches follow the occupied parts of the settlement plan. The Khmer Empire button opens the political map source.
+The original rollout’s After views show the housing outlines enabled. Each dashed patch follows one cluster of modelled houses. The overlay now starts off. The Khmer Empire button opens the political map source.
 
 | View | Before | After |
 |---|---|---|

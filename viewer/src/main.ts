@@ -961,6 +961,7 @@ async function start(root: HTMLElement): Promise<void> {
     dirty = true;
     clearTimeout(urlTimer);
     urlTimer = window.setTimeout(() => history.replaceState(null, '', toSearch(build.id, state)), 120);
+    if (selChanged) siteMap.clusterSite = null;
     if (selChanged || altsChanged) void showSelection();
     if (state.tree || taxonKind(state.sel)) wantTree();
     treePanel.el.hidden = !state.tree;
@@ -1524,7 +1525,11 @@ async function start(root: HTMLElement): Promise<void> {
     const place = state.sel && landscape?.places.get(state.sel);
     if (place && shownRecord === place.id) {
       const cores = settlementFocus(place, state.t, scenario()).cores;
-      inspect.siteDetails(cores, siteMap.description(place.id));
+      const extent = siteMap.extentFor(place.id);
+      inspect.siteDetails(cores, extent, (show) => {
+        siteMap.clusterSite = show ? place.id : null;
+        dirty = true;
+      });
     }
     territory.el.hidden = !showTerritory || hide;
     if (showTerritory && !hide) territory.place(camera, state.t, scenario(), state.sel);
@@ -2541,7 +2546,7 @@ async function start(root: HTMLElement): Promise<void> {
           for (const x of mine) if (!x.city && !x.unitOf) counts.set(x.pattern as Pattern, (counts.get(x.pattern as Pattern) ?? 0) + 1);
           // A scaled house can use a different form slot from its town. The plotted occupied
           // ground still identifies which town the visitor actually clicked in.
-          const occupied = siteMap.extentAt(x, y)?.pin;
+          const occupied = siteMap.extentAt(x, y, true)?.pin;
           const towns = pp.settlements.filter(
             (s) => s.city && (mine.includes(s) || (occupied && (s.record ? s.record === occupied.id : s.city === occupied.label))),
           );

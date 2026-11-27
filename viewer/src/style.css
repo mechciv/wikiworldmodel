@@ -554,5 +554,9 @@ html { touch-action: manipulation; overscroll-behavior-y: none; }
 .local-country { border-color: #b3a4cc; color: #eee5ff; }
 .site-pin:focus-visible, .local-country:focus-visible { outline: 2px solid white; }
 .site-details { display: flex; flex-wrap: wrap; align-items: baseline; gap: 3px 12px; margin-top: 6px; color: var(--muted); font-size: 12px; }
+.site-details label { display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }
+.site-details .cluster-legend { display: none; flex-basis: 100%; }
+.site-details label:has(input:checked) + .cluster-legend { display: block; }
+.cluster-legend::before { content: ''; display: inline-block; width: 18px; margin-right: 6px; vertical-align: middle; border-top: 1px dashed #ffd990; }
 .site-details:empty { display: none; }
 .site-details button { padding: 0; border: 0; color: var(--accent-text); background: none; text-decoration: underline; cursor: pointer; }
