@@ -26,7 +26,7 @@ const list = (over: Partial<ThingList> = {}): ThingList => ({
   count: 2,
   ...over,
 });
-const index = (lists: ThingList[]): ThingsIndex => ({ format: 'lightworld-things@1', lists, chunks: 4, shards: {}, split: [], treeChunks: 0 });
+const index = (lists: ThingList[]): ThingsIndex => ({ format: 'lightworld-things@2', lists, chunks: 4, split: [], cap: 4000, treeChunks: 0 });
 
 describe('a thing of a list', () => {
   it('is known by its scheme and key, and no record type is a scheme', () => {
@@ -90,6 +90,22 @@ describe('a thing of a list', () => {
     expect(page.relations).toEqual([expect.objectContaining({ rel: 'descends-from', to: 'db:txn:6', toLabel: 'Tyrannosaurini', wanted: false })]);
     expect(page.same_as).toEqual({ db: 'txn:7', wikidata: 'Q14332' });
   });
+
+  it("names it by its own other names and those of another list's thing that is it, and says how that was joined", () => {
+    const a = list();
+    const names = list({ scheme: 'col', dataset: 'src:test/names', field: 'field:test/names', sourceRecord: { ...SOURCE, id: 'src:test/names' } });
+    const lion = { la: 'Panthera leo' };
+    const page = thingPage(index([a, names]), { k: 'txn:9', l: 0, n: 'Panthera leo', v: [lion, 'species', null, null], am: ['col:4CGXP'], x: [['Leo leo', 'synonym', 'la']] }, [
+      { k: '4CGXP', l: 1, n: 'Panthera leo', v: [lion, 'species', null, null], x: [['Felis leo', 'synonym', 'la'], ['Lion', 'common name', 'en'], ['Leo leo', 'synonym', 'la']] },
+    ]);
+    expect(page.thing?.names).toEqual([
+      { text: 'Leo leo', note: 'synonym', lang: 'la' },
+      { text: 'Felis leo', note: 'synonym', lang: 'la' },
+      { text: 'Lion', note: 'common name', lang: 'en' },
+    ]);
+    expect(page.thing?.matched).toEqual(['col:4CGXP']);
+    expect(page.same_as).toMatchObject({ db: 'txn:9', col: '4CGXP' });
+  });
 });
 
 describe('search of the things', () => {
@@ -125,5 +141,16 @@ describe('search of the things', () => {
     ];
     expect(matchHits(hits, 'allosaurus').map((h) => h[0])).toEqual(['db:2', 'db:3']);
     expect(matchHits(hits, 'allosaur').map((h) => h[0])).toEqual(['db:2', 'db:4', 'db:3']);
+  });
+
+  it("ranks a name that holds the text's words whole with one that begins with them, and a thing's own name before its others", () => {
+    const hits: ThingHit[] = [
+      ['col:1', 'Kilimanjaro Shrew', 5, 'common name of Crocidura monax', 1],
+      ['col:2', 'Kilimanjaro Mouse Shrew', 5, 'common name of Myosorex zinki', 1],
+      ['natural-earth:1', 'Mount Kilimanjaro', 2, 'mountain'],
+      ['glottolog:1', 'Kilimanjaro-Taita', 1, 'family'],
+      ['natural-earth:2', 'Kilimanjaroish Plains', 2, 'plain'],
+    ];
+    expect(matchHits(hits, 'Kilimanjaro').map((h) => h[0])).toEqual(['glottolog:1', 'natural-earth:1', 'natural-earth:2', 'col:1', 'col:2']);
   });
 });

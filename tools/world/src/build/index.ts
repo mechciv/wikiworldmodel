@@ -90,7 +90,7 @@ import type { LandSnapshot, RocksSnapshot } from '../pbdb.ts';
 import type { ColumnsSnapshot } from '../macrostrat.ts';
 import { buildScene, witnesses } from './scene.ts';
 import { features as buildFeatures, holdersOf, labeller, periods as buildPeriods, records as buildRecords, search as buildSearch, sourceRecord, type Solved } from './records.ts';
-import { buildThings, thingLists } from './things.ts';
+import { thingFiles, thingLists } from './things.ts';
 import { worldThings } from '../things.ts';
 import { thingClaims, THINGS_INDEX } from '../../../../core/things.ts';
 import { planet as buildPlanet } from './planet.ts';
@@ -1175,17 +1175,28 @@ export async function runBuild(args: string[]): Promise<number> {
   const rowsOfRecords = [...listed.identity.rowsOf.entries()].sort(([a], [b]) => (a < b ? -1 : 1));
   const recordsStage = await dag.runStage(
     'records',
-    { worldEntitiesDigest, lists: listKeys, rowsOf: sha256(stableStringify(rowsOfRecords)) },
+    { worldEntitiesDigest, lists: listKeys, rowsOf: sha256(stableStringify(rowsOfRecords)), matched: sha256(stableStringify(rowsOfRecords.flatMap(([, ids]) => ids.filter((id) => listed.identity.matched.has(id))))) },
     async (sink) => {
       const recs = buildRecords(solved);
       for (const r of recs) {
         const ids = listed.identity.rowsOf.get(r.id);
         if (ids?.length) {
+          // A thing joined to the record's by a match of names, not by an id, says so; its other names go with its first row.
+          const matched = new Set(ids.flatMap((id) => listed.identity.matched.get(id) ?? []));
           r.rows = ids.flatMap((id) => {
             const t = listed.things.things.get(id)!;
-            return t.rows.map((row) => {
+            const names = t.names.filter((n) => n.text !== t.label);
+            return t.rows.map((row, i) => {
               const list = listsOfThings[row.list];
-              return { id, list: `${list.name}: ${list.title.charAt(0).toLowerCase()}${list.title.slice(1)}`, dataset: list.dataset, key: t.key, claims: thingClaims(list, { k: t.key, v: row.values }, r.id, false) };
+              return {
+                id,
+                list: `${list.name}: ${list.title.charAt(0).toLowerCase()}${list.title.slice(1)}`,
+                dataset: list.dataset,
+                key: t.key,
+                claims: thingClaims(list, { k: t.key, v: row.values }, r.id, false),
+                ...(i === 0 && names.length ? { names: names.slice(0, 30).map((n) => ({ text: n.text, note: n.note, ...(n.lang ? { lang: n.lang } : {}) })) } : {}),
+                ...(matched.has(id) ? { matched: true } : {}),
+              };
             });
           });
         }
@@ -1193,19 +1204,21 @@ export async function runBuild(args: string[]): Promise<number> {
       }
       return { count: recs.length };
     },
-    { codeFiles: ['tools/world/src/build/records.ts', 'core/records.ts', 'core/ladder.ts', 'core/things.ts', 'tools/world/src/things.ts', 'tools/world/src/tables.ts'] },
+    { codeFiles: ['tools/world/src/build/records.ts', 'core/records.ts', 'core/ladder.ts', 'core/things.ts', 'tools/world/src/things.ts', 'tools/world/src/tables.ts', 'tools/world/src/rowstream.ts'] },
   );
 
-  // Stage: things/: the things of lists, their pages, search and trees (docs/plans/ENTITIES.md, steps 2 to 4).
+  // Stage: things/: the things of lists, their pages, search and trees (docs/plans/ENTITIES.md, steps 2 to 5).
   const thingsStage = await dag.runStage(
     'things',
     { worldEntitiesDigest, lists: listKeys, overlays: world.overlays.filter((o) => o.same_as).map((o) => [o.row, o.same_as]) },
     async (sink) => {
-      const b = buildThings(world, listed.things, listed.identity, labeller(solved));
-      for (const [path, content] of [...b.files].sort(([a], [z]) => (a < z ? -1 : 1))) await sink.put(path, content);
-      return { count: listed.things.things.size, files: b.files.size, listedChildren: [...b.listedChildren.entries()].sort(([a], [z]) => (a < z ? -1 : 1)) };
+      // Each file is put as it is made: the lists may hold millions of things.
+      const files = thingFiles(world, listed.things, listed.identity, labeller(solved));
+      let r = files.next();
+      for (; !r.done; r = files.next()) await sink.put(r.value[0], r.value[1]);
+      return { count: listed.things.things.size, files: r.value.files, listedChildren: [...r.value.listedChildren.entries()].sort(([a], [z]) => (a < z ? -1 : 1)) };
     },
-    { codeFiles: ['tools/world/src/build/things.ts', 'tools/world/src/things.ts', 'core/things.ts', 'tools/world/src/tables.ts'] },
+    { codeFiles: ['tools/world/src/build/things.ts', 'tools/world/src/things.ts', 'core/things.ts', 'tools/world/src/tables.ts', 'tools/world/src/rowstream.ts'] },
   );
   log(`things  ${thingsStage.meta.count} things of ${listed.things.lists.length} lists, in ${thingsStage.meta.files} files; ${listed.identity.record.size} of them records`);
   const listedChildren = new Map<string, { thing: string; count: number }>(thingsStage.meta.listedChildren);

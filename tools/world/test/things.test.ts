@@ -1,13 +1,14 @@
-// The things of lists (docs/plans/ENTITIES.md, steps 2 to 4): a row of a list is a thing known by its scheme's id, two
-// snapshots of one catalogue are one thing, a record that names a thing's id is it, and nothing is joined by a name.
+// The things of lists (docs/plans/ENTITIES.md, steps 2 to 5): a row of a list is a thing known by its scheme's id, two
+// snapshots of one catalogue are one thing, a record that names a thing's id is it, and nothing is joined by a name
+// alone: two catalogues are joined where a name, a rank and the trees above them agree.
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { chunkOf, shardForText, shardKey, thingPagePath, thingSearchPath, thingTreePath, type ThingChunk, type ThingShard, type ThingTreeChunk } from '../../../core/things.ts';
-import { buildThings, splitsOf } from '../src/build/things.ts';
+import { chunkOf, dirOf, matchHits, shardForText, shardKey, thingPagePath, thingSearchDirPath, thingSearchPath, thingTreePath, type ThingChunk, type ThingShard, type ThingTreeChunk } from '../../../core/things.ts';
+import { buildThings, SHARD_CAP, splitsOf } from '../src/build/things.ts';
 import type { RowsSpec, Table } from '../src/tables.ts';
-import { identity, thingsOf, type List } from '../src/things.ts';
+import { identity, matches, thingsOf, type List } from '../src/things.ts';
 import { validateWorld } from '../src/validate/index.ts';
 import { loadWorld, type Entity, type Field, type World } from '../src/world.ts';
 
@@ -104,6 +105,73 @@ describe('one identity across records and lists', () => {
   });
 });
 
+describe('two catalogues of one kind', () => {
+  // The fossils' catalogue, and a catalogue of names that says its taxa are the fossils' where name, rank and tree agree.
+  const fossils = list('src:pbdb-land-2026-11-05', TAXA, [
+    { no: 1, name: 'Life', rank: 'unranked clade', parent: 0 },
+    { no: 2, name: 'Dinosauria', rank: 'unranked clade', parent: 1 },
+    { no: 3, name: 'Tyrannosaurus', rank: 'genus', parent: 2, first_max: 83.6, first_min: 72.2 },
+    { no: 4, name: 'Tyrannosaurus rex', rank: 'species', parent: 3, first_max: 72.2, first_min: 66 },
+    { no: 5, name: 'Morus', rank: 'genus', parent: 6 },
+    { no: 6, name: 'Sulidae', rank: 'family', parent: 1 },
+    { no: 7, name: 'Felidae', rank: 'family', parent: 1 },
+    { no: 8, name: 'Panthera', rank: 'genus', parent: 7 },
+  ]);
+  const NAMES: RowsSpec & { scheme: string } = {
+    kind: 'taxon',
+    key: '{ID}',
+    scheme: 'col',
+    parent: { key: '{parentID}', rel: 'descends-from' },
+    match: { scheme: 'pbdb', by: ['name', 'taxon_rank'] },
+    claims: { name: { column: 'scientificName', as: 'text', lang: 'la' }, taxon_rank: { column: 'rank' }, authorship: { column: 'authorship' } },
+  };
+  const names = list('src:col-2026-11-11', NAMES, [
+    // At the top of its list, with nothing above it to agree or disagree.
+    { ID: 'A', parentID: '', scientificName: 'Dinosauria', rank: 'unranked clade' },
+    { ID: 'B', parentID: 'A', scientificName: 'Tyrannosaurus', rank: 'genus', authorship: 'Osborn, 1905' },
+    { ID: 'C', parentID: 'B', scientificName: 'Tyrannosaurus rex', rank: 'species', authorship: 'Osborn, 1905' },
+    // The mulberries, which share a name with the gannets: their parents disagree.
+    { ID: 'E', parentID: '', scientificName: 'Moraceae', rank: 'family' },
+    { ID: 'D', parentID: 'E', scientificName: 'Morus', rank: 'genus', authorship: 'L.' },
+    { ID: 'G', parentID: '', scientificName: 'Felidae', rank: 'family' },
+    // Two of a name and rank in one list: neither is joined.
+    { ID: 'F', parentID: 'G', scientificName: 'Panthera', rank: 'genus', authorship: 'Oken, 1816' },
+    { ID: 'F2', parentID: 'G', scientificName: 'Panthera', rank: 'genus', authorship: 'Pocock, 1916' },
+    { ID: 'H', parentID: 'F', scientificName: 'Panthera leo', rank: 'species' },
+  ]);
+  const t = thingsOf([fossils, names]);
+  const world = { entities: [], overlays: [] } as unknown as World;
+  const id = identity(world, t);
+
+  it('are joined where one thing of each has the name and rank, and the parent of one is above the other', () => {
+    expect(matches([fossils, names]).map(([a, b]) => `${a}=${b}`).sort()).toEqual(['col:A=pbdb:txn:2', 'col:B=pbdb:txn:3', 'col:C=pbdb:txn:4', 'col:G=pbdb:txn:7']);
+    expect(id.also.get('col:B')).toEqual(['pbdb:txn:3']);
+    expect(id.matched.get('pbdb:txn:3')).toEqual(['col:B']);
+  });
+
+  it('are not joined where the trees disagree, nor where a name and rank are two things in one list', () => {
+    expect(id.also.has('col:D')).toBe(false);
+    expect(id.also.has('col:F')).toBe(false);
+    expect(id.also.has('pbdb:txn:8')).toBe(false);
+  });
+
+  it("are found once, as the thing of the list the other is matched to, and hang where it does with both lists' children", async () => {
+    expect(id.face.get('col:B')).toBe('pbdb:txn:3');
+    const b = buildThings(await loadWorld(), t, id, (x) => x);
+    const find = (text: string) => {
+      const key = shardForText(text, { split: b.index.split, shards: b.shards });
+      return key ? matchHits((JSON.parse(b.files.get(thingSearchPath(key))!) as ThingShard).entries, text).map((e) => e[0]) : [];
+    };
+    expect(find('Tyrannosaurus rex')).toEqual(['pbdb:txn:4']);
+    expect(find('Morus').sort()).toEqual(['col:D', 'pbdb:txn:5']);
+    const kids = (x: string) => (JSON.parse(b.files.get(thingTreePath(chunkOf(x, b.index.treeChunks)))!) as ThingTreeChunk).children[x]?.map((k) => k[0]) ?? [];
+    expect(kids('pbdb:txn:3')).toEqual(['pbdb:txn:4']);
+    expect(kids('pbdb:txn:7').sort()).toEqual(['col:F', 'col:F2', 'pbdb:txn:8']);
+    const page = (x: string) => (JSON.parse(b.files.get(thingPagePath(chunkOf(x, b.index.chunks)))!) as ThingChunk).things[x];
+    expect(page('col:B')).toMatchObject({ a: ['pbdb:txn:3'], am: ['pbdb:txn:3'] });
+  });
+});
+
 describe("the build's files of the things", () => {
   let world: World;
   beforeAll(async () => {
@@ -127,7 +195,7 @@ describe("the build's files of the things", () => {
     const id = identity({ entities: [entity('life/taxa/tyrannosaurus', { same_as: { pbdb: 'txn:2' } })], overlays: [] } as unknown as World, t);
     const b = buildThings(world, t, id, labels);
     const find = (text: string) => {
-      const key = shardForText(text, b.index);
+      const key = shardForText(text, { split: b.index.split, shards: b.shards });
       return key ? (JSON.parse(b.files.get(thingSearchPath(key))!) as ThingShard).entries.map((e) => e[0]) : [];
     };
     expect(find('rex')).toContain('pbdb:txn:3');
@@ -143,6 +211,24 @@ describe("the build's files of the things", () => {
     // A record's own thing is in the records' tree, and not among its parent's listed children.
     expect(kids('pbdb:txn:1').map((k) => k[0])).toEqual([]);
     expect(b.listedChildren.get('life/taxa/tyrannosaurus')).toEqual({ thing: 'pbdb:txn:2', count: 1 });
+  });
+
+  it('keep the shortest names in a shard of a word too many share, and count them all', () => {
+    const many = list('src:glottolog-5.3', LANGS, [
+      ...Array.from({ length: SHARD_CAP + 50 }, (_, i) => ({ Glottocode: `d${String(i).padStart(5, '0')}`, Name: `Variety ${'x'.repeat(i % 9)}${i}`, Level: 'dialect', Family_ID: '', Language_ID: '', ISO639P3code: '' })),
+      { Glottocode: 'shrt0001', Name: 'Variety', Level: 'language', Family_ID: '', Language_ID: '', ISO639P3code: '' },
+    ]);
+    const tt = thingsOf([many]);
+    const b = buildThings(world, tt, identity({ entities: [], overlays: [] } as unknown as World, tt), labels);
+    const key = shardForText('Variety', { split: b.index.split, shards: b.shards })!;
+    expect(b.shards[key]).toBe(SHARD_CAP + 51);
+    const kept = (JSON.parse(b.files.get(thingSearchPath(key))!) as ThingShard).entries;
+    expect(kept.length).toBe(SHARD_CAP);
+    expect(kept.map((e) => e[0])).toContain('glottolog:shrt0001');
+    expect(Math.max(...kept.map((e) => e[1].length))).toBeLessThanOrEqual(Math.min(...[...tt.things.values()].filter((x) => !kept.some((e) => e[0] === x.id)).map((x) => x.label.length)));
+    // The counts are in the directories, not the index, which grows with the vocabulary and not the things.
+    expect(JSON.parse(b.files.get(thingSearchDirPath(dirOf(key)))!).shards[key]).toBe(SHARD_CAP + 51);
+    expect(b.index).not.toHaveProperty('shards');
   });
 
   it('cut a shard finer where too many words begin alike, and read it by the same rule', () => {
@@ -188,6 +274,30 @@ describe('references to the things of lists', () => {
       'fields/b.yaml': field(`  kind: settlement\n  key: "{ne_id}"\n  parent: { key: "{parent}", rel: part-of }\n  claims:\n    name: { column: name, as: text }\n`).replace('field:test/places', 'field:test/other'),
     });
     expect(issues.filter((i) => i.check === 'rows').map((i) => `${i.file} ${i.where}`)).toEqual(['fields/a.yaml rows.key', 'fields/b.yaml rows.parent']);
+  });
+
+  it('give other names from a delimited table, and are matched to another list of their kind by a name and more', async () => {
+    const field = (id: string, data: string, rows: string) => `id: ${id}\ntype: field\ntitle: A list\ngrid: { kind: rows }\ntime: { lo: 1950 CE, hi: 2100 CE }\ndata: ${data}\nbasis: evidence\nspread: unknown\nrows:\n${rows}`;
+    const dataset = (id: string, url: string, format: string) => `  ${id}:\n    type: dataset\n    kind: compilation\n    citation: A fixture.\n    version: "1"\n    credit: A fixture\n    license: CC0-1.0\n    fetch: { url: "${url}", sha256: "${'0'.repeat(64)}", bytes: 1, format: ${format} }\n`;
+    const manifest = `publish:\n  licenses: [CC0-1.0]\ndatasets:\n${dataset('src:test/names', 'https://example.org/names.zip', 'zip')}${dataset('src:test/map', 'https://example.org/map.geojson', 'json')}${dataset('src:test/taxa', 'https://example.org/taxa.csv', 'csv')}`;
+    const issues = await check({
+      'manifest.yaml': manifest,
+      'sources/names.yaml': 'id: src:test/names\ntype: dataset\nkind: compilation\ncitation: A fixture.\n',
+      // The list the good one is matched to: taxa, with names and ranks.
+      'fields/taxa.yaml': field('field:test/taxa', '{ from: src:test/taxa }', `  kind: taxon\n  key: "{no}"\n  scheme: test-taxa\n  claims:\n    name: { column: name, as: text }\n    taxon_rank: { column: rank }\n`),
+      // Names from a table read as it comes, and a match to a scheme of the same kind by a name and a rank: as it should be.
+      'fields/good.yaml': field('field:test/good', '{ from: src:test/names, file: NameUsage.tsv }', `  kind: taxon\n  key: "{col:ID}"\n  scheme: good\n  match: { scheme: test-taxa, by: [name, taxon_rank] }\n  names:\n    - { of: "{col:parentID}", name: col:scientificName, note: synonym }\n    - { file: VernacularName.tsv, of: "{col:taxonID}", name: col:name, note: common name }\n  claims:\n    name: { column: col:scientificName, as: text }\n    taxon_rank: { column: col:rank }\n`),
+      // Names from a map's GeoJSON, which is not read as it comes; a match by a rank alone, to a scheme of another kind.
+      'fields/bad.yaml': field('field:test/bad', '{ from: src:test/map }', `  kind: settlement\n  key: "{ne_id}"\n  scheme: bad\n  match: { scheme: test-taxa, by: [taxon_rank, language_level] }\n  names:\n    - { of: "{ne_id}", name: namealt, note: other name }\n  claims:\n    name: { column: name, as: text }\n`),
+    });
+    expect(issues.filter((i) => i.check === 'rows').map((i) => `${i.file} ${i.where}: ${i.message}`)).toEqual([
+      'fields/bad.yaml rows.names: other names are read from a delimited table, a csv or tsv file or a member of a zip',
+      'fields/bad.yaml rows.match.scheme: the things of test-taxa are of another kind than settlement: a match joins things of one kind',
+      'fields/bad.yaml rows.match.by: a match is by a name and what else must agree with it',
+      'fields/bad.yaml rows.match.by: its rows give no "taxon_rank"',
+      'fields/bad.yaml rows.match.by: its rows give no "language_level"',
+      'fields/bad.yaml rows.match.by: field:test/taxa\'s rows give no "language_level"',
+    ]);
   });
 
   it('warn at an id of a scheme that no list read here has', async () => {

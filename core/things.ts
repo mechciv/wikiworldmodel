@@ -7,7 +7,9 @@
 // The build writes, beside the records:
 //   things/index.json          the lists, and how the rest is cut;
 //   things/pages/<n>.json      the things, by the hash of their ids (chunkOf), for their pages;
-//   things/search/<p>.json     search: every thing a name is known by, by the first letters of each word of it;
+//   things/search/<p>.json     search: every thing a name is known by, by the first letters of each word of it, a shard
+//                              of a word too many names share keeping the shortest of them;
+//   things/search-dir/<ab>.json the shards that begin with two letters, with how many entries each holds;
 //   things/tree/<n>.json       the things of a list that is a tree, as the children of each, by the hash of its id.
 // What the viewer loads at first is the index alone, which does not grow with the number of things.
 import type { ClaimRecord, EntityRecord, RelationRecord, SourceRecord } from './records.ts';
@@ -19,6 +21,10 @@ export const thingPagePath = (chunk: number) => `things/pages/${chunk}.json`;
 /** A shard's file: its letters as they are where they are a-z or 0-9, and any other as its code point, _hex_, so that no host decodes a name. */
 export const thingSearchPath = (prefix: string) => `things/search/${Array.from(prefix, (c) => (/[a-z0-9]/.test(c) ? c : `_${c.codePointAt(0)!.toString(16)}_`)).join('')}.json`;
 export const thingTreePath = (chunk: number) => `things/tree/${chunk}.json`;
+/** The directory of search's shards that begin with two letters, with how many entries each holds. */
+export const thingSearchDirPath = (two: string) => thingSearchPath(two).replace(/^things\/search\//, 'things/search-dir/');
+/** The two letters whose directory lists a shard. */
+export const dirOf = (key: string) => Array.from(key.replace(/\$$/, '')).slice(0, 2).join('');
 
 /** What a row's value is, as the vocabulary types its property: how a page writes it out. */
 export type ValueType = 'time' | 'point' | 'text' | 'string' | 'quantity' | 'ref' | string;
@@ -60,14 +66,14 @@ export interface ThingList {
 }
 
 export interface ThingsIndex {
-  format: 'lightworld-things@1';
+  format: 'lightworld-things@2';
   lists: ThingList[];
   /** how many chunks the pages are kept in */
   chunks: number;
-  /** the shards of search, by prefix, with how many entries each holds */
-  shards: Record<string, number>;
-  /** prefixes of two letters too full to be one shard: cut by their third letter */
+  /** the beginnings of words too full to be one shard, cut by one more letter (shardKey) */
   split: string[];
+  /** how many entries a shard keeps at most: one of a word more names share keeps the shortest of them */
+  cap: number;
   /** how many chunks the trees' children are kept in; 0 if no list is a tree */
   treeChunks: number;
 }
@@ -96,17 +102,29 @@ export interface ThingEntry {
   rl?: string;
   /** what else is this thing: rows of other lists, by id (docs/plans/ENTITIES.md, step 4) */
   a?: string[];
+  /** of those, the ones it was joined to by its name and what else its list says must agree, and not by an id */
+  am?: string[];
+  /** its other names, as its list gives them: each its text, what it is (a synonym, a common name), and its language */
+  x?: ([text: string, note: string] | [text: string, note: string, lang: string])[];
 }
 
 export interface ThingChunk {
   things: Record<string, ThingEntry>;
 }
 
-/** A search entry: id, name, list, and a few words to tell it from others of its name. */
-export type ThingHit = [id: string, label: string, list: number, detail: string];
+/**
+ * A search entry: id, name, list, and a few words to tell it from others of its name; and 1 where the name is another
+ * name of the thing (a synonym, a common name), not the one its list gives it first.
+ */
+export type ThingHit = [id: string, label: string, list: number, detail: string, other?: 1];
 
 export interface ThingShard {
   entries: ThingHit[];
+}
+
+/** The shards that begin with two letters, and how many entries each would hold, uncapped. */
+export interface ThingSearchDir {
+  shards: Record<string, number>;
 }
 
 /** A child in a tree: id, name, rank or level, when it began and ended (the axis's years), how many hang from it. */
@@ -163,11 +181,16 @@ export function nameMatches(name: string, text: string): boolean {
   return words.length > 0 && words.every((w) => starts.some((x) => x.startsWith(w)));
 }
 
+/** The directories that list the shards a text's words are in: the counts shardForText chooses by. */
+export function dirsForText(text: string, split: ReadonlySet<string>): string[] {
+  return [...new Set(wordsOf(text).map((w) => dirOf(shardKey(w, split))))];
+}
+
 /**
  * The shard to read for a text: of the shards its words are in, the one that holds fewest entries, since every hit has
  * all the words and the rarest narrows most. Undefined where some word's shard does not exist: nothing has that word.
  */
-export function shardForText(text: string, index: Pick<ThingsIndex, 'split' | 'shards'>, split: ReadonlySet<string> = new Set(index.split)): string | undefined {
+export function shardForText(text: string, index: Pick<ThingsIndex, 'split'> & ThingSearchDir, split: ReadonlySet<string> = new Set(index.split)): string | undefined {
   const words = wordsOf(text);
   if (!words.length) return undefined;
   let best: string | undefined;
@@ -182,19 +205,25 @@ export function shardForText(text: string, index: Pick<ThingsIndex, 'split' | 's
 }
 
 /**
- * The hits of a shard for a text, best first: a name that is the text, then one that begins with it, then the rest,
- * each in the order of the lists, then the shorter name first.
+ * The hits of a shard for a text, best first: a name that is the text; then one that begins with it, or holds its words
+ * whole, as "Mount Kilimanjaro" holds "Kilimanjaro"; then the rest. Within each, a thing's own name before another of
+ * its names, then the order of the lists, then the shorter name first.
  */
 export function matchHits(entries: ThingHit[], text: string, limit = 12): ThingHit[] {
-  const q = wordsOf(text).join(' ');
+  const qw = wordsOf(text);
+  const q = qw.join(' ');
   const rank = (h: ThingHit) => {
-    const name = wordsOf(h[1]).join(' ');
-    return name === q ? 0 : name.startsWith(q) ? 1 : 2;
+    const words = wordsOf(h[1]);
+    const name = words.join(' ');
+    if (name === q) return 0;
+    if (name.startsWith(q)) return 1;
+    for (let i = 0; i + qw.length <= words.length; i++) if (qw.every((w, k) => words[i + k] === w)) return 1;
+    return 2;
   };
   return entries
     .filter((h) => nameMatches(h[1], text))
     .map((h) => ({ h, r: rank(h) }))
-    .sort((a, b) => a.r - b.r || a.h[2] - b.h[2] || a.h[1].length - b.h[1].length || (a.h[1] < b.h[1] ? -1 : a.h[1] > b.h[1] ? 1 : 0))
+    .sort((a, b) => a.r - b.r || (a.h[4] ?? 0) - (b.h[4] ?? 0) || a.h[2] - b.h[2] || a.h[1].length - b.h[1].length || (a.h[1] < b.h[1] ? -1 : a.h[1] > b.h[1] ? 1 : 0))
     .slice(0, limit)
     .map((x) => x.h);
 }
@@ -338,6 +367,10 @@ export function thingPage(index: ThingsIndex, entry: ThingEntry, others: ThingEn
       wanted: false,
     });
   }
+  const names: { text: string; note: string; lang?: string }[] = [];
+  for (const e of [entry, ...others])
+    for (const [text, note, lang] of (e as Partial<ThingEntry>).x ?? [])
+      if (text !== entry.n && !names.some((n) => n.text === text && n.note === note)) names.push({ text, note, ...(lang ? { lang } : {}) });
   const basisOf = (props: string[]): Basis => list.props.find((p) => props.includes(p.prop))?.basis ?? 'evidence';
   const same_as: Record<string, string> = { [list.scheme]: entry.k, ...entry.s };
   for (const o of others) same_as[index.lists[o.l].scheme] = o.k;
@@ -359,7 +392,15 @@ export function thingPage(index: ThingsIndex, entry: ThingEntry, others: ThingEn
     derivedBy: { start: [], end: [] },
     sources,
     wanted: [],
-    thing: { list: list.name, dataset: list.dataset, key: entry.k, children: entry.c ?? 0 },
+    thing: {
+      list: list.name,
+      dataset: list.dataset,
+      key: entry.k,
+      children: entry.c ?? 0,
+      // Its other names, and those of the rows of other lists that are it: a catalogue's synonyms of a fossil's taxon.
+      ...(names.length ? { names } : {}),
+      ...(entry.am?.length ? { matched: entry.am } : {}),
+    },
   };
 }
 

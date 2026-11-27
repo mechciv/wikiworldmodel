@@ -12,7 +12,7 @@
     "fetch": "tsx tools/world/src/cli.ts fetch",
     "import": "tsx tools/world/src/cli.ts import",
     "validate": "tsx tools/world/src/cli.ts validate",
-    "build:world": "tsx tools/world/src/cli.ts build",
+    "build:world": "node --max-old-space-size=8192 --import tsx tools/world/src/cli.ts build",
     "dev": "vite --config viewer/vite.config.ts",
     "build:viewer": "vite build --config viewer/vite.config.ts",
     "build:site": "tsx tools/world/src/cli.ts site",

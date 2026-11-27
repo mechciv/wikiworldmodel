@@ -637,12 +637,13 @@ export class InspectPanel {
   private thingSection(r: EntityRecord): string {
     const t = r.thing!;
     const ids = Object.entries(r.same_as ?? {}).map(([k, v]) => `<code>${esc(k)}:${esc(String(v))}</code>`).join(', ');
-    return `<section class="thing"><h3>A thing of a list</h3><p class="method">A row of ${esc(t.list)}, not a record written here: what the dataset says of it, as it says it. It is known as ${ids}${t.children ? `, and ${t.children.toLocaleString('en-US')} of the list's things hang from it` : ''}.</p><p class="method">To say more of it, with sources, write a record that names <code>${esc(r.id)}</code> in its <code>same_as</code>: then this is that record's page.</p></section>`;
+    const matched = t.matched?.length ? `<p class="method">It is ${t.matched.map((m) => `<code>${esc(m)}</code>`).join(', ')} by its name and rank, and the trees above them agree: joined so by the build, which no id says.</p>` : '';
+    return `<section class="thing"><h3>A thing of a list</h3><p class="method">A row of ${esc(t.list)}, not a record written here: what the dataset says of it, as it says it. It is known as ${ids}${t.children ? `, and ${t.children.toLocaleString('en-US')} of the list's things hang from it` : ''}.</p>${matched}${namesList(t.names)}<p class="method">To say more of it, with sources, write a record that names <code>${esc(r.id)}</code> in its <code>same_as</code>: then this is that record's page.</p></section>`;
   }
 
   /** What the lists say of a record's thing: each row that is it, and its claims beside the record's own. */
   private rowsSection(r: EntityRecord): string {
-    const rows = r.rows!.map((x) => `<li><p><strong>${esc(x.list)}</strong>, <code>${esc(x.id)}</code></p><ul class="row-claims">${x.claims.map((c) => `<li>${esc(c.prop.replace(/_/g, ' '))}: ${esc(c.valueText)}</li>`).join('')}</ul></li>`).join('');
+    const rows = r.rows!.map((x) => `<li><p><strong>${esc(x.list)}</strong>, <code>${esc(x.id)}</code>${x.matched ? ', joined by its name and rank where the trees above agree' : ''}</p><ul class="row-claims">${x.claims.map((c) => `<li>${esc(c.prop.replace(/_/g, ' '))}: ${esc(c.valueText)}</li>`).join('')}</ul>${namesList(x.names)}</li>`).join('');
     return `<section class="rows"><h3>In the lists</h3><p class="method">The rows of datasets that are this thing too, by the ids it is named by. What they say stands beside the claims above, and is not read by the chronology.</p><ul class="listed">${rows}</ul></section>`;
   }
 
@@ -944,4 +945,12 @@ export class InspectPanel {
       s.quantity ?? 'Global series',
     );
   }
+}
+
+/** The other names a list gives a thing, by what each is: its synonyms, its common names. */
+function namesList(names: { text: string; note: string }[] | undefined): string {
+  if (!names?.length) return '';
+  const byNote = new Map<string, string[]>();
+  for (const n of names) byNote.set(n.note, [...(byNote.get(n.note) ?? []), n.text]);
+  return [...byNote].map(([note, texts]) => `<p class="method names"><strong>${esc(note.charAt(0).toUpperCase() + note.slice(1))}${texts.length > 1 ? 's' : ''}:</strong> ${texts.map(esc).join(', ')}</p>`).join('');
 }
