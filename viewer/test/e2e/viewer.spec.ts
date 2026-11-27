@@ -13,6 +13,8 @@ for (const trip of [
   { name: 'Mongol Empire 1250 CE', from: 2020, card: false },
 ]) {
   test(`the time machine turns the globe while scrubbing to ${trip.name}`, async ({ page }) => {
+    // Angkor's trip ends nearer the ground, where the view took nearly five minutes to settle in software on CI's runner.
+    test.setTimeout(10 * 60_000);
     await page.setViewportSize({ width: 800, height: 600 });
     await page.emulateMedia({ reducedMotion: 'no-preference' });
     await page.clock.install();

@@ -194,6 +194,8 @@ test.describe('on a touch screen', () => {
   test.use({ viewport: { width: 1280, height: 760 }, hasTouch: true });
 
   test('two fingers twist the view round, go up together to tilt it, and spread to come nearer', async ({ page }) => {
+    // Each gesture waits for the city to settle again, which took 4.3 to 4.7 minutes in all in software on CI's runner.
+    test.setTimeout(10 * 60_000);
     await page.goto(`/?b=${latestBuild()}&${OVERVIEW}&${FAST}`);
     await idle(page);
     const cam = async () => (await page.evaluate(() => window.__wikiworldmodel!.state())).cam;
