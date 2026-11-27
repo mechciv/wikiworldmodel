@@ -13,6 +13,9 @@ for (const trip of [
   { name: 'Mongol Empire 1250 CE', from: 2020, card: false },
 ]) {
   test(`the time machine turns the globe while scrubbing to ${trip.name}`, async ({ page }) => {
+    // A trip draws the globe at each time it passes through, in software: on CI's runner Angkor's, which also waited
+    // for its city to be drawn, ran past five minutes.
+    test.setTimeout(10 * 60_000);
     await page.setViewportSize({ width: 800, height: 600 });
     await page.emulateMedia({ reducedMotion: 'no-preference' });
     await page.clock.install();
@@ -47,7 +50,9 @@ for (const trip of [
     expect(sweeping.t).toBeGreaterThan(Math.min(first.t, framing.t));
     expect(sweeping.t).toBeLessThan(Math.max(first.t, framing.t));
     expect(framing.cam.lon).toBeGreaterThan(sweeping.cam.lon);
-    await idle(page);
+    // Landed, and the link says so: what lies there need not be drawn, which near Angkor's ground is its city.
+    await page.waitForFunction(() => !window.__wikiworldmodel!.waiting().includes('flight'), null, { polling: 100 });
+    await settledUrl(page);
     const landed = await state();
     // The saved camera gains four decimal places below the globe. Compare at the precision of the first framing movement.
     const samePlaceFromAbove = quantize({ ...landed, cam: { ...landed.cam, dist: framing.cam.dist } });
@@ -589,7 +594,8 @@ test('opening a record of the last few thousand years fits the time control to i
 });
 
 test('the wheel still zooms when the pointer is over a marker or its label', async ({ page }) => {
-  await page.goto(`/?b=${latestBuild()}&t=300&lat=41&lon=29&d=2&w=-800~2000`);
+  // In 500, when Constantinople's label has room: in 300 the Dedication of Constantinople, nearer the time, takes it.
+  await page.goto(`/?b=${latestBuild()}&t=500&lat=41&lon=29&d=2&w=-800~2000`);
   await idle(page);
   const marker = page.locator('.marker[data-entity="places/constantinople"]');
   for (const part of [marker.locator('.label'), marker.locator('.dot')]) {

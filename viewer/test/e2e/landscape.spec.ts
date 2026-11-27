@@ -194,8 +194,10 @@ test.describe('the human landscape', () => {
       expect((await scene(page))!.people!.forms).toContain(uruksTradition());
     });
 
-    test("a city with a record is drawn from the record: its name of the time, its people by its own claim, and streets", async ({ page }) => {
+    test("a city with a record is drawn from the record: its name of the time, its people by the model from its own figures, and streets", async ({ page }) => {
       // Tenochtitlan in 1519: the lists call the place Mexico City and give it 80,000; its record prefers 150,000-200,000.
+      // Its people are the population model's (docs/plans/MODELS.md, the pilot), which reads the record's preferred
+      // estimate as an observation with its work's bias, beside its ground and the lists' later figures: not the list's.
       await page.goto(`/?b=${latestBuild()}&${low(19.4326, -99.1332, 1519.5, 2500)}`);
       await idle(page);
       const p = (await scene(page))!.people!;
@@ -203,7 +205,10 @@ test.describe('the human landscape', () => {
       expect(city).toBeTruthy();
       expect(city.name).toBe('Tenochtitlan');
       expect(city.from).toBe('record');
-      expect(city.people).toBeGreaterThanOrEqual(150000);
+      // Within what the record's estimates for 1519 span, from the Anonymous Conqueror's 60,000 to Soustelle's 700,000.
+      expect(city.people).toBeGreaterThan(60000);
+      expect(city.people).toBeLessThan(700000);
+      expect(city.people).not.toBe(80000);
       expect((await scene(page))!.water!.lakes.some(l => l.field === 'field:earth/texcoco-1519')).toBe(true);
       // A town has streets, whatever says how they ran; the bar names it.
       expect(city.town).toBeTruthy();
@@ -276,7 +281,8 @@ test.describe('the human landscape', () => {
       await idle(page);
       const yangshao = (await scene(page))!.people!;
       expect(yangshao.things).toContain('A meeting house');
-      expect(yangshao.works).toContain('A ditch round a settlement');
+      // The ditch is laid round the village as one continuous perimeter (the settlement generator from version 7).
+      expect(yangshao.perimeters).toContain('A ditch round a settlement');
       // Click the house at the middle of the view, if one is there: what it rests on says that no two are drawn alike.
       const houses = await page.evaluate(() => window.__wikiworldmodel!.settlementsAt());
       expect(houses.length).toBeGreaterThan(0);

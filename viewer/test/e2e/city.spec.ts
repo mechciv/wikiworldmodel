@@ -194,25 +194,31 @@ test.describe('on a touch screen', () => {
   test.use({ viewport: { width: 1280, height: 760 }, hasTouch: true });
 
   test('two fingers twist the view round, go up together to tilt it, and spread to come nearer', async ({ page }) => {
+    // Each touch event waits for the full window's city to be drawn once, about a second in software on a laptop and
+    // several on CI's runner, where the test took 4.3 to 4.7 minutes in all with eight steps to a gesture.
+    test.setTimeout(10 * 60_000);
     await page.goto(`/?b=${latestBuild()}&${OVERVIEW}&${FAST}`);
     await idle(page);
     const cam = async () => (await page.evaluate(() => window.__wikiworldmodel!.state())).cam;
     const c0 = await cam();
+    // Four steps to a gesture, each short enough that one finger's step alone does not decide it before the other's comes
+    // (twoFingers in main.ts waits under 24 px).
+    const STEPS = 4;
     // An eighth of a turn, clockwise on the screen, in the middle of the picture clear of the scene's panel: what is under the fingers turns with them, so
     // the view turns the other way.
-    const round = (side: number) => Array.from({ length: 9 }, (_, i) => [640 + side * 50 * Math.cos((i / 8) * (Math.PI / 4)), 380 + side * 50 * Math.sin((i / 8) * (Math.PI / 4))] as [number, number]);
+    const round = (side: number) => Array.from({ length: STEPS + 1 }, (_, i) => [640 + side * 50 * Math.cos((i / STEPS) * (Math.PI / 4)), 380 + side * 50 * Math.sin((i / STEPS) * (Math.PI / 4))] as [number, number]);
     await touch(page, [round(-1), round(1)]);
     const c1 = await cam();
     expect((((c0.heading! - c1.heading! + 540) % 360) - 180)).toBeCloseTo(45, 0);
     expect(c1.tilt).toBe(c0.tilt);
     // Both up together tilts it towards the horizon, and nothing else.
-    await touch(page, [line([580, 430], [580, 350]), line([700, 430], [700, 350])]);
+    await touch(page, [line([580, 430], [580, 350], STEPS), line([700, 430], [700, 350], STEPS)]);
     const c2 = await cam();
     expect(c2.tilt!).toBeGreaterThan(c1.tilt! + 10);
     expect(c2.heading).toBe(c1.heading);
     expect(c2.dist).toBe(c1.dist);
     // Spread apart, they come nearer the ground.
-    await touch(page, [line([620, 380], [540, 380]), line([660, 380], [740, 380])]);
+    await touch(page, [line([620, 380], [540, 380], STEPS), line([660, 380], [740, 380], STEPS)]);
     expect((await cam()).dist).toBeLessThan(c2.dist);
   });
 });
