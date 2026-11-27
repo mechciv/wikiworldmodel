@@ -17,9 +17,10 @@ import type { SceneFileV2 } from '../../../core/scene.ts';
 import { parsePoint, toMa, type TimePointInput } from '../../../core/time.ts';
 import type { FramesFile, Tileset } from '../../../core/tileset.ts';
 import { indexTree, layoutTree, type TreeFile } from '../../../core/tree.ts';
-import { CELL } from '../../../world/generators/life/scene/v14.ts';
+import { CELL } from '../../../world/generators/life/scene/v15.ts';
 import { FULL_BUDGET, SceneStream } from '../../../world/generators/life/stream.ts';
-import type { LandSnapshot, PbdbSnapshot } from '../src/pbdb.ts';
+import { siteSpans } from '../src/build/atlas.ts';
+import type { LandSnapshot, PbdbSnapshot, RocksSnapshot } from '../src/pbdb.ts';
 import { pbdbNumber } from '../src/pbdb.ts';
 import { loadWorld, type World } from '../src/world.ts';
 import { datasetFile } from '../src/manifest.ts';
@@ -329,16 +330,21 @@ describe('the atlas', () => {
     const loosest = p.longest_span_in_stages * (older - younger);
     const byNo = new Map(land.taxa.map((x) => [x[0], x]));
     const rankOf = (no: number) => land.words[byNo.get(no)?.[2] ?? 0];
-    // The rows that reach the time, as a species is on a list as its genus: dated to a span that takes it in, and no longer
-    // than the stage allows.
-    const reaching = new Map<number, number[]>();
+    // The rows that reach the time, as a species is on a list as its genus: dated to a span (tightened by measured
+    // rock-record ages where available) that takes it in, and no longer than the stage allows.
+    const rockField = world.fields.find((f) => f.data?.as === 'rock-record');
+    const rocks = rockField && world.manifest.datasets[rockField.data!.from]
+      ? (JSON.parse(readFileSync(datasetFile(rockField.data!.from, world.manifest.datasets[rockField.data!.from], rockField.data!.file), 'utf8')) as RocksSnapshot)
+      : undefined;
+    const spans = siteSpans(land.sites, rocks);
+    const inStage = new Map<number, number[]>();
     for (const [, site, taxon] of land.rows) {
-      const [, , , max, min] = land.sites[site];
-      if (max < ageMa || min > ageMa || max - min > loosest) continue;
+      const [max, min] = spans[site];
+      if (max <= younger || min >= older || max - min > loosest) continue;
       for (let x = taxon, g = 0; x && g < 4; x = byNo.get(x)?.[3] ?? 0, g++) {
-        const l = reaching.get(x);
+        const l = inStage.get(x);
         if (l) l.push(site);
-        else reaching.set(x, [site]);
+        else inStage.set(x, [site]);
         if (!['species', 'subspecies', 'subgenus'].includes(rankOf(x))) break;
       }
     }
@@ -374,13 +380,20 @@ describe('the atlas', () => {
         // A scene hides a taxon while its rows in the stage do not reach the time shown (viewer/src/city/life.ts): one whose
         // rows all end before 1500 CE is not drawn then.
         if (e.taxon.span[1] > ageMa || e.taxon.span[0] < ageMa) continue;
-        // A patch is up to 4° across, and the graph 2° a step: that is the slack.
+        // A patch is up to 4° across, and the graph 2° a step: that is the slack. Radiocarbon-dated collections at a site
+        // may bracket 1500 CE (e.g. 150–950 CE and 1700–1800 CE), so check that nearby stage rows span `ageMa`.
         const reach = (e.tier === TIER.here ? p.here_km : p.region_km) + 900;
-        const near = (reaching.get(e.taxon.no) ?? []).some((s) => {
+        let hasOlder = false;
+        let hasYounger = false;
+        for (const s of inStage.get(e.taxon.no) ?? []) {
           const q = at(s);
-          return !!q && km(q, [lat, lon]) <= reach;
-        });
-        if (!near) problems.push(`${e.taxon.label} at ${lat}, ${lon}, tier ${e.tier}: no row within reach reaches ${t} CE`);
+          if (!q || km(q, [lat, lon]) > reach) continue;
+          const [max, min] = spans[s];
+          if (max >= ageMa) hasOlder = true;
+          if (min <= ageMa) hasYounger = true;
+          if (hasOlder && hasYounger) break;
+        }
+        if (!hasOlder || !hasYounger) problems.push(`${e.taxon.label} at ${lat}, ${lon}, tier ${e.tier}: no rows within reach span ${t} CE`);
         checked++;
       }
     }

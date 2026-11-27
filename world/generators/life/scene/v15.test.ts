@@ -12,7 +12,7 @@ import { cubeRoot, latticeOf, sizeWithin } from '../spec.ts';
 import type { SceneSubstrate } from '../../../../core/substrate.ts';
 import { CLUMP, FALLEN, FAST_BUDGET, FULL_BUDGET, INSTANCE_STRIDE, protoParts, SceneStream, STREWN, type LifeView, type Selection } from '../stream.ts';
 import { shedsWood } from '../strewn.ts';
-import { CELL, cellParts, densityOf, EXTENT, GENERATOR, LandCover, placeLook, VERSION, watersFor, type CellRows, type LivingParams } from './v14.ts';
+import { CELL, cellParts, climateCover, climateTones, densityOf, EXTENT, GENERATOR, LandCover, makePlan, placeLook, VERSION, watersFor, type CellRows, type LivingParams } from './v15.ts';
 import type { ChannelLaws } from '../../../../core/scene.ts';
 import { snowOf } from '../climate.ts';
 import { POSE } from '../forms.ts';
@@ -1124,5 +1124,145 @@ describe('a scene of the sea', () => {
     const fish: LivingTaxon[] = [...TAXA, taxon('swimmer', 'fish', 0.6)];
     const withFish = new SceneStream(specOf({ taxa: fish }));
     for (const c of cellsOf(withFish, 1)) for (let q = 0; q < c.count; q++) expect(fish[c.taxon[q]].label).not.toBe('swimmer');
+  });
+});
+
+describe('habitat gating and tropical forest cover (v15)', () => {
+  it('closes tropical forest smoothly across the monsoon-savanna margin rather than stepping at zero', () => {
+    // Seasonal rainforest just under Köppen's 0 mm monsoon threshold (margin = -3.7 mm) stays closed forest;
+    // true seasonal savanna (margin = -35 mm) remains open savanna.
+    const moist = climateCover('savanna', { hot: 26, cold: 22, aridity: 2.7, margin: -3.7 }, PARAMS.cover)!;
+    const drySav = climateCover('savanna', { hot: 30, cold: 22, aridity: 1.5, margin: -35 }, PARAMS.cover)!;
+    expect(moist.forest).toBeGreaterThan(0.9);
+    expect(moist.bare).toBeLessThan(0.02);
+    expect(drySav.forest).toBeCloseTo(PARAMS.cover.climates.savanna.forest, 6);
+    expect(drySav.bare).toBeCloseTo(PARAMS.cover.climates.savanna.bare, 6);
+
+    const cover = { plants: 1, forests: 1, grasses: 1 };
+    const moistTones = climateTones('savanna', { margin: -3.7 }, PARAMS.cover, cover);
+    const savTones = climateTones('savanna', { margin: -35 }, PARAMS.cover, cover);
+    // Moist tropical soil/herb tones blend strongly toward dark rainforest rather than bright golden savanna.
+    expect(moistTones.herb[0]).toBeLessThan(savTones.herb[0] * 0.5);
+
+    const moistSpec = specOf({ climate: 'savanna' });
+    moistSpec.biome.node = { hot: 26, cold: 22, aridity: 2.7, margin: -3.7 };
+    const savSpec = specOf({ climate: 'savanna' });
+    savSpec.biome.node = { hot: 30, cold: 22, aridity: 1.5, margin: -35 };
+    const lcMoist = new LandCover(moistSpec, stream.ground, stream.look.water, stream.plan.focus);
+    const lcSav = new LandCover(savSpec, stream.ground, stream.look.water, stream.plan.focus);
+    expect(lcMoist.forestShare).toBeGreaterThan(0.9);
+    expect(lcSav.forestShare).toBeCloseTo(PARAMS.cover.climates.savanna.forest, 6);
+  });
+
+  it('places water-edge, wet, and amphibious animals only where actual water exists, never in dry beds or on deep seafloors', () => {
+    const laws = parse(readFileSync(join(ROOT, 'fields/earth/rivers.yaml'), 'utf8')).params as ChannelLaws;
+    const dryTaxa: LivingTaxon[] = [
+      taxon('croc', 'crocodilian', 3),
+      taxon('frog', 'frog', 0.15),
+      taxon('capybara', 'small-mammal', 1.2, { habit: 'amphibious' }),
+      taxon('hippo', 'heavy-ungulate', 3.5, { habit: 'amphibious' }),
+      taxon('camel', 'camel', 2.4),
+    ];
+    // Dry desert with a wash whose bed holds water in no month (`wet: 0`): zero actual water.
+    const drySpec: SceneSpec = {
+      ...specOf({ climate: 'desert', seed: 'life/dry-gating', taxa: dryTaxa }),
+      water: { rivers: [{ key: 'test#wash', from: 'model', xy: [-40000, 0, 0, 0, 40000, 0], s0: 0, q: [80, 80, 80], z: [305, 300, 295], wet: 0 }], laws, tier: 'model', from: ['field:earth/rivers'] },
+    };
+    const dryStream = new SceneStream(drySpec);
+    const drySeen = new Map<string, number>();
+    let drinks = 0;
+    for (const c of cellsOf(dryStream, 2, 1600)) {
+      for (let q = 0; q < c.count; q++) {
+        const label = dryTaxa[c.taxon[q]].label;
+        drySeen.set(label, (drySeen.get(label) ?? 0) + 1);
+        if (c.pose[q] === POSE.drink) drinks++;
+      }
+    }
+    expect(drySeen.get('croc') ?? 0).toBe(0);
+    expect(drySeen.get('frog') ?? 0).toBe(0);
+    expect(drySeen.get('capybara') ?? 0).toBe(0);
+    expect(drySeen.get('hippo') ?? 0).toBe(0);
+    expect(drinks).toBe(0);
+    expect(drySeen.get('camel') ?? 0).toBeGreaterThan(0);
+
+    // On a scene with an actual wet river, amphibious capybara is placed and stays near the water.
+    const wetSpec = specOf({ taxa: [taxon('capybara', 'small-mammal', 1.2, { habit: 'amphibious' }), taxon('cypress', 'conifer', 30)] });
+    const wetPlan = makePlan(wetSpec, stream.ground, stream.look, watersFor(wetSpec, stream.look));
+    let wetCapys = 0;
+    const [fx, fy] = wetPlan.focus;
+    for (let dj = -3; dj <= 3; dj++) {
+      for (let di = -3; di <= 3; di++) {
+        const c = wetPlan.cell(Math.floor(fx / CELL) + di, Math.floor(fy / CELL) + dj, 2);
+        for (let q = 0; q < c.count; q++) {
+          if (wetSpec.taxa[c.taxon[q]].label !== 'capybara') continue;
+          wetCapys++;
+          const above = stream.ground.at(c.place[q * 6], c.place[q * 6 + 1]) - stream.look.water;
+          expect(above).toBeLessThan(6);
+        }
+      }
+    }
+    expect(wetCapys).toBeGreaterThan(0);
+
+    // On a deep seafloor (-60 m), an amphibious animal (sea otter) is never placed on the bottom, while a fish swims above it.
+    const deepTaxa: LivingTaxon[] = [taxon('otter', 'carnivoran', 1.2, { habit: 'amphibious' }), taxon('swimmer', 'fish', 0.6)];
+    const deepStream = new SceneStream(specOf({ relief: flat(-60), seed: 'life/deep-otter', taxa: deepTaxa }));
+    let otters = 0;
+    let fish = 0;
+    for (const c of cellsOf(deepStream, 1, 1200)) {
+      for (let q = 0; q < c.count; q++) {
+        if (deepTaxa[c.taxon[q]].label === 'otter') otters++;
+        else fish++;
+      }
+    }
+    expect(otters).toBe(0);
+    expect(fish).toBeGreaterThan(0);
+  });
+
+  it('allows open-country animals in deserts, gates animals by climate-at-height, and suppresses wild fossil humans when settlements are active', () => {
+    // High-altitude cold desert (4,200 m above tropical lowland -> ~4.4°C):
+    // - cold-adapted `llama` (`open`) stands and walks on bare desert ground;
+    // - warm tropical lowland `tapir` (`open`, `region`) is blocked by climate-at-height `animal_min`;
+    // - `Homo sapiens` appears without settlements and is suppressed once `spec.people` is active.
+    const alpineTaxa: LivingTaxon[] = [
+      taxon('llama', 'camel', 2.0, { tier: 'region', climate: [10, 4, 0, 5] }),
+      taxon('tapir', 'ungulate', 2.0, { tier: 'region', climate: [27, 2, 18, 4] }),
+      taxon('Homo sapiens', 'hominin', 1.7, { id: 'life/taxa/homo-sapiens', form_from: 'life/taxa/mammals/homo', tier: 'region' }),
+    ];
+    const alpineSpec = specOf({ climate: 'desert', relief: flat(4200), atHeight: climateOf(TROPICS, 300, 4), seed: 'life/alpine-desert', taxa: alpineTaxa });
+    const s = new SceneStream(alpineSpec);
+    const counts = { llama: 0, tapir: 0, human: 0 };
+    let movers = 0;
+    for (const c of cellsOf(s, 1, 1600)) {
+      movers += c.movers.length;
+      for (let q = 0; q < c.count; q++) {
+        const l = alpineTaxa[c.taxon[q]].label;
+        if (l === 'llama') counts.llama++;
+        else if (l === 'tapir') counts.tapir++;
+        else counts.human++;
+      }
+    }
+    expect(counts.llama).toBeGreaterThan(0);
+    expect(movers).toBeGreaterThan(0);
+    expect(counts.tapir).toBe(0);
+    expect(counts.human).toBeGreaterThan(0);
+
+    // With human settlements active (`spec.people`), wild fossil Homo is suppressed while native wildlife remains.
+    const settledSpec: SceneSpec = { ...alpineSpec, people: {} as SceneSpec['people'] };
+    const settledPlan = makePlan(settledSpec, s.ground, s.look, watersFor(settledSpec, s.look));
+    let settledHumans = 0;
+    let settledLlamas = 0;
+    const [fx, fy] = settledPlan.focus;
+    for (let dj = -4; dj <= 4; dj++) {
+      for (let di = -4; di <= 4; di++) {
+        const c = settledPlan.cell(Math.floor(fx / CELL) + di, Math.floor(fy / CELL) + dj, 1);
+        for (let q = 0; q < c.count; q++) {
+          const l = alpineTaxa[c.taxon[q]].label;
+          if (l === 'Homo sapiens') settledHumans++;
+          else if (l === 'llama') settledLlamas++;
+        }
+      }
+    }
+    expect(settledHumans).toBe(0);
+    expect(settledLlamas).toBeGreaterThan(0);
   });
 });

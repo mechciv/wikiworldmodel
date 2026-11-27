@@ -10,12 +10,20 @@ import { rotate, toLatLon, conj, unitVector } from '../../../../core/quat.ts';
 import { climateClass, type ClimateClass, type ClimateNode, type ClimateRule } from '../../../../core/climate.ts';
 import { fromMa, toMa } from '../../../../core/time.ts';
 import { FormTree } from '../forms.ts';
-import { pbdbNumber, type LandSnapshot } from '../pbdb.ts';
+import { pbdbNumber, type LandSite, type LandSnapshot, type RockAge, type RocksSnapshot } from '../pbdb.ts';
 import { sha256, stableStringify } from '../util.ts';
 import type { World } from '../world.ts';
 import type { ClimateKeyframe } from './climate.ts';
 import { SRC_W, type Snapshot } from './fields.ts';
 import { claimOf, sourceRecord, subjectTime, type Solved } from './records.ts';
+
+export type RocksAgeData = Pick<RocksSnapshot, 'ages' | 'words'>;
+
+export interface RecentClimateSource {
+  keys: ClimateKeyframe[];
+  grid: { step: number; nx: number; lon0: number; lat0: number };
+  maxAgeMa: number;
+}
 
 export interface AtlasParams {
   /** the grid of the lists, and of the distances, in degrees */
@@ -26,6 +34,15 @@ export interface AtlasParams {
   region_km: number;
   /** how quickly a row's weight falls off with distance, in km */
   kernel_km: number;
+  /** how much of a row's span must lie in the stage for it to count as recorded here */
+  here_share?: number;
+  /** how many extra km of overland distance each 1,000 m of vertical climb along the path counts as */
+  climb_cost?: number;
+  /** maximum elevation difference between a site and a patch (m), and its e-folding scale (m) */
+  max_elev_diff_m?: number;
+  elev_scale_m?: number;
+  /** minimum climate similarity (0–1) for a row to reach a patch as in the region */
+  min_climate_like?: number;
   /** how much further a km of shallow sea and of deep sea counts */
   shallow_cost: number;
   deep_cost: number;
@@ -57,6 +74,8 @@ interface Known {
   node: string;
   nodeNo: number;
   bucket: string;
+  /** true when PBDB places the taxon solely in marine/coastal waters (e.g. oceanic seabirds, marine crocs) */
+  strictlySea?: boolean;
   taxon: Omit<AtlasTaxon, 'rows' | 'span' | 'standin'>;
 }
 
@@ -125,13 +144,17 @@ export class LandGraph {
   readonly ny: number;
   readonly cost: Float32Array;
   readonly land: Uint8Array;
+  readonly elev: Int16Array;
+  private climbCost: number;
   private cosines: Float64Array;
-  constructor(readonly step: number, snap: Snapshot, isoline: number, p: Pick<AtlasParams, 'shallow_m' | 'shallow_cost' | 'deep_cost'>, costOf?: (elevation: number) => number) {
+  constructor(readonly step: number, snap: Snapshot, isoline: number, p: Pick<AtlasParams, 'shallow_m' | 'shallow_cost' | 'deep_cost' | 'climb_cost'>, costOf?: (elevation: number) => number) {
     this.nx = Math.round(360 / step);
     this.ny = Math.round(180 / step) + 1;
     const n = this.nx * this.ny;
     this.cost = new Float32Array(n);
     this.land = new Uint8Array(n);
+    this.elev = new Int16Array(n);
+    this.climbCost = costOf ? 0 : p.climb_cost ?? 0;
     this.cosines = new Float64Array(this.ny);
     for (let j = 0; j < this.ny; j++) {
       const lat = 90 - j * step;
@@ -140,6 +163,7 @@ export class LandGraph {
         const lon = -180 + i * step;
         const e = snap.elev[(90 - lat) * SRC_W + (lon + 180)];
         const k = j * this.nx + i;
+        this.elev[k] = e;
         this.land[k] = e >= isoline ? 1 : 0;
         this.cost[k] = costOf ? costOf(e) : e >= isoline ? 1 : e >= isoline - p.shallow_m ? p.shallow_cost : p.deep_cost;
       }
@@ -158,7 +182,7 @@ export class LandGraph {
       out[s] = 0;
       heap.push(0, s);
     }
-    const { nx, ny, step, cost, cosines } = this;
+    const { nx, ny, step, cost, land, elev, climbCost, cosines } = this;
     const km = step * 111.2;
     // Each node is settled once: many paths over a grid cost the same to within rounding.
     const done = new Uint8Array(out.length);
@@ -179,7 +203,8 @@ export class LandGraph {
           const ex = di * km * cosines[j];
           const ey = dj * km;
           const step2 = Math.sqrt(ex * ex + ey * ey) * (cost[k] + cost[m]) * 0.5;
-          const nd = d + step2;
+          const climb = climbCost && land[k] && land[m] ? (Math.abs(elev[m] - elev[k]) / 1000) * climbCost : 0;
+          const nd = d + step2 + climb;
           if (nd < out[m] && nd <= limit) {
             out[m] = nd;
             heap.push(nd, m);
@@ -190,6 +215,59 @@ export class LandGraph {
   }
 }
 
+const AGE_UNIT_MA: Record<string, number> = { Ma: 1, Ka: 1e-3, YBP: 1e-6 };
+
+/**
+ * Each site's effective [max, min] age span in Ma: its stratigraphic interval tightened by any valid measured ages for
+ * its collection in the rock record that overlap the stratigraphic interval. Single direct dates without a stated error
+ * receive a small symmetric uncertainty (±5%, at least 50 yr) so they remain a span rather than a zero-width instant.
+ */
+export function siteSpans(sites: LandSite[], rocks?: RocksAgeData): [number, number][] {
+  if (!rocks?.ages.length) return sites.map((s) => [s[3], s[4]]);
+  const byColl = new Map<number, RockAge[]>();
+  for (const a of rocks.ages) {
+    let list = byColl.get(a[0]);
+    if (!list) byColl.set(a[0], (list = []));
+    list.push(a);
+  }
+  return sites.map((s) => {
+    const [coll, , , sMax, sMin] = s;
+    const ages = byColl.get(coll);
+    if (!ages) return [sMax, sMin];
+    let hi = -Infinity;
+    let lo = Infinity;
+    let hasMax = false;
+    let hasMin = false;
+    for (const [, which, value, error, unitIdx] of ages) {
+      const scale = AGE_UNIT_MA[rocks.words[unitIdx] ?? ''];
+      if (!scale || !Number.isFinite(value) || value < 0) continue;
+      const v = value * scale;
+      const err = error !== null && Number.isFinite(error) && error > 0 ? error * scale : null;
+      if (which === 0) {
+        const pad = err ?? Math.max(v * 0.05, 5e-5);
+        hi = Math.max(hi, v + pad);
+        lo = Math.min(lo, Math.max(0, v - pad));
+        hasMax = true;
+        hasMin = true;
+      } else if (which === 1) {
+        hi = Math.max(hi, v + (err ?? 0));
+        hasMax = true;
+      } else if (which === 2) {
+        lo = Math.min(lo, Math.max(0, v - (err ?? 0)));
+        hasMin = true;
+      }
+    }
+    if (!hasMax && !hasMin) return [sMax, sMin];
+    const mMax = hasMax ? hi : sMax;
+    const mMin = hasMin ? lo : sMin;
+    if (mMax < mMin) return [sMax, sMin];
+    const cMax = Math.min(sMax, mMax);
+    const cMin = Math.max(sMin, mMin);
+    if (cMax < cMin) return [sMax, sMin];
+    return [cMax, cMin];
+  });
+}
+
 /**
  * How much of a row a stage holds: the share of the row's span that lies in it, or 0 where the row says too little of the
  * stage to count at all. A row dated to a span longer than `longest_span` says too little of any stage, and one longer than
@@ -197,10 +275,11 @@ export class LandGraph {
  * the Holocene, though its span takes the Holocene in.
  */
 export function rowShare(max: number, min: number, olderMa: number, youngerMa: number, p: Pick<AtlasParams, 'longest_span' | 'longest_span_in_stages'>): number {
-  if (max <= youngerMa || min >= olderMa) return 0;
   const span = max - min;
+  if (span === 0) return max > youngerMa && max < olderMa ? 1 : 0;
+  if (max <= youngerMa || min >= olderMa) return 0;
   if (span > p.longest_span || span > p.longest_span_in_stages * (olderMa - youngerMa)) return 0;
-  return (Math.min(max, olderMa) - Math.max(min, youngerMa)) / Math.max(span, 1e-3);
+  return (Math.min(max, olderMa) - Math.max(min, youngerMa)) / span;
 }
 
 /** When a record says its taxon died out, as an age in Ma, at the latest its end may be: undefined where it gives no end. */
@@ -288,7 +367,18 @@ export interface AtlasOut {
 }
 
 /** `recordEnd` says when a record's taxon died out; the world's solved records unless a test says otherwise. */
-export function buildAtlas(s: Solved, periods: PeriodRecord[], elevation: Snapshot[], climate: ClimateKeyframe[], climateGridInfo: { step: number; nx: number; lon0: number; lat0: number }, rule: ClimateRule, log: (m: string) => void, recordEnd: (id: string) => number | undefined = (id) => recordEndMa(s, id)): AtlasOut | undefined {
+export function buildAtlas(
+  s: Solved,
+  periods: PeriodRecord[],
+  elevation: Snapshot[],
+  climate: ClimateKeyframe[],
+  climateGridInfo: { step: number; nx: number; lon0: number; lat0: number },
+  rule: ClimateRule,
+  log: (m: string) => void,
+  recordEnd: (id: string) => number | undefined = (id) => recordEndMa(s, id),
+  recentClimates?: RecentClimateSource[],
+  rocks?: RocksAgeData,
+): AtlasOut | undefined {
   const w = s.world;
   const field = w.fields.find((f) => f.data?.as === 'community');
   if (!field) return undefined;
@@ -299,8 +389,13 @@ export function buildAtlas(s: Solved, periods: PeriodRecord[], elevation: Snapsh
     return undefined;
   }
   const p = field.params as unknown as AtlasParams;
+  const hereShare = p.here_share ?? 0.5;
+  const maxElevDiff = p.max_elev_diff_m ?? Infinity;
+  const elevScale = p.elev_scale_m ?? 0;
+  const minClimateLike = p.min_climate_like ?? 0;
   const isoline = (w.fields.find((f) => f.id === 'field:earth/coastline') as unknown as { isoline_m?: number } | undefined)?.isoline_m ?? 20;
   const known = classify(w, snap, p);
+  const spans = siteSpans(snap.sites, rocks);
 
   // Where each site was: its plate, from the plates of today's land.
   const now = [...elevation].sort((a, b) => a.ageMa - b.ageMa)[0];
@@ -350,7 +445,7 @@ export function buildAtlas(s: Solved, periods: PeriodRecord[], elevation: Snapsh
     if (!known.has(taxon)) continue;
     const t = rollup(taxon);
     rowsBySite[site].push(t);
-    if (snap.sites[site][3] - snap.sites[site][4] <= p.tight_span) tight.add(t);
+    if (spans[site][0] - spans[site][1] <= p.tight_span) tight.add(t);
   }
   // Where a record says when a taxon, or a clade above it, died out, nothing of it is drawn after: a row dated wholly after
   // that end says what the record denies, and is left out, and the taxon's span in a stage ends there.
@@ -385,10 +480,11 @@ export function buildAtlas(s: Solved, periods: PeriodRecord[], elevation: Snapsh
     if (Math.abs(key.ageMa - midMa) > 12) return;
     const graph = new LandGraph(p.graph_deg, key, isoline, p);
     // Each site in the stage, where it was, on the graph.
-    const atNode = new Map<number, Map<number, { w: number; rows: number; older: number; younger: number }>>();
+    const atNode = new Map<number, Map<number, { w: number; rows: number; older: number; younger: number; hOlder: number; hYounger: number }>>();
     let rowsHere = 0;
     snap.sites.forEach((site, i) => {
-      const [, lat, lng, max, min] = site;
+      const [, lat, lng] = site;
+      const [max, min] = spans[i];
       const share = rowShare(max, min, olderMa, youngerMa, p);
       if (!share) return;
       const plate = sitePlate[i];
@@ -402,6 +498,7 @@ export function buildAtlas(s: Solved, periods: PeriodRecord[], elevation: Snapsh
         here = new Map();
         atNode.set(node, here);
       }
+      const qualHere = share >= hereShare;
       for (const t of list) {
         if (max - min > p.tight_span && tight.has(t)) continue;
         const end = endOf(t);
@@ -413,7 +510,11 @@ export function buildAtlas(s: Solved, periods: PeriodRecord[], elevation: Snapsh
           e.rows++;
           e.older = Math.max(e.older, max);
           e.younger = Math.min(e.younger, min);
-        } else here.set(t, { w: share, rows: 1, older: max, younger: min });
+          if (qualHere) {
+            e.hOlder = Math.max(e.hOlder, max);
+            e.hYounger = Math.min(e.hYounger, min);
+          }
+        } else here.set(t, { w: share, rows: 1, older: max, younger: min, hOlder: qualHere ? max : -Infinity, hYounger: qualHere ? min : Infinity });
       }
     });
     // The most of each record's taxon in one place in this stage.
@@ -424,16 +525,26 @@ export function buildAtlas(s: Solved, periods: PeriodRecord[], elevation: Snapsh
       const lon = -180 + (node % graph.nx) * graph.step;
       for (const [id, rows] of count) if (!where[id] || rows > where[id].rows) where[id] = { t: slice, lat, lon, rows: round(rows) };
     }
-    // Their climates, for how like a place each is.
+    // Their climates, for how like a place each is: prefer the finest recent climate covering this stage, falling back to deep-time climate.
     const ck = [...climate].sort((a, b) => Math.abs(a.ageMa - midMa) - Math.abs(b.ageMa - midMa))[0];
-    const climateAt = (lat: number, lon: number): ClimateNode | undefined => {
-      if (!ck) return undefined;
-      const { step, nx, lon0, lat0 } = climateGridInfo;
-      const row = Math.round((lat0 - lat) / step);
-      const col = ((Math.round((lon - lon0) / step) % nx) + nx) % nx;
-      const k = (row * nx + col) * 4;
-      const c = { hot: ck.nodes[k], cold: ck.nodes[k + 1], aridity: ck.nodes[k + 2], margin: ck.nodes[k + 3] };
+    const recent = (recentClimates ?? [])
+      .filter((rc) => rc.keys.length && midMa <= rc.maxAgeMa)
+      .map((rc) => ({ grid: rc.grid, key: [...rc.keys].sort((a, b) => Math.abs(a.ageMa - midMa) - Math.abs(b.ageMa - midMa))[0] }));
+    const sampleClimate = (k: ClimateKeyframe | undefined, g: { step: number; nx: number; lon0: number; lat0: number }, lat: number, lon: number): ClimateNode | undefined => {
+      if (!k) return undefined;
+      const row = Math.round((g.lat0 - lat) / g.step);
+      const col = ((Math.round((lon - g.lon0) / g.step) % g.nx) + g.nx) % g.nx;
+      const idx = (row * g.nx + col) * 4;
+      if (idx < 0 || idx + 3 >= k.nodes.length) return undefined;
+      const c = { hot: k.nodes[idx], cold: k.nodes[idx + 1], aridity: k.nodes[idx + 2], margin: k.nodes[idx + 3] };
       return Number.isNaN(c.hot) ? undefined : c;
+    };
+    const climateAt = (lat: number, lon: number): ClimateNode | undefined => {
+      for (const r of recent) {
+        const c = sampleClimate(r.key, r.grid, lat, lon);
+        if (c) return c;
+      }
+      return sampleClimate(ck, climateGridInfo, lat, lon);
     };
     const nodeLat = (k: number) => 90 - Math.floor(k / graph.nx) * graph.step;
     const nodeLon = (k: number) => -180 + (k % graph.nx) * graph.step;
@@ -466,13 +577,31 @@ export function buildAtlas(s: Solved, periods: PeriodRecord[], elevation: Snapsh
     }
 
     // The patches: each is read at its land node nearest its middle, if it has any land.
-    const patchOf = new Map<number, number>();
+    const patchOf = new Map<number, { k: number; lo: number; hi: number; coastal: boolean; clims: ClimateNode[] }>();
+    const hasSeaNeighbor = (k: number): boolean => {
+      const j = Math.floor(k / graph.nx);
+      const i = k - j * graph.nx;
+      for (let dj = -1; dj <= 1; dj++) {
+        const jj = j + dj;
+        if (jj < 0 || jj >= graph.ny) continue;
+        for (let di = -1; di <= 1; di++) {
+          if (!dj && !di) continue;
+          const ii = (i + di + graph.nx) % graph.nx;
+          if (!graph.land[jj * graph.nx + ii]) return true;
+        }
+      }
+      return false;
+    };
     for (let row = 0; row < grid.ny; row++) {
       for (let col = 0; col < grid.nx; col++) {
         const lat = 90 - (row + 0.5) * grid.step;
         const lon = -180 + (col + 0.5) * grid.step;
         let best = -1;
         let bestD = Infinity;
+        let loE = Infinity;
+        let hiE = -Infinity;
+        let coastal = false;
+        const clims: ClimateNode[] = [];
         const span = Math.ceil(grid.step / graph.step / 2) + 1;
         const c0 = graph.nodeAt(lat, lon);
         const cj = Math.floor(c0 / graph.nx);
@@ -489,6 +618,12 @@ export function buildAtlas(s: Solved, periods: PeriodRecord[], elevation: Snapsh
             if (la > 90 - row * grid.step + 1e-9 || la < 90 - (row + 1) * grid.step - 1e-9) continue;
             const dLon = Math.abs(((lo - lon + 540) % 360) - 180);
             if (dLon > grid.step / 2 + 1e-9) continue;
+            const e = graph.elev[k];
+            if (e < loE) loE = e;
+            if (e > hiE) hiE = e;
+            if (!coastal && hasSeaNeighbor(k)) coastal = true;
+            const nc = climateAt(la, lo);
+            if (nc) clims.push(nc);
             const d = (la - lat) * (la - lat) + dLon * dLon;
             if (d < bestD) {
               bestD = d;
@@ -496,18 +631,18 @@ export function buildAtlas(s: Solved, periods: PeriodRecord[], elevation: Snapsh
             }
           }
         }
-        if (best >= 0) patchOf.set(row * grid.nx + col, best);
+        if (best >= 0) patchOf.set(row * grid.nx + col, { k: best, lo: loE, hi: hiE, coastal, clims });
       }
     }
-    const reach = p.region_km * 1.6;
+    const reach = p.region_km;
     const dist = new Float32Array(graph.nx * graph.ny);
     // For each patch: every occupied node it can reach, and how far.
     const reachOf = new Map<number, { node: number; km: number }[]>();
     const patches = [...patchOf.entries()];
     for (const o of occupied) {
       graph.walk([o], reach, dist);
-      for (const [patch, k] of patches) {
-        const d = dist[k];
+      for (const [patch, info] of patches) {
+        const d = dist[info.k];
         if (d === Infinity) continue;
         const l = reachOf.get(patch);
         if (l) l.push({ node: o, km: d });
@@ -550,62 +685,89 @@ export function buildAtlas(s: Solved, periods: PeriodRecord[], elevation: Snapsh
       }
       return i;
     };
-    // The whole span of each taxon's rows in the stage.
-    const spanOf = new Map<number, [number, number, number]>();
+    // The total row count of each taxon in the stage.
+    const rowsOf = new Map<number, number>();
     for (const here of atNode.values()) {
-      for (const [t, e] of here) {
-        const q = spanOf.get(t);
-        if (q) {
-          q[0] = Math.max(q[0], e.older);
-          q[1] = Math.min(q[1], e.younger);
-          q[2] += e.rows;
-        } else spanOf.set(t, [e.older, e.younger, e.rows]);
-      }
+      for (const [t, e] of here) rowsOf.set(t, (rowsOf.get(t) ?? 0) + e.rows);
     }
-    for (const [patch, k] of patches.sort((a, b) => a[0] - b[0])) {
+    const climateSim = (a: ClimateNode, b: ClimateNode): number => {
+      const ratio = Math.log(Math.max(a.aridity, 0.2) / Math.max(b.aridity, 0.2));
+      return Math.exp(-(Math.abs(a.hot - b.hot) / 15 + Math.abs(a.cold - b.cold) / 20 + Math.abs(ratio) / 1.5));
+    };
+    for (const [patch, info] of patches.sort((a, b) => a[0] - b[0])) {
+      const { k, lo: pLo, hi: pHi, coastal, clims } = info;
       const c = climateAt(nodeLat(k), nodeLon(k));
       const cls = c ? climateClass(c, rule) : null;
-      const score = new Map<number, { s: number; km: number }>();
+      const score = new Map<number, { s: number; km: number; older: number; younger: number; hOlder: number; hYounger: number }>();
       for (const { node, km } of reachOf.get(patch) ?? []) {
+        if (km > p.region_km) continue;
+        const sElev = graph.elev[node];
+        const dElev = sElev < pLo ? pLo - sElev : sElev > pHi ? sElev - pHi : 0;
+        if (km > 0 && dElev > maxElevDiff) continue;
         const oc = occClimate.get(node);
         let like = 1;
-        if (c && oc) {
-          const ratio = Math.log(Math.max(c.aridity, 0.05) / Math.max(oc.aridity, 0.05));
-          like = Math.exp(-(Math.abs(c.hot - oc.hot) / 15 + Math.abs(c.cold - oc.cold) / 20 + Math.abs(ratio) / 1.5));
+        if (clims.length && oc) {
+          like = 0;
+          for (const pc of clims) {
+            const v = climateSim(pc, oc);
+            if (v > like) like = v;
+          }
+          if (km > p.here_km && like < minClimateLike) continue;
         }
+        const elevLike = elevScale > 0 ? Math.exp(-dElev / elevScale) : 1;
         const fall = Math.exp(-km / p.kernel_km);
         for (const [t, e] of atNode.get(node)!) {
+          if (km > p.here_km && !coastal && known.get(t)!.strictlySea) continue;
+          const isHere = km <= p.here_km && e.hOlder >= e.hYounger;
+          const add = e.w * fall * like * elevLike;
           const q = score.get(t);
-          const add = e.w * fall * like;
           if (q) {
             q.s += add;
             if (km < q.km) q.km = km;
-          } else score.set(t, { s: add, km });
+            if (e.older > q.older) q.older = e.older;
+            if (e.younger < q.younger) q.younger = e.younger;
+            if (isHere) {
+              if (e.hOlder > q.hOlder) q.hOlder = e.hOlder;
+              if (e.hYounger < q.hYounger) q.hYounger = e.hYounger;
+            }
+          } else score.set(t, { s: add, km, older: e.older, younger: e.younger, hOlder: isHere ? e.hOlder : -Infinity, hYounger: isHere ? e.hYounger : Infinity });
         }
       }
-      // Heaviest first in each kind of thing, up to its quota: only what is near enough.
-      const byBucket = new Map<string, { t: number; s: number; km: number }[]>();
-      for (const [t, { s: sc, km }] of score) {
-        if (km > p.region_km) continue;
+      // Local direct evidence (`here`) ahead of regional inference (`region`), then heaviest first, up to each bucket's quota.
+      // A taxon only receives `TIER.here` if local rows (`km <= here_km`, `share >= here_share`) cover the full in-stage span
+      // emitted for this patch; when distant regional rows extend the span past what local rows attest, the entry is `TIER.region`.
+      const byBucket = new Map<string, { t: number; s: number; km: number; here: boolean; olderR: number; youngerR: number }[]>();
+      for (const [t, v] of score) {
+        const end = endOf(t);
+        const olderR = round(v.older, YEAR);
+        const youngerR = round(Math.max(v.younger, end ?? -Infinity), YEAR);
+        const hOlderR = round(v.hOlder, YEAR);
+        const hYoungerR = round(Math.max(v.hYounger, end ?? -Infinity), YEAR);
+        const here =
+          v.hOlder >= v.hYounger &&
+          Math.min(hOlderR, olderMa) >= Math.min(olderR, olderMa) - 1e-9 &&
+          Math.max(hYoungerR, youngerMa) <= Math.max(youngerR, youngerMa) + 1e-9;
         const b = known.get(t)!.bucket;
         const l = byBucket.get(b);
-        if (l) l.push({ t, s: sc, km });
-        else byBucket.set(b, [{ t, s: sc, km }]);
+        const item = { t, s: v.s, km: v.km, here, olderR, youngerR };
+        if (l) l.push(item);
+        else byBucket.set(b, [item]);
       }
       const flat: number[] = [];
       const far = Math.round(Math.min(65535, (nearest[k] === Infinity ? 20000 : nearest[k]) / 10));
       for (const bucket of Object.keys(p.quotas).sort()) {
-        const list = (byBucket.get(bucket) ?? []).sort((a, b) => b.s - a.s || a.t - b.t).slice(0, p.quotas[bucket]);
+        const list = (byBucket.get(bucket) ?? [])
+          .sort((a, b) => (b.here ? 1 : 0) - (a.here ? 1 : 0) || b.s - a.s || a.t - b.t)
+          .slice(0, p.quotas[bucket]);
         if (list.length) {
-          const top = list[0].s;
-          for (const { t, s: sc, km } of list) {
-            const i = entry(`t${t}`, () => {
-              const q = spanOf.get(t)!;
+          const top = list.reduce((m, x) => (x.s > m ? x.s : m), 0) || 1;
+          for (const { t, s: sc, km, here: isHere, olderR, youngerR } of list) {
+            const i = entry(`t${t}|${olderR}|${youngerR}`, () => {
               const kn = known.get(t)!;
               const climate = climateOf.get(t);
-              return { ...kn.taxon, rows: q[2], ...(climate ? { climate } : {}), span: [round(q[0], YEAR), round(Math.max(q[1], endOf(t) ?? -Infinity), YEAR)] };
+              return { ...kn.taxon, rows: rowsOf.get(t) ?? 0, ...(climate ? { climate } : {}), span: [olderR, youngerR] };
             });
-            flat.push(i, Math.max(1, Math.round((sc / top) * 255)), km <= p.here_km ? TIER.here : TIER.region, Math.round(Math.min(65535, km / 10)));
+            flat.push(i, Math.min(255, Math.max(1, Math.round((sc / top) * 255))), isHere ? TIER.here : TIER.region, Math.round(Math.min(65535, km / 10)));
           }
           continue;
         }
@@ -621,9 +783,10 @@ export function buildAtlas(s: Solved, periods: PeriodRecord[], elevation: Snapsh
           const example = exampleOf.get(b.node)!;
           const i = entry(`n${b.node}`, () => {
             // Drawn as the clade: its span is the stage's, as all that is known is that its kind was somewhere, up to the
-            // clade's end where a record gives one.
+            // clade's end where a record gives one. Strip any individual taxon's habit so a clade stand-in is generic.
+            const { habit: _habit, ...base } = example.taxon;
             const label = example.taxon.form_label;
-            return { ...example.taxon, label, no: b.nodeNo, id: b.node, rank: '', own: true, rows: 0, span: [round(olderMa, YEAR), round(Math.max(youngerMa, endOf(b.nodeNo) ?? -Infinity), YEAR)], standin: true };
+            return { ...base, label, no: b.nodeNo, id: b.node, rank: '', own: true, rows: 0, span: [round(olderMa, YEAR), round(Math.max(youngerMa, endOf(b.nodeNo) ?? -Infinity), YEAR)], standin: true };
           });
           flat.push(i, Math.max(1, Math.round((b.w / top) * 255)), TIER.standin, far);
         }
@@ -745,16 +908,18 @@ export function classify(w: World, snap: LandSnapshot, p: Pick<AtlasParams, 'big
       results.set(no, null);
       return null;
     }
-    // Something on land or in fresh water: this atlas holds no seas, whose genera have lists of their own (sea.ts), with no
-    // forms yet. Its rows are all from the land, so what the
-    // database calls marine only counts against what would have to swim: a pterosaur over the coast or a crocodile at the
-    // water's edge is not left out for it.
+    // Something on land or in fresh water: this atlas holds no seas, whose genera have lists of their own (sea.ts).
+    // Exclude taxa the database places exclusively in sea waters (unless flying or at the water's edge), and marine
+    // swimming taxa whose habit carries a marine depth zone (such as marine dolphins and porpoises tagged "marine,freshwater").
     const env = word(t[9]);
+    const habit = word(t[11]);
     const habitat = form.behave?.habitat;
+    const strictlySea = !!env && SEA_WATERS.test(env) && !/terrestrial|freshwater/.test(env);
+    const marineSwimmer = habitat === 'water' && !!env && /marine|oceanic/.test(env) && /depth=/.test(habit ?? '');
     // In the sea, a taxon the database says lived on land or in fresh water only is not drawn, whatever its body: a bear
     // whose bones lie in a marine bed does not walk on the sea's floor. One it says nothing of, or that flies, may be.
     const landOnly = !!env && !SEA_WATERS.test(env) && habitat !== 'air';
-    if (mode === 'land' ? env === 'marine' && habitat !== 'air' && habitat !== 'edge' && habitat !== 'wet' : form.kind !== 'animal' || !SEA_HABITATS.has(habitat ?? '') || landOnly) {
+    if (mode === 'land' ? (strictlySea && habitat !== 'air' && habitat !== 'edge' && habitat !== 'wet') || marineSwimmer : form.kind !== 'animal' || !SEA_HABITATS.has(habitat ?? '') || landOnly) {
       results.set(no, null);
       return null;
     }
@@ -780,6 +945,7 @@ export function classify(w: World, snap: LandSnapshot, p: Pick<AtlasParams, 'big
       nodeNo,
       // By its length, or what its mass says of it.
       bucket: bucketOf(form, length ? Math.sqrt(length.lo * length.hi) : mass ? Math.cbrt(Math.sqrt(mass.lo * mass.hi) / (form.mass_length ?? 20)) : undefined, p),
+      ...(strictlySea ? { strictlySea: true } : {}),
       taxon: {
         no,
         ...(adopted.get(no) ? { id: adopted.get(no) } : {}),

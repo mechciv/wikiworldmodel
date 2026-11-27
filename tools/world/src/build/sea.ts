@@ -10,7 +10,7 @@ import type { PeriodRecord } from '../../../../core/records.ts';
 import { fromMa, toMa } from '../../../../core/time.ts';
 import { pbdbNumber, type LandSnapshot } from '../pbdb.ts';
 import { stableStringify } from '../util.ts';
-import { atlasBins, classify, endsOf, LandGraph, recordEndMa, rowShare, YEAR, type AtlasParams } from './atlas.ts';
+import { atlasBins, classify, endsOf, LandGraph, recordEndMa, rowShare, siteSpans, YEAR, type AtlasParams, type RocksAgeData } from './atlas.ts';
 import { SRC_W, type Snapshot } from './fields.ts';
 import { sourceRecord, type Solved } from './records.ts';
 
@@ -23,6 +23,8 @@ export interface SeaParams {
   region_km: number;
   /** how quickly a row's weight falls off with distance, in km */
   kernel_km: number;
+  /** how much of a row's span must lie in the stage for it to count as recorded here */
+  here_share?: number;
   /** how much further a km of land, and of deep sea, counts than a km of shelf */
   land_cost: number;
   deep_cost: number;
@@ -66,6 +68,21 @@ export function beltOf(lat: number, edges: number[]): number {
   return b;
 }
 
+const COASTAL_HABIT = /amphibious|intertidal|foreshore|terrestrial/i;
+const COASTAL_ENV = /coastal|estuary|lagoonal|marginal marine|foreshore|shoreface|reef/i;
+const OPEN_SEA_ENV = /oceanic|open|offshore|pelagic|bathyal|abyssal|basin/i;
+
+/**
+ * Whether a marine taxon belongs to the coast or shallow shelf rather than the deep open ocean: amphibious mammals
+ * (sea otters, pinnipeds) and strictly coastal/estuarine/reef taxa, excluding flying seabirds (such as albatrosses).
+ */
+export function isCoastalSeaTaxon(habit: string | undefined, env: string | undefined, formHabitat?: string): boolean {
+  if (formHabitat === 'air') return false;
+  if (habit && COASTAL_HABIT.test(habit)) return true;
+  if (env && COASTAL_ENV.test(env) && !OPEN_SEA_ENV.test(env)) return true;
+  return false;
+}
+
 /** The genus a row's taxon is, or the taxon itself where it is a genus or above. */
 function genusOf(snap: LandSnapshot, byNo: Map<number, LandSnapshot['taxa'][number]>): (no: number) => number {
   const below = new Set(['species', 'subspecies', 'subgenus']);
@@ -97,14 +114,39 @@ function groupOf(snap: LandSnapshot, byNo: Map<number, LandSnapshot['taxa'][numb
 }
 
 /** `recordEnd` says when a record's taxon died out; the world's solved records unless a test says otherwise. */
-export function buildSeaAtlas(s: Solved, periods: PeriodRecord[], elevation: Snapshot[], snap: LandSnapshot, dataset: string, p: SeaParams, isoline: number, log: (m: string) => void, recordEnd: (id: string) => number | undefined = (id) => recordEndMa(s, id)): SeaOut {
+export function buildSeaAtlas(
+  s: Solved,
+  periods: PeriodRecord[],
+  elevation: Snapshot[],
+  snap: LandSnapshot,
+  dataset: string,
+  p: SeaParams,
+  isoline: number,
+  log: (m: string) => void,
+  recordEnd: (id: string) => number | undefined = (id) => recordEndMa(s, id),
+  rocks?: RocksAgeData,
+): SeaOut {
   const w = s.world;
   const field = w.fields.find((f) => f.data?.from === dataset)!;
+  const hereShare = p.here_share ?? 0.5;
   const byNo = new Map(snap.taxa.map((t) => [t[0], t]));
   const genus = genusOf(snap, byNo);
   // How each genus is drawn, where a node above it has a body for the sea: the land's atlas's classification, in the sea.
   const sizes = w.fields.find((f) => f.data?.as === 'community')?.params as unknown as Pick<AtlasParams, 'big_m' | 'small_m' | 'tiny_m'> | undefined;
   const known = classify(w, snap, sizes ?? { big_m: 3, small_m: 0.5, tiny_m: 0.1 }, 'sea');
+  const spans = siteSpans(snap.sites, rocks);
+  const coastalMemo = new Map<number, boolean>();
+  const coastalTaxon = (t: number): boolean => {
+    let v = coastalMemo.get(t);
+    if (v === undefined) {
+      const row = byNo.get(t);
+      const kn = known.get(t);
+      const formHab = kn ? known.forms.get(kn.taxon.form)?.behave?.habitat : undefined;
+      v = row ? isCoastalSeaTaxon(snap.words[row[11]], snap.words[row[9]], formHab) : false;
+      coastalMemo.set(t, v);
+    }
+    return v;
+  };
   const usedForms = new Set<string>();
   let drawnRows = 0;
 
@@ -133,7 +175,7 @@ export function buildSeaAtlas(s: Solved, periods: PeriodRecord[], elevation: Sna
     if (!byNo.has(taxon)) continue;
     const g = genus(taxon);
     rowsBySite[site].push(g);
-    if (snap.sites[site][3] - snap.sites[site][4] <= p.tight_span) tight.add(g);
+    if (spans[site][0] - spans[site][1] <= p.tight_span) tight.add(g);
   }
   // Where a record says when a genus, or a clade above it, died out, nothing of it is drawn after, as on land.
   const adoptedAt = new Map<number, string>();
@@ -159,10 +201,11 @@ export function buildSeaAtlas(s: Solved, periods: PeriodRecord[], elevation: Sna
     const nodeLat = (k: number) => 90 - Math.floor(k / graph.nx) * graph.step;
     const nodeLon = (k: number) => -180 + (k % graph.nx) * graph.step;
     // Each site in the stage, where it was, on the graph.
-    const atNode = new Map<number, Map<number, { w: number; rows: number; older: number; younger: number }>>();
+    const atNode = new Map<number, Map<number, { w: number; rows: number; older: number; younger: number; hOlder: number; hYounger: number }>>();
     let rowsHere = 0;
     snap.sites.forEach((site, i) => {
-      const [, lat, lng, max, min] = site;
+      const [, lat, lng] = site;
+      const [max, min] = spans[i];
       const share = rowShare(max, min, olderMa, youngerMa, p);
       if (!share) return;
       const plate = sitePlate[i];
@@ -176,6 +219,7 @@ export function buildSeaAtlas(s: Solved, periods: PeriodRecord[], elevation: Sna
         here = new Map();
         atNode.set(node, here);
       }
+      const qualHere = share >= hereShare;
       for (const t of list) {
         if (max - min > p.tight_span && tight.has(t)) continue;
         const end = endOf(t);
@@ -187,7 +231,11 @@ export function buildSeaAtlas(s: Solved, periods: PeriodRecord[], elevation: Sna
           e.rows++;
           e.older = Math.max(e.older, max);
           e.younger = Math.min(e.younger, min);
-        } else here.set(t, { w: share, rows: 1, older: max, younger: min });
+          if (qualHere) {
+            e.hOlder = Math.max(e.hOlder, max);
+            e.hYounger = Math.min(e.hYounger, min);
+          }
+        } else here.set(t, { w: share, rows: 1, older: max, younger: min, hOlder: qualHere ? max : -Infinity, hYounger: qualHere ? min : Infinity });
       }
     });
     const occupied = [...atNode.keys()].sort((a, b) => a - b);
@@ -273,14 +321,16 @@ export function buildSeaAtlas(s: Solved, periods: PeriodRecord[], elevation: Sna
       }
       return i;
     };
-    const taxonOf = (t: number): SeaTaxon => {
+    const taxonOf = (t: number, olderR?: number, youngerR?: number): SeaTaxon => {
       const x = byNo.get(t)!;
       const q = spanOf.get(t)!;
       const k = known.get(t);
       if (k) usedForms.add(k.taxon.form);
       // Its label, number and rank are the database's, as on any list; the rest is how it is drawn.
       const draw = k ? (({ no: _no, label: _label, rank: _rank, ...rest }) => rest)(k.taxon) : undefined;
-      return { no: t, label: x[1], rank: snap.words[x[2]] ?? '', group: groupOf(snap, byNo, t), rows: q[2], span: [round(q[0], YEAR), round(Math.max(q[1], endOf(t) ?? -Infinity), YEAR)], ...(draw ? { draw } : {}) };
+      const hi = olderR ?? round(q[0], YEAR);
+      const lo = youngerR ?? round(Math.max(q[1], endOf(t) ?? -Infinity), YEAR);
+      return { no: t, label: x[1], rank: snap.words[x[2]] ?? '', group: groupOf(snap, byNo, t), rows: q[2], span: [hi, lo], ...(draw ? { draw } : {}) };
     };
     /**
      * After the most recorded, the genera a scene can draw: the most recorded of those first, and no more than `per_class`
@@ -309,36 +359,68 @@ export function buildSeaAtlas(s: Solved, periods: PeriodRecord[], elevation: Sna
     const nodes: Record<string, number[]> = {};
     for (const [patch, k] of patches) {
       const belt = beltOf(nodeLat(k), p.belts);
-      const score = new Map<number, { s: number; km: number }>();
+      const deepPatch = isoline - graph.elev[k] > p.shallow_m;
+      const score = new Map<number, { s: number; km: number; older: number; younger: number; hOlder: number; hYounger: number }>();
       for (const { node, km } of reachOf.get(patch) ?? []) {
         const like = beltOf(nodeLat(node), p.belts) === belt ? 1 : p.other_belt;
         const fall = Math.exp(-km / p.kernel_km);
         for (const [t, e] of atNode.get(node)!) {
+          if (deepPatch && coastalTaxon(t)) continue;
+          const isHere = km <= p.here_km && e.hOlder >= e.hYounger;
           const q = score.get(t);
           const add = e.w * fall * like;
           if (q) {
             q.s += add;
             if (km < q.km) q.km = km;
-          } else score.set(t, { s: add, km });
+            if (e.older > q.older) q.older = e.older;
+            if (e.younger < q.younger) q.younger = e.younger;
+            if (isHere) {
+              if (e.hOlder > q.hOlder) q.hOlder = e.hOlder;
+              if (e.hYounger < q.hYounger) q.hYounger = e.hYounger;
+            }
+          } else score.set(t, { s: add, km, older: e.older, younger: e.younger, hOlder: isHere ? e.hOlder : -Infinity, hYounger: isHere ? e.hYounger : Infinity });
         }
       }
       const flat: number[] = [];
-      const ranked = [...score].map(([t, v]) => ({ t, ...v })).sort((a, b) => b.s - a.s || a.t - b.t);
+      const ranked = [...score]
+        .map(([t, v]) => {
+          const end = endOf(t);
+          const olderR = round(v.older, YEAR);
+          const youngerR = round(Math.max(v.younger, end ?? -Infinity), YEAR);
+          const hOlderR = round(v.hOlder, YEAR);
+          const hYoungerR = round(Math.max(v.hYounger, end ?? -Infinity), YEAR);
+          const here =
+            v.hOlder >= v.hYounger &&
+            Math.min(hOlderR, olderMa) >= Math.min(olderR, olderMa) - 1e-9 &&
+            Math.max(hYoungerR, youngerMa) <= Math.max(youngerR, youngerMa) + 1e-9;
+          return { t, s: v.s, km: v.km, here, olderR, youngerR };
+        })
+        .sort((a, b) => (b.here ? 1 : 0) - (a.here ? 1 : 0) || b.s - a.s || a.t - b.t);
       const most = ranked.slice(0, p.list_size);
       const list = [...most, ...drawable(ranked, most)];
       if (list.length) {
-        const top = list[0].s;
-        for (const { t, s: sc, km } of list) flat.push(entry(`t${t}`, () => taxonOf(t)), Math.max(1, Math.round((sc / top) * 255)), km <= p.here_km ? TIER.here : TIER.region, Math.round(Math.min(65535, km / 10)));
+        const top = list.reduce((m, x) => (x.s > m ? x.s : m), 0) || 1;
+        for (const { t, s: sc, km, here: isHere, olderR, youngerR } of list) {
+          flat.push(
+            entry(`t${t}|${olderR}|${youngerR}`, () => taxonOf(t, olderR, youngerR)),
+            Math.min(255, Math.max(1, Math.round((sc / top) * 255))),
+            isHere ? TIER.here : TIER.region,
+            Math.round(Math.min(65535, km / 10)),
+          );
+        }
       } else {
         // Nothing within reach: the stage's commonest genera of this belt, or of any, stand in.
         const pool = widespread.get(belt) ?? [...widespread.values()][0];
         if (pool) {
-          const pooled = [...pool].sort((a, b) => b[1] - a[1] || a[0] - b[0]).map(([t, n]) => ({ t, n }));
+          const pooled = [...pool]
+            .filter(([t]) => !deepPatch || !coastalTaxon(t))
+            .sort((a, b) => b[1] - a[1] || a[0] - b[0])
+            .map(([t, n]) => ({ t, n }));
           const most = pooled.slice(0, p.standins);
           const best = [...most, ...drawable(pooled, most)].map((e) => [e.t, e.n] as [number, number]);
           const top = best.length ? best[0][1] : 1;
           const far = Math.round(Math.min(65535, (nearest[k] === Infinity ? 20000 : nearest[k]) / 10));
-          for (const [t, n] of best) flat.push(entry(`s${t}`, () => ({ ...taxonOf(t), standin: true })), Math.max(1, Math.round((n / top) * 255)), TIER.standin, far);
+          for (const [t, n] of best) flat.push(entry(`s${t}`, () => ({ ...taxonOf(t), standin: true })), Math.min(255, Math.max(1, Math.round((n / top) * 255))), TIER.standin, far);
         }
       }
       // An empty list is a sea with no record of life in the stage, anywhere.

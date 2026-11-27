@@ -63,6 +63,8 @@ export interface LivingTaxon {
   /** its length follows from a claimed mass */
   fromMass?: boolean;
   diet?: string;
+  /** PBDB life habit (e.g. "amphibious", "aquatic", "arboreal"), carried from the atlas to gate habitat placement */
+  habit?: string;
   /**
    * the climate its rows lived in, as the atlas gives it: the mean and the spread of the warmest month and of the
    * coldest, °C. A scene grows a plant where the climate of its own heights is most like it.

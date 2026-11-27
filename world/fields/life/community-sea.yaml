@@ -39,6 +39,7 @@ params:
   here_km: 350
   region_km: 2200
   kernel_km: 900
+  here_share: 0.5
   # A km of land, and of open ocean, is as far as this many of shelf.
   land_cost: 14
   deep_cost: 3

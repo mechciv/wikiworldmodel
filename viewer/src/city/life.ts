@@ -8,7 +8,7 @@ import { defaultLeaf, LEAF_KINDS, type LeafKindName } from '../../../core/leaves
 import { lookup, type Scenario } from '../../../core/scenario.ts';
 import type { LivingTaxon, SceneSpec } from '../../../core/scene.ts';
 import { GroundSampler } from '../../../world/generators/city/ground.ts';
-import { Heights, placeLook, type LivingParams } from '../../../world/generators/life/scene/v14.ts';
+import { climateCover, climateTones, Heights, placeLook, type LivingParams } from '../../../world/generators/life/scene/v15.ts';
 import { snowOf } from '../../../world/generators/life/climate.ts';
 import { declination, MID_DAY } from '../../../core/water.ts';
 import { FIELD_SLOTS } from '../../../core/plots.ts';
@@ -342,10 +342,10 @@ export class LifeScene {
     r.setFarFields(detail?.far && this.people ? detail.far.data : null, detail?.far?.size ?? 1, detail?.far?.box ?? [0, 0, 0, 0]);
     r.setSmokes(detail?.smokes ?? null);
     const params = this.spec.generator.params as unknown as LivingParams;
-    const clim = params.cover.climates[this.spec.biome.climate];
+    const clim = climateCover(this.spec.biome.climate, this.spec.biome.node, params.cover);
     const cover = this.spec.biome.cover;
     // A land before plants has none of its climate's colours: only rock.
-    const tones = params.cover.tones[cover.plants > 0 ? clim?.tones ?? 'plain' : 'barren'] ?? params.cover.tones.plain;
+    const tones = climateTones(this.spec.biome.climate, this.spec.biome.node, params.cover, cover);
     // Where the world gives the rivers their water falls downstream, and no one level bands the banks.
     r.setWater(detail?.water.vertices ?? new Float32Array(0), detail?.water.indices ?? new Uint32Array(0), this.spec.water ? -1e4 : g.waterLevel, detail?.water.flow, tones.water);
     // What the ground is made of, where the world says: its own materials close by, and their colour in the land's from
@@ -353,7 +353,7 @@ export class LifeScene {
     const rock = rockLook(this.spec.bedrock);
     const ground = groundLook(this.spec.substrate, rock);
     // The land's shares are its climate's, as far as what its ground is made of bears them: bare ground has the rest
-    // (world/generators/life/scene/v14.ts, LandCover).
+    // (world/generators/life/scene/v15.ts, LandCover).
     const bears = meanBears(this.spec.substrate, params.cover.bears);
     r.setLand(Float32Array.from(groundTones(['soil', 'herb', 'bare', 'canopy', 'distant'].flatMap((k) => tones[k]), ground)), [Math.min(clim?.forest ?? 0, cover.forests) * bears, Math.min(clim?.herb ?? 0, cover.plants) * bears, 1 - cover.plants * (1 - (clim?.bare ?? 1)) * bears], snowOf(this.spec), sharesByHeight(this.spec, g.levels[g.levels.length - 1], bears));
     r.setSubstrate(ground);

@@ -1,4 +1,4 @@
-// A living scene, version 13: any place at any moment, on land or in the sea, from a spec. Nothing is laid out until it is looked at:
+// A living scene, version 15: any place at any moment, on land or in the sea, from a spec. Nothing is laid out until it is looked at:
 // each 400 m cell makes what stands in it from hashes of where it is, so the scene has no edge to speak of, and what a
 // far view shows is the top of the same list a near view shows in full. The records say which taxa could be here and how
 // big they grew; this says where each stands, how many there are, what it is doing and what colour it is, all invented
@@ -36,8 +36,10 @@
 // its leaves from an atlas (../plants.ts). Since version 13 a ground bears what its climate grows only as far as what
 // it is made of lets it (../sorting.ts): bare ground takes the rest of a crust of salt or of a mud dried to cracks, so
 // that fewer trees and low plants stand there; and stones stand on a ground whose substrate has gravel, and fallen wood
-// lies under trees (../strewn.ts, ../stream.ts). A scene whose ground bears all its climate grows has every tree and
-// animal where version 12 put it. The build and every browser are held to agree within the tolerance of
+// lies under trees (../strewn.ts, ../stream.ts). Since version 15 tropical forest cover transitions smoothly across the
+// monsoon-savanna margin rather than stepping at 0 mm, water-edge and amphibious animals require actual water and stay off
+// deep seafloors, open-country animals can stand in deserts, animals respect climate-at-height, and wild fossil Homo is
+// suppressed when human settlements are active. The build and every browser are held to agree within the tolerance of
 // core/fingerprint.ts.
 import type { Part } from '../../../../core/fingerprint.ts';
 import type { Form, Pose, Routine } from '../../../../core/form.ts';
@@ -56,7 +58,7 @@ import { drawRiver, meet, type Oxbow, type RiverChoices, type RiverPath } from '
 import { meanBears, type Bears } from '../sorting.ts';
 
 export const GENERATOR = 'gen:life/scene';
-export const VERSION = 14;
+export const VERSION = 15;
 
 /** The side of a cell of the ground, in metres. */
 export const CELL = 400;
@@ -117,12 +119,14 @@ export interface LivingParams {
      * and how much of the ground by water, flowing or dry, is under trees, where `riverside` says
      */
     climates: Record<string, { forest: number; herb: number; bare: number; river: number; riverside?: number; dunes?: number; tones: string }>;
+    /** driest-month margin band (mm) over which tropical cover smoothly transitions from open savanna to closed rainforest */
+    tropical_margin?: [number, number];
     /** how far beyond a bank of a river or a lake, flowing or dry, what grows by water reaches, m: all of it to the first, none past the second */
     strip?: [number, number];
     /** kinds in stands: each kind of a layer is commonest in patches about `size` metres across, the more so the higher `sharpness` */
     stands?: { size: number; sharpness: number };
-    /** the least a kind's liking for a climate spreads, °C, in its warmest month and in its coldest, however alike its rows' places were */
-    liking?: { hot_c: number; cold_c: number };
+    /** the least a kind's liking for a climate spreads, °C, in its warmest month and in its coldest, however alike its rows' places were; and minimum liking for placing animals */
+    liking?: { hot_c: number; cold_c: number; animal_min?: number };
     /** what colours each kind of land has: the generator's choice, and nobody's record */
     tones: Record<string, Record<string, number[]>>;
     /**
@@ -208,6 +212,11 @@ export interface LivingParams {
 
 const clamp01 = (x: number) => (x < 0 ? 0 : x > 1 ? 1 : x);
 
+const smooth = (a: number, b: number, x: number) => {
+  const t = clamp01((x - a) / (b - a));
+  return t * t * (3 - 2 * t);
+};
+
 /** What a share of the land grows, as the cover's table has it for a class, where the world allows it; and how much stands by water. */
 interface Growth {
   forest: number;
@@ -217,6 +226,66 @@ interface Growth {
   /** the warmest month and the coldest there, °C, which each kind's liking is held to */
   hot: number;
   cold: number;
+}
+
+/**
+ * Effective climate cover shares for a place or height. For tropical climates (`rainforest` / `savanna`), smoothly blends
+ * cover across `tropical_margin` (default `[-28, 0]` mm) so seasonal moist tropical forests just below Köppen's monsoon
+ * threshold stay closed forest rather than dropping discontinuously to open savanna.
+ */
+export function climateCover(
+  climate: string,
+  node: { hot: number; cold: number; aridity?: number; margin?: number },
+  coverParams: LivingParams['cover'],
+): { forest: number; herb: number; bare: number; river: number; riverside?: number; dunes?: number; tones: string } | undefined {
+  const cl = coverParams.climates[climate];
+  if (!cl) return undefined;
+  if ((climate === 'savanna' || climate === 'rainforest') && node.margin !== undefined) {
+    const rf = coverParams.climates.rainforest;
+    const sav = coverParams.climates.savanna;
+    if (rf && sav) {
+      const [lo, hi] = coverParams.tropical_margin ?? [-28, 0];
+      const rainy = smooth(lo, hi, node.margin);
+      const lerp = (a: number, b: number) => a + (b - a) * rainy;
+      return {
+        ...cl,
+        forest: lerp(sav.forest, rf.forest),
+        herb: lerp(sav.herb, rf.herb),
+        bare: lerp(sav.bare, rf.bare),
+        river: lerp(sav.river, rf.river),
+        riverside: lerp(sav.riverside ?? 0, rf.riverside ?? 0),
+        tones: rainy >= 0.5 ? rf.tones : sav.tones,
+      };
+    }
+  }
+  return cl;
+}
+
+/** Effective ground and water colour tones for a climate node, matching `climateCover`'s tropical transition. */
+export function climateTones(
+  climate: string,
+  node: { margin?: number },
+  coverParams: LivingParams['cover'],
+  cover: SceneCover,
+): Record<string, number[]> {
+  if (!(cover.plants > 0)) return coverParams.tones.barren ?? coverParams.tones.plain;
+  const cl = coverParams.climates[climate];
+  if ((climate === 'savanna' || climate === 'rainforest') && node.margin !== undefined) {
+    const rf = coverParams.tones[coverParams.climates.rainforest?.tones ?? 'rainforest'];
+    const sav = coverParams.tones[coverParams.climates.savanna?.tones ?? 'savanna'];
+    if (rf && sav) {
+      const [lo, hi] = coverParams.tropical_margin ?? [-28, 0];
+      const rainy = smooth(lo, hi, node.margin);
+      const out: Record<string, number[]> = {};
+      for (const k of Object.keys(rf)) {
+        const a = sav[k] ?? rf[k];
+        const b = rf[k];
+        out[k] = b.map((v, i) => (a[i] ?? v) + (v - (a[i] ?? v)) * rainy);
+      }
+      return out;
+    }
+  }
+  return coverParams.tones[cl?.tones ?? 'plain'] ?? coverParams.tones.plain;
 }
 
 function growthOf(cl: { forest: number; herb: number; bare: number; riverside?: number } | undefined, cover: SceneCover, node: { hot: number; cold: number }): Growth {
@@ -233,13 +302,13 @@ function growthOf(cl: { forest: number; herb: number; bare: number; riverside?: 
 export class Heights {
   private rows = new Map<number, Growth>();
   private c: NonNullable<SceneSpec['climate']>;
-  private table: LivingParams['cover']['climates'];
+  private coverParams: LivingParams['cover'];
   readonly band: number;
   readonly step: number;
   constructor(spec: SceneSpec) {
     const p = spec.generator.params as unknown as LivingParams;
     this.c = spec.climate!;
-    this.table = p.cover.climates;
+    this.coverParams = p.cover;
     this.cover = spec.biome.cover;
     this.band = (p.climate.band_c / this.c.lapse) * 1000;
     this.step = p.climate.step_m;
@@ -251,17 +320,12 @@ export class Heights {
     let g = this.rows.get(k);
     if (!g) {
       const node = nodeAtHeight(this.c.months, k * this.step, this.c.lapse);
-      g = growthOf(this.table[climateClass(node, this.c.rule)], this.cover, node);
+      g = growthOf(climateCover(climateClass(node, this.c.rule), node, this.coverParams), this.cover, node);
       this.rows.set(k, g);
     }
     return g;
   }
 }
-
-const smooth = (a: number, b: number, x: number) => {
-  const t = clamp01((x - a) / (b - a));
-  return t * t * (3 - 2 * t);
-};
 
 // ——— The land ———
 
@@ -318,7 +382,7 @@ export function placeLook(spec: SceneSpec): PlaceLook {
     }
   }
   const sea = e0 < g.sea_below;
-  const clim = params.cover.climates[spec.biome.climate];
+  const clim = climateCover(spec.biome.climate, spec.biome.node, params.cover);
   // Where the world says where the rivers run, they are its; where it says nothing, a weighted coin.
   // At sea there is no river to invent.
   const rivers = spec.water ? spec.water.rivers.length > 0 : !sea && (clim?.river ?? 0) * Math.min(1, spec.biome.cover.plants + 0.5) > hash2(3, 3, seed);
@@ -923,7 +987,7 @@ export class LandCover {
   constructor(spec: SceneSpec, private ground: GroundSampler, private level: number, focus: [number, number], private levelAt?: (x: number, y: number) => number, private clearing?: (x: number, y: number) => number, private banks?: Banks) {
     const p = spec.generator.params as unknown as LivingParams;
     this.c = p.cover;
-    const g = growthOf(p.cover.climates[spec.biome.climate], spec.biome.cover, spec.biome.node);
+    const g = growthOf(climateCover(spec.biome.climate, spec.biome.node, p.cover), spec.biome.cover, spec.biome.node);
     this.forest = g.forest;
     this.herb = g.herb;
     this.baren = g.bare;
@@ -1107,6 +1171,8 @@ interface TaxonLayout {
   /** an animal's groups for each cell, on average */
   perCell: number;
   habitat: string;
+  /** PBDB says this taxon is amphibious (e.g. capybara, hippo, sea otter, pinniped) */
+  amphibious: boolean;
   poses: number[];
   group: [number, number];
   flies?: [number, number];
@@ -1157,6 +1223,8 @@ export function liking(t: LivingTaxon, hot: number, cold: number, least: { hot_c
 
 /** What its list says a taxon eats, where that is other animals: such a one is drawn scarcer, and is no one's prey. */
 const HUNTS = /carnivor|insectiv|piscivor/;
+/** Wild fossil Homo taxa suppressed when human settlements (`spec.people`) are active. */
+const WILD_HUMANS = new Set(['life/taxa/homo-sapiens', 'life/taxa/mammals/homo']);
 
 /** How many to the km² a taxon is drawn at, by Damuth's rule and how common it is on its list. */
 export function densityOf(t: LivingTaxon, form: Form, a: LivingParams['animals'], productivity: number): number {
@@ -1192,9 +1260,14 @@ export function makePlan(spec: SceneSpec, ground: GroundSampler, look: PlaceLook
     const mean = (group[0] + group[1]) / 2;
     const perKm2 = plant ? 0 : densityOf(t, form, A, productivity);
     const perCell = plant ? 0 : Math.min(A.most_in_cell, (perKm2 * (CELL * CELL)) / 1e6 / mean);
-    const habitat = b.habitat ?? A.defaults.habitat;
+    const pbdbHabit = t.habit ?? '';
+    const amphibious = /amphibious/i.test(pbdbHabit);
+    let habitat = b.habitat ?? A.defaults.habitat;
+    // On land, animals whose PBDB life habit is amphibious or aquatic (e.g. capybara, hippopotamus, beaver)
+    // require water edge even when their clade's general body plan allows `any`, `open`, or `forest` terrain.
+    if (!plant && habitat !== 'water' && habitat !== 'floor' && habitat !== 'air' && habitat !== 'edge' && habitat !== 'wet' && /amphibious|aquatic/i.test(pbdbHabit)) habitat = 'edge';
     const poses = b.poses ?? A.defaults.poses;
-    return { index, t, form, plant, perCell, habitat, poses: poses.map((p) => POSE[p]), group, ...(b.flies ? { flies: b.flies } : {}), size: plant ? t.height ?? 1 : t.length ?? 1, routine: plant ? 'none' : routineOf({ ...b, habitat: habitat as NonNullable<typeof b.habitat>, poses }), hunts: HUNTS.test(t.diet ?? '') };
+    return { index, t, form, plant, perCell, habitat, amphibious, poses: poses.map((p) => POSE[p]), group, ...(b.flies ? { flies: b.flies } : {}), size: plant ? t.height ?? 1 : t.length ?? 1, routine: plant ? 'none' : routineOf({ ...b, habitat: habitat as NonNullable<typeof b.habitat>, poses }), hunts: HUNTS.test(t.diet ?? '') };
   });
   const canopy = layouts.filter((x) => x.plant && (x.form.behave?.layer ?? 'canopy') === 'canopy' && x.t.height !== undefined);
   const under = layouts.filter((x) => x.plant && x.form.behave?.layer === 'under' && x.t.height !== undefined);
@@ -1202,9 +1275,13 @@ export function makePlan(spec: SceneSpec, ground: GroundSampler, look: PlaceLook
   const tallAt = P.shrubs?.least_m ?? Infinity;
   const shrubs = under.filter((x) => x.size >= tallAt);
   const mats = layouts.filter((x) => x.plant && x.form.behave?.layer === 'float');
-  // On land, nothing that has to swim; in the sea, all of it.
+  // On land, nothing that has to swim; in the sea, all of it. When human settlements are active, suppress wild fossil Homo.
   const atSea = look.sea;
-  const animals = layouts.filter((x) => !x.plant && x.t.length !== undefined && (atSea || x.habitat !== 'water')).sort((a, b) => b.size - a.size || (a.t.id < b.t.id ? -1 : 1));
+  const hasWater = atSea || (waters.paths ? waters.paths.some((p) => !p.dry) : waters.river.length > 0) || waters.oxbows.length > 0 || waters.ponds.length > 0 || Boolean(waters.lakes && !waters.lakes.empty);
+  const hasPeople = Boolean(spec.people);
+  const animals = layouts
+    .filter((x) => !x.plant && x.t.length !== undefined && (atSea || x.habitat !== 'water') && !(hasPeople && (WILD_HUMANS.has(x.t.id) || WILD_HUMANS.has(x.t.form_from))))
+    .sort((a, b) => b.size - a.size || (a.t.id < b.t.id ? -1 : 1));
   const swim = params.sea?.swim_m ?? 40;
   /** How deep the water is over a place, in metres: zero on land. */
   const depthAt = (x: number, y: number) => Math.max(0, (levelAt ? levelAt(x, y) : level) - ground.at(x, y));
@@ -1299,23 +1376,39 @@ export function makePlan(spec: SceneSpec, ground: GroundSampler, look: PlaceLook
     }
     return true;
   };
-  const accept = (habitat: string, x: number, y: number, relaxed: boolean): boolean => {
+  const animalMin = least?.animal_min ?? 0;
+  const accept = (a: TaxonLayout, x: number, y: number, relaxed: boolean): boolean => {
     land.at(x, y);
-    if (habitat === 'air') return true;
     // In the sea: what swims needs water over it, what lives on the floor the floor under water; what lives anywhere, or
-    // at the water's edge, may be on the sea's floor too, or on whatever land the scene has.
+    // at the water's edge, may be on the sea's floor too (unless amphibious, which stays near the shore), or on whatever land the scene has.
     if (atSea) {
       const deep = depthAt(x, y);
-      if (habitat === 'water') return deep > 2;
-      if (habitat === 'floor') return deep > 0.5;
-      if ((habitat === 'any' || habitat === 'edge') && deep > 0.5) return true;
+      if (a.habitat === 'air') return true;
+      if (a.habitat === 'water') return deep > 2;
+      if (a.habitat === 'floor') return deep > 0.5;
+      if (a.amphibious) return deep <= 3 && land.above > -1.8 && land.above < 2;
+      if ((a.habitat === 'any' || a.habitat === 'edge') && deep > 0.5) return true;
     }
-    if (habitat === 'water' || habitat === 'floor') return false;
-    if (habitat === 'edge' || habitat === 'wet') return land.above > -1.8 && land.above < 1.1;
+    if (a.habitat === 'water' || a.habitat === 'floor') return false;
+    // On land, an animal with a known fossil climate envelope must tolerate this height's climate (e.g. no tropical
+    // lowland mammals up on an alpine ridge, even if they sit within the same 4° atlas patch).
+    if (!atSea && animalMin > 0 && least && a.t.climate && a.t.tier !== 'formation' && a.t.tier !== 'standin' && liking(a.t, land.hot, land.cold, least) < animalMin) return false;
+    if (a.habitat === 'air') return true;
+    if (a.habitat === 'edge' || a.habitat === 'wet') {
+      if (!hasWater) return false;
+      if (banks) {
+        if (land.water) return depthAt(x, y) < 1.8;
+        if (land.bed) return false;
+        const kind = banks.kindAt(x, y);
+        if (kind === BANK.river || kind === BANK.still) return banks.at(x, y) < 35;
+        return Boolean(levelAt && levelAt(x, y) === 0 && land.above > -1.8 && land.above < 1.1);
+      }
+      return land.above > -1.8 && land.above < 1.1;
+    }
     if (land.water) return false;
     if (relaxed) return true;
-    if (habitat === 'open') return land.canopy < 0.3 && land.bare < 0.7;
-    if (habitat === 'forest' || habitat === 'canopy') return land.canopy > 0.3;
+    if (a.habitat === 'open') return land.canopy < 0.3;
+    if (a.habitat === 'forest' || a.habitat === 'canopy') return land.canopy > 0.3;
     return true;
   };
   /** Lay out one group of animals around a place, into a list. */
@@ -1333,7 +1426,7 @@ export function makePlan(spec: SceneSpec, ground: GroundSampler, look: PlaceLook
       const x = cx + dcos(b) * r;
       const y = cy + dsin(b) * r;
       const relaxed = q > k * 4;
-      if (!accept(a.habitat, x, y, relaxed)) continue;
+      if (!accept(a, x, y, relaxed)) continue;
       const scale = drawn === 0 ? 1 : 0.68 + 0.32 * rng.next();
       const R = L * scale * (L < 0.6 ? 0.5 : 0.34);
       if (!relaxed && a.habitat !== 'air' && !clearOfTrees(x, y, R)) continue;
@@ -1347,7 +1440,7 @@ export function makePlan(spec: SceneSpec, ground: GroundSampler, look: PlaceLook
         const lo = Math.min(deep * 0.5, L * scale * 0.6);
         const hi = Math.max(lo, Math.min(deep - L * scale * 0.6, swim));
         z = gz + lo + (hi - lo) * rng.next();
-      } else if (deep > 0.5) {
+      } else if (deep > 0.5 && !a.amphibious) {
         // On the sea's floor: what lives there, and what lives anywhere or at the edge, rests on it.
         z = gz;
       } else if (a.habitat === 'edge' || a.habitat === 'wet') {
@@ -1359,7 +1452,7 @@ export function makePlan(spec: SceneSpec, ground: GroundSampler, look: PlaceLook
       if (a.flies) {
         pose = POSE.fly;
         z = gz + a.flies[0] + (a.flies[1] - a.flies[0]) * rng.next();
-      } else if (land.above < 1.2 && land.above > -0.2 && (pose === POSE.graze || pose === POSE.stand)) pose = POSE.drink;
+      } else if (hasWater && !land.bed && land.above < 1.2 && land.above > -0.2 && (pose === POSE.graze || pose === POSE.stand)) pose = POSE.drink;
       // Which of its group it is seeds its way: the same whatever else the cell holds by the time it is made.
       rows.animals.push({ row: rows.taxon.length, a, group: herd, salt: (Math.imul(salt, 0x9e3779b1) ^ Math.imul(drawn + 1, 0x85ebca6b)) >>> 0 });
       rows.add(x, y, z, dsin(h), dcos(h), scale, a.index, pose, rng.int(0, 255), rng.int(0, 255), rank);
@@ -1395,7 +1488,7 @@ export function makePlan(spec: SceneSpec, ground: GroundSampler, look: PlaceLook
       const L = a.size * scale;
       const H = (a.t.hip ?? a.size * (a.form.hip ?? 0.3)) * scale;
       const girth = L * (L < 0.6 ? 0.5 : 0.34);
-      const free = (px: number, py: number) => accept(a.habitat, px, py, false) && (a.habitat === 'air' || clearOfTrees(px, py, girth));
+      const free = (px: number, py: number) => accept(a, px, py, false) && (a.habitat === 'air' || clearOfTrees(px, py, girth));
       let prey: { x: number; y: number; r: number } | undefined;
       if (a.routine === 'stalk') {
         let best = R.stalk.reach;
@@ -1450,7 +1543,7 @@ export function makePlan(spec: SceneSpec, ground: GroundSampler, look: PlaceLook
         cx = focus[0] + dcos(b) * q;
         cy = focus[1] + dsin(b) * q;
       }
-      found = accept(a.habitat, cx, cy, relaxed);
+      found = accept(a, cx, cy, relaxed);
     }
     if (!found) continue;
     const salt = 100000 + a.index;
@@ -1539,7 +1632,7 @@ export function makePlan(spec: SceneSpec, ground: GroundSampler, look: PlaceLook
           for (let tries = 0; tries < 6 && !found; tries++) {
             cx = (i + rng.next()) * CELL;
             cy = (j + rng.next()) * CELL;
-            found = accept(a.habitat, cx, cy, false);
+            found = accept(a, cx, cy, false);
           }
           if (!found) continue;
           placeGroup(rows, groups, a, cx, cy, salt, (hash3(i, j, g, seed + a.index) * 256) | 0);

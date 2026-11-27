@@ -5,7 +5,7 @@ import { convexHull } from '../../../world/generators/city/math.ts';
 import type { Fingerprint } from '../../../core/fingerprint.ts';
 import { computeBatchBounds, computeProtoBounds, type BatchBounds, type ProtoBounds } from '../gl/culling.ts';
 import { groundNormals } from '../gl/groundNormals.ts';
-import { encodeGround, GRIDS, placeLook, worldGround } from '../../../world/generators/life/scene/v14.ts';
+import { encodeGround, GRIDS, placeLook, worldGround } from '../../../world/generators/life/scene/v15.ts';
 import { plotStyle } from '../../../core/plots.ts';
 import type { SceneSpec } from '../../../core/scene.ts';
 import { FAST_BUDGET, FULL_BUDGET, SceneStream, type Batch, type LifeView, type NamedGroup, type ProtoMesh } from '../../../world/generators/life/stream.ts';

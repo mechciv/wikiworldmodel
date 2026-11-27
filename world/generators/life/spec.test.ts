@@ -77,3 +77,49 @@ describe('the plate under a place', () => {
     expect(plateUnder(lost, 40, 30, 8)).toBe(2);
   });
 });
+
+describe('choosing land or sea for a scene', () => {
+  it('draws from the sea atlas rather than the land atlas when a submerged place falls inside a coastal land patch', async () => {
+    const { placeSpec } = await import('./spec.ts');
+    const { TIER } = await import('../../../core/atlas.ts');
+    const form = { kind: 'animal' as const, description: 'test', behave: { habitat: 'any' as const }, parts: { body: { type: 'trunk' as const, rings: [[-0.5, 1, 0.5, 0.05], [0.5, 1, 0.5, 0.05]] as [number, number, number, number][] } } };
+    const mkEntry = (no: number, label: string, habit?: string) => ({
+      taxon: { no, label, rank: 'genus', form: 'f', form_from: 't/x', form_label: label, own: true, length: { lo: 1, hi: 1, from: 't/x', own: true }, rows: 2, span: [1, 0] as [number, number], standin: false, ...(habit ? { habit } : {}) },
+      weight: 255,
+      tier: TIER.here,
+      km: 0,
+    });
+    const base = {
+      atlas: { format: 'lightworld-atlas@1', source: 'src:land', title: 'land', grid: { step: 4, nx: 90, ny: 45 }, here_km: 350, region_km: 2200, forms: 'forms.json', where: 'where.json', coverage: { taxa: 1, own_form: 1, inherited_form: 0, no_form: 0, rows_drawable: 1 }, bins: [] },
+      seaAtlas: { format: 'lightworld-sea@1', source: 'src:sea', title: 'sea', grid: { step: 4, nx: 90, ny: 45 }, here_km: 350, region_km: 2200, bins: [] },
+      bin: { from: -1e6, to: 1950, slice: 0, name: 'Test' },
+      list: () => [mkEntry(1, 'Brontothere', 'terrestrial')],
+      seaList: () => [mkEntry(2, 'Whale', 'aquatic, depth=surface')],
+      forms: { f: form },
+      keyAge: 0,
+      step: 1,
+      plate: () => 1,
+      carry: (_p: number, la: number, lo: number): [number, number] => [la, lo],
+      climateAge: 0,
+      climate: () => ({ hot: 26, cold: 20, aridity: 2, margin: 10 }),
+      rule: { polar: 10, frost: 0, tropical: 18, cold: 0, arid: 1, desert: 0.5 },
+      climateField: 'field:earth/climate',
+      cover: { plants: 1, forests: 1, grasses: 1 },
+      isoline: 20,
+      generator: { id: 'gen:life/scene', version: 15, params: {} },
+      substrate: () => ({ tier: 'evidence' as const, from: 'rocks' as const, weight: 1, materials: [['sand' as const, 1] as ['sand', number]], colours: [], marks: [], source: 'src:rocks', rows: [], sites: 1, km: 0 }),
+    };
+    // Submerged coastal shelf (-300 m < isoline 20 m): chooses sea atlas, carries habit, and skips land substrate.
+    const submerged = placeSpec({ ...base, elevation: () => -300 } as unknown as Parameters<typeof placeSpec>[0], 3.08, 81.63, 0)!;
+    expect(submerged.fossils.source).toBe('src:sea');
+    expect(submerged.taxa.map((t) => t.label)).toEqual(['Whale']);
+    expect(submerged.taxa[0].habit).toBe('aquatic, depth=surface');
+    expect(submerged.substrate).toBeUndefined();
+    // Emergent land (+100 m >= isoline 20 m): chooses land atlas and attaches land substrate.
+    const emergent = placeSpec({ ...base, elevation: () => 100 } as unknown as Parameters<typeof placeSpec>[0], 3.08, 81.63, 0)!;
+    expect(emergent.fossils.source).toBe('src:land');
+    expect(emergent.taxa.map((t) => t.label)).toEqual(['Brontothere']);
+    expect(emergent.taxa[0].habit).toBe('terrestrial');
+    expect(emergent.substrate).toBeDefined();
+  });
+});

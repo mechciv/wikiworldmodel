@@ -915,7 +915,7 @@ describe('where settlements stand, and what they farm (sites.ts)', () => {
   });
 
   it('puts a settlement in the same place from two scenes when a river lies past where one of them knows water', () => {
-    // A scene knows the water only within 34 km of its middle (scene/v14.ts, REACH), and weighs cells a little further.
+    // A scene knows the water only within 34 km of its middle (scene/v15.ts, REACH), and weighs cells a little further.
     // Rivers at 0 and 36 km east of the first scene's middle: the second, 16.7 km east, sees both; the first, only one.
     const rivers = [0, 36000];
     const b = { lat: 0, lon: 0.15 };

@@ -35,7 +35,7 @@ import type { AtlasWhere } from '../../core/atlas.ts';
 import type { SceneFileV2 } from '../../core/scene.ts';
 import { bedrockShort, groundAnswer, substrateShort } from '../../core/substrate.ts';
 import { LATTICE_DEG, latticeOf } from '../../world/generators/life/spec.ts';
-import { wetInMonth, type LivingParams } from '../../world/generators/life/scene/v14.ts';
+import { wetInMonth, type LivingParams } from '../../world/generators/life/scene/v15.ts';
 import { Camera, MAX_DIST, MIN_DIST } from './camera.ts';
 import { LifeAtlas, type ClimateData } from './city/lifeatlas.ts';
 import { Climates, type ClimateAt } from './climates.ts';
@@ -189,7 +189,7 @@ const GLOBE_GONE = 4.5e4;
 const PLACE_REACH = 15e3;
 /**
  * How far from a city's point a living scene draws its records: a scene reaches 16 km from its own point
- * (world/generators/life/scene/v14.ts, EXTENT), and a city's records some 7 km from its.
+ * (world/generators/life/scene/v15.ts, EXTENT), and a city's records some 7 km from its.
  */
 const BUNDLE_REACH = 2.3e4;
 /** How far one sees through the sea's water, as it is drawn: until its green light falls to a twentieth. */

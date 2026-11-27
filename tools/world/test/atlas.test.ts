@@ -6,7 +6,7 @@ import type { ClimateRule } from '../../../core/climate.ts';
 import type { Form } from '../../../core/form.ts';
 import type { PeriodRecord } from '../../../core/records.ts';
 import { toMa } from '../../../core/time.ts';
-import { atlasBins, buildAtlas, rowShare, type AtlasParams } from '../src/build/atlas.ts';
+import { atlasBins, buildAtlas, classify, rowShare, siteSpans, type AtlasParams, type RecentClimateSource, type RocksAgeData } from '../src/build/atlas.ts';
 import { SRC_W, type Snapshot } from '../src/build/fields.ts';
 import type { ClimateKeyframe } from '../src/build/climate.ts';
 import type { Solved } from '../src/build/records.ts';
@@ -351,9 +351,301 @@ describe('its stages', () => {
     expect(bins.some((b) => b.name.includes('C to D') || b.name.includes('to D'))).toBe(true);
   });
 
-  it('runs oldest first, each ending where it ends, and takes only the chart\'s stages', () => {
+  it("runs oldest first, each ending where it ends, and takes only the chart's stages", () => {
     const bins = atlasBins(stages, 8, 0.5);
     for (let i = 1; i < bins.length; i++) expect(bins[i].from).toBeGreaterThanOrEqual(bins[i - 1].from);
     expect(bins.some((b) => b.name === 'Not one')).toBe(false);
+  });
+});
+
+describe('habitat and date gating', () => {
+  const ago = (ma: number) => 1950 - ma * 1e6;
+  const holoChart: Pick<PeriodRecord, 'rank' | 'start' | 'end' | 'name' | 'id'>[] = [
+    { id: 'holo', rank: 'stage', name: 'Holocene', start: ago(0.0117), end: 1950 },
+  ];
+
+  const makeClimate = (fn: (lat: number, lon: number) => [number, number, number, number]): ClimateKeyframe => {
+    const nodes = new Float32Array(180 * 91 * 4);
+    for (let j = 0; j < 91; j++) {
+      const lat = 90 - j * 2;
+      for (let i = 0; i < 180; i++) {
+        const lon = -180 + i * 2;
+        const [h, c, a, m] = fn(lat, lon);
+        const idx = (j * 180 + i) * 4;
+        nodes[idx] = h;
+        nodes[idx + 1] = c;
+        nodes[idx + 2] = a;
+        nodes[idx + 3] = m;
+      }
+    }
+    return { ageMa: 0, values: new Uint8Array(0), plate: new Uint16Array(0), nodes } as unknown as ClimateKeyframe;
+  };
+
+  it('tightens site spans with measured ages from the rock record, per patch, so a dated region ends before an undated one', () => {
+    // Direct date with zero error gets padded ±5% (min 50 yr), Ka/Ma/YBP units convert properly, and non-overlapping or inverted ages are ignored.
+    const rocks: RocksAgeData = {
+      words: ['YBP', 'Ka', 'Ma'],
+      ages: [
+        [1, 1, 7000, 0, 0, 0], // coll 1 max 7000 YBP
+        [1, 2, 3000, 0, 0, 0], // coll 1 min 3000 YBP
+        [2, 0, 5, 0, 1, 0],    // coll 2 direct 5 Ka ±0 -> padded ±250 yr => [0.00525, 0.00475]
+        [3, 0, 2, 0.1, 2, 0],  // coll 3 direct 2 Ma -> outside [0.0117, 0], ignored
+        [4, 1, 2000, 0, 0, 0], // coll 4 inverted (max < min), ignored
+        [4, 2, 6000, 0, 0, 0],
+      ],
+    };
+    const spans = siteSpans(
+      [
+        [1, 10, -15, 0.0117, 0, 0],
+        [2, 10, -15, 0.0117, 0, 0],
+        [3, 10, -15, 0.0117, 0, 0],
+        [4, 10, -15, 0.0117, 0, 0],
+      ],
+      rocks,
+    );
+    expect(spans[0][0]).toBeCloseTo(0.007, 6);
+    expect(spans[0][1]).toBeCloseTo(0.003, 6);
+    expect(spans[1][0]).toBeCloseTo(0.00525, 6);
+    expect(spans[1][1]).toBeCloseTo(0.00475, 6);
+    expect(spans[2]).toEqual([0.0117, 0]);
+    expect(spans[3]).toEqual([0.0117, 0]);
+
+    // A narrow radiocarbon span (500 yr) wholly inside the Holocene counts as full share 1, not crushed to 0.5.
+    expect(rowShare(0.0055, 0.005, 0.0117, 0, PARAMS)).toBeCloseTo(1, 9);
+
+    // Same genus on two continents: west is radiocarbon-dated 7000..3000 YBP, east is undated Holocene -> per-patch local spans differ.
+    const snap: LandSnapshot = {
+      ...land,
+      taxa: [
+        [1, 'Life', 1, 0, 1, null, null, null, null, 0, 0, 0, 0],
+        [10, 'Beasts', 1, 1, 1, null, null, null, null, 0, 0, 0, 0],
+        [11, 'Hippo', 2, 10, 1, null, null, null, null, 0, 0, 0, 0],
+      ],
+      sites: [
+        [1, 10, -15, 0.0117, 0, 0], // west (dated 7000..3000 YBP via rocks)
+        [99, 10, 75, 0.0117, 0, 0], // east (undated Holocene)
+      ],
+      rows: [
+        [1, 0, 11],
+        [2, 1, 11],
+      ],
+    };
+    const out = buildAtlas({ world: makeWorld(snap), model } as unknown as Solved, holoChart as PeriodRecord[], [snapshot()], [key], { step: 2, nx: 180, lon0: -180, lat0: 90 }, rule, () => {}, () => undefined, undefined, rocks)!;
+    const bin = binNamed(out, 'Holocene');
+    const west = atlasList(bin, out.index.grid, 10, -15).find((e) => e.taxon.label === 'Hippo')!;
+    const east = atlasList(bin, out.index.grid, 10, 75).find((e) => e.taxon.label === 'Hippo')!;
+    expect(west.taxon.span).toEqual([0.007, 0.003]);
+    expect(east.taxon.span).toEqual([0.0117, 0]);
+  });
+
+  it('keeps loosely dated nearby rows out of here, and puts direct local evidence ahead of distant regional taxa', () => {
+    const customParams: AtlasParams = { ...PARAMS, here_share: 0.5, quotas: { ...PARAMS.quotas, big: 1 } };
+    const snap: LandSnapshot = {
+      ...land,
+      taxa: [
+        [1, 'Life', 1, 0, 1, null, null, null, null, 0, 0, 0, 0],
+        [10, 'Beasts', 1, 1, 1, null, null, null, null, 0, 0, 0, 0],
+        [11, 'Localhorse', 2, 10, 1, null, null, null, null, 0, 0, 0, 0],
+        [12, 'Loosecroc', 2, 10, 1, null, null, null, null, 0, 0, 0, 0],
+        [13, 'Farcommon', 2, 10, 1, null, null, null, null, 0, 0, 0, 0],
+      ],
+      sites: [
+        // Site 0 right here (10, -15), tightly dated to Holocene (share = 1)
+        [1, 10, -15, 0.0117, 0, 0],
+        // Site 1 right here (10, -15), loosely dated 0.04..0 Ma (share = 0.29 < here_share 0.5)
+        [2, 10, -15, 0.04, 0, 0],
+        // Site 2 far overland (2, -15, ~890 km > here_km 350), tightly dated with many rows
+        [3, 2, -15, 0.0117, 0, 0],
+      ],
+      rows: [
+        [1, 0, 11],
+        [2, 1, 12],
+        [3, 2, 13],
+        [4, 2, 13],
+        [5, 2, 13],
+        [6, 2, 13],
+        [7, 2, 13],
+        [8, 2, 13],
+      ],
+    };
+    const w = makeWorld(snap);
+    (w.fields[0] as { params: unknown }).params = customParams;
+    const out = buildAtlas({ world: w, model } as unknown as Solved, holoChart as PeriodRecord[], [snapshot()], [key], { step: 2, nx: 180, lon0: -180, lat0: 90 }, rule, () => {}, () => undefined)!;
+    const list = atlasList(binNamed(out, 'Holocene'), out.index.grid, 10, -15);
+    // Quota for `big` is 1: Localhorse (1 row, here) beats Farcommon (6 rows, region) and Loosecroc (loose share -> region).
+    expect(list.map((e) => e.taxon.label)).toEqual(['Localhorse']);
+    expect(list[0].tier).toBe(TIER.here);
+
+    // With quota 3, Loosecroc is demoted from here to region despite km = 0 because share < here_share.
+    (w.fields[0] as { params: unknown }).params = { ...customParams, quotas: { ...PARAMS.quotas, big: 3 } };
+    const out3 = buildAtlas({ world: w, model } as unknown as Solved, holoChart as PeriodRecord[], [snapshot()], [key], { step: 2, nx: 180, lon0: -180, lat0: 90 }, rule, () => {}, () => undefined)!;
+    const list3 = atlasList(binNamed(out3, 'Holocene'), out3.index.grid, 10, -15);
+    expect(list3.find((e) => e.taxon.label === 'Loosecroc')!.tier).toBe(TIER.region);
+    expect(list3.find((e) => e.taxon.label === 'Localhorse')!.tier).toBe(TIER.here);
+
+    // When a nearby dated row ends early (7000..5000 YBP) while a distant regional row reaches the present (0 Ma),
+    // the combined patch span relies on regional inference and must be demoted to TIER.region. By contrast, when local
+    // rows already cover the full in-stage span [0.0117, 0] and a distant row only extends older than the stage boundary,
+    // the entry stays TIER.here.
+    const mixSnap: LandSnapshot = {
+      ...land,
+      taxa: [
+        [1, 'Life', 1, 0, 1, null, null, null, null, 0, 0, 0, 0],
+        [10, 'Beasts', 1, 1, 1, null, null, null, null, 0, 0, 0, 0],
+        [11, 'Earlylocal', 2, 10, 1, null, null, null, null, 0, 0, 0, 0],
+        [12, 'Fullstage', 2, 10, 1, null, null, null, null, 0, 0, 0, 0],
+      ],
+      sites: [
+        [1, 10, -15, 0.007, 0.005, 0], // local early-Holocene row (here_km)
+        [2, 2, -15, 0.0117, 0, 0],     // distant Holocene row reaching present (~890 km, region)
+        [3, 10, -15, 0.0117, 0, 0],    // local row covering full Holocene
+        [4, 2, -15, 0.05, 0, 0],       // distant row extending older than Holocene boundary
+      ],
+      rows: [
+        [1, 0, 11],
+        [2, 1, 11],
+        [3, 2, 12],
+        [4, 3, 12],
+      ],
+    };
+    const wm = makeWorld(mixSnap);
+    (wm.fields[0] as { params: unknown }).params = { ...PARAMS, here_share: 0.5 };
+    const mixOut = buildAtlas({ world: wm, model } as unknown as Solved, holoChart as PeriodRecord[], [snapshot()], [key], { step: 2, nx: 180, lon0: -180, lat0: 90 }, rule, () => {}, () => undefined)!;
+    const mixList = atlasList(binNamed(mixOut, 'Holocene'), mixOut.index.grid, 10, -15);
+    const earlyLocal = mixList.find((e) => e.taxon.label === 'Earlylocal')!;
+    expect(earlyLocal.taxon.span).toEqual([0.0117, 0]);
+    expect(earlyLocal.tier).toBe(TIER.region);
+    const fullStage = mixList.find((e) => e.taxon.label === 'Fullstage')!;
+    expect(fullStage.tier).toBe(TIER.here);
+  });
+
+  it('gates regional taxa across mountain barriers, elevation differences, dissimilar climates, and deep inland coasts, and prefers late-Quaternary climate near the present', () => {
+    // One broad continent (lon [-40, 20], lat [-20, 30]):
+    // - West lowland at lon [-36, -22] (200 m), High mountain wall at lon [-20, -18] (3,800 m),
+    //   Plateau at lon [-16, -8] (3,200 m), East lowland at lon [-6, 16] (200 m).
+    const elev = new Int16Array(SRC_W * 181);
+    const plate = new Uint16Array(SRC_W * 181);
+    for (let j = 0; j <= 180; j++) {
+      for (let i = 0; i < SRC_W; i++) {
+        const lat = 90 - j;
+        const lon = i - 180;
+        let e = -4000;
+        if (lat >= -20 && lat <= 30 && lon >= -40 && lon <= 20) {
+          if (lon >= -20 && lon <= -18) e = 3800;
+          else if (lon >= -16 && lon <= -8) e = 3200;
+          else e = 200;
+        }
+        elev[j * SRC_W + i] = e;
+        plate[j * SRC_W + i] = 1;
+      }
+    }
+    const topoSnap: Snapshot = { ageMa: 0, elev, plate };
+    // Deep-time climate is uniform temperate everywhere, while recent climate splits wet tropics (lat >= 10) from cold desert (lat < 10).
+    const deepUniform = makeClimate(() => [24, 14, 1.5, 0]);
+    const recentSplit = makeClimate((lat) => (lat >= 10 ? [28, 24, 3.0, 40] : [12, -2, 0.15, -60]));
+    const recentSources: RecentClimateSource[] = [{ keys: [recentSplit], grid: { step: 2, nx: 180, lon0: -180, lat0: 90 }, maxAgeMa: 0.12 }];
+
+    const seabirdForm: Form = { kind: 'animal', description: 'seabird', behave: { habitat: 'air' }, parts: { body: { type: 'trunk', rings: [[-0.5, 1, 0.5, 0.05], [0.5, 1, 0.5, 0.05]] } } };
+    const snap: LandSnapshot = {
+      ...land,
+      words: ['', 'clade', 'genus', 'marine'],
+      taxa: [
+        [1, 'Life', 1, 0, 1, null, null, null, null, 0, 0, 0, 0],
+        [10, 'Beasts', 1, 1, 1, null, null, null, null, 0, 0, 0, 0],
+        [11, 'Lowlandbeast', 2, 10, 1, null, null, null, null, 0, 0, 0, 0],
+        [12, 'Easttropbeast', 2, 10, 1, null, null, null, null, 0, 0, 0, 0],
+        [30, 'Seabirds', 1, 1, 1, null, null, null, null, 3, 0, 0, 0],
+        [31, 'Petrel', 2, 30, 1, null, null, null, null, 3, 0, 0, 0],
+      ],
+      sites: [
+        [1, 16, -26, 0.0117, 0, 0], // West lowland (200 m, tropical)
+        [2, 16, 4, 0.0117, 0, 0],   // East tropical lowland (200 m, tropical, deep inland)
+        [3, 28, 18, 0.0117, 0, 0],  // Coastal corner (200 m, tropical) with Petrel
+      ],
+      rows: [
+        [1, 0, 11],
+        [2, 1, 12],
+        [3, 2, 31],
+      ],
+    };
+    const entities = [
+      taxonRecord('t/beasts', 10, [['body_plan', 'beast'], ['body_length', { lo: 2, hi: 4 }]]),
+      taxonRecord('t/seabirds', 30, [['body_plan', 'seabird'], ['body_length', { lo: 0.4, hi: 0.6 }]]),
+    ];
+    const gatedParams: AtlasParams = { ...PARAMS, climb_cost: 120, max_elev_diff_m: 1500, elev_scale_m: 1000, min_climate_like: 0.24 };
+    const w = {
+      ...makeWorld(snap),
+      entities,
+      entity: new Map(entities.map((e) => [e.id, e])),
+      plans: { beast: animal, seabird: seabirdForm },
+      fields: [{ id: 'field:life/community', title: 'Who', data: { as: 'community', from: 'src:land' }, params: gatedParams }, { id: 'field:earth/coastline', isoline_m: 20 }],
+    } as unknown as World;
+
+    const out = buildAtlas({ world: w, model } as unknown as Solved, holoChart as PeriodRecord[], [topoSnap], [deepUniform], { step: 2, nx: 180, lon0: -180, lat0: 90 }, rule, () => {}, () => undefined, recentSources)!;
+    const bin = binNamed(out, 'Holocene');
+
+    // Elevation gate: Lowlandbeast (200 m) does NOT reach the 3,200 m plateau patch (16, -12).
+    const onPlateau = atlasList(bin, out.index.grid, 16, -12).map((e) => e.taxon.label);
+    expect(onPlateau).not.toContain('Lowlandbeast');
+
+    // Climate gate + recentClimates preference: Easttropbeast (tropical at lat 16) reaches same-climate tropical lowland (16, 12)
+    // but is gated out of the cold desert lowland (2, 4) — proving recentClimates overrode the uniform deep-time climate!
+    const inEastTrop = atlasList(bin, out.index.grid, 16, 12).map((e) => e.taxon.label);
+    expect(inEastTrop).toContain('Easttropbeast');
+    const inEastDesert = atlasList(bin, out.index.grid, 2, 4).map((e) => e.taxon.label);
+    expect(inEastDesert).not.toContain('Easttropbeast');
+
+    // Strictly marine seabird (Petrel): present on nearby coast (28, 10), absent as region deep inland (16, 4).
+    const onCoast = atlasList(bin, out.index.grid, 28, 10).map((e) => e.taxon.label);
+    expect(onCoast).toContain('Petrel');
+    const deepInland = atlasList(bin, out.index.grid, 16, 4).map((e) => e.taxon.label);
+    expect(deepInland).not.toContain('Petrel');
+  });
+
+  it('excludes strictly marine taxa and marine depth-zone swimmers from the land atlas while keeping freshwater and water-edge taxa', () => {
+    const swimForm: Form = { kind: 'animal', description: 'swimmer', behave: { habitat: 'water' }, parts: { body: { type: 'trunk', rings: [[-0.5, 1, 0.5, 0.05], [0.5, 1, 0.5, 0.05]] } } };
+    const edgeForm: Form = { kind: 'animal', description: 'croc', behave: { habitat: 'edge' }, parts: { body: { type: 'trunk', rings: [[-0.5, 1, 0.5, 0.05], [0.5, 1, 0.5, 0.05]] } } };
+    const airForm: Form = { kind: 'animal', description: 'bird', behave: { habitat: 'air' }, parts: { body: { type: 'trunk', rings: [[-0.5, 1, 0.5, 0.05], [0.5, 1, 0.5, 0.05]] } } };
+    const words = ['', 'clade', 'genus', 'oceanic', 'marine,freshwater', 'freshwater', 'lagoonal,marine,brackish,freshwater', 'marine', 'aquatic, depth=surface', 'aquatic', 'nektonic'];
+    const snap: LandSnapshot = {
+      ...land,
+      words,
+      taxa: [
+        [1, 'Life', 1, 0, 1, null, null, null, null, 0, 0, 0, 0],
+        [10, 'Landclade', 1, 1, 1, null, null, null, null, 0, 0, 0, 0],
+        [11, 'Oceanbeast', 2, 10, 1, null, null, null, null, 3, 0, 0, 0],
+        [20, 'Swimmers', 1, 1, 1, null, null, null, null, 0, 0, 0, 0],
+        [21, 'Delphinus', 2, 20, 1, null, null, null, null, 4, 0, 8, 0],
+        [22, 'Inia', 2, 20, 1, null, null, null, null, 5, 0, 9, 0],
+        [23, 'Ceratodus', 2, 20, 1, null, null, null, null, 6, 0, 10, 0],
+        [30, 'Crocs', 1, 1, 1, null, null, null, null, 0, 0, 0, 0],
+        [31, 'Marinecroc', 2, 30, 1, null, null, null, null, 7, 0, 0, 0],
+        [40, 'Birds', 1, 1, 1, null, null, null, null, 0, 0, 0, 0],
+        [41, 'Seabird', 2, 40, 1, null, null, null, null, 7, 0, 0, 0],
+      ],
+      sites: [],
+      rows: [],
+    };
+    const entities = [
+      taxonRecord('t/land', 10, [['body_plan', 'beast'], ['body_length', { lo: 2, hi: 4 }]]),
+      taxonRecord('t/swim', 20, [['body_plan', 'swim'], ['body_length', { lo: 2, hi: 4 }]]),
+      taxonRecord('t/croc', 30, [['body_plan', 'edge'], ['body_length', { lo: 3, hi: 5 }]]),
+      taxonRecord('t/bird', 40, [['body_plan', 'air'], ['body_length', { lo: 0.5, hi: 1 }]]),
+    ];
+    const w = {
+      ...makeWorld(snap),
+      entities,
+      entity: new Map(entities.map((e) => [e.id, e])),
+      plans: { beast: animal, swim: swimForm, edge: edgeForm, air: airForm },
+    } as unknown as World;
+    const known = classify(w, snap, PARAMS, 'land');
+    expect(known.has(11)).toBe(false); // strictly oceanic animal excluded
+    expect(known.has(21)).toBe(false); // marine dolphin (marine,freshwater + depth=surface) excluded
+    expect(known.has(22)).toBe(true);  // freshwater river dolphin kept
+    expect(known.has(23)).toBe(true);  // euryhaline lungfish without depth= kept
+    expect(known.has(31)).toBe(true);  // coastal croc kept (flagged strictlySea)
+    expect(known.get(31)!.strictlySea).toBe(true);
+    expect(known.has(41)).toBe(true);  // seabird kept (flagged strictlySea)
+    expect(known.get(41)!.strictlySea).toBe(true);
   });
 });

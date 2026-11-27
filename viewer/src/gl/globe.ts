@@ -224,7 +224,7 @@ vec3 biome(vec3 n, float e, float reach, vec4 stone, float rugged) {
   float desert = (1.0 - smoothstep(uRule2.y * 0.54, uRule2.y * 1.46, wetness)) * (1.0 - polar);
   float tropical = smoothstep(uRule.z - 1.0, uRule.z + 1.0, cold);
   float boreal = 1.0 - smoothstep(uRule.w - 2.0, uRule.w + 2.0, cold);
-  float rainy = smoothstep(-8.0, 8.0, margin);
+  float rainy = smoothstep(-28.0, 0.0, margin);
   float fine = mix(wide.a, near.a, reach);
   float mott = mix(wide.r, near.r, reach);
   float streak = mix(wide.g, near.g, reach);

@@ -98,6 +98,7 @@ export function livingTaxon(e: AtlasEntry, forms: Record<string, Form>): LivingT
     ...(size && !size.own ? { size_from: size.from } : {}),
     ...(fromMass ? { fromMass: true } : {}),
     ...(t.diet ? { diet: t.diet } : {}),
+    ...(t.habit ? { habit: t.habit } : {}),
     ...(t.climate ? { climate: t.climate } : {}),
     time: timeOf(t.span[0], t.span[1]),
   };
@@ -332,11 +333,15 @@ export function placeSpec(w: PlaceWorld, lat: number, lon: number, ageMa: number
   const plate = plateUnder(w, origin.lat, origin.lon, ageMa);
   const [rl, ro] = plate ? w.carry(plate, origin.lat, origin.lon, ageMa, w.keyAge) : [origin.lat, origin.lon];
   const relief_at = { lat: round5(rl), lon: round5(ro) };
+  // A submerged sea site inside a coastal 4° patch should draw from the sea atlas rather than the land atlas.
+  const inSea = w.elevation(relief_at.lat, relief_at.lon) < w.isoline;
   const land = w.list(origin.lat, origin.lon);
-  const list = land ?? w.seaList?.(origin.lat, origin.lon);
+  const sea = w.seaList?.(origin.lat, origin.lon);
+  const fromSea = inSea && !!sea;
+  const list = fromSea ? sea : land ?? sea;
   if (!list) return undefined;
   // A scene from the sea's list rests on the sea's fossils.
-  const atlas = !land && w.seaAtlas ? w.seaAtlas : w.atlas;
+  const atlas = (fromSea || !land) && w.seaAtlas ? w.seaAtlas : w.atlas;
   // The months of the finest climate where there are some, and the deep past's runs' numbers where not.
   const m = w.months;
   const [ml, mo] = m && plate ? w.carry(plate, origin.lat, origin.lon, ageMa, m.frameMa) : [origin.lat, origin.lon];
@@ -367,7 +372,7 @@ export function placeSpec(w: PlaceWorld, lat: number, lon: number, ageMa: number
     spec.climate = { field, ageMa: age, months, height: Math.round(here.height - w.isoline), coast: Math.round(w.isoline), lapse: m!.lapse, rule: w.rule, water: m!.water, month: m!.month ?? warmestMonth(months), lat: round5(here.lat), ...(here.parts ? { parts: here.parts } : {}) };
   }
   // The ground of a place of land, where the world says what it was made of, and the rock under it.
-  if (land && (w.substrate || w.soil || w.bedrock || w.strata)) {
+  if (!fromSea && land && (w.substrate || w.soil || w.bedrock || w.strata)) {
     const carried = (toAge: number): [number, number] => (plate ? w.carry(plate, origin.lat, origin.lon, ageMa, toAge) : [origin.lat, origin.lon]);
     const [sl, so] = w.substrate ? carried(toMa(w.bin.slice)) : [0, 0];
     const [tl, to] = w.soil || w.bedrock || w.strata ? carried(0) : [0, 0];
