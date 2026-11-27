@@ -662,9 +662,23 @@ give one scheme, and a thing in both is one thing with a row in each.
 - **A record that names a thing's id in `same_as` is that thing.** Its page shows what the row says
   beside its own claims, and search finds it as the record. So before writing a record of something a
   list has, look it up there (`npm run world -- thing <scheme>:<key>`), and name it.
-- **Nothing is joined by a name.** `npm run world -- matches-wanted` lists the records that may be
+- **Nothing is joined by a name alone.** `npm run world -- matches-wanted` lists the records that may be
   things of the lists by their names (and places): each is a proposal to check, and becomes a join
-  when someone adds the id.
+  when someone adds the id. Two lists may be joined by the build where a field's `match:` says what
+  must agree besides the name (`match: { scheme: pbdb, by: [name, taxon_rank] }`): then a thing of the
+  list is the other scheme's where exactly one thing of each has those values, and the parent of one is
+  above the other in its tree. The page says it was joined so.
+- **A list's field says which rows are things** (`where: { "col:status": [accepted] }`), and the other
+  names of each (`names:`): rows of its own table, such as a catalogue's synonyms, or of another of its
+  dataset's tables or another dataset, such as common names or a gazetteer's ancient names. Search
+  finds a thing by any of them.
+- **A list may be of millions.** A delimited table is read as it comes, and a member of a zip where it
+  lies (`data: { file: NameUsage.tsv }`), so a release of gigabytes is pinned as it is published. The
+  build's files of the things are cut to be fetched a little at a time
+  ([plans/ENTITIES.md](plans/ENTITIES.md), steps 3 and 5).
+- **A scheme is an id space, not a kind.** One catalogue may give its cities and its seas ids of one
+  space, each layer a list of its own kind: `natural-earth:1159151593` is a city, and
+  `natural-earth:1159105181` a mountain.
 
 A record can't be written into a dataset, so an **overlay**, one file per row in
 [world/overlays/](../world/overlays/), names the row and does one of three things:

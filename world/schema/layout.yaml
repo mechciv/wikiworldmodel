@@ -23,6 +23,7 @@ kinds:
   # The Earth: its plates, rocks and ground, and what changed them.
   plate: earth/plates
   landform: earth/landforms
+  water-body: earth/waters
   large-igneous-province: earth/igneous-provinces
   rock-unit: earth/rock-units
   sample: earth/samples
@@ -45,6 +46,7 @@ kinds:
   polity: civilization/polities
   organization: civilization/organizations
   settlement: civilization/settlements
+  place: civilization/places
   building: civilization/structures
   monument: civilization/structures
   works: civilization/structures

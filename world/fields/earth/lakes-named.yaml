@@ -1,0 +1,22 @@
+id: field:earth/lakes-named
+type: field
+title: Today's lakes, by name
+description: >-
+  Natural Earth's lakes and reservoirs at 1:10m, as they are now: rows of the map, not records written here. A lake the map leaves unnamed is known by its id, and not found by search.
+grid: { kind: rows }
+time: { lo: 1950 CE, hi: 2100 CE }
+data:
+  from: src:natural-earth-lakes-10m-5.1.2
+basis: evidence
+spread: unknown
+# A list of things (docs/plans/ENTITIES.md, step 5): each feature is natural-earth:<ne_id>, the map's own id, which it keeps
+# from one release to the next and gives its cities and its seas alike; and its Wikidata id joins it to a record that
+# gives that.
+rows:
+  kind: water-body
+  key: "{ne_id}"
+  scheme: natural-earth
+  same_as: { wikidata: wikidataid }
+  claims:
+    name: { column: name, as: text }
+    feature_class: { column: featurecla }

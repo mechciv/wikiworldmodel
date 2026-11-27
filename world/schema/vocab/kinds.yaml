@@ -253,6 +253,11 @@ kinds:
       mountain-range:
         label: Mountain range
         description: An orogen or mountain range, from the start of its growth on.
+  water-body:
+    label: Body of water
+    description: >-
+      A sea, a gulf, a bay, a strait, a lake or a reservoir: a body of water as a map or a gazetteer names it, of the
+      shape it has now unless its phases say otherwise.
   large-igneous-province:
     label: Large igneous province
     description: A very large accumulation of igneous rock, erupted over a geologically short time.
@@ -326,6 +331,12 @@ kinds:
   settlement:
     label: Settlement
     description: A town or a city, from its founding or first settlement on; its names may change.
+  place:
+    label: Place
+    description: >-
+      A place as a gazetteer names it, of whatever sort: a settlement, a region, a river, a sanctuary. The rows of a
+      gazetteer of places of many sorts are of this kind (docs/plans/ENTITIES.md, step 5); a record of what a place is,
+      of a kind of its own, names the place's id in same_as.
   plate:
     label: Tectonic plate
     description: A rigid plate of a plate model. It also defines a frame, which moves with it.

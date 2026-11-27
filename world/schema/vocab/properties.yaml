@@ -219,6 +219,45 @@ properties:
     type: string
     applies_to: [taxon]
     description: A taxon's rank in the classification it comes from, such as genus or family.
+  authorship:
+    type: string
+    applies_to: [taxon]
+    description: >-
+      Who first named a taxon by its name, and when, as its catalogue writes it: Linnaeus, 1758; a name moved to another
+      genus has its first author in parentheses.
+  taxonomic_status:
+    type: string
+    applies_to: [taxon]
+    values:
+      accepted: A name the catalogue accepts for a taxon.
+      provisionally accepted: A name the catalogue accepts until its checklist has been reviewed.
+    description: Whether a catalogue of names accepts a taxon's name, or accepts it provisionally.
+  extinct:
+    type: string
+    applies_to: [taxon]
+    values:
+      "true": Its catalogue says the taxon is extinct.
+      "false": Its catalogue says the taxon still lives.
+    description: >-
+      Whether a taxon is extinct, as its catalogue says. A catalogue that says nothing leaves it open, and a living taxon
+      has no end.
+  environment:
+    type: string
+    applies_to: [taxon]
+    description: >-
+      Where a taxon lives, as its catalogue says: on land, in the sea, in fresh or brackish water, one or several, in the
+      catalogue's own words.
+  feature_class:
+    type: string
+    applies_to: [landform, water-body, place]
+    description: >-
+      What sort of feature a map or a gazetteer says a named place is, in its own words: a sea, a gulf, a range, a
+      desert, an island, a lake.
+  elevation:
+    type: quantity
+    unit: m
+    applies_to: [landform]
+    description: The height of a summit or another spot above sea level, as a map or a survey gives it.
   language_level:
     type: string
     applies_to: [language]

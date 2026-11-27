@@ -1,0 +1,22 @@
+id: field:earth/regions-named
+type: field
+title: The named regions of the land today
+description: >-
+  Natural Earth's named ranges, deserts, plateaus, plains, islands, peninsulas and other regions of the land, as today's map names them: rows of the map, not records written here. A mountain range written here, with its evidence of when it stood, is that range where it names the map's id or its Wikidata id.
+grid: { kind: rows }
+time: { lo: 1950 CE, hi: 2100 CE }
+data:
+  from: src:natural-earth-regions-5.1.2
+basis: evidence
+spread: unknown
+# A list of things (docs/plans/ENTITIES.md, step 5): each feature is natural-earth:<ne_id>, the map's own id, which it keeps
+# from one release to the next and gives its cities and its seas alike; and its Wikidata id joins it to a record that
+# gives that.
+rows:
+  kind: landform
+  key: "{NE_ID}"
+  scheme: natural-earth
+  same_as: { wikidata: WIKIDATAID }
+  claims:
+    name: { column: NAME, as: text }
+    feature_class: { column: FEATURECLA }

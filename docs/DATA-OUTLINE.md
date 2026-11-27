@@ -58,12 +58,12 @@ What every other domain leans on.
 
 | Need | Here | Sources | License | As |
 |---|---|---|---|---|
-| Present-day gazetteer | ◐ some ids | GeoNames; Wikidata | ✓ | D |
-| Ancient places, Mediterranean and Near East | ◐ ids on Rome records | Pleiades | ✓ CC BY | D |
+| Present-day gazetteer | ◐ some ids; Natural Earth's 1,251 cities as things | GeoNames (changes daily: needs a snapshot in the blob store); Wikidata | ✓ | D |
+| Ancient places, Mediterranean and Near East | ◐ Pleiades 4.1's 41,480 places as things, with their 38,862 ancient names; 39 records are theirs by the ids they give. No dates: the release keeps them with its locations and names | Pleiades | ✓ CC BY 3.0 | D |
 | Historical places worldwide | ○ | World Historical Gazetteer | ? | D |
 | Islamic world places | ○ | al-Ṯurayyā | ? | D |
 | China | ○ | CHGIS | ? | — |
-| Present-day borders, coastlines, rivers, lakes | ◐ land borders and cities, as a layer | Natural Earth | ✓ PD | D |
+| Present-day borders, coastlines, rivers, lakes | ◐ land borders and cities, as a layer; the named seas, lakes, ranges, deserts, islands, capes and peaks of the 1:10m map as things, joined to a record by a Wikidata id it gives; no rivers, whose 1:10m lines have no ids | Natural Earth | ✓ PD | D |
 | Plate assignment of every located record | ✓ | PALEOMAP polygons | ✓ | check |
 | More plate models as alternatives | ○ | Merdith et al. 2021 (1 Ga to now); Müller et al. 2019 and 2022 | ✓ CC BY (check each) | D |
 
@@ -160,10 +160,11 @@ What every other domain leans on.
 
 | Need | Here | Sources | License | As |
 |---|---|---|---|---|
-| Tree of life: topology | ◐ 26 clades from cellular organisms to Homo sapiens, the Hell Creek's taxa with their parents from the PBDB, and every taxon that has a form, with a panel; the land's 104,000 taxa as rows | Open Tree of Life synthetic tree; PBDB | ✓ (check) | D |
+| Tree of life: topology | ◐ 26 clades from cellular organisms to Homo sapiens, the Hell Creek's taxa with their parents from the PBDB, and every taxon that has a form, with a panel; the PBDB's 268,000 taxa and the Catalogue of Life's 2,718,468 accepted names as things of lists, each hung in its list's classification, the two joined where a name, a rank and the trees above them agree ([plans/ENTITIES.md](plans/ENTITIES.md), step 5). The Open Tree's phylogeny is not read | Open Tree of Life synthetic tree; Catalogue of Life; PBDB | ✓ CC BY (the Catalogue); Open Tree (check) | D |
 | Tree of life: divergence times | ◐ | TimeTree; fossil calibrations (Benton et al. 2015) | ? TimeTree | D/R |
 | Fossil occurrences with paleo-coordinates | ◐ 26 written, 16 fossil forests, a snapshot of the Hell Creek's 5,277 rows, of the land's 245,000 and of the sea's 1.4 million over the Phanerozoic; the sea's listed by genus with no forms, so none is drawn | Paleobiology Database | ✓ CC0 by the service's notice of November 2026 (earlier CC BY) | D (snapshot) |
 | Quaternary fossils and pollen | ○ | Neotoma | ✓ CC BY | D |
+| Living species, by name | ◐ the Catalogue of Life's release of November 2026, every accepted name a thing, found by its synonyms and English common names too; not in the atlas, so a scene of today draws no living species from it | Catalogue of Life (ChecklistBank) | ✓ CC BY 4.0 | D |
 | Present-day species occurrences | ○ | GBIF (licensed per dataset: keep CC0 and CC BY) | ◐ | D |
 | Species ranges through time | ○ | derived from occurrences (alpha hulls), as the design proposes | — | F (derived) |
 | The origin of life and early microbial evidence | ◐ | literature (stromatolites, isotopic evidence); alternatives for contested claims | — | R + alternative |
