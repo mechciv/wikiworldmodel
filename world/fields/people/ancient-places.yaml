@@ -1,0 +1,29 @@
+id: field:people/ancient-places
+type: field
+title: The places of the ancient world
+description: >-
+  Pleiades' places: the places of the ancient world its gazetteer names, settlements, regions, rivers, sanctuaries and
+  the rest, each at its representative point, with the names the gazetteer gives each. They are rows of the gazetteer,
+  not records written here, and say nothing of when a place was. A record that names a place's id in same_as is that
+  place, as Rome, Constantinople and the other places written here that give their Pleiades ids are already.
+grid: { kind: rows }
+time: { lo: 3000 BCE, hi: 1500 CE }
+data:
+  from: src:pleiades-places-4.1
+basis: evidence
+# A single value at each place and time: the gazetteer says how precise a point is in words, not by a number.
+spread: unknown
+# A list of things (docs/plans/ENTITIES.md, step 5): each place is pleiades:<id>, the gazetteer's own number, which the
+# records already give in same_as. Its names are a table of their own beside it, each naming its place.
+rows:
+  kind: place
+  key: "{id}"
+  scheme: pleiades
+  names:
+    - from: src:pleiades-names-4.1
+      of: "{place_id}"
+      name: romanized_form_1
+      note: ancient name
+  claims:
+    name: { column: title, as: text }
+    location: { column: [representative_latitude, representative_longitude], as: point, method: gazetteer }

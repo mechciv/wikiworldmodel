@@ -23,8 +23,9 @@ import { anchorPlace, anchorsOf, available, buildNetwork, chosen, countDays, cyc
 import { resolvePoints } from '../importer.ts';
 import { lineageLoop } from '../lineage.ts';
 import { REPO, safeJoin, WORLD } from '../paths.ts';
-import { readTable, rowClaims, type Table } from '../tables.ts';
-import { readLists, thingsOf, type Things } from '../things.ts';
+import { delimitedSource, readTable, rowClaims, type Table } from '../tables.ts';
+import { delimitedOf } from '../rowstream.ts';
+import { kindOf, readLists, thingsOf, type Things } from '../things.ts';
 import { stableStringify } from '../util.ts';
 import { kindIs, layoutOf, loadWorld, schemaDir, type Claim, type Entity, type Field, type Input, type Model, type Relation, type World } from '../world.ts';
 
@@ -132,7 +133,7 @@ class RefChecker {
       return undefined;
     }
     // A thing of a list stands where a record may: it is known by its scheme's id, as a record is by its own.
-    const kind = r.type === 'external' ? this.listed?.schemes.get(r.scheme) : undefined;
+    const kind = r.type === 'external' && this.listed?.schemes.has(r.scheme) ? (kindOf(this.listed, s) ?? this.listed.schemes.get(r.scheme)) : undefined;
     if (opts.types && !opts.types.includes(r.type) && !(kind && opts.types.includes('entity'))) {
       this.issues.push({ level: 'error', check: 'refs', file, where, message: `"${s}" should name a ${opts.types.join(' or ')} record` });
       return undefined;
@@ -670,9 +671,10 @@ function checkRowSpecs(world: World, issues: Issue[]): void {
     const spec = f.rows;
     if (spec.scheme) {
       if (spec.key.includes('{#}')) issues.push({ level: 'error', check: 'rows', ...at('.key'), message: 'a row known by its place in the file is not the same row in the next snapshot: a list of things keys its rows by the dataset\'s own ids' });
-      
-      const other = world.fields.find((g) => g !== f && g.rows?.scheme === spec.scheme && g.rows?.kind !== spec.kind);
-      if (other) issues.push({ level: 'error', check: 'rows', ...at('.kind'), message: `${other.id} reads things of ${spec.scheme} as ${article(other.rows!.kind)}: the things of one scheme are of one kind` });
+      // A scheme is an id space: one catalogue may give things of several kinds ids of one space, a list of each kind.
+      // Two snapshots of one list of a scheme are of one kind.
+      const other = world.fields.find((g) => g !== f && g.rows?.scheme === spec.scheme && g.data?.from === f.data?.from && g.rows?.kind !== spec.kind);
+      if (other) issues.push({ level: 'error', check: 'rows', ...at('.kind'), message: `${other.id} reads the same rows of ${spec.scheme} as ${article(other.rows!.kind)}: a row is of one kind` });
     }
     if (spec.parent) {
       if (!spec.scheme) issues.push({ level: 'error', check: 'rows', ...at('.parent'), message: 'only a list of things (rows: scheme) is a tree' });
@@ -680,6 +682,34 @@ function checkRowSpecs(world: World, issues: Issue[]): void {
     }
     if (spec.same_as && !spec.scheme) issues.push({ level: 'error', check: 'rows', ...at('.same_as'), message: 'only a list of things (rows: scheme) gives other ids of its rows' });
     for (const prop of spec.preferred ?? []) if (!spec.claims[prop]) issues.push({ level: 'error', check: 'rows', ...at('.preferred'), message: `its rows give no "${prop}"` });
+    // Other names are read from a table as it comes, which a delimited one is (docs/plans/ENTITIES.md, step 5).
+    if (spec.names?.length) {
+      const d = world.manifest.datasets[f.data?.from ?? ''];
+      const delimited = !!d && (['csv', 'tsv'].includes(d.fetch.format) || (d.fetch.format === 'zip' && !!f.data?.file && !!delimitedOf(f.data.file)));
+      if (!spec.scheme) issues.push({ level: 'error', check: 'rows', ...at('.names'), message: 'only a list of things (rows: scheme) gives other names of its rows' });
+      // A dataset that is not in the manifest is an error of its own.
+      else if (d && !delimited) issues.push({ level: 'error', check: 'rows', ...at('.names'), message: 'other names are read from a delimited table, a csv or tsv file or a member of a zip' });
+      for (const [i, n] of spec.names.entries()) {
+        if (n.from) {
+          const other = world.manifest.datasets[n.from];
+          if (!other) issues.push({ level: 'error', check: 'refs', ...at(`.names[${i}].from`), message: `${n.from} is not a dataset in the manifest` });
+          else if (!delimitedSource(n.from, other, n.file)) issues.push({ level: 'error', check: 'rows', ...at(`.names[${i}].from`), message: `${n.from}${n.file ? `'s "${n.file}"` : ''} is no delimited table` });
+        } else if (n.file && d && !delimitedSource(f.data!.from, d, n.file)) issues.push({ level: 'error', check: 'rows', ...at(`.names[${i}].file`), message: `"${n.file}" is no delimited table of ${f.data!.from}` });
+      }
+    }
+    // A match joins a list to another of the same kind, by properties both give, and never by a name alone.
+    if (spec.match) {
+      const others = world.fields.filter((g) => g !== f && g.rows?.scheme === spec.match!.scheme);
+      if (!spec.scheme) issues.push({ level: 'error', check: 'rows', ...at('.match'), message: 'only a list of things (rows: scheme) is matched to another' });
+      else if (spec.match.scheme === spec.scheme) issues.push({ level: 'error', check: 'rows', ...at('.match.scheme'), message: 'a list is matched to another scheme: two lists of one scheme are one catalogue already' });
+      if (!others.length) issues.push({ level: 'error', check: 'rows', ...at('.match.scheme'), message: `no field reads things of ${spec.match.scheme}` });
+      else if (others.some((g) => g.rows!.kind !== spec.kind)) issues.push({ level: 'error', check: 'rows', ...at('.match.scheme'), message: `the things of ${spec.match.scheme} are of another kind than ${spec.kind}: a match joins things of one kind` });
+      if (!spec.match.by.includes('name')) issues.push({ level: 'error', check: 'rows', ...at('.match.by'), message: 'a match is by a name and what else must agree with it' });
+      for (const prop of spec.match.by) {
+        if (!spec.claims[prop]) issues.push({ level: 'error', check: 'rows', ...at('.match.by'), message: `its rows give no "${prop}"` });
+        for (const g of others) if (!g.rows!.claims[prop]) issues.push({ level: 'error', check: 'rows', ...at('.match.by'), message: `${g.id}'s rows give no "${prop}"` });
+      }
+    }
   }
 }
 
@@ -887,7 +917,9 @@ function checkDataset(world: World, refs: RefChecker, id: string, file: string, 
   refs.check(id, file, where, { types: ['src'] });
   const d = world.manifest.datasets[id];
   if (world.source.has(id) && !d) issues.push({ level: 'error', check: 'refs', file, where, message: `${id} is a source but not a dataset in the manifest, so the build cannot fetch it` });
-  if (d && member && !d.fetch.files?.[member]) issues.push({ level: 'error', check: 'refs', file, where, message: `${id} has no file "${member}"` });
+  // A delimited table in a zip may be read from the archive where it lies, unpacked or not (tools/world/src/rowstream.ts).
+  const inArchive = d?.fetch.format === 'zip' && !!member && !!delimitedOf(member);
+  if (d && member && !d.fetch.files?.[member] && !inArchive) issues.push({ level: 'error', check: 'refs', file, where, message: `${id} has no file "${member}"` });
 }
 
 /** Competing claims need one of them preferred, in each picture they compete in. */

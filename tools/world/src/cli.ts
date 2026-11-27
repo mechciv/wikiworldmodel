@@ -476,7 +476,7 @@ const commands: Record<string, (args: string[]) => Promise<number | void>> = {
     const fold = (s: string) => wordsOf(s).join(' ');
     // Records by their names, of the kinds the lists are of, that name no thing of that kind's list yet.
     const byName = new Map<string, { id: string; kind: string; at?: { lat: number; lon: number } }[]>();
-    const kinds = new Set(things.schemes.values());
+    const kinds = new Set(things.lists.map((l) => l.spec.kind));
     for (const e of world.entities) {
       if (e.imported || ![...kinds].some((k) => e.kind === k || e.kind.startsWith(`${k}/`))) continue;
       if ((identity.rowsOf.get(e.id) ?? []).length) continue;
@@ -500,7 +500,7 @@ const commands: Record<string, (args: string[]) => Promise<number | void>> = {
     let shown = 0;
     for (const t of things.things.values()) {
       if (identity.record.has(t.id)) continue;
-      const kind = things.schemes.get(t.scheme)!;
+      const kind = things.lists[t.rows[0].list].spec.kind;
       for (const r of byName.get(fold(t.label)) ?? []) {
         if (r.kind !== kind && !r.kind.startsWith(`${kind}/`)) continue;
         const li = things.lists[t.rows[0].list];

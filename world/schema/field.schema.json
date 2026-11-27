@@ -206,13 +206,47 @@
           "additionalProperties": false
         },
         "same_as": { "type": "object", "description": "The ids of other schemes that its columns give, by scheme: the column", "propertyNames": { "pattern": "^[a-z][a-z0-9-]*$" }, "additionalProperties": { "type": "string" } },
-        "preferred": { "type": "array", "items": { "type": "string" }, "description": "The properties for which this list's value is preferred over another list's, of a thing that is in both" }
+        "preferred": { "type": "array", "items": { "type": "string" }, "description": "The properties for which this list's value is preferred over another list's, of a thing that is in both" },
+        "where": { "$ref": "#/$defs/rows_where", "description": "Which rows are rows of the list: a row is one only where each of these columns holds one of the values given" },
+        "names": {
+          "type": "array",
+          "description": "Other names of the list's things, from rows that name them: synonyms, common names. Read from a delimited table only",
+          "items": {
+            "type": "object",
+            "required": ["of", "name", "note"],
+            "properties": {
+              "from": { "$ref": "defs.json#/$defs/ref", "description": "Another dataset the names are in, where they are not in the list's own" },
+              "file": { "type": "string", "description": "The dataset's file or archive member the names are in, where it is not the list's own" },
+              "where": { "$ref": "#/$defs/rows_where", "description": "Which rows give a name" },
+              "of": { "type": "string", "minLength": 3, "description": "The key of the thing a row names, as a template of its columns" },
+              "name": { "type": "string", "description": "The column of the name" },
+              "lang": { "type": "string", "pattern": "^[a-z]{2,3}$", "description": "The language the names are in, by its code" },
+              "note": { "type": "string", "description": "What such a name is, in a word or two: a synonym, a common name" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "match": {
+          "type": "object",
+          "required": ["scheme", "by"],
+          "description": "A thing of this list is the thing of another scheme with the same values of these properties, where no id says so: where exactly one thing of each list has them, and the parent of one is above the other in its list, or one is at the top of its list. Never by a name alone. The other scheme's thing stands for both",
+          "properties": {
+            "scheme": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+            "by": { "type": "array", "items": { "type": "string" }, "minItems": 2 }
+          },
+          "additionalProperties": false
+        }
       },
       "additionalProperties": false
     }
   },
   "additionalProperties": false,
   "$defs": {
+    "rows_where": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "oneOf": [{ "type": "string" }, { "type": "array", "items": { "type": "string" }, "minItems": 1 }] }
+    },
     "by_value": {
       "description": "A number for every row, or set by a column's value",
       "oneOf": [

@@ -13,7 +13,8 @@ import type { Basis } from '../../../core/tileset.ts';
 import { parsePoint, toMa, type TimePointInput } from '../../../core/time.ts';
 export { rowRef } from '../../../core/refs.ts';
 import { parseTable } from './build/series.ts';
-import { resolveDatasetFile } from './manifest.ts';
+import { datasetPath, resolveDatasetFile } from './manifest.ts';
+import { delimitedOf, eachRow, type Delimited, type TableSource } from './rowstream.ts';
 import type { Citation, Field, World } from './world.ts';
 import { rockRows, type LandSnapshot, type RockRow, type RocksSnapshot } from './pbdb.ts';
 import { unitRows, type ColumnsSnapshot, type UnitRow } from './macrostrat.ts';
@@ -58,6 +59,44 @@ export interface RowsSpec {
   same_as?: Record<string, string>;
   /** the properties for which this list's value is preferred over another list's, of a thing that is in both */
   preferred?: string[];
+  /** which rows are rows of the list: a row is one only where each of these columns holds one of the values given */
+  where?: Record<string, string | string[]>;
+  /** other names of the list's things, from rows that name them: in the list's own table, or another of its dataset's */
+  names?: NamesSpec[];
+  /**
+   * A thing of this list is the thing of another scheme with the same values of these properties, where no id says so
+   * (docs/plans/ENTITIES.md, step 4): where exactly one thing of each list has them, and the parent of one is above the
+   * other in its list, or one is at the top of its list. Never by a name alone. The page says it was matched so, and the
+   * other scheme's thing stands for both.
+   */
+  match?: { scheme: string; by: string[] };
+}
+
+/** Rows that give another name of a thing of the list: its synonyms, its common names. */
+export interface NamesSpec {
+  /** another dataset they are in, where they are not in the list's own: a gazetteer's table of names beside its places */
+  from?: string;
+  /** the dataset's file or archive member they are in, where it is not the list's own */
+  file?: string;
+  /** which rows give one */
+  where?: Record<string, string | string[]>;
+  /** the key of the thing a row names, as a template of its columns */
+  of: string;
+  /** the column of the name */
+  name: string;
+  /** the language the names are in, by its code */
+  lang?: string;
+  /** what such a name is, in a word or two: a synonym, a common name */
+  note: string;
+}
+
+/** A table's rows by key, as a Map holds them or as a list of millions is kept (ColumnRows). */
+export interface RowMap {
+  readonly size: number;
+  has(key: string): boolean;
+  get(key: string): Record<string, unknown> | undefined;
+  keys(): Iterable<string>;
+  [Symbol.iterator](): Iterator<[string, Record<string, unknown>]>;
 }
 
 export interface Table {
@@ -65,7 +104,16 @@ export interface Table {
   field: string;
   spec: RowsSpec;
   /** each row's columns, by key, in the dataset's order */
-  rows: Map<string, Record<string, unknown>>;
+  rows: RowMap;
+  /** other names of its rows, where the field reads some (spec.names) */
+  names?: TableNames;
+}
+
+/** The other names of a list's rows: each the row it names, by its place, its text, and which of the field's names it is. */
+export interface TableNames {
+  at: Int32Array;
+  text: string[];
+  set: Uint8Array;
 }
 
 /** A claim a row makes, as the world's claims are: its value, and where in the dataset it comes from. */
@@ -247,17 +295,237 @@ export function landRows(snap: LandSnapshot): Record<string, unknown>[] {
   });
 }
 
+/** Does a row hold, in each column named, one of the values given? */
+export function rowWhere(where: Record<string, string | string[]> | undefined, columns: Record<string, unknown>): boolean {
+  if (!where) return true;
+  for (const [column, allowed] of Object.entries(where)) {
+    const v = columns[column];
+    const s = v === undefined || v === null ? '' : String(v);
+    if (Array.isArray(allowed) ? !allowed.includes(s) : allowed !== s) return false;
+  }
+  return true;
+}
+
 /** A field's dataset as a table of rows by key, if the field says how its rows are keyed and the dataset is here. */
 export async function readTable(world: World, field: Field): Promise<Table | undefined> {
   if (!field.rows || !field.data) return undefined;
+  // A delimited table is read as it comes, and kept by column: a list of millions is one.
+  const delimited = delimitedSource(field.data.from, world.manifest.datasets[field.data.from], field.data.file);
+  if (delimited) {
+    if (!existsSync(delimited.source.path)) return undefined;
+    const d = world.manifest.datasets[field.data.from];
+    return readColumns(field.data.from, field.id, field.rows, delimited, (file, from) => {
+      const other = from ? delimitedSource(from, world.manifest.datasets[from], file) : delimitedSource(field.data!.from, d, file);
+      return other && existsSync(other.source.path) ? other : undefined;
+    });
+  }
   const raw = await rawRows(world, field);
   if (!raw) return undefined;
   const rows = new Map<string, Record<string, unknown>>();
   raw.forEach((columns, i) => {
+    if (!rowWhere(field.rows!.where, columns)) return;
     const key = rowKey(field.rows!.key, columns, i);
     if (!rows.has(key)) rows.set(key, columns);
   });
   return { dataset: field.data.from, field: field.id, spec: field.rows, rows };
+}
+
+/** Where a dataset's table is, if it is a delimited one: a file, an archive's member unpacked, or one read from the archive. */
+export function delimitedSource(id: string, d: World['manifest']['datasets'][string] | undefined, member?: string): { source: TableSource; format: Delimited } | undefined {
+  if (!d) return undefined;
+  const format = d.fetch.format;
+  if (format === 'csv' || format === 'tsv') return { source: { path: resolveDatasetFile(id, d, member) }, format };
+  if (format !== 'zip' || !member) return undefined;
+  const unpacked = d.fetch.files?.[member];
+  const name = unpacked ? unpacked.path : member;
+  const as = delimitedOf(name);
+  if (!as) return undefined;
+  return unpacked ? { source: { path: resolveDatasetFile(id, d, member) }, format: as } : { source: { path: datasetPath(id, d), member }, format: as };
+}
+
+/** A template of columns, made ready to fill from a row's values: {Column} for a column, {#} for the row's place. */
+function templateOf(template: string, columns: string[]): (values: string[], index: number) => string {
+  const parts: (string | number)[] = [];
+  let last = 0;
+  for (const m of template.matchAll(/\{([^}]+)\}/g)) {
+    parts.push(template.slice(last, m.index));
+    parts.push(m[1] === '#' ? -1 : columns.indexOf(m[1]));
+    last = m.index! + m[0].length;
+  }
+  parts.push(template.slice(last));
+  return (values, index) => {
+    let s = '';
+    for (const p of parts) s += typeof p === 'string' ? p : p < 0 ? String(index) : (values[p] ?? '');
+    return s;
+  };
+}
+
+/** The columns a template names. */
+const templateColumns = (template: string) => [...template.matchAll(/\{([^}]+)\}/g)].map((m) => m[1]).filter((c) => c !== '#');
+
+/** The columns a field's rows read from the list's own table: its key, parent, other ids, claims, which rows, names. */
+export function columnsOf(spec: RowsSpec): string[] {
+  const out = new Set<string>();
+  for (const c of templateColumns(spec.key)) out.add(c);
+  if (spec.parent) for (const t of [spec.parent.key].flat()) for (const c of templateColumns(t)) out.add(c);
+  for (const c of Object.values(spec.same_as ?? {})) out.add(c);
+  for (const m of Object.values(spec.claims)) for (const c of [m.column].flat()) out.add(c);
+  for (const c of Object.keys(spec.where ?? {})) out.add(c);
+  for (const n of spec.names ?? []) if (!n.file && !n.from) for (const c of [...templateColumns(n.of), n.name, ...Object.keys(n.where ?? {})]) out.add(c);
+  return [...out];
+}
+
+/** A test of a row's values against a `where`, by the columns' places. */
+function whereOf(where: Record<string, string | string[]> | undefined, columns: string[]): (values: string[]) => boolean {
+  const tests = Object.entries(where ?? {}).map(([c, allowed]) => [columns.indexOf(c), new Set([allowed].flat())] as const);
+  return (values) => tests.every(([i, allowed]) => allowed.has(values[i] ?? ''));
+}
+
+/** A column of a list as it is kept: its values, or, for a column of few values, those values once and each row's. */
+type Column = (string | null)[] | { words: string[]; at: Uint32Array };
+const NONE = 0xffffffff;
+const cellOf = (c: Column, i: number): string | null => (Array.isArray(c) ? c[i] : c.at[i] === NONE ? null : c.words[c.at[i]]);
+
+/** A column as rows are added to it: each value of a few kinds kept once, until there are too many kinds for that to pay. */
+class ColumnBuilder {
+  private words: string[] = [];
+  private codes = new Map<string, number>();
+  private at: number[] = [];
+  private plain?: (string | null)[];
+  add(v: string): void {
+    const x = v === '' ? null : v;
+    if (this.plain) return void this.plain.push(x);
+    if (x === null) return void this.at.push(NONE);
+    let code = this.codes.get(x);
+    if (code === undefined) {
+      if (this.words.length >= 4096) {
+        this.plain = this.at.map((i) => (i === NONE ? null : this.words[i]));
+        this.plain.push(x);
+        this.at = [];
+        this.codes.clear();
+        return;
+      }
+      code = this.words.length;
+      this.words.push(x);
+      this.codes.set(x, code);
+    }
+    this.at.push(code);
+  }
+  done(): Column {
+    return this.plain ?? { words: this.words, at: Uint32Array.from(this.at) };
+  }
+}
+
+/**
+ * The rows of a list kept by column (docs/plans/ENTITIES.md, step 5): only the columns its field reads, and a row's
+ * record made only when it is asked for. A list of millions, held as a record a row, would not fit in memory.
+ */
+export class ColumnRows implements RowMap {
+  /** each row's place, by its key */
+  readonly index = new Map<string, number>();
+  constructor(
+    readonly rowKeys: string[],
+    readonly names: string[],
+    private readonly columns: Column[],
+  ) {
+    rowKeys.forEach((k, i) => this.index.set(k, i));
+  }
+  get size(): number {
+    return this.rowKeys.length;
+  }
+  has(key: string): boolean {
+    return this.index.has(key);
+  }
+  get(key: string): Record<string, unknown> | undefined {
+    const i = this.index.get(key);
+    return i === undefined ? undefined : this.at(i);
+  }
+  /** The row at a place, as its columns. */
+  at(i: number): Record<string, unknown> {
+    const out: Record<string, unknown> = {};
+    for (let c = 0; c < this.names.length; c++) {
+      const v = cellOf(this.columns[c], i);
+      if (v !== null) out[this.names[c]] = v;
+    }
+    return out;
+  }
+  /** One column's value at a place, without the rest of the row. */
+  cell(i: number, column: string): string | null {
+    const c = this.names.indexOf(column);
+    return c < 0 ? null : cellOf(this.columns[c], i);
+  }
+  keys(): Iterable<string> {
+    return this.rowKeys;
+  }
+  *[Symbol.iterator](): Iterator<[string, Record<string, unknown>]> {
+    for (let i = 0; i < this.rowKeys.length; i++) yield [this.rowKeys[i], this.at(i)];
+  }
+}
+
+/**
+ * A list's delimited table, read as it comes into columns, with the other names its field reads (spec.names), whose
+ * other files `fileOf` finds in the same dataset.
+ */
+export async function readColumns(
+  id: string,
+  fieldId: string,
+  spec: RowsSpec,
+  at: { source: TableSource; format: Delimited },
+  fileOf: (file: string | undefined, from: string | undefined) => { source: TableSource; format: Delimited } | undefined,
+): Promise<Table> {
+  const cols = columnsOf(spec);
+  const key = templateOf(spec.key, cols);
+  const isRow = whereOf(spec.where, cols);
+  const ownNames = (spec.names ?? []).map((n, set) => ({ n, set })).filter(({ n }) => !n.file && !n.from);
+  const nameTests = ownNames.map(({ n, set }) => ({ set, test: whereOf(n.where, cols), of: templateOf(n.of, cols), name: cols.indexOf(n.name) }));
+  const keys: string[] = [];
+  const seen = new Set<string>();
+  const builders = cols.map(() => new ColumnBuilder());
+  // The names, as they come: whom each names, by key, its text, and which of the field's names it is.
+  const namedOf: string[] = [];
+  const namedText: string[] = [];
+  const namedSet: number[] = [];
+  const name = (of: string, text: string, set: number) => {
+    namedOf.push(of);
+    namedText.push(text);
+    namedSet.push(set);
+  };
+  let index = 0;
+  await eachRow(at.source, at.format, cols, (values) => {
+    const i = index++;
+    for (const t of nameTests) if (t.test(values) && values[t.name]) name(t.of(values, i), values[t.name], t.set);
+    if (!isRow(values)) return;
+    const k = key(values, i);
+    if (seen.has(k)) return;
+    seen.add(k);
+    keys.push(k);
+    for (let c = 0; c < cols.length; c++) builders[c].add(values[c]);
+  });
+  seen.clear();
+  const rows = new ColumnRows(keys, cols, builders.map((b) => b.done()));
+  // Names from the dataset's other tables, such as a catalogue's common names, or from another dataset beside it.
+  for (const [set, n] of (spec.names ?? []).entries()) {
+    if (!n.file && !n.from) continue;
+    const other = fileOf(n.file, n.from);
+    if (!other) continue;
+    const ncols = [...new Set([...templateColumns(n.of), n.name, ...Object.keys(n.where ?? {})])];
+    const of = templateOf(n.of, ncols);
+    const test = whereOf(n.where, ncols);
+    const col = ncols.indexOf(n.name);
+    let j = 0;
+    await eachRow(other.source, other.format, ncols, (values) => {
+      const i = j++;
+      if (test(values) && values[col]) name(of(values, i), values[col], set);
+    });
+  }
+  let names: TableNames | undefined;
+  if (spec.names?.length) {
+    // A name of no row of the list names nothing here: a synonym of a name the list leaves out.
+    const kept: number[] = [];
+    for (let i = 0; i < namedOf.length; i++) if (rows.index.has(namedOf[i])) kept.push(i);
+    names = { at: Int32Array.from(kept, (i) => rows.index.get(namedOf[i])!), text: kept.map((i) => namedText[i]), set: Uint8Array.from(kept, (i) => namedSet[i]) };
+  }
+  return { dataset: id, field: fieldId, spec, rows, ...(names ? { names } : {}) };
 }
 
 /** Every table the world's fields declare, by dataset; a dataset not fetched here has none. */

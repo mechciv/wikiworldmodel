@@ -1,0 +1,46 @@
+id: field:life/catalogue-of-life
+type: field
+title: The taxa of the Catalogue of Life
+description: >-
+  The Catalogue of Life's taxa: every name its release of 11 November 2026 accepts, living or extinct, from the kingdoms
+  to the varieties, hung in the Catalogue's classification, with the synonyms and the English common names it gives each.
+  They are rows of the Catalogue, not records written here. Where the Paleobiology Database has a taxon of the same name
+  and rank, and no other of either list has them, and the parent of one is above the other in its list, the two are one
+  taxon, and the database's stands for both.
+grid: { kind: rows }
+time: { lo: 541 Ma, hi: 2100 CE }
+data:
+  from: src:col-2026-11-11
+  file: NameUsage.tsv
+basis: evidence
+# A single value at each place and time: the Catalogue gives no uncertainty.
+spread: unknown
+# A list of things (docs/plans/ENTITIES.md, steps 2 and 5): each accepted name is col:<ID>, the Catalogue's own identifier,
+# which it keeps from release to release, hung from its parent in the Catalogue's classification. A synonym's row names
+# the accepted name it is a synonym of in its parentID, as the ColDP format has it.
+rows:
+  kind: taxon
+  key: "{col:ID}"
+  scheme: col
+  where: { "col:status": [accepted, provisionally accepted] }
+  parent: { key: "{col:parentID}", rel: descends-from }
+  match: { scheme: pbdb, by: [name, taxon_rank] }
+  names:
+    - where: { "col:status": [synonym, ambiguous synonym] }
+      of: "{col:parentID}"
+      name: col:scientificName
+      lang: la
+      note: synonym
+    - file: VernacularName.tsv
+      where: { "col:language": eng }
+      of: "{col:taxonID}"
+      name: col:name
+      lang: en
+      note: common name
+  claims:
+    name: { column: col:scientificName, as: text, lang: la }
+    authorship: { column: col:authorship }
+    taxon_rank: { column: col:rank }
+    taxonomic_status: { column: col:status }
+    extinct: { column: col:extinct }
+    environment: { column: col:environment }

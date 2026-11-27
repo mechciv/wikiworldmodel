@@ -90,7 +90,7 @@ These are not style preferences. A pull request that breaks one is closed.
 ```sh
 npm install
 python3 -m venv .venv && .venv/bin/pip install -r tools/world/importers/requirements.txt
-npm run fetch          # the pinned datasets and snapshots → .cache/datasets & .cache/blobs (about 3 GB)
+npm run fetch          # the pinned datasets and snapshots → .cache/datasets & .cache/blobs (about 4 GB)
 npm run validate       # schema, references, vocabularies, review, chronology, plate frames
 npm test               # unit tests (need only the plate model and snapshots)
 npm run build:world    # incremental DAG build → .cache/build + dist/builds/<id>/ (--no-cache forces full rebuild)

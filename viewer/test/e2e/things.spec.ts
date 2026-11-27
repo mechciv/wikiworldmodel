@@ -1,4 +1,4 @@
-// The things of lists in the viewer (docs/plans/ENTITIES.md, steps 2 to 4): found by search as its shard of names comes,
+// The things of lists in the viewer (docs/plans/ENTITIES.md, steps 2 to 5): found by search as its shard of names comes,
 // opened as a page made from their list's chunk, or as the record that is them.
 import { expect, test } from '@playwright/test';
 import { idle, latestBuild } from './helpers.ts';
@@ -19,6 +19,22 @@ test('a thing of a list is found by search, and going to it opens its page where
   await expect(panel.locator('h2')).toHaveText('Etna, Italy');
   await expect(panel).toContainText('A thing of a list');
   await expect(panel).toContainText('where its list puts it today');
+});
+
+test('a living species is found by its common name, and its page names it as its catalogue does and says how the lists were joined', async ({ page }) => {
+  await page.goto(`/?b=${latestBuild()}&t=2020&lat=0&lon=20&d=3`);
+  await idle(page);
+  await page.fill('.search input', 'lion');
+  const hit = page.locator('.search li').filter({ hasText: 'common name of Panthera leo' }).first();
+  await expect(hit).toBeVisible();
+  await hit.dispatchEvent('mousedown');
+  await idle(page);
+  const panel = page.locator('.inspect');
+  await expect(panel.locator('h2')).toHaveText('Panthera leo');
+  // The Catalogue of Life's taxon, joined to the fossils' by its name, rank and tree: its common name and its synonyms.
+  await expect(panel).toContainText('Lion');
+  await expect(panel).toContainText('Felis leo');
+  await expect(panel).toContainText('by its name and rank');
 });
 
 test('a taxon no record is opens its own page, and one a record is opens the record, with what the list says of it', async ({ page }) => {

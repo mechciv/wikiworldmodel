@@ -155,7 +155,16 @@ export interface EntityRecord {
    * For the page of a thing of a list rather than a record (core/things.ts): the list it is of, the dataset and the row,
    * and how many things of the list hang from it.
    */
-  thing?: { list: string; dataset: string; key: string; children: number };
+  thing?: {
+    list: string;
+    dataset: string;
+    key: string;
+    children: number;
+    /** the other names its list gives it: synonyms, common names */
+    names?: { text: string; note: string; lang?: string }[];
+    /** the things of other lists it was joined to by its name and what else its list says must agree, not by an id */
+    matched?: string[];
+  };
   /** For a record: the rows of lists that are this thing too, each with what it says (docs/plans/ENTITIES.md, step 4). */
   rows?: ListedRow[];
 }
@@ -167,6 +176,10 @@ export interface ListedRow {
   dataset: string;
   key: string;
   claims: ClaimRecord[];
+  /** the other names this list gives the thing: synonyms, common names */
+  names?: { text: string; note: string; lang?: string }[];
+  /** joined to the record's thing by its name and what else its list says must agree, not by an id */
+  matched?: boolean;
 }
 
 export interface SearchEntry {

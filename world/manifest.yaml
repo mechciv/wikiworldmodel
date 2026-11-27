@@ -490,6 +490,44 @@ datasets:
           path: pbdb-sea-2026-11-06.json
           sha256: 06910b4f50b2be3e666904cdc610db7628a096b20819e1fd1642abdff360addb
 
+  src:col-2026-11-11:
+    type: dataset
+    kind: compilation
+    title: The Catalogue of Life, the release of 11 November 2026 (COL26.11)
+    citation: >-
+      Bánki, O., Roskov, Y., Döring, M., Ower, G., Hernández Robles, D. R., Plata Corredor, C. A., Stjernegaard Jeppesen,
+      T., Örn, A., Pape, T., Hobern, D., Garnett, S., Little, H., DeWalt, R. E., Miller, J., Orrell, T., Aalbu, R., Abbott,
+      J., Aedo, C., Aescht, E., et al. (2026). Catalogue of Life (Version 2026-11-11). Catalogue of Life Foundation,
+      Amsterdam, Netherlands. Its tables of name usages and vernacular names, in the monthly release's archive in the
+      Catalogue of Life Data Package format (ColDP).
+    published: 2026
+    version: "2026-11-11"
+    container: The Catalogue of Life
+    doi: 10.48580/dgzy8
+    url: https://www.checklistbank.org/dataset/317005
+    credit: Species from the Catalogue of Life
+    license: CC-BY-4.0
+    license_note: >-
+      The release's record in ChecklistBank (dataset 317005, read through its API on 26 November 2026) gives its licence as
+      "cc by", which ChecklistBank's own list of licences names "Creative Commons Attribution (CC BY) 4.0"; the archive's
+      metadata.yaml says "license: cc by" too. The Catalogue's own site refused a script and was not read.
+    reliability: >-
+      An assembly of expert checklists of the world's species, living and extinct. By its own account it "probably includes
+      just over 80% of the world’s known species", and many groups are still missing. A name's status, rank, whether it is
+      extinct and where it lives are as the checklist it comes from gives them; the classification above the species is
+      the Catalogue's, joined from those checklists. Its 2,718,468 accepted names are a list of described species and
+      their groups, not of all that lived: most species never were described.
+    verified:
+      by: machine:claude-code
+      how: >-
+        Licence, citation and version from the release's record in ChecklistBank and the archive's metadata.yaml; the
+        columns, the statuses and their counts from NameUsage.tsv and VernacularName.tsv themselves.
+    fetch:
+      url: https://download.checklistbank.org/col/monthly/2026-11-11_coldp.zip
+      sha256: 732e2fdbe16e75085dec59ed2b73c3fbf8c115706eeb50dd526e0e0f1e41b0f2
+      bytes: 1027041660
+      format: zip
+
   src:pbdb-rocks-2026-11-20:
     type: dataset
     kind: compilation
@@ -1155,6 +1193,189 @@ datasets:
       url: https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_50m_lakes.geojson
       sha256: d350b75978b26fe839b797c2c529b2fb8f47fb3983c03f4964e36d5df9378a52
       bytes: 876018
+      format: json
+
+  src:pleiades-places-4.1:
+    type: dataset
+    kind: compilation
+    title: "Pleiades: A Gazetteer of Past Places, release 4.1, its places"
+    citation: >-
+      Elliott, T., Talbert, R., Bagnall, R., Becker, J., Bond, S., Gillies, S., Holman, L., Horne, R., Moss, G.,
+      Rabinowitz, A., Robinson, E., Turner, B. & the Institute for the Study of the Ancient World (NYU) (2025). Pleiades
+      Datasets 4.1. Zenodo, doi:10.5281/zenodo.15540082. Its table of places, data/gis/places.csv, in the release v4.1 of
+      isawnyu/pleiades.datasets.
+    authors: ["Elliott, T.", "Talbert, R.", "Bagnall, R."]
+    published: 2025
+    version: "4.1"
+    container: Pleiades
+    doi: 10.5281/zenodo.15540082
+    url: https://pleiades.stoa.org/
+    credit: Ancient places from Pleiades
+    license: CC-BY-3.0
+    license_note: >-
+      The release's record on Zenodo gives its licence as cc-by-3.0, and the repository's README says "All content is
+      distributed under the terms of a Creative Commons Attribution license (cc-by)", linking to version 3.0.
+    reliability: >-
+      A community-built gazetteer of the ancient world, the Greek and Roman above all, grown from the Barrington Atlas of
+      the Greek and Roman World and reviewed by its editors. A place is a thing people named, of any sort, and its
+      representative point stands for all its locations; a place with no location has none. When each place was is
+      kept with its names and locations, which this table does not give.
+    verified:
+      by: machine:claude-code
+      how: >-
+        Licence, citation and authors from the release's record on Zenodo and the repository's README at v4.1; the
+        columns from the file itself.
+    fetch:
+      url: https://raw.githubusercontent.com/isawnyu/pleiades.datasets/v4.1/data/gis/places.csv
+      sha256: 5dd09b1a92c53e50cb9962bab44df12c5f0b7b683d4f228367d843637cfe5a59
+      bytes: 16048687
+      format: csv
+
+  src:pleiades-names-4.1:
+    type: dataset
+    kind: compilation
+    title: "Pleiades: A Gazetteer of Past Places, release 4.1, its names"
+    citation: >-
+      Elliott, T., Talbert, R., Bagnall, R., Becker, J., Bond, S., Gillies, S., Holman, L., Horne, R., Moss, G.,
+      Rabinowitz, A., Robinson, E., Turner, B. & the Institute for the Study of the Ancient World (NYU) (2025). Pleiades
+      Datasets 4.1. Zenodo, doi:10.5281/zenodo.15540082. Its table of the names of places, data/gis/names.csv, in the
+      release v4.1 of isawnyu/pleiades.datasets.
+    authors: ["Elliott, T.", "Talbert, R.", "Bagnall, R."]
+    published: 2025
+    version: "4.1"
+    container: Pleiades
+    doi: 10.5281/zenodo.15540082
+    url: https://pleiades.stoa.org/
+    credit: Ancient places from Pleiades
+    license: CC-BY-3.0
+    license_note: >-
+      The release's record on Zenodo gives its licence as cc-by-3.0, and the repository's README says "All content is
+      distributed under the terms of a Creative Commons Attribution license (cc-by)", linking to version 3.0.
+    reliability: >-
+      The names the gazetteer's places were known by in antiquity, each as attested and in a romanized form, with the
+      years it was in use where the sources say. A name's form is as its contributors read it.
+    verified:
+      by: machine:claude-code
+      how: Licence and citation as for its places; the columns from the file itself.
+    fetch:
+      url: https://raw.githubusercontent.com/isawnyu/pleiades.datasets/v4.1/data/gis/names.csv
+      sha256: 04716712d78dce2b43c9d093ba908d8397ee17496ffec8644e84a4bad1dac02d
+      bytes: 8481492
+      format: csv
+
+  src:natural-earth-marine-5.1.2:
+    type: dataset
+    kind: compilation
+    title: Natural Earth, 1:10m marine areas
+    citation: >-
+      Natural Earth. Marine areas (geography_marine_polys), 1:10m, version 5.1.2, in the GeoJSON of the project's repository (nvkelso/natural-earth-vector).
+    version: 5.1.2
+    url: https://www.naturalearthdata.com/
+    credit: Today's seas and landforms from Natural Earth
+    license: public-domain
+    license_note: >-
+      The project's terms of use say that all versions of its map data "are in the public domain".
+    reliability: >-
+      The seas, gulfs, bays, straits and other named waters of today's map, each an area drawn to be legible at a small scale, with its Wikidata id where the map gives one.
+    verified:
+      by: machine:claude-code
+      how: Licence as for the project's other layers read here; the features' classes, names and ids read from the file.
+    fetch:
+      url: https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_geography_marine_polys.geojson
+      sha256: 53f865e8ffa966cdd402145c82c5cd14ee7ce974cd0eb9a3f59f03a4cfd2d66c
+      bytes: 1692635
+      format: json
+
+  src:natural-earth-regions-5.1.2:
+    type: dataset
+    kind: compilation
+    title: Natural Earth, 1:10m physical regions
+    citation: >-
+      Natural Earth. Physical regions (geography_regions_polys), 1:10m, version 5.1.2, in the GeoJSON of the project's repository (nvkelso/natural-earth-vector).
+    version: 5.1.2
+    url: https://www.naturalearthdata.com/
+    credit: Today's seas and landforms from Natural Earth
+    license: public-domain
+    license_note: >-
+      The project's terms of use say that all versions of its map data "are in the public domain".
+    reliability: >-
+      The named ranges, deserts, plateaus, islands, peninsulas and other regions of today's map, each an area drawn loosely, since such regions have no agreed edge, with its Wikidata id where the map gives one.
+    verified:
+      by: machine:claude-code
+      how: Licence as for the project's other layers read here; the features' classes, names and ids read from the file.
+    fetch:
+      url: https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_geography_regions_polys.geojson
+      sha256: b7b26e50ea917d3696aec87f932def2bf5f890f5770e441d59c162c6f4c92a77
+      bytes: 5583870
+      format: json
+
+  src:natural-earth-regions-points-5.1.2:
+    type: dataset
+    kind: compilation
+    title: Natural Earth, 1:10m physical points
+    citation: >-
+      Natural Earth. Physical points (geography_regions_points), 1:10m, version 5.1.2, in the GeoJSON of the project's repository (nvkelso/natural-earth-vector).
+    version: 5.1.2
+    url: https://www.naturalearthdata.com/
+    credit: Today's seas and landforms from Natural Earth
+    license: public-domain
+    license_note: >-
+      The project's terms of use say that all versions of its map data "are in the public domain".
+    reliability: >-
+      Small islands, capes, waterfalls and the poles, each at a point, as today's map labels them, with its Wikidata id where the map gives one.
+    verified:
+      by: machine:claude-code
+      how: Licence as for the project's other layers read here; the features' classes, names and ids read from the file.
+    fetch:
+      url: https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_geography_regions_points.geojson
+      sha256: 25821b530966e62756faebf53699f12bf73550f8228aa4bbdf3e4132dd7cf806
+      bytes: 276429
+      format: json
+
+  src:natural-earth-peaks-5.1.2:
+    type: dataset
+    kind: compilation
+    title: Natural Earth, 1:10m elevation points
+    citation: >-
+      Natural Earth. Elevation points (geography_regions_elevation_points), 1:10m, version 5.1.2, in the GeoJSON of the project's repository (nvkelso/natural-earth-vector).
+    version: 5.1.2
+    url: https://www.naturalearthdata.com/
+    credit: Today's seas and landforms from Natural Earth
+    license: public-domain
+    license_note: >-
+      The project's terms of use say that all versions of its map data "are in the public domain".
+    reliability: >-
+      Mountains, spot heights, depressions and passes, each at a point with its height in metres as the map gives it, with its Wikidata id where the map gives one. Heights are rounded, and some differ from a survey's.
+    verified:
+      by: machine:claude-code
+      how: Licence as for the project's other layers read here; the features' classes, names and ids read from the file.
+    fetch:
+      url: https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_geography_regions_elevation_points.geojson
+      sha256: f98a16867867146ec4146d6d4b18c823eeedb2825947de666116cf9a4e3f43cb
+      bytes: 862686
+      format: json
+
+  src:natural-earth-lakes-10m-5.1.2:
+    type: dataset
+    kind: compilation
+    title: Natural Earth, 1:10m lakes
+    citation: >-
+      Natural Earth. Lakes and reservoirs, 1:10m, version 5.1.2, in the GeoJSON of the project's repository (nvkelso/natural-earth-vector).
+    version: 5.1.2
+    url: https://www.naturalearthdata.com/
+    credit: Today's seas and landforms from Natural Earth
+    license: public-domain
+    license_note: >-
+      The project's terms of use say that all versions of its map data "are in the public domain".
+    reliability: >-
+      Today's lakes and reservoirs large enough for a map at 1:10m, about half of them named, at their usual extent, with the Wikidata id of a named one where the map gives one. Lakes that come and go are drawn full.
+    verified:
+      by: machine:claude-code
+      how: Licence as for the project's other layers read here; the features' classes, names and ids read from the file.
+    fetch:
+      url: https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_lakes.geojson
+      sha256: 2d036f53dedec578001c5c30c2959ee7d4eebc1306900fa4367c49929ec8f2d9
+      bytes: 5043554
       format: json
 
   src:grwl-summary-v01.02:

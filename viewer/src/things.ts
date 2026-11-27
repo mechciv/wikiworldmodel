@@ -1,7 +1,7 @@
-// The things of lists, as the viewer reads them (core/things.ts; docs/plans/ENTITIES.md, steps 2 to 4): the index when
+// The things of lists, as the viewer reads them (core/things.ts; docs/plans/ENTITIES.md, steps 2 to 5): the index when
 // first asked for, then only the chunk a search, a page or a tree needs. Nothing of it is loaded with the build.
 import type { EntityRecord } from '../../core/records.ts';
-import { chunkOf, matchHits, shardForText, splitThing, thingPage, thingPagePath, thingSearchPath, thingTreePath, type ThingChild, type ThingChunk, type ThingEntry, type ThingHit, type ThingList, type ThingsIndex, type ThingShard, type ThingTreeChunk } from '../../core/things.ts';
+import { chunkOf, dirsForText, matchHits, shardForText, splitThing, thingPage, thingPagePath, thingSearchDirPath, thingSearchPath, thingTreePath, type ThingChild, type ThingChunk, type ThingEntry, type ThingHit, type ThingList, type ThingsIndex, type ThingSearchDir, type ThingShard, type ThingTreeChunk } from '../../core/things.ts';
 import type { BuildFetch } from './data.ts';
 
 /** What an id opens: the record that is the thing, or the thing's own page. */
@@ -13,6 +13,7 @@ export class ThingsReader {
   private schemes?: Set<string>;
   private pages = new Map<number, Promise<ThingChunk>>();
   private shards = new Map<string, Promise<ThingShard>>();
+  private dirs = new Map<string, Promise<ThingSearchDir>>();
   private trees = new Map<number, Promise<ThingTreeChunk>>();
 
   constructor(
@@ -88,7 +89,9 @@ export class ThingsReader {
   async search(text: string, limit = 12): Promise<{ hit: ThingHit; list: ThingList }[]> {
     const ix = await this.load();
     if (!ix) return [];
-    const key = shardForText(text, ix, this.split);
+    // The counts of the shards its words are in, from their directories: the rarest word narrows most.
+    const dirs = await Promise.all(dirsForText(text, this.split!).map((d) => this.chunk(this.dirs as Map<string | number, Promise<ThingSearchDir>>, d, thingSearchDirPath(d)).catch(() => ({ shards: {} }))));
+    const key = shardForText(text, { split: ix.split, shards: Object.assign({}, ...dirs.map((d) => d.shards)) }, this.split);
     if (!key) return [];
     const shard = await this.chunk(this.shards as Map<string | number, Promise<ThingShard>>, key, thingSearchPath(key)).catch(() => ({ entries: [] }));
     return matchHits(shard.entries, text, limit).map((hit) => ({ hit, list: ix.lists[hit[2]] }));

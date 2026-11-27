@@ -118,6 +118,16 @@ The Paleobiology Database. Regular occurrences named to a genus or better, from 
 - From: <https://paleobiodb.org/>
 - Source id: `src:pbdb-sea-2026-11-06`
 
+### The Catalogue of Life, the release of 11 November 2026 (COL26.11)
+
+Bánki, O., Roskov, Y., Döring, M., Ower, G., Hernández Robles, D. R., Plata Corredor, C. A., Stjernegaard Jeppesen, T., Örn, A., Pape, T., Hobern, D., Garnett, S., Little, H., DeWalt, R. E., Miller, J., Orrell, T., Aalbu, R., Abbott, J., Aedo, C., Aescht, E., et al. (2026). Catalogue of Life (Version 2026-11-11). Catalogue of Life Foundation, Amsterdam, Netherlands. Its tables of name usages and vernacular names, in the monthly release's archive in the Catalogue of Life Data Package format (ColDP).
+
+- Licence: CC-BY-4.0. The release's record in ChecklistBank (dataset 317005, read through its API on 26 November 2026) gives its licence as "cc by", which ChecklistBank's own list of licences names "Creative Commons Attribution (CC BY) 4.0"; the archive's metadata.yaml says "license: cc by" too. The Catalogue's own site refused a script and was not read.
+- Credit: Species from the Catalogue of Life
+- DOI: [10.48580/dgzy8](https://doi.org/10.48580/dgzy8)
+- From: <https://www.checklistbank.org/dataset/317005>
+- Source id: `src:col-2026-11-11`
+
 ### The Paleobiology Database, the rocks its fossils lie in
 
 The Paleobiology Database. Every collection whose interval overlaps 541 Ma to the present: its place, its interval's ages, its lithologies with their adjectives, its environment, its tectonic setting, its formation and any age measured for it, with the service's own classes of environment and types of lithology, read through the data service (data1.2) on 20 November 2026.
@@ -278,6 +288,71 @@ Natural Earth. Lakes and reservoirs, 1:50m, version 5.1.2, in the GeoJSON of the
 - Credit: Today's ocean and lakes from Natural Earth
 - From: <https://www.naturalearthdata.com/>
 - Source id: `src:natural-earth-lakes-5.1.2`
+
+### Pleiades: A Gazetteer of Past Places, release 4.1, its places
+
+Elliott, T., Talbert, R., Bagnall, R., Becker, J., Bond, S., Gillies, S., Holman, L., Horne, R., Moss, G., Rabinowitz, A., Robinson, E., Turner, B. & the Institute for the Study of the Ancient World (NYU) (2025). Pleiades Datasets 4.1. Zenodo, doi:10.5281/zenodo.15540082. Its table of places, data/gis/places.csv, in the release v4.1 of isawnyu/pleiades.datasets.
+
+- Licence: CC-BY-3.0. The release's record on Zenodo gives its licence as cc-by-3.0, and the repository's README says "All content is distributed under the terms of a Creative Commons Attribution license (cc-by)", linking to version 3.0.
+- Credit: Ancient places from Pleiades
+- DOI: [10.5281/zenodo.15540082](https://doi.org/10.5281/zenodo.15540082)
+- From: <https://pleiades.stoa.org/>
+- Source id: `src:pleiades-places-4.1`
+
+### Pleiades: A Gazetteer of Past Places, release 4.1, its names
+
+Elliott, T., Talbert, R., Bagnall, R., Becker, J., Bond, S., Gillies, S., Holman, L., Horne, R., Moss, G., Rabinowitz, A., Robinson, E., Turner, B. & the Institute for the Study of the Ancient World (NYU) (2025). Pleiades Datasets 4.1. Zenodo, doi:10.5281/zenodo.15540082. Its table of the names of places, data/gis/names.csv, in the release v4.1 of isawnyu/pleiades.datasets.
+
+- Licence: CC-BY-3.0. The release's record on Zenodo gives its licence as cc-by-3.0, and the repository's README says "All content is distributed under the terms of a Creative Commons Attribution license (cc-by)", linking to version 3.0.
+- Credit: Ancient places from Pleiades
+- DOI: [10.5281/zenodo.15540082](https://doi.org/10.5281/zenodo.15540082)
+- From: <https://pleiades.stoa.org/>
+- Source id: `src:pleiades-names-4.1`
+
+### Natural Earth, 1:10m marine areas
+
+Natural Earth. Marine areas (geography_marine_polys), 1:10m, version 5.1.2, in the GeoJSON of the project's repository (nvkelso/natural-earth-vector).
+
+- Licence: public-domain. The project's terms of use say that all versions of its map data "are in the public domain".
+- Credit: Today's seas and landforms from Natural Earth
+- From: <https://www.naturalearthdata.com/>
+- Source id: `src:natural-earth-marine-5.1.2`
+
+### Natural Earth, 1:10m physical regions
+
+Natural Earth. Physical regions (geography_regions_polys), 1:10m, version 5.1.2, in the GeoJSON of the project's repository (nvkelso/natural-earth-vector).
+
+- Licence: public-domain. The project's terms of use say that all versions of its map data "are in the public domain".
+- Credit: Today's seas and landforms from Natural Earth
+- From: <https://www.naturalearthdata.com/>
+- Source id: `src:natural-earth-regions-5.1.2`
+
+### Natural Earth, 1:10m physical points
+
+Natural Earth. Physical points (geography_regions_points), 1:10m, version 5.1.2, in the GeoJSON of the project's repository (nvkelso/natural-earth-vector).
+
+- Licence: public-domain. The project's terms of use say that all versions of its map data "are in the public domain".
+- Credit: Today's seas and landforms from Natural Earth
+- From: <https://www.naturalearthdata.com/>
+- Source id: `src:natural-earth-regions-points-5.1.2`
+
+### Natural Earth, 1:10m elevation points
+
+Natural Earth. Elevation points (geography_regions_elevation_points), 1:10m, version 5.1.2, in the GeoJSON of the project's repository (nvkelso/natural-earth-vector).
+
+- Licence: public-domain. The project's terms of use say that all versions of its map data "are in the public domain".
+- Credit: Today's seas and landforms from Natural Earth
+- From: <https://www.naturalearthdata.com/>
+- Source id: `src:natural-earth-peaks-5.1.2`
+
+### Natural Earth, 1:10m lakes
+
+Natural Earth. Lakes and reservoirs, 1:10m, version 5.1.2, in the GeoJSON of the project's repository (nvkelso/natural-earth-vector).
+
+- Licence: public-domain. The project's terms of use say that all versions of its map data "are in the public domain".
+- Credit: Today's seas and landforms from Natural Earth
+- From: <https://www.naturalearthdata.com/>
+- Source id: `src:natural-earth-lakes-10m-5.1.2`
 
 ### Global River Widths from Landsat (GRWL), the simplified vector product
 
