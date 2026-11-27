@@ -8,7 +8,9 @@ import { buildFile, canvasPng, idle, latestBuild } from './helpers.ts';
 const OVERVIEW = 't=315.5&lat=41.8915&lon=12.49&d=1.000235&h=302&v=66&clock=0';
 const COLOSSEUM = 't=315.5&lat=41.8902&lon=12.4922&d=1.000029&h=130&v=72&clock=0';
 const FORUM = 't=315.5&lat=41.89185&lon=12.48665&d=1.00004&h=300&v=72&clock=0';
-const PANTHEON = 't=315.5&lat=41.8990&lon=12.4768&d=1.000011&h=178&v=88&clock=0';
+// From inside the Pantheon's forecourt, 57 m from its porch: from 70 m the eye stood in a house the settlement generator
+// sets at the forecourt's north end, whose middle keeps clear of the square but whose walls do not.
+const PANTHEON = 't=315.5&lat=41.8990&lon=12.4768&d=1.000009&h=178&v=88&clock=0';
 const SUNSET = 't=315.5&lat=41.8915&lon=12.49&d=1.00012&h=280&v=72&hour=18.2&clock=0';
 
 test.setTimeout(15 * 60_000);

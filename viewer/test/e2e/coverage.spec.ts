@@ -54,8 +54,10 @@ test('a place on the map opens the globe there and then', async ({ page }) => {
 test('shows whose houses rest on a tradition, at each time the build counts, by way of life', async ({ page }) => {
   const counts = buildFile<CoverageFile>('coverage.json').landscape!.housing!;
   await page.goto(`/coverage.html?b=${latestBuild()}`);
-  const table = page.locator('.cov-houses table');
-  await expect(page.locator('.cov-houses h2')).toHaveText("People's houses, by way of life");
+  // The section of the houses; the population model's scores below it are drawn alike.
+  const section = page.locator('.cov-houses').filter({ has: page.locator('h2', { hasText: "People's houses, by way of life" }) });
+  await expect(section).toHaveCount(1);
+  const table = section.locator('table');
   // A row for each time counted, under the header; a column for each way of life.
   await expect(table.locator('tr')).toHaveCount(counts.length + 1);
   for (const way of ['foragers', 'herders', 'shifting cultivators', 'farmers', 'townspeople']) await expect(table.locator('th', { hasText: way })).toHaveCount(1);

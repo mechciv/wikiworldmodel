@@ -20,7 +20,8 @@ test.describe('held upright', () => {
     await idle(page);
     // Space at both sides of the globe, and the globe between them. Seen as a wide screen sees it, the globe would run off both.
     for (const fx of [0.04, 0.96]) expect(Math.max(...(await canvasPatch(page, fx, 0.5))), `at ${fx}`).toBeLessThan(25);
-    expect(Math.max(...(await canvasPatch(page, 0.5, 0.5)))).toBeGreaterThan(40);
+    // The open Atlantic at the middle: the satellite-style ocean is dark there, but brighter than space.
+    expect(Math.max(...(await canvasPatch(page, 0.5, 0.5)))).toBeGreaterThan(32);
   });
 
   test('the toggles fold behind a button beside the search, which lights while one of them is on', async ({ page }) => {

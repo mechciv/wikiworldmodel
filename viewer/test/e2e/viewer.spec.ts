@@ -558,7 +558,8 @@ test('the whole strip gives recent history room: years to the pixel, and its mom
 });
 
 test('a city is labelled by the name it had at the time shown', async ({ page }) => {
-  await page.goto(`/?b=${latestBuild()}&t=300&lat=41&lon=29&d=2&w=-800~2000`);
+  // In 500, when Constantinople's label has room: in 300 the Dedication of Constantinople, nearer the time, takes it.
+  await page.goto(`/?b=${latestBuild()}&t=500&lat=41&lon=29&d=2&w=-800~2000`);
   await idle(page);
   const city = page.locator('.marker[data-entity="places/constantinople"] .label');
   await expect(city).toHaveText('Byzantium');
@@ -589,7 +590,8 @@ test('opening a record of the last few thousand years fits the time control to i
 });
 
 test('the wheel still zooms when the pointer is over a marker or its label', async ({ page }) => {
-  await page.goto(`/?b=${latestBuild()}&t=300&lat=41&lon=29&d=2&w=-800~2000`);
+  // In 500, when Constantinople's label has room: in 300 the Dedication of Constantinople, nearer the time, takes it.
+  await page.goto(`/?b=${latestBuild()}&t=500&lat=41&lon=29&d=2&w=-800~2000`);
   await idle(page);
   const marker = page.locator('.marker[data-entity="places/constantinople"]');
   for (const part of [marker.locator('.label'), marker.locator('.dot')]) {
