@@ -1,0 +1,87 @@
+lane: deep
+title: The deep Earth
+about: The plates and what their motion does. Reconstructed from evidence, never predicted.
+nodes:
+  - id: mantle
+    label: Mantle flow
+    kind: given
+    what: "The slow overturning of the mantle that carries the plates."
+    now: none
+    note: "Nothing of it is in the world."
+    best: "Not predictable in detail. Models run elsewhere give its push on the surface, which is the node below."
+    gap: small
+  - id: plates
+    label: Where the plates were
+    kind: contingent
+    what: "The place and turning of every piece of crust at each time."
+    now: borrowed
+    has: [field:earth/continental-blocks, field:earth/continental-blocks-deep]
+    note: "PALEOMAP to 1,100 Ma and Cao et al. 2024 to 1,800 Ma: one model each, with no spread. The future has three scenarios named and no plates moved."
+    best: "Rival reconstructions as alternatives, palaeomagnetic poles as observations, and a spread on every past position. Longitude has no constraint before about 200 Ma."
+    gap: medium
+    seen: [stripes, rocks]
+  - id: plate-edges
+    label: Plate boundaries
+    kind: at-once
+    what: "Where plates part, meet and slide past, and how fast."
+    now: none
+    note: "They are in the plate model's archive and are not read."
+    best: "Read from a full-plate model, with the speed of each closing and opening. They are what uplift, volcanoes and the sea floor's age follow from."
+    gap: large
+    seen: [stripes, rocks]
+  - id: seafloor-age
+    label: Age of the sea floor
+    kind: at-once
+    what: "How long ago each piece of ocean floor formed at its ridge."
+    now: none
+    note: "Not in the world."
+    best: "Age grids from the plate model (Seton et al. 2020, licence unchecked), sure back to about 200 Ma."
+    gap: medium
+    seen: [stripes]
+  - id: volcanism
+    label: Volcanoes and great eruptions
+    kind: contingent
+    what: "Arcs, hotspots, the great igneous provinces and single eruptions."
+    now: records
+    has: [field:earth/hazards]
+    note: "Three igneous provinces as records, and NOAA's eruptions since 4360 BCE as rows. No arcs follow from the plates."
+    best: "Arcs drawn along trenches by rule. Eruptions stay evidence, with ice-core sulphate for the last 2,500 years."
+    gap: medium
+    seen: [rocks, ice-cores, texts]
+  - id: outgassing
+    label: CO₂ from the Earth
+    kind: at-once
+    what: "How much carbon the ridges, arcs and eruptions put into the air."
+    now: none
+    note: "Not in the world."
+    best: "Degassing from the length and speed of ridges and trenches, as the long-term carbon models write it."
+    gap: medium
+  - id: uplift
+    label: Uplift and sinking
+    kind: at-once
+    what: "Where the crust thickens and rises, and where it thins and sinks."
+    now: records
+    note: "Eight ranges have records of by when each stood. Nothing computes uplift from the plates."
+    best: "Rules from the boundaries: belts where continents meet, arcs above trenches, rift shoulders, and basins sinking on a known curve."
+    gap: large
+    seen: [heights, rocks]
+  - id: mantle-push
+    label: The mantle's push on the surface
+    kind: at-once
+    what: "Whole regions lifted or dropped by hundreds of metres over hot or cold mantle."
+    now: none
+    note: "Not in the world."
+    best: "Grids from geodynamic models, imported. They explain seas over continents that sea level does not."
+    gap: medium
+    seen: [rocks]
+edges:
+  - { from: mantle, to: plates, now: missing, how: "Flow in the mantle carries the plates. Reconstructions read their motion from the sea floor, not from the flow." }
+  - { from: plates, to: plate-edges, now: missing, how: "Where plates meet, part or slide is read off their motions." }
+  - { from: plate-edges, to: seafloor-age, now: missing, how: "New floor forms at a ridge and ages as it moves away." }
+  - { from: plate-edges, to: volcanism, now: missing, how: "Arcs stand above sinking plates, and rifts erupt." }
+  - { from: mantle, to: volcanism, now: missing, how: "Plumes from the deep mantle make the great igneous provinces." }
+  - { from: plate-edges, to: outgassing, now: missing, how: "The longer and faster the ridges and trenches, the more CO₂ comes out." }
+  - { from: volcanism, to: outgassing, now: missing, how: "Great eruptions release carbon in bursts." }
+  - { from: plate-edges, to: uplift, now: missing, how: "Crust thickens and rises where plates converge, and thins and sinks where they part." }
+  - { from: mantle, to: mantle-push, now: missing, how: "Rising mantle lifts the surface above it and sinking mantle pulls it down." }
+  - { from: plates, to: mantle-push, now: missing, how: "A continent rides over hot and cold mantle as it moves." }

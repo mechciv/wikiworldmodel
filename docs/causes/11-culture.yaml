@@ -1,0 +1,77 @@
+lane: culture
+title: What people knew and did
+about: Language, likeness between peoples, crafts, writing and belief.
+nodes:
+  - id: language-tree
+    label: How languages descend
+    kind: contingent
+    what: "The families of languages and how each branched."
+    now: borrowed
+    has: [field:earth/languages]
+    note: "Glottolog's families and today's points. Its tree has no dates."
+    best: "Dated trees for the families that have open ones, and the classification's steps for the rest."
+    gap: medium
+    seen: [texts, ethnography]
+  - id: language-range
+    label: Where each tongue was spoken
+    kind: spreading
+    what: "The ground each family of languages covered at a time."
+    now: none
+    note: "Only today's points. Nothing says where a language was spoken before now."
+    best: "Each family's past range as an arrival surface from a dated homeland, with rival homelands as alternatives."
+    gap: large
+    seen: [texts, dna, ethnography]
+  - id: likeness
+    label: How alike two peoples were
+    kind: at-once
+    what: "The distance between two peoples by descent and by ground: what carries a trait where no record holds."
+    now: none
+    note: "A tradition holds inside its regions or not at all. Nothing carries what neighbours or related peoples did."
+    best: "A distance by language tree and by travel between any two peoples at a time. Every trait of culture is pooled by it."
+    gap: large
+    seen: [ethnography]
+  - id: technology
+    label: Tools and crafts
+    kind: spreading
+    what: "Which crafts a people had: pottery, bronze, iron, the plough, the horse, the sail."
+    now: records
+    note: "Eight stone industries, the scripts and the industrial revolution as records. None has a reach."
+    best: "An arrival surface for each craft that changed what land could feed or how far people moved."
+    gap: large
+    seen: [sites, texts]
+  - id: writing
+    label: Writing and counting
+    kind: spreading
+    what: "Where people wrote and kept accounts."
+    now: records
+    note: "Ten scripts with their first finds and their descent."
+    best: "Its reach as a surface: where a text or a census can exist at all, which is the effort behind the written record."
+    gap: medium
+    seen: [texts, sites]
+  - id: beliefs
+    label: Religions and ideas
+    kind: spreading
+    what: "What people held sacred and true, and how far each belief reached."
+    now: none
+    note: "Not in the world."
+    best: "Each one's spread as a surface from its records, and what it builds as traits."
+    gap: medium
+    seen: [texts, sites]
+edges:
+  - { from: migration, to: language-tree, now: missing, how: "Tongues split when peoples part." }
+  - { from: language-tree, to: language-range, now: missing, how: "A family's range is the ground its branches came to hold." }
+  - { from: migration, to: language-range, now: missing, how: "A language moves with its speakers." }
+  - { from: farming-reach, to: language-range, now: missing, how: "Farmers' tongues spread with their fields, in several families." }
+  - { from: states, to: language-range, now: missing, loop: empire-and-tongue, how: "Empires spread their tongues." }
+  - { from: language-tree, to: likeness, now: missing, how: "Peoples of related speech tend to build, farm and keep animals alike." }
+  - { from: language-range, to: likeness, now: missing, how: "Neighbours on the ground are alike too." }
+  - { from: travel, to: likeness, now: missing, how: "Peoples in easy reach of each other borrow." }
+  - { from: resources, to: technology, now: missing, how: "No bronze without tin and copper." }
+  - { from: density, to: technology, now: missing, loop: more-minds, how: "More people make more inventions and lose fewer." }
+  - { from: travel, to: technology, now: missing, loop: crafts-on-routes, how: "Crafts spread along the routes." }
+  - { from: trade, to: technology, now: missing, loop: crafts-on-routes, how: "Goods carry the knowledge of their making." }
+  - { from: states, to: writing, now: missing, how: "Writing follows the counting of goods and people." }
+  - { from: trade, to: writing, now: missing, how: "Merchants keep accounts." }
+  - { from: travel, to: beliefs, now: missing, how: "Beliefs travel the routes." }
+  - { from: states, to: beliefs, now: missing, how: "Rulers adopt and impose." }
+  - { from: writing, to: beliefs, now: missing, how: "Scripture carries a belief unchanged across distance." }

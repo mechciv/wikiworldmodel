@@ -1,0 +1,161 @@
+lane: ground
+title: The ground
+about: The height of the land, the depth of the sea, the ice, and where the water stood.
+nodes:
+  - id: elevation
+    label: Height of the land
+    kind: settling
+    what: "How high the land stood, at about a hundred kilometres' grain."
+    now: borrowed
+    has: [field:earth/elevation]
+    note: "Hand-drawn maps at 1° every 5 Myr, in 40 m steps, with no spread. The Himalaya's summits swing from 8,800 m at 10 Ma to 7,100 m at 5 Ma, and the Alps stand 1 to 1.5 km low for 20 Myr, against the ranges' own records."
+    best: "The same maps as the central member, since the climate runs stand on them, corrected by measured heights and given a spread. Behind them, rules from the plate boundaries and landscape-evolution runs (Salles et al. 2023, licence unchecked)."
+    gap: large
+    seen: [heights, rocks, others]
+  - id: erosion
+    label: Wearing down and laying down
+    kind: at-once
+    what: "How fast the land is stripped, and where the sediment comes to rest."
+    now: none
+    note: "The model that carries today's relief back has no erosion, in its own words."
+    best: "Stream-power erosion and deposition, as landscape-evolution models run them, with rates checked against dated rock that has come up."
+    gap: large
+    seen: [rocks]
+  - id: relief
+    label: The fine shape of the ground
+    kind: settling
+    what: "Crests, valleys and plains below the grain of the height of the land."
+    now: rule
+    has: [field:earth/relief, model:earth/relief-carried, field:earth/relief-carried]
+    note: "Today's ground in 1.8 km cells, 30 m only round Rome, carried back on its plates to the Pliocene and further for eight ranges. Before that the generator invents it."
+    best: "30 m worldwide for today (SRTM, public domain). In deep time, shape generated from uplift, rock and rain, and held in aggregate to today's ranges."
+    gap: large
+    seen: [surveys]
+  - id: bedrock
+    label: The rock at the surface
+    kind: settling
+    what: "What rock a place stands on, and what loose ground lies over it."
+    now: borrowed
+    has: [field:earth/bedrock, field:earth/strata, model:earth/strata, model:earth/substrate, field:earth/substrate]
+    note: "Today's class of rock per half degree, held through the Quaternary. Macrostrat's 1,534 columns, most of them in North America. A scene's ground from the rocks of fossil collections near it."
+    best: "The same sources with a model between the columns: a unit carried along its basin, and new beds from the laying-down above."
+    gap: medium
+    seen: [rocks, surveys]
+  - id: ocean-depth
+    label: Depth of the sea floor
+    kind: at-once
+    what: "How deep the ocean was at each place."
+    now: borrowed
+    has: [field:earth/elevation, field:earth/relief]
+    note: "The elevation maps' schematic depths in deep time, and today's survey for the glacial cycles."
+    best: "Depth from the floor's age by a cooling law, with sediment and plateaus added."
+    gap: medium
+    seen: [surveys]
+  - id: basin-volume
+    label: What the ocean basins hold
+    kind: at-once
+    what: "The room the ocean basins have for water."
+    now: none
+    note: "Not in the world."
+    best: "Summed from the depth of the floor and the area of the continents. It is the capacity side of sea level."
+    gap: medium
+  - id: ice
+    label: Ice sheets
+    kind: settling
+    what: "Where grounded ice lay, and how thick."
+    now: borrowed
+    has: [field:earth/ice-sheets]
+    note: "PaleoMIST for 80 kyr at 1°, in two scenarios. None before, and none on mountains. The Snowball glaciations are records."
+    best: "Every cycle by indexing the last cycle's ice to sea level, a stated analogy. Older ice ages from the climate's snowline and mapped margins. Mountain ice from the climate at height."
+    gap: large
+    seen: [rocks, surveys, ice-cores]
+  - id: sea-level
+    label: Sea level
+    kind: at-once
+    what: "The height of the sea against the land, the world over."
+    now: borrowed
+    has: [field:earth/sea-level, field:earth/sea-level-stack, model:earth/ice-equivalent-sea-level, field:earth/ice-sheet-sea-level]
+    note: "A stack every 1 kyr for 798 kyr, laid over today's ground. In deep time a curve is drawn as a series and moves no coast. The ice added up as sea level is up to 54 m from the stack in Marine Isotope Stage 3."
+    best: "A budget: the water in the ocean over the basins' capacity. Rival curves as alternatives, which differ by 100 m or more on the Cretaceous high. Cycles at 1 kyr for 40 Myr from deep-sea isotopes (Rohling et al. 2022, unread)."
+    gap: large
+    seen: [proxies, rocks]
+  - id: rebound
+    label: The crust under the ice's weight
+    kind: settling
+    what: "How far the ground sank under ice and water, and rose after."
+    now: none
+    note: "Left out, in the relief's own words. Coasts near old ice sheets are wrong for it."
+    best: "The sea-level equation solved on the ice's history. PaleoMIST's archive carries its own calculation, which is not read."
+    gap: medium
+    seen: [rocks]
+  - id: coast
+    label: Land and sea
+    kind: at-once
+    what: "Which ground was dry and which was under the sea."
+    now: rule
+    has: [model:earth/coastline, field:earth/coastline, model:earth/relief-coastline, field:earth/relief-coastline]
+    note: "An isoline on the elevation. 36% of marine fossil collections fall on its land and 12% of land ones in its sea, and nothing corrects it from the rocks."
+    best: "A chance of sea for each cell and stage, conditioned on the marine and land beds the build already holds. Rebound near the ice, and deltas from sediment."
+    gap: large
+    seen: [rocks, fossils]
+  - id: land-links
+    label: Bridges and barriers
+    kind: at-once
+    what: "What it cost to cross from one place to another by land, shelf and deep sea."
+    now: rule
+    has: [model:life/atlas, model:life/sea-atlas]
+    note: "The life atlases measure the way overland and by sea, with crossings and climbs costing more. The glacial coast opens Beringia and Sunda. No one field of cost is shared by life and people."
+    best: "One cost surface for each time, with ice and climate as limits, read by every spreading node."
+    gap: medium
+  - id: gateways
+    label: Ocean gateways
+    kind: at-once
+    what: "Whether the narrow seaways between oceans were open."
+    now: none
+    note: "Only as they happen to lie in the elevation maps the climate runs used."
+    best: "Read from the land and sea of each time, with the dated ones as records: the Drake Passage, Panama, the Tethys."
+    gap: small
+    seen: [rocks]
+edges:
+  - { from: plates, to: elevation, now: built, how: "Each place rides its plate between the maps' keyframes." }
+  - { from: uplift, to: elevation, now: partial, by: model:earth/relief-carried, how: "A range's record says by when it stood. Its shape is carried back that far, but on the maps' own level." }
+  - { from: mantle-push, to: elevation, now: missing, how: "The mantle lifts and drops whole regions under their own crust." }
+  - { from: erosion, to: elevation, now: missing, how: "Land wears down once uplift stops, and sediment fills the basins." }
+  - { from: elevation, to: erosion, now: missing, loop: wearing-down, how: "Higher, steeper ground wears faster." }
+  - { from: rain-months, to: erosion, now: missing, loop: mountains-and-rain, how: "More water cuts faster." }
+  - { from: ice, to: erosion, now: missing, loop: mountains-and-rain, how: "Ice carves valleys and scrapes shields." }
+  - { from: bedrock, to: erosion, now: missing, how: "Soft rock goes first." }
+  - { from: elevation, to: relief, now: built, by: model:earth/relief-carried, how: "Today's shape is laid over the height the maps give each time." }
+  - { from: uplift, to: relief, now: built, by: model:earth/relief-carried, how: "A range's crests are carried back as far as its record says it stood." }
+  - { from: erosion, to: relief, now: missing, how: "Rivers and ice cut the valleys." }
+  - { from: bedrock, to: relief, now: missing, how: "Hard rock stands as ridges." }
+  - { from: plates, to: bedrock, now: built, by: model:earth/strata, how: "A place is carried on its plate to the column of rock it lies in today." }
+  - { from: volcanism, to: bedrock, now: partial, by: model:earth/substrate, how: "A lava or an ash being laid down in a column is the rock at the surface." }
+  - { from: erosion, to: bedrock, now: missing, loop: rock-cycle, how: "What is laid down becomes the next beds, and what is stripped bares older rock." }
+  - { from: seafloor-age, to: ocean-depth, now: missing, how: "The floor sinks as it cools with age." }
+  - { from: erosion, to: ocean-depth, now: missing, how: "Sediment shoals the floor near the continents." }
+  - { from: ocean-depth, to: basin-volume, now: missing, how: "Deeper floors hold more." }
+  - { from: plates, to: basin-volume, now: missing, how: "Continents that collide take up less room." }
+  - { from: temp-months, to: ice, now: missing, how: "Ice grows where the year's snow outlasts its melt." }
+  - { from: rain-months, to: ice, now: missing, how: "An ice sheet is fed by snowfall." }
+  - { from: elevation, to: ice, now: missing, how: "High ground gathers ice first." }
+  - { from: orbit, to: ice, now: missing, how: "Summer sunlight in the north paces the ice ages." }
+  - { from: ice, to: sea-level, now: partial, by: model:earth/ice-equivalent-sea-level, how: "Water locked in ice is out of the sea. It is added up as a check on the stack, while the coast follows the stack." }
+  - { from: basin-volume, to: sea-level, now: missing, how: "The same water stands lower in roomier basins." }
+  - { from: global-temp, to: sea-level, now: missing, how: "Warm water takes more room." }
+  - { from: groundwater, to: sea-level, now: missing, loop: water-on-land, how: "Water held on land is out of the sea, by metres." }
+  - { from: mantle, to: sea-level, now: missing, how: "Water goes down the trenches and comes back at the ridges, over hundreds of Myr." }
+  - { from: ice, to: rebound, now: missing, how: "The crust sinks under an ice sheet and rises for millennia after it has gone." }
+  - { from: sea-level, to: rebound, now: missing, how: "The sea's own weight bends the shelves." }
+  - { from: elevation, to: coast, now: built, by: model:earth/coastline, how: "The coast is an isoline on the elevation." }
+  - { from: relief, to: coast, now: built, by: model:earth/relief-coastline, how: "For the glacial cycles the coast is today's ground under each time's sea." }
+  - { from: sea-level, to: coast, now: partial, by: model:earth/relief-coastline, how: "The stack's level moves the coast for 798 kyr. Before that the maps' own zero is the coast." }
+  - { from: rebound, to: coast, now: missing, how: "Sunken crust near the ice drowns coasts that the sea level alone would bare." }
+  - { from: mantle-push, to: coast, now: missing, how: "A sagging continent floods without the sea rising." }
+  - { from: floodplains, to: coast, now: missing, loop: delta-building, how: "Deltas build land out into the sea." }
+  - { from: coast, to: land-links, now: built, by: model:life/atlas, how: "The sea costs far more to cross than the land." }
+  - { from: elevation, to: land-links, now: built, by: model:life/atlas, how: "Climbs cost extra, so ranges are barriers." }
+  - { from: temp-months, to: land-links, now: partial, by: model:life/atlas, how: "A like climate lets a lineage through and an unlike one stops it." }
+  - { from: ice, to: land-links, now: missing, how: "An ice sheet closes a corridor, and its melting opens one." }
+  - { from: coast, to: gateways, now: inside, loop: shelves-and-climate, how: "A low sea shuts shallow straits, as it did Bering's, and a high one opens them." }
+  - { from: plates, to: gateways, now: inside, how: "Continents drifting apart open the passages between oceans." }

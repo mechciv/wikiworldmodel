@@ -1,0 +1,83 @@
+lane: people
+title: People
+about: How many people there were, and what moved their numbers.
+nodes:
+  - id: density
+    label: People to the km²
+    kind: settling
+    what: "How many people lived on each piece of land."
+    now: borrowed
+    has: [field:earth/population, field:earth/world-population]
+    note: "HYDE's grid from 10,000 BCE, drawn as the value: totals by today's provinces, shared over the land by rules. Held out, Angkor's region came out twelvefold low. Nothing before 10,000 BCE."
+    best: "A field that settles towards what the land could feed since the way of life arrived, conditioned on censuses and surveys by their ground. HYDE and KK10 scored as rivals."
+    gap: large
+    seen: [texts, sites, others]
+  - id: births-deaths
+    label: Births, deaths and ages
+    kind: at-once
+    what: "How long people lived, how many children they had, and the ages of a household."
+    now: stand-in
+    has: [gen:people/settlement]
+    note: "A household of five, which is a choice."
+    best: "Model life tables by way of life: how many children, how many old."
+    gap: small
+    seen: [texts, sites]
+  - id: disease
+    label: Disease
+    kind: settling
+    what: "The standing burden of infection, and the plagues."
+    now: none
+    note: "Not in the world."
+    best: "A burden from warmth, crowding and kept animals. Epidemics as dated shocks."
+    gap: medium
+    seen: [texts, dna]
+  - id: shocks
+    label: Plagues, famines and conquests
+    kind: contingent
+    what: "Dated events that cut or moved a people's numbers."
+    now: none
+    note: "The world has no such record yet: a sack or a plague is not in a city's people until a figure says so."
+    best: "Dated events a settling node reads, each with a size its kind gives before any figure does. They are the experiments that test the people's model."
+    gap: medium
+    seen: [texts, sites]
+  - id: migration
+    label: Movements of people
+    kind: spreading
+    what: "Who moved where, and how many."
+    now: records
+    note: "The great dispersals as records. No flows between regions."
+    best: "Flows from full land to open land along the ways of travel, with the great movements as records."
+    gap: medium
+    seen: [dna, texts, sites]
+  - id: ancestry
+    label: Who descended from whom
+    kind: spreading
+    what: "The ancestry of the people of a place at a time."
+    now: none
+    note: "Individuals with ancient genomes are named in the dispersal records. No field."
+    best: "Ancestry through time and space, interpolated from ancient genomes (AADR, licence unchecked)."
+    gap: medium
+    seen: [dna]
+edges:
+  - { from: capacity, to: density, now: missing, how: "A people's numbers settle towards what their land can feed." }
+  - { from: farming-reach, to: density, now: missing, how: "The longer farming had been there, the nearer the land was to full." }
+  - { from: humans, to: density, now: missing, how: "No one lives where people had not yet come." }
+  - { from: births-deaths, to: density, now: missing, how: "How fast numbers can grow back." }
+  - { from: disease, to: density, now: missing, how: "A heavy burden holds numbers below what the land could feed." }
+  - { from: shocks, to: density, now: missing, how: "A plague or a conquest cuts numbers at a date." }
+  - { from: migration, to: density, now: missing, how: "People arriving and leaving." }
+  - { from: way-of-life, to: births-deaths, now: missing, how: "Settled farmers bear more children than foragers on the move." }
+  - { from: disease, to: births-deaths, now: missing, how: "Infection takes the young first." }
+  - { from: density, to: disease, now: missing, loop: crowd-disease, how: "Crowds keep an infection alive." }
+  - { from: animals-kept, to: disease, now: missing, how: "Herds gave people their plagues." }
+  - { from: temp-months, to: disease, now: missing, how: "Warm, wet land breeds more of it." }
+  - { from: travel, to: disease, now: missing, how: "Plagues ride the routes." }
+  - { from: swings, to: shocks, now: missing, how: "A run of bad years is a famine." }
+  - { from: disease, to: shocks, now: missing, how: "A new infection in an unexposed people is a catastrophe." }
+  - { from: events, to: shocks, now: missing, how: "A conquest can empty a land." }
+  - { from: travel, to: migration, now: missing, how: "People move as far as their means of travel carry them." }
+  - { from: shocks, to: migration, now: missing, loop: moved-peoples, how: "Famine and war set people moving." }
+  - { from: density, to: migration, now: missing, loop: full-land, how: "People leave full land for open land." }
+  - { from: states, to: migration, now: missing, loop: full-land, how: "States settle, deport and enslave." }
+  - { from: humans, to: ancestry, now: missing, how: "The first people of a land are its oldest ancestry." }
+  - { from: migration, to: ancestry, now: missing, how: "Each movement mixes or replaces." }

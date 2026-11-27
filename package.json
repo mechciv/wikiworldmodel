@@ -9,6 +9,7 @@
   },
   "scripts": {
     "world": "tsx tools/world/src/cli.ts",
+    "causes": "tsx tools/causes/build.ts",
     "fetch": "tsx tools/world/src/cli.ts fetch",
     "import": "tsx tools/world/src/cli.ts import",
     "validate": "tsx tools/world/src/cli.ts validate",

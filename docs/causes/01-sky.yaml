@@ -1,0 +1,43 @@
+# The graph of causes (docs/causes/README.md says how to read and change it). One file for each lane, in causal
+# order; a lane's edges are the causes of its own nodes.
+lane: sky
+title: Sun, orbit and what falls
+about: What reaches the Earth from outside. Nothing below causes it.
+nodes:
+  - id: sun
+    label: The Sun's brightness
+    kind: given
+    what: "How bright the Sun was, relative to today."
+    now: borrowed
+    has: [model:sun/gough-1981, field:sun/luminosity]
+    note: "Gough's fit to stellar models, from 4.3 Ga into the future. It gives no error."
+    best: "The same fit with a band: stellar models are the state of the art here."
+    gap: small
+  - id: orbit
+    label: Orbit and tilt
+    kind: given
+    what: "The shape of the orbit, the tilt of the axis and the season of nearest approach."
+    now: none
+    note: "Held at today's in the energy balance. The runs of the last 120 kyr carry their own inside them."
+    best: "Computed solutions of the orbit, exact for tens of Myr and statistical before. They pace the ice ages."
+    gap: medium
+  - id: spin
+    label: Length of the day
+    kind: settling
+    what: "How fast the Earth turned, and how far off the Moon stood."
+    now: borrowed
+    has: [field:earth/day-length, field:earth/moon-distance]
+    note: "Two series from one work, back to 3.22 Ga. No model reads them."
+    best: "The same series, read by the energy balance for the early Earth."
+    gap: small
+    seen: [rocks]
+  - id: impacts
+    label: Impacts
+    kind: contingent
+    what: "Bodies that struck the Earth, and when."
+    now: records
+    note: "The Moon-forming impact and Chicxulub as records, each with its evidence."
+    best: "Instances stay evidence. A rate from crater counts would serve a generator."
+    gap: small
+    seen: [rocks]
+edges: []

@@ -1,0 +1,78 @@
+lane: power
+title: States and events
+about: Rule, war and the named events of history. Instances are evidence's; a model gives only their statistics.
+nodes:
+  - id: complexity
+    label: How large and layered societies were
+    kind: settling
+    what: "Villages, chiefdoms or states: the levels of rule above the household."
+    now: none
+    note: "Not in the world."
+    best: "Levels of rule a region could carry, from its people, its surplus and its travel."
+    gap: medium
+    seen: [sites, texts]
+  - id: state-scale
+    label: How large states grew
+    kind: at-once
+    what: "The usual reach of a state at a place and time."
+    now: none
+    note: "Not in the world. Where no state is drawn, the world says unknown."
+    best: "The usual size of a state from farmland, terrain and the spread of horse and iron, fitted to the drawn states over the effort that drew them (after Turchin et al. 2013, unread)."
+    gap: medium
+    seen: [others, texts]
+  - id: states
+    label: Which state ruled where
+    kind: contingent
+    what: "The named states, their borders and their spans."
+    now: records
+    has: [field:earth/polities]
+    note: "Cliopatria's rows from 3400 BCE and 43 records. A state is drawn on 32% of inhabited land since 3258 BCE."
+    best: "Instances stay evidence: more of them, with rival borders as alternatives."
+    gap: small
+    seen: [texts, others]
+  - id: events
+    label: Wars, treaties and foundations
+    kind: contingent
+    what: "The dated events of history."
+    now: records
+    note: "61 events as records, most of them Rome's, the conquest of Mexico's and the Second World War's."
+    best: "Instances stay evidence. How often and how large is a generator's."
+    gap: small
+    seen: [texts, sites]
+  - id: rulers
+    label: Rulers and persons
+    kind: contingent
+    what: "The named people of history."
+    now: records
+    note: "46 persons as records, most of them rulers."
+    best: "Instances stay evidence."
+    gap: small
+    seen: [texts]
+  - id: industry
+    label: Engines and fuel
+    kind: spreading
+    what: "The energy a person commanded beyond muscle, wind and water."
+    now: records
+    note: "The industrial revolution is one record."
+    best: "Energy to a person as a surface from 1750. It lifts yield, travel and CO₂ together, and it is where the future begins."
+    gap: medium
+    seen: [texts, surveys]
+edges:
+  - { from: surplus, to: complexity, now: missing, how: "Rule above the village lives on what the growers do not eat." }
+  - { from: density, to: complexity, now: missing, how: "Many people in reach of each other need, and can bear, more levels of rule." }
+  - { from: events, to: complexity, now: missing, how: "War makes states." }
+  - { from: trade, to: complexity, now: missing, loop: trade-and-rank, how: "Control of trade makes chiefs." }
+  - { from: complexity, to: state-scale, now: missing, how: "More levels of rule hold more ground together." }
+  - { from: travel, to: state-scale, now: missing, how: "A state reaches as far as an order can be carried." }
+  - { from: relief, to: state-scale, now: missing, how: "Broken land breaks states." }
+  - { from: yield, to: state-scale, now: missing, how: "Farmland is what there is to tax." }
+  - { from: technology, to: state-scale, now: missing, how: "The horse and iron made the first great empires." }
+  - { from: state-scale, to: states, now: missing, how: "The usual size bounds the instance. Which state it was is evidence's alone." }
+  - { from: events, to: states, now: partial, how: "Conquests, unions and partitions are written as relations between records." }
+  - { from: technology, to: events, now: missing, how: "New arms change who wins." }
+  - { from: states, to: events, now: partial, loop: war-and-state, how: "States make war. Who fought is written as relations between records." }
+  - { from: density, to: events, now: missing, loop: pressure, how: "Full land is fought over." }
+  - { from: states, to: rulers, now: partial, how: "Who held which office is written as relations between records." }
+  - { from: technology, to: industry, now: missing, how: "The engine." }
+  - { from: resources, to: industry, now: missing, how: "Coal near the surface." }
+  - { from: trade, to: industry, now: missing, how: "Markets large enough to pay for machines." }

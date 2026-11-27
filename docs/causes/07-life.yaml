@@ -1,0 +1,106 @@
+lane: life
+title: Life
+about: Which lineages there were, where each lived, and how many.
+nodes:
+  - id: lineages
+    label: When each lineage arose and ended
+    kind: contingent
+    what: "The tree of life in time: the first and the last of every lineage."
+    now: borrowed
+    has: [field:life/taxa-land, field:life/taxa-sea, field:life/catalogue-of-life]
+    note: "First and last fossils as the Paleobiology Database has them, on its tree. A first record says only that the lineage had arisen by then."
+    best: "Origins and ends estimated beyond the first and last fossil, by how thin the record is. Dated trees where they are open."
+    gap: medium
+    seen: [fossils, dna]
+  - id: niche
+    label: What each lineage could live in
+    kind: settling
+    what: "The warmth, cold and wet a lineage tolerated."
+    now: rule
+    has: [model:life/atlas]
+    note: "Each taxon carries the warmest and coldest month of the places its fossils lay. Nothing is pooled from its relatives."
+    best: "Tolerances pooled up the tree of life, so that a taxon with three fossils borrows from its family."
+    gap: medium
+    seen: [fossils]
+  - id: range
+    label: Who lived where
+    kind: spreading
+    what: "The lineages present on each patch of land at each time."
+    now: rule
+    has: [model:life/atlas, field:life/community]
+    note: "245,000 fossil rows carried by distance and like climate on 4° patches. Since 100 Ma, 3–13% of answers are evidence, 33–43% inferred and 45–65% stand-ins. No effort model, so absence means nothing."
+    best: "Presence from the niche and from arrival over the land of the time. Detection from effort and outcrop. Scored on fossils held out by region."
+    gap: large
+    seen: [fossils, surveys]
+  - id: sea-range
+    label: Who lived in the sea
+    kind: spreading
+    what: "The genera present on each patch of sea at each time."
+    now: rule
+    has: [model:life/sea-atlas, field:life/community-sea]
+    note: "1.4 million rows, by genus, carried by sea within a like belt of latitude. The open ocean is mostly stand-ins, and none of it is drawn."
+    best: "The same occupancy model as the land's, on the sea's warmth and depth."
+    gap: large
+    seen: [fossils]
+  - id: body
+    label: Size and form
+    kind: settling
+    what: "How large each lineage was and what it looked like."
+    now: rule
+    note: "130 taxa have a form of their own, and 65,314 take the nearest node's on the tree."
+    best: "Sizes from measured specimens, pooled up the tree. Forms written family by family."
+    gap: medium
+    seen: [fossils]
+  - id: numbers
+    label: How many of each
+    kind: at-once
+    what: "Animals to the km², by size and by what they ate."
+    now: stand-in
+    has: [gen:life/scene]
+    note: "A scene's mix follows the atlas's weights, which measure how near a fossil lies. Nothing says how many animals the land fed."
+    best: "Numbers from the land's growth and the animal's mass, by feeding level."
+    gap: large
+    seen: [fossils, surveys]
+  - id: food-web
+    label: Who ate whom
+    kind: at-once
+    what: "Plant-eaters, meat-eaters and the share of each."
+    now: none
+    note: "Not in the world beyond a body plan's habit."
+    best: "Feeding levels from teeth and size, with predators a set share of their prey."
+    gap: small
+    seen: [fossils]
+  - id: extinctions
+    label: Die-offs
+    kind: contingent
+    what: "The mass extinctions and the smaller ones."
+    now: records
+    note: "The five mass extinctions and the great animals' end in five regions, with rival pictures of the cause."
+    best: "As it is: instances are evidence. The die-offs are the dated shocks that test the range model."
+    gap: small
+    seen: [fossils, rocks]
+edges:
+  - { from: extinctions, to: lineages, now: built, by: model:life/atlas, how: "Nothing of a lineage is drawn after the end its record gives." }
+  - { from: lineages, to: niche, now: missing, how: "A lineage inherits its parents' tolerances and shifts them slowly." }
+  - { from: lineages, to: range, now: built, by: model:life/atlas, how: "A taxon is listed in the stages its rows fall in." }
+  - { from: niche, to: range, now: partial, by: model:life/atlas, how: "A fossil of the region is inferred here only in a like climate." }
+  - { from: temp-months, to: range, now: built, by: model:life/atlas, how: "How alike two places' climates are gates what can spread between them." }
+  - { from: land-links, to: range, now: built, by: model:life/atlas, how: "Distance is over the land of the time, with sea and climbs costing more." }
+  - { from: biome, to: range, now: partial, by: model:life/atlas, how: "The cover's thresholds class a climate as like or unlike." }
+  - { from: density, to: range, now: missing, loop: hunting-and-clearing, how: "People hunted some lineages out and crowded out others." }
+  - { from: lineages, to: sea-range, now: built, by: model:life/sea-atlas, how: "A genus is listed in the stages its rows fall in." }
+  - { from: coast, to: sea-range, now: built, by: model:life/sea-atlas, how: "Distance is by sea, with the land dearest to cross." }
+  - { from: ocean-depth, to: sea-range, now: built, by: model:life/sea-atlas, how: "The shelf is cheap to follow and the open ocean dearer." }
+  - { from: sea-temp, to: sea-range, now: partial, by: model:life/sea-atlas, how: "A like belt of latitude stands in for a like sea." }
+  - { from: lineages, to: body, now: built, how: "A taxon with no form of its own is drawn as the nearest node of the tree that has one." }
+  - { from: temp-months, to: body, now: missing, how: "Size shifts with warmth, and with islands." }
+  - { from: growth, to: numbers, now: missing, how: "The land's growth sets how much flesh it can feed." }
+  - { from: body, to: numbers, now: missing, how: "Small animals are many and large ones few." }
+  - { from: range, to: numbers, now: partial, by: gen:life/scene, how: "A scene draws its animals in the mix of the atlas's weights." }
+  - { from: food-web, to: numbers, now: missing, how: "Meat-eaters are a small share of what they eat." }
+  - { from: body, to: food-web, now: missing, how: "Teeth and size say what an animal ate." }
+  - { from: range, to: food-web, now: missing, how: "A web is made of who is there." }
+  - { from: impacts, to: extinctions, now: partial, how: "Written as a cause between records, as Chicxulub is of the end of the Cretaceous." }
+  - { from: volcanism, to: extinctions, now: partial, how: "Written as a cause between records, where sources give one." }
+  - { from: global-temp, to: extinctions, now: missing, how: "Fast warming and cooling end lineages." }
+  - { from: humans, to: extinctions, now: partial, loop: overkill, how: "People arriving is one of the rival pictures for the great animals' end." }
