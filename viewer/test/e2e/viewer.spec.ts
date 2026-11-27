@@ -558,8 +558,7 @@ test('the whole strip gives recent history room: years to the pixel, and its mom
 });
 
 test('a city is labelled by the name it had at the time shown', async ({ page }) => {
-  // In 500, when Constantinople's label has room: in 300 the Dedication of Constantinople, nearer the time, takes it.
-  await page.goto(`/?b=${latestBuild()}&t=500&lat=41&lon=29&d=2&w=-800~2000`);
+  await page.goto(`/?b=${latestBuild()}&t=300&lat=41&lon=29&d=2&w=-800~2000`);
   await idle(page);
   const city = page.locator('.marker[data-entity="places/constantinople"] .label');
   await expect(city).toHaveText('Byzantium');

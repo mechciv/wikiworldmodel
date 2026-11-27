@@ -30,7 +30,9 @@ export class Search {
       else return;
       e.preventDefault();
     });
-    this.input.addEventListener('blur', () => setTimeout(() => this.close(), 150));
+    // Closed a moment after the box loses focus, unless it has it again by then: a search begun just after a choice
+    // keeps its list.
+    this.input.addEventListener('blur', () => setTimeout(() => document.activeElement !== this.input && this.close(), 150));
   }
 
   private run(kindLabel: (k: string) => string): void {
