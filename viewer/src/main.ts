@@ -76,6 +76,7 @@ import { FieldLayer } from './ui/fieldlayer.ts';
 import { Rivers } from './rivers.ts';
 import { RIVERS_TOGGLE, RiversLayer, type RiverNear, type RiversDrawn } from './ui/riverslayer.ts';
 import { TreePanel } from './ui/tree.ts';
+import { ThingsReader } from './things.ts';
 import { clampWindow, fitWindow, Timebar, xOf, type StateBand } from './ui/timebar.ts';
 import { Toolbar } from './ui/toolbar.ts';
 import logoUrl from '../../site/img/logo.svg';
@@ -303,6 +304,14 @@ async function start(root: HTMLElement): Promise<void> {
   const buildId = linked ?? newest;
   const build: Build = await loadBuild(store, buildId);
   const ts = build.tileset;
+  // The things of lists (core/things.ts): read only as a search, a page or the tree asks for them.
+  const things = new ThingsReader(build, ts.files.things);
+  /**
+   * A scene's taxon that no record adopts is named by the database's own number, txn:123; as a thing of the database's
+   * list it is pbdb:txn:123, and the other way about. Only the scheme of an id is read here, which is what it says.
+   */
+  const thingOfTaxon = (id: string) => (id.startsWith('txn:') && ts.files.things ? `pbdb:${id}` : id);
+  const taxonOfThing = (id: string) => (id.startsWith('pbdb:txn:') ? id.slice('pbdb:'.length) : id);
   const dataRange: [number, number] = ts.timeRange;
   // The time control reaches a little past the data at each end, so the data's edges show.
   const pad = (t: number) => Math.abs(PRESENT_YEAR - t) / 15;
@@ -655,7 +664,7 @@ async function start(root: HTMLElement): Promise<void> {
   labels.onSelect = (id) => {
     // In a living scene a name is of something standing here: it opens where it is, at the time shown.
     if (!(city instanceof LifeScene)) return goTo(id);
-    if (!id.startsWith('txn:')) return setState({ sel: id });
+    if (thingOfTaxon(id) !== id || !id.startsWith('txn:')) return setState({ sel: thingOfTaxon(id) });
     const info = organismInfo(id);
     if (!info) return;
     setState({ sel: null });
@@ -695,6 +704,7 @@ async function start(root: HTMLElement): Promise<void> {
     labelOf,
     altTitle,
     altHeld,
+    thingOf: (taxon) => (thingOfTaxon(taxon) !== taxon ? thingOfTaxon(taxon) : undefined),
   });
   const siteMap = new SiteMap(frameSettlement, inspectLocalPolity);
   labels.el.after(siteMap.el);
@@ -716,7 +726,9 @@ async function start(root: HTMLElement): Promise<void> {
   // The name, with the site's logo, leads back to the site's front page, beside the viewer's folder.
   brand.innerHTML = `<a class="home" href="../" title="WikiWorldModel: about the project"><img src="${esc(logoUrl)}" width="18" height="18" alt="" /><strong>WikiWorldModel</strong></a><span>${esc(named(dataRange[0])?.name ?? formatTime(dataRange[0]))} to ${esc(until)}</span><a class="coverage-link" title="How much of the world each layer knows, across time and the globe">How much is known →</a>`;
   brand.querySelector<HTMLAnchorElement>('.coverage-link')!.href = `./coverage.html?b=${encodeURIComponent(build.id)}`;
-  const search = new Search(build.search, build.periods.periods, kindLabel);
+  const search = new Search(build.search, build.periods.periods, kindLabel, async (text) =>
+    (await things.search(text)).map(({ hit, list }) => ({ type: 'thing' as const, id: hit[0], label: hit[1], detail: [kindLabel(list.kind), hit[3], list.name].filter(Boolean).join(' · ') })),
+  );
   const toolbar = new Toolbar(build.id, ts.alternatives, ts.layers ?? []);
   // The rivers' toggle sits with the fields' and is kept as theirs are, by its key in the link's `ly=`: the toolbar
   // lights it with them.
@@ -972,6 +984,24 @@ async function start(root: HTMLElement): Promise<void> {
     if (!id) {
       shownRecord = null;
       inspect.hide();
+      return;
+    }
+    // A record an import made that is a written one's thing opens the written one.
+    const same = build.search.entities.find((e) => e.id === id)?.same;
+    if (same) return setState({ sel: same });
+    // A thing of a list opens the record that is it, or else its own page, made here from its list's chunk.
+    if (await things.isThing(id)) {
+      const opened = await things.open(id).catch(() => undefined);
+      if (state.sel !== id) return;
+      if (opened && 'record' in opened) return setState({ sel: opened.record });
+      if (!opened) {
+        shownRecord = null;
+        inspect.hide();
+        return;
+      }
+      shownRecord = id;
+      dirty = true;
+      inspect.showEntity(opened.page, scenario(), opened.page.time, undefined, organismInfo(taxonOfThing(id)));
       return;
     }
     const [r] = await Promise.all([loadRecord(build, id), cityCatalogue, features.load([id]), scenarioKey(scenario()) ? features.wantVariants() : undefined, wantWhere()]);
@@ -2519,8 +2549,8 @@ async function start(root: HTMLElement): Promise<void> {
         if (found.structure) return setState({ sel: found.structure.id });
         if (found.taxon) {
           const t = found.taxon;
-          // A taxon with a record opens it; one that is only a row of the database says what the row says.
-          if (!t.id.startsWith('txn:')) return setState({ sel: t.id });
+          // A taxon with a record opens it, and one that is only a row of the database its page as a thing of that list.
+          if (thingOfTaxon(t.id) !== t.id || !t.id.startsWith('txn:')) return setState({ sel: thingOfTaxon(t.id) });
           setState({ sel: null });
           shownRecord = null;
           const info = organismInfo(t.id)!;
@@ -2957,6 +2987,7 @@ async function start(root: HTMLElement): Promise<void> {
   }
 
   treePanel.onSelect = (id) => goTo(id);
+  treePanel.loadChildren = (thing) => things.children(thing);
   treePanel.onClose = () => setState({ tree: false });
   markers.onSelect = (id) => {
     here = null;
@@ -3007,6 +3038,9 @@ async function start(root: HTMLElement): Promise<void> {
   /** Resolve the place at the requested date before moving either the clock or the camera. */
   async function destinationFor(id: string, at?: number): Promise<Destination> {
     here = null;
+    const same = entryOf(id)?.same;
+    if (same) return destinationFor(same, at);
+    if (await things.isThing(id)) return thingDestination(id, at);
     // Its marker may be somewhere the view has not asked for: fetch it, then go.
     if (features.has(id) && (!features.get(id) || (scenarioKey(scenario()) && !features.hasVariants))) {
       await Promise.all([features.load([id]), scenarioKey(scenario()) ? features.wantVariants() : undefined]);
@@ -3086,6 +3120,24 @@ async function start(root: HTMLElement): Promise<void> {
       const p = add(v, scale(add(scale(c, q[0]), cross(u, c)), 2));
       cam = { lat: (Math.asin(Math.max(-1, Math.min(1, p[2]))) * 180) / Math.PI, lon: (Math.atan2(p[1], p[0]) * 180) / Math.PI, dist: at === undefined ? 2.4 : 1.24 };
     }
+    return mapDestination({ t, sel: id, window }, cam, at !== undefined);
+  }
+
+  /**
+   * Go to a thing of a list: to the record that is it, where one is; or else to its time, over where its list puts it
+   * today. A list's place is today's, with no plate to carry it back: in deep time it is drawn where it is now.
+   */
+  async function thingDestination(id: string, at?: number): Promise<Destination> {
+    const opened = await things.open(id).catch(() => undefined);
+    if (opened && 'record' in opened) return destinationFor(opened.record, at);
+    if (!opened) return { arrive: () => setState({ sel: id }) };
+    const time = opened.page.time;
+    let t = at ?? state.t;
+    if (at === undefined && time.start.best !== null && visibility(time, t, halo(t), false) < 0.5) t = time.start.best;
+    t = Math.max(dataRange[0], Math.min(dataRange[1], t));
+    const window = (at === undefined ? windowFor(time) : windowAround(t)) ?? state.window;
+    const loc = opened.page.claims.find((c) => c.prop === 'location')?.value as { lat: number; lon: number } | undefined;
+    const cam = loc ? { lat: loc.lat, lon: loc.lon, dist: 1.6 } : undefined;
     return mapDestination({ t, sel: id, window }, cam, at !== undefined);
   }
 

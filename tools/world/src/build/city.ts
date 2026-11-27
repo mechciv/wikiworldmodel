@@ -257,7 +257,7 @@ function structureOf(s: Solved, e: Entity, elements: Map<string, OhmElement>, or
   const height = claimOf(s, e.id, 'height')?.value as number | undefined;
   const level = claimOf(s, e.id, 'ground_level')?.value as number | undefined;
   const { time, variants } = subjectTime(s, e.id);
-  const curated = !e.id.startsWith('rome/ohm/');
+  const curated = !e.imported;
   const area = rings.reduce((a, r) => a + ringArea(r), 0);
   // What the map outlines at this size is an estate or a quarter, not a building: nothing is raised on it.
   const kind = !curated && area > 120000 && e.kind.startsWith('building') ? 'open/district' : e.kind;

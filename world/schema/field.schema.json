@@ -51,7 +51,7 @@
       "properties": {
         "from": { "$ref": "defs.json#/$defs/ref" },
         "file": { "type": "string", "description": "The dataset's file, where it has several" },
-        "as": { "enum": ["climate", "months", "ice-sheets", "borders", "hazards", "polities", "routes", "languages", "people", "community", "community-sea", "rock-record", "relief", "river-widths", "anthromes", "land-use-assessment", "cities", "topsoil", "bedrock", "strata"], "description": "What the data is read as, where it is not elevation of each time: relief is today's ground on a fixed datum, held through the times the field covers, which a coastline reads at the sea level of each time; months is another variable of the dataset a climate is read from, by month or by year, kept beside that climate's months at its nodes (core/months.ts); topsoil and bedrock are today's maps of the ground, held as relief is, which a scene's ground is read from; strata is columns of rock units with the ages each was laid down between, which a ground is read from at any time" },
+        "as": { "enum": ["climate", "months", "ice-sheets", "borders", "hazards", "polities", "routes", "languages", "people", "community", "community-sea", "rock-record", "relief", "river-widths", "anthromes", "land-use-assessment", "cities", "topsoil", "bedrock", "strata", "taxa", "places"], "description": "What the data is read as, where it is not elevation of each time: relief is today's ground on a fixed datum, held through the times the field covers, which a coastline reads at the sea level of each time; months is another variable of the dataset a climate is read from, by month or by year, kept beside that climate's months at its nodes (core/months.ts); topsoil and bedrock are today's maps of the ground, held as relief is, which a scene's ground is read from; strata is columns of rock units with the ages each was laid down between, which a ground is read from at any time; taxa is a fossil snapshot's taxa, a row each; places is the points of a gazetteer, a row each" },
         "places": { "$ref": "defs.json#/$defs/ref", "description": "For borders: the dataset of places that goes with them" },
         "regions": { "$ref": "defs.json#/$defs/ref", "description": "For a land-use assessment by region: the dataset of the regions' shapes" },
         "variables": {
@@ -191,11 +191,22 @@
               "as": { "enum": ["string", "number", "text", "year", "year-end", "ma", "ma-range", "point"], "description": "string, number, text (in English), year (a year as the dataset counts it, with no year 0), year-end (the same, holding to the end of the year), ma (millions of years ago), ma-range (an older and a younger age column, in Ma), point (latitude and longitude columns, measured on today's Earth)" },
               "none": { "type": "array", "items": { "type": ["string", "number"] }, "description": "Values that mean the dataset gives none" },
               "method": { "type": "string" },
-              "basis": { "$ref": "defs.json#/$defs/basis" }
+              "basis": { "$ref": "defs.json#/$defs/basis" },
+              "lang": { "type": "string", "pattern": "^[a-z]{2,3}$", "description": "For a text: the language it is in, by its code (en by default; la for a taxon's name)" }
             },
             "additionalProperties": false
           }
-        }
+        },
+        "scheme": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$", "description": "A list of things (core/things.ts): each row is the thing <scheme>:<key>, known by the id its dataset gives it, the same in every snapshot. Only a key made from the dataset's own ids can have one: never {#}" },
+        "parent": {
+          "type": "object",
+          "required": ["key", "rel"],
+          "description": "For a list that is a tree: the key of the row each hangs from (a template, or several, of which the first that gives a key of the list), and the relation it has to it",
+          "properties": { "key": { "oneOf": [{ "type": "string" }, { "type": "array", "items": { "type": "string" }, "minItems": 1 }] }, "rel": { "type": "string" } },
+          "additionalProperties": false
+        },
+        "same_as": { "type": "object", "description": "The ids of other schemes that its columns give, by scheme: the column", "propertyNames": { "pattern": "^[a-z][a-z0-9-]*$" }, "additionalProperties": { "type": "string" } },
+        "preferred": { "type": "array", "items": { "type": "string" }, "description": "The properties for which this list's value is preferred over another list's, of a thing that is in both" }
       },
       "additionalProperties": false
     }

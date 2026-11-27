@@ -36,7 +36,7 @@ From [prominence.yaml](../world/schema/vocab/prominence.yaml), by the build:
 2. what its largest measured size adds: population, settlement area, area;
 3. among equals, the hash of its id, which favours nothing and does not change.
 
-Within a cell, each domain (earth, life, people) has its top few kept first, so that one domain cannot
+Within a cell, each domain (earth, life, civilization) has its top few kept first, so that one domain cannot
 fill it. Prominence answers *from how far away does this show by itself*. It is a choice about what a
 map can hold and no claim about the world, and it never hides a record from search, from its panel or
 from flying there. It must never count sources or links: those measure how much has been researched.

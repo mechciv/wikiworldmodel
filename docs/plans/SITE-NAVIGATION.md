@@ -7,7 +7,7 @@ Before this change, the inspector named Angkor and the bottom bar reported its h
 the city. Its centre for 851, Hariharalaya at Bakong, is about 5.2 km west-northwest of the saved camera target.
 Angkor's representative point lies farther northwest. The record uses that point for the later centre, Yasodharapura,
 from 889 CE. The settlement generator already uses the dated cores when placing the town.
-[Angkor record](../../world/entities/people/first-cities/angkor.yaml) · [Town layout](../../world/generators/people/settlement/town.ts)
+[Angkor record](../../world/entities/civilization/settlements/angkor.yaml) · [Town layout](../../world/generators/people/settlement/town.ts)
 
 The camera range in the link is 39.5 km. A ready local scene can take over below 80 km and fully replaces the globe
 below 45 km. Previously, the viewer hid the globe markers and state layer during that handoff. Local labels were enabled only

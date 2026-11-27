@@ -12,10 +12,12 @@ data:
 basis: evidence
 # A single value at each place and time: nobody gave its uncertainty (docs/STRUCTURE.md section 3.2).
 spread: unknown
-# Its rows are claims (docs/STRUCTURE.md section 3.1), keyed by the database's kind and its own number.
+# Its rows are claims (docs/STRUCTURE.md section 3.1), keyed by the database's kind and its own number, which is the
+# event's id in NOAA's databases: so each is a thing, ncei:eruption:5238 (docs/plans/ENTITIES.md, step 2).
 rows:
   kind: event/hazard
   key: "{kind}:{id}"
+  scheme: ncei
   claims:
     name: { column: name, as: text }
     date: { column: year, as: year, method: compilation }

@@ -19,6 +19,35 @@ async function saveSnapshotBlob(content: string | Uint8Array, filename: string, 
   );
 }
 
+/** What a thing of a list is, as `world thing` prints it; given a record's id, the things that are it. */
+async function thingText(id: string, world: Awaited<ReturnType<typeof loadWorld>>): Promise<number | void> {
+  const { worldThings } = await import('./things.ts');
+  const { things, identity } = await worldThings(world);
+  const ids = world.entity.has(id) ? (identity.rowsOf.get(id) ?? []) : [id];
+  if (world.entity.has(id)) console.log(ids.length ? `${id} is ${ids.join(', ')}` : `${id} names no thing of the lists read here`);
+  for (const x of ids) {
+    const t = things.things.get(x);
+    if (!t) {
+      console.log(`${x} is in none of the lists read here (${things.lists.map((l) => l.field.id).join(', ') || 'none is fetched'})`);
+      return 1;
+    }
+    console.log(`${t.id}  ${t.label}`);
+    for (const row of t.rows) {
+      const list = things.lists[row.list];
+      console.log(`  ${list.field.id}, ${list.dataset}#${t.key}`);
+      list.props.forEach((p, i) => row.values[i] !== null && console.log(`    ${p.padEnd(16)} ${JSON.stringify(row.values[i])}`));
+    }
+    if (t.parent) console.log(`  hangs from ${t.parent} (${things.things.get(t.parent)?.label ?? '?'})`);
+    const kids = [...things.things.values()].filter((c) => c.parent === t.id).length;
+    if (kids) console.log(`  ${kids} of the lists' things hang from it`);
+    if (Object.keys(t.same_as).length) console.log(`  its row gives ${Object.entries(t.same_as).map(([k, v]) => `${k}:${v}`).join(', ')}`);
+    const record = identity.record.get(t.id);
+    console.log(record ? `  it is ${record} (${world.entity.get(record)?.file})` : '  no record is it yet: a record that names it in same_as will be');
+    const also = identity.also.get(t.id);
+    if (also?.length) console.log(`  and is ${also.join(', ')}`);
+  }
+}
+
 const commands: Record<string, (args: string[]) => Promise<number | void>> = {
   // Every dataset, or only those named (plus `--snapshots` for all `blob:` snapshots):
   // `npm run fetch -- src:paleomap-plate-model --snapshots`.
@@ -410,11 +439,13 @@ const commands: Record<string, (args: string[]) => Promise<number | void>> = {
   // Every claim about a subject, a record or a row of a dataset, with where each comes from and which the default
   // picture shows (*): `npm run world -- claims src:noaa-hazards-2026-11-04#eruption:5238`, or an entity's id.
   async claims([ref]) {
-    if (!ref) throw new Error('usage: world claims <entity id | src:<dataset>#<row key>>');
+    if (!ref) throw new Error('usage: world claims <entity id | src:<dataset>#<row key> | <scheme>:<key>>');
     const world = await loadWorld();
     const { ClaimIndex } = await import('./claimindex.ts');
     const { parseRef } = await import('../../../core/refs.ts');
     const r = parseRef(ref);
+    // A thing of a list is known by its scheme's id: what each row of it says, and the record that is it.
+    if (r.type === 'external') return thingText(ref, world);
     const index = await ClaimIndex.of(world, r.type === 'row' ? [r.id] : []);
     if (r.type === 'row' && !index.tables.has(r.id)) console.log(`${r.id} is not read as rows here: fetch it, or give its field a rows: section`);
     const cs = index.of(ref);
@@ -427,6 +458,62 @@ const commands: Record<string, (args: string[]) => Promise<number | void>> = {
       const shown = pick && pick.origin === c.origin && pick.where === c.where && JSON.stringify(pick.value) === JSON.stringify(c.value) ? '*' : ' ';
       console.log(`${shown} ${c.prop.padEnd(14)} ${JSON.stringify(c.value)}\n    ${c.origin}, ${c.rank}, ${c.status}, ${c.level}; ${c.author}; ${c.where}${c.note ? `\n    ${c.note}` : ''}`);
     }
+  },
+  // A thing of a list (docs/plans/ENTITIES.md, steps 2 and 4): what each of its rows says, what it hangs from, what hangs
+  // from it, and which record and which other things it is. Given a record's id, the things that are it.
+  async thing([id]) {
+    if (!id) throw new Error('usage: world thing <scheme>:<key> | <entity id>');
+    return thingText(id, await loadWorld());
+  },
+  // Things of lists that a record may be, by name alone: proposals to confirm or refuse, never joins. A thing becomes a
+  // record's when the record names it in same_as, or an overlay ties its row to it (docs/plans/ENTITIES.md, step 4).
+  async 'matches-wanted'(args) {
+    const limit = Number(args[args.indexOf('--limit') + 1]) || 40;
+    const world = await loadWorld();
+    const { worldThings } = await import('./things.ts');
+    const { wordsOf } = await import('../../../core/things.ts');
+    const { things, identity } = await worldThings(world);
+    const fold = (s: string) => wordsOf(s).join(' ');
+    // Records by their names, of the kinds the lists are of, that name no thing of that kind's list yet.
+    const byName = new Map<string, { id: string; kind: string; at?: { lat: number; lon: number } }[]>();
+    const kinds = new Set(things.schemes.values());
+    for (const e of world.entities) {
+      if (e.imported || ![...kinds].some((k) => e.kind === k || e.kind.startsWith(`${k}/`))) continue;
+      if ((identity.rowsOf.get(e.id) ?? []).length) continue;
+      const at = e.claims.find((c) => c.prop === 'location')?.value as { lat: number; lon: number } | undefined;
+      for (const c of e.claims) {
+        if (c.prop !== 'name' || !c.value || typeof c.value !== 'object') continue;
+        for (const n of Object.values(c.value as Record<string, string>)) {
+          const key = fold(n);
+          if (!key) continue;
+          const list = byName.get(key) ?? [];
+          if (!list.some((x) => x.id === e.id)) list.push({ id: e.id, kind: e.kind, at });
+          byName.set(key, list);
+        }
+      }
+    }
+    const km = (a: { lat: number; lon: number }, b: { lat: number; lon: number }) => {
+      const r = Math.PI / 180;
+      const x = Math.sin(((b.lat - a.lat) * r) / 2) ** 2 + Math.cos(a.lat * r) * Math.cos(b.lat * r) * Math.sin(((b.lon - a.lon) * r) / 2) ** 2;
+      return 2 * 6371 * Math.asin(Math.sqrt(x));
+    };
+    let shown = 0;
+    for (const t of things.things.values()) {
+      if (identity.record.has(t.id)) continue;
+      const kind = things.schemes.get(t.scheme)!;
+      for (const r of byName.get(fold(t.label)) ?? []) {
+        if (r.kind !== kind && !r.kind.startsWith(`${kind}/`)) continue;
+        const li = things.lists[t.rows[0].list];
+        const i = li.props.indexOf('location');
+        const at = i >= 0 ? (t.rows[0].values[i] as { lat: number; lon: number } | null) : null;
+        // A place far from the record's is another place of the same name.
+        const d = at && r.at ? km(at, r.at) : undefined;
+        if (d !== undefined && d > 50) continue;
+        console.log(`${r.id}  may be  ${t.id} (${t.label})${d !== undefined ? `, ${d.toFixed(1)} km from it` : ''}: if so, give it same_as: { ${t.scheme}: "${t.key}" }`);
+        if (++shown >= limit) return;
+      }
+    }
+    if (!shown) console.log('no record may be a thing of the lists by its name');
   },
   // What a record came from, what came of it, and which records are one thing with it, in the default picture or
   // with the alternatives named: `npm run world -- lineage people/polities/rome [--alt alt:…]…`.

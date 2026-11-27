@@ -24,8 +24,9 @@ import { resolvePoints } from '../importer.ts';
 import { lineageLoop } from '../lineage.ts';
 import { REPO, safeJoin, WORLD } from '../paths.ts';
 import { readTable, rowClaims, type Table } from '../tables.ts';
+import { readLists, thingsOf, type Things } from '../things.ts';
 import { stableStringify } from '../util.ts';
-import { kindIs, loadWorld, schemaDir, type Claim, type Entity, type Field, type Input, type Model, type Relation, type World } from '../world.ts';
+import { kindIs, layoutOf, loadWorld, schemaDir, type Claim, type Entity, type Field, type Input, type Model, type Relation, type World } from '../world.ts';
 
 export interface Issue {
   level: 'error' | 'warning' | 'info';
@@ -110,6 +111,8 @@ class RefChecker {
     private issues: Issue[],
     /** the datasets read as tables of rows, for references to their rows */
     private tables: Map<string, Table> = new Map(),
+    /** the things of lists, for references to them by their ids (core/things.ts) */
+    private listed?: Things,
   ) {}
 
   /**
@@ -128,11 +131,20 @@ class RefChecker {
       this.issues.push({ level: 'error', check: 'refs', file, where, message: (e as RefError).message });
       return undefined;
     }
-    if (opts.types && !opts.types.includes(r.type)) {
+    // A thing of a list stands where a record may: it is known by its scheme's id, as a record is by its own.
+    const kind = r.type === 'external' ? this.listed?.schemes.get(r.scheme) : undefined;
+    if (opts.types && !opts.types.includes(r.type) && !(kind && opts.types.includes('entity'))) {
       this.issues.push({ level: 'error', check: 'refs', file, where, message: `"${s}" should name a ${opts.types.join(' or ')} record` });
       return undefined;
     }
-    if (r.type === 'external') return undefined;
+    if (r.type === 'external') {
+      if (!kind) return undefined;
+      if (!this.listed!.things.has(s)) {
+        this.issues.push({ level: 'warning', check: 'refs', file, where, message: `${s} is in none of the lists of ${r.scheme} read here (${this.listed!.lists.filter((l) => l.spec.scheme === r.scheme).map((l) => l.field.id).join(', ')})` });
+        return undefined;
+      }
+      return { id: s, kind, phases: [], claims: [], relations: [], file: '' };
+    }
     if (r.type === 'row') {
       if (!this.ids.has(r.id)) {
         this.issues.push({ level: 'error', check: 'refs', file, where, message: `${s} is a row of ${r.id}, which is not a dataset of the world` });
@@ -414,9 +426,9 @@ function checkLadder(c: Claim | Relation, issues: Issue[]): void {
   }
 }
 
-function checkRecords(world: World, issues: Issue[], tables: Map<string, Table> = new Map()): Wanted[] {
+function checkRecords(world: World, issues: Issue[], tables: Map<string, Table> = new Map(), listed?: Things): Wanted[] {
   const ids = registry(world, issues);
-  const refs = new RefChecker(world, ids, issues, tables);
+  const refs = new RefChecker(world, ids, issues, tables, listed);
   for (const e of world.entities) {
     const kind = world.vocab.kinds[e.kind];
     if (!kind) issues.push({ level: 'error', check: 'vocab', file: e.file, where: 'kind', message: `unknown kind "${e.kind}"` });
@@ -654,6 +666,20 @@ function checkRowSpecs(world: World, issues: Issue[]): void {
       if (map.method && !world.vocab.methods[map.method]) issues.push({ level: 'error', check: 'vocab', ...at(`.claims.${prop}.method`), message: `unknown method "${map.method}"` });
       if ((map.as === 'point' || map.as === 'ma-range') !== Array.isArray(map.column)) issues.push({ level: 'error', check: 'rows', ...at(`.claims.${prop}.column`), message: 'a point reads two columns, latitude and longitude, and a range of ages two, older and younger; anything else reads one' });
     }
+    // A list of things (core/things.ts): its rows are known by the dataset's own ids.
+    const spec = f.rows;
+    if (spec.scheme) {
+      if (spec.key.includes('{#}')) issues.push({ level: 'error', check: 'rows', ...at('.key'), message: 'a row known by its place in the file is not the same row in the next snapshot: a list of things keys its rows by the dataset\'s own ids' });
+      
+      const other = world.fields.find((g) => g !== f && g.rows?.scheme === spec.scheme && g.rows?.kind !== spec.kind);
+      if (other) issues.push({ level: 'error', check: 'rows', ...at('.kind'), message: `${other.id} reads things of ${spec.scheme} as ${article(other.rows!.kind)}: the things of one scheme are of one kind` });
+    }
+    if (spec.parent) {
+      if (!spec.scheme) issues.push({ level: 'error', check: 'rows', ...at('.parent'), message: 'only a list of things (rows: scheme) is a tree' });
+      if (!world.vocab.relations[spec.parent.rel]) issues.push({ level: 'error', check: 'vocab', ...at('.parent.rel'), message: `unknown relation type "${spec.parent.rel}"` });
+    }
+    if (spec.same_as && !spec.scheme) issues.push({ level: 'error', check: 'rows', ...at('.same_as'), message: 'only a list of things (rows: scheme) gives other ids of its rows' });
+    for (const prop of spec.preferred ?? []) if (!spec.claims[prop]) issues.push({ level: 'error', check: 'rows', ...at('.preferred'), message: `its rows give no "${prop}"` });
   }
 }
 
@@ -1244,6 +1270,58 @@ function checkProminence(world: World, issues: Issue[]): void {
   }
 }
 
+/**
+ * Every record lies in the directory for its kind (world/schema/layout.yaml), and every kind has one. A path means
+ * nothing to any tool, so a record elsewhere is only out of place: a warning, which says where it goes.
+ */
+function checkLayout(world: World, issues: Issue[]): void {
+  const file = 'schema/layout.yaml';
+  for (const [k, dirs] of Object.entries(world.vocab.layout)) {
+    if (!world.vocab.kinds[k]) issues.push({ level: 'error', check: 'vocab', file, where: `kinds.${k}`, message: `unknown kind "${k}"` });
+    for (const d of dirs) if (!/^[a-z0-9-]+(\/[a-z0-9-]+)*$/.test(d)) issues.push({ level: 'error', check: 'vocab', file, where: `kinds.${k}`, message: `"${d}" is not a directory under world/entities: lowercase words joined by /` });
+  }
+  if (!Object.keys(world.vocab.layout).length) return;
+  for (const k of Object.keys(world.vocab.kinds)) if (!layoutOf(world.vocab, k)) issues.push({ level: 'error', check: 'vocab', file, where: 'kinds', message: `no directory for the kind "${k}" or any kind above it` });
+  for (const e of world.entities) {
+    if (e.imported || !e.file.startsWith('entities/')) continue;
+    const dirs = layoutOf(world.vocab, e.kind);
+    if (!dirs || dirs.some((d) => e.file.startsWith(`entities/${d}/`))) continue;
+    const name = e.file.slice(e.file.lastIndexOf('/') + 1);
+    issues.push({ level: 'warning', check: 'layout', file: e.file, message: `${article(e.kind)} goes in ${dirs.map((d) => `world/entities/${d}/`).join(' or ')}: move it to ${dirs.length === 1 ? `world/entities/${dirs[0]}/${name}` : 'the one for what it is of'} (world/schema/layout.yaml). Its id stays as it is` });
+  }
+}
+
+/**
+ * An external id names one thing, so one record: two written records that give the same id in `same_as`, on
+ * themselves or on a phase, are one thing written twice. Records an import made are the dataset's: two of them with
+ * one id are the dataset's matter, and one that shares an id with a written record is the same thing, which the
+ * build joins (docs/plans/ENTITIES.md, step 4).
+ */
+function checkSameAs(world: World, issues: Issue[]): void {
+  const by = new Map<string, { e: Entity; where: string }[]>();
+  for (const e of world.entities) {
+    const add = (ids: Record<string, string | number> | undefined, where: string) => {
+      for (const [scheme, v] of Object.entries(ids ?? {})) {
+        const key = `${scheme}:${v}`;
+        let list = by.get(key);
+        if (!list) by.set(key, (list = []));
+        if (!list.some((x) => x.e === e)) list.push({ e, where });
+      }
+    };
+    add(e.same_as, 'same_as');
+    for (const p of e.phases) add(p.same_as, `phases.${p.id}.same_as`);
+  }
+  for (const [id, list] of by) {
+    if (list.length < 2) continue;
+    const written = list.filter((x) => !x.e.imported);
+    if (written.length > 1) {
+      for (const x of written.slice(1)) issues.push({ level: 'error', check: 'ids', file: x.e.file, where: x.where, message: `${id} is also given by ${written[0].e.id} (${written[0].e.file}): an id names one thing, and one thing is one record. Join the two, or say which each is` });
+    } else if (!written.length) {
+      issues.push({ level: 'info', check: 'ids', file: list[0].e.file, message: `${list.map((x) => x.e.id).join(' and ')}, made by an import, give one id, ${id}: the dataset's matter` });
+    }
+  }
+}
+
 /** Every body plan can be drawn; every taxon that says anything of its body reaches a plan and can be drawn too. */
 function checkForms(world: World, issues: Issue[]): void {
   const allowed = world.vocab.properties.body_plan?.values ?? {};
@@ -1303,12 +1381,15 @@ function checkTraditions(world: World, issues: Issue[]): void {
   }
 }
 
-export async function validateWorld(world: World, opts: { frames?: boolean; tables?: Map<string, Table> } = {}): Promise<Report> {
+export async function validateWorld(world: World, opts: { frames?: boolean; tables?: Map<string, Table>; things?: Things } = {}): Promise<Report> {
   const issues: Issue[] = world.loadIssues.map((e) => ({ level: 'error', check: 'load', file: e.file, where: e.where, message: e.message }));
   checkSchemas(world, issues);
-  const wanted = checkRecords(world, issues, opts.tables ?? (await overlayTables(world)));
+  const wanted = checkRecords(world, issues, opts.tables ?? (await overlayTables(world)), opts.things ?? thingsOf(await readLists(world)));
   checkRanks(world, issues);
   checkLineage(world, issues);
+  // The layout is this repository's: a world made for a test keeps its records where it likes, unless it has its own.
+  if (world.root === WORLD || existsSync(join(world.root, 'schema/layout.yaml'))) checkLayout(world, issues);
+  checkSameAs(world, issues);
   checkProminence(world, issues);
   checkForms(world, issues);
   checkTraditions(world, issues);

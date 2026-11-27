@@ -44,6 +44,8 @@ moves_with: src:paleomap-plate-model
 rows:
   kind: rock-unit
   key: "unit:{unit}"
+  # Macrostrat's own number for a unit, the same in every snapshot: each unit is a thing, macrostrat:unit:1234.
+  scheme: macrostrat
   claims:
     name: { column: label, as: text }
     start: { column: older_ma, as: ma, method: stratigraphic, basis: reconstruction }

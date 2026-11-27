@@ -6,6 +6,7 @@ import { formatTime, PRESENT_YEAR } from '../../../core/time.ts';
 import type { Scenario } from '../../../core/scenario.ts';
 import { aliveAt, ancestors, indexTree, layoutTree, subtree, timeOfNode, type TreeFile, type TreeIndex, type TreeRow } from '../../../core/tree.ts';
 import { positionOf, timeAt as timeAtPosition } from '../../../core/timescale.ts';
+import type { ThingChild } from '../../../core/things.ts';
 
 const GUTTER = 14;
 const AXIS = 22;
@@ -44,6 +45,10 @@ export class TreePanel {
   private slid = false;
   onSelect: (id: string) => void = () => {};
   onClose: () => void = () => {};
+  /** the things of a list that hang from a thing, fetched when a node that is one is opened (core/things.ts) */
+  loadChildren?: (thing: string) => Promise<ThingChild[]>;
+  /** the nodes whose things' children have been asked for */
+  private fetched = new Set<number>();
 
   constructor() {
     this.el = document.createElement('section');
@@ -129,7 +134,36 @@ export class TreePanel {
     this.file = file;
     this.index = indexTree(file.nodes);
     this.byId = new Map(file.nodes.map((n, i) => [n.id, i]));
+    this.fetched.clear();
     this.layout();
+  }
+
+  /** Has a node children of its list not fetched yet? */
+  private more = (i: number): boolean => {
+    const n = this.file?.nodes[i];
+    return !!n?.thing && !!n.listed && !this.fetched.has(i);
+  };
+
+  /**
+   * Fetch the things of a list that hang from a node, and hang them in the tree below it, folded: a database's taxa
+   * stay folded until asked for, as the imported ones do.
+   */
+  private async unfold(i: number): Promise<void> {
+    const file = this.file;
+    const n = file?.nodes[i];
+    if (!file || !n?.thing || !n.listed || this.fetched.has(i) || !this.loadChildren) return;
+    this.fetched.add(i);
+    const kids = await this.loadChildren(n.thing).catch(() => []);
+    if (this.file !== file) return;
+    const at = (t: number | null) => ({ best: t, lo: t ?? -Infinity, hi: t ?? Infinity, derived: false });
+    for (const [id, label, rank, start, end, count] of kids) {
+      if (this.byId.has(id)) continue;
+      this.byId.set(id, file.nodes.length);
+      file.nodes.push({ id, label, ...(rank ? { rank } : {}), parent: i, time: { start: at(start), end: at(end), instant: false }, imported: true, thing: id, ...(count ? { listed: count } : {}) });
+    }
+    this.index = indexTree(file.nodes);
+    this.layout();
+    this.redraw(true);
   }
 
   /** The rows as they stand, for tests: which taxa have rows, and where each lineage's bar runs. */
@@ -145,7 +179,7 @@ export class TreePanel {
 
   private layout(): void {
     if (!this.file || !this.index) return;
-    this.rows = layoutTree(this.file.nodes, this.index, this.open);
+    this.rows = layoutTree(this.file.nodes, this.index, this.open, this.more);
     this.clampScroll();
   }
 
@@ -275,7 +309,7 @@ export class TreePanel {
       g.fillStyle = lit ? '#ffc45c' : live ? '#bfe3cf' : '#66727f';
       g.fillRect(x0, y - Math.min(1, this.rowH * 0.2), Math.max(1.5, x1 - x0), Math.max(1, Math.min(2, this.rowH * 0.3)));
       if (labels) {
-        const more = row.folded ? ` +${this.index!.size[row.node]}` : '';
+        const more = row.folded ? ` +${this.more(row.node) ? n.listed! : this.index!.size[row.node]}` : '';
         g.fillStyle = lit ? '#ffd98f' : live ? '#dfe8ef' : '#8a95a1';
         const text = n.label + more;
         const tw = g.measureText(text).width;
@@ -343,14 +377,20 @@ export class TreePanel {
     if (r < 0 || !this.file) return;
     const row = this.rows[r];
     // The gutter folds and unfolds; the rest chooses the group.
-    if (x < GUTTER && this.index!.children[row.node].length) {
+    if (x < GUTTER && (this.index!.children[row.node].length || this.more(row.node))) {
       if (this.open.has(row.node)) this.open.delete(row.node);
-      else this.open.add(row.node);
+      else {
+        this.open.add(row.node);
+        void this.unfold(row.node);
+      }
       this.layout();
       this.redraw(true);
       return;
     }
-    if (row.folded) this.open.add(row.node);
+    if (row.folded) {
+      this.open.add(row.node);
+      void this.unfold(row.node);
+    }
     this.layout();
     this.onSelect(this.file.nodes[row.node].id);
     this.redraw(true);

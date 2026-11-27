@@ -36,6 +36,8 @@ export interface ColumnMap {
   none?: (string | number)[];
   method?: string;
   basis?: Basis;
+  /** for a text: the language it is in, by its code (en by default; la for a taxon's name) */
+  lang?: string;
 }
 
 export interface RowsSpec {
@@ -45,6 +47,17 @@ export interface RowsSpec {
   key: string;
   /** which property each column gives */
   claims: Record<string, ColumnMap>;
+  /**
+   * A list of things (core/things.ts): each row is the thing <scheme>:<key>, known by the id its dataset gives it, the same
+   * in every snapshot. Only a key made from the dataset's own ids can have one: never {#}.
+   */
+  scheme?: string;
+  /** for a list that is a tree: the key of the row each hangs from, the first of the templates that gives one, and the relation */
+  parent?: { key: string | string[]; rel: string };
+  /** the ids of other schemes that its columns give, by scheme: the column */
+  same_as?: Record<string, string>;
+  /** the properties for which this list's value is preferred over another list's, of a thing that is in both */
+  preferred?: string[];
 }
 
 export interface Table {
@@ -95,7 +108,7 @@ export function toValue(map: ColumnMap, columns: Record<string, unknown>): unkno
     case 'number':
       return Number(raw);
     case 'text':
-      return { en: String(raw) };
+      return { [map.lang ?? 'en']: String(raw) };
     // A year as datasets count them, with no year 0 (a stray 0 is read as 1 BCE), on the world's axis.
     case 'year':
       return Number(raw) < 0 ? Number(raw) + 1 : Number(raw);
@@ -172,6 +185,10 @@ export async function rawRows(world: World, field: Field): Promise<Record<string
     const snap = world.landFossils.get(id);
     return snap ? landRows(snap) : undefined;
   }
+  if (field.data!.as === 'taxa') {
+    const snap = world.landFossils.get(id) ?? (await snapshotOf<LandSnapshot>(id, d, field.data!.file));
+    return snap ? taxaRows(snap) : undefined;
+  }
   if (field.data!.as === 'rock-record') {
     const path = resolveDatasetFile(id, d, field.data!.file ?? (d.fetch.files ? Object.keys(d.fetch.files)[0] : undefined));
     return existsSync(path) ? rockRows(JSON.parse(await readFile(path, 'utf8')) as RocksSnapshot) : undefined;
@@ -189,6 +206,36 @@ export async function rawRows(world: World, field: Field): Promise<Record<string
   // A feature's geometry rides along as a column of its own, for what draws it; no property reads it.
   if (doc.features) return doc.features.map((f) => ({ ...f.properties, [GEOMETRY]: f.geometry ?? null }));
   return doc.rows;
+}
+
+/** A dataset's snapshot, read whole from its file, where nothing loaded it with the world. */
+async function snapshotOf<T>(id: string, d: World['manifest']['datasets'][string], member?: string): Promise<T | undefined> {
+  const path = resolveDatasetFile(id, d, member ?? (d.fetch.files ? Object.keys(d.fetch.files)[0] : undefined));
+  return existsSync(path) ? (JSON.parse(await readFile(path, 'utf8')) as T) : undefined;
+}
+
+/**
+ * A fossil snapshot's taxa as rows, one each, with the words its numbers stand for: the database's classification, with
+ * every taxon an occurrence names and all their parents. A taxon still living has no last appearance: the youngest
+ * occurrence of a living one is not its end.
+ */
+export function taxaRows(snap: LandSnapshot): Record<string, unknown>[] {
+  const w = (i: number) => snap.words[i] ?? '';
+  return snap.taxa.map(([no, name, rank, parent, extant, firstMax, firstMin, lastMax, lastMin, environment, diet, habit, motility]) => ({
+    no,
+    name,
+    rank: w(rank),
+    parent,
+    extant: extant === 1 ? 'yes' : extant === 0 ? 'no' : '',
+    first_max: firstMax,
+    first_min: firstMin,
+    last_max: extant === 1 ? null : lastMax,
+    last_min: extant === 1 ? null : lastMin,
+    environment: w(environment),
+    diet: w(diet),
+    habit: w(habit),
+    motility: w(motility),
+  }));
 }
 
 /** The land's fossils as one row per occurrence: its collection's place and ages joined in, and its taxon's number and name. */

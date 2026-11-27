@@ -100,7 +100,7 @@ then the written record's to date and describe.
 
 ### The monuments
 
-Ninety-six monuments are records under `world/entities/rome/`, 629 claims, researched in three
+Ninety-six monuments are records under `world/entities/rome/` (since moved to `world/entities/civilization/structures/rome/`), 629 claims, researched in three
 groups: the Forum and the imperial fora; the Palatine, the Colosseum valley and the south; and
 the Campus Martius and the river. Each has a start and usually an end and a footprint from the
 map, and 70 have a `form` with what the sources give of their orders, columns and facing. Their 387 quotes were checked by script against the downloaded texts: Platner and

@@ -121,7 +121,8 @@ class Page {
     // One hue, evenly stepped in lightness: a finer grid is brighter.
     this.grainColors = ['#184735', '#207053', '#359b75', '#58c69b', '#96edc7'];
     this.noGrain = this.colors.unknown;
-    this.dated = search.entities.map((entry) => {
+    // A record an import made that is a written one's thing is counted once, as the written one.
+    this.dated = search.entities.filter((entry) => !entry.same).map((entry) => {
       const t = entry.time;
       const start = t.start.best ?? t.start.lo ?? t.start.hi ?? PRESENT_YEAR;
       // An end nobody knows is not the present: such a record counts only where it starts.

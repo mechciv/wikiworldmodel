@@ -26,10 +26,17 @@ data:
 basis: evidence
 # A single value at each place and time: nobody gave its uncertainty (docs/STRUCTURE.md section 3.2).
 spread: unknown
-# Its rows are claims (docs/STRUCTURE.md section 3.1), keyed by the catalogue's Glottocode.
+# Its rows are claims (docs/STRUCTURE.md section 3.1), keyed by the catalogue's Glottocode. A Glottocode is the same in every
+# release, so each row is a thing, glottolog:stan1293 (docs/plans/ENTITIES.md, step 2): a family, a language or a
+# dialect, which hangs from the language it is a dialect of, or else from the family at the top of its tree. The
+# catalogue's table gives no family between the two.
 rows:
   kind: language
   key: "{Glottocode}"
+  scheme: glottolog
+  parent: { key: ["{Language_ID}", "{Family_ID}"], rel: member-of }
+  same_as: { iso639-3: ISO639P3code }
   claims:
     name: { column: Name, as: text }
+    language_level: { column: Level }
     location: { column: [Latitude, Longitude], as: point, method: compilation }

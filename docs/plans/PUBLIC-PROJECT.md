@@ -124,7 +124,7 @@ areas:
 
 A bot maps each changed record to its areas by its location, frame, `part-of` chain and
 dates, and requests review from those stewards. Until that bot exists, `CODEOWNERS`
-assigns by path (`world/entities/rome/` → the Rome stewards).
+assigns by path (`world/entities/civilization/structures/rome/` → the Rome stewards).
 
 ### Decisions
 

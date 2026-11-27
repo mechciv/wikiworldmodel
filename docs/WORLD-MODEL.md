@@ -629,7 +629,7 @@ changes in belief can be diffed.
 ## 6. Example record
 
 ```yaml
-# world/entities/places/italy/rome/buildings/colosseum.yaml
+# world/entities/civilization/structures/rome/colosseum.yaml
 id: rome/colosseum
 kind: building/amphitheatre
 same_as: { wikidata: Q10285 }
@@ -900,13 +900,13 @@ on the default picture and again on every alternative combined with it
 
 ```
 world/
-  schema/              JSON Schema for every record type; vocabularies (kinds, properties, relations)
+  schema/              JSON Schema for every record type; vocabularies (kinds, properties, relations); layout.yaml
   manifest.yaml        external datasets: url, version or snapshot date, sha256, license
   sources/             citations (one file per work)
   frames/              rotation models (or pointers to them), planet and site frames
   alternatives/        named hypotheses, perspectives and scenarios, and their groups
-  entities/            sharded by domain/region/era, one file per entity
-    earth/  life/  people/  places/italy/rome/…  space/  periods/
+  entities/            one file per entity, in the directory for its kind (schema/layout.yaml)
+    space/  earth/  life/  civilization/  periods/   each by kind: life/taxa/, civilization/structures/rome/, …
   generators/          procedural rules (code + tests), shared by build and viewer
   fields/              field definitions; arrays live in the blob store
   models/              models run here: inputs, outputs, where their parameters come from, checks

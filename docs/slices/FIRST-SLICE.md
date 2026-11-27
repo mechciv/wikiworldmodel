@@ -113,7 +113,7 @@ viewer/       the WebGL2 viewer; browser tests and golden renders
 
 ### How records are written
 
-A claim in the slice looks like this, from `entities/earth/structures/chicxulub-crater.yaml`:
+A claim in the slice looks like this, from `entities/earth/landforms/chicxulub-crater.yaml`:
 
 ```yaml
 diameter-hildebrand-1991:

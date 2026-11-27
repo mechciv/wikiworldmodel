@@ -96,7 +96,7 @@ generator, `gen:earth/biome-texture`, whose hash the browser checks.
 
 ### The transitions and fossil forests
 
-In `world/entities/life/transitions/` and `world/entities/life/fossil-forests/`, with 63 sources. The
+In `world/entities/life/transitions/` and `world/entities/life/fossil-forests/` (since moved to `world/entities/life/events/` and `world/entities/life/occurrences/`), with 63 sources. The
 `cover` property says which part of the picture a transition bounds; `evidence` says what kind of thing
 an occurrence is. A fossil forest in place has `evidence: in-situ-forest`, and that is what the check
 against the climate field looks for. Eleven plates that the forests and the formation needed were

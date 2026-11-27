@@ -40,6 +40,15 @@ describe('the tree', () => {
     expect(rows.some((r) => r.folded)).toBe(false);
   });
 
+  it("folds a record whose list's children are not fetched yet, with none of them here, until it is opened", () => {
+    const ix = indexTree(NODES);
+    // Plants has things of a list hanging from it (core/things.ts), fetched when it is opened.
+    const more = (i: number) => i === 1;
+    expect(layoutTree(NODES, ix, new Set(), more).find((r) => NODES[r.node].id === 'plants')?.folded).toBe(true);
+    expect(layoutTree(NODES, ix, new Set([1]), more).find((r) => NODES[r.node].id === 'plants')?.folded).toBe(false);
+    expect(layoutTree(NODES, ix, new Set()).find((r) => NODES[r.node].id === 'plants')?.folded).toBe(false);
+  });
+
   it('knows a group and the line above it', () => {
     const ix = indexTree(NODES);
     expect(subtree(ix, 3).sort()).toEqual([3, 4, 5]);

@@ -105,6 +105,8 @@ export interface InspectCallbacks {
   altTitle(id: string): string;
   /** who held a perspective, and when, if the records say */
   altHeld?(id: string): { id: string; label: string; held?: string }[] | undefined;
+  /** the thing of a list a scene's taxon with no record is, if the build has its list (core/things.ts) */
+  thingOf?(taxon: string): string | undefined;
 }
 
 /** Who held a perspective, in words: "held by Tlatelolco (1550 CE – 1555 CE) and …". */
@@ -590,7 +592,10 @@ export class InspectPanel {
       })
       .join('');
     const f = r.frame;
-    const where = !f
+    const at = r.thing ? r.claims.find((c) => c.prop === 'location') : undefined;
+    const where = at
+      ? `${esc(at.valueText)}, where its list puts it today. It says nothing of where it was before.`
+      : !f
       ? r.claims.some((c) => c.prop === 'territory')
         ? 'Its territory is drawn on the globe, from the rows of a borders dataset, for the years each row gives.'
         : 'No location: shown through what it is related to.'
@@ -614,6 +619,8 @@ export class InspectPanel {
       <section><h3>Claims</h3>${claims}</section>
       ${relations ? `<section><h3>Relations</h3><ul class="relations">${relations}</ul></section>` : ''}
       ${inverse ? `<section><h3>Related records</h3><ul class="relations inverse">${inverse}</ul></section>` : ''}
+      ${r.thing ? this.thingSection(r) : ''}
+      ${r.rows?.length ? this.rowsSection(r) : ''}
       ${r.wanted.length ? `<section><h3>Wanted</h3><p class="method">Referred to here but not written yet: ${r.wanted.map((w) => `<code>${esc(w)}</code>`).join(', ')}.</p></section>` : ''}
       <section><h3>Sources</h3><ol class="sources">${sources}</ol></section>`,
       r.kindLabel,
@@ -645,6 +652,19 @@ export class InspectPanel {
     for (const input of this.el.querySelectorAll<HTMLInputElement>('input[type=radio]')) {
       input.onchange = () => this.cb.onPick(input.dataset.members!.split(' '), input.value === input.dataset.default ? null : input.value);
     }
+  }
+
+  /** A thing of a list: a row of a dataset, with no record of its own yet, and how one is written for it. */
+  private thingSection(r: EntityRecord): string {
+    const t = r.thing!;
+    const ids = Object.entries(r.same_as ?? {}).map(([k, v]) => `<code>${esc(k)}:${esc(String(v))}</code>`).join(', ');
+    return `<section class="thing"><h3>A thing of a list</h3><p class="method">A row of ${esc(t.list)}, not a record written here: what the dataset says of it, as it says it. It is known as ${ids}${t.children ? `, and ${t.children.toLocaleString('en-US')} of the list's things hang from it` : ''}.</p><p class="method">To say more of it, with sources, write a record that names <code>${esc(r.id)}</code> in its <code>same_as</code>: then this is that record's page.</p></section>`;
+  }
+
+  /** What the lists say of a record's thing: each row that is it, and its claims beside the record's own. */
+  private rowsSection(r: EntityRecord): string {
+    const rows = r.rows!.map((x) => `<li><p><strong>${esc(x.list)}</strong>, <code>${esc(x.id)}</code></p><ul class="row-claims">${x.claims.map((c) => `<li>${esc(c.prop.replace(/_/g, ' '))}: ${esc(c.valueText)}</li>`).join('')}</ul></li>`).join('');
+    return `<section class="rows"><h3>In the lists</h3><p class="method">The rows of datasets that are this thing too, by the ids it is named by. What they say stands beside the claims above, and is not read by the chronology.</p><ul class="listed">${rows}</ul></section>`;
   }
 
   /** In a living scene: what puts this taxon there, from the records; and what the generator made up. */
@@ -681,7 +701,8 @@ export class InspectPanel {
       const list = taxa.filter((t) => t.tier === tier);
       if (!list.length) return '';
       const items = list.map((t) => {
-        const name = t.id.startsWith('txn:') ? esc(t.label) : this.link(t.id, t.label);
+        const thing = t.id.startsWith('txn:') ? this.cb.thingOf?.(t.id) : t.id;
+        const name = thing ? this.link(thing, t.label) : esc(t.label);
         const size = t.length !== undefined ? `${fmt(t.length)} m` : t.height !== undefined ? `${fmt(t.height)} m tall` : '';
         const own = t.own ? '' : `, drawn as ${esc(t.form_label)}`;
         return `<li>${name}${size ? ` <span class="method">${esc(size)}${own}</span>` : own ? ` <span class="method">${own.slice(2)}</span>` : ''}</li>`;

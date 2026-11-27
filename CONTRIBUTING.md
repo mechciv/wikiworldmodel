@@ -126,8 +126,10 @@ Figshare, PANGAEA, CEDA, publishers' sites, NOAA, OpenTopography, INGV, and the 
    has one, so two people or agents don't do the same thing.
 2. **Research it.** Find the best sources you can actually read (see
    [Research](docs/RECORDS.md#research)). Note each fact with its source, locator and verbatim quote as you go.
-3. **Write the records** in [world/](world/): one entity per file, claims and relations in their
-   subject's file, sources one per work.
+3. **Write the records** in [world/](world/): one entity per file, in the directory for its kind
+   ([world/schema/layout.yaml](world/schema/layout.yaml)), claims and relations in their subject's
+   file, sources one per work. A thing a dataset already lists is named by its id there, in
+   `same_as`, so that one thing is never written twice ([Where a record goes](docs/RECORDS.md#where-a-record-goes)).
 4. **Check quotes against the texts** you retrieved, by script, not by eye: save the text you read
    and run `npm run world -- quote-check src:… <text file>`. Every `quote` must be found in it
    (after normalizing whitespace and typography); the command lists any that are not, and records
@@ -157,6 +159,9 @@ Figshare, PANGAEA, CEDA, publishers' sites, NOAA, OpenTopography, INGV, and the 
   so a coarse form on a family is worth a lot, and a form for each species is the long-run aim.
 - **Building traditions**: `npm run world -- dwellings-wanted` lists the regions and times where the most people are drawn
   with generic houses, and [docs/DWELLINGS.md](docs/DWELLINGS.md) is the brief for a tradition's record.
+- **Matches wanted**: `npm run world -- matches-wanted` lists records that may be things of the lists
+  the world reads, by name, kind and place: check each, and where it is right, name the thing's id in
+  the record's `same_as` ([A list of things](docs/RECORDS.md#a-row-of-a-dataset)).
 - **Wanted records**: references to records nobody has written, listed by
   `npm run validate -- --verbose` and in each build's `coverage.json`.
 - **Unsourced claims**: listed in `coverage.json`, and counted by `npm run validate`. Find a source, or

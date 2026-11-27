@@ -151,6 +151,22 @@ export interface EntityRecord {
   sources: Record<string, SourceRecord>;
   /** records this one refers to that are not written yet */
   wanted: string[];
+  /**
+   * For the page of a thing of a list rather than a record (core/things.ts): the list it is of, the dataset and the row,
+   * and how many things of the list hang from it.
+   */
+  thing?: { list: string; dataset: string; key: string; children: number };
+  /** For a record: the rows of lists that are this thing too, each with what it says (docs/plans/ENTITIES.md, step 4). */
+  rows?: ListedRow[];
+}
+
+/** A row of a list that is a record's thing too: the thing's id, the list, and the row's claims. */
+export interface ListedRow {
+  id: string;
+  list: string;
+  dataset: string;
+  key: string;
+  claims: ClaimRecord[];
 }
 
 export interface SearchEntry {
@@ -174,6 +190,11 @@ export interface SearchEntry {
   places?: [number, number, number, number, number][];
   /** for rows of a dataset gathered under one name, rather than a record: the dataset */
   dataset?: string;
+  /**
+   * A record an import made that is the same thing as one written by hand, by an id both give (docs/plans/ENTITIES.md,
+   * step 4): the written one, which search shows and a click opens in its place.
+   */
+  same?: string;
 }
 
 export interface SearchFile {

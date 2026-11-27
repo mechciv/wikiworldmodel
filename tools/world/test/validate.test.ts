@@ -1,9 +1,10 @@
 // Each validator catches what it is for (section 9.2), on small worlds written for the test.
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
 import { validateWorld, type Issue } from '../src/validate/index.ts';
+import { WORLD } from '../src/paths.ts';
 import { loadWorld } from '../src/world.ts';
 
 const dirs: string[] = [];
@@ -83,10 +84,11 @@ describe('validators', () => {
       'entities/a.yaml': entity('test/planet', 'body/planet', `phases:\n  - id: hot\n  - id: wet\nclaims:\n  s1: { prop: surface, subject: "@hot", value: magma, ${cite} }\n  s2: { prop: surface, subject: "@wet", value: lava, ${cite} }\n  e: { prop: end, subject: "@hot", value: { ref: test/flow, lag: 1 Myr }, ${cite} }\n`),
       'entities/b.yaml': entity('test/flow', 'large-igneous-province', `claims:\n  start: { prop: start, value: 70 Ma, ${cite} }\n  s: { prop: surface, value: magma, ${cite} }\n`),
     });
+    // In the order of the records' ids, test/flow's before test/planet's.
     expect(errors(issues).map((i) => [i.where, i.message])).toEqual([
+      ['claims.s', '"surface" does not apply to a large-igneous-province (it applies to body/planet)'],
       ['claims.s2.value', 'not one of the values of surface: magma, crust-and-magma, ocean, bare-rock'],
       ['claims.e.value', 'a lag counts from an edge of the record: add edge: start or end'],
-      ['claims.s', '"surface" does not apply to a large-igneous-province (it applies to body/planet)'],
     ]);
   });
 
@@ -175,6 +177,39 @@ describe('validators', () => {
   it('never check an id against its file\'s path', async () => {
     const issues = await check({ 'entities/somewhere/else.yaml': entity('test/fossil', 'occurrence', `claims:\n  date: { prop: date, value: 70 Ma, ${cite} }\n`) });
     expect(issues).toEqual([]);
+  });
+});
+
+describe('where a record goes, and one id for one thing (docs/plans/ENTITIES.md, step 1)', () => {
+  const layout = readFileSync(join(WORLD, 'schema/layout.yaml'), 'utf8');
+  const lip = entity('test/flow', 'large-igneous-province', `claims:\n  start: { prop: start, value: 70 Ma, ${cite} }\n`);
+  const find = entity('test/fossil', 'occurrence', `claims:\n  date: { prop: date, value: 69 Ma, ${cite} }\n`);
+
+  it('say where a record out of its directory goes, and only that', async () => {
+    const issues = await check({ 'schema/layout.yaml': layout, 'entities/earth/igneous-provinces/flow.yaml': lip, 'entities/earth/plates/fossil.yaml': find });
+    expect(issues.filter((i) => i.check === 'layout')).toEqual([
+      expect.objectContaining({ level: 'warning', file: 'entities/earth/plates/fossil.yaml', message: expect.stringContaining('world/entities/life/occurrences/ or world/entities/civilization/occurrences/') }),
+    ]);
+    expect(errors(issues)).toEqual([]);
+  });
+
+  it('leave a world made for a test to keep its records where it likes', async () => {
+    const issues = await check({ 'entities/a.yaml': lip, 'entities/b.yaml': find });
+    expect(issues.filter((i) => i.check === 'layout')).toEqual([]);
+  });
+
+  it('reject two records, or a record and a phase of another, that give one id', async () => {
+    const issues = await check({
+      'entities/a.yaml': entity('test/flow', 'large-igneous-province', `same_as: { wikidata: Q1 }\nclaims:\n  start: { prop: start, value: 70 Ma, ${cite} }\n`),
+      'entities/b.yaml': entity('test/again', 'large-igneous-province', `same_as: { wikidata: Q1 }\nclaims:\n  start: { prop: start, value: 70 Ma, ${cite} }\n`),
+      'entities/c.yaml': entity('test/state', 'polity', `phases:\n  - id: first\n    same_as: { wikidata: Q2 }\nclaims:\n  start: { prop: start, value: 100 CE, ${cite} }\n`),
+      'entities/d.yaml': entity('test/other', 'polity', `same_as: { wikidata: Q2 }\nclaims:\n  start: { prop: start, value: 100 CE, ${cite} }\n`),
+    });
+    // The second of each pair, in the order of their ids, names the first.
+    expect(errors(issues).filter((i) => i.check === 'ids').map((i) => i.message)).toEqual([
+      expect.stringContaining('wikidata:Q1 is also given by test/again'),
+      expect.stringContaining('wikidata:Q2 is also given by test/other'),
+    ]);
   });
 });
 

@@ -1,0 +1,29 @@
+id: field:life/taxa-land
+type: field
+title: The taxa of the land's fossils
+description: >-
+  The Paleobiology Database's taxa: every taxon an occurrence of the land's snapshot names, with all its parents up to
+  Eukaryota, as the database classifies them, each with the interval of its oldest and of its youngest record in the
+  whole database. They are rows of the database, not records written here: a taxon's first record says no more than
+  that it had arisen by then, and a living one's youngest record is not its end, so it has none. A record that names a
+  taxon's number in same_as is that taxon.
+grid: { kind: rows }
+time: { lo: 541 Ma, hi: 0 Ma }
+data:
+  from: src:pbdb-land-2026-11-05
+  as: taxa
+basis: evidence
+# A single value at each place and time: the database gives no uncertainty beyond its intervals.
+spread: unknown
+# A list of things (docs/plans/ENTITIES.md, step 2): each taxon is pbdb:txn:<number>, the database's own id, hung from
+# its parent in the database's classification.
+rows:
+  kind: taxon
+  key: "txn:{no}"
+  scheme: pbdb
+  parent: { key: "txn:{parent}", rel: descends-from }
+  claims:
+    name: { column: name, as: text, lang: la }
+    taxon_rank: { column: rank, none: [""] }
+    start: { column: [first_max, first_min], as: ma-range, method: stratigraphic }
+    end: { column: [last_max, last_min], as: ma-range, method: stratigraphic }

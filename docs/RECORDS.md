@@ -63,10 +63,34 @@ Read three or four records near yours before writing; the patterns are consisten
 are in [world/schema/](../world/schema/), and the terms you may use in
 [world/schema/vocab/](../world/schema/vocab/).
 
+### Where a record goes
+
+In the directory for its kind, which [world/schema/layout.yaml](../world/schema/layout.yaml) gives:
+a polity in `world/entities/civilization/polities/`, a taxon in `world/entities/life/taxa/`, a
+mountain range in `world/entities/earth/landforms/`. `npm run validate` warns at a record outside
+it, and says where it goes.
+
+- **A directory is for a kind of thing, never for a project.** The records of a slice or a record
+  set go where their kinds go, and the set is a relation (its taxa `member-of` an ecosystem, its
+  buildings `part-of` a city) or a list in its slice's document.
+- **Shards below a kind's directory are free,** and named for what they hold: a clade for taxa
+  (`life/taxa/dinosaurs/`), the settlement for what was built in it
+  (`civilization/structures/rome/`), the finer kind for traditions
+  (`civilization/traditions/building/`).
+- **A few kinds belong to more than one domain,** and go in the one of what they are of: a find of
+  a living thing is `life/occurrences/`, a find of what people made `civilization/occurrences/`.
+- **The id is the path you first wrote it at,** and never changes after: a file that moves keeps its
+  id ([rule 7](../CONTRIBUTING.md#the-rules)). An id carries no meaning, so an old one that no longer
+  matches its path is fine. The world is read in the order of its ids, so a move changes nothing the
+  build makes.
+- **A thing a dataset already lists is named by its id there,** in `same_as`: a taxon by its number
+  in the Paleobiology Database, a place by its Pleiades or Wikidata id. Then the record and the
+  dataset's row are one thing, and the validator refuses a second record that names the same id.
+
 ### An event
 
 ```yaml
-# world/entities/people/events/battle-of-actium.yaml
+# world/entities/civilization/events/battle-of-actium.yaml
 id: people/events/battle-of-actium
 kind: event/battle
 summary: >-
@@ -140,7 +164,7 @@ A figure of a settlement's people, its ground or its houses counts some ground, 
   people.
 
 ```yaml
-# world/entities/people/first-cities/angkor.yaml
+# world/entities/civilization/settlements/angkor.yaml
   population-region-770:
     prop: population
     ground: region
@@ -205,7 +229,7 @@ new. **Where it is disputed whether two are one, write two records and join them
 of a record cannot. Then say what happened between the two, in the *later* record:
 
 ```yaml
-# world/entities/people/polities/great-britain.yaml
+# world/entities/civilization/polities/great-britain.yaml
 relations:
   from-england:
     rel: arose-from
@@ -253,7 +277,7 @@ relations:
   `subject-to` it, for the span it was one. `merged-into` is for what ended by being taken in.
 
 ```yaml
-# world/entities/people/polities/tlatelolco.yaml
+# world/entities/civilization/polities/tlatelolco.yaml
 relations:
   subject-to-tenochtitlan:
     rel: subject-to
@@ -318,7 +342,7 @@ written in the war's record, one `participant` relation each, with the span they
 their side in the note:
 
 ```yaml
-# world/entities/people/wars/second-world-war.yaml
+# world/entities/civilization/events/second-world-war.yaml
 relations:
   united-kingdom:
     rel: participant
@@ -350,7 +374,7 @@ events is at stake, each side's tellings belong to its perspective, an alternati
 default picture keeps what both say, the dates both give and who fought.
 
 ```yaml
-# world/entities/people/conquest/toxcatl-massacre.yaml
+# world/entities/civilization/events/toxcatl-massacre.yaml
   account-mexica:
     prop: account
     alt: alt:conquest-accounts/mexica
@@ -367,7 +391,7 @@ Who held a perspective is a relation of the holder, `holds`, with the span it he
 to where it said so:
 
 ```yaml
-# world/entities/people/persons/hernan-cortes.yaml
+# world/entities/civilization/persons/hernan-cortes.yaml
 relations:
   holds-the-conquerors-account:
     rel: holds
@@ -417,7 +441,7 @@ when it stood at about the height it has today, in two phases, and a model carri
 that far (`model:earth/relief-carried`, [SCENES.md](SCENES.md#the-grounds-shape)):
 
 ```yaml
-# world/entities/earth/orogens/himalaya.yaml
+# world/entities/earth/landforms/himalaya.yaml
 phases:
   - id: rising
     label: Rising
@@ -626,6 +650,21 @@ languages, Itiner-e's roads) is a source whose rows are claims. Its field's `row
 how a row is keyed and which column gives which property ([tools/world/src/tables.ts](../tools/world/src/tables.ts)).
 A row's address is `src:<dataset>#<key>`: the inspect panel shows it, and
 `npm run world -- claims <address>` lists what the row says.
+
+**A list of things.** Where a dataset gives its rows ids of its own, the same in every snapshot, its
+field's `rows:` names their `scheme`, and each row is a thing, `<scheme>:<key>`: `pbdb:txn:38613`,
+`glottolog:stan1293`, `ncei:eruption:5238`. A thing is found by search, has a page made from what its
+row says, and can be the target of a relation, as a record can
+([plans/ENTITIES.md](plans/ENTITIES.md)). A list that is a tree says which row each hangs from
+(`parent`), and the ids of other schemes its columns give (`same_as`). Two snapshots of one catalogue
+give one scheme, and a thing in both is one thing with a row in each.
+
+- **A record that names a thing's id in `same_as` is that thing.** Its page shows what the row says
+  beside its own claims, and search finds it as the record. So before writing a record of something a
+  list has, look it up there (`npm run world -- thing <scheme>:<key>`), and name it.
+- **Nothing is joined by a name.** `npm run world -- matches-wanted` lists the records that may be
+  things of the lists by their names (and places): each is a proposal to check, and becomes a join
+  when someone adds the id.
 
 A record can't be written into a dataset, so an **overlay**, one file per row in
 [world/overlays/](../world/overlays/), names the row and does one of three things:

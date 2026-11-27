@@ -89,7 +89,10 @@ import { bedrockAt, firstGround, firstRock, groundHeld, groundOfStrata, substrat
 import type { LandSnapshot, RocksSnapshot } from '../pbdb.ts';
 import type { ColumnsSnapshot } from '../macrostrat.ts';
 import { buildScene, witnesses } from './scene.ts';
-import { features as buildFeatures, holdersOf, periods as buildPeriods, records as buildRecords, search as buildSearch, sourceRecord, type Solved } from './records.ts';
+import { features as buildFeatures, holdersOf, labeller, periods as buildPeriods, records as buildRecords, search as buildSearch, sourceRecord, type Solved } from './records.ts';
+import { buildThings, thingLists } from './things.ts';
+import { worldThings } from '../things.ts';
+import { thingClaims, THINGS_INDEX } from '../../../../core/things.ts';
 import { planet as buildPlanet } from './planet.ts';
 import { series as buildSeries } from './series.ts';
 import { energyBalanceReport, RULES as ENERGY_BALANCE, seriesAt } from './energybalance.ts';
@@ -656,7 +659,10 @@ export async function runBuild(args: string[]): Promise<number> {
   //    chronology validation returns picture-level STN solutions for step 3 to reuse.
   const world = await loadWorld();
   const tables = await overlayTables(world);
-  const { issues, wanted, chronology } = await validateWorld(world, { tables });
+  // The things of lists, and which record each is (docs/plans/ENTITIES.md, steps 2 and 4): read once, for the
+  // references the validator checks and for search, pages and the tree.
+  const listed = await worldThings(world);
+  const { issues, wanted, chronology } = await validateWorld(world, { tables, things: listed.things });
   for (const i of issues) if (i.level !== 'info') log(formatIssue(i));
   if (issues.some((i) => i.level === 'error')) {
     log('build: the world does not validate');
@@ -959,7 +965,12 @@ export async function runBuild(args: string[]): Promise<number> {
   const allFeatures = buildFeatures(solved);
   const periodList = buildPeriods(solved);
   const periodHash = sha256(stableStringify(periodList));
+  // A record an import made that is the same thing as a written one is found as the written one.
   const found = buildSearch(solved, allFeatures);
+  for (const e of found.entities) {
+    const same = listed.identity.same.get(e.id);
+    if (same) e.same = same;
+  }
   const span = worldSpan(periodList, found, grids, seriesList);
 
   // Stage: features/*.json
@@ -1158,16 +1169,46 @@ export async function runBuild(args: string[]): Promise<number> {
       plateModel: dsKey(PLATE_MODEL),
     }),
   );
+  // What each list is, and which of its things each record is: a record's page shows what its rows say.
+  const listKeys = listed.things.lists.map((l) => ({ field: fieldKey(l.field), dataset: dsKey(l.dataset), source: srcKey(l.dataset) }));
+  const listsOfThings = thingLists(world, listed.things);
+  const rowsOfRecords = [...listed.identity.rowsOf.entries()].sort(([a], [b]) => (a < b ? -1 : 1));
   const recordsStage = await dag.runStage(
     'records',
-    { worldEntitiesDigest },
+    { worldEntitiesDigest, lists: listKeys, rowsOf: sha256(stableStringify(rowsOfRecords)) },
     async (sink) => {
       const recs = buildRecords(solved);
-      for (const r of recs) await sink.put(`records/${r.id}.json`, stableStringify(r));
+      for (const r of recs) {
+        const ids = listed.identity.rowsOf.get(r.id);
+        if (ids?.length) {
+          r.rows = ids.flatMap((id) => {
+            const t = listed.things.things.get(id)!;
+            return t.rows.map((row) => {
+              const list = listsOfThings[row.list];
+              return { id, list: `${list.name}: ${list.title.charAt(0).toLowerCase()}${list.title.slice(1)}`, dataset: list.dataset, key: t.key, claims: thingClaims(list, { k: t.key, v: row.values }, r.id, false) };
+            });
+          });
+        }
+        await sink.put(`records/${r.id}.json`, stableStringify(r));
+      }
       return { count: recs.length };
     },
-    { codeFiles: ['tools/world/src/build/records.ts', 'core/records.ts', 'core/ladder.ts'] },
+    { codeFiles: ['tools/world/src/build/records.ts', 'core/records.ts', 'core/ladder.ts', 'core/things.ts', 'tools/world/src/things.ts', 'tools/world/src/tables.ts'] },
   );
+
+  // Stage: things/: the things of lists, their pages, search and trees (docs/plans/ENTITIES.md, steps 2 to 4).
+  const thingsStage = await dag.runStage(
+    'things',
+    { worldEntitiesDigest, lists: listKeys, overlays: world.overlays.filter((o) => o.same_as).map((o) => [o.row, o.same_as]) },
+    async (sink) => {
+      const b = buildThings(world, listed.things, listed.identity, labeller(solved));
+      for (const [path, content] of [...b.files].sort(([a], [z]) => (a < z ? -1 : 1))) await sink.put(path, content);
+      return { count: listed.things.things.size, files: b.files.size, listedChildren: [...b.listedChildren.entries()].sort(([a], [z]) => (a < z ? -1 : 1)) };
+    },
+    { codeFiles: ['tools/world/src/build/things.ts', 'tools/world/src/things.ts', 'core/things.ts', 'tools/world/src/tables.ts'] },
+  );
+  log(`things  ${thingsStage.meta.count} things of ${listed.things.lists.length} lists, in ${thingsStage.meta.files} files; ${listed.identity.record.size} of them records`);
+  const listedChildren = new Map<string, { thing: string; count: number }>(thingsStage.meta.listedChildren);
 
   const periodSources = Object.fromEntries(
     [...new Set(world.entities.filter((e) => e.kind.startsWith('period/')).flatMap((e) => e.claims.flatMap((c) => c.sources.map((s) => s.ref))))]
@@ -1213,9 +1254,10 @@ export async function runBuild(args: string[]): Promise<number> {
         solved,
       ),
       vocab: world.vocab.kinds,
+      listed: thingsStage.meta.listedChildren,
     },
     async (sink) => {
-      await sink.put('tree.json', stableStringify(buildTree(solved)));
+      await sink.put('tree.json', stableStringify(buildTree(solved, listedChildren)));
       return {};
     },
     { codeFiles: ['tools/world/src/build/tree.ts'] },
@@ -2391,6 +2433,7 @@ export async function runBuild(args: string[]): Promise<number> {
       climate: deepClimateMeta?.ages.length ? 'climate.lwt' : undefined,
       ice: iceMeta ? 'ice.lwt' : undefined,
       tree: 'tree.json',
+      things: THINGS_INDEX,
       ...(hasPresent ? { present: 'present.json' } : {}),
       ...(hasHazards ? { hazards: 'hazards.json' } : {}),
       ...(hasPolities ? { polities: 'polities.json' } : {}),
