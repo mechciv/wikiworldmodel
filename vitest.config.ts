@@ -17,7 +17,7 @@ export default defineConfig({
         extends: true,
         test: {
           name: 'unit',
-          include: ['tools/world/test/**/*.test.ts', 'world/generators/**/*.test.ts', 'core/**/*.test.ts'],
+          include: ['tools/world/test/**/*.test.ts', 'tools/causes/**/*.test.ts', 'world/generators/**/*.test.ts', 'core/**/*.test.ts'],
           exclude: [...BUILD, ...REPRODUCIBLE],
         },
       },

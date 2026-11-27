@@ -1,0 +1,96 @@
+lane: water
+title: Water
+about: What the climate's water does on the ground of its time.
+nodes:
+  - id: snow
+    label: Snow and mountain ice
+    kind: at-once
+    what: "The snow lying in each month, and the ice that outlasts the summer on high ground."
+    now: rule
+    has: [model:earth/water-balance, model:earth/lapse-rate]
+    note: "The water balance lays each month's snow at a place's height. No glaciers follow from it."
+    best: "Glaciers where the year's snow outlasts its melt, at the climate's own heights."
+    gap: medium
+    seen: [surveys, rocks]
+  - id: runoff
+    label: Runoff
+    kind: at-once
+    what: "How much of the year's rain and snow the land gives its rivers."
+    now: rule
+    has: [model:earth/water-balance, field:earth/runoff]
+    note: "A monthly water balance on the one climate member. Its parameters were fitted to basins of the United States and are used everywhere."
+    best: "The same balance, calibrated to gauged flows the world over, run once for each climate member."
+    gap: small
+    seen: [surveys]
+  - id: rivers
+    label: Rivers
+    kind: at-once
+    what: "Where rivers ran and how much they carried."
+    now: rule
+    has: [model:earth/drainage, field:earth/rivers, field:earth/river-widths]
+    note: "Runoff routed at 0.1° over today's ground for the glacial cycles, and at 1° over the elevation maps before. Held to the rivers Landsat saw. No ice dams, and no loss along a river."
+    best: "The same, with the ice sheets' own ground, losses in dry land, and courses that shift on deltas. In deep time it can be no better than the height of the land."
+    gap: small
+    seen: [surveys, rocks]
+  - id: lakes
+    label: Lakes and wetlands
+    kind: at-once
+    what: "Where water stood in the hollows of the land, and how high."
+    now: rule
+    has: [model:earth/drainage, field:earth/lakes, field:earth/texcoco-1519]
+    note: "Hollows fill and spill by the climate, so the Caspian does not spill. Only lakes of 500 km² and more are kept."
+    best: "Smaller lakes and wetlands, held to old shorelines such as Mega-Chad's and Bonneville's."
+    gap: small
+    seen: [rocks, surveys]
+  - id: floodplains
+    label: Floodplains and deltas
+    kind: settling
+    what: "The land rivers build from what they carry."
+    now: none
+    note: "Left out: the sediment of rivers and deltas is not in the ground."
+    best: "Sediment from the wearing-down routed to the coast, so that deltas grow and harbours silt. Dated coasts as records."
+    gap: medium
+    seen: [rocks, texts]
+  - id: groundwater
+    label: Water under the ground
+    kind: settling
+    what: "Springs, shallow water and the stores that outlast a dry year."
+    now: none
+    note: "Not in the world."
+    best: "Where water is near the surface, from relief, rock and what soaks in: where wells and oases can be."
+    gap: medium
+    seen: [surveys]
+  - id: flood-season
+    label: A river's year
+    kind: at-once
+    what: "Which months a river runs high, low or dry."
+    now: rule
+    has: [model:earth/drainage]
+    note: "Routed month by month from what each basin's soil lets go."
+    best: "Held to gauged rivers' seasons, and to the Nile's recorded floods."
+    gap: small
+    seen: [surveys, texts]
+edges:
+  - { from: temp-months, to: snow, now: built, by: model:earth/water-balance, how: "Rain falls as snow by the month's temperature, and melts at a rate the temperature sets." }
+  - { from: rain-months, to: snow, now: built, by: model:earth/water-balance, how: "Snow is the cold months' rain." }
+  - { from: climate-height, to: snow, now: built, by: model:earth/lapse-rate, how: "Snow lies lower in winter than in summer, by the months at each height." }
+  - { from: rain-months, to: runoff, now: built, by: model:earth/water-balance, how: "What falls and is not taken up runs off." }
+  - { from: temp-months, to: runoff, now: built, by: model:earth/water-balance, how: "Warmth and daylight set how much the air takes back." }
+  - { from: snow, to: runoff, now: built, by: model:earth/water-balance, how: "Snow holds winter's water until the melt." }
+  - { from: soil, to: runoff, now: partial, by: model:earth/water-balance, how: "The soil holds water to its capacity. One capacity is used everywhere." }
+  - { from: biome, to: runoff, now: missing, how: "Plants take up water. The balance knows no cover." }
+  - { from: runoff, to: rivers, now: built, by: model:earth/drainage, how: "Each place's runoff is routed down every slope to the sea." }
+  - { from: relief, to: rivers, now: built, by: model:earth/drainage, how: "Water follows today's ground through the glacial cycles." }
+  - { from: elevation, to: rivers, now: built, by: model:earth/drainage, how: "Before the glacial cycles water follows the elevation maps, a degree to a cell." }
+  - { from: sea-level, to: rivers, now: built, by: model:earth/drainage, how: "Rivers end at the sea of their time, across the shelves a low sea bares." }
+  - { from: ice, to: rivers, now: missing, how: "Ice sheets dam rivers and turn them." }
+  - { from: runoff, to: lakes, now: built, by: model:earth/drainage, how: "A hollow fills with what flows into it." }
+  - { from: relief, to: lakes, now: built, by: model:earth/drainage, how: "A lake stands where the ground has a hollow, up to its lowest pass." }
+  - { from: temp-months, to: lakes, now: built, by: model:earth/water-balance, how: "A lake's surface loses what the air can take up, less the rain on it." }
+  - { from: rivers, to: floodplains, now: missing, how: "A river lays down what it carries where it slows." }
+  - { from: erosion, to: floodplains, now: missing, how: "Sediment stripped upstream is land built downstream." }
+  - { from: sea-level, to: floodplains, now: missing, how: "A rising sea drowns valleys, and deltas grow once it stands still." }
+  - { from: runoff, to: groundwater, now: missing, how: "What soaks in recharges the ground." }
+  - { from: bedrock, to: groundwater, now: missing, how: "Porous rock holds water and tight rock sheds it." }
+  - { from: runoff, to: flood-season, now: built, by: model:earth/drainage, how: "Each month's surplus is routed down the basin." }
+  - { from: snow, to: flood-season, now: built, by: model:earth/water-balance, how: "Meltwater makes the spring flood." }

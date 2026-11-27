@@ -1,0 +1,790 @@
+<title>WikiWorldModel Causal Graph</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: one screen. A strip of controls, then the graph as lanes stacked in causal order, with a reading panel
+     beside it. The look is the viewer's: its dark ground, its amber, its type; the light theme is its history page's. */
+  :root {
+    color-scheme: dark;
+    --bg: #03040b;
+    --surface: #0a0d14;
+    --raised: #121826;
+    --line: rgba(233, 236, 242, 0.16);
+    --hair: rgba(233, 236, 242, 0.06);
+    --text: #e9ecf2;
+    --muted: #9aa3b2;
+    --faint: #6f7a8d;
+    --accent: #f4b860;
+    --on-accent: #1a1205;
+    --up: #f4b860;
+    --down: #7fd1ff;
+    --s-none: #6f7a8d;
+    --s-stand-in: #ea44bf;
+    --s-borrowed: #f2a63a;
+    --s-rule: #d6c64a;
+    --s-conditioned: #4fd1b0;
+    --s-scored: #7fd1ff;
+    --s-records: #b3a3ff;
+    --k-given: #9aa3b2;
+    --k-at-once: #7fd1ff;
+    --k-settling: #4fd1b0;
+    --k-spreading: #f2a63a;
+    --k-contingent: #ea44bf;
+    --k-record: #b3a3ff;
+    --font: 'Geist', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      color-scheme: light;
+      --bg: #faf9f5;
+      --surface: #ffffff;
+      --raised: #f1efe8;
+      --line: rgba(35, 47, 43, 0.22);
+      --hair: rgba(35, 47, 43, 0.05);
+      --text: #232f2b;
+      --muted: #596760;
+      --faint: #8a918b;
+      --accent: #9a682e;
+      --on-accent: #ffffff;
+      --up: #a35f07;
+      --down: #1c6f9c;
+      --s-none: #8a918b;
+      --s-stand-in: #b0268a;
+      --s-borrowed: #b06a08;
+      --s-rule: #7b6d00;
+      --s-conditioned: #0d7a63;
+      --s-scored: #1173a8;
+      --s-records: #5a48b8;
+      --k-given: #6a6f7c;
+      --k-at-once: #1173a8;
+      --k-settling: #0d7a63;
+      --k-spreading: #b06a08;
+      --k-contingent: #b0268a;
+      --k-record: #5a48b8;
+    }
+  }
+  :root[data-theme="light"] {
+    color-scheme: light;
+    --bg: #faf9f5;
+    --surface: #ffffff;
+    --raised: #f1efe8;
+    --line: rgba(35, 47, 43, 0.22);
+    --hair: rgba(35, 47, 43, 0.05);
+    --text: #232f2b;
+    --muted: #596760;
+    --faint: #8a918b;
+    --accent: #9a682e;
+    --on-accent: #ffffff;
+    --up: #a35f07;
+    --down: #1c6f9c;
+    --s-none: #8a918b;
+    --s-stand-in: #b0268a;
+    --s-borrowed: #b06a08;
+    --s-rule: #7b6d00;
+    --s-conditioned: #0d7a63;
+    --s-scored: #1173a8;
+    --s-records: #5a48b8;
+    --k-given: #6a6f7c;
+    --k-at-once: #1173a8;
+    --k-settling: #0d7a63;
+    --k-spreading: #b06a08;
+    --k-contingent: #b0268a;
+    --k-record: #5a48b8;
+  }
+
+  html, body { height: 100%; }
+  body { background: var(--bg); color: var(--text); font: 14px/1.45 var(--font); }
+  * { box-sizing: border-box; }
+  button, input { font: inherit; color: inherit; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .app {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-block: 12px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  .top { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 20px; }
+  .name { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  h1 { margin: 0; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+  #counts { margin: 0; color: var(--muted); font-size: 12.5px; font-variant-numeric: tabular-nums; }
+  .tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-left: auto; }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
+  .seg button { background: none; border: 0; padding: 5px 10px; font-size: 12.5px; color: var(--muted); cursor: pointer; }
+  .seg button + button { border-left: 1px solid var(--line); }
+  .seg button[aria-pressed="true"] { background: var(--raised); color: var(--text); }
+  .tog { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--muted); cursor: pointer; }
+  .tog input { accent-color: var(--accent); margin: 0; }
+  #q { background: var(--surface); border: 1px solid var(--line); border-radius: 7px; padding: 5px 10px; width: 170px; font-size: 12.5px; }
+  #q::placeholder { color: var(--faint); }
+
+  .work { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 12px; }
+  .stage { position: relative; min-width: 0; min-height: 0; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); overflow: hidden; }
+  #svg { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; }
+  #svg.dragging { cursor: grabbing; }
+  .zoom { position: absolute; right: 10px; top: 10px; display: flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; background: var(--surface); }
+  .zoom button { background: none; border: 0; padding: 4px 10px; font-size: 13px; color: var(--muted); cursor: pointer; }
+  .zoom button + button { border-left: 1px solid var(--line); }
+  .zoom button:hover { color: var(--text); }
+  .legend {
+    position: absolute; left: 10px; bottom: 10px; max-width: calc(100% - 20px);
+    display: flex; flex-wrap: wrap; gap: 4px 12px; padding: 6px 10px;
+    background: color-mix(in srgb, var(--surface) 92%, transparent); border: 1px solid var(--line); border-radius: 7px;
+    font-size: 11.5px; color: var(--muted);
+  }
+  .legend span { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+  .legend i { width: 11px; height: 11px; border-radius: 3px; border: 1.5px solid var(--c); background: color-mix(in srgb, var(--c) var(--mix, 20%), transparent); }
+  .legend i.hollow { border-style: dashed; background: none; }
+  .legend svg { width: 26px; height: 8px; color: var(--muted); }
+  .legend .sep { width: 1px; background: var(--line); align-self: stretch; }
+
+  /* The graph. A node's colour is --c, set by what the graph is coloured by; --mix is how strongly it fills. */
+  .lane rect { fill: var(--hair); }
+  .lane:nth-child(even) rect { fill: transparent; }
+  .lane .lt { fill: var(--muted); font: 600 10.5px var(--font); letter-spacing: 0.09em; text-transform: uppercase; }
+  .lane .la { fill: var(--faint); font: 11px var(--font); }
+  .node { cursor: pointer; --c: var(--s-none); --mix: 18%; }
+  .node rect { fill: color-mix(in srgb, var(--c) var(--mix), var(--surface)); stroke: var(--c); stroke-width: 1.3; }
+  .node text { fill: var(--text); font: 500 11.5px var(--font); pointer-events: none; }
+  .node .gl { fill: var(--c); font: 600 12px var(--mono); }
+  .node.sel rect { stroke-width: 2.6; }
+  .node:focus-visible { outline: none; }
+  .node:focus-visible rect { stroke: var(--accent); stroke-width: 2.6; }
+  #svg[data-color="state"] .node[data-now="none"] { --c: var(--s-none); --mix: 0%; }
+  #svg[data-color="state"] .node[data-now="none"] rect { stroke-dasharray: 4 3; }
+  #svg[data-color="state"] .node[data-now="stand-in"] { --c: var(--s-stand-in); }
+  #svg[data-color="state"] .node[data-now="borrowed"] { --c: var(--s-borrowed); }
+  #svg[data-color="state"] .node[data-now="rule"] { --c: var(--s-rule); }
+  #svg[data-color="state"] .node[data-now="conditioned"] { --c: var(--s-conditioned); --mix: 30%; }
+  #svg[data-color="state"] .node[data-now="scored"] { --c: var(--s-scored); --mix: 42%; }
+  #svg[data-color="state"] .node[data-now="records"] { --c: var(--s-records); }
+  #svg[data-color="gap"] .node { --c: var(--accent); }
+  #svg[data-color="gap"] .node[data-gap="none"] { --c: var(--s-none); --mix: 0%; }
+  #svg[data-color="gap"] .node[data-gap="small"] { --mix: 8%; }
+  #svg[data-color="gap"] .node[data-gap="medium"] { --mix: 26%; }
+  #svg[data-color="gap"] .node[data-gap="large"] { --mix: 52%; }
+  #svg[data-color="gap"] .node[data-gap="total"] { --mix: 100%; }
+  #svg[data-color="gap"] .node[data-gap="total"] text { fill: var(--on-accent); }
+  #svg[data-color="kind"] .node[data-kind="given"] { --c: var(--k-given); }
+  #svg[data-color="kind"] .node[data-kind="at-once"] { --c: var(--k-at-once); }
+  #svg[data-color="kind"] .node[data-kind="settling"] { --c: var(--k-settling); }
+  #svg[data-color="kind"] .node[data-kind="spreading"] { --c: var(--k-spreading); }
+  #svg[data-color="kind"] .node[data-kind="contingent"] { --c: var(--k-contingent); }
+  #svg[data-color="kind"] .node[data-kind="record"] { --c: var(--k-record); }
+
+  .edge { color: var(--muted); opacity: 0.5; pointer-events: none; }
+  .edge path { fill: none; stroke: currentColor; stroke-width: 1.15; }
+  .edge polygon { fill: currentColor; }
+  .edge.e-partial path { stroke-dasharray: 9 4; }
+  .edge.e-inside path { stroke-dasharray: 1.5 4; stroke-linecap: round; stroke-width: 1.5; }
+  .edge.e-missing { opacity: 0.3; }
+  .edge.e-missing path { stroke-dasharray: 4 4; }
+  .edge.e-backwards { color: var(--s-stand-in); opacity: 0.7; }
+  .edge.e-backwards path { stroke-dasharray: 9 3 2 3; }
+  .edge.e-obs { color: var(--s-records); opacity: 0.18; }
+  .edge.e-obs path { stroke-width: 0.9; }
+  #svg.no-missing .edge.e-missing, #svg.no-record .edge.e-obs, #svg.no-record .in-record { display: none; }
+  #svg.picked .node:not(.on) { opacity: 0.22; }
+  #svg.picked .edge:not(.on) { opacity: 0.035; }
+  #svg.picked .edge.on { opacity: 0.6; }
+  #svg.picked .edge.near { opacity: 1; }
+  #svg.picked .edge.near path { stroke-width: 1.9; }
+  .edge.up { color: var(--up); }
+  .edge.down { color: var(--down); }
+  .edge.ring { color: var(--accent); }
+
+  .panel { min-width: 0; min-height: 0; display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+  .tabs { display: flex; border-bottom: 1px solid var(--line); }
+  .tabs button { flex: 1; background: none; border: 0; border-bottom: 2px solid transparent; padding: 9px 6px 7px; font-size: 12.5px; color: var(--muted); cursor: pointer; }
+  .tabs button[aria-selected="true"] { color: var(--text); border-bottom-color: var(--accent); }
+  #pane { flex: 1; min-height: 0; overflow: auto; padding: 14px 16px 18px; }
+  #pane h2 { margin: 2px 0 4px; font-size: 19px; font-weight: 600; letter-spacing: -0.01em; text-wrap: balance; }
+  #pane h3 { margin: 18px 0 6px; font-size: 10.5px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); }
+  #pane p { margin: 0 0 8px; }
+  .eyebrow { font-size: 12px; color: var(--muted); }
+  .what { color: var(--muted); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 2px; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px; border: 1px solid var(--line); border-radius: 999px; font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+  .chip i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
+  .ids { display: flex; flex-wrap: wrap; gap: 4px 6px; margin-top: 2px; }
+  .ids code { font: 11px var(--mono); color: var(--muted); background: var(--raised); border-radius: 4px; padding: 1px 6px; overflow-wrap: anywhere; }
+  .links { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
+  .links li { display: grid; grid-template-columns: 9px minmax(0, 1fr); gap: 0 8px; }
+  .links .dot { width: 9px; height: 9px; margin-top: 5px; border-radius: 50%; border: 1.5px solid var(--muted); }
+  .links .dot.built { background: var(--muted); }
+  .links .dot.partial { background: linear-gradient(90deg, var(--muted) 50%, transparent 50%); }
+  .links .dot.inside { border-style: dotted; }
+  .links .dot.missing { border-style: dashed; border-color: var(--faint); }
+  .links .dot.backwards { border-color: var(--s-stand-in); background: var(--s-stand-in); }
+  .links .dot.obs { border-color: var(--s-records); }
+  .links button, .rank button, .seenby button { background: none; border: 0; padding: 0; text-align: left; cursor: pointer; font-weight: 500; }
+  .links button:hover, .rank button:hover .rl, .seenby button:hover { color: var(--accent); }
+  .links .how { color: var(--muted); font-size: 13px; }
+  .links .st { color: var(--faint); font-size: 11.5px; }
+  .seenby { display: flex; flex-wrap: wrap; gap: 4px 12px; }
+  .seenby button { color: var(--s-records); font-size: 13px; }
+  .lead { color: var(--muted); font-size: 13px; }
+  .rank { list-style: none; margin: 10px 0 0; padding: 0; counter-reset: r; }
+  .rank li { counter-increment: r; border-top: 1px solid var(--hair); }
+  .rank button { width: 100%; display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 2px 8px; padding: 7px 0; align-items: baseline; }
+  .rank button::before { content: counter(r); color: var(--faint); font: 11.5px var(--mono); font-variant-numeric: tabular-nums; }
+  .rank .rs { color: var(--muted); font: 11.5px var(--mono); font-variant-numeric: tabular-nums; }
+  .rank .rm { grid-column: 2 / 4; color: var(--faint); font-size: 11.5px; font-weight: 400; }
+  .rank .bar { grid-column: 2 / 4; height: 3px; border-radius: 2px; background: var(--accent); opacity: 0.75; }
+  .loop { border-top: 1px solid var(--hair); padding: 9px 0; }
+  .loop > button { background: none; border: 0; padding: 0; cursor: pointer; font-weight: 600; text-transform: capitalize; }
+  .loop > button:hover { color: var(--accent); }
+  .loop ol { margin: 4px 0 0; padding-left: 18px; color: var(--muted); font-size: 13px; }
+
+  @media (max-width: 860px) {
+    html, body { height: auto; }
+    .app { height: auto; }
+    .tools { margin-left: 0; }
+    .work { display: flex; flex-direction: column; }
+    .stage { height: 66vh; min-height: 320px; }
+    #q { width: 140px; }
+    .legend { font-size: 10.5px; gap: 2px 9px; padding: 4px 8px; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .node, .edge { transition: opacity 0.12s; }
+  }
+</style>
+<!-- body -->
+<div class="app">
+  <header class="top">
+    <div class="name">
+      <h1>Causal graph</h1>
+      <p id="counts"></p>
+    </div>
+    <div class="tools">
+      <div class="seg" role="group" aria-label="Colour the quantities by">
+        <button type="button" data-color="state" aria-pressed="true">Where it stands</button>
+        <button type="button" data-color="gap" aria-pressed="false">Gap</button>
+        <button type="button" data-color="kind" aria-pressed="false">Kind</button>
+      </div>
+      <label class="tog"><input type="checkbox" id="t-missing" checked> Missing causes</label>
+      <label class="tog"><input type="checkbox" id="t-record"> The record</label>
+      <label class="tog"><input type="checkbox" id="t-chain"> Whole chain</label>
+      <input id="q" type="search" placeholder="Find a quantity" aria-label="Find a quantity" autocomplete="off">
+    </div>
+  </header>
+  <div class="work">
+    <section class="stage" aria-label="The graph of causes">
+      <svg id="svg" data-color="state" role="group" aria-label="Quantities in lanes, causes above their effects">
+        <g id="view"><g id="lanes"></g><g id="edges"></g><g id="nodes"></g></g>
+      </svg>
+      <div class="zoom">
+        <button type="button" id="z-out" aria-label="Zoom out">−</button>
+        <button type="button" id="z-fit">Fit</button>
+        <button type="button" id="z-in" aria-label="Zoom in">+</button>
+      </div>
+      <div class="legend" id="legend"></div>
+    </section>
+    <aside class="panel">
+      <div class="tabs" role="tablist">
+        <button type="button" role="tab" data-tab="rank" aria-selected="true">Where the work is</button>
+        <button type="button" role="tab" data-tab="node" aria-selected="false">Quantity</button>
+        <button type="button" role="tab" data-tab="loops" aria-selected="false">Loops</button>
+      </div>
+      <div id="pane" role="tabpanel"></div>
+    </aside>
+  </div>
+</div>
+<script type="application/json" id="graph">__GRAPH__</script>
+<script>
+(() => {
+  'use strict';
+  const G = JSON.parse(document.getElementById('graph').textContent);
+  const RECORD = 'record';
+  const SVG = 'http://www.w3.org/2000/svg';
+  const byId = new Map(G.nodes.map((n) => [n.id, n]));
+  const laneOf = new Map(G.lanes.map((l) => [l.id, l]));
+
+  const WORDS = {
+    state: { none: 'Nothing', 'stand-in': 'Stand-in', borrowed: 'Borrowed', rule: 'Own rule', conditioned: 'Conditioned', scored: 'Scored', records: 'Records' },
+    gap: { none: 'No gap', small: 'Small gap', medium: 'Medium gap', large: 'Large gap', total: 'Nothing built' },
+    kind: { given: 'Given', 'at-once': 'At once', settling: 'Settling', spreading: 'Spreading', contingent: 'Contingent', record: 'Evidence' },
+    edge: { built: 'carried', partial: 'partly carried', inside: 'inside a dataset', backwards: 'worked out backwards', missing: 'not carried', obs: 'observes' },
+  };
+  const STATE_TELLS = {
+    none: 'Nothing in the world answers it.',
+    'stand-in': 'A generator or a generic default decides it.',
+    borrowed: "Another's model or dataset is drawn as the value.",
+    rule: "A model of the world's own, which no evidence conditions.",
+    conditioned: "A model of the world's own, conditioned on evidence.",
+    scored: 'Conditioned on evidence, and scored on evidence held out.',
+    records: 'Instances written as records or read as rows.',
+  };
+  const KIND_TELLS = {
+    given: 'Comes from outside the graph.',
+    'at-once': 'A function of its causes at the same place and time.',
+    settling: 'Moves towards what its causes imply, over a time of its own.',
+    spreading: 'Arrives from somewhere, along paths.',
+    contingent: "Instances are evidence's alone; a model gives only their statistics.",
+    record: 'A kind of evidence.',
+  };
+  const GLYPH = { given: '○', 'at-once': '=', settling: '~', spreading: '»', contingent: '◆', record: '▤' };
+  const GAP_MIX = { none: '0%', small: '8%', medium: '26%', large: '52%', total: '100%' };
+
+  // Every cause, and every observation as an edge of its own kind from a quantity to the evidence that sees it.
+  const edges = G.edges.map((e) => ({ ...e }));
+  for (const n of G.nodes) for (const r of n.seen) edges.push({ from: n.id, to: r, now: 'obs', how: `${n.label} is seen through ${byId.get(r).label.toLowerCase()}.` });
+  const outOf = new Map(G.nodes.map((n) => [n.id, []]));
+  const intoOf = new Map(G.nodes.map((n) => [n.id, []]));
+  for (const e of edges) {
+    outOf.get(e.from).push(e);
+    intoOf.get(e.to).push(e);
+  }
+
+  // ---- Layout: lanes stacked in causal order; in a lane, a node below the nodes of its own lane that cause it.
+  const NW = 162, NH = 40, HG = 14, RG = 26, LANE_TOP = 34, LANE_BOT = 16, LANE_GAP = 0, MAXROW = 6, PAD = 20, WIDEST_GAP = 64;
+  const W = PAD * 2 + MAXROW * NW + (MAXROW - 1) * HG;
+  const pos = new Map();
+  const laneBox = new Map();
+  let H = 0;
+  let recordTop = 0;
+  (function layout() {
+    const rows = [];
+    let y = 0;
+    for (const lane of G.lanes) {
+      const ns = G.nodes.filter((n) => n.lane === lane.id);
+      const inLane = new Set(ns.map((n) => n.id));
+      const es = G.edges.filter((e) => !e.loop && inLane.has(e.from) && inLane.has(e.to));
+      const rank = new Map(ns.map((n) => [n.id, 0]));
+      for (let pass = 0; pass <= ns.length; pass++) {
+        let moved = false;
+        for (const e of es) if (rank.get(e.from) + 1 > rank.get(e.to)) { rank.set(e.to, rank.get(e.from) + 1); moved = true; }
+        if (!moved) break;
+      }
+      // Rows are filled in the order of rank, and a node starts a new row rather than stand beside one of its causes.
+      const causesIn = new Map(ns.map((n) => [n.id, new Set()]));
+      for (const e of es) causesIn.get(e.to).add(e.from);
+      const top = y;
+      if (lane.id === RECORD) recordTop = top;
+      y += LANE_TOP;
+      let row = [];
+      const close = () => { if (row.length) { rows.push({ nodes: row, y: y + NH / 2 }); y += NH + RG; row = []; } };
+      for (const n of [...ns].sort((a, b) => rank.get(a.id) - rank.get(b.id))) {
+        if (row.length >= MAXROW || row.some((m) => causesIn.get(n.id).has(m.id))) close();
+        row.push(n);
+      }
+      close();
+      y += LANE_BOT - RG;
+      laneBox.set(lane.id, { y: top, h: y - top });
+      y += LANE_GAP;
+    }
+    H = y;
+    // A row's nodes stand evenly about the middle, a short row leaning half-way towards what it is joined to.
+    const place = (row, lean) => {
+      const k = row.nodes.length;
+      const gap = k > 1 ? Math.min(WIDEST_GAP, Math.max(HG, (W - 2 * PAD - k * NW) / (k - 1))) : 0;
+      const total = k * NW + (k - 1) * gap;
+      const mid = Math.min(W - PAD - total / 2, Math.max(PAD + total / 2, W / 2 + lean));
+      row.nodes.forEach((n, i) => pos.set(n.id, { x: mid - total / 2 + NW / 2 + i * (NW + gap), y: row.y }));
+    };
+    for (const row of rows) place(row, 0);
+    const near = new Map(G.nodes.map((n) => [n.id, []]));
+    for (const e of G.edges) { near.get(e.from).push(e.to); near.get(e.to).push(e.from); }
+    // Each row in turn is put in the order of what its nodes are joined to in the other rows, to cross fewer edges.
+    for (let it = 0; it < 16; it++) {
+      for (const row of it % 2 ? [...rows].reverse() : rows) {
+        const want = row.nodes.map((n) => {
+          const xs = near.get(n.id).filter((id) => pos.get(id).y !== row.y).map((id) => pos.get(id).x);
+          return { n, x: xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : pos.get(n.id).x };
+        }).sort((a, b) => a.x - b.x);
+        row.nodes = want.map((w) => w.n);
+        place(row, 0.5 * (want.reduce((a, w) => a + w.x, 0) / want.length - W / 2));
+      }
+    }
+  })();
+
+  // ---- Drawing
+  const svg = document.getElementById('svg');
+  const view = document.getElementById('view');
+  const s = (tag, attrs = {}, kids = []) => {
+    const el = document.createElementNS(SVG, tag);
+    for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+    for (const kid of kids) el.append(kid);
+    return el;
+  };
+  const h = (tag, attrs = {}, kids = []) => {
+    const el = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) if (k === 'text') el.textContent = v; else el.setAttribute(k, v);
+    for (const kid of [].concat(kids)) if (kid != null) el.append(kid);
+    return el;
+  };
+
+  const lanesG = document.getElementById('lanes');
+  for (const lane of G.lanes) {
+    const box = laneBox.get(lane.id);
+    const title = s('text', { class: 'lt', x: PAD, y: box.y + 21 });
+    title.textContent = lane.title;
+    const about = s('text', { class: 'la', x: PAD + lane.title.length * 7.6 + 16, y: box.y + 21 });
+    about.textContent = lane.about;
+    lanesG.append(s('g', { class: lane.id === RECORD ? 'lane in-record' : 'lane' }, [s('rect', { x: 0, y: box.y, width: W, height: box.h }), title, about]));
+  }
+
+  /** A label on one line or two, broken between words. */
+  function lines(label) {
+    const max = 22;
+    if (label.length <= max) return [label];
+    const words = label.split(' ');
+    let first = '';
+    while (words.length && (first + ' ' + words[0]).trim().length <= max) first = (first + ' ' + words.shift()).trim();
+    let second = words.join(' ');
+    if (second.length > max + 1) second = second.slice(0, max - 1).trimEnd() + '…';
+    return first ? [first, second] : [label.slice(0, max - 1) + '…'];
+  }
+
+  const nodeEl = new Map();
+  const nodesG = document.getElementById('nodes');
+  for (const n of G.nodes) {
+    const p = pos.get(n.id);
+    const ls = lines(n.label);
+    const label = s('text', { x: 27, y: ls.length === 1 ? NH / 2 + 4 : NH / 2 - 3 });
+    ls.forEach((line, i) => { const t = s('tspan', { x: 27, dy: i ? 14 : 0 }); t.textContent = line; label.append(t); });
+    const glyph = s('text', { class: 'gl', x: 10, y: NH / 2 + 4 });
+    glyph.textContent = GLYPH[n.kind];
+    const g = s('g', {
+      class: n.lane === RECORD ? 'node in-record' : 'node', transform: `translate(${p.x - NW / 2},${p.y - NH / 2})`, tabindex: 0, role: 'button',
+      'aria-label': `${n.label}: ${WORDS.state[n.now]}, ${WORDS.gap[n.gap]}`, 'data-id': n.id, 'data-now': n.now, 'data-gap': n.gap, 'data-kind': n.kind,
+    }, [s('rect', { width: NW, height: NH, rx: 7 }), glyph, label]);
+    nodeEl.set(n.id, g);
+    nodesG.append(g);
+  }
+
+  const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+  const edgesG = document.getElementById('edges');
+  for (const e of edges) {
+    const a = pos.get(e.from), b = pos.get(e.to);
+    const lean = clamp((a.x - b.x) * 0.1, -NW / 2 + 14, NW / 2 - 14);
+    const sx = a.x - lean * 0.6, ex = b.x + lean;
+    let d, tip;
+    if (b.y > a.y) {
+      const sy = a.y + NH / 2, ey = b.y - NH / 2, bend = clamp((ey - sy) * 0.45, 14, 150);
+      d = `M${sx},${sy}C${sx},${sy + bend} ${ex},${ey - 6 - bend} ${ex},${ey - 6}`;
+      tip = `${ex - 3.6},${ey - 7} ${ex + 3.6},${ey - 7} ${ex},${ey - 0.5}`;
+    } else if (b.y < a.y) {
+      // Against the grain: out of the top of the cause, up into the bottom of the effect.
+      const sy = a.y - NH / 2, ey = b.y + NH / 2, bend = clamp((sy - ey) * 0.45, 14, 150);
+      d = `M${sx},${sy}C${sx},${sy - bend} ${ex},${ey + 6 + bend} ${ex},${ey + 6}`;
+      tip = `${ex - 3.6},${ey + 7} ${ex + 3.6},${ey + 7} ${ex},${ey + 0.5}`;
+    } else {
+      const sy = a.y - NH / 2, rise = clamp(Math.abs(b.x - a.x) * 0.12, 12, RG - 4);
+      d = `M${sx},${sy}C${sx},${sy - rise} ${ex},${sy - 6 - rise} ${ex},${sy - 6}`;
+      tip = `${ex - 3.6},${sy - 7} ${ex + 3.6},${sy - 7} ${ex},${sy - 0.5}`;
+    }
+    const title = s('title');
+    title.textContent = `${byId.get(e.from).label} → ${byId.get(e.to).label}: ${e.how}`;
+    e.el = s('g', { class: `edge e-${e.now}` }, [title, s('path', { d }), s('polygon', { points: tip })]);
+    edgesG.append(e.el);
+  }
+
+  // ---- Pan and zoom
+  const cam = { k: 1, x: 0, y: 0 };
+  const apply = () => view.setAttribute('transform', `translate(${cam.x},${cam.y}) scale(${cam.k})`);
+  const shownHeight = () => (svg.classList.contains('no-record') ? recordTop : H);
+  function fit() {
+    const box = svg.getBoundingClientRect();
+    cam.k = clamp(box.width / W, 0.3, 1.15);
+    cam.x = (box.width - W * cam.k) / 2;
+    cam.y = Math.max(8, (box.height - shownHeight() * cam.k) / 2);
+    apply();
+  }
+  function zoomAt(cx, cy, factor) {
+    const k = clamp(cam.k * factor, 0.25, 2.6);
+    cam.x = cx - (cx - cam.x) * (k / cam.k);
+    cam.y = cy - (cy - cam.y) * (k / cam.k);
+    cam.k = k;
+    apply();
+  }
+  function centre(id) {
+    const box = svg.getBoundingClientRect(), p = pos.get(id);
+    if (cam.k < 0.62) cam.k = 0.8;
+    cam.x = box.width / 2 - p.x * cam.k;
+    cam.y = box.height / 2 - p.y * cam.k;
+    apply();
+  }
+  svg.addEventListener('wheel', (ev) => {
+    ev.preventDefault();
+    const box = svg.getBoundingClientRect();
+    if (ev.ctrlKey || ev.metaKey) zoomAt(ev.clientX - box.left, ev.clientY - box.top, Math.exp(-ev.deltaY * 0.01));
+    else { cam.x -= ev.deltaX; cam.y -= ev.deltaY; apply(); }
+  }, { passive: false });
+  const fingers = new Map();
+  let drag = null;
+  svg.addEventListener('pointerdown', (ev) => {
+    fingers.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+    const node = ev.target.closest && ev.target.closest('.node');
+    drag = { x: ev.clientX, y: ev.clientY, moved: 0, id: node ? node.dataset.id : null, span: 0 };
+    svg.setPointerCapture(ev.pointerId);
+  });
+  svg.addEventListener('pointermove', (ev) => {
+    if (!fingers.has(ev.pointerId) || !drag) return;
+    const was = fingers.get(ev.pointerId);
+    fingers.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+    const box = svg.getBoundingClientRect();
+    if (fingers.size === 2) {
+      const [p, q] = [...fingers.values()];
+      const span = Math.hypot(p.x - q.x, p.y - q.y);
+      if (drag.span) zoomAt((p.x + q.x) / 2 - box.left, (p.y + q.y) / 2 - box.top, span / drag.span);
+      drag.span = span;
+      drag.moved = 99;
+      return;
+    }
+    cam.x += ev.clientX - was.x;
+    cam.y += ev.clientY - was.y;
+    drag.moved += Math.abs(ev.clientX - was.x) + Math.abs(ev.clientY - was.y);
+    if (drag.moved > 4) svg.classList.add('dragging');
+    apply();
+  });
+  const lift = (ev) => {
+    fingers.delete(ev.pointerId);
+    if (drag && fingers.size === 0) {
+      if (drag.moved <= 4) pick(drag.id);
+      drag = null;
+      svg.classList.remove('dragging');
+    } else if (drag) drag.span = 0;
+  };
+  svg.addEventListener('pointerup', lift);
+  svg.addEventListener('pointercancel', lift);
+  svg.addEventListener('keydown', (ev) => {
+    const node = ev.target.closest && ev.target.closest('.node');
+    if (node && (ev.key === 'Enter' || ev.key === ' ')) { ev.preventDefault(); pick(node.dataset.id); }
+    if (ev.key === 'Escape') pick(null);
+  });
+  const mid = () => { const b = svg.getBoundingClientRect(); return [b.width / 2, b.height / 2]; };
+  document.getElementById('z-in').addEventListener('click', () => zoomAt(...mid(), 1.3));
+  document.getElementById('z-out').addEventListener('click', () => zoomAt(...mid(), 1 / 1.3));
+  document.getElementById('z-fit').addEventListener('click', fit);
+
+  // ---- What is picked, and what is lit for it
+  let picked = null;
+  let ring = null;
+  let tab = 'rank';
+  const chain = document.getElementById('t-chain');
+
+  /** Everything up or down a node's causes, with how many steps away each is. Loops are followed too. */
+  function walk(id, next, end) {
+    const far = new Map();
+    let edge = [id];
+    for (let d = 1; edge.length; d++) {
+      const after = [];
+      for (const at of edge) for (const e of next.get(at)) {
+        if (e.now === 'obs' || e[end] === id || far.has(e[end])) continue;
+        far.set(e[end], d);
+        after.push(e[end]);
+      }
+      edge = after;
+    }
+    return far;
+  }
+
+  function light() {
+    for (const g of nodeEl.values()) g.classList.remove('on', 'sel');
+    for (const e of edges) e.el.classList.remove('on', 'near', 'up', 'down', 'ring');
+    svg.classList.toggle('picked', !!(picked || ring || found));
+    if (ring) {
+      for (const e of edges) if (e.loop === ring) {
+        e.el.classList.add('on', 'near', 'ring');
+        nodeEl.get(e.from).classList.add('on');
+        nodeEl.get(e.to).classList.add('on');
+      }
+      return;
+    }
+    if (!picked) {
+      if (found) for (const id of found) nodeEl.get(id).classList.add('on');
+      return;
+    }
+    const above = chain.checked ? walk(picked, intoOf, 'from') : new Map();
+    const below = chain.checked ? walk(picked, outOf, 'to') : new Map();
+    nodeEl.get(picked).classList.add('on', 'sel');
+    for (const e of edges) {
+      const into = e.to === picked, out = e.from === picked;
+      if (into || out) {
+        e.el.classList.add('on', 'near', into ? 'up' : 'down');
+        nodeEl.get(into ? e.from : e.to).classList.add('on');
+      } else if (e.now !== 'obs' && above.has(e.to) && above.has(e.from)) e.el.classList.add('on', 'up');
+      else if (e.now !== 'obs' && below.has(e.from) && below.has(e.to)) e.el.classList.add('on', 'down');
+    }
+    for (const id of above.keys()) nodeEl.get(id).classList.add('on');
+    for (const id of below.keys()) nodeEl.get(id).classList.add('on');
+  }
+
+  function pick(id, opts = {}) {
+    picked = id && byId.has(id) ? id : null;
+    ring = null;
+    if (picked && byId.get(picked).lane === RECORD && !recordBox.checked) { recordBox.checked = true; showRecord(); }
+    if (picked) tab = 'node';
+    else if (tab === 'node') tab = 'rank';
+    light();
+    panel();
+    if (picked && opts.centre) centre(picked);
+    try { history.replaceState(null, '', picked ? `#${picked}` : location.pathname + location.search); } catch { /* a frame that refuses it shows the same page */ }
+  }
+
+  // ---- The panel
+  const pane = document.getElementById('pane');
+  const chip = (word, colour) => h('span', { class: 'chip' }, [colour ? h('i', { style: `--c:${colour}` }) : null, word]);
+  const go = (id, word) => {
+    const b = h('button', { type: 'button', text: word });
+    b.addEventListener('click', () => pick(id, { centre: true }));
+    return b;
+  };
+  function linkList(list, end) {
+    const order = { built: 0, partial: 1, backwards: 2, inside: 3, missing: 4, obs: 5 };
+    return h('ul', { class: 'links' }, [...list].sort((a, b) => order[a.now] - order[b.now]).map((e) => h('li', {}, [
+      h('span', { class: `dot ${e.now}` }),
+      h('div', {}, [
+        go(e[end], byId.get(e[end]).label),
+        h('span', { class: 'st', text: `  ${WORDS.edge[e.now]}${e.by ? `, by ${e.by}` : ''}${e.loop ? `, closes the loop “${e.loop.replace(/-/g, ' ')}”` : ''}` }),
+        h('div', { class: 'how', text: e.how }),
+      ]),
+    ])));
+  }
+
+  function nodePane(n) {
+    const lane = laneOf.get(n.lane);
+    const causes = intoOf.get(n.id).filter((e) => e.now !== 'obs');
+    const effects = outOf.get(n.id).filter((e) => e.now !== 'obs');
+    const kids = [
+      h('div', { class: 'eyebrow', text: `${lane.title} · ${WORDS.kind[n.kind]}` }),
+      h('h2', { text: n.label }),
+      h('p', { class: 'what', text: n.what }),
+      h('div', { class: 'chips' }, [
+        chip(WORDS.state[n.now], `var(--s-${n.now})`),
+        chip(WORDS.gap[n.gap], n.gap === 'none' ? 'var(--s-none)' : `color-mix(in srgb, var(--accent) ${GAP_MIX[n.gap]}, var(--raised))`),
+        chip(n.lane === RECORD ? `observes ${n.down}` : `read by ${n.down}`),
+        n.lane === RECORD ? null : chip(`reads ${n.up}`),
+      ]),
+      h('h3', { text: 'Where the world stands' }),
+      h('p', { text: n.note }),
+      h('p', { class: 'lead', text: `${STATE_TELLS[n.now]} ${KIND_TELLS[n.kind]}` }),
+      n.has.length ? h('div', { class: 'ids' }, n.has.map((id) => h('code', { text: id }))) : null,
+      h('h3', { text: 'The best that could be built' }),
+      h('p', { text: n.best }),
+    ];
+    if (n.seen.length) kids.push(h('h3', { text: 'Seen through' }), h('div', { class: 'seenby' }, n.seen.map((r) => go(r, byId.get(r).label))));
+    if (n.lane === RECORD) {
+      const seen = intoOf.get(n.id).filter((e) => e.now === 'obs');
+      if (seen.length) kids.push(h('h3', { text: `Observes ${seen.length}` }), h('div', { class: 'seenby' }, seen.map((e) => go(e.from, byId.get(e.from).label))));
+    }
+    if (causes.length) kids.push(h('h3', { text: `Caused by ${causes.length}` }), linkList(causes, 'from'));
+    if (effects.length) kids.push(h('h3', { text: `Causes ${effects.length}` }), linkList(effects, 'to'));
+    // The causes further up that are furthest from built: what this node waits on.
+    const weight = { none: 0, small: 1, medium: 2, large: 3, total: 4 };
+    const waits = [...walk(n.id, intoOf, 'from')].map(([id, d]) => ({ n: byId.get(id), d })).filter((w) => weight[w.n.gap] >= 3)
+      .sort((a, b) => a.d - b.d || weight[b.n.gap] - weight[a.n.gap]).slice(0, 6);
+    if (waits.length) {
+      kids.push(h('h3', { text: 'Nearest causes with a large gap' }), h('ul', { class: 'links' }, waits.map((w) => h('li', {}, [
+        h('span', { class: 'dot missing' }),
+        h('div', {}, [go(w.n.id, w.n.label), h('span', { class: 'st', text: `  ${w.d} step${w.d === 1 ? '' : 's'} up, ${WORDS.gap[w.n.gap].toLowerCase()}` })]),
+      ]))));
+    }
+    return kids;
+  }
+
+  function rankPane() {
+    const order = [...G.nodes].sort((a, b) => b.score - a.score || b.down - a.down || a.id.localeCompare(b.id)).filter((n) => n.score > 0);
+    const top = order[0].score;
+    return [
+      h('p', { class: 'lead', text: 'Each quantity is ranked by its gap times its reach: how far the world is from the best model of it that could be built, times how many other quantities read it, the nearer ones counting for more. Click one to see it in the graph.' }),
+      h('ol', { class: 'rank' }, order.slice(0, 40).map((n) => {
+        const b = h('button', { type: 'button' }, [
+          h('span', { class: 'rl', text: n.label }),
+          h('span', { class: 'rs', text: String(n.score) }),
+          h('span', { class: 'rm', text: `${laneOf.get(n.lane).title} · ${WORDS.gap[n.gap].toLowerCase()} · ${n.lane === RECORD ? 'observes' : 'read by'} ${n.down}` }),
+          h('span', { class: 'bar', style: `width:${Math.max(2, (100 * n.score) / top)}%` }),
+        ]);
+        b.addEventListener('click', () => pick(n.id, { centre: true }));
+        return h('li', {}, b);
+      })),
+    ];
+  }
+
+  function loopsPane() {
+    const loops = new Map();
+    for (const e of G.edges) if (e.loop) { if (!loops.has(e.loop)) loops.set(e.loop, []); loops.get(e.loop).push(e); }
+    return [
+      h('p', { class: 'lead', text: 'A loop is a cause that runs back up the graph. Each edge here closes one; without them the graph has no cycle. Click a loop to light it.' }),
+      ...[...loops].sort((a, b) => a[0].localeCompare(b[0])).map(([name, es]) => {
+        const b = h('button', { type: 'button', text: name.replace(/-/g, ' ') });
+        b.addEventListener('click', () => { picked = null; ring = name; light(); });
+        return h('div', { class: 'loop' }, [b, h('ol', {}, es.map((e) => h('li', { text: `${byId.get(e.from).label} → ${byId.get(e.to).label}. ${e.how}` })))]);
+      }),
+    ];
+  }
+
+  function panel() {
+    for (const b of document.querySelectorAll('.tabs button')) b.setAttribute('aria-selected', String(b.dataset.tab === tab));
+    const kids = tab === 'rank' ? rankPane() : tab === 'loops' ? loopsPane()
+      : picked ? nodePane(byId.get(picked)) : [h('p', { class: 'lead', text: 'Click a quantity in the graph to see what causes it, what it causes, where the world stands on it and the best that could be built.' })];
+    pane.replaceChildren(...kids.filter(Boolean));
+    pane.scrollTop = 0;
+  }
+  for (const b of document.querySelectorAll('.tabs button')) b.addEventListener('click', () => { tab = b.dataset.tab; panel(); });
+
+  // ---- Controls
+  const keep = (key, value) => { try { localStorage.setItem(`causes.${key}`, value); } catch { /* not kept */ } };
+  const kept = (key) => { try { return localStorage.getItem(`causes.${key}`); } catch { return null; } };
+  const legend = document.getElementById('legend');
+  const stroke = (dash) => { const x = s('svg', { viewBox: '0 0 26 8' }, [s('path', { d: 'M1,4H25', fill: 'none', stroke: 'currentColor', 'stroke-width': 1.4, 'stroke-dasharray': dash })]); return x; };
+  function drawLegend(mode) {
+    const count = (key, v) => G.nodes.filter((n) => n[key] === v && (recordBox.checked || n.lane !== RECORD)).length;
+    const swatch = (key, v, word, colour, mix) => h('span', {}, [h('i', { class: mix === '0%' ? 'hollow' : '', style: `--c:${colour};--mix:${mix}` }), `${word} ${count(key, v)}`]);
+    const kids = mode === 'state' ? Object.keys(WORDS.state).map((v) => swatch('now', v, WORDS.state[v], `var(--s-${v})`, v === 'none' ? '0%' : '24%'))
+      : mode === 'gap' ? Object.keys(WORDS.gap).map((v) => swatch('gap', v, WORDS.gap[v], v === 'none' ? 'var(--s-none)' : 'var(--accent)', GAP_MIX[v]))
+      : Object.keys(WORDS.kind).filter((v) => v !== 'record' || recordBox.checked).map((v) => h('span', {}, [h('i', { style: `--c:var(--k-${v});--mix:24%` }), `${GLYPH[v]} ${WORDS.kind[v]} ${count('kind', v)}`]));
+    kids.push(h('span', { class: 'sep' }), h('span', {}, [stroke(''), 'carried']), h('span', {}, [stroke('1.5 4'), 'inside a dataset']), h('span', {}, [stroke('4 4'), 'not carried']));
+    legend.replaceChildren(...kids);
+  }
+  function colourBy(mode) {
+    svg.dataset.color = mode;
+    for (const b of document.querySelectorAll('.seg button')) b.setAttribute('aria-pressed', String(b.dataset.color === mode));
+    drawLegend(mode);
+    keep('colour', mode);
+  }
+  for (const b of document.querySelectorAll('.seg button')) b.addEventListener('click', () => colourBy(b.dataset.color));
+
+  const recordBox = document.getElementById('t-record');
+  const missingBox = document.getElementById('t-missing');
+  function showRecord() {
+    svg.classList.toggle('no-record', !recordBox.checked);
+    drawLegend(svg.dataset.color);
+    keep('record', recordBox.checked ? '1' : '0');
+  }
+  recordBox.addEventListener('change', () => { showRecord(); fit(); });
+  missingBox.addEventListener('change', () => svg.classList.toggle('no-missing', !missingBox.checked));
+  chain.addEventListener('change', light);
+
+  let found = null;
+  const q = document.getElementById('q');
+  q.addEventListener('input', () => {
+    const word = q.value.trim().toLowerCase();
+    found = word ? G.nodes.filter((n) => (recordBox.checked || n.lane !== RECORD) && (n.label.toLowerCase().includes(word) || n.id.includes(word))).map((n) => n.id) : null;
+    if (found) { picked = null; ring = null; }
+    light();
+  });
+  q.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Enter' && found && found.length) { const id = found[0]; found = null; q.value = ''; pick(id, { centre: true }); }
+  });
+
+  // ---- Start
+  const causes = G.edges.length, carried = G.edges.filter((e) => e.now === 'built' || e.now === 'partial').length;
+  document.getElementById('counts').textContent = `${G.nodes.length} quantities in ${G.lanes.length} lanes · ${causes} causes, ${carried} of them carried by the world today`;
+  recordBox.checked = kept('record') === '1';
+  svg.classList.toggle('no-record', !recordBox.checked);
+  colourBy(['state', 'gap', 'kind'].includes(kept('colour')) ? kept('colour') : 'state');
+  const fromHash = () => { const id = decodeURIComponent(location.hash.slice(1)); if (byId.has(id)) pick(id, { centre: true }); };
+  fit();
+  panel();
+  fromHash();
+  addEventListener('hashchange', fromHash);
+  let wide = svg.getBoundingClientRect().width;
+  addEventListener('resize', () => { const w = svg.getBoundingClientRect().width; if (Math.abs(w - wide) > 40 && !picked) fit(); wide = w; });
+})();
+</script>

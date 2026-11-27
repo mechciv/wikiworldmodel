@@ -1,0 +1,192 @@
+lane: towns
+title: Settlements and exchange
+about: Where people gathered, how they built, and what moved between them.
+nodes:
+  - id: surplus
+    label: Food beyond the growers' own
+    kind: at-once
+    what: "What a region grew beyond what its growers ate."
+    now: none
+    note: "Not in the world."
+    best: "Yield less the growers' needs: how many could live in towns and not farm."
+    gap: medium
+    seen: [texts]
+  - id: travel
+    label: How far a day's travel went
+    kind: at-once
+    what: "The time it took to cross land, river and sea with the means of the time."
+    now: none
+    note: "Not in the world."
+    best: "Travel time by foot, pack animal, cart, river boat and sail, over the same cost of ground the spreading nodes use."
+    gap: medium
+    seen: [texts]
+  - id: urban-share
+    label: How many settlements, how large
+    kind: at-once
+    what: "The number of settlements of each size in a region, and the share of people in towns."
+    now: borrowed
+    has: [field:people/cities, field:people/cities-ancient, field:people/anthromes, gen:people/settlement]
+    note: "Two lists give the large cities. Below their threshold, towns and villages are the generator's, from HYDE's classes."
+    best: "How many settlements of each size a region's people and surplus make, fitted to surveyed regions."
+    gap: medium
+    seen: [sites, surveys, others]
+  - id: town-sites
+    label: Where towns stand
+    kind: at-once
+    what: "The places that draw a town: crossings, harbours, springs and strongholds."
+    now: stand-in
+    has: [gen:people/settlement, field:people/ancient-places]
+    note: "A listed city stands at its place. Every other town is put down by the generator."
+    best: "A chance of a town at each place from water, routes and the people about it. Pleiades' places and founding dates as presence, over the effort that found them."
+    gap: medium
+    seen: [sites, texts, surveys]
+  - id: city-people
+    label: A settlement's people
+    kind: settling
+    what: "How many people one settlement held through its life."
+    now: scored
+    has: [model:people/city-population]
+    note: "Every figure is an observation of what it counts. Over 10,001 list figures held out one at a time, the 90% band holds 89.9%. Its prior for a region is HYDE's."
+    best: "Its prior from the people of the land in place of HYDE's, and shocks."
+    gap: small
+    seen: [texts, sites, others]
+  - id: town-density
+    label: People to the hectare
+    kind: at-once
+    what: "How densely a settlement's people lived on its built ground."
+    now: conditioned
+    has: [model:people/density]
+    note: "Pulled towards the settlements near in space and time whose ground was measured. How density grows with size is a choice."
+    best: "The scaling fitted to measured towns, and pooled by likeness as well as by distance."
+    gap: small
+    seen: [sites]
+  - id: town-form
+    label: A settlement's form
+    kind: at-once
+    what: "Packed along lanes, or households set apart among fields and water."
+    now: rule
+    has: [model:people/settlement-form]
+    note: "Compact or dispersed, on a tradition's word. It has no score."
+    best: "Scored on measured plans, of which Mahendraparvata's is the first candidate."
+    gap: medium
+    seen: [sites, surveys]
+  - id: town-growth
+    label: Where a town built, through time
+    kind: at-once
+    what: "Which ground was built on at each time."
+    now: rule
+    has: [model:people/settlement-growth]
+    note: "The ground ranked once by how soon it would be built on, and cut where the people's need is met."
+    best: "Held to dated quarters where excavation gives them."
+    gap: small
+    seen: [sites]
+  - id: houses
+    label: Houses
+    kind: at-once
+    what: "What a house was made of, its plan and its size."
+    now: stand-in
+    has: [gen:people/settlement]
+    note: "95 building traditions, hard-edged. They house 28% of people at 1 CE, 20% at 1000 and 56% at 1850. Everyone else gets one house for the whole Earth."
+    best: "A field for each trait of a house: materials from the land, pooled by likeness, observed by 1,300 ethnographic societies (D-PLACE, licence unchecked)."
+    gap: large
+    seen: [sites, ethnography, texts]
+  - id: institutions
+    label: Temples, markets and halls
+    kind: at-once
+    what: "How many shrines, markets and public buildings a town of a size had."
+    now: stand-in
+    has: [gen:people/settlement]
+    note: "Drawn where a tradition names them."
+    best: "So many people to a shrine or a market, by tradition, held to mapped counts such as Angkor's 1,177 temples."
+    gap: medium
+    seen: [sites, texts]
+  - id: wealth
+    label: Rich and poor
+    kind: at-once
+    what: "How unequal a settlement's households were."
+    now: none
+    note: "Every house of a tradition is one size."
+    best: "The spread of house sizes by way of life, as measured at dozens of sites (Kohler et al. 2017, unread)."
+    gap: small
+    seen: [sites]
+  - id: routes
+    label: Roads and routes
+    kind: settling
+    what: "The ways actually travelled between settlements."
+    now: stand-in
+    has: [field:earth/roman-roads, gen:people/settlement]
+    note: "The Roman roads as a layer. A town's own routes are the generator's."
+    best: "Least-cost ways between settlements over the ground and water of the time, with surveyed roads as evidence."
+    gap: medium
+    seen: [sites, surveys, texts]
+  - id: trade
+    label: Trade
+    kind: at-once
+    what: "What moved between settlements, and how much."
+    now: records
+    note: "Fourteen wrecks and the Silk Road's dated evidence, as records."
+    best: "Flows between settlements by their size and the travel between them. Cargoes stay evidence."
+    gap: small
+    seen: [sites, texts]
+  - id: resources
+    label: Ores, stone, salt and timber
+    kind: at-once
+    what: "Where the materials people needed lay."
+    now: none
+    note: "Not in the world."
+    best: "From the rock and the cover of each place, with mines as records."
+    gap: small
+    seen: [surveys, sites]
+edges:
+  - { from: yield, to: surplus, now: missing, how: "What is grown beyond the growers' own needs." }
+  - { from: intensity, to: surplus, now: missing, how: "Land worked harder feeds more who do not farm." }
+  - { from: technology, to: travel, now: missing, how: "The horse, the wheel and the sail each shrank the world." }
+  - { from: land-links, to: travel, now: missing, how: "People ride the same cost of ground as every spreading thing, faster." }
+  - { from: relief, to: travel, now: missing, how: "Passes and plains." }
+  - { from: rivers, to: travel, now: missing, how: "A river is a road downstream." }
+  - { from: winds, to: travel, now: missing, how: "Under sail the winds set the sea's routes and seasons." }
+  - { from: density, to: urban-share, now: built, by: model:people/lifeways, how: "HYDE's class of a cell, set by its people and land use, says village, hamlet or farmstead." }
+  - { from: surplus, to: urban-share, now: missing, how: "Towns hold as many as the surplus feeds." }
+  - { from: travel, to: urban-share, now: missing, how: "A town grows as far as food can be carried to it." }
+  - { from: states, to: urban-share, now: missing, how: "Capitals draw people and tribute." }
+  - { from: density, to: town-sites, now: partial, by: gen:people/settlement, how: "The generator puts settlements down where HYDE has people." }
+  - { from: rivers, to: town-sites, now: missing, how: "Towns stand at crossings, confluences and the heads of navigation." }
+  - { from: coast, to: town-sites, now: missing, how: "Harbours." }
+  - { from: relief, to: town-sites, now: missing, how: "Defensible and dry ground." }
+  - { from: travel, to: town-sites, now: missing, how: "Towns space themselves a market day apart." }
+  - { from: urban-share, to: city-people, now: missing, how: "A region's people bound how large its first city can be." }
+  - { from: density, to: city-people, now: partial, by: model:people/city-population, how: "HYDE's people within a region's ground are the prior of the region's, beside the town's own." }
+  - { from: shocks, to: city-people, now: missing, how: "A sack or a plague empties a city at a date." }
+  - { from: states, to: city-people, now: missing, how: "A capital rises and falls with its state." }
+  - { from: trade, to: city-people, now: missing, how: "A port outgrows its hinterland." }
+  - { from: city-people, to: town-density, now: built, by: model:people/density, how: "Density grows a little with a settlement's size." }
+  - { from: likeness, to: town-density, now: partial, by: model:people/density, how: "Pulled towards settlements near in space and time. Likeness by descent is not used." }
+  - { from: town-density, to: town-form, now: built, by: model:people/settlement-form, how: "A dispersed town's units stand as far apart as its density leaves room for." }
+  - { from: likeness, to: town-form, now: partial, by: model:people/settlement-form, how: "A tradition's record says compact or dispersed. Nothing carries it beyond the tradition's regions." }
+  - { from: water-works, to: town-form, now: missing, how: "Households gather round the pond or along the canal." }
+  - { from: city-people, to: town-growth, now: built, by: model:people/settlement-growth, how: "The built ground is cut where it meets the area the people needed." }
+  - { from: town-density, to: town-growth, now: built, by: model:people/settlement-growth, how: "The area needed is the people over their density." }
+  - { from: relief, to: town-growth, now: built, by: model:people/settlement-growth, how: "Steep ground and ground that floods are built last." }
+  - { from: routes, to: town-growth, now: built, by: model:people/settlement-growth, how: "A town grows out along its routes." }
+  - { from: likeness, to: houses, now: partial, by: gen:people/settlement, how: "A tradition's house is drawn inside its regions and span, and the stand-in outside." }
+  - { from: biome, to: houses, now: missing, how: "Timber where forests stand, and mud brick where they do not." }
+  - { from: temp-months, to: houses, now: missing, how: "Steep roofs for snow, raised floors for flood and heat." }
+  - { from: wealth, to: houses, now: missing, how: "A household's rank is its house's size." }
+  - { from: technology, to: houses, now: missing, how: "Fired brick, the arch and sawn timber." }
+  - { from: city-people, to: institutions, now: missing, how: "So many people to a shrine or a market." }
+  - { from: beliefs, to: institutions, now: missing, how: "What a people worship decides what they build for it." }
+  - { from: states, to: institutions, now: missing, how: "Palaces, granaries and courts." }
+  - { from: surplus, to: wealth, now: missing, how: "There is nothing to hoard without a surplus." }
+  - { from: way-of-life, to: wealth, now: missing, how: "Land that can be owned and inherited makes unequal houses." }
+  - { from: states, to: wealth, now: missing, how: "Tribute gathers wealth at the top." }
+  - { from: town-sites, to: routes, now: missing, how: "Routes run between the places people are." }
+  - { from: relief, to: routes, now: missing, how: "Roads take the easy ground." }
+  - { from: travel, to: routes, now: missing, how: "The means of travel decide what counts as easy." }
+  - { from: states, to: routes, now: missing, loop: empires-build-roads, how: "Empires build roads." }
+  - { from: travel, to: trade, now: missing, how: "Goods go as far as carriage is cheap." }
+  - { from: urban-share, to: trade, now: missing, how: "Large towns buy and sell more, to and from further off." }
+  - { from: resources, to: trade, now: missing, how: "What one land lacks another sells." }
+  - { from: routes, to: trade, now: missing, how: "Trade follows the roads there are." }
+  - { from: states, to: trade, now: missing, how: "Peace, coin and customs." }
+  - { from: bedrock, to: resources, now: missing, how: "Ores, stone and salt lie where the rock put them." }
+  - { from: biome, to: resources, now: missing, how: "Timber is where the forests are." }

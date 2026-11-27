@@ -1,0 +1,87 @@
+lane: cover
+title: What grew
+about: The vegetation and the soil under it.
+nodes:
+  - id: plant-kinds
+    label: Which plants there were yet
+    kind: contingent
+    what: "Whether land plants, forests, flowers and grasses had yet appeared."
+    now: records
+    has: [model:earth/biome-from-climate]
+    note: "Each cover is allowed only after the transition record that brought it: no forest before the first forests."
+    best: "As it is. The transitions are evidence, and the tree of life could date more of them."
+    gap: small
+    seen: [fossils]
+  - id: growth
+    label: Growth of the vegetation
+    kind: at-once
+    what: "How much plants grow on a square metre in a year."
+    now: borrowed
+    has: [field:earth/net-primary-production, field:earth/leaf-area]
+    note: "A vegetation model's output for 120 kyr, kept and tested by nothing here. No figure at all before that."
+    best: "A closed form from warmth and rain for every time, then a vegetation model for each climate member, held to today's measured growth."
+    gap: large
+    seen: [surveys, pollen]
+  - id: biome
+    label: What covered the land
+    kind: at-once
+    what: "Forest, grass, desert, tundra or ice."
+    now: rule
+    has: [model:earth/biome-from-climate, field:earth/biome, field:earth/biome-late-quaternary]
+    note: "The climate's class read through fixed thresholds: one cover to a cell. Held to 15 fossil forests, none of which falls in a desert. No pollen."
+    best: "Shares of each cover in a cell, conditioned on pollen (Neotoma, CC BY) and on plant fossils and coals before it."
+    gap: medium
+    seen: [pollen, fossils, rocks]
+  - id: leaf-season
+    label: The year of the leaves
+    kind: at-once
+    what: "When the land greens, flowers and browns."
+    now: stand-in
+    has: [gen:life/scene]
+    note: "A scene's plants do not yet follow the place's own months."
+    best: "Greening and leaf fall from each place's warmth and rain by month."
+    gap: small
+    seen: [surveys]
+  - id: fire
+    label: Fire
+    kind: at-once
+    what: "How often the land burns."
+    now: none
+    note: "Not in the world."
+    best: "From the dry months and the fuel on the ground, with charcoal in lake beds as evidence."
+    gap: small
+    seen: [pollen]
+  - id: soil
+    label: Soil
+    kind: settling
+    what: "What the loose ground is made of, how deep and how rich."
+    now: borrowed
+    has: [field:earth/soil, model:earth/substrate]
+    note: "Today's topsoil per half degree, held through the Holocene. Its sand, silt, clay and stones, with no depth and no richness."
+    best: "Soil from rock, climate, cover and slope where today's map cannot be held, and river-laid ground from the floodplains."
+    gap: medium
+    seen: [surveys, rocks]
+edges:
+  - { from: lineages, to: plant-kinds, now: partial, how: "Written as transition records by hand, not read from the tree of life." }
+  - { from: temp-months, to: growth, now: inside, how: "Plants grow by the warmth of the season." }
+  - { from: rain-months, to: growth, now: inside, how: "Water limits growth wherever it is short." }
+  - { from: co2, to: growth, now: inside, how: "With more CO₂ a plant grows on less water." }
+  - { from: soil, to: growth, now: missing, how: "Thin or poor soil holds growth back." }
+  - { from: plant-kinds, to: biome, now: built, by: model:earth/biome-from-climate, how: "A cover is drawn only once it had come to exist." }
+  - { from: temp-months, to: biome, now: built, by: model:earth/biome-from-climate, how: "The warmest and coldest month class the climate." }
+  - { from: rain-months, to: biome, now: built, by: model:earth/biome-from-climate, how: "Aridity sets desert, steppe and forest apart." }
+  - { from: climate-height, to: biome, now: built, by: model:earth/lapse-rate, how: "The months at a height give the cover there: a tropical mountain comes to tundra and ice." }
+  - { from: ice, to: biome, now: built, by: model:earth/biome-from-climate, how: "Where the ice-sheet field has the time, ice is drawn from it alone." }
+  - { from: fire, to: biome, now: missing, loop: fire-and-grass, how: "Burning keeps grass where trees could stand." }
+  - { from: numbers, to: biome, now: missing, loop: grazers, how: "Great herds keep the land open." }
+  - { from: land-use, to: biome, now: missing, loop: clearing, how: "Fields and pasture take the place of the wild cover." }
+  - { from: temp-months, to: leaf-season, now: missing, how: "Leaves open when the cold ends." }
+  - { from: rain-months, to: leaf-season, now: missing, how: "In the tropics the rains set the green season." }
+  - { from: biome, to: fire, now: missing, how: "Grass and dry forest carry fire, and wet forest does not." }
+  - { from: rain-months, to: fire, now: missing, how: "A dry season cures the fuel." }
+  - { from: density, to: fire, now: missing, loop: clearing, how: "People light most fires." }
+  - { from: bedrock, to: soil, now: partial, by: model:earth/substrate, how: "The rock under a place is what its soil is made from." }
+  - { from: biome, to: soil, now: missing, how: "Roots and litter build the soil." }
+  - { from: temp-months, to: soil, now: missing, how: "Warm, wet ground weathers deep." }
+  - { from: relief, to: soil, now: missing, how: "Soil is thin on slopes and thick in valleys." }
+  - { from: floodplains, to: soil, now: missing, loop: rivers-make-soil, how: "A river lays down new soil, which then holds the next rain." }

@@ -1,0 +1,152 @@
+lane: record
+title: The record
+about: How the world's evidence comes to exist. Each kind of evidence is caused by what was there, by what survived, and by where people have looked.
+nodes:
+  - id: preservation
+    label: What survives
+    kind: at-once
+    what: "The chance that a thing that was there left a trace that lasted."
+    now: none
+    note: "The records say it in words: beds laid down under water keep more, and old sea floor has gone down the trenches. No model."
+    best: "A chance of survival by setting and age, from the laying-down, the rock at the surface and the climate."
+    gap: large
+  - id: effort
+    label: Where people have looked
+    kind: given
+    what: "How much digging, coring, surveying and publishing a place and time have had."
+    now: none
+    note: "The records say it in words: the fossil lists partly show where people have dug. No field."
+    best: "A count the world already holds: every collection, date or site of a region and time, whatever it found."
+    gap: large
+  - id: stripes
+    label: Sea-floor stripes and old magnetism
+    kind: record
+    what: "Magnetic stripes of the sea floor, and the direction frozen into old rocks."
+    now: borrowed
+    note: "Read only inside the plate models. The models' own poles are in their archives and unread."
+    best: "Poles as observations of each plate's latitude, so that rival plate models can be scored."
+    gap: medium
+  - id: rocks
+    label: Beds of rock
+    kind: record
+    what: "What was laid down where and when: sea beds, river beds, coals, salts, tills, old soils."
+    now: borrowed
+    has: [field:earth/rock-record, field:earth/strata, model:earth/rock-record]
+    note: "The rocks of 279,000 fossil collections, and 35,481 units in 1,534 columns. They are held against the coast and correct nothing."
+    best: "Read as observations of the coast, the rain and the ice: a sea bed says sea, a coal says wet, a till says ice."
+    gap: large
+  - id: heights
+    label: Measured old heights
+    kind: record
+    what: "How high ground stood, from the isotopes of old rain and the shapes of fossil leaves."
+    now: records
+    note: "Claims on eight range records. They contradict the elevation maps by a kilometre and correct nothing."
+    best: "Observations of the height of the land, each with its several hundred metres of doubt."
+    gap: medium
+  - id: proxies
+    label: Measures of old climate
+    kind: record
+    what: "Isotopes, tree rings and chemistry that record warmth, rain and the sea's level."
+    now: borrowed
+    has: [field:earth/antarctic-temperature, field:earth/sea-level-stack]
+    note: "Read for CO₂, one curve of warmth, Antarctica's temperature and the sea's level. No proxy conditions a climate field."
+    best: "Observations of the climate fields: sea-surface isotopes for deep time, PAGES 2k (CC BY) for the last 2,000 years."
+    gap: large
+  - id: ice-cores
+    label: Ice cores
+    kind: record
+    what: "Old air, dust and sulphate trapped in ice."
+    now: borrowed
+    has: [field:earth/co2-ice-core, field:earth/methane-ice-core, field:earth/antarctic-temperature]
+    note: "CO₂, methane and Antarctic temperature for 800 kyr."
+    best: "Sulphate as dated eruptions, for the year-to-year swings."
+    gap: small
+  - id: pollen
+    label: Pollen and charcoal
+    kind: record
+    what: "What grew round a lake or bog, layer by layer."
+    now: none
+    note: "Not read."
+    best: "Neotoma (CC BY): the vegetation's evidence for the Quaternary, and the first sign of clearing and of crops."
+    gap: large
+  - id: fossils
+    label: Fossils
+    kind: record
+    what: "Where and when remains of each lineage were found."
+    now: borrowed
+    has: [field:life/taxa-land, field:life/taxa-sea, field:earth/genera-through-time]
+    note: "245,000 land rows and 1.4 million sea rows of the Paleobiology Database (CC0). No sightings of living species."
+    best: "The same rows read over their effort. Today's sightings (GBIF's open sets) for the present end."
+    gap: small
+  - id: sites
+    label: Sites, finds and their dates
+    kind: record
+    what: "Excavated places, what was found in them, and radiocarbon dates."
+    now: records
+    has: [field:people/ancient-places]
+    note: "Pleiades' places as a list, and a few dozen sites and finds written by hand. No database of dates."
+    best: "The radiocarbon databases (p3k14c, XRONOS, licences unchecked): dates by the hundred thousand, with the effort they show."
+    gap: large
+  - id: dna
+    label: Ancient genomes
+    kind: record
+    what: "The ancestry of dated individuals."
+    now: none
+    note: "Individuals are named in the dispersal records. No database."
+    best: "The Allen Ancient DNA Resource, licence unchecked."
+    gap: medium
+  - id: ethnography
+    label: Peoples described in recent centuries
+    kind: record
+    what: "How peoples built, farmed and kept animals when outsiders wrote it down."
+    now: none
+    note: "Read one work at a time, behind single traditions."
+    best: "D-PLACE (licence unchecked): about 1,300 societies' houses, crops and animals, tied to Glottolog's languages. Read as analogy, with an error that grows with the years back."
+    gap: large
+  - id: texts
+    label: Texts, censuses and inscriptions
+    kind: record
+    what: "What people wrote down."
+    now: records
+    note: "Read source by source, with locator and quote: 18,688 claims, of which 1,241 have quotes checked by script and none is yet accepted by a person."
+    best: "The same, at the scale agents can read. Censuses by region are the people's test set."
+    gap: medium
+  - id: surveys
+    label: Today's measurements
+    kind: record
+    what: "Satellites, gauges, maps and soil surveys of the present."
+    now: borrowed
+    has: [field:earth/relief, field:earth/river-widths, field:earth/soil, field:earth/bedrock]
+    note: "Relief at 1.8 km, rivers wider than 30 m, topsoil and bedrock at half a degree."
+    best: "Relief at 30 m, gauged flows, and gridded census counts to anchor the present end of every node."
+    gap: medium
+  - id: others
+    label: Others' reconstructions
+    kind: record
+    what: "Other people's models of the past: grids of people, maps of old land, climate runs, lists of cities and states."
+    now: borrowed
+    has: [field:earth/population, field:earth/elevation, field:earth/climate, field:people/cities, field:earth/polities]
+    note: "Drawn as the value wherever the world has no node of its own."
+    best: "Each one an observation with an error fitted on held-out evidence, and scored as a rival beside the world's own node."
+    gap: medium
+edges:
+  - { from: erosion, to: preservation, now: missing, how: "Burial keeps, and uplift and wear destroy." }
+  - { from: plates, to: preservation, now: missing, how: "Old sea floor and what lay on it go down the trenches." }
+  - { from: temp-months, to: preservation, now: missing, how: "Dry and frozen ground keep what wet ground rots." }
+  - { from: density, to: effort, now: missing, how: "Most digging is done near where most scholars live." }
+  - { from: preservation, to: rocks, now: missing, how: "Only rock that was not worn away is there to read." }
+  - { from: preservation, to: fossils, now: missing, how: "Hard parts in quiet water are kept, and most else is lost." }
+  - { from: preservation, to: pollen, now: missing, how: "Pollen keeps in lakes and bogs." }
+  - { from: preservation, to: sites, now: missing, how: "Stone and fired clay last, and wood and thatch do not." }
+  - { from: preservation, to: dna, now: missing, how: "Genomes last in the cold and the dry." }
+  - { from: effort, to: fossils, now: missing, how: "A fossil is in the database because someone collected there." }
+  - { from: effort, to: rocks, now: missing, how: "Columns are thickest where geologists are." }
+  - { from: effort, to: heights, now: missing, how: "A handful of basins have been measured." }
+  - { from: effort, to: proxies, now: missing, how: "Cores are drilled where ships and stations go." }
+  - { from: effort, to: pollen, now: missing, how: "Cored lakes cluster in Europe and North America." }
+  - { from: effort, to: sites, now: missing, how: "A site is known because someone dug it." }
+  - { from: effort, to: dna, now: missing, how: "Sampling follows the laboratories." }
+  - { from: effort, to: ethnography, now: missing, how: "Peoples were described where outsiders went, and when." }
+  - { from: writing, to: texts, now: missing, how: "No writing, no text." }
+  - { from: states, to: texts, now: missing, how: "States count their people and their land." }
+  - { from: preservation, to: texts, now: missing, how: "Clay and stone outlast papyrus and palm leaf." }

@@ -1,0 +1,197 @@
+lane: living
+title: Ways of living
+about: Where people had reached, how they got their food, and how many the land could feed.
+nodes:
+  - id: humans
+    label: Where people had reached
+    kind: spreading
+    what: "Which lands people had come to, and by when."
+    now: records
+    note: "The dispersals of Homo sapiens and their meetings with other humans as records, with rival pictures. No field says where people were before 10,000 BCE."
+    best: "An arrival surface fitted to the dated sites, limited by the climate and the land bridges of each time."
+    gap: large
+    seen: [sites, dna, fossils]
+  - id: domestication
+    label: Where each crop and animal was first kept
+    kind: contingent
+    what: "The place and time each domesticate began."
+    now: records
+    note: "About twenty records with places and dates. They feed no model."
+    best: "As it is: the beginnings are evidence. They are the origins the spreading nodes below start from."
+    gap: small
+    seen: [sites, dna]
+  - id: crop-limits
+    label: What each crop needs
+    kind: at-once
+    what: "The warmth, water and length of season each crop will grow in."
+    now: stand-in
+    has: [gen:people/settlement]
+    note: "The generator picks crops by the climate's class alone."
+    best: "Each crop's limits from the agronomy, set against each place's months."
+    gap: medium
+    seen: [surveys, sites]
+  - id: farming-reach
+    label: How far farming had spread
+    kind: spreading
+    what: "Whether each kind of farming had reached a place by a time."
+    now: borrowed
+    has: [field:people/land-use-assessment]
+    note: "Experts' levels for 146 regions at ten times from 10,000 BP, the nearest time holding, with hard edges."
+    best: "An arrival surface for each crop complex, fitted to radiocarbon first appearances (p3k14c, licence unchecked), and held out continent by continent."
+    gap: large
+    seen: [sites, pollen, others]
+  - id: herding-reach
+    label: How far herding had spread
+    kind: spreading
+    what: "Whether herds were kept at a place by a time."
+    now: borrowed
+    has: [field:people/land-use-assessment]
+    note: "The same experts' levels, for pastoralism."
+    best: "An arrival surface from where each animal was first kept, over grass."
+    gap: large
+    seen: [sites, others]
+  - id: way-of-life
+    label: How people lived off the land
+    kind: at-once
+    what: "The mix of foraging, herding, shifting and settled farming at a place."
+    now: rule
+    has: [model:people/lifeways, field:people/lifeways, field:people/anthromes]
+    note: "HYDE's classes joined to the experts by rules of thumb. The two agree that farming was widespread in 17 of 49 regions at 2,000 BP. The arrow runs backwards: the way of life is read off HYDE's people and land use."
+    best: "Shares of each way of life in a cell, from what had arrived and what the land favours, with the experts' levels as observations."
+    gap: large
+    seen: [sites, ethnography, texts]
+  - id: intensity
+    label: How hard the land was worked
+    kind: settling
+    what: "Fallows, ploughs, terraces, paddies and manure."
+    now: none
+    note: "Not in the world."
+    best: "Steps of working the land harder, which follow the people's press on it and what had been invented."
+    gap: medium
+    seen: [sites, texts, ethnography]
+  - id: water-works
+    label: Water works
+    kind: settling
+    what: "Canals, ponds, reservoirs and terraces."
+    now: stand-in
+    has: [gen:people/settlement]
+    note: "Drawn where a tradition's record names them, as the Khmer house's ponds are."
+    best: "Works where rivers and relief allow them and the crop and the crowding ask for them."
+    gap: medium
+    seen: [sites, surveys, texts]
+  - id: land-use
+    label: Fields, pasture and cleared forest
+    kind: at-once
+    what: "How much of the land people farmed, grazed or cleared."
+    now: borrowed
+    has: [field:earth/cropland, field:earth/grazing-land, field:people/anthromes]
+    note: "HYDE's series and classes: cropland to a person run back from 1960 and multiplied by its people."
+    best: "Worked land from the people and their way of life, with pollen's record of clearing as evidence."
+    gap: medium
+    seen: [pollen, texts, surveys, others]
+  - id: crops
+    label: Crops and fields
+    kind: at-once
+    what: "Which crops stood in the fields, in what shares, and how the fields were laid."
+    now: stand-in
+    has: [gen:people/settlement]
+    note: "Chosen in the generator by the climate's class. Seven farming traditions are written."
+    best: "Shares of each crop from its limits and its arrival, and fields by tradition."
+    gap: large
+    seen: [sites, texts, ethnography]
+  - id: farm-year
+    label: The farming year
+    kind: at-once
+    what: "The months of sowing, growth, harvest and fallow."
+    now: stand-in
+    has: [gen:people/settlement]
+    note: "Runs on the month's number, as in a temperate summer: rice ripens in August at Angkor."
+    best: "Sowing and harvest from each place's own rains, frosts and floods. It needs no new data."
+    gap: medium
+    seen: [texts, ethnography]
+  - id: animals-kept
+    label: Kept animals
+    kind: at-once
+    what: "Which animals a household kept, and how many."
+    now: stand-in
+    has: [gen:people/settlement]
+    note: "Twenty husbandry traditions are written. Where none holds, no animals are drawn."
+    best: "Animals from where each was first kept and how far it had spread, by climate and tradition."
+    gap: medium
+    seen: [sites, ethnography]
+  - id: yield
+    label: Food from a km²
+    kind: at-once
+    what: "How much food the land gave under the way of life practised on it."
+    now: none
+    note: "Not in the world."
+    best: "Wild food from the land's growth, its season and its waters. Crops' yield from the months, the soil and the water works."
+    gap: total
+    seen: [ethnography, texts]
+  - id: capacity
+    label: How many the land could feed
+    kind: at-once
+    what: "People to the km² that the food would keep."
+    now: none
+    note: "Not in the world."
+    best: "Yield over a person's needs, by way of life, fitted to peoples whose numbers and lands are known."
+    gap: total
+    seen: [ethnography, texts]
+edges:
+  - { from: lineages, to: humans, now: partial, how: "Fourteen human lineages are records. Where each arose is the start of its spread." }
+  - { from: land-links, to: humans, now: missing, how: "People crossed where the land and the low seas let them." }
+  - { from: temp-months, to: humans, now: missing, how: "Cold and desert closed the ways, and green corridors opened them." }
+  - { from: growth, to: humans, now: missing, how: "Foragers follow food." }
+  - { from: humans, to: domestication, now: missing, how: "A plant is first kept where people already gather it." }
+  - { from: range, to: domestication, now: missing, how: "A crop begins where its wild parent grew." }
+  - { from: domestication, to: crop-limits, now: missing, how: "A crop keeps its wild parent's needs, and is bred beyond them slowly." }
+  - { from: domestication, to: farming-reach, now: missing, how: "Farming spreads outward from where each crop began." }
+  - { from: crop-limits, to: farming-reach, now: missing, how: "A crop stops where its season is too short or too dry." }
+  - { from: temp-months, to: farming-reach, now: missing, how: "The length of the warm season is the limit northward and upward." }
+  - { from: rain-months, to: farming-reach, now: missing, how: "Rain, or a river in its place, is the limit in dry land." }
+  - { from: land-links, to: farming-reach, now: missing, how: "Farmers and their seeds travel over the ground of the time." }
+  - { from: humans, to: farming-reach, now: missing, how: "Farming reaches only where people are." }
+  - { from: domestication, to: herding-reach, now: missing, how: "Herding spreads outward from where each animal was first kept." }
+  - { from: biome, to: herding-reach, now: missing, how: "Herds need grass." }
+  - { from: land-links, to: herding-reach, now: missing, how: "Herders move fast over open ground." }
+  - { from: farming-reach, to: way-of-life, now: partial, by: model:people/lifeways, how: "The experts' level of farming in the region is read where HYDE's class names no use." }
+  - { from: herding-reach, to: way-of-life, now: partial, by: model:people/lifeways, how: "The experts' level of herding in the region, the same way." }
+  - { from: biome, to: way-of-life, now: missing, how: "What the land favours: forest, grass or river plain." }
+  - { from: way-of-life, to: intensity, now: missing, how: "Each way of life has its own ladder of working the land harder." }
+  - { from: technology, to: intensity, now: missing, how: "The plough, iron and the paddy each raised what a field could bear." }
+  - { from: density, to: intensity, now: missing, loop: more-mouths, how: "More mouths on the same land work it harder." }
+  - { from: rivers, to: water-works, now: missing, how: "A canal needs a river to draw from." }
+  - { from: relief, to: water-works, now: missing, how: "Slopes are terraced and flats are flooded." }
+  - { from: crops, to: water-works, now: missing, how: "Wet rice asks for standing water." }
+  - { from: intensity, to: water-works, now: missing, how: "Works are built when the land must give more." }
+  - { from: states, to: water-works, now: missing, loop: great-works, how: "The largest works need many hands under one direction." }
+  - { from: way-of-life, to: land-use, now: backwards, by: model:people/lifeways, how: "How people live sets how much land they work. Today the world reads it the other way, from HYDE's land use." }
+  - { from: density, to: land-use, now: inside, how: "HYDE multiplies its people by the cropland each used." }
+  - { from: intensity, to: land-use, now: missing, how: "Worked harder, less land feeds each person." }
+  - { from: crop-limits, to: crops, now: missing, how: "Only crops that will grow here are grown." }
+  - { from: farming-reach, to: crops, now: missing, how: "Only crops that had arrived are grown." }
+  - { from: temp-months, to: crops, now: partial, by: gen:people/settlement, how: "The generator picks crops by the climate's class." }
+  - { from: likeness, to: crops, now: missing, how: "Peoples keep the crops their forebears and neighbours grew." }
+  - { from: temp-months, to: farm-year, now: missing, how: "Frost bounds the growing season." }
+  - { from: rain-months, to: farm-year, now: missing, how: "The rains' onset is the sowing date." }
+  - { from: flood-season, to: farm-year, now: missing, how: "On the Nile the year is the flood's." }
+  - { from: crops, to: farm-year, now: missing, how: "Each crop has its own length of season." }
+  - { from: domestication, to: animals-kept, now: missing, how: "Only animals that had been tamed." }
+  - { from: herding-reach, to: animals-kept, now: missing, how: "Only animals that had arrived." }
+  - { from: biome, to: animals-kept, now: missing, how: "Camels in the dry, buffalo in the wet." }
+  - { from: likeness, to: animals-kept, now: missing, how: "Peoples keep the animals their forebears and neighbours kept." }
+  - { from: growth, to: yield, now: missing, how: "Wild food and pasture follow the land's growth." }
+  - { from: numbers, to: yield, now: missing, how: "Game is as plentiful as the animals are." }
+  - { from: rivers, to: yield, now: missing, how: "Rivers give fish, and floodwater for fields." }
+  - { from: coast, to: yield, now: missing, how: "Shores feed dense foragers." }
+  - { from: crops, to: yield, now: missing, how: "Each crop gives its own return to the hectare." }
+  - { from: soil, to: yield, now: missing, how: "Rich ground gives more." }
+  - { from: floodplains, to: yield, now: missing, how: "River-laid ground gives the richest harvests, renewed by each flood." }
+  - { from: intensity, to: yield, now: missing, how: "Land worked harder gives more." }
+  - { from: water-works, to: yield, now: missing, how: "Irrigated land gives more, and more surely." }
+  - { from: animals-kept, to: yield, now: missing, how: "Herds turn grass into food and pull the plough." }
+  - { from: swings, to: yield, now: missing, how: "A bad year is a thin harvest." }
+  - { from: industry, to: yield, now: missing, loop: machines-feed, how: "Fertiliser and engines multiplied the harvest." }
+  - { from: yield, to: capacity, now: missing, how: "Food over what a person needs." }
+  - { from: way-of-life, to: capacity, now: missing, how: "Foragers, herders and farmers live at densities a hundredfold apart on the same land." }
+  - { from: trade, to: capacity, now: missing, loop: cities-eat-from-afar, how: "A place that buys its food holds more people than its own land feeds." }

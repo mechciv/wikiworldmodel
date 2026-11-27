@@ -1,0 +1,174 @@
+lane: air
+title: Air and ocean
+about: What the air was made of, how warm the Earth was, and the climate of each place by month.
+nodes:
+  - id: co2
+    label: CO₂ in the air
+    kind: settling
+    what: "How much CO₂ the atmosphere held."
+    now: borrowed
+    has: [field:earth/co2, field:earth/co2-ice-core, field:earth/co2-paleosols]
+    note: "A fit through proxies for 420 Myr with a 68% band, ice cores for 800 kyr, and ranges from four ancient soils before. It is the one root field that carries a spread."
+    best: "The same, with the Cenozoic compilation (CenCO2PIP, unchecked), and before 420 Ma a prior from outgassing and weathering."
+    gap: small
+    seen: [proxies, ice-cores]
+  - id: other-gases
+    label: Methane and oxygen
+    kind: settling
+    what: "The other gases that warm the air or feed life."
+    now: borrowed
+    has: [field:earth/methane-ice-core]
+    note: "Methane from ice cores for 800 kyr. Oxygen's rise is told as records of events."
+    best: "Oxygen as rival curves. Methane as a term of the energy balance, which the Archean needs."
+    gap: medium
+    seen: [ice-cores, rocks]
+  - id: weathering
+    label: Weathering of rock
+    kind: at-once
+    what: "How fast rock breaks down chemically and takes CO₂ with it."
+    now: none
+    note: "Not in the world."
+    best: "The rate from warmth, runoff, fresh rock and plants, as the long-term carbon models write it. It is the Earth's thermostat."
+    gap: medium
+    seen: [proxies]
+  - id: albedo
+    label: Light thrown back
+    kind: at-once
+    what: "How much sunlight the surface reflects."
+    now: rule
+    has: [model:earth/energy-balance, field:earth/surface-albedo]
+    note: "In the energy balance, a band colder than −10 °C is ice. The climate runs' own albedo is kept and read by nothing."
+    best: "From the ice, the snow and the cover, so that a greener or a whiter land feeds back."
+    gap: medium
+    seen: [surveys]
+  - id: global-temp
+    label: The Earth's mean warmth
+    kind: at-once
+    what: "The average temperature of the surface."
+    now: rule
+    has: [model:earth/energy-balance, field:earth/temperature-energy-balance, field:earth/surface-temperature, field:earth/snowball-co2, field:earth/thaw-co2]
+    note: "A balance of energy by latitude, run for each member of the CO₂. It is 5 °C colder than the rocks' curve on average, with a correlation of 0.50. That curve is another's series."
+    best: "The same balance with methane and a geography, conditioned on the isotope record, with rival curves scored beside it."
+    gap: medium
+    seen: [proxies, others]
+  - id: ocean-flow
+    label: Ocean currents
+    kind: at-once
+    what: "How the sea carries heat from the tropics to the poles."
+    now: none
+    note: "Only inside the climate runs."
+    best: "Taken from the runs as they are. Not worth a model of the world's own."
+    gap: small
+  - id: winds
+    label: Winds and the belts of rain
+    kind: at-once
+    what: "The great circulation: trades, monsoons and westerlies."
+    now: borrowed
+    has: [field:earth/wind, field:earth/wind-speed]
+    note: "The runs' winds are kept. No model or generator reads them."
+    best: "Read for rain shadows and for the sea's routes under sail."
+    gap: small
+  - id: temp-months
+    label: Warmth by month
+    kind: at-once
+    what: "The temperature of each place in each month."
+    now: borrowed
+    has: [field:earth/climate, field:earth/climate-late-quaternary]
+    note: "One run for each 10 Myr at 2°, and a debiased series for 120 kyr. Spread unknown, and no evidence conditions it. At the Hell Creek the coldest month is below freezing where fossil leaves say 12–20 °C for the year."
+    best: "An ensemble made by scaling each run's pattern across the CO₂ band, conditioned on isotopes and leaves. Krapp et al. 2021 (open) to 800 kyr, and PAGES 2k (CC BY) for the last 2,000 years."
+    gap: large
+    seen: [proxies, pollen, fossils, others]
+  - id: rain-months
+    label: Rain by month
+    kind: at-once
+    what: "The rain and snow of each place in each month."
+    now: borrowed
+    has: [field:earth/climate, field:earth/climate-late-quaternary]
+    note: "From the same runs. Nothing tests it but the rivers it makes."
+    best: "With the warmth's ensemble, conditioned on coals, salts and old lake levels."
+    gap: large
+    seen: [rocks, pollen, proxies, others]
+  - id: climate-height
+    label: Climate at a height
+    kind: at-once
+    what: "The months at a place's own height within its cell."
+    now: rule
+    has: [model:earth/lapse-rate, field:earth/climate-at-height]
+    note: "One lapse rate everywhere and always, with the cell's rain at every height."
+    best: "Rain that follows relief, wet to windward and dry in the lee, and a lapse rate that changes with the season."
+    gap: medium
+    seen: [surveys]
+  - id: sea-temp
+    label: The sea's warmth and its ice
+    kind: at-once
+    what: "The temperature of the sea's surface, and where it froze."
+    now: none
+    note: "The sea's atlas uses belts of latitude in its place."
+    best: "From the same conditioned climate, so that a like belt becomes a like sea."
+    gap: medium
+    seen: [proxies]
+  - id: swings
+    label: Year-to-year swings
+    kind: contingent
+    what: "Droughts, cold spells and the years after great eruptions."
+    now: none
+    note: "Not in the world."
+    best: "Year by year for the last 2,000 years from tree rings and ice cores. Before that, only how often and how large."
+    gap: medium
+    seen: [proxies, ice-cores, texts]
+  - id: cloud
+    label: Cloud, damp and light
+    kind: at-once
+    what: "The cloudiness and humidity of each month."
+    now: borrowed
+    has: [field:earth/cloudiness, field:earth/relative-humidity, gen:earth/clouds]
+    note: "Kept for 120 kyr and read by no generator. The clouds drawn are generic."
+    best: "Read by the cloud generator and by the light of a scene."
+    gap: small
+edges:
+  - { from: outgassing, to: co2, now: missing, how: "What the Earth gives off is the air's supply." }
+  - { from: weathering, to: co2, now: missing, loop: thermostat, how: "Weathering rock draws CO₂ down." }
+  - { from: growth, to: co2, now: missing, loop: carbon-burial, how: "Buried plant carbon is out of the air. The coal ages are its mark." }
+  - { from: land-use, to: co2, now: missing, loop: clearing, how: "Cleared forest gives up its carbon." }
+  - { from: industry, to: co2, now: missing, loop: fossil-carbon, how: "Burned fuel puts back in two centuries what took ages to bury." }
+  - { from: plant-kinds, to: other-gases, now: missing, loop: life-makes-air, how: "Photosynthesis made the oxygen." }
+  - { from: global-temp, to: weathering, now: missing, how: "Warm, wet air weathers rock faster." }
+  - { from: runoff, to: weathering, now: missing, how: "Water carries the dissolved rock away." }
+  - { from: erosion, to: weathering, now: missing, how: "Fresh rock from young mountains weathers fastest." }
+  - { from: biome, to: weathering, now: missing, how: "Roots and soil acids speed it. Land plants cooled the Earth." }
+  - { from: global-temp, to: albedo, now: built, by: model:earth/energy-balance, loop: ice-albedo, how: "A band of latitude colder than −10 °C is taken to be ice." }
+  - { from: ice, to: albedo, now: missing, loop: ice-albedo, how: "The ice the world draws is not the ice the energy balance makes." }
+  - { from: biome, to: albedo, now: missing, loop: green-feedback, how: "Forest is dark. Desert and snow over grass are bright." }
+  - { from: sun, to: global-temp, now: built, by: model:earth/energy-balance, how: "The Sun's brightness sets the energy coming in." }
+  - { from: co2, to: global-temp, now: built, by: model:earth/energy-balance, how: "Each doubling of CO₂ keeps in about 4 W to the square metre." }
+  - { from: albedo, to: global-temp, now: built, by: model:earth/energy-balance, how: "What is thrown back does not warm." }
+  - { from: other-gases, to: global-temp, now: missing, how: "Methane warmed the Archean. The model has none." }
+  - { from: elevation, to: global-temp, now: missing, how: "Where the land lay changes what is absorbed. The model has no continents." }
+  - { from: spin, to: global-temp, now: missing, how: "A faster-turning Earth carried less heat to its poles." }
+  - { from: gateways, to: ocean-flow, now: inside, how: "An open passage lets a current run round the globe." }
+  - { from: global-temp, to: ocean-flow, now: inside, how: "The contrast of warm and cold water drives the overturning." }
+  - { from: global-temp, to: winds, now: inside, how: "The contrast between equator and pole drives the winds." }
+  - { from: elevation, to: winds, now: inside, how: "Plateaus steer the westerlies and draw the monsoon." }
+  - { from: global-temp, to: temp-months, now: missing, how: "Scaling a run's pattern to the Earth's mean warmth would give members. Today each time has the one run." }
+  - { from: co2, to: temp-months, now: inside, how: "Each run was made at one CO₂." }
+  - { from: sun, to: temp-months, now: inside, how: "Each run was made under the Sun of its time." }
+  - { from: orbit, to: temp-months, now: inside, how: "The orbit's cycles are inside the runs of the last 120 kyr, and held fixed in the deep past's." }
+  - { from: elevation, to: temp-months, now: inside, how: "The runs stand on the same maps of the land as the globe." }
+  - { from: ocean-flow, to: temp-months, now: inside, how: "Currents warm the coasts they pass." }
+  - { from: winds, to: temp-months, now: inside, how: "Winds carry the sea's mildness inland." }
+  - { from: ice, to: temp-months, now: inside, loop: ice-albedo, how: "An ice sheet chills the land round it. The deep past's runs have none before the present." }
+  - { from: coast, to: temp-months, now: missing, loop: shelves-and-climate, how: "A drowned or a bared shelf changes the land the air sees." }
+  - { from: winds, to: rain-months, now: inside, how: "Rain falls where the winds bring wet air and lift it." }
+  - { from: temp-months, to: rain-months, now: inside, how: "Warm air holds more water." }
+  - { from: elevation, to: rain-months, now: inside, how: "Mountains wring rain from the air, at the runs' 2° grain." }
+  - { from: biome, to: rain-months, now: missing, loop: green-feedback, how: "Forest gives water back to the air, and rain falls again downwind." }
+  - { from: temp-months, to: climate-height, now: built, by: model:earth/lapse-rate, how: "The air is colder by one lapse rate with height." }
+  - { from: relief, to: climate-height, now: built, by: model:earth/lapse-rate, how: "A place's own height within its cell." }
+  - { from: rain-months, to: climate-height, now: partial, by: model:earth/lapse-rate, how: "The cell's rain is used at every height." }
+  - { from: winds, to: climate-height, now: missing, how: "Windward slopes are wet and lee slopes dry." }
+  - { from: global-temp, to: sea-temp, now: missing, how: "The sea warms and cools with the Earth." }
+  - { from: ocean-flow, to: sea-temp, now: missing, how: "Currents set which coasts are warm." }
+  - { from: volcanism, to: swings, now: missing, how: "A great eruption dims a year or three." }
+  - { from: winds, to: swings, now: missing, how: "The circulation wobbles from year to year." }
+  - { from: temp-months, to: cloud, now: inside, how: "Cloud and damp come from the same runs as the warmth." }
+  - { from: winds, to: cloud, now: inside, how: "Cloud forms where air rises." }
