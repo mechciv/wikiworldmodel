@@ -3345,6 +3345,9 @@ async function start(root: HTMLElement): Promise<void> {
       // A view held still is averaged over a few frames, each a fraction of a pixel off the last: a test takes its frame
       // once they are done (docs/plans/RENDERING.md, step 4).
       ['refining', refining],
+      // A still the link asks for starts once those frames are done, and draws the scene again, richer: until it is
+      // done, the view is not finished, though between the two nothing else is waited on.
+      ['still', !!state.still && !!city && cityDrawn && !city.renderer.stillDone],
       // The ground's scanned materials, fetched once: a scene drawn before they came is drawn again with them.
       ['materials', !!city && cityDrawn && (city.renderer.materials.loading || city.renderer.leavesLoading)],
       ['landscape', landscapeOn() && (!landscape!.index || (landscapeLoading && !landscape!.globe))],
