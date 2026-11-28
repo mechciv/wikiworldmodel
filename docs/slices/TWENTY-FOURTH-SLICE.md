@@ -98,7 +98,7 @@ The dataset's paper says how each run's level was set (Li et al. 2022, *Methods*
 
 So a run's level is a choice of its makers', and its pattern is the model's answer to that level: which is what
 lets the pattern's answer to the mean be read across the runs. The global means worked out here from the file, each
-cell by its area, are the paper's Table 1 to a tenth of a degree.
+cell by its area, are the paper's Table 1 to a tenth of a degree, for the 54 runs it lists.
 
 ## Running it
 
@@ -128,7 +128,7 @@ Each with what the build of this slice found. Six do not hold in full, and say w
 | Held to the present, where the climate is measured, with each block's error told from the other blocks: the measured warmest and coldest month lie within the nine-in-ten band at about nine land nodes in ten, and the measured class is given more chance than the run's class taken as sure gives it | `tools/world/test/climatechance.test.ts`: *held to the present, has the measured climate in its band about nine times in ten…* | Holds. The warmest month at 90% of the land, the coldest at 91%, the aridity at 89%. The mean log of the chance given to the measured class: −0.738 by the run with its spread, −1.244 by the run's class as a point with the chance it turns out to deserve. |
 | Held to the present, the beds of the youngest keyframe leave the climate where it is measured | the same test | Holds: they move it a little nearer. With the beds of the last five million years read and the warmth held at the run's, the measured class is given −0.727 where the run with its spread gives it −0.738; the likeliest class is the measured one on 70% of the land for the run's 68%; the log of the aridity lies 0.654 from the measured for 0.673; the coldest month 3.36 °C for 3.33. The tills of the ice ages are among those beds, and with the reefs take away a twentieth of the square of the warmth's spread at the most. |
 | The climate answers in the evidence tier where the beds near say at least as much as the members do, and only within the deep past's field | `core/resolve.test.ts`: *answers the climate as evidence where what was found near has narrowed a run…*; `tools/world/test/climatechance.test.ts`: *answers the climate in the evidence tier only where…*; `tools/world/test/build.test.ts`: *answers every layer everywhere in a tier…* | **Does not hold as written: nowhere do the beds say as much as the members.** The most they take away is 45% of the square of the aridity's spread. The tier is given where they take a quarter or more, which narrows a band by an eighth: 4.7% of the land over all keyframes, and 15% over the last 90 Myr; of the coverage chart's places, 1% at 300 Ma, 2% at 150 Ma, 5% at 60 Ma and 17% at 5 Ma. Where the climate of the last glacial cycle answers, this says nothing. |
-| A click says the chance of each class and what was found near; the coverage page has the scores; and nothing that was drawn changes | `viewer/test/e2e/climatechance.spec.ts`; the golden images | Checked on the build of this commit; what was found is filled in with the commit after it. |
+| A click says the chance of each class and what was found near; the coverage page has the scores; and nothing that was drawn changes | `viewer/test/e2e/climatechance.spec.ts`; the golden images | Holds. At a place of 70 Ma where coals or salts lie near, a click fetches the one keyframe and the panel has the likeliest class with its chance, the bands, the beds counted and how far they narrowed the bands, under the badge *evidence*; far from every bed it says so, under *reconstruction*; and where the climate of the last glacial cycle is the one drawn it says nothing. The coverage page has the section and the lane. No golden image changed. |
 | The model's record says its prior, what it observes and what it is held to, and names tests that hold it to each | `npm run validate`; `world/models/earth/climate-conditioned.yaml` | Holds: no errors, no warnings; fourteen checks named, each found by the validator. |
 | The fit and every score add under a minute to a full build | the build's log | Holds: about 15 s. |
 
@@ -225,13 +225,14 @@ with salt and one with coal at a keyframe, the share with the salt on the drier 
 ## What it looks like
 
 A click on the land where the Hell Creek stood, at 66.5 Ma, before this slice and with it; and the coverage page's
-new section. The globe is the same in both: nothing new is drawn on it.
+new section. Both clicks are the same view of the same build, drawn on the GPU and cut to the panel's side, with
+the panel moved to what covers the land. The globe is the same in both: nothing new is drawn on it.
 
 | Before | After |
 |---|---|
 | ![A click at the Hell Creek before this slice: the panel says what covers the land](../images/climate-chance-hell-creek-before.jpg) | ![The same click with this slice: under it, how likely each climate was](../images/climate-chance-hell-creek-after.jpg) |
 
-![The coverage page's section on the climate of the deep past](../images/climate-chance-coverage.jpg)
+![The coverage page's section on the climate of the deep past](../images/climate-chance-coverage.png)
 
 ## Decisions
 
@@ -255,8 +256,8 @@ new section. The globe is the same in both: nothing new is drawn on it.
   [decision 13](../plans/MODELS.md#13-anothers-model-observes-it-is-not-the-prior) warns against, and the record says
   so. Its own error is how far it then lies from the curve with an era held out.
 - **Decision 13 is kept for what observes the level, and broken for the pattern.** The curve observes the Earth's
-  mean warmth and is no prior. The run is the shape of the prior at every place, because the world has no model of its own for where
-  the warmth and the rain fall. Its error is read at the present and conditioned by the beds.
+  mean warmth and is no prior. The run is the shape of the prior at every place, because the world has no model of
+  its own for where the warmth and the rain fall. Its error is read at the present and conditioned by the beds.
 - **The curve is read over a keyframe's span.** Its values are a million years apart, and it rises and falls within
   ten: the mean over the span, with how far it moves within it added to its band. Its band's half-width is read as
   one standard deviation, since its source does not say what it is.
@@ -324,7 +325,40 @@ new section. The globe is the same in both: nothing new is drawn on it.
 
 ## How it was checked
 
-The checks were run on the build of this commit, and are set down in the commit after it.
+By the agent that built it (Claude Code), on one machine, on 27 November 2026:
+
+- `npm run typecheck`;
+- `npm test`, 1,190 tests passing;
+- `npm run validate`, no errors and no warnings;
+- a world build from a clean commit (`262d7c6719fabe0d`), and `npm run test:build` on it, 150 tests passing;
+- `npm run build:viewer`, and the browser tests in software, as CI draws them, on a port of their own. All three
+  groups ran on the build of the commit that added the model: the globe's 121 tests, the city's 50 and the
+  six city views. One failed, a test of this slice that looked for the coverage chart's new lane before opening
+  its layer; the test was corrected. No golden image changed. The commit after that one changed the test, one
+  sentence of the panel and one line of the build's log. The world built from it is the same build, byte for byte,
+  and on it the build's tests and the globe group's tests of this slice, of the sea's chance, of the coverage page, of
+  the biomes, of the ice and of the viewer were run again, 62 tests passing;
+- `npm run causes`: the graph of causes checked, and its page rebuilt;
+- a click at the Hell Creek on the GPU, beside the same click in the viewer as it was before this slice, against the
+  same build; and the coverage page's section;
+- the model asked about thirteen well-known places, its scores set out by stretch of time, and the model held to the
+  present. That is how it was seen that the model is colder than the run at the Hell Creek and at the poles of warm
+  worlds, which no score on beds held out shows, since beds say next to nothing of warmth. The fossil forests were
+  made observations for it ([Decisions](#decisions)).
+
+Two sets of figures here are not in the build's files. They were worked out for this document with scripts over the
+build stage's own code and inputs: what the fossil forests and the columns' units with salt are given with the
+present's mean error taken off (75% and 61%); and the counts of the Paleobiology Database's collections of each kind
+and of the columns' units with salt (in *Limitations*).
+
+One source was read: Li et al. 2022, the paper of the climate dataset, in Europe PMC's full text, for how each run's
+level was set. Its two quotes here were checked by script against the text kept. No claim was written, so no
+`quoted` step was taken.
+
+What could not be done: the Hell Creek's leaf temperatures (Wilf et al. 2003) could not be read again, as their
+source was not reachable by script (Europe PMC's full text answered with an error, and PubMed Central's archive
+service does not give the article). They are held in a test against the model's band, from the quotes already on
+the record `life/hell-creek/ecosystem`, and were not made claims of their own.
 
 ## Next
 
