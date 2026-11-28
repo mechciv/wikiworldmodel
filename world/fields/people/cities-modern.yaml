@@ -1,0 +1,28 @@
+id: field:people/cities-modern
+type: field
+kind: points
+title: Modern urban centres and surviving historical towns, after GHSL and Natural Earth
+quantity: the people of a modern urban centre, at 1975, 1990, 2000 and 2015
+unit: people
+description: >-
+  Validated modern urban centres of the world (1975, 1990, 2000 and 2015) from the Global Human Settlement Layer Urban
+  Centre Database (GHSL UCDB R2019A V1.2, QA2_1V = 1), supplemented by Natural Earth 1:10m populated places strictly for
+  surviving smaller historical towns below GHSL's 50,000-person threshold. Matched to historical cities and living
+  records only by strict name and proximity so ruins beside modern cities are never falsely anchored, providing modern
+  endpoints for model:people/city-population and continuity inference after historical city lists end.
+frame: frame:earth/present-day
+grid: { kind: rows }
+time: { lo: 1975 CE, hi: 2015 CE }
+data:
+  from: src:ghsl-ucdb-2019
+  file: table
+  places: src:natural-earth-places-10m-5.1.2
+  as: cities
+basis: reconstruction
+spread: unknown
+interp: linear
+params:
+  format: ghsl-ucdb
+  role: modern
+  hold_yr: 25
+  gap_yr: 100

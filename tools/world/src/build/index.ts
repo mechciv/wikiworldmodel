@@ -71,7 +71,7 @@ import { FEATURE_INDEX } from '../../../../core/featuretiles.ts';
 import { prominenceOf, tileFeatures } from './featuretiles.ts';
 import { buildIce, type IceBuilt } from './ice.ts';
 import { hazardLayer, peopleLayer, polityLayer, presentLayer, stateRowKey } from './layers.ts';
-import { buildLandscape, disagreement, farmingAgreement, housing, housingCounts, HOUSING_TIMES, landscapeEntities, landscapeResolve, regionHyde, type LandscapeBuilt } from './landscape.ts';
+import { buildLandscape, cityHyde, disagreement, farmingAgreement, housing, housingCounts, HOUSING_TIMES, landscapeEntities, landscapeResolve, regionHyde, type LandscapeBuilt } from './landscape.ts';
 import { fitCitiesModel } from '../holdout.ts';
 import { kindIs } from '../world.ts';
 import { regionReach } from '../../../../core/landscape.ts';
@@ -707,6 +707,7 @@ export async function runBuild(args: string[]): Promise<number> {
           layer: f.layer,
           source: f.source,
           dataset: dsKey(f.data?.from),
+          ...(f.data?.places ? { placesDataset: dsKey(f.data.places) } : {}),
           sourceRecord: srcKey(f.derived ? f.source?.ref : f.data?.from),
         }
       : undefined;
@@ -1829,11 +1830,18 @@ export async function runBuild(args: string[]): Promise<number> {
         // The population model (model:people/city-population, docs/plans/MODELS.md): HYDE's people in each region a
         // record gives, the prior of its people beside the town's; then its parameters fitted to the figures held out,
         // the density model's anchors, and its scores, written into the cities file the browser reads.
-        if (pf)
+        if (pf) {
           for (const r of landscape.cities.records ?? []) {
             const km = regionReach(r);
             if (km) r.hyde = regionHyde(landscape, pf, r, km);
           }
+          const modernSources = new Set(landscape.cities.lists.filter((l) => l.role === 'modern').map((l) => l.source));
+          for (const c of landscape.cities.cities) {
+            if (modernSources.has(c.source) || !c.pops.length) continue;
+            const h = cityHyde(pf, c.lat, c.lon, c.pops[0][0]);
+            if (h.length) c.hyde = h;
+          }
+        }
         const peopleScores = fitCitiesModel(landscape.cities, log);
         landscape.files.set('people/cities.json', stableStringify(landscape.cities));
         for (const [p, c] of landscape.files) await sink.put(p, c);

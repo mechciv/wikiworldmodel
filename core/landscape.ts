@@ -16,7 +16,7 @@ import { siteClaimHistory } from './site-navigation.ts';
 import type { Scenario } from './scenario.ts';
 import type { Form } from './form.ts';
 import type { LivingTaxon, ScenePeople } from './scene.ts';
-import { centralAt, cityPopulation, densityPrior, dispersedAt, populationSpan, type DensityAnchor, type Figure, type Observation, type PeopleModel, type Population, type PopulationInput } from './citypop.ts';
+import { aliveAt, centralAt, cityPopulation, densityPrior, dispersedAt, existAt, peopleModel, populationSpan, type DensityAnchor, type Figure, type Observation, type PeopleModel, type Population, type PopulationInput } from './citypop.ts';
 import { peopleAt as peopleAtSeries, type PeopleSeries } from './growth.ts';
 
 /** A class of Anthromes 12K: its code in the grids, its name and broader level, the legend's colour, and what it means. */
@@ -318,6 +318,8 @@ export interface HousingCount {
 /** A city of a compiler's list: where it is placed, and its people at the years the list gives, on the axis. */
 export interface City {
   name: string;
+  /** alternate/constituent names (e.g. GHSL UC_NM_LST, Natural Earth namealt), used for strict identity matching */
+  alts?: string[];
   country: string;
   lat: number;
   lon: number;
@@ -328,6 +330,23 @@ export interface City {
   field: string;
   /** [year, people], in order */
   pops: [number, number][];
+  /** compact local regional HYDE population series [year, people] for demographic drift between historical figures */
+  hyde?: [number, number][];
+}
+
+/** Metadata of one city list in a CitiesFile. */
+export interface CityListMeta {
+  source: string;
+  field: string;
+  title: string;
+  hold: number;
+  gap: number;
+  /** 'historical' (default) or 'modern' (contemporary urban-centre / gazetteer anchor) */
+  role?: 'historical' | 'modern';
+  /** global benchmark columns [year, cutoffPeople] for left-censoring and occupancy inference */
+  cutoffs?: [number, number][];
+  /** calibrated prior [mean, sd] on this list's log bias relative to historical counts */
+  bias?: [number, number];
 }
 
 /** A dated placement or extent, with the claim and scenario that supply it. */
@@ -391,10 +410,10 @@ export const ownFigures = (r: Pick<CityRecord, 'id' | 'figures' | 'pops' | 'area
 export interface CitiesFile {
   format: 'lightworld-cities@1';
   /**
-   * each list: its dataset, field and title; how long a city is held either side of a figure; and the longest gap between
-   * two figures across which it is taken to have stood all along, its people straight between them
+   * each list: its dataset, field and title; how long a city is held either side of a figure; the longest gap for
+   * legacy fallback; its role ('historical' or 'modern'); global benchmark cutoffs; and calibrated log bias prior
    */
-  lists: { source: string; field: string; title: string; hold: number; gap: number }[];
+  lists: CityListMeta[];
   cities: City[];
   /** the settlements the world has records of, with a place */
   records?: CityRecord[];
@@ -449,6 +468,8 @@ export interface CityNear {
   town?: TownSpec;
   /** the band about its people at the time, as the model gives it: [lower, higher] */
   band?: [number, number];
+  /** occupancy / existence probability P(Z(t) = 1) at the time, where continuity is modeled */
+  exist?: number;
   /** what the settlement generator lays the city out from through the whole of its life (docs/plans/CITIES.md) */
   life?: CityLife;
 }
@@ -465,6 +486,8 @@ export interface CityLife {
   key: string;
   span: [number, number];
   members: PeopleSeries[];
+  /** occupancy / existence probability P(Z(t) = 1) across knots, where continuity is modeled */
+  exist?: { t: number[]; p: number[] };
   areas: { t: number; ha: number }[];
   /**
    * The density it is laid out at, people to the hectare at 10,000 people, as the population model gives it from its own
@@ -510,7 +533,8 @@ function bearing(lat1: number, lon1: number, lat2: number, lon2: number): number
  * the largest and nearest first, by the most people each ever had over how far off it is. They are the same whatever
  * the time, so a city's routes are the same through its life.
  */
-export function towardOf(f: Pick<CitiesFile, 'cities' | 'records'>, lat: number, lon: number): number[] {
+export function towardOf(f: Pick<CitiesFile, 'cities' | 'records'> & Partial<Pick<CitiesFile, 'lists'>>, lat: number, lon: number, includeModern = false): number[] {
+  const modernSources = new Set((f.lists ?? []).filter((l) => l.role === 'modern').map((l) => l.source));
   const found: { b: number; score: number }[] = [];
   const dLat = TOWARD.km / 111;
   const consider = (la: number, lo: number, pops: [number, number][]) => {
@@ -521,7 +545,10 @@ export function towardOf(f: Pick<CitiesFile, 'cities' | 'records'>, lat: number,
     if (!(most > 0)) return;
     found.push({ b: bearing(lat, lon, la, lo), score: most / d });
   };
-  for (const c of f.cities) consider(c.lat, c.lon, c.pops);
+  for (const c of f.cities) {
+    if (!includeModern && modernSources.has(c.source)) continue;
+    consider(c.lat, c.lon, c.pops);
+  }
   // A record with no people of its own counts by its houses, at six to a house, or its ground, at a hundred to the hectare.
   for (const r of f.records ?? []) {
     const pops = ownFigures(r, 'population');
@@ -529,6 +556,214 @@ export function towardOf(f: Pick<CitiesFile, 'cities' | 'records'>, lat: number,
   }
   found.sort((a, b) => b.score - a.score || a.b - b.b);
   return found.slice(0, TOWARD.most).map((x) => x.b);
+}
+
+// ——— Identity-aware settlement matching ———
+
+/** Normalize a city name for cross-dataset matching: strip diacritics, lowercase, drop punctuation and spaces. */
+export function normalizeCityName(s: string): string {
+  return s
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '');
+}
+
+function editDistanceAtMost2(a: string, b: string): number {
+  if (a === b) return 0;
+  if (Math.abs(a.length - b.length) > 2) return 3;
+  const dp = new Int16Array(a.length + 1);
+  for (let i = 0; i <= a.length; i++) dp[i] = i;
+  for (let j = 1; j <= b.length; j++) {
+    let prev = dp[0];
+    dp[0] = j;
+    for (let i = 1; i <= a.length; i++) {
+      const tmp = dp[i];
+      dp[i] = a[i - 1] === b[j - 1] ? prev : 1 + Math.min(prev, dp[i], dp[i - 1]);
+      prev = tmp;
+    }
+  }
+  return dp[a.length];
+}
+
+/**
+ * Whether two city names refer to the same name after diacritic stripping: exact match, edit distance ≤ 1 for
+ * names of ≥ 6 characters, or a shared prefix of ≥ 5 characters differing by at most 4 trailing characters (e.g.
+ * "Nara City" vs "Nara", or "Kanauji, Kanauj" vs "Kanauji").
+ */
+export function cityNamesMatch(a: string, b: string): boolean {
+  const partsA = a.split(/[,;/|]+/).map(normalizeCityName).filter(Boolean);
+  const partsB = b.split(/[,;/|]+/).map(normalizeCityName).filter(Boolean);
+  for (const na of partsA) {
+    for (const nb of partsB) {
+      if (na === nb) return true;
+      if (na.length >= 6 && nb.length >= 6 && editDistanceAtMost2(na, nb) <= 1) return true;
+      if (na.length >= 5 && nb.length >= 5 && (na.startsWith(nb) || nb.startsWith(na)) && Math.abs(na.length - nb.length) <= 4) return true;
+    }
+  }
+  return false;
+}
+
+/** All names carried by a settlement record. */
+export function recordNamesOf(r: Pick<CityRecord, 'name' | 'names'>): string[] {
+  const out = [r.name];
+  for (const n of r.names ?? []) if (!out.includes(n.text)) out.push(n.text);
+  return out;
+}
+
+/**
+ * Strict match between a modern urban-centre / gazetteer row and a historical city (or record): requires BOTH
+ * proximity and name agreement (primary name within 25 km, or alternate/constituent name within 6 km) so ruins
+ * adjacent to modern cities (Babylon/Al Hillah, Nineveh/Mosul, Angkor/Siem Reap, Carthage/Tunis, Cahokia/St. Louis)
+ * are never resurrected by distance alone.
+ */
+export function modernMatchesHistorical(
+  mod: Pick<City, 'name' | 'alts' | 'lat' | 'lon'>,
+  targetNames: string[],
+  lat: number,
+  lon: number,
+): { pri: number; d: number } | undefined {
+  if (Math.abs(mod.lat - lat) > 0.35) return undefined;
+  const d = kmBetween(lat, lon, mod.lat, mod.lon);
+  if (d > 25) return undefined;
+  if (targetNames.some((n) => cityNamesMatch(n, mod.name))) return { pri: 0, d };
+  if (d <= 6 && mod.alts?.some((a) => targetNames.some((n) => cityNamesMatch(n, a)))) return { pri: 1, d };
+  return undefined;
+}
+
+/** Gap in years between two cities' observed spans; 0 if they overlap. */
+function popSpanGap(a: Pick<City, 'pops'>, b: Pick<City, 'pops'>): number {
+  const a0 = a.pops[0]?.[0] ?? 0;
+  const a1 = a.pops.at(-1)?.[0] ?? a0;
+  const b0 = b.pops[0]?.[0] ?? 0;
+  const b1 = b.pops.at(-1)?.[0] ?? b0;
+  return Math.max(0, a0 - b1, b0 - a1);
+}
+
+/**
+ * Group list rows across sources into settlements using 1° spatial bucketing and priority one-to-one matching:
+ *  - Historical lists (e.g. Chandler ↔ Modelski): match by name within 12 km first, then by proximity within `mergeKm`
+ *    when their observed spans are within 500 yr (preventing ancient/modern collisions like Nineveh↔Mosul or Knossos↔Iraklion).
+ *  - Modern lists (role === 'modern', e.g. GHSL / Natural Earth): match to historical groups ONLY via strict
+ *    name + proximity (modernMatchesHistorical), one-to-one closest first; unmatched modern rows stand on their own.
+ */
+export function groupCityRows(cities: City[], lists: Pick<CityListMeta, 'source' | 'role'>[], mergeKm = 5): City[][] {
+  const isModern = new Set(lists.filter((l) => l.role === 'modern').map((l) => l.source));
+  const historical: City[] = [];
+  const modern: City[] = [];
+  for (const c of cities) {
+    if (isModern.has(c.source)) modern.push(c);
+    else historical.push(c);
+  }
+
+  // Bucket historical rows into 1° cells for O(N) neighbor lookup.
+  const hBuckets = new Map<string, number[]>();
+  const keyAt = (la: number, lo: number) => `${Math.floor(la)}_${Math.floor(lo)}`;
+  for (let i = 0; i < historical.length; i++) {
+    const k = keyAt(historical[i].lat, historical[i].lon);
+    (hBuckets.get(k) ?? hBuckets.set(k, []).get(k)!).push(i);
+  }
+
+  // Collect candidate cross-source historical pairs; exact/close name matches first, then close overlapping spans.
+  const hPairs: { i: number; j: number; pri: number; d: number }[] = [];
+  for (let i = 0; i < historical.length; i++) {
+    const a = historical[i];
+    const rLat = Math.floor(a.lat);
+    const rLon = Math.floor(a.lon);
+    for (let dl = -1; dl <= 1; dl++) {
+      for (let dn = -1; dn <= 1; dn++) {
+        const lonWrap = ((((rLon + dn) + 180) % 360) + 360) % 360 - 180;
+        const bucket = hBuckets.get(`${rLat + dl}_${lonWrap}`);
+        if (!bucket) continue;
+        for (const j of bucket) {
+          if (j <= i) continue;
+          const b = historical[j];
+          if (a.source === b.source) continue;
+          const d = kmBetween(a.lat, a.lon, b.lat, b.lon);
+          if (d > Math.max(12, mergeKm)) continue;
+          if (cityNamesMatch(a.name, b.name) && d <= 12) hPairs.push({ i, j, pri: 0, d });
+          else if (d <= mergeKm && popSpanGap(a, b) <= 500) hPairs.push({ i, j, pri: 1, d });
+        }
+      }
+    }
+  }
+  hPairs.sort((x, y) => x.pri - y.pri || x.d - y.d || x.i - y.i || x.j - y.j);
+
+  // Union-find / group assignment ensuring at most one row per source in each historical group.
+  const groupOf = new Int32Array(historical.length).fill(-1);
+  const groups: City[][] = [];
+  for (let i = 0; i < historical.length; i++) {
+    groupOf[i] = i;
+    groups.push([historical[i]]);
+  }
+  const active = new Uint8Array(historical.length).fill(1);
+  for (const { i, j } of hPairs) {
+    const gi = groupOf[i];
+    const gj = groupOf[j];
+    if (gi === gj) continue;
+    const ga = groups[gi];
+    const gb = groups[gj];
+    if (ga.some((x) => gb.some((y) => x.source === y.source))) continue;
+    for (const c of gb) ga.push(c);
+    for (let k = 0; k < historical.length; k++) if (groupOf[k] === gj) groupOf[k] = gi;
+    active[gj] = 0;
+  }
+  const histGroups = groups.filter((_, i) => active[i] === 1);
+
+  if (!modern.length) return histGroups;
+
+  // Bucket historical groups for fast modern-anchor matching.
+  const gBuckets = new Map<string, number[]>();
+  const gMeta = histGroups.map((g) => {
+    const names = [...new Set(g.map((c) => c.name))];
+    // Prefer the row with the latest observation as geographic reference (closest to modern urban centre).
+    const ref = [...g].sort((a, b) => (b.pops.at(-1)?.[0] ?? -1e9) - (a.pops.at(-1)?.[0] ?? -1e9) || (a.source < b.source ? -1 : 1))[0];
+    return { g, names, lat: ref.lat, lon: ref.lon };
+  });
+  for (let gi = 0; gi < gMeta.length; gi++) {
+    const k = keyAt(gMeta[gi].lat, gMeta[gi].lon);
+    (gBuckets.get(k) ?? gBuckets.set(k, []).get(k)!).push(gi);
+  }
+
+  // Strict one-to-one matching of modern anchors to historical groups.
+  const mPairs: { gi: number; mi: number; pri: number; d: number }[] = [];
+  for (let mi = 0; mi < modern.length; mi++) {
+    const m = modern[mi];
+    const rLat = Math.floor(m.lat);
+    const rLon = Math.floor(m.lon);
+    for (let dl = -1; dl <= 1; dl++) {
+      for (let dn = -1; dn <= 1; dn++) {
+        const lonWrap = ((((rLon + dn) + 180) % 360) + 360) % 360 - 180;
+        const bucket = gBuckets.get(`${rLat + dl}_${lonWrap}`);
+        if (!bucket) continue;
+        for (const gi of bucket) {
+          const hit = modernMatchesHistorical(m, gMeta[gi].names, gMeta[gi].lat, gMeta[gi].lon);
+          if (hit) mPairs.push({ gi, mi, pri: hit.pri, d: hit.d });
+        }
+      }
+    }
+  }
+  mPairs.sort(
+    (x, y) =>
+      x.pri - y.pri ||
+      x.d - y.d ||
+      (modern[x.mi].source < modern[y.mi].source ? -1 : modern[x.mi].source > modern[y.mi].source ? 1 : 0) ||
+      x.gi - y.gi ||
+      x.mi - y.mi,
+  );
+  const usedMod = new Uint8Array(modern.length);
+  const groupHasModern = new Uint8Array(histGroups.length);
+  for (const { gi, mi } of mPairs) {
+    if (usedMod[mi] || groupHasModern[gi]) continue;
+    histGroups[gi].push(modern[mi]);
+    usedMod[mi] = 1;
+    groupHasModern[gi] = 1;
+  }
+
+  // Unmatched modern cities stand on their own for modern scenes.
+  const out = [...histGroups];
+  for (let mi = 0; mi < modern.length; mi++) if (!usedMod[mi]) out.push([modern[mi]]);
+  return out;
 }
 
 /** Metres east and north of a place, on a plane about it. */
@@ -542,14 +777,35 @@ const middleOf = (span: [number, number]) => (span[0] + span[1]) / 2;
 
 /**
  * What the population model reads of a city (core/citypop.ts): its lists' rows, its record's figures and span, HYDE's
- * people in its region, the parameters the build fitted, and the prior of its density from the settlements near it
- * then, its own anchor left out so that it is pulled only by its neighbours.
+ * people in its region and local demographic drift, global benchmark cutoffs for left-censoring and occupancy, the
+ * parameters the build fitted, and the prior of its density from the settlements near it then, its own anchor left out.
  */
 export function populationInput(f: Pick<CitiesFile, 'lists' | 'model'>, lat: number, lon: number, rows: City[], r: CityRecord | undefined, guess: { hold: number }, model?: Partial<PeopleModel>): PopulationInput {
   const list = new Map(f.lists.map((l) => [l.source, l]));
-  const lists = rows.map((c) => ({ source: c.source, pops: c.pops, hold: list.get(c.source)?.hold ?? guess.hold }));
+  const lists = rows.map((c) => {
+    const l = list.get(c.source);
+    return {
+      source: c.source,
+      pops: c.pops,
+      hold: l?.hold ?? guess.hold,
+      ...(l?.role ? { role: l.role } : {}),
+      ...(l?.cutoffs?.length ? { cutoffs: l.cutoffs } : {}),
+      ...(l?.bias ? { bias: l.bias } : {}),
+    };
+  });
+  const benchmarks = f.lists.filter((l) => l.role !== 'modern' && l.cutoffs?.length).map((l) => ({ source: l.source, cutoffs: l.cutoffs! }));
+  const modernSurveyed = f.lists.some((l) => l.role === 'modern');
+  const localHyde = rows.find((c) => c.hyde?.length)?.hyde;
   const params = model ?? f.model?.params;
-  const input: PopulationInput = { lists, ...(r ? { figures: figuresOf(r), span: r.span } : {}), ...(r?.hyde ? { hyde: r.hyde } : {}), ...(params ? { model: params } : {}) };
+  const input: PopulationInput = {
+    lists,
+    ...(r ? { figures: figuresOf(r), span: r.span } : {}),
+    ...(r?.hyde ? { hyde: r.hyde } : {}),
+    ...(localHyde ? { localHyde } : {}),
+    ...(benchmarks.length ? { benchmarks } : {}),
+    ...(modernSurveyed ? { modernSurveyed } : {}),
+    ...(params ? { model: params } : {}),
+  };
   return { ...input, density: densityPrior(f.model?.anchors, lat, lon, middleOf(populationSpan(input)), params, r?.id) };
 }
 
@@ -567,7 +823,9 @@ function restsOn(pop: Population, rows: City[]): CityNear['from'] {
 
 /** A city's life from its lists' rows and its record. */
 function lifeOf(f: CitiesFile, lat: number, lon: number, rows: City[], r: CityRecord | undefined, pop: Population, scenario: Scenario): CityLife {
-  const row = rows[0];
+  const isModern = new Set(f.lists.filter((l) => l.role === 'modern').map((l) => l.source));
+  const row = rows.find((x) => !isModern.has(x.source)) ?? rows[0];
+  const pureModern = !r && rows.length > 0 && rows.every((x) => isModern.has(x.source));
   // Its cores, where its record gives them, in its own metres about its point.
   const cores = siteClaimHistory(r?.cores ?? [], scenario).map((c) => {
     const [x, y] = metresFrom(lat, lon, c.lat, c.lon);
@@ -577,13 +835,14 @@ function lifeOf(f: CitiesFile, lat: number, lon: number, rows: City[], r: CityRe
     key: r ? r.id : `${row.source}#${row.name}@${row.lat.toFixed(3)},${row.lon.toFixed(3)}`,
     span: pop.span,
     members: pop.members,
+    ...(pop.exist ? { exist: pop.exist } : {}),
     areas: r ? ownFigures(r, 'settlement_area').map(([t, ha]) => ({ t, ha })) : [],
     at10k: pop.at10k,
     density: pop.density,
     ...(pop.region ? { region: pop.region } : {}),
     ...(cores.length ? { cores } : {}),
     observations: pop.observations.map(({ source, claim, list, prop, ground, t, v, lo, hi, use, by, fit, loo }) => ({ source, ...(claim ? { claim } : {}), ...(list ? { list } : {}), prop, ground, ...(t ? { t } : {}), v, ...(lo !== undefined ? { lo } : {}), ...(hi !== undefined ? { hi } : {}), use, ...(by ? { by } : {}), ...(fit ? { fit } : {}), ...(loo ? { loo } : {}) })),
-    toward: towardOf(f, lat, lon),
+    toward: towardOf(f, lat, lon, pureModern),
     ...(r?.town ? { town: r.town } : {}),
     ...(r?.townSpan ? { townSpan: r.townSpan } : {}),
   };
@@ -655,19 +914,81 @@ export function citiesNear(f: Pick<CitiesFile, 'lists' | 'cities'>, lat: number,
 }
 
 /**
- * The cities a scene draws near a place at a time: the lists' (citiesNear), and the settlements the world has records
- * of that stood then. A record within `recordKm` of a list's city is that city: it is drawn where the record puts it, with
- * the record's houses, ground and layout. Every city's people are the population model's (populationOf), from its
- * lists' rows and its record's figures together; a record no list has then is drawn while its record says it stood, if
- * any of its figures can be read, and left out where none can.
+ * The cities a scene draws near a place at a time: the lists' (grouped across historical and modern datasets and
+ * evaluated by the population + occupancy model where global benchmarks or modern anchors are present, or via
+ * citiesNear on legacy builds), and the settlements the world has records of that stood then.
  */
 export function citiesAround(f: CitiesFile, lat: number, lon: number, t: number, km: number, guess: { perHouse: number; lot: number; hold: number; gap: number }, recordKm = 12, scenario: Scenario = {}): CityNear[] {
-  const near = citiesNear(f, lat, lon, t, km);
-  const out: CityNear[] = near.map(({ city, people, km: d, also }) => ({ name: city.name, country: city.country, lat: city.lat, lon: city.lon, people, km: d, field: city.field, source: city.source, also: also.map((a) => ({ people: a.people, field: a.city.field, source: a.city.source })), from: 'list' as const }));
-  // Each entry's rows of the lists and its record, for its life.
-  const rowsOf = new Map<CityNear, City[]>(out.map((c, i) => [c, [near[i].city, ...near[i].also.map((a) => a.city)]]));
+  const list = new Map(f.lists.map((l) => [l.source, l]));
+  const continuity = f.lists.some((l) => l.role === 'modern' || !!l.cutoffs?.length);
+  const thr = peopleModel(f.model?.params).occupancy.threshold;
+  const out: CityNear[] = [];
+  const rowsOf = new Map<CityNear, City[]>();
   const recordOf = new Map<CityNear, CityRecord>();
   const popOf = new Map<CityNear, Population>();
+
+  if (!continuity) {
+    const near = citiesNear(f, lat, lon, t, km);
+    for (const { city, people, km: d, also } of near) {
+      const entry: CityNear = { name: city.name, country: city.country, lat: city.lat, lon: city.lon, people, km: d, field: city.field, source: city.source, also: also.map((a) => ({ people: a.people, field: a.city.field, source: a.city.source })), from: 'list' };
+      out.push(entry);
+      rowsOf.set(entry, [city, ...also.map((a) => a.city)]);
+    }
+  } else {
+    // Gather rows slightly beyond `km` so a modern anchor up to 25 km from a city inside `km` still pairs with it.
+    const padKm = km + 26;
+    const dLatPad = padKm / 111;
+    const nearby: City[] = [];
+    for (const c of f.cities) {
+      if (Math.abs(c.lat - lat) > dLatPad) continue;
+      if (kmBetween(lat, lon, c.lat, c.lon) <= padKm) nearby.push(c);
+    }
+    // List rows claimed by a curated settlement record follow that record's span and never stand outside it.
+    const claimedOutsideSpan = new Set<City>();
+    for (const r of f.records ?? []) {
+      if (t >= r.span[0] && t <= r.span[1]) continue;
+      if (Math.abs(r.lat - lat) > dLatPad || kmBetween(lat, lon, r.lat, r.lon) > padKm) continue;
+      for (const c of rowsNear({ cities: nearby, lists: f.lists }, r.lat, r.lon, recordKm, recordNamesOf(r), r.span)) {
+        claimedOutsideSpan.add(c);
+      }
+    }
+    const groups = groupCityRows(nearby, f.lists);
+    for (const g of groups) {
+      if (g.some((c) => claimedOutsideSpan.has(c))) continue;
+      const head = g.find((c) => list.get(c.source)?.role !== 'modern') ?? g[0];
+      const d = kmBetween(lat, lon, head.lat, head.lon);
+      if (d > km) continue;
+      const minStart = Math.min(...g.map((c) => (c.pops[0]?.[0] ?? 0) - (list.get(c.source)?.hold ?? guess.hold)));
+      if (t < minStart) continue;
+      const pop = populationOf(f, head.lat, head.lon, g, undefined, guess);
+      if (!aliveAt(pop, t, thr)) continue;
+      const direct = g
+        .map((c) => {
+          const l = list.get(c.source);
+          return { c, p: cityPeople(c, t, l?.hold ?? guess.hold, l?.gap ?? guess.gap) };
+        })
+        .filter((x): x is { c: City; p: number } => x.p !== undefined && x.p > 0)
+        .sort((a, b) => b.p - a.p || (a.c.source < b.c.source ? -1 : 1));
+      const primary = direct[0]?.c ?? head;
+      const also = direct.filter((x) => x.c !== primary).map((x) => ({ people: x.p, field: x.c.field, source: x.c.source }));
+      const entry: CityNear = {
+        name: head.name,
+        country: head.country,
+        lat: head.lat,
+        lon: head.lon,
+        people: Math.round(centralAt(pop, t)),
+        km: Math.round(d * 10) / 10,
+        field: primary.field,
+        source: primary.source,
+        also,
+        from: 'list',
+      };
+      out.push(entry);
+      rowsOf.set(entry, g);
+      popOf.set(entry, pop);
+    }
+  }
+
   const dLat = km / 111;
   for (const r of f.records ?? []) {
     if (t < r.span[0] || t > r.span[1] || Math.abs(r.lat - lat) > dLat) continue;
@@ -677,25 +998,34 @@ export function citiesAround(f: CitiesFile, lat: number, lon: number, t: number,
     const area = figureAt(ownFigures(r, 'settlement_area'), t);
     const laid = r.town && (!r.townSpan || (t >= r.townSpan[0] && t <= r.townSpan[1])) ? r.town : undefined;
     const own = { record: r.id, ...(houses !== undefined ? { houses: Math.round(houses) } : {}), ...(area !== undefined ? { area } : {}), ...(laid ? { town: laid } : {}) };
-    // The list's city nearest the record, if one stands within reach of it.
+    const rNames = recordNamesOf(r);
+    // Its lists' rows near its point, matched with identity awareness so modern anchors attach only to matching living cities.
+    const rows = rowsNear(f, r.lat, r.lon, recordKm, rNames, r.span);
+    // The list's city matching this record: prefer one sharing a matched list row, else nearest within reach.
     let best = -1;
     let bestKm = recordKm;
     out.forEach((c, i) => {
-      const k = c.record ? Infinity : kmBetween(r.lat, r.lon, c.lat, c.lon);
-      if (k <= bestKm) {
+      if (c.record) return;
+      const cRows = rowsOf.get(c) ?? [];
+      if (rows.length && cRows.some((x) => rows.includes(x))) {
+        best = i;
+        bestKm = -1;
+        return;
+      }
+      if (bestKm < 0) return;
+      const k = kmBetween(r.lat, r.lon, c.lat, c.lon);
+      if (k <= bestKm && (!continuity || rNames.some((n) => cityNamesMatch(n, c.name)) || cRows.some((x) => list.get(x.source)?.role !== 'modern'))) {
         best = i;
         bestKm = k;
       }
     });
-    // Its lists' rows near its point, whatever their times, so that its people are the same at every time.
-    const rows = rowsNear(f, r.lat, r.lon, recordKm);
     const pop = populationOf(f, r.lat, r.lon, rows, r, guess);
     const people = centralAt(pop, t);
     const from = restsOn(pop, rows);
     if (best >= 0) {
       const c = out[best];
       // The list's figure stays beside the model's, as what the list says, where the record's own figures are read too.
-      out[best] = { ...c, ...own, name: nameAt(r, t), lat: r.lat, lon: r.lon, km: Math.round(d * 10) / 10, ...(people > 0 ? { people: Math.round(people) } : {}), from, ...(from !== 'list' ? { also: [{ people: c.people, field: c.field!, source: c.source! }, ...c.also] } : {}) };
+      out[best] = { ...c, ...own, name: nameAt(r, t), lat: r.lat, lon: r.lon, km: Math.round(d * 10) / 10, ...(people > 0 ? { people: Math.round(people) } : {}), from, ...(from !== 'list' && c.field && c.source ? { also: [{ people: c.people, field: c.field, source: c.source }, ...c.also] } : {}) };
       if (from !== 'list') {
         delete out[best].field;
         delete out[best].source;
@@ -709,7 +1039,7 @@ export function citiesAround(f: CitiesFile, lat: number, lon: number, t: number,
     if (!(people > 0)) continue;
     const entry: CityNear = { name: nameAt(r, t), country: '', lat: r.lat, lon: r.lon, people: Math.round(people), km: Math.round(d * 10) / 10, also: [], from, ...own };
     out.push(entry);
-    rowsOf.set(entry, []);
+    rowsOf.set(entry, rows);
     recordOf.set(entry, r);
     popOf.set(entry, pop);
   }
@@ -725,20 +1055,46 @@ export function citiesAround(f: CitiesFile, lat: number, lon: number, t: number,
       c.people = Math.round(central);
       c.band = [Math.round(peopleAtSeries(pop.members[2], t)), Math.round(peopleAtSeries(pop.members[1], t))];
     }
+    if (pop.exist) c.exist = Math.round(existAt(pop, t) * 100) / 100;
   }
   return out.sort((a, b) => a.km - b.km || b.people - a.people);
 }
 
-/** The lists' rows within `km` of a place whatever their times, the nearest of each list: a record's, for its people. */
-export function rowsNear(f: Pick<CitiesFile, 'cities'>, lat: number, lon: number, km: number): City[] {
-  const best = new Map<string, { c: City; d: number }>();
-  const dLat = km / 111;
+/**
+ * The lists' rows matching a settlement at `(lat, lon)` within `km`, at most one per source. When `names` and `span`
+ * are given (for a record), modern lists match only living records (`span[1] >= 1900`) by strict name + proximity,
+ * and historical lists prefer name matches and ignore rows from a disjoint era without a name match.
+ */
+export function rowsNear(
+  f: Pick<CitiesFile, 'cities'> & Partial<Pick<CitiesFile, 'lists'>>,
+  lat: number,
+  lon: number,
+  km: number,
+  names?: string[],
+  span?: [number, number],
+): City[] {
+  const isModern = new Set((f.lists ?? []).filter((l) => l.role === 'modern').map((l) => l.source));
+  const best = new Map<string, { c: City; pri: number; d: number }>();
+  const nameKm = names?.length ? Math.max(km, 25) : km;
+  const dLat = nameKm / 111;
   for (const c of f.cities) {
     if (Math.abs(c.lat - lat) > dLat) continue;
+    if (isModern.has(c.source)) {
+      if (!names?.length || (span && span[1] < 1900)) continue;
+      const hit = modernMatchesHistorical(c, names, lat, lon);
+      if (!hit) continue;
+      const b = best.get(c.source);
+      if (!b || hit.pri < b.pri || (hit.pri === b.pri && hit.d < b.d)) best.set(c.source, { c, pri: hit.pri, d: hit.d });
+      continue;
+    }
     const d = kmBetween(lat, lon, c.lat, c.lon);
-    if (d > km) continue;
+    if (d > nameKm) continue;
+    const named = names?.length ? names.some((n) => cityNamesMatch(n, c.name)) : false;
+    if (!named && d > km) continue;
+    if (!named && span && !c.pops.some(([y]) => y >= span[0] - 200 && y <= span[1] + 200)) continue;
+    const pri = named ? 0 : 1;
     const b = best.get(c.source);
-    if (!b || d < b.d) best.set(c.source, { c, d });
+    if (!b || pri < b.pri || (pri === b.pri && d < b.d)) best.set(c.source, { c, pri, d });
   }
   return [...best.values()].sort((a, b) => a.d - b.d || (a.c.source < b.c.source ? -1 : 1)).map((x) => x.c);
 }
@@ -772,7 +1128,7 @@ export function regionsInto(d: Pick<LandscapeData, 'cities'>, lat: number, lon: 
   for (const r of recs) {
     const reach = regionReach(r);
     if (!reach || kmBetween(lat, lon, r.lat, r.lon) > wide * 1.5 + reach) continue;
-    const pop = populationOf(d.cities, r.lat, r.lon, rowsNear(d.cities, r.lat, r.lon, 12), r, { hold: 50 });
+    const pop = populationOf(d.cities, r.lat, r.lon, rowsNear(d.cities, r.lat, r.lon, 12, recordNamesOf(r), r.span), r, { hold: 50 });
     const extra = dispersedAt(pop, t);
     if (extra === undefined) continue;
     const ha = pop.region!.ha;

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cityPopulation, densityAnchor, densityPrior, dispersedAt, holdOut, leaveOneOut, PEOPLE_MODEL, type Figure } from './citypop.ts';
+import { aliveAt, centralAt, cityPopulation, densityAnchor, densityPrior, dispersedAt, existAt, holdOut, leaveOneOut, PEOPLE_MODEL, type Figure } from './citypop.ts';
 import { peopleAt } from './growth.ts';
 
 const list = (pops: [number, number][], source = 'src:list-a', hold = 50) => ({ source, pops, hold });
@@ -145,5 +145,85 @@ describe("a settlement's people through time", () => {
     expect(held.length).toBe(1);
     expect(Math.exp(held[0].mean)).toBeCloseTo(20000, -2);
     expect(held[0].sd).toBeGreaterThan(PEOPLE_MODEL.bias.work - 1e-9);
+  });
+
+  it('curves a gap between observations with local HYDE regional demographic drift', () => {
+    const base = { lists: [list([[1000, 40000], [1800, 40000]])] };
+    const flat = cityPopulation({ ...base, model: { drift: 0 } });
+    // Regional population dips sharply to a quarter in 1400 then recovers by 1800.
+    const dipped = cityPopulation({
+      ...base,
+      localHyde: [[1000, 400000], [1400, 100000], [1800, 400000]],
+      model: { drift: 0.75 },
+    });
+    expect(centralAt(flat, 1400)).toBeCloseTo(40000, -2);
+    // At 1400, regional demographic decline pulls the gap estimate significantly downward while preserving endpoints.
+    expect(centralAt(dipped, 1400)).toBeLessThan(25000);
+    expect(centralAt(dipped, 1000) / 40000).toBeCloseTo(1, 3);
+    expect(centralAt(dipped, 1800) / 40000).toBeCloseTo(1, 3);
+  });
+
+  it('applies Laplace left-censoring on missed interior benchmarks without leaking held-out observations', () => {
+    const cutoffs: [number, number][] = [[1000, 20000], [1200, 20000], [1400, 20000], [1600, 20000]];
+    const uncensored = cityPopulation({
+      lists: [{ source: 'src:ch', pops: [[1000, 50000], [1600, 50000]], hold: 50 }],
+    });
+    const censored = cityPopulation({
+      lists: [{ source: 'src:ch', pops: [[1000, 50000], [1600, 50000]], hold: 50, cutoffs }],
+    });
+    // Missing two 20k global benchmarks in 1200 and 1400 gently pulls the interior estimate below the 50k straight line.
+    expect(centralAt(uncensored, 1300)).toBeCloseTo(50000, -2);
+    expect(centralAt(censored, 1300)).toBeLessThan(centralAt(uncensored, 1300) * 0.9);
+    expect(centralAt(censored, 1300)).toBeGreaterThan(15000);
+
+    // Zero leakage: holding out a real 1300 observation must suppress censoring at 1300 (same prediction with or without cutoff at 1300).
+    const withCut = holdOut(
+      { lists: [{ source: 'src:ch', pops: [[1000, 50000], [1300, 45000], [1600, 50000]], hold: 50, cutoffs: [[1300, 20000]] }] },
+      (o) => o.t?.[0] === 1300,
+    );
+    const withoutCut = holdOut(
+      { lists: [{ source: 'src:ch', pops: [[1000, 50000], [1300, 45000], [1600, 50000]], hold: 50 }] },
+      (o) => o.t?.[0] === 1300,
+    );
+    expect(withCut[0].mean).toBeCloseTo(withoutCut[0].mean, 6);
+    expect(withCut[0].sd).toBeCloseTo(withoutCut[0].sd, 6);
+  });
+
+  it('bridges living cities across long list silences while letting unanchored ruins lapse via occupancy HMM', () => {
+    const benchmarks = [
+      {
+        source: 'src:ch',
+        cutoffs: [
+          [-200, 30000], [100, 30000], [500, 30000], [800, 30000], [1000, 25000],
+          [1200, 25000], [1400, 25000], [1600, 25000], [1800, 20000], [1900, 20000], [1950, 50000],
+        ] as [number, number][],
+      },
+    ];
+    // Living city like Kanchipuram: listed in 1000 (40k), silent through 1285, re-listed in 1750 (25k) and modern 1975–2015.
+    const living = cityPopulation({
+      lists: [
+        { source: 'src:ch', pops: [[1000, 40000], [1750, 25000]], hold: 50, role: 'historical', cutoffs: benchmarks[0].cutoffs },
+        { source: 'src:mod', pops: [[1975, 110000], [2015, 220000]], hold: 25, role: 'modern', bias: [-0.1, 0.65] },
+      ],
+      benchmarks,
+      modernSurveyed: true,
+    });
+    expect(aliveAt(living, 1285)).toBe(true);
+    expect(existAt(living, 1285)).toBeGreaterThan(0.8);
+    expect(centralAt(living, 1285)).toBeGreaterThan(10000);
+    expect(aliveAt(living, 1890)).toBe(true);
+    expect(aliveAt(living, 2015)).toBe(true);
+
+    // Abandoned ruin like Babylon: last listed in -200 (100k), misses every subsequent benchmark and the 2015 modern survey.
+    const ruin = cityPopulation({
+      lists: [{ source: 'src:ch', pops: [[-500, 150000], [-200, 100000]], hold: 50, role: 'historical', cutoffs: benchmarks[0].cutoffs }],
+      benchmarks,
+      modernSurveyed: true,
+    });
+    expect(aliveAt(ruin, -200)).toBe(true);
+    expect(aliveAt(ruin, 500)).toBe(false);
+    expect(aliveAt(ruin, 1500)).toBe(false);
+    expect(aliveAt(ruin, 1900)).toBe(false);
+    expect(ruin.span[1]).toBeLessThan(300);
   });
 });

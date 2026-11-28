@@ -2000,9 +2000,9 @@ datasets:
       One compiler's estimates of the populations of the larger cities of the ancient world, in columns of years, with a
       place for each from a gazetteer and a number for how sure the placing is (Certainty). It names no evidence row by row,
       and its figures are often rounder and larger or smaller than later archaeological estimates: they are competing
-      claims, seldom the best. Its row for Teotihuacan has values in the columns BC_900 to BC_600 and its row for Tikal in
-      BC_900, BC_800 and BC_600, centuries before either city stood; they look like misplaced CE values and are left out
-      (field:people/cities-ancient, params.left_out).
+      claims, seldom the best. Its rows for five Pre-Columbian American cities (Teotihuacan, Tikal, Caracol, Tiahuanaco
+      and Tollan) duplicate their AD_400 to AD_1000 values in BC_900 to BC_300 (an exact 1,300-year shift), centuries
+      before those cities stood; those misplaced BCE cells are left out (field:people/cities-ancient, params.left_out).
     verified:
       by: machine:claude-code
       how: >-
@@ -2044,8 +2044,10 @@ datasets:
     reliability: >-
       One compiler's estimates of the populations of cities from 2250 BCE to 1975 CE, in columns of years, with a place for
       each from a gazetteer and a number for how sure the placing is (Certainty). Like Modelski's, it names no evidence row
-      by row, it leans on the cities historians wrote about, and its figures are competing claims. Some rows join an ancient
-      place to a modern figure under one name: its Memphis in Egypt has 846,000 people in 1975.
+      by row, it leans on the cities historians wrote about, and its figures are competing claims. Several rows conflate an
+      ancient or medieval site with a later city of the same or similar name (Memphis Egypt's 1975 figure is Memphis,
+      Tennessee; St. Louis's 1000 CE figure is Cahokia; Shang Ao's 1975 figure is modern Zhengzhou; Kherson's 800 and
+      1000 CE figures are Crimean Chersonesus); those cells are left out (field:people/cities, params.left_out).
     verified:
       by: machine:claude-code
       how: >-
@@ -2060,6 +2062,93 @@ datasets:
       via: >-
         chandlerV2.csv from https://ndownloader.figshare.com/articles/2059494/versions/3, a zip figshare makes on the fly,
         whose own bytes therefore change; the member is kept as it came.
+
+  src:ghsl-ucdb-2019:
+    type: dataset
+    kind: model
+    title: "GHS Urban Centre Database 2015, multitemporal and multidimensional attributes (R2019A, V1.2)"
+    citation: >-
+      Florczyk, A.J., Corbane, C., Schiavina, M., Pesaresi, M., Maffenini, L., Melchiorri, M., Politis, P., Sabo, F.,
+      Freire, S., Ehrlich, D., Kemper, T., Tommasi, P., Airaghi, D. and Zanchetta, L. (2019). GHS Urban Centre Database
+      2015, multitemporal and multidimensional attributes, R2019A. European Commission, Joint Research Centre (JRC)
+      [Dataset], doi:10.2905/53473144-b88c-44bc-b4a3-4583ed1f547e, Version 1.2 (updated 7 April 2020).
+    authors:
+      - "Florczyk, A.J."
+      - "Corbane, C."
+      - "Schiavina, M."
+      - "Pesaresi, M."
+      - "Maffenini, L."
+      - "Melchiorri, M."
+      - "Politis, P."
+      - "Sabo, F."
+      - "Freire, S."
+      - "Ehrlich, D."
+      - "Kemper, T."
+      - "Tommasi, P."
+      - "Airaghi, D."
+      - "Zanchetta, L."
+    published: 2019
+    version: R2019A V1.2 (7 April 2020)
+    container: European Commission, Joint Research Centre (JRC) Data Catalogue
+    doi: 10.2905/53473144-b88c-44bc-b4a3-4583ed1f547e
+    url: https://data.jrc.ec.europa.eu/dataset/53473144-b88c-44bc-b4a3-4583ed1f547e
+    credit: Modern urban centres (1975–2015) from GHSL UCDB R2019A (Florczyk et al. 2019, JRC)
+    license: CC-BY-4.0
+    license_note: >-
+      The copyright notice beside the V1.2 archive (copyright.txt, read from JRC's FTP) states: "Any copyright and/or sui
+      generis right on the dataset is licensed under the Creative Commons Attribution 4.0 International (CC BY 4.0)
+      licence."
+    reliability: >-
+      Satellite-derived urban-centre polygons (≥1,500 people/km² or ≥50% built-up, total ≥50,000 people in 2015) with
+      multitemporal GHS-POP counts at 1975, 1990, 2000 and 2015. Only rows with quality-control flag QA2_1V = 1 (true
+      positive urban centres, 10,159 named centres) are read. Urban-centre footprints differ from municipal or historical
+      city limits (in 1975 overlap with Chandler, n = 335, log ratios scatter with sd ≈ 0.68 and mean −0.11), and towns
+      below ~50,000 in 2015 are omitted (handled by the Natural Earth 1:10m fallback).
+    note: >-
+      The build reads the UTF-8 GeoPackage member (GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_2.gpkg) rather than the CSV, whose
+      MS-DOS CP850 export replaced non-CP850 characters in city names with question marks.
+    verified:
+      by: machine:antigravity
+      how: >-
+        Downloaded archive from JRC open-data FTP, verified SHA-256 and byte length of the zip and GeoPackage member,
+        read readme_V1_2.txt and copyright.txt verbatim, and checked QA2_1V counts, UTF-8 names, and 1975 overlap with
+        Chandler.
+    fetch:
+      url: https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_STAT_UCDB2015MT_GLOBE_R2019A/V1-2/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_2.zip
+      sha256: de42904e0d16d04400125c51325c1c6437f71e63e98501bc19ce6d06eaaab6b0
+      bytes: 41961339
+      format: zip
+      files:
+        table:
+          path: GHS_STAT_UCDB2015MT_GLOBE_R2019A/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_2.gpkg
+          sha256: de11f143413ba252692394e8919df0a9f776966eae0334f626290919f8e28abc
+
+  src:natural-earth-places-10m-5.1.2:
+    type: dataset
+    kind: compilation
+    title: Natural Earth, 1:10m populated places
+    citation: >-
+      Natural Earth. Populated places, simple, 1:10m, version 5.1.2, in the GeoJSON of the project's
+      repository (nvkelso/natural-earth-vector).
+    version: 5.1.2
+    url: https://www.naturalearthdata.com/
+    credit: Today's populated places (1:10m) from Natural Earth
+    license: public-domain
+    license_note: >-
+      The project's terms of use say that all versions of its map data "are in the public domain".
+    reliability: >-
+      A global gazetteer of ~7,300 cities and towns with pop_max/pop_min estimates of no single stated year; used only as
+      a modern-existence fallback for surviving historical towns below GHSL's 50,000-person urban-centre cutoff.
+    verified:
+      by: machine:antigravity
+      how: >-
+        Downloaded GeoJSON from immutable tag v5.1.2 of nvkelso/natural-earth-vector, verified SHA-256 and byte length,
+        and inspected feature fields (name, nameascii, namealt, adm0name, pop_max, pop_min).
+    fetch:
+      url: https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_populated_places_simple.geojson
+      sha256: fd3fa867a320cbd5c5b6bb5bc550afeec2939fb2cef688e508007282a55ac42f
+      bytes: 4932147
+      format: json
 
   src:paleomist-1.0:
     type: dataset

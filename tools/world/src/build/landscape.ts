@@ -14,7 +14,7 @@ import { join } from 'node:path';
 import { unzipSync } from 'fflate';
 import { decodeTile, encodeTile } from '../../../../core/container.ts';
 import { compileAgriculture, compileHusbandry, compileTraditions, prevalenceOf, traditionAt, traditionsFor, type Agriculture, type AgricultureInput, type CropEntry, type PrevalenceWord, type DwellingSpec, type FieldSpec, type Husbandry, type HusbandryInput, type LifewayWord, type OutbuildingSpec, type SettlementSpec, type TownSpec, type Tradition, type TraditionInput } from '../../../../core/dwelling.ts';
-import type { Figure } from '../../../../core/citypop.ts';
+import { aliveAt, centralAt, peopleModel, type Figure } from '../../../../core/citypop.ts';
 import { canonicalForm, type Form } from '../../../../core/form.ts';
 import type { LivingTaxon } from '../../../../core/scene.ts';
 import { GENERATOR as SETTLEMENT, peopleReach, VERSION as SETTLEMENT_VERSION } from '../../../../world/generators/people/settlement/v12.ts';
@@ -22,7 +22,7 @@ import { EXTENT } from '../../../../world/generators/life/scene/current.ts';
 import { FormTree } from '../forms.ts';
 import type { LandscapeIndex, TraditionsFile } from '../../../../core/landscape.ts';
 export type { LandscapeIndex, TraditionsFile };
-import { anthromeTile, assessmentAt, cityPeople, classAtStep, cellOf, figuresOf, kmBetween, LEVEL_WORDS, LIFEWAY_OF, lifewayOf, nameAt, nearestStep, shareDensity, tileKey, type AnthromeClass, type City, type CityRecord, type CitiesFile, type AnthromeTile, type AnthromeTileHeader, type Assessment, type AssessmentsFile, type HousingCount, type Pattern } from '../../../../core/landscape.ts';
+import { anthromeTile, assessmentAt, cityNamesMatch, cityPeople, classAtStep, cellOf, figuresOf, groupCityRows, kmBetween, LEVEL_WORDS, LIFEWAY_OF, lifewayOf, modernMatchesHistorical, nameAt, nearestStep, populationOf, recordNamesOf, rowsNear, shareDensity, tileKey, type AnthromeClass, type City, type CityRecord, type CitiesFile, type AnthromeTile, type AnthromeTileHeader, type Assessment, type AssessmentsFile, type HousingCount, type Pattern } from '../../../../core/landscape.ts';
 import { cellAt, gridSize, peopleAt, type PeopleFile } from '../../../../core/layers.ts';
 import { datasetFile } from '../manifest.ts';
 import { CACHE } from '../paths.ts';
@@ -301,31 +301,33 @@ export function anthromeRuns(zip: Uint8Array, classes: AnthromeClass[], globeFac
 
 // ——— ArchaeoGLOBE ———
 
+/** Split one CSV line, honouring double-quoted fields and escaped quotes. */
+function splitCsvLine(l: string): string[] {
+  const out: string[] = [];
+  let cur = '';
+  let q = false;
+  for (let i = 0; i < l.length; i++) {
+    const ch = l[i];
+    if (q) {
+      if (ch === '"' && l[i + 1] === '"') {
+        cur += '"';
+        i++;
+      } else if (ch === '"') q = false;
+      else cur += ch;
+    } else if (ch === '"') q = true;
+    else if (ch === ',') {
+      out.push(cur);
+      cur = '';
+    } else cur += ch;
+  }
+  out.push(cur);
+  return out;
+}
+
 /** The snapshot's rows, as the viewer reads them. */
 export function assessmentsFile(csv: string, source: string, title: string): AssessmentsFile {
   const lines = csv.split('\n').filter((l) => l && !l.startsWith('#'));
-  const split = (l: string): string[] => {
-    const out: string[] = [];
-    let cur = '';
-    let q = false;
-    for (let i = 0; i < l.length; i++) {
-      const ch = l[i];
-      if (q) {
-        if (ch === '"' && l[i + 1] === '"') {
-          cur += '"';
-          i++;
-        } else if (ch === '"') q = false;
-        else cur += ch;
-      } else if (ch === '"') q = true;
-      else if (ch === ',') {
-        out.push(cur);
-        cur = '';
-      } else cur += ch;
-    }
-    out.push(cur);
-    return out;
-  };
-  const head = split(lines[0]);
+  const head = splitCsvLine(lines[0]);
   const col = (name: string) => {
     const i = head.indexOf(name);
     if (i < 0) throw new Error(`the assessments have no column ${name}`);
@@ -341,7 +343,7 @@ export function assessmentsFile(csv: string, source: string, title: string): Ass
   const rows: Record<string, Assessment[]> = {};
   const SLICE_LABEL: Record<string, string> = { '10K': '10,000 BP', '8K': '8,000 BP', '6K': '6,000 BP', '4K': '4,000 BP', '3K': '3,000 BP', '2K': '2,000 BP', '1K': '1,000 BP', '1500CE': '1500 CE', '1750CE': '1750 CE', '1850CE': '1850 CE' };
   for (const l of lines.slice(1)) {
-    const c = split(l);
+    const c = splitCsvLine(l);
     const id = Number(c[col('region')]);
     const year = Number(c[col('year')]);
     if (!slices.some((s) => s.year === year)) slices.push({ year, label: SLICE_LABEL[c[col('slice')]] ?? c[col('slice')] });
@@ -368,47 +370,286 @@ export function cityYear(column: string): number | undefined {
   return m ? (m[1] === 'BC' ? 1 - Number(m[2]) : Number(m[2])) : undefined;
 }
 
+export interface CityLeftOut {
+  city: string;
+  country?: string;
+  columns: string[];
+}
+
 /** The rows of a list of cities, each with its people at the years it gives, less the cells a field leaves out. */
-export function citiesOf(csv: string, source: string, field: string, leftOut: { city: string; columns: string[] }[]): City[] {
+export function citiesOf(csv: string, source: string, field: string, leftOut: CityLeftOut[]): City[] {
   const lines = csv.replace(/\r/g, '').split('\n').filter((l) => l.trim());
-  const split = (l: string): string[] => {
-    const out: string[] = [];
-    let cur = '';
-    let q = false;
-    for (let i = 0; i < l.length; i++) {
-      const ch = l[i];
-      if (q) {
-        if (ch === '"' && l[i + 1] === '"') {
-          cur += '"';
-          i++;
-        } else if (ch === '"') q = false;
-        else cur += ch;
-      } else if (ch === '"') q = true;
-      else if (ch === ',') {
-        out.push(cur);
-        cur = '';
-      } else cur += ch;
-    }
-    out.push(cur);
-    return out;
-  };
-  const head = split(lines[0]);
+  const head = splitCsvLine(lines[0]);
+  const latIdx = head.indexOf('Latitude');
+  const lonIdx = head.indexOf('Longitude');
+  const countryIdx = head.indexOf('Country');
+  const certIdx = head.indexOf('Certainty');
   const out: City[] = [];
   for (const l of lines.slice(1)) {
-    const c = split(l);
+    const c = splitCsvLine(l);
     const name = c[0].trim();
-    const skip = new Set(leftOut.filter((x) => x.city === name).flatMap((x) => x.columns));
+    const country = countryIdx >= 0 ? (c[countryIdx] ?? '').trim() : '';
+    const skip = new Set(leftOut.filter((x) => x.city === name && (!x.country || x.country === country)).flatMap((x) => x.columns));
     const pops: [number, number][] = [];
     head.forEach((h, i) => {
       const y = cityYear(h);
       const v = Number(c[i]);
       if (y !== undefined && c[i] && c[i].trim() && Number.isFinite(v) && v > 0 && !skip.has(h)) pops.push([y, v]);
     });
-    const lat = Number(c[head.indexOf('Latitude')]);
-    const lon = Number(c[head.indexOf('Longitude')]);
+    const lat = Number(c[latIdx]);
+    const lon = Number(c[lonIdx]);
     if (!pops.length || !Number.isFinite(lat) || !Number.isFinite(lon)) continue;
     pops.sort((a, b) => a[0] - b[0]);
-    out.push({ name, country: c[head.indexOf('Country')].trim(), lat, lon, certainty: Number(c[head.indexOf('Certainty')]) || 0, source, field, pops });
+    out.push({ name, country, lat, lon, certainty: Number(c[certIdx]) || 0, source, field, pops });
+  }
+  return out;
+}
+
+/** One row of the GHSL Urban Centre Database (GHS_STAT_UCDB2015MT_GLOBE_R2019A). */
+export interface GhslRow {
+  QA2_1V?: number | string | null;
+  UC_NM_MN?: string | null;
+  UC_NM_LST?: string | null;
+  CTR_MN_NM?: string | null;
+  GCPNT_LAT?: number | string | null;
+  GCPNT_LON?: number | string | null;
+  P75?: number | string | null;
+  P90?: number | string | null;
+  P00?: number | string | null;
+  P15?: number | string | null;
+}
+
+const cleanModernName = (s: string | null | undefined): string => {
+  const t = (s ?? '').trim();
+  if (!t || t === 'N/A' || /^\?+$/.test(t) || !/[\p{L}\p{N}]/u.test(t)) return '';
+  return t;
+};
+
+const round4 = (x: number): number => Math.round(x * 1e4) / 1e4;
+
+/** Parse validated GHSL UCDB R2019A rows (QA2_1V === 1) into modern City anchors (1975, 1990, 2000, 2015). */
+export function ghslRowsOf(rows: Iterable<GhslRow>, source: string, field: string): City[] {
+  const out: City[] = [];
+  for (const r of rows) {
+    if (Number(r.QA2_1V) !== 1) continue;
+    const name = cleanModernName(r.UC_NM_MN);
+    if (!name) continue;
+    const lat = Number(r.GCPNT_LAT);
+    const lon = Number(r.GCPNT_LON);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) continue;
+    const pops: [number, number][] = [];
+    for (const [y, raw] of [
+      [1975, r.P75],
+      [1990, r.P90],
+      [2000, r.P00],
+      [2015, r.P15],
+    ] as const) {
+      const v = Number(raw);
+      if (Number.isFinite(v) && v >= 1000) pops.push([y, Math.round(v)]);
+    }
+    if (!pops.length) continue;
+    const alts: string[] = [];
+    if (r.UC_NM_LST) {
+      for (const raw of r.UC_NM_LST.split(';')) {
+        const a = cleanModernName(raw);
+        if (a && a !== name && !alts.includes(a)) alts.push(a);
+      }
+    }
+    out.push({
+      name,
+      ...(alts.length ? { alts } : {}),
+      country: cleanModernName(r.CTR_MN_NM),
+      lat: round4(lat),
+      lon: round4(lon),
+      certainty: 1,
+      source,
+      field,
+      pops,
+    });
+  }
+  return out.sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : a.lat - b.lat || a.lon - b.lon));
+}
+
+/** Parse GHSL UCDB R2019A CSV text into modern City anchors. */
+export function ghslCitiesOf(csv: string, source: string, field: string): City[] {
+  const lines = csv.replace(/\r/g, '').split('\n');
+  const first = lines.findIndex((l) => l.trim().length > 0);
+  if (first < 0) return [];
+  const head = splitCsvLine(lines[first]);
+  const col = (name: string) => head.indexOf(name);
+  const iQa = col('QA2_1V');
+  const iNm = col('UC_NM_MN');
+  const iLst = col('UC_NM_LST');
+  const iCtr = col('CTR_MN_NM');
+  const iLat = col('GCPNT_LAT');
+  const iLon = col('GCPNT_LON');
+  const i75 = col('P75');
+  const i90 = col('P90');
+  const i00 = col('P00');
+  const i15 = col('P15');
+  const rows: GhslRow[] = [];
+  for (let idx = first + 1; idx < lines.length; idx++) {
+    const l = lines[idx];
+    if (!l || l[0] === ',' || !l.trim()) continue;
+    const c = splitCsvLine(l);
+    rows.push({
+      QA2_1V: iQa >= 0 ? c[iQa] : undefined,
+      UC_NM_MN: iNm >= 0 ? c[iNm] : undefined,
+      UC_NM_LST: iLst >= 0 ? c[iLst] : undefined,
+      CTR_MN_NM: iCtr >= 0 ? c[iCtr] : undefined,
+      GCPNT_LAT: iLat >= 0 ? c[iLat] : undefined,
+      GCPNT_LON: iLon >= 0 ? c[iLon] : undefined,
+      P75: i75 >= 0 ? c[i75] : undefined,
+      P90: i90 >= 0 ? c[i90] : undefined,
+      P00: i00 >= 0 ? c[i00] : undefined,
+      P15: i15 >= 0 ? c[i15] : undefined,
+    });
+  }
+  return ghslRowsOf(rows, source, field);
+}
+
+/** Read GHSL UCDB R2019A from either its UTF-8 GeoPackage (.gpkg) or CSV (.csv). */
+export async function readGhslCities(filePath: string, source: string, field: string): Promise<City[]> {
+  if (filePath.endsWith('.gpkg')) {
+    const { DatabaseSync } = await import('node:sqlite');
+    const db = new DatabaseSync(filePath, { readOnly: true });
+    try {
+      const meta = db.prepare('SELECT table_name FROM gpkg_contents LIMIT 1').get() as { table_name?: string } | undefined;
+      const table = meta?.table_name ?? 'GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_2';
+      if (!/^[A-Za-z0-9_]+$/.test(table)) throw new Error(`unexpected GeoPackage table name "${table}"`);
+      const rows = db
+        .prepare(`SELECT QA2_1V, UC_NM_MN, UC_NM_LST, CTR_MN_NM, GCPNT_LAT, GCPNT_LON, P75, P90, P00, P15 FROM "${table}" WHERE QA2_1V = 1`)
+        .all() as GhslRow[];
+      return ghslRowsOf(rows, source, field);
+    } finally {
+      db.close();
+    }
+  }
+  return ghslCitiesOf(await readFile(filePath, 'utf8'), source, field);
+}
+
+/** Parse Natural Earth 1:10m populated places GeoJSON into modern City anchors (fallback for surviving smaller towns). */
+export function nePlacesOf(geojson: string, source: string, field: string, year = 2015): City[] {
+  const fc = JSON.parse(geojson) as { features?: { geometry?: { type?: string; coordinates?: unknown }; properties?: Record<string, unknown> }[] };
+  const out: City[] = [];
+  for (const feat of fc.features ?? []) {
+    if (feat.geometry?.type !== 'Point' || !Array.isArray(feat.geometry.coordinates)) continue;
+    const [lon, lat] = feat.geometry.coordinates as [number, number];
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) continue;
+    const props = feat.properties ?? {};
+    const name = cleanModernName(String(props.name ?? props.NAME ?? ''));
+    if (!name) continue;
+    const pop = Number(props.pop_max ?? props.POP_MAX ?? props.pop_min ?? props.POP_MIN ?? 0);
+    if (!(Number.isFinite(pop) && pop >= 1000)) continue;
+    const alts: string[] = [];
+    const addAlt = (raw: unknown) => {
+      if (typeof raw !== 'string' || !raw.trim()) return;
+      for (const part of raw.split(/[|;,]+/)) {
+        const a = cleanModernName(part);
+        if (a && a !== name && !alts.includes(a)) alts.push(a);
+      }
+    };
+    addAlt(props.nameascii ?? props.NAMEASCII);
+    addAlt(props.namealt ?? props.NAMEALT);
+    out.push({
+      name,
+      ...(alts.length ? { alts } : {}),
+      country: cleanModernName(String(props.adm0name ?? props.ADM0NAME ?? '')),
+      lat: round4(lat),
+      lon: round4(lon),
+      certainty: 1,
+      source,
+      field,
+      pops: [[year, Math.round(pop)]],
+    });
+  }
+  return out.sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : a.lat - b.lat || a.lon - b.lon));
+}
+
+/**
+ * Global benchmark columns of a historical city list: [year, cutoffPeople] for columns covering broad global
+ * geography (filtering out single-country census columns such as Chandler's 1530, 1841, 1851, 1872), deduplicated
+ * within `dedupeYr` windows by keeping the column with the most cities. The cutoff is the empirical `quantile`
+ * (default 25th percentile) of listed populations in that column.
+ */
+export function benchmarkCutoffs(
+  cities: City[],
+  opts: { minCountries?: number; minEarly?: number; earlyUntil?: number; quantile?: number; dedupeYr?: number } = {},
+): [number, number][] {
+  const minCountries = opts.minCountries ?? 15;
+  const minEarly = opts.minEarly ?? 15;
+  const earlyUntil = opts.earlyUntil ?? 650;
+  const quantile = opts.quantile ?? 0.25;
+  const dedupeYr = opts.dedupeYr ?? 20;
+  const byYear = new Map<number, { vals: number[]; countries: Set<string> }>();
+  for (const c of cities) {
+    for (const [y, v] of c.pops) {
+      if (!(v > 0)) continue;
+      let b = byYear.get(y);
+      if (!b) {
+        b = { vals: [], countries: new Set() };
+        byYear.set(y, b);
+      }
+      b.vals.push(v);
+      if (c.country) b.countries.add(c.country);
+    }
+  }
+  const raw: { y: number; n: number; cut: number }[] = [];
+  for (const [y, b] of [...byYear].sort((a, c) => a[0] - c[0])) {
+    if (b.countries.size < minCountries && !(y <= earlyUntil && b.vals.length >= minEarly)) continue;
+    b.vals.sort((a, c) => a - c);
+    const idx = Math.max(0, Math.min(b.vals.length - 1, Math.floor(b.vals.length * quantile)));
+    raw.push({ y, n: b.vals.length, cut: Math.round(b.vals[idx]) });
+  }
+  const kept: typeof raw = [];
+  for (const col of raw) {
+    const prev = kept.at(-1);
+    if (prev && col.y - prev.y < dedupeYr) {
+      if (col.n > prev.n) kept[kept.length - 1] = col;
+    } else {
+      kept.push(col);
+    }
+  }
+  return kept.map((x) => [x.y, x.cut]);
+}
+
+/**
+ * Compact Gaussian-smoothed 3°×3° local regional HYDE population series [year, people] about `(lat, lon)` from
+ * `fromYear - 500` to the last HYDE step, used as the regional demographic drift prior in model:people/city-population.
+ */
+export function cityHyde(people: PeopleFile, lat: number, lon: number, fromYear: number): [number, number][] {
+  const n = people.cell.length;
+  if (!n || !people.steps.length) return [];
+  const res = people.res;
+  const cells: { idx: number; w: number }[] = [];
+  let wSum = 0;
+  for (let dr = -1; dr <= 1; dr++) {
+    const la = lat + dr * res;
+    if (la < -90 || la > 90) continue;
+    for (let dc = -1; dc <= 1; dc++) {
+      const lo = ((((lon + dc * res + 180) % 360) + 360) % 360) - 180;
+      const w = Math.exp(-0.5 * (dr * dr + dc * dc));
+      wSum += w;
+      const hit = cellAt(people, lo, la);
+      if (hit.index >= 0) cells.push({ idx: hit.index, w });
+    }
+  }
+  if (!cells.length || !(wSum > 0)) return [];
+  const startYear = fromYear - 500;
+  const steps = people.steps;
+  const out: [number, number][] = [];
+  let lastT = -Infinity;
+  for (let si = 0; si < steps.length; si++) {
+    const t = steps[si];
+    if (t < startYear && si + 1 < steps.length && steps[si + 1] < startYear) continue;
+    const isEnd = si === steps.length - 1;
+    if (out.length > 0 && !isEnd && t !== 1975 && t - lastT < 50) continue;
+    let sum = 0;
+    const base = si * n;
+    for (const c of cells) sum += people.people[base + c.idx] * c.w;
+    // Scale by total kernel weight (9 cells' equivalent area) so the regional total is comparable across latitudes.
+    out.push([t, Math.round(figures3((sum / wSum) * 9))]);
+    lastT = t;
   }
   return out;
 }
@@ -832,14 +1073,136 @@ export async function buildLandscape(s: Solved, log: (s: string) => void): Promi
   files.set('people/assessments.json', stableStringify(assessments));
   const cityFields = w.fields.filter((f) => f.data?.as === 'cities');
   const cities: CitiesFile = { format: 'lightworld-cities@1', lists: [], cities: [] };
-  for (const f of cityFields) {
-    const p = (f.params ?? {}) as { left_out?: { city: string; columns: string[] }[]; hold_yr?: number; gap_yr?: number };
+  const histFields = cityFields.filter((f) => (f.params as { role?: string } | undefined)?.role !== 'modern');
+  const modernFields = cityFields.filter((f) => (f.params as { role?: string } | undefined)?.role === 'modern');
+  for (const f of histFields) {
+    const p = (f.params ?? {}) as { left_out?: CityLeftOut[]; hold_yr?: number; gap_yr?: number };
     const text = new TextDecoder('latin1').decode(await readFile(datasetFile(f.data!.from, ds[f.data!.from])));
-    cities.lists.push({ source: f.data!.from, field: f.id, title: f.title, hold: p.hold_yr ?? 0, gap: p.gap_yr ?? 1e9 });
-    cities.cities.push(...citiesOf(text, f.data!.from, f.id, p.left_out ?? []));
+    const rows = citiesOf(text, f.data!.from, f.id, p.left_out ?? []);
+    const cutoffs = benchmarkCutoffs(rows);
+    cities.lists.push({
+      source: f.data!.from,
+      field: f.id,
+      title: f.title,
+      hold: p.hold_yr ?? 0,
+      gap: p.gap_yr ?? 1e9,
+      role: 'historical',
+      ...(cutoffs.length ? { cutoffs } : {}),
+    });
+    cities.cities.push(...rows);
   }
   // The settlements the world has records of: a scene draws one from its own claims, beside or in place of a list's figure.
   cities.records = cityRecords(s);
+  if (modernFields.length) {
+    const histCities = [...cities.cities];
+    const livingRecords = (cities.records ?? []).filter((r) => r.span[1] >= 1900);
+    const targets: { lat: number; lon: number; names: string[] }[] = [
+      ...histCities.map((c) => ({ lat: c.lat, lon: c.lon, names: [c.name] })),
+      ...livingRecords.map((r) => ({ lat: r.lat, lon: r.lon, names: recordNamesOf(r) })),
+    ];
+    const tBuckets = new Map<string, typeof targets>();
+    for (const t of targets) {
+      const k = `${Math.floor(t.lat)}_${Math.floor(t.lon)}`;
+      (tBuckets.get(k) ?? tBuckets.set(k, []).get(k)!).push(t);
+    }
+    const pruneAlts = (rows: City[]) => {
+      for (const m of rows) {
+        if (!m.alts?.length) continue;
+        const rLat = Math.floor(m.lat);
+        const rLon = Math.floor(m.lon);
+        const nearNames: string[] = [];
+        for (let dl = -1; dl <= 1; dl++) {
+          for (let dn = -1; dn <= 1; dn++) {
+            const lonWrap = ((((rLon + dn + 180) % 360) + 360) % 360) - 180;
+            for (const t of tBuckets.get(`${rLat + dl}_${lonWrap}`) ?? []) {
+              if (kmBetween(m.lat, m.lon, t.lat, t.lon) <= 6) nearNames.push(...t.names);
+            }
+          }
+        }
+        const kept = nearNames.length ? m.alts.filter((a) => nearNames.some((n) => cityNamesMatch(n, a))) : [];
+        if (kept.length) m.alts = kept;
+        else delete m.alts;
+      }
+    };
+    for (const f of modernFields) {
+      const p = (f.params ?? {}) as { format?: string; hold_yr?: number; gap_yr?: number };
+      const primaryPath = datasetFile(f.data!.from, ds[f.data!.from], f.data!.file);
+      if (!existsSync(primaryPath)) throw new Error(`missing ${primaryPath}; run \`npm run fetch\` first`);
+      const primaryRows =
+        p.format === 'ghsl-ucdb'
+          ? await readGhslCities(primaryPath, f.data!.from, f.id)
+          : nePlacesOf(await readFile(primaryPath, 'utf8'), f.data!.from, f.id);
+      pruneAlts(primaryRows);
+      cities.lists.push({
+        source: f.data!.from,
+        field: f.id,
+        title: f.title,
+        hold: p.hold_yr ?? 25,
+        gap: p.gap_yr ?? 100,
+        role: 'modern',
+        bias: [0, 0.65],
+      });
+      cities.cities.push(...primaryRows);
+      // Optional gazetteer fallback (e.g. Natural Earth 1:10m): keep ONLY rows that strictly match surviving smaller
+      // historical towns / living records not already anchored by the primary urban-centre dataset.
+      if (f.data?.places) {
+        const placesPath = datasetFile(f.data.places, ds[f.data.places]);
+        if (!existsSync(placesPath)) throw new Error(`missing ${placesPath}; run \`npm run fetch\` first`);
+        const neRows = nePlacesOf(await readFile(placesPath, 'utf8'), f.data.places, f.id);
+        const modSources = new Set(cities.lists.filter((l) => l.role === 'modern').map((l) => l.source));
+        const grouped = groupCityRows(cities.cities, cities.lists);
+        const unmatched: { lat: number; lon: number; names: string[] }[] = [];
+        for (const g of grouped) {
+          if (g.some((c) => modSources.has(c.source))) continue;
+          const ref = [...g].sort((a, b) => (b.pops.at(-1)?.[0] ?? -1e9) - (a.pops.at(-1)?.[0] ?? -1e9))[0];
+          unmatched.push({ lat: ref.lat, lon: ref.lon, names: [...new Set(g.map((c) => c.name))] });
+        }
+        for (const r of livingRecords) {
+          const hit = rowsNear(cities, r.lat, r.lon, 25, recordNamesOf(r), r.span).some((c) => modSources.has(c.source));
+          if (!hit) unmatched.push({ lat: r.lat, lon: r.lon, names: recordNamesOf(r) });
+        }
+        const neBuckets = new Map<string, number[]>();
+        for (let i = 0; i < neRows.length; i++) {
+          const k = `${Math.floor(neRows[i].lat)}_${Math.floor(neRows[i].lon)}`;
+          (neBuckets.get(k) ?? neBuckets.set(k, []).get(k)!).push(i);
+        }
+        const keptIdx = new Set<number>();
+        for (const u of unmatched) {
+          let bestIdx = -1;
+          let bestPri = 9;
+          let bestD = Infinity;
+          const rLat = Math.floor(u.lat);
+          const rLon = Math.floor(u.lon);
+          for (let dl = -1; dl <= 1; dl++) {
+            for (let dn = -1; dn <= 1; dn++) {
+              const lonWrap = ((((rLon + dn + 180) % 360) + 360) % 360) - 180;
+              for (const i of neBuckets.get(`${rLat + dl}_${lonWrap}`) ?? []) {
+                const hit = modernMatchesHistorical(neRows[i], u.names, u.lat, u.lon);
+                if (hit && (hit.pri < bestPri || (hit.pri === bestPri && hit.d < bestD))) {
+                  bestIdx = i;
+                  bestPri = hit.pri;
+                  bestD = hit.d;
+                }
+              }
+            }
+          }
+          if (bestIdx >= 0) keptIdx.add(bestIdx);
+        }
+        const fallback = [...keptIdx].sort((a, b) => a - b).map((i) => neRows[i]);
+        pruneAlts(fallback);
+        cities.lists.push({
+          source: f.data.places,
+          field: f.id,
+          title: ds[f.data.places]?.title ?? f.title,
+          hold: p.hold_yr ?? 25,
+          gap: p.gap_yr ?? 100,
+          role: 'modern',
+          bias: [0, 0.7],
+        });
+        cities.cities.push(...fallback);
+      }
+    }
+  }
   files.set('people/cities.json', stableStringify(cities));
   const traditions = compileTraditions(traditionInputs(s, regionsId));
   // The animals people kept: the husbandry traditions, and each animal they name with its body and size.
@@ -904,14 +1267,34 @@ const toBuffer = (u: Uint8Array): ArrayBuffer => u.buffer.slice(u.byteOffset, u.
 
 /** What resolve reads of the human landscape (core/resolve.ts): the lifeway's tier at a place and time, and a city near it. */
 export function landscapeResolve(b: LandscapeBuilt): NonNullable<import('../../../../core/resolve.ts').ResolveWorld['landscape']> {
-  // The cities by whole degree, so that a grid of places asks only the few near each.
-  const buckets = new Map<string, City[]>();
-  for (const c of b.cities.cities) {
-    const k = `${Math.floor(c.lat)}_${Math.floor(c.lon)}`;
-    (buckets.get(k) ?? buckets.set(k, []).get(k)!).push(c);
-  }
   const reach = b.index.reach_km;
   const lists = new Map(b.cities.lists.map((l) => [l.source, l]));
+  const continuity = b.cities.lists.some((l) => l.role === 'modern' || !!l.cutoffs?.length);
+  const thr = peopleModel(b.cities.model?.params).occupancy.threshold;
+  // The cities by whole degree, so that a grid of places asks only the few near each.
+  type BucketEntry =
+    | { kind: 'legacy'; c: City }
+    | { kind: 'group'; head: City; rows: City[]; pureModern: boolean; minStart: number; recordSpan?: [number, number]; pop?: ReturnType<typeof populationOf> };
+  const buckets = new Map<string, BucketEntry[]>();
+  const addBucket = (lat: number, lon: number, entry: BucketEntry) => {
+    const k = `${Math.floor(lat)}_${Math.floor(lon)}`;
+    (buckets.get(k) ?? buckets.set(k, []).get(k)!).push(entry);
+  };
+  if (!continuity) {
+    for (const c of b.cities.cities) addBucket(c.lat, c.lon, { kind: 'legacy', c });
+  } else {
+    const claimedSpan = new Map<City, [number, number]>();
+    for (const r of b.cities.records ?? []) {
+      for (const c of rowsNear(b.cities, r.lat, r.lon, 12, recordNamesOf(r), r.span)) claimedSpan.set(c, r.span);
+    }
+    for (const g of groupCityRows(b.cities.cities, b.cities.lists)) {
+      const head = g.find((c) => lists.get(c.source)?.role !== 'modern') ?? g[0];
+      const pureModern = g.every((c) => lists.get(c.source)?.role === 'modern');
+      const minStart = Math.min(...g.map((c) => (c.pops[0]?.[0] ?? 0) - (lists.get(c.source)?.hold ?? 50)));
+      const recordSpan = g.map((c) => claimedSpan.get(c)).find((s): s is [number, number] => !!s);
+      addBucket(head.lat, head.lon, { kind: 'group', head, rows: g, pureModern, minStart, ...(recordSpan ? { recordSpan } : {}) });
+    }
+  }
   // The settlements with records, the same way: one that stood then, and says how big it was, is a city a scene draws.
   const records = new Map<string, CityRecord[]>();
   for (const r of b.cities.records ?? []) {
@@ -925,9 +1308,21 @@ export function landscapeResolve(b: LandscapeBuilt): NonNullable<import('../../.
       if (!here || !here.anthrome) return undefined;
       for (let dl = -1; dl <= 1; dl++) for (let dn = -1; dn <= 1; dn++) {
         const key = `${Math.floor(lat) + dl}_${Math.floor(lon) + dn}`;
-        for (const c of buckets.get(key) ?? []) {
-          const l = lists.get(c.source);
-          if (kmBetween(lat, lon, c.lat, c.lon) <= reach && (cityPeople(c, t, l?.hold ?? 0, l?.gap ?? Infinity) ?? 0) > 0) return { tier: 'evidence', pattern: 'city', city: c.name };
+        for (const e of buckets.get(key) ?? []) {
+          if (e.kind === 'legacy') {
+            const l = lists.get(e.c.source);
+            if (kmBetween(lat, lon, e.c.lat, e.c.lon) <= reach && (cityPeople(e.c, t, l?.hold ?? 0, l?.gap ?? Infinity) ?? 0) > 0) return { tier: 'evidence', pattern: 'city', city: e.c.name };
+          } else {
+            if (t < e.minStart || kmBetween(lat, lon, e.head.lat, e.head.lon) > reach) continue;
+            if (e.recordSpan && (t < e.recordSpan[0] || t > e.recordSpan[1])) continue;
+            if (e.pureModern) {
+              const l = lists.get(e.head.source);
+              if ((cityPeople(e.head, t, l?.hold ?? 25, l?.gap ?? 100) ?? 0) > 0) return { tier: 'evidence', pattern: 'city', city: e.head.name };
+            } else {
+              e.pop ??= populationOf(b.cities, e.head.lat, e.head.lon, e.rows, undefined, { hold: 50 });
+              if (aliveAt(e.pop, t, thr)) return { tier: 'evidence', pattern: 'city', city: e.head.name };
+            }
+          }
         }
         for (const r of records.get(key) ?? []) {
           if (t >= r.span[0] && t <= r.span[1] && figuresOf(r).some((x) => x.ground !== 'site' && x.ground !== 'region') && kmBetween(lat, lon, r.lat, r.lon) <= reach) return { tier: 'evidence', pattern: 'city', city: nameAt(r, t) };
@@ -1095,6 +1490,16 @@ export function regionHyde(b: LandscapeBuilt, people: PeopleFile, r: CityRecord,
  */
 export function housingCounts(b: LandscapeBuilt, rows: HousingRow[]): HousingCount[] {
   const lists = new Map(b.cities.lists.map((l) => [l.source, l]));
+  const continuity = b.cities.lists.some((l) => l.role === 'modern' || !!l.cutoffs?.length);
+  const thr = peopleModel(b.cities.model?.params).occupancy.threshold;
+  const groups = continuity
+    ? groupCityRows(b.cities.cities, b.cities.lists).map((g) => {
+        const head = g.find((c) => lists.get(c.source)?.role !== 'modern') ?? g[0];
+        const pureModern = g.every((c) => lists.get(c.source)?.role === 'modern');
+        const minStart = Math.min(...g.map((c) => (c.pops[0]?.[0] ?? 0) - (lists.get(c.source)?.hold ?? 50)));
+        return { head, rows: g, pureModern, minStart, pop: pureModern ? undefined : populationOf(b.cities, head.lat, head.lon, g, undefined, { hold: 50 }) };
+      })
+    : undefined;
   return [...new Set(rows.map((r) => r.t))].map((t) => {
     const mine = rows.filter((r) => r.t === t);
     const by: HousingCount['by'] = {};
@@ -1113,20 +1518,38 @@ export function housingCounts(b: LandscapeBuilt, rows: HousingRow[]): HousingCou
       }
       if (r.region) regions.set(r.region, (regions.get(r.region) ?? false) || !!r.tradition);
     }
-    // The lists' cities standing then; two lists' figures for one place are one city, with the larger.
-    const standing = new Map<string, { people: number; housed: boolean }>();
-    for (const c of b.cities.cities) {
-      const l = lists.get(c.source);
-      const n = cityPeople(c, t, l?.hold ?? 0, l?.gap ?? Infinity);
-      if (!n || n <= 0) continue;
-      const key = `${Math.round(c.lat * 20)}_${Math.round(c.lon * 20)}`;
-      if ((standing.get(key)?.people ?? 0) >= n) continue;
-      standing.set(key, { people: n, housed: !!traditionAt(b.traditions, b.at(c.lat, c.lon, t)?.region || undefined, t, 'townspeople') });
-    }
-    const cities: [number, number, number] = [standing.size, 0, 0];
-    for (const c of standing.values()) {
-      cities[1] += c.people;
-      if (c.housed) cities[2] += c.people;
+    const cities: [number, number, number] = [0, 0, 0];
+    if (groups) {
+      for (const g of groups) {
+        if (t < g.minStart) continue;
+        let n = 0;
+        if (g.pureModern) {
+          const l = lists.get(g.head.source);
+          n = cityPeople(g.head, t, l?.hold ?? 25, l?.gap ?? 100) ?? 0;
+        } else if (g.pop && aliveAt(g.pop, t, thr)) {
+          n = Math.round(centralAt(g.pop, t));
+        }
+        if (!(n > 0)) continue;
+        cities[0]++;
+        cities[1] += n;
+        if (traditionAt(b.traditions, b.at(g.head.lat, g.head.lon, t)?.region || undefined, t, 'townspeople')) cities[2] += n;
+      }
+    } else {
+      // Legacy builds/tests without continuity metadata: two lists' figures for one place are one city, with the larger.
+      const standing = new Map<string, { people: number; housed: boolean }>();
+      for (const c of b.cities.cities) {
+        const l = lists.get(c.source);
+        const n = cityPeople(c, t, l?.hold ?? 0, l?.gap ?? Infinity);
+        if (!n || n <= 0) continue;
+        const key = `${Math.round(c.lat * 20)}_${Math.round(c.lon * 20)}`;
+        if ((standing.get(key)?.people ?? 0) >= n) continue;
+        standing.set(key, { people: n, housed: !!traditionAt(b.traditions, b.at(c.lat, c.lon, t)?.region || undefined, t, 'townspeople') });
+      }
+      cities[0] = standing.size;
+      for (const c of standing.values()) {
+        cities[1] += c.people;
+        if (c.housed) cities[2] += c.people;
+      }
     }
     return { t, people, housed, ...(standIn ? { standIn } : {}), by, regions: [regions.size, [...regions.values()].filter(Boolean).length], cities };
   });

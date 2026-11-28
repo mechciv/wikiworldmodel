@@ -5,43 +5,50 @@ id: model:people/city-population
 type: model
 title: A settlement's people through time, from every figure of them
 description: >-
-  Reads every figure the world has of a settlement, the lists' (Chandler's and Modelski's, as Reba, Reitsma and Seto
-  placed them) and its own record's, as an observation of what it counts, and conditions on them all together. The log
-  of the settlement's people wanders through time as a random walk, so that between two figures it changes at a
-  constant rate and its doubt grows with the years from the nearest figure. A figure of the settlement's people
-  observes their mean over the years it is for, and says the people were there from the start of those years; one that
-  gives no years observes the whole of the settlement's life, weakly, and is never a point at its founding. A figure of its core observes a part of its people, a count of its
-  houses its people over a household, and its ground its people over the density they lived at, whose prior is
-  model:people/density's. A figure of its region observes the settlement's people and the land's about it together,
+  Reads every figure the world has of a settlement — historical lists (Chandler and Modelski, as Reba, Reitsma and Seto
+  placed them), modern urban-centre anchors (GHSL UCDB R2019A and Natural Earth 1:10m fallback, matched strictly by name
+  and proximity), and its own record's claims — as observations of what each counts, and conditions on them all together.
+  The log of the settlement's people follows a random walk with local regional demographic drift driven by HYDE 3.2.1
+  (Δx ~ γ Δ log(H(t) + H₀)), so that across multi-century gaps the trajectory follows regional demographic booms and
+  collapses while uncertainty grows with time from the nearest figure. Between observed figures, absence from global
+  historical benchmark columns (e.g. Chandler's multi-country census years) acts as a soft left-censored observation via
+  Laplace approximation, gently pulling an unlisted gap below the benchmark's inclusion cutoff without fabricating sharp
+  cliffs or leaking into held-out observations. A figure of the settlement's people observes their mean over the years it
+  is for, and says the people were there from the start of those years; one that gives no years observes the whole of the
+  settlement's life, weakly, and is never a point at its founding. A figure of its core observes a part of its people, a
+  count of its houses its people over a household, and its ground its people over the density they lived at, whose prior
+  is model:people/density's. A figure of its region observes the settlement's people and the land's about it together,
   over a prior of the settlement's and HYDE's in the region's ground; the bounds of a site today observe none of its
-  people. Each source's figures for a settlement share a bias, a factor by which they may all be high or low. A
-  preferred figure passes over its rivals: the record's other figures for the same ground at about the same time, a
-  count of houses then, and a list's figure within 25 years of it. Before the first figure the people rise from a
-  founding size at the settlement's start to where the first figure's years begin, and after the last figure's years
-  they fall to it at its end, or hold where its record runs on to the present. The model knows nothing of what happened to a city between two figures: a sack, a plague or a
-  boom is not in it until a figure says so.
+  people. Each source's figures for a settlement share a bias, a factor by which they may all be high or low (with modern
+  lists' mean offset and scatter calibrated empirically at build from 1975 overlap with Chandler). A preferred figure
+  passes over its rivals: the record's other figures for the same ground at about the same time, a count of houses then,
+  and a list's figure within 25 years of it. For settlements without an explicit record span, a two-state continuous-time
+  occupancy Markov chain (standing vs abandoned) combines observed figures, missed global benchmarks, and presence or
+  absence in the modern survey (2015) to infer occupancy probability P(Z(t) = 1), bridging living historical gaps while
+  letting unanchored ruins lapse after their last evidence.
 author: machine:claude-code
 code: core/citypop.ts
 inputs:
-  - { ref: field:people/cities-ancient, note: "Modelski's figures, by city and year" }
-  - { ref: field:people/cities, note: "Chandler's figures, by city and year" }
+  - { ref: field:people/cities-ancient, note: "Modelski's figures, by city and year, and their global benchmark cutoffs" }
+  - { ref: field:people/cities, note: "Chandler's figures, by city and year, and their global benchmark cutoffs" }
+  - { ref: field:people/cities-modern, note: "GHSL UCDB R2019A modern urban centres (1975–2015) and Natural Earth 1:10m fallback for surviving smaller towns" }
   - { prop: population, kind: settlement, note: "a settlement's own figures, each with the ground it counts and the years it is for" }
   - { prop: houses, kind: settlement, note: "its houses, where a record counts them" }
   - { prop: settlement_area, kind: settlement, note: "its ground, and its region's, which its people are read over" }
   - { prop: start, kind: settlement, note: "when it was founded" }
   - { prop: end, kind: settlement, note: "when it was left" }
   - { ref: model:people/density, note: "the prior of how densely it lived, from the settlements near it" }
-  - { ref: field:earth/population, note: "HYDE's people within a region's ground, the prior of a region's people beside the settlement's own" }
+  - { ref: field:earth/population, note: "HYDE's people within a region's ground, and a 3°×3° smoothed local series for regional demographic drift" }
 derives: >-
-  Each settlement's people through time, as the central reading and the band's edges, from its founding to its end;
-  its density scale; and, where its record gives a region, the region's people. Each figure's fit, and its prediction
-  from all the others, for the panel and the scores.
+  Each settlement's people through time, as the central reading and the band's edges, from its founding to its end; its
+  occupancy probability P(Z(t) = 1) where continuity is modeled; its density scale; and, where its record gives a region,
+  the region's people. Each figure's fit, and its prediction from all the others, for the panel and the scores.
 params:
   walk:
     choice: >-
       0.004 a year: the variance of the log of the people's random walk, so that a century from the nearest figure the
-      people may be about twice or half as many. The build fits it again to the lists' figures held out one at a time
-      (tools/world/src/holdout.ts), and writes what it fitted in the cities file.
+      people may be about twice or half as many. The build fits it again to the historical lists' figures held out one at
+      a time (tools/world/src/holdout.ts), and writes what it fitted in the cities file.
   bias:
     choice: >-
       0.286 for a list's figures and for a work's, where the build has fitted none: the spread of the log of the factor by
@@ -49,8 +56,28 @@ params:
       share one bias whatever they count, its people, its ground and its houses: a work that drew a city's ground wide
       counted its people over it, so that how densely they lived is what it says most surely. Its figures of the region
       have a bias of their own. At a list's figure 0.286 makes the band 1.6 times higher and lower, the band this model
-      drew before it read figures as observations. The build fits a list's to the lists' figures held out one at a time,
-      and a work's to the records' figures held out with their record's, and writes what it fitted in the cities file.
+      drew before it read figures as observations. The build fits a historical list's to the historical lists' figures
+      held out one at a time, calibrates a modern list's mean offset and scatter from 1975 overlap with historical lists,
+      and fits a work's to the records' figures held out with their record's, writing what it fitted in the cities file.
+  drift:
+    choice: >-
+      0.5 by default: weight in [0, 1] on local 3°×3° Gaussian-smoothed HYDE regional demographic drift
+      Δ log(H(t) + driftFloor) between observations. The build fits it over [0, 0.25, 0.5, 0.75, 1] by leave-one-out log
+      predictive density on historical lists (tools/world/src/holdout.ts) and writes what it fitted in the cities file.
+  drift_floor:
+    choice: >-
+      1,000 people: additive floor in log(H(t) + driftFloor) so sparsely populated ancient regions stay well-behaved
+      without extreme log jumps near zero.
+  censor:
+    choice: >-
+      Soft left-censoring on missed global benchmark columns strictly between observed figures (tau = 0.5 log-width,
+      rho = 0.45 inclusion probability for Laplace population conditioning, occRho = 0.7 for occupancy inference).
+      Censoring is suppressed within 25 years of any observation (including held-out ones) to prevent holdout leakage.
+  occupancy:
+    choice: >-
+      Two-state continuous-time Markov chain (abandon = 0.0008/yr, found = 0.00002/yr, modernCutoff = 15,000 people,
+      modernCoverage = 0.95 at 2015, standing threshold = 0.5) inferring P(Z(t) = 1) for unrecorded settlements from
+      observations, missed global benchmarks, and modern survey presence or absence.
   point:
     choice: >-
       0.05 on the log, about 5%: one figure's own error besides its source's bias, where the figure gives no range, so
@@ -88,8 +115,8 @@ uncertainty:
   kind: ensemble
   note: >-
     Member 0 is the central reading; members 1 and 2 are the band's higher and lower edges, at each figure's time and
-    between, as the model's posterior gives them. The spread comes from the figures' own ranges, their sources' biases
-    and the years between them.
+    between, as the model's posterior gives them. The spread comes from the figures' own ranges, their sources' biases,
+    left-censoring on missed benchmarks, and the years between them.
 checks:
   - { test: core/citypop.test.ts, holds: "reads a list between its figures at a constant rate, and stands only while the list holds it" }
   - { test: core/citypop.test.ts, holds: "passes over a list's figure near a record's preferred one, and reads it elsewhere" }
@@ -98,3 +125,6 @@ checks:
   - { test: core/citypop.test.ts, holds: "takes a core's figure for a part of the settlement, and a region's for the land about it besides" }
   - { test: core/citypop.test.ts, holds: "passes over a count of houses where a preferred figure gives the people, and reads it where none does" }
   - { test: core/citypop.test.ts, holds: "scores a figure held out by how well the others predict it" }
+  - { test: core/citypop.test.ts, holds: "curves a gap between observations with local HYDE regional demographic drift" }
+  - { test: core/citypop.test.ts, holds: "applies Laplace left-censoring on missed interior benchmarks without leaking held-out observations" }
+  - { test: core/citypop.test.ts, holds: "bridges living cities across long list silences while letting unanchored ruins lapse via occupancy HMM" }
