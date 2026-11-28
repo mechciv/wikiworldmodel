@@ -1,0 +1,85 @@
+# A derived field: made by the build from the elevation field, the level of the sea its shore beds give, the rock
+# record's collections, today's surveyed ground and the ranges' records (model:earth/land-height, core/heights.ts), and
+# written in files of its own, one for each keyframe (heights/). Nothing drawn reads it yet.
+id: field:earth/land-height
+type: field
+kind: raster
+title: The height of the land, by the rocks and the ranges
+quantity: the height of the ground above the sea of the time
+unit: m
+description: >-
+  How high each node of the elevation field stood above the sea at each of its keyframes, as a middle height and a
+  band. Where nothing else is known it is the field's own height above its coast, less the level of the sea that the
+  beds laid down at the shore give, and its band is as wide as the field is known to miss: by what its keyframe of the
+  present misses today's surveyed ground, grown by how much further it has the shore beds of a keyframe from the level
+  than it has those of the present, and on high ground by the share of their height by which it misses the ranges
+  whose records say they stood. Three kinds of evidence move it. From when a range's record says it stood at about its
+  present height, the ground in its outline is today's, within a fifth. Near a bed laid down at the shore, the field's
+  miss there is known and is carried to ground of like height about it. And the beds of the sea and of the land found
+  near, on ground the field has about as high as theirs, turn the chance that the ground lay below the level, as the
+  chance of sea reads them, a trace of a bed by its share of one and no more: the height is then the field's bell cut
+  at the level, each side weighed by that chance. It is the height of a moment taken anywhere in the keyframe's span,
+  some five million years, at a degree's grain. The elevation drawn, and all that stands on it, are still the
+  field's.
+datum: contemporaneous-sea-level
+frame: frame:earth/geographic
+grid: { kind: lonlat, res_deg: 1 }
+time: { lo: 540 Ma, hi: 0 Ma, step: 5 Myr }
+derived: true
+from: [field:earth/elevation, field:earth/shore-level, field:earth/rock-record, field:earth/relief]
+rule: land-height
+spread: ensemble
+uncertainty: >-
+  The band holds the height in nine chances of ten, and a member of the world is one share of every node's chances:
+  the middle member's the middle height, and a member's sea wherever the chance of it is above the member's share, so
+  that the members' seas lie one inside another. The map's misses have long tails, and a bell does not: the band is as
+  wide as holds nine misses in ten, and half of them lie within a quarter of it. Held to shore beds it was not shown,
+  the level lies in the band about nine times in ten, and held to today's surveyed ground at the present, today's
+  height does at nine nodes in ten; each build counts both (coverage.json, heights). On high ground the band is a
+  share of the map's height, which cannot hold a plateau the map has low: a range told without its own record lies in
+  it as seldom as half the time. Its chance of sea is told by height alone, and tells the kinds of beds it was not
+  shown worse than the chance of sea does by distance from the map's coast, and worse than the same beds do with no
+  map at all.
+interp: plate-warp
+moves_with: src:paleomap-plate-model
+params:
+  # Collections of one kind within a box this many degrees across are one bed, as the chance of sea counts them.
+  box_deg: 0.1
+  # Below this height, in metres, the field's sea is the ocean's floor: a bed there counts at its own node only.
+  deep_m: -1000
+  # The bell the beds near a node are counted by, in km.
+  kernel_km: 150
+  # A shore bed's word on the map's miss is carried to ground whose height on the map is within about this of the
+  # map's height at the bed, in metres.
+  like_m: 100
+  # The kind of a bed, of the sea or of the land, is carried to ground whose height on the map is within about this
+  # of the map's height at the bed, in metres.
+  like_kinds_m: 300
+  # What is found near a node counts against the map's word only so far as it comes to this many beds.
+  least_beds: 1
+  # Today's ground below this, in metres, is low: the map's miss at the present is metres there, and a share of the
+  # height above it or of the depth below.
+  low_m: 500
+  # South of this latitude the map of the present has the bed under the ice and the survey its top: left out of what
+  # the present measures.
+  ice_south: -60
+  # The phase of a range's record in which it stands at about its present height.
+  standing_phase: standing
+  # The doubt given a range's "about today's height": a share of it, and never less than so many metres.
+  range_doubt: 0.2
+  range_doubt_m: 200
+  # The furthest the map alone moves the odds of sea from even, as a log: 1.8% to 98.2%, as the chance of sea has it.
+  cap: 4
+  # Where the fits start: how many beds the map's word counts for beside the kinds found near, and for the rival by
+  # distance how fast the odds of sea change with each degree from the map's coast. The build fits them and writes
+  # what it fitted in heights/index.json.
+  strength: 0.3
+  slope_in: 0.4
+  slope_off: 0.4
+  # How many keyframes either side share one yield, and how many land beds they must have for it to be fitted.
+  yield_pool: 2
+  yield_land_min: 50
+  # What is held out to score it: a bed's tile and its block, in degrees, and every how many keyframes one whole.
+  tile_deg: 5
+  block_deg: 20
+  span_every: 4

@@ -1,0 +1,61 @@
+# A derived series: made by the build from the beds laid down at the shore (model:earth/shore-level, core/heights.ts),
+# with the heights it is the level of, and kept in their index (heights/index.json). It is not in series.json: the
+# series are made before the elevation is read.
+id: field:earth/shore-level
+type: field
+kind: series
+title: Sea level against the map's coast, from shore beds
+quantity: the sea's level against the coast the elevation field draws
+unit: m
+description: >-
+  How far the sea stood above or below the coast that the elevation field draws, at each of the field's keyframes: more
+  than nothing where the sea reached further than the map has it. It is read from the beds laid down at the shore, in
+  lagoons, estuaries, tidal flats and shallow water, which the rock record's database classes so: such a bed stood at
+  the sea's level, so the map's height where it puts one is the map's height for the level. It needs no count of how
+  many beds of each kind were found. The maps follow today's ground nearly whole where that ground stands near today's
+  sea, and shore beds are only found where their ground is land today; so the level is read on the beds whose ground
+  stands near today's sea, as the map's height for a bed whose ground stands at it. That reading takes the old shore,
+  on ground that has not moved since, to stand at today's sea. How high it does stand, which is the sea's level
+  against today's ground, the beds cannot tell: for each metre of it, the level here is higher by as much as the map
+  follows today's ground, which each keyframe keeps beside its level, with where the middle shore bed found stands
+  today. van der Meer's curve is that other quantity, and is set beside this and never read. Before about 265 Ma,
+  through most of the Cretaceous and in the Triassic the shore beds are too few on low ground, or lie in shelf seas
+  the map draws at one depth: there they cannot tell a level, and it is the map's own coast, with the band of a level
+  that nothing was found to tell.
+grid: { kind: series }
+time: { lo: 540 Ma, hi: 0 Ma, step: 5 Myr }
+derived: true
+from: [field:earth/elevation, field:earth/rock-record, field:earth/relief]
+rule: shore-level
+# A low and a high about each value: nine chances in ten.
+spread: band
+uncertainty: >-
+  Its band holds the level in nine chances of ten as it is read, with the old shore taken to stand at today's sea on
+  ground that has not moved: of the keyframes held out whole, the level their own beds give lies in the band told from
+  the others more than nine times in ten, and each build counts it (coverage.json, heights). The band does not hold
+  what that reading leaves open. If the old shore stands as high today as the middle shore bed found, the level is
+  higher by tens of metres to more than a hundred in the last 70 Myr, and each keyframe says by how much. At the
+  present, where the level is known to be nothing, the youngest keyframe's own beds put it within a metre or two of
+  that.
+interp: linear
+params:
+  # The rock record's classes of environment whose beds were laid down at the shore.
+  shore_classes: [marginal, stshallow]
+  # The map's depth below its coast, and today's ground below today's sea, are read no deeper than this, in metres:
+  # one of the map's steps.
+  floor_m: -40
+  # A shore bed counts for less in the level the higher its ground stands today: by a factor of e for each so many
+  # metres above today's sea, at the map's own grain. The map's following of today's ground is read over the same
+  # ground.
+  near_m: 150
+  # How many keyframes either side lend a keyframe their shore beds, for where the beds stand today and for how far
+  # the map has them from the level.
+  pool: 2
+  # How much shore beds must count for, by weight, for a keyframe's own to tell its level.
+  shore_min: 15
+  # The walks the level may take from one keyframe to the next: how much of itself it keeps, and how far it strays
+  # from the map's coast, in metres. The build keeps the pair that best tells each keyframe's level from the others'.
+  hold: [0.5, 0.7, 0.85, 0.95]
+  stray_m: [25, 50, 100, 200]
+  # Another's curve of sea level, which the level is set beside and never reads.
+  beside: field:earth/sea-level

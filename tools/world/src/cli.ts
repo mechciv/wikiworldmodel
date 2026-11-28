@@ -171,6 +171,31 @@ const commands: Record<string, (args: string[]) => Promise<number | void>> = {
     }
     console.log(coastText(found));
   },
+  /** The sea's level and the height of the land at a place of today at a time, as the latest build has them; with no place, how they held. */
+  async heights([lat, lon, ...when]) {
+    const { heightsIndexOf, heightsOfBuild, heightsScoresText, heightsText } = await import('./heightsat.ts');
+    const { parsePoint } = await import('../../../core/time.ts');
+    const { BUILDS } = await import('./paths.ts');
+    const index = join(BUILDS, 'index.json');
+    if (!existsSync(index)) throw new Error('no world build: run `npm run build:world` first');
+    const build = join(BUILDS, JSON.parse(readFileSync(index, 'utf8')).latest);
+    if (lat === undefined) {
+      const ix = heightsIndexOf(build);
+      if (!ix) {
+        console.log("The build has no heights: its rock record's snapshot was not fetched.");
+        return 1;
+      }
+      console.log(heightsScoresText(ix));
+      return;
+    }
+    if (lon === undefined || !when.length || [lat, lon].some((x) => !Number.isFinite(Number(x)))) throw new Error('usage: world heights [<lat> <lon> <time>], the place as it is today: world heights 45.9 7.4 20 Ma');
+    const found = heightsOfBuild(build, Number(lat), Number(lon), parsePoint(when.join(' ') as import('../../../core/time.ts').TimePointInput).t);
+    if (!found) {
+      console.log('The build has no height for that place and time: it has none at all, or no plate carries the place there.');
+      return 1;
+    }
+    console.log(heightsText(found));
+  },
   async rocks([lat, lon, ...when]) {
     if (lat === undefined || lon === undefined || !when.length) throw new Error('usage: world rocks <lat> <lon> <time>, the place as it is today: world rocks -4.04 -43.18 123.7 Ma');
     const { rocksOfBuild, rocksText } = await import('./rocksnear.ts');

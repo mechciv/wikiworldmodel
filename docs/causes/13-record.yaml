@@ -41,8 +41,8 @@ nodes:
     kind: record
     what: "How high ground stood, from the isotopes of old rain and the shapes of fossil leaves."
     now: records
-    note: "Claims on eight range records. They contradict the elevation maps by a kilometre and correct nothing."
-    best: "Observations of the height of the land, each with its several hundred metres of doubt."
+    note: "Claims on eight range records: by when each stood at about its present height. Since the twenty-third slice they observe the height of the land, beside what is drawn: from when a range stood, its ground is today's, give or take a fifth. The heights themselves are in the records' notes and not in claims, so every range has the one doubt."
+    best: "Each measured height a claim of its own, with its place, its time and its several hundred metres of doubt, read as an observation; and more ranges than eight, and older than 35 Myr."
     gap: medium
   - id: proxies
     label: Measures of old climate

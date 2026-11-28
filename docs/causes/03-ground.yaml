@@ -6,10 +6,10 @@ nodes:
     label: Height of the land
     kind: settling
     what: "How high the land stood, at about a hundred kilometres' grain."
-    now: borrowed
-    has: [field:earth/elevation]
-    note: "Hand-drawn maps at 1° every 5 Myr, in 40 m steps, with no spread. The Himalaya's summits swing from 8,800 m at 10 Ma to 7,100 m at 5 Ma, and the Alps stand 1 to 1.5 km low for 20 Myr, against the ranges' own records."
-    best: "The same maps as the central member, since the climate runs stand on them, corrected by measured heights and given a spread. Behind them, rules from the plate boundaries and landscape-evolution runs (Salles et al. 2023, licence unchecked)."
+    now: scored
+    has: [field:earth/elevation, model:earth/land-height, field:earth/land-height]
+    note: "What is drawn is still hand-drawn maps at 1° every 5 Myr, in 40 m steps, with no spread. Beside them, since the twenty-third slice, a height with a band at each node and keyframe: the map's, less the sea's level, where nothing else is known, with a spread measured against today's surveyed ground, the shore beds and the ranges; moved by eight ranges' records, by beds laid down at the shore and by the kinds of beds near. With their records read the ranges stand within 70 to 200 m of today's height, where the maps are 450 to 1,400 m off; a shore bed held out with its node lies 108 m from the level, where the maps have it 180 m. Its own sea is told by height alone and tells the kinds of beds held out worse than the chance of sea does. Nothing drawn reads it, and it has no cause in it: no uplift, no wearing down."
+    best: "The same heights under what is drawn, the land and sea taken from the chance of sea and the height on either side from here; each measured old height a claim of its own, with its place and its doubt; a law for the map's miss with long tails. Behind them, rules from the plate boundaries and landscape-evolution runs (Salles et al. 2023, licence unchecked)."
     gap: large
     seen: [heights, rocks, others]
   - id: erosion
@@ -73,10 +73,10 @@ nodes:
     label: Sea level
     kind: at-once
     what: "The height of the sea against the land, the world over."
-    now: borrowed
-    has: [field:earth/sea-level, field:earth/sea-level-stack, model:earth/ice-equivalent-sea-level, field:earth/ice-sheet-sea-level]
-    note: "A stack every 1 kyr for 798 kyr, laid over today's ground. In deep time a curve is drawn as a series and moves no coast. The ice added up as sea level is up to 54 m from the stack in Marine Isotope Stage 3."
-    best: "A budget: the water in the ocean over the basins' capacity. Rival curves as alternatives, which differ by 100 m or more on the Cretaceous high. Cycles at 1 kyr for 40 Myr from deep-sea isotopes (Rohling et al. 2022, unread)."
+    now: scored
+    has: [field:earth/sea-level, field:earth/sea-level-stack, model:earth/ice-equivalent-sea-level, field:earth/ice-sheet-sea-level, model:earth/shore-level, field:earth/shore-level]
+    note: "A stack every 1 kyr for 798 kyr, laid over today's ground. In deep time a curve is drawn as a series and moves no coast. Beside it, since the twenty-third slice, the sea's level against the maps' own coast at each keyframe, read from the beds laid down at the shore and from no count of beds: told by their own beds at 32 of 109 keyframes, within some tens of metres of the maps' coast in the last 70 Myr and 40 to 60 m above it at 35 and 40 Ma, and nothing at the present, where it is known. It is a reading: every map follows today's low ground by nine tenths or more in those keyframes, so the level takes the old shore to stand at today's sea on unmoved ground, and is higher by as much as it stands above it, which the beds cannot tell. The ice added up as sea level is up to 54 m from the stack in Marine Isotope Stage 3."
+    best: "A budget: the water in the ocean over the basins' capacity. The sea's level against today's ground from shores on ground known not to have moved, or from backstripped margins (Miller et al. 2020, unread). Rival curves as alternatives, which differ by 100 m or more on the Cretaceous high. Cycles at 1 kyr for 40 Myr from deep-sea isotopes (Rohling et al. 2022, unread)."
     gap: large
     seen: [proxies, rocks]
   - id: rebound
@@ -118,7 +118,7 @@ nodes:
     seen: [rocks]
 edges:
   - { from: plates, to: elevation, now: built, how: "Each place rides its plate between the maps' keyframes." }
-  - { from: uplift, to: elevation, now: partial, by: model:earth/relief-carried, how: "A range's record says by when it stood. Its shape is carried back that far, but on the maps' own level." }
+  - { from: uplift, to: elevation, now: partial, by: model:earth/land-height, how: "A range's record says by when it stood, and from then its ground is taken to stand at about today's height, beside what is drawn. Nothing raises a range: the eight that have records are all there is." }
   - { from: mantle-push, to: elevation, now: missing, how: "The mantle lifts and drops whole regions under their own crust." }
   - { from: erosion, to: elevation, now: missing, how: "Land wears down once uplift stops, and sediment fills the basins." }
   - { from: elevation, to: erosion, now: missing, loop: wearing-down, how: "Higher, steeper ground wears faster." }
@@ -149,7 +149,7 @@ edges:
   - { from: sea-level, to: rebound, now: missing, how: "The sea's own weight bends the shelves." }
   - { from: elevation, to: coast, now: built, by: model:earth/coastline, how: "The coast is an isoline on the elevation." }
   - { from: relief, to: coast, now: built, by: model:earth/relief-coastline, how: "For the glacial cycles the coast is today's ground under each time's sea." }
-  - { from: sea-level, to: coast, now: partial, by: model:earth/relief-coastline, how: "The stack's level moves the coast for 798 kyr. Before that the maps' own zero is the coast." }
+  - { from: sea-level, to: coast, now: partial, by: model:earth/relief-coastline, how: "The stack's level moves the coast for 798 kyr. Before that the maps' own zero is the coast drawn; a level read from the shore beds is taken off the maps' heights beside it, and moves little, since the beds cannot tell the sea's level against today's ground." }
   - { from: rebound, to: coast, now: missing, how: "Sunken crust near the ice drowns coasts that the sea level alone would bare." }
   - { from: mantle-push, to: coast, now: missing, how: "A sagging continent floods without the sea rising." }
   - { from: floodplains, to: coast, now: missing, loop: delta-building, how: "Deltas build land out into the sea." }

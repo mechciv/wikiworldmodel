@@ -5,6 +5,7 @@ import { inspectFootprint } from './footprint.ts';
 // records make to it, and what the derived dates rest on.
 import type { ClimateClass } from '../../../core/climate.ts';
 import { chanceWords } from '../../../core/coast.ts';
+import { heightWords, RESTS } from '../../../core/heights.ts';
 import type { Cover } from '../../../core/planet.ts';
 import type { LivingTaxon, SceneSpec } from '../../../core/scene.ts';
 import type { CitationRecord, ClaimRecord, EntityRecord, OverlaysFile, SeriesRecord, SourceRecord } from '../../../core/records.ts';
@@ -150,6 +151,41 @@ export interface TerrainInfo {
   sea?: SeaHere;
   /** how people lived here, as the human landscape has it at this time */
   landscape?: LandscapeHere;
+  /** how high the ground stood, by the rocks and the ranges, where the heights cover the time */
+  height?: HeightHere;
+}
+
+/**
+ * How high the ground stood where a click fell, as the heights have it at their keyframe nearer the time shown
+ * (model:earth/land-height, model:earth/shore-level; core/heights.ts): the middle height above the level with its band,
+ * the level then, and what the height rests on besides the map.
+ */
+export interface HeightHere {
+  /** the heights' title, and the level's */
+  title: string;
+  levelTitle: string;
+  /** the keyframe read, and the span its beds are of, in Ma */
+  ageMa: number;
+  olderMa: number;
+  youngerMa: number;
+  /** the map's own height above its coast here, in metres */
+  map: number;
+  /** the sea's level against the map's coast at the keyframe, with its band; whether the keyframe's own shore beds told it, and how many they were */
+  level: number;
+  levelLo: number;
+  levelHi: number;
+  levelTold: boolean;
+  shoreBeds: number;
+  /** the height above the level: the middle, the band of nine chances in ten, and the chance it lay below */
+  middle: number;
+  lo: number;
+  hi: number;
+  chance: number;
+  /** what it rests on besides the map, as bits (core/heights.ts, RESTS) */
+  rests: number;
+  /** how many members of the world have this ground below the level, and of how many */
+  members: [number, number];
+  source?: SourceRecord;
 }
 
 /** How people lived where a click fell, at the time shown (docs/HUMAN-LANDSCAPE.md). */
@@ -862,6 +898,7 @@ export class InspectPanel {
       <p>${lat}, ${lon} in the geographic frame of this time${info.plate ? `, on plate ${info.plate}${info.plateLabel ? ` (${esc(info.plateLabel)})` : ''}` : ', on no plate polygon (ocean floor the model does not track)'}.</p>
       ${info.ice && !underIce ? this.iceSection(info.ice) : ''}
       ${info.sea ? this.seaSection(info.sea, info.elevation < 0) : ''}
+      ${info.height ? this.heightSection(info.height) : ''}
       ${info.polity && info.elevation >= 0 ? this.politySection(info.polity) : ''}
       ${info.biome && info.elevation >= 0 && !underIce ? this.biomeSection(info.biome) : ''}
       <p class="method">${info.seaLevel ? this.seaLevelMethod(info.seaLevel, info.coastline) : `Interpolated between ${esc(blend)}, each moved with its plates to this time. The ${esc((info.coastline ?? 'coastline').toLowerCase())} is derived, not stored: the ${esc(info.datum === 'contemporaneous-sea-level' ? '0 m' : 'sea-level')} isoline of this field.`}${info.fieldSpread ? ` ${esc(SPREAD_TEXT[info.fieldSpread])}` : ''}</p></section>${this.stateSection(info.state)}${source}`,
@@ -901,6 +938,27 @@ export class InspectPanel {
       <p class="big">${Math.round(s.chance * 100)}% <span class="muted">for the sea</span></p>
       <p>${esc(say)}. ${esc(found)}${esc(weigh)}${esc(side)}</p>
       <p class="method">${esc(s.title)}, at its keyframe of ${esc(when(s.ageMa))}: the map's coast read softly, then the localities, a marine one counting for less where the sea leaves more of them (${s.told ? `${esc(String(s.yield))} here for each one the land leaves` : `${esc(String(s.yield))} for each one the land leaves, at the nearest keyframe whose rocks can tell: here the land left too few localities`}). Nothing is made of what was not found. Sea here in ${s.members[0]} of ${s.members[1]} members of the world. The coast drawn is still the map's; in evidence mode the rocks' is drawn over it.${src ? ` The localities are from ${esc(short(src, src.id))}.` : ''}</p></div>`;
+  }
+
+  /**
+   * How high the ground stood, by the rocks and the ranges: the middle height above the level of the sea with its
+   * band, the level then, and what the height rests on besides the map.
+   */
+  private heightSection(h: HeightHere): string {
+    const when = (ageMa: number) => formatTime(fromMa(ageMa));
+    const m = (x: number) => `${Math.abs(Math.round(x)).toLocaleString('en-US')} m ${x < 0 ? 'below' : 'above'}`;
+    const rests: string[] = [];
+    if (h.rests & RESTS.range) rests.push("a range's record says this ground stood at about its present height by then, and the height is today's, give or take a fifth");
+    if (h.rests & RESTS.shore) rests.push('beds laid down at the shore lie near, where the ground stood at the level: what the map misses by there is taken off');
+    if (h.rests & RESTS.kinds) rests.push('the beds found near, of the sea and of the land, say which side of the level it lay on');
+    const basis = h.rests ? 'evidence' : 'reconstruction';
+    const on = rests.length ? `${rests.join('; ')}.` : `Nothing found near of ${when(h.olderMa)} to ${when(h.youngerMa)} outweighs the map here, and no range's record speaks for this ground: the height is the map's, less the level, or near it, and the band is how far the map is known to miss.`;
+    const level = `${m(h.level)} the map's coast, between ${m(h.levelLo)} and ${m(h.levelHi)}`;
+    const src = h.source;
+    return `<div class="land-height"><h3>Height, by the rocks and the ranges <span class="badge basis-${basis}">${basis}</span></h3>
+      <p class="big">${h.middle < 0 ? '−' : ''}${Math.abs(Math.round(h.middle / 5) * 5).toLocaleString('en-US')} m <span class="muted">${h.middle < 0 ? 'below' : 'above'} the level of the sea</span></p>
+      <p>${esc(heightWords(h.middle, h.lo, h.hi).replace(/^a/, 'A'))}. The map of the time has this ground ${esc(m(h.map))} its coast. ${esc(on.charAt(0).toUpperCase() + on.slice(1))}</p>
+      <p class="method">${esc(h.title)}, at its keyframe of ${esc(when(h.ageMa))}. The sea's level then stood ${esc(level)}, ${h.levelTold ? "by the keyframe's own beds laid down at the shore" : "carried from the keyframes either side: this one's own shore beds could not tell it"}, read as if the old shore stood at today's sea on ground that has not moved (${esc(h.levelTitle.toLowerCase())}). Below the level in ${h.members[0]} of ${h.members[1]} members of the world. The height drawn, and the coast, are still the map's.${src ? ` The beds are from ${esc(short(src, src.id))}.` : ''}</p></div>`;
   }
 
   /** What the ice-sheet field gives here, in the dataset's own terms, and how far to trust it. */

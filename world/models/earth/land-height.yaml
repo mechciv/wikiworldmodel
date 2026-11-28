@@ -1,0 +1,221 @@
+# A model run here (section 4.10 of the design), made as docs/plans/MODELS.md asks. Its fitted numbers are in each
+# build's heights/index.json, where the build writes them; this record says where they come from.
+id: model:earth/land-height
+type: model
+title: The height of the land, from the map, the rocks and the ranges
+description: >-
+  How high each node of the elevation field stood above the sea at each of its keyframes, as a bell: a middle height
+  and a spread. Where nothing else is known the middle is the field's own height above its coast, less the level of
+  the sea that the shore beds give (model:earth/shore-level), since the climate's runs stand on that field. The spread
+  is how far the field is known to miss, each part as wide as holds nine misses in ten. On low ground it is what the
+  field's keyframe of the present misses today's surveyed ground by, grown by how much further the field has a
+  keyframe's shore beds from the level than it has those of the present. On high ground it is a share of the height:
+  the share by which the field misses the ranges whose records say they stood, and never less than at the present.
+  Over the deep sea it is the present's share of the depth. Three kinds of evidence then move a node. A range's
+  record: from when it says the range stood at about its present height, the ground in its outline stood at today's
+  height, give or take a fifth; where the map is further from that than its own spread, the map is taken to be in one
+  of its long misses and gives way. A bed laid down at the shore: there the ground stood at the level, so the map's
+  height above the level is the map's miss, known, and it is carried to the ground about, less with distance and less
+  the more the map's height there differs from its height at the bed. And the kinds of beds found near, of the sea and
+  of the land, on ground the map has about as high as theirs: they turn the chance that the ground lay below the
+  level, as the chance of sea reads them, by the share of marine among what a place yields, with a yield for each
+  keyframe. What is found near counts against the map only so far as it comes to a bed: a trace of one, far off or on
+  ground of another height, moves the chance by its share of a bed and no more. The height is then the bell cut at the
+  level, each side weighed by that chance, so that ground the rocks say was sea lies below the level and ground they
+  say was land above it. A range that stood is not read for the kinds of beds near: those are of the basins at its
+  foot. The
+  model knows nothing of why the land stood where it did: no uplift, no wearing down, no time before or after the
+  keyframe. And it moves nothing: the elevation drawn, the coast, the climate, the rivers and the scenes read the
+  field as they did.
+author: machine:claude-code
+code: core/heights.ts
+kind: at-once
+inputs:
+  - { ref: field:earth/elevation, note: "each keyframe's heights, which the middle starts from, its coast, and its keyframe of the present" }
+  - { ref: field:earth/shore-level, note: "the level of the sea against the map's coast at each keyframe, with its doubt" }
+  - { ref: field:earth/rock-record, note: "the collections: where each is, the span of its age, whether its bed was laid down under the sea or on land, and whether at the shore" }
+  - { ref: field:earth/relief, note: "today's surveyed ground: what the map's present misses, and what a range's ground stands at" }
+  - { ref: src:paleomap-plate-model, note: "where each collection's plate, and each range's ground, stood at each keyframe" }
+  - { kind: landform/mountain-range, note: "the ranges, with the phase in which each stands at about its present height" }
+  - { prop: extent, note: "the ground a range's record speaks for, as an outline on today's Earth" }
+  - { prop: start_before, note: "by when a range stood: a height like today's, measured at a dated time" }
+  - { prop: start, note: "when a range stood, where a source dates it" }
+outputs: [field:earth/land-height]
+prior:
+  - reads: field:earth/elevation
+    form: >-
+      A bell about the field's own height above its coast: another's map, taken for the middle because the climate's
+      runs stand on it and nothing in the world yet says how high the land should stand from its causes, the plates'
+      meeting and the wearing down after. Its spread is measured and not the map's own word: against today's surveyed
+      ground at the present, against the shore beds at each keyframe, and against the ranges on high ground.
+  - reads: field:earth/shore-level
+    form: The level is taken off the field's height, and the level's own doubt is added to the spread.
+observes:
+  - evidence: field:earth/rock-record
+    support: >-
+      A bed: the collections of one kind in a box of a tenth of a degree, in a keyframe's span of about five million
+      years, where their plate stood at the keyframe. A shore bed observes the height at its place, which was the
+      level's. A bed of the sea or of the land observes which side of the level its ground lay on.
+    error: >-
+      A shore bed misses its own node by what a bed of the present misses its own, some hundreds of metres in nine
+      cases of ten: the map's word counts beside it for as many beds as its own spread is narrower than that. A bed
+      says what its ground was at some time in the span, not at the keyframe. The sea leaves more beds than the land,
+      by a yield for each keyframe. That is the record's and no teller's: it is the one fitted with the height and the
+      distance from the map's coast read together, which tell the kinds of beds best. Fitted with the height alone,
+      where the height's own word is in doubt, it comes out half as great again to twice as great, since most beds
+      found on ground within the map's spread of the level are marine: a higher sea and a greater yield leave the
+      same record. Each build keeps that one beside it (heights/index.json, yield_own).
+    effort: >-
+      Beds are set against beds, marine against land, so that how much a place was looked at cancels, and nothing is
+      made of a place where neither was found. It does not cancel where one kind could not be looked for: the old
+      seas that are still sea have no beds. A bed's word, on the map's miss or on the side of the level, is carried
+      only to ground of like height on the map, so that the foot of a range says nothing of its crest.
+  - evidence: field:earth/relief
+    support: >-
+      Today's surveyed ground, averaged about each node of the field's grid. It observes the field's keyframe of the
+      present everywhere north of the southern ice, and a range's ground from when its record says it stood.
+    error: >-
+      At the present, nothing to speak of: the field's miss there is measured. For a range, the record says "about its
+      present height": a fifth of the height, and never less than 200 m, is given for that, which is about what the
+      ranges' sources give their own measured heights, one basin or one summit each.
+    effort: >-
+      Eight ranges have records, all of the last 35 Myr and none before. Elsewhere and earlier, high ground has the
+      map's height and a spread taken from those eight.
+holdout:
+  held:
+    - a bed's own node, the others of its node left out
+    - its tile of five degrees
+    - its block of twenty degrees, a region
+    - every fourth keyframe whole, an era, its beds told from the map alone with a level and a yield from the keyframes either side
+    - each range in turn, its own record left out and the map's miss on high ground taken from the other ranges
+  baseline: >-
+    The same beds, counted by their distance alone, with a yield for each keyframe and no map: an even chance of sea
+    everywhere before them. It tells the kind of a bed held out better than the height does, at every hold-out. The
+    distance from the map's coast, and the distance and the height read together, beat it wherever a tile or more is
+    held out.
+  rivals:
+    - is: model:earth/sea-chance
+      read: >-
+        the distance from the map's coast in place of the height above the level, with the same beds, as the chance
+        of sea reads the map; and the two read together. The distance tells the kind of a bed held out better at
+        every hold-out, and the two together a little better than the distance wherever a tile or more is held out.
+    - is: field:earth/elevation
+      read: the field as it is, its own coast and its own heights
+  scores: >-
+    coverage.json, under heights; and heights/index.json. The kinds of beds are scored on the keyframes whose yield
+    the rocks can tell; shore beds held out, on how far from the level the height has them; each range, on today's
+    height of its ground; and the present, on today's surveyed ground.
+params:
+  box_deg:
+    choice: A tenth of a degree, the chance of sea's own, so that the two are held to the same beds.
+  deep_m:
+    choice: 1,000 m below the field's coast, the chance of sea's own, deeper than which the field's sea is the ocean's floor and a bed counts at its own node and no other.
+  kernel_km:
+    choice: >-
+      150 km, the width at which the chance of sea's bell best told localities held out. Not fitted again here.
+  like_m:
+    choice: >-
+      A shore bed's word on the map's miss counts for six tenths on ground the map has a hundred metres higher or
+      lower than the bed's, and for next to nothing 300 m off. No work gives it; without it the beds of the sea that
+      stood at the foot of the Alps lowered the Alps.
+  like_kinds_m:
+    choice: >-
+      The kind of a bed counts for six tenths on ground the map has 300 m higher or lower than the bed's. A bed of the
+      sea says its own ground lay below the level, by a shelf sea's depth at most, and ground the map has far above it
+      was not under the same sea. No work gives the number. It was set after the present was looked at: counted by
+      distance alone, the beds of the sea at the foot of high ground put that ground under the sea too.
+  least_beds:
+    choice: >-
+      One bed: what is found near a node counts against the map's word only so far as it comes to a bed, and less than
+      that leaves the rest to the map. Set after the present was looked at too: the map's word is fitted to count for
+      a small part of a bed, and a fifth of one stray bed's weight had a plateau the map has 2.4 km up under the sea.
+  low_m:
+    choice: >-
+      Today's ground within 500 m of the sea is low, and the map's miss of it at the present is counted in metres;
+      above that as a share of the height, and below it as a share of the depth. A choice of where to part them.
+  ice_south:
+    choice: >-
+      South of 60°S the field's keyframe of the present has the rock under Antarctica's ice and the survey has the
+      ice's top, two kilometres higher: that is no miss of the map's, and is left out of what the present measures.
+  standing_phase:
+    choice: The phase of a range's record in which it stands at about its present height, as today's shape carried back reads it (model:earth/relief-carried).
+  range_doubt:
+    choice: >-
+      A fifth of today's height, for "about its present height". The records hold the times and not the heights; their
+      notes give what the sources measured: 4,400 ± 770 m at the Simplon, 2.2 to 3.3 km for a surface now at 2.5 km in
+      the Front Range, more than 4.0 km for a basin floor now at 4.7 km in Tibet. A fifth is about those.
+  range_doubt_m:
+    choice: Never less than 200 m, so that a low range is not held tighter than the map of the present holds any ground.
+  cap:
+    choice: >-
+      4, as a log of odds, the chance of sea's own: before the kinds of beds near are read, the chance that ground lay
+      below the level is never outside 1.8% to 98.2%. The map's misses have long tails that its bell does not.
+  strength:
+    choice: >-
+      Where the fit starts. The build fits how many beds the map's word counts for beside the kinds found near, where
+      those come to more than a bed, to beds told without their node's others and without their tile's, and writes
+      what it fitted in heights/index.json.
+  slope_in:
+    choice: Where the fit starts, for the rival that reads the distance from the map's coast; fitted as the chance of sea fits its own, and written in heights/index.json.
+  slope_off:
+    choice: Where the fit starts; fitted with slope_in, and written with it.
+  yield_pool:
+    choice: Two keyframes either side share a keyframe's yield, as in the chance of sea.
+  yield_land_min:
+    choice: Fifty land beds, by weight, in a keyframe and those it shares a yield with, as in the chance of sea; with fewer the yield is the nearest keyframe's that has them.
+  tile_deg:
+    choice: Five degrees, the tile a bed is held out with.
+  block_deg:
+    choice: Twenty degrees, the block a bed is held out with, as a region whole.
+  span_every:
+    choice: Every fourth keyframe is held out whole.
+uncertainty:
+  kind: ensemble
+  note: >-
+    A member of the world is one share of every node's chances: its height at a node is the height below which that
+    share of the node's chances lie, the middle member's the middle, and its sea is wherever the chance of sea is
+    above its share (core/heights.ts, memberHeight; core/coast.ts, memberLevel). One share for the whole globe takes
+    every place to be too high or too low together, which is the simplest thing that could be so. The numbers fitted
+    are taken as fitted.
+checks:
+  - { test: core/heights.test.ts, holds: "leaves ground with no bed near and no range at the map's height less the level, with the map's miss for a spread" }
+  - { test: core/heights.test.ts, holds: "puts a shore bed's ground at the level, and carries the map's miss there to ground of like height and no other" }
+  - { test: core/heights.test.ts, holds: "raises a range the map has low to about today's height, the more surely the further the map is from it" }
+  - { test: core/heights.test.ts, holds: "cuts the bell at the level and weighs its sides by the chance of sea: ground the rocks say was sea lies below it" }
+  - { test: core/heights.test.ts, holds: "moves the chance by a trace of a bed's share of one and no more, where the map's word alone would give way to it" }
+  - { test: core/heights.test.ts, holds: "draws a member's height as one share of every node's chances, the middle member's the middle, and its sea where the chance is above its share" }
+  - { test: tools/world/test/heights.test.ts, holds: "gives a height with a band at every node of every keyframe, the map's less the level where nothing else is known" }
+  - { test: tools/world/test/heights.test.ts, holds: "puts marine localities below the level and land ones above it more often than the map's coast does, at every hold-out" }
+  - { test: tools/world/test/heights.test.ts, holds: "tells the kind of a locality held out worse than the distance from the map's coast does, and the two together no worse than the distance" }
+  - { test: tools/world/test/heights.test.ts, holds: "does not beat the smoother with no causes on the kinds of localities held out, where the distance from the map's coast and the two read together do" }
+  - { test: tools/world/test/heights.test.ts, holds: "puts a shore bed held out nearer the level than the map does, with the level in its band about nine times in ten" }
+  - { test: tools/world/test/heights.test.ts, holds: "has the ranges at about today's height from when their records say they stood: the Alps at 20 Ma, the Himalaya at 10 and at 5 Ma" }
+  - { test: tools/world/test/heights.test.ts, holds: "says how each range fares with its own record left out" }
+  - { test: tools/world/test/heights.test.ts, holds: "held to the present, keeps today's height in its band at about nine nodes in ten, and moves the measured coast over less than a tenth of the globe" }
+disagrees:
+  - with: model:earth/sea-chance
+    note: >-
+      The height above the level tells the kind of a bed it was not shown worse than the distance from the map's
+      coast does, at every hold-out, and by more the more is held out; worse, too, than the same beds do with no map
+      at all; and from the map alone, with no bed read, far worse. At a degree's grain the map's height says little
+      of sea and land: a plain's and a shelf's are drawn by convention, and beds of the sea are found on ground the
+      map has high. The two read together tell a little better than the distance alone. So the heights' own sea is
+      the poorer of the two, and what is drawn should take its land and sea from the chance of sea, and its height on
+      either side from here. Each build has the scores (coverage.json, heights).
+  - with: field:earth/relief
+    note: >-
+      At the youngest keyframe the elevation is today's and the ground is surveyed, which the model does not know: it
+      reads that keyframe's beds as any other's. They are of the last two and a half million years, in which the sea
+      came and went over the shelves and fast ground rose a kilometre, and a bed of the sea is found only where the
+      sea has since left. They move the level across today's coast on four or five hundredths of the globe: land
+      today that the heights have below the level, and as much sea today that they have above it. Over today's land
+      the middle height is further from the surveyed ground than the map's own, by a seventh or so on average: a bed
+      says where its ground stood at some time in the span, and where its own tenth of a degree stands, which is not
+      where the node about it stands now. Each build counts both (heights/index.json, present).
+  - with: earth/orogens/front-range
+    note: >-
+      Told without its own record, from the map and from how far the map misses the other ranges, the range's ground
+      of today lies in the band less than half the time: the map has it more than a kilometre low for most of 30 Myr,
+      and a spread that is a share of the map's height is narrow where the map is low. The same holds, less badly,
+      for the Alps, the Sierra Nevada and the Tibetan Plateau. A bell cannot hold a plateau the map has missing; with
+      its record read, each range stands within a few hundred metres of today's height.

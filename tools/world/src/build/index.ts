@@ -25,7 +25,7 @@ import { claimGroups, solveScenario, solveVariants } from '../chronology.ts';
 import { fieldAgesMa, fieldSource, importBlocks, importElevation, importMeanGrid, importMonths, importReliefPlates, PLATE_MODEL, tiledField, type MonthsMore } from '../importer.ts';
 import { between, carriedReach, sceneShape, type ReliefFineHeader, type ReliefInfo } from '../../../../core/relief.ts';
 import { fillFromOcean, WATER, waterMask, type Areas } from './relief.ts';
-import { carriedInfo, encodeFineTile, fineLevel, type FineParams } from './shape.ts';
+import { carriedInfo, encodeFineTile, fineLevel, rangesOf, type FineParams } from './shape.ts';
 import { deepRivers, recentRivers, riverFiles, type DrainageParams, type Water } from './rivers.ts';
 import { encodeSegments, grwlSegments, thin, tiles as segmentTiles } from './grwl.ts';
 import { RiverNet, riverKeys, riverWidths, type RiverKey, type RiversInfo, type RiversKeysHeader, type RiversNetworkHeader, type RiversSet, type RiverWidths, type RiverWidthsHeader } from '../../../../core/rivers.ts';
@@ -62,6 +62,7 @@ import {
 import type { AtlasBin, AtlasIndex, SeaBin, SeaIndex } from '../../../../core/atlas.ts';
 import type { RocksBin, RocksIndex } from '../../../../core/rocks.ts';
 import { byteChance, byteFinds, nodeOf, restsOnFinds, type CoastIndex, type CoastKeyHeader } from '../../../../core/coast.ts';
+import { heightsStats } from '../../../../core/heights.ts';
 import { fieldFor, fieldLods, loadBlocks, loadRelief, loadSnapshots, paleoElevation, sliceField, SRC_H, SRC_W, tileGrid, timeBins, type GridField } from './fields.ts';
 import { buildCities } from './city.ts';
 import { climateGrid, climateKeyframes, encodeClimate, forestChecks, heightOn, monthsFiles, monthsKeyframes, partClasses, partsFiles, waterParamsOf, type ClimateKeyframe, type PartRead, type WaterOptions } from './climate.ts';
@@ -84,6 +85,7 @@ import { buildAtlas, type RecentClimateSource, type RocksAgeData } from './atlas
 import { buildSeaAtlas, type SeaOut, type SeaParams } from './sea.ts';
 import { buildRocks, type NoneWords, type RocksOut, type RocksParams } from './rocks.ts';
 import { buildCoast, type CoastParams, type SpanRule } from './coast.ts';
+import { buildHeights, type HeightsParams } from './heights.ts';
 import { buildGround, groundResolve, type GroundBuilt } from './groundmaps.ts';
 import { buildStrata, columnAt, todayOf, type StrataOut, type StrataParams } from './strata.ts';
 import { strataColumns, type StrataColumns, type StrataFile, type StrataHeader } from '../../../../core/strata.ts';
@@ -2091,6 +2093,71 @@ export async function runBuild(args: string[]): Promise<number> {
       coastStageKey = coastStage.key;
     } else log(`coast   not built: no snapshot ${id} yet`);
   }
+  // Stage: heights (the sea's level at each keyframe of the elevation field, from the beds laid down at the shore, and
+  // the height of the land with a band, from the map, the rocks and the ranges' records)
+  const levelField = world.fields.find((f) => f.rule === 'shore-level');
+  const landHeightField = world.fields.find((f) => f.rule === 'land-height');
+  const todayField = world.fields.find((f) => fieldSource(f) === 'relief');
+  let heightsMeta: { present: boolean; stats?: CoverageFile['heights'] } = { present: false };
+  if (levelField && landHeightField && todayField && rockField && rockLand) {
+    const id = rockField.data!.from;
+    const path = datasetFile(id, world.manifest.datasets[id], rockField.data!.file);
+    const todayData = world.manifest.datasets[todayField.data!.from];
+    const todayRes = (todayField.grid as { res_deg: number }).res_deg;
+    const landHeightParams = { ...(levelField.params as object), ...(landHeightField.params as object) } as HeightsParams & { standing_phase: string; beside?: string };
+    if (existsSync(path)) {
+      const ranges = rangesOf(solved, landHeightParams.standing_phase);
+      const beside = landHeightParams.beside ? seriesList.find((x) => x.id === landHeightParams.beside) : undefined;
+      const heightsStage = await dag.runStage(
+        'heights',
+        {
+          level: fieldKey(levelField),
+          height: fieldKey(landHeightField),
+          rocks: fieldKey(rockField),
+          fixes: fixesKey(claims.corrections(id)),
+          paleoImport,
+          isoline: coastIsoline,
+          plateModel: dsKey(PLATE_MODEL),
+          today: { dataset: dsKey(todayData.id), res: todayRes },
+          ranges,
+          beside: beside ? { id: beside.id, points: sha256(stableStringify(beside.points)) } : null,
+        },
+        async (sink) => {
+          const spec = rockField.rows;
+          const given = JSON.parse(await readFile(path, 'utf8')) as RocksSnapshot;
+          const snap = spec ? correctRocks(given, spec, claims.corrections(id)) : given;
+          const today = await importMeanGrid(datasetFile(todayData.id, todayData), todayData.fetch.sha256, todayRes, log);
+          const built = buildHeights(
+            solved.model,
+            rockLand.snapshots,
+            snap,
+            rockField.params as unknown as SpanRule,
+            today,
+            ranges,
+            beside ? { field: beside.id, title: beside.title, points: beside.points } : undefined,
+            landHeightParams,
+            coastIsoline,
+            {
+              field: landHeightField.id,
+              title: landHeightField.title,
+              description: landHeightField.description,
+              level: { field: levelField.id, title: levelField.title, description: levelField.description, quantity: levelField.quantity },
+              elevation: rockLand.field.id,
+              source: id,
+              sourceRecord: world.source.get(id) ? sourceRecord(world.source.get(id)!) : undefined,
+              today: todayField.id,
+            },
+            log,
+          );
+          for (const [p, c] of built.files) await sink.put(p, c);
+          return { present: true, stats: heightsStats(built.index) };
+        },
+        { codeFiles: ['tools/world/src/build/heights.ts', 'core/heights.ts', 'core/coast.ts', 'tools/world/src/build/atlas.ts', 'tools/world/src/build/shape.ts', 'tools/world/src/tables.ts', 'core/relief.ts', 'core/container.ts'] },
+      );
+      heightsMeta = heightsStage.meta;
+    } else log(`heights not built: no snapshot ${id} yet`);
+  }
+
   // The chance of sea as resolve asks for it: the nearest keyframe's, read back from the build's files when first asked.
   const coastKeys = new Map<number, { chance: Uint8Array; marine: Uint8Array; land: Uint8Array }>();
   let coastIndexRead: CoastIndex | undefined;
@@ -2420,6 +2487,7 @@ export async function runBuild(args: string[]): Promise<number> {
   if (rocksMeta.stats) coverageFile.rocks = rocksMeta.stats;
   if (strataMeta.stats) coverageFile.strata = strataMeta.stats;
   if (coastMeta.stats) coverageFile.coast = coastMeta.stats;
+  if (heightsMeta.stats) coverageFile.heights = heightsMeta.stats;
   if (atlasCoverage) coverageFile.forms = atlasCoverage;
 
   const genericLandGen = world.generators.find((g) => g.id === GENERIC_LAND);
@@ -2613,6 +2681,7 @@ export async function runBuild(args: string[]): Promise<number> {
       ...(groundHeader ? { ground: 'ground.lwt' } : {}),
       ...(strataMeta.present ? { strata: 'strata.lwt' } : {}),
       ...(coastMeta.present ? { coast: 'coast/index.json' } : {}),
+      ...(heightsMeta.present ? { heights: 'heights/index.json' } : {}),
       ...(landscapeMeta?.present ? { landscape: 'people/landscape.json' } : {}),
       ...(reliefInfo ? { relief: 'relief/index.json' } : {}),
       features: FEATURE_INDEX,

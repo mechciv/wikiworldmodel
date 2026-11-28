@@ -216,7 +216,7 @@ class Page {
     this.detail = el('aside', 'cov-detail');
     this.detail.setAttribute('aria-live', 'polite');
     main.append(this.chart, this.detail);
-    page.append(main, this.houses(), this.peopleScores(), this.seaScores(), this.table());
+    page.append(main, this.houses(), this.peopleScores(), this.seaScores(), this.heightScores(), this.table());
     app.append(page);
     this.tip = el('div', 'tip');
     this.tip.hidden = true;
@@ -1095,6 +1095,119 @@ class Page {
         ),
       );
     }
+    return box;
+  }
+
+  /**
+   * The sea's level and the height of the land on what they did not see (docs/slices/TWENTY-THIRD-SLICE.md;
+   * model:earth/shore-level, model:earth/land-height): the level through time beside another's curve, where the map
+   * puts shore beds held out, the kinds of localities held out beside the distance from the map's coast and a smoother
+   * with no causes, the ranges against their records, and the present, where the ground is surveyed.
+   */
+  heightScores(): HTMLElement {
+    const box = el('section', 'cov-houses');
+    const s = this.cov.heights;
+    if (!s) return box;
+    box.append(el('h2', undefined, "The sea's level and the height of the land, on what they did not see"));
+    const r = s.rule;
+    const m = (x: number) => `${x < 0 ? '−' : ''}${Math.abs(Math.round(x)).toLocaleString('en')}`;
+    box.append(
+      el(
+        'p',
+        'cov-lede',
+        `The level is how far the sea stood above the coast the map of each time draws, read from the beds laid down at the shore, where the ground stood at the level whatever was found: it needs no count of the beds of the sea against the land's. Every map follows today's ground where that ground stands near today's sea, so the level is read on the beds whose ground stands there, as if the old shore stood at today's sea on ground that has not moved: how high it does stand the beds cannot tell, and the table says what follows if it stands where the middle bed found does, or where van der Meer's curve has it. Their own shore beds tell the level at ${s.told} of ${s.keyframes} keyframes; at the others they are too few, or lie in shelf seas the map draws at one depth, and the level is carried from the keyframes either side. The height is then the map's, less the level, with a band as wide as the map is known to miss: ${r.now_m} m on low ground and ${pct(r.now_high)} of the height on high ground at the present, against today's surveyed ground, and ${pct(r.ranges_high)} of the height at the ranges whose records say they stood. A range's record, a shore bed near, and the kinds of beds found near then move it. Nothing drawn reads either yet.`,
+      ),
+    );
+    const row = (label: string, cells: string[]) => {
+      const tr = el('tr');
+      tr.append(el('td', undefined, label), ...cells.map((c) => el('td', undefined, c)));
+      return tr;
+    };
+    const table = (head: string[], rows: HTMLElement[]) => {
+      const t = el('table');
+      const h = el('tr');
+      h.append(...head.map((x) => el('th', undefined, x)));
+      t.append(h, ...rows);
+      const scroll = el('div', 'scroll');
+      scroll.append(t);
+      return scroll;
+    };
+
+    // The level through time, with what its reading leaves open, beside the other's curve.
+    const other = new Map((s.rival?.at ?? []).map((x) => [x.ageMa, x]));
+    const shown = s.levels.filter((k) => (k.ageMa <= 70 ? k.ageMa % 10 === 0 || k.ageMa === 5 : k.ageMa % 50 === 0));
+    box.append(
+      table(
+        ['Keyframe', "The level against the map's coast, m", 'In nine chances of ten', 'Told by', "The map follows today's low ground by", 'The middle shore bed found stands today at, m', 'The level if the old shore stands as high', ...(s.rival ? ['Sea level (van der Meer), m', 'The level if it stands there', 'Shore beds standing below it today'] : [])],
+        shown.map((k) =>
+          row(`${k.ageMa} Ma`, [
+            m(k.level),
+            `${m(k.lo)} to ${m(k.hi)}`,
+            k.told ? 'its own shore beds' : 'the keyframes either side',
+            pct(k.follow),
+            m(k.stands),
+            m(k.with_stands),
+            ...(s.rival ? [m(other.get(k.ageMa)?.value ?? 0), m(other.get(k.ageMa)?.level ?? 0), pct(other.get(k.ageMa)?.below ?? 0)] : []),
+          ]),
+        ),
+      ),
+    );
+
+    // Where the map puts a shore bed held out.
+    const miss = (x: { mean: number; middle: number }) => `${m(x.mean)} / ${m(x.middle)}`;
+    const shore = (label: string, x: { tile: { mean: number; middle: number }; block: { mean: number; middle: number }; span: { mean: number; middle: number } }) => row(label, [miss(x.tile), miss(x.block), miss(x.span)]);
+    box.append(
+      table(
+        ['Where the map puts a shore bed held out: the mean miss / the middle miss, m', 'Its tile held out', 'Its block', 'Its keyframe'],
+        [shore("The level, with the map's following of today's ground", s.scores.shore.level), shore("The map's own coast", s.scores.shore.map), shore('The shore beds near, with no level', s.scores.shore.smoother)],
+      ),
+    );
+
+    // The kinds of localities held out.
+    const lpd = (x: { lpd: number }) => x.lpd.toFixed(3);
+    const k = s.scores.kinds;
+    const a = s.scores.alone;
+    box.append(
+      table(
+        ['Mean log chance given to the kind a locality was', 'Its node held out', 'Its tile', 'Its block', 'Its keyframe', 'The map alone, no bed read'],
+        [
+          row('The height above the level, and the beds near', [lpd(k.height.node), lpd(k.height.tile), lpd(k.height.block), lpd(k.height.span), lpd(a.height)]),
+          row("The distance from the map's coast, and the same beds", [lpd(k.distance.node), lpd(k.distance.tile), lpd(k.distance.block), lpd(k.distance.span), lpd(a.distance)]),
+          row('Both read together', [lpd(k.both.node), lpd(k.both.tile), lpd(k.both.block), lpd(k.both.span), lpd(a.both)]),
+          row('The beds with no map: an even chance before them', [lpd(k.smoother.node), lpd(k.smoother.tile), lpd(k.smoother.block), lpd(k.smoother.span), '—']),
+          row("The height above the map's own coast, with no level", ['—', '—', '—', '—', lpd(a.no_level)]),
+        ],
+      ),
+    );
+    const side = (x: { marine_below: number; land_above: number }) => [pct(x.marine_below), pct(x.land_above)];
+    box.append(
+      table(
+        ['On the side of the level their kind is of', `Marine localities below it (${count(s.sides.localities.marine)})`, `Land localities above it (${count(s.sides.localities.land)})`],
+        [row("The map's coast", side(s.sides.map)), row('The height, their node held out', side(s.sides.node)), row('The height, their tile held out', side(s.sides.tile)), row('The height, their block held out', side(s.sides.block)), row('The height, nothing held out', side(s.sides.all))],
+      ),
+    );
+
+    // The ranges.
+    box.append(
+      table(
+        ['A range whose record says when it stood', 'Stood by', "Today's height of its ground, m", 'The map is off by, m', 'The height is off by, m', "Without its own record: today's height in the map's band"],
+        s.ranges.map((x) => row(x.label, [`${x.standingMa} Ma`, m(x.today), m(x.map.abs), m(x.height.abs), x.without.inside === undefined ? 'not scored' : pct(x.without.inside)])),
+      ),
+    );
+    const sh = s.scores.shore_height;
+    const now = s.present;
+    box.append(
+      el(
+        'p',
+        'cov-note',
+        `The log is of the chance given to the kind a locality turned out to be: 0 is sure and right, ${Math.log(0.5).toFixed(2)} a coin. The height above the level tells the kind of a locality held out worse than the distance from the map's coast does, at every hold-out, and worse than the same localities do with no map; the two together a little better than the distance wherever a tile or more is held out. A shore bed held out with its node lies ${m(sh.node.map)} m from the level on the map, in the middle, and ${m(sh.node.height)} m by the height; with its tile ${m(sh.tile.height)} m and with its block ${m(sh.block.height)} m; the level lies in the height's band ${pct(sh.node.inside)}, ${pct(sh.tile.inside)} and ${pct(sh.block.inside)} of the time. Of ${s.scores.level_band.n} keyframes held out whole, the level their own beds give lies in the band told from the others at ${pct(s.scores.level_band.inside)}. \`npm run world -- heights <lat> <lon> <time>\` gives a place.`,
+      ),
+      el(
+        'p',
+        'cov-note',
+        `Held to the present, where the level is known and the ground surveyed: the youngest keyframe's own beds put the level at ${m(now.level)} m against the map's coast, between ${m(now.lo)} and ${m(now.hi)}, where it is nothing; they are of the last two and a half million years, in which the sea stood below today's nearly all the time. The height has ${(now.height.to_sea * 100).toFixed(1)}% of the globe below the level that is land today and ${(now.height.to_land * 100).toFixed(1)}% above it that is sea, where the map has ${(now.map.to_sea * 100).toFixed(1)}% and ${(now.map.to_land * 100).toFixed(1)}%; over today's land its middle is ${m(now.miss.height)} m from today's ground on average, the map's ${m(now.miss.map)} m; and today's height lies in its band at ${pct(now.inside)} of nodes.`,
+      ),
+    );
     return box;
   }
 

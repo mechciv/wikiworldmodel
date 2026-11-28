@@ -173,7 +173,9 @@ export async function series(world: World): Promise<SeriesRecord[]> {
   const out: SeriesRecord[] = [];
   const modelled = new Set<string>(Object.values(ENERGY_BALANCE));
   // The energy-balance model's series read the others (the Sun's brightness, CO₂), so they come last.
-  const fields = world.fields.filter((f) => f.grid?.kind === 'series');
+  // The level of the sea from the shore beds is made with the heights, after the elevation is read, and kept in their
+  // index (build/heights.ts).
+  const fields = world.fields.filter((f) => f.grid?.kind === 'series' && f.rule !== 'shore-level');
   for (const f of [...fields.filter((x) => !modelled.has(x.rule ?? '')), ...fields.filter((x) => modelled.has(x.rule ?? ''))]) {
     const ice = f.rule === 'ice-equivalent-sea-level' ? await iceSeaLevel(world, f) : null;
     const points = ice

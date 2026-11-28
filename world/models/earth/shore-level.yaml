@@ -1,0 +1,173 @@
+# A model run here (section 4.10 of the design), made as docs/plans/MODELS.md asks. Its fitted numbers are in each
+# build's heights/index.json, where the build writes them; this record says where they come from.
+id: model:earth/shore-level
+type: model
+title: The sea's level against the map's coast, from the beds laid down at the shore
+description: >-
+  How far the sea stood above or below the coast the elevation field draws, at each of its keyframes. A level read
+  from the kinds of beds, of the sea and of the land, would need to know how many times more beds the sea leaves than
+  the land: more sea and sea beds better kept leave the same record, and each doubling of that yield is worth some
+  hundreds of metres of level, since the odds that a bed is marine change nearly threefold only every four or five
+  hundred metres of the map's height. So the level is not read from the kinds. It is read from the beds laid down at
+  the shore itself, in lagoons, estuaries, tidal flats and shallow water, which the rock record's database classes
+  so. Such a bed stood at the sea's level whatever the yield, and the map's height where it puts one is the map's
+  height for the level. Two things stand between that and a level. Shore beds are only found where their ground is
+  land today, which is where it has since risen or the sea has fallen. And on low ground every map is today's ground
+  carried back: read off the whole map, node by node, its heights follow today's by nine tenths or more where today's
+  ground stands near today's sea, in every keyframe of the last 70 Myr, and by a half or more in most before. So a
+  shore bed on ground that stands high today stands high on the map, and says how far its ground has risen and not
+  where the sea stood. The level is therefore read on the beds whose ground stands near today's sea, each counting for
+  less the higher its ground stands: the map's height at a bed, less the map's following times today's height of the
+  bed's ground, which is the map's height for a shore bed whose ground stands at today's sea. The map's depth below
+  its coast is read no deeper than one of its steps, since it draws its shelf seas at depths of convention; a bed over
+  the ocean's floor is of an island the map does not draw and is left out. Where a keyframe's shore beds count for too
+  little, or most of them lie deeper in the map's sea than its depths are read, its own beds tell no level. The levels
+  are then carried through time as a walk pulled back to the map's coast, each keyframe's beds observing it, so that a
+  keyframe with none takes its level from those either side and falls back to the map's the further they are. What
+  this cannot tell is the sea's level against today's ground. The reading takes the old shore, on ground that has not
+  moved since, to stand at today's sea; if it stands higher, the level is higher by the map's following times as
+  much, and where the map follows today's ground whole that is all of it. Each keyframe keeps the following, where the
+  middle shore bed found stands today, and what the level would be if the old shore stood as high: nothing sure sets
+  it lower than that middle, if ground has gone up as often as down. van der Meer's curve is the sea's level against
+  today's ground, and so says how high the old shore stands: it is set beside the level, never read by it, and held
+  to where the shore beds found stand today.
+author: machine:claude-code
+code: core/heights.ts
+kind: at-once
+inputs:
+  - { ref: field:earth/elevation, note: "each keyframe's height where a bed stood, read between its nodes; its coast; and its heights over all the ground that stands near today's sea" }
+  - { ref: field:earth/rock-record, note: "the collections: where each is, the span of its age, and the class of environment the database gives it, the shore's among them" }
+  - { ref: field:earth/relief, note: "today's surveyed height of the ground each bed lies on, and of all low ground, at the map's own grain and on the survey's" }
+  - { ref: src:paleomap-plate-model, note: "where each collection's plate, and each node of today's ground, stood at each keyframe" }
+outputs: [field:earth/shore-level]
+prior:
+  - reads: field:earth/elevation
+    form: >-
+      None of the sea's own causes is in the world for the deep past: not the ice, nor the room of the ocean's basins.
+      Before any bed is read the level is the map's own coast, give or take a stray, and a keyframe's level keeps a
+      share of the one before it: a walk pulled back to nothing, which is smoothing and no cause. The stray and the
+      share are those with which each keyframe's own level is best told from the others'. The map's following of
+      today's ground is a line fitted by least absolute misses through every node of today's low ground, carried to
+      where it stood: it is what the map is, and no bed enters into it.
+observes:
+  - evidence: field:earth/rock-record
+    support: >-
+      A shore bed: the collections of a box of a tenth of a degree, in a keyframe's span of about five million years,
+      whose environment the database classes as marginal marine or shallow subtidal, where their plate stood at the
+      keyframe. It observes the map's height at one place, where the truth is the level.
+    error: >-
+      A bed's place may be out by its coordinates and by the plate model; it is of some time in the span, in which the
+      shore moved; a lagoon or a shoal lies within some tens of metres of the level and not at it; and the map's own
+      miss at the place is the largest part. The level is the middle of what the beds give, which a few long misses
+      do not pull. How sure a keyframe's level is comes from leaving out each tile of five degrees of its beds in
+      turn, and it is never taken for surer than the map's own steps of height allow.
+    effort: >-
+      Shore beds are found where their ground is land today. Taking out what the map follows of today's height, and
+      counting a bed for less the higher its ground stands, reads the level where that selection does least: on
+      ground that still stands near the sea. Nothing else is made of it: the old shores that are under today's sea,
+      or buried, are not sampled, and how high the old shore stands today on unmoved ground is left open.
+  - evidence: field:earth/relief
+    support: Today's surveyed ground, averaged about each node of the map's grid, and on the survey's own grid at each bed.
+    error: >-
+      Nothing to speak of beside the map's. Where a bed's own tenth of a degree is partly sea today it stands a little
+      below today's sea on the survey's grid; today's ground and the map's depth are both read no deeper than the floor.
+    effort: Surveyed everywhere.
+holdout:
+  held:
+    - a shore bed's tile of five degrees
+    - its block of twenty degrees, a region
+    - its keyframe whole, the level then told from the other keyframes through the walk
+  baseline: >-
+    The other shore beds near, each counted by how near it lies, with no level: the map's heights at them, averaged
+    with one bed's weight of nothing. The level tells where the map puts a shore bed held out better than they do,
+    by more the more is held out; with a keyframe held out they have nothing, and are the map's own coast.
+  rivals:
+    - is: field:earth/elevation
+      read: its own coast taken for the level
+    - is: field:earth/sea-level
+      read: >-
+        van der Meer's curve, as where the old shore stands today on ground that has not moved. It cannot be scored
+        against the level on where the map puts shore beds, since both tell that alike: the curve only moves the
+        level by the map's following times its value. It is held instead to where the shore beds found stand today:
+        the share of them standing below the curve's level, which is about a half if ground has gone up as often as
+        down, and more if the curve has the sea too high or the ground under the beds found has sunk
+  scores: >-
+    coverage.json, under heights; and heights/index.json. Only the keyframes whose own beds tell a level are scored,
+    each bed counted as the level counts it. Each build also counts how often a keyframe's own level lies in the band
+    told from the others, and what the level is at the present, where it is known.
+params:
+  shore_classes:
+    choice: >-
+      The database's classes of marginal marine and shallow subtidal environments: lagoons, estuaries, bays, tidal
+      flats, delta plains, beaches, shoals and open shallow water. Reefs are left out, since the class takes in those
+      of the slope and of the open ocean's islands. No work gives which classes mark the level; the map's miss is so
+      much larger than any of their depths that the choice moves the level little.
+  floor_m:
+    choice: >-
+      One step of the map below its coast. Deeper than that a shore bed is read as lying a step into the map's sea and
+      no more, since the map's shelf seas are drawn at depths of convention: before 250 Ma most of them at one. Today's
+      ground is read no deeper either, so that a bed whose tenth of a degree is partly sea is read alike on both.
+  near_m:
+    choice: >-
+      A shore bed counts for 0.37 of what it would at today's sea level when its ground stands 150 m above it, at the
+      map's grain. Far up, the map follows today's ground by less, and one line through every bed alike read the low
+      ground's level tens of metres too high. A choice: wide enough to keep some scores of beds in a keyframe of the
+      last 70 Myr.
+  pool:
+    choice: >-
+      Two keyframes either side lend a keyframe their shore beds, for where the beds stand today and for how far the
+      map has them from the level. A choice: no work gives how fast either changes.
+  shore_min:
+    choice: >-
+      Shore beds must count for fifteen, by weight, for a keyframe's own to tell its level. With less, or with half
+      of them or more at the floor, the level comes from the keyframes either side.
+  hold:
+    choice: >-
+      The shares of itself the level may keep from one keyframe to the next. The build tries each with each stray,
+      keeps the pair with which every keyframe's own level is best told from the others', and writes which in
+      heights/index.json.
+  stray_m:
+    choice: The strays from the map's coast the walk may have, in metres; tried with each share, and written with it.
+  beside:
+    choice: >-
+      van der Meer's curve of sea level, the one the world holds for the deep past. It is another's reconstruction:
+      the level never reads it, and is set beside it.
+uncertainty:
+  kind: band
+  note: >-
+    A band of nine chances in ten about each keyframe's level as read: from how far its own level moves when each tile
+    of its beds is left out, and from the walk, which widens it where no bed tells. It holds none of what the reading
+    leaves open, how high the old shore stands today on unmoved ground: that is kept beside it, as the map's following
+    and where the middle shore bed found stands.
+checks:
+  - { test: core/heights.test.ts, holds: "reads the level off the beds laid down at the shore, where their ground stands at today's sea level, however many beds of each kind there are" }
+  - { test: core/heights.test.ts, holds: "tells how far the map follows today's height of a bed's ground, and is not pulled by a few beds the map has far off" }
+  - { test: core/heights.test.ts, holds: "carries the level between keyframes as a walk pulled back to the map's coast, wider where no bed tells it" }
+  - { test: tools/world/test/heights.test.ts, holds: "gives a level with a band at every keyframe, and says where the shore beds could not tell it" }
+  - { test: tools/world/test/heights.test.ts, holds: "held to the present, where the level is known, has nothing inside its band and puts the level within a few metres of it" }
+  - { test: tools/world/test/heights.test.ts, holds: "tells where the map puts a shore bed held out better than the map's own coast does and than the shore beds near with no level, the more so the more is held out" }
+  - { test: tools/world/test/heights.test.ts, holds: "is set beside van der Meer's curve, which it never reads: what the curve would make the level, and how many of the shore beds found stand below it today" }
+  - { test: tools/world/test/heights.test.ts, holds: "has a keyframe's own level inside the band told from the others about nine times in ten" }
+disagrees:
+  - with: field:earth/sea-level
+    note: >-
+      van der Meer's curve has the sea 150 to 210 m above today's from 25 to 100 Ma. Read with the old shore standing
+      there, the level against the map's coast would be 140 to 250 m in those keyframes of the last 70 Myr, far above
+      the band of the level as read, which is of a reading that takes the old shore to stand at today's sea. Where
+      the shore beds stand today decides between neither. From 10 to 20 Ma the middle bed found stands at 70 to 110 m
+      and about half the beds stand below the curve's level, as they would on ground that has gone up as often as
+      down. From 25 to 50 Ma the middle bed stands at about 100 m, half of where the curve has the sea, and six
+      beds in ten stand below the curve's level: either the sea stood lower than the curve has it, or the coastal
+      plains that hold those beds have sunk a hundred metres since and stayed above the sea. Each build has the
+      numbers (heights/index.json, rival).
+  - with: field:earth/elevation
+    note: >-
+      Read off the whole map, the maps of 5 to 45 Ma have ground that stands at today's sea standing 15 to 90 m above
+      their own coasts: on today's ground their sea lies below today's, where the shore beds of those times are
+      found above it and the world's one curve of sea level has it far above. At the shore beds themselves the maps
+      come nearer, within some tens of metres of the level as read; at 35 and 40 Ma they stay 40 to 60 m short of it.
+      And where a map draws its shelf seas at one depth most shore beds lie in them, at that depth: before about
+      265 Ma, and in much of the Cretaceous. A level read there would be the map's convention, 160 m or more below its
+      coast, and would dry every shelf sea the map draws. The model reads no level from those keyframes and says
+      which they are; the map's depth of a shelf sea is then wrong at each shore bed, which the height of the land
+      takes up bed by bed.

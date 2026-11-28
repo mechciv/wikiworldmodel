@@ -335,6 +335,11 @@ export interface CoverageFile {
     /** how it does stretch by stretch of time, against the localities and the columns of rock */
     through: import('./coast.ts').CoastStretch[];
   };
+  /**
+   * the sea's level and the height of the land (core/heights.ts, model:earth/shore-level, model:earth/land-height):
+   * each keyframe's level, and how the level and the heights hold on beds, ranges and the present they were not shown
+   */
+  heights?: import('./heights.ts').HeightsStats;
   /** fossil forests against the climate reconstructed for their place and time; none should be in a desert */
   forests?: { id: string; ageMa: number; keyframeMa: number; lat: number; lon: number; climate: string | null; label: string }[];
   /** which tier answers each layer, over a grid of places at times through each span (core/resolve.ts) */

@@ -7,6 +7,7 @@ import { PlateModels, RotationModel } from '../../core/rotation-model.ts';
 import { PRESENT_YEAR } from '../../core/time.ts';
 import type { AtlasIndex, SeaIndex } from '../../core/atlas.ts';
 import type { FeatureIndex } from '../../core/featuretiles.ts';
+import type { HeightsIndex } from '../../core/heights.ts';
 import type { RocksIndex } from '../../core/rocks.ts';
 import type { SubstrateFile } from '../../core/substrate.ts';
 import type { FramesFile, Tileset } from '../../core/tileset.ts';
@@ -32,6 +33,8 @@ export interface Build extends BuildFetch {
   periods: PeriodsFile;
   search: SearchFile;
   series: SeriesFile;
+  /** the sea's level and the heights of the land (core/heights.ts): their index, where the build has them */
+  heights?: HeightsIndex;
   planet: PlanetFile;
   features: FeatureIndex;
   /** who lived where, if this build has it */
@@ -99,7 +102,7 @@ export async function loadBuild(store: string, id: string): Promise<Build> {
   const manifest = await loadBuildManifest(base);
   const io = createBuildFetch(base, manifest);
   const tileset = await io.getJSON<Tileset>('tileset.json');
-  const [frames, periods, search, series, planet, features, atlas, sea, rocks, substrate] = await Promise.all([
+  const [frames, periods, search, series, planet, features, atlas, sea, rocks, substrate, heights] = await Promise.all([
     io.getJSON<FramesFile>(tileset.files.frames),
     io.getJSON<PeriodsFile>(tileset.files.periods),
     io.getJSON<SearchFile>(tileset.files.search),
@@ -110,7 +113,20 @@ export async function loadBuild(store: string, id: string): Promise<Build> {
     tileset.files.sea ? io.getJSON<SeaIndex>(tileset.files.sea) : Promise.resolve(undefined),
     tileset.files.rocks ? io.getJSON<RocksIndex>(tileset.files.rocks) : Promise.resolve(undefined),
     tileset.files.substrate ? io.getJSON<SubstrateFile>(tileset.files.substrate) : Promise.resolve(undefined),
+    // The level and the heights' index: a build that has it and cannot serve it is shown without.
+    tileset.files.heights
+      ? io.getJSON<HeightsIndex>(tileset.files.heights).catch((err) => {
+          console.error(`heights ${tileset.files.heights}:`, err);
+          return undefined;
+        })
+      : Promise.resolve(undefined),
   ]);
+  // The level of the sea from the shore beds is made with the heights and kept in their index (core/heights.ts): it
+  // joins the other series, so that the planet's readings have it beside the curve it is set against.
+  if (heights && !series.series.some((s) => s.id === heights.level.series.id)) {
+    series.series.push(heights.level.series);
+    series.series.sort((a, b) => (a.title < b.title ? -1 : a.title > b.title ? 1 : 0));
+  }
   // A period that still holds has no end; on the time axis it runs to the present.
   for (const p of periods.periods) {
     p.end ??= PRESENT_YEAR;
@@ -118,7 +134,7 @@ export async function loadBuild(store: string, id: string): Promise<Build> {
   }
   const model = new RotationModel(frames.rotations);
   const plates = new PlateModels(model, (frames.models ?? []).map((m) => ({ source: m.source, offset: m.offset, model: new RotationModel(m.rotations) })));
-  return { id, ...io, tileset, frames, model, plates, periods, search, series, planet, features, atlas, sea, rocks, substrate };
+  return { id, ...io, tileset, frames, model, plates, periods, search, series, planet, features, atlas, sea, rocks, substrate, heights };
 }
 
 const records = new Map<string, Promise<EntityRecord>>();

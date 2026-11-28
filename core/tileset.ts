@@ -222,7 +222,7 @@ export interface Tileset {
   timeRange: [number, number];
   lods: LodInfo[];
   tiles: TileRef[];
-  files: { frames: string; periods: string; search: string; records: string; coverage: string; series: string; planet: string; territory: string; city?: string; climate?: string; ice?: string; tree?: string; things?: string; present?: string; hazards?: string; polities?: string; overlays?: string; people?: string; atlas?: string; sea?: string; rocks?: string; substrate?: string; ground?: string; strata?: string; coast?: string; landscape?: string; relief?: string; features: string };
+  files: { frames: string; periods: string; search: string; records: string; coverage: string; series: string; planet: string; territory: string; city?: string; climate?: string; ice?: string; tree?: string; things?: string; present?: string; hazards?: string; polities?: string; overlays?: string; people?: string; atlas?: string; sea?: string; rocks?: string; substrate?: string; ground?: string; strata?: string; coast?: string; heights?: string; landscape?: string; relief?: string; features: string };
   /** the climate field the land is painted from, and the derived field that paints it */
   /** fields of points, lines and areas drawn over the globe, one renderer for all (core/fieldlayers.ts) */
   layers?: LayerInfo[];

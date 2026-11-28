@@ -8,7 +8,9 @@ quantities in the order of their causes, four kinds of node, what holds a model 
 exist, and how one estimate answers at every scale. Decisions 1 to 8 keep their numbers. Of the revision, its map is
 built: the [graph of causes](../causes/README.md), which holds every quantity here as a node with its causes, and
 ranks where the work is. So is its first field over the globe, how likely the sea was from the map and the rocks, as
-the [twenty-first slice](../slices/TWENTY-FIRST-SLICE.md). The plan touches [CITIES.md](CITIES.md),
+the [twenty-first slice](../slices/TWENTY-FIRST-SLICE.md); and, beside what is drawn, the two quantities at the top of
+the Earth's order, the sea's level against the maps' coast and the height of the land with a band, as the
+[twenty-third](../slices/TWENTY-THIRD-SLICE.md). The plan touches [CITIES.md](CITIES.md),
 [HUMAN-LANDSCAPE-REALISM.md](HUMAN-LANDSCAPE-REALISM.md), [VISUAL-GAPS.md](VISUAL-GAPS.md) and
 [ENTITIES.md](ENTITIES.md); [How this meets the other plans](#how-this-meets-the-other-plans) says how. It keeps the
 design's three kinds of content ([STRUCTURE.md](../STRUCTURE.md) section 1.1) and its contracts: uncertainty as
@@ -80,7 +82,16 @@ The design already puts models between the evidence and the generators (section 
   reads those collections: `model:earth/sea-chance` gives a chance of sea at every node and keyframe, from the map's
   coast read softly and the marine and land localities, scored on localities held out. Held against the columns of
   rock, which it does not read, it is right for 81 units in a hundred where the maps are for 72. It moves no ground
-  yet: the height of the land, and all that stands on it, are still the maps'.
+  yet: the height of the land, and all that stands on it, are still the maps'. Since the twenty-third slice two more
+  stand beside the maps. `model:earth/shore-level` reads the sea's level against the maps' own coast from the beds
+  laid down at the shore, and so from no count of beds: within some tens of metres of the maps' coast in the last
+  70 Myr, as far as the beds can tell, which is not far, since on low ground every map is today's ground carried back
+  and the level then turns on how high the old shore stands today. `model:earth/land-height` gives each node a height
+  with a band, the maps' where nothing else is known, with a spread measured against today's surveyed ground, the
+  shore beds and the ranges; the eight ranges' records, shore beds and the kinds of beds near move it. With their
+  records read the ranges stand within a couple of hundred metres of today's height. Its own sea, told by height
+  alone, tells the kinds of beds held out worse than the chance of sea does by distance from the coast. Nothing drawn
+  reads either.
 - **Life is carried by distance, in tiers.** `model:life/atlas` puts a taxon where a fossil of it lies near, or can
   be reached overland in a like climate. It has no model of where fossils were looked for, and says so: "its lists
   partly show where people have dug".
@@ -105,17 +116,18 @@ evidence into estimates everywhere.
 
 | Decision | Built | Not built |
 |---|---|---|
-| 1, 3, 7, 8 | For one node, a settlement's people: observations by their ground and years, exact Gaussian conditioning ([gauss.ts](../../core/gauss.ts), [citypop.ts](../../core/citypop.ts)), scores on figures held out (`npm run world -- holdout`), a source's bias fitted. For one field over the globe, the chance of sea ([coast.ts](../../core/coast.ts), `npm run world -- coast`): fitted at build, a byte a node at query. Model records' `kind`, `prior`, `observes` and `holdout` sections, which one record uses. | A harness shared by the nodes: each has its own scoring. The older models' records have none of the new sections. |
-| 2 | The sea's chance has a prior from its one cause that is in the world, the map's coast. | A prior from causes for any other node. The pilot's is HYDE's and the lists'. The sea's has no sea level and no sinking basin in it. |
+| 1, 3, 7, 8 | For one node, a settlement's people: observations by their ground and years, exact Gaussian conditioning ([gauss.ts](../../core/gauss.ts), [citypop.ts](../../core/citypop.ts)), scores on figures held out (`npm run world -- holdout`), a source's bias fitted. For one field over the globe, the chance of sea ([coast.ts](../../core/coast.ts), `npm run world -- coast`): fitted at build, a byte a node at query. For the sea's level and the height of the land ([heights.ts](../../core/heights.ts), `npm run world -- heights`): a bell a node, conditioned in closed form on a range's record, on shore beds and on the kinds of beds near, and any member's height from five bytes at query. Model records' `kind`, `prior`, `observes` and `holdout` sections, which three records use. | A harness shared by the nodes: each has its own scoring, and the heights' is the third. The older models' records have none of the new sections. |
+| 2 | The sea's chance has a prior from its one cause that is in the world, the map's coast. | A prior from causes for any other node. The pilot's is HYDE's and the lists'. The sea's has no sea level and no sinking basin in it. The height's middle is the map itself, with a spread that is measured, and the level's is a walk about the map's coast: neither is made of causes. |
 | 4 | A settlement's density pulled towards anchors near it in space and time. | Pooling by relatedness; a tradition carried beyond its regions. |
 | 5 | — | Analogy as a method: the vocabulary has no term for it. |
 | 6 | The settlement generator reads its people, density and fabric from nodes. | The generic house, the generic crops and the fields' calendar are still decided in the generator. |
 | 9 | The graph of causes, as a map to plan from. | Nothing in the build reads an order of causes. |
 | 10 | A record's `kind`; one node says it is `at-once`. | The other three kinds, and what holds each to its kind. |
-| 12 | For the sea's chance: hold-outs by tile, by block of 20° and by keyframe, beside a smoother with no causes, with what it gains growing as more is held out; and a check against the present, where the coast is measured, which found what the hold-outs could not: the record does not sample the seas that are still sea. | For every other node. No test of a cause's sign or size. |
-| 14 | A first count of what was found near, by kind (`field:earth/rock-finds`); the sea's chance sets finds against finds so that effort cancels, and reads no absence. | A model of effort, and of what survives. |
-| 15 | One kind of observation states its support: a locality's box of ground and span of years. | A density answered at every scale. |
-| 11, 13, 16 | — | All of them. |
+| 12 | For the sea's chance: hold-outs by tile, by block of 20° and by keyframe, beside a smoother with no causes, with what it gains growing as more is held out; and a check against the present, where the coast is measured, which found what the hold-outs could not: the record does not sample the seas that are still sea. For the level and the height the same hold-outs, of shore beds and of the kinds of beds, each range with its own record left out, and the present, where the level is known and the ground surveyed. | For every other node. No test of a cause's sign or size. |
+| 13 | Another's curve of sea level set beside the level, never read by it, and held to where the same shore beds stand today; the distance from the maps' coast scored beside the height as its rival. | The maps are still the middle of the height, for want of a prior from causes: their error is measured and they are not an observation of anything. HYDE and the climate runs are as they were. |
+| 14 | A first count of what was found near, by kind (`field:earth/rock-finds`); the sea's chance sets finds against finds so that effort cancels, and reads no absence. The level is read where the finding of shore beds on risen ground does least, on the beds whose ground still stands near the sea. | A model of effort, and of what survives. |
+| 15 | Three kinds of observation state their support: a locality's box of ground and span of years, a shore bed's place where the ground stood at the level, and a range's outline from when it stood. | A density answered at every scale. |
+| 11, 16 | — | All of them. |
 
 ## The design: a graph of quantities
 
@@ -393,9 +405,9 @@ climate, every cause as an edge that says whether the world carries it, and a ra
 | Quantity | Its causes | Kind | What observes it | Where it stands |
 |---|---|---|---|---|
 | Where the plates were | the mantle's flow, which nothing predicts | contingent | sea-floor stripes, old magnetism | One reconstruction to 1,100 Ma and one to 1,800 Ma, no spread. Their boundaries, which uplift follows from, are unread. The future's plates are not moved. |
-| The height of the land | uplift where plates converge, wearing down after, the mantle's push | settling | measured old heights, beds of rock | Another's maps at 1° every 5 Myr, with no model behind them; a kilometre out against the range records. Today's shape is carried back to the Pliocene. |
+| The height of the land | uplift where plates converge, wearing down after, the mantle's push | settling | measured old heights, beds of rock | Another's maps at 1° every 5 Myr, with no model behind them; a kilometre out against the range records. Today's shape is carried back to the Pliocene. Beside the maps, a height with a band at each node (`model:earth/land-height`): the maps' with a measured spread, moved by the ranges' records and the beds; it reads no cause and nothing drawn reads it. |
 | The depth of the sea floor | the floor's age, sediment | at once | today's surveys | The same maps' schematic depths. |
-| Ice, sea level and the coast | the climate, the basins' room, the ice's weight on the crust | settling, and at once for the coast | isotopes, shorelines, marine and land beds | A stack every 1 kyr for 798 kyr over today's ground, the strongest part. Before it a curve that moves no coast. Ice for 80 kyr only, and no rebound. For the deep past, a chance of sea from the maps' coast and the fossil localities (`model:earth/sea-chance`), which reads no sea level and moves no coast. |
+| Ice, sea level and the coast | the climate, the basins' room, the ice's weight on the crust | settling, and at once for the coast | isotopes, shorelines, marine and land beds | A stack every 1 kyr for 798 kyr over today's ground, the strongest part. Before it a curve that moves no coast. Ice for 80 kyr only, and no rebound. For the deep past, a chance of sea from the maps' coast and the fossil localities (`model:earth/sea-chance`), which reads no sea level and moves no coast; and a level against the maps' coast from the beds laid down at the shore (`model:earth/shore-level`), which cannot tell the sea's level against today's ground. |
 | The fine shape of the ground | the height of the land, wearing down, the rock | settling | today's surveys | 1.8 km cells, 30 m only round Rome; invented before the Pliocene. |
 | The climate of each month: warmth and rain | the Sun, CO₂, where the land and its heights lay, the ice | at once | isotopes, fossil leaves, pollen, coals and salts | One run for each time (Li et al. 2022 for the Phanerozoic, Beyer et al. 2020 for the last 120,000 years), spread unknown. No evidence conditions it. The energy balance is made of causes and held to evidence, but knows only latitude. |
 | Water: runoff, rivers, lakes | the climate, the relief | at once | rivers seen today, old shorelines and channels | `model:earth/water-balance` and `model:earth/drainage`, from causes. |
@@ -524,7 +536,9 @@ On the Earth's track the ground comes first, then the climate, then life. Three 
   build already holds against it. Built, as the [twenty-first slice](../slices/TWENTY-FIRST-SLICE.md), for the
   fossil localities; the columns of rock are still only held against it, and the coast drawn has not moved;
 - **a range's height as an observation:** the eight range records condition the height of the land, so that the
-  Himalaya's and the Alps' contradictions go;
+  Himalaya's and the Alps' contradictions go. Built, as the [twenty-third slice](../slices/TWENTY-THIRD-SLICE.md),
+  with the sea's level as the rocks can tell it, beside what is drawn: what stands on the ground still stands on the
+  maps', and putting the corrected ground under it is the step after;
 - **the effort behind the fossils** (decision 14): every collection of a stage within reach, whatever it found.
 
 After them: sea-level cycles before 798 ka and ice for every cycle, indexed to the last one's; relief at 30 m for
