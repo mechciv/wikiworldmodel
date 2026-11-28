@@ -21,12 +21,14 @@ basis: reconstruction
 spread: unknown
 interp: linear
 params:
-  # Cells of the file that are left out, and why: values centuries before the city stood (the source's reliability note).
+  # Cells of the file left out: 1,300-year BCE duplicates of AD_400..AD_1000 values in five Pre-Columbian cities (the source's reliability note).
   left_out:
     - { city: Teotihuacan, columns: [BC_900, BC_800, BC_700, BC_600] }
     - { city: Tikal, columns: [BC_900, BC_800, BC_600] }
+    - { city: Caracol, columns: [BC_900, BC_800, BC_700, BC_600, BC_500] }
+    - { city: Tiahuanaco, columns: [BC_500] }
+    - { city: Tollan, columns: [BC_300] }
   # How long a city with one figure is held either side of it, in years: a choice, half the file's usual gap.
   hold_yr: 50
-  # The longest gap between two of a city's figures across which it is taken to have stood all along, in years: a choice.
-  # A longer silence is not filled: the list's "St. Louis" has 15,000 people in 1000 CE and 925 in 1800, not a city between.
+  # Legacy fallback longest gap across which a single list row is linearly bridged without continuity metadata.
   gap_yr: 600

@@ -493,6 +493,25 @@ Reba, M., Reitsma, F. & Seto, K.C. (2016). Spatializing 6,000 years of global ur
 - From: <https://doi.org/10.6084/m9.figshare.2059494>
 - Source id: `src:reba-2016-chandler-v2`
 
+### GHS Urban Centre Database 2015, multitemporal and multidimensional attributes (R2019A, V1.2)
+
+Florczyk, A.J., Corbane, C., Schiavina, M., Pesaresi, M., Maffenini, L., Melchiorri, M., Politis, P., Sabo, F., Freire, S., Ehrlich, D., Kemper, T., Tommasi, P., Airaghi, D. and Zanchetta, L. (2019). GHS Urban Centre Database 2015, multitemporal and multidimensional attributes, R2019A. European Commission, Joint Research Centre (JRC) [Dataset], doi:10.2905/53473144-b88c-44bc-b4a3-4583ed1f547e, Version 1.2 (updated 7 April 2020).
+
+- Licence: CC-BY-4.0. The copyright notice beside the V1.2 archive (copyright.txt, read from JRC's FTP) states: "Any copyright and/or sui generis right on the dataset is licensed under the Creative Commons Attribution 4.0 International (CC BY 4.0) licence."
+- Credit: Modern urban centres (1975–2015) from GHSL UCDB R2019A (Florczyk et al. 2019, JRC)
+- DOI: [10.2905/53473144-b88c-44bc-b4a3-4583ed1f547e](https://doi.org/10.2905/53473144-b88c-44bc-b4a3-4583ed1f547e)
+- From: <https://data.jrc.ec.europa.eu/dataset/53473144-b88c-44bc-b4a3-4583ed1f547e>
+- Source id: `src:ghsl-ucdb-2019`
+
+### Natural Earth, 1:10m populated places
+
+Natural Earth. Populated places, simple, 1:10m, version 5.1.2, in the GeoJSON of the project's repository (nvkelso/natural-earth-vector).
+
+- Licence: public-domain. The project's terms of use say that all versions of its map data "are in the public domain".
+- Credit: Today's populated places (1:10m) from Natural Earth
+- From: <https://www.naturalearthdata.com/>
+- Source id: `src:natural-earth-places-10m-5.1.2`
+
 ### PaleoMIST 1.0: a global ice sheet reconstruction for the past 80,000 years
 
 Gowan, E.J. (2019). Global ice sheet reconstruction for the past 80000 years [dataset]. PANGAEA, https://doi.org/10.1594/PANGAEA.905800. Supplement to: Gowan, E.J., Zhang, X., Khosravi, S., Rovere, A., Stocchi, P., Hughes, A.L.C., Gyllencreutz, R., Mangerud, J., Svendsen, J.I. & Lohmann, G. (2021). A new global ice sheet reconstruction for the past 80 000 years. Nature Communications 12, 1199.

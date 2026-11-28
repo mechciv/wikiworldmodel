@@ -386,6 +386,9 @@ export function growthGrid(input: Pick<GrowthInput, 'people' | 'areas' | 'params
     for (let i = 0; i < s.t.length; i++) if (s.t[i] <= HORIZON) maxHa = Math.max(maxHa, areaFor(s.people[i], at10k, p.density));
     if (s.t.length && s.t[0] < HORIZON) maxHa = Math.max(maxHa, areaFor(peopleAt(s, HORIZON), at10k, p.density));
   }
+  if (!(maxHa > 0)) {
+    for (const s of input.people) for (let i = 0; i < s.people.length; i++) maxHa = Math.max(maxHa, areaFor(s.people[i], at10k, p.density));
+  }
   const cell = input.cell ?? cellFor(maxHa);
   const radius = Math.sqrt((maxHa * 1e4) / Math.PI);
   // Far enough for every core it was centred on, with the ground about each.

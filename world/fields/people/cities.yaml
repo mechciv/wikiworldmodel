@@ -6,10 +6,10 @@ quantity: the people of a city, at the years its compiler gives
 unit: people
 description: >-
   Cities of the world from 2250 BCE to 1975 CE as Tertius Chandler's Four Thousand Years of Urban Growth lists them, with
-  an estimate of their people at each of the years he gives, placed on the map by Reba, Reitsma & Seto (2016). A city
-  stands from the first year its row gives to the last, its people straight between them. The settlement generator draws
-  a town or a city of about that many people where one stands. Where Modelski's list (field:people/cities-ancient) gives
-  the same city, both are shown; the generator draws the larger.
+  an estimate of their people at each of the years he gives, placed on the map by Reba, Reitsma & Seto (2016). Together
+  with Modelski's list (field:people/cities-ancient), modern urban-centre anchors (field:people/cities-modern), local
+  HYDE demographic drift, and global benchmark cutoffs, model:people/city-population infers each city's people and
+  occupancy through gaps between listed years.
 frame: frame:earth/present-day
 grid: { kind: rows }
 time: { lo: 2250 BCE, hi: 1975 CE }
@@ -21,8 +21,12 @@ basis: reconstruction
 spread: unknown
 interp: linear
 params:
-  left_out: []
+  # Cells of the file left out because Reba et al. conflated two distinct cities under one name (the source's reliability note).
+  left_out:
+    - { city: Memphis, country: Egypt, columns: [AD_1975] }
+    - { city: St. Louis, columns: [AD_1000] }
+    - { city: Ao, columns: [AD_1975] }
+    - { city: Kherson, columns: [AD_800, AD_1000] }
   hold_yr: 50
-  # The longest gap between two of a city's figures across which it is taken to have stood all along, in years: a choice.
-  # A longer silence is not filled: the list's "St. Louis" has 15,000 people in 1000 CE and 925 in 1800, not a city between.
+  # Legacy fallback longest gap across which a single list row is linearly bridged without continuity metadata.
   gap_yr: 600

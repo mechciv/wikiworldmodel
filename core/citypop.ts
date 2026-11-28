@@ -27,7 +27,7 @@
 // Before the first figure the people rise from a founding size at the settlement's start, and after the last they
 // fall to it at its end; a settlement whose record runs on to the present holds its last figure.
 
-import { condition, logNormalPdf, type Row } from './gauss.ts';
+import { condition, conditionCensored, logNormalPdf, normCdf, type CensorRow, type Row } from './gauss.ts';
 import type { PeopleSeries } from './growth.ts';
 import { PRESENT_YEAR } from './time.ts';
 
@@ -57,6 +57,18 @@ export interface ListRows {
   source: string;
   pops: [number, number][];
   hold: number;
+  /** 'historical' (default) or 'modern' (contemporary urban-centre / gazetteer anchor) */
+  role?: 'historical' | 'modern';
+  /** global benchmark columns [year, cutoffPeople] for left-censoring and occupancy */
+  cutoffs?: [number, number][];
+  /** optional prior [mean, sd] on this list's log bias relative to historical counts */
+  bias?: [number, number];
+}
+
+/** A historical list's global benchmark columns: used for occupancy even for settlements that never appeared on that list. */
+export interface BenchmarkList {
+  source: string;
+  cutoffs: [number, number][];
 }
 
 /** The model's parameters: chosen, or fitted at build to figures held out (docs/plans/MODELS.md, decision 7). */
@@ -82,6 +94,14 @@ export interface PeopleModel {
   density: { at10k: number; spread: number; between: number; beta: number; km: number; years: number };
   /** the spread of the log of HYDE's people in a region, where a region's figures are set against it */
   hyde: number;
+  /** weight in [0, 1] on local HYDE regional demographic drift Δ log(H(t) + driftFloor) between figures; fitted at build */
+  drift: number;
+  /** additive floor (people) in log(H(t) + driftFloor) so sparsely populated ancient cells stay well-behaved */
+  driftFloor: number;
+  /** left-censoring on missed global benchmarks: soft-cutoff log-width, coverage for population conditioning, and coverage for occupancy */
+  censor: { tau: number; rho: number; occRho: number };
+  /** two-state continuous-time occupancy Markov chain: abandonment rate (/yr), re-founding rate (/yr), modern survey cutoff & coverage, standing threshold */
+  occupancy: { abandon: number; found: number; modernCutoff: number; modernCoverage: number; threshold: number };
   /** the people a settlement had at its founding and when it was left, where no figure says */
   founding: number;
   /** a record's preferred figure passes over a list's within this many years of it */
@@ -95,9 +115,9 @@ export interface PeopleModel {
 }
 
 /**
- * The defaults: every one a choice, said so in the model's records, until the build fits `walk` and `bias` to the
- * figures it holds out (tools/world/src/holdout.ts). A list's bias of 0.286 makes its band 1.6 times higher and lower
- * at a figure, the band this model drew before it read its figures as observations.
+ * The defaults: every one a choice, said so in the model's records, until the build fits `walk`, `bias` and `drift` to
+ * the figures it holds out (tools/world/src/holdout.ts). A list's bias of 0.286 makes its band 1.6 times higher and
+ * lower at a figure, the band this model drew before it read its figures as observations.
  */
 export const PEOPLE_MODEL: PeopleModel = {
   walk: 0.004,
@@ -107,6 +127,10 @@ export const PEOPLE_MODEL: PeopleModel = {
   household: [Math.log(5), 0.25],
   density: { at10k: 100, spread: 0.5, between: 0.4, beta: 0.2, km: 800, years: 800 },
   hyde: 0.34,
+  drift: 0.5,
+  driftFloor: 1000,
+  censor: { tau: 0.5, rho: 0.45, occRho: 0.7 },
+  occupancy: { abandon: 0.0008, found: 0.00002, modernCutoff: 15000, modernCoverage: 0.95, threshold: 0.5 },
   founding: 1000,
   near: 25,
   rivals: 50,
@@ -119,6 +143,8 @@ export const peopleModel = (m?: Partial<PeopleModel>): PeopleModel => ({
   ...m,
   bias: { ...PEOPLE_MODEL.bias, ...m?.bias },
   density: { ...PEOPLE_MODEL.density, ...m?.density },
+  censor: { ...PEOPLE_MODEL.censor, ...m?.censor },
+  occupancy: { ...PEOPLE_MODEL.occupancy, ...m?.occupancy },
 });
 
 /** How an observation was read, and if not, why not. */
@@ -160,6 +186,8 @@ export interface Population {
   density: { prior: [number, number]; post: [number, number] };
   /** its region, where its record gives one: its ground, and its people through time as members */
   region?: { ha: number; members: PeopleSeries[] };
+  /** occupancy / existence probability P(Z(t) = 1) at knots through time, where continuity is modeled */
+  exist?: { t: number[]; p: number[] };
   observations: Observation[];
 }
 
@@ -173,6 +201,12 @@ export interface PopulationInput {
   density?: [number, number];
   /** HYDE's people within its region's ground, [year, people], where its record gives a region */
   hyde?: [number, number][];
+  /** local regional HYDE population series [year, people] for demographic drift between figures */
+  localHyde?: [number, number][];
+  /** global benchmark columns across historical lists, for left-censoring and occupancy */
+  benchmarks?: BenchmarkList[];
+  /** true when a modern global gazetteer was surveyed against this settlement: absence of a modern list row is evidence against modern existence */
+  modernSurveyed?: boolean;
   model?: Partial<PeopleModel>;
   /** figures to leave out of the fit, and predict: for the scores */
   without?: (o: Observation) => boolean;
@@ -238,18 +272,23 @@ function seriesAt(points: [number, number][] | undefined, t: number): number {
   return points.at(-1)![1];
 }
 
-/** The span a settlement stood for: its record's where it bounds it, else its figures' reach. */
+/** The span a settlement stood for: its record's where it bounds it, else its figures' reach (extended to the present if modern-anchored). */
 function spanOf(input: PopulationInput, m: PeopleModel): { span: [number, number]; runsOn: boolean } {
   const reach: number[] = [];
-  for (const l of input.lists ?? []) for (const [t] of l.pops) if (Number.isFinite(t)) reach.push(t - l.hold, t + l.hold);
+  let hasModern = false;
+  for (const l of input.lists ?? []) {
+    if (l.role === 'modern' && l.pops.length) hasModern = true;
+    for (const [t] of l.pops) if (Number.isFinite(t)) reach.push(t - l.hold, t + l.hold);
+  }
   for (const f of input.figures ?? []) if (f.t && f.ground !== 'site') reach.push(f.t[0] - m.hold, f.t[1] + m.hold);
   const lo = reach.length ? Math.min(...reach) : 0;
   const hi = reach.length ? Math.max(...reach) : 0;
   const s = input.span;
   const start = s && !open(s[0]) ? s[0] : lo;
-  // A record with no end stands to the present, on the axis's present (core/time.ts), and holds its last figure.
-  const end = s ? (open(s[1]) ? Math.max(hi, PRESENT_YEAR) : s[1]) : hi;
-  return { span: [Math.min(start, end), Math.max(start, end)], runsOn: !!s && open(s[1]) };
+  // A record with no end, or a settlement anchored in a modern urban-centre dataset, stands to the present.
+  const runsOn = s ? open(s[1]) : hasModern;
+  const end = s ? (open(s[1]) ? Math.max(hi, PRESENT_YEAR) : s[1]) : hasModern ? Math.max(hi, PRESENT_YEAR) : hi;
+  return { span: [Math.min(start, end), Math.max(start, end)], runsOn };
 }
 
 /** When a settlement stood, as the model reads it: its record's span where it bounds it, else its figures' reach. */
@@ -310,9 +349,9 @@ function observe(input: PopulationInput, span: [number, number], m: PeopleModel)
   return out;
 }
 
-/** Knots: the span's ends, and the ends and the middle of every window read, in order, none within half a year of another. */
-function knotsOf(span: [number, number], obs: Observation[]): number[] {
-  const ts = [span[0], span[1], ...obs.filter((o) => o.at).flatMap((o) => [o.at![0], (o.at![0] + o.at![1]) / 2, o.at![1]])].sort((a, b) => a - b);
+/** Knots: the span's ends, the ends and the middle of every window read, plus optional extra knots, deduplicated within 0.5 yr. */
+function knotsOf(span: [number, number], obs: Observation[], extra: number[] = []): number[] {
+  const ts = [span[0], span[1], ...obs.filter((o) => o.at).flatMap((o) => [o.at![0], (o.at![0] + o.at![1]) / 2, o.at![1]]), ...extra].sort((a, b) => a - b);
   const out: number[] = [];
   for (const t of ts) if (!out.length || t - out[out.length - 1] > 0.5) out.push(t);
   return out;
@@ -379,6 +418,62 @@ function predict(row: Row, mean: Float64Array, cov: Float64Array, dim: number): 
   return [mu, v];
 }
 
+/**
+ * Exact forward–backward smoother for the two-state continuous-time occupancy Markov chain Z(t) ∈ {0, 1}:
+ *   abandonment hazard λ₁₀ (`abandon`), re-founding hazard λ₀₁ (`found`), and emission likelihoods [L(obs|Z=0), L(obs|Z=1)].
+ */
+function existenceHmm(knots: number[], emit: [number, number][], abandon: number, found: number): number[] {
+  const n = knots.length;
+  if (!n) return [];
+  const L = abandon + found;
+  const pi1 = L > 0 ? found / L : 0.5;
+  const pi0 = 1 - pi1;
+  const trans = (dt: number): [[number, number], [number, number]] => {
+    const e = Math.exp(-L * Math.max(0, dt));
+    return [
+      [pi0 + pi1 * e, pi1 * (1 - e)],
+      [pi0 * (1 - e), pi1 + pi0 * e],
+    ];
+  };
+  const a0 = new Float64Array(n);
+  const a1 = new Float64Array(n);
+  // Start at the settlement's earliest attested point (or weak prior if not pinned).
+  a0[0] = 0.5 * emit[0][0];
+  a1[0] = 0.5 * emit[0][1];
+  {
+    const s = a0[0] + a1[0] || 1;
+    a0[0] /= s;
+    a1[0] /= s;
+  }
+  for (let i = 1; i < n; i++) {
+    const T = trans(knots[i] - knots[i - 1]);
+    const p0 = (a0[i - 1] * T[0][0] + a1[i - 1] * T[1][0]) * emit[i][0];
+    const p1 = (a0[i - 1] * T[0][1] + a1[i - 1] * T[1][1]) * emit[i][1];
+    const s = p0 + p1 || 1;
+    a0[i] = p0 / s;
+    a1[i] = p1 / s;
+  }
+  const b0 = new Float64Array(n);
+  const b1 = new Float64Array(n);
+  b0[n - 1] = 1;
+  b1[n - 1] = 1;
+  for (let i = n - 2; i >= 0; i--) {
+    const T = trans(knots[i + 1] - knots[i]);
+    const q0 = T[0][0] * emit[i + 1][0] * b0[i + 1] + T[0][1] * emit[i + 1][1] * b1[i + 1];
+    const q1 = T[1][0] * emit[i + 1][0] * b0[i + 1] + T[1][1] * emit[i + 1][1] * b1[i + 1];
+    const s = q0 + q1 || 1;
+    b0[i] = q0 / s;
+    b1[i] = q1 / s;
+  }
+  const out: number[] = [];
+  for (let i = 0; i < n; i++) {
+    const p0 = a0[i] * b0[i];
+    const p1 = a1[i] * b1[i];
+    out.push(p1 / (p0 + p1 || 1));
+  }
+  return out;
+}
+
 /** Members from a posterior on knots: the central reading and the band's edges, ramped to a founding size outside the figures. */
 function membersOf(knots: number[], mean: Float64Array, cov: Float64Array, dim: number, first: number, last: number, span: [number, number], m: PeopleModel, ramp: { from: boolean; to: boolean }, offset = 0, shift: (t: number) => number = () => 0): PeopleSeries[] {
   const make = (z: number): PeopleSeries => {
@@ -408,10 +503,21 @@ function membersOf(knots: number[], mean: Float64Array, cov: Float64Array, dim: 
 
 /** The settlement's people through time, its density scale and its region's people, from every figure it has. */
 export function cityPopulation(input: PopulationInput): Population {
+  return cityPopulationCore(input, false);
+}
+
+function cityPopulationCore(input: PopulationInput, looOnly: boolean): Population {
   const m = peopleModel(input.model);
-  const { span, runsOn } = spanOf(input, m);
-  const obs = observe(input, span, m);
+  const { span: initialSpan, runsOn } = spanOf(input, m);
+  const obs = observe(input, initialSpan, m);
   const dPrior: [number, number] = input.density ?? [Math.log(m.density.at10k), Math.hypot(m.density.spread, m.density.between)];
+  const listBySource = new Map((input.lists ?? []).map((l) => [l.source, l]));
+  // Collect all global benchmark tables: from input.benchmarks plus any list's own cutoffs.
+  const benchmarkMap = new Map<string, [number, number][]>();
+  for (const b of input.benchmarks ?? []) if (b.cutoffs.length) benchmarkMap.set(b.source, b.cutoffs);
+  for (const l of input.lists ?? []) if (l.cutoffs?.length && !benchmarkMap.has(l.source)) benchmarkMap.set(l.source, l.cutoffs);
+  const allBenchmarks: BenchmarkList[] = [...benchmarkMap.entries()].map(([source, cutoffs]) => ({ source, cutoffs }));
+
   // The sources' biases: one for each list, and one for each work's figures of the settlement and its core, whatever
   // they count. A work that drew a city's ground wide counted its people over it: its ground and its people err
   // together, and how densely they lived is what it says most surely. Its figures of the region have one of their own.
@@ -426,10 +532,41 @@ export function cityPopulation(input: PopulationInput): Population {
       biasKind.push(o.list ? 'list' : 'work');
     }
   }
-  const knots = knotsOf(span, settlementObs);
+
+  const used = (o: Observation) => o.use === 'used';
+  const usedObs = settlementObs.filter(used);
+  const firstObs = usedObs.length ? Math.min(...usedObs.map((o) => o.at![0])) : initialSpan[0];
+  const lastObs = usedObs.length ? Math.max(...usedObs.map((o) => o.at![1])) : initialSpan[1];
+  const MODERN_SURVEY_YEAR = 2015;
+  const hasContinuity = !looOnly && !input.span && usedObs.length > 0 && (allBenchmarks.length > 0 || !!input.modernSurveyed);
+  // Evaluate Gaussian + HMM out to MODERN_SURVEY_YEAR (2015) when checking post-observation survival for an unrecorded city.
+  const evalEnd = hasContinuity && !runsOn ? Math.max(initialSpan[1], MODERN_SURVEY_YEAR) : initialSpan[1];
+  const evalSpan: [number, number] = [initialSpan[0], evalEnd];
+
+  // Any observation (including held-out ones!) near a benchmark year suppresses censoring there to guarantee zero leakage.
+  const hasObsNear = (t: number, tol = 25) => settlementObs.some((o) => o.at && o.at[0] - tol <= t && t <= o.at[1] + tol);
+
+  // Extra knots: missed global benchmarks (for left-censoring and occupancy), plus interior HYDE steps across gaps.
+  // Skipped in `looOnly` mode because unobserved random-walk knots marginalize out identically at observation knots.
+  const extraKnots: number[] = [];
+  if (!looOnly && usedObs.length) {
+    for (const b of allBenchmarks) {
+      for (const [bt] of b.cutoffs) {
+        if (bt > firstObs && bt <= evalEnd && !hasObsNear(bt)) extraKnots.push(bt);
+      }
+    }
+    if (hasContinuity && input.modernSurveyed && !runsOn && MODERN_SURVEY_YEAR > lastObs && MODERN_SURVEY_YEAR <= evalEnd) extraKnots.push(MODERN_SURVEY_YEAR);
+    if (input.localHyde?.length && m.drift > 0) {
+      const obsPts = settlementObs.flatMap((o) => [o.at![0], o.at![1]]);
+      for (const [ht] of input.localHyde) {
+        if (ht > firstObs + 25 && ht < lastObs - 25 && !obsPts.some((ot) => Math.abs(ot - ht) < 40)) extraKnots.push(ht);
+      }
+    }
+  }
+
+  const knots = knotsOf(evalSpan, settlementObs, extraKnots);
   const K = knots.length;
   const dim = K + 1 + biasKeys.length;
-  const used = (o: Observation) => o.use === 'used';
   const built = settlementRows(settlementObs, knots, m, (o) => K + 1 + biasKeys.indexOf(keyOf(o)));
   // A figure's own error is what reconciles two sources' figures. A settlement whose figures read are all one source's
   // has its error all in that source's bias: its figures are read exactly, as they were before this model, and two of
@@ -439,24 +576,61 @@ export function cityPopulation(input: PopulationInput): Population {
   if (oneSource) built.rows.forEach((r) => (r.r = Math.max(0, r.r - m.point ** 2)));
   const fitRows = built.rows.filter((_, i) => used(built.of[i]));
   const fitOf = built.of.filter(used);
+
+  let span: [number, number] = initialSpan;
   let members: PeopleSeries[] = [];
   let post: [number, number] = dPrior;
+  let exist: { t: number[]; p: number[] } | undefined;
+
   if (fitRows.length) {
-    // The prior: a level so wide it says nothing, round the figures' own; the density scale's; and each source's bias.
+    // The prior: a level so wide it says nothing, shaped by local HYDE demographic drift where available; the density
+    // scale's; and each source's bias (with per-list mean/sd where calibrated).
     const level = fitRows.filter((r) => r.w.length === 2).map((r) => r.y);
     const mu = new Float64Array(dim);
     const S = new Float64Array(dim * dim);
     const m0 = level.length ? level.reduce((a, b) => a + b, 0) / level.length : LN1E4;
-    for (let i = 0; i < K; i++) mu[i] = m0;
+    if (input.localHyde?.length && m.drift > 0) {
+      const hLogs = knots.map((t) => Math.log(Math.max(0, seriesAt(input.localHyde, t)) + m.driftFloor));
+      const hMean = hLogs.reduce((a, b) => a + b, 0) / K;
+      for (let i = 0; i < K; i++) mu[i] = m0 + m.drift * (hLogs[i] - hMean);
+    } else {
+      for (let i = 0; i < K; i++) mu[i] = m0;
+    }
     walkCov(knots, 1e4, m.walk, S, dim);
     mu[K] = dPrior[0];
     S[K * dim + K] = dPrior[1] ** 2;
-    biasKind.forEach((kind, j) => (S[(K + 1 + j) * dim + K + 1 + j] = m.bias[kind] ** 2));
-    const p = condition(mu, S, fitRows);
+    biasKind.forEach((kind, j) => {
+      const l = kind === 'list' ? listBySource.get(biasKeys[j]) : undefined;
+      if (l?.bias) {
+        mu[K + 1 + j] = l.bias[0];
+        S[(K + 1 + j) * dim + K + 1 + j] = l.bias[1] ** 2;
+      } else {
+        S[(K + 1 + j) * dim + K + 1 + j] = m.bias[kind] ** 2;
+      }
+    });
+
+    const pLin = condition(mu, S, fitRows);
     fitOf.forEach((o, i) => {
       o.y = fitRows[i].y;
-      o.loo = [p.loo[i].mean, Math.sqrt(p.loo[i].v)];
+      o.loo = [pLin.loo[i].mean, Math.sqrt(pLin.loo[i].v)];
     });
+    if (looOnly) return { span, members, from: [], at10k: Math.exp(post[0]), density: { prior: dPrior, post }, observations: obs };
+
+    // Left-censoring on missed global benchmarks strictly between observed figures: tells the model that an unlisted
+    // century inside a long gap was likely below the benchmark's cutoff rather than straight across at peak size.
+    const cens: CensorRow[] = [];
+    if (m.censor.rho > 0 && lastObs > firstObs) {
+      for (const b of allBenchmarks) {
+        const bIdx = biasKeys.indexOf(b.source);
+        if (bIdx < 0) continue;
+        for (const [bt, cut] of b.cutoffs) {
+          if (bt <= firstObs || bt >= lastObs || !(cut > 0) || hasObsNear(bt)) continue;
+          cens.push({ at: [knotIndex(knots, bt), K + 1 + bIdx], w: [1, 1], c: Math.log(cut), tau: m.censor.tau, rho: m.censor.rho });
+        }
+      }
+    }
+    const p = cens.length ? conditionCensored(pLin.mean, pLin.cov, cens) : pLin;
+
     // Every figure that can be placed, read or not, against what the model gives for it.
     built.of.forEach((o, i) => {
       const [f, v] = predict(built.rows[i], p.mean, p.cov, dim);
@@ -464,9 +638,63 @@ export function cityPopulation(input: PopulationInput): Population {
       o.fit = [f, Math.sqrt(v)];
     });
     post = [p.mean[K], Math.sqrt(Math.max(0, p.cov[K * dim + K]))];
+
+    // Two-state continuous-time occupancy HMM for settlements without an explicit record span: distinguishes living
+    // cities bridging long list silences from abandoned ruins that missed subsequent benchmarks and modern surveys.
+    if (hasContinuity) {
+      const occIndices: number[] = [];
+      for (let i = 0; i < K; i++) if (knots[i] >= firstObs - 0.5) occIndices.push(i);
+      const occKnots = occIndices.map((i) => knots[i]);
+      const emit: [number, number][] = occIndices.map((ki) => {
+        const t = knots[ki];
+        if (usedObs.some((o) => o.at![0] - 0.5 <= t && t <= o.at![1] + 0.5)) return [0, 1];
+        let pAlive = 1;
+        for (const b of allBenchmarks) {
+          const hit = b.cutoffs.find(([bt]) => Math.abs(bt - t) <= 0.5);
+          if (!hit || !(hit[1] > 0) || hasObsNear(t)) continue;
+          const bIdx = biasKeys.indexOf(b.source);
+          const xhat = bIdx >= 0 ? p.mean[ki] + p.mean[K + 1 + bIdx] : p.mean[ki];
+          const vhat =
+            bIdx >= 0
+              ? p.cov[ki * dim + ki] + p.cov[(K + 1 + bIdx) * dim + K + 1 + bIdx] + 2 * p.cov[ki * dim + K + 1 + bIdx]
+              : p.cov[ki * dim + ki] + m.bias.list ** 2;
+          pAlive *= 1 - m.censor.occRho + m.censor.occRho * normCdf((Math.log(hit[1]) - xhat) / Math.sqrt(m.censor.tau ** 2 + Math.max(0, vhat)));
+        }
+        if (input.modernSurveyed && !runsOn && Math.abs(t - MODERN_SURVEY_YEAR) <= 0.5) {
+          const xhat = p.mean[ki];
+          const vhat = Math.max(0, p.cov[ki * dim + ki]);
+          pAlive *= 1 - m.occupancy.modernCoverage + m.occupancy.modernCoverage * normCdf((Math.log(m.occupancy.modernCutoff) - xhat) / Math.sqrt(m.censor.tau ** 2 + vhat));
+        }
+        return [1, pAlive];
+      });
+      const occProbs = existenceHmm(occKnots, emit, m.occupancy.abandon, m.occupancy.found);
+      // Prepend the founding ramp [span[0], firstObs] at occupancy 1 so the hold halo before the first figure stands.
+      const exT = initialSpan[0] < occKnots[0] - 0.5 ? [initialSpan[0], ...occKnots] : [...occKnots];
+      const exP = initialSpan[0] < occKnots[0] - 0.5 ? [1, ...occProbs] : [...occProbs];
+      exist = { t: exT, p: exP };
+      if (!runsOn) {
+        // Find where post-observation occupancy first falls below threshold; hold at least to initialSpan[1] (lastObs + hold).
+        const thr = m.occupancy.threshold;
+        let end = initialSpan[1];
+        for (let i = 0; i < occKnots.length; i++) {
+          if (occKnots[i] < lastObs - 0.5) continue;
+          if (occProbs[i] >= thr) {
+            end = Math.max(end, occKnots[i]);
+          } else {
+            if (i > 0 && occProbs[i - 1] >= thr && occProbs[i - 1] > occProbs[i]) {
+              const frac = (occProbs[i - 1] - thr) / (occProbs[i - 1] - occProbs[i]);
+              end = Math.max(end, Math.round(occKnots[i - 1] + frac * (occKnots[i] - occKnots[i - 1])));
+            }
+            break;
+          }
+        }
+        span = [initialSpan[0], Math.min(evalEnd, end)];
+      }
+    }
+
     // The founding size stands only before the first figure's years begin, and the end's after the last's end: a figure
     // for 770–888 says the people were there all through those years, its start included.
-    members = membersOf(knots, p.mean, p.cov, dim, Math.min(...fitOf.map((o) => o.at![0])), Math.max(...fitOf.map((o) => o.at![1])), span, m, { from: true, to: !runsOn });
+    members = membersOf(knots, p.mean, p.cov, dim, firstObs, lastObs, span, m, { from: true, to: !runsOn });
   }
   const pop: Population = {
     span,
@@ -474,6 +702,7 @@ export function cityPopulation(input: PopulationInput): Population {
     from: members.length ? ['central', 'higher', 'lower'] : [],
     at10k: Math.exp(post[0]),
     density: { prior: dPrior, post },
+    ...(exist ? { exist } : {}),
     observations: obs,
   };
   const region = regionOf(input, obs, span, m, members[0]);
@@ -540,6 +769,25 @@ function regionOf(input: PopulationInput, obs: Observation[], span: [number, num
 
 /** A settlement's people at a time, on its central reading: 0 outside its span. */
 export const centralAt = (p: Pick<Population, 'members'>, t: number): number => (p.members[0] ? at(p.members[0], t) : 0);
+
+/** A settlement's occupancy probability P(Z(t) = 1) at a time; 1 inside its span when no occupancy curve is carried, 0 outside. */
+export function existAt(p: Pick<Population, 'exist' | 'members'>, t: number): number {
+  const m = p.members[0];
+  if (!m || !m.t.length || t < m.t[0] || t > m.t[m.t.length - 1]) return 0;
+  const ex = p.exist;
+  if (!ex || !ex.t.length) return 1;
+  if (t <= ex.t[0]) return ex.p[0];
+  if (t >= ex.t[ex.t.length - 1]) return ex.p[ex.p.length - 1];
+  let i = 0;
+  while (i + 1 < ex.t.length && ex.t[i + 1] < t) i++;
+  if (i + 1 >= ex.t.length || ex.t[i + 1] === ex.t[i]) return ex.p[i];
+  const u = (t - ex.t[i]) / (ex.t[i + 1] - ex.t[i]);
+  return ex.p[i] + u * (ex.p[i + 1] - ex.p[i]);
+}
+
+/** Whether a settlement is inferred to stand at time `t`: positive central population and occupancy probability above threshold. */
+export const aliveAt = (p: Pick<Population, 'exist' | 'members'>, t: number, threshold = PEOPLE_MODEL.occupancy.threshold): boolean =>
+  centralAt(p, t) > 0 && existAt(p, t) >= threshold;
 
 /**
  * How many people a region holds about its settlement at a time, beyond the settlement's own: the region's central
@@ -645,7 +893,9 @@ export interface PlaceScore {
 export interface PeopleScores {
   /** the parameters fitted, and the grid each was chosen from with the mean score at each */
   params: Partial<PeopleModel>;
-  grid: { walk: number; list: number; lpd: number }[];
+  grid: { walk: number; list: number; drift?: number; lpd: number }[];
+  /** HYDE regional demographic drift weight grid, where HYDE series were attached */
+  drifts?: { drift: number; lpd: number }[];
   /** and a work's bias, fitted after, by the records' figures held out */
   works: { work: number; lpd: number }[];
   /** each list's figure from its city's others, with the parameters fitted */
@@ -681,7 +931,8 @@ export function holdOut(input: Omit<PopulationInput, 'without'>, which: (o: Obse
 /** Scores of every figure a settlement's fit reads, each predicted from all the others: one fit, no refitting. */
 export function leaveOneOut(input: Omit<PopulationInput, 'without'>, which: (o: Observation) => boolean = () => true): Score[] {
   const m = peopleModel(input.model);
-  const p = cityPopulation(input);
+  const hasRegion = (input.figures ?? []).some((f) => f.ground === 'region');
+  const p = cityPopulationCore(input, !hasRegion);
   const out: Score[] = [];
   for (const o of p.observations) {
     if (o.use !== 'used' || o.y === undefined || !o.loo || !which(o)) continue;

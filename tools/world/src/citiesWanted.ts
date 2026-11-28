@@ -3,8 +3,9 @@
 // stood up to 1850, as the model of a settlement's people reads them (core/citypop.ts). The top of the list is where most
 // lives were lived in a city drawn from little more than its figure: a plan's skeleton there (its outline at dated
 // times, its walls and gates, its grid's direction, its main streets) does the most.
+import { aliveAt, type Population } from '../../../core/citypop.ts';
 import { peopleAt } from '../../../core/growth.ts';
-import { kmBetween, populationOf, type CitiesFile, type City, type CityRecord } from '../../../core/landscape.ts';
+import { groupCityRows, populationOf, recordNamesOf, rowsNear, type CitiesFile, type City, type CityRecord } from '../../../core/landscape.ts';
 import { formatTime } from '../../../core/time.ts';
 
 /** The tiers of what is known of a city (docs/plans/CITIES.md). */
@@ -30,54 +31,60 @@ export interface CityWanted {
 /** The last year counted: housing after it wants evidence of another kind (docs/plans/CITIES.md, What it will not do). */
 export const UNTIL = 1850;
 
-/** People times years over a span, by the model's central reading, in steps of a decade. */
-function peopleYears(members: { t: number[]; people: number[] }[], span: [number, number]): number {
-  const m = members[0];
+/** People times years over a span, by the model's central reading, in steps of a decade (only while the city stood). */
+function peopleYears(pop: Population, span: [number, number]): number {
+  const m = pop.members[0];
   if (!m) return 0;
   const a = span[0];
   const b = Math.min(span[1], UNTIL);
   let sum = 0;
-  for (let t = a; t < b; t += 10) sum += peopleAt(m, Math.min(b, t + 5)) * Math.min(10, b - t);
+  for (let t = a; t < b; t += 10) {
+    const mid = Math.min(b, t + 5);
+    if (!aliveAt(pop, mid)) continue;
+    sum += peopleAt(m, mid) * Math.min(10, b - t);
+  }
   return sum;
 }
 
 /**
- * Each city of the file once: a list's rows within `merge` km of one another, and a record within `recordKm` of them,
- * are one city. `mapped` names the settlements whose fabric a map of the world gives (a dataset's `import.site`).
+ * Each city of the file once: historical lists' rows are grouped by name + proximity (groupCityRows), modern anchors
+ * pair only by strict name + proximity, and a record takes its matching list rows within `recordKm`. `mapped` names
+ * the settlements whose fabric a map of the world gives (a dataset's `import.site`).
  */
 export function citiesWanted(f: CitiesFile, mapped: Set<string>, recordKm = 12, merge = 5): CityWanted[] {
+  const modern = new Set(f.lists.filter((l) => l.role === 'modern').map((l) => l.source));
+  const rawGroups = groupCityRows(f.cities, f.lists, merge);
+  const groupIndex = new Map<City, number>();
+  rawGroups.forEach((g, idx) => {
+    for (const c of g) groupIndex.set(c, idx);
+  });
+  const taken = new Set<number>();
   const groups: { rows: City[]; record?: CityRecord }[] = [];
-  for (const c of f.cities) {
-    const g = groups.find((x) => x.rows.some((r) => kmBetween(r.lat, r.lon, c.lat, c.lon) <= merge));
-    if (g) g.rows.push(c);
-    else groups.push({ rows: [c] });
-  }
   for (const r of f.records ?? []) {
-    let best: (typeof groups)[number] | undefined;
-    let bestKm = recordKm;
-    for (const g of groups) {
-      if (g.record) continue;
-      const k = Math.min(...g.rows.map((c) => kmBetween(r.lat, r.lon, c.lat, c.lon)));
-      if (k <= bestKm) {
-        best = g;
-        bestKm = k;
-      }
+    const rows = rowsNear(f, r.lat, r.lon, recordKm, recordNamesOf(r), r.span);
+    for (const c of rows) {
+      const idx = groupIndex.get(c);
+      if (idx !== undefined) taken.add(idx);
     }
-    if (best) best.record = r;
-    else groups.push({ rows: [], record: r });
+    groups.push({ rows, record: r });
   }
+  rawGroups.forEach((g, idx) => {
+    if (taken.has(idx)) return;
+    if (g.every((c) => modern.has(c.source))) return;
+    groups.push({ rows: g });
+  });
   const out: CityWanted[] = [];
   for (const g of groups) {
     const r = g.record;
     if (!g.rows.length && !r) continue;
-    const pop = populationOf(f, r?.lat ?? g.rows[0].lat, r?.lon ?? g.rows[0].lon, g.rows, r, { hold: 50 });
+    const head = g.rows.find((c) => !modern.has(c.source)) ?? g.rows[0];
+    const pop = populationOf(f, r?.lat ?? head.lat, r?.lon ?? head.lon, g.rows, r, { hold: 50 });
     if (!pop.members.length) continue;
     const span = pop.span;
     if (span[0] > UNTIL) continue;
     const most = Math.max(...pop.members[0].people);
     const skeleton = !!r && (r.town?.orientation !== undefined || (r.town?.wall !== undefined && r.town.wall !== 'none'));
     const tier: CityWanted['tier'] = r && mapped.has(r.id) ? 3 : skeleton ? 2 : r ? 1 : 0;
-    const head = g.rows[0];
     const wants =
       tier === 0
         ? 'a record: its names, its founding and its end, its areas'
@@ -86,7 +93,7 @@ export function citiesWanted(f: CitiesFile, mapped: Set<string>, recordKm = 12, 
           : tier === 2
             ? 'its fabric mapped in OpenHistoricalMap, with dates'
             : 'nothing more of its plan';
-    out.push({ name: r?.name ?? head.name, lat: r?.lat ?? head.lat, lon: r?.lon ?? head.lon, ...(r ? { record: r.id } : {}), tier, peopleYears: peopleYears(pop.members, span), span, most, wants });
+    out.push({ name: r?.name ?? head.name, lat: r?.lat ?? head.lat, lon: r?.lon ?? head.lon, ...(r ? { record: r.id } : {}), tier, peopleYears: peopleYears(pop, span), span, most, wants });
   }
   return out.sort((a, b) => b.peopleYears - a.peopleYears || (a.name < b.name ? -1 : 1));
 }

@@ -8,9 +8,9 @@ import { describe, expect, it } from 'vitest';
 import { parse } from 'yaml';
 import { agricultureAt, compileAgriculture, compileHusbandry, compileTraditions, cropProblems, cropsText, genericCropsFor, husbandryAt, dwellingProblems, fieldProblems, lifewayProblems, lifewayText, OUTBUILDING_LABEL, OUTBUILDING_ROOFED, OUTBUILDING_WORDS, outbuildingProblems, outbuildingsText, prevalenceOf, PREVALENCE_WORDS, settlementProblems, specText, traditionAt, traditionFor, traditionsFor, type LifewayWord, type Prevalence, type Tradition } from '../../../core/dwelling.ts';
 import { dispersedAt } from '../../../core/citypop.ts';
-import { anthromeTile, assessmentAt, cityPeople, citiesAround, citiesNear, classAtStep, figureAt, kmBetween, nameAt, LIFEWAY_OF, lifewayOf, nearestStep, populationOf, regionReach, regionsInto, shareDensity, tileKey, cellOf, type AnthromeClass, type Assessment, type CitiesFile, type City, type CityRecord } from '../../../core/landscape.ts';
+import { anthromeTile, assessmentAt, cityPeople, citiesAround, citiesNear, classAtStep, figureAt, groupCityRows, kmBetween, modernMatchesHistorical, nameAt, LIFEWAY_OF, lifewayOf, nearestStep, populationOf, regionReach, regionsInto, shareDensity, tileKey, cellOf, type AnthromeClass, type Assessment, type CitiesFile, type City, type CityRecord } from '../../../core/landscape.ts';
 import type { PeopleFile } from '../../../core/layers.ts';
-import { assessmentsFile, cityYear, citiesOf, eckert4Inverse, housing, housingCounts, landscapeEntities, settlementOutline, parseClassGrid, rasterizeRegions, stepOfName, type LandscapeBuilt } from '../src/build/landscape.ts';
+import { assessmentsFile, benchmarkCutoffs, cityHyde, cityYear, citiesOf, eckert4Inverse, ghslCitiesOf, housing, housingCounts, landscapeEntities, nePlacesOf, settlementOutline, parseClassGrid, rasterizeRegions, stepOfName, type LandscapeBuilt } from '../src/build/landscape.ts';
 import type { LatLon, OhmSnapshot } from '../src/ohm.ts';
 import type { World } from '../src/world.ts';
 import { wantedRows, wantedText, wantedTotals } from '../src/dwellingsWanted.ts';
@@ -759,4 +759,176 @@ it('reads only closed polygons from the named OHM elements of a settlement exten
   }]]);
   const swap = (ring: number[][]) => ring.map(([lat, lon]) => [lon, lat]);
   expect(settlementOutline({ snapshots }, { from: 'src:map', elements: ['relation/1', 'way/2'] })).toEqual([[swap(outer), swap(inner)]]);
+});
+
+describe('city continuity, modern anchors, and identity matching', () => {
+  it('supports country-scoped left_out so Memphis Egypt drops AD_1975 without touching Memphis USA', () => {
+    const csv = [
+      'City,OtherName,Country,Latitude,Longitude,Certainty,BC_430,AD_1900,AD_1975',
+      'Memphis,,Egypt,29.845,31.251,1,100000,,846000',
+      'Memphis,,United States of America,35.150,-90.049,1,,102000,700000',
+    ].join('\n');
+    const rows = citiesOf(csv, 'src:ch', 'field:people/cities', [{ city: 'Memphis', country: 'Egypt', columns: ['AD_1975'] }]);
+    const eg = rows.find((r) => r.country === 'Egypt')!;
+    const us = rows.find((r) => r.country === 'United States of America')!;
+    expect(eg.pops).toEqual([[-429, 100000]]);
+    expect(us.pops).toEqual([[1900, 102000], [1975, 700000]]);
+  });
+
+  it('parses GHSL UCDB CSV and Natural Earth 1:10m GeoJSON, filtering invalid QA flags and garbled names', () => {
+    const csv = [
+      'QA2_1V,UC_NM_MN,UC_NM_LST,CTR_MN_NM,GCPNT_LAT,GCPNT_LON,P75,P90,P00,P15',
+      '1,Kanchipuram,"Kanchipuram; Little Kanchipuram",India,12.8342,79.7036,112000,155000,188000,234000',
+      '0,FalsePositive,,India,12.9,79.8,60000,70000,80000,90000',
+      '1,???,???,China,31.2,121.5,50000,60000,70000,80000',
+      '1,N/A,,Brazil,-10,-50,50000,60000,70000,80000',
+      ',,,,,,,,,',
+    ].join('\n');
+    const ghsl = ghslCitiesOf(csv, 'src:ghsl', 'field:people/cities-modern');
+    expect(ghsl.length).toBe(1);
+    expect(ghsl[0]).toMatchObject({
+      name: 'Kanchipuram',
+      alts: ['Little Kanchipuram'],
+      country: 'India',
+      pops: [[1975, 112000], [1990, 155000], [2000, 188000], [2015, 234000]],
+    });
+
+    const geojson = JSON.stringify({
+      type: 'FeatureCollection',
+      features: [
+        { type: 'Feature', geometry: { type: 'Point', coordinates: [60.359, 41.378] }, properties: { name: 'Khiva', nameascii: 'Khiva', namealt: 'Xiva|Chiwa', adm0name: 'Uzbekistan', pop_max: 55000 } },
+        { type: 'Feature', geometry: { type: 'Point', coordinates: [0, 0] }, properties: { name: 'Tiny', pop_max: 200 } },
+      ],
+    });
+    const ne = nePlacesOf(geojson, 'src:ne10m', 'field:people/cities-modern');
+    expect(ne.length).toBe(1);
+    expect(ne[0]).toMatchObject({ name: 'Khiva', alts: ['Xiva', 'Chiwa'], country: 'Uzbekistan', pops: [[2015, 55000]] });
+  });
+
+  it('computes global benchmark cutoffs while dropping single-country census noise', () => {
+    const cities: City[] = [];
+    // 16 countries in 1500 and 1600 (true global benchmarks); only 1 country in 1530 (single-country census noise).
+    for (let i = 0; i < 16; i++) {
+      cities.push({
+        name: `C${i}`,
+        country: `Country${i}`,
+        lat: i,
+        lon: i,
+        certainty: 1,
+        source: 'src:ch',
+        field: 'f',
+        pops: [[1500, (i + 1) * 10000], [1600, (i + 1) * 12000]],
+      });
+    }
+    for (let i = 0; i < 20; i++) {
+      cities.push({ name: `Local${i}`, country: 'England', lat: 51, lon: 0, certainty: 1, source: 'src:ch', field: 'f', pops: [[1530, 4000 + i * 200]] });
+    }
+    const cuts = benchmarkCutoffs(cities);
+    expect(cuts.map(([y]) => y)).toEqual([1500, 1600]);
+    expect(cuts[0][1]).toBe(50000);
+  });
+
+  it('samples a compact 3x3 smoothed local HYDE regional demographic series', () => {
+    const nx = 360;
+    const cellOf1 = (lat: number, lon: number) => Math.floor(90 - lat) * nx + Math.floor(lon + 180);
+    const cells = [cellOf1(12.5, 79.5), cellOf1(13.5, 79.5)].sort((a, b) => a - b);
+    const steps = [500, 1000, 1500, 1750, 1800, 1975, 2015];
+    const people = new Uint32Array(steps.length * cells.length);
+    steps.forEach((_, si) => {
+      people[si * cells.length] = (si + 1) * 100000;
+      people[si * cells.length + 1] = (si + 1) * 50000;
+    });
+    const pf = { format: 'lightworld-people@1', res: 1, steps, scale: { lo: 1, hi: 1000 }, range: [], cell: new Uint32Array(cells), land: new Uint32Array([10000, 10000]), people } as unknown as PeopleFile;
+    const series = cityHyde(pf, 12.8, 79.7, 1000);
+    expect(series.length).toBe(steps.length);
+    expect(series[0][0]).toBe(500);
+    expect(series.at(-1)![0]).toBe(2015);
+    expect(series.at(-1)![1]).toBeGreaterThan(series[0][1] * 5);
+  });
+
+  it('matches living historical towns to modern anchors strictly by name + proximity without resurrecting nearby ruins', () => {
+    const lists = [
+      { source: 'src:ch', field: 'f:ch', title: 'Chandler', hold: 50, gap: 600, role: 'historical' as const },
+      { source: 'src:mod', field: 'f:mod', title: 'GHSL', hold: 25, gap: 100, role: 'modern' as const },
+    ];
+    const cities: City[] = [
+      // Living town matching primary name within 25 km
+      { name: 'Kanchipuram', country: 'India', lat: 12.83, lon: 79.70, certainty: 1, source: 'src:ch', field: 'f:ch', pops: [[1000, 40000]] },
+      { name: 'Kanchipuram', country: 'India', lat: 12.84, lon: 79.71, certainty: 1, source: 'src:mod', field: 'f:mod', pops: [[1975, 110000], [2015, 230000]] },
+      // Nearby modern city with different name must NOT match ancient ruin (Babylon vs Al Hillah ~6 km, Nineveh vs Mosul ~2 km, Carthage vs Tunis ~13 km, Angkor vs Siem Reap ~6 km)
+      { name: 'Babylon', country: 'Iraq', lat: 32.54, lon: 44.42, certainty: 1, source: 'src:ch', field: 'f:ch', pops: [[-429, 200000]] },
+      { name: 'Al Hillah', country: 'Iraq', lat: 32.48, lon: 44.43, certainty: 1, source: 'src:mod', field: 'f:mod', pops: [[1975, 150000], [2015, 450000]] },
+      { name: 'Nineveh', country: 'Iraq', lat: 36.36, lon: 43.15, certainty: 1, source: 'src:ch', field: 'f:ch', pops: [[-649, 120000]] },
+      { name: 'Mosul', country: 'Iraq', lat: 36.34, lon: 43.13, certainty: 1, source: 'src:mod', field: 'f:mod', pops: [[1975, 400000], [2015, 1400000]] },
+      { name: 'Carthage', country: 'Tunisia', lat: 36.85, lon: 10.32, certainty: 1, source: 'src:ch', field: 'f:ch', pops: [[-199, 150000]] },
+      { name: 'Tunis', country: 'Tunisia', lat: 36.81, lon: 10.18, certainty: 1, source: 'src:mod', field: 'f:mod', pops: [[1975, 900000], [2015, 2200000]] },
+      { name: 'Angkor', country: 'Cambodia', lat: 13.44, lon: 103.86, certainty: 1, source: 'src:ch', field: 'f:ch', pops: [[1200, 150000]] },
+      { name: 'Siem Reap', country: 'Cambodia', lat: 13.36, lon: 103.86, certainty: 1, source: 'src:mod', field: 'f:mod', pops: [[1975, 30000], [2015, 200000]] },
+    ];
+    const groups = groupCityRows(cities, lists);
+    const kanchi = groups.find((g) => g.some((c) => c.name === 'Kanchipuram'))!;
+    expect(kanchi.length).toBe(2);
+    for (const ruin of ['Babylon', 'Nineveh', 'Carthage', 'Angkor']) {
+      const g = groups.find((x) => x.some((c) => c.name === ruin))!;
+      expect(g.length).toBe(1);
+    }
+    // Alt name matches within 6 km (e.g. historical Constantinople paired with modern Istanbul via alt)
+    expect(modernMatchesHistorical({ name: 'Istanbul', alts: ['Constantinople'], lat: 41.01, lon: 28.97 }, ['Constantinople'], 41.008, 28.978)).toBeDefined();
+    expect(modernMatchesHistorical({ name: 'Istanbul', alts: ['Constantinople'], lat: 41.01, lon: 28.97 }, ['Constantinople'], 41.15, 28.97)).toBeUndefined();
+  });
+
+  it('bridges living historical towns across multi-century list gaps in citiesAround while keeping ruins absent', () => {
+    const cutoffs: [number, number][] = [
+      [-429, 40000], [-199, 40000], [100, 40000], [600, 35000], [1000, 25000],
+      [1200, 25000], [1400, 25000], [1600, 25000], [1800, 20000], [1900, 25000], [1950, 50000],
+    ];
+    const file: CitiesFile = {
+      format: 'lightworld-cities@1',
+      lists: [
+        { source: 'src:ch', field: 'field:people/cities', title: 'Chandler', hold: 50, gap: 600, role: 'historical', cutoffs },
+        { source: 'src:mod', field: 'field:people/cities-modern', title: 'GHSL', hold: 25, gap: 100, role: 'modern', bias: [-0.1, 0.65] },
+      ],
+      cities: [
+        // Kanchipuram-like 650+ yr gap bridged by continuity + modern anchor
+        { name: 'Kanchipuram', country: 'India', lat: 12.83, lon: 79.70, certainty: 1, source: 'src:ch', field: 'field:people/cities', pops: [[1000, 40000], [1750, 25000]] },
+        { name: 'Kanchipuram', country: 'India', lat: 12.84, lon: 79.71, certainty: 1, source: 'src:mod', field: 'field:people/cities-modern', pops: [[1975, 110000], [2015, 220000]] },
+        // Khiva-like 1800 -> 2015 gap bridged by modern anchor
+        { name: 'Khiva', country: 'Uzbekistan', lat: 41.38, lon: 60.36, certainty: 1, source: 'src:ch', field: 'field:people/cities', pops: [[1800, 10000]] },
+        { name: 'Khiva', country: 'Uzbekistan', lat: 41.38, lon: 60.36, certainty: 1, source: 'src:mod', field: 'field:people/cities-modern', pops: [[2015, 55000]] },
+        // Babylon-like ruin near Al Hillah
+        { name: 'Babylon', country: 'Iraq', lat: 32.54, lon: 44.42, certainty: 1, source: 'src:ch', field: 'field:people/cities', pops: [[-429, 200000], [-199, 100000]] },
+        { name: 'Al Hillah', country: 'Iraq', lat: 32.48, lon: 44.43, certainty: 1, source: 'src:mod', field: 'field:people/cities-modern', pops: [[1975, 150000], [2015, 450000]] },
+      ],
+    };
+    const guess = { perHouse: 6, lot: 200, hold: 50, gap: 600 };
+
+    // Kanchipuram stands in 1285 with realistic size and high occupancy
+    const k1285 = citiesAround(file, 12.83, 79.70, 1285, 30, guess);
+    expect(k1285.map((c) => c.name)).toEqual(['Kanchipuram']);
+    expect(k1285[0].people).toBeGreaterThan(10000);
+    expect(k1285[0].exist).toBeGreaterThan(0.8);
+
+    // Khiva stands in 1890 (between 1800 Chandler and 2015 modern anchor)
+    const kh1890 = citiesAround(file, 41.38, 60.36, 1890, 30, guess);
+    expect(kh1890.map((c) => c.name)).toEqual(['Khiva']);
+    expect(kh1890[0].people).toBeGreaterThan(10000);
+
+    // Babylon stands in -300, NOT in 1500 (and Al Hillah is NOT drawn in 1500 either)
+    expect(citiesAround(file, 32.54, 44.42, -300, 30, guess).map((c) => c.name)).toEqual(['Babylon']);
+    expect(citiesAround(file, 32.54, 44.42, 1500, 30, guess)).toEqual([]);
+
+    // Curated record end span overrides list-only HMM persistence (e.g. Cahokia abandoned 1350 despite 1300 list figure)
+    const withRecord: CitiesFile = {
+      ...file,
+      cities: [
+        ...file.cities,
+        { name: 'Cahokia', country: 'United States', lat: 38.65, lon: -90.06, certainty: 1, source: 'src:ch', field: 'field:people/cities', pops: [[1100, 40000], [1300, 15000]] },
+      ],
+      records: [
+        { id: 'people/first-cities/cahokia', name: 'Cahokia', lat: 38.65, lon: -90.06, span: [1050, 1350], pops: [[1150, 18000]], areas: [], houses: [] },
+      ],
+    };
+    expect(citiesAround(withRecord, 38.65, -90.06, 1150, 20, guess).map((c) => c.name)).toEqual(['Cahokia']);
+    expect(citiesAround(withRecord, 38.65, -90.06, 1450, 20, guess)).toEqual([]);
+  });
 });

@@ -908,11 +908,12 @@ class Page {
     const s = this.cov.landscape?.people;
     if (!s) return box;
     box.append(el('h2', undefined, "A city's people, on what the model did not see"));
+    const driftNote = s.params.drift !== undefined ? `, HYDE regional drift at ${s.params.drift},` : '';
     box.append(
       el(
         'p',
         'cov-lede',
-        `The population model reads every figure of a city, the lists' and its record's, as an observation of the ground it counts over the years it is for. Here each is predicted without it: a list's figure from its city's others, and a record's figures with all of its record's left out, from the lists and the settlements near it alone. 90% should fall within the band. The build fitted the walk of a city's people at ${s.params.walk} a year on the log and a list's bias at ${s.params.bias?.list} to the first, and a work's bias at ${s.params.bias?.work} to the second; ${count(s.anchors)} settlements give the density their neighbours are pulled towards.`,
+        `The population model reads every figure of a city, the lists' and its record's, as an observation of the ground it counts over the years it is for. Here each is predicted without it: a list's figure from its city's others, and a record's figures with all of its record's left out, from the lists and the settlements near it alone. 90% should fall within the band. The build fitted the walk of a city's people at ${s.params.walk} a year on the log,${driftNote} and a list's bias at ${s.params.bias?.list} to the first, and a work's bias at ${s.params.bias?.work} to the second; ${count(s.anchors)} settlements give the density their neighbours are pulled towards.`,
       ),
     );
     const sum = el('table');

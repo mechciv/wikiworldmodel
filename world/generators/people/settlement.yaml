@@ -26,6 +26,7 @@ inputs:
   - { ref: field:people/lifeways, note: "the pattern of settlement, from the two above" }
   - { ref: field:people/cities, note: "the cities that stood near, and their people" }
   - { ref: field:people/cities-ancient, note: "the cities that stood near, and their people" }
+  - { ref: field:people/cities-modern, note: "modern urban centres and surviving smaller historical towns anchoring historical cities to the present" }
   - { kind: tradition/building, note: "the building traditions that hold in the region at the time" }
   - { prop: dwelling, note: "what each tradition's houses were like" }
   - { prop: settlement_form, note: "how its houses stood together, in a ring or in rows, round open ground; what enclosed the settlement and each yard; and how many lived in each house" }
