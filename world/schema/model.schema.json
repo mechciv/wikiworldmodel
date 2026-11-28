@@ -20,6 +20,57 @@
       "items": { "$ref": "defs.json#/$defs/ref" }
     },
     "derives": { "type": "string", "description": "What it derives that is not a field, such as the dates of every record" },
+    "kind": {
+      "enum": ["at-once", "settling", "spreading", "contingent"],
+      "description": "For a model that estimates a quantity everywhere (docs/plans/MODELS.md, decision 10), how much the quantity remembers: at-once, a function of its causes at the same place and time; settling, moving towards what its causes imply over a time of its own; spreading, arriving from somewhere along paths; contingent, its instances evidence's alone and only their statistics a model's"
+    },
+    "prior": {
+      "type": "array",
+      "minItems": 1,
+      "description": "What it says of a place before any evidence of that place (decisions 2 and 11): each cause it reads, and the form the cause takes in it",
+      "items": {
+        "type": "object",
+        "required": ["reads", "form"],
+        "properties": { "reads": { "$ref": "defs.json#/$defs/ref" }, "form": { "type": "string", "minLength": 1 } },
+        "additionalProperties": false
+      }
+    },
+    "observes": {
+      "type": "array",
+      "minItems": 1,
+      "description": "The evidence that conditions it (decisions 3, 14 and 15): what it reads, the ground and years one observation is of, how an observation errs, and what stands for how it came to be found",
+      "items": {
+        "type": "object",
+        "required": ["evidence", "support", "error", "effort"],
+        "properties": {
+          "evidence": { "$ref": "defs.json#/$defs/ref" },
+          "support": { "type": "string", "minLength": 1 },
+          "error": { "type": "string", "minLength": 1 },
+          "effort": { "type": "string", "minLength": 1 }
+        },
+        "additionalProperties": false
+      }
+    },
+    "holdout": {
+      "type": "object",
+      "description": "What it is scored on (decisions 7, 12 and 13): the evidence held out, from the least to the most; the smoother with no causes it is scored beside; other models of the same quantity scored as rivals; and where a build writes the scores",
+      "required": ["held", "baseline", "scores"],
+      "properties": {
+        "held": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+        "baseline": { "type": "string", "minLength": 1 },
+        "rivals": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["is", "read"],
+            "properties": { "is": { "$ref": "defs.json#/$defs/ref" }, "read": { "type": "string", "minLength": 1 } },
+            "additionalProperties": false
+          }
+        },
+        "scores": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
     "params": {
       "type": "object",
       "description": "Where each parameter of its outputs comes from, by the parameter's name in the field: every one, and no other. A model that makes no field names the parameters of what it derives itself",

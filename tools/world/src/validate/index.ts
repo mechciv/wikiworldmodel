@@ -567,6 +567,10 @@ function checkRecords(world: World, issues: Issue[], tables: Map<string, Table> 
   }
   for (const m of world.models) {
     for (const [i, x] of m.inputs.entries()) checkInput(world, refs, x, m.file, `inputs[${i}]`, issues);
+    // What a node's prior reads, what it observes and what it is scored beside (docs/plans/MODELS.md) are records too.
+    for (const [i, x] of (m.prior ?? []).entries()) refs.check(x.reads, m.file, `prior[${i}].reads`);
+    for (const [i, x] of (m.observes ?? []).entries()) refs.check(x.evidence, m.file, `observes[${i}].evidence`);
+    for (const [i, x] of (m.holdout?.rivals ?? []).entries()) refs.check(x.is, m.file, `holdout.rivals[${i}].is`);
     for (const [i, x] of (m.outputs ?? []).entries()) refs.check(x, m.file, `outputs[${i}]`, { types: ['field'] });
     for (const [k, p] of Object.entries(m.params ?? {})) {
       if ('source' in p) refs.check(p.source.ref, m.file, `params.${k}.source.ref`, { types: ['src'] });

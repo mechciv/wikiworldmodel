@@ -313,6 +313,28 @@ export interface CoverageFile {
    * and sea of the elevation field, which does not read them
    */
   strata?: { columns: number; units: number; cells: number; lost: number[]; agreement?: import('./strata.ts').StrataAgreement };
+  /**
+   * how likely the sea was (model:earth/sea-chance): the rule as the build fitted it, its scores on localities held
+   * out beside a smoother with no causes and beside the field's coast, which side of the coast each kind of locality
+   * falls on, how it agrees with the columns of rock, which it does not read, and how much of the globe it reaches
+   */
+  coast?: {
+    field: string;
+    /** the localities it read, by weight, over how many keyframes; and how many of them it was fitted and scored on */
+    localities: number;
+    keyframes: number;
+    scored: number;
+    rule: import('./coast.ts').CoastIndex['rule'];
+    tried: import('./coast.ts').CoastIndex['tried'];
+    scores: import('./coast.ts').CoastScores;
+    sides: import('./coast.ts').CoastSides;
+    columns?: import('./coast.ts').CoastIndex['columns'];
+    globe: import('./coast.ts').CoastGlobe;
+    /** each keyframe's shares of the globe: the field's land the model has likelier sea, its sea likelier land, its land, and where the finds outweigh it */
+    moved: { ageMa: number; to_sea: number; to_land: number; land: number; reached: number }[];
+    /** how it does stretch by stretch of time, against the localities and the columns of rock */
+    through: import('./coast.ts').CoastStretch[];
+  };
   /** fossil forests against the climate reconstructed for their place and time; none should be in a desert */
   forests?: { id: string; ageMa: number; keyframeMa: number; lat: number; lon: number; climate: string | null; label: string }[];
   /** which tier answers each layer, over a grid of places at times through each span (core/resolve.ts) */

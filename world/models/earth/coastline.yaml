@@ -34,7 +34,8 @@ disagrees:
       coverage.json. A collection near a coast can fall on the wrong side of a field 1° across that is read
       at a stage's middle, and a collection's own place is often loose; how much of the third that explains
       has not been counted. What is left would be seas over the continents that the rocks record and the
-      field does not have. Nothing corrects the coast from the rocks yet.
+      field does not have. Nothing corrects the coast from the rocks yet: model:earth/sea-chance reads these
+      collections for how likely the sea was at each node, beside this coast, and the coast drawn is as it was.
   - with: field:earth/strata
     note: >-
       Each column of rock units asked at the middle of each stage, where its own point stood then: of the

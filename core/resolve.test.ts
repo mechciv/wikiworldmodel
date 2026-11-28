@@ -105,6 +105,26 @@ describe('resolve', () => {
     expect(resolve(world, 'water', 10, 0, GA(0.6)).tier).toBe('generic');
   });
 
+  it('answers land and sea as evidence where the rocks of the time say more than the map, and only on a map of elevation in the span', () => {
+    // North of 30° fossil localities lie near and outweigh the map; south of it nothing was found.
+    const coast: ResolveWorld['coast'] = { span: [GA(0.09), GA(0.01)], at: (lat) => ({ chance: lat > 30 ? 0.8 : 0.02, rests: lat > 30 }) };
+    const world: ResolveWorld = { ...WORLD, coast };
+    const north = resolve(world, 'geography', 60, 0, GA(0.05));
+    expect(north).toMatchObject({ tier: 'evidence', value: 'elevation' });
+    expect(north.why).toContain('Fossil localities of the time lie near');
+    expect(resolve(world, 'geography', 10, 0, GA(0.05))).toMatchObject({ tier: 'model', value: 'elevation' });
+    // Outside the span the chance answers for, the map answers alone, though it covers the time.
+    expect(resolve(world, 'geography', 60, 0, GA(0.005)).tier).toBe('model');
+    expect(resolve(world, 'geography', 60, 0, GA(0.095)).tier).toBe('model');
+    // A place the chance cannot answer for is the map's.
+    expect(resolve({ ...WORLD, coast: { span: coast.span, at: () => undefined } }, 'geography', 60, 0, GA(0.05)).tier).toBe('model');
+    // Continental blocks have no height and no coast of their own for the rocks to be set against.
+    const blocks: ResolveWorld = { ...world, geography: [{ title: 'Blocks', mode: 'blocks', coverage: [GA(0.1), 1950] }] };
+    expect(resolve(blocks, 'geography', 60, 0, GA(0.05))).toMatchObject({ tier: 'model', value: 'blocks' });
+    // Where no map covers the time, the rocks have nothing to move.
+    expect(resolve({ ...world, coast: { ...coast, span: [GA(3.5), GA(2.5)] } }, 'geography', 60, 0, GA(3)).tier).toBe('generic');
+  });
+
   it('answers the climate from the energy-balance model where no climate run covers the time, with its threshold', () => {
     expect(resolve(WORLD, 'climate', 0, 0, GA(3)).tier).toBe('generic');
     const w: ResolveWorld = { ...WORLD, climateModel: { span: [GA(4.3), 1950], freezeBelow: (t) => (t < GA(2) ? 0.0123 : 0.0001) } };

@@ -146,6 +146,31 @@ const commands: Record<string, (args: string[]) => Promise<number | void>> = {
   },
   // What the rocks of a stage say near a place, by the latest build: `npm run world -- rocks -4.04 -43.18 123.7 Ma`.
   // The place is as it is today; the time is written as a record writes one.
+  /** How likely the sea was at a place of today at a time, as the latest build has it; with no place, how its model held. */
+  async coast([lat, lon, ...when]) {
+    const { coastIndexOf, coastOfBuild, coastScoresText, coastText } = await import('./coastat.ts');
+    const { parsePoint } = await import('../../../core/time.ts');
+    const { BUILDS } = await import('./paths.ts');
+    const index = join(BUILDS, 'index.json');
+    if (!existsSync(index)) throw new Error('no world build: run `npm run build:world` first');
+    const build = join(BUILDS, JSON.parse(readFileSync(index, 'utf8')).latest);
+    if (lat === undefined) {
+      const ix = coastIndexOf(build);
+      if (!ix) {
+        console.log("The build has no chance of sea: its rock record's snapshot was not fetched.");
+        return 1;
+      }
+      console.log(coastScoresText(ix));
+      return;
+    }
+    if (lon === undefined || !when.length || [lat, lon].some((x) => !Number.isFinite(Number(x)))) throw new Error('usage: world coast [<lat> <lon> <time>], the place as it is today: world coast 39.1 -100.9 85 Ma');
+    const found = coastOfBuild(build, Number(lat), Number(lon), parsePoint(when.join(' ') as import('../../../core/time.ts').TimePointInput).t);
+    if (!found) {
+      console.log('The build has no chance of sea for that place and time: it has none at all, or no plate carries the place there.');
+      return 1;
+    }
+    console.log(coastText(found));
+  },
   async rocks([lat, lon, ...when]) {
     if (lat === undefined || lon === undefined || !when.length) throw new Error('usage: world rocks <lat> <lon> <time>, the place as it is today: world rocks -4.04 -43.18 123.7 Ma');
     const { rocksOfBuild, rocksText } = await import('./rocksnear.ts');

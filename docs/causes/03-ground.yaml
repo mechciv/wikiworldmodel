@@ -92,11 +92,11 @@ nodes:
     label: Land and sea
     kind: at-once
     what: "Which ground was dry and which was under the sea."
-    now: rule
-    has: [model:earth/coastline, field:earth/coastline, model:earth/relief-coastline, field:earth/relief-coastline]
-    note: "An isoline on the elevation. 36% of marine fossil collections fall on its land and 12% of land ones in its sea, and nothing corrects it from the rocks."
-    best: "A chance of sea for each cell and stage, conditioned on the marine and land beds the build already holds. Rebound near the ice, and deltas from sediment."
-    gap: large
+    now: scored
+    has: [model:earth/coastline, field:earth/coastline, model:earth/relief-coastline, field:earth/relief-coastline, model:earth/sea-chance, field:earth/sea-chance]
+    note: "The coast drawn is an isoline on the elevation. Beside it, since the twenty-first slice, a chance of sea at each node and keyframe of the deep past, from the map's coast read softly and the fossil localities of marine and land beds, scored on localities held out: with their 5° tile held out, 78% of marine localities lie in its sea, where the map's coast has 55%. Held to the present, where the coast is measured, it moves 7% of the globe across it: its coast is good to a few degrees. It reads no sea level and nothing of what was not found, and it moves no ground: the climate, the rivers and the scenes still stand on the map's coast."
+    best: "The chance conditioned on the columns of rock too, their gaps read as absence; the sea's level as its cause, so that a keyframe can have more sea than its map; the map read less softly the younger it is; and the coast drawn moved, with the elevation under it. Rebound near the ice, and deltas from sediment."
+    gap: medium
     seen: [rocks, fossils]
   - id: land-links
     label: Bridges and barriers

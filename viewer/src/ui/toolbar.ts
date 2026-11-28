@@ -60,6 +60,7 @@ export class Toolbar {
         <div><span class="sw procedural"></span>In a living scene, magenta: every animal and plant; its taxon and size are recorded, where it stands is invented</div>
         <div><span class="sw evidence"></span>Rings on the globe: eruptions, earthquakes and tsunamis of about the time shown, from NOAA's databases</div>
         <div><span class="sw reconstruction"></span>Reconstruction: PaleoDEM terrain, the plate model's blocks; ringed markers are placed by the plate model</div>
+        <div><span class="sw evidence"></span>Blue ground in deep time: fossil localities of the time say more of land and sea here than the map does. The pale band along a coast is where sea and land are each likely, and the blue line the coast as the rocks have it</div>
         <div><span class="sw reconstruction"></span>The glow of the People button: how many lived where, as HYDE reconstructs it, drawn smooth across its cells</div>
         <div><span class="sw procedural"></span>Cloud shapes, fine ridges and surface textures are generated. Where the geography is unknown, generic land marks the gap. Projections show values after the present.</div>
         <div><span class="sw derived"></span>Dashed: dates derived by the solver</div>

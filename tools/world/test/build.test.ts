@@ -84,7 +84,13 @@ describe('build', () => {
       for (const [layer, counts] of Object.entries(layers)) expect(Object.values(counts).reduce((a, b) => a + b, 0), `${layer} in ${span}`).toBe(648 * 8);
     }
     expect(spans['4600–1000 Ma'].geography.generic).toBeGreaterThan(0);
-    expect(spans['100–10 Ma'].geography).toEqual({ evidence: 0, model: 648 * 8, generic: 0, unknown: 0 });
+    // Where a map covers the time the land and sea are a model's, but for the ground where fossil localities of the time
+    // say more than the map does (model:earth/sea-chance): some of it, and far from most.
+    const mapped = spans['100–10 Ma'].geography;
+    expect(mapped).toMatchObject({ generic: 0, unknown: 0 });
+    expect(mapped.evidence).toBeGreaterThan(0);
+    expect(mapped.evidence).toBeLessThan(mapped.model / 4);
+    expect(spans['4600–1000 Ma'].geography.evidence).toBe(0);
     // The land's life is recorded somewhere in the Phanerozoic, and nowhere before it.
     expect(spans['100–10 Ma'].life.evidence).toBeGreaterThan(0);
     expect(spans['4600–1000 Ma'].life.evidence).toBe(0);
@@ -116,9 +122,12 @@ describe('build', () => {
       const k = TIERS.indexOf(s.tier);
       expect(Math.max(...inside.map(([, i]) => cells[i].share[k])), `${s.id} answers ${s.layer} in ${s.tier}`).toBeGreaterThan(0);
     }
-    // Where a map covers the time, the land and sea are a model's everywhere.
+    // Where a map covers the time, the land and sea are a model's everywhere but where the rocks of the time say more.
     const k66 = m.columns.findIndex(([a, b]) => a <= fromMa(66) && fromMa(66) < b);
-    expect(m.layers.find((l) => l.layer === 'geography')!.cells[k66].share[TIERS.indexOf('model')]).toBe(1);
+    const geo66 = m.layers.find((l) => l.layer === 'geography')!.cells[k66].share;
+    expect(geo66[TIERS.indexOf('model')] + geo66[TIERS.indexOf('evidence')]).toBeCloseTo(1, 3);
+    expect(geo66[TIERS.indexOf('model')]).toBeGreaterThan(0.6);
+    expect(geo66[TIERS.indexOf('evidence')]).toBeGreaterThan(0.02);
   });
 
   it('records generic land that its generator reproduces, at its share of the planet', () => {

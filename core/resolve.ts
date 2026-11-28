@@ -39,6 +39,11 @@ export interface ResolveWorld {
   planet: PlanetFile;
   /** the gridded geography, by field, with the span each covers [older, younger] on the axis */
   geography: { title: string; mode: 'elevation' | 'blocks'; coverage: [number, number] }[];
+  /**
+   * How likely the sea was (core/coast.ts, model:earth/sea-chance): the span it answers the elevation of the deep past
+   * for, and at a place and time the chance of sea and whether the fossil localities near weigh more than the map.
+   */
+  coast?: { span: [number, number]; at: (lat: number, lon: number, t: number) => { chance: number; rests: boolean } | undefined };
   climate?: [number, number];
   /** the energy-balance model (model:earth/energy-balance): the span it covers, and the CO₂ below which it freezes over */
   climateModel?: { span: [number, number]; freezeBelow?: (t: number) => number | null };
@@ -83,6 +88,9 @@ export function resolve(w: ResolveWorld, layer: LayerId, lat: number, lon: numbe
       const surface = look.into && molten(look.surface) && !molten(look.intoSurface) ? look.intoSurface : look.surface;
       if (surface === 'magma' || surface === 'crust-and-magma') return a('evidence', surface, 'The planet\'s state covers everything: there is no land and sea to map.');
       const f = w.geography.find((g) => within(g.coverage, t));
+      if (f?.mode === 'elevation' && within(w.coast?.span, t) && w.coast!.at(lat, lon, t)?.rests) {
+        return a('evidence', f.mode, 'Fossil localities of the time lie near, in beds laid down under the sea or on land: they say more of this ground than the map of the time does.');
+      }
       if (f) return a('model', f.mode, `${f.title} covers this time.`);
       if (surface === 'bare-rock') return a('generic', 'rock', 'Nothing records the ground of this time: bare rock is drawn, as the planet\'s state says there were no oceans.');
       const land = w.genericLand?.(lat, lon);

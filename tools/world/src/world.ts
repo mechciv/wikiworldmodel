@@ -314,6 +314,14 @@ export interface Model {
   outputs?: string[];
   derives?: string;
   params?: Record<string, Provenance>;
+  /** how much the quantity it estimates remembers (docs/plans/MODELS.md, decision 10) */
+  kind?: 'at-once' | 'settling' | 'spreading' | 'contingent';
+  /** what it says of a place before any evidence of it: each cause it reads, and the form the cause takes */
+  prior?: { reads: string; form: string }[];
+  /** the evidence that conditions it: what one observation is of, how it errs, and what stands for how it came to be found */
+  observes?: { evidence: string; support: string; error: string; effort: string }[];
+  /** what it is scored on: the evidence held out, the smoother with no causes, its rivals, and where the scores are written */
+  holdout?: { held: string[]; baseline: string; rivals?: { is: string; read: string }[]; scores: string };
   uncertainty: { kind: 'none' | 'interval' | 'band' | 'ensemble' | 'alternatives' | 'tiers'; note: string };
   checks?: { test: string; holds: string }[];
   disagrees?: { with: string; note: string }[];

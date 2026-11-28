@@ -94,6 +94,13 @@ uniform highp samplerCube uIce;
 uniform float uIceOn;
 uniform float uIceMix;
 uniform float uIceTop;
+// How likely the sea was, by the fossil localities of the time (core/coast.ts), at the keyframes on either side of the
+// time shown, each moved with its plates: R the chance of sea, G how far the finds near outweigh the field, with 0.5
+// where they weigh the same.
+uniform highp samplerCube uSea0;
+uniform highp samplerCube uSea1;
+uniform float uSeaMix;
+uniform float uSeaOn;
 // Where people lived: how dense they are, from 0 to 1 on the viewer's scale.
 uniform highp sampler2D uPeople;
 // Generic land, where no map covers the time: 128 is the coast.
@@ -475,7 +482,28 @@ void main() {
   c = mix(c, vec3(0.93, 0.96, 0.95), line * uEvidence * 0.85 * (1.0 - 0.5 * max(ice, sheets)));
   // Evidence mode: the whole field is a reconstruction — amber hatching, the ice sheets of a field too;
   // ice from a claimed latitude is procedural.
-  c = mix(c, mix(vec3(0.95, 0.65, 0.18), magenta, ice), uEvidence * (0.14 + 0.26 * hatch));
+  vec3 basis = vec3(0.95, 0.65, 0.18);
+  if (uSeaOn > 0.5 && uEvidence > 0.0) {
+    // How likely the sea was, by the fossil localities of the time (model:earth/sea-chance).
+    vec4 s = mix(texture(uSea0, n), texture(uSea1, n), uSeaMix);
+    vec3 blue = vec3(0.50, 0.82, 1.0);
+    float heard = smoothstep(0.15, 0.5, s.g);
+    float ds = max(fwidth(s.r), 0.004);
+    // Where the rocks take the other side from the map's, its land likelier sea than not or its sea likelier land,
+    // the ground is drawn as they have it: the sea's blue, or the sand of the land.
+    float against = heard * mix(1.0 - smoothstep(0.4, 0.5, s.r), smoothstep(0.5, 0.6, s.r), land);
+    vec3 says = mix(vec3(0.72, 0.61, 0.42), vec3(0.08, 0.27, 0.47), step(0.5, s.r));
+    c = mix(c, says * daylight(diffuse), against * uEvidence * 0.75);
+    // The coast's band: ground that is sea in more than a quarter of the members of the world, and in fewer than
+    // three quarters of them.
+    float band = smoothstep(0.25 - ds, 0.25 + ds, s.r) * (1.0 - smoothstep(0.75 - ds, 0.75 + ds, s.r));
+    c = mix(c, vec3(0.82, 0.89, 0.95), band * uEvidence * 0.18);
+    // The rocks' own coast, where sea and land are as likely as each other and localities lie near.
+    c = mix(c, blue, coastLine(s.r - 0.5, ds) * heard * uEvidence * 0.9);
+    // Where the finds outweigh the map, land and sea rest on evidence: its blue for the reconstruction's amber.
+    basis = mix(basis, blue, smoothstep(0.42, 0.58, s.g));
+  }
+  c = mix(c, mix(basis, magenta, ice), uEvidence * (0.14 + 0.26 * hatch));
   c = mix(mix(c, molten, uMolten), ember, uEmber);
   o = vec4(air(c, facing, mix(sun, 1.0, uEmber)), 1.0);
 }`;
@@ -763,6 +791,8 @@ export interface GlobeFrame {
   climate?: { mix: number; rule: { polar: number; frost: number; tropical: number; cold: number; arid: number; desert: number; reef_depth: number; reef_latitude: number } };
   /** the ice sheets' mix between the keyframes drawn, where a field has them at this time */
   ice?: { mix: number };
+  /** the mix between the two keyframes of the sea's chance drawn, while evidence mode shows what the rocks say of land and sea */
+  sea?: { mix: number };
   /** where people lived is drawn: the clouds, which are made up, thin out so as not to hide it */
   people?: boolean;
   /** the human landscape's classes are drawn */
@@ -823,6 +853,8 @@ export class GlobeRenderer {
   climateCubes: [WebGLTexture, WebGLTexture] | null = null;
   /** the ice sheets' cube, once the field has it */
   iceCube: WebGLTexture | null = null;
+  /** the two cube maps of the sea's chance, once the field has them */
+  seaCubes: [WebGLTexture, WebGLTexture] | null = null;
 
   constructor(private gl: GL, private fieldCube: WebGLTexture, private cubeSize: number) {
     this.surface = program(gl, 'surface', SPHERE_VS, SURFACE_FS);
@@ -1011,7 +1043,13 @@ export class GlobeRenderer {
     gl.bindTexture(gl.TEXTURE_2D, this.genericLandTex);
     gl.activeTexture(gl.TEXTURE9);
     gl.bindTexture(gl.TEXTURE_2D, this.anthromeTex);
-    setUniforms(gl, this.surface, { uField: 0, uPattern: 1, uTerritory: 2, uBiomeTex: 3, uClimate0: 4, uClimate1: 5, uIce: 6, uPeople: 7, uGenericLand: 8, uAnthromes: 9 }, ['uField', 'uPattern', 'uTerritory', 'uBiomeTex', 'uClimate0', 'uClimate1', 'uIce', 'uPeople', 'uGenericLand', 'uAnthromes']);
+    const sea = f.sea && this.seaCubes ? this.seaCubes : null;
+    gl.activeTexture(gl.TEXTURE10);
+    gl.bindTexture(gl.TEXTURE_CUBE_MAP, sea ? sea[0] : this.fieldCube);
+    gl.activeTexture(gl.TEXTURE11);
+    gl.bindTexture(gl.TEXTURE_CUBE_MAP, sea ? sea[1] : this.fieldCube);
+    setUniforms(gl, this.surface, { uField: 0, uPattern: 1, uTerritory: 2, uBiomeTex: 3, uClimate0: 4, uClimate1: 5, uIce: 6, uPeople: 7, uGenericLand: 8, uAnthromes: 9, uSea0: 10, uSea1: 11 }, ['uField', 'uPattern', 'uTerritory', 'uBiomeTex', 'uClimate0', 'uClimate1', 'uIce', 'uPeople', 'uGenericLand', 'uAnthromes', 'uSea0', 'uSea1']);
+    setUniforms(gl, this.surface, { uSeaOn: sea ? 1 : 0, uSeaMix: f.sea?.mix ?? 0 });
     const ac = this.surface.uniforms.get('uAnthromeColors[0]') ?? this.surface.uniforms.get('uAnthromeColors');
     if (ac) gl.uniform3fv(ac, this.anthromeColors);
     setUniforms(gl, this.surface, { uGenericOn: this.genericOn });

@@ -150,6 +150,39 @@ in vec2 vV;
 out vec4 o;
 void main() { o = vec4(vV.r, vV.r, vV.g, vV.g); }`;
 
+// The sea's pass: the same warp once more, of how likely the sea was and what was found near each node (core/coast.ts),
+// each keyframe into a cube of its own. Where the warp folds one plate over another the likelier land wins, as the
+// higher ground does in the elevation's pass, so the two keep the same ground on top.
+const SEA_VS = `#version 300 es
+precision highp float;
+precision highp int;
+uniform highp sampler2D uVal;
+uniform highp usampler2D uPlate;
+uniform highp sampler2D uRot;
+uniform int uRow;
+uniform int uNx;
+uniform vec3 uGrid;
+uniform vec3 uFx;
+uniform vec3 uFy;
+uniform vec3 uFw;
+out vec4 vV;
+void main() {
+  int i = gl_VertexID % uNx;
+  int j = gl_VertexID / uNx;
+  uint pl = texelFetch(uPlate, ivec2(i, j), 0).r;
+  vV = texelFetch(uVal, ivec2(i, j), 0);
+  float lon = radians(uGrid.x + float(i) * uGrid.z);
+  float lat = radians(uGrid.y - float(j) * uGrid.z);
+  vec3 p = vec3(cos(lat) * cos(lon), cos(lat) * sin(lon), sin(lat));
+  vec4 q = texelFetch(uRot, ivec2(int(pl), uRow), 0);
+  vec3 u = q.yzw;
+  vec3 c = cross(u, p);
+  p = p + 2.0 * (q.x * c + cross(u, c));
+  float d = 0.25 + 0.5 * vV.r;
+  float w = dot(uFw, p);
+  gl_Position = vec4(dot(uFx, p), dot(uFy, p), (2.0 * d - 1.0) * w, w);
+}`;
+
 export class FieldRenderer {
   readonly cube: CubeTarget;
   private prog: Program;
@@ -169,6 +202,16 @@ export class FieldRenderer {
   private iceKeys = new Map<number, WebGLTexture>();
   /** R and G how far the two keyframes around the time shown are from their margin; B and A the root of their thickness */
   iceCube: CubeTarget | null = null;
+  private seaProg: Program | null = null;
+  private seaRot: WebGLTexture | null = null;
+  /** every keyframe of the sea's chance taken to the GPU, by its age */
+  private seaKeys = new Map<number, ClimateKeyGPU>();
+  /**
+   * The sea's chance at the two keyframes around the time shown, each moved with its plates to it: R the chance of sea,
+   * G how far the finds near outweigh the field (a half where they weigh the same), B and A the marine and the land
+   * localities found near, as the bytes of core/coast.ts.
+   */
+  seaCubes: [CubeTarget, CubeTarget] | null = null;
 
   constructor(private gl: GL, private plateCount: number, size = 512) {
     if (!gl.getExtension('EXT_color_buffer_float')) throw new Error('This viewer needs WebGL2 with EXT_color_buffer_float.');
@@ -450,6 +493,87 @@ export class FieldRenderer {
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   }
 
+  /** Take a keyframe of the sea's chance to the GPU, by its age: four bytes a node, and each node's plate. The first call sets up the pass. */
+  addSea(grid: FieldGrid, ageMa: number, values: Uint8Array, plate: Uint16Array, size = 256): void {
+    const gl = this.gl;
+    if (!this.seaProg) {
+      this.seaProg = program(gl, 'sea', SEA_VS, CLIMATE_FS);
+      this.seaCubes = [cubeTarget(gl, size, gl.RGBA8, gl.RGBA, gl.UNSIGNED_BYTE), cubeTarget(gl, size, gl.RGBA8, gl.RGBA, gl.UNSIGNED_BYTE)];
+      this.seaRot = gl.createTexture()!;
+      gl.bindTexture(gl.TEXTURE_2D, this.seaRot);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, this.plateCount, 2, 0, gl.RGBA, gl.FLOAT, null);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    }
+    if (this.seaKeys.has(ageMa)) return;
+    gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+    const v = gl.createTexture()!;
+    gl.bindTexture(gl.TEXTURE_2D, v);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, grid.nx, grid.ny, 0, gl.RGBA, gl.UNSIGNED_BYTE, values);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    const pl = gl.createTexture()!;
+    gl.bindTexture(gl.TEXTURE_2D, pl);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.R16UI, grid.nx, grid.ny, 0, gl.RED_INTEGER, gl.UNSIGNED_SHORT, plate);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    this.seaKeys.set(ageMa, { values: v, plate: pl, grid });
+  }
+
+  /** Whether a keyframe of the sea's chance is on the GPU. */
+  hasSea(ageMa: number): boolean {
+    return this.seaKeys.has(ageMa);
+  }
+
+  /**
+   * Warp the sea's chance at keyframes k0 and k1 (ages in Ma) to the current time, with the rotations `render` moves the
+   * elevation's keyframes by: its nodes are the elevation's, on the same plates. `open` is the chance of sea where the
+   * plates have parted and no node lies, the open ocean's.
+   */
+  renderSea(k0: number, k1: number, rotK0: Float32Array, rotK1: Float32Array, open: number): void {
+    const gl = this.gl;
+    if (!this.seaProg || !this.seaCubes) return;
+    gl.bindTexture(gl.TEXTURE_2D, this.seaRot);
+    gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, this.plateCount, 1, gl.RGBA, gl.FLOAT, rotK0);
+    gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 1, this.plateCount, 1, gl.RGBA, gl.FLOAT, rotK1);
+    gl.useProgram(this.seaProg.program);
+    gl.bindVertexArray(this.vao);
+    const size = this.seaCubes[0].size;
+    gl.viewport(0, 0, size, size);
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthFunc(gl.LESS);
+    gl.disable(gl.CULL_FACE);
+    gl.disable(gl.BLEND);
+    gl.activeTexture(gl.TEXTURE2);
+    gl.bindTexture(gl.TEXTURE_2D, this.seaRot);
+    setUniforms(gl, this.seaProg, { uVal: 0, uPlate: 1, uRot: 2 }, ['uVal', 'uPlate', 'uRot']);
+    for (const [row, k] of [[0, k0], [1, k1]] as const) {
+      const key = this.seaKeys.get(k);
+      if (!key) continue;
+      const grid = key.grid;
+      setUniforms(gl, this.seaProg, { uNx: grid.nx }, ['uNx']);
+      setUniforms(gl, this.seaProg, { uGrid: [grid.lon0, grid.lat0, grid.step] });
+      const m = this.mesh(grid);
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, m.index);
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, key.values);
+      gl.activeTexture(gl.TEXTURE1);
+      gl.bindTexture(gl.TEXTURE_2D, key.plate);
+      setUniforms(gl, this.seaProg, { uRow: row }, ['uRow']);
+      for (let f = 0; f < 6; f++) {
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this.seaCubes[row].framebuffers[f]);
+        gl.clearColor(open, 0, 0, 0);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        const F = CUBE_FACES[f];
+        setUniforms(gl, this.seaProg, { uFx: F.slice(0, 3), uFy: F.slice(3, 6), uFw: F.slice(6, 9) });
+        gl.drawElements(gl.TRIANGLES, m.count, gl.UNSIGNED_INT, 0);
+      }
+    }
+    gl.bindVertexArray(null);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  }
+
   /** The cube of the ice in the direction `d`, as bytes: the two margins, and the two thicknesses. */
   sampleIce(d: [number, number, number]): [number, number, number, number] | null {
     return this.iceCube ? (this.readFace(this.iceCube, d, true) as [number, number, number, number]) : null;
@@ -515,13 +639,25 @@ export class FieldRenderer {
       disposeCubeTarget(gl, this.iceCube);
       this.iceCube = null;
     }
+    if (this.seaCubes) {
+      disposeCubeTarget(gl, this.seaCubes[0]);
+      disposeCubeTarget(gl, this.seaCubes[1]);
+      this.seaCubes = null;
+    }
     gl.deleteProgram(this.prog.program);
     if (this.climateProg) gl.deleteProgram(this.climateProg.program);
     if (this.iceProg) gl.deleteProgram(this.iceProg.program);
+    if (this.seaProg) gl.deleteProgram(this.seaProg.program);
     gl.deleteTexture(this.rot);
     if (this.climateRot) gl.deleteTexture(this.climateRot);
     if (this.iceRot) gl.deleteTexture(this.iceRot);
     if (this.icePlate) gl.deleteTexture(this.icePlate);
+    if (this.seaRot) gl.deleteTexture(this.seaRot);
+    for (const k of this.seaKeys.values()) {
+      gl.deleteTexture(k.values);
+      gl.deleteTexture(k.plate);
+    }
+    this.seaKeys.clear();
     for (const k of this.climateKeys.values()) {
       gl.deleteTexture(k.values);
       gl.deleteTexture(k.plate);

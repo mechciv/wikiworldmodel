@@ -1,0 +1,36 @@
+# A derived field: counted by the build from the rock record's collections (model:earth/sea-chance, core/coast.ts), and
+# written with the chance of sea it is read for, one file for each keyframe (coast/).
+id: field:earth/rock-finds
+type: field
+kind: raster
+title: Beds of the sea and of the land, found near
+quantity: the localities of marine beds, and of land beds, found near a place
+unit: localities, each counted by how near it lies
+description: >-
+  What was found near each node of the elevation field at each of its keyframes: the fossil localities of beds laid
+  down under the sea, and of beds laid down on land, of the keyframe's span. A locality is every collection of the
+  Paleobiology Database of one kind in one small box of ground, counted once, by the chance that one of them at least
+  is of the span; it stands where its plate stood at the keyframe, and counts whole at its own place and less with
+  distance. Collections the database calls both marine and terrestrial, or neither, are not counted. It is a count of
+  what has been collected and entered, so it says where people have looked as much as where there were beds to find:
+  a first measure of that effort, kind by kind, thick over Europe and North America and thin elsewhere. Where it is
+  nothing, nothing was found, which does not say that nothing was there.
+frame: frame:earth/geographic
+grid: { kind: lonlat, res_deg: 1 }
+time: { lo: 540 Ma, hi: 0 Ma, step: 5 Myr }
+derived: true
+from: [field:earth/rock-record, field:earth/elevation]
+rule: rock-finds
+spread: unknown
+uncertainty: >-
+  A count, with no error of its own. A collection's place may be out by tens of km, its plate's place at the keyframe
+  by more the further back, and its age is an interval's: it is of each keyframe its interval overlaps, by the share
+  that lies inside.
+interp: plate-warp
+moves_with: src:paleomap-plate-model
+params:
+  # Collections of one kind within a box this many degrees across are one locality.
+  box_deg: 0.1
+  # The widths the bell of the finds may take, in km: a locality counts whole at its own place, about six tenths one
+  # width off, and not at all beyond three. The build keeps the width that best predicts localities held out.
+  kernel_km: [100, 150, 200]
