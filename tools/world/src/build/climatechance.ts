@@ -1153,7 +1153,9 @@ export function buildClimateChance(input: ChanceInputs): ChanceOut {
     };
     tileScore[pair] = { model: perKey(rows.map((r) => guess(r, 'tile'))), smoother: perKey(smooth(smoother.own, 'tile')), alone: perKey(rows.map((r) => guess(r, 'none'))) };
     const s = scores[pair];
-    log(`climate-chance   ${pair}: a bed held out with its node is given ${s.model.node.lpd} (log of its chance, on average), with its tile ${s.model.tile.lpd}, with its block ${s.model.block.lpd}, with its era ${s.model.span.lpd}; the smoother with no causes ${s.smoother.node.lpd}, ${s.smoother.tile.lpd}, ${s.smoother.block.lpd}, ${s.smoother.span.lpd}; the members alone ${s.alone.lpd}`);
+    /** a score as the log has it: where nothing could be held out there is none, and a 0 would read as sure and right */
+    const said = (x: { n: number; lpd: number }) => (x.n ? String(x.lpd) : 'none');
+    log(`climate-chance   ${pair}: a bed held out with its node is given ${said(s.model.node)} (log of its chance, on average), with its tile ${said(s.model.tile)}, with its block ${said(s.model.block)}, with its era ${said(s.model.span)}; the smoother with no causes ${said(s.smoother.node)}, ${said(s.smoother.tile)}, ${said(s.smoother.block)}, ${said(s.smoother.span)}; the members alone ${said(s.alone)}`);
   }
 
   // ---- The columns of rock, which it does not read: units with a salt, and with a coal, being laid down at a keyframe.

@@ -172,6 +172,7 @@ test('the coverage page shows how the climate of the deep past held on what it d
   await expect(section).toContainText('The fossil forests');
   await expect(section).toContainText('Held to the present, where the climate is measured');
   await expect(section).toContainText('npm run world -- climate');
-  // The chart has its lane on the climate's layer.
+  // The chart has its lane on the climate's layer, once the layer is opened.
+  await page.locator('.row.layer[data-layer="climate"] .label').click();
   await expect(page.locator('.bar', { hasText: 'How likely each climate was' })).toBeVisible();
 });

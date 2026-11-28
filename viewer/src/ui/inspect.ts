@@ -1039,7 +1039,7 @@ export class InspectPanel {
     const [top, ...rest] = c.classes;
     const label = (cls: ClimateClass) => CLIMATE_LABEL[cls];
     const others = rest.length ? `Else: ${rest.map((x) => `${label(x.cls)}, ${pct(x.chance)}`).join('; ')}.` : 'No other class has one chance in twenty.';
-    const run = c.run ? (c.run === top.cls ? ' The run that is drawn has the same.' : ` The run that is drawn has ${label(c.run)}.`) : '';
+    const run = c.run ? ` The run that is drawn has ${label(c.run)}${c.run === top.cls ? ', the likeliest here' : ''}.` : '';
     const read = c.found.filter((f) => f.read);
     const any = read.some((f) => f.n[0] >= 0.05 || f.n[1] >= 0.05);
     const found = !read.length
