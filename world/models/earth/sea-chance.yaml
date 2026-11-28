@@ -1,0 +1,159 @@
+# A model run here (section 4.10 of the design), and the first field of the world made as docs/plans/MODELS.md asks:
+# a prior from its cause, the evidence as what it observes, and scores on evidence held out. Its fitted numbers are in
+# each build's coast/index.json, where the build writes them; this record says where they come from.
+id: model:earth/sea-chance
+type: model
+title: How likely the sea was, from the field's coast and the rocks
+description: >-
+  The chance that a place was under the sea at a keyframe of the elevation field, at every node of the field's grid.
+  Before any rock is read it is the field's, read softly: an even chance at the field's own coast, the log of the odds
+  rising by a slope with each degree offshore and falling by another with each degree inland, to a cap, and at the cap
+  over the ocean's floor. Then the fossil localities of the keyframe's span, each a kind of bed, the sea's or the
+  land's, found in a small box of ground where its plate stood at the keyframe, and counted by how near it lies. Finds
+  cannot be read as they come, since the sea leaves far more of them than the land: where the sea came and went, most
+  of what is found is marine. So the model reckons the share of marine among what a place yields. Before any find that
+  is what the field's chance would yield, by how many times more a moment of sea leaves than a moment of land; the
+  finds near a place are averaged in with it, the field's expectation counting for a fraction of one locality; and the
+  share is turned back into a chance by the same yield. A place where marine and land localities are found in the
+  yield's proportion is then as likely sea as land. The yield cannot be told from finds alone, since more sea and sea
+  beds better kept leave the same record: it is fixed, for each keyframe with its neighbours, by taking the field's
+  coast to be right on average. Before the land had life it left next to no localities, every find is marine whatever
+  the ground was, and no yield can be told: those keyframes take the yield of the nearest one whose rocks can tell
+  it, and the model is fitted and scored on the others. Over the ocean's floor a locality counts at its own node
+  and at no other: an island says nothing of the ocean round it. Nothing is made of what was not found, so a place
+  with no locality near keeps the field's chance however long anyone has looked there, and where the model moves the
+  coast it moves it towards the sea more often than not. It knows nothing of why the sea was where it was: no sea level, no sinking basin, no time before
+  or after the keyframe. And it moves no ground: the elevation is as it was, the globe's coast is still the elevation
+  field's, and what stands on that coast, the climate, the rivers and the scenes, stands on it still. In evidence mode
+  the globe draws the model's own coast over the field's, the band where the two are each likely, and the ground where
+  the finds say more than the map.
+author: machine:claude-code
+code: core/coast.ts
+kind: at-once
+inputs:
+  - { ref: field:earth/elevation, note: "each keyframe's land and sea, whose coast the chance starts from, and its plates" }
+  - { ref: field:earth/rock-record, note: "the collections: where each is, the span of its age, and whether the database calls its environment marine or terrestrial" }
+  - { ref: src:paleomap-plate-model, note: "where each collection's plate stood at each keyframe" }
+outputs: [field:earth/sea-chance, field:earth/rock-finds]
+prior:
+  - reads: field:earth/elevation
+    form: >-
+      An even chance of sea at the field's coast. The log of the odds rises by one slope for each degree of arc
+      offshore and falls by another for each degree inland, to a cap, and is at the cap over the field's deep sea. The
+      slopes are those with which the kind of every locality is best told from its distance to the field's coast and
+      nothing else.
+observes:
+  - evidence: field:earth/rock-record
+    support: >-
+      A locality: the collections of one kind, marine or terrestrial, in a box of a tenth of a degree, in a keyframe's
+      span of about five million years, where their plate stood at the keyframe. A collection is of each span its own
+      overlaps, by the share of it that lies inside.
+    error: >-
+      A locality says what its bed was laid down in at some time in the span, and not what the place was at the
+      keyframe. The sea leaves more localities than the land, by a yield fitted for each keyframe. A collection's
+      place may be out by its coordinates and by the plate model, which the width of the finds' bell takes up; that
+      width is the one that best predicts localities held out.
+    effort: >-
+      Finds are set against finds, marine against land, so that how much a place has been looked at cancels; and
+      nothing is made of a place where neither kind was found. What was found near each node is field:earth/rock-finds.
+      It does not cancel where one kind could not be looked for: beds of old seas are collected where they lie on
+      today's land, so the seas that are still sea have no localities, and the land sites beside them have nothing
+      set against them.
+holdout:
+  held:
+    - a locality's own node, the others of its node left out
+    - its tile of five degrees
+    - its block of twenty degrees, a region
+    - every fourth keyframe whole, an era, its localities told from the field alone with a yield from the keyframes either side
+  baseline: >-
+    The same localities, counted by their distance alone, with yields fitted the same way, and no field: an even
+    chance of sea everywhere before them. At the range of the finds' own bell it does as well as the model, and worse
+    the more is held out.
+  rivals:
+    - is: field:earth/elevation
+      read: its coast taken as sure, the chance of sea at the cap on its seaward side and at the cap's other end on its landward
+  scores: >-
+    coverage.json, under coast; and coast/index.json. Only the keyframes whose yield the rocks can tell are scored:
+    before the land had life every locality is marine, and a kind tests nothing. Besides the localities held out, each
+    build counts what the model moves at the present, where the coast is measured.
+params:
+  box_deg:
+    choice: >-
+      A tenth of a degree: collections of one kind this close together are one locality, since a quarry worked a
+      hundred times says no more of the sea than one worked once. No work gives it.
+  kernel_km:
+    choice: >-
+      The widths the bell of the finds may take. The build tries each, keeps the one with which localities are best
+      predicted when their node's others and their tile's are held out, and writes which in coast/index.json.
+  cap:
+    choice: >-
+      4, as a log of odds: the field alone never puts the chance of sea outside 1.8% to 98.2%. No work gives the error
+      of the field's coast; the cap says only that a map drawn by hand is not surer than that anywhere.
+  deep_m:
+    choice: >-
+      1,000 m below the field's sea level: deeper than that the field's sea is taken for the ocean's floor. Its chance
+      is at the cap whatever its distance from a coast, and a locality there counts at its own node and at no other.
+      The localities found far offshore are of islands and of ground the plates have since carried elsewhere, and
+      their kinds say little of the open sea round them: read as other localities are, the land sites of the
+      Quaternary's islands turned 4.5% of the globe from deep ocean to land at the present.
+  slope_in:
+    choice: >-
+      Where the fit starts. The build fits it with slope_off and each keyframe's yield to the kind of every locality,
+      told from its distance to the field's coast alone, and writes what it fitted in coast/index.json.
+  slope_off:
+    choice: Where the fit starts; fitted with slope_in, and written with it.
+  strength:
+    choice: >-
+      Where the fit starts. The build fits how many localities the field's expectation counts for to localities
+      predicted without their node's others and without their tile's, and writes what it fitted in coast/index.json.
+  pool:
+    choice: >-
+      Two keyframes either side share a keyframe's yield, so that a keyframe with few land localities borrows from its
+      neighbours in time. A choice: no work gives how fast the yield changes.
+  yield_land_min:
+    choice: >-
+      Fifty land localities, by weight, in a keyframe and those it shares a yield with: with fewer the yield is not
+      fitted, and is the nearest keyframe's that has them. In this record the count falls from 87 at 425 Ma to 39 at
+      430 Ma and to fewer than 12 before, so the number chosen parts the keyframes with land life from those without.
+      Fitted where there is no land locality, a yield runs to the thousands, and a few hundredths of a land locality,
+      as one far off counts, then outweigh ten marine ones at the place.
+  tile_deg:
+    choice: "Five degrees, the tile a locality is held out with: larger than the finds' bell, smaller than a region."
+  block_deg:
+    choice: Twenty degrees, the block a locality is held out with, as a region whole.
+  span_every:
+    choice: Every fourth keyframe is held out whole, to score an era with nothing of its own.
+uncertainty:
+  kind: ensemble
+  note: >-
+    The chance is the model's uncertainty, and a member of the world is a level of it: the sea of a member is wherever
+    the chance is above the member's level, the median member's a half (core/coast.ts, memberLevel). One level for the
+    whole globe takes every stretch of coast to err the same way, which is the simplest thing that could be so. The
+    numbers fitted are taken as fitted, with no doubt of their own, and so is the field's coast where nothing was found.
+checks:
+  - { test: core/coast.test.ts, holds: "leaves a place with no find near at the field's chance: a half at the coast, less inland, more offshore, surest over the ocean's floor" }
+  - { test: core/coast.test.ts, holds: "takes a place where marine and land localities are found in the yield's proportion to be as likely sea as land" }
+  - { test: core/coast.test.ts, holds: "moves towards the sea with marine localities and towards the land with land ones, a land one for more where the sea leaves more" }
+  - { test: core/coast.test.ts, holds: "draws a member's sea wherever the chance is above its level: the median member's at a half, and one sea inside another" }
+  - { test: core/coast.test.ts, holds: "counts a locality over the ocean's floor at its own node and at no other, and one beside the floor not on it" }
+  - { test: tools/world/test/coast.test.ts, holds: "puts localities held out on the side their kind is of more often than the field's coast does" }
+  - { test: tools/world/test/coast.test.ts, holds: "beats the smoother with no causes where a tile, a region or an era is held out, by more the more is held out, and matches it at a node" }
+  - { test: tools/world/test/coast.test.ts, holds: "says what it means: of the localities given a chance of being marine, about that share were" }
+  - { test: tools/world/test/coast.test.ts, holds: "agrees with the columns of rock, which it does not read, more often than the field's coast does" }
+  - { test: tools/world/test/coast.test.ts, holds: "held to the present, where the coast is measured, moves it over less than a tenth of the globe, and little of the sea to land" }
+disagrees:
+  - with: field:earth/strata
+    note: >-
+      The columns of rock, which the model does not read, say what was being laid down at each keyframe where a column
+      stands: under the sea, or on land. Taking both kinds together the model's likelier side is right more often than
+      the field's coast, by about nine units in a hundred, and for units of the sea by thirteen. For units of the land
+      it is right less often than the field, by about five in a hundred: where it moves the coast it moves it towards
+      the sea, since it reads finds and nothing of their absence, and the sea leaves the more finds. Each build counts
+      them (coverage.json, coast.columns).
+  - with: field:earth/elevation
+    note: >-
+      At the youngest keyframe the elevation is today's, and its coast is measured. The model does not know that: it
+      reads that map as softly as any other, and moves about 7% of the globe across the measured coast, the most of it
+      within two degrees. Its localities there are of the last 2.5 Myr, in which the sea stood up to some 120 m lower
+      and at times higher, so part of that is the span's and not the model's; the rest is the measure of how far its
+      coast can be trusted at any keyframe. Each build counts it (coast/index.json, the keyframe of 0 Ma).

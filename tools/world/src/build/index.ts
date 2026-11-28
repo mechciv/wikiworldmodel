@@ -61,6 +61,7 @@ import {
 } from '../../../../core/landscape.ts';
 import type { AtlasBin, AtlasIndex, SeaBin, SeaIndex } from '../../../../core/atlas.ts';
 import type { RocksBin, RocksIndex } from '../../../../core/rocks.ts';
+import { byteChance, byteFinds, nodeOf, restsOnFinds, type CoastIndex, type CoastKeyHeader } from '../../../../core/coast.ts';
 import { fieldFor, fieldLods, loadBlocks, loadRelief, loadSnapshots, paleoElevation, sliceField, SRC_H, SRC_W, tileGrid, timeBins, type GridField } from './fields.ts';
 import { buildCities } from './city.ts';
 import { climateGrid, climateKeyframes, encodeClimate, forestChecks, heightOn, monthsFiles, monthsKeyframes, partClasses, partsFiles, waterParamsOf, type ClimateKeyframe, type PartRead, type WaterOptions } from './climate.ts';
@@ -82,10 +83,11 @@ import { fieldLayers, mappedShores } from './fieldlayers.ts';
 import { buildAtlas, type RecentClimateSource, type RocksAgeData } from './atlas.ts';
 import { buildSeaAtlas, type SeaOut, type SeaParams } from './sea.ts';
 import { buildRocks, type NoneWords, type RocksOut, type RocksParams } from './rocks.ts';
+import { buildCoast, type CoastParams, type SpanRule } from './coast.ts';
 import { buildGround, groundResolve, type GroundBuilt } from './groundmaps.ts';
 import { buildStrata, columnAt, todayOf, type StrataOut, type StrataParams } from './strata.ts';
 import { strataColumns, type StrataColumns, type StrataFile, type StrataHeader } from '../../../../core/strata.ts';
-import { bedrockAt, firstGround, firstRock, groundHeld, groundOfStrata, substrateOfRocks, substrateOfSoil, type GroundHeader, type GroundMaps, type SceneBedrock, type SceneSubstrate, type StrataOf, type SubstrateFile, type SubstrateRule } from '../../../../core/substrate.ts';
+import { bedrockAt, firstGround, firstRock, groundHeld, groundOfStrata, strataAt, substrateOfRocks, substrateOfSoil, type GroundHeader, type GroundMaps, type SceneBedrock, type SceneSubstrate, type StrataOf, type SubstrateFile, type SubstrateRule } from '../../../../core/substrate.ts';
 import type { LandSnapshot, RocksSnapshot } from '../pbdb.ts';
 import type { ColumnsSnapshot } from '../macrostrat.ts';
 import { buildScene, witnesses } from './scene.ts';
@@ -2025,6 +2027,98 @@ export async function runBuild(args: string[]): Promise<number> {
   const getGround = () => (groundHeader ? (loadedGround ??= readGroundFromDag(dag)) : undefined);
   const getStrata = () => (strataMeta.present ? (loadedStrata ??= readStrataFromDag(dag)) : undefined);
 
+  // Stage: coast (how likely the sea was at each keyframe of the elevation field, and what was found near each node)
+  const coastField = world.fields.find((f) => f.rule === 'sea-chance');
+  const findsField = world.fields.find((f) => f.rule === 'rock-finds');
+  let coastMeta: { present: boolean; stats?: CoverageFile['coast']; keyframesMa?: number[] } = { present: false };
+  let coastStageKey = '';
+  if (coastField && findsField && rockField && rockLand) {
+    const id = rockField.data!.from;
+    const path = datasetFile(id, world.manifest.datasets[id], rockField.data!.file);
+    if (existsSync(path)) {
+      const strataRule = (substrateField?.params as unknown as SubstrateRule | undefined)?.strata;
+      const strataId = strataField?.data?.from;
+      const coastStage = await dag.runStage(
+        'coast',
+        {
+          field: fieldKey(coastField),
+          finds: fieldKey(findsField),
+          rocks: fieldKey(rockField),
+          fixes: fixesKey(claims.corrections(id)),
+          paleoImport,
+          isoline: coastIsoline,
+          plateModel: dsKey(PLATE_MODEL),
+          plateIndexList,
+          strataStageKey,
+          strataRule,
+        },
+        async (sink) => {
+          const spec = rockField.rows;
+          const given = JSON.parse(await readFile(path, 'utf8')) as RocksSnapshot;
+          const snap = spec ? correctRocks(given, spec, claims.corrections(id)) : given;
+          // The columns of rock, which the chance does not read: where each stands today, and what it has being laid down at an age.
+          const strata = strataRule && strataId ? getStrata() : undefined;
+          const points = strata ? (JSON.parse(await readFile(datasetFile(strataId!, world.manifest.datasets[strataId!], strataField!.data!.file), 'utf8')) as ColumnsSnapshot).columns.map((c): [number, number] => [c[4], c[5]]) : [];
+          if (strata && points.length !== strata.columns.columns.length) throw new Error(`coast: ${points.length} columns in ${strataId}, and ${strata.columns.columns.length} in the build's strata`);
+          const built = buildCoast(
+            solved.model,
+            rockLand.snapshots,
+            snap,
+            rockField.params as unknown as SpanRule,
+            { ...(findsField.params as object), ...(coastField.params as object) } as CoastParams,
+            coastIsoline,
+            plateIndex,
+            {
+              field: coastField.id,
+              title: coastField.title,
+              description: coastField.description,
+              finds: { field: findsField.id, title: findsField.title },
+              elevation: rockLand.field.id,
+              source: id,
+              sourceRecord: world.source.get(id) ? sourceRecord(world.source.get(id)!) : undefined,
+            },
+            strata && strataRule ? { points, says: (i, ageMa) => strataAt(strata.columns.columns[i], ageMa, strataRule).says } : undefined,
+            log,
+          );
+          for (const [p, c] of built.files) await sink.put(p, c);
+          const ix = built.index;
+          const stats: CoverageFile['coast'] = { field: ix.field, localities: Math.round(ix.keyframes.reduce((n, k) => n + k.localities[0] + k.localities[1], 0)), keyframes: ix.keyframes.length, scored: ix.keyframes.filter((k) => k.told).length, rule: ix.rule, tried: ix.tried, scores: ix.scores, sides: ix.sides, ...(ix.columns ? { columns: ix.columns } : {}), globe: ix.globe, moved: ix.keyframes.map((k) => ({ ageMa: k.ageMa, to_sea: k.to_sea, to_land: k.to_land, land: k.land, reached: k.reached })), through: ix.through };
+          return { present: true, stats, keyframesMa: ix.keyframes.map((k) => k.ageMa) };
+        },
+        { codeFiles: ['tools/world/src/build/coast.ts', 'core/coast.ts', 'tools/world/src/build/atlas.ts', 'tools/world/src/tables.ts', 'core/substrate.ts', 'core/strata.ts', 'core/container.ts'] },
+      );
+      coastMeta = coastStage.meta;
+      coastStageKey = coastStage.key;
+    } else log(`coast   not built: no snapshot ${id} yet`);
+  }
+  // The chance of sea as resolve asks for it: the nearest keyframe's, read back from the build's files when first asked.
+  const coastKeys = new Map<number, { chance: Uint8Array; marine: Uint8Array; land: Uint8Array }>();
+  let coastIndexRead: CoastIndex | undefined;
+  const coastResolve = (): ResolveWorld['coast'] => {
+    if (!coastMeta.present || !coastMeta.keyframesMa?.length || !rockLand) return undefined;
+    const ages = coastMeta.keyframesMa;
+    // Where today's relief answers the geography, its own coast does: the chance is for the elevation of the deep past.
+    const younger = Math.min(...grids.filter((g) => g !== rockLand && g.mode === 'elevation').map((g) => g.coverMa[0]), Infinity);
+    const span: [number, number] = [fromMa(Math.max(...ages)), fromMa(Number.isFinite(younger) ? younger : Math.min(...ages))];
+    return {
+      span,
+      at: (lat, lon, t) => {
+        const ageMa = toMa(t);
+        let age = ages[0];
+        for (const a of ages) if (Math.abs(a - ageMa) < Math.abs(age - ageMa)) age = a;
+        let key = coastKeys.get(age);
+        if (!key) {
+          coastIndexRead ??= JSON.parse(dag.readBlobTextSync('coast/index.json')) as CoastIndex;
+          const { header, arrays } = decodeTile<CoastKeyHeader>(toArrayBuffer(dag.readBlobBytesSync(`coast/${age}.lwt`)));
+          key = { chance: arrays[header.chance] as Uint8Array, marine: arrays[header.marine] as Uint8Array, land: arrays[header.land] as Uint8Array };
+          coastKeys.set(age, key);
+        }
+        const n = nodeOf({ nx: SRC_W, ny: SRC_H, step: 1 }, lat, lon);
+        return { chance: byteChance(key.chance[n]), rests: restsOnFinds(byteFinds(key.marine[n]), byteFinds(key.land[n]), coastIndexRead!.rule) };
+      },
+    };
+  };
+
   const groundOf = substrateRule
     ? (slice: number, positionAt: (ageMa: number) => { lat: number; lon: number }) => {
         const rocks = getRocks();
@@ -2325,6 +2419,7 @@ export async function runBuild(args: string[]): Promise<number> {
   }
   if (rocksMeta.stats) coverageFile.rocks = rocksMeta.stats;
   if (strataMeta.stats) coverageFile.strata = strataMeta.stats;
+  if (coastMeta.stats) coverageFile.coast = coastMeta.stats;
   if (atlasCoverage) coverageFile.forms = atlasCoverage;
 
   const genericLandGen = world.generators.find((g) => g.id === GENERIC_LAND);
@@ -2346,6 +2441,7 @@ export async function runBuild(args: string[]): Promise<number> {
       groundStageKey,
       strataStageKey,
       substrateStageKey,
+      coastStageKey,
       atlasStageKey,
       seaStageKey,
       riversStageKey,
@@ -2390,6 +2486,7 @@ export async function runBuild(args: string[]): Promise<number> {
         planetFile,
       );
       if (landscapeMeta?.present) resolveWorld.landscape = landscapeResolve(readLandscapeFromDag(dag));
+      resolveWorld.coast = coastResolve();
       if (substrateRule) {
         const rocks = getRocks();
         const ground = getGround();
@@ -2437,6 +2534,7 @@ export async function runBuild(args: string[]): Promise<number> {
         sources.push({ layer: 'substrate', id: rocksMeta.source, title: world.source.get(rocksMeta.source)?.title ?? rocksMeta.source, tier: 'evidence', span: rocksMeta.stagesSpan, lane: 'rocks' });
         sources.push({ layer: 'substrate', id: substrateField.id, title: substrateField.title, tier: 'model', span: rocksMeta.stagesSpan, lane: 'substrate' });
       }
+      if (resolveWorld.coast && coastField) sources.push({ layer: 'geography', id: coastField.id, title: coastField.title, tier: 'evidence', span: resolveWorld.coast.span, res_deg: 1, lane: 'coast' });
       if (reliefInfo && reliefGrid) {
         const held: [number, number] = [fromMa(reliefGrid.coverMa[0]), fromMa(reliefGrid.coverMa[1])];
         sources.push({ layer: 'geography', id: reliefInfo.field, title: `${reliefInfo.title}: the survey's cells, in a scene`, tier: 'model', span: held, res_deg: Math.round(reliefInfo.fine.step * 1e5) / 1e5, lane: 'relief-fine' });
@@ -2462,7 +2560,7 @@ export async function runBuild(args: string[]): Promise<number> {
       const land = landShares(resolveWorld, matrix.columns, COVERAGE.step, now);
       return { ...(balance ? { energyBalance: balance } : {}), ...(forests ? { forests } : {}), tiers, matrix, land };
     },
-    { codeFiles: ['core/resolve.ts', 'core/coverage.ts', 'core/glance.ts', 'tools/world/src/build/energybalance.ts', 'tools/world/src/build/climate.ts'] },
+    { codeFiles: ['core/resolve.ts', 'core/coverage.ts', 'core/glance.ts', 'core/coast.ts', 'tools/world/src/build/energybalance.ts', 'tools/world/src/build/climate.ts'] },
   );
   if (coverageAnalytics.meta.energyBalance) coverageFile.energyBalance = coverageAnalytics.meta.energyBalance;
   if (coverageAnalytics.meta.forests) coverageFile.forests = coverageAnalytics.meta.forests;
@@ -2514,6 +2612,7 @@ export async function runBuild(args: string[]): Promise<number> {
       ...(substrateRule ? { substrate: 'substrate.json' } : {}),
       ...(groundHeader ? { ground: 'ground.lwt' } : {}),
       ...(strataMeta.present ? { strata: 'strata.lwt' } : {}),
+      ...(coastMeta.present ? { coast: 'coast/index.json' } : {}),
       ...(landscapeMeta?.present ? { landscape: 'people/landscape.json' } : {}),
       ...(reliefInfo ? { relief: 'relief/index.json' } : {}),
       features: FEATURE_INDEX,

@@ -5,9 +5,10 @@ slice](../slices/NINETEENTH-SLICE.md) and its second node, the settlement's form
 [twentieth](../slices/TWENTIETH-SLICE.md); each says what it leaves out and how it differs from what is written here.
 The revision widens the plan from the people side to every quantity of the world, and adds decisions 9 to 16: the
 quantities in the order of their causes, four kinds of node, what holds a model to its causes, how evidence comes to
-exist, and how one estimate answers at every scale. Decisions 1 to 8 keep their numbers. Nothing of the revision is
-built but its map: the [graph of causes](../causes/README.md), which holds every quantity here as a node with its
-causes, and ranks where the work is. The plan touches [CITIES.md](CITIES.md),
+exist, and how one estimate answers at every scale. Decisions 1 to 8 keep their numbers. Of the revision, its map is
+built: the [graph of causes](../causes/README.md), which holds every quantity here as a node with its causes, and
+ranks where the work is. So is its first field over the globe, how likely the sea was from the map and the rocks, as
+the [twenty-first slice](../slices/TWENTY-FIRST-SLICE.md). The plan touches [CITIES.md](CITIES.md),
 [HUMAN-LANDSCAPE-REALISM.md](HUMAN-LANDSCAPE-REALISM.md), [VISUAL-GAPS.md](VISUAL-GAPS.md) and
 [ENTITIES.md](ENTITIES.md); [How this meets the other plans](#how-this-meets-the-other-plans) says how. It keeps the
 design's three kinds of content ([STRUCTURE.md](../STRUCTURE.md) section 1.1) and its contracts: uncertainty as
@@ -75,7 +76,11 @@ The design already puts models between the evidence and the generators (section 
   5 Myr, with no spread, and it is the top of the order of causes: the climate runs, the rivers and the fossils'
   places all stand on it. The world's own evidence contradicts it and corrects nothing: 36% of marine fossil
   collections fall on its land, and the Alps stand 1 to 1.5 km low for 20 Myr against their own record
-  (`model:earth/coastline` and `model:earth/relief-carried`, `disagrees`).
+  (`model:earth/coastline` and `model:earth/relief-carried`, `disagrees`). Since the twenty-first slice one model
+  reads those collections: `model:earth/sea-chance` gives a chance of sea at every node and keyframe, from the map's
+  coast read softly and the marine and land localities, scored on localities held out. Held against the columns of
+  rock, which it does not read, it is right for 81 units in a hundred where the maps are for 72. It moves no ground
+  yet: the height of the land, and all that stands on it, are still the maps'.
 - **Life is carried by distance, in tiers.** `model:life/atlas` puts a taxon where a fossil of it lies near, or can
   be reached overland in a like climate. It has no model of where fossils were looked for, and says so: "its lists
   partly show where people have dug".
@@ -100,12 +105,17 @@ evidence into estimates everywhere.
 
 | Decision | Built | Not built |
 |---|---|---|
-| 1, 3, 7, 8 | For one node, a settlement's people: observations by their ground and years, exact Gaussian conditioning ([gauss.ts](../../core/gauss.ts), [citypop.ts](../../core/citypop.ts)), scores on figures held out (`npm run world -- holdout`), a source's bias fitted. | Any node that is a field over the globe. Model records' `prior`, `observes` and `holdout` sections: the schema has none of them yet. |
-| 2 | — | A prior from causes. The pilot's is HYDE's and the lists'. |
+| 1, 3, 7, 8 | For one node, a settlement's people: observations by their ground and years, exact Gaussian conditioning ([gauss.ts](../../core/gauss.ts), [citypop.ts](../../core/citypop.ts)), scores on figures held out (`npm run world -- holdout`), a source's bias fitted. For one field over the globe, the chance of sea ([coast.ts](../../core/coast.ts), `npm run world -- coast`): fitted at build, a byte a node at query. Model records' `kind`, `prior`, `observes` and `holdout` sections, which one record uses. | A harness shared by the nodes: each has its own scoring. The older models' records have none of the new sections. |
+| 2 | The sea's chance has a prior from its one cause that is in the world, the map's coast. | A prior from causes for any other node. The pilot's is HYDE's and the lists'. The sea's has no sea level and no sinking basin in it. |
 | 4 | A settlement's density pulled towards anchors near it in space and time. | Pooling by relatedness; a tradition carried beyond its regions. |
 | 5 | — | Analogy as a method: the vocabulary has no term for it. |
 | 6 | The settlement generator reads its people, density and fabric from nodes. | The generic house, the generic crops and the fields' calendar are still decided in the generator. |
-| 9 to 16 | — | All of them. |
+| 9 | The graph of causes, as a map to plan from. | Nothing in the build reads an order of causes. |
+| 10 | A record's `kind`; one node says it is `at-once`. | The other three kinds, and what holds each to its kind. |
+| 12 | For the sea's chance: hold-outs by tile, by block of 20° and by keyframe, beside a smoother with no causes, with what it gains growing as more is held out; and a check against the present, where the coast is measured, which found what the hold-outs could not: the record does not sample the seas that are still sea. | For every other node. No test of a cause's sign or size. |
+| 14 | A first count of what was found near, by kind (`field:earth/rock-finds`); the sea's chance sets finds against finds so that effort cancels, and reads no absence. | A model of effort, and of what survives. |
+| 15 | One kind of observation states its support: a locality's box of ground and span of years. | A density answered at every scale. |
+| 11, 13, 16 | — | All of them. |
 
 ## The design: a graph of quantities
 
@@ -385,7 +395,7 @@ climate, every cause as an edge that says whether the world carries it, and a ra
 | Where the plates were | the mantle's flow, which nothing predicts | contingent | sea-floor stripes, old magnetism | One reconstruction to 1,100 Ma and one to 1,800 Ma, no spread. Their boundaries, which uplift follows from, are unread. The future's plates are not moved. |
 | The height of the land | uplift where plates converge, wearing down after, the mantle's push | settling | measured old heights, beds of rock | Another's maps at 1° every 5 Myr, with no model behind them; a kilometre out against the range records. Today's shape is carried back to the Pliocene. |
 | The depth of the sea floor | the floor's age, sediment | at once | today's surveys | The same maps' schematic depths. |
-| Ice, sea level and the coast | the climate, the basins' room, the ice's weight on the crust | settling, and at once for the coast | isotopes, shorelines, marine and land beds | A stack every 1 kyr for 798 kyr over today's ground, the strongest part. Before it a curve that moves no coast. Ice for 80 kyr only, and no rebound. |
+| Ice, sea level and the coast | the climate, the basins' room, the ice's weight on the crust | settling, and at once for the coast | isotopes, shorelines, marine and land beds | A stack every 1 kyr for 798 kyr over today's ground, the strongest part. Before it a curve that moves no coast. Ice for 80 kyr only, and no rebound. For the deep past, a chance of sea from the maps' coast and the fossil localities (`model:earth/sea-chance`), which reads no sea level and moves no coast. |
 | The fine shape of the ground | the height of the land, wearing down, the rock | settling | today's surveys | 1.8 km cells, 30 m only round Rome; invented before the Pliocene. |
 | The climate of each month: warmth and rain | the Sun, CO₂, where the land and its heights lay, the ice | at once | isotopes, fossil leaves, pollen, coals and salts | One run for each time (Li et al. 2022 for the Phanerozoic, Beyer et al. 2020 for the last 120,000 years), spread unknown. No evidence conditions it. The energy balance is made of causes and held to evidence, but knows only latitude. |
 | Water: runoff, rivers, lakes | the climate, the relief | at once | rivers seen today, old shorelines and channels | `model:earth/water-balance` and `model:earth/drainage`, from causes. |
@@ -511,7 +521,8 @@ by a [visual-gaps](VISUAL-GAPS.md) card at the places of judging.
 On the Earth's track the ground comes first, then the climate, then life. Three first steps need no new data:
 
 - **the coast conditioned on the rocks:** a chance of sea for each cell and stage, from the marine and land beds the
-  build already holds against it;
+  build already holds against it. Built, as the [twenty-first slice](../slices/TWENTY-FIRST-SLICE.md), for the
+  fossil localities; the columns of rock are still only held against it, and the coast drawn has not moved;
 - **a range's height as an observation:** the eight range records condition the height of the land, so that the
   Himalaya's and the Alps' contradictions go;
 - **the effort behind the fossils** (decision 14): every collection of a stage within reach, whatever it found.

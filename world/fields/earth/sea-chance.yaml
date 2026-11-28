@@ -1,0 +1,57 @@
+# A derived field: made by the build from the elevation field's coast and the rock record's collections
+# (model:earth/sea-chance, core/coast.ts), and written in files of its own, one for each keyframe (coast/).
+id: field:earth/sea-chance
+type: field
+kind: raster
+title: How likely the sea was
+quantity: the chance that a place was under the sea
+unit: a share, from 0 to 1
+description: >-
+  How likely each node of the elevation field was to be under the sea at each of its keyframes, as a chance from 0 to 1.
+  It starts from the field's own coast, read softly: an even chance at the coast, more with distance offshore and less
+  with distance inland, and as sure as it gets over the ocean's floor. The fossil localities of the keyframe's span then
+  move it: beds laid down under the sea and beds laid down on land, each counted by how near it lies, and weighed by
+  how many times more of them the sea leaves than the land. Over the ocean's floor a locality counts at its own node
+  and at no other. It reads what was found and nothing of what was not: a place with no locality near has the field's
+  chance, however long anyone has looked there. It is the land and sea of a moment taken anywhere in the keyframe's
+  span, some five million years: where the sea came and went in that time, the chance is about the share of it the sea
+  was there. The coast the globe draws is still the elevation field's.
+frame: frame:earth/geographic
+grid: { kind: lonlat, res_deg: 1 }
+time: { lo: 540 Ma, hi: 0 Ma, step: 5 Myr }
+derived: true
+from: [field:earth/elevation, field:earth/rock-finds]
+rule: sea-chance
+spread: ensemble
+uncertainty: >-
+  The chance is the uncertainty: a place at 0.8 is under the sea in four members of the world out of five. A member has
+  sea wherever the chance is above its level, the median member's level a half, so the members' seas lie one inside
+  another and the ground between the nearly sure sea and the nearly sure land is the coast's band. Localities held out
+  with their node, their tile or their region, and predicted, fall as the chances say they should, and each build
+  counts how well (coverage.json, coast). Held to the present, where the coast is measured, it moves about 7% of the
+  globe across it: its coast is good to a few degrees and no better. Where no locality lies near, the chance is the
+  field's alone, which was drawn by hand and comes with no error of its own. Before the land had life no locality is
+  the land's, and the chance there is fitted on the younger keyframes and tested only against the columns of rock.
+interp: plate-warp
+moves_with: src:paleomap-plate-model
+params:
+  # The field alone never moves the odds of sea further from even than this, as a log: 1.8% to 98.2%.
+  cap: 4
+  # Below this height, in metres, the field's sea is the ocean's floor: its chance of sea is at the cap, and a
+  # locality there counts at its own node and at no other.
+  deep_m: -1000
+  # Where the fit starts: how fast the log of the odds of sea falls with each degree inland of the field's coast and
+  # rises with each degree offshore, and how many localities the field's expectation counts for beside those found.
+  # The build fits all three and writes what it fitted in coast/index.json.
+  slope_in: 0.4
+  slope_off: 0.4
+  strength: 0.3
+  # How many keyframes either side share one yield with a keyframe.
+  pool: 2
+  # How many land localities, by weight, a keyframe and those it shares a yield with must have for its yield to be
+  # fitted. With fewer, as before the land had life, it takes the nearest keyframe's that has them.
+  yield_land_min: 50
+  # What is held out to score it: a locality's tile and its block, in degrees, and every how many keyframes one whole.
+  tile_deg: 5
+  block_deg: 20
+  span_every: 4

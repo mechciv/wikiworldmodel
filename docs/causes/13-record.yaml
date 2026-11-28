@@ -14,9 +14,10 @@ nodes:
     label: Where people have looked
     kind: given
     what: "How much digging, coring, surveying and publishing a place and time have had."
-    now: none
-    note: "The records say it in words: the fossil lists partly show where people have dug. No field."
-    best: "A count the world already holds: every collection, date or site of a region and time, whatever it found."
+    now: borrowed
+    has: [field:earth/rock-finds]
+    note: "A first count, for the rocks' two kinds: the marine and the land fossil localities near each node of the deep past's grid at each keyframe. The sea's chance sets one kind against the other, so that how much a place was looked at cancels where both could be collected; old seas that are still sea were never looked at, and there it does not. Nothing reads the count as effort yet: the fossil lists still partly show where people have dug."
+    best: "A count the world already holds: every collection, date or site of a region and time, whatever it found, read by every model of presence."
     gap: large
   - id: stripes
     label: Sea-floor stripes and old magnetism
@@ -32,8 +33,8 @@ nodes:
     what: "What was laid down where and when: sea beds, river beds, coals, salts, tills, old soils."
     now: borrowed
     has: [field:earth/rock-record, field:earth/strata, model:earth/rock-record]
-    note: "The rocks of 279,000 fossil collections, and 35,481 units in 1,534 columns. They are held against the coast and correct nothing."
-    best: "Read as observations of the coast, the rain and the ice: a sea bed says sea, a coal says wet, a till says ice."
+    note: "The rocks of 279,000 fossil collections, and 35,481 units in 1,534 columns. The collections' two kinds, marine and terrestrial, condition the chance of sea (model:earth/sea-chance). The columns are held against it and against the coast, and correct nothing; no bed is read for the rain or the ice."
+    best: "Read as observations of the coast, the rain and the ice: a sea bed says sea, a coal says wet, a till says ice. The columns' gaps as the absence they record."
     gap: large
   - id: heights
     label: Measured old heights

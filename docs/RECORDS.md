@@ -737,6 +737,17 @@ uncertainty: { kind: none, note: "A line with no width." }
   ([core/samples.ts](../core/samples.ts)): a member is a joint sample of the whole world, member 0 the
   central value. A model that reads a field with a band, alternatives or an ensemble runs once per
   member and carries the spread on; the validator warns at one that says its output carries none.
+- A model made as [plans/MODELS.md](plans/MODELS.md) asks says how it is made, in four more sections, whose
+  references the validator checks. Copy [sea-chance.yaml](../world/models/earth/sea-chance.yaml):
+  - `kind`: what it remembers, of the plan's four: `at-once`, `settling`, `spreading` or `contingent`;
+  - `prior`: what it expects before any evidence, from each cause it `reads`, and in what `form`;
+  - `observes`: each kind of `evidence` it conditions on, with one observation's `support` (the ground and the span
+    it speaks for), its `error`, and its `effort` (how the evidence came to exist, and what the model makes of its
+    absence);
+  - `holdout`: what is `held` out, the `baseline` with no causes that it must beat, the `rivals` it is set beside,
+    and where its `scores` are written.
+- A number the build fits is a `choice` that says where the fit starts and where the build writes what it fitted. The
+  record holds no fitted value: it is derived ([rule 5](../CONTRIBUTING.md#the-rules)).
 - A generator lists its `inputs` the same way, as records, or as `{ prop: … }`, `{ rel: … }` or
   `{ kind: … }` for every claim, relation or record of that term. Empty only if it reads nothing.
 - **A model or a generator?** A model turns evidence into a distribution: its output is a claim about

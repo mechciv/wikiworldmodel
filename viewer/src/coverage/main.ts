@@ -216,7 +216,7 @@ class Page {
     this.detail = el('aside', 'cov-detail');
     this.detail.setAttribute('aria-live', 'polite');
     main.append(this.chart, this.detail);
-    page.append(main, this.houses(), this.peopleScores(), this.table());
+    page.append(main, this.houses(), this.peopleScores(), this.seaScores(), this.table());
     app.append(page);
     this.tip = el('div', 'tip');
     this.tip.hidden = true;
@@ -958,6 +958,143 @@ class Page {
       box.append(det);
     }
     box.append(el('p', 'cov-note', 'The log density is of what a figure says, on the log of the people, under the prediction made without it: higher is better, and a figure far outside its band costs much. `npm run world -- holdout <record>` gives each figure of a record.'));
+    return box;
+  }
+
+  /**
+   * The sea's chance on what it did not see (docs/slices/TWENTY-FIRST-SLICE.md; model:earth/sea-chance): the kind of each
+   * fossil locality, marine or of the land, predicted with more and more of what lies round it held out, beside a
+   * smoother with no causes and the map's own coast; and the columns of rock, which the model does not read.
+   */
+  seaScores(): HTMLElement {
+    const box = el('section', 'cov-houses');
+    const s = this.cov.coast;
+    if (!s) return box;
+    box.append(el('h2', undefined, 'Land and sea, on what the model did not see'));
+    const r = s.rule;
+    box.append(
+      el(
+        'p',
+        'cov-lede',
+        `How likely the sea was is the map's coast read softly, then the fossil localities of the time: ${count(s.localities)} of them at ${s.keyframes} keyframes, each a bed laid down under the sea or on land. Here the kind of each locality is predicted without it: with the others of its own node of the grid left out, then its tile of five degrees, its block of twenty, and every fourth keyframe whole. Only the ${s.scored} keyframes with land localities enough are fitted and scored: before the land had life every locality is marine, and a kind tests nothing. Fitted: the odds of sea fall by ${r.slope_in} a degree inland of the map's coast and rise by ${r.slope_off} offshore, as logs; the map counts for ${r.strength} of a locality; a locality counts out to about ${Math.round(r.kernel_km * 3)} km.`,
+      ),
+    );
+    const t = el('table');
+    const head = el('tr');
+    head.append(el('th', undefined, 'Mean log chance given to the kind a locality was'), el('th', undefined, 'Its node held out'), el('th', undefined, 'Its tile'), el('th', undefined, 'Its block'), el('th', undefined, 'Its keyframe'));
+    t.append(head);
+    const row = (label: string, cells: string[]) => {
+      const tr = el('tr');
+      tr.append(el('td', undefined, label), ...cells.map((c) => el('td', undefined, c)));
+      return tr;
+    };
+    const lpd = (x: { lpd: number }) => x.lpd.toFixed(3);
+    const { model, smoother, field } = s.scores;
+    t.append(
+      row('The model: the map read softly, and the localities', [lpd(model.node), lpd(model.tile), lpd(model.block), lpd(model.span)]),
+      row('The localities with no map: an even chance before them', [lpd(smoother.node), lpd(smoother.tile), lpd(smoother.block), lpd(smoother.span)]),
+      row('The map read softly, and no localities', [lpd(field.soft), lpd(field.soft), lpd(field.soft), lpd(field.soft)]),
+      row("The map's coast taken as sure", [lpd(field.sure), lpd(field.sure), lpd(field.sure), lpd(field.sure)]),
+    );
+    const scroll = el('div', 'scroll');
+    scroll.append(t);
+    box.append(scroll);
+    const sides = el('table');
+    const sh = el('tr');
+    sh.append(el('th', undefined, 'On the side their kind is of'), el('th', undefined, `Marine localities in the sea (${count(Math.round(s.sides.localities.marine))})`), el('th', undefined, `Land localities on land (${count(Math.round(s.sides.localities.land))})`));
+    sides.append(sh);
+    const side = (x: { marine_in_sea: number; land_on_land: number }) => [pct(x.marine_in_sea), pct(x.land_on_land)];
+    sides.append(
+      row("The map's coast", side(s.sides.field)),
+      row('The model, their node held out', side(s.sides.node)),
+      row('The model, their tile held out', side(s.sides.tile)),
+      row('The model, their block held out', side(s.sides.block)),
+      row('The model, nothing held out', side(s.sides.all)),
+    );
+    const scroll2 = el('div', 'scroll');
+    scroll2.append(sides);
+    box.append(scroll2);
+    const held = el('table');
+    const hh = el('tr');
+    hh.append(el('th', undefined, 'Of the localities given this chance of being marine'), ...model.tile.held.map((b) => el('th', undefined, pct(b.given))));
+    held.append(hh);
+    held.append(
+      row('The share that were, their tile held out', model.tile.held.map((b) => (b.n ? pct(b.were) : '–'))),
+      row('How many', model.tile.held.map((b) => count(Math.round(b.n)))),
+    );
+    const scroll3 = el('div', 'scroll');
+    scroll3.append(held);
+    box.append(scroll3);
+    if (s.columns) {
+      const c = s.columns;
+      const cols = el('table');
+      const ch = el('tr');
+      ch.append(el('th', undefined, 'Against the columns of rock, which it does not read'), el('th', undefined, 'Units at a keyframe'), el('th', undefined, "On the map's side"), el('th', undefined, "On the model's likelier side"), el('th', undefined, 'Mean chance of sea'));
+      cols.append(ch);
+      cols.append(
+        row('Laid down under the sea', [count(c.sea.n), pct(c.sea.field), pct(c.sea.model), pct(c.sea.chance)]),
+        row('Laid down on land', [count(c.land.n), pct(c.land.field), pct(c.land.model), pct(c.land.chance)]),
+        row('Both kinds', [count(c.sea.n + c.land.n), pct(c.right.field), pct(c.right.model), '']),
+      );
+      const scroll4 = el('div', 'scroll');
+      scroll4.append(cols);
+      box.append(scroll4);
+    }
+    if (s.through.length) {
+      const tt = el('table');
+      const th = el('tr');
+      th.append(
+        el('th', undefined, 'Through time: on the side their kind is of, by the map and by the model'),
+        el('th', undefined, 'Marine localities, their node held out'),
+        el('th', undefined, 'Land localities'),
+        ...(s.columns ? [el('th', undefined, "The columns' units of the sea"), el('th', undefined, 'Of the land'), el('th', undefined, 'Both')] : []),
+      );
+      tt.append(th);
+      const to = (a: number, b: number) => `${pct(a)} → ${pct(b)}`;
+      for (const t of s.through) {
+        const c = t.columns;
+        tt.append(
+          row(`${t.olderMa}–${t.youngerMa} Ma${t.told ? '' : ', before the land had life'}`, [
+            `${to(t.field.marine_in_sea, t.node.marine_in_sea)} of ${count(t.localities.marine)}`,
+            t.localities.land ? `${to(t.field.land_on_land, t.node.land_on_land)} of ${count(t.localities.land)}` : '–',
+            ...(c ? [`${to(c.sea.field, c.sea.model)} of ${count(c.sea.n)}`, c.land.n ? `${to(c.land.field, c.land.model)} of ${count(c.land.n)}` : '–', to(c.right.field, c.right.model)] : []),
+          ]),
+        );
+      }
+      const scrollT = el('div', 'scroll');
+      scrollT.append(tt);
+      box.append(scrollT);
+    }
+    const most = [...s.moved].sort((a, b) => b.to_sea + b.to_land - (a.to_sea + a.to_land)).slice(0, 8).sort((a, b) => b.ageMa - a.ageMa);
+    if (most.length) {
+      const share = (x: number) => `${(x * 100).toFixed(1)}%`;
+      const mv = el('table');
+      const mh = el('tr');
+      mh.append(el('th', undefined, 'Where the rocks move the coast most'), el('th', undefined, "The map's land, likelier sea"), el('th', undefined, "The map's sea, likelier land"), el('th', undefined, "Land, of the globe: the map's"), el('th', undefined, "The model's"), el('th', undefined, 'Localities outweigh the map on'));
+      mv.append(mh);
+      for (const k of most) mv.append(row(`${k.ageMa} Ma`, [share(k.to_sea), share(k.to_land), share(k.land), share(k.land - k.to_sea + k.to_land), share(k.reached)]));
+      const scroll5 = el('div', 'scroll');
+      scroll5.append(mv);
+      box.append(scroll5);
+    }
+    const g = s.globe;
+    box.append(
+      el(
+        'p',
+        'cov-note',
+        `The log is of the chance the model gave to the kind a locality turned out to be: 0 is sure and right, ${Math.log(0.5).toFixed(2)} a coin. Over all keyframes the localities outweigh the map on ${pct(g.reached)} of the globe, and there the land and sea are counted as evidence above; ${pct(g.changed)} of the globe changes side, ${pct(g.to_sea)} of that to sea, since the model reads finds and nothing of their absence; ${pct(g.band)} has a chance of sea between 5% and 95%. \`npm run world -- coast <lat> <lon> <time>\` gives a place.`,
+      ),
+    );
+    const now = s.moved.find((k) => k.ageMa === 0);
+    if (now) {
+      box.append(
+        el(
+          'p',
+          'cov-note',
+          `Held to the present, where the coast is measured: at the youngest keyframe the model has ${(now.to_sea * 100).toFixed(1)}% of the globe likelier sea that is land, and ${(now.to_land * 100).toFixed(1)}% likelier land that is sea. Its localities there are of the last 2.5 million years, in which the sea stood up to some 120 m lower and at times higher, so not all of that is wrong; the rest is how far the model's coast can be trusted at any time.`,
+        ),
+      );
+    }
     return box;
   }
 

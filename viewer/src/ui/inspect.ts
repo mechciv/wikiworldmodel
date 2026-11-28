@@ -4,6 +4,7 @@ import { inspectFootprint } from './footprint.ts';
 // locators, the competing claims (which can be picked), its relations and the ones other
 // records make to it, and what the derived dates rest on.
 import type { ClimateClass } from '../../../core/climate.ts';
+import { chanceWords } from '../../../core/coast.ts';
 import type { Cover } from '../../../core/planet.ts';
 import type { LivingTaxon, SceneSpec } from '../../../core/scene.ts';
 import type { CitationRecord, ClaimRecord, EntityRecord, OverlaysFile, SeriesRecord, SourceRecord } from '../../../core/records.ts';
@@ -145,6 +146,8 @@ export interface TerrainInfo {
   people?: PeopleHere;
   /** what the ice-sheet field gives here, where it has any ice near */
   ice?: IceHere;
+  /** how likely the sea was here, by the fossil localities of the time, where a model of it covers the time */
+  sea?: SeaHere;
   /** how people lived here, as the human landscape has it at this time */
   landscape?: LandscapeHere;
 }
@@ -163,6 +166,40 @@ export interface LandscapeHere {
   whose?: string;
   kin?: string;
   tradition?: { id: string; label: string; dwelling: string };
+}
+
+/**
+ * How likely the sea was where a click fell, as the sea's chance has it at its keyframe nearer the time shown
+ * (model:earth/sea-chance, core/coast.ts): the chance, what was found near, and whether that outweighs the map.
+ */
+export interface SeaHere {
+  /** the field's title, and the title of the field of what was found */
+  title: string;
+  finds: string;
+  /** the keyframe read, and the span its localities are of, in Ma */
+  ageMa: number;
+  olderMa: number;
+  youngerMa: number;
+  chance: number;
+  /** the marine and the land localities found near, each counted by how near it lies */
+  marine: number;
+  land: number;
+  /** the finds near weigh more than the map does */
+  rests: boolean;
+  /** how many members of the world have sea here, and of how many */
+  members: [number, number];
+  /** how far off a locality is still counted, in km */
+  reachKm: number;
+  /** how many localities the map's own word counts for */
+  strength: number;
+  /**
+   * how many marine localities the sea leaves at this keyframe for each one the land leaves; `told` where the
+   * keyframe's own rocks could tell it, and not where the land left too few localities and a neighbour's is used
+   */
+  yield: number;
+  told: boolean;
+  /** the dataset the localities are read from */
+  source?: SourceRecord;
 }
 
 /** The ice-sheet field at a place and time: what it gives, and how far to trust it. */
@@ -824,6 +861,7 @@ export class InspectPanel {
         : `<p class="big">${info.elevation >= 0 ? '' : '−'}${Math.abs(Math.round(info.elevation)).toLocaleString('en-US')} m <span class="muted">${info.elevation >= 0 ? 'above' : 'below'} the sea level of the time</span></p>`}
       <p>${lat}, ${lon} in the geographic frame of this time${info.plate ? `, on plate ${info.plate}${info.plateLabel ? ` (${esc(info.plateLabel)})` : ''}` : ', on no plate polygon (ocean floor the model does not track)'}.</p>
       ${info.ice && !underIce ? this.iceSection(info.ice) : ''}
+      ${info.sea ? this.seaSection(info.sea, info.elevation < 0) : ''}
       ${info.polity && info.elevation >= 0 ? this.politySection(info.polity) : ''}
       ${info.biome && info.elevation >= 0 && !underIce ? this.biomeSection(info.biome) : ''}
       <p class="method">${info.seaLevel ? this.seaLevelMethod(info.seaLevel, info.coastline) : `Interpolated between ${esc(blend)}, each moved with its plates to this time. The ${esc((info.coastline ?? 'coastline').toLowerCase())} is derived, not stored: the ${esc(info.datum === 'contemporaneous-sea-level' ? '0 m' : 'sea-level')} isoline of this field.`}${info.fieldSpread ? ` ${esc(SPREAD_TEXT[info.fieldSpread])}` : ''}</p></section>${this.stateSection(info.state)}${source}`,
@@ -836,6 +874,33 @@ export class InspectPanel {
     const m = Math.round(level.m);
     const where = m === 0 ? 'at today\'s' : `${Math.abs(m).toLocaleString('en-US')} m ${m < 0 ? 'below' : 'above'} today's`;
     return `Today's ground, moved with its plates to this time, under the sea of the time: ${where}, as ${esc(level.title.toLowerCase())} has it. The ${esc((coastline ?? 'coastline').toLowerCase())} is derived, not stored: where today's ground meets that level.`;
+  }
+
+  /**
+   * How likely the sea was here, by the rocks: the chance, the localities found near, and whether they or the map say
+   * more. `mapSea` is whether the map of the time has sea here.
+   */
+  private seaSection(s: SeaHere, mapSea: boolean): string {
+    const count = (n: number) => (n < 0.05 ? 'none' : n < 10 ? n.toFixed(1) : String(Math.round(n)));
+    const when = (ageMa: number) => formatTime(fromMa(ageMa));
+    const nothing = s.marine < 0.05 && s.land < 0.05;
+    const basis = s.rests ? 'evidence' : 'reconstruction';
+    const words = chanceWords(s.chance).replace(/ \(.*\)$/, '');
+    const say = words.charAt(0).toUpperCase() + words.slice(1);
+    const found = nothing
+      ? `No fossil locality of ${when(s.olderMa)} to ${when(s.youngerMa)} was found within about ${s.reachKm} km of where this ground stood: the chance is the map's own, read softly, by how far this is from its coast.`
+      : `Fossil localities of ${when(s.olderMa)} to ${when(s.youngerMa)} within about ${s.reachKm} km of where this ground stood, each counted by how near it lies: ${count(s.marine)} of beds laid down under the sea, and ${count(s.land)} of beds laid down on land.`;
+    const weigh = nothing
+      ? ''
+      : s.rests
+        ? ' They weigh more than the map does here.'
+        : ` They weigh less than the map does here, which counts for ${s.strength} of a locality.`;
+    const side = nothing || s.chance > 0.5 === mapSea ? '' : ` The map of the time has ${mapSea ? 'sea' : 'land'} here, and the rocks say otherwise.`;
+    const src = s.source;
+    return `<div class="sea-chance"><h3>Sea or land, by the rocks <span class="badge basis-${basis}">${basis}</span></h3>
+      <p class="big">${Math.round(s.chance * 100)}% <span class="muted">for the sea</span></p>
+      <p>${esc(say)}. ${esc(found)}${esc(weigh)}${esc(side)}</p>
+      <p class="method">${esc(s.title)}, at its keyframe of ${esc(when(s.ageMa))}: the map's coast read softly, then the localities, a marine one counting for less where the sea leaves more of them (${s.told ? `${esc(String(s.yield))} here for each one the land leaves` : `${esc(String(s.yield))} for each one the land leaves, at the nearest keyframe whose rocks can tell: here the land left too few localities`}). Nothing is made of what was not found. Sea here in ${s.members[0]} of ${s.members[1]} members of the world. The coast drawn is still the map's; in evidence mode the rocks' is drawn over it.${src ? ` The localities are from ${esc(short(src, src.id))}.` : ''}</p></div>`;
   }
 
   /** What the ice-sheet field gives here, in the dataset's own terms, and how far to trust it. */

@@ -196,7 +196,9 @@ test('clicking the ground shows the field and its source', async ({ page }) => {
   const panel = page.locator('.inspect');
   await expect(panel).toContainText('Interpolated between');
   await expect(panel).toContainText('Scotese');
-  await expect(panel.locator('.badge.basis-reconstruction')).toBeVisible();
+  // The panel's own badge: the height is the map's. How likely the sea was, by the rocks, has a badge of its own below.
+  await expect(panel.locator('.meta .badge.basis-reconstruction')).toBeVisible();
+  await expect(panel.locator('.sea-chance h3')).toContainText('Sea or land, by the rocks');
 });
 
 test('evidence mode marks reconstruction and procedural content', async ({ page }) => {
