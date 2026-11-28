@@ -537,7 +537,7 @@ After them: sea-level cycles before 798 ka and ice for every cycle, indexed to t
 scenes of the human past; rival plate models as alternatives; and the climate as an ensemble conditioned on its
 proxies. The last is begun, as the [twenty-fourth slice](../slices/TWENTY-FOURTH-SLICE.md), for the deep past's runs
 and the evidence the world already held: it has no measure of warmth at a place to condition on yet, and nothing
-drawn reads it.
+drawn reads it. What comes after it, era by era, is [CLIMATE.md](CLIMATE.md).
 
 ### The people of the land, from causes
 

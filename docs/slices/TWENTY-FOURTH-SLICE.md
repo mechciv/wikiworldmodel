@@ -362,6 +362,9 @@ the record `life/hell-creek/ecosystem`, and were not made claims of their own.
 
 ## Next
 
+These are the steps nearest this slice. [plans/CLIMATE.md](../plans/CLIMATE.md) sets them in a roadmap for every
+era, from the measured years back.
+
 - **A measure of warmth at a place.** A property for the mean of the year and for the coldest month, with the Hell
   Creek's leaves as its first claims, read again from their source; and crocodilians and palms set against the
   other finds of the land, as a bound on the winter.
